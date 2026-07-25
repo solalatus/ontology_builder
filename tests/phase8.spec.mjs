@@ -137,6 +137,129 @@ test("Auto-layout does not crash or hang on disconnected components and a floati
   });
 });
 
+// Small epsilon for floating-point slack from the force simulation's own
+// iterative clamping, not a real tolerance for penetration.
+const EPS = 1e-6;
+function isFullyContained(inner, outer) {
+  return inner.x >= outer.x - EPS && inner.y >= outer.y - EPS &&
+    inner.x + inner.w <= outer.x + outer.w + EPS && inner.y + inner.h <= outer.y + outer.h + EPS;
+}
+
+async function establishMembership(page, memberLabel, groupLabel) {
+  await page.evaluate(({ memberLabel, groupLabel }) => {
+    const member = window.__kg.state.nodes.find((n) => n.label === memberLabel);
+    const group = window.__kg.state.nodes.find((n) => n.label === groupLabel);
+    member.groups.push(group.id);
+    window.__kg.actions.updateGroupMembership(member);
+  }, { memberLabel, groupLabel });
+}
+
+test("Auto-layout keeps a group's members strictly inside its box, even against an outward-pulling edge", async () => {
+  await withPage(async (page) => {
+    await seedGraph(
+      page,
+      [
+        { x: 400, y: 400, label: "Group", type: "group" },
+        { x: 450, y: 450, label: "Member", type: "entity" },
+        // Far away and strongly connected, so the force simulation has a
+        // real reason to try to pull Member out of its group's box.
+        { x: 2000, y: 2000, label: "Distant", type: "entity" },
+      ],
+      [[1, 2, "strongly pulls toward"]],
+    );
+    await establishMembership(page, "Member", "Group");
+
+    await page.click("#btn-autolayout");
+    await page.waitForFunction(() => window.__kg.history.past.length === 1);
+
+    const { group, member } = await page.evaluate(() => ({
+      group: window.__kg.state.nodes.find((n) => n.label === "Group"),
+      member: window.__kg.state.nodes.find((n) => n.label === "Member"),
+    }));
+    assert.ok(isFullyContained(member, group),
+      `member (${member.x},${member.y},${member.w}x${member.h}) escaped its group (${group.x},${group.y},${group.w}x${group.h})`);
+  });
+});
+
+test("Auto-layout keeps every member of a multi-member group contained, all at once", async () => {
+  await withPage(async (page) => {
+    await seedGraph(page, [
+      { x: 300, y: 300, label: "Group", type: "group" },
+      { x: 320, y: 320, label: "M1", type: "entity" },
+      { x: 340, y: 340, label: "M2", type: "entity" },
+      { x: 360, y: 360, label: "M3", type: "entity" },
+      { x: 900, y: 100, label: "Outsider", type: "entity" },
+    ], [[1, 4, "pulls"], [2, 4, "pulls"], [3, 4, "pulls"]]);
+    await establishMembership(page, "M1", "Group");
+    await establishMembership(page, "M2", "Group");
+    await establishMembership(page, "M3", "Group");
+
+    await page.click("#btn-autolayout");
+    await page.waitForFunction(() => window.__kg.history.past.length === 1);
+
+    const { group, members } = await page.evaluate(() => ({
+      group: window.__kg.state.nodes.find((n) => n.label === "Group"),
+      members: ["M1", "M2", "M3"].map((l) => window.__kg.state.nodes.find((n) => n.label === l)),
+    }));
+    for (const m of members) {
+      assert.ok(isFullyContained(m, group), `${m.label} escaped its group`);
+    }
+  });
+});
+
+test("Auto-layout respects nested group containment — member inside inner group inside outer group", async () => {
+  await withPage(async (page) => {
+    await seedGraph(page, [
+      { x: 100, y: 100, label: "Outer", type: "group" }, // default 320x220
+      { x: 150, y: 150, label: "Inner", type: "group" },
+      { x: 180, y: 180, label: "Member", type: "entity" },
+      { x: 1500, y: 1500, label: "FarAway", type: "entity" },
+    ], [[2, 3, "pulls hard"]]);
+    // Explicitly smaller than Outer, so containment has real slack to check
+    // rather than the two boxes being forced into an exact coincidental
+    // match by identical default group dimensions.
+    await page.evaluate(() => {
+      const inner = window.__kg.state.nodes.find((n) => n.label === "Inner");
+      inner.w = 220; inner.h = 150; // still comfortably bigger than Member's default 160x60
+    });
+    await establishMembership(page, "Member", "Inner");
+    await establishMembership(page, "Inner", "Outer");
+
+    await page.click("#btn-autolayout");
+    await page.waitForFunction(() => window.__kg.history.past.length === 1);
+
+    const { outer, inner, member } = await page.evaluate(() => ({
+      outer: window.__kg.state.nodes.find((n) => n.label === "Outer"),
+      inner: window.__kg.state.nodes.find((n) => n.label === "Inner"),
+      member: window.__kg.state.nodes.find((n) => n.label === "Member"),
+    }));
+    assert.ok(isFullyContained(member, inner), "member escaped its inner group");
+    assert.ok(isFullyContained(inner, outer), "inner group escaped the outer group");
+  });
+});
+
+test("Auto-layout on a group with a member larger than it stays finite and doesn't crash (best-effort clamp)", async () => {
+  await withPage(async (page) => {
+    await page.evaluate(() => {
+      const group = window.__kg.actions.createNode(100, 100, "TinyGroup", "group");
+      group.w = 60; group.h = 60; // MIN_GROUP_SIZE floor
+      const member = window.__kg.actions.createNode(110, 110, "BigMember", "entity");
+      member.w = 400; member.h = 300; // deliberately bigger than the group
+      member.groups.push(group.id);
+      window.__kg.actions.updateGroupMembership(member);
+      window.__kg.markDirty();
+    });
+
+    await page.click("#btn-autolayout");
+    await page.waitForFunction(() => window.__kg.history.past.length === 1);
+
+    const nodes = await page.evaluate(() => window.__kg.state.nodes);
+    for (const n of nodes) {
+      assert.ok(Number.isFinite(n.x) && Number.isFinite(n.y), `${n.label} has a non-finite position`);
+    }
+  });
+});
+
 test("Auto-layout is reachable only via its explicit toolbar button — never runs on its own", async () => {
   await withPage(async (page) => {
     await addNodeViaDblClick(page, 300, 300, "Alpha");

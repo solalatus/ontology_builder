@@ -10,14 +10,17 @@ State" so the project can be picked up cold at any time.
 ## Current State
 
 - **Phase:** Phases 0 through 8 complete, all with green automated test
-  suites (`node --test tests/*.spec.mjs`, 149 JS tests + 15 Python tests,
+  suites (`node --test tests/*.spec.mjs`, 153 JS tests + 15 Python tests,
   see Log below). Not yet hand-tested on real touch hardware (pinch/
   long-press) — deferred to Phase 10, not blocking. Phase 7's real-folder
   grant/write-back is likewise only mocked-tested so far, not hand-verified
   on real Chrome/Windows or Chromium/Linux — also deferred to Phase 10.
   Phase 9 (Scale & performance) not started. A "Clear" button and a dark/
   light theme toggle (both outside the phased plan, user-requested) were
-  also added — see their own sections below, right after Phase 11.
+  also added — see their own sections below, right after Phase 11. Phase
+  8's autolayout also now enforces explicit group-containment (members
+  can't escape their group's box during layout, user-requested hardening
+  — see the Phase 8 section and its Log entry).
 - **Target file:** `index.html` (single file, no external deps/CDN links).
   Dev-only test tooling lives in `tests/` and `tools/` (see `tests/README.md`)
   and never ships as part of the app.
@@ -467,7 +470,13 @@ claude.ai/code, which is plain git via GitHub as described above.
       hierarchical / grid — pick one, document choice in Log below)
 - [x] Single undo step regardless of node count (one "before" snapshot of
       all positions)
-- Tests (`tests/phase8.spec.mjs`, 5 tests):
+- [x] Group boundaries are non-penetrable by their members during
+      autolayout (user-requested hardening, beyond the original Phase 8
+      plan — see Log below): a member is clamped strictly inside every
+      group it belongs to on every iteration, including nested groups
+      (member → inner group → outer group), overriding the physics
+      simulation rather than just relying on the soft "contains" edge pull.
+- Tests (`tests/phase8.spec.mjs`, 9 tests):
   - Automated: no-op (no history entry, no movement) on an empty or
     single-node graph; on a small connected graph, positions change and
     it's exactly one undo step (one Undo restores every node's exact
@@ -477,7 +486,15 @@ claude.ai/code, which is plain git via GitHub as described above.
     disconnected components and a floating group with no edges at all
     (asserted via a wall-clock bound plus `Number.isFinite` on every
     resulting position); a reload never silently re-lays-out the graph
-    (confirms "never automatic" isn't just a UI claim).
+    (confirms "never automatic" isn't just a UI claim); a member stays
+    fully inside its group's box even when a strong edge pulls it toward a
+    far-away node (proves the clamp is a hard override, not a coincidence
+    of the soft attraction); every member of a multi-member group stays
+    contained simultaneously; nested containment holds (member inside
+    inner group, inner group inside outer group); a member deliberately
+    bigger than its (tiny) group doesn't crash or produce non-finite
+    positions (best-effort clamp on an already-possible pre-existing edge
+    case, not something autolayout itself creates).
   - Manual: visually sane result (no total node overlap) on a real fixture
     graph — layout aesthetics aren't something to assert numerically. Spot-
     checked headlessly with a 12-node/11-edge chain graph (mixed entity/
@@ -1223,6 +1240,71 @@ and record deltas here instead of editing the spec.)*
     --test tests/*.spec.mjs` (149 tests) and `python3 -m unittest discover
     -s tools -p "test_*.py"` (15 tests), both green — no regressions in
     Phases 0–8 or the Clear button.
+- 2026-07-25 — PR #10 (dark/light theme toggle) merged to `main` by the
+  user. Restarted this branch from `origin/main` per the merged-PR
+  protocol before starting the next requested item.
+- 2026-07-25 — Follow-up question: "in autolayout, groupings are
+  respected?" Answered first without implementing (per the user's
+  explicit request), based on a direct re-read of `autoLayout()`: members
+  *were* softly pulled toward their group via the auto-generated
+  `"contains"` edge (autolayout's attraction pass doesn't filter out
+  `edge.auto`), but nothing prevented a member from ending up outside its
+  group's box — no explicit containment constraint existed, only that
+  incidental spring pull. The user then asked to make containment
+  explicit: "group boundaries should be not penetrable by the things
+  contained." Implemented in `index.html`:
+  - **New `clampCenterIntoGroup()` helper and a per-iteration containment
+    pass inside `autoLayout()`'s relaxation loop.** After each iteration's
+    forces are applied (repulsion + edge attraction, including the
+    contains-edge pull already described above), every node with a
+    non-empty `groups[]` has its center clamped so its full rectangle
+    stays inside every group it belongs to. This is an explicit hard
+    constraint layered on top of the existing soft pull — the soft pull
+    alone doesn't guarantee containment (a strong unrelated edge, or
+    repulsion from other nodes, can still push a member toward the edge of
+    its box or past it), so the constraint has to be enforced separately
+    every iteration, not just hoped for from the spring force.
+  - **`GROUP_CONTAINMENT_PASSES = 5`** repeated clamp passes per iteration,
+    to let the constraint propagate through nested groups (member → inner
+    group → outer group) without needing a topological sort — a fixed,
+    generous pass count is enough since real nesting depth in this app is
+    always small, and is far cheaper to reason about than computing a
+    correct processing order every iteration.
+  - **Only members, never arbitrary overlapping nodes.** The user's ask
+    was specifically about "the things contained" — an unrelated node that
+    happens to overlap a group's box (without being a member) is
+    unaffected, matching the existing "membership isn't recomputed by
+    autolayout" behavior from the original Phase 8 work.
+  - **Scoped entirely to `autoLayout()`.** A manual drag can still pull a
+    member fully out of its group exactly as before — Phase 2's own
+    membership rules (`updateGroupMembership`, overlap-based add/remove)
+    are completely unaffected; this only hardens what autolayout itself
+    guarantees, since that's what was asked.
+  - **Best-effort, not a hard guarantee, when a member is larger than its
+    group's interior** (`Math.min`/`Math.max` around the clamp bounds keeps
+    `clamp()`'s `lo <= hi` contract intact instead of producing `NaN`) —
+    this is an already-possible pre-existing state (a manual resize could
+    already make a member bigger than its group before this change), not
+    something autolayout creates, so it's handled defensively rather than
+    guaranteed leak-proof.
+  - Added 4 tests to `tests/phase8.spec.mjs` (5 → 9 total): a member stays
+    fully inside its group even against a strong edge pulling it toward a
+    distant node (proves the clamp actually overrides physics rather than
+    coincidentally already holding); all members of a multi-member group
+    stay contained simultaneously; nested containment (member inside inner
+    group inside outer group, with the inner group deliberately sized
+    smaller than the outer so containment has real slack to check instead
+    of an exact coincidental box match); a member deliberately bigger than
+    its (tiny) group produces no crash or non-finite position. Also spot-
+    checked manually (outside the test suite) with a member connected by a
+    strong edge to a node 2000+ units away: both group and member drifted
+    substantially under the force simulation, but the member's final
+    rectangle stayed exactly inside the group's final rectangle — good
+    evidence the clamp holds even under real competing forces, not just in
+    a static setup. Ran the full suite before considering this done: `node
+    --test tests/*.spec.mjs` (153 tests) and `python3 -m unittest discover
+    -s tools -p "test_*.py"` (15 tests), both green — no regressions in
+    Phases 0–8, the Clear button, or the theme toggle.
 
 ---
 
