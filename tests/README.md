@@ -38,7 +38,34 @@ fallback is sandbox-specific and may not exist on your machine; the
 - `lib/page.mjs` — shared `withPage()` helper (opens `index.html`, fails
   the test on any console/page error, always closes the browser) and small
   UI-flow helpers reused across spec files.
+- `lib/server.mjs` — tiny dependency-free static file server, used only by
+  `phase4.spec.mjs` to exercise the OPFS storage backend for real (it
+  throws under `file://`, see TODO.md's Phase 4 Log entry).
+- `fixtures/*.txt` — TXT edge-list files used by both `phase6.spec.mjs`
+  (the app's own importer) and `../tools/test_load_edge_list.py` (the
+  standalone Python reference loader), so both are checked against one
+  shared set of examples instead of two that could drift apart.
 - `phase0.spec.mjs`, `phase1.spec.mjs`, ... — one file per TODO.md phase.
+- `python-parity.spec.mjs` — runs `../tools/load_edge_list.py` as a
+  subprocess against every fixture and diffs its output against the JS
+  importer's `parseTxtImport()`, proving the two agree rather than just
+  asserting it in a comment. Skips gracefully (with a console warning, not
+  a failure) if `python3` isn't on `PATH` — see "Python tests" below.
+
+## Python tests
+
+`tools/load_edge_list.py` (the reference loader from spec.md's Appendix,
+kept in sync with it by hand) has its own suite, `tools/test_load_edge_list.py`
+— standard library only (`unittest`), no dependencies:
+
+```sh
+python3 -m unittest discover -s tools -p "test_*.py"
+```
+
+It reuses the same `tests/fixtures/*.txt` files the JS suite does. Run both
+suites (JS + Python) before considering Phase 6-related changes done —
+`tests/python-parity.spec.mjs` (part of the JS suite above) additionally
+cross-checks the two against each other directly.
 
 ## The `window.__kg` test hook
 
