@@ -93,15 +93,61 @@
     cursor: grabbing;
   }
 
+  #canvas.mode-addnode,
+  #canvas.mode-connect {
+    cursor: crosshair;
+  }
+
   #import-file-input {
     display: none;
+  }
+
+  .kg-inline-input {
+    position: fixed;
+    transform: translate(-50%, -50%);
+    z-index: 20;
+    font-size: 14px;
+    padding: 6px 8px;
+    border-radius: 4px;
+    border: 1px solid #4da6ff;
+    background: #1e1e1e;
+    color: #e8e8e8;
+    min-width: 140px;
+  }
+
+  #sel-toolbar {
+    position: fixed;
+    display: none;
+    gap: 4px;
+    transform: translate(-50%, -170%);
+    z-index: 15;
+  }
+
+  #sel-toolbar button {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 1px solid var(--toolbar-border);
+    background: var(--btn-bg);
+    color: var(--toolbar-fg);
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+  }
+
+  #sel-toolbar button:hover {
+    background: var(--btn-bg-hover);
   }
 </style>
 </head>
 <body>
 
 <div id="toolbar">
-  <button id="btn-add-node" type="button">Add Node</button>
+  <button id="btn-add-node" type="button" aria-pressed="false">Add Node</button>
   <button id="btn-connect" type="button" aria-pressed="false">Connect</button>
   <button id="btn-autolayout" type="button">Auto-layout</button>
   <button id="btn-undo" type="button">Undo</button>
@@ -118,6 +164,11 @@
 
 <div id="canvas-wrap">
   <canvas id="canvas"></canvas>
+</div>
+
+<div id="sel-toolbar">
+  <button id="sel-toggle-dir" type="button" title="Toggle direction">&#8646;</button>
+  <button id="sel-trash" type="button" title="Delete">&#128465;</button>
 </div>
 
 <script>
@@ -144,6 +195,10 @@ function screenToWorld(sx, sy) {
   return { x: (sx - camera.panX) / camera.scale, y: (sy - camera.panY) / camera.scale };
 }
 
+function worldToScreen(wx, wy) {
+  return { x: wx * camera.scale + camera.panX, y: wy * camera.scale + camera.panY };
+}
+
 function zoomAt(screenX, screenY, factor) {
   const newScale = clamp(camera.scale * factor, MIN_SCALE, MAX_SCALE);
   if (newScale === camera.scale) return;
@@ -152,6 +207,151 @@ function zoomAt(screenX, screenY, factor) {
   camera.panX = screenX - world.x * newScale;
   camera.panY = screenY - world.y * newScale;
   markDirty();
+}
+
+// ---------------------------------------------------------------------------
+// Data model (spec Section 4). Ids are monotonic counters, never reused.
+// ---------------------------------------------------------------------------
+const state = {
+  nodes: [],
+  edges: [],
+  selection: { type: null, id: null }, // type: 'node' | 'edge' | null
+  mode: "idle", // 'idle' | 'addNode' | 'connect'
+  connectSource: null,
+  nextNodeNum: 1,
+  nextEdgeNum: 1,
+};
+
+const DEFAULT_NODE_W = 160;
+const DEFAULT_NODE_H = 60;
+
+function genNodeId() { return `n${state.nextNodeNum++}`; }
+function genEdgeId() { return `e${state.nextEdgeNum++}`; }
+
+function createNode(x, y, label, type = "entity") {
+  const node = {
+    id: genNodeId(),
+    label,
+    type,
+    x, y, w: DEFAULT_NODE_W, h: DEFAULT_NODE_H,
+    groups: [],
+    boundary_mode: type === "group" ? "manual" : undefined,
+    notes: null,
+  };
+  state.nodes.push(node);
+  markDirty();
+  return node;
+}
+
+function createEdge(sourceId, targetId, relation, directed = true, auto = false) {
+  const edge = { id: genEdgeId(), source: sourceId, target: targetId, relation, directed, auto };
+  state.edges.push(edge);
+  markDirty();
+  return edge;
+}
+
+function deleteNode(id) {
+  const idx = state.nodes.findIndex((n) => n.id === id);
+  if (idx === -1) return;
+  state.nodes.splice(idx, 1);
+  state.edges = state.edges.filter((e) => e.source !== id && e.target !== id);
+  if (state.selection.type === "node" && state.selection.id === id) clearSelection();
+  markDirty();
+}
+
+function deleteEdge(id) {
+  const idx = state.edges.findIndex((e) => e.id === id);
+  if (idx === -1) return;
+  state.edges.splice(idx, 1);
+  if (state.selection.type === "edge" && state.selection.id === id) clearSelection();
+  markDirty();
+}
+
+function selectNode(id) { state.selection = { type: "node", id }; markDirty(); }
+function selectEdge(id) { state.selection = { type: "edge", id }; markDirty(); }
+function clearSelection() { state.selection = { type: null, id: null }; markDirty(); }
+
+function setMode(mode) {
+  state.mode = mode;
+  if (mode !== "connect") state.connectSource = null;
+  canvas.classList.toggle("mode-addnode", mode === "addNode");
+  canvas.classList.toggle("mode-connect", mode === "connect");
+  document.getElementById("btn-add-node").setAttribute("aria-pressed", String(mode === "addNode"));
+  document.getElementById("btn-connect").setAttribute("aria-pressed", String(mode === "connect"));
+  markDirty();
+}
+
+// ---------------------------------------------------------------------------
+// Geometry helpers: hit-testing and edge anchor points (line clipped to the
+// node's rectangle border, so arrows/lines start/end at the box edge).
+// ---------------------------------------------------------------------------
+function findNodeAt(wx, wy) {
+  for (let i = state.nodes.length - 1; i >= 0; i--) {
+    const n = state.nodes[i];
+    if (wx >= n.x && wx <= n.x + n.w && wy >= n.y && wy <= n.y + n.h) return n;
+  }
+  return null;
+}
+
+function nodeHandles(n) {
+  return [
+    { x: n.x + n.w / 2, y: n.y },
+    { x: n.x + n.w / 2, y: n.y + n.h },
+    { x: n.x, y: n.y + n.h / 2 },
+    { x: n.x + n.w, y: n.y + n.h / 2 },
+  ];
+}
+
+function findNodeHandleAt(wx, wy) {
+  const radius = 10 / camera.scale; // constant ~10 screen px grab target
+  for (let i = state.nodes.length - 1; i >= 0; i--) {
+    const n = state.nodes[i];
+    for (const h of nodeHandles(n)) {
+      if (Math.hypot(wx - h.x, wy - h.y) <= radius) return { node: n, point: h };
+    }
+  }
+  return null;
+}
+
+function rectBorderPoint(rect, dx, dy) {
+  const cx = rect.x + rect.w / 2, cy = rect.y + rect.h / 2;
+  if (dx === 0 && dy === 0) return { x: cx, y: cy };
+  const hw = rect.w / 2, hh = rect.h / 2;
+  const sx = dx !== 0 ? hw / Math.abs(dx) : Infinity;
+  const sy = dy !== 0 ? hh / Math.abs(dy) : Infinity;
+  const s = Math.min(sx, sy);
+  return { x: cx + dx * s, y: cy + dy * s };
+}
+
+function edgeAnchors(edge) {
+  const src = state.nodes.find((n) => n.id === edge.source);
+  const tgt = state.nodes.find((n) => n.id === edge.target);
+  if (!src || !tgt) return null;
+  const scx = src.x + src.w / 2, scy = src.y + src.h / 2;
+  const tcx = tgt.x + tgt.w / 2, tcy = tgt.y + tgt.h / 2;
+  const a = rectBorderPoint(src, tcx - scx, tcy - scy);
+  const b = rectBorderPoint(tgt, scx - tcx, scy - tcy);
+  return { a, b };
+}
+
+function distToSegment(px, py, ax, ay, bx, by) {
+  const dx = bx - ax, dy = by - ay;
+  const lenSq = dx * dx + dy * dy;
+  let t = lenSq === 0 ? 0 : ((px - ax) * dx + (py - ay) * dy) / lenSq;
+  t = clamp(t, 0, 1);
+  const cx = ax + t * dx, cy = ay + t * dy;
+  return Math.hypot(px - cx, py - cy);
+}
+
+function findEdgeAt(wx, wy) {
+  const threshold = 6 / camera.scale;
+  for (let i = state.edges.length - 1; i >= 0; i--) {
+    const e = state.edges[i];
+    const anchors = edgeAnchors(e);
+    if (!anchors) continue;
+    if (distToSegment(wx, wy, anchors.a.x, anchors.a.y, anchors.b.x, anchors.b.y) <= threshold) return e;
+  }
+  return null;
 }
 
 // ---------------------------------------------------------------------------
@@ -174,9 +374,25 @@ window.addEventListener("resize", resizeCanvas);
 // ---------------------------------------------------------------------------
 // Render loop — dirty-flag driven, not a constant loop.
 // ---------------------------------------------------------------------------
+const NODE_FILL = "#242424";
+const NODE_STROKE = "#666666";
+const NODE_STROKE_SELECTED = "#4da6ff";
+const CONNECT_SOURCE_STROKE = "#ffb84d";
+const NODE_TEXT = "#e8e8e8";
+const HANDLE_FILL = "rgba(255,255,255,0.35)";
+const EDGE_STROKE = "#8a8a8a";
+const EDGE_STROKE_SELECTED = "#4da6ff";
+const EDGE_LABEL_FG = "#bbbbbb";
+const GHOST_STROKE = "#4da6ff";
+const NODE_FONT_SIZE = 16;
+const EDGE_FONT_SIZE = 12;
+const ARROWHEAD_SIZE = 10;
+
 function drawGrid() {
   // Grid spacing adapts to zoom so it stays visually useful at any scale.
-  const targetPx = 60; // desired on-screen spacing
+  // Drawn manually in screen space (not via ctx transform) to keep dot
+  // density/precision sane at extreme zoom (Section 6).
+  const targetPx = 60;
   let worldStep = targetPx / camera.scale;
   const pow10 = Math.pow(10, Math.floor(Math.log10(worldStep)));
   const mantissa = worldStep / pow10;
@@ -213,17 +429,141 @@ function drawEmptyState() {
   ctx.restore();
 }
 
+function roundRectPath(x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+
+function drawArrowhead(x, y, dx, dy, size) {
+  const angle = Math.atan2(dy, dx);
+  const a1 = angle + Math.PI - 0.4;
+  const a2 = angle + Math.PI + 0.4;
+  ctx.beginPath();
+  ctx.moveTo(x, y);
+  ctx.lineTo(x + size * Math.cos(a1), y + size * Math.sin(a1));
+  ctx.lineTo(x + size * Math.cos(a2), y + size * Math.sin(a2));
+  ctx.closePath();
+  ctx.fill();
+}
+
+function drawEdges() {
+  for (const edge of state.edges) {
+    const anchors = edgeAnchors(edge);
+    if (!anchors) continue;
+    const selected = state.selection.type === "edge" && state.selection.id === edge.id;
+    ctx.strokeStyle = selected ? EDGE_STROKE_SELECTED : EDGE_STROKE;
+    ctx.fillStyle = ctx.strokeStyle;
+    ctx.lineWidth = selected ? 3 : 2;
+    ctx.beginPath();
+    ctx.moveTo(anchors.a.x, anchors.a.y);
+    ctx.lineTo(anchors.b.x, anchors.b.y);
+    ctx.stroke();
+    if (edge.directed) {
+      drawArrowhead(anchors.b.x, anchors.b.y, anchors.b.x - anchors.a.x, anchors.b.y - anchors.a.y, ARROWHEAD_SIZE);
+    }
+    const mx = (anchors.a.x + anchors.b.x) / 2, my = (anchors.a.y + anchors.b.y) / 2;
+    ctx.fillStyle = EDGE_LABEL_FG;
+    ctx.font = `${EDGE_FONT_SIZE}px system-ui, sans-serif`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "bottom";
+    ctx.fillText(edge.relation, mx, my - 4);
+  }
+}
+
+function drawNodes() {
+  for (const node of state.nodes) {
+    const selected = state.selection.type === "node" && state.selection.id === node.id;
+    const isConnectSource = state.connectSource === node.id;
+    ctx.fillStyle = NODE_FILL;
+    ctx.strokeStyle = isConnectSource ? CONNECT_SOURCE_STROKE : selected ? NODE_STROKE_SELECTED : NODE_STROKE;
+    ctx.lineWidth = selected || isConnectSource ? 3 : 1.5;
+    roundRectPath(node.x, node.y, node.w, node.h, 8);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.save();
+    roundRectPath(node.x, node.y, node.w, node.h, 8);
+    ctx.clip();
+    ctx.fillStyle = NODE_TEXT;
+    ctx.font = `${NODE_FONT_SIZE}px system-ui, sans-serif`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(node.label, node.x + node.w / 2, node.y + node.h / 2, node.w - 16);
+    ctx.restore();
+
+    ctx.fillStyle = HANDLE_FILL;
+    for (const h of nodeHandles(node)) {
+      ctx.beginPath();
+      ctx.arc(h.x, h.y, 5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+}
+
+function drawGhostEdge() {
+  if (dragMode !== "createEdge" || !edgeDragSourceId || !edgeDragCurrentWorld) return;
+  const src = state.nodes.find((n) => n.id === edgeDragSourceId);
+  if (!src) return;
+  const cx = src.x + src.w / 2, cy = src.y + src.h / 2;
+  const a = rectBorderPoint(src, edgeDragCurrentWorld.x - cx, edgeDragCurrentWorld.y - cy);
+  ctx.save();
+  ctx.strokeStyle = GHOST_STROKE;
+  ctx.setLineDash([6, 4]);
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(a.x, a.y);
+  ctx.lineTo(edgeDragCurrentWorld.x, edgeDragCurrentWorld.y);
+  ctx.stroke();
+  ctx.restore();
+}
+
+const selToolbar = document.getElementById("sel-toolbar");
+const selToggleDirBtn = document.getElementById("sel-toggle-dir");
+const selTrashBtn = document.getElementById("sel-trash");
+
+function updateSelectionToolbar() {
+  if (!state.selection.type) { selToolbar.style.display = "none"; return; }
+  let anchorWorld;
+  if (state.selection.type === "node") {
+    const n = state.nodes.find((x) => x.id === state.selection.id);
+    if (!n) { selToolbar.style.display = "none"; return; }
+    anchorWorld = { x: n.x + n.w, y: n.y };
+    selToggleDirBtn.style.display = "none";
+  } else {
+    const e = state.edges.find((x) => x.id === state.selection.id);
+    const anchors = e && edgeAnchors(e);
+    if (!anchors) { selToolbar.style.display = "none"; return; }
+    anchorWorld = { x: (anchors.a.x + anchors.b.x) / 2, y: (anchors.a.y + anchors.b.y) / 2 };
+    selToggleDirBtn.style.display = "";
+  }
+  const screen = worldToScreen(anchorWorld.x, anchorWorld.y);
+  selToolbar.style.display = "flex";
+  selToolbar.style.left = `${screen.x}px`;
+  selToolbar.style.top = `${screen.y}px`;
+}
+
 function render() {
-  // Reset to identity (device pixels) before clearing.
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  // Device-pixel-ratio scale as the base transform; camera pan/zoom on top,
-  // both applied in CSS-pixel (screen) space.
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
   drawGrid();
-  drawEmptyState(); // placeholder until Phase 1 adds real node/edge rendering
+
+  ctx.save();
+  ctx.setTransform(dpr * camera.scale, 0, 0, dpr * camera.scale, dpr * camera.panX, dpr * camera.panY);
+  drawEdges();
+  drawNodes();
+  drawGhostEdge();
+  ctx.restore();
+
+  if (state.nodes.length === 0) drawEmptyState();
+
+  updateSelectionToolbar();
 }
 
 function loop() {
@@ -235,27 +575,161 @@ function loop() {
 }
 
 // ---------------------------------------------------------------------------
-// Pan (mouse drag / single-touch drag via Pointer Events)
+// Inline text input — used for node-label and edge-relation entry instead of
+// native prompt()/confirm(), so it's consistent, stylable, and DOM-testable.
 // ---------------------------------------------------------------------------
+let activeInlineEditor = null;
+
+function showInlineInput({ x, y, value = "", placeholder = "", onCommit, onCancel }) {
+  cancelInlineInput();
+  const input = document.createElement("input");
+  input.type = "text";
+  input.className = "kg-inline-input";
+  input.value = value;
+  input.placeholder = placeholder;
+  input.style.left = `${x}px`;
+  input.style.top = `${y}px`;
+  document.body.appendChild(input);
+  input.focus();
+  input.select();
+
+  let done = false;
+  function finish(commit) {
+    if (done) return;
+    done = true;
+    input.removeEventListener("keydown", onKey);
+    input.removeEventListener("blur", onBlur);
+    input.remove();
+    activeInlineEditor = null;
+    if (commit) onCommit(input.value);
+    else if (onCancel) onCancel();
+  }
+  function onKey(ev) {
+    if (ev.key === "Enter") { ev.preventDefault(); finish(true); }
+    else if (ev.key === "Escape") { ev.preventDefault(); finish(false); }
+  }
+  function onBlur() { finish(true); }
+
+  input.addEventListener("keydown", onKey);
+  input.addEventListener("blur", onBlur);
+  activeInlineEditor = { finish };
+}
+
+function cancelInlineInput() {
+  if (activeInlineEditor) activeInlineEditor.finish(false);
+}
+
+// ---------------------------------------------------------------------------
+// Primary pointer interaction: pan / node-move / edge-creation-drag, plus a
+// long-press-to-delete timer. A separate 'click' listener (below) handles
+// tap-based flows (select, Add Node placement, Connect mode taps) since
+// those are naturally distinguished from drags by the browser's own
+// click-vs-drag movement threshold.
+// ---------------------------------------------------------------------------
+const MOVE_THRESHOLD = 5; // screen px before a press counts as a drag
+const LONG_PRESS_MS = 600;
+
 let panPointerId = null;
 let panLast = { x: 0, y: 0 };
 
+let dragMode = null; // 'pan' | 'moveNode' | 'createEdge' | null
+let movingNodeId = null;
+let moveOffset = { x: 0, y: 0 };
+let edgeDragSourceId = null;
+let edgeDragCurrentWorld = null;
+let longPressTimer = null;
+let pointerDownScreen = null;
+let suppressNextClick = false;
+
 canvas.addEventListener("pointerdown", (e) => {
   if (e.pointerType === "touch" && activeTouches.size >= 2) return; // pinch owns this
+  if (e.pointerType === "mouse" && e.button !== 0) return; // primary button only
+
+  if (state.mode !== "idle") return; // addNode/connect: taps handled by 'click'
+
+  const rect = canvas.getBoundingClientRect();
+  const sx = e.clientX - rect.left, sy = e.clientY - rect.top;
+  const world = screenToWorld(sx, sy);
+  pointerDownScreen = { x: e.clientX, y: e.clientY };
+
+  const handleHit = findNodeHandleAt(world.x, world.y);
+  if (handleHit) {
+    dragMode = "createEdge";
+    edgeDragSourceId = handleHit.node.id;
+    edgeDragCurrentWorld = world;
+    canvas.setPointerCapture(e.pointerId);
+    markDirty();
+    return;
+  }
+
+  const nodeHit = findNodeAt(world.x, world.y);
+  if (nodeHit) {
+    selectNode(nodeHit.id);
+    dragMode = "moveNode";
+    movingNodeId = nodeHit.id;
+    moveOffset = { x: world.x - nodeHit.x, y: world.y - nodeHit.y };
+    canvas.setPointerCapture(e.pointerId);
+    longPressTimer = setTimeout(() => {
+      deleteNode(nodeHit.id);
+      dragMode = null;
+      movingNodeId = null;
+      longPressTimer = null;
+    }, LONG_PRESS_MS);
+    markDirty();
+    return;
+  }
+
+  const edgeHit = findEdgeAt(world.x, world.y);
+  if (edgeHit) {
+    selectEdge(edgeHit.id);
+    longPressTimer = setTimeout(() => {
+      deleteEdge(edgeHit.id);
+      longPressTimer = null;
+    }, LONG_PRESS_MS);
+    markDirty();
+    return; // no pan/move originates from an edge
+  }
+
   panPointerId = e.pointerId;
   panLast = { x: e.clientX, y: e.clientY };
   canvas.setPointerCapture(e.pointerId);
   canvas.classList.add("panning");
+  dragMode = "pan";
 });
 
 canvas.addEventListener("pointermove", (e) => {
-  if (e.pointerId !== panPointerId) return;
-  const dx = e.clientX - panLast.x;
-  const dy = e.clientY - panLast.y;
-  panLast = { x: e.clientX, y: e.clientY };
-  camera.panX += dx;
-  camera.panY += dy;
-  markDirty();
+  if (dragMode === "pan") {
+    if (e.pointerId !== panPointerId) return;
+    const dx = e.clientX - panLast.x, dy = e.clientY - panLast.y;
+    panLast = { x: e.clientX, y: e.clientY };
+    camera.panX += dx;
+    camera.panY += dy;
+    markDirty();
+    return;
+  }
+
+  if (dragMode === "moveNode" || dragMode === "createEdge") {
+    if (pointerDownScreen && longPressTimer) {
+      const moved = Math.hypot(e.clientX - pointerDownScreen.x, e.clientY - pointerDownScreen.y);
+      if (moved > MOVE_THRESHOLD) {
+        clearTimeout(longPressTimer);
+        longPressTimer = null;
+      }
+    }
+    const rect = canvas.getBoundingClientRect();
+    const world = screenToWorld(e.clientX - rect.left, e.clientY - rect.top);
+    if (dragMode === "moveNode") {
+      const node = state.nodes.find((n) => n.id === movingNodeId);
+      if (node) {
+        node.x = world.x - moveOffset.x;
+        node.y = world.y - moveOffset.y;
+        markDirty();
+      }
+    } else {
+      edgeDragCurrentWorld = world;
+      markDirty();
+    }
+  }
 });
 
 function endPan(e) {
@@ -263,8 +737,157 @@ function endPan(e) {
   panPointerId = null;
   canvas.classList.remove("panning");
 }
-canvas.addEventListener("pointerup", endPan);
-canvas.addEventListener("pointercancel", endPan);
+
+canvas.addEventListener("pointerup", (e) => {
+  if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+
+  if (dragMode === "pan") {
+    endPan(e);
+    dragMode = null;
+    return;
+  }
+
+  if (dragMode === "moveNode") {
+    const moved = pointerDownScreen ? Math.hypot(e.clientX - pointerDownScreen.x, e.clientY - pointerDownScreen.y) : 0;
+    if (moved > MOVE_THRESHOLD) suppressNextClick = true;
+    movingNodeId = null;
+    dragMode = null;
+    return;
+  }
+
+  if (dragMode === "createEdge") {
+    const rect = canvas.getBoundingClientRect();
+    const world = screenToWorld(e.clientX - rect.left, e.clientY - rect.top);
+    const targetNode = findNodeAt(world.x, world.y);
+    suppressNextClick = true;
+    const sourceId = edgeDragSourceId;
+    edgeDragSourceId = null;
+    edgeDragCurrentWorld = null;
+    dragMode = null;
+    if (targetNode && targetNode.id !== sourceId) {
+      beginAddEdgePrompt(sourceId, targetNode.id, { x: e.clientX, y: e.clientY });
+    }
+    markDirty();
+    return;
+  }
+});
+
+canvas.addEventListener("pointercancel", (e) => {
+  if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+  if (dragMode === "pan") endPan(e);
+  dragMode = null;
+  movingNodeId = null;
+  edgeDragSourceId = null;
+  edgeDragCurrentWorld = null;
+});
+
+function beginAddEdgePrompt(sourceId, targetId, screenPos) {
+  showInlineInput({
+    x: screenPos.x, y: screenPos.y, placeholder: "relation label",
+    onCommit: (text) => {
+      const relation = text.trim() || "related to";
+      const edge = createEdge(sourceId, targetId, relation, true, false);
+      selectEdge(edge.id);
+    },
+  });
+}
+
+function handleConnectTap(hitNode, screenPos) {
+  if (!hitNode) {
+    state.connectSource = null;
+    clearSelection();
+    return;
+  }
+  if (!state.connectSource) {
+    state.connectSource = hitNode.id;
+    selectNode(hitNode.id);
+    return;
+  }
+  if (state.connectSource === hitNode.id) {
+    state.connectSource = null;
+    clearSelection();
+    return;
+  }
+  const sourceId = state.connectSource;
+  state.connectSource = null;
+  beginAddEdgePrompt(sourceId, hitNode.id, screenPos);
+}
+
+canvas.addEventListener("click", (e) => {
+  if (suppressNextClick) { suppressNextClick = false; return; }
+
+  const rect = canvas.getBoundingClientRect();
+  const sx = e.clientX - rect.left, sy = e.clientY - rect.top;
+  const world = screenToWorld(sx, sy);
+
+  if (state.mode === "addNode") {
+    showInlineInput({
+      x: e.clientX, y: e.clientY, placeholder: "Node label",
+      onCommit: (text) => {
+        const label = text.trim();
+        if (label) {
+          const node = createNode(world.x - DEFAULT_NODE_W / 2, world.y - DEFAULT_NODE_H / 2, label);
+          selectNode(node.id);
+        }
+      },
+    });
+    setMode("idle");
+    return;
+  }
+
+  const nodeHit = findNodeAt(world.x, world.y);
+
+  if (state.mode === "connect") {
+    handleConnectTap(nodeHit, { x: e.clientX, y: e.clientY });
+    return;
+  }
+
+  if (nodeHit) { selectNode(nodeHit.id); return; }
+  const edgeHit = findEdgeAt(world.x, world.y);
+  if (edgeHit) { selectEdge(edgeHit.id); return; }
+  clearSelection();
+});
+
+canvas.addEventListener("dblclick", (e) => {
+  const rect = canvas.getBoundingClientRect();
+  const world = screenToWorld(e.clientX - rect.left, e.clientY - rect.top);
+  if (findNodeAt(world.x, world.y)) return; // don't hijack dblclick on an existing node
+  showInlineInput({
+    x: e.clientX, y: e.clientY, placeholder: "Node label",
+    onCommit: (text) => {
+      const label = text.trim();
+      if (label) {
+        const node = createNode(world.x - DEFAULT_NODE_W / 2, world.y - DEFAULT_NODE_H / 2, label);
+        selectNode(node.id);
+      }
+    },
+  });
+});
+
+window.addEventListener("keydown", (e) => {
+  if (activeInlineEditor) return; // don't hijack while typing
+  if (e.key === "Escape") {
+    if (state.mode !== "idle") setMode("idle");
+    if (state.connectSource) { state.connectSource = null; markDirty(); }
+    return;
+  }
+  if ((e.key === "Delete" || e.key === "Backspace") && state.selection.id) {
+    e.preventDefault();
+    if (state.selection.type === "node") deleteNode(state.selection.id);
+    else if (state.selection.type === "edge") deleteEdge(state.selection.id);
+  }
+});
+
+selTrashBtn.addEventListener("click", () => {
+  if (state.selection.type === "node") deleteNode(state.selection.id);
+  else if (state.selection.type === "edge") deleteEdge(state.selection.id);
+});
+
+selToggleDirBtn.addEventListener("click", () => {
+  if (state.selection.type !== "edge") return;
+  const edge = state.edges.find((x) => x.id === state.selection.id);
+  if (edge) { edge.directed = !edge.directed; markDirty(); }
+});
 
 // ---------------------------------------------------------------------------
 // Zoom — wheel/ctrl+wheel (desktop) and pinch (touch)
@@ -280,21 +903,19 @@ canvas.addEventListener("wheel", (e) => {
 
 const activeTouches = new Map(); // pointerId -> {x,y}
 let pinchStartDist = null;
-let pinchStartMid = null;
 
 canvas.addEventListener("pointerdown", (e) => {
   if (e.pointerType !== "touch") return;
   activeTouches.set(e.pointerId, { x: e.clientX, y: e.clientY });
   if (activeTouches.size === 2) {
-    // A pinch is starting: cancel any single-finger pan in progress.
     if (panPointerId !== null) {
       canvas.releasePointerCapture(panPointerId);
       panPointerId = null;
       canvas.classList.remove("panning");
     }
+    dragMode = null; // a pinch starting cancels any node-move/edge-drag too
     const pts = [...activeTouches.values()];
     pinchStartDist = distance(pts[0], pts[1]);
-    pinchStartMid = midpoint(pts[0], pts[1]);
   }
 });
 
@@ -309,17 +930,13 @@ canvas.addEventListener("pointermove", (e) => {
     const factor = dist / pinchStartDist;
     zoomAt(mid.x - rect.left, mid.y - rect.top, factor);
     pinchStartDist = dist;
-    pinchStartMid = mid;
   }
 });
 
 function endTouch(e) {
   if (e.pointerType !== "touch") return;
   activeTouches.delete(e.pointerId);
-  if (activeTouches.size < 2) {
-    pinchStartDist = null;
-    pinchStartMid = null;
-  }
+  if (activeTouches.size < 2) pinchStartDist = null;
 }
 canvas.addEventListener("pointerup", endTouch);
 canvas.addEventListener("pointercancel", endTouch);
@@ -328,8 +945,7 @@ function distance(a, b) { return Math.hypot(a.x - b.x, a.y - b.y); }
 function midpoint(a, b) { return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }; }
 
 // ---------------------------------------------------------------------------
-// Toolbar — zoom buttons are fully functional (camera exists in Phase 0);
-// everything else is a stub until its owning phase lands.
+// Toolbar
 // ---------------------------------------------------------------------------
 function notImplemented(label) {
   console.warn(`[KG Canvas] "${label}" is not implemented yet (see TODO.md).`);
@@ -342,8 +958,13 @@ document.getElementById("btn-zoom-out").addEventListener("click", () => {
   zoomAt(cssWidth / 2, cssHeight / 2, 1 / 1.25);
 });
 
-document.getElementById("btn-add-node").addEventListener("click", () => notImplemented("Add Node"));
-document.getElementById("btn-connect").addEventListener("click", () => notImplemented("Connect"));
+document.getElementById("btn-add-node").addEventListener("click", () => {
+  setMode(state.mode === "addNode" ? "idle" : "addNode");
+});
+document.getElementById("btn-connect").addEventListener("click", () => {
+  setMode(state.mode === "connect" ? "idle" : "connect");
+});
+
 document.getElementById("btn-autolayout").addEventListener("click", () => notImplemented("Auto-layout"));
 document.getElementById("btn-undo").addEventListener("click", () => notImplemented("Undo"));
 document.getElementById("btn-redo").addEventListener("click", () => notImplemented("Redo"));
@@ -357,6 +978,25 @@ importInput.addEventListener("change", () => {
   }
   importInput.value = "";
 });
+
+// ---------------------------------------------------------------------------
+// Debug/test-only introspection hook. Purely additive read/call surface over
+// state that already exists for the app's own operation — never required
+// for index.html to function, and never itself a source of app behavior.
+// ---------------------------------------------------------------------------
+window.__kg = {
+  state,
+  camera,
+  render,
+  markDirty,
+  worldToScreen,
+  screenToWorld,
+  zoomAt,
+  actions: {
+    createNode, createEdge, deleteNode, deleteEdge,
+    selectNode, selectEdge, clearSelection, setMode,
+  },
+};
 
 // ---------------------------------------------------------------------------
 // Boot
