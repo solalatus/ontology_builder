@@ -450,6 +450,83 @@ function updateUndoRedoButtons() {
 }
 
 // ---------------------------------------------------------------------------
+// Autolayout (Section 8): explicit-only, never automatic. Force-directed
+// (Fruchterman-Reingold style) relaxation of node *centers* — repulsion
+// between every pair of nodes, not just connected ones, so disconnected
+// components and floating groups still spread apart instead of piling up;
+// attraction only along edges. Starts from the graph's current positions
+// (rather than a fresh random scatter), so the result is deterministic for
+// a given graph + starting layout — no RNG involved, and nothing to seed.
+// A fixed iteration count with a cooling schedule guarantees termination
+// (no risk of hanging) regardless of graph shape.
+//
+// Group boxes are moved exactly like any other node and keep their own
+// w/h. That's intentional, not an oversight: boundary_mode is always
+// "manual" (Section 4.3) — nothing in this app ever auto-fits a group's
+// box to its members, so autolayout is free to move a group away from
+// members it doesn't visually contain afterward, same as a manual drag
+// would be.
+// ---------------------------------------------------------------------------
+function autoLayout() {
+  if (state.nodes.length < 2) return; // nothing to relax
+  const before = snapshotState();
+
+  const idealDist = 150; // target inter-node spacing
+  const iterations = 200;
+  let temperature = 100; // max displacement per iteration, cooled to ~0
+
+  const centers = state.nodes.map((n) => ({ x: n.x + n.w / 2, y: n.y + n.h / 2 }));
+  const indexById = new Map(state.nodes.map((n, i) => [n.id, i]));
+
+  for (let iter = 0; iter < iterations; iter++) {
+    const disp = centers.map(() => ({ x: 0, y: 0 }));
+
+    for (let i = 0; i < centers.length; i++) {
+      for (let j = i + 1; j < centers.length; j++) {
+        let dx = centers[i].x - centers[j].x;
+        let dy = centers[i].y - centers[j].y;
+        const dist = Math.hypot(dx, dy) || 0.01; // guard against exact overlap
+        const force = (idealDist * idealDist) / dist;
+        dx = (dx / dist) * force;
+        dy = (dy / dist) * force;
+        disp[i].x += dx; disp[i].y += dy;
+        disp[j].x -= dx; disp[j].y -= dy;
+      }
+    }
+
+    for (const edge of state.edges) {
+      const i = indexById.get(edge.source);
+      const j = indexById.get(edge.target);
+      if (i === undefined || j === undefined || i === j) continue;
+      let dx = centers[i].x - centers[j].x;
+      let dy = centers[i].y - centers[j].y;
+      const dist = Math.hypot(dx, dy) || 0.01;
+      const force = (dist * dist) / idealDist;
+      dx = (dx / dist) * force;
+      dy = (dy / dist) * force;
+      disp[i].x -= dx; disp[i].y -= dy;
+      disp[j].x += dx; disp[j].y += dy;
+    }
+
+    for (let i = 0; i < centers.length; i++) {
+      const dist = Math.hypot(disp[i].x, disp[i].y) || 0.01;
+      const capped = Math.min(dist, temperature);
+      centers[i].x += (disp[i].x / dist) * capped;
+      centers[i].y += (disp[i].y / dist) * capped;
+    }
+    temperature *= 0.95;
+  }
+
+  state.nodes.forEach((n, i) => {
+    n.x = centers[i].x - n.w / 2;
+    n.y = centers[i].y - n.h / 2;
+  });
+
+  markDirty();
+  pushHistory(before, snapshotState());
+}
+
+// ---------------------------------------------------------------------------
 // Tier 1 storage (Section 3.2): every edit writes immediately to a private,
 // non-visible background store — no prompts, protects against a crashed tab.
 //
@@ -1943,7 +2020,7 @@ document.getElementById("btn-connect").addEventListener("click", () => {
   setMode(state.mode === "connect" ? "idle" : "connect");
 });
 
-document.getElementById("btn-autolayout").addEventListener("click", () => notImplemented("Auto-layout"));
+document.getElementById("btn-autolayout").addEventListener("click", () => autoLayout());
 document.getElementById("btn-undo").addEventListener("click", () => undo());
 document.getElementById("btn-redo").addEventListener("click", () => redo());
 document.getElementById("btn-save-version").addEventListener("click", () => performSaveVersion());
@@ -2032,7 +2109,7 @@ window.__kg = {
   actions: {
     createNode, createEdge, deleteNode, deleteEdge,
     selectNode, selectEdge, clearSelection, setMode,
-    updateGroupMembership, undo, redo,
+    updateGroupMembership, undo, redo, autoLayout,
   },
   storage: {
     detectBackend: detectStorageBackend,
