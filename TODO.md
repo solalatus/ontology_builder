@@ -9,15 +9,15 @@ State" so the project can be picked up cold at any time.
 
 ## Current State
 
-- **Phase:** Phases 0 through 7 complete, all with green automated test
-  suites (`node --test tests/*.spec.mjs`, 138 JS tests + 15 Python tests,
+- **Phase:** Phases 0 through 8 complete, all with green automated test
+  suites (`node --test tests/*.spec.mjs`, 143 JS tests + 15 Python tests,
   see Log below). Not yet hand-tested on real touch hardware (pinch/
   long-press) — deferred to Phase 10, not blocking. Phase 7's real-folder
   grant/write-back is likewise only mocked-tested so far, not hand-verified
   on real Chrome/Windows or Chromium/Linux — also deferred to Phase 10.
-  Phase 8 (Autolayout) not started. A "Clear" button (outside the phased
-  plan, user-requested) was also added — see its own section below, right
-  after Phase 11.
+  Phase 9 (Scale & performance) not started. A "Clear" button (outside the
+  phased plan, user-requested) was also added — see its own section below,
+  right after Phase 11.
 - **Target file:** `index.html` (single file, no external deps/CDN links).
   Dev-only test tooling lives in `tests/` and `tools/` (see `tests/README.md`)
   and never ships as part of the app.
@@ -45,7 +45,8 @@ State" so the project can be picked up cold at any time.
   proving agreement rather than asserting it). See the dated Log entry
   below for the full account, including a second, smaller behavioral
   change (malformed-line handling) made for the same consistency reason.
-- **Next action:** Phase 8 (Autolayout).
+- **Next action:** Phase 9 (Scale & performance — viewport culling, ~1,000
+  synthetic node smoke test).
 
 ---
 
@@ -461,18 +462,29 @@ claude.ai/code, which is plain git via GitHub as described above.
 
 ## Phase 8 — Autolayout
 
-- [ ] Explicit "Auto-layout" button only, never automatic (Section 2, 8)
-- [ ] Algorithm: implementation detail, not fixed by spec (force-directed /
+- [x] Explicit "Auto-layout" button only, never automatic (Section 2, 8)
+- [x] Algorithm: implementation detail, not fixed by spec (force-directed /
       hierarchical / grid — pick one, document choice in Log below)
-- [ ] Single undo step regardless of node count (one "before" snapshot of
+- [x] Single undo step regardless of node count (one "before" snapshot of
       all positions)
-- Tests (planned, `tests/phase8.spec.mjs`):
-  - Automated: running autolayout on a fixture graph changes node
-    positions but is exactly one undo step (Undo restores every node's
-    pre-layout position in one action); doesn't crash/hang on disconnected
-    components or floating groups.
+- Tests (`tests/phase8.spec.mjs`, 5 tests):
+  - Automated: no-op (no history entry, no movement) on an empty or
+    single-node graph; on a small connected graph, positions change and
+    it's exactly one undo step (one Undo restores every node's exact
+    pre-layout position, one Redo re-applies the exact same result); only
+    `x`/`y` change — ids, labels, edge list, and group `groups[]`
+    membership are byte-identical before/after; doesn't crash or hang on
+    disconnected components and a floating group with no edges at all
+    (asserted via a wall-clock bound plus `Number.isFinite` on every
+    resulting position); a reload never silently re-lays-out the graph
+    (confirms "never automatic" isn't just a UI claim).
   - Manual: visually sane result (no total node overlap) on a real fixture
-    graph — layout aesthetics aren't something to assert numerically.
+    graph — layout aesthetics aren't something to assert numerically. Spot-
+    checked headlessly with a 12-node/11-edge chain graph (mixed entity/
+    group types): nodes spread into a readable line with no overlaps and
+    no `NaN`/`Infinity` positions — see Log entry below. **Not yet done on
+    a real device/browser** — deferred to Phase 10 alongside the other
+    hands-on checks.
 
 ## Phase 9 — Scale & performance
 
@@ -1078,6 +1090,56 @@ and record deltas here instead of editing the spec.)*
     Android never offer the button) — this can only be done on real OS/
     browser combinations, not in headless CI, so it's flagged in Current
     State rather than checked off.
+- 2026-07-25 — PR #8 (Phase 7) merged to `main` by the user. Restarted this
+  branch from `origin/main` per the merged-PR protocol before starting
+  Phase 8.
+- 2026-07-25 — Phase 8 (Autolayout) implemented in `index.html`. Notable
+  decisions:
+  - **Algorithm: force-directed (Fruchterman-Reingold style)**, chosen
+    over hierarchical or grid layout because it needs no notion of "root"
+    or "levels" (this graph model has neither) and degrades gracefully to
+    something reasonable for arbitrary, possibly-cyclic, possibly-
+    disconnected graphs — which is exactly the shape of data this app
+    allows. Repulsion runs over **every pair of nodes**, not just
+    connected ones, specifically so disconnected components and floating
+    groups (explicit test-plan requirements) still spread apart instead of
+    settling on top of each other; attraction runs only along edges.
+  - **Relaxation starts from the graph's current positions**, not a fresh
+    random scatter — deliberately avoids any RNG. This makes a given
+    graph + starting layout produce a deterministic result, which is what
+    makes exact-position-equality assertions in the test suite (e.g. "one
+    Redo reproduces the exact same result") possible without a fixed seed.
+  - **Fixed iteration count (200) with a cooling schedule** (temperature,
+    i.e. max per-iteration displacement, multiplied by 0.95 each pass)
+    guarantees termination regardless of graph shape — satisfies "doesn't
+    hang" by construction rather than by hoping convergence happens.
+  - **Group boxes are moved exactly like any other node, keeping their own
+    `w`/`h`.** This is intentional, not an oversight: `boundary_mode` is
+    always `"manual"` (Section 4.3, Decision from Phase 2) — nothing in
+    this app ever auto-fits a group's box to its members' positions, on a
+    drag or otherwise, so it would be inconsistent for autolayout alone to
+    start doing so. A member may end up visually outside its group's box
+    after a layout pass; `groups[]` membership itself is untouched (proven
+    by a dedicated test), same as after any manual group-box drag.
+  - **Single choke point, no new pattern**: `autoLayout()` takes one
+    `snapshotState()` before mutating, one after, and calls the existing
+    `pushHistory()` — the same command-pattern mechanism every other
+    action already uses, so "one undo step regardless of node count"
+    falls out of the existing undo/redo design rather than needing
+    special-casing.
+  - **No-op guard for <2 nodes** (`state.nodes.length < 2`) — nothing to
+    relax, and skipping avoids pushing a spurious no-op undo step for an
+    empty or single-node graph.
+  - Wrote `tests/phase8.spec.mjs` (5 tests, see the Phase 8 section above
+    for full coverage list). Also spot-checked headlessly outside the test
+    suite with a 12-node/11-edge chain graph (mixed entity/group node
+    types) and printed resulting positions: nodes spread into a readable
+    line, no overlapping coordinates, no `NaN`/`Infinity` — recorded here
+    since it's evidence beyond what the automated assertions check
+    (aesthetic sanity, not just correctness). Ran the full suite before
+    considering this done: `node --test tests/*.spec.mjs` (143 tests) and
+    `python3 -m unittest discover -s tools -p "test_*.py"` (15 tests),
+    both green — no regressions in Phases 0–7.
 
 ---
 
