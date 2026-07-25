@@ -94,6 +94,7 @@
   }
 
   #canvas.mode-addnode,
+  #canvas.mode-addgroup,
   #canvas.mode-connect {
     cursor: crosshair;
   }
@@ -148,6 +149,7 @@
 
 <div id="toolbar">
   <button id="btn-add-node" type="button" aria-pressed="false">Add Node</button>
+  <button id="btn-add-group" type="button" aria-pressed="false">Add Group</button>
   <button id="btn-connect" type="button" aria-pressed="false">Connect</button>
   <button id="btn-autolayout" type="button">Auto-layout</button>
   <button id="btn-undo" type="button">Undo</button>
@@ -216,7 +218,7 @@ const state = {
   nodes: [],
   edges: [],
   selection: { type: null, id: null }, // type: 'node' | 'edge' | null
-  mode: "idle", // 'idle' | 'addNode' | 'connect'
+  mode: "idle", // 'idle' | 'addNode' | 'addGroup' | 'connect'
   connectSource: null,
   nextNodeNum: 1,
   nextEdgeNum: 1,
@@ -224,16 +226,20 @@ const state = {
 
 const DEFAULT_NODE_W = 160;
 const DEFAULT_NODE_H = 60;
+const DEFAULT_GROUP_W = 320;
+const DEFAULT_GROUP_H = 220;
 
 function genNodeId() { return `n${state.nextNodeNum++}`; }
 function genEdgeId() { return `e${state.nextEdgeNum++}`; }
 
 function createNode(x, y, label, type = "entity") {
+  const w = type === "group" ? DEFAULT_GROUP_W : DEFAULT_NODE_W;
+  const h = type === "group" ? DEFAULT_GROUP_H : DEFAULT_NODE_H;
   const node = {
     id: genNodeId(),
     label,
     type,
-    x, y, w: DEFAULT_NODE_W, h: DEFAULT_NODE_H,
+    x, y, w, h,
     groups: [],
     boundary_mode: type === "group" ? "manual" : undefined,
     notes: null,
@@ -255,6 +261,11 @@ function deleteNode(id) {
   if (idx === -1) return;
   state.nodes.splice(idx, 1);
   state.edges = state.edges.filter((e) => e.source !== id && e.target !== id);
+  // If the deleted node was a group, drop it from any remaining member's groups[].
+  for (const n of state.nodes) {
+    const gi = n.groups.indexOf(id);
+    if (gi !== -1) n.groups.splice(gi, 1);
+  }
   if (state.selection.type === "node" && state.selection.id === id) clearSelection();
   markDirty();
 }
@@ -267,6 +278,58 @@ function deleteEdge(id) {
   markDirty();
 }
 
+// ---------------------------------------------------------------------------
+// Group membership (spec Section 4.3, Decision #2/#3). Directional-by-action:
+// only committed/cleared here, at the end of an explicit move-drag — never
+// recomputed just because boxes happen to overlap after some other change
+// (e.g. resizing or moving the group itself).
+// ---------------------------------------------------------------------------
+function rectsOverlap(a, b) {
+  return !(a.x + a.w <= b.x || a.x >= b.x + b.w || a.y + a.h <= b.y || a.y >= b.y + b.h);
+}
+
+function rectFullyContains(outer, inner) {
+  return outer.x <= inner.x && outer.y <= inner.y &&
+    outer.x + outer.w >= inner.x + inner.w && outer.y + outer.h >= inner.y + inner.h;
+}
+
+function createContainsEdge(groupId, memberId) {
+  createEdge(groupId, memberId, "contains", true, true);
+}
+
+function removeContainsEdge(groupId, memberId) {
+  state.edges = state.edges.filter((e) => !(e.auto && e.source === groupId && e.target === memberId));
+  markDirty();
+}
+
+function updateGroupMembership(node) {
+  const stillMember = [];
+  for (const gid of node.groups) {
+    const group = state.nodes.find((n) => n.id === gid);
+    if (group && rectsOverlap(node, group)) {
+      stillMember.push(gid);
+    } else {
+      removeContainsEdge(gid, node.id); // dragged fully outside (or group gone)
+    }
+  }
+  node.groups = stillMember;
+
+  let best = null;
+  for (const candidate of state.nodes) {
+    if (candidate.id === node.id) continue;
+    if (candidate.type !== "group") continue;
+    if (node.groups.includes(candidate.id)) continue;
+    if (candidate.w * candidate.h <= node.w * node.h) continue; // must be strictly bigger
+    if (!rectFullyContains(candidate, node)) continue; // "drop inside" = full containment
+    if (!best || candidate.w * candidate.h < best.w * best.h) best = candidate; // innermost wins
+  }
+  if (best) {
+    node.groups.push(best.id);
+    createContainsEdge(best.id, node.id);
+  }
+  markDirty();
+}
+
 function selectNode(id) { state.selection = { type: "node", id }; markDirty(); }
 function selectEdge(id) { state.selection = { type: "edge", id }; markDirty(); }
 function clearSelection() { state.selection = { type: null, id: null }; markDirty(); }
@@ -275,8 +338,10 @@ function setMode(mode) {
   state.mode = mode;
   if (mode !== "connect") state.connectSource = null;
   canvas.classList.toggle("mode-addnode", mode === "addNode");
+  canvas.classList.toggle("mode-addgroup", mode === "addGroup");
   canvas.classList.toggle("mode-connect", mode === "connect");
   document.getElementById("btn-add-node").setAttribute("aria-pressed", String(mode === "addNode"));
+  document.getElementById("btn-add-group").setAttribute("aria-pressed", String(mode === "addGroup"));
   document.getElementById("btn-connect").setAttribute("aria-pressed", String(mode === "connect"));
   markDirty();
 }
@@ -285,9 +350,20 @@ function setMode(mode) {
 // Geometry helpers: hit-testing and edge anchor points (line clipped to the
 // node's rectangle border, so arrows/lines start/end at the box edge).
 // ---------------------------------------------------------------------------
+// Nodes can now nest (groups), so hit-testing/rendering order can't just be
+// creation order any more: the smallest-area box under a point should win
+// (it's the visually topmost one), with later-created nodes breaking ties.
+// Used both for hit-testing (as-is) and rendering (reversed — biggest/
+// outermost drawn first, so nested boxes paint on top of their container).
+function nodesTopmostFirst() {
+  return state.nodes
+    .map((n, i) => ({ n, i }))
+    .sort((a, b) => (a.n.w * a.n.h - b.n.w * b.n.h) || (b.i - a.i))
+    .map((x) => x.n);
+}
+
 function findNodeAt(wx, wy) {
-  for (let i = state.nodes.length - 1; i >= 0; i--) {
-    const n = state.nodes[i];
+  for (const n of nodesTopmostFirst()) {
     if (wx >= n.x && wx <= n.x + n.w && wy >= n.y && wy <= n.y + n.h) return n;
   }
   return null;
@@ -304,11 +380,29 @@ function nodeHandles(n) {
 
 function findNodeHandleAt(wx, wy) {
   const radius = 10 / camera.scale; // constant ~10 screen px grab target
-  for (let i = state.nodes.length - 1; i >= 0; i--) {
-    const n = state.nodes[i];
+  for (const n of nodesTopmostFirst()) {
     for (const h of nodeHandles(n)) {
       if (Math.hypot(wx - h.x, wy - h.y) <= radius) return { node: n, point: h };
     }
+  }
+  return null;
+}
+
+// Section 4.3 explicitly requires a group's box to be "independently
+// resizable" (boundary_mode is always manual, i.e. never auto-fit) — so
+// unlike entity nodes, group nodes get a corner resize handle. This is also
+// the only way two groups can ever nest: they're all created at the same
+// default size, so recursive membership requires shrinking/growing one.
+const MIN_GROUP_SIZE = 60;
+
+function groupResizeHandlePoint(n) { return { x: n.x + n.w, y: n.y + n.h }; }
+
+function findGroupResizeHandleAt(wx, wy) {
+  const radius = 10 / camera.scale;
+  for (const n of nodesTopmostFirst()) {
+    if (n.type !== "group") continue;
+    const h = groupResizeHandlePoint(n);
+    if (Math.hypot(wx - h.x, wy - h.y) <= radius) return n;
   }
   return null;
 }
@@ -347,6 +441,7 @@ function findEdgeAt(wx, wy) {
   const threshold = 6 / camera.scale;
   for (let i = state.edges.length - 1; i >= 0; i--) {
     const e = state.edges[i];
+    if (e.auto) continue; // contains edges are never drawn, so never hit-testable
     const anchors = edgeAnchors(e);
     if (!anchors) continue;
     if (distToSegment(wx, wy, anchors.a.x, anchors.a.y, anchors.b.x, anchors.b.y) <= threshold) return e;
@@ -380,6 +475,8 @@ const NODE_STROKE_SELECTED = "#4da6ff";
 const CONNECT_SOURCE_STROKE = "#ffb84d";
 const NODE_TEXT = "#e8e8e8";
 const HANDLE_FILL = "rgba(255,255,255,0.35)";
+const GROUP_FILL = "rgba(77,166,255,0.06)";
+const GROUP_STROKE = "#4d7fa6";
 const EDGE_STROKE = "#8a8a8a";
 const EDGE_STROKE_SELECTED = "#4da6ff";
 const EDGE_LABEL_FG = "#bbbbbb";
@@ -453,6 +550,7 @@ function drawArrowhead(x, y, dx, dy, size) {
 
 function drawEdges() {
   for (const edge of state.edges) {
+    if (edge.auto) continue; // contains: communicated by nesting only, never drawn
     const anchors = edgeAnchors(edge);
     if (!anchors) continue;
     const selected = state.selection.type === "edge" && state.selection.id === edge.id;
@@ -476,24 +574,37 @@ function drawEdges() {
 }
 
 function drawNodes() {
-  for (const node of state.nodes) {
+  // Biggest/outermost first so nested boxes always paint on top of their
+  // container, regardless of creation order (mirrors hit-test priority).
+  const drawOrder = [...nodesTopmostFirst()].reverse();
+  for (const node of drawOrder) {
     const selected = state.selection.type === "node" && state.selection.id === node.id;
     const isConnectSource = state.connectSource === node.id;
-    ctx.fillStyle = NODE_FILL;
-    ctx.strokeStyle = isConnectSource ? CONNECT_SOURCE_STROKE : selected ? NODE_STROKE_SELECTED : NODE_STROKE;
+    const isGroup = node.type === "group";
+
+    ctx.fillStyle = isGroup ? GROUP_FILL : NODE_FILL;
+    ctx.strokeStyle = isConnectSource ? CONNECT_SOURCE_STROKE : selected ? NODE_STROKE_SELECTED : (isGroup ? GROUP_STROKE : NODE_STROKE);
     ctx.lineWidth = selected || isConnectSource ? 3 : 1.5;
+    ctx.setLineDash(isGroup ? [8, 5] : []);
     roundRectPath(node.x, node.y, node.w, node.h, 8);
     ctx.fill();
     ctx.stroke();
+    ctx.setLineDash([]);
 
     ctx.save();
     roundRectPath(node.x, node.y, node.w, node.h, 8);
     ctx.clip();
     ctx.fillStyle = NODE_TEXT;
     ctx.font = `${NODE_FONT_SIZE}px system-ui, sans-serif`;
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText(node.label, node.x + node.w / 2, node.y + node.h / 2, node.w - 16);
+    if (isGroup) {
+      ctx.textAlign = "left";
+      ctx.textBaseline = "top";
+      ctx.fillText(node.label, node.x + 10, node.y + 8, node.w - 20);
+    } else {
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(node.label, node.x + node.w / 2, node.y + node.h / 2, node.w - 16);
+    }
     ctx.restore();
 
     ctx.fillStyle = HANDLE_FILL;
@@ -501,6 +612,11 @@ function drawNodes() {
       ctx.beginPath();
       ctx.arc(h.x, h.y, 5, 0, Math.PI * 2);
       ctx.fill();
+    }
+
+    if (isGroup) {
+      const rh = groupResizeHandlePoint(node);
+      ctx.fillRect(rh.x - 5, rh.y - 5, 10, 10);
     }
   }
 }
@@ -632,11 +748,13 @@ const LONG_PRESS_MS = 600;
 let panPointerId = null;
 let panLast = { x: 0, y: 0 };
 
-let dragMode = null; // 'pan' | 'moveNode' | 'createEdge' | null
+let dragMode = null; // 'pan' | 'moveNode' | 'createEdge' | 'resizeGroup' | null
 let movingNodeId = null;
 let moveOffset = { x: 0, y: 0 };
 let edgeDragSourceId = null;
 let edgeDragCurrentWorld = null;
+let resizingNodeId = null;
+let resizeStart = { w: 0, h: 0, worldX: 0, worldY: 0 };
 let longPressTimer = null;
 let pointerDownScreen = null;
 let suppressNextClick = false;
@@ -651,6 +769,17 @@ canvas.addEventListener("pointerdown", (e) => {
   const sx = e.clientX - rect.left, sy = e.clientY - rect.top;
   const world = screenToWorld(sx, sy);
   pointerDownScreen = { x: e.clientX, y: e.clientY };
+
+  const resizeHit = findGroupResizeHandleAt(world.x, world.y);
+  if (resizeHit) {
+    dragMode = "resizeGroup";
+    resizingNodeId = resizeHit.id;
+    resizeStart = { w: resizeHit.w, h: resizeHit.h, worldX: world.x, worldY: world.y };
+    selectNode(resizeHit.id);
+    canvas.setPointerCapture(e.pointerId);
+    markDirty();
+    return;
+  }
 
   const handleHit = findNodeHandleAt(world.x, world.y);
   if (handleHit) {
@@ -729,6 +858,19 @@ canvas.addEventListener("pointermove", (e) => {
       edgeDragCurrentWorld = world;
       markDirty();
     }
+    return;
+  }
+
+  if (dragMode === "resizeGroup") {
+    const node = state.nodes.find((n) => n.id === resizingNodeId);
+    if (node) {
+      const rect = canvas.getBoundingClientRect();
+      const world = screenToWorld(e.clientX - rect.left, e.clientY - rect.top);
+      const dx = world.x - resizeStart.worldX, dy = world.y - resizeStart.worldY;
+      node.w = Math.max(MIN_GROUP_SIZE, resizeStart.w + dx);
+      node.h = Math.max(MIN_GROUP_SIZE, resizeStart.h + dy);
+      markDirty();
+    }
   }
 });
 
@@ -749,7 +891,11 @@ canvas.addEventListener("pointerup", (e) => {
 
   if (dragMode === "moveNode") {
     const moved = pointerDownScreen ? Math.hypot(e.clientX - pointerDownScreen.x, e.clientY - pointerDownScreen.y) : 0;
-    if (moved > MOVE_THRESHOLD) suppressNextClick = true;
+    if (moved > MOVE_THRESHOLD) {
+      suppressNextClick = true;
+      const node = state.nodes.find((n) => n.id === movingNodeId);
+      if (node) updateGroupMembership(node); // commit/clear membership on drop, not on mere click
+    }
     movingNodeId = null;
     dragMode = null;
     return;
@@ -770,6 +916,14 @@ canvas.addEventListener("pointerup", (e) => {
     markDirty();
     return;
   }
+
+  if (dragMode === "resizeGroup") {
+    const moved = pointerDownScreen ? Math.hypot(e.clientX - pointerDownScreen.x, e.clientY - pointerDownScreen.y) : 0;
+    if (moved > MOVE_THRESHOLD) suppressNextClick = true;
+    resizingNodeId = null;
+    dragMode = null;
+    return;
+  }
 });
 
 canvas.addEventListener("pointercancel", (e) => {
@@ -779,6 +933,7 @@ canvas.addEventListener("pointercancel", (e) => {
   movingNodeId = null;
   edgeDragSourceId = null;
   edgeDragCurrentWorld = null;
+  resizingNodeId = null;
 });
 
 function beginAddEdgePrompt(sourceId, targetId, screenPos) {
@@ -788,6 +943,21 @@ function beginAddEdgePrompt(sourceId, targetId, screenPos) {
       const relation = text.trim() || "related to";
       const edge = createEdge(sourceId, targetId, relation, true, false);
       selectEdge(edge.id);
+    },
+  });
+}
+
+function placeNewNodeAt(world, screenPos, type) {
+  showInlineInput({
+    x: screenPos.x, y: screenPos.y,
+    placeholder: type === "group" ? "Group label" : "Node label",
+    onCommit: (text) => {
+      const label = text.trim();
+      if (!label) return;
+      const w = type === "group" ? DEFAULT_GROUP_W : DEFAULT_NODE_W;
+      const h = type === "group" ? DEFAULT_GROUP_H : DEFAULT_NODE_H;
+      const node = createNode(world.x - w / 2, world.y - h / 2, label, type);
+      selectNode(node.id);
     },
   });
 }
@@ -820,17 +990,8 @@ canvas.addEventListener("click", (e) => {
   const sx = e.clientX - rect.left, sy = e.clientY - rect.top;
   const world = screenToWorld(sx, sy);
 
-  if (state.mode === "addNode") {
-    showInlineInput({
-      x: e.clientX, y: e.clientY, placeholder: "Node label",
-      onCommit: (text) => {
-        const label = text.trim();
-        if (label) {
-          const node = createNode(world.x - DEFAULT_NODE_W / 2, world.y - DEFAULT_NODE_H / 2, label);
-          selectNode(node.id);
-        }
-      },
-    });
+  if (state.mode === "addNode" || state.mode === "addGroup") {
+    placeNewNodeAt(world, { x: e.clientX, y: e.clientY }, state.mode === "addGroup" ? "group" : "entity");
     setMode("idle");
     return;
   }
@@ -852,16 +1013,7 @@ canvas.addEventListener("dblclick", (e) => {
   const rect = canvas.getBoundingClientRect();
   const world = screenToWorld(e.clientX - rect.left, e.clientY - rect.top);
   if (findNodeAt(world.x, world.y)) return; // don't hijack dblclick on an existing node
-  showInlineInput({
-    x: e.clientX, y: e.clientY, placeholder: "Node label",
-    onCommit: (text) => {
-      const label = text.trim();
-      if (label) {
-        const node = createNode(world.x - DEFAULT_NODE_W / 2, world.y - DEFAULT_NODE_H / 2, label);
-        selectNode(node.id);
-      }
-    },
-  });
+  placeNewNodeAt(world, { x: e.clientX, y: e.clientY }, "entity"); // spec gesture is entity-only
 });
 
 window.addEventListener("keydown", (e) => {
@@ -961,6 +1113,9 @@ document.getElementById("btn-zoom-out").addEventListener("click", () => {
 document.getElementById("btn-add-node").addEventListener("click", () => {
   setMode(state.mode === "addNode" ? "idle" : "addNode");
 });
+document.getElementById("btn-add-group").addEventListener("click", () => {
+  setMode(state.mode === "addGroup" ? "idle" : "addGroup");
+});
 document.getElementById("btn-connect").addEventListener("click", () => {
   setMode(state.mode === "connect" ? "idle" : "connect");
 });
@@ -995,6 +1150,7 @@ window.__kg = {
   actions: {
     createNode, createEdge, deleteNode, deleteEdge,
     selectNode, selectEdge, clearSelection, setMode,
+    updateGroupMembership,
   },
 };
 

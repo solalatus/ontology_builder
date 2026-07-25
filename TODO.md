@@ -9,15 +9,15 @@ State" so the project can be picked up cold at any time.
 
 ## Current State
 
-- **Phase:** Phase 0 and Phase 1 complete, both with green automated test
-  suites (`node --test tests/*.spec.mjs`, 19 tests, see Log below). Not yet
+- **Phase:** Phases 0, 1, and 2 complete, all with green automated test
+  suites (`node --test tests/*.spec.mjs`, 53 tests, see Log below). Not yet
   hand-tested on real touch hardware (pinch/long-press) — deferred to
-  Phase 10, not blocking. Phase 2 not started.
+  Phase 10, not blocking. Phase 3 not started.
 - **Target file:** `index.html` (single file, no external deps/CDN links).
   Dev-only test tooling lives in `tests/` (see `tests/README.md`) and never
   ships as part of the app.
-- **Next action:** Phase 2 (Groups — membership drag-in mechanic, auto
-  `contains` edges, recursive/overlapping membership).
+- **Next action:** Phase 3 (Undo/redo — command-pattern stack over add/move/
+  connect/delete/group/autolayout/import, one step per discrete action).
 
 ---
 
@@ -148,7 +148,9 @@ claude.ai/code, which is plain git via GitHub as described above.
       — bidirectional renders as plain line, **no arrowheads either end**
 - [x] Delete node/edge: select + delete key, or long-press → delete, or
       trash icon on selection
-- Tests (`tests/phase1.spec.mjs`, 14 tests, all green):
+- Tests (`tests/phase1.spec.mjs`, 31 tests, all green — expanded from an
+  initial 14 with a second, more extensive pass covering data-model shape
+  and interaction edge cases):
   - Automated: dblclick-add and Add-Node-button-then-tap both create a node
     with the entered label/default size; dblclick on an existing node is a
     no-op (no duplicate); Add Node is one-shot (mode reverts after
@@ -160,36 +162,63 @@ claude.ai/code, which is plain git via GitHub as described above.
     Delete key removes a selected node *and* its incident edges; the trash
     button removes a selected edge; long-press (>600ms, no movement)
     deletes a node, a short press does not; pre-existing pan behavior is
-    unaffected (regression check).
+    unaffected (regression check). Extensive additions: full Node/Edge
+    shape matches Section 4.1/4.2 exactly; ids are never reused after
+    delete+recreate; empty-label submit and Escape-while-editing both
+    create nothing; clicking empty canvas clears selection and hides the
+    selection toolbar (and shows it on select); Backspace deletes same as
+    Delete; trash icon also deletes a selected *node* (not just an edge);
+    long-press also deletes a selected *edge*; Escape with nothing pending
+    is a harmless no-op; Connect-mode self-tap and empty-canvas-tap both
+    cancel a pending source instead of misbehaving; a handle-drag released
+    on empty canvas or back on its own node creates no edge; two edges
+    with different relations can coexist between the same node pair; a
+    label with quotes/angle-brackets/ampersands round-trips intact;
+    deleting a node also clears its selection/toolbar.
   - Manual (not exercised here — no touch hardware in this sandbox, defer
     to Phase 10): long-press timing/feel and inline-input UX on an actual
     touch screen; long node labels at extreme zoom levels.
 
 ## Phase 2 — Groups
 
-- [ ] Group node type + creation
-- [ ] Membership mechanic: drag smaller box into larger box, commit on drop
+- [x] Group node type + creation
+- [x] Membership mechanic: drag smaller box into larger box, commit on drop
       (directional-by-action, never recomputed from later overlap) —
       Section 4.3, Decision #2
-- [ ] Auto-generate `contains` edge on membership (`auto: true`,
+- [x] Auto-generate `contains` edge on membership (`auto: true`,
       `directed: true`) — not drawn as visible arrow, containment shown via
       nesting only
-- [ ] Remove from group: drag member fully outside group boundary
-- [ ] Support recursive membership (group belonging to another group) and
+- [x] Remove from group: drag member fully outside group boundary
+- [x] Support recursive membership (group belonging to another group) and
       overlapping membership (node in multiple groups)
-- [ ] `boundary_mode` always `"manual"` — group box independently resizable,
+- [x] `boundary_mode` always `"manual"` — group box independently resizable,
       never auto-fits to members — Decision #3
-- Tests (planned, `tests/phase2.spec.mjs`):
-  - Automated: dragging a smaller node fully into a group and releasing
-    commits `groups[]` + creates exactly one `auto:true contains` edge;
-    moving/resizing the group afterward does *not* retroactively add
-    members from new geometric overlap; dragging a member fully outside
-    the group boundary removes membership and its `contains` edge;
-    recursive membership (group-in-group) and overlapping membership (one
-    node in 2+ groups) both hold; resizing a group never moves member
-    node positions.
-  - Manual: visual nesting reads correctly across zoom levels; confirm no
-    arrow is ever drawn on canvas for a `contains` edge.
+- Tests (`tests/phase2.spec.mjs`, 17 tests, all green):
+  - Automated: "Add Group" creates a `type:"group"` node with the Section
+    4.3 defaults (320×220, `boundary_mode:"manual"`, empty `groups[]`), is
+    one-shot, and Escape-cancelable, mirroring Add Node. Dragging a smaller
+    node fully into a group commits `groups[]` + creates exactly one
+    `auto:true` `contains` edge; creating a node directly inside a group's
+    boundary (no drag) does *not* auto-join; a drop that only *partially*
+    overlaps neither commits a new membership nor removes an existing one;
+    dragging a member fully outside removes membership + the edge; moving
+    or resizing the *group* afterward never cascades into changing an
+    already-committed member's membership; the resize-corner handle
+    changes w/h by the exact drag delta and clamps at a minimum size;
+    recursive nesting (a shrunk group dragged into a bigger one, then an
+    entity dragged into that inner group) joins only the *innermost*
+    container, never also the outer one; overlapping membership (one node
+    in two separate groups) works via two sequential drags, with equal-area
+    ties broken deterministically by creation order; deleting a group
+    clears the field from any (former) member's `groups[]` and removes the
+    edge; deleting a member leaves the group intact; a `contains` edge is
+    never selectable by clicking near it (the click resolves to a node);
+    hit-testing always picks the smallest/topmost box under the cursor
+    regardless of which node was created first.
+  - Manual: visual nesting reads correctly across zoom levels (spot-checked
+    via screenshots this session, not exhaustively at every zoom level);
+    confirm no arrow is ever drawn on canvas for a `contains` edge (also
+    confirmed via screenshot).
 
 ## Phase 3 — Undo/redo
 
@@ -423,6 +452,69 @@ and record deltas here instead of editing the spec.)*
   - `type: "group"` and the group `boundary_mode` field exist in the data
     model already (per Section 4.1), but nothing in Phase 1 creates a group
     node yet — group creation/membership behavior is entirely Phase 2's.
+- 2026-07-25 — PR #1 (Phases 0+1) merged to `main` by the user. Restarted
+  this branch from `origin/main` per the merged-PR protocol before starting
+  Phase 2 (`git fetch origin main && git checkout -B
+  claude/todo-first-step-44a4p1 origin/main`) — no unmerged work existed on
+  the old branch tip, so this was a clean rebase-from-main, not a rebase of
+  pending commits.
+- 2026-07-25 — Phase 2 (Groups) implemented in `index.html`, plus an
+  "extensive tests" pass requested by the user covering Phase 1 more
+  thoroughly (14→31 tests) alongside the new Phase 2 suite (17 tests, 53
+  total). Notable decisions:
+  - **Added a corner resize handle for group nodes** (bottom-right corner,
+    drag to resize, clamped to a `MIN_GROUP_SIZE` floor of 60). This is a
+    deliberate, spec-motivated *addition* beyond Section 7's interaction
+    table (which has no "resize" row at all): Section 4.3 explicitly says
+    a group's box is "independently resizable," and — critically — since
+    "Add Group" always creates the same 320×220 default size, two groups
+    can *only* ever nest if one is resized smaller than the other first;
+    without this, "recursive membership (group belonging to another
+    group)," an explicit Phase 2 checklist item, would be structurally
+    unreachable through the UI. Scoped to group nodes only (not entities),
+    since Section 4.3's "resizable" language is specific to groups and
+    nothing in the spec says the same about entities. Resizing a group
+    intentionally does *not* trigger `updateGroupMembership` — consistent
+    with Section 4.3's own example of "resizing the group box" as a case
+    that must never auto-recompute membership.
+  - **Added an "Add Group" toolbar button**, mirroring "Add Node" (one-shot
+    placement mode, inline label input). Phase 0's button-bar checklist
+    named a fixed set of buttons from Section 7's table, which has no
+    dedicated group-creation row — but Section 4.3 requires groups to
+    exist as a creatable node type, and per Section 2's own principle
+    ("every core action reachable via an on-screen button"), a button is
+    the right way to reach it. Considered folding group-vs-entity choice
+    into the existing inline-input UI instead (e.g. a type toggle next to
+    the text field); went with a separate button because it's simpler code
+    and at least as discoverable.
+  - **Membership commit/removal is evaluated only at the end of an actual
+    drag** (movement past `MOVE_THRESHOLD`), never on a plain click/no-op
+    press and never on node *creation* — otherwise merely clicking a node
+    that happens to already sit inside a group's visual bounds (e.g. one
+    created there directly) would silently join it, which is exactly the
+    "recomputed from later overlap" behavior Decision #2 rules out.
+  - **Membership add requires full containment; membership removal
+    requires zero overlap.** A drop that only partially overlaps a group
+    changes nothing either way — it neither joins nor leaves. This
+    asymmetric rule was the most literal reading of the two separate
+    spec sentences ("dropping inside commits," "drag fully outside" to
+    remove) and was locked in with explicit tests for both directions.
+  - **When a node's drop point is fully contained by more than one group
+    at once** (nested or overlapping), it joins only the smallest-area
+    (innermost) one that it isn't already a member of; a genuinely
+    disjoint second membership (spec's "overlapping membership") is only
+    reachable via a second, separate drag once the first is committed —
+    matching the "drag into a group, commit on drop" mechanic being an
+    inherently single-target action. Equal-area ties (e.g. two groups at
+    default size) are broken deterministically in favor of whichever group
+    was created first, so behavior is reproducible rather than
+    order-of-iteration-dependent.
+  - Hit-testing (and draw order) changed from Phase 1's "last created wins"
+    to "smallest-area box wins" (draw order is the reverse, so bigger/
+    outer boxes paint first and smaller/nested ones paint on top) — a
+    correctness fix that Phase 1 didn't need since nothing nested yet, but
+    Phase 2 does: without it, clicking a node fully inside a much bigger
+    group would hit the group instead of the member.
 
 ---
 
