@@ -6,7 +6,7 @@
 <title>Knowledge Graph Canvas</title>
 <style>
   :root {
-    color-scheme: light dark;
+    color-scheme: dark;
     --toolbar-bg: #1e1e1e;
     --toolbar-fg: #e8e8e8;
     --toolbar-border: #333;
@@ -16,6 +16,54 @@
     --canvas-bg: #121212;
     --grid-dot: #2a2a2a;
     --empty-fg: #666;
+    /* Canvas2D draw colors (Section 6) — read via getComputedStyle at render
+       time (see resolveColors() in the script below), since a canvas
+       fillStyle/strokeStyle can't reference a CSS var() directly. Keeping
+       every themeable color here, dark or canvas, means the toggle has one
+       source of truth instead of a parallel JS palette that could drift. */
+    --node-fill: #242424;
+    --node-stroke: #666666;
+    --node-stroke-selected: #4da6ff;
+    --connect-source-stroke: #ffb84d;
+    --node-text: #e8e8e8;
+    --handle-fill: rgba(255, 255, 255, 0.35);
+    --group-fill: rgba(77, 166, 255, 0.06);
+    --group-stroke: #4d7fa6;
+    --imported-stroke: #e0b13f;
+    --edge-stroke: #8a8a8a;
+    --edge-stroke-selected: #4da6ff;
+    --edge-label-fg: #bbbbbb;
+    --ghost-stroke: #4da6ff;
+  }
+
+  /* Explicit user toggle (not prefers-color-scheme) — see toggleTheme() in
+     the script. Defaults to dark (root, above) so an untouched app looks
+     exactly as it always has; this block only applies once the user opts
+     into light mode, and the choice is remembered via localStorage. */
+  :root[data-theme="light"] {
+    color-scheme: light;
+    --toolbar-bg: #f5f5f5;
+    --toolbar-fg: #1a1a1a;
+    --toolbar-border: #d0d0d0;
+    --btn-bg: #ffffff;
+    --btn-bg-hover: #e8e8e8;
+    --btn-bg-active: #d5d5d5;
+    --canvas-bg: #fafafa;
+    --grid-dot: #d8d8d8;
+    --empty-fg: #999999;
+    --node-fill: #ffffff;
+    --node-stroke: #999999;
+    --node-stroke-selected: #1a73e8;
+    --connect-source-stroke: #e67700;
+    --node-text: #1a1a1a;
+    --handle-fill: rgba(0, 0, 0, 0.35);
+    --group-fill: rgba(26, 115, 232, 0.06);
+    --group-stroke: #3f6ea8;
+    --imported-stroke: #b8860b;
+    --edge-stroke: #666666;
+    --edge-stroke-selected: #1a73e8;
+    --edge-label-fg: #555555;
+    --ghost-stroke: #1a73e8;
   }
 
   * { box-sizing: border-box; }
@@ -135,9 +183,9 @@
     font-size: 14px;
     padding: 6px 8px;
     border-radius: 4px;
-    border: 1px solid #4da6ff;
-    background: #1e1e1e;
-    color: #e8e8e8;
+    border: 1px solid var(--node-stroke-selected);
+    background: var(--toolbar-bg);
+    color: var(--toolbar-fg);
     min-width: 140px;
   }
 
@@ -243,6 +291,7 @@
     <button id="btn-zoom-out" type="button" aria-label="Zoom out">&minus;</button>
     <button id="btn-zoom-in" type="button" aria-label="Zoom in">&plus;</button>
   </div>
+  <button id="btn-theme-toggle" type="button" aria-pressed="false">Theme: Dark</button>
 </div>
 
 <div id="canvas-wrap">
@@ -292,6 +341,43 @@ const ctx = canvas.getContext("2d");
 
 let dirty = true;
 function markDirty() { dirty = true; }
+
+// ---------------------------------------------------------------------------
+// Dark/light theme toggle (out-of-spec, user-requested, same standing as the
+// Clear button). Explicit user choice, not prefers-color-scheme — a manual
+// toggle should override the OS setting, not follow it. Applied synchronously
+// here, at top-level script scope rather than inside boot(), so the correct
+// theme is set on <html> before the first paint/render (no dark-then-light
+// flash). Persisted in localStorage under its own key, deliberately separate
+// from the graph's own Tier 1 payload (storage.mjs) — this is a UI
+// preference, not graph data, and should survive Clear/import/new-graph
+// unaffected by any of that. Reading localStorage can throw in some locked-
+// down embeds; degrades to the dark default rather than breaking boot.
+// ---------------------------------------------------------------------------
+const THEME_STORAGE_KEY = "kg-theme";
+let theme = "dark";
+try {
+  if (localStorage.getItem(THEME_STORAGE_KEY) === "light") theme = "light";
+} catch (err) { /* localStorage unavailable — stay on the dark default */ }
+document.documentElement.dataset.theme = theme;
+
+function updateThemeButton() {
+  const btn = document.getElementById("btn-theme-toggle");
+  if (!btn) return;
+  // Reads as a status ("Theme: Dark"), not a command — a bare "Dark Mode"
+  // label would be ambiguous about whether it names the current state or
+  // the mode you're about to switch to.
+  btn.textContent = theme === "light" ? "Theme: Light" : "Theme: Dark";
+  btn.setAttribute("aria-pressed", String(theme === "light"));
+}
+
+function toggleTheme() {
+  theme = theme === "light" ? "dark" : "light";
+  document.documentElement.dataset.theme = theme;
+  try { localStorage.setItem(THEME_STORAGE_KEY, theme); } catch (err) { /* best-effort only */ }
+  updateThemeButton();
+  markDirty(); // canvas colors (resolveColors()) depend on the theme too
+}
 
 function clamp(v, lo, hi) { return Math.min(hi, Math.max(lo, v)); }
 
@@ -863,24 +949,37 @@ window.addEventListener("resize", resizeCanvas);
 // ---------------------------------------------------------------------------
 // Render loop — dirty-flag driven, not a constant loop.
 // ---------------------------------------------------------------------------
-const NODE_FILL = "#242424";
-const NODE_STROKE = "#666666";
-const NODE_STROKE_SELECTED = "#4da6ff";
-const CONNECT_SOURCE_STROKE = "#ffb84d";
-const NODE_TEXT = "#e8e8e8";
-const HANDLE_FILL = "rgba(255,255,255,0.35)";
-const GROUP_FILL = "rgba(77,166,255,0.06)";
-const GROUP_STROKE = "#4d7fa6";
-const IMPORTED_STROKE = "#e0b13f"; // TXT import: "flagged as newly added" (Section 5.3)
-const EDGE_STROKE = "#8a8a8a";
-const EDGE_STROKE_SELECTED = "#4da6ff";
-const EDGE_LABEL_FG = "#bbbbbb";
-const GHOST_STROKE = "#4da6ff";
 const NODE_FONT_SIZE = 16;
 const EDGE_FONT_SIZE = 12;
 const ARROWHEAD_SIZE = 10;
 
-function drawGrid() {
+// Resolves the current theme's CSS custom properties (see :root and
+// :root[data-theme="light"] above) into one palette object, computed once
+// per render() call rather than once per node/edge — a canvas fillStyle/
+// strokeStyle can't take a CSS var() directly, this is the bridge.
+function resolveColors() {
+  const cs = getComputedStyle(document.documentElement);
+  const v = (name, fallback) => cs.getPropertyValue(name).trim() || fallback;
+  return {
+    gridDot: v("--grid-dot", "#2a2a2a"),
+    emptyFg: v("--empty-fg", "#666"),
+    nodeFill: v("--node-fill", "#242424"),
+    nodeStroke: v("--node-stroke", "#666666"),
+    nodeStrokeSelected: v("--node-stroke-selected", "#4da6ff"),
+    connectSourceStroke: v("--connect-source-stroke", "#ffb84d"),
+    nodeText: v("--node-text", "#e8e8e8"),
+    handleFill: v("--handle-fill", "rgba(255,255,255,0.35)"),
+    groupFill: v("--group-fill", "rgba(77,166,255,0.06)"),
+    groupStroke: v("--group-stroke", "#4d7fa6"),
+    importedStroke: v("--imported-stroke", "#e0b13f"), // TXT import: "flagged as newly added" (Section 5.3)
+    edgeStroke: v("--edge-stroke", "#8a8a8a"),
+    edgeStrokeSelected: v("--edge-stroke-selected", "#4da6ff"),
+    edgeLabelFg: v("--edge-label-fg", "#bbbbbb"),
+    ghostStroke: v("--ghost-stroke", "#4da6ff"),
+  };
+}
+
+function drawGrid(colors) {
   // Grid spacing adapts to zoom so it stays visually useful at any scale.
   // Drawn manually in screen space (not via ctx transform) to keep dot
   // density/precision sane at extreme zoom (Section 6).
@@ -897,7 +996,7 @@ function drawGrid() {
   const startX = Math.floor(topLeft.x / worldStep) * worldStep;
   const startY = Math.floor(topLeft.y / worldStep) * worldStep;
 
-  ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue("--grid-dot").trim() || "#2a2a2a";
+  ctx.fillStyle = colors.gridDot;
   const dotRadius = clamp(1.2 * camera.scale, 0.5, 2);
 
   for (let wx = startX; wx <= bottomRight.x; wx += worldStep) {
@@ -911,9 +1010,9 @@ function drawGrid() {
   }
 }
 
-function drawEmptyState() {
+function drawEmptyState(colors) {
   ctx.save();
-  ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue("--empty-fg").trim() || "#666";
+  ctx.fillStyle = colors.emptyFg;
   ctx.font = "16px system-ui, sans-serif";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
@@ -943,13 +1042,13 @@ function drawArrowhead(x, y, dx, dy, size) {
   ctx.fill();
 }
 
-function drawEdges() {
+function drawEdges(colors) {
   for (const edge of state.edges) {
     if (edge.auto) continue; // contains: communicated by nesting only, never drawn
     const anchors = edgeAnchors(edge);
     if (!anchors) continue;
     const selected = state.selection.type === "edge" && state.selection.id === edge.id;
-    ctx.strokeStyle = selected ? EDGE_STROKE_SELECTED : EDGE_STROKE;
+    ctx.strokeStyle = selected ? colors.edgeStrokeSelected : colors.edgeStroke;
     ctx.fillStyle = ctx.strokeStyle;
     ctx.lineWidth = selected ? 3 : 2;
     ctx.beginPath();
@@ -960,7 +1059,7 @@ function drawEdges() {
       drawArrowhead(anchors.b.x, anchors.b.y, anchors.b.x - anchors.a.x, anchors.b.y - anchors.a.y, ARROWHEAD_SIZE);
     }
     const mx = (anchors.a.x + anchors.b.x) / 2, my = (anchors.a.y + anchors.b.y) / 2;
-    ctx.fillStyle = EDGE_LABEL_FG;
+    ctx.fillStyle = colors.edgeLabelFg;
     ctx.font = `${EDGE_FONT_SIZE}px system-ui, sans-serif`;
     ctx.textAlign = "center";
     ctx.textBaseline = "bottom";
@@ -968,7 +1067,7 @@ function drawEdges() {
   }
 }
 
-function drawNodes() {
+function drawNodes(colors) {
   // Biggest/outermost first so nested boxes always paint on top of their
   // container, regardless of creation order (mirrors hit-test priority).
   const drawOrder = [...nodesTopmostFirst()].reverse();
@@ -978,11 +1077,11 @@ function drawNodes() {
     const isGroup = node.type === "group";
     const isNewlyImported = newlyImportedIds.has(node.id);
 
-    ctx.fillStyle = isGroup ? GROUP_FILL : NODE_FILL;
-    ctx.strokeStyle = isConnectSource ? CONNECT_SOURCE_STROKE
-      : selected ? NODE_STROKE_SELECTED
-      : isNewlyImported ? IMPORTED_STROKE
-      : (isGroup ? GROUP_STROKE : NODE_STROKE);
+    ctx.fillStyle = isGroup ? colors.groupFill : colors.nodeFill;
+    ctx.strokeStyle = isConnectSource ? colors.connectSourceStroke
+      : selected ? colors.nodeStrokeSelected
+      : isNewlyImported ? colors.importedStroke
+      : (isGroup ? colors.groupStroke : colors.nodeStroke);
     ctx.lineWidth = selected || isConnectSource || isNewlyImported ? 3 : 1.5;
     ctx.setLineDash(isGroup ? [8, 5] : []);
     roundRectPath(node.x, node.y, node.w, node.h, 8);
@@ -993,7 +1092,7 @@ function drawNodes() {
     ctx.save();
     roundRectPath(node.x, node.y, node.w, node.h, 8);
     ctx.clip();
-    ctx.fillStyle = NODE_TEXT;
+    ctx.fillStyle = colors.nodeText;
     ctx.font = `${NODE_FONT_SIZE}px system-ui, sans-serif`;
     if (isGroup) {
       ctx.textAlign = "left";
@@ -1006,7 +1105,7 @@ function drawNodes() {
     }
     ctx.restore();
 
-    ctx.fillStyle = HANDLE_FILL;
+    ctx.fillStyle = colors.handleFill;
     for (const h of nodeHandles(node)) {
       ctx.beginPath();
       ctx.arc(h.x, h.y, 5, 0, Math.PI * 2);
@@ -1020,14 +1119,14 @@ function drawNodes() {
   }
 }
 
-function drawGhostEdge() {
+function drawGhostEdge(colors) {
   if (dragMode !== "createEdge" || !edgeDragSourceId || !edgeDragCurrentWorld) return;
   const src = state.nodes.find((n) => n.id === edgeDragSourceId);
   if (!src) return;
   const cx = src.x + src.w / 2, cy = src.y + src.h / 2;
   const a = rectBorderPoint(src, edgeDragCurrentWorld.x - cx, edgeDragCurrentWorld.y - cy);
   ctx.save();
-  ctx.strokeStyle = GHOST_STROKE;
+  ctx.strokeStyle = colors.ghostStroke;
   ctx.setLineDash([6, 4]);
   ctx.lineWidth = 2;
   ctx.beginPath();
@@ -1067,20 +1166,22 @@ function updateClearButton() {
 }
 
 function render() {
+  const colors = resolveColors();
+
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-  drawGrid();
+  drawGrid(colors);
 
   ctx.save();
   ctx.setTransform(dpr * camera.scale, 0, 0, dpr * camera.scale, dpr * camera.panX, dpr * camera.panY);
-  drawEdges();
-  drawNodes();
-  drawGhostEdge();
+  drawEdges(colors);
+  drawNodes(colors);
+  drawGhostEdge(colors);
   ctx.restore();
 
-  if (state.nodes.length === 0) drawEmptyState();
+  if (state.nodes.length === 0) drawEmptyState(colors);
 
   updateSelectionToolbar();
   updateClearButton();
@@ -2025,6 +2126,7 @@ document.getElementById("btn-undo").addEventListener("click", () => undo());
 document.getElementById("btn-redo").addEventListener("click", () => redo());
 document.getElementById("btn-save-version").addEventListener("click", () => performSaveVersion());
 document.getElementById("btn-folder-sync").addEventListener("click", () => connectFolderSync());
+document.getElementById("btn-theme-toggle").addEventListener("click", () => toggleTheme());
 
 // Graph name (Section 5.4's Open Question — resolved as an always-visible,
 // always-editable title rather than a one-time save-time prompt) is never
@@ -2128,6 +2230,10 @@ window.__kg = {
     },
   },
   getNewlyImportedIds: () => newlyImportedIds, // reassigned, not mutated — needs a getter, not a reference
+  theme: {
+    get: () => theme,
+    toggle: toggleTheme,
+  },
 };
 
 // ---------------------------------------------------------------------------
@@ -2136,6 +2242,7 @@ window.__kg = {
 async function boot() {
   resizeCanvas();
   updateUndoRedoButtons();
+  updateThemeButton();
   const restored = await loadGraphFromStorage();
   if (restored) {
     clearSelection();
