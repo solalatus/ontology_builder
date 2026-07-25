@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="en">
+<html lang="hu">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Knowledge Graph Canvas</title>
+<title>Tudásgráf Vászon</title>
 <style>
   :root {
     color-scheme: dark;
@@ -274,24 +274,25 @@
 <body>
 
 <div id="toolbar">
-  <span id="graph-title" tabindex="0" role="button" title="Click to rename">Untitled Graph</span>
-  <button id="btn-add-node" type="button" aria-pressed="false">Add Node</button>
-  <button id="btn-add-group" type="button" aria-pressed="false">Add Group</button>
-  <button id="btn-connect" type="button" aria-pressed="false">Connect</button>
-  <button id="btn-autolayout" type="button">Auto-layout</button>
-  <button id="btn-undo" type="button">Undo</button>
-  <button id="btn-redo" type="button">Redo</button>
-  <button id="btn-save-version" type="button">Save Version</button>
-  <button id="btn-folder-sync" type="button" aria-pressed="false" style="display:none;">Folder Sync</button>
-  <button id="btn-import-txt" type="button">Import from TXT</button>
+  <span id="graph-title" tabindex="0" role="button" title="Kattints az átnevezéshez">Névtelen gráf</span>
+  <button id="btn-add-node" type="button" aria-pressed="false">Csomópont hozzáadása</button>
+  <button id="btn-add-group" type="button" aria-pressed="false">Csoport hozzáadása</button>
+  <button id="btn-connect" type="button" aria-pressed="false">Összekapcsolás</button>
+  <button id="btn-autolayout" type="button">Automatikus elrendezés</button>
+  <button id="btn-undo" type="button">Visszavonás</button>
+  <button id="btn-redo" type="button">Újra</button>
+  <button id="btn-save-version" type="button">Verzió mentése</button>
+  <button id="btn-folder-sync" type="button" aria-pressed="false" style="display:none;">Mappa szinkronizálás</button>
+  <button id="btn-import-txt" type="button">Importálás TXT-ből</button>
   <input id="import-file-input" type="file" accept=".txt">
-  <button id="btn-clear" type="button">Clear</button>
+  <button id="btn-clear" type="button">Törlés</button>
   <div class="spacer"></div>
   <div class="zoom-group">
-    <button id="btn-zoom-out" type="button" aria-label="Zoom out">&minus;</button>
-    <button id="btn-zoom-in" type="button" aria-label="Zoom in">&plus;</button>
+    <button id="btn-zoom-out" type="button" aria-label="Kicsinyítés">&minus;</button>
+    <button id="btn-zoom-in" type="button" aria-label="Nagyítás">&plus;</button>
   </div>
-  <button id="btn-theme-toggle" type="button" aria-pressed="false">Theme: Dark</button>
+  <button id="btn-theme-toggle" type="button" aria-pressed="false">Téma: Sötét</button>
+  <button id="btn-lang-toggle" type="button" aria-pressed="false">Nyelv: Magyar</button>
 </div>
 
 <div id="canvas-wrap">
@@ -299,16 +300,16 @@
 </div>
 
 <div id="sel-toolbar">
-  <button id="sel-rename" type="button" title="Rename">&#9998;</button>
-  <button id="sel-toggle-dir" type="button" title="Toggle direction">&#8646;</button>
-  <button id="sel-trash" type="button" title="Delete">&#128465;</button>
+  <button id="sel-rename" type="button" title="Átnevezés">&#9998;</button>
+  <button id="sel-toggle-dir" type="button" title="Irány váltása">&#8646;</button>
+  <button id="sel-trash" type="button" title="Törlés">&#128465;</button>
 </div>
 
 <div id="confirm-overlay" class="modal-overlay">
   <div id="confirm-dialog" class="modal-dialog" role="alertdialog" aria-modal="true">
     <p id="confirm-message" class="modal-message"></p>
     <div id="confirm-actions" class="modal-actions">
-      <button id="confirm-cancel" type="button">Cancel</button>
+      <button id="confirm-cancel" type="button">Mégse</button>
       <button id="confirm-ok" type="button">OK</button>
     </div>
   </div>
@@ -318,9 +319,9 @@
   <div id="import-dialog" class="modal-dialog" role="alertdialog" aria-modal="true">
     <p id="import-summary" class="modal-message"></p>
     <div id="import-actions" class="modal-actions">
-      <button id="import-cancel" type="button">Cancel</button>
-      <button id="import-replace" type="button">Replace</button>
-      <button id="import-merge" type="button">Merge</button>
+      <button id="import-cancel" type="button">Mégse</button>
+      <button id="import-replace" type="button">Csere</button>
+      <button id="import-merge" type="button">Egyesítés</button>
     </div>
   </div>
 </div>
@@ -368,7 +369,7 @@ function updateThemeButton() {
   // Reads as a status ("Theme: Dark"), not a command — a bare "Dark Mode"
   // label would be ambiguous about whether it names the current state or
   // the mode you're about to switch to.
-  btn.textContent = theme === "light" ? "Theme: Light" : "Theme: Dark";
+  btn.textContent = theme === "light" ? t("themeLight") : t("themeDark");
   btn.setAttribute("aria-pressed", String(theme === "light"));
 }
 
@@ -378,6 +379,184 @@ function toggleTheme() {
   try { localStorage.setItem(THEME_STORAGE_KEY, theme); } catch (err) { /* best-effort only */ }
   updateThemeButton();
   markDirty(); // canvas colors (resolveColors()) depend on the theme too
+}
+
+// ---------------------------------------------------------------------------
+// Hungarian/English localization (out-of-spec, user-requested). Covers UI
+// chrome only — toolbar labels, dialog text, placeholders, tooltips, the
+// canvas empty-state message — never graph *content* (node labels, edge
+// relations, the graph's own name once renamed): those are user data, not
+// app interface, and translating them automatically would silently mangle
+// what the user actually typed.
+//
+// Same standing and same pattern as the theme toggle: an explicit toggle
+// (never inferred from navigator.language), defaulting to Hungarian per
+// the request, persisted under its own localStorage key independent of
+// both the theme key and the graph's own Tier 1 payload, and applied
+// synchronously at top-level script scope so the correct language is
+// already on every element before first paint — no flash of the other
+// language on load.
+//
+// Dynamic strings (ones with a count, or that embed another string) are
+// functions rather than plain values, called through the same t() lookup
+// as static ones — every call site already asks for its text at the exact
+// moment it's needed (opening a dialog, drawing a frame), so those need no
+// separate "re-apply on toggle" step the way static DOM text does.
+// ---------------------------------------------------------------------------
+const STRINGS = {
+  en: {
+    appTitle: "Knowledge Graph Canvas",
+    clickToRename: "Click to rename",
+    untitledGraph: "Untitled Graph",
+    addNode: "Add Node",
+    addGroup: "Add Group",
+    connect: "Connect",
+    autoLayout: "Auto-layout",
+    undo: "Undo",
+    redo: "Redo",
+    saveVersion: "Save Version",
+    folderSync: "Folder Sync",
+    folderSynced: (name) => `Synced: ${name}`,
+    importFromTxt: "Import from TXT",
+    clear: "Clear",
+    zoomOut: "Zoom out",
+    zoomIn: "Zoom in",
+    themeDark: "Theme: Dark",
+    themeLight: "Theme: Light",
+    renameTitle: "Rename",
+    toggleDirTitle: "Toggle direction",
+    deleteTitle: "Delete",
+    cancel: "Cancel",
+    ok: "OK",
+    replace: "Replace",
+    merge: "Merge",
+    clearConfirmMessage: "Clear the entire graph? This removes all nodes and edges. This can be undone with the Undo button.",
+    clearConfirmLabel: "Clear",
+    nodeLabelPlaceholder: "Node label",
+    groupLabelPlaceholder: "Group label",
+    relationLabelPlaceholder: "relation label",
+    graphNamePlaceholder: "Graph name",
+    emptyCanvasMessage: (addNodeLabel) => `Canvas is empty — use "${addNodeLabel}" to begin`,
+    importMergeSummary: (n, m) => `Merge: ${n} node(s) and ${m} edge(s) would be added. Nothing is ever removed.`,
+    importReplaceSummary: (n) => `Replace: same additions, plus ${n} node(s)/edge(s) not in this file would be removed.`,
+    defaultRelation: "related to",
+  },
+  hu: {
+    appTitle: "Tudásgráf Vászon",
+    clickToRename: "Kattints az átnevezéshez",
+    untitledGraph: "Névtelen gráf",
+    addNode: "Csomópont hozzáadása",
+    addGroup: "Csoport hozzáadása",
+    connect: "Összekapcsolás",
+    autoLayout: "Automatikus elrendezés",
+    undo: "Visszavonás",
+    redo: "Újra",
+    saveVersion: "Verzió mentése",
+    folderSync: "Mappa szinkronizálás",
+    folderSynced: (name) => `Szinkronizálva: ${name}`,
+    importFromTxt: "Importálás TXT-ből",
+    clear: "Törlés",
+    zoomOut: "Kicsinyítés",
+    zoomIn: "Nagyítás",
+    themeDark: "Téma: Sötét",
+    themeLight: "Téma: Világos",
+    renameTitle: "Átnevezés",
+    toggleDirTitle: "Irány váltása",
+    deleteTitle: "Törlés",
+    cancel: "Mégse",
+    ok: "OK",
+    replace: "Csere",
+    merge: "Egyesítés",
+    clearConfirmMessage: "Törlöd az egész gráfot? Ez eltávolítja az összes csomópontot és élt. Ez visszavonható a Visszavonás gombbal.",
+    clearConfirmLabel: "Törlés",
+    nodeLabelPlaceholder: "Csomópont neve",
+    groupLabelPlaceholder: "Csoport neve",
+    relationLabelPlaceholder: "kapcsolat neve",
+    graphNamePlaceholder: "Gráf neve",
+    emptyCanvasMessage: (addNodeLabel) => `A vászon üres — kattints a(z) "${addNodeLabel}" gombra a kezdéshez`,
+    importMergeSummary: (n, m) => `Egyesítés: ${n} csomópont és ${m} él kerülne hozzáadásra. Semmi nem törlődik.`,
+    importReplaceSummary: (n) => `Csere: ugyanazok a hozzáadások, plusz ${n} csomópont/él törlődne, amelyek nincsenek ebben a fájlban.`,
+    defaultRelation: "kapcsolódik",
+  },
+};
+
+const LANG_STORAGE_KEY = "kg-lang";
+let lang = "hu";
+try {
+  const stored = localStorage.getItem(LANG_STORAGE_KEY);
+  if (stored === "en" || stored === "hu") lang = stored;
+} catch (err) { /* localStorage unavailable — stay on the Hungarian default */ }
+document.documentElement.lang = lang;
+
+// t("key") for plain strings; t("key", ...args) calls a dynamic entry
+// (e.g. t("folderSynced", handle.name)) with those args.
+function t(key, ...args) {
+  const entry = STRINGS[lang][key];
+  return typeof entry === "function" ? entry(...args) : entry;
+}
+
+// True only for an untouched default name (in either language) — never for
+// a name the user actually typed, even if it happens to match. Lets the
+// still-untitled placeholder track the current language on toggle without
+// ever touching a real, user-chosen graph name.
+function isDefaultGraphName(name) {
+  return name === STRINGS.en.untitledGraph || name === STRINGS.hu.untitledGraph;
+}
+
+// Refreshes every *static* DOM element's translated text — the button
+// labels, dialog copy, and tooltips that exist once and just need updating
+// in place on toggle. Placeholders and dialog messages built at the
+// moment a prompt opens (showInlineInput/showConfirmDialog/import summary)
+// already call t() directly at that moment, so they need no entry here.
+function applyLanguage() {
+  document.documentElement.lang = lang;
+  document.title = t("appTitle");
+  const byId = (id) => document.getElementById(id);
+  const titleEl = byId("graph-title");
+  titleEl.title = t("clickToRename");
+  if (isDefaultGraphName(state.graphName)) {
+    state.graphName = t("untitledGraph");
+    titleEl.textContent = state.graphName;
+  }
+  byId("btn-add-node").textContent = t("addNode");
+  byId("btn-add-group").textContent = t("addGroup");
+  byId("btn-connect").textContent = t("connect");
+  byId("btn-autolayout").textContent = t("autoLayout");
+  byId("btn-undo").textContent = t("undo");
+  byId("btn-redo").textContent = t("redo");
+  byId("btn-save-version").textContent = t("saveVersion");
+  byId("btn-import-txt").textContent = t("importFromTxt");
+  byId("btn-clear").textContent = t("clear");
+  byId("btn-zoom-out").setAttribute("aria-label", t("zoomOut"));
+  byId("btn-zoom-in").setAttribute("aria-label", t("zoomIn"));
+  byId("sel-rename").title = t("renameTitle");
+  byId("sel-toggle-dir").title = t("toggleDirTitle");
+  byId("sel-trash").title = t("deleteTitle");
+  byId("confirm-cancel").textContent = t("cancel");
+  byId("confirm-ok").textContent = t("ok");
+  byId("import-cancel").textContent = t("cancel");
+  byId("import-replace").textContent = t("replace");
+  byId("import-merge").textContent = t("merge");
+  updateThemeButton(); // its text depends on theme, not language, but re-set here too for the aria-pressed-adjacent pattern
+  updateFolderSyncButton(); // "Folder Sync" / "Synced: X" text is language-dependent
+  updateLangButton();
+  markDirty(); // the canvas empty-state message is language-dependent too
+}
+
+function updateLangButton() {
+  const btn = document.getElementById("btn-lang-toggle");
+  if (!btn) return;
+  // Bilingual by construction, not looked up via t(): shows the *current*
+  // language's own name for itself, in that language, mirroring the
+  // status-not-command convention the theme toggle already established.
+  btn.textContent = lang === "hu" ? "Nyelv: Magyar" : "Language: English";
+  btn.setAttribute("aria-pressed", String(lang === "en"));
+}
+
+function toggleLanguage() {
+  lang = lang === "hu" ? "en" : "hu";
+  try { localStorage.setItem(LANG_STORAGE_KEY, lang); } catch (err) { /* best-effort only */ }
+  applyLanguage();
 }
 
 function clamp(v, lo, hi) { return Math.min(hi, Math.max(lo, v)); }
@@ -414,7 +593,7 @@ const state = {
   // Always-visible, always-editable (click the toolbar title) — not tied to
   // ever having saved. Used verbatim for display; sanitized only at the
   // point a filename is actually built (Section 5.4).
-  graphName: "Untitled Graph",
+  graphName: t("untitledGraph"),
   // Set on first "Save Version": {format_version, graph_id, version,
   // created, saved}. null until then — nothing has been exported yet, so
   // there's no version history to speak of.
@@ -1224,7 +1403,7 @@ function drawEmptyState(colors) {
   ctx.font = "16px system-ui, sans-serif";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.fillText("Canvas is empty — use “Add Node” to begin", cssWidth / 2, cssHeight / 2);
+  ctx.fillText(t("emptyCanvasMessage", t("addNode")), cssWidth / 2, cssHeight / 2);
   ctx.restore();
 }
 
@@ -1479,7 +1658,7 @@ const confirmOkBtn = document.getElementById("confirm-ok");
 const confirmCancelBtn = document.getElementById("confirm-cancel");
 let activeConfirm = null;
 
-function showConfirmDialog({ message, confirmLabel = "OK", onConfirm, onCancel }) {
+function showConfirmDialog({ message, confirmLabel = t("ok"), onConfirm, onCancel }) {
   cancelInlineInput();
   confirmMessageEl.textContent = message;
   confirmOkBtn.textContent = confirmLabel;
@@ -1744,9 +1923,9 @@ canvas.addEventListener("pointercancel", (e) => {
 
 function beginAddEdgePrompt(sourceId, targetId, screenPos) {
   showInlineInput({
-    x: screenPos.x, y: screenPos.y, placeholder: "relation label",
+    x: screenPos.x, y: screenPos.y, placeholder: t("relationLabelPlaceholder"),
     onCommit: (text) => {
-      const relation = text.trim() || "related to";
+      const relation = text.trim() || t("defaultRelation");
       const before = snapshotState();
       const edge = createEdge(sourceId, targetId, relation, true, false);
       pushHistory(before, snapshotState());
@@ -1758,7 +1937,7 @@ function beginAddEdgePrompt(sourceId, targetId, screenPos) {
 function placeNewNodeAt(world, screenPos, type) {
   showInlineInput({
     x: screenPos.x, y: screenPos.y,
-    placeholder: type === "group" ? "Group label" : "Node label",
+    placeholder: type === "group" ? t("groupLabelPlaceholder") : t("nodeLabelPlaceholder"),
     onCommit: (text) => {
       const label = text.trim();
       if (!label) return;
@@ -1787,7 +1966,7 @@ function beginRenameNodePrompt(nodeId, screenPos) {
   if (!node) return;
   showInlineInput({
     x: screenPos.x, y: screenPos.y, value: node.label,
-    placeholder: node.type === "group" ? "Group label" : "Node label",
+    placeholder: node.type === "group" ? t("groupLabelPlaceholder") : t("nodeLabelPlaceholder"),
     onCommit: (text) => {
       const label = text.trim();
       if (!label || label === node.label) return;
@@ -1803,7 +1982,7 @@ function beginRenameEdgePrompt(edgeId, screenPos) {
   const edge = state.edges.find((e) => e.id === edgeId);
   if (!edge) return;
   showInlineInput({
-    x: screenPos.x, y: screenPos.y, value: edge.relation, placeholder: "relation label",
+    x: screenPos.x, y: screenPos.y, value: edge.relation, placeholder: t("relationLabelPlaceholder"),
     onCommit: (text) => {
       const relation = text.trim();
       if (!relation || relation === edge.relation) return;
@@ -2093,10 +2272,10 @@ function updateFolderSyncButton() {
   const btn = document.getElementById("btn-folder-sync");
   if (!btn) return;
   if (tier2DirHandle) {
-    btn.textContent = `Synced: ${tier2DirHandle.name}`;
+    btn.textContent = t("folderSynced", tier2DirHandle.name);
     btn.setAttribute("aria-pressed", "true");
   } else {
-    btn.textContent = "Folder Sync";
+    btn.textContent = t("folderSync");
     btn.setAttribute("aria-pressed", "false");
   }
 }
@@ -2386,10 +2565,10 @@ function openImportDialog(text) {
   pendingImportText = text;
   const plan = planTxtImport(parseTxtImport(text));
   const lines = [
-    `Merge: ${plan.newNodeCount} node(s) and ${plan.newEdgeCount} edge(s) would be added. Nothing is ever removed.`,
+    t("importMergeSummary", plan.newNodeCount, plan.newEdgeCount),
   ];
   if (state.nodes.length || state.edges.length) {
-    lines.push(`Replace: same additions, plus ${plan.removedCount} node(s)/edge(s) not in this file would be removed.`);
+    lines.push(t("importReplaceSummary", plan.removedCount));
   } else {
     importReplaceBtn.style.display = "none";
   }
@@ -2446,6 +2625,7 @@ document.getElementById("btn-redo").addEventListener("click", () => redo());
 document.getElementById("btn-save-version").addEventListener("click", () => performSaveVersion());
 document.getElementById("btn-folder-sync").addEventListener("click", () => connectFolderSync());
 document.getElementById("btn-theme-toggle").addEventListener("click", () => toggleTheme());
+document.getElementById("btn-lang-toggle").addEventListener("click", () => toggleLanguage());
 
 // Graph name (Section 5.4's Open Question — resolved as an always-visible,
 // always-editable title rather than a one-time save-time prompt) is never
@@ -2461,9 +2641,9 @@ function openRenameGraphTitle() {
   const x = Math.max(90, rect.left + rect.width / 2);
   showInlineInput({
     x, y: rect.bottom + 16,
-    value: state.graphName, placeholder: "Graph name",
+    value: state.graphName, placeholder: t("graphNamePlaceholder"),
     onCommit: (text) => {
-      state.graphName = text.trim() || "Untitled Graph";
+      state.graphName = text.trim() || t("untitledGraph");
       graphTitleEl.textContent = state.graphName;
       scheduleSave();
     },
@@ -2499,8 +2679,8 @@ canvas.addEventListener("drop", async (e) => {
 document.getElementById("btn-clear").addEventListener("click", () => {
   if (state.nodes.length === 0 && state.edges.length === 0) return; // nothing to clear
   showConfirmDialog({
-    message: "Clear the entire graph? This removes all nodes and edges. This can be undone with the Undo button.",
-    confirmLabel: "Clear",
+    message: t("clearConfirmMessage"),
+    confirmLabel: t("clearConfirmLabel"),
     onConfirm: () => {
       const before = snapshotState();
       state.nodes = [];
@@ -2553,6 +2733,11 @@ window.__kg = {
     get: () => theme,
     toggle: toggleTheme,
   },
+  lang: {
+    get: () => lang,
+    toggle: toggleLanguage,
+    t,
+  },
   perf: {
     getRenderStats: () => ({ ...renderStats }),
     getVisibleWorldRect: () => visibleWorldRect(),
@@ -2573,12 +2758,13 @@ window.__kg = {
 async function boot() {
   resizeCanvas();
   updateUndoRedoButtons();
-  updateThemeButton();
+  applyLanguage(); // also refreshes the theme/folder-sync/lang button text
   const restored = await loadGraphFromStorage();
   if (restored) {
     clearSelection();
     markDirty();
   }
+  if (isDefaultGraphName(state.graphName)) state.graphName = t("untitledGraph");
   document.getElementById("graph-title").textContent = state.graphName;
   // Tier 2 opt-in (Section 3.1): only Chrome/Windows and Chromium/Linux
   // expose showDirectoryPicker at all — Brave and Chrome/Android don't, so

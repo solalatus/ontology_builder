@@ -18,6 +18,14 @@ async function withDownloadPage(fn) {
   page.on("download", (dl) => downloads.push(dl));
   await page.goto(APP_URL);
   await page.waitForFunction(() => Boolean(window.__kg));
+  // The app's real default UI language is Hungarian; this suite (like the
+  // shared withPage() in lib/page.mjs) pins English so its existing text
+  // assertions stay decoupled from the language feature. Pinned via
+  // evaluate() post-load rather than addInitScript — see the comment in
+  // lib/page.mjs's withPage() for why an addInitScript localStorage write
+  // racing with page.reload() is intermittently destructive to Tier 1 data
+  // on file:// origins.
+  await page.evaluate(() => { if (window.__kg.lang.get() !== "en") window.__kg.lang.toggle(); });
   try {
     await fn(page, downloads);
   } finally {

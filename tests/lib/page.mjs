@@ -9,7 +9,26 @@ export const APP_URL = "file://" + path.resolve(__dirname, "..", "..", "index.ht
 // Opens index.html (or `url`, e.g. a served http:// origin for OPFS tests —
 // see tests/lib/server.mjs) in a fresh headless page, fails the test on any
 // console/page error, and always closes the browser.
-export async function withPage(fn, { url = APP_URL } = {}) {
+//
+// Pins the UI language to English by default (`lang: "en"`) — the app's own
+// real default is Hungarian (see tests/localization.spec.mjs, which is the
+// one file that needs to see that), but every other test in this suite was
+// written against English button/placeholder text and is testing
+// functionality, not translation; forcing English here keeps all of that
+// decoupled from the language feature instead of needing every assertion
+// rewritten. Pass `lang: null` (or "hu") to see the app's actual default or
+// exercise a specific language on purpose.
+//
+// The pin is applied via page.evaluate() *after* window.__kg exists, not via
+// addInitScript. addInitScript re-runs on every navigation (including
+// page.reload()), and a script that writes to localStorage at that early,
+// pre-navigation point races with Chromium's localStorage rehydration for
+// file:// origins — intermittently (~15-20% of runs) wiping the app's own
+// already-saved Tier 1 data. That race reproduces even on unmodified code
+// with any addInitScript that touches localStorage, regardless of key; it
+// is a test-infra hazard, not an app bug. Setting the pin after load, the
+// same way a real user's click on the language toggle would, avoids it.
+export async function withPage(fn, { url = APP_URL, lang = "en" } = {}) {
   const browser = await launchChromium();
   const page = await browser.newPage({ viewport: { width: 1200, height: 800 } });
   const consoleErrors = [];
@@ -17,6 +36,7 @@ export async function withPage(fn, { url = APP_URL } = {}) {
   page.on("pageerror", (err) => consoleErrors.push(String(err)));
   await page.goto(url);
   await page.waitForFunction(() => Boolean(window.__kg));
+  if (lang) await page.evaluate((l) => { if (window.__kg.lang.get() !== l) window.__kg.lang.toggle(); }, lang);
   try {
     await fn(page);
   } finally {
