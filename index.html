@@ -877,15 +877,20 @@ function setMode(mode) {
 // (it's the visually topmost one), with later-created nodes breaking ties.
 // Used both for hit-testing (as-is) and rendering (reversed — biggest/
 // outermost drawn first, so nested boxes paint on top of their container).
-function nodesTopmostFirst() {
-  return state.nodes
+// Optional `rect` filters to nodes intersecting it (viewport culling, see
+// visibleWorldRect() below) — omitted, every call site that needs the full
+// unculled list (e.g. group-membership checks, which must consider groups
+// regardless of what's currently on screen) keeps working exactly as before.
+function nodesTopmostFirst(rect) {
+  const sorted = state.nodes
     .map((n, i) => ({ n, i }))
     .sort((a, b) => (a.n.w * a.n.h - b.n.w * b.n.h) || (b.i - a.i))
     .map((x) => x.n);
+  return rect ? sorted.filter((n) => rectsOverlap(n, rect)) : sorted;
 }
 
 function findNodeAt(wx, wy) {
-  for (const n of nodesTopmostFirst()) {
+  for (const n of nodesTopmostFirst(visibleWorldRect())) {
     if (wx >= n.x && wx <= n.x + n.w && wy >= n.y && wy <= n.y + n.h) return n;
   }
   return null;
@@ -902,7 +907,7 @@ function nodeHandles(n) {
 
 function findNodeHandleAt(wx, wy) {
   const radius = 10 / camera.scale; // constant ~10 screen px grab target
-  for (const n of nodesTopmostFirst()) {
+  for (const n of nodesTopmostFirst(visibleWorldRect())) {
     for (const h of nodeHandles(n)) {
       if (Math.hypot(wx - h.x, wy - h.y) <= radius) return { node: n, point: h };
     }
@@ -921,7 +926,7 @@ function groupResizeHandlePoint(n) { return { x: n.x + n.w, y: n.y + n.h }; }
 
 function findGroupResizeHandleAt(wx, wy) {
   const radius = 10 / camera.scale;
-  for (const n of nodesTopmostFirst()) {
+  for (const n of nodesTopmostFirst(visibleWorldRect())) {
     if (n.type !== "group") continue;
     const h = groupResizeHandlePoint(n);
     if (Math.hypot(wx - h.x, wy - h.y) <= radius) return n;
@@ -961,11 +966,13 @@ function distToSegment(px, py, ax, ay, bx, by) {
 
 function findEdgeAt(wx, wy) {
   const threshold = 6 / camera.scale;
+  const rect = visibleWorldRect();
   for (let i = state.edges.length - 1; i >= 0; i--) {
     const e = state.edges[i];
     if (e.auto) continue; // contains edges are never drawn, so never hit-testable
     const anchors = edgeAnchors(e);
     if (!anchors) continue;
+    if (!rectsOverlap(edgeBoundingRect(anchors), rect)) continue;
     if (distToSegment(wx, wy, anchors.a.x, anchors.a.y, anchors.b.x, anchors.b.y) <= threshold) return e;
   }
   return null;
@@ -987,6 +994,48 @@ function resizeCanvas() {
 }
 
 window.addEventListener("resize", resizeCanvas);
+
+// ---------------------------------------------------------------------------
+// Viewport culling (Section 6, Section 9): draw/hit-test only what
+// intersects the visible camera rect, so cost scales with what's on screen
+// rather than total graph size. Padding keeps things that visually extend a
+// little past a node/edge's own geometry (resize handles, edge labels, the
+// dashed group outline) from popping in/out right at the screen edge;
+// expressed in world units scaled by 1/camera.scale so it reads as a
+// constant ~50 screen px margin at any zoom level.
+//
+// Safe for hit-testing, not just drawing: findNodeAt/findEdgeAt etc. are
+// always called with a world point derived from a click inside the canvas,
+// which is by definition already inside this same rect — so a node/edge
+// that doesn't intersect it can never contain that point either. Filtering
+// to the visible subset first is a pure speed optimization there, not a
+// behavior change.
+// ---------------------------------------------------------------------------
+function visibleWorldRect() {
+  const pad = 50 / camera.scale;
+  const topLeft = screenToWorld(0, 0);
+  const bottomRight = screenToWorld(cssWidth, cssHeight);
+  return {
+    x: topLeft.x - pad,
+    y: topLeft.y - pad,
+    w: (bottomRight.x - topLeft.x) + 2 * pad,
+    h: (bottomRight.y - topLeft.y) + 2 * pad,
+  };
+}
+
+function edgeBoundingRect(anchors) {
+  const minX = Math.min(anchors.a.x, anchors.b.x);
+  const maxX = Math.max(anchors.a.x, anchors.b.x);
+  const minY = Math.min(anchors.a.y, anchors.b.y);
+  const maxY = Math.max(anchors.a.y, anchors.b.y);
+  return { x: minX, y: minY, w: maxX - minX, h: maxY - minY };
+}
+
+// Exposed via window.__kg (see below) so tests can assert culling actually
+// shrinks the drawn set when zoomed into a small region of a large graph,
+// rather than only inferring it indirectly from wall-clock timing (noisy
+// in CI) — see Phase 9 in TODO.md.
+const renderStats = { nodesDrawn: 0, nodesTotal: 0, edgesDrawn: 0, edgesTotal: 0 };
 
 // ---------------------------------------------------------------------------
 // Render loop — dirty-flag driven, not a constant loop.
@@ -1085,10 +1134,15 @@ function drawArrowhead(x, y, dx, dy, size) {
 }
 
 function drawEdges(colors) {
+  const rect = visibleWorldRect();
+  let edgesTotal = 0, edgesDrawn = 0;
   for (const edge of state.edges) {
     if (edge.auto) continue; // contains: communicated by nesting only, never drawn
+    edgesTotal++;
     const anchors = edgeAnchors(edge);
     if (!anchors) continue;
+    if (!rectsOverlap(edgeBoundingRect(anchors), rect)) continue; // viewport culling (Section 6/9)
+    edgesDrawn++;
     const selected = state.selection.type === "edge" && state.selection.id === edge.id;
     ctx.strokeStyle = selected ? colors.edgeStrokeSelected : colors.edgeStroke;
     ctx.fillStyle = ctx.strokeStyle;
@@ -1107,12 +1161,20 @@ function drawEdges(colors) {
     ctx.textBaseline = "bottom";
     ctx.fillText(edge.relation, mx, my - 4);
   }
+  renderStats.edgesTotal = edgesTotal;
+  renderStats.edgesDrawn = edgesDrawn;
 }
 
 function drawNodes(colors) {
+  const rect = visibleWorldRect();
   // Biggest/outermost first so nested boxes always paint on top of their
   // container, regardless of creation order (mirrors hit-test priority).
-  const drawOrder = [...nodesTopmostFirst()].reverse();
+  // Culled to the visible rect (Section 6/9) before the sort's more
+  // expensive per-node draw calls, not before the cheap O(n log n) sort
+  // itself — sorting all nodes is negligible next to the canvas calls.
+  const drawOrder = [...nodesTopmostFirst(rect)].reverse();
+  renderStats.nodesTotal = state.nodes.length;
+  renderStats.nodesDrawn = drawOrder.length;
   for (const node of drawOrder) {
     const selected = state.selection.type === "node" && state.selection.id === node.id;
     const isConnectSource = state.connectSource === node.id;
@@ -2275,6 +2337,10 @@ window.__kg = {
   theme: {
     get: () => theme,
     toggle: toggleTheme,
+  },
+  perf: {
+    getRenderStats: () => ({ ...renderStats }),
+    getVisibleWorldRect: () => visibleWorldRect(),
   },
 };
 
