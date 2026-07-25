@@ -277,3 +277,61 @@ test("Auto-layout is reachable only via its explicit toolbar button — never ru
     assert.deepEqual(afterReload, beforeReload, "reload must never silently re-layout the graph");
   });
 });
+
+test("a node belonging to two separate (overlapping-origin) groups stays contained in both simultaneously during Auto-layout", async () => {
+  await withPage(async (page) => {
+    // GroupA (100,100..420,320) and GroupB (200,100..520,320) — default
+    // 320x220 group boxes, positioned so their overlap (200..420, 100..320)
+    // comfortably fits a default 160x60 entity with room to spare. Set up
+    // directly (groups[] + contains edges by hand) rather than via
+    // establishMembership()'s push+updateGroupMembership combo — with two
+    // overlapping, mutually-qualifying groups, that auto-detection would
+    // itself add the second membership as a side effect of the first call,
+    // then double-push it on the second call.
+    await seedGraph(page, [
+      { x: 100, y: 100, label: "GroupA", type: "group" },
+      { x: 200, y: 100, label: "GroupB", type: "group" },
+      { x: 250, y: 150, label: "Shared", type: "entity" },
+      { x: 1800, y: 1800, label: "Puller", type: "entity" },
+    ], [[2, 3, "pulls hard"]]);
+    await page.evaluate(() => {
+      const groupA = window.__kg.state.nodes.find((n) => n.label === "GroupA");
+      const groupB = window.__kg.state.nodes.find((n) => n.label === "GroupB");
+      const shared = window.__kg.state.nodes.find((n) => n.label === "Shared");
+      // Enlarged well past the 320x220 default: at the sibling edge's
+      // natural equilibrium distance (~150-190 units, once other forces
+      // settle), two default-sized groups' overlap region comes out only
+      // slightly smaller than a default 160x60 entity — not enough margin
+      // for a reliable test. Bigger boxes leave comfortable slack.
+      groupA.w = 500; groupA.h = 400;
+      groupB.w = 500; groupB.h = 400;
+      shared.groups.push(groupA.id, groupB.id);
+      window.__kg.actions.createEdge(groupA.id, shared.id, "contains", true, true);
+      window.__kg.actions.createEdge(groupB.id, shared.id, "contains", true, true);
+      // Nothing else attracts GroupA and GroupB to each other, and all-pairs
+      // repulsion pushes every node pair apart — without some attraction
+      // between them, 200 iterations reliably drift two otherwise-unrelated
+      // groups apart until they no longer overlap at all, making simultaneous
+      // containment geometrically impossible regardless of the clamp logic.
+      // A direct edge keeps them attracted together, the same way any two
+      // genuinely-related groups in a real graph would tend to stay near
+      // each other — this isolates the clamp behavior under test from that
+      // unrelated (and, for two arbitrary sibling groups, arguably correct)
+      // drift-apart dynamic.
+      window.__kg.actions.createEdge(groupA.id, groupB.id, "sibling of");
+    });
+    const groupsBefore = await page.evaluate(() => window.__kg.state.nodes.find((n) => n.label === "Shared").groups);
+    assert.equal(groupsBefore.length, 2, "sanity check: Shared really is in both groups before layout");
+
+    await page.click("#btn-autolayout");
+    await page.waitForFunction(() => window.__kg.history.past.length === 1);
+
+    const { groupA, groupB, shared } = await page.evaluate(() => ({
+      groupA: window.__kg.state.nodes.find((n) => n.label === "GroupA"),
+      groupB: window.__kg.state.nodes.find((n) => n.label === "GroupB"),
+      shared: window.__kg.state.nodes.find((n) => n.label === "Shared"),
+    }));
+    assert.ok(isFullyContained(shared, groupA), "Shared escaped GroupA");
+    assert.ok(isFullyContained(shared, groupB), "Shared escaped GroupB");
+  });
+});

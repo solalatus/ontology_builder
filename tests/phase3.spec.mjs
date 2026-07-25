@@ -268,3 +268,118 @@ test("the undo stack is not persisted across reload — a fresh load always star
     assert.equal(await undoBtnDisabled(page), true);
   });
 });
+
+test("a long chain of 20 sequential adds fully undoes back to empty and fully redoes back to 20, in order", async () => {
+  await withPage(async (page) => {
+    // Bypasses the UI for setup speed (20 real dblclick+type+Enter round
+    // trips would be needlessly slow for a stress test); each add still
+    // goes through the same pushHistory() choke point every real action
+    // uses, via window.__kg.actions.pushHistoryFor (not exposed directly),
+    // so instead each iteration mirrors pushHistory()'s own two-snapshot
+    // shape by hand and drives undo/redo through the real action
+    // functions afterward, not raw DOM clicks — a manually-pushed
+    // history.past entry doesn't refresh the Undo/Redo buttons' disabled
+    // attribute (that only happens inside pushHistory()/undo()/redo()
+    // itself), so clicking the DOM buttons here would hang on a stale
+    // disabled button rather than testing the history logic at all.
+    for (let i = 0; i < 20; i++) {
+      await page.evaluate((label) => {
+        const before = { nodes: window.__kg.state.nodes.map((n) => ({ ...n, groups: [...n.groups] })), edges: window.__kg.state.edges.map((e) => ({ ...e })) };
+        window.__kg.actions.createNode(50 + (label % 10) * 60, 50 + Math.floor(label / 10) * 80, `N${label}`, "entity");
+        const after = { nodes: window.__kg.state.nodes.map((n) => ({ ...n, groups: [...n.groups] })), edges: window.__kg.state.edges.map((e) => ({ ...e })) };
+        window.__kg.history.past.push({ before, after });
+        window.__kg.history.future = [];
+      }, i);
+    }
+    assert.equal(await page.evaluate(() => window.__kg.state.nodes.length), 20);
+    assert.equal((await historyLengths(page)).past, 20);
+
+    for (let i = 0; i < 20; i++) await page.evaluate(() => window.__kg.actions.undo());
+    assert.equal(await page.evaluate(() => window.__kg.state.nodes.length), 0);
+    assert.equal((await historyLengths(page)).future, 20);
+    assert.equal(await undoBtnDisabled(page), true, "the button's disabled state should reflect the real history after real undo() calls");
+
+    for (let i = 0; i < 20; i++) await page.evaluate(() => window.__kg.actions.redo());
+    const nodes = await page.evaluate(() => window.__kg.state.nodes);
+    assert.equal(nodes.length, 20);
+    assert.equal(nodes[0].label, "N0");
+    assert.equal(nodes[19].label, "N19");
+    assert.equal(await redoBtnDisabled(page), true);
+  });
+});
+
+test("undo and redo always clear the current selection rather than trying to restore it", async () => {
+  await withPage(async (page) => {
+    await addNodeViaDblClick(page, 300, 300, "Alpha");
+    await addNodeViaDblClick(page, 500, 300, "Beta");
+    const box = await page.locator("#canvas").boundingBox();
+    await page.mouse.click(box.x + 500, box.y + 300); // select Beta
+    assert.equal((await page.evaluate(() => window.__kg.state.selection)).type, "node");
+
+    await page.click("#btn-undo");
+    assert.equal((await page.evaluate(() => window.__kg.state.selection)).type, null);
+
+    await page.mouse.click(box.x + 300, box.y + 300); // select Alpha
+    assert.equal((await page.evaluate(() => window.__kg.state.selection)).type, "node");
+
+    await page.click("#btn-redo");
+    assert.equal((await page.evaluate(() => window.__kg.state.selection)).type, null,
+      "redo should clear selection rather than reselecting whatever was selected before it ran");
+  });
+});
+
+test("alternating undo/redo cycles land on exactly the right state at every step, not just at the ends", async () => {
+  await withPage(async (page) => {
+    await addNodeViaDblClick(page, 200, 200, "A");
+    await addNodeViaDblClick(page, 400, 200, "B");
+    await addNodeViaDblClick(page, 600, 200, "C");
+    const labelsNow = async () => (await page.evaluate(() => window.__kg.state.nodes)).map((n) => n.label).sort();
+
+    assert.deepEqual(await labelsNow(), ["A", "B", "C"]);
+    await page.click("#btn-undo");
+    assert.deepEqual(await labelsNow(), ["A", "B"]);
+    await page.click("#btn-undo");
+    assert.deepEqual(await labelsNow(), ["A"]);
+    await page.click("#btn-redo");
+    assert.deepEqual(await labelsNow(), ["A", "B"]);
+    await page.click("#btn-undo");
+    assert.deepEqual(await labelsNow(), ["A"]);
+    await page.click("#btn-undo");
+    assert.deepEqual(await labelsNow(), []);
+    await page.click("#btn-redo");
+    await page.click("#btn-redo");
+    await page.click("#btn-redo");
+    assert.deepEqual(await labelsNow(), ["A", "B", "C"]);
+    assert.equal(await redoBtnDisabled(page), true);
+  });
+});
+
+test("undoing an Auto-layout after several unrelated prior actions only reverts the layout, not the earlier actions", async () => {
+  await withPage(async (page) => {
+    await addNodeViaDblClick(page, 200, 200, "A");
+    await addNodeViaDblClick(page, 400, 200, "B");
+    await createEdgeViaConnectMode(page, 200, 200, 400, 200, "linked");
+    await page.evaluate(() => window.__kg.actions.setMode("idle"));
+    const positionsBeforeLayout = await page.evaluate(() => window.__kg.state.nodes.map((n) => ({ x: n.x, y: n.y })));
+
+    await page.click("#btn-autolayout");
+    // add, add, connect = 3 steps already on the stack; +1 for the layout = 4.
+    // autoLayout() runs synchronously within the click handler, so by the
+    // time click() resolves the push has already happened — no need to
+    // (and, since it's already past 3 by then, no correct way to) wait for
+    // an intermediate count.
+    await page.waitForFunction(() => window.__kg.history.past.length === 4);
+
+    const positionsAfterLayout = await page.evaluate(() => window.__kg.state.nodes.map((n) => ({ x: n.x, y: n.y })));
+    assert.notDeepEqual(positionsAfterLayout, positionsBeforeLayout);
+
+    await page.click("#btn-undo"); // undo only the layout
+    const positionsAfterUndo = await page.evaluate(() => window.__kg.state.nodes.map((n) => ({ x: n.x, y: n.y })));
+    assert.deepEqual(positionsAfterUndo, positionsBeforeLayout);
+
+    const nodes = await page.evaluate(() => window.__kg.state.nodes);
+    const edges = await page.evaluate(() => window.__kg.state.edges);
+    assert.equal(nodes.length, 2, "the earlier node adds must still be intact");
+    assert.equal(edges.length, 1, "the earlier edge connect must still be intact");
+  });
+});

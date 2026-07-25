@@ -10,7 +10,7 @@ State" so the project can be picked up cold at any time.
 ## Current State
 
 - **Phase:** Phases 0 through 9 complete, all with green automated test
-  suites (`node --test tests/*.spec.mjs`, 159 JS tests + 15 Python tests,
+  suites (`node --test tests/*.spec.mjs`, 193 JS tests + 15 Python tests,
   see Log below). Not yet hand-tested on real touch hardware (pinch/
   long-press) — deferred to Phase 10, not blocking. Phase 7's real-folder
   grant/write-back is likewise only mocked-tested so far, not hand-verified
@@ -22,6 +22,20 @@ State" so the project can be picked up cold at any time.
   Phase 8's autolayout also now enforces explicit group-containment
   (members can't escape their group's box during layout, user-requested
   hardening — see the Phase 8 section and its Log entry).
+- **A dedicated test-hardening pass** (user-requested, ahead of Phase 10's
+  manual testing) went back through every phase and added substantially
+  more coverage (34 new tests, 159 → 193), and surfaced two real bugs in
+  the process — both fixed, not just documented: (1) `setPointerCapture`/
+  `releasePointerCapture` could throw uncaught (spec-documented, not
+  hypothetical) and silently abort the rest of a pinch-gesture handler,
+  meaning `pinchStartDist` might never get computed for that gesture; both
+  calls are now wrapped defensively. (2) Panning the canvas (a drag
+  starting on empty background) could silently clear whatever node/edge
+  was currently selected, because the native `click` event that still
+  fires after a pan's `mouseup` fell through to `clearSelection()` — pan
+  drags past the move threshold now set `suppressNextClick` just like
+  every other drag already does. See the dated Log entry below for full
+  details on both and the per-phase test additions.
 - **Target file:** `index.html` (single file, no external deps/CDN links).
   Dev-only test tooling lives in `tests/` and `tools/` (see `tests/README.md`)
   and never ships as part of the app.
@@ -159,11 +173,19 @@ claude.ai/code, which is plain git via GitHub as described above.
       constant loop — Section 6
 - [x] Empty-state UI shell: button bar per Section 7 (Add Node, Connect,
       Auto-layout, Undo, Redo, Save Version, Import from TXT, zoom +/−)
-- Tests (`tests/phase0.spec.mjs`, 5 tests, all green):
+- Tests (`tests/phase0.spec.mjs`, 11 tests, all green — expanded from 5 in
+  a later test-hardening pass, see the dated Log entry):
   - Automated: page loads with zero console/page errors and `camera` at
     identity; drag-pan, wheel-zoom (cursor over canvas), and the +/−
     buttons each change `window.__kg.camera` as expected; window resize
-    keeps the canvas filling its container.
+    keeps the canvas filling its container; `zoomAt` clamps to MIN_SCALE/
+    MAX_SCALE regardless of how extreme the requested factor is; `zoomAt`
+    keeps the exact world point under the cursor fixed; a zoom-in followed
+    by its exact inverse factor returns to (very nearly) the original
+    scale; a real two-finger pinch gesture (synthetic `pointerType: touch`
+    events) zooms in/out via the same `zoomAt` mechanism as wheel/buttons
+    — this is what surfaced the `setPointerCapture`/`releasePointerCapture`
+    bug described in the Log below.
   - Manual (deferred to Phase 10 — needs real hardware): pinch-zoom and
     single-finger pan on an actual touch device.
 
@@ -208,7 +230,16 @@ claude.ai/code, which is plain git via GitHub as described above.
     on empty canvas or back on its own node creates no edge; two edges
     with different relations can coexist between the same node pair; a
     label with quotes/angle-brackets/ampersands round-trips intact;
-    deleting a node also clears its selection/toolbar.
+    deleting a node also clears its selection/toolbar. Expanded to 39
+    tests in a later test-hardening pass: a new node is created centered
+    on the click point; clicking a second node switches selection directly
+    without deselecting first; a short click (no drag) on an edge selects
+    it rather than deleting/ignoring it; the selection toolbar tracks a
+    selected node's screen position across a pan; a very long label (500
+    chars) doesn't crash rendering; a group node works as a Connect-mode
+    endpoint just like an entity; two separate sequential drags on the
+    same node both apply independently; selection survives an unrelated
+    pan drag — this last one caught a real bug, see the Log entry below.
   - Manual (not exercised here — no touch hardware in this sandbox, defer
     to Phase 10): long-press timing/feel and inline-input UX on an actual
     touch screen; long node labels at extreme zoom levels.
@@ -227,7 +258,12 @@ claude.ai/code, which is plain git via GitHub as described above.
       overlapping membership (node in multiple groups)
 - [x] `boundary_mode` always `"manual"` — group box independently resizable,
       never auto-fits to members — Decision #3
-- Tests (`tests/phase2.spec.mjs`, 17 tests, all green):
+- Tests (`tests/phase2.spec.mjs`, 19 tests, all green — expanded from 17 in
+  a later test-hardening pass: deleting a grandparent group only cleans up
+  its direct child, a deeper grandchild membership is untouched; dragging
+  a node from deep inside a nested group to just outside it, but still
+  inside the outer group, reassigns membership from inner to outer in one
+  drag):
   - Automated: "Add Group" creates a `type:"group"` node with the Section
     4.3 defaults (320×220, `boundary_mode:"manual"`, empty `groups[]`), is
     one-shot, and Escape-cancelable, mirroring Add Node. Dragging a smaller
@@ -264,7 +300,13 @@ claude.ai/code, which is plain git via GitHub as described above.
 - [x] Undo/Redo buttons only, no dedicated gesture — Decision #8
 - [x] Confirm: undo stack NOT persisted across reload (reload starts fresh
       from last saved state) — Section 8
-- Tests (`tests/phase3.spec.mjs`, 16 tests, all green):
+- Tests (`tests/phase3.spec.mjs`, 20 tests, all green — expanded from 16 in
+  a later test-hardening pass: a 20-step chain fully undoes to empty and
+  fully redoes back, in order; undo/redo always clear the current
+  selection rather than trying to restore it; alternating undo/redo cycles
+  land on exactly the right state at every intermediate step, not just at
+  the ends; undoing an Auto-layout after several unrelated prior actions
+  only reverts the layout):
   - Automated: Undo/Redo buttons start disabled and correctly flip enabled/
     disabled as the stack fills/empties (checked via the real `disabled`
     DOM attribute, not just internal state); add node, add edge, toggle
@@ -296,7 +338,12 @@ claude.ai/code, which is plain git via GitHub as described above.
       programmatically in headless Chromium for both the served (OPFS) and
       `file://` (localStorage fallback) cases; the 4-platform hardware pass
       is still Phase 10's job.
-- Tests (`tests/phase4.spec.mjs`, 11 tests, all green):
+- Tests (`tests/phase4.spec.mjs`, 14 tests, all green — expanded from 11 in
+  a later test-hardening pass: a burst of many scheduled saves coalesces
+  into far fewer than N actual writes, proven via a counted
+  `localStorage.setItem` wrapper, not just inferred; a moderately large
+  graph (50 nodes, ~30 edges, nested groups) round-trips exactly; Clear
+  does not touch the separately-stored theme preference):
   - Automated: `window.__kg.storage.detectBackend()` resolves to
     `"localStorage"` under `file://` and to `"opfs"` when served over
     http (a real local static server is spun up in-test —
@@ -329,7 +376,12 @@ claude.ai/code, which is plain git via GitHub as described above.
       together on every "Save Version"
 - [x] Version number increments monotonically, stored in graph metadata,
       continuous across sessions
-- Tests (`tests/phase5.spec.mjs`, 17 tests, all green):
+- Tests (`tests/phase5.spec.mjs`, 21 tests, all green — expanded from 17 in
+  a later test-hardening pass: unicode/special characters in labels and
+  relations survive both JSON and TXT export intact; a 3-level-deep
+  nested-groups `groups[]` chain exports correctly; undoing an unrelated
+  action never resets or perturbs the version counter on the next save;
+  TXT export lists nodes and edges in creation order):
   - Automated: intercepts real browser downloads via `page.on('download')`
     (not `Promise.all` on two `waitForEvent` calls — that pairing turned
     out unreliable for two downloads fired synchronously from one click;
@@ -382,8 +434,15 @@ claude.ai/code, which is plain git via GitHub as described above.
       unchanged); one undo step regardless of size
 - [x] Triggered via "Import from TXT" button (native file-open dialog) and
       drag-and-drop of `.txt` onto canvas where supported
-- Tests (`tests/phase6.spec.mjs`, 17 tests + 5 fixture files under
-  `tests/fixtures/`, all green):
+- Tests (`tests/phase6.spec.mjs`, 22 tests + 5 fixture files under
+  `tests/fixtures/`, all green — expanded from 17 in a later test-hardening
+  pass: a file with only groups declared and no `## EDGES` section at all
+  imports cleanly; blank lines/trailing whitespace throughout don't break
+  parsing; merging a file that references a node previously deleted from
+  the current graph re-creates it fresh (matching is against the live
+  graph, not import history); merge adds a new member to an already-
+  existing group via a `contains` line; a ~200-node import completes
+  without hanging):
   - Automated: Merge on an empty graph reproduces spec's own worked example
     exactly (nodes, types, groups, directed flags, the auto `contains`
     edge); merge is idempotent (re-importing the same file adds nothing,
@@ -478,7 +537,9 @@ claude.ai/code, which is plain git via GitHub as described above.
       group it belongs to on every iteration, including nested groups
       (member → inner group → outer group), overriding the physics
       simulation rather than just relying on the soft "contains" edge pull.
-- Tests (`tests/phase8.spec.mjs`, 9 tests):
+- Tests (`tests/phase8.spec.mjs`, 10 tests, expanded from 9 in a later
+  test-hardening pass: a node belonging to two separate overlapping groups
+  stays contained in both simultaneously during layout):
   - Automated: no-op (no history entry, no movement) on an empty or
     single-node graph; on a small connected graph, positions change and
     it's exactly one undo step (one Undo restores every node's exact
@@ -513,7 +574,9 @@ claude.ai/code, which is plain git via GitHub as described above.
       smoke check — see Tests below; not measured on a real device yet)
 - [x] Confirm disconnected components / floating groups behave identically
       to connected graphs under pan/zoom/culling
-- Tests (`tests/phase9.spec.mjs`, 6 tests):
+- Tests (`tests/phase9.spec.mjs`, 7 tests, expanded from 6 in a later
+  test-hardening pass: a group's resize handle remains draggable after
+  panning/zooming the camera, proving hit-test culling doesn't break it):
   - Automated: seeded 1,000 synthetic nodes via `window.__kg.actions`
     (bypassing the UI for setup speed). Zooming into a small region draws
     far fewer than the full 1,000 (culling actually shrinks the drawn set,
@@ -1386,12 +1449,83 @@ and record deltas here instead of editing the spec.)*
     particular) with a large graph — headless frame-time smoke checks
     don't substitute for actually dragging it on real hardware. Deferred
     to Phase 10 alongside the other hands-on cross-platform checks.
+- 2026-07-25 — PR #12 (Phase 9) merged to `main` by the user. Restarted
+  this branch from `origin/main` per the merged-PR protocol before starting
+  the next requested item.
+- 2026-07-25 — Follow-up question: "what is missing?" Answered without
+  implementing (per the user's request): everything in Phases 0–9 was
+  functionally complete and automated-tested, leaving only Phase 10
+  (manual cross-platform verification) and Phase 11 (polish/out-of-scope
+  guardrails), plus one cosmetic loose end — the "Open Questions" section
+  still listed the autolayout algorithm choice as unresolved even though
+  Phase 8 had already picked and documented one.
+- 2026-07-25 — User asked to: (1) fix the stale Open Questions entry, (2)
+  add considerably more tests across *every* phase, driving the total up
+  hard, (3) open a PR, (4) leave everything stable ahead of Phase 10's
+  manual testing. Addressed all four:
+  - **Open Questions**: struck through the autolayout line and pointed it
+    at the Phase 8 Log entry, matching how the graph-name question was
+    already resolved there.
+  - **Test suite grew from 159 to 193 JS tests** (+34), spread across
+    every phase file rather than concentrated in one or two (phase0: 5→11,
+    phase1: 31→39, phase2: 17→19, phase3: 16→20, phase4: 11→14, phase5:
+    17→21, phase6: 17→22, phase8: 9→10, phase9: 6→7 — see each phase's own
+    Tests bullet above for exactly what was added; phase7 and the theme/
+    Clear suites were already judged thorough enough and left alone).
+    Python suite (15 tests) unchanged — no Python-side gaps identified.
+  - **Two real bugs found and fixed** in the process, not just written up
+    as findings — the whole point was stability, not a report:
+    1. **`setPointerCapture`/`releasePointerCapture` could throw
+       uncaught, silently truncating a pinch-gesture handler.** Writing a
+       real two-finger pinch test (synthetic `PointerEvent`s with
+       `pointerType: "touch"`, dispatched directly rather than relying on
+       flaky OS-level touch emulation) exposed this: both calls throw a
+       spec-documented `NotFoundError` when the given pointer id isn't
+       recognized as currently active. The pan-start code path calls
+       `setPointerCapture` and, when a second touch begins a pinch, calls
+       `releasePointerCapture` on the *first* touch's id to cancel the
+       pan — if either throws, every line of cleanup after it in that
+       same handler (`panPointerId = null`, `dragMode = null`, and
+       critically `pinchStartDist = distance(...)`) never runs, silently
+       breaking that pinch gesture's zoom entirely. Fixed with two small
+       wrappers, `safeSetPointerCapture`/`safeReleasePointerCapture`
+       (try/catch, swallow and continue), used at all 5 call sites. Real
+       touch hardware likely doesn't hit this often (a genuinely active
+       finger's capture calls should normally succeed), but it's a real,
+       spec-documented failure mode worth hardening against before Phase
+       10 puts pinch-zoom in front of an actual touchscreen — and it's
+       exactly what made the new pinch test possible to write reliably at
+       all, since the synthetic pointer ids used for testing don't count
+       as "active" to the browser's capture implementation either.
+    2. **Panning the canvas could silently clear the current selection.**
+       A pan drag ends with a `pointerup`, but the browser still fires a
+       native `click` event afterward on the same element; the click
+       handler falls through to `clearSelection()` when the click doesn't
+       land on a node/edge. Every *other* drag type (`moveNode`,
+       `resizeGroup`) already sets `suppressNextClick = true` when real
+       movement occurred, specifically to prevent this; the `pan` branch
+       never did. Caught by a new phase1 test ("selection survives an
+       unrelated pan"); fixed by adding the same movement-threshold-gated
+       `suppressNextClick = true` to the pan branch of the `pointerup`
+       handler. A plain click with no movement is unaffected and still
+       clears selection exactly as before (existing test coverage for
+       that continues to pass unchanged).
+  - Ran the full suite repeatedly throughout (after each phase file's
+    additions, not just once at the end) and after both fixes: `node
+    --test tests/*.spec.mjs` (193 tests) and `python3 -m unittest discover
+    -s tools -p "test_*.py"` (15 tests), both green throughout — no
+    regressions introduced anywhere by either the new tests or the fixes.
 
 ---
 
 ## Open Questions (not yet decided — raise before implementing that part)
 
-- Exact autolayout algorithm choice (Phase 8) — spec leaves this open.
+- ~~Exact autolayout algorithm choice (Phase 8) — spec leaves this open.~~
+  — resolved in Phase 8: force-directed (Fruchterman-Reingold style)
+  relaxation over node centers, chosen because it needs no "root"/"levels"
+  concept and degrades gracefully for arbitrary, possibly-cyclic,
+  possibly-disconnected graphs. See the Phase 8 Log entry for the full
+  rationale.
 - ~~Graph name (Section 5.4)~~ — resolved in Phase 5, via a direct question
   to the user rather than a unilateral pick: an always-visible, always-
   editable title in the toolbar (click to rename, defaults to "Untitled

@@ -359,3 +359,104 @@ test("saving an empty graph produces valid, structurally-correct (empty) JSON an
     assert.ok(text.includes("## NODES\n\n## EDGES\n"));
   });
 });
+
+test("unicode and special characters in labels/relations survive both JSON and TXT export intact", async () => {
+  await withDownloadPage(async (page, downloads) => {
+    const label1 = "Café Müller 日本語";
+    const label2 = "Zürich <-> Tōkyō";
+    const relation = 'says "hello" — 100% sure';
+    await addNodeViaDblClick(page, 250, 250, label1);
+    await addNodeViaDblClick(page, 650, 250, label2);
+    await createEdgeViaConnectMode(page, 250, 250, 650, 250, relation);
+    await page.evaluate(() => window.__kg.actions.setMode("idle"));
+
+    await saveVersion(page);
+    await page.waitForTimeout(200);
+
+    const jsonDl = downloads.find((d) => d.suggestedFilename().endsWith(".json"));
+    const parsedJson = JSON.parse(await readDownload(jsonDl));
+    assert.ok(parsedJson.nodes.some((n) => n.label === label1));
+    assert.ok(parsedJson.nodes.some((n) => n.label === label2));
+    assert.equal(parsedJson.edges[0].relation, relation);
+
+    const txtDl = downloads.find((d) => d.suggestedFilename().endsWith(".txt"));
+    const text = await readDownload(txtDl);
+    assert.ok(text.includes(label1));
+    assert.ok(text.includes(label2));
+    assert.ok(text.includes(relation));
+  });
+});
+
+test("deeply nested groups (3 levels) export their full groups[] chain correctly in JSON", async () => {
+  await withDownloadPage(async (page, downloads) => {
+    await page.evaluate(() => {
+      const outer = window.__kg.actions.createNode(0, 0, "Outer", "group");
+      outer.w = 600; outer.h = 400;
+      const inner = window.__kg.actions.createNode(50, 50, "Inner", "group");
+      inner.w = 300; inner.h = 200;
+      inner.groups.push(outer.id);
+      window.__kg.actions.createEdge(outer.id, inner.id, "contains", true, true);
+      const leaf = window.__kg.actions.createNode(80, 80, "Leaf", "entity");
+      leaf.groups.push(inner.id);
+      window.__kg.actions.createEdge(inner.id, leaf.id, "contains", true, true);
+      window.__kg.markDirty();
+    });
+
+    await saveVersion(page);
+    await page.waitForTimeout(200);
+
+    const jsonDl = downloads.find((d) => d.suggestedFilename().endsWith(".json"));
+    const parsed = JSON.parse(await readDownload(jsonDl));
+    const outer = parsed.nodes.find((n) => n.label === "Outer");
+    const inner = parsed.nodes.find((n) => n.label === "Inner");
+    const leaf = parsed.nodes.find((n) => n.label === "Leaf");
+    assert.deepEqual(outer.groups, []);
+    assert.deepEqual(inner.groups, [outer.id]);
+    assert.deepEqual(leaf.groups, [inner.id], "Leaf's groups[] references its direct (inner) parent only, not the outer grandparent");
+  });
+});
+
+test("undoing an unrelated action after a save does not reset or duplicate the version counter on the next save", async () => {
+  await withDownloadPage(async (page, downloads) => {
+    await addNodeViaDblClick(page, 300, 300, "Alpha");
+    await saveVersion(page); // v1
+    await page.waitForTimeout(200);
+
+    await addNodeViaDblClick(page, 600, 300, "Beta");
+    await page.click("#btn-undo"); // undo the Beta add — unrelated to meta/version at all
+
+    await saveVersion(page); // v2
+    await page.waitForTimeout(200);
+
+    assert.equal(downloads.length, 4);
+    const jsonNames = downloads.filter((d) => d.suggestedFilename().endsWith(".json")).map((d) => d.suggestedFilename());
+    assert.ok(jsonNames.some((n) => n.includes("_v0001_")));
+    assert.ok(jsonNames.some((n) => n.includes("_v0002_")));
+    const secondJson = downloads.filter((d) => d.suggestedFilename().endsWith(".json"))[1];
+    const parsed = JSON.parse(await readDownload(secondJson));
+    assert.equal(parsed.meta.version, 2, "undo must not reset or otherwise perturb the version counter");
+    assert.equal(parsed.nodes.length, 1, "Beta's undo should still be reflected — only Alpha remains");
+  });
+});
+
+test("TXT export lists nodes and edges in creation order, not some other implicit order", async () => {
+  await withDownloadPage(async (page, downloads) => {
+    await addNodeViaDblClick(page, 700, 250, "Zebra");
+    await addNodeViaDblClick(page, 250, 250, "Apple");
+    await addNodeViaDblClick(page, 450, 450, "Mango");
+    await createEdgeViaConnectMode(page, 700, 250, 250, 250, "first edge");
+    await page.evaluate(() => window.__kg.actions.setMode("idle"));
+    await createEdgeViaConnectMode(page, 250, 250, 450, 450, "second edge");
+    await page.evaluate(() => window.__kg.actions.setMode("idle"));
+
+    await saveVersion(page);
+    await page.waitForTimeout(200);
+
+    const txtDl = downloads.find((d) => d.suggestedFilename().endsWith(".txt"));
+    const text = await readDownload(txtDl);
+    const nodesIdx = { zebra: text.indexOf("Zebra"), apple: text.indexOf("Apple"), mango: text.indexOf("Mango") };
+    assert.ok(nodesIdx.zebra < nodesIdx.apple && nodesIdx.apple < nodesIdx.mango, "nodes listed in creation order");
+    const edgesIdx = { first: text.indexOf("first edge"), second: text.indexOf("second edge") };
+    assert.ok(edgesIdx.first < edgesIdx.second, "edges listed in creation order");
+  });
+});

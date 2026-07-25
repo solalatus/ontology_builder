@@ -1388,6 +1388,19 @@ confirmOverlay.addEventListener("click", (e) => {
 const MOVE_THRESHOLD = 5; // screen px before a press counts as a drag
 const LONG_PRESS_MS = 600;
 
+// setPointerCapture/releasePointerCapture throw NotFoundError if the given
+// pointer id isn't currently recognized as active (spec-documented, not
+// hypothetical) — a bare call left the rest of a handler's cleanup
+// (dragMode/panPointerId resets, pinchStartDist) unreachable whenever that
+// happened, which could silently break the very next pinch gesture. Wrapped
+// so a capture failure is a no-op rather than a derailed handler.
+function safeSetPointerCapture(id) {
+  try { canvas.setPointerCapture(id); } catch (err) { /* pointer no longer active — nothing to capture */ }
+}
+function safeReleasePointerCapture(id) {
+  try { canvas.releasePointerCapture(id); } catch (err) { /* already released or never captured — nothing to clean up */ }
+}
+
 let panPointerId = null;
 let panLast = { x: 0, y: 0 };
 
@@ -1421,7 +1434,7 @@ canvas.addEventListener("pointerdown", (e) => {
     resizeStart = { w: resizeHit.w, h: resizeHit.h, worldX: world.x, worldY: world.y };
     dragBeforeSnapshot = snapshotState();
     selectNode(resizeHit.id);
-    canvas.setPointerCapture(e.pointerId);
+    safeSetPointerCapture(e.pointerId);
     markDirty();
     return;
   }
@@ -1431,7 +1444,7 @@ canvas.addEventListener("pointerdown", (e) => {
     dragMode = "createEdge";
     edgeDragSourceId = handleHit.node.id;
     edgeDragCurrentWorld = world;
-    canvas.setPointerCapture(e.pointerId);
+    safeSetPointerCapture(e.pointerId);
     markDirty();
     return;
   }
@@ -1443,7 +1456,7 @@ canvas.addEventListener("pointerdown", (e) => {
     movingNodeId = nodeHit.id;
     moveOffset = { x: world.x - nodeHit.x, y: world.y - nodeHit.y };
     dragBeforeSnapshot = snapshotState();
-    canvas.setPointerCapture(e.pointerId);
+    safeSetPointerCapture(e.pointerId);
     longPressTimer = setTimeout(() => {
       const before = snapshotState();
       deleteNode(nodeHit.id);
@@ -1472,7 +1485,7 @@ canvas.addEventListener("pointerdown", (e) => {
 
   panPointerId = e.pointerId;
   panLast = { x: e.clientX, y: e.clientY };
-  canvas.setPointerCapture(e.pointerId);
+  safeSetPointerCapture(e.pointerId);
   canvas.classList.add("panning");
   dragMode = "pan";
 });
@@ -1535,6 +1548,14 @@ canvas.addEventListener("pointerup", (e) => {
   if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
 
   if (dragMode === "pan") {
+    // A real pan (movement past the threshold) must not also clear the
+    // current selection via the native "click" event the browser still
+    // fires after mouseup — without this, panning to look at another part
+    // of the graph would silently drop whatever was selected. A plain
+    // click with no movement is unaffected and still clears selection via
+    // the click handler's fallthrough, exactly as before.
+    const moved = pointerDownScreen ? Math.hypot(e.clientX - pointerDownScreen.x, e.clientY - pointerDownScreen.y) : 0;
+    if (moved > MOVE_THRESHOLD) suppressNextClick = true;
     endPan(e);
     dragMode = null;
     return;
@@ -1737,7 +1758,7 @@ canvas.addEventListener("pointerdown", (e) => {
   activeTouches.set(e.pointerId, { x: e.clientX, y: e.clientY });
   if (activeTouches.size === 2) {
     if (panPointerId !== null) {
-      canvas.releasePointerCapture(panPointerId);
+      safeReleasePointerCapture(panPointerId);
       panPointerId = null;
       canvas.classList.remove("panning");
     }
