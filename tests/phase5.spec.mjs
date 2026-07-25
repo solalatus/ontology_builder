@@ -26,14 +26,18 @@ async function withDownloadPage(fn) {
   assert.deepEqual(consoleErrors, [], "expected no console/page errors during the test");
 }
 
-async function saveVersion(page, graphName) {
+// The graph name is an always-visible, always-editable title (click to
+// rename), independent of Save Version — not a save-time prompt.
+async function setGraphTitle(page, name) {
+  await page.click("#graph-title");
+  await page.waitForSelector(".kg-inline-input");
+  await page.locator(".kg-inline-input").fill(name);
+  await page.keyboard.press("Enter");
+  await page.waitForSelector(".kg-inline-input", { state: "detached" });
+}
+
+async function saveVersion(page) {
   await page.click("#btn-save-version");
-  const needsName = await page.locator(".kg-inline-input").count();
-  if (needsName && graphName !== undefined) {
-    await page.locator(".kg-inline-input").fill(graphName);
-    await page.keyboard.press("Enter");
-    await page.waitForSelector(".kg-inline-input", { state: "detached" });
-  }
 }
 
 async function readDownload(dl) {
@@ -43,41 +47,94 @@ async function readDownload(dl) {
   return Buffer.concat(chunks).toString("utf-8");
 }
 
-test("first Save Version prompts for a graph name; subsequent saves don't re-prompt", async () => {
+test("the graph title defaults to 'Untitled Graph' and is visible without any prior action", async () => {
   await withDownloadPage(async (page) => {
-    await addNodeViaDblClick(page, 300, 300, "Alpha");
+    const text = await page.locator("#graph-title").textContent();
+    assert.equal(text, "Untitled Graph");
+    const graphName = await page.evaluate(() => window.__kg.state.graphName);
+    assert.equal(graphName, "Untitled Graph");
+  });
+});
 
-    await page.click("#btn-save-version");
-    assert.equal(await page.locator(".kg-inline-input").count(), 1, "first save should prompt for a name");
-    await page.locator(".kg-inline-input").fill("My Graph");
+test("clicking the title opens a rename field pre-filled with the current name; committing updates both state and the DOM", async () => {
+  await withDownloadPage(async (page) => {
+    await page.click("#graph-title");
+    const value = await page.locator(".kg-inline-input").inputValue();
+    assert.equal(value, "Untitled Graph");
+    await page.locator(".kg-inline-input").fill("Frankfurt AI Ontology");
     await page.keyboard.press("Enter");
     await page.waitForSelector(".kg-inline-input", { state: "detached" });
 
-    await page.click("#btn-save-version");
-    await page.waitForTimeout(100);
-    assert.equal(await page.locator(".kg-inline-input").count(), 0, "second save should not re-prompt");
+    assert.equal(await page.evaluate(() => window.__kg.state.graphName), "Frankfurt AI Ontology");
+    assert.equal(await page.locator("#graph-title").textContent(), "Frankfurt AI Ontology");
   });
 });
 
-test("Escape while the graph-name prompt is open cancels the save entirely — no meta, no downloads", async () => {
-  await withDownloadPage(async (page, downloads) => {
-    await addNodeViaDblClick(page, 300, 300, "Alpha");
-    await page.click("#btn-save-version");
-    await page.waitForSelector(".kg-inline-input");
+test("Enter/Space on the focused title also opens the rename field (keyboard access, not just click)", async () => {
+  await withDownloadPage(async (page) => {
+    await page.locator("#graph-title").focus();
+    await page.keyboard.press("Enter");
+    assert.equal(await page.locator(".kg-inline-input").count(), 1);
     await page.keyboard.press("Escape");
     await page.waitForSelector(".kg-inline-input", { state: "detached" });
-    await page.waitForTimeout(200);
 
-    assert.equal(downloads.length, 0);
-    const meta = await page.evaluate(() => window.__kg.state.meta);
-    assert.equal(meta, null);
+    await page.locator("#graph-title").focus();
+    await page.keyboard.press(" ");
+    assert.equal(await page.locator(".kg-inline-input").count(), 1);
   });
 });
 
-test("Save Version writes exactly two downloads, both with the versioned filename convention", async () => {
+test("Escape while renaming cancels without changing the name", async () => {
+  await withDownloadPage(async (page) => {
+    await page.click("#graph-title");
+    await page.locator(".kg-inline-input").fill("Should not stick");
+    await page.keyboard.press("Escape");
+    await page.waitForSelector(".kg-inline-input", { state: "detached" });
+
+    assert.equal(await page.evaluate(() => window.__kg.state.graphName), "Untitled Graph");
+    assert.equal(await page.locator("#graph-title").textContent(), "Untitled Graph");
+  });
+});
+
+test("committing an empty/whitespace-only name reverts to 'Untitled Graph' rather than going blank", async () => {
+  await withDownloadPage(async (page) => {
+    await setGraphTitle(page, "   ");
+    assert.equal(await page.evaluate(() => window.__kg.state.graphName), "Untitled Graph");
+    assert.equal(await page.locator("#graph-title").textContent(), "Untitled Graph");
+  });
+});
+
+test("a renamed graph title survives a reload", async () => {
+  await withDownloadPage(async (page) => {
+    await setGraphTitle(page, "Persistent Title");
+    await page.evaluate(() => window.__kg.storage.whenIdle());
+
+    await page.reload();
+    await page.waitForFunction(() => Boolean(window.__kg));
+    await page.waitForFunction(() => window.__kg.state.graphName === "Persistent Title");
+
+    assert.equal(await page.locator("#graph-title").textContent(), "Persistent Title");
+  });
+});
+
+test("Save Version never blocks on a prompt — clicking it immediately produces two downloads using the current title", async () => {
   await withDownloadPage(async (page, downloads) => {
     await addNodeViaDblClick(page, 300, 300, "Alpha");
-    await saveVersion(page, "Frankfurt AI Ontology");
+    await saveVersion(page);
+    await page.waitForTimeout(200);
+
+    assert.equal(downloads.length, 2);
+    const names = downloads.map((d) => d.suggestedFilename()).sort();
+    assert.match(names[0], /^Untitled-Graph_v0001_\d{4}-\d{2}-\d{2}T\d{4}Z\.json$/);
+    assert.match(names[1], /^Untitled-Graph_v0001_\d{4}-\d{2}-\d{2}T\d{4}Z\.txt$/);
+  });
+});
+
+test("Save Version writes exactly two downloads named after a custom title, per the versioned filename convention", async () => {
+  await withDownloadPage(async (page, downloads) => {
+    await addNodeViaDblClick(page, 300, 300, "Alpha");
+    await setGraphTitle(page, "Frankfurt AI Ontology");
+    await saveVersion(page);
     await page.waitForTimeout(200);
 
     assert.equal(downloads.length, 2);
@@ -87,12 +144,17 @@ test("Save Version writes exactly two downloads, both with the versioned filenam
   });
 });
 
-test("graph name is sanitized for filename safety (spaces and punctuation)", async () => {
+test("graph name is sanitized for filename safety (spaces and punctuation) at save time, not at rename time", async () => {
   await withDownloadPage(async (page, downloads) => {
     await addNodeViaDblClick(page, 300, 300, "Alpha");
-    await saveVersion(page, "  My!! Graph///Name  ");
+    await setGraphTitle(page, "  My!! Graph///Name  ");
+    // The displayed title keeps the raw, human-readable form...
+    assert.equal(await page.locator("#graph-title").textContent(), "My!! Graph///Name");
+
+    await saveVersion(page);
     await page.waitForTimeout(200);
 
+    // ...only the filename is sanitized.
     const jsonName = downloads.find((d) => d.suggestedFilename().endsWith(".json")).suggestedFilename();
     assert.ok(!/[!/\s]/.test(jsonName), `filename should have no spaces/slashes/bangs: ${jsonName}`);
     assert.match(jsonName, /^My-GraphName_v0001_/); // whitespace -> '-', other unsafe chars just stripped
@@ -115,7 +177,7 @@ test("the JSON export matches Section 5.1's schema exactly and round-trips throu
     await page.evaluate(() => window.__kg.actions.setMode("idle")); // Connect mode is sticky
     await dragNode(page, 250, 250, 550, 400); // Andhra Pradesh into the group
 
-    await saveVersion(page, "South Asia");
+    await saveVersion(page);
     await page.waitForTimeout(200);
 
     const jsonDl = downloads.find((d) => d.suggestedFilename().endsWith(".json"));
@@ -126,6 +188,7 @@ test("the JSON export matches Section 5.1's schema exactly and round-trips throu
     assert.equal(parsed.meta.version, 1);
     assert.match(parsed.meta.created, /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/);
     assert.equal(parsed.meta.created, parsed.meta.saved); // same instant, first save
+    assert.ok(!("graph_name" in parsed.meta), "graph name is filename-only, not part of the canonical meta object");
 
     assert.equal(parsed.nodes.length, 3);
     const group = parsed.nodes.find((n) => n.type === "group");
@@ -166,7 +229,7 @@ test("the TXT export matches Section 5.2's grammar exactly, including the contai
     await page.evaluate(() => window.__kg.actions.setMode("idle")); // Connect mode is sticky
     await dragNode(page, 250, 250, 550, 400);
 
-    await saveVersion(page, "South Asia");
+    await saveVersion(page);
     await page.waitForTimeout(200);
 
     const txtDl = downloads.find((d) => d.suggestedFilename().endsWith(".txt"));
@@ -203,7 +266,7 @@ test("a bidirectional edge exports with <-> in the TXT edge list", async () => {
     await page.mouse.click(box.x + 460, box.y + 250); // select the new edge (its midpoint)
     await page.click("#sel-toggle-dir"); // flip to bidirectional
 
-    await saveVersion(page, "Diplomacy");
+    await saveVersion(page);
     await page.waitForTimeout(200);
 
     const txtDl = downloads.find((d) => d.suggestedFilename().endsWith(".txt"));
@@ -215,9 +278,9 @@ test("a bidirectional edge exports with <-> in the TXT edge list", async () => {
 test("saving twice increments the version number monotonically, both in the filename and the JSON meta", async () => {
   await withDownloadPage(async (page, downloads) => {
     await addNodeViaDblClick(page, 300, 300, "Alpha");
-    await saveVersion(page, "Repeat Test");
+    await saveVersion(page);
     await page.waitForTimeout(200);
-    await page.click("#btn-save-version"); // no name prompt this time
+    await saveVersion(page);
     await page.waitForTimeout(200);
 
     assert.equal(downloads.length, 4);
@@ -231,10 +294,11 @@ test("saving twice increments the version number monotonically, both in the file
   });
 });
 
-test("graph_id, version, and graph_name survive a reload and keep incrementing across sessions", async () => {
+test("graph_id and version survive a reload and keep incrementing across sessions; the renamed title survives too", async () => {
   await withDownloadPage(async (page, downloads) => {
     await addNodeViaDblClick(page, 300, 300, "Alpha");
-    await saveVersion(page, "Persistent Graph");
+    await setGraphTitle(page, "Persistent Graph");
+    await saveVersion(page);
     await page.waitForTimeout(200);
     const firstGraphId = await page.evaluate(() => window.__kg.state.meta.graph_id);
     await page.evaluate(() => window.__kg.storage.whenIdle());
@@ -243,7 +307,9 @@ test("graph_id, version, and graph_name survive a reload and keep incrementing a
     await page.waitForFunction(() => Boolean(window.__kg));
     await page.waitForFunction(() => window.__kg.state.meta !== null);
 
-    await page.click("#btn-save-version"); // should NOT prompt for a name again
+    assert.equal(await page.locator("#graph-title").textContent(), "Persistent Graph");
+
+    await saveVersion(page);
     await page.waitForTimeout(300);
 
     assert.equal(downloads.length, 4);
@@ -251,6 +317,8 @@ test("graph_id, version, and graph_name survive a reload and keep incrementing a
     const parsed = JSON.parse(await readDownload(secondJson));
     assert.equal(parsed.meta.graph_id, firstGraphId, "graph_id must not change across sessions");
     assert.equal(parsed.meta.version, 2, "version continues from where it left off, not reset to 1");
+    const secondName = downloads.filter((d) => d.suggestedFilename().endsWith(".json"))[1].suggestedFilename();
+    assert.match(secondName, /^Persistent-Graph_v0002_/);
   });
 });
 
@@ -258,8 +326,17 @@ test("Save Version does not create an undo step — it's an export, not a graph 
   await withDownloadPage(async (page) => {
     await addNodeViaDblClick(page, 300, 300, "Alpha");
     const before = await page.evaluate(() => window.__kg.history.past.length);
-    await saveVersion(page, "No Undo Test");
+    await saveVersion(page);
     await page.waitForTimeout(200);
+    const after = await page.evaluate(() => window.__kg.history.past.length);
+    assert.equal(after, before);
+  });
+});
+
+test("renaming the graph title also does not create an undo step", async () => {
+  await withDownloadPage(async (page) => {
+    const before = await page.evaluate(() => window.__kg.history.past.length);
+    await setGraphTitle(page, "Renamed");
     const after = await page.evaluate(() => window.__kg.history.past.length);
     assert.equal(after, before);
   });
@@ -268,7 +345,7 @@ test("Save Version does not create an undo step — it's an export, not a graph 
 test("saving an empty graph produces valid, structurally-correct (empty) JSON and TXT", async () => {
   await withDownloadPage(async (page, downloads) => {
     // Save Version isn't gated on having content, unlike Clear.
-    await saveVersion(page, "Empty Graph");
+    await saveVersion(page);
     await page.waitForTimeout(200);
 
     assert.equal(downloads.length, 2);

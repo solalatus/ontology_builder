@@ -10,7 +10,7 @@ State" so the project can be picked up cold at any time.
 ## Current State
 
 - **Phase:** Phases 0, 1, 2, 3, 4, and 5 complete, all with green automated
-  test suites (`node --test tests/*.spec.mjs`, 103 tests, see Log below).
+  test suites (`node --test tests/*.spec.mjs`, 109 tests, see Log below).
   Not yet hand-tested on real touch hardware (pinch/long-press) — deferred
   to Phase 10, not blocking. Phase 6 not started. A "Clear" button (outside
   the phased plan, user-requested) was also added — see its own section
@@ -306,28 +306,37 @@ claude.ai/code, which is plain git via GitHub as described above.
       together on every "Save Version"
 - [x] Version number increments monotonically, stored in graph metadata,
       continuous across sessions
-- Tests (`tests/phase5.spec.mjs`, 11 tests, all green):
+- Tests (`tests/phase5.spec.mjs`, 17 tests, all green):
   - Automated: intercepts real browser downloads via `page.on('download')`
     (not `Promise.all` on two `waitForEvent` calls — that pairing turned
     out unreliable for two downloads fired synchronously from one click;
-    see Log). The first "Save Version" prompts for a graph name and
-    subsequent saves don't re-prompt; Escape during that prompt cancels
-    the whole save (no `meta`, no downloads); exactly two downloads are
-    written per save, named per the `<graph-name>_v<0000>_<timestamp>`
-    convention; the graph name is sanitized for filename safety; the JSON
-    output round-trips through `JSON.parse` and matches Section 5.1's
-    schema field-for-field (including `boundary_mode` only on groups and
-    `groups[]`/positions surviving intact) against a fixture with a group,
-    a member, and an ordinary edge; the TXT output matches Section 5.2's
-    grammar line-for-line against the same fixture, *including* the
-    `contains` line (unlike canvas rendering and Tier 1 storage, the TXT
-    export deliberately does not filter out `auto` edges — Section 5.2
-    says so explicitly); a bidirectional edge exports with `<->`; saving
-    twice increments the version monotonically in both the filename and
-    the JSON `meta.version`; `graph_id`/`version`/`graph_name` survive a
-    reload and keep incrementing rather than resetting (Tier 1 carries
-    `meta` now, see below); Save Version does not create an undo step;
-    an empty graph still exports valid, structurally-correct empty output.
+    see Log). The graph title defaults to "Untitled Graph" and is visible
+    with zero prior action; clicking it opens a rename field pre-filled
+    with the current name, Enter/Space on the focused title does the same
+    (keyboard access), Escape cancels without changing anything, an empty/
+    whitespace commit reverts to "Untitled Graph" rather than going blank,
+    and a renamed title survives a reload; Save Version never blocks on a
+    prompt — it always fires immediately using whatever the title
+    currently is; exactly two downloads are written per save, named per
+    the `<graph-name>_v<0000>_<timestamp>` convention; the *filename* is
+    sanitized for safety while the *displayed* title keeps the raw,
+    human-entered form (only sanitized at save time, not at rename time);
+    the JSON output round-trips through `JSON.parse` and matches Section
+    5.1's schema field-for-field (including `boundary_mode` only on
+    groups, `groups[]`/positions surviving intact, and confirming
+    `graph_name` is *not* part of the canonical `meta` object — it's
+    filename-only) against a fixture with a group, a member, and an
+    ordinary edge; the TXT output matches Section 5.2's grammar
+    line-for-line against the same fixture, *including* the `contains`
+    line (unlike canvas rendering and Tier 1 storage, the TXT export
+    deliberately does not filter out `auto` edges — Section 5.2 says so
+    explicitly); a bidirectional edge exports with `<->`; saving twice
+    increments the version monotonically in both the filename and the
+    JSON `meta.version`; `graph_id`, `version`, and the renamed title all
+    survive a reload and `version` keeps incrementing rather than
+    resetting; neither Save Version nor renaming the title creates an
+    undo step; an empty graph still exports valid, structurally-correct
+    empty output.
   - Manual: confirm the files actually land on disk via the real
     browser-native save/download flow (Tier 3 baseline) — not exercised
     here since Playwright intercepts the download event before any actual
@@ -737,23 +746,15 @@ and record deltas here instead of editing the spec.)*
   user. Restarted this branch from `origin/main` again per the merged-PR
   protocol before starting Phase 5 — same clean case as prior restarts.
 - 2026-07-25 — Phase 5 (File formats — export) implemented in
-  `index.html` (`tests/phase5.spec.mjs`, 11 tests; 103 total). Notable
-  decisions:
-  - **Resolved the "graph name" Open Question**: user-entered via the
-    existing inline-input UI the first time "Save Version" is clicked,
-    then stored in `state.meta.graph_name` and reused silently on every
-    later save — no re-prompting. `state.meta` (format_version, graph_id
-    via `crypto.randomUUID()`, version, graph_name, created) doesn't exist
-    at all until that first save; there's genuinely no version history to
-    speak of before then.
-  - **Graph-name sanitization is conservative, not decorative**: since it
-    lands directly in a cross-platform filename, whitespace runs become a
-    single `-` and everything outside `[A-Za-z0-9_-]` is stripped
-    (not replaced) — e.g. `"My!! Graph///Name"` becomes `"My-GraphName"`,
-    not `"My-Graph-Name"`. No spec text governs this; documented here so
-    the exact stripping-vs-replacing behavior doesn't have to be
-    rediscovered by reading the regex.
-  - **`meta` now rides along in Tier 1's storage payload** (Phase 4's
+  `index.html` (`tests/phase5.spec.mjs`, initially 11 tests; 103 total).
+  Notable decisions:
+  - **Resolved the "graph name" Open Question — initial pick.** First
+    implementation: user-entered via the inline-input UI the first time
+    "Save Version" is clicked, then stored in `state.meta.graph_name` and
+    reused silently on every later save. **This was superseded within the
+    same work session** — see the next Log entry below — after asking the
+    user directly instead of assuming the provisional pick was final.
+  - **`meta` rides along in Tier 1's storage payload** (Phase 4's
     `writeGraphToStorage`/`loadGraphFromStorage`), which is the only way
     "version number... continuous across sessions" (Section 9) can hold:
     without persisting `meta`, every reload would silently reset back to
@@ -777,13 +778,55 @@ and record deltas here instead of editing the spec.)*
     event). Switched to collecting via a persistent `page.on('download',
     ...)` listener instead, which reliably captured both with correct,
     distinct filenames — used throughout `phase5.spec.mjs`.
+- 2026-07-25 — Revised the graph-name UX after asking the user directly
+  (PR #5 was still open/unmerged at this point, so the change was pushed
+  as more commits to the same branch rather than a follow-up PR). Offered
+  three options — (a) keep the one-time save-time prompt just shipped,
+  (b) an always-visible, always-editable title in the toolbar defaulting
+  to "Untitled Graph," (c) no user input at all, an auto-generated name.
+  **User chose (b).** Reworked accordingly:
+  - `graphName` moved out of `state.meta` to its own top-level
+    `state.graphName` field (default `"Untitled Graph"`), since it's now
+    conceptually independent of whether the graph has ever been saved —
+    the title is visible and renamable from the very first paint, while
+    `state.meta` (format_version/graph_id/version/created) still only
+    gets created on the first actual "Save Version" click. Persisted via
+    Tier 1 alongside `meta` (same reasoning as above).
+  - Added `#graph-title`, a `role="button"` span at the start of the
+    toolbar. Click, or Enter/Space while it has focus, opens the same
+    `showInlineInput()` used everywhere else, pre-filled with the current
+    name; Escape cancels; an empty/whitespace commit reverts to
+    `"Untitled Graph"` rather than leaving the title blank.
+  - **Display value vs. filename value are now different strings.**
+    `state.graphName` stores the raw, human-typed name as-is (so the
+    title can read "Frankfurt AI Ontology") — `sanitizeGraphName()` is
+    now applied only at the moment `performSaveVersion()` builds a
+    filename, not when the rename commits. This is strictly better than
+    the superseded design, which sanitized (and thus visually mangled)
+    the name immediately on entry.
+  - `performSaveVersion()` now lazily creates `state.meta` itself if
+    absent (same shape as before), so "Save Version" is a single
+    unconditional action again — no branch on "is this the first save,"
+    since naming is no longer coupled to saving at all.
+  - Rewrote `tests/phase5.spec.mjs` end to end for the new UX (11 → 17
+    tests): title default/visibility, click-to-rename and its pre-filled
+    value, keyboard (Enter/Space) access, Escape-cancels, empty-commit
+    reverts to the default, the renamed title surviving a reload, Save
+    Version never blocking on a prompt, filename sanitization happening
+    at save time while the displayed title stays raw, and confirming
+    `graph_name` is correctly absent from the exported JSON's `meta`
+    object (it was always filename-only, per spec's own schema example —
+    that part didn't change).
 
 ---
 
 ## Open Questions (not yet decided — raise before implementing that part)
 
 - Exact autolayout algorithm choice (Phase 8) — spec leaves this open.
-- ~~Graph name (Section 5.4)~~ — resolved in Phase 5: user-entered via the
-  inline-input UI on the first "Save Version" click, then remembered in
-  `state.meta.graph_name` (persisted via Tier 1) for every save after.
-  See the Phase 5 Log entry for the sanitization rule.
+- ~~Graph name (Section 5.4)~~ — resolved in Phase 5, via a direct question
+  to the user rather than a unilateral pick: an always-visible, always-
+  editable title in the toolbar (click to rename, defaults to "Untitled
+  Graph"), stored in `state.graphName` and persisted via Tier 1 — *not*
+  gated behind Save Version at all. (An initial implementation used a
+  one-time prompt on first save instead; revised after the user was asked
+  and picked the always-visible title. See the Phase 5 Log entry.)

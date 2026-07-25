@@ -80,6 +80,26 @@
     gap: 2px;
   }
 
+  #graph-title {
+    font-size: 14px;
+    font-weight: 600;
+    padding: 8px 10px;
+    margin-right: 4px;
+    border-radius: 4px;
+    cursor: pointer;
+    color: var(--toolbar-fg);
+    white-space: nowrap;
+    max-width: 260px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  #graph-title:hover,
+  #graph-title:focus-visible {
+    background: var(--btn-bg-hover);
+    outline: none;
+  }
+
   #canvas-wrap {
     position: fixed;
     inset: 0;
@@ -203,6 +223,7 @@
 <body>
 
 <div id="toolbar">
+  <span id="graph-title" tabindex="0" role="button" title="Click to rename">Untitled Graph</span>
   <button id="btn-add-node" type="button" aria-pressed="false">Add Node</button>
   <button id="btn-add-group" type="button" aria-pressed="false">Add Group</button>
   <button id="btn-connect" type="button" aria-pressed="false">Connect</button>
@@ -288,9 +309,13 @@ const state = {
   connectSource: null,
   nextNodeNum: 1,
   nextEdgeNum: 1,
-  // Set on first "Save Version" (Section 5.4): {format_version, graph_id,
-  // version, graph_name, created, saved}. null until then — nothing has
-  // been exported yet, so there's no version history to speak of.
+  // Always-visible, always-editable (click the toolbar title) — not tied to
+  // ever having saved. Used verbatim for display; sanitized only at the
+  // point a filename is actually built (Section 5.4).
+  graphName: "Untitled Graph",
+  // Set on first "Save Version": {format_version, graph_id, version,
+  // created, saved}. null until then — nothing has been exported yet, so
+  // there's no version history to speak of.
   meta: null,
 };
 
@@ -505,6 +530,7 @@ async function writeGraphToStorage() {
     edges: state.edges,
     nextNodeNum: state.nextNodeNum,
     nextEdgeNum: state.nextEdgeNum,
+    graphName: state.graphName,
     meta: state.meta, // so version numbers stay continuous across sessions (Section 9)
   });
 }
@@ -548,6 +574,7 @@ async function loadGraphFromStorage() {
   state.edges = data.edges;
   state.nextNodeNum = typeof data.nextNodeNum === "number" ? data.nextNodeNum : state.nextNodeNum;
   state.nextEdgeNum = typeof data.nextEdgeNum === "number" ? data.nextEdgeNum : state.nextEdgeNum;
+  if (typeof data.graphName === "string" && data.graphName) state.graphName = data.graphName;
   if (data.meta && typeof data.meta === "object") state.meta = data.meta;
   return true;
 }
@@ -1530,10 +1557,18 @@ function triggerDownload(filename, content, mimeType) {
 }
 
 function performSaveVersion() {
+  if (!state.meta) {
+    state.meta = {
+      format_version: 1,
+      graph_id: crypto.randomUUID(),
+      version: 0,
+      created: isoTimestampSeconds(),
+    };
+  }
   state.meta.version += 1;
   const savedAt = isoTimestampSeconds();
   state.meta.saved = savedAt;
-  const base = `${state.meta.graph_name}_v${String(state.meta.version).padStart(4, "0")}_${filenameTimestamp(savedAt)}`;
+  const base = `${sanitizeGraphName(state.graphName)}_v${String(state.meta.version).padStart(4, "0")}_${filenameTimestamp(savedAt)}`;
   triggerDownload(`${base}.json`, JSON.stringify(buildJsonExport(savedAt), null, 2), "application/json");
   triggerDownload(`${base}.txt`, buildTxtExport(savedAt), "text/plain");
   scheduleSave(); // persist the incremented version so it survives a reload (Section 9)
@@ -1566,27 +1601,34 @@ document.getElementById("btn-connect").addEventListener("click", () => {
 document.getElementById("btn-autolayout").addEventListener("click", () => notImplemented("Auto-layout"));
 document.getElementById("btn-undo").addEventListener("click", () => undo());
 document.getElementById("btn-redo").addEventListener("click", () => redo());
-document.getElementById("btn-save-version").addEventListener("click", () => {
-  if (!state.meta) {
-    // First-ever save on this graph: ask for the name used in every
-    // versioned filename from here on (TODO.md's Open Questions resolved
-    // this as "user-entered at first save" — spec.md doesn't say).
-    showInlineInput({
-      x: cssWidth / 2, y: cssHeight / 2, placeholder: "Graph name",
-      onCommit: (text) => {
-        state.meta = {
-          format_version: 1,
-          graph_id: crypto.randomUUID(),
-          version: 0,
-          graph_name: sanitizeGraphName(text),
-          created: isoTimestampSeconds(),
-        };
-        performSaveVersion();
-      },
-    });
-    return;
-  }
-  performSaveVersion();
+document.getElementById("btn-save-version").addEventListener("click", () => performSaveVersion());
+
+// Graph name (Section 5.4's Open Question — resolved as an always-visible,
+// always-editable title rather than a one-time save-time prompt) is never
+// gated behind Save Version; it defaults to "Untitled Graph" and can be
+// renamed anytime by clicking the title.
+const graphTitleEl = document.getElementById("graph-title");
+
+function openRenameGraphTitle() {
+  const rect = graphTitleEl.getBoundingClientRect();
+  // Clamp so the centered (translate(-50%,-50%)) input never clips off the
+  // left edge — the title sits flush at x=0, so its own midpoint is too
+  // close to the edge for a ~140px-wide input.
+  const x = Math.max(90, rect.left + rect.width / 2);
+  showInlineInput({
+    x, y: rect.bottom + 16,
+    value: state.graphName, placeholder: "Graph name",
+    onCommit: (text) => {
+      state.graphName = text.trim() || "Untitled Graph";
+      graphTitleEl.textContent = state.graphName;
+      scheduleSave();
+    },
+  });
+}
+
+graphTitleEl.addEventListener("click", openRenameGraphTitle);
+graphTitleEl.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openRenameGraphTitle(); }
 });
 
 const importInput = document.getElementById("import-file-input");
@@ -1652,6 +1694,7 @@ async function boot() {
     clearSelection();
     markDirty();
   }
+  document.getElementById("graph-title").textContent = state.graphName;
 }
 
 boot();
