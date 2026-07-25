@@ -313,6 +313,7 @@ function pushHistory(before, after) {
   history.past.push({ before, after });
   history.future = [];
   updateUndoRedoButtons();
+  scheduleSave();
 }
 
 function undo() {
@@ -323,6 +324,7 @@ function undo() {
   clearSelection();
   updateUndoRedoButtons();
   markDirty();
+  scheduleSave();
 }
 
 function redo() {
@@ -333,11 +335,154 @@ function redo() {
   clearSelection();
   updateUndoRedoButtons();
   markDirty();
+  scheduleSave();
 }
 
 function updateUndoRedoButtons() {
   document.getElementById("btn-undo").disabled = history.past.length === 0;
   document.getElementById("btn-redo").disabled = history.future.length === 0;
+}
+
+// ---------------------------------------------------------------------------
+// Tier 1 storage (Section 3.2): every edit writes immediately to a private,
+// non-visible background store — no prompts, protects against a crashed tab.
+//
+// Spec Section 3.1 lists OPFS as universally supported, and Section 2 says
+// the app "opens directly in a browser" with "no external server required."
+// In practice those two claims conflict: OPFS throws SecurityError under a
+// file:// origin (confirmed by testing) — it only works when the page is
+// actually served over http(s). Since double-clicking index.html is exactly
+// the deployment mode Section 2 promises, OPFS-only would silently provide
+// zero crash protection in that mode. So this detects OPFS and falls back to
+// localStorage (which does work under file://) when OPFS isn't usable,
+// keeping "always-on, all platforms" true in both deployment modes at the
+// cost of a second code path and localStorage's much smaller size ceiling
+// (fine at the spec's own target scale — Section 6 — of ~1,000 nodes).
+// ---------------------------------------------------------------------------
+const OPFS_FILENAME = "kg-canvas-live.json";
+const LOCALSTORAGE_KEY = "kg-canvas-live";
+
+let storageBackend = null; // 'opfs' | 'localStorage' | 'none', decided once
+
+async function detectStorageBackend() {
+  if (storageBackend) return storageBackend;
+  try {
+    if (navigator.storage && navigator.storage.getDirectory) {
+      await navigator.storage.getDirectory();
+      storageBackend = "opfs";
+      return storageBackend;
+    }
+  } catch (err) {
+    // Present but unusable here (e.g. file:// origin) — fall through to localStorage.
+  }
+  try {
+    localStorage.setItem("__kg_probe__", "1");
+    localStorage.removeItem("__kg_probe__");
+    storageBackend = "localStorage";
+  } catch (err) {
+    storageBackend = "none";
+    console.warn("[KG Canvas] No live-save backend available in this context — Tier 1 disabled:", err);
+  }
+  return storageBackend;
+}
+
+async function writeGraphPayload(payload) {
+  const backend = await detectStorageBackend();
+  const json = JSON.stringify(payload);
+  if (backend === "opfs") {
+    try {
+      const root = await navigator.storage.getDirectory();
+      const fileHandle = await root.getFileHandle(OPFS_FILENAME, { create: true });
+      const writable = await fileHandle.createWritable();
+      await writable.write(json);
+      await writable.close();
+    } catch (err) {
+      console.warn("[KG Canvas] OPFS save failed:", err);
+    }
+  } else if (backend === "localStorage") {
+    try {
+      localStorage.setItem(LOCALSTORAGE_KEY, json);
+    } catch (err) {
+      console.warn("[KG Canvas] localStorage save failed:", err);
+    }
+  }
+}
+
+async function readGraphPayload() {
+  const backend = await detectStorageBackend();
+  if (backend === "opfs") {
+    try {
+      const root = await navigator.storage.getDirectory();
+      const fileHandle = await root.getFileHandle(OPFS_FILENAME, { create: false });
+      const file = await fileHandle.getFile();
+      const text = await file.text();
+      return text ? JSON.parse(text) : null;
+    } catch (err) {
+      if (!err || err.name !== "NotFoundError") console.warn("[KG Canvas] OPFS load failed:", err);
+      return null;
+    }
+  }
+  if (backend === "localStorage") {
+    try {
+      const text = localStorage.getItem(LOCALSTORAGE_KEY);
+      return text ? JSON.parse(text) : null;
+    } catch (err) {
+      console.warn("[KG Canvas] localStorage load failed:", err);
+      return null;
+    }
+  }
+  return null;
+}
+
+async function writeGraphToStorage() {
+  await writeGraphPayload({
+    nodes: state.nodes,
+    edges: state.edges,
+    nextNodeNum: state.nextNodeNum,
+    nextEdgeNum: state.nextEdgeNum,
+  });
+}
+
+// Saves are coalesced, not queued: a burst of edits while a write is already
+// in flight collapses into exactly one trailing save of the latest state,
+// and writes never run concurrently (avoiding interleaved/corrupt writes).
+let saveScheduled = false;
+let saveRunning = false;
+let saveIdleResolvers = [];
+
+function scheduleSave() {
+  saveScheduled = true;
+  runSaveLoop();
+}
+
+async function runSaveLoop() {
+  if (saveRunning) return;
+  saveRunning = true;
+  while (saveScheduled) {
+    saveScheduled = false;
+    await writeGraphToStorage();
+  }
+  saveRunning = false;
+  const resolvers = saveIdleResolvers;
+  saveIdleResolvers = [];
+  resolvers.forEach((resolve) => resolve());
+}
+
+// Test/debug hook: resolves once no save is in flight or queued, so tests
+// can wait deterministically instead of guessing timing.
+function whenSaveIdle() {
+  if (!saveRunning && !saveScheduled) return Promise.resolve();
+  return new Promise((resolve) => saveIdleResolvers.push(resolve));
+}
+
+async function loadGraphFromStorage() {
+  const data = await readGraphPayload();
+  if (!data || !Array.isArray(data.nodes) || !Array.isArray(data.edges)) return false;
+  state.nodes = data.nodes;
+  state.edges = data.edges;
+  state.nextNodeNum = typeof data.nextNodeNum === "number" ? data.nextNodeNum : state.nextNodeNum;
+  state.nextEdgeNum = typeof data.nextEdgeNum === "number" ? data.nextEdgeNum : state.nextEdgeNum;
+  return true;
 }
 
 // ---------------------------------------------------------------------------
@@ -1243,13 +1388,27 @@ window.__kg = {
     selectNode, selectEdge, clearSelection, setMode,
     updateGroupMembership, undo, redo,
   },
+  storage: {
+    detectBackend: detectStorageBackend,
+    whenIdle: whenSaveIdle,
+    save: scheduleSave,
+  },
 };
 
 // ---------------------------------------------------------------------------
 // Boot
 // ---------------------------------------------------------------------------
-resizeCanvas();
-updateUndoRedoButtons();
+async function boot() {
+  resizeCanvas();
+  updateUndoRedoButtons();
+  const restored = await loadGraphFromStorage();
+  if (restored) {
+    clearSelection();
+    markDirty();
+  }
+}
+
+boot();
 requestAnimationFrame(loop);
 </script>
 
