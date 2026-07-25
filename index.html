@@ -80,6 +80,26 @@
     gap: 2px;
   }
 
+  #graph-title {
+    font-size: 14px;
+    font-weight: 600;
+    padding: 8px 10px;
+    margin-right: 4px;
+    border-radius: 4px;
+    cursor: pointer;
+    color: var(--toolbar-fg);
+    white-space: nowrap;
+    max-width: 260px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  #graph-title:hover,
+  #graph-title:focus-visible {
+    background: var(--btn-bg-hover);
+    outline: none;
+  }
+
   #canvas-wrap {
     position: fixed;
     inset: 0;
@@ -203,6 +223,7 @@
 <body>
 
 <div id="toolbar">
+  <span id="graph-title" tabindex="0" role="button" title="Click to rename">Untitled Graph</span>
   <button id="btn-add-node" type="button" aria-pressed="false">Add Node</button>
   <button id="btn-add-group" type="button" aria-pressed="false">Add Group</button>
   <button id="btn-connect" type="button" aria-pressed="false">Connect</button>
@@ -288,6 +309,14 @@ const state = {
   connectSource: null,
   nextNodeNum: 1,
   nextEdgeNum: 1,
+  // Always-visible, always-editable (click the toolbar title) — not tied to
+  // ever having saved. Used verbatim for display; sanitized only at the
+  // point a filename is actually built (Section 5.4).
+  graphName: "Untitled Graph",
+  // Set on first "Save Version": {format_version, graph_id, version,
+  // created, saved}. null until then — nothing has been exported yet, so
+  // there's no version history to speak of.
+  meta: null,
 };
 
 const DEFAULT_NODE_W = 160;
@@ -501,6 +530,8 @@ async function writeGraphToStorage() {
     edges: state.edges,
     nextNodeNum: state.nextNodeNum,
     nextEdgeNum: state.nextEdgeNum,
+    graphName: state.graphName,
+    meta: state.meta, // so version numbers stay continuous across sessions (Section 9)
   });
 }
 
@@ -543,6 +574,8 @@ async function loadGraphFromStorage() {
   state.edges = data.edges;
   state.nextNodeNum = typeof data.nextNodeNum === "number" ? data.nextNodeNum : state.nextNodeNum;
   state.nextEdgeNum = typeof data.nextEdgeNum === "number" ? data.nextEdgeNum : state.nextEdgeNum;
+  if (typeof data.graphName === "string" && data.graphName) state.graphName = data.graphName;
+  if (data.meta && typeof data.meta === "object") state.meta = data.meta;
   return true;
 }
 
@@ -1437,6 +1470,111 @@ function distance(a, b) { return Math.hypot(a.x - b.x, a.y - b.y); }
 function midpoint(a, b) { return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }; }
 
 // ---------------------------------------------------------------------------
+// File formats — export (Section 5.1, 5.2, 5.4). "Save Version" always
+// writes both a JSON (canonical, full-fidelity) and a TXT (structure-only
+// edge list) file together, via a plain <a download> — the universal Tier 3
+// path per Section 3.1's capability matrix (Tier 2's native save dialog is
+// Phase 7, a progressive enhancement on top of this, not a replacement).
+// ---------------------------------------------------------------------------
+function isoTimestampSeconds(date = new Date()) {
+  return date.toISOString().replace(/\.\d{3}Z$/, "Z"); // "2026-07-25T14:20:00Z", no ms
+}
+
+// "2026-07-25T14:20:00Z" -> "2026-07-25T1420Z" (Section 5.4's filename form —
+// no colons/seconds, since colons aren't filename-safe on some filesystems).
+function filenameTimestamp(iso) {
+  const [datePart, timePart] = iso.split("T");
+  return `${datePart}T${timePart.slice(0, 5).replace(":", "")}Z`;
+}
+
+// Spec doesn't define graph-name rules (see TODO.md's Open Questions); kept
+// conservative since it lands directly in a filename on every platform.
+function sanitizeGraphName(raw) {
+  const cleaned = raw.trim().replace(/\s+/g, "-").replace(/[^A-Za-z0-9_-]/g, "");
+  return cleaned || "graph";
+}
+
+function buildJsonExport(savedAt) {
+  return {
+    meta: {
+      format_version: state.meta.format_version,
+      graph_id: state.meta.graph_id,
+      version: state.meta.version,
+      created: state.meta.created,
+      saved: savedAt,
+    },
+    nodes: state.nodes.map((n) => {
+      const out = {
+        id: n.id, label: n.label, type: n.type,
+        x: n.x, y: n.y, w: n.w, h: n.h,
+        groups: [...n.groups],
+        notes: n.notes,
+      };
+      if (n.type === "group") out.boundary_mode = n.boundary_mode;
+      return out;
+    }),
+    edges: state.edges.map((e) => ({
+      id: e.id, source: e.source, target: e.target,
+      relation: e.relation, directed: e.directed, auto: e.auto,
+    })),
+  };
+}
+
+function buildTxtExport(savedAt) {
+  const lines = [
+    "# KG Canvas export",
+    `# format_version: ${state.meta.format_version}`,
+    `# graph_id: ${state.meta.graph_id}`,
+    `# version: ${state.meta.version}`,
+    `# saved: ${savedAt}`,
+    "",
+    "## NODES",
+  ];
+  for (const n of state.nodes) {
+    lines.push(n.type === "group" ? `${n.label} [group]` : n.label);
+  }
+  lines.push("", "## EDGES");
+  for (const e of state.edges) {
+    const src = state.nodes.find((n) => n.id === e.source);
+    const tgt = state.nodes.find((n) => n.id === e.target);
+    if (!src || !tgt) continue; // shouldn't happen — deleteNode() always cleans up edges
+    const arrow = e.directed ? "->" : "<->";
+    lines.push(`${src.label} ${arrow} ${tgt.label} : ${e.relation}`);
+  }
+  return lines.join("\n") + "\n";
+}
+
+function triggerDownload(filename, content, mimeType) {
+  const blob = new Blob([content], { type: mimeType });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function performSaveVersion() {
+  if (!state.meta) {
+    state.meta = {
+      format_version: 1,
+      graph_id: crypto.randomUUID(),
+      version: 0,
+      created: isoTimestampSeconds(),
+    };
+  }
+  state.meta.version += 1;
+  const savedAt = isoTimestampSeconds();
+  state.meta.saved = savedAt;
+  const base = `${sanitizeGraphName(state.graphName)}_v${String(state.meta.version).padStart(4, "0")}_${filenameTimestamp(savedAt)}`;
+  triggerDownload(`${base}.json`, JSON.stringify(buildJsonExport(savedAt), null, 2), "application/json");
+  triggerDownload(`${base}.txt`, buildTxtExport(savedAt), "text/plain");
+  scheduleSave(); // persist the incremented version so it survives a reload (Section 9)
+}
+
+// ---------------------------------------------------------------------------
 // Toolbar
 // ---------------------------------------------------------------------------
 function notImplemented(label) {
@@ -1463,7 +1601,35 @@ document.getElementById("btn-connect").addEventListener("click", () => {
 document.getElementById("btn-autolayout").addEventListener("click", () => notImplemented("Auto-layout"));
 document.getElementById("btn-undo").addEventListener("click", () => undo());
 document.getElementById("btn-redo").addEventListener("click", () => redo());
-document.getElementById("btn-save-version").addEventListener("click", () => notImplemented("Save Version"));
+document.getElementById("btn-save-version").addEventListener("click", () => performSaveVersion());
+
+// Graph name (Section 5.4's Open Question — resolved as an always-visible,
+// always-editable title rather than a one-time save-time prompt) is never
+// gated behind Save Version; it defaults to "Untitled Graph" and can be
+// renamed anytime by clicking the title.
+const graphTitleEl = document.getElementById("graph-title");
+
+function openRenameGraphTitle() {
+  const rect = graphTitleEl.getBoundingClientRect();
+  // Clamp so the centered (translate(-50%,-50%)) input never clips off the
+  // left edge — the title sits flush at x=0, so its own midpoint is too
+  // close to the edge for a ~140px-wide input.
+  const x = Math.max(90, rect.left + rect.width / 2);
+  showInlineInput({
+    x, y: rect.bottom + 16,
+    value: state.graphName, placeholder: "Graph name",
+    onCommit: (text) => {
+      state.graphName = text.trim() || "Untitled Graph";
+      graphTitleEl.textContent = state.graphName;
+      scheduleSave();
+    },
+  });
+}
+
+graphTitleEl.addEventListener("click", openRenameGraphTitle);
+graphTitleEl.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openRenameGraphTitle(); }
+});
 
 const importInput = document.getElementById("import-file-input");
 document.getElementById("btn-import-txt").addEventListener("click", () => importInput.click());
@@ -1528,6 +1694,7 @@ async function boot() {
     clearSelection();
     markDirty();
   }
+  document.getElementById("graph-title").textContent = state.graphName;
 }
 
 boot();
