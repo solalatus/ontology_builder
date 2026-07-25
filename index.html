@@ -234,6 +234,7 @@
   <button id="btn-undo" type="button">Undo</button>
   <button id="btn-redo" type="button">Redo</button>
   <button id="btn-save-version" type="button">Save Version</button>
+  <button id="btn-folder-sync" type="button" aria-pressed="false" style="display:none;">Folder Sync</button>
   <button id="btn-import-txt" type="button">Import from TXT</button>
   <input id="import-file-input" type="file" accept=".txt">
   <button id="btn-clear" type="button">Clear</button>
@@ -1576,6 +1577,56 @@ function triggerDownload(filename, content, mimeType) {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
+// ---------------------------------------------------------------------------
+// Tier 2 storage (Section 3.2, progressive enhancement): once a folder is
+// granted via showDirectoryPicker, explicit saves write silently into it —
+// no further prompts, no browser download — instead of Tier 3's <a download>.
+// Chrome/Windows + Chromium/Linux only (Section 3.1); Brave and Android
+// don't expose the API at all, so feature-detection alone keeps the opt-in
+// hidden there — no separate platform check needed.
+// Session-scoped only: the granted handle isn't persisted across a reload
+// (the File System Access API supports storing a handle for later re-grant
+// via IndexedDB, but spec only requires "no further prompts" once granted,
+// not that the grant itself survives a full reload — treated as a possible
+// future enhancement, not a gap against what's specified).
+// ---------------------------------------------------------------------------
+let tier2DirHandle = null;
+
+function updateFolderSyncButton() {
+  const btn = document.getElementById("btn-folder-sync");
+  if (!btn) return;
+  if (tier2DirHandle) {
+    btn.textContent = `Synced: ${tier2DirHandle.name}`;
+    btn.setAttribute("aria-pressed", "true");
+  } else {
+    btn.textContent = "Folder Sync";
+    btn.setAttribute("aria-pressed", "false");
+  }
+}
+
+async function connectFolderSync() {
+  try {
+    const handle = await window.showDirectoryPicker({ mode: "readwrite" });
+    tier2DirHandle = handle;
+    updateFolderSyncButton();
+  } catch (err) {
+    if (!err || err.name !== "AbortError") console.warn("[KG Canvas] Folder Sync grant failed:", err);
+  }
+}
+
+async function writeFileToFolder(dirHandle, filename, content) {
+  const fileHandle = await dirHandle.getFileHandle(filename, { create: true });
+  const writable = await fileHandle.createWritable();
+  await writable.write(content);
+  await writable.close();
+}
+
+// Test/debug hook: lets tests await the in-flight save (folder write or
+// download trigger) rather than guessing timing — same pattern as
+// storage.whenIdle() in Phase 4.
+let pendingSaveVersion = Promise.resolve();
+function waitForSaveVersion() { return pendingSaveVersion; }
+
 function performSaveVersion() {
   if (!state.meta) {
     state.meta = {
@@ -1589,8 +1640,23 @@ function performSaveVersion() {
   const savedAt = isoTimestampSeconds();
   state.meta.saved = savedAt;
   const base = `${sanitizeGraphName(state.graphName)}_v${String(state.meta.version).padStart(4, "0")}_${filenameTimestamp(savedAt)}`;
-  triggerDownload(`${base}.json`, JSON.stringify(buildJsonExport(savedAt), null, 2), "application/json");
-  triggerDownload(`${base}.txt`, buildTxtExport(savedAt), "text/plain");
+  const jsonContent = JSON.stringify(buildJsonExport(savedAt), null, 2);
+  const txtContent = buildTxtExport(savedAt);
+
+  if (tier2DirHandle) {
+    pendingSaveVersion = Promise.all([
+      writeFileToFolder(tier2DirHandle, `${base}.json`, jsonContent),
+      writeFileToFolder(tier2DirHandle, `${base}.txt`, txtContent),
+    ]).catch((err) => {
+      console.warn("[KG Canvas] Folder Sync write failed, falling back to download:", err);
+      triggerDownload(`${base}.json`, jsonContent, "application/json");
+      triggerDownload(`${base}.txt`, txtContent, "text/plain");
+    });
+  } else {
+    triggerDownload(`${base}.json`, jsonContent, "application/json");
+    triggerDownload(`${base}.txt`, txtContent, "text/plain");
+    pendingSaveVersion = Promise.resolve();
+  }
   scheduleSave(); // persist the incremented version so it survives a reload (Section 9)
 }
 
@@ -1881,6 +1947,7 @@ document.getElementById("btn-autolayout").addEventListener("click", () => notImp
 document.getElementById("btn-undo").addEventListener("click", () => undo());
 document.getElementById("btn-redo").addEventListener("click", () => redo());
 document.getElementById("btn-save-version").addEventListener("click", () => performSaveVersion());
+document.getElementById("btn-folder-sync").addEventListener("click", () => connectFolderSync());
 
 // Graph name (Section 5.4's Open Question — resolved as an always-visible,
 // always-editable title rather than a one-time save-time prompt) is never
@@ -1972,6 +2039,17 @@ window.__kg = {
     whenIdle: whenSaveIdle,
     save: scheduleSave,
   },
+  tier2: {
+    waitForSaveVersion,
+    getDirHandle: () => tier2DirHandle,
+    // Direct injection lets tests exercise the write path without a real
+    // user-gesture-gated picker grant; connectFolderSync() itself is
+    // exercised separately by mocking window.showDirectoryPicker.
+    setDirHandle: (handle) => {
+      tier2DirHandle = handle;
+      updateFolderSyncButton();
+    },
+  },
   getNewlyImportedIds: () => newlyImportedIds, // reassigned, not mutated — needs a getter, not a reference
 };
 
@@ -1987,6 +2065,14 @@ async function boot() {
     markDirty();
   }
   document.getElementById("graph-title").textContent = state.graphName;
+  // Tier 2 opt-in (Section 3.1): only Chrome/Windows and Chromium/Linux
+  // expose showDirectoryPicker at all — Brave and Chrome/Android don't, so
+  // feature detection alone keeps the button hidden there with no separate
+  // platform sniff needed.
+  if ("showDirectoryPicker" in window) {
+    document.getElementById("btn-folder-sync").style.display = "";
+    updateFolderSyncButton();
+  }
 }
 
 boot();
