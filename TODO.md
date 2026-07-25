@@ -10,14 +10,14 @@ State" so the project can be picked up cold at any time.
 ## Current State
 
 - **Phase:** Phases 0 through 8 complete, all with green automated test
-  suites (`node --test tests/*.spec.mjs`, 143 JS tests + 15 Python tests,
+  suites (`node --test tests/*.spec.mjs`, 149 JS tests + 15 Python tests,
   see Log below). Not yet hand-tested on real touch hardware (pinch/
   long-press) — deferred to Phase 10, not blocking. Phase 7's real-folder
   grant/write-back is likewise only mocked-tested so far, not hand-verified
   on real Chrome/Windows or Chromium/Linux — also deferred to Phase 10.
-  Phase 9 (Scale & performance) not started. A "Clear" button (outside the
-  phased plan, user-requested) was also added — see its own section below,
-  right after Phase 11.
+  Phase 9 (Scale & performance) not started. A "Clear" button and a dark/
+  light theme toggle (both outside the phased plan, user-requested) were
+  also added — see their own sections below, right after Phase 11.
 - **Target file:** `index.html` (single file, no external deps/CDN links).
   Dev-only test tooling lives in `tests/` and `tools/` (see `tests/README.md`)
   and never ships as part of the app.
@@ -562,6 +562,31 @@ phase above — tracked here instead of invented as a fake phase number.
   underneath it; Clear is exactly one undo step and Undo/Redo round-trip
   it correctly; a genuinely disabled Clear button can't be clicked at all;
   the post-clear (empty) state is what survives a reload, not the old one.
+
+### Dark/light theme toggle
+
+- [x] Explicit "Theme: Dark" / "Theme: Light" toolbar button — status label,
+      not a command, and `aria-pressed` reflects whether light is active
+- [x] Defaults to dark (the app's original, only-ever look), never follows
+      `prefers-color-scheme` — a manual toggle should override the OS
+      setting, not silently follow it
+- [x] Covers both the CSS-driven toolbar/dialog chrome and the Canvas2D-
+      drawn graph itself (node/edge/group colors) — a real second theme,
+      not just a toolbar recolor
+- [x] Persisted in its own `localStorage` key (`kg-theme`), independent of
+      the graph's own Tier 1 payload — a UI preference, not graph data;
+      survives Clear/import/reload unaffected by any of that
+- [x] Applied synchronously at top-level script scope (before `boot()`,
+      before first paint) — no dark-then-light flash on load
+- Tests (`tests/theme.spec.mjs`, 6 tests, all green): defaults to dark on a
+  fresh load with no prior `localStorage`; clicking the toggle flips
+  `<html data-theme>`, the button label, and `aria-pressed` both ways;
+  toggling actually repaints the canvas (a node's fill pixel, sampled away
+  from its label text, changes color between themes — proves the change
+  reaches Canvas2D draw calls, not just DOM/CSS); the choice survives a
+  reload; toggling never pushes an undo/redo history entry (it's a display
+  preference, not a graph edit); the `window.__kg.theme` test hook mirrors
+  the button.
 
 ---
 
@@ -1140,6 +1165,64 @@ and record deltas here instead of editing the spec.)*
     considering this done: `node --test tests/*.spec.mjs` (143 tests) and
     `python3 -m unittest discover -s tools -p "test_*.py"` (15 tests),
     both green — no regressions in Phases 0–7.
+- 2026-07-25 — PR #9 (Phase 8) merged to `main` by the user. Restarted this
+  branch from `origin/main` per the merged-PR protocol before starting the
+  next requested item.
+- 2026-07-25 — Added a dark/light theme toggle (out-of-spec, user-
+  requested, same standing as the Clear button — see its own section
+  above). Notable decisions:
+  - **Explicit toggle, not `prefers-color-scheme`.** The app has always
+    been dark-only; adding a light option and then silently switching
+    users to it based on OS setting would be a bigger, unrequested change
+    than "add a toggle." `:root`'s `color-scheme` was narrowed from
+    `light dark` to plain `dark` for the same reason — it was declared but
+    never backed by an actual light variant before this, so it was already
+    slightly misleading.
+  - **One CSS custom-property source of truth for every themeable color**,
+    including the ones Canvas2D draws with — not a parallel JS palette
+    object that could quietly drift from the CSS one. The previously
+    hardcoded `NODE_FILL`/`EDGE_STROKE`/etc. constants are gone; a new
+    `resolveColors()` reads all of them via `getComputedStyle` once per
+    `render()` call (not once per node/edge — a real, if small, perf
+    consideration) and the result is threaded through `drawGrid()`,
+    `drawEmptyState()`, `drawEdges()`, `drawNodes()`, `drawGhostEdge()` as
+    a plain parameter. `drawGrid()`/`drawEmptyState()` already did their
+    own per-call `getComputedStyle` lookup for `--grid-dot`/`--empty-fg`
+    (Phase 0); folded into the same mechanism rather than left as a second
+    pattern.
+  - **Button label is a status ("Theme: Dark"/"Theme: Light"), not a
+    command.** First draft used the target-mode-style label the Folder
+    Sync button uses ("Dark Mode"/"Light Mode"), but on reflection that
+    reads ambiguously for a single on/off toggle — is "Dark Mode" naming
+    the mode you're in or the mode you'd switch to? A status-style label
+    has only one reading. `aria-pressed` still follows the existing
+    Folder-Sync-style convention (`true` when the non-default state, light,
+    is active).
+  - **Persisted separately from the graph** (`localStorage["kg-theme"]`,
+    not part of `state` or the Tier 1 payload) — this is a UI preference
+    that should outlive Clear, TXT import/replace, and switching graphs
+    entirely, none of which should ever touch it.
+  - **Applied at top-level script scope, before `boot()` runs** — setting
+    `document.documentElement.dataset.theme` has to happen before the
+    first paint to avoid a dark-then-light flash on load; `boot()` itself
+    only fills in the button's initial label/`aria-pressed` (which does
+    need the DOM element to exist first).
+  - Wrote `tests/theme.spec.mjs` (6 tests): defaults to dark with no prior
+    `localStorage`; the toggle flips the `<html>` attribute/label/
+    `aria-pressed` both directions; toggling actually changes a rendered
+    canvas pixel (sampled near a node's corner, deliberately away from its
+    centered label text — sampling the exact center first caught a real
+    test bug, since the label glyph's own theme-dependent color
+    contaminated the sample and produced a mid-gray antialiased read
+    instead of the fill color); the choice survives a reload; toggling
+    never pushes an undo/redo history entry, confirming it's a display
+    preference and not a graph edit; the `window.__kg.theme` hook mirrors
+    the button. Also spot-checked visually via headless screenshots of
+    both themes side by side (readable contrast, no illegible text/edges
+    in either). Ran the full suite before considering this done: `node
+    --test tests/*.spec.mjs` (149 tests) and `python3 -m unittest discover
+    -s tools -p "test_*.py"` (15 tests), both green — no regressions in
+    Phases 0–8 or the Clear button.
 
 ---
 
