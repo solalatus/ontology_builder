@@ -9,12 +9,15 @@ State" so the project can be picked up cold at any time.
 
 ## Current State
 
-- **Phase:** Phases 0 through 6 complete, all with green automated test
-  suites (`node --test tests/*.spec.mjs`, 130 JS tests + 15 Python tests,
+- **Phase:** Phases 0 through 7 complete, all with green automated test
+  suites (`node --test tests/*.spec.mjs`, 138 JS tests + 15 Python tests,
   see Log below). Not yet hand-tested on real touch hardware (pinch/
-  long-press) — deferred to Phase 10, not blocking. Phase 7 not started.
-  A "Clear" button (outside the phased plan, user-requested) was also
-  added — see its own section below, right after Phase 11.
+  long-press) — deferred to Phase 10, not blocking. Phase 7's real-folder
+  grant/write-back is likewise only mocked-tested so far, not hand-verified
+  on real Chrome/Windows or Chromium/Linux — also deferred to Phase 10.
+  Phase 8 (Autolayout) not started. A "Clear" button (outside the phased
+  plan, user-requested) was also added — see its own section below, right
+  after Phase 11.
 - **Target file:** `index.html` (single file, no external deps/CDN links).
   Dev-only test tooling lives in `tests/` and `tools/` (see `tests/README.md`)
   and never ships as part of the app.
@@ -42,8 +45,7 @@ State" so the project can be picked up cold at any time.
   proving agreement rather than asserting it). See the dated Log entry
   below for the full account, including a second, smaller behavioral
   change (malformed-line handling) made for the same consistency reason.
-- **Next action:** Phase 7 (Tier 2 storage — `showDirectoryPicker` live
-  folder sync, Chrome/Chromium desktop only, progressive enhancement).
+- **Next action:** Phase 8 (Autolayout).
 
 ---
 
@@ -424,22 +426,38 @@ claude.ai/code, which is plain git via GitHub as described above.
 
 ## Phase 7 — Tier 2 storage (live folder sync, progressive enhancement)
 
-- [ ] Feature-detect `showDirectoryPicker` — offer opt-in only on Chrome/
+- [x] Feature-detect `showDirectoryPicker` — offer opt-in only on Chrome/
       Windows and Chromium/Linux (NOT Brave, NOT Android — Section 3.1)
-- [ ] On grant, explicit saves write silently into chosen folder, no further
+- [x] On grant, explicit saves write silently into chosen folder, no further
       prompts
-- [ ] Confirm app is fully functional with Tier 2 entirely absent (Brave/
+- [x] Confirm app is fully functional with Tier 2 entirely absent (Brave/
       Android path never blocked)
-- Tests (planned, `tests/phase7.spec.mjs`):
-  - Automated: force `'showDirectoryPicker' in window` both true and false
-    (headless Chromium won't have real user-gesture directory access
-    either way, so this is a feature-detection/branch-coverage check, not
-    a real grant/write test) and confirm the app offers/hides the opt-in
-    accordingly and never throws when the API is absent.
-  - Manual (required — this phase is fundamentally about real OS
-    interaction): actual folder grant + silent write-back on Chrome/
-    Windows and Chromium/Linux; confirm Brave/Linux and Chrome/Android
-    never even offer Tier 2.
+- Tests (`tests/phase7.spec.mjs`, 8 tests):
+  - Automated: turns out headless Chromium *does* expose
+    `showDirectoryPicker` (the property exists regardless of user-gesture
+    grant), so real end-to-end coverage was possible, not just branch
+    coverage — `window.showDirectoryPicker` is mocked via Playwright's
+    `addInitScript` (installed before `index.html`'s own scripts run, since
+    `boot()` feature-detects synchronously at load) to grant a fake
+    directory handle and record writes in-memory. Covers: button hidden
+    when the API is deleted from `window` (Brave/Android simulation) and
+    the app still runs error-free; button revealed + correct initial state
+    when the API is present; successful grant updates button text/
+    `aria-pressed`; a cancelled picker (`AbortError`) leaves Tier 2
+    disconnected with no console error; a connected Save Version writes
+    exactly two files into the mock folder (correct versioned filenames,
+    valid JSON content) and triggers **zero** browser downloads; a write
+    failure *after* grant falls back to the normal two-download Tier 3
+    path rather than silently losing the save; Save Version without ever
+    connecting behaves exactly like the pre-Phase-7 baseline; the
+    `window.__kg.tier2.setDirHandle()` test hook drives the same button
+    state as a real grant.
+  - Manual (still required — this phase is fundamentally about real OS
+    interaction, and headless mocking can't prove the real native picker
+    dialog or real filesystem writes work): actual folder grant + silent
+    write-back on Chrome/Windows and Chromium/Linux; confirm Brave/Linux
+    and Chrome/Android never even offer Tier 2. **Not yet done** — flagged
+    in Current State.
 
 ## Phase 8 — Autolayout
 
@@ -994,6 +1012,72 @@ and record deltas here instead of editing the spec.)*
   - Ran everything before considering this done: `node --test
     tests/*.spec.mjs` (130 tests) and `python3 -m unittest discover -s
     tools -p "test_*.py"` (15 tests), both fully green.
+- 2026-07-25 — PR #7 (spec/Python/JS consistency fix) merged to `main` by
+  the user. Restarted this branch from `origin/main` per the merged-PR
+  protocol before starting Phase 7.
+- 2026-07-25 — Phase 7 (Tier 2 storage — live folder sync) implemented in
+  `index.html`. Notable decisions:
+  - **New `#btn-folder-sync` toolbar button**, hidden by default
+    (`style="display:none"`) and only revealed by `boot()` when
+    `'showDirectoryPicker' in window` is true — Brave and Chrome/Android
+    don't expose the API at all (Section 3.1), so this single feature
+    check is sufficient; no separate platform/UA sniffing needed. Button
+    text/`aria-pressed` toggle between `"Folder Sync"` (disconnected) and
+    `"Synced: <folder name>"` (connected), driven by
+    `updateFolderSyncButton()`.
+  - **`performSaveVersion()` now branches on a module-level
+    `tier2DirHandle`**: if set, both export files are written silently into
+    the granted folder via `FileSystemDirectoryHandle.getFileHandle()` →
+    `createWritable()` → `write()`/`close()`, and Tier 3's `<a download>`
+    is *not* also triggered — Tier 2 replaces Tier 3 for that save, it
+    doesn't supplement it (a save that both silently wrote to a folder
+    *and* popped a browser download would be surprising, and Section 3.2
+    frames Tier 2 as a strictly better mode once connected, not an
+    additive one). If a write fails after grant (e.g. permission revoked
+    mid-session, disk full), it falls back to the ordinary two-download
+    path in a `.catch()` rather than silently losing the save.
+  - **Session-scoped grant only** — `tier2DirHandle` is a plain in-memory
+    variable, not persisted to Tier 1 storage or IndexedDB, so a reload
+    always starts back at Tier 3 baseline and requires re-granting. The
+    File System Access API does support persisting a handle for later
+    re-grant via IndexedDB, but spec Section 3.2 only requires "no further
+    prompts" *once granted*, not that the grant itself survive a reload —
+    treated as a possible future enhancement, not a gap against what's
+    actually specified. Flagged here in case that reading is ever
+    revisited.
+  - **`AbortError` (user cancels the picker) is swallowed silently**
+    (`console.warn` only for any *other* rejection reason) — cancelling is
+    an expected, non-error outcome, consistent with how the rest of the
+    app treats Escape/cancel on its own dialogs.
+  - **Test hook surprise**: headless Chromium (via Playwright) actually
+    *does* expose `window.showDirectoryPicker` as a real function — the
+    property exists independent of any user-gesture grant, it's only
+    *invoking* it without a gesture that would fail. This meant real
+    end-to-end coverage was possible by mocking
+    `window.showDirectoryPicker` itself (via Playwright's
+    `addInitScript`, installed before `index.html`'s own scripts run,
+    since `boot()`'s feature detection runs synchronously at load) rather
+    than only the feature-detection branch-coverage originally sketched
+    in this file's Phase 7 plan. Added `window.__kg.tier2` (`
+    waitForSaveVersion`, `getDirHandle`, `setDirHandle`) as the test hook,
+    mirroring Phase 4's `storage.whenIdle()` pattern.
+  - Wrote `tests/phase7.spec.mjs` (8 tests): button hidden/shown by feature
+    detection; real app usability with Tier 2 entirely absent; successful
+    mock grant updates button state; `AbortError` cancel leaves it
+    disconnected with no console error; a connected save writes exactly
+    two correctly-named, valid-JSON/TXT files into the mock folder and
+    fires zero downloads; a post-grant write failure falls back to the
+    normal two-download path; unconnected Save Version is unchanged from
+    pre-Phase-7 baseline; the `setDirHandle` hook drives the same button
+    state as a real grant. Ran the full suite before considering this
+    done: `node --test tests/*.spec.mjs` (138 tests) and `python3 -m
+    unittest discover -s tools -p "test_*.py"` (15 tests), both green — no
+    regressions in Phases 0–6.
+  - **Manual verification still outstanding** (real Chrome/Windows and
+    Chromium/Linux folder grant + write-back, and confirming Brave/Chrome-
+    Android never offer the button) — this can only be done on real OS/
+    browser combinations, not in headless CI, so it's flagged in Current
+    State rather than checked off.
 
 ---
 
