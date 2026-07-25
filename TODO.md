@@ -9,9 +9,13 @@ State" so the project can be picked up cold at any time.
 
 ## Current State
 
-- **Phase:** Not started — spec finalized (v1.0), no implementation yet.
-- **Target file:** single portable `index.html` (name TBD — not yet created).
-- **Next action:** Phase 0 (scaffold) — see below.
+- **Phase:** Phase 0 (scaffold) complete and smoke-tested (headless Chromium
+  via Playwright — see Log below). Not yet hand-tested on a real touch device
+  (pinch/long-press) or on Brave — do that as part of Phase 10, not blocking
+  for now. Phase 1 not started.
+- **Target file:** `index.html` (created, single file, no external
+  deps/CDN links).
+- **Next action:** Phase 1 (data model & core node/edge ops).
 
 ---
 
@@ -69,13 +73,13 @@ claude.ai/code, which is plain git via GitHub as described above.
 
 ## Phase 0 — Scaffold
 
-- [ ] Create single HTML file with inlined `<style>` and `<script>` blocks
+- [x] Create single HTML file with inlined `<style>` and `<script>` blocks
       (no external files, no CDN links — spec Section 2)
-- [ ] Canvas2D setup with camera transform (pan offset + zoom scale) —
+- [x] Canvas2D setup with camera transform (pan offset + zoom scale) —
       Section 6
-- [ ] Basic render loop: dirty-flag driven `requestAnimationFrame`, not a
+- [x] Basic render loop: dirty-flag driven `requestAnimationFrame`, not a
       constant loop — Section 6
-- [ ] Empty-state UI shell: button bar per Section 7 (Add Node, Connect,
+- [x] Empty-state UI shell: button bar per Section 7 (Add Node, Connect,
       Auto-layout, Undo, Redo, Save Version, Import from TXT, zoom +/−)
 
 ## Phase 1 — Data model & core node/edge ops
@@ -206,6 +210,26 @@ and record deltas here instead of editing the spec.)*
 - 2026-07-25 — TODO.md created. No implementation code exists yet; only
   `spec.md` (v1.0, finalized) is committed. Repo: `solalatus/ontology_builder`
   on `main`, working tree clean at commit `a6091b4` ("initial commit").
+- 2026-07-25 — Phase 0 (scaffold) implemented in `index.html`: single file,
+  Canvas2D with a pan (screenX = worldX*scale + panX form) + zoom camera,
+  dirty-flag `requestAnimationFrame` render loop (adaptive dot grid +
+  empty-state message as placeholder render content), and the full Section 7
+  toolbar. Pan via Pointer Events drag; zoom via wheel and touch pinch, plus
+  the +/− toolbar buttons (all three paths call one `zoomAt()` that keeps the
+  world point under the cursor/midpoint fixed). Only the zoom buttons and
+  pan/zoom gestures are functionally real in this phase — Add Node, Connect,
+  Auto-layout, Undo, Redo, Save Version, and Import from TXT are wired to a
+  `notImplemented()` console-warn stub (Import from TXT additionally opens a
+  real native file picker via a hidden `<input type=file accept=".txt">`, but
+  only logs the picked filename — no parsing yet, that's Phase 6).
+  Smoke-tested headlessly with Playwright/Chromium: zero console/page errors
+  on load; drag-pan, the +/− toolbar buttons, and ctrl/plain wheel-zoom over
+  the canvas each produce the expected pixel-level canvas change (verified by
+  diffing screenshots, not eyeballing); window resize reflows the canvas
+  correctly under the fixed toolbar. Pinch-zoom and touch pan share the same
+  `zoomAt()`/pointer-drag code paths as the tested mouse/wheel paths but
+  weren't separately exercised (no real touch device here) — confirm on an
+  actual Android device in Phase 10.
 
 ---
 
