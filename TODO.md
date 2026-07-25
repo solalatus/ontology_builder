@@ -9,15 +9,24 @@ State" so the project can be picked up cold at any time.
 
 ## Current State
 
-- **Phase:** Phases 0, 1, 2, and 3 complete, all with green automated test
-  suites (`node --test tests/*.spec.mjs`, 69 tests, see Log below). Not yet
-  hand-tested on real touch hardware (pinch/long-press) — deferred to
-  Phase 10, not blocking. Phase 4 not started.
+- **Phase:** Phases 0, 1, 2, 3, and 4 complete, all with green automated
+  test suites (`node --test tests/*.spec.mjs`, 92 tests, see Log below).
+  Not yet hand-tested on real touch hardware (pinch/long-press) — deferred
+  to Phase 10, not blocking. Phase 5 not started. A "Clear" button (outside
+  the phased plan, user-requested) was also added — see its own section
+  below, right after Phase 11.
 - **Target file:** `index.html` (single file, no external deps/CDN links).
   Dev-only test tooling lives in `tests/` (see `tests/README.md`) and never
   ships as part of the app.
-- **Next action:** Phase 4 (Tier 1 storage — every edit auto-saved to OPFS
-  in the background, restored on load for crash/dropped-tab recovery).
+- **Important deviation from spec, read before touching storage:** Tier 1
+  is *not* OPFS-only as spec Section 3.2 literally says — it's OPFS with an
+  automatic localStorage fallback, because OPFS throws `SecurityError`
+  under a `file://` origin (confirmed by testing), which is exactly the
+  deployment mode Section 2 promises ("opens directly in a browser...no
+  external server required"). See the Phase 4 Log entry below for the full
+  story and why this was a user decision, not a unilateral call.
+- **Next action:** Phase 5 (File formats — JSON canonical export, TXT
+  edge-list export, versioned filenames).
 
 ---
 
@@ -252,19 +261,37 @@ claude.ai/code, which is plain git via GitHub as described above.
 
 ## Phase 4 — Tier 1 storage (OPFS live engine)
 
-- [ ] Every edit writes immediately to OPFS in background (add/move/connect/
-      group/delete) — no prompts, no visible file
-- [ ] On load: restore from OPFS if present (crash/dropped-tab recovery)
-- [ ] Verify this works on all 4 target combos (OPFS is universally
-      supported per Section 3.1 capability matrix)
-- Tests (planned, `tests/phase4.spec.mjs`):
-  - Automated: make an edit, `page.reload()` without any explicit save, and
-    confirm `window.__kg.state` after reload matches pre-reload state
-    (crash/dropped-tab recovery); confirm an OPFS write happens on every
-    edit type, not just on an explicit save action.
-  - Manual: spot-check on all 4 target browser/OS combos per the Section
-    3.1 matrix — OPFS is claimed universal there, worth confirming directly
-    at least once per platform.
+- [x] Every edit writes immediately to OPFS in background (add/move/connect/
+      group/delete) — no prompts, no visible file (**+ localStorage
+      fallback for `file://` contexts where OPFS is unusable — see Current
+      State and Log below**)
+- [x] On load: restore from OPFS if present (crash/dropped-tab recovery)
+- [x] Verify this works on all 4 target combos (OPFS is universally
+      supported per Section 3.1 capability matrix) — **partially**: verified
+      programmatically in headless Chromium for both the served (OPFS) and
+      `file://` (localStorage fallback) cases; the 4-platform hardware pass
+      is still Phase 10's job.
+- Tests (`tests/phase4.spec.mjs`, 11 tests, all green):
+  - Automated: `window.__kg.storage.detectBackend()` resolves to
+    `"localStorage"` under `file://` and to `"opfs"` when served over
+    http (a real local static server is spun up in-test —
+    `tests/lib/server.mjs` — specifically to exercise the OPFS path for
+    real, not just the fallback); an edit schedules a save and, once
+    `storage.whenIdle()` resolves, the payload is actually present in the
+    backing store; reloading restores nodes/edges *and* group membership
+    (`groups[]` + the auto `contains` edge) correctly in both backends; id
+    counters are restored too, so a node added post-reload never collides
+    with a restored id; the state persisted is whatever's current *after*
+    an Undo, not the undone version; a fresh profile with nothing saved
+    boots to a normal empty graph; a corrupted saved payload is caught and
+    ignored (boots empty, no crash, no console error) via `page.addInitScript`
+    seeding garbage JSON before the app's own boot script runs; camera pan/
+    zoom and selection are deliberately *not* restored (only graph data is
+    — consistent with Phase 3 already not persisting the undo stack).
+  - Manual: the actual 4-platform matrix (Chrome/Windows, Chromium/Linux,
+    Brave/Linux, Chrome/Android) — deferred to Phase 10 as originally
+    planned; what's new is that Phase 10 must now also confirm which
+    backend each platform/deployment-mode combination actually lands on.
 
 ## Phase 5 — File formats (export)
 
@@ -392,6 +419,39 @@ claude.ai/code, which is plain git via GitHub as described above.
   sync, OWL/RDF reasoning, multi-graph switcher) and no auto-pruning logic
   exists for version files; manual final read-through of `TODO.md` vs
   `spec.md` for drift before calling v1.0 done.
+
+---
+
+## Additional features (outside the phased plan)
+
+Features requested directly by the user that don't map onto any spec.md
+phase above — tracked here instead of invented as a fake phase number.
+
+### Clear graph
+
+- [x] "Clear" toolbar button, disabled when the graph is already empty
+- [x] Confirms via a centered modal dialog (not native `confirm()`, for the
+      same reason as the inline text input — consistent styling, DOM-
+      testable) before doing anything destructive; Cancel, clicking the
+      backdrop, or Escape all back out with zero effect; Enter or the
+      dialog's own confirm button proceed
+- [x] Empties `state.nodes` and `state.edges` in one action
+- [x] Undoable: routed through the same `pushHistory()` mechanism as every
+      other action (Phase 3), so it's exactly one undo step and Undo
+      restores the graph exactly as it was
+- [x] Persisted like any other edit: goes through `pushHistory()`, which
+      already triggers `scheduleSave()` (Phase 4), so a cleared graph is
+      what a reload restores — not the pre-clear one
+- Tests (`tests/clear-graph.spec.mjs`, 12 tests, all green): button
+  disabled/enabled state tracks whether the graph is empty; opening the
+  dialog doesn't clear anything by itself; Cancel, backdrop-click, and
+  Escape all leave the graph untouched and close the dialog; Enter and the
+  confirm button both clear it; clearing removes nodes, edges, and group
+  membership together; Escape while the dialog is open closes only the
+  dialog and doesn't also cancel an unrelated armed mode (e.g. Add Group)
+  underneath it; Clear is exactly one undo step and Undo/Redo round-trip
+  it correctly; a genuinely disabled Clear button can't be clicked at all;
+  the post-clear (empty) state is what survives a reload, not the old one.
 
 ---
 
@@ -571,6 +631,90 @@ and record deltas here instead of editing the spec.)*
     the previously-selected node or edge may not exist in the restored
     snapshot (e.g. it was the thing just undone into non-existence), so
     trying to preserve it isn't meaningfully well-defined.
+- 2026-07-25 — PR #3 (Phase 3) merged to `main` by the user. Restarted this
+  branch from `origin/main` again per the merged-PR protocol before
+  starting Phase 4 — same clean case as the prior two restarts.
+- 2026-07-25 — Phase 4 (Tier 1 storage) implemented in `index.html`
+  (`tests/phase4.spec.mjs`, 11 tests; 80 total). **This phase surfaced a
+  real spec/reality conflict, resolved by asking the user rather than
+  deciding unilaterally:**
+  - **The discovery.** Section 3.1's capability matrix marks OPFS as
+    universally supported, and Section 2 promises the app "opens directly
+    in a browser... no external server required" (i.e., double-click
+    `index.html`, a `file://` URL). Empirically testing
+    `navigator.storage.getDirectory()` under a `file://` origin in
+    Chromium throws `SecurityError` — OPFS is *only* usable when the page
+    is actually served over http(s). Taken literally, an OPFS-only Tier 1
+    would provide **zero** crash protection for anyone using the app in
+    exactly the mode Section 2 advertises as the primary one. This isn't a
+    coding bug to route around silently — it's a real conflict between two
+    spec claims, discovered by the same headless-testing setup this
+    project has been using for verification all along.
+  - **The question asked and the answer.** Presented three options: (a)
+    OPFS + automatic localStorage fallback when OPFS is unusable, keeping
+    "always-on, all platforms" true in both deployment modes; (b) OPFS
+    only, exactly as spec's Section 3.2 names it, accepting that Tier 1
+    silently no-ops under `file://`; (c) OPFS only, but with a visible
+    one-time UI warning when unavailable. **User chose (a).**
+  - **Implementation.** `detectStorageBackend()` tries OPFS first (feature
+    presence *and* an actual `getDirectory()` call, since presence alone
+    doesn't mean it'll work); on failure, falls back to `localStorage`
+    (verified via a quick probe write). The choice is cached for the
+    session. Both backends persist the same minimal payload —
+    `{nodes, edges, nextNodeNum, nextEdgeNum}` — deliberately *not*
+    camera/selection/mode/undo-history, which stay ephemeral/session-only
+    (consistent with Phase 3 already not persisting the undo stack).
+    Saves are coalesced through a small scheduler (`scheduleSave` /
+    `runSaveLoop`) rather than queued: a burst of edits while a write is
+    in flight collapses into exactly one trailing save of the latest
+    state, and writes never run concurrently. Hooked into the single
+    `pushHistory()` choke point plus `undo()`/`redo()` directly (since
+    those bypass `pushHistory`), so it automatically covers every current
+    and future action that goes through the undo system — no per-handler
+    wiring needed.
+  - **id counters are persisted alongside the graph** (not just
+    nodes/edges) — without this, a restored session that then adds a new
+    node would regenerate a colliding id, violating "ids are never reused"
+    (Section 4.1).
+  - **Testing implication:** since `file://` can only ever exercise the
+    localStorage fallback, a genuine end-to-end check of the OPFS code
+    path required actually serving the file. Added
+    `tests/lib/server.mjs` — a ~30-line dependency-free static file server
+    (`node:http` + `node:fs`) used only by `phase4.spec.mjs` — so both
+    backends are verified against the real browser API, not just one of
+    them by construction of the test environment.
+- 2026-07-25 — Follow-up question after Phase 4 shipped: "does opening
+  index.html resume the last disk-synced state, and how does browser
+  close/reopen work?" Verified empirically (not just reasoned about)
+  with a real `launchPersistentContext` test — fully closing the browser
+  process and relaunching it fresh against the same profile still
+  restored a node added in the prior session, confirming Tier 1 survives
+  a real browser restart, not merely a same-process page reload.
+- 2026-07-25 — Added a "Clear" button + confirm-dialog feature (user
+  request, outside the phased plan — tracked in its own section above
+  rather than shoehorned into a phase number). `tests/clear-graph.spec.mjs`
+  (12 tests; 92 total across the whole suite). Notable decisions:
+  - **Confirm dialog is a custom centered modal, not native `confirm()`**
+    — same rationale already established for node/edge inline entry in
+    Phase 1: consistent styling and DOM-testability. Cancel, clicking the
+    backdrop, and Escape are all equivalent "back out" paths; Enter and
+    the dialog's own button are equivalent "proceed" paths.
+  - **Free undo/redo support, not reimplemented.** Clear goes through the
+    exact same `snapshotState()` / `pushHistory()` pair as every other
+    mutating action (Phase 3), so it's automatically exactly one undo
+    step and automatically triggers a background save (Phase 4) — no new
+    persistence or history code needed, just correct use of the existing
+    choke points.
+  - **id counters are not reset by Clear.** Consistent with delete never
+    resetting them either — if a user Clears, then Undoes, then keeps
+    editing, ids must still never collide with anything that existed
+    before the Clear.
+  - The dialog's Escape handling is checked *before* the existing
+    Escape-cancels-armed-mode logic in the global keydown handler (an
+    early return when the dialog is open), so Escape while the dialog is
+    showing only ever dismisses the dialog — it can't also silently
+    cancel an unrelated armed Add Node/Add Group/Connect mode underneath
+    it in the same keypress.
 
 ---
 
