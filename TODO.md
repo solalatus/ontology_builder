@@ -9,18 +9,19 @@ State" so the project can be picked up cold at any time.
 
 ## Current State
 
-- **Phase:** Phases 0 through 8 complete, all with green automated test
-  suites (`node --test tests/*.spec.mjs`, 153 JS tests + 15 Python tests,
+- **Phase:** Phases 0 through 9 complete, all with green automated test
+  suites (`node --test tests/*.spec.mjs`, 159 JS tests + 15 Python tests,
   see Log below). Not yet hand-tested on real touch hardware (pinch/
   long-press) — deferred to Phase 10, not blocking. Phase 7's real-folder
   grant/write-back is likewise only mocked-tested so far, not hand-verified
   on real Chrome/Windows or Chromium/Linux — also deferred to Phase 10.
-  Phase 9 (Scale & performance) not started. A "Clear" button and a dark/
-  light theme toggle (both outside the phased plan, user-requested) were
-  also added — see their own sections below, right after Phase 11. Phase
-  8's autolayout also now enforces explicit group-containment (members
-  can't escape their group's box during layout, user-requested hardening
-  — see the Phase 8 section and its Log entry).
+  Phase 9's real-device 60fps feel is similarly only smoke-tested
+  headlessly so far — also deferred to Phase 10. A "Clear" button and a
+  dark/light theme toggle (both outside the phased plan, user-requested)
+  were also added — see their own sections below, right after Phase 11.
+  Phase 8's autolayout also now enforces explicit group-containment
+  (members can't escape their group's box during layout, user-requested
+  hardening — see the Phase 8 section and its Log entry).
 - **Target file:** `index.html` (single file, no external deps/CDN links).
   Dev-only test tooling lives in `tests/` and `tools/` (see `tests/README.md`)
   and never ships as part of the app.
@@ -48,8 +49,9 @@ State" so the project can be picked up cold at any time.
   proving agreement rather than asserting it). See the dated Log entry
   below for the full account, including a second, smaller behavioral
   change (malformed-line handling) made for the same consistency reason.
-- **Next action:** Phase 9 (Scale & performance — viewport culling, ~1,000
-  synthetic node smoke test).
+- **Next action:** Phase 10 (Cross-platform verification — the manual
+  hands-on matrix that every deferred Tier-B item from Phases 0–9 above
+  finally gets exercised against for real).
 
 ---
 
@@ -505,20 +507,38 @@ claude.ai/code, which is plain git via GitHub as described above.
 
 ## Phase 9 — Scale & performance
 
-- [ ] Viewport culling (draw/hit-test only what intersects visible camera
+- [x] Viewport culling (draw/hit-test only what intersects visible camera
       rect) — Section 6
-- [ ] Verify smooth 60fps drag/pan/zoom at ~1,000 synthetic nodes
-- [ ] Confirm disconnected components / floating groups behave identically
+- [x] Verify smooth 60fps drag/pan/zoom at ~1,000 synthetic nodes (frame-time
+      smoke check — see Tests below; not measured on a real device yet)
+- [x] Confirm disconnected components / floating groups behave identically
       to connected graphs under pan/zoom/culling
-- Tests (planned, `tests/phase9.spec.mjs`):
-  - Automated: seed ~1,000 synthetic nodes via `window.__kg.actions`
-    (bypassing the UI for setup speed), then assert `render()` stays under
-    a rough frame-time budget and that viewport culling actually reduces
-    draw/hit-test work when zoomed into a small region (e.g. instrument a
-    counter, or compare timing zoomed-out vs zoomed-in) — a smoke check on
-    the *shape* of the perf characteristic, not a strict benchmark/CI gate.
+- Tests (`tests/phase9.spec.mjs`, 6 tests):
+  - Automated: seeded 1,000 synthetic nodes via `window.__kg.actions`
+    (bypassing the UI for setup speed). Zooming into a small region draws
+    far fewer than the full 1,000 (culling actually shrinks the drawn set,
+    checked via an exposed `renderStats` counter — Section 9's plan
+    suggested either a counter or timing comparison; the counter was
+    chosen since it's exact and immune to CI timing noise); zooming out to
+    fit the whole graph draws nearly all 1,000 back (culling isn't
+    silently losing anything); `render()` stays under a generous 100ms/
+    frame budget even in the worst case of (nearly) all 1,000 nodes
+    actually drawn (a smoke check on the shape of the perf characteristic,
+    per the original plan, not a strict CI gate); a scattered mix of
+    connected pairs, isolated singletons, and a floating group across a
+    huge world are culled by an exact position-only check (drawn count
+    matches an independently-computed geometric overlap against the
+    exposed visible-world-rect, regardless of connectivity or node type —
+    directly proves the "behave identically" requirement rather than just
+    asserting it); a node that's actually on screen after zooming in still
+    selects correctly on click (culling doesn't silently break real hit-
+    testing); an edge whose both endpoints are off-screen but whose
+    segment's bounding box crosses the viewport is still drawn (culling by
+    endpoint bounding box, not "is either endpoint visible").
   - Manual: real-device feel (Chrome/Android in particular) with a large
     graph — headless timing doesn't substitute for actually dragging it.
+    **Not yet done** — deferred to Phase 10 alongside the other hands-on
+    checks.
 
 ## Phase 10 — Cross-platform verification
 
@@ -1305,6 +1325,67 @@ and record deltas here instead of editing the spec.)*
     --test tests/*.spec.mjs` (153 tests) and `python3 -m unittest discover
     -s tools -p "test_*.py"` (15 tests), both green — no regressions in
     Phases 0–8, the Clear button, or the theme toggle.
+- 2026-07-25 — PR #11 (explicit group containment in Auto-layout) merged
+  to `main` by the user. Restarted this branch from `origin/main` per the
+  merged-PR protocol before starting Phase 9.
+- 2026-07-25 — Phase 9 (Scale & performance) implemented in `index.html`.
+  Notable decisions:
+  - **Viewport culling via a single `visibleWorldRect()` helper**, reused
+    for both drawing and hit-testing rather than two separate mechanisms.
+    A 50-world-unit padding (scaled by `1/camera.scale`, so it reads as a
+    constant ~50 screen px margin at any zoom) keeps things that visually
+    extend a little past a node/edge's own geometry — resize handles, edge
+    labels, the dashed group outline — from popping in/out right at the
+    screen edge.
+  - **Hit-testing culling is provably behavior-preserving, not just an
+    optimization that happens to still pass tests.** `findNodeAt`,
+    `findNodeHandleAt`, `findGroupResizeHandleAt`, and `findEdgeAt` are all
+    called with a world point derived from a click inside the canvas —
+    which by construction is always inside the same `visibleWorldRect()`
+    used to cull. A node/edge that doesn't intersect that rect can
+    therefore never contain that point either, so filtering to the
+    visible subset first can't change any hit-test outcome, only skip
+    wasted work. `nodesTopmostFirst()` took an optional `rect` parameter
+    for this (filtering only when passed one) rather than becoming two
+    functions — call sites that genuinely need every node regardless of
+    what's on screen (e.g. `updateGroupMembership`, which iterates
+    `state.nodes` directly, not through this helper at all) are
+    unaffected either way.
+  - **Edges are culled by their own segment's bounding box**
+    (`edgeBoundingRect()`), not by "is either endpoint node currently
+    visible." A long edge whose both endpoints are off-screen but whose
+    line still crosses the viewport (a real, if unusual, layout) must
+    still draw — tested explicitly, see below.
+  - **`renderStats` (nodes/edges drawn vs. total), exposed via
+    `window.__kg.perf`, instead of relying on wall-clock timing to prove
+    culling works.** Section 9's original test plan suggested "a counter,
+    or compare timing zoomed-out vs zoomed-in" — the counter was chosen
+    because it gives an exact, CI-noise-immune assertion ("drawn count
+    equals the independently-computed geometric overlap"), whereas timing
+    comparisons are inherently fuzzy. Timing is still used, but only for
+    the one thing a counter can't show — the actual frame-time budget —
+    and deliberately framed as a smoke check (a generous 100ms/frame
+    threshold), not a strict gate, matching the original plan's own
+    language.
+  - **`render()` and `markDirty()` were already exposed on `window.__kg`**
+    from earlier phases, which let tests drive deterministic, synchronous
+    render passes (`camera.scale = ...; render()`) instead of guessing at
+    `requestAnimationFrame` timing — no new test hook needed for that part.
+  - Wrote `tests/phase9.spec.mjs` (6 tests, see the Phase 9 section above
+    for the full list) using a 1,000-node synthetic grid (50 cols × 20
+    rows, 300 units apart) seeded directly via `window.__kg.actions` for
+    setup speed. Also spot-checked visually (outside the test suite) with
+    a smaller on-screen grid via a headless screenshot: partially-visible
+    nodes at the viewport's edges still render fully and correctly, no
+    pop-in/out artifacts at the boundary. Ran the full suite before
+    considering this done: `node --test tests/*.spec.mjs` (159 tests) and
+    `python3 -m unittest discover -s tools -p "test_*.py"` (15 tests),
+    both green — no regressions in Phases 0–8, the Clear button, the theme
+    toggle, or the explicit group-containment work.
+  - **Not done in this phase**: real-device 60fps feel (Chrome/Android in
+    particular) with a large graph — headless frame-time smoke checks
+    don't substitute for actually dragging it on real hardware. Deferred
+    to Phase 10 alongside the other hands-on cross-platform checks.
 
 ---
 
