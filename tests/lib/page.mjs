@@ -32,3 +32,25 @@ export async function addNodeViaDblClick(page, sx, sy, label) {
   await page.keyboard.press("Enter");
   await page.waitForSelector(".kg-inline-input", { state: "detached" });
 }
+
+// One-shot toolbar-armed placement, used for both "Add Node" and "Add Group"
+// (btnId is '#btn-add-node' or '#btn-add-group').
+export async function addNodeViaButton(page, btnId, sx, sy, label) {
+  const box = await page.locator("#canvas").boundingBox();
+  await page.click(btnId);
+  await page.mouse.click(box.x + sx, box.y + sy);
+  await page.waitForSelector(".kg-inline-input");
+  await page.locator(".kg-inline-input").fill(label);
+  await page.keyboard.press("Enter");
+  await page.waitForSelector(".kg-inline-input", { state: "detached" });
+}
+
+// Drags whatever node is at (fromSx, fromSy) to (toSx, toSy) with enough
+// intermediate steps to clear the move threshold and trigger a real drag.
+export async function dragNode(page, fromSx, fromSy, toSx, toSy) {
+  const box = await page.locator("#canvas").boundingBox();
+  await page.mouse.move(box.x + fromSx, box.y + fromSy);
+  await page.mouse.down();
+  await page.mouse.move(box.x + toSx, box.y + toSy, { steps: 10 });
+  await page.mouse.up();
+}
