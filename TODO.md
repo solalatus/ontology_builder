@@ -10,18 +10,21 @@ State" so the project can be picked up cold at any time.
 ## Current State
 
 - **Phase:** Phases 0 through 9 complete, all with green automated test
-  suites (`node --test tests/*.spec.mjs`, 193 JS tests + 15 Python tests,
+  suites (`node --test tests/*.spec.mjs`, 214 JS tests + 15 Python tests,
   see Log below). Not yet hand-tested on real touch hardware (pinch/
   long-press) — deferred to Phase 10, not blocking. Phase 7's real-folder
   grant/write-back is likewise only mocked-tested so far, not hand-verified
   on real Chrome/Windows or Chromium/Linux — also deferred to Phase 10.
   Phase 9's real-device 60fps feel is similarly only smoke-tested
-  headlessly so far — also deferred to Phase 10. A "Clear" button and a
-  dark/light theme toggle (both outside the phased plan, user-requested)
+  headlessly so far — also deferred to Phase 10. A "Clear" button, a
+  dark/light theme toggle, editable node/edge labels (rename), and
+  parallel-edge bending (all outside the phased plan, user-requested)
   were also added — see their own sections below, right after Phase 11.
   Phase 8's autolayout also now enforces explicit group-containment
-  (members can't escape their group's box during layout, user-requested
-  hardening — see the Phase 8 section and its Log entry).
+  (members can't escape their group's box during layout), and Phase 2's
+  group-drag now cascades membership both ways (absorb on drag-onto,
+  release on drag-away) — both user-requested hardening/reversals, see
+  their own Log entries.
 - **A dedicated test-hardening pass** (user-requested, ahead of Phase 10's
   manual testing) went back through every phase and added substantially
   more coverage (34 new tests, 159 → 193), and surfaced two real bugs in
@@ -258,12 +261,20 @@ claude.ai/code, which is plain git via GitHub as described above.
       overlapping membership (node in multiple groups)
 - [x] `boundary_mode` always `"manual"` — group box independently resizable,
       never auto-fits to members — Decision #3
-- Tests (`tests/phase2.spec.mjs`, 19 tests, all green — expanded from 17 in
-  a later test-hardening pass: deleting a grandparent group only cleans up
-  its direct child, a deeper grandchild membership is untouched; dragging
-  a node from deep inside a nested group to just outside it, but still
-  inside the outer group, reassigns membership from inner to outer in one
-  drag):
+- [x] **Dragging the group itself now cascades membership too** (user-
+      requested, later change — see the dated Log entry): dropping a group
+      onto previously-unrelated nodes absorbs any it now fully contains,
+      and dragging it away from a member down to zero overlap releases
+      that member, symmetric with how a member's own drag already worked.
+      This *replaces* the original "moving a group never cascades"
+      decision — resizing a group still never cascades, per Section 4.3's
+      explicit language about that one specific case.
+- Tests (`tests/phase2.spec.mjs`, 22 tests, all green — expanded from 19 in
+  the group-drag-cascade change, on top of the earlier test-hardening
+  pass's additions: deleting a grandparent group only cleans up its direct
+  child, a deeper grandchild membership is untouched; dragging a node from
+  deep inside a nested group to just outside it, but still inside the
+  outer group, reassigns membership from inner to outer in one drag):
   - Automated: "Add Group" creates a `type:"group"` node with the Section
     4.3 defaults (320×220, `boundary_mode:"manual"`, empty `groups[]`), is
     one-shot, and Escape-cancelable, mirroring Add Node. Dragging a smaller
@@ -271,10 +282,9 @@ claude.ai/code, which is plain git via GitHub as described above.
     `auto:true` `contains` edge; creating a node directly inside a group's
     boundary (no drag) does *not* auto-join; a drop that only *partially*
     overlaps neither commits a new membership nor removes an existing one;
-    dragging a member fully outside removes membership + the edge; moving
-    or resizing the *group* afterward never cascades into changing an
-    already-committed member's membership; the resize-corner handle
-    changes w/h by the exact drag delta and clamps at a minimum size;
+    dragging a member fully outside removes membership + the edge; the
+    resize-corner handle changes w/h by the exact drag delta and clamps at
+    a minimum size, and resizing still never cascades membership;
     recursive nesting (a shrunk group dragged into a bigger one, then an
     entity dragged into that inner group) joins only the *innermost*
     container, never also the outer one; overlapping membership (one node
@@ -284,7 +294,15 @@ claude.ai/code, which is plain git via GitHub as described above.
     edge; deleting a member leaves the group intact; a `contains` edge is
     never selectable by clicking near it (the click resolves to a node);
     hit-testing always picks the smallest/topmost box under the cursor
-    regardless of which node was created first.
+    regardless of which node was created first. **Group-drag cascade**:
+    dragging a group away from a member down to zero overlap releases that
+    member; nudging a group so it only partially (not fully) overlaps a
+    prior member keeps that member, the same overlap-to-keep rule a
+    member's own drag already follows; dragging a group onto a previously
+    unrelated node absorbs it; dragging a group simultaneously onto one
+    node and away from another (releasing the old member, absorbing the
+    new one) happens as exactly one undo step, and undo reverts both
+    changes together.
   - Manual: visual nesting reads correctly across zoom levels (spot-checked
     via screenshots this session, not exhaustively at every zoom level);
     confirm no arrow is ever drawn on canvas for a `contains` edge (also
@@ -687,6 +705,61 @@ phase above — tracked here instead of invented as a fake phase number.
   reload; toggling never pushes an undo/redo history entry (it's a display
   preference, not a graph edit); the `window.__kg.theme` test hook mirrors
   the button.
+
+### Editable node/edge labels (rename)
+
+- [x] Double-click an existing node on desktop opens an inline rename
+      field pre-filled with its current label (or an existing edge, near
+      its line, pre-filled with its current relation) — reuses the exact
+      `showInlineInput()` pattern creation already uses
+- [x] Floating selection toolbar gained a rename button (pencil icon),
+      visible for both node and edge selections — the touch-friendly
+      equivalent, since there's no reliable double-tap distinct from a
+      fast double-select on touch devices
+- [x] Empty or unchanged submission is a no-op: no history entry, matching
+      how an empty label at creation time creates nothing
+- [x] Exactly one undo step per rename, fully reversible
+- Tests (`tests/rename.spec.mjs`, 10 tests, all green): double-click opens
+  a rename field pre-filled with the current label and commits correctly;
+  Escape cancels without changing anything; an unchanged or blank
+  submission pushes no undo step; renaming is exactly one undo step and
+  fully reversible; a group node uses the group placeholder and renames
+  identically to an entity; double-clicking an edge (on its line) opens a
+  rename field pre-filled with the relation and commits correctly; edge
+  renaming is also exactly one undo step; the selection toolbar's rename
+  button opens the same prompt as double-click; that button is visible for
+  both node and edge selections (unlike the direction-toggle, which is
+  edge-only); a renamed label/relation survives a reload like any other
+  edit.
+
+### Parallel edge bending
+
+- [x] When 2+ (non-`auto`) edges connect the same unordered node pair,
+      each bends into a quadratic curve, offset perpendicular to the
+      straight line by a multiple of a fixed step, symmetric around zero
+      (e.g. 3 edges bend at -1, 0, +1 steps) — a lone edge between a pair
+      is completely unaffected (bend 0 == straight, the common case)
+- [x] Endpoints stay exactly where a straight edge's anchors would be
+      (node-border-clipped, unchanged) — only the path between them bends
+- [x] Arrowhead follows the curve's actual tangent at the endpoint, not
+      the straight a→b direction
+- [x] Hit-testing (`findEdgeAt`) and viewport culling (`edgeBoundingRect`)
+      are both bend-aware: a bent edge is hit-tested by sampling its
+      actual curve, and culled by a bounding box that includes the control
+      point (a quadratic bezier is always within the convex hull of its
+      three control points, so this can never wrongly exclude the curve)
+- Tests (`tests/parallel-edges.spec.mjs`, 8 tests, all green): a lone edge
+  between a pair never bends; two edges bend to opposite sides by equal,
+  non-zero, perpendicular amounts; three edges bend symmetrically with the
+  middle one staying exactly on the straight line; an `auto` (contains)
+  edge never counts toward a pair's bend group; hit-testing resolves each
+  bent edge to its own curve rather than always the first one; double-
+  clicking one bent curve renames that specific edge, not its sibling;
+  viewport culling accounts for a curve's bulge beyond its straight-line
+  bounding box; two edges pointing in opposite directions (A→B and B→A)
+  between the same pair still fan out distinctly rather than mirroring
+  onto the same curve — this last one caught a real bug, see the Log entry
+  below.
 
 ---
 
@@ -1515,6 +1588,79 @@ and record deltas here instead of editing the spec.)*
     --test tests/*.spec.mjs` (193 tests) and `python3 -m unittest discover
     -s tools -p "test_*.py"` (15 tests), both green throughout — no
     regressions introduced anywhere by either the new tests or the fixes.
+- 2026-07-25 — PR #13 (test-hardening pass) merged to `main` by the user.
+  Restarted this branch from `origin/main` before starting the next
+  requested item.
+- 2026-07-25 — Three new desktop-focused user requirements implemented
+  together: parallel-edge bending, editable labels via double-click (+
+  touch), and group-drag membership cascade. Notable decisions:
+  - **Group-drag membership cascade is a deliberate reversal of an earlier
+    decision**, not a new independent feature: Phase 2's "moving the group
+    itself afterward does not cascade or alter the member's committed
+    membership" test (and the design decision behind it) is now the
+    opposite of how the app behaves. The user explicitly asked for a
+    group being dragged onto nodes to absorb them, and — for symmetry,
+    since the alternative (absorb-only, never release) would be a
+    stranger, harder-to-explain rule — a group dragged away from a member
+    now releases it too, following the exact same overlap-to-keep/full-
+    containment-to-join rules a *member's* own drag already used. Resizing
+    a group is unchanged and still never cascades — Section 4.3 is
+    explicit about that one specific case, and nothing about the new
+    request touches resize. Implemented as `updateMembershipForMovedGroup()`,
+    which simply calls the existing `updateGroupMembership()` for every
+    *other* node in the graph after a group-type node's drag settles —
+    reusing 100% of the existing membership logic rather than duplicating
+    it, so both directions (absorb/release) and all existing rules (tie-
+    breaking, innermost-wins, nested groups) apply automatically and
+    consistently. The old, now-backwards test was rewritten (not just
+    deleted) to assert the new, correct behavior, and four more were added
+    covering absorption, partial-overlap-keeps-membership, and the
+    combined absorb+release-in-one-undo-step case.
+  - **Editable labels: double-click reuses `showInlineInput()` verbatim**,
+    the same helper creation already used, just pre-filled with the
+    current text instead of empty — no new UI mechanism invented. The
+    touch-equivalent is a new pencil-icon button in the floating selection
+    toolbar (`#sel-rename`), visible for both node and edge selections
+    (unlike the direction-toggle button, which only makes sense for
+    edges) — chosen over trying to define a reliable double-tap gesture,
+    since double-tap is already ambiguous with a fast double-select on
+    touch hardware.
+  - **Parallel-edge bending: found and fixed two real issues during
+    testing, not just at review.** First, the initial bend step (28 world
+    units) looked technically correct in the geometry-only unit tests but
+    produced genuinely unreadable, overlapping labels in a real screenshot
+    spot-check — increased to 60 after visually confirming the result.
+    Second — the more serious one — the perpendicular bend direction was
+    originally derived from each edge's own source→target vector, so two
+    edges in the same parallel group pointing in *opposite* directions
+    (A→B and B→A) had their bend axes mirrored relative to each other,
+    silently collapsing one edge's offset onto another's instead of
+    fanning out. Neither the original geometry unit tests nor a same-
+    direction screenshot caught this — only a screenshot using a mix of
+    edge directions did. Fixed by computing the perpendicular from a
+    canonical (lexicographic node-id) direction instead of the edge's own
+    source/target order, and added a dedicated regression test
+    ("opposite directions... still fan out distinctly") that fails
+    without the fix. A second, unrelated test bug surfaced in the same
+    pass: a test click landed on the *previously-selected* edge's own
+    floating selection toolbar (positioned above its anchor via
+    `translate(-50%,-170%)`), which happened to visually overlap the
+    *other* edge's curve at this bend size and silently swallowed the
+    click — fixed by clearing selection before the precision clicks in
+    that test, not by changing the app (the toolbar's positioning is
+    correct and unrelated to the edge-bending feature itself).
+  - Exposed `window.__kg.getEdgeGeometry(edgeId)` (anchors, control point,
+    actual midpoint) so tests can assert bend offset/direction precisely
+    instead of only inferring it from rendered pixels.
+  - Wrote three new test files: `tests/rename.spec.mjs` (10 tests),
+    `tests/parallel-edges.spec.mjs` (8 tests), plus 3 net new tests in
+    `tests/phase2.spec.mjs` (one old test rewritten, four new ones added,
+    19 → 22) for the group-drag cascade. Ran the full suite repeatedly
+    throughout (not just once at the end, since two of the three features
+    each surfaced a real bug mid-testing): `node --test tests/*.spec.mjs`
+    (214 tests) and `python3 -m unittest discover -s tools -p "test_*.py"`
+    (15 tests), both green — no regressions in any earlier phase or
+    out-of-spec feature.
 
 ---
 

@@ -110,22 +110,104 @@ test("dragging a member fully outside the group removes membership and its conta
   });
 });
 
-test("moving the group itself afterward does not cascade or alter the member's committed membership", async () => {
+// NOTE: prior to a later user-requested change, moving a group never
+// cascaded membership at all (this test used to assert the opposite of
+// what it does now). The group's own drag is now treated symmetrically
+// with a member's own drag: dropping a group onto previously-unrelated
+// nodes absorbs them, and dragging a group away from a member (down to
+// zero overlap) releases it — see the dated Log entry for the full
+// rationale. Resizing (below) is unchanged and still never cascades,
+// per Section 4.3's explicit language about that specific case.
+test("dragging a group away from a member (down to zero overlap) releases that member's committed membership", async () => {
   await withPage(async (page) => {
     await addNodeViaButton(page, "#btn-add-group", 600, 400, "Group A"); // rect 440,290 .. 760,510
     await addNodeViaButton(page, "#btn-add-node", 100, 100, "Member");
     await dragNode(page, 100, 100, 600, 400); // commits; member now centered at group's center
 
-    // Grab the group at a point inside its box but outside the member's box.
-    await dragNode(page, 460, 300, 1000, 700);
+    // Grab the group at a point inside its box but outside the member's box,
+    // and drag it far enough that the two boxes no longer overlap at all.
+    await dragNode(page, 460, 300, 1500, 1500);
 
     const group = await page.evaluate(() => window.__kg.state.nodes.find((n) => n.type === "group"));
     const member = await page.evaluate(() => window.__kg.state.nodes.find((n) => n.type === "entity"));
     const edges = await page.evaluate(() => window.__kg.state.edges);
 
     assert.notEqual(group.x, 440); // it actually moved
-    assert.deepEqual(member.groups, [group.id]); // membership untouched despite now being visually disjoint
-    assert.equal(edges.length, 1);
+    assert.deepEqual(member.groups, [], "membership is released once the group is dragged fully away");
+    assert.equal(edges.length, 0, "the contains edge is cleaned up along with it");
+  });
+});
+
+test("dragging a group so it now overlaps only partially (not fully) with a prior member keeps that member, same rule as a member's own drag", async () => {
+  await withPage(async (page) => {
+    await addNodeViaButton(page, "#btn-add-group", 600, 400, "Group A"); // rect 440,290 .. 760,510
+    await addNodeViaButton(page, "#btn-add-node", 100, 100, "Member"); // will land at 600,400 center -> rect 520,370..680,430
+    await dragNode(page, 100, 100, 600, 400); // commits
+
+    // Nudge the group a little so it still overlaps Member, just not fully.
+    await dragNode(page, 460, 300, 560, 300);
+
+    const group = await page.evaluate(() => window.__kg.state.nodes.find((n) => n.type === "group"));
+    const member = await page.evaluate(() => window.__kg.state.nodes.find((n) => n.type === "entity"));
+    assert.deepEqual(member.groups, [group.id], "partial overlap after a group drag keeps membership, matching the existing overlap-to-keep rule");
+  });
+});
+
+test("dragging a group onto previously-unrelated nodes absorbs them as members", async () => {
+  await withPage(async (page) => {
+    await addNodeViaButton(page, "#btn-add-group", 100, 100, "Group A"); // rect -60,-10 .. 260,210
+    await addNodeViaDblClick(page, 900, 700, "Loner");
+
+    // Loner sits far from Group A initially — no membership yet.
+    let loner = await page.evaluate(() => window.__kg.state.nodes.find((n) => n.label === "Loner"));
+    assert.deepEqual(loner.groups, []);
+
+    // Drag the group (grabbed at a point inside it, away from any handle)
+    // so it now fully contains Loner.
+    const lonerCenter = { x: loner.x + loner.w / 2, y: loner.y + loner.h / 2 };
+    await dragNode(page, 100, 100, lonerCenter.x, lonerCenter.y);
+
+    const group = await page.evaluate(() => window.__kg.state.nodes.find((n) => n.type === "group"));
+    loner = await page.evaluate(() => window.__kg.state.nodes.find((n) => n.label === "Loner"));
+    const edges = await page.evaluate(() => window.__kg.state.edges);
+    const autoEdge = edges.find((e) => e.auto);
+
+    assert.deepEqual(loner.groups, [group.id], "Loner joins the group purely because the group was dragged onto it");
+    assert.equal(autoEdge.source, group.id);
+    assert.equal(autoEdge.target, loner.id);
+  });
+});
+
+test("dragging a group onto a node and away from another member happens together, in one undo step", async () => {
+  await withPage(async (page) => {
+    await addNodeViaButton(page, "#btn-add-group", 600, 400, "Group A"); // rect 440,290 .. 760,510
+    await addNodeViaButton(page, "#btn-add-node", 100, 100, "OldMember");
+    await dragNode(page, 100, 100, 600, 400); // OldMember joins Group A
+    await addNodeViaDblClick(page, 900, 600, "NewNeighbor"); // rect 820,570..980,630
+
+    const before = await page.evaluate(() => window.__kg.history.past.length);
+    // Grab point (460,300) is offset (-140,-100) from the group's own
+    // center (600,400); dragging that grab point to NewNeighbor's center
+    // minus that same offset lands the group's *center* exactly on
+    // NewNeighbor's center, guaranteeing full containment (group is
+    // 320x220, well bigger than NewNeighbor's default 160x60) while
+    // landing nowhere near OldMember's original position.
+    await dragNode(page, 460, 300, 900 - 140, 600 - 100);
+
+    const group = await page.evaluate(() => window.__kg.state.nodes.find((n) => n.type === "group"));
+    const oldMember = await page.evaluate(() => window.__kg.state.nodes.find((n) => n.label === "OldMember"));
+    const newNeighbor = await page.evaluate(() => window.__kg.state.nodes.find((n) => n.label === "NewNeighbor"));
+    assert.deepEqual(oldMember.groups, [], "released");
+    assert.deepEqual(newNeighbor.groups, [group.id], "absorbed");
+
+    const after = await page.evaluate(() => window.__kg.history.past.length);
+    assert.equal(after, before + 1, "the whole drag (move + release + absorb) is exactly one undo step");
+
+    await page.click("#btn-undo");
+    const oldMemberRestored = await page.evaluate(() => window.__kg.state.nodes.find((n) => n.label === "OldMember"));
+    const newNeighborRestored = await page.evaluate(() => window.__kg.state.nodes.find((n) => n.label === "NewNeighbor"));
+    assert.deepEqual(oldMemberRestored.groups, [group.id], "undo restores the released membership");
+    assert.deepEqual(newNeighborRestored.groups, [], "undo also reverts the newly-absorbed membership");
   });
 });
 

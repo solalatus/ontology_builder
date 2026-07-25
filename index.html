@@ -299,6 +299,7 @@
 </div>
 
 <div id="sel-toolbar">
+  <button id="sel-rename" type="button" title="Rename">&#9998;</button>
   <button id="sel-toggle-dir" type="button" title="Toggle direction">&#8646;</button>
   <button id="sel-trash" type="button" title="Delete">&#128465;</button>
 </div>
@@ -852,6 +853,23 @@ function updateGroupMembership(node) {
   markDirty();
 }
 
+// A dragged GROUP now actively absorbs nodes it's dropped onto, and
+// releases members it's dragged away from — symmetric with how dragging a
+// member itself already worked. This is a deliberate, later reversal of an
+// earlier "moving a group never cascades membership" decision (see the
+// dated Log entry): resizing a group still never auto-fits to members
+// (Section 4.3 is explicit about that one case), but the group's own drag
+// is now treated the same as any member's drag. Reuses
+// updateGroupMembership() per other node so the exact same rules
+// (strictly-bigger, innermost-wins, overlap-to-keep, full-containment-to-
+// join) apply regardless of which side initiated the drag.
+function updateMembershipForMovedGroup(group) {
+  for (const other of state.nodes) {
+    if (other.id === group.id) continue;
+    updateGroupMembership(other);
+  }
+}
+
 function selectNode(id) { state.selection = { type: "node", id }; markDirty(); }
 function selectEdge(id) { state.selection = { type: "edge", id }; markDirty(); }
 function clearSelection() { state.selection = { type: null, id: null }; markDirty(); }
@@ -955,6 +973,81 @@ function edgeAnchors(edge) {
   return { a, b };
 }
 
+// ---------------------------------------------------------------------------
+// Parallel-edge bending (out-of-spec, user-requested): when 2+ (non-auto)
+// edges connect the same unordered node pair, they'd otherwise draw as
+// perfectly overlapping lines with stacked, unreadable labels. Each edge in
+// such a group is bent into a quadratic curve, offset perpendicular to the
+// straight line by a multiple of EDGE_BEND_STEP, symmetric around zero
+// (e.g. 3 edges bend at -1, 0, +1 steps) so a lone edge between two nodes
+// is completely unaffected (bend 0 == a straight line, the common case).
+// Endpoints stay exactly where edgeAnchors() would put a straight edge —
+// only the path between them bends — so this never changes hit-target
+// anchoring at the node border, just how the line/label reach it.
+// ---------------------------------------------------------------------------
+const EDGE_BEND_STEP = 60; // world units of perpendicular offset per step
+
+function computeEdgeBendInfo() {
+  const groups = new Map(); // "id1|id2" (sorted) -> [edge, ...] in encounter order
+  for (const edge of state.edges) {
+    if (edge.auto) continue; // contains edges are never drawn/hit-tested, so never bent
+    const key = edge.source < edge.target ? `${edge.source}|${edge.target}` : `${edge.target}|${edge.source}`;
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(edge);
+  }
+  const info = new Map(); // edge.id -> { index, count }
+  for (const group of groups.values()) {
+    group.forEach((edge, index) => info.set(edge.id, { index, count: group.length }));
+  }
+  return info;
+}
+
+// Null when there's only one edge for this node pair (the common case) —
+// callers draw/hit-test a plain straight line in that case, unchanged from
+// before parallel-edge bending existed.
+function edgeControlPoint(a, b, edge, bendInfo) {
+  const info = bendInfo.get(edge.id);
+  if (!info || info.count <= 1) return null;
+  // The perpendicular axis must be canonical — independent of which node
+  // this particular edge calls "source" vs "target" — or two edges in the
+  // same parallel group pointing opposite ways would have their a->b
+  // direction (and so their perpendicular) flipped relative to each other,
+  // silently mirroring one edge's offset onto another's and landing them
+  // on the exact same curve instead of fanning out (found by screenshot
+  // spot-check, not just the geometry-only unit tests, which happened not
+  // to cover a same-pair, opposite-direction case).
+  const flip = edge.source > edge.target ? -1 : 1;
+  const dx = flip * (b.x - a.x), dy = flip * (b.y - a.y);
+  const len = Math.hypot(dx, dy) || 1;
+  const nx = -dy / len, ny = dx / len; // unit perpendicular to the straight line
+  const step = info.index - (info.count - 1) / 2; // symmetric around 0
+  const mid = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+  return { x: mid.x + nx * step * EDGE_BEND_STEP, y: mid.y + ny * step * EDGE_BEND_STEP };
+}
+
+function quadraticBezierPoint(a, control, b, t) {
+  const mt = 1 - t;
+  return {
+    x: mt * mt * a.x + 2 * mt * t * control.x + t * t * b.x,
+    y: mt * mt * a.y + 2 * mt * t * control.y + t * t * b.y,
+  };
+}
+
+// Full render/hit-test geometry for one edge: anchors (always at the node
+// border, exactly as a straight edge would be), an optional bend control
+// point, and the actual midpoint a label/toolbar/rename-prompt should sit
+// at — the bezier-evaluated midpoint when bent, the plain segment midpoint
+// otherwise (control is null, so this degrades to the pre-bending formula).
+function edgeGeometry(edge, bendInfo) {
+  const anchors = edgeAnchors(edge);
+  if (!anchors) return null;
+  const control = edgeControlPoint(anchors.a, anchors.b, edge, bendInfo);
+  const mid = control
+    ? quadraticBezierPoint(anchors.a, control, anchors.b, 0.5)
+    : { x: (anchors.a.x + anchors.b.x) / 2, y: (anchors.a.y + anchors.b.y) / 2 };
+  return { a: anchors.a, b: anchors.b, control, mid };
+}
+
 function distToSegment(px, py, ax, ay, bx, by) {
   const dx = bx - ax, dy = by - ay;
   const lenSq = dx * dx + dy * dy;
@@ -964,16 +1057,36 @@ function distToSegment(px, py, ax, ay, bx, by) {
   return Math.hypot(px - cx, py - cy);
 }
 
+// Distance from a point to a bent (or straight) edge: a bent edge is
+// sampled into short straight sub-segments and the minimum distance to any
+// of them is used — plenty precise at the pixel-scale threshold this is
+// compared against, and exact (not an approximation at all) when there's
+// no control point, since that's just the single a->b segment.
+const EDGE_CURVE_SAMPLES = 16;
+function distToEdgePath(px, py, a, control, b) {
+  if (!control) return distToSegment(px, py, a.x, a.y, b.x, b.y);
+  let prev = a;
+  let best = Infinity;
+  for (let i = 1; i <= EDGE_CURVE_SAMPLES; i++) {
+    const t = i / EDGE_CURVE_SAMPLES;
+    const pt = quadraticBezierPoint(a, control, b, t);
+    best = Math.min(best, distToSegment(px, py, prev.x, prev.y, pt.x, pt.y));
+    prev = pt;
+  }
+  return best;
+}
+
 function findEdgeAt(wx, wy) {
   const threshold = 6 / camera.scale;
   const rect = visibleWorldRect();
+  const bendInfo = computeEdgeBendInfo();
   for (let i = state.edges.length - 1; i >= 0; i--) {
     const e = state.edges[i];
     if (e.auto) continue; // contains edges are never drawn, so never hit-testable
-    const anchors = edgeAnchors(e);
-    if (!anchors) continue;
-    if (!rectsOverlap(edgeBoundingRect(anchors), rect)) continue;
-    if (distToSegment(wx, wy, anchors.a.x, anchors.a.y, anchors.b.x, anchors.b.y) <= threshold) return e;
+    const geo = edgeGeometry(e, bendInfo);
+    if (!geo) continue;
+    if (!rectsOverlap(edgeBoundingRect(geo, geo.control), rect)) continue;
+    if (distToEdgePath(wx, wy, geo.a, geo.control, geo.b) <= threshold) return e;
   }
   return null;
 }
@@ -1023,11 +1136,15 @@ function visibleWorldRect() {
   };
 }
 
-function edgeBoundingRect(anchors) {
-  const minX = Math.min(anchors.a.x, anchors.b.x);
-  const maxX = Math.max(anchors.a.x, anchors.b.x);
-  const minY = Math.min(anchors.a.y, anchors.b.y);
-  const maxY = Math.max(anchors.a.y, anchors.b.y);
+// `control` (optional): a bent edge's curve is entirely within the convex
+// hull of {a, control, b} (a property of quadratic beziers), so including
+// it here is exact enough for culling — never excludes any point the curve
+// actually reaches, at worst includes a little extra straight-line margin.
+function edgeBoundingRect(anchors, control) {
+  const xs = [anchors.a.x, anchors.b.x], ys = [anchors.a.y, anchors.b.y];
+  if (control) { xs.push(control.x); ys.push(control.y); }
+  const minX = Math.min(...xs), maxX = Math.max(...xs);
+  const minY = Math.min(...ys), maxY = Math.max(...ys);
   return { x: minX, y: minY, w: maxX - minX, h: maxY - minY };
 }
 
@@ -1135,31 +1252,37 @@ function drawArrowhead(x, y, dx, dy, size) {
 
 function drawEdges(colors) {
   const rect = visibleWorldRect();
+  const bendInfo = computeEdgeBendInfo();
   let edgesTotal = 0, edgesDrawn = 0;
   for (const edge of state.edges) {
     if (edge.auto) continue; // contains: communicated by nesting only, never drawn
     edgesTotal++;
-    const anchors = edgeAnchors(edge);
-    if (!anchors) continue;
-    if (!rectsOverlap(edgeBoundingRect(anchors), rect)) continue; // viewport culling (Section 6/9)
+    const geo = edgeGeometry(edge, bendInfo);
+    if (!geo) continue;
+    if (!rectsOverlap(edgeBoundingRect(geo, geo.control), rect)) continue; // viewport culling (Section 6/9)
     edgesDrawn++;
     const selected = state.selection.type === "edge" && state.selection.id === edge.id;
     ctx.strokeStyle = selected ? colors.edgeStrokeSelected : colors.edgeStroke;
     ctx.fillStyle = ctx.strokeStyle;
     ctx.lineWidth = selected ? 3 : 2;
     ctx.beginPath();
-    ctx.moveTo(anchors.a.x, anchors.a.y);
-    ctx.lineTo(anchors.b.x, anchors.b.y);
+    ctx.moveTo(geo.a.x, geo.a.y);
+    if (geo.control) ctx.quadraticCurveTo(geo.control.x, geo.control.y, geo.b.x, geo.b.y);
+    else ctx.lineTo(geo.b.x, geo.b.y);
     ctx.stroke();
     if (edge.directed) {
-      drawArrowhead(anchors.b.x, anchors.b.y, anchors.b.x - anchors.a.x, anchors.b.y - anchors.a.y, ARROWHEAD_SIZE);
+      // Arrowhead follows the curve's actual tangent at the endpoint (the
+      // direction from the control point to b), not the straight a->b
+      // direction, so it still points the way the bent line is heading —
+      // degrades to the old a->b direction exactly when control is null.
+      const tailPoint = geo.control || geo.a;
+      drawArrowhead(geo.b.x, geo.b.y, geo.b.x - tailPoint.x, geo.b.y - tailPoint.y, ARROWHEAD_SIZE);
     }
-    const mx = (anchors.a.x + anchors.b.x) / 2, my = (anchors.a.y + anchors.b.y) / 2;
     ctx.fillStyle = colors.edgeLabelFg;
     ctx.font = `${EDGE_FONT_SIZE}px system-ui, sans-serif`;
     ctx.textAlign = "center";
     ctx.textBaseline = "bottom";
-    ctx.fillText(edge.relation, mx, my - 4);
+    ctx.fillText(edge.relation, geo.mid.x, geo.mid.y - 4);
   }
   renderStats.edgesTotal = edgesTotal;
   renderStats.edgesDrawn = edgesDrawn;
@@ -1241,6 +1364,7 @@ function drawGhostEdge(colors) {
 }
 
 const selToolbar = document.getElementById("sel-toolbar");
+const selRenameBtn = document.getElementById("sel-rename");
 const selToggleDirBtn = document.getElementById("sel-toggle-dir");
 const selTrashBtn = document.getElementById("sel-trash");
 
@@ -1254,9 +1378,9 @@ function updateSelectionToolbar() {
     selToggleDirBtn.style.display = "none";
   } else {
     const e = state.edges.find((x) => x.id === state.selection.id);
-    const anchors = e && edgeAnchors(e);
-    if (!anchors) { selToolbar.style.display = "none"; return; }
-    anchorWorld = { x: (anchors.a.x + anchors.b.x) / 2, y: (anchors.a.y + anchors.b.y) / 2 };
+    const geo = e && edgeGeometry(e, computeEdgeBendInfo());
+    if (!geo) { selToolbar.style.display = "none"; return; }
+    anchorWorld = geo.mid; // the curve's actual midpoint when the edge is bent, not the straight-line one
     selToggleDirBtn.style.display = "";
   }
   const screen = worldToScreen(anchorWorld.x, anchorWorld.y);
@@ -1566,7 +1690,10 @@ canvas.addEventListener("pointerup", (e) => {
     if (moved > MOVE_THRESHOLD) {
       suppressNextClick = true;
       const node = state.nodes.find((n) => n.id === movingNodeId);
-      if (node) updateGroupMembership(node); // commit/clear membership on drop, not on mere click
+      if (node) {
+        updateGroupMembership(node); // commit/clear the dragged node's own membership, not on mere click
+        if (node.type === "group") updateMembershipForMovedGroup(node); // absorb/release other nodes
+      }
       if (dragBeforeSnapshot) pushHistory(dragBeforeSnapshot, snapshotState()); // move + membership: one step
     }
     movingNodeId = null;
@@ -1645,6 +1772,65 @@ function placeNewNodeAt(world, screenPos, type) {
   });
 }
 
+// ---------------------------------------------------------------------------
+// Renaming (out-of-spec, user-requested): double-click an existing node/edge
+// on desktop; the floating selection toolbar's rename button (visible for
+// both node and edge selections) is the touch-friendly equivalent, since
+// there's no reliable double-tap gesture distinct from a fast double-select
+// on touch devices. Both reuse the same showInlineInput() pattern as
+// creation, pre-filled with the current text — Enter/blur commits, Escape
+// cancels. An empty or unchanged submission is a no-op: no history entry,
+// matching how an empty label at creation time creates nothing at all.
+// ---------------------------------------------------------------------------
+function beginRenameNodePrompt(nodeId, screenPos) {
+  const node = state.nodes.find((n) => n.id === nodeId);
+  if (!node) return;
+  showInlineInput({
+    x: screenPos.x, y: screenPos.y, value: node.label,
+    placeholder: node.type === "group" ? "Group label" : "Node label",
+    onCommit: (text) => {
+      const label = text.trim();
+      if (!label || label === node.label) return;
+      const before = snapshotState();
+      node.label = label;
+      pushHistory(before, snapshotState());
+      markDirty();
+    },
+  });
+}
+
+function beginRenameEdgePrompt(edgeId, screenPos) {
+  const edge = state.edges.find((e) => e.id === edgeId);
+  if (!edge) return;
+  showInlineInput({
+    x: screenPos.x, y: screenPos.y, value: edge.relation, placeholder: "relation label",
+    onCommit: (text) => {
+      const relation = text.trim();
+      if (!relation || relation === edge.relation) return;
+      const before = snapshotState();
+      edge.relation = relation;
+      pushHistory(before, snapshotState());
+      markDirty();
+    },
+  });
+}
+
+function renameSelected() {
+  if (state.selection.type === "node") {
+    const n = state.nodes.find((x) => x.id === state.selection.id);
+    if (!n) return;
+    const screen = worldToScreen(n.x + n.w / 2, n.y + n.h / 2);
+    beginRenameNodePrompt(n.id, screen);
+  } else if (state.selection.type === "edge") {
+    const e = state.edges.find((x) => x.id === state.selection.id);
+    if (!e) return;
+    const geo = edgeGeometry(e, computeEdgeBendInfo());
+    if (!geo) return;
+    const screen = worldToScreen(geo.mid.x, geo.mid.y);
+    beginRenameEdgePrompt(e.id, screen);
+  }
+}
+
 function handleConnectTap(hitNode, screenPos) {
   if (!hitNode) {
     state.connectSource = null;
@@ -1695,8 +1881,14 @@ canvas.addEventListener("click", (e) => {
 canvas.addEventListener("dblclick", (e) => {
   const rect = canvas.getBoundingClientRect();
   const world = screenToWorld(e.clientX - rect.left, e.clientY - rect.top);
-  if (findNodeAt(world.x, world.y)) return; // don't hijack dblclick on an existing node
-  placeNewNodeAt(world, { x: e.clientX, y: e.clientY }, "entity"); // spec gesture is entity-only
+  const screenPos = { x: e.clientX, y: e.clientY };
+
+  const nodeHit = findNodeAt(world.x, world.y);
+  if (nodeHit) { beginRenameNodePrompt(nodeHit.id, screenPos); return; }
+  const edgeHit = findEdgeAt(world.x, world.y);
+  if (edgeHit) { beginRenameEdgePrompt(edgeHit.id, screenPos); return; }
+
+  placeNewNodeAt(world, screenPos, "entity"); // spec gesture is entity-only
 });
 
 window.addEventListener("keydown", (e) => {
@@ -1719,6 +1911,8 @@ window.addEventListener("keydown", (e) => {
     pushHistory(before, snapshotState());
   }
 });
+
+selRenameBtn.addEventListener("click", () => renameSelected());
 
 selTrashBtn.addEventListener("click", () => {
   if (!state.selection.type) return;
@@ -2362,6 +2556,14 @@ window.__kg = {
   perf: {
     getRenderStats: () => ({ ...renderStats }),
     getVisibleWorldRect: () => visibleWorldRect(),
+  },
+  // Exposes the exact anchor/control/midpoint geometry a given edge id
+  // renders and hit-tests with, so tests can assert bend behavior (offset
+  // direction/magnitude, straight-when-alone) precisely instead of only
+  // inferring it from pixels.
+  getEdgeGeometry: (edgeId) => {
+    const edge = state.edges.find((e) => e.id === edgeId);
+    return edge ? edgeGeometry(edge, computeEdgeBendInfo()) : null;
   },
 };
 
