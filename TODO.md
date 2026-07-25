@@ -9,15 +9,15 @@ State" so the project can be picked up cold at any time.
 
 ## Current State
 
-- **Phase:** Phases 0, 1, and 2 complete, all with green automated test
-  suites (`node --test tests/*.spec.mjs`, 53 tests, see Log below). Not yet
+- **Phase:** Phases 0, 1, 2, and 3 complete, all with green automated test
+  suites (`node --test tests/*.spec.mjs`, 69 tests, see Log below). Not yet
   hand-tested on real touch hardware (pinch/long-press) — deferred to
-  Phase 10, not blocking. Phase 3 not started.
+  Phase 10, not blocking. Phase 4 not started.
 - **Target file:** `index.html` (single file, no external deps/CDN links).
   Dev-only test tooling lives in `tests/` (see `tests/README.md`) and never
   ships as part of the app.
-- **Next action:** Phase 3 (Undo/redo — command-pattern stack over add/move/
-  connect/delete/group/autolayout/import, one step per discrete action).
+- **Next action:** Phase 4 (Tier 1 storage — every edit auto-saved to OPFS
+  in the background, restored on load for crash/dropped-tab recovery).
 
 ---
 
@@ -222,20 +222,33 @@ claude.ai/code, which is plain git via GitHub as described above.
 
 ## Phase 3 — Undo/redo
 
-- [ ] Command-pattern undo stack in memory
-- [ ] Every discrete action = one undo step: add, move, connect, delete,
-      group, autolayout, TXT import
-- [ ] Undo/Redo buttons only, no dedicated gesture — Decision #8
-- [ ] Confirm: undo stack NOT persisted across reload (reload starts fresh
+- [x] Command-pattern undo stack in memory
+- [x] Every discrete action = one undo step: add, move, connect, delete,
+      group, autolayout, TXT import (autolayout/TXT import don't exist yet
+      — Phases 8/6 — so only add/move/connect/delete/group are wired so
+      far; the history mechanism itself is generic and ready for them)
+- [x] Undo/Redo buttons only, no dedicated gesture — Decision #8
+- [x] Confirm: undo stack NOT persisted across reload (reload starts fresh
       from last saved state) — Section 8
-- Tests (planned, `tests/phase3.spec.mjs`):
-  - Automated: each action type (add/move/connect/delete/group/autolayout/
-    TXT import) produces exactly one undo step (stack length +1, not more);
-    Undo then Redo round-trips to a deep-equal `state.nodes`/`state.edges`
-    at each step; a fresh page load starts with an empty undo stack even
-    after prior edits + reload.
+- Tests (`tests/phase3.spec.mjs`, 16 tests, all green):
+  - Automated: Undo/Redo buttons start disabled and correctly flip enabled/
+    disabled as the stack fills/empties (checked via the real `disabled`
+    DOM attribute, not just internal state); add node, add edge, toggle
+    edge direction, delete node (incl. its incident edges), delete edge,
+    move node, and resize a group each Undo to the exact prior state and
+    Redo back — ids are preserved across both (never regenerated); a
+    group-membership commit from a drag-in is exactly *one* combined undo
+    step (not two), and undoing it clears both `groups[]` and the auto
+    `contains` edge together; long-press delete is also exactly one step;
+    performing a new action after an Undo discards the redo stack; Undo/
+    Redo are genuinely inert with an empty stack (both via the disabled
+    button being unclickable *and* via calling the underlying functions
+    directly as a defensive check); several sequential adds are exactly
+    that many undo steps; reloading the page always starts with an empty
+    stack, confirming no persistence.
   - Manual: rapid alternating Undo/Redo clicks don't visibly desync the
-    canvas from `state`.
+    canvas from `state` (spot-checked via screenshots this session, not an
+    extended stress pass).
 
 ## Phase 4 — Tier 1 storage (OPFS live engine)
 
@@ -515,6 +528,49 @@ and record deltas here instead of editing the spec.)*
     correctness fix that Phase 1 didn't need since nothing nested yet, but
     Phase 2 does: without it, clicking a node fully inside a much bigger
     group would hit the group instead of the member.
+- 2026-07-25 — PR #2 (Phase 2) merged to `main` by the user. Restarted this
+  branch from `origin/main` again per the merged-PR protocol before
+  starting Phase 3 — same clean case as before, no unmerged work on the old
+  tip.
+- 2026-07-25 — Phase 3 (Undo/redo) implemented in `index.html`
+  (`tests/phase3.spec.mjs`, 16 tests; 69 total across all phases). Notable
+  decisions:
+  - **Snapshot-based, not delta-based.** Every undo step stores a full
+    `{before, after}` clone of `{nodes, edges}` rather than a hand-written
+    inverse per action type. Chosen for correctness by construction — a
+    delta-based command for, say, "delete node" would need to remember to
+    also restore every incident edge and every other node's `groups[]`
+    entry that referenced it, and any future phase that adds a new mutation
+    would need its own hand-rolled inverse too. A snapshot can't get this
+    wrong. This also directly matches the spec's own description of
+    autolayout (Phase 8) as "one before snapshot of all positions" —
+    generalized here to every action instead of being special-cased later.
+    `nextNodeNum`/`nextEdgeNum` counters are deliberately *not* part of the
+    snapshot, since ids must never be reused (Section 4.1) even across
+    undo/redo.
+  - **Group membership is not a separate undo step from the move that
+    caused it.** Since the *only* way to change membership is the drag-in/
+    drag-out mechanic (Phase 2), the before/after snapshot for a "move"
+    action is taken spanning the entire drag lifecycle (pointerdown to
+    pointerup, after `updateGroupMembership` runs) — so a drag that both
+    repositions a node *and* changes its group membership is one Undo, not
+    two. Verified explicitly in the test suite.
+  - **Resize (the group-only corner handle added in Phase 2) is undoable
+    too**, via the same before/after-snapshot-around-the-drag pattern as
+    move. Phase 3's checklist enumerates "add, move, connect, delete,
+    group, autolayout, TXT import" and doesn't name resize specifically,
+    but it's a real state mutation with no other listed category to fall
+    under — leaving it un-undoable would just be a gap, not a deliberate
+    scope boundary.
+  - **Undo/Redo buttons are `disabled` (real DOM attribute) when their
+    stack is empty**, not just inert. Decision #8 says "buttons only, no
+    dedicated gesture" for undo/redo, which this doesn't contradict — it's
+    about *how* the action is reached, not whether the button gives
+    feedback when there's nothing to do.
+  - Selection is intentionally cleared (not restored) on every Undo/Redo —
+    the previously-selected node or edge may not exist in the restored
+    snapshot (e.g. it was the thing just undone into non-existence), so
+    trying to preserve it isn't meaningfully well-defined.
 
 ---
 
