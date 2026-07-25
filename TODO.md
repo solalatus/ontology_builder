@@ -32,6 +32,41 @@ feature) unless a phase below says otherwise.
 
 ---
 
+## Working across environments (CLI vs claude.ai/code)
+
+This project gets worked on from two different Claude Code environments —
+the local/CLI one and the web-based claude.ai/code one — sometimes in the
+same day. **The GitHub repo (`solalatus/ontology_builder`, `main` branch) is
+the only source of truth between them.** Neither environment's local working
+directory persists or is shared with the other — each session starts from
+whatever is on `origin/main`.
+
+Rules to avoid confusion:
+
+- **Before switching environments:** commit and push whatever you were doing
+  in the one you're leaving (git itself is handled by the user, not by
+  Claude — see below). An environment switch with uncommitted local changes
+  means those changes are invisible to the other environment.
+- **After switching environments:** pull `origin/main` first, then re-read
+  this TODO.md's "Current State" section before doing anything else — it
+  may have been updated by the other environment.
+- **This file is the handoff mechanism.** Keep "Current State" accurate and
+  commit it along with any code change, so whichever environment opens the
+  repo next — CLI or web — sees the same picture.
+- **Git operations in the CLI environment are handled by the user, not
+  Claude**, for this project (confirmed 2026-07-25) — Claude should edit
+  files but leave staging/commit/push to the user here. Whether the same
+  holds in claude.ai/code is a separate call the user makes there.
+
+**Do not confuse this with the app's own storage tiers (spec Section 3.2).**
+"Tier 1 / Tier 2 / Tier 3" in `spec.md` describe how the *Knowledge Graph
+Canvas app itself* persists a user's graph data at runtime (OPFS, folder
+sync, export files) — that's a feature being built. It has nothing to do
+with how the *source code of this project* is synced between the CLI and
+claude.ai/code, which is plain git via GitHub as described above.
+
+---
+
 ## Phase 0 — Scaffold
 
 - [ ] Create single HTML file with inlined `<style>` and `<script>` blocks
