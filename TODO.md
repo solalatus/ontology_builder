@@ -10,16 +10,17 @@ State" so the project can be picked up cold at any time.
 ## Current State
 
 - **Phase:** Phases 0 through 9 complete, all with green automated test
-  suites (`node --test tests/*.spec.mjs`, 214 JS tests + 15 Python tests,
+  suites (`node --test tests/*.spec.mjs`, 228 JS tests + 15 Python tests,
   see Log below). Not yet hand-tested on real touch hardware (pinch/
   long-press) — deferred to Phase 10, not blocking. Phase 7's real-folder
   grant/write-back is likewise only mocked-tested so far, not hand-verified
   on real Chrome/Windows or Chromium/Linux — also deferred to Phase 10.
   Phase 9's real-device 60fps feel is similarly only smoke-tested
   headlessly so far — also deferred to Phase 10. A "Clear" button, a
-  dark/light theme toggle, editable node/edge labels (rename), and
-  parallel-edge bending (all outside the phased plan, user-requested)
-  were also added — see their own sections below, right after Phase 11.
+  dark/light theme toggle, editable node/edge labels (rename), parallel-
+  edge bending, and Hungarian/English UI localization (all outside the
+  phased plan, user-requested) were also added — see their own sections
+  below, right after Phase 11.
   Phase 8's autolayout also now enforces explicit group-containment
   (members can't escape their group's box during layout), and Phase 2's
   group-drag now cascades membership both ways (absorb on drag-onto,
@@ -760,6 +761,48 @@ phase above — tracked here instead of invented as a fake phase number.
   between the same pair still fan out distinctly rather than mirroring
   onto the same curve — this last one caught a real bug, see the Log entry
   below.
+
+### Hungarian/English localization
+
+- [x] All UI *chrome* text (toolbar button labels/aria-labels, tooltips,
+      placeholders, dialog messages, the canvas empty-state message, the
+      page `<title>`) is localized into Hungarian and English via a small
+      `STRINGS = { en: {...}, hu: {...} }` dictionary and a `t(key, ...args)`
+      lookup — dynamic entries are functions (interpolated at call time),
+      static entries are plain strings
+- [x] A "Nyelv: Magyar" / "Language: English" toolbar button toggles
+      between them, mirroring the existing theme-toggle button's
+      status-label convention (`aria-pressed` reflects English being
+      active)
+- [x] Defaults to Hungarian on first load, persisted in its own
+      `localStorage` key (`kg-lang`), applied synchronously at top-level
+      script scope (before `boot()`, before first paint) — same
+      no-flash-of-wrong-language pattern the theme toggle already
+      established
+- [x] **Explicitly does NOT translate user-created graph content** — node
+      labels, edge relations, and a graph's name once the user has
+      actually renamed it are user data, not application interface, and
+      auto-translating them would corrupt what the user actually typed.
+      The one exception: an *untouched* "Untitled Graph"/"Névtelen gráf"
+      placeholder title (never renamed) tracks the current language on
+      toggle, since it's the app's own default text, not something the
+      user wrote — see the Log entry below for how this is detected
+      without ever risking a real user-chosen name.
+- [x] Toggling language is not an undoable graph action (never touches the
+      undo/redo stack), exactly like the theme toggle
+- Tests (`tests/localization.spec.mjs`, 14 tests, all green): defaults to
+  Hungarian with no prior `localStorage`; toggling flips every static
+  button/tooltip/aria-label and the `<html lang>` attribute, and flips
+  back; the choice persists across a reload; toggling pushes no undo/redo
+  entry; the `window.__kg.lang` test hook mirrors the button; an untouched
+  "Untitled Graph" placeholder retranslates on toggle, but a graph the
+  user has actually renamed never does; the canvas empty-state message and
+  the node/group/relation inline-input placeholders translate in both
+  languages; the Clear confirm dialog's message and button labels
+  translate; the import dialog's diff-summary message translates with
+  correctly interpolated node/edge counts, and its Cancel/Replace/Merge
+  button labels translate; the selection toolbar's Rename/Delete tooltips
+  translate.
 
 ---
 
@@ -1659,6 +1702,75 @@ and record deltas here instead of editing the spec.)*
     throughout (not just once at the end, since two of the three features
     each surfaced a real bug mid-testing): `node --test tests/*.spec.mjs`
     (214 tests) and `python3 -m unittest discover -s tools -p "test_*.py"`
+    (15 tests), both green — no regressions in any earlier phase or
+    out-of-spec feature.
+- 2026-07-25 — Hungarian/English localization implemented in `index.html`.
+  Notable decisions and a real regression found and fixed along the way:
+  - **Scope: UI chrome only, never graph content.** Node labels, edge
+    relations, and a graph's own name (once renamed) are user data — never
+    auto-translated. Only toolbar/dialog/placeholder/tooltip text and the
+    canvas empty-state message are localized. The one deliberate exception
+    is the still-*default* "Untitled Graph" placeholder title: since it's
+    the app's own text, not something the user wrote, it now retranslates
+    on toggle. Detected via `isDefaultGraphName()`, which compares the
+    current `state.graphName` against *both* languages' literal default
+    string — not a separate boolean flag — so a graph saved as the default
+    in one language and reloaded under the other still gets recognized and
+    retranslated, and a real user-typed name (even coincidentally identical
+    text) is structurally indistinguishable from that check only in the
+    single edge case of a user renaming their graph to literally "Untitled
+    Graph" — accepted as negligible, same category of edge case as
+    `isContainsDeclaration`'s reliance on a magic relation string elsewhere
+    in this codebase.
+  - **Same pattern as the theme toggle throughout**, deliberately: a
+    `STRINGS.{en,hu}` dictionary + `t()` lookup, a `lang` variable read
+    from its own `localStorage` key synchronously at top-level script
+    scope (before `boot()`), and an `applyLanguage()` DOM-refresh function
+    mirroring `updateThemeButton()`'s role — chosen for consistency with
+    an already-established, already-tested convention rather than
+    inventing a second one.
+  - **Existing tests assert hardcoded English text everywhere** (~200
+    tests across every phase file), and this feature's Hungarian default
+    would have broken all of them. Rather than rewriting every assertion,
+    the shared `withPage()` helper (`tests/lib/page.mjs`) gained a
+    `lang: "en"` default parameter that pins English for every test in the
+    suite except the new `tests/localization.spec.mjs` itself (which
+    passes `lang: null` to see the app's real default and exercise the
+    toggle on purpose). The two other files with their own hand-rolled
+    page lifecycle (`tests/phase5.spec.mjs`'s `withDownloadPage`,
+    `tests/phase7.spec.mjs`'s `withFolderPage`) were patched the same way.
+  - **Found and fixed a real, intermittent (~15-20% of runs) regression
+    during this pass — but traced it to a pre-existing Chromium/Playwright
+    hazard, not new application code.** The initial English-pin used
+    `page.addInitScript(() => localStorage.setItem("kg-lang","en"))`,
+    which intermittently caused a `page.reload()` immediately afterward to
+    restore an *empty* graph even though Tier 1 storage had just been
+    confirmed saved (`storage.whenIdle()` resolved first). Proved via
+    `git stash`/`git stash pop` A/B testing that this reproduced
+    identically on unmodified `main` as long as *any* `addInitScript`
+    wrote to `localStorage` (even an unrelated key) before a reload — 3-4
+    failures per 20 runs both with and without the localization changes,
+    0 failures per 20 with no `addInitScript` at all or with a no-op one.
+    Root cause: `addInitScript` re-runs on every navigation including
+    `page.reload()`, and a `localStorage` write injected at that early,
+    pre-navigation point races with Chromium's own `localStorage`
+    rehydration for `file://` origins — occasionally starting the new
+    document from an empty in-memory map, applying the injected write on
+    top of it, and persisting that (now missing the app's own prior save)
+    back to disk. This is a test-infrastructure hazard specific to
+    `addInitScript` + `file://` + reload, not a bug in the app's Tier 1
+    code. **Fix:** all three helpers now pin the language via
+    `page.evaluate(() => window.__kg.lang.toggle())` *after*
+    `window.__kg` exists (i.e. after the page's own script has already
+    run), the same mechanism a real user's click would use — proven
+    stable across a 25-iteration stress run with zero failures, vs. the
+    ~20% failure rate of the `addInitScript` approach at the same sample
+    size.
+  - Wrote `tests/localization.spec.mjs` (14 tests). Ran the full suite
+    repeatedly during the regression hunt (not just once at the end):
+    `node --test tests/*.spec.mjs` (228 tests, run twice consecutively to
+    confirm the reload-hang fix actually holds, not just a lucky single
+    pass) and `python3 -m unittest discover -s tools -p "test_*.py"`
     (15 tests), both green — no regressions in any earlier phase or
     out-of-spec feature.
 
