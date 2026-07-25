@@ -10,14 +10,14 @@ State" so the project can be picked up cold at any time.
 ## Current State
 
 - **Phase:** Phases 0 through 6 complete, all with green automated test
-  suites (`node --test tests/*.spec.mjs`, 126 tests, see Log below). Not
-  yet hand-tested on real touch hardware (pinch/long-press) — deferred to
-  Phase 10, not blocking. Phase 7 not started. A "Clear" button (outside
-  the phased plan, user-requested) was also added — see its own section
-  below, right after Phase 11.
+  suites (`node --test tests/*.spec.mjs`, 130 JS tests + 15 Python tests,
+  see Log below). Not yet hand-tested on real touch hardware (pinch/
+  long-press) — deferred to Phase 10, not blocking. Phase 7 not started.
+  A "Clear" button (outside the phased plan, user-requested) was also
+  added — see its own section below, right after Phase 11.
 - **Target file:** `index.html` (single file, no external deps/CDN links).
-  Dev-only test tooling lives in `tests/` (see `tests/README.md`) and never
-  ships as part of the app.
+  Dev-only test tooling lives in `tests/` and `tools/` (see `tests/README.md`)
+  and never ships as part of the app.
 - **Important deviation from spec, read before touching storage:** Tier 1
   is *not* OPFS-only as spec Section 3.2 literally says — it's OPFS with an
   automatic localStorage fallback, because OPFS throws `SecurityError`
@@ -25,15 +25,23 @@ State" so the project can be picked up cold at any time.
   deployment mode Section 2 promises ("opens directly in a browser...no
   external server required"). See the Phase 4 Log entry below for the full
   story and why this was a user decision, not a unilateral call.
-- **spec.md's own reference Python TXT loader (Appendix) has a bug**: as
-  literally written, `if not line or line.startswith("#"): continue` runs
-  *before* the `## NODES`/`## EDGES` header checks, and both headers also
-  start with `#` — so the headers are unreachable and the reference loader
-  as written parses nothing. `index.html`'s importer checks the headers
-  first and does not have this bug; this was found by testing against
-  spec's own worked example, not by inspection. See the Phase 6 Log entry.
-  spec.md itself was left untouched (frozen v1.0 reference) per this file's
-  own convention — deltas live here, not by editing the spec.
+- **spec.md's reference Python TXT loader (Appendix) had a bug, now fixed
+  in spec.md itself.** As originally written, the generic `#`-comment skip
+  ran before the `## NODES`/`## EDGES` header checks, and both headers also
+  start with `#` — so the headers were unreachable and the reference loader
+  parsed nothing, even against spec's own worked example. Found by testing
+  (not inspection): the exact Python snippet, run against text extracted
+  directly from spec.md, returned `([], [])`. **Unlike every other spec
+  deviation in this project, spec.md was directly edited this time** — the
+  user explicitly asked for spec/Python/JS to be brought into "one
+  consistent state" rather than recording another delta in this file. A
+  standalone, tested copy now lives at `tools/load_edge_list.py` (kept
+  byte-identical to spec.md's snippet), with `tools/test_load_edge_list.py`
+  (Python `unittest`) and `tests/python-parity.spec.mjs` (runs the Python
+  script as a subprocess and diffs its output against the JS importer,
+  proving agreement rather than asserting it). See the dated Log entry
+  below for the full account, including a second, smaller behavioral
+  change (malformed-line handling) made for the same consistency reason.
 - **Next action:** Phase 7 (Tier 2 storage — `showDirectoryPicker` live
   folder sync, Chrome/Chromium desktop only, progressive enhancement).
 
@@ -352,9 +360,10 @@ claude.ai/code, which is plain git via GitHub as described above.
 ## Phase 6 — TXT import (Section 5.3)
 
 - [x] Reference Python-style loader logic ported to JS (parse `## NODES` /
-      `## EDGES`, `[group]`, `->` vs `<->`) — **with a bug fix**: the
-      reference loader's check order makes its own section headers
-      unreachable; the JS port checks headers first. See Log.
+      `## EDGES`, `[group]`, `->` vs `<->`) — **with a bug fix**, applied to
+      *both* the JS port and spec.md's own Appendix snippet: the original
+      check order made the section headers unreachable. Standalone tested
+      copy at `tools/load_edge_list.py`. See Log.
 - [x] Merge mode (default): label+type matched; new nodes created and
       auto-placed (shelf/grid, flagged as new); existing nodes keep
       position/size/groups untouched; new edges added; missing edges left
@@ -395,6 +404,23 @@ claude.ai/code, which is plain git via GitHub as described above.
     drag-and-drop (synthetic `DragEvent` in tests exercises the app's drop
     handler correctly but isn't a full substitute for an actual file being
     dragged from a real file manager) — both deferred to Phase 10.
+  - **Python reference loader** (`tools/load_edge_list.py`, kept
+    byte-identical to spec.md's Appendix snippet): `tools/test_load_edge_list.py`
+    (15 tests, `unittest`, stdlib only) covers the same shared
+    `tests/fixtures/*.txt` files — full reproduction of spec's worked
+    example (including that the fix actually works — one test pins down
+    exactly the "headers swallowed by the comment check" regression),
+    group-suffix stripping, bidirectional edges, comments/blank lines
+    ignored, both classes of malformed edge line skipped, a bare `[group]`
+    marker with no name skipped, a file with no recognized sections
+    returning empty, and multiple edges between the same pair. Separately,
+    `tests/python-parity.spec.mjs` (4 tests, part of the JS suite) runs the
+    Python script as a subprocess against every fixture and diffs its
+    output against the JS importer's `parseTxtImport()` directly — proof
+    the two agree, not just a comment claiming they do. Skips gracefully
+    (console warning, not a failure) if `python3` isn't on `PATH`.
+    Run both: `node --test tests/*.spec.mjs && python3 -m unittest
+    discover -s tools -p "test_*.py"`.
 
 ## Phase 7 — Tier 2 storage (live folder sync, progressive enhancement)
 
@@ -914,6 +940,60 @@ and record deltas here instead of editing the spec.)*
     changes) — spec doesn't specify exact counting rules, and node/edge
     counts are the figures a user actually recognizes when sanity-checking
     an import.
+- 2026-07-25 — PR #6 (Phase 6) merged to `main` by the user. Restarted this
+  branch from `origin/main` per the merged-PR protocol before this
+  follow-up fix — same clean case as prior restarts.
+- 2026-07-25 — Follow-up: user asked to verify the Python-reference-loader
+  bug claim empirically (not just trust the earlier write-up), then asked
+  for it to be fixed everywhere in one consistent state — spec.md, a real
+  standalone Python file, and the JS port — with a test for the Python
+  side too.
+  - **Verification, on request, before touching anything.** Extracted the
+    exact worked example text directly out of `spec.md` (via regex over
+    the raw file, not my own retyped fixture) and ran spec's exact
+    Appendix code, character-for-character, against it in a real Python
+    3.11 interpreter: `NODES: []` / `EDGES: []`. This is what justified
+    editing spec.md itself, rather than resting on the earlier JS-port
+    finding alone.
+  - **spec.md was directly edited** — the one deliberate exception to this
+    file's own "keep spec.md frozen, record deltas here" rule in the whole
+    project so far, because the user explicitly asked for a single
+    consistent fix rather than another delta entry. The Appendix snippet
+    now has the corrected check order plus the same malformed-line
+    handling described below; `tools/load_edge_list.py` is kept
+    byte-identical to it (mechanically diffed to confirm — see
+    `tests/python-parity.spec.mjs` and the ad hoc check run this session).
+  - **Second, smaller consistency fix beyond the header-order bug**: the
+    original reference snippet would raise `ValueError` on a malformed
+    edge line (e.g. no `" : "` separator — `line.rsplit(" : ", 1)` can't
+    unpack into two names), while the JS importer has always silently
+    skipped such lines. Left alone, "the reference loader" and "the app's
+    real importer" would disagree on how to handle a slightly malformed
+    hand-edited file — exactly the kind of inconsistency the user asked to
+    eliminate. Added the same skip-on-malformed behavior to both spec.md's
+    snippet and `tools/load_edge_list.py`. This is a real behavioral
+    change to spec's reference code, not just a check-order fix, flagged
+    here explicitly since it's a bigger deviation than the original bug
+    report described.
+  - **New `tools/` directory**: `load_edge_list.py` (the standalone,
+    tested loader) and `test_load_edge_list.py` (15 `unittest` tests,
+    stdlib only, matching this project's "no dependencies" ethos for the
+    Python side too). Both reuse `tests/fixtures/*.txt` — the same files
+    `tests/phase6.spec.mjs` uses — so the JS and Python suites are checked
+    against one shared set of examples, not two that could quietly drift.
+  - **New `tests/python-parity.spec.mjs`** (4 tests, one per fixture):
+    runs `tools/load_edge_list.py` as a subprocess and deep-equals its
+    output against `window.parseTxtImport()` (the JS importer's parser,
+    reachable directly since top-level `function` declarations in a
+    classic `<script>` become `window` properties — confirmed empirically
+    while debugging the original bug, not an intentional public API).
+    Skips gracefully, with a console warning rather than a failure, if
+    `python3` isn't on `PATH` — consistent with how Playwright-dependent
+    tests are already treated as environment-dependent nice-to-haves per
+    the Testing Strategy section.
+  - Ran everything before considering this done: `node --test
+    tests/*.spec.mjs` (130 tests) and `python3 -m unittest discover -s
+    tools -p "test_*.py"` (15 tests), both fully green.
 
 ---
 

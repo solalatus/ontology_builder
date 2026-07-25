@@ -298,31 +298,44 @@ def load_edge_list(path):
     with open(path, encoding="utf-8") as f:
         for raw in f:
             line = raw.strip()
-            if not line or line.startswith("#"):
-                continue
+            # Section headers are checked before the generic "#" comment
+            # skip below, since "## NODES"/"## EDGES" also start with "#" —
+            # checking the comment rule first would make both headers
+            # unreachable and the loader would parse nothing at all.
             if line == "## NODES":
                 section = "nodes"
                 continue
             if line == "## EDGES":
                 section = "edges"
                 continue
+            if not line or line.startswith("#"):
+                continue
             if section == "nodes":
                 is_group = line.endswith("[group]")
-                name = line.replace("[group]", "").strip()
-                nodes.append({"label": name, "type": "group" if is_group else "entity"})
+                name = line[: -len("[group]")].strip() if is_group else line
+                if name:
+                    nodes.append({"label": name, "type": "group" if is_group else "entity"})
             elif section == "edges":
+                if " : " not in line:
+                    continue  # malformed — no relation separator, skip
                 conn, relation = line.rsplit(" : ", 1)
                 if "<->" in conn:
-                    src, tgt = conn.split("<->")
                     directed = False
-                else:
-                    src, tgt = conn.split("->")
+                    src, tgt = conn.split("<->", 1)
+                elif "->" in conn:
                     directed = True
-                edges.append({
-                    "source": src.strip(),
-                    "target": tgt.strip(),
-                    "relation": relation.strip(),
-                    "directed": directed,
-                })
+                    src, tgt = conn.split("->", 1)
+                else:
+                    continue  # malformed — no connector, skip
+                src, tgt, relation = src.strip(), tgt.strip(), relation.strip()
+                if src and tgt and relation:
+                    edges.append({
+                        "source": src,
+                        "target": tgt,
+                        "relation": relation,
+                        "directed": directed,
+                    })
     return nodes, edges
 ```
+
+A standalone, tested copy of this loader lives at `tools/load_edge_list.py` (kept byte-for-byte in sync with the snippet above) — see `tools/test_load_edge_list.py`.
