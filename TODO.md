@@ -9,10 +9,10 @@ State" so the project can be picked up cold at any time.
 
 ## Current State
 
-- **Phase:** Phases 0, 1, 2, 3, and 4 complete, all with green automated
-  test suites (`node --test tests/*.spec.mjs`, 92 tests, see Log below).
+- **Phase:** Phases 0, 1, 2, 3, 4, and 5 complete, all with green automated
+  test suites (`node --test tests/*.spec.mjs`, 103 tests, see Log below).
   Not yet hand-tested on real touch hardware (pinch/long-press) — deferred
-  to Phase 10, not blocking. Phase 5 not started. A "Clear" button (outside
+  to Phase 10, not blocking. Phase 6 not started. A "Clear" button (outside
   the phased plan, user-requested) was also added — see its own section
   below, right after Phase 11.
 - **Target file:** `index.html` (single file, no external deps/CDN links).
@@ -25,8 +25,10 @@ State" so the project can be picked up cold at any time.
   deployment mode Section 2 promises ("opens directly in a browser...no
   external server required"). See the Phase 4 Log entry below for the full
   story and why this was a user decision, not a unilateral call.
-- **Next action:** Phase 5 (File formats — JSON canonical export, TXT
-  edge-list export, versioned filenames).
+- **Next action:** Phase 6 (TXT import — merge and replace modes, Section
+  5.3). `state.meta` (added in Phase 5) already exists by the time this
+  runs if the user has ever saved; if they haven't, decide there whether
+  import should force the graph-name prompt too or default silently.
 
 ---
 
@@ -295,25 +297,41 @@ claude.ai/code, which is plain git via GitHub as described above.
 
 ## Phase 5 — File formats (export)
 
-- [ ] JSON canonical export exactly per Section 5.1 schema (meta, nodes,
+- [x] JSON canonical export exactly per Section 5.1 schema (meta, nodes,
       edges — full fidelity incl. positions/sizes/group boundaries)
-- [ ] TXT edge-list export exactly per Section 5.2 grammar (`## NODES`,
+- [x] TXT edge-list export exactly per Section 5.2 grammar (`## NODES`,
       `## EDGES`, `->` / `<->`, `[group]` suffix, comment header)
-- [ ] Versioned filename convention (Section 5.4):
+- [x] Versioned filename convention (Section 5.4):
       `<graph-name>_v<0000>_<UTC-timestamp>.{json,txt}` — both written
       together on every "Save Version"
-- [ ] Version number increments monotonically, stored in graph metadata,
+- [x] Version number increments monotonically, stored in graph metadata,
       continuous across sessions
-- Tests (planned, `tests/phase5.spec.mjs`):
-  - Automated: build a small fixture graph via `window.__kg.actions`,
-    trigger "Save Version", intercept the downloaded blob(s) (Playwright's
-    `page.on('download', ...)`) and assert the JSON matches Section 5.1's
-    schema exactly (round-trips through `JSON.parse`) and the TXT matches
-    Section 5.2's grammar byte-for-byte for that fixture; filenames follow
-    the `<graph-name>_v<0000>_<UTC-timestamp>.{json,txt}` convention;
-    saving twice increments the version number monotonically.
+- Tests (`tests/phase5.spec.mjs`, 11 tests, all green):
+  - Automated: intercepts real browser downloads via `page.on('download')`
+    (not `Promise.all` on two `waitForEvent` calls — that pairing turned
+    out unreliable for two downloads fired synchronously from one click;
+    see Log). The first "Save Version" prompts for a graph name and
+    subsequent saves don't re-prompt; Escape during that prompt cancels
+    the whole save (no `meta`, no downloads); exactly two downloads are
+    written per save, named per the `<graph-name>_v<0000>_<timestamp>`
+    convention; the graph name is sanitized for filename safety; the JSON
+    output round-trips through `JSON.parse` and matches Section 5.1's
+    schema field-for-field (including `boundary_mode` only on groups and
+    `groups[]`/positions surviving intact) against a fixture with a group,
+    a member, and an ordinary edge; the TXT output matches Section 5.2's
+    grammar line-for-line against the same fixture, *including* the
+    `contains` line (unlike canvas rendering and Tier 1 storage, the TXT
+    export deliberately does not filter out `auto` edges — Section 5.2
+    says so explicitly); a bidirectional edge exports with `<->`; saving
+    twice increments the version monotonically in both the filename and
+    the JSON `meta.version`; `graph_id`/`version`/`graph_name` survive a
+    reload and keep incrementing rather than resetting (Tier 1 carries
+    `meta` now, see below); Save Version does not create an undo step;
+    an empty graph still exports valid, structurally-correct empty output.
   - Manual: confirm the files actually land on disk via the real
-    browser-native save/download flow (Tier 3 baseline).
+    browser-native save/download flow (Tier 3 baseline) — not exercised
+    here since Playwright intercepts the download event before any actual
+    disk write; that's a genuine gap only real manual use can close.
 
 ## Phase 6 — TXT import (Section 5.3)
 
@@ -715,11 +733,57 @@ and record deltas here instead of editing the spec.)*
     showing only ever dismisses the dialog — it can't also silently
     cancel an unrelated armed Add Node/Add Group/Connect mode underneath
     it in the same keypress.
+- 2026-07-25 — PR #4 (Phase 4 + Clear button) merged to `main` by the
+  user. Restarted this branch from `origin/main` again per the merged-PR
+  protocol before starting Phase 5 — same clean case as prior restarts.
+- 2026-07-25 — Phase 5 (File formats — export) implemented in
+  `index.html` (`tests/phase5.spec.mjs`, 11 tests; 103 total). Notable
+  decisions:
+  - **Resolved the "graph name" Open Question**: user-entered via the
+    existing inline-input UI the first time "Save Version" is clicked,
+    then stored in `state.meta.graph_name` and reused silently on every
+    later save — no re-prompting. `state.meta` (format_version, graph_id
+    via `crypto.randomUUID()`, version, graph_name, created) doesn't exist
+    at all until that first save; there's genuinely no version history to
+    speak of before then.
+  - **Graph-name sanitization is conservative, not decorative**: since it
+    lands directly in a cross-platform filename, whitespace runs become a
+    single `-` and everything outside `[A-Za-z0-9_-]` is stripped
+    (not replaced) — e.g. `"My!! Graph///Name"` becomes `"My-GraphName"`,
+    not `"My-Graph-Name"`. No spec text governs this; documented here so
+    the exact stripping-vs-replacing behavior doesn't have to be
+    rediscovered by reading the regex.
+  - **`meta` now rides along in Tier 1's storage payload** (Phase 4's
+    `writeGraphToStorage`/`loadGraphFromStorage`), which is the only way
+    "version number... continuous across sessions" (Section 9) can hold:
+    without persisting `meta`, every reload would silently reset back to
+    an unsaved, version-less graph even after real saves had happened.
+  - **Save Version is deliberately not wrapped in `pushHistory()`.** It's
+    an export/side-effect action, not a graph mutation — nothing in
+    `state.nodes`/`state.edges` changes, so there is nothing to undo, and
+    treating it as an undo step would let Undo illegitimately roll back a
+    version number that a real file already exists for on disk.
+  - **`auto:true` "contains" edges are exported in both formats**, unlike
+    canvas rendering (Phase 2, never drawn) and Tier 1 storage (persisted
+    as an implementation detail, not user-facing) — Section 5.2 says so
+    explicitly ("`contains` edges are included like any other edge"), and
+    the JSON schema's own example shows one. Easy to get wrong by reusing
+    the `drawEdges`/`findEdgeAt` "skip auto" habit from Phase 2; this
+    export code deliberately does not filter by `.auto`.
+  - **Testing note**: `Promise.all([page.waitForEvent('download'),
+    page.waitForEvent('download')])` proved unreliable for two downloads
+    fired synchronously within one click handler (in earlier ad hoc
+    verification, both promises resolved to what looked like the same
+    event). Switched to collecting via a persistent `page.on('download',
+    ...)` listener instead, which reliably captured both with correct,
+    distinct filenames — used throughout `phase5.spec.mjs`.
 
 ---
 
 ## Open Questions (not yet decided — raise before implementing that part)
 
 - Exact autolayout algorithm choice (Phase 8) — spec leaves this open.
-- Graph name (used in versioned filenames, Section 5.4) — is it user-entered
-  at first save, or derived from something else? Spec doesn't say explicitly.
+- ~~Graph name (Section 5.4)~~ — resolved in Phase 5: user-entered via the
+  inline-input UI on the first "Save Version" click, then remembered in
+  `state.meta.graph_name` (persisted via Tier 1) for every save after.
+  See the Phase 5 Log entry for the sanitization rule.
