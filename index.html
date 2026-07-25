@@ -540,19 +540,48 @@ function updateUndoRedoButtons() {
 // (Fruchterman-Reingold style) relaxation of node *centers* — repulsion
 // between every pair of nodes, not just connected ones, so disconnected
 // components and floating groups still spread apart instead of piling up;
-// attraction only along edges. Starts from the graph's current positions
+// attraction along edges, including the auto-generated "contains" edges
+// (Section 4.3) — that's what pulls a group and its members toward each
+// other in the first place. Starts from the graph's current positions
 // (rather than a fresh random scatter), so the result is deterministic for
 // a given graph + starting layout — no RNG involved, and nothing to seed.
 // A fixed iteration count with a cooling schedule guarantees termination
 // (no risk of hanging) regardless of graph shape.
 //
 // Group boxes are moved exactly like any other node and keep their own
-// w/h. That's intentional, not an oversight: boundary_mode is always
-// "manual" (Section 4.3) — nothing in this app ever auto-fits a group's
-// box to its members, so autolayout is free to move a group away from
-// members it doesn't visually contain afterward, same as a manual drag
-// would be.
+// w/h — boundary_mode is always "manual" (Section 4.3), nothing in this
+// app ever auto-fits a group's box to its members, autolayout included.
+// But a member must never end up outside the box it belongs to: after each
+// iteration's forces are applied, every node with non-empty groups[] is
+// clamped back inside each group it belongs to (clampCenterIntoGroup).
+// This is an explicit hard constraint, not just the spring pull from the
+// contains-edge attraction above — that pull alone doesn't guarantee
+// containment (a member's own repulsion from other nodes, or the group's
+// own attraction elsewhere, can still push it past the box edge). Multiple
+// clamp passes per iteration (GROUP_CONTAINMENT_PASSES) handle nested
+// groups (member -> inner group -> outer group) by letting the constraint
+// propagate outward; this is a fixed-pass approximation, not a topological
+// sort, since real nesting depth in this app is always small. Does not
+// touch groups[] membership itself or run outside autolayout — a manual
+// drag can still pull a node fully out of a group exactly as before
+// (Phase 2's own membership rules are unaffected).
 // ---------------------------------------------------------------------------
+const GROUP_CONTAINMENT_PASSES = 5;
+
+function clampCenterIntoGroup(center, w, h, groupCenter, groupW, groupH) {
+  const minCx = groupCenter.x - groupW / 2 + w / 2;
+  const maxCx = groupCenter.x + groupW / 2 - w / 2;
+  const minCy = groupCenter.y - groupH / 2 + h / 2;
+  const maxCy = groupCenter.y + groupH / 2 - h / 2;
+  // min/max can invert when the member is wider/taller than the group's
+  // interior (e.g. a member bigger than MIN_GROUP_SIZE) — Math.min/max
+  // keeps clamp()'s (lo <= hi) contract intact instead of producing NaN;
+  // this is a pre-existing possible state (a manual resize could already
+  // make a member larger than its group), not something autolayout creates.
+  center.x = clamp(center.x, Math.min(minCx, maxCx), Math.max(minCx, maxCx));
+  center.y = clamp(center.y, Math.min(minCy, maxCy), Math.max(minCy, maxCy));
+}
+
 function autoLayout() {
   if (state.nodes.length < 2) return; // nothing to relax
   const before = snapshotState();
@@ -600,6 +629,19 @@ function autoLayout() {
       centers[i].x += (disp[i].x / dist) * capped;
       centers[i].y += (disp[i].y / dist) * capped;
     }
+
+    for (let pass = 0; pass < GROUP_CONTAINMENT_PASSES; pass++) {
+      for (let i = 0; i < state.nodes.length; i++) {
+        const node = state.nodes[i];
+        for (const gid of node.groups) {
+          const gi = indexById.get(gid);
+          if (gi === undefined) continue;
+          const group = state.nodes[gi];
+          clampCenterIntoGroup(centers[i], node.w, node.h, centers[gi], group.w, group.h);
+        }
+      }
+    }
+
     temperature *= 0.95;
   }
 
