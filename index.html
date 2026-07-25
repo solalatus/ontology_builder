@@ -169,7 +169,7 @@
     background: var(--btn-bg-hover);
   }
 
-  #confirm-overlay {
+  .modal-overlay {
     position: fixed;
     inset: 0;
     display: none;
@@ -179,8 +179,8 @@
     z-index: 30;
   }
 
-  #confirm-dialog {
-    max-width: 340px;
+  .modal-dialog {
+    max-width: 380px;
     margin: 16px;
     padding: 16px;
     border-radius: 8px;
@@ -189,19 +189,21 @@
     color: var(--toolbar-fg);
   }
 
-  #confirm-message {
+  .modal-message {
     margin: 0 0 14px;
     font-size: 14px;
     line-height: 1.4;
+    white-space: pre-line;
   }
 
-  #confirm-actions {
+  .modal-actions {
     display: flex;
     justify-content: flex-end;
     gap: 8px;
+    flex-wrap: wrap;
   }
 
-  #confirm-actions button {
+  .modal-actions button {
     font-size: 14px;
     padding: 7px 14px;
     color: var(--toolbar-fg);
@@ -211,11 +213,12 @@
     cursor: pointer;
   }
 
-  #confirm-actions button:hover {
+  .modal-actions button:hover {
     background: var(--btn-bg-hover);
   }
 
-  #confirm-ok {
+  #confirm-ok,
+  #import-replace {
     border-color: #a64d4d !important;
   }
 </style>
@@ -250,12 +253,23 @@
   <button id="sel-trash" type="button" title="Delete">&#128465;</button>
 </div>
 
-<div id="confirm-overlay">
-  <div id="confirm-dialog" role="alertdialog" aria-modal="true">
-    <p id="confirm-message"></p>
-    <div id="confirm-actions">
+<div id="confirm-overlay" class="modal-overlay">
+  <div id="confirm-dialog" class="modal-dialog" role="alertdialog" aria-modal="true">
+    <p id="confirm-message" class="modal-message"></p>
+    <div id="confirm-actions" class="modal-actions">
       <button id="confirm-cancel" type="button">Cancel</button>
       <button id="confirm-ok" type="button">OK</button>
+    </div>
+  </div>
+</div>
+
+<div id="import-overlay" class="modal-overlay">
+  <div id="import-dialog" class="modal-dialog" role="alertdialog" aria-modal="true">
+    <p id="import-summary" class="modal-message"></p>
+    <div id="import-actions" class="modal-actions">
+      <button id="import-cancel" type="button">Cancel</button>
+      <button id="import-replace" type="button">Replace</button>
+      <button id="import-merge" type="button">Merge</button>
     </div>
   </div>
 </div>
@@ -400,6 +414,7 @@ function restoreSnapshot(snap) {
 }
 
 function pushHistory(before, after) {
+  newlyImportedIds = new Set(); // any new discrete action retires the "just imported" highlight
   history.past.push({ before, after });
   history.future = [];
   updateUndoRedoButtons();
@@ -778,6 +793,7 @@ const NODE_TEXT = "#e8e8e8";
 const HANDLE_FILL = "rgba(255,255,255,0.35)";
 const GROUP_FILL = "rgba(77,166,255,0.06)";
 const GROUP_STROKE = "#4d7fa6";
+const IMPORTED_STROKE = "#e0b13f"; // TXT import: "flagged as newly added" (Section 5.3)
 const EDGE_STROKE = "#8a8a8a";
 const EDGE_STROKE_SELECTED = "#4da6ff";
 const EDGE_LABEL_FG = "#bbbbbb";
@@ -882,10 +898,14 @@ function drawNodes() {
     const selected = state.selection.type === "node" && state.selection.id === node.id;
     const isConnectSource = state.connectSource === node.id;
     const isGroup = node.type === "group";
+    const isNewlyImported = newlyImportedIds.has(node.id);
 
     ctx.fillStyle = isGroup ? GROUP_FILL : NODE_FILL;
-    ctx.strokeStyle = isConnectSource ? CONNECT_SOURCE_STROKE : selected ? NODE_STROKE_SELECTED : (isGroup ? GROUP_STROKE : NODE_STROKE);
-    ctx.lineWidth = selected || isConnectSource ? 3 : 1.5;
+    ctx.strokeStyle = isConnectSource ? CONNECT_SOURCE_STROKE
+      : selected ? NODE_STROKE_SELECTED
+      : isNewlyImported ? IMPORTED_STROKE
+      : (isGroup ? GROUP_STROKE : NODE_STROKE);
+    ctx.lineWidth = selected || isConnectSource || isNewlyImported ? 3 : 1.5;
     ctx.setLineDash(isGroup ? [8, 5] : []);
     roundRectPath(node.x, node.y, node.w, node.h, 8);
     ctx.fill();
@@ -1575,6 +1595,265 @@ function performSaveVersion() {
 }
 
 // ---------------------------------------------------------------------------
+// File formats — import (Section 5.3). Parser is a direct port of the
+// spec's own reference Python loader (same grammar, same "<->" before "->"
+// check order since "<->" also contains "->" as a substring). The app's own
+// import additionally does label+type-matched merge/replace against the
+// live graph — the Python snippet is read-only.
+//
+// UI note: Section 7 lists a single "Import from TXT" entry point (button +
+// drag-drop), but Section 5.3 defines two distinct modes and requires a
+// confirmation step (with a diff summary) specifically for Replace. Since
+// there's no second button to reach Replace with, both modes are offered
+// together in one dialog after a file is chosen — Merge stays a single
+// undoable, no-extra-confirmation action in spirit (it's presented, not
+// gated), while Replace's diff-summary requirement is satisfied by the same
+// dialog. This is a necessary UI addition beyond Section 7's literal table,
+// the same way Add Group's button and the group resize handle were.
+// ---------------------------------------------------------------------------
+function parseTxtImport(text) {
+  const nodes = [];
+  const edges = [];
+  let section = null;
+  for (const raw of text.split(/\r\n|\n|\r/)) {
+    const line = raw.trim();
+    // Section headers first: "## NODES"/"## EDGES" also start with "#", so
+    // checking the generic comment-skip first (as spec.md's own reference
+    // Python snippet literally does) makes them unreachable dead code —
+    // the headers would never be recognized. Confirmed by testing against
+    // the spec's own worked example.
+    if (line === "## NODES") { section = "nodes"; continue; }
+    if (line === "## EDGES") { section = "edges"; continue; }
+    if (!line || line.startsWith("#")) continue;
+    if (section === "nodes") {
+      const isGroup = line.endsWith("[group]");
+      const label = (isGroup ? line.slice(0, -"[group]".length) : line).trim();
+      if (label) nodes.push({ label, type: isGroup ? "group" : "entity" });
+    } else if (section === "edges") {
+      const sepIdx = line.lastIndexOf(" : ");
+      if (sepIdx === -1) continue; // malformed — no relation separator, skip
+      const conn = line.slice(0, sepIdx);
+      const relation = line.slice(sepIdx + 3).trim();
+      let directed, src, tgt;
+      if (conn.includes("<->")) {
+        directed = false;
+        [src, tgt] = conn.split("<->");
+      } else if (conn.includes("->")) {
+        directed = true;
+        [src, tgt] = conn.split("->");
+      } else {
+        continue; // malformed — no connector, skip
+      }
+      src = (src || "").trim();
+      tgt = (tgt || "").trim();
+      if (src && tgt && relation) edges.push({ source: src, target: tgt, relation, directed });
+    }
+  }
+  return { nodes, edges };
+}
+
+function isContainsDeclaration(edge) {
+  return edge.directed && edge.relation === "contains";
+}
+
+// Shared by the dialog's diff-count preview and the real commit, so the
+// numbers shown are guaranteed to match what actually happens. Doesn't
+// mutate state — resolves against a label->node map that includes both
+// real existing nodes and lightweight "would be created" placeholders.
+function planTxtImport(parsed) {
+  const labelToNode = new Map();
+  for (const n of state.nodes) if (!labelToNode.has(n.label)) labelToNode.set(n.label, n);
+
+  const nodePlans = parsed.nodes.map((pn) => {
+    const existing = state.nodes.find((n) => n.label === pn.label && n.type === pn.type);
+    if (existing) {
+      labelToNode.set(pn.label, existing);
+      return { label: pn.label, type: pn.type, existing };
+    }
+    const placeholder = { pending: true, label: pn.label, type: pn.type };
+    labelToNode.set(pn.label, placeholder);
+    return { label: pn.label, type: pn.type, existing: null };
+  });
+
+  const containsDecls = [];
+  const ordinaryEdgePlans = [];
+  for (const pe of parsed.edges) {
+    const srcNode = labelToNode.get(pe.source);
+    const tgtNode = labelToNode.get(pe.target);
+    if (!srcNode || !tgtNode) continue; // references a label not in ## NODES — skip defensively
+    if (isContainsDeclaration(pe)) {
+      if (srcNode.type === "group") containsDecls.push({ groupLabel: pe.source, memberLabel: pe.target });
+      continue; // malformed (source isn't a group) — skip silently either way
+    }
+    const existingEdge = (!srcNode.pending && !tgtNode.pending)
+      ? state.edges.find((e) => !e.auto && e.source === srcNode.id && e.target === tgtNode.id &&
+          e.relation === pe.relation && e.directed === pe.directed)
+      : null;
+    ordinaryEdgePlans.push({ ...pe, existing: existingEdge });
+  }
+
+  const newNodeCount = nodePlans.filter((np) => !np.existing).length;
+  const newEdgeCount = ordinaryEdgePlans.filter((ep) => !ep.existing).length;
+
+  let removedCount = 0;
+  if (state.nodes.length || state.edges.length) {
+    const matchedIds = new Set(nodePlans.filter((np) => np.existing).map((np) => np.existing.id));
+    const nodesToRemove = state.nodes.filter((n) => !matchedIds.has(n.id));
+    const removedIds = new Set(nodesToRemove.map((n) => n.id));
+    const matchedEdgeIds = new Set(ordinaryEdgePlans.filter((ep) => ep.existing).map((ep) => ep.existing.id));
+    const edgesToRemove = state.edges.filter((e) => !e.auto && !removedIds.has(e.source) &&
+      !removedIds.has(e.target) && !matchedEdgeIds.has(e.id));
+    removedCount = nodesToRemove.length + edgesToRemove.length;
+  }
+
+  return { nodePlans, ordinaryEdgePlans, containsDecls, newNodeCount, newEdgeCount, removedCount };
+}
+
+// Simple shelf/grid placement for newly-created nodes, starting just below
+// the existing content's bounding box (Section 5.3: "not full autolayout").
+function computeImportShelf() {
+  let originX = 0, originY = 0;
+  if (state.nodes.length > 0) {
+    originX = Math.min(...state.nodes.map((n) => n.x));
+    originY = Math.max(...state.nodes.map((n) => n.y + n.h)) + 80;
+  }
+  let col = 0, row = 0;
+  const COLS = 5, GAP_X = 200, GAP_Y = 100;
+  return (type) => {
+    const pos = { x: originX + col * GAP_X, y: originY + row * GAP_Y };
+    col += 1;
+    if (col >= COLS) { col = 0; row += 1; }
+    return pos;
+  };
+}
+
+let newlyImportedIds = new Set();
+
+function commitTxtImport(text, mode) {
+  const before = snapshotState();
+  const parsed = parseTxtImport(text);
+  const nextShelfPosition = computeImportShelf();
+
+  const labelToNode = new Map();
+  for (const n of state.nodes) if (!labelToNode.has(n.label)) labelToNode.set(n.label, n);
+
+  const matchedExistingIds = new Set();
+  const createdNodeIds = [];
+  for (const pn of parsed.nodes) {
+    const existing = state.nodes.find((n) => n.label === pn.label && n.type === pn.type);
+    if (existing) {
+      matchedExistingIds.add(existing.id);
+      labelToNode.set(pn.label, existing);
+      continue;
+    }
+    const pos = nextShelfPosition(pn.type);
+    const node = createNode(pos.x, pos.y, pn.label, pn.type);
+    createdNodeIds.push(node.id);
+    labelToNode.set(pn.label, node);
+  }
+
+  // Group-membership declarations first (spec: "exactly as if it had been
+  // dragged in on canvas" — i.e. groups[] + an auto contains edge).
+  for (const pe of parsed.edges) {
+    if (!isContainsDeclaration(pe)) continue;
+    const group = labelToNode.get(pe.source);
+    const member = labelToNode.get(pe.target);
+    if (group && member && group.type === "group" && !member.groups.includes(group.id)) {
+      member.groups.push(group.id);
+      createContainsEdge(group.id, member.id);
+    }
+  }
+
+  // Ordinary edges: add only if an equivalent one doesn't already exist.
+  for (const pe of parsed.edges) {
+    if (isContainsDeclaration(pe)) continue;
+    const src = labelToNode.get(pe.source);
+    const tgt = labelToNode.get(pe.target);
+    if (!src || !tgt) continue;
+    const dup = state.edges.some((e) => !e.auto && e.source === src.id && e.target === tgt.id &&
+      e.relation === pe.relation && e.directed === pe.directed);
+    if (!dup) createEdge(src.id, tgt.id, pe.relation, pe.directed, false);
+  }
+
+  if (mode === "replace") {
+    const nodesToRemove = state.nodes.filter((n) => !matchedExistingIds.has(n.id) && !createdNodeIds.includes(n.id));
+    for (const n of nodesToRemove) deleteNode(n.id);
+
+    // Prune any surviving node's group memberships not re-declared by this TXT.
+    const declaredMemberships = new Set();
+    for (const pe of parsed.edges) {
+      if (!isContainsDeclaration(pe)) continue;
+      const group = labelToNode.get(pe.source);
+      const member = labelToNode.get(pe.target);
+      if (group && member) declaredMemberships.add(`${group.id} ${member.id}`);
+    }
+    for (const n of state.nodes) {
+      const kept = n.groups.filter((gid) => declaredMemberships.has(`${gid} ${n.id}`));
+      if (kept.length !== n.groups.length) {
+        for (const gid of n.groups) if (!kept.includes(gid)) removeContainsEdge(gid, n.id);
+        n.groups = kept;
+      }
+    }
+
+    // Remove ordinary edges not declared by this TXT.
+    const declaredOrdinary = new Set();
+    for (const pe of parsed.edges) {
+      if (isContainsDeclaration(pe)) continue;
+      const src = labelToNode.get(pe.source), tgt = labelToNode.get(pe.target);
+      if (src && tgt) declaredOrdinary.add(`${src.id} ${tgt.id} ${pe.relation} ${pe.directed}`);
+    }
+    const edgesToRemove = state.edges.filter((e) => !e.auto &&
+      !declaredOrdinary.has(`${e.source} ${e.target} ${e.relation} ${e.directed}`));
+    for (const e of edgesToRemove) deleteEdge(e.id);
+  }
+
+  pushHistory(before, snapshotState()); // clears any stale "just imported" highlight first
+  newlyImportedIds = new Set(createdNodeIds);
+  markDirty();
+}
+
+const importOverlay = document.getElementById("import-overlay");
+const importSummaryEl = document.getElementById("import-summary");
+const importMergeBtn = document.getElementById("import-merge");
+const importReplaceBtn = document.getElementById("import-replace");
+const importCancelBtn = document.getElementById("import-cancel");
+let pendingImportText = null;
+
+function openImportDialog(text) {
+  pendingImportText = text;
+  const plan = planTxtImport(parseTxtImport(text));
+  const lines = [
+    `Merge: ${plan.newNodeCount} node(s) and ${plan.newEdgeCount} edge(s) would be added. Nothing is ever removed.`,
+  ];
+  if (state.nodes.length || state.edges.length) {
+    lines.push(`Replace: same additions, plus ${plan.removedCount} node(s)/edge(s) not in this file would be removed.`);
+  } else {
+    importReplaceBtn.style.display = "none";
+  }
+  importSummaryEl.textContent = lines.join("\n\n");
+  importOverlay.style.display = "flex";
+}
+
+function closeImportDialog() {
+  importOverlay.style.display = "none";
+  importReplaceBtn.style.display = "";
+  pendingImportText = null;
+}
+
+importMergeBtn.addEventListener("click", () => {
+  const text = pendingImportText;
+  closeImportDialog();
+  if (text !== null) commitTxtImport(text, "merge");
+});
+importReplaceBtn.addEventListener("click", () => {
+  const text = pendingImportText;
+  closeImportDialog();
+  if (text !== null) commitTxtImport(text, "replace");
+});
+importCancelBtn.addEventListener("click", () => closeImportDialog());
+importOverlay.addEventListener("click", (e) => { if (e.target === importOverlay) closeImportDialog(); });
+
+// ---------------------------------------------------------------------------
 // Toolbar
 // ---------------------------------------------------------------------------
 function notImplemented(label) {
@@ -1633,11 +1912,23 @@ graphTitleEl.addEventListener("keydown", (e) => {
 
 const importInput = document.getElementById("import-file-input");
 document.getElementById("btn-import-txt").addEventListener("click", () => importInput.click());
-importInput.addEventListener("change", () => {
-  if (importInput.files && importInput.files[0]) {
-    notImplemented(`Import from TXT (selected "${importInput.files[0].name}")`);
-  }
-  importInput.value = "";
+importInput.addEventListener("change", async () => {
+  const file = importInput.files && importInput.files[0];
+  importInput.value = ""; // allow re-selecting the same filename later
+  if (!file) return;
+  openImportDialog(await file.text());
+});
+
+// Drag-and-drop of a .txt file onto the canvas, per Section 7's "where
+// supported" accelerator (native file-open dialog above is the baseline).
+canvas.addEventListener("dragover", (e) => {
+  if ([...e.dataTransfer.items].some((it) => it.kind === "file")) e.preventDefault();
+});
+canvas.addEventListener("drop", async (e) => {
+  const file = [...e.dataTransfer.files].find((f) => f.name.toLowerCase().endsWith(".txt"));
+  if (!file) return;
+  e.preventDefault();
+  openImportDialog(await file.text());
 });
 
 document.getElementById("btn-clear").addEventListener("click", () => {
@@ -1681,6 +1972,7 @@ window.__kg = {
     whenIdle: whenSaveIdle,
     save: scheduleSave,
   },
+  getNewlyImportedIds: () => newlyImportedIds, // reassigned, not mutated — needs a getter, not a reference
 };
 
 // ---------------------------------------------------------------------------

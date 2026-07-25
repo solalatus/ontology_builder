@@ -1,0 +1,6 @@
+## NODES
+Andhra Pradesh
+Telugu
+
+## EDGES
+Andhra Pradesh -> Telugu : language used

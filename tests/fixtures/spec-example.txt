@@ -1,0 +1,19 @@
+# KG Canvas export
+# format_version: 1
+# graph_id: b3f1b2b0-test
+# version: 1
+# saved: 2026-07-25T14:20:00Z
+
+## NODES
+Andhra Pradesh
+Telugu
+Marathi
+South Asian Languages [group]
+Guatemala
+European Union
+
+## EDGES
+South Asian Languages -> Andhra Pradesh : contains
+Andhra Pradesh -> Telugu : language used
+Andhra Pradesh -> Marathi : language used
+Guatemala <-> European Union : diplomatic relation

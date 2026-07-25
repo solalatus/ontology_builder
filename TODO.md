@@ -9,10 +9,10 @@ State" so the project can be picked up cold at any time.
 
 ## Current State
 
-- **Phase:** Phases 0, 1, 2, 3, 4, and 5 complete, all with green automated
-  test suites (`node --test tests/*.spec.mjs`, 109 tests, see Log below).
-  Not yet hand-tested on real touch hardware (pinch/long-press) — deferred
-  to Phase 10, not blocking. Phase 6 not started. A "Clear" button (outside
+- **Phase:** Phases 0 through 6 complete, all with green automated test
+  suites (`node --test tests/*.spec.mjs`, 126 tests, see Log below). Not
+  yet hand-tested on real touch hardware (pinch/long-press) — deferred to
+  Phase 10, not blocking. Phase 7 not started. A "Clear" button (outside
   the phased plan, user-requested) was also added — see its own section
   below, right after Phase 11.
 - **Target file:** `index.html` (single file, no external deps/CDN links).
@@ -25,10 +25,17 @@ State" so the project can be picked up cold at any time.
   deployment mode Section 2 promises ("opens directly in a browser...no
   external server required"). See the Phase 4 Log entry below for the full
   story and why this was a user decision, not a unilateral call.
-- **Next action:** Phase 6 (TXT import — merge and replace modes, Section
-  5.3). `state.meta` (added in Phase 5) already exists by the time this
-  runs if the user has ever saved; if they haven't, decide there whether
-  import should force the graph-name prompt too or default silently.
+- **spec.md's own reference Python TXT loader (Appendix) has a bug**: as
+  literally written, `if not line or line.startswith("#"): continue` runs
+  *before* the `## NODES`/`## EDGES` header checks, and both headers also
+  start with `#` — so the headers are unreachable and the reference loader
+  as written parses nothing. `index.html`'s importer checks the headers
+  first and does not have this bug; this was found by testing against
+  spec's own worked example, not by inspection. See the Phase 6 Log entry.
+  spec.md itself was left untouched (frozen v1.0 reference) per this file's
+  own convention — deltas live here, not by editing the spec.
+- **Next action:** Phase 7 (Tier 2 storage — `showDirectoryPicker` live
+  folder sync, Chrome/Chromium desktop only, progressive enhancement).
 
 ---
 
@@ -344,30 +351,50 @@ claude.ai/code, which is plain git via GitHub as described above.
 
 ## Phase 6 — TXT import (Section 5.3)
 
-- [ ] Reference Python-style loader logic ported to JS (parse `## NODES` /
-      `## EDGES`, `[group]`, `->` vs `<->`)
-- [ ] Merge mode (default): label+type matched; new nodes created and
+- [x] Reference Python-style loader logic ported to JS (parse `## NODES` /
+      `## EDGES`, `[group]`, `->` vs `<->`) — **with a bug fix**: the
+      reference loader's check order makes its own section headers
+      unreachable; the JS port checks headers first. See Log.
+- [x] Merge mode (default): label+type matched; new nodes created and
       auto-placed (shelf/grid, flagged as new); existing nodes keep
       position/size/groups untouched; new edges added; missing edges left
       alone (never deleted); `X -> Y : contains` lines interpreted as group
       membership, not literal edges
-- [ ] Replace mode: same diff, but removes nodes/edges absent from TXT;
+- [x] Replace mode: same diff, but removes nodes/edges absent from TXT;
       requires confirmation step showing diff summary (N added/removed/
       unchanged); one undo step regardless of size
-- [ ] Triggered via "Import from TXT" button (native file-open dialog) and
+- [x] Triggered via "Import from TXT" button (native file-open dialog) and
       drag-and-drop of `.txt` onto canvas where supported
-- Tests (planned, `tests/phase6.spec.mjs`):
-  - Automated: a handful of fixture `.txt` files under `tests/fixtures/`
-    covering — new nodes created + auto-placed; existing label matches
-    keep position/size/groups untouched; new edges added; edges missing
-    from the TXT left alone (merge is additive-only); `X -> Y : contains`
-    lines become group membership, not literal edges. Separately: Replace
-    mode removes graph-only nodes/edges, shows correct N-added/N-removed/
-    N-unchanged diff counts, and both modes commit as exactly one undo
-    step regardless of file size. Drive import via `page.setInputFiles()`
-    on the hidden file input (no real OS file-picker needed for this part).
-  - Manual: actual drag-and-drop of a `.txt` file onto the canvas in a real
-    browser window; native file-open dialog path.
+- Tests (`tests/phase6.spec.mjs`, 17 tests + 5 fixture files under
+  `tests/fixtures/`, all green):
+  - Automated: Merge on an empty graph reproduces spec's own worked example
+    exactly (nodes, types, groups, directed flags, the auto `contains`
+    edge); merge is idempotent (re-importing the same file adds nothing,
+    creates no duplicates); an existing node's position/size/groups survive
+    a merge untouched (matched purely by label+type, confirmed by moving
+    it first and checking coordinates after); merge never deletes an edge
+    absent from the TXT; newly-created nodes are shelf/grid-placed below
+    existing content, never full autolayout; new nodes are flagged
+    (`getNewlyImportedIds()`) until the *next* discrete action clears the
+    flag; the Replace button is hidden when the graph is already empty
+    (nothing to remove, so nothing to confirm); the dialog's diff-summary
+    counts are asserted to match what committing actually produces, not
+    just eyeballed; Replace removes graph-only nodes/edges in exactly one
+    undo step, fully reversible; Replace preserves a surviving node's
+    position while pruning group membership the new TXT doesn't redeclare
+    (and removing the now-orphaned `contains` edge); Cancel and clicking
+    the dialog backdrop both apply nothing; label matching is confirmed
+    case-sensitive; matching requires label *and* type (same label,
+    different type, creates a second distinct node); malformed edge lines
+    (no connector, no `" : "` separator) are skipped without crashing;
+    drag-and-drop onto the canvas (via a synthetic `DragEvent`+
+    `DataTransfer`, since Playwright can't drag a real OS file) opens the
+    same dialog as the file picker; an import triggers a background save
+    and survives a reload.
+  - Manual: the native file-open dialog chrome itself, and a real OS-level
+    drag-and-drop (synthetic `DragEvent` in tests exercises the app's drop
+    handler correctly but isn't a full substitute for an actual file being
+    dragged from a real file manager) — both deferred to Phase 10.
 
 ## Phase 7 — Tier 2 storage (live folder sync, progressive enhancement)
 
@@ -817,6 +844,76 @@ and record deltas here instead of editing the spec.)*
     `graph_name` is correctly absent from the exported JSON's `meta`
     object (it was always filename-only, per spec's own schema example —
     that part didn't change).
+- 2026-07-25 — PR #5 (Phase 5 + the title-UX revision) merged to `main` by
+  the user. Restarted this branch from `origin/main` again per the
+  merged-PR protocol before starting Phase 6 — same clean case as prior
+  restarts.
+- 2026-07-25 — Phase 6 (TXT import) implemented in `index.html`
+  (`tests/phase6.spec.mjs`, 17 tests + `tests/fixtures/*.txt`; 126 total).
+  Notable decisions:
+  - **Found and fixed a real bug in spec.md's own reference Python
+    loader** (the Appendix). As literally written:
+    ```python
+    if not line or line.startswith("#"):
+        continue
+    if line == "## NODES":
+        section = "nodes"
+    ```
+    `"## NODES"` and `"## EDGES"` both start with `"#"`, so the generic
+    comment-skip catches them first and the header checks below are dead
+    code — the reference loader, run as-is, would parse nothing at all
+    out of its own worked example. This wasn't caught by reading the code;
+    it was caught by porting it to JS the same way and then running it
+    against spec's own example file, which came back with 0 nodes/0
+    edges. The JS port in `index.html` checks the two exact header strings
+    *before* the generic `"#"`-comment skip, which correctly reproduces
+    the format the prose and worked example actually describe. `spec.md`
+    itself was **not** edited (frozen v1.0 reference, per this file's own
+    stated convention) — this delta is recorded here only. Worth a note to
+    anyone hand-porting the Appendix snippet elsewhere.
+  - **Unified one dialog for both Merge and Replace**, opened after a file
+    is chosen (file picker or drag-drop), rather than two separate flows.
+    Section 7's interaction table lists exactly one entry point ("Import
+    from TXT") for the whole feature, but Section 5.3 defines two distinct
+    modes and mandates a confirmation-with-diff-summary specifically for
+    Replace — there's no second button to reach Replace through otherwise.
+    The dialog shows live diff counts for *both* modes side by side (via
+    `planTxtImport()`, the same function the commit path uses, so the
+    numbers shown are guaranteed to match what actually happens) with
+    Merge and Replace as separate buttons, Merge visually primary. This is
+    a necessary UI addition beyond Section 7's literal table, the same
+    category of decision as Add Group's button and the group resize
+    handle in Phase 2.
+  - **Edge identity for diffing is the full (source, target, relation,
+    directed) tuple.** Spec doesn't define edge equality precisely; this
+    is the most literal reading of "edges present in the TXT but missing
+    from the graph are added" given labels aren't unique ids and a node
+    pair can legitimately have multiple edges with different relations
+    (already true since Phase 1). A `directed` flag flip is therefore
+    treated as a different edge for diffing purposes, not an in-place
+    update to an existing one.
+  - **A `"X -> Y : contains"` line only becomes a membership declaration
+    if X actually resolves to a `type: "group"` node** (after this
+    import's own node creation/matching). If X is an entity, the line is
+    silently skipped — spec doesn't address this malformed case, and
+    creating a fake edge or crashing both seemed worse than ignoring one
+    bad line.
+  - **Replace mode's group-membership handling**: a surviving node's
+    `groups[]` is recomputed to exactly the containment declarations this
+    TXT makes for it — memberships not redeclared are dropped (and their
+    `contains` edge removed), mirroring how ordinary edges absent from the
+    TXT get removed in Replace mode. Position/size are still left alone
+    for any node matched by label+type, same as Merge.
+  - **"Flagged as newly added" is a transient, non-persisted highlight**
+    (`newlyImportedIds`, a plain `Set` outside `state`, not part of any
+    snapshot/export), cleared automatically at the top of `pushHistory()`
+    — so it survives exactly until the *next* discrete action, matching
+    "briefly highlighted, then normal" without needing a timer or
+    extending the single-selection model to multi-select.
+  - **Diff counts shown are nodes+ordinary-edges only** (not membership
+    changes) — spec doesn't specify exact counting rules, and node/edge
+    counts are the figures a user actually recognizes when sanity-checking
+    an import.
 
 ---
 

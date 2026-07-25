@@ -1,0 +1,6 @@
+## NODES
+Andhra Pradesh
+Kerala
+
+## EDGES
+Andhra Pradesh -> Kerala : neighboring state
