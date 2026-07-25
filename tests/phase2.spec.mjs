@@ -267,6 +267,94 @@ test("deleting a member removes its contains edge but leaves the group intact", 
   });
 });
 
+test("deleting a grandparent group only cleans up its direct child — a deeper (grandchild) membership is untouched", async () => {
+  await withPage(async (page) => {
+    await addNodeViaButton(page, "#btn-add-group", 700, 400, "Outer"); // rect 540,290 .. 860,510
+    await addNodeViaButton(page, "#btn-add-group", 200, 200, "Inner"); // rect 40,90 .. 360,310, corner at 360,310
+    await dragNode(page, 360, 310, 240, 240); // shrink Inner to 200x150
+    await dragNode(page, 140, 165, 700, 400); // drag Inner's body fully into Outer
+
+    await addNodeViaButton(page, "#btn-add-node", 100, 700, "Leaf");
+    let inner = await page.evaluate(() => window.__kg.state.nodes.find((n) => n.label === "Inner"));
+    const innerCenter = { x: inner.x + inner.w / 2, y: inner.y + inner.h / 2 };
+    await dragNode(page, 100, 700, innerCenter.x, innerCenter.y); // Leaf joins Inner only
+
+    // Delete Outer (click a spot inside Outer's box but outside Inner's).
+    const outer = await page.evaluate(() => window.__kg.state.nodes.find((n) => n.label === "Outer"));
+    inner = await page.evaluate(() => window.__kg.state.nodes.find((n) => n.label === "Inner"));
+    const box = await page.locator("#canvas").boundingBox();
+    // A point inside Outer's rect but outside Inner's (Outer spans 540,290..860,510).
+    const spotX = inner.x + inner.w + 20 <= outer.x + outer.w ? inner.x + inner.w + 20 : outer.x + 10;
+    const spotY = outer.y + 10;
+    await page.mouse.click(box.x + spotX, box.y + spotY);
+    let sel = await page.evaluate(() => window.__kg.state.selection);
+    assert.equal(sel.type, "node");
+    const selectedLabel = await page.evaluate(() =>
+      window.__kg.state.nodes.find((n) => n.id === window.__kg.state.selection.id).label);
+    assert.equal(selectedLabel, "Outer");
+    await page.keyboard.press("Delete");
+
+    const nodes = await page.evaluate(() => window.__kg.state.nodes);
+    const remainingInner = nodes.find((n) => n.label === "Inner");
+    const leaf = nodes.find((n) => n.label === "Leaf");
+    const edges = await page.evaluate(() => window.__kg.state.edges);
+
+    assert.equal(nodes.length, 2, "Outer is gone, Inner and Leaf remain");
+    assert.deepEqual(remainingInner.groups, [], "Inner's link to the deleted Outer is cleaned up");
+    assert.deepEqual(leaf.groups, [remainingInner.id], "Leaf's membership in Inner is completely unaffected by Outer's deletion");
+    assert.equal(edges.length, 1, "only the surviving Inner->Leaf contains edge remains");
+    assert.equal(edges[0].source, remainingInner.id);
+    assert.equal(edges[0].target, leaf.id);
+  });
+});
+
+test("dragging a node from deep inside a nested group to just outside it (but still inside the outer group) reassigns membership from inner to outer in one drag", async () => {
+  await withPage(async (page) => {
+    // Precise geometry set up directly (bypassing the UI, same pattern as
+    // phase8/phase9's setup helpers) — Outer is large enough to leave a
+    // margin around Inner that's big enough to actually fit a default
+    // 160x60 entity in the "ring" between them, which a UI-driven default-
+    // sized Outer/Inner pair (320x220 / resized-down) cannot geometrically
+    // provide (the margin ends up smaller than a default entity itself).
+    // Membership + contains edges set directly rather than via
+    // updateGroupMembership() — that function's own auto-detect search
+    // would also match Leaf against Outer (which, being huge, fully
+    // contains Leaf too), double-joining it before the drag under test
+    // even happens. Setting the exact intended starting state avoids that.
+    await page.evaluate(() => {
+      const outer = window.__kg.actions.createNode(0, 0, "Outer", "group");
+      outer.w = 600; outer.h = 400;
+      const inner = window.__kg.actions.createNode(50, 50, "Inner", "group");
+      inner.w = 150; inner.h = 100;
+      inner.groups.push(outer.id);
+      window.__kg.actions.createEdge(outer.id, inner.id, "contains", true, true);
+      const leaf = window.__kg.actions.createNode(70, 70, "Leaf", "entity");
+      leaf.groups.push(inner.id);
+      window.__kg.actions.createEdge(inner.id, leaf.id, "contains", true, true);
+      window.__kg.markDirty();
+    });
+
+    let inner = await page.evaluate(() => window.__kg.state.nodes.find((n) => n.label === "Inner"));
+    let outer = await page.evaluate(() => window.__kg.state.nodes.find((n) => n.label === "Outer"));
+    let leaf = await page.evaluate(() => window.__kg.state.nodes.find((n) => n.label === "Leaf"));
+    assert.deepEqual(leaf.groups, [inner.id], "sanity check: setup actually placed Leaf in Inner");
+
+    // Drag Leaf (grabbing its current center) to (400,300) — deep inside
+    // Outer's 600x400 box, nowhere near Inner's 50,50..200,150 corner.
+    const leafCenter = { x: leaf.x + leaf.w / 2, y: leaf.y + leaf.h / 2 };
+    await dragNode(page, leafCenter.x, leafCenter.y, 400, 300);
+
+    leaf = await page.evaluate(() => window.__kg.state.nodes.find((n) => n.label === "Leaf"));
+    const edges = await page.evaluate(() => window.__kg.state.edges);
+    const autoEdges = edges.filter((e) => e.auto);
+
+    assert.deepEqual(leaf.groups, [outer.id], "membership transitions straight from Inner to Outer in one drag");
+    assert.equal(autoEdges.length, 2, "Outer->Inner unchanged, plus the new Outer->Leaf edge");
+    assert.ok(autoEdges.some((e) => e.source === outer.id && e.target === leaf.id));
+    assert.ok(!autoEdges.some((e) => e.source === inner.id && e.target === leaf.id), "the old Inner->Leaf edge is gone");
+  });
+});
+
 test("a contains edge is never selectable by clicking near it — the click resolves to a node instead", async () => {
   await withPage(async (page) => {
     await addNodeViaButton(page, "#btn-add-group", 600, 400, "Group A"); // rect 440,290 .. 760,510

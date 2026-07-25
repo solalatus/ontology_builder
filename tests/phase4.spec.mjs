@@ -141,6 +141,84 @@ test("a corrupted saved payload is ignored gracefully — the app boots to an em
   assert.deepEqual(consoleErrors, []);
 });
 
+test("a burst of many scheduled saves coalesces into far fewer than N actual writes, and still persists the latest state", async () => {
+  await withPage(async (page) => {
+    await addNodeViaDblClick(page, 300, 300, "Alpha");
+    await page.evaluate(() => window.__kg.storage.whenIdle()); // settle the one real save from adding the node
+
+    const result = await page.evaluate(async () => {
+      let setItemCalls = 0;
+      const originalSetItem = localStorage.setItem.bind(localStorage);
+      localStorage.setItem = (key, value) => { setItemCalls++; return originalSetItem(key, value); };
+      for (let i = 0; i < 10; i++) window.__kg.storage.save(); // 10 synchronous, un-awaited schedule calls
+      await window.__kg.storage.whenIdle();
+      localStorage.setItem = originalSetItem;
+      return { setItemCalls, raw: localStorage.getItem("kg-canvas-live") };
+    });
+
+    assert.ok(result.setItemCalls < 10, `expected far fewer than 10 actual writes from 10 scheduled saves (coalesced), got ${result.setItemCalls}`);
+    assert.ok(result.setItemCalls >= 1, "at least one write should still happen");
+    const parsed = JSON.parse(result.raw);
+    assert.equal(parsed.nodes.length, 1);
+    assert.equal(parsed.nodes[0].label, "Alpha");
+  });
+});
+
+test("a moderately large graph (50 nodes, ~30 edges, nested groups) round-trips exactly across a reload", async () => {
+  await withPage(async (page) => {
+    await page.evaluate(() => {
+      const outer = window.__kg.actions.createNode(0, 0, "Outer", "group");
+      outer.w = 2000; outer.h = 1500;
+      const ids = [];
+      for (let i = 0; i < 48; i++) {
+        const col = i % 8, row = Math.floor(i / 8);
+        const n = window.__kg.actions.createNode(100 + col * 200, 100 + row * 200, `N${i}`, "entity");
+        ids.push(n.id);
+        n.groups.push(outer.id);
+        window.__kg.actions.createEdge(outer.id, n.id, "contains", true, true);
+      }
+      for (let i = 0; i < 30; i++) {
+        window.__kg.actions.createEdge(ids[i % ids.length], ids[(i + 7) % ids.length], `rel${i}`);
+      }
+      window.__kg.markDirty();
+      window.__kg.storage.save();
+    });
+    await page.evaluate(() => window.__kg.storage.whenIdle());
+
+    await page.reload();
+    await page.waitForFunction(() => Boolean(window.__kg));
+    await page.waitForFunction(() => window.__kg.state.nodes.length === 49);
+
+    const nodes = await page.evaluate(() => window.__kg.state.nodes);
+    const edges = await page.evaluate(() => window.__kg.state.edges);
+    assert.equal(nodes.length, 49, "48 entities + 1 outer group");
+    assert.equal(edges.length, 48 + 30, "48 contains edges + 30 regular edges");
+    const outer = nodes.find((n) => n.label === "Outer");
+    const someMember = nodes.find((n) => n.label === "N10");
+    assert.deepEqual(someMember.groups, [outer.id]);
+    const regularEdges = edges.filter((e) => !e.auto);
+    assert.equal(regularEdges.length, 30);
+    assert.ok(regularEdges.every((e) => e.relation.startsWith("rel")));
+  });
+});
+
+test("Clear does not touch the separately-stored theme preference", async () => {
+  await withPage(async (page) => {
+    await page.click("#btn-theme-toggle"); // dark -> light
+    await addNodeViaDblClick(page, 300, 300, "Alpha");
+    await page.evaluate(() => window.__kg.storage.whenIdle());
+
+    await page.click("#btn-clear");
+    await page.click("#confirm-ok");
+    await page.evaluate(() => window.__kg.storage.whenIdle());
+
+    assert.equal(await page.evaluate(() => window.__kg.state.nodes.length), 0);
+    assert.equal(await page.evaluate(() => window.__kg.theme.get()), "light",
+      "Clear must only affect graph data, never the independently-stored theme preference");
+    assert.equal(await page.evaluate(() => localStorage.getItem("kg-theme")), "light");
+  });
+});
+
 test("camera pan/zoom and selection are not restored across reload — only graph data persists", async () => {
   await withPage(async (page) => {
     await addNodeViaDblClick(page, 300, 300, "Alpha");

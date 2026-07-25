@@ -439,3 +439,141 @@ test("deleting a node deselects it and hides the selection toolbar", async () =>
     await page.waitForFunction(() => document.getElementById("sel-toolbar").style.display === "none");
   });
 });
+
+test("a new node is created centered on the click point, not with a corner at the click point", async () => {
+  await withPage(async (page) => {
+    await addNodeViaDblClick(page, 400, 300, "Centered");
+    const node = await page.evaluate(() => window.__kg.state.nodes[0]);
+    const world = await page.evaluate(() => window.__kg.screenToWorld(400, 300));
+    assert.ok(Math.abs((node.x + node.w / 2) - world.x) < 1, "click point should land at the node's horizontal center");
+    assert.ok(Math.abs((node.y + node.h / 2) - world.y) < 1, "click point should land at the node's vertical center");
+  });
+});
+
+test("clicking a second node directly switches selection without needing to deselect first", async () => {
+  await withPage(async (page) => {
+    await addNodeViaDblClick(page, 250, 250, "First");
+    await addNodeViaDblClick(page, 600, 250, "Second");
+    const box = await page.locator("#canvas").boundingBox();
+
+    await page.mouse.click(box.x + 250, box.y + 250);
+    let selection = await page.evaluate(() => window.__kg.state.selection);
+    const firstId = await page.evaluate(() => window.__kg.state.nodes.find((n) => n.label === "First").id);
+    assert.equal(selection.id, firstId);
+
+    await page.mouse.click(box.x + 600, box.y + 250);
+    selection = await page.evaluate(() => window.__kg.state.selection);
+    const secondId = await page.evaluate(() => window.__kg.state.nodes.find((n) => n.label === "Second").id);
+    assert.equal(selection.type, "node");
+    assert.equal(selection.id, secondId);
+  });
+});
+
+test("a short click (no drag) on an edge selects it rather than deleting or ignoring it", async () => {
+  await withPage(async (page) => {
+    await addNodeViaDblClick(page, 250, 250, "A");
+    await addNodeViaDblClick(page, 650, 250, "B");
+    await createEdgeViaConnectMode(page, 250, 250, 650, 250, "linked to");
+    await page.evaluate(() => window.__kg.actions.setMode("idle"));
+
+    const edgeId = await page.evaluate(() => window.__kg.state.edges[0].id);
+    const box = await page.locator("#canvas").boundingBox();
+    // Midpoint of the two node centers, where the edge line passes through.
+    await page.mouse.click(box.x + 450, box.y + 250);
+
+    const selection = await page.evaluate(() => window.__kg.state.selection);
+    assert.equal(selection.type, "edge");
+    assert.equal(selection.id, edgeId);
+    const edges = await page.evaluate(() => window.__kg.state.edges.length);
+    assert.equal(edges, 1, "a plain click must not delete the edge");
+  });
+});
+
+test("the selection toolbar follows the selected node's screen position when panning", async () => {
+  await withPage(async (page) => {
+    await addNodeViaDblClick(page, 400, 300, "Alpha");
+    const box = await page.locator("#canvas").boundingBox();
+    await page.mouse.click(box.x + 400, box.y + 300);
+    await page.waitForFunction(() => getComputedStyle(document.getElementById("sel-toolbar")).display !== "none");
+    const beforeLeft = await page.evaluate(() => document.getElementById("sel-toolbar").style.left);
+
+    // Pan the camera — the still-selected node's screen position moves, so
+    // the floating toolbar anchored to it should move too.
+    await page.mouse.move(box.x + 600, box.y + 400);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 500, box.y + 350, { steps: 5 });
+    await page.mouse.up();
+
+    const afterLeft = await page.evaluate(() => document.getElementById("sel-toolbar").style.left);
+    assert.notEqual(beforeLeft, afterLeft, "the selection toolbar should track the node across a pan");
+  });
+});
+
+test("a node with a very long label renders without crashing or throwing (text is clipped, not overflowed)", async () => {
+  await withPage(async (page) => {
+    const longLabel = "A".repeat(500);
+    await addNodeViaDblClick(page, 400, 300, longLabel);
+    const node = await page.evaluate(() => window.__kg.state.nodes[0]);
+    assert.equal(node.label, longLabel, "the full label is still stored even though only part of it is drawn");
+  });
+});
+
+test("a group node can be a Connect-mode endpoint just like an entity", async () => {
+  await withPage(async (page) => {
+    await page.click("#btn-add-group");
+    const box = await page.locator("#canvas").boundingBox();
+    await page.mouse.click(box.x + 300, box.y + 300);
+    await page.waitForSelector(".kg-inline-input");
+    await page.locator(".kg-inline-input").fill("MyGroup");
+    await page.keyboard.press("Enter");
+    await page.waitForSelector(".kg-inline-input", { state: "detached" });
+
+    await addNodeViaDblClick(page, 700, 500, "Entity");
+    await createEdgeViaConnectMode(page, 300, 300, 700, 500, "relates to");
+
+    const edges = await page.evaluate(() => window.__kg.state.edges);
+    assert.equal(edges.length, 1);
+    const group = await page.evaluate(() => window.__kg.state.nodes.find((n) => n.type === "group"));
+    assert.equal(edges[0].source, group.id);
+  });
+});
+
+test("two separate, sequential drags on the same node both apply correctly and independently", async () => {
+  await withPage(async (page) => {
+    await addNodeViaDblClick(page, 300, 300, "Alpha");
+    const box = await page.locator("#canvas").boundingBox();
+
+    await page.mouse.move(box.x + 300, box.y + 300);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 450, box.y + 320, { steps: 5 });
+    await page.mouse.up();
+    const afterFirst = await page.evaluate(() => window.__kg.state.nodes[0]);
+
+    await page.mouse.move(box.x + 450 + afterFirst.w / 2 - 80, box.y + 320);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 200, box.y + 500, { steps: 5 });
+    await page.mouse.up();
+    const afterSecond = await page.evaluate(() => window.__kg.state.nodes[0]);
+
+    assert.notDeepEqual(afterSecond, afterFirst);
+    assert.equal(await page.evaluate(() => window.__kg.state.nodes.length), 1, "still exactly one node, not a duplicate from either drag");
+  });
+});
+
+test("selection survives an unrelated pan — panning the canvas does not clear the current selection", async () => {
+  await withPage(async (page) => {
+    await addNodeViaDblClick(page, 400, 300, "Alpha");
+    const box = await page.locator("#canvas").boundingBox();
+    await page.mouse.click(box.x + 400, box.y + 300);
+    const idBefore = await page.evaluate(() => window.__kg.state.selection.id);
+
+    await page.mouse.move(box.x + 800, box.y + 600);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 700, box.y + 550, { steps: 5 });
+    await page.mouse.up();
+
+    const selection = await page.evaluate(() => window.__kg.state.selection);
+    assert.equal(selection.type, "node");
+    assert.equal(selection.id, idBefore);
+  });
+});

@@ -17,6 +17,20 @@ async function importSummary(page) {
   return page.locator("#import-summary").textContent();
 }
 
+// Drives an import via synthetic drag-drop (DataTransfer + DragEvent) rather
+// than a real file on disk, for inline text content that only needs to
+// exist for one test — same technique the malformed-edge-lines test uses.
+async function dropText(page, text, filename = "import.txt") {
+  await page.evaluate(({ t, name }) => {
+    const dt = new DataTransfer();
+    const file = new File([t], name, { type: "text/plain" });
+    dt.items.add(file);
+    const canvas = document.getElementById("canvas");
+    canvas.dispatchEvent(new DragEvent("drop", { bubbles: true, cancelable: true, dataTransfer: dt }));
+  }, { t: text, name: filename });
+  await page.waitForSelector("#import-overlay", { state: "visible" });
+}
+
 test("Merge on an empty graph reproduces the spec's own worked example exactly", async () => {
   await withPage(async (page) => {
     await triggerImport(page, "spec-example.txt");
@@ -338,5 +352,132 @@ test("TXT import triggers a background save — the imported graph survives a re
 
     const nodes = await page.evaluate(() => window.__kg.state.nodes.map((n) => n.label));
     assert.deepEqual(nodes.sort(), ["Andhra Pradesh", "Telugu"]);
+  });
+});
+
+test("a file with only groups declared and no ## EDGES section at all imports cleanly", async () => {
+  await withPage(async (page) => {
+    const text = ["## NODES", "Solo Group [group]", "Another Group [group]"].join("\n");
+    await dropText(page, text, "groups-only.txt");
+    await page.click("#import-merge");
+    await page.waitForTimeout(150);
+
+    const nodes = await page.evaluate(() => window.__kg.state.nodes);
+    const edges = await page.evaluate(() => window.__kg.state.edges);
+    assert.equal(nodes.length, 2);
+    assert.ok(nodes.every((n) => n.type === "group"));
+    assert.equal(edges.length, 0);
+  });
+});
+
+test("blank lines, trailing whitespace, and extra spacing throughout the file don't break parsing", async () => {
+  await withPage(async (page) => {
+    const text = [
+      "",
+      "   ",
+      "## NODES",
+      "",
+      "  Alpha  ",
+      "",
+      "",
+      "Beta",
+      "   ",
+      "## EDGES",
+      "",
+      "  Alpha -> Beta : relates to  ",
+      "",
+    ].join("\n");
+    await dropText(page, text, "whitespace.txt");
+    await page.click("#import-merge");
+    await page.waitForTimeout(150);
+
+    const nodes = await page.evaluate(() => window.__kg.state.nodes.map((n) => n.label));
+    const edges = await page.evaluate(() => window.__kg.state.edges);
+    assert.deepEqual(nodes.sort(), ["Alpha", "Beta"], "leading/trailing whitespace around labels is trimmed");
+    assert.equal(edges.length, 1);
+    assert.equal(edges[0].relation, "relates to");
+  });
+});
+
+test("merging a file that references a node previously deleted from the current graph re-creates it fresh", async () => {
+  await withPage(async (page) => {
+    await triggerImport(page, "subset.txt");
+    await page.click("#import-merge");
+    await page.waitForTimeout(150);
+    assert.equal(await page.evaluate(() => window.__kg.state.nodes.length), 2);
+
+    // Delete "Telugu" from the live graph — merging the same file again
+    // should treat it as absent-from-current-graph and recreate it, since
+    // matching is against the live graph, not import history.
+    // Imported nodes land near world (0,0), which sits directly under the
+    // fixed toolbar that visually overlaps the top of the canvas element —
+    // pan down first so the click actually reaches the canvas.
+    await page.evaluate(() => { window.__kg.camera.panY = 150; window.__kg.render(); });
+    const box = await page.locator("#canvas").boundingBox();
+    const telugu = await page.evaluate(() => window.__kg.state.nodes.find((n) => n.label === "Telugu"));
+    const screen = await page.evaluate((n) => window.__kg.worldToScreen(n.x + n.w / 2, n.y + n.h / 2), telugu);
+    await page.mouse.click(box.x + screen.x, box.y + screen.y);
+    const sel = await page.evaluate(() => window.__kg.state.selection);
+    assert.equal(sel.type, "node", "sanity check: the click actually selected the node before deleting it");
+    await page.keyboard.press("Delete");
+    assert.equal(await page.evaluate(() => window.__kg.state.nodes.length), 1);
+
+    await triggerImport(page, "subset.txt");
+    await page.click("#import-merge");
+    await page.waitForTimeout(150);
+
+    const nodes = await page.evaluate(() => window.__kg.state.nodes.map((n) => n.label));
+    assert.deepEqual(nodes.sort(), ["Andhra Pradesh", "Telugu"], "Telugu is back after re-merging");
+    const newTelugu = await page.evaluate(() => window.__kg.state.nodes.find((n) => n.label === "Telugu"));
+    assert.notEqual(newTelugu.id, telugu.id, "the re-created node gets a fresh id, not the old deleted one");
+  });
+});
+
+test("merge adds a new member to an already-existing group (matched by label) via a contains line", async () => {
+  await withPage(async (page) => {
+    await addNodeViaButton(page, "#btn-add-group", 300, 300, "South Asian Languages");
+    const existingGroup = await page.evaluate(() => window.__kg.state.nodes[0]);
+
+    const text = [
+      "## NODES",
+      "South Asian Languages [group]",
+      "Kannada",
+      "",
+      "## EDGES",
+      "South Asian Languages -> Kannada : contains",
+    ].join("\n");
+    await dropText(page, text, "new-member.txt");
+    await page.click("#import-merge");
+    await page.waitForTimeout(150);
+
+    const nodes = await page.evaluate(() => window.__kg.state.nodes);
+    assert.equal(nodes.length, 2, "matched the existing group by label — did not create a duplicate group node");
+    const group = nodes.find((n) => n.label === "South Asian Languages");
+    const kannada = nodes.find((n) => n.label === "Kannada");
+    assert.equal(group.id, existingGroup.id, "the pre-existing group node itself is untouched, just its membership grows");
+    assert.deepEqual(kannada.groups, [group.id]);
+    const edges = await page.evaluate(() => window.__kg.state.edges);
+    const autoEdge = edges.find((e) => e.auto);
+    assert.equal(autoEdge.source, group.id);
+    assert.equal(autoEdge.target, kannada.id);
+  });
+});
+
+test("a large import (~200 nodes) completes without hanging or crashing", async () => {
+  await withPage(async (page) => {
+    const nodeLines = Array.from({ length: 200 }, (_, i) => `Node${i}`);
+    const edgeLines = Array.from({ length: 150 }, (_, i) => `Node${i} -> Node${(i + 37) % 200} : rel${i}`);
+    const text = ["## NODES", ...nodeLines, "", "## EDGES", ...edgeLines].join("\n");
+
+    const start = Date.now();
+    await dropText(page, text, "large.txt");
+    await page.click("#import-merge");
+    await page.waitForFunction(() => window.__kg.state.nodes.length === 200);
+    assert.ok(Date.now() - start < 15000, "a 200-node import should complete quickly, not hang");
+
+    const nodes = await page.evaluate(() => window.__kg.state.nodes);
+    const edges = await page.evaluate(() => window.__kg.state.edges);
+    assert.equal(nodes.length, 200);
+    assert.equal(edges.length, 150);
   });
 });

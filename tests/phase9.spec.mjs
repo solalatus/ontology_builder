@@ -117,6 +117,33 @@ test("clicking a node that's actually on screen after zooming in still selects i
   });
 });
 
+test("a group's resize handle remains draggable after panning/zooming the camera (hit-test culling doesn't break it)", async () => {
+  await withPage(async (page) => {
+    await page.evaluate(() => {
+      window.__kg.actions.createNode(300, 300, "Group", "group"); // default 320x220
+      window.__kg.markDirty();
+    });
+    // Chosen so the resize handle (world 620,520, at scale 1.5) lands well
+    // inside the 1200x800 viewport with room for the drag beyond it too —
+    // panX/panY of 120/180 would put the handle off-screen entirely.
+    await setCamera(page, { scale: 1.5, panX: -330, panY: -380 });
+
+    const group = await page.evaluate(() => window.__kg.state.nodes[0]);
+    const handleWorld = { x: group.x + group.w, y: group.y + group.h };
+    const handleScreen = await page.evaluate((p) => window.__kg.worldToScreen(p.x, p.y), handleWorld);
+    const box = await page.locator("#canvas").boundingBox();
+
+    await page.mouse.move(box.x + handleScreen.x, box.y + handleScreen.y);
+    await page.mouse.down();
+    await page.mouse.move(box.x + handleScreen.x + 90, box.y + handleScreen.y + 60, { steps: 5 });
+    await page.mouse.up();
+
+    const resized = await page.evaluate(() => window.__kg.state.nodes[0]);
+    assert.ok(resized.w > group.w, `expected width to grow after a panned/zoomed resize drag, got ${resized.w} vs ${group.w}`);
+    assert.ok(resized.h > group.h, `expected height to grow after a panned/zoomed resize drag, got ${resized.h} vs ${group.h}`);
+  });
+});
+
 test("edges are culled independently of their endpoint nodes' own visibility bookkeeping — a long edge crossing the viewport still draws", async () => {
   await withPage(async (page) => {
     await page.evaluate(() => {
