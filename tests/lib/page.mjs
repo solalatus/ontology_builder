@@ -54,3 +54,17 @@ export async function dragNode(page, fromSx, fromSy, toSx, toSy) {
   await page.mouse.move(box.x + toSx, box.y + toSy, { steps: 10 });
   await page.mouse.up();
 }
+
+// Connect mode is sticky (unlike Add Node's one-shot mode), so it may
+// already be armed from a previous call in the same test — set it
+// explicitly rather than toggling the button, which would turn it off.
+export async function createEdgeViaConnectMode(page, ax, ay, bx, by, relation) {
+  await page.evaluate(() => window.__kg.actions.setMode("connect"));
+  const box = await page.locator("#canvas").boundingBox();
+  await page.mouse.click(box.x + ax, box.y + ay);
+  await page.mouse.click(box.x + bx, box.y + by);
+  await page.waitForSelector(".kg-inline-input");
+  if (relation) await page.locator(".kg-inline-input").fill(relation);
+  await page.keyboard.press("Enter");
+  await page.waitForSelector(".kg-inline-input", { state: "detached" });
+}

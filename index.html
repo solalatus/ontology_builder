@@ -66,6 +66,11 @@
     background: var(--btn-bg-active);
   }
 
+  #toolbar button:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+
   #toolbar .spacer {
     flex: 1 1 auto;
   }
@@ -276,6 +281,63 @@ function deleteEdge(id) {
   state.edges.splice(idx, 1);
   if (state.selection.type === "edge" && state.selection.id === id) clearSelection();
   markDirty();
+}
+
+// ---------------------------------------------------------------------------
+// Undo/redo (Section 8, Decision #8): command-pattern stack, one entry per
+// discrete user action, restored via a full {nodes, edges} snapshot rather
+// than tracked per-action deltas — matches the spec's own description of
+// autolayout as "one before snapshot," generalized to every action here for
+// correctness by construction (no mutation can forget to register its
+// inverse). `groups[]` arrays are cloned too since they're mutated in place.
+// Id counters are intentionally NOT part of the snapshot: ids are never
+// reused (Section 4.1), so they must keep incrementing across undo/redo.
+// Nothing here is persisted — it's just these two in-memory arrays, so a
+// reload always starts with an empty stack (Section 8).
+// ---------------------------------------------------------------------------
+const history = { past: [], future: [] };
+
+function snapshotState() {
+  return {
+    nodes: state.nodes.map((n) => ({ ...n, groups: [...n.groups] })),
+    edges: state.edges.map((e) => ({ ...e })),
+  };
+}
+
+function restoreSnapshot(snap) {
+  state.nodes = snap.nodes.map((n) => ({ ...n, groups: [...n.groups] }));
+  state.edges = snap.edges.map((e) => ({ ...e }));
+}
+
+function pushHistory(before, after) {
+  history.past.push({ before, after });
+  history.future = [];
+  updateUndoRedoButtons();
+}
+
+function undo() {
+  if (history.past.length === 0) return;
+  const entry = history.past.pop();
+  restoreSnapshot(entry.before);
+  history.future.push(entry);
+  clearSelection();
+  updateUndoRedoButtons();
+  markDirty();
+}
+
+function redo() {
+  if (history.future.length === 0) return;
+  const entry = history.future.pop();
+  restoreSnapshot(entry.after);
+  history.past.push(entry);
+  clearSelection();
+  updateUndoRedoButtons();
+  markDirty();
+}
+
+function updateUndoRedoButtons() {
+  document.getElementById("btn-undo").disabled = history.past.length === 0;
+  document.getElementById("btn-redo").disabled = history.future.length === 0;
 }
 
 // ---------------------------------------------------------------------------
@@ -755,6 +817,7 @@ let edgeDragSourceId = null;
 let edgeDragCurrentWorld = null;
 let resizingNodeId = null;
 let resizeStart = { w: 0, h: 0, worldX: 0, worldY: 0 };
+let dragBeforeSnapshot = null; // captured at drag-start, for moveNode/resizeGroup undo steps
 let longPressTimer = null;
 let pointerDownScreen = null;
 let suppressNextClick = false;
@@ -775,6 +838,7 @@ canvas.addEventListener("pointerdown", (e) => {
     dragMode = "resizeGroup";
     resizingNodeId = resizeHit.id;
     resizeStart = { w: resizeHit.w, h: resizeHit.h, worldX: world.x, worldY: world.y };
+    dragBeforeSnapshot = snapshotState();
     selectNode(resizeHit.id);
     canvas.setPointerCapture(e.pointerId);
     markDirty();
@@ -797,11 +861,15 @@ canvas.addEventListener("pointerdown", (e) => {
     dragMode = "moveNode";
     movingNodeId = nodeHit.id;
     moveOffset = { x: world.x - nodeHit.x, y: world.y - nodeHit.y };
+    dragBeforeSnapshot = snapshotState();
     canvas.setPointerCapture(e.pointerId);
     longPressTimer = setTimeout(() => {
+      const before = snapshotState();
       deleteNode(nodeHit.id);
+      pushHistory(before, snapshotState());
       dragMode = null;
       movingNodeId = null;
+      dragBeforeSnapshot = null;
       longPressTimer = null;
     }, LONG_PRESS_MS);
     markDirty();
@@ -812,7 +880,9 @@ canvas.addEventListener("pointerdown", (e) => {
   if (edgeHit) {
     selectEdge(edgeHit.id);
     longPressTimer = setTimeout(() => {
+      const before = snapshotState();
       deleteEdge(edgeHit.id);
+      pushHistory(before, snapshotState());
       longPressTimer = null;
     }, LONG_PRESS_MS);
     markDirty();
@@ -895,8 +965,10 @@ canvas.addEventListener("pointerup", (e) => {
       suppressNextClick = true;
       const node = state.nodes.find((n) => n.id === movingNodeId);
       if (node) updateGroupMembership(node); // commit/clear membership on drop, not on mere click
+      if (dragBeforeSnapshot) pushHistory(dragBeforeSnapshot, snapshotState()); // move + membership: one step
     }
     movingNodeId = null;
+    dragBeforeSnapshot = null;
     dragMode = null;
     return;
   }
@@ -919,8 +991,12 @@ canvas.addEventListener("pointerup", (e) => {
 
   if (dragMode === "resizeGroup") {
     const moved = pointerDownScreen ? Math.hypot(e.clientX - pointerDownScreen.x, e.clientY - pointerDownScreen.y) : 0;
-    if (moved > MOVE_THRESHOLD) suppressNextClick = true;
+    if (moved > MOVE_THRESHOLD) {
+      suppressNextClick = true;
+      if (dragBeforeSnapshot) pushHistory(dragBeforeSnapshot, snapshotState());
+    }
     resizingNodeId = null;
+    dragBeforeSnapshot = null;
     dragMode = null;
     return;
   }
@@ -934,6 +1010,7 @@ canvas.addEventListener("pointercancel", (e) => {
   edgeDragSourceId = null;
   edgeDragCurrentWorld = null;
   resizingNodeId = null;
+  dragBeforeSnapshot = null;
 });
 
 function beginAddEdgePrompt(sourceId, targetId, screenPos) {
@@ -941,7 +1018,9 @@ function beginAddEdgePrompt(sourceId, targetId, screenPos) {
     x: screenPos.x, y: screenPos.y, placeholder: "relation label",
     onCommit: (text) => {
       const relation = text.trim() || "related to";
+      const before = snapshotState();
       const edge = createEdge(sourceId, targetId, relation, true, false);
+      pushHistory(before, snapshotState());
       selectEdge(edge.id);
     },
   });
@@ -956,7 +1035,9 @@ function placeNewNodeAt(world, screenPos, type) {
       if (!label) return;
       const w = type === "group" ? DEFAULT_GROUP_W : DEFAULT_NODE_W;
       const h = type === "group" ? DEFAULT_GROUP_H : DEFAULT_NODE_H;
+      const before = snapshotState();
       const node = createNode(world.x - w / 2, world.y - h / 2, label, type);
+      pushHistory(before, snapshotState());
       selectNode(node.id);
     },
   });
@@ -1025,20 +1106,29 @@ window.addEventListener("keydown", (e) => {
   }
   if ((e.key === "Delete" || e.key === "Backspace") && state.selection.id) {
     e.preventDefault();
+    const before = snapshotState();
     if (state.selection.type === "node") deleteNode(state.selection.id);
     else if (state.selection.type === "edge") deleteEdge(state.selection.id);
+    pushHistory(before, snapshotState());
   }
 });
 
 selTrashBtn.addEventListener("click", () => {
+  if (!state.selection.type) return;
+  const before = snapshotState();
   if (state.selection.type === "node") deleteNode(state.selection.id);
   else if (state.selection.type === "edge") deleteEdge(state.selection.id);
+  pushHistory(before, snapshotState());
 });
 
 selToggleDirBtn.addEventListener("click", () => {
   if (state.selection.type !== "edge") return;
   const edge = state.edges.find((x) => x.id === state.selection.id);
-  if (edge) { edge.directed = !edge.directed; markDirty(); }
+  if (!edge) return;
+  const before = snapshotState();
+  edge.directed = !edge.directed;
+  pushHistory(before, snapshotState());
+  markDirty();
 });
 
 // ---------------------------------------------------------------------------
@@ -1121,8 +1211,8 @@ document.getElementById("btn-connect").addEventListener("click", () => {
 });
 
 document.getElementById("btn-autolayout").addEventListener("click", () => notImplemented("Auto-layout"));
-document.getElementById("btn-undo").addEventListener("click", () => notImplemented("Undo"));
-document.getElementById("btn-redo").addEventListener("click", () => notImplemented("Redo"));
+document.getElementById("btn-undo").addEventListener("click", () => undo());
+document.getElementById("btn-redo").addEventListener("click", () => redo());
 document.getElementById("btn-save-version").addEventListener("click", () => notImplemented("Save Version"));
 
 const importInput = document.getElementById("import-file-input");
@@ -1142,6 +1232,7 @@ importInput.addEventListener("change", () => {
 window.__kg = {
   state,
   camera,
+  history,
   render,
   markDirty,
   worldToScreen,
@@ -1150,7 +1241,7 @@ window.__kg = {
   actions: {
     createNode, createEdge, deleteNode, deleteEdge,
     selectNode, selectEdge, clearSelection, setMode,
-    updateGroupMembership,
+    updateGroupMembership, undo, redo,
   },
 };
 
@@ -1158,6 +1249,7 @@ window.__kg = {
 // Boot
 // ---------------------------------------------------------------------------
 resizeCanvas();
+updateUndoRedoButtons();
 requestAnimationFrame(loop);
 </script>
 

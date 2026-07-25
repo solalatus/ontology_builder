@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { withPage, addNodeViaDblClick } from "./lib/page.mjs";
+import { withPage, addNodeViaDblClick, createEdgeViaConnectMode } from "./lib/page.mjs";
 
 test("double-click empty canvas adds a node with the entered label", async () => {
   await withPage(async (page) => {
@@ -94,20 +94,6 @@ test("dragging from a node's edge handle to another node creates a directed edge
     assert.equal(edges[0].auto, false);
   });
 });
-
-async function createEdgeViaConnectMode(page, ax, ay, bx, by, relation) {
-  // Connect mode is sticky (unlike Add Node's one-shot mode), so it may
-  // already be armed from a previous call in the same test — set it
-  // explicitly rather than toggling the button, which would turn it off.
-  await page.evaluate(() => window.__kg.actions.setMode("connect"));
-  const box = await page.locator("#canvas").boundingBox();
-  await page.mouse.click(box.x + ax, box.y + ay);
-  await page.mouse.click(box.x + bx, box.y + by);
-  await page.waitForSelector(".kg-inline-input");
-  if (relation) await page.locator(".kg-inline-input").fill(relation);
-  await page.keyboard.press("Enter");
-  await page.waitForSelector(".kg-inline-input", { state: "detached" });
-}
 
 test("Connect mode: tap source then target creates an edge", async () => {
   await withPage(async (page) => {
