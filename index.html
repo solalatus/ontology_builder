@@ -148,6 +148,56 @@
   #sel-toolbar button:hover {
     background: var(--btn-bg-hover);
   }
+
+  #confirm-overlay {
+    position: fixed;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.55);
+    z-index: 30;
+  }
+
+  #confirm-dialog {
+    max-width: 340px;
+    margin: 16px;
+    padding: 16px;
+    border-radius: 8px;
+    background: var(--toolbar-bg);
+    border: 1px solid var(--toolbar-border);
+    color: var(--toolbar-fg);
+  }
+
+  #confirm-message {
+    margin: 0 0 14px;
+    font-size: 14px;
+    line-height: 1.4;
+  }
+
+  #confirm-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+
+  #confirm-actions button {
+    font-size: 14px;
+    padding: 7px 14px;
+    color: var(--toolbar-fg);
+    background: var(--btn-bg);
+    border: 1px solid var(--toolbar-border);
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  #confirm-actions button:hover {
+    background: var(--btn-bg-hover);
+  }
+
+  #confirm-ok {
+    border-color: #a64d4d !important;
+  }
 </style>
 </head>
 <body>
@@ -162,6 +212,7 @@
   <button id="btn-save-version" type="button">Save Version</button>
   <button id="btn-import-txt" type="button">Import from TXT</button>
   <input id="import-file-input" type="file" accept=".txt">
+  <button id="btn-clear" type="button">Clear</button>
   <div class="spacer"></div>
   <div class="zoom-group">
     <button id="btn-zoom-out" type="button" aria-label="Zoom out">&minus;</button>
@@ -176,6 +227,16 @@
 <div id="sel-toolbar">
   <button id="sel-toggle-dir" type="button" title="Toggle direction">&#8646;</button>
   <button id="sel-trash" type="button" title="Delete">&#128465;</button>
+</div>
+
+<div id="confirm-overlay">
+  <div id="confirm-dialog" role="alertdialog" aria-modal="true">
+    <p id="confirm-message"></p>
+    <div id="confirm-actions">
+      <button id="confirm-cancel" type="button">Cancel</button>
+      <button id="confirm-ok" type="button">OK</button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -870,6 +931,10 @@ function updateSelectionToolbar() {
   selToolbar.style.top = `${screen.y}px`;
 }
 
+function updateClearButton() {
+  document.getElementById("btn-clear").disabled = state.nodes.length === 0 && state.edges.length === 0;
+}
+
 function render() {
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -887,6 +952,7 @@ function render() {
   if (state.nodes.length === 0) drawEmptyState();
 
   updateSelectionToolbar();
+  updateClearButton();
 }
 
 function loop() {
@@ -941,6 +1007,40 @@ function showInlineInput({ x, y, value = "", placeholder = "", onCommit, onCance
 function cancelInlineInput() {
   if (activeInlineEditor) activeInlineEditor.finish(false);
 }
+
+// ---------------------------------------------------------------------------
+// Confirm dialog — a centered modal for destructive actions (e.g. Clear),
+// used instead of native confirm() for the same reason as the inline text
+// input: consistent styling and DOM-testability.
+// ---------------------------------------------------------------------------
+const confirmOverlay = document.getElementById("confirm-overlay");
+const confirmMessageEl = document.getElementById("confirm-message");
+const confirmOkBtn = document.getElementById("confirm-ok");
+const confirmCancelBtn = document.getElementById("confirm-cancel");
+let activeConfirm = null;
+
+function showConfirmDialog({ message, confirmLabel = "OK", onConfirm, onCancel }) {
+  cancelInlineInput();
+  confirmMessageEl.textContent = message;
+  confirmOkBtn.textContent = confirmLabel;
+  confirmOverlay.style.display = "flex";
+  activeConfirm = { onConfirm, onCancel };
+}
+
+function closeConfirmDialog(confirmed) {
+  if (!activeConfirm) return;
+  const { onConfirm, onCancel } = activeConfirm;
+  activeConfirm = null;
+  confirmOverlay.style.display = "none";
+  if (confirmed) { if (onConfirm) onConfirm(); }
+  else if (onCancel) onCancel();
+}
+
+confirmOkBtn.addEventListener("click", () => closeConfirmDialog(true));
+confirmCancelBtn.addEventListener("click", () => closeConfirmDialog(false));
+confirmOverlay.addEventListener("click", (e) => {
+  if (e.target === confirmOverlay) closeConfirmDialog(false); // click outside the dialog = cancel
+});
 
 // ---------------------------------------------------------------------------
 // Primary pointer interaction: pan / node-move / edge-creation-drag, plus a
@@ -1243,6 +1343,11 @@ canvas.addEventListener("dblclick", (e) => {
 });
 
 window.addEventListener("keydown", (e) => {
+  if (activeConfirm) {
+    if (e.key === "Escape") { e.preventDefault(); closeConfirmDialog(false); }
+    else if (e.key === "Enter") { e.preventDefault(); closeConfirmDialog(true); }
+    return;
+  }
   if (activeInlineEditor) return; // don't hijack while typing
   if (e.key === "Escape") {
     if (state.mode !== "idle") setMode("idle");
@@ -1367,6 +1472,23 @@ importInput.addEventListener("change", () => {
     notImplemented(`Import from TXT (selected "${importInput.files[0].name}")`);
   }
   importInput.value = "";
+});
+
+document.getElementById("btn-clear").addEventListener("click", () => {
+  if (state.nodes.length === 0 && state.edges.length === 0) return; // nothing to clear
+  showConfirmDialog({
+    message: "Clear the entire graph? This removes all nodes and edges. This can be undone with the Undo button.",
+    confirmLabel: "Clear",
+    onConfirm: () => {
+      const before = snapshotState();
+      state.nodes = [];
+      state.edges = [];
+      state.connectSource = null;
+      clearSelection();
+      pushHistory(before, snapshotState());
+      markDirty();
+    },
+  });
 });
 
 // ---------------------------------------------------------------------------

@@ -10,9 +10,11 @@ State" so the project can be picked up cold at any time.
 ## Current State
 
 - **Phase:** Phases 0, 1, 2, 3, and 4 complete, all with green automated
-  test suites (`node --test tests/*.spec.mjs`, 80 tests, see Log below).
+  test suites (`node --test tests/*.spec.mjs`, 92 tests, see Log below).
   Not yet hand-tested on real touch hardware (pinch/long-press) — deferred
-  to Phase 10, not blocking. Phase 5 not started.
+  to Phase 10, not blocking. Phase 5 not started. A "Clear" button (outside
+  the phased plan, user-requested) was also added — see its own section
+  below, right after Phase 11.
 - **Target file:** `index.html` (single file, no external deps/CDN links).
   Dev-only test tooling lives in `tests/` (see `tests/README.md`) and never
   ships as part of the app.
@@ -420,6 +422,39 @@ claude.ai/code, which is plain git via GitHub as described above.
 
 ---
 
+## Additional features (outside the phased plan)
+
+Features requested directly by the user that don't map onto any spec.md
+phase above — tracked here instead of invented as a fake phase number.
+
+### Clear graph
+
+- [x] "Clear" toolbar button, disabled when the graph is already empty
+- [x] Confirms via a centered modal dialog (not native `confirm()`, for the
+      same reason as the inline text input — consistent styling, DOM-
+      testable) before doing anything destructive; Cancel, clicking the
+      backdrop, or Escape all back out with zero effect; Enter or the
+      dialog's own confirm button proceed
+- [x] Empties `state.nodes` and `state.edges` in one action
+- [x] Undoable: routed through the same `pushHistory()` mechanism as every
+      other action (Phase 3), so it's exactly one undo step and Undo
+      restores the graph exactly as it was
+- [x] Persisted like any other edit: goes through `pushHistory()`, which
+      already triggers `scheduleSave()` (Phase 4), so a cleared graph is
+      what a reload restores — not the pre-clear one
+- Tests (`tests/clear-graph.spec.mjs`, 12 tests, all green): button
+  disabled/enabled state tracks whether the graph is empty; opening the
+  dialog doesn't clear anything by itself; Cancel, backdrop-click, and
+  Escape all leave the graph untouched and close the dialog; Enter and the
+  confirm button both clear it; clearing removes nodes, edges, and group
+  membership together; Escape while the dialog is open closes only the
+  dialog and doesn't also cancel an unrelated armed mode (e.g. Add Group)
+  underneath it; Clear is exactly one undo step and Undo/Redo round-trip
+  it correctly; a genuinely disabled Clear button can't be clicked at all;
+  the post-clear (empty) state is what survives a reload, not the old one.
+
+---
+
 ## Log / Decisions
 
 *(Append dated entries here when something is clarified, changed, or
@@ -648,6 +683,38 @@ and record deltas here instead of editing the spec.)*
     (`node:http` + `node:fs`) used only by `phase4.spec.mjs` — so both
     backends are verified against the real browser API, not just one of
     them by construction of the test environment.
+- 2026-07-25 — Follow-up question after Phase 4 shipped: "does opening
+  index.html resume the last disk-synced state, and how does browser
+  close/reopen work?" Verified empirically (not just reasoned about)
+  with a real `launchPersistentContext` test — fully closing the browser
+  process and relaunching it fresh against the same profile still
+  restored a node added in the prior session, confirming Tier 1 survives
+  a real browser restart, not merely a same-process page reload.
+- 2026-07-25 — Added a "Clear" button + confirm-dialog feature (user
+  request, outside the phased plan — tracked in its own section above
+  rather than shoehorned into a phase number). `tests/clear-graph.spec.mjs`
+  (12 tests; 92 total across the whole suite). Notable decisions:
+  - **Confirm dialog is a custom centered modal, not native `confirm()`**
+    — same rationale already established for node/edge inline entry in
+    Phase 1: consistent styling and DOM-testability. Cancel, clicking the
+    backdrop, and Escape are all equivalent "back out" paths; Enter and
+    the dialog's own button are equivalent "proceed" paths.
+  - **Free undo/redo support, not reimplemented.** Clear goes through the
+    exact same `snapshotState()` / `pushHistory()` pair as every other
+    mutating action (Phase 3), so it's automatically exactly one undo
+    step and automatically triggers a background save (Phase 4) — no new
+    persistence or history code needed, just correct use of the existing
+    choke points.
+  - **id counters are not reset by Clear.** Consistent with delete never
+    resetting them either — if a user Clears, then Undoes, then keeps
+    editing, ids must still never collide with anything that existed
+    before the Clear.
+  - The dialog's Escape handling is checked *before* the existing
+    Escape-cancels-armed-mode logic in the global keydown handler (an
+    early return when the dialog is open), so Escape while the dialog is
+    showing only ever dismisses the dialog — it can't also silently
+    cancel an unrelated armed Add Node/Add Group/Connect mode underneath
+    it in the same keypress.
 
 ---
 
