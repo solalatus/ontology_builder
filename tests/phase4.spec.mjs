@@ -54,6 +54,52 @@ test("reloading the page restores nodes, edges, and groups from the live-save ba
   });
 });
 
+test("boot requests persistent storage (best-effort, doesn't block or throw)", async () => {
+  const browser = await launchChromium();
+  const page = await browser.newPage({ viewport: { width: 1200, height: 800 } });
+  const consoleErrors = [];
+  page.on("console", (msg) => { if (msg.type() === "error") consoleErrors.push(msg.text()); });
+  page.on("pageerror", (err) => consoleErrors.push(String(err)));
+  await page.addInitScript(() => {
+    window.__persistCalled = false;
+    const original = navigator.storage.persist.bind(navigator.storage);
+    navigator.storage.persist = (...args) => {
+      window.__persistCalled = true;
+      return original(...args);
+    };
+  });
+  await page.goto(APP_URL);
+  await page.waitForFunction(() => Boolean(window.__kg));
+  await page.waitForFunction(() => window.__persistCalled === true);
+  await browser.close();
+  assert.deepEqual(consoleErrors, []);
+});
+
+test("reloading with a saved graph shows a restore toast naming the node/edge counts", async () => {
+  await withPage(async (page) => {
+    await addNodeViaDblClick(page, 250, 250, "Alpha");
+    await addNodeViaDblClick(page, 600, 250, "Beta");
+    await createEdgeViaConnectMode(page, 250, 250, 600, 250, "relates to");
+    await page.evaluate(() => window.__kg.storage.whenIdle());
+
+    await page.reload();
+    await page.waitForFunction(() => Boolean(window.__kg));
+    await page.waitForFunction(() => window.__kg.state.nodes.length === 2);
+
+    await page.waitForFunction(() => document.getElementById("restore-toast").classList.contains("visible"));
+    const text = await page.textContent("#restore-toast");
+    assert.match(text, /2/, "toast should mention the restored node count");
+    assert.match(text, /1/, "toast should mention the restored edge count");
+  });
+});
+
+test("a fresh load with nothing saved yet shows no restore toast", async () => {
+  await withPage(async (page) => {
+    const visible = await page.evaluate(() => document.getElementById("restore-toast").classList.contains("visible"));
+    assert.equal(visible, false);
+  });
+});
+
 test("group membership (groups[] and the auto contains edge) survives a reload", async () => {
   await withPage(async (page) => {
     await page.click("#btn-add-group");

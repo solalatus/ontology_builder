@@ -345,6 +345,29 @@
   #import-replace {
     border-color: #a64d4d !important;
   }
+
+  #restore-toast {
+    position: fixed;
+    left: 50%;
+    bottom: 24px;
+    transform: translateX(-50%) translateY(8px);
+    padding: 10px 16px;
+    border-radius: var(--radius-sm);
+    background: var(--toolbar-bg);
+    border: 1px solid var(--toolbar-border);
+    color: var(--toolbar-fg);
+    box-shadow: var(--shadow-md);
+    font-size: 13px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--transition-fast), transform var(--transition-fast);
+    z-index: 40;
+  }
+
+  #restore-toast.visible {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
 </style>
 </head>
 <body>
@@ -401,6 +424,8 @@
     </div>
   </div>
 </div>
+
+<div id="restore-toast" role="status" aria-live="polite"></div>
 
 <script>
 "use strict";
@@ -516,6 +541,7 @@ const STRINGS = {
     importMergeSummary: (n, m) => `Merge: ${n} node(s) and ${m} edge(s) would be added. Nothing is ever removed.`,
     importReplaceSummary: (n) => `Replace: same additions, plus ${n} node(s)/edge(s) not in this file would be removed.`,
     defaultRelation: "related to",
+    sessionRestoredToast: (n, m) => `Restored last session (${n} node${n === 1 ? "" : "s"}, ${m} edge${m === 1 ? "" : "s"})`,
   },
   hu: {
     appTitle: "Tudásgráf Vászon",
@@ -553,6 +579,7 @@ const STRINGS = {
     importMergeSummary: (n, m) => `Egyesítés: ${n} csomópont és ${m} él kerülne hozzáadásra. Semmi nem törlődik.`,
     importReplaceSummary: (n) => `Csere: ugyanazok a hozzáadások, plusz ${n} csomópont/él törlődne, amelyek nincsenek ebben a fájlban.`,
     defaultRelation: "kapcsolódik",
+    sessionRestoredToast: (n, m) => `Visszaállítva az előző munkamenet (${n} csomópont, ${m} él)`,
   },
 };
 
@@ -3044,6 +3071,21 @@ window.__kg = {
   },
 };
 
+// Best-effort only: silent auto-restore (loadGraphFromStorage, above) leaves
+// the user with no way to tell whether it actually ran, which is exactly the
+// blind spot that made a flaky Android launch path (see TODO.md) hard to
+// reason about. This doesn't fix that flakiness — it just surfaces the
+// outcome instead of hiding it, so a failed restore isn't mistaken for one
+// that never happened.
+let restoreToastTimer = null;
+function showRestoreToast(nodeCount, edgeCount) {
+  const el = document.getElementById("restore-toast");
+  el.textContent = t("sessionRestoredToast", nodeCount, edgeCount);
+  el.classList.add("visible");
+  clearTimeout(restoreToastTimer);
+  restoreToastTimer = setTimeout(() => el.classList.remove("visible"), 3000);
+}
+
 // ---------------------------------------------------------------------------
 // Boot
 // ---------------------------------------------------------------------------
@@ -3051,10 +3093,18 @@ async function boot() {
   resizeCanvas();
   updateUndoRedoButtons();
   applyLanguage(); // also refreshes the theme/folder-sync/lang button text
+  // Best-effort request not to have Tier 1's storage evicted under disk
+  // pressure. Doesn't require a backend decision first — it applies to the
+  // origin's storage bucket as a whole (OPFS and localStorage alike) — and
+  // never blocks boot on its result either way.
+  if (navigator.storage && navigator.storage.persist) {
+    navigator.storage.persist().catch(() => {});
+  }
   const restored = await loadGraphFromStorage();
   if (restored) {
     clearSelection();
     markDirty();
+    showRestoreToast(state.nodes.length, state.edges.length);
   }
   if (isDefaultGraphName(state.graphName)) state.graphName = t("untitledGraph");
   document.getElementById("graph-title").textContent = state.graphName;

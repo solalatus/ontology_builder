@@ -10,7 +10,7 @@ State" so the project can be picked up cold at any time.
 ## Current State
 
 - **Phase:** Phases 0 through 9 complete, all with green automated test
-  suites (`node --test tests/*.spec.mjs`, 276 JS tests + 15 Python tests,
+  suites (`node --test tests/*.spec.mjs`, 279 JS tests + 15 Python tests,
   see Log below). Not yet hand-tested on real touch hardware (pinch/
   long-press) — deferred to Phase 10, not blocking. Phase 7's real-folder
   grant/write-back is likewise only mocked-tested so far, not hand-verified
@@ -86,6 +86,15 @@ State" so the project can be picked up cold at any time.
   rings, transitions) with 5 new regression tests in
   `tests/ui-polish.spec.mjs` — see "Visual polish pass" (right after
   "Priority test-coverage completion") and the dated Log entry.
+- **A follow-up Android-reliability request**: after discussing why
+  auto-restoring the last graph on load is inherently less reliable on
+  Android than desktop under this app's "just open the file" model (no
+  stable storage origin guaranteed when a file manager opens the HTML file
+  via a `content://` intent rather than a plain `file://` path), two cheap,
+  additive changes went in without touching that underlying model: `boot()`
+  now calls `navigator.storage.persist()` best-effort, and a restored
+  session now shows a small toast instead of restoring silently. See Phase
+  4's own bullet and the dated Log entry.
 - **A dedicated test-hardening pass** (user-requested, ahead of Phase 10's
   manual testing) went back through every phase and added substantially
   more coverage (34 new tests, 159 → 193), and surfaced two real bugs in
@@ -496,7 +505,27 @@ claude.ai/code, which is plain git via GitHub as described above.
       programmatically in headless Chromium for both the served (OPFS) and
       `file://` (localStorage fallback) cases; the 4-platform hardware pass
       is still Phase 10's job.
-- Tests (`tests/phase4.spec.mjs`, 16 tests, all green — expanded from 11 in
+- [x] **Reliability follow-up** (user-requested, prompted by "how do we make
+      this more reliable on Android without abandoning the double-click-the-
+      file model?"): two small, additive changes, neither changing which
+      backend gets picked or how. (1) `boot()` now calls
+      `navigator.storage.persist()` (best-effort, wrapped so a rejection is
+      swallowed) right away, independent of which Tier 1 backend eventually
+      gets used — it applies to the origin's whole storage bucket, so it's
+      requested unconditionally rather than gated behind
+      `detectStorageBackend()`. This doesn't fix the actual Android
+      flakiness (an `file://` open routed through a file manager's
+      `content://` intent can still land on a different, unstable storage
+      origin each launch — see the dated Log entry for the full
+      diagnosis) — it only reduces the *other* common way local data
+      quietly disappears (eviction under storage pressure). (2) A restored
+      session is no longer silent: a small toast (`#restore-toast`, bottom-
+      center, reusing the polish pass's shadow/radius/transition tokens)
+      now reports "Restored last session (N nodes, M edges)" whenever
+      `loadGraphFromStorage()` finds a payload — nothing shown on a fresh/
+      empty boot. Doesn't increase reliability either, but replaces "did it
+      even try to restore" silence with a visible, honest answer.
+- Tests (`tests/phase4.spec.mjs`, 19 tests, all green — expanded from 16 in
   a later test-hardening pass: a burst of many scheduled saves coalesces
   into far fewer than N actual writes, proven via a counted
   `localStorage.setItem` wrapper, not just inferred; a moderately large
@@ -2608,6 +2637,59 @@ and record deltas here instead of editing the spec.)*
     consecutively) and `python3 -m unittest discover -s tools -p
     "test_*.py"` (15 tests), both green — no regressions from either the
     flake fix or the CSS polish.
+- 2026-07-26 — User asked, exploratory, whether there's a "civilized,
+  non-idiosyncratic" way to open the last-worked-on graph automatically on
+  both Android and desktop when the file is just double-clicked. Answered
+  without implementing anything first: `boot()` already does this (silent
+  `loadGraphFromStorage()` restore on every load), but it only works
+  reliably if the browser hands the page the *same storage origin* across
+  launches — which `file://` doesn't guarantee, especially on Android,
+  where tapping the file in a file manager often routes through a
+  `content://` intent rather than a stable `file://` path, so Chrome/
+  Android can land on a different (or ephemeral) origin each launch and
+  silently defeat `localStorage`/OPFS persistence. The fully standards-based
+  fix (an installable PWA served from a fixed origin, with
+  `navigator.storage.persist()`) was named but flagged as a bigger
+  architectural shift that breaks the project's deliberate "no external
+  server, just open the file" model. Asked for cheap ideas that keep that
+  model instead; proposed, ranked by leverage: (1) a one-time Android
+  home-screen shortcut to the file's own `file://` URL (bypasses the file
+  manager's `content://` indirection entirely — most likely to actually
+  fix the flakiness, but a user-side setup step, not app code); (2)
+  calling `navigator.storage.persist()` on boot (cheap, real, reduces
+  eviction risk regardless of origin stability); (3) adding IndexedDB as a
+  broader-quota middle tier between OPFS and localStorage; (4) making a
+  successful restore visible instead of silent; (5) reaffirming the
+  existing manual export/import as the deterministic fallback when
+  auto-restore doesn't fire. User asked to implement (2) and (4) — the two
+  "cheap, zero risk" ones that are pure app code, no user-side setup, and
+  don't change backend selection or the storage model at all.
+  - **`navigator.storage.persist()`** (2): called once in `boot()`,
+    unconditionally (not gated behind `detectStorageBackend()`, since it
+    requests persistence for the origin's whole storage bucket, not a
+    specific API) and wrapped so a rejection is swallowed — verified
+    `navigator.storage.persist` is actually present even under `file://`
+    in headless Chromium before relying on it. Doesn't fix the Android
+    origin-instability problem — it only guards against the *other* way
+    local data quietly disappears (eviction under storage pressure).
+  - **Visible restore toast** (4): a new `#restore-toast` element (bottom-
+    center, reusing the polish pass's `--radius-sm`/`--shadow-md`/
+    `--transition-fast` tokens so it matches the rest of the UI) shows
+    "Restored last session (N nodes, M edges)" — new
+    `sessionRestoredToast` i18n strings in both languages — whenever
+    `loadGraphFromStorage()` finds a payload; nothing shown on a genuinely
+    fresh/empty boot, so a new user isn't shown a toast about nothing.
+    Auto-hides after 3 seconds.
+  - Added 3 new tests to `tests/phase4.spec.mjs` (16 → 19): boot calls
+    `navigator.storage.persist()` (verified by wrapping it via
+    `page.addInitScript` before the app's own boot script runs, the same
+    pattern already used for the corrupted-payload test) without throwing
+    or logging a console error; a reload with a previously saved 2-node/
+    1-edge graph shows the toast with both counts; a genuinely fresh
+    profile shows no toast at all.
+  - Ran the full suite twice consecutively: `node --test tests/*.spec.mjs`
+    (276 → 279 tests) and `python3 -m unittest discover -s tools -p
+    "test_*.py"` (15 tests), both green.
 
 ---
 
