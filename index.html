@@ -1796,8 +1796,18 @@ let dragBeforeSnapshot = null; // captured at drag-start, for moveNode/resizeGro
 let longPressTimer = null;
 let pointerDownScreen = null;
 let suppressNextClick = false;
+// The pointer currently driving pan/moveNode/resizeGroup/createEdge. A
+// second pointer's own pointerdown must never start an independent second
+// interaction through this handler — without this guard, a second touch
+// arriving to start a pinch reaches this handler *before* the touch-pinch
+// listener below gets a chance to recognize it, and its own hit-test can
+// silently reassign dragMode/movingNodeId/panPointerId out from under the
+// first pointer's still-active drag, corrupting or losing it entirely
+// (see abortActiveDrag()'s doc comment for the concrete failure mode).
+let activePointerId = null;
 
 canvas.addEventListener("pointerdown", (e) => {
+  if (dragMode !== null && e.pointerId !== activePointerId) return; // an interaction is already owned by another pointer
   if (e.pointerType === "touch" && activeTouches.size >= 2) return; // pinch owns this
   if (e.pointerType === "mouse" && e.button !== 0) return; // primary button only
 
@@ -1811,6 +1821,7 @@ canvas.addEventListener("pointerdown", (e) => {
   const resizeHit = findGroupResizeHandleAt(world.x, world.y);
   if (resizeHit) {
     dragMode = "resizeGroup";
+    activePointerId = e.pointerId;
     resizingNodeId = resizeHit.id;
     resizeStart = { w: resizeHit.w, h: resizeHit.h, worldX: world.x, worldY: world.y };
     dragBeforeSnapshot = snapshotState();
@@ -1823,6 +1834,7 @@ canvas.addEventListener("pointerdown", (e) => {
   const handleHit = findNodeHandleAt(world.x, world.y);
   if (handleHit) {
     dragMode = "createEdge";
+    activePointerId = e.pointerId;
     edgeDragSourceId = handleHit.node.id;
     edgeDragCurrentWorld = world;
     safeSetPointerCapture(e.pointerId);
@@ -1834,6 +1846,7 @@ canvas.addEventListener("pointerdown", (e) => {
   if (nodeHit) {
     selectNode(nodeHit.id);
     dragMode = "moveNode";
+    activePointerId = e.pointerId;
     movingNodeId = nodeHit.id;
     moveOffset = { x: world.x - nodeHit.x, y: world.y - nodeHit.y };
     dragBeforeSnapshot = snapshotState();
@@ -1843,6 +1856,7 @@ canvas.addEventListener("pointerdown", (e) => {
       deleteNode(nodeHit.id);
       pushHistory(before, snapshotState());
       dragMode = null;
+      activePointerId = null;
       movingNodeId = null;
       dragBeforeSnapshot = null;
       longPressTimer = null;
@@ -1869,6 +1883,7 @@ canvas.addEventListener("pointerdown", (e) => {
   safeSetPointerCapture(e.pointerId);
   canvas.classList.add("panning");
   dragMode = "pan";
+  activePointerId = e.pointerId;
 });
 
 canvas.addEventListener("pointermove", (e) => {
@@ -1883,6 +1898,7 @@ canvas.addEventListener("pointermove", (e) => {
   }
 
   if (dragMode === "moveNode" || dragMode === "createEdge") {
+    if (e.pointerId !== activePointerId) return;
     if (pointerDownScreen && longPressTimer) {
       const moved = Math.hypot(e.clientX - pointerDownScreen.x, e.clientY - pointerDownScreen.y);
       if (moved > MOVE_THRESHOLD) {
@@ -1915,6 +1931,7 @@ canvas.addEventListener("pointermove", (e) => {
   }
 
   if (dragMode === "resizeGroup") {
+    if (e.pointerId !== activePointerId) return;
     const node = state.nodes.find((n) => n.id === resizingNodeId);
     if (node) {
       const rect = canvas.getBoundingClientRect();
@@ -1937,6 +1954,7 @@ canvas.addEventListener("pointerup", (e) => {
   if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
 
   if (dragMode === "pan") {
+    if (e.pointerId !== activePointerId) return;
     // A real pan (movement past the threshold) must not also clear the
     // current selection via the native "click" event the browser still
     // fires after mouseup — without this, panning to look at another part
@@ -1947,10 +1965,12 @@ canvas.addEventListener("pointerup", (e) => {
     if (moved > MOVE_THRESHOLD) suppressNextClick = true;
     endPan(e);
     dragMode = null;
+    activePointerId = null;
     return;
   }
 
   if (dragMode === "moveNode") {
+    if (e.pointerId !== activePointerId) return;
     const moved = pointerDownScreen ? Math.hypot(e.clientX - pointerDownScreen.x, e.clientY - pointerDownScreen.y) : 0;
     if (moved > MOVE_THRESHOLD) {
       suppressNextClick = true;
@@ -1964,10 +1984,12 @@ canvas.addEventListener("pointerup", (e) => {
     movingNodeId = null;
     dragBeforeSnapshot = null;
     dragMode = null;
+    activePointerId = null;
     return;
   }
 
   if (dragMode === "createEdge") {
+    if (e.pointerId !== activePointerId) return;
     const rect = canvas.getBoundingClientRect();
     const world = screenToWorld(e.clientX - rect.left, e.clientY - rect.top);
     const targetNode = findNodeAt(world.x, world.y);
@@ -1976,6 +1998,7 @@ canvas.addEventListener("pointerup", (e) => {
     edgeDragSourceId = null;
     edgeDragCurrentWorld = null;
     dragMode = null;
+    activePointerId = null;
     if (targetNode && targetNode.id !== sourceId) {
       beginAddEdgePrompt(sourceId, targetNode.id, { x: e.clientX, y: e.clientY });
     }
@@ -1984,6 +2007,7 @@ canvas.addEventListener("pointerup", (e) => {
   }
 
   if (dragMode === "resizeGroup") {
+    if (e.pointerId !== activePointerId) return;
     const moved = pointerDownScreen ? Math.hypot(e.clientX - pointerDownScreen.x, e.clientY - pointerDownScreen.y) : 0;
     if (moved > MOVE_THRESHOLD) {
       suppressNextClick = true;
@@ -1992,19 +2016,60 @@ canvas.addEventListener("pointerup", (e) => {
     resizingNodeId = null;
     dragBeforeSnapshot = null;
     dragMode = null;
+    activePointerId = null;
     return;
   }
 });
 
-canvas.addEventListener("pointercancel", (e) => {
+// A drag interrupted mid-flight — a genuine browser pointercancel, or a
+// second touch arriving to start a pinch (see the touch pointerdown
+// listener below) — used to just null out dragMode/movingNodeId/etc.
+// directly, silently stranding whatever position/size change had already
+// happened: node.x/y (or w/h) stayed mutated, but pushHistory() was never
+// called, so the change was both un-undoable and invisible to the next
+// save. "Every discrete action = one undo step" (Phase 3) applies here
+// too — an interruption commits whatever changed so far, exactly like an
+// ordinary drag release would, and is skipped entirely (no empty undo
+// step) if nothing actually moved/resized yet.
+function commitDragIfChanged() {
+  if (!dragBeforeSnapshot) return;
+  const after = snapshotState();
+  if (JSON.stringify(dragBeforeSnapshot) !== JSON.stringify(after)) pushHistory(dragBeforeSnapshot, after);
+}
+
+function abortActiveDrag() {
+  // A pending long-press-delete timer must die with the interrupted drag
+  // too — otherwise it still fires ~600ms later using its own closed-over
+  // node reference, deleting a node the user has already moved on from
+  // (e.g. into a pinch gesture) with no warning and no undo step recorded
+  // for it.
   if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
-  if (dragMode === "pan") endPan(e);
+  if (dragMode === "moveNode" && movingNodeId) {
+    const node = state.nodes.find((n) => n.id === movingNodeId);
+    if (node) {
+      updateGroupMembership(node);
+      if (node.type === "group") updateMembershipForMovedGroup(node);
+    }
+    commitDragIfChanged();
+  } else if (dragMode === "resizeGroup" && resizingNodeId) {
+    commitDragIfChanged(); // resize never cascades membership, same as a normal resize release
+  }
+  // createEdge has nothing persistent to commit (no edge exists until a
+  // target is confirmed) and pan has no undo history at all — both leave
+  // no trace once dragMode clears.
   dragMode = null;
+  activePointerId = null;
   movingNodeId = null;
   edgeDragSourceId = null;
   edgeDragCurrentWorld = null;
   resizingNodeId = null;
   dragBeforeSnapshot = null;
+  markDirty();
+}
+
+canvas.addEventListener("pointercancel", (e) => {
+  if (dragMode === "pan") endPan(e);
+  abortActiveDrag();
 });
 
 function beginAddEdgePrompt(sourceId, targetId, screenPos) {
@@ -2224,7 +2289,7 @@ canvas.addEventListener("pointerdown", (e) => {
       panPointerId = null;
       canvas.classList.remove("panning");
     }
-    dragMode = null; // a pinch starting cancels any node-move/edge-drag too
+    abortActiveDrag(); // a pinch starting cancels any node-move/edge-drag too, committing whatever already changed
     const pts = [...activeTouches.values()];
     pinchStartDist = distance(pts[0], pts[1]);
   }

@@ -10,7 +10,7 @@ State" so the project can be picked up cold at any time.
 ## Current State
 
 - **Phase:** Phases 0 through 9 complete, all with green automated test
-  suites (`node --test tests/*.spec.mjs`, 243 JS tests + 15 Python tests,
+  suites (`node --test tests/*.spec.mjs`, 252 JS tests + 15 Python tests,
   see Log below). Not yet hand-tested on real touch hardware (pinch/
   long-press) — deferred to Phase 10, not blocking. Phase 7's real-folder
   grant/write-back is likewise only mocked-tested so far, not hand-verified
@@ -32,6 +32,15 @@ State" so the project can be picked up cold at any time.
   move from resize. The rename field's inline input also had a positioning
   fix (anchors to the node/edge's own geometry, clamped to the viewport,
   instead of the raw click point) — see their own Log entries.
+- **A user-requested "extensive visual and functional testing" pass**
+  (not a new feature — pure QA) found and fixed 3 real, pre-existing bugs,
+  all in the same corner: a second touch arriving to start a pinch-zoom
+  while a different finger is already mid-drag could corrupt the drag,
+  silently lose the in-progress position/size change from undo history, or
+  leave a pending long-press-delete timer armed to fire on a node/edge the
+  user had already moved past. See the dated Log entry and the "Multi-
+  touch drag-interruption fixes" section (right after Hungarian/English
+  localization) for the full account.
 - **A dedicated test-hardening pass** (user-requested, ahead of Phase 10's
   manual testing) went back through every phase and added substantially
   more coverage (34 new tests, 159 → 193), and surfaced two real bugs in
@@ -883,6 +892,69 @@ phase above — tracked here instead of invented as a fake phase number.
   correctly interpolated node/edge counts, and its Cancel/Replace/Merge
   button labels translate; the selection toolbar's Rename/Delete tooltips
   translate.
+
+### Multi-touch drag-interruption fixes (QA pass, no new user-facing feature)
+
+User-requested "extensive visual and functional testing" pass, not a
+feature request — found and fixed 3 related bugs, all pre-existing (not
+introduced by any earlier phase or additional feature in this project,
+just never previously exercised by a test), all in the same corner:
+what happens when a second touch arrives to start a pinch-zoom while a
+different finger is already mid-drag.
+
+- [x] **Interrupting a drag no longer strands the position/size change
+      outside undo history.** Previously, a pinch starting mid-drag (or a
+      genuine browser `pointercancel`) just nulled `dragMode` and friends
+      directly — whatever had already moved/resized stayed mutated in
+      `state`, but `pushHistory()` was never called, so the change was
+      both un-undoable and invisible to the next save. New
+      `abortActiveDrag()` commits whatever changed so far exactly like an
+      ordinary drag release would (including the group-move member
+      cascade and membership recompute), and is a genuine no-op — no empty
+      undo step — if nothing had moved yet. Both interruption sites (pinch
+      start, `pointercancel`) now call it.
+- [x] **A second pointer's own `pointerdown` could hijack an already-active
+      drag from a different pointer.** The main pointerdown handler had no
+      concept of "an interaction is already in progress" — a second
+      touch's pointerdown reached it *before* the pinch-recognition logic
+      (a separate listener) ever ran, and its own hit-test could reassign
+      `dragMode`/`movingNodeId`/`panPointerId` out from under the first
+      pointer's still-active drag. A new `activePointerId` variable tracks
+      which pointer owns the current interaction; pointerdown now ignores
+      any other pointer while one is active, and pointermove/pointerup
+      guard on it too (mirroring the `pan` mode's pre-existing
+      `panPointerId` check, generalized to every drag mode).
+- [x] **A pinch starting no longer leaves a pending long-press-delete timer
+      armed.** The 600ms long-press timer (started on pointerdown, meant to
+      be cleared by whichever pointerup/pointercancel ends that same
+      press) wasn't cleared by a pinch starting — so a user who began a
+      long-press, then added a second finger to pinch-zoom instead, would
+      still have the original node (or edge) deleted out from under them
+      ~600ms later with no warning. `abortActiveDrag()` now clears it as
+      its first action.
+- Tests (new `tests/pointer-interrupt.spec.mjs`, 8 tests, plus 1 new test
+  in `tests/group-move.spec.mjs`, all green): a pinch interrupting a
+  single-finger node drag commits the partial move as one undo step
+  instead of losing it, and undo reverts it exactly; an immediate pinch
+  (no movement yet) produces no spurious undo step; a pinch interrupting a
+  *group* drag commits the group's move and its cascaded member move
+  together as one step, membership intact, and undo restores both exactly;
+  a pinch interrupting a group *resize* commits the partial resize as one
+  step and never moves the group's own position; a pinch cancels a pending
+  long-press-delete timer for both a node and an edge (proven by actually
+  waiting past the 600ms threshold and confirming survival, not just
+  checking the timer variable); a pinch interrupting a `createEdge` drag
+  (dragging from a node's connect-handle) creates no phantom edge and no
+  undo step; a second finger's pointerdown never hijacks an in-progress
+  drag — proven by continuing to move the *first* finger after the pinch
+  starts and confirming the node no longer responds to it. Plus a
+  `group-move.spec.mjs` addition found true during the same pass (not a
+  bug, but an under-tested interaction worth locking in): a node that's a
+  member of two overlapping groups keeps membership in the one being
+  dragged (carried along) but correctly loses it in the stationary one it
+  no longer overlaps once the drag lands, proving the end-of-drag
+  membership recompute re-evaluates *every* listed group against the
+  node's new position, not just the one that moved.
 
 ---
 
@@ -1942,6 +2014,81 @@ and record deltas here instead of editing the spec.)*
     (243 tests, run twice consecutively) and `python3 -m unittest discover
     -s tools -p "test_*.py"` (15 tests), both green — no regressions in
     any earlier phase or out-of-spec feature.
+- 2026-07-26 — User-requested QA pass ("extensive visual and functional
+  testing... if you find anything, fix"). Not a feature request — pure bug
+  hunting, done by scripting real interaction sequences against the live
+  app (screenshots + `window.__kg` introspection) rather than by reading
+  code, specifically targeting recently-changed areas and the interactions
+  between them. Found 3 real, related bugs, all pre-existing (none
+  introduced by any earlier phase/feature in this project — this was the
+  first time this exact interaction was ever exercised, by a test or
+  otherwise). All three live in `index.html`'s primary pointer-handling
+  code (canvas `pointerdown`/`pointermove`/`pointerup`/`pointercancel`) and
+  the separate touch-pinch listener beneath it:
+  1. **A pinch interrupting a drag silently discarded whatever had already
+     moved/resized.** Reproduced first as a direct repro script (drag a
+     node, then dispatch a second touch's `pointerdown`), confirmed via
+     `window.__kg.history.past.length` staying unchanged even though
+     `state.nodes[0].x/y` had visibly moved — an edit that was live in
+     `state` but permanently un-undoable and would vanish on the very next
+     save/reload with no trace. Root cause: the pinch-start handler (and
+     `pointercancel`) just set `dragMode = null` and friends directly,
+     with no `pushHistory()` call. Fixed with a new `abortActiveDrag()`
+     that commits whatever changed (including a group's cascaded member
+     move and its membership recompute) exactly like an ordinary drag
+     release, and is a true no-op if nothing had moved yet (checked via a
+     `JSON.stringify` diff against the drag's own `dragBeforeSnapshot`,
+     not a screen-distance heuristic, since an interruption has no
+     "current pointer position" to measure a heuristic against).
+  2. **A deeper, related bug found while building a *correct* repro for
+     #1 with real touch semantics** (two independent touch pointers, not a
+     mouse+touch mix): dispatching a second finger's `pointerdown` mid-drag
+     showed `dragMode` had already flipped from `"moveNode"` to `"pan"`
+     *before* `abortActiveDrag()` even ran — because the second pointer's
+     own `pointerdown` reaches the app's *main* hit-testing handler first
+     (registered before the pinch-recognition listener), and that handler
+     had no concept of "an interaction is already active," so it happily
+     started a brand-new one (a pan, since the second finger's tap point
+     was empty canvas) using the second pointer's own coordinates,
+     clobbering the first pointer's still-active drag state out from under
+     it. Fixed with a new `activePointerId` tracker: pointerdown now
+     ignores any pointer that isn't the one already driving an active
+     interaction, and pointermove/pointerup were given the same guard
+     (generalizing the `pan` mode's pre-existing `panPointerId` check to
+     every drag mode) so a second pointer's later move/up events can't
+     interleave with or prematurely terminate the first pointer's drag
+     either.
+  3. **A third, independently-found bug in the same area**: a pinch
+     starting didn't cancel a pending 600ms long-press-delete timer, so a
+     user who began a long-press then added a second finger to pinch
+     instead would still have that node (or edge) deleted out from under
+     them well after they'd moved on — reproduced by waiting past the
+     600ms threshold post-interruption and observing the node count drop
+     to 0. Fixed by having `abortActiveDrag()` clear `longPressTimer` as
+     its first action (and simplified `pointercancel`, which had its own
+     separate copy of the same clear, to just call `abortActiveDrag()`
+     now that it owns this responsibility centrally).
+  - Also explored, found no bugs, but the exploration is now locked in as
+    a permanent regression test since it was genuinely under-tested: a
+    node that's a member of two overlapping groups, where only one of the
+    two is dragged — confirmed the end-of-drag membership recompute
+    correctly re-evaluates the node's *other* (stationary) group
+    membership against its new position too, not just the group that
+    moved, releasing it from the one it physically left behind while
+    keeping it in the one that carried it along. Also spot-checked (no
+    bugs found, not turned into new tests beyond what already existed):
+    parallel/bent edges continuing to render correctly through a group
+    move, the member-hue color in light theme, keyboard input (Delete/
+    Backspace) while a rename field is focused not leaking through to the
+    canvas's own shortcuts, and rename-field positioning at extreme
+    zoom-out.
+  - Wrote a new `tests/pointer-interrupt.spec.mjs` (8 tests) plus 1 new
+    test in `tests/group-move.spec.mjs` (10 tests total). Ran the full
+    suite repeatedly during the fix (not just once at the end, since the
+    second bug was found while writing the repro for the first one):
+    `node --test tests/*.spec.mjs` (252 tests, run twice consecutively)
+    and `python3 -m unittest discover -s tools -p "test_*.py"` (15 tests),
+    both green — no regressions in any earlier phase or feature.
 
 ---
 
