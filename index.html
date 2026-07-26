@@ -7,12 +7,23 @@
 <style>
   :root {
     color-scheme: dark;
+    /* Shared look-and-feel tokens (radius/timing don't need a per-theme
+       value, only the colors below do) — one place to retune the overall
+       feel instead of a magic number repeated at every call site. */
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --transition-fast: 120ms ease;
     --toolbar-bg: #1e1e1e;
     --toolbar-fg: #e8e8e8;
     --toolbar-border: #333;
     --btn-bg: #2c2c2c;
     --btn-bg-hover: #3a3a3a;
     --btn-bg-active: #4a4a4a;
+    --accent: #4da6ff;
+    --accent-bg-pressed: rgba(77, 166, 255, 0.16);
+    --shadow-color: rgba(0, 0, 0, 0.45);
+    --shadow-sm: 0 1px 3px var(--shadow-color);
+    --shadow-md: 0 6px 20px var(--shadow-color);
     --canvas-bg: #121212;
     --grid-dot: #2a2a2a;
     --empty-fg: #666;
@@ -54,6 +65,9 @@
     --btn-bg: #ffffff;
     --btn-bg-hover: #e8e8e8;
     --btn-bg-active: #d5d5d5;
+    --accent: #1a73e8;
+    --accent-bg-pressed: rgba(26, 115, 232, 0.1);
+    --shadow-color: rgba(0, 0, 0, 0.15);
     --canvas-bg: #fafafa;
     --grid-dot: #d8d8d8;
     --empty-fg: #999999;
@@ -95,38 +109,66 @@
     z-index: 10;
     display: flex;
     flex-wrap: wrap;
-    gap: 6px;
-    padding: 8px;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
     background: var(--toolbar-bg);
     color: var(--toolbar-fg);
     border-bottom: 1px solid var(--toolbar-border);
+    box-shadow: var(--shadow-sm);
   }
 
   #toolbar button {
     font-size: 14px;
     line-height: 1;
-    padding: 8px 12px;
+    padding: 8px 14px;
     color: var(--toolbar-fg);
     background: var(--btn-bg);
     border: 1px solid var(--toolbar-border);
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
     cursor: pointer;
     touch-action: manipulation;
     user-select: none;
+    transition: background-color var(--transition-fast), border-color var(--transition-fast),
+      transform var(--transition-fast), box-shadow var(--transition-fast);
   }
 
   #toolbar button:hover {
     background: var(--btn-bg-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
   }
 
-  #toolbar button:active,
-  #toolbar button[aria-pressed="true"] {
+  #toolbar button:active {
     background: var(--btn-bg-active);
+    transform: translateY(0);
+    box-shadow: none;
+  }
+
+  /* An "armed" toggle (Add Node/Group, Connect, Theme, Language, Folder
+     Sync once connected) reads as a status, not just a slightly-darker
+     button — an accent-colored border/tint makes which mode is active
+     legible at a glance instead of blending into the row. */
+  #toolbar button[aria-pressed="true"] {
+    background: var(--accent-bg-pressed);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  #toolbar button[aria-pressed="true"]:hover {
+    background: var(--accent-bg-pressed);
   }
 
   #toolbar button:disabled {
     opacity: 0.4;
     cursor: default;
+    transform: none;
+    box-shadow: none;
+  }
+
+  #toolbar button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
   }
 
   #toolbar .spacer {
@@ -135,7 +177,14 @@
 
   #toolbar .zoom-group {
     display: flex;
-    gap: 2px;
+    gap: 3px;
+  }
+
+  #toolbar .zoom-group button {
+    width: 36px;
+    padding: 8px 0;
+    text-align: center;
+    font-size: 16px;
   }
 
   #graph-title {
@@ -143,19 +192,25 @@
     font-weight: 600;
     padding: 8px 10px;
     margin-right: 4px;
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
     cursor: pointer;
     color: var(--toolbar-fg);
     white-space: nowrap;
     max-width: 260px;
     overflow: hidden;
     text-overflow: ellipsis;
+    transition: background-color var(--transition-fast);
   }
 
   #graph-title:hover,
   #graph-title:focus-visible {
     background: var(--btn-bg-hover);
     outline: none;
+  }
+
+  #graph-title:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
   }
 
   #canvas-wrap {
@@ -191,30 +246,33 @@
     transform: translate(-50%, -50%);
     z-index: 20;
     font-size: 14px;
-    padding: 6px 8px;
-    border-radius: 4px;
+    padding: 7px 9px;
+    border-radius: var(--radius-sm);
     border: 1px solid var(--node-stroke-selected);
     background: var(--toolbar-bg);
     color: var(--toolbar-fg);
     min-width: 140px;
+    box-shadow: var(--shadow-md);
   }
 
   #sel-toolbar {
     position: fixed;
     display: none;
-    gap: 4px;
+    gap: 6px;
     transform: translate(-50%, -170%);
     z-index: 15;
   }
 
   #sel-toolbar button {
-    width: 30px;
-    height: 30px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
     border: 1px solid var(--toolbar-border);
     background: var(--btn-bg);
     color: var(--toolbar-fg);
     cursor: pointer;
+    box-shadow: var(--shadow-md);
+    transition: background-color var(--transition-fast), transform var(--transition-fast);
     font-size: 14px;
     line-height: 1;
     display: flex;
@@ -225,6 +283,12 @@
 
   #sel-toolbar button:hover {
     background: var(--btn-bg-hover);
+    transform: scale(1.08);
+  }
+
+  #sel-trash:hover {
+    border-color: #a64d4d;
+    color: #d16a6a;
   }
 
   .modal-overlay {
@@ -240,17 +304,18 @@
   .modal-dialog {
     max-width: 380px;
     margin: 16px;
-    padding: 16px;
-    border-radius: 8px;
+    padding: 20px;
+    border-radius: var(--radius-md);
     background: var(--toolbar-bg);
     border: 1px solid var(--toolbar-border);
     color: var(--toolbar-fg);
+    box-shadow: var(--shadow-md);
   }
 
   .modal-message {
-    margin: 0 0 14px;
+    margin: 0 0 16px;
     font-size: 14px;
-    line-height: 1.4;
+    line-height: 1.5;
     white-space: pre-line;
   }
 
@@ -263,12 +328,13 @@
 
   .modal-actions button {
     font-size: 14px;
-    padding: 7px 14px;
+    padding: 8px 16px;
     color: var(--toolbar-fg);
     background: var(--btn-bg);
     border: 1px solid var(--toolbar-border);
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
     cursor: pointer;
+    transition: background-color var(--transition-fast);
   }
 
   .modal-actions button:hover {

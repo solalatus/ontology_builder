@@ -80,7 +80,12 @@ test("five edges between the same pair bend symmetrically at five distinct, even
       await createEdgeViaConnectMode(page, 250, 400, 650, 400, relation);
     }
     await page.evaluate(() => window.__kg.actions.setMode("idle"));
+    // Same race as the other hit-testing test below: wait for the
+    // selection toolbar to actually hide (a next-rAF DOM update, not
+    // synchronous with clearSelection() itself) before any click below
+    // risks landing on its still-visible, stale position instead.
     await page.evaluate(() => window.__kg.actions.clearSelection());
+    await page.waitForFunction(() => getComputedStyle(document.getElementById("sel-toolbar")).display === "none");
     const edges = await page.evaluate(() => window.__kg.state.edges);
     assert.equal(edges.length, 5);
 
@@ -176,7 +181,13 @@ test("hit-testing resolves each bent edge to its own curve, not always the first
     // (translate(-50%,-170%) of its own anchor) — close enough, with this
     // bend size, to visually overlap and swallow a click meant for the
     // first curve. Clear it first so only the canvas can receive the click.
+    // clearSelection() only sets the dirty flag; the toolbar's DOM
+    // display:none is applied inside render(), on the *next*
+    // requestAnimationFrame tick — a real (if rare) race, since a click
+    // dispatched immediately after evaluate() resolves could still land on
+    // the stale, not-yet-hidden toolbar. Wait for it to actually hide.
     await page.evaluate(() => window.__kg.actions.clearSelection());
+    await page.waitForFunction(() => getComputedStyle(document.getElementById("sel-toolbar")).display === "none");
     const edges = await page.evaluate(() => window.__kg.state.edges);
     const geoFirst = await geometryOf(page, edges[0].id);
     const geoSecond = await geometryOf(page, edges[1].id);

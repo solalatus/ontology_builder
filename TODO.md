@@ -10,7 +10,7 @@ State" so the project can be picked up cold at any time.
 ## Current State
 
 - **Phase:** Phases 0 through 9 complete, all with green automated test
-  suites (`node --test tests/*.spec.mjs`, 271 JS tests + 15 Python tests,
+  suites (`node --test tests/*.spec.mjs`, 276 JS tests + 15 Python tests,
   see Log below). Not yet hand-tested on real touch hardware (pinch/
   long-press) — deferred to Phase 10, not blocking. Phase 7's real-folder
   grant/write-back is likewise only mocked-tested so far, not hand-verified
@@ -69,6 +69,23 @@ State" so the project can be picked up cold at any time.
   the first real run, confirming the app's existing design already handles
   them correctly. See "Priority test-coverage completion" (right after the
   end-to-end workflow section) and the dated Log entry.
+- **A follow-up "bug-hunt, known-test-weakness, and visual polish" pass**:
+  the bug-hunt itself found no new bugs (a fresh visual/functional
+  screenshot review of dark/light themes with groups, members, and
+  selection state active turned up nothing). The one known test weakness —
+  a low-rate flake in `tests/parallel-edges.spec.mjs`'s hit-testing tests —
+  was root-caused (not just retried away) to a genuine render-loop timing
+  race: `clearSelection()` only sets a dirty flag, and the actual DOM
+  change (hiding `#sel-toolbar`) happens on the next animation-frame tick
+  inside `render()`, not synchronously — a same-tick `page.mouse.click()`
+  could land on the still-visible stale toolbar. Fixed with an explicit
+  `waitForFunction` wait for the toolbar to actually hide before clicking,
+  in both affected tests. See "Parallel edge bending" and the dated Log
+  entry. Also did a visual/aesthetic polish pass on buttons and the
+  toolbar (rounded corners, hover/active/armed states, shadows, focus
+  rings, transitions) with 5 new regression tests in
+  `tests/ui-polish.spec.mjs` — see "Visual polish pass" (right after
+  "Priority test-coverage completion") and the dated Log entry.
 - **A dedicated test-hardening pass** (user-requested, ahead of Phase 10's
   manual testing) went back through every phase and added substantially
   more coverage (34 new tests, 159 → 193), and surfaced two real bugs in
@@ -1169,6 +1186,66 @@ than assume it.
       pre-filled with the correct label, the viewport clamp still keeps it
       fully on-screen and clear of the toolbar, and the rename itself
       commits correctly with membership intact throughout.
+
+---
+
+### Visual polish pass (aesthetic, no new feature — plus one known-flake fix)
+
+A user-requested pass covering three things at once: an outstanding-bug
+hunt (none found), a known test weakness (a real fix, not just a retry),
+and a visual/aesthetic polish of the toolbar and buttons.
+
+- [x] **Bug hunt**: a fresh visual + functional screenshot review of both
+      themes with a group, a member, and an active selection all on screen
+      at once turned up no new anomalies.
+- [x] **Known test weakness fixed**: `tests/parallel-edges.spec.mjs`'s two
+      hit-testing tests had a low-rate flake, previously chalked up to
+      environmental noise. Root-caused this round to a genuine timing race
+      in the app itself: `clearSelection()` (and other actions that call
+      `markDirty()`) only flip a dirty flag — the actual DOM update (e.g.
+      hiding `#sel-toolbar`) happens on the *next* `requestAnimationFrame`
+      tick inside `render()`, not synchronously. A test that calls
+      `page.evaluate(() => actions.clearSelection())` and immediately
+      follows with `page.mouse.click()` can have that click land on the
+      still-visible, stale toolbar from before the hide takes effect. Fixed
+      by waiting for the toolbar to actually disappear
+      (`await page.waitForFunction(() => getComputedStyle(...).display ===
+      "none")`) before the next click, in both affected tests. Verified
+      clean over multiple standalone repeated runs post-fix.
+- [x] **Visual/aesthetic polish** (`index.html` CSS only — no draw-color
+      Canvas2D variables touched, to avoid disturbing `theme.spec.mjs`'s
+      exact-pixel assertions):
+      - New shared CSS custom properties: `--radius-sm`, `--radius-md`,
+        `--transition-fast` (declared once, shared by both themes since
+        they're not color-dependent), plus per-theme `--accent`,
+        `--accent-bg-pressed`, `--shadow-color`, and `--shadow-sm`/
+        `--shadow-md` (declared once against `--shadow-color`, but still
+        resolve correctly per-theme since `var()` references resolve
+        lazily against the cascade in effect at point of use).
+      - Toolbar buttons: rounded corners, more breathing room, a subtle
+        lift + shadow on hover, a `box-shadow`-based active/armed
+        indicator, and a `:focus-visible` outline ring for keyboard users.
+      - A new **armed-mode indicator**: a toggle button with
+        `aria-pressed="true"` (e.g. "add node" or "connect" mode) now gets
+        a distinct accent-colored border/background/text instead of
+        reading identically to an unpressed button.
+      - Floating selection toolbar and modal dialogs: added shadows so
+        they read as floating above the canvas/backdrop, plus a slightly
+        larger hit target and hover scale on the selection toolbar's
+        buttons.
+      - All color/shape transitions are eased over `--transition-fast`
+        (120ms) rather than snapping instantly.
+      - New `tests/ui-polish.spec.mjs` (5 tests) locks this in via
+        `getComputedStyle` checks (border color differs when armed vs
+        not, and differs again between themes; corners are rounded;
+        floating toolbar/modals cast a shadow) — deliberately checking
+        *computed* CSS rather than exact pixel colors, so it won't be
+        brittle against a future retint. Two of its own tests initially
+        flaked for the same reason as the parallel-edges fix above (a
+        `getComputedStyle` read landing mid-`transition`, this time on the
+        arm/disarm border-color animation rather than the render loop) —
+        fixed the same way, by waiting out the transition
+        (`page.waitForTimeout`) before sampling.
 
 ---
 
@@ -2480,6 +2557,57 @@ and record deltas here instead of editing the spec.)*
     consecutively) and `python3 -m unittest discover -s tools -p
     "test_*.py"` (15 tests), both green — no regressions in any earlier
     phase or feature.
+- 2026-07-26 — User asked for a combined pass: hunt for any outstanding
+  bug, fix any known test weakness, and polish the visual design of
+  buttons/toolbar/general aesthetics. Three parts:
+  - **Bug hunt**: a fresh screenshot-based visual + functional review of
+    both themes with a group, a member, and an active selection all on
+    screen turned up nothing — no new bugs found this round.
+  - **Known test weakness fixed**: the low-rate flake in
+    `parallel-edges.spec.mjs`'s two hit-testing tests, previously assumed
+    to be environmental noise, was actually root-caused this time.
+    `clearSelection()` (like other actions that call `markDirty()`) only
+    sets a dirty flag — the DOM side effect (hiding `#sel-toolbar`) only
+    happens inside `render()`, on the next `requestAnimationFrame` tick,
+    not synchronously with the state change. A test that does
+    `page.evaluate(() => actions.clearSelection())` immediately followed by
+    `page.mouse.click()` could have that click land on the still-visible
+    stale toolbar from before the hide actually took effect. Fixed by
+    inserting `await page.waitForFunction(() => getComputedStyle(...)
+    .display === "none")` right after the `clearSelection()` call in both
+    affected tests, before the next click. Verified clean over 8+
+    consecutive standalone runs of the file post-fix (it had previously
+    been shown to flake at a low rate via an earlier `git stash` A/B test).
+  - **Visual/aesthetic polish** (`index.html`, CSS only): added shared
+    `--radius-sm`/`--radius-md`/`--transition-fast` custom properties plus
+    per-theme `--accent`/`--accent-bg-pressed`/`--shadow-color`/
+    `--shadow-sm`/`--shadow-md`; gave toolbar buttons rounded corners, more
+    padding, a hover lift-and-shadow, eased transitions, and a
+    `:focus-visible` outline; added a new **armed-mode indicator** — a
+    toggle button with `aria-pressed="true"` now gets a distinct accent
+    border/background/text instead of looking identical to an unpressed
+    button; gave the floating selection toolbar and modal dialogs a
+    `box-shadow` so they read as floating above the canvas/backdrop.
+    Deliberately left every Canvas2D draw-color variable (`--node-fill`,
+    `--group-fill`, etc.) untouched, to avoid disturbing
+    `theme.spec.mjs`'s exact-pixel-color assertions.
+  - Locked the polish in with a new `tests/ui-polish.spec.mjs` (5 tests),
+    checking *computed* CSS rather than exact colors (armed vs. unarmed
+    border differs, and differs again between themes; corners are
+    rounded; the floating toolbar and modals cast a shadow). Two of its
+    own tests initially flaked for the same underlying reason as the
+    parallel-edges fix above — reading `getComputedStyle(...).borderColor`
+    immediately after an arm/disarm change caught the new 120ms
+    `transition` mid-animation, returning an interpolated color rather
+    than the settled one (confirmed by hand-computing the linear RGB
+    interpolation fraction between the two endpoint colors and finding it
+    matched the observed "wrong" value almost exactly). Fixed by waiting
+    out the transition (`page.waitForTimeout(200)`) before each sample.
+  - Ran the full suite repeatedly: `node --test tests/*.spec.mjs` (271 → 276
+    tests with the 5 new `ui-polish.spec.mjs` tests, run clean twice
+    consecutively) and `python3 -m unittest discover -s tools -p
+    "test_*.py"` (15 tests), both green — no regressions from either the
+    flake fix or the CSS polish.
 
 ---
 
