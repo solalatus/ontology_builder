@@ -10,7 +10,7 @@ State" so the project can be picked up cold at any time.
 ## Current State
 
 - **Phase:** Phases 0 through 9 complete, all with green automated test
-  suites (`node --test tests/*.spec.mjs`, 262 JS tests + 15 Python tests,
+  suites (`node --test tests/*.spec.mjs`, 271 JS tests + 15 Python tests,
   see Log below). Not yet hand-tested on real touch hardware (pinch/
   long-press) — deferred to Phase 10, not blocking. Phase 7's real-folder
   grant/write-back is likewise only mocked-tested so far, not hand-verified
@@ -59,6 +59,16 @@ State" so the project can be picked up cold at any time.
   session exercising many features together — see "Testing Strategy" and
   its own "Additional features" section, right after Multi-touch
   drag-interruption fixes.
+- **A follow-up "implement all remaining high/medium priority tests from
+  the plan" pass** closed out the rest of that same planning pass's
+  findings — compounding Tier 1+2 storage failures, autolayout under
+  adversarial graphs, parallel edges beyond 3, heterogeneous undo/redo
+  stress, drag-interruption cost at 1,000 nodes, and rename-anchoring
+  under a triple zoom+pan+membership combination. Unlike the rounds above,
+  **no new bugs were found** — every one of these 9 new tests passed on
+  the first real run, confirming the app's existing design already handles
+  them correctly. See "Priority test-coverage completion" (right after the
+  end-to-end workflow section) and the dated Log entry.
 - **A dedicated test-hardening pass** (user-requested, ahead of Phase 10's
   manual testing) went back through every phase and added substantially
   more coverage (34 new tests, 159 → 193), and surfaced two real bugs in
@@ -1100,6 +1110,65 @@ different finger is already mid-drag.
   that adds a new group member via a `contains` line and confirms it
   joined without disturbing anyone already there; and finally Clears the
   graph and undoes that back to the exact full state from just before.
+
+### Priority test-coverage completion (planned, no new feature — no bugs found)
+
+Closes out the "high" and "medium" priority items from an earlier planning
+pass (`what's complex and under-tested?`) that weren't already implemented
+in prior rounds (the plan's top two, TXT import's redundant-ancestor bug
+and OPFS write-failure coverage, were already done — see their own
+sections above). **Every test in this round passed on the first real run
+with no app changes needed** — unlike several earlier QA rounds, this
+batch didn't surface new bugs; it closes out coverage for scenarios the
+app's existing design already handled correctly, and proves that rather
+than assume it.
+
+- [x] **Compounding storage failures** (`tests/phase7.spec.mjs`, +1 test):
+      a Tier 2 (folder sync) write failure *and* a simultaneous Tier 1
+      (localStorage) write failure, both induced at once from the same
+      Save Version click — confirmed neither compounds into a crash, a
+      hang, or a lost save; the Tier 2 side still falls back to its usual
+      Tier 3 downloads, the Tier 1 side's `whenIdle()` still resolves, and
+      a later save with both failures lifted persists correctly.
+- [x] **Autolayout under adversarial graphs** (`tests/phase8.spec.mjs`,
+      +4 tests): a 3-node cycle, a dense 8-node/28-edge all-pairs graph
+      (plus confirming no two nodes collapse onto the exact same point
+      despite 28 competing pulls), an overcrowded 10-member group in a
+      small box all pulled toward the same distant outsider, and a mixed
+      graph combining disconnected islands, a floating group, and 3-level
+      group nesting all at once — every case checked for `Number.isFinite`
+      positions, a sane completion time, and (where applicable) every
+      containment invariant holding simultaneously.
+- [x] **Parallel edges beyond 3** (`tests/parallel-edges.spec.mjs`,
+      +1 test): 5 edges between the same pair bend at precisely the
+      expected symmetric, evenly-spaced offsets (steps -2,-1,0,+1,+2 ×
+      `EDGE_BEND_STEP`, checked as *signed* offsets along the perpendicular
+      axis, not just "5 different distances"), and — the part most likely
+      to break first at higher multiplicity — every one of the 5 curves is
+      still individually resolvable by clicking its own midpoint, not just
+      "some of them."
+- [x] **Deep undo/redo stress across heterogeneous action types**
+      (`tests/phase3.spec.mjs`, +1 test): a 9-step sequence mixing group
+      creation, a membership-committing drag, a resize, a rename, a plain
+      add, a connect, a rigid-body group move (cascading a renamed member
+      along with it), and a delete — a full snapshot taken after *every*
+      step, then undone one step at a time checking an exact `deepEqual`
+      match against each recorded snapshot in reverse (not just the two
+      ends), then redone all the way forward checking the same snapshots
+      again going forwards.
+- [x] **`abortActiveDrag()`'s diff cost at scale** (`tests/pointer-interrupt.spec.mjs`,
+      +1 test): a pinch interrupting a drag on a 1,000-node graph (the same
+      scale `phase9.spec.mjs` already stress-tests for render/culling)
+      still commits correctly and well within a generous time budget — the
+      `JSON.stringify`-based before/after diff this path uses doesn't
+      introduce a perceptible hang even at that size.
+- [x] **Rename-field anchoring under zoom + pan-near-edge + group
+      membership, all three at once** (`tests/rename.spec.mjs`, +1 test):
+      a group member zoomed in heavily and panned so its true (unclamped)
+      center is genuinely off-screen — confirmed the field still opens
+      pre-filled with the correct label, the viewport clamp still keeps it
+      fully on-screen and clear of the toolbar, and the rename itself
+      commits correctly with membership intact throughout.
 
 ---
 
@@ -2345,6 +2414,72 @@ and record deltas here instead of editing the spec.)*
     tests/*.spec.mjs` (262 tests, run clean twice consecutively) and
     `python3 -m unittest discover -s tools -p "test_*.py"` (15 tests),
     both green — no regressions in any earlier phase or feature.
+- 2026-07-26 — User asked to go back to the "what's complex and
+  under-tested" plan and implement everything marked "high" or "medium"
+  priority that wasn't already done (the plan's top two items — the TXT
+  import bug and OPFS coverage — were already implemented in the previous
+  round). Six items closed out, one per remaining plan bullet, each in the
+  test file its topic already lived in:
+  - **Compounding storage failures** (`phase7.spec.mjs`): induced a Tier 2
+    folder-write failure and a Tier 1 `localStorage` write failure from the
+    same Save Version click, simultaneously. No bug — Tier 2's existing
+    fallback-to-download and Tier 1's independent try/catch don't interact
+    badly; both resolve, the in-memory graph survives, and a later save
+    with both failures lifted persists correctly.
+  - **Autolayout under adversarial graphs** (`phase8.spec.mjs`, 4 tests): a
+    3-cycle, an 8-node/28-edge all-pairs-connected graph, a 10-member
+    group crammed into a small box all pulled the same direction, and a
+    mixed graph combining disconnected islands + a floating group + 3
+    levels of nesting. No bug — the force-directed simulation's per-
+    iteration clamp holds regardless of graph shape, and all-pairs
+    repulsion keeps even 28 competing pulls from collapsing any two nodes
+    onto the same point.
+  - **Parallel edges beyond 3** (`parallel-edges.spec.mjs`): 5 edges
+    between the same pair. No bug — `computeEdgeBendInfo()`'s
+    `step = index - (count-1)/2` formula generalizes cleanly past 3 (steps
+    -2,-1,0,+1,+2), verified as *signed* perpendicular offsets against the
+    exact `EDGE_BEND_STEP` constant, not just "5 different distances," and
+    all 5 curves stayed individually hit-testable — the scenario most
+    likely to break first at higher multiplicity, and it didn't.
+  - **Heterogeneous undo/redo stress** (`phase3.spec.mjs`): a 9-step
+    sequence (group create, membership-committing drag, resize, rename,
+    plain add, connect, rigid-body group move carrying the renamed member
+    along, delete) with a full snapshot recorded after *every* step, then
+    undone one at a time checked against each snapshot in reverse, then
+    redone forward checked again. No bug — the snapshot-based undo system
+    (Phase 3's original design decision, chosen specifically to be
+    correct-by-construction regardless of what mutated) held up exactly
+    across every one of the 9 steps, including the two newest, most
+    structurally different action types (rigid-body group move and
+    resize) it had never been stress-tested alongside heterogeneous
+    neighbors before.
+  - **`abortActiveDrag()`'s diff cost at 1,000 nodes**
+    (`pointer-interrupt.spec.mjs`): a pinch interrupting a drag on the same
+    scale `phase9.spec.mjs` already uses for render/culling stress-testing.
+    No bug — `commitDragIfChanged()`'s `JSON.stringify`-based before/after
+    diff resolved well within a generous time budget, correctly, every
+    time.
+  - **Rename-field anchoring under zoom + pan-near-edge + group membership,
+    combined** (`rename.spec.mjs`): a group member zoomed in ~3.3x and
+    panned until its true (unclamped) center was genuinely off-screen to
+    the left, with only a sliver of its (now huge) box still visible. No
+    bug — the field opened correctly pre-filled, `clampCenterToViewport()`
+    still kept it fully on-screen and clear of the toolbar, and the rename
+    committed correctly with membership intact. (This test's own pan
+    distance needed tuning twice during development — first too short to
+    push the center off-screen at all, second requiring the *opposite*
+    correction to keep enough of the member's box on-screen for the
+    double-click to still land on it — a test-authoring detail, not an
+    app issue, caught immediately by real runs each time.)
+  - Every one of these 9 new tests passed on its first real run with no
+    application code changes — a genuinely different outcome from the
+    prior three QA/coverage rounds in this project, each of which found at
+    least one real bug. Ran the full suite repeatedly regardless (the
+    rename test's own tuning needed two more runs to get right):
+    `node --test tests/*.spec.mjs` (271 tests, run clean twice
+    consecutively) and `python3 -m unittest discover -s tools -p
+    "test_*.py"` (15 tests), both green — no regressions in any earlier
+    phase or feature.
 
 ---
 

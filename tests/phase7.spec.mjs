@@ -198,3 +198,40 @@ test("the tier2.setDirHandle test hook drives the same button state as a real gr
     assert.equal(await page.getAttribute("#btn-folder-sync", "aria-pressed"), "false");
   });
 });
+
+test("a Tier 2 write failure AND a simultaneous Tier 1 (localStorage) write failure don't compound into a crash, a hang, or a lost save", async () => {
+  await withFolderPage(async (page, downloads) => {
+    await addNodeViaDblClick(page, 300, 300, "Alpha");
+    await page.click("#btn-folder-sync");
+    await page.waitForFunction(() => window.__kg.tier2.getDirHandle() !== null);
+    await page.evaluate(() => window.__kg.storage.whenIdle()); // settle the save from adding the node
+
+    // Break BOTH layers at once: Tier 2's folder write (already broken by
+    // installFailingWritePicker) and Tier 1's localStorage write, which
+    // performSaveVersion() also triggers via its own scheduleSave() call
+    // to persist the incremented version — two independent failure paths
+    // firing from the same user action.
+    await page.evaluate(() => {
+      window.__originalSetItem = localStorage.setItem.bind(localStorage);
+      localStorage.setItem = () => { throw new DOMException("Quota exceeded", "QuotaExceededError"); };
+    });
+
+    await page.click("#btn-save-version");
+    await page.evaluate(() => window.__kg.tier2.waitForSaveVersion()); // Tier 2/3 side must still resolve
+    await page.evaluate(() => window.__kg.storage.whenIdle()); // Tier 1 side must still resolve too, not hang
+    await page.waitForTimeout(200);
+
+    assert.equal(downloads.length, 2, "the Tier 2 failure still falls back to the usual two Tier 3 downloads");
+    const nodeCount = await page.evaluate(() => window.__kg.state.nodes.length);
+    assert.equal(nodeCount, 1, "the in-memory graph survives both failures");
+    const version = await page.evaluate(() => window.__kg.state.meta.version);
+    assert.equal(version, 1, "the version counter still incremented in memory, even though persisting it failed");
+
+    // Lift both failures — the app must keep working normally afterward.
+    await page.evaluate(() => { localStorage.setItem = window.__originalSetItem; });
+    await page.evaluate(() => window.__kg.storage.save());
+    await page.evaluate(() => window.__kg.storage.whenIdle());
+    const raw = await page.evaluate(() => localStorage.getItem("kg-canvas-live"));
+    assert.equal(JSON.parse(raw).nodes.length, 1, "a subsequent successful save persists correctly once both failures are lifted");
+  }, { initScript: installFailingWritePicker() });
+});

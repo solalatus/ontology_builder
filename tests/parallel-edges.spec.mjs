@@ -72,6 +72,51 @@ test("three edges between the same pair bend symmetrically — the middle one st
   });
 });
 
+test("five edges between the same pair bend symmetrically at five distinct, evenly-spaced offsets, and every curve is still individually hit-testable", async () => {
+  await withPage(async (page) => {
+    await addNodeViaDblClick(page, 250, 400, "A");
+    await addNodeViaDblClick(page, 650, 400, "B");
+    for (const relation of ["r1", "r2", "r3", "r4", "r5"]) {
+      await createEdgeViaConnectMode(page, 250, 400, 650, 400, relation);
+    }
+    await page.evaluate(() => window.__kg.actions.setMode("idle"));
+    await page.evaluate(() => window.__kg.actions.clearSelection());
+    const edges = await page.evaluate(() => window.__kg.state.edges);
+    assert.equal(edges.length, 5);
+
+    const geos = await Promise.all(edges.map((e) => geometryOf(page, e.id)));
+    const straightMid = { x: (geos[0].a.x + geos[0].b.x) / 2, y: (geos[0].a.y + geos[0].b.y) / 2 };
+    // Signed offset along the perpendicular axis (not just magnitude), so
+    // the symmetric -2,-1,0,+1,+2-step spacing is checked precisely rather
+    // than just "five different distances."
+    const lineDx = geos[0].b.x - geos[0].a.x, lineDy = geos[0].b.y - geos[0].a.y;
+    const len = Math.hypot(lineDx, lineDy);
+    const nx = -lineDy / len, ny = lineDx / len;
+    const signedOffsets = geos.map((g) => (g.control.x - straightMid.x) * nx + (g.control.y - straightMid.y) * ny);
+    signedOffsets.sort((a, b) => a - b);
+
+    const EDGE_BEND_STEP = 60; // world units per step, mirrors index.html's own constant
+    const expected = [-2, -1, 0, 1, 2].map((step) => step * EDGE_BEND_STEP);
+    for (let i = 0; i < 5; i++) {
+      assert.ok(Math.abs(signedOffsets[i] - expected[i]) < 1e-6,
+        `step ${i - 2}: expected offset ${expected[i]}, got ${signedOffsets[i]}`);
+    }
+
+    // Every one of the 5 curves must still resolve to its own distinct edge
+    // when clicked at its own midpoint — not just "some" of them, as a
+    // higher multiplicity is exactly where a hit-testing regression (e.g.
+    // curves bunching close enough together to be ambiguous) would show up
+    // first.
+    const box = await page.locator("#canvas").boundingBox();
+    for (let i = 0; i < edges.length; i++) {
+      const geo = await geometryOf(page, edges[i].id);
+      await page.mouse.click(box.x + geo.mid.x, box.y + geo.mid.y);
+      const selection = await page.evaluate(() => window.__kg.state.selection);
+      assert.equal(selection.id, edges[i].id, `clicking edge ${i}'s own midpoint should select edge ${i}, not a neighbor`);
+    }
+  });
+});
+
 test("parallel edges pointing in opposite directions (A->B and B->A) still fan out distinctly, not mirrored onto the same curve", async () => {
   await withPage(async (page) => {
     await addNodeViaDblClick(page, 250, 400, "A");

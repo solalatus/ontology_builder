@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { withPage, addNodeViaDblClick, addNodeViaButton, createEdgeViaConnectMode } from "./lib/page.mjs";
+import { withPage, addNodeViaDblClick, addNodeViaButton, createEdgeViaConnectMode, dragNode } from "./lib/page.mjs";
 
 async function historyLengths(page) {
   return page.evaluate(() => ({ past: window.__kg.history.past.length, future: window.__kg.history.future.length }));
@@ -320,6 +320,68 @@ test("a rename field near the top of the viewport is clamped below the toolbar, 
     assert.ok(inputBox.y >= toolbarBottom - 0.5, `input top ${inputBox.y} should be at/below toolbar bottom ${toolbarBottom}`);
     assert.ok(inputBox.x >= 0, `input should not spill off the left edge, got x=${inputBox.x}`);
     await page.keyboard.press("Escape");
+  });
+});
+
+test("renaming a group member holds up under zoom + pan-near-edge + membership all at once: the field anchors to the node and stays clamped on-screen", async () => {
+  await withPage(async (page) => {
+    // Each of zoom/pan, screen-edge clamping, and group membership is
+    // tested individually elsewhere — this combines all three, since none
+    // of those tests alone would catch a regression that only appears
+    // when they interact (e.g. clamping computed against the wrong,
+    // un-zoomed anchor, or a member's geometry resolving incorrectly once
+    // its own screen position is near the edge of the viewport).
+    await addNodeViaButton(page, "#btn-add-group", 500, 400, "Group");
+    const group = await page.evaluate(() => window.__kg.state.nodes[0]);
+    const memberStart = { x: group.x + 100, y: group.y + 60 };
+    await addNodeViaButton(page, "#btn-add-node", memberStart.x, memberStart.y, "Member");
+    await dragNode(page, memberStart.x, memberStart.y, memberStart.x + 6, memberStart.y + 6); // commit membership
+    const member = await page.evaluate(() => window.__kg.state.nodes.find((n) => n.label === "Member"));
+    assert.equal(member.groups.length, 1, "sanity check: membership actually committed");
+
+    const box = await page.locator("#canvas").boundingBox();
+    const memberScreenBefore = await page.evaluate(() => {
+      const n = window.__kg.state.nodes.find((l) => l.label === "Member");
+      return window.__kg.worldToScreen(n.x + n.w / 2, n.y + n.h / 2);
+    });
+
+    // Zoom in heavily on the member, then pan it very close to the left
+    // edge of the viewport — close enough that its true (unclamped)
+    // center would render off-screen.
+    await page.mouse.move(box.x + memberScreenBefore.x, box.y + memberScreenBefore.y);
+    await page.mouse.wheel(0, -800);
+    await page.mouse.move(box.x + 700, box.y + 300);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 100, box.y + 300, { steps: 8 });
+    await page.mouse.up();
+    await page.waitForTimeout(50);
+
+    const memberAfter = await page.evaluate(() => window.__kg.state.nodes.find((n) => n.label === "Member"));
+    assert.deepEqual(memberAfter.groups, member.groups, "membership survived the pan/zoom untouched");
+    const trueAnchor = await page.evaluate(() => {
+      const n = window.__kg.state.nodes.find((l) => l.label === "Member");
+      return window.__kg.worldToScreen(n.x + n.w / 2, n.y + n.h / 2);
+    });
+    assert.ok(trueAnchor.x < 0, "sanity check: the member's true center is now genuinely off-screen to the left");
+
+    // Double-click well inside the now-huge, mostly off-screen member box
+    // (its right portion is still on-screen after the pan).
+    await page.mouse.dblclick(box.x + 50, box.y + 300);
+    await page.waitForSelector(".kg-inline-input");
+    assert.equal(await page.locator(".kg-inline-input").inputValue(), "Member", "still the correct node, correctly pre-filled");
+
+    const inputBox = await page.locator(".kg-inline-input").boundingBox();
+    assert.ok(inputBox.x >= 0, `the clamp must still keep the field fully on-screen (x=${inputBox.x}), even anchored to an off-screen true center`);
+    assert.ok(inputBox.x + inputBox.width <= box.width + 0.5, "field must not spill off the right edge either");
+    const toolbarBottom = await page.evaluate(() => document.getElementById("toolbar").getBoundingClientRect().bottom);
+    assert.ok(inputBox.y >= toolbarBottom - 0.5, "field must still clear the toolbar");
+
+    await page.locator(".kg-inline-input").fill("Renamed Member");
+    await page.keyboard.press("Enter");
+    await page.waitForSelector(".kg-inline-input", { state: "detached" });
+    const renamed = await page.evaluate(() => window.__kg.state.nodes.find((n) => n.label === "Renamed Member"));
+    assert.ok(renamed, "the rename itself committed correctly despite all three conditions combined");
+    assert.deepEqual(renamed.groups, member.groups, "membership is still intact after the rename");
   });
 });
 

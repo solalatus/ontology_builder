@@ -283,3 +283,54 @@ test("a pointercancel during a pan cleanly ends the pan without pushing any (non
     assert.equal(node.y, placed.y + 50 / scale);
   });
 });
+
+// abortActiveDrag()'s commit path (see index.html's commitDragIfChanged())
+// diffs the drag's "before" snapshot against the current state via
+// JSON.stringify to decide whether anything actually changed — cheap for a
+// typical graph, but the whole point of a QA/coverage pass is not assuming
+// that scales; this proves it does, on a graph big enough that the
+// per-frame render/culling budget in phase9.spec.mjs already treats as its
+// own stress scenario.
+async function seedGrid(page, count, cols, spacing) {
+  await page.evaluate(({ count, cols, spacing }) => {
+    for (let i = 0; i < count; i++) {
+      const col = i % cols, row = Math.floor(i / cols);
+      window.__kg.actions.createNode(col * spacing, row * spacing, `N${i}`, "entity");
+    }
+    window.__kg.markDirty();
+  }, { count, cols, spacing });
+}
+
+test("a pinch interrupting a drag on a 1000-node graph still commits quickly, correctly, and without hanging", async () => {
+  await withPage(async (page) => {
+    await seedGrid(page, 1000, 50, 300);
+    const box = await page.locator("#canvas").boundingBox();
+    // Node 0 sits at world (0,0); with the default camera (scale 1, no
+    // pan) that's screen (0,0) relative to the canvas — nudge the camera
+    // so it's actually clickable within the viewport.
+    await page.evaluate(() => { window.__kg.camera.panX = 400; window.__kg.camera.panY = 300; window.__kg.markDirty(); });
+
+    const before = await page.evaluate(() => window.__kg.state.nodes.find((n) => n.label === "N0"));
+    const historyBefore = await historyLength(page);
+
+    const start = Date.now();
+    await dispatchTouch(page, [
+      pe("pointerdown", 1, box.x + 400, box.y + 300), // node N0's screen position after the pan above
+      pe("pointermove", 1, box.x + 500, box.y + 420),
+    ]);
+    await dispatchTouch(page, [pe("pointerdown", 2, box.x + 20, box.y + 20, false)]); // pinch interrupts
+    const elapsed = Date.now() - start;
+
+    assert.ok(elapsed < 5000, `expected the interrupted drag on a 1000-node graph to commit quickly, took ${elapsed}ms`);
+
+    const nodes = await page.evaluate(() => window.__kg.state.nodes);
+    assert.equal(nodes.length, 1000, "no node lost or duplicated");
+    const after = nodes.find((n) => n.label === "N0");
+    assert.notEqual(after.x, before.x, "the interrupted node actually moved");
+    assert.equal((await historyLength(page)), historyBefore + 1, "the partial move on a large graph is still committed as one undo step");
+
+    await page.evaluate(() => window.__kg.actions.undo());
+    const restored = (await page.evaluate(() => window.__kg.state.nodes)).find((n) => n.label === "N0");
+    assert.equal(restored.x, before.x, "undo restores the exact prior position even on a large graph");
+  });
+});
