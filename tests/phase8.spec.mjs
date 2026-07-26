@@ -335,3 +335,117 @@ test("a node belonging to two separate (overlapping-origin) groups stays contain
     assert.ok(isFullyContained(shared, groupB), "Shared escaped GroupB");
   });
 });
+
+// --- Adversarial graphs (QA/test-coverage pass, no bug expected a priori —
+// autolayout's clamp-then-simulate design should be robust to any graph
+// shape; these exist to prove that rather than assume it) --------------
+
+test("Auto-layout terminates cleanly on a graph containing a cycle (A->B->C->A)", async () => {
+  await withPage(async (page) => {
+    await seedGraph(
+      page,
+      [
+        { x: 100, y: 100, label: "A", type: "entity" },
+        { x: 150, y: 100, label: "B", type: "entity" },
+        { x: 125, y: 150, label: "C", type: "entity" },
+      ],
+      [[0, 1, "to B"], [1, 2, "to C"], [2, 0, "back to A"]],
+    );
+    const start = Date.now();
+    await page.click("#btn-autolayout");
+    await page.waitForFunction(() => window.__kg.history.past.length === 1);
+    assert.ok(Date.now() - start < 10000, "a 3-cycle should not hang or loop forever");
+
+    const nodes = await page.evaluate(() => window.__kg.state.nodes);
+    assert.equal(nodes.length, 3);
+    for (const n of nodes) assert.ok(Number.isFinite(n.x) && Number.isFinite(n.y), `${n.label} has a non-finite position`);
+  });
+});
+
+test("Auto-layout terminates cleanly on a dense, near-complete graph (8 nodes, all-pairs edges)", async () => {
+  await withPage(async (page) => {
+    const labels = ["A", "B", "C", "D", "E", "F", "G", "H"];
+    const nodeSpecs = labels.map((label, i) => ({ x: 100 + (i % 4) * 40, y: 100 + Math.floor(i / 4) * 40, label, type: "entity" }));
+    const edgeSpecs = [];
+    for (let i = 0; i < labels.length; i++) {
+      for (let j = i + 1; j < labels.length; j++) edgeSpecs.push([i, j, `${labels[i]}-${labels[j]}`]);
+    }
+    await seedGraph(page, nodeSpecs, edgeSpecs); // 8 nodes, 28 edges — every pair pulling on every other
+
+    const start = Date.now();
+    await page.click("#btn-autolayout");
+    await page.waitForFunction(() => window.__kg.history.past.length === 1);
+    assert.ok(Date.now() - start < 10000, "a dense all-pairs graph should not hang");
+
+    const nodes = await page.evaluate(() => window.__kg.state.nodes);
+    assert.equal(nodes.length, 8);
+    for (const n of nodes) assert.ok(Number.isFinite(n.x) && Number.isFinite(n.y), `${n.label} has a non-finite position`);
+    // No two nodes should have collapsed onto the exact same point despite
+    // 28 competing pulls — all-pairs repulsion should still keep them apart.
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        assert.ok(nodes[i].x !== nodes[j].x || nodes[i].y !== nodes[j].y, `${nodes[i].label} and ${nodes[j].label} collapsed onto the same point`);
+      }
+    }
+  });
+});
+
+test("Auto-layout keeps every member of an overcrowded group (10 members, small box) contained simultaneously", async () => {
+  await withPage(async (page) => {
+    const memberSpecs = [];
+    for (let i = 0; i < 10; i++) memberSpecs.push({ x: 300 + i * 5, y: 300 + i * 3, label: `M${i}`, type: "entity" });
+    await seedGraph(page, [{ x: 300, y: 300, label: "Group", type: "group" }, ...memberSpecs, { x: 900, y: 900, label: "Puller", type: "entity" }],
+      memberSpecs.map((_, i) => [i + 1, memberSpecs.length + 1, "pulls"])); // every member pulled toward the same far-away outsider
+    for (let i = 0; i < memberSpecs.length; i++) await establishMembership(page, `M${i}`, "Group");
+
+    const start = Date.now();
+    await page.click("#btn-autolayout");
+    await page.waitForFunction(() => window.__kg.history.past.length === 1);
+    assert.ok(Date.now() - start < 10000, "an overcrowded group should not hang");
+
+    const { group, members } = await page.evaluate(() => ({
+      group: window.__kg.state.nodes.find((n) => n.label === "Group"),
+      members: window.__kg.state.nodes.filter((n) => n.label.startsWith("M")),
+    }));
+    assert.equal(members.length, 10);
+    for (const m of members) {
+      assert.ok(Number.isFinite(m.x) && Number.isFinite(m.y), `${m.label} has a non-finite position`);
+      assert.ok(isFullyContained(m, group), `${m.label} escaped the overcrowded group`);
+    }
+  });
+});
+
+test("Auto-layout holds every containment invariant at once on a mixed graph: disconnected islands, a floating group, and 3-level-deep nesting", async () => {
+  await withPage(async (page) => {
+    await seedGraph(page, [
+      { x: 50, y: 50, label: "IslandA", type: "entity" },
+      { x: 70, y: 70, label: "IslandB", type: "entity" },
+      { x: 600, y: 600, label: "FloatingGroup", type: "group" },
+      { x: 200, y: 200, label: "Outer", type: "group" },
+      { x: 220, y: 220, label: "Inner", type: "group" },
+      { x: 240, y: 240, label: "Leaf", type: "entity" },
+      { x: 1000, y: 1000, label: "PullsLeaf", type: "entity" },
+    ], [[5, 6, "pulls hard"]]);
+    await page.evaluate(() => {
+      const inner = window.__kg.state.nodes.find((n) => n.label === "Inner");
+      inner.w = 220; inner.h = 150; // smaller than Outer, still bigger than a default entity
+    });
+    await establishMembership(page, "Leaf", "Inner");
+    await establishMembership(page, "Inner", "Outer");
+
+    const start = Date.now();
+    await page.click("#btn-autolayout");
+    await page.waitForFunction(() => window.__kg.history.past.length === 1);
+    assert.ok(Date.now() - start < 10000, "a mixed graph should not hang");
+
+    const nodes = await page.evaluate(() => window.__kg.state.nodes);
+    assert.equal(nodes.length, 7);
+    for (const n of nodes) assert.ok(Number.isFinite(n.x) && Number.isFinite(n.y), `${n.label} has a non-finite position`);
+
+    const outer = nodes.find((n) => n.label === "Outer");
+    const inner = nodes.find((n) => n.label === "Inner");
+    const leaf = nodes.find((n) => n.label === "Leaf");
+    assert.ok(isFullyContained(leaf, inner), "Leaf escaped Inner");
+    assert.ok(isFullyContained(inner, outer), "Inner escaped Outer");
+  });
+});
