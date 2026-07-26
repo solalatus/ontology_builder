@@ -1033,6 +1033,21 @@ function updateGroupMembership(node) {
     if (node.groups.includes(candidate.id)) continue;
     if (candidate.w * candidate.h <= node.w * node.h) continue; // must be strictly bigger
     if (!rectFullyContains(candidate, node)) continue; // "drop inside" = full containment
+    // A candidate that's just a bigger ancestor of a group this node is
+    // ALREADY (still) a member of is redundant — that containment already
+    // holds transitively through nesting. Without this, dragging a group
+    // that already has its own nested member into a bigger outer group
+    // would give the member a second, direct membership in the outer
+    // group too (plus a second, redundant `contains` edge), breaking
+    // "innermost wins" for a cascaded drop the same way it's already
+    // enforced for a fresh one. Two same-level, merely-overlapping
+    // candidates (neither containing the other) are unaffected — that's
+    // the legitimate "member of two separate groups" case.
+    const redundant = node.groups.some((gid) => {
+      const existing = state.nodes.find((n) => n.id === gid);
+      return existing && rectFullyContains(candidate, existing);
+    });
+    if (redundant) continue;
     if (!best || candidate.w * candidate.h < best.w * best.h) best = candidate; // innermost wins
   }
   if (best) {

@@ -287,3 +287,30 @@ test("OPFS-backed graph (nodes, edges, groups) round-trips correctly across a re
     assert.equal(edges[0].auto, true);
   }, { url: `${server.url}/index.html` });
 });
+
+test("a localStorage write failure (e.g. quota exceeded) is caught, doesn't crash the app, and whenIdle() still resolves instead of hanging", async () => {
+  await withPage(async (page) => {
+    await addNodeViaDblClick(page, 300, 300, "Alpha");
+    await page.evaluate(() => window.__kg.storage.whenIdle()); // settle the save from adding the node
+
+    const result = await page.evaluate(async () => {
+      const originalSetItem = localStorage.setItem.bind(localStorage);
+      localStorage.setItem = () => { throw new DOMException("Quota exceeded", "QuotaExceededError"); };
+      window.__kg.actions.createNode(500, 500, "Beta", "entity");
+      window.__kg.markDirty();
+      window.__kg.storage.save();
+      await window.__kg.storage.whenIdle(); // must resolve, not hang, even though the write threw
+      localStorage.setItem = originalSetItem;
+      return { nodeCount: window.__kg.state.nodes.length };
+    });
+    assert.equal(result.nodeCount, 2, "the in-memory edit itself must survive a failed write");
+
+    // The app must keep working normally afterward — a real save with the
+    // failure lifted should still succeed.
+    await page.evaluate(() => window.__kg.storage.save());
+    await page.evaluate(() => window.__kg.storage.whenIdle());
+    const raw = await page.evaluate(() => localStorage.getItem("kg-canvas-live"));
+    const parsed = JSON.parse(raw);
+    assert.equal(parsed.nodes.length, 2, "a subsequent successful save persists the current (already-edited) state");
+  });
+});

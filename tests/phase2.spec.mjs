@@ -341,6 +341,29 @@ test("deleting a group cleans up the (former) member's groups[] and the contains
   });
 });
 
+test("long-pressing a group node (with a member) deletes the group and cleans up the member's groups[] and the contains edge, same as keyboard Delete", async () => {
+  await withPage(async (page) => {
+    await addNodeViaButton(page, "#btn-add-group", 600, 400, "Group A");
+    await addNodeViaButton(page, "#btn-add-node", 100, 100, "Member");
+    await dragNode(page, 100, 100, 600, 400);
+
+    const box = await page.locator("#canvas").boundingBox();
+    // A point inside the group but outside the member, so the long-press
+    // hits the group itself, not the member on top of it.
+    await page.mouse.move(box.x + 460, box.y + 300);
+    await page.mouse.down();
+    await page.waitForTimeout(700);
+    await page.mouse.up();
+
+    const nodes = await page.evaluate(() => window.__kg.state.nodes);
+    const edges = await page.evaluate(() => window.__kg.state.edges);
+    assert.equal(nodes.length, 1);
+    assert.equal(nodes[0].label, "Member");
+    assert.deepEqual(nodes[0].groups, [], "the member's groups[] is cleaned up");
+    assert.equal(edges.length, 0, "the contains edge is cleaned up too");
+  });
+});
+
 test("deleting a member removes its contains edge but leaves the group intact", async () => {
   await withPage(async (page) => {
     await addNodeViaButton(page, "#btn-add-group", 600, 400, "Group A");

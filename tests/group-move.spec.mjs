@@ -153,6 +153,44 @@ test("dragging a group onto a previously unrelated node still absorbs it AND car
   });
 });
 
+test("dragging a small group (with its own member) into a bigger group absorbs the small group as a member, while its own member still travels along with it", async () => {
+  await withPage(async (page) => {
+    await addNodeViaButton(page, "#btn-add-group", 700, 500, "Outer");
+    await addNodeViaButton(page, "#btn-add-group", 200, 200, "Inner");
+    // Shrink Inner to 200x150 — bigger than a default entity (so it can
+    // hold one), smaller than Outer (so it can nest inside it).
+    const inner = (await nodeState(page)).find((n) => n.label === "Inner");
+    await dragNode(page, inner.x + inner.w, inner.y + inner.h, inner.x + 200, inner.y + 150);
+    const innerResized = (await nodeState(page)).find((n) => n.label === "Inner");
+
+    // Give Inner its own member, well inside its (now small) box.
+    const leafCx = innerResized.x + 100, leafCy = innerResized.y + 75;
+    await addNodeViaButton(page, "#btn-add-node", leafCx, leafCy, "Leaf");
+    await dragNode(page, leafCx, leafCy, leafCx + 5, leafCy + 5);
+
+    const before = await nodeState(page);
+    const outer = before.find((n) => n.label === "Outer");
+    const innerBefore = before.find((n) => n.label === "Inner");
+    const leafBefore = before.find((n) => n.label === "Leaf");
+    assert.deepEqual(leafBefore.groups, [innerBefore.id], "Leaf is a member of Inner before the drag");
+    assert.deepEqual(innerBefore.groups, [], "Inner is not yet a member of Outer");
+
+    // Drag Inner (grab its body, not its own resize handle) fully into Outer.
+    const grab = { x: innerBefore.x + 20, y: innerBefore.y + 20 };
+    const target = { x: outer.x + outer.w / 2 - innerBefore.w / 2 + 20, y: outer.y + outer.h / 2 - innerBefore.h / 2 + 20 };
+    await dragNode(page, grab.x, grab.y, target.x, target.y);
+
+    const after = await nodeState(page);
+    const innerAfter = after.find((n) => n.label === "Inner");
+    const leafAfter = after.find((n) => n.label === "Leaf");
+    const dx = innerAfter.x - innerBefore.x, dy = innerAfter.y - innerBefore.y;
+    assert.deepEqual(innerAfter.groups, [outer.id], "Inner is absorbed as a member of Outer by this same drag");
+    assert.equal(leafAfter.x, leafBefore.x + dx, "Leaf travels along with Inner, its own parent, during Inner's drag");
+    assert.equal(leafAfter.y, leafBefore.y + dy);
+    assert.deepEqual(leafAfter.groups, [innerAfter.id], "Leaf's own membership is untouched — still just Inner, not also Outer (innermost-only, unaffected by Inner's own absorption)");
+  });
+});
+
 test("a node that's a member of two overlapping groups keeps membership in the one being dragged, but loses it in the stationary one it no longer overlaps", async () => {
   await withPage(async (page) => {
     // A: 140,190..460,410 ; B: 240,190..560,410 ; overlap 240..460,190..410

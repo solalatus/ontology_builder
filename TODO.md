@@ -10,7 +10,7 @@ State" so the project can be picked up cold at any time.
 ## Current State
 
 - **Phase:** Phases 0 through 9 complete, all with green automated test
-  suites (`node --test tests/*.spec.mjs`, 252 JS tests + 15 Python tests,
+  suites (`node --test tests/*.spec.mjs`, 257 JS tests + 15 Python tests,
   see Log below). Not yet hand-tested on real touch hardware (pinch/
   long-press) — deferred to Phase 10, not blocking. Phase 7's real-folder
   grant/write-back is likewise only mocked-tested so far, not hand-verified
@@ -41,6 +41,12 @@ State" so the project can be picked up cold at any time.
   user had already moved past. See the dated Log entry and the "Multi-
   touch drag-interruption fixes" section (right after Hungarian/English
   localization) for the full account.
+- **A follow-up "enhance the test suite" pass** (also pure QA/coverage,
+  not a feature) found and fixed one more real, pre-existing bug while
+  writing a new test: `updateGroupMembership()` could give a member a
+  spurious *second*, direct membership in a bigger ancestor group when the
+  group it was already nested in got dragged into that ancestor — see the
+  Phase 2 section's own bullet and the dated Log entry.
 - **A dedicated test-hardening pass** (user-requested, ahead of Phase 10's
   manual testing) went back through every phase and added substantially
   more coverage (34 new tests, 159 → 193), and surfaced two real bugs in
@@ -303,7 +309,20 @@ claude.ai/code, which is plain git via GitHub as described above.
       that differs between a move (drags contents along) and a resize
       (never does), reverting to the normal look the instant the drag
       ends.
-- Tests (`tests/phase2.spec.mjs`, 22 tests, all green — rewritten in the
+- [x] **`updateGroupMembership()` bugfix (found via a QA/test-coverage
+      pass, not a feature): a candidate group that's just a bigger ancestor
+      of a group the node is already a member of is now skipped**, instead
+      of being added as a second, redundant, direct membership. Without
+      this, dragging a group that already has its own nested member into a
+      bigger *outer* group gave that member a spurious second, direct
+      membership in the outer group too (plus a spurious second `contains`
+      edge) — a member of Inner-inside-Outer should be "in Outer" only
+      through nesting, never through a separate direct edge as well. The
+      fix only skips a candidate that fully contains one of the node's
+      *existing* memberships — the legitimate "member of two separate,
+      merely-overlapping, same-level groups" case (below) is unaffected,
+      since neither of those groups contains the other.
+- Tests (`tests/phase2.spec.mjs`, 23 tests, all green — rewritten in the
   rigid-body-move change: two tests that asserted the old "drag away
   releases a member" behavior now assert the opposite — the member travels
   with the group — since that behavior is what replaced it; on top of the
@@ -311,9 +330,11 @@ claude.ai/code, which is plain git via GitHub as described above.
   only cleans up its direct child, a deeper grandchild membership is
   untouched; dragging a node from deep inside a nested group to just
   outside it, but still inside the outer group, reassigns membership from
-  inner to outer in one drag. A new `tests/group-move.spec.mjs`, 9 tests,
-  covers the rigid-body-move mechanics and the visual hue/highlight in
-  depth):
+  inner to outer in one drag; long-pressing a group node (with a member)
+  deletes it and cleans up membership/the contains edge the same way
+  keyboard Delete already does. A new `tests/group-move.spec.mjs`, 11
+  tests, covers the rigid-body-move mechanics, the visual hue/highlight,
+  and the redundant-ancestor-membership fix in depth):
   - Automated (`phase2.spec.mjs`): "Add Group" creates a `type:"group"`
     node with the Section 4.3 defaults (320×220, `boundary_mode:"manual"`,
     empty `groups[]`), is one-shot, and Escape-cancelable, mirroring Add
@@ -359,7 +380,18 @@ claude.ai/code, which is plain git via GitHub as described above.
     reports `isBeingMoved` (never `isBeingResized`) and a group being
     resized reports the reverse, both clearing the instant the drag ends,
     and a resize is proven to never move the group's own x/y even by one
-    pixel while the highlight is active.
+    pixel while the highlight is active. **Redundant-ancestor-membership
+    fix**: dragging a small group (with its own nested member) into a
+    bigger outer group absorbs the small group as the outer group's member
+    while the nested member travels along with its own (immediate) parent
+    — and the nested member's `groups[]` stays exactly `[innerGroupId]`,
+    never gaining a second, direct `[outerGroupId]` entry too (this is the
+    regression test for the bug above — it fails without the fix); a node
+    that's a member of two separate, merely-overlapping (not nested)
+    groups still correctly keeps both memberships when only one of the two
+    is dragged, and correctly loses the *stationary* one it no longer
+    overlaps — proving the fix didn't overcorrect into blocking the
+    legitimate multi-membership case.
   - Manual: visual nesting reads correctly across zoom levels (spot-checked
     via screenshots this session, not exhaustively at every zoom level);
     confirm no arrow is ever drawn on canvas for a `contains` edge (also
@@ -416,12 +448,15 @@ claude.ai/code, which is plain git via GitHub as described above.
       programmatically in headless Chromium for both the served (OPFS) and
       `file://` (localStorage fallback) cases; the 4-platform hardware pass
       is still Phase 10's job.
-- Tests (`tests/phase4.spec.mjs`, 14 tests, all green — expanded from 11 in
+- Tests (`tests/phase4.spec.mjs`, 15 tests, all green — expanded from 11 in
   a later test-hardening pass: a burst of many scheduled saves coalesces
   into far fewer than N actual writes, proven via a counted
   `localStorage.setItem` wrapper, not just inferred; a moderately large
   graph (50 nodes, ~30 edges, nested groups) round-trips exactly; Clear
-  does not touch the separately-stored theme preference):
+  does not touch the separately-stored theme preference; a later QA/test-
+  coverage pass added a `localStorage.setItem` *write*-failure test — a
+  different failure mode than the existing corrupted-payload-on-*load*
+  test above it):
   - Automated: `window.__kg.storage.detectBackend()` resolves to
     `"localStorage"` under `file://` and to `"opfs"` when served over
     http (a real local static server is spun up in-test —
@@ -437,7 +472,14 @@ claude.ai/code, which is plain git via GitHub as described above.
     ignored (boots empty, no crash, no console error) via `page.addInitScript`
     seeding garbage JSON before the app's own boot script runs; camera pan/
     zoom and selection are deliberately *not* restored (only graph data is
-    — consistent with Phase 3 already not persisting the undo stack).
+    — consistent with Phase 3 already not persisting the undo stack). A
+    `localStorage.setItem` *write* throwing (e.g. `QuotaExceededError`,
+    simulated by monkey-patching it mid-test) is caught rather than
+    crashing the app — the in-memory edit itself survives, `whenIdle()`
+    still resolves instead of hanging forever inside the write's own
+    `await`, and a later successful save (once the failure is lifted)
+    persists correctly, proving the failure doesn't wedge the save loop
+    for good.
   - Manual: the actual 4-platform matrix (Chrome/Windows, Chromium/Linux,
     Brave/Linux, Chrome/Android) — deferred to Phase 10 as originally
     planned; what's new is that Phase 10 must now also confirm which
@@ -932,8 +974,10 @@ different finger is already mid-drag.
       still have the original node (or edge) deleted out from under them
       ~600ms later with no warning. `abortActiveDrag()` now clears it as
       its first action.
-- Tests (new `tests/pointer-interrupt.spec.mjs`, 8 tests, plus 1 new test
-  in `tests/group-move.spec.mjs`, all green): a pinch interrupting a
+- Tests (`tests/pointer-interrupt.spec.mjs`, 10 tests — 8 from the initial
+  bugfix pass, expanded by 2 in a later test-coverage pass, plus 3 new
+  tests spread across `tests/group-move.spec.mjs`/`tests/phase2.spec.mjs`/
+  `tests/phase4.spec.mjs`, all green): a pinch interrupting a
   single-finger node drag commits the partial move as one undo step
   instead of losing it, and undo reverts it exactly; an immediate pinch
   (no movement yet) produces no spurious undo step; a pinch interrupting a
@@ -947,14 +991,27 @@ different finger is already mid-drag.
   (dragging from a node's connect-handle) creates no phantom edge and no
   undo step; a second finger's pointerdown never hijacks an in-progress
   drag — proven by continuing to move the *first* finger after the pinch
-  starts and confirming the node no longer responds to it. Plus a
-  `group-move.spec.mjs` addition found true during the same pass (not a
-  bug, but an under-tested interaction worth locking in): a node that's a
-  member of two overlapping groups keeps membership in the one being
-  dragged (carried along) but correctly loses it in the stationary one it
-  no longer overlaps once the drag lands, proving the end-of-drag
-  membership recompute re-evaluates *every* listed group against the
-  node's new position, not just the one that moved.
+  starts and confirming the node no longer responds to it; a **genuine**
+  `pointercancel` event (not synthesized via a pinch's second finger, but
+  dispatched directly — the other real-world trigger, e.g. the OS
+  reclaiming a gesture) also commits a partial drag instead of losing it,
+  through the exact same `abortActiveDrag()` path; a `pointercancel`
+  during a *pan* (which has no undo history at all) cleanly ends it with
+  no spurious history entry, and a fresh drag afterward works normally —
+  proving `dragMode`/`activePointerId` were fully released, not left in a
+  stuck state. Plus 3 more finds from the same test-coverage pass (not
+  bugs, but under-tested interactions worth locking in, except the group-
+  move one below, which *did* surface a real bug — see the Phase 2
+  section above): a node that's a member of two overlapping groups keeps
+  membership in the one being dragged (carried along) but correctly loses
+  it in the stationary one it no longer overlaps once the drag lands,
+  proving the end-of-drag membership recompute re-evaluates *every* listed
+  group against the node's new position, not just the one that moved
+  (`group-move.spec.mjs`); long-pressing a group node (with a member) via
+  touch deletes it and cleans up membership/the edge the same way keyboard
+  Delete already does (`phase2.spec.mjs`); a `localStorage.setItem` write
+  failure is caught without crashing the app or hanging `whenIdle()`
+  (`phase4.spec.mjs`).
 
 ---
 
@@ -2088,6 +2145,63 @@ and record deltas here instead of editing the spec.)*
     second bug was found while writing the repro for the first one):
     `node --test tests/*.spec.mjs` (252 tests, run twice consecutively)
     and `python3 -m unittest discover -s tools -p "test_*.py"` (15 tests),
+    both green — no regressions in any earlier phase or feature.
+- 2026-07-26 — Follow-up user request: "DO enhance the test suite" (after
+  a "what is our test coverage now" question). Surveyed `index.html` and
+  the existing suite for genuinely under-tested areas — interactions
+  between features and error-handling paths, specifically — rather than
+  re-testing what already had solid coverage. Added 4 new tests across 3
+  existing files plus 2 more in `pointer-interrupt.spec.mjs`, and found one
+  more real, pre-existing bug in the process:
+  - **`updateGroupMembership()` redundant-ancestor-membership bug.**
+    While writing a test for "drag a group that already has its own
+    nested member into a bigger outer group," the nested member ended up
+    with `groups: ['innerId', 'outerId']` — a second, direct membership in
+    the *outer* group, plus a redundant second `contains` edge — instead
+    of staying purely nested through Inner alone. Root cause: the
+    function's "find a new candidate group" loop only excludes candidates
+    the node is *already a direct member of*; it doesn't know a candidate
+    might be a bigger ancestor of a group the node is already nested in,
+    so once Inner (already excluded, being an existing membership) drops
+    out of consideration, Outer looks like an unrelated, legitimate new
+    candidate and gets added too. Fixed by additionally skipping any
+    candidate that fully contains one of the node's *existing* kept
+    memberships — verified this doesn't regress the legitimate
+    "member of two separate, merely-overlapping (non-nested) groups" case,
+    since neither of those groups contains the other, so the new check
+    never fires for it. This was reachable before the rigid-body group-
+    move feature too (in principle, via `updateMembershipForMovedGroup`'s
+    per-other-node loop), but the rigid-body move made it easy to trigger
+    reliably (a nested member's position is now *guaranteed* to land
+    inside the new outer group's box every time, rather than only
+    coincidentally).
+  - Other areas explored, no bugs found, added as new coverage rather than
+    just spot-checked: long-pressing a *group* node (with a member) via
+    touch — same cleanup as keyboard Delete, now proven through the real
+    touch-drag code path rather than only the keyboard path; a
+    `localStorage.setItem` write throwing (not just a corrupted payload on
+    *load*, which was already covered) doesn't crash the app or hang
+    `whenIdle()` forever; a genuine `pointercancel` DOM event (dispatched
+    directly, not synthesized via a second finger) exercises the same
+    `abortActiveDrag()` path as the pinch-interrupt fixes above, including
+    for a *pan* specifically (which has no undo history at all — confirmed
+    a cancelled pan cleanly releases `dragMode`/`activePointerId` so a
+    fresh drag afterward works normally, not left in a stuck state).
+  - Also fixed an unrelated git-hygiene issue at the user's explicit
+    request: the branch tip (a merge commit GitHub itself authored when
+    merging PR #17, committer `noreply@github.com`) showed as "Unverified"
+    on GitHub. Amended just that commit's author/committer metadata to
+    `Claude <noreply@anthropic.com>` and force-pushed — scoped entirely to
+    this project's own `claude/todo-first-step-44a4p1` branch, never to
+    `main` itself, so no shared/published history on `main` was rewritten.
+  - Ran the full suite repeatedly during development. Also independently
+    confirmed one single-run flake in the pre-existing
+    `tests/parallel-edges.spec.mjs` (unrelated file, untouched this
+    session) reproduces at the same low rate on a clean `git stash` of
+    this session's own changes — pre-existing environmental flakiness, not
+    a regression from this pass. `node --test tests/*.spec.mjs` (257
+    tests, run clean twice consecutively after isolating the flake) and
+    `python3 -m unittest discover -s tools -p "test_*.py"` (15 tests),
     both green — no regressions in any earlier phase or feature.
 
 ---

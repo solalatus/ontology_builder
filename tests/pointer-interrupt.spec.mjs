@@ -222,3 +222,64 @@ test("a second finger's pointerdown never hijacks an in-progress single-finger d
     assert.equal(after.y, mid.y);
   });
 });
+
+test("a genuine pointercancel event (not just a pinch) also commits a partial drag instead of losing it", async () => {
+  await withPage(async (page) => {
+    await addNodeViaButton(page, "#btn-add-node", 400, 300, "Alpha");
+    const box = await page.locator("#canvas").boundingBox();
+    const before = await page.evaluate(() => ({ ...window.__kg.state.nodes[0] }));
+    const historyBefore = await historyLength(page);
+
+    await dispatchTouch(page, [
+      pe("pointerdown", 1, box.x + 400, box.y + 300),
+      pe("pointermove", 1, box.x + 480, box.y + 420),
+    ]);
+    const mid = await page.evaluate(() => ({ ...window.__kg.state.nodes[0] }));
+    assert.notEqual(mid.x, before.x, "the drag must have actually moved the node before the cancel");
+
+    // A real pointercancel — e.g. the OS reclaiming the gesture for a
+    // system action — rather than a second finger's pointerdown.
+    await page.evaluate(() => {
+      const canvas = document.getElementById("canvas");
+      canvas.dispatchEvent(new PointerEvent("pointercancel", { pointerId: 1, pointerType: "touch", bubbles: true }));
+    });
+
+    const after = await page.evaluate(() => window.__kg.state.nodes[0]);
+    const historyAfter = await historyLength(page);
+    assert.deepEqual({ x: after.x, y: after.y }, { x: mid.x, y: mid.y });
+    assert.equal(historyAfter, historyBefore + 1, "the partial move is committed as one undo step, not lost");
+  });
+});
+
+test("a pointercancel during a pan cleanly ends the pan without pushing any (nonexistent) undo step", async () => {
+  await withPage(async (page) => {
+    const box = await page.locator("#canvas").boundingBox();
+    const panBefore = await page.evaluate(() => ({ ...window.__kg.camera }));
+
+    await dispatchTouch(page, [
+      pe("pointerdown", 1, box.x + 200, box.y + 200),
+      pe("pointermove", 1, box.x + 350, box.y + 300),
+    ]);
+    const panMid = await page.evaluate(() => ({ ...window.__kg.camera }));
+    assert.notEqual(panMid.panX, panBefore.panX, "the pan must have actually moved the camera before the cancel");
+
+    await page.evaluate(() => {
+      const canvas = document.getElementById("canvas");
+      canvas.dispatchEvent(new PointerEvent("pointercancel", { pointerId: 1, pointerType: "touch", bubbles: true }));
+    });
+
+    // Panning has no undo history at all — cancelling it mid-flight must
+    // not touch history, and a fresh drag on the same node afterward must
+    // work normally (dragMode/activePointerId were properly released).
+    await addNodeViaButton(page, "#btn-add-node", 500, 500, "Alpha");
+    const placed = await page.evaluate(() => ({ ...window.__kg.state.nodes[0] }));
+    await dragNode(page, 500, 500, 550, 550);
+    const node = await page.evaluate(() => window.__kg.state.nodes[0]);
+    // Screen-space delta scales by the current camera zoom (unchanged by a
+    // pan) to get the expected world-space delta, rather than assuming
+    // screen == world coordinates.
+    const scale = await page.evaluate(() => window.__kg.camera.scale);
+    assert.equal(node.x, placed.x + 50 / scale, "moved by the drag delta, proving normal interaction resumed cleanly");
+    assert.equal(node.y, placed.y + 50 / scale);
+  });
+});
