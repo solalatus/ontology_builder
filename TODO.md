@@ -10,7 +10,7 @@ State" so the project can be picked up cold at any time.
 ## Current State
 
 - **Phase:** Phases 0 through 9 complete, all with green automated test
-  suites (`node --test tests/*.spec.mjs`, 257 JS tests + 15 Python tests,
+  suites (`node --test tests/*.spec.mjs`, 262 JS tests + 15 Python tests,
   see Log below). Not yet hand-tested on real touch hardware (pinch/
   long-press) — deferred to Phase 10, not blocking. Phase 7's real-folder
   grant/write-back is likewise only mocked-tested so far, not hand-verified
@@ -47,6 +47,18 @@ State" so the project can be picked up cold at any time.
   spurious *second*, direct membership in a bigger ancestor group when the
   group it was already nested in got dragged into that ancestor — see the
   Phase 2 section's own bullet and the dated Log entry.
+- **A follow-up "implement the two highest-priority gaps from the plan,
+  plus an end-to-end workflow test" pass** found and fixed the *same*
+  redundant-ancestor bug's sibling in a different code path:
+  `commitTxtImport()`'s `contains`-declaration handling had no equivalent
+  guard at all (it doesn't call `updateGroupMembership()` — a TXT file
+  establishes membership from declared text, not geometry). See the Phase
+  6 section's own bullet and the dated Log entry. Also added the first
+  deliberate exception to this suite's "one file per phase/feature"
+  convention: `tests/end-to-end-workflow.spec.mjs`, a single long realistic
+  session exercising many features together — see "Testing Strategy" and
+  its own "Additional features" section, right after Multi-touch
+  drag-interruption fixes.
 - **A dedicated test-hardening pass** (user-requested, ahead of Phase 10's
   manual testing) went back through every phase and added substantially
   more coverage (34 new tests, 159 → 193), and surfaced two real bugs in
@@ -140,6 +152,15 @@ touch hardware, OS-native file/save dialogs, actual cross-browser installs).
   as a strong nice-to-have that should be run and kept green whenever the
   environment supports it, not a hard gate that blocks marking a phase
   done — consistent with "verification is manual unless otherwise stated."
+- **One deliberate exception to "one spec file per phase/feature":
+  `tests/end-to-end-workflow.spec.mjs`.** Every other file verifies one
+  feature or edge case in isolation; this file exists specifically to
+  catch integration bugs that only surface when features interact across
+  a real multi-step session — a rename anchoring correctly mid-group-
+  membership, an undo landing back inside a since-resized group, a reload
+  after a mix of theme/language/graph edits all persisting together. See
+  its own section below (right after Multi-touch drag-interruption fixes)
+  and the dated Log entry.
 
 **Tier B — Manual checklist (the required minimum).**
 
@@ -448,7 +469,7 @@ claude.ai/code, which is plain git via GitHub as described above.
       programmatically in headless Chromium for both the served (OPFS) and
       `file://` (localStorage fallback) cases; the 4-platform hardware pass
       is still Phase 10's job.
-- Tests (`tests/phase4.spec.mjs`, 15 tests, all green — expanded from 11 in
+- Tests (`tests/phase4.spec.mjs`, 16 tests, all green — expanded from 11 in
   a later test-hardening pass: a burst of many scheduled saves coalesces
   into far fewer than N actual writes, proven via a counted
   `localStorage.setItem` wrapper, not just inferred; a moderately large
@@ -456,7 +477,8 @@ claude.ai/code, which is plain git via GitHub as described above.
   does not touch the separately-stored theme preference; a later QA/test-
   coverage pass added a `localStorage.setItem` *write*-failure test — a
   different failure mode than the existing corrupted-payload-on-*load*
-  test above it):
+  test above it; a still-later pass added the equivalent for the *other*
+  live backend, OPFS):
   - Automated: `window.__kg.storage.detectBackend()` resolves to
     `"localStorage"` under `file://` and to `"opfs"` when served over
     http (a real local static server is spun up in-test —
@@ -479,7 +501,12 @@ claude.ai/code, which is plain git via GitHub as described above.
     still resolves instead of hanging forever inside the write's own
     `await`, and a later successful save (once the failure is lifted)
     persists correctly, proving the failure doesn't wedge the save loop
-    for good.
+    for good. The same is proven for OPFS specifically (served over http,
+    `navigator.storage.getDirectory()` made to throw only for the *write*
+    call — backend detection itself, already cached from an earlier
+    settled save, is untouched): the in-memory edit survives, `whenIdle()`
+    resolves, backend detection still reports `"opfs"`, and a subsequent
+    save/reload round-trips the current state correctly.
   - Manual: the actual 4-platform matrix (Chrome/Windows, Chromium/Linux,
     Brave/Linux, Chrome/Android) — deferred to Phase 10 as originally
     planned; what's new is that Phase 10 must now also confirm which
@@ -554,7 +581,22 @@ claude.ai/code, which is plain git via GitHub as described above.
       unchanged); one undo step regardless of size
 - [x] Triggered via "Import from TXT" button (native file-open dialog) and
       drag-and-drop of `.txt` onto canvas where supported
-- Tests (`tests/phase6.spec.mjs`, 22 tests + 5 fixture files under
+- [x] **Contains-declaration redundant-ancestor guard** (bugfix, found via a
+      QA/test-coverage pass, not a feature): applying `X -> Y : contains`
+      lines now skips a declaration that's just a bigger ancestor of a
+      group `Y` is already (declared or previously) nested in — the same
+      guard `updateGroupMembership()` (the drag-based path) already has,
+      applied through a different mechanism since TXT import establishes
+      membership from declared text, not geometry. Without this, a file
+      declaring both `Outer -> Leaf : contains` and
+      `Inner -> Leaf : contains` (with Inner itself nested in Outer) gave
+      Leaf a spurious second, direct membership in Outer on top of its
+      real one in Inner, plus a redundant second `contains` edge. The
+      check is computed from the *complete* set of this file's (and any
+      pre-existing) group-to-group nesting before any declaration is
+      applied, so the result never depends on which order the `## EDGES`
+      lines happen to appear in.
+- Tests (`tests/phase6.spec.mjs`, 25 tests + 5 fixture files under
   `tests/fixtures/`, all green — expanded from 17 in a later test-hardening
   pass: a file with only groups declared and no `## EDGES` section at all
   imports cleanly; blank lines/trailing whitespace throughout don't break
@@ -562,7 +604,13 @@ claude.ai/code, which is plain git via GitHub as described above.
   the current graph re-creates it fresh (matching is against the live
   graph, not import history); merge adds a new member to an already-
   existing group via a `contains` line; a ~200-node import completes
-  without hanging):
+  without hanging; 3 more added for the redundant-ancestor guard: a leaf
+  declared as a member of both an inner and its outer ancestor group keeps
+  only the real, innermost membership (no redundant edge either); the same
+  file produces an identical result regardless of which order its
+  `contains` lines appear in; a leaf declared as a member of two genuinely
+  separate, non-nested groups still gets both — proving the guard doesn't
+  overcorrect into blocking legitimate overlapping membership):
   - Automated: Merge on an empty graph reproduces spec's own worked example
     exactly (nodes, types, groups, directed flags, the auto `contains`
     edge); merge is idempotent (re-importing the same file adds nothing,
@@ -1012,6 +1060,46 @@ different finger is already mid-drag.
   Delete already does (`phase2.spec.mjs`); a `localStorage.setItem` write
   failure is caught without crashing the app or hanging `whenIdle()`
   (`phase4.spec.mjs`).
+
+### End-to-end workflow test (test-coverage addition, no new feature)
+
+- [x] `tests/end-to-end-workflow.spec.mjs` — a single, long, realistic user
+      session exercising many features *together*, deliberately breaking
+      from the rest of the suite's "one file per phase/feature, small
+      focused tests" convention (see its own note in "Testing Strategy"
+      above). Two more real, pre-existing gaps were found and fixed while
+      writing it (both in `commitTxtImport()`, a different code path from
+      the drag-based `updateGroupMembership()` PR #18 already fixed —
+      see those Phase 6/Phase 4 sections above): the redundant-ancestor
+      contains-declaration bug, and the OPFS write-failure test.
+- Tests (`tests/end-to-end-workflow.spec.mjs`, 1 test — deliberately one
+  long narrative, not many small ones, since the point is exercising
+  everything in the same session, not isolating any single step): renames
+  the graph title; toggles theme and language (and back); builds a group
+  with two committed members plus a node deliberately left outside it,
+  checking the member-hue test hook along the way; creates two parallel
+  (bent) edges between the two members plus an ordinary edge to the
+  outside node, checking their curves are visibly distinct; double-clicks
+  to rename a member, asserting the rename field anchors to that node's
+  own center (not the click point); drags the group and confirms both
+  members move by the exact same delta, membership survives, and the
+  bent edge between them still resolves to real (finite) geometry;
+  resizes the group and confirms members never move; runs Auto-layout and
+  confirms it's exactly one undo step with both members still fully
+  contained (using the same epsilon-tolerant containment check
+  `phase8.spec.mjs` uses, not a stricter one — a strict check was the
+  first version of this test's own bug, not the app's, caught immediately
+  by a real run); clicks Save Version and confirms the version counter
+  increments (from whatever it was, including the lazily-initialized
+  `state.meta === null` case before any save has ever happened); undoes
+  three steps in a row (autolayout, resize, move) checking the exact
+  state at each intermediate step, then redoes all three back and asserts
+  the result is `deepEqual` to the pre-undo snapshot, not just "similar";
+  reloads the page and confirms the whole graph, the theme, the language,
+  and the graph title all survive together; imports a TXT file (merge)
+  that adds a new group member via a `contains` line and confirms it
+  joined without disturbing anyone already there; and finally Clears the
+  graph and undoes that back to the exact full state from just before.
 
 ---
 
@@ -2201,6 +2289,60 @@ and record deltas here instead of editing the spec.)*
     this session's own changes — pre-existing environmental flakiness, not
     a regression from this pass. `node --test tests/*.spec.mjs` (257
     tests, run clean twice consecutively after isolating the flake) and
+    `python3 -m unittest discover -s tools -p "test_*.py"` (15 tests),
+    both green — no regressions in any earlier phase or feature.
+- 2026-07-26 — User asked for a plan (no implementation) of what's complex
+  and under-tested; then asked to implement the two highest-priority
+  findings plus a new end-to-end workflow test. Both findings were
+  verified against the actual code before implementing (not assumed from
+  the plan alone):
+  - **`commitTxtImport()`'s redundant-ancestor contains-declaration bug**
+    (the plan's #1). Verified the drag-based fix from PR #18
+    (`updateGroupMembership()`) is a *separate* code path from TXT import's
+    own `contains`-declaration handling, which pushes directly into
+    `member.groups` with no equivalent guard at all. Confirmed via a direct
+    repro (a hand-built TXT file declaring both `Outer -> Leaf : contains`
+    and `Inner -> Leaf : contains`, with Inner itself declared nested in
+    Outer) that Leaf ended up with `groups: ['Inner', 'Outer']` plus a
+    redundant second `contains` edge — the exact bug PR #18 fixed for
+    drag-based membership, reachable again through the import path. Fixed
+    by building the declared (plus pre-existing) group-to-group nesting
+    graph up front from the whole file, then skipping any `contains`
+    declaration that's just a bigger ancestor of a group the target is
+    already known to be nested in — computed independently of the order
+    lines happen to appear in the file (confirmed by testing the same file
+    with its lines reordered and getting an identical result), unlike the
+    drag-based fix, which has real node geometry to check against instead.
+  - **OPFS write-failure resilience** (the plan's #2 — a coverage gap, not
+    a bug: the localStorage write-failure test added in the prior pass had
+    no OPFS equivalent). Added on the served/http test setup, monkey-
+    patching `navigator.storage.getDirectory()` to throw only *after* the
+    backend was already detected and cached from an earlier settled save —
+    so the induced failure hits only `writeGraphPayload()`'s own later
+    call, never backend detection itself. Confirmed the app doesn't crash,
+    `whenIdle()` still resolves, and a later successful save/reload
+    round-trips correctly — no bug found, coverage gap closed as planned.
+  - **New `tests/end-to-end-workflow.spec.mjs`** — the user's third ask,
+    a single long realistic session (rename graph → toggle theme/language
+    → build a group with committed members → parallel edges → rename via
+    double-click → rigid-body group move → resize → autolayout → Save
+    Version → undo/redo three steps and back → reload → TXT import merge
+    → Clear → undo) verifying real invariants at every step, not just
+    "didn't crash." This is a deliberate one-off exception to the rest of
+    the suite's small-focused-test convention, called out explicitly in
+    "Testing Strategy" so it doesn't read as an accidental one-file-does-
+    everything sprawl. Caught two of its own bugs during development (both
+    fixed in the test, not the app): a containment check needed the same
+    floating-point epsilon tolerance `phase8.spec.mjs` already uses instead
+    of strict `<=`/`>=`; and `state.meta` is lazily `null` until the very
+    first Save Version, which the version-counter assertion needed to
+    handle rather than assuming a `0` starting value existed already.
+  - Wrote 3 new tests in `tests/phase6.spec.mjs` (22 → 25), 1 new test in
+    `tests/phase4.spec.mjs` (15 → 16), and the 1-test
+    `end-to-end-workflow.spec.mjs`. Ran the full suite repeatedly during
+    development (the end-to-end test's own two bugs were both caught this
+    way, immediately, not discovered later): `node --test
+    tests/*.spec.mjs` (262 tests, run clean twice consecutively) and
     `python3 -m unittest discover -s tools -p "test_*.py"` (15 tests),
     both green — no regressions in any earlier phase or feature.
 

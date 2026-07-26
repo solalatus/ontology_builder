@@ -463,6 +463,100 @@ test("merge adds a new member to an already-existing group (matched by label) vi
   });
 });
 
+// A drag-based membership change is guarded against giving a node a
+// spurious second, direct membership in a bigger ancestor group when it's
+// already nested in a smaller group inside that same ancestor — see the
+// updateGroupMembership() fix/tests in phase2.spec.mjs and
+// group-move.spec.mjs. TXT import establishes membership from declared
+// `contains` lines rather than geometry, but a file can just as easily
+// declare the same redundant relationship directly, so it needs the same
+// guard through a different mechanism (declared/known group-to-group
+// nesting, not rectFullyContains()).
+test("a TXT file declaring a leaf's containment in both an inner AND an outer (ancestor) group keeps only the innermost, real membership", async () => {
+  await withPage(async (page) => {
+    const text = [
+      "## NODES",
+      "Outer [group]",
+      "Inner [group]",
+      "Leaf",
+      "",
+      "## EDGES",
+      "Outer -> Inner : contains",
+      "Inner -> Leaf : contains",
+      "Outer -> Leaf : contains", // redundant — Leaf is already transitively in Outer via Inner
+    ].join("\n");
+    await dropText(page, text, "redundant-nesting.txt");
+    await page.click("#import-merge");
+    await page.waitForTimeout(150);
+
+    const nodes = await page.evaluate(() => window.__kg.state.nodes);
+    const outer = nodes.find((n) => n.label === "Outer");
+    const inner = nodes.find((n) => n.label === "Inner");
+    const leaf = nodes.find((n) => n.label === "Leaf");
+    assert.deepEqual(inner.groups, [outer.id], "Inner really is nested in Outer");
+    assert.deepEqual(leaf.groups, [inner.id], "Leaf keeps only its real, innermost membership — not also a direct one in Outer");
+
+    const autoEdges = await page.evaluate(() => window.__kg.state.edges.filter((e) => e.auto));
+    assert.equal(autoEdges.length, 2, "exactly Outer->Inner and Inner->Leaf — no redundant Outer->Leaf edge");
+    assert.ok(!autoEdges.some((e) => e.source === outer.id && e.target === leaf.id), "no direct Outer->Leaf contains edge");
+  });
+});
+
+test("the same redundant-nesting file imports identically regardless of which order the contains lines appear in", async () => {
+  await withPage(async (page) => {
+    const text = [
+      "## NODES",
+      "Outer [group]",
+      "Inner [group]",
+      "Leaf",
+      "",
+      "## EDGES",
+      "Outer -> Leaf : contains", // the redundant line declared FIRST this time
+      "Outer -> Inner : contains",
+      "Inner -> Leaf : contains",
+    ].join("\n");
+    await dropText(page, text, "redundant-nesting-reordered.txt");
+    await page.click("#import-merge");
+    await page.waitForTimeout(150);
+
+    const nodes = await page.evaluate(() => window.__kg.state.nodes);
+    const outer = nodes.find((n) => n.label === "Outer");
+    const inner = nodes.find((n) => n.label === "Inner");
+    const leaf = nodes.find((n) => n.label === "Leaf");
+    assert.deepEqual(leaf.groups, [inner.id], "same result no matter the line order in the file");
+    const autoEdges = await page.evaluate(() => window.__kg.state.edges.filter((e) => e.auto));
+    assert.equal(autoEdges.length, 2);
+  });
+});
+
+test("a leaf declared as a member of two genuinely separate (non-nested) groups still gets both memberships from a TXT import", async () => {
+  await withPage(async (page) => {
+    const text = [
+      "## NODES",
+      "GroupA [group]",
+      "GroupB [group]",
+      "Leaf",
+      "",
+      "## EDGES",
+      "GroupA -> Leaf : contains",
+      "GroupB -> Leaf : contains",
+    ].join("\n");
+    await dropText(page, text, "two-separate-groups.txt");
+    await page.click("#import-merge");
+    await page.waitForTimeout(150);
+
+    const nodes = await page.evaluate(() => window.__kg.state.nodes);
+    const groupA = nodes.find((n) => n.label === "GroupA");
+    const groupB = nodes.find((n) => n.label === "GroupB");
+    const leaf = nodes.find((n) => n.label === "Leaf");
+    assert.equal(leaf.groups.length, 2, "neither group is an ancestor of the other, so this is legitimate overlapping membership");
+    assert.ok(leaf.groups.includes(groupA.id) && leaf.groups.includes(groupB.id));
+
+    const autoEdges = await page.evaluate(() => window.__kg.state.edges.filter((e) => e.auto));
+    assert.equal(autoEdges.length, 2, "both contains edges are real, not redundant");
+  });
+});
+
 test("a large import (~200 nodes) completes without hanging or crashing", async () => {
   await withPage(async (page) => {
     const nodeLines = Array.from({ length: 200 }, (_, i) => `Node${i}`);

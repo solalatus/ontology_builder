@@ -314,3 +314,34 @@ test("a localStorage write failure (e.g. quota exceeded) is caught, doesn't cras
     assert.equal(parsed.nodes.length, 2, "a subsequent successful save persists the current (already-edited) state");
   });
 });
+
+test("an OPFS write failure (createWritable/write throwing) is caught, doesn't crash the app, and whenIdle() still resolves instead of hanging", async () => {
+  await withPage(async (page) => {
+    await addNodeViaDblClick(page, 300, 300, "Alpha");
+    await page.evaluate(() => window.__kg.storage.whenIdle()); // settle the save from adding the node, caching the "opfs" backend
+
+    const result = await page.evaluate(async () => {
+      const originalGetDirectory = navigator.storage.getDirectory.bind(navigator.storage);
+      // detectStorageBackend() already cached "opfs" from the settled save
+      // above, so this only breaks writeGraphPayload()'s own later call —
+      // never backend detection itself.
+      navigator.storage.getDirectory = () => { throw new DOMException("Disk quota exceeded", "QuotaExceededError"); };
+      window.__kg.actions.createNode(500, 500, "Beta", "entity");
+      window.__kg.markDirty();
+      window.__kg.storage.save();
+      await window.__kg.storage.whenIdle(); // must resolve, not hang, even though the write threw
+      navigator.storage.getDirectory = originalGetDirectory;
+      return { nodeCount: window.__kg.state.nodes.length, backend: window.__kg.storage.detectBackend ? await window.__kg.storage.detectBackend() : null };
+    });
+    assert.equal(result.nodeCount, 2, "the in-memory edit itself must survive a failed OPFS write");
+    assert.equal(result.backend, "opfs", "backend detection itself is untouched by the write failure");
+
+    // The app must keep working normally afterward — a real save with the
+    // failure lifted should still succeed.
+    await page.evaluate(() => window.__kg.storage.save());
+    await page.evaluate(() => window.__kg.storage.whenIdle());
+    await page.reload();
+    await page.waitForFunction(() => Boolean(window.__kg));
+    await page.waitForFunction(() => window.__kg.state.nodes.length === 2);
+  }, { url: `${server.url}/index.html` });
+});

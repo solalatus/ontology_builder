@@ -2663,16 +2663,58 @@ function commitTxtImport(text, mode) {
     labelToNode.set(pn.label, node);
   }
 
-  // Group-membership declarations first (spec: "exactly as if it had been
-  // dragged in on canvas" — i.e. groups[] + an auto contains edge).
-  for (const pe of parsed.edges) {
-    if (!isContainsDeclaration(pe)) continue;
+  // Group-membership declarations (spec: "exactly as if it had been
+  // dragged in on canvas" — i.e. groups[] + an auto contains edge), guarded
+  // against the same redundant-ancestor case updateGroupMembership() (the
+  // drag-based path) guards against: a file can declare both
+  // "Outer -> Leaf : contains" and "Inner -> Leaf : contains" with Inner
+  // itself declared (or already known) as nested inside Outer — without
+  // this, Leaf would end up with a spurious second, direct membership in
+  // Outer on top of its real one in Inner, plus a redundant second
+  // `contains` edge, even though that containment already holds
+  // transitively. Unlike the drag-based path, TXT import has no geometry
+  // to check against — "ancestor" here means "declared (or already
+  // existing) group-to-group nesting," computed up front so the result is
+  // independent of which order the `## EDGES` lines happen to appear in.
+  const containsDeclarations = parsed.edges.filter(isContainsDeclaration);
+
+  const groupParents = new Map(); // groupId -> Set<parentGroupId>
+  for (const n of state.nodes) if (n.type === "group") groupParents.set(n.id, new Set(n.groups));
+  for (const pe of containsDeclarations) {
     const group = labelToNode.get(pe.source);
     const member = labelToNode.get(pe.target);
-    if (group && member && group.type === "group" && !member.groups.includes(group.id)) {
-      member.groups.push(group.id);
-      createContainsEdge(group.id, member.id);
+    if (group && member && group.type === "group" && member.type === "group") {
+      if (!groupParents.has(member.id)) groupParents.set(member.id, new Set());
+      groupParents.get(member.id).add(group.id);
     }
+  }
+  function isDeclaredAncestorGroup(candidateId, groupId, seen = new Set()) {
+    if (seen.has(groupId)) return false; // guards against a (malformed) cycle
+    seen.add(groupId);
+    for (const parentId of groupParents.get(groupId) || []) {
+      if (parentId === candidateId || isDeclaredAncestorGroup(candidateId, parentId, seen)) return true;
+    }
+    return false;
+  }
+
+  const declaredGroupsByMember = new Map(); // memberId -> Set<groupId> (declared by this file, plus already-existing)
+  for (const pe of containsDeclarations) {
+    const group = labelToNode.get(pe.source);
+    const member = labelToNode.get(pe.target);
+    if (!group || !member || group.type !== "group") continue;
+    if (!declaredGroupsByMember.has(member.id)) declaredGroupsByMember.set(member.id, new Set(member.groups));
+    declaredGroupsByMember.get(member.id).add(group.id);
+  }
+
+  for (const pe of containsDeclarations) {
+    const group = labelToNode.get(pe.source);
+    const member = labelToNode.get(pe.target);
+    if (!group || !member || group.type !== "group" || member.groups.includes(group.id)) continue;
+    const allDeclared = declaredGroupsByMember.get(member.id) || new Set();
+    const redundant = [...allDeclared].some((gid) => gid !== group.id && isDeclaredAncestorGroup(group.id, gid));
+    if (redundant) continue;
+    member.groups.push(group.id);
+    createContainsEdge(group.id, member.id);
   }
 
   // Ordinary edges: add only if an equivalent one doesn't already exist.
