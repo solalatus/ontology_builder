@@ -153,6 +153,33 @@ test("dragging a group onto a previously unrelated node still absorbs it AND car
   });
 });
 
+test("a node that's a member of two overlapping groups keeps membership in the one being dragged, but loses it in the stationary one it no longer overlaps", async () => {
+  await withPage(async (page) => {
+    // A: 140,190..460,410 ; B: 240,190..560,410 ; overlap 240..460,190..410
+    await addNodeViaButton(page, "#btn-add-group", 300, 300, "A");
+    await addNodeViaButton(page, "#btn-add-group", 400, 300, "B");
+    await addNodeViaButton(page, "#btn-add-node", 100, 700, "D");
+    await dragNode(page, 100, 700, 350, 300); // D joins A (tie -> first created)
+    await dragNode(page, 350, 300, 356, 304); // D joins B too (now member of both)
+
+    let state = await nodeState(page);
+    let d = state.find((n) => n.label === "D");
+    const groupA = state.find((n) => n.label === "A");
+    const groupB = state.find((n) => n.label === "B");
+    assert.deepEqual(d.groups.sort(), [groupA.id, groupB.id].sort(), "D must be a member of both before the drag");
+
+    // Drag A far away — D is a direct member of A, so it travels along;
+    // B never moves, so D leaves B's now-stale overlap behind.
+    await dragNode(page, groupA.x + 10, groupA.y + 10, groupA.x + 500, groupA.y + 500);
+
+    state = await nodeState(page);
+    d = state.find((n) => n.label === "D");
+    const groupBAfter = state.find((n) => n.label === "B");
+    assert.deepEqual(d.groups, [groupA.id], "D stays a member of A (carried along) but is released from B (never moved, no longer overlapped)");
+    assert.deepEqual(groupBAfter, groupB, "B itself is completely untouched by A's drag");
+  });
+});
+
 // --- Visual distinction: membership hue + move-vs-resize highlight -----
 
 async function pixelAt(page, worldX, worldY) {
