@@ -10,7 +10,7 @@ State" so the project can be picked up cold at any time.
 ## Current State
 
 - **Phase:** Phases 0 through 9 complete, all with green automated test
-  suites (`node --test tests/*.spec.mjs`, 228 JS tests + 15 Python tests,
+  suites (`node --test tests/*.spec.mjs`, 243 JS tests + 15 Python tests,
   see Log below). Not yet hand-tested on real touch hardware (pinch/
   long-press) — deferred to Phase 10, not blocking. Phase 7's real-folder
   grant/write-back is likewise only mocked-tested so far, not hand-verified
@@ -23,9 +23,15 @@ State" so the project can be picked up cold at any time.
   below, right after Phase 11.
   Phase 8's autolayout also now enforces explicit group-containment
   (members can't escape their group's box during layout), and Phase 2's
-  group-drag now cascades membership both ways (absorb on drag-onto,
-  release on drag-away) — both user-requested hardening/reversals, see
-  their own Log entries.
+  group-drag has gone through two rounds of user-requested reversal: it
+  now cascades absorption on drag-onto, and a group's own move is a
+  rigid-body drag that carries its contents along (replacing the
+  drag-away-releases-a-member behavior from the first round, which a
+  rigid-body move makes physically unreachable) — group membership also
+  now has its own visual hue, and a live group drag visually distinguishes
+  move from resize. The rename field's inline input also had a positioning
+  fix (anchors to the node/edge's own geometry, clamped to the viewport,
+  instead of the raw click point) — see their own Log entries.
 - **A dedicated test-hardening pass** (user-requested, ahead of Phase 10's
   manual testing) went back through every phase and added substantially
   more coverage (34 new tests, 159 → 193), and surfaced two real bugs in
@@ -264,50 +270,94 @@ claude.ai/code, which is plain git via GitHub as described above.
       never auto-fits to members — Decision #3
 - [x] **Dragging the group itself now cascades membership too** (user-
       requested, later change — see the dated Log entry): dropping a group
-      onto previously-unrelated nodes absorbs any it now fully contains,
-      and dragging it away from a member down to zero overlap releases
-      that member, symmetric with how a member's own drag already worked.
+      onto previously-unrelated nodes absorbs any it now fully contains.
       This *replaces* the original "moving a group never cascades"
       decision — resizing a group still never cascades, per Section 4.3's
       explicit language about that one specific case.
-- Tests (`tests/phase2.spec.mjs`, 22 tests, all green — expanded from 19 in
-  the group-drag-cascade change, on top of the earlier test-hardening
-  pass's additions: deleting a grandparent group only cleans up its direct
-  child, a deeper grandchild membership is untouched; dragging a node from
-  deep inside a nested group to just outside it, but still inside the
-  outer group, reassigns membership from inner to outer in one drag):
-  - Automated: "Add Group" creates a `type:"group"` node with the Section
-    4.3 defaults (320×220, `boundary_mode:"manual"`, empty `groups[]`), is
-    one-shot, and Escape-cancelable, mirroring Add Node. Dragging a smaller
-    node fully into a group commits `groups[]` + creates exactly one
-    `auto:true` `contains` edge; creating a node directly inside a group's
-    boundary (no drag) does *not* auto-join; a drop that only *partially*
-    overlaps neither commits a new membership nor removes an existing one;
-    dragging a member fully outside removes membership + the edge; the
-    resize-corner handle changes w/h by the exact drag delta and clamps at
-    a minimum size, and resizing still never cascades membership;
-    recursive nesting (a shrunk group dragged into a bigger one, then an
-    entity dragged into that inner group) joins only the *innermost*
-    container, never also the outer one; overlapping membership (one node
-    in two separate groups) works via two sequential drags, with equal-area
-    ties broken deterministically by creation order; deleting a group
-    clears the field from any (former) member's `groups[]` and removes the
-    edge; deleting a member leaves the group intact; a `contains` edge is
-    never selectable by clicking near it (the click resolves to a node);
-    hit-testing always picks the smallest/topmost box under the cursor
-    regardless of which node was created first. **Group-drag cascade**:
-    dragging a group away from a member down to zero overlap releases that
-    member; nudging a group so it only partially (not fully) overlaps a
-    prior member keeps that member, the same overlap-to-keep rule a
-    member's own drag already follows; dragging a group onto a previously
-    unrelated node absorbs it; dragging a group simultaneously onto one
-    node and away from another (releasing the old member, absorbing the
-    new one) happens as exactly one undo step, and undo reverts both
-    changes together.
+- [x] **A group's own move is now a rigid-body drag** (second reversal of
+      the point above, later user-requested change — see the dated Log
+      entry): every currently-contained member — recursively, including
+      members of a nested member group — moves by the exact same delta as
+      the group itself while it's being dragged, so its position *relative
+      to the group* never changes. This makes "drag the group away until a
+      member stops overlapping" physically unreachable through a group's
+      own drag now (a member can still only ever be released by its own
+      independent drag); absorbing previously-unrelated nodes the group's
+      new position now covers is unaffected, since those nodes don't move.
+      Resizing still never drags members or cascades membership, unchanged
+      from the point above.
+- [x] **Group membership now has a visual hue**: any non-group node
+      currently listed in a group's membership renders with a distinct
+      fill/stroke color (independent of selection), so which nodes belong
+      to a group is visible at a glance rather than only inferable from
+      nesting. A group being actively dragged also gets a live highlight
+      that differs between a move (drags contents along) and a resize
+      (never does), reverting to the normal look the instant the drag
+      ends.
+- Tests (`tests/phase2.spec.mjs`, 22 tests, all green — rewritten in the
+  rigid-body-move change: two tests that asserted the old "drag away
+  releases a member" behavior now assert the opposite — the member travels
+  with the group — since that behavior is what replaced it; on top of the
+  earlier test-hardening pass's additions: deleting a grandparent group
+  only cleans up its direct child, a deeper grandchild membership is
+  untouched; dragging a node from deep inside a nested group to just
+  outside it, but still inside the outer group, reassigns membership from
+  inner to outer in one drag. A new `tests/group-move.spec.mjs`, 9 tests,
+  covers the rigid-body-move mechanics and the visual hue/highlight in
+  depth):
+  - Automated (`phase2.spec.mjs`): "Add Group" creates a `type:"group"`
+    node with the Section 4.3 defaults (320×220, `boundary_mode:"manual"`,
+    empty `groups[]`), is one-shot, and Escape-cancelable, mirroring Add
+    Node. Dragging a smaller node fully into a group commits `groups[]` +
+    creates exactly one `auto:true` `contains` edge; creating a node
+    directly inside a group's boundary (no drag) does *not* auto-join; a
+    drop that only *partially* overlaps neither commits a new membership
+    nor removes an existing one; dragging a member fully outside removes
+    membership + the edge; the resize-corner handle changes w/h by the
+    exact drag delta and clamps at a minimum size, and resizing still
+    never cascades membership; recursive nesting (a shrunk group dragged
+    into a bigger one, then an entity dragged into that inner group) joins
+    only the *innermost* container, never also the outer one; overlapping
+    membership (one node in two separate groups) works via two sequential
+    drags, with equal-area ties broken deterministically by creation
+    order; deleting a group clears the field from any (former) member's
+    `groups[]` and removes the edge; deleting a member leaves the group
+    intact; a `contains` edge is never selectable by clicking near it (the
+    click resolves to a node); hit-testing always picks the
+    smallest/topmost box under the cursor regardless of which node was
+    created first. **Group-drag, rigid-body**: dragging a group far away
+    keeps a contained member fully intact instead of releasing it; nudging
+    a group by a small delta carries a member by that exact same delta,
+    proven via position deltas, not just the membership-array outcome;
+    dragging a group onto a new node absorbs it while an existing member
+    (carried along in the same drag) keeps its own membership, all in one
+    undo step, and undo restores the member's *exact* prior position
+    (`deepEqual` against the pre-drag snapshot, not just its `groups[]`).
+  - Automated (`group-move.spec.mjs`): a group drag moves every contained
+    member by the exact same delta, membership surviving intact; a resize
+    drag never moves a member, even by one pixel; a member nested two
+    levels deep (member of an inner group, itself a member of an outer
+    group) moves when the *outer* group is dragged; the whole move+cascade
+    is exactly one undo step and undo restores every member's exact prior
+    position; dragging a group onto a previously-unrelated node still
+    absorbs it while existing members are carried along, in one drag. For
+    the visual hue: a node's rendered fill pixel actually changes (sampled
+    via `getImageData`, not inferred) the moment it becomes a member and
+    reverts the moment it's dragged back out; `window.__kg.getNodeVisualState()`
+    (a new test hook mirroring `drawNodes()`'s exact color-selection logic)
+    reports `isMember` correctly for a member, a non-member, and the group
+    itself (never true for the group); mid-drag, a group being moved
+    reports `isBeingMoved` (never `isBeingResized`) and a group being
+    resized reports the reverse, both clearing the instant the drag ends,
+    and a resize is proven to never move the group's own x/y even by one
+    pixel while the highlight is active.
   - Manual: visual nesting reads correctly across zoom levels (spot-checked
     via screenshots this session, not exhaustively at every zoom level);
     confirm no arrow is ever drawn on canvas for a `contains` edge (also
-    confirmed via screenshot).
+    confirmed via screenshot); the membership hue and move/resize
+    highlights were spot-checked via screenshots this session too (member
+    node green-tinted fill+stroke, group border violet while moving, cyan
+    while resizing).
 
 ## Phase 3 — Undo/redo
 
@@ -720,18 +770,48 @@ phase above — tracked here instead of invented as a fake phase number.
 - [x] Empty or unchanged submission is a no-op: no history entry, matching
       how an empty label at creation time creates nothing
 - [x] Exactly one undo step per rename, fully reversible
-- Tests (`tests/rename.spec.mjs`, 10 tests, all green): double-click opens
-  a rename field pre-filled with the current label and commits correctly;
-  Escape cancels without changing anything; an unchanged or blank
-  submission pushes no undo step; renaming is exactly one undo step and
-  fully reversible; a group node uses the group placeholder and renames
-  identically to an entity; double-clicking an edge (on its line) opens a
-  rename field pre-filled with the relation and commits correctly; edge
-  renaming is also exactly one undo step; the selection toolbar's rename
-  button opens the same prompt as double-click; that button is visible for
-  both node and edge selections (unlike the direction-toggle, which is
-  edge-only); a renamed label/relation survives a reload like any other
-  edit.
+- [x] **Positioning fix (later, user-requested — "pops up at funky places,
+      distant from the node")**: the rename field now always anchors to
+      the node/edge's own current geometry (node center; edge's actual
+      curve midpoint) computed fresh via `worldToScreen()`, never to the
+      raw click/tap coordinate that triggered it. The raw-click approach
+      could land the field far from a node's own rendered label — e.g.
+      double-clicking near a corner of a large or heavily-zoomed node — for
+      no reason a user would expect. `beginRenameNodePrompt`/
+      `beginRenameEdgePrompt` no longer take a `screenPos` parameter at
+      all; they compute their own anchor, so double-click and the
+      selection-toolbar's rename button (which already anchored to model
+      geometry) are now provably consistent instead of coincidentally
+      similar. Separately, `showInlineInput()` now clamps the field's
+      *center* to stay inside the viewport and below the toolbar overlay
+      (`clampCenterToViewport()`), re-measured against the field's real
+      laid-out size once it's in the DOM — so a node dragged close to a
+      screen edge no longer produces a rename field that's partly
+      off-screen or rendered underneath the toolbar.
+- Tests (`tests/rename.spec.mjs`, 16 tests, all green — expanded from 10 in
+  the positioning fix): double-click opens a rename field pre-filled with
+  the current label and commits correctly; Escape cancels without changing
+  anything; an unchanged or blank submission pushes no undo step; renaming
+  is exactly one undo step and fully reversible; a group node uses the
+  group placeholder and renames identically to an entity; double-clicking
+  an edge (on its line) opens a rename field pre-filled with the relation
+  and commits correctly; edge renaming is also exactly one undo step; the
+  selection toolbar's rename button opens the same prompt as double-click;
+  that button is visible for both node and edge selections (unlike the
+  direction-toggle, which is edge-only); a renamed label/relation survives
+  a reload like any other edit. **Positioning**: double-clicking near a
+  large group's corner (far from its center) still anchors the field to
+  the node's center, not the click point; the anchor tracks the node
+  through a zoom+pan, matching `worldToScreen(center)` to sub-pixel
+  precision, even when the double-click itself lands near an edge of the
+  (now large) node; double-clicking near a bent edge's source endpoint
+  (deliberately far from its midpoint, using a real two-edge parallel-bend
+  pair so the midpoint is off the straight line) still anchors to the
+  curve's actual midpoint; a field near the top of the viewport clamps
+  below the toolbar rather than rendering underneath it; a field near the
+  right/bottom edge clamps fully on-screen; the selection-toolbar's rename
+  button is unaffected by *where* the node was clicked to select it, since
+  it never used click position to begin with.
 
 ### Parallel edge bending
 
@@ -1773,6 +1853,95 @@ and record deltas here instead of editing the spec.)*
     pass) and `python3 -m unittest discover -s tools -p "test_*.py"`
     (15 tests), both green — no regressions in any earlier phase or
     out-of-spec feature.
+- 2026-07-26 — Two more user-requested changes implemented in `index.html`:
+  a rename-field positioning fix, and a group-move behavior change with a
+  new visual-hue feature.
+  - **Rename-field positioning.** The rename field previously anchored to
+    the raw screen coordinate of whatever click/tap triggered it
+    (`e.clientX`/`e.clientY` at double-click time). For a large or
+    heavily-zoomed node, double-clicking near a corner — still squarely on
+    the node, just not centered — popped the field up far from the node's
+    own rendered label, which read as arbitrary rather than anchored to
+    anything. Fixed by having `beginRenameNodePrompt`/`beginRenameEdgePrompt`
+    compute their own anchor from the node/edge's *current* geometry
+    (`worldToScreen(node center)` / curve midpoint) instead of accepting a
+    `screenPos` parameter at all — the same thing the selection toolbar's
+    rename button already did, so double-click and the touch-equivalent
+    button are now provably the same code path rather than two
+    independently-written approximations of it. Separately added
+    `clampCenterToViewport()` inside `showInlineInput()`, re-measuring the
+    field's real laid-out size once it's actually in the DOM (so the min-
+    width CSS and padding are accounted for, not guessed) and clamping its
+    center to stay fully on-screen and below the toolbar overlay — a node
+    dragged close to a window edge no longer produces a rename field that's
+    partly invisible. Verified visually via screenshots (a heavily-zoomed
+    node's corner double-click now anchors dead-center on the node; a node
+    dragged under the toolbar now clamps below it) as well as with new
+    tests. Wrote 6 new tests in `tests/rename.spec.mjs` (10 → 16).
+  - **Group move: rigid-body drag.** Dragging a group (not its resize
+    handle) now moves every currently-contained member by the exact same
+    delta — recursively, so a member of a nested member group moves too
+    when the outermost group is dragged. Implemented via a new
+    `collectContainedDescendants(groupId)` helper (BFS over `groups[]`
+    membership edges) called from the existing `moveNode` pointer-drag
+    handler, which was changed from an absolute position assignment to a
+    delta-based one specifically so the same per-frame delta could be
+    reapplied to every descendant. Resizing is completely unaffected (still
+    never moves or cascades to members, per Section 4.3). Membership
+    commit/release logic itself (`updateGroupMembership`/
+    `updateMembershipForMovedGroup`) is untouched — it still runs once at
+    drag-end exactly as before; the only change is that a member's
+    position now tracks the group throughout the drag, so by construction
+    it's always still exactly where it needs to be for that end-of-drag
+    check to keep finding it contained.
+    - **This is a second reversal of the "does a group's own drag cascade
+      membership" decision** (see the two dated Log entries above): the
+      first round made a group's own drag absorb newly-overlapped nodes
+      *and* release members it moved away from, symmetric with a member's
+      own drag. A rigid-body move makes the "release by moving away" half
+      physically unreachable — a member welded to the group's own motion
+      can never lose overlap with it through the group's drag alone. Found
+      via the full regression suite, not by inspection: two tests in
+      `tests/phase2.spec.mjs` that asserted the old "drag group away
+      releases the member" behavior started failing the moment the rigid-
+      body cascade was wired in, which is exactly the expected, correct
+      consequence of the change rather than a bug — both tests were
+      rewritten (not just deleted) to assert the new behavior, and a third,
+      still-technically-passing-but-now-inaccurately-worded test ("partial
+      overlap after a group drag keeps membership") was also rewritten,
+      since a group's own drag can no longer produce partial overlap for
+      an existing member at all (translation preserves full containment).
+      Absorbing previously-unrelated nodes the group's new position now
+      covers is unaffected either way, since those nodes don't move.
+  - **Group-membership visual hue + move/resize highlight.** Any
+    non-group node currently listed in a group's membership now renders
+    with a distinct fill/stroke color (new `--member-fill`/`--member-stroke`
+    theme tokens, both themes), independent of selection — membership is
+    now visible at a glance instead of only inferable from nesting. A
+    group being actively dragged gets a temporary highlight that differs
+    between a live move (`--group-move-stroke`, violet) and a live resize
+    (`--group-resize-stroke`, cyan), checked in `drawNodes()` against the
+    existing `dragMode`/`movingNodeId`/`resizingNodeId` drag-state
+    variables and taking priority over the ordinary "selected" blue while
+    that specific drag is in flight — reverting to the normal look the
+    instant the pointer is released. Exposed a new
+    `window.__kg.getNodeVisualState(nodeId)` test hook mirroring the exact
+    same `isMember`/`isBeingMoved`/`isBeingResized` logic `drawNodes()`
+    uses, so tests can assert the color-selection decision directly
+    (including the moment mid-drag, which a screenshot can't reliably
+    catch) — complemented by one true pixel-sampling test (`getImageData`,
+    same technique as the theme toggle's tests) proving the member hue
+    actually reaches a real Canvas2D fill, not just the selection logic.
+    Verified visually via screenshots (member node green-tinted, group
+    border violet while moving, cyan while resizing).
+  - Wrote a new `tests/group-move.spec.mjs` (9 tests) and rewrote 3 tests
+    in `tests/phase2.spec.mjs` (22 tests total, same count — replacements,
+    not additions) for the rigid-body reversal. Ran the full suite
+    repeatedly during development, not just once at the end (the phase2
+    regressions were caught this way): `node --test tests/*.spec.mjs`
+    (243 tests, run twice consecutively) and `python3 -m unittest discover
+    -s tools -p "test_*.py"` (15 tests), both green — no regressions in
+    any earlier phase or out-of-spec feature.
 
 ---
 

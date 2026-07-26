@@ -34,6 +34,12 @@
     --edge-stroke-selected: #4da6ff;
     --edge-label-fg: #bbbbbb;
     --ghost-stroke: #4da6ff;
+    /* Group-membership hue (entity nodes that belong to >=1 group) and the
+       two group-drag highlights (live move vs. live resize) — see Log. */
+    --member-fill: rgba(77, 189, 143, 0.07);
+    --member-stroke: #4dbd8f;
+    --group-move-stroke: #b085f5;
+    --group-resize-stroke: #4dd0e1;
   }
 
   /* Explicit user toggle (not prefers-color-scheme) — see toggleTheme() in
@@ -64,6 +70,10 @@
     --edge-stroke-selected: #1a73e8;
     --edge-label-fg: #555555;
     --ghost-stroke: #1a73e8;
+    --member-fill: rgba(47, 143, 99, 0.07);
+    --member-stroke: #2f8f63;
+    --group-move-stroke: #8452c9;
+    --group-resize-stroke: #0097a7;
   }
 
   * { box-sizing: border-box; }
@@ -1049,6 +1059,31 @@ function updateMembershipForMovedGroup(group) {
   }
 }
 
+// All nodes transitively contained by groupId — direct members, plus
+// members of any nested member group, and so on. Used to drag a group's
+// whole contents along with it as one rigid unit while it's being moved
+// (never during resize — Section 4.3's box is independently resizable and
+// must never auto-fit to/drag its members). Membership itself is
+// unaffected by this: it's still only ever committed/cleared by
+// updateGroupMembership()/updateMembershipForMovedGroup(), evaluated once
+// the drag ends, exactly as before.
+function collectContainedDescendants(groupId) {
+  const result = new Set();
+  let frontier = [groupId];
+  while (frontier.length) {
+    const next = [];
+    for (const n of state.nodes) {
+      if (result.has(n.id)) continue;
+      if (n.groups.some((gid) => frontier.includes(gid))) {
+        result.add(n.id);
+        next.push(n.id);
+      }
+    }
+    frontier = next;
+  }
+  return result;
+}
+
 function selectNode(id) { state.selection = { type: "node", id }; markDirty(); }
 function selectEdge(id) { state.selection = { type: "edge", id }; markDirty(); }
 function clearSelection() { state.selection = { type: null, id: null }; markDirty(); }
@@ -1363,6 +1398,10 @@ function resolveColors() {
     edgeStrokeSelected: v("--edge-stroke-selected", "#4da6ff"),
     edgeLabelFg: v("--edge-label-fg", "#bbbbbb"),
     ghostStroke: v("--ghost-stroke", "#4da6ff"),
+    memberFill: v("--member-fill", "rgba(77,189,143,0.07)"),
+    memberStroke: v("--member-stroke", "#4dbd8f"),
+    groupMoveStroke: v("--group-move-stroke", "#b085f5"),
+    groupResizeStroke: v("--group-resize-stroke", "#4dd0e1"),
   };
 }
 
@@ -1482,13 +1521,28 @@ function drawNodes(colors) {
     const isConnectSource = state.connectSource === node.id;
     const isGroup = node.type === "group";
     const isNewlyImported = newlyImportedIds.has(node.id);
+    // Group membership hue: any non-group node currently listed in a
+    // group's contains (i.e. its own groups[] is non-empty) reads as
+    // visually distinct from an ordinary, ungrouped entity — independent
+    // of selection, so it stays visible whether or not it's picked.
+    const isMember = !isGroup && node.groups.length > 0;
+    // The dragged group itself gets a highlight distinguishing a live move
+    // (drags its contents along) from a live resize (never does) — only
+    // while that specific drag is in flight, reverting to the normal
+    // selected/group look the instant the pointer is released.
+    const isBeingMoved = isGroup && dragMode === "moveNode" && movingNodeId === node.id;
+    const isBeingResized = isGroup && dragMode === "resizeGroup" && resizingNodeId === node.id;
 
-    ctx.fillStyle = isGroup ? colors.groupFill : colors.nodeFill;
+    ctx.fillStyle = isGroup ? colors.groupFill : isMember ? colors.memberFill : colors.nodeFill;
     ctx.strokeStyle = isConnectSource ? colors.connectSourceStroke
+      : isBeingMoved ? colors.groupMoveStroke
+      : isBeingResized ? colors.groupResizeStroke
       : selected ? colors.nodeStrokeSelected
       : isNewlyImported ? colors.importedStroke
-      : (isGroup ? colors.groupStroke : colors.nodeStroke);
-    ctx.lineWidth = selected || isConnectSource || isNewlyImported ? 3 : 1.5;
+      : isGroup ? colors.groupStroke
+      : isMember ? colors.memberStroke
+      : colors.nodeStroke;
+    ctx.lineWidth = selected || isConnectSource || isNewlyImported || isBeingMoved || isBeingResized ? 3 : 1.5;
     ctx.setLineDash(isGroup ? [8, 5] : []);
     roundRectPath(node.x, node.y, node.w, node.h, 8);
     ctx.fill();
@@ -1608,6 +1662,25 @@ function loop() {
 // ---------------------------------------------------------------------------
 let activeInlineEditor = null;
 
+// Keeps a fixed-position element's *center* (x, y) far enough inside the
+// viewport that its own box never spills off-screen or under the toolbar
+// overlay — without this, a rename input anchored near a screen edge (e.g.
+// a node close to the window border after panning) could render partly
+// invisible, which read as "funky"/"distant" even though the anchor point
+// itself was correct.
+function clampCenterToViewport(x, y, halfW, halfH) {
+  const margin = 8;
+  const toolbarBottom = document.getElementById("toolbar").getBoundingClientRect().bottom;
+  const minX = halfW + margin;
+  const maxX = window.innerWidth - halfW - margin;
+  const minY = toolbarBottom + halfH + margin;
+  const maxY = window.innerHeight - halfH - margin;
+  return {
+    x: minX <= maxX ? Math.min(Math.max(x, minX), maxX) : (minX + maxX) / 2,
+    y: minY <= maxY ? Math.min(Math.max(y, minY), maxY) : (minY + maxY) / 2,
+  };
+}
+
 function showInlineInput({ x, y, value = "", placeholder = "", onCommit, onCancel }) {
   cancelInlineInput();
   const input = document.createElement("input");
@@ -1618,6 +1691,11 @@ function showInlineInput({ x, y, value = "", placeholder = "", onCommit, onCance
   input.style.left = `${x}px`;
   input.style.top = `${y}px`;
   document.body.appendChild(input);
+  // Re-clamp using the input's real, laid-out size (min-width 140px plus
+  // padding/border) now that it's actually in the DOM.
+  const clamped = clampCenterToViewport(x, y, input.offsetWidth / 2, input.offsetHeight / 2);
+  input.style.left = `${clamped.x}px`;
+  input.style.top = `${clamped.y}px`;
   input.focus();
   input.select();
 
@@ -1817,8 +1895,16 @@ canvas.addEventListener("pointermove", (e) => {
     if (dragMode === "moveNode") {
       const node = state.nodes.find((n) => n.id === movingNodeId);
       if (node) {
-        node.x = world.x - moveOffset.x;
-        node.y = world.y - moveOffset.y;
+        const newX = world.x - moveOffset.x, newY = world.y - moveOffset.y;
+        const dx = newX - node.x, dy = newY - node.y;
+        node.x = newX;
+        node.y = newY;
+        if (node.type === "group") {
+          for (const id of collectContainedDescendants(node.id)) {
+            const member = state.nodes.find((n) => n.id === id);
+            if (member) { member.x += dx; member.y += dy; }
+          }
+        }
         markDirty();
       }
     } else {
@@ -1960,10 +2046,18 @@ function placeNewNodeAt(world, screenPos, type) {
 // creation, pre-filled with the current text — Enter/blur commits, Escape
 // cancels. An empty or unchanged submission is a no-op: no history entry,
 // matching how an empty label at creation time creates nothing at all.
+//
+// The anchor position is always derived from the node/edge's own current
+// geometry (center for a node, curve midpoint for an edge) — never from
+// wherever the triggering click/tap happened to land. A double-click can
+// land anywhere inside a (possibly large, post-zoom) node's box, and using
+// that raw point made the input pop up far from the node's own rendered
+// label, which read as arbitrary/"funky" rather than anchored to anything.
 // ---------------------------------------------------------------------------
-function beginRenameNodePrompt(nodeId, screenPos) {
+function beginRenameNodePrompt(nodeId) {
   const node = state.nodes.find((n) => n.id === nodeId);
   if (!node) return;
+  const screenPos = worldToScreen(node.x + node.w / 2, node.y + node.h / 2);
   showInlineInput({
     x: screenPos.x, y: screenPos.y, value: node.label,
     placeholder: node.type === "group" ? t("groupLabelPlaceholder") : t("nodeLabelPlaceholder"),
@@ -1978,9 +2072,12 @@ function beginRenameNodePrompt(nodeId, screenPos) {
   });
 }
 
-function beginRenameEdgePrompt(edgeId, screenPos) {
+function beginRenameEdgePrompt(edgeId) {
   const edge = state.edges.find((e) => e.id === edgeId);
   if (!edge) return;
+  const geo = edgeGeometry(edge, computeEdgeBendInfo());
+  if (!geo) return;
+  const screenPos = worldToScreen(geo.mid.x, geo.mid.y);
   showInlineInput({
     x: screenPos.x, y: screenPos.y, value: edge.relation, placeholder: t("relationLabelPlaceholder"),
     onCommit: (text) => {
@@ -1996,17 +2093,9 @@ function beginRenameEdgePrompt(edgeId, screenPos) {
 
 function renameSelected() {
   if (state.selection.type === "node") {
-    const n = state.nodes.find((x) => x.id === state.selection.id);
-    if (!n) return;
-    const screen = worldToScreen(n.x + n.w / 2, n.y + n.h / 2);
-    beginRenameNodePrompt(n.id, screen);
+    beginRenameNodePrompt(state.selection.id);
   } else if (state.selection.type === "edge") {
-    const e = state.edges.find((x) => x.id === state.selection.id);
-    if (!e) return;
-    const geo = edgeGeometry(e, computeEdgeBendInfo());
-    if (!geo) return;
-    const screen = worldToScreen(geo.mid.x, geo.mid.y);
-    beginRenameEdgePrompt(e.id, screen);
+    beginRenameEdgePrompt(state.selection.id);
   }
 }
 
@@ -2063,9 +2152,9 @@ canvas.addEventListener("dblclick", (e) => {
   const screenPos = { x: e.clientX, y: e.clientY };
 
   const nodeHit = findNodeAt(world.x, world.y);
-  if (nodeHit) { beginRenameNodePrompt(nodeHit.id, screenPos); return; }
+  if (nodeHit) { beginRenameNodePrompt(nodeHit.id); return; }
   const edgeHit = findEdgeAt(world.x, world.y);
-  if (edgeHit) { beginRenameEdgePrompt(edgeHit.id, screenPos); return; }
+  if (edgeHit) { beginRenameEdgePrompt(edgeHit.id); return; }
 
   placeNewNodeAt(world, screenPos, "entity"); // spec gesture is entity-only
 });
@@ -2749,6 +2838,21 @@ window.__kg = {
   getEdgeGeometry: (edgeId) => {
     const edge = state.edges.find((e) => e.id === edgeId);
     return edge ? edgeGeometry(edge, computeEdgeBendInfo()) : null;
+  },
+  // Mirrors the exact same isMember/isBeingMoved/isBeingResized checks
+  // drawNodes() uses to pick a node's fill/stroke color, so tests can
+  // assert the color-selection *logic* precisely (including mid-drag,
+  // where a real screenshot would need to catch a single in-flight frame)
+  // rather than only inferring it from rendered pixels.
+  getNodeVisualState: (nodeId) => {
+    const node = state.nodes.find((n) => n.id === nodeId);
+    if (!node) return null;
+    const isGroup = node.type === "group";
+    return {
+      isMember: !isGroup && node.groups.length > 0,
+      isBeingMoved: isGroup && dragMode === "moveNode" && movingNodeId === node.id,
+      isBeingResized: isGroup && dragMode === "resizeGroup" && resizingNodeId === node.id,
+    };
   },
 };
 

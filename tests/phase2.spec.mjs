@@ -110,22 +110,30 @@ test("dragging a member fully outside the group removes membership and its conta
   });
 });
 
-// NOTE: prior to a later user-requested change, moving a group never
-// cascaded membership at all (this test used to assert the opposite of
-// what it does now). The group's own drag is now treated symmetrically
-// with a member's own drag: dropping a group onto previously-unrelated
-// nodes absorbs them, and dragging a group away from a member (down to
-// zero overlap) releases it — see the dated Log entry for the full
-// rationale. Resizing (below) is unchanged and still never cascades,
+// NOTE: this is the SECOND reversal of this decision — see the dated Log
+// entries. First, moving a group never cascaded membership at all. Then a
+// user-requested change made a group's own drag symmetric with a member's
+// own drag: dropping onto previously-unrelated nodes absorbed them, and
+// dragging away from a member (down to zero overlap) released it. Now, a
+// group's move is a *rigid-body* operation: every currently-contained
+// member (recursively, including members of nested member groups) moves by
+// the exact same delta as the group itself, so its position *relative to
+// the group* never changes during the drag — which makes "drag the group
+// away until it stops overlapping a member" physically unreachable, since
+// the member is welded to the group's own motion. A member can still only
+// ever be released by its own independent drag (below). Absorbing
+// previously-unrelated nodes the group's new position now covers is
+// unaffected by this and still happens, since those nodes don't move.
+// Resizing (below) is unchanged and still never cascades or drags members,
 // per Section 4.3's explicit language about that specific case.
-test("dragging a group away from a member (down to zero overlap) releases that member's committed membership", async () => {
+test("dragging a group far away keeps a contained member fully intact — it travels with the group instead of being released", async () => {
   await withPage(async (page) => {
     await addNodeViaButton(page, "#btn-add-group", 600, 400, "Group A"); // rect 440,290 .. 760,510
     await addNodeViaButton(page, "#btn-add-node", 100, 100, "Member");
     await dragNode(page, 100, 100, 600, 400); // commits; member now centered at group's center
 
     // Grab the group at a point inside its box but outside the member's box,
-    // and drag it far enough that the two boxes no longer overlap at all.
+    // and drag it very far away.
     await dragNode(page, 460, 300, 1500, 1500);
 
     const group = await page.evaluate(() => window.__kg.state.nodes.find((n) => n.type === "group"));
@@ -133,23 +141,28 @@ test("dragging a group away from a member (down to zero overlap) releases that m
     const edges = await page.evaluate(() => window.__kg.state.edges);
 
     assert.notEqual(group.x, 440); // it actually moved
-    assert.deepEqual(member.groups, [], "membership is released once the group is dragged fully away");
-    assert.equal(edges.length, 0, "the contains edge is cleaned up along with it");
+    assert.deepEqual(member.groups, [group.id], "the member travels with the group instead of losing membership");
+    assert.equal(edges.length, 1, "the contains edge survives the move too");
   });
 });
 
-test("dragging a group so it now overlaps only partially (not fully) with a prior member keeps that member, same rule as a member's own drag", async () => {
+test("nudging a group by a small delta carries a member by the exact same delta, staying fully (not partially) contained", async () => {
   await withPage(async (page) => {
     await addNodeViaButton(page, "#btn-add-group", 600, 400, "Group A"); // rect 440,290 .. 760,510
     await addNodeViaButton(page, "#btn-add-node", 100, 100, "Member"); // will land at 600,400 center -> rect 520,370..680,430
     await dragNode(page, 100, 100, 600, 400); // commits
+    const memberBefore = await page.evaluate(() => window.__kg.state.nodes.find((n) => n.type === "entity"));
 
-    // Nudge the group a little so it still overlaps Member, just not fully.
+    // A small nudge would have left only partial overlap under the old,
+    // non-rigid behavior — now the member rides along, so it stays exactly
+    // where it always was relative to the group.
     await dragNode(page, 460, 300, 560, 300);
 
     const group = await page.evaluate(() => window.__kg.state.nodes.find((n) => n.type === "group"));
     const member = await page.evaluate(() => window.__kg.state.nodes.find((n) => n.type === "entity"));
-    assert.deepEqual(member.groups, [group.id], "partial overlap after a group drag keeps membership, matching the existing overlap-to-keep rule");
+    assert.equal(member.x, memberBefore.x + 100, "member moves by the same delta as the group (100,0)");
+    assert.equal(member.y, memberBefore.y);
+    assert.deepEqual(member.groups, [group.id], "still fully contained, since it moved rigidly with the group");
   });
 });
 
@@ -178,35 +191,37 @@ test("dragging a group onto previously-unrelated nodes absorbs them as members",
   });
 });
 
-test("dragging a group onto a node and away from another member happens together, in one undo step", async () => {
+test("dragging a group onto a new node absorbs it, while an existing member (carried along in the same drag) keeps its own membership — all as one undo step", async () => {
   await withPage(async (page) => {
     await addNodeViaButton(page, "#btn-add-group", 600, 400, "Group A"); // rect 440,290 .. 760,510
     await addNodeViaButton(page, "#btn-add-node", 100, 100, "OldMember");
     await dragNode(page, 100, 100, 600, 400); // OldMember joins Group A
     await addNodeViaDblClick(page, 900, 600, "NewNeighbor"); // rect 820,570..980,630
+    const oldMemberBefore = await page.evaluate(() => window.__kg.state.nodes.find((n) => n.label === "OldMember"));
 
     const before = await page.evaluate(() => window.__kg.history.past.length);
     // Grab point (460,300) is offset (-140,-100) from the group's own
     // center (600,400); dragging that grab point to NewNeighbor's center
     // minus that same offset lands the group's *center* exactly on
     // NewNeighbor's center, guaranteeing full containment (group is
-    // 320x220, well bigger than NewNeighbor's default 160x60) while
-    // landing nowhere near OldMember's original position.
+    // 320x220, well bigger than NewNeighbor's default 160x60).
     await dragNode(page, 460, 300, 900 - 140, 600 - 100);
 
     const group = await page.evaluate(() => window.__kg.state.nodes.find((n) => n.type === "group"));
     const oldMember = await page.evaluate(() => window.__kg.state.nodes.find((n) => n.label === "OldMember"));
     const newNeighbor = await page.evaluate(() => window.__kg.state.nodes.find((n) => n.label === "NewNeighbor"));
-    assert.deepEqual(oldMember.groups, [], "released");
-    assert.deepEqual(newNeighbor.groups, [group.id], "absorbed");
+    assert.deepEqual(oldMember.groups, [group.id], "carried along with the group, so it's still fully contained");
+    assert.equal(oldMember.x, oldMemberBefore.x + (900 - 140 - 460));
+    assert.equal(oldMember.y, oldMemberBefore.y + (600 - 100 - 300));
+    assert.deepEqual(newNeighbor.groups, [group.id], "absorbed because the group's new position now covers it");
 
     const after = await page.evaluate(() => window.__kg.history.past.length);
-    assert.equal(after, before + 1, "the whole drag (move + release + absorb) is exactly one undo step");
+    assert.equal(after, before + 1, "the whole drag (move + carry + absorb) is exactly one undo step");
 
     await page.click("#btn-undo");
     const oldMemberRestored = await page.evaluate(() => window.__kg.state.nodes.find((n) => n.label === "OldMember"));
     const newNeighborRestored = await page.evaluate(() => window.__kg.state.nodes.find((n) => n.label === "NewNeighbor"));
-    assert.deepEqual(oldMemberRestored.groups, [group.id], "undo restores the released membership");
+    assert.deepEqual(oldMemberRestored, oldMemberBefore, "undo restores the member's exact prior position/membership");
     assert.deepEqual(newNeighborRestored.groups, [], "undo also reverts the newly-absorbed membership");
   });
 });
