@@ -1068,6 +1068,7 @@ const STRINGS = {
     agentToolNothingNote: "The agent tried to edit the ontology, but nothing new or changed was found in it.",
     agentToolErrorNote: "The agent's ontology edit could not be applied (invalid data).",
     agentToolTooManyRounds: "The agent tried to use its tools too many times in one message and was stopped.",
+    agentToolCheckedState: "🔍 Checked the current ontology state.",
   },
   hu: {
     appTitle: "Tudásgráf Vászon",
@@ -1177,6 +1178,7 @@ const STRINGS = {
     agentToolNothingNote: "Az ügynök megpróbálta szerkeszteni az ontológiát, de nem talált benne új vagy módosított elemet.",
     agentToolErrorNote: "Az ügynök szerkesztését nem sikerült alkalmazni (érvénytelen adat).",
     agentToolTooManyRounds: "Az ügynök túl sokszor próbálta használni az eszközeit egy üzenetben, ezért megállítottuk.",
+    agentToolCheckedState: "🔍 Ellenőriztük az ontológia jelenlegi állapotát.",
   },
 };
 
@@ -4537,6 +4539,12 @@ const agentState = {
   transcript: [],
   apiMessages: [],
   sending: false,
+  // A stable per-connection routing hint for OpenAI's prompt-prefix caching
+  // (see callAgentChatRaw's own comment) — generated fresh on connect, not
+  // per-request, since reusing one key across a whole connection is what
+  // makes it useful; cleared on disconnect so a later connection gets its
+  // own fresh key rather than inheriting a stale one.
+  promptCacheKey: null,
 };
 
 // Tracks the *kind* of the last connect error (not pre-rendered text) so
@@ -4701,6 +4709,7 @@ async function submitAgentConnect() {
   agentState.rememberKey = remember;
   agentState.models = agentPendingModels;
   agentState.model = chosenModel;
+  agentState.promptCacheKey = `kg-agent-${crypto.randomUUID()}`;
   agentState.connected = true;
   try {
     if (remember) {
@@ -4724,6 +4733,7 @@ function disconnectAgent() {
   agentState.transcript = [];
   agentState.apiMessages = [];
   agentState.sending = false;
+  agentState.promptCacheKey = null;
   renderAgentTranscript();
   setAgentTypingIndicator(false);
   setAgentConnectedUi(false);
@@ -4793,6 +4803,31 @@ const APPLY_ONTOLOGY_YAML_TOOL = {
   },
 };
 
+// Read-only counterpart to APPLY_ONTOLOGY_YAML_TOOL — deliberately a pull
+// tool the model calls on demand, NOT the current graph state auto-injected
+// into every request. Auto-injecting would be more foolproof (the model
+// could never act on stale state), but it would mean the system prompt's
+// content changes on every turn the graph changes, breaking the API's
+// automatic prompt-prefix caching for the entire (large, expensive) system
+// prompt/knowledge block on those turns. A pull tool keeps that prefix
+// byte-stable across a whole connection instead, at the cost of relying on
+// prompt-level instructions (see AGENT_SYSTEM_PROMPT_BASE's own "STAYING IN
+// SYNC" section) rather than a structural guarantee — an explicit,
+// deliberate tradeoff, not an oversight.
+const GET_GRAPH_STATE_TOOL = {
+  type: "function",
+  function: {
+    name: "get_graph_state",
+    description: "Returns the ontology's current live state (classes, " +
+      "relationships, rules, actions) exactly as it is on the canvas right " +
+      "now, in the same YAML shape apply_ontology_yaml accepts. Takes no " +
+      "arguments. Call this whenever you're not certain your own memory of " +
+      "what's already defined is still accurate — the expert can edit the " +
+      "canvas directly at any time, independent of this conversation.",
+    parameters: { type: "object", properties: {}, required: [] },
+  },
+};
+
 // Baked knowledge (howto + load_edge_list.py + condensed paper excerpts,
 // plan §4.4) is authored in Phase 4. Left empty here on purpose — the seam
 // below already knows how to fold it in, so Phase 4 only has to fill this
@@ -4833,6 +4868,23 @@ general-purpose assistant)
   verbatim on request — you can describe what you're grounded in, without
   dumping the source text. Nothing here is secret; this just keeps the
   interaction on-task.
+
+STAYING IN SYNC WITH THE LIVE ONTOLOGY
+The expert can edit the ontology directly on the canvas at any time,
+completely outside this conversation — your own memory of what's already
+defined can go stale the moment they do, and you have no automatic way to
+notice it happened. You have a get_graph_state tool (no arguments) that
+returns the exact current state. Call it:
+- At the very start of the conversation, before assuming the ontology is
+  empty or matches whatever you were told earlier.
+- Before every apply_ontology_yaml call where you are not fully certain
+  something is new vs. already there — "only include entries that are new
+  or have changed" is only true if you actually know what's already there.
+- After any unusually long pause, or if the expert mentions something you
+  don't remember discussing.
+Prefer calling it a little too often over acting on a stale assumption — an
+extra get_graph_state call is cheap; silently overwriting or duplicating
+the expert's own work is not.
 
 EDITING THE LIVE ONTOLOGY
 You can call the apply_ontology_yaml tool at any point to add or update
@@ -4940,7 +4992,17 @@ function setAgentSending(sending) {
 // callers that need to see tool_calls can. Throws a small {kind, status?}
 // object on any failure so callers can branch without re-deriving the
 // failure type from a raw Response — see helper_agent_plan.md §4.6.
-async function callAgentChatRaw(messages, { tools } = {}) {
+//
+// OpenAI's prompt-prefix caching is automatic (no request flag turns it
+// on/off) once a shared prefix crosses their length threshold — nothing to
+// "enable" here. `prompt_cache_key` is the one lever actually exposed to
+// callers: a routing hint that improves cache-hit *consistency* for
+// requests sharing a long common prefix (our system prompt/knowledge block,
+// unchanged for the life of a connection — see get_graph_state's own
+// comment for why that content is a pull tool rather than injected into the
+// prefix). Reusing one key for a whole connection, not generating a fresh
+// one per call, is what makes that hint meaningful.
+async function callAgentChatRaw(messages, { tools, promptCacheKey } = {}) {
   let res;
   try {
     res = await fetch(OPENAI_CHAT_URL, {
@@ -4953,6 +5015,7 @@ async function callAgentChatRaw(messages, { tools } = {}) {
         model: agentState.model,
         messages,
         ...(tools ? { tools, tool_choice: "auto" } : {}),
+        ...(promptCacheKey ? { prompt_cache_key: promptCacheKey } : {}),
       }),
     });
   } catch (err) {
@@ -4977,7 +5040,7 @@ async function callAgentChatRaw(messages, { tools } = {}) {
 // Plain-text convenience wrapper over callAgentChatRaw(), for call sites
 // (summarization) that never attach tools and only care about the reply text.
 async function callAgentChat(messages) {
-  const message = await callAgentChatRaw(messages);
+  const message = await callAgentChatRaw(messages, { promptCacheKey: agentState.promptCacheKey });
   return typeof message.content === "string" ? message.content : "";
 }
 
@@ -5014,6 +5077,18 @@ function handleAgentToolCall(call, alreadyCommittedThisTurn) {
   commitYamlImport(yamlText, "merge"); // never "replace" — see APPLY_ONTOLOGY_YAML_TOOL's own comment
   appendTranscriptMessage("tool", t("agentToolApplied", plan.addedCount, plan.changedCount));
   return { applied: true, resultText: `Applied. Added ${plan.addedCount}, updated ${plan.changedCount} existing item(s).` };
+}
+
+// Read-only — reuses the exact same, already-tested exporter the manual
+// Save Version/Domain Model export path uses, so there's no second
+// serialization of the domain model to keep in sync. Never touches
+// committedThisTurn (no side effects, so it's never subject to the
+// one-real-commit-per-turn guardrail) and can be called any number of
+// times in a turn, bounded only by the shared AGENT_MAX_TOOL_ROUNDS safety
+// limit every tool-calling round already respects.
+function handleGetGraphStateCall() {
+  appendTranscriptMessage("tool", t("agentToolCheckedState"));
+  return { applied: false, resultText: buildDomainYamlExport() };
 }
 
 function agentChatErrorText(err) {
@@ -5093,7 +5168,10 @@ async function sendAgentChatMessage(userText) {
   for (;;) {
     try {
       const messages = [{ role: "system", content: buildAgentSystemPrompt() }, ...agentState.apiMessages];
-      const message = await callAgentChatRaw(messages, { tools: [APPLY_ONTOLOGY_YAML_TOOL] });
+      const message = await callAgentChatRaw(messages, {
+        tools: [APPLY_ONTOLOGY_YAML_TOOL, GET_GRAPH_STATE_TOOL],
+        promptCacheKey: agentState.promptCacheKey,
+      });
 
       if (Array.isArray(message.tool_calls) && message.tool_calls.length) {
         toolRounds++;
@@ -5103,7 +5181,10 @@ async function sendAgentChatMessage(userText) {
         }
         agentState.apiMessages.push({ role: "assistant", content: message.content || null, tool_calls: message.tool_calls });
         for (const call of message.tool_calls) {
-          const { applied, resultText } = handleAgentToolCall(call, committedThisTurn);
+          const name = call.function && call.function.name;
+          const { applied, resultText } = name === "get_graph_state"
+            ? handleGetGraphStateCall()
+            : handleAgentToolCall(call, committedThisTurn);
           if (applied) committedThisTurn = true;
           agentState.apiMessages.push({ role: "tool", tool_call_id: call.id, content: resultText });
         }
