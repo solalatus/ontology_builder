@@ -3022,7 +3022,7 @@ function buildJsonExport(savedAt) {
     })),
     edges: state.edges.map((e) => ({
       id: e.id, source: e.source, target: e.target,
-      relation: e.relation, directed: e.directed, auto: e.auto,
+      relation: e.relation, directed: e.directed,
       meaning: e.meaning, // agent_ontology_spec.md §4.2
     })),
     // agent_ontology_spec.md §4.3 — additive top-level collections, empty
@@ -3052,6 +3052,153 @@ function buildTxtExport(savedAt) {
     lines.push(`${src.label} ${arrow} ${tgt.label} : ${e.relation}`);
   }
   return lines.join("\n") + "\n";
+}
+
+// ---------------------------------------------------------------------------
+// Domain Model YAML export (agent_ontology_spec.md §5) — a third file
+// bundled into "Save Version" alongside the JSON/TXT above. Hand-written,
+// block-style-only YAML serializer (no anchors/tags/flow-style at all,
+// consistent with the project's zero-external-dependency constraint) plus a
+// builder that reshapes canvas state into the howto's classes/relationships/
+// rules/actions structure.
+// ---------------------------------------------------------------------------
+
+// A plain scalar is only emitted unquoted when it's unambiguous under YAML's
+// plain-scalar grammar in both block and (defensively) flow contexts; every
+// indicator character, a leading/trailing space, and reserved literals force
+// a double-quoted, backslash-escaped form instead.
+function yamlScalar(value) {
+  if (value === null || value === undefined) return "null";
+  if (typeof value === "boolean" || typeof value === "number") return String(value);
+  const s = String(value);
+  const RESERVED = /^(true|false|null|yes|no|on|off|~)$/i;
+  const NUMERIC = /^[-+]?(\d+\.?\d*|\.\d+)$/;
+  const plainSafe = s.length > 0
+    && !/^\s|\s$/.test(s)
+    && !/[:#,[\]{}"'&*!|>%@`\n\t\r]/.test(s)
+    && !RESERVED.test(s) && !NUMERIC.test(s);
+  if (plainSafe) return s;
+  const escaped = s
+    .replace(/\\/g, "\\\\")
+    .replace(/"/g, '\\"')
+    .replace(/\n/g, "\\n")
+    .replace(/\t/g, "\\t")
+    .replace(/\r/g, "\\r");
+  return `"${escaped}"`;
+}
+
+// Serializes a plain value (nested plain objects/arrays/scalars only — no
+// class instances, no undefined) into an array of YAML lines at the given
+// indent depth. An empty array/object renders as the inline `[]`/`{}` token
+// — the only concession to flow syntax, since block style has no other way
+// to represent "zero items" (see agent_ontology_spec.md §5).
+function yamlLines(value, indent) {
+  const pad = "  ".repeat(indent);
+  if (Array.isArray(value)) {
+    if (value.length === 0) return [`${pad}[]`];
+    const lines = [];
+    for (const item of value) {
+      if (item !== null && typeof item === "object") {
+        const itemLines = yamlLines(item, indent + 1);
+        lines.push(`${pad}- ${itemLines[0].trim()}`, ...itemLines.slice(1));
+      } else {
+        lines.push(`${pad}- ${yamlScalar(item)}`);
+      }
+    }
+    return lines;
+  }
+  if (value !== null && typeof value === "object") {
+    const keys = Object.keys(value);
+    if (keys.length === 0) return [`${pad}{}`];
+    const lines = [];
+    for (const key of keys) {
+      const v = value[key];
+      const isEmptyCollection = v !== null && typeof v === "object"
+        && (Array.isArray(v) ? v.length === 0 : Object.keys(v).length === 0);
+      if (v !== null && typeof v === "object" && !isEmptyCollection) {
+        lines.push(`${pad}${yamlScalar(key)}:`, ...yamlLines(v, indent + 1));
+      } else if (isEmptyCollection) {
+        lines.push(`${pad}${yamlScalar(key)}: ${Array.isArray(v) ? "[]" : "{}"}`);
+      } else {
+        lines.push(`${pad}${yamlScalar(key)}: ${yamlScalar(v)}`);
+      }
+    }
+    return lines;
+  }
+  return [`${pad}${yamlScalar(value)}`];
+}
+
+function toYaml(rootObject) {
+  return yamlLines(rootObject, 0).join("\n") + "\n";
+}
+
+// "issued by" -> "issuedBy"; unicode-letter-aware word splitting (not just
+// A-Za-z) so accented labels don't get silently mangled. Falls back to a
+// fixed name for the (practically unreachable — beginAddEdgePrompt() always
+// defaults a blank relation to t("defaultRelation")) case of no word
+// characters at all.
+function toCamelCaseId(text) {
+  const words = String(text).trim().split(/[^\p{L}\p{N}]+/u).filter(Boolean);
+  if (words.length === 0) return "relationship";
+  return words
+    .map((w, i) => (i === 0 ? w.toLowerCase() : w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()))
+    .join("");
+}
+
+// Reshapes canvas state into agent_ontology_spec.md §5's structure. Classes/
+// rules/actions are keyed by label/name exactly as typed (last-write-wins on
+// a same-key collision — same as the existing JSON export's ids-by-reference
+// approach, not specially disambiguated, since only the relationships
+// collision case was ever flagged as needing one — see Decision Log #9).
+// relationships is a **list**, not a name-keyed map (Decision Log #9,
+// resolving Open Question 3) — sidesteps the collision problem outright.
+function buildDomainModel() {
+  const classes = {};
+  for (const n of state.nodes) {
+    const properties = {};
+    for (const p of n.properties) {
+      const prop = { type: p.type };
+      if (p.unit) prop.unit = p.unit;
+      if (p.allowed && p.allowed.length > 0) prop.allowed = [...p.allowed];
+      properties[p.name] = prop;
+    }
+    classes[n.label] = { meaning: n.meaning, aliases: [...n.aliases], properties };
+  }
+
+  const relationships = state.edges.map((e) => {
+    const src = state.nodes.find((n) => n.id === e.source);
+    const tgt = state.nodes.find((n) => n.id === e.target);
+    return {
+      name: toCamelCaseId(e.relation),
+      from: src ? src.label : null,
+      to: tgt ? tgt.label : null,
+      meaning: e.meaning,
+    };
+  });
+
+  const rules = {};
+  for (const r of state.rules) rules[r.name] = { conditions: [...r.conditions] };
+
+  const actions = {};
+  for (const a of state.actions) {
+    const inputNode = state.nodes.find((n) => n.id === a.inputClassId);
+    const preconditionNames = a.preconditions
+      .map((ruleId) => state.rules.find((r) => r.id === ruleId))
+      .filter(Boolean)
+      .map((r) => r.name);
+    actions[a.name] = {
+      input: inputNode ? inputNode.label : null,
+      preconditions: preconditionNames,
+      effect: a.effect,
+      verification: a.verification,
+    };
+  }
+
+  return { classes, relationships, rules, actions };
+}
+
+function buildDomainYamlExport() {
+  return toYaml(buildDomainModel());
 }
 
 function triggerDownload(filename, content, mimeType) {
@@ -3131,19 +3278,23 @@ function performSaveVersion() {
   const base = `${sanitizeGraphName(state.graphName)}_v${String(state.meta.version).padStart(4, "0")}_${filenameTimestamp(savedAt)}`;
   const jsonContent = JSON.stringify(buildJsonExport(savedAt), null, 2);
   const txtContent = buildTxtExport(savedAt);
+  const yamlContent = buildDomainYamlExport(); // agent_ontology_spec.md §5
 
   if (tier2DirHandle) {
     pendingSaveVersion = Promise.all([
       writeFileToFolder(tier2DirHandle, `${base}.json`, jsonContent),
       writeFileToFolder(tier2DirHandle, `${base}.txt`, txtContent),
+      writeFileToFolder(tier2DirHandle, `${base}.domain.yaml`, yamlContent),
     ]).catch((err) => {
       console.warn("[KG Canvas] Folder Sync write failed, falling back to download:", err);
       triggerDownload(`${base}.json`, jsonContent, "application/json");
       triggerDownload(`${base}.txt`, txtContent, "text/plain");
+      triggerDownload(`${base}.domain.yaml`, yamlContent, "application/x-yaml");
     });
   } else {
     triggerDownload(`${base}.json`, jsonContent, "application/json");
     triggerDownload(`${base}.txt`, txtContent, "text/plain");
+    triggerDownload(`${base}.domain.yaml`, yamlContent, "application/x-yaml");
     pendingSaveVersion = Promise.resolve();
   }
   scheduleSave(); // persist the incremented version so it survives a reload (Section 9)

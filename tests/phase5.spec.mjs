@@ -125,30 +125,32 @@ test("a renamed graph title survives a reload", async () => {
   });
 });
 
-test("Save Version never blocks on a prompt — clicking it immediately produces two downloads using the current title", async () => {
+test("Save Version never blocks on a prompt — clicking it immediately produces three downloads using the current title", async () => {
   await withDownloadPage(async (page, downloads) => {
     await addNodeViaDblClick(page, 300, 300, "Alpha");
     await saveVersion(page);
     await page.waitForTimeout(200);
 
-    assert.equal(downloads.length, 2);
+    assert.equal(downloads.length, 3);
     const names = downloads.map((d) => d.suggestedFilename()).sort();
-    assert.match(names[0], /^Untitled-Graph_v0001_\d{4}-\d{2}-\d{2}T\d{4}Z\.json$/);
-    assert.match(names[1], /^Untitled-Graph_v0001_\d{4}-\d{2}-\d{2}T\d{4}Z\.txt$/);
+    assert.match(names[0], /^Untitled-Graph_v0001_\d{4}-\d{2}-\d{2}T\d{4}Z\.domain\.yaml$/);
+    assert.match(names[1], /^Untitled-Graph_v0001_\d{4}-\d{2}-\d{2}T\d{4}Z\.json$/);
+    assert.match(names[2], /^Untitled-Graph_v0001_\d{4}-\d{2}-\d{2}T\d{4}Z\.txt$/);
   });
 });
 
-test("Save Version writes exactly two downloads named after a custom title, per the versioned filename convention", async () => {
+test("Save Version writes exactly three downloads named after a custom title, per the versioned filename convention", async () => {
   await withDownloadPage(async (page, downloads) => {
     await addNodeViaDblClick(page, 300, 300, "Alpha");
     await setGraphTitle(page, "Frankfurt AI Ontology");
     await saveVersion(page);
     await page.waitForTimeout(200);
 
-    assert.equal(downloads.length, 2);
+    assert.equal(downloads.length, 3);
     const names = downloads.map((d) => d.suggestedFilename()).sort();
-    assert.match(names[0], /^Frankfurt-AI-Ontology_v0001_\d{4}-\d{2}-\d{2}T\d{4}Z\.json$/);
-    assert.match(names[1], /^Frankfurt-AI-Ontology_v0001_\d{4}-\d{2}-\d{2}T\d{4}Z\.txt$/);
+    assert.match(names[0], /^Frankfurt-AI-Ontology_v0001_\d{4}-\d{2}-\d{2}T\d{4}Z\.domain\.yaml$/);
+    assert.match(names[1], /^Frankfurt-AI-Ontology_v0001_\d{4}-\d{2}-\d{2}T\d{4}Z\.json$/);
+    assert.match(names[2], /^Frankfurt-AI-Ontology_v0001_\d{4}-\d{2}-\d{2}T\d{4}Z\.txt$/);
   });
 });
 
@@ -273,7 +275,7 @@ test("saving twice increments the version number monotonically, both in the file
     await saveVersion(page);
     await page.waitForTimeout(200);
 
-    assert.equal(downloads.length, 4);
+    assert.equal(downloads.length, 6);
     const jsonNames = downloads.filter((d) => d.suggestedFilename().endsWith(".json")).map((d) => d.suggestedFilename());
     assert.ok(jsonNames.some((n) => n.includes("_v0001_")));
     assert.ok(jsonNames.some((n) => n.includes("_v0002_")));
@@ -302,7 +304,7 @@ test("graph_id and version survive a reload and keep incrementing across session
     await saveVersion(page);
     await page.waitForTimeout(300);
 
-    assert.equal(downloads.length, 4);
+    assert.equal(downloads.length, 6);
     const secondJson = downloads.filter((d) => d.suggestedFilename().endsWith(".json"))[1];
     const parsed = JSON.parse(await readDownload(secondJson));
     assert.equal(parsed.meta.graph_id, firstGraphId, "graph_id must not change across sessions");
@@ -332,13 +334,13 @@ test("renaming the graph title also does not create an undo step", async () => {
   });
 });
 
-test("saving an empty graph produces valid, structurally-correct (empty) JSON and TXT", async () => {
+test("saving an empty graph produces valid, structurally-correct (empty) JSON, TXT, and domain YAML", async () => {
   await withDownloadPage(async (page, downloads) => {
     // Save Version isn't gated on having content, unlike Clear.
     await saveVersion(page);
     await page.waitForTimeout(200);
 
-    assert.equal(downloads.length, 2);
+    assert.equal(downloads.length, 3);
     const jsonDl = downloads.find((d) => d.suggestedFilename().endsWith(".json"));
     const parsed = JSON.parse(await readDownload(jsonDl));
     assert.deepEqual(parsed.nodes, []);
@@ -347,6 +349,10 @@ test("saving an empty graph produces valid, structurally-correct (empty) JSON an
     const txtDl = downloads.find((d) => d.suggestedFilename().endsWith(".txt"));
     const text = await readDownload(txtDl);
     assert.ok(text.includes("## NODES\n\n## EDGES\n"));
+
+    const yamlDl = downloads.find((d) => d.suggestedFilename().endsWith(".domain.yaml"));
+    const yaml = await readDownload(yamlDl);
+    assert.equal(yaml, "classes: {}\nrelationships: []\nrules: {}\nactions: {}\n");
   });
 });
 
@@ -389,7 +395,7 @@ test("undoing an unrelated action after a save does not reset or duplicate the v
     await saveVersion(page); // v2
     await page.waitForTimeout(200);
 
-    assert.equal(downloads.length, 4);
+    assert.equal(downloads.length, 6);
     const jsonNames = downloads.filter((d) => d.suggestedFilename().endsWith(".json")).map((d) => d.suggestedFilename());
     assert.ok(jsonNames.some((n) => n.includes("_v0001_")));
     assert.ok(jsonNames.some((n) => n.includes("_v0002_")));

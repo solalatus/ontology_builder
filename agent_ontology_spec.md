@@ -151,22 +151,34 @@ Bundled into the **existing** "Save Version" action as a third file, alongside t
 `spec.md` §5.4 already writes together — no new toolbar button for export. Filename:
 `<graph-name>_v<0000>_<UTC-timestamp>.domain.yaml`.
 
-Structure mirrors the howto's own compact example exactly:
+Structure mirrors the howto's own compact example, with one deliberate deviation from it (see the
+`relationships` bullet below, resolving Open Question 3):
 
 ```yaml
 classes:
   Invoice:
     meaning: A request from a supplier to receive payment.
-    aliases: [bill]
+    aliases:
+      - bill
     properties:
-      invoiceNumber: {type: text}
-      amount: {type: number, unit: EUR}
+      invoiceNumber:
+        type: text
+      amount:
+        type: number
+        unit: EUR
       status:
-        allowed: [draft, matched, disputed, approved, paid]
-      dueDate: {type: date}
+        type: text
+        allowed:
+          - draft
+          - matched
+          - disputed
+          - approved
+          - paid
+      dueDate:
+        type: date
 
 relationships:
-  issuedBy:
+  - name: issuedBy
     from: Invoice
     to: Supplier
     meaning: The supplier that submitted the invoice.
@@ -180,24 +192,38 @@ rules:
 actions:
   approveInvoice:
     input: Invoice
-    preconditions: [canApproveInvoice]
+    preconditions:
+      - canApproveInvoice
     effect: invoice status becomes approved
     verification: confirm the new invoice status
 ```
 
 **Generation rules:**
 - One `classes` entry per node, keyed by its `label` (Class name) exactly as typed — no
-  derived slug. Properties, keyed by property `name`, only include `unit`/`allowed` when set.
-- One `relationships` entry per edge, keyed by a camelCase id derived from the edge's
-  `relation` label (e.g. "issued by" → `issuedBy`) — the label itself stays human-readable in the UI;
-  the export derives the machine key. Collisions (two edges, same derived key, different class pairs)
-  get a numeric suffix (`issuedBy2`) rather than silently overwriting one another — flagged as Open
-  Question 3, since it's the one place this app's free-form graph model doesn't map 1:1 onto the
-  howto's implied "one definition per named relationship type."
+  derived slug. `meaning` is always present (`null` when unset). Each property is keyed by its `name`,
+  with `type` always present and `unit`/`allowed` included only when actually set (`unit` is only ever
+  meaningful for `type: number`; `allowed` is an independent, optional fixed-choice list on any type).
+- **`relationships` is a list, not a name-keyed map** (resolves Open Question 3): one entry per edge,
+  each `{name, from, to, meaning}`, where `name` is a camelCase id derived from the edge's `relation`
+  label (e.g. "issued by" → `issuedBy`, the same derivation the howto's own naming style uses) and
+  `from`/`to` are the endpoint classes' labels. A list sidesteps the collision problem a name-keyed map
+  would have (two edges deriving the same camelCase key between different class pairs) entirely, rather
+  than needing a numeric-suffix disambiguation scheme — chosen over the howto's own map-shaped example
+  specifically because this app's free-form graph model allows exactly that collision and a list has no
+  uniqueness constraint to violate. `meaning` is included even when `null`, for a uniform shape across
+  entries (unlike `classes`' properties, where `unit`/`allowed` are omitted rather than null — those are
+  per-property optional attributes, not a top-level field every entry has).
 - `rules`/`actions` map close to directly onto Section 4.3's shapes, keyed by `name`.
-- A hand-written minimal YAML serializer is used (indentation + list/scalar rules only, no anchors/
-  tags/flow-style needed for this shape) — consistent with the project's zero-external-dependency
-  constraint (`spec.md` §2). No new library, no build step.
+- A hand-written minimal YAML serializer is used, **block style only** — every list renders as `- item`
+  lines, never an inline `[a, b, c]` flow sequence, and every nested object renders as indented `key:`
+  lines, never an inline `{...}` flow mapping (indentation + list/scalar rules only, no anchors/tags/
+  flow-style at all) — consistent with the project's zero-external-dependency constraint (`spec.md`
+  §2): a single style to implement and to test against, deterministically, without a flow-vs-block
+  decision to get right for every value shape. A scalar needing to be unambiguous under YAML's plain-
+  scalar grammar (contains `:`, `#`, a bracket/brace/comma, starts with whitespace or a YAML indicator
+  character, or looks like a reserved literal such as `true`/`null`/a bare number) is double-quoted with
+  standard backslash escaping; everything else renders unquoted for readability, matching the howto's
+  own style.
 - Nothing here changes the existing `.json`/`.txt` outputs — they keep exporting the full canvas
   exactly as `spec.md` §5.1/5.2 specify, camera-irrelevant fields included.
 
@@ -272,8 +298,9 @@ group→hierarchy export logic to write; every node is simply a Class.
 2. Is a `"boolean"` property type worth adding beyond the howto's own examples (text/number/date), or
    should the first pass match the howto literally and add boolean later if actually needed?
    (Section 4.1 default: include it — it's a common, obvious type.)
-3. How should same-named relationships between different class pairs be disambiguated in the YAML
-   export — numeric suffix (default proposed), or some other scheme? (Section 5.)
+3. ~~How should same-named relationships between different class pairs be disambiguated in the YAML
+   export — numeric suffix, or some other scheme?~~ **Resolved — see Section 5 and Decision Log #9:
+   `relationships` is a list, not a name-keyed map, so there is no key to collide.**
 4. ~~Should group `contains` edges export as a `relationships` entry, or should Groups stay purely
    cosmetic/canvas-only and be excluded from the domain export entirely?~~ **Resolved — see Section 6
    and `spec.md` Decision Log #11: Groups were removed from the app entirely, not just from this
@@ -293,3 +320,4 @@ group→hierarchy export logic to write; every node is simply a Class.
 | 6 | Class/Relationship detail editing | A new icon in the existing selection toolbar opening a modal, leaving the existing fast single-field rename flow untouched. |
 | 7 | Import (YAML → canvas) | Deferred to a later phase — export is the load-bearing capability the howto actually calls for; import is desirable but secondary. |
 | 8 | Groups (Open Question 4) | Resolved by removing Groups from the base app entirely (canvas UI, data model, both file formats) rather than choosing an export-time interpretation — see `spec.md` Decision Log #11 and Section 6 above. |
+| 9 | Relationship-key collisions (Open Question 3) | Resolved by making `relationships` a list of `{name, from, to, meaning}` objects rather than a name-keyed map — sidesteps the collision problem rather than disambiguating it, since a list has no uniqueness constraint. See Section 5. |

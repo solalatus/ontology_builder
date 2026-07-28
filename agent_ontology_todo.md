@@ -8,9 +8,9 @@ enough that this can be picked up cold.
 
 ## Current State
 
-- **Phase:** Phases A through E are all implemented, tested, and green — see their checklists below,
+- **Phase:** Phases A through F are all implemented, tested, and green — see their checklists below,
   now fully checked off (Phase C was folded into B; Phase E was folded into D — see each phase's own
-  note). Phases F through I are not started. Of the four open questions from `agent_ontology_spec.md`
+  note). Phases G through I are not started. Of the four open questions from `agent_ontology_spec.md`
   §9: #3 (relationship-key collisions) is resolved — the user chose a list structure for `relationships`
   over a name-keyed map, sidestepping the collision-naming question entirely (see the dated Log entry).
   #4 (Groups) is also resolved, by a route neither original option covered: the user asked for Groups to
@@ -18,18 +18,19 @@ enough that this can be picked up cold.
   from this export — implemented as its own dedicated phase/PR ahead of Phase F, tracked in the dated Log
   entry below and in the base app's own `TODO.md`/`spec.md` (Decision Log #11), not in this file's phase
   checklist since it's a base-app change, not an Agent Ontology one. #1 (app title) and #2 (boolean
-  property type) remain open, deferred to their stated defaults until Phase F surfaces a reason to
-  revisit.
+  property type) remain open, deferred to their stated defaults — nothing in Phase F needed to revisit
+  either.
 - **Relationship to the base app:** this branch builds strictly on top of `index.html` as it exists on
-  `main` today (all PRs through #25 merged: bugfixes, visual polish, Android-reliability follow-ups,
-  and this branch's own Phase A/B/C/D/E, plus the base app's own separate Groups-removal PR). Nothing in
+  `main` today (all PRs through #26 merged: bugfixes, visual polish, Android-reliability follow-ups,
+  this branch's own Phase A/B/C/D/E, and the base app's own separate Groups-removal PR). Nothing in
   the base app's `spec.md`/`TODO.md` changes as a *consequence of Agent Ontology* — Groups removal is a
-  base-app decision with its own base-app PR, documented in the base app's own `spec.md`/`TODO.md`, and
-  only referenced here for its effect on Phase F's scope.
-- **Test suite:** 314 JS tests (279 base + 7 Phase A + 15 Phase B/C + 13 Phase D/E, in
-  `tests/agent-ontology-phase-{a,b,d}.spec.mjs`) + 15 Python tests, all green, run twice consecutively —
-  as of before the base app's Groups-removal PR; that PR's own count changes are tracked in the base
-  app's own `TODO.md`, not here.
+  base-app decision with its own base-app PR, documented in the base app's own `spec.md`/`TODO.md`.
+- **Test suite:** 264 JS tests (254 base-plus-Groups-removal + 10 new in
+  `tests/agent-ontology-phase-f.spec.mjs`) + 11 Python tests, all green, run twice/three-times
+  consecutively. (Phase A/B/D's own test files remain at their original counts — 7/15/13 — this Current
+  State bullet now just reports the whole-suite total rather than re-deriving it phase-by-phase, since
+  the base-app Groups-removal PR changed several base-app file counts too; see that PR's own account in
+  the base app's `TODO.md` for the itemized breakdown.)
 - **A Phase B side effect worth knowing about:** widening `#sel-toolbar` from 3 icons to 4 (the new
   "Edit Details" icon) exposed a real, if narrow, pre-existing interaction hazard — a lingering
   selection's floating toolbar can now more easily reach over a nearby node's own click point, since
@@ -41,12 +42,11 @@ enough that this can be picked up cold.
   happened and why.
 - **Target file:** still `index.html` (same single file — Agent Ontology is not a separate app or a
   second file, just new fields/UI/export on the existing one).
-- **Next action:** Phase F (Domain Model YAML export) — the actual load-bearing deliverable the whole
-  initiative exists for (agent_ontology_spec.md §1: producing the howto's exact shape from a
-  hand-authored graph), now that the base app's Groups-removal PR has cleared the way: Phase F's
-  `relationships:` export is a plain list (per the resolved Open Question 3) and needs no group/
-  `contains`-edge special-casing at all (per the resolved Open Question 4) — both simplifications versus
-  what the spec originally described.
+- **Next action:** Phase G (Import — YAML → canvas), the lower-priority, deferred phase per spec §5's
+  own framing ("export is the load-bearing capability... import is desirable but secondary"). Phase H
+  (localization for Phase F/G's own UI strings — note Phase F added no new UI strings at all, since it's
+  bundled into the existing Save Version action with no new toolbar button or dialog) and Phase I (final
+  regression pass, docs, PR) follow after.
 
 ---
 
@@ -210,21 +210,49 @@ Phase B rather than as later, separate work. Nothing here needed its own dedicat
   dropdown reflecting current canvas nodes (with "no class" staying selectable); `deleteNode()` nulling
   `inputClassId` rather than deleting the action it belonged to
 
-## Phase F — Domain Model YAML export
+## Phase F — Domain Model YAML export ✅ done
 
-- [ ] Hand-written minimal YAML serializer (indentation + list/scalar only — no external dependency)
-- [ ] Bundled as a third file into the existing "Save Version" action:
+- [x] Hand-written minimal YAML serializer (`yamlScalar`/`yamlLines`/`toYaml`), block style only — no
+      anchors/tags/flow-style, no external dependency. A plain scalar is emitted unquoted only when
+      unambiguous under YAML's plain-scalar grammar; anything else (colons, hashes, brackets/braces/
+      commas, quotes, leading/trailing whitespace, newlines, YAML-reserved literals like `true`/`null`/
+      a bare number) is double-quoted with backslash escaping. Empty arrays/objects render as the
+      inline `[]`/`{}` token — the one deliberate exception to "block style only," since there's no
+      other way to represent zero items in block form.
+- [x] Bundled as a third file into the existing "Save Version" action (`performSaveVersion()`, both the
+      Tier 3 download branch and the Tier 2 folder-write branch, with the same fallback-to-download
+      behavior on a Tier 2 write failure that the JSON/TXT files already had):
       `<graph-name>_v<0000>_<UTC-timestamp>.domain.yaml`
-- [ ] `classes:` — one entry per node, keyed by label, per spec §5
-- [ ] `relationships:` — a **list** of `{name, from, to, meaning}` entries, one per edge (resolved: the
+- [x] `classes:` — one entry per node, keyed by label, per spec §5; `meaning` always present (`null`
+      when unset); each property keyed by name with `type` always present, `unit`/`allowed` only when
+      actually set
+- [x] `relationships:` — a **list** of `{name, from, to, meaning}` entries, one per edge (resolved: the
       user chose a list structure over a name-keyed map, sidestepping Open Question 3's collision-naming
-      question entirely — no camelCase-key derivation or numeric-suffix disambiguation needed)
-- [ ] `rules:` / `actions:` — per spec §4.3 shapes
-- [ ] No group/`contains`-edge special-casing needed — Groups were removed from the base app entirely
+      question entirely — no numeric-suffix disambiguation needed). `name` is still a camelCase id
+      derived from the edge's `relation` label via `toCamelCaseId()` (e.g. "issued by" → `issuedBy`,
+      unicode-letter-aware word splitting) — the list structure means two edges deriving the *same*
+      camelCase name just become two distinct list entries, not a collision to resolve.
+- [x] `rules:` / `actions:` — per spec §4.3 shapes, keyed by name; an action's `inputClassId`/
+      `preconditions` (rule ids) resolve to the current class label / rule names at export time, and
+      degrade to `null` / a filtered (non-crashing) list if a referenced node or rule is somehow gone by
+      the time of export (defensive — in practice `deleteNode()`/`deleteRule()` already keep these
+      references clean, per Phase D/E's own decisions)
+- [x] No group/`contains`-edge special-casing needed — Groups were removed from the base app entirely
       (Open Question 4, resolved by elimination; see base app's `spec.md` Decision Log #11)
-- Tests: exported YAML matches the howto's own worked example shape when fed an equivalent graph
-  (structural comparison, not brittle string-diff); a graph with no classes/relationships/rules/actions
-  filled in still exports valid (if mostly empty) YAML without crashing
+- Tests (`tests/agent-ontology-phase-f.spec.mjs`, 10 new tests, all green): exported YAML matches the
+  howto's own worked example shape exactly, byte-for-byte, when fed an equivalent graph; a graph with no
+  classes/relationships/rules/actions filled in still exports valid, minimal YAML; two edges whose
+  relation labels derive the same camelCase name both survive as distinct list entries rather than one
+  overwriting the other; property export includes `type` always and `unit`/`allowed` only when actually
+  set (including the empty-`allowed`-array case, which must omit the key rather than emit an empty
+  list); class/edge `meaning` renders as the literal `null` when unset and as real text when set;
+  YAML-significant characters (colon, hash, quotes, newline) in a label/meaning/alias get double-quoted
+  and escaped while plain-safe scalars stay bare for readability; `toCamelCaseId()` handles multi-word,
+  single-word, and punctuation-heavy relation labels; an action whose input class was deleted (via a
+  real Delete keypress, not a hand-simulated stale reference) exports `input: null` rather than a
+  dangling id; Save Version bundles the YAML as a third download named per the versioned filename
+  convention, alongside JSON/TXT; the YAML addition doesn't change JSON/TXT content or shape (and
+  confirms no stale `auto` field leaking through from the removed Groups feature).
 
 ## Phase G — Import (YAML → canvas) — later phase, lower priority
 
@@ -378,3 +406,42 @@ as the reference and record deltas/clarifications here instead of rewriting the 
   Decision Log entries it reverses). Net effect on this initiative: Phase F's `relationships:` export is
   now simpler on both fronts than the spec originally described — a list, and no group/`contains`-edge
   special-casing to write at all.
+- 2026-07-28 — Groups-removal PR merged; user said to go ahead with Phase F and to add more tests along
+  the way "to stabilize." Before implementing, found and fixed two things left inconsistent by the
+  previous session's design-question resolution: `agent_ontology_spec.md` §5's own YAML example and
+  "Generation rules" text still showed the *old* map-keyed-with-collision-suffix `relationships` shape
+  (Open Question 3 was resolved in conversation and in this file's own Log/Phase-F-checklist, but the
+  spec document itself was never actually updated to match) — rewritten to the list shape, block-style
+  arrays throughout (matching a fresh design decision made while implementing: the serializer supports
+  exactly one style, block, never inline `[a, b, c]`/`{k: v}` flow syntax, to keep the "minimal, no
+  flow-style" implementation genuinely single-path rather than needing a per-value style decision) —
+  and Open Question 3 itself marked resolved with a new Decision Log entry (#9), matching how Open
+  Question 4/Groups was already handled.
+  Implemented Phase F in full: `yamlScalar()`/`yamlLines()`/`toYaml()` (a general-purpose, block-style-
+  only recursive serializer for plain JS values — objects/arrays/scalars — not special-cased per section,
+  so classes/relationships/rules/actions all go through the same code path), `toCamelCaseId()` (unicode-
+  letter-aware word splitting, e.g. "issued by" → `issuedBy`), and `buildDomainModel()`/
+  `buildDomainYamlExport()` reshaping `state` into the spec's structure. Wired into `performSaveVersion()`
+  as a third file (`.domain.yaml`) in both the Tier 3 download branch and the Tier 2 folder-write branch,
+  with the same fallback-to-download-on-write-failure behavior the JSON/TXT files already had. Also
+  caught and fixed one small piece of leftover Groups-removal debt while in this code: `buildJsonExport()`
+  still spread `auto: e.auto` into every exported edge — harmless (always `undefined`, silently dropped
+  by `JSON.stringify`) but dead, confusing code from before Groups were removed; deleted.
+  Manually verified the exact worked-example shape via a scratch script before writing it into the test
+  suite (byte-for-byte match against the howto's own compact example), then checked edge cases the same
+  way: empty graph, unicode/quote/colon/hash/newline-containing labels and meanings, and two edges whose
+  relation labels derive the same camelCase name (confirms the list-not-map decision actually holds under
+  the exact scenario it was chosen to avoid — both survive as distinct entries, no silent overwrite).
+  Per the user's explicit "add more tests to stabilize" request, went beyond just covering Phase F's own
+  new code: added `tests/agent-ontology-phase-f.spec.mjs` (10 tests covering all of the above, including
+  Save Version's three-download bundling and a check that the YAML addition doesn't perturb JSON/TXT
+  content) and updated every existing test that hard-coded a two-download assumption from Save Version
+  now that there are three — `tests/phase5.spec.mjs` (6 `downloads.length` assertions, 2→3 and 4→6) and
+  `tests/phase7.spec.mjs` (Tier 2 folder-write equivalents: `filenames.length` 2→3, plus 3 more
+  `downloads.length` assertions in its Tier-2-failure-falls-back-to-Tier-3 tests).
+  Full suite green: `node --test tests/*.spec.mjs` (264 tests) run three times consecutively (one run hit
+  a single unrelated flake in `tests/ui-polish.spec.mjs` — a visual/theme test that passed cleanly both
+  standalone and on the next full-suite run, consistent with resource contention across many parallel
+  browser instances rather than a real regression from this phase's changes) and
+  `python3 -m unittest discover -s tools -p "test_*.py"` (11 tests, untouched by this phase — YAML export
+  is JS-only), all green.
