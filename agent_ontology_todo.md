@@ -8,21 +8,35 @@ enough that this can be picked up cold.
 
 ## Current State
 
-- **Phase:** Phase A (data model additions) is implemented, tested, and green — see its checklist
-  below, now fully checked off. Phases B through I are not started. The four open questions from
-  `agent_ontology_spec.md` §9 have not been explicitly answered by the user yet; Phase A proceeded on
-  the spec's own stated defaults (§9's answers don't block Phase A's data-model-only scope — they
-  matter starting Phase D/F). Still worth resolving before those phases start.
+- **Phase:** Phase A (data model additions) and Phase B (Class editor UI) are both implemented,
+  tested, and green — see their checklists below, now fully checked off. Phases C through I are not
+  started. The four open questions from `agent_ontology_spec.md` §9 have not been explicitly answered
+  by the user yet; A and B both proceeded on the spec's own stated defaults (none of §9's questions
+  bear on either phase's scope — they start mattering at Phase F, the YAML export). Still worth
+  resolving before that phase starts.
 - **Relationship to the base app:** this branch builds strictly on top of `index.html` as it exists on
   `main` today (all PRs through #22 merged: bugfixes, visual polish, Android-reliability follow-ups).
   Nothing in the base app's `spec.md`/`TODO.md` changes — this is a new capability layered on, tracked
   separately so the base app's own history/conventions stay undisturbed.
-- **Test suite:** 286 JS tests (279 base + 7 new in `tests/agent-ontology-phase-a.spec.mjs`) + 15
-  Python tests, all green, run twice consecutively.
+- **Test suite:** 301 JS tests (279 base + 7 Phase A + 15 Phase B, in `tests/agent-ontology-phase-a
+  .spec.mjs` / `tests/agent-ontology-phase-b.spec.mjs`) + 15 Python tests, all green, run twice
+  consecutively.
+- **A Phase B side effect worth knowing about:** widening `#sel-toolbar` from 3 icons to 4 (the new
+  "Edit Details" icon) exposed a real, if narrow, pre-existing interaction hazard — a lingering
+  selection's floating toolbar can now more easily reach over a nearby node's own click point, since
+  `setMode()` never clears `state.selection`. This broke a shared test helper
+  (`createEdgeViaConnectMode` in `tests/lib/page.mjs`, used by many spec files, not just this branch's
+  own), fixed by having that helper clear selection before arming connect mode. See the dated Log entry
+  — this is a base-app-level test-infra fix that happened to be surfaced by an Agent Ontology UI change,
+  not something scoped to Agent Ontology's own feature set, but recorded here since that's where it
+  happened and why.
 - **Target file:** still `index.html` (same single file — Agent Ontology is not a separate app or a
   second file, just new fields/UI/export on the existing one).
-- **Next action:** confirm/resolve the four open questions in `agent_ontology_spec.md` §9 (or proceed
-  with the spec's stated defaults), then start Phase A.
+- **Next action:** Phase D (Rules manager). Phase C (Relationship editor UI) turned out to already be
+  fully covered — the details dialog was built as one shared implementation handling both nodes and
+  edges from the start (per `agent_ontology_spec.md` §7's own design: "same new icon, shown for edge
+  selection instead"), so Phase C's checklist is checked off alongside Phase B's below rather than done
+  as separate follow-up work.
 
 ---
 
@@ -88,22 +102,60 @@ Same tooling and conventions as the base app — no new test framework, no new d
   old (pre-Phase-A) two-array snapshot shape directly (`phase1.spec.mjs`, `phase3.spec.mjs`,
   `phase5.spec.mjs`) — expected fallout from an intentional rename/shape change, not regressions.
 
-## Phase B — Class editor UI
+## Phase B — Class editor UI ✅ done
 
-- [ ] New 4th icon in `#sel-toolbar`, shown for entity/group node selection: "Edit Details"
-- [ ] New modal (`.modal-dialog` pattern): Meaning (textarea), Aliases (add/remove chips or lines),
-      Properties (add/remove rows: name, type dropdown [text/number/date/boolean], unit — number only,
-      allowed-values list — optional)
-- [ ] Committing the modal is one undo step, same as every other discrete action in the app
-- [ ] Existing rename (✎) flow untouched — still label-only, still fast
-- Tests: opening/editing/saving each field persists correctly; cancel discards changes; undo reverts a
-  commit in one step; a node with no meaning/aliases/properties set behaves exactly as before this phase
+- [x] New 4th icon in `#sel-toolbar` (`#sel-details`, an ⓘ glyph), shown for every selection — node
+      *and* edge alike, unlike `#sel-toggle-dir` which hides for nodes (Phase C folded in from the
+      start, see below)
+- [x] New modal (`#details-overlay`/`#details-dialog`, the `.modal-dialog` pattern): Meaning
+      (textarea), Aliases (add/remove rows), Properties (add/remove cards: name, type dropdown
+      [text/number/date/boolean], unit — shown only for type "number", allowed-values — a single
+      comma-separated text field, parsed/trimmed/de-duped-of-empties on save rather than its own
+      repeatable sub-list, for a simpler first pass)
+- [x] Committing the modal is one undo step (`snapshotState()`/`pushHistory()`, same as every other
+      discrete action) — and, matching the existing rename flow's own discipline, a save with no actual
+      changes pushes no history entry at all
+- [x] Existing rename (✎) flow untouched — still label-only, still fast, still its own icon
+- [x] Global keydown handler extended with a `detailsEditingTarget`-guarded early return (Escape closes/
+      cancels; critically, this also prevents Delete/Backspace inside the dialog's own text fields from
+      falling through to the canvas-level delete-selection shortcut)
+- Tests (`tests/agent-ontology-phase-b.spec.mjs`, 15 tests, all green): opening pre-fills every field
+  from current state; Class vs. Group vs. Relationship titles differ correctly; Save commits
+  meaning+aliases+properties together as exactly one undo step and undo fully reverts it; Cancel/
+  clicking outside/Escape all discard without pushing history; backspacing in the meaning textarea
+  doesn't delete the selected node; removing an alias/property row before saving persists the removal;
+  the Unit field's visibility tracks the property type dropdown live; a nameless newly-added property
+  row is dropped rather than saved; allowed-values parsing trims and drops empty entries; a genuinely
+  no-op save pushes no undo step; language toggle re-translates the dialog's static chrome; a node with
+  nothing set behaves exactly as before this phase.
+- **A CSS layout bug found and fixed during this phase, not a pre-existing one:** the first draft laid
+  out each property as one flat 5-cell flex row (name/type/unit/allowed/remove-button). At this dialog's
+  width those don't fit on one line, so the row wrapped — but flex-wrap wraps a row's own children, not
+  whole rows, so the remove button (and sometimes the allowed-values field) visually landed on what
+  looked like a second, unrelated, ownerless row. Screenshot-caught before committing, not left for a
+  test to catch (getComputedStyle-based tests wouldn't have flagged a purely visual misread). Fixed by
+  restructuring each property into a deliberate two-line card (name+remove on top, type+unit+allowed
+  below) rather than relying on accidental wrap — verified clean in both themes via screenshot.
+- **A real, if narrow, pre-existing interaction hazard this phase's UI change exposed** (not an Agent
+  Ontology bug itself — see the dated Log entry and the Current State bullet above for the full account):
+  widening `#sel-toolbar` broke a *shared, base-app* test helper (`createEdgeViaConnectMode`), fixed at
+  the helper level.
 
-## Phase C — Relationship editor UI
+## Phase C — Relationship editor UI ✅ done (folded into Phase B)
 
-- [ ] Same new icon, shown for edge selection instead: smaller modal with just Meaning
-- [ ] Existing relation-label rename flow untouched
-- Tests: meaning round-trips through Tier 1 + JSON export; undo reverts in one step
+`agent_ontology_spec.md` §7 always described this as "the same new icon, shown for edge selection
+instead" — one shared dialog, not two separate implementations — so it was built and tested alongside
+Phase B rather than as later, separate work. Nothing here needed its own dedicated code.
+
+- [x] Same new icon, shown for edge selection instead: `openDetailsDialog("edge", id)` hides the
+      aliases/properties sections (`display: none`) and shows only Meaning, leaving the rest of the
+      dialog's chrome (title text swaps to "Edit Relationship Details", Save/Cancel/Escape/outside-click
+      all behave identically) shared with the node case
+- [x] Existing relation-label rename flow untouched
+- Tests: covered directly in `tests/agent-ontology-phase-b.spec.mjs` ("an edge's details dialog shows
+  only Meaning — aliases/properties sections are hidden") plus Phase A's own
+  `tests/agent-ontology-phase-a.spec.mjs`, which already proved `Edge.meaning` round-trips through
+  Tier 1 storage and the JSON export before any UI existed to set it by hand
 
 ## Phase D — Rules manager
 
@@ -209,3 +261,34 @@ as the reference and record deltas/clarifications here instead of rewriting the 
   confirming a subsequent redo doesn't inherit that mutation. Full suite green twice consecutively:
   286 JS tests (279 + 7 new) and 15 Python tests. PR opened per the user's request; per instruction,
   waiting for the user to merge rather than proceeding straight to Phase B.
+- 2026-07-26 — Phase A's PR merged; user said to continue. Implemented Phase B (Class editor UI) and,
+  since the spec always described it as one shared dialog rather than two separate ones, Phase C
+  (Relationship editor UI) came along for free — see both phases' checklists above for the full
+  breakdown. New `#sel-details` icon in `#sel-toolbar`; new `#details-overlay` modal (Meaning textarea
+  always, Aliases/Properties sections shown for nodes and hidden for edges); `createPropertyRow()`/
+  `createAliasRow()` build the repeatable form rows; `saveDetailsDialog()` commits everything as one
+  `pushHistory()` step, skipping the push entirely when nothing actually changed (matching the existing
+  rename flow's own no-op discipline); the global keydown handler gained a `detailsEditingTarget` guard
+  so Escape closes the dialog and — more importantly — Delete/Backspace while typing in the dialog's own
+  fields no longer falls through to the canvas-level delete-selection shortcut.
+  Caught and fixed a real CSS layout bug via screenshot before it ever reached a test: the first
+  property-row draft was one flat 5-cell flex row, which doesn't fit this dialog's width and wraps —
+  but flex-wrap wraps a row's own children individually, so the remove button (and sometimes the
+  allowed-values field) landed on what visually read as a separate, ownerless row. Restructured each
+  property into a deliberate two-line card instead of relying on wrap; reconfirmed clean in both themes.
+  Also surfaced a real, narrow, pre-existing interaction hazard in the *base app*, not an Agent Ontology
+  bug: widening `#sel-toolbar` from 3 icons to 4 was enough to make the floating selection toolbar (which
+  `setMode()` never hides — it only clears `connectSource`, not `state.selection`) reach over a nearby
+  node's own click point. This broke `tests/end-to-end-workflow.spec.mjs` (a base-app test, unrelated to
+  this branch's own feature) by covering Alice's center point with the toolbar left over from the
+  previous edge's selection, right as the test tried to arm connect-mode's second parallel edge.
+  Confirmed via `git stash` A/B testing that this was a genuine regression, not pre-existing flakiness.
+  Fixed at the right level — the shared `createEdgeViaConnectMode` test helper in `tests/lib/page.mjs`
+  (used by many spec files, not just this branch's) now clears selection and waits for the toolbar to
+  actually hide (the same render-loop dirty-flag timing race documented next to its other occurrence in
+  `parallel-edges.spec.mjs`) before arming connect mode — rather than papering over it by tweaking one
+  test's node-spacing coordinates, which would've left the same hazard latent for the next test or the
+  next icon this toolbar gains.
+  New `tests/agent-ontology-phase-b.spec.mjs` (15 tests) covers Phase B/C together. Full suite green
+  twice consecutively: 301 JS tests (286 + 15 new) and 15 Python tests. PR opened; waiting for merge
+  before starting Phase D, per the same wait-for-merge instruction as Phase A.
