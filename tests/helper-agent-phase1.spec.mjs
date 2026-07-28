@@ -143,6 +143,118 @@ test("pickDefaultAgentModel falls back to the newest chat model when no reasonin
   });
 });
 
+// Regression test for a bug found by running against a real OpenAI key's
+// actual model list (tests/helper-agent-live-openai.spec.mjs): the newest
+// id in the "reasoning" pool was a deep-research variant -- a specialized
+// autonomous-research product, not a general chat model -- because it sorts
+// newer by `created` than the ordinary o-series/gpt-5 ids alongside it.
+test("pickDefaultAgentModel excludes deep-research/search-preview/search-api variants even when they're the newest id", async () => {
+  await withPage(async (page) => {
+    const result = await page.evaluate(() => {
+      const models = [
+        { id: "o4-mini", created: 100 },
+        { id: "o4-mini-deep-research-2025-06-26", created: 999 }, // newest id, but not a general chat model
+        { id: "gpt-5-search-api-2025-10-14", created: 998 }, // also newest-ish, also not a general chat model
+      ];
+      return window.__kg.agent.pickDefaultModel(models);
+    });
+    assert.equal(result, "o4-mini");
+  });
+});
+
+// Second half of the same live-discovered bug: OpenAI's gpt-5.x family is
+// this account's actual current reasoning-capable lineup, but the original
+// heuristic only recognized "o<digit>" ids and the literal words
+// think/reason -- so gpt-5.x was silently invisible to the "reasoning pool"
+// and a much older o-series id would win by default even when a newer
+// gpt-5.x release existed.
+test("pickDefaultAgentModel treats gpt-5.x and later as reasoning-family, preferring it over an older non-reasoning id", async () => {
+  await withPage(async (page) => {
+    const result = await page.evaluate(() => {
+      const models = [
+        { id: "o1", created: 100 },
+        { id: "gpt-5.5", created: 900 },
+        { id: "gpt-4.1", created: 500 }, // newer than o1 but not reasoning-family -- must lose to gpt-5.5
+      ];
+      return window.__kg.agent.pickDefaultModel(models);
+    });
+    assert.equal(result, "gpt-5.5");
+  });
+});
+
+// A second, more severe live-discovered bug on top of the deep-research one
+// above: the *newest* id in the real reasoning pool, "gpt-5.6-luna", turned
+// out to return a real 400 ("Function tools ... are not supported ... in
+// /v1/chat/completions") the instant tools were attached -- which is every
+// real request this app makes, since apply_ontology_yaml/get_graph_state are
+// always sent. Nothing in OpenAI's /v1/models response signals this ahead of
+// time; the fix is to prefer the "standard tier" (bare version, no
+// mini/nano/pro/preview-codename suffix) over any suffixed variant,
+// including ones newer than it -- see isStandardTierModel's own comment.
+test("pickDefaultAgentModel prefers a standard-tier reasoning model over a newer mini/nano/pro variant", async () => {
+  await withPage(async (page) => {
+    const result = await page.evaluate(() => window.__kg.agent.pickDefaultModel([
+      { id: "gpt-5", created: 100 },
+      { id: "gpt-5-mini", created: 999 },
+      { id: "gpt-5-pro", created: 998 },
+    ]));
+    assert.equal(result, "gpt-5");
+  });
+});
+
+// The exact real-world shape of the live-discovered bug: a preview-codename
+// variant ("-luna") that is both the newest id *and* passes every other
+// filter (it's reasoning-family, it's not deep-research/search/embedding),
+// yet is not standard-tier and must still lose to an older standard-tier release.
+test("pickDefaultAgentModel prefers a standard-tier reasoning model over a newer preview-codename variant", async () => {
+  await withPage(async (page) => {
+    const result = await page.evaluate(() => window.__kg.agent.pickDefaultModel([
+      { id: "gpt-5.5", created: 500 },
+      { id: "gpt-5.6-luna", created: 999 },
+    ]));
+    assert.equal(result, "gpt-5.5");
+  });
+});
+
+// A dated snapshot of the standard tier (no mini/nano/pro/codename suffix,
+// just a pinned release date) still counts as standard-tier -- only an
+// actual size/specialty/preview suffix should be deprioritized.
+test("pickDefaultAgentModel treats a dated snapshot of the standard tier as standard-tier, not a variant", async () => {
+  await withPage(async (page) => {
+    const result = await page.evaluate(() => window.__kg.agent.pickDefaultModel([
+      { id: "gpt-5-mini", created: 999 },
+      { id: "gpt-5-2025-08-07", created: 100 },
+    ]));
+    assert.equal(result, "gpt-5-2025-08-07");
+  });
+});
+
+// When a key's reasoning pool has no standard-tier candidate at all (e.g.
+// an account whose only reasoning access is the mini tier), the heuristic
+// must still fall back to the full reasoning pool rather than skipping past
+// it straight to an ordinary chat model.
+test("pickDefaultAgentModel falls back to the full reasoning pool when no standard-tier reasoning model is available", async () => {
+  await withPage(async (page) => {
+    const result = await page.evaluate(() => window.__kg.agent.pickDefaultModel([
+      { id: "o3-mini", created: 100 },
+      { id: "gpt-4o", created: 999 }, // newer, but not reasoning-family -- must still lose to o3-mini
+    ]));
+    assert.equal(result, "o3-mini");
+  });
+});
+
+test("pickDefaultAgentModel does not treat gpt-4.x as reasoning-family (only gpt-5 and above)", async () => {
+  await withPage(async (page) => {
+    const result = await page.evaluate(() => window.__kg.agent.pickDefaultModel([
+      { id: "gpt-4.1", created: 100 },
+      { id: "gpt-4o", created: 200 },
+    ]));
+    // No reasoning-family candidate in this list at all -- falls back to the
+    // newest plain chat model, same fallback path the pre-existing test above covers.
+    assert.equal(result, "gpt-4o");
+  });
+});
+
 test("an invalid key surfaces an inline error and does not connect", async () => {
   await withPageAllowingResourceErrors(async (page) => {
     await mockModelsRoute(page, { status: 401 });

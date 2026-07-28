@@ -332,6 +332,56 @@ test("a rate-limit response shows a distinct chat error", async () => {
   });
 });
 
+// A 429 with error.code "insufficient_quota" is a permanently exhausted
+// billing balance, not a transient rate limit -- "wait a moment and try
+// again" is actively wrong advice for it. Confirmed live against a real
+// out-of-quota OpenAI key (tests/helper-agent-live-openai.spec.mjs); this is
+// the mocked regression test locking the fix in for CI, which has no key.
+test("a 429 with error.code=insufficient_quota shows a distinct message from an ordinary rate limit", async () => {
+  await withPageAllowingResourceErrors(async (page) => {
+    await connectAgent(page);
+    await page.route(CHAT_URL, (route) => {
+      route.fulfill({
+        status: 429,
+        contentType: "application/json",
+        body: JSON.stringify({ error: { message: "You exceeded your current quota, please check your plan and billing details.", type: "insufficient_quota", code: "insufficient_quota" } }),
+      });
+    });
+
+    await sendChatMessage(page, "hello");
+    await page.waitForFunction(() => !window.__kg.agent.isSending());
+    const last = await lastTranscriptMessage(page);
+    assert.equal(last.role, "system");
+    const [insufficientQuotaText, rateLimitText] = await page.evaluate(() => [
+      window.__kg.lang.t("agentChatErrorInsufficientQuota"),
+      window.__kg.lang.t("agentChatErrorRateLimit"),
+    ]);
+    assert.equal(last.text, insufficientQuotaText);
+    assert.notEqual(last.text, rateLimitText);
+  });
+});
+
+// A 429 with no error.code at all (or an unrecognized one) must not be
+// mistaken for insufficient_quota -- falls back to the ordinary rate-limit
+// message, exactly like the sibling test above without a "code" field.
+test("a 429 with an unrecognized error.code still falls back to the ordinary rate-limit message", async () => {
+  await withPageAllowingResourceErrors(async (page) => {
+    await connectAgent(page);
+    await page.route(CHAT_URL, (route) => {
+      route.fulfill({
+        status: 429,
+        contentType: "application/json",
+        body: JSON.stringify({ error: { message: "Too many requests", code: "rate_limit_exceeded" } }),
+      });
+    });
+
+    await sendChatMessage(page, "hello");
+    await page.waitForFunction(() => !window.__kg.agent.isSending());
+    const last = await lastTranscriptMessage(page);
+    assert.equal(last.text, await page.evaluate(() => window.__kg.lang.t("agentChatErrorRateLimit")));
+  });
+});
+
 test("a network/CORS failure shows a distinct chat error", async () => {
   await withPageAllowingResourceErrors(async (page) => {
     await connectAgent(page);
