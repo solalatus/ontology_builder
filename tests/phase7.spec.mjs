@@ -148,11 +148,12 @@ test("once connected, Save Version writes silently into the folder and triggers 
 
     const writes = await page.evaluate(() => window.__mockFolderWrites);
     const filenames = Object.keys(writes).sort();
-    assert.equal(filenames.length, 2);
-    assert.match(filenames[0], /^Untitled-Graph_v0001_\d{4}-\d{2}-\d{2}T\d{4}Z\.json$/);
-    assert.match(filenames[1], /^Untitled-Graph_v0001_\d{4}-\d{2}-\d{2}T\d{4}Z\.txt$/);
+    assert.equal(filenames.length, 3);
+    assert.match(filenames[0], /^Untitled-Graph_v0001_\d{4}-\d{2}-\d{2}T\d{4}Z\.domain\.yaml$/);
+    assert.match(filenames[1], /^Untitled-Graph_v0001_\d{4}-\d{2}-\d{2}T\d{4}Z\.json$/);
+    assert.match(filenames[2], /^Untitled-Graph_v0001_\d{4}-\d{2}-\d{2}T\d{4}Z\.txt$/);
 
-    const jsonWrite = writes[filenames[0]];
+    const jsonWrite = writes[filenames[1]];
     const parsed = JSON.parse(jsonWrite);
     assert.equal(parsed.nodes.length, 1);
     assert.equal(parsed.nodes[0].label, "Alpha");
@@ -169,20 +170,21 @@ test("if a Tier 2 write fails after grant, Save Version falls back to a Tier 3 d
     await page.evaluate(() => window.__kg.tier2.waitForSaveVersion());
     await page.waitForTimeout(200);
 
-    assert.equal(downloads.length, 2, "a failed folder write should still produce the usual two downloads");
+    assert.equal(downloads.length, 3, "a failed folder write should still produce the usual three downloads");
     const names = downloads.map((d) => d.suggestedFilename()).sort();
-    assert.match(names[0], /\.json$/);
-    assert.match(names[1], /\.txt$/);
+    assert.match(names[0], /\.domain\.yaml$/);
+    assert.match(names[1], /\.json$/);
+    assert.match(names[2], /\.txt$/);
   }, { initScript: installFailingWritePicker() });
 });
 
-test("without ever connecting Folder Sync, Save Version behaves exactly like Tier 3 baseline (two downloads)", async () => {
+test("without ever connecting Folder Sync, Save Version behaves exactly like Tier 3 baseline (three downloads)", async () => {
   await withFolderPage(async (page, downloads) => {
     await addNodeViaDblClick(page, 300, 300, "Alpha");
     await page.click("#btn-save-version");
     await page.waitForTimeout(200);
 
-    assert.equal(downloads.length, 2);
+    assert.equal(downloads.length, 3);
     assert.equal(await page.evaluate(() => window.__kg.tier2.getDirHandle()), null);
   }, { initScript: installMockPicker({ name: "UnusedFolder" }) });
 });
@@ -221,7 +223,7 @@ test("a Tier 2 write failure AND a simultaneous Tier 1 (localStorage) write fail
     await page.evaluate(() => window.__kg.storage.whenIdle()); // Tier 1 side must still resolve too, not hang
     await page.waitForTimeout(200);
 
-    assert.equal(downloads.length, 2, "the Tier 2 failure still falls back to the usual two Tier 3 downloads");
+    assert.equal(downloads.length, 3, "the Tier 2 failure still falls back to the usual three Tier 3 downloads");
     const nodeCount = await page.evaluate(() => window.__kg.state.nodes.length);
     assert.equal(nodeCount, 1, "the in-memory graph survives both failures");
     const version = await page.evaluate(() => window.__kg.state.meta.version);
