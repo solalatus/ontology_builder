@@ -1,8 +1,8 @@
 # Helper Agent — Implementation Plan
 
-Status: **Phase 1 implemented and tested** (see `helper_agent_todo.md` for the
-per-phase log). Revised after user feedback on the first draft (see §3, §4.1,
-§4.3, §4.9, §4.10 for what changed).
+Status: **Phases 1–2 implemented and tested** (see `helper_agent_todo.md` for
+the per-phase log). Revised after user feedback on the first draft (see §3,
+§4.1, §4.3, §4.9, §4.10 for what changed).
 Branch: `helper_agent`, branched from `origin/main` at `533820e` (tip after PR #30).
 
 ## 0. Standing ground rules for this subproject
