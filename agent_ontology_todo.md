@@ -8,9 +8,10 @@ enough that this can be picked up cold.
 
 ## Current State
 
-- **Phase:** Phases A through H are all implemented, tested, and green — see their checklists below,
-  now fully checked off (Phase C was folded into B; Phase E was folded into D — see each phase's own
-  note). Phase I (final regression pass, docs, PR) is what's left. Of the four open questions from
+- **Phase:** All of Phases A through I are implemented, tested, and green — see their checklists below,
+  now fully checked off (Phase C was folded into B; Phase E was folded into D; Phase H's actual scope
+  turned out small and was folded into the same pass as Phase G — see each phase's own note). **The
+  Agent Ontology initiative as originally planned is complete.** Of the four open questions from
   `agent_ontology_spec.md` §9: #3 (relationship-key collisions) is resolved — the user chose a list
   structure for `relationships` over a name-keyed map, sidestepping the collision-naming question
   entirely (see the dated Log entry). #4 (Groups) is also resolved, by a route neither original option
@@ -19,21 +20,20 @@ enough that this can be picked up cold.
   ahead of Phase F, tracked in the dated Log entry below and in the base app's own `TODO.md`/`spec.md`
   (Decision Log #11), not in this file's phase checklist since it's a base-app change, not an Agent
   Ontology one. Phase G's own flagged question (import merge/replace semantics) is resolved too — see
-  Decision #10 and Phase G's own checklist below. #1 (app title) and #2 (boolean property type) remain
-  open, deferred to their stated defaults — nothing in Phase F, G, or H needed to revisit either.
+  Decision #10. #1 (app title) and #2 (boolean property type) remain genuinely open — deferred to their
+  stated defaults throughout, since nothing in Phases F through I ever surfaced a reason to revisit
+  either; picking those back up (if ever) would be new, separately-scoped work, not a continuation of
+  this initiative's own plan.
 - **Relationship to the base app:** this branch builds strictly on top of `index.html` as it exists on
-  `main` today (all PRs through #27 merged: bugfixes, visual polish, Android-reliability follow-ups,
-  this branch's own Phase A/B/C/D/E/F/G/H, and the base app's own separate Groups-removal PR). Nothing in
+  `main` today (all PRs through #28 merged: bugfixes, visual polish, Android-reliability follow-ups,
+  this branch's own Phase A through H, and the base app's own separate Groups-removal PR). Nothing in
   the base app's `spec.md`/`TODO.md` changes as a *consequence of Agent Ontology* — Groups removal is a
   base-app decision with its own base-app PR, documented in the base app's own `spec.md`/`TODO.md`.
-- **Test suite:** 281 JS tests (254 base-plus-Groups-removal + 11 in `tests/agent-ontology-phase-f.spec.mjs`
-  + 15 in `tests/agent-ontology-phase-g.spec.mjs` + 1 new in `tests/localization.spec.mjs`, 13 → 14) + 11
-  Python tests, all green, run twice consecutively. (Phase A/B/D's own test files remain at their
-  original counts — 7/15/13 — this Current State bullet now just reports the whole-suite total rather
-  than re-deriving it phase-by-phase, since the base-app Groups-removal PR changed several base-app file
-  counts too; see that PR's own account in the base app's `TODO.md` for the itemized breakdown. Phase F's
-  own file grew from 10 to 11 tests during Phase G — a direct regression test for the `toCamelCaseId()`
-  idempotency bug Phase G's own idempotency test caught; see Phase G's checklist and the dated Log entry.)
+- **Test suite:** 282 JS tests (281 through Phase G/H + 1 new in `tests/agent-ontology-end-to-end.spec.mjs`,
+  the Phase I cross-phase integration test) + 11 Python tests, all green, run twice consecutively. (Phase
+  A/B/D's own test files remain at their original counts — 7/15/13 — this Current State bullet now just
+  reports the whole-suite total rather than re-deriving it phase-by-phase; see each phase's own checklist
+  above, and the base app's own `TODO.md`, for the itemized per-file breakdown.)
 - **A Phase B side effect worth knowing about:** widening `#sel-toolbar` from 3 icons to 4 (the new
   "Edit Details" icon) exposed a real, if narrow, pre-existing interaction hazard — a lingering
   selection's floating toolbar can now more easily reach over a nearby node's own click point, since
@@ -45,8 +45,12 @@ enough that this can be picked up cold.
   happened and why.
 - **Target file:** still `index.html` (same single file — Agent Ontology is not a separate app or a
   second file, just new fields/UI/export on the existing one).
-- **Next action:** Phase I — final regression pass, docs, PR for the whole initiative (or, if more work
-  surfaces first, whatever the user directs next; Phases A through H are all that were ever planned).
+- **Next action:** none planned — this initiative (Phases A through I) is complete. The howto's full
+  shape (classes with meaning/aliases/properties, relationships with meaning, rules, actions) can now be
+  hand-authored on canvas, exported as `.domain.yaml`, and re-imported, round-tripping cleanly. Any
+  further work here (Open Questions #1/#2, or anything beyond the original plan) would start as a fresh,
+  explicitly-scoped request, not a continuation of an in-flight phase. The base app's own `TODO.md` still
+  has Phase 10 (manual cross-platform verification) outstanding, unrelated to this initiative.
 
 ---
 
@@ -324,12 +328,28 @@ phase's remaining work was verification, not new string-writing:
   with interpolated counts, in both languages, mirroring the existing TXT-import-summary translation test
   right next to it.
 
-## Phase I — Regression pass, docs, PR
+## Phase I — Regression pass, docs, PR ✅ done
 
-- [ ] Full suite green (base app's existing tests + all new Agent Ontology tests), run twice
+- [x] Full suite green (base app's existing tests + all new Agent Ontology tests), run twice
       consecutively per this project's established convention
-- [ ] `agent_ontology_todo.md` "Current State" updated to reflect what shipped
-- [ ] Commit/push on `agent_ontology`; PR only if/when explicitly asked for
+- [x] **A new cross-phase integration test**, per the user's standing "keep adding test coverage" request:
+      every prior phase's own test file exercises its slice in isolation; nothing until now exercised
+      Phases A through H *together* in one realistic session, the same "integration bugs only surface in
+      combination" rationale `tests/end-to-end-workflow.spec.mjs` uses for the base app. Added
+      `tests/agent-ontology-end-to-end.spec.mjs`: two classes authored with meaning/aliases/properties via
+      the Details dialog, connected by a relationship with its own meaning, a rule and an action
+      referencing each other and a class, Save Version (verifying all three exported files' actual
+      content, not just their count), undo/redo across the domain-model save, a full reload proving every
+      new field across every collection survives Tier 1 persistence *together* (not just individually, as
+      each phase's own tests already prove), simulated hand-edit drift on a class's meaning, a YAML
+      re-import of the earlier export that aggressively overwrites the drift back to the exported value
+      (Phase G's semantics, exercised against a real multi-collection graph rather than a minimal
+      fixture), and finally Clear + Undo restoring the fully-reconciled graph exactly. Ran 4 times
+      consecutively on its own (not just as part of the full-suite runs below) given its length and
+      realistic-session complexity — stable every time, no flake.
+- [x] `agent_ontology_todo.md` "Current State" updated to reflect what shipped
+- [x] Commit/push on `agent_ontology`; PR opened (matching the pattern every prior phase in this
+      initiative has followed)
 
 ---
 
@@ -546,3 +566,29 @@ as the reference and record deltas/clarifications here instead of rewriting the 
   `toCamelCaseId()` regression) + 1 in `tests/localization.spec.mjs`) and
   `python3 -m unittest discover -s tools -p "test_*.py"` (11 tests, untouched — Phase G's import is
   JS-only), all green.
+- 2026-07-28 — Phase G/H's PR merged; user said "ok, next phase," repeating the standing "add some more
+  test coverage on the way" instruction from the previous round. Phase I is explicitly a wrap-up phase
+  (regression pass, docs, PR) rather than new feature work, so the coverage-add for this round took the
+  form of the one thing genuinely missing across the whole initiative: every phase's own test file
+  exercises its slice in isolation (Phase A's data model, Phase B/C's details dialog, Phase D/E's rules/
+  actions modal, Phase F's export, Phase G's import), but nothing exercised Phases A through H *together*
+  in one realistic session — the same gap `tests/end-to-end-workflow.spec.mjs` fills for the base app,
+  never mirrored for the Agent Ontology layer specifically. Added
+  `tests/agent-ontology-end-to-end.spec.mjs` (1 long test, not many small ones, matching that file's own
+  precedent): two classes authored through the real Details dialog UI with meaning/aliases/properties, a
+  relationship connected and given its own meaning the same way, a rule and action created through the
+  real Domain Model modal UI referencing each other and a class, Save Version with assertions against the
+  *actual content* of all three exported files (not just that three downloads happened — phase5/phase-f's
+  own tests already cover that mechanically), undo/redo across the domain-model save, a full reload
+  proving meaning/aliases/properties/relationship-meaning/rules/actions all survive Tier 1 persistence
+  *together* in one graph (each is proven individually elsewhere, but never all at once), simulated
+  hand-edit drift on a class's meaning after the reload, a YAML re-import of the earlier export
+  aggressively overwriting that drift back to the exported value (Phase G's semantics, exercised against
+  a real multi-collection graph rather than a minimal fixture), and finally Clear + Undo restoring the
+  fully-reconciled graph exactly. Ran standalone 4 times consecutively given its length before folding it
+  into the full-suite runs, to rule out flakiness specific to a long realistic session — stable every
+  time.
+  Full suite green twice consecutively: `node --test tests/*.spec.mjs` (282 tests — 281 + 1) and
+  `python3 -m unittest discover -s tools -p "test_*.py"` (11 tests, untouched), all green. This closes out
+  the Agent Ontology initiative as originally planned (Phases A through I) — see the "Current State"
+  section above for the final summary and what, if anything, would come next.
