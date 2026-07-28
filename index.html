@@ -1059,6 +1059,7 @@ const STRINGS = {
     agentContextCompacted: "Earlier context was summarized to fit the model's limit.",
     agentChatErrorInvalidKey: "OpenAI rejected the API key. Disconnect and reconnect with a valid one.",
     agentChatErrorRateLimit: "Rate limit reached. Wait a moment and try again.",
+    agentChatErrorInsufficientQuota: "This OpenAI account is out of quota. Check your plan and billing on platform.openai.com — waiting will not help.",
     agentChatErrorNetwork: "Could not reach the OpenAI API (network or CORS error).",
     agentChatErrorContextLength: "The conversation is too long and couldn't be shortened further. Try starting a new topic.",
     agentChatErrorGeneric: "Something went wrong contacting the agent. Try again.",
@@ -1169,6 +1170,7 @@ const STRINGS = {
     agentContextCompacted: "A korábbi beszélgetést összefoglaltuk, hogy beleférjen a modell korlátjába.",
     agentChatErrorInvalidKey: "Az OpenAI elutasította az API kulcsot. Válaszd le, majd csatlakozz újra érvényes kulccsal.",
     agentChatErrorRateLimit: "Elérted a sebességkorlátot. Várj egy kicsit, majd próbáld újra.",
+    agentChatErrorInsufficientQuota: "Ennek az OpenAI fióknak elfogyott a kerete. Ellenőrizd az előfizetést és a számlázást a platform.openai.com oldalon — várakozás nem segít.",
     agentChatErrorNetwork: "Nem sikerült elérni az OpenAI API-t (hálózati vagy CORS hiba).",
     agentChatErrorContextLength: "A beszélgetés túl hosszú, és nem sikerült tovább rövidíteni. Próbálj új témát kezdeni.",
     agentChatErrorGeneric: "Hiba történt az ügynök elérésekor. Próbáld újra.",
@@ -4500,20 +4502,30 @@ const AGENT_KEY_STORAGE_KEY = "kg-agent-key";
 const AGENT_MODEL_STORAGE_KEY = "kg-agent-model";
 const OPENAI_MODELS_URL = "https://api.openai.com/v1/models";
 
-// Reasoning/"thinking" models are the current o-series (o1, o3, o4, ...)
-// plus any id that says so explicitly. Heuristic on purpose (see
-// helper_agent_plan.md §4.1) — the naming scheme is OpenAI's to change, and
-// this stays correct without an edit as long as future reasoning models
-// keep either convention.
+// Reasoning/"thinking" models are the current o-series (o1, o3, o4, ...),
+// any GPT major version 5 or above (OpenAI folded reasoning into the
+// mainline GPT lineup starting there — confirmed live: a real key's model
+// list has no o-series entry newer than mid-2025, while gpt-5.x entries are
+// current and would otherwise never be considered), plus any id that says
+// so explicitly. Heuristic on purpose (see helper_agent_plan.md §4.1) — the
+// naming scheme is OpenAI's to change, and this stays correct without an
+// edit as long as future reasoning models keep one of these conventions.
 function isLikelyReasoningModel(id) {
-  return /^o[0-9]/i.test(id) || /think|reason/i.test(id);
+  return /^o[0-9]/i.test(id) || /^gpt-[5-9](\.|-|$)/i.test(id) || /think|reason/i.test(id);
 }
 
 // Excludes non-chat model families (audio/image/embedding/moderation/base
 // completion) so the fallback pool (when no reasoning model is available on
 // this key) doesn't default to something that can't hold a conversation.
+// deep-research/search-preview/search-api are also excluded even though
+// they're otherwise "chat-shaped" ids: they're specialized product
+// endpoints (autonomous long-running research jobs; web-search-grounded
+// completions) with different interaction models than this panel's
+// ordinary turn-by-turn tool-calling chat, not general defaults — found via
+// a real key's model list, where the newest-by-created id in the reasoning
+// pool was otherwise a "-deep-research-" variant, not a general chat model.
 function isLikelyChatModel(id) {
-  return !/whisper|tts|dall-e|embedding|moderation|davinci|babbage|curie|ada|realtime|audio|transcribe|image/i.test(id);
+  return !/whisper|tts|dall-e|embedding|moderation|davinci|babbage|curie|ada|realtime|audio|transcribe|image|deep-research|search-preview|search-api/i.test(id);
 }
 
 function pickDefaultAgentModel(models) {
@@ -5442,6 +5454,14 @@ async function callAgentChatRaw(messages, { tools, promptCacheKey } = {}) {
       throw { kind: "contextLength" };
     }
     if (res.status === 401) throw { kind: "invalidKey" };
+    // OpenAI uses the same 429 status for two very different situations,
+    // distinguished only by error.code: a transient rate_limit_exceeded
+    // (worth waiting out) vs. insufficient_quota, a permanently exhausted
+    // billing balance that no amount of waiting fixes — confirmed live
+    // against a real out-of-quota key (see tests/helper-agent-live-openai.spec.mjs),
+    // which returned an accurate-looking but actively wrong "wait a moment"
+    // message before this distinction existed.
+    if (res.status === 429 && code === "insufficient_quota") throw { kind: "insufficientQuota" };
     if (res.status === 429) throw { kind: "rateLimit" };
     throw { kind: "generic", status: res.status };
   }
@@ -5506,6 +5526,7 @@ function handleGetGraphStateCall() {
 function agentChatErrorText(err) {
   const kind = (err && err.kind) || "generic";
   if (kind === "invalidKey") return t("agentChatErrorInvalidKey");
+  if (kind === "insufficientQuota") return t("agentChatErrorInsufficientQuota");
   if (kind === "rateLimit") return t("agentChatErrorRateLimit");
   if (kind === "network") return t("agentChatErrorNetwork");
   if (kind === "contextLength") return t("agentChatErrorContextLength");

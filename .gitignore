@@ -1,2 +1,5 @@
 __pycache__/
 *.pyc
+
+# Local secrets for helper_agent live OpenAI tests (tests/README.md) — never committed.
+.env

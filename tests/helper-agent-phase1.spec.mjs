@@ -143,6 +143,57 @@ test("pickDefaultAgentModel falls back to the newest chat model when no reasonin
   });
 });
 
+// Regression test for a bug found by running against a real OpenAI key's
+// actual model list (tests/helper-agent-live-openai.spec.mjs): the newest
+// id in the "reasoning" pool was a deep-research variant -- a specialized
+// autonomous-research product, not a general chat model -- because it sorts
+// newer by `created` than the ordinary o-series/gpt-5 ids alongside it.
+test("pickDefaultAgentModel excludes deep-research/search-preview/search-api variants even when they're the newest id", async () => {
+  await withPage(async (page) => {
+    const result = await page.evaluate(() => {
+      const models = [
+        { id: "o4-mini", created: 100 },
+        { id: "o4-mini-deep-research-2025-06-26", created: 999 }, // newest id, but not a general chat model
+        { id: "gpt-5-search-api-2025-10-14", created: 998 }, // also newest-ish, also not a general chat model
+      ];
+      return window.__kg.agent.pickDefaultModel(models);
+    });
+    assert.equal(result, "o4-mini");
+  });
+});
+
+// Second half of the same live-discovered bug: OpenAI's gpt-5.x family is
+// this account's actual current reasoning-capable lineup, but the original
+// heuristic only recognized "o<digit>" ids and the literal words
+// think/reason -- so gpt-5.x was silently invisible to the "reasoning pool"
+// and a much older o-series id would win by default even when a newer
+// gpt-5.x release existed.
+test("pickDefaultAgentModel treats gpt-5.x and later as reasoning-family, preferring it over an older o-series id", async () => {
+  await withPage(async (page) => {
+    const result = await page.evaluate(() => {
+      const models = [
+        { id: "o1", created: 100 },
+        { id: "gpt-5.6-luna", created: 999 },
+        { id: "gpt-4.1", created: 500 }, // newer than o1 but not reasoning-family -- must lose to gpt-5.6-luna
+      ];
+      return window.__kg.agent.pickDefaultModel(models);
+    });
+    assert.equal(result, "gpt-5.6-luna");
+  });
+});
+
+test("pickDefaultAgentModel does not treat gpt-4.x as reasoning-family (only gpt-5 and above)", async () => {
+  await withPage(async (page) => {
+    const result = await page.evaluate(() => window.__kg.agent.pickDefaultModel([
+      { id: "gpt-4.1", created: 100 },
+      { id: "gpt-4o", created: 200 },
+    ]));
+    // No reasoning-family candidate in this list at all -- falls back to the
+    // newest plain chat model, same fallback path the pre-existing test above covers.
+    assert.equal(result, "gpt-4o");
+  });
+});
+
 test("an invalid key surfaces an inline error and does not connect", async () => {
   await withPageAllowingResourceErrors(async (page) => {
     await mockModelsRoute(page, { status: 401 });
