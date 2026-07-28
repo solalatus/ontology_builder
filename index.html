@@ -355,6 +355,20 @@
     margin: 14px 0 6px;
   }
 
+  /* Sub-field labels inside a Domain Model rule/action card (Conditions,
+     Input class, Preconditions, Effect, Verification). Unlike the
+     placeholder text on the fields themselves, these stay visible once a
+     field is filled in — without them, a filled-in Effect input and a
+     filled-in Verification input are two visually identical text boxes
+     with no way to tell which is which at a glance. */
+  .details-field-sublabel {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    opacity: 0.65;
+    margin: 2px 0 0;
+  }
+
   .details-textarea,
   .details-list input,
   .details-list select {
@@ -755,11 +769,16 @@ const STRINGS = {
     addRule: "+ Add rule",
     addAction: "+ Add action",
     ruleNamePlaceholder: "rule name",
+    conditionsLabel: "Conditions",
     conditionPlaceholder: "condition",
     addCondition: "+ Add condition",
     actionNamePlaceholder: "action name",
+    inputClassLabel: "Input class",
     noClassSelected: "— no class —",
+    preconditionsLabel: "Preconditions (hold Ctrl/Cmd to select multiple)",
+    effectLabel: "Effect",
     effectPlaceholder: "effect",
+    verificationLabel: "Verification",
     verificationPlaceholder: "verification",
     untitledRulePlaceholder: "(untitled rule)",
   },
@@ -826,11 +845,16 @@ const STRINGS = {
     addRule: "+ Szabály hozzáadása",
     addAction: "+ Művelet hozzáadása",
     ruleNamePlaceholder: "szabály neve",
+    conditionsLabel: "Feltételek",
     conditionPlaceholder: "feltétel",
     addCondition: "+ Feltétel hozzáadása",
     actionNamePlaceholder: "művelet neve",
+    inputClassLabel: "Bemeneti osztály",
     noClassSelected: "— nincs osztály —",
+    preconditionsLabel: "Előfeltételek (Ctrl/Cmd lenyomva több is kiválasztható)",
+    effectLabel: "Hatás",
     effectPlaceholder: "hatás",
+    verificationLabel: "Ellenőrzés",
     verificationPlaceholder: "ellenőrzés",
     untitledRulePlaceholder: "(névtelen szabály)",
   },
@@ -2307,6 +2331,17 @@ function refreshActionPreconditionOptions() {
   }
 }
 
+// A small persistent label above a rule/action card's sub-field — unlike
+// the field's own placeholder text, this stays visible once the field is
+// filled in, so e.g. a filled-in Effect input and a filled-in Verification
+// input (both plain text boxes) stay distinguishable at a glance.
+function createSublabel(text) {
+  const label = document.createElement("span");
+  label.className = "details-field-sublabel";
+  label.textContent = text;
+  return label;
+}
+
 function createRuleCard(rule) {
   const card = document.createElement("div");
   card.className = "domain-model-rule-card";
@@ -2336,7 +2371,7 @@ function createRuleCard(rule) {
     row.querySelector("input").focus();
   });
 
-  card.append(topRow, conditionsList, addConditionBtn);
+  card.append(topRow, createSublabel(t("conditionsLabel")), conditionsList, addConditionBtn);
   return card;
 }
 
@@ -2395,7 +2430,13 @@ function createActionCard(action) {
   verificationInput.placeholder = t("verificationPlaceholder");
   verificationInput.value = action ? action.verification : "";
 
-  card.append(topRow, classSelect, preconditionsSelect, effectInput, verificationInput);
+  card.append(
+    topRow,
+    createSublabel(t("inputClassLabel")), classSelect,
+    createSublabel(t("preconditionsLabel")), preconditionsSelect,
+    createSublabel(t("effectLabel")), effectInput,
+    createSublabel(t("verificationLabel")), verificationInput,
+  );
   return card;
 }
 
@@ -3154,6 +3195,18 @@ function toYaml(rootObject) {
 // giant lowercased word on the next pass — see agent_ontology_todo.md's
 // Phase G Log entry for the bug this fixes (a re-import wrongly seeing its
 // own previously-normalized edge as a non-match and duplicating it).
+//
+// Known, accepted limitation: two or more consecutive uppercase letters
+// (e.g. a name with back-to-back single-letter words, "isAKindOf") have no
+// internal lowercase-then-uppercase boundary for the regex above to find,
+// so a second pass through this function can lowercase part of that run
+// that a from-scratch derivation would have capitalized ("isAKindOf" ->
+// "isAkindOf" on re-derivation). This never affects a *first* derivation
+// from a human-typed relation label (the case every real caller hits), and
+// the result is still stable after that one lossy step — re-deriving a
+// third time reproduces the second result exactly — so it can't cause the
+// re-import duplicate-edge bug above; it's pinned by a test precisely so a
+// future change can't silently make it worse without a test failing.
 function toCamelCaseId(text) {
   const spaced = String(text).replace(/([\p{Ll}\p{N}])(\p{Lu})/gu, "$1 $2");
   const words = spaced.trim().split(/[^\p{L}\p{N}]+/u).filter(Boolean);
