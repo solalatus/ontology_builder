@@ -9,14 +9,15 @@ merged into `main` — see `helper_agent_plan.md` §0.
 
 ## Current State
 
-- **Phase:** Phases 1 (panel scaffold + BYOK connect modal + live model list), 2 (live chat, no tools
-  yet), and 3 (tool-calling) are implemented, tested, and green, plus a Phase-3 addendum (`get_graph_state`
-  + prompt-cache key, user-directed after Phase 3 shipped — see its own dated Log entry below). Phases
-  4–6 (see `helper_agent_plan.md` §6) are not started.
+- **Phase:** All six phases (see `helper_agent_plan.md` §6) are implemented, tested, and green: 1 (panel
+  scaffold + BYOK connect modal + live model list), 2 (live chat, no tools yet), 3 (tool-calling, plus its
+  `get_graph_state` addendum — see its own dated Log entry below), 4 (baked knowledge + finalized system
+  prompt), 5 (visual QA pass), and 6 (this final regression/docs pass).
 - **Test suite:** `tests/helper-agent-phase1.spec.mjs` (11) + `tests/helper-agent-phase2.spec.mjs` (15) +
-  `tests/helper-agent-phase3.spec.mjs` (9) + `tests/helper-agent-graph-state.spec.mjs` (10), all mocking
-  the OpenAI API via `page.route()` (no real network calls, no API key needed). Full repo suite: 340 JS
-  tests, all green, run twice consecutively.
+  `tests/helper-agent-phase3.spec.mjs` (9) + `tests/helper-agent-graph-state.spec.mjs` (10) +
+  `tests/helper-agent-phase4.spec.mjs` (8), all mocking the OpenAI API via `page.route()` (no real network
+  calls, no API key needed). Full repo suite: 348 JS tests + 13 Python tests, all green, run twice
+  consecutively.
 - **What Phase 1 built:** the collapsed-by-default `#agent-panel` (toggle fixed to the left edge), the
   two-stage `#agent-connect-overlay` modal (stage 1: enter API key → live `GET /v1/models` call, which
   doubles as the real-world CORS check per plan §3; stage 2: review/override the heuristically
@@ -251,3 +252,87 @@ connection — the user's own explicit direction, overriding this plan's earlier
       of an unrecognized tool name. Updated one pre-existing Phase 3 test whose "exactly one tool"
       assertion this addendum intentionally made untrue.
 - Full suite: 340 JS tests + 13 Python tests, green, run twice consecutively.
+
+## Phase 4 — System prompt + knowledge
+
+- [x] `AGENT_KNOWLEDGE` populated (previously the empty seam Phase 2 left behind): the full
+      `minimal_domain_model_howto.md` text, the full `tools/load_edge_list.py` source (kept in sync with
+      the retrospective-audit BOM fix — `encoding="utf-8-sig"`, not plain `utf-8`), and a condensed,
+      newly-authored excerpt of the paper's operational sections (§4 formalism rationale — why
+      relationships and properties are both just predicates distinguished by range; §7 recommended
+      minimal profile, levels 0–3; §9 construction method's 9 steps) — deliberately not the full paper, no
+      proofs/citations/benchmark numbers.
+- [x] New "INTERVIEW PROCESS" system-prompt section (`AGENT_SYSTEM_PROMPT_BASE`, between GROUND RULES and
+      SCOPE): 10 numbered phases (0 orientation via `get_graph_state` first, 1 real questions/actions, 2
+      classes, 3 relationships, 4 decision-bearing properties, 5 language layer, 6 constraints/fixed
+      choices, 7 rules, 8 actions, 9 validation pass with a competency check + final checklist), adapted
+      from the original MyGPT prompt's phase structure and the paper's §9 construction method, reconciled
+      for incremental `apply_ontology_yaml` calls instead of an end-of-session file dump.
+- [x] Tests: `tests/helper-agent-phase4.spec.mjs` (7 tests at the time) — the full howto content present
+      (including its own complete compact example, proving the whole doc is embedded rather than
+      summarized), the loader source present with the BOM fix, the paper excerpt present with negative
+      assertions proving it's a condensation (no `Proposition \d`, no benchmark dataset names, no numbered
+      citation markers), all 10 INTERVIEW PROCESS phase markers present, no leaked API mechanics
+      (endpoint URL, key prefix), system-prompt stability across repeated calls, and language-toggle
+      isolation (only the OUTPUT LANGUAGE directive block differs between en/hu, everything else
+      byte-identical).
+
+### Log
+
+**2026-07-28 — Phase 4 implemented.** The knowledge content was authored from the actual uploaded source
+files (the howto doc and `tools/load_edge_list.py`, copied verbatim) plus a fresh re-read of the full
+paper PDF for §4/§7/§9, rather than paraphrased from memory — confirmed accurate against the paper's own
+text before splicing into `index.html`. One test-authoring bug surfaced and fixed during this phase's own
+test-writing, not a content bug: the "no numbered citation markers" negative assertion
+(`assert.doesNotMatch(prompt, /\[\d+\]/)`) initially false-matched the embedded Python loader's own
+`sys.argv[0]`/`sys.argv[1]` array indexing. Fixed by tightening the regex to
+`/(?<!\w)\[\d+\]/` — a citation bracket is never immediately preceded by a word character the way
+`argv[` is. Full suite: 347 JS tests + 13 Python tests, green, run twice consecutively.
+
+## Phase 5 — i18n + visual polish
+
+i18n needed no new work here — every phase since Phase 1 added its own bilingual `STRINGS` entries as it
+went, so this phase was purely the visual QA sweep the plan's §6 called for.
+
+- [x] Screenshot-driven QA pass (`page.screenshot()` against a real headless Chromium, mocked OpenAI
+      responses): collapsed panel, disconnected expanded panel, both connect-modal stages (key entry,
+      model review), both connect-modal error states (empty key, network/CORS failure), a connected panel
+      with an empty transcript, a mixed-role transcript (user/assistant text/tool-outcome note), light and
+      dark themes, a narrow (420px) viewport, and long-message word-wrap/auto-scroll behavior.
+- [x] Found and fixed one real defect: `agentNoToolsNote` (the static line under the transcript) still
+      read "This agent can only talk for now — editing the canvas arrives in a later phase" in both
+      languages — stale copy written before Phase 3 shipped `apply_ontology_yaml`, never updated since.
+      Reworded (en: "This agent can read the current domain model and apply changes to it — review each
+      edit as it lands."; hu: matching translation) in both the `STRINGS` table and the static HTML
+      fallback markup.
+- [x] Everything else held up under the sweep with no changes needed: text wrapping, transcript
+      auto-scroll, panel width at a narrow viewport, error-message contrast/readability, and both themes
+      all rendered correctly.
+- [x] Test: added to `tests/helper-agent-phase4.spec.mjs` (bringing it to 8) — asserts the note no longer
+      contains the stale "can only talk for now" / "arrives in a later phase" phrasing in either language,
+      and does contain the corrected wording.
+
+### Log
+
+**2026-07-28 — Phase 5 implemented.** No CSS/layout changes were needed — the panel's existing flex layout
+(transcript `flex:1` with a `max-height: 40vh` cap, growing from the top rather than pinning input to the
+very bottom on a short conversation) was already a deliberate, working choice from earlier phases, not a
+new regression, so it was left as-is rather than redesigned without a concrete complaint driving it. The
+one substantive finding (stale pre-Phase-3 copy) is exactly the kind of thing this phase's QA sweep was
+for. Full suite: 348 JS tests + 13 Python tests, green, run twice consecutively.
+
+## Phase 6 — Tests + docs
+
+- [x] Full regression pass: 348 JS tests (`node --test tests/*.spec.mjs`), run twice consecutively, plus
+      13 Python tests (`python3 -m unittest discover -s tools -p "test_*.py"`) — all green.
+- [x] `helper_agent_plan.md` §6 updated to mark Phases 4–6 done, with a short summary of what each
+      actually built (vs. the plan's original forward-looking description).
+- [x] This file's Current State and per-phase sections updated to close out the subproject's originally
+      planned six phases.
+
+### Log
+
+**2026-07-28 — Phase 6 implemented.** Per the user's explicit instruction to implement all remaining
+phases (4, 5, and 6) in one continuous pass. This closes out the six-phase plan from
+`helper_agent_plan.md` §6 in full; the branch remains `helper_agent`, still never merged into `main` per
+§0.

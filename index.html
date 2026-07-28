@@ -811,7 +811,7 @@
       </div>
       <div id="agent-transcript" class="agent-transcript"></div>
       <p id="agent-typing-indicator" class="agent-typing-indicator" style="display:none;">…</p>
-      <p id="agent-no-tools-note" class="agent-no-tools-note">Az ügynök egyelőre csak beszélget, a vászon szerkesztése egy következő fázisban érkezik.</p>
+      <p id="agent-no-tools-note" class="agent-no-tools-note">Az ügynök olvassa az aktuális doménmodellt, és változtatásokat is alkalmazhat rajta — kövesd nyomon az egyes szerkesztéseket.</p>
       <div class="agent-input-row">
         <input id="agent-chat-input" type="text" disabled placeholder="Írj üzenetet…">
         <button id="agent-chat-send" type="button" disabled>Küldés</button>
@@ -1045,7 +1045,7 @@ const STRINGS = {
     agentRememberKey: "Remember this key on this device",
     agentDisconnect: "Disconnect",
     agentForgetKey: "Forget saved key",
-    agentNoToolsNote: "This agent can only talk for now — editing the canvas arrives in a later phase.",
+    agentNoToolsNote: "This agent can read the current domain model and apply changes to it — review each edit as it lands.",
     agentChatSend: "Send",
     agentChatInputPlaceholder: "Type a message…",
     agentConnecting: "Connecting…",
@@ -1155,7 +1155,7 @@ const STRINGS = {
     agentRememberKey: "A kulcs megjegyzése ezen az eszközön",
     agentDisconnect: "Leválasztás",
     agentForgetKey: "Elmentett kulcs törlése",
-    agentNoToolsNote: "Az ügynök egyelőre csak beszélget, a vászon szerkesztése egy következő fázisban érkezik.",
+    agentNoToolsNote: "Az ügynök olvassa az aktuális doménmodellt, és változtatásokat is alkalmazhat rajta — kövesd nyomon az egyes szerkesztéseket.",
     agentChatSend: "Küldés",
     agentChatInputPlaceholder: "Írj üzenetet…",
     agentConnecting: "Csatlakozás…",
@@ -4828,11 +4828,378 @@ const GET_GRAPH_STATE_TOOL = {
   },
 };
 
-// Baked knowledge (howto + load_edge_list.py + condensed paper excerpts,
-// plan §4.4) is authored in Phase 4. Left empty here on purpose — the seam
-// below already knows how to fold it in, so Phase 4 only has to fill this
-// constant in, not touch the request-building code.
-const AGENT_KNOWLEDGE = "";
+// Baked knowledge (Phase 4, helper_agent_plan.md §4.4): the howto doc in
+// full, the reference Python TXT loader (kept byte-identical to
+// tools/load_edge_list.py by the comment above it -- if that file changes,
+// update this constant to match), and a condensed excerpt of the paper's
+// operational sections (4, 7, 9 -- not the formal proofs, not the full
+// paper). Never touched by context-length compaction (only agentState.
+// apiMessages compacts, plan §4.10) and never changes based on live graph
+// state (see GET_GRAPH_STATE_TOOL's own comment on why that's a pull tool,
+// not baked in here) -- this constant is as static as AGENT_SYSTEM_PROMPT_BASE
+// itself, which is what keeps the whole system-prompt prefix cacheable.
+const AGENT_KNOWLEDGE = `
+## How to describe a domain for an AI agent
+
+# How to Describe a Domain for an AI Agent
+
+This guide helps you create a small, useful description of your domain without technical modeling knowledge.
+
+The goal is simple: describe only what the agent must **recognize, connect, compare, decide, or change**.
+
+## 1. List the important kinds of things
+
+Write down the main business objects the agent needs to understand.
+
+Examples:
+
+- Invoice
+- Supplier
+- Employee
+- Purchase order
+
+Use familiar singular names. Avoid database table names.
+
+## 2. Give each thing a short meaning
+
+Use one plain sentence.
+
+\`\`\`yaml
+Invoice:
+  meaning: A request from a supplier to receive payment.
+\`\`\`
+
+## 3. Add common alternative names
+
+Include words that users may use for the same concept.
+
+\`\`\`yaml
+Supplier:
+  meaning: An organization providing goods or services.
+  aliases: [vendor]
+\`\`\`
+
+Use aliases only when the words mean the same thing in your setting.
+
+## 4. Describe the important connections
+
+Write each connection as:
+
+\`\`\`text
+Thing --relationship--> Other thing
+\`\`\`
+
+Example:
+
+\`\`\`text
+Invoice --issued by--> Supplier
+Invoice --matches--> Purchase order
+Employee --works for--> Department
+\`\`\`
+
+Give every relationship a clear verb phrase.
+
+## 5. Add only decision-relevant properties
+
+A property is a value the agent may need to identify, filter, compare, explain, or change.
+
+Good examples:
+
+- invoice number
+- amount
+- status
+- due date
+- risk level
+- approval limit
+
+Do not include technical fields that users never ask about.
+
+\`\`\`yaml
+Invoice:
+  properties:
+    invoiceNumber:
+      type: text
+    amount:
+      type: number
+      unit: EUR
+    status:
+      allowed: [draft, matched, disputed, approved, paid]
+    dueDate:
+      type: date
+\`\`\`
+
+## 6. Use fixed choices where possible
+
+When a property has a small set of valid values, list them.
+
+\`\`\`yaml
+riskStatus:
+  allowed: [clear, review-required, blocked]
+\`\`\`
+
+This prevents inconsistent wording.
+
+## 7. Add simple rules only when needed
+
+Write rules as ordinary conditions.
+
+\`\`\`yaml
+canApproveInvoice:
+  conditions:
+    - invoice status is matched
+    - supplier risk status is clear
+    - invoice amount is within the employee approval limit
+\`\`\`
+
+Keep rules separate from descriptions.
+
+## 8. Describe actions separately
+
+For each action, state:
+
+- what it acts on;
+- what must be true first;
+- what changes;
+- how success is checked.
+
+\`\`\`yaml
+action: approveInvoice
+input: Invoice
+preconditions:
+  - canApproveInvoice
+effect:
+  - invoice status becomes approved
+verification:
+  - read the invoice again and confirm the status
+\`\`\`
+
+## Complete compact example
+
+\`\`\`yaml
+classes:
+  Invoice:
+    meaning: A request from a supplier to receive payment.
+    properties:
+      invoiceNumber: {type: text}
+      amount: {type: number, unit: EUR}
+      status:
+        allowed: [draft, matched, disputed, approved, paid]
+      dueDate: {type: date}
+
+  Supplier:
+    meaning: An organization providing goods or services.
+    aliases: [vendor]
+    properties:
+      riskStatus:
+        allowed: [clear, review-required, blocked]
+
+  Employee:
+    meaning: A person working for the organization.
+    properties:
+      approvalLimit: {type: number, unit: EUR}
+
+relationships:
+  issuedBy:
+    from: Invoice
+    to: Supplier
+    meaning: The supplier that submitted the invoice.
+
+rules:
+  canApproveInvoice:
+    conditions:
+      - invoice status is matched
+      - supplier risk status is clear
+      - invoice amount is within the employee approval limit
+
+actions:
+  approveInvoice:
+    input: Invoice
+    preconditions: [canApproveInvoice]
+    effect: invoice status becomes approved
+    verification: confirm the new invoice status
+\`\`\`
+
+## Final check
+
+Before finishing, ask:
+
+1. Does every class represent something users talk about?
+2. Does every relationship have a clear direction and verb?
+3. Does every property help identify, filter, decide, explain, or act?
+4. Are common synonyms included?
+5. Are fixed value lists used where appropriate?
+6. Are important actions protected by explicit conditions?
+
+If an item does not help the agent perform a real task, leave it out.
+
+---
+
+## Reference TXT edge-list loader (Python, for describing the .txt export/import format precisely if asked)
+
+\`\`\`python
+"""Reference loader for the Knowledge Graph Canvas TXT edge-list format
+(spec.md Section 5.2). Standard library only, no dependencies.
+
+This is the exact snippet from spec.md's Appendix, kept in sync by hand —
+see tools/test_load_edge_list.py. index.html's own importer (Section 5.3)
+additionally does label-matched merge/replace against live graph state;
+this module is read-only, for external scripts/pipelines.
+"""
+
+import sys
+
+
+def load_edge_list(path):
+    nodes, edges = [], []
+    section = None
+    # utf-8-sig (not plain utf-8) so a leading BOM — which Windows tools like
+    # Notepad/Excel add by default on "Save As UTF-8" — is stripped before
+    # line processing. Without this, the BOM prefixes the file's first
+    # line, so it never equals "## NODES" literally and every node in the
+    # file is silently dropped (edges still parse, since "## EDGES" appears
+    # later in the file, past where the BOM's effect only reaches). Decodes
+    # identically to plain utf-8 when there's no BOM.
+    with open(path, encoding="utf-8-sig") as f:
+        for raw in f:
+            line = raw.strip()
+            # Section headers are checked before the generic "#" comment
+            # skip below, since "## NODES"/"## EDGES" also start with "#" —
+            # checking the comment rule first would make both headers
+            # unreachable and the loader would parse nothing at all.
+            if line == "## NODES":
+                section = "nodes"
+                continue
+            if line == "## EDGES":
+                section = "edges"
+                continue
+            if not line or line.startswith("#"):
+                continue
+            if section == "nodes":
+                if line:
+                    nodes.append({"label": line})
+            elif section == "edges":
+                if " : " not in line:
+                    continue  # malformed — no relation separator, skip
+                conn, relation = line.rsplit(" : ", 1)
+                if "<->" in conn:
+                    directed = False
+                    src, tgt = conn.split("<->", 1)
+                elif "->" in conn:
+                    directed = True
+                    src, tgt = conn.split("->", 1)
+                else:
+                    continue  # malformed — no connector, skip
+                src, tgt, relation = src.strip(), tgt.strip(), relation.strip()
+                if src and tgt and relation:
+                    edges.append({
+                        "source": src,
+                        "target": tgt,
+                        "relation": relation,
+                        "directed": directed,
+                    })
+    return nodes, edges
+
+
+if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        print(f"usage: {sys.argv[0]} <path-to-txt-file>", file=sys.stderr)
+        sys.exit(1)
+    import json
+    parsed_nodes, parsed_edges = load_edge_list(sys.argv[1])
+    print(json.dumps({"nodes": parsed_nodes, "edges": parsed_edges}, indent=2))
+\`\`\`
+
+---
+
+## Background: why this model looks the way it does
+
+Condensed from "A Minimal Semantic Representation for Domain-Grounded AI
+Agents" (Szabados, 2026), sections 4, 7, and 9 — the operational parts, not
+the formal proofs. This tool is the paper's own reference implementation.
+
+### The formalism (paper section 4)
+
+The model is a Minimal Typed Semantic Representation (MTSR): classes,
+datatypes/value-sets, predicates, an optional subclass relation, and a
+lexical layer (preferred label, aliases, short definition) per class and
+relationship.
+
+The key move: a "relationship" and a "property" are not different kinds of
+thing. Both are predicates, distinguished only by what they point at — a
+predicate whose target is another class (like \`issuedBy: Invoice ->
+Supplier\`) is what this tool's YAML calls a relationship; a predicate whose
+target is a datatype or a fixed value set (like \`status: Invoice ->
+{draft, matched, ...}\`) is what this tool calls a property. That's why the
+YAML shape has both \`relationships\` and per-class \`properties\` instead of
+forcing everything into one or the other.
+
+Two things earn their place for reasons beyond "seemed useful": the lexical
+layer (meaning/aliases) exists because a purely symbolic schema is
+invariant under renaming, while a natural-language user's phrasing is not
+— so without labels/aliases an LLM can't reliably map "vendor" to \`Supplier\`.
+Boundary constraints (required, allowed values, numeric bounds) are kept
+separate from the core model because open-world semantic entailment cannot
+treat an absent value as invalid — a closed-world check is a genuinely
+different kind of thing, evaluated only at query/action boundaries, not
+baked into what a class or predicate "means."
+
+Actions in the full paper's formal model are \`<name, inputs, preconditions,
+effect, authorization, verification>\` — this tool's own action fields
+(input, preconditions, effect, verification) are the operational subset;
+authorization/enforcement is deliberately left to systems outside this
+tool, same as the paper's own worked example ("the language model may
+propose the action; preconditions and authorization checks should be
+enforced outside the model").
+
+### Recommended minimal profile (paper section 7)
+
+A practical way to decide how much to model, in increasing order — don't
+skip to a higher level than a class actually needs:
+
+- **Level 0 — relation backbone.** Classes and relationships only. Enough
+  for an agent that just navigates/retrieves connected entities.
+- **Level 1 — decision properties.** Add properties only when they're used
+  to identify, filter, compare, decide, explain, or populate a tool call.
+  A practical target is 3-10 agent-visible properties per important class
+  — not every field a database happens to have.
+- **Level 2 — action-boundary constraints.** Add \`required\`/\`allowed\`/
+  numeric bounds only where invalid or missing data must actually block an
+  action.
+- **Level 3 — optional extensions** (subclassing, inverse predicates,
+  disjointness, provenance, rule engines, full OWL profiles) are
+  deliberately out of scope for this tool. If a domain seems to need them,
+  say so plainly rather than trying to approximate them in this format.
+
+### Construction method (paper section 9)
+
+The paper's own recommended sequence for building a model like this one,
+which the interview process below mirrors phase-for-phase:
+
+1. Collect 20-50 real questions and 5-15 real actions the agent must
+   handle — don't start by documenting every field in every system.
+2. Promote a noun to a class only when the agent must identify it,
+   retrieve it, connect it to other objects, or pass it to a tool.
+3. Promote a verb phrase to a relationship only when it's a stable,
+   navigable connection between two classes.
+4. Promote a value to a property only when it shows up in a real filter,
+   comparison, action precondition, tool parameter, or explanation.
+5. Add one preferred label, aliases, and one short definition per class
+   and relationship. Treat near-synonyms carefully — two words can mean
+   the same thing in one setting and different things in another.
+6. Mark a property required or bounded only where its absence or an
+   invalid value would actually have to change what the agent does.
+7. (Deployment-time, not authoring: record which external system each
+   predicate is sourced from, and which source wins on disagreement.)
+8. (Runtime, not authoring: an agent should be handed only the relevant
+   classes/paths/properties for its current task, not the whole model.)
+9. Test every class/property/rule/action against the real questions and
+   actions from step 1 — something that doesn't help answer or perform any
+   of them shouldn't be in the model.
+
+Steps 7-8 are about production deployment and runtime retrieval, not this
+conversation — mentioned here only for completeness; nothing about them
+changes how you conduct the interview.
+`;
 
 const AGENT_SYSTEM_PROMPT_BASE = `ROLE
 You are a professional knowledge engineer specializing in Minimal Typed
@@ -4853,6 +5220,51 @@ GROUND RULES
   before merging two terms into one class.
 - Never fabricate domain content. If the expert is unsure, record it as an
   open question rather than guessing.
+
+INTERVIEW PROCESS (mirrors the construction method your own knowledge
+explains the reasoning for — adapt the pacing to how much the expert
+already has instead of following it rigidly)
+0. Orientation: call get_graph_state first. If it's empty, ask what
+   business domain/agent this is for, in one or two sentences, and briefly
+   explain the process (about 9 short phases; the expert can stop early
+   with whatever is captured so far). If it's not empty, recap what's
+   already there instead of assuming a blank slate.
+1. Real questions and actions: elicit 10-20 real questions the agent must
+   answer and 5-10 actions it must perform. Do not model anything yet —
+   just collect these verbatim. This list is the acceptance test for
+   everything that follows.
+2. Classes: from that list, propose candidate classes (kinds of things,
+   not instances). Confirm each one earns its place: "does the agent need
+   to identify, retrieve, connect, or pass this to a tool?"
+3. Relationships: propose relationships as verb phrases between two
+   classes, each with an explicit direction. Reject vague or directionless
+   relationships.
+4. Decision-bearing properties: for each class, propose ONLY properties
+   that trace back to a Phase 1 question or action (filter, compare,
+   decide, explain, or act). Reject "nice to know" fields.
+5. Language layer: for every class and relationship, capture one plain
+   meaning sentence; ask about aliases/synonyms explicitly (don't assume).
+6. Constraints and fixed choices: for properties with a small value set,
+   capture the allowed list. Ask "what breaks if this value is missing or
+   wrong?" to decide if a property is required/bounded.
+7. Rules: capture named, plain-language condition lists only where a real
+   decision depends on them.
+8. Actions: for each Phase-1 action, capture its input class,
+   precondition rule(s), effect, and a verification step.
+9. Validation pass — run BOTH checks before considering a class,
+   relationship, rule, or action finished:
+   (a) Competency check: replay every relevant Phase-1 question/action
+       against the current model out loud; if it can't be answered, go
+       back to the relevant earlier phase.
+   (b) Final checklist: every class is something users talk about; every
+       relationship has a clear direction and verb; every property helps
+       identify/filter/decide/explain/act; common synonyms are captured;
+       fixed value lists are used where appropriate; important actions
+       have explicit conditions.
+   Report the result of both checks to the expert plainly.
+Apply each apply_ontology_yaml call as soon as a phase step is confirmed —
+don't wait for phase 9 to record anything (see EDITING THE LIVE ONTOLOGY
+below).
 
 SCOPE (this agent is embedded in a single-page ontology-building tool, not a
 general-purpose assistant)

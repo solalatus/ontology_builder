@@ -1,7 +1,7 @@
 # Helper Agent — Implementation Plan
 
-Status: **Phases 1–3 implemented and tested, plus a Phase-3 addendum**
-(`get_graph_state` + prompt-cache key — see §4.5b; per-phase log in
+Status: **Phases 1–6 implemented and tested** (Phase-3 addendum:
+`get_graph_state` + prompt-cache key — see §4.5b; per-phase log in
 `helper_agent_todo.md`). Revised after user feedback on the first draft (see
 §3, §4.1, §4.3, §4.9, §4.10 for what changed).
 Branch: `helper_agent`, branched from `origin/main` at `533820e` (tip after PR #30).
@@ -491,16 +491,30 @@ Phases A–I), renumbered fresh for this subproject:
 - **Phase 3 — Tool-calling.** Wire `apply_ontology_yaml`, the merge-based
   commit path, the applied-diff transcript line, the single-call-per-turn
   guardrail.
-- **Phase 4 — System prompt + knowledge.** Finalize the adapted system
-  prompt and author the condensed paper excerpt (§4.4) as a concrete
-  reviewable string.
-- **Phase 5 — i18n + visual polish.** Bilingual strings, styling pass
-  matching existing modal/panel conventions.
-- **Phase 6 — Tests + docs.** Playwright tests with a mocked `fetch` (real
-  OpenAI calls aren't viable in CI — no committed key, and non-deterministic
-  model output). Mock returns scripted tool-call responses to exercise the
-  merge/undo/transcript path deterministically. Update this repo's todo/spec
-  docs for the subproject on the `helper_agent` branch only.
+- **Phase 4 — System prompt + knowledge (done).** `AGENT_KNOWLEDGE` populated
+  with the full howto doc, the full `load_edge_list.py` source, and a
+  condensed operational excerpt of the paper's §4/§7/§9 (not the formal
+  proofs/citations/benchmarks). `AGENT_SYSTEM_PROMPT_BASE` gained a new
+  10-phase (0–9) "INTERVIEW PROCESS" section adapted from the original MyGPT
+  prompt and the paper's §9 construction method, reconciled for incremental
+  tool-calling instead of an end-of-session dump.
+- **Phase 5 — i18n + visual polish (done).** i18n was already complete
+  incrementally in each prior phase. The polish pass was a screenshot-driven
+  QA sweep (connect modal stages/errors, disconnected/connected panel, a
+  mixed-role transcript, narrow-viewport and long-message wrapping, both
+  themes) that found and fixed one real defect: `agentNoToolsNote` still read
+  "this agent can only talk for now — editing the canvas arrives in a later
+  phase," stale copy left over from before Phase 3 shipped
+  `apply_ontology_yaml`. No layout/CSS changes were needed — wrapping,
+  scrolling, and contrast all held up under the QA sweep.
+- **Phase 6 — Tests + docs (done).** Playwright tests with a mocked `fetch`
+  throughout (real OpenAI calls aren't viable in CI — no committed key, and
+  non-deterministic model output). `tests/helper-agent-phase4.spec.mjs` (8
+  tests) covers the baked knowledge content, the INTERVIEW PROCESS section,
+  system-prompt stability/cache-safety, and the corrected `agentNoToolsNote`
+  copy. Full suite green (348 JS tests + 13 Python tests, run twice). Docs
+  (this file + `helper_agent_todo.md`) updated for the subproject on the
+  `helper_agent` branch only.
 
 Each phase can be its own PR against `helper_agent`, following the existing
 project convention of phase-sized reviewable increments.
