@@ -71,7 +71,7 @@ test("toggling theme swaps the accent/shadow tokens too, not just the base palet
     const darkBorder = await computedStyle(page, "#btn-connect", "borderColor");
 
     await page.click("#btn-theme-toggle");
-    await page.waitForTimeout(200); // this test previously sampled immediately after the click, racing the same border-color transition the other tests in this file already wait out — a rare full-suite-under-load flake traced to exactly that missing wait
+    await page.waitForTimeout(200); // this test previously sampled immediately after the click, racing the same border-color transition the other tests in this file already wait out — a rare full-suite-under-load flake
     const lightBorder = await computedStyle(page, "#btn-connect", "borderColor");
 
     assert.notEqual(darkBorder, lightBorder, "the accent color used for an armed button's border should differ between dark and light themes");

@@ -115,6 +115,26 @@ test("an untitled graph's placeholder name tracks the current language, but a us
   });
 });
 
+// The test above renames to a name that doesn't collide with either
+// language's placeholder text. This one renames to the *literal* English
+// placeholder string on purpose — "never touched" used to be inferred by
+// string equality against that exact text, which couldn't tell this
+// deliberate choice apart from having never been renamed at all.
+test("renaming a graph to the literal placeholder text on purpose still survives a language toggle untranslated", async () => {
+  await withRealDefaultPage(async (page) => {
+    await page.click("#btn-lang-toggle"); // -> en, so the placeholder text and the chosen name are identical strings
+    assert.equal(await page.locator("#graph-title").textContent(), "Untitled Graph");
+
+    await page.click("#graph-title");
+    await page.locator(".kg-inline-input").fill("Untitled Graph");
+    await page.keyboard.press("Enter");
+
+    await page.click("#btn-lang-toggle"); // -> hu
+    assert.equal(await page.locator("#graph-title").textContent(), "Untitled Graph",
+      "a deliberate rename to this exact text must not be mistaken for the untouched default and retranslated");
+  });
+});
+
 test("canvas empty-state message and node/relation placeholders translate via the t() hook", async () => {
   await withRealDefaultPage(async (page) => {
     const huEmpty = await page.evaluate(() => window.__kg.lang.t("emptyCanvasMessage", window.__kg.lang.t("addNode")));

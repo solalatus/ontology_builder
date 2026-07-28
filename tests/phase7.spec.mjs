@@ -77,6 +77,40 @@ function installMockPicker({ name = "MockFolder", rejectWith = null } = {}) {
   };
 }
 
+// Returns a *different* named folder each time showDirectoryPicker is
+// called, each with its own independent in-memory write log
+// (window.__mockFolderWritesByName[folderName]) — for exercising what
+// happens on a *second* grant while Tier 2 is already connected to a first
+// folder (connectFolderSync() has no guard against this; nothing in the
+// existing suite exercised granting twice in one session before).
+function installSequentialMockPicker(names) {
+  return {
+    arg: names,
+    fn: (names) => {
+      window.__mockFolderWritesByName = {};
+      let callIndex = 0;
+      window.showDirectoryPicker = async () => {
+        const name = names[Math.min(callIndex, names.length - 1)];
+        callIndex++;
+        window.__mockFolderWritesByName[name] = window.__mockFolderWritesByName[name] || {};
+        return {
+          name,
+          async getFileHandle(filename) {
+            return {
+              async createWritable() {
+                return {
+                  async write(content) { window.__mockFolderWritesByName[name][filename] = content; },
+                  async close() {},
+                };
+              },
+            };
+          },
+        };
+      };
+    },
+  };
+}
+
 // A picker grant that succeeds, but whose writes always fail — exercises
 // performSaveVersion()'s fallback-to-download branch.
 function installFailingWritePicker() {
@@ -122,6 +156,45 @@ test("clicking Folder Sync grants a folder and updates the button to reflect the
     assert.equal(await page.locator("#btn-folder-sync").textContent(), "Synced: MockFolder");
     assert.equal(await page.getAttribute("#btn-folder-sync", "aria-pressed"), "true");
   }, { initScript: installMockPicker({ name: "MockFolder" }) });
+});
+
+// connectFolderSync() (index.html) has no guard against being invoked while
+// already connected — clicking Folder Sync a second time silently re-grants
+// and switches the write target to whatever folder is picked next, with no
+// confirmation and no disconnect step in between. Judged current, working-
+// as-designed behavior (not a bug to fix) rather than a missing feature —
+// this pins that it's at least deterministic: the second grant fully
+// replaces the first as the write target, it doesn't write to both or leave
+// the first one silently still active underneath.
+test("granting a second folder while already connected switches the write target entirely, not additively", async () => {
+  await withFolderPage(async (page) => {
+    await page.click("#btn-folder-sync");
+    await page.waitForFunction(() => window.__kg.tier2.getDirHandle() !== null);
+    assert.equal(await page.locator("#btn-folder-sync").textContent(), "Synced: FolderA");
+
+    await addNodeViaDblClick(page, 300, 300, "Alpha");
+    await page.evaluate(() => window.__kg.actions.setMode("idle"));
+    await page.click("#btn-save-version");
+    await page.evaluate(() => window.__kg.tier2.waitForSaveVersion());
+
+    const aWritesAfterFirstSave = await page.evaluate(() => Object.keys(window.__mockFolderWritesByName.FolderA || {}).length);
+    assert.ok(aWritesAfterFirstSave > 0, "the first Save Version should have written into FolderA");
+
+    // Second grant, while already connected to FolderA.
+    await page.click("#btn-folder-sync");
+    await page.waitForFunction(() => window.__kg.tier2.getDirHandle().name === "FolderB");
+    assert.equal(await page.locator("#btn-folder-sync").textContent(), "Synced: FolderB");
+
+    await page.click("#btn-save-version");
+    await page.evaluate(() => window.__kg.tier2.waitForSaveVersion());
+
+    const bWritesAfterSecondSave = await page.evaluate(() => Object.keys(window.__mockFolderWritesByName.FolderB || {}).length);
+    assert.ok(bWritesAfterSecondSave > 0, "the second Save Version should write into FolderB");
+
+    // The point of this test: the second save must not also land in FolderA.
+    const aWritesAfterSecondSave = await page.evaluate(() => Object.keys(window.__mockFolderWritesByName.FolderA).length);
+    assert.equal(aWritesAfterSecondSave, aWritesAfterFirstSave, "FolderA must not receive the second Save Version's writes too");
+  }, { initScript: installSequentialMockPicker(["FolderA", "FolderB"]) });
 });
 
 test("a cancelled picker (AbortError) leaves Tier 2 disconnected, with no console error", async () => {

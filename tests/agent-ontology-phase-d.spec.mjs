@@ -220,6 +220,36 @@ test("toggling language updates the Domain Model dialog's static labels/title", 
   });
 });
 
+// The dialog's own top-level labels (checked above) are refreshed by
+// applyLanguage() directly; a rule/action card's own sub-labels are baked
+// into the DOM once at card-creation time (createSublabel()) and need
+// their own refresh pass — this combination (an already-open card, then a
+// language toggle) was the one path the two tests above never exercised
+// together.
+test("an already-open rule/action card's sub-labels retranslate too, not just the dialog's own static chrome", async () => {
+  await withPage(async (page) => {
+    await addNodeViaDblClick(page, 300, 300, "Invoice");
+    await openDomainModel(page);
+    await addRuleWithCondition(page, "canApproveInvoice", "invoice status is matched");
+    await page.click("#domain-model-add-action");
+
+    const ruleCard = page.locator(".domain-model-rule-card").first();
+    const actionCard = page.locator(".domain-model-action-card").first();
+    assert.equal(await ruleCard.locator(".details-field-sublabel").textContent(), "Conditions");
+
+    await page.evaluate(() => window.__kg.lang.toggle());
+
+    assert.equal(await ruleCard.locator(".details-field-sublabel").textContent(), "Feltételek");
+    const actionSublabelsHu = await actionCard.locator(".details-field-sublabel").allTextContents();
+    assert.deepEqual(actionSublabelsHu, [
+      "Bemeneti osztály",
+      "Előfeltételek (Ctrl/Cmd lenyomva több is kiválasztható)",
+      "Hatás",
+      "Ellenőrzés",
+    ]);
+  });
+});
+
 // A filled-in Effect input and a filled-in Verification input are otherwise
 // two visually identical plain text boxes — their own placeholder text
 // disappears once a value is typed, so a persistent sub-label above each
@@ -320,5 +350,29 @@ test("many rules and actions built through the real UI (25 each) keep every acti
     await page.click("#domain-model-save");
     await page.waitForSelector("#domain-model-overlay", { state: "hidden" });
     assert.equal(await page.evaluate(() => window.__kg.state.rules.length), 24);
+  });
+});
+
+// Nothing traps focus inside an open modal, so Tab can still reach an
+// unrelated toolbar button while e.g. the Details dialog is open — this
+// pins that opening Domain Model in that state is a no-op rather than
+// stacking a second overlay on top of the first (isAnyModalOpen(), index.html).
+test("opening Domain Model while the Details dialog is already open is a no-op, not a stacked second modal", async () => {
+  await withPage(async (page) => {
+    await addNodeViaDblClick(page, 300, 300, "Invoice");
+    const box = await page.locator("#canvas").boundingBox();
+    await page.mouse.click(box.x + 300, box.y + 300); // select the node
+    await page.click("#sel-details");
+    await page.waitForSelector("#details-overlay", { state: "visible" });
+
+    // Exactly what Tab-cycling could reach, then Enter/click on it.
+    await page.evaluate(() => document.getElementById("btn-domain-model").click());
+
+    const domainModelDisplay = await page.evaluate(() => getComputedStyle(document.getElementById("domain-model-overlay")).display);
+    assert.equal(domainModelDisplay, "none", "Domain Model must not open while Details is already open");
+    const detailsDisplay = await page.evaluate(() => document.getElementById("details-overlay").style.display);
+    assert.equal(detailsDisplay, "flex", "the already-open Details dialog must stay open, undisturbed");
+
+    await page.click("#details-cancel");
   });
 });

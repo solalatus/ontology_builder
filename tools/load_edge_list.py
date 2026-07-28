@@ -13,7 +13,14 @@ import sys
 def load_edge_list(path):
     nodes, edges = [], []
     section = None
-    with open(path, encoding="utf-8") as f:
+    # utf-8-sig (not plain utf-8) so a leading BOM — which Windows tools like
+    # Notepad/Excel add by default on "Save As UTF-8" — is stripped before
+    # line processing. Without this, the BOM prefixes the file's first
+    # line, so it never equals "## NODES" literally and every node in the
+    # file is silently dropped (edges still parse, since "## EDGES" appears
+    # later in the file, past where the BOM's effect only reaches). Decodes
+    # identically to plain utf-8 when there's no BOM.
+    with open(path, encoding="utf-8-sig") as f:
         for raw in f:
             line = raw.strip()
             # Section headers are checked before the generic "#" comment
