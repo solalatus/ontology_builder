@@ -39,20 +39,6 @@ test("selecting a node and clicking Edit Details opens a modal pre-filled with i
   });
 });
 
-test("a group node's details dialog reads 'Edit Group Details', not 'Edit Class Details'", async () => {
-  await withPage(async (page) => {
-    await page.click("#btn-add-group");
-    const box = await page.locator("#canvas").boundingBox();
-    await page.mouse.click(box.x + 500, box.y + 400);
-    await page.waitForSelector(".kg-inline-input");
-    await page.locator(".kg-inline-input").fill("Team");
-    await page.keyboard.press("Enter");
-    await page.waitForSelector(".kg-inline-input", { state: "detached" }); // placeNewNodeAt selects the new group
-    await openDetailsForSelection(page);
-    assert.equal(await page.locator("#details-title").textContent(), "Edit Group Details");
-  });
-});
-
 test("an edge's details dialog shows only Meaning — aliases/properties sections are hidden", async () => {
   await withPage(async (page) => {
     await addNodeViaDblClick(page, 250, 250, "Invoice");

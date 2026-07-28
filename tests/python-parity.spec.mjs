@@ -34,7 +34,7 @@ function sortedEdges(edges) {
     .sort((a, b) => (a.source + a.target + a.relation).localeCompare(b.source + b.target + b.relation));
 }
 function sortedNodes(nodes) {
-  return [...nodes].sort((a, b) => (a.label + a.type).localeCompare(b.label + b.type));
+  return [...nodes].sort((a, b) => a.label.localeCompare(b.label));
 }
 
 const fixtures = fs.readdirSync(fixturesDir).filter((f) => f.endsWith(".txt"));

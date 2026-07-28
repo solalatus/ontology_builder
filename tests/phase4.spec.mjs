@@ -34,7 +34,7 @@ test("an edit schedules a save; after it settles, localStorage holds the graph p
   });
 });
 
-test("reloading the page restores nodes, edges, and groups from the live-save backend", async () => {
+test("reloading the page restores nodes and edges from the live-save backend", async () => {
   await withPage(async (page) => {
     await addNodeViaDblClick(page, 250, 250, "Alpha");
     await addNodeViaDblClick(page, 600, 250, "Beta");
@@ -97,33 +97,6 @@ test("a fresh load with nothing saved yet shows no restore toast", async () => {
   await withPage(async (page) => {
     const visible = await page.evaluate(() => document.getElementById("restore-toast").classList.contains("visible"));
     assert.equal(visible, false);
-  });
-});
-
-test("group membership (groups[] and the auto contains edge) survives a reload", async () => {
-  await withPage(async (page) => {
-    await page.click("#btn-add-group");
-    const box = await page.locator("#canvas").boundingBox();
-    await page.mouse.click(box.x + 600, box.y + 400);
-    await page.waitForSelector(".kg-inline-input");
-    await page.locator(".kg-inline-input").fill("Group A");
-    await page.keyboard.press("Enter");
-    await page.waitForSelector(".kg-inline-input", { state: "detached" });
-
-    await addNodeViaDblClick(page, 100, 100, "Member");
-    await dragNode(page, 100, 100, 600, 400); // commits membership
-    await page.evaluate(() => window.__kg.storage.whenIdle());
-
-    await page.reload();
-    await page.waitForFunction(() => Boolean(window.__kg));
-    await page.waitForFunction(() => window.__kg.state.nodes.length === 2);
-
-    const group = await page.evaluate(() => window.__kg.state.nodes.find((n) => n.type === "group"));
-    const member = await page.evaluate(() => window.__kg.state.nodes.find((n) => n.type === "entity"));
-    const edges = await page.evaluate(() => window.__kg.state.edges);
-    assert.deepEqual(member.groups, [group.id]);
-    assert.equal(edges.length, 1);
-    assert.equal(edges[0].auto, true);
   });
 });
 
@@ -210,18 +183,14 @@ test("a burst of many scheduled saves coalesces into far fewer than N actual wri
   });
 });
 
-test("a moderately large graph (50 nodes, ~30 edges, nested groups) round-trips exactly across a reload", async () => {
+test("a moderately large graph (50 nodes, 30 edges) round-trips exactly across a reload", async () => {
   await withPage(async (page) => {
     await page.evaluate(() => {
-      const outer = window.__kg.actions.createNode(0, 0, "Outer", "group");
-      outer.w = 2000; outer.h = 1500;
       const ids = [];
-      for (let i = 0; i < 48; i++) {
+      for (let i = 0; i < 50; i++) {
         const col = i % 8, row = Math.floor(i / 8);
-        const n = window.__kg.actions.createNode(100 + col * 200, 100 + row * 200, `N${i}`, "entity");
+        const n = window.__kg.actions.createNode(100 + col * 200, 100 + row * 200, `N${i}`);
         ids.push(n.id);
-        n.groups.push(outer.id);
-        window.__kg.actions.createEdge(outer.id, n.id, "contains", true, true);
       }
       for (let i = 0; i < 30; i++) {
         window.__kg.actions.createEdge(ids[i % ids.length], ids[(i + 7) % ids.length], `rel${i}`);
@@ -233,18 +202,13 @@ test("a moderately large graph (50 nodes, ~30 edges, nested groups) round-trips 
 
     await page.reload();
     await page.waitForFunction(() => Boolean(window.__kg));
-    await page.waitForFunction(() => window.__kg.state.nodes.length === 49);
+    await page.waitForFunction(() => window.__kg.state.nodes.length === 50);
 
     const nodes = await page.evaluate(() => window.__kg.state.nodes);
     const edges = await page.evaluate(() => window.__kg.state.edges);
-    assert.equal(nodes.length, 49, "48 entities + 1 outer group");
-    assert.equal(edges.length, 48 + 30, "48 contains edges + 30 regular edges");
-    const outer = nodes.find((n) => n.label === "Outer");
-    const someMember = nodes.find((n) => n.label === "N10");
-    assert.deepEqual(someMember.groups, [outer.id]);
-    const regularEdges = edges.filter((e) => !e.auto);
-    assert.equal(regularEdges.length, 30);
-    assert.ok(regularEdges.every((e) => e.relation.startsWith("rel")));
+    assert.equal(nodes.length, 50);
+    assert.equal(edges.length, 30);
+    assert.ok(edges.every((e) => e.relation.startsWith("rel")));
   });
 });
 
@@ -305,18 +269,11 @@ test("when served over http, the storage backend resolves to opfs", async () => 
   }, { url: `${server.url}/index.html` });
 });
 
-test("OPFS-backed graph (nodes, edges, groups) round-trips correctly across a reload when served", async () => {
+test("OPFS-backed graph (nodes, edges) round-trips correctly across a reload when served", async () => {
   await withPage(async (page) => {
-    await page.click("#btn-add-group");
-    const box = await page.locator("#canvas").boundingBox();
-    await page.mouse.click(box.x + 600, box.y + 400);
-    await page.waitForSelector(".kg-inline-input");
-    await page.locator(".kg-inline-input").fill("Group A");
-    await page.keyboard.press("Enter");
-    await page.waitForSelector(".kg-inline-input", { state: "detached" });
-
-    await addNodeViaDblClick(page, 100, 100, "Member");
-    await dragNode(page, 100, 100, 600, 400);
+    await addNodeViaDblClick(page, 250, 250, "Alpha");
+    await addNodeViaDblClick(page, 600, 250, "Beta");
+    await createEdgeViaConnectMode(page, 250, 250, 600, 250, "relates to");
     await page.evaluate(() => window.__kg.storage.whenIdle());
 
     await page.reload();
@@ -325,12 +282,11 @@ test("OPFS-backed graph (nodes, edges, groups) round-trips correctly across a re
 
     const backend = await page.evaluate(() => window.__kg.storage.detectBackend());
     assert.equal(backend, "opfs");
-    const group = await page.evaluate(() => window.__kg.state.nodes.find((n) => n.type === "group"));
-    const member = await page.evaluate(() => window.__kg.state.nodes.find((n) => n.type === "entity"));
+    const nodes = await page.evaluate(() => window.__kg.state.nodes);
     const edges = await page.evaluate(() => window.__kg.state.edges);
-    assert.deepEqual(member.groups, [group.id]);
+    assert.deepEqual(nodes.map((n) => n.label).sort(), ["Alpha", "Beta"]);
     assert.equal(edges.length, 1);
-    assert.equal(edges[0].auto, true);
+    assert.equal(edges[0].relation, "relates to");
   }, { url: `${server.url}/index.html` });
 });
 
@@ -342,7 +298,7 @@ test("a localStorage write failure (e.g. quota exceeded) is caught, doesn't cras
     const result = await page.evaluate(async () => {
       const originalSetItem = localStorage.setItem.bind(localStorage);
       localStorage.setItem = () => { throw new DOMException("Quota exceeded", "QuotaExceededError"); };
-      window.__kg.actions.createNode(500, 500, "Beta", "entity");
+      window.__kg.actions.createNode(500, 500, "Beta");
       window.__kg.markDirty();
       window.__kg.storage.save();
       await window.__kg.storage.whenIdle(); // must resolve, not hang, even though the write threw
@@ -372,7 +328,7 @@ test("an OPFS write failure (createWritable/write throwing) is caught, doesn't c
       // above, so this only breaks writeGraphPayload()'s own later call —
       // never backend detection itself.
       navigator.storage.getDirectory = () => { throw new DOMException("Disk quota exceeded", "QuotaExceededError"); };
-      window.__kg.actions.createNode(500, 500, "Beta", "entity");
+      window.__kg.actions.createNode(500, 500, "Beta");
       window.__kg.markDirty();
       window.__kg.storage.save();
       await window.__kg.storage.whenIdle(); // must resolve, not hang, even though the write threw

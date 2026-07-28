@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import path from "node:path";
 import fs from "node:fs";
 import { fileURLToPath } from "node:url";
-import { withPage, addNodeViaDblClick, addNodeViaButton, dragNode, createEdgeViaConnectMode } from "./lib/page.mjs";
+import { withPage, addNodeViaDblClick, dragNode, createEdgeViaConnectMode } from "./lib/page.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const fixture = (name) => path.resolve(__dirname, "fixtures", name);
@@ -39,30 +39,19 @@ test("Merge on an empty graph reproduces the spec's own worked example exactly",
 
     const nodes = await page.evaluate(() => window.__kg.state.nodes);
     const edges = await page.evaluate(() => window.__kg.state.edges);
-    assert.equal(nodes.length, 6);
-    assert.equal(edges.length, 4);
+    assert.equal(nodes.length, 5);
+    assert.equal(edges.length, 3);
 
-    const group = nodes.find((n) => n.label === "South Asian Languages");
     const andhra = nodes.find((n) => n.label === "Andhra Pradesh");
     const telugu = nodes.find((n) => n.label === "Telugu");
     const marathi = nodes.find((n) => n.label === "Marathi");
     const guatemala = nodes.find((n) => n.label === "Guatemala");
     const eu = nodes.find((n) => n.label === "European Union");
 
-    assert.equal(group.type, "group");
-    assert.deepEqual(andhra.groups, [group.id]);
-    assert.deepEqual(telugu.groups, []);
-
-    const containsEdge = edges.find((e) => e.auto);
-    assert.equal(containsEdge.source, group.id);
-    assert.equal(containsEdge.target, andhra.id);
-    assert.equal(containsEdge.relation, "contains");
-
-    const ordinary = edges.filter((e) => !e.auto);
-    assert.equal(ordinary.length, 3);
-    assert.ok(ordinary.some((e) => e.source === andhra.id && e.target === telugu.id && e.relation === "language used" && e.directed === true));
-    assert.ok(ordinary.some((e) => e.source === andhra.id && e.target === marathi.id && e.relation === "language used" && e.directed === true));
-    assert.ok(ordinary.some((e) => e.source === guatemala.id && e.target === eu.id && e.relation === "diplomatic relation" && e.directed === false));
+    assert.ok(andhra && telugu && marathi && guatemala && eu);
+    assert.ok(edges.some((e) => e.source === andhra.id && e.target === telugu.id && e.relation === "language used" && e.directed === true));
+    assert.ok(edges.some((e) => e.source === andhra.id && e.target === marathi.id && e.relation === "language used" && e.directed === true));
+    assert.ok(edges.some((e) => e.source === guatemala.id && e.target === eu.id && e.relation === "diplomatic relation" && e.directed === false));
   });
 });
 
@@ -80,12 +69,12 @@ test("Merge is idempotent — re-importing the same file adds nothing and create
 
     const nodes = await page.evaluate(() => window.__kg.state.nodes);
     const edges = await page.evaluate(() => window.__kg.state.edges);
-    assert.equal(nodes.length, 6);
-    assert.equal(edges.length, 4);
+    assert.equal(nodes.length, 5);
+    assert.equal(edges.length, 3);
   });
 });
 
-test("existing nodes keep their position, size, and groups untouched on merge — matched purely by label", async () => {
+test("existing nodes keep their position and size untouched on merge — matched purely by label", async () => {
   await withPage(async (page) => {
     await addNodeViaDblClick(page, 700, 500, "Andhra Pradesh");
     await dragNode(page, 700, 500, 900, 650); // move it somewhere custom
@@ -96,7 +85,7 @@ test("existing nodes keep their position, size, and groups untouched on merge �
     await page.waitForTimeout(150);
 
     const nodes = await page.evaluate(() => window.__kg.state.nodes);
-    assert.equal(nodes.length, 6, "Andhra Pradesh matched, not duplicated");
+    assert.equal(nodes.length, 5, "Andhra Pradesh matched, not duplicated");
     const after = nodes.find((n) => n.label === "Andhra Pradesh");
     assert.equal(after.x, before.x);
     assert.equal(after.y, before.y);
@@ -172,7 +161,7 @@ test("Import dialog's diff summary counts match what actually happens on commit"
     await triggerImport(page, "subset.txt"); // fully already present -> 0/0, but graph has content now
     const summary = await importSummary(page);
     assert.match(summary, /Merge: 0 node\(s\) and 0 edge\(s\) would be added/);
-    assert.match(summary, /Replace: same additions, plus 4 node\(s\)\/edge\(s\)/);
+    assert.match(summary, /Replace: same additions, plus 3 node\(s\)\/edge\(s\)/);
     await page.click("#import-cancel");
 
     await triggerImport(page, "subset.txt");
@@ -205,13 +194,13 @@ test("Replace mode removes nodes/edges absent from the TXT, in exactly one undo 
 
     await page.click("#btn-undo");
     nodes = await page.evaluate(() => window.__kg.state.nodes.map((n) => n.label));
-    assert.equal(nodes.length, 6, "one Undo restores the full pre-Replace graph");
+    assert.equal(nodes.length, 5, "one Undo restores the full pre-Replace graph");
     edges = await page.evaluate(() => window.__kg.state.edges);
-    assert.equal(edges.length, 4);
+    assert.equal(edges.length, 3);
   });
 });
 
-test("Replace mode preserves position for nodes that survive, and prunes group membership not redeclared", async () => {
+test("Replace mode preserves position for nodes that survive", async () => {
   await withPage(async (page) => {
     await triggerImport(page, "spec-example.txt");
     await page.click("#import-merge");
@@ -219,8 +208,6 @@ test("Replace mode preserves position for nodes that survive, and prunes group m
     const beforeAndhra = await page.evaluate(() =>
       window.__kg.state.nodes.find((n) => n.label === "Andhra Pradesh"));
 
-    // subset.txt keeps Andhra Pradesh + Telugu but drops the "South Asian
-    // Languages -> Andhra Pradesh : contains" line entirely.
     await triggerImport(page, "subset.txt");
     await page.click("#import-replace");
     await page.waitForTimeout(150);
@@ -229,9 +216,6 @@ test("Replace mode preserves position for nodes that survive, and prunes group m
     const andhra = nodes.find((n) => n.label === "Andhra Pradesh");
     assert.equal(andhra.x, beforeAndhra.x);
     assert.equal(andhra.y, beforeAndhra.y);
-    assert.deepEqual(andhra.groups, [], "membership not redeclared in the replace TXT must be pruned");
-    const edges = await page.evaluate(() => window.__kg.state.edges);
-    assert.equal(edges.filter((e) => e.auto).length, 0, "the now-orphaned contains edge must be removed too");
   });
 });
 
@@ -268,22 +252,6 @@ test("label matching is case-sensitive — a differently-cased label is a distin
     assert.equal(labels.length, 3, "distinct casing means a new node, not a match");
     assert.ok(labels.includes("andhra pradesh"));
     assert.ok(labels.includes("Andhra Pradesh"));
-  });
-});
-
-test("matching requires both label AND type — importing the same label as a different type creates a second, distinct node", async () => {
-  await withPage(async (page) => {
-    await addNodeViaDblClick(page, 250, 250, "Andhra Pradesh"); // entity
-
-    await triggerImport(page, "andhra-as-group.txt"); // same label, declared as [group]
-    await page.click("#import-merge");
-    await page.waitForTimeout(150);
-
-    const nodes = await page.evaluate(() => window.__kg.state.nodes);
-    assert.equal(nodes.length, 2, "label match alone isn't enough — type must match too");
-    const byType = Object.fromEntries(nodes.map((n) => [n.type, n]));
-    assert.equal(byType.entity.label, "Andhra Pradesh");
-    assert.equal(byType.group.label, "Andhra Pradesh");
   });
 });
 
@@ -355,21 +323,6 @@ test("TXT import triggers a background save — the imported graph survives a re
   });
 });
 
-test("a file with only groups declared and no ## EDGES section at all imports cleanly", async () => {
-  await withPage(async (page) => {
-    const text = ["## NODES", "Solo Group [group]", "Another Group [group]"].join("\n");
-    await dropText(page, text, "groups-only.txt");
-    await page.click("#import-merge");
-    await page.waitForTimeout(150);
-
-    const nodes = await page.evaluate(() => window.__kg.state.nodes);
-    const edges = await page.evaluate(() => window.__kg.state.edges);
-    assert.equal(nodes.length, 2);
-    assert.ok(nodes.every((n) => n.type === "group"));
-    assert.equal(edges.length, 0);
-  });
-});
-
 test("blank lines, trailing whitespace, and extra spacing throughout the file don't break parsing", async () => {
   await withPage(async (page) => {
     const text = [
@@ -430,130 +383,6 @@ test("merging a file that references a node previously deleted from the current 
     assert.deepEqual(nodes.sort(), ["Andhra Pradesh", "Telugu"], "Telugu is back after re-merging");
     const newTelugu = await page.evaluate(() => window.__kg.state.nodes.find((n) => n.label === "Telugu"));
     assert.notEqual(newTelugu.id, telugu.id, "the re-created node gets a fresh id, not the old deleted one");
-  });
-});
-
-test("merge adds a new member to an already-existing group (matched by label) via a contains line", async () => {
-  await withPage(async (page) => {
-    await addNodeViaButton(page, "#btn-add-group", 300, 300, "South Asian Languages");
-    const existingGroup = await page.evaluate(() => window.__kg.state.nodes[0]);
-
-    const text = [
-      "## NODES",
-      "South Asian Languages [group]",
-      "Kannada",
-      "",
-      "## EDGES",
-      "South Asian Languages -> Kannada : contains",
-    ].join("\n");
-    await dropText(page, text, "new-member.txt");
-    await page.click("#import-merge");
-    await page.waitForTimeout(150);
-
-    const nodes = await page.evaluate(() => window.__kg.state.nodes);
-    assert.equal(nodes.length, 2, "matched the existing group by label — did not create a duplicate group node");
-    const group = nodes.find((n) => n.label === "South Asian Languages");
-    const kannada = nodes.find((n) => n.label === "Kannada");
-    assert.equal(group.id, existingGroup.id, "the pre-existing group node itself is untouched, just its membership grows");
-    assert.deepEqual(kannada.groups, [group.id]);
-    const edges = await page.evaluate(() => window.__kg.state.edges);
-    const autoEdge = edges.find((e) => e.auto);
-    assert.equal(autoEdge.source, group.id);
-    assert.equal(autoEdge.target, kannada.id);
-  });
-});
-
-// A drag-based membership change is guarded against giving a node a
-// spurious second, direct membership in a bigger ancestor group when it's
-// already nested in a smaller group inside that same ancestor — see the
-// updateGroupMembership() fix/tests in phase2.spec.mjs and
-// group-move.spec.mjs. TXT import establishes membership from declared
-// `contains` lines rather than geometry, but a file can just as easily
-// declare the same redundant relationship directly, so it needs the same
-// guard through a different mechanism (declared/known group-to-group
-// nesting, not rectFullyContains()).
-test("a TXT file declaring a leaf's containment in both an inner AND an outer (ancestor) group keeps only the innermost, real membership", async () => {
-  await withPage(async (page) => {
-    const text = [
-      "## NODES",
-      "Outer [group]",
-      "Inner [group]",
-      "Leaf",
-      "",
-      "## EDGES",
-      "Outer -> Inner : contains",
-      "Inner -> Leaf : contains",
-      "Outer -> Leaf : contains", // redundant — Leaf is already transitively in Outer via Inner
-    ].join("\n");
-    await dropText(page, text, "redundant-nesting.txt");
-    await page.click("#import-merge");
-    await page.waitForTimeout(150);
-
-    const nodes = await page.evaluate(() => window.__kg.state.nodes);
-    const outer = nodes.find((n) => n.label === "Outer");
-    const inner = nodes.find((n) => n.label === "Inner");
-    const leaf = nodes.find((n) => n.label === "Leaf");
-    assert.deepEqual(inner.groups, [outer.id], "Inner really is nested in Outer");
-    assert.deepEqual(leaf.groups, [inner.id], "Leaf keeps only its real, innermost membership — not also a direct one in Outer");
-
-    const autoEdges = await page.evaluate(() => window.__kg.state.edges.filter((e) => e.auto));
-    assert.equal(autoEdges.length, 2, "exactly Outer->Inner and Inner->Leaf — no redundant Outer->Leaf edge");
-    assert.ok(!autoEdges.some((e) => e.source === outer.id && e.target === leaf.id), "no direct Outer->Leaf contains edge");
-  });
-});
-
-test("the same redundant-nesting file imports identically regardless of which order the contains lines appear in", async () => {
-  await withPage(async (page) => {
-    const text = [
-      "## NODES",
-      "Outer [group]",
-      "Inner [group]",
-      "Leaf",
-      "",
-      "## EDGES",
-      "Outer -> Leaf : contains", // the redundant line declared FIRST this time
-      "Outer -> Inner : contains",
-      "Inner -> Leaf : contains",
-    ].join("\n");
-    await dropText(page, text, "redundant-nesting-reordered.txt");
-    await page.click("#import-merge");
-    await page.waitForTimeout(150);
-
-    const nodes = await page.evaluate(() => window.__kg.state.nodes);
-    const outer = nodes.find((n) => n.label === "Outer");
-    const inner = nodes.find((n) => n.label === "Inner");
-    const leaf = nodes.find((n) => n.label === "Leaf");
-    assert.deepEqual(leaf.groups, [inner.id], "same result no matter the line order in the file");
-    const autoEdges = await page.evaluate(() => window.__kg.state.edges.filter((e) => e.auto));
-    assert.equal(autoEdges.length, 2);
-  });
-});
-
-test("a leaf declared as a member of two genuinely separate (non-nested) groups still gets both memberships from a TXT import", async () => {
-  await withPage(async (page) => {
-    const text = [
-      "## NODES",
-      "GroupA [group]",
-      "GroupB [group]",
-      "Leaf",
-      "",
-      "## EDGES",
-      "GroupA -> Leaf : contains",
-      "GroupB -> Leaf : contains",
-    ].join("\n");
-    await dropText(page, text, "two-separate-groups.txt");
-    await page.click("#import-merge");
-    await page.waitForTimeout(150);
-
-    const nodes = await page.evaluate(() => window.__kg.state.nodes);
-    const groupA = nodes.find((n) => n.label === "GroupA");
-    const groupB = nodes.find((n) => n.label === "GroupB");
-    const leaf = nodes.find((n) => n.label === "Leaf");
-    assert.equal(leaf.groups.length, 2, "neither group is an ancestor of the other, so this is legitimate overlapping membership");
-    assert.ok(leaf.groups.includes(groupA.id) && leaf.groups.includes(groupB.id));
-
-    const autoEdges = await page.evaluate(() => window.__kg.state.edges.filter((e) => e.auto));
-    assert.equal(autoEdges.length, 2, "both contains edges are real, not redundant");
   });
 });
 

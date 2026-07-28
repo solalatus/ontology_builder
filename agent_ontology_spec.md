@@ -42,12 +42,18 @@ knowledge graph — specific real things, not kinds of things. The howto's worke
 Supplier, Employee) is unambiguously **class**-level — kinds of things a business talks about. The app's
 existing data model doesn't distinguish the two; a "node" is just a labeled box either way.
 
-**Decision:** Agent Ontology mode treats every non-group node as a **Class** — a kind of thing, not a
+**Decision:** Agent Ontology mode treats every node as a **Class** — a kind of thing, not a
 specific instance. This isn't a new mode switch or a new node type: it's a reframing of the same
-`type: "entity"` node, with new optional fields (meaning, aliases, properties) that are only meaningful
+node, with new optional fields (meaning, aliases, properties) that are only meaningful
 once you're modeling at the class level. A user who wants to keep using the app exactly as `spec.md`
 describes — sketching instance-level graphs — loses nothing and can simply leave the new fields empty;
 the base app's behavior (Sections 3–9 of `spec.md`) is completely unaffected.
+
+**Update (see `spec.md` Decision Log #11):** the base app's Groups feature was removed entirely after
+this document was first drafted, resolving Open Question 4 (Section 9) by elimination rather than by
+choosing an export-time interpretation — there is no longer a "non-group node" distinction to make; all
+nodes are Classes. Section 6 below is kept for historical record but no longer describes a live design
+choice.
 
 ---
 
@@ -55,8 +61,7 @@ the base app's behavior (Sections 3–9 of `spec.md`) is completely unaffected.
 
 | Howto term | Current app term | New UI label | Internal identifier |
 |---|---|---|---|
-| Class | Node (`type: "entity"`) | **Class** | unchanged: `type: "entity"` |
-| *(no howto equivalent — see Section 6)* | Group (`type: "group"`) | Group (unchanged) | unchanged: `type: "group"` |
+| Class | Node | **Class** | unchanged |
 | Relationship | Edge | Relationship (concept); "Connect" stays as the mode-toggle button label | unchanged: `relation` field |
 | class meaning | — (dormant `notes` field, schema'd but never exposed in any editor, see Section 4.1) | **Meaning** | `notes` → renamed to `meaning` |
 | class aliases | — | **Aliases** | new: `aliases: string[]` |
@@ -66,7 +71,7 @@ the base app's behavior (Sections 3–9 of `spec.md`) is completely unaffected.
 | Action | — | **Actions** (new panel, off the toolbar) | new top-level `actions: Action[]` |
 
 **Toolbar label changes:** "Add Node" → "Add Class" (and the matching Hungarian string). "Node label"
-placeholder → "Class name." Everything else in the toolbar (Add Group, Connect, Auto-layout, Undo,
+placeholder → "Class name." Everything else in the toolbar (Connect, Auto-layout, Undo,
 Redo, Save Version, Folder Sync, Import from TXT, Clear, zoom, theme/lang toggles) is unchanged.
 
 **Deliberately not renamed:** the app's own title ("Knowledge Graph Canvas" / "Tudásgráf Vászon"). The
@@ -181,21 +186,20 @@ actions:
 ```
 
 **Generation rules:**
-- One `classes` entry per non-group node, keyed by its `label` (Class name) exactly as typed — no
+- One `classes` entry per node, keyed by its `label` (Class name) exactly as typed — no
   derived slug. Properties, keyed by property `name`, only include `unit`/`allowed` when set.
-- One `relationships` entry per non-`auto` edge, keyed by a camelCase id derived from the edge's
+- One `relationships` entry per edge, keyed by a camelCase id derived from the edge's
   `relation` label (e.g. "issued by" → `issuedBy`) — the label itself stays human-readable in the UI;
   the export derives the machine key. Collisions (two edges, same derived key, different class pairs)
   get a numeric suffix (`issuedBy2`) rather than silently overwriting one another — flagged as Open
   Question 3, since it's the one place this app's free-form graph model doesn't map 1:1 onto the
   howto's implied "one definition per named relationship type."
 - `rules`/`actions` map close to directly onto Section 4.3's shapes, keyed by `name`.
-- **Group nodes and their auto-generated `contains` edges are handled specially — see Section 6.**
 - A hand-written minimal YAML serializer is used (indentation + list/scalar rules only, no anchors/
   tags/flow-style needed for this shape) — consistent with the project's zero-external-dependency
   constraint (`spec.md` §2). No new library, no build step.
 - Nothing here changes the existing `.json`/`.txt` outputs — they keep exporting the full canvas
-  exactly as `spec.md` §5.1/5.2 specify, group nodes and camera-irrelevant fields included.
+  exactly as `spec.md` §5.1/5.2 specify, camera-irrelevant fields included.
 
 **Deliberately deferred (not in the first phased pass):** import — parsing a hand-edited or
 agent-generated domain YAML back into canvas state, symmetric to the existing TXT import (`spec.md`
@@ -205,26 +209,25 @@ listed as a later phase (Phase G, Section 8) so the first pass stays focused.
 
 ---
 
-## 6. Groups → class hierarchy (proposed, flagged as Open Question 4)
+## 6. Groups → class hierarchy (superseded — Groups removed, see `spec.md` Decision Log #11)
 
-The howto has no notion of grouping/hierarchy in its minimal example. This app already has one:
-dragging a class into a group commits an automatic `contains` edge (`spec.md` §4.3). Rather than treat
-Groups as purely cosmetic canvas organization (safe, but wastes a feature that already does exactly
-what a "supertype/category" relationship needs), the proposal is: **a group's `contains` edges export
-as relationship entries too**, using a fixed relationship name (default proposal: `includes`) — turning
-existing drag-to-group interactions into free, no-new-UI class-hierarchy authoring.
+**Historical record only — this section no longer describes a live design choice.** It originally
+proposed that a group's `contains` edges export as relationship entries too, using a fixed relationship
+name (`includes`), turning drag-to-group interactions into free class-hierarchy authoring — framed as
+Open Question 4 in Section 9.
 
-This is a genuine design choice beyond what the howto shows, not something it requires — happy to keep
-groups purely cosmetic (excluded from the domain export entirely) instead, if you'd rather the export
-stay a literal minimum. Either way, nothing about how Groups work on canvas changes; this is purely an
-export-time interpretation decision.
+That question was resolved by a different route than either option it posed: the user asked for Groups
+to be removed from the base app entirely — canvas UI, data model, and both file formats — rather than
+export-time-only exclusion, on the grounds that Groups added complexity with no clean mapping onto a
+strict classes/relationships model. See `spec.md`'s Decision Log #11 for the full rationale. There is no
+group→hierarchy export logic to write; every node is simply a Class.
 
 ---
 
 ## 7. UI / affordance plan
 
 - **Class editor.** A new 4th icon in the existing `#sel-toolbar` (alongside rename ✎ / toggle-direction
-  ⇄ / trash 🗑) when a Class or Group node is selected: "Edit Details," opening a new modal (reusing the
+  ⇄ / trash 🗑) when a Class node is selected: "Edit Details," opening a new modal (reusing the
   existing `.modal-dialog`/`.modal-overlay` pattern from the confirm/import dialogs) with: Meaning
   (textarea), Aliases (repeatable text input), Properties (repeatable row: name, type dropdown, unit —
   shown only for type "number", allowed-values list — shown only when relevant). The existing rename (✎)
@@ -271,9 +274,10 @@ export-time interpretation decision.
    (Section 4.1 default: include it — it's a common, obvious type.)
 3. How should same-named relationships between different class pairs be disambiguated in the YAML
    export — numeric suffix (default proposed), or some other scheme? (Section 5.)
-4. Should group `contains` edges export as a `relationships` entry (proposed default: relationship name
-   `includes`), or should Groups stay purely cosmetic/canvas-only and be excluded from the domain
-   export entirely? (Section 6.)
+4. ~~Should group `contains` edges export as a `relationships` entry, or should Groups stay purely
+   cosmetic/canvas-only and be excluded from the domain export entirely?~~ **Resolved — see Section 6
+   and `spec.md` Decision Log #11: Groups were removed from the app entirely, not just from this
+   export.**
 
 ---
 
@@ -281,10 +285,11 @@ export-time interpretation decision.
 
 | # | Topic | Decision |
 |---|---|---|
-| 1 | Node vs. instance framing | Non-group nodes are treated as Classes (kinds of things), not instances — additive to the existing generic node model, doesn't force a mode switch. |
+| 1 | Node vs. instance framing | Nodes are treated as Classes (kinds of things), not instances — additive to the existing generic node model, doesn't force a mode switch. |
 | 2 | `notes` field | Renamed to `meaning` rather than adding a parallel field — it was schema'd but never exposed in any editor, so this is a zero-risk rename, not new state. |
 | 3 | Rules/Actions references | Stored by id (rule id, class id), resolved to names at display/export time — consistent with how edges already reference node ids, not labels. |
 | 4 | Export delivery | Bundled as a third file into the existing "Save Version" action, not a new toolbar button — minimizes new UI surface. |
 | 5 | Rules/Actions UI | One combined "Domain Model" toolbar button/modal rather than two separate toolbar buttons — toolbar-crowding concern. |
 | 6 | Class/Relationship detail editing | A new icon in the existing selection toolbar opening a modal, leaving the existing fast single-field rename flow untouched. |
 | 7 | Import (YAML → canvas) | Deferred to a later phase — export is the load-bearing capability the howto actually calls for; import is desirable but secondary. |
+| 8 | Groups (Open Question 4) | Resolved by removing Groups from the base app entirely (canvas UI, data model, both file formats) rather than choosing an export-time interpretation — see `spec.md` Decision Log #11 and Section 6 above. |

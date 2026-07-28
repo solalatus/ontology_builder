@@ -10,7 +10,7 @@ async function seedGrid(page, count, cols, spacing) {
     for (let i = 0; i < count; i++) {
       const col = i % cols;
       const row = Math.floor(i / cols);
-      window.__kg.actions.createNode(col * spacing, row * spacing, `N${i}`, "entity");
+      window.__kg.actions.createNode(col * spacing, row * spacing, `N${i}`);
     }
     window.__kg.markDirty();
   }, { count, cols, spacing });
@@ -68,15 +68,15 @@ test("render() stays within a generous frame-time budget even drawing all ~1,000
   });
 });
 
-test("disconnected nodes and a floating group scattered across a huge world are culled purely by position, same as connected nodes", async () => {
+test("disconnected nodes scattered across a huge world are culled purely by position, same as connected nodes", async () => {
   await withPage(async (page) => {
     await page.evaluate(() => {
-      const a = window.__kg.actions.createNode(0, 0, "ConnA", "entity");
-      const b = window.__kg.actions.createNode(200, 0, "ConnB", "entity");
+      const a = window.__kg.actions.createNode(0, 0, "ConnA");
+      const b = window.__kg.actions.createNode(200, 0, "ConnB");
       window.__kg.actions.createEdge(a.id, b.id, "linked");
-      window.__kg.actions.createNode(100, 300, "IsolatedNear", "entity"); // in view
-      window.__kg.actions.createNode(5000, 5000, "IsolatedFar", "entity"); // out of view
-      window.__kg.actions.createNode(8000, 100, "FloatingGroup", "group"); // out of view
+      window.__kg.actions.createNode(100, 300, "IsolatedNear"); // in view
+      window.__kg.actions.createNode(5000, 5000, "IsolatedFar"); // out of view
+      window.__kg.actions.createNode(8000, 100, "IsolatedFar2"); // out of view
       window.__kg.markDirty();
     });
     await setCamera(page, { scale: 1, panX: 0, panY: 0 });
@@ -92,7 +92,7 @@ test("disconnected nodes and a floating group scattered across a huge world are 
     }
     const expectedVisible = nodes.filter((n) => overlaps(n, rect)).length;
     assert.equal(stats.nodesDrawn, expectedVisible,
-      "drawn count should exactly match what geometrically overlaps the visible rect, regardless of connectivity or node type");
+      "drawn count should exactly match what geometrically overlaps the visible rect, regardless of connectivity");
     // Sanity: this scattered setup should be a genuine mix, not everything or nothing.
     assert.ok(expectedVisible > 0 && expectedVisible < nodes.length);
   });
@@ -117,38 +117,11 @@ test("clicking a node that's actually on screen after zooming in still selects i
   });
 });
 
-test("a group's resize handle remains draggable after panning/zooming the camera (hit-test culling doesn't break it)", async () => {
-  await withPage(async (page) => {
-    await page.evaluate(() => {
-      window.__kg.actions.createNode(300, 300, "Group", "group"); // default 320x220
-      window.__kg.markDirty();
-    });
-    // Chosen so the resize handle (world 620,520, at scale 1.5) lands well
-    // inside the 1200x800 viewport with room for the drag beyond it too —
-    // panX/panY of 120/180 would put the handle off-screen entirely.
-    await setCamera(page, { scale: 1.5, panX: -330, panY: -380 });
-
-    const group = await page.evaluate(() => window.__kg.state.nodes[0]);
-    const handleWorld = { x: group.x + group.w, y: group.y + group.h };
-    const handleScreen = await page.evaluate((p) => window.__kg.worldToScreen(p.x, p.y), handleWorld);
-    const box = await page.locator("#canvas").boundingBox();
-
-    await page.mouse.move(box.x + handleScreen.x, box.y + handleScreen.y);
-    await page.mouse.down();
-    await page.mouse.move(box.x + handleScreen.x + 90, box.y + handleScreen.y + 60, { steps: 5 });
-    await page.mouse.up();
-
-    const resized = await page.evaluate(() => window.__kg.state.nodes[0]);
-    assert.ok(resized.w > group.w, `expected width to grow after a panned/zoomed resize drag, got ${resized.w} vs ${group.w}`);
-    assert.ok(resized.h > group.h, `expected height to grow after a panned/zoomed resize drag, got ${resized.h} vs ${group.h}`);
-  });
-});
-
 test("edges are culled independently of their endpoint nodes' own visibility bookkeeping — a long edge crossing the viewport still draws", async () => {
   await withPage(async (page) => {
     await page.evaluate(() => {
-      const a = window.__kg.actions.createNode(-5000, 400, "FarLeft", "entity");
-      const b = window.__kg.actions.createNode(5000, 400, "FarRight", "entity");
+      const a = window.__kg.actions.createNode(-5000, 400, "FarLeft");
+      const b = window.__kg.actions.createNode(5000, 400, "FarRight");
       window.__kg.actions.createEdge(a.id, b.id, "spans the whole view");
       window.__kg.markDirty();
     });

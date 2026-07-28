@@ -70,15 +70,15 @@ test("Escape cancels the confirm dialog, same as Cancel", async () => {
 test("Escape while the dialog is open only closes the dialog, it doesn't also cancel an armed mode underneath", async () => {
   await withPage(async (page) => {
     await addNodeViaDblClick(page, 300, 300, "Alpha");
-    await page.click("#btn-add-group"); // arm Add Group mode
-    assert.equal(await page.evaluate(() => window.__kg.state.mode), "addGroup");
+    await page.click("#btn-add-node"); // arm Add Node mode
+    assert.equal(await page.evaluate(() => window.__kg.state.mode), "addNode");
 
     await page.click("#btn-clear");
     assert.equal(await overlayDisplay(page), "flex");
     await page.keyboard.press("Escape"); // should only dismiss the dialog
 
     assert.equal(await overlayDisplay(page), "none");
-    assert.equal(await page.evaluate(() => window.__kg.state.mode), "addGroup", "armed mode survives the dialog's own Escape");
+    assert.equal(await page.evaluate(() => window.__kg.state.mode), "addNode", "armed mode survives the dialog's own Escape");
     const nodes = await page.evaluate(() => window.__kg.state.nodes);
     assert.equal(nodes.length, 1); // Clear was cancelled
   });
@@ -96,15 +96,8 @@ test("Enter confirms the dialog, same as clicking the confirm button", async () 
   });
 });
 
-test("confirming Clear empties nodes, edges, and groups", async () => {
+test("confirming Clear empties nodes and edges", async () => {
   await withPage(async (page) => {
-    await page.click("#btn-add-group");
-    const box = await page.locator("#canvas").boundingBox();
-    await page.mouse.click(box.x + 600, box.y + 400);
-    await page.waitForSelector(".kg-inline-input");
-    await page.locator(".kg-inline-input").fill("Group A");
-    await page.keyboard.press("Enter");
-    await page.waitForSelector(".kg-inline-input", { state: "detached" });
     await addNodeViaDblClick(page, 250, 250, "Alpha");
     await addNodeViaDblClick(page, 700, 250, "Beta");
     await createEdgeViaConnectMode(page, 250, 250, 700, 250, "relates to");

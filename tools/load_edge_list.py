@@ -29,10 +29,8 @@ def load_edge_list(path):
             if not line or line.startswith("#"):
                 continue
             if section == "nodes":
-                is_group = line.endswith("[group]")
-                name = line[: -len("[group]")].strip() if is_group else line
-                if name:
-                    nodes.append({"label": name, "type": "group" if is_group else "entity"})
+                if line:
+                    nodes.append({"label": line})
             elif section == "edges":
                 if " : " not in line:
                     continue  # malformed — no relation separator, skip

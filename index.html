@@ -38,19 +38,11 @@
     --connect-source-stroke: #ffb84d;
     --node-text: #e8e8e8;
     --handle-fill: rgba(255, 255, 255, 0.35);
-    --group-fill: rgba(77, 166, 255, 0.06);
-    --group-stroke: #4d7fa6;
     --imported-stroke: #e0b13f;
     --edge-stroke: #8a8a8a;
     --edge-stroke-selected: #4da6ff;
     --edge-label-fg: #bbbbbb;
     --ghost-stroke: #4da6ff;
-    /* Group-membership hue (entity nodes that belong to >=1 group) and the
-       two group-drag highlights (live move vs. live resize) — see Log. */
-    --member-fill: rgba(77, 189, 143, 0.07);
-    --member-stroke: #4dbd8f;
-    --group-move-stroke: #b085f5;
-    --group-resize-stroke: #4dd0e1;
   }
 
   /* Explicit user toggle (not prefers-color-scheme) — see toggleTheme() in
@@ -77,17 +69,11 @@
     --connect-source-stroke: #e67700;
     --node-text: #1a1a1a;
     --handle-fill: rgba(0, 0, 0, 0.35);
-    --group-fill: rgba(26, 115, 232, 0.06);
-    --group-stroke: #3f6ea8;
     --imported-stroke: #b8860b;
     --edge-stroke: #666666;
     --edge-stroke-selected: #1a73e8;
     --edge-label-fg: #555555;
     --ghost-stroke: #1a73e8;
-    --member-fill: rgba(47, 143, 99, 0.07);
-    --member-stroke: #2f8f63;
-    --group-move-stroke: #8452c9;
-    --group-resize-stroke: #0097a7;
   }
 
   * { box-sizing: border-box; }
@@ -145,7 +131,7 @@
     box-shadow: none;
   }
 
-  /* An "armed" toggle (Add Node/Group, Connect, Theme, Language, Folder
+  /* An "armed" toggle (Add Node, Connect, Theme, Language, Folder
      Sync once connected) reads as a status, not just a slightly-darker
      button — an accent-colored border/tint makes which mode is active
      legible at a glance instead of blending into the row. */
@@ -232,7 +218,6 @@
   }
 
   #canvas.mode-addnode,
-  #canvas.mode-addgroup,
   #canvas.mode-connect {
     cursor: crosshair;
   }
@@ -517,7 +502,6 @@
 <div id="toolbar">
   <span id="graph-title" tabindex="0" role="button" title="Kattints az átnevezéshez">Névtelen gráf</span>
   <button id="btn-add-node" type="button" aria-pressed="false">Csomópont hozzáadása</button>
-  <button id="btn-add-group" type="button" aria-pressed="false">Csoport hozzáadása</button>
   <button id="btn-connect" type="button" aria-pressed="false">Összekapcsolás</button>
   <button id="btn-domain-model" type="button">Doménmodell</button>
   <button id="btn-autolayout" type="button">Automatikus elrendezés</button>
@@ -709,7 +693,6 @@ const STRINGS = {
     clickToRename: "Click to rename",
     untitledGraph: "Untitled Graph",
     addNode: "Add Node",
-    addGroup: "Add Group",
     connect: "Connect",
     autoLayout: "Auto-layout",
     undo: "Undo",
@@ -733,7 +716,6 @@ const STRINGS = {
     clearConfirmMessage: "Clear the entire graph? This removes all nodes and edges. This can be undone with the Undo button.",
     clearConfirmLabel: "Clear",
     nodeLabelPlaceholder: "Node label",
-    groupLabelPlaceholder: "Group label",
     relationLabelPlaceholder: "relation label",
     graphNamePlaceholder: "Graph name",
     emptyCanvasMessage: (addNodeLabel) => `Canvas is empty — use "${addNodeLabel}" to begin`,
@@ -744,7 +726,6 @@ const STRINGS = {
     // Agent Ontology (agent_ontology_spec.md §7) — Class/Relationship details dialog.
     editDetailsTitle: "Edit details",
     editClassDetailsTitle: "Edit Class Details",
-    editGroupDetailsTitle: "Edit Group Details",
     editRelationshipDetailsTitle: "Edit Relationship Details",
     meaningLabel: "Meaning",
     aliasesLabel: "Aliases",
@@ -781,7 +762,6 @@ const STRINGS = {
     clickToRename: "Kattints az átnevezéshez",
     untitledGraph: "Névtelen gráf",
     addNode: "Csomópont hozzáadása",
-    addGroup: "Csoport hozzáadása",
     connect: "Összekapcsolás",
     autoLayout: "Automatikus elrendezés",
     undo: "Visszavonás",
@@ -805,7 +785,6 @@ const STRINGS = {
     clearConfirmMessage: "Törlöd az egész gráfot? Ez eltávolítja az összes csomópontot és élt. Ez visszavonható a Visszavonás gombbal.",
     clearConfirmLabel: "Törlés",
     nodeLabelPlaceholder: "Csomópont neve",
-    groupLabelPlaceholder: "Csoport neve",
     relationLabelPlaceholder: "kapcsolat neve",
     graphNamePlaceholder: "Gráf neve",
     emptyCanvasMessage: (addNodeLabel) => `A vászon üres — kattints a(z) "${addNodeLabel}" gombra a kezdéshez`,
@@ -816,7 +795,6 @@ const STRINGS = {
     // Agent Ontology (agent_ontology_spec.md §7) — Class/Relationship details dialog.
     editDetailsTitle: "Részletek szerkesztése",
     editClassDetailsTitle: "Osztály részleteinek szerkesztése",
-    editGroupDetailsTitle: "Csoport részleteinek szerkesztése",
     editRelationshipDetailsTitle: "Kapcsolat részleteinek szerkesztése",
     meaningLabel: "Jelentés",
     aliasesLabel: "Alias nevek",
@@ -889,7 +867,6 @@ function applyLanguage() {
     titleEl.textContent = state.graphName;
   }
   byId("btn-add-node").textContent = t("addNode");
-  byId("btn-add-group").textContent = t("addGroup");
   byId("btn-connect").textContent = t("connect");
   byId("btn-domain-model").textContent = t("domainModel");
   byId("btn-autolayout").textContent = t("autoLayout");
@@ -973,7 +950,7 @@ const state = {
   nodes: [],
   edges: [],
   selection: { type: null, id: null }, // type: 'node' | 'edge' | null
-  mode: "idle", // 'idle' | 'addNode' | 'addGroup' | 'connect'
+  mode: "idle", // 'idle' | 'addNode' | 'connect'
   connectSource: null,
   nextNodeNum: 1,
   nextEdgeNum: 1,
@@ -998,27 +975,22 @@ const state = {
 
 const DEFAULT_NODE_W = 160;
 const DEFAULT_NODE_H = 60;
-const DEFAULT_GROUP_W = 320;
-const DEFAULT_GROUP_H = 220;
 
 function genNodeId() { return `n${state.nextNodeNum++}`; }
 function genEdgeId() { return `e${state.nextEdgeNum++}`; }
 function genRuleId() { return `r${state.nextRuleNum++}`; }
 function genActionId() { return `a${state.nextActionNum++}`; }
 
-function createNode(x, y, label, type = "entity") {
-  const w = type === "group" ? DEFAULT_GROUP_W : DEFAULT_NODE_W;
-  const h = type === "group" ? DEFAULT_GROUP_H : DEFAULT_NODE_H;
+// Every node is a Class (agent_ontology_spec.md §2 — groups were removed
+// entirely, see the dated Log entry, so this is no longer a "non-group
+// node" qualifier, it's just every node).
+function createNode(x, y, label) {
   const node = {
     id: genNodeId(),
     label,
-    type,
-    x, y, w, h,
-    groups: [],
-    boundary_mode: type === "group" ? "manual" : undefined,
-    // Agent Ontology (agent_ontology_spec.md §4.1): every non-group node
-    // doubles as a Class. `meaning` replaces the old `notes` field (never
-    // exposed in any editor, so this is a rename, not new state).
+    x, y, w: DEFAULT_NODE_W, h: DEFAULT_NODE_H,
+    // `meaning` replaces the old `notes` field (never exposed in any
+    // editor, so this is a rename, not new state).
     meaning: null,
     aliases: [],
     properties: [],
@@ -1028,9 +1000,9 @@ function createNode(x, y, label, type = "entity") {
   return node;
 }
 
-function createEdge(sourceId, targetId, relation, directed = true, auto = false) {
+function createEdge(sourceId, targetId, relation, directed = true) {
   const edge = {
-    id: genEdgeId(), source: sourceId, target: targetId, relation, directed, auto,
+    id: genEdgeId(), source: sourceId, target: targetId, relation, directed,
     meaning: null, // agent_ontology_spec.md §4.2
   };
   state.edges.push(edge);
@@ -1065,7 +1037,7 @@ function deleteRule(id) {
   if (idx === -1) return;
   state.rules.splice(idx, 1);
   // Same "clean up the reference, don't block or cascade-delete" posture as
-  // deleteNode()'s groups[] cleanup below — preconditions are stored by
+  // deleteNode()'s inputClassId cleanup below — preconditions are stored by
   // rule id specifically so a deletion like this stays a non-catastrophic,
   // silent cleanup rather than an orphaned/dangling reference.
   for (const a of state.actions) {
@@ -1087,11 +1059,6 @@ function deleteNode(id) {
   if (idx === -1) return;
   state.nodes.splice(idx, 1);
   state.edges = state.edges.filter((e) => e.source !== id && e.target !== id);
-  // If the deleted node was a group, drop it from any remaining member's groups[].
-  for (const n of state.nodes) {
-    const gi = n.groups.indexOf(id);
-    if (gi !== -1) n.groups.splice(gi, 1);
-  }
   // An Action referencing this node as its input class loses the reference,
   // not the whole action — its effect/verification/preconditions text is
   // still meaningful even without an input class (agent_ontology_spec.md
@@ -1117,8 +1084,7 @@ function deleteEdge(id) {
 // than tracked per-action deltas — matches the spec's own description of
 // autolayout as "one before snapshot," generalized to every action here for
 // correctness by construction (no mutation can forget to register its
-// inverse). `groups[]` arrays are cloned too since they're mutated in place.
-// Id counters are intentionally NOT part of the snapshot: ids are never
+// inverse). Id counters are intentionally NOT part of the snapshot: ids are never
 // reused (Section 4.1), so they must keep incrementing across undo/redo.
 // Nothing here is persisted — it's just these two in-memory arrays, so a
 // reload always starts with an empty stack (Section 8).
@@ -1126,19 +1092,16 @@ function deleteEdge(id) {
 const history = { past: [], future: [] };
 
 // Agent Ontology's aliases[]/properties[] (nodes) and rules[]/actions[]
-// arrays get the same explicit-clone treatment as groups[] above, for the
-// same reason: a shallow `{...n}` would leave the array reference shared
-// between snapshots, so a later in-place mutation would silently corrupt
-// an already-pushed "before" snapshot. No UI mutates any of these yet
-// (Phase A is data-model only), but snapshotState/restoreSnapshot are
-// meant to be correct for every field un­conditionally, not just the ones
-// currently reachable from the UI — see the correctness-by-construction
-// note above.
+// arrays get the same explicit-clone treatment: a shallow `{...n}` would
+// leave the array reference shared between snapshots, so a later in-place
+// mutation would silently corrupt an already-pushed "before" snapshot. No
+// UI mutates rules/actions this way yet, but snapshotState/restoreSnapshot
+// are meant to be correct for every field unconditionally, not just the
+// ones currently reachable from the UI.
 function snapshotState() {
   return {
     nodes: state.nodes.map((n) => ({
       ...n,
-      groups: [...n.groups],
       aliases: [...n.aliases],
       properties: n.properties.map((p) => ({ ...p })),
     })),
@@ -1151,7 +1114,6 @@ function snapshotState() {
 function restoreSnapshot(snap) {
   state.nodes = snap.nodes.map((n) => ({
     ...n,
-    groups: [...n.groups],
     aliases: [...n.aliases],
     properties: n.properties.map((p) => ({ ...p })),
   }));
@@ -1199,49 +1161,13 @@ function updateUndoRedoButtons() {
 // Autolayout (Section 8): explicit-only, never automatic. Force-directed
 // (Fruchterman-Reingold style) relaxation of node *centers* — repulsion
 // between every pair of nodes, not just connected ones, so disconnected
-// components and floating groups still spread apart instead of piling up;
-// attraction along edges, including the auto-generated "contains" edges
-// (Section 4.3) — that's what pulls a group and its members toward each
-// other in the first place. Starts from the graph's current positions
-// (rather than a fresh random scatter), so the result is deterministic for
-// a given graph + starting layout — no RNG involved, and nothing to seed.
-// A fixed iteration count with a cooling schedule guarantees termination
-// (no risk of hanging) regardless of graph shape.
-//
-// Group boxes are moved exactly like any other node and keep their own
-// w/h — boundary_mode is always "manual" (Section 4.3), nothing in this
-// app ever auto-fits a group's box to its members, autolayout included.
-// But a member must never end up outside the box it belongs to: after each
-// iteration's forces are applied, every node with non-empty groups[] is
-// clamped back inside each group it belongs to (clampCenterIntoGroup).
-// This is an explicit hard constraint, not just the spring pull from the
-// contains-edge attraction above — that pull alone doesn't guarantee
-// containment (a member's own repulsion from other nodes, or the group's
-// own attraction elsewhere, can still push it past the box edge). Multiple
-// clamp passes per iteration (GROUP_CONTAINMENT_PASSES) handle nested
-// groups (member -> inner group -> outer group) by letting the constraint
-// propagate outward; this is a fixed-pass approximation, not a topological
-// sort, since real nesting depth in this app is always small. Does not
-// touch groups[] membership itself or run outside autolayout — a manual
-// drag can still pull a node fully out of a group exactly as before
-// (Phase 2's own membership rules are unaffected).
+// components still spread apart instead of piling up; attraction along
+// edges. Starts from the graph's current positions (rather than a fresh
+// random scatter), so the result is deterministic for a given graph +
+// starting layout — no RNG involved, and nothing to seed. A fixed
+// iteration count with a cooling schedule guarantees termination (no risk
+// of hanging) regardless of graph shape.
 // ---------------------------------------------------------------------------
-const GROUP_CONTAINMENT_PASSES = 5;
-
-function clampCenterIntoGroup(center, w, h, groupCenter, groupW, groupH) {
-  const minCx = groupCenter.x - groupW / 2 + w / 2;
-  const maxCx = groupCenter.x + groupW / 2 - w / 2;
-  const minCy = groupCenter.y - groupH / 2 + h / 2;
-  const maxCy = groupCenter.y + groupH / 2 - h / 2;
-  // min/max can invert when the member is wider/taller than the group's
-  // interior (e.g. a member bigger than MIN_GROUP_SIZE) — Math.min/max
-  // keeps clamp()'s (lo <= hi) contract intact instead of producing NaN;
-  // this is a pre-existing possible state (a manual resize could already
-  // make a member larger than its group), not something autolayout creates.
-  center.x = clamp(center.x, Math.min(minCx, maxCx), Math.max(minCx, maxCx));
-  center.y = clamp(center.y, Math.min(minCy, maxCy), Math.max(minCy, maxCy));
-}
-
 function autoLayout() {
   if (state.nodes.length < 2) return; // nothing to relax
   const before = snapshotState();
@@ -1288,18 +1214,6 @@ function autoLayout() {
       const capped = Math.min(dist, temperature);
       centers[i].x += (disp[i].x / dist) * capped;
       centers[i].y += (disp[i].y / dist) * capped;
-    }
-
-    for (let pass = 0; pass < GROUP_CONTAINMENT_PASSES; pass++) {
-      for (let i = 0; i < state.nodes.length; i++) {
-        const node = state.nodes[i];
-        for (const gid of node.groups) {
-          const gi = indexById.get(gid);
-          if (gi === undefined) continue;
-          const group = state.nodes[gi];
-          clampCenterIntoGroup(centers[i], node.w, node.h, centers[gi], group.w, group.h);
-        }
-      }
     }
 
     temperature *= 0.95;
@@ -1490,113 +1404,9 @@ async function loadGraphFromStorage() {
   return true;
 }
 
-// ---------------------------------------------------------------------------
-// Group membership (spec Section 4.3, Decision #2/#3). Directional-by-action:
-// only committed/cleared here, at the end of an explicit move-drag — never
-// recomputed just because boxes happen to overlap after some other change
-// (e.g. resizing or moving the group itself).
-// ---------------------------------------------------------------------------
+// Used for viewport culling (Section 6/9) — not group-specific.
 function rectsOverlap(a, b) {
   return !(a.x + a.w <= b.x || a.x >= b.x + b.w || a.y + a.h <= b.y || a.y >= b.y + b.h);
-}
-
-function rectFullyContains(outer, inner) {
-  return outer.x <= inner.x && outer.y <= inner.y &&
-    outer.x + outer.w >= inner.x + inner.w && outer.y + outer.h >= inner.y + inner.h;
-}
-
-function createContainsEdge(groupId, memberId) {
-  createEdge(groupId, memberId, "contains", true, true);
-}
-
-function removeContainsEdge(groupId, memberId) {
-  state.edges = state.edges.filter((e) => !(e.auto && e.source === groupId && e.target === memberId));
-  markDirty();
-}
-
-function updateGroupMembership(node) {
-  const stillMember = [];
-  for (const gid of node.groups) {
-    const group = state.nodes.find((n) => n.id === gid);
-    if (group && rectsOverlap(node, group)) {
-      stillMember.push(gid);
-    } else {
-      removeContainsEdge(gid, node.id); // dragged fully outside (or group gone)
-    }
-  }
-  node.groups = stillMember;
-
-  let best = null;
-  for (const candidate of state.nodes) {
-    if (candidate.id === node.id) continue;
-    if (candidate.type !== "group") continue;
-    if (node.groups.includes(candidate.id)) continue;
-    if (candidate.w * candidate.h <= node.w * node.h) continue; // must be strictly bigger
-    if (!rectFullyContains(candidate, node)) continue; // "drop inside" = full containment
-    // A candidate that's just a bigger ancestor of a group this node is
-    // ALREADY (still) a member of is redundant — that containment already
-    // holds transitively through nesting. Without this, dragging a group
-    // that already has its own nested member into a bigger outer group
-    // would give the member a second, direct membership in the outer
-    // group too (plus a second, redundant `contains` edge), breaking
-    // "innermost wins" for a cascaded drop the same way it's already
-    // enforced for a fresh one. Two same-level, merely-overlapping
-    // candidates (neither containing the other) are unaffected — that's
-    // the legitimate "member of two separate groups" case.
-    const redundant = node.groups.some((gid) => {
-      const existing = state.nodes.find((n) => n.id === gid);
-      return existing && rectFullyContains(candidate, existing);
-    });
-    if (redundant) continue;
-    if (!best || candidate.w * candidate.h < best.w * best.h) best = candidate; // innermost wins
-  }
-  if (best) {
-    node.groups.push(best.id);
-    createContainsEdge(best.id, node.id);
-  }
-  markDirty();
-}
-
-// A dragged GROUP now actively absorbs nodes it's dropped onto, and
-// releases members it's dragged away from — symmetric with how dragging a
-// member itself already worked. This is a deliberate, later reversal of an
-// earlier "moving a group never cascades membership" decision (see the
-// dated Log entry): resizing a group still never auto-fits to members
-// (Section 4.3 is explicit about that one case), but the group's own drag
-// is now treated the same as any member's drag. Reuses
-// updateGroupMembership() per other node so the exact same rules
-// (strictly-bigger, innermost-wins, overlap-to-keep, full-containment-to-
-// join) apply regardless of which side initiated the drag.
-function updateMembershipForMovedGroup(group) {
-  for (const other of state.nodes) {
-    if (other.id === group.id) continue;
-    updateGroupMembership(other);
-  }
-}
-
-// All nodes transitively contained by groupId — direct members, plus
-// members of any nested member group, and so on. Used to drag a group's
-// whole contents along with it as one rigid unit while it's being moved
-// (never during resize — Section 4.3's box is independently resizable and
-// must never auto-fit to/drag its members). Membership itself is
-// unaffected by this: it's still only ever committed/cleared by
-// updateGroupMembership()/updateMembershipForMovedGroup(), evaluated once
-// the drag ends, exactly as before.
-function collectContainedDescendants(groupId) {
-  const result = new Set();
-  let frontier = [groupId];
-  while (frontier.length) {
-    const next = [];
-    for (const n of state.nodes) {
-      if (result.has(n.id)) continue;
-      if (n.groups.some((gid) => frontier.includes(gid))) {
-        result.add(n.id);
-        next.push(n.id);
-      }
-    }
-    frontier = next;
-  }
-  return result;
 }
 
 function selectNode(id) { state.selection = { type: "node", id }; markDirty(); }
@@ -1607,10 +1417,8 @@ function setMode(mode) {
   state.mode = mode;
   if (mode !== "connect") state.connectSource = null;
   canvas.classList.toggle("mode-addnode", mode === "addNode");
-  canvas.classList.toggle("mode-addgroup", mode === "addGroup");
   canvas.classList.toggle("mode-connect", mode === "connect");
   document.getElementById("btn-add-node").setAttribute("aria-pressed", String(mode === "addNode"));
-  document.getElementById("btn-add-group").setAttribute("aria-pressed", String(mode === "addGroup"));
   document.getElementById("btn-connect").setAttribute("aria-pressed", String(mode === "connect"));
   markDirty();
 }
@@ -1619,20 +1427,13 @@ function setMode(mode) {
 // Geometry helpers: hit-testing and edge anchor points (line clipped to the
 // node's rectangle border, so arrows/lines start/end at the box edge).
 // ---------------------------------------------------------------------------
-// Nodes can now nest (groups), so hit-testing/rendering order can't just be
-// creation order any more: the smallest-area box under a point should win
-// (it's the visually topmost one), with later-created nodes breaking ties.
-// Used both for hit-testing (as-is) and rendering (reversed — biggest/
-// outermost drawn first, so nested boxes paint on top of their container).
-// Optional `rect` filters to nodes intersecting it (viewport culling, see
-// visibleWorldRect() below) — omitted, every call site that needs the full
-// unculled list (e.g. group-membership checks, which must consider groups
-// regardless of what's currently on screen) keeps working exactly as before.
+// Every node is the same fixed size, so "topmost" for overlapping boxes is
+// just creation order — the most recently added node wins an ambiguous
+// click. Used both for hit-testing (as-is) and rendering (reversed, so the
+// most recent node still paints on top). Optional `rect` filters to nodes
+// intersecting it (viewport culling, see visibleWorldRect() below).
 function nodesTopmostFirst(rect) {
-  const sorted = state.nodes
-    .map((n, i) => ({ n, i }))
-    .sort((a, b) => (a.n.w * a.n.h - b.n.w * b.n.h) || (b.i - a.i))
-    .map((x) => x.n);
+  const sorted = [...state.nodes].reverse();
   return rect ? sorted.filter((n) => rectsOverlap(n, rect)) : sorted;
 }
 
@@ -1662,24 +1463,6 @@ function findNodeHandleAt(wx, wy) {
   return null;
 }
 
-// Section 4.3 explicitly requires a group's box to be "independently
-// resizable" (boundary_mode is always manual, i.e. never auto-fit) — so
-// unlike entity nodes, group nodes get a corner resize handle. This is also
-// the only way two groups can ever nest: they're all created at the same
-// default size, so recursive membership requires shrinking/growing one.
-const MIN_GROUP_SIZE = 60;
-
-function groupResizeHandlePoint(n) { return { x: n.x + n.w, y: n.y + n.h }; }
-
-function findGroupResizeHandleAt(wx, wy) {
-  const radius = 10 / camera.scale;
-  for (const n of nodesTopmostFirst(visibleWorldRect())) {
-    if (n.type !== "group") continue;
-    const h = groupResizeHandlePoint(n);
-    if (Math.hypot(wx - h.x, wy - h.y) <= radius) return n;
-  }
-  return null;
-}
 
 function rectBorderPoint(rect, dx, dy) {
   const cx = rect.x + rect.w / 2, cy = rect.y + rect.h / 2;
@@ -1719,7 +1502,6 @@ const EDGE_BEND_STEP = 60; // world units of perpendicular offset per step
 function computeEdgeBendInfo() {
   const groups = new Map(); // "id1|id2" (sorted) -> [edge, ...] in encounter order
   for (const edge of state.edges) {
-    if (edge.auto) continue; // contains edges are never drawn/hit-tested, so never bent
     const key = edge.source < edge.target ? `${edge.source}|${edge.target}` : `${edge.target}|${edge.source}`;
     if (!groups.has(key)) groups.set(key, []);
     groups.get(key).push(edge);
@@ -1811,7 +1593,6 @@ function findEdgeAt(wx, wy) {
   const bendInfo = computeEdgeBendInfo();
   for (let i = state.edges.length - 1; i >= 0; i--) {
     const e = state.edges[i];
-    if (e.auto) continue; // contains edges are never drawn, so never hit-testable
     const geo = edgeGeometry(e, bendInfo);
     if (!geo) continue;
     if (!rectsOverlap(edgeBoundingRect(geo, geo.control), rect)) continue;
@@ -1841,9 +1622,9 @@ window.addEventListener("resize", resizeCanvas);
 // Viewport culling (Section 6, Section 9): draw/hit-test only what
 // intersects the visible camera rect, so cost scales with what's on screen
 // rather than total graph size. Padding keeps things that visually extend a
-// little past a node/edge's own geometry (resize handles, edge labels, the
-// dashed group outline) from popping in/out right at the screen edge;
-// expressed in world units scaled by 1/camera.scale so it reads as a
+// little past a node/edge's own geometry (connection handles, edge labels)
+// from popping in/out right at the screen edge; expressed in world units
+// scaled by 1/camera.scale so it reads as a
 // constant ~50 screen px margin at any zoom level.
 //
 // Safe for hit-testing, not just drawing: findNodeAt/findEdgeAt etc. are
@@ -1906,17 +1687,11 @@ function resolveColors() {
     connectSourceStroke: v("--connect-source-stroke", "#ffb84d"),
     nodeText: v("--node-text", "#e8e8e8"),
     handleFill: v("--handle-fill", "rgba(255,255,255,0.35)"),
-    groupFill: v("--group-fill", "rgba(77,166,255,0.06)"),
-    groupStroke: v("--group-stroke", "#4d7fa6"),
     importedStroke: v("--imported-stroke", "#e0b13f"), // TXT import: "flagged as newly added" (Section 5.3)
     edgeStroke: v("--edge-stroke", "#8a8a8a"),
     edgeStrokeSelected: v("--edge-stroke-selected", "#4da6ff"),
     edgeLabelFg: v("--edge-label-fg", "#bbbbbb"),
     ghostStroke: v("--ghost-stroke", "#4da6ff"),
-    memberFill: v("--member-fill", "rgba(77,189,143,0.07)"),
-    memberStroke: v("--member-stroke", "#4dbd8f"),
-    groupMoveStroke: v("--group-move-stroke", "#b085f5"),
-    groupResizeStroke: v("--group-resize-stroke", "#4dd0e1"),
   };
 }
 
@@ -1988,7 +1763,6 @@ function drawEdges(colors) {
   const bendInfo = computeEdgeBendInfo();
   let edgesTotal = 0, edgesDrawn = 0;
   for (const edge of state.edges) {
-    if (edge.auto) continue; // contains: communicated by nesting only, never drawn
     edgesTotal++;
     const geo = edgeGeometry(edge, bendInfo);
     if (!geo) continue;
@@ -2034,50 +1808,26 @@ function drawNodes(colors) {
   for (const node of drawOrder) {
     const selected = state.selection.type === "node" && state.selection.id === node.id;
     const isConnectSource = state.connectSource === node.id;
-    const isGroup = node.type === "group";
     const isNewlyImported = newlyImportedIds.has(node.id);
-    // Group membership hue: any non-group node currently listed in a
-    // group's contains (i.e. its own groups[] is non-empty) reads as
-    // visually distinct from an ordinary, ungrouped entity — independent
-    // of selection, so it stays visible whether or not it's picked.
-    const isMember = !isGroup && node.groups.length > 0;
-    // The dragged group itself gets a highlight distinguishing a live move
-    // (drags its contents along) from a live resize (never does) — only
-    // while that specific drag is in flight, reverting to the normal
-    // selected/group look the instant the pointer is released.
-    const isBeingMoved = isGroup && dragMode === "moveNode" && movingNodeId === node.id;
-    const isBeingResized = isGroup && dragMode === "resizeGroup" && resizingNodeId === node.id;
 
-    ctx.fillStyle = isGroup ? colors.groupFill : isMember ? colors.memberFill : colors.nodeFill;
+    ctx.fillStyle = colors.nodeFill;
     ctx.strokeStyle = isConnectSource ? colors.connectSourceStroke
-      : isBeingMoved ? colors.groupMoveStroke
-      : isBeingResized ? colors.groupResizeStroke
       : selected ? colors.nodeStrokeSelected
       : isNewlyImported ? colors.importedStroke
-      : isGroup ? colors.groupStroke
-      : isMember ? colors.memberStroke
       : colors.nodeStroke;
-    ctx.lineWidth = selected || isConnectSource || isNewlyImported || isBeingMoved || isBeingResized ? 3 : 1.5;
-    ctx.setLineDash(isGroup ? [8, 5] : []);
+    ctx.lineWidth = selected || isConnectSource || isNewlyImported ? 3 : 1.5;
     roundRectPath(node.x, node.y, node.w, node.h, 8);
     ctx.fill();
     ctx.stroke();
-    ctx.setLineDash([]);
 
     ctx.save();
     roundRectPath(node.x, node.y, node.w, node.h, 8);
     ctx.clip();
     ctx.fillStyle = colors.nodeText;
     ctx.font = `${NODE_FONT_SIZE}px system-ui, sans-serif`;
-    if (isGroup) {
-      ctx.textAlign = "left";
-      ctx.textBaseline = "top";
-      ctx.fillText(node.label, node.x + 10, node.y + 8, node.w - 20);
-    } else {
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText(node.label, node.x + node.w / 2, node.y + node.h / 2, node.w - 16);
-    }
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(node.label, node.x + node.w / 2, node.y + node.h / 2, node.w - 16);
     ctx.restore();
 
     ctx.fillStyle = colors.handleFill;
@@ -2085,11 +1835,6 @@ function drawNodes(colors) {
       ctx.beginPath();
       ctx.arc(h.x, h.y, 5, 0, Math.PI * 2);
       ctx.fill();
-    }
-
-    if (isGroup) {
-      const rh = groupResizeHandlePoint(node);
-      ctx.fillRect(rh.x - 5, rh.y - 5, 10, 10);
     }
   }
 }
@@ -2303,12 +2048,9 @@ let detailsEditingTarget = null; // { kind: "node" | "edge", id } | null
 // dialog isn't open.
 function updateDetailsTitle() {
   if (!detailsEditingTarget) return;
-  if (detailsEditingTarget.kind === "edge") {
-    detailsTitleEl.textContent = t("editRelationshipDetailsTitle");
-    return;
-  }
-  const node = state.nodes.find((n) => n.id === detailsEditingTarget.id);
-  detailsTitleEl.textContent = node && node.type === "group" ? t("editGroupDetailsTitle") : t("editClassDetailsTitle");
+  detailsTitleEl.textContent = detailsEditingTarget.kind === "edge"
+    ? t("editRelationshipDetailsTitle")
+    : t("editClassDetailsTitle"); // every node is a Class now — groups were removed entirely
 }
 
 function createDetailsRemoveButton(onRemove) {
@@ -2747,19 +2489,17 @@ function safeReleasePointerCapture(id) {
 let panPointerId = null;
 let panLast = { x: 0, y: 0 };
 
-let dragMode = null; // 'pan' | 'moveNode' | 'createEdge' | 'resizeGroup' | null
+let dragMode = null; // 'pan' | 'moveNode' | 'createEdge' | null
 let movingNodeId = null;
 let moveOffset = { x: 0, y: 0 };
 let edgeDragSourceId = null;
 let edgeDragCurrentWorld = null;
-let resizingNodeId = null;
-let resizeStart = { w: 0, h: 0, worldX: 0, worldY: 0 };
-let dragBeforeSnapshot = null; // captured at drag-start, for moveNode/resizeGroup undo steps
+let dragBeforeSnapshot = null; // captured at drag-start, for moveNode undo steps
 let longPressTimer = null;
 let pointerDownScreen = null;
 let suppressNextClick = false;
-// The pointer currently driving pan/moveNode/resizeGroup/createEdge. A
-// second pointer's own pointerdown must never start an independent second
+// The pointer currently driving pan/moveNode/createEdge. A second
+// pointer's own pointerdown must never start an independent second
 // interaction through this handler — without this guard, a second touch
 // arriving to start a pinch reaches this handler *before* the touch-pinch
 // listener below gets a chance to recognize it, and its own hit-test can
@@ -2779,19 +2519,6 @@ canvas.addEventListener("pointerdown", (e) => {
   const sx = e.clientX - rect.left, sy = e.clientY - rect.top;
   const world = screenToWorld(sx, sy);
   pointerDownScreen = { x: e.clientX, y: e.clientY };
-
-  const resizeHit = findGroupResizeHandleAt(world.x, world.y);
-  if (resizeHit) {
-    dragMode = "resizeGroup";
-    activePointerId = e.pointerId;
-    resizingNodeId = resizeHit.id;
-    resizeStart = { w: resizeHit.w, h: resizeHit.h, worldX: world.x, worldY: world.y };
-    dragBeforeSnapshot = snapshotState();
-    selectNode(resizeHit.id);
-    safeSetPointerCapture(e.pointerId);
-    markDirty();
-    return;
-  }
 
   const handleHit = findNodeHandleAt(world.x, world.y);
   if (handleHit) {
@@ -2873,16 +2600,8 @@ canvas.addEventListener("pointermove", (e) => {
     if (dragMode === "moveNode") {
       const node = state.nodes.find((n) => n.id === movingNodeId);
       if (node) {
-        const newX = world.x - moveOffset.x, newY = world.y - moveOffset.y;
-        const dx = newX - node.x, dy = newY - node.y;
-        node.x = newX;
-        node.y = newY;
-        if (node.type === "group") {
-          for (const id of collectContainedDescendants(node.id)) {
-            const member = state.nodes.find((n) => n.id === id);
-            if (member) { member.x += dx; member.y += dy; }
-          }
-        }
+        node.x = world.x - moveOffset.x;
+        node.y = world.y - moveOffset.y;
         markDirty();
       }
     } else {
@@ -2890,19 +2609,6 @@ canvas.addEventListener("pointermove", (e) => {
       markDirty();
     }
     return;
-  }
-
-  if (dragMode === "resizeGroup") {
-    if (e.pointerId !== activePointerId) return;
-    const node = state.nodes.find((n) => n.id === resizingNodeId);
-    if (node) {
-      const rect = canvas.getBoundingClientRect();
-      const world = screenToWorld(e.clientX - rect.left, e.clientY - rect.top);
-      const dx = world.x - resizeStart.worldX, dy = world.y - resizeStart.worldY;
-      node.w = Math.max(MIN_GROUP_SIZE, resizeStart.w + dx);
-      node.h = Math.max(MIN_GROUP_SIZE, resizeStart.h + dy);
-      markDirty();
-    }
   }
 });
 
@@ -2936,12 +2642,7 @@ canvas.addEventListener("pointerup", (e) => {
     const moved = pointerDownScreen ? Math.hypot(e.clientX - pointerDownScreen.x, e.clientY - pointerDownScreen.y) : 0;
     if (moved > MOVE_THRESHOLD) {
       suppressNextClick = true;
-      const node = state.nodes.find((n) => n.id === movingNodeId);
-      if (node) {
-        updateGroupMembership(node); // commit/clear the dragged node's own membership, not on mere click
-        if (node.type === "group") updateMembershipForMovedGroup(node); // absorb/release other nodes
-      }
-      if (dragBeforeSnapshot) pushHistory(dragBeforeSnapshot, snapshotState()); // move + membership: one step
+      if (dragBeforeSnapshot) pushHistory(dragBeforeSnapshot, snapshotState());
     }
     movingNodeId = null;
     dragBeforeSnapshot = null;
@@ -2967,32 +2668,18 @@ canvas.addEventListener("pointerup", (e) => {
     markDirty();
     return;
   }
-
-  if (dragMode === "resizeGroup") {
-    if (e.pointerId !== activePointerId) return;
-    const moved = pointerDownScreen ? Math.hypot(e.clientX - pointerDownScreen.x, e.clientY - pointerDownScreen.y) : 0;
-    if (moved > MOVE_THRESHOLD) {
-      suppressNextClick = true;
-      if (dragBeforeSnapshot) pushHistory(dragBeforeSnapshot, snapshotState());
-    }
-    resizingNodeId = null;
-    dragBeforeSnapshot = null;
-    dragMode = null;
-    activePointerId = null;
-    return;
-  }
 });
 
 // A drag interrupted mid-flight — a genuine browser pointercancel, or a
 // second touch arriving to start a pinch (see the touch pointerdown
 // listener below) — used to just null out dragMode/movingNodeId/etc.
-// directly, silently stranding whatever position/size change had already
-// happened: node.x/y (or w/h) stayed mutated, but pushHistory() was never
-// called, so the change was both un-undoable and invisible to the next
-// save. "Every discrete action = one undo step" (Phase 3) applies here
-// too — an interruption commits whatever changed so far, exactly like an
-// ordinary drag release would, and is skipped entirely (no empty undo
-// step) if nothing actually moved/resized yet.
+// directly, silently stranding whatever position change had already
+// happened: node.x/y stayed mutated, but pushHistory() was never called,
+// so the change was both un-undoable and invisible to the next save.
+// "Every discrete action = one undo step" (Phase 3) applies here too — an
+// interruption commits whatever changed so far, exactly like an ordinary
+// drag release would, and is skipped entirely (no empty undo step) if
+// nothing actually moved yet.
 function commitDragIfChanged() {
   if (!dragBeforeSnapshot) return;
   const after = snapshotState();
@@ -3007,14 +2694,7 @@ function abortActiveDrag() {
   // for it.
   if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
   if (dragMode === "moveNode" && movingNodeId) {
-    const node = state.nodes.find((n) => n.id === movingNodeId);
-    if (node) {
-      updateGroupMembership(node);
-      if (node.type === "group") updateMembershipForMovedGroup(node);
-    }
     commitDragIfChanged();
-  } else if (dragMode === "resizeGroup" && resizingNodeId) {
-    commitDragIfChanged(); // resize never cascades membership, same as a normal resize release
   }
   // createEdge has nothing persistent to commit (no edge exists until a
   // target is confirmed) and pan has no undo history at all — both leave
@@ -3024,7 +2704,6 @@ function abortActiveDrag() {
   movingNodeId = null;
   edgeDragSourceId = null;
   edgeDragCurrentWorld = null;
-  resizingNodeId = null;
   dragBeforeSnapshot = null;
   markDirty();
 }
@@ -3040,24 +2719,22 @@ function beginAddEdgePrompt(sourceId, targetId, screenPos) {
     onCommit: (text) => {
       const relation = text.trim() || t("defaultRelation");
       const before = snapshotState();
-      const edge = createEdge(sourceId, targetId, relation, true, false);
+      const edge = createEdge(sourceId, targetId, relation, true);
       pushHistory(before, snapshotState());
       selectEdge(edge.id);
     },
   });
 }
 
-function placeNewNodeAt(world, screenPos, type) {
+function placeNewNodeAt(world, screenPos) {
   showInlineInput({
     x: screenPos.x, y: screenPos.y,
-    placeholder: type === "group" ? t("groupLabelPlaceholder") : t("nodeLabelPlaceholder"),
+    placeholder: t("nodeLabelPlaceholder"),
     onCommit: (text) => {
       const label = text.trim();
       if (!label) return;
-      const w = type === "group" ? DEFAULT_GROUP_W : DEFAULT_NODE_W;
-      const h = type === "group" ? DEFAULT_GROUP_H : DEFAULT_NODE_H;
       const before = snapshotState();
-      const node = createNode(world.x - w / 2, world.y - h / 2, label, type);
+      const node = createNode(world.x - DEFAULT_NODE_W / 2, world.y - DEFAULT_NODE_H / 2, label);
       pushHistory(before, snapshotState());
       selectNode(node.id);
     },
@@ -3087,7 +2764,7 @@ function beginRenameNodePrompt(nodeId) {
   const screenPos = worldToScreen(node.x + node.w / 2, node.y + node.h / 2);
   showInlineInput({
     x: screenPos.x, y: screenPos.y, value: node.label,
-    placeholder: node.type === "group" ? t("groupLabelPlaceholder") : t("nodeLabelPlaceholder"),
+    placeholder: t("nodeLabelPlaceholder"),
     onCommit: (text) => {
       const label = text.trim();
       if (!label || label === node.label) return;
@@ -3154,8 +2831,8 @@ canvas.addEventListener("click", (e) => {
   const sx = e.clientX - rect.left, sy = e.clientY - rect.top;
   const world = screenToWorld(sx, sy);
 
-  if (state.mode === "addNode" || state.mode === "addGroup") {
-    placeNewNodeAt(world, { x: e.clientX, y: e.clientY }, state.mode === "addGroup" ? "group" : "entity");
+  if (state.mode === "addNode") {
+    placeNewNodeAt(world, { x: e.clientX, y: e.clientY });
     setMode("idle");
     return;
   }
@@ -3183,7 +2860,7 @@ canvas.addEventListener("dblclick", (e) => {
   const edgeHit = findEdgeAt(world.x, world.y);
   if (edgeHit) { beginRenameEdgePrompt(edgeHit.id); return; }
 
-  placeNewNodeAt(world, screenPos, "entity"); // spec gesture is entity-only
+  placeNewNodeAt(world, screenPos);
 });
 
 window.addEventListener("keydown", (e) => {
@@ -3334,20 +3011,15 @@ function buildJsonExport(savedAt) {
       created: state.meta.created,
       saved: savedAt,
     },
-    nodes: state.nodes.map((n) => {
-      const out = {
-        id: n.id, label: n.label, type: n.type,
-        x: n.x, y: n.y, w: n.w, h: n.h,
-        groups: [...n.groups],
-        // Agent Ontology (agent_ontology_spec.md §4.1) — meaning replaces
-        // the old, never-wired notes field; aliases/properties are new.
-        meaning: n.meaning,
-        aliases: [...n.aliases],
-        properties: n.properties.map((p) => ({ ...p })),
-      };
-      if (n.type === "group") out.boundary_mode = n.boundary_mode;
-      return out;
-    }),
+    nodes: state.nodes.map((n) => ({
+      id: n.id, label: n.label,
+      x: n.x, y: n.y, w: n.w, h: n.h,
+      // Agent Ontology (agent_ontology_spec.md §4.1) — meaning replaces
+      // the old, never-wired notes field; aliases/properties are new.
+      meaning: n.meaning,
+      aliases: [...n.aliases],
+      properties: n.properties.map((p) => ({ ...p })),
+    })),
     edges: state.edges.map((e) => ({
       id: e.id, source: e.source, target: e.target,
       relation: e.relation, directed: e.directed, auto: e.auto,
@@ -3370,9 +3042,7 @@ function buildTxtExport(savedAt) {
     "",
     "## NODES",
   ];
-  for (const n of state.nodes) {
-    lines.push(n.type === "group" ? `${n.label} [group]` : n.label);
-  }
+  for (const n of state.nodes) lines.push(n.label);
   lines.push("", "## EDGES");
   for (const e of state.edges) {
     const src = state.nodes.find((n) => n.id === e.source);
@@ -3483,8 +3153,8 @@ function performSaveVersion() {
 // File formats — import (Section 5.3). Parser is a direct port of the
 // spec's own reference Python loader (same grammar, same "<->" before "->"
 // check order since "<->" also contains "->" as a substring). The app's own
-// import additionally does label+type-matched merge/replace against the
-// live graph — the Python snippet is read-only.
+// import additionally does label-matched merge/replace against the live
+// graph — the Python snippet is read-only.
 //
 // UI note: Section 7 lists a single "Import from TXT" entry point (button +
 // drag-drop), but Section 5.3 defines two distinct modes and requires a
@@ -3493,8 +3163,7 @@ function performSaveVersion() {
 // together in one dialog after a file is chosen — Merge stays a single
 // undoable, no-extra-confirmation action in spirit (it's presented, not
 // gated), while Replace's diff-summary requirement is satisfied by the same
-// dialog. This is a necessary UI addition beyond Section 7's literal table,
-// the same way Add Group's button and the group resize handle were.
+// dialog. This is a necessary UI addition beyond Section 7's literal table.
 // ---------------------------------------------------------------------------
 function parseTxtImport(text) {
   const nodes = [];
@@ -3511,9 +3180,8 @@ function parseTxtImport(text) {
     if (line === "## EDGES") { section = "edges"; continue; }
     if (!line || line.startsWith("#")) continue;
     if (section === "nodes") {
-      const isGroup = line.endsWith("[group]");
-      const label = (isGroup ? line.slice(0, -"[group]".length) : line).trim();
-      if (label) nodes.push({ label, type: isGroup ? "group" : "entity" });
+      const label = line.trim();
+      if (label) nodes.push({ label });
     } else if (section === "edges") {
       const sepIdx = line.lastIndexOf(" : ");
       if (sepIdx === -1) continue; // malformed — no relation separator, skip
@@ -3537,10 +3205,6 @@ function parseTxtImport(text) {
   return { nodes, edges };
 }
 
-function isContainsDeclaration(edge) {
-  return edge.directed && edge.relation === "contains";
-}
-
 // Shared by the dialog's diff-count preview and the real commit, so the
 // numbers shown are guaranteed to match what actually happens. Doesn't
 // mutate state — resolves against a label->node map that includes both
@@ -3550,28 +3214,23 @@ function planTxtImport(parsed) {
   for (const n of state.nodes) if (!labelToNode.has(n.label)) labelToNode.set(n.label, n);
 
   const nodePlans = parsed.nodes.map((pn) => {
-    const existing = state.nodes.find((n) => n.label === pn.label && n.type === pn.type);
+    const existing = state.nodes.find((n) => n.label === pn.label);
     if (existing) {
       labelToNode.set(pn.label, existing);
-      return { label: pn.label, type: pn.type, existing };
+      return { label: pn.label, existing };
     }
-    const placeholder = { pending: true, label: pn.label, type: pn.type };
+    const placeholder = { pending: true, label: pn.label };
     labelToNode.set(pn.label, placeholder);
-    return { label: pn.label, type: pn.type, existing: null };
+    return { label: pn.label, existing: null };
   });
 
-  const containsDecls = [];
   const ordinaryEdgePlans = [];
   for (const pe of parsed.edges) {
     const srcNode = labelToNode.get(pe.source);
     const tgtNode = labelToNode.get(pe.target);
     if (!srcNode || !tgtNode) continue; // references a label not in ## NODES — skip defensively
-    if (isContainsDeclaration(pe)) {
-      if (srcNode.type === "group") containsDecls.push({ groupLabel: pe.source, memberLabel: pe.target });
-      continue; // malformed (source isn't a group) — skip silently either way
-    }
     const existingEdge = (!srcNode.pending && !tgtNode.pending)
-      ? state.edges.find((e) => !e.auto && e.source === srcNode.id && e.target === tgtNode.id &&
+      ? state.edges.find((e) => e.source === srcNode.id && e.target === tgtNode.id &&
           e.relation === pe.relation && e.directed === pe.directed)
       : null;
     ordinaryEdgePlans.push({ ...pe, existing: existingEdge });
@@ -3586,12 +3245,12 @@ function planTxtImport(parsed) {
     const nodesToRemove = state.nodes.filter((n) => !matchedIds.has(n.id));
     const removedIds = new Set(nodesToRemove.map((n) => n.id));
     const matchedEdgeIds = new Set(ordinaryEdgePlans.filter((ep) => ep.existing).map((ep) => ep.existing.id));
-    const edgesToRemove = state.edges.filter((e) => !e.auto && !removedIds.has(e.source) &&
+    const edgesToRemove = state.edges.filter((e) => !removedIds.has(e.source) &&
       !removedIds.has(e.target) && !matchedEdgeIds.has(e.id));
     removedCount = nodesToRemove.length + edgesToRemove.length;
   }
 
-  return { nodePlans, ordinaryEdgePlans, containsDecls, newNodeCount, newEdgeCount, removedCount };
+  return { nodePlans, ordinaryEdgePlans, newNodeCount, newEdgeCount, removedCount };
 }
 
 // Simple shelf/grid placement for newly-created nodes, starting just below
@@ -3604,7 +3263,7 @@ function computeImportShelf() {
   }
   let col = 0, row = 0;
   const COLS = 5, GAP_X = 200, GAP_Y = 100;
-  return (type) => {
+  return () => {
     const pos = { x: originX + col * GAP_X, y: originY + row * GAP_Y };
     col += 1;
     if (col >= COLS) { col = 0; row += 1; }
@@ -3625,112 +3284,40 @@ function commitTxtImport(text, mode) {
   const matchedExistingIds = new Set();
   const createdNodeIds = [];
   for (const pn of parsed.nodes) {
-    const existing = state.nodes.find((n) => n.label === pn.label && n.type === pn.type);
+    const existing = state.nodes.find((n) => n.label === pn.label);
     if (existing) {
       matchedExistingIds.add(existing.id);
       labelToNode.set(pn.label, existing);
       continue;
     }
-    const pos = nextShelfPosition(pn.type);
-    const node = createNode(pos.x, pos.y, pn.label, pn.type);
+    const pos = nextShelfPosition();
+    const node = createNode(pos.x, pos.y, pn.label);
     createdNodeIds.push(node.id);
     labelToNode.set(pn.label, node);
   }
 
-  // Group-membership declarations (spec: "exactly as if it had been
-  // dragged in on canvas" — i.e. groups[] + an auto contains edge), guarded
-  // against the same redundant-ancestor case updateGroupMembership() (the
-  // drag-based path) guards against: a file can declare both
-  // "Outer -> Leaf : contains" and "Inner -> Leaf : contains" with Inner
-  // itself declared (or already known) as nested inside Outer — without
-  // this, Leaf would end up with a spurious second, direct membership in
-  // Outer on top of its real one in Inner, plus a redundant second
-  // `contains` edge, even though that containment already holds
-  // transitively. Unlike the drag-based path, TXT import has no geometry
-  // to check against — "ancestor" here means "declared (or already
-  // existing) group-to-group nesting," computed up front so the result is
-  // independent of which order the `## EDGES` lines happen to appear in.
-  const containsDeclarations = parsed.edges.filter(isContainsDeclaration);
-
-  const groupParents = new Map(); // groupId -> Set<parentGroupId>
-  for (const n of state.nodes) if (n.type === "group") groupParents.set(n.id, new Set(n.groups));
-  for (const pe of containsDeclarations) {
-    const group = labelToNode.get(pe.source);
-    const member = labelToNode.get(pe.target);
-    if (group && member && group.type === "group" && member.type === "group") {
-      if (!groupParents.has(member.id)) groupParents.set(member.id, new Set());
-      groupParents.get(member.id).add(group.id);
-    }
-  }
-  function isDeclaredAncestorGroup(candidateId, groupId, seen = new Set()) {
-    if (seen.has(groupId)) return false; // guards against a (malformed) cycle
-    seen.add(groupId);
-    for (const parentId of groupParents.get(groupId) || []) {
-      if (parentId === candidateId || isDeclaredAncestorGroup(candidateId, parentId, seen)) return true;
-    }
-    return false;
-  }
-
-  const declaredGroupsByMember = new Map(); // memberId -> Set<groupId> (declared by this file, plus already-existing)
-  for (const pe of containsDeclarations) {
-    const group = labelToNode.get(pe.source);
-    const member = labelToNode.get(pe.target);
-    if (!group || !member || group.type !== "group") continue;
-    if (!declaredGroupsByMember.has(member.id)) declaredGroupsByMember.set(member.id, new Set(member.groups));
-    declaredGroupsByMember.get(member.id).add(group.id);
-  }
-
-  for (const pe of containsDeclarations) {
-    const group = labelToNode.get(pe.source);
-    const member = labelToNode.get(pe.target);
-    if (!group || !member || group.type !== "group" || member.groups.includes(group.id)) continue;
-    const allDeclared = declaredGroupsByMember.get(member.id) || new Set();
-    const redundant = [...allDeclared].some((gid) => gid !== group.id && isDeclaredAncestorGroup(group.id, gid));
-    if (redundant) continue;
-    member.groups.push(group.id);
-    createContainsEdge(group.id, member.id);
-  }
-
-  // Ordinary edges: add only if an equivalent one doesn't already exist.
+  // Add only if an equivalent edge doesn't already exist.
   for (const pe of parsed.edges) {
-    if (isContainsDeclaration(pe)) continue;
     const src = labelToNode.get(pe.source);
     const tgt = labelToNode.get(pe.target);
     if (!src || !tgt) continue;
-    const dup = state.edges.some((e) => !e.auto && e.source === src.id && e.target === tgt.id &&
+    const dup = state.edges.some((e) => e.source === src.id && e.target === tgt.id &&
       e.relation === pe.relation && e.directed === pe.directed);
-    if (!dup) createEdge(src.id, tgt.id, pe.relation, pe.directed, false);
+    if (!dup) createEdge(src.id, tgt.id, pe.relation, pe.directed);
   }
 
   if (mode === "replace") {
     const nodesToRemove = state.nodes.filter((n) => !matchedExistingIds.has(n.id) && !createdNodeIds.includes(n.id));
     for (const n of nodesToRemove) deleteNode(n.id);
 
-    // Prune any surviving node's group memberships not re-declared by this TXT.
-    const declaredMemberships = new Set();
-    for (const pe of parsed.edges) {
-      if (!isContainsDeclaration(pe)) continue;
-      const group = labelToNode.get(pe.source);
-      const member = labelToNode.get(pe.target);
-      if (group && member) declaredMemberships.add(`${group.id} ${member.id}`);
-    }
-    for (const n of state.nodes) {
-      const kept = n.groups.filter((gid) => declaredMemberships.has(`${gid} ${n.id}`));
-      if (kept.length !== n.groups.length) {
-        for (const gid of n.groups) if (!kept.includes(gid)) removeContainsEdge(gid, n.id);
-        n.groups = kept;
-      }
-    }
-
-    // Remove ordinary edges not declared by this TXT.
+    // Remove edges not declared by this TXT.
     const declaredOrdinary = new Set();
     for (const pe of parsed.edges) {
-      if (isContainsDeclaration(pe)) continue;
       const src = labelToNode.get(pe.source), tgt = labelToNode.get(pe.target);
-      if (src && tgt) declaredOrdinary.add(`${src.id} ${tgt.id} ${pe.relation} ${pe.directed}`);
+      if (src && tgt) declaredOrdinary.add(`${src.id} ${tgt.id} ${pe.relation} ${pe.directed}`);
     }
-    const edgesToRemove = state.edges.filter((e) => !e.auto &&
-      !declaredOrdinary.has(`${e.source} ${e.target} ${e.relation} ${e.directed}`));
+    const edgesToRemove = state.edges.filter((e) =>
+      !declaredOrdinary.has(`${e.source} ${e.target} ${e.relation} ${e.directed}`));
     for (const e of edgesToRemove) deleteEdge(e.id);
   }
 
@@ -3796,9 +3383,6 @@ document.getElementById("btn-zoom-out").addEventListener("click", () => {
 
 document.getElementById("btn-add-node").addEventListener("click", () => {
   setMode(state.mode === "addNode" ? "idle" : "addNode");
-});
-document.getElementById("btn-add-group").addEventListener("click", () => {
-  setMode(state.mode === "addGroup" ? "idle" : "addGroup");
 });
 document.getElementById("btn-connect").addEventListener("click", () => {
   setMode(state.mode === "connect" ? "idle" : "connect");
@@ -3895,7 +3479,7 @@ window.__kg = {
   actions: {
     createNode, createEdge, deleteNode, deleteEdge,
     selectNode, selectEdge, clearSelection, setMode,
-    updateGroupMembership, undo, redo, autoLayout,
+    undo, redo, autoLayout,
     // Agent Ontology data-model constructors (agent_ontology_spec.md §4.3)
     // — no UI calls these yet (Phase D/E), so tests reach them here.
     createRule, createAction, deleteRule, deleteAction,
@@ -3937,21 +3521,6 @@ window.__kg = {
   getEdgeGeometry: (edgeId) => {
     const edge = state.edges.find((e) => e.id === edgeId);
     return edge ? edgeGeometry(edge, computeEdgeBendInfo()) : null;
-  },
-  // Mirrors the exact same isMember/isBeingMoved/isBeingResized checks
-  // drawNodes() uses to pick a node's fill/stroke color, so tests can
-  // assert the color-selection *logic* precisely (including mid-drag,
-  // where a real screenshot would need to catch a single in-flight frame)
-  // rather than only inferring it from rendered pixels.
-  getNodeVisualState: (nodeId) => {
-    const node = state.nodes.find((n) => n.id === nodeId);
-    if (!node) return null;
-    const isGroup = node.type === "group";
-    return {
-      isMember: !isGroup && node.groups.length > 0,
-      isBeingMoved: isGroup && dragMode === "moveNode" && movingNodeId === node.id,
-      isBeingResized: isGroup && dragMode === "resizeGroup" && resizingNodeId === node.id,
-    };
   },
 };
 

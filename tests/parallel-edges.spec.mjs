@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { withPage, addNodeViaDblClick, addNodeViaButton, createEdgeViaConnectMode } from "./lib/page.mjs";
+import { withPage, addNodeViaDblClick, createEdgeViaConnectMode } from "./lib/page.mjs";
 
 async function geometryOf(page, edgeId) {
   return page.evaluate((id) => window.__kg.getEdgeGeometry(id), edgeId);
@@ -145,27 +145,6 @@ test("parallel edges pointing in opposite directions (A->B and B->A) still fan o
 
     const dist = Math.hypot(geos[0].mid.x - geos[1].mid.x, geos[0].mid.y - geos[1].mid.y);
     assert.ok(dist > 10, `expected the two curves' midpoints to be clearly apart, got ${dist} apart (${JSON.stringify(geos[0].mid)} vs ${JSON.stringify(geos[1].mid)})`);
-  });
-});
-
-test("bending ignores auto (contains) edges — a group's contains edge doesn't cause a real edge to the same member to bend", async () => {
-  await withPage(async (page) => {
-    await addNodeViaButton(page, "#btn-add-group", 300, 300, "Group");
-    await addNodeViaDblClick(page, 700, 500, "Member");
-    // Manually establish membership (creates an auto contains edge Group->Member).
-    await page.evaluate(() => {
-      const group = window.__kg.state.nodes.find((n) => n.type === "group");
-      const member = window.__kg.state.nodes.find((n) => n.type === "entity");
-      member.groups.push(group.id);
-      window.__kg.actions.createEdge(group.id, member.id, "contains", true, true);
-    });
-    // Now add one genuine, visible edge between the very same pair.
-    await createEdgeViaConnectMode(page, 300, 300, 700, 500, "also related");
-    await page.evaluate(() => window.__kg.actions.setMode("idle"));
-
-    const realEdge = await page.evaluate(() => window.__kg.state.edges.find((e) => !e.auto));
-    const geo = await geometryOf(page, realEdge.id);
-    assert.equal(geo.control, null, "the auto contains edge must not count toward this pair's bend group");
   });
 });
 

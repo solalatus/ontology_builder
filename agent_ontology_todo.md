@@ -10,16 +10,26 @@ enough that this can be picked up cold.
 
 - **Phase:** Phases A through E are all implemented, tested, and green — see their checklists below,
   now fully checked off (Phase C was folded into B; Phase E was folded into D — see each phase's own
-  note). Phases F through I are not started. The four open questions from `agent_ontology_spec.md` §9
-  have not been explicitly answered by the user yet; none of A–E's scope touched them (they start
-  mattering at Phase F, the YAML export, the very next phase). Still worth resolving before that starts.
+  note). Phases F through I are not started. Of the four open questions from `agent_ontology_spec.md`
+  §9: #3 (relationship-key collisions) is resolved — the user chose a list structure for `relationships`
+  over a name-keyed map, sidestepping the collision-naming question entirely (see the dated Log entry).
+  #4 (Groups) is also resolved, by a route neither original option covered: the user asked for Groups to
+  be removed from the *base app* entirely (canvas UI, data model, both file formats), not just excluded
+  from this export — implemented as its own dedicated phase/PR ahead of Phase F, tracked in the dated Log
+  entry below and in the base app's own `TODO.md`/`spec.md` (Decision Log #11), not in this file's phase
+  checklist since it's a base-app change, not an Agent Ontology one. #1 (app title) and #2 (boolean
+  property type) remain open, deferred to their stated defaults until Phase F surfaces a reason to
+  revisit.
 - **Relationship to the base app:** this branch builds strictly on top of `index.html` as it exists on
-  `main` today (all PRs through #24 merged: bugfixes, visual polish, Android-reliability follow-ups,
-  and this branch's own Phase A/B/C). Nothing in the base app's `spec.md`/`TODO.md` changes — this is a
-  new capability layered on, tracked separately so the base app's own history/conventions stay
-  undisturbed.
+  `main` today (all PRs through #25 merged: bugfixes, visual polish, Android-reliability follow-ups,
+  and this branch's own Phase A/B/C/D/E, plus the base app's own separate Groups-removal PR). Nothing in
+  the base app's `spec.md`/`TODO.md` changes as a *consequence of Agent Ontology* — Groups removal is a
+  base-app decision with its own base-app PR, documented in the base app's own `spec.md`/`TODO.md`, and
+  only referenced here for its effect on Phase F's scope.
 - **Test suite:** 314 JS tests (279 base + 7 Phase A + 15 Phase B/C + 13 Phase D/E, in
-  `tests/agent-ontology-phase-{a,b,d}.spec.mjs`) + 15 Python tests, all green, run twice consecutively.
+  `tests/agent-ontology-phase-{a,b,d}.spec.mjs`) + 15 Python tests, all green, run twice consecutively —
+  as of before the base app's Groups-removal PR; that PR's own count changes are tracked in the base
+  app's own `TODO.md`, not here.
 - **A Phase B side effect worth knowing about:** widening `#sel-toolbar` from 3 icons to 4 (the new
   "Edit Details" icon) exposed a real, if narrow, pre-existing interaction hazard — a lingering
   selection's floating toolbar can now more easily reach over a nearby node's own click point, since
@@ -33,10 +43,10 @@ enough that this can be picked up cold.
   second file, just new fields/UI/export on the existing one).
 - **Next action:** Phase F (Domain Model YAML export) — the actual load-bearing deliverable the whole
   initiative exists for (agent_ontology_spec.md §1: producing the howto's exact shape from a
-  hand-authored graph). This is also where the four open questions in §9 stop being deferrable —
-  relationship-key collisions and the groups-as-hierarchy question both bear directly on what Phase F
-  actually emits, so worth confirming or explicitly reaffirming the spec's stated defaults before
-  starting.
+  hand-authored graph), now that the base app's Groups-removal PR has cleared the way: Phase F's
+  `relationships:` export is a plain list (per the resolved Open Question 3) and needs no group/
+  `contains`-edge special-casing at all (per the resolved Open Question 4) — both simplifications versus
+  what the spec originally described.
 
 ---
 
@@ -45,8 +55,8 @@ enough that this can be picked up cold.
 1. Read `agent_ontology_spec.md` in full — it's the source of truth for this feature set, same role
    `spec.md` plays for the base app.
 2. Read the base app's own `spec.md` + `TODO.md` "Current State" for what the app already does — Agent
-   Ontology assumes and depends on all of it (storage tiers, undo/redo, i18n, the existing node/edge/
-   group model).
+   Ontology assumes and depends on all of it (storage tiers, undo/redo, i18n, the existing node/edge
+   model — note that Groups were removed from the base app; see `spec.md` Decision Log #11).
 3. Read this file's "Current State" and "Log / Decisions" for anything that's been clarified or
    changed since the spec was drafted.
 4. Continue with the first unchecked item below.
@@ -205,16 +215,16 @@ Phase B rather than as later, separate work. Nothing here needed its own dedicat
 - [ ] Hand-written minimal YAML serializer (indentation + list/scalar only — no external dependency)
 - [ ] Bundled as a third file into the existing "Save Version" action:
       `<graph-name>_v<0000>_<UTC-timestamp>.domain.yaml`
-- [ ] `classes:` — one entry per non-group node, keyed by label, per spec §5
-- [ ] `relationships:` — one entry per non-auto edge, keyed by camelCase-derived id from `relation`,
-      collision-suffixed per spec §5's Open Question 3 resolution
+- [ ] `classes:` — one entry per node, keyed by label, per spec §5
+- [ ] `relationships:` — a **list** of `{name, from, to, meaning}` entries, one per edge (resolved: the
+      user chose a list structure over a name-keyed map, sidestepping Open Question 3's collision-naming
+      question entirely — no camelCase-key derivation or numeric-suffix disambiguation needed)
 - [ ] `rules:` / `actions:` — per spec §4.3 shapes
-- [ ] Group `contains` edges handled per spec §6's resolved decision (either exported as `includes`
-      relationships, or excluded entirely — depends on Open Question 4)
+- [ ] No group/`contains`-edge special-casing needed — Groups were removed from the base app entirely
+      (Open Question 4, resolved by elimination; see base app's `spec.md` Decision Log #11)
 - Tests: exported YAML matches the howto's own worked example shape when fed an equivalent graph
-  (structural comparison, not brittle string-diff); relationship-key collisions produce distinct keys,
-  not silent overwrites; a graph with no classes/relationships/rules/actions filled in still exports
-  valid (if mostly empty) YAML without crashing
+  (structural comparison, not brittle string-diff); a graph with no classes/relationships/rules/actions
+  filled in still exports valid (if mostly empty) YAML without crashing
 
 ## Phase G — Import (YAML → canvas) — later phase, lower priority
 
@@ -347,3 +357,24 @@ as the reference and record deltas/clarifications here instead of rewriting the 
   not just the final saved state. Full suite green twice consecutively: 314 JS tests (301 + 13 new) and
   15 Python tests. PR opened; waiting for merge before starting Phase F, per the same instruction as
   Phase A/B.
+- 2026-07-28 — Phase D/E's PR merged; user said "go" to continue toward Phase F. Before implementing,
+  raised the two design questions Phase F's export actually needs answered (`agent_ontology_spec.md` §9
+  Open Questions 3 and 4): how to handle relationship-name collisions in the YAML export, and whether a
+  group's `contains` edges should export as class-hierarchy relationships. User resolved both, and the
+  second answer went well beyond the question asked: (1) for relationship-key collisions — switch
+  `relationships` to a **list** of `{name, from, to, meaning}` objects instead of a name-keyed map,
+  eliminating the collision-naming problem entirely rather than picking a disambiguation scheme; (2) for
+  groups — **remove Groups from the app altogether, UI and data model both, not just exclude them from
+  this export** ("Stick to the ontology spec"). Scope of (2) is a base-app change, not an Agent Ontology
+  one: the "Add Group" toolbar button and placement mode, drag-into-group membership, rigid-body group
+  move, group resize, `type`/`groups[]`/`boundary_mode` on nodes, `auto` on edges, the TXT/JSON
+  `[group]`/`contains` syntax, and the Python reference loader's group parsing. Asked whether this should
+  be its own dedicated phase/PR ahead of Phase F or folded into Phase F itself; user chose a separate
+  phase first, then said to plan and implement it immediately in the same session rather than waiting for
+  further confirmation. Implemented as a base-app change on its own branch/PR — not tracked as a
+  numbered phase in this file, since it isn't an Agent Ontology feature, but logged here because it
+  directly unblocks and simplifies Phase F (see the base app's own `TODO.md` Log and `spec.md` Decision
+  Log #11 for the full account: what was removed, the full list of touched files, and the historical
+  Decision Log entries it reverses). Net effect on this initiative: Phase F's `relationships:` export is
+  now simpler on both fronts than the spec originally described — a list, and no group/`contains`-edge
+  special-casing to write at all.

@@ -8,10 +8,8 @@ test("double-click empty canvas adds a node with the entered label", async () =>
     const nodes = await page.evaluate(() => window.__kg.state.nodes);
     assert.equal(nodes.length, 1);
     assert.equal(nodes[0].label, "Alpha");
-    assert.equal(nodes[0].type, "entity");
     assert.equal(nodes[0].w, 160);
     assert.equal(nodes[0].h, 60);
-    assert.deepEqual(nodes[0].groups, []);
   });
 });
 
@@ -91,7 +89,6 @@ test("dragging from a node's edge handle to another node creates a directed edge
     assert.equal(edges.length, 1);
     assert.equal(edges[0].relation, "relates to");
     assert.equal(edges[0].directed, true);
-    assert.equal(edges[0].auto, false);
   });
 });
 
@@ -221,13 +218,10 @@ test("a freshly created node matches the full Section 4.1 shape", async () => {
     assert.equal(typeof node.id, "string");
     assert.ok(node.id.length > 0);
     assert.equal(node.label, "Alpha");
-    assert.equal(node.type, "entity");
     assert.equal(typeof node.x, "number");
     assert.equal(typeof node.y, "number");
     assert.equal(node.w, 160);
     assert.equal(node.h, 60);
-    assert.deepEqual(node.groups, []);
-    assert.equal(node.boundary_mode, undefined);
     // Agent Ontology (agent_ontology_spec.md §4.1): meaning replaces the
     // old, never-wired notes field; aliases/properties are new.
     assert.equal(node.meaning, null);
@@ -247,7 +241,6 @@ test("a freshly created edge matches the full Section 4.2 shape", async () => {
     assert.equal(edge.target, "n2");
     assert.equal(edge.relation, "relates to");
     assert.equal(edge.directed, true);
-    assert.equal(edge.auto, false);
     assert.equal(edge.meaning, null); // agent_ontology_spec.md §4.2
   });
 });
@@ -520,26 +513,6 @@ test("a node with a very long label renders without crashing or throwing (text i
     await addNodeViaDblClick(page, 400, 300, longLabel);
     const node = await page.evaluate(() => window.__kg.state.nodes[0]);
     assert.equal(node.label, longLabel, "the full label is still stored even though only part of it is drawn");
-  });
-});
-
-test("a group node can be a Connect-mode endpoint just like an entity", async () => {
-  await withPage(async (page) => {
-    await page.click("#btn-add-group");
-    const box = await page.locator("#canvas").boundingBox();
-    await page.mouse.click(box.x + 300, box.y + 300);
-    await page.waitForSelector(".kg-inline-input");
-    await page.locator(".kg-inline-input").fill("MyGroup");
-    await page.keyboard.press("Enter");
-    await page.waitForSelector(".kg-inline-input", { state: "detached" });
-
-    await addNodeViaDblClick(page, 700, 500, "Entity");
-    await createEdgeViaConnectMode(page, 300, 300, 700, 500, "relates to");
-
-    const edges = await page.evaluate(() => window.__kg.state.edges);
-    assert.equal(edges.length, 1);
-    const group = await page.evaluate(() => window.__kg.state.nodes.find((n) => n.type === "group"));
-    assert.equal(edges[0].source, group.id);
   });
 });
 
