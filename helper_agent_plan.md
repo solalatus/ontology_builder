@@ -1,7 +1,8 @@
 # Helper Agent — Implementation Plan
 
-Status: **Reviewed — Phase 1 in progress.** Revised after user feedback on the
-first draft (see §3, §4.1, §4.3, §4.9, §4.10 for what changed).
+Status: **Phase 1 implemented and tested** (see `helper_agent_todo.md` for the
+per-phase log). Revised after user feedback on the first draft (see §3, §4.1,
+§4.3, §4.9, §4.10 for what changed).
 Branch: `helper_agent`, branched from `origin/main` at `533820e` (tip after PR #30).
 
 ## 0. Standing ground rules for this subproject
@@ -62,6 +63,20 @@ intercepting/rewriting this specific traffic rather than passing it through
 unmodified. So the missing CORS header on the error path is **not** trusted
 as representative of real-world behavior (a real user's browser, hitting
 `api.openai.com` directly, may see a normal fully-CORS'd error response).
+
+**A second attempt was made with a real headless browser**, not just
+`curl`, to get closer to the truth: a Playwright-launched Chromium, given
+this sandbox's proxy explicitly (`proxy: { server: "http://127.0.0.1:44683" }`)
+and TLS errors ignored, opened `index.html` from `file://` and ran the same
+`fetch()` calls the real feature would make. Both failed with
+`net::ERR_CONNECTION_RESET` at the network layer — but `curl` through that
+*exact same proxy*, at the *same moment*, still succeeded. Since the only
+variable is the client (curl vs. Chromium's proxy-tunneling/TLS
+negotiation), this is a sandbox-specific plumbing limitation, not a CORS
+signal — it says nothing about how a real user's ordinary, unproxied browser
+behaves. No API key — real or fake — resolves this; it's a network-path
+problem, not an authentication one. This is the ceiling of what's testable
+from inside this environment.
 
 **Resolution:** treat this as a provisional go rather than a hard blocker,
 and fold the real validation into the product itself instead of a throwaway
