@@ -8,19 +8,18 @@ enough that this can be picked up cold.
 
 ## Current State
 
-- **Phase:** Phase A (data model additions) and Phase B (Class editor UI) are both implemented,
-  tested, and green — see their checklists below, now fully checked off. Phases C through I are not
-  started. The four open questions from `agent_ontology_spec.md` §9 have not been explicitly answered
-  by the user yet; A and B both proceeded on the spec's own stated defaults (none of §9's questions
-  bear on either phase's scope — they start mattering at Phase F, the YAML export). Still worth
-  resolving before that phase starts.
+- **Phase:** Phases A through E are all implemented, tested, and green — see their checklists below,
+  now fully checked off (Phase C was folded into B; Phase E was folded into D — see each phase's own
+  note). Phases F through I are not started. The four open questions from `agent_ontology_spec.md` §9
+  have not been explicitly answered by the user yet; none of A–E's scope touched them (they start
+  mattering at Phase F, the YAML export, the very next phase). Still worth resolving before that starts.
 - **Relationship to the base app:** this branch builds strictly on top of `index.html` as it exists on
-  `main` today (all PRs through #22 merged: bugfixes, visual polish, Android-reliability follow-ups).
-  Nothing in the base app's `spec.md`/`TODO.md` changes — this is a new capability layered on, tracked
-  separately so the base app's own history/conventions stay undisturbed.
-- **Test suite:** 301 JS tests (279 base + 7 Phase A + 15 Phase B, in `tests/agent-ontology-phase-a
-  .spec.mjs` / `tests/agent-ontology-phase-b.spec.mjs`) + 15 Python tests, all green, run twice
-  consecutively.
+  `main` today (all PRs through #24 merged: bugfixes, visual polish, Android-reliability follow-ups,
+  and this branch's own Phase A/B/C). Nothing in the base app's `spec.md`/`TODO.md` changes — this is a
+  new capability layered on, tracked separately so the base app's own history/conventions stay
+  undisturbed.
+- **Test suite:** 314 JS tests (279 base + 7 Phase A + 15 Phase B/C + 13 Phase D/E, in
+  `tests/agent-ontology-phase-{a,b,d}.spec.mjs`) + 15 Python tests, all green, run twice consecutively.
 - **A Phase B side effect worth knowing about:** widening `#sel-toolbar` from 3 icons to 4 (the new
   "Edit Details" icon) exposed a real, if narrow, pre-existing interaction hazard — a lingering
   selection's floating toolbar can now more easily reach over a nearby node's own click point, since
@@ -32,11 +31,12 @@ enough that this can be picked up cold.
   happened and why.
 - **Target file:** still `index.html` (same single file — Agent Ontology is not a separate app or a
   second file, just new fields/UI/export on the existing one).
-- **Next action:** Phase D (Rules manager). Phase C (Relationship editor UI) turned out to already be
-  fully covered — the details dialog was built as one shared implementation handling both nodes and
-  edges from the start (per `agent_ontology_spec.md` §7's own design: "same new icon, shown for edge
-  selection instead"), so Phase C's checklist is checked off alongside Phase B's below rather than done
-  as separate follow-up work.
+- **Next action:** Phase F (Domain Model YAML export) — the actual load-bearing deliverable the whole
+  initiative exists for (agent_ontology_spec.md §1: producing the howto's exact shape from a
+  hand-authored graph). This is also where the four open questions in §9 stop being deferrable —
+  relationship-key collisions and the groups-as-hierarchy question both bear directly on what Phase F
+  actually emits, so worth confirming or explicitly reaffirming the spec's stated defaults before
+  starting.
 
 ---
 
@@ -157,21 +157,48 @@ Phase B rather than as later, separate work. Nothing here needed its own dedicat
   `tests/agent-ontology-phase-a.spec.mjs`, which already proved `Edge.meaning` round-trips through
   Tier 1 storage and the JSON export before any UI existed to set it by hand
 
-## Phase D — Rules manager
+## Phase D — Rules manager ✅ done
 
-- [ ] New toolbar button "Domain Model" (only new top-level toolbar button this whole feature adds)
-- [ ] Modal, Rules section: add/edit/delete a named rule with an ordered list of free-text conditions
-- Tests: CRUD round-trips through Tier 1 + JSON export; deleting a rule that's referenced by an
-  existing Action's preconditions is handled explicitly (decide: block deletion with a message, or
-  delete and drop the dangling reference — needs a decision when this phase starts)
+- [x] New toolbar button "Domain Model" (`#btn-domain-model`, placed right after Connect) — the only
+      new top-level toolbar button this whole feature adds, per `agent_ontology_spec.md` §7 Decision #5
+- [x] Modal (`#domain-model-overlay`), Rules section: add/edit/delete a named rule with an ordered
+      list of free-text conditions — whole-dialog draft-then-commit (every add/remove/edit happens
+      against DOM elements only; `state.rules`/`state.actions` are read once on open, written once on
+      Save as a single undo step), same philosophy as the Phase B/C details dialog
+- [x] **Decision on the flagged question** (deleting a rule referenced by an action's precondition):
+      dropped silently, not blocked — both inside the modal's own save flow (a rule left nameless, or
+      removed via its row's ✕, drops out of any action's selected preconditions) and at the data-layer
+      `deleteRule()` primitive itself (extended to scrub the id from every action's preconditions, the
+      same pattern `deleteNode()` already uses for cleaning up `groups[]` references). Consistent with
+      Phase A's own original reasoning for storing preconditions by id rather than name: making a
+      rename/delete non-catastrophic by construction, not something needing a confirmation dialog.
+- Tests (`tests/agent-ontology-phase-d.spec.mjs`, shared with Phase E below, 13 tests total): rule
+  CRUD round-trips with real sequential ids; a nameless rule is dropped rather than saved; removing a
+  rule row live-updates any action's preconditions `<select>` (its option disappears immediately, not
+  just after save); `deleteRule()` scrubs dangling preconditions; Cancel/Escape discard all edits made
+  since opening; a genuinely no-op save pushes no undo step; language toggle re-translates the dialog.
 
-## Phase E — Actions manager
+## Phase E — Actions manager ✅ done (built together with Phase D — one shared modal, per spec §7)
 
-- [ ] Same modal, Actions section: add/edit/delete a named action — input-class dropdown (populated
-      from current entity/group nodes), preconditions multi-select (populated from current Rules),
-      effect (text), verification (text)
-- Tests: CRUD round-trips; input-class dropdown reflects current nodes live; deleting a class that's
-  referenced as an Action's input is handled explicitly (same category of decision as Phase D)
+- [x] Same modal, Actions section: add/edit/delete a named action — input-class dropdown (a static
+      snapshot of `state.nodes` at modal-open time, since nothing else on the page is interactive while
+      the modal is open, so it can't go stale mid-session), preconditions multi-select (a native
+      `<select multiple>`, kept live-in-sync with the Rules section above — see `refreshAction
+      PreconditionOptions()`, re-run on rule add/remove/rename), effect (text), verification (text)
+- [x] **Decision on the flagged question** (deleting a class referenced as an action's input): the
+      reference is nulled, not the whole action — `deleteNode()` extended to null out `inputClassId` on
+      any action pointing at the deleted node, mirroring the same reasoning as Phase D's rule-deletion
+      decision above (an action's effect/verification/preconditions text is still meaningful without an
+      input class; the dropdown already has a "— no class —" option to represent that state)
+- [x] A same-session precondition reference (an action selecting a rule added earlier in the *same*
+      still-open editing session, before either has a real id) resolves correctly at Save time via a
+      draft-id → real-id map, since neither the rule nor the action has a real id until the moment
+      they're actually committed
+- Tests: covered together with Phase D in `tests/agent-ontology-phase-d.spec.mjs` — action CRUD;
+  resolving a same-session draft precondition id to the saved rule's real id; pre-filling an existing
+  action's input class and pre-*selecting* its existing preconditions on dialog open; the input-class
+  dropdown reflecting current canvas nodes (with "no class" staying selectable); `deleteNode()` nulling
+  `inputClassId` rather than deleting the action it belonged to
 
 ## Phase F — Domain Model YAML export
 
@@ -292,3 +319,31 @@ as the reference and record deltas/clarifications here instead of rewriting the 
   New `tests/agent-ontology-phase-b.spec.mjs` (15 tests) covers Phase B/C together. Full suite green
   twice consecutively: 301 JS tests (286 + 15 new) and 15 Python tests. PR opened; waiting for merge
   before starting Phase D, per the same wait-for-merge instruction as Phase A.
+- 2026-07-28 — Phase B/C's PR merged; user said "go." Implemented Phase D (Rules manager) and, since
+  `agent_ontology_spec.md` §7 always described Rules and Actions as one shared "Domain Model" modal
+  rather than two separate toolbar entries, Phase E (Actions manager) came along in the same pass —
+  same pattern as Phase C folding into B. New `#btn-domain-model` toolbar button (the only new
+  top-level button this whole initiative adds, per spec Decision #5); new `#domain-model-overlay`
+  modal with two sections (Rules: name + ordered free-text conditions; Actions: name + input-class
+  dropdown + preconditions multi-select + effect + verification), whole-dialog draft-then-commit on
+  Save exactly like the Phase B/C details dialog — nothing here mutates `state.rules`/`state.actions`
+  live, only on an explicit Save, as one undo step.
+  The two decisions both phases' checklists flagged as needing a call: **deleting a rule referenced by
+  an action's precondition** — dropped silently (both inside the modal's save-time filtering and at the
+  `deleteRule()` primitive itself, extended to scrub the reference, mirroring `deleteNode()`'s existing
+  `groups[]` cleanup) — and **deleting a class referenced as an action's input** — `inputClassId` nulled
+  rather than the action deleted, since effect/verification/preconditions text stays meaningful without
+  an input class and the dropdown already models "unset" via its blank option. Both decisions follow the
+  same reasoning Phase A originally gave for storing these references by id rather than name: making a
+  rename/delete a non-catastrophic, silent cleanup rather than something that needs to block or cascade.
+  Real implementation complexity, not just wiring: actions can reference rules added in the *same* still
+  -open editing session before either has a real id yet (both are DOM-only drafts until Save), handled
+  via `draft_`-prefixed placeholder ids and a draftId→realId map built at save time; and a rule's
+  precondition *options* inside every action's `<select multiple>` have to stay live-synced as rules are
+  added, renamed, or removed while the dialog is still open — not just refreshed once on open — since a
+  user plausibly writes a rule, then references it from an action, all in one sitting.
+  New `tests/agent-ontology-phase-d.spec.mjs` (13 tests, covering D and E together) — including one
+  that specifically proves the live-select-option-sync above by checking option count *before* saving,
+  not just the final saved state. Full suite green twice consecutively: 314 JS tests (301 + 13 new) and
+  15 Python tests. PR opened; waiting for merge before starting Phase F, per the same instruction as
+  Phase A/B.

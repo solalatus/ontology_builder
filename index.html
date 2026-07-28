@@ -466,6 +466,28 @@
     background: var(--btn-bg-hover);
   }
 
+  /* Agent Ontology — Rules/Actions manager cards. Same bordered-card
+     treatment as .details-property-row above, reused here for the same
+     reason: several distinct fields per entry read better as one visually
+     bounded unit than as one long unbroken flex row. */
+  .domain-model-rule-card,
+  .domain-model-action-card {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 8px;
+    border: 1px solid var(--toolbar-border);
+    border-radius: var(--radius-sm);
+  }
+
+  .dm-rule-conditions {
+    margin-left: 8px;
+  }
+
+  .dm-action-preconditions {
+    min-height: 60px;
+  }
+
   #restore-toast {
     position: fixed;
     left: 50%;
@@ -497,6 +519,7 @@
   <button id="btn-add-node" type="button" aria-pressed="false">Csomópont hozzáadása</button>
   <button id="btn-add-group" type="button" aria-pressed="false">Csoport hozzáadása</button>
   <button id="btn-connect" type="button" aria-pressed="false">Összekapcsolás</button>
+  <button id="btn-domain-model" type="button">Doménmodell</button>
   <button id="btn-autolayout" type="button">Automatikus elrendezés</button>
   <button id="btn-undo" type="button">Visszavonás</button>
   <button id="btn-redo" type="button">Újra</button>
@@ -574,6 +597,31 @@
     <div class="modal-actions">
       <button id="details-cancel" type="button">Cancel</button>
       <button id="details-save" type="button">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Agent Ontology (agent_ontology_spec.md §7, Decision #5): Rules/Actions
+     manager — one shared dialog with two sections rather than two separate
+     toolbar buttons, the only new top-level toolbar button this whole
+     feature adds. Whole-dialog Save/Cancel, same draft-then-commit
+     philosophy as #details-overlay above — every add/remove/edit here is
+     against an in-DOM draft, never live state, until Save. -->
+<div id="domain-model-overlay" class="modal-overlay">
+  <div id="domain-model-dialog" class="modal-dialog details-dialog" role="dialog" aria-modal="true">
+    <h2 id="domain-model-title" class="modal-title">Domain Model</h2>
+
+    <label id="domain-model-rules-label" class="details-field-label">Rules</label>
+    <div id="domain-model-rules-list" class="details-list"></div>
+    <button id="domain-model-add-rule" type="button" class="details-add-btn">+ Add rule</button>
+
+    <label id="domain-model-actions-label" class="details-field-label">Actions</label>
+    <div id="domain-model-actions-list" class="details-list"></div>
+    <button id="domain-model-add-action" type="button" class="details-add-btn">+ Add action</button>
+
+    <div class="modal-actions">
+      <button id="domain-model-cancel" type="button">Cancel</button>
+      <button id="domain-model-save" type="button">Save</button>
     </div>
   </div>
 </div>
@@ -713,6 +761,20 @@ const STRINGS = {
     propertyTypeBoolean: "boolean",
     removeRow: "Remove",
     save: "Save",
+    // Agent Ontology (agent_ontology_spec.md §7) — Rules/Actions manager.
+    domainModel: "Domain Model",
+    rulesLabel: "Rules",
+    actionsLabel: "Actions",
+    addRule: "+ Add rule",
+    addAction: "+ Add action",
+    ruleNamePlaceholder: "rule name",
+    conditionPlaceholder: "condition",
+    addCondition: "+ Add condition",
+    actionNamePlaceholder: "action name",
+    noClassSelected: "— no class —",
+    effectPlaceholder: "effect",
+    verificationPlaceholder: "verification",
+    untitledRulePlaceholder: "(untitled rule)",
   },
   hu: {
     appTitle: "Tudásgráf Vászon",
@@ -771,6 +833,20 @@ const STRINGS = {
     propertyTypeBoolean: "logikai",
     removeRow: "Eltávolítás",
     save: "Mentés",
+    // Agent Ontology (agent_ontology_spec.md §7) — Rules/Actions manager.
+    domainModel: "Doménmodell",
+    rulesLabel: "Szabályok",
+    actionsLabel: "Műveletek",
+    addRule: "+ Szabály hozzáadása",
+    addAction: "+ Művelet hozzáadása",
+    ruleNamePlaceholder: "szabály neve",
+    conditionPlaceholder: "feltétel",
+    addCondition: "+ Feltétel hozzáadása",
+    actionNamePlaceholder: "művelet neve",
+    noClassSelected: "— nincs osztály —",
+    effectPlaceholder: "hatás",
+    verificationPlaceholder: "ellenőrzés",
+    untitledRulePlaceholder: "(névtelen szabály)",
   },
 };
 
@@ -815,6 +891,7 @@ function applyLanguage() {
   byId("btn-add-node").textContent = t("addNode");
   byId("btn-add-group").textContent = t("addGroup");
   byId("btn-connect").textContent = t("connect");
+  byId("btn-domain-model").textContent = t("domainModel");
   byId("btn-autolayout").textContent = t("autoLayout");
   byId("btn-undo").textContent = t("undo");
   byId("btn-redo").textContent = t("redo");
@@ -840,6 +917,13 @@ function applyLanguage() {
   byId("details-cancel").textContent = t("cancel");
   byId("details-save").textContent = t("save");
   updateDetailsTitle(); // no-op if the dialog isn't open — see its own definition
+  byId("domain-model-title").textContent = t("domainModel");
+  byId("domain-model-rules-label").textContent = t("rulesLabel");
+  byId("domain-model-actions-label").textContent = t("actionsLabel");
+  byId("domain-model-add-rule").textContent = t("addRule");
+  byId("domain-model-add-action").textContent = t("addAction");
+  byId("domain-model-cancel").textContent = t("cancel");
+  byId("domain-model-save").textContent = t("save");
   updateThemeButton(); // its text depends on theme, not language, but re-set here too for the aria-pressed-adjacent pattern
   updateFolderSyncButton(); // "Folder Sync" / "Synced: X" text is language-dependent
   updateLangButton();
@@ -980,6 +1064,14 @@ function deleteRule(id) {
   const idx = state.rules.findIndex((r) => r.id === id);
   if (idx === -1) return;
   state.rules.splice(idx, 1);
+  // Same "clean up the reference, don't block or cascade-delete" posture as
+  // deleteNode()'s groups[] cleanup below — preconditions are stored by
+  // rule id specifically so a deletion like this stays a non-catastrophic,
+  // silent cleanup rather than an orphaned/dangling reference.
+  for (const a of state.actions) {
+    const pi = a.preconditions.indexOf(id);
+    if (pi !== -1) a.preconditions.splice(pi, 1);
+  }
   markDirty();
 }
 
@@ -999,6 +1091,13 @@ function deleteNode(id) {
   for (const n of state.nodes) {
     const gi = n.groups.indexOf(id);
     if (gi !== -1) n.groups.splice(gi, 1);
+  }
+  // An Action referencing this node as its input class loses the reference,
+  // not the whole action — its effect/verification/preconditions text is
+  // still meaningful even without an input class (agent_ontology_spec.md
+  // §7's Actions manager treats a null inputClassId as "unset").
+  for (const a of state.actions) {
+    if (a.inputClassId === id) a.inputClassId = null;
   }
   if (state.selection.type === "node" && state.selection.id === id) clearSelection();
   markDirty();
@@ -2387,6 +2486,242 @@ detailsOverlay.addEventListener("click", (e) => {
 });
 
 // ---------------------------------------------------------------------------
+// Agent Ontology (agent_ontology_spec.md §7, Decision #5): Rules/Actions
+// manager. Whole-dialog draft-then-commit, same philosophy as the details
+// dialog above — every add/remove/edit here happens against DOM elements
+// only; state.rules/state.actions are read once on open and written once
+// on Save (as a single undo step), never touched while the dialog is open.
+//
+// New rows (from "+ Add rule"/"+ Add action") don't have a real id yet —
+// they get a `draft_`-prefixed placeholder id, good only for this editing
+// session, so an action's preconditions <select> can still reference a
+// rule added in the same session before either has been saved. Save()
+// mints real ids (genRuleId()/genActionId()) only for rows still carrying
+// a draft id; existing rows keep their real id untouched, unchanged
+// whether or not anything on them was actually edited.
+// ---------------------------------------------------------------------------
+const domainModelOverlay = document.getElementById("domain-model-overlay");
+const domainModelRulesList = document.getElementById("domain-model-rules-list");
+const domainModelActionsList = document.getElementById("domain-model-actions-list");
+const domainModelAddRuleBtn = document.getElementById("domain-model-add-rule");
+const domainModelAddActionBtn = document.getElementById("domain-model-add-action");
+const domainModelSaveBtn = document.getElementById("domain-model-save");
+const domainModelCancelBtn = document.getElementById("domain-model-cancel");
+
+let domainModelOpen = false;
+
+function genDraftId() { return `draft_${Math.random().toString(36).slice(2, 9)}`; }
+
+function createConditionRow(text) {
+  const row = document.createElement("div");
+  row.className = "details-row";
+  const input = document.createElement("input");
+  input.type = "text";
+  input.className = "dm-rule-condition-input";
+  input.placeholder = t("conditionPlaceholder");
+  input.value = text || "";
+  row.append(input, createDetailsRemoveButton(() => row.remove()));
+  return row;
+}
+
+// Rebuilds every action card's preconditions <select> options from the
+// rules list's *current* DOM state (id + live name-input value) — called
+// after anything that can invalidate that option list: opening the dialog,
+// adding/removing a rule, or typing in a rule's name. Preserves each
+// select's currently-selected values across the rebuild, except on an
+// action card's very first population (right after it's created from an
+// existing action), where its saved `preconditions` (real rule ids) seed
+// the initial selection instead — see createActionCard()'s own comment.
+function refreshActionPreconditionOptions() {
+  const ruleOptions = [...domainModelRulesList.children].map((card) => ({
+    value: card.dataset.ruleId,
+    label: card.querySelector(".dm-rule-name").value.trim() || t("untitledRulePlaceholder"),
+  }));
+  for (const actionCard of domainModelActionsList.children) {
+    const select = actionCard.querySelector(".dm-action-preconditions");
+    let selectedValues;
+    if (actionCard.dataset.pendingPreconditions !== undefined) {
+      selectedValues = new Set(JSON.parse(actionCard.dataset.pendingPreconditions));
+      delete actionCard.dataset.pendingPreconditions;
+    } else {
+      selectedValues = new Set([...select.selectedOptions].map((o) => o.value));
+    }
+    select.textContent = "";
+    for (const { value, label } of ruleOptions) {
+      const opt = document.createElement("option");
+      opt.value = value;
+      opt.textContent = label;
+      opt.selected = selectedValues.has(value);
+      select.appendChild(opt);
+    }
+  }
+}
+
+function createRuleCard(rule) {
+  const card = document.createElement("div");
+  card.className = "domain-model-rule-card";
+  card.dataset.ruleId = rule ? rule.id : genDraftId();
+
+  const topRow = document.createElement("div");
+  topRow.className = "details-property-row-top";
+  const nameInput = document.createElement("input");
+  nameInput.type = "text";
+  nameInput.className = "dm-rule-name";
+  nameInput.placeholder = t("ruleNamePlaceholder");
+  nameInput.value = rule ? rule.name : "";
+  nameInput.addEventListener("input", refreshActionPreconditionOptions);
+  topRow.append(nameInput, createDetailsRemoveButton(() => { card.remove(); refreshActionPreconditionOptions(); }));
+
+  const conditionsList = document.createElement("div");
+  conditionsList.className = "dm-rule-conditions details-list";
+  for (const cond of (rule ? rule.conditions : [])) conditionsList.appendChild(createConditionRow(cond));
+
+  const addConditionBtn = document.createElement("button");
+  addConditionBtn.type = "button";
+  addConditionBtn.className = "details-add-btn";
+  addConditionBtn.textContent = t("addCondition");
+  addConditionBtn.addEventListener("click", () => {
+    const row = createConditionRow("");
+    conditionsList.appendChild(row);
+    row.querySelector("input").focus();
+  });
+
+  card.append(topRow, conditionsList, addConditionBtn);
+  return card;
+}
+
+function createActionCard(action) {
+  const card = document.createElement("div");
+  card.className = "domain-model-action-card";
+  card.dataset.actionId = action ? action.id : genDraftId();
+  // Seeds the *first* call to refreshActionPreconditionOptions() with this
+  // action's saved preconditions (real rule ids) — the options don't exist
+  // yet at card-creation time (they're built from sibling rule cards), so
+  // the initial selection has to be applied after that first population,
+  // not here.
+  if (action) card.dataset.pendingPreconditions = JSON.stringify(action.preconditions || []);
+
+  const topRow = document.createElement("div");
+  topRow.className = "details-property-row-top";
+  const nameInput = document.createElement("input");
+  nameInput.type = "text";
+  nameInput.className = "dm-action-name";
+  nameInput.placeholder = t("actionNamePlaceholder");
+  nameInput.value = action ? action.name : "";
+  topRow.append(nameInput, createDetailsRemoveButton(() => card.remove()));
+
+  const classSelect = document.createElement("select");
+  classSelect.className = "dm-action-input-class";
+  const blankOpt = document.createElement("option");
+  blankOpt.value = "";
+  blankOpt.textContent = t("noClassSelected");
+  classSelect.appendChild(blankOpt);
+  // A static snapshot of state.nodes at modal-open time: canvas nodes can't
+  // change while this dialog is open (nothing else is interactive), so
+  // there's no live-refresh concern here the way there is for rule options.
+  for (const n of state.nodes) {
+    const opt = document.createElement("option");
+    opt.value = n.id;
+    opt.textContent = n.label;
+    classSelect.appendChild(opt);
+  }
+  classSelect.value = (action && action.inputClassId) || "";
+
+  const preconditionsSelect = document.createElement("select");
+  preconditionsSelect.className = "dm-action-preconditions";
+  preconditionsSelect.multiple = true;
+  // Options populated by refreshActionPreconditionOptions(), called by the
+  // caller right after this card is appended to the DOM.
+
+  const effectInput = document.createElement("input");
+  effectInput.type = "text";
+  effectInput.className = "dm-action-effect";
+  effectInput.placeholder = t("effectPlaceholder");
+  effectInput.value = action ? action.effect : "";
+
+  const verificationInput = document.createElement("input");
+  verificationInput.type = "text";
+  verificationInput.className = "dm-action-verification";
+  verificationInput.placeholder = t("verificationPlaceholder");
+  verificationInput.value = action ? action.verification : "";
+
+  card.append(topRow, classSelect, preconditionsSelect, effectInput, verificationInput);
+  return card;
+}
+
+function openDomainModelDialog() {
+  cancelInlineInput();
+  domainModelOpen = true;
+  domainModelRulesList.textContent = "";
+  domainModelActionsList.textContent = "";
+  for (const rule of state.rules) domainModelRulesList.appendChild(createRuleCard(rule));
+  for (const action of state.actions) domainModelActionsList.appendChild(createActionCard(action));
+  refreshActionPreconditionOptions();
+  domainModelOverlay.style.display = "flex";
+}
+
+function closeDomainModelDialog() {
+  domainModelOverlay.style.display = "none";
+  domainModelOpen = false;
+}
+
+function saveDomainModelDialog() {
+  const before = snapshotState();
+  const draftIdToRealId = new Map();
+
+  const newRules = [...domainModelRulesList.children].map((card) => {
+    const draftId = card.dataset.ruleId;
+    const realId = draftId.startsWith("draft_") ? genRuleId() : draftId;
+    draftIdToRealId.set(draftId, realId);
+    const name = card.querySelector(".dm-rule-name").value.trim();
+    const conditions = [...card.querySelectorAll(".dm-rule-condition-input")].map((i) => i.value.trim()).filter(Boolean);
+    return { id: realId, name, conditions };
+  }).filter((r) => r.name); // a nameless rule card isn't saved, same discipline as nameless properties (Phase B)
+  const survivingRuleIds = new Set(newRules.map((r) => r.id));
+
+  const newActions = [...domainModelActionsList.children].map((card) => {
+    const draftId = card.dataset.actionId;
+    const realId = draftId.startsWith("draft_") ? genActionId() : draftId;
+    const name = card.querySelector(".dm-action-name").value.trim();
+    const inputClassId = card.querySelector(".dm-action-input-class").value || null;
+    const preconditions = [...card.querySelector(".dm-action-preconditions").selectedOptions]
+      .map((o) => draftIdToRealId.get(o.value))
+      .filter((id) => id && survivingRuleIds.has(id)); // drops a reference to a rule that got deleted or left nameless in this same save
+    const effect = card.querySelector(".dm-action-effect").value.trim();
+    const verification = card.querySelector(".dm-action-verification").value.trim();
+    return { id: realId, name, inputClassId, preconditions, effect, verification };
+  }).filter((a) => a.name);
+
+  const changed = JSON.stringify(newRules) !== JSON.stringify(state.rules) || JSON.stringify(newActions) !== JSON.stringify(state.actions);
+  closeDomainModelDialog();
+  if (changed) {
+    state.rules = newRules;
+    state.actions = newActions;
+    pushHistory(before, snapshotState());
+    markDirty();
+  }
+}
+
+domainModelAddRuleBtn.addEventListener("click", () => {
+  const card = createRuleCard(null);
+  domainModelRulesList.appendChild(card);
+  refreshActionPreconditionOptions();
+  card.querySelector(".dm-rule-name").focus();
+});
+domainModelAddActionBtn.addEventListener("click", () => {
+  const card = createActionCard(null);
+  domainModelActionsList.appendChild(card);
+  refreshActionPreconditionOptions();
+  card.querySelector(".dm-action-name").focus();
+});
+domainModelSaveBtn.addEventListener("click", saveDomainModelDialog);
+domainModelCancelBtn.addEventListener("click", () => closeDomainModelDialog());
+domainModelOverlay.addEventListener("click", (e) => {
+  if (e.target === domainModelOverlay) closeDomainModelDialog(); // click outside the dialog = cancel
+});
+document.getElementById("btn-domain-model").addEventListener("click", openDomainModelDialog);
+
+// ---------------------------------------------------------------------------
 // Primary pointer interaction: pan / node-move / edge-creation-drag, plus a
 // long-press-to-delete timer. A separate 'click' listener (below) handles
 // tap-based flows (select, Add Node placement, Connect mode taps) since
@@ -2864,6 +3199,10 @@ window.addEventListener("keydown", (e) => {
   // deleting the canvas selection while the user is editing dialog text.
   if (detailsEditingTarget) {
     if (e.key === "Escape") { e.preventDefault(); closeDetailsDialog(); }
+    return;
+  }
+  if (domainModelOpen) {
+    if (e.key === "Escape") { e.preventDefault(); closeDomainModelDialog(); }
     return;
   }
   if (activeInlineEditor) return; // don't hijack while typing
