@@ -8,12 +8,10 @@
 Andhra Pradesh
 Telugu
 Marathi
-South Asian Languages [group]
 Guatemala
 European Union
 
 ## EDGES
-South Asian Languages -> Andhra Pradesh : contains
 Andhra Pradesh -> Telugu : language used
 Andhra Pradesh -> Marathi : language used
 Guatemala <-> European Union : diplomatic relation

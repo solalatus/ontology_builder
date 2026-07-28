@@ -136,6 +136,25 @@ State" so the project can be picked up cold at any time.
   proving agreement rather than asserting it). See the dated Log entry
   below for the full account, including a second, smaller behavioral
   change (malformed-line handling) made for the same consistency reason.
+- **Groups removed entirely (2026-07-28).** Requested from a sibling
+  initiative (`agent_ontology_todo.md`, working toward a strict
+  classes/relationships domain-model export) as a pivot away from
+  export-time-only exclusion: Groups are gone from the canvas UI ("Add
+  Group" button/mode, drag-into-group membership, rigid-body group move,
+  group resize, all group-specific rendering), the data model (`type`,
+  `groups[]`, `boundary_mode` all removed from Node; `auto` removed from
+  Edge — every node is now a fixed `DEFAULT_NODE_W`×`DEFAULT_NODE_H` box,
+  never resizable), and both file formats (TXT's `[group]` suffix and
+  `contains`-line grammar, JSON's corresponding fields). The Python
+  reference loader (`tools/load_edge_list.py`) and its tests were updated
+  to match. **`spec.md` was directly amended, not just delta-logged here**
+  — Phase 2 and every other spec section describing Groups now carries a
+  removal note, and Decision Log entries #2/#3 (which originally added
+  Groups) are marked reversed, pointing at a new entry (#11) explaining
+  why. See spec.md's own Decision Log #11 for the full rationale, and the
+  dated Log entry below for the file-by-file account. This is a *base-app*
+  change with its own PR, done ahead of (and to simplify) the sibling
+  initiative's Phase F export work — not an Agent Ontology feature itself.
 - **Next action:** Phase 10 (Cross-platform verification — the manual
   hands-on matrix that every deferred Tier-B item from Phases 0–9 above
   finally gets exercised against for real).
@@ -327,6 +346,12 @@ claude.ai/code, which is plain git via GitHub as described above.
     touch screen; long node labels at extreme zoom levels.
 
 ## Phase 2 — Groups
+
+**Removed entirely, 2026-07-28 — see the "Groups removed entirely" bullet
+under "Current State" and the dated Log entry below.** This section is kept
+as a historical record of what was built and later reversed, per this
+project's convention of not silently deleting decided-and-shipped work; none
+of the checklist items below describe current behavior.
 
 - [x] Group node type + creation
 - [x] Membership mechanic: drag smaller box into larger box, commit on drop
@@ -2690,6 +2715,77 @@ and record deltas here instead of editing the spec.)*
   - Ran the full suite twice consecutively: `node --test tests/*.spec.mjs`
     (276 → 279 tests) and `python3 -m unittest discover -s tools -p
     "test_*.py"` (15 tests), both green.
+- 2026-07-28 — **Groups removed entirely**, requested from the sibling
+  `agent_ontology_todo.md` initiative while scoping that initiative's Phase F
+  (a strict classes/relationships YAML export): asked whether a group's
+  `contains` edges should export as class-hierarchy relationships, the user's
+  answer went past the question — "Remove groups altogether from the UI and
+  the data model also. Stick to the ontology spec." Confirmed via
+  `AskUserQuestion` that this should be its own dedicated phase/PR ahead of
+  Phase F rather than folded into it, then told to plan and implement
+  immediately rather than wait for further confirmation.
+  Removed from `index.html`: the "Add Group" toolbar button and its
+  placement mode; drag-into-group membership commit/removal
+  (`updateGroupMembership`, `updateMembershipForMovedGroup`,
+  `collectContainedDescendants`, `rectFullyContains`); rigid-body group move
+  and group resize (including the resize-handle hit-testing and its pointer-
+  drag branch); `createContainsEdge`/`removeContainsEdge`; group-specific
+  rendering (nested/member visual states, member hue, distinct move-vs-resize
+  outline) in `drawNodes()`; `DEFAULT_GROUP_W/H`, `MIN_GROUP_SIZE`,
+  `GROUP_CONTAINMENT_PASSES` and autolayout's group-containment clamp pass;
+  the `--group-fill`/`--group-stroke`/`--member-fill`/`--member-stroke`/
+  `--group-move-stroke`/`--group-resize-stroke` CSS custom properties; the
+  `addGroup`/`groupLabelPlaceholder`/`editGroupDetailsTitle` i18n strings.
+  Data model: `Node.type`, `Node.groups[]`, `Node.boundary_mode` all removed
+  — every node is now a fixed `DEFAULT_NODE_W`×`DEFAULT_NODE_H` box, never
+  resizable; `Edge.auto` removed (it existed solely for group-generated
+  `contains` edges). File formats: TXT's `[group]` label suffix and
+  `contains`-line grammar removed from both export and import
+  (`buildTxtExport`/`parseTxtImport`/`planTxtImport`/`commitTxtImport`);
+  JSON export no longer includes `type`/`groups`/`boundary_mode`/`auto`.
+  `tools/load_edge_list.py` (the spec's own Python reference loader) had its
+  `[group]`-parsing branch removed to match; `tools/test_load_edge_list.py`
+  lost its 4 group-specific tests and had its remaining node-shape
+  assertions updated (11/11 passing).
+  **`spec.md` was directly amended, not just delta-logged here** — the same
+  treatment given to the Python-loader bug-fix Log entry above, because a
+  reversal this size (removing a whole feature area) would otherwise leave
+  spec.md actively wrong about the current data model and file formats, not
+  just silent on a later addition. Every section describing Groups (1, 2,
+  3.2, 4.1, 4.2, 5.1, 5.2, 5.3, 7, 8, the Appendix's Python snippet) was
+  updated; Section 4.3 (Group semantics) is kept as a numbered stub rather
+  than renumbered, since this file's own Phase 2 section and others
+  cross-reference "Section 4.3" by number. Decision Log entries #2 and #3
+  (which originally added Groups) are marked `~~struck through~~
+  **REVERSED — see #11.**` rather than deleted, and a new entry #11 records
+  the reversal and its rationale — the same struck-through-not-deleted
+  convention this file itself uses for its own historical record (see the
+  note now at the top of the Phase 2 section above).
+  Test suite: deleted `tests/phase2.spec.mjs` (23 tests, entirely about
+  Groups) and `tests/group-move.spec.mjs` (11 tests, entirely about rigid-
+  body group move) wholesale, per this project's "one file per phase/
+  feature" convention (`tests/README.md`) — a fully group-scoped file has no
+  non-group remainder to keep. Surgically edited every other file with
+  group-touching tests: `phase1.spec.mjs`, `phase3.spec.mjs`,
+  `phase4.spec.mjs`, `phase5.spec.mjs`, `phase6.spec.mjs`, `phase8.spec.mjs`
+  (lost its entire group-containment-during-autolayout test block — no
+  containment invariant to test once groups don't exist), `phase9.spec.mjs`,
+  `clear-graph.spec.mjs`, `parallel-edges.spec.mjs`,
+  `pointer-interrupt.spec.mjs`, `localization.spec.mjs`,
+  `end-to-end-workflow.spec.mjs` (rewritten to drop its group-creation/
+  rigid-move/resize phases while keeping the rest of its realistic multi-
+  feature session intact), and `rename.spec.mjs` (its zoom+pan+clamping
+  combination test rewritten to drop the membership leg it was combining
+  with, keeping the other two). `tests/fixtures/andhra-as-group.txt` deleted;
+  `tests/fixtures/spec-example.txt` rewritten to match spec.md's own
+  amended worked example (5 nodes/3 edges, no group node, no contains line).
+  Also updated the sibling `agent_ontology_spec.md`/`agent_ontology_todo.md`
+  to reflect the removal — see that file's own dated Log entry for the
+  Agent-Ontology-side account (Open Question 4 resolved by elimination
+  rather than by choosing an export-time interpretation).
+  Ran the full suite twice consecutively: `node --test tests/*.spec.mjs`
+  (254 tests) and `python3 -m unittest discover -s tools -p "test_*.py"`
+  (11 tests), both green both times.
 
 ---
 

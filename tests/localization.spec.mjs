@@ -42,7 +42,6 @@ test("toggling the language switches all static toolbar/dialog text, the <html> 
     await page.click("#btn-lang-toggle");
     assert.equal(await page.evaluate(() => document.documentElement.lang), "en");
     assert.equal(await page.locator("#btn-add-node").textContent(), "Add Node");
-    assert.equal(await page.locator("#btn-add-group").textContent(), "Add Group");
     assert.equal(await page.locator("#btn-connect").textContent(), "Connect");
     assert.equal(await page.locator("#btn-autolayout").textContent(), "Auto-layout");
     assert.equal(await page.locator("#btn-undo").textContent(), "Undo");
@@ -116,7 +115,7 @@ test("an untitled graph's placeholder name tracks the current language, but a us
   });
 });
 
-test("canvas empty-state message and node/group/relation placeholders translate via the t() hook", async () => {
+test("canvas empty-state message and node/relation placeholders translate via the t() hook", async () => {
   await withRealDefaultPage(async (page) => {
     const huEmpty = await page.evaluate(() => window.__kg.lang.t("emptyCanvasMessage", window.__kg.lang.t("addNode")));
     assert.equal(huEmpty, 'A vászon üres — kattints a(z) "Csomópont hozzáadása" gombra a kezdéshez');
@@ -137,22 +136,6 @@ test("node placeholder is translated (Hungarian default, then English)", async (
     await page.click("#btn-lang-toggle"); // -> en
     await page.mouse.dblclick(box.x + 500, box.y + 500);
     assert.equal(await page.locator(".kg-inline-input").getAttribute("placeholder"), "Node label");
-    await page.keyboard.press("Escape");
-  });
-});
-
-test("group placeholder is translated (Hungarian default, then English)", async () => {
-  await withRealDefaultPage(async (page) => {
-    await page.click("#btn-add-group");
-    const box = await page.locator("#canvas").boundingBox();
-    await page.mouse.click(box.x + 300, box.y + 300);
-    assert.equal(await page.locator(".kg-inline-input").getAttribute("placeholder"), "Csoport neve");
-    await page.keyboard.press("Escape");
-
-    await page.click("#btn-lang-toggle"); // -> en
-    await page.click("#btn-add-group");
-    await page.mouse.click(box.x + 500, box.y + 500);
-    assert.equal(await page.locator(".kg-inline-input").getAttribute("placeholder"), "Group label");
     await page.keyboard.press("Escape");
   });
 });

@@ -83,26 +83,6 @@ test("renaming a node is exactly one undo step, fully reversible", async () => {
   });
 });
 
-test("renaming a group node uses the group's placeholder and renames just as well as an entity", async () => {
-  await withPage(async (page) => {
-    await addNodeViaButton(page, "#btn-add-group", 600, 400, "Old Group Name");
-    const box = await page.locator("#canvas").boundingBox();
-
-    await page.mouse.dblclick(box.x + 600, box.y + 400);
-    await page.waitForSelector(".kg-inline-input");
-    assert.equal(await page.locator(".kg-inline-input").getAttribute("placeholder"), "Group label");
-    assert.equal(await page.locator(".kg-inline-input").inputValue(), "Old Group Name");
-    await page.locator(".kg-inline-input").fill("New Group Name");
-    await page.keyboard.press("Enter");
-    await page.waitForSelector(".kg-inline-input", { state: "detached" });
-
-    const nodes = await page.evaluate(() => window.__kg.state.nodes);
-    assert.equal(nodes.length, 1);
-    assert.equal(nodes[0].label, "New Group Name");
-    assert.equal(nodes[0].type, "group");
-  });
-});
-
 test("double-clicking an existing edge (on its line) opens a rename field pre-filled with its relation; committing renames it", async () => {
   await withPage(async (page) => {
     await addNodeViaDblClick(page, 250, 250, "A");
@@ -198,14 +178,14 @@ async function inputCenter(page) {
   return { x: box.x + box.width / 2, y: box.y + box.height / 2 };
 }
 
-test("double-clicking far from a large node's center still anchors the rename field to the node's center, not the click point", async () => {
+test("double-clicking far from a node's center still anchors the rename field to the node's center, not the click point", async () => {
   await withPage(async (page) => {
-    await addNodeViaButton(page, "#btn-add-group", 600, 400, "Big Group");
+    await addNodeViaButton(page, "#btn-add-node", 600, 400, "Big Node");
     const box = await page.locator("#canvas").boundingBox();
 
-    // Group default size is 320x220 — double-click near its top-left
+    // Node default size is 160x60 — double-click near its top-left
     // corner, far from the (600,400) center.
-    await page.mouse.dblclick(box.x + 470, box.y + 320);
+    await page.mouse.dblclick(box.x + 535, box.y + 375);
     await page.waitForSelector(".kg-inline-input");
 
     const center = await inputCenter(page);
@@ -323,21 +303,14 @@ test("a rename field near the top of the viewport is clamped below the toolbar, 
   });
 });
 
-test("renaming a group member holds up under zoom + pan-near-edge + membership all at once: the field anchors to the node and stays clamped on-screen", async () => {
+test("renaming a node holds up under zoom + pan-near-edge combined: the field anchors to the node and stays clamped on-screen", async () => {
   await withPage(async (page) => {
-    // Each of zoom/pan, screen-edge clamping, and group membership is
-    // tested individually elsewhere — this combines all three, since none
-    // of those tests alone would catch a regression that only appears
-    // when they interact (e.g. clamping computed against the wrong,
-    // un-zoomed anchor, or a member's geometry resolving incorrectly once
-    // its own screen position is near the edge of the viewport).
-    await addNodeViaButton(page, "#btn-add-group", 500, 400, "Group");
-    const group = await page.evaluate(() => window.__kg.state.nodes[0]);
-    const memberStart = { x: group.x + 100, y: group.y + 60 };
-    await addNodeViaButton(page, "#btn-add-node", memberStart.x, memberStart.y, "Member");
-    await dragNode(page, memberStart.x, memberStart.y, memberStart.x + 6, memberStart.y + 6); // commit membership
+    // Each of zoom/pan and screen-edge clamping is tested individually
+    // elsewhere — this combines both, since neither test alone would catch
+    // a regression that only appears when they interact (e.g. clamping
+    // computed against the wrong, un-zoomed anchor).
+    await addNodeViaButton(page, "#btn-add-node", 500, 400, "Member");
     const member = await page.evaluate(() => window.__kg.state.nodes.find((n) => n.label === "Member"));
-    assert.equal(member.groups.length, 1, "sanity check: membership actually committed");
 
     const box = await page.locator("#canvas").boundingBox();
     const memberScreenBefore = await page.evaluate(() => {
@@ -345,7 +318,7 @@ test("renaming a group member holds up under zoom + pan-near-edge + membership a
       return window.__kg.worldToScreen(n.x + n.w / 2, n.y + n.h / 2);
     });
 
-    // Zoom in heavily on the member, then pan it very close to the left
+    // Zoom in heavily on the node, then pan it very close to the left
     // edge of the viewport — close enough that its true (unclamped)
     // center would render off-screen.
     await page.mouse.move(box.x + memberScreenBefore.x, box.y + memberScreenBefore.y);
@@ -356,17 +329,15 @@ test("renaming a group member holds up under zoom + pan-near-edge + membership a
     await page.mouse.up();
     await page.waitForTimeout(50);
 
-    const memberAfter = await page.evaluate(() => window.__kg.state.nodes.find((n) => n.label === "Member"));
-    assert.deepEqual(memberAfter.groups, member.groups, "membership survived the pan/zoom untouched");
     const trueAnchor = await page.evaluate(() => {
       const n = window.__kg.state.nodes.find((l) => l.label === "Member");
       return window.__kg.worldToScreen(n.x + n.w / 2, n.y + n.h / 2);
     });
-    assert.ok(trueAnchor.x < 0, "sanity check: the member's true center is now genuinely off-screen to the left");
+    assert.ok(trueAnchor.x < 0, "sanity check: the node's true center is now genuinely off-screen to the left");
 
-    // Double-click well inside the now-huge, mostly off-screen member box
+    // Double-click well inside the now-huge, mostly off-screen node box
     // (its right portion is still on-screen after the pan).
-    await page.mouse.dblclick(box.x + 50, box.y + 300);
+    await page.mouse.dblclick(box.x + 60, box.y + 350);
     await page.waitForSelector(".kg-inline-input");
     assert.equal(await page.locator(".kg-inline-input").inputValue(), "Member", "still the correct node, correctly pre-filled");
 
@@ -380,8 +351,8 @@ test("renaming a group member holds up under zoom + pan-near-edge + membership a
     await page.keyboard.press("Enter");
     await page.waitForSelector(".kg-inline-input", { state: "detached" });
     const renamed = await page.evaluate(() => window.__kg.state.nodes.find((n) => n.label === "Renamed Member"));
-    assert.ok(renamed, "the rename itself committed correctly despite all three conditions combined");
-    assert.deepEqual(renamed.groups, member.groups, "membership is still intact after the rename");
+    assert.ok(renamed, "the rename itself committed correctly despite both conditions combined");
+    assert.equal(renamed.id, member.id);
   });
 });
 
@@ -413,9 +384,9 @@ test("a rename field near the right/bottom viewport edge is clamped fully on-scr
 
 test("the selection toolbar's rename button (touch equivalent) is unaffected by click position, since it never had one — still centers on the node", async () => {
   await withPage(async (page) => {
-    await addNodeViaButton(page, "#btn-add-group", 600, 400, "Big Group");
+    await addNodeViaButton(page, "#btn-add-node", 600, 400, "Big Node");
     const box = await page.locator("#canvas").boundingBox();
-    await page.mouse.click(box.x + 470, box.y + 320); // click near the corner to select, not the center
+    await page.mouse.click(box.x + 535, box.y + 375); // click near the corner to select, not the center
     await page.waitForFunction(() => getComputedStyle(document.getElementById("sel-toolbar")).display !== "none");
 
     await page.click("#sel-rename");

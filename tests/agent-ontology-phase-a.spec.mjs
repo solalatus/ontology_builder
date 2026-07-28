@@ -253,7 +253,7 @@ test("undo/redo restores rules with independently-cloned arrays — a later in-p
     // references to whatever's live — via real undo()/redo() calls.
     const result = await page.evaluate(() => {
       const snap = () => ({
-        nodes: window.__kg.state.nodes.map((n) => ({ ...n, groups: [...n.groups], aliases: [...n.aliases], properties: n.properties.map((p) => ({ ...p })) })),
+        nodes: window.__kg.state.nodes.map((n) => ({ ...n, aliases: [...n.aliases], properties: n.properties.map((p) => ({ ...p })) })),
         edges: window.__kg.state.edges.map((e) => ({ ...e })),
         rules: window.__kg.state.rules.map((r) => ({ ...r, conditions: [...r.conditions] })),
         actions: window.__kg.state.actions.map((a) => ({ ...a, preconditions: [...a.preconditions] })),

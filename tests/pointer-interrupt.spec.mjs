@@ -78,68 +78,6 @@ test("a pinch starting immediately (no movement yet) produces no spurious undo s
   });
 });
 
-test("a pinch interrupting a group drag commits the group's move AND its cascaded member move together, as one undo step", async () => {
-  await withPage(async (page) => {
-    await addNodeViaButton(page, "#btn-add-group", 500, 400, "Group1");
-    const g = await page.evaluate(() => window.__kg.state.nodes[0]);
-    const memberCx = g.x + 100, memberCy = g.y + 60;
-    await addNodeViaButton(page, "#btn-add-node", memberCx, memberCy, "Member");
-    await dragNode(page, memberCx, memberCy, memberCx + 8, memberCy + 8); // commit membership
-
-    const box = await page.locator("#canvas").boundingBox();
-    const before = await page.evaluate(() => window.__kg.state.nodes.map((n) => ({ label: n.label, x: n.x, y: n.y, groups: n.groups })));
-    const member = before.find((n) => n.label === "Member");
-    assert.equal(member.groups.length, 1, "membership must have committed before the drag");
-    const historyBefore = await historyLength(page);
-
-    // Grab the group at a point that doesn't overlap the member.
-    const grabX = g.x + 250, grabY = g.y + 180;
-    await dispatchTouch(page, [
-      pe("pointerdown", 1, box.x + grabX, box.y + grabY),
-      pe("pointermove", 1, box.x + grabX + 150, box.y + grabY + 120),
-    ]);
-    const midMember = await page.evaluate(() => window.__kg.state.nodes.find((n) => n.label === "Member"));
-    assert.notEqual(midMember.x, member.x, "the member must have moved along with the group before the interruption");
-
-    await dispatchTouch(page, [pe("pointerdown", 2, box.x + 20, box.y + 20, false)]);
-
-    const after = await page.evaluate(() => window.__kg.state.nodes.map((n) => ({ label: n.label, x: n.x, y: n.y, groups: n.groups })));
-    const historyAfter = await historyLength(page);
-    assert.equal(historyAfter, historyBefore + 1, "group move + member cascade is exactly one undo step, even when interrupted");
-    assert.deepEqual(after.find((n) => n.label === "Member").groups, ["n1"], "membership survives the interrupted move");
-
-    await page.evaluate(() => window.__kg.actions.undo());
-    const restored = await page.evaluate(() => window.__kg.state.nodes.map((n) => ({ label: n.label, x: n.x, y: n.y, groups: n.groups })));
-    assert.deepEqual(restored, before, "undo restores both the group and its member to their exact prior positions");
-  });
-});
-
-test("a pinch interrupting a group resize commits the resize as one undo step, and a group resize never carries a member along", async () => {
-  await withPage(async (page) => {
-    await addNodeViaButton(page, "#btn-add-group", 500, 400, "Group1");
-    const g = await page.evaluate(() => window.__kg.state.nodes[0]);
-    const box = await page.locator("#canvas").boundingBox();
-    const before = await page.evaluate(() => ({ ...window.__kg.state.nodes[0] }));
-    const historyBefore = await historyLength(page);
-
-    await dispatchTouch(page, [
-      pe("pointerdown", 1, box.x + g.x + g.w, box.y + g.y + g.h), // resize handle
-      pe("pointermove", 1, box.x + g.x + g.w + 80, box.y + g.y + g.h + 60),
-    ]);
-    const mid = await page.evaluate(() => window.__kg.state.nodes[0]);
-    assert.notEqual(mid.w, before.w, "the resize must have actually changed w/h before the interruption");
-
-    await dispatchTouch(page, [pe("pointerdown", 2, box.x + 20, box.y + 20, false)]);
-
-    const after = await page.evaluate(() => window.__kg.state.nodes[0]);
-    const historyAfter = await historyLength(page);
-    assert.equal(after.x, before.x, "resize never moves the group's own position");
-    assert.equal(after.y, before.y);
-    assert.deepEqual({ w: after.w, h: after.h }, { w: mid.w, h: mid.h }, "the partial resize is preserved");
-    assert.equal(historyAfter, historyBefore + 1, "the partial resize is committed as exactly one undo step");
-  });
-});
-
 test("a pinch starting cancels a pending long-press-delete timer — the node survives instead of being deleted ~600ms later", async () => {
   await withPage(async (page) => {
     await addNodeViaButton(page, "#btn-add-node", 400, 300, "Alpha");
@@ -295,7 +233,7 @@ async function seedGrid(page, count, cols, spacing) {
   await page.evaluate(({ count, cols, spacing }) => {
     for (let i = 0; i < count; i++) {
       const col = i % cols, row = Math.floor(i / cols);
-      window.__kg.actions.createNode(col * spacing, row * spacing, `N${i}`, "entity");
+      window.__kg.actions.createNode(col * spacing, row * spacing, `N${i}`);
     }
     window.__kg.markDirty();
   }, { count, cols, spacing });

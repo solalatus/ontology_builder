@@ -12,7 +12,7 @@ async function historyLengths(page) {
 // letting each test start Auto-layout from a clean undo stack).
 async function seedGraph(page, nodes, edges = []) {
   await page.evaluate(({ nodes, edges }) => {
-    const ids = nodes.map((n) => window.__kg.actions.createNode(n.x, n.y, n.label, n.type).id);
+    const ids = nodes.map((n) => window.__kg.actions.createNode(n.x, n.y, n.label).id);
     for (const [a, b, relation] of edges) {
       window.__kg.actions.createEdge(ids[a], ids[b], relation ?? "related to");
     }
@@ -44,11 +44,11 @@ test("Auto-layout moves nodes and is exactly one undo step regardless of node co
     await seedGraph(
       page,
       [
-        { x: 100, y: 100, label: "A", type: "entity" },
-        { x: 110, y: 105, label: "B", type: "entity" },
-        { x: 105, y: 95, label: "C", type: "entity" },
-        { x: 108, y: 110, label: "D", type: "entity" },
-        { x: 95, y: 90, label: "E", type: "entity" },
+        { x: 100, y: 100, label: "A" },
+        { x: 110, y: 105, label: "B" },
+        { x: 105, y: 95, label: "C" },
+        { x: 108, y: 110, label: "D" },
+        { x: 95, y: 90, label: "E" },
       ],
       [[0, 1, "connects to"], [1, 2, "connects to"], [2, 3, "connects to"], [3, 4, "connects to"]],
     );
@@ -75,52 +75,41 @@ test("Auto-layout moves nodes and is exactly one undo step regardless of node co
   });
 });
 
-test("Auto-layout changes only node positions — ids, labels, edges, and group membership are untouched", async () => {
+test("Auto-layout changes only node positions — ids, labels, and edges are untouched", async () => {
   await withPage(async (page) => {
     await seedGraph(
       page,
       [
-        { x: 100, y: 100, label: "Group", type: "group" },
-        { x: 150, y: 150, label: "Member", type: "entity" },
+        { x: 100, y: 100, label: "A" },
+        { x: 150, y: 150, label: "B" },
       ],
+      [[0, 1, "unrelated edge"]],
     );
-    // Establish real membership the same way a drag would, via the exposed action.
-    await page.evaluate(() => {
-      const member = window.__kg.state.nodes.find((n) => n.label === "Member");
-      const group = window.__kg.state.nodes.find((n) => n.label === "Group");
-      member.groups = [group.id];
-      window.__kg.actions.updateGroupMembership(member);
-    });
-    await page.evaluate(() => window.__kg.actions.createEdge(
-      window.__kg.state.nodes.find((n) => n.label === "Group").id,
-      window.__kg.state.nodes.find((n) => n.label === "Member").id,
-      "unrelated edge",
-    ));
     const beforeSnapshot = await page.evaluate(() => ({
-      nodes: window.__kg.state.nodes.map(({ id, label, type, w, h, groups }) => ({ id, label, type, w, h, groups })),
+      nodes: window.__kg.state.nodes.map(({ id, label, w, h }) => ({ id, label, w, h })),
       edgeCount: window.__kg.state.edges.length,
     }));
 
     await page.click("#btn-autolayout");
 
     const afterSnapshot = await page.evaluate(() => ({
-      nodes: window.__kg.state.nodes.map(({ id, label, type, w, h, groups }) => ({ id, label, type, w, h, groups })),
+      nodes: window.__kg.state.nodes.map(({ id, label, w, h }) => ({ id, label, w, h })),
       edgeCount: window.__kg.state.edges.length,
     }));
     assert.deepEqual(afterSnapshot, beforeSnapshot, "non-position fields must be byte-identical after layout");
   });
 });
 
-test("Auto-layout does not crash or hang on disconnected components and a floating group with no edges", async () => {
+test("Auto-layout does not crash or hang on disconnected components and a floating, edge-less node", async () => {
   await withPage(async (page) => {
     await seedGraph(
       page,
       [
-        { x: 50, y: 50, label: "Island A", type: "entity" },
-        { x: 60, y: 60, label: "Island B", type: "entity" },
-        { x: 400, y: 400, label: "Lonely Group", type: "group" },
-        { x: 200, y: 200, label: "Connected 1", type: "entity" },
-        { x: 210, y: 210, label: "Connected 2", type: "entity" },
+        { x: 50, y: 50, label: "Island A" },
+        { x: 60, y: 60, label: "Island B" },
+        { x: 400, y: 400, label: "Lonely Node" },
+        { x: 200, y: 200, label: "Connected 1" },
+        { x: 210, y: 210, label: "Connected 2" },
       ],
       [[3, 4, "linked"]],
     );
@@ -133,129 +122,6 @@ test("Auto-layout does not crash or hang on disconnected components and a floati
     assert.equal(nodes.length, 5);
     for (const n of nodes) {
       assert.ok(Number.isFinite(n.x) && Number.isFinite(n.y), `node ${n.label} has a non-finite position`);
-    }
-  });
-});
-
-// Small epsilon for floating-point slack from the force simulation's own
-// iterative clamping, not a real tolerance for penetration.
-const EPS = 1e-6;
-function isFullyContained(inner, outer) {
-  return inner.x >= outer.x - EPS && inner.y >= outer.y - EPS &&
-    inner.x + inner.w <= outer.x + outer.w + EPS && inner.y + inner.h <= outer.y + outer.h + EPS;
-}
-
-async function establishMembership(page, memberLabel, groupLabel) {
-  await page.evaluate(({ memberLabel, groupLabel }) => {
-    const member = window.__kg.state.nodes.find((n) => n.label === memberLabel);
-    const group = window.__kg.state.nodes.find((n) => n.label === groupLabel);
-    member.groups.push(group.id);
-    window.__kg.actions.updateGroupMembership(member);
-  }, { memberLabel, groupLabel });
-}
-
-test("Auto-layout keeps a group's members strictly inside its box, even against an outward-pulling edge", async () => {
-  await withPage(async (page) => {
-    await seedGraph(
-      page,
-      [
-        { x: 400, y: 400, label: "Group", type: "group" },
-        { x: 450, y: 450, label: "Member", type: "entity" },
-        // Far away and strongly connected, so the force simulation has a
-        // real reason to try to pull Member out of its group's box.
-        { x: 2000, y: 2000, label: "Distant", type: "entity" },
-      ],
-      [[1, 2, "strongly pulls toward"]],
-    );
-    await establishMembership(page, "Member", "Group");
-
-    await page.click("#btn-autolayout");
-    await page.waitForFunction(() => window.__kg.history.past.length === 1);
-
-    const { group, member } = await page.evaluate(() => ({
-      group: window.__kg.state.nodes.find((n) => n.label === "Group"),
-      member: window.__kg.state.nodes.find((n) => n.label === "Member"),
-    }));
-    assert.ok(isFullyContained(member, group),
-      `member (${member.x},${member.y},${member.w}x${member.h}) escaped its group (${group.x},${group.y},${group.w}x${group.h})`);
-  });
-});
-
-test("Auto-layout keeps every member of a multi-member group contained, all at once", async () => {
-  await withPage(async (page) => {
-    await seedGraph(page, [
-      { x: 300, y: 300, label: "Group", type: "group" },
-      { x: 320, y: 320, label: "M1", type: "entity" },
-      { x: 340, y: 340, label: "M2", type: "entity" },
-      { x: 360, y: 360, label: "M3", type: "entity" },
-      { x: 900, y: 100, label: "Outsider", type: "entity" },
-    ], [[1, 4, "pulls"], [2, 4, "pulls"], [3, 4, "pulls"]]);
-    await establishMembership(page, "M1", "Group");
-    await establishMembership(page, "M2", "Group");
-    await establishMembership(page, "M3", "Group");
-
-    await page.click("#btn-autolayout");
-    await page.waitForFunction(() => window.__kg.history.past.length === 1);
-
-    const { group, members } = await page.evaluate(() => ({
-      group: window.__kg.state.nodes.find((n) => n.label === "Group"),
-      members: ["M1", "M2", "M3"].map((l) => window.__kg.state.nodes.find((n) => n.label === l)),
-    }));
-    for (const m of members) {
-      assert.ok(isFullyContained(m, group), `${m.label} escaped its group`);
-    }
-  });
-});
-
-test("Auto-layout respects nested group containment — member inside inner group inside outer group", async () => {
-  await withPage(async (page) => {
-    await seedGraph(page, [
-      { x: 100, y: 100, label: "Outer", type: "group" }, // default 320x220
-      { x: 150, y: 150, label: "Inner", type: "group" },
-      { x: 180, y: 180, label: "Member", type: "entity" },
-      { x: 1500, y: 1500, label: "FarAway", type: "entity" },
-    ], [[2, 3, "pulls hard"]]);
-    // Explicitly smaller than Outer, so containment has real slack to check
-    // rather than the two boxes being forced into an exact coincidental
-    // match by identical default group dimensions.
-    await page.evaluate(() => {
-      const inner = window.__kg.state.nodes.find((n) => n.label === "Inner");
-      inner.w = 220; inner.h = 150; // still comfortably bigger than Member's default 160x60
-    });
-    await establishMembership(page, "Member", "Inner");
-    await establishMembership(page, "Inner", "Outer");
-
-    await page.click("#btn-autolayout");
-    await page.waitForFunction(() => window.__kg.history.past.length === 1);
-
-    const { outer, inner, member } = await page.evaluate(() => ({
-      outer: window.__kg.state.nodes.find((n) => n.label === "Outer"),
-      inner: window.__kg.state.nodes.find((n) => n.label === "Inner"),
-      member: window.__kg.state.nodes.find((n) => n.label === "Member"),
-    }));
-    assert.ok(isFullyContained(member, inner), "member escaped its inner group");
-    assert.ok(isFullyContained(inner, outer), "inner group escaped the outer group");
-  });
-});
-
-test("Auto-layout on a group with a member larger than it stays finite and doesn't crash (best-effort clamp)", async () => {
-  await withPage(async (page) => {
-    await page.evaluate(() => {
-      const group = window.__kg.actions.createNode(100, 100, "TinyGroup", "group");
-      group.w = 60; group.h = 60; // MIN_GROUP_SIZE floor
-      const member = window.__kg.actions.createNode(110, 110, "BigMember", "entity");
-      member.w = 400; member.h = 300; // deliberately bigger than the group
-      member.groups.push(group.id);
-      window.__kg.actions.updateGroupMembership(member);
-      window.__kg.markDirty();
-    });
-
-    await page.click("#btn-autolayout");
-    await page.waitForFunction(() => window.__kg.history.past.length === 1);
-
-    const nodes = await page.evaluate(() => window.__kg.state.nodes);
-    for (const n of nodes) {
-      assert.ok(Number.isFinite(n.x) && Number.isFinite(n.y), `${n.label} has a non-finite position`);
     }
   });
 });
@@ -278,64 +144,6 @@ test("Auto-layout is reachable only via its explicit toolbar button — never ru
   });
 });
 
-test("a node belonging to two separate (overlapping-origin) groups stays contained in both simultaneously during Auto-layout", async () => {
-  await withPage(async (page) => {
-    // GroupA (100,100..420,320) and GroupB (200,100..520,320) — default
-    // 320x220 group boxes, positioned so their overlap (200..420, 100..320)
-    // comfortably fits a default 160x60 entity with room to spare. Set up
-    // directly (groups[] + contains edges by hand) rather than via
-    // establishMembership()'s push+updateGroupMembership combo — with two
-    // overlapping, mutually-qualifying groups, that auto-detection would
-    // itself add the second membership as a side effect of the first call,
-    // then double-push it on the second call.
-    await seedGraph(page, [
-      { x: 100, y: 100, label: "GroupA", type: "group" },
-      { x: 200, y: 100, label: "GroupB", type: "group" },
-      { x: 250, y: 150, label: "Shared", type: "entity" },
-      { x: 1800, y: 1800, label: "Puller", type: "entity" },
-    ], [[2, 3, "pulls hard"]]);
-    await page.evaluate(() => {
-      const groupA = window.__kg.state.nodes.find((n) => n.label === "GroupA");
-      const groupB = window.__kg.state.nodes.find((n) => n.label === "GroupB");
-      const shared = window.__kg.state.nodes.find((n) => n.label === "Shared");
-      // Enlarged well past the 320x220 default: at the sibling edge's
-      // natural equilibrium distance (~150-190 units, once other forces
-      // settle), two default-sized groups' overlap region comes out only
-      // slightly smaller than a default 160x60 entity — not enough margin
-      // for a reliable test. Bigger boxes leave comfortable slack.
-      groupA.w = 500; groupA.h = 400;
-      groupB.w = 500; groupB.h = 400;
-      shared.groups.push(groupA.id, groupB.id);
-      window.__kg.actions.createEdge(groupA.id, shared.id, "contains", true, true);
-      window.__kg.actions.createEdge(groupB.id, shared.id, "contains", true, true);
-      // Nothing else attracts GroupA and GroupB to each other, and all-pairs
-      // repulsion pushes every node pair apart — without some attraction
-      // between them, 200 iterations reliably drift two otherwise-unrelated
-      // groups apart until they no longer overlap at all, making simultaneous
-      // containment geometrically impossible regardless of the clamp logic.
-      // A direct edge keeps them attracted together, the same way any two
-      // genuinely-related groups in a real graph would tend to stay near
-      // each other — this isolates the clamp behavior under test from that
-      // unrelated (and, for two arbitrary sibling groups, arguably correct)
-      // drift-apart dynamic.
-      window.__kg.actions.createEdge(groupA.id, groupB.id, "sibling of");
-    });
-    const groupsBefore = await page.evaluate(() => window.__kg.state.nodes.find((n) => n.label === "Shared").groups);
-    assert.equal(groupsBefore.length, 2, "sanity check: Shared really is in both groups before layout");
-
-    await page.click("#btn-autolayout");
-    await page.waitForFunction(() => window.__kg.history.past.length === 1);
-
-    const { groupA, groupB, shared } = await page.evaluate(() => ({
-      groupA: window.__kg.state.nodes.find((n) => n.label === "GroupA"),
-      groupB: window.__kg.state.nodes.find((n) => n.label === "GroupB"),
-      shared: window.__kg.state.nodes.find((n) => n.label === "Shared"),
-    }));
-    assert.ok(isFullyContained(shared, groupA), "Shared escaped GroupA");
-    assert.ok(isFullyContained(shared, groupB), "Shared escaped GroupB");
-  });
-});
-
 // --- Adversarial graphs (QA/test-coverage pass, no bug expected a priori —
 // autolayout's clamp-then-simulate design should be robust to any graph
 // shape; these exist to prove that rather than assume it) --------------
@@ -345,9 +153,9 @@ test("Auto-layout terminates cleanly on a graph containing a cycle (A->B->C->A)"
     await seedGraph(
       page,
       [
-        { x: 100, y: 100, label: "A", type: "entity" },
-        { x: 150, y: 100, label: "B", type: "entity" },
-        { x: 125, y: 150, label: "C", type: "entity" },
+        { x: 100, y: 100, label: "A" },
+        { x: 150, y: 100, label: "B" },
+        { x: 125, y: 150, label: "C" },
       ],
       [[0, 1, "to B"], [1, 2, "to C"], [2, 0, "back to A"]],
     );
@@ -365,7 +173,7 @@ test("Auto-layout terminates cleanly on a graph containing a cycle (A->B->C->A)"
 test("Auto-layout terminates cleanly on a dense, near-complete graph (8 nodes, all-pairs edges)", async () => {
   await withPage(async (page) => {
     const labels = ["A", "B", "C", "D", "E", "F", "G", "H"];
-    const nodeSpecs = labels.map((label, i) => ({ x: 100 + (i % 4) * 40, y: 100 + Math.floor(i / 4) * 40, label, type: "entity" }));
+    const nodeSpecs = labels.map((label, i) => ({ x: 100 + (i % 4) * 40, y: 100 + Math.floor(i / 4) * 40, label }));
     const edgeSpecs = [];
     for (let i = 0; i < labels.length; i++) {
       for (let j = i + 1; j < labels.length; j++) edgeSpecs.push([i, j, `${labels[i]}-${labels[j]}`]);
@@ -387,65 +195,5 @@ test("Auto-layout terminates cleanly on a dense, near-complete graph (8 nodes, a
         assert.ok(nodes[i].x !== nodes[j].x || nodes[i].y !== nodes[j].y, `${nodes[i].label} and ${nodes[j].label} collapsed onto the same point`);
       }
     }
-  });
-});
-
-test("Auto-layout keeps every member of an overcrowded group (10 members, small box) contained simultaneously", async () => {
-  await withPage(async (page) => {
-    const memberSpecs = [];
-    for (let i = 0; i < 10; i++) memberSpecs.push({ x: 300 + i * 5, y: 300 + i * 3, label: `M${i}`, type: "entity" });
-    await seedGraph(page, [{ x: 300, y: 300, label: "Group", type: "group" }, ...memberSpecs, { x: 900, y: 900, label: "Puller", type: "entity" }],
-      memberSpecs.map((_, i) => [i + 1, memberSpecs.length + 1, "pulls"])); // every member pulled toward the same far-away outsider
-    for (let i = 0; i < memberSpecs.length; i++) await establishMembership(page, `M${i}`, "Group");
-
-    const start = Date.now();
-    await page.click("#btn-autolayout");
-    await page.waitForFunction(() => window.__kg.history.past.length === 1);
-    assert.ok(Date.now() - start < 10000, "an overcrowded group should not hang");
-
-    const { group, members } = await page.evaluate(() => ({
-      group: window.__kg.state.nodes.find((n) => n.label === "Group"),
-      members: window.__kg.state.nodes.filter((n) => n.label.startsWith("M")),
-    }));
-    assert.equal(members.length, 10);
-    for (const m of members) {
-      assert.ok(Number.isFinite(m.x) && Number.isFinite(m.y), `${m.label} has a non-finite position`);
-      assert.ok(isFullyContained(m, group), `${m.label} escaped the overcrowded group`);
-    }
-  });
-});
-
-test("Auto-layout holds every containment invariant at once on a mixed graph: disconnected islands, a floating group, and 3-level-deep nesting", async () => {
-  await withPage(async (page) => {
-    await seedGraph(page, [
-      { x: 50, y: 50, label: "IslandA", type: "entity" },
-      { x: 70, y: 70, label: "IslandB", type: "entity" },
-      { x: 600, y: 600, label: "FloatingGroup", type: "group" },
-      { x: 200, y: 200, label: "Outer", type: "group" },
-      { x: 220, y: 220, label: "Inner", type: "group" },
-      { x: 240, y: 240, label: "Leaf", type: "entity" },
-      { x: 1000, y: 1000, label: "PullsLeaf", type: "entity" },
-    ], [[5, 6, "pulls hard"]]);
-    await page.evaluate(() => {
-      const inner = window.__kg.state.nodes.find((n) => n.label === "Inner");
-      inner.w = 220; inner.h = 150; // smaller than Outer, still bigger than a default entity
-    });
-    await establishMembership(page, "Leaf", "Inner");
-    await establishMembership(page, "Inner", "Outer");
-
-    const start = Date.now();
-    await page.click("#btn-autolayout");
-    await page.waitForFunction(() => window.__kg.history.past.length === 1);
-    assert.ok(Date.now() - start < 10000, "a mixed graph should not hang");
-
-    const nodes = await page.evaluate(() => window.__kg.state.nodes);
-    assert.equal(nodes.length, 7);
-    for (const n of nodes) assert.ok(Number.isFinite(n.x) && Number.isFinite(n.y), `${n.label} has a non-finite position`);
-
-    const outer = nodes.find((n) => n.label === "Outer");
-    const inner = nodes.find((n) => n.label === "Inner");
-    const leaf = nodes.find((n) => n.label === "Leaf");
-    assert.ok(isFullyContained(leaf, inner), "Leaf escaped Inner");
-    assert.ok(isFullyContained(inner, outer), "Inner escaped Outer");
   });
 });

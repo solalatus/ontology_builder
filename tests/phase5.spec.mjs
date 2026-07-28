@@ -171,19 +171,10 @@ test("graph name is sanitized for filename safety (spaces and punctuation) at sa
 
 test("the JSON export matches Section 5.1's schema exactly and round-trips through JSON.parse", async () => {
   await withDownloadPage(async (page, downloads) => {
-    await page.click("#btn-add-group");
-    const box = await page.locator("#canvas").boundingBox();
-    await page.mouse.click(box.x + 600, box.y + 400);
-    await page.waitForSelector(".kg-inline-input");
-    await page.locator(".kg-inline-input").fill("South Asian Languages");
-    await page.keyboard.press("Enter");
-    await page.waitForSelector(".kg-inline-input", { state: "detached" });
-
     await addNodeViaDblClick(page, 250, 250, "Andhra Pradesh");
     await addNodeViaDblClick(page, 650, 250, "Telugu");
     await createEdgeViaConnectMode(page, 250, 250, 650, 250, "language used");
     await page.evaluate(() => window.__kg.actions.setMode("idle")); // Connect mode is sticky
-    await dragNode(page, 250, 250, 550, 400); // Andhra Pradesh into the group
 
     await saveVersion(page);
     await page.waitForTimeout(200);
@@ -198,31 +189,23 @@ test("the JSON export matches Section 5.1's schema exactly and round-trips throu
     assert.equal(parsed.meta.created, parsed.meta.saved); // same instant, first save
     assert.ok(!("graph_name" in parsed.meta), "graph name is filename-only, not part of the canonical meta object");
 
-    assert.equal(parsed.nodes.length, 3);
-    const group = parsed.nodes.find((n) => n.type === "group");
+    assert.equal(parsed.nodes.length, 2);
     const member = parsed.nodes.find((n) => n.label === "Andhra Pradesh");
     const other = parsed.nodes.find((n) => n.label === "Telugu");
-    assert.equal(group.boundary_mode, "manual");
-    assert.deepEqual(member.groups, [group.id]);
-    assert.deepEqual(other.groups, []);
     // Agent Ontology (agent_ontology_spec.md §4.1): meaning replaces the
     // old, never-wired notes field; aliases/properties are new.
-    for (const n of [group, member, other]) {
+    for (const n of [member, other]) {
       assert.ok("x" in n && "y" in n && "w" in n && "h" in n && "meaning" in n && "aliases" in n && "properties" in n);
     }
     assert.equal(member.meaning, null);
     assert.deepEqual(member.aliases, []);
     assert.deepEqual(member.properties, []);
 
-    assert.equal(parsed.edges.length, 2);
-    const relEdge = parsed.edges.find((e) => !e.auto);
-    const containsEdge = parsed.edges.find((e) => e.auto);
+    assert.equal(parsed.edges.length, 1);
+    const relEdge = parsed.edges[0];
     assert.equal(relEdge.relation, "language used");
     assert.equal(relEdge.directed, true);
     assert.equal(relEdge.meaning, null); // agent_ontology_spec.md §4.2
-    assert.equal(containsEdge.relation, "contains");
-    assert.equal(containsEdge.source, group.id);
-    assert.equal(containsEdge.target, member.id);
 
     // agent_ontology_spec.md §4.3 — additive top-level collections, present
     // and empty when nothing's been authored yet (Phase A has no UI for
@@ -232,21 +215,12 @@ test("the JSON export matches Section 5.1's schema exactly and round-trips throu
   });
 });
 
-test("the TXT export matches Section 5.2's grammar exactly, including the contains line", async () => {
+test("the TXT export matches Section 5.2's grammar exactly", async () => {
   await withDownloadPage(async (page, downloads) => {
-    await page.click("#btn-add-group");
-    const box = await page.locator("#canvas").boundingBox();
-    await page.mouse.click(box.x + 600, box.y + 400);
-    await page.waitForSelector(".kg-inline-input");
-    await page.locator(".kg-inline-input").fill("South Asian Languages");
-    await page.keyboard.press("Enter");
-    await page.waitForSelector(".kg-inline-input", { state: "detached" });
-
     await addNodeViaDblClick(page, 250, 250, "Andhra Pradesh");
     await addNodeViaDblClick(page, 650, 250, "Telugu");
     await createEdgeViaConnectMode(page, 250, 250, 650, 250, "language used");
     await page.evaluate(() => window.__kg.actions.setMode("idle")); // Connect mode is sticky
-    await dragNode(page, 250, 250, 550, 400);
 
     await saveVersion(page);
     await page.waitForTimeout(200);
@@ -264,14 +238,11 @@ test("the TXT export matches Section 5.2's grammar exactly, including the contai
     assert.equal(lines[6], "## NODES");
 
     const nodesSection = lines.slice(7, lines.indexOf("## EDGES") - 1);
-    assert.deepEqual(nodesSection.sort(), ["Andhra Pradesh", "South Asian Languages [group]", "Telugu"].sort());
+    assert.deepEqual(nodesSection.sort(), ["Andhra Pradesh", "Telugu"].sort());
 
     const edgesStart = lines.indexOf("## EDGES") + 1;
     const edgesSection = lines.slice(edgesStart).filter((l) => l.length > 0);
-    assert.deepEqual(
-      edgesSection.sort(),
-      ["Andhra Pradesh -> Telugu : language used", "South Asian Languages -> Andhra Pradesh : contains"].sort()
-    );
+    assert.deepEqual(edgesSection, ["Andhra Pradesh -> Telugu : language used"]);
   });
 });
 
@@ -403,35 +374,6 @@ test("unicode and special characters in labels/relations survive both JSON and T
     assert.ok(text.includes(label1));
     assert.ok(text.includes(label2));
     assert.ok(text.includes(relation));
-  });
-});
-
-test("deeply nested groups (3 levels) export their full groups[] chain correctly in JSON", async () => {
-  await withDownloadPage(async (page, downloads) => {
-    await page.evaluate(() => {
-      const outer = window.__kg.actions.createNode(0, 0, "Outer", "group");
-      outer.w = 600; outer.h = 400;
-      const inner = window.__kg.actions.createNode(50, 50, "Inner", "group");
-      inner.w = 300; inner.h = 200;
-      inner.groups.push(outer.id);
-      window.__kg.actions.createEdge(outer.id, inner.id, "contains", true, true);
-      const leaf = window.__kg.actions.createNode(80, 80, "Leaf", "entity");
-      leaf.groups.push(inner.id);
-      window.__kg.actions.createEdge(inner.id, leaf.id, "contains", true, true);
-      window.__kg.markDirty();
-    });
-
-    await saveVersion(page);
-    await page.waitForTimeout(200);
-
-    const jsonDl = downloads.find((d) => d.suggestedFilename().endsWith(".json"));
-    const parsed = JSON.parse(await readDownload(jsonDl));
-    const outer = parsed.nodes.find((n) => n.label === "Outer");
-    const inner = parsed.nodes.find((n) => n.label === "Inner");
-    const leaf = parsed.nodes.find((n) => n.label === "Leaf");
-    assert.deepEqual(outer.groups, []);
-    assert.deepEqual(inner.groups, [outer.id]);
-    assert.deepEqual(leaf.groups, [inner.id], "Leaf's groups[] references its direct (inner) parent only, not the outer grandparent");
   });
 });
 

@@ -134,51 +134,6 @@ test("Delete edge (trash icon): Undo restores it", async () => {
   });
 });
 
-test("Group membership from a drag-in is a single undo step: Undo removes both groups[] and the auto edge together", async () => {
-  await withPage(async (page) => {
-    await addNodeViaButton(page, "#btn-add-group", 600, 400, "Group A");
-    await addNodeViaButton(page, "#btn-add-node", 100, 100, "Member");
-    const before = await historyLengths(page);
-
-    await dragNode(page, 100, 100, 600, 400); // commits membership
-    const after = await historyLengths(page);
-    assert.equal(after.past, before.past + 1, "membership commit is exactly one more undo step, not two");
-
-    let member = await page.evaluate(() => window.__kg.state.nodes.find((n) => n.label === "Member"));
-    assert.equal(member.groups.length, 1);
-    assert.equal((await page.evaluate(() => window.__kg.state.edges)).length, 1);
-
-    await page.click("#btn-undo");
-    member = await page.evaluate(() => window.__kg.state.nodes.find((n) => n.label === "Member"));
-    assert.deepEqual(member.groups, []);
-    assert.equal((await page.evaluate(() => window.__kg.state.edges)).length, 0);
-
-    await page.click("#btn-redo");
-    member = await page.evaluate(() => window.__kg.state.nodes.find((n) => n.label === "Member"));
-    assert.equal(member.groups.length, 1);
-    assert.equal((await page.evaluate(() => window.__kg.state.edges)).length, 1);
-  });
-});
-
-test("resizing a group: Undo restores the exact original size, Redo re-applies it", async () => {
-  await withPage(async (page) => {
-    await addNodeViaButton(page, "#btn-add-group", 600, 400, "Group A"); // rect 440,290..760,510
-    await dragNode(page, 760, 510, 600, 380); // shrink via resize corner
-    const resized = await page.evaluate(() => window.__kg.state.nodes[0]);
-    assert.equal(resized.w, 160);
-    assert.equal(resized.h, 90);
-
-    await page.click("#btn-undo");
-    const restored = await page.evaluate(() => window.__kg.state.nodes[0]);
-    assert.equal(restored.w, 320);
-    assert.equal(restored.h, 220);
-
-    await page.click("#btn-redo");
-    const redone = await page.evaluate(() => window.__kg.state.nodes[0]);
-    assert.equal(redone.w, 160);
-    assert.equal(redone.h, 90);
-  });
-});
 
 test("long-press delete is also exactly one undo step", async () => {
   await withPage(async (page) => {
@@ -287,13 +242,13 @@ test("a long chain of 20 sequential adds fully undoes back to empty and fully re
     for (let i = 0; i < 20; i++) {
       await page.evaluate((label) => {
         const snap = () => ({
-          nodes: window.__kg.state.nodes.map((n) => ({ ...n, groups: [...n.groups], aliases: [...n.aliases], properties: n.properties.map((p) => ({ ...p })) })),
+          nodes: window.__kg.state.nodes.map((n) => ({ ...n, aliases: [...n.aliases], properties: n.properties.map((p) => ({ ...p })) })),
           edges: window.__kg.state.edges.map((e) => ({ ...e })),
           rules: window.__kg.state.rules.map((r) => ({ ...r, conditions: [...r.conditions] })),
           actions: window.__kg.state.actions.map((a) => ({ ...a, preconditions: [...a.preconditions] })),
         });
         const before = snap();
-        window.__kg.actions.createNode(50 + (label % 10) * 60, 50 + Math.floor(label / 10) * 80, `N${label}`, "entity");
+        window.__kg.actions.createNode(50 + (label % 10) * 60, 50 + Math.floor(label / 10) * 80, `N${label}`);
         const after = snap();
         window.__kg.history.past.push({ before, after });
         window.__kg.history.future = [];
@@ -392,49 +347,41 @@ test("undoing an Auto-layout after several unrelated prior actions only reverts 
   });
 });
 
-test("a long, heterogeneous action sequence (group create, membership drag, resize, rename, connect, rigid group move, delete) fully undoes step-by-step and fully redoes back, matching an exact snapshot at every single intermediate step", async () => {
+test("a long, heterogeneous action sequence (add, move, rename, connect, toggle direction, move again, delete) fully undoes step-by-step and fully redoes back, matching an exact snapshot at every single intermediate step", async () => {
   await withPage(async (page) => {
     const snapshot = () => page.evaluate(() => ({
-      nodes: window.__kg.state.nodes.map((n) => ({ ...n, groups: [...n.groups] })),
+      nodes: window.__kg.state.nodes.map((n) => ({ ...n, aliases: [...n.aliases], properties: n.properties.map((p) => ({ ...p })) })),
       edges: window.__kg.state.edges.map((e) => ({ ...e })),
     }));
     const snapshots = [await snapshot()]; // index 0 = the empty starting state
 
-    // Step 1: create a group.
-    await addNodeViaButton(page, "#btn-add-group", 500, 400, "Group");
+    // Step 1: create a node.
+    await addNodeViaButton(page, "#btn-add-node", 300, 300, "Alpha");
     snapshots.push(await snapshot());
 
-    // Step 2: create a member entity.
-    const group = await page.evaluate(() => window.__kg.state.nodes[0]);
-    const memberStart = { x: group.x + 100, y: group.y + 60 };
-    await addNodeViaButton(page, "#btn-add-node", memberStart.x, memberStart.y, "Member");
+    // Step 2: create a second node.
+    await addNodeViaButton(page, "#btn-add-node", 700, 300, "Beta");
     snapshots.push(await snapshot());
 
-    // Step 3: drag the member fully into the group — commits membership.
-    await dragNode(page, memberStart.x, memberStart.y, memberStart.x + 6, memberStart.y + 6);
+    // Step 3: move the first node.
+    await dragNode(page, 300, 300, 340, 260);
     snapshots.push(await snapshot());
 
-    // Step 4: resize the group.
-    const groupBeforeResize = await page.evaluate(() => window.__kg.state.nodes.find((n) => n.label === "Group"));
-    await dragNode(page, groupBeforeResize.x + groupBeforeResize.w, groupBeforeResize.y + groupBeforeResize.h,
-      groupBeforeResize.x + groupBeforeResize.w + 60, groupBeforeResize.y + groupBeforeResize.h + 40);
-    snapshots.push(await snapshot());
-
-    // Step 5: rename the member.
-    const memberNode = await page.evaluate(() => window.__kg.state.nodes.find((n) => n.label === "Member"));
+    // Step 4: rename it.
+    const alpha = await page.evaluate(() => window.__kg.state.nodes.find((n) => n.label === "Alpha"));
     const box = await page.locator("#canvas").boundingBox();
-    await page.mouse.dblclick(box.x + memberNode.x + memberNode.w / 2, box.y + memberNode.y + memberNode.h / 2);
+    await page.mouse.dblclick(box.x + alpha.x + alpha.w / 2, box.y + alpha.y + alpha.h / 2);
     await page.waitForSelector(".kg-inline-input");
     await page.locator(".kg-inline-input").fill("Renamed");
     await page.keyboard.press("Enter");
     await page.waitForSelector(".kg-inline-input", { state: "detached" });
     snapshots.push(await snapshot());
 
-    // Step 6: create a second, unrelated node outside the group.
+    // Step 5: create a third, unrelated node.
     await addNodeViaDblClick(page, 950, 700, "Outsider");
     snapshots.push(await snapshot());
 
-    // Step 7: connect Renamed -> Outsider.
+    // Step 6: connect Renamed -> Outsider.
     const renamed = await page.evaluate(() => window.__kg.state.nodes.find((n) => n.label === "Renamed"));
     const outsider = await page.evaluate(() => window.__kg.state.nodes.find((n) => n.label === "Outsider"));
     await createEdgeViaConnectMode(
@@ -446,11 +393,21 @@ test("a long, heterogeneous action sequence (group create, membership drag, resi
     await page.evaluate(() => window.__kg.actions.setMode("idle"));
     snapshots.push(await snapshot());
 
-    // Step 8: drag the group itself (rigid-body move) — carries Renamed
-    // along with it, membership and the edge to Outsider all surviving.
-    const groupBeforeMove = await page.evaluate(() => window.__kg.state.nodes.find((n) => n.label === "Group"));
-    const grabPoint = { x: groupBeforeMove.x + groupBeforeMove.w - 10, y: groupBeforeMove.y + groupBeforeMove.h - 10 };
-    await dragNode(page, grabPoint.x, grabPoint.y, grabPoint.x + 140, grabPoint.y + 100);
+    // Step 7: toggle the new edge's direction.
+    const edgeMid = await page.evaluate(() => {
+      const e = window.__kg.state.edges[0];
+      const src = window.__kg.state.nodes.find((n) => n.id === e.source);
+      const tgt = window.__kg.state.nodes.find((n) => n.id === e.target);
+      return { x: (src.x + src.w / 2 + tgt.x + tgt.w / 2) / 2, y: (src.y + src.h / 2 + tgt.y + tgt.h / 2) / 2 };
+    });
+    await page.mouse.click(box.x + edgeMid.x, box.y + edgeMid.y);
+    await page.click("#sel-toggle-dir");
+    snapshots.push(await snapshot());
+
+    // Step 8: move Renamed again.
+    const renamedNow = await page.evaluate(() => window.__kg.state.nodes.find((n) => n.label === "Renamed"));
+    await dragNode(page, renamedNow.x + renamedNow.w / 2, renamedNow.y + renamedNow.h / 2,
+      renamedNow.x + renamedNow.w / 2 + 140, renamedNow.y + renamedNow.h / 2 + 100);
     snapshots.push(await snapshot());
 
     // Step 9: delete Outsider — removes its incident edge too, as one step.
@@ -464,9 +421,7 @@ test("a long, heterogeneous action sequence (group create, membership drag, resi
     assert.equal(historyDepth, 9, "each of the 9 actions above is exactly one undo step");
 
     // Walk all the way back, checking the *exact* snapshot at every step —
-    // not just the two ends — since this is precisely where a rigid-body
-    // group move's member cascade, or a resize's deliberate non-cascade,
-    // could silently desync from the snapshot-based undo stack.
+    // not just the two ends.
     for (let i = snapshots.length - 1; i > 0; i--) {
       await page.click("#btn-undo");
       const current = await snapshot();

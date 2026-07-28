@@ -1,6 +1,6 @@
 # Knowledge Graph Canvas — Technical Specification
 
-**Status:** v1.0 — Finalized
+**Status:** v1.1 — Finalized, amended (Groups removed — see Decision Log #11)
 **Target:** Single portable HTML file, no build step, no external server required
 **Confirmed platforms:** Chrome (Windows), Chromium/Brave (Linux), Chrome (Android)
 
@@ -8,9 +8,9 @@
 
 ## 1. Purpose & Scope
 
-A single-file, offline-first visual editor for building small-to-medium knowledge graphs / ontologies by hand: draggable entity boxes, labeled directional or bidirectional relations, and recursive/overlapping grouping — with fast infinite-zoom canvas interaction and explicit, user-controlled export/import to versioned files on disk in two formats (JSON canonical + plain-text edge list).
+A single-file, offline-first visual editor for building small-to-medium knowledge graphs / ontologies by hand: draggable entity boxes and labeled directional or bidirectional relations — with fast infinite-zoom canvas interaction and explicit, user-controlled export/import to versioned files on disk in two formats (JSON canonical + plain-text edge list).
 
-Typical usage is graphs in the low hundreds of nodes; the app is engineered for headroom up to ~1,000 nodes (Section 6). The graph is not required to be a single connected structure — small disconnected snippets, standalone groups, and isolated entities coexisting on the same canvas is normal, expected usage, not an edge case.
+Typical usage is graphs in the low hundreds of nodes; the app is engineered for headroom up to ~1,000 nodes (Section 6). The graph is not required to be a single connected structure — small disconnected snippets and isolated entities coexisting on the same canvas is normal, expected usage, not an edge case.
 
 This is a personal authoring tool, not a collaborative multi-user system, and not a replacement for a real triple store. It's meant to sit upstream of your GraphRAG/n8n pipelines: sketch an ontology by hand, quickly, then export in a form immediately usable by scripts or fed to an LLM — or edit the structure directly as text and bring it back in.
 
@@ -22,8 +22,8 @@ This is a personal authoring tool, not a collaborative multi-user system, and no
 - **No implicit layout.** Nodes stay exactly where placed. Autolayout exists only as an explicit, undoable action — never runs automatically.
 - **Manual save, not silent background sync.** Disk persistence is an explicit user action ("Save Version"), never continuous or invisible. In-app state is never lost between explicit saves (Section 3.2, Tier 1), but *file* versions are created only when asked for.
 - **Dual export format, bidirectional for TXT.** Every explicit save writes both a JSON file (canonical, full-fidelity) and a TXT file (plain edge list). The TXT format can also be edited externally and re-imported (Section 5.3).
-- **Buttons are the primary control surface.** Every core action is reachable via an on-screen button; gestures exist as accelerators for direct-manipulation actions (move, connect, group, pan, zoom) but are never the *only* path to an action.
-- **No assumption of connectivity.** The canvas and both file formats handle disconnected components, floating groups, and isolated nodes as first-class, unremarkable cases.
+- **Buttons are the primary control surface.** Every core action is reachable via an on-screen button; gestures exist as accelerators for direct-manipulation actions (move, connect, pan, zoom) but are never the *only* path to an action.
+- **No assumption of connectivity.** The canvas and both file formats handle disconnected components and isolated nodes as first-class, unremarkable cases.
 
 ---
 
@@ -47,7 +47,7 @@ Verified against current (2026) browser behavior for the three confirmed target 
 ### 3.2 Three-tier storage model
 
 **Tier 1 — Live engine (all platforms, always on).**
-Every edit (add/move/connect/group/delete) writes immediately to OPFS in the background — instant, no prompts, protects against a crashed tab or dropped tablet. Not a user-visible file.
+Every edit (add/move/connect/delete) writes immediately to OPFS in the background — instant, no prompts, protects against a crashed tab or dropped tablet. Not a user-visible file.
 
 **Tier 2 — Live folder sync (Chrome/Chromium desktop only, progressive enhancement).**
 Optionally, the app may request a real folder via `showDirectoryPicker({mode: 'readwrite'})`. Once granted, explicit saves write silently into that folder with no further prompts. Not available on Brave or Android — the app must work fully without it.
@@ -65,11 +65,8 @@ Optionally, the app may request a real folder via `showDirectoryPicker({mode: 'r
 |---|---|---|
 | `id` | string | stable unique id, never reused |
 | `label` | string | entity name, shown in the box — also the matching key for TXT import (Section 5.3) |
-| `type` | `"entity"` \| `"group"` | a group is itself an entity |
 | `x`, `y` | number | top-left position in canvas space |
-| `w`, `h` | number | box dimensions |
-| `groups` | string[] | ids of all groups this node currently belongs to — supports overlapping membership |
-| `boundary_mode` | `"manual"` | groups only; groups do not auto-fit to members (Section 4.3) |
+| `w`, `h` | number | box dimensions — fixed at creation, never independently resized |
 | `notes` | string \| null | free-text, optional |
 
 ### 4.2 Edge
@@ -81,15 +78,10 @@ Optionally, the app may request a real folder via `showDirectoryPicker({mode: 'r
 | `target` | node id | |
 | `relation` | string | the label |
 | `directed` | boolean | `true` = single arrowhead source→target. `false` = no direction specified → bidirectional, rendered as a plain line with **no arrowheads at either end** |
-| `auto` | boolean | `true` only for system-generated `contains` edges; these are never hand-created or hand-deleted as ordinary edges |
 
-### 4.3 Group semantics
+### 4.3 Group semantics — removed (see Decision Log #11)
 
-- A group is a node (`type: "group"`) with its own id, label, position/size, and can itself belong to other groups (recursive) or be the source/target of ordinary relations.
-- **Membership is directional-by-action, not geometric.** Membership is granted only by dragging the smaller (member) box into the larger (group) box; dropping inside commits membership. The reverse action — moving or resizing the group box so that it now visually overlaps other boxes — does **not** auto-include them. Membership never gets silently recomputed from overlap after the fact.
-- Group boundaries can overlap freely on canvas, and a node can belong to any number of groups simultaneously.
-- `boundary_mode` is always `"manual"`: the group's box is independently resizable and never auto-fits to its members' positions.
-- Every membership generates exactly one automatic edge: `{source: group_id, target: member_id, relation: "contains", directed: true, auto: true}`. This edge exists in the data model and in both export formats but is **not** drawn as a visible arrow on canvas — containment is communicated purely by visual nesting, avoiding arrow clutter on groups with many members.
+This section originally specified a `type: "group"` node variant (independently resizable, recursive membership via drag-into, an auto-generated `contains` edge per membership). **Groups were removed from the app entirely** — every node is now a plain entity, box size is fixed, and there is no membership/containment concept in the data model, the canvas UI, or either file format. See Decision Log entry #11 for the rationale; this section number is kept as a stub (rather than renumbering every section after it) since other parts of this document, and this project's TODO.md, still cross-reference "Section 4.3" in their own historical Log entries.
 
 ---
 
@@ -97,7 +89,7 @@ Optionally, the app may request a real folder via `showDirectoryPicker({mode: 'r
 
 ### 5.1 JSON (canonical, full-fidelity)
 
-The source of truth. Contains everything needed to fully reconstruct the canvas exactly as left, including positions and group boundaries.
+The source of truth. Contains everything needed to fully reconstruct the canvas exactly as left.
 
 ```json
 {
@@ -112,18 +104,14 @@ The source of truth. Contains everything needed to fully reconstruct the canvas 
     {
       "id": "n1",
       "label": "Andhra Pradesh",
-      "type": "entity",
       "x": 120, "y": 340, "w": 160, "h": 60,
-      "groups": ["g1"],
       "notes": null
     },
     {
-      "id": "g1",
-      "label": "South Asian Languages",
-      "type": "group",
-      "x": 80, "y": 300, "w": 420, "h": 240,
-      "groups": [],
-      "boundary_mode": "manual"
+      "id": "n2",
+      "label": "Telugu",
+      "x": 380, "y": 340, "w": 160, "h": 60,
+      "notes": null
     }
   ],
   "edges": [
@@ -132,16 +120,7 @@ The source of truth. Contains everything needed to fully reconstruct the canvas 
       "source": "n1",
       "target": "n2",
       "relation": "language used",
-      "directed": true,
-      "auto": false
-    },
-    {
-      "id": "e2",
-      "source": "g1",
-      "target": "n1",
-      "relation": "contains",
-      "directed": true,
-      "auto": true
+      "directed": true
     }
   ]
 }
@@ -153,12 +132,11 @@ Designed to be hand-editable in any text editor and trivially parseable in Pytho
 
 Grammar:
 - Lines starting with `#` are comments/metadata, ignored by parsers.
-- `## NODES` section: one entity name per line. Groups are suffixed with ` [group]`.
+- `## NODES` section: one entity name per line.
 - `## EDGES` section: one relation per line:
   - `Source -> Target : relation label` (directed)
   - `Source <-> Target : relation label` (bidirectional / no direction specified)
 - Names must not contain the literal substrings `->`, `<->`, or ` : `.
-- `contains` edges are included like any other edge, so containment survives into the flat export and is editable the same way (see 5.3).
 
 Example:
 
@@ -173,12 +151,10 @@ Example:
 Andhra Pradesh
 Telugu
 Marathi
-South Asian Languages [group]
 Guatemala
 European Union
 
 ## EDGES
-South Asian Languages -> Andhra Pradesh : contains
 Andhra Pradesh -> Telugu : language used
 Andhra Pradesh -> Marathi : language used
 Guatemala <-> European Union : diplomatic relation
@@ -190,12 +166,11 @@ This is intentionally the same shape as the "List of Edges" textualization forma
 
 Triggered via an explicit "Import from TXT" button (native file-open dialog, or drag-and-drop of a `.txt` file onto the canvas as an accelerator). Two modes, both applied as a single undoable action:
 
-- **Merge (default, safe).** Diffs the imported file against the current graph, matched by `label` (case-sensitive) and `type`:
+- **Merge (default, safe).** Diffs the imported file against the current graph, matched by `label` (case-sensitive):
   - Nodes present in the TXT but not in the current graph are **created**, auto-placed in an unused region of the canvas (simple shelf/grid placement — not full autolayout), and flagged as newly added for easy visual identification.
-  - Nodes already present (label match) **keep their existing position, size, and group boundaries untouched.**
+  - Nodes already present (label match) **keep their existing position untouched.**
   - Edges present in the TXT but missing from the graph are **added.**
   - Edges present in the graph but missing from the TXT are **left alone, not deleted.** Merge is additive/updating only — it never removes anything.
-  - Lines of the form `GroupLabel -> MemberLabel : contains` are **not** created as ordinary edges. They are interpreted as group-membership declarations: the member node's `groups` list is updated to include the group, exactly as if it had been dragged in on canvas. This preserves the invariant that `contains` edges are always derived from membership, never freeform.
 - **Replace (explicit, destructive).** Same diffing, but edges/nodes present in the current graph and absent from the TXT are removed. Requires a confirmation step that summarizes the diff (N added, N removed, N unchanged) before committing. Undoable in one step regardless of size, same as autolayout.
 
 **Known limitation (inherent to a labels-only, ID-less format):** because matching is by label text, renaming a node in the text editor is indistinguishable from deleting the old node and creating a new one — the renamed node will lose its saved position and be re-placed as if new. This is a structural property of the format, not a bug; worth remembering when hand-editing.
@@ -216,7 +191,7 @@ Example: `frankfurt-ai-ontology_v0042_2026-07-25T1420Z.json` and the matching `.
 - **Renderer:** Canvas2D (not DOM/SVG), driven by a single camera transform (pan offset + zoom scale) applied per frame.
 - **Zoom:** continuous, effectively unbounded in both directions (practical clamp at extreme values to avoid float precision issues, e.g. 0.01×–100×).
 - **Performance target:** smooth interaction (60fps drag/pan/zoom) up to ~1,000 nodes, with typical real-world usage in the low hundreds. Viewport culling (only draw/hit-test what intersects the visible camera rect) is sufficient at this scale without a spatial index; a quadtree can be added later without any format or interaction changes if real usage exceeds this comfortably.
-- **Disconnected layouts:** the camera and culling logic make no assumption of a single connected component — scattered snippets and floating groups render and pan/zoom identically to a single connected graph.
+- **Disconnected layouts:** the camera and culling logic make no assumption of a single connected component — scattered snippets render and pan/zoom identically to a single connected graph.
 - **Redraw model:** dirty-flag driven `requestAnimationFrame` — redraw only on interaction, not a constant loop, to conserve battery on tablet.
 
 ---
@@ -233,8 +208,6 @@ Every action has a button; gestures exist as accelerators where natural.
 | Add edge | drag from a node's edge handle to another node → relation label prompt | "Connect" mode toggle, then tap source, tap target |
 | Set edge direction | tap the edge, toggle directed/bidirectional | edge context menu |
 | Move node | drag the box | — |
-| Add to group | drag the smaller box into/onto the larger box; drop commits membership | "Add to Group" in context menu after selecting both |
-| Remove from group | drag the member fully outside the group boundary | "Remove from Group" in context menu |
 | Delete node/edge | select + delete key, or long-press → delete | trash icon on selection |
 | Undo/redo | — (no dedicated gesture; avoids conflicting with pan/zoom) | Undo/Redo buttons — primary and only path, by design |
 | Autolayout | — (deliberately no gesture) | explicit "Auto-layout" button, one undo step |
@@ -247,7 +220,7 @@ Every action has a button; gestures exist as accelerators where natural.
 
 - **Default:** zero automatic layout. Every node stays exactly where dragged until moved again.
 - **Autolayout:** explicit, opt-in, recorded as a single undo step (one "before" snapshot of all positions, restorable in one undo regardless of how many nodes moved). Algorithm choice (force-directed vs. hierarchical vs. grid) is an implementation detail, not fixed by this spec.
-- **Undo/redo:** command-pattern stack in memory, independent of the Tier-1 live-save engine. Every discrete user action (add, move, connect, delete, group, autolayout, TXT import) is one undo step. Not persisted across a full app reload — reload starts a fresh undo stack from the last saved state.
+- **Undo/redo:** command-pattern stack in memory, independent of the Tier-1 live-save engine. Every discrete user action (add, move, connect, delete, autolayout, TXT import) is one undo step. Not persisted across a full app reload — reload starts a fresh undo stack from the last saved state.
 
 ---
 
@@ -275,15 +248,16 @@ Every action has a button; gestures exist as accelerators where natural.
 | # | Topic | Decision |
 |---|---|---|
 | 1 | Target platforms | Chrome/Windows, Chromium/Brave on Linux, Chrome/Android. Brave treated as Tier-3-only due to File System Access API being blocked by default. |
-| 2 | Group membership mechanic | Explicit drag-small-into-big; commits on drop; never recomputed from later geometry changes. |
-| 3 | Group boundary | Always `manual`; groups never auto-fit to members. |
+| 2 | Group membership mechanic | ~~Explicit drag-small-into-big; commits on drop; never recomputed from later geometry changes.~~ **REVERSED — see #11.** |
+| 3 | Group boundary | ~~Always `manual`; groups never auto-fit to members.~~ **REVERSED — see #11.** |
 | 4 | Bidirectional edge rendering | Plain line, no arrowheads at either end. |
 | 5 | Scale target | Design headroom to ~1,000 nodes; typical real usage in the low hundreds. |
-| 6 | Multi-graph / connectivity | Single graph per session; graph is not required to be fully connected — disconnected snippets and floating groups are normal. |
+| 6 | Multi-graph / connectivity | Single graph per session; graph is not required to be fully connected — disconnected snippets are normal. |
 | 7 | Version retention | Unbounded; no automatic pruning. |
 | 8 | Undo control | Buttons only, no dedicated gesture. |
-| 9 | TXT re-import | Required. Merge (safe, additive) and Replace (destructive, confirmed) modes, label-matched, `contains` lines interpreted as membership. |
+| 9 | TXT re-import | Required. Merge (safe, additive) and Replace (destructive, confirmed) modes, label-matched. |
 | 10 | Concurrent multi-device editing | Out of scope. |
+| 11 | Groups removed entirely | User-requested pivot toward a strict classes/relationships ontology model (the `agent_ontology_spec.md` initiative) — groups added complexity (visual nesting, drag-to-join semantics, an independently resizable box, an auto-generated `contains` edge, ambiguous "is this really a category or just visual tidying?" semantics) with no clean mapping onto that model. Removed from the UI, the data model (`type`, `groups[]`, `boundary_mode` all gone; box size is now always fixed), and both file formats — not just excluded from the newer YAML export. Reverses Decisions #2 and #3 above; superseded by nothing — there is no replacement grouping mechanism in v1.1. |
 
 ---
 
@@ -311,10 +285,8 @@ def load_edge_list(path):
             if not line or line.startswith("#"):
                 continue
             if section == "nodes":
-                is_group = line.endswith("[group]")
-                name = line[: -len("[group]")].strip() if is_group else line
-                if name:
-                    nodes.append({"label": name, "type": "group" if is_group else "entity"})
+                if line:
+                    nodes.append({"label": line})
             elif section == "edges":
                 if " : " not in line:
                     continue  # malformed — no relation separator, skip
