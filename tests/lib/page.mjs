@@ -79,7 +79,22 @@ export async function dragNode(page, fromSx, fromSy, toSx, toSy) {
 // Connect mode is sticky (unlike Add Node's one-shot mode), so it may
 // already be armed from a previous call in the same test — set it
 // explicitly rather than toggling the button, which would turn it off.
+//
+// Also clears any lingering selection first: setMode() doesn't touch
+// state.selection, so the floating #sel-toolbar from a *previous*
+// selection (e.g. the edge just created by an earlier call to this same
+// helper — createEdge selects its own result) stays on screen across the
+// mode switch. Wide enough (multiple icons — see agent_ontology_spec.md
+// §7's added 4th icon), it can sit directly over a nearby node's own
+// click point and swallow the tap meant to arm connect-mode's source,
+// hanging this function's later waitForSelector forever. Waits for the
+// actual DOM hide, not just the state change — clearSelection() only sets
+// a dirty flag; the hide itself happens on the next render() tick (the
+// same race documented next to its other occurrence in
+// parallel-edges.spec.mjs).
 export async function createEdgeViaConnectMode(page, ax, ay, bx, by, relation) {
+  await page.evaluate(() => window.__kg.actions.clearSelection());
+  await page.waitForFunction(() => getComputedStyle(document.getElementById("sel-toolbar")).display === "none");
   await page.evaluate(() => window.__kg.actions.setMode("connect"));
   const box = await page.locator("#canvas").boundingBox();
   await page.mouse.click(box.x + ax, box.y + ay);

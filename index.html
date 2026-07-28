@@ -346,6 +346,126 @@
     border-color: #a64d4d !important;
   }
 
+  /* Agent Ontology (agent_ontology_spec.md §7): Class/Relationship details
+     dialog. Reuses .modal-overlay/.modal-dialog/.modal-actions above —
+     these rules only add what's specific to this dialog's form fields. */
+  .details-dialog {
+    max-width: 460px;
+    width: 90vw;
+    max-height: 85vh;
+    overflow-y: auto;
+  }
+
+  .modal-title {
+    margin: 0 0 14px;
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  .details-field-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    opacity: 0.8;
+    margin: 14px 0 6px;
+  }
+
+  .details-textarea,
+  .details-list input,
+  .details-list select {
+    font: inherit;
+    font-size: 14px;
+    padding: 7px 9px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--toolbar-border);
+    background: var(--btn-bg);
+    color: var(--toolbar-fg);
+  }
+
+  .details-textarea {
+    width: 100%;
+    box-sizing: border-box;
+    resize: vertical;
+  }
+
+  .details-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .details-row {
+    display: flex;
+    gap: 6px;
+  }
+
+  .details-row input {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .details-property-row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 8px;
+    border: 1px solid var(--toolbar-border);
+    border-radius: var(--radius-sm);
+  }
+
+  .details-property-row-top,
+  .details-property-row-bottom {
+    display: flex;
+    gap: 6px;
+  }
+
+  .details-property-name {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .details-property-type {
+    flex: 0 0 auto;
+  }
+
+  .details-property-unit,
+  .details-property-allowed {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  .details-row-remove {
+    flex: 0 0 auto;
+    width: 28px;
+    padding: 0;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--toolbar-border);
+    background: var(--btn-bg);
+    color: var(--toolbar-fg);
+    cursor: pointer;
+    transition: background-color var(--transition-fast);
+  }
+
+  .details-row-remove:hover {
+    background: var(--btn-bg-hover);
+  }
+
+  .details-add-btn {
+    margin-top: 6px;
+    font-size: 13px;
+    padding: 6px 10px;
+    border-radius: var(--radius-sm);
+    border: 1px dashed var(--toolbar-border);
+    background: transparent;
+    color: var(--toolbar-fg);
+    cursor: pointer;
+    transition: background-color var(--transition-fast);
+  }
+
+  .details-add-btn:hover {
+    background: var(--btn-bg-hover);
+  }
+
   #restore-toast {
     position: fixed;
     left: 50%;
@@ -400,6 +520,7 @@
 
 <div id="sel-toolbar">
   <button id="sel-rename" type="button" title="Átnevezés">&#9998;</button>
+  <button id="sel-details" type="button" title="Részletek szerkesztése">&#9432;</button>
   <button id="sel-toggle-dir" type="button" title="Irány váltása">&#8646;</button>
   <button id="sel-trash" type="button" title="Törlés">&#128465;</button>
 </div>
@@ -426,6 +547,36 @@
 </div>
 
 <div id="restore-toast" role="status" aria-live="polite"></div>
+
+<!-- Agent Ontology (agent_ontology_spec.md §7): Class/Relationship details
+     editor. One shared dialog — sections toggle visibility depending on
+     whether a node or an edge is being edited (aliases/properties are
+     node-only, per spec §7's "Relationship editor... just Meaning"). -->
+<div id="details-overlay" class="modal-overlay">
+  <div id="details-dialog" class="modal-dialog details-dialog" role="dialog" aria-modal="true">
+    <h2 id="details-title" class="modal-title"></h2>
+
+    <label id="details-meaning-label" class="details-field-label" for="details-meaning">Meaning</label>
+    <textarea id="details-meaning" class="details-textarea" rows="2"></textarea>
+
+    <div id="details-aliases-section">
+      <label id="details-aliases-label" class="details-field-label">Aliases</label>
+      <div id="details-aliases-list" class="details-list"></div>
+      <button id="details-add-alias" type="button" class="details-add-btn">+ Add alias</button>
+    </div>
+
+    <div id="details-properties-section">
+      <label id="details-properties-label" class="details-field-label">Properties</label>
+      <div id="details-properties-list" class="details-list"></div>
+      <button id="details-add-property" type="button" class="details-add-btn">+ Add property</button>
+    </div>
+
+    <div class="modal-actions">
+      <button id="details-cancel" type="button">Cancel</button>
+      <button id="details-save" type="button">Save</button>
+    </div>
+  </div>
+</div>
 
 <script>
 "use strict";
@@ -542,6 +693,26 @@ const STRINGS = {
     importReplaceSummary: (n) => `Replace: same additions, plus ${n} node(s)/edge(s) not in this file would be removed.`,
     defaultRelation: "related to",
     sessionRestoredToast: (n, m) => `Restored last session (${n} node${n === 1 ? "" : "s"}, ${m} edge${m === 1 ? "" : "s"})`,
+    // Agent Ontology (agent_ontology_spec.md §7) — Class/Relationship details dialog.
+    editDetailsTitle: "Edit details",
+    editClassDetailsTitle: "Edit Class Details",
+    editGroupDetailsTitle: "Edit Group Details",
+    editRelationshipDetailsTitle: "Edit Relationship Details",
+    meaningLabel: "Meaning",
+    aliasesLabel: "Aliases",
+    propertiesLabel: "Properties",
+    aliasPlaceholder: "alias",
+    addAlias: "+ Add alias",
+    addProperty: "+ Add property",
+    propertyNamePlaceholder: "property name",
+    propertyUnitPlaceholder: "unit (e.g. EUR)",
+    propertyAllowedPlaceholder: "allowed values, comma-separated",
+    propertyTypeText: "text",
+    propertyTypeNumber: "number",
+    propertyTypeDate: "date",
+    propertyTypeBoolean: "boolean",
+    removeRow: "Remove",
+    save: "Save",
   },
   hu: {
     appTitle: "Tudásgráf Vászon",
@@ -580,6 +751,26 @@ const STRINGS = {
     importReplaceSummary: (n) => `Csere: ugyanazok a hozzáadások, plusz ${n} csomópont/él törlődne, amelyek nincsenek ebben a fájlban.`,
     defaultRelation: "kapcsolódik",
     sessionRestoredToast: (n, m) => `Visszaállítva az előző munkamenet (${n} csomópont, ${m} él)`,
+    // Agent Ontology (agent_ontology_spec.md §7) — Class/Relationship details dialog.
+    editDetailsTitle: "Részletek szerkesztése",
+    editClassDetailsTitle: "Osztály részleteinek szerkesztése",
+    editGroupDetailsTitle: "Csoport részleteinek szerkesztése",
+    editRelationshipDetailsTitle: "Kapcsolat részleteinek szerkesztése",
+    meaningLabel: "Jelentés",
+    aliasesLabel: "Alias nevek",
+    propertiesLabel: "Tulajdonságok",
+    aliasPlaceholder: "alias",
+    addAlias: "+ Alias hozzáadása",
+    addProperty: "+ Tulajdonság hozzáadása",
+    propertyNamePlaceholder: "tulajdonság neve",
+    propertyUnitPlaceholder: "mértékegység (pl. EUR)",
+    propertyAllowedPlaceholder: "megengedett értékek, vesszővel elválasztva",
+    propertyTypeText: "szöveg",
+    propertyTypeNumber: "szám",
+    propertyTypeDate: "dátum",
+    propertyTypeBoolean: "logikai",
+    removeRow: "Eltávolítás",
+    save: "Mentés",
   },
 };
 
@@ -633,6 +824,7 @@ function applyLanguage() {
   byId("btn-zoom-out").setAttribute("aria-label", t("zoomOut"));
   byId("btn-zoom-in").setAttribute("aria-label", t("zoomIn"));
   byId("sel-rename").title = t("renameTitle");
+  byId("sel-details").title = t("editDetailsTitle");
   byId("sel-toggle-dir").title = t("toggleDirTitle");
   byId("sel-trash").title = t("deleteTitle");
   byId("confirm-cancel").textContent = t("cancel");
@@ -640,6 +832,14 @@ function applyLanguage() {
   byId("import-cancel").textContent = t("cancel");
   byId("import-replace").textContent = t("replace");
   byId("import-merge").textContent = t("merge");
+  byId("details-meaning-label").textContent = t("meaningLabel");
+  byId("details-aliases-label").textContent = t("aliasesLabel");
+  byId("details-properties-label").textContent = t("propertiesLabel");
+  byId("details-add-alias").textContent = t("addAlias");
+  byId("details-add-property").textContent = t("addProperty");
+  byId("details-cancel").textContent = t("cancel");
+  byId("details-save").textContent = t("save");
+  updateDetailsTitle(); // no-op if the dialog isn't open — see its own definition
   updateThemeButton(); // its text depends on theme, not language, but re-set here too for the aria-pressed-adjacent pattern
   updateFolderSyncButton(); // "Folder Sync" / "Synced: X" text is language-dependent
   updateLangButton();
@@ -1814,6 +2014,7 @@ function drawGhostEdge(colors) {
 
 const selToolbar = document.getElementById("sel-toolbar");
 const selRenameBtn = document.getElementById("sel-rename");
+const selDetailsBtn = document.getElementById("sel-details");
 const selToggleDirBtn = document.getElementById("sel-toggle-dir");
 const selTrashBtn = document.getElementById("sel-trash");
 
@@ -1973,6 +2174,216 @@ confirmOkBtn.addEventListener("click", () => closeConfirmDialog(true));
 confirmCancelBtn.addEventListener("click", () => closeConfirmDialog(false));
 confirmOverlay.addEventListener("click", (e) => {
   if (e.target === confirmOverlay) closeConfirmDialog(false); // click outside the dialog = cancel
+});
+
+// ---------------------------------------------------------------------------
+// Agent Ontology (agent_ontology_spec.md §7): Class/Relationship details
+// dialog. One shared overlay; aliases/properties sections toggle visibility
+// depending on whether the target is a node or an edge. Committing is one
+// undo step, same as every other discrete action — and, like the rename
+// flow right above, a no-op save (nothing actually changed) doesn't push a
+// history entry at all.
+// ---------------------------------------------------------------------------
+const detailsOverlay = document.getElementById("details-overlay");
+const detailsTitleEl = document.getElementById("details-title");
+const detailsMeaningEl = document.getElementById("details-meaning");
+const detailsAliasesSection = document.getElementById("details-aliases-section");
+const detailsAliasesList = document.getElementById("details-aliases-list");
+const detailsPropertiesSection = document.getElementById("details-properties-section");
+const detailsPropertiesList = document.getElementById("details-properties-list");
+const detailsAddAliasBtn = document.getElementById("details-add-alias");
+const detailsAddPropertyBtn = document.getElementById("details-add-property");
+const detailsCancelBtn = document.getElementById("details-cancel");
+const detailsSaveBtn = document.getElementById("details-save");
+
+let detailsEditingTarget = null; // { kind: "node" | "edge", id } | null
+
+// Re-derives the dialog's own heading from whatever's currently being
+// edited — called both when opening and from applyLanguage(), so a language
+// toggle mid-edit doesn't leave a stale-language title. A no-op when the
+// dialog isn't open.
+function updateDetailsTitle() {
+  if (!detailsEditingTarget) return;
+  if (detailsEditingTarget.kind === "edge") {
+    detailsTitleEl.textContent = t("editRelationshipDetailsTitle");
+    return;
+  }
+  const node = state.nodes.find((n) => n.id === detailsEditingTarget.id);
+  detailsTitleEl.textContent = node && node.type === "group" ? t("editGroupDetailsTitle") : t("editClassDetailsTitle");
+}
+
+function createDetailsRemoveButton(onRemove) {
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "details-row-remove";
+  btn.setAttribute("aria-label", t("removeRow"));
+  btn.textContent = "✕";
+  btn.addEventListener("click", onRemove);
+  return btn;
+}
+
+function createAliasRow(value) {
+  const row = document.createElement("div");
+  row.className = "details-row";
+  const input = document.createElement("input");
+  input.type = "text";
+  input.className = "details-alias-input";
+  input.placeholder = t("aliasPlaceholder");
+  input.value = value;
+  row.append(input, createDetailsRemoveButton(() => row.remove()));
+  return row;
+}
+
+const PROPERTY_TYPES = ["text", "number", "date", "boolean"];
+
+// prop.id is preserved from existing state; a brand-new row (from "+ Add
+// property") gets one generated here so every row has a stable id at all
+// times — Property.id isn't referenced by anything yet (agent_ontology_spec.md
+// §4.1 marks it "reserved for Import"), so a short random suffix is enough,
+// no global counter needed the way node/edge/rule/action ids have one.
+// Two sub-rows per property, not one flat 5-cell row: at this dialog's
+// width, name+type+unit+allowed+remove-button don't fit on one line and
+// wrap unpredictably — the remove button was landing on its own visual
+// line, looking like it belonged to a different (empty) row. A deliberate
+// two-line "card" per property reads correctly regardless of exact widths.
+function createPropertyRow(prop) {
+  const row = document.createElement("div");
+  row.className = "details-property-row";
+  row.dataset.propId = prop.id || `p_${Math.random().toString(36).slice(2, 9)}`;
+
+  const topRow = document.createElement("div");
+  topRow.className = "details-property-row-top";
+  const nameInput = document.createElement("input");
+  nameInput.type = "text";
+  nameInput.className = "details-property-name";
+  nameInput.placeholder = t("propertyNamePlaceholder");
+  nameInput.value = prop.name || "";
+  topRow.append(nameInput, createDetailsRemoveButton(() => row.remove()));
+
+  const bottomRow = document.createElement("div");
+  bottomRow.className = "details-property-row-bottom";
+  const typeSelect = document.createElement("select");
+  typeSelect.className = "details-property-type";
+  for (const type of PROPERTY_TYPES) {
+    const opt = document.createElement("option");
+    opt.value = type;
+    opt.textContent = t(`propertyType${type[0].toUpperCase()}${type.slice(1)}`);
+    typeSelect.appendChild(opt);
+  }
+  typeSelect.value = prop.type || "text";
+
+  const unitInput = document.createElement("input");
+  unitInput.type = "text";
+  unitInput.className = "details-property-unit";
+  unitInput.placeholder = t("propertyUnitPlaceholder");
+  unitInput.value = prop.unit || "";
+
+  const allowedInput = document.createElement("input");
+  allowedInput.type = "text";
+  allowedInput.className = "details-property-allowed";
+  allowedInput.placeholder = t("propertyAllowedPlaceholder");
+  allowedInput.value = (prop.allowed || []).join(", ");
+
+  function syncUnitVisibility() {
+    unitInput.style.display = typeSelect.value === "number" ? "" : "none";
+  }
+  typeSelect.addEventListener("change", syncUnitVisibility);
+  syncUnitVisibility();
+
+  bottomRow.append(typeSelect, unitInput, allowedInput);
+  row.append(topRow, bottomRow);
+  return row;
+}
+
+function openDetailsDialog(kind, id) {
+  cancelInlineInput();
+  const target = kind === "node" ? state.nodes.find((n) => n.id === id) : state.edges.find((e) => e.id === id);
+  if (!target) return;
+  detailsEditingTarget = { kind, id };
+  updateDetailsTitle();
+  detailsMeaningEl.value = target.meaning || "";
+
+  const isNode = kind === "node";
+  detailsAliasesSection.style.display = isNode ? "" : "none";
+  detailsPropertiesSection.style.display = isNode ? "" : "none";
+  detailsAliasesList.textContent = "";
+  detailsPropertiesList.textContent = "";
+  if (isNode) {
+    for (const alias of target.aliases) detailsAliasesList.appendChild(createAliasRow(alias));
+    for (const prop of target.properties) detailsPropertiesList.appendChild(createPropertyRow(prop));
+  }
+
+  detailsOverlay.style.display = "flex";
+  detailsMeaningEl.focus();
+}
+
+function closeDetailsDialog() {
+  detailsOverlay.style.display = "none";
+  detailsEditingTarget = null;
+}
+
+function collectAliasesFromDom() {
+  return [...detailsAliasesList.querySelectorAll(".details-alias-input")]
+    .map((input) => input.value.trim())
+    .filter(Boolean);
+}
+
+function collectPropertiesFromDom() {
+  return [...detailsPropertiesList.children]
+    .map((row) => {
+      const type = row.querySelector(".details-property-type").value;
+      const unitRaw = row.querySelector(".details-property-unit").value.trim();
+      const allowedRaw = row.querySelector(".details-property-allowed").value.trim();
+      return {
+        id: row.dataset.propId,
+        name: row.querySelector(".details-property-name").value.trim(),
+        type,
+        unit: type === "number" && unitRaw ? unitRaw : null,
+        allowed: allowedRaw ? allowedRaw.split(",").map((s) => s.trim()).filter(Boolean) : null,
+      };
+    })
+    .filter((p) => p.name); // a row added then left nameless (add-then-cancel-typing) isn't saved as a property
+}
+
+function saveDetailsDialog() {
+  if (!detailsEditingTarget) return;
+  const { kind, id } = detailsEditingTarget;
+  const target = kind === "node" ? state.nodes.find((n) => n.id === id) : state.edges.find((e) => e.id === id);
+  if (!target) { closeDetailsDialog(); return; }
+
+  const before = snapshotState();
+  const meaning = detailsMeaningEl.value.trim() || null;
+  let changed = meaning !== target.meaning;
+  target.meaning = meaning;
+  if (kind === "node") {
+    const aliases = collectAliasesFromDom();
+    const properties = collectPropertiesFromDom();
+    if (JSON.stringify(aliases) !== JSON.stringify(target.aliases)) changed = true;
+    if (JSON.stringify(properties) !== JSON.stringify(target.properties)) changed = true;
+    target.aliases = aliases;
+    target.properties = properties;
+  }
+  closeDetailsDialog();
+  if (changed) {
+    pushHistory(before, snapshotState());
+    markDirty();
+  }
+}
+
+detailsAddAliasBtn.addEventListener("click", () => {
+  const row = createAliasRow("");
+  detailsAliasesList.appendChild(row);
+  row.querySelector("input").focus();
+});
+detailsAddPropertyBtn.addEventListener("click", () => {
+  const row = createPropertyRow({ name: "", type: "text", unit: null, allowed: null });
+  detailsPropertiesList.appendChild(row);
+  row.querySelector(".details-property-name").focus();
+});
+detailsSaveBtn.addEventListener("click", saveDetailsDialog);
+detailsCancelBtn.addEventListener("click", () => closeDetailsDialog());
+detailsOverlay.addEventListener("click", (e) => {
+  if (e.target === detailsOverlay) closeDetailsDialog(); // click outside the dialog = cancel
 });
 
 // ---------------------------------------------------------------------------
@@ -2446,6 +2857,15 @@ window.addEventListener("keydown", (e) => {
     else if (e.key === "Enter") { e.preventDefault(); closeConfirmDialog(true); }
     return;
   }
+  // No Enter-to-save here, unlike activeConfirm above: the meaning field is
+  // a textarea (Enter should insert a newline) and Enter while typing an
+  // alias/property name is ordinary text editing, not a submit gesture.
+  // Escape-to-cancel only. This also guards Delete/Backspace below from
+  // deleting the canvas selection while the user is editing dialog text.
+  if (detailsEditingTarget) {
+    if (e.key === "Escape") { e.preventDefault(); closeDetailsDialog(); }
+    return;
+  }
   if (activeInlineEditor) return; // don't hijack while typing
   if (e.key === "Escape") {
     if (state.mode !== "idle") setMode("idle");
@@ -2462,6 +2882,11 @@ window.addEventListener("keydown", (e) => {
 });
 
 selRenameBtn.addEventListener("click", () => renameSelected());
+
+selDetailsBtn.addEventListener("click", () => {
+  if (!state.selection.type) return;
+  openDetailsDialog(state.selection.type, state.selection.id);
+});
 
 selTrashBtn.addEventListener("click", () => {
   if (!state.selection.type) return;
