@@ -139,6 +139,58 @@ test("relationships is a list, not a name-keyed map — two edges deriving the s
   });
 });
 
+// classes/rules/actions ARE name-keyed maps (unlike relationships above) —
+// nothing in the UI stops two nodes/rules/actions from sharing a
+// label/name, so a plain object-literal map would let the second silently
+// overwrite the first's entire entry. assignUniqueExportNames() (index.html)
+// disambiguates with a numeric suffix instead, so both survive.
+test("two classes sharing a label both survive the export, disambiguated with a numeric suffix", async () => {
+  await withPage(async (page) => {
+    await addNodeViaDblClick(page, 250, 250, "Invoice");
+    await addNodeViaDblClick(page, 650, 250, "Invoice");
+
+    const yaml = await domainYaml(page);
+    assert.ok(yaml.includes("Invoice:\n"), "the first Invoice keeps its plain name");
+    assert.ok(yaml.includes("Invoice_2:\n"), "the second Invoice gets a disambiguating suffix instead of overwriting the first");
+  });
+});
+
+test("two rules sharing a name both survive the export, and an action's precondition still resolves to the right one", async () => {
+  await withPage(async (page) => {
+    const ids = await page.evaluate(() => {
+      const ruleA = window.__kg.actions.createRule("sameName", ["condition A"]);
+      const ruleB = window.__kg.actions.createRule("sameName", ["condition B"]);
+      return { a: ruleA.id, b: ruleB.id };
+    });
+
+    const yaml = await domainYaml(page);
+    assert.ok(yaml.includes("sameName:\n    conditions:\n      - condition A"), "the first rule keeps its plain name");
+    assert.ok(yaml.includes("sameName_2:\n    conditions:\n      - condition B"), "the second rule gets a disambiguating suffix");
+
+    // An action referencing the *second* rule by id must resolve its
+    // precondition to the disambiguated name, not the original (colliding) one.
+    await page.evaluate((ruleBId) => {
+      window.__kg.actions.createAction("useSecondRule", null, [ruleBId], "effect", "verify");
+    }, ids.b);
+    const yaml2 = await domainYaml(page);
+    assert.ok(yaml2.includes("useSecondRule:\n    input: null\n    preconditions:\n      - sameName_2"),
+      "the action's precondition must point at the disambiguated rule it actually references");
+  });
+});
+
+test("two actions sharing a name both survive the export, disambiguated with a numeric suffix", async () => {
+  await withPage(async (page) => {
+    await page.evaluate(() => {
+      window.__kg.actions.createAction("sameAction", null, [], "effect one", "verify one");
+      window.__kg.actions.createAction("sameAction", null, [], "effect two", "verify two");
+    });
+
+    const yaml = await domainYaml(page);
+    assert.ok(yaml.includes("sameAction:\n    input: null\n    preconditions: []\n    effect: effect one"));
+    assert.ok(yaml.includes("sameAction_2:\n    input: null\n    preconditions: []\n    effect: effect two"));
+  });
+});
+
 test("property export includes type always, unit only for number properties that have one, and allowed only when non-empty", async () => {
   await withPage(async (page) => {
     await page.evaluate(() => {

@@ -192,3 +192,24 @@ tests for every new feature going forward, keep existing tests up to date, stabi
   test, and a combined tool-calling + context-length-compaction test to prove the two Phase 2/3 features
   compose correctly rather than just each working in isolation.
 - Full suite: 322 JS tests, green, run twice consecutively.
+
+## Maintenance — merged base-app fixes from `main`
+
+**2026-07-28.** Per explicit instruction after the base-scope retrospective test-coverage pass (PR #34)
+merged into `main`: this branch had diverged from `main` before that pass, so it still carried the same 6
+pre-existing bugs `main` just fixed (a malformed rules/actions storage payload crashing undo/save, silent
+class/rule/action name collisions in the YAML export, unguarded modal stacking, a UTF-8-BOM bug in
+`tools/load_edge_list.py`, stale rule/action card sub-labels on a language toggle, and a literal-
+placeholder-text graph rename false positive — see `TODO.md`'s own dated Log entry on `main` for the full
+per-bug account) plus a test-stability fix in `tests/ui-polish.spec.mjs` this branch had *also* made
+independently (see Phase 2's own Log entry above) before the two branches diverged.
+
+Merged `origin/main` into this branch. One trivial conflict, in `tests/ui-polish.spec.mjs` — both
+branches had independently added the identical fix (a missing `waitForTimeout` before sampling a
+transitioning border color) with slightly different comment wording; kept `main`'s wording, since it's
+otherwise byte-identical. `index.html` merged with no conflicts (the two branches' changes touch entirely
+different functions — this subproject's own agent-panel code vs. the base-app fixes). No changes needed
+to any of this branch's own `helper-agent-phase*.spec.mjs` files.
+
+Full suite (base app's 295 + this subproject's own 35 = 330 JS tests) green, run twice consecutively; 13
+Python tests green.

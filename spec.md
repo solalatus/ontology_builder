@@ -269,7 +269,7 @@ Demonstrates the format is genuinely trivial to consume externally — no depend
 def load_edge_list(path):
     nodes, edges = [], []
     section = None
-    with open(path, encoding="utf-8") as f:
+    with open(path, encoding="utf-8-sig") as f:  # utf-8-sig strips a leading BOM (e.g. from Windows Notepad/Excel); decodes identically to utf-8 otherwise
         for raw in f:
             line = raw.strip()
             # Section headers are checked before the generic "#" comment

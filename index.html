@@ -1195,10 +1195,12 @@ function t(key, ...args) {
   return typeof entry === "function" ? entry(...args) : entry;
 }
 
-// True only for an untouched default name (in either language) — never for
-// a name the user actually typed, even if it happens to match. Lets the
-// still-untitled placeholder track the current language on toggle without
-// ever touching a real, user-chosen graph name.
+// Best-effort heuristic, used only to migrate a payload saved before
+// state.graphNameIsDefault existed (loadGraphFromStorage) — the live app
+// itself tracks "never renamed" explicitly instead of inferring it from a
+// string match, since a user deliberately renaming to this exact literal
+// text is indistinguishable from "never touched" under a match alone (see
+// state.graphNameIsDefault's own comment).
 function isDefaultGraphName(name) {
   return name === STRINGS.en.untitledGraph || name === STRINGS.hu.untitledGraph;
 }
@@ -1214,7 +1216,7 @@ function applyLanguage() {
   const byId = (id) => document.getElementById(id);
   const titleEl = byId("graph-title");
   titleEl.title = t("clickToRename");
-  if (isDefaultGraphName(state.graphName)) {
+  if (state.graphNameIsDefault) {
     state.graphName = t("untitledGraph");
     titleEl.textContent = state.graphName;
   }
@@ -1253,6 +1255,14 @@ function applyLanguage() {
   byId("domain-model-add-action").textContent = t("addAction");
   byId("domain-model-cancel").textContent = t("cancel");
   byId("domain-model-save").textContent = t("save");
+  // Unlike this dialog's own top-level labels above, a rule/action card's
+  // sub-labels (Conditions/Input class/Preconditions/Effect/Verification)
+  // are baked into the DOM once at card-creation time (createSublabel()) —
+  // this dialog can stay open across a language toggle, so already-open
+  // cards need their own refresh pass, not just the dialog's static chrome.
+  for (const el of document.querySelectorAll(".details-field-sublabel[data-i18n-key]")) {
+    el.textContent = t(el.dataset.i18nKey);
+  }
   updateThemeButton(); // its text depends on theme, not language, but re-set here too for the aria-pressed-adjacent pattern
   updateFolderSyncButton(); // "Folder Sync" / "Synced: X" text is language-dependent
   updateLangButton();
@@ -1336,6 +1346,13 @@ const state = {
   // ever having saved. Used verbatim for display; sanitized only at the
   // point a filename is actually built (Section 5.4).
   graphName: t("untitledGraph"),
+  // Tracks "never renamed" explicitly rather than inferring it from
+  // `graphName` matching the placeholder text — a string-equality check
+  // can't tell "never touched" apart from a user deliberately renaming to
+  // that exact literal string, which used to mean *that* choice got
+  // silently overwritten on the next language toggle, indistinguishable
+  // from having never been renamed at all.
+  graphNameIsDefault: true,
   // Set on first "Save Version": {format_version, graph_id, version,
   // created, saved}. null until then — nothing has been exported yet, so
   // there's no version history to speak of.
@@ -1704,6 +1721,7 @@ async function writeGraphToStorage() {
     nextNodeNum: state.nextNodeNum,
     nextEdgeNum: state.nextEdgeNum,
     graphName: state.graphName,
+    graphNameIsDefault: state.graphNameIsDefault,
     meta: state.meta, // so version numbers stay continuous across sessions (Section 9)
     // Agent Ontology (agent_ontology_spec.md §4.4): additive fields, so an
     // older reader loading this payload just ignores them.
@@ -1766,6 +1784,34 @@ function normalizeLoadedEdge(e) {
   return { ...e, meaning: typeof e.meaning === "string" ? e.meaning : null };
 }
 
+// A malformed rule/action item (e.g. a hand-edited or partially-migrated
+// storage payload missing `conditions`/`preconditions`) used to reach
+// snapshotState()/restoreSnapshot() unguarded, which spread it with `[...r
+// .conditions]` and threw — and since pushHistory(before, snapshotState())
+// evaluates snapshotState() before the call, the throw happened *before*
+// pushHistory ever ran, silently breaking undo *and* save for the rest of
+// the session on the very next edit. Normalizing on load (same pattern as
+// normalizeLoadedNode/normalizeLoadedEdge above) closes that off at the
+// only path that deserializes these objects rather than constructing them
+// via createRule()/createAction().
+function normalizeLoadedRule(r) {
+  return {
+    ...r,
+    name: typeof r.name === "string" ? r.name : "",
+    conditions: Array.isArray(r.conditions) ? r.conditions : [],
+  };
+}
+
+function normalizeLoadedAction(a) {
+  return {
+    ...a,
+    name: typeof a.name === "string" ? a.name : "",
+    preconditions: Array.isArray(a.preconditions) ? a.preconditions : [],
+    effect: typeof a.effect === "string" ? a.effect : "",
+    verification: typeof a.verification === "string" ? a.verification : "",
+  };
+}
+
 async function loadGraphFromStorage() {
   const data = await readGraphPayload();
   if (!data || !Array.isArray(data.nodes) || !Array.isArray(data.edges)) return false;
@@ -1775,9 +1821,15 @@ async function loadGraphFromStorage() {
   state.nextEdgeNum = typeof data.nextEdgeNum === "number" ? data.nextEdgeNum : state.nextEdgeNum;
   state.nextRuleNum = typeof data.nextRuleNum === "number" ? data.nextRuleNum : state.nextRuleNum;
   state.nextActionNum = typeof data.nextActionNum === "number" ? data.nextActionNum : state.nextActionNum;
-  state.rules = Array.isArray(data.rules) ? data.rules : [];
-  state.actions = Array.isArray(data.actions) ? data.actions : [];
+  state.rules = Array.isArray(data.rules) ? data.rules.map(normalizeLoadedRule) : [];
+  state.actions = Array.isArray(data.actions) ? data.actions.map(normalizeLoadedAction) : [];
   if (typeof data.graphName === "string" && data.graphName) state.graphName = data.graphName;
+  // Migration fallback for a payload saved before graphNameIsDefault
+  // existed: fall back to the old string-equality heuristic rather than
+  // assuming either true or false outright.
+  state.graphNameIsDefault = typeof data.graphNameIsDefault === "boolean"
+    ? data.graphNameIsDefault
+    : isDefaultGraphName(state.graphName);
   if (data.meta && typeof data.meta === "object") state.meta = data.meta;
   return true;
 }
@@ -2375,7 +2427,22 @@ const confirmOkBtn = document.getElementById("confirm-ok");
 const confirmCancelBtn = document.getElementById("confirm-cancel");
 let activeConfirm = null;
 
+// Guards against stacking a second modal on top of one that's already open
+// — nothing here traps focus, so Tab can reach an unrelated toolbar button
+// while e.g. the Details dialog is open, and Enter on it would otherwise
+// open Domain Model underneath the still-open Details overlay with no way
+// to tell (Escape only closes the top one; the bottom one then blocks the
+// whole canvas/toolbar once the top one's dismissed). Checked fresh via
+// getElementById, not the module-level overlay consts, so it works
+// regardless of where in the file it's called from relative to those
+// consts' own declaration order.
+function isAnyModalOpen() {
+  return ["confirm-overlay", "details-overlay", "domain-model-overlay", "import-overlay"]
+    .some((id) => document.getElementById(id).style.display === "flex");
+}
+
 function showConfirmDialog({ message, confirmLabel = t("ok"), onConfirm, onCancel }) {
+  if (isAnyModalOpen()) return;
   cancelInlineInput();
   confirmMessageEl.textContent = message;
   confirmOkBtn.textContent = confirmLabel;
@@ -2515,6 +2582,7 @@ function createPropertyRow(prop) {
 }
 
 function openDetailsDialog(kind, id) {
+  if (isAnyModalOpen()) return;
   cancelInlineInput();
   const target = kind === "node" ? state.nodes.find((n) => n.id === id) : state.edges.find((e) => e.id === id);
   if (!target) return;
@@ -2681,10 +2749,18 @@ function refreshActionPreconditionOptions() {
 // the field's own placeholder text, this stays visible once the field is
 // filled in, so e.g. a filled-in Effect input and a filled-in Verification
 // input (both plain text boxes) stay distinguishable at a glance.
-function createSublabel(text) {
+// Takes a STRINGS *key*, not pre-translated text — unlike most of this
+// dialog's other one-off labels, rule/action cards can stay open across a
+// language toggle (the dialog itself isn't modal-exclusive with the toolbar
+// language button), and applyLanguage() only refreshes *static*, always-
+// present elements (see its own comment). Tagging the key here lets
+// applyLanguage() retranslate every currently-rendered sublabel generically,
+// instead of every already-open card silently keeping its stale-language text.
+function createSublabel(key) {
   const label = document.createElement("span");
   label.className = "details-field-sublabel";
-  label.textContent = text;
+  label.dataset.i18nKey = key;
+  label.textContent = t(key);
   return label;
 }
 
@@ -2717,7 +2793,7 @@ function createRuleCard(rule) {
     row.querySelector("input").focus();
   });
 
-  card.append(topRow, createSublabel(t("conditionsLabel")), conditionsList, addConditionBtn);
+  card.append(topRow, createSublabel("conditionsLabel"), conditionsList, addConditionBtn);
   return card;
 }
 
@@ -2778,15 +2854,16 @@ function createActionCard(action) {
 
   card.append(
     topRow,
-    createSublabel(t("inputClassLabel")), classSelect,
-    createSublabel(t("preconditionsLabel")), preconditionsSelect,
-    createSublabel(t("effectLabel")), effectInput,
-    createSublabel(t("verificationLabel")), verificationInput,
+    createSublabel("inputClassLabel"), classSelect,
+    createSublabel("preconditionsLabel"), preconditionsSelect,
+    createSublabel("effectLabel"), effectInput,
+    createSublabel("verificationLabel"), verificationInput,
   );
   return card;
 }
 
 function openDomainModelDialog() {
+  if (isAnyModalOpen()) return;
   cancelInlineInput();
   domainModelOpen = true;
   domainModelRulesList.textContent = "";
@@ -3569,7 +3646,43 @@ function toCamelCaseId(text) {
 // collision case was ever flagged as needing one — see Decision Log #9).
 // relationships is a **list**, not a name-keyed map (Decision Log #9,
 // resolving Open Question 3) — sidesteps the collision problem outright.
+// classes/rules/actions are name/label-keyed maps in the export (unlike
+// relationships, kept as a list specifically so two same-derived-name edges
+// both survive — see the test right below this comment's sibling in
+// tests/agent-ontology-phase-f.spec.mjs). Two nodes/rules/actions can
+// perfectly well share a label/name in the live graph (nothing in the UI
+// enforces uniqueness), which used to mean the second silently overwrote
+// the first's entire entry on export — one whole class/rule/action
+// vanishing with no warning. Deterministic, first-occurrence-wins:
+// resolves every item to a name that's unique *within this export*,
+// appending a numeric suffix on a collision, so nothing is ever dropped.
+// Returns a Map from item.id to its resolved export name, used both for
+// this map's own keys and by anything elsewhere in the export that
+// references the same item by name (relationship endpoints, action inputs/
+// preconditions) — so a renamed-on-collision item stays referentially
+// consistent throughout the file, not just correct in isolation.
+function assignUniqueExportNames(items, getName) {
+  const taken = new Set();
+  const idToName = new Map();
+  for (const item of items) {
+    const base = getName(item) || "";
+    let candidate = base;
+    let suffix = 2;
+    while (taken.has(candidate)) {
+      candidate = `${base}_${suffix}`;
+      suffix++;
+    }
+    taken.add(candidate);
+    idToName.set(item.id, candidate);
+  }
+  return idToName;
+}
+
 function buildDomainModel() {
+  const nodeNameById = assignUniqueExportNames(state.nodes, (n) => n.label);
+  const ruleNameById = assignUniqueExportNames(state.rules, (r) => r.name);
+  const actionNameById = assignUniqueExportNames(state.actions, (a) => a.name);
+
   const classes = {};
   for (const n of state.nodes) {
     const properties = {};
@@ -3579,7 +3692,7 @@ function buildDomainModel() {
       if (p.allowed && p.allowed.length > 0) prop.allowed = [...p.allowed];
       properties[p.name] = prop;
     }
-    classes[n.label] = { meaning: n.meaning, aliases: [...n.aliases], properties };
+    classes[nodeNameById.get(n.id)] = { meaning: n.meaning, aliases: [...n.aliases], properties };
   }
 
   const relationships = state.edges.map((e) => {
@@ -3587,24 +3700,23 @@ function buildDomainModel() {
     const tgt = state.nodes.find((n) => n.id === e.target);
     return {
       name: toCamelCaseId(e.relation),
-      from: src ? src.label : null,
-      to: tgt ? tgt.label : null,
+      from: src ? nodeNameById.get(src.id) : null,
+      to: tgt ? nodeNameById.get(tgt.id) : null,
       meaning: e.meaning,
     };
   });
 
   const rules = {};
-  for (const r of state.rules) rules[r.name] = { conditions: [...r.conditions] };
+  for (const r of state.rules) rules[ruleNameById.get(r.id)] = { conditions: [...r.conditions] };
 
   const actions = {};
   for (const a of state.actions) {
     const inputNode = state.nodes.find((n) => n.id === a.inputClassId);
     const preconditionNames = a.preconditions
-      .map((ruleId) => state.rules.find((r) => r.id === ruleId))
-      .filter(Boolean)
-      .map((r) => r.name);
-    actions[a.name] = {
-      input: inputNode ? inputNode.label : null,
+      .map((ruleId) => ruleNameById.get(ruleId))
+      .filter(Boolean);
+    actions[actionNameById.get(a.id)] = {
+      input: inputNode ? nodeNameById.get(inputNode.id) : null,
       preconditions: preconditionNames,
       effect: a.effect,
       verification: a.verification,
@@ -4221,6 +4333,7 @@ function hasAnyGraphContent() {
 }
 
 function openImportDialog(text, kind = "txt") {
+  if (isAnyModalOpen()) return;
   pendingImportText = text;
   pendingImportKind = kind;
   const lines = [];
@@ -4307,7 +4420,12 @@ function openRenameGraphTitle() {
     x, y: rect.bottom + 16,
     value: state.graphName, placeholder: t("graphNamePlaceholder"),
     onCommit: (text) => {
-      state.graphName = text.trim() || t("untitledGraph");
+      const trimmed = text.trim();
+      // An explicit rename is no longer "default" even if the user
+      // deliberately typed the placeholder text itself — only clearing the
+      // field back to empty counts as reverting to the untouched default.
+      state.graphNameIsDefault = !trimmed;
+      state.graphName = trimmed || t("untitledGraph");
       graphTitleEl.textContent = state.graphName;
       scheduleSave();
     },
@@ -5146,7 +5264,7 @@ async function boot() {
     markDirty();
     showRestoreToast(state.nodes.length, state.edges.length);
   }
-  if (isDefaultGraphName(state.graphName)) state.graphName = t("untitledGraph");
+  if (state.graphNameIsDefault) state.graphName = t("untitledGraph");
   document.getElementById("graph-title").textContent = state.graphName;
   // Tier 2 opt-in (Section 3.1): only Chrome/Windows and Chromium/Linux
   // expose showDirectoryPicker at all — Brave and Chrome/Android don't, so

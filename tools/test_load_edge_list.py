@@ -32,6 +32,20 @@ def load_text(text):
         os.unlink(path)
 
 
+def load_text_with_bom(text):
+    """Same as load_text(), but the file is written with a leading UTF-8 BOM
+    — exactly what Windows Notepad/Excel produce on "Save As UTF-8", and the
+    exact trigger for the BOM-drops-all-nodes bug this module's own comment
+    on the utf-8-sig open() call documents."""
+    with tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False, encoding="utf-8-sig") as f:
+        f.write(text)
+        path = f.name
+    try:
+        return load_edge_list(path)
+    finally:
+        os.unlink(path)
+
+
 class TestSpecExample(unittest.TestCase):
     """Regression test for the header/comment-check-order bug: before the
     fix, this returned ([], []) for spec.md's own worked example."""
@@ -112,6 +126,25 @@ class TestGrammarEdgeCases(unittest.TestCase):
         )
         self.assertEqual(len(edges), 2)
         self.assertEqual({e["relation"] for e in edges}, {"relation one", "relation two"})
+
+
+class TestUtf8Bom(unittest.TestCase):
+    """A leading UTF-8 BOM (str.strip() does not remove U+FEFF) used to make
+    the file's first line never equal "## NODES" literally, silently
+    dropping every node while edges still parsed fine — since "## EDGES"
+    appears later in the file, past where the BOM's effect reaches. See the
+    utf-8-sig comment on load_edge_list()'s own open() call."""
+
+    def test_nodes_still_parse_with_a_leading_bom(self):
+        nodes, edges = load_text_with_bom(
+            "## NODES\nAlpha\nBeta\n\n## EDGES\nAlpha -> Beta : relation\n"
+        )
+        self.assertEqual([n["label"] for n in nodes], ["Alpha", "Beta"])
+        self.assertEqual(len(edges), 1)
+
+    def test_bom_file_matches_the_equivalent_non_bom_file_exactly(self):
+        text = "## NODES\nAlpha\nBeta\nGamma\n\n## EDGES\nAlpha -> Beta : one\nBeta <-> Gamma : two\n"
+        self.assertEqual(load_text_with_bom(text), load_text(text))
 
 
 if __name__ == "__main__":
