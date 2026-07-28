@@ -228,7 +228,11 @@ test("a freshly created node matches the full Section 4.1 shape", async () => {
     assert.equal(node.h, 60);
     assert.deepEqual(node.groups, []);
     assert.equal(node.boundary_mode, undefined);
-    assert.equal(node.notes, null);
+    // Agent Ontology (agent_ontology_spec.md §4.1): meaning replaces the
+    // old, never-wired notes field; aliases/properties are new.
+    assert.equal(node.meaning, null);
+    assert.deepEqual(node.aliases, []);
+    assert.deepEqual(node.properties, []);
   });
 });
 
@@ -244,6 +248,7 @@ test("a freshly created edge matches the full Section 4.2 shape", async () => {
     assert.equal(edge.relation, "relates to");
     assert.equal(edge.directed, true);
     assert.equal(edge.auto, false);
+    assert.equal(edge.meaning, null); // agent_ontology_spec.md §4.2
   });
 });
 

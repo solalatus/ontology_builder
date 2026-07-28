@@ -205,19 +205,30 @@ test("the JSON export matches Section 5.1's schema exactly and round-trips throu
     assert.equal(group.boundary_mode, "manual");
     assert.deepEqual(member.groups, [group.id]);
     assert.deepEqual(other.groups, []);
+    // Agent Ontology (agent_ontology_spec.md §4.1): meaning replaces the
+    // old, never-wired notes field; aliases/properties are new.
     for (const n of [group, member, other]) {
-      assert.ok("x" in n && "y" in n && "w" in n && "h" in n && "notes" in n);
+      assert.ok("x" in n && "y" in n && "w" in n && "h" in n && "meaning" in n && "aliases" in n && "properties" in n);
     }
-    assert.equal(member.notes, null);
+    assert.equal(member.meaning, null);
+    assert.deepEqual(member.aliases, []);
+    assert.deepEqual(member.properties, []);
 
     assert.equal(parsed.edges.length, 2);
     const relEdge = parsed.edges.find((e) => !e.auto);
     const containsEdge = parsed.edges.find((e) => e.auto);
     assert.equal(relEdge.relation, "language used");
     assert.equal(relEdge.directed, true);
+    assert.equal(relEdge.meaning, null); // agent_ontology_spec.md §4.2
     assert.equal(containsEdge.relation, "contains");
     assert.equal(containsEdge.source, group.id);
     assert.equal(containsEdge.target, member.id);
+
+    // agent_ontology_spec.md §4.3 — additive top-level collections, present
+    // and empty when nothing's been authored yet (Phase A has no UI for
+    // these; a future phase's tests cover non-empty rules/actions export).
+    assert.deepEqual(parsed.rules, []);
+    assert.deepEqual(parsed.actions, []);
   });
 });
 
