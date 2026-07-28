@@ -160,6 +160,52 @@ test("a corrupted saved payload is ignored gracefully — the app boots to an em
   assert.deepEqual(consoleErrors, []);
 });
 
+// A hand-edited or partially-migrated payload can have valid top-level JSON
+// but a malformed rule/action (missing conditions/preconditions) — unlike
+// the fully-corrupt-JSON case above, this used to reach snapshotState()
+// unguarded and throw there, which (since pushHistory(before,
+// snapshotState()) evaluates its arguments before the call) meant the throw
+// happened *before* pushHistory ever ran — silently breaking undo *and*
+// save for the rest of the session on the very next ordinary edit, with no
+// visible sign anything was wrong beyond a console error.
+test("a malformed rule/action in a saved payload doesn't break undo/save for the rest of the session", async () => {
+  const browser = await launchChromium();
+  const page = await browser.newPage({ viewport: { width: 1200, height: 800 } });
+  const consoleErrors = [];
+  page.on("console", (msg) => { if (msg.type() === "error") consoleErrors.push(msg.text()); });
+  page.on("pageerror", (err) => consoleErrors.push(String(err)));
+  await page.addInitScript(() => {
+    localStorage.setItem("kg-canvas-live", JSON.stringify({
+      nodes: [], edges: [],
+      rules: [{ id: "r1", name: "missingConditions" }], // no `conditions` array
+      actions: [{ id: "a1", name: "missingPreconditions" }], // no `preconditions` array
+    }));
+  });
+  await page.goto(APP_URL);
+  await page.waitForFunction(() => Boolean(window.__kg));
+
+  const loaded = await page.evaluate(() => ({
+    rule: window.__kg.state.rules[0],
+    action: window.__kg.state.actions[0],
+  }));
+  assert.deepEqual(loaded.rule.conditions, []);
+  assert.deepEqual(loaded.action.preconditions, []);
+
+  // The real regression: one ordinary edit after loading such a payload
+  // must still register as a normal, undoable, saved change.
+  const historyBefore = await page.evaluate(() => window.__kg.history.past.length);
+  await addNodeViaDblClick(page, 300, 300, "Alpha");
+  const historyAfter = await page.evaluate(() => window.__kg.history.past.length);
+  assert.equal(historyAfter - historyBefore, 1, "an ordinary edit must still push exactly one undo step");
+
+  await page.evaluate(() => window.__kg.storage.whenIdle());
+  const saved = await page.evaluate(() => JSON.parse(localStorage.getItem("kg-canvas-live")));
+  assert.equal(saved.nodes.length, 1, "the edit must actually persist, not silently fail to save");
+
+  await browser.close();
+  assert.deepEqual(consoleErrors, []);
+});
+
 test("a burst of many scheduled saves coalesces into far fewer than N actual writes, and still persists the latest state", async () => {
   await withPage(async (page) => {
     await addNodeViaDblClick(page, 300, 300, "Alpha");

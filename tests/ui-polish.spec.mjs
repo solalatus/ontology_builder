@@ -67,9 +67,11 @@ test("modal dialogs cast a shadow distinguishing them from the darkened backdrop
 test("toggling theme swaps the accent/shadow tokens too, not just the base palette — an armed button's border differs between themes", async () => {
   await withPage(async (page) => {
     await page.click("#btn-connect");
+    await page.waitForTimeout(200); // let the border-color transition finish before sampling it (see the two tests above)
     const darkBorder = await computedStyle(page, "#btn-connect", "borderColor");
 
     await page.click("#btn-theme-toggle");
+    await page.waitForTimeout(200); // this test previously sampled immediately after the click, racing the same border-color transition the other tests in this file already wait out — a rare full-suite-under-load flake
     const lightBorder = await computedStyle(page, "#btn-connect", "borderColor");
 
     assert.notEqual(darkBorder, lightBorder, "the accent color used for an armed button's border should differ between dark and light themes");

@@ -155,6 +155,32 @@ State" so the project can be picked up cold at any time.
   dated Log entry below for the file-by-file account. This is a *base-app*
   change with its own PR, done ahead of (and to simplify) the sibling
   initiative's Phase F export work — not an Agent Ontology feature itself.
+- **A retrospective test-coverage audit (2026-07-28)**, requested independently
+  of any phase (the user wanted the whole project's coverage revisited, not
+  just a sibling subproject's own new work) found and fixed 6 real,
+  pre-existing bugs — not just gaps — via an execution-verified audit (every
+  candidate was reproduced by actually running it, not just read off the
+  code): a malformed `rules`/`actions` item in a loaded storage payload could
+  crash `snapshotState()` and silently break undo *and* save for the rest of
+  the session; two nodes/rules/actions sharing a label/name silently
+  overwrote each other in the Domain Model YAML export (one whole entry
+  vanishing, no warning); nothing guarded against a second modal stacking on
+  top of an already-open one (reachable via Tab, since no modal traps focus);
+  `tools/load_edge_list.py` silently dropped every node on a UTF-8-BOM-
+  prefixed file (Windows Notepad/Excel's default "Save As UTF-8"); a rule/
+  action card's own sub-labels didn't retranslate on a language toggle while
+  already open; and a graph deliberately renamed to the literal placeholder
+  text ("Untitled Graph"/"Névtelen gráf") got silently retranslated back,
+  indistinguishable from never having been renamed. A seventh finding
+  (Folder Sync silently switching targets on a second grant, no confirm/
+  disconnect step) was judged current, working-as-designed behavior, not a
+  bug — pinned with a regression test instead of changed. Also ported over a
+  test-stability fix (a missing CSS-transition-settle wait in
+  `tests/ui-polish.spec.mjs`'s theme-toggle test) that had already been made
+  independently on the unrelated `helper_agent` branch. Test suite: 295 JS
+  tests + 13 Python tests (up from 287 + 11 before this pass), full suite run
+  twice consecutively, both green. See the dated Log entry for the full
+  per-bug account.
 - **Next action:** Phase 10 (Cross-platform verification — the manual
   hands-on matrix that every deferred Tier-B item from Phases 0–9 above
   finally gets exercised against for real).
@@ -2786,6 +2812,104 @@ and record deltas here instead of editing the spec.)*
   Ran the full suite twice consecutively: `node --test tests/*.spec.mjs`
   (254 tests) and `python3 -m unittest discover -s tools -p "test_*.py"`
   (11 tests), both green both times.
+- 2026-07-28 — **Retrospective test-coverage audit, requested independently
+  of any phase** ("add more tests retrospectively also to all levels of the
+  project, also the base scope" — a sibling `helper_agent` branch was mid-
+  flight on its own subproject's tests at the time; this pass covers the
+  base app on `main`, a separate effort). Rather than write speculative new
+  tests for already-well-covered code (this project has been through several
+  prior dedicated coverage passes — see the Log entries above), a background
+  research agent was asked to read the full existing test suite (24 files)
+  and `index.html` section by section, and for every candidate gap it found,
+  actually run it against the real app/loader to confirm a genuine failure,
+  not just a plausible one. All 7 reported findings reproduced. Fixed 6,
+  pinned 1 as intentional:
+  1. **Malformed rules/actions in a loaded storage payload crashed the
+     undo/save pipeline for the rest of the session.** `loadGraphFromStorage()`
+     validated `Array.isArray(data.rules)`/`Array.isArray(data.actions)` at
+     the top level but never each item's own shape, unlike
+     `normalizeLoadedNode`/`normalizeLoadedEdge`. `snapshotState()`/
+     `restoreSnapshot()` unconditionally spread `[...r.conditions]`/
+     `[...a.preconditions]` — a rule/action missing that field threw, and
+     since `pushHistory(before, snapshotState())` evaluates its arguments
+     before the call, the throw happened *before* `pushHistory` (and thus
+     `scheduleSave()`) ever ran. Fixed with `normalizeLoadedRule`/
+     `normalizeLoadedAction`, mirroring the existing node/edge normalizers.
+     Regression test: `tests/phase4.spec.mjs`.
+  2. **Two classes/rules/actions sharing a name silently overwrote each
+     other in the Domain Model YAML export** — `buildDomainModel()` keyed
+     `classes`/`rules`/`actions` by plain label/name with last-write-wins,
+     and nothing in the UI enforces uniqueness (unlike `relationships`,
+     already a list for exactly this reason — see the Phase F Log entry).
+     Fixed with `assignUniqueExportNames()`: deterministic, first-occurrence-
+     wins name resolution with a numeric suffix on collision, threaded
+     through consistently so relationship endpoints and action preconditions
+     that reference a renamed-on-collision item stay correct. Regression
+     tests: `tests/agent-ontology-phase-f.spec.mjs` (3 new).
+  3. **Nothing stopped a second modal from stacking on top of an already-open
+     one** — no focus trap exists anywhere, so Tab can reach an unrelated
+     toolbar button (e.g. Domain Model) while another dialog (e.g. Details)
+     is open, and activating it opened a second overlay underneath/on top of
+     the first with no clean way out (Escape only closes the top one).
+     Fixed with a shared `isAnyModalOpen()` guard at the top of every
+     open-dialog function (`showConfirmDialog`, `openDetailsDialog`,
+     `openDomainModelDialog`, `openImportDialog`) — deliberately the
+     narrowest fix (block a second modal from opening at all) rather than
+     building generic focus-trap infrastructure, which would have been a
+     much larger, riskier change for the same practical outcome. Regression
+     test: `tests/agent-ontology-phase-d.spec.mjs`.
+  4. **`tools/load_edge_list.py` silently dropped every node on a UTF-8-BOM-
+     prefixed file** — Python's `str.strip()` doesn't remove U+FEFF, so a
+     BOM-prefixed file's first line never equals `"## NODES"` literally
+     (edges still parsed, since `"## EDGES"` appears later, past the BOM's
+     reach). A very real trigger: Windows Notepad/Excel's default "Save As
+     UTF-8" adds a BOM. The JS importer is unaffected (`.trim()` does strip
+     U+FEFF), so this was also a Python/JS parity gap. Fixed by opening with
+     `encoding="utf-8-sig"` instead of `"utf-8"` (decodes identically when
+     there's no BOM) — in both `tools/load_edge_list.py` and spec.md's own
+     copy of the same snippet, kept in sync per that file's own convention.
+     Regression tests: `tools/test_load_edge_list.py` (2 new).
+  5. **A Domain Model rule/action card's sub-labels didn't retranslate on a
+     language toggle while the card was already open** — `applyLanguage()`
+     refreshes every static top-level dialog label, but `createSublabel()`
+     baked translated text into the DOM once, at card-creation time, with no
+     refresh path for already-rendered cards. Fixed by having
+     `createSublabel()` take a STRINGS *key* (tagged via `data-i18n-key`)
+     instead of pre-translated text, and having `applyLanguage()` loop over
+     every currently-rendered sublabel and retranslate it from that key.
+     Regression test: `tests/agent-ontology-phase-d.spec.mjs`.
+  6. **A graph deliberately renamed to the literal placeholder text got
+     silently retranslated back on the next language toggle** —
+     `isDefaultGraphName()` inferred "never renamed" via string equality
+     against `STRINGS.en/hu.untitledGraph`, which can't distinguish that
+     from a user renaming *to* that exact literal string on purpose. Fixed
+     by tracking `state.graphNameIsDefault` explicitly (set on the actual
+     rename action, not inferred from the resulting string), persisted
+     alongside `graphName` in the storage payload with a migration fallback
+     to the old string-equality heuristic for a payload saved before this
+     field existed. Regression test: `tests/localization.spec.mjs`.
+  7. **Not fixed, by design:** Folder Sync (Tier 2) has no guard against a
+     second grant while already connected — clicking it again silently
+     re-grants and switches the write target to whatever folder is picked
+     next, with no confirmation or disconnect step. Judged a product-design
+     question rather than a bug (implementing a confirm/disconnect flow
+     would be new feature work, out of scope for a coverage-fixing pass) —
+     pinned instead with a test proving the switch is at least fully
+     deterministic (the second grant replaces the target entirely, it
+     doesn't write to both or leave the first folder silently still active).
+     Test: `tests/phase7.spec.mjs`.
+  Also ported a test-stability fix made independently on the unrelated
+  `helper_agent` branch (a missing CSS-transition-settle wait in
+  `tests/ui-polish.spec.mjs`'s theme-toggle test, causing a rare full-suite-
+  under-load flake) — the two branches diverged before that fix landed, so
+  it hadn't reached `main` yet.
+  Every fix above was verified against a real regression: each new test was
+  confirmed to fail (via `git stash` reverting just the fix, or by direct
+  execution against unmodified code) before confirming it passes with the
+  fix in place — not just written to pass against the post-fix code.
+  Ran the full suite twice consecutively: `node --test tests/*.spec.mjs`
+  (295 tests) and `python3 -m unittest discover -s tools -p "test_*.py"`
+  (13 tests), both green both times.
 
 ---
 
