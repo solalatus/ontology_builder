@@ -8,29 +8,32 @@ enough that this can be picked up cold.
 
 ## Current State
 
-- **Phase:** Phases A through F are all implemented, tested, and green — see their checklists below,
+- **Phase:** Phases A through H are all implemented, tested, and green — see their checklists below,
   now fully checked off (Phase C was folded into B; Phase E was folded into D — see each phase's own
-  note). Phases G through I are not started. Of the four open questions from `agent_ontology_spec.md`
-  §9: #3 (relationship-key collisions) is resolved — the user chose a list structure for `relationships`
-  over a name-keyed map, sidestepping the collision-naming question entirely (see the dated Log entry).
-  #4 (Groups) is also resolved, by a route neither original option covered: the user asked for Groups to
-  be removed from the *base app* entirely (canvas UI, data model, both file formats), not just excluded
-  from this export — implemented as its own dedicated phase/PR ahead of Phase F, tracked in the dated Log
-  entry below and in the base app's own `TODO.md`/`spec.md` (Decision Log #11), not in this file's phase
-  checklist since it's a base-app change, not an Agent Ontology one. #1 (app title) and #2 (boolean
-  property type) remain open, deferred to their stated defaults — nothing in Phase F needed to revisit
-  either.
+  note). Phase I (final regression pass, docs, PR) is what's left. Of the four open questions from
+  `agent_ontology_spec.md` §9: #3 (relationship-key collisions) is resolved — the user chose a list
+  structure for `relationships` over a name-keyed map, sidestepping the collision-naming question
+  entirely (see the dated Log entry). #4 (Groups) is also resolved, by a route neither original option
+  covered: the user asked for Groups to be removed from the *base app* entirely (canvas UI, data model,
+  both file formats), not just excluded from this export — implemented as its own dedicated phase/PR
+  ahead of Phase F, tracked in the dated Log entry below and in the base app's own `TODO.md`/`spec.md`
+  (Decision Log #11), not in this file's phase checklist since it's a base-app change, not an Agent
+  Ontology one. Phase G's own flagged question (import merge/replace semantics) is resolved too — see
+  Decision #10 and Phase G's own checklist below. #1 (app title) and #2 (boolean property type) remain
+  open, deferred to their stated defaults — nothing in Phase F, G, or H needed to revisit either.
 - **Relationship to the base app:** this branch builds strictly on top of `index.html` as it exists on
-  `main` today (all PRs through #26 merged: bugfixes, visual polish, Android-reliability follow-ups,
-  this branch's own Phase A/B/C/D/E, and the base app's own separate Groups-removal PR). Nothing in
+  `main` today (all PRs through #27 merged: bugfixes, visual polish, Android-reliability follow-ups,
+  this branch's own Phase A/B/C/D/E/F/G/H, and the base app's own separate Groups-removal PR). Nothing in
   the base app's `spec.md`/`TODO.md` changes as a *consequence of Agent Ontology* — Groups removal is a
   base-app decision with its own base-app PR, documented in the base app's own `spec.md`/`TODO.md`.
-- **Test suite:** 264 JS tests (254 base-plus-Groups-removal + 10 new in
-  `tests/agent-ontology-phase-f.spec.mjs`) + 11 Python tests, all green, run twice/three-times
-  consecutively. (Phase A/B/D's own test files remain at their original counts — 7/15/13 — this Current
-  State bullet now just reports the whole-suite total rather than re-deriving it phase-by-phase, since
-  the base-app Groups-removal PR changed several base-app file counts too; see that PR's own account in
-  the base app's `TODO.md` for the itemized breakdown.)
+- **Test suite:** 281 JS tests (254 base-plus-Groups-removal + 11 in `tests/agent-ontology-phase-f.spec.mjs`
+  + 15 in `tests/agent-ontology-phase-g.spec.mjs` + 1 new in `tests/localization.spec.mjs`, 13 → 14) + 11
+  Python tests, all green, run twice consecutively. (Phase A/B/D's own test files remain at their
+  original counts — 7/15/13 — this Current State bullet now just reports the whole-suite total rather
+  than re-deriving it phase-by-phase, since the base-app Groups-removal PR changed several base-app file
+  counts too; see that PR's own account in the base app's `TODO.md` for the itemized breakdown. Phase F's
+  own file grew from 10 to 11 tests during Phase G — a direct regression test for the `toCamelCaseId()`
+  idempotency bug Phase G's own idempotency test caught; see Phase G's checklist and the dated Log entry.)
 - **A Phase B side effect worth knowing about:** widening `#sel-toolbar` from 3 icons to 4 (the new
   "Edit Details" icon) exposed a real, if narrow, pre-existing interaction hazard — a lingering
   selection's floating toolbar can now more easily reach over a nearby node's own click point, since
@@ -42,11 +45,8 @@ enough that this can be picked up cold.
   happened and why.
 - **Target file:** still `index.html` (same single file — Agent Ontology is not a separate app or a
   second file, just new fields/UI/export on the existing one).
-- **Next action:** Phase G (Import — YAML → canvas), the lower-priority, deferred phase per spec §5's
-  own framing ("export is the load-bearing capability... import is desirable but secondary"). Phase H
-  (localization for Phase F/G's own UI strings — note Phase F added no new UI strings at all, since it's
-  bundled into the existing Save Version action with no new toolbar button or dialog) and Phase I (final
-  regression pass, docs, PR) follow after.
+- **Next action:** Phase I — final regression pass, docs, PR for the whole initiative (or, if more work
+  surfaces first, whatever the user directs next; Phases A through H are all that were ever planned).
 
 ---
 
@@ -254,19 +254,75 @@ Phase B rather than as later, separate work. Nothing here needed its own dedicat
   convention, alongside JSON/TXT; the YAML addition doesn't change JSON/TXT content or shape (and
   confirms no stale `auto` field leaking through from the removed Groups feature).
 
-## Phase G — Import (YAML → canvas) — later phase, lower priority
+## Phase G — Import (YAML → canvas) ✅ done
 
-- [ ] Parser for the same YAML shape, symmetric to the existing TXT import (`spec.md` §5.3) — merge/
-      replace semantics still to be decided (does it reuse the exact same two-mode UX, or is a
-      class/relationship-level description different enough to warrant its own confirmation flow?)
-- Tests: TBD once this phase actually starts
+- [x] Hand-written parser (`parseDomainYamlImport()`, built on `parseYamlBlock()`/`splitYamlKeyValue()`/
+      `parseYamlValueToken()`) for exactly the block-style YAML subset `buildDomainYamlExport()` can
+      produce — symmetric to the existing TXT import (`spec.md` §5.3), not a general YAML parser.
+      Malformed/truncated input degrades gracefully (missing pieces default to empty) rather than
+      throwing, matching `parseTxtImport()`'s own skip-don't-crash discipline.
+- [x] **Merge/replace semantics resolved** (was the one flagged open question): reuses the exact same
+      two-mode dialog/UX as TXT import — no new confirmation flow — but deliberately more aggressive:
+      a matched class/relationship/rule/action is overwritten wholesale with the file's values on both
+      Merge and Replace (not left untouched like TXT's node/edge merge); only Replace additionally
+      removes anything the file doesn't mention. See `agent_ontology_spec.md` §11/Decision #10 and the
+      dated Log entry below for the full rationale.
+- [x] Entry point: the existing "Import from TXT" button/file-input/drag-drop, relabeled **"Import"**
+      (both languages) and widened to recognize `.yaml`/`.yml` (routes to the new importer) vs.
+      everything else including `.txt` (routes to the existing, unchanged TXT importer) — no new toolbar
+      button, matching the export side's own "minimize new UI surface" precedent.
+- [x] Matching rules: classes/rules/actions by label/name exactly; relationships by
+      `(endpoint labels, toCamelCaseId(edge.relation) === entry.name)` — a match's `relation` text is
+      itself normalized to the imported literal name, an honest consequence of the export only ever
+      storing the derived camelCase name, not the original human phrasing.
+- [x] Commit order is fixed (classes, rules, relationships, actions) regardless of the file's own section
+      order, since relationships/actions reference classes/rules by label/name; a dangling reference
+      (to a class/rule declared nowhere in the file and not already on canvas) is skipped defensively,
+      not treated as an error.
+- [x] **Found and fixed a real bug while implementing this, not a pre-existing one:** `toCamelCaseId()`
+      (Phase F) wasn't idempotent — re-deriving from an already-camelCase string like `"issuedBy"`
+      lowercased the whole thing to `"issuedby"` instead of reproducing it, because the word-splitter
+      only split on non-letter/digit separators, not on camelCase's own lowercase→uppercase boundaries.
+      Since a matched relationship's `relation` text gets normalized to the imported name on import, a
+      *second* import of the same file recomputed `toCamelCaseId()` against that now-already-camelCase
+      text, got a different (over-lowercased) result, and silently created a duplicate edge instead of
+      recognizing its own prior normalization. Fixed by also splitting on camelCase boundaries before the
+      existing separator-based split, making the function idempotent for realistic input; added a direct
+      regression test in `tests/agent-ontology-phase-f.spec.mjs` for `toCamelCaseId()` itself, not just
+      the import behavior that surfaced it.
+- Tests (`tests/agent-ontology-phase-g.spec.mjs`, 15 tests, all green): a full worked-example YAML
+  imports classes/relationships/rules/actions correctly on an empty graph; re-importing the identical
+  file is idempotent (no duplicates — this is the test that caught the `toCamelCaseId()` bug above);
+  Merge overwrites a matched class's meaning/aliases/properties wholesale rather than field-by-field;
+  Merge never removes an unmatched class/rule/action; Replace removes everything absent from the file in
+  exactly one undo step, fully reversible; a matched relationship's meaning is overwritten and its
+  relation label normalized to the imported name; a relationship referencing an undeclared class is
+  skipped without crashing; the Replace button hides on an empty graph; Cancel applies nothing; commit
+  order resolves references correctly regardless of the file's own section order (actions/relationships
+  declared *before* classes/rules in the raw text); unicode and quoted-scalar class names/meanings
+  survive an export-then-reimport round trip; malformed/truncated/garbage YAML degrades gracefully;
+  both `.yaml` and `.yml` extensions route to the domain importer; the diff-summary counts match what
+  actually happens on commit, including the "0 added / N changed" case after a full prior import.
 
-## Phase H — Localization
+## Phase H — Localization ✅ done
 
-- [ ] Every new label/placeholder/button/modal string gets `en` and `hu` entries in `STRINGS`,
-      following the existing pattern exactly
-- Tests: language toggle correctly re-renders all new UI surfaces, same pattern as existing
-  `localization.spec.mjs`-style coverage
+Scope turned out small: Phase F added zero new UI strings at all (bundled into the existing Save Version
+action, no new toolbar button or dialog). Phase G added exactly three — the relabeled `importButton`
+("Import from TXT" → "Import," since the button now handles two formats) and the two new YAML-import
+summary strings (`importYamlMergeSummary`/`importYamlReplaceSummary`) — all three already given `en`/`hu`
+entries as part of Phase G's own implementation, following the existing `STRINGS` pattern exactly. This
+phase's remaining work was verification, not new string-writing:
+
+- [x] Every new/changed string has both `en` and `hu` entries (verified — done during Phase G itself)
+- [x] Language toggle correctly re-renders the new surfaces — added a dedicated test for the YAML import
+      summary specifically (the one new surface that didn't already have language-toggle coverage; the
+      relabeled Import button's own toggle behavior was already exercised by the existing "toggling the
+      language switches all static toolbar/dialog text" test in `tests/localization.spec.mjs`, just
+      updated to expect "Import" instead of "Import from TXT")
+- Tests (`tests/localization.spec.mjs`, 13 → 14 tests): new test asserts the Domain Model YAML import
+  summary's "N item(s) would be added, M existing item(s) would be updated" phrasing translates correctly
+  with interpolated counts, in both languages, mirroring the existing TXT-import-summary translation test
+  right next to it.
 
 ## Phase I — Regression pass, docs, PR
 
@@ -445,3 +501,48 @@ as the reference and record deltas/clarifications here instead of rewriting the 
   browser instances rather than a real regression from this phase's changes) and
   `python3 -m unittest discover -s tools -p "test_*.py"` (11 tests, untouched by this phase — YAML export
   is JS-only), all green.
+- 2026-07-28 — Phase F's PR merged; user said to go ahead with the next phase, and added a standing
+  instruction to keep adding test coverage along the way in future phases too, not just when a phase's
+  own scope specifically calls for it. Started Phase G (Import). Its checklist flagged one real open
+  design question up front: merge/replace semantics for a Domain Model YAML import, given it describes
+  classes/relationships/rules/actions rather than simple nodes/edges. Offered two options via
+  `AskUserQuestion` (reuse TXT-import's existing "never touch a match" semantics vs. a field-level
+  partial-merge for classes); the user dismissed that prompt and instead said directly: reuse the
+  existing TXT-import mechanism/UX, but be aggressive — matched entries can be overwritten. This is
+  actually simpler than either option originally offered (no field-by-field partial-merge logic needed)
+  — confirmed the interpretation in one sentence and proceeded rather than re-prompting.
+  Implemented Phase G in full — see its own checklist above for the complete breakdown. Highlights not
+  already covered there: `parseYamlBlock()` is one general recursive parser (mirroring `yamlLines()` in
+  reverse) rather than four separate hard-coded per-section parsers, since properties-within-classes and
+  the relationships list both need real nested-structure parsing anyway, so a shared engine pays for
+  itself; the one special case is a list item that's itself a mapping (`- name: ...` relationship
+  entries), where the first key shares the dash's own line. `commitYamlImport()` processes classes, then
+  rules, then relationships, then actions in that **fixed** order regardless of the source file's actual
+  section order, specifically so forward references (an action declared before its input class, etc.)
+  resolve correctly — verified with a dedicated test that deliberately writes the sections in a
+  scrambled, unrealistic order.
+  Found and fixed a real bug during this phase, not a pre-existing one: `toCamelCaseId()` (Phase F) is
+  not idempotent by construction, and Phase G's own aggressive-overwrite import normalizes a matched
+  edge's relation text to the imported camelCase name — so a second import recomputing
+  `toCamelCaseId()` against that already-normalized text got a different, over-lowercased result
+  (`"issuedBy"` → `"issuedby"`) and silently created a duplicate edge instead of recognizing its own
+  prior normalization. Caught by the idempotent-re-import test, not by inspection. Fixed by also
+  splitting on camelCase's own lowercase→uppercase boundaries before the existing separator-based word
+  split; added a direct unit-level regression test for `toCamelCaseId()` itself in
+  `tests/agent-ontology-phase-f.spec.mjs` (not just the import-level symptom) so a future change to that
+  function can't silently reintroduce the same class of bug.
+  Also renamed the "Import from TXT" button to "Import" (both languages) since it now recognizes two
+  file formats by extension, and fixed the one pre-existing test that hard-coded the old label
+  (`tests/localization.spec.mjs`).
+  Folded Phase H (Localization) into the same pass, per the user's "always add test coverage" standing
+  instruction and because its actual scope turned out tiny: Phase F added no new UI strings at all, and
+  Phase G added exactly three (`importButton`, `importYamlMergeSummary`, `importYamlReplaceSummary`),
+  all already given `en`/`hu` entries as part of Phase G's own implementation. Phase H's remaining work
+  was a verification pass — added one new test asserting the YAML import summary's interpolated counts
+  translate correctly in both languages (the one new surface that didn't already have language-toggle
+  coverage from Phase G's own tests).
+  Full suite green twice consecutively: `node --test tests/*.spec.mjs` (281 tests — 264 + 15 in
+  `tests/agent-ontology-phase-g.spec.mjs` + 1 in `tests/agent-ontology-phase-f.spec.mjs` (the
+  `toCamelCaseId()` regression) + 1 in `tests/localization.spec.mjs`) and
+  `python3 -m unittest discover -s tools -p "test_*.py"` (11 tests, untouched — Phase G's import is
+  JS-only), all green.

@@ -230,8 +230,8 @@ actions:
 **Deliberately deferred (not in the first phased pass):** import — parsing a hand-edited or
 agent-generated domain YAML back into canvas state, symmetric to the existing TXT import (`spec.md`
 §5.3). The howto is framed as a guide for *producing* a description; export is the load-bearing
-capability. Import is real and desirable (round-tripping an agent's edits back onto the canvas) but is
-listed as a later phase (Phase G, Section 8) so the first pass stays focused.
+capability. Import is real and desirable (round-tripping an agent's edits back onto the canvas) but was
+listed as a later phase (Phase G) so the first pass stayed focused — since implemented; see Section 11.
 
 ---
 
@@ -321,3 +321,58 @@ group→hierarchy export logic to write; every node is simply a Class.
 | 7 | Import (YAML → canvas) | Deferred to a later phase — export is the load-bearing capability the howto actually calls for; import is desirable but secondary. |
 | 8 | Groups (Open Question 4) | Resolved by removing Groups from the base app entirely (canvas UI, data model, both file formats) rather than choosing an export-time interpretation — see `spec.md` Decision Log #11 and Section 6 above. |
 | 9 | Relationship-key collisions (Open Question 3) | Resolved by making `relationships` a list of `{name, from, to, meaning}` objects rather than a name-keyed map — sidesteps the collision problem rather than disambiguating it, since a list has no uniqueness constraint. See Section 5. |
+| 10 | Import merge/replace semantics (Phase G) | Deliberately more aggressive than the base app's TXT node/edge import: a matched class/relationship/rule/action is overwritten with the file's values on both Merge and Replace, not left untouched — only Replace additionally removes anything the file doesn't mention. Same two-mode dialog/UX is reused, not a new confirmation flow. See Section 11. |
+
+---
+
+## 11. Domain Model YAML Import (Phase G) — resolved design
+
+Symmetric to Phase F's export (Section 5): a hand-written parser for exactly the block-style YAML
+subset `buildDomainYamlExport()` can produce (2-space indent, `- item` lists, `key:`/`key: value` maps,
+double-quoted/escaped scalars, inline `[]`/`{}` for empty collections) — not a general YAML parser, the
+same "symmetric to the app's own grammar, not the whole spec" posture `parseTxtImport()` takes for the
+TXT format (`spec.md` §5.3). Malformed or truncated input degrades gracefully (missing pieces default to
+empty) rather than throwing.
+
+**Entry point:** the existing "Import from TXT" toolbar button and its file-input/drag-drop accelerator,
+relabeled **"Import"** (both languages) since it now recognizes two formats by extension — `.yaml`/`.yml`
+routes to the Domain Model importer below, everything else (including `.txt`) to the existing TXT
+importer, unchanged. No new toolbar button, matching Decision #4's "minimize new UI surface" reasoning
+for the export side.
+
+**Merge/replace semantics (Decision #10) — the one open design question Phase G started with:**
+deliberately more aggressive than the base app's own TXT node/edge merge, which never touches a matched
+node/edge's fields. Here:
+- **Merge:** every class/relationship/rule/action in the file is applied — if something matching
+  already exists on canvas, its fields are **overwritten wholesale** with the file's values (not merged
+  field-by-field, not left untouched); if nothing matches, it's created. Nothing already on canvas but
+  absent from the file is ever removed.
+- **Replace:** same as Merge, plus anything on canvas that isn't mentioned in the file at all — for any
+  of the four collections — is removed.
+- This reuses the exact same two-button (`Merge`/`Replace`) dialog and diff-summary UI as TXT import —
+  no new confirmation flow — just fed by a different parser/planner pair and a different (more
+  aggressive) commit semantic. The diff summary itself is phrased generically across the four
+  heterogeneous collections ("N item(s) would be added, M existing item(s) would be updated") rather than
+  breaking out per-collection counts, mirroring the TXT summary's own simplicity.
+
+**Matching rules** (what counts as "the same" class/relationship/rule/action across an import):
+- Classes: node label === the YAML's class key, exactly.
+- Rules: rule name === the YAML's rule key, exactly.
+- Actions: action name === the YAML's action key, exactly.
+- Relationships: an existing edge matches a `relationships` list entry when its endpoints' current
+  labels equal the entry's `from`/`to` **and** `toCamelCaseId(edge.relation) === entry.name`. A matched
+  edge's `relation` text is itself overwritten to the entry's literal `name` (not just its `meaning`) —
+  an honest consequence of Section 5's chosen export shape, which stores only the derived camelCase name,
+  not the original human-phrased relation label; re-importing necessarily normalizes toward that name.
+  `toCamelCaseId()` had to be made idempotent for this to work correctly across a re-import (see the
+  dated Log entry in `agent_ontology_todo.md` for the bug this fixes): re-deriving from an already-
+  camelCase string (e.g. one this importer already normalized) must reproduce that same string, not
+  flatten it further, or a second import would fail to recognize its own prior normalization and
+  duplicate the edge instead of matching it.
+
+**Commit order:** classes, then rules, then relationships, then actions — regardless of the order those
+sections actually appear in the source file, since relationships reference classes by label and actions
+reference both classes and rules. A relationship or action referencing a class/rule that isn't declared
+anywhere in the file and doesn't already exist on canvas is skipped defensively (same posture
+`planTxtImport()`/`commitTxtImport()` take for a TXT edge referencing an undeclared node label), not
+treated as an error.

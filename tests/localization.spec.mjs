@@ -47,7 +47,7 @@ test("toggling the language switches all static toolbar/dialog text, the <html> 
     assert.equal(await page.locator("#btn-undo").textContent(), "Undo");
     assert.equal(await page.locator("#btn-redo").textContent(), "Redo");
     assert.equal(await page.locator("#btn-save-version").textContent(), "Save Version");
-    assert.equal(await page.locator("#btn-import-txt").textContent(), "Import from TXT");
+    assert.equal(await page.locator("#btn-import-txt").textContent(), "Import");
     assert.equal(await page.locator("#btn-clear").textContent(), "Clear");
     assert.equal(await page.getAttribute("#btn-zoom-out", "aria-label"), "Zoom out");
     assert.equal(await page.getAttribute("#btn-zoom-in", "aria-label"), "Zoom in");
@@ -201,6 +201,36 @@ test("the import summary message translates with correctly interpolated counts, 
     assert.equal(
       await page.locator("#import-summary").textContent(),
       "Merge: 2 node(s) and 1 edge(s) would be added. Nothing is ever removed.",
+    );
+    await page.click("#import-cancel");
+  });
+});
+
+test("the Domain Model YAML import summary message translates with correctly interpolated counts, in both languages", async () => {
+  await withRealDefaultPage(async (page) => {
+    const yamlText = [
+      "classes:",
+      "  Alpha:",
+      "    meaning: null",
+      "    aliases: []",
+      "    properties: {}",
+      "relationships: []",
+      "rules: {}",
+      "actions: {}",
+      "",
+    ].join("\n");
+    await dropText(page, yamlText, "import.domain.yaml");
+    assert.equal(
+      await page.locator("#import-summary").textContent(),
+      "Egyesítés: 1 elem kerülne hozzáadásra, 0 meglévő elem frissülne a fájl értékeivel. Semmi nem törlődik.",
+    );
+    await page.click("#import-cancel");
+
+    await page.click("#btn-lang-toggle"); // -> en
+    await dropText(page, yamlText, "import.domain.yaml");
+    assert.equal(
+      await page.locator("#import-summary").textContent(),
+      "Merge: 1 item(s) would be added, 0 existing item(s) would be updated with the file's values. Nothing is removed.",
     );
     await page.click("#import-cancel");
   });

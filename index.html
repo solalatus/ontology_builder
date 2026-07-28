@@ -509,8 +509,8 @@
   <button id="btn-redo" type="button">Újra</button>
   <button id="btn-save-version" type="button">Verzió mentése</button>
   <button id="btn-folder-sync" type="button" aria-pressed="false" style="display:none;">Mappa szinkronizálás</button>
-  <button id="btn-import-txt" type="button">Importálás TXT-ből</button>
-  <input id="import-file-input" type="file" accept=".txt">
+  <button id="btn-import-txt" type="button">Importálás</button>
+  <input id="import-file-input" type="file" accept=".txt,.yaml,.yml">
   <button id="btn-clear" type="button">Törlés</button>
   <div class="spacer"></div>
   <div class="zoom-group">
@@ -700,7 +700,7 @@ const STRINGS = {
     saveVersion: "Save Version",
     folderSync: "Folder Sync",
     folderSynced: (name) => `Synced: ${name}`,
-    importFromTxt: "Import from TXT",
+    importButton: "Import", // handles both .txt (spec.md §5.3) and .domain.yaml (agent_ontology_spec.md §8, Phase G)
     clear: "Clear",
     zoomOut: "Zoom out",
     zoomIn: "Zoom in",
@@ -721,6 +721,12 @@ const STRINGS = {
     emptyCanvasMessage: (addNodeLabel) => `Canvas is empty — use "${addNodeLabel}" to begin`,
     importMergeSummary: (n, m) => `Merge: ${n} node(s) and ${m} edge(s) would be added. Nothing is ever removed.`,
     importReplaceSummary: (n) => `Replace: same additions, plus ${n} node(s)/edge(s) not in this file would be removed.`,
+    // Agent Ontology (agent_ontology_spec.md §8, Phase G) — Domain Model YAML
+    // import. Deliberately more aggressive than the plain TXT summary above:
+    // a matched class/relationship/rule/action is overwritten, not left
+    // untouched, on both Merge and Replace.
+    importYamlMergeSummary: (added, changed) => `Merge: ${added} item(s) would be added, ${changed} existing item(s) would be updated with the file's values. Nothing is removed.`,
+    importYamlReplaceSummary: (n) => `Replace: same additions/updates, plus ${n} item(s) not in this file would be removed.`,
     defaultRelation: "related to",
     sessionRestoredToast: (n, m) => `Restored last session (${n} node${n === 1 ? "" : "s"}, ${m} edge${m === 1 ? "" : "s"})`,
     // Agent Ontology (agent_ontology_spec.md §7) — Class/Relationship details dialog.
@@ -769,7 +775,7 @@ const STRINGS = {
     saveVersion: "Verzió mentése",
     folderSync: "Mappa szinkronizálás",
     folderSynced: (name) => `Szinkronizálva: ${name}`,
-    importFromTxt: "Importálás TXT-ből",
+    importButton: "Importálás",
     clear: "Törlés",
     zoomOut: "Kicsinyítés",
     zoomIn: "Nagyítás",
@@ -790,6 +796,8 @@ const STRINGS = {
     emptyCanvasMessage: (addNodeLabel) => `A vászon üres — kattints a(z) "${addNodeLabel}" gombra a kezdéshez`,
     importMergeSummary: (n, m) => `Egyesítés: ${n} csomópont és ${m} él kerülne hozzáadásra. Semmi nem törlődik.`,
     importReplaceSummary: (n) => `Csere: ugyanazok a hozzáadások, plusz ${n} csomópont/él törlődne, amelyek nincsenek ebben a fájlban.`,
+    importYamlMergeSummary: (added, changed) => `Egyesítés: ${added} elem kerülne hozzáadásra, ${changed} meglévő elem frissülne a fájl értékeivel. Semmi nem törlődik.`,
+    importYamlReplaceSummary: (n) => `Csere: ugyanazok a hozzáadások/frissítések, plusz ${n} elem törlődne, amelyek nincsenek ebben a fájlban.`,
     defaultRelation: "kapcsolódik",
     sessionRestoredToast: (n, m) => `Visszaállítva az előző munkamenet (${n} csomópont, ${m} él)`,
     // Agent Ontology (agent_ontology_spec.md §7) — Class/Relationship details dialog.
@@ -873,7 +881,7 @@ function applyLanguage() {
   byId("btn-undo").textContent = t("undo");
   byId("btn-redo").textContent = t("redo");
   byId("btn-save-version").textContent = t("saveVersion");
-  byId("btn-import-txt").textContent = t("importFromTxt");
+  byId("btn-import-txt").textContent = t("importButton");
   byId("btn-clear").textContent = t("clear");
   byId("btn-zoom-out").setAttribute("aria-label", t("zoomOut"));
   byId("btn-zoom-in").setAttribute("aria-label", t("zoomIn"));
@@ -3137,8 +3145,18 @@ function toYaml(rootObject) {
 // fixed name for the (practically unreachable — beginAddEdgePrompt() always
 // defaults a blank relation to t("defaultRelation")) case of no word
 // characters at all.
+//
+// Idempotent by construction (toCamelCaseId(toCamelCaseId(x)) === toCamelCaseId(x)
+// for realistic input): a lowercase-then-uppercase boundary is treated as a
+// word break too, not just non-letter/digit separators, so re-deriving from
+// an already-camelCase string (e.g. a relation label Phase G's importer
+// already normalized on a prior round trip) doesn't get flattened into one
+// giant lowercased word on the next pass — see agent_ontology_todo.md's
+// Phase G Log entry for the bug this fixes (a re-import wrongly seeing its
+// own previously-normalized edge as a non-match and duplicating it).
 function toCamelCaseId(text) {
-  const words = String(text).trim().split(/[^\p{L}\p{N}]+/u).filter(Boolean);
+  const spaced = String(text).replace(/([\p{Ll}\p{N}])(\p{Lu})/gu, "$1 $2");
+  const words = spaced.trim().split(/[^\p{L}\p{N}]+/u).filter(Boolean);
   if (words.length === 0) return "relationship";
   return words
     .map((w, i) => (i === 0 ? w.toLowerCase() : w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()))
@@ -3477,23 +3495,346 @@ function commitTxtImport(text, mode) {
   markDirty();
 }
 
+// ---------------------------------------------------------------------------
+// Domain Model YAML import (agent_ontology_spec.md §5/§8, Phase G) — the
+// inverse of buildDomainYamlExport()/toYaml() above. Hand-written to parse
+// exactly the block-style subset that serializer can produce (2-space
+// indent, "- item" lists, "key:"/"key: value" maps, double-quoted/escaped
+// scalars, inline "[]"/"{}" for empty collections) — not a general YAML
+// parser, the same "symmetric to the app's own grammar, not the whole spec"
+// posture parseTxtImport() takes for the TXT format. Malformed/truncated
+// input degrades gracefully (missing pieces default to empty) rather than
+// throwing, matching parseTxtImport()'s own skip-don't-crash discipline.
+//
+// Import semantics are deliberately more aggressive than TXT's node/edge
+// merge: a class/relationship/rule/action matched against something already
+// on canvas gets its fields overwritten by the imported values (not left
+// untouched) on both Merge and Replace — only Replace additionally removes
+// anything not present in the file. This is a real, decided divergence from
+// TXT import's "existing entries are never touched" posture, not an
+// oversight — see the dated Log entry in agent_ontology_todo.md.
+// ---------------------------------------------------------------------------
+
+function yamlUnescapeQuoted(body) {
+  return body
+    .replace(/\\n/g, "\n")
+    .replace(/\\t/g, "\t")
+    .replace(/\\r/g, "\r")
+    .replace(/\\"/g, '"')
+    .replace(/\\\\/g, "\\");
+}
+
+// Inverse of yamlScalar()/the empty-collection shorthand — a bare (post
+// "key: ") value token back into null / [] / {} / a string.
+function parseYamlValueToken(token) {
+  if (token === "[]") return [];
+  if (token === "{}") return {};
+  if (token === "null" || token === "") return null;
+  if (token.length >= 2 && token.startsWith('"') && token.endsWith('"')) {
+    return yamlUnescapeQuoted(token.slice(1, -1));
+  }
+  return token;
+}
+
+function findYamlClosingQuote(s, openIdx) {
+  for (let i = openIdx + 1; i < s.length; i++) {
+    if (s[i] === "\\") { i += 1; continue; }
+    if (s[i] === '"') return i;
+  }
+  return -1;
+}
+
+// Splits a "key: value" or bare "key:" (value continues on nested lines)
+// line into [key, valueToken | undefined]. Returns null if the line isn't
+// a recognizable key line at all (e.g. a plain scalar list item). A
+// possibly-quoted key is resolved first since our own keys are only ever
+// quoted when they'd otherwise be ambiguous (e.g. contain ": ").
+function splitYamlKeyValue(content) {
+  let key, rest;
+  if (content.startsWith('"')) {
+    const end = findYamlClosingQuote(content, 0);
+    if (end === -1) return null;
+    key = yamlUnescapeQuoted(content.slice(1, end));
+    rest = content.slice(end + 1);
+  } else {
+    const colon = content.indexOf(":");
+    if (colon === -1) return null;
+    key = content.slice(0, colon);
+    rest = content.slice(colon);
+  }
+  if (!rest.startsWith(":")) return null;
+  rest = rest.slice(1);
+  if (rest === "") return [key, undefined];
+  if (!rest.startsWith(" ")) return null; // malformed — not "key:" nor "key: value"
+  return [key, rest.slice(1)];
+}
+
+// Recursively parses one YAML block (a map or a list) starting at `indent`
+// (in 2-space units) from `lines[pos.i]` onward, advancing `pos.i` past
+// everything it consumes. `lines` is a flat array of {indent, content}
+// (blank lines and #-comments already stripped). Mirrors yamlLines() in
+// reverse, including its one special case: a list item that's itself a
+// mapping (relationships' `- name: ...` entries) has its first key sharing
+// the dash's line.
+function parseYamlBlock(lines, pos, indent) {
+  if (pos.i >= lines.length || lines[pos.i].indent < indent) return undefined;
+  const first = lines[pos.i];
+  if (first.content === "[]") { pos.i += 1; return []; }
+  if (first.content === "{}") { pos.i += 1; return {}; }
+  if (first.content === "-" || first.content.startsWith("- ")) {
+    const arr = [];
+    while (pos.i < lines.length && lines[pos.i].indent === indent &&
+      (lines[pos.i].content === "-" || lines[pos.i].content.startsWith("- "))) {
+      const itemContent = lines[pos.i].content === "-" ? "" : lines[pos.i].content.slice(2);
+      pos.i += 1;
+      if (itemContent === "") { arr.push(parseYamlBlock(lines, pos, indent + 1)); continue; }
+      const kv = splitYamlKeyValue(itemContent);
+      if (!kv) { arr.push(parseYamlValueToken(itemContent)); continue; }
+      const obj = {};
+      obj[kv[0]] = kv[1] !== undefined ? parseYamlValueToken(kv[1]) : parseYamlBlock(lines, pos, indent + 1);
+      while (pos.i < lines.length && lines[pos.i].indent === indent + 1) {
+        const kv2 = splitYamlKeyValue(lines[pos.i].content);
+        if (!kv2) break;
+        pos.i += 1;
+        obj[kv2[0]] = kv2[1] !== undefined ? parseYamlValueToken(kv2[1]) : parseYamlBlock(lines, pos, indent + 2);
+      }
+      arr.push(obj);
+    }
+    return arr;
+  }
+  const obj = {};
+  while (pos.i < lines.length && lines[pos.i].indent === indent) {
+    const kv = splitYamlKeyValue(lines[pos.i].content);
+    if (!kv) break; // not a key line — stop this block defensively rather than crash
+    pos.i += 1;
+    obj[kv[0]] = kv[1] !== undefined ? parseYamlValueToken(kv[1]) : parseYamlBlock(lines, pos, indent + 1);
+  }
+  return obj;
+}
+
+function parseDomainYamlImport(text) {
+  const lines = [];
+  for (const raw of text.split(/\r\n|\n|\r/)) {
+    const noTrailing = raw.replace(/[ \t]+$/, "");
+    const trimmed = noTrailing.trim();
+    if (trimmed === "" || trimmed.startsWith("#")) continue;
+    const indentSpaces = noTrailing.length - noTrailing.trimStart().length;
+    if (indentSpaces % 2 !== 0) continue; // malformed indentation — skip defensively
+    lines.push({ indent: indentSpaces / 2, content: noTrailing.trimStart() });
+  }
+  const root = parseYamlBlock(lines, { i: 0 }, 0) || {};
+  const asMap = (v) => (v && typeof v === "object" && !Array.isArray(v)) ? v : {};
+  const asList = (v) => Array.isArray(v) ? v : [];
+  return {
+    classes: asMap(root.classes),
+    relationships: asList(root.relationships),
+    rules: asMap(root.rules),
+    actions: asMap(root.actions),
+  };
+}
+
+// Shared by the dialog's diff-count preview and the real commit (mirrors
+// planTxtImport()'s own "compute once, reuse for both" shape) — resolves
+// against label/name maps that include both real existing entries and
+// lightweight "would be created" placeholders, so relationships/actions
+// referencing a class or rule declared earlier in the same file resolve
+// correctly even before anything is actually created.
+function planYamlImport(parsed) {
+  const classLabels = Object.keys(parsed.classes);
+  const ruleNames = Object.keys(parsed.rules);
+  const actionNames = Object.keys(parsed.actions);
+
+  const classPlans = classLabels.map((label) => ({
+    label, existing: state.nodes.find((n) => n.label === label) || null,
+  }));
+  const rulePlans = ruleNames.map((name) => ({
+    name, existing: state.rules.find((r) => r.name === name) || null,
+  }));
+  const actionPlans = actionNames.map((name) => ({
+    name, existing: state.actions.find((a) => a.name === name) || null,
+  }));
+
+  const labelIsKnown = new Set(classLabels);
+  for (const n of state.nodes) labelIsKnown.add(n.label);
+  const relationshipPlans = [];
+  for (const rel of parsed.relationships) {
+    if (!rel || typeof rel !== "object") continue;
+    if (!labelIsKnown.has(rel.from) || !labelIsKnown.has(rel.to)) continue; // dangling reference — skip
+    const existing = state.edges.find((e) => {
+      const src = state.nodes.find((n) => n.id === e.source);
+      const tgt = state.nodes.find((n) => n.id === e.target);
+      return src && tgt && src.label === rel.from && tgt.label === rel.to &&
+        toCamelCaseId(e.relation) === rel.name;
+    });
+    relationshipPlans.push({ rel, existing: existing || null });
+  }
+
+  const addedCount = classPlans.filter((p) => !p.existing).length +
+    relationshipPlans.filter((p) => !p.existing).length +
+    rulePlans.filter((p) => !p.existing).length +
+    actionPlans.filter((p) => !p.existing).length;
+  const changedCount = classPlans.filter((p) => p.existing).length +
+    relationshipPlans.filter((p) => p.existing).length +
+    rulePlans.filter((p) => p.existing).length +
+    actionPlans.filter((p) => p.existing).length;
+
+  let removedCount = 0;
+  if (state.nodes.length || state.edges.length || state.rules.length || state.actions.length) {
+    const matchedNodeIds = new Set(classPlans.filter((p) => p.existing).map((p) => p.existing.id));
+    const matchedEdgeIds = new Set(relationshipPlans.filter((p) => p.existing).map((p) => p.existing.id));
+    const matchedRuleIds = new Set(rulePlans.filter((p) => p.existing).map((p) => p.existing.id));
+    const matchedActionIds = new Set(actionPlans.filter((p) => p.existing).map((p) => p.existing.id));
+    const removedNodes = state.nodes.filter((n) => !matchedNodeIds.has(n.id)).length;
+    const removedEdges = state.edges.filter((e) => !matchedEdgeIds.has(e.id) &&
+      !state.nodes.some((n) => (n.id === e.source || n.id === e.target) && !matchedNodeIds.has(n.id))).length;
+    const removedRules = state.rules.filter((r) => !matchedRuleIds.has(r.id)).length;
+    const removedActions = state.actions.filter((a) => !matchedActionIds.has(a.id)).length;
+    removedCount = removedNodes + removedEdges + removedRules + removedActions;
+  }
+
+  return { classPlans, relationshipPlans, rulePlans, actionPlans, addedCount, changedCount, removedCount };
+}
+
+function commitYamlImport(text, mode) {
+  const before = snapshotState();
+  const parsed = parseDomainYamlImport(text);
+  const nextShelfPosition = computeImportShelf();
+
+  const labelToNode = new Map();
+  for (const n of state.nodes) labelToNode.set(n.label, n);
+  const matchedNodeIds = new Set();
+  for (const [label, cls] of Object.entries(parsed.classes)) {
+    const properties = Object.entries(cls && cls.properties && typeof cls.properties === "object" ? cls.properties : {})
+      .map(([name, p]) => ({
+        id: `p_${Math.random().toString(36).slice(2, 9)}`, name, // matches the property-id convention createPropertyRow() uses
+        type: (p && p.type) || "text",
+        unit: (p && p.unit) || null,
+        allowed: (p && Array.isArray(p.allowed)) ? p.allowed : null,
+      }));
+    const meaning = cls && typeof cls.meaning === "string" ? cls.meaning : null;
+    const aliases = (cls && Array.isArray(cls.aliases)) ? [...cls.aliases] : [];
+    const existing = state.nodes.find((n) => n.label === label);
+    if (existing) {
+      existing.meaning = meaning;
+      existing.aliases = aliases;
+      existing.properties = properties;
+      matchedNodeIds.add(existing.id);
+      labelToNode.set(label, existing);
+    } else {
+      const pos = nextShelfPosition();
+      const node = createNode(pos.x, pos.y, label);
+      node.meaning = meaning;
+      node.aliases = aliases;
+      node.properties = properties;
+      matchedNodeIds.add(node.id);
+      labelToNode.set(label, node);
+    }
+  }
+
+  const nameToRule = new Map();
+  for (const r of state.rules) nameToRule.set(r.name, r);
+  const matchedRuleIds = new Set();
+  for (const [name, rule] of Object.entries(parsed.rules)) {
+    const conditions = (rule && Array.isArray(rule.conditions)) ? [...rule.conditions] : [];
+    const existing = state.rules.find((r) => r.name === name);
+    if (existing) {
+      existing.conditions = conditions;
+      matchedRuleIds.add(existing.id);
+      nameToRule.set(name, existing);
+    } else {
+      const r = createRule(name, conditions);
+      matchedRuleIds.add(r.id);
+      nameToRule.set(name, r);
+    }
+  }
+
+  const matchedEdgeIds = new Set();
+  for (const rel of parsed.relationships) {
+    if (!rel || typeof rel !== "object") continue;
+    const src = labelToNode.get(rel.from);
+    const tgt = labelToNode.get(rel.to);
+    if (!src || !tgt) continue; // references a class not in this file/on canvas — skip defensively
+    const relationName = rel.name || toCamelCaseId("");
+    const meaning = typeof rel.meaning === "string" ? rel.meaning : null;
+    const existing = state.edges.find((e) => {
+      const s = state.nodes.find((n) => n.id === e.source);
+      const t = state.nodes.find((n) => n.id === e.target);
+      return s && t && s.label === rel.from && t.label === rel.to && toCamelCaseId(e.relation) === relationName;
+    });
+    if (existing) {
+      existing.relation = relationName; // aggressive overwrite normalizes the label to the imported name
+      existing.meaning = meaning;
+      matchedEdgeIds.add(existing.id);
+    } else {
+      const edge = createEdge(src.id, tgt.id, relationName, true);
+      edge.meaning = meaning;
+      matchedEdgeIds.add(edge.id);
+    }
+  }
+
+  const matchedActionIds = new Set();
+  for (const [name, action] of Object.entries(parsed.actions)) {
+    const inputNode = action && typeof action.input === "string" ? labelToNode.get(action.input) : null;
+    const preconditionIds = (action && Array.isArray(action.preconditions))
+      ? action.preconditions.map((n) => nameToRule.get(n)).filter(Boolean).map((r) => r.id)
+      : [];
+    const effect = (action && typeof action.effect === "string") ? action.effect : "";
+    const verification = (action && typeof action.verification === "string") ? action.verification : "";
+    const existing = state.actions.find((a) => a.name === name);
+    if (existing) {
+      existing.inputClassId = inputNode ? inputNode.id : null;
+      existing.preconditions = preconditionIds;
+      existing.effect = effect;
+      existing.verification = verification;
+      matchedActionIds.add(existing.id);
+    } else {
+      const a = createAction(name, inputNode ? inputNode.id : null, preconditionIds, effect, verification);
+      matchedActionIds.add(a.id);
+    }
+  }
+
+  if (mode === "replace") {
+    for (const n of state.nodes.filter((n) => !matchedNodeIds.has(n.id))) deleteNode(n.id);
+    for (const e of state.edges.filter((e) => !matchedEdgeIds.has(e.id))) deleteEdge(e.id);
+    for (const r of state.rules.filter((r) => !matchedRuleIds.has(r.id))) deleteRule(r.id);
+    for (const a of state.actions.filter((a) => !matchedActionIds.has(a.id))) deleteAction(a.id);
+  }
+
+  pushHistory(before, snapshotState());
+  newlyImportedIds = new Set(); // Section-5.3-style highlight only applies to plain node/edge TXT import
+  markDirty();
+}
+
 const importOverlay = document.getElementById("import-overlay");
 const importSummaryEl = document.getElementById("import-summary");
 const importMergeBtn = document.getElementById("import-merge");
 const importReplaceBtn = document.getElementById("import-replace");
 const importCancelBtn = document.getElementById("import-cancel");
 let pendingImportText = null;
+// "txt" (spec.md §5.3, node/edge merge-never-touches-matches) or "yaml"
+// (agent_ontology_spec.md §8, Phase G — aggressive overwrite-on-match). Set
+// alongside pendingImportText so Merge/Replace dispatch to the right
+// parser/commit pair without re-sniffing the file content.
+let pendingImportKind = "txt";
 
-function openImportDialog(text) {
+function hasAnyGraphContent() {
+  return Boolean(state.nodes.length || state.edges.length || state.rules.length || state.actions.length);
+}
+
+function openImportDialog(text, kind = "txt") {
   pendingImportText = text;
-  const plan = planTxtImport(parseTxtImport(text));
-  const lines = [
-    t("importMergeSummary", plan.newNodeCount, plan.newEdgeCount),
-  ];
-  if (state.nodes.length || state.edges.length) {
-    lines.push(t("importReplaceSummary", plan.removedCount));
+  pendingImportKind = kind;
+  const lines = [];
+  if (kind === "yaml") {
+    const plan = planYamlImport(parseDomainYamlImport(text));
+    lines.push(t("importYamlMergeSummary", plan.addedCount, plan.changedCount));
+    if (hasAnyGraphContent()) lines.push(t("importYamlReplaceSummary", plan.removedCount));
+    else importReplaceBtn.style.display = "none";
   } else {
-    importReplaceBtn.style.display = "none";
+    const plan = planTxtImport(parseTxtImport(text));
+    lines.push(t("importMergeSummary", plan.newNodeCount, plan.newEdgeCount));
+    if (state.nodes.length || state.edges.length) lines.push(t("importReplaceSummary", plan.removedCount));
+    else importReplaceBtn.style.display = "none";
   }
   importSummaryEl.textContent = lines.join("\n\n");
   importOverlay.style.display = "flex";
@@ -3506,14 +3847,18 @@ function closeImportDialog() {
 }
 
 importMergeBtn.addEventListener("click", () => {
-  const text = pendingImportText;
+  const text = pendingImportText, kind = pendingImportKind;
   closeImportDialog();
-  if (text !== null) commitTxtImport(text, "merge");
+  if (text === null) return;
+  if (kind === "yaml") commitYamlImport(text, "merge");
+  else commitTxtImport(text, "merge");
 });
 importReplaceBtn.addEventListener("click", () => {
-  const text = pendingImportText;
+  const text = pendingImportText, kind = pendingImportKind;
   closeImportDialog();
-  if (text !== null) commitTxtImport(text, "replace");
+  if (text === null) return;
+  if (kind === "yaml") commitYamlImport(text, "replace");
+  else commitTxtImport(text, "replace");
 });
 importCancelBtn.addEventListener("click", () => closeImportDialog());
 importOverlay.addEventListener("click", (e) => { if (e.target === importOverlay) closeImportDialog(); });
@@ -3575,25 +3920,38 @@ graphTitleEl.addEventListener("keydown", (e) => {
   if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openRenameGraphTitle(); }
 });
 
+// .yaml/.yml -> the Domain Model importer (agent_ontology_spec.md §8, Phase
+// G); everything else falls through to the plain node/edge TXT importer
+// (spec.md §5.3) — matches the .domain.yaml extension Save Version writes,
+// and a bare .yaml/.yml for a hand-trimmed or hand-authored file.
+function importKindForFilename(name) {
+  const lower = name.toLowerCase();
+  return (lower.endsWith(".yaml") || lower.endsWith(".yml")) ? "yaml" : "txt";
+}
+
 const importInput = document.getElementById("import-file-input");
 document.getElementById("btn-import-txt").addEventListener("click", () => importInput.click());
 importInput.addEventListener("change", async () => {
   const file = importInput.files && importInput.files[0];
   importInput.value = ""; // allow re-selecting the same filename later
   if (!file) return;
-  openImportDialog(await file.text());
+  openImportDialog(await file.text(), importKindForFilename(file.name));
 });
 
-// Drag-and-drop of a .txt file onto the canvas, per Section 7's "where
-// supported" accelerator (native file-open dialog above is the baseline).
+// Drag-and-drop of a .txt/.yaml/.yml file onto the canvas, per Section 7's
+// "where supported" accelerator (native file-open dialog above is the
+// baseline).
 canvas.addEventListener("dragover", (e) => {
   if ([...e.dataTransfer.items].some((it) => it.kind === "file")) e.preventDefault();
 });
 canvas.addEventListener("drop", async (e) => {
-  const file = [...e.dataTransfer.files].find((f) => f.name.toLowerCase().endsWith(".txt"));
+  const file = [...e.dataTransfer.files].find((f) => {
+    const lower = f.name.toLowerCase();
+    return lower.endsWith(".txt") || lower.endsWith(".yaml") || lower.endsWith(".yml");
+  });
   if (!file) return;
   e.preventDefault();
-  openImportDialog(await file.text());
+  openImportDialog(await file.text(), importKindForFilename(file.name));
 });
 
 document.getElementById("btn-clear").addEventListener("click", () => {
