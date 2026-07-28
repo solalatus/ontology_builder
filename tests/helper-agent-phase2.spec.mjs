@@ -186,7 +186,7 @@ test("assistant and user message content is rendered as text, never as markup (X
   });
 });
 
-test("every request resends the system prompt, without a tools field, matching the current UI language", async () => {
+test("every request resends the system prompt, matching the current UI language", async () => {
   await withPage(async (page) => {
     await connectAgent(page);
     const bodies = mockChatSequence(page, [() => ({ body: chatCompletionBody("ok") })]);
@@ -196,7 +196,8 @@ test("every request resends the system prompt, without a tools field, matching t
 
     assert.equal(bodies[0].messages[0].role, "system");
     assert.match(bodies[0].messages[0].content, /OUTPUT LANGUAGE: English \(en\)/);
-    assert.equal(bodies[0].tools, undefined, "Phase 2 must not send a tools field yet");
+    // Whether a `tools` field is attached is Phase 3's concern (tests/helper-agent-phase3.spec.mjs) —
+    // this test only pins the system prompt/language behavior that's Phase 2's own.
   }, { lang: "en" });
 });
 
