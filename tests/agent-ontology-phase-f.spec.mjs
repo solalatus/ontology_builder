@@ -212,6 +212,24 @@ test("relation-label camelCase derivation handles multi-word, single-word, and p
   });
 });
 
+test("camelCase derivation is idempotent — re-deriving from an already-camelCase relation label doesn't flatten it", async () => {
+  // Phase G's importer normalizes a matched edge's relation text to the
+  // imported camelCase name (see agent_ontology_todo.md's Phase G Log
+  // entry). If toCamelCaseId() weren't idempotent, re-exporting after that
+  // normalization would derive a *different* name the second time around
+  // (e.g. "issuedBy" -> "issuedby", losing the internal capital), breaking
+  // a re-import's ability to recognize its own previously-normalized edge.
+  await withPage(async (page) => {
+    await addNodeViaDblClick(page, 200, 200, "A");
+    await addNodeViaDblClick(page, 500, 200, "B");
+    await createEdgeViaConnectMode(page, 200, 200, 500, 200, "issuedBy"); // already camelCase, not "issued by"
+    await page.evaluate(() => window.__kg.actions.setMode("idle"));
+
+    const yaml = await domainYaml(page);
+    assert.ok(yaml.includes("- name: issuedBy\n"), "re-deriving from an already-camelCase label is a no-op, not a further flattening");
+  });
+});
+
 test("an action referencing a deleted input class exports input: null rather than a dangling id", async () => {
   await withPage(async (page) => {
     await addNodeViaDblClick(page, 300, 300, "Invoice");
