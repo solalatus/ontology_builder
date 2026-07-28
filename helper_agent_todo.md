@@ -10,13 +10,13 @@ merged into `main` — see `helper_agent_plan.md` §0.
 ## Current State
 
 - **Phase:** Phases 1 (panel scaffold + BYOK connect modal + live model list), 2 (live chat, no tools
-  yet), and 3 (tool-calling) are implemented, tested, and green. Phases 4–6 (see `helper_agent_plan.md`
-  §6) are not started.
-- **Test suite:** `tests/helper-agent-phase1.spec.mjs` (11 tests) + `tests/helper-agent-phase2.spec.mjs`
-  (15 tests) + `tests/helper-agent-phase3.spec.mjs` (9 tests), all mocking the OpenAI API via
-  `page.route()` (no real network calls, no API key needed). Full repo suite: 322 JS tests, all green,
-  run twice consecutively (plus 3 standalone reruns of `tests/ui-polish.spec.mjs` after a small
-  robustness fix there — see the Phase 2 Log entry).
+  yet), and 3 (tool-calling) are implemented, tested, and green, plus a Phase-3 addendum (`get_graph_state`
+  + prompt-cache key, user-directed after Phase 3 shipped — see its own dated Log entry below). Phases
+  4–6 (see `helper_agent_plan.md` §6) are not started.
+- **Test suite:** `tests/helper-agent-phase1.spec.mjs` (11) + `tests/helper-agent-phase2.spec.mjs` (15) +
+  `tests/helper-agent-phase3.spec.mjs` (9) + `tests/helper-agent-graph-state.spec.mjs` (10), all mocking
+  the OpenAI API via `page.route()` (no real network calls, no API key needed). Full repo suite: 340 JS
+  tests, all green, run twice consecutively.
 - **What Phase 1 built:** the collapsed-by-default `#agent-panel` (toggle fixed to the left edge), the
   two-stage `#agent-connect-overlay` modal (stage 1: enter API key → live `GET /v1/models` call, which
   doubles as the real-world CORS check per plan §3; stage 2: review/override the heuristically
@@ -213,3 +213,41 @@ to any of this branch's own `helper-agent-phase*.spec.mjs` files.
 
 Full suite (base app's 295 + this subproject's own 35 = 330 JS tests) green, run twice consecutively; 13
 Python tests green.
+
+## Addendum to Phase 3 — `get_graph_state` + prompt-cache key
+
+**2026-07-28.** User-directed follow-up after asking "how does the agent know about the current state of
+the graph?" — a real gap: the agent had no channel at all for learning what's already on canvas, only the
+running conversation. See `helper_agent_plan.md` §4.5b for the full design writeup and the explicit
+tradeoff reasoning (a pull tool, chosen over auto-injecting live state into the system prompt, specifically
+to keep the prompt prefix byte-stable so OpenAI's prompt-prefix caching stays effective across a whole
+connection — the user's own explicit direction, overriding this plan's earlier default lean).
+
+- [x] `GET_GRAPH_STATE_TOOL` — no arguments, reuses the existing, already-tested `buildDomainYamlExport()`
+      verbatim (no new serialization logic). Attached to every chat request alongside
+      `APPLY_ONTOLOGY_YAML_TOOL`.
+- [x] New "STAYING IN SYNC WITH THE LIVE ONTOLOGY" system-prompt section (directly above "EDITING THE LIVE
+      ONTOLOGY"): call `get_graph_state` at conversation start, before any write it's not sure is genuinely
+      new-vs-changed, and after any long pause or surprise. Prompt-based behavioral guarding only — no
+      structural guarantee the model actually calls it, an explicit, accepted tradeoff for keeping the
+      cache prefix stable.
+- [x] `handleGetGraphStateCall()` — read-only, never touches `committedThisTurn`, so it never counts
+      against `apply_ontology_yaml`'s one-real-commit-per-turn guardrail and can be called any number of
+      times per turn, bounded only by the existing shared `AGENT_MAX_TOOL_ROUNDS` limit.
+      `sendAgentChatMessage()`'s tool-dispatch loop now branches on `call.function.name`.
+- [x] `agentState.promptCacheKey` — generated fresh on connect (`crypto.randomUUID()`-based), cleared on
+      disconnect, sent as `prompt_cache_key` on every request (both `callAgentChatRaw()` call sites,
+      including the summarization path). Clarified in code comments: OpenAI's prompt-prefix caching is
+      automatic with no explicit enable flag — `prompt_cache_key` only strengthens cache-hit *routing
+      consistency* for a shared long prefix, which is exactly what staying pull-tool-based (rather than
+      injecting live state into the prompt) is what makes worth doing at all.
+- [x] Tests: `tests/helper-agent-graph-state.spec.mjs` (10 new) — correctness against
+      `buildDomainYamlExport()` on empty and populated graphs, reflecting a manual canvas edit made
+      entirely outside the conversation, non-interaction with the one-commit guardrail, no undo step ever
+      created by the read tool, the shared round-limit still applying to a read-only loop, the tool
+      schema present on every request, **the system prompt's message content proven byte-identical before
+      and after the graph changes** (the concrete proof the cache-preserving design actually holds), the
+      cache key's stability within one connection and freshness across a reconnect, and graceful handling
+      of an unrecognized tool name. Updated one pre-existing Phase 3 test whose "exactly one tool"
+      assertion this addendum intentionally made untrue.
+- Full suite: 340 JS tests + 13 Python tests, green, run twice consecutively.

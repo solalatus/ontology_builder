@@ -1,8 +1,9 @@
 # Helper Agent — Implementation Plan
 
-Status: **Phases 1–3 implemented and tested** (see `helper_agent_todo.md` for
-the per-phase log). Revised after user feedback on the first draft (see §3,
-§4.1, §4.3, §4.9, §4.10 for what changed).
+Status: **Phases 1–3 implemented and tested, plus a Phase-3 addendum**
+(`get_graph_state` + prompt-cache key — see §4.5b; per-phase log in
+`helper_agent_todo.md`). Revised after user feedback on the first draft (see
+§3, §4.1, §4.3, §4.9, §4.10 for what changed).
 Branch: `helper_agent`, branched from `origin/main` at `533820e` (tip after PR #30).
 
 ## 0. Standing ground rules for this subproject
@@ -302,6 +303,47 @@ agent turn" property exactly (per the confirmed decision), the plan is:
   cheap to implement, and keeps the guarantee even if the model doesn't
   follow the instruction perfectly.
 
+### 4.5b Reading live graph state (`get_graph_state`) — added after Phase 3
+
+**Gap identified after Phase 3 shipped:** the model had no channel at all for
+learning what's already on the canvas. Its only "knowledge" of the graph was
+the running conversation — meaning it started every connection blind to any
+pre-existing content, went stale the instant the user made a manual edit
+through the canvas UI (a normal, expected thing to do with this panel open),
+and had no real way to tell "new" from "changed" despite the write tool's own
+instruction depending on that distinction.
+
+**Decision (explicit, overriding the plan's own default lean toward
+auto-injecting live state into the system prompt):** a second, read-only
+pull tool, `get_graph_state` — no arguments, returns the exact same YAML
+`buildDomainYamlExport()` already produces for Save Version and the manual
+Import dialog, so there's no new serialization logic and the model reads and
+writes one consistent grammar. The model decides when to call it; there is
+no structural guarantee it always has fresh state, only a strong prompt-level
+push (a new "STAYING IN SYNC WITH THE LIVE ONTOLOGY" system-prompt section,
+directly above "EDITING THE LIVE ONTOLOGY," instructing it to call this at
+conversation start, before any write it isn't sure is genuinely new-or-
+changed, and after any long pause or surprise).
+
+This was chosen explicitly over always injecting the live state into the
+system prompt on every request, *because* that would mean the system
+prompt's content changes every time the graph changes — breaking OpenAI's
+automatic prompt-prefix caching for the entire (large, expensive) system
+prompt/knowledge block on exactly those turns. A pull tool keeps that prefix
+byte-stable for the life of a connection. The accepted tradeoff, made
+knowingly rather than as an oversight: correctness now rests on prompt-level
+behavioral guarding instead of a structural guarantee, and a model that
+calls it far more often than necessary costs extra round-trips. Judged
+acceptable — an extra cheap tool call beats a stale write silently
+clobbering the expert's own work, and the alternative's cache-breaking cost
+was judged worse for a live, potentially-long-running conversation.
+
+`get_graph_state` has no side effects, so it never interacts with
+`apply_ontology_yaml`'s one-real-commit-per-turn guardrail (§4.5) — it can
+be called any number of times per turn, bounded only by the same
+`AGENT_MAX_TOOL_ROUNDS` safety limit every tool-calling round already
+respects.
+
 ### 4.6 API integration details
 
 - Endpoint: OpenAI Chat Completions (`/v1/chat/completions`) with `tools`
@@ -312,10 +354,15 @@ agent turn" property exactly (per the confirmed decision), the plan is:
   real complexity (partial JSON argument buffering) for a first
   implementation; can be revisited later.
 - Every request resends: system prompt + baked knowledge + full running
-  message history (the API is stateless). Noted cost/latency implication;
-  OpenAI's automatic prompt-prefix caching should absorb most of the
-  repeated-prefix cost for the system prompt/knowledge portion, but this is
-  an observation to confirm empirically, not something to build.
+  message history (the API is stateless). `prompt_cache_key` (a stable
+  per-connection routing hint, generated fresh on connect and reused for
+  every request in that session) is sent on every call to strengthen
+  OpenAI's automatic prompt-prefix caching's hit consistency — caching
+  itself needs no explicit opt-in flag, `prompt_cache_key` only improves
+  routing for it. This is exactly why §4.5b's `get_graph_state` is a pull
+  tool rather than data baked into the prompt: keeping the system-prompt
+  prefix byte-stable across a connection is what makes this cache key
+  actually pay off.
 - Error handling surfaced directly in the chat transcript as a system-style
   message: invalid key, rate limit (429), network/CORS failure, malformed
   tool-call arguments (caught around the `parseDomainYamlImport` call —

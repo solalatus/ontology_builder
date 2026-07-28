@@ -247,9 +247,12 @@ test("every chat request carries the apply_ontology_yaml tool definition", async
     await page.waitForFunction(() => !window.__kg.agent.isSending());
 
     assert.equal(bodies[0].tool_choice, "auto");
-    assert.equal(bodies[0].tools.length, 1);
-    assert.equal(bodies[0].tools[0].function.name, "apply_ontology_yaml");
-    assert.deepEqual(bodies[0].tools[0].function.parameters.required, ["yaml"]);
+    // apply_ontology_yaml plus get_graph_state (tests/helper-agent-graph-state.spec.mjs
+    // covers the read-only tool itself in depth) — this test only pins the write tool.
+    const names = bodies[0].tools.map((tl) => tl.function.name);
+    assert.ok(names.includes("apply_ontology_yaml"));
+    const applyTool = bodies[0].tools.find((tl) => tl.function.name === "apply_ontology_yaml");
+    assert.deepEqual(applyTool.function.parameters.required, ["yaml"]);
   });
 });
 
