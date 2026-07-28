@@ -163,6 +163,18 @@ dropdown; the user can override it to any other model their key can access
 before hitting Connect, or change it later from the connected panel header
 without reopening the modal.
 
+**Revised after live testing against a real key (`tests/helper-agent-live-openai.spec.mjs`).** The
+snippet above is what shipped originally; live testing found the newest id in a real reasoning pool could
+be a model that genuinely can't do function-calling on `/v1/chat/completions` at all (a real 400,
+`"Function tools with reasoning_effort are not supported ... in /v1/chat/completions"`) — nothing in
+OpenAI's own `/v1/models` response signals this ahead of time. The heuristic now also prefers the
+"standard tier" (the bare version id, optionally with a dated snapshot suffix — no mini/nano/pro/
+chat-latest/codex/preview-codename suffix) within the reasoning pool before falling back to the full pool.
+See `isStandardTierModel()`'s own comment in `index.html` and `helper_agent_todo.md`'s live-testing
+addendum for the full account of what was found and why this was the chosen fix over the alternatives
+(a live tool-calling capability probe at connect time was considered and rejected as disproportionate
+complexity/latency/cost for a BYOK panel).
+
 ### 4.2 Chat panel state machine
 
 Three states: `collapsed` → `disconnected` (expanded, showing Connect) →

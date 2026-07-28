@@ -336,3 +336,71 @@ for. Full suite: 348 JS tests + 13 Python tests, green, run twice consecutively.
 phases (4, 5, and 6) in one continuous pass. This closes out the six-phase plan from
 `helper_agent_plan.md` §6 in full; the branch remains `helper_agent`, still never merged into `main` per
 §0.
+
+## Addendum — live OpenAI integration tests + two real bugs found
+
+**2026-07-28.** User-directed follow-up: every prior test in this subproject mocks the OpenAI API
+entirely (`page.route()` serving hand-authored JSON), so nothing had ever exercised this code against the
+*actual* live API contract. Per explicit instruction: a gitignored `.env` (`OPENAI_API_KEY=...`) at the
+repo root, never committed and never baked into any shipped file, plus a new opt-in live test file.
+
+- [x] `tests/lib/env.mjs` — minimal dependency-free `.env` parser (`loadEnvKey(name)`); environment wins
+      over `.env` if both are set.
+- [x] `.gitignore` gained a `.env` entry.
+- [x] `tests/helper-agent-live-openai.spec.mjs` (6 tests) — see its own header comment for the full
+      design writeup. Skips entirely, with a clear reason, when no key is configured. Because a real
+      headless Chromium *inside this specific sandbox* cannot reach `api.openai.com` directly (confirmed
+      via `page.on("requestfailed")` → `net::ERR_CONNECTION_RESET`, reproducing the exact finding
+      `helper_agent_plan.md` §3's CORS spike already made once, independent of which key is used), every
+      live test's `page.route()` handler forwards the app's real outgoing request to the genuine OpenAI
+      endpoint via Node's own `fetch()` (confirmed reachable from Node in this sandbox) and relays the
+      real response back unmodified — the browser still drives real UI interactions and real app code the
+      whole way; only the last network hop is relayed through Node rather than dialed directly, a sandbox
+      artifact rather than a change to what's being tested. A real user's own browser has no such
+      restriction.
+- [x] Live coverage: a real `GET /v1/models` call (shape assumptions, default-model selection against a
+      real catalog), a real invalid-key 401, a real plain chat reply rendered through the actual UI, a
+      real tool-calling round trip that genuinely applies to the canvas through the real import pipeline,
+      a real `get_graph_state` call seeing a manually-added node, and the output-language lock holding
+      against a real Hungarian directive. Confirmed stable across two consecutive real runs.
+
+**Two real bugs found this way, neither of which any mocked test could have caught:**
+
+1. **Default-model heuristic picked a "deep-research" specialty model, and never saw `gpt-5.x` at all.**
+   Against a real key's actual model list, the newest id in the "reasoning" pool was
+   `o4-mini-deep-research-2025-06-26` — a specialized autonomous-research product, not a general chat
+   model — because the original heuristic only recognized `o<digit>` ids and the literal words
+   think/reason, so the account's entire `gpt-5.x` lineup (its real current reasoning-capable models) was
+   invisible to it. Fixed: excluded `deep-research`/`search-preview`/`search-api` from the chat-model
+   pool, and extended the reasoning-family heuristic to `gpt-5` and above.
+2. **That same fix's own newest pick, `gpt-5.6-luna`, turned out to be unusable by this app at all.**
+   A live chat-completion call with tools attached (i.e. every real request this app makes) returned a
+   real `400`: *"Function tools with reasoning_effort are not supported for gpt-5.6-luna in
+   /v1/chat/completions. To use function tools, use /v1/responses or set reasoning_effort to 'none'."*
+   Tested systematically across the account's whole reasoning-family model list: this failure was
+   specific to the newest preview-codename generation (`-luna`/`-terra`/`-sol`), not to `gpt-5.x` in
+   general (`gpt-5`, `gpt-5.5`, `gpt-5-mini`, `gpt-5-nano`, the o-series, and `gpt-4o-mini`/`gpt-4.1` all
+   supported tools fine). Also tested the error's own suggested workaround
+   (`reasoning_effort: "none"`) — it does unblock `gpt-5.6-luna`, but every other model tested (`o1`,
+   `o3-mini`, `gpt-5`, `gpt-5-mini`, `gpt-4o-mini`, `gpt-4.1`) rejects that same parameter outright, so
+   sending it unconditionally was not viable. Nothing in OpenAI's own `/v1/models` response signals this
+   incompatibility ahead of time. Fixed, and reinforced by the user's own explicit instruction ("medium
+   models are preferred, not the small/cheap ones"): added `isStandardTierModel()` — prefers the bare
+   version id (optionally with a dated snapshot suffix, e.g. `gpt-5.5-2026-04-23`) over any
+   mini/nano/pro/chat-latest/codex/preview-codename-suffixed variant. This satisfies the user's own
+   stated size preference and, as a side effect of the same rule, structurally avoids ever auto-selecting
+   an undiscovered-but-similarly-exotic preview variant again, without needing an extra live capability
+   probe on every connect.
+- [x] `pickDefaultAgentModel`'s mocked regression tests (`tests/helper-agent-phase1.spec.mjs`) rewritten
+      to match: standard-tier preferred over a newer mini/nano/pro variant, standard-tier preferred over a
+      newer preview-codename variant (the exact real-world shape of bug 2), a dated snapshot of the
+      standard tier still counts as standard, and the full reasoning pool remains the fallback when a key
+      has no standard-tier candidate at all.
+- [x] `tests/helper-agent-phase2.spec.mjs` gained two new mocked tests locking in the `insufficientQuota`
+      fix from the prior session (a 429 with `error.code: "insufficient_quota"` now shows a distinct
+      message from an ordinary rate limit; an unrecognized `error.code` still falls back to the ordinary
+      rate-limit message) — this fix had been implemented and tested before this addendum but is recorded
+      here since it was discovered by the same live-key investigation (the first key provided had no
+      billing quota at all, which is what led to writing that fix before a funded key was provided).
+- Full suite: 363 JS tests (including the 6 live tests, run for real against a funded key) + 13 Python
+  tests, green, run twice consecutively.

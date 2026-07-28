@@ -52,6 +52,27 @@ fallback is sandbox-specific and may not exist on your machine; the
   asserting it in a comment. Skips gracefully (with a console warning, not
   a failure) if `python3` isn't on `PATH` — see "Python tests" below.
 
+## Live OpenAI integration tests (opt-in)
+
+`helper-agent-live-openai.spec.mjs` is the one file in this suite that makes
+genuine calls to the real OpenAI API instead of mocking `page.route()` —
+every other `helper-agent-*` spec is fully mocked, deterministic, and needs
+no secret. It exists to catch the class of bug a hand-authored mock can
+never catch: a mismatch between what the code *assumes* the live API
+returns and what it actually returns today. It found two real bugs this way
+(see `helper_agent_todo.md`'s Log for the account) — a default-model
+heuristic that picked a specialty/incompatible model against a real
+account's model list, and a 429 error message that conflated a transient
+rate limit with a permanently exhausted quota.
+
+Opt-in: skips every test, with a clear reason, unless `OPENAI_API_KEY` is
+set. Put it in a `.env` file at the repo root (`OPENAI_API_KEY=sk-...`) —
+`.env` is gitignored and must never be committed — or export it in the
+environment; either way `tests/lib/env.mjs` picks it up (environment wins
+over `.env` if both are set). Costs a small amount of real money per run (a
+handful of cheap chat-completion calls); never runs in CI, only when a key
+is deliberately provided.
+
 ## Python tests
 
 `tools/load_edge_list.py` (the reference loader from spec.md's Appendix,

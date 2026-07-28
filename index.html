@@ -4528,10 +4528,30 @@ function isLikelyChatModel(id) {
   return !/whisper|tts|dall-e|embedding|moderation|davinci|babbage|curie|ada|realtime|audio|transcribe|image|deep-research|search-preview|search-api/i.test(id);
 }
 
+// A "standard tier" id is the bare version string (optionally with a
+// dated snapshot suffix, e.g. "gpt-5.5-2026-04-23") -- no -mini/-nano/-pro
+// tier suffix, and no bare-word preview-codename suffix either (e.g.
+// "gpt-5.6-luna"). Preferred over those for two independent reasons that
+// happen to point the same way: the user's own stated preference for a
+// medium model over the small/cheap tier, and a real, live-discovered bug
+// this excludes as a side effect -- a preview-codename generation
+// ("-luna"/"-terra"/"-sol") that returned a real 400 ("Function tools ...
+// are not supported ... in /v1/chat/completions") the moment tools were
+// attached, which is every real request this app makes. No field in
+// OpenAI's own /v1/models response signals this incompatibility ahead of
+// time; avoiding non-standard-tier ids by default is the safest bet without
+// an extra live capability probe on every connect.
+function isStandardTierModel(id) {
+  return /^(gpt-[0-9]+(\.[0-9]+)?|o[0-9]+)(-\d{4}-\d{2}-\d{2})?$/i.test(id);
+}
+
 function pickDefaultAgentModel(models) {
   const chatModels = models.filter((m) => isLikelyChatModel(m.id));
-  const pool = chatModels.filter((m) => isLikelyReasoningModel(m.id));
-  const candidates = pool.length ? pool : chatModels;
+  const reasoningModels = chatModels.filter((m) => isLikelyReasoningModel(m.id));
+  const standardReasoningModels = reasoningModels.filter((m) => isStandardTierModel(m.id));
+  const candidates = standardReasoningModels.length ? standardReasoningModels
+    : reasoningModels.length ? reasoningModels
+    : chatModels;
   if (!candidates.length) return null;
   return [...candidates].sort((a, b) => (b.created || 0) - (a.created || 0))[0].id;
 }
@@ -5735,6 +5755,7 @@ window.__kg = {
     pickDefaultModel: pickDefaultAgentModel,
     isLikelyReasoningModel,
     isLikelyChatModel,
+    isStandardTierModel,
     getConnectErrorKind: () => agentConnectErrorKind,
     // Phase 2 — live chat test surface.
     sendMessage: submitAgentChatInput,
