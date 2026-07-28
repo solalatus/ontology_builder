@@ -8,14 +8,17 @@ enough that this can be picked up cold.
 
 ## Current State
 
-- **Phase:** Planning only. `agent_ontology_spec.md` (v0.1 draft) is written and committed on this
-  branch (`agent_ontology`). **No implementation has started** — this file exists to track the phased
-  build once the open questions in the spec's Section 9 are resolved (or explicitly deferred) and the
-  first phase is greenlit.
+- **Phase:** Phase A (data model additions) is implemented, tested, and green — see its checklist
+  below, now fully checked off. Phases B through I are not started. The four open questions from
+  `agent_ontology_spec.md` §9 have not been explicitly answered by the user yet; Phase A proceeded on
+  the spec's own stated defaults (§9's answers don't block Phase A's data-model-only scope — they
+  matter starting Phase D/F). Still worth resolving before those phases start.
 - **Relationship to the base app:** this branch builds strictly on top of `index.html` as it exists on
   `main` today (all PRs through #22 merged: bugfixes, visual polish, Android-reliability follow-ups).
   Nothing in the base app's `spec.md`/`TODO.md` changes — this is a new capability layered on, tracked
   separately so the base app's own history/conventions stay undisturbed.
+- **Test suite:** 286 JS tests (279 base + 7 new in `tests/agent-ontology-phase-a.spec.mjs`) + 15
+  Python tests, all green, run twice consecutively.
 - **Target file:** still `index.html` (same single file — Agent Ontology is not a separate app or a
   second file, just new fields/UI/export on the existing one).
 - **Next action:** confirm/resolve the four open questions in `agent_ontology_spec.md` §9 (or proceed
@@ -50,21 +53,40 @@ Same tooling and conventions as the base app — no new test framework, no new d
 
 ---
 
-## Phase A — Data model additions
+## Phase A — Data model additions ✅ done
 
-- [ ] Rename `Node.notes` → `Node.meaning` (schema + the one place it's read/written today — see
+- [x] Rename `Node.notes` → `Node.meaning` (schema + the one place it's read/written today — see
       `agent_ontology_spec.md` §3, this is a rename of a dormant field, not new state)
-- [ ] Add `Node.aliases: string[]` (default `[]`)
-- [ ] Add `Node.properties: Property[]` (default `[]`) — shape per spec §4.1
-- [ ] Add `Edge.meaning: string | null` (default `null`)
-- [ ] Add top-level `state.rules: Rule[]` and `state.actions: Action[]` (default `[]` each)
-- [ ] Tier 1 payload (`writeGraphToStorage`/`loadGraphFromStorage`) extended to persist/restore the
-      four new fields above — backward compatible: a payload saved before this phase loads with all
-      four defaulting to their empty values, no crash, no migration step
-- [ ] Existing `.json` export (`spec.md` §5.1) includes the new fields on every node/edge, plus two new
+- [x] Add `Node.aliases: string[]` (default `[]`)
+- [x] Add `Node.properties: Property[]` (default `[]`) — shape per spec §4.1
+- [x] Add `Edge.meaning: string | null` (default `null`)
+- [x] Add top-level `state.rules: Rule[]` and `state.actions: Action[]` (default `[]` each), plus
+      `state.nextRuleNum`/`state.nextActionNum` id counters and `createRule`/`createAction`/
+      `deleteRule`/`deleteAction` data-model constructors (mirroring `createNode`/`createEdge` exactly
+      — no undo-history registration inside them either, that's always the caller's job; no UI calls
+      them yet, exposed on `window.__kg.actions` for Phase D/E and for this phase's own tests)
+- [x] Tier 1 payload (`writeGraphToStorage`/`loadGraphFromStorage`) extended to persist/restore the new
+      fields above — backward compatible: a payload saved before this phase loads with all new fields
+      defaulting to their empty values (`normalizeLoadedNode`/`normalizeLoadedEdge`), no crash, no
+      migration step, verified via a hand-seeded pre-Phase-A-shaped `localStorage` payload
+- [x] `snapshotState()`/`restoreSnapshot()` (the undo/redo engine) extended to clone `aliases`/
+      `properties`/`rules`/`actions` too, not just `groups`/nodes/edges as before — nothing mutates
+      these yet via any UI, but this keeps the "every field is undo-correct by construction" property
+      the existing code already documents, rather than leaving a latent gap for Phase D/E to trip over
+- [x] Existing `.json` export (`spec.md` §5.1) includes the new fields on every node/edge, plus two new
       top-level `rules`/`actions` arrays
-- Tests: a saved-before-this-phase payload still loads correctly (regression); new fields round-trip
-  through Tier 1 save/reload; new fields round-trip through JSON export
+- Tests (`tests/agent-ontology-phase-a.spec.mjs`, 7 new tests, all green): `createRule`/`createAction`
+  produce sequential, non-colliding ids; `deleteRule`/`deleteAction` remove by id without disturbing
+  anything else; a node's meaning/aliases/properties and an edge's meaning survive a Tier 1 save/reload
+  round-trip; rules/actions (and their id counters) survive the same round-trip, including a
+  post-reload id not colliding with a restored one; a payload saved before this phase existed loads
+  cleanly with every new field defaulting correctly, no crash, no console error; the JSON export
+  includes populated meaning/aliases/properties/rules/actions when they're actually set; undo/redo
+  restores rules via a genuinely independent clone, not an aliased array reference (proven by mutating
+  live state in place after taking a snapshot, then confirming redo doesn't inherit that mutation).
+  Fixed 3 pre-existing base-app tests that referenced the now-renamed `notes` field or hand-rolled the
+  old (pre-Phase-A) two-array snapshot shape directly (`phase1.spec.mjs`, `phase3.spec.mjs`,
+  `phase5.spec.mjs`) — expected fallout from an intentional rename/shape change, not regressions.
 
 ## Phase B — Class editor UI
 
@@ -163,3 +185,27 @@ as the reference and record deltas/clarifications here instead of rewriting the 
   implementing (app title rename, boolean property type, relationship-key collision handling, whether
   groups export as hierarchy or stay cosmetic) — spec states a default for each so implementation isn't
   blocked on an answer, but Phase A hasn't started yet pending direction on those.
+- 2026-07-26 — User asked to start implementing on this same branch, first phase only, then test and
+  PR and wait for merge before continuing. Phase A (data model additions) implemented in full per its
+  checklist above: `Node.notes` renamed to `meaning` (the one existing read/write site, in
+  `buildJsonExport`, updated along with it); `Node.aliases`/`Node.properties` added; `Edge.meaning`
+  added; `state.rules`/`state.actions` added as new top-level arrays with their own id counters and
+  `createRule`/`createAction`/`deleteRule`/`deleteAction` constructors (same shape and lack of
+  self-registered undo history as `createNode`/`createEdge`); `snapshotState()`/`restoreSnapshot()`
+  extended to clone every new array field, not just the ones currently reachable from UI; Tier 1
+  storage read/write extended, with a new normalization step on load
+  (`normalizeLoadedNode`/`normalizeLoadedEdge`) so a payload saved before this phase — or any payload
+  missing the new fields for any reason — gets sane defaults rather than `undefined` propagating
+  through the app; the JSON export extended to include all of the above. No `format_version` bump —
+  every change is additive-only, consistent with the spec's own backward-compatibility section.
+  3 pre-existing tests broke as a direct, expected consequence of the rename/shape change (not
+  regressions) and were fixed in place: `phase1.spec.mjs` and `phase5.spec.mjs` asserted the old
+  `notes` field name; `phase3.spec.mjs`'s "20 sequential adds" stress test hand-rolled its own
+  before/after snapshot shape (bypassing `snapshotState()` for speed, per its own comment) using the
+  old two-array `{nodes, edges}` shape, which `restoreSnapshot()` now expects to include `rules`/
+  `actions` too. New `tests/agent-ontology-phase-a.spec.mjs` (7 tests) covers the new behavior,
+  including one test that specifically proves `restoreSnapshot()` hands back independently-cloned
+  arrays rather than aliased references, by mutating live state in place after a snapshot and
+  confirming a subsequent redo doesn't inherit that mutation. Full suite green twice consecutively:
+  286 JS tests (279 + 7 new) and 15 Python tests. PR opened per the user's request; per instruction,
+  waiting for the user to merge rather than proceeding straight to Phase B.

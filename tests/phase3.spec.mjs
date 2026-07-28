@@ -276,17 +276,25 @@ test("a long chain of 20 sequential adds fully undoes back to empty and fully re
     // goes through the same pushHistory() choke point every real action
     // uses, via window.__kg.actions.pushHistoryFor (not exposed directly),
     // so instead each iteration mirrors pushHistory()'s own two-snapshot
-    // shape by hand and drives undo/redo through the real action
-    // functions afterward, not raw DOM clicks — a manually-pushed
-    // history.past entry doesn't refresh the Undo/Redo buttons' disabled
-    // attribute (that only happens inside pushHistory()/undo()/redo()
-    // itself), so clicking the DOM buttons here would hang on a stale
-    // disabled button rather than testing the history logic at all.
+    // shape by hand (nodes/edges/rules/actions — the same four arrays
+    // snapshotState() itself clones, see agent_ontology_spec.md §4.3) and
+    // drives undo/redo through the real action functions afterward, not
+    // raw DOM clicks — a manually-pushed history.past entry doesn't
+    // refresh the Undo/Redo buttons' disabled attribute (that only
+    // happens inside pushHistory()/undo()/redo() itself), so clicking the
+    // DOM buttons here would hang on a stale disabled button rather than
+    // testing the history logic at all.
     for (let i = 0; i < 20; i++) {
       await page.evaluate((label) => {
-        const before = { nodes: window.__kg.state.nodes.map((n) => ({ ...n, groups: [...n.groups] })), edges: window.__kg.state.edges.map((e) => ({ ...e })) };
+        const snap = () => ({
+          nodes: window.__kg.state.nodes.map((n) => ({ ...n, groups: [...n.groups], aliases: [...n.aliases], properties: n.properties.map((p) => ({ ...p })) })),
+          edges: window.__kg.state.edges.map((e) => ({ ...e })),
+          rules: window.__kg.state.rules.map((r) => ({ ...r, conditions: [...r.conditions] })),
+          actions: window.__kg.state.actions.map((a) => ({ ...a, preconditions: [...a.preconditions] })),
+        });
+        const before = snap();
         window.__kg.actions.createNode(50 + (label % 10) * 60, 50 + Math.floor(label / 10) * 80, `N${label}`, "entity");
-        const after = { nodes: window.__kg.state.nodes.map((n) => ({ ...n, groups: [...n.groups] })), edges: window.__kg.state.edges.map((e) => ({ ...e })) };
+        const after = snap();
         window.__kg.history.past.push({ before, after });
         window.__kg.history.future = [];
       }, i);

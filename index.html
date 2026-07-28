@@ -701,6 +701,15 @@ const state = {
   // created, saved}. null until then — nothing has been exported yet, so
   // there's no version history to speak of.
   meta: null,
+  // Agent Ontology (agent_ontology_spec.md §4.3): named condition sets and
+  // named operations. Neither is graph-shaped (no source/target, nothing to
+  // draw as a box or an arrow), so they live as flat top-level lists rather
+  // than nodes/edges — same reasoning that already keeps camera/selection
+  // out of the node/edge model.
+  nextRuleNum: 1,
+  nextActionNum: 1,
+  rules: [],
+  actions: [],
 };
 
 const DEFAULT_NODE_W = 160;
@@ -710,6 +719,8 @@ const DEFAULT_GROUP_H = 220;
 
 function genNodeId() { return `n${state.nextNodeNum++}`; }
 function genEdgeId() { return `e${state.nextEdgeNum++}`; }
+function genRuleId() { return `r${state.nextRuleNum++}`; }
+function genActionId() { return `a${state.nextActionNum++}`; }
 
 function createNode(x, y, label, type = "entity") {
   const w = type === "group" ? DEFAULT_GROUP_W : DEFAULT_NODE_W;
@@ -721,7 +732,12 @@ function createNode(x, y, label, type = "entity") {
     x, y, w, h,
     groups: [],
     boundary_mode: type === "group" ? "manual" : undefined,
-    notes: null,
+    // Agent Ontology (agent_ontology_spec.md §4.1): every non-group node
+    // doubles as a Class. `meaning` replaces the old `notes` field (never
+    // exposed in any editor, so this is a rename, not new state).
+    meaning: null,
+    aliases: [],
+    properties: [],
   };
   state.nodes.push(node);
   markDirty();
@@ -729,10 +745,49 @@ function createNode(x, y, label, type = "entity") {
 }
 
 function createEdge(sourceId, targetId, relation, directed = true, auto = false) {
-  const edge = { id: genEdgeId(), source: sourceId, target: targetId, relation, directed, auto };
+  const edge = {
+    id: genEdgeId(), source: sourceId, target: targetId, relation, directed, auto,
+    meaning: null, // agent_ontology_spec.md §4.2
+  };
   state.edges.push(edge);
   markDirty();
   return edge;
+}
+
+// Agent Ontology data-model constructors (agent_ontology_spec.md §4.3).
+// Deliberately as bare as createNode()/createEdge() above — no undo-history
+// registration here either; that's always the caller's job (see the call
+// sites around createNode/createEdge for the pattern), and no UI calls
+// these yet (Phase B/C/D/E of agent_ontology_todo.md).
+function createRule(name, conditions = []) {
+  const rule = { id: genRuleId(), name, conditions: [...conditions] };
+  state.rules.push(rule);
+  markDirty();
+  return rule;
+}
+
+function createAction(name, inputClassId, preconditions = [], effect = "", verification = "") {
+  const action = {
+    id: genActionId(), name, inputClassId,
+    preconditions: [...preconditions], effect, verification,
+  };
+  state.actions.push(action);
+  markDirty();
+  return action;
+}
+
+function deleteRule(id) {
+  const idx = state.rules.findIndex((r) => r.id === id);
+  if (idx === -1) return;
+  state.rules.splice(idx, 1);
+  markDirty();
+}
+
+function deleteAction(id) {
+  const idx = state.actions.findIndex((a) => a.id === id);
+  if (idx === -1) return;
+  state.actions.splice(idx, 1);
+  markDirty();
 }
 
 function deleteNode(id) {
@@ -771,16 +826,39 @@ function deleteEdge(id) {
 // ---------------------------------------------------------------------------
 const history = { past: [], future: [] };
 
+// Agent Ontology's aliases[]/properties[] (nodes) and rules[]/actions[]
+// arrays get the same explicit-clone treatment as groups[] above, for the
+// same reason: a shallow `{...n}` would leave the array reference shared
+// between snapshots, so a later in-place mutation would silently corrupt
+// an already-pushed "before" snapshot. No UI mutates any of these yet
+// (Phase A is data-model only), but snapshotState/restoreSnapshot are
+// meant to be correct for every field un­conditionally, not just the ones
+// currently reachable from the UI — see the correctness-by-construction
+// note above.
 function snapshotState() {
   return {
-    nodes: state.nodes.map((n) => ({ ...n, groups: [...n.groups] })),
+    nodes: state.nodes.map((n) => ({
+      ...n,
+      groups: [...n.groups],
+      aliases: [...n.aliases],
+      properties: n.properties.map((p) => ({ ...p })),
+    })),
     edges: state.edges.map((e) => ({ ...e })),
+    rules: state.rules.map((r) => ({ ...r, conditions: [...r.conditions] })),
+    actions: state.actions.map((a) => ({ ...a, preconditions: [...a.preconditions] })),
   };
 }
 
 function restoreSnapshot(snap) {
-  state.nodes = snap.nodes.map((n) => ({ ...n, groups: [...n.groups] }));
+  state.nodes = snap.nodes.map((n) => ({
+    ...n,
+    groups: [...n.groups],
+    aliases: [...n.aliases],
+    properties: n.properties.map((p) => ({ ...p })),
+  }));
   state.edges = snap.edges.map((e) => ({ ...e }));
+  state.rules = snap.rules.map((r) => ({ ...r, conditions: [...r.conditions] }));
+  state.actions = snap.actions.map((a) => ({ ...a, preconditions: [...a.preconditions] }));
 }
 
 function pushHistory(before, after) {
@@ -1036,6 +1114,12 @@ async function writeGraphToStorage() {
     nextEdgeNum: state.nextEdgeNum,
     graphName: state.graphName,
     meta: state.meta, // so version numbers stay continuous across sessions (Section 9)
+    // Agent Ontology (agent_ontology_spec.md §4.4): additive fields, so an
+    // older reader loading this payload just ignores them.
+    nextRuleNum: state.nextRuleNum,
+    nextActionNum: state.nextActionNum,
+    rules: state.rules,
+    actions: state.actions,
   });
 }
 
@@ -1071,13 +1155,37 @@ function whenSaveIdle() {
   return new Promise((resolve) => saveIdleResolvers.push(resolve));
 }
 
+// A payload saved before Agent Ontology existed has nodes/edges with no
+// meaning/aliases/properties fields at all — normalize on load so the rest
+// of the app (JSON export, future editor UI) can always assume the full
+// shape instead of scattering `n.aliases || []` checks everywhere. Nodes/
+// edges created fresh (createNode/createEdge) or via TXT import already
+// get this shape directly; this is the one path that deserializes objects
+// without going through those constructors.
+function normalizeLoadedNode(n) {
+  return {
+    ...n,
+    meaning: typeof n.meaning === "string" ? n.meaning : null,
+    aliases: Array.isArray(n.aliases) ? n.aliases : [],
+    properties: Array.isArray(n.properties) ? n.properties : [],
+  };
+}
+
+function normalizeLoadedEdge(e) {
+  return { ...e, meaning: typeof e.meaning === "string" ? e.meaning : null };
+}
+
 async function loadGraphFromStorage() {
   const data = await readGraphPayload();
   if (!data || !Array.isArray(data.nodes) || !Array.isArray(data.edges)) return false;
-  state.nodes = data.nodes;
-  state.edges = data.edges;
+  state.nodes = data.nodes.map(normalizeLoadedNode);
+  state.edges = data.edges.map(normalizeLoadedEdge);
   state.nextNodeNum = typeof data.nextNodeNum === "number" ? data.nextNodeNum : state.nextNodeNum;
   state.nextEdgeNum = typeof data.nextEdgeNum === "number" ? data.nextEdgeNum : state.nextEdgeNum;
+  state.nextRuleNum = typeof data.nextRuleNum === "number" ? data.nextRuleNum : state.nextRuleNum;
+  state.nextActionNum = typeof data.nextActionNum === "number" ? data.nextActionNum : state.nextActionNum;
+  state.rules = Array.isArray(data.rules) ? data.rules : [];
+  state.actions = Array.isArray(data.actions) ? data.actions : [];
   if (typeof data.graphName === "string" && data.graphName) state.graphName = data.graphName;
   if (data.meta && typeof data.meta === "object") state.meta = data.meta;
   return true;
@@ -2467,7 +2575,11 @@ function buildJsonExport(savedAt) {
         id: n.id, label: n.label, type: n.type,
         x: n.x, y: n.y, w: n.w, h: n.h,
         groups: [...n.groups],
-        notes: n.notes,
+        // Agent Ontology (agent_ontology_spec.md §4.1) — meaning replaces
+        // the old, never-wired notes field; aliases/properties are new.
+        meaning: n.meaning,
+        aliases: [...n.aliases],
+        properties: n.properties.map((p) => ({ ...p })),
       };
       if (n.type === "group") out.boundary_mode = n.boundary_mode;
       return out;
@@ -2475,7 +2587,12 @@ function buildJsonExport(savedAt) {
     edges: state.edges.map((e) => ({
       id: e.id, source: e.source, target: e.target,
       relation: e.relation, directed: e.directed, auto: e.auto,
+      meaning: e.meaning, // agent_ontology_spec.md §4.2
     })),
+    // agent_ontology_spec.md §4.3 — additive top-level collections, empty
+    // arrays when nothing's been authored yet.
+    rules: state.rules.map((r) => ({ ...r, conditions: [...r.conditions] })),
+    actions: state.actions.map((a) => ({ ...a, preconditions: [...a.preconditions] })),
   };
 }
 
@@ -3015,6 +3132,9 @@ window.__kg = {
     createNode, createEdge, deleteNode, deleteEdge,
     selectNode, selectEdge, clearSelection, setMode,
     updateGroupMembership, undo, redo, autoLayout,
+    // Agent Ontology data-model constructors (agent_ontology_spec.md §4.3)
+    // — no UI calls these yet (Phase D/E), so tests reach them here.
+    createRule, createAction, deleteRule, deleteAction,
   },
   storage: {
     detectBackend: detectStorageBackend,
