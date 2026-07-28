@@ -509,6 +509,181 @@
     opacity: 1;
     transform: translateX(-50%) translateY(0);
   }
+
+  /* Helper Agent (helper_agent_plan.md §4.2) — collapsed/expanded chat
+     panel, fixed to the left edge per the original vision ("a chat bar at
+     the left"). Collapsed by default; expanding never resizes the canvas
+     underneath it, it just overlays. */
+  #agent-panel {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 25;
+    display: flex;
+    align-items: stretch;
+    pointer-events: none;
+  }
+
+  #agent-panel-toggle {
+    pointer-events: auto;
+    align-self: flex-start;
+    margin: 12px 0 0 0;
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+    line-height: 1;
+    border: 1px solid var(--toolbar-border);
+    border-left: none;
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    background: var(--toolbar-bg);
+    color: var(--toolbar-fg);
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    transition: background-color var(--transition-fast);
+  }
+
+  #agent-panel-toggle:hover {
+    background: var(--btn-bg-hover);
+  }
+
+  #agent-panel-body {
+    pointer-events: auto;
+    width: 320px;
+    max-width: 85vw;
+    display: none;
+    flex-direction: column;
+    background: var(--toolbar-bg);
+    border-right: 1px solid var(--toolbar-border);
+    box-shadow: var(--shadow-md);
+    padding: 14px;
+    box-sizing: border-box;
+    overflow-y: auto;
+  }
+
+  #agent-panel.expanded #agent-panel-body {
+    display: flex;
+  }
+
+  .agent-panel-intro {
+    font-size: 13px;
+    line-height: 1.5;
+    opacity: 0.85;
+    margin: 0 0 14px;
+  }
+
+  .agent-panel-header {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  #agent-model-select {
+    flex: 1;
+    min-width: 0;
+    font: inherit;
+    font-size: 13px;
+    padding: 6px 8px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--toolbar-border);
+    background: var(--btn-bg);
+    color: var(--toolbar-fg);
+  }
+
+  .agent-connect-error {
+    margin: 8px 0 0;
+    font-size: 12px;
+    line-height: 1.4;
+    color: #e08a8a;
+    white-space: pre-line;
+  }
+
+  .agent-connect-error:empty {
+    display: none;
+  }
+
+  .agent-remember-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 10px 0 0;
+    font-size: 13px;
+  }
+
+  #agent-key-input {
+    width: 100%;
+    box-sizing: border-box;
+    font: inherit;
+    font-size: 14px;
+    padding: 7px 9px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--toolbar-border);
+    background: var(--btn-bg);
+    color: var(--toolbar-fg);
+  }
+
+  .agent-transcript {
+    flex: 1;
+    min-height: 120px;
+    max-height: 40vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 10px;
+    font-size: 13px;
+  }
+
+  .agent-transcript-msg {
+    padding: 6px 9px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--toolbar-border);
+    background: var(--btn-bg);
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .agent-phase2-note {
+    font-size: 12px;
+    opacity: 0.7;
+    margin: 0 0 10px;
+  }
+
+  .agent-input-row {
+    display: flex;
+    gap: 6px;
+  }
+
+  #agent-chat-input {
+    flex: 1;
+    min-width: 0;
+    font: inherit;
+    font-size: 14px;
+    padding: 7px 9px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--toolbar-border);
+    background: var(--btn-bg);
+    color: var(--toolbar-fg);
+  }
+
+  .agent-forget-key-row {
+    margin: 10px 0 0;
+  }
+
+  #agent-forget-key {
+    font-size: 12px;
+    padding: 5px 9px;
+    color: var(--toolbar-fg);
+    background: transparent;
+    border: 1px dashed var(--toolbar-border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+  }
+
+  #agent-forget-key:hover {
+    background: var(--btn-bg-hover);
+  }
 </style>
 </head>
 <body>
@@ -568,6 +743,53 @@
 </div>
 
 <div id="restore-toast" role="status" aria-live="polite"></div>
+
+<!-- Helper Agent (helper_agent_plan.md) — BYOK connect modal. Reuses
+     .modal-overlay/.modal-dialog/.modal-actions like every other dialog. -->
+<div id="agent-connect-overlay" class="modal-overlay">
+  <div id="agent-connect-dialog" class="modal-dialog" role="dialog" aria-modal="true">
+    <h2 id="agent-connect-title" class="modal-title">Segéd ügynök csatlakoztatása</h2>
+    <label id="agent-key-label" class="details-field-label" for="agent-key-input">OpenAI API kulcs</label>
+    <input id="agent-key-input" type="password" autocomplete="off" spellcheck="false">
+    <label id="agent-model-label" class="details-field-label" for="agent-model-select-modal">Modell</label>
+    <select id="agent-model-select-modal" disabled></select>
+    <label id="agent-remember-row" class="agent-remember-row">
+      <input id="agent-remember-key" type="checkbox">
+      <span id="agent-remember-text">A kulcs megjegyzése ezen az eszközön</span>
+    </label>
+    <p id="agent-connect-error" class="agent-connect-error" role="alert"></p>
+    <div class="modal-actions">
+      <button id="agent-connect-cancel" type="button">Mégse</button>
+      <button id="agent-connect-submit" type="button">Csatlakozás</button>
+    </div>
+  </div>
+</div>
+
+<!-- Helper Agent panel: collapsed by default (helper_agent_plan.md §4.2). -->
+<div id="agent-panel">
+  <button id="agent-panel-toggle" type="button" aria-expanded="false" title="Segéd ügynök">&#129302;</button>
+  <div id="agent-panel-body">
+    <div id="agent-panel-disconnected">
+      <p id="agent-panel-intro" class="agent-panel-intro">Csatlakozz a saját OpenAI API kulcsoddal egy segéd ügynökhöz, ami a doménmodell felépítésében segít.</p>
+      <button id="agent-connect-open" type="button">Csatlakozás</button>
+    </div>
+    <div id="agent-panel-connected" style="display:none;">
+      <div class="agent-panel-header">
+        <select id="agent-model-select"></select>
+        <button id="agent-disconnect" type="button" title="Leválasztás">&#10005;</button>
+      </div>
+      <div id="agent-transcript" class="agent-transcript"></div>
+      <p id="agent-phase2-note" class="agent-phase2-note">Az élő beszélgetés a következő fázisban érkezik.</p>
+      <div class="agent-input-row">
+        <input id="agent-chat-input" type="text" disabled>
+        <button id="agent-chat-send" type="button" disabled>Küldés</button>
+      </div>
+    </div>
+    <p id="agent-forget-key-row" class="agent-forget-key-row" style="display:none;">
+      <button id="agent-forget-key" type="button">Elmentett kulcs törlése</button>
+    </p>
+  </div>
+</div>
 
 <!-- Agent Ontology (agent_ontology_spec.md §7): Class/Relationship details
      editor. One shared dialog — sections toggle visibility depending on
@@ -781,6 +1003,25 @@ const STRINGS = {
     verificationLabel: "Verification",
     verificationPlaceholder: "verification",
     untitledRulePlaceholder: "(untitled rule)",
+    // Helper Agent (helper_agent_plan.md) — BYOK chat panel, Phase 1.
+    agentPanelToggle: "Helper agent",
+    agentPanelIntro: "Connect with your own OpenAI API key to a helper agent that assists with building the domain model.",
+    agentConnect: "Connect",
+    agentConnectTitle: "Connect helper agent",
+    agentKeyLabel: "OpenAI API key",
+    agentModelLabel: "Model",
+    agentRememberKey: "Remember this key on this device",
+    agentDisconnect: "Disconnect",
+    agentForgetKey: "Forget saved key",
+    agentPhase2Note: "Live conversation arrives in the next phase.",
+    agentChatSend: "Send",
+    agentConnecting: "Connecting…",
+    agentConfirmModel: "Confirm model & connect",
+    agentErrorEmptyKey: "Enter an API key.",
+    agentErrorInvalidKey: "OpenAI rejected this key. Check it and try again.",
+    agentErrorNetwork: "Could not reach the OpenAI API (network or CORS error). Check your connection and try again.",
+    agentErrorNoModels: "The key worked, but no chat-capable models were returned for it.",
+    agentErrorGeneric: (status) => `Connection failed (HTTP ${status}). Check your key and try again.`,
   },
   hu: {
     appTitle: "Tudásgráf Vászon",
@@ -857,6 +1098,25 @@ const STRINGS = {
     verificationLabel: "Ellenőrzés",
     verificationPlaceholder: "ellenőrzés",
     untitledRulePlaceholder: "(névtelen szabály)",
+    // Helper Agent (helper_agent_plan.md) — BYOK chat panel, Phase 1.
+    agentPanelToggle: "Segéd ügynök",
+    agentPanelIntro: "Csatlakozz a saját OpenAI API kulcsoddal egy segéd ügynökhöz, ami a doménmodell felépítésében segít.",
+    agentConnect: "Csatlakozás",
+    agentConnectTitle: "Segéd ügynök csatlakoztatása",
+    agentKeyLabel: "OpenAI API kulcs",
+    agentModelLabel: "Modell",
+    agentRememberKey: "A kulcs megjegyzése ezen az eszközön",
+    agentDisconnect: "Leválasztás",
+    agentForgetKey: "Elmentett kulcs törlése",
+    agentPhase2Note: "Az élő beszélgetés a következő fázisban érkezik.",
+    agentChatSend: "Küldés",
+    agentConnecting: "Csatlakozás…",
+    agentConfirmModel: "Modell megerősítése és csatlakozás",
+    agentErrorEmptyKey: "Add meg az API kulcsot.",
+    agentErrorInvalidKey: "Az OpenAI elutasította ezt a kulcsot. Ellenőrizd és próbáld újra.",
+    agentErrorNetwork: "Nem sikerült elérni az OpenAI API-t (hálózati vagy CORS hiba). Ellenőrizd a kapcsolatot és próbáld újra.",
+    agentErrorNoModels: "A kulcs működött, de nem érkezett hozzá csevegésre alkalmas modell.",
+    agentErrorGeneric: (status) => `Sikertelen csatlakozás (HTTP ${status}). Ellenőrizd a kulcsot és próbáld újra.`,
   },
 };
 
@@ -936,7 +1196,32 @@ function applyLanguage() {
   updateThemeButton(); // its text depends on theme, not language, but re-set here too for the aria-pressed-adjacent pattern
   updateFolderSyncButton(); // "Folder Sync" / "Synced: X" text is language-dependent
   updateLangButton();
+  applyAgentLanguage();
   markDirty(); // the canvas empty-state message is language-dependent too
+}
+
+// Helper Agent (helper_agent_plan.md §4.8) — same "refresh static text in
+// place" approach as applyLanguage() above, split into its own function so
+// the agent panel's markup stays easy to find/maintain together.
+function applyAgentLanguage() {
+  const byId = (id) => document.getElementById(id);
+  byId("agent-panel-toggle").title = t("agentPanelToggle");
+  byId("agent-panel-intro").textContent = t("agentPanelIntro");
+  byId("agent-connect-open").textContent = t("agentConnect");
+  byId("agent-connect-title").textContent = t("agentConnectTitle");
+  byId("agent-key-label").textContent = t("agentKeyLabel");
+  byId("agent-model-label").textContent = t("agentModelLabel");
+  byId("agent-remember-text").textContent = t("agentRememberKey");
+  byId("agent-connect-cancel").textContent = t("cancel");
+  updateAgentConnectSubmitLabel();
+  byId("agent-disconnect").title = t("agentDisconnect");
+  byId("agent-phase2-note").textContent = t("agentPhase2Note");
+  byId("agent-chat-send").textContent = t("agentChatSend");
+  byId("agent-forget-key").textContent = t("agentForgetKey");
+  // Error text is re-rendered from the last known error *kind*, not just
+  // copied verbatim, so a language toggle mid-error doesn't leave a
+  // stale-language message on screen.
+  renderAgentConnectError();
 }
 
 function updateLangButton() {
@@ -4025,6 +4310,267 @@ document.getElementById("btn-clear").addEventListener("click", () => {
 });
 
 // ---------------------------------------------------------------------------
+// Helper Agent (helper_agent_plan.md) — Phase 1: collapsed/expanded panel,
+// BYOK connect modal, live GET /v1/models call (doubles as the real CORS
+// check per plan §3), default-model heuristic with manual override. No
+// chat-turn API calls yet — that's Phase 2.
+// ---------------------------------------------------------------------------
+const AGENT_KEY_STORAGE_KEY = "kg-agent-key";
+const AGENT_MODEL_STORAGE_KEY = "kg-agent-model";
+const OPENAI_MODELS_URL = "https://api.openai.com/v1/models";
+
+// Reasoning/"thinking" models are the current o-series (o1, o3, o4, ...)
+// plus any id that says so explicitly. Heuristic on purpose (see
+// helper_agent_plan.md §4.1) — the naming scheme is OpenAI's to change, and
+// this stays correct without an edit as long as future reasoning models
+// keep either convention.
+function isLikelyReasoningModel(id) {
+  return /^o[0-9]/i.test(id) || /think|reason/i.test(id);
+}
+
+// Excludes non-chat model families (audio/image/embedding/moderation/base
+// completion) so the fallback pool (when no reasoning model is available on
+// this key) doesn't default to something that can't hold a conversation.
+function isLikelyChatModel(id) {
+  return !/whisper|tts|dall-e|embedding|moderation|davinci|babbage|curie|ada|realtime|audio|transcribe|image/i.test(id);
+}
+
+function pickDefaultAgentModel(models) {
+  const chatModels = models.filter((m) => isLikelyChatModel(m.id));
+  const pool = chatModels.filter((m) => isLikelyReasoningModel(m.id));
+  const candidates = pool.length ? pool : chatModels;
+  if (!candidates.length) return null;
+  return [...candidates].sort((a, b) => (b.created || 0) - (a.created || 0))[0].id;
+}
+
+const agentState = {
+  panelExpanded: false,
+  connected: false,
+  apiKey: null,
+  rememberKey: false,
+  model: null,
+  models: [], // [{id, created}], newest-first once sorted for display
+  // Full UI transcript vs. the API-facing working set diverge starting
+  // Phase 2 (helper_agent_plan.md §4.10) — both already declared here so
+  // Phase 2 doesn't need a state-shape migration.
+  transcript: [],
+  apiMessages: [],
+};
+
+// Tracks the *kind* of the last connect error (not pre-rendered text) so
+// applyAgentLanguage() can re-render it correctly after a language toggle
+// instead of leaving a stale-language message on screen.
+let agentConnectErrorKind = null; // null | "emptyKey" | "invalidKey" | "network" | "noModels" | {status}
+
+function renderAgentConnectError() {
+  const el = document.getElementById("agent-connect-error");
+  if (!agentConnectErrorKind) { el.textContent = ""; return; }
+  if (agentConnectErrorKind === "emptyKey") el.textContent = t("agentErrorEmptyKey");
+  else if (agentConnectErrorKind === "invalidKey") el.textContent = t("agentErrorInvalidKey");
+  else if (agentConnectErrorKind === "network") el.textContent = t("agentErrorNetwork");
+  else if (agentConnectErrorKind === "noModels") el.textContent = t("agentErrorNoModels");
+  else if (agentConnectErrorKind && typeof agentConnectErrorKind === "object") el.textContent = t("agentErrorGeneric", agentConnectErrorKind.status);
+  else el.textContent = "";
+}
+
+function setAgentConnectError(kind) {
+  agentConnectErrorKind = kind;
+  renderAgentConnectError();
+}
+
+// GET /v1/models with the given key. Returns the parsed model list on
+// success ({id, created}[]); throws {kind: "invalidKey"|"network"|{status}}
+// on failure, so the caller can drive setAgentConnectError() directly.
+async function fetchOpenAiModels(apiKey) {
+  let res;
+  try {
+    res = await fetch(OPENAI_MODELS_URL, {
+      method: "GET",
+      headers: { Authorization: `Bearer ${apiKey}` },
+    });
+  } catch (err) {
+    throw { kind: "network" };
+  }
+  if (res.status === 401) throw { kind: "invalidKey" };
+  if (!res.ok) throw { kind: { status: res.status } };
+  let json;
+  try {
+    json = await res.json();
+  } catch (err) {
+    throw { kind: "network" };
+  }
+  const data = Array.isArray(json && json.data) ? json.data : [];
+  return data
+    .filter((m) => m && typeof m.id === "string")
+    .map((m) => ({ id: m.id, created: typeof m.created === "number" ? m.created : 0 }));
+}
+
+function populateAgentModelSelects(models, selectedId) {
+  const sorted = [...models].sort((a, b) => (b.created || 0) - (a.created || 0));
+  for (const id of ["agent-model-select-modal", "agent-model-select"]) {
+    const select = document.getElementById(id);
+    select.textContent = "";
+    for (const m of sorted) {
+      const opt = document.createElement("option");
+      opt.value = m.id;
+      opt.textContent = m.id === selectedId ? `${m.id} ★` : m.id;
+      select.appendChild(opt);
+    }
+    select.disabled = sorted.length === 0;
+    if (selectedId) select.value = selectedId;
+  }
+}
+
+function setAgentPanelExpanded(expanded) {
+  agentState.panelExpanded = expanded;
+  const panel = document.getElementById("agent-panel");
+  panel.classList.toggle("expanded", expanded);
+  document.getElementById("agent-panel-toggle").setAttribute("aria-expanded", String(expanded));
+}
+
+// Two-stage flow so the model list (fetched live, not hardcoded — plan
+// §4.1) can actually be reviewed/overridden before the connection is
+// finalized, rather than only being decided after the fact:
+//   "key"   — user enters their API key; submit fetches /v1/models.
+//   "model" — the model <select> is now populated + enabled with a
+//             heuristic default pre-selected; submit finalizes the connection
+//             using whichever model is currently selected.
+let agentConnectStage = "key";
+let agentPendingKey = null;
+let agentPendingModels = [];
+
+function updateAgentConnectSubmitLabel() {
+  document.getElementById("agent-connect-submit").textContent =
+    agentConnectStage === "model" ? t("agentConfirmModel") : t("agentConnect");
+}
+
+function openAgentConnectModal() {
+  agentConnectStage = "key";
+  agentPendingKey = null;
+  agentPendingModels = [];
+  setAgentConnectError(null);
+  // Pre-fills a remembered key so a returning user doesn't retype it, but
+  // Connect still requires an explicit click either way — persistence is
+  // just a convenience, not a bypass of the "always via the modal" vision.
+  let storedKey = "";
+  try { storedKey = localStorage.getItem(AGENT_KEY_STORAGE_KEY) || ""; } catch (err) { /* ignore */ }
+  document.getElementById("agent-key-input").value = storedKey;
+  document.getElementById("agent-remember-key").checked = Boolean(storedKey);
+  document.getElementById("agent-connect-submit").disabled = false;
+  const modalSelect = document.getElementById("agent-model-select-modal");
+  modalSelect.textContent = "";
+  modalSelect.disabled = true;
+  updateAgentConnectSubmitLabel();
+  document.getElementById("agent-connect-overlay").style.display = "flex";
+}
+
+function closeAgentConnectModal() {
+  document.getElementById("agent-connect-overlay").style.display = "none";
+}
+
+function setAgentConnectedUi(connected) {
+  document.getElementById("agent-panel-disconnected").style.display = connected ? "none" : "";
+  document.getElementById("agent-panel-connected").style.display = connected ? "" : "none";
+  document.getElementById("agent-forget-key-row").style.display = hasStoredAgentKey() ? "" : "none";
+}
+
+function hasStoredAgentKey() {
+  try {
+    return Boolean(localStorage.getItem(AGENT_KEY_STORAGE_KEY));
+  } catch (err) {
+    return false;
+  }
+}
+
+async function submitAgentConnect() {
+  const submitBtn = document.getElementById("agent-connect-submit");
+
+  if (agentConnectStage === "key") {
+    const key = document.getElementById("agent-key-input").value.trim();
+    if (!key) { setAgentConnectError("emptyKey"); return; }
+    setAgentConnectError(null);
+    submitBtn.disabled = true;
+    submitBtn.textContent = t("agentConnecting");
+    try {
+      const models = await fetchOpenAiModels(key);
+      if (!models.length) { setAgentConnectError("noModels"); return; }
+      agentPendingKey = key;
+      agentPendingModels = models;
+      const defaultModel = pickDefaultAgentModel(models);
+      populateAgentModelSelects(models, defaultModel);
+      document.getElementById("agent-model-select-modal").disabled = false;
+      agentConnectStage = "model";
+    } catch (err) {
+      setAgentConnectError((err && err.kind) || "network");
+    } finally {
+      submitBtn.disabled = false;
+      updateAgentConnectSubmitLabel();
+    }
+    return;
+  }
+
+  // agentConnectStage === "model": finalize with whichever model is selected.
+  const chosenModel = document.getElementById("agent-model-select-modal").value;
+  const remember = document.getElementById("agent-remember-key").checked;
+  agentState.apiKey = agentPendingKey;
+  agentState.rememberKey = remember;
+  agentState.models = agentPendingModels;
+  agentState.model = chosenModel;
+  agentState.connected = true;
+  try {
+    if (remember) {
+      localStorage.setItem(AGENT_KEY_STORAGE_KEY, agentPendingKey);
+      localStorage.setItem(AGENT_MODEL_STORAGE_KEY, chosenModel || "");
+    } else {
+      localStorage.removeItem(AGENT_KEY_STORAGE_KEY);
+      localStorage.removeItem(AGENT_MODEL_STORAGE_KEY);
+    }
+  } catch (err) { /* best-effort only, mirrors the language/theme persistence precedent */ }
+  populateAgentModelSelects(agentPendingModels, chosenModel);
+  setAgentConnectedUi(true);
+  closeAgentConnectModal();
+}
+
+function disconnectAgent() {
+  agentState.connected = false;
+  agentState.apiKey = null;
+  agentState.models = [];
+  agentState.model = null;
+  agentState.transcript = [];
+  agentState.apiMessages = [];
+  setAgentConnectedUi(false);
+}
+
+function forgetStoredAgentKey() {
+  try {
+    localStorage.removeItem(AGENT_KEY_STORAGE_KEY);
+    localStorage.removeItem(AGENT_MODEL_STORAGE_KEY);
+  } catch (err) { /* best-effort only */ }
+  document.getElementById("agent-forget-key-row").style.display = "none";
+}
+
+document.getElementById("agent-panel-toggle").addEventListener("click", () => {
+  setAgentPanelExpanded(!agentState.panelExpanded);
+});
+document.getElementById("agent-connect-open").addEventListener("click", () => openAgentConnectModal());
+document.getElementById("agent-connect-cancel").addEventListener("click", () => closeAgentConnectModal());
+document.getElementById("agent-connect-overlay").addEventListener("click", (e) => {
+  if (e.target === document.getElementById("agent-connect-overlay")) closeAgentConnectModal();
+});
+document.getElementById("agent-connect-submit").addEventListener("click", () => submitAgentConnect());
+document.getElementById("agent-key-input").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") submitAgentConnect();
+});
+document.getElementById("agent-disconnect").addEventListener("click", () => disconnectAgent());
+document.getElementById("agent-forget-key").addEventListener("click", () => forgetStoredAgentKey());
+document.getElementById("agent-model-select").addEventListener("change", (e) => {
+  agentState.model = e.target.value;
+  if (agentState.rememberKey) {
+    try { localStorage.setItem(AGENT_MODEL_STORAGE_KEY, agentState.model); } catch (err) { /* best-effort only */ }
+  }
+});
+
+// ---------------------------------------------------------------------------
 // Debug/test-only introspection hook. Purely additive read/call surface over
 // state that already exists for the app's own operation — never required
 // for index.html to function, and never itself a source of app behavior.
@@ -4084,6 +4630,22 @@ window.__kg = {
     const edge = state.edges.find((e) => e.id === edgeId);
     return edge ? edgeGeometry(edge, computeEdgeBendInfo()) : null;
   },
+  // Helper Agent (helper_agent_plan.md) — Phase 1 test surface.
+  agent: {
+    state: agentState,
+    isExpanded: () => agentState.panelExpanded,
+    setExpanded: setAgentPanelExpanded,
+    openConnectModal: openAgentConnectModal,
+    closeConnectModal: closeAgentConnectModal,
+    submitConnect: submitAgentConnect,
+    disconnect: disconnectAgent,
+    forgetStoredKey: forgetStoredAgentKey,
+    hasStoredKey: hasStoredAgentKey,
+    pickDefaultModel: pickDefaultAgentModel,
+    isLikelyReasoningModel,
+    isLikelyChatModel,
+    getConnectErrorKind: () => agentConnectErrorKind,
+  },
 };
 
 // Best-effort only: silent auto-restore (loadGraphFromStorage, above) leaves
@@ -4131,6 +4693,7 @@ async function boot() {
     document.getElementById("btn-folder-sync").style.display = "";
     updateFolderSyncButton();
   }
+  setAgentConnectedUi(false); // shows the "forget key" affordance if one was persisted in a prior session
 }
 
 boot();
