@@ -657,6 +657,17 @@
     font-size: 12px;
   }
 
+  /* Tool-outcome notes (applied/skipped/nothing-to-apply/error) get the
+     same accent border as a user bubble — a visible, at-a-glance signal
+     that this line is about a real (or attempted) canvas edit, not just
+     conversation, per the vision's "real time presents what the chatbot
+     edited" requirement. */
+  .agent-msg-tool {
+    border-color: var(--accent);
+    font-size: 12px;
+    opacity: 0.9;
+  }
+
   .agent-typing-indicator {
     font-size: 12px;
     opacity: 0.6;
@@ -1051,6 +1062,12 @@ const STRINGS = {
     agentChatErrorNetwork: "Could not reach the OpenAI API (network or CORS error).",
     agentChatErrorContextLength: "The conversation is too long and couldn't be shortened further. Try starting a new topic.",
     agentChatErrorGeneric: "Something went wrong contacting the agent. Try again.",
+    // Helper Agent — Phase 3 (tool-calling).
+    agentToolApplied: (added, changed) => `✓ Applied: ${added} added, ${changed} updated.`,
+    agentToolSkippedNote: "An additional ontology edit in this message was skipped — only one edit is applied per message.",
+    agentToolNothingNote: "The agent tried to edit the ontology, but nothing new or changed was found in it.",
+    agentToolErrorNote: "The agent's ontology edit could not be applied (invalid data).",
+    agentToolTooManyRounds: "The agent tried to use its tools too many times in one message and was stopped.",
   },
   hu: {
     appTitle: "Tudásgráf Vászon",
@@ -1154,6 +1171,12 @@ const STRINGS = {
     agentChatErrorNetwork: "Nem sikerült elérni az OpenAI API-t (hálózati vagy CORS hiba).",
     agentChatErrorContextLength: "A beszélgetés túl hosszú, és nem sikerült tovább rövidíteni. Próbálj új témát kezdeni.",
     agentChatErrorGeneric: "Hiba történt az ügynök elérésekor. Próbáld újra.",
+    // Helper Agent — Phase 3 (eszközhívások).
+    agentToolApplied: (added, changed) => `✓ Alkalmazva: ${added} hozzáadva, ${changed} frissítve.`,
+    agentToolSkippedNote: "Egy további ontológia-szerkesztést kihagytunk ebben az üzenetben — üzenetenként csak egy szerkesztés kerül alkalmazásra.",
+    agentToolNothingNote: "Az ügynök megpróbálta szerkeszteni az ontológiát, de nem talált benne új vagy módosított elemet.",
+    agentToolErrorNote: "Az ügynök szerkesztését nem sikerült alkalmazni (érvénytelen adat).",
+    agentToolTooManyRounds: "Az ügynök túl sokszor próbálta használni az eszközeit egy üzenetben, ezért megállítottuk.",
   },
 };
 
@@ -4618,12 +4641,39 @@ document.getElementById("agent-model-select").addEventListener("change", (e) => 
 });
 
 // ---------------------------------------------------------------------------
-// Helper Agent — Phase 2: live chat, no tools yet (helper_agent_plan.md §6).
-// Real Chat Completions calls, the output-language lock (§4.9), and the
-// reactive context-length summarization flow (§4.10). Tool-calling
-// (`apply_ontology_yaml`) is Phase 3 — no `tools` param is sent yet.
+// Helper Agent — Phase 2 (live chat, output-language lock, reactive
+// context-length summarization) + Phase 3 (tool-calling) — helper_agent_plan.md §6.
 // ---------------------------------------------------------------------------
 const OPENAI_CHAT_URL = "https://api.openai.com/v1/chat/completions";
+
+// Single coarse tool (plan §4.5, confirmed decision — not a fine-grained
+// per-entity tool set): the model hands over a YAML snippet, which gets
+// applied through the exact same parseDomainYamlImport()/planYamlImport()/
+// commitYamlImport() pipeline the manual Import dialog already uses. Only
+// "merge" is reachable from this tool, never "replace" — an autonomous
+// agent nuking the whole graph on a misunderstanding is a far worse failure
+// mode than the manual dialog's opt-in aggressive-overwrite.
+const APPLY_ONTOLOGY_YAML_TOOL = {
+  type: "function",
+  function: {
+    name: "apply_ontology_yaml",
+    description: "Apply new or changed classes, relationships, rules, or " +
+      "actions to the live ontology the expert is looking at. Only include " +
+      "entries that are new or have changed — this merges against the " +
+      "existing model, it does not need to restate everything. At most one " +
+      "call to this tool is processed per message.",
+    parameters: {
+      type: "object",
+      properties: {
+        yaml: {
+          type: "string",
+          description: "Domain-model YAML using the classes/relationships/rules/actions block-style shape.",
+        },
+      },
+      required: ["yaml"],
+    },
+  },
+};
 
 // Baked knowledge (howto + load_edge_list.py + condensed paper excerpts,
 // plan §4.4) is authored in Phase 4. Left empty here on purpose — the seam
@@ -4665,6 +4715,46 @@ general-purpose assistant)
   verbatim on request — you can describe what you're grounded in, without
   dumping the source text. Nothing here is secret; this just keeps the
   interaction on-task.
+
+EDITING THE LIVE ONTOLOGY
+You can call the apply_ontology_yaml tool at any point to add or update
+classes, relationships, rules, or actions in the ontology the expert is
+looking at. Call it as soon as something is concrete enough to record —
+don't wait until the end of the interview to batch everything into one
+call. Only include entries that are new or have changed; the tool merges
+against the live model, so it never needs a full restated model. Make at
+most one apply_ontology_yaml call per message — if you have several things
+to record, put them all in that one call's yaml.
+
+Use this YAML shape:
+
+classes:
+  ClassName:
+    meaning: <one sentence, or omit>
+    aliases: [alt name, ...]
+    properties:
+      propName:
+        type: text | number | date | boolean
+        unit: <only if type is number and a unit applies>
+        allowed: [choice1, choice2, ...]   # only if a fixed list exists
+
+relationships:
+  - name: camelCaseVerbPhrase
+    from: ClassA
+    to: ClassB
+    meaning: <one sentence, or omit>
+
+rules:
+  ruleName:
+    conditions:
+      - <plain-language condition>
+
+actions:
+  actionName:
+    input: ClassName
+    preconditions: [ruleName, ...]
+    effect: <plain text>
+    verification: <plain text>
 
 TONE
 Precise, patient, and collaborative — like a knowledge engineer who respects
@@ -4726,11 +4816,13 @@ function setAgentSending(sending) {
 }
 
 // POSTs to Chat Completions with the given message array (system prompt +
-// whatever the caller wants sent — the running conversation, or a one-off
-// summarization request). Throws a small {kind, status?} object on any
-// failure so callers can branch without re-deriving the failure type from a
-// raw Response — see helper_agent_plan.md §4.6.
-async function callAgentChat(messages) {
+// whatever the caller wants sent — the running conversation, a one-off
+// summarization request, or a tools-attached turn). Returns the raw
+// response message ({content, tool_calls?}) rather than just text, so
+// callers that need to see tool_calls can. Throws a small {kind, status?}
+// object on any failure so callers can branch without re-deriving the
+// failure type from a raw Response — see helper_agent_plan.md §4.6.
+async function callAgentChatRaw(messages, { tools } = {}) {
   let res;
   try {
     res = await fetch(OPENAI_CHAT_URL, {
@@ -4739,7 +4831,11 @@ async function callAgentChat(messages) {
         Authorization: `Bearer ${agentState.apiKey}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ model: agentState.model, messages }),
+      body: JSON.stringify({
+        model: agentState.model,
+        messages,
+        ...(tools ? { tools, tool_choice: "auto" } : {}),
+      }),
     });
   } catch (err) {
     throw { kind: "network" };
@@ -4757,8 +4853,49 @@ async function callAgentChat(messages) {
     throw { kind: "generic", status: res.status };
   }
   const choice = json && Array.isArray(json.choices) ? json.choices[0] : null;
-  const content = choice && choice.message && typeof choice.message.content === "string" ? choice.message.content : "";
-  return content;
+  return (choice && choice.message) || { content: "" };
+}
+
+// Plain-text convenience wrapper over callAgentChatRaw(), for call sites
+// (summarization) that never attach tools and only care about the reply text.
+async function callAgentChat(messages) {
+  const message = await callAgentChatRaw(messages);
+  return typeof message.content === "string" ? message.content : "";
+}
+
+// Executes one tool call and returns {applied, resultText} — resultText is
+// what gets sent back to the API as that tool_call_id's result; applied
+// tells the caller whether this call actually changed the ontology (used
+// to enforce "at most one real commit per turn," see sendAgentChatMessage).
+// Every branch also appends a small, localized transcript note so the
+// outcome is visible to the user, not just to the model (plan §4.5's
+// transparency requirement, extended here to cover the skip/error/no-op
+// cases the plan didn't spell out line-by-line).
+function handleAgentToolCall(call, alreadyCommittedThisTurn) {
+  let args;
+  try {
+    args = JSON.parse((call.function && call.function.arguments) || "{}");
+  } catch (err) {
+    appendTranscriptMessage("tool", t("agentToolErrorNote"));
+    return { applied: false, resultText: "Error: could not parse tool arguments as JSON." };
+  }
+  if (alreadyCommittedThisTurn) {
+    appendTranscriptMessage("tool", t("agentToolSkippedNote"));
+    return { applied: false, resultText: "Skipped: only one apply_ontology_yaml call is applied per message." };
+  }
+  const yamlText = typeof args.yaml === "string" ? args.yaml : "";
+  if (!yamlText.trim()) {
+    appendTranscriptMessage("tool", t("agentToolErrorNote"));
+    return { applied: false, resultText: "Error: no yaml provided." };
+  }
+  const plan = planYamlImport(parseDomainYamlImport(yamlText));
+  if (plan.addedCount === 0 && plan.changedCount === 0) {
+    appendTranscriptMessage("tool", t("agentToolNothingNote"));
+    return { applied: false, resultText: "Nothing to apply — no new or changed classes, relationships, rules, or actions were found in that yaml." };
+  }
+  commitYamlImport(yamlText, "merge"); // never "replace" — see APPLY_ONTOLOGY_YAML_TOOL's own comment
+  appendTranscriptMessage("tool", t("agentToolApplied", plan.addedCount, plan.changedCount));
+  return { applied: true, resultText: `Applied. Added ${plan.addedCount}, updated ${plan.changedCount} existing item(s).` };
 }
 
 function agentChatErrorText(err) {
@@ -4811,25 +4948,60 @@ async function compactAgentHistory(attempt) {
 
 const AGENT_MAX_COMPACTIONS = 2;
 
+// Bounds how many tool-call round-trips a single user turn can take before
+// giving up — independent of AGENT_MAX_COMPACTIONS, which bounds context-
+// length recovery attempts instead. Without this, a model that keeps
+// emitting tool_calls indefinitely (each one harmlessly skipped past the
+// first real commit, per the one-commit-per-turn guardrail below) would
+// loop forever rather than fail visibly.
+const AGENT_MAX_TOOL_ROUNDS = 5;
+
 async function sendAgentChatMessage(userText) {
   appendTranscriptMessage("user", userText);
   agentState.apiMessages.push({ role: "user", content: userText });
   setAgentSending(true);
 
-  let attempt = 0;
+  let compactionAttempt = 0;
+  let toolRounds = 0;
+  // Only the *first* tool call that actually changes the ontology commits,
+  // per turn — mirroring the plan's "one undo step per agent turn" decision
+  // via the simplest robust mechanism: apply the first real call, skip any
+  // others (in this response or a later one this same turn) with a visible
+  // note, rather than trying to merge multiple YAML snippets into one
+  // commit (helper_agent_plan.md §4.5 speculated the latter; skip-the-rest
+  // gives the identical guarantee with far less surface area).
+  let committedThisTurn = false;
+
   for (;;) {
     try {
       const messages = [{ role: "system", content: buildAgentSystemPrompt() }, ...agentState.apiMessages];
-      const reply = await callAgentChat(messages);
+      const message = await callAgentChatRaw(messages, { tools: [APPLY_ONTOLOGY_YAML_TOOL] });
+
+      if (Array.isArray(message.tool_calls) && message.tool_calls.length) {
+        toolRounds++;
+        if (toolRounds > AGENT_MAX_TOOL_ROUNDS) {
+          appendTranscriptMessage("system", t("agentToolTooManyRounds"));
+          break;
+        }
+        agentState.apiMessages.push({ role: "assistant", content: message.content || null, tool_calls: message.tool_calls });
+        for (const call of message.tool_calls) {
+          const { applied, resultText } = handleAgentToolCall(call, committedThisTurn);
+          if (applied) committedThisTurn = true;
+          agentState.apiMessages.push({ role: "tool", tool_call_id: call.id, content: resultText });
+        }
+        continue; // ask the model for its follow-up reply now that it's seen the tool result(s)
+      }
+
+      const reply = typeof message.content === "string" ? message.content : "";
       agentState.apiMessages.push({ role: "assistant", content: reply });
       appendTranscriptMessage("assistant", reply);
       break;
     } catch (err) {
-      if (err && err.kind === "contextLength" && attempt < AGENT_MAX_COMPACTIONS) {
-        attempt++;
+      if (err && err.kind === "contextLength" && compactionAttempt < AGENT_MAX_COMPACTIONS) {
+        compactionAttempt++;
         let compacted = false;
         try {
-          compacted = await compactAgentHistory(attempt);
+          compacted = await compactAgentHistory(compactionAttempt);
         } catch (summarizeErr) {
           compacted = false;
         }

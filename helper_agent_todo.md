@@ -9,12 +9,14 @@ merged into `main` — see `helper_agent_plan.md` §0.
 
 ## Current State
 
-- **Phase:** Phases 1 (panel scaffold + BYOK connect modal + live model list) and 2 (live chat, no tools
-  yet) are implemented, tested, and green. Phases 3–6 (see `helper_agent_plan.md` §6) are not started.
+- **Phase:** Phases 1 (panel scaffold + BYOK connect modal + live model list), 2 (live chat, no tools
+  yet), and 3 (tool-calling) are implemented, tested, and green. Phases 4–6 (see `helper_agent_plan.md`
+  §6) are not started.
 - **Test suite:** `tests/helper-agent-phase1.spec.mjs` (11 tests) + `tests/helper-agent-phase2.spec.mjs`
-  (15 tests), all mocking the OpenAI API via `page.route()` (no real network calls, no API key needed).
-  Full repo suite: 313 JS tests, all green, run twice consecutively (plus 3 standalone reruns of
-  `tests/ui-polish.spec.mjs` after a small robustness fix there — see the Phase 2 Log entry).
+  (15 tests) + `tests/helper-agent-phase3.spec.mjs` (9 tests), all mocking the OpenAI API via
+  `page.route()` (no real network calls, no API key needed). Full repo suite: 322 JS tests, all green,
+  run twice consecutively (plus 3 standalone reruns of `tests/ui-polish.spec.mjs` after a small
+  robustness fix there — see the Phase 2 Log entry).
 - **What Phase 1 built:** the collapsed-by-default `#agent-panel` (toggle fixed to the left edge), the
   two-stage `#agent-connect-overlay` modal (stage 1: enter API key → live `GET /v1/models` call, which
   doubles as the real-world CORS check per plan §3; stage 2: review/override the heuristically
@@ -30,10 +32,24 @@ merged into `main` — see `helper_agent_plan.md` §0.
   (bounded to 2 compaction attempts, falling back to a deeper compaction on a second overflow) while
   `agentState.transcript` — what the user actually sees — is never shortened. No `tools` field is sent
   yet (Phase 3). Transcript rendering is `textContent`-only, never `innerHTML` (plan §4.7).
+- **What Phase 3 built:** a single coarse `apply_ontology_yaml` tool (plan §4.5 — no fine-grained
+  per-entity tool set), attached to every chat request (`tools`/`tool_choice: "auto"`), wired to the
+  exact same `parseDomainYamlImport()`/`planYamlImport()`/`commitYamlImport()` pipeline the manual Import
+  dialog uses. Always "merge," never "replace" — the tool literally cannot reach replace mode. Exactly
+  one real commit is allowed per user turn: the first tool call that actually changes something commits
+  (one `commitYamlImport()` call = one undo step, inherited for free from that function's own existing
+  `snapshotState()`/`pushHistory()`), and any further tool calls that same turn are skipped with a
+  visible, localized transcript note rather than merged into the same commit (a deliberate simplification
+  over the plan's literal "concatenate the YAML" wording — see this section's Log entry). Every outcome
+  (applied / skipped / nothing-to-apply / malformed-arguments) gets its own transcript note, not just the
+  success case. A bounded `AGENT_MAX_TOOL_ROUNDS = 5` stops a pathological always-calls-the-tool loop from
+  running forever, independent of the existing `AGENT_MAX_COMPACTIONS` bound for context-length recovery.
 - **`window.__kg.agent`** exposes the same test-introspection surface the rest of the app already
   follows: `state`, `isExpanded`/`setExpanded`, `openConnectModal`/`closeConnectModal`/`submitConnect`,
   `disconnect`, `forgetStoredKey`/`hasStoredKey`, `pickDefaultModel` (+ the two heuristic predicates it's
-  built from), `getConnectErrorKind`, and now `sendMessage`/`buildSystemPrompt`/`isSending`.
+  built from), `getConnectErrorKind`, `sendMessage`/`buildSystemPrompt`/`isSending`. Phase 3 didn't need
+  to add anything new here — tests exercise tool-calling entirely through the existing `sendMessage()` +
+  `window.__kg.state`/`window.__kg.history` surfaces.
 
 ## Phase 1 — Panel scaffold + connect modal + model list
 
@@ -128,3 +144,51 @@ tests for every new feature going forward, keep existing tests up to date, stabi
   wait 200ms after their own color-changing clicks. Added the same wait after both clicks in that test.
   Confirmed fixed: 3 standalone reruns of that file plus 2 full-suite reruns, all green.
 - Full suite: 313 JS tests, green, run twice consecutively (plus the standalone reruns above).
+
+## Phase 3 — Tool-calling
+
+- [x] `APPLY_ONTOLOGY_YAML_TOOL` schema (single `yaml` string parameter), attached to every chat request.
+- [x] `handleAgentToolCall()` wires the tool to `parseDomainYamlImport()`/`planYamlImport()`/
+      `commitYamlImport(yaml, "merge")` — never `"replace"`.
+- [x] One-real-commit-per-turn guardrail: first applying call commits (and inherits the "one call =
+      one undo step" property directly from `commitYamlImport()`'s own snapshot/pushHistory pair, no new
+      history-batching code needed); further tool calls the same turn are skipped with a visible note.
+- [x] No-op detection: a tool call whose YAML adds/changes nothing is reported as such and creates no
+      undo step (a defensive check added on top of `commitYamlImport()`, which itself would otherwise
+      push an empty-diff history entry unconditionally).
+- [x] Malformed tool-call arguments (invalid JSON) are caught and reported, not thrown.
+- [x] `AGENT_MAX_TOOL_ROUNDS = 5` bounds a pathological always-calls-the-tool loop.
+- [x] `AGENT_SYSTEM_PROMPT_BASE` gained an "EDITING THE LIVE ONTOLOGY" section: call the tool
+      incrementally as things are confirmed (not batched to one end-of-interview dump, unlike the
+      original MyGPT's file-download framing), at most one call per message, the YAML shape spec.
+- [x] Tests: `tests/helper-agent-phase3.spec.mjs` (9 tests). Updated one Phase 2 test whose "no tools
+      field" assertion Phase 3 intentionally made untrue.
+
+### Log
+
+**2026-07-28 — Phase 3 implemented.** Notable decisions/deviations from the plan's literal text:
+
+- The plan's §4.5 speculated that multiple `tool_calls` in one response would be handled by
+  "concatenat[ing] their yaml bodies under merged top-level keys before a single `commitYamlImport`
+  call." Implemented differently: only the *first* call that actually changes something commits; any
+  others are skipped with their own visible tool-role response (`"Skipped: only one apply_ontology_yaml
+  call is applied per message."`) sent back to the API, and a separate localized transcript note shown
+  to the user. This gives the identical guarantee (one real edit, one undo step, per turn) with far less
+  surface area — no bespoke re-serialization of merged parsed YAML back into the bespoke text dialect,
+  which would have been the fragile part of the literal approach.
+- Every tool-call outcome (applied / skipped / nothing-to-apply / malformed-arguments) gets its own
+  transcript note, not just the success case the plan explicitly named — reasoned to matter for the
+  same "real time presents what the chatbot edited" transparency goal the plan states, extended to also
+  cover *attempted-but-not-applied* edits, which are just as important for the user to see.
+- Added a no-op guard in front of `commitYamlImport()`: that function's own `pushHistory()` call is
+  unconditional (it doesn't check whether `before`/`after` snapshots actually differ), which is fine for
+  its existing manual-import caller (only invoked after a real file selection) but would let a
+  do-nothing tool call still burn an undo-history slot. `handleAgentToolCall()` now checks
+  `planYamlImport()`'s added/changed counts before ever calling `commitYamlImport()`.
+- Extensive test coverage per the user's explicit instruction: real canvas-state assertions (not just
+  transcript text) that a tool call went through the actual import pipeline, an undo-reverses-it test,
+  a two-tool-calls-in-one-response test asserting both the skip behavior *and* that both `tool_call_id`s
+  get a response (an API-contract requirement, not just app-internal correctness), a bounded-runaway-loop
+  test, and a combined tool-calling + context-length-compaction test to prove the two Phase 2/3 features
+  compose correctly rather than just each working in isolation.
+- Full suite: 322 JS tests, green, run twice consecutively.
