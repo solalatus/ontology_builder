@@ -116,10 +116,13 @@ test("a valid key fetches models, defaults to the newest reasoning model, and le
     const connectedModel = await page.evaluate(() => window.__kg.agent.state.model);
     assert.equal(connectedModel, "gpt-4.1");
 
-    // Modal closed, connected UI visible, chat input still disabled (Phase 2 territory).
+    // Modal closed, connected UI visible. The chat input is enabled once
+    // connected (live chat is Phase 2); the send button stays disabled
+    // until there's actually something typed to send — see
+    // tests/helper-agent-phase2.spec.mjs for the full chat-loop coverage.
     const overlayDisplay = await page.evaluate(() => getComputedStyle(document.getElementById("agent-connect-overlay")).display);
     assert.equal(overlayDisplay, "none");
-    assert.equal(await page.isDisabled("#agent-chat-input"), true);
+    assert.equal(await page.isDisabled("#agent-chat-input"), false);
     assert.equal(await page.isDisabled("#agent-chat-send"), true);
     const panelSelectValue = await page.$eval("#agent-model-select", (el) => el.value);
     assert.equal(panelSelectValue, "gpt-4.1");
