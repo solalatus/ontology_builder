@@ -1,6 +1,8 @@
 # Agent Ontology — Domain Model Authoring (Technical Specification)
 
-**Status:** v0.1 — Draft plan, phased implementation not yet started
+**Status:** v1.0 — Implemented in full (Phases A through I complete; see `agent_ontology_todo.md`'s
+Current State and Decision Log for the final account, including the two still-open, non-blocking
+questions #1/#2 in Section 9).
 **Builds on:** `spec.md` (Knowledge Graph Canvas v1.0, shipped, unchanged). This document specifies an
 **additive** layer on top of the existing app. Canvas mechanics, camera, storage tiers, undo/redo,
 theming, i18n, and the existing JSON/TXT export formats all stay exactly as `spec.md` defines them.
