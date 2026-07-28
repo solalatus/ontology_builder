@@ -219,3 +219,106 @@ test("toggling language updates the Domain Model dialog's static labels/title", 
     assert.equal(await page.locator("#domain-model-title").textContent(), "Doménmodell");
   });
 });
+
+// A filled-in Effect input and a filled-in Verification input are otherwise
+// two visually identical plain text boxes — their own placeholder text
+// disappears once a value is typed, so a persistent sub-label above each
+// field is the only thing that keeps them distinguishable at a glance.
+test("rule and action cards show persistent sub-labels above every field, not just placeholder text that vanishes once filled in", async () => {
+  await withPage(async (page) => {
+    await addNodeViaDblClick(page, 300, 300, "Invoice");
+    await openDomainModel(page);
+    await addRuleWithCondition(page, "canApproveInvoice", "invoice status is matched");
+    await page.click("#domain-model-add-action");
+    await page.locator(".dm-action-name").fill("approveInvoice");
+    await page.locator(".dm-action-effect").fill("invoice status becomes approved");
+    await page.locator(".dm-action-verification").fill("confirm the new invoice status");
+
+    const ruleCard = page.locator(".domain-model-rule-card").first();
+    assert.equal(await ruleCard.locator(".details-field-sublabel").textContent(), "Conditions");
+
+    const actionCard = page.locator(".domain-model-action-card").first();
+    const actionSublabels = await actionCard.locator(".details-field-sublabel").allTextContents();
+    assert.deepEqual(actionSublabels, [
+      "Input class",
+      "Preconditions (hold Ctrl/Cmd to select multiple)",
+      "Effect",
+      "Verification",
+    ]);
+
+    // The sub-labels stay put and legible even once every field has real
+    // content — the actual bug this UI change fixes.
+    assert.equal(await page.locator(".dm-action-effect").inputValue(), "invoice status becomes approved");
+    assert.equal(await page.locator(".dm-action-verification").inputValue(), "confirm the new invoice status");
+  });
+});
+
+// --- Scale (no existing test builds more than 2-3 rules/actions through
+// the real UI — this proves refreshActionPreconditionOptions()'s live-sync
+// rebuild, which re-runs on every rule add/remove/rename, still produces
+// exactly-correct option lists once there are enough rules/actions for a
+// stale or partially-rebuilt list to plausibly go unnoticed) -------------
+
+test("many rules and actions built through the real UI (25 each) keep every action's precondition options complete and correct", async () => {
+  await withPage(async (page) => {
+    await addNodeViaDblClick(page, 300, 300, "Invoice");
+    await openDomainModel(page);
+
+    for (let i = 0; i < 25; i++) {
+      await addRuleWithCondition(page, `rule${i}`, `condition ${i}`);
+    }
+    for (let i = 0; i < 25; i++) {
+      await page.click("#domain-model-add-action");
+      await page.locator(".dm-action-name").last().fill(`action${i}`);
+      await page.locator(".dm-action-preconditions").last().selectOption({ label: `rule${i}` });
+    }
+
+    // Every action's preconditions <select> must offer all 25 rules, live,
+    // not just the ones that existed when that particular action card was
+    // created (rules 0-24 were all added *before* any action, so this also
+    // exercises the ordinary case — but the option *count* per select is the
+    // real regression risk at this scale, since a bug in the rebuild loop
+    // could plausibly leave a stale/truncated list on some cards but not
+    // others).
+    const optionCounts = await page.locator(".dm-action-preconditions").evaluateAll(
+      (selects) => selects.map((s) => s.options.length),
+    );
+    assert.deepEqual(optionCounts, Array(25).fill(25), "every action's precondition list has all 25 rules, on every card");
+
+    await page.click("#domain-model-save");
+    await page.waitForSelector("#domain-model-overlay", { state: "hidden" });
+
+    const { rules, actions } = await page.evaluate(() => ({ rules: window.__kg.state.rules, actions: window.__kg.state.actions }));
+    assert.equal(rules.length, 25);
+    assert.equal(actions.length, 25);
+    const action17 = actions.find((a) => a.name === "action17");
+    const rule17 = rules.find((r) => r.name === "rule17");
+    assert.deepEqual(action17.preconditions, [rule17.id]);
+
+    // Reopen and remove a rule from the middle of the list — every action
+    // card's live options must drop it immediately (not just the ones
+    // created after the removal), and the removed rule's own precondition
+    // must vanish from whichever action had selected it.
+    await openDomainModel(page);
+    let targetCard = null;
+    for (const card of await page.locator(".domain-model-rule-card").all()) {
+      if ((await card.locator(".dm-rule-name").inputValue()) === "rule12") { targetCard = card; break; }
+    }
+    assert.ok(targetCard, "sanity check: found rule12's card");
+    await targetCard.locator(".details-row-remove").first().click();
+
+    const optionCountsAfterRemoval = await page.locator(".dm-action-preconditions").evaluateAll(
+      (selects) => selects.map((s) => s.options.length),
+    );
+    assert.deepEqual(optionCountsAfterRemoval, Array(25).fill(24), "removing one rule drops the option count on every action card, immediately");
+
+    const stillHasRule12 = await page.locator(".dm-action-preconditions").evaluateAll(
+      (selects) => selects.some((s) => [...s.options].some((o) => o.textContent === "rule12")),
+    );
+    assert.equal(stillHasRule12, false, "the removed rule's option is gone from every action's list, not just some");
+
+    await page.click("#domain-model-save");
+    await page.waitForSelector("#domain-model-overlay", { state: "hidden" });
+    assert.equal(await page.evaluate(() => window.__kg.state.rules.length), 24);
+  });
+});

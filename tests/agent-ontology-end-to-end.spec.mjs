@@ -219,3 +219,117 @@ test("a realistic Agent Ontology authoring session — classes, a relationship, 
     assert.equal((await page.evaluate(() => window.__kg.state.actions)).length, 1);
   });
 });
+
+// Everything above uses exactly one rule and one action, the minimal shape
+// needed to prove a reference resolves at all. A real domain model reads
+// more like a workflow: several stages, each gated by its own rule, with a
+// later stage's action sometimes depending on more than one precondition
+// at once (not just "the one rule right before it"). This test builds that
+// shape through the real Domain Model UI — a 4-stage invoice approval
+// chain — and checks the chain survives Save, mid-chain deletion, export,
+// and undo/redo intact.
+test("a longer, realistic chain of rules and actions (a 4-stage invoice workflow) resolves correctly end to end, including a multi-precondition action and mid-chain rule deletion", async () => {
+  await withDownloadPage(async (page, downloads) => {
+    await addNodeViaDblClick(page, 300, 300, "Invoice");
+    await page.click("#btn-domain-model");
+    await page.waitForSelector("#domain-model-overlay", { state: "visible" });
+
+    async function addRule(name, conditions) {
+      await page.click("#domain-model-add-rule");
+      await page.locator(".dm-rule-name").last().fill(name);
+      for (const cond of conditions) {
+        await page.locator(".domain-model-rule-card").last().locator(".details-add-btn").click();
+        await page.locator(".dm-rule-condition-input").last().fill(cond);
+      }
+    }
+    async function addAction(name, preconditionNames, effect, verification) {
+      await page.click("#domain-model-add-action");
+      const card = page.locator(".domain-model-action-card").last();
+      await card.locator(".dm-action-name").fill(name);
+      await card.locator(".dm-action-input-class").selectOption({ label: "Invoice" });
+      await card.locator(".dm-action-preconditions").selectOption(preconditionNames.map((label) => ({ label })));
+      await card.locator(".dm-action-effect").fill(effect);
+      await card.locator(".dm-action-verification").fill(verification);
+    }
+
+    // Stage 1: submit
+    await addRule("invoiceReceived", ["invoice has arrived", "invoice has a valid PO reference"]);
+    await addAction("submitInvoice", ["invoiceReceived"],
+      "invoice status becomes submitted", "check invoice status is submitted");
+    // Stage 2: match
+    await addRule("invoiceMatched", ["invoice amount matches PO amount", "invoice status is submitted"]);
+    await addAction("matchInvoice", ["invoiceMatched"],
+      "invoice status becomes matched", "check invoice status is matched");
+    // Stage 3: approve — gated on *two* preconditions at once, a genuine
+    // longer-chain reference pattern the single-rule tests elsewhere never
+    // exercise.
+    await addRule("supplierRiskClear", ["supplier risk status is clear"]);
+    await addAction("approveInvoice", ["invoiceMatched", "supplierRiskClear"],
+      "invoice status becomes approved", "check invoice status is approved");
+    // Stage 4: pay
+    await addRule("invoiceApproved", ["invoice status is approved"]);
+    await addAction("payInvoice", ["invoiceApproved"],
+      "invoice status becomes paid", "check payment confirmation");
+
+    await page.click("#domain-model-save");
+    await page.waitForSelector("#domain-model-overlay", { state: "hidden" });
+
+    let { rules, actions } = await page.evaluate(() => ({ rules: window.__kg.state.rules, actions: window.__kg.state.actions }));
+    assert.equal(rules.length, 4);
+    assert.equal(actions.length, 4);
+    const byName = (list, name) => list.find((x) => x.name === name);
+    const approveAction = byName(actions, "approveInvoice");
+    const matchedRule = byName(rules, "invoiceMatched");
+    const riskRule = byName(rules, "supplierRiskClear");
+    assert.equal(approveAction.preconditions.length, 2, "the approve stage really did keep both preconditions");
+    assert.deepEqual(new Set(approveAction.preconditions), new Set([matchedRule.id, riskRule.id]));
+    assert.equal(byName(actions, "payInvoice").inputClassId, (await nodeByLabel(page, "Invoice")).id);
+
+    // Save Version — the exported YAML should read as one coherent chain,
+    // not four disconnected fragments.
+    await page.click("#btn-save-version");
+    await page.waitForTimeout(200);
+    const yamlDl = downloads.find((d) => d.suggestedFilename().endsWith(".domain.yaml"));
+    const yaml = await readDownload(yamlDl);
+    for (const name of ["invoiceReceived", "invoiceMatched", "supplierRiskClear", "invoiceApproved"]) {
+      assert.ok(yaml.includes(`${name}:`), `expected rule ${name} in the export`);
+    }
+    for (const name of ["submitInvoice", "matchInvoice", "approveInvoice", "payInvoice"]) {
+      assert.ok(yaml.includes(`${name}:`), `expected action ${name} in the export`);
+    }
+    assert.ok(yaml.includes("preconditions:\n      - invoiceMatched\n      - supplierRiskClear")
+      || yaml.includes("preconditions:\n      - supplierRiskClear\n      - invoiceMatched"),
+      "approveInvoice's two preconditions both made it into the export, in some order");
+
+    // Mid-chain deletion, through the real dialog UI (not a data-layer
+    // bypass) so the removal is a normal, undoable edit: removing
+    // "invoiceMatched" (stage 2's rule) must cleanly drop it from *both*
+    // places that reference it — matchInvoice's own (now-empty) precondition
+    // list and approveInvoice's two-item one — without disturbing the rest
+    // of the chain.
+    await page.click("#btn-domain-model");
+    await page.waitForSelector("#domain-model-overlay", { state: "visible" });
+    let matchedRuleCard = null;
+    for (const card of await page.locator(".domain-model-rule-card").all()) {
+      if ((await card.locator(".dm-rule-name").inputValue()) === "invoiceMatched") { matchedRuleCard = card; break; }
+    }
+    assert.ok(matchedRuleCard, "sanity check: found invoiceMatched's card");
+    await matchedRuleCard.locator(".details-row-remove").first().click();
+    await page.click("#domain-model-save");
+    await page.waitForSelector("#domain-model-overlay", { state: "hidden" });
+
+    ({ rules, actions } = await page.evaluate(() => ({ rules: window.__kg.state.rules, actions: window.__kg.state.actions })));
+    assert.equal(rules.length, 3, "invoiceMatched is gone, the other three stages' rules remain");
+    assert.deepEqual(byName(actions, "matchInvoice").preconditions, [], "matchInvoice's dangling precondition was scrubbed");
+    assert.deepEqual(byName(actions, "approveInvoice").preconditions, [riskRule.id], "approveInvoice keeps its still-valid precondition, drops only the deleted one");
+    assert.equal(actions.length, 4, "no action itself was deleted — only the dangling reference");
+
+    // Undo restores the whole chain, including the deleted rule and both
+    // dangling-reference cleanups, as one step (the dialog's Save is always
+    // exactly one undo entry, regardless of how much changed inside it).
+    await page.click("#btn-undo");
+    ({ rules, actions } = await page.evaluate(() => ({ rules: window.__kg.state.rules, actions: window.__kg.state.actions })));
+    assert.equal(rules.length, 4, "undo brings invoiceMatched back");
+    assert.equal(byName(actions, "approveInvoice").preconditions.length, 2, "and restores both of approveInvoice's preconditions");
+  });
+});

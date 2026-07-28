@@ -29,11 +29,20 @@ enough that this can be picked up cold.
   this branch's own Phase A through H, and the base app's own separate Groups-removal PR). Nothing in
   the base app's `spec.md`/`TODO.md` changes as a *consequence of Agent Ontology* — Groups removal is a
   base-app decision with its own base-app PR, documented in the base app's own `spec.md`/`TODO.md`.
-- **Test suite:** 282 JS tests (281 through Phase G/H + 1 new in `tests/agent-ontology-end-to-end.spec.mjs`,
-  the Phase I cross-phase integration test) + 11 Python tests, all green, run twice consecutively. (Phase
-  A/B/D's own test files remain at their original counts — 7/15/13 — this Current State bullet now just
-  reports the whole-suite total rather than re-deriving it phase-by-phase; see each phase's own checklist
-  above, and the base app's own `TODO.md`, for the itemized per-file breakdown.)
+- **Test suite:** 287 JS tests (282 through Phase I + 5 from the post-initiative coverage/UI pass below)
+  + 11 Python tests, all green, run twice consecutively. (Phase A/B/D's own test files remain at their
+  original counts — 7/15/13 — this Current State bullet now just reports the whole-suite total rather
+  than re-deriving it phase-by-phase; see each phase's own checklist above, and the base app's own
+  `TODO.md`, for the itemized per-file breakdown.)
+- **Post-initiative coverage + Rules UI pass (2026-07-28, after Phase I):** the user asked for the
+  initiative's own critical-area gaps to be closed and for the Domain Model's Rules/Actions UI to be
+  reviewed for usability — not a new lettered phase, since the initiative itself was already complete;
+  see the dated Log entry for the full account. Summary: fixed a real UI bug (Effect/Verification inputs
+  and the Preconditions select had no persistent labels — once filled in, two plain text boxes were
+  visually indistinguishable), and added test coverage for three previously-thin areas: a large-scale
+  (350-entry) YAML export/import round trip, a documented-and-pinned known limitation in
+  `toCamelCaseId()`, a 25-rule/25-action Domain Model UI stress test, and a longer, multi-stage rules/
+  actions chain exercised end to end (including a multi-precondition action and mid-chain deletion).
 - **A Phase B side effect worth knowing about:** widening `#sel-toolbar` from 3 icons to 4 (the new
   "Edit Details" icon) exposed a real, if narrow, pre-existing interaction hazard — a lingering
   selection's floating toolbar can now more easily reach over a nearby node's own click point, since
@@ -592,3 +601,51 @@ as the reference and record deltas/clarifications here instead of rewriting the 
   `python3 -m unittest discover -s tools -p "test_*.py"` (11 tests, untouched), all green. This closes out
   the Agent Ontology initiative as originally planned (Phases A through I) — see the "Current State"
   section above for the final summary and what, if anything, would come next.
+- 2026-07-28 — Asked what critical areas could most benefit from more test coverage now that the
+  initiative was closed. Answered with four concrete, verified gaps rather than speculating: no stress/
+  scale test existed for the Domain Model YAML export/import path at all (every other big feature in this
+  codebase has one); `toCamelCaseId()`'s consecutive-uppercase-letter limitation, found while fixing its
+  idempotency bug in Phase G, was undocumented and untested; the Domain Model modal's rule/action UI had
+  never been exercised at more than 2-3 entries; and Phase 10 (manual cross-platform verification) is
+  real but can't be automated. User said to implement the first three, and separately to make the Rules
+  UI itself "work well and look well," plus add end-to-end tests for longer chains of actions.
+  **Rules UI fix, not just polish:** screenshotted the Domain Model dialog in both themes before touching
+  anything (a filled-in Effect input and a filled-in Verification input are two plain text boxes with no
+  persistent label — once typed into, the field's own placeholder text vanishes, so there was no way to
+  tell which was which at a glance; same gap for the Preconditions multi-select and the input-class
+  select). Added a `.details-field-sublabel` style (a smaller, more muted variant of the existing
+  `.details-field-label` used for the dialog's top-level Meaning/Aliases/Properties/Rules/Actions
+  headings) and a small `createSublabel()` helper, wired into `createRuleCard()` (a "Conditions" label)
+  and `createActionCard()` ("Input class," "Preconditions (hold Ctrl/Cmd to select multiple)," "Effect,"
+  "Verification"). New `en`/`hu` strings for all five, following the existing per-card (not live-
+  retranslated while the dialog stays open) placeholder-text precedent rather than inventing a new one.
+  Re-screenshotted to confirm the fix in both themes before writing the confirming test.
+  **Coverage additions**, one per identified gap: (1) `tests/agent-ontology-phase-g.spec.mjs` gained a
+  150-class/100-relationship/50-rule/50-action export-then-fresh-reimport round-trip test, completing in
+  well under a second — proves the recursive `yamlLines()`/`parseYamlBlock()` pair doesn't degrade at a
+  size closer to a real generated domain model. (2) `toCamelCaseId()` got a code comment documenting the
+  consecutive-uppercase-letters limitation precisely (re-deriving from an already-camelCase string with a
+  run of 2+ capitals, e.g. from back-to-back single-letter words, can lowercase part of that run on a
+  *second* derivation — verified by direct execution before writing the comment, not just reasoned about)
+  plus a pinning test in `tests/agent-ontology-phase-f.spec.mjs` asserting the exact (imperfect but
+  stable-after-one-step) behavior, so a future change can't silently regress it further without a test
+  failing. (3) `tests/agent-ontology-phase-d.spec.mjs` gained a 25-rule/25-action stress test built
+  through the *real* UI (not a data-layer bypass) — found no bugs, `refreshActionPreconditionOptions()`'s
+  live-sync rebuild held up correctly at scale, including verifying every action's option count drops
+  together, immediately, when a rule is removed mid-session. (4) Also added a direct test for the new
+  sublabels in the same file.
+  **Longer-chains end-to-end test:** added a second, differently-focused long test to
+  `tests/agent-ontology-end-to-end.spec.mjs` (the Phase I integration-test file — a chain-of-rules-and-
+  actions scenario is a variant of "cross-phase integration," not a new category, so it lives alongside
+  the original session-based test rather than in its own file): a 4-stage invoice approval workflow
+  (submit → match → approve → pay) built through the real Domain Model UI, with the approve stage gated
+  on *two* preconditions at once (a genuine longer-chain reference pattern no single-rule test elsewhere
+  exercises), verified through Save, a Save Version export (checking the exported YAML reads as one
+  coherent chain, not four disconnected fragments), a mid-chain rule deletion through the real UI
+  (confirming the dangling reference is scrubbed from both places that pointed to it, without disturbing
+  unrelated stages), and undo restoring the entire chain — including both cleanup effects — as the one
+  undo step a dialog Save always is. Ran standalone 4 times to confirm no flakiness, matching the
+  convention set for the original end-to-end test.
+  Full suite green twice consecutively: `node --test tests/*.spec.mjs` (287 tests — 282 + 5) and
+  `python3 -m unittest discover -s tools -p "test_*.py"` (11 tests, untouched — everything here is
+  JS-only), all green.

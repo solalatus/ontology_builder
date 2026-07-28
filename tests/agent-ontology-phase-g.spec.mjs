@@ -439,3 +439,91 @@ test("the diff-summary counts match what actually happens on commit", async () =
     assert.match(summary2, /Merge: 0 item\(s\) would be added, 5 existing item\(s\) would be updated/);
   });
 });
+
+// --- Scale (no other agent-ontology test exercises the YAML export/import
+// path at anything beyond a handful of entries — this proves the recursive
+// serializer/parser (yamlLines()/parseYamlBlock()) doesn't hang, doesn't
+// blow the stack on deep-ish nesting, and round-trips correctly at a size
+// closer to what a real generated domain model could reach) -------------
+
+test("a large domain model (150 classes, 100 relationships, 50 rules, 50 actions) round-trips through export then re-import correctly and quickly", async () => {
+  await withPage(async (page) => {
+    const start = Date.now();
+    const yaml = await page.evaluate(() => {
+      const nodeIds = [];
+      for (let i = 0; i < 150; i++) {
+        const n = window.__kg.actions.createNode((i % 15) * 200, Math.floor(i / 15) * 150, `Class${i}`);
+        n.meaning = `Meaning of Class${i}.`;
+        n.aliases = [`alias${i}a`, `alias${i}b`];
+        n.properties = [
+          { id: `p${i}a`, name: "code", type: "text", unit: null, allowed: null },
+          { id: `p${i}b`, name: "amount", type: "number", unit: "EUR", allowed: null },
+        ];
+        nodeIds.push(n.id);
+      }
+      for (let i = 0; i < 100; i++) {
+        const src = nodeIds[i % nodeIds.length];
+        const tgt = nodeIds[(i + 37) % nodeIds.length];
+        const edge = window.__kg.actions.createEdge(src, tgt, `relatesTo${i}`);
+        edge.meaning = `Relationship ${i}.`;
+      }
+      const ruleIds = [];
+      for (let i = 0; i < 50; i++) {
+        const r = window.__kg.actions.createRule(`rule${i}`, [`condition ${i}a`, `condition ${i}b`]);
+        ruleIds.push(r.id);
+      }
+      for (let i = 0; i < 50; i++) {
+        window.__kg.actions.createAction(
+          `action${i}`, nodeIds[i], [ruleIds[i], ruleIds[(i + 1) % ruleIds.length]],
+          `effect ${i}`, `verification ${i}`,
+        );
+      }
+      window.__kg.markDirty();
+      return window.buildDomainYamlExport();
+    });
+    const exportMs = Date.now() - start;
+    assert.ok(exportMs < 10000, `export of a 350-entry domain model should be quick, took ${exportMs}ms`);
+
+    // Clear and re-import into a fresh graph — the strongest round-trip
+    // check, since a Merge into the *same* graph would trivially "match"
+    // everything by construction.
+    await page.evaluate(() => {
+      window.__kg.state.nodes.length = 0;
+      window.__kg.state.edges.length = 0;
+      window.__kg.state.rules.length = 0;
+      window.__kg.state.actions.length = 0;
+      window.__kg.markDirty();
+    });
+
+    const importStart = Date.now();
+    await dropYaml(page, yaml, "large.domain.yaml");
+    await page.click("#import-merge");
+    await page.waitForFunction(() => window.__kg.state.nodes.length === 150);
+    const importMs = Date.now() - importStart;
+    assert.ok(importMs < 15000, `re-import of a 350-entry domain model should be quick, took ${importMs}ms`);
+
+    const { nodes, edges, rules, actions } = await page.evaluate(() => ({
+      nodes: window.__kg.state.nodes,
+      edges: window.__kg.state.edges,
+      rules: window.__kg.state.rules,
+      actions: window.__kg.state.actions,
+    }));
+    assert.equal(nodes.length, 150);
+    assert.equal(edges.length, 100);
+    assert.equal(rules.length, 50);
+    assert.equal(actions.length, 50);
+
+    const class42 = nodes.find((n) => n.label === "Class42");
+    assert.equal(class42.meaning, "Meaning of Class42.");
+    assert.deepEqual(class42.aliases, ["alias42a", "alias42b"]);
+    assert.equal(class42.properties.length, 2);
+    assert.ok(class42.properties.some((p) => p.name === "amount" && p.unit === "EUR"));
+
+    const action7 = actions.find((a) => a.name === "action7");
+    assert.equal(action7.effect, "effect 7");
+    assert.equal(action7.preconditions.length, 2, "both preconditions on a re-imported action resolved to real rule ids");
+
+    const relatesTo23Count = edges.filter((e) => e.relation === "relatesTo23").length;
+    assert.equal(relatesTo23Count, 1, "no duplicate/dropped relationships at scale");
+  });
+});

@@ -230,6 +230,30 @@ test("camelCase derivation is idempotent — re-deriving from an already-camelCa
   });
 });
 
+test("known, accepted limitation: consecutive uppercase letters (e.g. from back-to-back single-letter words) aren't perfectly stable across a second derivation, but settle after that", async () => {
+  // toCamelCaseId()'s own comment documents this precisely: a run of 2+
+  // uppercase letters has no internal lowercase-then-uppercase boundary for
+  // the idempotency fix to find, so re-deriving from an already-camelCase
+  // string can lowercase part of a run a from-scratch derivation would have
+  // capitalized. This is pinned, not fixed — it never affects a *first*
+  // derivation from a human-typed relation label (every real caller), and
+  // the result is stable after that one lossy step, so it can't reintroduce
+  // the re-import duplicate-edge bug the idempotency fix above targets. If
+  // this test starts failing, toCamelCaseId() changed in a way that needs
+  // its own comment (and this test) revisited, not silently ignored.
+  await withPage(async (page) => {
+    const results = await page.evaluate(() => {
+      const first = window.toCamelCaseId("is-a-kind-of");
+      const second = window.toCamelCaseId(first);
+      const third = window.toCamelCaseId(second);
+      return { first, second, third };
+    });
+    assert.equal(results.first, "isAKindOf", "a fresh derivation from hyphenated words capitalizes each word normally");
+    assert.equal(results.second, "isAkindOf", "known limitation: re-deriving from that result lowercases part of the consecutive-capital run");
+    assert.equal(results.third, results.second, "but it's stable from there — a third derivation doesn't drift any further");
+  });
+});
+
 test("an action referencing a deleted input class exports input: null rather than a dangling id", async () => {
   await withPage(async (page) => {
     await addNodeViaDblClick(page, 300, 300, "Invoice");
