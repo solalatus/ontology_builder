@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
-import { tagApiMessagesWithTurn } from "./evals/lib/conversationOrchestrator.mjs";
+import { tagApiMessagesWithTurn, looksLikeEarlyPhaseCheckpoint } from "./evals/lib/conversationOrchestrator.mjs";
 import { writeConversationLog, writeToolCallLog, writeReport, LOG_PATH, TOOL_CALL_LOG_PATH, REPORT_PATH } from "./evals/lib/reportGenerator.mjs";
 
 // Fast, deterministic unit tests for the eval's full-transparency logging
@@ -18,6 +18,52 @@ import { writeConversationLog, writeToolCallLog, writeReport, LOG_PATH, TOOL_CAL
 // notes (turns 22/23, 35, 36 of the run right after the batching fix
 // shipped) that could previously only be judged by trusting the
 // interviewer's own retelling.
+
+// Deterministic pre-filter for appearsFinished()'s classifier -- catches
+// the interviewer's own consistent "Phase N recap" phrasing (N 0-8) before
+// ever asking the LLM, since a real run found even an explicitly-instructed
+// classifier model misjudging exactly this shape of message as the final
+// wrap-up. See helper_agent_todo.md's dated Log entry for the real turn
+// that triggered this.
+const REAL_FALSE_POSITIVE_MESSAGE = "Recorded those 5 stakeholder, approval, and change-linkage relationships.\n\n" +
+  "**Phase 3 recap — relationships captured:**\n\n" +
+  "- Alerts trigger incidents.\n" +
+  "- Incidents affect IT services, involve configuration items, are assigned to resolver groups.\n\n" +
+  "Every class now has at least one relationship to something else.\n\n" +
+  "Please confirm: is this relationship set accurate enough to move into **decision-bearing properties**, " +
+  "or is there any important missing connection?";
+
+test("looksLikeEarlyPhaseCheckpoint catches the exact real message that fooled the LLM classifier", () => {
+  assert.equal(looksLikeEarlyPhaseCheckpoint(REAL_FALSE_POSITIVE_MESSAGE), true);
+});
+
+test("looksLikeEarlyPhaseCheckpoint catches \"Phase N recap\" for every early phase (0-8), and the reverse \"recap ... phase N\" order", () => {
+  for (let n = 0; n <= 8; n++) {
+    assert.equal(looksLikeEarlyPhaseCheckpoint(`**Phase ${n} recap — some heading:**\n\nDetails here.`), true, `phase ${n} recap should match`);
+  }
+  assert.equal(looksLikeEarlyPhaseCheckpoint("Here's a quick recap of phase 5 before we continue."), true);
+});
+
+test("looksLikeEarlyPhaseCheckpoint catches \"Phase N is confirmed complete\" for early phases", () => {
+  assert.equal(looksLikeEarlyPhaseCheckpoint("Great — Phase 5 is confirmed complete. Moving on to constraints."), true);
+});
+
+test("looksLikeEarlyPhaseCheckpoint does not match phase 9 (the real final pass) so it still reaches the LLM classifier", () => {
+  assert.equal(looksLikeEarlyPhaseCheckpoint("**Phase 9 recap — final validation:**\n\nEverything checks out."), false);
+  assert.equal(looksLikeEarlyPhaseCheckpoint("Phase 9 is confirmed complete. The ontology is ready to use."), false);
+});
+
+test("looksLikeEarlyPhaseCheckpoint does not match a genuine final wrap-up with no phase-recap phrasing at all", () => {
+  const finalMessage = "## Final validation pass\n\nI ran the competency check against your original questions and " +
+    "actions, and the final checklist. Every question is answerable and every action has preconditions. " +
+    "The ontology is ready for use.";
+  assert.equal(looksLikeEarlyPhaseCheckpoint(finalMessage), false);
+});
+
+test("looksLikeEarlyPhaseCheckpoint does not match ordinary text with no phase/recap markers", () => {
+  assert.equal(looksLikeEarlyPhaseCheckpoint("What is the current status of the incident?"), false);
+  assert.equal(looksLikeEarlyPhaseCheckpoint(""), false);
+});
 
 test("tagApiMessagesWithTurn tags every message with its turn number and passes content through unchanged", () => {
   const apiMessages = [
@@ -139,7 +185,10 @@ test("writeReport renders both the full-domain and practical-scope metrics, clea
   const orchestratorResult = { stoppedReason: "app_agent_appears_finished", turnsUsed: 39, durationMs: 1000 };
   const operationalStats = { appAgentApiCalls: 1, applyToolCalls: 1, getGraphStateCalls: 1, toolApplied: 1, toolSkipped: 0, toolNothing: 0, toolError: 0 };
 
-  writeReport({ metrics, scopedMetrics, operationalStats, orchestratorResult, llmReviewText: "None observed.", interviewerModel: "gpt-test", personaModel: "gpt-test-persona" });
+  writeReport({
+    metrics, scopedMetrics, operationalStats, orchestratorResult, llmReviewText: "None observed.",
+    interviewerModel: "gpt-test", personaModel: "gpt-test-persona", classifierModel: "gpt-test-classifier",
+  });
   const text = fs.readFileSync(REPORT_PATH, "utf8");
 
   assert.match(text, /Full domain/);
@@ -147,4 +196,5 @@ test("writeReport renders both the full-domain and practical-scope metrics, clea
   assert.match(text, /39\.2%/); // full-domain composite
   assert.match(text, /70\.0%/); // scoped composite
   assert.match(text, /tool-calls\.md/); // points readers at the new transparency log
+  assert.match(text, /Classifier model: `gpt-test-classifier`/);
 });

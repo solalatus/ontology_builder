@@ -781,3 +781,42 @@ redundant or kept as a defensive safety net — user chose **keep both**.
       nothing — proves the physical edit and the code filter agree exactly, not just that neither crashes).
 - Full suite (`tests/*.spec.mjs`, 397 JS tests) green. A full real eval re-run confirmed no regression — see
   this addendum's own follow-up note for the numbers.
+
+**Note:** PR #42 (covering everything up to this point in this file) was merged mid-session; the two addenda
+above ended up as unmerged commits on top of already-merged history. Per protocol, rebased them onto the
+fresh `helper_agent` and opened a new PR (#43) rather than reusing the closed one — see that PR for the
+concrete rebase/force-push mechanics.
+
+## Addendum — appearsFinished false-positive, round two: a deterministic pre-filter + a smarter classifier model
+
+**2026-07-29.** PR #43's own confirmatory eval run stopped after only 11 turns — the `appearsFinished`
+classifier (`tests/evals/lib/conversationOrchestrator.mjs`) fired on a message that opened with **"Phase 3
+recap — relationships captured:"** and closed by asking to move into the next phase: textbook mid-interview
+checkpoint language, and exactly the failure mode already "fixed" once before (see this file's earlier Log
+entry) by telling the classifier about all 10 phases explicitly. That instruction was already correct and
+specific; the cheap, 2-token-budget model still got it wrong. User's diagnosis request, then explicit
+instruction: implement a fix, and separately upgrade the classifier model.
+
+- [x] **Deterministic pre-filter** — new `looksLikeEarlyPhaseCheckpoint()`, exported from
+      `conversationOrchestrator.mjs`. Regexes for the interviewer's own consistent phrasing ("Phase N recap",
+      "recap ... Phase N", "Phase N is confirmed complete", N restricted to 0-8 so a genuine phase-9 final
+      pass still reaches the LLM) run *before* the classifier API call at all; a match short-circuits straight
+      to "not finished" with zero API cost. Only ever forces NO, never YES — strictly additive, can't make the
+      classifier more trigger-happy than before, only less.
+- [x] **Smarter classifier model** — `ONTOLOGY_EVAL_CLASSIFIER_MODEL`'s default changed from a hardcoded
+      `"gpt-4o-mini"` to whatever real, live-picked "standard tier" model the interviewer itself connects
+      with (same pattern `ONTOLOGY_EVAL_REVIEW_MODEL` already used) — a fixed cheap model was plausibly part
+      of why the instruction alone wasn't enough. Still overridable via the env var for anyone who wants a
+      specific model regardless.
+- [x] **A little more room to reason** — `max_tokens` raised from 2 to 60, and the classifier prompt now asks
+      for a one-line phase identification before the YES/NO verdict (parsed from the *last* non-empty line of
+      the response) instead of forcing an immediate terse guess. `report.md` now also lists the classifier
+      model used, alongside the interviewer's and persona's, for transparency.
+- [x] Tests (`tests/ontology-recovery-transparency.spec.mjs`, +6): `looksLikeEarlyPhaseCheckpoint` catches the
+      exact real message that fooled the classifier; catches "Phase N recap" for every early phase 0-8 and
+      the reverse "recap ... phase N" order; catches "Phase N is confirmed complete"; does *not* match phase 9
+      (so the real final pass still reaches the LLM) or a genuine phase-9-style final wrap-up with no
+      phase-recap phrasing at all; does not match ordinary unrelated text. `writeReport` test updated to cover
+      the new classifier-model line.
+- Full suite (`tests/*.spec.mjs`, 403 JS tests) green. A full real eval re-run confirmed the fix and upgraded
+  model together — see this addendum's own follow-up note for the numbers.

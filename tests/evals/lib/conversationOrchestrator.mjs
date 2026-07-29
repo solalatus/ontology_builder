@@ -3,32 +3,59 @@ import { createPersonaAgent, OPENING_LINE } from "./personaAgent.mjs";
 
 const CLASSIFIER_URL = "https://api.openai.com/v1/chat/completions";
 
+// Deterministic pre-filter, checked before ever calling the LLM classifier
+// below. First live run of this eval (see helper_agent_todo.md's Log) found
+// a real false positive: the interviewer's own system prompt has it recap
+// and ask for confirmation at the end of *each* of its 10 phases
+// (helper_agent_plan.md §4.3's INTERVIEW PROCESS), and a Phase-1-only recap
+// was misread as the whole interview being done. That was "fixed" by
+// telling the LLM classifier about all 10 phases explicitly -- but a later
+// run found the *same* failure mode again, on a message that literally
+// opened with "**Phase 3 recap — relationships captured:**" and closed by
+// asking to move into the next phase: about as textbook a mid-interview
+// checkpoint as exists, and the instructed classifier still said YES. A
+// cheap, low-token-budget model apparently can't reliably tell a phase
+// recap's rhetorical shape (bulleted summary + "please confirm") from a
+// real final wrap-up's, no matter how the instructions are worded.
+//
+// This catches the interviewer's own consistent "Phase N recap" / "Phase N
+// is confirmed complete" phrasing (N 0-8, never 9 -- phase 9 is the real
+// final pass and must still reach the LLM call) with plain regex, and
+// short-circuits straight to "not finished" without spending an API call at
+// all. It only ever forces NO, never YES, so it can only make the
+// classifier less trigger-happy than before, never more.
+const EARLY_PHASE_CHECKPOINT_PATTERNS = [
+  /\bphase\s*[0-8]\b[^\n]{0,40}\brecap\b/i,
+  /\brecap\b[^\n]{0,40}\bphase\s*[0-8]\b/i,
+  /\bphase\s*[0-8]\b[^\n]{0,60}\bconfirmed\s+complete\b/i,
+];
+export function looksLikeEarlyPhaseCheckpoint(text) {
+  return EARLY_PHASE_CHECKPOINT_PATTERNS.some((re) => re.test(text));
+}
+
 // Cheap, separate real call asking whether the interviewer's latest message
 // reads like it believes the *entire* elicitation is wrapped up -- this is
 // what lets a run stop well before the turn cap instead of always running
 // to the limit. Kept as its own tiny classification call (not reused from
-// the persona or app agent) so it can use a fixed, cheap,
-// deterministic-as-possible model regardless of what either conversational
-// role is configured to use.
-//
-// First live run of this eval (see helper_agent_todo.md's Log) found a
-// real false positive here: the interviewer's own system prompt has it
-// recap and ask for confirmation at the end of *each* of its 10 phases
-// (helper_agent_plan.md §4.3's INTERVIEW PROCESS), and a Phase-1-only recap
-// ("Phase 1 has enough material... [recap]... ready to move on?") was
-// misread as the whole interview being done, stopping the run after 17
-// turns with zero classes ever modeled. The fix: tell the classifier about
-// those phases explicitly and require the message to look like the *final*
-// one (phase 9, or an equivalent competency-question/final-checklist pass),
-// not just the end of an early phase.
+// the persona or app agent) so it can use a model chosen independently of
+// either conversational role -- see ontology-recovery.eval.spec.mjs, which
+// now defaults it to the same real, live-picked "standard tier" model the
+// interviewer itself connected with (not a fixed cheap one), after the
+// classifier default (gpt-4o-mini) proved to be part of what made the
+// false-positive above hard to instruction-away: a more capable model is
+// less prone to being fooled by rhetorical shape alone. Also given a little
+// more room to reason before answering (a one-sentence phase identification
+// on its own line, then the verdict on the line after) rather than forcing
+// an immediate 2-token guess -- max_tokens raised accordingly.
 async function appearsFinished(text, { apiKey, model }) {
+  if (looksLikeEarlyPhaseCheckpoint(text)) return false;
   const res = await fetch(CLASSIFIER_URL, {
     method: "POST",
     headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
     body: JSON.stringify({
       model,
       temperature: 0,
-      max_tokens: 2,
+      max_tokens: 60,
       messages: [
         {
           role: "system",
@@ -38,10 +65,12 @@ async function appearsFinished(text, { apiKey, model }) {
             "9 final validation pass (competency-question check, final checklist). It recaps and asks for " +
             "confirmation at the end of EVERY phase, not just the last one -- a recap of phase 1, 2, 3, etc. " +
             "asking to proceed to the next phase is completely normal mid-interview behavior, not completion. " +
-            "Answer with exactly one word, YES or NO: does this specific message indicate the *entire* " +
-            "10-phase interview is finished (this is the phase-9-equivalent final wrap-up, referencing a " +
-            "completed model as a whole, not just one earlier phase's recap)? Default to NO whenever the " +
-            "message reads like an earlier phase's checkpoint rather than a true final summary.",
+            "First, on one line, name which phase (0-9) this message's content most resembles, or say " +
+            "'final wrap-up' if it's phase 9 or equivalent. Then, on the next line by itself, answer with " +
+            "exactly one word, YES or NO: does this specific message indicate the *entire* 10-phase " +
+            "interview is finished (this is the phase-9-equivalent final wrap-up, referencing a completed " +
+            "model as a whole, not just one earlier phase's recap)? Default to NO whenever the message reads " +
+            "like an earlier phase's checkpoint rather than a true final summary.",
         },
         { role: "user", content: text },
       ],
@@ -49,7 +78,9 @@ async function appearsFinished(text, { apiKey, model }) {
   });
   const data = await res.json();
   const answer = (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || "";
-  return /^\s*yes/i.test(answer);
+  const lines = answer.trim().split("\n").map((l) => l.trim()).filter(Boolean);
+  const verdictLine = lines[lines.length - 1] || "";
+  return /^\s*yes/i.test(verdictLine);
 }
 
 // Pure, unit-testable tagging step: given a slice of raw apiMessages

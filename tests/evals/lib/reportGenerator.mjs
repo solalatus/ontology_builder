@@ -124,7 +124,7 @@ export async function generateLlmReview({ apiKey, model, orchestratorResult }) {
 // showing both, rather than quietly swapping the denominator, is what makes
 // this an addition to transparency rather than a way to make the number
 // look better.
-export function writeReport({ metrics, scopedMetrics, operationalStats, orchestratorResult, llmReviewText, interviewerModel, personaModel }) {
+export function writeReport({ metrics, scopedMetrics, operationalStats, orchestratorResult, llmReviewText, interviewerModel, personaModel, classifierModel }) {
   fs.mkdirSync(RESULTS_DIR, { recursive: true });
   const m = metrics;
   const s = scopedMetrics;
@@ -152,7 +152,7 @@ export function writeReport({ metrics, scopedMetrics, operationalStats, orchestr
     "",
     "## Run stats",
     "",
-    `- Interviewer model: \`${interviewerModel}\` · Persona model: \`${personaModel}\``,
+    `- Interviewer model: \`${interviewerModel}\` · Persona model: \`${personaModel}\` · Classifier model: \`${classifierModel}\``,
     `- Stopped: **${orchestratorResult.stoppedReason}**, after ${orchestratorResult.turnsUsed} turns, ${(orchestratorResult.durationMs / 1000).toFixed(0)}s wall-clock`,
     `- Real app-agent API calls: ${operationalStats.appAgentApiCalls} (apply_ontology_yaml called ${operationalStats.applyToolCalls}× · get_graph_state called ${operationalStats.getGraphStateCalls}×)`,
     `- Tool outcomes seen in transcript: ${operationalStats.toolApplied} applied · ${operationalStats.toolSkipped} skipped · ${operationalStats.toolNothing} no-op · ${operationalStats.toolError} error`,

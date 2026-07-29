@@ -631,3 +631,14 @@ these too, keeping the runtime filters as a safety net rather than removing
 them — done via a surgical script confined entirely to the `predicates:` and
 `actions:` sections, verified to match the filters' own output exactly. See
 `helper_agent_todo.md`'s own further dated addenda for both.
+
+A later confirmatory run stopped after only 11 turns: `appearsFinished`
+(`tests/evals/lib/conversationOrchestrator.mjs`) misjudged an explicit
+"Phase 3 recap" message as the whole interview being done -- the same
+failure mode already addressed once before, this time surviving an
+already-specific instruction to the classifier model. Fixed with a
+deterministic regex pre-filter that catches the interviewer's own "Phase N
+recap" phrasing (N 0-8) before the classifier is even called, and by
+defaulting the classifier model to the interviewer's own live-picked
+"standard tier" model instead of a fixed cheap one. See
+`helper_agent_todo.md`'s own further dated addendum for the details.

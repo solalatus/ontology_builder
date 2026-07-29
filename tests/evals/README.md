@@ -222,7 +222,7 @@ All environment-configurable, none hardcoded:
 | `ONTOLOGY_EVAL_MAX_TURNS` | 500 | Hard turn cap — raised from 100 once the interviewer's own pacing was fixed to batch similar items instead of one-per-turn (helper_agent_todo.md's dated Log entry) |
 | `ONTOLOGY_EVAL_WALLCLOCK_MINUTES` | 45 | Hard wall-clock cap |
 | `ONTOLOGY_EVAL_PERSONA_MODEL` | `gpt-4o-mini` | Simulating Eszter is a lighter task than open-ended elicitation, so this defaults cheap |
-| `ONTOLOGY_EVAL_CLASSIFIER_MODEL` | `gpt-4o-mini` | The cheap "does this look finished?" check |
+| `ONTOLOGY_EVAL_CLASSIFIER_MODEL` | (interviewer's own connected model) | The "does this look finished?" check — was a fixed cheap default (`gpt-4o-mini`) until a real run found it hard to instruction-away from a false positive on an early-phase recap; now defaults to whatever real, live-picked "standard tier" model the interviewer connects with, same pattern as `ONTOLOGY_EVAL_REVIEW_MODEL`. Also backed by a deterministic pre-filter (`looksLikeEarlyPhaseCheckpoint` in `lib/conversationOrchestrator.mjs`) that catches the interviewer's own "Phase N recap" phrasing before ever calling this model at all. |
 | `ONTOLOGY_EVAL_REVIEW_MODEL` | (interviewer's own connected model) | The report's LLM-review call |
 
 The interviewer side always uses whatever model the app's own real
