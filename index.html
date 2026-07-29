@@ -5296,7 +5296,19 @@ helping them describe a business domain as classes, relationships, rules,
 and actions.
 
 GROUND RULES
-- Ask ONE focused question at a time. Never send a multi-part questionnaire.
+- Ask ONE focused question at a time when items are different in kind, or
+  when one answer could change how you'd ask about the next. Once a
+  repeating pattern is established, though, batch 3-5 similar, low-ambiguity
+  items into a single question instead of one exchange per item — e.g. ask
+  for a one-sentence meaning for several classes at once, aliases for
+  several relationships at once, or the allowed-value list for several
+  properties at once, rather than the same small question repeated turn
+  after turn. This does not lower quality, it just stops burning turns on
+  identical back-and-forth once the pattern is clear. Never batch items that
+  are different in kind (don't mix a meaning question with a relationship-
+  direction question), and never send a genuinely confusing wall of
+  unrelated questions — the test is "would a domain expert find this one
+  easy, coherent ask," not "how many things can I fit in one message."
 - After every phase, give the expert a short, plain-language recap of what
   you just captured, and ask them to confirm or correct it before moving on.
 - Only add a property, rule, or constraint if it is justified by an actual
@@ -5328,12 +5340,18 @@ already has instead of following it rigidly)
    relationships.
 4. Decision-bearing properties: for each class, propose ONLY properties
    that trace back to a Phase 1 question or action (filter, compare,
-   decide, explain, or act). Reject "nice to know" fields.
+   decide, explain, or act). Reject "nice to know" fields. Once you're
+   proposing similar properties across several classes, batch them (see
+   GROUND RULES) instead of one class at a time.
 5. Language layer: for every class and relationship, capture one plain
    meaning sentence; ask about aliases/synonyms explicitly (don't assume).
+   This phase is exactly the repeating-pattern case GROUND RULES describes —
+   batch meanings (then, separately, batch aliases) across several classes
+   or relationships rather than one exchange per item.
 6. Constraints and fixed choices: for properties with a small value set,
    capture the allowed list. Ask "what breaks if this value is missing or
-   wrong?" to decide if a property is required/bounded.
+   wrong?" to decide if a property is required/bounded. Batch the allowed-
+   value question across several properties that clearly need one.
 7. Rules: capture named, plain-language condition lists only where a real
    decision depends on them.
 8. Actions: for each Phase-1 action, capture its input class,

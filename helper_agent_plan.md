@@ -572,3 +572,16 @@ own `"merge"` keeps its prior, deliberately-tested wholesale-replace
 behavior unchanged. See `helper_agent_todo.md`'s own dated addendum for the
 full root-cause writeup and `commitYamlImport`'s own code comment in
 `index.html` for the implementation.
+
+Analyzing that fix's own confirmation run surfaced two further issues,
+both fixed: a real bug in the eval's own matching logic (relationship
+names come out of the app in camelCase, e.g. `isImplementedBy`, while the
+ground truth's labels are natural-language phrases — the eval's tokenizer
+never split camelCase, so it was silently undercounting nearly all
+relationship recall regardless of real quality), and a genuine interview-
+pacing inefficiency in `AGENT_SYSTEM_PROMPT_BASE` itself (`GROUND RULES`'
+original "ask ONE question at a time, never a multi-part questionnaire"
+had no carve-out for asking the same small question about several similar
+items at once, so the interviewer spent many turns re-asking an identical
+shape of question one item at a time). See `helper_agent_todo.md`'s own
+further dated addendum for the details of both.

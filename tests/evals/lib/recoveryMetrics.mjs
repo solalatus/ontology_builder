@@ -9,8 +9,26 @@
 // as a known limitation in tests/evals/README.md rather than solved with a
 // second LLM-matching pass, to keep this eval's own moving parts small.
 
+// Recovered relationship names come out of the app in its own camelCase
+// dialect ("isImplementedBy", "dependsOn" -- the YAML shape the agent's
+// own tool schema uses), while the ground truth's predicate labels are
+// natural-language phrases ("is implemented by", "depends on"). Splitting
+// camelCase into words *before* lowercasing lets those actually compare
+// equal instead of "isimplementedby" (one unsplit token) never overlapping
+// with ["implemented", "by"] -- confirmed live: this was silently
+// suppressing almost all relationship recall (0.7% despite 60 real
+// recovered edges in the run that found it), an eval-tooling bug, not a
+// reflection of real interview quality. Same known consecutive-uppercase-
+// acronym limitation as the app's own toCamelCaseId() (helper_agent_todo.md
+// / TODO.md's own prior note on that) -- not fixed here either, for the
+// same reason: not worth the complexity for what's realistically never a
+// real predicate name in this domain.
+function splitCamelCase(s) {
+  return String(s || "").replace(/([a-z0-9])([A-Z])/g, "$1 $2");
+}
+
 function normalize(s) {
-  return String(s || "")
+  return splitCamelCase(s)
     .toLowerCase()
     .replace(/[^a-z0-9áéíóöőúüű\s]/gi, " ")
     .replace(/\s+/g, " ")

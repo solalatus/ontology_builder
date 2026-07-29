@@ -38,7 +38,7 @@ check, or run it for real via `node --test`.
    - the app agent's latest reply looks like it believes the interview is
      essentially wrapped up (a cheap real classification call after each
      app-agent turn — `appearsFinished()` in `lib/conversationOrchestrator.mjs`);
-   - `ONTOLOGY_EVAL_MAX_TURNS` turns (default 100);
+   - `ONTOLOGY_EVAL_MAX_TURNS` turns (default 500);
    - `ONTOLOGY_EVAL_WALLCLOCK_MINUTES` wall-clock minutes (default 45).
 4. Diffs the final recovered canvas model against the ground-truth fixture
    (`lib/recoveryMetrics.mjs`) and writes `results/report.md` +
@@ -77,7 +77,12 @@ Matching is heuristic token-set-overlap string comparison (normalized,
 stopword-stripped, Jaccard ≥ 0.6), not an LLM judge — deterministic and
 cheap, at the cost of missing recoveries phrased very differently from the
 ground truth's own labels/aliases. A known limitation, not solved here to
-keep this eval's own moving parts small.
+keep this eval's own moving parts small. Normalization does split camelCase
+into words first (`isImplementedBy` → `is implemented by`) — the app's own
+relationship-name dialect is camelCase while the ground truth's predicate
+labels are natural-language phrases, and a first real run found this
+silently suppressing almost all relationship recall before the split was
+added (helper_agent_todo.md's dated Log entry).
 
 - **Class / relationship recall, precision, F1** — standard set-comparison
   metrics between the ground truth and the recovered canvas model.
@@ -94,7 +99,7 @@ keep this eval's own moving parts small.
 
 ## Expectation to set going in
 
-The ground truth is large. A bounded interview — even up to 100 turns — will
+The ground truth is large. A bounded interview — even up to 500 turns — will
 realistically recover a minority of it, the same way a real human interview
 would need several sessions for a domain this size. This eval's value is
 trend-tracking (did a prompt or heuristic change move the recovery rate up
@@ -107,7 +112,7 @@ All environment-configurable, none hardcoded:
 
 | Variable | Default | Purpose |
 |---|---|---|
-| `ONTOLOGY_EVAL_MAX_TURNS` | 100 | Hard turn cap |
+| `ONTOLOGY_EVAL_MAX_TURNS` | 500 | Hard turn cap — raised from 100 once the interviewer's own pacing was fixed to batch similar items instead of one-per-turn (helper_agent_todo.md's dated Log entry) |
 | `ONTOLOGY_EVAL_WALLCLOCK_MINUTES` | 45 | Hard wall-clock cap |
 | `ONTOLOGY_EVAL_PERSONA_MODEL` | `gpt-4o-mini` | Simulating Eszter is a lighter task than open-ended elicitation, so this defaults cheap |
 | `ONTOLOGY_EVAL_CLASSIFIER_MODEL` | `gpt-4o-mini` | The cheap "does this look finished?" check |
@@ -117,11 +122,13 @@ The interviewer side always uses whatever model the app's own real
 default-model heuristic picks for the connecting key — that's the actual
 behavior a real user gets, not a value to override here.
 
-A full 100-turn run realistically costs well under a dollar (mini-tier
-persona/classifier calls dominate call count; the interviewer's own calls
-are comparatively few) but can take a meaningful fraction of the 45-minute
-wall-clock budget if it never trips the early-stop check. For quick
-iteration while changing this eval itself, override the turn cap down, e.g.:
+A full run realistically costs well under a dollar regardless of the turn
+cap (mini-tier persona/classifier calls dominate call count; the
+interviewer's own calls are comparatively few), but in practice the
+45-minute wall-clock default is almost always what actually stops a run
+long before 500 turns — the turn cap is headroom for an efficient
+interview to use, not a target it's expected to reach. For quick iteration
+while changing this eval itself, override the turn cap down, e.g.:
 
 ```sh
 ONTOLOGY_EVAL_MAX_TURNS=6 node --test tests/evals/*.eval.spec.mjs
