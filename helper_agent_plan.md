@@ -603,3 +603,16 @@ overwritten every run) for full transparency, so a suspected tool/state-
 sync issue can be checked against what actually happened rather than the
 interviewer's own narration of it. See `helper_agent_todo.md`'s own further
 dated addendum for the full root-cause writeup.
+
+That transparency log then found a real, confirmed app bug: `index.html`'s
+hand-rolled YAML parser (`parseYamlValueToken`) only recognized the *empty*
+inline flow-list token `"[]"`; a non-empty one like
+`preconditions: [canDeclareMajorIncident]` or `aliases: [ticket, issue]` —
+completely idiomatic YAML a real model wrote unprompted once conversations
+grew action/rule-heavy — fell through to the plain-string branch, so
+downstream `Array.isArray()` checks in `commitYamlImport`'s field-level
+merge treated the field as not given and silently dropped it to `[]`. Fixed
+by teaching the parser to split a non-empty inline list on top-level commas
+(quote-aware, reusing the existing quoted-scalar escape handling) instead of
+only recognizing the empty case. See `helper_agent_todo.md`'s own further
+dated addendum for the fix details and tests.

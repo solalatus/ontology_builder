@@ -100,6 +100,88 @@ test("Merge on an empty graph reproduces a full worked-example YAML exactly — 
   });
 });
 
+// Regression coverage for a real bug a live ontology-recovery eval run
+// found in itself (see helper_agent_todo.md's dated Log entry): parseYamlValueToken
+// only special-cased the *empty* inline list "[]" -- a non-empty one like
+// "aliases: [ticket, issue]" or "preconditions: [canApproveInvoice]" fell
+// through to the plain-string branch, so Array.isArray() checks downstream
+// saw a string and silently treated the field as not given, dropping
+// exactly what was sent. This is completely idiomatic YAML for a short
+// list and a real model wrote it unprompted. Same worked example as above,
+// but every list field uses inline flow syntax instead of block "- item"
+// lines, to prove both styles now parse identically.
+const INLINE_LIST_WORKED_EXAMPLE_YAML = [
+  "classes:",
+  "  Invoice:",
+  "    meaning: A request from a supplier to receive payment.",
+  "    aliases: [bill]",
+  "    properties:",
+  "      invoiceNumber:",
+  "        type: text",
+  "      amount:",
+  "        type: number",
+  "        unit: EUR",
+  "  Supplier:",
+  "    meaning: An organization providing goods or services.",
+  "    aliases: []",
+  "    properties: {}",
+  "relationships:",
+  "  - name: issuedBy",
+  "    from: Invoice",
+  "    to: Supplier",
+  "    meaning: The supplier that submitted the invoice.",
+  "rules:",
+  "  canApproveInvoice:",
+  "    conditions:",
+  "      - invoice status is matched",
+  "      - supplier risk status is clear",
+  "actions:",
+  "  approveInvoice:",
+  "    input: Invoice",
+  "    preconditions: [canApproveInvoice]",
+  "    effect: invoice status becomes approved",
+  "    verification: confirm the new invoice status",
+  "",
+].join("\n");
+
+test("Merge parses inline flow-list syntax (\"aliases: [bill]\", \"preconditions: [canApproveInvoice]\") the same as block-list syntax", async () => {
+  await withPage(async (page) => {
+    await dropYaml(page, INLINE_LIST_WORKED_EXAMPLE_YAML);
+    await page.click("#import-merge");
+    await page.waitForTimeout(150);
+
+    const { nodes, rules, actions } = await page.evaluate(() => ({
+      nodes: window.__kg.state.nodes,
+      rules: window.__kg.state.rules,
+      actions: window.__kg.state.actions,
+    }));
+    const invoice = nodes.find((n) => n.label === "Invoice");
+    assert.deepEqual(invoice.aliases, ["bill"], "an inline single-item list must parse to a real array, not the literal string \"[bill]\"");
+
+    assert.equal(rules.length, 1);
+    assert.equal(actions.length, 1);
+    assert.deepEqual(actions[0].preconditions, [rules[0].id],
+      "the action's inline-list precondition must resolve to the real rule id, not be dropped to []");
+  });
+});
+
+test("An inline flow-list item that's a quoted string containing a comma doesn't get split on that inner comma", async () => {
+  await withPage(async (page) => {
+    const text = [
+      "classes:",
+      '  Invoice:',
+      '    aliases: ["bill, formal", memo]',
+      "",
+    ].join("\n");
+    await dropYaml(page, text);
+    await page.click("#import-merge");
+    await page.waitForTimeout(150);
+
+    const invoice = (await page.evaluate(() => window.__kg.state.nodes))[0];
+    assert.deepEqual(invoice.aliases, ["bill, formal", "memo"]);
+  });
+});
+
 test("Merge is idempotent — re-importing the exact same file produces no duplicates", async () => {
   await withPage(async (page) => {
     await dropYaml(page, WORKED_EXAMPLE_YAML);
