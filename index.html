@@ -4598,6 +4598,23 @@ const AGENT_KEY_STORAGE_KEY = "kg-agent-key";
 const AGENT_MODEL_STORAGE_KEY = "kg-agent-model";
 const OPENAI_MODELS_URL = "https://api.openai.com/v1/models";
 
+// Shared backoff for both real API entry points (model discovery below and
+// chat turns, see callAgentChatRaw further down) — a 429 with
+// rate_limit_exceeded is an ordinary, transient condition under shared
+// account/org rate limits and normally clears within a few seconds, unlike
+// insufficient_quota (a permanently exhausted billing balance, distinguished
+// by error.code, that no amount of waiting fixes and must never be
+// retried). Failing the whole request on the first 429 made every rate
+// limit visible to the user as a hard error even though waiting a moment
+// would have succeeded.
+const AGENT_RATE_LIMIT_MAX_ATTEMPTS = 4; // 1 initial try + 3 retries
+function agentRateLimitBackoffMs(attempt) {
+  return Math.min(1000 * 2 ** (attempt - 1), 4000); // 1s, 2s, 4s
+}
+function sleepMs(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 // Reasoning/"thinking" models are the current o-series (o1, o3, o4, ...),
 // any GPT major version 5 or above (OpenAI folded reasoning into the
 // mainline GPT lineup starting there — confirmed live: a real key's model
@@ -4698,29 +4715,43 @@ function setAgentConnectError(kind) {
 
 // GET /v1/models with the given key. Returns the parsed model list on
 // success ({id, created}[]); throws {kind: "invalidKey"|"network"|{status}}
-// on failure, so the caller can drive setAgentConnectError() directly.
+// on failure, so the caller can drive setAgentConnectError() directly. A
+// transient 429 (rate_limit_exceeded) is retried with backoff before that;
+// see AGENT_RATE_LIMIT_MAX_ATTEMPTS's own comment.
 async function fetchOpenAiModels(apiKey) {
-  let res;
-  try {
-    res = await fetch(OPENAI_MODELS_URL, {
-      method: "GET",
-      headers: { Authorization: `Bearer ${apiKey}` },
-    });
-  } catch (err) {
-    throw { kind: "network" };
+  for (let attempt = 1; attempt <= AGENT_RATE_LIMIT_MAX_ATTEMPTS; attempt++) {
+    let res;
+    try {
+      res = await fetch(OPENAI_MODELS_URL, {
+        method: "GET",
+        headers: { Authorization: `Bearer ${apiKey}` },
+      });
+    } catch (err) {
+      throw { kind: "network" };
+    }
+    if (res.status === 401) throw { kind: "invalidKey" };
+    if (res.status === 429) {
+      let errJson = null;
+      try { errJson = await res.json(); } catch (err) { /* some error bodies aren't JSON */ }
+      const isPermanentQuotaError = errJson && errJson.error && errJson.error.code === "insufficient_quota";
+      if (!isPermanentQuotaError && attempt < AGENT_RATE_LIMIT_MAX_ATTEMPTS) {
+        await sleepMs(agentRateLimitBackoffMs(attempt));
+        continue;
+      }
+      throw { kind: { status: 429 } };
+    }
+    if (!res.ok) throw { kind: { status: res.status } };
+    let json;
+    try {
+      json = await res.json();
+    } catch (err) {
+      throw { kind: "network" };
+    }
+    const data = Array.isArray(json && json.data) ? json.data : [];
+    return data
+      .filter((m) => m && typeof m.id === "string")
+      .map((m) => ({ id: m.id, created: typeof m.created === "number" ? m.created : 0 }));
   }
-  if (res.status === 401) throw { kind: "invalidKey" };
-  if (!res.ok) throw { kind: { status: res.status } };
-  let json;
-  try {
-    json = await res.json();
-  } catch (err) {
-    throw { kind: "network" };
-  }
-  const data = Array.isArray(json && json.data) ? json.data : [];
-  return data
-    .filter((m) => m && typeof m.id === "string")
-    .map((m) => ({ id: m.id, created: typeof m.created === "number" ? m.created : 0 }));
 }
 
 function populateAgentModelSelects(models, selectedId) {
@@ -5578,46 +5609,55 @@ function setAgentSending(sending) {
 // prefix). Reusing one key for a whole connection, not generating a fresh
 // one per call, is what makes that hint meaningful.
 async function callAgentChatRaw(messages, { tools, promptCacheKey } = {}) {
-  let res;
-  try {
-    res = await fetch(OPENAI_CHAT_URL, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${agentState.apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: agentState.model,
-        messages,
-        ...(tools ? { tools, tool_choice: "auto" } : {}),
-        ...(promptCacheKey ? { prompt_cache_key: promptCacheKey } : {}),
-      }),
-    });
-  } catch (err) {
-    throw { kind: "network" };
-  }
-  let json = null;
-  try { json = await res.json(); } catch (err) { /* some error bodies aren't JSON */ }
-  if (!res.ok) {
-    const code = json && json.error && json.error.code;
-    const message = (json && json.error && json.error.message) || "";
-    if (res.status === 400 && (code === "context_length_exceeded" || /context length|maximum context/i.test(message))) {
-      throw { kind: "contextLength" };
+  for (let attempt = 1; attempt <= AGENT_RATE_LIMIT_MAX_ATTEMPTS; attempt++) {
+    let res;
+    try {
+      res = await fetch(OPENAI_CHAT_URL, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${agentState.apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: agentState.model,
+          messages,
+          ...(tools ? { tools, tool_choice: "auto" } : {}),
+          ...(promptCacheKey ? { prompt_cache_key: promptCacheKey } : {}),
+        }),
+      });
+    } catch (err) {
+      throw { kind: "network" };
     }
-    if (res.status === 401) throw { kind: "invalidKey" };
-    // OpenAI uses the same 429 status for two very different situations,
-    // distinguished only by error.code: a transient rate_limit_exceeded
-    // (worth waiting out) vs. insufficient_quota, a permanently exhausted
-    // billing balance that no amount of waiting fixes — confirmed live
-    // against a real out-of-quota key (see tests/helper-agent-live-openai.spec.mjs),
-    // which returned an accurate-looking but actively wrong "wait a moment"
-    // message before this distinction existed.
-    if (res.status === 429 && code === "insufficient_quota") throw { kind: "insufficientQuota" };
-    if (res.status === 429) throw { kind: "rateLimit" };
-    throw { kind: "generic", status: res.status };
+    let json = null;
+    try { json = await res.json(); } catch (err) { /* some error bodies aren't JSON */ }
+    if (!res.ok) {
+      const code = json && json.error && json.error.code;
+      const message = (json && json.error && json.error.message) || "";
+      if (res.status === 400 && (code === "context_length_exceeded" || /context length|maximum context/i.test(message))) {
+        throw { kind: "contextLength" };
+      }
+      if (res.status === 401) throw { kind: "invalidKey" };
+      // OpenAI uses the same 429 status for two very different situations,
+      // distinguished only by error.code: a transient rate_limit_exceeded
+      // (worth waiting out, see AGENT_RATE_LIMIT_MAX_ATTEMPTS's own comment)
+      // vs. insufficient_quota, a permanently exhausted billing balance that
+      // no amount of waiting fixes — confirmed live against a real
+      // out-of-quota key (see tests/helper-agent-live-openai.spec.mjs),
+      // which returned an accurate-looking but actively wrong "wait a
+      // moment" message before this distinction existed.
+      if (res.status === 429 && code === "insufficient_quota") throw { kind: "insufficientQuota" };
+      if (res.status === 429) {
+        if (attempt < AGENT_RATE_LIMIT_MAX_ATTEMPTS) {
+          await sleepMs(agentRateLimitBackoffMs(attempt));
+          continue;
+        }
+        throw { kind: "rateLimit" };
+      }
+      throw { kind: "generic", status: res.status };
+    }
+    const choice = json && Array.isArray(json.choices) ? json.choices[0] : null;
+    return (choice && choice.message) || { content: "" };
   }
-  const choice = json && Array.isArray(json.choices) ? json.choices[0] : null;
-  return (choice && choice.message) || { content: "" };
 }
 
 // Plain-text convenience wrapper over callAgentChatRaw(), for call sites

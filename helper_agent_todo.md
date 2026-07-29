@@ -873,3 +873,54 @@ done. All three implemented together:
 - Full suite (`tests/*.spec.mjs`, 407 JS tests) green; the 5 failures seen in this run are pre-existing,
   unrelated `helper-agent-live-openai.spec.mjs` live tests hit by real API rate limiting (HTTP 429), not this
   change.
+
+## Addendum — rate-limit backoff, in both the production agent and the test harness
+
+**2026-07-29.** Attempting the live confirmatory eval for the addendum above hit real 429s immediately on
+connect (before even reaching the interview), and re-running it a second time hit the same wall. User's
+instruction: implement backoff for rate limiting in both the agent and the tests, on top of everything already
+in flight.
+
+- [x] **Production agent (`index.html`)** — `callAgentChatRaw` (chat turns) and `fetchOpenAiModels` (the
+      connect-flow model list) both used to fail immediately on any 429, including an ordinary transient
+      `rate_limit_exceeded` that would very plausibly have succeeded a moment later. Both now retry with
+      exponential backoff (new shared `AGENT_RATE_LIMIT_MAX_ATTEMPTS = 4`, `agentRateLimitBackoffMs`: 1s, 2s,
+      4s — 1 initial try + 3 retries) before surfacing an error to the user. `insufficient_quota` (the
+      permanent, billing-exhausted case, distinguished by `error.code` exactly like the existing
+      rate-limit-vs-quota distinction) is still never retried — no amount of waiting fixes it, and retrying it
+      anyway would just burn more time for no benefit.
+- [x] **Test harness (`tests/lib/liveOpenAi.mjs`)** — `forwardToRealOpenAi`, the Node-side relay every live
+      test/eval routes real API calls through (this sandbox's browser can't reach `api.openai.com` directly),
+      now retries the same way *inside the relay itself*, before ever calling `route.fulfill()`. This matters
+      for a reason the client-side retry above can't fix on its own: Chromium logs its own
+      `"Failed to load resource: ... 429"` console message for *every* non-2xx response it receives, even one
+      a caller's own retry loop recovers from -- and `withPage()` (`tests/lib/page.mjs`) asserts zero
+      console/page errors for the whole test. Without retrying inside the relay, each intermediate failed
+      attempt would still fail the test even if the retry eventually succeeded. Relaying only the final
+      (post-retry) response means the page only ever sees one outcome per request, exactly like a real
+      (non-relayed) client experiencing one slow call rather than several distinct failed ones. Root-caused via
+      `tests/evals/*.eval.spec.mjs` failing with exactly three `"Failed to load resource: ... 429"` console
+      errors, all during the model-discovery call at connect.
+- [x] Tests: `tests/helper-agent-phase2.spec.mjs` (+4) -- a transient 429 is retried and succeeds once the API
+      recovers (proven by counting actual requests sent, not just the final outcome); a rate limit that never
+      clears is retried exactly 4 times total then gives up (bounded, not infinite); `insufficient_quota` is
+      never retried (exactly 1 attempt); the connect flow's model-discovery call gets the same treatment.
+      `tests/live-openai-relay-backoff.spec.mjs` (new, +3) -- unit tests of the relay itself, monkey-patching
+      Node's global `fetch` with a scripted 429/429/200 sequence (no API key, no real network) to prove the
+      page genuinely only ever sees the eventual single outcome, not each intermediate attempt; a permanent
+      `insufficient_quota` is never retried; a rate limit that never clears still gives up after exactly 4
+      attempts rather than hanging forever.
+- Full suite (`tests/*.spec.mjs`, 414 JS tests) green.
+- **Live confirmation blocked, not skipped:** re-running the confirmatory eval to prove the *original*
+  `appearsFinished`/`max_tokens` fix actually stops a genuine finished interview promptly (this addendum's own
+  stated goal) still failed immediately -- but by design this time: `forwardToRealOpenAi`'s own new
+  quota-vs-rate-limit check correctly declined to retry, and a direct, isolated `curl`-equivalent call against
+  the real key confirmed why: `error.code: "insufficient_quota"`, "You exceeded your current quota, please
+  check your plan and billing details." This is the account's real, current OpenAI billing state, not a bug in
+  this branch -- todays's heavy API usage (all the mocked suite's live tests, the two earlier eval attempts,
+  this diagnostic call itself) appears to have exhausted it. Every automated check that doesn't require a live
+  key (407 -> 414 mocked JS tests, all passing) is done and confirms both the original fix and this addendum's
+  backoff work behave correctly, including correctly *not* retrying this exact condition. The one thing still
+  outstanding -- an actual multi-turn live interview proving `appearsFinished`/`looksLikePureAcknowledgment`
+  stop a real run promptly -- needs the account's quota restored first; nothing further to fix in code until
+  then.

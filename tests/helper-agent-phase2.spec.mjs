@@ -382,6 +382,99 @@ test("a 429 with an unrecognized error.code still falls back to the ordinary rat
   });
 });
 
+// A transient rate limit is worth waiting a moment for, not an immediate
+// hard failure -- callAgentChatRaw (index.html) now retries a 429 with
+// backoff before giving up. mockChatSequence serves a different response
+// per call (429, 429, then a real success), so a passing test here proves
+// the retry loop actually re-sent the request rather than just eventually
+// showing an error.
+test("a transient rate-limit response is retried with backoff and succeeds once the API recovers", async () => {
+  await withPageAllowingResourceErrors(async (page) => {
+    await connectAgent(page);
+    const rateLimitBody = { error: { message: "Rate limit reached", code: "rate_limit_exceeded" } };
+    const requestBodies = mockChatSequence(page, [
+      () => ({ status: 429, body: rateLimitBody }),
+      () => ({ status: 429, body: rateLimitBody }),
+      () => ({ body: chatCompletionBody("Sorry for the wait -- let's continue.") }),
+    ]);
+
+    await sendChatMessage(page, "hello");
+    await page.waitForFunction(() => !window.__kg.agent.isSending(), null, { timeout: 15000 });
+    const last = await lastTranscriptMessage(page);
+    assert.equal(last.role, "assistant");
+    assert.equal(last.text, "Sorry for the wait -- let's continue.");
+    assert.equal(requestBodies.length, 3, "expected the two failed attempts plus the eventual success, not just one call");
+  });
+});
+
+// The retry loop must not run forever -- it's bounded (index.html's
+// AGENT_RATE_LIMIT_MAX_ATTEMPTS: 1 initial try + 3 retries = 4 total) so a
+// rate limit that never clears still surfaces to the user eventually
+// instead of hanging the chat indefinitely.
+test("a rate limit that never clears is retried a bounded number of times, then gives up", async () => {
+  await withPageAllowingResourceErrors(async (page) => {
+    await connectAgent(page);
+    const requestBodies = mockChatSequence(page, [
+      () => ({ status: 429, body: { error: { message: "Rate limit reached", code: "rate_limit_exceeded" } } }),
+    ]);
+
+    await sendChatMessage(page, "hello");
+    await page.waitForFunction(() => !window.__kg.agent.isSending(), null, { timeout: 15000 });
+    const last = await lastTranscriptMessage(page);
+    assert.equal(last.text, await page.evaluate(() => window.__kg.lang.t("agentChatErrorRateLimit")));
+    assert.equal(requestBodies.length, 4, "expected exactly 4 total attempts (1 initial + 3 retries), not an unbounded retry loop");
+  });
+});
+
+// insufficient_quota is permanent (an exhausted billing balance) -- retrying
+// it wastes time and API calls on something backoff can never fix, so it
+// must fail on the very first attempt, unlike the ordinary rate-limit case
+// above.
+test("an insufficient_quota error is never retried, unlike an ordinary rate limit", async () => {
+  await withPageAllowingResourceErrors(async (page) => {
+    await connectAgent(page);
+    const requestBodies = mockChatSequence(page, [
+      () => ({ status: 429, body: { error: { message: "You exceeded your current quota.", code: "insufficient_quota" } } }),
+    ]);
+
+    await sendChatMessage(page, "hello");
+    await page.waitForFunction(() => !window.__kg.agent.isSending());
+    const last = await lastTranscriptMessage(page);
+    assert.equal(last.text, await page.evaluate(() => window.__kg.lang.t("agentChatErrorInsufficientQuota")));
+    assert.equal(requestBodies.length, 1, "expected exactly one attempt -- retrying a permanent quota error is pointless");
+  });
+});
+
+// fetchOpenAiModels (the GET /v1/models call during connect) gets the same
+// backoff treatment as the chat endpoint above -- a rate limit hit while
+// just discovering models shouldn't be any less recoverable than one hit
+// mid-conversation.
+test("connecting retries a transient rate-limit on model discovery and succeeds once it recovers", async () => {
+  await withPageAllowingResourceErrors(async (page) => {
+    const models = [{ id: "gpt-4o-mini", created: 1715000000, object: "model", owned_by: "openai" }];
+    let callCount = 0;
+    await page.route(MODELS_URL, (route) => {
+      callCount++;
+      if (callCount < 3) {
+        route.fulfill({ status: 429, contentType: "application/json", body: JSON.stringify({ error: { message: "Rate limit reached", code: "rate_limit_exceeded" } }) });
+        return;
+      }
+      route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ object: "list", data: models }) });
+    });
+
+    const expanded = await page.evaluate(() => window.__kg.agent.isExpanded());
+    if (!expanded) await page.click("#agent-panel-toggle");
+    await page.click("#agent-connect-open");
+    await page.fill("#agent-key-input", "sk-test-key");
+    await page.click("#agent-connect-submit");
+    await page.waitForFunction(() => !document.getElementById("agent-model-select-modal").disabled, null, { timeout: 15000 });
+
+    assert.equal(callCount, 3, "expected the two failed attempts plus the eventual success");
+    const modelOptions = await page.evaluate(() => Array.from(document.getElementById("agent-model-select-modal").options).map((o) => o.value));
+    assert.deepEqual(modelOptions, ["gpt-4o-mini"]);
+  });
+});
+
 test("a network/CORS failure shows a distinct chat error", async () => {
   await withPageAllowingResourceErrors(async (page) => {
     await connectAgent(page);

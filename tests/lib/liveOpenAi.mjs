@@ -12,25 +12,57 @@ import { launchChromium } from "./browser.mjs";
 export const MODELS_URL = "https://api.openai.com/v1/models";
 export const CHAT_URL = "https://api.openai.com/v1/chat/completions";
 
+// Same backoff shape as index.html's own AGENT_RATE_LIMIT_MAX_ATTEMPTS --
+// a real, shared account/org rate limit under real API load (this sandbox's
+// own live test/eval runs all draw on the same key) produces a genuine
+// transient 429 fairly often, and retrying it *inside the relay* matters
+// for a reason client-side retries alone can't fix: withPage() (page.mjs)
+// asserts zero console/page errors, and Chromium logs its own "Failed to
+// load resource: ... 429" console message for *every* non-2xx response it
+// receives, even one a caller's own retry loop recovers from. If the relay
+// forwarded each failed attempt back to the page before eventually
+// succeeding, the page would still see (and log) every intermediate
+// failure and the test would fail regardless of the final outcome. Retrying
+// here, before ever calling route.fulfill(), means the page only ever sees
+// one response per request -- the eventual success, or the final failure --
+// exactly like a real (non-relayed) client would experience a single slow
+// call rather than several distinct failed ones.
+const RELAY_RATE_LIMIT_MAX_ATTEMPTS = 4; // 1 initial try + 3 retries
+function relayRateLimitBackoffMs(attempt) {
+  return Math.min(1000 * 2 ** (attempt - 1), 4000); // 1s, 2s, 4s
+}
+function sleepMs(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 // Relays the app's real outgoing request to the real OpenAI API and relays
-// the real response back untouched. Returns the array of real response
-// bodies seen, in order, for callers that want to inspect what the live API
-// actually sent back.
+// the real response back untouched (after retrying a transient 429 -- see
+// above). Returns the array of real, final response bodies seen, in order
+// (one per relayed request, post-retry), for callers that want to inspect
+// what the live API actually sent back.
 export function forwardToRealOpenAi(page, url) {
   const responses = [];
   page.route(url, async (route) => {
     const req = route.request();
     let res, text;
-    try {
-      res = await fetch(url, {
-        method: req.method(),
-        headers: { Authorization: req.headers()["authorization"], "Content-Type": "application/json" },
-        body: req.postData(),
-      });
-      text = await res.text();
-    } catch (err) {
-      await route.fulfill({ status: 599, contentType: "application/json", body: JSON.stringify({ error: { message: String(err) } }) });
-      return;
+    for (let attempt = 1; attempt <= RELAY_RATE_LIMIT_MAX_ATTEMPTS; attempt++) {
+      try {
+        res = await fetch(url, {
+          method: req.method(),
+          headers: { Authorization: req.headers()["authorization"], "Content-Type": "application/json" },
+          body: req.postData(),
+        });
+        text = await res.text();
+      } catch (err) {
+        await route.fulfill({ status: 599, contentType: "application/json", body: JSON.stringify({ error: { message: String(err) } }) });
+        return;
+      }
+      if (res.status !== 429 || attempt >= RELAY_RATE_LIMIT_MAX_ATTEMPTS) break;
+      let parsedErr = null;
+      try { parsedErr = JSON.parse(text); } catch (err) { /* non-JSON error body */ }
+      const isPermanentQuotaError = parsedErr && parsedErr.error && parsedErr.error.code === "insufficient_quota";
+      if (isPermanentQuotaError) break; // no amount of waiting fixes this one
+      await sleepMs(relayRateLimitBackoffMs(attempt));
     }
     let parsed = null;
     try { parsed = JSON.parse(text); } catch (err) { /* non-JSON body, leave parsed null */ }

@@ -660,3 +660,17 @@ thinks, and a prompt-level defense on the persona side
 to give one short closing line and stop once it recognizes the interviewer
 has wrapped up, rather than keep volunteering new content. See
 `helper_agent_todo.md`'s own further dated addendum for the details.
+
+Both the production agent and the test harness also gained rate-limit
+backoff: `index.html`'s `callAgentChatRaw`/`fetchOpenAiModels` now retry an
+ordinary transient 429 with exponential backoff instead of failing
+immediately (never retrying the permanent `insufficient_quota` case), and
+the test harness's `forwardToRealOpenAi` relay (`tests/lib/liveOpenAi.mjs`)
+retries the same way *inside the relay itself*, so a page driven through it
+never sees a failed intermediate attempt -- only the eventual outcome,
+avoiding a real failure mode where Chromium's own per-response console
+logging made even a successfully-retried call still fail `withPage()`'s
+strict no-console-errors assertion. See `helper_agent_todo.md`'s own
+further dated addendum for the details, including why the live
+confirmatory eval this was meant to unblock is still pending on the
+account's own OpenAI quota rather than on anything left to fix in code.
