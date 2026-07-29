@@ -30,6 +30,92 @@ function normalizeLabel(s) {
   return String(s || "").trim().toLowerCase().replace(/\s+/g, " ");
 }
 
+function stripPunctuation(s) {
+  return String(s || "").replace(/[^a-z0-9\s]/gi, " ").replace(/\s+/g, " ").trim();
+}
+
+// "is a" (subclass) predicates -- 23 of them in this fixture, e.g. "Major
+// Incident is a Incident", "Application is a Configuration Item" -- encode a
+// taxonomy relationship this app's data model has no way to represent: it's
+// flat classes plus directed relationship edges only, no subclassing (see
+// index.html's commitYamlImport comment, and a real eval run's own
+// interviewer explicitly saying so mid-interview: "this tool does not use
+// subclassing directly ... instead, connect them with a clear relationship").
+// A correctly-behaving interview therefore models "Major Incident declared
+// from Incident" instead of forcing "is a" onto a generic relationship edge
+// -- scoring that choice as a recall miss would penalize *correct* behavior,
+// not bad interview technique. Filtered out the same documented, auditable
+// way isRecoverableProperty filters identifier/uri fields: a rule over the
+// untouched fixture, not a hand-trimmed copy of it.
+function isRecoverableRelationship(predicate) {
+  return predicate.label !== "is a";
+}
+
+// PRACTICAL INTERVIEW SCOPE ---------------------------------------------
+// The fixture models a *comprehensive* 68-class reference domain, built for
+// reuse across many possible interviews/experiments, not a scoped
+// deliverable for any single one of them. A real, single-session,
+// competency-question-driven interview -- this app's own actual
+// methodology: elicit real questions/actions first (Phase 1), then model
+// only what's needed to answer them -- will only ever reach the slice of
+// that domain implied by whatever questions/actions actually came up.
+// Scoring against the full 68-class domain every run measures the wrong
+// thing: it grades a focused domain interview against an entire reference
+// textbook, not against what a good interview on this topic could
+// realistically be expected to cover.
+//
+// practicalScopeClassIds gives a second, tighter, and just as auditable
+// denominator: every class whose label or a declared alias appears
+// (case/punctuation-insensitive, whole-word) inside the fixture's *own*
+// canonical competencyQuestions + actions section -- question text; action
+// labels, preconditions, effects, verification, and authorization text.
+// That's exactly the same kind of "real questions and real actions"
+// material Phase 1 of the app's own interview methodology is built to
+// elicit and scope everything else from. It's mechanical, not hand-picked:
+// it only depends on what the fixture's own canonical competency-test
+// material actually talks about, so it can't silently drift into an
+// arbitrary hand-trimmed subset the way editing the YAML by hand could.
+function buildPracticalScopeClassIds(doc, classes) {
+  const corpusParts = [...(doc.competencyQuestions || [])];
+  for (const a of Object.values(doc.actions || {})) {
+    corpusParts.push(a.label || "");
+    corpusParts.push(...(a.preconditions || []));
+    corpusParts.push(...(a.effects || []));
+    corpusParts.push(...(a.verification || []));
+    corpusParts.push(...(a.authorization || []));
+  }
+  const corpus = ` ${stripPunctuation(normalizeLabel(corpusParts.join(" \n ")))} `;
+  const scope = new Set();
+  for (const [id, c] of Object.entries(classes)) {
+    // c.aliases already includes the class's own label (see below), each
+    // pre-normalized to lowercase -- strip punctuation the same way the
+    // corpus was, so "on-call engineer" matches "on call engineer".
+    const hit = c.aliases.some((a) => {
+      const stripped = stripPunctuation(a);
+      return stripped.length > 2 && corpus.includes(` ${stripped} `);
+    });
+    if (hit) scope.add(id);
+  }
+  return scope;
+}
+
+// Filters a loaded ground-truth model down to only the classes named in
+// classIds (plus relationships/properties anchored to them), for scoring
+// against a narrower denominator (e.g. practicalScopeClassIds) while
+// reusing the exact same computeRecoveryMetrics logic used for the full
+// domain -- no separate scoring code path to keep in sync.
+export function scopeGroundTruth(groundTruth, classIds) {
+  const classes = {};
+  for (const [id, c] of Object.entries(groundTruth.classes)) {
+    if (classIds.has(id)) classes[id] = c;
+  }
+  const relationships = groundTruth.relationships.filter(
+    (r) => classIds.has(r.fromClassId) && classIds.has(r.toClassId)
+  );
+  const properties = groundTruth.properties.filter((p) => classIds.has(p.classId));
+  return { ...groundTruth, classes, relationships, properties };
+}
+
 // Builds the normalized comparison structure used by recoveryMetrics.mjs.
 // classes: id -> { id, label, aliases: string[] (normalized, includes label) }
 // relationships: [{ id, label, fromClassId, toClassId }]  (object-kind predicates)
@@ -56,6 +142,7 @@ export function loadGroundTruthModel({ includeAllProperties = false } = {}) {
   for (const [id, p] of Object.entries(doc.predicates || {})) {
     if (p.kind === "object") {
       if (!classes[p.from] || !classes[p.to]) continue; // predicate targets a non-class (shouldn't happen, defensive)
+      if (!isRecoverableRelationship(p)) continue;
       relationships.push({ id, label: p.label, fromClassId: p.from, toClassId: p.to });
     } else {
       if (!classes[p.from]) continue;
@@ -65,5 +152,7 @@ export function loadGroundTruthModel({ includeAllProperties = false } = {}) {
     }
   }
 
-  return { classes, relationships, properties, valueSets, metadata: doc.metadata || {} };
+  const practicalScopeClassIds = buildPracticalScopeClassIds(doc, classes);
+
+  return { classes, relationships, properties, valueSets, metadata: doc.metadata || {}, practicalScopeClassIds };
 }

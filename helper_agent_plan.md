@@ -585,3 +585,34 @@ had no carve-out for asking the same small question about several similar
 items at once, so the interviewer spent many turns re-asking an identical
 shape of question one item at a time). See `helper_agent_todo.md`'s own
 further dated addendum for the details of both.
+
+A follow-up analysis pass on that fix's own confirmation run found the
+remaining low composite score (39.2%) was mostly a scope-mismatch artifact
+rather than an interview-quality problem: the ground truth is a
+comprehensive 68-class reference domain, while a competency-question-driven
+interview only ever reaches the slice implied by whatever questions/actions
+actually came up. `tests/evals/lib/groundTruthModel.mjs` now scores against
+both the full domain and a second, mechanically-derived "practical scope"
+(classes the fixture's own canonical competency questions/actions actually
+talk about) side by side, and excludes the 23 `"is a"` subclass predicates
+the app's flat data model has no way to represent. Phase 3 (relationships)
+of the system prompt gained the same batch-and-don't-stop-early guidance
+Phases 4–6 already had. The eval also now captures the interviewer's exact
+tool-call arguments and results (`results/tool-calls.md`, gitignored,
+overwritten every run) for full transparency, so a suspected tool/state-
+sync issue can be checked against what actually happened rather than the
+interviewer's own narration of it. See `helper_agent_todo.md`'s own further
+dated addendum for the full root-cause writeup.
+
+That transparency log then found a real, confirmed app bug: `index.html`'s
+hand-rolled YAML parser (`parseYamlValueToken`) only recognized the *empty*
+inline flow-list token `"[]"`; a non-empty one like
+`preconditions: [canDeclareMajorIncident]` or `aliases: [ticket, issue]` —
+completely idiomatic YAML a real model wrote unprompted once conversations
+grew action/rule-heavy — fell through to the plain-string branch, so
+downstream `Array.isArray()` checks in `commitYamlImport`'s field-level
+merge treated the field as not given and silently dropped it to `[]`. Fixed
+by teaching the parser to split a non-empty inline list on top-level commas
+(quote-aware, reusing the existing quoted-scalar escape handling) instead of
+only recognizing the empty case. See `helper_agent_todo.md`'s own further
+dated addendum for the fix details and tests.

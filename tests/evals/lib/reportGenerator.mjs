@@ -6,6 +6,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export const RESULTS_DIR = path.resolve(__dirname, "..", "results");
 export const LOG_PATH = path.join(RESULTS_DIR, "conversation-log.md");
 export const REPORT_PATH = path.join(RESULTS_DIR, "report.md");
+export const TOOL_CALL_LOG_PATH = path.join(RESULTS_DIR, "tool-calls.md");
 
 const CHAT_URL = "https://api.openai.com/v1/chat/completions";
 
@@ -16,13 +17,26 @@ function pct(x) {
 // Overwritten every run, not accumulated -- "full conversation logs,
 // overwritten at each pass" per the user's own instruction. Fixed filename,
 // gitignored (tests/evals/README.md).
+//
+// Also the live progress view: the eval spec's onProgress callback (see
+// conversationOrchestrator.mjs) calls this same function after every turn
+// with the conversation-so-far, not just once at the very end -- so
+// checking this file mid-run (`cat`/`tail` it, or open it in an editor)
+// shows real, current progress, not a stale or empty file. `status` is
+// free text -- pass a real stoppedReason for the final call, or something
+// like "in progress -- turn 7 started, sending to app agent" for an
+// interim one; either way it and the "last updated" timestamp below are
+// what let a 2-minute glance tell "still moving" from "stuck since
+// <timestamp>" (this file's own mtime is the same signal, but the explicit
+// timestamp means that read doesn't require a second `stat` call).
 export function writeConversationLog(orchestratorResult) {
   fs.mkdirSync(RESULTS_DIR, { recursive: true });
   const lines = [
     "# Ontology-recovery eval — conversation log",
     "",
-    `Stopped: **${orchestratorResult.stoppedReason}** after ${orchestratorResult.turnsUsed} turns, ` +
-    `${(orchestratorResult.durationMs / 1000).toFixed(0)}s wall-clock.`,
+    `Status: **${orchestratorResult.stoppedReason}** — ${orchestratorResult.turnsUsed} turn(s) so far, ` +
+    `${(orchestratorResult.durationMs / 1000).toFixed(0)}s elapsed.`,
+    `Last updated: ${new Date().toISOString()}`,
     "",
   ];
   for (const entry of orchestratorResult.log) {
@@ -99,9 +113,21 @@ export async function generateLlmReview({ apiKey, model, orchestratorResult }) {
 // report.md: metrics table up front (per the user's own instruction --
 // "things one can optimize against"), then operational stats, then the LLM
 // review, then a pointer to the full log. Overwritten every run.
-export function writeReport({ metrics, operationalStats, orchestratorResult, llmReviewText, interviewerModel, personaModel }) {
+//
+// Two metrics objects are reported side by side, not one replacing the
+// other: `metrics` is scored against the fixture's full 68-class reference
+// domain (comprehensive, for context/comparability across fixture
+// revisions); `scopedMetrics` is scored against practicalScopeClassIds --
+// the classes the fixture's own canonical competency-questions/actions
+// material actually talks about (see groundTruthModel.mjs). A single-
+// session, competency-driven interview can only ever reach the second one;
+// showing both, rather than quietly swapping the denominator, is what makes
+// this an addition to transparency rather than a way to make the number
+// look better.
+export function writeReport({ metrics, scopedMetrics, operationalStats, orchestratorResult, llmReviewText, interviewerModel, personaModel }) {
   fs.mkdirSync(RESULTS_DIR, { recursive: true });
   const m = metrics;
+  const s = scopedMetrics;
   const lines = [
     "# Ontology-recovery eval report",
     "",
@@ -109,13 +135,20 @@ export function writeReport({ metrics, operationalStats, orchestratorResult, llm
     "",
     "## Headline metrics",
     "",
-    "| Metric | Value | Detail |",
-    "|---|---|---|",
-    `| **Recovery effectiveness (composite)** | **${pct(m.recoveryEffectiveness)}** | equal-weighted: class F1, relationship F1, property recall, value fidelity |`,
-    `| Class recall / precision / F1 | ${pct(m.classes.recall)} / ${pct(m.classes.precision)} / ${pct(m.classes.f1)} | ${m.classes.matched}/${m.classes.groundTruthTotal} ground-truth classes matched; ${m.classes.recoveredTotal} recovered |`,
-    `| Relationship recall / precision / F1 | ${pct(m.relationships.recall)} / ${pct(m.relationships.precision)} / ${pct(m.relationships.f1)} | ${m.relationships.matched}/${m.relationships.groundTruthTotal} ground-truth relationships matched; ${m.relationships.recoveredTotal} recovered |`,
-    `| Property recall | ${pct(m.properties.recall)} | ${m.properties.matched}/${m.properties.groundTruthTotal} ground-truth properties matched (technical identifier/URI fields excluded — see tests/evals/README.md) |`,
-    `| Controlled-value fidelity | ${pct(m.controlledValueFidelity)} | average allowed-value overlap across matched controlled-value properties |`,
+    "Two denominators, side by side: **full domain** is every class/relationship/property in the fixture's " +
+    "68-class comprehensive reference model; **practical scope** is the subset the fixture's own canonical " +
+    "competency questions and actions actually talk about (see tests/evals/README.md) -- the ceiling a real, " +
+    "single-session, competency-driven interview could reach even with perfect elicitation. Full-domain numbers " +
+    "give context and cross-run comparability; practical-scope numbers are the more meaningful read of interview " +
+    "quality on their own.",
+    "",
+    "| Metric | Full domain | Practical scope | Detail |",
+    "|---|---|---|---|",
+    `| **Recovery effectiveness (composite)** | **${pct(m.recoveryEffectiveness)}** | **${pct(s.recoveryEffectiveness)}** | equal-weighted: class F1, relationship F1, property recall, value fidelity |`,
+    `| Class recall / precision / F1 | ${pct(m.classes.recall)} / ${pct(m.classes.precision)} / ${pct(m.classes.f1)} | ${pct(s.classes.recall)} / ${pct(s.classes.precision)} / ${pct(s.classes.f1)} | ${m.classes.matched}/${m.classes.groundTruthTotal} full · ${s.classes.matched}/${s.classes.groundTruthTotal} scoped ground-truth classes matched; ${m.classes.recoveredTotal} recovered |`,
+    `| Relationship recall / precision / F1 | ${pct(m.relationships.recall)} / ${pct(m.relationships.precision)} / ${pct(m.relationships.f1)} | ${pct(s.relationships.recall)} / ${pct(s.relationships.precision)} / ${pct(s.relationships.f1)} | ${m.relationships.matched}/${m.relationships.groundTruthTotal} full · ${s.relationships.matched}/${s.relationships.groundTruthTotal} scoped ground-truth relationships matched; ${m.relationships.recoveredTotal} recovered (subclass/"is a" predicates excluded from both -- see README) |`,
+    `| Property recall | ${pct(m.properties.recall)} | ${pct(s.properties.recall)} | ${m.properties.matched}/${m.properties.groundTruthTotal} full · ${s.properties.matched}/${s.properties.groundTruthTotal} scoped ground-truth properties matched (technical identifier/URI fields excluded — see tests/evals/README.md) |`,
+    `| Controlled-value fidelity | ${pct(m.controlledValueFidelity)} | ${pct(s.controlledValueFidelity)} | average allowed-value overlap across matched controlled-value properties |`,
     "",
     "## Run stats",
     "",
@@ -130,8 +163,64 @@ export function writeReport({ metrics, operationalStats, orchestratorResult, llm
     "",
     "## Full conversation log",
     "",
-    "See `conversation-log.md` in this same directory (overwritten every run alongside this report).",
+    "See `conversation-log.md` in this same directory (overwritten every run alongside this report). Every real " +
+    "apply_ontology_yaml/get_graph_state tool call's exact arguments and results are in `tool-calls.md` alongside " +
+    "it, for verifying any suspected tool/state-sync issue against what was actually sent and returned rather " +
+    "than the interviewer's own narration of it.",
     "",
   ];
   fs.writeFileSync(REPORT_PATH, lines.join("\n"));
+}
+
+// FULL TRANSPARENCY LOG ---------------------------------------------------
+// The human-readable conversation-log.md only ever contains the interview
+// participants' visible text plus the app's short tool notes ("Checked the
+// current ontology state.", "Applied: 3 added, 1 updated."). It never shows
+// what the interviewer actually *sent* as apply_ontology_yaml's yaml
+// argument, or exactly what get_graph_state returned -- so a suspected
+// tool/state-sync issue (an LLM reviewer narrating "aliases weren't
+// retained") could previously only be judged by trusting the interviewer's
+// own retelling. tool-calls.md instead dumps the raw OpenAI-API-level
+// message log conversationOrchestrator.mjs already captures via
+// window.__kg.agent.state.apiMessages (the exact request/response content
+// the app itself sent and received) -- every tool call's real arguments and
+// every tool result's real content, turn by turn, so any future dispute
+// about what actually happened can be checked against ground truth instead
+// of a summary. Overwritten every run, same convention as the other results
+// files.
+function formatToolCallEntry(entry) {
+  const lines = [`### Turn ${entry.turn} — ${entry.role}`, ""];
+  if (entry.role === "assistant" && Array.isArray(entry.tool_calls) && entry.tool_calls.length) {
+    for (const call of entry.tool_calls) {
+      const name = (call.function && call.function.name) || "(unknown tool)";
+      const rawArgs = (call.function && call.function.arguments) || "";
+      let prettyArgs = rawArgs;
+      try { prettyArgs = JSON.stringify(JSON.parse(rawArgs), null, 2); } catch (err) { /* not JSON, print raw */ }
+      lines.push(`**Tool call: \`${name}\`**`, "", "```", prettyArgs, "```", "");
+    }
+    if (entry.content) lines.push(entry.content, "");
+  } else {
+    lines.push(entry.content || "_(empty)_", "");
+  }
+  return lines.join("\n");
+}
+
+// Also written live, turn by turn, same as writeConversationLog above --
+// same onProgress callback, same reasoning: a hang mid-run should leave a
+// file showing every tool call up through the last completed turn, not
+// nothing at all.
+export function writeToolCallLog(rawApiLog) {
+  fs.mkdirSync(RESULTS_DIR, { recursive: true });
+  const lines = [
+    "# Ontology-recovery eval — raw tool-call transparency log",
+    "",
+    "Exact API-level messages (real tool_calls arguments, real tool result content) captured from " +
+    "`window.__kg.agent.state.apiMessages` after every turn -- ground truth for what the interviewer actually " +
+    "sent and received, independent of its own narration in conversation-log.md or the LLM review's summary of " +
+    "it.",
+    `Last updated: ${new Date().toISOString()}`,
+    "",
+  ];
+  for (const entry of rawApiLog) lines.push(formatToolCallEntry(entry));
+  fs.writeFileSync(TOOL_CALL_LOG_PATH, lines.join("\n"));
 }

@@ -280,6 +280,52 @@ test("a second tool call adding one new property does not wipe a class's meaning
   });
 });
 
+// Regression coverage for a real bug a live ontology-recovery eval run
+// found in itself (see helper_agent_todo.md's dated Log entry, and
+// tests/agent-ontology-phase-g.spec.mjs's own matching regression test for
+// the shared parser fix): a real model wrote `preconditions: [ruleName]`
+// and `aliases: [a, b]` -- completely idiomatic inline-flow-list YAML for a
+// short list -- and the parser silently dropped them to [] because it only
+// recognized the *empty* "[]" token, not a populated one. Reproduces the
+// exact real-world shape: rules defined in one turn, an action referencing
+// them by inline list in a later turn (the two-call split a real
+// conversation naturally does, and the one most likely to expose a
+// same-call-only bug if the fix were narrower than it needs to be).
+test("an action's inline-list preconditions (from a later tool call) resolve to the rule created by an earlier one, not []", async () => {
+  await withPage(async (page) => {
+    await connectAgent(page);
+    mockChatSequence(page, [
+      () => ({ body: toolCallCompletionBody([toolCall("call_1", {
+        yaml: "rules:\n  canDeclareMajorIncident:\n    conditions:\n      - incident severity is sev1 or sev2\n",
+      })]) }),
+      () => ({ body: chatCompletionBody("Recorded the rule.") }),
+    ]);
+    await sendChatMessage(page, "Add the major-incident rule.");
+    await page.waitForFunction(() => !window.__kg.agent.isSending());
+
+    mockChatSequence(page, [
+      () => ({ body: toolCallCompletionBody([toolCall("call_2", {
+        yaml: "classes:\n  Incident:\n    aliases: [ticket, issue]\n" +
+          "actions:\n  declareMajorIncident:\n    input: Incident\n    preconditions: [canDeclareMajorIncident]\n    effect: A major incident is declared.\n",
+      })]) }),
+      () => ({ body: chatCompletionBody("Recorded the action.") }),
+    ]);
+    await sendChatMessage(page, "Add the declare action.");
+    await page.waitForFunction(() => !window.__kg.agent.isSending());
+
+    const { rules, actions, incident } = await page.evaluate(() => ({
+      rules: window.__kg.state.rules,
+      actions: window.__kg.state.actions,
+      incident: window.__kg.state.nodes.find((n) => n.label === "Incident"),
+    }));
+    assert.equal(rules.length, 1);
+    assert.equal(actions.length, 1);
+    assert.deepEqual(actions[0].preconditions, [rules[0].id],
+      "the inline-list precondition must resolve to the real rule id created in the earlier turn, not []");
+    assert.deepEqual(incident.aliases, ["ticket", "issue"], "inline-list aliases must parse to a real array too, not be dropped");
+  });
+});
+
 test("a tool call that re-specifies an existing property by name updates it in place instead of duplicating it", async () => {
   await withPage(async (page) => {
     await connectAgent(page);

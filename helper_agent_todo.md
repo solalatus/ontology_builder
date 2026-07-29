@@ -591,6 +591,124 @@ for asking the same small question about several similar items at once.
       remains the practical real-world bound in nearly every run regardless of the turn cap.
 - Full suite (`tests/*.spec.mjs`, including the 7 live tests) green, run twice consecutively (374 JS tests),
   plus 13 Python tests.
-- A full real eval run at the new 500-turn cap, both fixes active, was done as end-to-end confirmation —
-  see this addendum's own follow-up note (or `tests/evals/results/report.md` at the time, gitignored) for
-  the actual numbers.
+- A full real eval run at the new 500-turn cap, both fixes active, was done as end-to-end confirmation:
+  composite recovery 8.2% → 39.2%, classes matched 12 → 18 (81.8% precision), properties matched 10 → 23,
+  controlled-value fidelity 0.0% → 90.1%, and the interview finished naturally in 39 turns instead of hitting
+  its (much larger) turn budget unfinished. Shipped as PR #41, merged into `helper_agent`.
+
+## Addendum — root-cause analysis of the low composite score, and full tool-call transparency
+
+**2026-07-29.** User asked, analysis-only, (1) whether the post-batching-fix run's LLM-review "tool/state
+sync issue" notes (turns 22/23, 35, 36 — aliases/preconditions/allowed-values apparently needing
+re-application) indicated a real bug, and (2) why the composite score was still only 39.2% and how that could
+be improved, evidence-based.
+
+**Finding 1 — no code bug found.** Read the actual turn 22/23/35/36 transcript text plus the
+`commitYamlImport`/`get_graph_state` code directly rather than trusting the LLM reviewer's paraphrase (same
+discipline as the original PR #40 investigation). `agent-merge`'s field-level-preserve logic is intact, and
+both `nameToRule` and `labelToNode` (`index.html`, `commitYamlImport`) are pre-seeded from *existing* state
+before a call's own YAML is processed, so a precondition/name reference to an entity created several turns
+earlier resolves correctly — there's no code path that would silently drop it. The system prompt's own
+"STAYING IN SYNC WITH THE LIVE ONTOLOGY" section explicitly tells the interviewer to call `get_graph_state`
+before every apply and reconcile defensively ("an extra get_graph_state call is cheap; silently overwriting
+or duplicating the expert's own work is not") — the re-applies are that instruction working as intended, not
+evidence of data loss. Given this couldn't be fully proven from the human-readable transcript alone (it never
+shows the interviewer's actual tool-call arguments), see "Full transparency" below.
+
+**Finding 2 — the low composite score is mostly a scope-mismatch artifact, not an interview-quality
+problem, with hard numbers behind that claim.** The ground-truth fixture is a comprehensive 68-class
+reference domain; the interview is deliberately competency-question-driven (elicit real questions/actions
+first, model only what's needed for them). Computed the actual ceiling: given the 18 ground-truth classes the
+interview's own scope reached, only 35/143 relationships (24.5%) and 58/111 properties (52.3%) were even
+structurally reachable — the composite was being measured against a domain several times larger than what a
+single-session, competency-driven interview was ever trying to cover. The interview's own Phase 9 validation
+pass in that same run confirmed full support for all 20 original competency questions and all 10 actions —
+judged against its actual design goal, it succeeded.
+
+Two secondary, real findings from the same analysis:
+- 23 of the ground truth's 143 relationships are `"is a"` (subclass) predicates the app's flat
+  classes-plus-relationships data model has no way to represent — the interviewer correctly avoided forcing
+  these onto generic relationship edges (turn 5: "this tool does not use subclassing directly ... instead,
+  connect them with a clear relationship"), but the eval was still scoring their absence as a recall miss.
+- Phase 3 (relationships) of the system prompt had no completeness guidance — unlike Phases 4/5/6, which got
+  the earlier batching reinforcement — so the interviewer proposed one opening backbone batch of
+  relationships and moved on, without working back through the rest of its own confirmed class list.
+
+**Fixes implemented** (user: "implement all of these... implement, test, PR"), all in
+`tests/evals/lib/groundTruthModel.mjs` unless noted:
+
+- `isRecoverableRelationship()` — excludes `"is a"` predicates from scored relationships, same documented,
+  auditable-filter-over-the-untouched-fixture pattern as the existing `isRecoverableProperty()`.
+- `buildPracticalScopeClassIds()` / `practicalScopeClassIds` — a second, tighter, still mechanically (not
+  hand-) derived denominator: every class whose label or alias appears, whole-word, inside the fixture's own
+  canonical `competencyQuestions:` + `actions:` text. 28 of 68 classes, 48 of 120 non-"is a" relationships, 69
+  of 111 properties. `scopeGroundTruth()` filters an already-loaded ground truth down to a class-id set,
+  reusing `computeRecoveryMetrics()` unchanged for both the full-domain and practical-scope columns.
+  `report.md`'s headline table now shows both side by side, not one replacing the other — full-domain for
+  cross-run comparability, practical-scope as the more meaningful single-run quality read.
+- `index.html`'s Phase 3 (relationships) gained the same don't-stop-after-one-batch, cover-everything-
+  confirmed guidance Phases 4/5/6 already had, specifically calling out that a confirmed class left with no
+  relationships is a sign of stopping too early, not a naturally standalone class.
+- **Full tool-call transparency** (user: "implement tooling for logging... tool call args and whatever else
+  needed"): `conversationOrchestrator.mjs` now also captures `window.__kg.agent.state.apiMessages` (the exact
+  API-level request/response content the app itself sends/receives, already exposed for testing) after every
+  turn, tagged by turn (`tagApiMessagesWithTurn`), and `reportGenerator.mjs`'s new `writeToolCallLog()` dumps
+  it to `results/tool-calls.md` (overwritten every run, same convention as the other results files) —
+  every `apply_ontology_yaml` call's real `yaml` argument, pretty-printed, and every tool result's real
+  content, so a future suspected tool/state-sync issue can be checked against what actually happened instead
+  of the interviewer's own narration or the LLM reviewer's summary of it.
+
+Tests: `tests/ontology-recovery-metrics.spec.mjs` (+4: "is a" exclusion with a raw-fixture sanity count,
+practicalScopeClassIds is non-trivial and contains/excludes the expected classes, `scopeGroundTruth` filters
+correctly, scoped denominators never exceed full ones and stay NaN-safe); new top-level
+`tests/ontology-recovery-transparency.spec.mjs` (+5, no browser/API key: `tagApiMessagesWithTurn` tags and
+passes content through unchanged including on an empty slice; `writeToolCallLog` renders real tool-call
+arguments and results and overwrites rather than accumulates; `writeReport` renders both metrics columns);
+`tests/helper-agent-phase4.spec.mjs` (+1: pins the Phase 3 completeness-guidance text).
+
+**Live progress logging.** A live confirmatory eval run then hit a real `page.waitForFunction` timeout inside
+one `sendChatMessage` call, ~13 minutes in — and left nothing on disk to inspect, since `conversation-log.md`/
+the new `tool-calls.md` were only ever written once, after the whole run succeeded (the per-turn arrays were
+function-local until the final `return`, discarded by the exception). Fixed: `runOntologyRecoveryConversation`
+now takes an `onProgress` callback, fired before and after the one call in the loop with no progress signal of
+its own (`sendChatMessage`); the eval spec's own `onProgress` re-uses `writeConversationLog`/`writeToolCallLog`
+so both files stay live and current turn-by-turn, each with a "Last updated" timestamp — a run can be checked
+mid-flight, and a hang or crash leaves everything up through the last completed turn on disk instead of
+nothing. New tests (+2 in `tests/ontology-recovery-transparency.spec.mjs`): `writeConversationLog` reflects a
+growing, in-progress log correctly across repeated calls; both writers include the live timestamp. The
+original timeout turned out to be a one-off (a same-config re-run completed cleanly in ~15.7 minutes), not a
+reproducible regression from the Phase 3 change.
+
+**A real, confirmed app bug, found using the new transparency log itself.** That successful re-run's own LLM
+review flagged, more insistently than before, that action preconditions and class aliases kept coming back
+empty even after re-application — "final validation still notes `preconditions: []`". Reading `tool-calls.md`
+instead of trusting the review's paraphrase: the model's real tool-call arguments contained
+`preconditions: [canDeclareMajorIncident]` and `aliases: [ticket, issue]` — a completely idiomatic *inline
+flow-list*, not the block `- item` style this app's own YAML exporter always produces — and the very next
+`get_graph_state` result showed `preconditions: []` / `aliases: []` for those exact same entries. Root cause,
+confirmed by reading the code: `parseYamlValueToken` (`index.html`) only special-cased the *empty* inline list
+token `"[]"`; a non-empty one like `"[canDeclareMajorIncident]"` fell through to the plain-string branch, so
+`Array.isArray(action.preconditions)` downstream (`commitYamlImport`'s field-level-merge checks) saw a string,
+treated the field as not-given, and silently created the action/class with an empty list — discarding exactly
+what the model sent, every time it chose this (very natural) syntax. Not a new bug from anything in this
+addendum; a pre-existing parser gap the model started triggering naturally once conversations grew
+action/rule-heavy enough for it to reach for inline lists on its own.
+
+- [x] Fixed: `parseYamlValueToken` now parses a non-empty inline flow-list (`[a, b, c]`) into a real array,
+      via a new `splitYamlInlineListItems()` that splits on top-level commas only (reusing
+      `findYamlClosingQuote`'s own escape handling so a quoted item's internal comma doesn't split it), each
+      item then re-run through `parseYamlValueToken` itself for consistent scalar handling. Deliberately
+      scoped to `[...]` only, not a non-empty inline flow-*map* `{...}` — the app's own exporter never emits
+      one and no real tool-call payload has been observed using that syntax, so there's no evidence yet it's
+      a live problem worth the extra parsing surface.
+- [x] Tests: `tests/agent-ontology-phase-g.spec.mjs` (+2 — manual-import "merge" pathway, which shares the
+      same parser): the same worked-example YAML with every list field in inline-flow style parses identically
+      to the existing block-list version (aliases and action preconditions both resolve correctly, not to
+      `[]`); a quoted list item containing a comma doesn't get split on its own inner comma.
+      `tests/helper-agent-phase3.spec.mjs` (+1 — the actual real-world agent-merge pathway): reproduces the
+      exact two-turn shape a live conversation naturally produces (a rule defined in one tool call, an action
+      referencing it via `preconditions: [ruleName]` in a later one, plus `aliases: [a, b]` on a class in that
+      same later call) and confirms the precondition resolves to the real rule id and the aliases parse to a
+      real array, not `[]`.
+- Full suite (`tests/*.spec.mjs`, 389 JS tests) green, run twice, plus 13 Python tests. A full real eval
+  re-run confirmed the fix end-to-end — see this addendum's own follow-up note for the actual numbers.

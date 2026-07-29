@@ -4,9 +4,9 @@ import { withPage } from "../lib/page.mjs";
 import { loadEnvKey } from "../lib/env.mjs";
 import { connectAgentLive } from "../lib/liveOpenAi.mjs";
 import { runOntologyRecoveryConversation } from "./lib/conversationOrchestrator.mjs";
-import { loadGroundTruthModel } from "./lib/groundTruthModel.mjs";
+import { loadGroundTruthModel, scopeGroundTruth } from "./lib/groundTruthModel.mjs";
 import { computeRecoveryMetrics } from "./lib/recoveryMetrics.mjs";
-import { writeConversationLog, computeOperationalStats, generateLlmReview, writeReport } from "./lib/reportGenerator.mjs";
+import { writeConversationLog, computeOperationalStats, generateLlmReview, writeReport, writeToolCallLog } from "./lib/reportGenerator.mjs";
 
 // Ontology-recovery eval — see tests/evals/README.md for the full design
 // writeup. Not part of the default `node --test tests/*.spec.mjs` run
@@ -57,6 +57,22 @@ test(
       assert.ok(interviewerModel, "expected the real connect flow to pick a real model");
       void modelResponses;
 
+      // Live progress: re-uses the exact same writers the final, successful
+      // path calls once at the end, so results/conversation-log.md and
+      // results/tool-calls.md are real and current at any point during a
+      // run -- checking them mid-run (every couple of minutes, say) shows
+      // real turn-by-turn progress instead of a stale or empty file, and a
+      // hang or crash mid-run still leaves everything up through the last
+      // completed turn on disk instead of nothing (both files are
+      // function-local return values otherwise, discarded by an exception
+      // thrown mid-loop -- exactly what happened investigating a real
+      // timeout while validating this same fix, see helper_agent_todo.md's
+      // dated Log entry).
+      const onProgress = (snapshot) => {
+        writeConversationLog({ ...snapshot, stoppedReason: `in progress (${snapshot.phase}, turn ${snapshot.turn})` });
+        writeToolCallLog(snapshot.rawApiLog);
+      };
+
       const orchestratorResult = await runOntologyRecoveryConversation({
         page,
         apiKey: OPENAI_API_KEY,
@@ -64,6 +80,7 @@ test(
         classifierModel: CLASSIFIER_MODEL,
         maxTurns: MAX_TURNS,
         wallClockMs: WALLCLOCK_MS,
+        onProgress,
       });
 
       assert.ok(orchestratorResult.turnsUsed >= 1, "expected at least one real turn to happen");
@@ -75,15 +92,19 @@ test(
       }));
       const groundTruth = loadGroundTruthModel();
       const metrics = computeRecoveryMetrics(groundTruth, recoveredState);
+      const scopedGroundTruth = scopeGroundTruth(groundTruth, groundTruth.practicalScopeClassIds);
+      const scopedMetrics = computeRecoveryMetrics(scopedGroundTruth, recoveredState);
 
       assert.ok(Number.isFinite(metrics.recoveryEffectiveness), "composite score must be a real number, not NaN");
       assert.ok(metrics.classes.recall >= 0 && metrics.classes.recall <= 1);
+      assert.ok(Number.isFinite(scopedMetrics.recoveryEffectiveness), "scoped composite score must be a real number, not NaN");
 
       const operationalStats = computeOperationalStats(orchestratorResult);
       writeConversationLog(orchestratorResult);
+      writeToolCallLog(orchestratorResult.rawApiLog);
       const reviewModel = REVIEW_MODEL_OVERRIDE || interviewerModel;
       const llmReviewText = await generateLlmReview({ apiKey: OPENAI_API_KEY, model: reviewModel, orchestratorResult });
-      writeReport({ metrics, operationalStats, orchestratorResult, llmReviewText, interviewerModel, personaModel: PERSONA_MODEL });
+      writeReport({ metrics, scopedMetrics, operationalStats, orchestratorResult, llmReviewText, interviewerModel, personaModel: PERSONA_MODEL });
     });
   }
 );

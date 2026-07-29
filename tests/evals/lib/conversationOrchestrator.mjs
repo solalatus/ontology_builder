@@ -52,6 +52,17 @@ async function appearsFinished(text, { apiKey, model }) {
   return /^\s*yes/i.test(answer);
 }
 
+// Pure, unit-testable tagging step: given a slice of raw apiMessages
+// entries (window.__kg.agent.state.apiMessages -- the exact {role, content,
+// tool_calls?} objects the app pushes for every real API request/response,
+// see index.html's sendAgentChatMessage) newly added during one turn, tags
+// each with that turn number for reportGenerator.mjs's raw transparency
+// log. Kept separate from the page.evaluate() call site below so this
+// mapping is testable without a live browser.
+export function tagApiMessagesWithTurn(apiMessages, turn) {
+  return apiMessages.map((m) => ({ turn, ...m }));
+}
+
 // Runs the full simulated interview: alternates the real app agent (driven
 // through `page`, already connected via connectAgentLive) and the persona
 // agent (personaAgent.mjs), starting from the persona's own scripted
@@ -59,6 +70,21 @@ async function appearsFinished(text, { apiKey, model }) {
 // consider the interview finished, the turn cap, or the wallclock budget --
 // see the file's own module doc in tests/evals/README.md for the full
 // rationale.
+//
+// onProgress(snapshot), if given, fires several times per turn -- most
+// importantly *before* the one call that's actually slow (sendChatMessage,
+// which waits on a real, possibly-tool-calling API round-trip with no
+// intermediate feedback of its own) rather than only after. That ordering
+// is the whole point: a run that hangs or times out inside sendChatMessage
+// previously left nothing to inspect at all (the real per-turn arrays only
+// existed as function-local variables, never returned until the very end,
+// so an exception thrown mid-loop discarded them) -- exactly what happened
+// investigating a real timeout while testing this fix (helper_agent_todo.md's
+// dated Log entry). The eval spec's own onProgress callback re-uses
+// writeConversationLog/writeToolCallLog to keep the same two results files
+// live and auditable turn-by-turn during a run, not just written once at
+// the end -- "every_turn_started" is specifically what survives a hang,
+// showing which turn was in flight and how long ago it started.
 export async function runOntologyRecoveryConversation({
   page,
   apiKey,
@@ -66,10 +92,12 @@ export async function runOntologyRecoveryConversation({
   classifierModel = "gpt-4o-mini",
   maxTurns = 100,
   wallClockMs = 45 * 60 * 1000,
+  onProgress,
 }) {
   const persona = createPersonaAgent({ apiKey, model: personaModel });
   const chatResponses = forwardToRealOpenAi(page, CHAT_URL);
   const log = [{ turn: 0, speaker: "persona", text: OPENING_LINE }];
+  const rawApiLog = [];
 
   const startedAt = Date.now();
   let incomingForApp = OPENING_LINE;
@@ -77,15 +105,44 @@ export async function runOntologyRecoveryConversation({
   let consecutiveEmptyAppTurns = 0;
   let turnsUsed = 0;
 
+  // Never let a progress-reporting failure (a bad file write, a full disk)
+  // take down the real conversation it's only reporting on.
+  const emitProgress = (phase, turn) => {
+    if (!onProgress) return;
+    try {
+      onProgress({ phase, turn, turnsUsed, durationMs: Date.now() - startedAt, log: [...log], rawApiLog: [...rawApiLog] });
+    } catch (err) { /* reporting must be best-effort, never fatal */ }
+  };
+
   for (let turn = 1; turn <= maxTurns; turn++) {
     if (Date.now() - startedAt > wallClockMs) { stoppedReason = "wallclock_timeout"; break; }
     turnsUsed = turn;
 
+    // Fires before the one call in this loop with no progress feedback of
+    // its own -- see this function's own header comment for why that
+    // ordering (not "after") is what makes this useful during a hang.
+    emitProgress("turn_started", turn);
+
     const transcriptBefore = await page.evaluate(() => window.__kg.agent.state.transcript.length);
+    const apiMessagesBefore = await page.evaluate(() => window.__kg.agent.state.apiMessages.length);
     await sendChatMessage(page, incomingForApp, { timeout: 90000 });
     const transcriptAfter = await page.evaluate(() => window.__kg.agent.state.transcript);
     const newEntries = transcriptAfter.slice(transcriptBefore);
     for (const entry of newEntries) log.push({ turn, speaker: `app-${entry.role}`, text: entry.text });
+
+    // Raw API-level transparency: the exact tool_calls arguments and tool
+    // result content, independent of the human-readable transcript notes
+    // above -- see reportGenerator.mjs's writeToolCallLog. A compaction
+    // (compactAgentHistory) can shrink apiMessages instead of only
+    // appending to it; slicing from the pre-turn length still captures
+    // every message pushed *during* this turn correctly, it just can't see
+    // older turns' entries a later compaction folded away -- acceptable,
+    // since compaction only replaces already-logged history, it doesn't
+    // change what this turn itself sent/received.
+    const apiMessagesAfter = await page.evaluate(() => window.__kg.agent.state.apiMessages);
+    const newApiMessages = apiMessagesAfter.length >= apiMessagesBefore ? apiMessagesAfter.slice(apiMessagesBefore) : apiMessagesAfter;
+    rawApiLog.push(...tagApiMessagesWithTurn(newApiMessages, turn));
+    emitProgress("app_turn_complete", turn); // sendChatMessage returned -- this turn's real content just landed in log/rawApiLog
 
     const lastAssistant = [...newEntries].reverse().find((m) => m.role === "assistant");
     const appText = lastAssistant && lastAssistant.text ? lastAssistant.text.trim() : "";
@@ -107,7 +164,10 @@ export async function runOntologyRecoveryConversation({
     const personaReply = await persona.reply(appText);
     log.push({ turn, speaker: "persona", text: personaReply.text });
     incomingForApp = personaReply.text;
+    emitProgress("persona_turn_complete", turn);
   }
+
+  emitProgress(stoppedReason, turnsUsed);
 
   return {
     log,
@@ -115,5 +175,6 @@ export async function runOntologyRecoveryConversation({
     stoppedReason,
     durationMs: Date.now() - startedAt,
     chatResponses, // raw real API responses for the app agent's side, for operational metrics
+    rawApiLog, // exact tool_calls arguments + tool result content per turn, for reportGenerator.mjs's transparency log
   };
 }

@@ -4039,14 +4039,59 @@ function yamlUnescapeQuoted(body) {
     .replace(/\\\\/g, "\\");
 }
 
+// Splits the inside of an inline flow-list ("a, b, \"c, d\"" from
+// "[a, b, \"c, d\"]") on top-level commas only — a quoted item's own commas
+// don't split it, reusing findYamlClosingQuote's same escape handling so
+// this stays consistent with how quoted scalars are unescaped elsewhere in
+// this parser.
+function splitYamlInlineListItems(inner) {
+  const items = [];
+  let current = "";
+  let i = 0;
+  while (i < inner.length) {
+    const c = inner[i];
+    if (c === '"') {
+      const end = findYamlClosingQuote(inner, i);
+      if (end === -1) { current += inner.slice(i); break; }
+      current += inner.slice(i, end + 1);
+      i = end + 1;
+      continue;
+    }
+    if (c === ",") { items.push(current); current = ""; i += 1; continue; }
+    current += c;
+    i += 1;
+  }
+  items.push(current);
+  return items;
+}
+
 // Inverse of yamlScalar()/the empty-collection shorthand — a bare (post
 // "key: ") value token back into null / [] / {} / a string.
+//
+// Real live agent tool calls (helper_agent_todo.md's dated Log entry) were
+// found writing short lists as an inline flow-sequence -- e.g.
+// `preconditions: [canDeclareMajorIncident]`, `aliases: [ticket, issue]` --
+// which is completely idiomatic YAML for a short list, but this parser
+// previously only special-cased the *empty* `[]` token; any non-empty one
+// fell through to the plain-string branch below, so `Array.isArray(...)`
+// checks downstream (commitYamlImport's fieldLevelMerge logic) saw a
+// string, treated the field as not-given, and silently created the
+// action/class with an empty list instead of what was actually sent. Only
+// `[...]` is handled here, not a non-empty inline flow-map `{...}` --
+// this app's own exporter (yamlLines) never emits one, and no real
+// tool-call payload has been observed using inline-map syntax, so there's
+// no evidence yet that it's a live problem worth the extra parsing surface.
 function parseYamlValueToken(token) {
   if (token === "[]") return [];
   if (token === "{}") return {};
   if (token === "null" || token === "") return null;
   if (token.length >= 2 && token.startsWith('"') && token.endsWith('"')) {
     return yamlUnescapeQuoted(token.slice(1, -1));
+  }
+  if (token.length >= 2 && token[0] === "[" && token[token.length - 1] === "]") {
+    const inner = token.slice(1, -1).trim();
+    if (inner === "") return [];
+    return splitYamlInlineListItems(inner).map((item) => parseYamlValueToken(item.trim()));
   }
   return token;
 }
@@ -5337,7 +5382,12 @@ already has instead of following it rigidly)
    to identify, retrieve, connect, or pass this to a tool?"
 3. Relationships: propose relationships as verb phrases between two
    classes, each with an explicit direction. Reject vague or directionless
-   relationships.
+   relationships. Don't stop after one opening batch — once the class list
+   is confirmed, systematically work through the plausible connections
+   among ALL of them (not just the obvious backbone), batching similar ones
+   (see GROUND RULES) across as many questions as it takes. A confirmed
+   class left with no relationships to anything else is a sign you moved on
+   too early, not that it's naturally standalone.
 4. Decision-bearing properties: for each class, propose ONLY properties
    that trace back to a Phase 1 question or action (filter, compare,
    decide, explain, or act). Reject "nice to know" fields. Once you're
