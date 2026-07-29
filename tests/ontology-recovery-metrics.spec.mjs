@@ -121,6 +121,57 @@ test("computeRecoveryMetrics against a scoped ground truth never has a smaller d
   assert.ok(Number.isFinite(narrowed.recoveryEffectiveness));
 });
 
+test("groundTruthModel reduces every multi-input fixture action to a single primary input, dropping the rest with a count", () => {
+  const gt = loadGroundTruthModel();
+  const raw = yaml.load(loadRawFixtureText());
+  assert.ok(gt.actions.length > 0);
+  for (const a of gt.actions) {
+    const rawInputs = Object.entries(raw.actions[a.id].inputs);
+    assert.equal(a.primaryInputClassId, rawInputs[0][1], `${a.id}'s primary input must be the first-listed one in the raw fixture`);
+    assert.equal(a.droppedInputCount, rawInputs.length - 1, `${a.id}'s dropped count must match how many extra inputs the raw fixture actually declares`);
+  }
+  // Sanity: the fixture really does define at least one multi-input action,
+  // so the assertions above are exercising real reduction, not a no-op.
+  assert.ok(gt.actions.some((a) => a.droppedInputCount > 0), "expected at least one real multi-input action in the fixture");
+  // declareMajorIncident is a known multi-input case (incident, commander) --
+  // pin its exact reduction so a future fixture edit that reorders its
+  // inputs is caught, not silently accepted.
+  const declare = gt.actions.find((a) => a.id === "declareMajorIncident");
+  assert.equal(declare.primaryInputClassId, "incident");
+  assert.equal(declare.droppedInputCount, 1);
+});
+
+test("groundTruthModel does not report a dropped input for an action that only ever had one", () => {
+  const gt = loadGroundTruthModel();
+  const raw = yaml.load(loadRawFixtureText());
+  const singleInputActionId = Object.keys(raw.actions).find((id) => Object.keys(raw.actions[id].inputs).length === 1);
+  assert.ok(singleInputActionId, "expected the fixture to contain at least one single-input action for this test to mean anything");
+  const reduced = gt.actions.find((a) => a.id === singleInputActionId);
+  assert.equal(reduced.droppedInputCount, 0);
+});
+
+test("scopeGroundTruth filters actions to only those whose primary input class is in scope", () => {
+  const gt = loadGroundTruthModel();
+  const scoped = scopeGroundTruth(gt, gt.practicalScopeClassIds);
+  assert.ok(scoped.actions.every((a) => gt.practicalScopeClassIds.has(a.primaryInputClassId)));
+  const excludedClassIds = new Set(Object.keys(gt.classes).filter((id) => !gt.practicalScopeClassIds.has(id)));
+  assert.ok(!scoped.actions.some((a) => excludedClassIds.has(a.primaryInputClassId)));
+});
+
+test("scopeGroundTruth on a synthetic ground truth keeps only in-scope actions", () => {
+  const groundTruth = {
+    classes: { a: { id: "a", label: "A", aliases: ["a"] }, b: { id: "b", label: "B", aliases: ["b"] } },
+    relationships: [],
+    properties: [],
+    actions: [
+      { id: "act1", label: "Act 1", primaryInputClassId: "a", droppedInputCount: 0 },
+      { id: "act2", label: "Act 2", primaryInputClassId: "b", droppedInputCount: 1 },
+    ],
+  };
+  const scoped = scopeGroundTruth(groundTruth, new Set(["a"]));
+  assert.deepEqual(scoped.actions.map((a) => a.id), ["act1"]);
+});
+
 test("computeRecoveryMetrics handles an entirely empty recovered state without crashing or producing NaN", () => {
   const groundTruth = loadGroundTruthModel();
   const metrics = computeRecoveryMetrics(groundTruth, { nodes: [], edges: [] });

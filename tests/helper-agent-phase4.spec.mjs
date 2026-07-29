@@ -101,6 +101,23 @@ test("the system prompt pushes Phase 3 (relationships) to systematically cover a
   });
 });
 
+test("the system prompt tells the interviewer actions take exactly one input class and how to handle a real action that needs more", async () => {
+  // A real eval run's LLM review flagged several actions as having
+  // "incomplete inputs" (e.g. assignResolverGroup only takes Incident, not
+  // also ResolverGroup) -- but index.html's own action schema
+  // (state.actions[].inputClassId) is a single scalar, not a list, so this
+  // isn't a modeling mistake the interviewer can fix; it's this tool's own
+  // deliberate scope. Pins that the interviewer is told so explicitly,
+  // mirroring how the no-subclassing limitation is already documented for
+  // it elsewhere in this same prompt.
+  await withPage(async (page) => {
+    const prompt = await systemPrompt(page);
+    assert.match(prompt, /exactly ONE input class in this tool\s*—\s*not a list/);
+    assert.match(prompt, /represent the other participant through a relationship,\s*a property, or a precondition/);
+    assert.match(prompt, /deliberate limit of this tool, not something to\s*work around or apologize for/);
+  });
+});
+
 test("the system prompt never reveals the underlying model name or API mechanics that aren't part of the knowledge itself", async () => {
   // Not a security boundary (see SCOPE's own comment on this), just a
   // sanity check that nothing accidentally leaked in from the surrounding

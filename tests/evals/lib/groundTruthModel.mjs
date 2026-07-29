@@ -51,6 +51,43 @@ function isRecoverableRelationship(predicate) {
   return predicate.label !== "is a";
 }
 
+// GROUND-TRUTH ACTIONS, REDUCED TO A SINGLE INPUT ------------------------
+// The fixture's own actions each declare potentially several named inputs
+// (e.g. declareMajorIncident: inputs: {incident: incident, commander:
+// incidentCommander}) -- but this app's Action node has exactly one input
+// class: index.html's `inputClassId` is a scalar field, not a list, the
+// YAML tool schema's `input:` key is singular, and the Actions manager UI
+// is a single-select, not a multi-select. That's a deliberate scope
+// decision (AGENT_SYSTEM_PROMPT_BASE's own Phase 8 note tells the
+// interviewer so explicitly), not a bug -- see helper_agent_todo.md's dated
+// Log entry for the fuller reasoning, which also covers why this is a
+// genuine ontology-expressiveness limit and not just a file-format detail.
+//
+// Crediting a ground-truth action's *secondary* inputs anywhere in this
+// eval would hold a correctly-behaving interview to a standard the app can
+// never satisfy -- the same reasoning as isRecoverableRelationship's "is a"
+// exclusion above. reducedActions keeps only the first-listed input per
+// action (the record the action is fundamentally about, by the fixture's
+// own ordering convention) and reports how many were dropped, so that
+// omission is an explicit, auditable choice instead of an accident of
+// which fields happen to get read.
+function buildReducedActions(doc, classes) {
+  const actions = [];
+  for (const [id, a] of Object.entries(doc.actions || {})) {
+    const inputEntries = Object.entries(a.inputs || {});
+    if (!inputEntries.length) continue;
+    const primaryInputClassId = inputEntries[0][1];
+    if (!classes[primaryInputClassId]) continue; // references a non-class (shouldn't happen, defensive)
+    actions.push({
+      id,
+      label: a.label || id,
+      primaryInputClassId,
+      droppedInputCount: inputEntries.length - 1,
+    });
+  }
+  return actions;
+}
+
 // PRACTICAL INTERVIEW SCOPE ---------------------------------------------
 // The fixture models a *comprehensive* 68-class reference domain, built for
 // reuse across many possible interviews/experiments, not a scoped
@@ -68,14 +105,17 @@ function isRecoverableRelationship(predicate) {
 // denominator: every class whose label or a declared alias appears
 // (case/punctuation-insensitive, whole-word) inside the fixture's *own*
 // canonical competencyQuestions + actions section -- question text; action
-// labels, preconditions, effects, verification, and authorization text.
-// That's exactly the same kind of "real questions and real actions"
-// material Phase 1 of the app's own interview methodology is built to
-// elicit and scope everything else from. It's mechanical, not hand-picked:
-// it only depends on what the fixture's own canonical competency-test
-// material actually talks about, so it can't silently drift into an
-// arbitrary hand-trimmed subset the way editing the YAML by hand could.
-function buildPracticalScopeClassIds(doc, classes) {
+// labels, preconditions, effects, verification, and authorization text;
+// plus each action's *primary* input class (see buildReducedActions --
+// secondary inputs are deliberately never credited here, for the same
+// reason they're dropped there). That's exactly the same kind of "real
+// questions and real actions" material Phase 1 of the app's own interview
+// methodology is built to elicit and scope everything else from. It's
+// mechanical, not hand-picked: it only depends on what the fixture's own
+// canonical competency-test material actually talks about, so it can't
+// silently drift into an arbitrary hand-trimmed subset the way editing the
+// YAML by hand could.
+function buildPracticalScopeClassIds(doc, classes, reducedActions) {
   const corpusParts = [...(doc.competencyQuestions || [])];
   for (const a of Object.values(doc.actions || {})) {
     corpusParts.push(a.label || "");
@@ -84,6 +124,7 @@ function buildPracticalScopeClassIds(doc, classes) {
     corpusParts.push(...(a.verification || []));
     corpusParts.push(...(a.authorization || []));
   }
+  for (const a of reducedActions) corpusParts.push(classes[a.primaryInputClassId].label);
   const corpus = ` ${stripPunctuation(normalizeLabel(corpusParts.join(" \n ")))} `;
   const scope = new Set();
   for (const [id, c] of Object.entries(classes)) {
@@ -100,10 +141,10 @@ function buildPracticalScopeClassIds(doc, classes) {
 }
 
 // Filters a loaded ground-truth model down to only the classes named in
-// classIds (plus relationships/properties anchored to them), for scoring
-// against a narrower denominator (e.g. practicalScopeClassIds) while
-// reusing the exact same computeRecoveryMetrics logic used for the full
-// domain -- no separate scoring code path to keep in sync.
+// classIds (plus relationships/properties/actions anchored to them), for
+// scoring against a narrower denominator (e.g. practicalScopeClassIds)
+// while reusing the exact same computeRecoveryMetrics logic used for the
+// full domain -- no separate scoring code path to keep in sync.
 export function scopeGroundTruth(groundTruth, classIds) {
   const classes = {};
   for (const [id, c] of Object.entries(groundTruth.classes)) {
@@ -113,7 +154,8 @@ export function scopeGroundTruth(groundTruth, classIds) {
     (r) => classIds.has(r.fromClassId) && classIds.has(r.toClassId)
   );
   const properties = groundTruth.properties.filter((p) => classIds.has(p.classId));
-  return { ...groundTruth, classes, relationships, properties };
+  const actions = (groundTruth.actions || []).filter((a) => classIds.has(a.primaryInputClassId));
+  return { ...groundTruth, classes, relationships, properties, actions };
 }
 
 // Builds the normalized comparison structure used by recoveryMetrics.mjs.
@@ -122,6 +164,11 @@ export function scopeGroundTruth(groundTruth, classIds) {
 // properties: [{ id, label, classId, kind, targetId, allowedValues: string[]|null }]
 //   (datatype/controlled-value predicates that survive the filter above)
 // valueSets: id -> { label, values: string[] }
+// actions: [{ id, label, primaryInputClassId, droppedInputCount }] -- see
+//   buildReducedActions; not currently scored by computeRecoveryMetrics
+//   (no action-recall metric exists yet), exposed for documentation and any
+//   future consumer that needs the fixture's actions already reduced to
+//   what this app's single-input model can represent.
 export function loadGroundTruthModel({ includeAllProperties = false } = {}) {
   const doc = yaml.load(loadRawFixtureText());
 
@@ -152,7 +199,8 @@ export function loadGroundTruthModel({ includeAllProperties = false } = {}) {
     }
   }
 
-  const practicalScopeClassIds = buildPracticalScopeClassIds(doc, classes);
+  const actions = buildReducedActions(doc, classes);
+  const practicalScopeClassIds = buildPracticalScopeClassIds(doc, classes, actions);
 
-  return { classes, relationships, properties, valueSets, metadata: doc.metadata || {}, practicalScopeClassIds };
+  return { classes, relationships, properties, valueSets, actions, metadata: doc.metadata || {}, practicalScopeClassIds };
 }

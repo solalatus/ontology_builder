@@ -712,3 +712,41 @@ action/rule-heavy enough for it to reach for inline lists on its own.
       real array, not `[]`.
 - Full suite (`tests/*.spec.mjs`, 389 JS tests) green, run twice, plus 13 Python tests. A full real eval
   re-run confirmed the fix end-to-end — see this addendum's own follow-up note for the actual numbers.
+
+## Addendum — single-input actions: agent guidance + a documented ground-truth reduction
+
+**2026-07-29.** Follow-up analysis on the just-fixed run's LLM review, which flagged several actions as
+having "incomplete inputs" (e.g. `assignResolverGroup` only takes `Incident`, not also `ResolverGroup`).
+Traced this to a real, deliberate schema boundary, not a modeling mistake: `state.actions[].inputClassId`
+(`index.html`) is a single scalar, not a list — the Actions manager UI is a single-select, the YAML tool
+schema's `input:` key is singular, and `deleteNode()`'s reference cleanup assumes exactly one reference to
+null out. Confirmed this is a genuine ontology-expressiveness limit (not a file-format/parsing detail like
+the YAML-list bug above): there's no array anywhere in the pipeline already waiting to be read correctly.
+User's direction: keep the app's model as-is, but (1) tell the interviewing agent explicitly so it stops
+treating this as something to work around, and (2) stop letting the eval's ground truth implicitly expect
+what the app can't represent.
+
+- [x] `index.html`'s `INTERVIEW PROCESS` Phase 8 (actions) now states directly: an action has exactly one
+      input class in this tool; if a real action needs more than one, pick the class it's fundamentally
+      about and represent the other participant via a relationship, property, or precondition instead —
+      "a deliberate limit of this tool, not something to work around or apologize for." Mirrors how the
+      no-subclassing limitation is already explicitly documented for the interviewer elsewhere in the same
+      prompt.
+- [x] `tests/evals/lib/groundTruthModel.mjs`'s new `buildReducedActions()`: reduces each ground-truth
+      action's potentially-multiple `inputs:` (the fixture itself declares several per action, e.g.
+      `declareMajorIncident: inputs: {incident: ..., commander: ...}`) down to the first-listed ("primary")
+      one, recording how many were dropped (`droppedInputCount`) so the reduction is an explicit, auditable
+      adjustment rather than a silent omission — same documented-filter pattern as `isRecoverableProperty`/
+      `isRecoverableRelationship`. Exposed as `groundTruth.actions`, filtered by `scopeGroundTruth()` the
+      same way classes/relationships/properties already are. Not wired into `computeRecoveryMetrics` (no
+      action-recall metric exists), but the primary input class of each action now feeds
+      `practicalScopeClassIds`'s corpus — secondary inputs deliberately never do. Verified empirically this
+      doesn't silently change the existing practical-scope class set for the current fixture (already-covered
+      via other text), so it's a correctness/auditability improvement, not an unannounced behavior change.
+- [x] Tests: `tests/ontology-recovery-metrics.spec.mjs` (+4): every multi-input fixture action reduces to its
+      first-listed input with the correct drop count (including a pinned check on `declareMajorIncident`
+      specifically); a genuinely single-input action reports zero dropped; `scopeGroundTruth` filters actions
+      by primary-input-class membership, both against the real fixture and a synthetic ground truth object.
+      `tests/helper-agent-phase4.spec.mjs` (+1): pins the Phase 8 single-input guidance text.
+- Full suite (`tests/*.spec.mjs`, 394 JS tests) green, plus 13 Python tests. A full real eval re-run
+  confirmed the change doesn't regress anything — see this addendum's own follow-up note for the numbers.
