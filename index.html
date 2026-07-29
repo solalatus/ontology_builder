@@ -4210,37 +4210,85 @@ function planYamlImport(parsed) {
   return { classPlans, relationshipPlans, rulePlans, actionPlans, addedCount, changedCount, removedCount };
 }
 
+// Upserts incoming properties (name -> {type, unit, allowed}) into an
+// existing property array by name, leaving properties the caller didn't
+// mention untouched -- only used by "agent-merge" (see commitYamlImport's
+// own comment on why this exists as a separate mode from the manual
+// dialog's "merge").
+function mergePropertiesByName(existingProperties, incomingByName) {
+  const result = existingProperties.map((p) => ({ ...p }));
+  for (const [name, p] of Object.entries(incomingByName)) {
+    const merged = {
+      id: `p_${Math.random().toString(36).slice(2, 9)}`, name,
+      type: (p && p.type) || "text",
+      unit: (p && p.unit) || null,
+      allowed: (p && Array.isArray(p.allowed)) ? p.allowed : null,
+    };
+    const idx = result.findIndex((ep) => ep.name === name);
+    if (idx >= 0) {
+      merged.id = result[idx].id;
+      result[idx] = merged;
+    } else {
+      result.push(merged);
+    }
+  }
+  return result;
+}
+
+// mode is "merge" (manual Import dialog's own Merge button — matched
+// classes/rules/relationships/actions have every field wholesale replaced
+// by whatever this one file specifies, including clearing fields the file
+// omits; tests/agent-ontology-phase-g.spec.mjs's own tests document this as
+// deliberate: a human re-uploading a self-contained file expects it to be
+// authoritative for what it lists), "replace" (also deletes anything
+// unmatched), or "agent-merge" (apply_ontology_yaml only, see
+// handleAgentToolCall) -- a third mode added after a live, real
+// conversation (tests/evals/ontology-recovery.eval.spec.mjs's first full
+// run, see helper_agent_todo.md's Log) showed the agent tool's own
+// documented contract ("only include entries that are new or have changed
+// -- this merges against the existing model, it does not need to restate
+// everything") was silently violated by reusing plain "merge" semantics: a
+// real model correctly sending a minimal diff (e.g. just one new property)
+// had every field it didn't restate -- meaning, aliases, other properties
+// -- wiped, and had to notice and manually re-send them to recover. Under
+// "agent-merge", a field that's absent from this call's parsed YAML for an
+// *existing, matched* entity is left exactly as it was, not cleared;
+// `properties` specifically upserts by name (see mergePropertiesByName)
+// instead of replacing the whole array. Newly-created entities are
+// unaffected by any of this -- there's nothing to preserve yet.
 function commitYamlImport(text, mode) {
   const before = snapshotState();
   const parsed = parseDomainYamlImport(text);
   const nextShelfPosition = computeImportShelf();
+  const fieldLevelMerge = mode === "agent-merge";
 
   const labelToNode = new Map();
   for (const n of state.nodes) labelToNode.set(n.label, n);
   const matchedNodeIds = new Set();
   for (const [label, cls] of Object.entries(parsed.classes)) {
-    const properties = Object.entries(cls && cls.properties && typeof cls.properties === "object" ? cls.properties : {})
-      .map(([name, p]) => ({
-        id: `p_${Math.random().toString(36).slice(2, 9)}`, name, // matches the property-id convention createPropertyRow() uses
-        type: (p && p.type) || "text",
-        unit: (p && p.unit) || null,
-        allowed: (p && Array.isArray(p.allowed)) ? p.allowed : null,
-      }));
-    const meaning = cls && typeof cls.meaning === "string" ? cls.meaning : null;
-    const aliases = (cls && Array.isArray(cls.aliases)) ? [...cls.aliases] : [];
+    const propertiesByName = cls && cls.properties && typeof cls.properties === "object" ? cls.properties : {};
+    const meaningGiven = cls && typeof cls.meaning === "string";
+    const aliasesGiven = cls && Array.isArray(cls.aliases);
     const existing = state.nodes.find((n) => n.label === label);
     if (existing) {
-      existing.meaning = meaning;
-      existing.aliases = aliases;
-      existing.properties = properties;
+      if (!fieldLevelMerge || meaningGiven) existing.meaning = meaningGiven ? cls.meaning : null;
+      if (!fieldLevelMerge || aliasesGiven) existing.aliases = aliasesGiven ? [...cls.aliases] : [];
+      existing.properties = fieldLevelMerge
+        ? mergePropertiesByName(existing.properties, propertiesByName)
+        : Object.entries(propertiesByName).map(([name, p]) => ({
+            id: `p_${Math.random().toString(36).slice(2, 9)}`, name, // matches the property-id convention createPropertyRow() uses
+            type: (p && p.type) || "text",
+            unit: (p && p.unit) || null,
+            allowed: (p && Array.isArray(p.allowed)) ? p.allowed : null,
+          }));
       matchedNodeIds.add(existing.id);
       labelToNode.set(label, existing);
     } else {
       const pos = nextShelfPosition();
       const node = createNode(pos.x, pos.y, label);
-      node.meaning = meaning;
-      node.aliases = aliases;
-      node.properties = properties;
+      node.meaning = meaningGiven ? cls.meaning : null;
+      node.aliases = aliasesGiven ? [...cls.aliases] : [];
+      node.properties = mergePropertiesByName([], propertiesByName);
       matchedNodeIds.add(node.id);
       labelToNode.set(label, node);
     }
@@ -4250,14 +4298,14 @@ function commitYamlImport(text, mode) {
   for (const r of state.rules) nameToRule.set(r.name, r);
   const matchedRuleIds = new Set();
   for (const [name, rule] of Object.entries(parsed.rules)) {
-    const conditions = (rule && Array.isArray(rule.conditions)) ? [...rule.conditions] : [];
+    const conditionsGiven = rule && Array.isArray(rule.conditions);
     const existing = state.rules.find((r) => r.name === name);
     if (existing) {
-      existing.conditions = conditions;
+      if (!fieldLevelMerge || conditionsGiven) existing.conditions = conditionsGiven ? [...rule.conditions] : [];
       matchedRuleIds.add(existing.id);
       nameToRule.set(name, existing);
     } else {
-      const r = createRule(name, conditions);
+      const r = createRule(name, conditionsGiven ? [...rule.conditions] : []);
       matchedRuleIds.add(r.id);
       nameToRule.set(name, r);
     }
@@ -4270,7 +4318,7 @@ function commitYamlImport(text, mode) {
     const tgt = labelToNode.get(rel.to);
     if (!src || !tgt) continue; // references a class not in this file/on canvas — skip defensively
     const relationName = rel.name || toCamelCaseId("");
-    const meaning = typeof rel.meaning === "string" ? rel.meaning : null;
+    const meaningGiven = typeof rel.meaning === "string";
     const existing = state.edges.find((e) => {
       const s = state.nodes.find((n) => n.id === e.source);
       const t = state.nodes.find((n) => n.id === e.target);
@@ -4278,32 +4326,35 @@ function commitYamlImport(text, mode) {
     });
     if (existing) {
       existing.relation = relationName; // aggressive overwrite normalizes the label to the imported name
-      existing.meaning = meaning;
+      if (!fieldLevelMerge || meaningGiven) existing.meaning = meaningGiven ? rel.meaning : null;
       matchedEdgeIds.add(existing.id);
     } else {
       const edge = createEdge(src.id, tgt.id, relationName, true);
-      edge.meaning = meaning;
+      edge.meaning = meaningGiven ? rel.meaning : null;
       matchedEdgeIds.add(edge.id);
     }
   }
 
   const matchedActionIds = new Set();
   for (const [name, action] of Object.entries(parsed.actions)) {
-    const inputNode = action && typeof action.input === "string" ? labelToNode.get(action.input) : null;
-    const preconditionIds = (action && Array.isArray(action.preconditions))
+    const inputGiven = action && typeof action.input === "string";
+    const inputNode = inputGiven ? labelToNode.get(action.input) : null;
+    const preconditionsGiven = action && Array.isArray(action.preconditions);
+    const preconditionIds = preconditionsGiven
       ? action.preconditions.map((n) => nameToRule.get(n)).filter(Boolean).map((r) => r.id)
       : [];
-    const effect = (action && typeof action.effect === "string") ? action.effect : "";
-    const verification = (action && typeof action.verification === "string") ? action.verification : "";
+    const effectGiven = action && typeof action.effect === "string";
+    const verificationGiven = action && typeof action.verification === "string";
     const existing = state.actions.find((a) => a.name === name);
     if (existing) {
-      existing.inputClassId = inputNode ? inputNode.id : null;
-      existing.preconditions = preconditionIds;
-      existing.effect = effect;
-      existing.verification = verification;
+      if (!fieldLevelMerge || inputGiven) existing.inputClassId = inputNode ? inputNode.id : null;
+      if (!fieldLevelMerge || preconditionsGiven) existing.preconditions = preconditionIds;
+      if (!fieldLevelMerge || effectGiven) existing.effect = effectGiven ? action.effect : "";
+      if (!fieldLevelMerge || verificationGiven) existing.verification = verificationGiven ? action.verification : "";
       matchedActionIds.add(existing.id);
     } else {
-      const a = createAction(name, inputNode ? inputNode.id : null, preconditionIds, effect, verification);
+      const a = createAction(name, inputNode ? inputNode.id : null, preconditionIds,
+        effectGiven ? action.effect : "", verificationGiven ? action.verification : "");
       matchedActionIds.add(a.id);
     }
   }
@@ -4809,10 +4860,14 @@ const OPENAI_CHAT_URL = "https://api.openai.com/v1/chat/completions";
 // Single coarse tool (plan §4.5, confirmed decision — not a fine-grained
 // per-entity tool set): the model hands over a YAML snippet, which gets
 // applied through the exact same parseDomainYamlImport()/planYamlImport()/
-// commitYamlImport() pipeline the manual Import dialog already uses. Only
-// "merge" is reachable from this tool, never "replace" — an autonomous
-// agent nuking the whole graph on a misunderstanding is a far worse failure
-// mode than the manual dialog's opt-in aggressive-overwrite.
+// commitYamlImport() pipeline the manual Import dialog already uses, via
+// commitYamlImport's own "agent-merge" mode (see that function's comment)
+// — never "replace" — an autonomous agent nuking the whole graph on a
+// misunderstanding is a far worse failure mode than the manual dialog's
+// opt-in aggressive-overwrite, and never plain "merge" either, since that
+// mode's wholesale-field-replace-on-match semantics silently contradict
+// this tool's own documented contract below ("does not need to restate
+// everything").
 const APPLY_ONTOLOGY_YAML_TOOL = {
   type: "function",
   function: {
@@ -5526,7 +5581,7 @@ function handleAgentToolCall(call, alreadyCommittedThisTurn) {
     appendTranscriptMessage("tool", t("agentToolNothingNote"));
     return { applied: false, resultText: "Nothing to apply — no new or changed classes, relationships, rules, or actions were found in that yaml." };
   }
-  commitYamlImport(yamlText, "merge"); // never "replace" — see APPLY_ONTOLOGY_YAML_TOOL's own comment
+  commitYamlImport(yamlText, "agent-merge"); // never "replace"; not "merge" either — see commitYamlImport's own comment
   appendTranscriptMessage("tool", t("agentToolApplied", plan.addedCount, plan.changedCount));
   return { applied: true, resultText: `Applied. Added ${plan.addedCount}, updated ${plan.changedCount} existing item(s).` };
 }

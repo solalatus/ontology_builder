@@ -560,3 +560,15 @@ Deliberately kept separate from the main test suite (not swept in by
 `tests/*.spec.mjs`) since it is an eval that produces a report to read, not
 a deterministic pass/fail test — real, non-deterministic LLMs are talking
 to each other on both sides of the simulated interview.
+
+The eval's own second full real run then found a genuine bug in the app
+itself this way: `commitYamlImport`'s "merge" mode wholesale-replaced a
+matched class's meaning/aliases/properties instead of merging field-by-
+field, silently contradicting `apply_ontology_yaml`'s own documented
+contract ("does not need to restate everything") every time a real model
+correctly sent a minimal diff. Fixed with a new `commitYamlImport` mode,
+`"agent-merge"`, used only by the agent tool — the manual Import dialog's
+own `"merge"` keeps its prior, deliberately-tested wholesale-replace
+behavior unchanged. See `helper_agent_todo.md`'s own dated addendum for the
+full root-cause writeup and `commitYamlImport`'s own code comment in
+`index.html` for the implementation.
