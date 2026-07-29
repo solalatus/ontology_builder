@@ -631,3 +631,46 @@ these too, keeping the runtime filters as a safety net rather than removing
 them — done via a surgical script confined entirely to the `predicates:` and
 `actions:` sections, verified to match the filters' own output exactly. See
 `helper_agent_todo.md`'s own further dated addenda for both.
+
+A later confirmatory run stopped after only 11 turns: `appearsFinished`
+(`tests/evals/lib/conversationOrchestrator.mjs`) misjudged an explicit
+"Phase 3 recap" message as the whole interview being done -- the same
+failure mode already addressed once before, this time surviving an
+already-specific instruction to the classifier model. Fixed with a
+deterministic regex pre-filter that catches the interviewer's own "Phase N
+recap" phrasing (N 0-8) before the classifier is even called, and by
+defaulting the classifier model to the interviewer's own live-picked
+"standard tier" model instead of a fixed cheap one. See
+`helper_agent_todo.md`'s own further dated addendum for the details.
+
+That model-default change turned out to have its own regression: a
+reasoning-tier model picked as classifier rejects the `max_tokens` param
+outright, and the old code silently treated that API failure as "not
+finished," so a confirmatory run looped 160+ turns of pure pleasantries
+after the interviewer had already, explicitly finished -- caught only
+because the user asked to check the actual log content, not just the turn
+count. Fixed by dropping `temperature`/`max_tokens` from that request
+entirely (matching `index.html`'s own working call shape) and making any
+future classifier API failure a loud thrown error instead of a silent
+default. Hardened with two more layers on top: a second, API-free safety
+net (`looksLikePureAcknowledgment`) that stops the run after two
+consecutive content-free pleasantries regardless of what the classifier
+thinks, and a prompt-level defense on the persona side
+(`fixtures/persona-eszter.md`) instructing the simulated interview subject
+to give one short closing line and stop once it recognizes the interviewer
+has wrapped up, rather than keep volunteering new content. See
+`helper_agent_todo.md`'s own further dated addendum for the details.
+
+Both the production agent and the test harness also gained rate-limit
+backoff: `index.html`'s `callAgentChatRaw`/`fetchOpenAiModels` now retry an
+ordinary transient 429 with exponential backoff instead of failing
+immediately (never retrying the permanent `insufficient_quota` case), and
+the test harness's `forwardToRealOpenAi` relay (`tests/lib/liveOpenAi.mjs`)
+retries the same way *inside the relay itself*, so a page driven through it
+never sees a failed intermediate attempt -- only the eventual outcome,
+avoiding a real failure mode where Chromium's own per-response console
+logging made even a successfully-retried call still fail `withPage()`'s
+strict no-console-errors assertion. See `helper_agent_todo.md`'s own
+further dated addendum for the details, including why the live
+confirmatory eval this was meant to unblock is still pending on the
+account's own OpenAI quota rather than on anything left to fix in code.

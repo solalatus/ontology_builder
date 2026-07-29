@@ -44,7 +44,16 @@ const MAX_TURNS = Number(process.env.ONTOLOGY_EVAL_MAX_TURNS) || 500;
 const WALLCLOCK_MINUTES = Number(process.env.ONTOLOGY_EVAL_WALLCLOCK_MINUTES) || 45;
 const WALLCLOCK_MS = WALLCLOCK_MINUTES * 60 * 1000;
 const PERSONA_MODEL = process.env.ONTOLOGY_EVAL_PERSONA_MODEL || "gpt-4o-mini";
-const CLASSIFIER_MODEL = process.env.ONTOLOGY_EVAL_CLASSIFIER_MODEL || "gpt-4o-mini";
+// No longer a fixed cheap default (was "gpt-4o-mini") -- a real run found
+// the deterministic pre-filter in conversationOrchestrator.mjs's
+// looksLikeEarlyPhaseCheckpoint() was needed precisely because a cheap,
+// low-token-budget model was hard to instruction-away from a false
+// positive. Defaulting to whatever real, live-picked "standard tier" model
+// the interviewer itself connects with (same pattern REVIEW_MODEL_OVERRIDE
+// already uses below) gives the LLM fallback a more capable model too,
+// without hardcoding a specific model id here that could drift out of date
+// or not exist for a given key/account.
+const CLASSIFIER_MODEL_OVERRIDE = process.env.ONTOLOGY_EVAL_CLASSIFIER_MODEL || null;
 const REVIEW_MODEL_OVERRIDE = process.env.ONTOLOGY_EVAL_REVIEW_MODEL || null;
 
 test(
@@ -56,6 +65,7 @@ test(
       const interviewerModel = await page.evaluate(() => window.__kg.agent.state.model);
       assert.ok(interviewerModel, "expected the real connect flow to pick a real model");
       void modelResponses;
+      const classifierModel = CLASSIFIER_MODEL_OVERRIDE || interviewerModel;
 
       // Live progress: re-uses the exact same writers the final, successful
       // path calls once at the end, so results/conversation-log.md and
@@ -77,7 +87,7 @@ test(
         page,
         apiKey: OPENAI_API_KEY,
         personaModel: PERSONA_MODEL,
-        classifierModel: CLASSIFIER_MODEL,
+        classifierModel,
         maxTurns: MAX_TURNS,
         wallClockMs: WALLCLOCK_MS,
         onProgress,
@@ -104,7 +114,7 @@ test(
       writeToolCallLog(orchestratorResult.rawApiLog);
       const reviewModel = REVIEW_MODEL_OVERRIDE || interviewerModel;
       const llmReviewText = await generateLlmReview({ apiKey: OPENAI_API_KEY, model: reviewModel, orchestratorResult });
-      writeReport({ metrics, scopedMetrics, operationalStats, orchestratorResult, llmReviewText, interviewerModel, personaModel: PERSONA_MODEL });
+      writeReport({ metrics, scopedMetrics, operationalStats, orchestratorResult, llmReviewText, interviewerModel, personaModel: PERSONA_MODEL, classifierModel });
     });
   }
 );

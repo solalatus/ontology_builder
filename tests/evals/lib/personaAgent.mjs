@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { loadRawFixtureText } from "./groundTruthModel.mjs";
+import { RATE_LIMIT_MAX_ATTEMPTS, rateLimitBackoffMs, sleepMs, isInsufficientQuotaError } from "../../lib/liveOpenAi.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PERSONA_PATH = path.resolve(__dirname, "..", "fixtures", "persona-eszter.md");
@@ -33,15 +34,28 @@ function buildSystemPrompt() {
 export function createPersonaAgent({ apiKey, model }) {
   const messages = [{ role: "system", content: buildSystemPrompt() }];
 
+  // Retries a transient 429 with backoff, same as every other real API call
+  // site in the app/test suite (index.html's callAgentChatRaw,
+  // tests/lib/liveOpenAi.mjs's relay) -- a real eval run hit this exact gap
+  // (this function had no retry at all) when the persona's own direct call
+  // failed on a transient rate limit mid-conversation, well past the
+  // connect flow the relay already protects. insufficient_quota is still
+  // never retried.
   async function reply(incomingText) {
     messages.push({ role: "user", content: incomingText });
-    const res = await fetch(CHAT_URL, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ model, messages }),
-    });
-    const data = await res.json();
-    if (!res.ok) {
+    let res, data;
+    for (let attempt = 1; attempt <= RATE_LIMIT_MAX_ATTEMPTS; attempt++) {
+      res = await fetch(CHAT_URL, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ model, messages }),
+      });
+      data = await res.json();
+      if (res.ok) break;
+      if (res.status === 429 && attempt < RATE_LIMIT_MAX_ATTEMPTS && !isInsufficientQuotaError(data)) {
+        await sleepMs(rateLimitBackoffMs(attempt));
+        continue;
+      }
       throw new Error(`persona agent call failed: HTTP ${res.status} ${data && data.error && data.error.message}`);
     }
     const text = (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || "";

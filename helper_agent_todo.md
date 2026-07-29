@@ -781,3 +781,176 @@ redundant or kept as a defensive safety net — user chose **keep both**.
       nothing — proves the physical edit and the code filter agree exactly, not just that neither crashes).
 - Full suite (`tests/*.spec.mjs`, 397 JS tests) green. A full real eval re-run confirmed no regression — see
   this addendum's own follow-up note for the numbers.
+
+**Note:** PR #42 (covering everything up to this point in this file) was merged mid-session; the two addenda
+above ended up as unmerged commits on top of already-merged history. Per protocol, rebased them onto the
+fresh `helper_agent` and opened a new PR (#43) rather than reusing the closed one — see that PR for the
+concrete rebase/force-push mechanics.
+
+## Addendum — appearsFinished false-positive, round two: a deterministic pre-filter + a smarter classifier model
+
+**2026-07-29.** PR #43's own confirmatory eval run stopped after only 11 turns — the `appearsFinished`
+classifier (`tests/evals/lib/conversationOrchestrator.mjs`) fired on a message that opened with **"Phase 3
+recap — relationships captured:"** and closed by asking to move into the next phase: textbook mid-interview
+checkpoint language, and exactly the failure mode already "fixed" once before (see this file's earlier Log
+entry) by telling the classifier about all 10 phases explicitly. That instruction was already correct and
+specific; the cheap, 2-token-budget model still got it wrong. User's diagnosis request, then explicit
+instruction: implement a fix, and separately upgrade the classifier model.
+
+- [x] **Deterministic pre-filter** — new `looksLikeEarlyPhaseCheckpoint()`, exported from
+      `conversationOrchestrator.mjs`. Regexes for the interviewer's own consistent phrasing ("Phase N recap",
+      "recap ... Phase N", "Phase N is confirmed complete", N restricted to 0-8 so a genuine phase-9 final
+      pass still reaches the LLM) run *before* the classifier API call at all; a match short-circuits straight
+      to "not finished" with zero API cost. Only ever forces NO, never YES — strictly additive, can't make the
+      classifier more trigger-happy than before, only less.
+- [x] **Smarter classifier model** — `ONTOLOGY_EVAL_CLASSIFIER_MODEL`'s default changed from a hardcoded
+      `"gpt-4o-mini"` to whatever real, live-picked "standard tier" model the interviewer itself connects
+      with (same pattern `ONTOLOGY_EVAL_REVIEW_MODEL` already used) — a fixed cheap model was plausibly part
+      of why the instruction alone wasn't enough. Still overridable via the env var for anyone who wants a
+      specific model regardless.
+- [x] **A little more room to reason** — `max_tokens` raised from 2 to 60, and the classifier prompt now asks
+      for a one-line phase identification before the YES/NO verdict (parsed from the *last* non-empty line of
+      the response) instead of forcing an immediate terse guess. `report.md` now also lists the classifier
+      model used, alongside the interviewer's and persona's, for transparency.
+- [x] Tests (`tests/ontology-recovery-transparency.spec.mjs`, +6): `looksLikeEarlyPhaseCheckpoint` catches the
+      exact real message that fooled the classifier; catches "Phase N recap" for every early phase 0-8 and
+      the reverse "recap ... phase N" order; catches "Phase N is confirmed complete"; does *not* match phase 9
+      (so the real final pass still reaches the LLM) or a genuine phase-9-style final wrap-up with no
+      phase-recap phrasing at all; does not match ordinary unrelated text. `writeReport` test updated to cover
+      the new classifier-model line.
+- Full suite (`tests/*.spec.mjs`, 403 JS tests) green. A full real eval re-run confirmed the fix and upgraded
+  model together — see this addendum's own follow-up note for the numbers.
+
+## Addendum — the classifier-model upgrade's own regression: `max_tokens` rejected by reasoning-tier models, silently swallowed as "not finished"
+
+**2026-07-29.** User's ask: "check the discussion in the log if it is healthy" — not just the turn-count
+header, the actual content. Reading `results/conversation-log.md` around turns 190-200 of the confirmatory
+run for the previous addendum found the interviewer had explicitly finished at turn 38-39 ("we'll consider
+the ontology interview complete for this first version"), then just kept trading "Thank you" / "You're
+welcome" / "Take care" for 160+ turns after that — the exact false-negative version of the false-positive bug
+the previous addendum fixed, and self-inflicted by that same fix.
+
+Root cause: `ONTOLOGY_EVAL_CLASSIFIER_MODEL` now defaults to the interviewer's own live-picked model, which
+can be a reasoning-tier model (e.g. a real `gpt-5.5-...` pick). The classifier request still sent
+`temperature: 0, max_tokens: 60`, and reasoning-tier models reject `max_tokens` outright — confirmed live with
+two isolated `node -e` API calls (one with `max_tokens` → HTTP 400 `"Unsupported parameter: 'max_tokens' is
+not supported with this model. Use 'max_completion_tokens' instead."`; the same call without it → 200 success,
+`completion_tokens_details.reasoning_tokens: 20` in the response). The old `appearsFinished()` code treated
+*any* API failure the same as an empty answer (`data.choices` undefined → `answer = ""` → regex match fails →
+`false`), so every single classifier call silently failed and the run just never stopped on its own — bounded
+only by the turn cap / wallclock. Killed the confirmed-broken background run (PIDs 19146/19145/18789) rather
+than let it burn the remaining budget for a result already known to be worthless.
+
+User's follow-up instruction, in the same message: fix this, **and** harden the finished-detection with a
+second, independent layer that doesn't depend on the classifier at all, **and** add a prompt-level defense on
+the persona side so the simulated interview subject stops re-igniting the small talk once things are actually
+done. All three implemented together:
+
+- [x] **The actual bug** — `appearsFinished()` no longer sends `temperature` or `max_tokens` at all, matching
+      `index.html`'s own `callAgentChatRaw()` (confirmed via grep to never set either, which is exactly why
+      the interviewer's own real conversation never hit this). Added a `res.ok`/`data.error` check that throws
+      a descriptive error naming the model and HTTP status on any classifier API failure, so a *future*
+      incompatibility is a loud, immediate test failure instead of another silent multi-hour hang.
+- [x] **Second, independent safety net (no API call, can't be fooled)** — new `looksLikePureAcknowledgment()`,
+      exported from `conversationOrchestrator.mjs`: a message under 25 words, with no `?` in it, that opens
+      with a stock closing phrase ("thank you", "you're welcome", "take care", "sounds good", "no problem",
+      "goodbye", etc.) is a content-free pleasantry regardless of what any classifier thinks. Two of these in
+      a row from the app agent stop the run (`pleasantry_loop_detected`) *before* even calling
+      `appearsFinished()` — cheaper, and immune to the exact failure mode above by construction, since it
+      never touches the network. Can only shorten a run that's already gone idle; a real answer is either
+      longer or asks something back, so it can't misfire on genuine content.
+- [x] **Persona-side prompt defense** — new "Ending the interview" section in
+      `tests/evals/fixtures/persona-eszter.md`: instructs Eszter to recognize the interviewer's own wrap-up
+      cues (final validation pass, competency check, an explicit "interview complete"/"ready for use"
+      statement) and give one short closing line instead of volunteering new content, asking a new question of
+      her own, or trading farewells back and forth turn after turn. Doesn't stop the loop by itself (that's
+      the two mechanisms above), but stops the persona from being the thing that keeps feeding the interviewer
+      new material to react to once the real interview is over.
+- [x] Tests (`tests/ontology-recovery-transparency.spec.mjs`, +5): `looksLikePureAcknowledgment` recognizes
+      the real stock closing lines from the actual 160-turn loop; rejects real content even when it opens with
+      a closing-sounding word (word-count guard); rejects anything ending in `?`; rejects ordinary domain
+      content and empty/null input.
+- Full suite (`tests/*.spec.mjs`, 407 JS tests) green; the 5 failures seen in this run are pre-existing,
+  unrelated `helper-agent-live-openai.spec.mjs` live tests hit by real API rate limiting (HTTP 429), not this
+  change.
+
+## Addendum — rate-limit backoff, in both the production agent and the test harness
+
+**2026-07-29.** Attempting the live confirmatory eval for the addendum above hit real 429s immediately on
+connect (before even reaching the interview), and re-running it a second time hit the same wall. User's
+instruction: implement backoff for rate limiting in both the agent and the tests, on top of everything already
+in flight.
+
+- [x] **Production agent (`index.html`)** — `callAgentChatRaw` (chat turns) and `fetchOpenAiModels` (the
+      connect-flow model list) both used to fail immediately on any 429, including an ordinary transient
+      `rate_limit_exceeded` that would very plausibly have succeeded a moment later. Both now retry with
+      exponential backoff (new shared `AGENT_RATE_LIMIT_MAX_ATTEMPTS = 4`, `agentRateLimitBackoffMs`: 1s, 2s,
+      4s — 1 initial try + 3 retries) before surfacing an error to the user. `insufficient_quota` (the
+      permanent, billing-exhausted case, distinguished by `error.code` exactly like the existing
+      rate-limit-vs-quota distinction) is still never retried — no amount of waiting fixes it, and retrying it
+      anyway would just burn more time for no benefit.
+- [x] **Test harness (`tests/lib/liveOpenAi.mjs`)** — `forwardToRealOpenAi`, the Node-side relay every live
+      test/eval routes real API calls through (this sandbox's browser can't reach `api.openai.com` directly),
+      now retries the same way *inside the relay itself*, before ever calling `route.fulfill()`. This matters
+      for a reason the client-side retry above can't fix on its own: Chromium logs its own
+      `"Failed to load resource: ... 429"` console message for *every* non-2xx response it receives, even one
+      a caller's own retry loop recovers from -- and `withPage()` (`tests/lib/page.mjs`) asserts zero
+      console/page errors for the whole test. Without retrying inside the relay, each intermediate failed
+      attempt would still fail the test even if the retry eventually succeeded. Relaying only the final
+      (post-retry) response means the page only ever sees one outcome per request, exactly like a real
+      (non-relayed) client experiencing one slow call rather than several distinct failed ones. Root-caused via
+      `tests/evals/*.eval.spec.mjs` failing with exactly three `"Failed to load resource: ... 429"` console
+      errors, all during the model-discovery call at connect.
+- [x] Tests: `tests/helper-agent-phase2.spec.mjs` (+4) -- a transient 429 is retried and succeeds once the API
+      recovers (proven by counting actual requests sent, not just the final outcome); a rate limit that never
+      clears is retried exactly 4 times total then gives up (bounded, not infinite); `insufficient_quota` is
+      never retried (exactly 1 attempt); the connect flow's model-discovery call gets the same treatment.
+      `tests/live-openai-relay-backoff.spec.mjs` (new, +3) -- unit tests of the relay itself, monkey-patching
+      Node's global `fetch` with a scripted 429/429/200 sequence (no API key, no real network) to prove the
+      page genuinely only ever sees the eventual single outcome, not each intermediate attempt; a permanent
+      `insufficient_quota` is never retried; a rate limit that never clears still gives up after exactly 4
+      attempts rather than hanging forever.
+- Full suite (`tests/*.spec.mjs`, 414 JS tests) green.
+
+**Follow-up, same day, once the account's quota was restored:** the live confirmatory eval finally ran for
+real (~98s) instead of failing at connect -- and then failed again, `insufficient_quota`, from
+`personaAgent.mjs`'s own direct `fetch()` call mid-conversation. That call (and `conversationOrchestrator.mjs`'s
+`appearsFinished` classifier, and `reportGenerator.mjs`'s `generateLlmReview`) each make their own real API call
+outside the relay entirely and had no backoff of any kind -- a real gap in the work above, which only covered
+`index.html` and the relay.
+
+- [x] Consolidated the backoff constants (`RATE_LIMIT_MAX_ATTEMPTS`, `rateLimitBackoffMs`,
+      `isInsufficientQuotaError`) into exported members of `tests/lib/liveOpenAi.mjs` (previously private to
+      the relay) and reused them in all three previously-unprotected call sites: `personaAgent.mjs`'s
+      `reply()`, `conversationOrchestrator.mjs`'s `appearsFinished` (now exported for direct testability, same
+      reasoning as `looksLikeEarlyPhaseCheckpoint`), and `reportGenerator.mjs`'s `generateLlmReview` (which
+      keeps its existing degrade-to-a-soft-fail-message-instead-of-throwing behavior once retries are
+      exhausted, rather than adopting the throw-on-failure shape of the other two).
+- [x] Tests (`tests/eval-rate-limit-backoff.spec.mjs`, new, +6): each of the three call sites retries a
+      transient 429 and succeeds once it recovers (proven by counting real fetch calls against a scripted
+      429/429/200 sequence); each never retries a permanent `insufficient_quota`; `generateLlmReview`
+      specifically confirmed to degrade to its soft-fail message (not throw) after exactly 4 bounded attempts
+      against a rate limit that never clears. All via a monkey-patched `global.fetch` -- deterministic, no API
+      key, no real network.
+- Full suite (`tests/*.spec.mjs`, 420 JS tests) green, including all 5 previously-failing live tests in
+  `helper-agent-live-openai.spec.mjs` -- confirmed the account's quota, not a code bug, was the entire cause of
+  every failure seen in this addendum and the one above it.
+- **Live confirmation, finally clean:** with quota restored and all three backoff gaps closed, the
+  confirmatory eval ran a full real interview end to end and stopped itself at **turn 45 (849s wall-clock)**
+  via `app_agent_appears_finished`, on a genuine final wrap-up (full competency check + final checklist
+  against the original acceptance questions/actions) -- not the 500-turn cap, not the 45-minute wallclock, and
+  no pleasantry loop. This is the confirmation the `appearsFinished`/`max_tokens` fix, both hardening layers,
+  and the full backoff pass were all waiting on. Task #116 (this whole thread of work) is done.
+- **Live confirmation blocked, not skipped:** re-running the confirmatory eval to prove the *original*
+  `appearsFinished`/`max_tokens` fix actually stops a genuine finished interview promptly (this addendum's own
+  stated goal) still failed immediately -- but by design this time: `forwardToRealOpenAi`'s own new
+  quota-vs-rate-limit check correctly declined to retry, and a direct, isolated `curl`-equivalent call against
+  the real key confirmed why: `error.code: "insufficient_quota"`, "You exceeded your current quota, please
+  check your plan and billing details." This is the account's real, current OpenAI billing state, not a bug in
+  this branch -- todays's heavy API usage (all the mocked suite's live tests, the two earlier eval attempts,
+  this diagnostic call itself) appears to have exhausted it. Every automated check that doesn't require a live
+  key (407 -> 414 mocked JS tests, all passing) is done and confirms both the original fix and this addendum's
+  backoff work behave correctly, including correctly *not* retrying this exact condition. The one thing still
+  outstanding -- an actual multi-turn live interview proving `appearsFinished`/`looksLikePureAcknowledgment`
+  stop a real run promptly -- needs the account's quota restored first; nothing further to fix in code until
+  then.
