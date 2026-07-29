@@ -5405,7 +5405,15 @@ already has instead of following it rigidly)
 7. Rules: capture named, plain-language condition lists only where a real
    decision depends on them.
 8. Actions: for each Phase-1 action, capture its input class,
-   precondition rule(s), effect, and a verification step.
+   precondition rule(s), effect, and a verification step. An action has
+   exactly ONE input class in this tool — not a list. If a real action
+   genuinely involves more than one class (e.g. "assign resolver group"
+   touches both the incident and the resolver group), pick the one the
+   action is fundamentally about or that changes state (here, the
+   incident), and represent the other participant through a relationship,
+   a property, or a precondition instead of trying to give the action a
+   second input. This is a deliberate limit of this tool, not something to
+   work around or apologize for.
 9. Validation pass — run BOTH checks before considering a class,
    relationship, rule, or action finished:
    (a) Competency check: replay every relevant Phase-1 question/action

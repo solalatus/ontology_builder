@@ -616,3 +616,18 @@ by teaching the parser to split a non-empty inline list on top-level commas
 (quote-aware, reusing the existing quoted-scalar escape handling) instead of
 only recognizing the empty case. See `helper_agent_todo.md`'s own further
 dated addendum for the fix details and tests.
+
+Follow-up analysis on that fix's own confirmation run found actions needing
+more than one input class (`assignResolverGroup` needs both the incident and
+the resolver group) flagged as a modeling defect — but `state.actions[].inputClassId`
+is a single scalar throughout the app (data model, UI, YAML schema), a
+deliberate ontology-expressiveness boundary, not a bug. The interviewer is
+now told this directly in Phase 8, and `tests/evals/lib/groundTruthModel.mjs`
+reduces each ground-truth action to its primary input the same
+documented-filter way it already excludes `"is a"` predicates and
+identifier/uri properties. The user then asked for the bundled fixture
+(`fixtures/itops_mtsr.yaml`) to be physically corrected for all three of
+these too, keeping the runtime filters as a safety net rather than removing
+them — done via a surgical script confined entirely to the `predicates:` and
+`actions:` sections, verified to match the filters' own output exactly. See
+`helper_agent_todo.md`'s own further dated addenda for both.

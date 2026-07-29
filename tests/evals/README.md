@@ -76,17 +76,25 @@ the LLM reviewer's summary of that narration.
 
 ## Fixtures
 
-`fixtures/itops_mtsr.yaml` and `fixtures/persona-eszter.md` are versioned,
-unmodified copies of the uploaded ground-truth ontology and persona prompt.
-They are not secrets — the ground truth is hidden only from the app agent
-under test (which never sees this directory), not from the repo.
+`fixtures/itops_mtsr.yaml` and `fixtures/persona-eszter.md` are versioned
+copies of the uploaded ground-truth ontology and persona prompt. They are
+not secrets — the ground truth is hidden only from the app agent under test
+(which never sees this directory), not from the repo.
+
+`itops_mtsr.yaml` is *not* a byte-for-byte unmodified copy of the original
+upload — see "Deliberate, documented edits to the ground truth" below for
+exactly what was changed and why (three categories, each also enforced at
+runtime by a still-exported filter function, so the correction survives even
+if this file is ever replaced by a fresh, uncorrected upload). Every other
+section (`classes:`, `valueSets:`, `constraints:`, `mappings:`,
+`competencyQuestions:`) is untouched from the original upload.
 
 ## Deliberate, documented edits to the ground truth
 
 The user's own instruction was to trim the ground truth "based on the
 handbook" before treating it as the recovery target — always as a
 documented, auditable filter in `lib/groundTruthModel.mjs`, never a
-hand-edited copy of the fixture. Three filters, each independently
+hand-edited copy of the fixture. Four adjustments, each independently
 justified:
 
 - **`isRecoverableProperty`** — excludes any property predicate whose
@@ -105,6 +113,19 @@ justified:
   relationship"), modeling `Major Incident —declared from→ Incident`
   instead of forcing `"is a"` onto a generic edge. Scoring that choice as a
   miss would penalize correct behavior, not bad interview technique.
+- **`buildReducedActions`** — the fixture's own actions each declare
+  potentially several named inputs (e.g. `declareMajorIncident: inputs:
+  {incident: ..., commander: ...}`), but this app's Action node has exactly
+  one input class (`inputClassId` is a scalar, not a list — see
+  `index.html`'s own Phase 8 note, which tells the interviewer this
+  explicitly). Ground-truth actions are reduced to their first-listed
+  ("primary") input only; secondary inputs are dropped, with the drop count
+  recorded (`groundTruth.actions[].droppedInputCount`) so the reduction is
+  visible, not silent. Not currently wired into any scored metric (there's
+  no action-recall dimension yet), but the *primary* input class of each
+  action does feed `practicalScopeClassIds` below — the *secondary* ones
+  deliberately never do, for the same reason `isRecoverableRelationship`
+  excludes `"is a"`.
 - **`practicalScopeClassIds`** — see "Full domain vs. practical scope"
   below.
 
@@ -129,9 +150,11 @@ isn't failing to recover those; they were never in scope to begin with.
 `groundTruthModel.mjs`'s `practicalScopeClassIds` gives a second, tighter,
 and just as auditable denominator: every class whose label or a declared
 alias appears (case/punctuation-insensitive, whole-word) inside the
-fixture's *own* canonical `competencyQuestions:` + `actions:` section —
-mechanical, not hand-picked, since it only depends on what the fixture's
-own canonical competency-test material actually talks about. `report.md`'s
+fixture's *own* canonical `competencyQuestions:` + `actions:` section, plus
+each reduced action's primary input class (see "Deliberate, documented
+edits" above — secondary inputs never count here) — mechanical, not
+hand-picked, since it only depends on what the fixture's own canonical
+competency-test material actually talks about. `report.md`'s
 headline table now shows both **Full domain** and **Practical scope**
 columns side by side for every metric — full-domain numbers for
 cross-run/cross-fixture-revision comparability, practical-scope numbers as
