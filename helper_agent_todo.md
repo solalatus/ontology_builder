@@ -750,3 +750,34 @@ what the app can't represent.
       `tests/helper-agent-phase4.spec.mjs` (+1): pins the Phase 8 single-input guidance text.
 - Full suite (`tests/*.spec.mjs`, 394 JS tests) green, plus 13 Python tests. A full real eval re-run
   confirmed the change doesn't regress anything — see this addendum's own follow-up note for the numbers.
+
+## Addendum — physically corrected the ground-truth fixture itself, on top of the runtime filters
+
+**2026-07-29.** User's explicit follow-up instruction: apply all three corrections above (identifier/uri
+properties, `"is a"` predicates, multi-input actions) directly to `fixtures/itops_mtsr.yaml` itself, not just
+as runtime filters. Asked first (via `AskUserQuestion`) whether the runtime filters should then be removed as
+redundant or kept as a defensive safety net — user chose **keep both**.
+
+- [x] Wrote a one-off Node script (js-yaml-driven, surgical raw-text line removal so the rest of the file's
+      formatting is untouched — no full YAML re-serialization, which would have reformatted the whole
+      ~2800-line file and lost the real diff signal) that: removed all 23 `"is a"` predicates, all 37
+      identifier/uri-target datatype predicates, and every action's secondary `inputs:` entries (keeping only
+      the first-listed one). Verified via re-parse: 0 `"is a"` predicates, 0 identifier/uri properties, 0
+      multi-input actions remain; counts match the runtime filters' own output exactly (120 relationships, 111
+      properties, 68 classes unchanged). Diff is confined entirely to the `predicates:` and `actions:`
+      sections — `classes:`, `valueSets:`, `constraints:`, `mappings:`, and `competencyQuestions:` are
+      byte-for-byte untouched. 373 lines removed, 0 added.
+- [x] `isRecoverableProperty`, `isRecoverableRelationship`, and `buildReducedActions` (`groundTruthModel.mjs`)
+      are now exported — they're a no-op against the corrected bundled fixture, but still real, unit-tested
+      code that would immediately do its job again if the fixture is ever replaced by a fresh, uncorrected
+      gold-standard upload.
+- [x] `tests/evals/README.md`'s "Fixtures" section no longer claims `itops_mtsr.yaml` is a byte-for-byte
+      unmodified upload — documents exactly what was changed and why, and that every other section is
+      untouched.
+- [x] Tests reworked: the three "does the filter remove something from the real fixture" tests (which would
+      now be vacuously true/false against a pre-cleaned file) became **isolated unit tests of the exported
+      filter functions against synthetic predicates/actions** (the real, still-meaningful safety-net
+      behavior) plus **idempotence checks against the real fixture** (filtering an already-clean file changes
+      nothing — proves the physical edit and the code filter agree exactly, not just that neither crashes).
+- Full suite (`tests/*.spec.mjs`, 397 JS tests) green. A full real eval re-run confirmed no regression — see
+  this addendum's own follow-up note for the numbers.

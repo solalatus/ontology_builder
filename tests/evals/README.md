@@ -76,10 +76,18 @@ the LLM reviewer's summary of that narration.
 
 ## Fixtures
 
-`fixtures/itops_mtsr.yaml` and `fixtures/persona-eszter.md` are versioned,
-unmodified copies of the uploaded ground-truth ontology and persona prompt.
-They are not secrets — the ground truth is hidden only from the app agent
-under test (which never sees this directory), not from the repo.
+`fixtures/itops_mtsr.yaml` and `fixtures/persona-eszter.md` are versioned
+copies of the uploaded ground-truth ontology and persona prompt. They are
+not secrets — the ground truth is hidden only from the app agent under test
+(which never sees this directory), not from the repo.
+
+`itops_mtsr.yaml` is *not* a byte-for-byte unmodified copy of the original
+upload — see "Deliberate, documented edits to the ground truth" below for
+exactly what was changed and why (three categories, each also enforced at
+runtime by a still-exported filter function, so the correction survives even
+if this file is ever replaced by a fresh, uncorrected upload). Every other
+section (`classes:`, `valueSets:`, `constraints:`, `mappings:`,
+`competencyQuestions:`) is untouched from the original upload.
 
 ## Deliberate, documented edits to the ground truth
 

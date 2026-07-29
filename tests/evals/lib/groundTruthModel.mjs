@@ -17,12 +17,21 @@ export function loadRawFixtureText() {
 // failures would penalize the agent for correctly following its own
 // instructions -- a real domain interview surfaces "what severity is this"
 // or "who owns this service", not "what is this record's internal
-// identifier field called". This is the one deliberate edit to the ground
-// truth the user asked for ("modify the yaml based on the handbook, skip
-// what is needed") -- implemented as a documented, auditable filter rule
-// over the untouched fixture, not a hand-trimmed copy of the YAML that
-// could silently drift from the canonical source.
-function isRecoverableProperty(predicate) {
+// identifier field called".
+//
+// This started as the one deliberate edit to the ground truth the user
+// asked for ("modify the yaml based on the handbook, skip what is needed"),
+// implemented purely as a documented, auditable filter over an untouched
+// fixture rather than a hand-trimmed copy of the YAML that could silently
+// drift from the canonical source. The user later asked for the bundled
+// fixture itself to be physically corrected too, on top of keeping this
+// filter as a safety net (helper_agent_todo.md's dated Log entry) -- so
+// `fixtures/itops_mtsr.yaml` no longer contains any identifier/uri-target
+// properties to filter, and this function is now a no-op against it. It
+// stays exported and unit-tested directly (not just indirectly through the
+// fixture) so it's still doing real, verified work if that fixture is ever
+// replaced by a fresh, uncorrected gold-standard upload.
+export function isRecoverableProperty(predicate) {
   return !(predicate.kind !== "object" && (predicate.to === "identifier" || predicate.to === "uri"));
 }
 
@@ -34,31 +43,35 @@ function stripPunctuation(s) {
   return String(s || "").replace(/[^a-z0-9\s]/gi, " ").replace(/\s+/g, " ").trim();
 }
 
-// "is a" (subclass) predicates -- 23 of them in this fixture, e.g. "Major
-// Incident is a Incident", "Application is a Configuration Item" -- encode a
-// taxonomy relationship this app's data model has no way to represent: it's
-// flat classes plus directed relationship edges only, no subclassing (see
-// index.html's commitYamlImport comment, and a real eval run's own
-// interviewer explicitly saying so mid-interview: "this tool does not use
-// subclassing directly ... instead, connect them with a clear relationship").
-// A correctly-behaving interview therefore models "Major Incident declared
+// "is a" (subclass) predicates -- the fixture originally modeled 23 of
+// these, e.g. "Major Incident is a Incident", "Application is a
+// Configuration Item" -- encode a taxonomy relationship this app's data
+// model has no way to represent: it's flat classes plus directed
+// relationship edges only, no subclassing (see index.html's
+// commitYamlImport comment, and a real eval run's own interviewer
+// explicitly saying so mid-interview: "this tool does not use subclassing
+// directly ... instead, connect them with a clear relationship"). A
+// correctly-behaving interview therefore models "Major Incident declared
 // from Incident" instead of forcing "is a" onto a generic relationship edge
 // -- scoring that choice as a recall miss would penalize *correct* behavior,
-// not bad interview technique. Filtered out the same documented, auditable
-// way isRecoverableProperty filters identifier/uri fields: a rule over the
-// untouched fixture, not a hand-trimmed copy of it.
-function isRecoverableRelationship(predicate) {
+// not bad interview technique.
+//
+// The bundled fixture has since had all 23 physically removed too (same
+// "also correct the file itself, keep the filter as a safety net" request
+// as isRecoverableProperty above) -- exported and unit-tested directly for
+// the same reason.
+export function isRecoverableRelationship(predicate) {
   return predicate.label !== "is a";
 }
 
 // GROUND-TRUTH ACTIONS, REDUCED TO A SINGLE INPUT ------------------------
-// The fixture's own actions each declare potentially several named inputs
-// (e.g. declareMajorIncident: inputs: {incident: incident, commander:
-// incidentCommander}) -- but this app's Action node has exactly one input
-// class: index.html's `inputClassId` is a scalar field, not a list, the
-// YAML tool schema's `input:` key is singular, and the Actions manager UI
-// is a single-select, not a multi-select. That's a deliberate scope
-// decision (AGENT_SYSTEM_PROMPT_BASE's own Phase 8 note tells the
+// The fixture's own actions originally declared potentially several named
+// inputs (e.g. declareMajorIncident: inputs: {incident: incident,
+// commander: incidentCommander}) -- but this app's Action node has exactly
+// one input class: index.html's `inputClassId` is a scalar field, not a
+// list, the YAML tool schema's `input:` key is singular, and the Actions
+// manager UI is a single-select, not a multi-select. That's a deliberate
+// scope decision (AGENT_SYSTEM_PROMPT_BASE's own Phase 8 note tells the
 // interviewer so explicitly), not a bug -- see helper_agent_todo.md's dated
 // Log entry for the fuller reasoning, which also covers why this is a
 // genuine ontology-expressiveness limit and not just a file-format detail.
@@ -66,12 +79,18 @@ function isRecoverableRelationship(predicate) {
 // Crediting a ground-truth action's *secondary* inputs anywhere in this
 // eval would hold a correctly-behaving interview to a standard the app can
 // never satisfy -- the same reasoning as isRecoverableRelationship's "is a"
-// exclusion above. reducedActions keeps only the first-listed input per
-// action (the record the action is fundamentally about, by the fixture's
-// own ordering convention) and reports how many were dropped, so that
-// omission is an explicit, auditable choice instead of an accident of
+// exclusion above. buildReducedActions keeps only the first-listed input
+// per action (the record the action is fundamentally about, by the
+// fixture's own ordering convention) and reports how many were dropped, so
+// that omission is an explicit, auditable choice instead of an accident of
 // which fields happen to get read.
-function buildReducedActions(doc, classes) {
+//
+// The bundled fixture's own `actions:` have since had every secondary
+// input physically removed too, so `droppedInputCount` is 0 for all of them
+// against the current file -- exported and unit-tested directly against
+// synthetic multi-input actions for the same "still a real safety net"
+// reason as the two filters above.
+export function buildReducedActions(doc, classes) {
   const actions = [];
   for (const [id, a] of Object.entries(doc.actions || {})) {
     const inputEntries = Object.entries(a.inputs || {});

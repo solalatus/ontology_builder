@@ -680,144 +680,6 @@ valueSets:
     - corrupted
     - verified
 predicates:
-  itOperationsTeam_is_a_organizationalUnit:
-    label: is a
-    from: itOperationsTeam
-    to: organizationalUnit
-    kind: object
-    definition: Relates IT Operations Team to Organizational Unit by "is a".
-  serviceDesk_is_a_organizationalUnit:
-    label: is a
-    from: serviceDesk
-    to: organizationalUnit
-    kind: object
-    definition: Relates Service Desk to Organizational Unit by "is a".
-  networkOperationsCentre_is_a_organizationalUnit:
-    label: is a
-    from: networkOperationsCentre
-    to: organizationalUnit
-    kind: object
-    definition: Relates Network Operations Centre to Organizational Unit by "is a".
-  securityOperationsCentre_is_a_organizationalUnit:
-    label: is a
-    from: securityOperationsCentre
-    to: organizationalUnit
-    kind: object
-    definition: Relates Security Operations Centre to Organizational Unit by "is a".
-  incidentResponseTeam_is_a_organizationalUnit:
-    label: is a
-    from: incidentResponseTeam
-    to: organizationalUnit
-    kind: object
-    definition: Relates Incident Response Team to Organizational Unit by "is a".
-  resolverGroup_is_a_organizationalUnit:
-    label: is a
-    from: resolverGroup
-    to: organizationalUnit
-    kind: object
-    definition: Relates Resolver Group to Organizational Unit by "is a".
-  application_is_a_configurationItem:
-    label: is a
-    from: application
-    to: configurationItem
-    kind: object
-    definition: Relates Application to Configuration Item by "is a".
-  database_is_a_configurationItem:
-    label: is a
-    from: database
-    to: configurationItem
-    kind: object
-    definition: Relates Database to Configuration Item by "is a".
-  infrastructureComponent_is_a_configurationItem:
-    label: is a
-    from: infrastructureComponent
-    to: configurationItem
-    kind: object
-    definition: Relates Infrastructure Component to Configuration Item by "is a".
-  cloudService_is_a_configurationItem:
-    label: is a
-    from: cloudService
-    to: configurationItem
-    kind: object
-    definition: Relates Cloud Service to Configuration Item by "is a".
-  networkSegment_is_a_configurationItem:
-    label: is a
-    from: networkSegment
-    to: configurationItem
-    kind: object
-    definition: Relates Network Segment to Configuration Item by "is a".
-  backupSet_is_a_configurationItem:
-    label: is a
-    from: backupSet
-    to: configurationItem
-    kind: object
-    definition: Relates Backup Set to Configuration Item by "is a".
-  server_is_a_infrastructureComponent:
-    label: is a
-    from: server
-    to: infrastructureComponent
-    kind: object
-    definition: Relates Server to Infrastructure Component by "is a".
-  virtualMachine_is_a_infrastructureComponent:
-    label: is a
-    from: virtualMachine
-    to: infrastructureComponent
-    kind: object
-    definition: Relates Virtual Machine to Infrastructure Component by "is a".
-  containerPlatform_is_a_infrastructureComponent:
-    label: is a
-    from: containerPlatform
-    to: infrastructureComponent
-    kind: object
-    definition: Relates Container Platform to Infrastructure Component by "is a".
-  networkDevice_is_a_infrastructureComponent:
-    label: is a
-    from: networkDevice
-    to: infrastructureComponent
-    kind: object
-    definition: Relates Network Device to Infrastructure Component by "is a".
-  endpoint_is_a_infrastructureComponent:
-    label: is a
-    from: endpoint
-    to: infrastructureComponent
-    kind: object
-    definition: Relates Endpoint to Infrastructure Component by "is a".
-  storageSystem_is_a_infrastructureComponent:
-    label: is a
-    from: storageSystem
-    to: infrastructureComponent
-    kind: object
-    definition: Relates Storage System to Infrastructure Component by "is a".
-  securityEvent_is_a_event:
-    label: is a
-    from: securityEvent
-    to: event
-    kind: object
-    definition: Relates Security Event to Event by "is a".
-  majorIncident_is_a_incident:
-    label: is a
-    from: majorIncident
-    to: incident
-    kind: object
-    definition: Relates Major Incident to Incident by "is a".
-  cybersecurityIncident_is_a_incident:
-    label: is a
-    from: cybersecurityIncident
-    to: incident
-    kind: object
-    definition: Relates Cybersecurity Incident to Incident by "is a".
-  emergencyChange_is_a_change:
-    label: is a
-    from: emergencyChange
-    to: change
-    kind: object
-    definition: Relates Emergency Change to Change by "is a".
-  thirdPartyService_is_a_itService:
-    label: is a
-    from: thirdPartyService
-    to: itService
-    kind: object
-    definition: Relates Third-party Service to IT Service by "is a".
   bank_contains_organizationalUnit:
     label: contains
     from: bank
@@ -1538,168 +1400,6 @@ predicates:
     to: evidenceItem
     kind: object
     definition: Relates Regulatory Notification to Evidence Item by "includes".
-  organizationalUnit_has_identifier_identifier:
-    label: has identifier
-    from: organizationalUnit
-    to: identifier
-    kind: datatype
-    definition: Relates Organizational Unit to Identifier by "has identifier".
-  vendor_has_identifier_identifier:
-    label: has identifier
-    from: vendor
-    to: identifier
-    kind: datatype
-    definition: Relates Vendor to Identifier by "has identifier".
-  regulator_has_identifier_identifier:
-    label: has identifier
-    from: regulator
-    to: identifier
-    kind: datatype
-    definition: Relates Regulator to Identifier by "has identifier".
-  stakeholder_has_identifier_identifier:
-    label: has identifier
-    from: stakeholder
-    to: identifier
-    kind: datatype
-    definition: Relates Stakeholder to Identifier by "has identifier".
-  businessService_has_identifier_identifier:
-    label: has identifier
-    from: businessService
-    to: identifier
-    kind: datatype
-    definition: Relates Business Service to Identifier by "has identifier".
-  itService_has_identifier_identifier:
-    label: has identifier
-    from: itService
-    to: identifier
-    kind: datatype
-    definition: Relates IT Service to Identifier by "has identifier".
-  configurationItem_has_identifier_identifier:
-    label: has identifier
-    from: configurationItem
-    to: identifier
-    kind: datatype
-    definition: Relates Configuration Item to Identifier by "has identifier".
-  monitoringRule_has_identifier_identifier:
-    label: has identifier
-    from: monitoringRule
-    to: identifier
-    kind: datatype
-    definition: Relates Monitoring Rule to Identifier by "has identifier".
-  metric_has_identifier_identifier:
-    label: has identifier
-    from: metric
-    to: identifier
-    kind: datatype
-    definition: Relates Metric to Identifier by "has identifier".
-  logSource_has_identifier_identifier:
-    label: has identifier
-    from: logSource
-    to: identifier
-    kind: datatype
-    definition: Relates Log Source to Identifier by "has identifier".
-  event_has_identifier_identifier:
-    label: has identifier
-    from: event
-    to: identifier
-    kind: datatype
-    definition: Relates Event to Identifier by "has identifier".
-  alert_has_identifier_identifier:
-    label: has identifier
-    from: alert
-    to: identifier
-    kind: datatype
-    definition: Relates Alert to Identifier by "has identifier".
-  incident_has_identifier_identifier:
-    label: has identifier
-    from: incident
-    to: identifier
-    kind: datatype
-    definition: Relates Incident to Identifier by "has identifier".
-  problem_has_identifier_identifier:
-    label: has identifier
-    from: problem
-    to: identifier
-    kind: datatype
-    definition: Relates Problem to Identifier by "has identifier".
-  knownError_has_identifier_identifier:
-    label: has identifier
-    from: knownError
-    to: identifier
-    kind: datatype
-    definition: Relates Known Error to Identifier by "has identifier".
-  change_has_identifier_identifier:
-    label: has identifier
-    from: change
-    to: identifier
-    kind: datatype
-    definition: Relates Change to Identifier by "has identifier".
-  release_has_identifier_identifier:
-    label: has identifier
-    from: release
-    to: identifier
-    kind: datatype
-    definition: Relates Release to Identifier by "has identifier".
-  deployment_has_identifier_identifier:
-    label: has identifier
-    from: deployment
-    to: identifier
-    kind: datatype
-    definition: Relates Deployment to Identifier by "has identifier".
-  backupSet_has_identifier_identifier:
-    label: has identifier
-    from: backupSet
-    to: identifier
-    kind: datatype
-    definition: Relates Backup Set to Identifier by "has identifier".
-  recoveryPlan_has_identifier_identifier:
-    label: has identifier
-    from: recoveryPlan
-    to: identifier
-    kind: datatype
-    definition: Relates Recovery Plan to Identifier by "has identifier".
-  disasterRecoveryTest_has_identifier_identifier:
-    label: has identifier
-    from: disasterRecoveryTest
-    to: identifier
-    kind: datatype
-    definition: Relates Disaster Recovery Test to Identifier by "has identifier".
-  evidenceItem_has_identifier_identifier:
-    label: has identifier
-    from: evidenceItem
-    to: identifier
-    kind: datatype
-    definition: Relates Evidence Item to Identifier by "has identifier".
-  communication_has_identifier_identifier:
-    label: has identifier
-    from: communication
-    to: identifier
-    kind: datatype
-    definition: Relates Communication to Identifier by "has identifier".
-  materialityAssessment_has_identifier_identifier:
-    label: has identifier
-    from: materialityAssessment
-    to: identifier
-    kind: datatype
-    definition: Relates Materiality Assessment to Identifier by "has identifier".
-  regulatoryNotification_has_identifier_identifier:
-    label: has identifier
-    from: regulatoryNotification
-    to: identifier
-    kind: datatype
-    definition: Relates Regulatory Notification to Identifier by "has identifier".
-  postIncidentReview_has_identifier_identifier:
-    label: has identifier
-    from: postIncidentReview
-    to: identifier
-    kind: datatype
-    definition: Relates Post-Incident Review to Identifier by "has identifier".
-  correctiveAction_has_identifier_identifier:
-    label: has identifier
-    from: correctiveAction
-    to: identifier
-    kind: datatype
-    definition: Relates Corrective Action to Identifier by "has identifier".
   organizationalUnit_has_name_text:
     label: has name
     from: organizationalUnit
@@ -1838,12 +1538,6 @@ predicates:
     to: criticalityTier
     kind: controlled-value
     definition: Relates Configuration Item to Criticality Tier by "has criticality tier".
-  configurationItem_has_configuration_record_uri:
-    label: has configuration record
-    from: configurationItem
-    to: uri
-    kind: datatype
-    definition: Relates Configuration Item to URI by "has configuration record".
   application_is_externally_accessible_boolean:
     label: is externally accessible
     from: application
@@ -1868,42 +1562,18 @@ predicates:
     to: text
     kind: datatype
     definition: Relates Database to Text by "has engine version".
-  environment_has_identifier_identifier:
-    label: has identifier
-    from: environment
-    to: identifier
-    kind: datatype
-    definition: Relates Environment to Identifier by "has identifier".
   environment_has_environment_type_environmentType:
     label: has environment type
     from: environment
     to: environmentType
     kind: controlled-value
     definition: Relates Environment to Environment Type by "has environment type".
-  site_has_identifier_identifier:
-    label: has identifier
-    from: site
-    to: identifier
-    kind: datatype
-    definition: Relates Site to Identifier by "has identifier".
   site_has_location_name_text:
     label: has location name
     from: site
     to: text
     kind: datatype
     definition: Relates Site to Text by "has location name".
-  dataCentre_has_identifier_identifier:
-    label: has identifier
-    from: dataCentre
-    to: identifier
-    kind: datatype
-    definition: Relates Data Centre to Identifier by "has identifier".
-  dataAsset_has_identifier_identifier:
-    label: has identifier
-    from: dataAsset
-    to: identifier
-    kind: datatype
-    definition: Relates Data Asset to Identifier by "has identifier".
   dataAsset_has_name_text:
     label: has name
     from: dataAsset
@@ -1916,18 +1586,6 @@ predicates:
     to: dataClassification
     kind: controlled-value
     definition: Relates Data Asset to Data Classification by "has data classification".
-  integrationInterface_has_identifier_identifier:
-    label: has identifier
-    from: integrationInterface
-    to: identifier
-    kind: datatype
-    definition: Relates Integration Interface to Identifier by "has identifier".
-  integrationInterface_has_endpoint_URI_uri:
-    label: has endpoint URI
-    from: integrationInterface
-    to: uri
-    kind: datatype
-    definition: Relates Integration Interface to URI by "has endpoint URI".
   integrationInterface_has_protocol_text:
     label: has protocol
     from: integrationInterface
@@ -2138,12 +1796,6 @@ predicates:
     to: timestamp
     kind: datatype
     definition: Relates Major Incident to Timestamp by "is declared at".
-  majorIncident_has_coordination_bridge_uri:
-    label: has coordination bridge
-    from: majorIncident
-    to: uri
-    kind: datatype
-    definition: Relates Major Incident to URI by "has coordination bridge".
   problem_has_summary_text:
     label: has summary
     from: problem
@@ -2300,12 +1952,6 @@ predicates:
     to: durationMinutes
     kind: datatype
     definition: Relates Disaster Recovery Test to Duration Minutes by "has actual recovery time".
-  evidenceItem_has_storage_location_uri:
-    label: has storage location
-    from: evidenceItem
-    to: uri
-    kind: datatype
-    definition: Relates Evidence Item to URI by "has storage location".
   evidenceItem_is_collected_at_timestamp:
     label: is collected at
     from: evidenceItem
@@ -2390,12 +2036,6 @@ predicates:
     to: notificationStatus
     kind: controlled-value
     definition: Relates Regulatory Notification to Notification Status by "has status".
-  regulatoryNotification_has_submission_receipt_uri:
-    label: has submission receipt
-    from: regulatoryNotification
-    to: uri
-    kind: datatype
-    definition: Relates Regulatory Notification to URI by "has submission receipt".
   postIncidentReview_is_held_on_date:
     label: is held on
     from: postIncidentReview
@@ -2572,7 +2212,6 @@ actions:
     label: Acknowledge alert
     inputs:
       alert: alert
-      operator: onCallEngineer
     preconditions:
     - alert.status == new
     - operator is authorized for the responsible resolver group
@@ -2587,7 +2226,6 @@ actions:
     label: Declare major incident
     inputs:
       incident: incident
-      commander: incidentCommander
     preconditions:
     - incident.status not in [resolved, closed, cancelled]
     - incident.severity in [sev1-critical, sev2-high]
@@ -2604,7 +2242,6 @@ actions:
     label: Assign incident
     inputs:
       incident: incident
-      resolverGroup: resolverGroup
     preconditions:
     - incident.status not in [closed, cancelled]
     - resolver group supports an affected service or configuration item
@@ -2618,7 +2255,6 @@ actions:
     label: Contain incident
     inputs:
       incident: incident
-      runbook: runbook
     preconditions:
     - incident.status in [acknowledged, investigating]
     - containment scope and expected side effects are recorded
@@ -2633,7 +2269,6 @@ actions:
     label: Isolate configuration item
     inputs:
       incident: incident
-      configurationItem: configurationItem
     preconditions:
     - configuration item is linked to the incident
     - isolation impact is assessed
@@ -2648,8 +2283,6 @@ actions:
     label: Fail over service
     inputs:
       incident: incident
-      service: itService
-      recoveryPlan: recoveryPlan
     preconditions:
     - recovery plan applies to the service
     - target recovery environment is available
@@ -2664,8 +2297,6 @@ actions:
     label: Restore backup
     inputs:
       backupSet: backupSet
-      target: configurationItem
-      recoveryPlan: recoveryPlan
     preconditions:
     - backup status in [successful, verified]
     - backup protects the target
@@ -2680,7 +2311,6 @@ actions:
     label: Execute emergency change
     inputs:
       change: emergencyChange
-      implementer: onCallEngineer
     preconditions:
     - change is linked to an active incident
     - implementation and backout plans are present
@@ -2696,7 +2326,6 @@ actions:
     label: Send stakeholder communication
     inputs:
       incident: incident
-      communication: communication
     preconditions:
     - audience, message, owner, and approval state are recorded
     - message content matches the latest verified incident state
@@ -2710,7 +2339,6 @@ actions:
     label: Submit regulatory notification
     inputs:
       notification: regulatoryNotification
-      assessment: materialityAssessment
     preconditions:
     - assessment.result == reportable
     - notification is linked to the incident and regulator
