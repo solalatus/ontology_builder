@@ -481,3 +481,63 @@ re-running.
   post-fix run's actual report/log (gitignored, not part of this commit).
 - Full suite (all `tests/*.spec.mjs`, including the 6 live tests) green, run twice consecutively, plus the
   eval itself run for real multiple times as described above.
+
+## Addendum — fixed the merge-semantics bug the eval's second full run found (Option B)
+
+**2026-07-29.** The second full 100-turn run above (report at the time: 3.7% composite recovery, 21
+classes created, 0% relationship recall despite 29 real edges) surfaced a real, severe bug via its LLM
+review, independently of anything this addendum's own author was looking for: the assistant repeatedly
+said things like *"I also noticed the live canvas had lost the Incident meaning during the previous
+property merge, so I restored it"* (turn 73) and *"I also restored Incident.status because the live merge
+had dropped it when severity was added"* (turn 74), with the same pattern recurring at turns 98 and 100.
+
+**Root cause:** `commitYamlImport()` (`index.html`), shared by both the manual Domain-Model import dialog
+and the agent's `apply_ontology_yaml` tool, did a wholesale field overwrite on any matched-by-label
+existing class — `existing.meaning`/`existing.aliases`/`existing.properties` were unconditionally
+reassigned from whatever the incoming YAML specified for that class, defaulting to `null`/`[]`/an empty
+array when a field was simply absent. This directly contradicted the tool's own documented contract, stated
+twice (its schema description *and* the system prompt's own `EDITING THE LIVE ONTOLOGY` section): *"Only
+include entries that are new or have changed — this merges against the existing model, it does not need to
+restate everything."* A real model correctly following that instruction and sending a minimal diff (e.g.
+just one new property) had everything else it didn't restate silently wiped. The same wholesale-replace
+pattern also applied to rule `conditions`, relationship `meaning`, and action `input`/`preconditions`/
+`effect`/`verification`. An old bug (present since Phase G's original manual-import implementation, and
+*deliberately* pinned there by its own test — `tests/agent-ontology-phase-g.spec.mjs`'s "Merge overwrites a
+matched class's meaning/aliases/properties wholesale" — a human re-uploading a self-contained file
+reasonably expects it to be authoritative for what it lists); inherited unnoticed when Phase 3 bolted the
+agent tool onto the same function without reconciling that the agent's own incremental, minimal-diff
+use case needs the opposite default. Never caught before because every existing test either restated full
+class definitions or never chained a genuinely partial update against a richer pre-existing node — only a
+long, natural, real conversation exercises it, which only this eval produces.
+
+**Fix chosen (Option B of two presented to the user):** rather than changing "merge" globally (which would
+retroactively change the manual dialog's own deliberately-tested wholesale-replace behavior), `commitYamlImport`
+gained a third mode, `"agent-merge"`, used only by `handleAgentToolCall()`. Under it, a field absent from an
+existing/matched entity's incoming YAML is left exactly as it was, not cleared — classes' `meaning`/`aliases`,
+rules' `conditions`, relationships' `meaning`, and actions' `input`/`preconditions`/`effect`/`verification`
+all follow this rule. `properties` specifically upserts by name (new helper `mergePropertiesByName()`) instead
+of replacing the whole array, since that's the field the real run's own transcript showed being lost
+repeatedly. Newly-created entities are unaffected (nothing to preserve yet). Plain `"merge"` (manual dialog)
+and `"replace"` keep their exact prior behavior, matched-entity fields included — Phase G's own wholesale-
+replace test needed no changes and stayed green throughout.
+
+- [x] `mergePropertiesByName()` + `commitYamlImport`'s `fieldLevelMerge` branching (index.html).
+- [x] `handleAgentToolCall()` calls `commitYamlImport(yamlText, "agent-merge")`, not `"merge"`.
+- [x] Comments updated at both the `APPLY_ONTOLOGY_YAML_TOOL` definition and `commitYamlImport` itself
+      explaining why a third mode exists and what each of the three modes does.
+- [x] Mocked regression tests, `tests/helper-agent-phase3.spec.mjs` (+5): a second tool call adding one
+      property doesn't wipe the class's meaning or the first call's property; re-specifying an existing
+      property by name updates it in place instead of duplicating it; meaning is still explicitly
+      updatable when a call *does* specify it (omission preserves, but doesn't get "stuck"); aliases
+      preserved the same way; a re-declared relationship without a meaning preserves the meaning an
+      earlier call set. All of Phase G's own existing tests (including the wholesale-replace one) stayed
+      green unchanged.
+- [x] Live regression test, `tests/helper-agent-live-openai.spec.mjs` (+1, "agentic" end-to-end): two real,
+      separate tool calls against the same class, the second one deliberately told not to restate the
+      first's meaning/property — confirms the fix holds against the genuine API, not just mocked
+      responses. Stable across two consecutive real runs.
+- Full suite (`tests/*.spec.mjs`, including the 7 live tests) green, run twice consecutively, plus 13
+  Python tests.
+- A third full 100-turn/45-minute real eval run was done post-fix as an end-to-end confirmation — see this
+  addendum's own follow-up note (or `tests/evals/results/report.md` at the time, gitignored) for the actual
+  before/after comparison.

@@ -13,11 +13,14 @@ import {
 // This file is the deliberate exception: it makes genuine calls to the real
 // OpenAI API, using a real key, to catch the class of bug a hand-authored
 // mock can never catch -- a mismatch between what the code *assumes* the
-// live API returns and what it *actually* returns today. Two real bugs
-// were found this way (see the Log entry in helper_agent_todo.md): a
+// live API returns and what it *actually* returns today. Three real bugs
+// were found this way (see the Log entries in helper_agent_todo.md): a
 // default-model heuristic that picked a "deep-research" specialty model
-// against a real account's model list, and a 429 error message that
-// conflated a transient rate limit with a permanently exhausted quota.
+// against a real account's model list, a 429 error message that conflated
+// a transient rate limit with a permanently exhausted quota, and (found by
+// this file's own broader sibling, the ontology-recovery eval's first full
+// live conversation) a merge-mode bug where a second, minimal-diff tool
+// call silently wiped a class's meaning and earlier-added properties.
 //
 // Opt-in, not required: skipped entirely, with a clear reason, unless
 // OPENAI_API_KEY is set (in a gitignored .env at the repo root, or the
@@ -203,4 +206,47 @@ test("live: the output-language lock holds for a real model against a real Hunga
     // an exact-text match against non-deterministic model output.
     assert.match(last.text, /[áéíóöőúüű]/i, `expected a Hungarian reply, got: ${last.text}`);
   }, { lang: "hu" });
+});
+
+// Regression coverage for a third real bug the live suite's own broader
+// sibling -- the ontology-recovery eval's first full 100-turn run -- found
+// in itself: apply_ontology_yaml's tool schema and system prompt both
+// promise "only include entries that are new or have changed... does not
+// need to restate everything," but commitYamlImport's old "merge" mode did
+// a wholesale field replace on any matched class, silently wiping meaning
+// and previously-added properties whenever a real model correctly followed
+// that instruction and sent a minimal diff. Fixed via a new "agent-merge"
+// mode (index.html's commitYamlImport, used only by this tool); mocked
+// regression coverage lives in tests/helper-agent-phase3.spec.mjs. This is
+// the live confirmation that two real, independently-prompted tool calls
+// against the same class actually compose correctly against the genuine
+// API, not just against hand-authored mock responses.
+test("live: two real, separate tool calls against the same class compose — the second doesn't erase what the first added", { skip }, async () => {
+  await withPage(async (page) => {
+    await connectAgentLive(page, OPENAI_API_KEY);
+    forwardToRealOpenAi(page, CHAT_URL);
+
+    await sendChatMessage(
+      page,
+      "Add a class called Incident, meaning: An unplanned service disruption. Give it one property called " +
+      "status (type text). Use apply_ontology_yaml right now."
+    );
+    await sendChatMessage(
+      page,
+      "Now also add a property called severity (type text) to the Incident class. Use apply_ontology_yaml " +
+      "right now — only include the new property, you don't need to restate the class's meaning or its " +
+      "other property."
+    );
+
+    const incident = await page.evaluate(() => window.__kg.state.nodes.find((n) => n.label === "Incident"));
+    assert.ok(incident, "the Incident class should exist after the first call");
+    // Robust to either safe strategy a real model might take (relying on
+    // the merge, or defensively resending the meaning anyway) -- what must
+    // hold regardless is that it survives as a real, non-empty value.
+    assert.ok(typeof incident.meaning === "string" && incident.meaning.trim().length > 0,
+      `expected the Incident class to still have a meaning after the second call, got: ${JSON.stringify(incident.meaning)}`);
+    const propNames = incident.properties.map((p) => p.name.toLowerCase());
+    assert.ok(propNames.includes("status"), `expected the first call's "status" property to survive, got: ${JSON.stringify(propNames)}`);
+    assert.ok(propNames.includes("severity"), `expected the second call's "severity" property to be added, got: ${JSON.stringify(propNames)}`);
+  });
 });

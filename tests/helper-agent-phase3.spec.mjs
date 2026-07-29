@@ -238,6 +238,149 @@ test("the tool never removes pre-existing, unmentioned classes — merge only, r
   });
 });
 
+// Regression coverage for a real bug the ontology-recovery eval's first
+// full live run found in itself (see helper_agent_todo.md's Log): the tool
+// schema and system prompt both promise "only include entries that are new
+// or have changed... does not need to restate everything," but a second
+// apply_ontology_yaml call that only added a new property was silently
+// wiping the class's meaning and any properties added by an earlier call —
+// a real model, correctly following its own instructions, kept losing its
+// own prior work. Fixed via commitYamlImport's new "agent-merge" mode
+// (index.html), used only by this tool, distinct from the manual dialog's
+// own "merge" (which tests/agent-ontology-phase-g.spec.mjs's own tests
+// pin as deliberately wholesale-replace, unchanged by this fix).
+test("a second tool call adding one new property does not wipe a class's meaning or the property an earlier call added", async () => {
+  await withPage(async (page) => {
+    await connectAgent(page);
+    mockChatSequence(page, [
+      () => ({ body: toolCallCompletionBody([toolCall("call_1", {
+        yaml: "classes:\n  Incident:\n    meaning: A managed disruption.\n    properties:\n      status:\n        type: text\n",
+      })]) }),
+      () => ({ body: chatCompletionBody("Recorded status. What else?") }),
+    ]);
+    await sendChatMessage(page, "Incident has a status.");
+    await page.waitForFunction(() => !window.__kg.agent.isSending());
+
+    // Second turn: only mentions the new property, exactly per the tool's
+    // own "does not need to restate everything" contract — no meaning, no
+    // aliases, no repeat of `status`.
+    mockChatSequence(page, [
+      () => ({ body: toolCallCompletionBody([toolCall("call_2", {
+        yaml: "classes:\n  Incident:\n    properties:\n      severity:\n        type: text\n",
+      })]) }),
+      () => ({ body: chatCompletionBody("Recorded severity too.") }),
+    ]);
+    await sendChatMessage(page, "It also has a severity.");
+    await page.waitForFunction(() => !window.__kg.agent.isSending());
+
+    const incident = await page.evaluate(() => window.__kg.state.nodes.find((n) => n.label === "Incident"));
+    assert.equal(incident.meaning, "A managed disruption.", "meaning from the first call must survive a second call that doesn't restate it");
+    const propNames = incident.properties.map((p) => p.name).sort();
+    assert.deepEqual(propNames, ["severity", "status"], "both properties must be present, not just the one from the latest call");
+  });
+});
+
+test("a tool call that re-specifies an existing property by name updates it in place instead of duplicating it", async () => {
+  await withPage(async (page) => {
+    await connectAgent(page);
+    mockChatSequence(page, [
+      () => ({ body: toolCallCompletionBody([toolCall("call_1", {
+        yaml: "classes:\n  Incident:\n    properties:\n      status:\n        type: text\n",
+      })]) }),
+      () => ({ body: chatCompletionBody("done") }),
+    ]);
+    await sendChatMessage(page, "add status");
+    await page.waitForFunction(() => !window.__kg.agent.isSending());
+
+    mockChatSequence(page, [
+      () => ({ body: toolCallCompletionBody([toolCall("call_2", {
+        yaml: "classes:\n  Incident:\n    properties:\n      status:\n        type: text\n        allowed:\n          - new\n          - resolved\n          - closed\n",
+      })]) }),
+      () => ({ body: chatCompletionBody("done") }),
+    ]);
+    await sendChatMessage(page, "status should be a fixed choice");
+    await page.waitForFunction(() => !window.__kg.agent.isSending());
+
+    const incident = await page.evaluate(() => window.__kg.state.nodes.find((n) => n.label === "Incident"));
+    assert.equal(incident.properties.length, 1, "the second call must update the same property, not add a duplicate");
+    assert.deepEqual(incident.properties[0].allowed, ["new", "resolved", "closed"]);
+  });
+});
+
+test("a tool call can still explicitly change a previously-set meaning — omission preserves, but an explicit new value still applies", async () => {
+  await withPage(async (page) => {
+    await connectAgent(page);
+    mockChatSequence(page, [
+      () => ({ body: toolCallCompletionBody([toolCall("call_1", { yaml: "classes:\n  Incident:\n    meaning: OLD MEANING.\n" })]) }),
+      () => ({ body: chatCompletionBody("done") }),
+    ]);
+    await sendChatMessage(page, "add incident");
+    await page.waitForFunction(() => !window.__kg.agent.isSending());
+
+    mockChatSequence(page, [
+      () => ({ body: toolCallCompletionBody([toolCall("call_2", { yaml: "classes:\n  Incident:\n    meaning: NEW MEANING.\n" })]) }),
+      () => ({ body: chatCompletionBody("done") }),
+    ]);
+    await sendChatMessage(page, "actually, reword the meaning");
+    await page.waitForFunction(() => !window.__kg.agent.isSending());
+
+    const incident = await page.evaluate(() => window.__kg.state.nodes.find((n) => n.label === "Incident"));
+    assert.equal(incident.meaning, "NEW MEANING.");
+  });
+});
+
+test("a tool call that omits aliases on a follow-up class update preserves the aliases an earlier call set", async () => {
+  await withPage(async (page) => {
+    await connectAgent(page);
+    mockChatSequence(page, [
+      () => ({ body: toolCallCompletionBody([toolCall("call_1", { yaml: "classes:\n  Incident:\n    aliases:\n      - incidens\n" })]) }),
+      () => ({ body: chatCompletionBody("done") }),
+    ]);
+    await sendChatMessage(page, "add incident with alias");
+    await page.waitForFunction(() => !window.__kg.agent.isSending());
+
+    mockChatSequence(page, [
+      () => ({ body: toolCallCompletionBody([toolCall("call_2", {
+        yaml: "classes:\n  Incident:\n    properties:\n      status:\n        type: text\n",
+      })]) }),
+      () => ({ body: chatCompletionBody("done") }),
+    ]);
+    await sendChatMessage(page, "add status too");
+    await page.waitForFunction(() => !window.__kg.agent.isSending());
+
+    const incident = await page.evaluate(() => window.__kg.state.nodes.find((n) => n.label === "Incident"));
+    assert.deepEqual(incident.aliases, ["incidens"], "aliases from the first call must survive a second call that doesn't restate them");
+  });
+});
+
+test("a tool call that re-declares an existing relationship without a meaning preserves the meaning an earlier call set", async () => {
+  await withPage(async (page) => {
+    await connectAgent(page);
+    mockChatSequence(page, [
+      () => ({ body: toolCallCompletionBody([toolCall("call_1", {
+        yaml: "classes:\n  Incident:\n    meaning: x\n  ItService:\n    meaning: y\nrelationships:\n  - name: impacts\n    from: Incident\n    to: ItService\n    meaning: The service disrupted by this incident.\n",
+      })]) }),
+      () => ({ body: chatCompletionBody("done") }),
+    ]);
+    await sendChatMessage(page, "incident impacts a service");
+    await page.waitForFunction(() => !window.__kg.agent.isSending());
+
+    // Re-declares the same relationship (same from/to/name) without a meaning.
+    mockChatSequence(page, [
+      () => ({ body: toolCallCompletionBody([toolCall("call_2", {
+        yaml: "relationships:\n  - name: impacts\n    from: Incident\n    to: ItService\n",
+      })]) }),
+      () => ({ body: chatCompletionBody("done") }),
+    ]);
+    await sendChatMessage(page, "confirm that relationship again");
+    await page.waitForFunction(() => !window.__kg.agent.isSending());
+
+    const edges = await page.evaluate(() => window.__kg.state.edges);
+    assert.equal(edges.length, 1, "the same relationship must be matched, not duplicated");
+    assert.equal(edges[0].meaning, "The service disrupted by this incident.");
+  });
+});
+
 test("every chat request carries the apply_ontology_yaml tool definition", async () => {
   await withPage(async (page) => {
     await connectAgent(page);
