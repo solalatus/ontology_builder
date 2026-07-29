@@ -935,6 +935,12 @@ outside the relay entirely and had no backoff of any kind -- a real gap in the w
 - Full suite (`tests/*.spec.mjs`, 420 JS tests) green, including all 5 previously-failing live tests in
   `helper-agent-live-openai.spec.mjs` -- confirmed the account's quota, not a code bug, was the entire cause of
   every failure seen in this addendum and the one above it.
+- **Live confirmation, finally clean:** with quota restored and all three backoff gaps closed, the
+  confirmatory eval ran a full real interview end to end and stopped itself at **turn 45 (849s wall-clock)**
+  via `app_agent_appears_finished`, on a genuine final wrap-up (full competency check + final checklist
+  against the original acceptance questions/actions) -- not the 500-turn cap, not the 45-minute wallclock, and
+  no pleasantry loop. This is the confirmation the `appearsFinished`/`max_tokens` fix, both hardening layers,
+  and the full backoff pass were all waiting on. Task #116 (this whole thread of work) is done.
 - **Live confirmation blocked, not skipped:** re-running the confirmatory eval to prove the *original*
   `appearsFinished`/`max_tokens` fix actually stops a genuine finished interview promptly (this addendum's own
   stated goal) still failed immediately -- but by design this time: `forwardToRealOpenAi`'s own new
