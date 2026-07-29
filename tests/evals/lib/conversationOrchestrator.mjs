@@ -70,6 +70,21 @@ export function tagApiMessagesWithTurn(apiMessages, turn) {
 // consider the interview finished, the turn cap, or the wallclock budget --
 // see the file's own module doc in tests/evals/README.md for the full
 // rationale.
+//
+// onProgress(snapshot), if given, fires several times per turn -- most
+// importantly *before* the one call that's actually slow (sendChatMessage,
+// which waits on a real, possibly-tool-calling API round-trip with no
+// intermediate feedback of its own) rather than only after. That ordering
+// is the whole point: a run that hangs or times out inside sendChatMessage
+// previously left nothing to inspect at all (the real per-turn arrays only
+// existed as function-local variables, never returned until the very end,
+// so an exception thrown mid-loop discarded them) -- exactly what happened
+// investigating a real timeout while testing this fix (helper_agent_todo.md's
+// dated Log entry). The eval spec's own onProgress callback re-uses
+// writeConversationLog/writeToolCallLog to keep the same two results files
+// live and auditable turn-by-turn during a run, not just written once at
+// the end -- "every_turn_started" is specifically what survives a hang,
+// showing which turn was in flight and how long ago it started.
 export async function runOntologyRecoveryConversation({
   page,
   apiKey,
@@ -77,6 +92,7 @@ export async function runOntologyRecoveryConversation({
   classifierModel = "gpt-4o-mini",
   maxTurns = 100,
   wallClockMs = 45 * 60 * 1000,
+  onProgress,
 }) {
   const persona = createPersonaAgent({ apiKey, model: personaModel });
   const chatResponses = forwardToRealOpenAi(page, CHAT_URL);
@@ -89,9 +105,23 @@ export async function runOntologyRecoveryConversation({
   let consecutiveEmptyAppTurns = 0;
   let turnsUsed = 0;
 
+  // Never let a progress-reporting failure (a bad file write, a full disk)
+  // take down the real conversation it's only reporting on.
+  const emitProgress = (phase, turn) => {
+    if (!onProgress) return;
+    try {
+      onProgress({ phase, turn, turnsUsed, durationMs: Date.now() - startedAt, log: [...log], rawApiLog: [...rawApiLog] });
+    } catch (err) { /* reporting must be best-effort, never fatal */ }
+  };
+
   for (let turn = 1; turn <= maxTurns; turn++) {
     if (Date.now() - startedAt > wallClockMs) { stoppedReason = "wallclock_timeout"; break; }
     turnsUsed = turn;
+
+    // Fires before the one call in this loop with no progress feedback of
+    // its own -- see this function's own header comment for why that
+    // ordering (not "after") is what makes this useful during a hang.
+    emitProgress("turn_started", turn);
 
     const transcriptBefore = await page.evaluate(() => window.__kg.agent.state.transcript.length);
     const apiMessagesBefore = await page.evaluate(() => window.__kg.agent.state.apiMessages.length);
@@ -112,6 +142,7 @@ export async function runOntologyRecoveryConversation({
     const apiMessagesAfter = await page.evaluate(() => window.__kg.agent.state.apiMessages);
     const newApiMessages = apiMessagesAfter.length >= apiMessagesBefore ? apiMessagesAfter.slice(apiMessagesBefore) : apiMessagesAfter;
     rawApiLog.push(...tagApiMessagesWithTurn(newApiMessages, turn));
+    emitProgress("app_turn_complete", turn); // sendChatMessage returned -- this turn's real content just landed in log/rawApiLog
 
     const lastAssistant = [...newEntries].reverse().find((m) => m.role === "assistant");
     const appText = lastAssistant && lastAssistant.text ? lastAssistant.text.trim() : "";
@@ -133,7 +164,10 @@ export async function runOntologyRecoveryConversation({
     const personaReply = await persona.reply(appText);
     log.push({ turn, speaker: "persona", text: personaReply.text });
     incomingForApp = personaReply.text;
+    emitProgress("persona_turn_complete", turn);
   }
+
+  emitProgress(stoppedReason, turnsUsed);
 
   return {
     log,

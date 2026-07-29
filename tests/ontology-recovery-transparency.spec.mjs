@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import { tagApiMessagesWithTurn } from "./evals/lib/conversationOrchestrator.mjs";
-import { writeToolCallLog, writeReport, TOOL_CALL_LOG_PATH, REPORT_PATH } from "./evals/lib/reportGenerator.mjs";
+import { writeConversationLog, writeToolCallLog, writeReport, LOG_PATH, TOOL_CALL_LOG_PATH, REPORT_PATH } from "./evals/lib/reportGenerator.mjs";
 
 // Fast, deterministic unit tests for the eval's full-transparency logging
 // (tests/evals/lib/conversationOrchestrator.mjs's rawApiLog capture and
@@ -84,6 +84,42 @@ test("writeToolCallLog overwrites the previous run's file rather than accumulati
   const text = fs.readFileSync(TOOL_CALL_LOG_PATH, "utf8");
   assert.ok(!text.includes("first run marker"));
   assert.ok(text.includes("second run marker"));
+});
+
+test("writeConversationLog is safe to call repeatedly with a growing, in-progress log and always reflects the latest call's content", () => {
+  // This is exactly the onProgress usage pattern in ontology-recovery.eval.spec.mjs:
+  // called once per turn with a partial log, not just once at the very end.
+  writeConversationLog({
+    stoppedReason: "in progress (turn_started, turn 1)",
+    turnsUsed: 1,
+    durationMs: 5000,
+    log: [{ turn: 0, speaker: "persona", text: "opening line" }],
+  });
+  let text = fs.readFileSync(LOG_PATH, "utf8");
+  assert.match(text, /Status: \*\*in progress \(turn_started, turn 1\)\*\*/);
+  assert.match(text, /Last updated: \d{4}-\d{2}-\d{2}T/);
+  assert.match(text, /opening line/);
+  assert.ok(!text.includes("turn 2 reply"), "the second turn hasn't happened yet in this snapshot");
+
+  writeConversationLog({
+    stoppedReason: "app_agent_appears_finished",
+    turnsUsed: 2,
+    durationMs: 9000,
+    log: [
+      { turn: 0, speaker: "persona", text: "opening line" },
+      { turn: 1, speaker: "app-assistant", text: "first reply" },
+      { turn: 2, speaker: "persona", text: "turn 2 reply" },
+    ],
+  });
+  text = fs.readFileSync(LOG_PATH, "utf8");
+  assert.match(text, /Status: \*\*app_agent_appears_finished\*\*/);
+  assert.match(text, /turn 2 reply/);
+});
+
+test("writeToolCallLog includes a live-updated timestamp so a repeated read can tell fresh from stale", () => {
+  writeToolCallLog([{ turn: 1, role: "user", content: "x" }]);
+  const text = fs.readFileSync(TOOL_CALL_LOG_PATH, "utf8");
+  assert.match(text, /Last updated: \d{4}-\d{2}-\d{2}T/);
 });
 
 function fakeMetrics(overrides = {}) {

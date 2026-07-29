@@ -17,13 +17,26 @@ function pct(x) {
 // Overwritten every run, not accumulated -- "full conversation logs,
 // overwritten at each pass" per the user's own instruction. Fixed filename,
 // gitignored (tests/evals/README.md).
+//
+// Also the live progress view: the eval spec's onProgress callback (see
+// conversationOrchestrator.mjs) calls this same function after every turn
+// with the conversation-so-far, not just once at the very end -- so
+// checking this file mid-run (`cat`/`tail` it, or open it in an editor)
+// shows real, current progress, not a stale or empty file. `status` is
+// free text -- pass a real stoppedReason for the final call, or something
+// like "in progress -- turn 7 started, sending to app agent" for an
+// interim one; either way it and the "last updated" timestamp below are
+// what let a 2-minute glance tell "still moving" from "stuck since
+// <timestamp>" (this file's own mtime is the same signal, but the explicit
+// timestamp means that read doesn't require a second `stat` call).
 export function writeConversationLog(orchestratorResult) {
   fs.mkdirSync(RESULTS_DIR, { recursive: true });
   const lines = [
     "# Ontology-recovery eval — conversation log",
     "",
-    `Stopped: **${orchestratorResult.stoppedReason}** after ${orchestratorResult.turnsUsed} turns, ` +
-    `${(orchestratorResult.durationMs / 1000).toFixed(0)}s wall-clock.`,
+    `Status: **${orchestratorResult.stoppedReason}** — ${orchestratorResult.turnsUsed} turn(s) so far, ` +
+    `${(orchestratorResult.durationMs / 1000).toFixed(0)}s elapsed.`,
+    `Last updated: ${new Date().toISOString()}`,
     "",
   ];
   for (const entry of orchestratorResult.log) {
@@ -192,6 +205,10 @@ function formatToolCallEntry(entry) {
   return lines.join("\n");
 }
 
+// Also written live, turn by turn, same as writeConversationLog above --
+// same onProgress callback, same reasoning: a hang mid-run should leave a
+// file showing every tool call up through the last completed turn, not
+// nothing at all.
 export function writeToolCallLog(rawApiLog) {
   fs.mkdirSync(RESULTS_DIR, { recursive: true });
   const lines = [
@@ -201,6 +218,7 @@ export function writeToolCallLog(rawApiLog) {
     "`window.__kg.agent.state.apiMessages` after every turn -- ground truth for what the interviewer actually " +
     "sent and received, independent of its own narration in conversation-log.md or the LLM review's summary of " +
     "it.",
+    `Last updated: ${new Date().toISOString()}`,
     "",
   ];
   for (const entry of rawApiLog) lines.push(formatToolCallEntry(entry));

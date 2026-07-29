@@ -57,6 +57,22 @@ test(
       assert.ok(interviewerModel, "expected the real connect flow to pick a real model");
       void modelResponses;
 
+      // Live progress: re-uses the exact same writers the final, successful
+      // path calls once at the end, so results/conversation-log.md and
+      // results/tool-calls.md are real and current at any point during a
+      // run -- checking them mid-run (every couple of minutes, say) shows
+      // real turn-by-turn progress instead of a stale or empty file, and a
+      // hang or crash mid-run still leaves everything up through the last
+      // completed turn on disk instead of nothing (both files are
+      // function-local return values otherwise, discarded by an exception
+      // thrown mid-loop -- exactly what happened investigating a real
+      // timeout while validating this same fix, see helper_agent_todo.md's
+      // dated Log entry).
+      const onProgress = (snapshot) => {
+        writeConversationLog({ ...snapshot, stoppedReason: `in progress (${snapshot.phase}, turn ${snapshot.turn})` });
+        writeToolCallLog(snapshot.rawApiLog);
+      };
+
       const orchestratorResult = await runOntologyRecoveryConversation({
         page,
         apiKey: OPENAI_API_KEY,
@@ -64,6 +80,7 @@ test(
         classifierModel: CLASSIFIER_MODEL,
         maxTurns: MAX_TURNS,
         wallClockMs: WALLCLOCK_MS,
+        onProgress,
       });
 
       assert.ok(orchestratorResult.turnsUsed >= 1, "expected at least one real turn to happen");
