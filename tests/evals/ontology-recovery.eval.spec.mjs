@@ -1,0 +1,82 @@
+import { test } from "node:test";
+import assert from "node:assert/strict";
+import { withPage } from "../lib/page.mjs";
+import { loadEnvKey } from "../lib/env.mjs";
+import { connectAgentLive } from "../lib/liveOpenAi.mjs";
+import { runOntologyRecoveryConversation } from "./lib/conversationOrchestrator.mjs";
+import { loadGroundTruthModel } from "./lib/groundTruthModel.mjs";
+import { computeRecoveryMetrics } from "./lib/recoveryMetrics.mjs";
+import { writeConversationLog, computeOperationalStats, generateLlmReview, writeReport } from "./lib/reportGenerator.mjs";
+
+// Ontology-recovery eval — see tests/evals/README.md for the full design
+// writeup. Not part of the default `node --test tests/*.spec.mjs` run
+// (this file lives under tests/evals/, which that non-recursive glob never
+// sees); run explicitly with `node --test tests/evals/*.eval.spec.mjs`.
+//
+// Simulates a full ontology-elicitation interview: the app's real helper
+// agent (interviewer, driven through the real browser+API exactly like
+// tests/helper-agent-live-openai.spec.mjs) against a second, independent
+// LLM playing Eszter Farkas (tests/evals/lib/personaAgent.mjs), whose
+// answers are grounded in the hidden ground-truth ontology
+// (tests/evals/fixtures/itops_mtsr.yaml). At the end, the agent's recovered
+// canvas model is diffed against the ground truth and a report is written.
+//
+// This is an eval, not a strict pass/fail test: two real, non-deterministic
+// LLMs are talking to each other, so run-to-run variance is expected and
+// normal. The assertions below are generous sanity floors that catch
+// outright breakage (a crash, a NaN metric, zero API calls happening at
+// all) -- the actual value of this file is the report it writes, not a
+// binary verdict.
+
+const OPENAI_API_KEY = loadEnvKey("OPENAI_API_KEY");
+const skip = OPENAI_API_KEY
+  ? false
+  : "Set OPENAI_API_KEY in a .env file at the repo root (see tests/README.md) to run the ontology-recovery eval.";
+
+const MAX_TURNS = Number(process.env.ONTOLOGY_EVAL_MAX_TURNS) || 100;
+const WALLCLOCK_MINUTES = Number(process.env.ONTOLOGY_EVAL_WALLCLOCK_MINUTES) || 45;
+const WALLCLOCK_MS = WALLCLOCK_MINUTES * 60 * 1000;
+const PERSONA_MODEL = process.env.ONTOLOGY_EVAL_PERSONA_MODEL || "gpt-4o-mini";
+const CLASSIFIER_MODEL = process.env.ONTOLOGY_EVAL_CLASSIFIER_MODEL || "gpt-4o-mini";
+const REVIEW_MODEL_OVERRIDE = process.env.ONTOLOGY_EVAL_REVIEW_MODEL || null;
+
+test(
+  "ontology-recovery eval: simulated interview against the Hungarian bank IT-ops ontology",
+  { skip, timeout: WALLCLOCK_MS + 10 * 60 * 1000 },
+  async () => {
+    await withPage(async (page) => {
+      const modelResponses = await connectAgentLive(page, OPENAI_API_KEY);
+      const interviewerModel = await page.evaluate(() => window.__kg.agent.state.model);
+      assert.ok(interviewerModel, "expected the real connect flow to pick a real model");
+      void modelResponses;
+
+      const orchestratorResult = await runOntologyRecoveryConversation({
+        page,
+        apiKey: OPENAI_API_KEY,
+        personaModel: PERSONA_MODEL,
+        classifierModel: CLASSIFIER_MODEL,
+        maxTurns: MAX_TURNS,
+        wallClockMs: WALLCLOCK_MS,
+      });
+
+      assert.ok(orchestratorResult.turnsUsed >= 1, "expected at least one real turn to happen");
+      assert.ok(orchestratorResult.chatResponses.length >= 1, "expected at least one real app-agent API call");
+
+      const recoveredState = await page.evaluate(() => ({
+        nodes: window.__kg.state.nodes,
+        edges: window.__kg.state.edges,
+      }));
+      const groundTruth = loadGroundTruthModel();
+      const metrics = computeRecoveryMetrics(groundTruth, recoveredState);
+
+      assert.ok(Number.isFinite(metrics.recoveryEffectiveness), "composite score must be a real number, not NaN");
+      assert.ok(metrics.classes.recall >= 0 && metrics.classes.recall <= 1);
+
+      const operationalStats = computeOperationalStats(orchestratorResult);
+      writeConversationLog(orchestratorResult);
+      const reviewModel = REVIEW_MODEL_OVERRIDE || interviewerModel;
+      const llmReviewText = await generateLlmReview({ apiKey: OPENAI_API_KEY, model: reviewModel, orchestratorResult });
+      writeReport({ metrics, operationalStats, orchestratorResult, llmReviewText, interviewerModel, personaModel: PERSONA_MODEL });
+    });
+  }
+);

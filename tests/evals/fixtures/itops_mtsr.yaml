@@ -1,0 +1,2788 @@
+metadata:
+  title: IT Operations and Incident Response Ontology for a Medium-sized Hungarian Bank
+  profile: Minimal Typed Semantic Representation (MTSR), levels 0-2
+  canonicalLanguage: en
+  lexicalLanguages:
+  - en
+  - hu
+  jurisdictionContext: Hungary / European Union banking operations
+  version: 1.0.0
+  generatedOn: '2026-07-29'
+  scope: IT service operations, observability, incident response, problem/change/recovery management, stakeholder communication,
+    evidence, and regulatory reporting workflow.
+  governanceNote: Value sets, materiality logic, authorization rules, and mappings must be reviewed against the bank's approved
+    policies and current legal obligations before production use.
+classes:
+  bank:
+    label: Bank
+    aliases:
+    - bank
+    - hitelintézet
+    definition: The regulated financial institution whose IT services and incidents are managed.
+  organizationalUnit:
+    label: Organizational Unit
+    aliases:
+    - szervezeti egység
+    definition: A governed unit of the bank with defined responsibilities.
+  itOperationsTeam:
+    label: IT Operations Team
+    aliases:
+    - IT üzemeltetés
+    - üzemeltetési csapat
+    definition: The team responsible for reliable day-to-day operation of IT services.
+  serviceDesk:
+    label: Service Desk
+    aliases:
+    - help desk
+    - ügyfélszolgálati IT pult
+    - hibabejelentő
+    definition: The first-line function that receives, records, triages, and routes user-reported issues.
+  networkOperationsCentre:
+    label: Network Operations Centre
+    aliases:
+    - NOC
+    - hálózatüzemeltetési központ
+    definition: The function that monitors and operates network and infrastructure services.
+  securityOperationsCentre:
+    label: Security Operations Centre
+    aliases:
+    - SOC
+    - biztonsági műveleti központ
+    definition: The function that monitors, investigates, and coordinates response to cyber threats.
+  incidentResponseTeam:
+    label: Incident Response Team
+    aliases:
+    - IRT
+    - incidenskezelő csapat
+    definition: The cross-functional team responsible for coordinating significant incident response.
+  resolverGroup:
+    label: Resolver Group
+    aliases:
+    - megoldócsoport
+    - support group
+    definition: A team assigned to diagnose and restore a specific technology or service area.
+  onCallEngineer:
+    label: On-call Engineer
+    aliases:
+    - ügyeletes mérnök
+    - on-call
+    definition: A technical specialist available for time-critical operational response.
+  incidentCommander:
+    label: Incident Commander
+    aliases:
+    - incident manager
+    - incidensparancsnok
+    - MIM lead
+    definition: The person accountable for command, coordination, and decision cadence during a major incident.
+  serviceOwner:
+    label: Service Owner
+    aliases:
+    - szolgáltatásgazda
+    definition: The role accountable for an IT service across its lifecycle.
+  applicationOwner:
+    label: Application Owner
+    aliases:
+    - alkalmazásgazda
+    definition: The role accountable for an application and its operational fitness.
+  technicalOwner:
+    label: Technical Owner
+    aliases:
+    - technikai gazda
+    definition: The role accountable for the engineering and maintenance of a configuration item.
+  businessOwner:
+    label: Business Owner
+    aliases:
+    - üzleti gazda
+    definition: The business role accountable for a business service or process.
+  vendor:
+    label: Vendor
+    aliases:
+    - supplier
+    - szállító
+    - beszállító
+    definition: An external organization supplying or supporting technology or services.
+  regulator:
+    label: Regulator
+    aliases:
+    - supervisory authority
+    - felügyeleti hatóság
+    definition: A competent authority that supervises the bank or receives required notifications.
+  stakeholder:
+    label: Stakeholder
+    aliases:
+    - érintett
+    definition: A person, group, or organization affected by or responsible for an operational outcome.
+  businessService:
+    label: Business Service
+    aliases:
+    - üzleti szolgáltatás
+    definition: A customer- or business-facing capability delivered by the bank.
+  businessProcess:
+    label: Business Process
+    aliases:
+    - üzleti folyamat
+    definition: A coordinated set of activities producing a business outcome.
+  customerChannel:
+    label: Customer Channel
+    aliases:
+    - ügyfélcsatorna
+    definition: A channel through which customers access banking services.
+  itService:
+    label: IT Service
+    aliases:
+    - informatics service
+    - informatikai szolgáltatás
+    definition: A managed technology capability supporting one or more business services.
+  serviceLevelObjective:
+    label: Service Level Objective
+    aliases:
+    - SLO
+    - szolgáltatási célszint
+    definition: A measurable target for availability, response, or restoration of an IT service.
+  configurationItem:
+    label: Configuration Item
+    aliases:
+    - CI
+    - konfigurációs elem
+    definition: A managed component recorded in the configuration-management scope.
+  application:
+    label: Application
+    aliases:
+    - alkalmazás
+    - app
+    definition: A software system that implements business or operational functionality.
+  database:
+    label: Database
+    aliases:
+    - adatbázis
+    - DB
+    definition: A managed persistent data store used by an application or service.
+  infrastructureComponent:
+    label: Infrastructure Component
+    aliases:
+    - infrastruktúra-elem
+    definition: A technical component providing compute, network, platform, endpoint, or storage capability.
+  server:
+    label: Server
+    aliases:
+    - kiszolgáló
+    definition: A physical compute host providing processing capacity.
+  virtualMachine:
+    label: Virtual Machine
+    aliases:
+    - VM
+    - virtuális gép
+    definition: A virtualized compute instance hosted on infrastructure.
+  containerPlatform:
+    label: Container Platform
+    aliases:
+    - Kubernetes platform
+    - konténerplatform
+    definition: A managed platform used to run containerized workloads.
+  cloudService:
+    label: Cloud Service
+    aliases:
+    - felhőszolgáltatás
+    definition: A technology capability consumed from an external or group cloud provider.
+  networkDevice:
+    label: Network Device
+    aliases:
+    - hálózati eszköz
+    definition: A managed device that routes, switches, filters, or terminates network traffic.
+  networkSegment:
+    label: Network Segment
+    aliases:
+    - hálózati szegmens
+    - VLAN
+    definition: A logically or physically bounded portion of the bank network.
+  endpoint:
+    label: Endpoint
+    aliases:
+    - végpont
+    - munkaállomás
+    definition: A managed user or administrative computing endpoint.
+  storageSystem:
+    label: Storage System
+    aliases:
+    - tárolórendszer
+    definition: A managed system providing persistent block, file, or object storage.
+  backupSet:
+    label: Backup Set
+    aliases:
+    - mentéskészlet
+    - backup
+    definition: A defined collection of recoverable backup data for protected components.
+  dataCentre:
+    label: Data Centre
+    aliases:
+    - DC
+    - adatközpont
+    definition: A facility hosting managed technology infrastructure.
+  site:
+    label: Site
+    aliases:
+    - telephely
+    - location
+    definition: A physical bank, supplier, or hosting location.
+  environment:
+    label: Environment
+    aliases:
+    - környezet
+    definition: A deployment context such as production, test, development, or disaster recovery.
+  dataAsset:
+    label: Data Asset
+    aliases:
+    - adatvagyon-elem
+    definition: A governed collection of information processed or stored by services.
+  integrationInterface:
+    label: Integration Interface
+    aliases:
+    - interface
+    - API
+    - integrációs interfész
+    definition: A defined technical interface through which systems exchange data or commands.
+  thirdPartyService:
+    label: Third-party Service
+    aliases:
+    - outsourced service
+    - külső szolgáltatás
+    definition: An externally provided service on which the bank depends.
+  monitoringTool:
+    label: Monitoring Tool
+    aliases:
+    - monitoring platform
+    - felügyeleti eszköz
+    definition: A platform that collects telemetry and evaluates operational conditions.
+  monitoringRule:
+    label: Monitoring Rule
+    aliases:
+    - alert rule
+    - riasztási szabály
+    definition: A deterministic condition that evaluates telemetry and may generate an alert.
+  metric:
+    label: Metric
+    aliases:
+    - mérőszám
+    definition: A time-stamped quantitative observation about a component or service.
+  logSource:
+    label: Log Source
+    aliases:
+    - naplóforrás
+    definition: A system or component that emits operational or security records.
+  event:
+    label: Event
+    aliases:
+    - esemény
+    definition: A time-stamped observation representing a state change or noteworthy occurrence.
+  securityEvent:
+    label: Security Event
+    aliases:
+    - biztonsági esemény
+    definition: An event relevant to confidentiality, integrity, availability, authenticity, or cyber threat activity.
+  alert:
+    label: Alert
+    aliases:
+    - riasztás
+    definition: A monitoring or security signal requiring triage or acknowledgement.
+  incident:
+    label: Incident
+    aliases:
+    - incidens
+    - hibajegy
+    definition: An unplanned interruption, degradation, or security condition requiring managed response.
+  majorIncident:
+    label: Major Incident
+    aliases:
+    - MI
+    - kiemelt incidens
+    - súlyos incidens
+    definition: An incident requiring exceptional coordination because of high business or regulatory impact.
+  cybersecurityIncident:
+    label: Cybersecurity Incident
+    aliases:
+    - cyber incident
+    - kiberbiztonsági incidens
+    definition: An incident caused by or involving malicious, unauthorized, or security-relevant activity.
+  problem:
+    label: Problem
+    aliases:
+    - probléma
+    definition: The underlying cause or potential cause of one or more incidents.
+  knownError:
+    label: Known Error
+    aliases:
+    - ismert hiba
+    definition: A diagnosed problem with a documented cause or workaround.
+  change:
+    label: Change
+    aliases:
+    - változás
+    - módosítás
+    definition: A controlled addition, modification, or removal that may affect an IT service.
+  emergencyChange:
+    label: Emergency Change
+    aliases:
+    - sürgősségi változás
+    - emergency fix
+    definition: A change processed under an accelerated path to address an urgent operational need.
+  release:
+    label: Release
+    aliases:
+    - kiadás
+    - release
+    definition: A governed package of approved changes introduced together.
+  deployment:
+    label: Deployment
+    aliases:
+    - telepítés
+    - élesítés
+    definition: The technical execution that installs or activates a release or change.
+  workaround:
+    label: Workaround
+    aliases:
+    - kerülőmegoldás
+    definition: A temporary method that reduces or bypasses the impact of an incident or problem.
+  runbook:
+    label: Runbook
+    aliases:
+    - üzemeltetési eljárás
+    - playbook
+    definition: A maintained operational procedure for diagnosis, response, recovery, or verification.
+  recoveryPlan:
+    label: Recovery Plan
+    aliases:
+    - helyreállítási terv
+    - DR plan
+    definition: A documented plan for restoring an IT service and its dependencies.
+  businessContinuityPlan:
+    label: Business Continuity Plan
+    aliases:
+    - BCP
+    - üzletmenet-folytonossági terv
+    definition: A plan for maintaining or resuming critical business services during disruption.
+  disasterRecoveryTest:
+    label: Disaster Recovery Test
+    aliases:
+    - DR test
+    - katasztrófa-helyreállítási teszt
+    definition: A controlled exercise that validates recovery procedures, timings, and dependencies.
+  evidenceItem:
+    label: Evidence Item
+    aliases:
+    - evidence
+    - bizonyíték
+    definition: A preserved record, artifact, or observation supporting incident analysis and accountability.
+  communication:
+    label: Communication
+    aliases:
+    - értesítés
+    - tájékoztatás
+    definition: A controlled message sent to operational, business, customer, vendor, or regulatory audiences.
+  materialityAssessment:
+    label: Materiality Assessment
+    aliases:
+    - reportability assessment
+    - lényegességi értékelés
+    definition: A documented determination of incident significance and reporting implications.
+  regulatoryNotification:
+    label: Regulatory Notification
+    aliases:
+    - supervisory notification
+    - felügyeleti bejelentés
+    definition: A formal incident-related submission to a competent authority.
+  postIncidentReview:
+    label: Post-Incident Review
+    aliases:
+    - PIR
+    - RCA review
+    - incidens utóelemzés
+    definition: A structured review of causes, response effectiveness, lessons, and follow-up work.
+  correctiveAction:
+    label: Corrective Action
+    aliases:
+    - remediation action
+    - helyesbítő intézkedés
+    definition: A tracked action intended to remove a cause, reduce risk, or improve response capability.
+datatypes:
+  identifier:
+    label: Identifier
+    base: string
+    definition: A stable unique identifier in an authoritative system.
+  text:
+    label: Text
+    base: string
+    definition: Human-readable free text.
+  timestamp:
+    label: Timestamp
+    base: date-time
+    definition: A date and time with timezone.
+  date:
+    label: Date
+    base: date
+    definition: A calendar date.
+  durationMinutes:
+    label: Duration Minutes
+    base: integer
+    unit: min
+    minimum: 0
+    definition: A non-negative duration measured in minutes.
+  integer:
+    label: Integer
+    base: integer
+    definition: A whole number.
+  decimal:
+    label: Decimal
+    base: number
+    definition: A decimal numeric value.
+  percentage:
+    label: Percentage
+    base: number
+    unit: '%'
+    minimum: 0
+    maximum: 100
+    definition: A percentage from 0 to 100.
+  boolean:
+    label: Boolean
+    base: boolean
+    definition: A true or false value.
+  uri:
+    label: URI
+    base: string
+    format: uri
+    definition: A resolvable or persistent resource reference.
+valueSets:
+  incidentStatus:
+    label: Incident Status
+    values: &id003
+    - new
+    - acknowledged
+    - investigating
+    - contained
+    - recovering
+    - monitoring
+    - resolved
+    - closed
+    - cancelled
+  alertStatus:
+    label: Alert Status
+    values: &id001
+    - new
+    - acknowledged
+    - suppressed
+    - escalated
+    - closed
+  severityLevel:
+    label: Severity Level
+    values: &id002
+    - sev1-critical
+    - sev2-high
+    - sev3-medium
+    - sev4-low
+  priorityLevel:
+    label: Priority Level
+    values: &id004
+    - p1-critical
+    - p2-high
+    - p3-medium
+    - p4-low
+  impactLevel:
+    label: Impact Level
+    values:
+    - enterprise-wide
+    - multiple-services
+    - single-service
+    - limited-users
+    - no-observed-impact
+  urgencyLevel:
+    label: Urgency Level
+    values:
+    - immediate
+    - high
+    - normal
+    - low
+  incidentCategory:
+    label: Incident Category
+    values:
+    - availability
+    - performance
+    - capacity
+    - network
+    - application
+    - database
+    - infrastructure
+    - data-integrity
+    - cybersecurity
+    - third-party
+    - change-induced
+    - other
+  detectionSourceType:
+    label: Detection Source Type
+    values:
+    - monitoring
+    - siem
+    - service-desk
+    - user-report
+    - vendor-report
+    - automated-control
+    - regulator
+    - other
+  environmentType:
+    label: Environment Type
+    values:
+    - production
+    - disaster-recovery
+    - pre-production
+    - test
+    - development
+    - management
+  criticalityTier:
+    label: Criticality Tier
+    values:
+    - tier-1-critical
+    - tier-2-important
+    - tier-3-standard
+    - tier-4-supporting
+  dataClassification:
+    label: Data Classification
+    values:
+    - public
+    - internal
+    - confidential
+    - restricted
+  serviceHealthState:
+    label: Service Health State
+    values:
+    - healthy
+    - degraded
+    - partially-unavailable
+    - unavailable
+    - recovering
+    - unknown
+  recoveryState:
+    label: Recovery State
+    values:
+    - not-started
+    - in-progress
+    - restored
+    - verified
+    - failed
+  changeStatus:
+    label: Change Status
+    values: &id005
+    - draft
+    - assessed
+    - approved
+    - scheduled
+    - implementing
+    - implemented
+    - failed
+    - rolled-back
+    - closed
+    - cancelled
+  changeRiskLevel:
+    label: Change Risk Level
+    values: &id006
+    - low
+    - medium
+    - high
+    - critical
+  communicationAudience:
+    label: Communication Audience
+    values:
+    - technical
+    - management
+    - business
+    - customer
+    - vendor
+    - regulator
+    - all-staff
+  notificationStatus:
+    label: Notification Status
+    values: &id008
+    - draft
+    - pending-approval
+    - approved
+    - submitted
+    - accepted
+    - rejected
+    - withdrawn
+  materialityResult:
+    label: Materiality Result
+    values:
+    - not-reportable
+    - potentially-reportable
+    - reportable
+    - undetermined
+  evidenceIntegrityStatus:
+    label: Evidence Integrity Status
+    values: &id007
+    - collected
+    - hashed
+    - verified
+    - sealed
+    - compromised
+  rootCauseCategory:
+    label: Root Cause Category
+    values:
+    - software-defect
+    - configuration-error
+    - capacity-shortage
+    - hardware-failure
+    - network-failure
+    - human-error
+    - process-failure
+    - third-party-failure
+    - cyber-attack
+    - unknown
+  correctiveActionStatus:
+    label: Corrective Action Status
+    values: &id009
+    - open
+    - in-progress
+    - blocked
+    - implemented
+    - verified
+    - closed
+    - cancelled
+  testResult:
+    label: Test Result
+    values:
+    - passed
+    - passed-with-observations
+    - failed
+    - not-completed
+  problemStatus:
+    label: Problem Status
+    values:
+    - new
+    - investigating
+    - root-cause-known
+    - known-error
+    - resolved
+    - closed
+  deploymentStatus:
+    label: Deployment Status
+    values:
+    - planned
+    - running
+    - succeeded
+    - failed
+    - rolled-back
+    - cancelled
+  backupStatus:
+    label: Backup Status
+    values:
+    - scheduled
+    - running
+    - successful
+    - failed
+    - expired
+    - corrupted
+    - verified
+predicates:
+  itOperationsTeam_is_a_organizationalUnit:
+    label: is a
+    from: itOperationsTeam
+    to: organizationalUnit
+    kind: object
+    definition: Relates IT Operations Team to Organizational Unit by "is a".
+  serviceDesk_is_a_organizationalUnit:
+    label: is a
+    from: serviceDesk
+    to: organizationalUnit
+    kind: object
+    definition: Relates Service Desk to Organizational Unit by "is a".
+  networkOperationsCentre_is_a_organizationalUnit:
+    label: is a
+    from: networkOperationsCentre
+    to: organizationalUnit
+    kind: object
+    definition: Relates Network Operations Centre to Organizational Unit by "is a".
+  securityOperationsCentre_is_a_organizationalUnit:
+    label: is a
+    from: securityOperationsCentre
+    to: organizationalUnit
+    kind: object
+    definition: Relates Security Operations Centre to Organizational Unit by "is a".
+  incidentResponseTeam_is_a_organizationalUnit:
+    label: is a
+    from: incidentResponseTeam
+    to: organizationalUnit
+    kind: object
+    definition: Relates Incident Response Team to Organizational Unit by "is a".
+  resolverGroup_is_a_organizationalUnit:
+    label: is a
+    from: resolverGroup
+    to: organizationalUnit
+    kind: object
+    definition: Relates Resolver Group to Organizational Unit by "is a".
+  application_is_a_configurationItem:
+    label: is a
+    from: application
+    to: configurationItem
+    kind: object
+    definition: Relates Application to Configuration Item by "is a".
+  database_is_a_configurationItem:
+    label: is a
+    from: database
+    to: configurationItem
+    kind: object
+    definition: Relates Database to Configuration Item by "is a".
+  infrastructureComponent_is_a_configurationItem:
+    label: is a
+    from: infrastructureComponent
+    to: configurationItem
+    kind: object
+    definition: Relates Infrastructure Component to Configuration Item by "is a".
+  cloudService_is_a_configurationItem:
+    label: is a
+    from: cloudService
+    to: configurationItem
+    kind: object
+    definition: Relates Cloud Service to Configuration Item by "is a".
+  networkSegment_is_a_configurationItem:
+    label: is a
+    from: networkSegment
+    to: configurationItem
+    kind: object
+    definition: Relates Network Segment to Configuration Item by "is a".
+  backupSet_is_a_configurationItem:
+    label: is a
+    from: backupSet
+    to: configurationItem
+    kind: object
+    definition: Relates Backup Set to Configuration Item by "is a".
+  server_is_a_infrastructureComponent:
+    label: is a
+    from: server
+    to: infrastructureComponent
+    kind: object
+    definition: Relates Server to Infrastructure Component by "is a".
+  virtualMachine_is_a_infrastructureComponent:
+    label: is a
+    from: virtualMachine
+    to: infrastructureComponent
+    kind: object
+    definition: Relates Virtual Machine to Infrastructure Component by "is a".
+  containerPlatform_is_a_infrastructureComponent:
+    label: is a
+    from: containerPlatform
+    to: infrastructureComponent
+    kind: object
+    definition: Relates Container Platform to Infrastructure Component by "is a".
+  networkDevice_is_a_infrastructureComponent:
+    label: is a
+    from: networkDevice
+    to: infrastructureComponent
+    kind: object
+    definition: Relates Network Device to Infrastructure Component by "is a".
+  endpoint_is_a_infrastructureComponent:
+    label: is a
+    from: endpoint
+    to: infrastructureComponent
+    kind: object
+    definition: Relates Endpoint to Infrastructure Component by "is a".
+  storageSystem_is_a_infrastructureComponent:
+    label: is a
+    from: storageSystem
+    to: infrastructureComponent
+    kind: object
+    definition: Relates Storage System to Infrastructure Component by "is a".
+  securityEvent_is_a_event:
+    label: is a
+    from: securityEvent
+    to: event
+    kind: object
+    definition: Relates Security Event to Event by "is a".
+  majorIncident_is_a_incident:
+    label: is a
+    from: majorIncident
+    to: incident
+    kind: object
+    definition: Relates Major Incident to Incident by "is a".
+  cybersecurityIncident_is_a_incident:
+    label: is a
+    from: cybersecurityIncident
+    to: incident
+    kind: object
+    definition: Relates Cybersecurity Incident to Incident by "is a".
+  emergencyChange_is_a_change:
+    label: is a
+    from: emergencyChange
+    to: change
+    kind: object
+    definition: Relates Emergency Change to Change by "is a".
+  thirdPartyService_is_a_itService:
+    label: is a
+    from: thirdPartyService
+    to: itService
+    kind: object
+    definition: Relates Third-party Service to IT Service by "is a".
+  bank_contains_organizationalUnit:
+    label: contains
+    from: bank
+    to: organizationalUnit
+    kind: object
+    definition: Relates Bank to Organizational Unit by "contains".
+  bank_provides_businessService:
+    label: provides
+    from: bank
+    to: businessService
+    kind: object
+    definition: Relates Bank to Business Service by "provides".
+  bank_is_supervised_by_regulator:
+    label: is supervised by
+    from: bank
+    to: regulator
+    kind: object
+    definition: Relates Bank to Regulator by "is supervised by".
+  organizationalUnit_includes_stakeholder:
+    label: includes
+    from: organizationalUnit
+    to: stakeholder
+    kind: object
+    definition: Relates Organizational Unit to Stakeholder by "includes".
+  itOperationsTeam_operates_itService:
+    label: operates
+    from: itOperationsTeam
+    to: itService
+    kind: object
+    definition: Relates IT Operations Team to IT Service by "operates".
+  serviceDesk_records_incident:
+    label: records
+    from: serviceDesk
+    to: incident
+    kind: object
+    definition: Relates Service Desk to Incident by "records".
+  networkOperationsCentre_operates_monitoringTool:
+    label: operates
+    from: networkOperationsCentre
+    to: monitoringTool
+    kind: object
+    definition: Relates Network Operations Centre to Monitoring Tool by "operates".
+  securityOperationsCentre_monitors_securityEvent:
+    label: monitors
+    from: securityOperationsCentre
+    to: securityEvent
+    kind: object
+    definition: Relates Security Operations Centre to Security Event by "monitors".
+  incidentResponseTeam_coordinates_majorIncident:
+    label: coordinates
+    from: incidentResponseTeam
+    to: majorIncident
+    kind: object
+    definition: Relates Incident Response Team to Major Incident by "coordinates".
+  resolverGroup_resolves_incident:
+    label: resolves
+    from: resolverGroup
+    to: incident
+    kind: object
+    definition: Relates Resolver Group to Incident by "resolves".
+  onCallEngineer_is_member_of_resolverGroup:
+    label: is member of
+    from: onCallEngineer
+    to: resolverGroup
+    kind: object
+    definition: Relates On-call Engineer to Resolver Group by "is member of".
+  incidentCommander_is_member_of_incidentResponseTeam:
+    label: is member of
+    from: incidentCommander
+    to: incidentResponseTeam
+    kind: object
+    definition: Relates Incident Commander to Incident Response Team by "is member of".
+  incidentCommander_commands_majorIncident:
+    label: commands
+    from: incidentCommander
+    to: majorIncident
+    kind: object
+    definition: Relates Incident Commander to Major Incident by "commands".
+  serviceOwner_owns_itService:
+    label: owns
+    from: serviceOwner
+    to: itService
+    kind: object
+    definition: Relates Service Owner to IT Service by "owns".
+  applicationOwner_owns_application:
+    label: owns
+    from: applicationOwner
+    to: application
+    kind: object
+    definition: Relates Application Owner to Application by "owns".
+  technicalOwner_owns_configurationItem:
+    label: owns
+    from: technicalOwner
+    to: configurationItem
+    kind: object
+    definition: Relates Technical Owner to Configuration Item by "owns".
+  businessOwner_is_accountable_for_businessService:
+    label: is accountable for
+    from: businessOwner
+    to: businessService
+    kind: object
+    definition: Relates Business Owner to Business Service by "is accountable for".
+  vendor_provides_thirdPartyService:
+    label: provides
+    from: vendor
+    to: thirdPartyService
+    kind: object
+    definition: Relates Vendor to Third-party Service by "provides".
+  vendor_supports_application:
+    label: supports
+    from: vendor
+    to: application
+    kind: object
+    definition: Relates Vendor to Application by "supports".
+  vendor_provides_cloudService:
+    label: provides
+    from: vendor
+    to: cloudService
+    kind: object
+    definition: Relates Vendor to Cloud Service by "provides".
+  regulator_receives_regulatoryNotification:
+    label: receives
+    from: regulator
+    to: regulatoryNotification
+    kind: object
+    definition: Relates Regulator to Regulatory Notification by "receives".
+  stakeholder_has_interest_in_businessService:
+    label: has interest in
+    from: stakeholder
+    to: businessService
+    kind: object
+    definition: Relates Stakeholder to Business Service by "has interest in".
+  businessService_supports_businessProcess:
+    label: supports
+    from: businessService
+    to: businessProcess
+    kind: object
+    definition: Relates Business Service to Business Process by "supports".
+  businessService_is_delivered_through_customerChannel:
+    label: is delivered through
+    from: businessService
+    to: customerChannel
+    kind: object
+    definition: Relates Business Service to Customer Channel by "is delivered through".
+  businessService_depends_on_itService:
+    label: depends on
+    from: businessService
+    to: itService
+    kind: object
+    definition: Relates Business Service to IT Service by "depends on".
+  businessService_is_protected_by_businessContinuityPlan:
+    label: is protected by
+    from: businessService
+    to: businessContinuityPlan
+    kind: object
+    definition: Relates Business Service to Business Continuity Plan by "is protected by".
+  itService_is_governed_by_serviceLevelObjective:
+    label: is governed by
+    from: itService
+    to: serviceLevelObjective
+    kind: object
+    definition: Relates IT Service to Service Level Objective by "is governed by".
+  itService_is_implemented_by_application:
+    label: is implemented by
+    from: itService
+    to: application
+    kind: object
+    definition: Relates IT Service to Application by "is implemented by".
+  itService_runs_on_infrastructureComponent:
+    label: runs on
+    from: itService
+    to: infrastructureComponent
+    kind: object
+    definition: Relates IT Service to Infrastructure Component by "runs on".
+  itService_depends_on_thirdPartyService:
+    label: depends on
+    from: itService
+    to: thirdPartyService
+    kind: object
+    definition: Relates IT Service to Third-party Service by "depends on".
+  itService_processes_dataAsset:
+    label: processes
+    from: itService
+    to: dataAsset
+    kind: object
+    definition: Relates IT Service to Data Asset by "processes".
+  itService_exposes_integrationInterface:
+    label: exposes
+    from: itService
+    to: integrationInterface
+    kind: object
+    definition: Relates IT Service to Integration Interface by "exposes".
+  itService_is_deployed_in_environment:
+    label: is deployed in
+    from: itService
+    to: environment
+    kind: object
+    definition: Relates IT Service to Environment by "is deployed in".
+  application_uses_database:
+    label: uses
+    from: application
+    to: database
+    kind: object
+    definition: Relates Application to Database by "uses".
+  application_consumes_integrationInterface:
+    label: consumes
+    from: application
+    to: integrationInterface
+    kind: object
+    definition: Relates Application to Integration Interface by "consumes".
+  application_runs_on_infrastructureComponent:
+    label: runs on
+    from: application
+    to: infrastructureComponent
+    kind: object
+    definition: Relates Application to Infrastructure Component by "runs on".
+  database_is_stored_on_storageSystem:
+    label: is stored on
+    from: database
+    to: storageSystem
+    kind: object
+    definition: Relates Database to Storage System by "is stored on".
+  server_is_hosted_in_dataCentre:
+    label: is hosted in
+    from: server
+    to: dataCentre
+    kind: object
+    definition: Relates Server to Data Centre by "is hosted in".
+  virtualMachine_is_hosted_on_server:
+    label: is hosted on
+    from: virtualMachine
+    to: server
+    kind: object
+    definition: Relates Virtual Machine to Server by "is hosted on".
+  containerPlatform_is_hosted_on_virtualMachine:
+    label: is hosted on
+    from: containerPlatform
+    to: virtualMachine
+    kind: object
+    definition: Relates Container Platform to Virtual Machine by "is hosted on".
+  networkDevice_connects_to_networkSegment:
+    label: connects to
+    from: networkDevice
+    to: networkSegment
+    kind: object
+    definition: Relates Network Device to Network Segment by "connects to".
+  endpoint_connects_to_networkSegment:
+    label: connects to
+    from: endpoint
+    to: networkSegment
+    kind: object
+    definition: Relates Endpoint to Network Segment by "connects to".
+  configurationItem_is_located_at_site:
+    label: is located at
+    from: configurationItem
+    to: site
+    kind: object
+    definition: Relates Configuration Item to Site by "is located at".
+  configurationItem_belongs_to_environment:
+    label: belongs to
+    from: configurationItem
+    to: environment
+    kind: object
+    definition: Relates Configuration Item to Environment by "belongs to".
+  backupSet_protects_configurationItem:
+    label: protects
+    from: backupSet
+    to: configurationItem
+    kind: object
+    definition: Relates Backup Set to Configuration Item by "protects".
+  backupSet_is_stored_in_storageSystem:
+    label: is stored in
+    from: backupSet
+    to: storageSystem
+    kind: object
+    definition: Relates Backup Set to Storage System by "is stored in".
+  recoveryPlan_recovers_itService:
+    label: recovers
+    from: recoveryPlan
+    to: itService
+    kind: object
+    definition: Relates Recovery Plan to IT Service by "recovers".
+  recoveryPlan_uses_backupSet:
+    label: uses
+    from: recoveryPlan
+    to: backupSet
+    kind: object
+    definition: Relates Recovery Plan to Backup Set by "uses".
+  businessContinuityPlan_covers_businessService:
+    label: covers
+    from: businessContinuityPlan
+    to: businessService
+    kind: object
+    definition: Relates Business Continuity Plan to Business Service by "covers".
+  disasterRecoveryTest_tests_recoveryPlan:
+    label: tests
+    from: disasterRecoveryTest
+    to: recoveryPlan
+    kind: object
+    definition: Relates Disaster Recovery Test to Recovery Plan by "tests".
+  recoveryPlan_is_validated_by_disasterRecoveryTest:
+    label: is validated by
+    from: recoveryPlan
+    to: disasterRecoveryTest
+    kind: object
+    definition: Relates Recovery Plan to Disaster Recovery Test by "is validated by".
+  integrationInterface_connects_application:
+    label: connects
+    from: integrationInterface
+    to: application
+    kind: object
+    definition: Relates Integration Interface to Application by "connects".
+  dataAsset_is_stored_in_database:
+    label: is stored in
+    from: dataAsset
+    to: database
+    kind: object
+    definition: Relates Data Asset to Database by "is stored in".
+  thirdPartyService_is_provided_by_vendor:
+    label: is provided by
+    from: thirdPartyService
+    to: vendor
+    kind: object
+    definition: Relates Third-party Service to Vendor by "is provided by".
+  monitoringTool_monitors_configurationItem:
+    label: monitors
+    from: monitoringTool
+    to: configurationItem
+    kind: object
+    definition: Relates Monitoring Tool to Configuration Item by "monitors".
+  monitoringTool_monitors_itService:
+    label: monitors
+    from: monitoringTool
+    to: itService
+    kind: object
+    definition: Relates Monitoring Tool to IT Service by "monitors".
+  monitoringRule_is_executed_by_monitoringTool:
+    label: is executed by
+    from: monitoringRule
+    to: monitoringTool
+    kind: object
+    definition: Relates Monitoring Rule to Monitoring Tool by "is executed by".
+  monitoringRule_evaluates_metric:
+    label: evaluates
+    from: monitoringRule
+    to: metric
+    kind: object
+    definition: Relates Monitoring Rule to Metric by "evaluates".
+  metric_measures_configurationItem:
+    label: measures
+    from: metric
+    to: configurationItem
+    kind: object
+    definition: Relates Metric to Configuration Item by "measures".
+  metric_measures_itService:
+    label: measures
+    from: metric
+    to: itService
+    kind: object
+    definition: Relates Metric to IT Service by "measures".
+  logSource_is_produced_by_configurationItem:
+    label: is produced by
+    from: logSource
+    to: configurationItem
+    kind: object
+    definition: Relates Log Source to Configuration Item by "is produced by".
+  monitoringTool_collects_logSource:
+    label: collects
+    from: monitoringTool
+    to: logSource
+    kind: object
+    definition: Relates Monitoring Tool to Log Source by "collects".
+  event_is_observed_on_configurationItem:
+    label: is observed on
+    from: event
+    to: configurationItem
+    kind: object
+    definition: Relates Event to Configuration Item by "is observed on".
+  event_relates_to_itService:
+    label: relates to
+    from: event
+    to: itService
+    kind: object
+    definition: Relates Event to IT Service by "relates to".
+  securityEvent_concerns_dataAsset:
+    label: concerns
+    from: securityEvent
+    to: dataAsset
+    kind: object
+    definition: Relates Security Event to Data Asset by "concerns".
+  securityEvent_is_derived_from_logSource:
+    label: is derived from
+    from: securityEvent
+    to: logSource
+    kind: object
+    definition: Relates Security Event to Log Source by "is derived from".
+  alert_is_generated_by_monitoringRule:
+    label: is generated by
+    from: alert
+    to: monitoringRule
+    kind: object
+    definition: Relates Alert to Monitoring Rule by "is generated by".
+  alert_indicates_event:
+    label: indicates
+    from: alert
+    to: event
+    kind: object
+    definition: Relates Alert to Event by "indicates".
+  alert_concerns_itService:
+    label: concerns
+    from: alert
+    to: itService
+    kind: object
+    definition: Relates Alert to IT Service by "concerns".
+  alert_concerns_configurationItem:
+    label: concerns
+    from: alert
+    to: configurationItem
+    kind: object
+    definition: Relates Alert to Configuration Item by "concerns".
+  alert_may_open_incident:
+    label: may open
+    from: alert
+    to: incident
+    kind: object
+    definition: Relates Alert to Incident by "may open".
+  incident_is_triggered_by_alert:
+    label: is triggered by
+    from: incident
+    to: alert
+    kind: object
+    definition: Relates Incident to Alert by "is triggered by".
+  incident_is_correlated_from_event:
+    label: is correlated from
+    from: incident
+    to: event
+    kind: object
+    definition: Relates Incident to Event by "is correlated from".
+  incident_impacts_itService:
+    label: impacts
+    from: incident
+    to: itService
+    kind: object
+    definition: Relates Incident to IT Service by "impacts".
+  incident_impacts_businessService:
+    label: impacts
+    from: incident
+    to: businessService
+    kind: object
+    definition: Relates Incident to Business Service by "impacts".
+  incident_affects_configurationItem:
+    label: affects
+    from: incident
+    to: configurationItem
+    kind: object
+    definition: Relates Incident to Configuration Item by "affects".
+  incident_is_assigned_to_resolverGroup:
+    label: is assigned to
+    from: incident
+    to: resolverGroup
+    kind: object
+    definition: Relates Incident to Resolver Group by "is assigned to".
+  incident_is_handled_by_onCallEngineer:
+    label: is handled by
+    from: incident
+    to: onCallEngineer
+    kind: object
+    definition: Relates Incident to On-call Engineer by "is handled by".
+  incident_is_coordinated_by_incidentCommander:
+    label: is coordinated by
+    from: incident
+    to: incidentCommander
+    kind: object
+    definition: Relates Incident to Incident Commander by "is coordinated by".
+  incident_is_handled_with_runbook:
+    label: is handled with
+    from: incident
+    to: runbook
+    kind: object
+    definition: Relates Incident to Runbook by "is handled with".
+  incident_is_supported_by_evidenceItem:
+    label: is supported by
+    from: incident
+    to: evidenceItem
+    kind: object
+    definition: Relates Incident to Evidence Item by "is supported by".
+  incident_is_communicated_through_communication:
+    label: is communicated through
+    from: incident
+    to: communication
+    kind: object
+    definition: Relates Incident to Communication by "is communicated through".
+  incident_notifies_stakeholder:
+    label: notifies
+    from: incident
+    to: stakeholder
+    kind: object
+    definition: Relates Incident to Stakeholder by "notifies".
+  incident_is_escalated_to_vendor:
+    label: is escalated to
+    from: incident
+    to: vendor
+    kind: object
+    definition: Relates Incident to Vendor by "is escalated to".
+  incident_is_linked_to_problem:
+    label: is linked to
+    from: incident
+    to: problem
+    kind: object
+    definition: Relates Incident to Problem by "is linked to".
+  incident_is_resolved_by_change:
+    label: is resolved by
+    from: incident
+    to: change
+    kind: object
+    definition: Relates Incident to Change by "is resolved by".
+  incident_is_recovered_with_recoveryPlan:
+    label: is recovered with
+    from: incident
+    to: recoveryPlan
+    kind: object
+    definition: Relates Incident to Recovery Plan by "is recovered with".
+  incident_is_evaluated_by_materialityAssessment:
+    label: is evaluated by
+    from: incident
+    to: materialityAssessment
+    kind: object
+    definition: Relates Incident to Materiality Assessment by "is evaluated by".
+  incident_is_reviewed_in_postIncidentReview:
+    label: is reviewed in
+    from: incident
+    to: postIncidentReview
+    kind: object
+    definition: Relates Incident to Post-Incident Review by "is reviewed in".
+  majorIncident_requires_communication:
+    label: requires
+    from: majorIncident
+    to: communication
+    kind: object
+    definition: Relates Major Incident to Communication by "requires".
+  majorIncident_requires_postIncidentReview:
+    label: requires
+    from: majorIncident
+    to: postIncidentReview
+    kind: object
+    definition: Relates Major Incident to Post-Incident Review by "requires".
+  cybersecurityIncident_is_derived_from_securityEvent:
+    label: is derived from
+    from: cybersecurityIncident
+    to: securityEvent
+    kind: object
+    definition: Relates Cybersecurity Incident to Security Event by "is derived from".
+  cybersecurityIncident_requires_preservation_of_evidenceItem:
+    label: requires preservation of
+    from: cybersecurityIncident
+    to: evidenceItem
+    kind: object
+    definition: Relates Cybersecurity Incident to Evidence Item by "requires preservation of".
+  cybersecurityIncident_requires_materialityAssessment:
+    label: requires
+    from: cybersecurityIncident
+    to: materialityAssessment
+    kind: object
+    definition: Relates Cybersecurity Incident to Materiality Assessment by "requires".
+  cybersecurityIncident_may_require_regulatoryNotification:
+    label: may require
+    from: cybersecurityIncident
+    to: regulatoryNotification
+    kind: object
+    definition: Relates Cybersecurity Incident to Regulatory Notification by "may require".
+  problem_groups_incident:
+    label: groups
+    from: problem
+    to: incident
+    kind: object
+    definition: Relates Problem to Incident by "groups".
+  problem_is_documented_by_knownError:
+    label: is documented by
+    from: problem
+    to: knownError
+    kind: object
+    definition: Relates Problem to Known Error by "is documented by".
+  knownError_has_workaround:
+    label: has
+    from: knownError
+    to: workaround
+    kind: object
+    definition: Relates Known Error to Workaround by "has".
+  knownError_affects_configurationItem:
+    label: affects
+    from: knownError
+    to: configurationItem
+    kind: object
+    definition: Relates Known Error to Configuration Item by "affects".
+  workaround_is_documented_in_runbook:
+    label: is documented in
+    from: workaround
+    to: runbook
+    kind: object
+    definition: Relates Workaround to Runbook by "is documented in".
+  change_modifies_configurationItem:
+    label: modifies
+    from: change
+    to: configurationItem
+    kind: object
+    definition: Relates Change to Configuration Item by "modifies".
+  change_affects_itService:
+    label: affects
+    from: change
+    to: itService
+    kind: object
+    definition: Relates Change to IT Service by "affects".
+  change_is_implemented_by_release:
+    label: is implemented by
+    from: change
+    to: release
+    kind: object
+    definition: Relates Change to Release by "is implemented by".
+  release_is_delivered_by_deployment:
+    label: is delivered by
+    from: release
+    to: deployment
+    kind: object
+    definition: Relates Release to Deployment by "is delivered by".
+  deployment_targets_environment:
+    label: targets
+    from: deployment
+    to: environment
+    kind: object
+    definition: Relates Deployment to Environment by "targets".
+  deployment_deploys_application:
+    label: deploys
+    from: deployment
+    to: application
+    kind: object
+    definition: Relates Deployment to Application by "deploys".
+  emergencyChange_is_justified_by_incident:
+    label: is justified by
+    from: emergencyChange
+    to: incident
+    kind: object
+    definition: Relates Emergency Change to Incident by "is justified by".
+  postIncidentReview_reviews_incident:
+    label: reviews
+    from: postIncidentReview
+    to: incident
+    kind: object
+    definition: Relates Post-Incident Review to Incident by "reviews".
+  postIncidentReview_identifies_problem:
+    label: identifies
+    from: postIncidentReview
+    to: problem
+    kind: object
+    definition: Relates Post-Incident Review to Problem by "identifies".
+  postIncidentReview_produces_correctiveAction:
+    label: produces
+    from: postIncidentReview
+    to: correctiveAction
+    kind: object
+    definition: Relates Post-Incident Review to Corrective Action by "produces".
+  correctiveAction_is_owned_by_organizationalUnit:
+    label: is owned by
+    from: correctiveAction
+    to: organizationalUnit
+    kind: object
+    definition: Relates Corrective Action to Organizational Unit by "is owned by".
+  correctiveAction_is_implemented_by_change:
+    label: is implemented by
+    from: correctiveAction
+    to: change
+    kind: object
+    definition: Relates Corrective Action to Change by "is implemented by".
+  evidenceItem_documents_incident:
+    label: documents
+    from: evidenceItem
+    to: incident
+    kind: object
+    definition: Relates Evidence Item to Incident by "documents".
+  communication_is_addressed_to_stakeholder:
+    label: is addressed to
+    from: communication
+    to: stakeholder
+    kind: object
+    definition: Relates Communication to Stakeholder by "is addressed to".
+  communication_is_about_incident:
+    label: is about
+    from: communication
+    to: incident
+    kind: object
+    definition: Relates Communication to Incident by "is about".
+  materialityAssessment_assesses_incident:
+    label: assesses
+    from: materialityAssessment
+    to: incident
+    kind: object
+    definition: Relates Materiality Assessment to Incident by "assesses".
+  materialityAssessment_triggers_regulatoryNotification:
+    label: triggers
+    from: materialityAssessment
+    to: regulatoryNotification
+    kind: object
+    definition: Relates Materiality Assessment to Regulatory Notification by "triggers".
+  regulatoryNotification_is_sent_to_regulator:
+    label: is sent to
+    from: regulatoryNotification
+    to: regulator
+    kind: object
+    definition: Relates Regulatory Notification to Regulator by "is sent to".
+  regulatoryNotification_reports_incident:
+    label: reports
+    from: regulatoryNotification
+    to: incident
+    kind: object
+    definition: Relates Regulatory Notification to Incident by "reports".
+  regulatoryNotification_includes_evidenceItem:
+    label: includes
+    from: regulatoryNotification
+    to: evidenceItem
+    kind: object
+    definition: Relates Regulatory Notification to Evidence Item by "includes".
+  organizationalUnit_has_identifier_identifier:
+    label: has identifier
+    from: organizationalUnit
+    to: identifier
+    kind: datatype
+    definition: Relates Organizational Unit to Identifier by "has identifier".
+  vendor_has_identifier_identifier:
+    label: has identifier
+    from: vendor
+    to: identifier
+    kind: datatype
+    definition: Relates Vendor to Identifier by "has identifier".
+  regulator_has_identifier_identifier:
+    label: has identifier
+    from: regulator
+    to: identifier
+    kind: datatype
+    definition: Relates Regulator to Identifier by "has identifier".
+  stakeholder_has_identifier_identifier:
+    label: has identifier
+    from: stakeholder
+    to: identifier
+    kind: datatype
+    definition: Relates Stakeholder to Identifier by "has identifier".
+  businessService_has_identifier_identifier:
+    label: has identifier
+    from: businessService
+    to: identifier
+    kind: datatype
+    definition: Relates Business Service to Identifier by "has identifier".
+  itService_has_identifier_identifier:
+    label: has identifier
+    from: itService
+    to: identifier
+    kind: datatype
+    definition: Relates IT Service to Identifier by "has identifier".
+  configurationItem_has_identifier_identifier:
+    label: has identifier
+    from: configurationItem
+    to: identifier
+    kind: datatype
+    definition: Relates Configuration Item to Identifier by "has identifier".
+  monitoringRule_has_identifier_identifier:
+    label: has identifier
+    from: monitoringRule
+    to: identifier
+    kind: datatype
+    definition: Relates Monitoring Rule to Identifier by "has identifier".
+  metric_has_identifier_identifier:
+    label: has identifier
+    from: metric
+    to: identifier
+    kind: datatype
+    definition: Relates Metric to Identifier by "has identifier".
+  logSource_has_identifier_identifier:
+    label: has identifier
+    from: logSource
+    to: identifier
+    kind: datatype
+    definition: Relates Log Source to Identifier by "has identifier".
+  event_has_identifier_identifier:
+    label: has identifier
+    from: event
+    to: identifier
+    kind: datatype
+    definition: Relates Event to Identifier by "has identifier".
+  alert_has_identifier_identifier:
+    label: has identifier
+    from: alert
+    to: identifier
+    kind: datatype
+    definition: Relates Alert to Identifier by "has identifier".
+  incident_has_identifier_identifier:
+    label: has identifier
+    from: incident
+    to: identifier
+    kind: datatype
+    definition: Relates Incident to Identifier by "has identifier".
+  problem_has_identifier_identifier:
+    label: has identifier
+    from: problem
+    to: identifier
+    kind: datatype
+    definition: Relates Problem to Identifier by "has identifier".
+  knownError_has_identifier_identifier:
+    label: has identifier
+    from: knownError
+    to: identifier
+    kind: datatype
+    definition: Relates Known Error to Identifier by "has identifier".
+  change_has_identifier_identifier:
+    label: has identifier
+    from: change
+    to: identifier
+    kind: datatype
+    definition: Relates Change to Identifier by "has identifier".
+  release_has_identifier_identifier:
+    label: has identifier
+    from: release
+    to: identifier
+    kind: datatype
+    definition: Relates Release to Identifier by "has identifier".
+  deployment_has_identifier_identifier:
+    label: has identifier
+    from: deployment
+    to: identifier
+    kind: datatype
+    definition: Relates Deployment to Identifier by "has identifier".
+  backupSet_has_identifier_identifier:
+    label: has identifier
+    from: backupSet
+    to: identifier
+    kind: datatype
+    definition: Relates Backup Set to Identifier by "has identifier".
+  recoveryPlan_has_identifier_identifier:
+    label: has identifier
+    from: recoveryPlan
+    to: identifier
+    kind: datatype
+    definition: Relates Recovery Plan to Identifier by "has identifier".
+  disasterRecoveryTest_has_identifier_identifier:
+    label: has identifier
+    from: disasterRecoveryTest
+    to: identifier
+    kind: datatype
+    definition: Relates Disaster Recovery Test to Identifier by "has identifier".
+  evidenceItem_has_identifier_identifier:
+    label: has identifier
+    from: evidenceItem
+    to: identifier
+    kind: datatype
+    definition: Relates Evidence Item to Identifier by "has identifier".
+  communication_has_identifier_identifier:
+    label: has identifier
+    from: communication
+    to: identifier
+    kind: datatype
+    definition: Relates Communication to Identifier by "has identifier".
+  materialityAssessment_has_identifier_identifier:
+    label: has identifier
+    from: materialityAssessment
+    to: identifier
+    kind: datatype
+    definition: Relates Materiality Assessment to Identifier by "has identifier".
+  regulatoryNotification_has_identifier_identifier:
+    label: has identifier
+    from: regulatoryNotification
+    to: identifier
+    kind: datatype
+    definition: Relates Regulatory Notification to Identifier by "has identifier".
+  postIncidentReview_has_identifier_identifier:
+    label: has identifier
+    from: postIncidentReview
+    to: identifier
+    kind: datatype
+    definition: Relates Post-Incident Review to Identifier by "has identifier".
+  correctiveAction_has_identifier_identifier:
+    label: has identifier
+    from: correctiveAction
+    to: identifier
+    kind: datatype
+    definition: Relates Corrective Action to Identifier by "has identifier".
+  organizationalUnit_has_name_text:
+    label: has name
+    from: organizationalUnit
+    to: text
+    kind: datatype
+    definition: Relates Organizational Unit to Text by "has name".
+  vendor_has_legal_name_text:
+    label: has legal name
+    from: vendor
+    to: text
+    kind: datatype
+    definition: Relates Vendor to Text by "has legal name".
+  vendor_has_criticality_tier_criticalityTier:
+    label: has criticality tier
+    from: vendor
+    to: criticalityTier
+    kind: controlled-value
+    definition: Relates Vendor to Criticality Tier by "has criticality tier".
+  vendor_is_critical_provider_boolean:
+    label: is critical provider
+    from: vendor
+    to: boolean
+    kind: datatype
+    definition: Relates Vendor to Boolean by "is critical provider".
+  regulator_has_name_text:
+    label: has name
+    from: regulator
+    to: text
+    kind: datatype
+    definition: Relates Regulator to Text by "has name".
+  stakeholder_has_name_text:
+    label: has name
+    from: stakeholder
+    to: text
+    kind: datatype
+    definition: Relates Stakeholder to Text by "has name".
+  stakeholder_has_audience_type_communicationAudience:
+    label: has audience type
+    from: stakeholder
+    to: communicationAudience
+    kind: controlled-value
+    definition: Relates Stakeholder to Communication Audience by "has audience type".
+  businessService_has_name_text:
+    label: has name
+    from: businessService
+    to: text
+    kind: datatype
+    definition: Relates Business Service to Text by "has name".
+  businessService_has_description_text:
+    label: has description
+    from: businessService
+    to: text
+    kind: datatype
+    definition: Relates Business Service to Text by "has description".
+  businessService_has_criticality_tier_criticalityTier:
+    label: has criticality tier
+    from: businessService
+    to: criticalityTier
+    kind: controlled-value
+    definition: Relates Business Service to Criticality Tier by "has criticality tier".
+  businessService_has_health_state_serviceHealthState:
+    label: has health state
+    from: businessService
+    to: serviceHealthState
+    kind: controlled-value
+    definition: Relates Business Service to Service Health State by "has health state".
+  businessService_has_availability_target_percentage:
+    label: has availability target
+    from: businessService
+    to: percentage
+    kind: datatype
+    definition: Relates Business Service to Percentage by "has availability target".
+  itService_has_name_text:
+    label: has name
+    from: itService
+    to: text
+    kind: datatype
+    definition: Relates IT Service to Text by "has name".
+  itService_has_description_text:
+    label: has description
+    from: itService
+    to: text
+    kind: datatype
+    definition: Relates IT Service to Text by "has description".
+  itService_has_criticality_tier_criticalityTier:
+    label: has criticality tier
+    from: itService
+    to: criticalityTier
+    kind: controlled-value
+    definition: Relates IT Service to Criticality Tier by "has criticality tier".
+  itService_has_health_state_serviceHealthState:
+    label: has health state
+    from: itService
+    to: serviceHealthState
+    kind: controlled-value
+    definition: Relates IT Service to Service Health State by "has health state".
+  itService_has_availability_target_percentage:
+    label: has availability target
+    from: itService
+    to: percentage
+    kind: datatype
+    definition: Relates IT Service to Percentage by "has availability target".
+  serviceLevelObjective_has_availability_target_percentage:
+    label: has availability target
+    from: serviceLevelObjective
+    to: percentage
+    kind: datatype
+    definition: Relates Service Level Objective to Percentage by "has availability target".
+  serviceLevelObjective_has_acknowledgement_target_durationMinutes:
+    label: has acknowledgement target
+    from: serviceLevelObjective
+    to: durationMinutes
+    kind: datatype
+    definition: Relates Service Level Objective to Duration Minutes by "has acknowledgement target".
+  serviceLevelObjective_has_restoration_target_durationMinutes:
+    label: has restoration target
+    from: serviceLevelObjective
+    to: durationMinutes
+    kind: datatype
+    definition: Relates Service Level Objective to Duration Minutes by "has restoration target".
+  configurationItem_has_name_text:
+    label: has name
+    from: configurationItem
+    to: text
+    kind: datatype
+    definition: Relates Configuration Item to Text by "has name".
+  configurationItem_has_version_text:
+    label: has version
+    from: configurationItem
+    to: text
+    kind: datatype
+    definition: Relates Configuration Item to Text by "has version".
+  configurationItem_has_criticality_tier_criticalityTier:
+    label: has criticality tier
+    from: configurationItem
+    to: criticalityTier
+    kind: controlled-value
+    definition: Relates Configuration Item to Criticality Tier by "has criticality tier".
+  configurationItem_has_configuration_record_uri:
+    label: has configuration record
+    from: configurationItem
+    to: uri
+    kind: datatype
+    definition: Relates Configuration Item to URI by "has configuration record".
+  application_is_externally_accessible_boolean:
+    label: is externally accessible
+    from: application
+    to: boolean
+    kind: datatype
+    definition: Relates Application to Boolean by "is externally accessible".
+  application_has_release_version_text:
+    label: has release version
+    from: application
+    to: text
+    kind: datatype
+    definition: Relates Application to Text by "has release version".
+  database_has_engine_type_text:
+    label: has engine type
+    from: database
+    to: text
+    kind: datatype
+    definition: Relates Database to Text by "has engine type".
+  database_has_engine_version_text:
+    label: has engine version
+    from: database
+    to: text
+    kind: datatype
+    definition: Relates Database to Text by "has engine version".
+  environment_has_identifier_identifier:
+    label: has identifier
+    from: environment
+    to: identifier
+    kind: datatype
+    definition: Relates Environment to Identifier by "has identifier".
+  environment_has_environment_type_environmentType:
+    label: has environment type
+    from: environment
+    to: environmentType
+    kind: controlled-value
+    definition: Relates Environment to Environment Type by "has environment type".
+  site_has_identifier_identifier:
+    label: has identifier
+    from: site
+    to: identifier
+    kind: datatype
+    definition: Relates Site to Identifier by "has identifier".
+  site_has_location_name_text:
+    label: has location name
+    from: site
+    to: text
+    kind: datatype
+    definition: Relates Site to Text by "has location name".
+  dataCentre_has_identifier_identifier:
+    label: has identifier
+    from: dataCentre
+    to: identifier
+    kind: datatype
+    definition: Relates Data Centre to Identifier by "has identifier".
+  dataAsset_has_identifier_identifier:
+    label: has identifier
+    from: dataAsset
+    to: identifier
+    kind: datatype
+    definition: Relates Data Asset to Identifier by "has identifier".
+  dataAsset_has_name_text:
+    label: has name
+    from: dataAsset
+    to: text
+    kind: datatype
+    definition: Relates Data Asset to Text by "has name".
+  dataAsset_has_data_classification_dataClassification:
+    label: has data classification
+    from: dataAsset
+    to: dataClassification
+    kind: controlled-value
+    definition: Relates Data Asset to Data Classification by "has data classification".
+  integrationInterface_has_identifier_identifier:
+    label: has identifier
+    from: integrationInterface
+    to: identifier
+    kind: datatype
+    definition: Relates Integration Interface to Identifier by "has identifier".
+  integrationInterface_has_endpoint_URI_uri:
+    label: has endpoint URI
+    from: integrationInterface
+    to: uri
+    kind: datatype
+    definition: Relates Integration Interface to URI by "has endpoint URI".
+  integrationInterface_has_protocol_text:
+    label: has protocol
+    from: integrationInterface
+    to: text
+    kind: datatype
+    definition: Relates Integration Interface to Text by "has protocol".
+  thirdPartyService_has_criticality_tier_criticalityTier:
+    label: has criticality tier
+    from: thirdPartyService
+    to: criticalityTier
+    kind: controlled-value
+    definition: Relates Third-party Service to Criticality Tier by "has criticality tier".
+  monitoringRule_has_name_text:
+    label: has name
+    from: monitoringRule
+    to: text
+    kind: datatype
+    definition: Relates Monitoring Rule to Text by "has name".
+  monitoringRule_has_default_severity_severityLevel:
+    label: has default severity
+    from: monitoringRule
+    to: severityLevel
+    kind: controlled-value
+    definition: Relates Monitoring Rule to Severity Level by "has default severity".
+  metric_has_metric_name_text:
+    label: has metric name
+    from: metric
+    to: text
+    kind: datatype
+    definition: Relates Metric to Text by "has metric name".
+  metric_has_numeric_value_decimal:
+    label: has numeric value
+    from: metric
+    to: decimal
+    kind: datatype
+    definition: Relates Metric to Decimal by "has numeric value".
+  metric_has_unit_text:
+    label: has unit
+    from: metric
+    to: text
+    kind: datatype
+    definition: Relates Metric to Text by "has unit".
+  metric_is_measured_at_timestamp:
+    label: is measured at
+    from: metric
+    to: timestamp
+    kind: datatype
+    definition: Relates Metric to Timestamp by "is measured at".
+  logSource_has_source_type_text:
+    label: has source type
+    from: logSource
+    to: text
+    kind: datatype
+    definition: Relates Log Source to Text by "has source type".
+  event_is_observed_at_timestamp:
+    label: is observed at
+    from: event
+    to: timestamp
+    kind: datatype
+    definition: Relates Event to Timestamp by "is observed at".
+  event_has_event_type_text:
+    label: has event type
+    from: event
+    to: text
+    kind: datatype
+    definition: Relates Event to Text by "has event type".
+  event_has_detection_source_detectionSourceType:
+    label: has detection source
+    from: event
+    to: detectionSourceType
+    kind: controlled-value
+    definition: Relates Event to Detection Source Type by "has detection source".
+  alert_is_raised_at_timestamp:
+    label: is raised at
+    from: alert
+    to: timestamp
+    kind: datatype
+    definition: Relates Alert to Timestamp by "is raised at".
+  alert_has_summary_text:
+    label: has summary
+    from: alert
+    to: text
+    kind: datatype
+    definition: Relates Alert to Text by "has summary".
+  alert_has_status_alertStatus:
+    label: has status
+    from: alert
+    to: alertStatus
+    kind: controlled-value
+    definition: Relates Alert to Alert Status by "has status".
+  alert_has_severity_severityLevel:
+    label: has severity
+    from: alert
+    to: severityLevel
+    kind: controlled-value
+    definition: Relates Alert to Severity Level by "has severity".
+  alert_has_detection_source_detectionSourceType:
+    label: has detection source
+    from: alert
+    to: detectionSourceType
+    kind: controlled-value
+    definition: Relates Alert to Detection Source Type by "has detection source".
+  alert_has_occurrence_count_integer:
+    label: has occurrence count
+    from: alert
+    to: integer
+    kind: datatype
+    definition: Relates Alert to Integer by "has occurrence count".
+  incident_has_summary_text:
+    label: has summary
+    from: incident
+    to: text
+    kind: datatype
+    definition: Relates Incident to Text by "has summary".
+  incident_has_description_text:
+    label: has description
+    from: incident
+    to: text
+    kind: datatype
+    definition: Relates Incident to Text by "has description".
+  incident_is_detected_at_timestamp:
+    label: is detected at
+    from: incident
+    to: timestamp
+    kind: datatype
+    definition: Relates Incident to Timestamp by "is detected at".
+  incident_is_opened_at_timestamp:
+    label: is opened at
+    from: incident
+    to: timestamp
+    kind: datatype
+    definition: Relates Incident to Timestamp by "is opened at".
+  incident_is_resolved_at_timestamp:
+    label: is resolved at
+    from: incident
+    to: timestamp
+    kind: datatype
+    definition: Relates Incident to Timestamp by "is resolved at".
+  incident_is_closed_at_timestamp:
+    label: is closed at
+    from: incident
+    to: timestamp
+    kind: datatype
+    definition: Relates Incident to Timestamp by "is closed at".
+  incident_has_status_incidentStatus:
+    label: has status
+    from: incident
+    to: incidentStatus
+    kind: controlled-value
+    definition: Relates Incident to Incident Status by "has status".
+  incident_has_severity_severityLevel:
+    label: has severity
+    from: incident
+    to: severityLevel
+    kind: controlled-value
+    definition: Relates Incident to Severity Level by "has severity".
+  incident_has_priority_priorityLevel:
+    label: has priority
+    from: incident
+    to: priorityLevel
+    kind: controlled-value
+    definition: Relates Incident to Priority Level by "has priority".
+  incident_has_impact_impactLevel:
+    label: has impact
+    from: incident
+    to: impactLevel
+    kind: controlled-value
+    definition: Relates Incident to Impact Level by "has impact".
+  incident_has_urgency_urgencyLevel:
+    label: has urgency
+    from: incident
+    to: urgencyLevel
+    kind: controlled-value
+    definition: Relates Incident to Urgency Level by "has urgency".
+  incident_has_category_incidentCategory:
+    label: has category
+    from: incident
+    to: incidentCategory
+    kind: controlled-value
+    definition: Relates Incident to Incident Category by "has category".
+  incident_has_detection_source_detectionSourceType:
+    label: has detection source
+    from: incident
+    to: detectionSourceType
+    kind: controlled-value
+    definition: Relates Incident to Detection Source Type by "has detection source".
+  incident_is_recurring_boolean:
+    label: is recurring
+    from: incident
+    to: boolean
+    kind: datatype
+    definition: Relates Incident to Boolean by "is recurring".
+  incident_has_time_to_acknowledge_durationMinutes:
+    label: has time to acknowledge
+    from: incident
+    to: durationMinutes
+    kind: datatype
+    definition: Relates Incident to Duration Minutes by "has time to acknowledge".
+  incident_has_time_to_restore_durationMinutes:
+    label: has time to restore
+    from: incident
+    to: durationMinutes
+    kind: datatype
+    definition: Relates Incident to Duration Minutes by "has time to restore".
+  majorIncident_is_declared_at_timestamp:
+    label: is declared at
+    from: majorIncident
+    to: timestamp
+    kind: datatype
+    definition: Relates Major Incident to Timestamp by "is declared at".
+  majorIncident_has_coordination_bridge_uri:
+    label: has coordination bridge
+    from: majorIncident
+    to: uri
+    kind: datatype
+    definition: Relates Major Incident to URI by "has coordination bridge".
+  problem_has_summary_text:
+    label: has summary
+    from: problem
+    to: text
+    kind: datatype
+    definition: Relates Problem to Text by "has summary".
+  problem_has_status_problemStatus:
+    label: has status
+    from: problem
+    to: problemStatus
+    kind: controlled-value
+    definition: Relates Problem to Problem Status by "has status".
+  problem_has_root_cause_category_rootCauseCategory:
+    label: has root cause category
+    from: problem
+    to: rootCauseCategory
+    kind: controlled-value
+    definition: Relates Problem to Root Cause Category by "has root cause category".
+  knownError_has_diagnosed_cause_text:
+    label: has diagnosed cause
+    from: knownError
+    to: text
+    kind: datatype
+    definition: Relates Known Error to Text by "has diagnosed cause".
+  knownError_has_workaround_summary_text:
+    label: has workaround summary
+    from: knownError
+    to: text
+    kind: datatype
+    definition: Relates Known Error to Text by "has workaround summary".
+  change_has_summary_text:
+    label: has summary
+    from: change
+    to: text
+    kind: datatype
+    definition: Relates Change to Text by "has summary".
+  change_has_status_changeStatus:
+    label: has status
+    from: change
+    to: changeStatus
+    kind: controlled-value
+    definition: Relates Change to Change Status by "has status".
+  change_has_risk_level_changeRiskLevel:
+    label: has risk level
+    from: change
+    to: changeRiskLevel
+    kind: controlled-value
+    definition: Relates Change to Change Risk Level by "has risk level".
+  change_has_planned_start_timestamp:
+    label: has planned start
+    from: change
+    to: timestamp
+    kind: datatype
+    definition: Relates Change to Timestamp by "has planned start".
+  change_has_planned_end_timestamp:
+    label: has planned end
+    from: change
+    to: timestamp
+    kind: datatype
+    definition: Relates Change to Timestamp by "has planned end".
+  change_has_implementation_plan_text:
+    label: has implementation plan
+    from: change
+    to: text
+    kind: datatype
+    definition: Relates Change to Text by "has implementation plan".
+  change_has_backout_plan_text:
+    label: has backout plan
+    from: change
+    to: text
+    kind: datatype
+    definition: Relates Change to Text by "has backout plan".
+  release_has_version_text:
+    label: has version
+    from: release
+    to: text
+    kind: datatype
+    definition: Relates Release to Text by "has version".
+  release_has_release_date_date:
+    label: has release date
+    from: release
+    to: date
+    kind: datatype
+    definition: Relates Release to Date by "has release date".
+  deployment_has_status_deploymentStatus:
+    label: has status
+    from: deployment
+    to: deploymentStatus
+    kind: controlled-value
+    definition: Relates Deployment to Deployment Status by "has status".
+  deployment_is_started_at_timestamp:
+    label: is started at
+    from: deployment
+    to: timestamp
+    kind: datatype
+    definition: Relates Deployment to Timestamp by "is started at".
+  deployment_is_completed_at_timestamp:
+    label: is completed at
+    from: deployment
+    to: timestamp
+    kind: datatype
+    definition: Relates Deployment to Timestamp by "is completed at".
+  backupSet_has_status_backupStatus:
+    label: has status
+    from: backupSet
+    to: backupStatus
+    kind: controlled-value
+    definition: Relates Backup Set to Backup Status by "has status".
+  backupSet_has_last_successful_backup_timestamp:
+    label: has last successful backup
+    from: backupSet
+    to: timestamp
+    kind: datatype
+    definition: Relates Backup Set to Timestamp by "has last successful backup".
+  backupSet_has_last_verification_timestamp:
+    label: has last verification
+    from: backupSet
+    to: timestamp
+    kind: datatype
+    definition: Relates Backup Set to Timestamp by "has last verification".
+  recoveryPlan_has_recovery_time_objective_durationMinutes:
+    label: has recovery time objective
+    from: recoveryPlan
+    to: durationMinutes
+    kind: datatype
+    definition: Relates Recovery Plan to Duration Minutes by "has recovery time objective".
+  recoveryPlan_has_recovery_point_objective_durationMinutes:
+    label: has recovery point objective
+    from: recoveryPlan
+    to: durationMinutes
+    kind: datatype
+    definition: Relates Recovery Plan to Duration Minutes by "has recovery point objective".
+  recoveryPlan_has_last_review_date_date:
+    label: has last review date
+    from: recoveryPlan
+    to: date
+    kind: datatype
+    definition: Relates Recovery Plan to Date by "has last review date".
+  disasterRecoveryTest_is_executed_on_date:
+    label: is executed on
+    from: disasterRecoveryTest
+    to: date
+    kind: datatype
+    definition: Relates Disaster Recovery Test to Date by "is executed on".
+  disasterRecoveryTest_has_test_result_testResult:
+    label: has test result
+    from: disasterRecoveryTest
+    to: testResult
+    kind: controlled-value
+    definition: Relates Disaster Recovery Test to Test Result by "has test result".
+  disasterRecoveryTest_has_actual_recovery_time_durationMinutes:
+    label: has actual recovery time
+    from: disasterRecoveryTest
+    to: durationMinutes
+    kind: datatype
+    definition: Relates Disaster Recovery Test to Duration Minutes by "has actual recovery time".
+  evidenceItem_has_storage_location_uri:
+    label: has storage location
+    from: evidenceItem
+    to: uri
+    kind: datatype
+    definition: Relates Evidence Item to URI by "has storage location".
+  evidenceItem_is_collected_at_timestamp:
+    label: is collected at
+    from: evidenceItem
+    to: timestamp
+    kind: datatype
+    definition: Relates Evidence Item to Timestamp by "is collected at".
+  evidenceItem_has_integrity_status_evidenceIntegrityStatus:
+    label: has integrity status
+    from: evidenceItem
+    to: evidenceIntegrityStatus
+    kind: controlled-value
+    definition: Relates Evidence Item to Evidence Integrity Status by "has integrity status".
+  evidenceItem_has_cryptographic_hash_text:
+    label: has cryptographic hash
+    from: evidenceItem
+    to: text
+    kind: datatype
+    definition: Relates Evidence Item to Text by "has cryptographic hash".
+  communication_is_sent_at_timestamp:
+    label: is sent at
+    from: communication
+    to: timestamp
+    kind: datatype
+    definition: Relates Communication to Timestamp by "is sent at".
+  communication_has_audience_communicationAudience:
+    label: has audience
+    from: communication
+    to: communicationAudience
+    kind: controlled-value
+    definition: Relates Communication to Communication Audience by "has audience".
+  communication_has_status_notificationStatus:
+    label: has status
+    from: communication
+    to: notificationStatus
+    kind: controlled-value
+    definition: Relates Communication to Notification Status by "has status".
+  communication_has_message_summary_text:
+    label: has message summary
+    from: communication
+    to: text
+    kind: datatype
+    definition: Relates Communication to Text by "has message summary".
+  materialityAssessment_is_assessed_at_timestamp:
+    label: is assessed at
+    from: materialityAssessment
+    to: timestamp
+    kind: datatype
+    definition: Relates Materiality Assessment to Timestamp by "is assessed at".
+  materialityAssessment_has_result_materialityResult:
+    label: has result
+    from: materialityAssessment
+    to: materialityResult
+    kind: controlled-value
+    definition: Relates Materiality Assessment to Materiality Result by "has result".
+  materialityAssessment_has_rationale_text:
+    label: has rationale
+    from: materialityAssessment
+    to: text
+    kind: datatype
+    definition: Relates Materiality Assessment to Text by "has rationale".
+  materialityAssessment_has_reporting_due_time_timestamp:
+    label: has reporting due time
+    from: materialityAssessment
+    to: timestamp
+    kind: datatype
+    definition: Relates Materiality Assessment to Timestamp by "has reporting due time".
+  regulatoryNotification_is_due_at_timestamp:
+    label: is due at
+    from: regulatoryNotification
+    to: timestamp
+    kind: datatype
+    definition: Relates Regulatory Notification to Timestamp by "is due at".
+  regulatoryNotification_is_submitted_at_timestamp:
+    label: is submitted at
+    from: regulatoryNotification
+    to: timestamp
+    kind: datatype
+    definition: Relates Regulatory Notification to Timestamp by "is submitted at".
+  regulatoryNotification_has_status_notificationStatus:
+    label: has status
+    from: regulatoryNotification
+    to: notificationStatus
+    kind: controlled-value
+    definition: Relates Regulatory Notification to Notification Status by "has status".
+  regulatoryNotification_has_submission_receipt_uri:
+    label: has submission receipt
+    from: regulatoryNotification
+    to: uri
+    kind: datatype
+    definition: Relates Regulatory Notification to URI by "has submission receipt".
+  postIncidentReview_is_held_on_date:
+    label: is held on
+    from: postIncidentReview
+    to: date
+    kind: datatype
+    definition: Relates Post-Incident Review to Date by "is held on".
+  postIncidentReview_has_findings_text:
+    label: has findings
+    from: postIncidentReview
+    to: text
+    kind: datatype
+    definition: Relates Post-Incident Review to Text by "has findings".
+  correctiveAction_has_action_description_text:
+    label: has action description
+    from: correctiveAction
+    to: text
+    kind: datatype
+    definition: Relates Corrective Action to Text by "has action description".
+  correctiveAction_has_status_correctiveActionStatus:
+    label: has status
+    from: correctiveAction
+    to: correctiveActionStatus
+    kind: controlled-value
+    definition: Relates Corrective Action to Corrective Action Status by "has status".
+  correctiveAction_has_due_date_date:
+    label: has due date
+    from: correctiveAction
+    to: date
+    kind: datatype
+    definition: Relates Corrective Action to Date by "has due date".
+constraints:
+  alert:
+    has_identifier:
+      required: true
+      maximumCount: 1
+      type: identifier
+    is_raised_at:
+      required: true
+      maximumCount: 1
+      type: timestamp
+    has_status:
+      required: true
+      maximumCount: 1
+      allowed: *id001
+    has_severity:
+      required: true
+      maximumCount: 1
+      allowed: *id002
+  incident:
+    has_identifier:
+      required: true
+      maximumCount: 1
+      type: identifier
+    has_summary:
+      required: true
+      maximumCount: 1
+      type: text
+    is_opened_at:
+      required: true
+      maximumCount: 1
+      type: timestamp
+    has_status:
+      required: true
+      maximumCount: 1
+      allowed: *id003
+    has_severity:
+      required: true
+      maximumCount: 1
+      allowed: *id002
+    has_priority:
+      required: true
+      maximumCount: 1
+      allowed: *id004
+    impacts:
+      minimumCount: 1
+      targetClass: itService
+      appliesAt:
+      - declareMajorIncident
+      - closeIncident
+  majorIncident:
+    is_declared_at:
+      required: true
+      maximumCount: 1
+      type: timestamp
+    is_coordinated_by:
+      required: true
+      maximumCount: 1
+      targetClass: incidentCommander
+    requires_communication:
+      minimumCount: 1
+      targetClass: communication
+  change:
+    has_identifier:
+      required: true
+      maximumCount: 1
+      type: identifier
+    has_status:
+      required: true
+      maximumCount: 1
+      allowed: *id005
+    has_risk_level:
+      required: true
+      maximumCount: 1
+      allowed: *id006
+    has_implementation_plan:
+      required: true
+      maximumCount: 1
+      type: text
+    has_backout_plan:
+      required: true
+      maximumCount: 1
+      type: text
+    modifies:
+      minimumCount: 1
+      targetClass: configurationItem
+  emergencyChange:
+    is_justified_by:
+      required: true
+      maximumCount: 1
+      targetClass: incident
+  evidenceItem:
+    has_identifier:
+      required: true
+      maximumCount: 1
+      type: identifier
+    is_collected_at:
+      required: true
+      maximumCount: 1
+      type: timestamp
+    has_integrity_status:
+      required: true
+      maximumCount: 1
+      allowed: *id007
+    has_storage_location:
+      required: true
+      maximumCount: 1
+      type: uri
+  regulatoryNotification:
+    reports:
+      required: true
+      maximumCount: 1
+      targetClass: incident
+    is_sent_to:
+      required: true
+      minimumCount: 1
+      targetClass: regulator
+    is_due_at:
+      required: true
+      maximumCount: 1
+      type: timestamp
+    has_status:
+      required: true
+      maximumCount: 1
+      allowed: *id008
+  correctiveAction:
+    is_owned_by:
+      required: true
+      maximumCount: 1
+      targetClass: organizationalUnit
+    has_action_description:
+      required: true
+      maximumCount: 1
+      type: text
+    has_status:
+      required: true
+      maximumCount: 1
+      allowed: *id009
+    has_due_date:
+      required: true
+      maximumCount: 1
+      type: date
+actions:
+  acknowledgeAlert:
+    label: Acknowledge alert
+    inputs:
+      alert: alert
+      operator: onCallEngineer
+    preconditions:
+    - alert.status == new
+    - operator is authorized for the responsible resolver group
+    effects:
+    - alert.status := acknowledged
+    - acknowledgement timestamp is recorded
+    authorization:
+    - operator is on duty or explicitly delegated
+    verification:
+    - read alert and confirm status == acknowledged
+  declareMajorIncident:
+    label: Declare major incident
+    inputs:
+      incident: incident
+      commander: incidentCommander
+    preconditions:
+    - incident.status not in [resolved, closed, cancelled]
+    - incident.severity in [sev1-critical, sev2-high]
+    - at least one impacted IT service is identified
+    - commander is assigned
+    effects:
+    - incident is classified as Major Incident
+    - major-incident coordination and communication cadence start
+    authorization:
+    - commander or designated duty manager is authorized
+    verification:
+    - read incident and confirm major-incident flag, commander, declaration time, and communication record
+  assignIncident:
+    label: Assign incident
+    inputs:
+      incident: incident
+      resolverGroup: resolverGroup
+    preconditions:
+    - incident.status not in [closed, cancelled]
+    - resolver group supports an affected service or configuration item
+    effects:
+    - incident is assigned to resolver group
+    authorization:
+    - service desk, incident commander, or routing automation is authorized
+    verification:
+    - read incident and confirm resolver group assignment
+  containIncident:
+    label: Contain incident
+    inputs:
+      incident: incident
+      runbook: runbook
+    preconditions:
+    - incident.status in [acknowledged, investigating]
+    - containment scope and expected side effects are recorded
+    effects:
+    - approved containment steps are executed
+    - incident.status := contained when containment is verified
+    authorization:
+    - incident commander and relevant technical owner authorize consequential steps
+    verification:
+    - verify containment indicators and service impact
+  isolateConfigurationItem:
+    label: Isolate configuration item
+    inputs:
+      incident: incident
+      configurationItem: configurationItem
+    preconditions:
+    - configuration item is linked to the incident
+    - isolation impact is assessed
+    - rollback or reconnection method is available
+    effects:
+    - configuration item is isolated from defined networks or dependencies
+    authorization:
+    - incident commander and technical owner authorize isolation, subject to emergency policy
+    verification:
+    - confirm isolation and check remaining service health
+  failOverService:
+    label: Fail over service
+    inputs:
+      incident: incident
+      service: itService
+      recoveryPlan: recoveryPlan
+    preconditions:
+    - recovery plan applies to the service
+    - target recovery environment is available
+    - data-recovery point is acceptable
+    effects:
+    - service workload is moved to the recovery environment
+    authorization:
+    - incident commander and service owner authorize failover
+    verification:
+    - confirm service health and critical business transactions in the recovery environment
+  restoreBackup:
+    label: Restore backup
+    inputs:
+      backupSet: backupSet
+      target: configurationItem
+      recoveryPlan: recoveryPlan
+    preconditions:
+    - backup status in [successful, verified]
+    - backup protects the target
+    - restore point and target environment are approved
+    effects:
+    - backup data is restored to the target
+    authorization:
+    - technical owner or recovery lead authorizes restore
+    verification:
+    - validate data integrity and application functionality after restore
+  executeEmergencyChange:
+    label: Execute emergency change
+    inputs:
+      change: emergencyChange
+      implementer: onCallEngineer
+    preconditions:
+    - change is linked to an active incident
+    - implementation and backout plans are present
+    - affected configuration items are identified
+    - risk is explicitly accepted
+    effects:
+    - approved emergency change is implemented and status is updated
+    authorization:
+    - emergency-change authority approves according to bank policy
+    verification:
+    - run technical checks, verify service health, and record implementation evidence
+  sendStakeholderCommunication:
+    label: Send stakeholder communication
+    inputs:
+      incident: incident
+      communication: communication
+    preconditions:
+    - audience, message, owner, and approval state are recorded
+    - message content matches the latest verified incident state
+    effects:
+    - communication is sent and timestamped
+    authorization:
+    - communication owner or incident commander approves the message
+    verification:
+    - confirm delivery status and archive the final message
+  submitRegulatoryNotification:
+    label: Submit regulatory notification
+    inputs:
+      notification: regulatoryNotification
+      assessment: materialityAssessment
+    preconditions:
+    - assessment.result == reportable
+    - notification is linked to the incident and regulator
+    - required fields and supporting evidence are complete
+    - notification.status == approved
+    - submission occurs before notification.dueAt
+    effects:
+    - notification.status := submitted
+    - submission receipt is stored
+    authorization:
+    - designated regulatory-reporting authority approves submission
+    verification:
+    - confirm accepted submission or record rejection and remediation
+  closeIncident:
+    label: Close incident
+    inputs:
+      incident: incident
+    preconditions:
+    - incident.status in [resolved, monitoring]
+    - impacted services have health state healthy or an accepted residual condition
+    - resolution and restoration evidence are recorded
+    - required stakeholder communications are complete
+    - major and cybersecurity incidents have a scheduled or completed post-incident review
+    effects:
+    - incident.status := closed
+    - closure timestamp is recorded
+    authorization:
+    - incident owner or incident commander authorizes closure
+    verification:
+    - read incident and linked services; confirm closure state and retained evidence
+mappings:
+  incident:
+    authoritativeSource: ITSM.Incident
+    notes: Incident record and lifecycle state.
+  alert:
+    authoritativeSource: MonitoringOrSIEM.Alert
+    notes: Operational and security alert records.
+  securityEvent:
+    authoritativeSource: SIEM.SecurityEvent
+    notes: Correlated security telemetry.
+  configurationItem:
+    authoritativeSource: CMDB.ConfigurationItem
+    notes: Managed asset identity and relationships.
+  itService:
+    authoritativeSource: ServiceCatalogue.ITService
+    notes: Service ownership, criticality, and dependencies.
+  change:
+    authoritativeSource: ITSM.Change
+    notes: Change assessment, approval, and implementation state.
+  recoveryPlan:
+    authoritativeSource: ContinuityRepository.RecoveryPlan
+    notes: Approved recovery procedures and objectives.
+  runbook:
+    authoritativeSource: OperationsKnowledgeBase.Runbook
+    notes: Version-controlled operational procedures.
+  evidenceItem:
+    authoritativeSource: EvidenceRepository.Item
+    notes: Immutable or controlled evidence storage.
+  regulatoryNotification:
+    authoritativeSource: RegulatoryReporting.Notification
+    notes: Submission workflow and receipts.
+  correctiveAction:
+    authoritativeSource: GRC.Action
+    notes: Tracked remediation and verification.
+competencyQuestions:
+- Which business services and customer channels are impacted by this incident?
+- Which configuration items and third-party services are on the dependency path of the affected IT service?
+- Which active alerts and events are correlated with the incident?
+- Who owns the affected service and which resolver group and on-call engineer should be assigned?
+- Does the incident meet the bank-defined criteria for major-incident declaration?
+- Which runbook, workaround, backup set, and recovery plan can be used safely?
+- Was the incident caused by a recent change or deployment?
+- Is a materiality assessment complete and is a regulatory notification required and due?
+- Are evidence integrity, stakeholder communications, and closure conditions complete?
+- Which corrective actions from prior post-incident reviews remain open for the affected service?

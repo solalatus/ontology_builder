@@ -546,3 +546,17 @@ project convention of phase-sized reviewable increments.
 4. Also added per this review round, not from the original open-items list:
    prompt scope-hardening (§4.3), the output-language lock (§4.9), and the
    long-context/summarization flow (§4.10) — all reflected above.
+
+## 8. Post-plan extension — ontology-recovery eval
+
+Not one of the original six phases: a user-directed addition after all six
+shipped, living entirely under `tests/evals/` (see `tests/evals/README.md`
+for the full design and `helper_agent_todo.md`'s own dated Log entry for
+what was built and the real bug it found in itself on first use). Simulates
+a full elicitation interview between this agent and a second LLM playing a
+domain-expert persona grounded in a hidden ground-truth ontology, then
+reports how much of the ground truth the interview actually recovered.
+Deliberately kept separate from the main test suite (not swept in by
+`tests/*.spec.mjs`) since it is an eval that produces a report to read, not
+a deterministic pass/fail test — real, non-deterministic LLMs are talking
+to each other on both sides of the simulated interview.
