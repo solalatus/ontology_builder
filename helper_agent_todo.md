@@ -404,3 +404,80 @@ repo root, never committed and never baked into any shipped file, plus a new opt
       billing quota at all, which is what led to writing that fix before a funded key was provided).
 - Full suite: 363 JS tests (including the 6 live tests, run for real against a funded key) + 13 Python
   tests, green, run twice consecutively.
+
+## Addendum — ontology-recovery eval (simulated interview against a real domain)
+
+**2026-07-29.** User-directed: a separate, optional eval that simulates a full ontology-elicitation
+interview between the app's real helper agent and a second, independent LLM playing a domain-expert
+persona, grounded in a hidden ground-truth ontology (a ~2800-line MTSR model for a fictional Hungarian
+bank's IT-ops/incident-response domain, plus a matching persona prompt for "Eszter Farkas", both supplied
+by the user), then reports how much of it the interview recovered.
+
+- [x] `tests/evals/` — a new subdirectory specifically because `node --test tests/*.spec.mjs`'s glob is
+      non-recursive and never sees it, keeping this eval out of the default suite run without any
+      skip-flag plumbing. Run explicitly: `node --test tests/evals/*.eval.spec.mjs`.
+- [x] `tests/evals/fixtures/itops_mtsr.yaml` / `persona-eszter.md` — unmodified, versioned copies of the
+      user-supplied ontology and persona prompt. Not secrets (the ground truth is hidden only from the
+      app agent under test, never from the repo).
+- [x] `package.json` (new — this repo had none before) with `js-yaml` as its one devDependency, needed to
+      parse the fixture's YAML anchors correctly; `index.html` itself remains fully dependency-free
+      (spec.md Section 2) regardless, same precedent as Playwright already being dev-only tooling.
+- [x] `tests/lib/liveOpenAi.mjs` — `forwardToRealOpenAi()`/`connectAgentLive()`/`sendChatMessage()`/
+      `withPageAllowingResourceErrors()` extracted out of `tests/helper-agent-live-openai.spec.mjs` into a
+      shared module, reused by both that suite and this eval instead of duplicated. Re-ran the live suite
+      after the extraction to confirm no behavior change (6/6 still passing).
+- [x] `tests/evals/lib/groundTruthModel.mjs` — parses the fixture into normalized classes/relationships/
+      properties/valueSets. Implements the user's own instruction ("modify the yaml based on the handbook,
+      skip what is needed") as a documented, auditable filter (`isRecoverableProperty`) over the untouched
+      fixture rather than a hand-trimmed copy: any property whose target datatype is `identifier` or `uri`
+      is excluded from the recovery target, since the app's own baked howto doc already tells the agent
+      not to model those ("Do not include technical fields that users never ask about") — scoring their
+      absence as a failure would penalize the agent for following its own instructions. 68 classes / 143
+      relationships / 111 (of 148) properties survive.
+- [x] `tests/evals/lib/personaAgent.mjs` — a plain Node-side Chat Completions loop simulating Eszter (no
+      browser needed for this side -- it's a test fixture, not the code path under test, and Node's own
+      `fetch()` reaches OpenAI directly in this sandbox). System prompt = the persona doc + the full,
+      *unfiltered* ground-truth YAML embedded literally below it, matching the persona doc's own claim
+      that the reference file is "present alongside this prompt." Conversation seeded with the persona
+      doc's own scripted opening line, not generated.
+- [x] `tests/evals/lib/conversationOrchestrator.mjs` — alternates the real app agent (through the browser,
+      relayed exactly like the live suite) and the persona agent, starting from the opening line. Stops on
+      whichever comes first: a cheap real classifier call (`appearsFinished()`) judging the interviewer's
+      latest reply as a genuine final wrap-up, `ONTOLOGY_EVAL_MAX_TURNS` (default 100), or
+      `ONTOLOGY_EVAL_WALLCLOCK_MINUTES` (default 45) — all three user-specified. A `consecutiveEmptyAppTurns`
+      guard aborts cleanly if the app agent ever produces a tool-only turn with no text three times running,
+      rather than burning the whole turn budget on empty nudges.
+- [x] `tests/evals/lib/recoveryMetrics.mjs` — diffs the recovered canvas (`window.__kg.state`) against the
+      filtered ground truth. Heuristic token-set-Jaccard label matching (not an LLM judge, to keep this
+      eval's own moving parts small — documented limitation in `tests/evals/README.md`). Class/relationship
+      recall+precision+F1, property recall, controlled-value fidelity (allowed-value-list overlap), and an
+      equal-weighted composite "recovery effectiveness" score.
+- [x] `tests/evals/lib/reportGenerator.mjs` — writes `results/report.md` (headline metrics table first, per
+      the user's own instruction — "things one can optimize against") and `results/conversation-log.md`
+      (the full interleaved transcript), both fixed filenames **overwritten every run**, gitignored. The
+      report's own "LLM review" section is one real call (default: whatever model the interviewer itself
+      connected with) reading the full log and flagging errors/noteworthy events in structured markdown —
+      the user's own explicit request.
+- [x] `tests/evals/ontology-recovery.eval.spec.mjs` — the single `node:test` entry point. Generous sanity-
+      floor assertions only (no crash, at least one real API call, metrics are finite numbers) — this is a
+      report-generating eval, not a strict pass/fail test, since two real non-deterministic LLMs are
+      talking to each other.
+
+**A real bug the eval's own first full-length try-out run found, in the eval itself:** the first genuine
+100-turn/45-minute run stopped after only 17 turns via `appearsFinished()`, having created zero classes.
+The actual turn-17 text was the interviewer's own system prompt correctly recapping the end of **Phase 1**
+(real questions/actions) and asking to proceed to Phase 2 (classes) — normal, expected mid-interview
+behavior per the INTERVIEW PROCESS's own per-phase checkpoint design (`helper_agent_plan.md` §4.3), not the
+whole interview being done. The classifier's prompt only described "a final summary, a closing check for
+anything else" without telling it the interviewer checkpoints at the end of *every* one of its 10 phases,
+so a single-phase recap satisfied that description. Fixed by naming all 10 phases explicitly in the
+classifier's system prompt and requiring the message to look like the phase-9-equivalent final wrap-up
+specifically, defaulting to NO for any earlier phase's checkpoint. Verified against the exact false-positive
+text (now NO), a genuine final-wrap-up example (still YES), and a second early-phase example (NO) before
+re-running.
+- Tried out for real against a funded key: an initial 3-turn smoke run (mechanics only), then two full
+  100-turn/45-minute attempts — the first surfaced the classifier bug above (stopped at 17 turns, 0%
+  recovery, real API calls confirmed working throughout); see `tests/evals/results/` for the
+  post-fix run's actual report/log (gitignored, not part of this commit).
+- Full suite (all `tests/*.spec.mjs`, including the 6 live tests) green, run twice consecutively, plus the
+  eval itself run for real multiple times as described above.

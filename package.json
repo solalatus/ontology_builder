@@ -1,0 +1,8 @@
+{
+  "name": "ontology-builder-tests",
+  "private": true,
+  "description": "Dev-only test tooling for index.html (spec.md Section 2) — the shipped app itself remains a single dependency-free HTML file regardless of what's installed here.",
+  "devDependencies": {
+    "js-yaml": "^4.1.0"
+  }
+}

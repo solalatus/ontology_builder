@@ -3,3 +3,10 @@ __pycache__/
 
 # Local secrets for helper_agent live OpenAI tests (tests/README.md) — never committed.
 .env
+
+# Dev-only test tooling deps (package.json) — index.html itself ships with none.
+node_modules/
+
+# Generated eval reports (tests/evals/README.md) — overwritten each run, not repo content.
+tests/evals/results/*.md
+tests/evals/results/*.json

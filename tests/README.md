@@ -32,6 +32,12 @@ as a normal project dependency, it falls back to that fixed path. That
 fallback is sandbox-specific and may not exist on your machine; the
 `npm install` path above is the portable one.
 
+`package.json`'s only committed dependency is `js-yaml`, used solely by the
+ontology-recovery eval (below) to parse its ground-truth fixture — plain
+`npm install` in the repo root picks it up. `index.html` itself remains a
+single dependency-free file regardless (spec.md Section 2); this is
+dev-only test tooling, same as Playwright.
+
 ## Layout
 
 - `lib/browser.mjs` — Playwright chromium launcher w/ the fallback above.
@@ -72,6 +78,25 @@ environment; either way `tests/lib/env.mjs` picks it up (environment wins
 over `.env` if both are set). Costs a small amount of real money per run (a
 handful of cheap chat-completion calls); never runs in CI, only when a key
 is deliberately provided.
+
+## Ontology-recovery eval (opt-in, separate from the main suite)
+
+`tests/evals/ontology-recovery.eval.spec.mjs` simulates a full ontology-
+elicitation interview between the app's real helper agent and a second,
+independent LLM playing a domain-expert persona grounded in a hidden
+ground-truth ontology, then reports how much of it the interview recovered.
+Lives under `tests/evals/` specifically so `tests/*.spec.mjs` never sweeps
+it in — run it explicitly:
+
+```sh
+node --test tests/evals/*.eval.spec.mjs
+```
+
+Same `OPENAI_API_KEY`/`.env` convention as the live suite above, plus its
+own env-configurable turn/wall-clock/model budget. See
+`tests/evals/README.md` for the full design writeup — it's a report-
+generating eval, not a strict pass/fail test, and costs meaningfully more
+time/money per run than anything else in this directory.
 
 ## Python tests
 
