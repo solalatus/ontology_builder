@@ -86,6 +86,21 @@ test("the system prompt allows batching similar, low-ambiguity items instead of 
   });
 });
 
+test("the system prompt pushes Phase 3 (relationships) to systematically cover all confirmed classes, not just an opening batch", async () => {
+  // A real eval run (helper_agent_todo.md's addendum) found relationship
+  // recall far below even its own reachable ceiling once class/property
+  // scope was accounted for -- the interviewer asked one backbone batch of
+  // relationships, then moved on, leaving most plausible connections among
+  // its own confirmed classes never asked about. This pins the fix: Phase 3
+  // now explicitly says not to stop after the opening batch.
+  await withPage(async (page) => {
+    const prompt = await systemPrompt(page);
+    assert.match(prompt, /Don't stop after one opening batch/);
+    assert.match(prompt, /systematically work through the plausible connections\s*among ALL of them/);
+    assert.match(prompt, /left with no relationships to anything else is a sign you moved on\s*too early/);
+  });
+});
+
 test("the system prompt never reveals the underlying model name or API mechanics that aren't part of the knowledge itself", async () => {
   // Not a security boundary (see SCOPE's own comment on this), just a
   // sanity check that nothing accidentally leaked in from the surrounding

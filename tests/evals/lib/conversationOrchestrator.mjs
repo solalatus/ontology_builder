@@ -52,6 +52,17 @@ async function appearsFinished(text, { apiKey, model }) {
   return /^\s*yes/i.test(answer);
 }
 
+// Pure, unit-testable tagging step: given a slice of raw apiMessages
+// entries (window.__kg.agent.state.apiMessages -- the exact {role, content,
+// tool_calls?} objects the app pushes for every real API request/response,
+// see index.html's sendAgentChatMessage) newly added during one turn, tags
+// each with that turn number for reportGenerator.mjs's raw transparency
+// log. Kept separate from the page.evaluate() call site below so this
+// mapping is testable without a live browser.
+export function tagApiMessagesWithTurn(apiMessages, turn) {
+  return apiMessages.map((m) => ({ turn, ...m }));
+}
+
 // Runs the full simulated interview: alternates the real app agent (driven
 // through `page`, already connected via connectAgentLive) and the persona
 // agent (personaAgent.mjs), starting from the persona's own scripted
@@ -70,6 +81,7 @@ export async function runOntologyRecoveryConversation({
   const persona = createPersonaAgent({ apiKey, model: personaModel });
   const chatResponses = forwardToRealOpenAi(page, CHAT_URL);
   const log = [{ turn: 0, speaker: "persona", text: OPENING_LINE }];
+  const rawApiLog = [];
 
   const startedAt = Date.now();
   let incomingForApp = OPENING_LINE;
@@ -82,10 +94,24 @@ export async function runOntologyRecoveryConversation({
     turnsUsed = turn;
 
     const transcriptBefore = await page.evaluate(() => window.__kg.agent.state.transcript.length);
+    const apiMessagesBefore = await page.evaluate(() => window.__kg.agent.state.apiMessages.length);
     await sendChatMessage(page, incomingForApp, { timeout: 90000 });
     const transcriptAfter = await page.evaluate(() => window.__kg.agent.state.transcript);
     const newEntries = transcriptAfter.slice(transcriptBefore);
     for (const entry of newEntries) log.push({ turn, speaker: `app-${entry.role}`, text: entry.text });
+
+    // Raw API-level transparency: the exact tool_calls arguments and tool
+    // result content, independent of the human-readable transcript notes
+    // above -- see reportGenerator.mjs's writeToolCallLog. A compaction
+    // (compactAgentHistory) can shrink apiMessages instead of only
+    // appending to it; slicing from the pre-turn length still captures
+    // every message pushed *during* this turn correctly, it just can't see
+    // older turns' entries a later compaction folded away -- acceptable,
+    // since compaction only replaces already-logged history, it doesn't
+    // change what this turn itself sent/received.
+    const apiMessagesAfter = await page.evaluate(() => window.__kg.agent.state.apiMessages);
+    const newApiMessages = apiMessagesAfter.length >= apiMessagesBefore ? apiMessagesAfter.slice(apiMessagesBefore) : apiMessagesAfter;
+    rawApiLog.push(...tagApiMessagesWithTurn(newApiMessages, turn));
 
     const lastAssistant = [...newEntries].reverse().find((m) => m.role === "assistant");
     const appText = lastAssistant && lastAssistant.text ? lastAssistant.text.trim() : "";
@@ -115,5 +141,6 @@ export async function runOntologyRecoveryConversation({
     stoppedReason,
     durationMs: Date.now() - startedAt,
     chatResponses, // raw real API responses for the app agent's side, for operational metrics
+    rawApiLog, // exact tool_calls arguments + tool result content per turn, for reportGenerator.mjs's transparency log
   };
 }

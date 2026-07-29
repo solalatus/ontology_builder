@@ -41,13 +41,38 @@ check, or run it for real via `node --test`.
    - `ONTOLOGY_EVAL_MAX_TURNS` turns (default 500);
    - `ONTOLOGY_EVAL_WALLCLOCK_MINUTES` wall-clock minutes (default 45).
 4. Diffs the final recovered canvas model against the ground-truth fixture
-   (`lib/recoveryMetrics.mjs`) and writes `results/report.md` +
-   `results/conversation-log.md` — both fixed filenames, **overwritten every
-   run**, gitignored (this is a report to read, not repo content).
+   (`lib/recoveryMetrics.mjs`), against both the full domain and the
+   practical-scope subset (see below), and writes `results/report.md` +
+   `results/conversation-log.md` + `results/tool-calls.md` — three fixed
+   filenames, **overwritten every run**, gitignored (these are reports to
+   read, not repo content).
 5. `results/report.md` also includes one real LLM call's review of the full
    conversation, flagging errors and noteworthy events — defaults to
    whatever model the interviewer itself connected with, overridable via
-   `ONTOLOGY_EVAL_REVIEW_MODEL`.
+   `ONTOLOGY_EVAL_REVIEW_MODEL`. Treat its findings as a lead to verify, not
+   a verdict: it only ever sees the human-readable transcript, so anything
+   it flags as a possible tool/state-sync issue should be checked against
+   `results/tool-calls.md` (see "Full transparency" below) before being
+   taken at face value — a real run's reviewer flagged exactly this kind of
+   issue, and reading the underlying app code showed the live-sync-caution
+   language in the system prompt's own "STAYING IN SYNC WITH THE LIVE
+   ONTOLOGY" section was a more likely explanation than an actual bug
+   (helper_agent_todo.md's dated Log entry).
+
+## Full transparency: `results/tool-calls.md`
+
+The human-readable conversation log only ever shows short tool notes
+("Checked the current ontology state.", "Applied: 3 added, 1 updated.") —
+never what the interviewer actually sent as `apply_ontology_yaml`'s `yaml`
+argument, or exactly what `get_graph_state` returned. `results/tool-calls.md`
+dumps the raw API-level message log instead: every tool call's real
+arguments (pretty-printed) and every tool result's real content, turn by
+turn, captured from `window.__kg.agent.state.apiMessages` (the exact
+request/response content the app itself sent and received —
+`lib/conversationOrchestrator.mjs`'s `tagApiMessagesWithTurn`). This exists
+specifically so a suspected tool/state-sync issue can be checked against
+what actually happened instead of the interviewer's own narration of it, or
+the LLM reviewer's summary of that narration.
 
 ## Fixtures
 
@@ -56,20 +81,64 @@ unmodified copies of the uploaded ground-truth ontology and persona prompt.
 They are not secrets — the ground truth is hidden only from the app agent
 under test (which never sees this directory), not from the repo.
 
-## The one deliberate edit to the ground truth
+## Deliberate, documented edits to the ground truth
 
 The user's own instruction was to trim the ground truth "based on the
-handbook" before treating it as the recovery target. Implemented as a
-documented, auditable filter in `lib/groundTruthModel.mjs`
-(`isRecoverableProperty`), not a hand-edited copy of the fixture: any
-property predicate whose target datatype is `identifier` or `uri` is
-excluded from the comparison target. The app's own baked howto doc
-(`AGENT_KNOWLEDGE` in `index.html`) explicitly tells the agent not to model
-these ("Do not include technical fields that users never ask about"), so
-scoring their absence as a recall failure would penalize the agent for
-correctly following its own instructions. Everything else in the ~2800-line
-fixture — all 68 classes, all 143 relationships, all 111 remaining
-decision-relevant properties, every controlled-value set — is fair game.
+handbook" before treating it as the recovery target — always as a
+documented, auditable filter in `lib/groundTruthModel.mjs`, never a
+hand-edited copy of the fixture. Three filters, each independently
+justified:
+
+- **`isRecoverableProperty`** — excludes any property predicate whose
+  target datatype is `identifier` or `uri`. The app's own baked howto doc
+  (`AGENT_KNOWLEDGE` in `index.html`) explicitly tells the agent not to
+  model these ("Do not include technical fields that users never ask
+  about"), so scoring their absence as a recall failure would penalize the
+  agent for correctly following its own instructions.
+- **`isRecoverableRelationship`** — excludes the 23 `"is a"` (subclass)
+  predicates the fixture models (`Major Incident is a Incident`,
+  `Application is a Configuration Item`, and so on). The app's data model
+  is flat classes plus directed relationship edges only — no subclassing
+  (see `index.html`'s `commitYamlImport` comment) — and a real eval run's
+  own interviewer correctly said so mid-interview ("this tool does not use
+  subclassing directly ... instead, connect them with a clear
+  relationship"), modeling `Major Incident —declared from→ Incident`
+  instead of forcing `"is a"` onto a generic edge. Scoring that choice as a
+  miss would penalize correct behavior, not bad interview technique.
+- **`practicalScopeClassIds`** — see "Full domain vs. practical scope"
+  below.
+
+Everything else — all 68 classes, all 120 remaining relationships, all 111
+remaining decision-relevant properties, every controlled-value set — is
+fair game, scored against the full domain as before.
+
+## Full domain vs. practical scope
+
+The fixture models a *comprehensive* 68-class reference domain, built for
+reuse across many possible interviews/experiments — not a scoped
+deliverable for any one of them. A real, single-session,
+competency-question-driven interview (this app's own actual methodology:
+elicit real questions/actions first, then model only what's needed to
+answer them) will only ever reach the slice of that domain implied by
+whatever questions/actions actually came up. Scoring 100%-domain recall
+every run measures the wrong thing — a live run whose interviewer opened
+with "I lead IT operations governance and major-incident management" and
+never asked about, say, container platforms or business continuity testing
+isn't failing to recover those; they were never in scope to begin with.
+
+`groundTruthModel.mjs`'s `practicalScopeClassIds` gives a second, tighter,
+and just as auditable denominator: every class whose label or a declared
+alias appears (case/punctuation-insensitive, whole-word) inside the
+fixture's *own* canonical `competencyQuestions:` + `actions:` section —
+mechanical, not hand-picked, since it only depends on what the fixture's
+own canonical competency-test material actually talks about. `report.md`'s
+headline table now shows both **Full domain** and **Practical scope**
+columns side by side for every metric — full-domain numbers for
+cross-run/cross-fixture-revision comparability, practical-scope numbers as
+the more meaningful read of a single interview's own quality. `scopeGroundTruth()`
+filters an already-loaded ground truth model down to a given class-id set,
+reusing the exact same `computeRecoveryMetrics()` scoring logic for both
+columns rather than maintaining a second code path.
 
 ## Metrics (see `lib/recoveryMetrics.mjs`)
 
@@ -97,14 +166,29 @@ added (helper_agent_todo.md's dated Log entry).
   fitted one — tune in `computeRecoveryMetrics()` if a different balance
   matters more for what's being optimized.
 
+Relationship recall specifically was found to lag even its own reachable
+ceiling (well below what the classes actually modeled in a run could
+support) because Phase 3 of the interviewer's own system prompt
+(`index.html`'s `INTERVIEW PROCESS`) asked one opening batch of backbone
+relationships, then moved on to properties without working back through the
+rest of the confirmed class list. Fixed by adding explicit
+don't-stop-after-one-batch, cover-everything-confirmed guidance to Phase 3,
+pinned by `tests/helper-agent-phase4.spec.mjs`.
+
 ## Expectation to set going in
 
-The ground truth is large. A bounded interview — even up to 500 turns — will
-realistically recover a minority of it, the same way a real human interview
-would need several sessions for a domain this size. This eval's value is
-trend-tracking (did a prompt or heuristic change move the recovery rate up
-or down, did tool-call errors increase, did the interview get less
-efficient) rather than expecting the composite score to approach 100%.
+The full-domain ground truth is large, and by design a bounded, focused
+interview should only reach a fraction of it — that's not a shortfall to
+close, it's what a scoped, competency-driven interview is supposed to do
+(see "Full domain vs. practical scope" above). Even the **practical-scope**
+composite, scored against just the classes/relationships/properties the
+fixture's own canonical competency material actually talks about, is a more
+demanding bar than it looks — it still requires near-exhaustive elicitation
+across everything in that narrower scope. This eval's value is
+trend-tracking on both columns (did a prompt or heuristic change move
+practical-scope recovery up or down, did full-domain scope itself widen,
+did tool-call errors increase, did the interview get less efficient) rather
+than expecting either composite score to approach 100%.
 
 ## Cost and configuration knobs
 

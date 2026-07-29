@@ -4,9 +4,9 @@ import { withPage } from "../lib/page.mjs";
 import { loadEnvKey } from "../lib/env.mjs";
 import { connectAgentLive } from "../lib/liveOpenAi.mjs";
 import { runOntologyRecoveryConversation } from "./lib/conversationOrchestrator.mjs";
-import { loadGroundTruthModel } from "./lib/groundTruthModel.mjs";
+import { loadGroundTruthModel, scopeGroundTruth } from "./lib/groundTruthModel.mjs";
 import { computeRecoveryMetrics } from "./lib/recoveryMetrics.mjs";
-import { writeConversationLog, computeOperationalStats, generateLlmReview, writeReport } from "./lib/reportGenerator.mjs";
+import { writeConversationLog, computeOperationalStats, generateLlmReview, writeReport, writeToolCallLog } from "./lib/reportGenerator.mjs";
 
 // Ontology-recovery eval — see tests/evals/README.md for the full design
 // writeup. Not part of the default `node --test tests/*.spec.mjs` run
@@ -75,15 +75,19 @@ test(
       }));
       const groundTruth = loadGroundTruthModel();
       const metrics = computeRecoveryMetrics(groundTruth, recoveredState);
+      const scopedGroundTruth = scopeGroundTruth(groundTruth, groundTruth.practicalScopeClassIds);
+      const scopedMetrics = computeRecoveryMetrics(scopedGroundTruth, recoveredState);
 
       assert.ok(Number.isFinite(metrics.recoveryEffectiveness), "composite score must be a real number, not NaN");
       assert.ok(metrics.classes.recall >= 0 && metrics.classes.recall <= 1);
+      assert.ok(Number.isFinite(scopedMetrics.recoveryEffectiveness), "scoped composite score must be a real number, not NaN");
 
       const operationalStats = computeOperationalStats(orchestratorResult);
       writeConversationLog(orchestratorResult);
+      writeToolCallLog(orchestratorResult.rawApiLog);
       const reviewModel = REVIEW_MODEL_OVERRIDE || interviewerModel;
       const llmReviewText = await generateLlmReview({ apiKey: OPENAI_API_KEY, model: reviewModel, orchestratorResult });
-      writeReport({ metrics, operationalStats, orchestratorResult, llmReviewText, interviewerModel, personaModel: PERSONA_MODEL });
+      writeReport({ metrics, scopedMetrics, operationalStats, orchestratorResult, llmReviewText, interviewerModel, personaModel: PERSONA_MODEL });
     });
   }
 );
