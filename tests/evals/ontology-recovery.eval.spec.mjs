@@ -33,7 +33,14 @@ const skip = OPENAI_API_KEY
   ? false
   : "Set OPENAI_API_KEY in a .env file at the repo root (see tests/README.md) to run the ontology-recovery eval.";
 
-const MAX_TURNS = Number(process.env.ONTOLOGY_EVAL_MAX_TURNS) || 100;
+// Raised from 100 to 500 once the interviewer's own pacing was fixed to
+// batch similar low-ambiguity items instead of one-per-turn (index.html's
+// GROUND RULES/INTERVIEW PROCESS -- see helper_agent_todo.md's dated Log
+// entry) -- with that fix, more turns means covering more of the ground
+// truth instead of just spending more turns re-asking the same shape of
+// question. The 45-minute wallclock default below remains the practical
+// real-world bound regardless of this cap.
+const MAX_TURNS = Number(process.env.ONTOLOGY_EVAL_MAX_TURNS) || 500;
 const WALLCLOCK_MINUTES = Number(process.env.ONTOLOGY_EVAL_WALLCLOCK_MINUTES) || 45;
 const WALLCLOCK_MS = WALLCLOCK_MINUTES * 60 * 1000;
 const PERSONA_MODEL = process.env.ONTOLOGY_EVAL_PERSONA_MODEL || "gpt-4o-mini";

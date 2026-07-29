@@ -538,6 +538,59 @@ replace test needed no changes and stayed green throughout.
       responses. Stable across two consecutive real runs.
 - Full suite (`tests/*.spec.mjs`, including the 7 live tests) green, run twice consecutively, plus 13
   Python tests.
-- A third full 100-turn/45-minute real eval run was done post-fix as an end-to-end confirmation — see this
-  addendum's own follow-up note (or `tests/evals/results/report.md` at the time, gitignored) for the actual
-  before/after comparison.
+- A third full 100-turn/45-minute real eval run was done post-fix as an end-to-end confirmation, showing a
+  clean, unconfounded improvement with the same turn cap and domain: composite recovery 3.7% → 8.2%,
+  classes matched 5 → 12, properties matched 4 → 10, and the "I noticed X was lost" self-correction pattern
+  gone entirely from the transcript.
+
+## Addendum — eval-tooling and interview-pacing fixes found by analyzing that same post-fix run
+
+**2026-07-29.** User asked for a short analysis of what could still be improved before doing anything.
+Two further issues were identified from the merge-fix confirmation run above, both then fixed:
+
+**1. A real bug in the eval's own metrics code (not the app).** Relationship recall was still only 0.7%
+(1/143) despite 60 real edges having been created that run. The app stores relationship names in its own
+camelCase dialect (`isImplementedBy`, `dependsOn` — the YAML shape `apply_ontology_yaml` itself uses), while
+the ground truth's predicate labels are natural-language phrases (`"is implemented by"`). The eval's
+`labelsMatch()` (`tests/evals/lib/recoveryMetrics.mjs`) tokenizes on whitespace only, so a camelCase relation
+name arrives as one unsplit token (`isimplementedby`) that can essentially never overlap with the ground
+truth's multi-word tokens — silently suppressing almost all relationship recall regardless of real interview
+quality.
+
+- [x] `normalize()` now splits camelCase into words before lowercasing (`splitCamelCase()`), so
+      `isImplementedBy` → `is implemented by` and correctly compares against the ground truth's own phrasing.
+      Same known consecutive-uppercase-acronym limitation as the app's own `toCamelCaseId()` (`TODO.md`'s
+      prior note on that) — not solved here either, for the same reason: not a real predicate name in this
+      domain.
+- [x] New fast, deterministic unit-test file `tests/ontology-recovery-metrics.spec.mjs` (4 tests, no browser,
+      no API key — pure logic, runs as part of the main suite even though the eval itself lives separately
+      under `tests/evals/`): the camelCase fix itself; the pre-existing substring-conflation pitfall
+      ("Incident" vs "Major Incident") stays fixed; `groundTruthModel`'s identifier/uri filter removes only
+      what it should; an empty recovered state produces finite, non-NaN metrics.
+
+**2. A real interview-pacing inefficiency, independently flagged twice by the LLM review in one run** (turns
+42–89: "one class meaning per turn... a batched prompt could have collected 5–10 at once"; turns 89+: same
+for constraints). Root cause: `AGENT_SYSTEM_PROMPT_BASE`'s very first `GROUND RULES` line was an absolute
+rule — *"Ask ONE focused question at a time. Never send a multi-part questionnaire."* — with no carve-out
+for asking the same small question about several similar items at once.
+
+- [x] Rewrote that rule (`index.html`): one-at-a-time still applies when items are different in kind or
+      answer-dependent, but once a repeating pattern is established, batch 3-5 similar, low-ambiguity items
+      (several class meanings, several relationships' aliases, several properties' allowed-value lists) into
+      one question instead of one exchange per item. Explicit non-goal preserved: never batch genuinely
+      different-in-kind questions, never send a confusing wall of unrelated ones.
+- [x] Reinforced at the two specific phases the real run's own LLM review singled out — Phase 4 (properties),
+      Phase 5 (language layer), Phase 6 (constraints) — each now points back to the batching rule as the
+      expected pattern for that phase specifically, not just a generic footnote.
+- [x] New mocked test, `tests/helper-agent-phase4.spec.mjs` (+1): pins the batching-guidance text and its
+      explicit different-in-kind exclusion in the system prompt.
+- [x] `ONTOLOGY_EVAL_MAX_TURNS` default raised 100 → 500 (`tests/evals/ontology-recovery.eval.spec.mjs`,
+      `tests/evals/README.md`), per the user's own explicit instruction, gated on the pacing fix actually
+      landing first: with batching, more turns should mean covering more of the ground truth, not just more
+      turns spent re-asking the same shape of question. The 45-minute wall-clock default is unchanged and
+      remains the practical real-world bound in nearly every run regardless of the turn cap.
+- Full suite (`tests/*.spec.mjs`, including the 7 live tests) green, run twice consecutively (374 JS tests),
+  plus 13 Python tests.
+- A full real eval run at the new 500-turn cap, both fixes active, was done as end-to-end confirmation —
+  see this addendum's own follow-up note (or `tests/evals/results/report.md` at the time, gitignored) for
+  the actual numbers.

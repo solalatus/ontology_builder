@@ -64,6 +64,28 @@ test("the system prompt includes the INTERVIEW PROCESS section with all 10 phase
   });
 });
 
+// Regression coverage for a real interview-pacing inefficiency the
+// ontology-recovery eval's own LLM review flagged twice in one run (turns
+// 42-89 and 89+): GROUND RULES used to say "Ask ONE focused question at a
+// time. Never send a multi-part questionnaire," with no carve-out, so the
+// interviewer asked for one class meaning, one alias, or one allowed-value
+// list per turn even once the exact same small question had already
+// repeated many times. Fixed by allowing batching once a repeating pattern
+// is established, while still requiring one-at-a-time for genuinely
+// different-in-kind or answer-dependent questions.
+test("the system prompt allows batching similar, low-ambiguity items instead of a strict one-question-at-a-time rule", async () => {
+  await withPage(async (page) => {
+    const prompt = await systemPrompt(page);
+    assert.match(prompt, /batch 3-5 similar,\s*low-ambiguity\s*items/);
+    assert.match(prompt, /Never batch items that\s*are different in kind/);
+    // The two phases the eval's own real run singled out as the most
+    // repetitive (language layer, constraints) call this out explicitly,
+    // not just the general ground rule.
+    assert.match(prompt, /repeating-pattern case GROUND RULES describes/);
+    assert.match(prompt, /Batch the allowed-\s*value question across several properties/);
+  });
+});
+
 test("the system prompt never reveals the underlying model name or API mechanics that aren't part of the knowledge itself", async () => {
   // Not a security boundary (see SCOPE's own comment on this), just a
   // sanity check that nothing accidentally leaked in from the surrounding
