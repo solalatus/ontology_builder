@@ -36,10 +36,30 @@ check, or run it for real via `node --test`.
    `lib/personaAgent.mjs`), whose reply goes back into the app's chat box.
 3. Stops on whichever comes first:
    - the app agent's latest reply looks like it believes the interview is
-     essentially wrapped up (a cheap real classification call after each
-     app-agent turn — `appearsFinished()` in `lib/conversationOrchestrator.mjs`);
+     essentially wrapped up (a real classification call after each
+     app-agent turn — `appearsFinished()` in `lib/conversationOrchestrator.mjs`,
+     itself backed by a deterministic pre-filter that never needs the API
+     call at all — see the config table below);
+   - the app agent has sent two consecutive short, content-free
+     pleasantries in a row with no question in them (`looksLikePureAcknowledgment()`
+     in `lib/conversationOrchestrator.mjs`) — a second, independent safety
+     net that needs no API call and can't be fooled by a classifier model
+     misjudging content, added after a real run looped 160+ turns of pure
+     "Thank you" / "You're welcome" / "Take care" past the point the
+     interview had already, explicitly finished (the classifier call itself
+     was silently failing that run — see the `ONTOLOGY_EVAL_CLASSIFIER_MODEL`
+     row below);
    - `ONTOLOGY_EVAL_MAX_TURNS` turns (default 500);
    - `ONTOLOGY_EVAL_WALLCLOCK_MINUTES` wall-clock minutes (default 45).
+
+   The persona itself (`lib/personaAgent.mjs`'s `fixtures/persona-eszter.md`)
+   also carries a prompt-level defense against the same failure: instructed
+   to recognize the interviewer's own wrap-up cues (a final validation pass,
+   a competency check, an explicit "interview complete" statement) and give
+   one short closing line rather than keep volunteering new content or
+   trading farewells back and forth — the persona's own contribution to
+   *not* re-igniting the loop, alongside the two deterministic/LLM checks
+   above that actually stop it.
 4. Diffs the final recovered canvas model against the ground-truth fixture
    (`lib/recoveryMetrics.mjs`), against both the full domain and the
    practical-scope subset (see below), and writes `results/report.md` +
@@ -222,7 +242,7 @@ All environment-configurable, none hardcoded:
 | `ONTOLOGY_EVAL_MAX_TURNS` | 500 | Hard turn cap — raised from 100 once the interviewer's own pacing was fixed to batch similar items instead of one-per-turn (helper_agent_todo.md's dated Log entry) |
 | `ONTOLOGY_EVAL_WALLCLOCK_MINUTES` | 45 | Hard wall-clock cap |
 | `ONTOLOGY_EVAL_PERSONA_MODEL` | `gpt-4o-mini` | Simulating Eszter is a lighter task than open-ended elicitation, so this defaults cheap |
-| `ONTOLOGY_EVAL_CLASSIFIER_MODEL` | (interviewer's own connected model) | The "does this look finished?" check — was a fixed cheap default (`gpt-4o-mini`) until a real run found it hard to instruction-away from a false positive on an early-phase recap; now defaults to whatever real, live-picked "standard tier" model the interviewer connects with, same pattern as `ONTOLOGY_EVAL_REVIEW_MODEL`. Also backed by a deterministic pre-filter (`looksLikeEarlyPhaseCheckpoint` in `lib/conversationOrchestrator.mjs`) that catches the interviewer's own "Phase N recap" phrasing before ever calling this model at all. |
+| `ONTOLOGY_EVAL_CLASSIFIER_MODEL` | (interviewer's own connected model) | The "does this look finished?" check — was a fixed cheap default (`gpt-4o-mini`) until a real run found it hard to instruction-away from a false positive on an early-phase recap; now defaults to whatever real, live-picked "standard tier" model the interviewer connects with, same pattern as `ONTOLOGY_EVAL_REVIEW_MODEL`. Also backed by a deterministic pre-filter (`looksLikeEarlyPhaseCheckpoint` in `lib/conversationOrchestrator.mjs`) that catches the interviewer's own "Phase N recap" phrasing before ever calling this model at all. Defaulting to the interviewer's own model can pick a reasoning-tier model, which rejects the `temperature`/`max_tokens` params this call used to send (HTTP 400, `"Unsupported parameter: 'max_tokens'..."`); the old code silently treated that failure as "not finished" instead of surfacing it, which is what let the 160+-turn pleasantry loop above happen in the first place. `appearsFinished()` no longer sends either param (matching `index.html`'s own `callAgentChatRaw()`, which never did) and now throws instead of silently defaulting on any classifier API error. |
 | `ONTOLOGY_EVAL_REVIEW_MODEL` | (interviewer's own connected model) | The report's LLM-review call |
 
 The interviewer side always uses whatever model the app's own real

@@ -642,3 +642,21 @@ recap" phrasing (N 0-8) before the classifier is even called, and by
 defaulting the classifier model to the interviewer's own live-picked
 "standard tier" model instead of a fixed cheap one. See
 `helper_agent_todo.md`'s own further dated addendum for the details.
+
+That model-default change turned out to have its own regression: a
+reasoning-tier model picked as classifier rejects the `max_tokens` param
+outright, and the old code silently treated that API failure as "not
+finished," so a confirmatory run looped 160+ turns of pure pleasantries
+after the interviewer had already, explicitly finished -- caught only
+because the user asked to check the actual log content, not just the turn
+count. Fixed by dropping `temperature`/`max_tokens` from that request
+entirely (matching `index.html`'s own working call shape) and making any
+future classifier API failure a loud thrown error instead of a silent
+default. Hardened with two more layers on top: a second, API-free safety
+net (`looksLikePureAcknowledgment`) that stops the run after two
+consecutive content-free pleasantries regardless of what the classifier
+thinks, and a prompt-level defense on the persona side
+(`fixtures/persona-eszter.md`) instructing the simulated interview subject
+to give one short closing line and stop once it recognizes the interviewer
+has wrapped up, rather than keep volunteering new content. See
+`helper_agent_todo.md`'s own further dated addendum for the details.

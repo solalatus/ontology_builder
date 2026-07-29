@@ -33,6 +33,31 @@ export function looksLikeEarlyPhaseCheckpoint(text) {
   return EARLY_PHASE_CHECKPOINT_PATTERNS.some((re) => re.test(text));
 }
 
+// Second, independent safety net -- catches the actual failure mode a real
+// run hit (helper_agent_todo.md's dated Log entry: 160+ turns of pure
+// "Thank you" / "You're welcome" / "Take care" after the interview had
+// already, explicitly finished), and unlike appearsFinished() below it
+// needs no API call and can never be fooled by a model (classifier or
+// interviewer) misjudging content -- it only looks at shape. A message
+// this short, with no question mark (i.e. not inviting more conversation),
+// that opens with a stock closing phrase, is a pure acknowledgment with no
+// new domain content -- regardless of whether it's actually the "finished"
+// message or just small talk. Two of these in a row from the app agent
+// means the conversation has gone idle either way, so the loop below stops
+// on the second one rather than trusting appearsFinished() to eventually
+// catch up. This can only shorten a run that has already stopped producing
+// content, never cut off a real answer (a real answer is either longer, or
+// asks something back).
+const PURE_ACKNOWLEDGMENT_PATTERN = /^\s*(thanks|thank you|you'?re welcome|take care|sounds (good|great)|great(,| -)? thanks|glad (to|i could) help|my pleasure|no problem|appreciate it|have a (great|good|nice) (day|one)|goodbye|bye( for now)?)\b/i;
+export function looksLikePureAcknowledgment(text) {
+  if (!text) return false;
+  const trimmed = text.trim();
+  if (!trimmed) return false;
+  if (trimmed.split(/\s+/).length > 25) return false; // real content runs longer than a closing line
+  if (trimmed.includes("?")) return false; // a question means the conversation is still active
+  return PURE_ACKNOWLEDGMENT_PATTERN.test(trimmed);
+}
+
 // Cheap, separate real call asking whether the interviewer's latest message
 // reads like it believes the *entire* elicitation is wrapped up -- this is
 // what lets a run stop well before the turn cap instead of always running
@@ -46,7 +71,21 @@ export function looksLikeEarlyPhaseCheckpoint(text) {
 // less prone to being fooled by rhetorical shape alone. Also given a little
 // more room to reason before answering (a one-sentence phase identification
 // on its own line, then the verdict on the line after) rather than forcing
-// an immediate 2-token guess -- max_tokens raised accordingly.
+// an immediate 2-token guess.
+//
+// Deliberately does NOT set `temperature` or `max_tokens` -- a live run
+// with a reasoning-tier interviewer model (e.g. a real "gpt-5.5-..." pick)
+// found `max_tokens` rejected outright ("Unsupported parameter: 'max_tokens'
+// is not supported with this model. Use 'max_completion_tokens' instead."),
+// and the resulting HTTP 400 was silently swallowed by the old code below
+// (data.choices undefined -> answer "" -> always "not finished"), so the
+// run never stopped and just looped polite goodbyes for 160+ turns after
+// the interviewer had explicitly finished. index.html's own
+// callAgentChatRaw() never sets these either, for the same reason: it's the
+// one request shape confirmed to work across every model family this app
+// might connect with, standard and reasoning-tier alike. A `res.ok`/
+// `data.error` check now also makes any *future* incompatibility a loud,
+// immediate test failure instead of a silent multi-hour hang.
 async function appearsFinished(text, { apiKey, model }) {
   if (looksLikeEarlyPhaseCheckpoint(text)) return false;
   const res = await fetch(CLASSIFIER_URL, {
@@ -54,8 +93,6 @@ async function appearsFinished(text, { apiKey, model }) {
     headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
     body: JSON.stringify({
       model,
-      temperature: 0,
-      max_tokens: 60,
       messages: [
         {
           role: "system",
@@ -77,6 +114,9 @@ async function appearsFinished(text, { apiKey, model }) {
     }),
   });
   const data = await res.json();
+  if (!res.ok || data.error) {
+    throw new Error(`appearsFinished classifier call failed (HTTP ${res.status}, model "${model}"): ${(data.error && data.error.message) || "unknown error"}`);
+  }
   const answer = (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || "";
   const lines = answer.trim().split("\n").map((l) => l.trim()).filter(Boolean);
   const verdictLine = lines[lines.length - 1] || "";
@@ -98,9 +138,13 @@ export function tagApiMessagesWithTurn(apiMessages, turn) {
 // through `page`, already connected via connectAgentLive) and the persona
 // agent (personaAgent.mjs), starting from the persona's own scripted
 // opening line. Stops on whichever comes first: the app agent appearing to
-// consider the interview finished, the turn cap, or the wallclock budget --
-// see the file's own module doc in tests/evals/README.md for the full
-// rationale.
+// consider the interview finished (appearsFinished, an LLM call, backed by
+// looksLikeEarlyPhaseCheckpoint's deterministic pre-filter), two
+// consecutive content-free pleasantries from the app agent
+// (looksLikePureAcknowledgment, a second and independent safety net that
+// needs no API call and cannot be fooled the way a classifier model can),
+// the turn cap, or the wallclock budget -- see the file's own module doc in
+// tests/evals/README.md for the full rationale.
 //
 // onProgress(snapshot), if given, fires several times per turn -- most
 // importantly *before* the one call that's actually slow (sendChatMessage,
@@ -134,6 +178,7 @@ export async function runOntologyRecoveryConversation({
   let incomingForApp = OPENING_LINE;
   let stoppedReason = "max_turns_reached";
   let consecutiveEmptyAppTurns = 0;
+  let consecutivePureAcknowledgmentTurns = 0;
   let turnsUsed = 0;
 
   // Never let a progress-reporting failure (a bad file write, a full disk)
@@ -185,6 +230,16 @@ export async function runOntologyRecoveryConversation({
       continue;
     }
     consecutiveEmptyAppTurns = 0;
+
+    if (looksLikePureAcknowledgment(appText)) {
+      consecutivePureAcknowledgmentTurns++;
+      if (consecutivePureAcknowledgmentTurns >= 2) {
+        stoppedReason = "pleasantry_loop_detected";
+        break;
+      }
+    } else {
+      consecutivePureAcknowledgmentTurns = 0;
+    }
 
     if (Date.now() - startedAt > wallClockMs) { stoppedReason = "wallclock_timeout"; break; }
     if (await appearsFinished(appText, { apiKey, model: classifierModel })) {

@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
-import { tagApiMessagesWithTurn, looksLikeEarlyPhaseCheckpoint } from "./evals/lib/conversationOrchestrator.mjs";
+import { tagApiMessagesWithTurn, looksLikeEarlyPhaseCheckpoint, looksLikePureAcknowledgment } from "./evals/lib/conversationOrchestrator.mjs";
 import { writeConversationLog, writeToolCallLog, writeReport, LOG_PATH, TOOL_CALL_LOG_PATH, REPORT_PATH } from "./evals/lib/reportGenerator.mjs";
 
 // Fast, deterministic unit tests for the eval's full-transparency logging
@@ -63,6 +63,40 @@ test("looksLikeEarlyPhaseCheckpoint does not match a genuine final wrap-up with 
 test("looksLikeEarlyPhaseCheckpoint does not match ordinary text with no phase/recap markers", () => {
   assert.equal(looksLikeEarlyPhaseCheckpoint("What is the current status of the incident?"), false);
   assert.equal(looksLikeEarlyPhaseCheckpoint(""), false);
+});
+
+// Second, independent safety net -- a real run looped 160+ turns of pure
+// "Thank you" / "You're welcome" / "Take care" after the interview had
+// already, explicitly finished, because appearsFinished's classifier call
+// was silently failing (see the max_tokens fix above/nearby in the Log).
+// looksLikePureAcknowledgment needs no API call and detects the *shape* of
+// a content-free closing exchange directly, as a backstop that can't be
+// fooled by a classifier model's judgment call.
+test("looksLikePureAcknowledgment recognizes short stock closing lines with no question", () => {
+  assert.equal(looksLikePureAcknowledgment("Thank you!"), true);
+  assert.equal(looksLikePureAcknowledgment("You're welcome!"), true);
+  assert.equal(looksLikePureAcknowledgment("Take care."), true);
+  assert.equal(looksLikePureAcknowledgment("Sounds good, thank you for walking through this."), true);
+  assert.equal(looksLikePureAcknowledgment("Great, thanks so much for your time today."), true);
+  assert.equal(looksLikePureAcknowledgment("No problem at all."), true);
+  assert.equal(looksLikePureAcknowledgment("Goodbye!"), true);
+});
+
+test("looksLikePureAcknowledgment rejects real content even when it starts with a closing-sounding word", () => {
+  // Long enough that it's clearly still substantive, not just a sign-off.
+  const longReply = "Thanks for that -- before we move on, I want to flag that the incident-to-problem link " +
+    "also needs a root-cause category captured, since that's what the post-incident review depends on later.";
+  assert.equal(looksLikePureAcknowledgment(longReply), false);
+});
+
+test("looksLikePureAcknowledgment rejects a message ending in a question, even a short one", () => {
+  assert.equal(looksLikePureAcknowledgment("Thanks -- one more thing, does that cover it?"), false);
+});
+
+test("looksLikePureAcknowledgment rejects ordinary domain content and empty input", () => {
+  assert.equal(looksLikePureAcknowledgment("An incident impacts an IT service."), false);
+  assert.equal(looksLikePureAcknowledgment(""), false);
+  assert.equal(looksLikePureAcknowledgment(null), false);
 });
 
 test("tagApiMessagesWithTurn tags every message with its turn number and passes content through unchanged", () => {

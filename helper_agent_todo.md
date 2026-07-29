@@ -820,3 +820,56 @@ instruction: implement a fix, and separately upgrade the classifier model.
       the new classifier-model line.
 - Full suite (`tests/*.spec.mjs`, 403 JS tests) green. A full real eval re-run confirmed the fix and upgraded
   model together — see this addendum's own follow-up note for the numbers.
+
+## Addendum — the classifier-model upgrade's own regression: `max_tokens` rejected by reasoning-tier models, silently swallowed as "not finished"
+
+**2026-07-29.** User's ask: "check the discussion in the log if it is healthy" — not just the turn-count
+header, the actual content. Reading `results/conversation-log.md` around turns 190-200 of the confirmatory
+run for the previous addendum found the interviewer had explicitly finished at turn 38-39 ("we'll consider
+the ontology interview complete for this first version"), then just kept trading "Thank you" / "You're
+welcome" / "Take care" for 160+ turns after that — the exact false-negative version of the false-positive bug
+the previous addendum fixed, and self-inflicted by that same fix.
+
+Root cause: `ONTOLOGY_EVAL_CLASSIFIER_MODEL` now defaults to the interviewer's own live-picked model, which
+can be a reasoning-tier model (e.g. a real `gpt-5.5-...` pick). The classifier request still sent
+`temperature: 0, max_tokens: 60`, and reasoning-tier models reject `max_tokens` outright — confirmed live with
+two isolated `node -e` API calls (one with `max_tokens` → HTTP 400 `"Unsupported parameter: 'max_tokens' is
+not supported with this model. Use 'max_completion_tokens' instead."`; the same call without it → 200 success,
+`completion_tokens_details.reasoning_tokens: 20` in the response). The old `appearsFinished()` code treated
+*any* API failure the same as an empty answer (`data.choices` undefined → `answer = ""` → regex match fails →
+`false`), so every single classifier call silently failed and the run just never stopped on its own — bounded
+only by the turn cap / wallclock. Killed the confirmed-broken background run (PIDs 19146/19145/18789) rather
+than let it burn the remaining budget for a result already known to be worthless.
+
+User's follow-up instruction, in the same message: fix this, **and** harden the finished-detection with a
+second, independent layer that doesn't depend on the classifier at all, **and** add a prompt-level defense on
+the persona side so the simulated interview subject stops re-igniting the small talk once things are actually
+done. All three implemented together:
+
+- [x] **The actual bug** — `appearsFinished()` no longer sends `temperature` or `max_tokens` at all, matching
+      `index.html`'s own `callAgentChatRaw()` (confirmed via grep to never set either, which is exactly why
+      the interviewer's own real conversation never hit this). Added a `res.ok`/`data.error` check that throws
+      a descriptive error naming the model and HTTP status on any classifier API failure, so a *future*
+      incompatibility is a loud, immediate test failure instead of another silent multi-hour hang.
+- [x] **Second, independent safety net (no API call, can't be fooled)** — new `looksLikePureAcknowledgment()`,
+      exported from `conversationOrchestrator.mjs`: a message under 25 words, with no `?` in it, that opens
+      with a stock closing phrase ("thank you", "you're welcome", "take care", "sounds good", "no problem",
+      "goodbye", etc.) is a content-free pleasantry regardless of what any classifier thinks. Two of these in
+      a row from the app agent stop the run (`pleasantry_loop_detected`) *before* even calling
+      `appearsFinished()` — cheaper, and immune to the exact failure mode above by construction, since it
+      never touches the network. Can only shorten a run that's already gone idle; a real answer is either
+      longer or asks something back, so it can't misfire on genuine content.
+- [x] **Persona-side prompt defense** — new "Ending the interview" section in
+      `tests/evals/fixtures/persona-eszter.md`: instructs Eszter to recognize the interviewer's own wrap-up
+      cues (final validation pass, competency check, an explicit "interview complete"/"ready for use"
+      statement) and give one short closing line instead of volunteering new content, asking a new question of
+      her own, or trading farewells back and forth turn after turn. Doesn't stop the loop by itself (that's
+      the two mechanisms above), but stops the persona from being the thing that keeps feeding the interviewer
+      new material to react to once the real interview is over.
+- [x] Tests (`tests/ontology-recovery-transparency.spec.mjs`, +5): `looksLikePureAcknowledgment` recognizes
+      the real stock closing lines from the actual 160-turn loop; rejects real content even when it opens with
+      a closing-sounding word (word-count guard); rejects anything ending in `?`; rejects ordinary domain
+      content and empty/null input.
+- Full suite (`tests/*.spec.mjs`, 407 JS tests) green; the 5 failures seen in this run are pre-existing,
+  unrelated `helper-agent-live-openai.spec.mjs` live tests hit by real API rate limiting (HTTP 429), not this
+  change.
