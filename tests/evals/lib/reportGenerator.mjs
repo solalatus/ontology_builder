@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { RATE_LIMIT_MAX_ATTEMPTS, rateLimitBackoffMs, sleepMs, isInsufficientQuotaError } from "../../lib/liveOpenAi.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export const RESULTS_DIR = path.resolve(__dirname, "..", "results");
@@ -83,29 +84,42 @@ export async function generateLlmReview({ apiKey, model, orchestratorResult }) {
   const transcriptText = orchestratorResult.log
     .map((e) => `[turn ${e.turn} | ${e.speaker}]\n${e.text}`)
     .join("\n\n");
-  const res = await fetch(CHAT_URL, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-    body: JSON.stringify({
-      model,
-      messages: [
-        {
-          role: "system",
-          content: "You are reviewing a transcript of a simulated ontology-elicitation interview between an " +
-            "AI interviewer (speaker labels starting with \"app-\") and a simulated domain-expert persona " +
-            "(speaker label \"persona\"). Write a concise, skimmable review in markdown with two sections: " +
-            "'## Errors' (tool failures, contradictions, the interviewer losing track of state, misapplied " +
-            "edits, or anything that looks like a real bug) and '## Noteworthy observations' (good or bad " +
-            "interview technique, missed obvious follow-ups, especially efficient or inefficient moments, " +
-            "anything a reviewer optimizing this agent's prompt would want to know). Use bullet points with " +
-            "the turn number. If a section has nothing to report, write 'None observed.' under it. Do not " +
-            "restate the whole transcript.",
-        },
-        { role: "user", content: transcriptText },
-      ],
-    }),
-  });
-  const data = await res.json();
+  let res, data;
+  // Retries a transient 429 with backoff, same as every other real API call
+  // site in the app/test suite -- this one still degrades to a soft-fail
+  // message rather than throwing once retries are exhausted, matching its
+  // existing behavior (a review failure shouldn't crash the whole eval run).
+  for (let attempt = 1; attempt <= RATE_LIMIT_MAX_ATTEMPTS; attempt++) {
+    res = await fetch(CHAT_URL, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model,
+        messages: [
+          {
+            role: "system",
+            content: "You are reviewing a transcript of a simulated ontology-elicitation interview between an " +
+              "AI interviewer (speaker labels starting with \"app-\") and a simulated domain-expert persona " +
+              "(speaker label \"persona\"). Write a concise, skimmable review in markdown with two sections: " +
+              "'## Errors' (tool failures, contradictions, the interviewer losing track of state, misapplied " +
+              "edits, or anything that looks like a real bug) and '## Noteworthy observations' (good or bad " +
+              "interview technique, missed obvious follow-ups, especially efficient or inefficient moments, " +
+              "anything a reviewer optimizing this agent's prompt would want to know). Use bullet points with " +
+              "the turn number. If a section has nothing to report, write 'None observed.' under it. Do not " +
+              "restate the whole transcript.",
+          },
+          { role: "user", content: transcriptText },
+        ],
+      }),
+    });
+    data = await res.json();
+    if (res.ok) break;
+    if (res.status === 429 && !isInsufficientQuotaError(data) && attempt < RATE_LIMIT_MAX_ATTEMPTS) {
+      await sleepMs(rateLimitBackoffMs(attempt));
+      continue;
+    }
+    break;
+  }
   if (!res.ok) return `_LLM review call failed: HTTP ${res.status} ${data && data.error && data.error.message}_`;
   return (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || "_LLM review returned no content._";
 }

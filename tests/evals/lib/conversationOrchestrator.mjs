@@ -1,4 +1,4 @@
-import { CHAT_URL, forwardToRealOpenAi, sendChatMessage } from "../../lib/liveOpenAi.mjs";
+import { CHAT_URL, forwardToRealOpenAi, sendChatMessage, RATE_LIMIT_MAX_ATTEMPTS, rateLimitBackoffMs, sleepMs, isInsufficientQuotaError } from "../../lib/liveOpenAi.mjs";
 import { createPersonaAgent, OPENING_LINE } from "./personaAgent.mjs";
 
 const CLASSIFIER_URL = "https://api.openai.com/v1/chat/completions";
@@ -86,35 +86,46 @@ export function looksLikePureAcknowledgment(text) {
 // might connect with, standard and reasoning-tier alike. A `res.ok`/
 // `data.error` check now also makes any *future* incompatibility a loud,
 // immediate test failure instead of a silent multi-hour hang.
-async function appearsFinished(text, { apiKey, model }) {
+export async function appearsFinished(text, { apiKey, model }) {
   if (looksLikeEarlyPhaseCheckpoint(text)) return false;
-  const res = await fetch(CLASSIFIER_URL, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-    body: JSON.stringify({
-      model,
-      messages: [
-        {
-          role: "system",
-          content: "You judge a single message from an AI conducting a domain-modeling interview, which " +
-            "runs through 10 numbered phases: 0 orientation, 1 real questions/actions, 2 classes, " +
-            "3 relationships, 4 decision properties, 5 language/aliases, 6 constraints, 7 rules, 8 actions, " +
-            "9 final validation pass (competency-question check, final checklist). It recaps and asks for " +
-            "confirmation at the end of EVERY phase, not just the last one -- a recap of phase 1, 2, 3, etc. " +
-            "asking to proceed to the next phase is completely normal mid-interview behavior, not completion. " +
-            "First, on one line, name which phase (0-9) this message's content most resembles, or say " +
-            "'final wrap-up' if it's phase 9 or equivalent. Then, on the next line by itself, answer with " +
-            "exactly one word, YES or NO: does this specific message indicate the *entire* 10-phase " +
-            "interview is finished (this is the phase-9-equivalent final wrap-up, referencing a completed " +
-            "model as a whole, not just one earlier phase's recap)? Default to NO whenever the message reads " +
-            "like an earlier phase's checkpoint rather than a true final summary.",
-        },
-        { role: "user", content: text },
-      ],
-    }),
-  });
-  const data = await res.json();
-  if (!res.ok || data.error) {
+  let res, data;
+  // Retries a transient 429 with backoff, same as every other real API call
+  // site (index.html, the relay, personaAgent.mjs) -- this classifier call
+  // had no retry at all until a real run hit a rate limit here mid-eval.
+  // insufficient_quota is still never retried.
+  for (let attempt = 1; attempt <= RATE_LIMIT_MAX_ATTEMPTS; attempt++) {
+    res = await fetch(CLASSIFIER_URL, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model,
+        messages: [
+          {
+            role: "system",
+            content: "You judge a single message from an AI conducting a domain-modeling interview, which " +
+              "runs through 10 numbered phases: 0 orientation, 1 real questions/actions, 2 classes, " +
+              "3 relationships, 4 decision properties, 5 language/aliases, 6 constraints, 7 rules, 8 actions, " +
+              "9 final validation pass (competency-question check, final checklist). It recaps and asks for " +
+              "confirmation at the end of EVERY phase, not just the last one -- a recap of phase 1, 2, 3, etc. " +
+              "asking to proceed to the next phase is completely normal mid-interview behavior, not completion. " +
+              "First, on one line, name which phase (0-9) this message's content most resembles, or say " +
+              "'final wrap-up' if it's phase 9 or equivalent. Then, on the next line by itself, answer with " +
+              "exactly one word, YES or NO: does this specific message indicate the *entire* 10-phase " +
+              "interview is finished (this is the phase-9-equivalent final wrap-up, referencing a completed " +
+              "model as a whole, not just one earlier phase's recap)? Default to NO whenever the message reads " +
+              "like an earlier phase's checkpoint rather than a true final summary.",
+          },
+          { role: "user", content: text },
+        ],
+      }),
+    });
+    data = await res.json();
+    if (res.ok && !data.error) break;
+    const isRetryableRateLimit = res.status === 429 && !isInsufficientQuotaError(data) && attempt < RATE_LIMIT_MAX_ATTEMPTS;
+    if (isRetryableRateLimit) {
+      await sleepMs(rateLimitBackoffMs(attempt));
+      continue;
+    }
     throw new Error(`appearsFinished classifier call failed (HTTP ${res.status}, model "${model}"): ${(data.error && data.error.message) || "unknown error"}`);
   }
   const answer = (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || "";

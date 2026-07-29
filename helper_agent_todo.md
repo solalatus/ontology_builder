@@ -911,6 +911,30 @@ in flight.
       `insufficient_quota` is never retried; a rate limit that never clears still gives up after exactly 4
       attempts rather than hanging forever.
 - Full suite (`tests/*.spec.mjs`, 414 JS tests) green.
+
+**Follow-up, same day, once the account's quota was restored:** the live confirmatory eval finally ran for
+real (~98s) instead of failing at connect -- and then failed again, `insufficient_quota`, from
+`personaAgent.mjs`'s own direct `fetch()` call mid-conversation. That call (and `conversationOrchestrator.mjs`'s
+`appearsFinished` classifier, and `reportGenerator.mjs`'s `generateLlmReview`) each make their own real API call
+outside the relay entirely and had no backoff of any kind -- a real gap in the work above, which only covered
+`index.html` and the relay.
+
+- [x] Consolidated the backoff constants (`RATE_LIMIT_MAX_ATTEMPTS`, `rateLimitBackoffMs`,
+      `isInsufficientQuotaError`) into exported members of `tests/lib/liveOpenAi.mjs` (previously private to
+      the relay) and reused them in all three previously-unprotected call sites: `personaAgent.mjs`'s
+      `reply()`, `conversationOrchestrator.mjs`'s `appearsFinished` (now exported for direct testability, same
+      reasoning as `looksLikeEarlyPhaseCheckpoint`), and `reportGenerator.mjs`'s `generateLlmReview` (which
+      keeps its existing degrade-to-a-soft-fail-message-instead-of-throwing behavior once retries are
+      exhausted, rather than adopting the throw-on-failure shape of the other two).
+- [x] Tests (`tests/eval-rate-limit-backoff.spec.mjs`, new, +6): each of the three call sites retries a
+      transient 429 and succeeds once it recovers (proven by counting real fetch calls against a scripted
+      429/429/200 sequence); each never retries a permanent `insufficient_quota`; `generateLlmReview`
+      specifically confirmed to degrade to its soft-fail message (not throw) after exactly 4 bounded attempts
+      against a rate limit that never clears. All via a monkey-patched `global.fetch` -- deterministic, no API
+      key, no real network.
+- Full suite (`tests/*.spec.mjs`, 420 JS tests) green, including all 5 previously-failing live tests in
+  `helper-agent-live-openai.spec.mjs` -- confirmed the account's quota, not a code bug, was the entire cause of
+  every failure seen in this addendum and the one above it.
 - **Live confirmation blocked, not skipped:** re-running the confirmatory eval to prove the *original*
   `appearsFinished`/`max_tokens` fix actually stops a genuine finished interview promptly (this addendum's own
   stated goal) still failed immediately -- but by design this time: `forwardToRealOpenAi`'s own new
