@@ -825,8 +825,11 @@
 
 <!-- Agent Ontology (agent_ontology_spec.md §7): Class/Relationship details
      editor. One shared dialog — sections toggle visibility depending on
-     whether a node or an edge is being edited (aliases/properties are
-     node-only, per spec §7's "Relationship editor... just Meaning"). -->
+     whether a node or an edge is being edited. Properties remain node-only
+     (edges have no property concept); aliases are shared by both (a real
+     ontology-recovery eval run found the interviewer routinely eliciting
+     relationship synonyms with nowhere to store them — see index.html's
+     createEdge() comment). -->
 <div id="details-overlay" class="modal-overlay">
   <div id="details-dialog" class="modal-dialog details-dialog" role="dialog" aria-modal="true">
     <h2 id="details-title" class="modal-title"></h2>
@@ -1403,6 +1406,13 @@ function createEdge(sourceId, targetId, relation, directed = true) {
   const edge = {
     id: genEdgeId(), source: sourceId, target: targetId, relation, directed,
     meaning: null, // agent_ontology_spec.md §4.2
+    // Relationships get aliases the same way classes always have (below) —
+    // added after a live ontology-recovery eval found the interviewer
+    // routinely eliciting real relationship synonyms from a domain expert
+    // ("affects → impacts, degrades, disrupts") with nowhere to store them,
+    // since edges had no alias concept at all. See helper_agent_todo.md's
+    // dated addendum for the real transcript that surfaced this.
+    aliases: [],
   };
   state.edges.push(edge);
   markDirty();
@@ -1504,7 +1514,14 @@ function snapshotState() {
       aliases: [...n.aliases],
       properties: n.properties.map((p) => ({ ...p })),
     })),
-    edges: state.edges.map((e) => ({ ...e })),
+    // edge.aliases needs the same fresh-array treatment as node.aliases
+    // above -- a bare `{ ...e }` shallow-copies the edge object but leaves
+    // `aliases` pointing at the *same* array instance, so a later edit that
+    // reassigns state.edges[i].aliases is safe, but any future code that
+    // ever mutated the array in place (a push/splice instead of a full
+    // reassignment) would silently corrupt every past undo/redo snapshot
+    // sharing that same array reference.
+    edges: state.edges.map((e) => ({ ...e, aliases: [...(e.aliases || [])] })),
     rules: state.rules.map((r) => ({ ...r, conditions: [...r.conditions] })),
     actions: state.actions.map((a) => ({ ...a, preconditions: [...a.preconditions] })),
   };
@@ -1516,7 +1533,7 @@ function restoreSnapshot(snap) {
     aliases: [...n.aliases],
     properties: n.properties.map((p) => ({ ...p })),
   }));
-  state.edges = snap.edges.map((e) => ({ ...e }));
+  state.edges = snap.edges.map((e) => ({ ...e, aliases: [...(e.aliases || [])] }));
   state.rules = snap.rules.map((r) => ({ ...r, conditions: [...r.conditions] }));
   state.actions = snap.actions.map((a) => ({ ...a, preconditions: [...a.preconditions] }));
 }
@@ -1785,7 +1802,11 @@ function normalizeLoadedNode(n) {
 }
 
 function normalizeLoadedEdge(e) {
-  return { ...e, meaning: typeof e.meaning === "string" ? e.meaning : null };
+  return {
+    ...e,
+    meaning: typeof e.meaning === "string" ? e.meaning : null,
+    aliases: Array.isArray(e.aliases) ? e.aliases : [],
+  };
 }
 
 // A malformed rule/action item (e.g. a hand-edited or partially-migrated
@@ -2595,12 +2616,12 @@ function openDetailsDialog(kind, id) {
   detailsMeaningEl.value = target.meaning || "";
 
   const isNode = kind === "node";
-  detailsAliasesSection.style.display = isNode ? "" : "none";
-  detailsPropertiesSection.style.display = isNode ? "" : "none";
+  detailsAliasesSection.style.display = ""; // aliases are shared by both nodes and edges now
+  detailsPropertiesSection.style.display = isNode ? "" : "none"; // properties remain node-only
   detailsAliasesList.textContent = "";
   detailsPropertiesList.textContent = "";
+  for (const alias of target.aliases) detailsAliasesList.appendChild(createAliasRow(alias));
   if (isNode) {
-    for (const alias of target.aliases) detailsAliasesList.appendChild(createAliasRow(alias));
     for (const prop of target.properties) detailsPropertiesList.appendChild(createPropertyRow(prop));
   }
 
@@ -2646,12 +2667,12 @@ function saveDetailsDialog() {
   const meaning = detailsMeaningEl.value.trim() || null;
   let changed = meaning !== target.meaning;
   target.meaning = meaning;
+  const aliases = collectAliasesFromDom();
+  if (JSON.stringify(aliases) !== JSON.stringify(target.aliases)) changed = true;
+  target.aliases = aliases;
   if (kind === "node") {
-    const aliases = collectAliasesFromDom();
     const properties = collectPropertiesFromDom();
-    if (JSON.stringify(aliases) !== JSON.stringify(target.aliases)) changed = true;
     if (JSON.stringify(properties) !== JSON.stringify(target.properties)) changed = true;
-    target.aliases = aliases;
     target.properties = properties;
   }
   closeDetailsDialog();
@@ -3500,6 +3521,7 @@ function buildJsonExport(savedAt) {
       id: e.id, source: e.source, target: e.target,
       relation: e.relation, directed: e.directed,
       meaning: e.meaning, // agent_ontology_spec.md §4.2
+      aliases: [...(e.aliases || [])],
     })),
     // agent_ontology_spec.md §4.3 — additive top-level collections, empty
     // arrays when nothing's been authored yet.
@@ -3707,6 +3729,7 @@ function buildDomainModel() {
       from: src ? nodeNameById.get(src.id) : null,
       to: tgt ? nodeNameById.get(tgt.id) : null,
       meaning: e.meaning,
+      aliases: [...(e.aliases || [])],
     };
   });
 
@@ -4364,6 +4387,7 @@ function commitYamlImport(text, mode) {
     if (!src || !tgt) continue; // references a class not in this file/on canvas — skip defensively
     const relationName = rel.name || toCamelCaseId("");
     const meaningGiven = typeof rel.meaning === "string";
+    const aliasesGiven = Array.isArray(rel.aliases);
     const existing = state.edges.find((e) => {
       const s = state.nodes.find((n) => n.id === e.source);
       const t = state.nodes.find((n) => n.id === e.target);
@@ -4372,10 +4396,12 @@ function commitYamlImport(text, mode) {
     if (existing) {
       existing.relation = relationName; // aggressive overwrite normalizes the label to the imported name
       if (!fieldLevelMerge || meaningGiven) existing.meaning = meaningGiven ? rel.meaning : null;
+      if (!fieldLevelMerge || aliasesGiven) existing.aliases = aliasesGiven ? [...rel.aliases] : [];
       matchedEdgeIds.add(existing.id);
     } else {
       const edge = createEdge(src.id, tgt.id, relationName, true);
       edge.meaning = meaningGiven ? rel.meaning : null;
+      edge.aliases = aliasesGiven ? [...rel.aliases] : [];
       matchedEdgeIds.add(edge.id);
     }
   }
@@ -5435,7 +5461,11 @@ already has instead of following it rigidly)
    meaning sentence; ask about aliases/synonyms explicitly (don't assume).
    This phase is exactly the repeating-pattern case GROUND RULES describes —
    batch meanings (then, separately, batch aliases) across several classes
-   or relationships rather than one exchange per item.
+   or relationships rather than one exchange per item. Relationship aliases
+   are real, storable data (the relationships YAML shape has its own
+   aliases list, same as classes) — once the expert confirms a batch of
+   them, actually call apply_ontology_yaml with those aliases before moving
+   on. Don't let a good answer here become conversation-only.
 6. Constraints and fixed choices: for properties with a small value set,
    capture the allowed list. Ask "what breaks if this value is missing or
    wrong?" to decide if a property is required/bounded. Batch the allowed-
@@ -5530,6 +5560,7 @@ relationships:
     from: ClassA
     to: ClassB
     meaning: <one sentence, or omit>
+    aliases: [alt phrasing, ...]
 
 rules:
   ruleName:

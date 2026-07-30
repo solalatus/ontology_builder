@@ -112,6 +112,7 @@ Property = {
 | Field | Type | Notes |
 |---|---|---|
 | `meaning` | string \| null | one plain sentence describing the relationship; `relation` (the existing field) continues to serve as the verb-phrase name |
+| `aliases` | string[] | alternate phrasings for the same relationship; empty array by default. Added after `meaning` shipped — see `helper_agent_todo.md`'s dated addendum for why (a real ontology-recovery eval run found the interviewer eliciting real relationship synonyms from a domain expert with nowhere to store them, since edges had no alias concept at all, unlike nodes) |
 
 ### 4.3 New top-level collections
 
@@ -261,7 +262,10 @@ group→hierarchy export logic to write; every node is simply a Class.
   shown only for type "number", allowed-values list — shown only when relevant). The existing rename (✎)
   stays a fast, single-field, label-only edit — unchanged — so the common case doesn't get slower.
 - **Relationship editor.** Same new icon, shown when an edge is selected instead: a smaller modal with
-  just Meaning (the `relation` label keeps using the existing rename flow as today).
+  Meaning and Aliases (the `relation` label keeps using the existing rename flow as today; no Properties
+  section — edges have no property concept). Originally shipped Meaning-only; aliases were added after a
+  real ontology-recovery eval run found the interviewer routinely eliciting real relationship synonyms
+  from a domain expert with nowhere to store them — see `helper_agent_todo.md`'s dated addendum.
 - **Rules manager.** One new toolbar button, "Domain Model," opening a modal with two sections/tabs:
   Rules (name + an editable list of condition strings, add/edit/delete) and Actions (name + input-class
   dropdown populated from current nodes + preconditions multi-select populated from current rules +

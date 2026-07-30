@@ -140,13 +140,24 @@ export function computeRecoveryMetrics(groundTruth, recoveredState) {
 
   // Relationships: a ground-truth relationship is recovered if some edge
   // connects a recovered-node-matched-to-fromClass to a recovered-node-
-  // matched-to-toClass with a semantically close relation label.
+  // matched-to-toClass with a semantically close relation label. Checks the
+  // edge's own aliases too, not just its primary label -- the app's
+  // relationships gained an aliases field (mirroring classes) after a real
+  // eval run found the interviewer eliciting real relationship synonyms
+  // from the persona with nowhere to store them (see helper_agent_todo.md's
+  // dated addendum). Gold's own relationship label still has no alias list
+  // (the fixture's predicates never had one, unlike classes) -- this is a
+  // one-sided widening on the recovered side only.
+  function edgeLabelMatchesGt(gtLabel, edge) {
+    const candidates = [edge.relation, ...(edge.aliases || [])];
+    return candidates.some((c) => labelsMatch(gtLabel, c, REL_PROP_LABEL_MATCH_THRESHOLD));
+  }
   let relMatched = 0;
   for (const rel of groundTruth.relationships) {
     const fromNodeIds = new Set(gtToRecovered.get(rel.fromClassId) || []);
     const toNodeIds = new Set(gtToRecovered.get(rel.toClassId) || []);
     if (!fromNodeIds.size || !toNodeIds.size) continue;
-    const found = edges.some((e) => fromNodeIds.has(e.source) && toNodeIds.has(e.target) && labelsMatch(rel.label, e.relation, REL_PROP_LABEL_MATCH_THRESHOLD));
+    const found = edges.some((e) => fromNodeIds.has(e.source) && toNodeIds.has(e.target) && edgeLabelMatchesGt(rel.label, e));
     if (found) relMatched++;
   }
   const relRecall = groundTruth.relationships.length ? relMatched / groundTruth.relationships.length : 0;
@@ -155,7 +166,7 @@ export function computeRecoveryMetrics(groundTruth, recoveredState) {
     const srcGtClass = recoveredToGt.get(e.source);
     const tgtGtClass = recoveredToGt.get(e.target);
     if (!srcGtClass || !tgtGtClass) continue;
-    if (groundTruth.relationships.some((rel) => rel.fromClassId === srcGtClass && rel.toClassId === tgtGtClass && labelsMatch(rel.label, e.relation, REL_PROP_LABEL_MATCH_THRESHOLD))) {
+    if (groundTruth.relationships.some((rel) => rel.fromClassId === srcGtClass && rel.toClassId === tgtGtClass && edgeLabelMatchesGt(rel.label, e))) {
       recoveredRelMatchedToGt++;
     }
   }

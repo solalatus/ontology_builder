@@ -1039,3 +1039,89 @@ overwritten) as the audit dataset -- the last `get_graph_state` dump (turn 44) a
   outstanding -- an actual multi-turn live interview proving `appearsFinished`/`looksLikePureAcknowledgment`
   stop a real run promptly -- needs the account's quota restored first; nothing further to fix in code until
   then.
+
+## Addendum -- relationships gain aliases (a real app feature, not just an eval fix), plus a persona wording fix
+
+**2026-07-30.** Following up on "why is relationship recall stuck," asked to read the actual transcript from
+the last confirmatory run rather than reason about it abstractly. Two concrete, different findings, not one:
+
+1. The interviewer invents every relationship's wording itself in Phase 3 and the persona just says
+   "Confirmed" to 18 relationships in a row, turn after turn, never once volunteering her own phrasing --
+   her system prompt says to correct *wrong* relationships, not *differently-worded-but-not-wrong* ones.
+2. Turn 22 of that same run: the interviewer explicitly elicits real relationship synonyms from the persona
+   ("affects -> impacts, degrades, disrupts" -- literally includes gold's own wording as a volunteered
+   synonym) across 31 relationships -- genuinely excellent content -- and then the very next
+   `apply_ontology_yaml` call only carries `classes: aliases`, nothing for relationships, and no tool call for
+   relationship aliases ever happens. Traced to the actual code: `state.edges[]` had `relation` and `meaning`
+   only -- **no `aliases` field at all**, unlike nodes. This isn't an eval artifact; it's a real, pre-existing
+   product gap the eval happened to surface, the same category of finding as the single-input-action
+   limitation from an earlier addendum.
+
+User: implement both, option A for the second one (add real `aliases` to the app, not a prompting workaround),
+with test coverage, a live eval re-run, and a PR.
+
+- [x] **Persona wording pushback** (`fixtures/persona-eszter.md`, "Relationship questions") -- told to state
+      her team's actual phrasing when it genuinely differs from what's proposed (not merely a synonym she'd
+      also accept), instead of silently confirming a plausible-sounding guess.
+- [x] **Relationships gained a real `aliases` field**, mirroring what nodes have always had:
+      - `index.html`'s `createEdge()` now initializes `aliases: []`.
+      - `buildDomainModel()`/`buildDomainYamlExport()` include each relationship's aliases in the exported
+        YAML, same shape as classes.
+      - `buildJsonExport()` (Save Version's JSON file) includes them too.
+      - `commitYamlImport()`'s relationship loop gained the same `aliasesGiven`/field-level-merge handling
+        classes already had, so `apply_ontology_yaml` (and manual YAML import) can set them.
+      - `normalizeLoadedEdge()` backfills a missing `aliases` field to `[]` on load -- a payload saved by an
+        older version of the app (no `aliases` key on its edges at all) still loads cleanly.
+      - **UI**: the shared class/relationship details dialog's Aliases section, previously node-only ("edges
+        have no aliases, per spec section 7's `Relationship editor... just Meaning`" -- now stale), is shown
+        for both kinds; Properties stays node-only (edges genuinely have no property concept). Same
+        `createAliasRow`/`+ Add alias`/remove-row components nodes already used -- no new UI built.
+      - AGENT_KNOWLEDGE's authoritative YAML shape reference and Phase 5's own instructions updated so the
+        interviewer knows relationship aliases are real, storable data and to actually call
+        `apply_ontology_yaml` with them once confirmed, not just discuss and drop them.
+      - **A real bug found in the course of this, unrelated to the missing field itself**: `snapshotState()`/
+        `restoreSnapshot()` (undo/redo) shallow-copied edges (`{ ...e }`), leaving a shared `aliases` array
+        reference across snapshots instead of a fresh copy the way nodes already got (`aliases: [...n.aliases]`)
+        -- fixed to match nodes exactly, closing off a latent future-mutation-corrupts-history risk before it
+        could ever bite, not because anything currently mutates the array in place.
+      - `recoveryMetrics.mjs`'s relationship matching now also checks a recovered edge's aliases, not just its
+        primary label, mirroring how class matching already checks a node's alias list.
+- [x] **A self-inflicted syntax error, caught before it shipped**: an early draft of the Phase 5 prompt edit
+      used markdown-style backticks (`` `relationships:` ``) *inside* the JS template literal that builds the
+      system prompt -- an unescaped backtick terminates a template literal early, and the following prompt
+      text got parsed as JS source, crashing the whole page on load with `SyntaxError: Unexpected identifier
+      'relationships'`. This cascaded into every single mocked test hanging at `withPage`'s own
+      `window.__kg` wait (30s timeout each) rather than failing fast, since the app never finished booting at
+      all. Caught by directly loading the page and checking for console/page errors when a routine test run
+      took 11+ minutes instead of its usual few seconds; confirmed and pinpointed via `node --check` on the
+      extracted inline `<script>` block. Fixed by dropping the backticks (plain text, no markdown emphasis
+      needed inside the prompt itself).
+- [x] Tests (new/updated, +9 net): `agent-ontology-phase-b.spec.mjs` -- an edge's details dialog now shows
+      Aliases (not just Meaning), editing/saving an edge's aliases commits as one undo step and reverts on
+      undo. `agent-ontology-phase-f.spec.mjs` -- exported YAML includes a relationship's aliases in the same
+      shape as a class's. `phase4.spec.mjs` -- a relationship's aliases survive a *real* Tier 1 reload through
+      the actual details-dialog UI (not a direct state mutation -- a first attempt at this test used
+      `state.edges[0].aliases = [...]` directly, which bypasses `markDirty()`/`scheduleSave()` entirely and
+      would have falsely passed only because nothing was actually persisted; caught by the test itself
+      failing honestly); a pre-feature saved payload with no `aliases` key on its edges at all still loads
+      without error, normalizing to `[]`. `ontology-recovery-metrics.spec.mjs` -- unaffected (relationship
+      matching tests already covered the label-check path; no gold-side change was needed since the fixture's
+      predicates still have no aliases).
+- Full suite (`tests/*.spec.mjs`, 431 JS tests) green.
+- **Live confirmation.** A fresh confirmatory run (turn 38, 621s, `app_agent_appears_finished` again -- genuine
+  finish, not a cap/timeout/loop) against the previous run (turn 37, 662s) as baseline:
+  - **Composite: 30.2% -> 45.7% full domain, 47.3% -> 57.1% scoped** -- another large jump on top of the
+    previous addendum's own.
+  - **Relationships, the specific target of this addendum: recall 2.5%/4.2% -> 8.3%/12.5% (more than
+    tripled), precision 5.6%/5.6% -> 21.9%/18.8% (nearly quadrupled), F1 3.4%/4.8% -> 12.1%/15.0%.** Both
+    matched count (3 -> 10 full-domain) and recovered-edge count (36 -> 32, fewer but more of them correct)
+    moved the right direction -- not just a denominator artifact, real improvement on the one metric that had
+    been stuck flat across every prior run this session. The LLM review of this run independently praised
+    "Relationship elicitation was systematic and well batched... consistently asked for direction/verb
+    confirmation and **incorporated corrections**" (turns 7-12) -- consistent with the persona wording-pushback
+    fix actually firing in practice, not just sitting unused in the prompt.
+  - Property recall and controlled-value fidelity also up substantially (property recall 31.5%/38.5% ->
+    26.1%/46.2%; fidelity 43.3%/83.3% -> 100%/100%) -- plausibly continued benefit from the same relationship/
+    property matching threshold work, though single-run noise across independent live conversations means this
+    isn't attributed to any one specific change with certainty.
+  - Class metrics held steady to modestly improved (scoped F1 62.5% -> 67.1%).
