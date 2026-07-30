@@ -1344,3 +1344,30 @@ to reconstruct it from a chat log the way this very investigation just had to. `
 and `tests/evals/README.md` all updated to document this: only the most recent run's files are ever committed
 (each write overwrites the previous run, same as before -- this is a visibility change, not a new accumulation
 policy).
+
+**Live confirmation of the Phase 1 probing fix -- real recall gain, but a new precision cost, still short of the
+merged baseline.** User set an explicit merge gate: won't merge this branch until it beats the last *merged*
+run's numbers (composite 45.7%/57.1% full/scoped; class recall/precision 60.7%/75.0% scoped; relationship
+recall/precision 12.5%/18.8% scoped). Ran a fresh confirmatory eval (46 turns, 1089s) to test the fix.
+
+- **The probe visibly fired, independently confirmed by the LLM reviewer**, not just self-reported: *"Turns
+  3-4: Good gap-checking prompt for roles, environments, and governance forums before modeling classes."*
+- **Both recall metrics genuinely improved over baseline**: class recall 67.9% (vs 60.7%), relationship recall
+  17.1% (vs 12.5%) -- real progress on exactly the problem this whole investigation chased.
+- **But precision fell hard**: class precision 55.3% (vs 75.0%), relationship precision 9.7% (vs 18.8%). The
+  interview over-elaborated -- 38 recovered classes against a 28-class scoped ground truth, inventing plausible
+  extra organizational apparatus (`ExecutiveSponsor`, `CrisisManagementTeam`, `MajorIncidentBridge`,
+  `DetectionSource`, `ResponseAction`, `DecisionRecord`) once the persona, probed with an open "anything else?"
+  for roles/context, generatively supplied a lot more than the six specific gaps this fix was aimed at. The
+  interviewer correctly grounded these in real (persona-stated) Phase 1 material per its own rules -- this
+  isn't a modeling-discipline failure -- but this fixture's specific scope doesn't credit the extra apparatus,
+  so it only cost precision against this ground truth.
+- **Net effect on composite (F1-based, not recall-based)**: class F1 60.9% (vs 67.1%), relationship F1 12.4%
+  (vs 15.0%), composite 28.2%/39.4% (vs 45.7%/57.1%). Still below the merge gate.
+- **Diagnosis, not just the number**: the open-ended "anything else, particularly other roles or environments"
+  probe is doing its job of surfacing omissions, but it's not targeted enough -- it invites the persona to
+  generatively expand scope rather than specifically fill the six-class-shaped gap this investigation
+  originally found. A narrower probe (name the categories explicitly -- on-call/staffing roles, deployment/
+  environment context -- rather than an open invitation) is the next candidate lever, not yet implemented.
+- Committed this run's results (`report.md`/`conversation-log.md`/`tool-calls.md`) alongside this note, per the
+  now-standing policy of committing the latest run with every PR.
