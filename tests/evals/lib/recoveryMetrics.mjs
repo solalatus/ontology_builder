@@ -109,7 +109,7 @@ function f1(recall, precision) {
 
 // Builds { gtClassId -> [recoveredNodeIds] } by matching each ground-truth
 // class's label/aliases against each recovered node's label/meaning/aliases.
-function matchClasses(groundTruth, recoveredNodes) {
+export function matchClasses(groundTruth, recoveredNodes) {
   const gtToRecovered = new Map();
   const recoveredToGt = new Map();
   for (const gtClass of Object.values(groundTruth.classes)) {
@@ -229,5 +229,142 @@ export function computeRecoveryMetrics(groundTruth, recoveredState) {
     properties: { recall: propertyRecall, matched: propMatched, groundTruthTotal: groundTruth.properties.length },
     controlledValueFidelity,
     recoveryEffectiveness,
+  };
+}
+
+// MATCH DETAIL FOR THE LLM-JUDGE SUPPLEMENT (llmMatcher.mjs) --------------
+// computeRecoveryMetrics above is the fast, free, deterministic pass and is
+// left completely untouched by this -- every existing test in
+// tests/ontology-recovery-metrics.spec.mjs keeps exercising exactly that
+// regex/token-based matcher, unaffected by anything below. This is a
+// separate, additive function that re-derives the same matching (some
+// duplication with the loops above, accepted deliberately so the heuristic
+// function above has zero risk of behavior drift) but also collects what it
+// *couldn't* match -- the residual gold items and recovered items llmMatcher.mjs
+// hands to a real LLM judge for a second opinion, since a token-overlap
+// threshold can't tell "sev1-critical" and "Critical" are the same severity
+// scale, only that they don't share enough words.
+//
+// Deliberately narrow about what counts as a worthwhile residual pair to
+// judge: relationships/properties are only included here when their class-
+// pair/host-class *already matched* heuristically -- if the endpoint classes
+// themselves never matched, no relationship label judgment can rescue that,
+// it's a class-level miss already visible in computeRecoveryMetrics's own
+// unmatched classes. This keeps the LLM judge's job to exactly the "same
+// concept, different words" question it's actually good at, not asked to
+// also re-derive class-level matching from scratch.
+export function computeMatchDetail(groundTruth, recoveredState) {
+  const nodes = recoveredState.nodes || [];
+  const edges = recoveredState.edges || [];
+  const { gtToRecovered, recoveredToGt } = matchClasses(groundTruth, nodes);
+
+  const matchedGtClassIds = new Set(gtToRecovered.keys());
+  const matchedRecoveredNodeIds = new Set(recoveredToGt.keys());
+  const unmatchedGoldClasses = Object.values(groundTruth.classes)
+    .filter((c) => !matchedGtClassIds.has(c.id))
+    .map((c) => ({ id: c.id, label: c.label, aliases: c.aliases }));
+  const unmatchedRecoveredNodes = nodes
+    .filter((n) => !matchedRecoveredNodeIds.has(n.id))
+    .map((n) => ({ id: n.id, label: n.label, meaning: n.meaning, aliases: n.aliases || [] }));
+
+  function edgeLabelMatchesGt(gtLabel, edge) {
+    const candidates = [edge.relation, ...(edge.aliases || [])];
+    return candidates.some((c) => labelsMatch(gtLabel, c, REL_PROP_LABEL_MATCH_THRESHOLD));
+  }
+  function relationshipHeuristicMatch(rel, fromNodeIds, toNodeIds) {
+    const forward = edges.some((e) => fromNodeIds.has(e.source) && toNodeIds.has(e.target) && edgeLabelMatchesGt(rel.label, e));
+    if (forward) return true;
+    if (!rel.reciprocalLabel) return false;
+    return edges.some((e) => toNodeIds.has(e.source) && fromNodeIds.has(e.target) && edgeLabelMatchesGt(rel.reciprocalLabel, e));
+  }
+  const labelOf = (id) => (groundTruth.classes[id] || {}).label || id;
+  const unmatchedGoldRelationships = [];
+  let relEligibleGoldCount = 0, relMatchedGoldCount = 0; // "eligible" = endpoints matched, a real wording question
+  for (const rel of groundTruth.relationships) {
+    const fromNodeIds = new Set(gtToRecovered.get(rel.fromClassId) || []);
+    const toNodeIds = new Set(gtToRecovered.get(rel.toClassId) || []);
+    if (!fromNodeIds.size || !toNodeIds.size) continue; // class-level miss, not a wording question
+    relEligibleGoldCount++;
+    if (relationshipHeuristicMatch(rel, fromNodeIds, toNodeIds)) {
+      relMatchedGoldCount++;
+    } else {
+      unmatchedGoldRelationships.push({
+        id: rel.id, label: rel.label, reciprocalLabel: rel.reciprocalLabel || null,
+        fromClassLabel: labelOf(rel.fromClassId), toClassLabel: labelOf(rel.toClassId),
+      });
+    }
+  }
+  const unmatchedRecoveredEdges = [];
+  let relEligibleRecoveredCount = 0, relMatchedRecoveredCount = 0;
+  for (const e of edges) {
+    const srcGtClass = recoveredToGt.get(e.source);
+    const tgtGtClass = recoveredToGt.get(e.target);
+    if (!srcGtClass || !tgtGtClass) continue; // endpoints never matched a gt class at all -- not a wording question either
+    relEligibleRecoveredCount++;
+    const matchesSomeGtRel = groundTruth.relationships.some((rel) => {
+      const forward = rel.fromClassId === srcGtClass && rel.toClassId === tgtGtClass && edgeLabelMatchesGt(rel.label, e);
+      if (forward) return true;
+      if (!rel.reciprocalLabel) return false;
+      return rel.toClassId === srcGtClass && rel.fromClassId === tgtGtClass && edgeLabelMatchesGt(rel.reciprocalLabel, e);
+    });
+    if (matchesSomeGtRel) {
+      relMatchedRecoveredCount++;
+    } else {
+      unmatchedRecoveredEdges.push({
+        id: e.id, relation: e.relation, aliases: e.aliases || [],
+        fromClassLabel: labelOf(srcGtClass), toClassLabel: labelOf(tgtGtClass),
+      });
+    }
+  }
+
+  const unmatchedGoldProperties = [];
+  const matchedControlledValueProperties = [];
+  let propEligibleCount = 0, propMatchedCount = 0;
+  for (const prop of groundTruth.properties) {
+    const nodeIds = gtToRecovered.get(prop.classId) || [];
+    if (!nodeIds.length) continue; // host class never matched -- not a wording question
+    propEligibleCount++;
+    let matchedProp = null;
+    for (const nodeId of nodeIds) {
+      const node = nodes.find((n) => n.id === nodeId);
+      if (!node) continue;
+      const hit = (node.properties || []).find((p) => labelsMatch(prop.label, p.name, REL_PROP_LABEL_MATCH_THRESHOLD));
+      if (hit) { matchedProp = hit; break; }
+    }
+    if (!matchedProp) {
+      const hostNode = nodes.find((n) => nodeIds.includes(n.id));
+      unmatchedGoldProperties.push({
+        id: prop.id, label: prop.label, hostClassLabel: labelOf(prop.classId),
+        recoveredHostProperties: (hostNode && hostNode.properties || []).map((p) => p.name),
+      });
+    } else {
+      propMatchedCount++;
+    }
+    if (matchedProp && prop.allowedValues && prop.allowedValues.length) {
+      matchedControlledValueProperties.push({
+        id: prop.id, label: prop.label, goldAllowedValues: prop.allowedValues, recoveredAllowedValues: matchedProp.allowed || [],
+        heuristicFidelity: jaccard(prop.allowedValues, matchedProp.allowed || []),
+      });
+    }
+  }
+
+  return {
+    classes: {
+      unmatchedGold: unmatchedGoldClasses, unmatchedRecovered: unmatchedRecoveredNodes,
+      matchedGoldCount: matchedGtClassIds.size, matchedRecoveredCount: matchedRecoveredNodeIds.size,
+      goldTotal: Object.keys(groundTruth.classes).length, recoveredTotal: nodes.length,
+    },
+    relationships: {
+      unmatchedGold: unmatchedGoldRelationships, unmatchedRecovered: unmatchedRecoveredEdges,
+      // "eligible" counts (endpoints matched some gt class) are the real denominators the LLM-judge
+      // pass adds on top of -- a relationship/edge whose endpoints never matched anything is a
+      // class-level miss and was never eligible for this residual judging in the first place.
+      matchedGoldCount: relMatchedGoldCount, eligibleGoldCount: relEligibleGoldCount, goldTotal: groundTruth.relationships.length,
+      matchedRecoveredCount: relMatchedRecoveredCount, eligibleRecoveredCount: relEligibleRecoveredCount, recoveredTotal: edges.length,
+    },
+    properties: {
+      unmatchedGold: unmatchedGoldProperties, matchedControlledValue: matchedControlledValueProperties,
+      matchedGoldCount: propMatchedCount, eligibleGoldCount: propEligibleCount, goldTotal: groundTruth.properties.length,
+    },
   };
 }
