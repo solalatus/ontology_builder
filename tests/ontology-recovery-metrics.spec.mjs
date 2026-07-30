@@ -4,6 +4,7 @@ import yaml from "js-yaml";
 import {
   loadGroundTruthModel, scopeGroundTruth, loadRawFixtureText,
   isRecoverableProperty, isRecoverableRelationship, buildReducedActions,
+  mergeReciprocalRelationshipPairs,
 } from "./evals/lib/groundTruthModel.mjs";
 import { computeRecoveryMetrics } from "./evals/lib/recoveryMetrics.mjs";
 
@@ -37,6 +38,77 @@ test("isRecoverableRelationship rejects only \"is a\" (subclass) predicates", ()
   assert.equal(isRecoverableRelationship({ label: "is a" }), false);
   assert.equal(isRecoverableRelationship({ label: "impacts" }), true);
   assert.equal(isRecoverableRelationship({ label: "declared from" }), true);
+});
+
+test("mergeReciprocalRelationshipPairs merges two opposite-direction predicates between the same class pair into one entry with a reciprocalLabel", () => {
+  const relationships = [
+    { id: "incident_isSupportedBy_evidence", label: "is supported by", fromClassId: "incident", toClassId: "evidence" },
+    { id: "evidence_documents_incident", label: "documents", fromClassId: "evidence", toClassId: "incident" },
+  ];
+  const merged = mergeReciprocalRelationshipPairs(relationships);
+  assert.equal(merged.length, 1, "the reciprocal pair should collapse into a single scoring unit");
+  assert.equal(merged[0].id, "incident_isSupportedBy_evidence", "keeps the first-encountered entry as canonical");
+  assert.equal(merged[0].label, "is supported by");
+  assert.equal(merged[0].reciprocalLabel, "documents");
+  assert.equal(merged[0].reciprocalId, "evidence_documents_incident");
+});
+
+test("mergeReciprocalRelationshipPairs leaves a lone relationship (no opposite-direction partner) untouched", () => {
+  const relationships = [{ id: "incident_impacts_itService", label: "impacts", fromClassId: "incident", toClassId: "itService" }];
+  const merged = mergeReciprocalRelationshipPairs(relationships);
+  assert.deepEqual(merged, relationships);
+  assert.equal(merged[0].reciprocalLabel, undefined);
+});
+
+test("mergeReciprocalRelationshipPairs leaves two same-direction predicates between the same class pair untouched (two real facts, not one double-counted)", () => {
+  // e.g. the fixture's own System/Application -supports-> ITService pair is
+  // two genuinely different classes -- but a same-direction pair sharing
+  // one class-pair key would be two distinct real predicates, not a
+  // reciprocal phrasing of one fact, and must not be collapsed.
+  const relationships = [
+    { id: "a", label: "hasBackup", fromClassId: "itService", toClassId: "backup" },
+    { id: "b", label: "hasWorkaround", fromClassId: "itService", toClassId: "backup" },
+  ];
+  const merged = mergeReciprocalRelationshipPairs(relationships);
+  assert.equal(merged.length, 2, "same-direction predicates between the same classes are two real facts, never merged");
+  assert.ok(merged.every((r) => r.reciprocalLabel === undefined));
+});
+
+test("mergeReciprocalRelationshipPairs only pairs each relationship once, even with 3+ entries sharing a class-pair key", () => {
+  const relationships = [
+    { id: "fwd1", label: "is supported by", fromClassId: "incident", toClassId: "evidence" },
+    { id: "rev1", label: "documents", fromClassId: "evidence", toClassId: "incident" },
+    { id: "fwd2", label: "is otherwise linked to", fromClassId: "incident", toClassId: "evidence" },
+  ];
+  const merged = mergeReciprocalRelationshipPairs(relationships);
+  assert.equal(merged.length, 2, "fwd1+rev1 merge into one unit; fwd2 has no partner left and stays separate");
+  const mergedPair = merged.find((r) => r.id === "fwd1");
+  assert.equal(mergedPair.reciprocalLabel, "documents");
+  const lone = merged.find((r) => r.id === "fwd2");
+  assert.equal(lone.reciprocalLabel, undefined);
+});
+
+test("groundTruthModel's bundled fixture has 7 reciprocal relationship pairs in the practical scope, a real and audited fraction of scored relationships", () => {
+  // Pinned to the real live-eval audit that found this (helper_agent_todo.md's
+  // dated addendum): 7 class-pairs, 14 of the 48 pre-merge scoped
+  // relationships (29.2%), collapse to 7 scoring units post-merge.
+  const gt = loadGroundTruthModel();
+  const scoped = scopeGroundTruth(gt, gt.practicalScopeClassIds, gt.practicalScopePropertyIds);
+  const reciprocalCount = scoped.relationships.filter((r) => r.reciprocalLabel).length;
+  assert.equal(reciprocalCount, 7);
+  const expectedPairLabels = [
+    ["resolves", "is assigned to"],
+    ["receives", "is sent to"],
+    ["may open", "is triggered by"],
+    ["is supported by", "documents"],
+    ["is communicated through", "is about"],
+    ["is evaluated by", "assesses"],
+    ["is reviewed in", "reviews"],
+  ];
+  for (const [label, reciprocalLabel] of expectedPairLabels) {
+    const hit = scoped.relationships.find((r) => r.label === label && r.reciprocalLabel === reciprocalLabel);
+    assert.ok(hit, `expected a merged pair "${label}" / "${reciprocalLabel}"`);
+  }
 });
 
 test("buildReducedActions reduces a multi-input synthetic action to its first-listed input and reports the drop count", () => {
@@ -122,6 +194,78 @@ test("computeRecoveryMetrics credits a relationship recorded with a different pr
   assert.equal(metrics.relationships.recall, 1);
 });
 
+// A reciprocal-pair gt relationship (label + reciprocalLabel, see
+// groundTruthModel.mjs's mergeReciprocalRelationshipPairs) must be creditable
+// by recovering *either* direction -- the app correctly models the real
+// connection with exactly one edge, and shouldn't be penalized for not also
+// creating a redundant second edge in the opposite direction just to match
+// gold's own choice to phrase the same fact twice.
+test("computeRecoveryMetrics credits a reciprocal-pair relationship when only the canonical direction is recovered", () => {
+  const groundTruth = {
+    classes: {
+      incident: { id: "incident", label: "Incident", aliases: ["incident"] },
+      evidence: { id: "evidence", label: "Evidence", aliases: ["evidence"] },
+    },
+    relationships: [{ id: "a", label: "is supported by", reciprocalLabel: "documents", fromClassId: "incident", toClassId: "evidence" }],
+    properties: [],
+  };
+  const recovered = {
+    nodes: [
+      { id: "n1", label: "Incident", meaning: "", aliases: [], properties: [] },
+      { id: "n2", label: "Evidence", meaning: "", aliases: [], properties: [] },
+    ],
+    edges: [{ id: "e1", source: "n1", target: "n2", relation: "isSupportedBy" }],
+  };
+  const metrics = computeRecoveryMetrics(groundTruth, recovered);
+  assert.equal(metrics.relationships.matched, 1);
+  assert.equal(metrics.relationships.recall, 1);
+});
+
+test("computeRecoveryMetrics credits a reciprocal-pair relationship when only the reciprocal direction is recovered (opposite edge direction, reciprocal label)", () => {
+  const groundTruth = {
+    classes: {
+      incident: { id: "incident", label: "Incident", aliases: ["incident"] },
+      evidence: { id: "evidence", label: "Evidence", aliases: ["evidence"] },
+    },
+    relationships: [{ id: "a", label: "is supported by", reciprocalLabel: "documents", fromClassId: "incident", toClassId: "evidence" }],
+    properties: [],
+  };
+  const recovered = {
+    nodes: [
+      { id: "n1", label: "Incident", meaning: "", aliases: [], properties: [] },
+      { id: "n2", label: "Evidence", meaning: "", aliases: [], properties: [] },
+    ],
+    // Edge runs Evidence -> Incident, using gold's *reciprocal* label "documents".
+    edges: [{ id: "e1", source: "n2", target: "n1", relation: "documents" }],
+  };
+  const metrics = computeRecoveryMetrics(groundTruth, recovered);
+  assert.equal(metrics.relationships.matched, 1, "the reciprocal direction+label must count as recovering the same real-world connection");
+  assert.equal(metrics.relationships.recall, 1);
+  assert.equal(metrics.relationships.precision, 1, "the recovered edge must also count on the precision side via the reciprocal check");
+});
+
+test("computeRecoveryMetrics does NOT credit a reciprocal-pair relationship from an edge in the wrong direction using the wrong (non-reciprocal) label", () => {
+  const groundTruth = {
+    classes: {
+      incident: { id: "incident", label: "Incident", aliases: ["incident"] },
+      evidence: { id: "evidence", label: "Evidence", aliases: ["evidence"] },
+    },
+    relationships: [{ id: "a", label: "is supported by", reciprocalLabel: "documents", fromClassId: "incident", toClassId: "evidence" }],
+    properties: [],
+  };
+  const recovered = {
+    nodes: [
+      { id: "n1", label: "Incident", meaning: "", aliases: [], properties: [] },
+      { id: "n2", label: "Evidence", meaning: "", aliases: [], properties: [] },
+    ],
+    // Reverse direction, but with the *canonical* label, not "documents" --
+    // shares zero tokens with "documents", so this must still miss.
+    edges: [{ id: "e1", source: "n2", target: "n1", relation: "isSupportedBy" }],
+  };
+  const metrics = computeRecoveryMetrics(groundTruth, recovered);
+  assert.equal(metrics.relationships.matched, 0);
+});
+
 // The residual limit this threshold change does NOT fix, documented rather
 // than silently papered over: a genuine different word choice with zero
 // token overlap at all can never match under Jaccard, no matter how low the
@@ -173,7 +317,13 @@ test("groundTruthModel's bundled fixture has already had every \"is a\" predicat
   const isACount = Object.values(yaml.load(loadRawFixtureText()).predicates)
     .filter((p) => p.kind === "object" && p.label === "is a").length;
   assert.equal(isACount, 0, "the raw fixture itself must no longer declare any \"is a\" predicate");
-  assert.equal(filtered.relationships.length, rawObjectPredicateCount);
+  // mergeReciprocalRelationshipPairs (groundTruthModel.mjs) collapses each
+  // opposite-direction pair sharing a class pair into one scoring unit --
+  // every raw object predicate still contributes to a relationship, just
+  // not always its own dedicated one, so the count drops by exactly the
+  // number of merged pairs, not by nothing.
+  const reciprocalPairCount = filtered.relationships.filter((r) => r.reciprocalLabel).length;
+  assert.equal(filtered.relationships.length, rawObjectPredicateCount - reciprocalPairCount);
 });
 
 test("groundTruthModel's practicalScopeClassIds is a real, non-trivial, auditable subset of the full domain", () => {

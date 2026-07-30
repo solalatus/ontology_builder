@@ -152,13 +152,23 @@ export function computeRecoveryMetrics(groundTruth, recoveredState) {
     const candidates = [edge.relation, ...(edge.aliases || [])];
     return candidates.some((c) => labelsMatch(gtLabel, c, REL_PROP_LABEL_MATCH_THRESHOLD));
   }
+  // A gt relationship carrying `reciprocalLabel` (groundTruthModel.mjs's
+  // mergeReciprocalRelationshipPairs) represents one real-world connection
+  // gold happened to phrase from both ends -- recovered as satisfied by
+  // either direction, not both, since a correctly-modeled recovered graph
+  // only ever has one edge for it.
+  function relationshipRecovered(rel, fromNodeIds, toNodeIds) {
+    const forward = edges.some((e) => fromNodeIds.has(e.source) && toNodeIds.has(e.target) && edgeLabelMatchesGt(rel.label, e));
+    if (forward) return true;
+    if (!rel.reciprocalLabel) return false;
+    return edges.some((e) => toNodeIds.has(e.source) && fromNodeIds.has(e.target) && edgeLabelMatchesGt(rel.reciprocalLabel, e));
+  }
   let relMatched = 0;
   for (const rel of groundTruth.relationships) {
     const fromNodeIds = new Set(gtToRecovered.get(rel.fromClassId) || []);
     const toNodeIds = new Set(gtToRecovered.get(rel.toClassId) || []);
     if (!fromNodeIds.size || !toNodeIds.size) continue;
-    const found = edges.some((e) => fromNodeIds.has(e.source) && toNodeIds.has(e.target) && edgeLabelMatchesGt(rel.label, e));
-    if (found) relMatched++;
+    if (relationshipRecovered(rel, fromNodeIds, toNodeIds)) relMatched++;
   }
   const relRecall = groundTruth.relationships.length ? relMatched / groundTruth.relationships.length : 0;
   let recoveredRelMatchedToGt = 0;
@@ -166,9 +176,13 @@ export function computeRecoveryMetrics(groundTruth, recoveredState) {
     const srcGtClass = recoveredToGt.get(e.source);
     const tgtGtClass = recoveredToGt.get(e.target);
     if (!srcGtClass || !tgtGtClass) continue;
-    if (groundTruth.relationships.some((rel) => rel.fromClassId === srcGtClass && rel.toClassId === tgtGtClass && edgeLabelMatchesGt(rel.label, e))) {
-      recoveredRelMatchedToGt++;
-    }
+    const matchesSomeGtRel = groundTruth.relationships.some((rel) => {
+      const forward = rel.fromClassId === srcGtClass && rel.toClassId === tgtGtClass && edgeLabelMatchesGt(rel.label, e);
+      if (forward) return true;
+      if (!rel.reciprocalLabel) return false;
+      return rel.toClassId === srcGtClass && rel.fromClassId === tgtGtClass && edgeLabelMatchesGt(rel.reciprocalLabel, e);
+    });
+    if (matchesSomeGtRel) recoveredRelMatchedToGt++;
   }
   const relPrecision = edges.length ? recoveredRelMatchedToGt / edges.length : 0;
 

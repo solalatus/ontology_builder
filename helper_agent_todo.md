@@ -1125,3 +1125,73 @@ with test coverage, a live eval re-run, and a PR.
     property matching threshold work, though single-run noise across independent live conversations means this
     isn't attributed to any one specific change with certainty.
   - Class metrics held steady to modestly improved (scoped F1 62.5% -> 67.1%).
+
+## Addendum -- a real scoring bug: reciprocal relationship pairs double-counted
+
+**2026-07-30.** Auditing the eval's own ground-truth scoring directly (the same real-data audit technique used
+elsewhere in this doc -- extract an actual `get_graph_state` dump, run the real matcher against it, don't
+reason abstractly) found a genuine, previously-undiscovered systematic bug in the eval's scoring, not the app.
+
+**7 class-pairs in the scoped ground truth (14 of 48 scoped relationships pre-fix, 29.2%) model one real-world
+connection as two separate predicates phrased from each end** -- e.g. `"is supported by"` (Incident -> Evidence)
+and `"documents"` (Evidence -> Incident) are the same fact, not two. This app's data model correctly represents
+each real-world connection with exactly one directed edge; creating both would be redundant, wrong modeling.
+Scoring each gold direction as a separately recoverable relationship silently caps achievable recall below
+100% no matter how good an interview is, and makes which half gets credited a coin flip on which arbitrary
+direction+wording the interviewer happens to land on -- unrelated to interview quality.
+
+- [x] **Fix**: `groundTruthModel.mjs` gained `mergeReciprocalRelationshipPairs()`, applied in
+      `loadGroundTruthModel()` -- detects class-pairs with exactly two opposite-direction predicates and
+      merges them into one scoring unit (`label` for the canonical/first-encountered direction,
+      `reciprocalLabel` for the other). Same-direction pairs sharing a class-pair key (two genuinely different
+      real facts, e.g. two distinct predicates both from System to ITService) are left untouched -- only a
+      true opposite-direction pair gets merged. `recoveryMetrics.mjs`'s relationship recall/precision loops
+      now credit a merged pair as recovered if *either* direction+label is found among the recovered edges,
+      not just the canonical one.
+- [x] Tests (`tests/ontology-recovery-metrics.spec.mjs`, +8): the merge logic itself (opposite-direction pair
+      merges, lone relationship untouched, same-direction pair NOT merged, only-once pairing with 3+ entries
+      sharing a class-pair key); the bundled fixture has exactly the 7 audited reciprocal pairs in scope, with
+      their real labels pinned; `computeRecoveryMetrics` credits a reciprocal pair from either direction
+      (forward-direction-canonical-label, reverse-direction-reciprocal-label) and correctly does NOT credit a
+      reversed edge using the *wrong* (non-reciprocal) label even though it shares no tokens with either gold
+      phrasing in that direction. One existing test's assumption (`filtered.relationships.length ===
+      rawObjectPredicateCount`) broke as an expected, correct consequence of the merge and was updated to
+      subtract the real merged-pair count instead of silently loosening the assertion.
+- Full suite (`tests/*.spec.mjs`) green.
+
+**Effect on scoring, checked against a real captured run's data:** the fix does not change the app or the
+prompt at all -- it corrects a measurement bug. Recalculating a captured run's results under the fix showed the
+matched *relationship count* is unaffected (the fix only rescues a miss when the recovered edge already has
+the correct wording in the wrong direction), but the *denominator* shrinks by the 7 merged pairs, so recall
+percentages tick up slightly and, more importantly, stop being subject to the direction-luck coin flip this
+bug introduced. A fairer, more accurate scoring baseline going forward, not a claimed improvement to interview
+quality.
+
+## Addendum -- mocked tests were silently clobbering real eval results; results now committed to the repo
+
+**2026-07-30.** While investigating a separate question, went looking for a real run's actual
+`conversation-log.md`/`tool-calls.md` and found synthetic test-fixture placeholder text ("opening line", "first
+run marker") instead of the real transcript. Root cause: `tests/ontology-recovery-transparency.spec.mjs` (a
+mocked, no-API-key unit test) calls the real `writeConversationLog`/`writeToolCallLog`/`writeReport` functions
+with synthetic content, and those functions wrote to the exact same fixed, shared path a real live eval uses --
+so running the full mocked suite (`node --test tests/*.spec.mjs`) right after a live eval run silently
+destroyed that run's real evidence, with no error or warning of any kind.
+
+- [x] **Fix**: `reportGenerator.mjs`'s three `write*` functions (`writeConversationLog`, `writeToolCallLog`,
+      `writeReport`) and a new `pathsFor(dir)` helper now accept an optional `{ dir }` override, defaulting to
+      the real, shared `RESULTS_DIR` -- real eval callers (`ontology-recovery.eval.spec.mjs`) never pass this
+      option, so their behavior, and the exported `LOG_PATH`/`REPORT_PATH`/`TOOL_CALL_LOG_PATH` constants any
+      other tooling might already read, are unchanged. `tests/ontology-recovery-transparency.spec.mjs` now
+      writes to its own `fs.mkdtempSync`-created throwaway directory instead of the shared results directory.
+- [x] Tests (+2): `pathsFor()`'s default still resolves to the real, shared path; this file's own writes never
+      land in the real results directory (checked directly, not just asserted by construction).
+- Full suite (`tests/*.spec.mjs`) green.
+
+**Also, per explicit instruction: eval results are no longer gitignored.** `tests/evals/results/*.md` was
+previously excluded from git (see the prior `.gitignore` comment, "reports to read, not repo content") -- now
+committed with every PR that includes a live run, so anyone browsing the repo can read the latest real
+transcript/report directly, or re-run the eval and land a fresh version of the same three files in the same
+place, without needing to reconstruct anything. `.gitignore`, `tests/README.md`, and `tests/evals/README.md`
+all updated to document this: only the most recent run's files are ever committed (each write still overwrites
+the previous run, same as before -- this is a visibility change, not a new accumulation policy).
+
