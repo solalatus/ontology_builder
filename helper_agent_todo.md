@@ -1208,3 +1208,59 @@ you look at the transcript or the aggregate numbers:
   additive guidance, not a behavior removal, and did nothing to explain the *drop* -- the drop traces to which
   classes got elicited at all, not to the new checks actively hurting anything), but the "did the numbers
   improve" question needs more than one run to answer and isn't settled by this one.
+
+**Asked to investigate further: "is this level of variance really just noise?"** Rather than accept that at
+face value, re-ran the same real-data audit technique on this run's actual recovered relationships and found a
+genuine, previously-undiscovered **systematic** issue sitting alongside the ordinary variance -- a real bug in
+the eval's own scoring, not the app or the prompts.
+
+**A structural scoring bug: reciprocal relationship pairs double-counted as two facts.** 7 class-pairs in the
+scoped ground truth (14 of 48 scoped relationships pre-fix, **29.2%**) are the fixture modeling one real-world
+connection twice, phrased from each end -- e.g. `"is supported by"` (Incident -> Evidence) and `"documents"`
+(Evidence -> Incident) are the same fact, not two. This app's data model correctly represents each real-world
+connection with exactly one directed edge; creating both would be redundant, wrong modeling. Scoring each gold
+direction as a separately recoverable relationship silently caps achievable recall below 100% no matter how
+good an interview is, and makes which half gets credited a coin flip on which arbitrary direction+wording the
+interviewer happens to land on -- unrelated to interview quality.
+
+- [x] **Fix**: `groundTruthModel.mjs` gained `mergeReciprocalRelationshipPairs()`, applied in
+      `loadGroundTruthModel()` -- detects class-pairs with exactly two opposite-direction predicates and
+      merges them into one scoring unit (`label` for the canonical/first-encountered direction,
+      `reciprocalLabel` for the other). Same-direction pairs sharing a class-pair key (two genuinely different
+      real facts, e.g. two distinct predicates both from System to ITService) are left untouched -- only a
+      true opposite-direction pair gets merged. `recoveryMetrics.mjs`'s relationship recall/precision loops
+      now credit a merged pair as recovered if *either* direction+label is found among the recovered edges,
+      not just the canonical one.
+- [x] Tests (`tests/ontology-recovery-metrics.spec.mjs`, +8): the merge logic itself (opposite-direction pair
+      merges, lone relationship untouched, same-direction pair NOT merged, only-once pairing with 3+ entries
+      sharing a class-pair key); the bundled fixture has exactly the 7 audited reciprocal pairs in scope, with
+      their real labels pinned; `computeRecoveryMetrics` credits a reciprocal pair from either direction
+      (forward-direction-canonical-label, reverse-direction-reciprocal-label) and correctly does NOT credit a
+      reversed edge using the *wrong* (non-reciprocal) label even though it shares no tokens with either gold
+      phrasing in that direction. One existing test's assumption (`filtered.relationships.length ===
+      rawObjectPredicateCount`) broke as an expected, correct consequence of the merge and was updated to
+      subtract the real merged-pair count instead of silently loosening the assertion.
+- Full suite (`tests/*.spec.mjs`, 442 JS tests) green.
+
+**Recalculated against the same already-captured run-3 final graph state -- not a new live run, per explicit
+user request to recalc rather than re-run and spend more API budget:**
+
+| Metric | Original (double-counted denominator) | Recalculated (fixed) |
+|---|---|---|
+| Composite (full/scoped) | 21.8% / 32.4% | 21.9% / 32.6% |
+| Relationship recall (full) | 2.5% (3/120) | 2.8% (3/108) |
+| Relationship recall (scoped) | 4.2% (2/48) | 4.9% (2/41) |
+| Relationship matched count | 3 full / 2 scoped | **3 full / 2 scoped -- unchanged** |
+
+**Honest read, not oversold:** the matched *count* didn't move. The fix only rescues a miss when the recovered
+edge already has the *correct wording in the wrong direction* -- but auditing this run's actual misses
+(`hasEvidence`, `hasMaterialityAssessment`, `hasPostIncidentReview`, `hasEmergencyChange`, `relatesTo`) found
+they share zero tokens with *either* of gold's paired phrasings in *either* direction. They're a generic
+`"hasX"` naming convention, a genuine zero-token-overlap wording gap (the same already-documented, deliberately
+unaddressed category as this addendum's own Finding 3), not a direction artifact this fix was built to catch.
+So: **the reciprocal-pair fix is a real, correctly-implemented, well-tested correction to a genuine scoring
+bug** (removes double-counting that was silently capping achievable recall and adding direction-luck noise to
+every run), **but it does not explain why this specific run scored lower than the prior 8.3%/12.5% baseline**
+-- that gap remains attributed to ordinary run-to-run wording variance between two independent conversations.
+Cannot retroactively recompute the *prior* run's numbers under the fix -- `tool-calls.md`/`conversation-log.md`
+are overwritten every run, not versioned, so that run's raw data no longer exists to recalc against.
