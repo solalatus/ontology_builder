@@ -1,6 +1,6 @@
 # Ontology-recovery eval report
 
-Generated: 2026-07-30T14:45:10.048Z
+Generated: 2026-07-30T15:07:49.716Z
 
 ## Headline metrics
 
@@ -8,48 +8,42 @@ Two denominators, side by side: **full domain** is every class/relationship/prop
 
 | Metric | Full domain | Practical scope | Detail |
 |---|---|---|---|
-| **Recovery effectiveness (composite)** | **28.2%** | **39.4%** | equal-weighted: class F1, relationship F1, property recall, value fidelity |
-| Class recall / precision / F1 | 35.3% / 65.8% / 45.9% | 67.9% / 55.3% / 60.9% | 24/68 full · 19/28 scoped ground-truth classes matched; 38 recovered |
-| Relationship recall / precision / F1 | 9.3% / 9.7% / 9.5% | 17.1% / 9.7% / 12.4% | 10/108 full · 7/41 scoped ground-truth relationships matched; 72 recovered (subclass/"is a" predicates excluded from both -- see README) |
-| Property recall | 22.5% | 46.2% | 25/111 full · 12/26 scoped ground-truth properties matched (technical identifier/URI fields excluded — see tests/evals/README.md) |
-| Controlled-value fidelity | 34.9% | 38.2% | average allowed-value overlap across matched controlled-value properties |
+| **Recovery effectiveness (composite)** | **27.0%** | **35.9%** | equal-weighted: class F1, relationship F1, property recall, value fidelity |
+| Class recall / precision / F1 | 32.4% / 70.0% / 44.3% | 57.1% / 50.0% / 53.3% | 22/68 full · 16/28 scoped ground-truth classes matched; 30 recovered |
+| Relationship recall / precision / F1 | 9.3% / 23.3% / 13.2% | 17.1% / 16.3% / 16.7% | 10/108 full · 7/41 scoped ground-truth relationships matched; 43 recovered (subclass/"is a" predicates excluded from both -- see README) |
+| Property recall | 25.2% | 42.3% | 28/111 full · 11/26 scoped ground-truth properties matched (technical identifier/URI fields excluded — see tests/evals/README.md) |
+| Controlled-value fidelity | 25.2% | 31.3% | average allowed-value overlap across matched controlled-value properties |
 
 ## Run stats
 
 - Interviewer model: `gpt-5.5-2026-04-23` · Persona model: `gpt-4o-mini` · Classifier model: `gpt-5.5-2026-04-23`
-- Stopped: **app_agent_appears_finished**, after 46 turns, 1089s wall-clock
-- Real app-agent API calls: 87 (apply_ontology_yaml called 34× · get_graph_state called 7×)
-- Tool outcomes seen in transcript: 34 applied · 0 skipped · 0 no-op · 0 error
+- Stopped: **app_agent_appears_finished**, after 45 turns, 903s wall-clock
+- Real app-agent API calls: 87 (apply_ontology_yaml called 36× · get_graph_state called 6×)
+- Tool outcomes seen in transcript: 36 applied · 0 skipped · 0 no-op · 0 error
 
 ## LLM review of the conversation
 
 ## Errors
 
-- **Turn 11:** The interviewer/tool could not actually rename/delete `AffectedSystem`; it added `System` and left the obsolete class/edge in place. The assistant correctly noticed this, but the ontology remained polluted for the rest of the session.
-- **Turn 14:** Tool reported “11 added” for a batch where one proposed relationship (`updatedTo`) was explicitly corrected to `isReviewedBy`. Without state details, possible risk that both the rejected and corrected regulatory committee relationships were added; assistant says only corrected one was recorded.
-- **Turn 17:** Tool reported “8 added” after adding only two classes plus unspecified relationships. The assistant did not enumerate exactly which relationships were added for `ResponseAction`/`DecisionRecord`, making later validation dependent on assumptions.
-- **Turn 19 and onward:** Property updates show small counts like “1 updated,” “6 updated,” etc. for many proposed properties. This may be normal if the tool updates classes in bulk, but if counts represent individual properties, many properties may not have been recorded. The assistant did not verify property-level persistence.
-- **Turn 32:** Persona’s “Remove” summary included `emergency change for incident`, which was not part of that batch and had been accepted in turn 31. The assistant did not challenge this contradiction; unclear whether it accidentally removed/overrode a previously accepted alias.
-- **Turn 41:** Assistant says it “added the supporting rule `canNotifyTechnicalOwner`,” though this rule was not explicitly proposed back to the persona before recording. The persona suggested a precondition, not a named rule.
-- **Turn 42:** Assistant added direct relationships from `DecisionRecord` to `TechnicalChange` and `EmergencyChangeRequest` based on verification needs, but did so without explicitly asking before applying.
-- **Turn 45–46:** Final validation still had unresolved obsolete `AffectedSystem`/`Incident —affects→ AffectedSystem`; assistant declared “Final validation is complete” despite a known live-canvas issue.
+- **Turn 14, 15, 16, 18, 33, 34, 35, 45:** Tool reports such as “0 added, 3 updated” for property/value additions are ambiguous and suggest properties may be stored as updates to classes rather than distinct additions. Not necessarily wrong, but hard to audit from transcript.
+- **Turn 38:** The assistant says it recorded six rules “with the corrective-action ownership condition removed,” but the persona had only said the condition was “Not Recommended” unless structure exists. The app did not explicitly re-present the modified `canTrackCorrectiveAction` rule before applying it, so the actual stored version is not independently confirmed.
+- **Turn 45:** Final validation claims “Every class has at least one relationship.” Likely true after added relationships, but no ontology dump is shown; reviewer cannot verify. Minor transparency issue rather than a clear bug.
 
 ## Noteworthy observations
 
-- **Turn 1:** Strong start: interviewer anchors ontology to real competency questions/actions and explains phased process clearly.
-- **Turns 3–4:** Good gap-checking prompt for roles, environments, and governance forums before modeling classes.
-- **Turn 5:** Candidate class list was comprehensive, but the persona simply rubber-stamped “keep all.” Interviewer could have pushed harder on whether separate role classes vs a shared `Person/Team` pattern would scale.
-- **Turn 7–9:** Good handling of executive sponsor modeling ambiguity; interviewer paused and asked whether sponsorship belongs on `Service`, `Incident`, or both.
-- **Turn 9–11:** Good follow-up on `AffectedSystem` naming; interviewer correctly avoided deciding for the expert and elicited broader `System`.
-- **Turns 11–17:** Relationship elicitation was systematic and acceptance-test driven. However, many inverse/redundant relationships were accepted, potentially making the ontology dense and harder to maintain.
-- **Turn 16:** Excellent recognition that “current actions” and “decisions” were not covered by `CorrectiveAction`; adding `ResponseAction` and `DecisionRecord` fixed a real modeling gap.
-- **Turns 18–23:** Property elicitation stayed mostly decision-bearing and avoided low-value audit fields, which is good technique.
-- **Turns 27–32:** Alias elicitation was careful about only true synonyms. However, the simulated persona often rejected common operational phrases as “informal,” which may reduce natural-language coverage; interviewer did not challenge questionable rejections like “on-call,” “comms,” or “environment.”
-- **Turns 33–36:** Fixed-value elicitation was efficient and included “what breaks if missing/wrong,” a useful prompt for later rules.
-- **Turns 37–39:** Rules were clear and action-oriented, but many conditions reference concepts not explicitly modeled as properties/classes, e.g. “customer-facing service,” “regulated business process,” or “approved execution according to governance process.”
-- **Turns 40–43:** Action definitions followed the requested one-input-class structure and included verification steps, which is strong. Some actions with input class `MajorIncidentBridge`/`CrisisManagementTeam` still require an incident context, relying on relationships rather than input arguments.
-- **Turn 44:** Validation pass was useful and found meaningful missing relationships, especially `DecisionRecord —recordsDecisionFor→ RecoveryPlan`.
-- **Overall:** Interviewer was thorough and state-aware, but heavily confirmation-driven; the persona mostly agreed with proposals. More open-ended elicitation or challenge questions could have surfaced bank-specific nuance instead of accepting generic ITIL-like defaults.
+- **Turn 1:** Strong opening: established phases and acceptance-test approach before modeling.
+- **Turn 2:** Good targeted follow-up about roles and deployment context before proposing classes.
+- **Turn 3:** Candidate class list was comprehensive but accepted all 29 classes with little pruning; interviewer could have challenged whether many role classes should be subtypes/instances of a common `Person/Role/Team`.
+- **Turns 4–12:** Relationship elicitation was systematic and batched well. The agent also checked state and noticed `Deployment Context` was unconnected, which is good ontology hygiene.
+- **Turn 11:** Good catch adding `CommunicationUpdate` as a class based on acceptance-test wording.
+- **Turns 13–18:** Property elicitation stayed tied to decision/action needs and handled ambiguous unit for `estimatedRecoveryTime` properly by pausing to get a single standard.
+- **Turns 23–31:** Alias elicitation was unusually thorough, including explicit rejection of misleading near-synonyms. This is useful but quite lengthy/repetitive.
+- **Turn 35:** Good handling of tool limitation: explained that required-property constraints cannot be stored directly and would instead inform rules/action preconditions.
+- **Turn 36–38:** Rule elicitation was well grounded in actions. The assistant correctly flagged that corrective-action ownership lacked a relationship/property before adding it.
+- **Turn 39:** Good adaptation to action tool constraint of “one input class,” explaining how other participants are represented through relationships and rules.
+- **Turn 42:** Strong validation behavior: checked live graph against original questions and found missing direct relationships.
+- **Turn 44:** Excellent final gap detection: noticed DR test needed `testedAt` and `result` to answer “last disaster recovery test results.”
+- **Overall:** The simulated persona mostly rubber-stamped suggestions; the interviewer compensated somewhat by asking about misleading aliases and state gaps, but could have used more open-ended domain probing for bank-specific severity/materiality thresholds, regulatory timing deadlines, communication approval rules, and evidence retention requirements.
 
 ## Full conversation log
 

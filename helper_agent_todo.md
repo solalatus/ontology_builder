@@ -1371,3 +1371,46 @@ recall/precision 12.5%/18.8% scoped). Ran a fresh confirmatory eval (46 turns, 1
   environment context -- rather than an open invitation) is the next candidate lever, not yet implemented.
 - Committed this run's results (`report.md`/`conversation-log.md`/`tool-calls.md`) alongside this note, per the
   now-standing policy of committing the latest run with every PR.
+
+**Narrowed the probe to a closed, two-category question -- live-confirmed: relationship metrics now genuinely
+beat the merged baseline, but class metrics got worse, composite still short.** Replaced the open "anything
+else, particularly other roles or environments" with one closed question naming exactly two categories
+(on-call/staffing role next to one already named; environment/deployment context), with an explicit
+instruction against inviting open-ended extra scope. Fresh confirmatory run (45 turns, 903s):
+
+- **The narrow probe fired correctly, quoted verbatim from the transcript** (turn 2): *"For each role you
+  named -- service responsible owner, incident commander, resolver group, stakeholder, third party/regulator
+  if relevant -- is there a closely related day-to-day role the agent must identify separately, such as
+  on-call engineer, service desk, technical owner, communications lead, or recovery lead; and do any of the
+  questions/actions depend on a specific environment or deployment context..."* The persona surfaced On-call
+  Engineer, Technical Owner, and Communications Lead in response, and both On-call Engineer and Technical Owner
+  made it all the way to real modeled relationships (`Incident --handledBy--> On-Call Engineer`,
+  `BusinessService --technicallyOwnedBy--> Technical Owner`). The LLM reviewer independently flagged this too:
+  *"Turn 2: Good targeted follow-up about roles and deployment context before proposing classes."*
+
+| Metric | Merged baseline | Open probe (prior run) | Narrow probe (this run) |
+|---|---|---|---|
+| Composite (scoped) | **57.1%** | 39.4% | 35.9% |
+| Class recall/precision (scoped) | 60.7% / 75.0% | 67.9% / 55.3% | 57.1% / 50.0% |
+| Class F1 (scoped) | 67.1% | 60.9% | 53.3% |
+| Relationship recall/precision (scoped) | 12.5% / 18.8% | 17.1% / 9.7% | 17.1% / 16.3% |
+| Relationship F1 (scoped) | 15.0% | 12.4% | **16.7%** |
+
+**Mixed, not a clean win -- reported honestly, not spun.** Narrowing the probe did exactly what it was aimed
+at on relationships: recall held at the open-probe's improved level (17.1%, still beating baseline's 12.5%)
+while precision recovered sharply (16.3% vs the open probe's 9.7%, now close to baseline's 18.8%) -- relationship
+F1 (16.7%) now genuinely **beats** the merged baseline (15.0%) for the first time across every run this
+session. But class metrics went the wrong way on *both* axes this run (recall 57.1%, below even baseline's
+60.7%; precision 50.0%, below the open probe's already-low 55.3%) -- worse than either comparison point, not
+just a precision/recall trade this time. Composite (F1-based, averaged across class F1/relationship F1/
+property recall/value fidelity) is still short of the merge gate: 35.9% vs 57.1%.
+
+**Assessment:** the relationship-side result is a real, mechanistically-explained improvement (narrower probe
+-> more precise elicitation -> better relationship precision without losing the recall gain). The class-side
+drop doesn't have an equally clear mechanism yet -- plausibly ordinary run-to-run persona variance (this
+session's own repeatedly-documented, expected noise source) rather than something the narrower probe caused,
+since there's no obvious causal story for why naming two specific categories would suppress class elicitation
+elsewhere in the conversation. Four live runs on this branch have now each landed on a different point in a
+noisy distribution, none clearing the merge gate on composite. Not implementing a further reactive single-run
+tweak without more signal -- the next honest step is more samples (to separate real effect from noise) rather
+than another one-shot prompt change chasing this run's specific shortfall.
