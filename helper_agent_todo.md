@@ -1281,6 +1281,61 @@ own `fs.mkdtempSync`-created throwaway directory. Two new tests pin the isolatio
 resolves to the real path; this file's own writes never land in the real results directory) -- full suite
 444/444 green (434 baseline + 8 reciprocal-pair tests + 2 isolation tests).
 
+**A fresh live run (with the clobber bug fixed, so this time the evidence survived) finally answers the actual
+question: why do Bank/Environment/Deployment/On-call Engineer/Service Desk/Technical Owner keep going missing?**
+Read the real, uncorrupted `conversation-log.md` this time and grepped it directly for all six topics plus
+synonyms. Direct transcript evidence, quoted:
+
+- **Turn 1**, the interviewer's Phase 1 prompt: *"Please give me 10–20 real questions that an IT operations /
+  major-incident agent should be able to answer in your bank's setting."* -- notice this asks the persona to
+  freely generate her own questions, not recite the fixture's own canonical `competencyQuestions:` list
+  verbatim (nothing in the app or the eval harness feeds her that literal text -- `personaAgent.mjs` grounds
+  her in the fixture's full YAML, but Phase 1 explicitly asks for *her own* words).
+- **Turn 2**, her actual answer (all 20, quoted in full in the log): a real, plausible, well-formed list --
+  but it never once mentions on-call engineer, service desk, technical owner, environment, or deployment, and
+  "bank" only ever appears as a descriptive modifier ("in our bank's setting"), never as something to model.
+  Tellingly, question 5 is *"Which resolver group has been assigned to this incident?"* -- the fixture's own
+  canonical Q4 pairs this with on-call engineer explicitly (*"which resolver group **and on-call engineer**
+  should be assigned?"*), but her own paraphrase dropped the second half while keeping the first.
+- Her 10-item actions list (turn 2) has the same gap: nothing about selecting a deployment environment,
+  scheduling a deployment, or which role (service desk / technical owner / on-call engineer) is authorized to
+  do what -- even though the fixture's own actions repeatedly use exactly these roles in their authorization
+  clauses.
+- **Turn 2**, the interviewer's own reply: *"Good — I've captured these 20 real questions as the acceptance
+  test..."* -- accepted her list at face value and moved directly into actions, no further probing.
+- **Turn 3** (the interviewer's Phase-1 recap) and the persona's own reply: *"I don't have any additions or
+  changes at this stage; it's a solid foundation... Please proceed to the next phase!"* -- she explicitly
+  declined to add anything when given the chance.
+
+**Conclusion, with confidence, not speculation:** this is not a Phase 2 (class-creation) failure and not a
+flaw in the interviewer's behavior. The interviewer did exactly what its own repeatedly-reinforced Phase-1-
+grounding methodology tells it to do -- build only from what the persona actually said -- and the persona
+simply never said anything about these six topics. The earlier "headline vs. fine-print" hypothesis (tested
+and found insufficient two rounds ago) was looking in the wrong place: the real gate isn't which part of the
+fixture's own competency-question text a class appears in, it's whether the persona's own freely-generated
+Phase 1 paraphrase happens to reproduce that entity at all -- and an LLM asked to improvise "20 real questions
+a domain expert would ask" naturally drops secondary role names and infrastructure-context concepts even when
+closely related ones survive, the same way a person given 30 seconds to list what they'd ask about would.
+
+**A related, more fundamental thing this same run surfaced:** the persona's fidelity to the fixture's own
+specific taxonomy is itself inconsistent run to run. This run's final class list includes `BusinessService`,
+`EscalationProcess`, `Cause`, and a separate `Event` class -- none of which exist anywhere in the ground-truth
+fixture at all -- while `Infrastructure` stood in for what gold splits into `ConfigurationItem` and
+`Environment`. The persona isn't reciting the hidden fixture; she's an LLM improvising a domain expert from
+general IT-operations knowledge, loosely grounded in the fixture rather than bound to its exact wording and
+taxonomy. That's by design (this project has repeatedly and deliberately declined to make either the ground
+truth matching or the persona a literal script-reciting oracle -- same philosophy as declining a synonym
+dictionary or loosening direction-matching), but it means a meaningful share of run-to-run "missing class"
+variance is really "which domain framing the persona's own generation happened to produce this run," largely
+independent of interviewer quality.
+
+**Not recommending a code or persona-prompt change for this.** Tightening the persona's grounding to reliably
+reproduce every fixture entity would turn her back into a script-reciting oracle -- exactly the shortcut this
+project has consistently rejected elsewhere for the same reason (it would stop testing whether the interviewer
+can build a good model from what a real, imperfectly-articulate domain expert actually says, and start testing
+whether it can transcribe a hidden document). Documenting this as a now-understood, evidence-backed source of
+run-to-run variance instead, the same treatment as the eval's other acknowledged noise sources.
+
 **Also, per explicit new instruction: eval results are no longer gitignored.** `tests/evals/results/*.md` was
 previously excluded (see `.gitignore`'s prior comment, "reports to read, not repo content") -- now committed
 with every PR that includes a live run, so anyone browsing the repo can read the latest real transcript/report
