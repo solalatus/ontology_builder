@@ -731,3 +731,20 @@ strict no-console-errors assertion. See `helper_agent_todo.md`'s own
 further dated addendum for the details, including why the live
 confirmatory eval this was meant to unblock is still pending on the
 account's own OpenAI quota rather than on anything left to fix in code.
+
+A later round audited a real run's final graph state directly against gold
+and found two more concrete gaps: several distinctly-named gold roles (on-
+call engineer, incident commander, service owner, technical owner)
+collapsing into one generic bucket class, and relationship coverage that
+stopped at "every class has >=1 relationship" without checking that classes
+named together in the same original question/action get a direct
+relationship between that specific pair. Both got targeted Phase 2/3/9
+prompt fixes. A live confirmatory re-run showed the fixes visibly firing in
+the transcript (roles kept distinct, pairwise coverage explicitly checked)
+but the run's *aggregate* numbers came in lower than the prior baseline,
+traced to a different subset of classes being elicited at all this
+particular run (several roles and classes named in Finding 1 as "never
+elicited" stayed never-elicited) -- a single-run variance question the
+prompt fixes weren't targeted at and don't resolve by themselves. See
+`helper_agent_todo.md`'s own further dated addendum for the full numbers
+and root-cause analysis.

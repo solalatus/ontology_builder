@@ -1173,3 +1173,38 @@ not noise.
       needed a regex fix after the first run failed on an actual, not assumed, line-wrap point in the rendered
       prompt text -- caught immediately by the test itself, not shipped broken.
 - Full suite (`tests/*.spec.mjs`, 434 JS tests) green.
+
+**Live confirmation, 2026-07-30 (mixed result -- reporting honestly, not spun).** Re-ran the real eval
+(`gpt-5.5-2026-04-23` interviewer/classifier, 40 turns, 718s). Two very different reads depending on whether
+you look at the transcript or the aggregate numbers:
+
+- **Qualitatively, both fixes visibly fired.** Turn 40's own final-checklist output explicitly lists "Distinct
+  named roles were kept distinct: ServiceOwner, ResolverGroup, IncidentCommander, Stakeholder" and
+  "Relationship coverage was checked against jointly mentioned classes in the original questions/actions" --
+  the interviewer is literally executing the new Phase 9 checklist items, not just carrying the old one.
+  `ServiceOwner` and `IncidentCommander` came out as two separate classes this run (previously bucketed into
+  one generic `OperationalRole`) -- Finding 1's role-over-consolidation pattern is gone where it was actually
+  present.
+- **Quantitatively, this run's aggregate numbers are lower than the pre-fix baseline**, not higher: composite
+  21.8%/32.4% (full/scoped) vs the prior confirmatory run's 45.7%/57.1%; class recall/precision/F1 26.5%/76.2%/
+  39.3% vs 30.9%/80.0%; relationship recall/precision/F1 2.5%/10.7%/4.1% vs 8.3%/21.9% (roughly back to the
+  *pre-aliases-feature* relationship numbers). Property recall 13.5%/23.1% and composite both down too.
+- **Root-caused, not just accepted at face value.** Digging into the actual recovered class list: `Bank`,
+  `Environment`, `Deployment`, and three of the five previously-bucketed roles (`On-call Engineer`,
+  `Service Desk`, `Technical Owner`) still never appeared *at all* this run -- not bucketed, just never
+  elicited, the other sub-pattern Finding 1 named and didn't specifically target with this round's fix (the
+  anti-bucketing guidance only helps once several roles are actually *on the table together*; it can't invent
+  a role the interviewer never asked about). Relationship matching is gated on both endpoint classes already
+  being matched (`recoveryMetrics.mjs`'s `matchClasses` step) -- so a run that happens to elicit a different
+  subset of classes than the previous run mechanically drags relationship recall down with it too, independent
+  of whether the pairwise-coverage bar itself is working. Confirmed the matching code itself is unchanged and
+  correct (`edgeLabelMatchesGt` still checks edge aliases, `16b9c81`'s aliases-matching logic is intact on this
+  branch) -- this is real class-recovery variance between two independent stochastic conversations, not a
+  matcher regression.
+- **Conclusion:** the two fixes are doing what they were designed to do when their trigger condition occurs in
+  a given run, but a single live run is a noisy way to measure that against a single-run baseline that was
+  itself just one sample -- exactly the kind of variance this eval's own README already flags as expected. Not
+  claiming a numeric win here; the qualitative transcript evidence supports keeping the fixes (they're strictly
+  additive guidance, not a behavior removal, and did nothing to explain the *drop* -- the drop traces to which
+  classes got elicited at all, not to the new checks actively hurting anything), but the "did the numbers
+  improve" question needs more than one run to answer and isn't settled by this one.
