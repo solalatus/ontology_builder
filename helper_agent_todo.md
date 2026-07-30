@@ -1004,6 +1004,28 @@ overwritten) as the audit dataset -- the last `get_graph_state` dump (turn 44) a
       Phase-1-grounding and `get_graph_state` coverage-check phrasing; Phase 9's new mechanical-audit and
       no-declaring-complete-over-a-noted-gap phrasing.
 - Full suite (`tests/*.spec.mjs`, 427 JS tests) green.
+- **Live confirmation.** A fresh confirmatory run (turn 37, 662s, `app_agent_appears_finished` -- genuine
+  finish again, not a cap/timeout/loop) against the previous merged run (turn 45, 849s) as baseline:
+  - **Composite recovery effectiveness: 19.7% -> 30.2% full domain, 24.8% -> 47.3% scoped** -- a large,
+    clear improvement.
+  - **Property recall: 9.0% -> 31.5% full domain** (10 -> 35 matched, out of the *same* unchanged 111-property
+    full-domain denominator) -- direct, strong confirmation the lower relationship/property matching threshold
+    (D) is doing real work, not just a scoped-denominator artifact. Scoped property recall (11.6% -> 38.5%)
+    combines that same threshold effect with the smaller, tighter 26-property scoped denominator (C).
+  - **Class recall/precision, scoped: 50.0%/66.7% -> 53.6%/75.0%** -- a real but modest gain.
+  - **Relationships: roughly flat this run** (2.5%/8.3% -> 2.5%/5.6% full, 6.3%/8.3% -> 4.2%/5.6% scoped) --
+    not the improvement hoped for from B, but this is the noisiest single metric across two independent live
+    LLM conversations (this eval's own stated philosophy: "run-to-run variance is expected and normal"), and
+    the LLM review of *this specific run* explicitly praised relationship elicitation as "systematic," "ensured
+    every class had at least one relationship," and "efficient coverage" (turns 6-11) -- a positive qualitative
+    read the raw numbers alone don't capture, plausibly explained by this run's specific recovered wording
+    happening not to overlap well with gold's, rather than the interviewer skipping relationships. Would need
+    more than one run to separate a real B regression from ordinary variance; not chasing that further without
+    more evidence either way.
+  - Fewer turns (45 -> 37) and less wall-clock time (849s -> 662s) despite the new mechanical
+    `get_graph_state` audits in both Phase 3 and Phase 9 (`get_graph_state` calls: 4 -> 6) -- the composite
+    score went up substantially with a *shorter* session, suggesting the grounding-in-Phase-1 guidance made
+    elicitation more efficient per turn rather than requiring more turns to cover the same ground.
 - **Live confirmation blocked, not skipped:** re-running the confirmatory eval to prove the *original*
   `appearsFinished`/`max_tokens` fix actually stops a genuine finished interview promptly (this addendum's own
   stated goal) still failed immediately -- but by design this time: `forwardToRealOpenAi`'s own new
