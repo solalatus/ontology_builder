@@ -64,8 +64,24 @@ check, or run it for real via `node --test`.
    (`lib/recoveryMetrics.mjs`), against both the full domain and the
    practical-scope subset (see below), and writes `results/report.md` +
    `results/conversation-log.md` + `results/tool-calls.md` — three fixed
-   filenames, **overwritten every run**, gitignored (these are reports to
-   read, not repo content).
+   filenames, **overwritten every run, never accumulated**.
+   **Committed to the repo as of the run bundled with each PR** (not
+   gitignored — see `.gitignore`'s own comment on this): only the most
+   recent run's files are ever present, so anyone browsing the repo can
+   read the latest real transcript/report directly, or re-run the eval
+   themselves and get a fresh version of the exact same three files in the
+   exact same place. If you're looking for "what did the last live run
+   actually do," these three files under `tests/evals/results/` *are* that
+   record — no separate archive or changelog to hunt for.
+   `tests/evals/lib/reportGenerator.mjs`'s `write*` functions default to
+   this real, shared path; they accept an optional `{ dir }` override used
+   only by this project's own *mocked* unit tests
+   (`tests/ontology-recovery-transparency.spec.mjs`), so that running the
+   regular mocked suite (`node --test tests/*.spec.mjs`) — which includes
+   those tests — can never again silently clobber a real run's committed
+   results with synthetic test fixture content (this happened once; see
+   `helper_agent_todo.md`'s dated addendum for the concrete incident that
+   motivated the `{ dir }` override).
 5. `results/report.md` also includes one real LLM call's review of the full
    conversation, flagging errors and noteworthy events — defaults to
    whatever model the interviewer itself connected with, overridable via

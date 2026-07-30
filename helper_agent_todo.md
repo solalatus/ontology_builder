@@ -1264,3 +1264,28 @@ every run), **but it does not explain why this specific run scored lower than th
 -- that gap remains attributed to ordinary run-to-run wording variance between two independent conversations.
 Cannot retroactively recompute the *prior* run's numbers under the fix -- `tool-calls.md`/`conversation-log.md`
 are overwritten every run, not versioned, so that run's raw data no longer exists to recalc against.
+
+**A second, related bug found and fixed in the course of the "recalc" work above: mocked unit tests were
+silently clobbering real live-run evidence.** Investigating why relationship recall dropped, the next step was
+to grep the actual run's `conversation-log.md`/`tool-calls.md` for whether Phase 0/1 ever surfaced Bank/
+Environment/Deployment/On-call Engineer/Service Desk/Technical Owner at all -- both files turned out to contain
+synthetic test-fixture placeholder text ("opening line", "first run marker") instead of the real transcript.
+Root cause: `tests/ontology-recovery-transparency.spec.mjs` (a mocked, no-API-key unit test) calls the real
+`writeConversationLog`/`writeToolCallLog`/`writeReport` functions with synthetic content, and those functions
+wrote to the exact same fixed, shared path a real live eval run uses -- so running the full mocked suite
+(`node --test tests/*.spec.mjs`) right after a live eval, as this session's own regression-pass discipline does
+after every code change, silently destroyed that run's real evidence. Fixed: `reportGenerator.mjs`'s three
+`write*` functions and a new `pathsFor(dir)` helper now accept an optional `{ dir }` override (defaulting to
+the real, shared `RESULTS_DIR` -- real eval callers are unaffected); the transparency spec now writes to its
+own `fs.mkdtempSync`-created throwaway directory. Two new tests pin the isolation (`pathsFor()`'s default still
+resolves to the real path; this file's own writes never land in the real results directory) -- full suite
+444/444 green (434 baseline + 8 reciprocal-pair tests + 2 isolation tests).
+
+**Also, per explicit new instruction: eval results are no longer gitignored.** `tests/evals/results/*.md` was
+previously excluded (see `.gitignore`'s prior comment, "reports to read, not repo content") -- now committed
+with every PR that includes a live run, so anyone browsing the repo can read the latest real transcript/report
+directly or re-run the eval and get a fresh version of the same three files in the same place, without having
+to reconstruct it from a chat log the way this very investigation just had to. `.gitignore`, `tests/README.md`,
+and `tests/evals/README.md` all updated to document this: only the most recent run's files are ever committed
+(each write overwrites the previous run, same as before -- this is a visibility change, not a new accumulation
+policy).

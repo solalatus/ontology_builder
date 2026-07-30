@@ -1,8 +1,24 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
 import { tagApiMessagesWithTurn, looksLikeEarlyPhaseCheckpoint, looksLikePureAcknowledgment } from "./evals/lib/conversationOrchestrator.mjs";
-import { writeConversationLog, writeToolCallLog, writeReport, LOG_PATH, TOOL_CALL_LOG_PATH, REPORT_PATH } from "./evals/lib/reportGenerator.mjs";
+import { writeConversationLog, writeToolCallLog, writeReport, pathsFor, RESULTS_DIR } from "./evals/lib/reportGenerator.mjs";
+
+// Own throwaway directory, not the real tests/evals/results/ -- these are
+// mocked unit tests writing synthetic fixture content ("first run marker",
+// "opening line"), and a real live eval run writes its actual transcript to
+// that same shared, gitignored directory. Before this existed, running the
+// full mocked suite (`node --test tests/*.spec.mjs`) right after a real live
+// eval run silently clobbered that run's real conversation-log.md/
+// tool-calls.md/report.md with this file's own test fixtures -- discovered
+// only when a later investigation went looking for the real transcript and
+// found test placeholders instead (see helper_agent_todo.md's dated
+// addendum). reportGenerator.mjs's write* functions accept this `{ dir }`
+// override specifically so these tests never touch the real results files.
+const TEST_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "ontology-eval-transparency-test-"));
+const { logPath: LOG_PATH, toolCallLogPath: TOOL_CALL_LOG_PATH, reportPath: REPORT_PATH } = pathsFor(TEST_DIR);
 
 // Fast, deterministic unit tests for the eval's full-transparency logging
 // (tests/evals/lib/conversationOrchestrator.mjs's rawApiLog capture and
@@ -142,7 +158,7 @@ test("writeToolCallLog renders each tool call's real arguments (pretty-printed) 
     },
     { turn: 2, role: "tool", tool_call_id: "call_2", content: "Applied. Added 1, updated 0 existing item(s)." },
   ];
-  writeToolCallLog(rawApiLog);
+  writeToolCallLog(rawApiLog, { dir: TEST_DIR });
   const text = fs.readFileSync(TOOL_CALL_LOG_PATH, "utf8");
 
   assert.match(text, /### Turn 1 — assistant/);
@@ -159,8 +175,8 @@ test("writeToolCallLog renders each tool call's real arguments (pretty-printed) 
 });
 
 test("writeToolCallLog overwrites the previous run's file rather than accumulating", () => {
-  writeToolCallLog([{ turn: 1, role: "user", content: "first run marker" }]);
-  writeToolCallLog([{ turn: 1, role: "user", content: "second run marker" }]);
+  writeToolCallLog([{ turn: 1, role: "user", content: "first run marker" }], { dir: TEST_DIR });
+  writeToolCallLog([{ turn: 1, role: "user", content: "second run marker" }], { dir: TEST_DIR });
   const text = fs.readFileSync(TOOL_CALL_LOG_PATH, "utf8");
   assert.ok(!text.includes("first run marker"));
   assert.ok(text.includes("second run marker"));
@@ -174,7 +190,7 @@ test("writeConversationLog is safe to call repeatedly with a growing, in-progres
     turnsUsed: 1,
     durationMs: 5000,
     log: [{ turn: 0, speaker: "persona", text: "opening line" }],
-  });
+  }, { dir: TEST_DIR });
   let text = fs.readFileSync(LOG_PATH, "utf8");
   assert.match(text, /Status: \*\*in progress \(turn_started, turn 1\)\*\*/);
   assert.match(text, /Last updated: \d{4}-\d{2}-\d{2}T/);
@@ -190,16 +206,32 @@ test("writeConversationLog is safe to call repeatedly with a growing, in-progres
       { turn: 1, speaker: "app-assistant", text: "first reply" },
       { turn: 2, speaker: "persona", text: "turn 2 reply" },
     ],
-  });
+  }, { dir: TEST_DIR });
   text = fs.readFileSync(LOG_PATH, "utf8");
   assert.match(text, /Status: \*\*app_agent_appears_finished\*\*/);
   assert.match(text, /turn 2 reply/);
 });
 
 test("writeToolCallLog includes a live-updated timestamp so a repeated read can tell fresh from stale", () => {
-  writeToolCallLog([{ turn: 1, role: "user", content: "x" }]);
+  writeToolCallLog([{ turn: 1, role: "user", content: "x" }], { dir: TEST_DIR });
   const text = fs.readFileSync(TOOL_CALL_LOG_PATH, "utf8");
   assert.match(text, /Last updated: \d{4}-\d{2}-\d{2}T/);
+});
+
+test("pathsFor() with no argument resolves to the real, shared RESULTS_DIR a live eval run uses -- the default this file's own TEST_DIR override must never change", () => {
+  const defaultPaths = pathsFor();
+  assert.equal(defaultPaths.logPath, path.join(RESULTS_DIR, "conversation-log.md"));
+  assert.equal(defaultPaths.reportPath, path.join(RESULTS_DIR, "report.md"));
+  assert.equal(defaultPaths.toolCallLogPath, path.join(RESULTS_DIR, "tool-calls.md"));
+});
+
+test("this file's own write* calls never touch the real, shared RESULTS_DIR -- only TEST_DIR", () => {
+  writeToolCallLog([{ turn: 1, role: "user", content: "isolation probe -- must not land in the real results dir" }], { dir: TEST_DIR });
+  const realToolCallLogPath = pathsFor(RESULTS_DIR).toolCallLogPath;
+  if (fs.existsSync(realToolCallLogPath)) {
+    const realText = fs.readFileSync(realToolCallLogPath, "utf8");
+    assert.ok(!realText.includes("isolation probe"), "a mocked unit test must never write into the real eval results directory");
+  }
 });
 
 function fakeMetrics(overrides = {}) {
@@ -222,6 +254,7 @@ test("writeReport renders both the full-domain and practical-scope metrics, clea
   writeReport({
     metrics, scopedMetrics, operationalStats, orchestratorResult, llmReviewText: "None observed.",
     interviewerModel: "gpt-test", personaModel: "gpt-test-persona", classifierModel: "gpt-test-classifier",
+    dir: TEST_DIR,
   });
   const text = fs.readFileSync(REPORT_PATH, "utf8");
 

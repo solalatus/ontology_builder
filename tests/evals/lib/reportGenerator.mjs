@@ -9,6 +9,30 @@ export const LOG_PATH = path.join(RESULTS_DIR, "conversation-log.md");
 export const REPORT_PATH = path.join(RESULTS_DIR, "report.md");
 export const TOOL_CALL_LOG_PATH = path.join(RESULTS_DIR, "tool-calls.md");
 
+// Every write* function below defaults to RESULTS_DIR (the real, shared,
+// gitignored eval results a live run writes to and this app's own
+// documented workflow tells a user to `tail` mid-run) -- but accepts an
+// optional `dir` override, purely so tests/ontology-recovery-transparency.
+// spec.mjs's *mocked* unit tests (synthetic "first run marker"/"opening
+// line" fixture content) can point at a throwaway directory instead. Before
+// this existed, those unit tests wrote straight to the shared RESULTS_DIR --
+// harmless in isolation, but running the full mocked suite (`node --test
+// tests/*.spec.mjs`) right after a real live eval run silently clobbered
+// that run's actual conversation-log.md/tool-calls.md/report.md with
+// synthetic fixture text, discovered only when a later investigation went
+// looking for the real transcript and found test placeholders instead (see
+// helper_agent_todo.md's dated addendum). Real eval callers
+// (ontology-recovery.eval.spec.mjs) never pass this option, so their
+// behavior -- and the exported LOG_PATH/REPORT_PATH/TOOL_CALL_LOG_PATH
+// constants other tooling may already read from -- is unchanged.
+export function pathsFor(dir = RESULTS_DIR) {
+  return {
+    logPath: path.join(dir, "conversation-log.md"),
+    reportPath: path.join(dir, "report.md"),
+    toolCallLogPath: path.join(dir, "tool-calls.md"),
+  };
+}
+
 const CHAT_URL = "https://api.openai.com/v1/chat/completions";
 
 function pct(x) {
@@ -30,8 +54,8 @@ function pct(x) {
 // what let a 2-minute glance tell "still moving" from "stuck since
 // <timestamp>" (this file's own mtime is the same signal, but the explicit
 // timestamp means that read doesn't require a second `stat` call).
-export function writeConversationLog(orchestratorResult) {
-  fs.mkdirSync(RESULTS_DIR, { recursive: true });
+export function writeConversationLog(orchestratorResult, { dir = RESULTS_DIR } = {}) {
+  fs.mkdirSync(dir, { recursive: true });
   const lines = [
     "# Ontology-recovery eval — conversation log",
     "",
@@ -43,7 +67,7 @@ export function writeConversationLog(orchestratorResult) {
   for (const entry of orchestratorResult.log) {
     lines.push(`### Turn ${entry.turn} — ${entry.speaker}`, "", entry.text, "");
   }
-  fs.writeFileSync(LOG_PATH, lines.join("\n"));
+  fs.writeFileSync(pathsFor(dir).logPath, lines.join("\n"));
 }
 
 // Tool-call activity, read from both the raw real API responses (for exact
@@ -138,8 +162,8 @@ export async function generateLlmReview({ apiKey, model, orchestratorResult }) {
 // showing both, rather than quietly swapping the denominator, is what makes
 // this an addition to transparency rather than a way to make the number
 // look better.
-export function writeReport({ metrics, scopedMetrics, operationalStats, orchestratorResult, llmReviewText, interviewerModel, personaModel, classifierModel }) {
-  fs.mkdirSync(RESULTS_DIR, { recursive: true });
+export function writeReport({ metrics, scopedMetrics, operationalStats, orchestratorResult, llmReviewText, interviewerModel, personaModel, classifierModel, dir = RESULTS_DIR }) {
+  fs.mkdirSync(dir, { recursive: true });
   const m = metrics;
   const s = scopedMetrics;
   const lines = [
@@ -183,7 +207,7 @@ export function writeReport({ metrics, scopedMetrics, operationalStats, orchestr
     "than the interviewer's own narration of it.",
     "",
   ];
-  fs.writeFileSync(REPORT_PATH, lines.join("\n"));
+  fs.writeFileSync(pathsFor(dir).reportPath, lines.join("\n"));
 }
 
 // FULL TRANSPARENCY LOG ---------------------------------------------------
@@ -223,8 +247,8 @@ function formatToolCallEntry(entry) {
 // same onProgress callback, same reasoning: a hang mid-run should leave a
 // file showing every tool call up through the last completed turn, not
 // nothing at all.
-export function writeToolCallLog(rawApiLog) {
-  fs.mkdirSync(RESULTS_DIR, { recursive: true });
+export function writeToolCallLog(rawApiLog, { dir = RESULTS_DIR } = {}) {
+  fs.mkdirSync(dir, { recursive: true });
   const lines = [
     "# Ontology-recovery eval — raw tool-call transparency log",
     "",
@@ -236,5 +260,5 @@ export function writeToolCallLog(rawApiLog) {
     "",
   ];
   for (const entry of rawApiLog) lines.push(formatToolCallEntry(entry));
-  fs.writeFileSync(TOOL_CALL_LOG_PATH, lines.join("\n"));
+  fs.writeFileSync(pathsFor(dir).toolCallLogPath, lines.join("\n"));
 }
