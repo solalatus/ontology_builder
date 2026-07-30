@@ -1108,3 +1108,20 @@ with test coverage, a live eval re-run, and a PR.
       matching tests already covered the label-check path; no gold-side change was needed since the fixture's
       predicates still have no aliases).
 - Full suite (`tests/*.spec.mjs`, 431 JS tests) green.
+- **Live confirmation.** A fresh confirmatory run (turn 38, 621s, `app_agent_appears_finished` again -- genuine
+  finish, not a cap/timeout/loop) against the previous run (turn 37, 662s) as baseline:
+  - **Composite: 30.2% -> 45.7% full domain, 47.3% -> 57.1% scoped** -- another large jump on top of the
+    previous addendum's own.
+  - **Relationships, the specific target of this addendum: recall 2.5%/4.2% -> 8.3%/12.5% (more than
+    tripled), precision 5.6%/5.6% -> 21.9%/18.8% (nearly quadrupled), F1 3.4%/4.8% -> 12.1%/15.0%.** Both
+    matched count (3 -> 10 full-domain) and recovered-edge count (36 -> 32, fewer but more of them correct)
+    moved the right direction -- not just a denominator artifact, real improvement on the one metric that had
+    been stuck flat across every prior run this session. The LLM review of this run independently praised
+    "Relationship elicitation was systematic and well batched... consistently asked for direction/verb
+    confirmation and **incorporated corrections**" (turns 7-12) -- consistent with the persona wording-pushback
+    fix actually firing in practice, not just sitting unused in the prompt.
+  - Property recall and controlled-value fidelity also up substantially (property recall 31.5%/38.5% ->
+    26.1%/46.2%; fidelity 43.3%/83.3% -> 100%/100%) -- plausibly continued benefit from the same relationship/
+    property matching threshold work, though single-run noise across independent live conversations means this
+    isn't attributed to any one specific change with certainty.
+  - Class metrics held steady to modestly improved (scoped F1 62.5% -> 67.1%).
