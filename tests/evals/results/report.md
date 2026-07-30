@@ -1,45 +1,65 @@
 # Ontology-recovery eval report
 
-Generated: 2026-07-30T18:59:47.755Z
+Generated: 2026-07-30T20:54:35.677Z
 
-## Headline metrics
+## Heuristic (regex/token-overlap) metrics
 
 Two denominators, side by side: **full domain** is every class/relationship/property in the fixture's 68-class comprehensive reference model; **practical scope** is the subset the fixture's own canonical competency questions and actions actually talk about (see tests/evals/README.md) -- the ceiling a real, single-session, competency-driven interview could reach even with perfect elicitation. Full-domain numbers give context and cross-run comparability; practical-scope numbers are the more meaningful read of interview quality on their own.
 
 | Metric | Full domain | Practical scope | Detail |
 |---|---|---|---|
-| **Recovery effectiveness (composite)** | **31.8%** | **45.2%** | equal-weighted: class F1, relationship F1, property recall, value fidelity |
-| Class recall / precision / F1 | 33.8% / 85.2% / 48.4% | 71.4% / 74.1% / 72.7% | 23/68 full · 20/28 scoped ground-truth classes matched; 27 recovered |
-| Relationship recall / precision / F1 | 9.3% / 22.2% / 13.1% | 19.5% / 17.8% / 18.6% | 10/108 full · 8/41 scoped ground-truth relationships matched; 45 recovered (subclass/"is a" predicates excluded from both -- see README) |
-| Property recall | 31.5% | 57.7% | 35/111 full · 15/26 scoped ground-truth properties matched (technical identifier/URI fields excluded — see tests/evals/README.md) |
-| Controlled-value fidelity | 34.2% | 31.8% | average allowed-value overlap across matched controlled-value properties |
+| **Recovery effectiveness (composite)** | **26.9%** | **40.5%** | equal-weighted: class F1, relationship F1, property recall, value fidelity |
+| Class recall / precision / F1 | 26.5% / 90.0% / 40.9% | 53.6% / 75.0% / 62.5% | 18/68 full · 15/28 scoped ground-truth classes matched; 20 recovered |
+| Relationship recall / precision / F1 | 5.6% / 23.1% / 9.0% | 12.2% / 19.2% / 14.9% | 6/108 full · 5/41 scoped ground-truth relationships matched; 26 recovered (subclass/"is a" predicates excluded from both -- see README) |
+| Property recall | 19.8% | 46.2% | 22/111 full · 12/26 scoped ground-truth properties matched (technical identifier/URI fields excluded — see tests/evals/README.md) |
+| Controlled-value fidelity | 37.9% | 38.6% | average allowed-value overlap across matched controlled-value properties |
+
+## Semantic (LLM-adjudicated) metrics
+
+Same two denominators, same table shape, computed by `llmMatcher.mjs`'s `computeSemanticRecoveryMetrics()`: the heuristic pass above, plus a strict LLM judge given a second, structured look at every residual near-miss the heuristic pass rejected (a class/relationship/property phrased very differently than gold's hidden wording, or a controlled-value list using a different labeling convention for the same real scale). The judge only ever adds matches the heuristic pass missed -- it never overrides or removes a heuristic match, so this section's numbers are always >= the section above's on every recall metric. Any gap between the two sections is exactly the wording-variance tax the heuristic-only score was paying; a genuinely wrong or missing recovery costs the same in both.
+
+| Metric | Full domain | Practical scope | Detail |
+|---|---|---|---|
+| **Recovery effectiveness (composite)** | **36.6%** | **53.2%** | equal-weighted: class F1, relationship F1, property recall, value fidelity |
+| Class recall / precision / F1 | 26.5% / 90.0% / 40.9% | 53.6% / 75.0% / 62.5% | 18/68 full · 15/28 scoped ground-truth classes matched; 20 recovered |
+| Relationship recall / precision / F1 | 13.9% / 57.7% / 22.4% | 31.7% / 50.0% / 38.8% | 15/108 full · 13/41 scoped ground-truth relationships matched; 26 recovered (subclass/"is a" predicates excluded from both -- see README) |
+| Property recall | 21.6% | 50.0% | 24/111 full · 13/26 scoped ground-truth properties matched (technical identifier/URI fields excluded — see tests/evals/README.md) |
+| Controlled-value fidelity | 61.4% | 61.7% | average allowed-value overlap across matched controlled-value properties |
 
 ## Run stats
 
 - Interviewer model: `gpt-5.5-2026-04-23` · Persona model: `gpt-4o-mini` · Classifier model: `gpt-5.5-2026-04-23`
-- Stopped: **app_agent_appears_finished**, after 40 turns, 624s wall-clock
-- Real app-agent API calls: 76 (apply_ontology_yaml called 33× · get_graph_state called 3×)
-- Tool outcomes seen in transcript: 33 applied · 0 skipped · 0 no-op · 0 error
+- Stopped: **app_agent_appears_finished**, after 33 turns, 479s wall-clock
+- Real app-agent API calls: 77 (apply_ontology_yaml called 27× · get_graph_state called 17×)
+- Tool outcomes seen in transcript: 27 applied · 0 skipped · 0 no-op · 0 error
 
 ## LLM review of the conversation
 
 ## Errors
 
-- **Turn 36–37:** `requiresRegulatoryNotification` includes “Regulatory notification status is not submitted/accepted/withdrawn,” but `createRegulatoryNotificationDraft` creates the notification. If no notification exists yet, this precondition may be impossible to evaluate or could block draft creation.
-- **Turn 36–37:** `canDeclareMajorIncident` requires the “major-incident declaration initiator is identified,” but `declareMajorIncident` creates/updates the `MajorIncidentDeclaration`. The initiator is not an input to the action, so the rule may require data on a record that does not exist yet.
-- **Turn 38–40:** `canSendStakeholderUpdate` was created with a “message content is provided” precondition before `Communication.messageContent` existed. The agent caught and fixed this at validation, but it indicates the action/rule/property consistency check happened late.
-- **Turn 40:** Validation claims the question “What are the criteria for service health state?” is covered by allowed values on `healthState`. Allowed values like `healthy/degraded/unavailable/unknown` do not define criteria or thresholds, so this competency question is not truly satisfied.
-- **Turn 28–32:** `Authorization → authorizes → EmergencyChange` is defined as permitting or denying execution, while aliases include `approves`/`permits` and `Authorization.decision` can be `rejected` or `revoked`. This conflates an authorization record with a positive approval.
+- **Turn 11:** Tool result says “0 added, 3 updated” after confirming 12 properties across Incident, BusinessService, and ConfigurationItem. Similar pattern recurs later; the assistant says all properties were recorded, but the tool counts suggest only class-level records were updated, not individual properties. Could be normal batching, but it looks suspicious without visibility into state.
+- **Turn 12:** Tool result “0 added, 8 updated” for properties across 8 classes; again implies class records updated rather than property-level additions. Not necessarily a bug, but the counts don’t match the assistant’s “recorded properties” wording.
+- **Turn 13:** Tool result “0 added, 9 updated” for properties across 9 classes; same potential count/state ambiguity.
+- **Turn 26:** Assistant says it recorded allowed values for 10 properties, but tool reports “0 added, 7 updated.” Possible missed value-list updates or misleading count.
+- **Turn 27:** Assistant says it recorded 8 fixed-choice lists including the refined `DecisionOwner.decisionAuthorityLevel`, but tool reports only “0 added, 6 updated.” Potential dropped lists or misleading tool reporting.
+- **Turn 28:** Assistant says it recorded RTO/RPO units and blocking significance for 7 properties, but tool reports only “0 added, 1 updated.” This is the clearest apparent mismatch; likely not all constraints/blocking notes were actually persisted.
+- **Turn 32:** `initiateRecoveryProcedure` uses precondition **canDeclareRecovery**, whose conditions include recovery procedure execution status already being `completed`. This contradicts the action’s effect (“started or advanced”) and verification (“changed from not started to in progress or completed”). There should be a separate `canInitiateRecoveryProcedure` rule.
+- **Turn 33:** Final validation claims it “ran the validation against the live ontology state,” but only a generic state check occurred and no explicit validation tool output is shown. This may be overstating what was actually verified.
 
 ## Noteworthy observations
 
-- **Turns 5–14:** The interviewer did a good job batching relationships and checking distinctions such as Alert vs Event, Change vs EmergencyChange, and Stakeholder vs IncidentCommander.
-- **Turns 15–20:** Property elicitation was systematic and tied back to the Phase 1 questions/actions, which kept the ontology from becoming purely speculative.
-- **Turns 23–33:** Alias collection was thorough, but many aliases were accepted by broad confirmation. The interviewer rarely challenged potentially ambiguous terms like `owner`, `managed by`, `rolls back`, or `CAPA`.
-- **Turns 34–35:** Controlled vocabularies were useful, but the interviewer accepted “all listed values are blockers” very broadly. Some missing values, e.g. `expectedRecoveryTime`, may block certain decisions but not all stakeholder communication.
-- **Turns 37–39:** Action modeling followed a clear pattern: input, preconditions, effect, verification. However, actions like `assignResolverGroup` refer to a “selected ResolverGroup” without making that selected group an input or explicit linked object.
-- **Turns 39–40:** The validation pass was valuable and caught a real missing property. This suggests an earlier automated consistency check between preconditions and available properties would improve the flow.
-- **Overall:** The interviewer was efficient but highly leading. The persona mostly rubber-stamped proposed structures, so bank-specific nuances such as exact major-incident thresholds, materiality criteria, regulatory reporting deadlines, and health-state criteria were under-elicited.
+- **Turn 1:** Strong opening structure: starts with acceptance-test questions/actions before modeling, which is good ontology elicitation practice.
+- **Turns 3–4:** Good confirmation loop for candidate classes; correctly applied the user’s rename from `StakeholderUpdate` to `Communication`.
+- **Turns 4–9:** Relationship elicitation was efficient and well batched. The interviewer repeatedly asked for direction/verb confirmation and incorporated terminology corrections.
+- **Turn 8:** Good state-awareness moment: checked for isolated classes before adding additional plausible relationships.
+- **Turns 16–18:** Good handling of aliases vs non-synonyms. The interviewer explicitly asked about ambiguous terms like `MI`, `service owner`, `emergency change`, and `event`, preventing bad synonym capture.
+- **Turns 22–25:** Relationship alias elicitation was thorough, but somewhat verbose/repetitive. Could be compressed by asking for exceptions only after proposing aliases.
+- **Turn 26:** Missed opportunity to clarify whether suggested `internal memo` should be added. Persona said “might also consider adding,” then “current list is sufficient,” so not adding is defensible, but a quick clarification could help.
+- **Turn 27:** Potential conceptual issue: `DecisionOwner.decisionAuthorityLevel` allowed value `service owner` conflicts with earlier statement that “service owner” is a different role and not a synonym for DecisionOwner. It may still be a valid authority level, but the interviewer should have clarified.
+- **Turn 28:** Rules were a useful transition from constraints to action preconditions. However, several proposed rules are quite high-level and not formalized enough to be machine-actionable, e.g. “assignment criteria matches.”
+- **Turn 29:** `canExecuteEmergencyChange` includes “incident is related to the change,” but no condition that the incident is active/open, despite the persona glossing it as linked to an active incident. The interviewer missed this discrepancy.
+- **Turn 31:** Good explanation that each action has exactly one input class and other entities must be represented through relationships/properties/preconditions.
+- **Turn 33:** Final recap is clear and maps original competency questions back to ontology structures, which is a strong validation technique.
 
 ## Full conversation log
 
