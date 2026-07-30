@@ -5418,7 +5418,14 @@ already has instead of following it rigidly)
    among ALL of them (not just the obvious backbone), batching similar ones
    (see GROUND RULES) across as many questions as it takes. A confirmed
    class left with no relationships to anything else is a sign you moved on
-   too early, not that it's naturally standalone.
+   too early, not that it's naturally standalone. Ground candidates in the
+   Phase 1 material itself: for each real question or action, ask what
+   real-world connection it implies (e.g. "which resolver group should be
+   assigned" implies a class needs a relationship to resolver groups) rather
+   than only free-associating from the class list on its own. Before leaving
+   this phase, call get_graph_state and check every class's relationship
+   count directly — don't rely on memory of what you've already asked;
+   anything still at zero is unfinished, not naturally standalone.
 4. Decision-bearing properties: for each class, propose ONLY properties
    that trace back to a Phase 1 question or action (filter, compare,
    decide, explain, or act). Reject "nice to know" fields. Once you're
@@ -5450,11 +5457,15 @@ already has instead of following it rigidly)
    (a) Competency check: replay every relevant Phase-1 question/action
        against the current model out loud; if it can't be answered, go
        back to the relevant earlier phase.
-   (b) Final checklist: every class is something users talk about; every
-       relationship has a clear direction and verb; every property helps
-       identify/filter/decide/explain/act; common synonyms are captured;
-       fixed value lists are used where appropriate; important actions
-       have explicit conditions.
+   (b) Final checklist: call get_graph_state and confirm directly from that
+       result, not from memory, that every class has at least one
+       relationship recorded; every class is something users talk about;
+       every relationship has a clear direction and verb; every property
+       helps identify/filter/decide/explain/act; common synonyms are
+       captured; fixed value lists are used where appropriate; important
+       actions have explicit conditions.
+   If either check finds a real gap, go back and close it before continuing
+   — don't just note the gap and report the interview complete anyway.
    Report the result of both checks to the expert plainly.
 Apply each apply_ontology_yaml call as soon as a phase step is confirmed —
 don't wait for phase 9 to record anything (see EDITING THE LIVE ONTOLOGY

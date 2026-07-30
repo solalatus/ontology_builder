@@ -64,6 +64,25 @@ test("the system prompt includes the INTERVIEW PROCESS section with all 10 phase
   });
 });
 
+// A real confirmatory eval run's own LLM review found the interviewer
+// declaring the interview complete (turn 45's final validation pass) while
+// its own final checklist was, on inspection, wrong -- it reported every
+// class as having relationships when at least one didn't, from memory
+// rather than from an actual check. Requiring get_graph_state here (the
+// same tool already used for Phase 3's own coverage check) and forbidding
+// "note the gap and move on anyway" closes that gap directly, and is also
+// the main lever for a longer, more thorough session generally: nothing
+// caps turns/wallclock in practice (the eval never gets close), the
+// interviewer's own willingness to call itself done early is the real
+// constraint.
+test("the system prompt's final checklist requires a get_graph_state check, not memory, and forbids reporting completion over an unresolved gap", async () => {
+  await withPage(async (page) => {
+    const prompt = await systemPrompt(page);
+    assert.match(prompt, /call get_graph_state and confirm directly from that\s*result, not from memory, that every class has at least one\s*relationship recorded/);
+    assert.match(prompt, /go back and close it before continuing\s*—\s*don't just note the gap and report the interview complete anyway/);
+  });
+});
+
 // Regression coverage for a real interview-pacing inefficiency the
 // ontology-recovery eval's own LLM review flagged twice in one run (turns
 // 42-89 and 89+): GROUND RULES used to say "Ask ONE focused question at a
@@ -98,6 +117,22 @@ test("the system prompt pushes Phase 3 (relationships) to systematically cover a
     assert.match(prompt, /Don't stop after one opening batch/);
     assert.match(prompt, /systematically work through the plausible connections\s*among ALL of them/);
     assert.match(prompt, /left with no relationships to anything else is a sign you moved on\s*too early/);
+  });
+});
+
+// Follow-up regression: even with the guidance above, a real confirmatory
+// eval run still recovered relationships at a fraction of its own
+// scoped-recall ceiling (see helper_agent_todo.md's dated addendum). Two
+// further, more mechanical pushes: ground candidates directly in the
+// Phase 1 material (many relationships are already implied by a real
+// question/action, the same anchoring already used for properties), and
+// require an actual get_graph_state check of each class's relationship
+// count rather than trusting memory of what's already been asked.
+test("the system prompt grounds relationship candidates in Phase 1 material and requires a get_graph_state coverage check before leaving Phase 3", async () => {
+  await withPage(async (page) => {
+    const prompt = await systemPrompt(page);
+    assert.match(prompt, /Ground candidates in the\s*Phase 1 material itself/);
+    assert.match(prompt, /Before leaving\s*this phase, call get_graph_state and check every class's relationship\s*count directly/);
   });
 });
 

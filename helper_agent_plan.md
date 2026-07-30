@@ -661,6 +661,23 @@ to give one short closing line and stop once it recognizes the interviewer
 has wrapped up, rather than keep volunteering new content. See
 `helper_agent_todo.md`'s own further dated addendum for the details.
 
+A later follow-up asked why class/relationship/property recall were all
+low, and (after discussing four concrete options) implemented all four:
+audited the scoring logic against a real run's own recovered data and found
+relationships/properties get one bare label compared against gold's one
+bare label (no alias list on either side, unlike classes), so
+`recoveryMetrics.mjs` now uses a lower, still-gated Jaccard threshold for
+those two dimensions specifically; Phase 3 now grounds relationship
+candidates in the Phase 1 material itself and requires a `get_graph_state`
+coverage check before moving on; Phase 9's final checklist now requires the
+same mechanical check (not memory) and forbids declaring the interview
+complete over a noted-but-unclosed gap; and `groundTruthModel.mjs` gained
+`practicalScopePropertyIds`, narrowing the scored property set to ones
+whose own label is independently evidenced in the fixture's own
+competency-question/action material, not just inherited from an in-scope
+host class. See `helper_agent_todo.md`'s own further dated addendum for the
+full audit trail and the real examples behind each change.
+
 Both the production agent and the test harness also gained rate-limit
 backoff: `index.html`'s `callAgentChatRaw`/`fetchOpenAiModels` now retry an
 ordinary transient 429 with exponential backoff instead of failing

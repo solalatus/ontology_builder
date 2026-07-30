@@ -134,7 +134,7 @@ export function buildReducedActions(doc, classes) {
 // canonical competency-test material actually talks about, so it can't
 // silently drift into an arbitrary hand-trimmed subset the way editing the
 // YAML by hand could.
-function buildPracticalScopeClassIds(doc, classes, reducedActions) {
+function buildScopeCorpus(doc, classes, reducedActions) {
   const corpusParts = [...(doc.competencyQuestions || [])];
   for (const a of Object.values(doc.actions || {})) {
     corpusParts.push(a.label || "");
@@ -144,7 +144,10 @@ function buildPracticalScopeClassIds(doc, classes, reducedActions) {
     corpusParts.push(...(a.authorization || []));
   }
   for (const a of reducedActions) corpusParts.push(classes[a.primaryInputClassId].label);
-  const corpus = ` ${stripPunctuation(normalizeLabel(corpusParts.join(" \n ")))} `;
+  return ` ${stripPunctuation(normalizeLabel(corpusParts.join(" \n ")))} `;
+}
+
+function buildPracticalScopeClassIds(classes, corpus) {
   const scope = new Set();
   for (const [id, c] of Object.entries(classes)) {
     // c.aliases already includes the class's own label (see below), each
@@ -159,12 +162,51 @@ function buildPracticalScopeClassIds(doc, classes, reducedActions) {
   return scope;
 }
 
+// Properties get the same treatment as classes above, against the exact
+// same corpus -- but independently, not merely inherited from their host
+// class already being in scope. A property on an in-scope class can still
+// be a field nobody's actual question or action ever mentions by name --
+// exactly the "nice to know" field AGENT_KNOWLEDGE already tells the agent
+// to reject, regardless of which class it lives on. Unlike classes,
+// properties have no `aliases:` in the fixture to check (same asymmetry
+// recoveryMetrics.mjs documents for relationship labels) -- own label only.
+//
+// Whole-phrase substring (the class approach above) doesn't work here: the
+// fixture's own predicate-label convention is "has X" / "is X" for two
+// thirds of all predicates ("has criticality tier", "is critical
+// provider"), and a natural competency question is never going to contain
+// that exact "has X" phrase verbatim -- confirmed empirically, it matched
+// zero of 111 properties on the first attempt. Content-word overlap against
+// the corpus (stopword-stripped, same idea as recoveryMetrics.mjs's own
+// tokenize/labelsMatch) is the forgiving version: "has criticality tier"
+// only needs "criticality" and "tier" to each appear *somewhere* in the
+// corpus, not adjacent to each other or to "has".
+const SCOPE_STOPWORDS = new Set(["a", "an", "the", "is", "of", "its", "to", "for", "has", "have", "and", "or"]);
+function scopeTokens(s) {
+  return stripPunctuation(normalizeLabel(s)).split(" ").filter((w) => w && !SCOPE_STOPWORDS.has(w));
+}
+function buildPracticalScopePropertyIds(properties, corpus) {
+  const corpusTokens = new Set(scopeTokens(corpus));
+  const scope = new Set();
+  for (const p of properties) {
+    const tokens = scopeTokens(p.label);
+    if (tokens.length && tokens.every((t) => corpusTokens.has(t))) scope.add(p.id);
+  }
+  return scope;
+}
+
 // Filters a loaded ground-truth model down to only the classes named in
 // classIds (plus relationships/properties/actions anchored to them), for
 // scoring against a narrower denominator (e.g. practicalScopeClassIds)
 // while reusing the exact same computeRecoveryMetrics logic used for the
 // full domain -- no separate scoring code path to keep in sync.
-export function scopeGroundTruth(groundTruth, classIds) {
+//
+// propertyIds, if given, additionally requires each property's own id to be
+// in practicalScopePropertyIds -- not just its host class being in
+// classIds -- see buildPracticalScopePropertyIds above. Optional (defaults
+// to no extra filtering) so callers that only care about class-level
+// scoping don't need to thread it through.
+export function scopeGroundTruth(groundTruth, classIds, propertyIds = null) {
   const classes = {};
   for (const [id, c] of Object.entries(groundTruth.classes)) {
     if (classIds.has(id)) classes[id] = c;
@@ -172,7 +214,9 @@ export function scopeGroundTruth(groundTruth, classIds) {
   const relationships = groundTruth.relationships.filter(
     (r) => classIds.has(r.fromClassId) && classIds.has(r.toClassId)
   );
-  const properties = groundTruth.properties.filter((p) => classIds.has(p.classId));
+  const properties = groundTruth.properties.filter(
+    (p) => classIds.has(p.classId) && (!propertyIds || propertyIds.has(p.id))
+  );
   const actions = (groundTruth.actions || []).filter((a) => classIds.has(a.primaryInputClassId));
   return { ...groundTruth, classes, relationships, properties, actions };
 }
@@ -219,7 +263,12 @@ export function loadGroundTruthModel({ includeAllProperties = false } = {}) {
   }
 
   const actions = buildReducedActions(doc, classes);
-  const practicalScopeClassIds = buildPracticalScopeClassIds(doc, classes, actions);
+  const scopeCorpus = buildScopeCorpus(doc, classes, actions);
+  const practicalScopeClassIds = buildPracticalScopeClassIds(classes, scopeCorpus);
+  const practicalScopePropertyIds = buildPracticalScopePropertyIds(properties, scopeCorpus);
 
-  return { classes, relationships, properties, valueSets, actions, metadata: doc.metadata || {}, practicalScopeClassIds };
+  return {
+    classes, relationships, properties, valueSets, actions, metadata: doc.metadata || {},
+    practicalScopeClassIds, practicalScopePropertyIds,
+  };
 }
