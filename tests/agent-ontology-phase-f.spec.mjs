@@ -100,6 +100,7 @@ test("the exported YAML reproduces the howto's own worked example structure exac
       "    from: Invoice",
       "    to: Supplier",
       "    meaning: null",
+      "    aliases: []",
       "rules:",
       "  canApproveInvoice:",
       "    conditions:",
@@ -114,6 +115,24 @@ test("the exported YAML reproduces the howto's own worked example structure exac
       "    verification: confirm the new invoice status",
       "",
     ].join("\n"));
+  });
+});
+
+// Relationships gained an aliases field (mirroring classes) after a real
+// ontology-recovery eval run found the interviewer eliciting real
+// relationship synonyms from a domain expert with nowhere to store them —
+// see helper_agent_todo.md's dated addendum and index.html's createEdge().
+test("a relationship's aliases are included in the export, same shape as a class's", async () => {
+  await withPage(async (page) => {
+    await page.evaluate(() => {
+      const invoice = window.__kg.actions.createNode(100, 100, "Invoice");
+      const supplier = window.__kg.actions.createNode(400, 100, "Supplier");
+      const edge = window.__kg.actions.createEdge(invoice.id, supplier.id, "issued by");
+      edge.aliases = ["billed by", "sent by"];
+      window.__kg.markDirty();
+    });
+    const yaml = await domainYaml(page);
+    assert.ok(yaml.includes("- name: issuedBy\n    from: Invoice\n    to: Supplier\n    meaning: null\n    aliases:\n      - billed by\n      - sent by\n"));
   });
 });
 

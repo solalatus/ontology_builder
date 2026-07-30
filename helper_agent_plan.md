@@ -678,6 +678,25 @@ competency-question/action material, not just inherited from an in-scope
 host class. See `helper_agent_todo.md`'s own further dated addendum for the
 full audit trail and the real examples behind each change.
 
+Reading that same run's actual transcript (not just its metrics) surfaced a
+second, deeper finding: relationships in this app had no `aliases` field at
+all, unlike classes -- so a real Phase 5 exchange where the interviewer
+elicited genuine relationship synonyms from the persona (including gold's
+own wording, volunteered) had nowhere to be stored and was silently
+dropped. Fixed as a real app feature, not an eval-only workaround:
+`state.edges[]` gained `aliases: []` (`index.html`'s `createEdge()`), wired
+through the domain YAML export/import, JSON export, the shared class/
+relationship details dialog's UI (aliases section, previously node-only,
+now shown for edges too), and `recoveryMetrics.mjs`'s relationship
+matching. Also fixed a related undo/redo bug found in the process
+(`snapshotState()`/`restoreSnapshot()` shallow-copying edges left aliases
+arrays shared by reference across snapshots instead of freshly copied, like
+nodes already got) and a persona-side wording fix so the simulated
+interview subject volunteers her own phrasing instead of rubber-stamping a
+plausible-sounding guess. See `helper_agent_todo.md`'s own further dated
+addendum for the details, including a self-inflicted template-literal
+syntax error caught and fixed before it shipped.
+
 Both the production agent and the test harness also gained rate-limit
 backoff: `index.html`'s `callAgentChatRaw`/`fetchOpenAiModels` now retry an
 ordinary transient 429 with exponential backoff instead of failing

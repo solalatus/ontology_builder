@@ -3,8 +3,12 @@ import assert from "node:assert/strict";
 import { withPage, addNodeViaDblClick, createEdgeViaConnectMode } from "./lib/page.mjs";
 
 // Agent Ontology, Phase B (agent_ontology_todo.md): the Class/Relationship
-// details editor — a new 4th icon in #sel-toolbar opening #details-overlay,
-// with aliases/properties sections shown for nodes and hidden for edges.
+// details editor — a new 4th icon in #sel-toolbar opening #details-overlay.
+// Properties are node-only (edges have no property concept); aliases are
+// shared by both nodes and edges (relationships gained an aliases field
+// after a real ontology-recovery eval run found the interviewer eliciting
+// real relationship synonyms with nowhere to store them -- see
+// helper_agent_todo.md's dated addendum and index.html's createEdge()).
 
 async function selectNodeOnCanvas(page, sx, sy) {
   const box = await page.locator("#canvas").boundingBox();
@@ -39,15 +43,45 @@ test("selecting a node and clicking Edit Details opens a modal pre-filled with i
   });
 });
 
-test("an edge's details dialog shows only Meaning — aliases/properties sections are hidden", async () => {
+test("an edge's details dialog shows Meaning and Aliases, but not Properties (edges have no property concept)", async () => {
   await withPage(async (page) => {
     await addNodeViaDblClick(page, 250, 250, "Invoice");
     await addNodeViaDblClick(page, 650, 250, "Supplier");
     await createEdgeViaConnectMode(page, 250, 250, 650, 250, "issued by"); // selects the new edge
+    await page.evaluate(() => { window.__kg.state.edges[0].aliases = ["billed by"]; });
     await openDetailsForSelection(page);
     assert.equal(await page.locator("#details-title").textContent(), "Edit Relationship Details");
-    assert.equal(await page.locator("#details-aliases-section").evaluate((el) => getComputedStyle(el).display), "none");
+    assert.equal(await page.locator("#details-aliases-section").evaluate((el) => getComputedStyle(el).display), "block");
+    assert.equal(await page.locator(".details-alias-input").inputValue(), "billed by");
     assert.equal(await page.locator("#details-properties-section").evaluate((el) => getComputedStyle(el).display), "none");
+  });
+});
+
+test("editing an edge's meaning and aliases and clicking Save commits everything as a single undo step", async () => {
+  await withPage(async (page) => {
+    await addNodeViaDblClick(page, 250, 250, "Invoice");
+    await addNodeViaDblClick(page, 650, 250, "Supplier");
+    await createEdgeViaConnectMode(page, 250, 250, 650, 250, "issued by");
+    const historyBefore = await page.evaluate(() => window.__kg.history.past.length);
+
+    await openDetailsForSelection(page);
+    await page.locator("#details-meaning").fill("The supplier that submitted the invoice.");
+    await page.click("#details-add-alias");
+    await page.locator(".details-alias-input").fill("billed by");
+    await page.click("#details-save");
+    await page.waitForSelector("#details-overlay", { state: "hidden" });
+
+    const edge = await page.evaluate(() => window.__kg.state.edges[0]);
+    assert.equal(edge.meaning, "The supplier that submitted the invoice.");
+    assert.deepEqual(edge.aliases, ["billed by"]);
+
+    const historyAfter = await page.evaluate(() => window.__kg.history.past.length);
+    assert.equal(historyAfter, historyBefore + 1, "the whole edit commits as exactly one undo step");
+
+    await page.evaluate(() => window.__kg.actions.undo());
+    const undone = await page.evaluate(() => window.__kg.state.edges[0]);
+    assert.equal(undone.meaning, null);
+    assert.deepEqual(undone.aliases, []);
   });
 });
 

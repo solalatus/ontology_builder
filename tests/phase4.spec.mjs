@@ -54,6 +54,68 @@ test("reloading the page restores nodes and edges from the live-save backend", a
   });
 });
 
+// A relationship's aliases must survive a real Tier 1 write/reload round
+// trip, not just live in memory for the current session -- the whole point
+// of adding them (see index.html's createEdge() and helper_agent_todo.md's
+// dated addendum) was real, persisted data, not a UI-only decoration.
+test("a relationship's aliases survive a real reload, same as a class's", async () => {
+  await withPage(async (page) => {
+    await addNodeViaDblClick(page, 250, 250, "Alpha");
+    await addNodeViaDblClick(page, 600, 250, "Beta");
+    await createEdgeViaConnectMode(page, 250, 250, 600, 250, "relates to"); // also selects the new edge
+
+    // Through the real details-dialog UI, not a direct state mutation --
+    // setting state.edges[0].aliases directly bypasses markDirty()/
+    // scheduleSave() entirely (a real earlier attempt at this test proved
+    // exactly that: whenIdle() resolved instantly because nothing was ever
+    // scheduled, and the "persisted" aliases were actually never saved).
+    await page.click("#sel-details");
+    await page.waitForSelector("#details-overlay", { state: "visible" });
+    await page.click("#details-add-alias");
+    await page.locator(".details-alias-input").fill("connected to");
+    await page.click("#details-save");
+    await page.waitForSelector("#details-overlay", { state: "hidden" });
+    await page.evaluate(() => window.__kg.storage.whenIdle());
+
+    await page.reload();
+    await page.waitForFunction(() => Boolean(window.__kg));
+    await page.waitForFunction(() => window.__kg.state.edges.length === 1);
+
+    const edge = await page.evaluate(() => window.__kg.state.edges[0]);
+    assert.deepEqual(edge.aliases, ["connected to"]);
+  });
+});
+
+// A payload saved by a version of the app before relationships had aliases
+// (no `aliases` key on the edge at all) must still load cleanly -- the same
+// backward-compatibility guarantee normalizeLoadedNode already gives old
+// node payloads, now also true for edges via normalizeLoadedEdge. Seeds
+// localStorage directly before boot (mirrors this file's own "malformed
+// rule/action in a saved payload" test above) rather than going through a
+// live save, since the whole point is a payload shaped like it came from a
+// version of the app that never wrote `aliases` on an edge at all.
+test("a saved payload with no aliases field on its edges at all (pre-feature) still loads without error, normalizing to an empty array", async () => {
+  const browser = await launchChromium();
+  const page = await browser.newPage({ viewport: { width: 1200, height: 800 } });
+  const consoleErrors = [];
+  page.on("console", (msg) => { if (msg.type() === "error") consoleErrors.push(msg.text()); });
+  page.on("pageerror", (err) => consoleErrors.push(String(err)));
+  await page.addInitScript(() => {
+    localStorage.setItem("kg-canvas-live", JSON.stringify({
+      nodes: [{ id: "n1", label: "Alpha", x: 100, y: 100, w: 160, h: 60 }, { id: "n2", label: "Beta", x: 400, y: 100, w: 160, h: 60 }],
+      edges: [{ id: "e1", source: "n1", target: "n2", relation: "relates to", directed: true }], // no `aliases` key at all
+    }));
+  });
+  await page.goto(APP_URL);
+  await page.waitForFunction(() => Boolean(window.__kg));
+  await page.waitForFunction(() => window.__kg.state.edges.length === 1);
+
+  const edge = await page.evaluate(() => window.__kg.state.edges[0]);
+  assert.deepEqual(edge.aliases, []);
+  await browser.close();
+  assert.deepEqual(consoleErrors, []);
+});
+
 test("boot requests persistent storage (best-effort, doesn't block or throw)", async () => {
   const browser = await launchChromium();
   const page = await browser.newPage({ viewport: { width: 1200, height: 800 } });
