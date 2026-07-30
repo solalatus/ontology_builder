@@ -183,10 +183,24 @@ filters an already-loaded ground truth model down to a given class-id set,
 reusing the exact same `computeRecoveryMetrics()` scoring logic for both
 columns rather than maintaining a second code path.
 
+`practicalScopePropertyIds` narrows the properties column one level
+further, the same way `practicalScopeClassIds` narrows classes: a property
+living on an in-scope class isn't automatically in scope itself — its own
+label has to independently show up (content-word overlap against the same
+corpus, since two-thirds of the fixture's predicate labels follow a "has X"
+/ "is X" convention no natural competency question is going to contain
+verbatim) in that competency-question/action material too. Against the
+bundled fixture this drops the scoped property count from 69 (class-only)
+to 26 — genuine "nice to know" fields like `has name`/`has description`/
+`has version` don't survive even though their host class is squarely in
+scope, while decision-bearing ones like `has status`/`has severity` do.
+`scopeGroundTruth()` takes an optional third `propertyIds` argument for
+this (omit it to keep the old class-only property filtering).
+
 ## Metrics (see `lib/recoveryMetrics.mjs`)
 
 Matching is heuristic token-set-overlap string comparison (normalized,
-stopword-stripped, Jaccard ≥ 0.6), not an LLM judge — deterministic and
+stopword-stripped, Jaccard-based), not an LLM judge — deterministic and
 cheap, at the cost of missing recoveries phrased very differently from the
 ground truth's own labels/aliases. A known limitation, not solved here to
 keep this eval's own moving parts small. Normalization does split camelCase
@@ -195,6 +209,28 @@ relationship-name dialect is camelCase while the ground truth's predicate
 labels are natural-language phrases, and a first real run found this
 silently suppressing almost all relationship recall before the split was
 added (helper_agent_todo.md's dated Log entry).
+
+Two different Jaccard thresholds, not one: classes (0.6) get every one of
+the ground truth's own declared aliases cross-checked against the recovered
+node's own label/meaning/aliases — real, built-in tolerance for rephrasing.
+Relationships and properties (0.3) get none of that: the fixture's
+`predicates:` section has no `aliases:` field at all, and the app's own
+edge/property data model has no alias concept either — always exactly one
+recorded label against exactly one gold label, with nowhere else to look.
+Auditing a real confirmatory run's actual recovered relationships against
+gold found this asymmetry silently costing correct recoveries at the class
+threshold (e.g. `Incident handledUsing Runbook` for gold's `Incident is
+handled with Runbook` — same class pair, same direction, same meaning, one
+preposition the interviewer could never have known to avoid since gold's
+exact wording is hidden from it — Jaccard 0.33). The lower threshold is
+still gated by the relationship/property's class pair (or host class)
+already matching, which does most of the disambiguating work a class match
+relies on alone, so it's safe to be more forgiving here without the same
+false-positive risk classes would have. It does *not* rescue a genuine
+different word choice with zero token overlap at all (gold's "impacts" vs a
+recorded "affects" — Jaccard 0) — that residual gap is accepted, not
+silently hidden behind a synonym dictionary this eval deliberately doesn't
+maintain.
 
 - **Class / relationship recall, precision, F1** — standard set-comparison
   metrics between the ground truth and the recovered canvas model.

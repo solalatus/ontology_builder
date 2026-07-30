@@ -41,15 +41,45 @@ function tokenize(s) {
 }
 
 // Two labels "match" if they're identical after normalization, or their
-// stopword-stripped token sets overlap heavily (Jaccard >= LABEL_MATCH_THRESHOLD).
+// stopword-stripped token sets overlap heavily enough (Jaccard >= threshold).
 // Plain substring containment was tried first and rejected: "Incident" is a
 // substring of "Major Incident", which would wrongly count a single generic
 // "Incident" node as recovering the ontology's distinct majorIncident and
 // cybersecurityIncident classes too. Token-set Jaccard tolerates real
 // rephrasing (a dropped article, reordered words) without conflating
 // genuinely different multi-word concepts that merely share a word.
-const LABEL_MATCH_THRESHOLD = 0.6;
-function labelsMatch(a, b) {
+//
+// Two different thresholds, not one: classes get every one of the ground
+// truth's own declared aliases *and* the recovered node's own
+// label/meaning/aliases cross-checked against each other (matchClasses,
+// below) -- a rich many-to-many comparison with real tolerance for
+// rephrasing built in. Relationships and properties get none of that: the
+// fixture's `predicates:` section (both object- and datatype-kind) has no
+// `aliases:` field at all, and the app's own edge/property data model has
+// no alias concept either (unlike nodes) -- so it's always exactly one
+// recorded label against exactly one gold label, with nowhere else to look.
+// Auditing a real confirmatory eval run's actual recovered relationships
+// against gold (helper_agent_todo.md's dated addendum) found this asymmetry
+// silently costing real, correct recoveries at the class threshold: e.g.
+// the interviewer recorded "Incident handledUsing Runbook" for gold's
+// "Incident is handled with Runbook" (Jaccard 0.33 -- one shared word,
+// "handled", out of three total) and "Incident recoveredUsing RecoveryPlan"
+// for gold's "Incident is recovered with RecoveryPlan" (same 0.33) -- both
+// exactly the same relationship, correct class pair and direction, just a
+// "using" vs "with" preposition choice the agent could never have known to
+// avoid, since gold's exact wording is deliberately hidden from it. A
+// relationship/property match is also always gated by its class pair (or
+// host class) already matching, which does most of the disambiguating work
+// a class match relies on alone -- so a lower bar here is safe in a way it
+// wouldn't be for classes. REL_PROP_LABEL_MATCH_THRESHOLD is set just below
+// that real 0.33 case. It does NOT rescue a genuine different-word choice
+// with zero token overlap at all (e.g. gold's "impacts" vs a recorded
+// "affects" -- Jaccard 0, no threshold fixes that without a synonym
+// dictionary this eval deliberately doesn't maintain, see this file's own
+// module doc) -- that residual gap is accepted, not silently hidden.
+const CLASS_LABEL_MATCH_THRESHOLD = 0.6;
+const REL_PROP_LABEL_MATCH_THRESHOLD = 0.3;
+function labelsMatch(a, b, threshold = CLASS_LABEL_MATCH_THRESHOLD) {
   const na = normalize(a), nb = normalize(b);
   if (!na || !nb) return false;
   if (na === nb) return true;
@@ -59,7 +89,7 @@ function labelsMatch(a, b) {
   let intersection = 0;
   for (const t of sa) if (sb.has(t)) intersection++;
   const union = new Set([...sa, ...sb]).size;
-  return union > 0 && intersection / union >= LABEL_MATCH_THRESHOLD;
+  return union > 0 && intersection / union >= threshold;
 }
 
 function jaccard(a, b) {
@@ -116,7 +146,7 @@ export function computeRecoveryMetrics(groundTruth, recoveredState) {
     const fromNodeIds = new Set(gtToRecovered.get(rel.fromClassId) || []);
     const toNodeIds = new Set(gtToRecovered.get(rel.toClassId) || []);
     if (!fromNodeIds.size || !toNodeIds.size) continue;
-    const found = edges.some((e) => fromNodeIds.has(e.source) && toNodeIds.has(e.target) && labelsMatch(rel.label, e.relation));
+    const found = edges.some((e) => fromNodeIds.has(e.source) && toNodeIds.has(e.target) && labelsMatch(rel.label, e.relation, REL_PROP_LABEL_MATCH_THRESHOLD));
     if (found) relMatched++;
   }
   const relRecall = groundTruth.relationships.length ? relMatched / groundTruth.relationships.length : 0;
@@ -125,7 +155,7 @@ export function computeRecoveryMetrics(groundTruth, recoveredState) {
     const srcGtClass = recoveredToGt.get(e.source);
     const tgtGtClass = recoveredToGt.get(e.target);
     if (!srcGtClass || !tgtGtClass) continue;
-    if (groundTruth.relationships.some((rel) => rel.fromClassId === srcGtClass && rel.toClassId === tgtGtClass && labelsMatch(rel.label, e.relation))) {
+    if (groundTruth.relationships.some((rel) => rel.fromClassId === srcGtClass && rel.toClassId === tgtGtClass && labelsMatch(rel.label, e.relation, REL_PROP_LABEL_MATCH_THRESHOLD))) {
       recoveredRelMatchedToGt++;
     }
   }
@@ -140,7 +170,7 @@ export function computeRecoveryMetrics(groundTruth, recoveredState) {
     for (const nodeId of nodeIds) {
       const node = nodes.find((n) => n.id === nodeId);
       if (!node) continue;
-      const hit = (node.properties || []).find((p) => labelsMatch(prop.label, p.name));
+      const hit = (node.properties || []).find((p) => labelsMatch(prop.label, p.name, REL_PROP_LABEL_MATCH_THRESHOLD));
       if (hit) { matchedProp = hit; break; }
     }
     if (matchedProp) {

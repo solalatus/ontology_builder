@@ -102,7 +102,7 @@ test(
       }));
       const groundTruth = loadGroundTruthModel();
       const metrics = computeRecoveryMetrics(groundTruth, recoveredState);
-      const scopedGroundTruth = scopeGroundTruth(groundTruth, groundTruth.practicalScopeClassIds);
+      const scopedGroundTruth = scopeGroundTruth(groundTruth, groundTruth.practicalScopeClassIds, groundTruth.practicalScopePropertyIds);
       const scopedMetrics = computeRecoveryMetrics(scopedGroundTruth, recoveredState);
 
       assert.ok(Number.isFinite(metrics.recoveryEffectiveness), "composite score must be a real number, not NaN");

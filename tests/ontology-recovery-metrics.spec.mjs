@@ -93,6 +93,60 @@ test("computeRecoveryMetrics matches a camelCase recovered relation name against
   assert.equal(metrics.relationships.recall, 1);
 });
 
+// A real confirmatory eval run recorded these exact two relationships
+// (class pair, direction, and meaning all correct) but they scored as
+// unmatched at the class-level 0.6 Jaccard threshold -- "using" vs "with"
+// is a one-word preposition difference the interviewer could never have
+// known to avoid, since gold's exact wording is deliberately hidden from
+// it (helper_agent_todo.md's dated addendum has the full audit). Pins that
+// the lower relationship/property threshold recovers real matches like
+// these, which the class-level threshold alone would still reject.
+test("computeRecoveryMetrics credits a relationship recorded with a different preposition than gold's exact wording", () => {
+  const groundTruth = {
+    classes: {
+      incident: { id: "incident", label: "Incident", aliases: ["incident"] },
+      runbook: { id: "runbook", label: "Runbook", aliases: ["runbook"] },
+    },
+    relationships: [{ id: "incident_is_handled_with_runbook", label: "is handled with", fromClassId: "incident", toClassId: "runbook" }],
+    properties: [],
+  };
+  const recovered = {
+    nodes: [
+      { id: "n1", label: "Incident", meaning: "x", aliases: [], properties: [] },
+      { id: "n2", label: "Runbook", meaning: "y", aliases: [], properties: [] },
+    ],
+    edges: [{ id: "e1", source: "n1", target: "n2", relation: "handledUsing" }],
+  };
+  const metrics = computeRecoveryMetrics(groundTruth, recovered);
+  assert.equal(metrics.relationships.matched, 1, "\"handledUsing\" should match gold's \"is handled with\" despite the preposition difference");
+  assert.equal(metrics.relationships.recall, 1);
+});
+
+// The residual limit this threshold change does NOT fix, documented rather
+// than silently papered over: a genuine different word choice with zero
+// token overlap at all can never match under Jaccard, no matter how low the
+// threshold goes, without a synonym dictionary this eval deliberately
+// doesn't maintain (recoveryMetrics.mjs's own module doc).
+test("computeRecoveryMetrics still does not credit a relationship whose label shares no words with gold's, even a very close synonym", () => {
+  const groundTruth = {
+    classes: {
+      incident: { id: "incident", label: "Incident", aliases: ["incident"] },
+      itService: { id: "itService", label: "IT Service", aliases: ["it service"] },
+    },
+    relationships: [{ id: "incident_impacts_itService", label: "impacts", fromClassId: "incident", toClassId: "itService" }],
+    properties: [],
+  };
+  const recovered = {
+    nodes: [
+      { id: "n1", label: "Incident", meaning: "x", aliases: [], properties: [] },
+      { id: "n2", label: "IT Service", meaning: "y", aliases: [], properties: [] },
+    ],
+    edges: [{ id: "e1", source: "n1", target: "n2", relation: "affects" }],
+  };
+  const metrics = computeRecoveryMetrics(groundTruth, recovered);
+  assert.equal(metrics.relationships.matched, 0, "\"affects\" vs \"impacts\" share zero tokens -- not fixable by threshold tuning alone");
+});
+
 test("computeRecoveryMetrics still does not conflate a short generic label with a longer one that happens to contain it", () => {
   // Regression pin for the substring-matching pitfall this project already
   // rejected once (recoveryMetrics.mjs's own header comment): "Incident"
@@ -152,6 +206,48 @@ test("scopeGroundTruth filters classes/relationships/properties down to only the
   assert.ok(scoped.relationships.length < gt.relationships.length);
   assert.ok(scoped.properties.every((p) => gt.practicalScopeClassIds.has(p.classId)));
   assert.ok(scoped.properties.length < gt.properties.length);
+});
+
+// practicalScopePropertyIds: a property on an in-scope class isn't
+// automatically in scope itself -- its own label has to independently
+// appear (content-word overlap, not a class hand-me-down) in the fixture's
+// own competency-question/action corpus. Pins the real, auditable result
+// against the bundled fixture: a genuine, non-trivial reduction (not a
+// no-op, and not everything), and specific real examples on each side of
+// the line -- decision-bearing fields (status, severity) survive, generic
+// administrative ones (name, description, version) don't, matching
+// AGENT_KNOWLEDGE's own "reject nice to know fields" instruction.
+test("groundTruthModel's practicalScopePropertyIds is a real, non-trivial, auditable subset of the class-scoped properties", () => {
+  const gt = loadGroundTruthModel();
+  const classScopedProperties = gt.properties.filter((p) => gt.practicalScopeClassIds.has(p.classId));
+  const propertyScoped = classScopedProperties.filter((p) => gt.practicalScopePropertyIds.has(p.id));
+  assert.ok(propertyScoped.length > 0, "property scope must not be empty");
+  assert.ok(propertyScoped.length < classScopedProperties.length,
+    "property-level scoping must be a real reduction on top of class-level scoping, not a no-op");
+  const inScopeLabels = propertyScoped.map((p) => p.label);
+  for (const expected of ["has status", "has severity"]) {
+    assert.ok(inScopeLabels.includes(expected), `expected "${expected}" to survive property-level scoping`);
+  }
+  const outOfScopeLabels = classScopedProperties.filter((p) => !gt.practicalScopePropertyIds.has(p.id)).map((p) => p.label);
+  for (const excluded of ["has name", "has description", "has version"]) {
+    assert.ok(outOfScopeLabels.includes(excluded), `expected "${excluded}" to be excluded by property-level scoping`);
+  }
+});
+
+test("scopeGroundTruth, given propertyIds, additionally requires each property's own id to be in scope, not just its host class", () => {
+  const gt = loadGroundTruthModel();
+  const scoped = scopeGroundTruth(gt, gt.practicalScopeClassIds, gt.practicalScopePropertyIds);
+  assert.ok(scoped.properties.every((p) => gt.practicalScopePropertyIds.has(p.id)));
+  const classOnlyScoped = scopeGroundTruth(gt, gt.practicalScopeClassIds);
+  assert.ok(scoped.properties.length < classOnlyScoped.properties.length,
+    "passing propertyIds must reduce the property count versus class-only scoping");
+});
+
+test("scopeGroundTruth without propertyIds keeps its prior class-only behavior (backward compatible default)", () => {
+  const gt = loadGroundTruthModel();
+  const classIdsOnly = scopeGroundTruth(gt, gt.practicalScopeClassIds);
+  const explicitNull = scopeGroundTruth(gt, gt.practicalScopeClassIds, null);
+  assert.deepEqual(classIdsOnly.properties, explicitNull.properties);
 });
 
 test("computeRecoveryMetrics against a scoped ground truth never has a smaller denominator than what was actually reachable", () => {

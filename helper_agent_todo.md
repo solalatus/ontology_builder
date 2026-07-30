@@ -941,6 +941,69 @@ outside the relay entirely and had no backoff of any kind -- a real gap in the w
   against the original acceptance questions/actions) -- not the 500-turn cap, not the 45-minute wallclock, and
   no pleasantry loop. This is the confirmation the `appearsFinished`/`max_tokens` fix, both hardening layers,
   and the full backoff pass were all waiting on. Task #116 (this whole thread of work) is done.
+
+## Addendum -- four follow-up questions on recovery quality, opinion-and-plan then all four implemented
+
+**2026-07-30.** With PR #44 merged, user asked why class/relationship/property recall were all low (a
+follow-up to the merged run's own report.md), then four concrete questions on what to do about it: (A) can the
+interview realistically be widened toward 80%+ scoped recall, (B) can relationship prompting be improved, (C)
+can the gold's scope be made more realistic (pruned properties + more discussion depth/prompting), (D) how
+would the scoring logic itself be audited. Discussed and opined first (turn budget isn't the real constraint --
+the last run stopped at turn 45 of 500 with 36 unused minutes, because the interviewer decided it was done, not
+because it ran out of room), then user: "implement them all, test, PR."
+
+D was done first, using the just-merged run's own real `results/tool-calls.md` (still on disk, not yet
+overwritten) as the audit dataset -- the last `get_graph_state` dump (turn 44) against the gold fixture's own
+`predicates:` section directly, before any new eval run could overwrite that evidence.
+
+- [x] **D -- matching threshold audit, real findings, targeted fix.** Confirmed a real, structural asymmetry:
+      classes get every declared alias cross-checked against the recovered node's own label/meaning/aliases
+      (rich, many-to-many); relationships and properties get exactly one recorded label against exactly one
+      gold label, because the fixture's `predicates:` section has no `aliases:` field and the app's own
+      edge/property data model has no alias concept either (unlike nodes). Manually diffing the last run's
+      actual recovered relationships against gold found concrete, real near-misses this asymmetry was
+      silently failing: `Incident handledUsing Runbook` (gold: "is handled with", Jaccard 0.33) and `Incident
+      recoveredUsing RecoveryPlan` (gold: "is recovered with", same 0.33) -- correct class pair, correct
+      direction, correct meaning, purely a preposition choice the interviewer could never have known to avoid
+      since gold's exact wording is deliberately hidden from it. `recoveryMetrics.mjs`'s `labelsMatch()` now
+      takes a threshold param: `CLASS_LABEL_MATCH_THRESHOLD = 0.6` (unchanged) vs a new
+      `REL_PROP_LABEL_MATCH_THRESHOLD = 0.3` for relationships/properties, justified by the real 0.33 evidence
+      and by the fact that a rel/prop match is always additionally gated by its class pair (or host class)
+      already matching, which does most of a class match's own disambiguating work. Explicitly does **not**
+      rescue a genuine zero-overlap word choice (gold "impacts" vs recorded "affects", Jaccard 0) -- documented
+      as an accepted residual limit, not silently papered over with a synonym dictionary.
+- [x] **B -- Phase 3 (relationships) prompting.** Two more mechanical pushes on top of the existing "don't stop
+      after one opening batch" guidance (already in place, evidently not enough on its own): ground candidates
+      directly in the Phase 1 material itself (many relationships are already implied by a real question/action
+      -- the same anchoring already used for property gating), and require an actual `get_graph_state` call to
+      check each class's relationship count before leaving the phase, rather than trusting memory of what's
+      already been asked.
+- [x] **A -- Phase 9 (validation) mechanical completeness audit.** The turn/wallclock budget was never the
+      real constraint (45 of 500 turns, 14 of 45 minutes used) -- the interviewer's own willingness to
+      self-declare "done" is. The final checklist now requires calling `get_graph_state` and confirming
+      directly from that result (not memory) that every class has at least one relationship, and explicitly
+      forbids reporting the interview complete over a checklist gap that was merely noted rather than closed.
+- [x] **C -- property scope tightening.** New `practicalScopePropertyIds` in `groundTruthModel.mjs`, mirroring
+      `practicalScopeClassIds` but one level deeper: a property on an in-scope class isn't automatically
+      in-scope itself, its own label has to independently show content-word overlap with the fixture's
+      competency-question/action corpus. First attempt (whole-phrase substring, matching the class approach
+      exactly) matched **zero** of 111 properties -- two-thirds of the fixture's predicate labels follow a
+      "has X" / "is X" convention no natural competency question is ever going to contain verbatim. Switched to
+      stopword-stripped content-word overlap (all of a property's own content words must each appear somewhere
+      in the corpus, not necessarily adjacent). Against the bundled fixture: scoped properties drop from 69
+      (class-only) to 26 -- genuinely generic fields (`has name`, `has description`, `has version`) don't
+      survive even on an in-scope class, while decision-bearing ones (`has status`, `has severity`) do,
+      matching AGENT_KNOWLEDGE's own "reject nice to know fields" instruction. `scopeGroundTruth()` takes an
+      optional third `propertyIds` argument (omitting it keeps the prior class-only behavior, so existing
+      2-arg call sites/tests are unaffected).
+- [x] Tests: `tests/ontology-recovery-metrics.spec.mjs` (+7) -- the two real near-miss relationships now
+      credited; the zero-overlap "impacts"/"affects" case still correctly not credited (the accepted residual
+      limit, pinned so it's a documented choice, not a silent gap); `practicalScopePropertyIds` is a real,
+      non-trivial subset with specific real examples on each side; `scopeGroundTruth`'s new `propertyIds` arg
+      behaves correctly both given and omitted. `tests/helper-agent-phase4.spec.mjs` (+2) -- Phase 3's new
+      Phase-1-grounding and `get_graph_state` coverage-check phrasing; Phase 9's new mechanical-audit and
+      no-declaring-complete-over-a-noted-gap phrasing.
+- Full suite (`tests/*.spec.mjs`, 427 JS tests) green.
 - **Live confirmation blocked, not skipped:** re-running the confirmatory eval to prove the *original*
   `appearsFinished`/`max_tokens` fix actually stops a genuine finished interview promptly (this addendum's own
   stated goal) still failed immediately -- but by design this time: `forwardToRealOpenAi`'s own new
