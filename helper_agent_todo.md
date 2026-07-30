@@ -1195,3 +1195,4 @@ place, without needing to reconstruct anything. `.gitignore`, `tests/README.md`,
 all updated to document this: only the most recent run's files are ever committed (each write still overwrites
 the previous run, same as before -- this is a visibility change, not a new accumulation policy).
 
+
