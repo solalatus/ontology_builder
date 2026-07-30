@@ -1125,3 +1125,51 @@ with test coverage, a live eval re-run, and a PR.
     property matching threshold work, though single-run noise across independent live conversations means this
     isn't attributed to any one specific change with certainty.
   - Class metrics held steady to modestly improved (scoped F1 62.5% -> 67.1%).
+
+## Addendum -- auditing the actual final graph state against gold directly, then two targeted prompt fixes
+
+**2026-07-30.** Asked to look deeper at "what problems remain, plan first." Rather than reason about the
+metrics abstractly, extracted the previous confirmatory run's actual final `get_graph_state` dump and ran the
+real matcher (`computeRecoveryMetrics`, `groundTruthModel`'s own scoping) against it directly in a one-off
+script -- the same technique the earlier relationship-alias audit used, applied here to classes/relationships/
+properties together. Two concrete, well-evidenced findings, in priority order:
+
+**Finding 1 -- missing classes, the single biggest lever.** 11 of 28 scoped gold classes were never recovered.
+Two patterns: (a) **role over-consolidation** -- gold wants five separate named actors (On-call Engineer,
+Incident Commander, Service Owner, Technical Owner, Service Desk), each with distinct responsibilities, but the
+interviewer bucketed all of them into one generic `OperationalRole` class; (b) **never elicited at all** (Bank,
+Environment, Deployment, Workaround) or **granularity confusion** (`Change` never created, only its
+`EmergencyChange` subtype; `RecoveryObjective` created instead of the conceptually different `Recovery Plan`).
+Missing classes cascade hard: 19 of 48 scoped relationships and 5 of 26 scoped properties were unreachable
+purely because one endpoint class never existed.
+
+**Finding 2 -- even with both classes present, the specific connection is still usually missing.** Of the 29
+scoped relationships where *both* endpoint classes were actually recovered, only 6 matched -- 23 were still
+missed. Manually diffing those 23 against the recovered edges found only ~4 are wording near-misses (covered
+by the existing threshold work); the rest (`Alert-concerns-Service`, `Regulator-receives-Notification`,
+`BackupSet-protects-CI`, `Incident-notifies-Stakeholder`, etc.) were simply never asked about, despite both
+classes existing. This means the PR #45/#46 fix ("every class needs >=1 relationship, checked via
+`get_graph_state`") is necessary but not sufficient -- it stops a class from being totally isolated, but
+doesn't push toward checking every *pair* that plausibly connects, especially secondary connections outside
+the "obvious backbone."
+
+A third finding (zero-token-overlap wording gaps like `hasAlert` vs gold's `is triggered by`, and one direction
+reversal) was deliberately **not** acted on -- consistent with this project's repeated, documented choice not
+to maintain a synonym dictionary or loosen direction-matching, since direction is meaningful data in this tool,
+not noise.
+
+- [x] **Phase 2 (classes)** -- new guidance against collapsing several distinctly-named actors/roles into one
+      generic bucket class, with the exact real examples (on-call engineer, incident commander, service owner,
+      technical owner) as the illustration.
+- [x] **Phase 3 (relationships)** -- upgraded the coverage bar from "every class has >=1 relationship" to
+      "every pair of classes jointly mentioned in the same Phase 1 question/action has a direct relationship
+      between that specific pair" -- co-occurrence in the original acceptance-test material is a much stronger
+      signal than "this class needs *some* relationship to *something*."
+- [x] **Phase 9 (validation)** -- final checklist upgraded to match both new bars: the same jointly-mentioned-
+      pair check, and confirming every distinctly-named actor/role became its own class rather than a bucket
+      type.
+- [x] Tests (`tests/helper-agent-phase4.spec.mjs`, +3): the anti-bucketing guidance is present; the upgraded
+      Phase 3 pairwise-coverage bar is present; the Phase 9 final checklist covers both new bars. One test
+      needed a regex fix after the first run failed on an actual, not assumed, line-wrap point in the rendered
+      prompt text -- caught immediately by the test itself, not shipped broken.
+- Full suite (`tests/*.spec.mjs`, 434 JS tests) green.

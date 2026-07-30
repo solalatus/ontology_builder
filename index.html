@@ -5436,7 +5436,15 @@ already has instead of following it rigidly)
    everything that follows.
 2. Classes: from that list, propose candidate classes (kinds of things,
    not instances). Confirm each one earns its place: "does the agent need
-   to identify, retrieve, connect, or pass this to a tool?"
+   to identify, retrieve, connect, or pass this to a tool?" Watch for
+   several distinctly-named actors or roles collapsing into one generic
+   bucket class — a single generic "Role" or "Owner" standing in for
+   several separately-named responsibilities (e.g. on-call engineer,
+   incident commander, service owner, technical owner) loses real
+   distinctions the expert actually has. If the real questions/actions name
+   multiple different roles the agent must identify, distinguish, or route
+   to separately, each one that matters earns its own class, not a shared
+   generic type — even if they'd otherwise look similar enough to merge.
 3. Relationships: propose relationships as verb phrases between two
    classes, each with an explicit direction. Reject vague or directionless
    relationships. Don't stop after one opening batch — once the class list
@@ -5451,7 +5459,13 @@ already has instead of following it rigidly)
    than only free-associating from the class list on its own. Before leaving
    this phase, call get_graph_state and check every class's relationship
    count directly — don't rely on memory of what you've already asked;
-   anything still at zero is unfinished, not naturally standalone.
+   anything still at zero is unfinished, not naturally standalone. Having at
+   least one relationship isn't the real bar, though: two classes that
+   appear together in the same original Phase 1 question or action almost
+   always need a direct relationship between them specifically, not just
+   each one separately connected to something else. Re-read the Phase 1
+   list once more before moving on, and confirm every pair of classes it
+   jointly mentions has an explicit relationship between that exact pair.
 4. Decision-bearing properties: for each class, propose ONLY properties
    that trace back to a Phase 1 question or action (filter, compare,
    decide, explain, or act). Reject "nice to know" fields. Once you're
@@ -5489,11 +5503,16 @@ already has instead of following it rigidly)
        back to the relevant earlier phase.
    (b) Final checklist: call get_graph_state and confirm directly from that
        result, not from memory, that every class has at least one
-       relationship recorded; every class is something users talk about;
-       every relationship has a clear direction and verb; every property
-       helps identify/filter/decide/explain/act; common synonyms are
-       captured; fixed value lists are used where appropriate; important
-       actions have explicit conditions.
+       relationship recorded, AND that every pair of classes jointly
+       mentioned in a Phase 1 question or action has a direct relationship
+       between that specific pair (not just each side connected to
+       something else); every distinctly-named actor or role from Phase 1
+       became its own class, not folded into one generic bucket type;
+       every class is something users talk about; every relationship has a
+       clear direction and verb; every property helps
+       identify/filter/decide/explain/act; common synonyms are captured;
+       fixed value lists are used where appropriate; important actions have
+       explicit conditions.
    If either check finds a real gap, go back and close it before continuing
    — don't just note the gap and report the interview complete anyway.
    Report the result of both checks to the expert plainly.

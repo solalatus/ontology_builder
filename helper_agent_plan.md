@@ -697,6 +697,27 @@ plausible-sounding guess. See `helper_agent_todo.md`'s own further dated
 addendum for the details, including a self-inflicted template-literal
 syntax error caught and fixed before it shipped.
 
+Asked to look deeper still and plan before acting, the actual final
+`get_graph_state` dump from a confirmatory run was extracted and scored
+directly with the real matcher in a one-off script, finding two further,
+concrete issues: missing classes are the single biggest lever (11 of 28
+scoped gold classes never recovered, five of them because distinctly-named
+roles like on-call engineer and incident commander all collapsed into one
+generic `OperationalRole` bucket class, cascading into 19 unreachable
+relationships and 5 unreachable properties), and even when both endpoint
+classes exist, the specific pairwise relationship between them is still
+usually missing (only 6 of 29 such "reachable" relationships matched).
+Fixed with two more prompt-level bars: Phase 2 now warns against
+collapsing several distinctly-named actors into one generic role class,
+and Phase 3/Phase 9 both upgraded their relationship-coverage bar from
+"every class has at least one relationship" to "every pair of classes
+jointly mentioned in the same Phase 1 question/action has a direct
+relationship between that specific pair." A third finding (zero-overlap
+wording gaps and one direction reversal) was deliberately left alone,
+consistent with this project's repeated choice not to maintain a synonym
+dictionary or loosen direction-matching. See `helper_agent_todo.md`'s own
+further dated addendum for the full audit trail.
+
 Both the production agent and the test harness also gained rate-limit
 backoff: `index.html`'s `callAgentChatRaw`/`fetchOpenAiModels` now retry an
 ordinary transient 429 with exponential backoff instead of failing

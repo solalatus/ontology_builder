@@ -83,6 +83,19 @@ test("the system prompt's final checklist requires a get_graph_state check, not 
   });
 });
 
+// The final checklist's own bar needs to match the upgraded Phase 3/Phase 2
+// bars above, not just the original "every class has >=1 relationship"
+// check -- otherwise a session could pass its own final validation while
+// still missing every jointly-named-pair relationship and every
+// bucketed-away role class found in the real audit.
+test("the system prompt's final checklist also covers jointly-named relationship pairs and distinctly-named roles, matching the upgraded Phase 2/3 bars", async () => {
+  await withPage(async (page) => {
+    const prompt = await systemPrompt(page);
+    assert.match(prompt, /every pair of classes jointly\s*mentioned in a Phase 1 question or action has a direct relationship\s*between that specific pair/);
+    assert.match(prompt, /every distinctly-named actor or role from Phase 1\s*became its own class, not folded into one generic bucket type/);
+  });
+});
+
 // Regression coverage for a real interview-pacing inefficiency the
 // ontology-recovery eval's own LLM review flagged twice in one run (turns
 // 42-89 and 89+): GROUND RULES used to say "Ask ONE focused question at a
@@ -133,6 +146,39 @@ test("the system prompt grounds relationship candidates in Phase 1 material and 
     const prompt = await systemPrompt(page);
     assert.match(prompt, /Ground candidates in the\s*Phase 1 material itself/);
     assert.match(prompt, /Before leaving\s*this phase, call get_graph_state and check every class's relationship\s*count directly/);
+  });
+});
+
+// Auditing a real confirmatory run's actual final graph state against gold
+// directly (not just its metrics) found the "every class has >=1
+// relationship" bar above was necessary but not sufficient: 23 of 29
+// scoped relationships whose *both* endpoint classes were actually
+// recovered were still missing -- the class itself had a relationship to
+// *something*, just not to the specific other class a Phase 1 item jointly
+// named. Pins the upgraded bar: co-occurrence in the same original
+// question/action is a strong signal two classes need a direct
+// relationship between that exact pair, not just each side connected
+// elsewhere.
+test("the system prompt requires checking that classes jointly named in the same Phase 1 item have a direct relationship between them, not just individually connected", async () => {
+  await withPage(async (page) => {
+    const prompt = await systemPrompt(page);
+    assert.match(prompt, /two classes that\s*appear together in the same original Phase 1 question or action almost\s*always need a direct relationship between them specifically/);
+    assert.match(prompt, /confirm every pair of classes it\s*jointly mentions has an explicit relationship between that exact pair/);
+  });
+});
+
+// Same audit found 11 of 28 scoped gold classes never recovered at all,
+// and 5 of those specifically because five separately-named roles (on-call
+// engineer, incident commander, service owner, technical owner, service
+// desk) all collapsed into one generic "OperationalRole" class -- the
+// single biggest lever found, since a missing class cascades into every
+// relationship/property that would have connected to it (19 of 48 scoped
+// relationships were unreachable for exactly this reason in that run).
+test("the system prompt warns against collapsing several distinctly-named roles into one generic bucket class", async () => {
+  await withPage(async (page) => {
+    const prompt = await systemPrompt(page);
+    assert.match(prompt, /Watch for\s*several distinctly-named actors or roles collapsing into one generic\s*bucket class/);
+    assert.match(prompt, /each one that matters earns its own class, not a shared\s*generic type/);
   });
 });
 
