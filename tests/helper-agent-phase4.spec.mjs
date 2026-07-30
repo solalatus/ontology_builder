@@ -136,6 +136,52 @@ test("the system prompt's Phase 1 probe is narrow and closed (two named categori
   });
 });
 
+// A live confirmatory eval run's real transcript (helper_agent_todo.md's
+// dated addendum) audited every class-related tool call in a full 45-turn
+// conversation and found exactly one: 29 classes added in a single batch
+// at turn 4, never touched again. Of those 29, 12 had no counterpart in
+// gold at all -- and the interviewer's own Phase 1 probe literally named
+// "service desk" as an example, but the expert's answer substituted
+// "Application Support Team"/"Infrastructure Support Team" instead, and
+// the interviewer never checked back on the specific term it had asked
+// about. This test pins the Phase 1 fix for that: don't silently accept a
+// substituted term without checking whether it's the same thing or
+// something genuinely different.
+test("the system prompt requires checking back when the expert's Phase 1 probe answer substitutes different terms than the ones asked about, not silently accepting the substitution", async () => {
+  await withPage(async (page) => {
+    const prompt = await systemPrompt(page);
+    assert.match(prompt, /If\s*the expert's answer uses different terms than the ones this question\s*itself named as examples, don't silently accept whichever wording came\s*back/);
+    assert.match(prompt, /ask directly whether that's the same real-world thing under a\s*different name at their organization, or something genuinely\s*additional/);
+  });
+});
+
+// Same audit found the actual mechanism behind that 29-class, zero-pruning
+// batch: the interviewer proposed all 29 at once and asked one single
+// "which of these should stay" question over the whole list -- and the
+// simulated persona's entire response was "All candidate classes should
+// stay," including for three parallel role classes (Resolver Group /
+// Application Support Team / Infrastructure Support Team) the interviewer
+// had itself flagged as possibly the same thing. This test pins the Phase
+// 2 fix: confirm classes in small justified batches with a stated
+// per-item reason, and don't accept a bare "keep all"/"keep them
+// separate" as resolving a self-flagged ambiguity without an operational
+// reason attached.
+test("the system prompt requires per-item justification for classes in small batches, not one omnibus \"which should stay\" question over a large proposed list", async () => {
+  await withPage(async (page) => {
+    const prompt = await systemPrompt(page);
+    assert.match(prompt, /For each one, state the specific Phase 1 question or\s*action it's needed for/);
+    assert.match(prompt, /Don't propose a\s*long list all at once and ask one single "which of these should stay"\s*question over the whole batch — that shape reliably gets a blanket\s*"keep all" back with no real scrutiny of any individual item/);
+  });
+});
+
+test("the system prompt requires the interviewer to flag likely-overlapping class candidates itself and reject a bare \"keep all\" without an operational reason", async () => {
+  await withPage(async (page) => {
+    const prompt = await systemPrompt(page);
+    assert.match(prompt, /several plausible-\s*sounding candidates that only differ by department or naming\s*convention, not by anything the agent actually needs to do differently\s*with them/);
+    assert.match(prompt, /a bare "keep them separate" or "keep all" doesn't\s*settle it without a specific operational reason attached/);
+  });
+});
+
 // Regression coverage for a real interview-pacing inefficiency the
 // ontology-recovery eval's own LLM review flagged twice in one run (turns
 // 42-89 and 89+): GROUND RULES used to say "Ask ONE focused question at a
@@ -217,8 +263,8 @@ test("the system prompt requires checking that classes jointly named in the same
 test("the system prompt warns against collapsing several distinctly-named roles into one generic bucket class", async () => {
   await withPage(async (page) => {
     const prompt = await systemPrompt(page);
-    assert.match(prompt, /Watch for\s*several distinctly-named actors or roles collapsing into one generic\s*bucket class/);
-    assert.match(prompt, /each one that matters earns its own class, not a shared\s*generic type/);
+    assert.match(prompt, /Watch\s*for several distinctly-named actors or roles collapsing into one\s*generic bucket class/);
+    assert.match(prompt, /each one that matters earns its own class, not a\s*shared generic type/);
   });
 });
 
