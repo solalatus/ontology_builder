@@ -111,9 +111,28 @@ test("the system prompt requires one deliberate follow-up probe for omitted role
   await withPage(async (page) => {
     const prompt = await systemPrompt(page);
     assert.match(prompt, /An expert's first-pass list, given freely,\s*reliably omits things they'd still confirm as real if asked directly/);
-    assert.match(prompt, /especially secondary roles beyond the obvious one/);
-    assert.match(prompt, /Before moving to Phase 2, ask one deliberate\s*follow-up naming a few concrete categories this kind of gap tends to hide\s*in/);
-    assert.match(prompt, /other roles involved beyond the ones already named, and any\s*environment\/context distinctions that matter/);
+    assert.match(prompt, /especially a secondary role standing next to one already named/);
+    assert.match(prompt, /Before\s*moving to Phase 2, ask ONE closed, narrow follow-up covering exactly\s*these two things/);
+  });
+});
+
+// A first version of this probe asked an open "anything else?" and a live
+// confirmatory run showed why that's the wrong shape: it visibly worked
+// (recall genuinely improved -- class 67.9% vs the merged baseline's
+// 60.7%, relationship 17.1% vs 12.5%), but precision collapsed (class
+// 55.3% vs 75.0%, relationship 9.7% vs 18.8%) because the persona, invited
+// to volunteer "anything else," generatively supplied whole extra
+// organizational apparatus (ExecutiveSponsor, CrisisManagementTeam,
+// MajorIncidentBridge...) well past the specific six-class gap the fix
+// targeted -- composite fell further behind the merge gate, not closer.
+// Narrowed to name the two specific categories closed-question style
+// instead, with an explicit warning against the open-invitation shape.
+test("the system prompt's Phase 1 probe is narrow and closed (two named categories), not an open invitation that risks inviting scope creep", async () => {
+  await withPage(async (page) => {
+    const prompt = await systemPrompt(page);
+    assert.match(prompt, /is there a closely related\s*role that actually does the day-to-day work \(on-call\/staffing\), and\s*does any of this depend on a specific environment or deployment\s*context/);
+    assert.match(prompt, /do not invite open-ended extra scope \("is\s*there anything else at all\?" tends to produce elaboration well past\s*what's needed, more classes than the acceptance test calls for, not\s*fewer\)/);
+    assert.match(prompt, /Add only what the expert ties to answering one of the already-/);
   });
 });
 
