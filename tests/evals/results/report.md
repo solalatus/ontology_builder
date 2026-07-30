@@ -1,6 +1,6 @@
 # Ontology-recovery eval report
 
-Generated: 2026-07-30T15:07:49.716Z
+Generated: 2026-07-30T17:13:11.723Z
 
 ## Headline metrics
 
@@ -8,42 +8,39 @@ Two denominators, side by side: **full domain** is every class/relationship/prop
 
 | Metric | Full domain | Practical scope | Detail |
 |---|---|---|---|
-| **Recovery effectiveness (composite)** | **27.0%** | **35.9%** | equal-weighted: class F1, relationship F1, property recall, value fidelity |
-| Class recall / precision / F1 | 32.4% / 70.0% / 44.3% | 57.1% / 50.0% / 53.3% | 22/68 full · 16/28 scoped ground-truth classes matched; 30 recovered |
-| Relationship recall / precision / F1 | 9.3% / 23.3% / 13.2% | 17.1% / 16.3% / 16.7% | 10/108 full · 7/41 scoped ground-truth relationships matched; 43 recovered (subclass/"is a" predicates excluded from both -- see README) |
-| Property recall | 25.2% | 42.3% | 28/111 full · 11/26 scoped ground-truth properties matched (technical identifier/URI fields excluded — see tests/evals/README.md) |
-| Controlled-value fidelity | 25.2% | 31.3% | average allowed-value overlap across matched controlled-value properties |
+| **Recovery effectiveness (composite)** | **24.5%** | **33.7%** | equal-weighted: class F1, relationship F1, property recall, value fidelity |
+| Class recall / precision / F1 | 29.4% / 86.4% / 43.9% | 50.0% / 63.6% / 56.0% | 20/68 full · 14/28 scoped ground-truth classes matched; 22 recovered |
+| Relationship recall / precision / F1 | 5.6% / 15.4% / 8.2% | 9.8% / 10.3% / 10.0% | 6/108 full · 4/41 scoped ground-truth relationships matched; 39 recovered (subclass/"is a" predicates excluded from both -- see README) |
+| Property recall | 16.2% | 34.6% | 18/111 full · 9/26 scoped ground-truth properties matched (technical identifier/URI fields excluded — see tests/evals/README.md) |
+| Controlled-value fidelity | 29.8% | 34.3% | average allowed-value overlap across matched controlled-value properties |
 
 ## Run stats
 
 - Interviewer model: `gpt-5.5-2026-04-23` · Persona model: `gpt-4o-mini` · Classifier model: `gpt-5.5-2026-04-23`
-- Stopped: **app_agent_appears_finished**, after 45 turns, 903s wall-clock
-- Real app-agent API calls: 87 (apply_ontology_yaml called 36× · get_graph_state called 6×)
-- Tool outcomes seen in transcript: 36 applied · 0 skipped · 0 no-op · 0 error
+- Stopped: **app_agent_appears_finished**, after 61 turns, 941s wall-clock
+- Real app-agent API calls: 112 (apply_ontology_yaml called 47× · get_graph_state called 4×)
+- Tool outcomes seen in transcript: 47 applied · 0 skipped · 0 no-op · 0 error
 
 ## LLM review of the conversation
 
 ## Errors
 
-- **Turn 14, 15, 16, 18, 33, 34, 35, 45:** Tool reports such as “0 added, 3 updated” for property/value additions are ambiguous and suggest properties may be stored as updates to classes rather than distinct additions. Not necessarily wrong, but hard to audit from transcript.
-- **Turn 38:** The assistant says it recorded six rules “with the corrective-action ownership condition removed,” but the persona had only said the condition was “Not Recommended” unless structure exists. The app did not explicitly re-present the modified `canTrackCorrectiveAction` rule before applying it, so the actual stored version is not independently confirmed.
-- **Turn 45:** Final validation claims “Every class has at least one relationship.” Likely true after added relationships, but no ontology dump is shown; reviewer cannot verify. Minor transparency issue rather than a clear bug.
+- **Turn 59:** `submitMaterialityAssessment` uses `canDecideRegulatoryNotification` as its precondition. That rule requires the Materiality Assessment to be `Completed` and have an outcome, which is circular for an action whose effect is to submit/complete the assessment and populate the outcome. This should likely have a separate rule such as `canSubmitMaterialityAssessment`.
+- **Turn 55–58:** `canCloseIncident` is reused as the precondition for `conductPostIncidentReview`. That may be too strong or semantically wrong: conducting a PIR is not the same as closing an incident, and PIRs may occur after closure or have different prerequisites.
+- **Turn 50–54:** Severity values were captured as both `Critical/High/Medium/Low` and `Sev 1–4` without eliciting an explicit mapping. If both are allowed “interchangeably,” the ontology should encode equivalence/mapping, otherwise rules using severity may be ambiguous.
 
 ## Noteworthy observations
 
-- **Turn 1:** Strong opening: established phases and acceptance-test approach before modeling.
-- **Turn 2:** Good targeted follow-up about roles and deployment context before proposing classes.
-- **Turn 3:** Candidate class list was comprehensive but accepted all 29 classes with little pruning; interviewer could have challenged whether many role classes should be subtypes/instances of a common `Person/Role/Team`.
-- **Turns 4–12:** Relationship elicitation was systematic and batched well. The agent also checked state and noticed `Deployment Context` was unconnected, which is good ontology hygiene.
-- **Turn 11:** Good catch adding `CommunicationUpdate` as a class based on acceptance-test wording.
-- **Turns 13–18:** Property elicitation stayed tied to decision/action needs and handled ambiguous unit for `estimatedRecoveryTime` properly by pausing to get a single standard.
-- **Turns 23–31:** Alias elicitation was unusually thorough, including explicit rejection of misleading near-synonyms. This is useful but quite lengthy/repetitive.
-- **Turn 35:** Good handling of tool limitation: explained that required-property constraints cannot be stored directly and would instead inform rules/action preconditions.
-- **Turn 36–38:** Rule elicitation was well grounded in actions. The assistant correctly flagged that corrective-action ownership lacked a relationship/property before adding it.
-- **Turn 39:** Good adaptation to action tool constraint of “one input class,” explaining how other participants are represented through relationships and rules.
-- **Turn 42:** Strong validation behavior: checked live graph against original questions and found missing direct relationships.
-- **Turn 44:** Excellent final gap detection: noticed DR test needed `testedAt` and `result` to answer “last disaster recovery test results.”
-- **Overall:** The simulated persona mostly rubber-stamped suggestions; the interviewer compensated somewhat by asking about misleading aliases and state gaps, but could have used more open-ended domain probing for bank-specific severity/materiality thresholds, regulatory timing deadlines, communication approval rules, and evidence retention requirements.
+- **Turn 3:** The interviewer asked a useful but overloaded follow-up combining day-to-day roles and environment/deployment context in one question. It produced valuable data, but could have been split for cleaner elicitation.
+- **Turns 5–11:** Strong class elicitation discipline: small batches, tied to acceptance questions/actions, and explicitly left out plausible-but-unneeded roles such as Application Owner, SOC, NOC, and Technical Expert.
+- **Turns 12–20:** Relationship elicitation was systematic and generally well-grounded in competency questions. The interviewer also handled corrections well, e.g. weakening `Emergency Change Request —resolves→ Incident` to `related to`.
+- **Turn 20:** The Phase 3 recap compressed many relationships into grouped bullets, which was skimmable but risked obscuring exact verb phrases and directions.
+- **Turns 21–27:** Property elicitation stayed focused on decision/action-bearing fields rather than expanding into a full CMDB/ITSM schema — good prompt behavior.
+- **Turns 32–49:** Alias elicitation was careful about rejecting broader or direction-sensitive terms, especially `event`, `snapshot`, `upstream/downstream dependency`, and `change environment`.
+- **Turns 50–53:** Fixed-choice lists were mostly accepted without probing bank-specific conventions beyond severity. A real expert interview should ask whether these values match tooling exactly, including capitalization and lifecycle edge cases.
+- **Turns 53–57:** Good transition from constraints to named rules, especially distinguishing warn vs block behavior.
+- **Turns 58–60:** Action definitions were consistently structured with one input class, preconditions, effects, and verification. However, the interviewer should have challenged the questionable preconditions for materiality submission and PIR rather than accepting the persona’s confirmation.
+- **Overall:** The interview was highly structured and efficient for building a broad ontology, but the simulated persona tended to rubber-stamp proposed content. The interviewer could improve by asking for concrete examples or counterexamples before finalizing rules and fixed lists.
 
 ## Full conversation log
 

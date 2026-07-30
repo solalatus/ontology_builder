@@ -1414,3 +1414,59 @@ elsewhere in the conversation. Four live runs on this branch have now each lande
 noisy distribution, none clearing the merge gate on composite. Not implementing a further reactive single-run
 tweak without more signal -- the next honest step is more samples (to separate real effect from noise) rather
 than another one-shot prompt change chasing this run's specific shortfall.
+
+**Instead of stopping at "more samples needed," did a full audit of every class-related step in that run's
+entire transcript (every turn, every tool call) and found the actual mechanism: all 29 classes were added in
+one tool call at turn 4 and never touched again across the remaining 41 turns -- the interviewer proposed the
+whole list at once and asked one omnibus "which should stay" question, and the persona's entire answer was
+"All candidate classes should stay," including for three role classes (Resolver Group / Application Support
+Team / Infrastructure Support Team) the interviewer had itself flagged as possibly the same thing. 12 of the
+29 (41%) had no gold counterpart. Separately: the Phase 1 probe's own example text literally said "service
+desk," but the persona's answer substituted different terms and the interviewer never checked back on the
+specific word it had used -- Service Desk never became a class.
+
+- [x] **Fix 1**: Phase 2 now requires per-item justification in small batches, not one big list with a single
+      "should any leave" question.
+- [x] **Fix 2**: Phase 2 now requires the interviewer to flag likely-overlapping candidates itself and reject
+      a bare "keep all"/"keep them separate" without a stated operational reason.
+- [x] **Fix 3**: Phase 1's probe now requires checking back when the expert's answer substitutes different
+      terms than the ones the question itself named as examples.
+- Tests: +3 in `tests/helper-agent-phase4.spec.mjs`; two existing regexes needed updates for real line-wrap
+  changes the edit introduced, caught immediately by the tests themselves. Full suite 449/449 green.
+
+**Live-confirmed: the interviewer's behavior changed exactly as designed, and the LLM reviewer independently
+praised it -- but composite got worse, not better, the lowest of any PR #47 run yet.**
+
+| Metric | Merged baseline | Narrow probe (prior run) | Per-item justification (this run) |
+|---|---|---|---|
+| Composite (scoped) | **57.1%** | 35.9% | **33.7%** |
+| Class recall/precision (scoped) | 60.7% / 75.0% | 57.1% / 50.0% | **50.0%** / 63.6% |
+| Class F1 (scoped) | 67.1% | 53.3% | 56.0% |
+| Relationship recall/precision (scoped) | 12.5% / 18.8% | 17.1% / 16.3% | 9.8% / 10.3% |
+| Relationship F1 (scoped) | 15.0% | 16.7% | 10.0% |
+
+Class matched count (14/28 scoped) is the lowest of any run this session. Class precision did recover somewhat
+(63.6% vs the narrow-probe run's 50.0%, closer to baseline's 75.0%) -- the per-item scrutiny is doing real
+work there. But class recall dropped further (50.0%, below every prior run), and relationships regressed on
+both axes too (back down near the pre-fix numbers).
+
+**The irony, quoted verbatim, and the actual explanation:** the interviewer asked exactly the right per-item
+question this fix was designed to produce -- *"Is On-Call Engineer needed to answer/perform the current
+questions/actions, such as assigning responders or routing restoration work, or should we leave it out for
+now?"* -- and the persona answered *"For the current acceptance test, the On-Call Engineer does not need to be
+included as a separate class... the existing classes can cover the immediate needs without additional
+complexity."* On-Call Engineer is the exact class that motivated the entire investigation two addenda ago. The
+interviewer did precisely what was asked of it -- real, specific, per-item scrutiny -- and this run, the
+persona's answer to that same good question was "no." The LLM reviewer's own transcript notes independently
+praised this behavior: *"Turns 5-11: Strong class elicitation discipline: small batches, tied to acceptance
+questions/actions, and explicitly left out plausible-but-unneeded roles."*
+
+**Assessment, five live runs in, none clearing the gate:** every fix shipped this session has been real,
+well-evidenced, and behaviorally verified to fire as designed in the transcript -- and composite has still
+never once beaten the merged baseline (32.6% / 40.7% / 39.4% / 35.9% / 33.7%, vs baseline's 57.1%, no
+improving trend across them). The dominant variable across all five appears to be the persona's own
+turn-to-turn judgment calls (rubber-stamp vs. genuine critical pushback, which specific terms she volunteers),
+not the interviewer's mechanics -- which this round's fix improved by every behavioral measure available and
+still didn't move the composite score in the right direction. Continuing to react to single-run numbers with
+further one-shot prompt changes is no longer a defensible use of the signal available; the honest next step
+really is averaging multiple runs per configuration, not another targeted fix.
