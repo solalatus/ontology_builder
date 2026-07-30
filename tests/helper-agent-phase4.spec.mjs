@@ -96,6 +96,27 @@ test("the system prompt's final checklist also covers jointly-named relationship
   });
 });
 
+// A live confirmatory eval run's real transcript (helper_agent_todo.md's
+// dated addendum) found the actual root cause of several classes never
+// getting recovered at all: the interviewer accepted the persona's first-
+// pass Phase 1 answer at face value and moved straight to Phase 2 ("Good --
+// I've captured these 20 real questions... Please proceed to the next
+// phase!") without ever asking whether anything was missing. The persona's
+// own free-form list had quietly dropped "on-call engineer" from the
+// fixture's own "which resolver group and on-call engineer" question,
+// keeping only "resolver group" -- an omission a deliberate one-more-check
+// follow-up would have caught, since real domain experts reliably remember
+// secondary roles/context only when asked directly, not on the first pass.
+test("the system prompt requires one deliberate follow-up probe for omitted roles/context before leaving Phase 1, not accepting the expert's first list as complete", async () => {
+  await withPage(async (page) => {
+    const prompt = await systemPrompt(page);
+    assert.match(prompt, /An expert's first-pass list, given freely,\s*reliably omits things they'd still confirm as real if asked directly/);
+    assert.match(prompt, /especially secondary roles beyond the obvious one/);
+    assert.match(prompt, /Before moving to Phase 2, ask one deliberate\s*follow-up naming a few concrete categories this kind of gap tends to hide\s*in/);
+    assert.match(prompt, /other roles involved beyond the ones already named, and any\s*environment\/context distinctions that matter/);
+  });
+});
+
 // Regression coverage for a real interview-pacing inefficiency the
 // ontology-recovery eval's own LLM review flagged twice in one run (turns
 // 42-89 and 89+): GROUND RULES used to say "Ask ONE focused question at a
