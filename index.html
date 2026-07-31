@@ -807,6 +807,7 @@
     <div id="agent-panel-connected" style="display:none;">
       <div class="agent-panel-header">
         <select id="agent-model-select"></select>
+        <button id="agent-restart-conversation" type="button" title="Beszélgetés újraindítása">&#8635;</button>
         <button id="agent-disconnect" type="button" title="Leválasztás">&#10005;</button>
       </div>
       <div id="agent-transcript" class="agent-transcript"></div>
@@ -1073,6 +1074,12 @@ const STRINGS = {
     agentToolErrorNote: "The agent's ontology edit could not be applied (invalid data).",
     agentToolTooManyRounds: "The agent tried to use its tools too many times in one message and was stopped.",
     agentToolCheckedState: "🔍 Checked the current ontology state.",
+    // Helper Agent — Post-plan extension (helper_agent_plan.md §9): conversation persistence & restart.
+    agentRestartConversation: "Restart conversation",
+    agentRestartConfirmMessage: "This will permanently delete the current conversation history with the agent. The ontology on the canvas will NOT be affected. This cannot be undone.",
+    agentRestartConfirmLabel: "Restart conversation",
+    agentConversationRestored: (n) => `Restored previous conversation (${n} message${n === 1 ? "" : "s"}).`,
+    agentConversationResumeGapNote: (gapText) => `This conversation resumed after a gap of about ${gapText} — the agent will check the ontology for changes before continuing.`,
   },
   hu: {
     appTitle: "Tudásgráf Vászon",
@@ -1184,6 +1191,12 @@ const STRINGS = {
     agentToolErrorNote: "Az ügynök szerkesztését nem sikerült alkalmazni (érvénytelen adat).",
     agentToolTooManyRounds: "Az ügynök túl sokszor próbálta használni az eszközeit egy üzenetben, ezért megállítottuk.",
     agentToolCheckedState: "🔍 Ellenőriztük az ontológia jelenlegi állapotát.",
+    // Helper Agent — utólagos bővítés (helper_agent_plan.md §9): beszélgetés mentése és újraindítása.
+    agentRestartConversation: "Beszélgetés újraindítása",
+    agentRestartConfirmMessage: "Ez véglegesen törli az ügynökkel folytatott jelenlegi beszélgetés előzményeit. A vásznon lévő ontológiát ez NEM érinti. Ez nem vonható vissza.",
+    agentRestartConfirmLabel: "Beszélgetés újraindítása",
+    agentConversationRestored: (n) => `Visszaállítva az előző beszélgetés (${n} üzenet).`,
+    agentConversationResumeGapNote: (gapText) => `Ez a beszélgetés kb. ${gapText} szünet után folytatódik — az ügynök az ontológia változásait fogja ellenőrizni, mielőtt folytatná.`,
   },
 };
 
@@ -1292,6 +1305,7 @@ function applyAgentLanguage() {
   byId("agent-connect-cancel").textContent = t("cancel");
   updateAgentConnectSubmitLabel();
   byId("agent-disconnect").title = t("agentDisconnect");
+  byId("agent-restart-conversation").title = t("agentRestartConversation");
   byId("agent-no-tools-note").textContent = t("agentNoToolsNote");
   byId("agent-chat-send").textContent = t("agentChatSend");
   byId("agent-chat-input").setAttribute("placeholder", t("agentChatInputPlaceholder"));
@@ -4718,6 +4732,165 @@ const agentState = {
   promptCacheKey: null,
 };
 
+// ---------------------------------------------------------------------------
+// Agent conversation persistence (helper_agent_plan.md §9). A second,
+// independent storage channel from the graph's own Tier 1 above -- same
+// shape (OPFS-first, localStorage fallback, coalescing save loop), but a
+// deliberately separate key/file and a fully separate save-loop instance,
+// so a large or malformed conversation record can never threaten the
+// ontology's own save reliability, and so the two can never block or
+// interleave with each other. Reuses detectStorageBackend() directly
+// (already generic/parameterless) rather than detecting the backend twice.
+// ---------------------------------------------------------------------------
+const AGENT_CONVERSATION_OPFS_FILENAME = "kg-agent-conversation.json";
+const AGENT_CONVERSATION_LOCALSTORAGE_KEY = "kg-agent-conversation";
+
+async function writeAgentConversationPayload(payload) {
+  const backend = await detectStorageBackend();
+  const json = JSON.stringify(payload);
+  if (backend === "opfs") {
+    try {
+      const root = await navigator.storage.getDirectory();
+      const fileHandle = await root.getFileHandle(AGENT_CONVERSATION_OPFS_FILENAME, { create: true });
+      const writable = await fileHandle.createWritable();
+      await writable.write(json);
+      await writable.close();
+    } catch (err) {
+      console.warn("[KG Canvas] OPFS save failed (agent conversation):", err);
+    }
+  } else if (backend === "localStorage") {
+    try {
+      localStorage.setItem(AGENT_CONVERSATION_LOCALSTORAGE_KEY, json);
+    } catch (err) {
+      console.warn("[KG Canvas] localStorage save failed (agent conversation):", err);
+    }
+  }
+}
+
+async function readAgentConversationPayload() {
+  const backend = await detectStorageBackend();
+  if (backend === "opfs") {
+    try {
+      const root = await navigator.storage.getDirectory();
+      const fileHandle = await root.getFileHandle(AGENT_CONVERSATION_OPFS_FILENAME, { create: false });
+      const file = await fileHandle.getFile();
+      const text = await file.text();
+      return text ? JSON.parse(text) : null;
+    } catch (err) {
+      if (!err || err.name !== "NotFoundError") console.warn("[KG Canvas] OPFS load failed (agent conversation):", err);
+      return null;
+    }
+  }
+  if (backend === "localStorage") {
+    try {
+      const text = localStorage.getItem(AGENT_CONVERSATION_LOCALSTORAGE_KEY);
+      return text ? JSON.parse(text) : null;
+    } catch (err) {
+      console.warn("[KG Canvas] localStorage load failed (agent conversation):", err);
+      return null;
+    }
+  }
+  return null;
+}
+
+async function writeAgentConversationToStorage() {
+  await writeAgentConversationPayload({
+    transcript: agentState.transcript,
+    apiMessages: agentState.apiMessages,
+    savedAt: Date.now(),
+  });
+}
+
+// Coalescing save loop, identical shape to Tier 1's own scheduleSave/
+// runSaveLoop above (see that comment) but a fully independent instance —
+// its own flags, its own in-flight write — so it can never block on or
+// interleave with the graph's own save loop.
+let agentConversationSaveScheduled = false;
+let agentConversationSaveRunning = false;
+let agentConversationSaveIdleResolvers = [];
+
+function scheduleAgentConversationSave() {
+  agentConversationSaveScheduled = true;
+  runAgentConversationSaveLoop();
+}
+
+async function runAgentConversationSaveLoop() {
+  if (agentConversationSaveRunning) return;
+  agentConversationSaveRunning = true;
+  while (agentConversationSaveScheduled) {
+    agentConversationSaveScheduled = false;
+    await writeAgentConversationToStorage();
+  }
+  agentConversationSaveRunning = false;
+  const resolvers = agentConversationSaveIdleResolvers;
+  agentConversationSaveIdleResolvers = [];
+  resolvers.forEach((resolve) => resolve());
+}
+
+// Test hook, same purpose as whenSaveIdle() above: lets a test await a
+// deterministic "no save in flight or queued" point instead of guessing.
+function whenAgentConversationSaveIdle() {
+  if (!agentConversationSaveRunning && !agentConversationSaveScheduled) return Promise.resolve();
+  return new Promise((resolve) => agentConversationSaveIdleResolvers.push(resolve));
+}
+
+// A gap under this is treated as "just reloaded, nothing has likely
+// changed" and restores silently (still shown via the restore note, just
+// without the extra re-check instruction). Above it, a synthetic message is
+// spliced into apiMessages telling the agent explicitly that time passed
+// and to call get_graph_state before continuing (helper_agent_plan.md
+// §9.4) -- nothing else gives the model any way to perceive that a gap
+// happened at all, since apiMessages alone carries no wall-clock signal.
+const AGENT_RESUME_GAP_THRESHOLD_MS = 5 * 60 * 1000;
+
+function formatAgentResumeGap(ms) {
+  const minutes = Math.round(ms / 60000);
+  if (minutes < 60) return `${minutes} minute${minutes === 1 ? "" : "s"}`;
+  const hours = Math.round(ms / 3600000);
+  if (hours < 48) return `${hours} hour${hours === 1 ? "" : "s"}`;
+  const days = Math.round(ms / 86400000);
+  return `${days} day${days === 1 ? "" : "s"}`;
+}
+
+// Loaded at boot, before any BYOK connection is made — mirrors
+// loadGraphFromStorage()'s own posture: restoring is silent data
+// hydration, never an auto-action. The transcript is rendered as soon as
+// the panel is later shown (renderAgentTranscript() runs immediately
+// here), but nothing here ever calls the OpenAI API on its own; the user
+// still has to click Connect, same as a remembered API key today only
+// pre-fills the input, never auto-connects. Returns {restored, gapMs}
+// mainly for tests — the actual transcript notes are appended here, not by
+// the caller, since they need to already be part of the transcript array
+// boot() renders, in order.
+async function loadAgentConversationFromStorage() {
+  const data = await readAgentConversationPayload();
+  if (!data || !Array.isArray(data.transcript) || !Array.isArray(data.apiMessages)) {
+    return { restored: false, gapMs: 0 };
+  }
+  if (!data.transcript.length && !data.apiMessages.length) {
+    return { restored: false, gapMs: 0 }; // nothing to restore
+  }
+  agentState.transcript = data.transcript.filter((m) => m && typeof m.role === "string" && typeof m.text === "string");
+  agentState.apiMessages = data.apiMessages.filter((m) => m && typeof m.role === "string");
+  const savedAt = typeof data.savedAt === "number" ? data.savedAt : Date.now();
+  const gapMs = Math.max(0, Date.now() - savedAt);
+  appendTranscriptMessage("system", t("agentConversationRestored", agentState.transcript.length));
+  if (agentState.apiMessages.length && gapMs > AGENT_RESUME_GAP_THRESHOLD_MS) {
+    const gapText = formatAgentResumeGap(gapMs);
+    // Invisible in the transcript by design, same convention as the
+    // compaction summary splice above (sendAgentChatMessage/
+    // compactAgentHistory) — a real instruction to the model, not
+    // something the human said. The separate transcript note right after
+    // is what makes the *fact* that this happened visible to the user.
+    agentState.apiMessages.push({
+      role: "user",
+      content: `[Session resumed after a gap of roughly ${gapText} -- the ontology may have changed outside this conversation since the last message. Call get_graph_state before continuing.]`,
+    });
+    appendTranscriptMessage("system", t("agentConversationResumeGapNote", gapText));
+  }
+  return { restored: true, gapMs };
+}
+
 // Tracks the *kind* of the last connect error (not pre-rendered text) so
 // applyAgentLanguage() can re-render it correctly after a language toggle
 // instead of leaving a stale-language message on screen.
@@ -4922,6 +5095,25 @@ function disconnectAgent() {
   renderAgentTranscript();
   setAgentTypingIndicator(false);
   setAgentConnectedUi(false);
+  // Persists the clear, same as restartAgentConversation() below — without
+  // this, a reload after disconnecting would silently resurrect the
+  // pre-disconnect conversation from storage, contradicting the immediate
+  // in-memory clear the user just triggered.
+  scheduleAgentConversationSave();
+}
+
+// Restart Conversation (helper_agent_plan.md §9.3) — explicitly and only
+// clears the conversation. Never touches `state` (the ontology), never
+// calls markDirty()/pushHistory(), never touches Tier 1/Tier 2 graph
+// storage in any way, and (unlike disconnectAgent() above) does not clear
+// apiKey/model/connected — restarting the conversation shouldn't force
+// re-entering the API key.
+function restartAgentConversation() {
+  agentState.transcript = [];
+  agentState.apiMessages = [];
+  agentState.promptCacheKey = `kg-agent-${crypto.randomUUID()}`;
+  renderAgentTranscript();
+  scheduleAgentConversationSave();
 }
 
 function forgetStoredAgentKey() {
@@ -4945,6 +5137,14 @@ document.getElementById("agent-key-input").addEventListener("keydown", (e) => {
   if (e.key === "Enter") submitAgentConnect();
 });
 document.getElementById("agent-disconnect").addEventListener("click", () => disconnectAgent());
+document.getElementById("agent-restart-conversation").addEventListener("click", () => {
+  if (!agentState.transcript.length && !agentState.apiMessages.length) return; // nothing to restart
+  showConfirmDialog({
+    message: t("agentRestartConfirmMessage"),
+    confirmLabel: t("agentRestartConfirmLabel"),
+    onConfirm: () => restartAgentConversation(),
+  });
+});
 document.getElementById("agent-forget-key").addEventListener("click", () => forgetStoredAgentKey());
 document.getElementById("agent-model-select").addEventListener("change", (e) => {
   agentState.model = e.target.value;
@@ -6033,6 +6233,11 @@ async function sendAgentChatMessage(userText) {
     }
   }
   setAgentSending(false);
+  // Every exit path above (a real reply, the too-many-rounds note, or an
+  // unrecoverable error) reaches here — the one common point where the
+  // turn has fully settled, so a single scheduleAgentConversationSave()
+  // call covers all of them (helper_agent_plan.md §9.2).
+  scheduleAgentConversationSave();
 }
 
 function submitAgentChatInput() {
@@ -6130,6 +6335,11 @@ window.__kg = {
     sendMessage: submitAgentChatInput,
     buildSystemPrompt: buildAgentSystemPrompt,
     isSending: () => agentState.sending,
+    // Post-plan extension (helper_agent_plan.md §9) — conversation
+    // persistence/restart test surface.
+    restartConversation: restartAgentConversation,
+    whenConversationSaveIdle: whenAgentConversationSaveIdle,
+    loadConversationFromStorage: loadAgentConversationFromStorage,
   },
 };
 
@@ -6168,6 +6378,7 @@ async function boot() {
     markDirty();
     showRestoreToast(state.nodes.length, state.edges.length);
   }
+  await loadAgentConversationFromStorage();
   if (state.graphNameIsDefault) state.graphName = t("untitledGraph");
   document.getElementById("graph-title").textContent = state.graphName;
   // Tier 2 opt-in (Section 3.1): only Chrome/Windows and Chromium/Linux

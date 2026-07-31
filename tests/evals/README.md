@@ -285,6 +285,52 @@ practical-scope recovery up or down, did full-domain scope itself widen,
 did tool-call errors increase, did the interview get less efficient) rather
 than expecting either composite score to approach 100%.
 
+## Translating a simulated run into a real engagement's time/effort
+
+The interviewer side of this eval is the real app agent — its numbers here
+are the actual product experience, not a proxy. The *persona* side is not:
+it's a single independently-sampled LLM improvising a domain expert from
+general IT-operations knowledge in one pass, with no ability to actually
+go check anything (an exact severity taxonomy, an internal status
+vocabulary, an org chart) the way a real subject would. That gap matters
+for reading these numbers correctly, not just for interpreting turn counts.
+
+**AI-pace wall-clock is not human wall-clock.** The best confirmed run on
+this repo's history (`helper_agent-prompt-fixes-round2`, merged) took 48
+turns and 909s (~15 minutes) — that's LLM-to-LLM latency, seconds per
+turn, nothing like what a real subject needs to read, think, and answer.
+Estimated from the actual message density in these transcripts (each
+interviewer turn batches 3-9 items, needing a real multi-sentence answer):
+roughly **2.5-4 hours of a real expert's engaged time** for an interview
+of this depth, done back-to-back — and realistically more than that in
+practice, because a real subject stops to verify things (an exact status
+list, a regulatory threshold) that the simulated persona just invents
+instantly, and because no one sustains that density of precise technical
+answers for hours without a real quality drop.
+
+**Company-side commitment estimate: two domain experts, two days each**
+(~4 person-days total, done as a compressed engagement rather than spread
+over calendar weeks) is a realistic sizing for a real interview at this
+fixture's scope — splitting by domain (operational/incident-response vs.
+regulatory/compliance, since this fixture spans both) cuts each expert's
+share of raw Q&A to roughly the 1.5-2 hour range, with the rest of each
+day's allocation covering fact-finding, prep, and reviewing the resulting
+model afterward rather than trusting it blind. **This estimate is scoped
+to recover the *full* practical-scope ground truth**, not the partial
+recovery this eval's simulated runs actually land on (composite scores in
+the 40-65% range even on the best confirmed runs as of this writing) — the
+eval's ceiling is capped by what a single-pass, non-fact-checking
+simulated persona happens to volunteer, not by what a real, resourced,
+two-session engagement with real subject-matter access could achieve. Two
+experts with two real days and the ability to actually go verify things
+should reasonably be expected to reach full practical-scope coverage,
+which this eval's own simulated numbers cannot demonstrate by construction
+and should not be read as a ceiling on.
+
+See `helper_agent_plan.md` §9 for the feature this reasoning directly
+motivated (agent conversation persistence across reloads) — a two-day,
+two-person engagement will not fit in one open browser tab.
+
 ## Cost and configuration knobs
 
 All environment-configurable, none hardcoded:
