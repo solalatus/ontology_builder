@@ -5433,10 +5433,61 @@ already has instead of following it rigidly)
 1. Real questions and actions: elicit 10-20 real questions the agent must
    answer and 5-10 actions it must perform. Do not model anything yet —
    just collect these verbatim. This list is the acceptance test for
-   everything that follows.
+   everything that follows. An expert's first-pass list, given freely,
+   reliably omits things they'd still confirm as real if asked directly —
+   especially a secondary role standing next to one already named (e.g.
+   naming the resolver group but not who's on call, or naming a service
+   without naming who staffs its service desk) and which environment or
+   deployment context a question/action implicitly depends on. Before
+   moving to Phase 2, ask ONE closed, narrow follow-up covering exactly
+   these two things: "for each role you named, is there a closely related
+   role that actually does the day-to-day work (on-call/staffing), and
+   does any of this depend on a specific environment or deployment
+   context?" Ask only that — do not invite open-ended extra scope ("is
+   there anything else at all?" tends to produce elaboration well past
+   what's needed, more classes than the acceptance test calls for, not
+   fewer). Add only what the expert ties to answering one of the already-
+   named questions/actions; a general-sounding extra role or governance
+   body that isn't tied to any of them stays out, same bar as Phase 2's
+   own inclusion rule below. If they confirm there's nothing else in these
+   two categories, that's a real answer too and settles it — move on. If
+   the expert's answer uses different terms than the ones this question
+   itself named as examples, don't silently accept whichever wording came
+   back — ask directly whether that's the same real-world thing under a
+   different name at their organization, or something genuinely
+   additional. A named example term going completely unaddressed in the
+   reply is itself worth one direct follow-up line ("is there also a
+   service desk specifically, or does what you described already cover
+   that role?") before moving on, not a silent substitution either way.
 2. Classes: from that list, propose candidate classes (kinds of things,
-   not instances). Confirm each one earns its place: "does the agent need
-   to identify, retrieve, connect, or pass this to a tool?"
+   not instances). For each one, state the specific Phase 1 question or
+   action it's needed for, then confirm: "does the agent need to
+   identify, retrieve, connect, or pass this to a tool?" Don't propose a
+   long list all at once and ask one single "which of these should stay"
+   question over the whole batch — that shape reliably gets a blanket
+   "keep all" back with no real scrutiny of any individual item, even
+   from an engaged expert. Confirm in small, justified batches instead,
+   each tied to specific acceptance-test material.
+   Watch both directions of the same over/under-splitting mistake. Watch
+   for several distinctly-named actors or roles collapsing into one
+   generic bucket class — a single generic "Role" or "Owner" standing in
+   for several separately-named responsibilities (e.g. on-call engineer,
+   incident commander, service owner, technical owner) loses real
+   distinctions the expert actually has; if the real questions/actions
+   name multiple different roles the agent must identify, distinguish, or
+   route to separately, each one that matters earns its own class, not a
+   shared generic type. But also watch the opposite: several plausible-
+   sounding candidates that only differ by department or naming
+   convention, not by anything the agent actually needs to do differently
+   with them (e.g. "Resolver Group," "Application Support Team," and
+   "Infrastructure Support Team" proposed as three separate classes,
+   never actually shown to route or behave differently in any real
+   question/action). If you notice this pattern yourself, say so directly
+   and ask which one is real rather than presenting all of them as
+   already-justified — a bare "keep them separate" or "keep all" doesn't
+   settle it without a specific operational reason attached (e.g. "yes,
+   because X and Y are staffed and escalated independently" is a real
+   answer; agreement alone is not).
 3. Relationships: propose relationships as verb phrases between two
    classes, each with an explicit direction. Reject vague or directionless
    relationships. Don't stop after one opening batch — once the class list
@@ -5451,7 +5502,13 @@ already has instead of following it rigidly)
    than only free-associating from the class list on its own. Before leaving
    this phase, call get_graph_state and check every class's relationship
    count directly — don't rely on memory of what you've already asked;
-   anything still at zero is unfinished, not naturally standalone.
+   anything still at zero is unfinished, not naturally standalone. Having at
+   least one relationship isn't the real bar, though: two classes that
+   appear together in the same original Phase 1 question or action almost
+   always need a direct relationship between them specifically, not just
+   each one separately connected to something else. Re-read the Phase 1
+   list once more before moving on, and confirm every pair of classes it
+   jointly mentions has an explicit relationship between that exact pair.
 4. Decision-bearing properties: for each class, propose ONLY properties
    that trace back to a Phase 1 question or action (filter, compare,
    decide, explain, or act). Reject "nice to know" fields. Once you're
@@ -5489,11 +5546,16 @@ already has instead of following it rigidly)
        back to the relevant earlier phase.
    (b) Final checklist: call get_graph_state and confirm directly from that
        result, not from memory, that every class has at least one
-       relationship recorded; every class is something users talk about;
-       every relationship has a clear direction and verb; every property
-       helps identify/filter/decide/explain/act; common synonyms are
-       captured; fixed value lists are used where appropriate; important
-       actions have explicit conditions.
+       relationship recorded, AND that every pair of classes jointly
+       mentioned in a Phase 1 question or action has a direct relationship
+       between that specific pair (not just each side connected to
+       something else); every distinctly-named actor or role from Phase 1
+       became its own class, not folded into one generic bucket type;
+       every class is something users talk about; every relationship has a
+       clear direction and verb; every property helps
+       identify/filter/decide/explain/act; common synonyms are captured;
+       fixed value lists are used where appropriate; important actions have
+       explicit conditions.
    If either check finds a real gap, go back and close it before continuing
    — don't just note the gap and report the interview complete anyway.
    Report the result of both checks to the expert plainly.

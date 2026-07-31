@@ -83,6 +83,105 @@ test("the system prompt's final checklist requires a get_graph_state check, not 
   });
 });
 
+// The final checklist's own bar needs to match the upgraded Phase 3/Phase 2
+// bars above, not just the original "every class has >=1 relationship"
+// check -- otherwise a session could pass its own final validation while
+// still missing every jointly-named-pair relationship and every
+// bucketed-away role class found in the real audit.
+test("the system prompt's final checklist also covers jointly-named relationship pairs and distinctly-named roles, matching the upgraded Phase 2/3 bars", async () => {
+  await withPage(async (page) => {
+    const prompt = await systemPrompt(page);
+    assert.match(prompt, /every pair of classes jointly\s*mentioned in a Phase 1 question or action has a direct relationship\s*between that specific pair/);
+    assert.match(prompt, /every distinctly-named actor or role from Phase 1\s*became its own class, not folded into one generic bucket type/);
+  });
+});
+
+// A live confirmatory eval run's real transcript (helper_agent_todo.md's
+// dated addendum) found the actual root cause of several classes never
+// getting recovered at all: the interviewer accepted the persona's first-
+// pass Phase 1 answer at face value and moved straight to Phase 2 ("Good --
+// I've captured these 20 real questions... Please proceed to the next
+// phase!") without ever asking whether anything was missing. The persona's
+// own free-form list had quietly dropped "on-call engineer" from the
+// fixture's own "which resolver group and on-call engineer" question,
+// keeping only "resolver group" -- an omission a deliberate one-more-check
+// follow-up would have caught, since real domain experts reliably remember
+// secondary roles/context only when asked directly, not on the first pass.
+test("the system prompt requires one deliberate follow-up probe for omitted roles/context before leaving Phase 1, not accepting the expert's first list as complete", async () => {
+  await withPage(async (page) => {
+    const prompt = await systemPrompt(page);
+    assert.match(prompt, /An expert's first-pass list, given freely,\s*reliably omits things they'd still confirm as real if asked directly/);
+    assert.match(prompt, /especially a secondary role standing next to one already named/);
+    assert.match(prompt, /Before\s*moving to Phase 2, ask ONE closed, narrow follow-up covering exactly\s*these two things/);
+  });
+});
+
+// A first version of this probe asked an open "anything else?" and a live
+// confirmatory run showed why that's the wrong shape: it visibly worked
+// (recall genuinely improved -- class 67.9% vs the merged baseline's
+// 60.7%, relationship 17.1% vs 12.5%), but precision collapsed (class
+// 55.3% vs 75.0%, relationship 9.7% vs 18.8%) because the persona, invited
+// to volunteer "anything else," generatively supplied whole extra
+// organizational apparatus (ExecutiveSponsor, CrisisManagementTeam,
+// MajorIncidentBridge...) well past the specific six-class gap the fix
+// targeted -- composite fell further behind the merge gate, not closer.
+// Narrowed to name the two specific categories closed-question style
+// instead, with an explicit warning against the open-invitation shape.
+test("the system prompt's Phase 1 probe is narrow and closed (two named categories), not an open invitation that risks inviting scope creep", async () => {
+  await withPage(async (page) => {
+    const prompt = await systemPrompt(page);
+    assert.match(prompt, /is there a closely related\s*role that actually does the day-to-day work \(on-call\/staffing\), and\s*does any of this depend on a specific environment or deployment\s*context/);
+    assert.match(prompt, /do not invite open-ended extra scope \("is\s*there anything else at all\?" tends to produce elaboration well past\s*what's needed, more classes than the acceptance test calls for, not\s*fewer\)/);
+    assert.match(prompt, /Add only what the expert ties to answering one of the already-/);
+  });
+});
+
+// A live confirmatory eval run's real transcript (helper_agent_todo.md's
+// dated addendum) audited every class-related tool call in a full 45-turn
+// conversation and found exactly one: 29 classes added in a single batch
+// at turn 4, never touched again. Of those 29, 12 had no counterpart in
+// gold at all -- and the interviewer's own Phase 1 probe literally named
+// "service desk" as an example, but the expert's answer substituted
+// "Application Support Team"/"Infrastructure Support Team" instead, and
+// the interviewer never checked back on the specific term it had asked
+// about. This test pins the Phase 1 fix for that: don't silently accept a
+// substituted term without checking whether it's the same thing or
+// something genuinely different.
+test("the system prompt requires checking back when the expert's Phase 1 probe answer substitutes different terms than the ones asked about, not silently accepting the substitution", async () => {
+  await withPage(async (page) => {
+    const prompt = await systemPrompt(page);
+    assert.match(prompt, /If\s*the expert's answer uses different terms than the ones this question\s*itself named as examples, don't silently accept whichever wording came\s*back/);
+    assert.match(prompt, /ask directly whether that's the same real-world thing under a\s*different name at their organization, or something genuinely\s*additional/);
+  });
+});
+
+// Same audit found the actual mechanism behind that 29-class, zero-pruning
+// batch: the interviewer proposed all 29 at once and asked one single
+// "which of these should stay" question over the whole list -- and the
+// simulated persona's entire response was "All candidate classes should
+// stay," including for three parallel role classes (Resolver Group /
+// Application Support Team / Infrastructure Support Team) the interviewer
+// had itself flagged as possibly the same thing. This test pins the Phase
+// 2 fix: confirm classes in small justified batches with a stated
+// per-item reason, and don't accept a bare "keep all"/"keep them
+// separate" as resolving a self-flagged ambiguity without an operational
+// reason attached.
+test("the system prompt requires per-item justification for classes in small batches, not one omnibus \"which should stay\" question over a large proposed list", async () => {
+  await withPage(async (page) => {
+    const prompt = await systemPrompt(page);
+    assert.match(prompt, /For each one, state the specific Phase 1 question or\s*action it's needed for/);
+    assert.match(prompt, /Don't propose a\s*long list all at once and ask one single "which of these should stay"\s*question over the whole batch — that shape reliably gets a blanket\s*"keep all" back with no real scrutiny of any individual item/);
+  });
+});
+
+test("the system prompt requires the interviewer to flag likely-overlapping class candidates itself and reject a bare \"keep all\" without an operational reason", async () => {
+  await withPage(async (page) => {
+    const prompt = await systemPrompt(page);
+    assert.match(prompt, /several plausible-\s*sounding candidates that only differ by department or naming\s*convention, not by anything the agent actually needs to do differently\s*with them/);
+    assert.match(prompt, /a bare "keep them separate" or "keep all" doesn't\s*settle it without a specific operational reason attached/);
+  });
+});
+
 // Regression coverage for a real interview-pacing inefficiency the
 // ontology-recovery eval's own LLM review flagged twice in one run (turns
 // 42-89 and 89+): GROUND RULES used to say "Ask ONE focused question at a
@@ -133,6 +232,39 @@ test("the system prompt grounds relationship candidates in Phase 1 material and 
     const prompt = await systemPrompt(page);
     assert.match(prompt, /Ground candidates in the\s*Phase 1 material itself/);
     assert.match(prompt, /Before leaving\s*this phase, call get_graph_state and check every class's relationship\s*count directly/);
+  });
+});
+
+// Auditing a real confirmatory run's actual final graph state against gold
+// directly (not just its metrics) found the "every class has >=1
+// relationship" bar above was necessary but not sufficient: 23 of 29
+// scoped relationships whose *both* endpoint classes were actually
+// recovered were still missing -- the class itself had a relationship to
+// *something*, just not to the specific other class a Phase 1 item jointly
+// named. Pins the upgraded bar: co-occurrence in the same original
+// question/action is a strong signal two classes need a direct
+// relationship between that exact pair, not just each side connected
+// elsewhere.
+test("the system prompt requires checking that classes jointly named in the same Phase 1 item have a direct relationship between them, not just individually connected", async () => {
+  await withPage(async (page) => {
+    const prompt = await systemPrompt(page);
+    assert.match(prompt, /two classes that\s*appear together in the same original Phase 1 question or action almost\s*always need a direct relationship between them specifically/);
+    assert.match(prompt, /confirm every pair of classes it\s*jointly mentions has an explicit relationship between that exact pair/);
+  });
+});
+
+// Same audit found 11 of 28 scoped gold classes never recovered at all,
+// and 5 of those specifically because five separately-named roles (on-call
+// engineer, incident commander, service owner, technical owner, service
+// desk) all collapsed into one generic "OperationalRole" class -- the
+// single biggest lever found, since a missing class cascades into every
+// relationship/property that would have connected to it (19 of 48 scoped
+// relationships were unreachable for exactly this reason in that run).
+test("the system prompt warns against collapsing several distinctly-named roles into one generic bucket class", async () => {
+  await withPage(async (page) => {
+    const prompt = await systemPrompt(page);
+    assert.match(prompt, /Watch\s*for several distinctly-named actors or roles collapsing into one\s*generic bucket class/);
+    assert.match(prompt, /each one that matters earns its own class, not a\s*shared generic type/);
   });
 });
 
