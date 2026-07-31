@@ -318,6 +318,70 @@ test("toggling the UI language still only changes the OUTPUT LANGUAGE directive,
   }, { lang: "en" });
 });
 
+// Round 2 of live-confirmed prompt fixes, this time built from a detailed
+// read-through of the eval-most-experimented-llm-judge merged baseline's
+// own 62-turn transcript, cross-checked against the fixture's real gold
+// classes -- not a hypothesis, four specific, quoted failure modes that
+// transcript actually exhibited.
+
+test("Phase 2 treats a role surfaced only by the Phase 1 probe as a candidate, not a pre-approved inclusion", async () => {
+  // The merged baseline's own transcript created Compliance Officer and
+  // Business Line -- neither exists anywhere in the gold fixture -- purely
+  // because the interviewer's own proposal text asserted "needed because
+  // Compliance Officer reviews reporting-relevant incidents" without ever
+  // testing that claim against a real, still-open Phase 1 question/action.
+  await withPage(async (page) => {
+    const prompt = await systemPrompt(page);
+    assert.match(prompt, /A role that only surfaced from the Phase 1 follow-up probe/);
+    assert.match(prompt, /is a candidate, not a\s*pre-approved inclusion/);
+    assert.match(prompt, /without tying it to a specific still-open question or action\s*stays out/);
+  });
+});
+
+test("Phase 3 bans disguised subclassing wording (\"is type of\", \"is a kind of\") and requires a real operational connector instead", async () => {
+  // The merged baseline's transcript recorded "Cybersecurity Incident --is
+  // type of--> Incident" -- this tool has no subclassing, and the eval's
+  // own scoring (groundTruthModel.mjs) explicitly excludes is-a predicates
+  // from both gold and recovered, so this relationship could never earn
+  // credit under any circumstances: a full round-trip spent on something
+  // structurally unscoreable, not a wording near-miss.
+  await withPage(async (page) => {
+    const prompt = await systemPrompt(page);
+    assert.match(prompt, /Never phrase a relationship as disguised subclassing/);
+    assert.match(prompt, /"is type of," "is a kind of," "is a," "classified as,"/);
+    assert.match(prompt, /find the real operational connector instead/);
+  });
+});
+
+test("Phase 3 asks for a routing/derivation relationship, not just a recording relationship, for \"who should be assigned\"-style questions", async () => {
+  // The merged baseline never built any relationship that could let the
+  // agent recommend a resolver group (only Resolver Group staffed by
+  // On-call Engineer, and an assignment rule whose only condition is
+  // "resolver group is identified") -- so "Who should be assigned to
+  // resolve this incident?", a real Phase 1 question, was structurally
+  // unanswerable, not just imperfectly worded.
+  await withPage(async (page) => {
+    const prompt = await systemPrompt(page);
+    assert.match(prompt, /that implies two\s*different relationships, not one/);
+    assert.match(prompt, /derive or recommend/);
+    assert.match(prompt, /cannot actually answer a "should be"\s*question/);
+  });
+});
+
+test("Phase 4 checks an excluded property against the still-open Phase 1 list before accepting the exclusion", async () => {
+  // The merged baseline's transcript proposed Incident.issueKey, the
+  // expert called it optional, and the interviewer accepted the exclusion
+  // -- only for the Phase 9 validation pass to discover Phase 1's own
+  // question ("what incidents have been logged for the same issue
+  // previously?") was unanswerable without it, and have to backtrack.
+  await withPage(async (page) => {
+    const prompt = await systemPrompt(page);
+    assert.match(prompt, /Before accepting the\s*expert calling a property "optional"/);
+    assert.match(prompt, /don't accept the exclusion at\s*face value/);
+    assert.match(prompt, /A property genuinely unneeded by anything on the\s*list stays excluded as normal/);
+  });
+});
+
 test("the connected panel's static note reflects that tool-calling has shipped, not stale pre-Phase-3 copy", async () => {
   // Phase 3 shipped apply_ontology_yaml; this note used to say the agent
   // "can only talk for now" and that editing "arrives in a later phase" --

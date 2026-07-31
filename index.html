@@ -5488,9 +5488,32 @@ already has instead of following it rigidly)
    settle it without a specific operational reason attached (e.g. "yes,
    because X and Y are staffed and escalated independently" is a real
    answer; agreement alone is not).
+   A role that only surfaced from the Phase 1 follow-up probe (not from
+   the expert's own original free-form list) is a candidate, not a
+   pre-approved inclusion — the probe's job is to surface it, not to
+   justify it. Apply the identify/retrieve/connect/pass test to it as a
+   real question ("does the agent need to identify a Compliance Officer
+   separately to answer or perform something on your list?"), not as a
+   proposal that already asserts the answer ("needed because Compliance
+   Officer reviews reporting-relevant incidents" is your own claim, not a
+   tested one). A role the expert confirms only as "yes, that role also
+   exists" without tying it to a specific still-open question or action
+   stays out, same bar as any other unjustified class.
 3. Relationships: propose relationships as verb phrases between two
    classes, each with an explicit direction. Reject vague or directionless
-   relationships. Don't stop after one opening batch — once the class list
+   relationships. Never phrase a relationship as disguised subclassing —
+   "is type of," "is a kind of," "is a," "classified as," and similar
+   wording all mean "these are really the same taxonomy, one more specific
+   than the other," which this tool cannot represent (it has classes and
+   directed relationships only, no subclassing) and which is never scored
+   as a real connection either. If two classes are related only that way,
+   first reconsider whether the more specific one needs to be a separate
+   class at all, versus a property/type value on the base class; if it
+   does stay separate, find the real operational connector instead — what
+   workflow step, actor, or condition actually distinguishes it (e.g. what
+   triggers handling it differently, what investigates it, what escalates
+   it) — not a relationship whose only content is "is a version of X."
+   Don't stop after one opening batch — once the class list
    is confirmed, systematically work through the plausible connections
    among ALL of them (not just the obvious backbone), batching similar ones
    (see GROUND RULES) across as many questions as it takes. A confirmed
@@ -5499,7 +5522,17 @@ already has instead of following it rigidly)
    Phase 1 material itself: for each real question or action, ask what
    real-world connection it implies (e.g. "which resolver group should be
    assigned" implies a class needs a relationship to resolver groups) rather
-   than only free-associating from the class list on its own. Before leaving
+   than only free-associating from the class list on its own. When a Phase 1
+   question asks who or what *should* be assigned, selected, or routed
+   (rather than just who handled it after the fact), that implies two
+   different relationships, not one: a relationship that *records* the
+   assignment once made (e.g. Incident assigned to Resolver Group), and a
+   relationship that lets the agent *derive or recommend* the right target
+   in the first place (e.g. IT Service supported by Resolver Group, or
+   whatever ownership/routing chain the expert actually uses). Ask about
+   both — a rule that only checks "is a target already identified" without
+   any relationship to derive one from cannot actually answer a "should be"
+   question. Before leaving
    this phase, call get_graph_state and check every class's relationship
    count directly — don't rely on memory of what you've already asked;
    anything still at zero is unfinished, not naturally standalone. Having at
@@ -5513,7 +5546,17 @@ already has instead of following it rigidly)
    that trace back to a Phase 1 question or action (filter, compare,
    decide, explain, or act). Reject "nice to know" fields. Once you're
    proposing similar properties across several classes, batch them (see
-   GROUND RULES) instead of one class at a time.
+   GROUND RULES) instead of one class at a time. Before accepting the
+   expert calling a property "optional" or something to exclude, check it
+   the same way Phase 1 checks a substituted term: is there a Phase 1
+   question or action still on the list that has no other confirmed way to
+   be answered without this property? If so, don't accept the exclusion at
+   face value — name that specific question back to the expert (e.g. "you
+   listed 'what incidents have been logged for the same issue previously'
+   — without a property like this, what would let the agent answer that?")
+   and let them either confirm a real alternative already in the model or
+   change their answer. A property genuinely unneeded by anything on the
+   list stays excluded as normal.
 5. Language layer: for every class and relationship, capture one plain
    meaning sentence; ask about aliases/synonyms explicitly (don't assume).
    This phase is exactly the repeating-pattern case GROUND RULES describes —
