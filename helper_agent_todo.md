@@ -1522,3 +1522,80 @@ claim that this is a fully noise-free result.
 
 - Full suite (`tests/*.spec.mjs`) 478/478 green, both before and after the live run.
 - Results (`report.md`/`conversation-log.md`/`tool-calls.md`) committed alongside this note.
+
+## Addendum -- round 2: four more prompt fixes from a transcript read-through, then a real overfitting problem found and retrofitted
+
+**2026-07-31.** After the LLM-judge PR above merged, did a detailed manual read-through of the new merged
+baseline's own 62-turn transcript (not metrics alone), cross-checked against the fixture's real gold classes.
+Found four concrete, evidence-backed gaps: (1) `Technical Owner` -- the exact role that started the whole
+investigation five rounds ago -- still missing, because the Phase 1 probe's two categories ("day-to-day role,"
+"environment/deployment context") don't semantically cover an asset-engineering role; (2) Phase 4 accepted a
+persona hedge ("optional, can be excluded") on `Incident.issueKey` without checking it against the still-open
+Phase 1 question that specifically needed it, catching the gap only in Phase 9 validation instead of Phase 4
+itself; (3) role-class over-generation still happens, just in the opposite direction from what was fixed
+before -- `Compliance Officer`/`Business Line` created with no gold counterpart, because a Phase-1-probe-
+surfaced role was treated as pre-justified rather than tested; (4) a disguised subclassing relationship
+(`Cybersecurity Incident --is type of--> Incident`) slipped through despite established no-subclassing policy,
+structurally unscoreable since the eval excludes is-a predicates from both sides; (5) no relationship existed
+anywhere that could let the agent *recommend* a resolver group, only a rule checking one was already picked --
+"Who *should* be assigned?" was structurally unanswerable, not just imperfectly worded.
+
+Implemented fixes 2-5 (1 held back per explicit instruction, since it would have needed a new outbound probe
+question -- see the overfitting section below for why that mattered). Full suite 482/482 (4 new tests).
+
+**Two live confirmatory runs, mechanism-level wins confirmed directly from the transcripts, composite mixed:**
+run A (52 turns) and run B (61 turns, more API calls than baseline -- ruling out "shorter interview" as an
+explanation the user directly asked about and this file confirmed false by checking `MAX_TURNS`/wallclock
+usage and the reactive context-compaction marker, neither ever engaged). Both runs: zero disguised-subclassing
+relationships; zero wasted no-gold classes (run B worked through the Compliance-Officer-adjacent ambiguity and
+settled on one real class instead of several); an explicit routing/derivation relationship built and quoted
+both times (run B: *"Supports recommending the right resolver group before assignment, not just recording the
+assigned group"*). Composite: run A below baseline on the scoped-semantic number (50.1% vs 53.2%), run B beat
+baseline on 3 of 4 numbers with the same metric still 3 points short (49.9%). Reported both runs honestly to
+the user rather than picking the better one.
+
+**Then a genuine problem, raised directly by the user: how much of the interviewer prompt is overfit to the
+IT-ops domain the eval fixture happens to use?** A line-by-line audit of GROUND RULES/INTERVIEW PROCESS found
+three real severity tiers, all concentrated exactly where this investigation (five earlier rounds plus this
+one) had repeatedly edited the prompt -- because every fix in that loop read an IT-ops transcript for ideas and
+naturally reached for that transcript's own vocabulary as its illustrative example, with nothing in the loop
+ever checking for domain-generality:
+
+- **Tier 1, worst: literal outbound question text.** Phase 1's own probe, sent verbatim to every user
+  regardless of domain: *"is there a closely related role that actually does the day-to-day work
+  (on-call/staffing), and does any of this depend on a specific environment or deployment context?"* --
+  "on-call/staffing" and "deployment context" are IT/software jargon, nonsensical to an expert in an unrelated
+  field.
+- **Tier 2: reasoning-guidance examples, all drawn from the same one domain.** Phase 2's bucket-collapse
+  example ("on-call engineer, incident commander, service owner, technical owner"), its near-synonym example
+  ("Resolver Group," "Application Support Team," "Infrastructure Support Team"), its probe-candidate example
+  ("Compliance Officer"); Phase 3's routing-vs-recording paragraph naming "Resolver Group"/"Incident" three
+  times; Phase 8's single-input-class example ("assign resolver group... incident and resolver group").
+- **Tier 3, actually worse than domain-overfit: a hardcoded quote from one specific eval transcript.** Phase
+  4's property-exclusion check literally quoted one persona's own sentence verbatim: *"you listed 'what
+  incidents have been logged for the same issue previously'..."* -- not an illustrative domain example, the
+  exact wording from one specific run.
+
+**Retrofit: rewrote every instance across all three tiers to use abstract structural placeholders (Class
+A/B, Role X/Y, Team 1/2) or dynamic grounding in the live conversation's own content, never a fixed domain
+noun.** Phase 1's probe now asks using the roles the expert already named as its own concrete anchor, instead
+of a canned IT-ops example pair. Findings 2 (Phase 3, actor-chain-vs-direct-link) and 3 (Phase 4,
+reference-class status field) from the prior transcript read-through were then implemented for the first
+time, written domain-neutrally from the start rather than needing a later retrofit. `GROUND RULES` itself
+gained an explicit standing bullet stating the general-purpose-tool principle. A code comment (outside the
+template literal, so it's never sent to the model) sits directly above `AGENT_SYSTEM_PROMPT_BASE` in
+`index.html` making the rule impossible to miss for the next edit. `helper_agent_plan.md` §0 gained the same
+rule as a standing ground rule for the subproject.
+
+- [x] **Enforcement, not just a one-time cleanup**: a new test in `tests/helper-agent-phase4.spec.mjs`
+      extracts the exact GROUND RULES..INTERVIEW PROCESS substring and asserts a blocklist of IT-ops terms
+      (resolver group, on-call, service desk, compliance officer, incident commander, major incident,
+      incident, regulator, cybersecurity, materiality, emergency change, deployment context, configuration
+      item) never appears in it -- this must stay green on every future prompt edit, not just today's.
+- [x] Fixed 8 pre-existing tests whose regexes pinned exact line-wrap points in text this retrofit rewrote
+      (wrap points shift when surrounding text changes length) -- verified each new regex against the actual
+      rendered prompt directly before writing it, not by hand-tracing wrapped text.
+- [x] Tests: +3 (blocklist, finding 2, finding 3). Full suite 482/482.
+- Per explicit instruction, this round's PR happens regardless of composite score against baseline -- the
+  point is correctness (not overfitting a general-purpose tool to one eval domain), not chasing this specific
+  run's number.
