@@ -64,6 +64,63 @@ export function isRecoverableRelationship(predicate) {
   return predicate.label !== "is a";
 }
 
+// RECIPROCAL RELATIONSHIP PAIRS ------------------------------------------
+// A real live-eval run audited directly against this fixture (helper_agent_
+// todo.md's dated addendum) found 7 class-pairs in the practical scope --
+// 14 of 48 scoped relationships, 29.2% -- modeled as two separate predicate
+// entries for what is really one real-world connection, phrased from each
+// end: e.g. "is supported by" (Incident -> Evidence Item) and "documents"
+// (Evidence Item -> Incident) are the same fact, not two. This app's data
+// model represents each real-world connection as exactly one directed edge
+// (creating both directions would be redundant, wrong modeling, not
+// better modeling) -- so scoring each gold direction as a separately
+// recoverable relationship silently caps achievable recall below 100% no
+// matter how good an interview is, and makes which half gets credited
+// dependent on which arbitrary direction+wording the interviewer happens to
+// land on, not on interview quality. A real run's actual recovered graph
+// (same addendum) had modeled the real-world connection for 5 of these 7
+// pairs correctly -- via `hasEvidence`, `hasPostIncidentReview`, etc -- and
+// still scored 0/2 on every one of them, because the single edge it created
+// only ever satisfies one of the two gold directions.
+//
+// Merges each such pair into one relationship entry carrying both labels
+// (`label` for the canonical direction this function picks -- the
+// first-encountered of the pair, stable and deterministic -- plus
+// `reciprocalLabel` for the other), so recoveryMetrics.mjs can credit the
+// pair as recovered if *either* direction is found, not require both. Only
+// pairs of exactly two predicates in opposite directions between the same
+// two classes are merged; three-or-more-way or same-direction groups (two
+// genuinely different facts that happen to share a class pair, e.g. two
+// distinct predicates both from System to ITService) are left untouched,
+// since collapsing those would hide a real missed relationship instead of
+// an artifact of double-counting one fact.
+export function mergeReciprocalRelationshipPairs(relationships) {
+  const byPairKey = new Map();
+  for (const rel of relationships) {
+    const key = [rel.fromClassId, rel.toClassId].sort().join("|");
+    if (!byPairKey.has(key)) byPairKey.set(key, []);
+    byPairKey.get(key).push(rel);
+  }
+  const consumedIds = new Set();
+  const merged = [];
+  for (const rel of relationships) {
+    if (consumedIds.has(rel.id)) continue;
+    const group = byPairKey.get([rel.fromClassId, rel.toClassId].sort().join("|"));
+    const partner = group.find(
+      (other) => !consumedIds.has(other.id) && other.id !== rel.id &&
+        other.fromClassId === rel.toClassId && other.toClassId === rel.fromClassId
+    );
+    consumedIds.add(rel.id);
+    if (partner) {
+      consumedIds.add(partner.id);
+      merged.push({ ...rel, reciprocalLabel: partner.label, reciprocalId: partner.id });
+    } else {
+      merged.push(rel);
+    }
+  }
+  return merged;
+}
+
 // GROUND-TRUTH ACTIONS, REDUCED TO A SINGLE INPUT ------------------------
 // The fixture's own actions originally declared potentially several named
 // inputs (e.g. declareMajorIncident: inputs: {incident: incident,
@@ -262,13 +319,15 @@ export function loadGroundTruthModel({ includeAllProperties = false } = {}) {
     }
   }
 
+  const mergedRelationships = mergeReciprocalRelationshipPairs(relationships);
+
   const actions = buildReducedActions(doc, classes);
   const scopeCorpus = buildScopeCorpus(doc, classes, actions);
   const practicalScopeClassIds = buildPracticalScopeClassIds(classes, scopeCorpus);
   const practicalScopePropertyIds = buildPracticalScopePropertyIds(properties, scopeCorpus);
 
   return {
-    classes, relationships, properties, valueSets, actions, metadata: doc.metadata || {},
+    classes, relationships: mergedRelationships, properties, valueSets, actions, metadata: doc.metadata || {},
     practicalScopeClassIds, practicalScopePropertyIds,
   };
 }

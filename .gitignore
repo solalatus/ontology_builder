@@ -7,6 +7,9 @@ __pycache__/
 # Dev-only test tooling deps (package.json) — index.html itself ships with none.
 node_modules/
 
-# Generated eval reports (tests/evals/README.md) — overwritten each run, not repo content.
-tests/evals/results/*.md
-tests/evals/results/*.json
+# tests/evals/results/*.md is intentionally NOT ignored: report.md,
+# conversation-log.md, tool-calls.md are committed with every PR that
+# includes a live eval run, so anyone browsing the repo can see (and
+# audit) the latest run's real transcript without re-running it themselves.
+# Only the latest run's files are ever committed -- each write overwrites
+# the previous run's content, never accumulates -- see tests/evals/README.md.

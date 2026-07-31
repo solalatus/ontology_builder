@@ -98,6 +98,16 @@ own env-configurable turn/wall-clock/model budget. See
 generating eval, not a strict pass/fail test, and costs meaningfully more
 time/money per run than anything else in this directory.
 
+The most recent live run's actual output — `tests/evals/results/report.md`
+(metrics + LLM review), `conversation-log.md` (human-readable transcript),
+`tool-calls.md` (raw tool-call arguments/results) — is **committed to the
+repo**, not gitignored, and gets refreshed with every PR that includes a
+new live run. Only the latest run's files are ever present (each write
+overwrites the previous run, never accumulates), so those three files under
+`tests/evals/results/` are always the current, real record of the most
+recent run — read them directly, no need to re-run the eval just to see
+what the last one found.
+
 ## Python tests
 
 `tools/load_edge_list.py` (the reference loader from spec.md's Appendix,
