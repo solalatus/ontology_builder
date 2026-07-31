@@ -162,24 +162,12 @@ export async function generateLlmReview({ apiKey, model, orchestratorResult }) {
 // showing both, rather than quietly swapping the denominator, is what makes
 // this an addition to transparency rather than a way to make the number
 // look better.
-export function writeReport({ metrics, scopedMetrics, operationalStats, orchestratorResult, llmReviewText, interviewerModel, personaModel, classifierModel, dir = RESULTS_DIR }) {
-  fs.mkdirSync(dir, { recursive: true });
-  const m = metrics;
-  const s = scopedMetrics;
-  const lines = [
-    "# Ontology-recovery eval report",
-    "",
-    `Generated: ${new Date().toISOString()}`,
-    "",
-    "## Headline metrics",
-    "",
-    "Two denominators, side by side: **full domain** is every class/relationship/property in the fixture's " +
-    "68-class comprehensive reference model; **practical scope** is the subset the fixture's own canonical " +
-    "competency questions and actions actually talk about (see tests/evals/README.md) -- the ceiling a real, " +
-    "single-session, competency-driven interview could reach even with perfect elicitation. Full-domain numbers " +
-    "give context and cross-run comparability; practical-scope numbers are the more meaningful read of interview " +
-    "quality on their own.",
-    "",
+// The 5-row metrics table body, shared between the heuristic and semantic
+// sections below so the two can never drift out of the same shape/columns
+// -- a reader comparing them should only ever see the numbers differ, never
+// the layout.
+function metricsTableLines(m, s) {
+  return [
     "| Metric | Full domain | Practical scope | Detail |",
     "|---|---|---|---|",
     `| **Recovery effectiveness (composite)** | **${pct(m.recoveryEffectiveness)}** | **${pct(s.recoveryEffectiveness)}** | equal-weighted: class F1, relationship F1, property recall, value fidelity |`,
@@ -187,7 +175,66 @@ export function writeReport({ metrics, scopedMetrics, operationalStats, orchestr
     `| Relationship recall / precision / F1 | ${pct(m.relationships.recall)} / ${pct(m.relationships.precision)} / ${pct(m.relationships.f1)} | ${pct(s.relationships.recall)} / ${pct(s.relationships.precision)} / ${pct(s.relationships.f1)} | ${m.relationships.matched}/${m.relationships.groundTruthTotal} full · ${s.relationships.matched}/${s.relationships.groundTruthTotal} scoped ground-truth relationships matched; ${m.relationships.recoveredTotal} recovered (subclass/"is a" predicates excluded from both -- see README) |`,
     `| Property recall | ${pct(m.properties.recall)} | ${pct(s.properties.recall)} | ${m.properties.matched}/${m.properties.groundTruthTotal} full · ${s.properties.matched}/${s.properties.groundTruthTotal} scoped ground-truth properties matched (technical identifier/URI fields excluded — see tests/evals/README.md) |`,
     `| Controlled-value fidelity | ${pct(m.controlledValueFidelity)} | ${pct(s.controlledValueFidelity)} | average allowed-value overlap across matched controlled-value properties |`,
+  ];
+}
+
+// semanticMetrics/semanticScopedMetrics (llmMatcher.mjs's
+// computeSemanticRecoveryMetrics) are always rendered as their own section
+// right after the heuristic one, never merged into one table and never
+// silently replacing it -- a reader should always be able to see both the
+// free/instant/deterministic score and the LLM-adjudicated one side by
+// side, so it's visible how much of any difference is wording variance the
+// judge caught vs. a real difference in what was actually modeled (see
+// llmMatcher.mjs's own module doc for why this module exists at all).
+export function writeReport({ metrics, scopedMetrics, semanticMetrics, semanticScopedMetrics, operationalStats, orchestratorResult, llmReviewText, interviewerModel, personaModel, classifierModel, dir = RESULTS_DIR }) {
+  fs.mkdirSync(dir, { recursive: true });
+  const m = metrics;
+  const s = scopedMetrics;
+  const scopeBlurb =
+    "Two denominators, side by side: **full domain** is every class/relationship/property in the fixture's " +
+    "68-class comprehensive reference model; **practical scope** is the subset the fixture's own canonical " +
+    "competency questions and actions actually talk about (see tests/evals/README.md) -- the ceiling a real, " +
+    "single-session, competency-driven interview could reach even with perfect elicitation. Full-domain numbers " +
+    "give context and cross-run comparability; practical-scope numbers are the more meaningful read of interview " +
+    "quality on their own.";
+  const lines = [
+    "# Ontology-recovery eval report",
     "",
+    `Generated: ${new Date().toISOString()}`,
+    "",
+    "## Heuristic (regex/token-overlap) metrics",
+    "",
+    scopeBlurb,
+    "",
+    ...metricsTableLines(m, s),
+    "",
+  ];
+  if (semanticMetrics && semanticScopedMetrics) {
+    lines.push(
+      "## Semantic (LLM-adjudicated) metrics",
+      "",
+      "Same two denominators, same table shape, computed by `llmMatcher.mjs`'s `computeSemanticRecoveryMetrics()`: " +
+      "the heuristic pass above, plus a strict LLM judge given a second, structured look at every residual near-miss " +
+      "the heuristic pass rejected (a class/relationship/property phrased very differently than gold's hidden " +
+      "wording, or a controlled-value list using a different labeling convention for the same real scale). The " +
+      "judge only ever adds matches the heuristic pass missed -- it never overrides or removes a heuristic match, " +
+      "so this section's numbers are always >= the section above's on every recall metric. Any gap between the two " +
+      "sections is exactly the wording-variance tax the heuristic-only score was paying; a genuinely wrong or " +
+      "missing recovery costs the same in both.",
+      "",
+      ...metricsTableLines(semanticMetrics, semanticScopedMetrics),
+      "",
+    );
+  } else {
+    lines.push(
+      "## Semantic (LLM-adjudicated) metrics",
+      "",
+      "_Not computed for this run -- see run stats below for why (e.g. no API budget available for the extra " +
+      "judge calls). The heuristic metrics above are unaffected either way._",
+      "",
+    );
+  }
+  lines.push(
     "## Run stats",
     "",
     `- Interviewer model: \`${interviewerModel}\` · Persona model: \`${personaModel}\` · Classifier model: \`${classifierModel}\``,
@@ -206,7 +253,7 @@ export function writeReport({ metrics, scopedMetrics, operationalStats, orchestr
     "it, for verifying any suspected tool/state-sync issue against what was actually sent and returned rather " +
     "than the interviewer's own narration of it.",
     "",
-  ];
+  );
   fs.writeFileSync(pathsFor(dir).reportPath, lines.join("\n"));
 }
 

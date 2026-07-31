@@ -6,7 +6,15 @@ import {
   isRecoverableProperty, isRecoverableRelationship, buildReducedActions,
   mergeReciprocalRelationshipPairs,
 } from "./evals/lib/groundTruthModel.mjs";
-import { computeRecoveryMetrics } from "./evals/lib/recoveryMetrics.mjs";
+import { computeRecoveryMetrics, computeMatchDetail, matchClasses } from "./evals/lib/recoveryMetrics.mjs";
+
+// This file covers recoveryMetrics.mjs's own regex/token-overlap matcher
+// only -- deterministic, no API key, no network. The LLM-judge supplement
+// built on top of it (llmMatcher.mjs, judging the residual near-misses this
+// matcher can't reach) has its own separate, clearly-labeled test file,
+// tests/ontology-recovery-llm-matching.spec.mjs -- kept apart deliberately
+// so it's always obvious which tests exercise the free/instant heuristic
+// pass and which exercise the LLM-adjudicated one.
 
 // Fast, deterministic unit tests for tests/evals/'s own matching/metrics
 // logic -- pure JS, no browser, no API key, so these run as part of the
@@ -462,4 +470,129 @@ test("computeRecoveryMetrics handles an entirely empty recovered state without c
   assert.equal(metrics.controlledValueFidelity, null);
   assert.ok(Number.isFinite(metrics.recoveryEffectiveness));
   assert.equal(metrics.recoveryEffectiveness, 0);
+});
+
+// computeMatchDetail: the residual "what the heuristic matcher couldn't
+// reach" detail llmMatcher.mjs judges a second time. Built on the exact
+// same matchClasses() the heuristic metrics use (imported and tested
+// directly here too), not a re-derivation that could silently drift.
+
+test("matchClasses is exported and produces the same class pairing computeRecoveryMetrics relies on internally", () => {
+  const groundTruth = {
+    classes: { incident: { id: "incident", label: "Incident", aliases: ["incident"] } },
+  };
+  const nodes = [{ id: "n1", label: "Incident", meaning: "", aliases: [] }];
+  const { gtToRecovered, recoveredToGt } = matchClasses(groundTruth, nodes);
+  assert.deepEqual(gtToRecovered.get("incident"), ["n1"]);
+  assert.equal(recoveredToGt.get("n1"), "incident");
+});
+
+function twoClassGroundTruth(overrides = {}) {
+  return {
+    classes: {
+      incident: { id: "incident", label: "Incident", aliases: ["incident"] },
+      evidence: { id: "evidence", label: "Evidence Item", aliases: ["evidence item"] },
+    },
+    relationships: [],
+    properties: [],
+    ...overrides,
+  };
+}
+
+test("computeMatchDetail lists a gold class as unmatched only when nothing in the recovered nodes matched it, alongside every unmatched recovered node", () => {
+  const groundTruth = twoClassGroundTruth();
+  const recoveredState = {
+    nodes: [
+      { id: "n1", label: "Incident", meaning: "", aliases: [] }, // matches gold's Incident
+      { id: "n2", label: "Some Invented Class", meaning: "", aliases: [] }, // matches nothing
+    ],
+    edges: [],
+  };
+  const detail = computeMatchDetail(groundTruth, recoveredState);
+  assert.deepEqual(detail.classes.unmatchedGold.map((c) => c.id), ["evidence"]);
+  assert.deepEqual(detail.classes.unmatchedRecovered.map((n) => n.id), ["n2"]);
+});
+
+test("computeMatchDetail flags a relationship as unmatched only when its endpoint classes DID match but no edge's label matched -- not when the endpoints themselves never matched", () => {
+  const groundTruth = twoClassGroundTruth({
+    relationships: [{ id: "rel1", label: "is supported by", fromClassId: "incident", toClassId: "evidence" }],
+  });
+  // Endpoints matched, but the recovered edge's relation label shares no
+  // tokens with "is supported by" -- exactly the kind of case the LLM judge
+  // exists for.
+  const recoveredState = {
+    nodes: [
+      { id: "n1", label: "Incident", meaning: "", aliases: [] },
+      { id: "n2", label: "Evidence Item", meaning: "", aliases: [] },
+    ],
+    edges: [{ id: "e1", source: "n1", target: "n2", relation: "hasEvidence", aliases: [] }],
+  };
+  const detail = computeMatchDetail(groundTruth, recoveredState);
+  assert.deepEqual(detail.relationships.unmatchedGold.map((r) => r.id), ["rel1"]);
+  assert.equal(detail.relationships.unmatchedGold[0].fromClassLabel, "Incident");
+  assert.equal(detail.relationships.unmatchedGold[0].toClassLabel, "Evidence Item");
+  assert.deepEqual(detail.relationships.unmatchedRecovered.map((e) => e.id), ["e1"]);
+});
+
+test("computeMatchDetail excludes a relationship from unmatchedGold when its endpoint classes never matched at all -- that's a class-level miss, not a wording question the LLM judge can fix", () => {
+  const groundTruth = twoClassGroundTruth({
+    relationships: [{ id: "rel1", label: "is supported by", fromClassId: "incident", toClassId: "evidence" }],
+  });
+  const recoveredState = {
+    nodes: [{ id: "n1", label: "Incident", meaning: "", aliases: [] }], // Evidence never recovered at all
+    edges: [],
+  };
+  const detail = computeMatchDetail(groundTruth, recoveredState);
+  assert.deepEqual(detail.relationships.unmatchedGold, []);
+});
+
+test("computeMatchDetail excludes a relationship already satisfied by its reciprocal-direction label from unmatchedGold", () => {
+  const groundTruth = twoClassGroundTruth({
+    relationships: [{ id: "rel1", label: "is supported by", reciprocalLabel: "documents", fromClassId: "incident", toClassId: "evidence" }],
+  });
+  const recoveredState = {
+    nodes: [
+      { id: "n1", label: "Incident", meaning: "", aliases: [] },
+      { id: "n2", label: "Evidence Item", meaning: "", aliases: [] },
+    ],
+    // Reverse direction, using the reciprocal label -- already a heuristic match.
+    edges: [{ id: "e1", source: "n2", target: "n1", relation: "documents", aliases: [] }],
+  };
+  const detail = computeMatchDetail(groundTruth, recoveredState);
+  assert.deepEqual(detail.relationships.unmatchedGold, []);
+  assert.deepEqual(detail.relationships.unmatchedRecovered, []);
+});
+
+test("computeMatchDetail lists a property as unmatched only when its host class matched but no property name matched, including what the host node's real properties actually are", () => {
+  const groundTruth = twoClassGroundTruth({
+    properties: [{ id: "prop1", label: "has severity", classId: "incident", kind: "controlled-value", targetId: "severitySet", allowedValues: ["sev1", "sev2"] }],
+  });
+  const recoveredState = {
+    nodes: [{ id: "n1", label: "Incident", meaning: "", aliases: [], properties: [{ name: "priority", allowed: ["p1", "p2"] }] }],
+    edges: [],
+  };
+  const detail = computeMatchDetail(groundTruth, recoveredState);
+  assert.equal(detail.properties.unmatchedGold.length, 1);
+  assert.equal(detail.properties.unmatchedGold[0].id, "prop1");
+  assert.equal(detail.properties.unmatchedGold[0].hostClassLabel, "Incident");
+  assert.deepEqual(detail.properties.unmatchedGold[0].recoveredHostProperties, ["priority"]);
+});
+
+test("computeMatchDetail reports a matched controlled-value property's heuristic fidelity score alongside both raw value lists, for the LLM judge to re-score", () => {
+  const groundTruth = twoClassGroundTruth({
+    properties: [{ id: "prop1", label: "has severity", classId: "incident", kind: "controlled-value", targetId: "severitySet", allowedValues: ["sev1-critical", "sev2-high"] }],
+  });
+  const recoveredState = {
+    nodes: [{ id: "n1", label: "Incident", meaning: "", aliases: [], properties: [{ name: "severity", allowed: ["Critical", "High"] }] }],
+    edges: [],
+  };
+  const detail = computeMatchDetail(groundTruth, recoveredState);
+  assert.equal(detail.properties.unmatchedGold.length, 0);
+  assert.equal(detail.properties.matchedControlledValue.length, 1);
+  const m = detail.properties.matchedControlledValue[0];
+  assert.equal(m.id, "prop1");
+  assert.deepEqual(m.goldAllowedValues, ["sev1-critical", "sev2-high"]);
+  assert.deepEqual(m.recoveredAllowedValues, ["Critical", "High"]);
+  // Real heuristic score is low here (different label conventions) -- the whole point of the LLM re-score.
+  assert.ok(m.heuristicFidelity < 0.5, `expected a low token-overlap fidelity score, got ${m.heuristicFidelity}`);
 });

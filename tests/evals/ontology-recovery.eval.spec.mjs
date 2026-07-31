@@ -6,6 +6,7 @@ import { connectAgentLive } from "../lib/liveOpenAi.mjs";
 import { runOntologyRecoveryConversation } from "./lib/conversationOrchestrator.mjs";
 import { loadGroundTruthModel, scopeGroundTruth } from "./lib/groundTruthModel.mjs";
 import { computeRecoveryMetrics } from "./lib/recoveryMetrics.mjs";
+import { computeSemanticRecoveryMetrics } from "./lib/llmMatcher.mjs";
 import { writeConversationLog, computeOperationalStats, generateLlmReview, writeReport, writeToolCallLog } from "./lib/reportGenerator.mjs";
 
 // Ontology-recovery eval — see tests/evals/README.md for the full design
@@ -114,7 +115,25 @@ test(
       writeToolCallLog(orchestratorResult.rawApiLog);
       const reviewModel = REVIEW_MODEL_OVERRIDE || interviewerModel;
       const llmReviewText = await generateLlmReview({ apiKey: OPENAI_API_KEY, model: reviewModel, orchestratorResult });
-      writeReport({ metrics, scopedMetrics, operationalStats, orchestratorResult, llmReviewText, interviewerModel, personaModel: PERSONA_MODEL, classifierModel });
+
+      // The LLM-judge supplement (llmMatcher.mjs) -- always attempted on a
+      // real run, per the user's own explicit "always show both versions of
+      // results" instruction, but wrapped so a judge failure (a transient
+      // API error, an exhausted quota) degrades the report to the heuristic
+      // section alone rather than failing the whole eval run over a
+      // best-effort scoring supplement. writeReport's own "not computed"
+      // fallback note (reportGenerator.mjs) makes that degradation visible
+      // in the report itself, not a silently missing section.
+      let semanticMetrics = null, semanticScopedMetrics = null;
+      try {
+        semanticMetrics = await computeSemanticRecoveryMetrics({ groundTruth, recoveredState, apiKey: OPENAI_API_KEY, model: classifierModel });
+        semanticScopedMetrics = await computeSemanticRecoveryMetrics({ groundTruth: scopedGroundTruth, recoveredState, apiKey: OPENAI_API_KEY, model: classifierModel });
+      } catch (err) {
+        semanticMetrics = null;
+        semanticScopedMetrics = null;
+      }
+
+      writeReport({ metrics, scopedMetrics, semanticMetrics, semanticScopedMetrics, operationalStats, orchestratorResult, llmReviewText, interviewerModel, personaModel: PERSONA_MODEL, classifierModel });
     });
   }
 );

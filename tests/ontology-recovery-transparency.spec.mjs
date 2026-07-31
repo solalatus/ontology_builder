@@ -265,3 +265,52 @@ test("writeReport renders both the full-domain and practical-scope metrics, clea
   assert.match(text, /tool-calls\.md/); // points readers at the new transparency log
   assert.match(text, /Classifier model: `gpt-test-classifier`/);
 });
+
+// llmMatcher.mjs's computeSemanticRecoveryMetrics is always rendered as its
+// own section alongside the heuristic one when the caller has it -- never
+// merged into one table, never silently swapped in. Two tests: the section
+// present with real numbers when passed, and a clear "not computed" note
+// (not a silently missing section) when it isn't -- e.g. a run with no API
+// budget for the extra judge calls still produces a complete, honest report.
+test("writeReport renders the semantic (LLM-adjudicated) metrics as its own section alongside the heuristic one when given both", () => {
+  const metrics = fakeMetrics({ recoveryEffectiveness: 0.392 });
+  const scopedMetrics = fakeMetrics({ recoveryEffectiveness: 0.7 });
+  const semanticMetrics = fakeMetrics({ recoveryEffectiveness: 0.55 });
+  const semanticScopedMetrics = fakeMetrics({ recoveryEffectiveness: 0.85 });
+  const orchestratorResult = { stoppedReason: "app_agent_appears_finished", turnsUsed: 39, durationMs: 1000 };
+  const operationalStats = { appAgentApiCalls: 1, applyToolCalls: 1, getGraphStateCalls: 1, toolApplied: 1, toolSkipped: 0, toolNothing: 0, toolError: 0 };
+
+  writeReport({
+    metrics, scopedMetrics, semanticMetrics, semanticScopedMetrics, operationalStats, orchestratorResult,
+    llmReviewText: "None observed.", interviewerModel: "gpt-test", personaModel: "gpt-test-persona", classifierModel: "gpt-test-classifier",
+    dir: TEST_DIR,
+  });
+  const text = fs.readFileSync(REPORT_PATH, "utf8");
+
+  assert.match(text, /## Heuristic \(regex\/token-overlap\) metrics/);
+  assert.match(text, /## Semantic \(LLM-adjudicated\) metrics/);
+  assert.match(text, /39\.2%/); // heuristic full-domain composite
+  assert.match(text, /55\.0%/); // semantic full-domain composite
+  assert.match(text, /85\.0%/); // semantic scoped composite
+  // The heuristic section's own numbers must still be present and distinct
+  // from the semantic section's -- this is a genuine second table, not one
+  // overwriting the other.
+  assert.match(text, /70\.0%/); // heuristic scoped composite
+});
+
+test("writeReport shows a clear \"not computed\" note for the semantic section, not a silently missing one, when semantic metrics aren't provided", () => {
+  const metrics = fakeMetrics({ recoveryEffectiveness: 0.392 });
+  const scopedMetrics = fakeMetrics({ recoveryEffectiveness: 0.7 });
+  const orchestratorResult = { stoppedReason: "app_agent_appears_finished", turnsUsed: 39, durationMs: 1000 };
+  const operationalStats = { appAgentApiCalls: 1, applyToolCalls: 1, getGraphStateCalls: 1, toolApplied: 1, toolSkipped: 0, toolNothing: 0, toolError: 0 };
+
+  writeReport({
+    metrics, scopedMetrics, operationalStats, orchestratorResult, llmReviewText: "None observed.",
+    interviewerModel: "gpt-test", personaModel: "gpt-test-persona", classifierModel: "gpt-test-classifier",
+    dir: TEST_DIR,
+  });
+  const text = fs.readFileSync(REPORT_PATH, "utf8");
+
+  assert.match(text, /## Semantic \(LLM-adjudicated\) metrics/);
+  assert.match(text, /Not computed for this run/);
+});

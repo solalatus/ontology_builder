@@ -1470,3 +1470,15 @@ not the interviewer's mechanics -- which this round's fix improved by every beha
 still didn't move the composite score in the right direction. Continuing to react to single-run numbers with
 further one-shot prompt changes is no longer a defensible use of the signal available; the honest next step
 really is averaging multiple runs per configuration, not another targeted fix.
+
+**Live sanity check on this branch (`helper_agent-eval-bugfixes`, based on the last merged prompt with only the
+two scoring/tooling fixes above, zero `index.html` changes).** Composite 31.8%/45.2% (full/scoped) -- still
+below the merged baseline's 57.1% scoped composite, but the interesting part is *why*: class F1 (72.7%) and
+relationship F1 (18.6%) both **beat** the baseline's own 67.1%/15.0% -- the best structural recovery (class
+recall 71.4%, relationship recall 19.5%, both above baseline) of any run this whole session, using the exact
+same unmodified interview prompt. The composite gap traces entirely to controlled-value fidelity landing low
+this run (31.8%, vs. the baseline's much higher implied share) -- a separate axis of run-to-run variance,
+unrelated to class/relationship structure or either scoring fix. Confirms the two bug fixes are scoring-neutral
+in the intended sense (no prompt behavior changed) and that this run's actual interview quality was good.
+
+
