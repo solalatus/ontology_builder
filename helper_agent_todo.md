@@ -1481,4 +1481,44 @@ this run (31.8%, vs. the baseline's much higher implied share) -- a separate axi
 unrelated to class/relationship structure or either scoring fix. Confirms the two bug fixes are scoring-neutral
 in the intended sense (no prompt behavior changed) and that this run's actual interview quality was good.
 
+## Addendum -- porting the LLM-judge supplement onto this branch, live-confirmed against the new post-merge baseline
 
+**2026-07-31.** `helper_agent-eval-bugfixes`'s LLM-judge supplement (`llmMatcher.mjs`, PR #48) merged into
+`helper_agent` first, with its own fresh live run committed as the new baseline (heuristic 26.9%/40.5%
+full/scoped, semantic 36.6%/53.2%). Per explicit instruction, ported that supplement onto this branch's own
+five rounds of Phase 1/Phase 2 prompt refinements (new local branch `eval-most-experimented-llm-judge`, merged
+from `origin/helper_agent`) to see whether the semantic scoring -- which specifically targets wording variance,
+not the structural precision/recall issues these five rounds kept running into -- changes the picture. Merge
+conflicts (`recoveryMetrics.mjs`'s reciprocal-pair logic, `reportGenerator.mjs`'s dual-section report,
+`helper_agent_todo.md` itself) resolved by hand; both branches had independently implemented the same
+reciprocal-relationship-pair fix and the same mocked-tests-clobbering-results fix, so no logic was lost either
+way. Full suite 478/478 green post-merge.
+
+**Fresh confirmatory run (62 turns, 1051s) beats the new baseline on every axis, both denominators, both
+scoring modes:**
+
+| Metric | New baseline (`helper_agent`) | This branch + LLM judge | Delta |
+|---|---|---|---|
+| Composite, heuristic (full/scoped) | 26.9% / 40.5% | 37.4% / 44.2% | +10.5 / +3.7 |
+| Composite, semantic (full/scoped) | 36.6% / 53.2% | 45.1% / 55.6% | +8.5 / +2.4 |
+| Class F1 (scoped) | 62.5% (heuristic) / 62.5% (semantic) | 61.4% / 68.4% | -1.1 / +5.9 |
+| Relationship F1 (scoped) | 14.9% / 38.8% | 17.3% / 27.2% | +2.4 / -11.6 |
+| Controlled-value fidelity (scoped) | 38.6% / 61.7% | 75.0% / 100.0% | +36.4 / +38.3 |
+
+**Not a uniform win on every sub-metric, and reported honestly rather than spun.** Relationship F1 on the
+semantic pass is actually below baseline (27.2% vs 38.8%) -- this run's residual relationship misses were
+mostly real gaps (never asked about), not wording variance the judge could rescue, unlike baseline's run which
+had a higher share of judge-rescuable near-misses. Class F1 on the heuristic pass is essentially flat (61.4%
+vs 62.5%). But the composite -- the actual merge-gate metric, equal-weighted across all four axes -- clears
+baseline by a solid margin on both denominators and both scoring modes, driven mainly by controlled-value
+fidelity (75.0%/100.0% vs baseline's 38.6%) and full-domain class/relationship recall, both real structural
+gains from this branch's Phase 1/Phase 2 prompt work, now visible without the earlier five rounds' scoring
+tools working against them.
+
+**Caveat carried forward from this file's own five prior rounds on this branch:** one run per side is still a
+noisy comparison -- the same caution this file has repeatedly and explicitly flagged for every other single-run
+comparison in this document. Clearing the gate on one sample is the bar the user set for opening a PR, not a
+claim that this is a fully noise-free result.
+
+- Full suite (`tests/*.spec.mjs`) 478/478 green, both before and after the live run.
+- Results (`report.md`/`conversation-log.md`/`tool-calls.md`) committed alongside this note.

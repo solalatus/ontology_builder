@@ -1,46 +1,57 @@
 # Ontology-recovery eval report
 
-Generated: 2026-07-30T17:13:11.723Z
+Generated: 2026-07-31T06:45:30.149Z
 
-## Headline metrics
+## Heuristic (regex/token-overlap) metrics
 
 Two denominators, side by side: **full domain** is every class/relationship/property in the fixture's 68-class comprehensive reference model; **practical scope** is the subset the fixture's own canonical competency questions and actions actually talk about (see tests/evals/README.md) -- the ceiling a real, single-session, competency-driven interview could reach even with perfect elicitation. Full-domain numbers give context and cross-run comparability; practical-scope numbers are the more meaningful read of interview quality on their own.
 
 | Metric | Full domain | Practical scope | Detail |
 |---|---|---|---|
-| **Recovery effectiveness (composite)** | **24.5%** | **33.7%** | equal-weighted: class F1, relationship F1, property recall, value fidelity |
-| Class recall / precision / F1 | 29.4% / 86.4% / 43.9% | 50.0% / 63.6% / 56.0% | 20/68 full · 14/28 scoped ground-truth classes matched; 22 recovered |
-| Relationship recall / precision / F1 | 5.6% / 15.4% / 8.2% | 9.8% / 10.3% / 10.0% | 6/108 full · 4/41 scoped ground-truth relationships matched; 39 recovered (subclass/"is a" predicates excluded from both -- see README) |
-| Property recall | 16.2% | 34.6% | 18/111 full · 9/26 scoped ground-truth properties matched (technical identifier/URI fields excluded — see tests/evals/README.md) |
-| Controlled-value fidelity | 29.8% | 34.3% | average allowed-value overlap across matched controlled-value properties |
+| **Recovery effectiveness (composite)** | **37.4%** | **44.2%** | equal-weighted: class F1, relationship F1, property recall, value fidelity |
+| Class recall / precision / F1 | 35.3% / 79.3% / 48.8% | 60.7% / 62.1% / 61.4% | 24/68 full · 17/28 scoped ground-truth classes matched; 29 recovered |
+| Relationship recall / precision / F1 | 6.5% / 17.5% / 9.5% | 17.1% / 17.5% / 17.3% | 7/108 full · 7/41 scoped ground-truth relationships matched; 40 recovered (subclass/"is a" predicates excluded from both -- see README) |
+| Property recall | 13.5% | 23.1% | 15/111 full · 6/26 scoped ground-truth properties matched (technical identifier/URI fields excluded — see tests/evals/README.md) |
+| Controlled-value fidelity | 77.8% | 75.0% | average allowed-value overlap across matched controlled-value properties |
+
+## Semantic (LLM-adjudicated) metrics
+
+Same two denominators, same table shape, computed by `llmMatcher.mjs`'s `computeSemanticRecoveryMetrics()`: the heuristic pass above, plus a strict LLM judge given a second, structured look at every residual near-miss the heuristic pass rejected (a class/relationship/property phrased very differently than gold's hidden wording, or a controlled-value list using a different labeling convention for the same real scale). The judge only ever adds matches the heuristic pass missed -- it never overrides or removes a heuristic match, so this section's numbers are always >= the section above's on every recall metric. Any gap between the two sections is exactly the wording-variance tax the heuristic-only score was paying; a genuinely wrong or missing recovery costs the same in both.
+
+| Metric | Full domain | Practical scope | Detail |
+|---|---|---|---|
+| **Recovery effectiveness (composite)** | **45.1%** | **55.6%** | equal-weighted: class F1, relationship F1, property recall, value fidelity |
+| Class recall / precision / F1 | 38.2% / 86.2% / 53.0% | 67.9% / 69.0% / 68.4% | 26/68 full · 19/28 scoped ground-truth classes matched; 29 recovered |
+| Relationship recall / precision / F1 | 12.0% / 32.5% / 17.6% | 26.8% / 27.5% / 27.2% | 13/108 full · 11/41 scoped ground-truth relationships matched; 40 recovered (subclass/"is a" predicates excluded from both -- see README) |
+| Property recall | 15.3% | 26.9% | 17/111 full · 7/26 scoped ground-truth properties matched (technical identifier/URI fields excluded — see tests/evals/README.md) |
+| Controlled-value fidelity | 94.5% | 100.0% | average allowed-value overlap across matched controlled-value properties |
 
 ## Run stats
 
 - Interviewer model: `gpt-5.5-2026-04-23` · Persona model: `gpt-4o-mini` · Classifier model: `gpt-5.5-2026-04-23`
-- Stopped: **app_agent_appears_finished**, after 61 turns, 941s wall-clock
-- Real app-agent API calls: 112 (apply_ontology_yaml called 47× · get_graph_state called 4×)
-- Tool outcomes seen in transcript: 47 applied · 0 skipped · 0 no-op · 0 error
+- Stopped: **app_agent_appears_finished**, after 62 turns, 1051s wall-clock
+- Real app-agent API calls: 122 (apply_ontology_yaml called 49× · get_graph_state called 11×)
+- Tool outcomes seen in transcript: 49 applied · 0 skipped · 0 no-op · 0 error
 
 ## LLM review of the conversation
 
 ## Errors
 
-- **Turn 59:** `submitMaterialityAssessment` uses `canDecideRegulatoryNotification` as its precondition. That rule requires the Materiality Assessment to be `Completed` and have an outcome, which is circular for an action whose effect is to submit/complete the assessment and populate the outcome. This should likely have a separate rule such as `canSubmitMaterialityAssessment`.
-- **Turn 55–58:** `canCloseIncident` is reused as the precondition for `conductPostIncidentReview`. That may be too strong or semantically wrong: conducting a PIR is not the same as closing an incident, and PIRs may occur after closure or have different prerequisites.
-- **Turn 50–54:** Severity values were captured as both `Critical/High/Medium/Low` and `Sev 1–4` without eliciting an explicit mapping. If both are allowed “interchangeably,” the ontology should encode equivalence/mapping, otherwise rules using severity may be ambiguous.
+- **Turn 23 / Turn 60**: The interviewer excluded `Incident.issueKey` even though the Phase 1 acceptance question “What incidents have been logged for the same issue previously?” required a stable repeat-issue matching mechanism. This was caught and repaired only during final validation.
+- **Turn 62**: Final validation claims “Who should be assigned to resolve this incident?” is covered by `Incident --assigned to--> Resolver Group`, but that only records the assignment after it exists. The model still lacks a way to determine/recommend the correct resolver group, e.g. `IT Service --supported by/resolved by--> Resolver Group` or routing rules.
+- **Turn 62**: Final competency check refers to `Recovery Plan --forIncident--> Incident`, but the confirmed relationship was `Recovery Plan --for--> Incident`. Likely a recap/serialization naming inconsistency.
 
 ## Noteworthy observations
 
-- **Turn 3:** The interviewer asked a useful but overloaded follow-up combining day-to-day roles and environment/deployment context in one question. It produced valuable data, but could have been split for cleaner elicitation.
-- **Turns 5–11:** Strong class elicitation discipline: small batches, tied to acceptance questions/actions, and explicitly left out plausible-but-unneeded roles such as Application Owner, SOC, NOC, and Technical Expert.
-- **Turns 12–20:** Relationship elicitation was systematic and generally well-grounded in competency questions. The interviewer also handled corrections well, e.g. weakening `Emergency Change Request —resolves→ Incident` to `related to`.
-- **Turn 20:** The Phase 3 recap compressed many relationships into grouped bullets, which was skimmable but risked obscuring exact verb phrases and directions.
-- **Turns 21–27:** Property elicitation stayed focused on decision/action-bearing fields rather than expanding into a full CMDB/ITSM schema — good prompt behavior.
-- **Turns 32–49:** Alias elicitation was careful about rejecting broader or direction-sensitive terms, especially `event`, `snapshot`, `upstream/downstream dependency`, and `change environment`.
-- **Turns 50–53:** Fixed-choice lists were mostly accepted without probing bank-specific conventions beyond severity. A real expert interview should ask whether these values match tooling exactly, including capitalization and lifecycle edge cases.
-- **Turns 53–57:** Good transition from constraints to named rules, especially distinguishing warn vs block behavior.
-- **Turns 58–60:** Action definitions were consistently structured with one input class, preconditions, effects, and verification. However, the interviewer should have challenged the questionable preconditions for materiality submission and PIR rather than accepting the persona’s confirmation.
-- **Overall:** The interview was highly structured and efficient for building a broad ontology, but the simulated persona tended to rubber-stamp proposed content. The interviewer could improve by asking for concrete examples or counterexamples before finalizing rules and fixed lists.
+- **Turn 2**: Good focused follow-up on day-to-day roles and deployment contexts; it kept scope tied to the original questions/actions.
+- **Turns 4–10**: Candidate class elicitation was systematic and justified, but highly leading. The persona tended to accept nearly every proposed class, resulting in many role classes that may be over-specified.
+- **Turn 8**: Good modeling discipline: the interviewer avoided adding `Service Dependency` as a class and instead modeled `IT Service --depends on--> IT Service`.
+- **Turns 13–21**: Strong handling of optional relationships. The interviewer repeatedly avoided adding “nice to have” communication/audience links without confirmation.
+- **Turns 22–28**: “Decision-bearing properties only” framing was useful, but the interviewer still initially missed a property required by an original competency question (`issueKey`).
+- **Turns 34–42**: Alias elicitation was thorough but probably inefficient. Many relationship aliases were accepted with little scrutiny, and some may be semantically loose, e.g. `detected in` for `occurs in`, or `assesses` for `monitors`.
+- **Turns 47–58**: Rule/action phases were well structured around preconditions, effects, and verification. However, several rules remain qualitative rather than operational, e.g. “sev2-high requires additional impact criteria” without thresholds.
+- **Turn 52–55**: Good recovery from the all-staff communication gap: the interviewer added `StakeholderCommunication.audienceType` instead of inventing an unnecessary `All Staff` class, and constrained values to the Phase 1 scope.
+- **Turn 60–62**: Final validation pass was valuable and caught a real competency gap. This is a strong pattern to preserve.
 
 ## Full conversation log
 
