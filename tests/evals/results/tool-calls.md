@@ -1,7 +1,7 @@
 # Ontology-recovery eval — raw tool-call transparency log
 
 Exact API-level messages (real tool_calls arguments, real tool result content) captured from `window.__kg.agent.state.apiMessages` after every turn -- ground truth for what the interviewer actually sent and received, independent of its own narration in conversation-log.md or the LLM review's summary of it.
-Last updated: 2026-07-31T06:42:26.010Z
+Last updated: 2026-07-31T09:07:45.281Z
 
 ### Turn 1 — user
 
@@ -25,115 +25,105 @@ actions: {}
 
 ### Turn 1 — assistant
 
-Great — the ontology is currently empty, so we’ll start from the business tasks the agent must support.
+Great — we’re starting from a blank ontology.
 
-We’ll build this in short phases:
+The domain is IT operations governance and major-incident management for a bank, covering services, dependencies, incidents, ownership, recovery, emergency changes, evidence, communications, reviews, and regulatory reporting.
 
-1. real questions and actions the agent must handle  
-2. candidate classes/kinds of things  
-3. relationships between them  
-4. decision-relevant properties  
-5. meanings and aliases  
-6. fixed values and constraints  
-7. rules  
-8. actions  
-9. validation against the original questions/actions  
+I’ll guide this in short phases. First we collect the real questions and actions the agent must support; later we turn only those into classes, relationships, properties, rules, and actions. You can stop early and we’ll keep whatever has been captured.
 
-You can stop early at any point; whatever we’ve captured so far will still be useful.
+**Phase 1 — acceptance-test questions and actions**
 
-**First question:** Please list **10–20 real questions** the agent should be able to answer and **5–10 real actions** it should be able to perform in your IT operations / major-incident domain.
+Please list:
 
-Use the wording your users would actually use. For example, questions might start with “Which service…?”, “Who owns…?”, “What incidents…?”, and actions might start with “Open…”, “Assign…”, “Notify…”, “Create…”, “Escalate…”.
+1. **10–20 real questions** the agent must be able to answer, phrased the way users would ask them.
+2. **5–10 real actions** the agent must be able to perform or help initiate.
+
+For now, don’t worry about structure or completeness — just give the practical questions/actions verbatim.
 
 ### Turn 2 — user
 
-I can certainly help with that. Here’s a list of questions and actions relevant to our IT operations and major-incident management:  ### Real Questions: 1. Which service is impacted by this incident? 2. Who owns the affected IT service? 3. What is the current status of the incident? 4. What is the severity level of this incident? 5. Who should be assigned to resolve this incident? 6. What are the main dependencies of the affected IT service? 7. Is there a known workaround for this issue? 8. What incidents have been logged for the same issue previously? 9. What alerts have triggered this incident? 10. When was the incident first detected? 11. Has a materiality assessment been conducted for this incident? 12. Do we need to notify regulators about this incident? 13. What recovery plan is in place for the affected service? 14. Have any communications been sent to stakeholders? 15. What corrective actions have been identified from past incidents? 16. Is there an active investigation for this cybersecurity incident? 17. What is the timeline for restoring normal operations? 18. How many users are affected by this service degradation? 19. What monitoring tools are currently assessing the impacted service? 20. Who is the incident commander for this major incident?  ### Real Actions: 1. Open a new incident. 2. Assign the incident to a resolver group. 3. Notify stakeholders about the incident status. 4. Escalate the incident to major-incident status. 5. Create a recovery plan for the incident. 6. Run a materiality assessment for the incident. 7. Document the incident findings in a post-incident review. 8. Restore service from a backup. 9. Execute an emergency change related to the incident. 10. Send a communication update to all staff.  This structured approach will ultimately assist in ensuring efficient incident management and operational resilience. If you’d like to elaborate on any particular area or aspect of these questions and actions, just let me know!
+Sure, here are the questions and actions that would be relevant for IT operations governance and major-incident management in our bank:  ### Questions: 1. Which business services are currently impacted by this incident? 2. What are the dependencies of the affected IT service? 3. Who is the service owner for this particular application? 4. What is the status of the ongoing incident? 5. Has this incident been classified as a major incident? 6. What is the severity and priority level of the current incident? 7. Which resolver group should be assigned to this incident? 8. What runbook or workaround can we utilize to mitigate the incident? 9. Is there any evidence related to this incident that needs to be preserved? 10. Have all relevant stakeholders been informed about the incident? 11. What corrective actions were identified in the last post-incident review? 12. How do we determine if a regulatory notification is required for this incident? 13. What recovery plan is associated with the affected service? 14. Are there any ongoing risks related to the incident recovery? 15. How do we track the time taken to acknowledge incidents? 16. Are any alerts currently triggering this incident's creation? 17. What is the latest update on the incident's resolution? 18. What should be the communication cadence during a major incident? 19. Have we conducted a materiality assessment for this incident? 20. How do we close the incident once it has been resolved?  ### Actions: 1. Assign the incident to the relevant resolver group. 2. Acknowledge the alert associated with the incident. 3. Declare the incident as a major incident if criteria are met. 4. Communicate status updates to stakeholders regarding the incident. 5. Initiate a regulatory notification process for the incident. 6. Execute a recovery plan for restoring the affected service. 7. Perform a materiality assessment to evaluate reportability. 8. Execute an emergency change linked to the incident. 9. Conduct a post-incident review to gather insights. 10. Close the incident once all conditions for closure are satisfied.   Let me know how you would like to proceed from here!
 
 ### Turn 2 — assistant
 
-Thanks — I’ve captured those as the acceptance-test questions and actions for the model.
+Thank you — I’ve captured those as the acceptance-test list.
 
-Before we move to candidate classes, one narrow follow-up: **for each role you named** — service owner, resolver group, incident commander, stakeholders, regulators, and “all staff” — **is there a closely related role that actually does the day-to-day work** such as on-call responders or service-desk staff, and **does any of this depend on a specific environment or deployment context** such as production, disaster recovery, cloud region, platform, or business line?
-
-Please only include related roles or contexts if they are needed to answer or perform one of the questions/actions you already listed.
+Before we move into modeling, one narrow follow-up: **for each role you named — service owner, resolver group, stakeholders — is there a closely related role that actually does the day-to-day work, such as on-call/staffing for the service or incident, and does any of this depend on a specific environment or deployment context?**
 
 ### Turn 3 — user
 
-Certainly! Here’s a breakdown of the closely related roles for each of those positions and how they may connect to specific environments or contexts based on the questions and actions we listed:  ### Roles and Related Day-to-Day Work: 1. **Service Owner**    - **Related Role:** Application Owner - responsible for the operational fitness of the applications that support the service.    - **Context:** This role often operates within the production environment as it pertains to customer-facing services.  2. **Resolver Group**    - **Related Role:** On-call Engineer - directly responds to tickets and incidents escalated to their group.    - **Context:** The on-call personnel often work in production environments where immediate incident resolution is crucial, but they may also deal with issues in test or pre-production environments if they impact deployment readiness.  3. **Incident Commander**    - **Related Role:** Incident Response Team Member - supports the coordination during major incidents and may assist in communication and higher-level decisions during crisis management efforts.    - **Context:** The incident command process typically operates across production and disaster recovery contexts to ensure continuity.  4. **Stakeholders**    - **Related Role:** Business Owner - represents the interests of the business and may require updates or actions affected by the incident.    - **Context:** Depending on the business line impacted, this role may have specific concerns related to production services or business continuity plans.  5. **Regulators**    - **Related Role:** Compliance Officer - involved in ensuring that the bank adheres to regulatory requirements and may need to review incidents relevant for reporting.    - **Context:** Regulatory considerations apply distinctly in production environments where actual services are delivered and the bank incurs legal obligations.  6. **All Staff**    - **Related Role:** Service Desk Staff - the first line of communication for incident reporting and initial triage.    - **Context:** Service desk staff primarily operate in production environments but also engage during changes in pre-production or test environments for incident evaluation.  By understanding these relationships and contexts, the model can properly reflect the operational roles within our IT incident management lifecycle and ensure effective communication and responsibility delegation. If you have any specific scenarios you'd like to explore further, I'm here to help!
+Yes, there are indeed closely related roles that handle the day-to-day operations in conjunction with the primary roles you mentioned. Here's how they break down:  ### Roles and Their Day-to-Day Counterparts:  1. **Service Owner**    - **Related Role**: **On-call Engineer** – This is the technical specialist available for immediate operational response related to the service. They might work closely with the service owner to ensure service availability and reliability, especially when incidents occur.  2. **Resolver Group**    - **Related Role**: **Technical Owner** – Responsible for the engineering and maintenance of the configuration items within the resolver group’s scope. They are typically the ones who handle the actual technical work of diagnosing and restoring service.  3. **Stakeholders**    - **Related Role**: **Incident Commander** – During major incidents, the incident commander engages stakeholders to ensure that the incident response is adequately communicated and managed. They are responsible for the coordination of actions and ensuring stakeholder needs are met.  ### Environment or Deployment Context Dependence: The effectiveness and responsibilities of these roles can indeed depend on the environment or deployment context. For instance:  - **On-call Engineers** may vary across **production**, **test**, or **development** environments. The staffing for on-call duties may differ based on the criticality of services being operated in these environments. - **Resolver Groups** may have specific expertise depending on the environment. For example, a resolver group might be dedicated entirely to production incidents, while a different group focuses on development or pre-production issues. - **Incident Commanders** may also vary by environment, as different operational protocols could be in place for incidents occurring in production versus non-production environments.  These nuances create a structured yet flexible framework for operational responsibilities depending on context and service criticality. Would you like to delve deeper into any specific area?
 
 ### Turn 3 — assistant
 
-Phase 1 recap — I’ve captured these as the real tasks the ontology must support.
+Thanks — I’ve captured the Phase 1 acceptance test as:
 
 **Questions the agent must answer**
-- impacted service, service owner, incident status/severity, resolver assignment
-- service dependencies, workaround, previous same-issue incidents, triggering alerts, detection time
-- materiality assessment and regulator notification need
-- recovery plan, stakeholder communications, corrective actions
-- cybersecurity investigation, restoration timeline, affected-user count
-- monitoring tools assessing the service
-- incident commander for a major incident
+- Impacted business services, IT-service dependencies, service owner/application ownership.
+- Incident status, major-incident classification, severity/priority, latest resolution update, closure readiness.
+- Correct resolver group assignment, alerts that created the incident, acknowledgement timing.
+- Runbook/workaround, recovery plan, ongoing recovery risks, emergency recovery/change context.
+- Evidence preservation, stakeholder communications, communication cadence.
+- Post-incident review corrective actions.
+- Regulatory notification need and materiality assessment.
 
-**Actions the agent must perform**
-- open a new incident
-- assign an incident to a resolver group
-- notify stakeholders
-- escalate to major-incident status
-- create a recovery plan
-- run a materiality assessment
-- document post-incident findings
-- restore service from backup
-- execute an emergency change
-- send an all-staff communication update
+**Actions the agent must perform or help initiate**
+- Assign incident to resolver group.
+- Acknowledge associated alert.
+- Declare major incident when criteria are met.
+- Send stakeholder status updates.
+- Initiate regulatory notification.
+- Execute recovery plan.
+- Perform materiality assessment.
+- Execute emergency change linked to the incident.
+- Conduct post-incident review.
+- Close incident when closure conditions are satisfied.
 
-**Closely related roles/contexts you tied to those tasks**
-- Service Owner, with Application Owner involved in application operational fitness
-- Resolver Group, with On-call Engineer doing direct response work
-- Incident Commander, with Incident Response Team Member supporting coordination and communications
-- Stakeholders, including Business Owner for business impact and updates
-- Regulators, with Compliance Officer reviewing/reporting-relevant incidents
-- All Staff communications, with Service Desk Staff handling first-line reporting/triage
-- Environment/deployment context matters, especially production, test/pre-production where deployment readiness is affected, disaster recovery, business line, and possibly customer-facing service context
+**Additional role/context candidates surfaced**
+- On-call Engineer, related to day-to-day operational response.
+- Technical Owner, related to engineering/maintenance and technical restoration work.
+- Incident Commander, related to coordinating major-incident response and stakeholder engagement.
+- Environment / deployment context, such as production, test, development, or pre-production, because staffing, resolver routing, and protocols may differ by context.
 
-Please confirm or correct this Phase 1 capture. Once confirmed, I’ll propose candidate classes in small justified batches, each tied back to these questions/actions.
+Before I turn these into candidate classes: **is that recap accurate, or would you correct any wording?**
 
 ### Turn 4 — user
 
-Your Phase 1 recap is accurate and comprehensive. Here’s a confirmation of your captured content:  ### Questions the Agent Must Answer: - Impacted service, service owner, incident status/severity, resolver assignment - Service dependencies, workaround, previous same-issue incidents, triggering alerts, detection time - Need for materiality assessment and regulator notification - Recovery plan, stakeholder communications, corrective actions - Cybersecurity investigation, restoration timeline, affected-user count - Monitoring tools assessing the service - Incident commander for a major incident  ### Actions the Agent Must Perform: - Open a new incident - Assign an incident to a resolver group - Notify stakeholders - Escalate to major-incident status - Create a recovery plan - Run a materiality assessment - Document post-incident findings - Restore service from backup - Execute an emergency change - Send an all-staff communication update  ### Closely Related Roles/Contexts Associated with Those Tasks: - Service Owner (with Application Owner for application operational fitness) - Resolver Group (with On-call Engineer for direct response work) - Incident Commander (with Incident Response Team Member for supporting coordination and communications) - Stakeholders (including Business Owner for business impact and updates) - Regulators (with Compliance Officer for reviewing/reporting-relevant incidents) - All Staff communications (with Service Desk Staff for first-line reporting/triage) - Environment/deployment context, particularly production, test/pre-production, disaster recovery, and business line implications  Your structured framework will effectively guide the development of the ontology to support the identified questions and actions. I look forward to your proposed candidate classes!
+Your recap is accurate and well-structured! It captures the essence of the questions, actions, and additional role/context candidates effectively.   Just a minor wording suggestion for clarity, particularly for the section on **"Additional role/context candidates surfaced"**:   Instead of saying "related to," you might specify more clearly that these roles are "responsible for" specific tasks in day-to-day operations. For instance, it could read:  - **On-call Engineer**, responsible for day-to-day operational response. - **Technical Owner**, responsible for engineering and maintenance as well as technical restoration work. - **Incident Commander**, responsible for coordinating major-incident response and engaging with stakeholders.  Additionally, you could clarify that the ***environment/deployment context*** influences the functioning of these roles by describing how the operational protocols, staffing, and resolver assignments may vary.   Overall, it's a very comprehensive summary! If you'd like to make these adjustments, you may, but they are not strictly necessary. Would you like to proceed with the next steps in modeling?
 
 ### Turn 4 — assistant
 
-Great — Phase 1 is confirmed.
+Yes — I’ll use your clarified wording.
 
-Now Phase 2: candidate **classes**. These are kinds of things the agent must identify, retrieve, connect, or pass to a tool — not every possible field.
+**Phase 2 — candidate classes**
 
-First proposed batch: core incident-management objects.
+I’ll propose candidate **classes**, meaning kinds of things the agent must identify, retrieve, connect to other things, or pass to a tool. I’ll do this in small batches and tie each one back to your questions/actions.
+
+First batch: core operational objects.
 
 1. **Incident**  
-   Needed for almost every question/action: status, severity, impacted service, detection time, assignment, escalation, recovery, materiality, communications, review.  
-   The agent likely needs to identify, retrieve, update, and pass incidents to tools.
+   Needed for almost every question/action: status, severity, priority, major-incident declaration, assignment, communication, regulatory notification, recovery, review, closure.  
+   Does the agent need to identify/retrieve/connect/pass an **Incident**?
 
-2. **IT Service**  
-   Needed for “Which service is impacted?”, “Who owns the affected IT service?”, dependencies, monitoring tools, recovery plan, affected users.  
-   The agent likely needs to identify, retrieve, and connect services to owners, incidents, dependencies, and monitoring.
+2. **Alert**  
+   Needed for “Are any alerts currently triggering this incident’s creation?” and “Acknowledge the alert associated with the incident.”  
+   Does the agent need to identify/retrieve/connect/pass an **Alert**?
 
-3. **Major Incident**  
-   Needed for “Who is the incident commander for this major incident?” and “Escalate the incident to major-incident status.”  
-   Here I want to check whether this is a **separate kind of thing** in your process, or whether it is just an Incident with a status/flag/severity.
+3. **IT Service**  
+   Needed for “What are the dependencies of the affected IT service?”, “What recovery plan is associated with the affected service?”, and service-impact/recovery actions.  
+   Does the agent need to identify/retrieve/connect/pass an **IT Service**?
 
-4. **Cybersecurity Incident**  
-   Needed for “Is there an active investigation for this cybersecurity incident?”  
-   Again, I want to check whether this is a **separate kind of incident** in your process, or an Incident with a type/category.
+4. **Business Service**  
+   Needed for “Which business services are currently impacted by this incident?”  
+   Does the agent need to identify/retrieve/connect/pass a **Business Service** separately from an IT Service?
 
-5. **Alert**  
-   Needed for “What alerts have triggered this incident?”  
-   The agent likely needs to identify alerts and connect them to incidents and monitoring tools.
-
-For each of these five, does the agent need to identify, retrieve, connect, or pass it to a tool? And for **Major Incident** and **Cybersecurity Incident**, should they be separate classes, or properties/types of **Incident**?
+5. **Application**  
+   Needed because you asked “Who is the service owner for this particular application?”  
+   Does the agent need to identify/retrieve/connect/pass an **Application** separately from an IT Service, or in your bank is an application treated as a type/name of IT Service for this purpose?
 
 ### Turn 5 — user
 
-Your proposed batch of candidate classes makes sense and aligns well with the operational needs regarding incident management. Here's my evaluation for each class, along with the clarification for Major Incident and Cybersecurity Incident:  1. **Incident**    - **Functions:** Yes, the agent needs to identify, retrieve, update, and pass incidents to tools. This is essential for almost all questions and actions related to incident management.  2. **IT Service**    - **Functions:** Yes, the agent needs to identify, retrieve, and connect IT services to owners, incidents, dependencies, and monitoring tools. Having a clear understanding of IT services is fundamental to effective incident response.  3. **Major Incident**    - **Functions:** This should be treated as a **separate class**. While it is related to incidents, a Major Incident carries specific requirements for enhanced coordination, communication, and review. This distinction allows for tailored processes and workflows that typically accompany major incidents, distinguishing them from standard incidents.  4. **Cybersecurity Incident**    - **Functions:** Similar to Major Incident, this should also be a **separate class**. Although cybersecurity incidents may share properties with regular incidents, they often require specialized handling, investigation, and evidence management protocols. Treating them distinctly allows for effective tracking and compliance with cybersecurity regulations.  5. **Alert**    - **Functions:** Yes, the agent needs to identify alerts and connect them to incidents and monitoring tools. Alerts are critical in detecting initial issues and are tied closely to incident management processes.  In summary, classes 1, 2, 5 should enable the agent to identify, retrieve, connect, or pass data effectively, while classes 3 and 4 (Major Incident and Cybersecurity Incident) should be treated as separate classes to reflect their unique handling requirements.   If you have any further classes to discuss or want to move on to the next phase, feel free to propose!
+Your proposed candidate classes look good, and they map directly to the questions and actions identified earlier. Here's my feedback on each one:  1. **Incident**      Yes, the agent must be able to identify, retrieve, connect to, and pass an **Incident**. This object is central to incident management and must capture all relevant details regarding its status, severity, priority, and actions taken.  2. **Alert**      Definitely, the agent needs to identify, retrieve, connect to, and pass an **Alert**. Alerts are critical for understanding incident triggers and acknowledging them effectively.  3. **IT Service**      Yes, the agent needs to identify, retrieve, connect to, and pass an **IT Service**. This class is crucial for assessing service dependencies, recovery plans, and the overall impact of incidents.  4. **Business Service**      Yes, it is necessary for the agent to identify, retrieve, connect to, and pass a **Business Service** separately from an IT Service. Business services are typically viewed through the lens of customer-facing capabilities and may have distinct operational impacts compared to the underlying IT services.  5. **Application**      Yes, the agent needs to identify, retrieve, connect to, and pass an **Application** separately from an IT Service. While applications are often part of IT services and may be treated as a category within them, they have distinct ownership and operational considerations, making independent identification important.  Your approach is well-aligned with the operational needs we've outlined earlier, and these definitions will certainly support the required functionalities. Would you like to continue with another batch of candidate classes?
 
 ### Turn 5 — assistant
 
@@ -141,7 +131,7 @@ Your proposed batch of candidate classes makes sense and aligns well with the op
 
 ```
 {
-  "yaml": "classes:\n  Incident: {}\n  ITService: {}\n  MajorIncident: {}\n  CybersecurityIncident: {}\n  Alert: {}\n"
+  "yaml": "classes:\n  Incident: {}\n  Alert: {}\n  ITService: {}\n  BusinessService: {}\n  Application: {}\n"
 }
 ```
 
@@ -151,71 +141,32 @@ Applied. Added 5, updated 0 existing item(s).
 
 ### Turn 5 — assistant
 
-Recorded those five classes.
+Captured the first class batch: **Incident, Alert, IT Service, Business Service, and Application**.
 
-Next candidate batch: plans, assessments, communications, and reviews that appeared directly in the questions/actions.
+Next batch: response artifacts and operational support objects.
 
-1. **Recovery Plan**  
-   Needed for “What recovery plan is in place?” and “Create a recovery plan for the incident.”  
-   Does the agent need to identify/retrieve/create/connect recovery plans?
+1. **Runbook**  
+   Needed for “What runbook or workaround can we utilize to mitigate the incident?”  
+   Does the agent need to identify/retrieve/connect/pass a **Runbook**?
 
-2. **Materiality Assessment**  
-   Needed for “Has a materiality assessment been conducted?” and “Run a materiality assessment.”  
-   Does the agent need to identify/retrieve/create/connect these assessments?
+2. **Workaround**  
+   Also needed for mitigation guidance. Is **Workaround** something the agent must identify separately from a Runbook, or is it usually just content inside a Runbook?
 
-3. **Regulatory Notification**  
-   Needed for “Do we need to notify regulators?”  
-   I’m proposing this only if the agent needs to track/report an actual notification workflow or artifact, not just answer yes/no.
+3. **Recovery Plan**  
+   Needed for “What recovery plan is associated with the affected service?” and “Execute a recovery plan for restoring the affected service.”  
+   Does the agent need to identify/retrieve/connect/pass a **Recovery Plan**?
 
-4. **Stakeholder Communication**  
-   Needed for “Have any communications been sent to stakeholders?”, “Notify stakeholders,” and “Send a communication update to all staff.”  
-   Should stakeholder updates and all-staff updates be the same class, or are they different communication artifacts/workflows?
+4. **Emergency Change**  
+   Needed for “Execute an emergency change linked to the incident.”  
+   Does the agent need to identify/retrieve/connect/pass an **Emergency Change**?
 
-5. **Post-Incident Review**  
-   Needed for “Document incident findings in a post-incident review” and corrective actions from past incidents.  
-   Does the agent need to identify/retrieve/create/connect post-incident reviews?
-
-Which of these should be included as classes, and should **Stakeholder Communication** cover all-staff updates too or should those be separate?
+5. **Evidence**  
+   Needed for “Is there any evidence related to this incident that needs to be preserved?”  
+   Does the agent need to identify/retrieve/connect/pass **Evidence**?
 
 ### Turn 6 — user
 
-Let’s evaluate your proposed classes regarding their necessity and connectivity within the incident management framework:  1. **Recovery Plan**    - **Functions:** Yes, the agent needs to identify, retrieve, create, and connect recovery plans. Having a documented recovery plan is crucial for effective incident recovery and service restoration, and the agent should manage these plans actively.  2. **Materiality Assessment**    - **Functions:** Yes, the agent needs to identify, retrieve, create, and connect materiality assessments. These assessments are essential for determining the significance of an incident and the need for regulatory notifications, so managing them is important.  3. **Regulatory Notification**    - **Functions:** Yes, this should be included as a class. The agent needs to track the notification workflow, including submissions to regulators and their associated statuses. Since regulatory notifications are formal submissions that carry accountability, they merit their own class.  4. **Stakeholder Communication**    - **Functions:** Yes, the agent needs to identify, retrieve, create, and connect communications. This class should encompass all stakeholder communications, as well as specific updates to all staff. However, it may be useful to distinguish between them in terms of audience relevance, but operationally, they can be managed within a single communication class.  5. **Post-Incident Review**    - **Functions:** Yes, the agent needs to identify, retrieve, create, and connect post-incident reviews. Documenting findings and corrective actions is critical for continuous improvement in incident management processes.  ### Summary: - **Classes to Include:**    - Recovery Plan   - Materiality Assessment   - Regulatory Notification   - Stakeholder Communication (covering all-staff updates under this umbrella)   - Post-Incident Review  All five classes represent significant components of the incident management lifecycle and are necessary for the agent to effectively support the corresponding questions and actions you outlined earlier. If you have additional classes to propose or wish to advance to the next phase, feel free to continue!
-
-### Turn 6 — assistant
-
-**Tool call: `get_graph_state`**
-
-```
-{}
-```
-
-### Turn 6 — tool
-
-classes:
-  Incident:
-    meaning: null
-    aliases: []
-    properties: {}
-  ITService:
-    meaning: null
-    aliases: []
-    properties: {}
-  MajorIncident:
-    meaning: null
-    aliases: []
-    properties: {}
-  CybersecurityIncident:
-    meaning: null
-    aliases: []
-    properties: {}
-  Alert:
-    meaning: null
-    aliases: []
-    properties: {}
-relationships: []
-rules: {}
-actions: {}
-
+Your proposed classes for the second batch are well-founded, and here’s my feedback regarding each one:  1. **Runbook**      Yes, the agent must be able to identify, retrieve, connect to, and pass a **Runbook**. This class is essential for providing operational procedures used during incident response and recovery.  2. **Workaround**      Yes, the agent should identify, retrieve, connect to, and pass a **Workaround** separately from a Runbook. While workarounds can be documented in runbooks, they often serve as distinct temporary measures to mitigate incidents prior to a full resolution. It's important to treat them as separate artifacts for clarity in incident management.  3. **Recovery Plan**      Yes, the agent needs to identify, retrieve, connect to, and pass a **Recovery Plan**. This class is critical for ensuring that appropriate recovery actions can be executed in response to an incident affecting IT services.  4. **Emergency Change**      Yes, the agent must identify, retrieve, connect to, and pass an **Emergency Change**. This class is crucial for managing urgent adjustments required to resolve incidents quickly.  5. **Evidence**      Yes, the agent should be able to identify, retrieve, connect to, and pass **Evidence**. Preserving and managing evidence is essential for incident analysis, accountability, and compliance with regulatory requirements.  This batch aligns well with operational response and support needs. If you're ready, we can continue with another batch of candidate classes!
 
 ### Turn 6 — assistant
 
@@ -223,7 +174,7 @@ actions: {}
 
 ```
 {
-  "yaml": "classes:\n  RecoveryPlan: {}\n  MaterialityAssessment: {}\n  RegulatoryNotification: {}\n  StakeholderCommunication: {}\n  PostIncidentReview: {}\n"
+  "yaml": "classes:\n  Runbook: {}\n  Workaround: {}\n  RecoveryPlan: {}\n  EmergencyChange: {}\n  Evidence: {}\n"
 }
 ```
 
@@ -233,90 +184,33 @@ Applied. Added 5, updated 0 existing item(s).
 
 ### Turn 6 — assistant
 
-Recorded those five classes. Stakeholder Communication will cover both targeted stakeholder updates and all-staff updates, with audience handled later only if it is decision-relevant.
+Captured the second class batch: **Runbook, Workaround, Recovery Plan, Emergency Change, and Evidence**.
 
-Next candidate batch: people/roles. The Phase 1 material named several distinct responsibilities, but I want to avoid both over-splitting and collapsing important roles into a vague “Owner” or “Role.”
+Next batch: governance, communication, and review objects.
 
-Proposed classes:
+1. **Stakeholder**  
+   Needed for “Have all relevant stakeholders been informed?” and “Communicate status updates to stakeholders.”  
+   Does the agent need to identify/retrieve/connect/pass **Stakeholders**?
 
-1. **Service Owner**  
-   Needed for “Who owns the affected IT service?”
+2. **Communication Update**  
+   Needed for “What is the latest update on the incident’s resolution?” and status-update communications.  
+   Does the agent need to identify/retrieve/connect/pass a **Communication Update** as its own record?
 
-2. **Application Owner**  
-   Needed because you said this related role is responsible for operational fitness of applications supporting the service.  
-   I need to confirm whether the agent must identify this separately from Service Owner, or whether in your workflow it can be treated as a kind of Service Owner.
+3. **Post-Incident Review**  
+   Needed for “What corrective actions were identified in the last post-incident review?” and “Conduct a post-incident review.”  
+   Does the agent need to identify/retrieve/connect/pass a **Post-Incident Review**?
 
-3. **Resolver Group**  
-   Needed for “Who should be assigned to resolve this incident?” and “Assign the incident to a resolver group.”
+4. **Corrective Action**  
+   Needed for corrective actions identified in reviews.  
+   Does the agent need to identify/retrieve/connect/pass **Corrective Actions** separately from the review itself?
 
-4. **On-call Engineer**  
-   Needed because you said this person directly responds to tickets/incidents escalated to the group.  
-   I need to confirm whether the agent must identify the individual on-call engineer separately, or whether assigning to Resolver Group is sufficient.
-
-5. **Incident Commander**  
-   Needed for “Who is the incident commander for this major incident?”
-
-For each: should it be a separate class because the agent must identify/connect/route to it separately, or should any be merged?
+5. **Regulatory Notification**  
+   Needed for “How do we determine if a regulatory notification is required?” and “Initiate a regulatory notification process.”  
+   Does the agent need to identify/retrieve/connect/pass a **Regulatory Notification**?
 
 ### Turn 7 — user
 
-Let's assess your proposed classes for people's roles in the context of incident management and determine whether they should be treated as separate classes or if any can be merged.  1. **Service Owner**    - **Separate Class:** Yes, the agent needs to identify, retrieve, and connect this role separately as it is essential for determining accountability for the IT service.  2. **Application Owner**    - **Separate Class:** Yes, this should be treated as a separate class. While the Application Owner is related to the Service Owner, they have distinct responsibilities concerning the operational fitness of applications. Maintaining this distinction helps clarify who to engage for specific aspects related to application performance.  3. **Resolver Group**    - **Separate Class:** Yes, the agent needs to identify, retrieve, and connect this role separately. Resolver Groups are structured teams that have specific knowledge and expertise to resolve incidents, making them critical in the assignment process.  4. **On-call Engineer**    - **Separate Class:** Yes, the agent should identify the individual on-call engineer separately. While the On-call Engineer is part of the Resolver Group, knowing the specific engineer who is available for immediate incident response is crucial for effective incident management.  5. **Incident Commander**    - **Separate Class:** Yes, the agent needs to identify, retrieve, and connect this role separately. The Incident Commander plays a unique leadership role during major incidents, and their distinct responsibilities necessitate separate recognition in the system.  ### Summary: All proposed roles should be treated as separate classes due to their individual significance in the incident management process. This will allow for clear identification, routing, and assignment in alignment with the workflows we've established so far. If you have additional classes to propose or wish to move to the next phase, feel free to continue!
-
-### Turn 7 — assistant
-
-**Tool call: `get_graph_state`**
-
-```
-{}
-```
-
-### Turn 7 — tool
-
-classes:
-  Incident:
-    meaning: null
-    aliases: []
-    properties: {}
-  ITService:
-    meaning: null
-    aliases: []
-    properties: {}
-  MajorIncident:
-    meaning: null
-    aliases: []
-    properties: {}
-  CybersecurityIncident:
-    meaning: null
-    aliases: []
-    properties: {}
-  Alert:
-    meaning: null
-    aliases: []
-    properties: {}
-  RecoveryPlan:
-    meaning: null
-    aliases: []
-    properties: {}
-  MaterialityAssessment:
-    meaning: null
-    aliases: []
-    properties: {}
-  RegulatoryNotification:
-    meaning: null
-    aliases: []
-    properties: {}
-  StakeholderCommunication:
-    meaning: null
-    aliases: []
-    properties: {}
-  PostIncidentReview:
-    meaning: null
-    aliases: []
-    properties: {}
-relationships: []
-rules: {}
-actions: {}
-
+Your proposed classes for this batch are well thought out, and here's my feedback for each of them:  1. **Stakeholder**      Yes, the agent should identify, retrieve, connect to, and pass **Stakeholders**. This class is essential for tracking who needs to be informed and engaged during incident responses.  2. **Communication Update**      Yes, the agent needs to identify, retrieve, connect to, and pass a **Communication Update** as its own record. Communication is crucial for keeping stakeholders informed, and having separate records of updates helps ensure clarity and accountability.  3. **Post-Incident Review**      Yes, the agent must be able to identify, retrieve, connect to, and pass a **Post-Incident Review**. This is key for capturing the analysis and findings after an incident, which help inform future incident management practices.  4. **Corrective Action**      Yes, the agent needs to identify, retrieve, connect to, and pass **Corrective Actions** separately from the review itself. Corrective actions are actionable items that stem from the reviews and may have their own tracking and accountability needs.  5. **Regulatory Notification**      Yes, the agent must identify, retrieve, connect to, and pass a **Regulatory Notification**. This is important for compliance purposes and for formalizing the communication needed with regulatory authorities in response to incidents.  This batch effectively captures the governance and communication aspects of incident management. If you’re ready, we can move on to another batch of candidate classes!
 
 ### Turn 7 — assistant
 
@@ -324,7 +218,7 @@ actions: {}
 
 ```
 {
-  "yaml": "classes:\n  ServiceOwner: {}\n  ApplicationOwner: {}\n  ResolverGroup: {}\n  OnCallEngineer: {}\n  IncidentCommander: {}\n"
+  "yaml": "classes:\n  Stakeholder: {}\n  CommunicationUpdate: {}\n  PostIncidentReview: {}\n  CorrectiveAction: {}\n  RegulatoryNotification: {}\n"
 }
 ```
 
@@ -334,104 +228,33 @@ Applied. Added 5, updated 0 existing item(s).
 
 ### Turn 7 — assistant
 
-Recorded those five role classes as separate classes.
+Captured the third class batch: **Stakeholder, Communication Update, Post-Incident Review, Corrective Action, and Regulatory Notification**.
 
-Next candidate batch: remaining named roles and operational objects.
+Next batch: decision/process objects and roles surfaced by your questions.
 
-1. **Incident Response Team Member**  
-   Needed because you said they support coordination, communications, and decisions during major incidents. Should the agent identify these people separately from Incident Commander?
+1. **Materiality Assessment**  
+   Needed for “Have we conducted a materiality assessment?” and “Perform a materiality assessment to evaluate reportability.”  
+   Does the agent need to identify/retrieve/connect/pass a **Materiality Assessment**?
 
-2. **Business Owner**  
-   Needed as a stakeholder type representing the business impact/update perspective. Should the agent identify this separately from general stakeholders?
+2. **Risk**  
+   Needed for “Are there any ongoing risks related to the incident recovery?”  
+   Does the agent need to identify/retrieve/connect/pass a **Risk** as a separate thing, rather than just a note on the Incident or Recovery Plan?
 
-3. **Compliance Officer**  
-   Needed for reviewing/reporting-relevant incidents and regulatory workflows. Should the agent identify this separately?
+3. **Service Owner**  
+   Needed for “Who is the service owner for this particular application?”  
+   Does the agent need to identify the **Service Owner** as a distinct role, separately from other operational roles?
 
-4. **Regulator**  
-   Needed for “Do we need to notify regulators?” and tracking formal regulatory notifications. Should the agent identify the receiving regulator separately?
+4. **Resolver Group**  
+   Needed for “Which resolver group should be assigned?” and “Assign the incident to the relevant resolver group.”  
+   Does the agent need to identify/retrieve/connect/pass a **Resolver Group**?
 
-5. **Service Desk Staff**  
-   Needed for first-line reporting and triage. Should the agent identify service desk staff separately, or is this outside the actions/questions we’re supporting?
+5. **Environment**  
+   Surfaced in the follow-up because staffing, resolver assignment, and incident protocol may vary by production, test, development, or pre-production context.  
+   Does the agent need to identify/retrieve/connect/pass an **Environment** to answer or perform the listed questions/actions?
 
 ### Turn 8 — user
 
-Let’s evaluate your proposed classes for remaining roles and operational objects to determine their necessity and whether they should be treated as separate classes or if they can be merged:  1. **Incident Response Team Member**    - **Separate Class:** Yes, the agent should identify these individuals separately from the Incident Commander. While the Commander has a leadership role, the members of the Incident Response Team support various functions and decisions during incidents. Recognizing them distinctly provides clarity on who contributes to incident management.  2. **Business Owner**    - **Separate Class:** Yes, the agent should identify the Business Owner separately from general stakeholders. The Business Owner represents a specific perspective, namely, the business impact and updates relevant to the incident. Therefore, it’s crucial to have this distinction for proper stakeholder engagement.  3. **Compliance Officer**    - **Separate Class:** Yes, the agent should identify this role separately. The Compliance Officer has specific responsibilities for overseeing regulatory requirements and ensuring incidents are appropriately reviewed and reported. This specialization warrants distinct recognition.  4. **Regulator**    - **Separate Class:** Yes, the agent should identify the receiving regulator separately. This is important for tracking which regulators need to be notified and for managing any formal regulatory notification processes, as distinct regulators may have different requirements and reporting pathways.  5. **Service Desk Staff**    - **Separate Class:** Yes, the agent should identify service desk staff separately. This role is crucial for first-line reporting, incident triage, and user communication. Recognizing them distinctly allows for better coordination and management of incident resolutions.  ### Summary: All proposed roles and operational objects should be treated as separate classes. This approach enables clear identification and connection of responsibilities, which is vital for effective incident management and communication. If you have more classes to propose or are ready to move to the next phase, please let me know!
-
-### Turn 8 — assistant
-
-**Tool call: `get_graph_state`**
-
-```
-{}
-```
-
-### Turn 8 — tool
-
-classes:
-  Incident:
-    meaning: null
-    aliases: []
-    properties: {}
-  ITService:
-    meaning: null
-    aliases: []
-    properties: {}
-  MajorIncident:
-    meaning: null
-    aliases: []
-    properties: {}
-  CybersecurityIncident:
-    meaning: null
-    aliases: []
-    properties: {}
-  Alert:
-    meaning: null
-    aliases: []
-    properties: {}
-  RecoveryPlan:
-    meaning: null
-    aliases: []
-    properties: {}
-  MaterialityAssessment:
-    meaning: null
-    aliases: []
-    properties: {}
-  RegulatoryNotification:
-    meaning: null
-    aliases: []
-    properties: {}
-  StakeholderCommunication:
-    meaning: null
-    aliases: []
-    properties: {}
-  PostIncidentReview:
-    meaning: null
-    aliases: []
-    properties: {}
-  ServiceOwner:
-    meaning: null
-    aliases: []
-    properties: {}
-  ApplicationOwner:
-    meaning: null
-    aliases: []
-    properties: {}
-  ResolverGroup:
-    meaning: null
-    aliases: []
-    properties: {}
-  OnCallEngineer:
-    meaning: null
-    aliases: []
-    properties: {}
-  IncidentCommander:
-    meaning: null
-    aliases: []
-    properties: {}
-relationships: []
-rules: {}
-actions: {}
-
+Your proposed classes for this batch are insightful, and here’s my feedback regarding each of them:  1. **Materiality Assessment**      Yes, the agent must be able to identify, retrieve, connect to, and pass a **Materiality Assessment**. This class is crucial for determining the significance of incidents and assessing the need for regulatory notifications.  2. **Risk**      Yes, the agent needs to identify, retrieve, connect to, and pass a **Risk** as a separate entity. Ongoing risks associated with incident recovery can have distinct implications and require independent tracking and management.  3. **Service Owner**      Yes, the agent should identify, retrieve, connect to, and pass the **Service Owner** as a distinct role. This is important for clarifying responsibilities and ensuring that the correct personnel are engaged in incident management and service stewardship.  4. **Resolver Group**      Yes, the agent needs to identify, retrieve, connect to, and pass a **Resolver Group**. This is essential for routing incident assignments correctly and tracking resolution efforts.  5. **Environment**      Yes, the agent needs to identify, retrieve, connect to, and pass an **Environment**. Since different environments can have different staffing, protocols, and resolver groups, this distinction is important for accurate incident management and operational responses.  This batch enriches the set of classes with critical decision and process objects, as well as operational roles. If you're ready, we can continue with additional classes or any other focus you would like to pursue!
 
 ### Turn 8 — assistant
 
@@ -439,7 +262,7 @@ actions: {}
 
 ```
 {
-  "yaml": "classes:\n  IncidentResponseTeamMember: {}\n  BusinessOwner: {}\n  ComplianceOfficer: {}\n  Regulator: {}\n  ServiceDeskStaff: {}\n"
+  "yaml": "classes:\n  MaterialityAssessment: {}\n  Risk: {}\n  ServiceOwner: {}\n  ResolverGroup: {}\n  Environment: {}\n"
 }
 ```
 
@@ -449,129 +272,22 @@ Applied. Added 5, updated 0 existing item(s).
 
 ### Turn 8 — assistant
 
-Recorded those five as separate classes.
+Captured the fourth class batch: **Materiality Assessment, Risk, Service Owner, Resolver Group, and Environment**.
 
-Next candidate batch: dependencies, monitoring, recovery/change/evidence items.
+Final role batch from the Phase 1 follow-up. These surfaced as related operational roles, but I want to confirm each against your original questions/actions rather than include them just because they exist.
 
-1. **Service Dependency**  
-   Needed for “What are the main dependencies of the affected IT service?”  
-   Question: do users talk about dependencies as actual dependency records/objects, or should we instead model direct relationships between IT services, such as “IT Service depends on IT Service”?
+1. **On-call Engineer**  
+   You described this role as responsible for day-to-day operational response. Does the agent need to identify/retrieve/connect/pass the **On-call Engineer** separately in order to answer or perform anything on the list — for example routing response, staffing by environment, or executing recovery?
 
-2. **Monitoring Tool**  
-   Needed for “What monitoring tools are currently assessing the impacted service?” and alerts.  
-   Does the agent need to identify/connect monitoring tools?
+2. **Technical Owner**  
+   You described this role as responsible for engineering/maintenance and technical restoration work. Does the agent need to identify/retrieve/connect/pass the **Technical Owner** separately from the Resolver Group or Service Owner for any listed question/action?
 
-3. **Workaround**  
-   Needed for “Is there a known workaround for this issue?”  
-   Does the agent need to retrieve/connect workaround instructions separately, or is it just a text field on Incident or Known Issue?
-
-4. **Corrective Action**  
-   Needed for “What corrective actions have been identified from past incidents?”  
-   Does the agent need to identify/track corrective actions separately?
-
-5. **Emergency Change**  
-   Needed for “Execute an emergency change related to the incident.”  
-   Does the agent need to identify/create/execute/track emergency changes as separate objects?
+3. **Incident Commander**  
+   You described this role as responsible for coordinating major-incident response and engaging stakeholders. Does the agent need to identify/retrieve/connect/pass the **Incident Commander** separately for major-incident declaration, communications, stakeholder coordination, or closure?
 
 ### Turn 9 — user
 
-Let’s assess your proposed classes related to dependencies, monitoring, recovery/change evidence items to determine their necessity and connectivity:  1. **Service Dependency**    - **Modeling Approach:** Instead of a separate class for Service Dependency, it would be more appropriate to model direct relationships between IT services, such as “IT Service depends on IT Service.” This approach simplifies modeling and querying by allowing direct mappings that can be dynamically evaluated without needing a separate dependency record.  2. **Monitoring Tool**    - **Separate Class:** Yes, the agent needs to identify and connect monitoring tools separately. Monitoring tools are essential components for assessing service health and generating alerts, so having them recognized as distinct entities is valuable for operational clarity.  3. **Workaround**    - **Separate Class or Not:** While workarounds can be detailed in a text field on an Incident or Known Issue, it is beneficial to model Workaround as a separate class. This allows for clearer management of specific workaround instructions that can be directly associated with incidents or known issues, enabling easier retrieval and linkage.  4. **Corrective Action**    - **Separate Class:** Yes, the agent needs to identify and track corrective actions separately. These actions are crucial for documenting and following up on improvements arising from post-incident reviews, making distinct identification necessary.  5. **Emergency Change**    - **Separate Class:** Yes, the agent needs to identify, create, execute, and track emergency changes as separate objects. Emergency changes have specific processes and tracking requirements that differentiate them from regular changes, and distinct recognition supports compliance and operational integrity.  ### Summary: - **Modeling Approach for Service Dependency:** Use direct relationships rather than a separate class. - **Classes to Include:**    - Monitoring Tool (as a separate class)   - Workaround (as a separate class)   - Corrective Action (as a separate class)   - Emergency Change (as a separate class)  This structured approach will ensure the ontology supports operational needs clearly and effectively. If you have additional classes to propose or wish to proceed to the next phase, please let me know!
-
-### Turn 9 — assistant
-
-**Tool call: `get_graph_state`**
-
-```
-{}
-```
-
-### Turn 9 — tool
-
-classes:
-  Incident:
-    meaning: null
-    aliases: []
-    properties: {}
-  ITService:
-    meaning: null
-    aliases: []
-    properties: {}
-  MajorIncident:
-    meaning: null
-    aliases: []
-    properties: {}
-  CybersecurityIncident:
-    meaning: null
-    aliases: []
-    properties: {}
-  Alert:
-    meaning: null
-    aliases: []
-    properties: {}
-  RecoveryPlan:
-    meaning: null
-    aliases: []
-    properties: {}
-  MaterialityAssessment:
-    meaning: null
-    aliases: []
-    properties: {}
-  RegulatoryNotification:
-    meaning: null
-    aliases: []
-    properties: {}
-  StakeholderCommunication:
-    meaning: null
-    aliases: []
-    properties: {}
-  PostIncidentReview:
-    meaning: null
-    aliases: []
-    properties: {}
-  ServiceOwner:
-    meaning: null
-    aliases: []
-    properties: {}
-  ApplicationOwner:
-    meaning: null
-    aliases: []
-    properties: {}
-  ResolverGroup:
-    meaning: null
-    aliases: []
-    properties: {}
-  OnCallEngineer:
-    meaning: null
-    aliases: []
-    properties: {}
-  IncidentCommander:
-    meaning: null
-    aliases: []
-    properties: {}
-  IncidentResponseTeamMember:
-    meaning: null
-    aliases: []
-    properties: {}
-  BusinessOwner:
-    meaning: null
-    aliases: []
-    properties: {}
-  ComplianceOfficer:
-    meaning: null
-    aliases: []
-    properties: {}
-  Regulator:
-    meaning: null
-    aliases: []
-    properties: {}
-  ServiceDeskStaff:
-    meaning: null
-    aliases: []
-    properties: {}
-relationships: []
-rules: {}
-actions: {}
-
+Your final batch of roles is well-considered, and here’s my feedback regarding each one:  1. **On-call Engineer**      Yes, the agent needs to identify, retrieve, connect to, and pass the **On-call Engineer** separately. This role is crucial for routing responses and staffing decisions, especially in time-sensitive operational situations. Their specific expertise may also be essential during incident escalation and recovery efforts.  2. **Technical Owner**      Yes, the agent needs to identify, retrieve, connect to, and pass the **Technical Owner** separately from the Resolver Group or Service Owner. The Technical Owner’s role is specifically focused on the engineering and technical aspects of incident resolution, which may require distinct engagement beyond the resolver group's general functions.  3. **Incident Commander**      Yes, the agent needs to identify, retrieve, connect to, and pass the **Incident Commander** separately. This role is vital for coordinating major incident responses, managing communications, engaging stakeholders, and establishing a closure strategy during major incidents. Their unique responsibilities necessitate independent identification.  This batch reinforces the operational roles that are essential for effective incident response management. If you’re ready to wrap up this phase or have any other queries, please let me know!
 
 ### Turn 9 — assistant
 
@@ -579,387 +295,129 @@ actions: {}
 
 ```
 {
-  "yaml": "classes:\n  MonitoringTool: {}\n  Workaround: {}\n  CorrectiveAction: {}\n  EmergencyChange: {}\n"
+  "yaml": "classes:\n  OnCallEngineer: {}\n  TechnicalOwner: {}\n  IncidentCommander: {}\n"
 }
 ```
 
 ### Turn 9 — tool
 
-Applied. Added 4, updated 0 existing item(s).
+Applied. Added 3, updated 0 existing item(s).
 
 ### Turn 9 — assistant
 
-Recorded **Monitoring Tool**, **Workaround**, **Corrective Action**, and **Emergency Change**. I did **not** add Service Dependency as a class; we’ll model service-to-service dependency as a relationship in Phase 3.
+Captured the final role batch: **On-call Engineer, Technical Owner, and Incident Commander**.
 
-Final candidate class batch before we recap Phase 2:
+**Phase 2 recap — confirmed classes**
 
-1. **Backup**  
-   Needed for “Restore service from a backup.”  
-   Does the agent need to identify/select/pass a backup to a restore tool, or is “backup” just an execution detail of the restore action?
+So far the ontology has these classes:
 
-2. **Environment**  
-   Needed because you confirmed production, pre-production/test, and disaster recovery context may change incident handling, regulatory relevance, or service restoration.  
-   Should the agent identify/connect incidents, services, monitoring, or changes to an environment?
+- **Incident**
+- **Alert**
+- **IT Service**
+- **Business Service**
+- **Application**
+- **Runbook**
+- **Workaround**
+- **Recovery Plan**
+- **Emergency Change**
+- **Evidence**
+- **Stakeholder**
+- **Communication Update**
+- **Post-Incident Review**
+- **Corrective Action**
+- **Regulatory Notification**
+- **Materiality Assessment**
+- **Risk**
+- **Service Owner**
+- **Resolver Group**
+- **Environment**
+- **On-call Engineer**
+- **Technical Owner**
+- **Incident Commander**
 
-3. **Business Line**  
-   Needed because you said business-line context affects stakeholder/business-owner concerns and continuity implications.  
-   Should the agent identify/connect incidents or services to a business line?
+These are all justified by your Phase 1 questions/actions or by the role/environment follow-up where you confirmed the agent must identify or route to them separately.
 
-4. **Investigation**  
-   Needed for “Is there an active investigation for this cybersecurity incident?”  
-   Should cybersecurity investigations be separate objects, or just a status/property on Cybersecurity Incident?
-
-5. **Affected User Group**  
-   Needed for “How many users are affected by this service degradation?”  
-   Should affected users/user groups be separately identified, or should this be only a numeric affected-user count property on Incident or IT Service?
+Before we move to relationships: **is this class list correct, or should any class be renamed, removed, or merged?**
 
 ### Turn 10 — user
 
-Let’s evaluate your final candidate classes to determine their necessity and how they should be modeled:  1. **Backup**    - **Separate Class or Not:** Yes, the agent should identify/select and pass a backup to a restore tool. While the execution of a restore action may reference a backup, treating Backup as a separate class allows for clearer management and selection of specific backup sets, especially when planning restoration activities.  2. **Environment**    - **Separate Class:** Yes, the agent should identify and connect incidents, services, monitoring tools, or changes to an Environment. By associating these entities with specific environments (e.g., production, pre-production/test, disaster recovery), the agent ensures proper context for incident handling and decision-making, especially regarding compliance and service restoration.  3. **Business Line**    - **Separate Class:** Yes, the agent should identify and connect incidents or services to a Business Line. This classification allows the bank to better understand the implications of incidents on specific business areas and respond effectively to stakeholder concerns.  4. **Investigation**    - **Separate Class or Not:** Yes, cybersecurity investigations should be treated as separate objects. While they may relate to a Cybersecurity Incident, having distinct Investigation records allows for more detailed documentation and management of investigative processes and results, which may require different handling compared to regular incidents.  5. **Affected User Group**    - **Separate Class or Not:** Yes, Affected User Group should be identified separately, rather than being just a numeric count property. Recognizing distinct user groups allows for targeted communications and recovery strategies, as different groups may have varying needs and impacts based on the incident.  ### Summary: - **Classes to Include:**    - Backup (as a separate class)   - Environment (as a separate class)   - Business Line (as a separate class)   - Investigation (as a separate class)   - Affected User Group (as a separate class)  With these additions, the final model will comprehensively cover the operational needs for incident management and support the questions and actions identified in the earlier phases. If you're ready to recap Phase 2 or move to the next stage in your process, just let me know!
+Your class list is comprehensive and accurately reflects the essential elements of IT operations governance and major-incident management based on the previously discussed questions, actions, and roles. I don't see any immediate need to rename, remove, or merge any of the classes—their distinctions are relevant for the operational tasks they support. Each class has a clear function and justification in the context of incident management.  If you're ready to proceed, we can move on to defining the relationships between these classes!
 
 ### Turn 10 — assistant
 
-**Tool call: `get_graph_state`**
+Great — moving to **Phase 3: relationships**.
 
-```
-{}
-```
+A relationship is a directed verb phrase between two classes, like:
 
-### Turn 10 — tool
+> Incident --affects--> IT Service
 
-classes:
-  Incident:
-    meaning: null
-    aliases: []
-    properties: {}
-  ITService:
-    meaning: null
-    aliases: []
-    properties: {}
-  MajorIncident:
-    meaning: null
-    aliases: []
-    properties: {}
-  CybersecurityIncident:
-    meaning: null
-    aliases: []
-    properties: {}
-  Alert:
-    meaning: null
-    aliases: []
-    properties: {}
-  RecoveryPlan:
-    meaning: null
-    aliases: []
-    properties: {}
-  MaterialityAssessment:
-    meaning: null
-    aliases: []
-    properties: {}
-  RegulatoryNotification:
-    meaning: null
-    aliases: []
-    properties: {}
-  StakeholderCommunication:
-    meaning: null
-    aliases: []
-    properties: {}
-  PostIncidentReview:
-    meaning: null
-    aliases: []
-    properties: {}
-  ServiceOwner:
-    meaning: null
-    aliases: []
-    properties: {}
-  ApplicationOwner:
-    meaning: null
-    aliases: []
-    properties: {}
-  ResolverGroup:
-    meaning: null
-    aliases: []
-    properties: {}
-  OnCallEngineer:
-    meaning: null
-    aliases: []
-    properties: {}
-  IncidentCommander:
-    meaning: null
-    aliases: []
-    properties: {}
-  IncidentResponseTeamMember:
-    meaning: null
-    aliases: []
-    properties: {}
-  BusinessOwner:
-    meaning: null
-    aliases: []
-    properties: {}
-  ComplianceOfficer:
-    meaning: null
-    aliases: []
-    properties: {}
-  Regulator:
-    meaning: null
-    aliases: []
-    properties: {}
-  ServiceDeskStaff:
-    meaning: null
-    aliases: []
-    properties: {}
-  MonitoringTool:
-    meaning: null
-    aliases: []
-    properties: {}
-  Workaround:
-    meaning: null
-    aliases: []
-    properties: {}
-  CorrectiveAction:
-    meaning: null
-    aliases: []
-    properties: {}
-  EmergencyChange:
-    meaning: null
-    aliases: []
-    properties: {}
-relationships: []
-rules: {}
-actions: {}
+First relationship batch: core incident/service/alert connections implied by your questions and actions.
 
+Please confirm or correct these directions and verb phrases:
 
-### Turn 10 — assistant
+1. **Alert --triggers--> Incident**  
+   For “Are any alerts currently triggering this incident’s creation?” and “Acknowledge the alert associated with the incident.”
 
-**Tool call: `apply_ontology_yaml`**
+2. **Incident --affects--> IT Service**  
+   For identifying the affected IT service during impact, recovery, and resolver routing.
 
-```
-{
-  "yaml": "classes:\n  Backup: {}\n  Environment: {}\n  BusinessLine: {}\n  Investigation: {}\n  AffectedUserGroup: {}\n"
-}
-```
+3. **Incident --impacts--> Business Service**  
+   For “Which business services are currently impacted by this incident?”
 
-### Turn 10 — tool
+4. **IT Service --supports--> Business Service**  
+   Needed to derive business-service impact from affected IT services.
 
-Applied. Added 5, updated 0 existing item(s).
+5. **Application --supports--> IT Service**  
+   Since you said applications are distinct but often part of IT services with separate ownership/operational considerations.
 
-### Turn 10 — assistant
-
-Recorded those five classes.
-
-Phase 2 recap — confirmed classes so far:
-
-**Incident and service objects**
-- Incident
-- Major Incident
-- Cybersecurity Incident
-- IT Service
-- Alert
-
-**Plans, assessments, communications, reviews**
-- Recovery Plan
-- Materiality Assessment
-- Regulatory Notification
-- Stakeholder Communication
-- Post-Incident Review
-
-**Roles / actors**
-- Service Owner
-- Application Owner
-- Resolver Group
-- On-call Engineer
-- Incident Commander
-- Incident Response Team Member
-- Business Owner
-- Compliance Officer
-- Regulator
-- Service Desk Staff
-
-**Monitoring, recovery, change, improvement**
-- Monitoring Tool
-- Workaround
-- Corrective Action
-- Emergency Change
-- Backup
-
-**Context / impact**
-- Environment
-- Business Line
-- Investigation
-- Affected User Group
-
-**Not added as a class**
-- Service Dependency — we’ll represent this as an **IT Service depends on IT Service** relationship.
-
-Please confirm or correct this Phase 2 class list. Then we’ll move to Phase 3 and define directional relationships between these classes.
+Are these five relationships correct as stated?
 
 ### Turn 11 — user
 
-Your Phase 2 recap is accurate and comprehensive. Here’s the confirmation of your recorded classes:  ### Incident and Service Objects: - **Incident** - **Major Incident** - **Cybersecurity Incident** - **IT Service** - **Alert**  ### Plans, Assessments, Communications, Reviews: - **Recovery Plan** - **Materiality Assessment** - **Regulatory Notification** - **Stakeholder Communication** - **Post-Incident Review**  ### Roles / Actors: - **Service Owner** - **Application Owner** - **Resolver Group** - **On-call Engineer** - **Incident Commander** - **Incident Response Team Member** - **Business Owner** - **Compliance Officer** - **Regulator** - **Service Desk Staff**  ### Monitoring, Recovery, Change, Improvement: - **Monitoring Tool** - **Workaround** - **Corrective Action** - **Emergency Change** - **Backup**  ### Context / Impact: - **Environment** - **Business Line** - **Investigation** - **Affected User Group**  ### Not Added as a Class: - **Service Dependency** — represented as an **IT Service depends on IT Service** relationship.  This list provides a solid foundation for the organizational structure of the model. If you’re ready, let’s move to Phase 3 and define the directional relationships between these classes!
+Your proposed relationships are well-defined, and I confirm their correctness along with the directions and verb phrases. Here's the confirmation for each:  1. **Alert --triggers--> Incident**      Correct. This relationship reflects that alerts can lead to the creation of incidents and is essential for both incident acknowledgment and identification.  2. **Incident --affects--> IT Service**      Correct. This accurately depicts how incidents can impact IT services, which is vital for understanding the scope and response to issues.  3. **Incident --impacts--> Business Service**      Correct. This relationship captures the essence of how incidents can affect business services directly, aligning with incident reporting and stakeholder communication.  4. **IT Service --supports--> Business Service**      Correct. This relationship correctly illustrates the dependency of business services on IT services, which is important for service impact assessments.  5. **Application --supports--> IT Service**      Correct. This reflects that applications are integral components of IT services and highlights their role in operational considerations.  All five relationships are accurate and appropriate for the operational context. If you have more relationships to define or wish to proceed to the next batch, let me know!
 
 ### Turn 11 — assistant
 
-Great — Phase 2 is confirmed.
+**Tool call: `apply_ontology_yaml`**
 
-Phase 3: relationships. We’ll define each as a clear directed verb phrase: **Class --verb phrase--> Class**.
+```
+{
+  "yaml": "relationships:\n  - name: triggers\n    from: Alert\n    to: Incident\n  - name: affects\n    from: Incident\n    to: ITService\n  - name: impacts\n    from: Incident\n    to: BusinessService\n  - name: supports\n    from: ITService\n    to: BusinessService\n  - name: supports\n    from: Application\n    to: ITService\n"
+}
+```
 
-First relationship batch: core incident/service detection and impact relationships implied directly by the Phase 1 questions.
+### Turn 11 — tool
 
-Proposed relationships:
+Applied. Added 5, updated 0 existing item(s).
 
-1. **Incident --impacts--> IT Service**  
-   Needed for “Which service is impacted by this incident?”
+### Turn 11 — assistant
 
-2. **Incident --triggered by--> Alert**  
-   Needed for “What alerts have triggered this incident?”
+Captured those five core relationships.
 
-3. **Alert --generated by--> Monitoring Tool**  
-   Needed to connect alerts back to monitoring sources.
+Next relationship batch: ownership, staffing, and environment-dependent routing.
 
-4. **Monitoring Tool --monitors--> IT Service**  
-   Needed for “What monitoring tools are currently assessing the impacted service?”
+Please confirm or correct these:
 
-5. **IT Service --depends on--> IT Service**  
-   Needed for “What are the main dependencies of the affected IT service?”  
-   This is the direct service-to-service dependency relationship we discussed instead of a Service Dependency class.
+1. **Application --ownedBy--> Service Owner**  
+   For “Who is the service owner for this particular application?”
 
-Please confirm, correct the wording/direction, or tell me if any should be different.
+2. **IT Service --staffedBy--> On-call Engineer**  
+   For day-to-day operational response and staffing decisions.
+
+3. **IT Service --supportedBy--> Resolver Group**  
+   This is the relationship used to derive which resolver group *should* be assigned to an incident affecting that service.
+
+4. **Incident --assignedTo--> Resolver Group**  
+   This records the resolver group actually assigned to the incident.
+
+5. **Resolver Group --operatesIn--> Environment**  
+   For environment-specific resolver assignment, such as production versus development groups.
+
+Are these correct as stated?
 
 ### Turn 12 — user
 
-Your proposed relationships accurately reflect the core incident/service detection and impact connections necessary for the model. Here’s the confirmation and evaluation of each relationship:  1. **Incident --impacts--> IT Service**      - **Confirmed**: This relationship clearly defines how an incident affects specific IT services, aligning with the stated question about impacted services.  2. **Incident --triggered by--> Alert**      - **Confirmed**: This relationship effectively captures the link between alerts and the incidents they may initiate.  3. **Alert --generated by--> Monitoring Tool**      - **Confirmed**: This accurately connects alerts to their originating monitoring tools, clarifying source accountability.  4. **Monitoring Tool --monitors--> IT Service**      - **Confirmed**: This relationship identifies the monitoring coverage of IT services, which is essential for operational oversight.  5. **IT Service --depends on--> IT Service**      - **Confirmed**: This relationship directly models the service-to-service dependencies as discussed, effectively representing the connections without needing a separate class.  ### Summary: All relationships are confirmed as proposed. They align well with the previously defined questions and actions. If you have more relationships to propose or if you'd like to move to the next phase, let me know!
-
-### Turn 12 — assistant
-
-**Tool call: `get_graph_state`**
-
-```
-{}
-```
-
-### Turn 12 — tool
-
-classes:
-  Incident:
-    meaning: null
-    aliases: []
-    properties: {}
-  ITService:
-    meaning: null
-    aliases: []
-    properties: {}
-  MajorIncident:
-    meaning: null
-    aliases: []
-    properties: {}
-  CybersecurityIncident:
-    meaning: null
-    aliases: []
-    properties: {}
-  Alert:
-    meaning: null
-    aliases: []
-    properties: {}
-  RecoveryPlan:
-    meaning: null
-    aliases: []
-    properties: {}
-  MaterialityAssessment:
-    meaning: null
-    aliases: []
-    properties: {}
-  RegulatoryNotification:
-    meaning: null
-    aliases: []
-    properties: {}
-  StakeholderCommunication:
-    meaning: null
-    aliases: []
-    properties: {}
-  PostIncidentReview:
-    meaning: null
-    aliases: []
-    properties: {}
-  ServiceOwner:
-    meaning: null
-    aliases: []
-    properties: {}
-  ApplicationOwner:
-    meaning: null
-    aliases: []
-    properties: {}
-  ResolverGroup:
-    meaning: null
-    aliases: []
-    properties: {}
-  OnCallEngineer:
-    meaning: null
-    aliases: []
-    properties: {}
-  IncidentCommander:
-    meaning: null
-    aliases: []
-    properties: {}
-  IncidentResponseTeamMember:
-    meaning: null
-    aliases: []
-    properties: {}
-  BusinessOwner:
-    meaning: null
-    aliases: []
-    properties: {}
-  ComplianceOfficer:
-    meaning: null
-    aliases: []
-    properties: {}
-  Regulator:
-    meaning: null
-    aliases: []
-    properties: {}
-  ServiceDeskStaff:
-    meaning: null
-    aliases: []
-    properties: {}
-  MonitoringTool:
-    meaning: null
-    aliases: []
-    properties: {}
-  Workaround:
-    meaning: null
-    aliases: []
-    properties: {}
-  CorrectiveAction:
-    meaning: null
-    aliases: []
-    properties: {}
-  EmergencyChange:
-    meaning: null
-    aliases: []
-    properties: {}
-  Backup:
-    meaning: null
-    aliases: []
-    properties: {}
-  Environment:
-    meaning: null
-    aliases: []
-    properties: {}
-  BusinessLine:
-    meaning: null
-    aliases: []
-    properties: {}
-  Investigation:
-    meaning: null
-    aliases: []
-    properties: {}
-  AffectedUserGroup:
-    meaning: null
-    aliases: []
-    properties: {}
-relationships: []
-rules: {}
-actions: {}
-
+Your proposed relationships for ownership, staffing, and environment-dependent routing are accurate. Here’s the confirmation for each:  1. **Application --ownedBy--> Service Owner**      Correct. This clearly defines the ownership of the application and aligns with operational accountability.  2. **IT Service --staffedBy--> On-call Engineer**      Correct. This relationship effectively captures the staffing arrangements for day-to-day operational response, ensuring the right personnel are engaged.  3. **IT Service --supportedBy--> Resolver Group**      Correct. This relationship accurately signifies which resolver group is responsible for supporting the respective IT service, aiding incident assignment.  4. **Incident --assignedTo--> Resolver Group**      Correct. This relationship marks the actual resolver group assigned to an incident, enabling effective incident management and tracking.  5. **Resolver Group --operatesIn--> Environment**      Correct. This captures the context of where the resolver group operates, reflecting the differences in responsibilities across various environments, such as production and development.  All five relationships are correct as stated. If you're ready to continue with more relationship definitions or have other areas to cover, let me know!
 
 ### Turn 12 — assistant
 
@@ -967,7 +425,7 @@ actions: {}
 
 ```
 {
-  "yaml": "relationships:\n  - name: impacts\n    from: Incident\n    to: ITService\n  - name: triggeredBy\n    from: Incident\n    to: Alert\n  - name: generatedBy\n    from: Alert\n    to: MonitoringTool\n  - name: monitors\n    from: MonitoringTool\n    to: ITService\n  - name: dependsOn\n    from: ITService\n    to: ITService\n"
+  "yaml": "relationships:\n  - name: ownedBy\n    from: Application\n    to: ServiceOwner\n  - name: staffedBy\n    from: ITService\n    to: OnCallEngineer\n  - name: supportedBy\n    from: ITService\n    to: ResolverGroup\n  - name: assignedTo\n    from: Incident\n    to: ResolverGroup\n  - name: operatesIn\n    from: ResolverGroup\n    to: Environment\n"
 }
 ```
 
@@ -977,32 +435,34 @@ Applied. Added 5, updated 0 existing item(s).
 
 ### Turn 12 — assistant
 
-Recorded those five core relationships.
+Captured the ownership, staffing, and routing relationships.
 
-Next relationship batch: ownership, assignment, and day-to-day response.
+Next batch: technical ownership and dependency context.
 
-Proposed relationships:
+Please confirm or correct these:
 
-1. **IT Service --owned by--> Service Owner**  
-   Needed for “Who owns the affected IT service?”
+1. **Technical Owner --maintains--> Application**  
+   For the technical owner’s engineering and maintenance responsibility.
 
-2. **IT Service --supported by--> Application Owner**  
-   Needed to identify who is responsible for operational fitness of supporting applications.
+2. **Technical Owner --restores--> IT Service**  
+   For distinct technical restoration work during incidents.
 
-3. **Incident --assigned to--> Resolver Group**  
-   Needed for “Who should be assigned to resolve this incident?” and the assign action.
+3. **IT Service --dependsOn--> IT Service**  
+   For “What are the dependencies of the affected IT service?”  
+   This allows one IT service to depend on another IT service.
 
-4. **Resolver Group --staffed by--> On-call Engineer**  
-   Needed to identify the specific on-call engineer for immediate response.
+4. **Application --dependsOn--> Application**  
+   Also for technical dependencies, where the dependency is specifically between applications.
 
-5. **Incident --triaged by--> Service Desk Staff**  
-   Needed because service desk staff provide first-line reporting and triage.
+5. **Incident --occursIn--> Environment**  
+   For environment-specific protocols, staffing, and resolver assignment.
 
-Please confirm, correct wording/direction, or tell me if any should be different.
+Are these correct as stated? 
+
 
 ### Turn 13 — user
 
-Your proposed relationships regarding ownership, assignment, and day-to-day response are well-structured and align with the operational needs of the model. Here’s the confirmation and evaluation of each relationship:  1. **IT Service --owned by--> Service Owner**      - **Confirmed**: This relationship clearly identifies the accountability for each IT service, supporting the question on service ownership.  2. **IT Service --supported by--> Application Owner**      - **Confirmed**: This captures the operational fitness responsibility of applications that underpin IT services, effectively linking them to their owners.  3. **Incident --assigned to--> Resolver Group**      - **Confirmed**: This relationship accurately dictates the assignment process for incident resolution, addressing the assignment and operational needs.  4. **Resolver Group --staffed by--> On-call Engineer**      - **Confirmed**: This identifies the specific personnel who are available for immediate incident response, clarifying the on-call arrangement.  5. **Incident --triaged by--> Service Desk Staff**      - **Confirmed**: This effectively illustrates the role of service desk staff in first-line incident management and triage, reflecting their critical operational function.  ### Summary: All relationships are confirmed as proposed. They align well with the questions and actions established earlier. If you have more relationships to propose or if you're ready to move to the next phase, please let me know!
+Your proposed relationships regarding technical ownership and dependency context are well-defined. Here’s the confirmation for each:  1. **Technical Owner --maintains--> Application**      Correct. This relationship accurately reflects the technical owner's responsibilities concerning the engineering and ongoing maintenance of the application.  2. **Technical Owner --restores--> IT Service**      Correct. This relationship signifies the distinct role of the technical owner in the restoration efforts during incidents affecting the IT service.  3. **IT Service --dependsOn--> IT Service**      Correct. This captures the dependencies between IT services, allowing for accurate impact assessments and incident management.  4. **Application --dependsOn--> Application**      Correct. This relationship allows for the identification of dependencies specifically among applications, vital for understanding interdependencies.  5. **Incident --occursIn--> Environment**      Correct. This relationship indicates the environment context during which the incident occurs, impacting operational protocols and resolver assignments.  All five relationships are correct as stated. If you're prepared to proceed with additional relationships or any other aspect, just let me know!
 
 ### Turn 13 — assistant
 
@@ -1010,7 +470,7 @@ Your proposed relationships regarding ownership, assignment, and day-to-day resp
 
 ```
 {
-  "yaml": "relationships:\n  - name: ownedBy\n    from: ITService\n    to: ServiceOwner\n  - name: supportedBy\n    from: ITService\n    to: ApplicationOwner\n  - name: assignedTo\n    from: Incident\n    to: ResolverGroup\n  - name: staffedBy\n    from: ResolverGroup\n    to: OnCallEngineer\n  - name: triagedBy\n    from: Incident\n    to: ServiceDeskStaff\n"
+  "yaml": "relationships:\n  - name: maintains\n    from: TechnicalOwner\n    to: Application\n  - name: restores\n    from: TechnicalOwner\n    to: ITService\n  - name: dependsOn\n    from: ITService\n    to: ITService\n  - name: dependsOn\n    from: Application\n    to: Application\n  - name: occursIn\n    from: Incident\n    to: Environment\n"
 }
 ```
 
@@ -1020,33 +480,33 @@ Applied. Added 5, updated 0 existing item(s).
 
 ### Turn 13 — assistant
 
-Recorded those five ownership/assignment/response relationships.
+Captured the technical ownership and dependency relationships.
 
-Next relationship batch: major incident coordination and communications.
+Next batch: mitigation and recovery relationships.
 
-Proposed relationships:
+Please confirm or correct these:
 
-1. **Major Incident --escalated from--> Incident**  
-   Needed for “Escalate the incident to major-incident status.”  
-   This direction treats the Major Incident record as created from or based on the original Incident.
+1. **IT Service --hasRunbook--> Runbook**  
+   For finding the relevant operational procedure for the affected service.
 
-2. **Major Incident --led by--> Incident Commander**  
-   Needed for “Who is the incident commander for this major incident?”
+2. **Runbook --documents--> Workaround**  
+   Since workarounds can be documented in runbooks but are distinct temporary measures.
 
-3. **Major Incident --supported by--> Incident Response Team Member**  
-   Needed to identify supporting team members.
+3. **Incident --mitigatedBy--> Workaround**  
+   For identifying or recording which workaround can mitigate this incident.
 
-4. **Stakeholder Communication --about--> Incident**  
-   Needed for communications about incident status.
+4. **IT Service --hasRecoveryPlan--> Recovery Plan**  
+   For “What recovery plan is associated with the affected service?”
 
-5. **Stakeholder Communication --sent to--> Business Owner**  
-   Needed where the business owner is a targeted stakeholder representing business impact.
+5. **Incident --usesRecoveryPlan--> Recovery Plan**  
+   For executing or tracking the recovery plan used for this incident.
 
-Question: for all-staff updates, should we also create **Stakeholder Communication --sent to--> Service Desk Staff** or is Service Desk Staff not the audience for all-staff communications in this model? Since we did not create an “All Staff” class, I want to avoid inventing one unless the agent must identify that audience separately.
+Are these correct as stated? 
+
 
 ### Turn 14 — user
 
-Your proposed relationships regarding major incident coordination and communications are well-articulated. Here’s the confirmation and evaluation of each relationship, plus guidance on the stakeholder communication aspect:  1. **Major Incident --escalated from--> Incident**      - **Confirmed**: This accurately represents the relationship between a Major Incident and the original Incident, capturing the escalation process effectively.  2. **Major Incident --led by--> Incident Commander**      - **Confirmed**: This relationship clearly identifies the leadership of the Major Incident, addressing the need for coordination.  3. **Major Incident --supported by--> Incident Response Team Member**      - **Confirmed**: This highlights the supporting roles involved in managing a Major Incident, ensuring clarity about team structures.  4. **Stakeholder Communication --about--> Incident**      - **Confirmed**: This effectively captures the nature of the communication regarding the incident.  5. **Stakeholder Communication --sent to--> Business Owner**      - **Confirmed**: This appropriately recognizes the targeted communication to business owners as stakeholders in incident management.  ### Regarding All-Staff Updates: - **Should we create**: Given that service desk staff are generally part of the support team and need to be informed about major incidents, it would be reasonable to include **Stakeholder Communication --sent to--> Service Desk Staff**. However, if the intention is to treat all-staff communications as general updates that do not specifically call out roles or job functions in the context of an incident, then creating a separate relationship for them may not be necessary.  ### Conclusion: You should decide based on the operational needs: - If all-staff communications are relevant to Service Desk Staff, then include the relationship. - If you want to keep communications broader and not specific, it can remain as is without that particular connection.  If you choose to include it, I recommend the wording: **Stakeholder Communication --sent to--> Service Desk Staff** to maintain clear communication pathways for incident awareness. Let me know how you’d like to proceed!
+Your proposed relationships related to mitigation and recovery are well-conceived. Here’s the confirmation for each:  1. **IT Service --hasRunbook--> Runbook**      Correct. This relationship reflects the association between an IT service and the relevant operational procedures outlined in a runbook.  2. **Runbook --documents--> Workaround**      Correct. This relationship appropriately acknowledges that workarounds can be documented in runbooks, while distinguishing them as temporary measures.  3. **Incident --mitigatedBy--> Workaround**      Correct. This captures the relationship whereby identifying or recording a workaround is crucial for incident mitigation.  4. **IT Service --hasRecoveryPlan--> Recovery Plan**      Correct. This relationship signifies the association between an IT service and its relevant recovery plan.  5. **Incident --usesRecoveryPlan--> Recovery Plan**      Correct. This captures the essential link for executing or tracking the recovery plan that is employed in response to the incident.  All five relationships are correct as stated. If you're ready to continue with more relationship definitions or have another area to explore, just let me know!
 
 ### Turn 14 — assistant
 
@@ -1054,7 +514,7 @@ Your proposed relationships regarding major incident coordination and communicat
 
 ```
 {
-  "yaml": "relationships:\n  - name: escalatedFrom\n    from: MajorIncident\n    to: Incident\n  - name: ledBy\n    from: MajorIncident\n    to: IncidentCommander\n  - name: supportedBy\n    from: MajorIncident\n    to: IncidentResponseTeamMember\n  - name: about\n    from: StakeholderCommunication\n    to: Incident\n  - name: sentTo\n    from: StakeholderCommunication\n    to: BusinessOwner\n"
+  "yaml": "relationships:\n  - name: hasRunbook\n    from: ITService\n    to: Runbook\n  - name: documents\n    from: Runbook\n    to: Workaround\n  - name: mitigatedBy\n    from: Incident\n    to: Workaround\n  - name: hasRecoveryPlan\n    from: ITService\n    to: RecoveryPlan\n  - name: usesRecoveryPlan\n    from: Incident\n    to: RecoveryPlan\n"
 }
 ```
 
@@ -1064,34 +524,33 @@ Applied. Added 5, updated 0 existing item(s).
 
 ### Turn 14 — assistant
 
-Recorded the five confirmed relationships.
+Captured the mitigation and recovery relationships.
 
-On the all-staff point, I’ll hold off adding **Stakeholder Communication --sent to--> Service Desk Staff** for now because your answer described it as optional rather than a confirmed operational need. We can add it later if the agent must specifically route communications to Service Desk Staff as an audience.
+Next batch: evidence, emergency change, and recovery risk.
 
-Next relationship batch: regulatory/materiality workflow.
+Please confirm or correct these:
 
-Proposed relationships:
+1. **Incident --hasEvidence--> Evidence**  
+   For evidence related to the incident.
 
-1. **Materiality Assessment --assesses--> Incident**  
-   Needed for “Has a materiality assessment been conducted for this incident?” and “Run a materiality assessment.”
+2. **Evidence --preservedFor--> Incident**  
+   This is more explicit about preservation obligation. Is this direction useful, or is **Incident --hasEvidence--> Evidence** enough?
 
-2. **Materiality Assessment --reviewed by--> Compliance Officer**  
-   Needed because Compliance Officer reviews reporting-relevant incidents.
+3. **Emergency Change --linkedTo--> Incident**  
+   For “Execute an emergency change linked to the incident.”
 
-3. **Regulatory Notification --based on--> Materiality Assessment**  
-   Needed because the assessment determines the need for notification.
+4. **Emergency Change --changes--> IT Service**  
+   For emergency changes that restore or modify the affected service.
 
-4. **Regulatory Notification --notifies--> Regulator**  
-   Needed to track formal submissions to the receiving regulator.
+5. **Recovery Plan --hasRisk--> Risk**  
+   For ongoing risks related to incident recovery.
 
-5. **Regulatory Notification --about--> Incident**  
-   Needed to connect the notification directly to the incident being reported.
+Are these correct, and should we keep both evidence relationships or only one? 
 
-Please confirm, correct wording/direction, or tell me if any should be different.
 
 ### Turn 15 — user
 
-Your proposed relationships regarding the regulatory and materiality workflow are well-structured and align with the operational requirements. Here’s the confirmation and evaluation of each relationship:  1. **Materiality Assessment --assesses--> Incident**      - **Confirmed**: This relationship effectively captures the assessment process related to determining the significance of incidents.  2. **Materiality Assessment --reviewed by--> Compliance Officer**      - **Confirmed**: This clearly identifies the role of the Compliance Officer in reviewing materiality assessments and their relevance to incident reporting.  3. **Regulatory Notification --based on--> Materiality Assessment**      - **Confirmed**: This establishes the critical connection between materiality assessments and the decision to issue regulatory notifications, supporting effective tracking.  4. **Regulatory Notification --notifies--> Regulator**      - **Confirmed**: This relationship accurately captures the necessity of tracking formal submissions to relevant regulators, clarifying accountability.  5. **Regulatory Notification --about--> Incident**      - **Confirmed**: This connects the regulatory notification directly back to the incident being reported, which is essential for compliance tracking.  ### Summary: All proposed relationships are confirmed as they stand. They align well with the questions and actions we've previously defined and support efficient regulatory and materiality workflows. If you have more relationships to propose or if you're ready to proceed to the next phase, just let me know!
+Your proposed relationships concerning evidence, emergency changes, and recovery risk are sound. Here’s the confirmation for each:  1. **Incident --hasEvidence--> Evidence**      Correct. This relationship effectively links an incident to the related evidence, indicating what material supports the incident analysis.  2. **Evidence --preservedFor--> Incident**      This relationship is also useful in providing explicit clarity around the preservation obligation. While **Incident --hasEvidence--> Evidence** captures the association, having both can underline the importance of evidence preservation for accountability. Therefore, you can choose to keep both relationships for enhanced clarity.  3. **Emergency Change --linkedTo--> Incident**      Correct. This relationship indicates that emergency changes are associated with specific incidents for urgency in restoring service.  4. **Emergency Change --changes--> IT Service**      Correct. This relationship reflects the modifications that emergency changes apply to the affected IT service.  5. **Recovery Plan --hasRisk--> Risk**      Correct. This relationship captures the ongoing risks that may be associated with implementing the recovery plan for incident recovery.  Overall, all five relationships are correct. Maintaining both evidence relationships adds clarity, so I recommend keeping them. If you're ready to proceed with further relationships or another focus area, let me know!
 
 ### Turn 15 — assistant
 
@@ -1099,7 +558,7 @@ Your proposed relationships regarding the regulatory and materiality workflow ar
 
 ```
 {
-  "yaml": "relationships:\n  - name: assesses\n    from: MaterialityAssessment\n    to: Incident\n  - name: reviewedBy\n    from: MaterialityAssessment\n    to: ComplianceOfficer\n  - name: basedOn\n    from: RegulatoryNotification\n    to: MaterialityAssessment\n  - name: notifies\n    from: RegulatoryNotification\n    to: Regulator\n  - name: about\n    from: RegulatoryNotification\n    to: Incident\n"
+  "yaml": "relationships:\n  - name: hasEvidence\n    from: Incident\n    to: Evidence\n  - name: preservedFor\n    from: Evidence\n    to: Incident\n  - name: linkedTo\n    from: EmergencyChange\n    to: Incident\n  - name: changes\n    from: EmergencyChange\n    to: ITService\n  - name: hasRisk\n    from: RecoveryPlan\n    to: Risk\n"
 }
 ```
 
@@ -1109,36 +568,31 @@ Applied. Added 5, updated 0 existing item(s).
 
 ### Turn 15 — assistant
 
-Recorded those five regulatory/materiality relationships.
+Captured the evidence, emergency change, and recovery-risk relationships.
 
-Next relationship batch: recovery, backup, emergency change, and workarounds.
+Next batch: communications and incident-command relationships.
 
-Proposed relationships:
+Please confirm or correct these:
 
-1. **Recovery Plan --for--> Incident**  
-   Needed for “What recovery plan is in place for the affected service?” and “Create a recovery plan for the incident.”
+1. **Incident --hasCommunicationUpdate--> Communication Update**  
+   For the latest resolution/status update.
 
-2. **Recovery Plan --restores--> IT Service**  
-   Needed to connect the plan to the affected service being recovered.
+2. **Communication Update --sentTo--> Stakeholder**  
+   For checking whether relevant stakeholders have been informed.
 
-3. **Recovery Plan --uses--> Backup**  
-   Needed for “Restore service from a backup” and selecting/passing a backup.
+3. **Incident Commander --coordinates--> Incident**  
+   For major-incident coordination.
 
-4. **Emergency Change --related to--> Incident**  
-   Needed for “Execute an emergency change related to the incident.”
+4. **Incident Commander --engages--> Stakeholder**  
+   For stakeholder engagement during major incidents.
 
-5. **Emergency Change --changes--> IT Service**  
-   Needed to identify what service the emergency change affects.
+5. **Incident --commandedBy--> Incident Commander**  
+   This records who is acting as commander for a specific incident. Should we keep this in addition to **Incident Commander --coordinates--> Incident**, or is one direction enough operationally? 
 
-6. **Workaround --applies to--> Incident**  
-   Needed for “Is there a known workaround for this issue?”
-
-Please confirm, correct wording/direction, or tell me if any should be different. 
-Because this is a repeating pattern of recovery/change links, I included six rather than five; let me know if that is too much at once.
 
 ### Turn 16 — user
 
-Your proposed relationships concerning recovery, backup, emergency change, and workarounds are clear and relevant to the incident management process. Here’s the confirmation and evaluation of each relationship:  1. **Recovery Plan --for--> Incident**      - **Confirmed**: This relationship accurately captures the specific recovery plan associated with an incident, supporting the workflow for effective recovery management.  2. **Recovery Plan --restores--> IT Service**      - **Confirmed**: This establishes the connection between the recovery plan and the affected IT service, clarifying what is to be restored.  3. **Recovery Plan --uses--> Backup**      - **Confirmed**: This captures the relationship for selecting and passing a backup necessary for restoring the service, making it essential for operational execution.  4. **Emergency Change --related to--> Incident**      - **Confirmed**: This appropriately links emergency changes to specific incidents, reflecting the need for expedited resolution actions.  5. **Emergency Change --changes--> IT Service**      - **Confirmed**: This relationship clearly identifies which IT service is affected by the emergency change, supporting tracking and accountability.  6. **Workaround --applies to--> Incident**      - **Confirmed**: This correctly identifies the relationship between workarounds and the incidents they are intended to mitigate, ensuring clarity in incident resolution strategies.  ### Summary: All proposed relationships are confirmed as they stand and fit well within the operational framework you’ve established. The inclusion of six relationships in this batch is fine and does not feel like too much at once. If you have more relationships to propose or if you're ready to proceed, let me know!
+Your proposed relationships concerning communications and incident-command are well-structured. Here’s the confirmation for each:  1. **Incident --hasCommunicationUpdate--> Communication Update**      Correct. This relationship accurately reflects the connection between an incident and its communication updates regarding resolution or status.  2. **Communication Update --sentTo--> Stakeholder**      Correct. This relationship captures the distribution of communication updates to relevant stakeholders, ensuring they are informed.  3. **Incident Commander --coordinates--> Incident**      Correct. This indicates the incident commander's role in managing and coordinating the response during a major incident.  4. **Incident Commander --engages--> Stakeholder**      Correct. This captures the incident commander's role in actively engaging with stakeholders throughout the incident management process.  5. **Incident --commandedBy--> Incident Commander**      This relationship is useful to explicitly record which individual is acting as the commander for that specific incident. It adds clarity and separates the command accountability from the coordination of the incident response. Therefore, I recommend keeping both **Incident --commandedBy--> Incident Commander** and **Incident Commander --coordinates--> Incident** for operational completeness.  Overall, all five relationships are correct as stated. If you have additional relationships to define or want to shift to another part of the modeling process, let me know!
 
 ### Turn 16 — assistant
 
@@ -1146,42 +600,43 @@ Your proposed relationships concerning recovery, backup, emergency change, and w
 
 ```
 {
-  "yaml": "relationships:\n  - name: forIncident\n    from: RecoveryPlan\n    to: Incident\n  - name: restores\n    from: RecoveryPlan\n    to: ITService\n  - name: uses\n    from: RecoveryPlan\n    to: Backup\n  - name: relatedTo\n    from: EmergencyChange\n    to: Incident\n  - name: changes\n    from: EmergencyChange\n    to: ITService\n  - name: appliesTo\n    from: Workaround\n    to: Incident\n"
+  "yaml": "relationships:\n  - name: hasCommunicationUpdate\n    from: Incident\n    to: CommunicationUpdate\n  - name: sentTo\n    from: CommunicationUpdate\n    to: Stakeholder\n  - name: coordinates\n    from: IncidentCommander\n    to: Incident\n  - name: engages\n    from: IncidentCommander\n    to: Stakeholder\n  - name: commandedBy\n    from: Incident\n    to: IncidentCommander\n"
 }
 ```
 
 ### Turn 16 — tool
 
-Applied. Added 6, updated 0 existing item(s).
+Applied. Added 5, updated 0 existing item(s).
 
 ### Turn 16 — assistant
 
-Recorded those six recovery/change/workaround relationships.
+Captured the communication and incident-command relationships.
 
-Next relationship batch: post-incident review and improvement tracking.
+Next batch: review, corrective action, and regulatory-reporting relationships.
 
-Proposed relationships:
+Please confirm or correct these:
 
-1. **Post-Incident Review --reviews--> Incident**  
-   Needed for “Document incident findings in a post-incident review.”
+1. **Incident --reviewedBy--> Post-Incident Review**  
+   For conducting and finding the last post-incident review.
 
 2. **Post-Incident Review --identifies--> Corrective Action**  
-   Needed for “What corrective actions have been identified from past incidents?”
+   For “What corrective actions were identified in the last post-incident review?”
 
-3. **Corrective Action --addresses--> Incident**  
-   Needed to trace an improvement action back to the incident/problem it is intended to prevent or mitigate.
+3. **Incident --hasMaterialityAssessment--> Materiality Assessment**  
+   For “Have we conducted a materiality assessment?”
 
-4. **Corrective Action --assigned to--> Resolver Group**  
-   Needed if the agent must track who owns delivery of the corrective action. This is not explicitly in Phase 1, but may be necessary to manage corrective actions; confirm only if real.
+4. **Materiality Assessment --determinesNeedFor--> Regulatory Notification**  
+   For deciding whether regulatory notification is required.
 
-5. **Post-Incident Review --approved by--> Service Owner**  
-   Needed only if service owner approval is part of your review workflow. Not previously confirmed, so please reject if not needed.
+5. **Regulatory Notification --notifiesAbout--> Incident**  
+   For the notification process being about a specific incident.
 
-Which of these are confirmed, and should 4 or 5 be excluded as “nice to know” rather than required for the agent’s tasks?
+Are these correct as stated? 
+
 
 ### Turn 17 — user
 
-Your proposed relationships related to post-incident reviews and improvement tracking are mostly appropriate and on target. Here’s the confirmation and evaluation of each relationship, along with guidance on the optional items:  1. **Post-Incident Review --reviews--> Incident**      - **Confirmed**: This relationship accurately captures the connection between post-incident reviews and the incidents they evaluate, supporting the documentation of findings.  2. **Post-Incident Review --identifies--> Corrective Action**      - **Confirmed**: This establishes the link between reviews and the corrective actions that emerge from the findings of those reviews.  3. **Corrective Action --addresses--> Incident**      - **Confirmed**: This relationship is critical for tracing specific improvement actions back to the incidents or problems they are intended to mitigate, ensuring accountability.  4. **Corrective Action --assigned to--> Resolver Group**      - **Optional/Not Required**: This relationship can be viewed as "nice to know" rather than strictly required, as it may not be explicitly necessary for the core agent tasks identified in Phase 1. If tracking who delivers corrective actions is important for your operational process, consider adding it. If not, it may be better to keep it out for simplicity.  5. **Post-Incident Review --approved by--> Service Owner**      - **Optional/Not Required**: If service owner approval is not a standardized part of your review workflow, this relationship can also be excluded. It would be unnecessary for the agent to track this unless your process explicitly dictates service owner involvement in review approvals.  ### Summary: - **Confirmed Relationships:** 1, 2, 3 - **Optional Relationships:** 4 and 5 - You can choose to exclude relationships 4 and 5 if they do not directly impact the agent’s tasks based on your operational workflows. If you’d like to proceed with the confirmed relationships and exclude the optional ones, please let me know!
+Your proposed relationships concerning review, corrective action, and regulatory-reporting are well-structured. Here’s the confirmation for each:  1. **Incident --reviewedBy--> Post-Incident Review**      Correct. This relationship accurately indicates that an incident is subject to review in a post-incident analysis.  2. **Post-Incident Review --identifies--> Corrective Action**      Correct. This captures the function of the post-incident review to identify any corrective actions needed based on findings.  3. **Incident --hasMaterialityAssessment--> Materiality Assessment**      Correct. This relationship signifies that every incident may have an associated materiality assessment linked to it.  4. **Materiality Assessment --determinesNeedFor--> Regulatory Notification**      Correct. This accurately captures the relationship defining whether a regulatory notification is warranted based on the assessment's findings.  5. **Regulatory Notification --notifiesAbout--> Incident**      Correct. This relationship represents that the regulatory notification is specifically about an incident, clarifying the link between reporting and the incident itself.  All five relationships are correctly stated. If you’re ready to move on to the next set of relationships or have other areas you’d like to explore or validate, just let me know!
 
 ### Turn 17 — assistant
 
@@ -1189,42 +644,42 @@ Your proposed relationships related to post-incident reviews and improvement tra
 
 ```
 {
-  "yaml": "relationships:\n  - name: reviews\n    from: PostIncidentReview\n    to: Incident\n  - name: identifies\n    from: PostIncidentReview\n    to: CorrectiveAction\n  - name: addresses\n    from: CorrectiveAction\n    to: Incident\n"
+  "yaml": "relationships:\n  - name: reviewedBy\n    from: Incident\n    to: PostIncidentReview\n  - name: identifies\n    from: PostIncidentReview\n    to: CorrectiveAction\n  - name: hasMaterialityAssessment\n    from: Incident\n    to: MaterialityAssessment\n  - name: determinesNeedFor\n    from: MaterialityAssessment\n    to: RegulatoryNotification\n  - name: notifiesAbout\n    from: RegulatoryNotification\n    to: Incident\n"
 }
 ```
 
 ### Turn 17 — tool
 
-Applied. Added 3, updated 0 existing item(s).
+Applied. Added 5, updated 0 existing item(s).
 
 ### Turn 17 — assistant
 
-Recorded only the three confirmed post-incident/improvement relationships. I excluded the optional “assigned to Resolver Group” and “approved by Service Owner” links for now because they are not required by the Phase 1 tasks.
+Captured the review, corrective-action, and regulatory-reporting relationships.
 
-Next relationship batch: cybersecurity investigation and context.
+Before leaving relationships, I want to close a few routing/context gaps implied by your earlier answers — especially deriving who should be informed or assigned, not only recording what happened after the fact.
 
-Proposed relationships:
+Please confirm or correct these:
 
-1. **Cybersecurity Incident --specializes--> Incident**  
-   Needed because it is handled distinctly but still relates to the underlying incident.
+1. **Incident --hasStakeholder--> Stakeholder**  
+   For determining the relevant stakeholders for a specific incident before sending updates.
 
-2. **Investigation --investigates--> Cybersecurity Incident**  
-   Needed for “Is there an active investigation for this cybersecurity incident?”
+2. **Business Service --hasStakeholder--> Stakeholder**  
+   For deriving stakeholders from the impacted business service.
 
-3. **Investigation --supported by--> Incident Response Team Member**  
-   Needed if incident response team members are involved in the cyber investigation process.
+3. **IT Service --runsIn--> Environment**  
+   For environment-specific staffing, protocols, and resolver assignment.
 
-4. **Investigation --reviewed by--> Compliance Officer**  
-   Needed only if compliance review of cybersecurity investigations is required for reporting/evidence workflows. This was implied but not directly confirmed.
+4. **Application --deployedIn--> Environment**  
+   For application-specific deployment context.
 
-5. **Cybersecurity Incident --has workaround--> Workaround**  
-   Needed only if cyber incidents use separate workarounds from general incident workarounds; otherwise **Workaround --applies to--> Incident** may be enough.
+5. **On-call Engineer --covers--> Environment**  
+   For day-to-day response staffing by production, test, development, or pre-production context.
 
-Which of these are confirmed, and should 4 or 5 be excluded? Also, is “specializes” the right wording for the link from Cybersecurity Incident to Incident, or would your users say “classified as,” “derived from,” or something else?
+Are these relationships correct as stated?
 
 ### Turn 18 — user
 
-Your proposed relationships regarding cybersecurity investigations and context offer valuable distinctions. Here’s the confirmation and evaluation of each relationship, along with recommendations for wording and inclusion:  1. **Cybersecurity Incident --specializes--> Incident**      - **Confirmed, but Wording Adjustment Needed**: While the relationship is valid, "specializes" might not be the most commonly used term in operational language. A more fitting term may be “classified as” or “is a type of,” which clearly indicates that a Cybersecurity Incident is a specific form of Incident.  2. **Investigation --investigates--> Cybersecurity Incident**      - **Confirmed**: This relationship accurately reflects the need to understand which investigations are active concerning cybersecurity incidents.  3. **Investigation --supported by--> Incident Response Team Member**      - **Confirmed**: This relationship is necessary if incident response team members are indeed involved in the process of investigating cybersecurity incidents.  4. **Investigation --reviewed by--> Compliance Officer**      - **Optional/Not Required**: This relationship can be considered “nice to know” unless compliance review is a mandatory step in your process for cybersecurity investigations. If it is not essential to track at this level, it could be excluded for simplicity.  5. **Cybersecurity Incident --has workaround--> Workaround**      - **Dependent on Use Case**: This will depend on whether cybersecurity incidents have distinct workarounds from general incidents. If the existing relationship **Workaround --applies to--> Incident** sufficiently covers the needs of all incidents, including cybersecurity, then it might be best to exclude this additional relationship to maintain clarity.  ### Summary: - **Confirmed Relationships:** 2 and 3 (with wording adjustment for 1) - **Wording Adjustment:** Change "specializes" to "classified as" or "is a type of" for the link between Cybersecurity Incident and Incident. - **Optional Relationships:** 4 and 5 could potentially be excluded unless your operational workflow specifically demands tracking these details.  If you’d like to proceed with the confirmed relationships and suggestions or have additional adjustments to discuss, please let me know!
+Your proposed relationships aimed at closing routing and context gaps are well thought out. Here’s the confirmation for each:  1. **Incident --hasStakeholder--> Stakeholder**      Correct. This relationship establishes the identification of relevant stakeholders associated with a specific incident, aiding in communication and updates.  2. **Business Service --hasStakeholder--> Stakeholder**      Correct. This accurately reflects that stakeholders can be derived from the impacted business service, ensuring that all relevant parties are considered.  3. **IT Service --runsIn--> Environment**      Correct. This relationship indicates where the IT service operates, which is important for contextual staffing and operational protocols.  4. **Application --deployedIn--> Environment**      Correct. This captures where a particular application is deployed, which is crucial for understanding its operational context.  5. **On-call Engineer --covers--> Environment**      Correct. This relationship reflects how on-call engineers are assigned based on the environment (such as production, test, etc.), ensuring appropriate staffing for operational responses.  All five relationships are correct as stated. With these relationships, you've successfully defined essential operational contexts for effective incident management. If you're ready to proceed to another phase or have other questions, please let me know!
 
 ### Turn 18 — assistant
 
@@ -1232,72 +687,15 @@ Your proposed relationships regarding cybersecurity investigations and context o
 
 ```
 {
-  "yaml": "relationships:\n  - name: isTypeOf\n    from: CybersecurityIncident\n    to: Incident\n  - name: investigates\n    from: Investigation\n    to: CybersecurityIncident\n  - name: supportedBy\n    from: Investigation\n    to: IncidentResponseTeamMember\n"
+  "yaml": "relationships:\n  - name: hasStakeholder\n    from: Incident\n    to: Stakeholder\n  - name: hasStakeholder\n    from: BusinessService\n    to: Stakeholder\n  - name: runsIn\n    from: ITService\n    to: Environment\n  - name: deployedIn\n    from: Application\n    to: Environment\n  - name: covers\n    from: OnCallEngineer\n    to: Environment\n"
 }
 ```
 
 ### Turn 18 — tool
 
-Applied. Added 3, updated 0 existing item(s).
+Applied. Added 5, updated 0 existing item(s).
 
 ### Turn 18 — assistant
-
-Recorded the three confirmed cybersecurity relationships, using **Cybersecurity Incident --is type of--> Incident**. I excluded the optional compliance-review and cyber-specific workaround relationships for now.
-
-Next relationship batch: environment, business line, affected users, and backups.
-
-Proposed relationships:
-
-1. **Incident --occurs in--> Environment**  
-   Needed because production vs test/pre-production vs disaster recovery changes incident handling.
-
-2. **IT Service --runs in--> Environment**  
-   Needed to know which environment a service instance/context belongs to.
-
-3. **Emergency Change --applies in--> Environment**  
-   Needed because emergency changes may affect production, DR, or non-production differently.
-
-4. **IT Service --serves--> Business Line**  
-   Needed because business-line context affects impact and stakeholder concerns.
-
-5. **Incident --affects--> Affected User Group**  
-   Needed for affected users and targeted communications/recovery strategy.
-
-6. **Backup --for--> IT Service**  
-   Needed to select the backup for restoring the affected service.
-
-Please confirm, correct wording/direction, or tell me if any should be different.
-
-### Turn 19 — user
-
-Your proposed relationships regarding environment, business line, affected users, and backups are relevant and appropriately defined. Here’s the confirmation and evaluation of each relationship:  1. **Incident --occurs in--> Environment**      - **Confirmed**: This relationship accurately reflects the importance of the environment in which an incident occurs, thus affecting how the incident is handled.  2. **IT Service --runs in--> Environment**      - **Confirmed**: This relationship is essential for clarifying the context of each IT service and its operational environment.  3. **Emergency Change --applies in--> Environment**      - **Confirmed**: This captures the necessity to track which environments an emergency change impacts, crucial for understanding its implications.  4. **IT Service --serves--> Business Line**      - **Confirmed**: This relationship appropriately links IT services to the specific business lines they support, reflecting stakeholder concerns and impact considerations.  5. **Incident --affects--> Affected User Group**      - **Confirmed**: This relationship effectively recognizes the impact of incidents on specific user groups, supporting targeted communication and recovery efforts.  6. **Backup --for--> IT Service**      - **Confirmed**: This relationship accurately links backups to the IT services they are intended to restore, critical for incident recovery workflows.  ### Summary: All proposed relationships are confirmed and align well with the operational needs established in previous phases. If you're ready to proceed or have further relationships to propose, please let me know!
-
-### Turn 19 — assistant
-
-**Tool call: `apply_ontology_yaml`**
-
-```
-{
-  "yaml": "relationships:\n  - name: occursIn\n    from: Incident\n    to: Environment\n  - name: runsIn\n    from: ITService\n    to: Environment\n  - name: appliesIn\n    from: EmergencyChange\n    to: Environment\n  - name: serves\n    from: ITService\n    to: BusinessLine\n  - name: affects\n    from: Incident\n    to: AffectedUserGroup\n  - name: forService\n    from: Backup\n    to: ITService\n"
-}
-```
-
-### Turn 19 — tool
-
-Applied. Added 6, updated 0 existing item(s).
-
-### Turn 19 — assistant
-
-Recorded those six context/impact/backup relationships.
-
-We’re close to the end of Phase 3, but I need to systematically check for gaps rather than rely on memory. I’ll inspect the current graph state next, then I’ll ask about any classes that are still isolated or any Phase 1 class-pairs that appear together but lack a direct relationship. 
-
-
-### Turn 20 — user
-
-That sounds like a practical approach to ensure comprehensive coverage. Reviewing the current graph state for any isolated classes or missing relationships will help identify any gaps before finalizing Phase 3. Once you’ve inspected the current state, feel free to ask about any specific classes or relationships you’d like to discuss further, and I’ll be here to assist you!
-
-### Turn 20 — assistant
 
 **Tool call: `get_graph_state`**
 
@@ -1305,22 +703,10 @@ That sounds like a practical approach to ensure comprehensive coverage. Reviewin
 {}
 ```
 
-### Turn 20 — tool
+### Turn 18 — tool
 
 classes:
   Incident:
-    meaning: null
-    aliases: []
-    properties: {}
-  ITService:
-    meaning: null
-    aliases: []
-    properties: {}
-  MajorIncident:
-    meaning: null
-    aliases: []
-    properties: {}
-  CybersecurityIncident:
     meaning: null
     aliases: []
     properties: {}
@@ -1328,67 +714,19 @@ classes:
     meaning: null
     aliases: []
     properties: {}
-  RecoveryPlan:
+  ITService:
     meaning: null
     aliases: []
     properties: {}
-  MaterialityAssessment:
+  BusinessService:
     meaning: null
     aliases: []
     properties: {}
-  RegulatoryNotification:
+  Application:
     meaning: null
     aliases: []
     properties: {}
-  StakeholderCommunication:
-    meaning: null
-    aliases: []
-    properties: {}
-  PostIncidentReview:
-    meaning: null
-    aliases: []
-    properties: {}
-  ServiceOwner:
-    meaning: null
-    aliases: []
-    properties: {}
-  ApplicationOwner:
-    meaning: null
-    aliases: []
-    properties: {}
-  ResolverGroup:
-    meaning: null
-    aliases: []
-    properties: {}
-  OnCallEngineer:
-    meaning: null
-    aliases: []
-    properties: {}
-  IncidentCommander:
-    meaning: null
-    aliases: []
-    properties: {}
-  IncidentResponseTeamMember:
-    meaning: null
-    aliases: []
-    properties: {}
-  BusinessOwner:
-    meaning: null
-    aliases: []
-    properties: {}
-  ComplianceOfficer:
-    meaning: null
-    aliases: []
-    properties: {}
-  Regulator:
-    meaning: null
-    aliases: []
-    properties: {}
-  ServiceDeskStaff:
-    meaning: null
-    aliases: []
-    properties: {}
-  MonitoringTool:
+  Runbook:
     meaning: null
     aliases: []
     properties: {}
@@ -1396,7 +734,7 @@ classes:
     meaning: null
     aliases: []
     properties: {}
-  CorrectiveAction:
+  RecoveryPlan:
     meaning: null
     aliases: []
     properties: {}
@@ -1404,7 +742,43 @@ classes:
     meaning: null
     aliases: []
     properties: {}
-  Backup:
+  Evidence:
+    meaning: null
+    aliases: []
+    properties: {}
+  Stakeholder:
+    meaning: null
+    aliases: []
+    properties: {}
+  CommunicationUpdate:
+    meaning: null
+    aliases: []
+    properties: {}
+  PostIncidentReview:
+    meaning: null
+    aliases: []
+    properties: {}
+  CorrectiveAction:
+    meaning: null
+    aliases: []
+    properties: {}
+  RegulatoryNotification:
+    meaning: null
+    aliases: []
+    properties: {}
+  MaterialityAssessment:
+    meaning: null
+    aliases: []
+    properties: {}
+  Risk:
+    meaning: null
+    aliases: []
+    properties: {}
+  ServiceOwner:
+    meaning: null
+    aliases: []
+    properties: {}
+  ResolverGroup:
     meaning: null
     aliases: []
     properties: {}
@@ -1412,36 +786,76 @@ classes:
     meaning: null
     aliases: []
     properties: {}
-  BusinessLine:
+  OnCallEngineer:
     meaning: null
     aliases: []
     properties: {}
-  Investigation:
+  TechnicalOwner:
     meaning: null
     aliases: []
     properties: {}
-  AffectedUserGroup:
+  IncidentCommander:
     meaning: null
     aliases: []
     properties: {}
 relationships:
-  - name: impacts
+  - name: triggers
+    from: Alert
+    to: Incident
+    meaning: null
+    aliases: []
+  - name: affects
     from: Incident
     to: ITService
     meaning: null
     aliases: []
-  - name: triggeredBy
+  - name: impacts
     from: Incident
-    to: Alert
+    to: BusinessService
     meaning: null
     aliases: []
-  - name: generatedBy
-    from: Alert
-    to: MonitoringTool
+  - name: supports
+    from: ITService
+    to: BusinessService
     meaning: null
     aliases: []
-  - name: monitors
-    from: MonitoringTool
+  - name: supports
+    from: Application
+    to: ITService
+    meaning: null
+    aliases: []
+  - name: ownedBy
+    from: Application
+    to: ServiceOwner
+    meaning: null
+    aliases: []
+  - name: staffedBy
+    from: ITService
+    to: OnCallEngineer
+    meaning: null
+    aliases: []
+  - name: supportedBy
+    from: ITService
+    to: ResolverGroup
+    meaning: null
+    aliases: []
+  - name: assignedTo
+    from: Incident
+    to: ResolverGroup
+    meaning: null
+    aliases: []
+  - name: operatesIn
+    from: ResolverGroup
+    to: Environment
+    meaning: null
+    aliases: []
+  - name: maintains
+    from: TechnicalOwner
+    to: Application
+    meaning: null
+    aliases: []
+  - name: restores
+    from: TechnicalOwner
     to: ITService
     meaning: null
     aliases: []
@@ -1450,97 +864,52 @@ relationships:
     to: ITService
     meaning: null
     aliases: []
-  - name: ownedBy
-    from: ITService
-    to: ServiceOwner
+  - name: dependsOn
+    from: Application
+    to: Application
     meaning: null
     aliases: []
-  - name: supportedBy
-    from: ITService
-    to: ApplicationOwner
-    meaning: null
-    aliases: []
-  - name: assignedTo
+  - name: occursIn
     from: Incident
-    to: ResolverGroup
+    to: Environment
     meaning: null
     aliases: []
-  - name: staffedBy
-    from: ResolverGroup
-    to: OnCallEngineer
+  - name: hasRunbook
+    from: ITService
+    to: Runbook
     meaning: null
     aliases: []
-  - name: triagedBy
+  - name: documents
+    from: Runbook
+    to: Workaround
+    meaning: null
+    aliases: []
+  - name: mitigatedBy
     from: Incident
-    to: ServiceDeskStaff
+    to: Workaround
     meaning: null
     aliases: []
-  - name: escalatedFrom
-    from: MajorIncident
+  - name: hasRecoveryPlan
+    from: ITService
+    to: RecoveryPlan
+    meaning: null
+    aliases: []
+  - name: usesRecoveryPlan
+    from: Incident
+    to: RecoveryPlan
+    meaning: null
+    aliases: []
+  - name: hasEvidence
+    from: Incident
+    to: Evidence
+    meaning: null
+    aliases: []
+  - name: preservedFor
+    from: Evidence
     to: Incident
     meaning: null
     aliases: []
-  - name: ledBy
-    from: MajorIncident
-    to: IncidentCommander
-    meaning: null
-    aliases: []
-  - name: supportedBy
-    from: MajorIncident
-    to: IncidentResponseTeamMember
-    meaning: null
-    aliases: []
-  - name: about
-    from: StakeholderCommunication
-    to: Incident
-    meaning: null
-    aliases: []
-  - name: sentTo
-    from: StakeholderCommunication
-    to: BusinessOwner
-    meaning: null
-    aliases: []
-  - name: assesses
-    from: MaterialityAssessment
-    to: Incident
-    meaning: null
-    aliases: []
-  - name: reviewedBy
-    from: MaterialityAssessment
-    to: ComplianceOfficer
-    meaning: null
-    aliases: []
-  - name: basedOn
-    from: RegulatoryNotification
-    to: MaterialityAssessment
-    meaning: null
-    aliases: []
-  - name: notifies
-    from: RegulatoryNotification
-    to: Regulator
-    meaning: null
-    aliases: []
-  - name: about
-    from: RegulatoryNotification
-    to: Incident
-    meaning: null
-    aliases: []
-  - name: forIncident
-    from: RecoveryPlan
-    to: Incident
-    meaning: null
-    aliases: []
-  - name: restores
-    from: RecoveryPlan
-    to: ITService
-    meaning: null
-    aliases: []
-  - name: uses
-    from: RecoveryPlan
-    to: Backup
-    meaning: null
-    aliases: []
-  - name: relatedTo
+  - name: linkedTo
     from: EmergencyChange
     to: Incident
     meaning: null
@@ -1550,14 +919,39 @@ relationships:
     to: ITService
     meaning: null
     aliases: []
-  - name: appliesTo
-    from: Workaround
+  - name: hasRisk
+    from: RecoveryPlan
+    to: Risk
+    meaning: null
+    aliases: []
+  - name: hasCommunicationUpdate
+    from: Incident
+    to: CommunicationUpdate
+    meaning: null
+    aliases: []
+  - name: sentTo
+    from: CommunicationUpdate
+    to: Stakeholder
+    meaning: null
+    aliases: []
+  - name: coordinates
+    from: IncidentCommander
     to: Incident
     meaning: null
     aliases: []
-  - name: reviews
-    from: PostIncidentReview
-    to: Incident
+  - name: engages
+    from: IncidentCommander
+    to: Stakeholder
+    meaning: null
+    aliases: []
+  - name: commandedBy
+    from: Incident
+    to: IncidentCommander
+    meaning: null
+    aliases: []
+  - name: reviewedBy
+    from: Incident
+    to: PostIncidentReview
     meaning: null
     aliases: []
   - name: identifies
@@ -1565,29 +959,29 @@ relationships:
     to: CorrectiveAction
     meaning: null
     aliases: []
-  - name: addresses
-    from: CorrectiveAction
-    to: Incident
-    meaning: null
-    aliases: []
-  - name: isTypeOf
-    from: CybersecurityIncident
-    to: Incident
-    meaning: null
-    aliases: []
-  - name: investigates
-    from: Investigation
-    to: CybersecurityIncident
-    meaning: null
-    aliases: []
-  - name: supportedBy
-    from: Investigation
-    to: IncidentResponseTeamMember
-    meaning: null
-    aliases: []
-  - name: occursIn
+  - name: hasMaterialityAssessment
     from: Incident
-    to: Environment
+    to: MaterialityAssessment
+    meaning: null
+    aliases: []
+  - name: determinesNeedFor
+    from: MaterialityAssessment
+    to: RegulatoryNotification
+    meaning: null
+    aliases: []
+  - name: notifiesAbout
+    from: RegulatoryNotification
+    to: Incident
+    meaning: null
+    aliases: []
+  - name: hasStakeholder
+    from: Incident
+    to: Stakeholder
+    meaning: null
+    aliases: []
+  - name: hasStakeholder
+    from: BusinessService
+    to: Stakeholder
     meaning: null
     aliases: []
   - name: runsIn
@@ -1595,57 +989,117 @@ relationships:
     to: Environment
     meaning: null
     aliases: []
-  - name: appliesIn
-    from: EmergencyChange
+  - name: deployedIn
+    from: Application
     to: Environment
     meaning: null
     aliases: []
-  - name: serves
-    from: ITService
-    to: BusinessLine
-    meaning: null
-    aliases: []
-  - name: affects
-    from: Incident
-    to: AffectedUserGroup
-    meaning: null
-    aliases: []
-  - name: forService
-    from: Backup
-    to: ITService
+  - name: covers
+    from: OnCallEngineer
+    to: Environment
     meaning: null
     aliases: []
 rules: {}
 actions: {}
 
 
+### Turn 18 — assistant
+
+I checked the live graph. Every confirmed class now has at least one relationship, which is good.
+
+Before we close Phase 3, two original questions mention class pairs that would be safer to connect directly rather than only through another path:
+
+1. **Incident --usesRunbook--> Runbook**  
+   For “What runbook or workaround can we utilize to mitigate the incident?”  
+   We already have **IT Service --hasRunbook--> Runbook** and **Incident --mitigatedBy--> Workaround**, but this direct relationship would record or retrieve the runbook used for this specific incident.
+
+2. **Incident --hasRisk--> Risk**  
+   For “Are there any ongoing risks related to the incident recovery?”  
+   We already have **Recovery Plan --hasRisk--> Risk**, but this direct relationship would record risks specifically associated with this incident’s recovery.
+
+Should we add these two direct relationships?
+
+### Turn 19 — user
+
+Yes, adding those two direct relationships would enhance the clarity and specificity of the model, allowing for more precise associations between incidents and their respective runbooks and risks. Here’s the confirmation and rationale for each addition:  1. **Incident --usesRunbook--> Runbook**      Yes, this relationship should be added. It provides a direct connection between an incident and the specific runbook utilized for mitigation efforts, enabling easier retrieval and documentation of the procedural guidance relevant to each incident.  2. **Incident --hasRisk--> Risk**      Yes, this relationship should also be added. It allows for direct tracking of risks that are specifically associated with the current incident's recovery, separate from more general risks tied to the recovery plan.  By adding these relationships, you ensure that the incident management process is more robust, with clearly defined connections that facilitate easier access to pertinent operational details. If you're ready, I can help you finalize these additions or proceed to the next phase!
+
+### Turn 19 — assistant
+
+**Tool call: `apply_ontology_yaml`**
+
+```
+{
+  "yaml": "relationships:\n  - name: usesRunbook\n    from: Incident\n    to: Runbook\n  - name: hasRisk\n    from: Incident\n    to: Risk\n"
+}
+```
+
+### Turn 19 — tool
+
+Applied. Added 2, updated 0 existing item(s).
+
+### Turn 19 — assistant
+
+Captured the two direct relationships: **Incident uses Runbook** and **Incident has Risk**.
+
+**Phase 3 recap — relationships captured**
+
+The model now connects:
+
+- Alerts to incidents.
+- Incidents to affected IT services, impacted business services, environment, resolver groups, commander, stakeholders, communications, evidence, runbooks, workarounds, recovery plans, risks, reviews, assessments, and notification workflow.
+- IT services to business services, applications, dependencies, resolver groups, on-call staffing, runbooks, recovery plans, and environments.
+- Applications to service owners, technical owners, application dependencies, IT services, and environments.
+- Emergency changes to incidents and IT services.
+- Reviews to corrective actions.
+- Materiality assessments to regulatory notifications.
+- Communication updates to stakeholders.
+- Resolver groups and on-call engineers to environments.
+
+Every confirmed class has at least one relationship, and we added direct relationships where the Phase 1 questions named two things together.
+
+Please confirm: **does this relationship coverage look right, or is there any connection that is wrong, missing, or directionally reversed before we move to decision-bearing properties?**
+
+### Turn 20 — user
+
+Your Phase 3 recap accurately summarizes the relationships captured in the model, and I confirm that the coverage looks right. Each relationship aligns well with the operational context and requirements we discussed earlier, ensuring that all relevant classes are properly connected.  To summarize: - Your connections among incidents, alerts, services, applications, and the various roles reflect an effective structure for incident management and operational governance. - The addition of direct relationships for **Incident uses Runbook** and **Incident has Risk** enhances specificity and clarity, which is a valuable improvement. - There are no apparent wrong connections, missing links, or directionally reversed relationships based on our prior discussions.  Everything looks appropriately structured, and I believe you're set to proceed to decision-bearing properties. If you’re ready, let’s continue to that next phase!
+
 ### Turn 20 — assistant
 
-I inspected the current graph. Good news: **every confirmed class has at least one relationship**.
+Great — moving to **Phase 4: decision-bearing properties**.
 
-I see one remaining relationship gap from the original tasks around communications/audiences. We have:
+Properties are values the agent needs to identify, filter, compare, decide, explain, or populate in an action. I’ll avoid “nice to know” fields.
 
-- **Stakeholder Communication --about--> Incident**
-- **Stakeholder Communication --sent to--> Business Owner**
+First batch: **Incident** properties directly needed by your questions/actions.
 
-But Phase 1 also included **all-staff communication updates**, **affected users**, and Service Desk Staff as a first-line communication/triage role.
+Please confirm or correct these proposed Incident properties:
 
-Please confirm which of these direct relationships are operationally real for the agent’s tasks:
+1. **status** — needed for “What is the status of the ongoing incident?”, “latest update on resolution,” and closure decisions.  
+   Type: fixed choice, with allowed values to define later.
 
-1. **Stakeholder Communication --sent to--> Affected User Group**  
-   For targeted updates to impacted users/user groups.
+2. **isMajorIncident** — needed for “Has this incident been classified as a major incident?” and “Declare the incident as a major incident if criteria are met.”  
+   Type: boolean.
 
-2. **Stakeholder Communication --sent to--> Service Desk Staff**  
-   For making sure the service desk has the latest message for user calls/tickets.
+3. **severity** — needed for “What is the severity level of the current incident?” and major-incident/materiality decisions.  
+   Type: fixed choice, allowed values later.
 
-3. **Stakeholder Communication --prepared by--> Incident Response Team Member**  
-   For major-incident communications supported by incident response team members.
+4. **priority** — needed for “What is the priority level of the current incident?” and response/routing urgency.  
+   Type: fixed choice, allowed values later.
 
-Please confirm any that are required, and reject any that are not needed.
+5. **openedAt** — needed to track incident lifecycle timing and support acknowledgement / response-time calculations.  
+   Type: date/time.  
+   The tool only has `date`, so we would record this as `date` even though operationally it means timestamp.
+
+6. **resolvedAt** — needed for closure readiness and tracking time to resolution.  
+   Type: date/time, recorded as `date`.
+
+7. **closedAt** — needed for “How do we close the incident once it has been resolved?” and post-closure verification.  
+   Type: date/time, recorded as `date`.
+
+Do these belong on **Incident**, and are any of them unnecessary for the Phase 1 questions/actions?
 
 ### Turn 21 — user
 
-Let’s evaluate the proposed relationships regarding stakeholder communications to determine their operational relevance for the agent’s tasks:  1. **Stakeholder Communication --sent to--> Affected User Group**      - **Confirmed**: This relationship is operationally real for the agent's tasks. Targeted updates to impacted users or groups are essential for effective communication during incidents, ensuring those affected are informed appropriately.  2. **Stakeholder Communication --sent to--> Service Desk Staff**      - **Optional/Not Required**: While it can be beneficial for Service Desk Staff to be informed of communications, it is not strictly necessary if the communication is considered an all-staff update. If the agent’s focus is on broader communications without specific routing to Service Desk Staff, this relationship can be deemed redundant for the current model.  3. **Stakeholder Communication --prepared by--> Incident Response Team Member**      - **Confirmed**: This relationship is necessary. It captures the involvement of incident response team members in preparing major incident communications, which is part of the incident management workflow.  ### Summary: - **Required Relationships:**    - Stakeholder Communication --sent to--> Affected User Group   - Stakeholder Communication --prepared by--> Incident Response Team Member - **Optional Relationship:**    - Stakeholder Communication --sent to--> Service Desk Staff (not required for the operational tasks)  If you'd like to proceed with these confirmations or have further adjustments to make, just let me know!
+Your proposed properties for the **Incident** class are well-focused on the needs identified in the Phase 1 questions and actions. Here’s the confirmation for each property:  1. **status** — Correct. This property is essential for tracking the incident's current status, supporting updates, and guiding closure decisions.      Type: fixed choice, with allowed values defined later.  2. **isMajorIncident** — Correct. This boolean property is crucial for identifying whether the incident is classified as a major incident, impacting decisions related to escalation and declaration.      Type: boolean.  3. **severity** — Correct. This property is necessary for assessing the severity level of the incident, influencing major-incident classification and materiality assessments.      Type: fixed choice, with allowed values defined later.  4. **priority** — Correct. This property is important for determining the urgency of incident responses and routing efforts effectively.      Type: fixed choice, with allowed values defined later.  5. **openedAt** — Correct. Tracking the time an incident is opened is essential for lifecycle management and response-time calculations.      Type: date/time, recorded as `date`.  6. **resolvedAt** — Correct. This property supports closure readiness and allows tracking of the time taken to resolve the incident.      Type: date/time, recorded as `date`.  7. **closedAt** — Correct. This property is necessary for managing the incident closure and supporting post-closure verification efforts.      Type: date/time, recorded as `date`.  All of these properties belong on the **Incident** class and are necessary to fulfill the requirements derived from the Phase 1 questions and actions. None of them appear unnecessary in this context.   If you're ready, we can continue to the next batch of properties!
 
 ### Turn 21 — assistant
 
@@ -1653,122 +1107,95 @@ Let’s evaluate the proposed relationships regarding stakeholder communications
 
 ```
 {
-  "yaml": "relationships:\n  - name: sentTo\n    from: StakeholderCommunication\n    to: AffectedUserGroup\n  - name: preparedBy\n    from: StakeholderCommunication\n    to: IncidentResponseTeamMember\n"
+  "yaml": "classes:\n  Incident:\n    properties:\n      status:\n        type: text\n      isMajorIncident:\n        type: boolean\n      severity:\n        type: text\n      priority:\n        type: text\n      openedAt:\n        type: date\n      resolvedAt:\n        type: date\n      closedAt:\n        type: date\n"
 }
 ```
 
 ### Turn 21 — tool
 
-Applied. Added 2, updated 0 existing item(s).
+Applied. Added 0, updated 1 existing item(s).
 
 ### Turn 21 — assistant
 
-Recorded the two required communication relationships and excluded the optional Service Desk Staff audience relationship.
+Captured those **Incident** properties.
 
-Phase 3 recap — confirmed relationship groups:
+Next batch: properties needed for alert acknowledgement, communications, and evidence preservation.
 
-**Incident/service detection and impact**
-- Incident impacts IT Service
-- Incident triggered by Alert
-- Alert generated by Monitoring Tool
-- Monitoring Tool monitors IT Service
-- IT Service depends on IT Service
+Please confirm or correct these:
 
-**Ownership, assignment, response**
-- IT Service owned by Service Owner
-- IT Service supported by Application Owner
-- Incident assigned to Resolver Group
-- Resolver Group staffed by On-call Engineer
-- Incident triaged by Service Desk Staff
+**Alert**
+1. **status** — needed to know whether the alert is still active or acknowledged. Type: fixed choice later.
+2. **triggeredAt** — needed to understand alert timing and incident creation context. Type: date.
+3. **acknowledgedAt** — needed for “How do we track the time taken to acknowledge incidents?” Type: date.
 
-**Major incident coordination**
-- Major Incident escalated from Incident
-- Major Incident led by Incident Commander
-- Major Incident supported by Incident Response Team Member
+**Communication Update**
+4. **sentAt** — needed to know the latest update and communication cadence. Type: date.
+5. **message** — needed to pass/send the actual status update to stakeholders. Type: text.
 
-**Communications**
-- Stakeholder Communication about Incident
-- Stakeholder Communication sent to Business Owner
-- Stakeholder Communication sent to Affected User Group
-- Stakeholder Communication prepared by Incident Response Team Member
+**Evidence**
+6. **preservationRequired** — needed for “Is there any evidence related to this incident that needs to be preserved?” Type: boolean.
+7. **preservationStatus** — needed to know whether required evidence has actually been preserved. Type: fixed choice later.
 
-**Regulatory/materiality**
-- Materiality Assessment assesses Incident
-- Materiality Assessment reviewed by Compliance Officer
-- Regulatory Notification based on Materiality Assessment
-- Regulatory Notification notifies Regulator
-- Regulatory Notification about Incident
+Do these properties belong, and is any one unnecessary for the Phase 1 questions/actions? 
 
-**Recovery/change/workaround**
-- Recovery Plan for Incident
-- Recovery Plan restores IT Service
-- Recovery Plan uses Backup
-- Backup for IT Service
-- Emergency Change related to Incident
-- Emergency Change changes IT Service
-- Emergency Change applies in Environment
-- Workaround applies to Incident
-
-**Post-incident improvement**
-- Post-Incident Review reviews Incident
-- Post-Incident Review identifies Corrective Action
-- Corrective Action addresses Incident
-
-**Cybersecurity**
-- Cybersecurity Incident is type of Incident
-- Investigation investigates Cybersecurity Incident
-- Investigation supported by Incident Response Team Member
-
-**Context and impact**
-- Incident occurs in Environment
-- IT Service runs in Environment
-- IT Service serves Business Line
-- Incident affects Affected User Group
-
-Please confirm or correct this Phase 3 relationship recap. Then we’ll move to Phase 4: decision-bearing properties only — values needed to identify, filter, compare, decide, explain, or perform the actions.
 
 ### Turn 22 — user
 
-Your Phase 3 recap is accurate and comprehensive. Here’s the confirmation of the recorded relationship groups:  ### Relationship Groups Confirmed: **Incident/Service Detection and Impact:** - Incident impacts IT Service - Incident triggered by Alert - Alert generated by Monitoring Tool - Monitoring Tool monitors IT Service - IT Service depends on IT Service  **Ownership, Assignment, Response:** - IT Service owned by Service Owner - IT Service supported by Application Owner - Incident assigned to Resolver Group - Resolver Group staffed by On-call Engineer - Incident triaged by Service Desk Staff  **Major Incident Coordination:** - Major Incident escalated from Incident - Major Incident led by Incident Commander - Major Incident supported by Incident Response Team Member  **Communications:** - Stakeholder Communication about Incident - Stakeholder Communication sent to Business Owner - Stakeholder Communication sent to Affected User Group - Stakeholder Communication prepared by Incident Response Team Member  **Regulatory/Materiality:** - Materiality Assessment assesses Incident - Materiality Assessment reviewed by Compliance Officer - Regulatory Notification based on Materiality Assessment - Regulatory Notification notifies Regulator - Regulatory Notification about Incident  **Recovery/Change/Workaround:** - Recovery Plan for Incident - Recovery Plan restores IT Service - Recovery Plan uses Backup - Backup for IT Service - Emergency Change related to Incident - Emergency Change changes IT Service - Emergency Change applies in Environment - Workaround applies to Incident  **Post-Incident Improvement:** - Post-Incident Review reviews Incident - Post-Incident Review identifies Corrective Action - Corrective Action addresses Incident  **Cybersecurity:** - Cybersecurity Incident is type of Incident - Investigation investigates Cybersecurity Incident - Investigation supported by Incident Response Team Member  **Context and Impact:** - Incident occurs in Environment - IT Service runs in Environment - IT Service serves Business Line - Incident affects Affected User Group  ### Summary Confirmation: All classes and relationships have been accurately recorded and reflect the operational needs discussed in previous phases. If you’re ready to proceed to Phase 4, focusing on decision-bearing properties and their values, please go ahead!
+Your proposed properties for **Alert**, **Communication Update**, and **Evidence** are well-aligned with the operational needs identified in the Phase 1 questions and actions. Here’s the confirmation for each property:  **Alert** 1. **status** — Correct. This property is essential for identifying whether the alert is active or acknowledged, informing management actions.      Type: fixed choice, with allowed values defined later.  2. **triggeredAt** — Correct. This property is important for understanding the timing of the alert and the context of incident creation, which is critical for tracking incidents over time.      Type: date.  3. **acknowledgedAt** — Correct. This property enables tracking the time taken to acknowledge alerts, facilitating performance metrics around incident response.      Type: date.  **Communication Update** 4. **sentAt** — Correct. This property is necessary for understanding when the latest communication update was sent, which supports the communication cadence and ensures timely information flow.      Type: date.  5. **message** — Correct. This property captures the actual content of the communication update sent to stakeholders, making it essential for effective communication management.      Type: text.  **Evidence** 6. **preservationRequired** — Correct. This boolean property is crucial for determining whether evidence preservation is necessary, helping ensure compliance with operational protocols.      Type: boolean.  7. **preservationStatus** — Correct. This property is important for tracking whether the required evidence has been preserved, ensuring accountability and clarity in the incident management process.      Type: fixed choice, with allowed values defined later.  All of these properties belong to their respective classes and are necessary based on the Phase 1 questions and actions. If you’re ready, we can move on to the next batch of properties!
 
 ### Turn 22 — assistant
 
-Great — Phase 3 is confirmed.
+**Tool call: `apply_ontology_yaml`**
 
-Phase 4: decision-bearing properties. We’ll add only values the agent needs to **identify, filter, compare, decide, explain, or act**. I’ll start with **Incident**, because most questions/actions depend on it.
+```
+{
+  "yaml": "classes:\n  Alert:\n    properties:\n      status:\n        type: text\n      triggeredAt:\n        type: date\n      acknowledgedAt:\n        type: date\n  CommunicationUpdate:\n    properties:\n      sentAt:\n        type: date\n      message:\n        type: text\n  Evidence:\n    properties:\n      preservationRequired:\n        type: boolean\n      preservationStatus:\n        type: text\n"
+}
+```
 
-Proposed **Incident** properties:
+### Turn 22 — tool
 
-1. **incidentId** — text  
-   Needed to identify/retrieve/open/update/pass the incident to tools.
+Applied. Added 0, updated 3 existing item(s).
 
-2. **status** — text, likely fixed choices later  
-   Needed for “What is the current status of the incident?”
+### Turn 22 — assistant
 
-3. **severityLevel** — text, likely fixed choices later  
-   Needed for “What is the severity level?” and escalation decisions.
+Captured properties for **Alert**, **Communication Update**, and **Evidence**.
 
-4. **firstDetectedAt** — date  
-   Needed for “When was the incident first detected?”
+Next batch: properties for assessment, regulatory notification, risk, emergency change, corrective action, and review.
 
-5. **affectedUserCount** — number  
-   Needed for “How many users are affected?”
+Please confirm or correct these:
 
-6. **estimatedRestorationTime** — date  
-   Needed for “What is the timeline for restoring normal operations?”
+1. **Materiality Assessment — outcome**  
+   Needed to evaluate reportability. Type: fixed choice later.
 
-7. **issueKey** — text  
-   Needed for “What incidents have been logged for the same issue previously?”  
-   This would be a stable identifier/fingerprint/category used to match repeat incidents. If your process does not have this, we should not add it.
+2. **Materiality Assessment — assessedAt**  
+   Needed to know whether/when assessment was conducted. Type: date.
 
-8. **summary** — text  
-   Needed if the agent must create/open an incident or explain what it is about.
+3. **Regulatory Notification — status**  
+   Needed to track whether the notification process has been initiated/submitted/completed. Type: fixed choice later.
 
-Please confirm which of these Incident properties are actually used in decisions, answers, explanations, or tool calls — and reject any that are only “nice to know.”
+4. **Regulatory Notification — requiredBy**  
+   Needed if the agent must know the deadline for regulatory notification. Type: date.  
+   Does the Phase 1 reporting workflow require tracking this deadline, or should we exclude it for now?
+
+5. **Risk — status**  
+   Needed for ongoing risks related to recovery. Type: fixed choice later.
+
+6. **Emergency Change — status**  
+   Needed to know whether the emergency change is requested/approved/executed/verified. Type: fixed choice later.
+
+7. **Corrective Action — status**  
+   Needed to track review follow-up actions. Type: fixed choice later.
+
+8. **Post-Incident Review — completedAt**  
+   Needed for “last post-incident review” and knowing whether the review has been conducted. Type: date.
+
+Do these belong? In particular, should **Regulatory Notification.requiredBy** be included because deadlines are part of your regulatory-reporting workflow, or left out? 
+
 
 ### Turn 23 — user
 
-Your proposed properties for the **Incident** class are relevant and aligned with the operational needs for decision-making and incident management. Here’s the evaluation of each proposed property:  1. **incidentId** — text      - **Confirmed**: This property is essential for identifying, retrieving, opening, updating, and passing the incident to tools. It is a critical identifier.  2. **status** — text, likely fixed choices later      - **Confirmed**: This property is necessary for determining the current status of the incident, helping answer multiple questions and guide incident management actions.  3. **severityLevel** — text, likely fixed choices later      - **Confirmed**: This is crucial for understanding the severity of the incident, supporting escalation decisions and prioritization actions.  4. **firstDetectedAt** — date      - **Confirmed**: This property is important for tracking the incident’s timeline and answering questions related to detection timing.  5. **affectedUserCount** — number      - **Confirmed**: This property helps quantify the impact of an incident, which is vital for communication and operational decisions.  6. **estimatedRestorationTime** — date      - **Confirmed**: This is essential for informing stakeholders of expected timelines for restoration, thus aiding in operational planning and communication.  7. **issueKey** — text      - **Optional/Not Required**: While beneficial for categorizing and matching repeat incidents, if your process does not have a specific need for this categorization as part of incident tracking and management, it can be excluded.  8. **summary** — text      - **Confirmed**: This property is important for creating, opening, and explaining the incident’s context, making it necessary for agent interactions.  ### Summary: **Confirmed Properties for Incident Class:** - incidentId - status - severityLevel - firstDetectedAt - affectedUserCount - estimatedRestorationTime - summary  **Property to Exclude:** - issueKey (unless your operational needs specify otherwise)  If you’d like to proceed with the confirmed properties for the Incident class or have additional classes or properties to discuss, just let me know!
+Your proposed properties for **Materiality Assessment**, **Regulatory Notification**, **Risk**, **Emergency Change**, **Corrective Action**, and **Post-Incident Review** are well-structured and align with the needs identified in the Phase 1 questions/actions. Here’s the confirmation for each property:  1. **Materiality Assessment — outcome**      Correct. This property is essential for evaluating whether an incident is reportable and what actions are necessary.      Type: fixed choice, with allowed values defined later.  2. **Materiality Assessment — assessedAt**      Correct. This property allows tracking when the assessment was conducted, which is important for accountability and time-sensitive decisions.      Type: date.  3. **Regulatory Notification — status**      Correct. This property is vital for monitoring the progress of the regulatory notification process and whether it has been initiated, submitted, or completed.      Type: fixed choice, with allowed values defined later.  4. **Regulatory Notification — requiredBy**      Correct. This property is relevant for tracking the deadline for regulatory notification. Given that obligations typically have specific deadlines, including this property would support timely responses and regulatory compliance, thus it should be included in your model.      Type: date.  5. **Risk — status**      Correct. This property is important for managing ongoing risks related to incident recovery and ensuring they are actively tracked and mitigated.      Type: fixed choice, with allowed values defined later.  6. **Emergency Change — status**      Correct. This property helps track the various states of the emergency change process, which is critical for operational oversight.      Type: fixed choice, with allowed values defined later.  7. **Corrective Action — status**      Correct. This property is necessary for tracking the status of follow-up actions identified in post-incident reviews and ensuring accountability.      Type: fixed choice, with allowed values defined later.  8. **Post-Incident Review — completedAt**      Correct. This property is essential for documenting when the post-incident review was completed, supporting the overall incident management lifecycle.      Type: date.  All of these properties belong to their respective classes, and including **Regulatory Notification — requiredBy** is justified given the importance of deadline tracking for compliance. If you're ready, we can move on to the next batch of properties!
 
 ### Turn 23 — assistant
 
@@ -1776,49 +1203,48 @@ Your proposed properties for the **Incident** class are relevant and aligned wit
 
 ```
 {
-  "yaml": "classes:\n  Incident:\n    properties:\n      incidentId:\n        type: text\n      status:\n        type: text\n      severityLevel:\n        type: text\n      firstDetectedAt:\n        type: date\n      affectedUserCount:\n        type: number\n      estimatedRestorationTime:\n        type: date\n      summary:\n        type: text\n"
+  "yaml": "classes:\n  MaterialityAssessment:\n    properties:\n      outcome:\n        type: text\n      assessedAt:\n        type: date\n  RegulatoryNotification:\n    properties:\n      status:\n        type: text\n      requiredBy:\n        type: date\n  Risk:\n    properties:\n      status:\n        type: text\n  EmergencyChange:\n    properties:\n      status:\n        type: text\n  CorrectiveAction:\n    properties:\n      status:\n        type: text\n  PostIncidentReview:\n    properties:\n      completedAt:\n        type: date\n"
 }
 ```
 
 ### Turn 23 — tool
 
-Applied. Added 0, updated 1 existing item(s).
+Applied. Added 0, updated 6 existing item(s).
 
 ### Turn 23 — assistant
 
-Recorded the confirmed Incident properties and excluded **issueKey**.
+Captured those governance, assessment, reporting, risk, change, corrective-action, and review properties.
 
-Next property batch: **Major Incident** and **Cybersecurity Incident**.
+Next batch: service, ownership, environment, and communication-cadence properties.
 
-Proposed **Major Incident** properties:
+Please confirm or correct these:
 
-1. **majorIncidentId** — text  
-   Needed to identify/retrieve/pass the major incident record.
+1. **IT Service — criticality**  
+   Needed because environment staffing and response may vary by service criticality, and impact/major-incident decisions often depend on it. Type: fixed choice later.
 
-2. **coordinationStatus** — text, likely fixed choices later  
-   Needed to manage enhanced coordination workflow.
+2. **Business Service — criticality**  
+   Needed to assess business impact and regulatory/materiality significance. Type: fixed choice later.
 
-3. **declaredAt** — date  
-   Needed to explain when the incident became major and support timelines.
+3. **Environment — name**  
+   Needed to distinguish production, test, development, pre-production. Type: fixed choice later if your values are standardized.
 
-Proposed **Cybersecurity Incident** properties:
+4. **Incident Commander — communicationCadence**  
+   Needed for “What should be the communication cadence during a major incident?” Type: text, unless it is a fixed set.
 
-4. **cyberIncidentId** — text  
-   Needed to identify/retrieve/pass the cybersecurity incident record.
+5. **Service Owner — contactMethod**  
+   Needed only if the agent must contact or route to the service owner directly. Type: text.  
+   Is this actually required for your listed actions, or should contact details stay outside this ontology?
 
-5. **investigationStatus** — text, likely fixed choices later  
-   Needed for “Is there an active investigation for this cybersecurity incident?”  
-   Alternative: this may belong only on **Investigation** rather than Cybersecurity Incident.
+6. **Stakeholder — contactMethod**  
+   Needed only if the agent sends communication updates to stakeholders. Type: text.  
+   Is this needed because the agent performs stakeholder communications, or handled by another communication tool outside this model?
 
-6. **evidenceHandlingRequired** — boolean  
-   Needed only if the agent must decide whether cybersecurity evidence protocols apply. You mentioned evidence management protocols earlier, but it was not in the original question/action list except indirectly via investigation/regulatory workflows.
-
-Please confirm which of these are needed, and whether **investigationStatus** belongs on Cybersecurity Incident, Investigation, or both. 
+Which of these should we keep? 
 
 
 ### Turn 24 — user
 
-Let’s evaluate your proposed properties for the **Major Incident** and **Cybersecurity Incident** classes:  ### Proposed Major Incident Properties: 1. **majorIncidentId** — text      - **Confirmed**: This property is essential for identifying, retrieving, and passing the major incident record, enabling effective incident management.  2. **coordinationStatus** — text, likely fixed choices later      - **Confirmed**: This is necessary for managing the enhanced coordination workflow specific to major incidents, crucial for operational tracking.  3. **declaredAt** — date      - **Confirmed**: This property supports explanation and tracking of when the incident was declared a major incident, aiding in timeline management.  ### Proposed Cybersecurity Incident Properties: 4. **cyberIncidentId** — text      - **Confirmed**: This property is important for identifying, retrieving, and passing the cybersecurity incident record, facilitating the distinct management of these incidents.  5. **investigationStatus** — text, likely fixed choices later      - **Not Required**: This property would be more relevant on the **Investigation** class rather than the Cybersecurity Incident class. The status of the investigation should pertain to the investigation process itself, and thus it should be tracked separately.  6. **evidenceHandlingRequired** — boolean      - **Optional/Not Required**: While important for evidence management in cybersecurity, this property is not explicitly tied to the defined questions or actions you've outlined previously. If your operational needs dictate strict evidence handling based on incident classification, it can be reconsidered; otherwise, it could be excluded for clarity.  ### Summary: **Confirmed Properties for Major Incident:** - majorIncidentId - coordinationStatus - declaredAt  **Confirmed Properties for Cybersecurity Incident:** - cyberIncidentId  **To Exclude:** - investigationStatus (to be included in the Investigation class) - evidenceHandlingRequired (unless operational processes dictate its necessity)  If you’re ready to proceed with the confirmed properties or have additional classes or properties to discuss, just let me know!
+Your proposed properties regarding service, ownership, environment, and communication cadence are relevant and closely aligned with operational needs. Here’s the confirmation and feedback for each property:  1. **IT Service — criticality**      Correct. This property is essential as it informs staffing decisions, response approaches, and impact assessments for incidents, including major-incident determinations.      Type: fixed choice, with allowed values defined later.  2. **Business Service — criticality**      Correct. This property is necessary for assessing the business impact and understanding regulatory and materiality significance associated with business services.      Type: fixed choice, with allowed values defined later.  3. **Environment — name**      Correct. This property is crucial for distinguishing between different environments such as production, test, development, and pre-production, aiding in operational alignment.      Type: fixed choice, particularly if values are standardized.  4. **Incident Commander — communicationCadence**      Correct. This property is important for specifying communication frequency during major incidents, ensuring that stakeholders receive timely updates.      Type: text, unless you decide to standardize it with a fixed set.  5. **Service Owner — contactMethod**      This property could be valuable if the agent needs to contact or route to the service owner directly as part of incident management. However, if these contact details are not needed for the actions discussed in Phase 1, it might be better to handle them outside this ontology to keep the model streamlined. If direct contact is not essential, consider excluding it.  6. **Stakeholder — contactMethod**      Similar to the service owner, this property would be relevant if the agent is directly responsible for sending communications to stakeholders. If stakeholder communications are typically managed by another tool or system outside this model, it might be best to omit this property. Otherwise, if direct communication via the agent is required, then it should be included.  **Recommendations:** - Keep **IT Service — criticality**, **Business Service — criticality**, and **Environment — name**. - Keep **Incident Commander — communicationCadence** if the communication cadence needs to be defined specifically. - Consider excluding **Service Owner — contactMethod** and **Stakeholder — contactMethod** unless it is necessary for the agent's direct communications.  Let me know how you'd like to proceed!
 
 ### Turn 24 — assistant
 
@@ -1826,119 +1252,71 @@ Let’s evaluate your proposed properties for the **Major Incident** and **Cyber
 
 ```
 {
-  "yaml": "classes:\n  MajorIncident:\n    properties:\n      majorIncidentId:\n        type: text\n      coordinationStatus:\n        type: text\n      declaredAt:\n        type: date\n  CybersecurityIncident:\n    properties:\n      cyberIncidentId:\n        type: text\n"
+  "yaml": "classes:\n  ITService:\n    properties:\n      criticality:\n        type: text\n  BusinessService:\n    properties:\n      criticality:\n        type: text\n  Environment:\n    properties:\n      name:\n        type: text\n  IncidentCommander:\n    properties:\n      communicationCadence:\n        type: text\n"
 }
 ```
 
 ### Turn 24 — tool
 
-Applied. Added 0, updated 2 existing item(s).
+Applied. Added 0, updated 4 existing item(s).
 
 ### Turn 24 — assistant
 
-Recorded those properties. I excluded **evidenceHandlingRequired**, and we’ll consider **investigationStatus** under the Investigation class.
+Captured the four confirmed properties:
 
-Next property batch: service, alert, monitoring, and environment.
+- **IT Service.criticality**
+- **Business Service.criticality**
+- **Environment.name**
+- **Incident Commander.communicationCadence**
 
-Proposed **IT Service** properties:
+I left out **Service Owner.contactMethod** and **Stakeholder.contactMethod** for now, because you did not confirm that the ontology itself must hold contact details. The model can still route communications through the **Communication Update --sentTo--> Stakeholder** relationship and an external communication tool if needed.
 
-1. **serviceId** — text  
-   Needed to identify/retrieve/connect services.
+**Phase 4 recap — decision-bearing properties captured**
 
-2. **serviceName** — text  
-   Needed for user-facing answers like “Which service is impacted?”
+Current property coverage supports:
+- Incident status, major classification, severity, priority, opened/resolved/closed timing.
+- Alert status and acknowledgement timing.
+- Communication update timing and message content.
+- Evidence preservation need and preservation status.
+- Materiality assessment outcome and timing.
+- Regulatory notification status and deadline.
+- Risk status.
+- Emergency change status.
+- Corrective action status.
+- Post-incident review completion timing.
+- IT/business service criticality.
+- Environment name.
+- Incident commander communication cadence.
 
-3. **criticality** — text, likely fixed choices later  
-   Needed if service criticality affects severity, escalation, recovery, or regulatory decisions. Confirm only if it actually does.
-
-Proposed **Alert** properties:
-
-4. **alertId** — text  
-   Needed to identify/retrieve/connect triggering alerts.
-
-5. **alertTimestamp** — date  
-   Needed to support detection timeline.
-
-6. **alertSeverity** — text, likely fixed choices later  
-   Needed if alert severity helps decide incident severity/escalation.
-
-Proposed **Monitoring Tool** property:
-
-7. **toolName** — text  
-   Needed to identify which monitoring tools assess the service.
-
-Proposed **Environment** property:
-
-8. **environmentType** — text, likely fixed choices later  
-   Needed for production/pre-production/test/disaster recovery context.
-
-Which of these are needed for the agent’s questions/actions, and should any be excluded?
+Before we move to meanings and aliases: **is this property set correct, or is any Phase 1 question/action still impossible to answer because a decision-bearing property is missing?**
 
 ### Turn 25 — user
 
-Let’s evaluate your proposed properties for the **IT Service**, **Alert**, **Monitoring Tool**, and **Environment** classes:  ### Proposed IT Service Properties: 1. **serviceId** — text      - **Confirmed**: This property is essential for identifying, retrieving, and connecting services as part of incident management.  2. **serviceName** — text      - **Confirmed**: This property is important for user-facing interactions, particularly in answering questions like "Which service is impacted?"  3. **criticality** — text, likely fixed choices later      - **Confirmed**: This property is relevant as service criticality can indeed affect decisions regarding severity, escalation, recovery, and regulatory actions. It is necessary for the agent to know the criticality status of the service.  ### Proposed Alert Properties: 4. **alertId** — text      - **Confirmed**: This property is necessary for identifying, retrieving, and connecting alert records related to incidents.  5. **alertTimestamp** — date      - **Confirmed**: This property supports understanding the timeline of the detection process, which is essential for incident management.  6. **alertSeverity** — text, likely fixed choices later      - **Confirmed**: This property is important if alert severity helps inform incident severity or escalation decisions, aiding in proper prioritization.  ### Proposed Monitoring Tool Property: 7. **toolName** — text      - **Confirmed**: This property is necessary for identifying which monitoring tools assess the service, ensuring that the right tools are referenced in the incident management process.  ### Proposed Environment Property: 8. **environmentType** — text, likely fixed choices later      - **Confirmed**: This property is relevant as it specifies the context in which services operate, influencing incident handling and regulatory decisions.  ### Summary: All proposed properties for **IT Service**, **Alert**, **Monitoring Tool**, and **Environment** classes are confirmed as necessary for the agent’s questions and actions. None need to be excluded at this time.   If you’re ready to proceed with the confirmed properties or have additional classes or properties to discuss, just let me know!
+Your recap of the decision-bearing properties captured is thorough, and I confirm that this property set is well-aligned with the Phase 1 questions and actions. The properties you've defined cover the essential elements required for effective incident management, communication, and reporting.  Here are a few key points regarding completeness:  - The properties related to **Incident**, **Alert**, **Communication Update**, **Evidence**, **Materiality Assessment**, **Regulatory Notification**, **Risk**, **Emergency Change**, **Corrective Action**, **Post-Incident Review**, **IT Service**, **Business Service**, **Environment**, and **Incident Commander** provide comprehensive coverage for decision-making and operational actions. - Since you've excluded **Service Owner.contactMethod** and **Stakeholder.contactMethod** for valid reasons, this decision is appropriate if those communications can be routed through the existing **Communication Update** relationships and handled by external tools.  After reviewing what has been captured and verifying against the Phase 1 questions and actions, I do not see any critical decision-bearing properties that are missing. Everything necessary for operationalizing the identified questions and actions appears to be in place.  If you're ready to proceed to meanings and aliases, we can move on!
 
 ### Turn 25 — assistant
 
-**Tool call: `apply_ontology_yaml`**
+Great — moving to **Phase 5: language layer**.
 
-```
-{
-  "yaml": "classes:\n  ITService:\n    properties:\n      serviceId:\n        type: text\n      serviceName:\n        type: text\n      criticality:\n        type: text\n  Alert:\n    properties:\n      alertId:\n        type: text\n      alertTimestamp:\n        type: date\n      alertSeverity:\n        type: text\n  MonitoringTool:\n    properties:\n      toolName:\n        type: text\n  Environment:\n    properties:\n      environmentType:\n        type: text\n"
-}
-```
+Now we capture plain meanings and later aliases/synonyms, so the agent can map user wording to the ontology.
 
-### Turn 25 — tool
+First batch: core operational classes. Please confirm or correct these one-sentence meanings:
 
-Applied. Added 0, updated 4 existing item(s).
+1. **Incident** — An operational event or disruption that requires investigation, response, mitigation, recovery, or closure.
 
-### Turn 25 — assistant
+2. **Alert** — A monitoring or detection signal that may trigger the creation or handling of an incident.
 
-Recorded those properties.
+3. **IT Service** — A technology service operated by IT that supports applications, business services, or operational capabilities.
 
-Next property batch: recovery, backup, emergency change, workaround.
+4. **Business Service** — A customer-facing or business-facing capability that may depend on one or more IT services.
 
-Proposed **Recovery Plan** properties:
+5. **Application** — A software system or application component with distinct ownership, deployment context, and operational considerations.
 
-1. **planId** — text  
-   Needed to identify/retrieve/create the plan.
-
-2. **recoveryStatus** — text, likely fixed choices later  
-   Needed to answer what recovery is in place and track restoration progress.
-
-3. **targetRecoveryTime** — date  
-   Needed for restoration timeline.
-
-Proposed **Backup** properties:
-
-4. **backupId** — text  
-   Needed to select/pass a backup to a restore tool.
-
-5. **backupTimestamp** — date  
-   Needed to choose a suitable restore point.
-
-Proposed **Emergency Change** properties:
-
-6. **changeId** — text  
-   Needed to identify/execute/track the emergency change.
-
-7. **changeStatus** — text, likely fixed choices later  
-   Needed to know whether the change is proposed, approved, executing, completed, failed, etc.
-
-Proposed **Workaround** properties:
-
-8. **workaroundId** — text  
-   Needed to identify/retrieve the workaround.
-
-9. **instructions** — text  
-   Needed to explain or execute the known workaround.
-
-Which of these are needed, and should any be excluded? 
-
+Are these meanings accurate in your bank’s usage?
 
 ### Turn 26 — user
 
-Let’s evaluate your proposed properties for the **Recovery Plan**, **Backup**, **Emergency Change**, and **Workaround** classes to determine their necessity for the agent’s tasks:  ### Proposed Recovery Plan Properties: 1. **planId** — text      - **Confirmed**: This property is essential for identifying, retrieving, and creating the recovery plan for incident management.  2. **recoveryStatus** — text, likely fixed choices later      - **Confirmed**: This is necessary for understanding the status of recovery efforts, helping track progress during incident resolution.  3. **targetRecoveryTime** — date      - **Confirmed**: This property is important for establishing timelines for restoration, which is crucial for incident management and stakeholder communication.  ### Proposed Backup Properties: 4. **backupId** — text      - **Confirmed**: This property is necessary for selecting and passing the correct backup to a restore tool, supporting efficient recovery operations.  5. **backupTimestamp** — date      - **Confirmed**: This is essential to identify a suitable restore point, making it vital for recovery workflows.  ### Proposed Emergency Change Properties: 6. **changeId** — text      - **Confirmed**: This property is necessary for identifying, executing, and tracking emergency changes in relation to incidents.  7. **changeStatus** — text, likely fixed choices later      - **Confirmed**: This is important for knowing the current state of the emergency change, influencing operational decisions during an incident.  ### Proposed Workaround Properties: 8. **workaroundId** — text      - **Confirmed**: This property is essential for identifying and retrieving specific workarounds that may be applied during incident resolution.  9. **instructions** — text      - **Confirmed**: This property is necessary to explain or execute the known workaround, enabling quick resolution during incidents.  ### Summary: All proposed properties for **Recovery Plan**, **Backup**, **Emergency Change**, and **Workaround** classes are confirmed as necessary for the agent’s questions and actions. None need to be excluded at this time.   If you’re ready to proceed with the confirmed properties or have additional classes or properties to discuss, just let me know!
+Your proposed meanings for the core operational classes are clear, succinct, and align well with how these terms are used in the context of IT operations and incident management. Here’s the confirmation for each meaning:  1. **Incident** — Correct. This definition aptly captures the essence of an incident as an event or disruption needing a managed response and resolution.  2. **Alert** — Correct. This definition effectively describes an alert as a signal from monitoring systems that can lead to further incident management actions.  3. **IT Service** — Correct. This definition accurately expresses that an IT service encompasses technology capabilities that support various applications and business services.  4. **Business Service** — Correct. This definition reflects a customer-facing or internal capability that relies on underlying IT services for functionality.  5. **Application** — Correct. This definition successfully conveys that an application has its own ownership, deployment context, and operational considerations, distinguishing it from the broader IT service.  All the meanings you provided are accurate and appropriately convey the definitions used in the bank's context. If you’re ready, we can proceed to the next batch of classes for meanings and aliases!
 
 ### Turn 26 — assistant
 
@@ -1946,72 +1324,36 @@ Let’s evaluate your proposed properties for the **Recovery Plan**, **Backup**,
 
 ```
 {
-  "yaml": "classes:\n  RecoveryPlan:\n    properties:\n      planId:\n        type: text\n      recoveryStatus:\n        type: text\n      targetRecoveryTime:\n        type: date\n  Backup:\n    properties:\n      backupId:\n        type: text\n      backupTimestamp:\n        type: date\n  EmergencyChange:\n    properties:\n      changeId:\n        type: text\n      changeStatus:\n        type: text\n  Workaround:\n    properties:\n      workaroundId:\n        type: text\n      instructions:\n        type: text\n"
+  "yaml": "classes:\n  Incident:\n    meaning: An operational event or disruption that requires investigation, response, mitigation, recovery, or closure.\n  Alert:\n    meaning: A monitoring or detection signal that may trigger the creation or handling of an incident.\n  ITService:\n    meaning: A technology service operated by IT that supports applications, business services, or operational capabilities.\n  BusinessService:\n    meaning: A customer-facing or business-facing capability that may depend on one or more IT services.\n  Application:\n    meaning: A software system or application component with distinct ownership, deployment context, and operational considerations.\n"
 }
 ```
 
 ### Turn 26 — tool
 
-Applied. Added 0, updated 4 existing item(s).
+Applied. Added 0, updated 5 existing item(s).
 
 ### Turn 26 — assistant
 
-Recorded those properties.
+Captured meanings for the five core operational classes.
 
-Next property batch: materiality, regulatory notification, communications, post-incident review, corrective action.
+Next batch: response and recovery artifacts. Please confirm or correct these meanings:
 
-Proposed **Materiality Assessment** properties:
+1. **Runbook** — A documented operational procedure used to guide incident response, mitigation, recovery, or service operation.
 
-1. **assessmentId** — text  
-   Needed to identify/retrieve/run the assessment.
+2. **Workaround** — A temporary measure used to reduce impact or restore partial service before a full resolution is completed.
 
-2. **assessmentStatus** — text, likely fixed choices later  
-   Needed for “Has a materiality assessment been conducted?”
+3. **Recovery Plan** — A planned set of steps for restoring an affected IT service to an acceptable operational state.
 
-3. **materialityOutcome** — text, likely fixed choices later  
-   Needed to decide/explain whether regulator notification is required.
+4. **Emergency Change** — An urgent change made under emergency procedures to restore service or reduce incident impact.
 
-Proposed **Regulatory Notification** properties:
+5. **Evidence** — Information, records, logs, artifacts, or observations preserved to support incident analysis, accountability, or compliance.
 
-4. **notificationId** — text  
-   Needed to track formal submissions.
-
-5. **notificationStatus** — text, likely fixed choices later  
-   Needed to track workflow/submission status.
-
-6. **submittedAt** — date  
-   Needed to explain whether/when regulators were notified.
-
-Proposed **Stakeholder Communication** properties:
-
-7. **communicationId** — text  
-   Needed to identify/retrieve/send communication.
-
-8. **sentAt** — date  
-   Needed for “Have any communications been sent?”
-
-9. **messageSummary** — text  
-   Needed to explain what was communicated.
-
-Proposed **Post-Incident Review** property:
-
-10. **reviewId** — text  
-   Needed to identify/retrieve/document review findings.
-
-Proposed **Corrective Action** properties:
-
-11. **actionId** — text  
-   Needed to identify/track corrective actions.
-
-12. **actionStatus** — text, likely fixed choices later  
-   Needed if the agent must track follow-up progress.
-
-Which of these are needed, and should any be excluded? 
+Are these meanings accurate? 
 
 
 ### Turn 27 — user
 
-Let’s evaluate your proposed properties for **Materiality Assessment**, **Regulatory Notification**, **Stakeholder Communication**, **Post-Incident Review**, and **Corrective Action** to determine their necessity for the agent’s tasks:  ### Proposed Materiality Assessment Properties: 1. **assessmentId** — text      - **Confirmed**: This property is essential for identifying, retrieving, and running the materiality assessment.  2. **assessmentStatus** — text, likely fixed choices later      - **Confirmed**: This property is necessary for determining whether a materiality assessment has been conducted, which is critical for decision-making.  3. **materialityOutcome** — text, likely fixed choices later      - **Confirmed**: This is important for explaining and deciding whether regulatory notification is required based on the assessment outcome.  ### Proposed Regulatory Notification Properties: 4. **notificationId** — text      - **Confirmed**: This property is necessary for tracking formal submissions related to regulatory notifications.  5. **notificationStatus** — text, likely fixed choices later      - **Confirmed**: This is essential for tracking the workflow and submission status of regulatory notifications.  6. **submittedAt** — date      - **Confirmed**: This property is important for documenting whether/when regulators were notified, providing an explanation for the communication timeline.  ### Proposed Stakeholder Communication Properties: 7. **communicationId** — text      - **Confirmed**: This property is necessary for identifying, retrieving, and sending communications effectively.  8. **sentAt** — date      - **Confirmed**: This is important for tracking and explaining whether communications have been sent, creating a record of communication actions.  9. **messageSummary** — text      - **Confirmed**: This property is essential for explaining what was communicated, providing context for stakeholders.  ### Proposed Post-Incident Review Property: 10. **reviewId** — text      - **Confirmed**: This property is necessary for identifying, retrieving, and documenting the findings of the post-incident review.  ### Proposed Corrective Action Properties: 11. **actionId** — text      - **Confirmed**: This property is essential for identifying and tracking corrective actions, which is vital for improvement efforts.  12. **actionStatus** — text, likely fixed choices later      - **Confirmed**: This property is important if the agent must track the follow-up progress of corrective actions, supporting accountability in implementation.  ### Summary: All proposed properties for **Materiality Assessment**, **Regulatory Notification**, **Stakeholder Communication**, **Post-Incident Review**, and **Corrective Action** classes are confirmed as necessary for the agent’s questions and actions. None need to be excluded at this time.  If you’re ready to proceed with the confirmed properties or have additional classes or properties to discuss, just let me know!
+Your proposed meanings for the response and recovery artifacts are well-articulated and accurately reflect their usage in IT operations and incident management. Here’s the confirmation for each meaning:  1. **Runbook** — Correct. This definition effectively captures the purpose of a runbook as a documented procedure designed to guide responses and operations for incidents.  2. **Workaround** — Correct. This definition succinctly describes a workaround as a temporary solution implemented to mitigate impact or maintain partial service until a full resolution can be achieved.  3. **Recovery Plan** — Correct. This meaning accurately conveys that a recovery plan outlines the steps necessary to restore an affected IT service to its operational state.  4. **Emergency Change** — Correct. This definition clearly identifies an emergency change as a prompt modification made to quickly restore service or alleviate an incident's effects under an expedited process.  5. **Evidence** — Correct. This definition accurately encompasses the types of records and information that need to be preserved for incident-related analysis and compliance purposes.  All of the meanings you provided are accurate and effectively convey the definitions used within your bank’s operational context. If you’re ready, we can proceed to the next batch of classes for meanings and aliases!
 
 ### Turn 27 — assistant
 
@@ -2019,7 +1361,7 @@ Let’s evaluate your proposed properties for **Materiality Assessment**, **Regu
 
 ```
 {
-  "yaml": "classes:\n  MaterialityAssessment:\n    properties:\n      assessmentId:\n        type: text\n      assessmentStatus:\n        type: text\n      materialityOutcome:\n        type: text\n  RegulatoryNotification:\n    properties:\n      notificationId:\n        type: text\n      notificationStatus:\n        type: text\n      submittedAt:\n        type: date\n  StakeholderCommunication:\n    properties:\n      communicationId:\n        type: text\n      sentAt:\n        type: date\n      messageSummary:\n        type: text\n  PostIncidentReview:\n    properties:\n      reviewId:\n        type: text\n  CorrectiveAction:\n    properties:\n      actionId:\n        type: text\n      actionStatus:\n        type: text\n"
+  "yaml": "classes:\n  Runbook:\n    meaning: A documented operational procedure used to guide incident response, mitigation, recovery, or service operation.\n  Workaround:\n    meaning: A temporary measure used to reduce impact or restore partial service before a full resolution is completed.\n  RecoveryPlan:\n    meaning: A planned set of steps for restoring an affected IT service to an acceptable operational state.\n  EmergencyChange:\n    meaning: An urgent change made under emergency procedures to restore service or reduce incident impact.\n  Evidence:\n    meaning: Information, records, logs, artifacts, or observations preserved to support incident analysis, accountability, or compliance.\n"
 }
 ```
 
@@ -2029,51 +1371,28 @@ Applied. Added 0, updated 5 existing item(s).
 
 ### Turn 27 — assistant
 
-Recorded those properties.
+Captured meanings for response and recovery artifacts.
 
-Next property batch: investigation, business line, affected user group, and role/actor identifiers.
+Next batch: communication, review, and regulatory workflow classes. Please confirm or correct these meanings:
 
-Proposed **Investigation** properties:
+1. **Stakeholder** — A person, group, or function that needs to be informed, engaged, or considered during incident response.
 
-1. **investigationId** — text  
-   Needed to identify/retrieve the investigation.
+2. **Communication Update** — A recorded status message or notification sent about an incident to stakeholders.
 
-2. **investigationStatus** — text, likely fixed choices later  
-   Needed for “Is there an active investigation?”
+3. **Post-Incident Review** — A structured review conducted after an incident to analyze causes, response effectiveness, lessons learned, and follow-up actions.
 
-Proposed **Business Line** properties:
+4. **Corrective Action** — A follow-up action identified to reduce recurrence, address gaps, or improve incident response after a review.
 
-3. **businessLineName** — text  
-   Needed to identify/explain which business line is affected.
+5. **Regulatory Notification** — A formal notification or reporting workflow to a regulator concerning an incident.
 
-Proposed **Affected User Group** properties:
+6. **Materiality Assessment** — An assessment used to determine the significance, impact, or reportability of an incident.
 
-4. **groupName** — text  
-   Needed to identify targeted affected groups.
-
-5. **estimatedUserCount** — number  
-   Needed if the affected-user count is tracked at group level as well as Incident level.
-
-For role/actor classes, proposed shared identifying properties:
-
-6. **personName** — text for Service Owner, Application Owner, On-call Engineer, Incident Commander, Incident Response Team Member, Business Owner, Compliance Officer, Service Desk Staff  
-   Needed to answer “who” questions and route communications/assignments.
-
-7. **contactChannel** — text for those same person-like classes  
-   Needed only if the agent must notify or route to them directly; otherwise exclude.
-
-8. **groupName** — text for Resolver Group  
-   Needed to identify assignment target.
-
-9. **regulatorName** — text for Regulator  
-   Needed to identify receiving regulator.
-
-Which of these are needed? Also, should **estimatedUserCount** live on Affected User Group, Incident, or both? 
+Are these meanings accurate? 
 
 
 ### Turn 28 — user
 
-Let’s evaluate your proposed properties for **Investigation**, **Business Line**, **Affected User Group**, and role/actor identifiers to determine their necessity for the agent’s tasks:  ### Proposed Investigation Properties: 1. **investigationId** — text      - **Confirmed**: This property is essential for identifying and retrieving the investigation, making it critical for incident management.  2. **investigationStatus** — text, likely fixed choices later      - **Confirmed**: This property is necessary for determining whether there is an active investigation, supporting the decision-making process surrounding cybersecurity incidents.  ### Proposed Business Line Properties: 3. **businessLineName** — text      - **Confirmed**: This property is important for identifying and explaining the specific business line that is affected, which is useful for stakeholder communications.  ### Proposed Affected User Group Properties: 4. **groupName** — text      - **Confirmed**: This property is essential for identifying targeted affected groups, helping in tailored communication and incident management.  5. **estimatedUserCount** — number      - **Confirmed**: This property should live on the **Affected User Group** class. Tracking affected user count at the group level is particularly valuable for understanding the impact of incidents on different segments within the organization. It can also be useful alongside the overall incident-level count but is best placed specifically within Affected User Group to capture that detail.  ### Proposed Role/Actor Properties: 6. **personName** — text      - **Confirmed**: This property is essential for all relevant roles, as it provides the necessary identification for routing communications and assignments effectively.  7. **contactChannel** — text      - **Optional/Not Required**: While this could be beneficial for direct communications, it is not strictly necessary if the communication can be routed through existing organizational structures. Consider excluding it for now unless direct notification is a clear operational need.  8. **groupName** — text for Resolver Group      - **Confirmed**: This property is necessary for identifying the assignment target, helping to clarify which group should be engaged for incident resolution.  9. **regulatorName** — text for Regulator      - **Confirmed**: This property is important for identifying the specific receiving regulator in the context of regulatory notifications and compliance.  ### Summary: **Confirmed Properties:** - Investigation Class: investigationId, investigationStatus - Business Line Class: businessLineName - Affected User Group Class: groupName, estimatedUserCount - Role/Actor Classes: personName, groupName (for Resolver Group), regulatorName  **Optional Property to Exclude:** - contactChannel (unless direct notification is essential)  If you’re ready to proceed with the confirmed properties or have additional classes or properties to discuss, just let me know!
+Your proposed meanings for the communication, review, and regulatory workflow classes are well-considered and align with their usage in IT operations and incident management. Here’s the confirmation for each meaning:  1. **Stakeholder** — Correct. This definition accurately reflects that stakeholders are individuals or groups that play a role in the incident response process and need to be kept informed or engaged.  2. **Communication Update** — Correct. This meaning effectively captures that a communication update is a recorded message sent to inform stakeholders about the status of an incident.  3. **Post-Incident Review** — Correct. This definition correctly describes the purpose of a post-incident review, which is to evaluate the incident and gather insights for future improvements.  4. **Corrective Action** — Correct. This meaning succinctly conveys that a corrective action is a follow-up measure identified in the aftermath of a review to enhance processes and reduce future risks.  5. **Regulatory Notification** — Correct. This definition accurately communicates that a regulatory notification refers to the formalized process of reporting an incident to the appropriate regulatory authority.  6. **Materiality Assessment** — Correct. This meaning appropriately describes the purpose of a materiality assessment in determining the significance and reportability of incidents.  All of the meanings you provided are accurate and clearly convey the definitions used in the bank’s operational context. If you’re ready, we can proceed to the next set of classes for meanings and aliases!
 
 ### Turn 28 — assistant
 
@@ -2081,99 +1400,77 @@ Let’s evaluate your proposed properties for **Investigation**, **Business Line
 
 ```
 {
-  "yaml": "classes:\n  Investigation:\n    properties:\n      investigationId:\n        type: text\n      investigationStatus:\n        type: text\n  BusinessLine:\n    properties:\n      businessLineName:\n        type: text\n  AffectedUserGroup:\n    properties:\n      groupName:\n        type: text\n      estimatedUserCount:\n        type: number\n  ServiceOwner:\n    properties:\n      personName:\n        type: text\n  ApplicationOwner:\n    properties:\n      personName:\n        type: text\n  OnCallEngineer:\n    properties:\n      personName:\n        type: text\n  IncidentCommander:\n    properties:\n      personName:\n        type: text\n  IncidentResponseTeamMember:\n    properties:\n      personName:\n        type: text\n  BusinessOwner:\n    properties:\n      personName:\n        type: text\n  ComplianceOfficer:\n    properties:\n      personName:\n        type: text\n  ServiceDeskStaff:\n    properties:\n      personName:\n        type: text\n  ResolverGroup:\n    properties:\n      groupName:\n        type: text\n  Regulator:\n    properties:\n      regulatorName:\n        type: text\n"
+  "yaml": "classes:\n  Stakeholder:\n    meaning: A person, group, or function that needs to be informed, engaged, or considered during incident response.\n  CommunicationUpdate:\n    meaning: A recorded status message or notification sent about an incident to stakeholders.\n  PostIncidentReview:\n    meaning: A structured review conducted after an incident to analyze causes, response effectiveness, lessons learned, and follow-up actions.\n  CorrectiveAction:\n    meaning: A follow-up action identified to reduce recurrence, address gaps, or improve incident response after a review.\n  RegulatoryNotification:\n    meaning: A formal notification or reporting workflow to a regulator concerning an incident.\n  MaterialityAssessment:\n    meaning: An assessment used to determine the significance, impact, or reportability of an incident.\n"
 }
 ```
 
 ### Turn 28 — tool
 
-Applied. Added 0, updated 13 existing item(s).
+Applied. Added 0, updated 6 existing item(s).
 
 ### Turn 28 — assistant
 
-Recorded the confirmed properties and excluded **contactChannel** for now.
+Captured meanings for communication, review, and regulatory workflow classes.
 
-Phase 4 recap — decision-bearing properties captured:
+Final class-meaning batch: risk, roles, and environment. Please confirm or correct these meanings:
 
-**Incident**
-- incidentId, status, severityLevel, firstDetectedAt, affectedUserCount, estimatedRestorationTime, summary
+1. **Risk** — A potential adverse outcome or unresolved exposure related to incident recovery or service operation.
 
-**Major Incident**
-- majorIncidentId, coordinationStatus, declaredAt
+2. **Service Owner** — The accountable role responsible for ownership and stewardship of an application or service.
 
-**Cybersecurity Incident**
-- cyberIncidentId
+3. **Resolver Group** — A support group responsible for receiving, diagnosing, and resolving assigned incidents.
 
-**IT Service**
-- serviceId, serviceName, criticality
+4. **Environment** — A deployment or operational context, such as production, pre-production, test, or development.
 
-**Alert**
-- alertId, alertTimestamp, alertSeverity
+5. **On-call Engineer** — The technical specialist available for day-to-day or immediate operational response for a service or environment.
 
-**Monitoring Tool**
-- toolName
+6. **Technical Owner** — The role responsible for engineering, maintenance, and technical restoration of applications or services.
 
-**Environment**
-- environmentType
+7. **Incident Commander** — The role responsible for coordinating major-incident response, communications, stakeholder engagement, and closure strategy.
 
-**Recovery / backup / emergency change / workaround**
-- Recovery Plan: planId, recoveryStatus, targetRecoveryTime
-- Backup: backupId, backupTimestamp
-- Emergency Change: changeId, changeStatus
-- Workaround: workaroundId, instructions
-
-**Materiality / regulatory / communication / review / corrective action**
-- Materiality Assessment: assessmentId, assessmentStatus, materialityOutcome
-- Regulatory Notification: notificationId, notificationStatus, submittedAt
-- Stakeholder Communication: communicationId, sentAt, messageSummary
-- Post-Incident Review: reviewId
-- Corrective Action: actionId, actionStatus
-
-**Investigation / business line / affected user group**
-- Investigation: investigationId, investigationStatus
-- Business Line: businessLineName
-- Affected User Group: groupName, estimatedUserCount
-
-**Actors**
-- personName for Service Owner, Application Owner, On-call Engineer, Incident Commander, Incident Response Team Member, Business Owner, Compliance Officer, Service Desk Staff
-- groupName for Resolver Group
-- regulatorName for Regulator
-
-**Excluded for now**
-- Incident.issueKey
-- CybersecurityIncident.evidenceHandlingRequired
-- role contactChannel
-
-Please confirm or correct this Phase 4 property recap. Then we’ll move to Phase 5: plain meanings and aliases/synonyms for the classes and relationships. 
+Are these meanings accurate? 
 
 
 ### Turn 29 — user
 
-Your Phase 4 recap is accurate and comprehensive. Here’s the confirmation of the recorded decision-bearing properties:  ### Decision-Bearing Properties Captured:  **Incident** - incidentId, status, severityLevel, firstDetectedAt, affectedUserCount, estimatedRestorationTime, summary  **Major Incident** - majorIncidentId, coordinationStatus, declaredAt  **Cybersecurity Incident** - cyberIncidentId  **IT Service** - serviceId, serviceName, criticality  **Alert** - alertId, alertTimestamp, alertSeverity  **Monitoring Tool** - toolName  **Environment** - environmentType  **Recovery / Backup / Emergency Change / Workaround** - Recovery Plan: planId, recoveryStatus, targetRecoveryTime - Backup: backupId, backupTimestamp - Emergency Change: changeId, changeStatus - Workaround: workaroundId, instructions  **Materiality / Regulatory / Communication / Review / Corrective Action** - Materiality Assessment: assessmentId, assessmentStatus, materialityOutcome - Regulatory Notification: notificationId, notificationStatus, submittedAt - Stakeholder Communication: communicationId, sentAt, messageSummary - Post-Incident Review: reviewId - Corrective Action: actionId, actionStatus  **Investigation / Business Line / Affected User Group** - Investigation: investigationId, investigationStatus - Business Line: businessLineName - Affected User Group: groupName, estimatedUserCount  **Actors** - personName for Service Owner, Application Owner, On-call Engineer, Incident Commander, Incident Response Team Member, Business Owner, Compliance Officer, Service Desk Staff - groupName for Resolver Group - regulatorName for Regulator  **Excluded for Now** - Incident.issueKey - CybersecurityIncident.evidenceHandlingRequired - role.contactChannel  ### Summary Confirmation: All properties have been accurately recorded, and the exclusions are appropriate based on the operational focus and confirmed needs.  If you’re ready, we can move on to Phase 5 to define the plain meanings and aliases/synonyms for the classes and relationships. Please let me know how you’d like to proceed!
+Your proposed meanings for risk, roles, and environment are well-structured and accurately represent their usage in IT operations and incident management. Here’s the confirmation for each meaning:  1. **Risk** — Correct. This definition effectively captures the essence of risk as a potential negative outcome or exposure that can affect incident recovery or service operations.  2. **Service Owner** — Correct. This meaning conveys that the service owner is the accountable individual responsible for the stewardship of a specific application or service.  3. **Resolver Group** — Correct. This definition accurately reflects that a resolver group is a support team tasked with managing, diagnosing, and resolving incidents assigned to them.  4. **Environment** — Correct. This meaning clearly identifies an environment as the context in which services or applications are deployed and operated, such as production, pre-production, test, or development.  5. **On-call Engineer** — Correct. This definition succinctly describes the on-call engineer as the technical expert available for immediate operational response, ensuring service continuity.  6. **Technical Owner** — Correct. This meaning effectively conveys that the technical owner is responsible for the engineering, maintenance, and technical restoration duties concerning applications or services.  7. **Incident Commander** — Correct. This definition accurately describes the incident commander’s role in managing major incidents, coordinating communication, engaging stakeholders, and establishing closure strategies.  All of the meanings you provided are accurate and clearly represent the definitions used in your bank’s operational context. You can proceed to the next steps!
 
 ### Turn 29 — assistant
 
-Great — Phase 4 is confirmed.
+**Tool call: `apply_ontology_yaml`**
 
-Phase 5: language layer. We’ll capture one plain meaning sentence and aliases/synonyms. I’ll do meanings first, then aliases separately.
+```
+{
+  "yaml": "classes:\n  Risk:\n    meaning: A potential adverse outcome or unresolved exposure related to incident recovery or service operation.\n  ServiceOwner:\n    meaning: The accountable role responsible for ownership and stewardship of an application or service.\n  ResolverGroup:\n    meaning: A support group responsible for receiving, diagnosing, and resolving assigned incidents.\n  Environment:\n    meaning: A deployment or operational context, such as production, pre-production, test, or development.\n  OnCallEngineer:\n    meaning: The technical specialist available for day-to-day or immediate operational response for a service or environment.\n  TechnicalOwner:\n    meaning: The role responsible for engineering, maintenance, and technical restoration of applications or services.\n  IncidentCommander:\n    meaning: The role responsible for coordinating major-incident response, communications, stakeholder engagement, and closure strategy.\n"
+}
+```
 
-First meanings batch: core incident/service objects. Please confirm or edit these one-sentence meanings:
+### Turn 29 — tool
 
-1. **Incident** — An unplanned event or degradation that disrupts, risks, or may disrupt an IT service or normal operations.
+Applied. Added 0, updated 7 existing item(s).
 
-2. **Major Incident** — An incident that has been formally escalated for enhanced coordination, communication, recovery management, and review.
+### Turn 29 — assistant
 
-3. **Cybersecurity Incident** — An incident involving suspected or confirmed cybersecurity impact that requires specialized investigation and handling.
+Captured meanings for the remaining classes.
 
-4. **IT Service** — A technology service provided to the business or customers, supported by applications, infrastructure, people, and processes.
+Next, aliases/synonyms for classes. Please confirm which of these are true synonyms in your bank’s language, and correct any that are not equivalent.
 
-5. **Alert** — A signal generated by a monitoring tool indicating a potential issue, degradation, threshold breach, or abnormal condition.
+1. **Incident** aliases: issue, ticket, outage  
+2. **Alert** aliases: alarm, event  
+3. **IT Service** aliases: technology service, technical service  
+4. **Business Service** aliases: business capability, customer-facing service  
+5. **Application** aliases: app, system  
+6. **Runbook** aliases: playbook, procedure  
+7. **Workaround** aliases: temporary fix, mitigation  
+8. **Recovery Plan** aliases: restoration plan, recovery procedure  
+9. **Emergency Change** aliases: urgent change, expedited change  
+10. **Evidence** aliases: artifact, log evidence, record
 
-Are these meanings accurate in your bank’s terminology?
+Which of these should we keep as aliases?
 
 ### Turn 30 — user
 
-Your proposed meanings for the core incident/service objects are well-articulated and largely aligned with operational terminology. Here’s the confirmation and minor edits for clarity:  1. **Incident** — An unplanned event or degradation that disrupts, risks, or may disrupt an IT service or normal operations.      - **Confirmed**: This meaning effectively captures the essence of an incident.  2. **Major Incident** — An incident that has been formally escalated for enhanced coordination, communication, recovery management, and review.      - **Confirmed**: This definition accurately reflects the formal escalation process and associated expectations.  3. **Cybersecurity Incident** — An incident involving suspected or confirmed cybersecurity impact that requires specialized investigation and handling.      - **Confirmed**: This meaning appropriately highlights the need for specific cybersecurity protocols and attention.  4. **IT Service** — A technology service provided to the business or customers, supported by applications, infrastructure, personnel, and processes.      - **Edit Suggestion**: Change "people" to "personnel" for a more formal tone: "A technology service provided to the business or customers, supported by applications, infrastructure, personnel, and processes."  5. **Alert** — A signal generated by a monitoring tool indicating a potential issue, degradation, threshold breach, or abnormal condition.      - **Confirmed**: This definition accurately describes the purpose and nature of alerts as operational signals.  ### Summary: Your meanings are largely confirmed with a suggested edit to the definition of **IT Service** for consistency and formality. If you’re ready, you can proceed to propose aliases/synonyms for these classes, or let me know how you’d like to continue!
+Your proposed aliases and synonyms for the classes are mostly clear and relevant, but some need clarification or may not translate directly as equivalents. Here's the review:  1. **Incident** aliases:     - **issue**: This can be considered a synonym.    - **ticket**: This is commonly used in IT service management but may refer to the logged record rather than the incident itself; it can be included as a loose synonym depending on context.    - **outage**: This typically refers to specific types of incidents (availability-related) and may not be a direct synonym. It should be used cautiously.     **Keep**: issue, ticket (with caution), exclude outage.  2. **Alert** aliases:     - **alarm**: This can be considered a synonym and often used interchangeably in operational contexts.    - **event**: This is broader and not necessarily a synonym—events may occur without triggering alerts; thus, it is best to exclude it.     **Keep**: alarm, exclude event.  3. **IT Service** aliases:    - **technology service**: This is a valid synonym.    - **technical service**: This may convey a similar meaning, but it could be interpreted differently based on context. It’s best to exclude it.     **Keep**: technology service, exclude technical service.  4. **Business Service** aliases:    - **business capability**: This captures the essence but may not always be equivalent; it can be context-dependent. Use cautiously.    - **customer-facing service**: This is a relevant synonym.     **Keep**: customer-facing service, use business capability cautiously.  5. **Application** aliases:    - **app**: This is a commonly accepted informal synonym.    - **system**: This is broader and may not refer exclusively to applications; it should be excluded.     **Keep**: app, exclude system.  6. **Runbook** aliases:    - **playbook**: This is often used interchangeably in operational contexts and is a suitable synonym.    - **procedure**: This is related but more general; it does not specifically refer to runbooks. Use cautiously.     **Keep**: playbook, use procedure cautiously.  7. **Workaround** aliases:    - **temporary fix**: This is a relevant synonym.    - **mitigation**: While related, it is broader and refers more to the strategy rather than the specific action. It should be excluded.     **Keep**: temporary fix, exclude mitigation.  8. **Recovery Plan** aliases:    - **restoration plan**: This is an appropriate synonym.    - **recovery procedure**: Also a valid synonym.     **Keep**: both restoration plan and recovery procedure.  9. **Emergency Change** aliases:    - **urgent change**: This is a valid synonym.    - **expedited change**: This aligns with the concept and can be considered a synonym.     **Keep**: both urgent change and expedited change.  10. **Evidence** aliases:     - **artifact**: This is suitable and commonly used synonymously in the context of evidence.     - **log evidence**: While specific to the type of evidence, it is effectively equivalent. Keep it for specificity.     - **record**: This is broader and may not always be interchangeable; use cautiously.     **Keep**: artifact, log evidence, use record cautiously.  **Summary of Confirmed Aliases:** - **Incident**: issue, ticket (cautiously) - **Alert**: alarm - **IT Service**: technology service - **Business Service**: customer-facing service (business capability cautiously) - **Application**: app - **Runbook**: playbook (procedure cautiously) - **Workaround**: temporary fix - **Recovery Plan**: restoration plan, recovery procedure - **Emergency Change**: urgent change, expedited change - **Evidence**: artifact, log evidence (record cautiously)  Feel free to let me know how you would like to proceed!
 
 ### Turn 30 — assistant
 
@@ -2181,33 +1478,40 @@ Your proposed meanings for the core incident/service objects are well-articulate
 
 ```
 {
-  "yaml": "classes:\n  Incident:\n    meaning: An unplanned event or degradation that disrupts, risks, or may disrupt an IT service or normal operations.\n  MajorIncident:\n    meaning: An incident that has been formally escalated for enhanced coordination, communication, recovery management, and review.\n  CybersecurityIncident:\n    meaning: An incident involving suspected or confirmed cybersecurity impact that requires specialized investigation and handling.\n  ITService:\n    meaning: A technology service provided to the business or customers, supported by applications, infrastructure, personnel, and processes.\n  Alert:\n    meaning: A signal generated by a monitoring tool indicating a potential issue, degradation, threshold breach, or abnormal condition.\n"
+  "yaml": "classes:\n  Incident:\n    aliases: [issue]\n  Alert:\n    aliases: [alarm]\n  ITService:\n    aliases: [technology service]\n  BusinessService:\n    aliases: [customer-facing service]\n  Application:\n    aliases: [app]\n  Runbook:\n    aliases: [playbook]\n  Workaround:\n    aliases: [temporary fix]\n  RecoveryPlan:\n    aliases: [restoration plan, recovery procedure]\n  EmergencyChange:\n    aliases: [urgent change, expedited change]\n  Evidence:\n    aliases: [artifact, log evidence]\n"
 }
 ```
 
 ### Turn 30 — tool
 
-Applied. Added 0, updated 5 existing item(s).
+Applied. Added 0, updated 10 existing item(s).
 
 ### Turn 30 — assistant
 
-Recorded those five meanings, including the IT Service wording edit.
+Captured only the strong aliases and left out the cautious/broader ones for now, to avoid treating near-synonyms as exact equivalents.
 
-Next meanings batch: plans, assessments, communications, and reviews. Please confirm or edit:
+Next alias batch for the remaining classes. Please confirm which are true synonyms in your bank’s language:
 
-1. **Recovery Plan** — A documented plan describing how an affected IT service will be restored or stabilized after an incident.
+1. **Stakeholder** aliases: interested party, business contact  
+2. **Communication Update** aliases: status update, comms update, notification  
+3. **Post-Incident Review** aliases: PIR, postmortem, lessons learned review  
+4. **Corrective Action** aliases: remediation action, follow-up action  
+5. **Regulatory Notification** aliases: regulatory report, regulator notification  
+6. **Materiality Assessment** aliases: reportability assessment, materiality review  
+7. **Risk** aliases: exposure, recovery risk  
+8. **Service Owner** aliases: application owner, service accountable owner  
+9. **Resolver Group** aliases: support group, assignment group  
+10. **Environment** aliases: deployment context, runtime environment  
+11. **On-call Engineer** aliases: duty engineer, on-call support  
+12. **Technical Owner** aliases: engineering owner, technical lead  
+13. **Incident Commander** aliases: incident manager, major incident lead
 
-2. **Materiality Assessment** — An assessment of an incident’s significance, impact, and reportability for operational, business, or regulatory purposes.
+Which should we keep as aliases, and which are broader/different in your setting? 
 
-3. **Regulatory Notification** — A formal notification or submission to a regulator about an incident or its assessed impact.
-
-4. **Stakeholder Communication** — A message or update sent to a defined audience about an incident, its status, impact, or recovery progress.
-
-5. **Post-Incident Review** — A review conducted after an incident to document findings, lessons learned, and corrective actions.
 
 ### Turn 31 — user
 
-Your proposed meanings for the plans, assessments, communications, and reviews are clear and well-defined. Here are the confirmations and minor edits for clarity where needed:  1. **Recovery Plan** — A documented plan describing how an affected IT service will be restored or stabilized after an incident.      - **Confirmed**: This meaning accurately reflects the purpose of a recovery plan.  2. **Materiality Assessment** — An assessment of an incident’s significance, impact, and reportability for operational, business, or regulatory purposes.      - **Confirmed**: This definition appropriately captures the essence and objectives of a materiality assessment.  3. **Regulatory Notification** — A formal notification or submission to a regulator about an incident or its assessed impact.      - **Confirmed**: This meaning accurately conveys the focus and importance of regulatory notifications.  4. **Stakeholder Communication** — A message or update sent to a defined audience about an incident, its status, impact, or recovery progress.      - **Confirmed**: This definition effectively outlines the purpose of stakeholder communications.  5. **Post-Incident Review** — A review conducted after an incident to document findings, lessons learned, and corrective actions.      - **Confirmed**: This meaning well describes the objective of post-incident reviews.  ### Summary: All proposed meanings are confirmed as accurate and appropriate for the context. If you're ready to proceed with the next batch of aliases/synonyms or have any other areas to cover, just let me know!
+Your proposed aliases for the remaining classes are mostly relevant, but some need clarification or may not be direct synonyms. Here’s the confirmation along with recommendations:  1. **Stakeholder** aliases:    - **interested party**: This can be considered a synonym.    - **business contact**: This is somewhat broader and may refer only to specific individuals rather than the general stakeholder role; it’s best to exclude this.     **Keep**: interested party, exclude business contact.  2. **Communication Update** aliases:    - **status update**: This is a valid synonym.    - **comms update**: This is informal but acceptable; it can be included.    - **notification**: This is broader and may refer to any notification type rather than just those concerning incidents; it’s best to exclude this.     **Keep**: status update, comms update, exclude notification.  3. **Post-Incident Review** aliases:    - **PIR**: This is an accepted acronym and synonymous with the full term.    - **postmortem**: This is commonly used interchangeably; it can be included.    - **lessons learned review**: This focuses more on the outcomes rather than the review process itself; it’s not quite the same, so exclude it.     **Keep**: PIR, postmortem, exclude lessons learned review.  4. **Corrective Action** aliases:    - **remediation action**: This is a valid synonym.    - **follow-up action**: This is broader and could refer to any type of follow-up, not necessarily corrective; exclude it.     **Keep**: remediation action, exclude follow-up action.  5. **Regulatory Notification** aliases:    - **regulatory report**: This is effectively equivalent and can be considered a synonym.    - **regulator notification**: This is essentially the same and can be kept.     **Keep**: both regulatory report and regulator notification.  6. **Materiality Assessment** aliases:    - **reportability assessment**: This is an acceptable synonym.    - **materiality review**: This is somewhat broader and may imply a different focus; it’s best to exclude this.     **Keep**: reportability assessment, exclude materiality review.  7. **Risk** aliases:    - **exposure**: This can refer to risk but is broader in some contexts; it’s best to exclude this.    - **recovery risk**: This is more specific and can be considered a synonym.     **Keep**: recovery risk, exclude exposure.  8. **Service Owner** aliases:    - **application owner**: This is not a direct synonym, as it focuses on applications specifically rather than services in general; exclude it.    - **service accountable owner**: This is a valid synonym and reflects accountability appropriately.     **Keep**: service accountable owner, exclude application owner.  9. **Resolver Group** aliases:    - **support group**: This is synonymous and can be kept.    - **assignment group**: This refers more specifically to the mechanics of assignment rather than the functional group itself; it’s best to exclude this.     **Keep**: support group, exclude assignment group.  10. **Environment** aliases:     - **deployment context**: This is a synonym and appropriately covers environments.     - **runtime environment**: This is a specific context that may not encompass all environments in operations; exclude this.     **Keep**: deployment context, exclude runtime environment.  11. **On-call Engineer** aliases:     - **duty engineer**: This is a valid synonym and used in many organizations.     - **on-call support**: This is also a relevant synonym.     **Keep**: both duty engineer and on-call support.  12. **Technical Owner** aliases:     - **engineering owner**: This is related but may imply a slightly different role; it’s best to exclude it.     - **technical lead**: This can be considered a synonym as it reflects similar responsibilities.     **Keep**: technical lead, exclude engineering owner.  13. **Incident Commander** aliases:     - **incident manager**: This is typically synonymous in practice and can be kept.     - **major incident lead**: This reflects a similar function and is a useful alias.     **Keep**: both incident manager and major incident lead.  **Summary of Confirmed Aliases:** - **Stakeholder**: interested party - **Communication Update**: status update, comms update - **Post-Incident Review**: PIR, postmortem - **Corrective Action**: remediation action - **Regulatory Notification**: regulatory report, regulator notification - **Materiality Assessment**: reportability assessment - **Risk**: recovery risk - **Service Owner**: service accountable owner - **Resolver Group**: support group - **Environment**: deployment context - **On-call Engineer**: duty engineer, on-call support - **Technical Owner**: technical lead - **Incident Commander**: incident manager, major incident lead  Let me know if you'd like to move forward or make any adjustments!
 
 ### Turn 31 — assistant
 
@@ -2215,33 +1519,41 @@ Your proposed meanings for the plans, assessments, communications, and reviews a
 
 ```
 {
-  "yaml": "classes:\n  RecoveryPlan:\n    meaning: A documented plan describing how an affected IT service will be restored or stabilized after an incident.\n  MaterialityAssessment:\n    meaning: An assessment of an incident's significance, impact, and reportability for operational, business, or regulatory purposes.\n  RegulatoryNotification:\n    meaning: A formal notification or submission to a regulator about an incident or its assessed impact.\n  StakeholderCommunication:\n    meaning: A message or update sent to a defined audience about an incident, its status, impact, or recovery progress.\n  PostIncidentReview:\n    meaning: A review conducted after an incident to document findings, lessons learned, and corrective actions.\n"
+  "yaml": "classes:\n  Stakeholder:\n    aliases: [interested party]\n  CommunicationUpdate:\n    aliases: [status update, comms update]\n  PostIncidentReview:\n    aliases: [PIR, postmortem]\n  CorrectiveAction:\n    aliases: [remediation action]\n  RegulatoryNotification:\n    aliases: [regulatory report, regulator notification]\n  MaterialityAssessment:\n    aliases: [reportability assessment]\n  Risk:\n    aliases: [recovery risk]\n  ServiceOwner:\n    aliases: [service accountable owner]\n  ResolverGroup:\n    aliases: [support group]\n  Environment:\n    aliases: [deployment context]\n  OnCallEngineer:\n    aliases: [duty engineer, on-call support]\n  TechnicalOwner:\n    aliases: [technical lead]\n  IncidentCommander:\n    aliases: [incident manager, major incident lead]\n"
 }
 ```
 
 ### Turn 31 — tool
 
-Applied. Added 0, updated 5 existing item(s).
+Applied. Added 0, updated 13 existing item(s).
 
 ### Turn 31 — assistant
 
-Recorded those five meanings.
+Captured the confirmed aliases for the remaining classes.
 
-Next meanings batch: operational roles. Please confirm or edit:
+Now we’ll add meanings for relationships. I’ll batch them by area.
 
-1. **Service Owner** — The accountable person responsible for the overall ownership and governance of an IT service.
+First relationship-meaning batch: service impact, dependencies, and alert creation. Please confirm or correct these meanings:
 
-2. **Application Owner** — The accountable person responsible for the operational fitness of an application supporting an IT service.
+1. **Alert --triggers--> Incident** — The alert is a detection signal that causes or contributes to creating or handling the incident.
 
-3. **Resolver Group** — A team assigned to investigate and resolve incidents within its area of technical responsibility.
+2. **Incident --affects--> IT Service** — The incident disrupts, degrades, or otherwise impacts the operation of the IT service.
 
-4. **On-call Engineer** — The individual currently available to respond to incidents for a resolver group.
+3. **Incident --impacts--> Business Service** — The incident affects the delivery or availability of the business service.
 
-5. **Incident Commander** — The person leading coordination, decision-making, and communications during a major incident.
+4. **IT Service --supports--> Business Service** — The IT service enables or contributes to the operation of the business service.
+
+5. **Application --supports--> IT Service** — The application is a component or capability used to deliver the IT service.
+
+6. **IT Service --dependsOn--> IT Service** — The IT service relies on another IT service to operate correctly.
+
+7. **Application --dependsOn--> Application** — The application relies on another application to operate correctly.
+
+Are these relationship meanings accurate?
 
 ### Turn 32 — user
 
-Your proposed meanings for the operational roles are clear and well-defined. Here’s the confirmation and a minor edit for clarity where needed:  1. **Service Owner** — The accountable person responsible for the overall ownership and governance of an IT service.      - **Confirmed**: This meaning accurately reflects the role's responsibilities.  2. **Application Owner** — The accountable person responsible for the operational fitness of an application supporting an IT service.      - **Confirmed**: This definition appropriately captures the essence of the application owner's responsibilities.  3. **Resolver Group** — A team assigned to investigate and resolve incidents within its area of technical responsibility.      - **Confirmed**: This meaning effectively describes the function of a resolver group.  4. **On-call Engineer** — The individual currently available to respond to incidents for a resolver group.      - **Edit Suggestion**: Add "technical" for clarification: "The individual technically responsible and currently available to respond to incidents for a resolver group."  5. **Incident Commander** — The person leading coordination, decision-making, and communications during a major incident.      - **Confirmed**: This meaning effectively outlines the incident commander's role.  ### Summary: All proposed meanings are confirmed, with an optional edit for the definition of **On-call Engineer** for clarity. If you’re ready to proceed with the next batch of aliases/synonyms or have any other areas to cover, just let me know!
+Your proposed meanings for the relationships regarding service impact, dependencies, and alert creation are clear and well-aligned with operational terminology. Here’s the confirmation for each meaning:  1. **Alert --triggers--> Incident** — Correct. This meaning accurately describes how an alert acts as a detection signal that initiates or contributes to the creation or management of an incident.  2. **Incident --affects--> IT Service** — Correct. This definition appropriately captures the impact of an incident on the operation of the IT service, covering disruptions or degradations.  3. **Incident --impacts--> Business Service** — Correct. This meaning effectively conveys how an incident influences the delivery and availability of business services.  4. **IT Service --supports--> Business Service** — Correct. This definition reflects the role of the IT service in enabling or enhancing the functionality of the business service.  5. **Application --supports--> IT Service** — Correct. This definition appropriately indicates that the application serves as a component or capability in providing the IT service.  6. **IT Service --dependsOn--> IT Service** — Correct. This meaning accurately indicates that one IT service relies on another for proper operation.  7. **Application --dependsOn--> Application** — Correct. This relationship successfully conveys that applications can rely on one another to function effectively.  All of the relationship meanings you provided are accurate, representing a clear understanding of how these elements interrelate in the incident management process. If you're ready, we can move to the next batch of relationship meanings!
 
 ### Turn 32 — assistant
 
@@ -2249,33 +1561,44 @@ Your proposed meanings for the operational roles are clear and well-defined. Her
 
 ```
 {
-  "yaml": "classes:\n  ServiceOwner:\n    meaning: The accountable person responsible for the overall ownership and governance of an IT service.\n  ApplicationOwner:\n    meaning: The accountable person responsible for the operational fitness of an application supporting an IT service.\n  ResolverGroup:\n    meaning: A team assigned to investigate and resolve incidents within its area of technical responsibility.\n  OnCallEngineer:\n    meaning: The individual technically responsible and currently available to respond to incidents for a resolver group.\n  IncidentCommander:\n    meaning: The person leading coordination, decision-making, and communications during a major incident.\n"
+  "yaml": "relationships:\n  - name: triggers\n    from: Alert\n    to: Incident\n    meaning: The alert is a detection signal that causes or contributes to creating or handling the incident.\n  - name: affects\n    from: Incident\n    to: ITService\n    meaning: The incident disrupts, degrades, or otherwise impacts the operation of the IT service.\n  - name: impacts\n    from: Incident\n    to: BusinessService\n    meaning: The incident affects the delivery or availability of the business service.\n  - name: supports\n    from: ITService\n    to: BusinessService\n    meaning: The IT service enables or contributes to the operation of the business service.\n  - name: supports\n    from: Application\n    to: ITService\n    meaning: The application is a component or capability used to deliver the IT service.\n  - name: dependsOn\n    from: ITService\n    to: ITService\n    meaning: The IT service relies on another IT service to operate correctly.\n  - name: dependsOn\n    from: Application\n    to: Application\n    meaning: The application relies on another application to operate correctly.\n"
 }
 ```
 
 ### Turn 32 — tool
 
-Applied. Added 0, updated 5 existing item(s).
+Applied. Added 0, updated 7 existing item(s).
 
 ### Turn 32 — assistant
 
-Recorded those role meanings, including the On-call Engineer edit.
+Captured meanings for those impact and dependency relationships.
 
-Next meanings batch: remaining roles/actors. Please confirm or edit:
+Next relationship-meaning batch: ownership, staffing, routing, and environment. Please confirm or correct:
 
-1. **Incident Response Team Member** — A person supporting incident coordination, investigation, communications, or recovery activities during an incident or major incident.
+1. **Application --ownedBy--> Service Owner** — The service owner is accountable for stewardship and ownership of the application.
 
-2. **Business Owner** — The person accountable for a business area affected by an IT service or incident.
+2. **IT Service --staffedBy--> On-call Engineer** — The IT service has an on-call engineer available for operational response.
 
-3. **Compliance Officer** — The person responsible for reviewing incidents or assessments for regulatory and compliance obligations.
+3. **IT Service --supportedBy--> Resolver Group** — The resolver group is responsible for support and incident handling for the IT service.
 
-4. **Regulator** — An external supervisory or regulatory authority that may receive formal incident notifications.
+4. **Incident --assignedTo--> Resolver Group** — The incident is routed or allocated to the resolver group for diagnosis or resolution.
 
-5. **Service Desk Staff** — A person providing first-line incident reporting, user support, triage, or communication handling.
+5. **Resolver Group --operatesIn--> Environment** — The resolver group handles work in a specific deployment or operational environment.
+
+6. **Incident --occursIn--> Environment** — The incident occurs within a specific deployment or operational environment.
+
+7. **IT Service --runsIn--> Environment** — The IT service operates within a specific deployment or operational environment.
+
+8. **Application --deployedIn--> Environment** — The application is deployed within a specific environment.
+
+9. **On-call Engineer --covers--> Environment** — The on-call engineer provides operational response coverage for a specific environment.
+
+Are these accurate? 
+
 
 ### Turn 33 — user
 
-Your proposed meanings for the remaining roles/actors are well-defined and align with the operational requirements. Here’s the confirmation and minor edits for clarity where needed:  1. **Incident Response Team Member** — A person supporting incident coordination, investigation, communications, or recovery activities during an incident or major incident.      - **Confirmed**: This meaning accurately reflects the role's diverse responsibilities during incidents.  2. **Business Owner** — The person accountable for a business area affected by an IT service or incident.      - **Confirmed**: This definition appropriately captures the accountability linked to business areas impacted by IT services.  3. **Compliance Officer** — The person responsible for reviewing incidents or assessments for regulatory and compliance obligations.      - **Confirmed**: This meaning effectively outlines the compliance officer's essential role in oversight and review.  4. **Regulator** — An external supervisory or regulatory authority that may receive formal incident notifications.      - **Confirmed**: This definition correctly identifies the function of regulators in relation to incident notifications.  5. **Service Desk Staff** — A person providing first-line incident reporting, user support, triage, or communication handling.      - **Confirmed**: This meaning comprehensively describes the responsibilities associated with service desk staff.   ### Summary: All proposed meanings are confirmed as accurate and appropriate for the context of the operational roles. If you're ready to proceed with the next batch of aliases/synonyms or have any other areas to cover, just let me know!
+Your proposed meanings for the ownership, staffing, routing, and environment relationships are clear and appropriately convey their operational significance. Here’s the confirmation for each meaning:  1. **Application --ownedBy--> Service Owner** — Correct. This meaning accurately describes the service owner's accountability for the stewardship and ownership of the application.  2. **IT Service --staffedBy--> On-call Engineer** — Correct. This definition reflects that an on-call engineer is available for operational response related to the IT service.  3. **IT Service --supportedBy--> Resolver Group** — Correct. This definition appropriately indicates that the resolver group is responsible for providing support and handling incidents for the IT service.  4. **Incident --assignedTo--> Resolver Group** — Correct. This meaning clearly conveys that the incident is routed or allocated to the resolver group for diagnosis and resolution.  5. **Resolver Group --operatesIn--> Environment** — Correct. This definition accurately indicates that the resolver group works within a specific deployment or operational environment.  6. **Incident --occursIn--> Environment** — Correct. This meaning effectively communicates that an incident takes place within a specific deployment or operational environment.  7. **IT Service --runsIn--> Environment** — Correct. This relationship accurately reflects that the IT service operates in a defined deployment or operational environment.  8. **Application --deployedIn--> Environment** — Correct. This definition appropriately indicates that the application is deployed in a specific environment.  9. **On-call Engineer --covers--> Environment** — Correct. This meaning clearly captures that the on-call engineer provides operational response coverage within a specific environment.  All of the relationship meanings you provided are accurate and clearly convey the intended connections. If you’re ready, we can move to the next batch of relationship meanings!
 
 ### Turn 33 — assistant
 
@@ -2283,41 +1606,54 @@ Your proposed meanings for the remaining roles/actors are well-defined and align
 
 ```
 {
-  "yaml": "classes:\n  IncidentResponseTeamMember:\n    meaning: A person supporting incident coordination, investigation, communications, or recovery activities during an incident or major incident.\n  BusinessOwner:\n    meaning: The person accountable for a business area affected by an IT service or incident.\n  ComplianceOfficer:\n    meaning: The person responsible for reviewing incidents or assessments for regulatory and compliance obligations.\n  Regulator:\n    meaning: An external supervisory or regulatory authority that may receive formal incident notifications.\n  ServiceDeskStaff:\n    meaning: A person providing first-line incident reporting, user support, triage, or communication handling.\n"
+  "yaml": "relationships:\n  - name: ownedBy\n    from: Application\n    to: ServiceOwner\n    meaning: The service owner is accountable for stewardship and ownership of the application.\n  - name: staffedBy\n    from: ITService\n    to: OnCallEngineer\n    meaning: The IT service has an on-call engineer available for operational response.\n  - name: supportedBy\n    from: ITService\n    to: ResolverGroup\n    meaning: The resolver group is responsible for support and incident handling for the IT service.\n  - name: assignedTo\n    from: Incident\n    to: ResolverGroup\n    meaning: The incident is routed or allocated to the resolver group for diagnosis or resolution.\n  - name: operatesIn\n    from: ResolverGroup\n    to: Environment\n    meaning: The resolver group handles work in a specific deployment or operational environment.\n  - name: occursIn\n    from: Incident\n    to: Environment\n    meaning: The incident occurs within a specific deployment or operational environment.\n  - name: runsIn\n    from: ITService\n    to: Environment\n    meaning: The IT service operates within a specific deployment or operational environment.\n  - name: deployedIn\n    from: Application\n    to: Environment\n    meaning: The application is deployed within a specific environment.\n  - name: covers\n    from: OnCallEngineer\n    to: Environment\n    meaning: The on-call engineer provides operational response coverage for a specific environment.\n"
 }
 ```
 
 ### Turn 33 — tool
 
-Applied. Added 0, updated 5 existing item(s).
+Applied. Added 0, updated 9 existing item(s).
 
 ### Turn 33 — assistant
 
-Recorded those five meanings.
+Captured meanings for ownership, staffing, routing, and environment relationships.
 
-Next meanings batch: monitoring, recovery/change, improvement, and context. Please confirm or edit:
+Next relationship-meaning batch: technical ownership, runbooks, workarounds, recovery, change, risk, and evidence. Please confirm or correct:
 
-1. **Monitoring Tool** — A system or platform that observes service health, detects abnormal conditions, and generates alerts.
+1. **Technical Owner --maintains--> Application** — The technical owner is responsible for engineering and ongoing maintenance of the application.
 
-2. **Workaround** — A temporary mitigation or set of instructions used to reduce impact or restore partial function before permanent resolution.
+2. **Technical Owner --restores--> IT Service** — The technical owner performs or leads technical restoration work for the IT service.
 
-3. **Corrective Action** — An improvement action identified after an incident to prevent recurrence or reduce future impact.
+3. **IT Service --hasRunbook--> Runbook** — The IT service has an associated runbook for operational procedures or incident response.
 
-4. **Emergency Change** — An expedited change performed during or because of an incident to restore service or reduce impact.
+4. **Incident --usesRunbook--> Runbook** — The incident uses or records a specific runbook for mitigation, recovery, or response guidance.
 
-5. **Backup** — A restorable copy or backup set of data, configuration, system state, or service components used for recovery.
+5. **Runbook --documents--> Workaround** — The runbook records a workaround that may be used during incident mitigation.
 
-6. **Environment** — A deployment or operating context such as production, pre-production, test, or disaster recovery.
+6. **Incident --mitigatedBy--> Workaround** — The incident is mitigated by a temporary measure before full resolution.
 
-7. **Business Line** — A business area or line of business that consumes or is supported by IT services.
+7. **IT Service --hasRecoveryPlan--> Recovery Plan** — The IT service has an associated recovery plan for restoration.
 
-8. **Investigation** — A structured inquiry into a cybersecurity incident to establish facts, scope, cause, evidence, and required response.
+8. **Incident --usesRecoveryPlan--> Recovery Plan** — The incident uses or records a specific recovery plan for restoring the affected service.
 
-9. **Affected User Group** — A defined group of users impacted by an incident or service degradation.
+9. **Emergency Change --linkedTo--> Incident** — The emergency change is associated with the incident that prompted or required it.
+
+10. **Emergency Change --changes--> IT Service** — The emergency change modifies or restores the affected IT service.
+
+11. **Recovery Plan --hasRisk--> Risk** — The recovery plan has an associated risk that may affect recovery.
+
+12. **Incident --hasRisk--> Risk** — The incident has a risk specifically associated with its recovery or ongoing management.
+
+13. **Incident --hasEvidence--> Evidence** — The incident has related evidence used for analysis, accountability, or compliance.
+
+14. **Evidence --preservedFor--> Incident** — The evidence is preserved for the incident as part of accountability, investigation, or compliance needs.
+
+Are these accurate? 
+
 
 ### Turn 34 — user
 
-Your proposed meanings for monitoring, recovery/change, improvement, and context-related terms are well-crafted and comprehensive. Here’s the confirmation with minor edits for clarity where needed:  1. **Monitoring Tool** — A system or platform that observes service health, detects abnormal conditions, and generates alerts.      - **Confirmed**: This definition accurately reflects the purpose and function of monitoring tools.  2. **Workaround** — A temporary mitigation or set of instructions used to reduce impact or restore partial function before permanent resolution.      - **Confirmed**: This meaning effectively captures the essence of what a workaround entails.  3. **Corrective Action** — An improvement action identified after an incident to prevent recurrence or reduce future impact.      - **Confirmed**: This definition accurately describes the intent and purpose of corrective actions.  4. **Emergency Change** — An expedited change performed during or because of an incident to restore service or reduce impact.      - **Confirmed**: This meaning effectively outlines the urgent nature of emergency changes in response to incidents.  5. **Backup** — A restorable copy or backup set of data, configuration, system state, or service components used for recovery.      - **Confirmed**: This definition clearly captures the purpose and use of backups in recovery workflows.  6. **Environment** — A deployment or operating context such as production, pre-production, test, or disaster recovery.      - **Confirmed**: This meaning accurately reflects what encompasses an environment in relation to IT services.  7. **Business Line** — A business area or line of business that consumes or is supported by IT services.      - **Confirmed**: This definition effectively conveys the relationship between business lines and IT services.  8. **Investigation** — A structured inquiry into a cybersecurity incident to establish facts, scope, cause, evidence, and required response.      - **Confirmed**: This meaning adequately describes the nature and purpose of an investigation in cybersecurity contexts.  9. **Affected User Group** — A defined group of users impacted by an incident or service degradation.      - **Confirmed**: This definition clearly outlines the focus of affected user groups in incident management and communication.  ### Summary: All proposed meanings are confirmed as accurate and appropriate for their respective contexts. If you’re ready to proceed with the next batch of aliases/synonyms or have any other areas to cover, just let me know!
+Your proposed meanings for the relationships related to technical ownership, runbooks, workarounds, recovery, change, risk, and evidence are clear and accurately reflect their usage. Here’s the confirmation for each meaning:  1. **Technical Owner --maintains--> Application** — Correct. This meaning accurately indicates that the technical owner is responsible for the engineering and ongoing maintenance of the application.  2. **Technical Owner --restores--> IT Service** — Correct. This definition effectively conveys that the technical owner leads or performs the technical restoration work required for the IT service.  3. **IT Service --hasRunbook--> Runbook** — Correct. This meaning captures that the IT service is associated with a specific runbook that outlines operational procedures or incident response strategies.  4. **Incident --usesRunbook--> Runbook** — Correct. This definition indicates that the incident references or employs a specific runbook for guidance during mitigation, recovery, or incident response.  5. **Runbook --documents--> Workaround** — Correct. This meaning accurately conveys that the runbook may record a workaround as part of procedural information during incident management.  6. **Incident --mitigatedBy--> Workaround** — Correct. This meaning effectively states that the incident can be mitigated by a temporary measure while awaiting full resolution.  7. **IT Service --hasRecoveryPlan--> Recovery Plan** — Correct. This definition indicates that the IT service has an associated recovery plan that outlines recovery steps in the event of an incident.  8. **Incident --usesRecoveryPlan--> Recovery Plan** — Correct. This definition captures that the incident references or utilizes a specific recovery plan for restoring the affected service.  9. **Emergency Change --linkedTo--> Incident** — Correct. This meaning indicates that the emergency change is associated with the incident it is intended to address or result from.  10. **Emergency Change --changes--> IT Service** — Correct. This definition accurately reflects that the emergency change modifies or restores the affected IT service.  11. **Recovery Plan --hasRisk--> Risk** — Correct. This relationship captures that the recovery plan is associated with a risk that could potentially impact the recovery efforts.  12. **Incident --hasRisk--> Risk** — Correct. This meaning conveys that there is a specific risk associated with the incident itself, particularly in terms of recovery and ongoing management.  13. **Incident --hasEvidence--> Evidence** — Correct. This definition accurately indicates that the incident has related evidence to support analysis, accountability, and compliance.  14. **Evidence --preservedFor--> Incident** — Correct. This meaning effectively states that the evidence is preserved specifically for the incident, aligning with accountability and investigation needs.  All of the meanings you provided are accurate and convey the intended relationships clearly. If you’re ready to proceed to the next batch of relationship meanings or have other areas you’d like to focus on, let me know!
 
 ### Turn 34 — assistant
 
@@ -2325,39 +1661,50 @@ Your proposed meanings for monitoring, recovery/change, improvement, and context
 
 ```
 {
-  "yaml": "classes:\n  MonitoringTool:\n    meaning: A system or platform that observes service health, detects abnormal conditions, and generates alerts.\n  Workaround:\n    meaning: A temporary mitigation or set of instructions used to reduce impact or restore partial function before permanent resolution.\n  CorrectiveAction:\n    meaning: An improvement action identified after an incident to prevent recurrence or reduce future impact.\n  EmergencyChange:\n    meaning: An expedited change performed during or because of an incident to restore service or reduce impact.\n  Backup:\n    meaning: A restorable copy or backup set of data, configuration, system state, or service components used for recovery.\n  Environment:\n    meaning: A deployment or operating context such as production, pre-production, test, or disaster recovery.\n  BusinessLine:\n    meaning: A business area or line of business that consumes or is supported by IT services.\n  Investigation:\n    meaning: A structured inquiry into a cybersecurity incident to establish facts, scope, cause, evidence, and required response.\n  AffectedUserGroup:\n    meaning: A defined group of users impacted by an incident or service degradation.\n"
+  "yaml": "relationships:\n  - name: maintains\n    from: TechnicalOwner\n    to: Application\n    meaning: The technical owner is responsible for engineering and ongoing maintenance of the application.\n  - name: restores\n    from: TechnicalOwner\n    to: ITService\n    meaning: The technical owner performs or leads technical restoration work for the IT service.\n  - name: hasRunbook\n    from: ITService\n    to: Runbook\n    meaning: The IT service has an associated runbook for operational procedures or incident response.\n  - name: usesRunbook\n    from: Incident\n    to: Runbook\n    meaning: The incident uses or records a specific runbook for mitigation, recovery, or response guidance.\n  - name: documents\n    from: Runbook\n    to: Workaround\n    meaning: The runbook records a workaround that may be used during incident mitigation.\n  - name: mitigatedBy\n    from: Incident\n    to: Workaround\n    meaning: The incident is mitigated by a temporary measure before full resolution.\n  - name: hasRecoveryPlan\n    from: ITService\n    to: RecoveryPlan\n    meaning: The IT service has an associated recovery plan for restoration.\n  - name: usesRecoveryPlan\n    from: Incident\n    to: RecoveryPlan\n    meaning: The incident uses or records a specific recovery plan for restoring the affected service.\n  - name: linkedTo\n    from: EmergencyChange\n    to: Incident\n    meaning: The emergency change is associated with the incident that prompted or required it.\n  - name: changes\n    from: EmergencyChange\n    to: ITService\n    meaning: The emergency change modifies or restores the affected IT service.\n  - name: hasRisk\n    from: RecoveryPlan\n    to: Risk\n    meaning: The recovery plan has an associated risk that may affect recovery.\n  - name: hasRisk\n    from: Incident\n    to: Risk\n    meaning: The incident has a risk specifically associated with its recovery or ongoing management.\n  - name: hasEvidence\n    from: Incident\n    to: Evidence\n    meaning: The incident has related evidence used for analysis, accountability, or compliance.\n  - name: preservedFor\n    from: Evidence\n    to: Incident\n    meaning: The evidence is preserved for the incident as part of accountability, investigation, or compliance needs.\n"
 }
 ```
 
 ### Turn 34 — tool
 
-Applied. Added 0, updated 9 existing item(s).
+Applied. Added 0, updated 14 existing item(s).
 
 ### Turn 34 — assistant
 
-Recorded those nine meanings.
+Captured meanings for technical ownership, runbooks, workarounds, recovery, change, risk, and evidence relationships.
 
-Now aliases/synonyms for **classes**. Please confirm only terms that mean the same thing in your bank; reject near-synonyms that are different.
+Final relationship-meaning batch: communications, command, stakeholders, review, and regulatory reporting. Please confirm or correct:
 
-Proposed aliases:
+1. **Incident --hasCommunicationUpdate--> Communication Update** — The incident has a recorded communication or status update.
 
-1. **Incident** — incident ticket, service incident  
-2. **Major Incident** — MI, major outage, major incident ticket  
-3. **Cybersecurity Incident** — cyber incident, security incident  
-4. **IT Service** — technology service, service  
-5. **Alert** — monitoring alert, event  
-6. **Recovery Plan** — restoration plan, recovery runbook  
-7. **Materiality Assessment** — impact assessment, reportability assessment  
-8. **Regulatory Notification** — regulator notification, regulatory report  
-9. **Stakeholder Communication** — incident communication, status update, comms update  
-10. **Post-Incident Review** — PIR, postmortem, lessons learned review
+2. **Communication Update --sentTo--> Stakeholder** — The communication update is sent or directed to a stakeholder.
 
-Which aliases are valid, and which should be removed because they mean something different in your organization? 
+3. **Incident --hasStakeholder--> Stakeholder** — The incident has a stakeholder who needs to be informed, engaged, or considered.
+
+4. **Business Service --hasStakeholder--> Stakeholder** — The business service has a stakeholder who may need to be informed when the service is impacted.
+
+5. **Incident Commander --coordinates--> Incident** — The incident commander coordinates the response for the incident.
+
+6. **Incident Commander --engages--> Stakeholder** — The incident commander engages stakeholders during incident response.
+
+7. **Incident --commandedBy--> Incident Commander** — The incident has an assigned commander accountable for coordinating response.
+
+8. **Incident --reviewedBy--> Post-Incident Review** — The incident is analyzed through a post-incident review.
+
+9. **Post-Incident Review --identifies--> Corrective Action** — The post-incident review identifies a corrective action.
+
+10. **Incident --hasMaterialityAssessment--> Materiality Assessment** — The incident has a materiality assessment to determine significance or reportability.
+
+11. **Materiality Assessment --determinesNeedFor--> Regulatory Notification** — The materiality assessment determines whether regulatory notification is needed.
+
+12. **Regulatory Notification --notifiesAbout--> Incident** — The regulatory notification reports or notifies a regulator about the incident.
+
+Are these meanings accurate? 
 
 
 ### Turn 35 — user
 
-Let’s evaluate your proposed aliases/synonyms to confirm their appropriateness and accuracy based on the terminology used in the bank:  1. **Incident** — incident ticket, service incident      - **Confirmed**: Both terms are valid as they accurately reflect the same concept.  2. **Major Incident** — MI, major outage, major incident ticket      - **Confirmed**: "MI" and "major incident ticket" are valid. However, "major outage" might be contextually narrower, often referring specifically to disruptions rather than the broader categorization of a major incident.  3. **Cybersecurity Incident** — cyber incident, security incident      - **Confirmed**: Both terms are valid equivalents in the context of cybersecurity incidents.  4. **IT Service** — technology service, service      - **Confirmed**: Both terms are valid as they denote the same operational concept.  5. **Alert** — monitoring alert, event      - **Confirmed**: "Monitoring alert" is valid; however, "event" can be too broad, as it may not specifically relate to alerts. Therefore, "event" should be excluded.  6. **Recovery Plan** — restoration plan, recovery runbook      - **Confirmed**: Both terms are valid and indicate similar documents or plans.  7. **Materiality Assessment** — impact assessment, reportability assessment      - **Confirmed**: Both terms are valid; they reflect similar assessment concepts.  8. **Regulatory Notification** — regulator notification, regulatory report      - **Confirmed**: Both terms are valid, representing the same process.  9. **Stakeholder Communication** — incident communication, status update, comms update      - **Confirmed**: "Incident communication" and "status update" are valid. However, "comms update" is more informal and may not be widely used in formal documentation, so it can be excluded.  10. **Post-Incident Review** — PIR, postmortem, lessons learned review      - **Confirmed**: All terms are valid descriptors for the post-incident review process.  ### Aliases Summary: **Retained Valid Aliases:** 1. **Incident**: incident ticket, service incident 2. **Major Incident**: MI, major incident ticket 3. **Cybersecurity Incident**: cyber incident, security incident 4. **IT Service**: technology service, service 5. **Alert**: monitoring alert 6. **Recovery Plan**: restoration plan, recovery runbook 7. **Materiality Assessment**: impact assessment, reportability assessment 8. **Regulatory Notification**: regulator notification, regulatory report 9. **Stakeholder Communication**: incident communication, status update 10. **Post-Incident Review**: PIR, postmortem, lessons learned review  **To Exclude:** - Major Incident: major outage - Alert: event (because it is too broad) - Stakeholder Communication: comms update (due to its informal nature)  If you’re ready to proceed with the aliases for the remaining objects or have any other areas to address, just let me know!
+Your proposed meanings for the relationships related to communications, command, stakeholders, review, and regulatory reporting are well-articulated and accurately reflect their operational significance. Here’s the confirmation for each meaning:  1. **Incident --hasCommunicationUpdate--> Communication Update** — Correct. This meaning accurately indicates that the incident is associated with a recorded communication or status update.  2. **Communication Update --sentTo--> Stakeholder** — Correct. This definition effectively conveys that the communication update is sent or directed to a stakeholder, ensuring they are informed.  3. **Incident --hasStakeholder--> Stakeholder** — Correct. This meaning captures that the incident includes stakeholders who need to be kept informed, engaged, or considered during response efforts.  4. **Business Service --hasStakeholder--> Stakeholder** — Correct. This definition accurately reflects that a business service includes stakeholders who may need to be informed if the service is impacted.  5. **Incident Commander --coordinates--> Incident** — Correct. This meaning indicates that the incident commander is responsible for coordinating the response efforts for the incident.  6. **Incident Commander --engages--> Stakeholder** — Correct. This definition effectively conveys that the incident commander actively engages stakeholders during the incident response.  7. **Incident --commandedBy--> Incident Commander** — Correct. This relationship captures that the incident has a designated commander responsible for overseeing coordination of the response.  8. **Incident --reviewedBy--> Post-Incident Review** — Correct. This meaning indicates that the incident is subject to analysis through a structured post-incident review process.  9. **Post-Incident Review --identifies--> Corrective Action** — Correct. This definition accurately conveys that the post-incident review process is responsible for identifying corrective actions.  10. **Incident --hasMaterialityAssessment--> Materiality Assessment** — Correct. This meaning reflects that the incident has a materiality assessment to evaluate its significance or reportability.  11. **Materiality Assessment --determinesNeedFor--> Regulatory Notification** — Correct. This accurately indicates that the materiality assessment helps ascertain whether regulatory notification is required for the incident.  12. **Regulatory Notification --notifiesAbout--> Incident** — Correct. This relationship effectively conveys that the regulatory notification is focused on reporting or notifying a regulator about a specific incident.  All of the meanings you provided are accurate and effectively convey the intended relationships within your operational context. If you’re ready, we can move on to the next steps!
 
 ### Turn 35 — assistant
 
@@ -2365,48 +1712,37 @@ Let’s evaluate your proposed aliases/synonyms to confirm their appropriateness
 
 ```
 {
-  "yaml": "classes:\n  Incident:\n    aliases: [incident ticket, service incident]\n  MajorIncident:\n    aliases: [MI, major incident ticket]\n  CybersecurityIncident:\n    aliases: [cyber incident, security incident]\n  ITService:\n    aliases: [technology service, service]\n  Alert:\n    aliases: [monitoring alert]\n  RecoveryPlan:\n    aliases: [restoration plan, recovery runbook]\n  MaterialityAssessment:\n    aliases: [impact assessment, reportability assessment]\n  RegulatoryNotification:\n    aliases: [regulator notification, regulatory report]\n  StakeholderCommunication:\n    aliases: [incident communication, status update]\n  PostIncidentReview:\n    aliases: [PIR, postmortem, lessons learned review]\n"
+  "yaml": "relationships:\n  - name: hasCommunicationUpdate\n    from: Incident\n    to: CommunicationUpdate\n    meaning: The incident has a recorded communication or status update.\n  - name: sentTo\n    from: CommunicationUpdate\n    to: Stakeholder\n    meaning: The communication update is sent or directed to a stakeholder.\n  - name: hasStakeholder\n    from: Incident\n    to: Stakeholder\n    meaning: The incident has a stakeholder who needs to be informed, engaged, or considered.\n  - name: hasStakeholder\n    from: BusinessService\n    to: Stakeholder\n    meaning: The business service has a stakeholder who may need to be informed when the service is impacted.\n  - name: coordinates\n    from: IncidentCommander\n    to: Incident\n    meaning: The incident commander coordinates the response for the incident.\n  - name: engages\n    from: IncidentCommander\n    to: Stakeholder\n    meaning: The incident commander engages stakeholders during incident response.\n  - name: commandedBy\n    from: Incident\n    to: IncidentCommander\n    meaning: The incident has an assigned commander accountable for coordinating response.\n  - name: reviewedBy\n    from: Incident\n    to: PostIncidentReview\n    meaning: The incident is analyzed through a post-incident review.\n  - name: identifies\n    from: PostIncidentReview\n    to: CorrectiveAction\n    meaning: The post-incident review identifies a corrective action.\n  - name: hasMaterialityAssessment\n    from: Incident\n    to: MaterialityAssessment\n    meaning: The incident has a materiality assessment to determine significance or reportability.\n  - name: determinesNeedFor\n    from: MaterialityAssessment\n    to: RegulatoryNotification\n    meaning: The materiality assessment determines whether regulatory notification is needed.\n  - name: notifiesAbout\n    from: RegulatoryNotification\n    to: Incident\n    meaning: The regulatory notification reports or notifies a regulator about the incident.\n"
 }
 ```
 
 ### Turn 35 — tool
 
-Applied. Added 0, updated 10 existing item(s).
+Applied. Added 0, updated 12 existing item(s).
 
 ### Turn 35 — assistant
 
-Recorded those class aliases and excluded **major outage**, **event**, and **comms update**.
+Captured meanings for the final relationship batch.
 
-Next class alias batch: roles, monitoring/change/recovery objects, and context.
+Next: **relationship aliases** — alternative verb phrases users may say for the same relationship. I’ll keep these conservative, like we did for class aliases.
 
-Proposed aliases:
+First relationship-alias batch: impact, support, dependencies, and routing. Please confirm which are true equivalent phrasings in your bank’s usage:
 
-1. **Service Owner** — service accountable owner, service lead  
-2. **Application Owner** — app owner, application lead  
-3. **Resolver Group** — support group, assignment group, resolver team  
-4. **On-call Engineer** — on-call, duty engineer  
-5. **Incident Commander** — IC, incident lead  
-6. **Incident Response Team Member** — response team member, incident team member  
-7. **Business Owner** — business service owner, business lead  
-8. **Compliance Officer** — compliance lead, regulatory compliance officer  
-9. **Regulator** — supervisory authority, competent authority  
-10. **Service Desk Staff** — service desk analyst, help desk staff  
-11. **Monitoring Tool** — monitoring platform, observability tool  
-12. **Workaround** — temporary fix, mitigation  
-13. **Corrective Action** — remediation action, action item  
-14. **Emergency Change** — emergency change request, expedited change  
-15. **Backup** — backup set, restore point  
-16. **Environment** — deployment environment, runtime environment  
-17. **Business Line** — line of business, LOB  
-18. **Investigation** — cyber investigation, security investigation  
-19. **Affected User Group** — impacted user group, affected users
+1. **Alert --triggers--> Incident** aliases: raises, creates, generates  
+2. **Incident --affects--> IT Service** aliases: impacts, disrupts  
+3. **Incident --impacts--> Business Service** aliases: affects, disrupts  
+4. **IT Service --supports--> Business Service** aliases: enables, underpins  
+5. **Application --supports--> IT Service** aliases: contributes to, underpins  
+6. **IT Service --dependsOn--> IT Service** aliases: relies on, requires  
+7. **Application --dependsOn--> Application** aliases: relies on, requires  
+8. **Incident --assignedTo--> Resolver Group** aliases: routed to, allocated to  
+9. **IT Service --supportedBy--> Resolver Group** aliases: handled by, owned by support group  
 
-Which aliases are valid, and which should be removed because they mean something different in your organization? 
-
+Which should we keep, and which are too broad or misleading?
 
 ### Turn 36 — user
 
-Let’s evaluate your proposed aliases for roles, monitoring/change/recovery objects, and context to confirm their validity based on the terminology used in the bank:  1. **Service Owner** — service accountable owner, service lead      - **Confirmed**: Both terms are valid and indicate similar responsibilities.  2. **Application Owner** — app owner, application lead      - **Confirmed**: Both terms are valid equivalents.  3. **Resolver Group** — support group, assignment group, resolver team      - **Confirmed**: All terms accurately reflect the group's function in incident management.  4. **On-call Engineer** — on-call, duty engineer      - **Confirmed**: Both terms are valid.  5. **Incident Commander** — IC, incident lead      - **Confirmed**: Both terms are valid in the incident management context, especially "IC" being a commonly used shorthand.  6. **Incident Response Team Member** — response team member, incident team member      - **Confirmed**: Both terms appropriately describe the role.  7. **Business Owner** — business service owner, business lead      - **Confirmed**: Both terms accurately reflect the business owner’s responsibilities.  8. **Compliance Officer** — compliance lead, regulatory compliance officer      - **Confirmed**: Both terms are valid but consider that "regulatory compliance officer" may specifically emphasize their regulatory function.  9. **Regulator** — supervisory authority, competent authority      - **Confirmed**: Both terms are valid synonyms.  10. **Service Desk Staff** — service desk analyst, help desk staff       - **Confirmed**: Both terms accurately reflect the function of service desk roles.  11. **Monitoring Tool** — monitoring platform, observability tool       - **Confirmed**: Both terms are valid, as they relate to the functionality of monitoring tools.  12. **Workaround** — temporary fix, mitigation       - **Confirmed**: Both terms are accurately reflective of what a workaround entails.  13. **Corrective Action** — remediation action, action item       - **Confirmed**: "Remediation action" is valid; however, "action item" may imply a task that is not always associated with corrective actions, so if it lacks specificity, consider using it cautiously.  14. **Emergency Change** — emergency change request, expedited change       - **Confirmed**: Both terms are valid and indicate the urgency of such changes.  15. **Backup** — backup set, restore point       - **Confirmed**: Both terms accurately reflect what a backup entails.  16. **Environment** — deployment environment, runtime environment       - **Confirmed**: Both terms are valid equivalents.  17. **Business Line** — line of business, LOB       - **Confirmed**: Both terms are interchangeable within the business context.  18. **Investigation** — cyber investigation, security investigation       - **Confirmed**: Both terms adequately describe the investigative context for cybersecurity incidents.  19. **Affected User Group** — impacted user group, affected users       - **Confirmed**: Both terms accurately capture the concept of user groups impacted by incidents.  ### Summary: All proposed aliases are confirmed as valid and appropriate for the respective classes. If you’re ready to proceed with the next batch of aliases/synonyms or have any other areas to cover, just let me know!
+Your proposed relationship aliases are generally well-considered, but some may not be exact equivalents in the context of your bank’s usage. Here’s the review for each group of aliases:  1. **Alert --triggers--> Incident**      - **raises**: This is a relevant synonym.    - **creates**: Correct; this captures the essence of how alerts can prompt incident creation.    - **generates**: This is also appropriate and can be included.     **Keep**: raises, creates, generates.  2. **Incident --affects--> IT Service**      - **impacts**: This is a relevant synonym and captures the meaning well.    - **disrupts**: This is appropriate when referring specifically to incidents causing interruption.     **Keep**: impacts, disrupts.  3. **Incident --impacts--> Business Service**      - **affects**: This is a valid synonym and correctly reflects the relationship.    - **disrupts**: This is again suitable when referring to the incident's influence.     **Keep**: affects, disrupts.  4. **IT Service --supports--> Business Service**      - **enables**: This is a solid synonym and can be kept.    - **underpins**: This is also equivalent in meaning and is appropriate to include.     **Keep**: enables, underpins.  5. **Application --supports--> IT Service**      - **contributes to**: This is suitable and reflects the supportive role of applications.    - **underpins**: This is appropriate and conveys the foundational nature of application support.     **Keep**: contributes to, underpins.  6. **IT Service --dependsOn--> IT Service**      - **relies on**: This is a valid synonym and accurately represents the relationship.    - **requires**: This is also appropriate and well-aligned with the intended meaning.     **Keep**: relies on, requires.  7. **Application --dependsOn--> Application**      - **relies on**: This is a suitable synonym and accurately captures the dependency.    - **requires**: This is also correct and conveys the necessity of the relationship.     **Keep**: relies on, requires.  8. **Incident --assignedTo--> Resolver Group**      - **routed to**: This is a relevant synonym that accurately describes the action taken.    - **allocated to**: This is also appropriate and correctly denotes the assignment process.     **Keep**: routed to, allocated to.  9. **IT Service --supportedBy--> Resolver Group**      - **handled by**: This conveys a similar meaning but could imply more direct involvement, so it may be slightly broader.    - **owned by support group**: This could lead to confusion as it implies ownership rather than support, so it’s best to exclude this.     **Keep**: handled by (tentatively), exclude owned by support group.  **Summary of Confirmed Relationship Aliases:**  - **Alert --triggers--> Incident**: raises, creates, generates - **Incident --affects--> IT Service**: impacts, disrupts - **Incident --impacts--> Business Service**: affects, disrupts - **IT Service --supports--> Business Service**: enables, underpins - **Application --supports--> IT Service**: contributes to, underpins - **IT Service --dependsOn--> IT Service**: relies on, requires - **Application --dependsOn--> Application**: relies on, requires - **Incident --assignedTo--> Resolver Group**: routed to, allocated to - **IT Service --supportedBy--> Resolver Group**: handled by (tentatively; use cautiously), exclude owned by support group  Let me know if you would like to continue with additional relationship aliases or have any other questions!
 
 ### Turn 36 — assistant
 
@@ -2414,39 +1750,38 @@ Let’s evaluate your proposed aliases for roles, monitoring/change/recovery obj
 
 ```
 {
-  "yaml": "classes:\n  ServiceOwner:\n    aliases: [service accountable owner, service lead]\n  ApplicationOwner:\n    aliases: [app owner, application lead]\n  ResolverGroup:\n    aliases: [support group, assignment group, resolver team]\n  OnCallEngineer:\n    aliases: [on-call, duty engineer]\n  IncidentCommander:\n    aliases: [IC, incident lead]\n  IncidentResponseTeamMember:\n    aliases: [response team member, incident team member]\n  BusinessOwner:\n    aliases: [business service owner, business lead]\n  ComplianceOfficer:\n    aliases: [compliance lead, regulatory compliance officer]\n  Regulator:\n    aliases: [supervisory authority, competent authority]\n  ServiceDeskStaff:\n    aliases: [service desk analyst, help desk staff]\n  MonitoringTool:\n    aliases: [monitoring platform, observability tool]\n  Workaround:\n    aliases: [temporary fix, mitigation]\n  CorrectiveAction:\n    aliases: [remediation action]\n  EmergencyChange:\n    aliases: [emergency change request, expedited change]\n  Backup:\n    aliases: [backup set, restore point]\n  Environment:\n    aliases: [deployment environment, runtime environment]\n  BusinessLine:\n    aliases: [line of business, LOB]\n  Investigation:\n    aliases: [cyber investigation, security investigation]\n  AffectedUserGroup:\n    aliases: [impacted user group, affected users]\n"
+  "yaml": "relationships:\n  - name: triggers\n    from: Alert\n    to: Incident\n    aliases: [raises, creates, generates]\n  - name: affects\n    from: Incident\n    to: ITService\n    aliases: [impacts, disrupts]\n  - name: impacts\n    from: Incident\n    to: BusinessService\n    aliases: [affects, disrupts]\n  - name: supports\n    from: ITService\n    to: BusinessService\n    aliases: [enables, underpins]\n  - name: supports\n    from: Application\n    to: ITService\n    aliases: [contributes to, underpins]\n  - name: dependsOn\n    from: ITService\n    to: ITService\n    aliases: [relies on, requires]\n  - name: dependsOn\n    from: Application\n    to: Application\n    aliases: [relies on, requires]\n  - name: assignedTo\n    from: Incident\n    to: ResolverGroup\n    aliases: [routed to, allocated to]\n"
 }
 ```
 
 ### Turn 36 — tool
 
-Applied. Added 0, updated 19 existing item(s).
+Applied. Added 0, updated 8 existing item(s).
 
 ### Turn 36 — assistant
 
-Recorded those aliases. I left out **action item** for Corrective Action because you flagged it as less specific.
+Captured the confirmed strong aliases. I did **not** add “handled by” for **IT Service --supportedBy--> Resolver Group** because you marked it as tentative/broader.
 
-Now relationship meanings. Since these are repetitive, I’ll batch the most central ones first. Please confirm or edit these one-sentence meanings:
+Next relationship-alias batch: ownership, environment, recovery, evidence, and change. Please confirm which are true equivalent phrasings:
 
-1. **Incident --impacts--> IT Service** — The incident disrupts, degrades, risks, or otherwise affects the IT service.
+1. **Application --ownedBy--> Service Owner** aliases: accountable to, owned by  
+2. **IT Service --staffedBy--> On-call Engineer** aliases: covered by, has on-call  
+3. **Resolver Group --operatesIn--> Environment** aliases: works in, supports environment  
+4. **Incident --occursIn--> Environment** aliases: happens in, detected in  
+5. **IT Service --runsIn--> Environment** aliases: operates in, hosted in  
+6. **Application --deployedIn--> Environment** aliases: runs in, hosted in  
+7. **On-call Engineer --covers--> Environment** aliases: supports, is on duty for  
+8. **Incident --hasEvidence--> Evidence** aliases: includes evidence, has artifacts  
+9. **Evidence --preservedFor--> Incident** aliases: retained for, held for  
+10. **Emergency Change --linkedTo--> Incident** aliases: associated with, related to  
+11. **Emergency Change --changes--> IT Service** aliases: modifies, restores
 
-2. **Incident --triggered by--> Alert** — The incident was created from, correlated with, or initiated because of the alert.
+Which should we keep, and which are too broad or misleading? 
 
-3. **Alert --generated by--> Monitoring Tool** — The alert originated from the monitoring tool.
-
-4. **Monitoring Tool --monitors--> IT Service** — The monitoring tool observes the health or behavior of the IT service.
-
-5. **IT Service --depends on--> IT Service** — One IT service requires another IT service to operate correctly.
-
-6. **IT Service --owned by--> Service Owner** — The service owner is accountable for the IT service.
-
-7. **IT Service --supported by--> Application Owner** — The application owner is responsible for operational fitness of applications supporting the IT service.
-
-8. **Incident --assigned to--> Resolver Group** — The incident is routed to the resolver group responsible for investigation or resolution.
 
 ### Turn 37 — user
 
-Your proposed meanings for the relationships are well-crafted, and most are accurately defined. Here’s the confirmation with slight edits for clarity where needed:  1. **Incident --impacts--> IT Service** — The incident disrupts, degrades, risks, or otherwise affects the IT service.      - **Confirmed**: This meaning clearly captures the essence of the relationship.  2. **Incident --triggered by--> Alert** — The incident was created from, correlated with, or initiated because of the alert.      - **Confirmed**: This accurately describes how alerts lead to the creation or escalation of incidents.  3. **Alert --generated by--> Monitoring Tool** — The alert originated from the monitoring tool.      - **Confirmed**: This definition appropriately reflects the source of alerts in the incident management process.  4. **Monitoring Tool --monitors--> IT Service** — The monitoring tool observes the health or behavior of the IT service.      - **Confirmed**: This captures the functionality of monitoring tools effectively.  5. **IT Service --depends on--> IT Service** — One IT service requires another IT service to operate correctly.      - **Confirmed**: This meaning clearly articulates the relationship of dependency between IT services.  6. **IT Service --owned by--> Service Owner** — The service owner is accountable for the IT service.      - **Confirmed**: This meaning accurately reflects the accountability structure for IT services.  7. **IT Service --supported by--> Application Owner** — The application owner is responsible for the operational fitness of applications supporting the IT service.      - **Confirmed**: This clearly defines the supportive relationship and accountability.  8. **Incident --assigned to--> Resolver Group** — The incident is routed to the resolver group responsible for investigation or resolution.      - **Confirmed**: This meaning effectively describes the assignment process of incidents.  ### Summary: All proposed relationship meanings are confirmed as accurate and appropriately defined. If you're ready to continue with more meanings or have any other areas to address, just let me know!
+Your proposed relationship aliases for ownership, environment, recovery, evidence, and change are generally appropriate, but some need to be refined or excluded for clarity. Here’s the review for each:  1. **Application --ownedBy--> Service Owner**      - **accountable to**: This expresses a similar meaning, but it somewhat implies the service owner has a responsibility to another party rather than ownership; it’s best to exclude.    - **owned by**: This is a direct synonym and should be kept.     **Keep**: owned by, exclude accountable to.  2. **IT Service --staffedBy--> On-call Engineer**      - **covered by**: This is a valid synonym as it reflects the presence of the on-call engineer in operational response terms.    - **has on-call**: This implies the availability of on-call engineers but is slightly less clear; it would be better to exclude.     **Keep**: covered by, exclude has on-call.  3. **Resolver Group --operatesIn--> Environment**      - **works in**: This is a suitable synonym capturing the operational context.    - **supports environment**: This could imply more direct involvement and may not clearly indicate the broader operating context; better to exclude.     **Keep**: works in, exclude supports environment.  4. **Incident --occursIn--> Environment**      - **happens in**: This is a suitable synonym and reflects the intended meaning accurately.    - **detected in**: This may imply that the incident is only recognized within the environment, not necessarily where it occurs; it’s better to exclude.     **Keep**: happens in, exclude detected in.  5. **IT Service --runsIn--> Environment**      - **operates in**: This is a valid synonym and accurately conveys the relationship.    - **hosted in**: This is also appropriate, as it indicates where the IT service is deployed.     **Keep**: operates in, hosted in.  6. **Application --deployedIn--> Environment**      - **runs in**: This can be considered a synonym as it reflects the operational context of the application.    - **hosted in**: This is suitable and indicates the deployment context effectively.     **Keep**: runs in, hosted in.  7. **On-call Engineer --covers--> Environment**      - **supports**: This reflects the operational role of the on-call engineer well and can be kept.    - **is on duty for**: This indicates availability specifically but may imply a more limited context; it’s best to exclude.     **Keep**: supports, exclude is on duty for.  8. **Incident --hasEvidence--> Evidence**      - **includes evidence**: This is a valid synonym and captures the relationship accurately.    - **has artifacts**: This term can be broader and may not specifically refer to evidence used in incident analysis; it should be excluded.     **Keep**: includes evidence, exclude has artifacts.  9. **Evidence --preservedFor--> Incident**      - **retained for**: This is suitable and accurately reflects the purpose of evidence preservation.    - **held for**: This can imply a broader interpretation and may not clearly express the relationship; it’s best to exclude.     **Keep**: retained for, exclude held for.  10. **Emergency Change --linkedTo--> Incident**       - **associated with**: This is a fitting synonym that reflects the relationship effectively.     - **related to**: This is similarly appropriate and conveys the intended meaning.     **Keep**: both associated with and related to.  11. **Emergency Change --changes--> IT Service**       - **modifies**: This is a valid synonym and accurately describes the relationship.     - **restores**: This suggests a specific action and is appropriate in the context of emergency changes, so it can be included.     **Keep**: both modifies and restores.  **Summary of Confirmed Relationship Aliases:**  - **Application --ownedBy--> Service Owner**: owned by - **IT Service --staffedBy--> On-call Engineer**: covered by - **Resolver Group --operatesIn--> Environment**: works in - **Incident --occursIn--> Environment**: happens in - **IT Service --runsIn--> Environment**: operates in, hosted in - **Application --deployedIn--> Environment**: runs in, hosted in - **On-call Engineer --covers--> Environment**: supports - **Incident --hasEvidence--> Evidence**: includes evidence - **Evidence --preservedFor--> Incident**: retained for - **Emergency Change --linkedTo--> Incident**: associated with, related to - **Emergency Change --changes--> IT Service**: modifies, restores  Let me know if you want to continue with further relationship aliases or any other aspects!
 
 ### Turn 37 — assistant
 
@@ -2454,42 +1789,49 @@ Your proposed meanings for the relationships are well-crafted, and most are accu
 
 ```
 {
-  "yaml": "relationships:\n  - name: impacts\n    from: Incident\n    to: ITService\n    meaning: The incident disrupts, degrades, risks, or otherwise affects the IT service.\n  - name: triggeredBy\n    from: Incident\n    to: Alert\n    meaning: The incident was created from, correlated with, or initiated because of the alert.\n  - name: generatedBy\n    from: Alert\n    to: MonitoringTool\n    meaning: The alert originated from the monitoring tool.\n  - name: monitors\n    from: MonitoringTool\n    to: ITService\n    meaning: The monitoring tool observes the health or behavior of the IT service.\n  - name: dependsOn\n    from: ITService\n    to: ITService\n    meaning: One IT service requires another IT service to operate correctly.\n  - name: ownedBy\n    from: ITService\n    to: ServiceOwner\n    meaning: The service owner is accountable for the IT service.\n  - name: supportedBy\n    from: ITService\n    to: ApplicationOwner\n    meaning: The application owner is responsible for the operational fitness of applications supporting the IT service.\n  - name: assignedTo\n    from: Incident\n    to: ResolverGroup\n    meaning: The incident is routed to the resolver group responsible for investigation or resolution.\n"
+  "yaml": "relationships:\n  - name: ownedBy\n    from: Application\n    to: ServiceOwner\n    aliases: [owned by]\n  - name: staffedBy\n    from: ITService\n    to: OnCallEngineer\n    aliases: [covered by]\n  - name: operatesIn\n    from: ResolverGroup\n    to: Environment\n    aliases: [works in]\n  - name: occursIn\n    from: Incident\n    to: Environment\n    aliases: [happens in]\n  - name: runsIn\n    from: ITService\n    to: Environment\n    aliases: [operates in, hosted in]\n  - name: deployedIn\n    from: Application\n    to: Environment\n    aliases: [runs in, hosted in]\n  - name: covers\n    from: OnCallEngineer\n    to: Environment\n    aliases: [supports]\n  - name: hasEvidence\n    from: Incident\n    to: Evidence\n    aliases: [includes evidence]\n  - name: preservedFor\n    from: Evidence\n    to: Incident\n    aliases: [retained for]\n  - name: linkedTo\n    from: EmergencyChange\n    to: Incident\n    aliases: [associated with, related to]\n  - name: changes\n    from: EmergencyChange\n    to: ITService\n    aliases: [modifies, restores]\n"
 }
 ```
 
 ### Turn 37 — tool
 
-Applied. Added 0, updated 8 existing item(s).
+Applied. Added 0, updated 11 existing item(s).
 
 ### Turn 37 — assistant
 
-Recorded those relationship meanings.
+Captured those confirmed relationship aliases.
 
-Next relationship meanings batch: response, major incident, and communications. Please confirm or edit:
+Final relationship-alias batch: communications, reviews, regulatory reporting, recovery, and command. Please confirm which are true equivalent phrasings:
 
-1. **Resolver Group --staffed by--> On-call Engineer** — The resolver group has an on-call engineer available for immediate response.
+1. **Technical Owner --maintains--> Application** aliases: supports technically, engineers  
+2. **Technical Owner --restores--> IT Service** aliases: recovers, restores service  
+3. **IT Service --hasRunbook--> Runbook** aliases: has playbook, uses runbook  
+4. **Incident --usesRunbook--> Runbook** aliases: follows runbook, uses playbook  
+5. **Runbook --documents--> Workaround** aliases: contains, describes  
+6. **Incident --mitigatedBy--> Workaround** aliases: reduced by, worked around by  
+7. **IT Service --hasRecoveryPlan--> Recovery Plan** aliases: has restoration plan, has recovery procedure  
+8. **Incident --usesRecoveryPlan--> Recovery Plan** aliases: follows recovery plan, uses restoration plan  
+9. **Recovery Plan --hasRisk--> Risk** aliases: includes risk, carries risk  
+10. **Incident --hasRisk--> Risk** aliases: includes risk, carries recovery risk  
+11. **Incident --hasCommunicationUpdate--> Communication Update** aliases: has status update, includes comms update  
+12. **Communication Update --sentTo--> Stakeholder** aliases: distributed to, sent out to  
+13. **Incident --hasStakeholder--> Stakeholder** aliases: involves, has interested party  
+14. **Business Service --hasStakeholder--> Stakeholder** aliases: has interested party, has business stakeholder  
+15. **Incident Commander --coordinates--> Incident** aliases: leads, manages  
+16. **Incident Commander --engages--> Stakeholder** aliases: communicates with, involves  
+17. **Incident --commandedBy--> Incident Commander** aliases: led by, managed by  
+18. **Incident --reviewedBy--> Post-Incident Review** aliases: reviewed in, analyzed in  
+19. **Post-Incident Review --identifies--> Corrective Action** aliases: raises, records  
+20. **Incident --hasMaterialityAssessment--> Materiality Assessment** aliases: has reportability assessment, assessed by  
+21. **Materiality Assessment --determinesNeedFor--> Regulatory Notification** aliases: determines reportability, decides notification need  
+22. **Regulatory Notification --notifiesAbout--> Incident** aliases: reports incident, concerns
 
-2. **Incident --triaged by--> Service Desk Staff** — Service desk staff perform initial intake, classification, or triage for the incident.
-
-3. **Major Incident --escalated from--> Incident** — The major incident record is created from or formally linked to the incident that was escalated.
-
-4. **Major Incident --led by--> Incident Commander** — The incident commander leads coordination and decision-making for the major incident.
-
-5. **Major Incident --supported by--> Incident Response Team Member** — Incident response team members support the handling of the major incident.
-
-6. **Stakeholder Communication --about--> Incident** — The communication provides information about the incident, its impact, status, or recovery.
-
-7. **Stakeholder Communication --sent to--> Business Owner** — The communication is addressed to a business owner as an affected stakeholder.
-
-8. **Stakeholder Communication --sent to--> Affected User Group** — The communication is addressed to a group of users affected by the incident.
-
-9. **Stakeholder Communication --prepared by--> Incident Response Team Member** — An incident response team member prepares or contributes to the communication. 
+Which should we keep, and which are too broad or misleading? 
 
 
 ### Turn 38 — user
 
-Your proposed meanings for the relationships related to response, major incidents, and communications are clear and accurately defined. Here’s the confirmation with minor edits for clarity where needed:  1. **Resolver Group --staffed by--> On-call Engineer** — The resolver group has an on-call engineer available for immediate response.      - **Confirmed**: This meaning effectively describes the availability of on-call engineers in the resolver group.  2. **Incident --triaged by--> Service Desk Staff** — Service desk staff perform initial intake, classification, or triage for the incident.      - **Confirmed**: This accurately captures the role of service desk staff in incident management.  3. **Major Incident --escalated from--> Incident** — The major incident record is created from or formally linked to the incident that was escalated.      - **Confirmed**: This meaning clearly conveys the relationship between a major incident and its originating incident.  4. **Major Incident --led by--> Incident Commander** — The incident commander leads coordination and decision-making for the major incident.      - **Confirmed**: This effectively describes the leadership role of the incident commander in major incident management.  5. **Major Incident --supported by--> Incident Response Team Member** — Incident response team members support the handling of the major incident.      - **Confirmed**: This accurately reflects the supportive role of team members in managing major incidents.  6. **Stakeholder Communication --about--> Incident** — The communication provides information about the incident, its impact, status, or recovery.      - **Confirmed**: This meaning captures the essential informational role of stakeholder communications.  7. **Stakeholder Communication --sent to--> Business Owner** — The communication is addressed to a business owner as an affected stakeholder.      - **Confirmed**: This clearly identifies the target audience for stakeholder communications.  8. **Stakeholder Communication --sent to--> Affected User Group** — The communication is addressed to a group of users affected by the incident.      - **Confirmed**: This accurately reflects the focus of communications directed at impacted user groups.  9. **Stakeholder Communication --prepared by--> Incident Response Team Member** — An incident response team member prepares or contributes to the communication.      - **Confirmed**: This meaning effectively describes the involvement of team members in preparing communications.  ### Summary: All proposed relationship meanings are confirmed as accurate and appropriate. If you're ready to continue with more meanings or have any other areas to address, just let me know!
+Your proposed relationship aliases for communications, reviews, regulatory reporting, recovery, and command are mostly apt, but some may need refinement or exclusion for clarity. Here’s the review for each:  1. **Technical Owner --maintains--> Application**      - **supports technically**: This is suitable and reflects the role well.    - **engineers**: This is somewhat broader and could be interpreted differently; it might be better to exclude it.     **Keep**: supports technically, exclude engineers.  2. **Technical Owner --restores--> IT Service**      - **recovers**: This is appropriate and captures the essence of the restoration work.    - **restores service**: This is also relevant as it directly describes the function.     **Keep**: both recovers and restores service.  3. **IT Service --hasRunbook--> Runbook**      - **has playbook**: This is akin to runbooks and can be kept.    - **uses runbook**: This may imply usage rather than ownership; it’s better to exclude for clarity.     **Keep**: has playbook, exclude uses runbook.  4. **Incident --usesRunbook--> Runbook**      - **follows runbook**: This is an appropriate synonym that reflects the relationship well.    - **uses playbook**: This may carry a similar meaning to runbook, so it’s valid.     **Keep**: follows runbook, uses playbook.  5. **Runbook --documents--> Workaround**      - **contains**: This can be seen as synonymous and reflects the relationship clearly.    - **describes**: This is broader and may not always indicate a strong connection; it’s best to exclude.     **Keep**: contains, exclude describes.  6. **Incident --mitigatedBy--> Workaround**      - **reduced by**: This is relevant and captures the essence of mitigation.    - **worked around by**: This is also valid and reflects the temporary nature of the action.     **Keep**: both reduced by and worked around by.  7. **IT Service --hasRecoveryPlan--> Recovery Plan**      - **has restoration plan**: This is a valid synonym and can be included.    - **has recovery procedure**: This is also appropriate and reflects the context well.     **Keep**: both has restoration plan and has recovery procedure.  8. **Incident --usesRecoveryPlan--> Recovery Plan**      - **follows recovery plan**: This is a suitable synonym and accurately reflects the relationship.    - **uses restoration plan**: This carries a similar meaning and is also valid.     **Keep**: both follows recovery plan and uses restoration plan.  9. **Recovery Plan --hasRisk--> Risk**      - **includes risk**: This is a valid synonym and accurately captures the relationship.    - **carries risk**: This can imply broader interpretations and may not be as clear; it’s better to exclude.     **Keep**: includes risk, exclude carries risk.  10. **Incident --hasRisk--> Risk**       - **includes risk**: This is appropriate and reflects the connection accurately.     - **carries recovery risk**: This is somewhat specific and may not be broadly applicable; better to exclude for clarity.     **Keep**: includes risk, exclude carries recovery risk.  11. **Incident --hasCommunicationUpdate--> Communication Update**       - **has status update**: This is a relevant synonym and can be included.     - **includes comms update**: This is also acceptable, as it captures a similar idea.     **Keep**: both has status update and includes comms update.  12. **Communication Update --sentTo--> Stakeholder**       - **distributed to**: This is a suitable synonym that reflects the dissemination of updates.     - **sent out to**: This is slightly informal but appropriate; can be included.     **Keep**: both distributed to and sent out to.  13. **Incident --hasStakeholder--> Stakeholder**       - **involves**: This captures the inclusion of stakeholders but is broader; it’s best to exclude.     - **has interested party**: This is relevant and can be considered a synonym.     **Keep**: has interested party, exclude involves.  14. **Business Service --hasStakeholder--> Stakeholder**       - **has interested party**: This is valid and aligns well with the meaning.     - **has business stakeholder**: This is somewhat redundant and may not be necessary; it’s better to exclude.     **Keep**: has interested party, exclude has business stakeholder.  15. **Incident Commander --coordinates--> Incident**       - **leads**: This is a relevant synonym and can be kept.     - **manages**: This implies a similar function and is suitable.     **Keep**: both leads and manages.  16. **Incident Commander --engages--> Stakeholder**       - **communicates with**: This is relevant and effectively captures the intention behind engagement.     - **involves**: This is broader and may not reflect the specific nature of stakeholder engagement; it’s better to exclude.     **Keep**: communicates with, exclude involves.  17. **Incident --commandedBy--> Incident Commander**       - **led by**: This is a valid synonym and appropriately captures the accountability.     - **managed by**: This carries a similar meaning and can be included.     **Keep**: both led by and managed by.  18. **Incident --reviewedBy--> Post-Incident Review**       - **reviewed in**: This is suitable as it reflects the process of analysis.     - **analyzed in**: This is also valid and accurately describes the review process.     **Keep**: both reviewed in and analyzed in.  19. **Post-Incident Review --identifies--> Corrective Action**       - **raises**: This is applicable and denotes the action of flagging corrective actions.     - **records**: This is also appropriate as it reflects documentation; both can be included.     **Keep**: both raises and records.  20. **Incident --hasMaterialityAssessment--> Materiality Assessment**       - **has reportability assessment**: This is effective and accurately conveys the purpose of the materiality assessment.     - **assessed by**: This implies a more passive relationship and may not convey the intent; it’s better to exclude.     **Keep**: has reportability assessment, exclude assessed by.  21. **Materiality Assessment --determinesNeedFor--> Regulatory Notification**       - **determines reportability**: This is a valid synonym that captures the intent well.     - **decides notification need**: This is also an appropriate phrase that conveys the relationship accurately.     **Keep**: both determines reportability and decides notification need.  22. **Regulatory Notification --notifiesAbout--> Incident**       - **reports incident**: This is a fitting synonym and accurately describes the relationship.     - **concerns**: This is broader and can imply various contexts; better to exclude.     **Keep**: reports incident, exclude concerns.  **Summary of Confirmed Relationship Aliases:**  - **Technical Owner --maintains--> Application**: supports technically - **Technical Owner --restores--> IT Service**: recovers, restores service - **IT Service --hasRunbook--> Runbook**: has playbook - **Incident --usesRunbook--> Runbook**: follows runbook, uses playbook - **Runbook --documents--> Workaround**: contains - **Incident --mitigatedBy--> Workaround**: reduced by, worked around by - **IT Service --hasRecoveryPlan--> Recovery Plan**: has restoration plan, has recovery procedure - **Incident --usesRecoveryPlan--> Recovery Plan**: follows recovery plan, uses restoration plan - **Recovery Plan --hasRisk--> Risk**: includes risk - **Incident --hasRisk--> Risk**: includes risk - **Incident --hasCommunicationUpdate--> Communication Update**: has status update, includes comms update - **Communication Update --sentTo--> Stakeholder**: distributed to, sent out to - **Incident --hasStakeholder--> Stakeholder**: has interested party - **Business Service --hasStakeholder--> Stakeholder**: has interested party - **Incident Commander --coordinates--> Incident**: leads, manages - **Incident Commander --engages--> Stakeholder**: communicates with - **Incident --commandedBy--> Incident Commander**: led by, managed by - **Incident --reviewedBy--> Post-Incident Review**: reviewed in, analyzed in - **Post-Incident Review --identifies--> Corrective Action**: raises, records - **Incident --hasMaterialityAssessment--> Materiality Assessment**: has reportability assessment - **Materiality Assessment --determinesNeedFor--> Regulatory Notification**: determines reportability, decides notification need - **Regulatory Notification --notifiesAbout--> Incident**: reports incident  Let me know if you would like to continue with further relationship aliases or if there's anything else you need!
 
 ### Turn 38 — assistant
 
@@ -2497,108 +1839,59 @@ Your proposed meanings for the relationships related to response, major incident
 
 ```
 {
-  "yaml": "relationships:\n  - name: staffedBy\n    from: ResolverGroup\n    to: OnCallEngineer\n    meaning: The resolver group has an on-call engineer available for immediate response.\n  - name: triagedBy\n    from: Incident\n    to: ServiceDeskStaff\n    meaning: Service desk staff perform initial intake, classification, or triage for the incident.\n  - name: escalatedFrom\n    from: MajorIncident\n    to: Incident\n    meaning: The major incident record is created from or formally linked to the incident that was escalated.\n  - name: ledBy\n    from: MajorIncident\n    to: IncidentCommander\n    meaning: The incident commander leads coordination and decision-making for the major incident.\n  - name: supportedBy\n    from: MajorIncident\n    to: IncidentResponseTeamMember\n    meaning: Incident response team members support the handling of the major incident.\n  - name: about\n    from: StakeholderCommunication\n    to: Incident\n    meaning: The communication provides information about the incident, its impact, status, or recovery.\n  - name: sentTo\n    from: StakeholderCommunication\n    to: BusinessOwner\n    meaning: The communication is addressed to a business owner as an affected stakeholder.\n  - name: sentTo\n    from: StakeholderCommunication\n    to: AffectedUserGroup\n    meaning: The communication is addressed to a group of users affected by the incident.\n  - name: preparedBy\n    from: StakeholderCommunication\n    to: IncidentResponseTeamMember\n    meaning: An incident response team member prepares or contributes to the communication.\n"
+  "yaml": "relationships:\n  - name: maintains\n    from: TechnicalOwner\n    to: Application\n    aliases: [supports technically]\n  - name: restores\n    from: TechnicalOwner\n    to: ITService\n    aliases: [recovers, restores service]\n  - name: hasRunbook\n    from: ITService\n    to: Runbook\n    aliases: [has playbook]\n  - name: usesRunbook\n    from: Incident\n    to: Runbook\n    aliases: [follows runbook, uses playbook]\n  - name: documents\n    from: Runbook\n    to: Workaround\n    aliases: [contains]\n  - name: mitigatedBy\n    from: Incident\n    to: Workaround\n    aliases: [reduced by, worked around by]\n  - name: hasRecoveryPlan\n    from: ITService\n    to: RecoveryPlan\n    aliases: [has restoration plan, has recovery procedure]\n  - name: usesRecoveryPlan\n    from: Incident\n    to: RecoveryPlan\n    aliases: [follows recovery plan, uses restoration plan]\n  - name: hasRisk\n    from: RecoveryPlan\n    to: Risk\n    aliases: [includes risk]\n  - name: hasRisk\n    from: Incident\n    to: Risk\n    aliases: [includes risk]\n  - name: hasCommunicationUpdate\n    from: Incident\n    to: CommunicationUpdate\n    aliases: [has status update, includes comms update]\n  - name: sentTo\n    from: CommunicationUpdate\n    to: Stakeholder\n    aliases: [distributed to, sent out to]\n  - name: hasStakeholder\n    from: Incident\n    to: Stakeholder\n    aliases: [has interested party]\n  - name: hasStakeholder\n    from: BusinessService\n    to: Stakeholder\n    aliases: [has interested party]\n  - name: coordinates\n    from: IncidentCommander\n    to: Incident\n    aliases: [leads, manages]\n  - name: engages\n    from: IncidentCommander\n    to: Stakeholder\n    aliases: [communicates with]\n  - name: commandedBy\n    from: Incident\n    to: IncidentCommander\n    aliases: [led by, managed by]\n  - name: reviewedBy\n    from: Incident\n    to: PostIncidentReview\n    aliases: [reviewed in, analyzed in]\n  - name: identifies\n    from: PostIncidentReview\n    to: CorrectiveAction\n    aliases: [raises, records]\n  - name: hasMaterialityAssessment\n    from: Incident\n    to: MaterialityAssessment\n    aliases: [has reportability assessment]\n  - name: determinesNeedFor\n    from: MaterialityAssessment\n    to: RegulatoryNotification\n    aliases: [determines reportability, decides notification need]\n  - name: notifiesAbout\n    from: RegulatoryNotification\n    to: Incident\n    aliases: [reports incident]\n"
 }
 ```
 
 ### Turn 38 — tool
 
-Applied. Added 0, updated 9 existing item(s).
+Applied. Added 0, updated 22 existing item(s).
 
 ### Turn 38 — assistant
 
-Recorded those relationship meanings.
+Captured the confirmed relationship aliases and excluded the broader/misleading ones.
 
-Next relationship meanings batch: regulatory, recovery/change, improvement, cybersecurity, and context. Please confirm or edit:
+**Phase 5 recap — language layer captured**
 
-1. **Materiality Assessment --assesses--> Incident** — The assessment evaluates the incident’s impact, significance, and reportability.
+We now have:
+- Plain meanings for all classes.
+- Conservative aliases for all classes where you confirmed exact or near-exact usage.
+- Plain meanings for all relationships.
+- Conservative aliases for relationships where you confirmed equivalent verb phrases.
 
-2. **Materiality Assessment --reviewed by--> Compliance Officer** — The compliance officer reviews the assessment for regulatory and compliance implications.
+Next is **Phase 6: constraints and fixed choices** — mainly allowed values for properties such as incident status, severity, priority, alert status, evidence preservation status, assessment outcomes, notification status, risk/change/action status, criticality, and environment.
 
-3. **Regulatory Notification --based on--> Materiality Assessment** — The notification is prepared or required based on the outcome of the materiality assessment.
-
-4. **Regulatory Notification --notifies--> Regulator** — The notification is submitted to the regulator.
-
-5. **Regulatory Notification --about--> Incident** — The notification reports information about the incident.
-
-6. **Recovery Plan --for--> Incident** — The recovery plan is created for or associated with the incident.
-
-7. **Recovery Plan --restores--> IT Service** — The recovery plan describes how the IT service will be restored or stabilized.
-
-8. **Recovery Plan --uses--> Backup** — The recovery plan relies on the backup for restoration.
-
-9. **Backup --for--> IT Service** — The backup can be used to restore the IT service.
-
-10. **Emergency Change --related to--> Incident** — The emergency change is raised because of or in response to the incident.
-
-11. **Emergency Change --changes--> IT Service** — The emergency change modifies or affects the IT service.
-
-12. **Emergency Change --applies in--> Environment** — The emergency change is executed in or affects the specified environment. 
-13. **Workaround --applies to--> Incident** — The workaround can be used to mitigate or reduce the impact of the incident.
-
-14. **Post-Incident Review --reviews--> Incident** — The post-incident review evaluates the incident after recovery or closure.
-
-15. **Post-Incident Review --identifies--> Corrective Action** — The review records corrective actions arising from findings or lessons learned.
-
-16. **Corrective Action --addresses--> Incident** — The corrective action is intended to prevent recurrence or reduce future impact related to the incident.
-
-17. **Cybersecurity Incident --is type of--> Incident** — The cybersecurity incident is a specialized form of incident.
-
-18. **Investigation --investigates--> Cybersecurity Incident** — The investigation examines the cybersecurity incident.
-
-19. **Investigation --supported by--> Incident Response Team Member** — Incident response team members support the investigation.
-
-20. **Incident --occurs in--> Environment** — The incident occurs in a specific deployment or operating environment.
-
-21. **IT Service --runs in--> Environment** — The IT service operates in the specified environment.
-
-22. **IT Service --serves--> Business Line** — The IT service supports or is consumed by the business line.
-
-23. **Incident --affects--> Affected User Group** — The incident affects the specified group of users.
+Please confirm before we proceed: **does the language layer look right overall, or are there any terms where the alias could cause confusion and should be removed?**
 
 ### Turn 39 — user
 
-Your proposed meanings for the relationships regarding regulatory, recovery/change, improvement, cybersecurity, and context terms are clear and well-defined. Here’s the confirmation with minor edits for clarity where needed:  1. **Materiality Assessment --assesses--> Incident** — The assessment evaluates the incident’s impact, significance, and reportability.      - **Confirmed**: This meaning accurately captures the role of the materiality assessment.  2. **Materiality Assessment --reviewed by--> Compliance Officer** — The compliance officer reviews the assessment for regulatory and compliance implications.      - **Confirmed**: This reflects the oversight role of the compliance officer effectively.  3. **Regulatory Notification --based on--> Materiality Assessment** — The notification is prepared or required based on the outcome of the materiality assessment.      - **Confirmed**: This meaning appropriately illustrates the connection to the assessment outcome.  4. **Regulatory Notification --notifies--> Regulator** — The notification is submitted to the regulator.      - **Confirmed**: This accurately describes the purpose of the regulatory notification.  5. **Regulatory Notification --about--> Incident** — The notification reports information about the incident.      - **Confirmed**: This meaning effectively connects the notification to the incident context.  6. **Recovery Plan --for--> Incident** — The recovery plan is created for or associated with the incident.      - **Confirmed**: This adequately captures the relationship between recovery plans and incidents.  7. **Recovery Plan --restores--> IT Service** — The recovery plan describes how the IT service will be restored or stabilized.      - **Confirmed**: This meaning clearly defines the purpose and function of the recovery plan.  8. **Recovery Plan --uses--> Backup** — The recovery plan relies on the backup for restoration.      - **Confirmed**: This reflects the dependency on backups for recovery processes.  9. **Backup --for--> IT Service** — The backup can be used to restore the IT service.      - **Confirmed**: This meaning accurately describes the role of backups.  10. **Emergency Change --related to--> Incident** — The emergency change is raised because of or in response to the incident.      - **Confirmed**: This effectively captures the relationship between emergency changes and incidents.  11. **Emergency Change --changes--> IT Service** — The emergency change modifies or affects the IT service.      - **Confirmed**: This meaning accurately reflects the impact of emergency changes.  12. **Emergency Change --applies in--> Environment** — The emergency change is executed in or affects the specified environment.      - **Confirmed**: This meaning appropriately describes the context of emergency changes.  13. **Workaround --applies to--> Incident** — The workaround can be used to mitigate or reduce the impact of the incident.      - **Confirmed**: This meaning effectively captures the purpose of workarounds.  14. **Post-Incident Review --reviews--> Incident** — The post-incident review evaluates the incident after recovery or closure.      - **Confirmed**: This accurately describes the function of post-incident reviews.  15. **Post-Incident Review --identifies--> Corrective Action** — The review records corrective actions arising from findings or lessons learned.      - **Confirmed**: This meaning clearly outlines the resulting actions from the review process.  16. **Corrective Action --addresses--> Incident** — The corrective action is intended to prevent recurrence or reduce future impact related to the incident.      - **Confirmed**: This effectively captures the purpose of corrective actions.  17. **Cybersecurity Incident --is type of--> Incident** — The cybersecurity incident is a specialized form of incident.      - **Confirmed**: This meaning accurately reflects the classification of cybersecurity incidents.  18. **Investigation --investigates--> Cybersecurity Incident** — The investigation examines the cybersecurity incident.      - **Confirmed**: This clearly outlines the investigative focus.  19. **Investigation --supported by--> Incident Response Team Member** — Incident response team members support the investigation.      - **Confirmed**: This captures the role of team members in supporting the investigation efforts.  20. **Incident --occurs in--> Environment** — The incident occurs in a specific deployment or operating environment.      - **Confirmed**: This meaning effectively describes the context in which incidents take place.  21. **IT Service --runs in--> Environment** — The IT service operates in the specified environment.      - **Confirmed**: This accurately describes where IT services are deployed.  22. **IT Service --serves--> Business Line** — The IT service supports or is consumed by the business line.      - **Confirmed**: This meaning captures the functional relationship between services and business lines.  23. **Incident --affects--> Affected User Group** — The incident affects the specified group of users.      - **Confirmed**: This accurately describes the impact of incidents on user groups.  ### Summary: All proposed relationship meanings are confirmed as accurate and appropriate. If you're ready to proceed with more meanings, aliases, or any other areas to address, just let me know!
+The language layer you’ve captured looks comprehensive and well-structured. The meanings and aliases for both classes and relationships are clear, conservative, and aligned with operational terminology as used within your bank.   Here’s a brief recap and confirmation regarding potential concerns:  - **Plain meanings for classes**: These are well-articulated and accurately represent the operational context. - **Conservative aliases for classes**: The aliases chosen are suitable and reflect commonly understood terms used in the industry, providing a good basis for mapping user language to the ontology. - **Plain meanings for relationships**: The meanings accurately describe the intended connections and align with operational processes. - **Conservative aliases for relationships**: You’ve taken care to select synonyms that accurately convey the relationships without introducing confusion or ambiguity.  There are no obvious terms or aliases that seem likely to cause confusion in your language layer. Everything appears to be appropriately structured to support clear communication and operational efficiency.  If you’re ready to proceed with Phase 6: constraints and fixed choices, you can go ahead!
 
 ### Turn 39 — assistant
 
-**Tool call: `apply_ontology_yaml`**
+Great — moving to **Phase 6: constraints and fixed choices**.
 
-```
-{
-  "yaml": "relationships:\n  - name: assesses\n    from: MaterialityAssessment\n    to: Incident\n    meaning: The assessment evaluates the incident's impact, significance, and reportability.\n  - name: reviewedBy\n    from: MaterialityAssessment\n    to: ComplianceOfficer\n    meaning: The compliance officer reviews the assessment for regulatory and compliance implications.\n  - name: basedOn\n    from: RegulatoryNotification\n    to: MaterialityAssessment\n    meaning: The notification is prepared or required based on the outcome of the materiality assessment.\n  - name: notifies\n    from: RegulatoryNotification\n    to: Regulator\n    meaning: The notification is submitted to the regulator.\n  - name: about\n    from: RegulatoryNotification\n    to: Incident\n    meaning: The notification reports information about the incident.\n  - name: forIncident\n    from: RecoveryPlan\n    to: Incident\n    meaning: The recovery plan is created for or associated with the incident.\n  - name: restores\n    from: RecoveryPlan\n    to: ITService\n    meaning: The recovery plan describes how the IT service will be restored or stabilized.\n  - name: uses\n    from: RecoveryPlan\n    to: Backup\n    meaning: The recovery plan relies on the backup for restoration.\n  - name: forService\n    from: Backup\n    to: ITService\n    meaning: The backup can be used to restore the IT service.\n  - name: relatedTo\n    from: EmergencyChange\n    to: Incident\n    meaning: The emergency change is raised because of or in response to the incident.\n  - name: changes\n    from: EmergencyChange\n    to: ITService\n    meaning: The emergency change modifies or affects the IT service.\n  - name: appliesIn\n    from: EmergencyChange\n    to: Environment\n    meaning: The emergency change is executed in or affects the specified environment.\n  - name: appliesTo\n    from: Workaround\n    to: Incident\n    meaning: The workaround can be used to mitigate or reduce the impact of the incident.\n  - name: reviews\n    from: PostIncidentReview\n    to: Incident\n    meaning: The post-incident review evaluates the incident after recovery or closure.\n  - name: identifies\n    from: PostIncidentReview\n    to: CorrectiveAction\n    meaning: The review records corrective actions arising from findings or lessons learned.\n  - name: addresses\n    from: CorrectiveAction\n    to: Incident\n    meaning: The corrective action is intended to prevent recurrence or reduce future impact related to the incident.\n  - name: isTypeOf\n    from: CybersecurityIncident\n    to: Incident\n    meaning: The cybersecurity incident is a specialized form of incident.\n  - name: investigates\n    from: Investigation\n    to: CybersecurityIncident\n    meaning: The investigation examines the cybersecurity incident.\n  - name: supportedBy\n    from: Investigation\n    to: IncidentResponseTeamMember\n    meaning: Incident response team members support the investigation.\n  - name: occursIn\n    from: Incident\n    to: Environment\n    meaning: The incident occurs in a specific deployment or operating environment.\n  - name: runsIn\n    from: ITService\n    to: Environment\n    meaning: The IT service operates in the specified environment.\n  - name: serves\n    from: ITService\n    to: BusinessLine\n    meaning: The IT service supports or is consumed by the business line.\n  - name: affects\n    from: Incident\n    to: AffectedUserGroup\n    meaning: The incident affects the specified group of users.\n"
-}
-```
+For properties with a small standardized value set, we’ll capture the allowed choices. First batch: incident and alert operational states.
 
-### Turn 39 — tool
+Please provide or confirm the allowed values for these properties in your bank:
 
-Applied. Added 0, updated 23 existing item(s).
+1. **Incident.status**  
+   Proposed starting list: `new`, `acknowledged`, `investigating`, `mitigating`, `recovering`, `resolved`, `closed`
 
-### Turn 39 — assistant
+2. **Incident.severity**  
+   Proposed starting list: `critical`, `high`, `medium`, `low`
 
-Recorded those relationship meanings.
+3. **Incident.priority**  
+   Proposed starting list: `P1`, `P2`, `P3`, `P4`
 
-Now relationship aliases/synonyms. Please confirm only phrasings users might actually use for the same relationship, and reject near-synonyms that mean something different.
+4. **Alert.status**  
+   Proposed starting list: `active`, `acknowledged`, `suppressed`, `cleared`
 
-Proposed aliases for the most common relationships:
-
-1. **Incident --impacts--> IT Service**: affects, degrades, disrupts  
-2. **Incident --triggered by--> Alert**: caused by alert, opened from alert, correlated with alert  
-3. **Alert --generated by--> Monitoring Tool**: raised by, emitted by, produced by  
-4. **Monitoring Tool --monitors--> IT Service**: observes, assesses, watches  
-5. **IT Service --depends on--> IT Service**: relies on, requires, has upstream dependency  
-6. **IT Service --owned by--> Service Owner**: accountable to, owned by service owner  
-7. **IT Service --supported by--> Application Owner**: supported by app owner, application-owned by  
-8. **Incident --assigned to--> Resolver Group**: routed to, allocated to, assigned resolver group  
-9. **Resolver Group --staffed by--> On-call Engineer**: has on-call, covered by, staffed with  
-10. **Incident --triaged by--> Service Desk Staff**: initially handled by, first-line triaged by
-
-Which of these aliases are valid, and which should be removed? 
-
+Are these allowed-value lists correct, and should any values be renamed, added, or removed?
 
 ### Turn 40 — user
 
-Let’s evaluate your proposed aliases/synonyms for the most common relationships to confirm their validity based on what might be commonly used in practice:  1. **Incident --impacts--> IT Service**: affects, degrades, disrupts      - **Confirmed**: All terms are valid as they all convey the same implications regarding the impact of incidents on IT services.  2. **Incident --triggered by--> Alert**: caused by alert, opened from alert, correlated with alert      - **Confirmed**: All terms are valid. Each conveys the relationship accurately, reflecting how alerts relate to incidents.  3. **Alert --generated by--> Monitoring Tool**: raised by, emitted by, produced by      - **Confirmed**: All the terms are valid synonyms for how alerts originate from monitoring tools.  4. **Monitoring Tool --monitors--> IT Service**: observes, assesses, watches      - **Confirmed**: All terms accurately reflect the monitoring function of the tools concerning IT services.  5. **IT Service --depends on--> IT Service**: relies on, requires, has upstream dependency      - **Confirmed**: All the aliases are valid as they express the same basic principle of service dependency.  6. **IT Service --owned by--> Service Owner**: accountable to, owned by service owner      - **Confirmed**: Both terms are valid, and they represent the concept of responsibility appropriately.  7. **IT Service --supported by--> Application Owner**: supported by app owner, application-owned by      - **Confirmed**: The first alias is valid; however, "application-owned by" may imply ownership rather than support, which can create confusion, so it should be excluded.  8. **Incident --assigned to--> Resolver Group**: routed to, allocated to, assigned resolver group      - **Confirmed**: All terms accurately describe the assignment process to the resolver group.  9. **Resolver Group --staffed by--> On-call Engineer**: has on-call, covered by, staffed with      - **Confirmed**: All terms are valid as they describe the staffing of the resolver group effectively.  10. **Incident --triaged by--> Service Desk Staff**: initially handled by, first-line triaged by       - **Confirmed**: Both terms are valid descriptions of the triage process by service desk staff.  ### Summary: **Retained Valid Aliases:** 1. affects, degrades, disrupts 2. caused by alert, opened from alert, correlated with alert 3. raised by, emitted by, produced by 4. observes, assesses, watches 5. relies on, requires, has upstream dependency 6. accountable to, owned by service owner 7. supported by app owner 8. routed to, allocated to, assigned resolver group 9. has on-call, covered by, staffed with 10. initially handled by, first-line triaged by  **To Exclude:** - **IT Service --supported by--> Application Owner**: excluded: "application-owned by"    These alias assessments capture common terminology used in the operational context. If you’re ready to proceed or have further aliases to propose, just let me know!
+The proposed allowed values for the operational states of incidents and alerts are mostly good, but here are my confirmations and recommendations for each:  1. **Incident.status**      Proposed starting list: `new`, `acknowledged`, `investigating`, `mitigating`, `recovering`, `resolved`, `closed`      **Confirmation**: This list is mostly accurate. However, "mitigating" is not typically used in standard status definitions; it might be more common to see "contained" or simply "monitoring." I recommend adjusting this to `new`, `acknowledged`, `investigating`, `contained`, `recovering`, `resolved`, `closed`.  2. **Incident.severity**      Proposed starting list: `critical`, `high`, `medium`, `low`      **Confirmation**: This list is correct as it stands.  3. **Incident.priority**      Proposed starting list: `P1`, `P2`, `P3`, `P4`      **Confirmation**: This is an appropriate list for priority levels and is commonly used in incident management.  4. **Alert.status**      Proposed starting list: `active`, `acknowledged`, `suppressed`, `cleared`      **Confirmation**: This list is accurate. It captures the typical statuses associated with alerts effectively.  **Final Allowed-Value Lists:**  1. **Incident.status**: `new`, `acknowledged`, `investigating`, `contained`, `recovering`, `resolved`, `closed` 2. **Incident.severity**: `critical`, `high`, `medium`, `low` 3. **Incident.priority**: `P1`, `P2`, `P3`, `P4` 4. **Alert.status**: `active`, `acknowledged`, `suppressed`, `cleared`  If you're ready to proceed to the next batch of properties for allowed-value lists, we can continue!
 
 ### Turn 40 — assistant
 
@@ -2606,48 +1899,52 @@ Let’s evaluate your proposed aliases/synonyms for the most common relationship
 
 ```
 {
-  "yaml": "relationships:\n  - name: impacts\n    from: Incident\n    to: ITService\n    aliases: [affects, degrades, disrupts]\n  - name: triggeredBy\n    from: Incident\n    to: Alert\n    aliases: [caused by alert, opened from alert, correlated with alert]\n  - name: generatedBy\n    from: Alert\n    to: MonitoringTool\n    aliases: [raised by, emitted by, produced by]\n  - name: monitors\n    from: MonitoringTool\n    to: ITService\n    aliases: [observes, assesses, watches]\n  - name: dependsOn\n    from: ITService\n    to: ITService\n    aliases: [relies on, requires, has upstream dependency]\n  - name: ownedBy\n    from: ITService\n    to: ServiceOwner\n    aliases: [accountable to, owned by service owner]\n  - name: supportedBy\n    from: ITService\n    to: ApplicationOwner\n    aliases: [supported by app owner]\n  - name: assignedTo\n    from: Incident\n    to: ResolverGroup\n    aliases: [routed to, allocated to, assigned resolver group]\n  - name: staffedBy\n    from: ResolverGroup\n    to: OnCallEngineer\n    aliases: [has on-call, covered by, staffed with]\n  - name: triagedBy\n    from: Incident\n    to: ServiceDeskStaff\n    aliases: [initially handled by, first-line triaged by]\n"
+  "yaml": "classes:\n  Incident:\n    properties:\n      status:\n        type: text\n        allowed: [new, acknowledged, investigating, contained, recovering, resolved, closed]\n      severity:\n        type: text\n        allowed: [critical, high, medium, low]\n      priority:\n        type: text\n        allowed: [P1, P2, P3, P4]\n  Alert:\n    properties:\n      status:\n        type: text\n        allowed: [active, acknowledged, suppressed, cleared]\n"
 }
 ```
 
 ### Turn 40 — tool
 
-Applied. Added 0, updated 10 existing item(s).
+Applied. Added 0, updated 2 existing item(s).
 
 ### Turn 40 — assistant
 
-Recorded those relationship aliases and excluded **application-owned by**.
+Captured allowed values for **Incident.status**, **Incident.severity**, **Incident.priority**, and **Alert.status**.
 
-Next relationship alias batch: major incident, communication, regulatory, and recovery/change links.
+Next batch: governance, reporting, risk, change, corrective action, and service context choices.
 
-Proposed aliases:
+Please confirm or correct these allowed-value lists:
 
-1. **Major Incident --escalated from--> Incident**: promoted from, declared from, raised from  
-2. **Major Incident --led by--> Incident Commander**: commanded by, coordinated by, led by IC  
-3. **Major Incident --supported by--> Incident Response Team Member**: assisted by, supported by response team  
-4. **Stakeholder Communication --about--> Incident**: regarding, concerning, update for  
-5. **Stakeholder Communication --sent to--> Business Owner**: addressed to business owner, notified business owner  
-6. **Stakeholder Communication --sent to--> Affected User Group**: addressed to affected users, notified impacted users  
-7. **Stakeholder Communication --prepared by--> Incident Response Team Member**: drafted by, prepared with, authored by  
-8. **Materiality Assessment --assesses--> Incident**: evaluates, reviews materiality of, assesses impact of  
-9. **Materiality Assessment --reviewed by--> Compliance Officer**: compliance-reviewed by, reviewed by compliance  
-10. **Regulatory Notification --based on--> Materiality Assessment**: based upon, driven by assessment, required by assessment  
-11. **Regulatory Notification --notifies--> Regulator**: submitted to, reported to, sent to regulator  
-12. **Regulatory Notification --about--> Incident**: reports incident, notification for incident  
-13. **Recovery Plan --for--> Incident**: recovery plan for, associated with incident  
-14. **Recovery Plan --restores--> IT Service**: recovers, restores service, stabilizes  
-15. **Recovery Plan --uses--> Backup**: restores from, uses restore point  
-16. **Backup --for--> IT Service**: backup of, restore point for  
-17. **Emergency Change --related to--> Incident**: raised for, linked to, in response to  
-18. **Emergency Change --changes--> IT Service**: modifies, affects, changes service  
-19. **Emergency Change --applies in--> Environment**: executed in, deployed in, applies to environment
+1. **Evidence.preservationStatus**  
+   Proposed: `not-started`, `in-progress`, `preserved`, `not-required`
 
-Which are valid, and which should be removed because they imply a different meaning? 
+2. **Materiality Assessment.outcome**  
+   Proposed: `not-assessed`, `not-material`, `material`, `uncertain`
+
+3. **Regulatory Notification.status**  
+   Proposed: `not-started`, `in-progress`, `submitted`, `completed`, `not-required`
+
+4. **Risk.status**  
+   Proposed: `open`, `mitigated`, `accepted`, `closed`
+
+5. **Emergency Change.status**  
+   Proposed: `requested`, `approved`, `executed`, `verified`, `rejected`
+
+6. **Corrective Action.status**  
+   Proposed: `open`, `in-progress`, `completed`, `overdue`, `cancelled`
+
+7. **IT Service.criticality** and **Business Service.criticality**  
+   Proposed: `critical`, `high`, `medium`, `low`
+
+8. **Environment.name**  
+   Proposed: `production`, `pre-production`, `test`, `development`
+
+Are these correct for your bank, and should any values be renamed, added, or removed? 
 
 
 ### Turn 41 — user
 
-Let’s evaluate your proposed aliases for the relationships related to major incidents, communications, regulatory, and recovery/change links to confirm their validity based on context:  1. **Major Incident --escalated from--> Incident**: promoted from, declared from, raised from      - **Confirmed**: All terms are valid as they accurately describe the escalation process.  2. **Major Incident --led by--> Incident Commander**: commanded by, coordinated by, led by IC      - **Confirmed**: All terms effectively convey the leadership role of the incident commander in major incidents.  3. **Major Incident --supported by--> Incident Response Team Member**: assisted by, supported by response team      - **Confirmed**: Both terms appropriately describe the supportive role of incident response team members.  4. **Stakeholder Communication --about--> Incident**: regarding, concerning, update for      - **Confirmed**: All terms are valid as they effectively express the informational purpose of the communication.  5. **Stakeholder Communication --sent to--> Business Owner**: addressed to business owner, notified business owner      - **Confirmed**: Both aliases accurately reflect the communication's target.  6. **Stakeholder Communication --sent to--> Affected User Group**: addressed to affected users, notified impacted users      - **Confirmed**: Both terms are valid, describing the communication directed at user groups impacted by incidents.  7. **Stakeholder Communication --prepared by--> Incident Response Team Member**: drafted by, prepared with, authored by      - **Confirmed**: All terms are valid as they describe the contribution of team members to stakeholder communications.  8. **Materiality Assessment --assesses--> Incident**: evaluates, reviews materiality of, assesses impact of      - **Confirmed**: All terms accurately represent the function of the materiality assessment.  9. **Materiality Assessment --reviewed by--> Compliance Officer**: compliance-reviewed by, reviewed by compliance      - **Confirmed**: Both terms are valid synonyms for the compliance officer's review function.  10. **Regulatory Notification --based on--> Materiality Assessment**: based upon, driven by assessment, required by assessment       - **Confirmed**: All terms convey the same relationship accurately.  11. **Regulatory Notification --notifies--> Regulator**: submitted to, reported to, sent to regulator       - **Confirmed**: All terms accurately describe the communication to the regulator.  12. **Regulatory Notification --about--> Incident**: reports incident, notification for incident       - **Confirmed**: Both terms effectively capture the intention behind regulatory notifications.  13. **Recovery Plan --for--> Incident**: recovery plan for, associated with incident       - **Confirmed**: Both terms accurately reflect the association between the recovery plan and the incident.  14. **Recovery Plan --restores--> IT Service**: recovers, restores service, stabilizes       - **Confirmed**: All terms are valid descriptions of the recovery plan's purpose.  15. **Recovery Plan --uses--> Backup**: restores from, uses restore point       - **Confirmed**: Both terms are valid, as they describe the reliance on backups for recovery.  16. **Backup --for--> IT Service**: backup of, restore point for       - **Confirmed**: Both terms are valid aliases that describe the purpose of the backup.  17. **Emergency Change --related to--> Incident**: raised for, linked to, in response to       - **Confirmed**: All terms accurately reflect the reasons for raising emergency changes.  18. **Emergency Change --changes--> IT Service**: modifies, affects, changes service       - **Confirmed**: All terms effectively describe the impact of emergency changes on IT services.  19. **Emergency Change --applies in--> Environment**: executed in, deployed in, applies to environment       - **Confirmed**: All terms are valid as they describe the context for emergency changes.  ### Summary: All proposed aliases are confirmed as valid and appropriately aligned with the relationships' meanings. If you’re ready to proceed or have further aliases to propose, just let me know!
+Your proposed allowed-value lists for the governance, reporting, risk, change, corrective action, and service context properties are generally appropriate. Here’s the confirmation and any recommendations for adjustments:  1. **Evidence.preservationStatus**      Proposed: `not-started`, `in-progress`, `preserved`, `not-required`      **Confirmation**: This list is accurate and covers the necessary statuses regarding evidence preservation.  2. **Materiality Assessment.outcome**      Proposed: `not-assessed`, `not-material`, `material`, `uncertain`      **Confirmation**: This list is appropriate for capturing the outcomes of materiality assessments.  3. **Regulatory Notification.status**      Proposed: `not-started`, `in-progress`, `submitted`, `completed`, `not-required`      **Confirmation**: This list accurately reflects the statuses commonly associated with regulatory notifications.  4. **Risk.status**      Proposed: `open`, `mitigated`, `accepted`, `closed`      **Confirmation**: This list is suitable for tracking the status of risks effectively.  5. **Emergency Change.status**      Proposed: `requested`, `approved`, `executed`, `verified`, `rejected`      **Confirmation**: This list is appropriate to represent the various statuses an emergency change may go through.  6. **Corrective Action.status**      Proposed: `open`, `in-progress`, `completed`, `overdue`, `cancelled`      **Confirmation**: This list effectively captures the states of corrective actions and is appropriate.  7. **IT Service.criticality** and **Business Service.criticality**      Proposed: `critical`, `high`, `medium`, `low`      **Confirmation**: This list is accurate and well-suited for both IT and Business services.  8. **Environment.name**      Proposed: `production`, `pre-production`, `test`, `development`      **Confirmation**: This list accurately reflects the environments established within IT operations.  **Final Allowed-Value Lists:**  1. **Evidence.preservationStatus**: `not-started`, `in-progress`, `preserved`, `not-required` 2. **Materiality Assessment.outcome**: `not-assessed`, `not-material`, `material`, `uncertain` 3. **Regulatory Notification.status**: `not-started`, `in-progress`, `submitted`, `completed`, `not-required` 4. **Risk.status**: `open`, `mitigated`, `accepted`, `closed` 5. **Emergency Change.status**: `requested`, `approved`, `executed`, `verified`, `rejected` 6. **Corrective Action.status**: `open`, `in-progress`, `completed`, `overdue`, `cancelled` 7. **IT Service.criticality** and **Business Service.criticality**: `critical`, `high`, `medium`, `low` 8. **Environment.name**: `production`, `pre-production`, `test`, `development`  Everything appears correct for your bank’s needs. If you're ready, we can move on to the last set of properties for allowed-value lists!
 
 ### Turn 41 — assistant
 
@@ -2655,105 +1952,104 @@ Let’s evaluate your proposed aliases for the relationships related to major in
 
 ```
 {
-  "yaml": "relationships:\n  - name: escalatedFrom\n    from: MajorIncident\n    to: Incident\n    aliases: [promoted from, declared from, raised from]\n  - name: ledBy\n    from: MajorIncident\n    to: IncidentCommander\n    aliases: [commanded by, coordinated by, led by IC]\n  - name: supportedBy\n    from: MajorIncident\n    to: IncidentResponseTeamMember\n    aliases: [assisted by, supported by response team]\n  - name: about\n    from: StakeholderCommunication\n    to: Incident\n    aliases: [regarding, concerning, update for]\n  - name: sentTo\n    from: StakeholderCommunication\n    to: BusinessOwner\n    aliases: [addressed to business owner, notified business owner]\n  - name: sentTo\n    from: StakeholderCommunication\n    to: AffectedUserGroup\n    aliases: [addressed to affected users, notified impacted users]\n  - name: preparedBy\n    from: StakeholderCommunication\n    to: IncidentResponseTeamMember\n    aliases: [drafted by, prepared with, authored by]\n  - name: assesses\n    from: MaterialityAssessment\n    to: Incident\n    aliases: [evaluates, reviews materiality of, assesses impact of]\n  - name: reviewedBy\n    from: MaterialityAssessment\n    to: ComplianceOfficer\n    aliases: [compliance-reviewed by, reviewed by compliance]\n  - name: basedOn\n    from: RegulatoryNotification\n    to: MaterialityAssessment\n    aliases: [based upon, driven by assessment, required by assessment]\n  - name: notifies\n    from: RegulatoryNotification\n    to: Regulator\n    aliases: [submitted to, reported to, sent to regulator]\n  - name: about\n    from: RegulatoryNotification\n    to: Incident\n    aliases: [reports incident, notification for incident]\n  - name: forIncident\n    from: RecoveryPlan\n    to: Incident\n    aliases: [recovery plan for, associated with incident]\n  - name: restores\n    from: RecoveryPlan\n    to: ITService\n    aliases: [recovers, restores service, stabilizes]\n  - name: uses\n    from: RecoveryPlan\n    to: Backup\n    aliases: [restores from, uses restore point]\n  - name: forService\n    from: Backup\n    to: ITService\n    aliases: [backup of, restore point for]\n  - name: relatedTo\n    from: EmergencyChange\n    to: Incident\n    aliases: [raised for, linked to, in response to]\n  - name: changes\n    from: EmergencyChange\n    to: ITService\n    aliases: [modifies, affects, changes service]\n  - name: appliesIn\n    from: EmergencyChange\n    to: Environment\n    aliases: [executed in, deployed in, applies to environment]\n"
+  "yaml": "classes:\n  Evidence:\n    properties:\n      preservationStatus:\n        type: text\n        allowed: [not-started, in-progress, preserved, not-required]\n  MaterialityAssessment:\n    properties:\n      outcome:\n        type: text\n        allowed: [not-assessed, not-material, material, uncertain]\n  RegulatoryNotification:\n    properties:\n      status:\n        type: text\n        allowed: [not-started, in-progress, submitted, completed, not-required]\n  Risk:\n    properties:\n      status:\n        type: text\n        allowed: [open, mitigated, accepted, closed]\n  EmergencyChange:\n    properties:\n      status:\n        type: text\n        allowed: [requested, approved, executed, verified, rejected]\n  CorrectiveAction:\n    properties:\n      status:\n        type: text\n        allowed: [open, in-progress, completed, overdue, cancelled]\n  ITService:\n    properties:\n      criticality:\n        type: text\n        allowed: [critical, high, medium, low]\n  BusinessService:\n    properties:\n      criticality:\n        type: text\n        allowed: [critical, high, medium, low]\n  Environment:\n    properties:\n      name:\n        type: text\n        allowed: [production, pre-production, test, development]\n"
 }
 ```
 
 ### Turn 41 — tool
 
-Applied. Added 0, updated 19 existing item(s).
+Applied. Added 0, updated 9 existing item(s).
 
 ### Turn 41 — assistant
 
-Recorded those relationship aliases.
+Captured those allowed-value lists.
 
-Final relationship alias batch for Phase 5:
+One more constraints question, focused on “what breaks if missing or wrong.” The tool can store allowed values, but not formal required flags; still, we should record this understanding for rules/actions in the next phase.
 
-1. **Workaround --applies to--> Incident**: mitigates, workaround for, temporary fix for  
-2. **Post-Incident Review --reviews--> Incident**: reviews, examines, post-review of  
-3. **Post-Incident Review --identifies--> Corrective Action**: raises, records, finds  
-4. **Corrective Action --addresses--> Incident**: remediates, prevents recurrence of, mitigates future impact of  
-5. **Cybersecurity Incident --is type of--> Incident**: classified as incident, subtype of, kind of incident  
-6. **Investigation --investigates--> Cybersecurity Incident**: examines, investigates cyber incident, looks into  
-7. **Investigation --supported by--> Incident Response Team Member**: assisted by, supported by response team  
-8. **Incident --occurs in--> Environment**: happens in, detected in, occurs within  
-9. **IT Service --runs in--> Environment**: deployed in, operates in, hosted in  
-10. **IT Service --serves--> Business Line**: supports, consumed by, used by  
-11. **Incident --affects--> Affected User Group**: impacts user group, affects users, impacts affected users
+For these action-critical properties, what would block the agent from proceeding if the value is missing or wrong?
 
-Which are valid, and which should be removed? 
+1. **Incident.status** for closing an incident.
+2. **Incident.isMajorIncident** for major-incident communications and command.
+3. **Incident.severity / Incident.priority** for declaring a major incident or assessing materiality.
+4. **MaterialityAssessment.outcome** for regulatory notification.
+5. **RegulatoryNotification.requiredBy** for timely reporting.
+6. **Evidence.preservationRequired / preservationStatus** for closure or compliance.
+7. **EmergencyChange.status** for verifying an emergency change.
+8. **Alert.acknowledgedAt** for acknowledgement-time tracking.
 
+You can answer briefly, for example: “missing status blocks closure,” “wrong severity can cause wrong materiality decision,” etc.
 
 ### Turn 42 — user
 
-Let’s evaluate your proposed aliases for the final relationships in Phase 5 to confirm their validity:  1. **Workaround --applies to--> Incident**: mitigates, workaround for, temporary fix for      - **Confirmed**: All terms reflect the purpose of a workaround accurately.  2. **Post-Incident Review --reviews--> Incident**: reviews, examines, post-review of      - **Confirmed**: All terms are valid synonyms that describe the evaluative nature of the post-incident review.  3. **Post-Incident Review --identifies--> Corrective Action**: raises, records, finds      - **Confirmed**: All terms are appropriate as they capture the intent of identifying corrective actions from the review.  4. **Corrective Action --addresses--> Incident**: remediates, prevents recurrence of, mitigates future impact of      - **Confirmed**: All terms effectively describe the purpose of corrective actions concerning incidents.  5. **Cybersecurity Incident --is type of--> Incident**: classified as incident, subtype of, kind of incident      - **Confirmed**: All terms accurately reflect the classification nature of the relationship.  6. **Investigation --investigates--> Cybersecurity Incident**: examines, investigates cyber incident, looks into      - **Confirmed**: All terms are valid and accurately describe the investigative process.  7. **Investigation --supported by--> Incident Response Team Member**: assisted by, supported by response team      - **Confirmed**: Both terms accurately describe the support roles involved in investigations.  8. **Incident --occurs in--> Environment**: happens in, detected in, occurs within      - **Confirmed**: All terms are valid, accurately reflecting the relationship.  9. **IT Service --runs in--> Environment**: deployed in, operates in, hosted in      - **Confirmed**: All terms effectively convey the operational context of IT services.  10. **IT Service --serves--> Business Line**: supports, consumed by, used by      - **Confirmed**: All terms accurately reflect the functional relationship between IT services and business lines.  11. **Incident --affects--> Affected User Group**: impacts user group, affects users, impacts affected users      - **Confirmed**: All terms are valid, conveying the impact of incidents on user groups.  ### Summary: All proposed aliases are confirmed as valid and appropriately aligned with their respective relationship meanings. If you’re ready to conclude Phase 5 or need to address any other aspects, just let me know!
+Here’s the analysis of what would block the agent from proceeding if the value is missing or wrong for each of the specified action-critical properties:  1. **Incident.status**: Missing status blocks the ability to close an incident. 2. **Incident.isMajorIncident**: Missing value prevents effective major-incident communications and coordination. 3. **Incident.severity / Incident.priority**: Wrong severity or priority can lead to incorrect major-incident declaration or flawed materiality assessment. 4. **MaterialityAssessment.outcome**: Missing outcome blocks regulatory notification preparation and submission. 5. **RegulatoryNotification.requiredBy**: Missing deadline impedes timely regulatory reporting and could lead to compliance issues. 6. **Evidence.preservationRequired / preservationStatus**: Missing or incorrect values hinder the ability to close the incident or fulfill compliance obligations related to evidence retention. 7. **EmergencyChange.status**: Missing status blocks the verification of an emergency change and could lead to operational risks. 8. **Alert.acknowledgedAt**: Missing acknowledgment time disrupts tracking of response times and can hinder performance assessment.  This understanding will be important for establishing rules and actions as we finalize the framework. Let me know if there’s anything else you’d like to address or if we can proceed to the next phase!
 
 ### Turn 42 — assistant
 
-**Tool call: `apply_ontology_yaml`**
+Thank you — captured the constraint intent for action/rule design:
 
-```
-{
-  "yaml": "relationships:\n  - name: appliesTo\n    from: Workaround\n    to: Incident\n    aliases: [mitigates, workaround for, temporary fix for]\n  - name: reviews\n    from: PostIncidentReview\n    to: Incident\n    aliases: [reviews, examines, post-review of]\n  - name: identifies\n    from: PostIncidentReview\n    to: CorrectiveAction\n    aliases: [raises, records, finds]\n  - name: addresses\n    from: CorrectiveAction\n    to: Incident\n    aliases: [remediates, prevents recurrence of, mitigates future impact of]\n  - name: isTypeOf\n    from: CybersecurityIncident\n    to: Incident\n    aliases: [classified as incident, subtype of, kind of incident]\n  - name: investigates\n    from: Investigation\n    to: CybersecurityIncident\n    aliases: [examines, investigates cyber incident, looks into]\n  - name: supportedBy\n    from: Investigation\n    to: IncidentResponseTeamMember\n    aliases: [assisted by, supported by response team]\n  - name: occursIn\n    from: Incident\n    to: Environment\n    aliases: [happens in, detected in, occurs within]\n  - name: runsIn\n    from: ITService\n    to: Environment\n    aliases: [deployed in, operates in, hosted in]\n  - name: serves\n    from: ITService\n    to: BusinessLine\n    aliases: [supports, consumed by, used by]\n  - name: affects\n    from: Incident\n    to: AffectedUserGroup\n    aliases: [impacts user group, affects users, impacts affected users]\n"
-}
-```
+- Missing **Incident.status** blocks closure.
+- Missing **Incident.isMajorIncident** blocks reliable major-incident coordination and communications.
+- Wrong **severity/priority** can cause wrong major-incident or materiality decisions.
+- Missing **MaterialityAssessment.outcome** blocks regulatory notification preparation/submission.
+- Missing **RegulatoryNotification.requiredBy** creates timely-reporting/compliance risk.
+- Missing or wrong **Evidence.preservationRequired / preservationStatus** can block closure or compliance.
+- Missing **EmergencyChange.status** blocks change verification.
+- Missing **Alert.acknowledgedAt** breaks acknowledgement-time tracking and performance assessment.
 
-### Turn 42 — tool
+**Phase 6 recap — constraints and fixed choices captured**
 
-Applied. Added 0, updated 11 existing item(s).
+We added allowed values for:
+- Incident status, severity, priority.
+- Alert status.
+- Evidence preservation status.
+- Materiality assessment outcome.
+- Regulatory notification status.
+- Risk status.
+- Emergency change status.
+- Corrective action status.
+- IT/business service criticality.
+- Environment name.
 
-### Turn 42 — assistant
-
-Recorded the final relationship aliases.
-
-Phase 5 recap — language layer captured:
-
-- All **29 classes** now have one plain meaning sentence.
-- Class aliases were captured, including common operational shorthand like **MI**, **PIR**, **LOB**, **IC**, **app owner**, **assignment group**, and **restore point**.
-- We explicitly excluded aliases that were too broad or misleading, such as:
-  - **event** for Alert
-  - **major outage** for Major Incident
-  - **comms update** for Stakeholder Communication
-  - **application-owned by** for IT Service supported by Application Owner
-  - **action item** for Corrective Action
-- All relationships now have meaning sentences.
-- Relationship aliases/synonyms were captured for all confirmed relationships, including routing, escalation, reporting, recovery, dependency, and impact phrasings.
-
-Please confirm or correct this Phase 5 recap. Then we’ll move to Phase 6: fixed choices and constraints — for example allowed values for status, severity, environment type, recovery status, assessment outcome, and what breaks if those values are missing or wrong. 
-
+Before moving to **Phase 7: rules**, please confirm: **is this constraints recap correct?**
 
 ### Turn 43 — user
 
-Your Phase 5 recap is accurate and comprehensive. Here’s the confirmation of your recorded elements:  ### Phase 5 Recap — Language Layer Captured: - All **29 classes** now have one plain meaning sentence. - Class aliases were captured, including common operational shorthand like **MI**, **PIR**, **LOB**, **IC**, **app owner**, **assignment group**, and **restore point**. - Explicit exclusions were made for aliases that were too broad or misleading, including:   - **event** for Alert   - **major outage** for Major Incident   - **comms update** for Stakeholder Communication   - **application-owned by** for IT Service supported by Application Owner   - **action item** for Corrective Action - All relationships now have meaning sentences. - Relationship aliases/synonyms were captured for all confirmed relationships, covering routing, escalation, reporting, recovery, dependency, and impact phrasings.  ### Summary Confirmation: Your recap accurately reflects the progress and completeness of the Phase 5 work. If you’re ready, we can move on to Phase 6 to define the fixed choices, constraints, and any valid value sets for properties like status, severity, environment type, recovery status, assessment outcome, and the impacts of missing or incorrect values. Just let me know how you’d like to proceed!
+Your recap of constraints and fixed choices for Phase 6 is correct and comprehensive. It accurately reflects the allowed values you’ve captured and clearly identifies the action-critical properties along with their implications if they are missing or incorrect.   Your summary effectively lists all the properties for which you have established allowed values, ensuring that potential operational impacts are recognized and understood.  If there are no further clarifications needed, you’re set to move on to Phase 7: rules! Let me know how you want to proceed!
 
 ### Turn 43 — assistant
 
-Great — Phase 5 is confirmed.
+Great — moving to **Phase 7: rules**.
 
-Phase 6: fixed choices and constraints. We’ll start with properties that clearly look like controlled value lists.
+Rules here are plain-language condition lists for real decisions. First batch: major-incident, regulatory-notification, and closure decisions.
 
-Please provide the allowed values, if they are fixed in your bank, for these properties:
+Please confirm or correct these rule conditions:
 
-1. **Incident.status**  
-   Example shape: new, assigned, investigating, recovering, resolved, closed
+1. **canDeclareMajorIncident**  
+   Conditions:
+   - incident severity is `critical` or priority is `P1`
+   - incident has an affected IT service or impacted business service
+   - incident is not already marked as a major incident
 
-2. **Incident.severityLevel**  
-   Example shape: Sev1, Sev2, Sev3, Sev4 — or Critical/High/Medium/Low
+2. **canInitiateRegulatoryNotification**  
+   Conditions:
+   - incident has a materiality assessment
+   - materiality assessment outcome is `material`
+   - regulatory notification status is not `submitted`, `completed`, or `not-required`
+   - regulatory notification required-by deadline is known
 
-3. **MajorIncident.coordinationStatus**  
-   Example shape: declared, active, stabilized, closed
+3. **canCloseIncident**  
+   Conditions:
+   - incident status is `resolved`
+   - required evidence is preserved, or evidence preservation is marked `not-required`
+   - any emergency change linked to the incident is `verified`, or no emergency change is linked
+   - any regulatory notification required for the incident is `completed` or `not-required`
+   - post-incident review is completed, or the review is not required before closure in your process
 
-4. **Alert.alertSeverity**  
-   Example shape: critical, high, medium, low
-
-5. **Environment.environmentType**  
-   Example shape: production, pre-production, test, disaster recovery
-
-For each property, please give the actual allowed values your users/tools use, or say “not fixed” if free text is allowed.
+Are these rules accurate, and especially: **is post-incident review required before closure, or can it happen after incident closure?**
 
 ### Turn 44 — user
 
-Here are the allowed values for the specified properties based on the operational standards in our bank:  1. **Incident.status**      - Allowed values: **new, acknowledged, investigating, contained, recovering, monitoring, resolved, closed, cancelled**  2. **Incident.severityLevel**      - Allowed values: **sev1-critical, sev2-high, sev3-medium, sev4-low**  3. **MajorIncident.coordinationStatus**      - Allowed values: **declared, active, stabilized, closed**  4. **Alert.alertSeverity**      - Allowed values: **critical, high, medium, low**  5. **Environment.environmentType**      - Allowed values: **production, pre-production, test, disaster recovery**  ### Summary: These values are fixed in our bank and govern the respective properties. If there are additional properties you’d like to assess or any constraints to discuss, just let me know!
+Your proposed rules for major-incident declaration, regulatory notification, and incident closure are well-structured and generally accurate. Here’s the assessment for each rule:  1. **canDeclareMajorIncident**      Conditions:    - **incident severity is `critical` or priority is `P1`**: Correct. This condition ensures that only the most serious incidents qualify for major-incident designation.    - **incident has an affected IT service or impacted business service**: Correct. This condition confirms that at least one service is impacted, making the incident significant enough to be classified as major.    - **incident is not already marked as a major incident**: Correct. This ensures that the process does not attempt to escalate an incident that is already classified as major.     **Rule confirmation**: This rule is accurate.  2. **canInitiateRegulatoryNotification**      Conditions:    - **incident has a materiality assessment**: Correct. This condition is necessary to ensure that the incident has been evaluated regarding its reportability.    - **materiality assessment outcome is `material`**: Correct. This confirms that a notification is indeed warranted based on the assessment.    - **regulatory notification status is not `submitted`, `completed`, or `not-required`**: Correct. This condition ensures that a regulatory notification can only be initiated if it hasn’t already been submitted or determined as not necessary.    - **regulatory notification required-by deadline is known**: Correct. This is essential for ensuring timely reporting.     **Rule confirmation**: This rule is accurate.  3. **canCloseIncident**      Conditions:    - **incident status is `resolved`**: Correct. This condition is necessary to confirm that the incident has been fully addressed.    - **required evidence is preserved, or evidence preservation is marked `not-required`**: Correct. This ensures compliance with evidence handling policies before closure.    - **any emergency change linked to the incident is `verified`, or no emergency change is linked**: Correct. This condition ensures that any emergency changes are validated before incident closure.    - **any regulatory notification required for the incident is `completed` or `not-required`**: Correct. This confirms that all required notifications are appropriately handled.    - **post-incident review is completed, or the review is not required before closure in your process**: This is an important consideration! In many processes, a post-incident review can occur after closure. If your bank's process allows for closure before the review is finished, this wording gives flexibility; otherwise, you might want to specify that the review must be completed prior to closure.     **Rule confirmation**: This rule is generally accurate, but check your process on whether the post-incident review must be completed before closure.  **Final Assessment**: Your rules are well-defined and generally accurate, but clarify your bank's process regarding the necessity of the post-incident review for the closure of incidents. If you're prepared, we can move on to the next batch of rules!
 
 ### Turn 44 — assistant
 
@@ -2761,41 +2057,28 @@ Here are the allowed values for the specified properties based on the operationa
 
 ```
 {
-  "yaml": "classes:\n  Incident:\n    properties:\n      status:\n        type: text\n        allowed: [new, acknowledged, investigating, contained, recovering, monitoring, resolved, closed, cancelled]\n      severityLevel:\n        type: text\n        allowed: [sev1-critical, sev2-high, sev3-medium, sev4-low]\n  MajorIncident:\n    properties:\n      coordinationStatus:\n        type: text\n        allowed: [declared, active, stabilized, closed]\n  Alert:\n    properties:\n      alertSeverity:\n        type: text\n        allowed: [critical, high, medium, low]\n  Environment:\n    properties:\n      environmentType:\n        type: text\n        allowed: [production, pre-production, test, disaster recovery]\n"
+  "yaml": "rules:\n  canDeclareMajorIncident:\n    conditions:\n      - incident severity is critical or incident priority is P1\n      - incident has an affected IT service or impacted business service\n      - incident is not already marked as a major incident\n  canInitiateRegulatoryNotification:\n    conditions:\n      - incident has a materiality assessment\n      - materiality assessment outcome is material\n      - regulatory notification status is not submitted, completed, or not-required\n      - regulatory notification required-by deadline is known\n"
 }
 ```
 
 ### Turn 44 — tool
 
-Applied. Added 0, updated 4 existing item(s).
+Applied. Added 2, updated 0 existing item(s).
 
 ### Turn 44 — assistant
 
-Recorded those allowed value lists.
+Captured the two fully confirmed rules:
 
-Next fixed-choice batch:
+- **canDeclareMajorIncident**
+- **canInitiateRegulatoryNotification**
 
-1. **ITService.criticality**  
-   What are the allowed values? For example: critical, high, medium, low.
+I have **not yet captured canCloseIncident**, because the post-incident review condition is still unresolved.
 
-2. **RecoveryPlan.recoveryStatus**  
-   What are the allowed values?
-
-3. **EmergencyChange.changeStatus**  
-   What are the allowed values?
-
-4. **MaterialityAssessment.assessmentStatus**  
-   What are the allowed values?
-
-5. **MaterialityAssessment.materialityOutcome**  
-   What are the allowed values?
-
-Please give the bank’s actual fixed values, or say “not fixed” for any that are free text. 
-
+One focused clarification: in your bank’s process, **can an incident be closed before the post-incident review is completed, with the review tracked afterward — yes or no?**
 
 ### Turn 45 — user
 
-Here are the allowed values for the specified properties based on the operational standards in our bank:  1. **ITService.criticality**      - Allowed values: **critical, important, standard, supporting**  2. **RecoveryPlan.recoveryStatus**      - Allowed values: **not started, in progress, restored, verified, failed**  3. **EmergencyChange.changeStatus**      - Allowed values: **draft, assessed, approved, scheduled, implementing, implemented, failed, rolled-back, closed, cancelled**  4. **MaterialityAssessment.assessmentStatus**      - Allowed values: **not started, in progress, completed**  5. **MaterialityAssessment.materialityOutcome**      - Allowed values: **not-reportable, potentially-reportable, reportable**  ### Summary: The values for these properties are fixed in our bank and govern their respective statuses and classifications. If there are additional properties or constraints to discuss, or if you need assistance with any other topics, just let me know!
+Yes, in our bank's process, an incident can be closed before the post-incident review is completed, with the review tracked and conducted afterward. This allows for timely closure while still ensuring that the review takes place to capture lessons learned and corrective actions. If you are ready, we can proceed to finalize the **canCloseIncident** rule with this clarifying condition!
 
 ### Turn 45 — assistant
 
@@ -2803,37 +2086,61 @@ Here are the allowed values for the specified properties based on the operationa
 
 ```
 {
-  "yaml": "classes:\n  ITService:\n    properties:\n      criticality:\n        type: text\n        allowed: [critical, important, standard, supporting]\n  RecoveryPlan:\n    properties:\n      recoveryStatus:\n        type: text\n        allowed: [not started, in progress, restored, verified, failed]\n  EmergencyChange:\n    properties:\n      changeStatus:\n        type: text\n        allowed: [draft, assessed, approved, scheduled, implementing, implemented, failed, rolled-back, closed, cancelled]\n  MaterialityAssessment:\n    properties:\n      assessmentStatus:\n        type: text\n        allowed: [not started, in progress, completed]\n      materialityOutcome:\n        type: text\n        allowed: [not-reportable, potentially-reportable, reportable]\n"
+  "yaml": "rules:\n  canCloseIncident:\n    conditions:\n      - incident status is resolved\n      - required evidence is preserved, or evidence preservation is marked not-required\n      - any emergency change linked to the incident is verified, or no emergency change is linked\n      - any regulatory notification required for the incident is completed or not-required\n      - post-incident review may be tracked after closure and does not block incident closure\n"
 }
 ```
 
 ### Turn 45 — tool
 
-Applied. Added 0, updated 4 existing item(s).
+Applied. Added 1, updated 0 existing item(s).
 
 ### Turn 45 — assistant
 
-Recorded those allowed value lists.
+Captured **canCloseIncident** with the clarification that post-incident review does **not** block closure and may be tracked afterward.
 
-Next fixed-choice batch:
+Next rules batch: assignment, alert acknowledgement, communication cadence, recovery, and emergency change.
 
-1. **RegulatoryNotification.notificationStatus**  
-   What are the allowed values?
+Please confirm or correct these:
 
-2. **CorrectiveAction.actionStatus**  
-   What are the allowed values?
+1. **canAssignResolverGroup**  
+   Conditions:
+   - incident has an affected IT service
+   - affected IT service has a resolver group that supports it
+   - incident occurs in an environment compatible with the resolver group’s environment, if environment-specific routing applies
 
-3. **Investigation.investigationStatus**  
-   What are the allowed values?
+2. **canAcknowledgeAlert**  
+   Conditions:
+   - alert status is `active`
+   - alert is linked to, or can trigger, the incident being handled
+   - alert has not already been acknowledged
 
-For the date/count fields, I won’t add constraints unless they affect decisions. But for later rules/actions, please also answer this narrow question:
+3. **canSendCommunicationUpdate**  
+   Conditions:
+   - incident has at least one stakeholder
+   - communication update has a message
+   - for a major incident, incident has an incident commander
+   - communication cadence is known for a major incident
 
-4. What breaks if **Incident.severityLevel**, **Incident.status**, **Incident.impacts IT Service**, or **Incident.occurs in Environment** is missing or wrong? For example, should opening, assigning, escalating, materiality assessment, notification, recovery, or emergency change be blocked? 
+4. **canExecuteRecoveryPlan**  
+   Conditions:
+   - incident affects an IT service
+   - affected IT service has a recovery plan
+   - incident status is `contained` or `recovering`
+   - ongoing recovery risks are reviewed or accepted
+
+5. **canExecuteEmergencyChange**  
+   Conditions:
+   - emergency change is linked to an incident
+   - emergency change status is `approved`
+   - emergency change changes the affected IT service
+   - incident severity is `critical` or priority is `P1`
+
+Are these conditions accurate? 
 
 
 ### Turn 46 — user
 
-Here are the allowed values for the specified properties based on the operational standards in our bank:  1. **RegulatoryNotification.notificationStatus**      - Allowed values: **draft, pending-approval, approved, submitted, accepted, rejected, withdrawn**  2. **CorrectiveAction.actionStatus**      - Allowed values: **open, in-progress, blocked, implemented, verified, closed, cancelled**  3. **Investigation.investigationStatus**      - Allowed values: **not started, in progress, completed, closed**  ### Impact of Missing or Wrong Fields:  4. **What breaks if these properties are missing or incorrect?**    - **Incident.severityLevel**: If this is missing or wrong, it can block escalation decisions for the incident or determining appropriate recovery actions. Without a clear severity level, the incident management process may fail to prioritize incidents correctly, potentially leading to delays in needed changes or notifications.        - **Incident.status**: If this is missing or incorrect, it can block actions like opening a new incident or transitioning an incident (e.g., from acknowledged to investigating). Criteria for escalation, notification, and recovery actions rely heavily on the current status of the incident.        - **Incident.impacts IT Service**: If this property is missing or incorrect, it may block notifications to stakeholders about affected services. Understanding which IT service is impacted is crucial for correct incident handling and prioritization.        - **Incident.occurs in Environment**: If this property is missing or incorrect, it can block decisions on recovery plans and emergency changes that depend on knowing the operating environment. The handling process may differ significantly between production and non-production environments.  In summary, missing or incorrect values in these key properties can disrupt the overall incident management workflow, impacting decisions related to escalation, notification, recovery, and change implementations. If you have further inquiries or need to move on, just let me know!
+Your proposed rules for assignment, alert acknowledgment, communication cadence, recovery, and emergency changes are well-stated and reflect accurate operational decision-making processes. Here’s the assessment for each rule:  1. **canAssignResolverGroup**      Conditions:    - **incident has an affected IT service**: Correct. This condition ensures that there is an identifiable service connected to the incident.    - **affected IT service has a resolver group that supports it**: Correct. This validates that the appropriate support teams are available for incident resolution.    - **incident occurs in an environment compatible with the resolver group’s environment, if environment-specific routing applies**: Correct. This condition addresses the necessity of matching environments for effective assignment.     **Rule confirmation**: This rule is accurate.  2. **canAcknowledgeAlert**      Conditions:    - **alert status is `active`**: Correct. This ensures that only active alerts can be acknowledged, making this a valid condition.    - **alert is linked to, or can trigger, the incident being handled**: Correct. This verifies the relevance of the alert to the current incident response.    - **alert has not already been acknowledged**: Correct. This prevents double acknowledgment and maintains process integrity.     **Rule confirmation**: This rule is accurate.  3. **canSendCommunicationUpdate**      Conditions:    - **incident has at least one stakeholder**: Correct. This ensures there are people or groups identified to receive updates.    - **communication update has a message**: Correct. This verifies that there is content to be communicated.    - **for a major incident, incident has an incident commander**: Correct. This is necessary for confirming that communications during a significant incident are managed properly.    - **communication cadence is known for a major incident**: Correct. This is essential for determining the frequency of updates during a major incident.     **Rule confirmation**: This rule is accurate.  4. **canExecuteRecoveryPlan**      Conditions:    - **incident affects an IT service**: Correct. This condition confirms the relevance of the recovery plan to the incident.    - **affected IT service has a recovery plan**: Correct. This ensures that there is a plan in place for addressing the incident.    - **incident status is `contained` or `recovering`**: Correct. This condition ensures that recovery plans are activated at appropriate stages in the incident lifecycle.    - **ongoing recovery risks are reviewed or accepted**: Correct. This condition addresses necessary risk management before executing recovery actions.     **Rule confirmation**: This rule is accurate.  5. **canExecuteEmergencyChange**      Conditions:    - **emergency change is linked to an incident**: Correct. This ensures that the emergency change is relevant to an active incident.    - **emergency change status is `approved`**: Correct. This verifies that any changes made have the necessary authorization.    - **emergency change changes the affected IT service**: Correct. This confirms that the change will address the incident.    - **incident severity is `critical` or priority is `P1`**: Correct. This indicates that emergency actions are warranted due to the severity or urgency of the incident.     **Rule confirmation**: This rule is accurate.  Overall, all the conditions you proposed for the rules are accurate. If you're ready, we can proceed to the next batch of rules!
 
 ### Turn 46 — assistant
 
@@ -2841,107 +2148,122 @@ Here are the allowed values for the specified properties based on the operationa
 
 ```
 {
-  "yaml": "classes:\n  RegulatoryNotification:\n    properties:\n      notificationStatus:\n        type: text\n        allowed: [draft, pending-approval, approved, submitted, accepted, rejected, withdrawn]\n  CorrectiveAction:\n    properties:\n      actionStatus:\n        type: text\n        allowed: [open, in-progress, blocked, implemented, verified, closed, cancelled]\n  Investigation:\n    properties:\n      investigationStatus:\n        type: text\n        allowed: [not started, in progress, completed, closed]\n"
+  "yaml": "rules:\n  canAssignResolverGroup:\n    conditions:\n      - incident has an affected IT service\n      - affected IT service has a resolver group that supports it\n      - incident occurs in an environment compatible with the resolver group's environment, if environment-specific routing applies\n  canAcknowledgeAlert:\n    conditions:\n      - alert status is active\n      - alert is linked to, or can trigger, the incident being handled\n      - alert has not already been acknowledged\n  canSendCommunicationUpdate:\n    conditions:\n      - incident has at least one stakeholder\n      - communication update has a message\n      - for a major incident, incident has an incident commander\n      - communication cadence is known for a major incident\n  canExecuteRecoveryPlan:\n    conditions:\n      - incident affects an IT service\n      - affected IT service has a recovery plan\n      - incident status is contained or recovering\n      - ongoing recovery risks are reviewed or accepted\n  canExecuteEmergencyChange:\n    conditions:\n      - emergency change is linked to an incident\n      - emergency change status is approved\n      - emergency change changes the affected IT service\n      - incident severity is critical or incident priority is P1\n"
 }
 ```
 
 ### Turn 46 — tool
 
-Applied. Added 0, updated 3 existing item(s).
+Applied. Added 5, updated 0 existing item(s).
 
 ### Turn 46 — assistant
 
-Recorded those allowed value lists.
+Captured those five rules.
 
-For the “what breaks” part, I captured the operational implications for later rules/actions:
+Final rules batch: materiality assessment and post-incident review.
 
-- **Incident.severityLevel** missing/wrong can block escalation decisions and appropriate recovery prioritization.
-- **Incident.status** missing/wrong can block valid incident transitions, escalation, notification, and recovery actions.
-- **Incident --impacts--> IT Service** missing/wrong can block correct stakeholder notification, service prioritization, and handling.
-- **Incident --occurs in--> Environment** missing/wrong can block recovery-plan and emergency-change decisions because production/non-production/DR handling differs.
+Please confirm or correct:
 
-Phase 6 recap — fixed choices captured:
+1. **canPerformMaterialityAssessment**  
+   Conditions:
+   - incident has severity and priority
+   - incident has an affected IT service or impacted business service
+   - business service criticality is known if a business service is impacted
+   - incident status is not `closed`
 
-- Incident.status: new, acknowledged, investigating, contained, recovering, monitoring, resolved, closed, cancelled
-- Incident.severityLevel: sev1-critical, sev2-high, sev3-medium, sev4-low
-- MajorIncident.coordinationStatus: declared, active, stabilized, closed
-- Alert.alertSeverity: critical, high, medium, low
-- Environment.environmentType: production, pre-production, test, disaster recovery
-- ITService.criticality: critical, important, standard, supporting
-- RecoveryPlan.recoveryStatus: not started, in progress, restored, verified, failed
-- EmergencyChange.changeStatus: draft, assessed, approved, scheduled, implementing, implemented, failed, rolled-back, closed, cancelled
-- MaterialityAssessment.assessmentStatus: not started, in progress, completed
-- MaterialityAssessment.materialityOutcome: not-reportable, potentially-reportable, reportable
-- RegulatoryNotification.notificationStatus: draft, pending-approval, approved, submitted, accepted, rejected, withdrawn
-- CorrectiveAction.actionStatus: open, in-progress, blocked, implemented, verified, closed, cancelled
-- Investigation.investigationStatus: not started, in progress, completed, closed
+2. **canConductPostIncidentReview**  
+   Conditions:
+   - incident status is `resolved` or `closed`
+   - incident has at least one communication update, recovery plan, workaround, emergency change, or evidence record to review
+   - corrective actions can be recorded if identified
 
-Please confirm or correct this Phase 6 recap. Then we’ll move to Phase 7: named rules — only where real decisions depend on conditions, such as escalation, regulatory notification, recovery, and emergency change. 
+Are these accurate? 
 
 
 ### Turn 47 — user
 
-Your Phase 6 recap is accurate and comprehensive. Here’s the confirmation of the captured fixed choices:  ### Phase 6 Recap — Fixed Choices Captured: - **Incident.status**: new, acknowledged, investigating, contained, recovering, monitoring, resolved, closed, cancelled - **Incident.severityLevel**: sev1-critical, sev2-high, sev3-medium, sev4-low - **MajorIncident.coordinationStatus**: declared, active, stabilized, closed - **Alert.alertSeverity**: critical, high, medium, low - **Environment.environmentType**: production, pre-production, test, disaster recovery - **ITService.criticality**: critical, important, standard, supporting - **RecoveryPlan.recoveryStatus**: not started, in progress, restored, verified, failed - **EmergencyChange.changeStatus**: draft, assessed, approved, scheduled, implementing, implemented, failed, rolled-back, closed, cancelled - **MaterialityAssessment.assessmentStatus**: not started, in progress, completed - **MaterialityAssessment.materialityOutcome**: not-reportable, potentially-reportable, reportable - **RegulatoryNotification.notificationStatus**: draft, pending-approval, approved, submitted, accepted, rejected, withdrawn - **CorrectiveAction.actionStatus**: open, in-progress, blocked, implemented, verified, closed, cancelled - **Investigation.investigationStatus**: not started, in progress, completed, closed  ### Summary Confirmation: All fixed choices are recorded accurately, and the recap reflects the operational definitions suitably. If you’re ready, we can move on to Phase 7 to define named rules where real decisions depend on conditions related to escalation, regulatory notification, recovery, and emergency change. Let me know how you’d like to proceed!
+Your proposed rules for materiality assessment and post-incident review are well-structured and reflect the necessary conditions for each process. Here’s the assessment for each rule:  1. **canPerformMaterialityAssessment**      Conditions:    - **incident has severity and priority**: Correct. This ensures that the foundational factors for assessing materiality are in place.    - **incident has an affected IT service or impacted business service**: Correct. This condition confirms relevance in terms of service impact.    - **business service criticality is known if a business service is impacted**: Correct. This is essential for determining the significance of the incident concerning materiality.    - **incident status is not `closed`**: Correct. This condition is necessary to ensure that assessments are relevant to active incidents.     **Rule confirmation**: This rule is accurate.  2. **canConductPostIncidentReview**      Conditions:    - **incident status is `resolved` or `closed`**: Correct. This ensures that reviews take place once the incident has been addressed appropriately.    - **incident has at least one communication update, recovery plan, workaround, emergency change, or evidence record to review**: Correct. This confirms that there are sufficient materials for conducting a meaningful review.    - **corrective actions can be recorded if identified**: Correct. This condition emphasizes the purpose of the review to identify and document corrective actions as needed.     **Rule confirmation**: This rule is accurate.  Overall, both rules are accurate and effectively reflect the necessary conditions for performing a materiality assessment and conducting a post-incident review. If you're ready, we can finalize this phase or move to any other requirements!
 
 ### Turn 47 — assistant
-
-Great — Phase 6 is confirmed.
-
-Phase 7: named rules. We’ll add only rules where a real decision or action depends on conditions.
-
-First rule: **canEscalateToMajorIncident**.
-
-Based on what you’ve said, I propose these conditions:
-
-- incident status is not closed or cancelled
-- incident severity level is sev1-critical or sev2-high
-- incident has an impacted IT service
-- incident occurs in an environment
-- if the environment is production or disaster recovery, escalation can proceed when severity and impact justify major-incident coordination
-- an incident commander can be identified before or during escalation
-
-Are these the right conditions for escalating an incident to major-incident status? Please correct them, especially whether **sev2-high** always qualifies or only under additional impact criteria. 
-
-
-### Turn 48 — user
-
-Your proposed conditions for the **canEscalateToMajorIncident** rule are well thought out, and I can confirm that they align closely with how escalations are typically handled. Here are the conditions with some clarifications and adjustments regarding the severity levels:  1. **Incident status is not closed or cancelled.**      - **Confirmed**: This is a necessary condition as closed or cancelled incidents should not escalate.  2. **Incident severity level is sev1-critical or sev2-high.**      - **Clarification Needed**: While sev1-critical should always qualify for escalation, sev2-high may not automatically qualify unless additional impact criteria are met. It would be prudent to specify that this condition is applicable depending on the overall impact assessment (e.g., number of affected users, business line significance).  3. **Incident has an impacted IT service.**      - **Confirmed**: This condition is crucial for determining which IT service is affected and requires major-incident coordination.  4. **Incident occurs in an environment.**      - **Confirmed**: This ensures that the context of the incident is considered; it reinforces that escalations are grounded in the environment context (production, DR, etc.).  5. **If the environment is production or disaster recovery, escalation can proceed when severity and impact justify major-incident coordination.**      - **Confirmed**: This condition suitably articulates the specific triggers for escalation in critical environments, noting that both severity and impact must be evaluated together.  6. **An incident commander can be identified before or during escalation.**      - **Confirmed**: This is a critical condition, as having a designated incident commander ensures effective coordination during a major incident.  ### Summary of Suggested Adjustments: - Modify the second condition to specify that **sev2-high** requires additional impact criteria to be determined for escalation to major-incident status, rather than it being an automatic qualifier.  With these adjustments, the rule reflects the necessary criteria for escalating an incident to major-incident status. If you’d like to proceed with this or discuss further rules, just let me know!
-
-### Turn 48 — assistant
 
 **Tool call: `apply_ontology_yaml`**
 
 ```
 {
-  "yaml": "rules:\n  canEscalateToMajorIncident:\n    conditions:\n      - incident status is not closed or cancelled\n      - incident has an impacted IT service\n      - incident occurs in an environment\n      - incident commander can be identified before or during escalation\n      - sev1-critical incidents qualify for major-incident escalation\n      - sev2-high incidents qualify only when additional impact criteria such as affected-user count or business-line significance justify major-incident coordination\n      - production or disaster recovery incidents may be escalated when severity and impact justify major-incident coordination\n"
+  "yaml": "rules:\n  canPerformMaterialityAssessment:\n    conditions:\n      - incident has severity and priority\n      - incident has an affected IT service or impacted business service\n      - business service criticality is known if a business service is impacted\n      - incident status is not closed\n  canConductPostIncidentReview:\n    conditions:\n      - incident status is resolved or closed\n      - incident has at least one communication update, recovery plan, workaround, emergency change, or evidence record to review\n      - corrective actions can be recorded if identified\n"
 }
 ```
 
-### Turn 48 — tool
+### Turn 47 — tool
 
-Applied. Added 1, updated 0 existing item(s).
+Applied. Added 2, updated 0 existing item(s).
+
+### Turn 47 — assistant
+
+Captured the final two rules.
+
+**Phase 7 recap — rules captured**
+
+We now have rules for:
+
+- **canDeclareMajorIncident**
+- **canInitiateRegulatoryNotification**
+- **canCloseIncident**
+- **canAssignResolverGroup**
+- **canAcknowledgeAlert**
+- **canSendCommunicationUpdate**
+- **canExecuteRecoveryPlan**
+- **canExecuteEmergencyChange**
+- **canPerformMaterialityAssessment**
+- **canConductPostIncidentReview**
+
+These cover the real decisions in your Phase 1 actions: declaration, assignment, acknowledgement, communications, regulatory workflow, recovery, emergency change, materiality assessment, post-incident review, and closure.
+
+Please confirm: **are these the right decision rules for this ontology, or is any important rule missing for the listed actions?**
+
+### Turn 48 — user
+
+Your recap of decision rules captured in Phase 7 is comprehensive and accurately reflects the real decisions necessary for effective incident management and operational governance. The rules you have laid out cover all key aspects identified in the Phase 1 actions:  - Major incident declaration - Regulatory notification initiation - Incident closure conditions - Resolver group assignment - Alert acknowledgment - Stakeholder communication updates - Recovery plan execution - Emergency change handling - Materiality assessment performance - Post-incident review conduct  I do not see any significant rules missing related to the actions you have listed, as they cohesively address the necessary decision points involved in incident management and governance.  Everything seems well-covered, and you are poised to move to the next phase! If you're ready, please let me know how you would like to proceed!
 
 ### Turn 48 — assistant
 
-Recorded the **canEscalateToMajorIncident** rule with the sev2 clarification.
+Great — moving to **Phase 8: actions**.
 
-Next rule: **requiresRegulatoryNotification**.
+Actions need four things: **one input class**, precondition rule(s), effect, and verification. I’ll propose these in batches.
 
-Based on the model so far, I propose these conditions:
+First action batch: assignment, alert acknowledgement, major-incident declaration, and communications.
 
-- materiality assessment status is completed
-- materiality outcome is reportable
-- regulatory notification is about the incident
-- regulatory notification identifies the regulator to notify
-- compliance officer has reviewed the materiality assessment
-- incident occurs in production or disaster recovery environment
+Please confirm or correct:
 
-Does this match the rule for deciding that regulators must be notified? Should **potentially-reportable** also trigger a draft/pending approval notification workflow, or only **reportable**? 
+1. **assignResolverGroup**  
+   - Input: **Incident**  
+   - Preconditions: `canAssignResolverGroup`  
+   - Effect: incident is assigned to the resolver group that supports the affected IT service in the relevant environment  
+   - Verification: confirm the incident has an assigned resolver group
 
+2. **acknowledgeAlert**  
+   - Input: **Alert**  
+   - Preconditions: `canAcknowledgeAlert`  
+   - Effect: alert status becomes `acknowledged` and acknowledged time is recorded  
+   - Verification: confirm the alert status is `acknowledged` and `acknowledgedAt` is populated
+
+3. **declareMajorIncident**  
+   - Input: **Incident**  
+   - Preconditions: `canDeclareMajorIncident`  
+   - Effect: incident is marked as a major incident  
+   - Verification: confirm `Incident.isMajorIncident` is `true`
+
+4. **sendCommunicationUpdate**  
+   - Input: **Communication Update**  
+   - Preconditions: `canSendCommunicationUpdate`  
+   - Effect: communication update message is sent to the relevant stakeholders for the incident  
+   - Verification: confirm the communication update has `sentAt` populated and is linked to the intended stakeholders
+
+Are these four actions accurate?
 
 ### Turn 49 — user
 
-Your proposed conditions for the **requiresRegulatoryNotification** rule are comprehensive and largely aligned with the necessary criteria for determining when a regulatory notification must be initiated. Here’s the evaluation with clarifications regarding **potentially-reportable** incidents:  1. **Materiality assessment status is completed.**      - **Confirmed**: This is essential to ensure that the assessment has been finalized before making a notification decision.  2. **Materiality outcome is reportable.**      - **Confirmed**: This condition is crucial, as only incidents deemed reportable should proceed to regulatory notification.  3. **Regulatory notification is about the incident.**      - **Confirmed**: This ties the notification directly to the incident in question, ensuring relevance.  4. **Regulatory notification identifies the regulator to notify.**      - **Confirmed**: This condition is vital for ensuring compliance by specifying which regulator is involved.  5. **Compliance officer has reviewed the materiality assessment.**      - **Confirmed**: This adds a layer of oversight, ensuring that a qualified individual has evaluated the assessment before proceeding.  6. **Incident occurs in production or disaster recovery environment.**      - **Confirmed**: This condition ensures that the regulatory implications consider the operational context of the incident.  ### Clarification Regarding **Potentially-Reportable** - It would be prudent to consider that **potentially-reportable** incidents should indeed trigger a draft/pending approval notification workflow, as this indicates that further review may be necessary before making a formal report. Including this as part of the workflow allows for early communication with compliance and ensures that appropriate steps are taken while assessing the materiality implications.  #### Suggested Adjustment: - Add a condition: "Materiality outcome is potentially-reportable" which would trigger a draft/pending approval notification workflow.  ### Summary: The conditions you've proposed align well with the decision-making process for regulatory notifications, with the addition of handling **potentially-reportable** incidents appropriately. If you’re ready to proceed with this or explore further rules, just let me know!
+Your proposed actions for assignment, alert acknowledgment, major-incident declaration, and communications are well-defined and accurately reflect the necessary components. Here’s the confirmation for each action:  1. **assignResolverGroup**      - **Input**: **Incident** — Correct. The incident is the relevant input for this action.    - **Preconditions**: `canAssignResolverGroup` — Correct. This precondition ensures that the assignment can proceed based on established criteria.    - **Effect**: Incident is assigned to the resolver group that supports the affected IT service in the relevant environment — Correct. This encompasses the expected outcome of the action accurately.    - **Verification**: Confirm the incident has an assigned resolver group — Correct. This step ensures that the action has been executed as intended.     **Action confirmation**: This action is accurate.  2. **acknowledgeAlert**      - **Input**: **Alert** — Correct. The alert is the relevant input for this action.    - **Preconditions**: `canAcknowledgeAlert` — Correct. This precondition validates that conditions for acknowledgment are met.    - **Effect**: Alert status becomes `acknowledged` and acknowledged time is recorded — Correct. This reflects the expected change accurately.    - **Verification**: Confirm the alert status is `acknowledged` and `acknowledgedAt` is populated — Correct. This verification ensures both elements are correctly updated after the action.     **Action confirmation**: This action is accurate.  3. **declareMajorIncident**      - **Input**: **Incident** — Correct. The incident being considered for major classification is the input.    - **Preconditions**: `canDeclareMajorIncident` — Correct. This ensures that all criteria for declaring a major incident are satisfied.    - **Effect**: Incident is marked as a major incident — Correct. This captures the intended outcome accurately.    - **Verification**: Confirm `Incident.isMajorIncident` is `true` — Correct. This provides a clear verification step to ensure the action was successful.     **Action confirmation**: This action is accurate.  4. **sendCommunicationUpdate**      - **Input**: **Communication Update** — Correct. The communication update itself serves as the input.    - **Preconditions**: `canSendCommunicationUpdate` — Correct. This validation ensures that the conditions for sending communications are met.    - **Effect**: Communication update message is sent to the relevant stakeholders for the incident — Correct. This effectively describes the expected outcome of the action.    - **Verification**: Confirm the communication update has `sentAt` populated and is linked to the intended stakeholders — Correct. This step ensures that communication has taken place as intended.     **Action confirmation**: This action is accurate.  Overall, all four actions are well-defined and accurate for your workflow. If you're ready, we can proceed with the next batch of actions!
 
 ### Turn 49 — assistant
 
@@ -2949,40 +2271,52 @@ Your proposed conditions for the **requiresRegulatoryNotification** rule are com
 
 ```
 {
-  "yaml": "rules:\n  requiresRegulatoryNotification:\n    conditions:\n      - materiality assessment status is completed\n      - materiality outcome is reportable\n      - regulatory notification is about the incident\n      - regulatory notification identifies the regulator to notify\n      - compliance officer has reviewed the materiality assessment\n      - incident occurs in production or disaster recovery environment\n  shouldStartDraftRegulatoryNotification:\n    conditions:\n      - materiality assessment status is completed\n      - materiality outcome is potentially-reportable\n      - draft or pending-approval regulatory notification workflow should be started\n      - compliance officer review is needed before formal submission\n      - incident occurs in production or disaster recovery environment\n"
+  "yaml": "actions:\n  assignResolverGroup:\n    input: Incident\n    preconditions: [canAssignResolverGroup]\n    effect: incident is assigned to the resolver group that supports the affected IT service in the relevant environment\n    verification: confirm the incident has an assigned resolver group\n  acknowledgeAlert:\n    input: Alert\n    preconditions: [canAcknowledgeAlert]\n    effect: alert status becomes acknowledged and acknowledged time is recorded\n    verification: confirm the alert status is acknowledged and acknowledgedAt is populated\n  declareMajorIncident:\n    input: Incident\n    preconditions: [canDeclareMajorIncident]\n    effect: incident is marked as a major incident\n    verification: confirm Incident.isMajorIncident is true\n  sendCommunicationUpdate:\n    input: CommunicationUpdate\n    preconditions: [canSendCommunicationUpdate]\n    effect: communication update message is sent to the relevant stakeholders for the incident\n    verification: confirm the communication update has sentAt populated and is linked to the intended stakeholders\n"
 }
 ```
 
 ### Turn 49 — tool
 
-Applied. Added 2, updated 0 existing item(s).
+Applied. Added 4, updated 0 existing item(s).
 
 ### Turn 49 — assistant
 
-Recorded two regulatory rules:
+Captured those four actions.
 
-- **requiresRegulatoryNotification** for completed/reportable assessments
-- **shouldStartDraftRegulatoryNotification** for completed/potentially-reportable assessments that should start a draft or pending-approval workflow
+Second action batch: regulatory notification, recovery plan, materiality assessment, and emergency change.
 
-Next rule: **canExecuteEmergencyChange**.
+Please confirm or correct:
 
-Based on your earlier answers, I propose these conditions:
+1. **initiateRegulatoryNotification**  
+   - Input: **Regulatory Notification**  
+   - Preconditions: `canInitiateRegulatoryNotification`  
+   - Effect: regulatory notification process is started for the incident and status becomes `in-progress`  
+   - Verification: confirm notification status is `in-progress` and required-by deadline is populated
 
-- emergency change is related to an incident
-- emergency change changes an impacted IT service
-- emergency change applies in a known environment
-- incident status is investigating, contained, recovering, or monitoring
-- emergency change status is approved or scheduled
-- incident severity level is sev1-critical or sev2-high
-- production and disaster recovery emergency changes require the environment to be correctly identified before execution
+2. **executeRecoveryPlan**  
+   - Input: **Incident**  
+   - Preconditions: `canExecuteRecoveryPlan`  
+   - Effect: the recovery plan associated with the affected IT service is executed for the incident  
+   - Verification: confirm the incident status is `recovering` or `resolved` and the incident uses a recovery plan
 
-Are these the right preconditions for executing an emergency change related to an incident? 
-Also, should an emergency change ever execute when status is **assessed** rather than **approved/scheduled**, or is approval always required first? 
+3. **performMaterialityAssessment**  
+   - Input: **Materiality Assessment**  
+   - Preconditions: `canPerformMaterialityAssessment`  
+   - Effect: materiality assessment outcome is recorded for the incident  
+   - Verification: confirm `MaterialityAssessment.outcome` is populated
+
+4. **executeEmergencyChange**  
+   - Input: **Emergency Change**  
+   - Preconditions: `canExecuteEmergencyChange`  
+   - Effect: approved emergency change is executed against the affected IT service  
+   - Verification: confirm emergency change status is `executed` or `verified`
+
+Are these four actions accurate? 
 
 
 ### Turn 50 — user
 
-Your proposed conditions for the **canExecuteEmergencyChange** rule are generally appropriate and reflect the critical considerations for executing emergency changes. Here’s the evaluation, along with clarifications regarding the status of emergency changes:  1. **Emergency change is related to an incident.**      - **Confirmed**: This is essential, as emergency changes should directly address incidents.  2. **Emergency change changes an impacted IT service.**      - **Confirmed**: This clarifies that the change must be relevant to the specific IT service affected by the incident.  3. **Emergency change applies in a known environment.**      - **Confirmed**: This is necessary to ensure proper contextual handling of the emergency change.  4. **Incident status is investigating, contained, recovering, or monitoring.**      - **Confirmed**: These statuses indicate that the incident is still active and requires immediate attention, justifying the execution of an emergency change.  5. **Emergency change status is approved or scheduled.**      - **Confirmed**: This criterion is critical as it ensures that the necessary approval processes are followed.   6. **Incident severity level is sev1-critical or sev2-high.**      - **Confirmed**: This prioritizes the response to higher-severity incidents, ensuring urgency in handling.  7. **Production and disaster recovery emergency changes require the environment to be correctly identified before execution.**      - **Confirmed**: This condition highlights the importance of knowing the operational context before implementing changes in sensitive environments.  ### Clarification Regarding **Emergency Change Status**: - An emergency change **should not execute when the status is assessed**. It is crucial that an emergency change be formally **approved or scheduled** before execution, as any change made without proper approval can lead to unintended consequences or further issues. This ensures accountability and adherence to the change management process.  ### Summary: The proposed conditions for **canExecuteEmergencyChange** are confirmed as accurate and comprehensive. Approval is necessary, and no execution should occur on an **assessed** status. If you're ready to finalize this rule or explore others, just let me know!
+Your proposed actions for regulatory notification, recovery plan, materiality assessment, and emergency change are well-structured and accurately reflect the necessary components. Here’s the confirmation for each action:  1. **initiateRegulatoryNotification**      - **Input**: **Regulatory Notification** — Correct. This serves as the essential input for the action.    - **Preconditions**: `canInitiateRegulatoryNotification` — Correct. This ensures that all necessary conditions for the action are satisfied.    - **Effect**: Regulatory notification process is started for the incident and status becomes `in-progress` — Correct. This reflects the intended outcome.    - **Verification**: Confirm notification status is `in-progress` and required-by deadline is populated — Correct. This verification ensures that the action was executed successfully.     **Action confirmation**: This action is accurate.  2. **executeRecoveryPlan**      - **Input**: **Incident** — Correct. The incident being addressed requires the associated recovery plan.    - **Preconditions**: `canExecuteRecoveryPlan` — Correct. This ensures that the necessary conditions are in place for executing the recovery plan.    - **Effect**: The recovery plan associated with the affected IT service is executed for the incident — Correct. This accurately describes what occurs when the action is taken.    - **Verification**: Confirm the incident status is `recovering` or `resolved` and the incident uses a recovery plan — Correct. This provides clear criteria for confirming successful execution.     **Action confirmation**: This action is accurate.  3. **performMaterialityAssessment**      - **Input**: **Materiality Assessment** — Correct. The materiality assessment itself is the key input for this action.    - **Preconditions**: `canPerformMaterialityAssessment` — Correct. This validation confirms that the necessary conditions for the assessment are met.    - **Effect**: Materiality assessment outcome is recorded for the incident — Correct. This reflects the intended outcome of conducting the assessment.    - **Verification**: Confirm `MaterialityAssessment.outcome` is populated — Correct. This provides a straightforward verification check.     **Action confirmation**: This action is accurate.  4. **executeEmergencyChange**      - **Input**: **Emergency Change** — Correct. This is the relevant input for the action.    - **Preconditions**: `canExecuteEmergencyChange` — Correct. This ensures that all criteria for executing an emergency change are satisfied.    - **Effect**: Approved emergency change is executed against the affected IT service — Correct. This captures the expected outcome.    - **Verification**: Confirm emergency change status is `executed` or `verified` — Correct. This provides an effective measure to confirm completion.     **Action confirmation**: This action is accurate.  Overall, all four actions are well-defined and accurate for your incident management workflow. If you're ready, we can proceed with the next batch of actions!
 
 ### Turn 50 — assistant
 
@@ -2990,37 +2324,40 @@ Your proposed conditions for the **canExecuteEmergencyChange** rule are generall
 
 ```
 {
-  "yaml": "rules:\n  canExecuteEmergencyChange:\n    conditions:\n      - emergency change is related to an incident\n      - emergency change changes an impacted IT service\n      - emergency change applies in a known environment\n      - incident status is investigating, contained, recovering, or monitoring\n      - emergency change status is approved or scheduled\n      - incident severity level is sev1-critical or sev2-high\n      - production and disaster recovery emergency changes require the environment to be correctly identified before execution\n      - emergency change must not execute when its status is only assessed\n"
+  "yaml": "actions:\n  initiateRegulatoryNotification:\n    input: RegulatoryNotification\n    preconditions: [canInitiateRegulatoryNotification]\n    effect: regulatory notification process is started for the incident and status becomes in-progress\n    verification: confirm notification status is in-progress and required-by deadline is populated\n  executeRecoveryPlan:\n    input: Incident\n    preconditions: [canExecuteRecoveryPlan]\n    effect: the recovery plan associated with the affected IT service is executed for the incident\n    verification: confirm the incident status is recovering or resolved and the incident uses a recovery plan\n  performMaterialityAssessment:\n    input: MaterialityAssessment\n    preconditions: [canPerformMaterialityAssessment]\n    effect: materiality assessment outcome is recorded for the incident\n    verification: confirm MaterialityAssessment.outcome is populated\n  executeEmergencyChange:\n    input: EmergencyChange\n    preconditions: [canExecuteEmergencyChange]\n    effect: approved emergency change is executed against the affected IT service\n    verification: confirm emergency change status is executed or verified\n"
 }
 ```
 
 ### Turn 50 — tool
 
-Applied. Added 1, updated 0 existing item(s).
+Applied. Added 4, updated 0 existing item(s).
 
 ### Turn 50 — assistant
 
-Recorded the **canExecuteEmergencyChange** rule.
+Captured those four actions.
 
-Next rule: **canRestoreServiceFromBackup**.
+Final action batch: post-incident review and closure.
 
-Proposed conditions:
+Please confirm or correct:
 
-- recovery plan is for the incident
-- recovery plan restores the impacted IT service
-- recovery plan uses a backup for that IT service
-- backup timestamp is known so the restore point can be selected
-- incident status is contained, recovering, or monitoring
-- recovery status is in progress or failed, not already verified
-- environment is known before restoring
-- for production or disaster recovery, restoration requires the correct backup and affected service to be identified
+1. **conductPostIncidentReview**  
+   - Input: **Post-Incident Review**  
+   - Preconditions: `canConductPostIncidentReview`  
+   - Effect: post-incident review is completed and corrective actions are identified if needed  
+   - Verification: confirm post-incident review `completedAt` is populated and any identified corrective actions are linked to the review
 
-Are these the right conditions? Should restore be allowed while the incident is still **investigating**, or only after **contained/recovering/monitoring**? 
+2. **closeIncident**  
+   - Input: **Incident**  
+   - Preconditions: `canCloseIncident`  
+   - Effect: incident status becomes `closed` and closed time is recorded  
+   - Verification: confirm incident status is `closed` and `closedAt` is populated
+
+Are these two actions accurate? 
 
 
 ### Turn 51 — user
 
-Your proposed conditions for the **canRestoreServiceFromBackup** rule are comprehensive and logically structured. Here’s the evaluation:  1. **Recovery plan is for the incident.**      - **Confirmed**: This is essential to ensure that the correct recovery plan is associated with the incident being managed.  2. **Recovery plan restores the impacted IT service.**      - **Confirmed**: This condition clarifies that the recovery plan must be relevant to the service affected.  3. **Recovery plan uses a backup for that IT service.**      - **Confirmed**: This is critical, as it establishes the need for a backup as part of the recovery process.  4. **Backup timestamp is known so the restore point can be selected.**      - **Confirmed**: This is necessary to ensure that the correct point in time for restoration is identified.  5. **Incident status is contained, recovering, or monitoring.**      - **Confirmed**: This condition should indeed exclude the **investigating** status as restoration should only occur once the incident is in a state where recovery efforts can begin.  6. **Recovery status is in progress or failed, not already verified.**      - **Confirmed**: This is appropriate, ensuring that restoration is attempted if the plan is still active or has encountered issues but has not been verified already.  7. **Environment is known before restoring.**      - **Confirmed**: This is necessary to ensure the restoration process is positioned correctly within the appropriate operational context.  8. **For production or disaster recovery, restoration requires the correct backup and affected service to be identified.**      - **Confirmed**: This condition appropriately emphasizes the need for specificity when restoring services in critical environments.  ### Summary: Your conditions for the **canRestoreServiceFromBackup** rule are confirmed as entirely appropriate. The restoration should only be allowed after the incident status has transitioned to **contained, recovering, or monitoring**, ensuring recovery actions are taken when appropriate. If you’re ready to finalize this rule or explore others, just let me know!
+Your proposed actions for conducting the post-incident review and closing the incident are well-defined and align with the necessary components of the incident management process. Here’s the confirmation for each action:  1. **conductPostIncidentReview**      - **Input**: **Post-Incident Review** — Correct. This is the relevant input for this action.    - **Preconditions**: `canConductPostIncidentReview` — Correct. This ensures that the conditions for performing the review are satisfied.    - **Effect**: Post-incident review is completed and corrective actions are identified if needed — Correct. This accurately reflects the intended outcome of the review process.    - **Verification**: Confirm post-incident review `completedAt` is populated and any identified corrective actions are linked to the review — Correct. This provides a clear verification step to ensure the review's completion and linkage to corrective actions.     **Action confirmation**: This action is accurate.  2. **closeIncident**      - **Input**: **Incident** — Correct. The incident being closed serves as the input for this action.    - **Preconditions**: `canCloseIncident` — Correct. This ensures that all necessary conditions for closure are met.    - **Effect**: Incident status becomes `closed` and closed time is recorded — Correct. This captures the expected outcome when the incident is closed.    - **Verification**: Confirm incident status is `closed` and `closedAt` is populated — Correct. This verification step ensures that the closure was executed properly.     **Action confirmation**: This action is accurate.  Overall, both actions are well-defined and accurately capture the necessary conditions and outcomes for your incident management workflow. If you’re ready, we can finalize this phase or move on to any additional items you’d like to address!
 
 ### Turn 51 — assistant
 
@@ -3028,2963 +2365,748 @@ Your proposed conditions for the **canRestoreServiceFromBackup** rule are compre
 
 ```
 {
-  "yaml": "rules:\n  canRestoreServiceFromBackup:\n    conditions:\n      - recovery plan is for the incident\n      - recovery plan restores the impacted IT service\n      - recovery plan uses a backup for that IT service\n      - backup timestamp is known so the restore point can be selected\n      - incident status is contained, recovering, or monitoring\n      - recovery status is in progress or failed, not already verified\n      - environment is known before restoring\n      - for production or disaster recovery, restoration requires the correct backup and affected service to be identified\n      - restore is not allowed while incident status is still investigating\n"
+  "yaml": "actions:\n  conductPostIncidentReview:\n    input: PostIncidentReview\n    preconditions: [canConductPostIncidentReview]\n    effect: post-incident review is completed and corrective actions are identified if needed\n    verification: confirm post-incident review completedAt is populated and any identified corrective actions are linked to the review\n  closeIncident:\n    input: Incident\n    preconditions: [canCloseIncident]\n    effect: incident status becomes closed and closed time is recorded\n    verification: confirm incident status is closed and closedAt is populated\n"
 }
 ```
 
 ### Turn 51 — tool
 
-Applied. Added 1, updated 0 existing item(s).
+Applied. Added 2, updated 0 existing item(s).
 
 ### Turn 51 — assistant
 
-Recorded the **canRestoreServiceFromBackup** rule.
+Captured the final two actions.
 
-Next rule: **canSendStakeholderCommunication**.
+**Phase 8 recap — actions captured**
 
-Proposed conditions:
+We now have actions for all 10 Phase 1 actions:
 
-- communication is about an incident
-- communication has a message summary
-- communication is sent to a business owner or affected user group
-- incident has status, severity level, impacted IT service, and environment identified
-- for major incidents, an incident response team member prepares or contributes to the communication
-- for production or disaster recovery incidents, affected audience must be identified before sending
+1. **assignResolverGroup**
+2. **acknowledgeAlert**
+3. **declareMajorIncident**
+4. **sendCommunicationUpdate**
+5. **initiateRegulatoryNotification**
+6. **executeRecoveryPlan**
+7. **performMaterialityAssessment**
+8. **executeEmergencyChange**
+9. **conductPostIncidentReview**
+10. **closeIncident**
 
-Are these the right conditions for sending stakeholder communications? Should all-staff updates be represented here by **Affected User Group**, or do we need a separate condition/property later for audience type? 
+Each has one input class, precondition rule(s), effect, and verification step.
 
+Before the final validation pass: **is this action set correct, or is any action misnamed or missing?**
 
 ### Turn 52 — user
 
-Your proposed conditions for the **canSendStakeholderCommunication** rule are well-structured and cover the essential aspects needed for effective communication. Here’s the evaluation with a few clarifications regarding the audience:  1. **Communication is about an incident.**      - **Confirmed**: This condition is essential to ensure the relevance of the communication.  2. **Communication has a message summary.**      - **Confirmed**: This is necessary to provide context and content for the communication.  3. **Communication is sent to a business owner or affected user group.**      - **Confirmed**: This captures the primary audiences for most stakeholder communications effectively.  4. **Incident has status, severity level, impacted IT service, and environment identified.**      - **Confirmed**: All these factors are important for ensuring that the communication addresses the relevant context.  5. **For major incidents, an incident response team member prepares or contributes to the communication.**      - **Confirmed**: This emphasizes the need for a coordinated communication effort during major incidents.  6. **For production or disaster recovery incidents, affected audience must be identified before sending.**      - **Confirmed**: This is critical for ensuring clarity in communication during impactful incidents.  ### Regarding All-Staff Updates: - **Should all-staff updates be represented here by Affected User Group?**      - The definition of **Affected User Group** might be too narrow if it is not meant to cover all-staff communications. It would be prudent to consider creating a condition that accounts for broad communications to all staff. Using a separate condition or property later to denote audience type may enhance clarity, ensuring that the agent can properly manage different communication channels and audiences.  ### Summary: The conditions you've defined for **canSendStakeholderCommunication** are confirmed as correct, with the suggestion to consider a broader definition or separate condition to address all-staff communications if needed. If you're ready to finalize this rule or explore others, just let me know!
+Your recap of the actions captured in Phase 8 is comprehensive and accurately covers the 10 Phase 1 actions. Each action is well-defined with a clear input class, precondition rules, effects, and verification steps.   There are no misnamed actions, and none appear to be missing based on the Phase 1 requirements you originally outlined. Each action aligns well with the operational goals of incident management and governance as discussed throughout the phases, ensuring that all critical aspects of the process are addressed.  Everything looks correct and complete. If you’re ready for the final validation pass or have any other checks in mind, let's proceed!
 
 ### Turn 52 — assistant
 
-**Tool call: `apply_ontology_yaml`**
+**Tool call: `get_graph_state`**
 
 ```
-{
-  "yaml": "rules:\n  canSendStakeholderCommunication:\n    conditions:\n      - communication is about an incident\n      - communication has a message summary\n      - communication is sent to a business owner or affected user group\n      - incident has status, severity level, impacted IT service, and environment identified\n      - for major incidents, an incident response team member prepares or contributes to the communication\n      - for production or disaster recovery incidents, affected audience must be identified before sending\n"
-}
+{}
 ```
 
 ### Turn 52 — tool
 
-Applied. Added 1, updated 0 existing item(s).
+classes:
+  Incident:
+    meaning: "An operational event or disruption that requires investigation, response, mitigation, recovery, or closure."
+    aliases:
+      - issue
+    properties:
+      status:
+        type: text
+        allowed:
+          - new
+          - acknowledged
+          - investigating
+          - contained
+          - recovering
+          - resolved
+          - closed
+      isMajorIncident:
+        type: boolean
+      severity:
+        type: text
+        allowed:
+          - critical
+          - high
+          - medium
+          - low
+      priority:
+        type: text
+        allowed:
+          - P1
+          - P2
+          - P3
+          - P4
+      openedAt:
+        type: date
+      resolvedAt:
+        type: date
+      closedAt:
+        type: date
+  Alert:
+    meaning: A monitoring or detection signal that may trigger the creation or handling of an incident.
+    aliases:
+      - alarm
+    properties:
+      status:
+        type: text
+        allowed:
+          - active
+          - acknowledged
+          - suppressed
+          - cleared
+      triggeredAt:
+        type: date
+      acknowledgedAt:
+        type: date
+  ITService:
+    meaning: "A technology service operated by IT that supports applications, business services, or operational capabilities."
+    aliases:
+      - technology service
+    properties:
+      criticality:
+        type: text
+        allowed:
+          - critical
+          - high
+          - medium
+          - low
+  BusinessService:
+    meaning: A customer-facing or business-facing capability that may depend on one or more IT services.
+    aliases:
+      - customer-facing service
+    properties:
+      criticality:
+        type: text
+        allowed:
+          - critical
+          - high
+          - medium
+          - low
+  Application:
+    meaning: "A software system or application component with distinct ownership, deployment context, and operational considerations."
+    aliases:
+      - app
+    properties: {}
+  Runbook:
+    meaning: "A documented operational procedure used to guide incident response, mitigation, recovery, or service operation."
+    aliases:
+      - playbook
+    properties: {}
+  Workaround:
+    meaning: A temporary measure used to reduce impact or restore partial service before a full resolution is completed.
+    aliases:
+      - temporary fix
+    properties: {}
+  RecoveryPlan:
+    meaning: A planned set of steps for restoring an affected IT service to an acceptable operational state.
+    aliases:
+      - restoration plan
+      - recovery procedure
+    properties: {}
+  EmergencyChange:
+    meaning: An urgent change made under emergency procedures to restore service or reduce incident impact.
+    aliases:
+      - urgent change
+      - expedited change
+    properties:
+      status:
+        type: text
+        allowed:
+          - requested
+          - approved
+          - executed
+          - verified
+          - rejected
+  Evidence:
+    meaning: "Information, records, logs, artifacts, or observations preserved to support incident analysis, accountability, or compliance."
+    aliases:
+      - artifact
+      - log evidence
+    properties:
+      preservationRequired:
+        type: boolean
+      preservationStatus:
+        type: text
+        allowed:
+          - not-started
+          - in-progress
+          - preserved
+          - not-required
+  Stakeholder:
+    meaning: "A person, group, or function that needs to be informed, engaged, or considered during incident response."
+    aliases:
+      - interested party
+    properties: {}
+  CommunicationUpdate:
+    meaning: A recorded status message or notification sent about an incident to stakeholders.
+    aliases:
+      - status update
+      - comms update
+    properties:
+      sentAt:
+        type: date
+      message:
+        type: text
+  PostIncidentReview:
+    meaning: "A structured review conducted after an incident to analyze causes, response effectiveness, lessons learned, and follow-up actions."
+    aliases:
+      - PIR
+      - postmortem
+    properties:
+      completedAt:
+        type: date
+  CorrectiveAction:
+    meaning: "A follow-up action identified to reduce recurrence, address gaps, or improve incident response after a review."
+    aliases:
+      - remediation action
+    properties:
+      status:
+        type: text
+        allowed:
+          - open
+          - in-progress
+          - completed
+          - overdue
+          - cancelled
+  RegulatoryNotification:
+    meaning: A formal notification or reporting workflow to a regulator concerning an incident.
+    aliases:
+      - regulatory report
+      - regulator notification
+    properties:
+      status:
+        type: text
+        allowed:
+          - not-started
+          - in-progress
+          - submitted
+          - completed
+          - not-required
+      requiredBy:
+        type: date
+  MaterialityAssessment:
+    meaning: "An assessment used to determine the significance, impact, or reportability of an incident."
+    aliases:
+      - reportability assessment
+    properties:
+      outcome:
+        type: text
+        allowed:
+          - not-assessed
+          - not-material
+          - material
+          - uncertain
+      assessedAt:
+        type: date
+  Risk:
+    meaning: A potential adverse outcome or unresolved exposure related to incident recovery or service operation.
+    aliases:
+      - recovery risk
+    properties:
+      status:
+        type: text
+        allowed:
+          - open
+          - mitigated
+          - accepted
+          - closed
+  ServiceOwner:
+    meaning: The accountable role responsible for ownership and stewardship of an application or service.
+    aliases:
+      - service accountable owner
+    properties: {}
+  ResolverGroup:
+    meaning: "A support group responsible for receiving, diagnosing, and resolving assigned incidents."
+    aliases:
+      - support group
+    properties: {}
+  Environment:
+    meaning: "A deployment or operational context, such as production, pre-production, test, or development."
+    aliases:
+      - deployment context
+    properties:
+      name:
+        type: text
+        allowed:
+          - production
+          - pre-production
+          - test
+          - development
+  OnCallEngineer:
+    meaning: The technical specialist available for day-to-day or immediate operational response for a service or environment.
+    aliases:
+      - duty engineer
+      - on-call support
+    properties: {}
+  TechnicalOwner:
+    meaning: "The role responsible for engineering, maintenance, and technical restoration of applications or services."
+    aliases:
+      - technical lead
+    properties: {}
+  IncidentCommander:
+    meaning: "The role responsible for coordinating major-incident response, communications, stakeholder engagement, and closure strategy."
+    aliases:
+      - incident manager
+      - major incident lead
+    properties:
+      communicationCadence:
+        type: text
+relationships:
+  - name: triggers
+    from: Alert
+    to: Incident
+    meaning: The alert is a detection signal that causes or contributes to creating or handling the incident.
+    aliases:
+      - raises
+      - creates
+      - generates
+  - name: affects
+    from: Incident
+    to: ITService
+    meaning: "The incident disrupts, degrades, or otherwise impacts the operation of the IT service."
+    aliases:
+      - impacts
+      - disrupts
+  - name: impacts
+    from: Incident
+    to: BusinessService
+    meaning: The incident affects the delivery or availability of the business service.
+    aliases:
+      - affects
+      - disrupts
+  - name: supports
+    from: ITService
+    to: BusinessService
+    meaning: The IT service enables or contributes to the operation of the business service.
+    aliases:
+      - enables
+      - underpins
+  - name: supports
+    from: Application
+    to: ITService
+    meaning: The application is a component or capability used to deliver the IT service.
+    aliases:
+      - contributes to
+      - underpins
+  - name: ownedBy
+    from: Application
+    to: ServiceOwner
+    meaning: The service owner is accountable for stewardship and ownership of the application.
+    aliases:
+      - owned by
+  - name: staffedBy
+    from: ITService
+    to: OnCallEngineer
+    meaning: The IT service has an on-call engineer available for operational response.
+    aliases:
+      - covered by
+  - name: supportedBy
+    from: ITService
+    to: ResolverGroup
+    meaning: The resolver group is responsible for support and incident handling for the IT service.
+    aliases: []
+  - name: assignedTo
+    from: Incident
+    to: ResolverGroup
+    meaning: The incident is routed or allocated to the resolver group for diagnosis or resolution.
+    aliases:
+      - routed to
+      - allocated to
+  - name: operatesIn
+    from: ResolverGroup
+    to: Environment
+    meaning: The resolver group handles work in a specific deployment or operational environment.
+    aliases:
+      - works in
+  - name: maintains
+    from: TechnicalOwner
+    to: Application
+    meaning: The technical owner is responsible for engineering and ongoing maintenance of the application.
+    aliases:
+      - supports technically
+  - name: restores
+    from: TechnicalOwner
+    to: ITService
+    meaning: The technical owner performs or leads technical restoration work for the IT service.
+    aliases:
+      - recovers
+      - restores service
+  - name: dependsOn
+    from: ITService
+    to: ITService
+    meaning: The IT service relies on another IT service to operate correctly.
+    aliases:
+      - relies on
+      - requires
+  - name: dependsOn
+    from: Application
+    to: Application
+    meaning: The application relies on another application to operate correctly.
+    aliases:
+      - relies on
+      - requires
+  - name: occursIn
+    from: Incident
+    to: Environment
+    meaning: The incident occurs within a specific deployment or operational environment.
+    aliases:
+      - happens in
+  - name: hasRunbook
+    from: ITService
+    to: Runbook
+    meaning: The IT service has an associated runbook for operational procedures or incident response.
+    aliases:
+      - has playbook
+  - name: documents
+    from: Runbook
+    to: Workaround
+    meaning: The runbook records a workaround that may be used during incident mitigation.
+    aliases:
+      - contains
+  - name: mitigatedBy
+    from: Incident
+    to: Workaround
+    meaning: The incident is mitigated by a temporary measure before full resolution.
+    aliases:
+      - reduced by
+      - worked around by
+  - name: hasRecoveryPlan
+    from: ITService
+    to: RecoveryPlan
+    meaning: The IT service has an associated recovery plan for restoration.
+    aliases:
+      - has restoration plan
+      - has recovery procedure
+  - name: usesRecoveryPlan
+    from: Incident
+    to: RecoveryPlan
+    meaning: The incident uses or records a specific recovery plan for restoring the affected service.
+    aliases:
+      - follows recovery plan
+      - uses restoration plan
+  - name: hasEvidence
+    from: Incident
+    to: Evidence
+    meaning: "The incident has related evidence used for analysis, accountability, or compliance."
+    aliases:
+      - includes evidence
+  - name: preservedFor
+    from: Evidence
+    to: Incident
+    meaning: "The evidence is preserved for the incident as part of accountability, investigation, or compliance needs."
+    aliases:
+      - retained for
+  - name: linkedTo
+    from: EmergencyChange
+    to: Incident
+    meaning: The emergency change is associated with the incident that prompted or required it.
+    aliases:
+      - associated with
+      - related to
+  - name: changes
+    from: EmergencyChange
+    to: ITService
+    meaning: The emergency change modifies or restores the affected IT service.
+    aliases:
+      - modifies
+      - restores
+  - name: hasRisk
+    from: RecoveryPlan
+    to: Risk
+    meaning: The recovery plan has an associated risk that may affect recovery.
+    aliases:
+      - includes risk
+  - name: hasCommunicationUpdate
+    from: Incident
+    to: CommunicationUpdate
+    meaning: The incident has a recorded communication or status update.
+    aliases:
+      - has status update
+      - includes comms update
+  - name: sentTo
+    from: CommunicationUpdate
+    to: Stakeholder
+    meaning: The communication update is sent or directed to a stakeholder.
+    aliases:
+      - distributed to
+      - sent out to
+  - name: coordinates
+    from: IncidentCommander
+    to: Incident
+    meaning: The incident commander coordinates the response for the incident.
+    aliases:
+      - leads
+      - manages
+  - name: engages
+    from: IncidentCommander
+    to: Stakeholder
+    meaning: The incident commander engages stakeholders during incident response.
+    aliases:
+      - communicates with
+  - name: commandedBy
+    from: Incident
+    to: IncidentCommander
+    meaning: The incident has an assigned commander accountable for coordinating response.
+    aliases:
+      - led by
+      - managed by
+  - name: reviewedBy
+    from: Incident
+    to: PostIncidentReview
+    meaning: The incident is analyzed through a post-incident review.
+    aliases:
+      - reviewed in
+      - analyzed in
+  - name: identifies
+    from: PostIncidentReview
+    to: CorrectiveAction
+    meaning: The post-incident review identifies a corrective action.
+    aliases:
+      - raises
+      - records
+  - name: hasMaterialityAssessment
+    from: Incident
+    to: MaterialityAssessment
+    meaning: The incident has a materiality assessment to determine significance or reportability.
+    aliases:
+      - has reportability assessment
+  - name: determinesNeedFor
+    from: MaterialityAssessment
+    to: RegulatoryNotification
+    meaning: The materiality assessment determines whether regulatory notification is needed.
+    aliases:
+      - determines reportability
+      - decides notification need
+  - name: notifiesAbout
+    from: RegulatoryNotification
+    to: Incident
+    meaning: The regulatory notification reports or notifies a regulator about the incident.
+    aliases:
+      - reports incident
+  - name: hasStakeholder
+    from: Incident
+    to: Stakeholder
+    meaning: "The incident has a stakeholder who needs to be informed, engaged, or considered."
+    aliases:
+      - has interested party
+  - name: hasStakeholder
+    from: BusinessService
+    to: Stakeholder
+    meaning: The business service has a stakeholder who may need to be informed when the service is impacted.
+    aliases:
+      - has interested party
+  - name: runsIn
+    from: ITService
+    to: Environment
+    meaning: The IT service operates within a specific deployment or operational environment.
+    aliases:
+      - operates in
+      - hosted in
+  - name: deployedIn
+    from: Application
+    to: Environment
+    meaning: The application is deployed within a specific environment.
+    aliases:
+      - runs in
+      - hosted in
+  - name: covers
+    from: OnCallEngineer
+    to: Environment
+    meaning: The on-call engineer provides operational response coverage for a specific environment.
+    aliases:
+      - supports
+  - name: usesRunbook
+    from: Incident
+    to: Runbook
+    meaning: "The incident uses or records a specific runbook for mitigation, recovery, or response guidance."
+    aliases:
+      - follows runbook
+      - uses playbook
+  - name: hasRisk
+    from: Incident
+    to: Risk
+    meaning: The incident has a risk specifically associated with its recovery or ongoing management.
+    aliases:
+      - includes risk
+rules:
+  canDeclareMajorIncident:
+    conditions:
+      - incident severity is critical or incident priority is P1
+      - incident has an affected IT service or impacted business service
+      - incident is not already marked as a major incident
+  canInitiateRegulatoryNotification:
+    conditions:
+      - incident has a materiality assessment
+      - materiality assessment outcome is material
+      - "regulatory notification status is not submitted, completed, or not-required"
+      - regulatory notification required-by deadline is known
+  canCloseIncident:
+    conditions:
+      - incident status is resolved
+      - "required evidence is preserved, or evidence preservation is marked not-required"
+      - "any emergency change linked to the incident is verified, or no emergency change is linked"
+      - any regulatory notification required for the incident is completed or not-required
+      - post-incident review may be tracked after closure and does not block incident closure
+  canAssignResolverGroup:
+    conditions:
+      - incident has an affected IT service
+      - affected IT service has a resolver group that supports it
+      - "incident occurs in an environment compatible with the resolver group's environment, if environment-specific routing applies"
+  canAcknowledgeAlert:
+    conditions:
+      - alert status is active
+      - "alert is linked to, or can trigger, the incident being handled"
+      - alert has not already been acknowledged
+  canSendCommunicationUpdate:
+    conditions:
+      - incident has at least one stakeholder
+      - communication update has a message
+      - "for a major incident, incident has an incident commander"
+      - communication cadence is known for a major incident
+  canExecuteRecoveryPlan:
+    conditions:
+      - incident affects an IT service
+      - affected IT service has a recovery plan
+      - incident status is contained or recovering
+      - ongoing recovery risks are reviewed or accepted
+  canExecuteEmergencyChange:
+    conditions:
+      - emergency change is linked to an incident
+      - emergency change status is approved
+      - emergency change changes the affected IT service
+      - incident severity is critical or incident priority is P1
+  canPerformMaterialityAssessment:
+    conditions:
+      - incident has severity and priority
+      - incident has an affected IT service or impacted business service
+      - business service criticality is known if a business service is impacted
+      - incident status is not closed
+  canConductPostIncidentReview:
+    conditions:
+      - incident status is resolved or closed
+      - "incident has at least one communication update, recovery plan, workaround, emergency change, or evidence record to review"
+      - corrective actions can be recorded if identified
+actions:
+  assignResolverGroup:
+    input: Incident
+    preconditions:
+      - canAssignResolverGroup
+    effect: incident is assigned to the resolver group that supports the affected IT service in the relevant environment
+    verification: confirm the incident has an assigned resolver group
+  acknowledgeAlert:
+    input: Alert
+    preconditions:
+      - canAcknowledgeAlert
+    effect: alert status becomes acknowledged and acknowledged time is recorded
+    verification: confirm the alert status is acknowledged and acknowledgedAt is populated
+  declareMajorIncident:
+    input: Incident
+    preconditions:
+      - canDeclareMajorIncident
+    effect: incident is marked as a major incident
+    verification: confirm Incident.isMajorIncident is true
+  sendCommunicationUpdate:
+    input: CommunicationUpdate
+    preconditions:
+      - canSendCommunicationUpdate
+    effect: communication update message is sent to the relevant stakeholders for the incident
+    verification: confirm the communication update has sentAt populated and is linked to the intended stakeholders
+  initiateRegulatoryNotification:
+    input: RegulatoryNotification
+    preconditions:
+      - canInitiateRegulatoryNotification
+    effect: regulatory notification process is started for the incident and status becomes in-progress
+    verification: confirm notification status is in-progress and required-by deadline is populated
+  executeRecoveryPlan:
+    input: Incident
+    preconditions:
+      - canExecuteRecoveryPlan
+    effect: the recovery plan associated with the affected IT service is executed for the incident
+    verification: confirm the incident status is recovering or resolved and the incident uses a recovery plan
+  performMaterialityAssessment:
+    input: MaterialityAssessment
+    preconditions:
+      - canPerformMaterialityAssessment
+    effect: materiality assessment outcome is recorded for the incident
+    verification: confirm MaterialityAssessment.outcome is populated
+  executeEmergencyChange:
+    input: EmergencyChange
+    preconditions:
+      - canExecuteEmergencyChange
+    effect: approved emergency change is executed against the affected IT service
+    verification: confirm emergency change status is executed or verified
+  conductPostIncidentReview:
+    input: PostIncidentReview
+    preconditions:
+      - canConductPostIncidentReview
+    effect: post-incident review is completed and corrective actions are identified if needed
+    verification: confirm post-incident review completedAt is populated and any identified corrective actions are linked to the review
+  closeIncident:
+    input: Incident
+    preconditions:
+      - canCloseIncident
+    effect: incident status becomes closed and closed time is recorded
+    verification: confirm incident status is closed and closedAt is populated
+
 
 ### Turn 52 — assistant
 
-Recorded the **canSendStakeholderCommunication** rule as confirmed.
-
-You raised a useful gap: all-staff updates may not fit cleanly under **Affected User Group** because that class means users specifically impacted by an incident.
-
-Before I add anything, one focused question: for all-staff communication updates, does the agent need to distinguish **audience type** on Stakeholder Communication — for example **business-owner**, **affected-user-group**, **all-staff** — in order to choose/send the right communication workflow? 
-
-
-### Turn 53 — user
-
-Yes, distinguishing **audience type** on **Stakeholder Communication** is important for the agent to effectively manage and route communication updates. Having audience types such as **business-owner**, **affected-user-group**, and **all-staff** enables the agent to:  1. **Tailor Content**: Ensure that the message content is relevant to the audience's interests and concerns. Different audiences may require different information or levels of detail.     2. **Select Communication Channels**: Determine the appropriate channels for delivering communications to different audience types, which may vary based on the urgency and nature of the message.     3. **Manage Approval Processes**: Facilitate any necessary approvals based on the audience type, especially if certain communications require sign-off from specific roles or stakeholders.  4. **Track Responses and Engagement**: Analyze how different audience groups respond to incident updates, which can inform future communication strategies.  ### Conclusion: Incorporating audience type as a property in the **Stakeholder Communication** class will enhance the agent’s ability to manage communications effectively and ensure that all staff updates, along with other types, are properly handled. If you're ready to move forward with adding this distinction or have further considerations, let me know!
-
-### Turn 53 — assistant
-
-**Tool call: `get_graph_state`**
-
-```
-{}
-```
-
-### Turn 53 — tool
-
-classes:
-  Incident:
-    meaning: "An unplanned event or degradation that disrupts, risks, or may disrupt an IT service or normal operations."
-    aliases:
-      - incident ticket
-      - service incident
-    properties:
-      incidentId:
-        type: text
-      status:
-        type: text
-        allowed:
-          - new
-          - acknowledged
-          - investigating
-          - contained
-          - recovering
-          - monitoring
-          - resolved
-          - closed
-          - cancelled
-      severityLevel:
-        type: text
-        allowed:
-          - sev1-critical
-          - sev2-high
-          - sev3-medium
-          - sev4-low
-      firstDetectedAt:
-        type: date
-      affectedUserCount:
-        type: number
-      estimatedRestorationTime:
-        type: date
-      summary:
-        type: text
-  ITService:
-    meaning: "A technology service provided to the business or customers, supported by applications, infrastructure, personnel, and processes."
-    aliases:
-      - technology service
-      - service
-    properties:
-      serviceId:
-        type: text
-      serviceName:
-        type: text
-      criticality:
-        type: text
-        allowed:
-          - critical
-          - important
-          - standard
-          - supporting
-  MajorIncident:
-    meaning: "An incident that has been formally escalated for enhanced coordination, communication, recovery management, and review."
-    aliases:
-      - MI
-      - major incident ticket
-    properties:
-      majorIncidentId:
-        type: text
-      coordinationStatus:
-        type: text
-        allowed:
-          - declared
-          - active
-          - stabilized
-          - closed
-      declaredAt:
-        type: date
-  CybersecurityIncident:
-    meaning: An incident involving suspected or confirmed cybersecurity impact that requires specialized investigation and handling.
-    aliases:
-      - cyber incident
-      - security incident
-    properties:
-      cyberIncidentId:
-        type: text
-  Alert:
-    meaning: "A signal generated by a monitoring tool indicating a potential issue, degradation, threshold breach, or abnormal condition."
-    aliases:
-      - monitoring alert
-    properties:
-      alertId:
-        type: text
-      alertTimestamp:
-        type: date
-      alertSeverity:
-        type: text
-        allowed:
-          - critical
-          - high
-          - medium
-          - low
-  RecoveryPlan:
-    meaning: A documented plan describing how an affected IT service will be restored or stabilized after an incident.
-    aliases:
-      - restoration plan
-      - recovery runbook
-    properties:
-      planId:
-        type: text
-      recoveryStatus:
-        type: text
-        allowed:
-          - not started
-          - in progress
-          - restored
-          - verified
-          - failed
-      targetRecoveryTime:
-        type: date
-  MaterialityAssessment:
-    meaning: "An assessment of an incident's significance, impact, and reportability for operational, business, or regulatory purposes."
-    aliases:
-      - impact assessment
-      - reportability assessment
-    properties:
-      assessmentId:
-        type: text
-      assessmentStatus:
-        type: text
-        allowed:
-          - not started
-          - in progress
-          - completed
-      materialityOutcome:
-        type: text
-        allowed:
-          - not-reportable
-          - potentially-reportable
-          - reportable
-  RegulatoryNotification:
-    meaning: A formal notification or submission to a regulator about an incident or its assessed impact.
-    aliases:
-      - regulator notification
-      - regulatory report
-    properties:
-      notificationId:
-        type: text
-      notificationStatus:
-        type: text
-        allowed:
-          - draft
-          - pending-approval
-          - approved
-          - submitted
-          - accepted
-          - rejected
-          - withdrawn
-      submittedAt:
-        type: date
-  StakeholderCommunication:
-    meaning: "A message or update sent to a defined audience about an incident, its status, impact, or recovery progress."
-    aliases:
-      - incident communication
-      - status update
-    properties:
-      communicationId:
-        type: text
-      sentAt:
-        type: date
-      messageSummary:
-        type: text
-  PostIncidentReview:
-    meaning: "A review conducted after an incident to document findings, lessons learned, and corrective actions."
-    aliases:
-      - PIR
-      - postmortem
-      - lessons learned review
-    properties:
-      reviewId:
-        type: text
-  ServiceOwner:
-    meaning: The accountable person responsible for the overall ownership and governance of an IT service.
-    aliases:
-      - service accountable owner
-      - service lead
-    properties:
-      personName:
-        type: text
-  ApplicationOwner:
-    meaning: The accountable person responsible for the operational fitness of an application supporting an IT service.
-    aliases:
-      - app owner
-      - application lead
-    properties:
-      personName:
-        type: text
-  ResolverGroup:
-    meaning: A team assigned to investigate and resolve incidents within its area of technical responsibility.
-    aliases:
-      - support group
-      - assignment group
-      - resolver team
-    properties:
-      groupName:
-        type: text
-  OnCallEngineer:
-    meaning: The individual technically responsible and currently available to respond to incidents for a resolver group.
-    aliases:
-      - on-call
-      - duty engineer
-    properties:
-      personName:
-        type: text
-  IncidentCommander:
-    meaning: "The person leading coordination, decision-making, and communications during a major incident."
-    aliases:
-      - IC
-      - incident lead
-    properties:
-      personName:
-        type: text
-  IncidentResponseTeamMember:
-    meaning: "A person supporting incident coordination, investigation, communications, or recovery activities during an incident or major incident."
-    aliases:
-      - response team member
-      - incident team member
-    properties:
-      personName:
-        type: text
-  BusinessOwner:
-    meaning: The person accountable for a business area affected by an IT service or incident.
-    aliases:
-      - business service owner
-      - business lead
-    properties:
-      personName:
-        type: text
-  ComplianceOfficer:
-    meaning: The person responsible for reviewing incidents or assessments for regulatory and compliance obligations.
-    aliases:
-      - compliance lead
-      - regulatory compliance officer
-    properties:
-      personName:
-        type: text
-  Regulator:
-    meaning: An external supervisory or regulatory authority that may receive formal incident notifications.
-    aliases:
-      - supervisory authority
-      - competent authority
-    properties:
-      regulatorName:
-        type: text
-  ServiceDeskStaff:
-    meaning: "A person providing first-line incident reporting, user support, triage, or communication handling."
-    aliases:
-      - service desk analyst
-      - help desk staff
-    properties:
-      personName:
-        type: text
-  MonitoringTool:
-    meaning: "A system or platform that observes service health, detects abnormal conditions, and generates alerts."
-    aliases:
-      - monitoring platform
-      - observability tool
-    properties:
-      toolName:
-        type: text
-  Workaround:
-    meaning: A temporary mitigation or set of instructions used to reduce impact or restore partial function before permanent resolution.
-    aliases:
-      - temporary fix
-      - mitigation
-    properties:
-      workaroundId:
-        type: text
-      instructions:
-        type: text
-  CorrectiveAction:
-    meaning: An improvement action identified after an incident to prevent recurrence or reduce future impact.
-    aliases:
-      - remediation action
-    properties:
-      actionId:
-        type: text
-      actionStatus:
-        type: text
-        allowed:
-          - open
-          - in-progress
-          - blocked
-          - implemented
-          - verified
-          - closed
-          - cancelled
-  EmergencyChange:
-    meaning: An expedited change performed during or because of an incident to restore service or reduce impact.
-    aliases:
-      - emergency change request
-      - expedited change
-    properties:
-      changeId:
-        type: text
-      changeStatus:
-        type: text
-        allowed:
-          - draft
-          - assessed
-          - approved
-          - scheduled
-          - implementing
-          - implemented
-          - failed
-          - rolled-back
-          - closed
-          - cancelled
-  Backup:
-    meaning: "A restorable copy or backup set of data, configuration, system state, or service components used for recovery."
-    aliases:
-      - backup set
-      - restore point
-    properties:
-      backupId:
-        type: text
-      backupTimestamp:
-        type: date
-  Environment:
-    meaning: "A deployment or operating context such as production, pre-production, test, or disaster recovery."
-    aliases:
-      - deployment environment
-      - runtime environment
-    properties:
-      environmentType:
-        type: text
-        allowed:
-          - production
-          - pre-production
-          - test
-          - disaster recovery
-  BusinessLine:
-    meaning: A business area or line of business that consumes or is supported by IT services.
-    aliases:
-      - line of business
-      - LOB
-    properties:
-      businessLineName:
-        type: text
-  Investigation:
-    meaning: "A structured inquiry into a cybersecurity incident to establish facts, scope, cause, evidence, and required response."
-    aliases:
-      - cyber investigation
-      - security investigation
-    properties:
-      investigationId:
-        type: text
-      investigationStatus:
-        type: text
-        allowed:
-          - not started
-          - in progress
-          - completed
-          - closed
-  AffectedUserGroup:
-    meaning: A defined group of users impacted by an incident or service degradation.
-    aliases:
-      - impacted user group
-      - affected users
-    properties:
-      groupName:
-        type: text
-      estimatedUserCount:
-        type: number
-relationships:
-  - name: impacts
-    from: Incident
-    to: ITService
-    meaning: "The incident disrupts, degrades, risks, or otherwise affects the IT service."
-    aliases:
-      - affects
-      - degrades
-      - disrupts
-  - name: triggeredBy
-    from: Incident
-    to: Alert
-    meaning: "The incident was created from, correlated with, or initiated because of the alert."
-    aliases:
-      - caused by alert
-      - opened from alert
-      - correlated with alert
-  - name: generatedBy
-    from: Alert
-    to: MonitoringTool
-    meaning: The alert originated from the monitoring tool.
-    aliases:
-      - raised by
-      - emitted by
-      - produced by
-  - name: monitors
-    from: MonitoringTool
-    to: ITService
-    meaning: The monitoring tool observes the health or behavior of the IT service.
-    aliases:
-      - observes
-      - assesses
-      - watches
-  - name: dependsOn
-    from: ITService
-    to: ITService
-    meaning: One IT service requires another IT service to operate correctly.
-    aliases:
-      - relies on
-      - requires
-      - has upstream dependency
-  - name: ownedBy
-    from: ITService
-    to: ServiceOwner
-    meaning: The service owner is accountable for the IT service.
-    aliases:
-      - accountable to
-      - owned by service owner
-  - name: supportedBy
-    from: ITService
-    to: ApplicationOwner
-    meaning: The application owner is responsible for the operational fitness of applications supporting the IT service.
-    aliases:
-      - supported by app owner
-  - name: assignedTo
-    from: Incident
-    to: ResolverGroup
-    meaning: The incident is routed to the resolver group responsible for investigation or resolution.
-    aliases:
-      - routed to
-      - allocated to
-      - assigned resolver group
-  - name: staffedBy
-    from: ResolverGroup
-    to: OnCallEngineer
-    meaning: The resolver group has an on-call engineer available for immediate response.
-    aliases:
-      - has on-call
-      - covered by
-      - staffed with
-  - name: triagedBy
-    from: Incident
-    to: ServiceDeskStaff
-    meaning: "Service desk staff perform initial intake, classification, or triage for the incident."
-    aliases:
-      - initially handled by
-      - first-line triaged by
-  - name: escalatedFrom
-    from: MajorIncident
-    to: Incident
-    meaning: The major incident record is created from or formally linked to the incident that was escalated.
-    aliases:
-      - promoted from
-      - declared from
-      - raised from
-  - name: ledBy
-    from: MajorIncident
-    to: IncidentCommander
-    meaning: The incident commander leads coordination and decision-making for the major incident.
-    aliases:
-      - commanded by
-      - coordinated by
-      - led by IC
-  - name: supportedBy
-    from: MajorIncident
-    to: IncidentResponseTeamMember
-    meaning: Incident response team members support the handling of the major incident.
-    aliases:
-      - assisted by
-      - supported by response team
-  - name: about
-    from: StakeholderCommunication
-    to: Incident
-    meaning: "The communication provides information about the incident, its impact, status, or recovery."
-    aliases:
-      - regarding
-      - concerning
-      - update for
-  - name: sentTo
-    from: StakeholderCommunication
-    to: BusinessOwner
-    meaning: The communication is addressed to a business owner as an affected stakeholder.
-    aliases:
-      - addressed to business owner
-      - notified business owner
-  - name: assesses
-    from: MaterialityAssessment
-    to: Incident
-    meaning: "The assessment evaluates the incident's impact, significance, and reportability."
-    aliases:
-      - evaluates
-      - reviews materiality of
-      - assesses impact of
-  - name: reviewedBy
-    from: MaterialityAssessment
-    to: ComplianceOfficer
-    meaning: The compliance officer reviews the assessment for regulatory and compliance implications.
-    aliases:
-      - compliance-reviewed by
-      - reviewed by compliance
-  - name: basedOn
-    from: RegulatoryNotification
-    to: MaterialityAssessment
-    meaning: The notification is prepared or required based on the outcome of the materiality assessment.
-    aliases:
-      - based upon
-      - driven by assessment
-      - required by assessment
-  - name: notifies
-    from: RegulatoryNotification
-    to: Regulator
-    meaning: The notification is submitted to the regulator.
-    aliases:
-      - submitted to
-      - reported to
-      - sent to regulator
-  - name: about
-    from: RegulatoryNotification
-    to: Incident
-    meaning: The notification reports information about the incident.
-    aliases:
-      - reports incident
-      - notification for incident
-  - name: forIncident
-    from: RecoveryPlan
-    to: Incident
-    meaning: The recovery plan is created for or associated with the incident.
-    aliases:
-      - recovery plan for
-      - associated with incident
-  - name: restores
-    from: RecoveryPlan
-    to: ITService
-    meaning: The recovery plan describes how the IT service will be restored or stabilized.
-    aliases:
-      - recovers
-      - restores service
-      - stabilizes
-  - name: uses
-    from: RecoveryPlan
-    to: Backup
-    meaning: The recovery plan relies on the backup for restoration.
-    aliases:
-      - restores from
-      - uses restore point
-  - name: relatedTo
-    from: EmergencyChange
-    to: Incident
-    meaning: The emergency change is raised because of or in response to the incident.
-    aliases:
-      - raised for
-      - linked to
-      - in response to
-  - name: changes
-    from: EmergencyChange
-    to: ITService
-    meaning: The emergency change modifies or affects the IT service.
-    aliases:
-      - modifies
-      - affects
-      - changes service
-  - name: appliesTo
-    from: Workaround
-    to: Incident
-    meaning: The workaround can be used to mitigate or reduce the impact of the incident.
-    aliases:
-      - mitigates
-      - workaround for
-      - temporary fix for
-  - name: reviews
-    from: PostIncidentReview
-    to: Incident
-    meaning: The post-incident review evaluates the incident after recovery or closure.
-    aliases:
-      - reviews
-      - examines
-      - post-review of
-  - name: identifies
-    from: PostIncidentReview
-    to: CorrectiveAction
-    meaning: The review records corrective actions arising from findings or lessons learned.
-    aliases:
-      - raises
-      - records
-      - finds
-  - name: addresses
-    from: CorrectiveAction
-    to: Incident
-    meaning: The corrective action is intended to prevent recurrence or reduce future impact related to the incident.
-    aliases:
-      - remediates
-      - prevents recurrence of
-      - mitigates future impact of
-  - name: isTypeOf
-    from: CybersecurityIncident
-    to: Incident
-    meaning: The cybersecurity incident is a specialized form of incident.
-    aliases:
-      - classified as incident
-      - subtype of
-      - kind of incident
-  - name: investigates
-    from: Investigation
-    to: CybersecurityIncident
-    meaning: The investigation examines the cybersecurity incident.
-    aliases:
-      - examines
-      - investigates cyber incident
-      - looks into
-  - name: supportedBy
-    from: Investigation
-    to: IncidentResponseTeamMember
-    meaning: Incident response team members support the investigation.
-    aliases:
-      - assisted by
-      - supported by response team
-  - name: occursIn
-    from: Incident
-    to: Environment
-    meaning: The incident occurs in a specific deployment or operating environment.
-    aliases:
-      - happens in
-      - detected in
-      - occurs within
-  - name: runsIn
-    from: ITService
-    to: Environment
-    meaning: The IT service operates in the specified environment.
-    aliases:
-      - deployed in
-      - operates in
-      - hosted in
-  - name: appliesIn
-    from: EmergencyChange
-    to: Environment
-    meaning: The emergency change is executed in or affects the specified environment.
-    aliases:
-      - executed in
-      - deployed in
-      - applies to environment
-  - name: serves
-    from: ITService
-    to: BusinessLine
-    meaning: The IT service supports or is consumed by the business line.
-    aliases:
-      - supports
-      - consumed by
-      - used by
-  - name: affects
-    from: Incident
-    to: AffectedUserGroup
-    meaning: The incident affects the specified group of users.
-    aliases:
-      - impacts user group
-      - affects users
-      - impacts affected users
-  - name: forService
-    from: Backup
-    to: ITService
-    meaning: The backup can be used to restore the IT service.
-    aliases:
-      - backup of
-      - restore point for
-  - name: sentTo
-    from: StakeholderCommunication
-    to: AffectedUserGroup
-    meaning: The communication is addressed to a group of users affected by the incident.
-    aliases:
-      - addressed to affected users
-      - notified impacted users
-  - name: preparedBy
-    from: StakeholderCommunication
-    to: IncidentResponseTeamMember
-    meaning: An incident response team member prepares or contributes to the communication.
-    aliases:
-      - drafted by
-      - prepared with
-      - authored by
-rules:
-  canEscalateToMajorIncident:
-    conditions:
-      - incident status is not closed or cancelled
-      - incident has an impacted IT service
-      - incident occurs in an environment
-      - incident commander can be identified before or during escalation
-      - sev1-critical incidents qualify for major-incident escalation
-      - sev2-high incidents qualify only when additional impact criteria such as affected-user count or business-line significance justify major-incident coordination
-      - production or disaster recovery incidents may be escalated when severity and impact justify major-incident coordination
-  requiresRegulatoryNotification:
-    conditions:
-      - materiality assessment status is completed
-      - materiality outcome is reportable
-      - regulatory notification is about the incident
-      - regulatory notification identifies the regulator to notify
-      - compliance officer has reviewed the materiality assessment
-      - incident occurs in production or disaster recovery environment
-  shouldStartDraftRegulatoryNotification:
-    conditions:
-      - materiality assessment status is completed
-      - materiality outcome is potentially-reportable
-      - draft or pending-approval regulatory notification workflow should be started
-      - compliance officer review is needed before formal submission
-      - incident occurs in production or disaster recovery environment
-  canExecuteEmergencyChange:
-    conditions:
-      - emergency change is related to an incident
-      - emergency change changes an impacted IT service
-      - emergency change applies in a known environment
-      - "incident status is investigating, contained, recovering, or monitoring"
-      - emergency change status is approved or scheduled
-      - incident severity level is sev1-critical or sev2-high
-      - production and disaster recovery emergency changes require the environment to be correctly identified before execution
-      - emergency change must not execute when its status is only assessed
-  canRestoreServiceFromBackup:
-    conditions:
-      - recovery plan is for the incident
-      - recovery plan restores the impacted IT service
-      - recovery plan uses a backup for that IT service
-      - backup timestamp is known so the restore point can be selected
-      - "incident status is contained, recovering, or monitoring"
-      - "recovery status is in progress or failed, not already verified"
-      - environment is known before restoring
-      - "for production or disaster recovery, restoration requires the correct backup and affected service to be identified"
-      - restore is not allowed while incident status is still investigating
-  canSendStakeholderCommunication:
-    conditions:
-      - communication is about an incident
-      - communication has a message summary
-      - communication is sent to a business owner or affected user group
-      - "incident has status, severity level, impacted IT service, and environment identified"
-      - "for major incidents, an incident response team member prepares or contributes to the communication"
-      - "for production or disaster recovery incidents, affected audience must be identified before sending"
-actions: {}
-
-
-### Turn 53 — assistant
-
-**Tool call: `apply_ontology_yaml`**
-
-```
-{
-  "yaml": "classes:\n  StakeholderCommunication:\n    properties:\n      audienceType:\n        type: text\n"
-}
-```
-
-### Turn 53 — tool
-
-Applied. Added 0, updated 1 existing item(s).
-
-### Turn 53 — assistant
-
-Recorded **StakeholderCommunication.audienceType** as a decision-bearing property because it is needed to choose and route the right communication workflow.
-
-Now one follow-up for the fixed choices: should the allowed values for **StakeholderCommunication.audienceType** be exactly:
-
-- business-owner
-- affected-user-group
-- all-staff
-
-Or are there additional fixed audience types the agent must distinguish for the Phase 1 communication actions?
-
-### Turn 54 — user
-
-The proposed allowed values for **StakeholderCommunication.audienceType** are well-defined for the context you've established. However, depending on the bank's operational needs, you might also want to consider the following additional fixed audience types:  1. **incident-response-team**: For communications directed at the incident response team members directly involved in handling the incident.    2. **vendor**: If communications need to occur with external vendors or suppliers impacted by the incident or who play a role in the resolution.  3. **management**: High-level communications directed at management or executive stakeholders who need oversight on incidents but may not be classified as business owners.  Including these additional audience types can provide further granularity in communication routing, enhancing the agent's effectiveness in managing stakeholder interactions.  ### Suggested Allowed Values for **StakeholderCommunication.audienceType**: - business-owner - affected-user-group - all-staff - incident-response-team - vendor - management  ### Summary: If these additional audience types are relevant to your operational processes, consider adding them to the allowed values. If not, the three you proposed are sufficient for the current communication requirements. Let me know how you'd like to proceed!
-
-### Turn 54 — assistant
-
-Thanks — I’ll be careful not to add audience types “just in case.”
-
-From the Phase 1 actions, the confirmed communication needs are:
-
-- notify stakeholders about incident status
-- send an all-staff communication update
-- targeted updates to affected user groups
-- business-owner stakeholder updates
-
-So the directly justified values are:
-
-- **business-owner**
-- **affected-user-group**
-- **all-staff**
-
-The additional suggestions need confirmation against the original tasks:
-
-- **incident-response-team** — include only if the agent must send operational updates to the incident response team, not just record that they prepared communications.
-- **vendor** — not currently modeled as a class and not in the Phase 1 questions/actions, so I would exclude unless vendor communication is required for one of the listed incident actions.
-- **management** — not currently modeled as a class and not distinct from Business Owner in the confirmed model, so I would exclude unless executive/management communication is a required workflow.
-
-**Focused question:** For **StakeholderCommunication.audienceType**, should we record only the three directly justified values — **business-owner, affected-user-group, all-staff** — or are **incident-response-team**, **vendor**, or **management** also required to perform one of the Phase 1 communication actions?
-
-### Turn 55 — user
-
-Based on your analysis and the confirmed communication needs from Phase 1, it would be appropriate to record only the three directly justified values for **StakeholderCommunication.audienceType**:  - **business-owner** - **affected-user-group** - **all-staff**  ### Justification: - **incident-response-team**: If the agent's role is primarily to record or track contributions from the incident response team members rather than sending them separate communications, this audience type would not need to be included in the initial scope.  - **vendor**: Since communication with vendors is not currently modeled as a class and is not explicitly required within the Phase 1 tasks, it makes sense to exclude this option for now.  - **management**: If the role of business owners sufficiently encompasses executive interests and no distinct communication workflows for management have been outlined in the Phase 1 requirements, then this should also be excluded.  ### Conclusion: Recording only the justified values will help keep the model focused and usable without unnecessary complexity. If you’re ready to finalize these values or have further considerations, just let me know!
-
-### Turn 55 — assistant
-
-**Tool call: `apply_ontology_yaml`**
-
-```
-{
-  "yaml": "classes:\n  StakeholderCommunication:\n    properties:\n      audienceType:\n        type: text\n        allowed: [business-owner, affected-user-group, all-staff]\n"
-}
-```
-
-### Turn 55 — tool
-
-Applied. Added 0, updated 1 existing item(s).
-
-### Turn 55 — assistant
-
-Recorded the allowed values for **StakeholderCommunication.audienceType** as:
-
-- business-owner
-- affected-user-group
-- all-staff
-
-I excluded incident-response-team, vendor, and management because they are not required by the confirmed Phase 1 communication actions.
-
-Phase 7 recap — named rules captured:
-
-- **canEscalateToMajorIncident**
-  - requires open/non-cancelled incident, impacted service, environment, incident commander, and severity/impact justification
-  - sev1-critical qualifies; sev2-high requires additional impact criteria
-
-- **requiresRegulatoryNotification**
-  - completed materiality assessment, reportable outcome, compliance review, regulator identified, production/DR context
-
-- **shouldStartDraftRegulatoryNotification**
-  - completed assessment with potentially-reportable outcome starts draft/pending approval workflow
-
-- **canExecuteEmergencyChange**
-  - emergency change must relate to an incident, affect the impacted service, have known environment, active incident status, approved/scheduled change status, and sev1/sev2 severity
-  - assessed status alone is not enough
-
-- **canRestoreServiceFromBackup**
-  - recovery plan must match incident/service/backup, backup timestamp known, environment known, incident status contained/recovering/monitoring
-  - restore is not allowed while still investigating
-
-- **canSendStakeholderCommunication**
-  - communication must be about an incident, have message summary, have allowed audience type/recipient, and include incident status/severity/service/environment context
-  - for major incidents, incident response team member prepares or contributes
-  - for production/DR, affected audience must be identified
-
-Also added **StakeholderCommunication.audienceType** with fixed values:
-- business-owner
-- affected-user-group
-- all-staff
-
-Please confirm or correct this Phase 7 recap. Then we’ll move to Phase 8: actions — input class, precondition rule, effect, and verification for the real actions from Phase 1.
-
-### Turn 56 — user
-
-Your Phase 7 recap is accurate and comprehensively captures the named rules along with the fixed values for **StakeholderCommunication.audienceType**. Here’s the confirmation of your recorded rules and values:  ### Phase 7 Recap — Named Rules Captured: - **canEscalateToMajorIncident**   - Requires open/non-cancelled incident, impacted service, environment, incident commander, and severity/impact justification.   - Sev1-critical qualifies; sev2-high requires additional impact criteria.  - **requiresRegulatoryNotification**   - Completed materiality assessment, reportable outcome, compliance review, regulator identified, production/DR context.  - **shouldStartDraftRegulatoryNotification**   - Completed assessment with potentially-reportable outcome starts draft/pending approval workflow.  - **canExecuteEmergencyChange**   - Emergency change must relate to an incident, affect the impacted service, have known environment, active incident status, approved/scheduled change status, and sev1/sev2 severity.   - Assessed status alone is not enough.  - **canRestoreServiceFromBackup**   - Recovery plan must match incident/service/backup, backup timestamp known, environment known, incident status contained/recovering/monitoring.   - Restore is not allowed while still investigating.  - **canSendStakeholderCommunication**   - Communication must be about an incident, have message summary, have allowed audience type/recipient, and include incident status/severity/service/environment context.   - For major incidents, incident response team member prepares or contributes.   - For production/DR, affected audience must be identified.  ### Additional Information: - **StakeholderCommunication.audienceType** has fixed values:   - business-owner   - affected-user-group   - all-staff  ### Summary Confirmation: All elements have been accurately recorded, and the recap reflects a clear understanding of the decision-making processes within the incident management framework. If you’re ready to proceed to Phase 8 and define the actions—including input class, precondition rule, effect, and verification for the real actions from Phase 1—just let me know!
-
-### Turn 56 — assistant
-
-Great — Phase 7 is confirmed.
-
-Phase 8: actions. For each action, we’ll capture:
-
-- **input class** — exactly one class the action is fundamentally about
-- **precondition rule(s)** — named rules that must be true first, if any
-- **effect** — what changes
-- **verification** — how the agent/tool confirms success
-
-First action batch: incident creation, assignment, and escalation.
-
-Proposed action definitions:
-
-1. **openIncident**
-   - **Input:** Incident
-   - **Preconditions:** none, beyond required incident creation details being available to the operational tool
-   - **Effect:** a new incident record is created with initial status, severity, summary, detected time, impacted service/environment if known
-   - **Verification:** retrieve the incident and confirm an incidentId exists and status is set
-
-2. **assignIncidentToResolverGroup**
-   - **Input:** Incident
-   - **Preconditions:** I think we may need a new rule **canAssignIncidentToResolverGroup**, with conditions:
-     - incident is not closed or cancelled
-     - resolver group is identified
-     - impacted IT service is identified or enough routing information exists
-   - **Effect:** incident is assigned to the selected resolver group
-   - **Verification:** retrieve the incident and confirm it is assigned to that resolver group
-
-3. **escalateIncidentToMajorIncident**
-   - **Input:** Incident
-   - **Preconditions:** canEscalateToMajorIncident
-   - **Effect:** a major incident record is created or linked, coordination status becomes declared or active, and an incident commander is assigned/identified
-   - **Verification:** retrieve the major incident and confirm it is escalated from the incident and has coordination status declared or active
-
-Are these action definitions correct? And should we add the proposed **canAssignIncidentToResolverGroup** rule for the assignment action?
-
-### Turn 57 — user
-
-Your proposed action definitions for incident creation, assignment, and escalation are generally well-structured and appropriate for the incident management framework. Here’s the evaluation with a confirmation and suggestions:  1. **openIncident**    - **Input:** Incident      - **Preconditions:** None, beyond required incident creation details being available to the operational tool.      - **Effect:** A new incident record is created with initial status, severity, summary, detected time, impacted service/environment if known.      - **Verification:** Retrieve the incident and confirm an incidentId exists and status is set.      - **Confirmed**: This action definition is clear and accurately reflects the incident creation process.  2. **assignIncidentToResolverGroup**    - **Input:** Incident      - **Preconditions:** **canAssignIncidentToResolverGroup** (this new rule is valid and necessary). Conditions:      - Incident is not closed or cancelled.      - Resolver group is identified.      - Impacted IT service is identified or enough routing information exists.    - **Effect:** Incident is assigned to the selected resolver group.      - **Verification:** Retrieve the incident and confirm it is assigned to that resolver group.      - **Confirmed**: Adding the proposed **canAssignIncidentToResolverGroup** rule is essential to ensure proper conditions are met before making the assignment.  3. **escalateIncidentToMajorIncident**    - **Input:** Incident      - **Preconditions:** canEscalateToMajorIncident      - **Effect:** A major incident record is created or linked, coordination status becomes declared or active, and an incident commander is assigned/identified.      - **Verification:** Retrieve the major incident and confirm it is escalated from the incident and has coordination status declared or active.      - **Confirmed**: This action definition effectively outlines the process for escalating an incident.  ### Summary: All action definitions are correct as proposed. The addition of **canAssignIncidentToResolverGroup** as a precondition rule for the assignment action is appropriate and necessary for operational integrity. If you’re ready to proceed with the next batch of actions or need further adjustments, just let me know!
-
-### Turn 57 — assistant
-
-**Tool call: `apply_ontology_yaml`**
-
-```
-{
-  "yaml": "rules:\n  canAssignIncidentToResolverGroup:\n    conditions:\n      - incident is not closed or cancelled\n      - resolver group is identified\n      - impacted IT service is identified or enough routing information exists\n\nactions:\n  openIncident:\n    input: Incident\n    preconditions: []\n    effect: A new incident record is created with initial status, severity, summary, detected time, and impacted service or environment if known.\n    verification: Retrieve the incident and confirm an incidentId exists and status is set.\n  assignIncidentToResolverGroup:\n    input: Incident\n    preconditions: [canAssignIncidentToResolverGroup]\n    effect: Incident is assigned to the selected resolver group.\n    verification: Retrieve the incident and confirm it is assigned to that resolver group.\n  escalateIncidentToMajorIncident:\n    input: Incident\n    preconditions: [canEscalateToMajorIncident]\n    effect: A major incident record is created or linked, coordination status becomes declared or active, and an incident commander is assigned or identified.\n    verification: Retrieve the major incident and confirm it is escalated from the incident and has coordination status declared or active.\n"
-}
-```
-
-### Turn 57 — tool
-
-Applied. Added 4, updated 0 existing item(s).
-
-### Turn 57 — assistant
-
-Recorded the **canAssignIncidentToResolverGroup** rule and the first three actions.
-
-Next action batch: communications and recovery planning/materiality.
-
-Proposed action definitions:
-
-1. **notifyStakeholders**
-   - **Input:** StakeholderCommunication
-   - **Preconditions:** canSendStakeholderCommunication
-   - **Effect:** stakeholder communication is sent to the selected audience and sentAt is recorded
-   - **Verification:** retrieve the communication and confirm sentAt is populated and audienceType is correct
-
-2. **sendAllStaffCommunicationUpdate**
-   - **Input:** StakeholderCommunication
-   - **Preconditions:** canSendStakeholderCommunication
-   - **Effect:** stakeholder communication with audienceType all-staff is sent and sentAt is recorded
-   - **Verification:** retrieve the communication and confirm audienceType is all-staff and sentAt is populated
-
-3. **createRecoveryPlan**
-   - **Input:** Incident
-   - **Preconditions:** none currently named; possible lightweight rule **canCreateRecoveryPlan**:
-     - incident is not closed or cancelled
-     - impacted IT service is identified
-     - environment is identified
-   - **Effect:** recovery plan is created and linked to the incident and impacted IT service
-   - **Verification:** retrieve the recovery plan and confirm it is for the incident and restores the impacted IT service
-
-4. **runMaterialityAssessment**
-   - **Input:** Incident
-   - **Preconditions:** possible lightweight rule **canRunMaterialityAssessment**:
-     - incident has severity level
-     - incident has impacted IT service
-     - incident occurs in environment
-     - business line or affected-user impact is available when needed for assessment
-   - **Effect:** materiality assessment is created or updated with assessmentStatus and materialityOutcome
-   - **Verification:** retrieve the assessment and confirm assessmentStatus is completed or in progress and it assesses the incident
-
-Are these action definitions correct, and should we add the two lightweight rules **canCreateRecoveryPlan** and **canRunMaterialityAssessment**? 
-
-
-### Turn 58 — user
-
-Your proposed action definitions for the communications and recovery planning/materiality processes are structured well, and I've evaluated each one below:  1. **notifyStakeholders**    - **Input:** StakeholderCommunication      - **Preconditions:** canSendStakeholderCommunication      - **Effect:** Stakeholder communication is sent to the selected audience and sentAt is recorded.      - **Verification:** Retrieve the communication and confirm sentAt is populated and audienceType is correct.      - **Confirmed**: This action definition accurately reflects the process for notifying stakeholders.  2. **sendAllStaffCommunicationUpdate**    - **Input:** StakeholderCommunication      - **Preconditions:** canSendStakeholderCommunication      - **Effect:** Stakeholder communication with audienceType all-staff is sent and sentAt is recorded.      - **Verification:** Retrieve the communication and confirm audienceType is all-staff and sentAt is populated.      - **Confirmed**: This definition effectively describes the process for sending all-staff updates.  3. **createRecoveryPlan**    - **Input:** Incident      - **Preconditions:** **canCreateRecoveryPlan** (the proposed conditions are valid):      - Incident is not closed or cancelled.      - Impacted IT service is identified.      - Environment is identified.      - **Effect:** Recovery plan is created and linked to the incident and impacted IT service.      - **Verification:** Retrieve the recovery plan and confirm it is for the incident and restores the impacted IT service.      - **Confirmed**: Adding **canCreateRecoveryPlan** as a precondition is necessary to ensure all relevant details are available for plan creation.  4. **runMaterialityAssessment**    - **Input:** Incident      - **Preconditions:** **canRunMaterialityAssessment** (the proposed conditions are valid):      - Incident has severity level.      - Incident has impacted IT service.      - Incident occurs in an environment.      - Business line or affected-user impact is available when needed for assessment.      - **Effect:** Materiality assessment is created or updated with assessmentStatus and materialityOutcome.      - **Verification:** Retrieve the assessment and confirm assessmentStatus is completed or in progress and it assesses the incident.      - **Confirmed**: Adding **canRunMaterialityAssessment** as a precondition is appropriate to ensure the assessment is valid.  ### Summary: All proposed action definitions are correct, and it is advisable to add the two lightweight rules **canCreateRecoveryPlan** and **canRunMaterialityAssessment** as preconditions for their respective actions. If you’re ready to proceed with these actions or have further considerations, just let me know!
-
-### Turn 58 — assistant
-
-**Tool call: `apply_ontology_yaml`**
-
-```
-{
-  "yaml": "rules:\n  canCreateRecoveryPlan:\n    conditions:\n      - incident is not closed or cancelled\n      - impacted IT service is identified\n      - environment is identified\n  canRunMaterialityAssessment:\n    conditions:\n      - incident has severity level\n      - incident has impacted IT service\n      - incident occurs in an environment\n      - business line or affected-user impact is available when needed for assessment\n\nactions:\n  notifyStakeholders:\n    input: StakeholderCommunication\n    preconditions: [canSendStakeholderCommunication]\n    effect: Stakeholder communication is sent to the selected audience and sentAt is recorded.\n    verification: Retrieve the communication and confirm sentAt is populated and audienceType is correct.\n  sendAllStaffCommunicationUpdate:\n    input: StakeholderCommunication\n    preconditions: [canSendStakeholderCommunication]\n    effect: Stakeholder communication with audienceType all-staff is sent and sentAt is recorded.\n    verification: Retrieve the communication and confirm audienceType is all-staff and sentAt is populated.\n  createRecoveryPlan:\n    input: Incident\n    preconditions: [canCreateRecoveryPlan]\n    effect: Recovery plan is created and linked to the incident and impacted IT service.\n    verification: Retrieve the recovery plan and confirm it is for the incident and restores the impacted IT service.\n  runMaterialityAssessment:\n    input: Incident\n    preconditions: [canRunMaterialityAssessment]\n    effect: Materiality assessment is created or updated with assessmentStatus and materialityOutcome.\n    verification: Retrieve the assessment and confirm assessmentStatus is completed or in progress and it assesses the incident.\n"
-}
-```
-
-### Turn 58 — tool
-
-Applied. Added 6, updated 0 existing item(s).
-
-### Turn 58 — assistant
-
-Recorded the two lightweight rules and four actions.
-
-Next action batch: post-incident review, restore, and emergency change.
-
-Proposed action definitions:
-
-1. **documentPostIncidentReview**
-   - **Input:** PostIncidentReview
-   - **Preconditions:** possible rule **canDocumentPostIncidentReview**:
-     - post-incident review reviews an incident
-     - incident status is resolved or closed
-   - **Effect:** review findings are documented and corrective actions may be identified
-   - **Verification:** retrieve the post-incident review and confirm reviewId exists and it reviews the incident
-
-2. **restoreServiceFromBackup**
-   - **Input:** RecoveryPlan
-   - **Preconditions:** canRestoreServiceFromBackup
-   - **Effect:** affected IT service is restored from the selected backup and recoveryStatus is updated
-   - **Verification:** retrieve the recovery plan and service status/tool result and confirm recoveryStatus is restored or verified
-
-3. **executeEmergencyChange**
-   - **Input:** EmergencyChange
-   - **Preconditions:** canExecuteEmergencyChange
-   - **Effect:** emergency change is executed against the affected IT service/environment and changeStatus is updated
-   - **Verification:** retrieve the emergency change and confirm changeStatus is implementing, implemented, failed, or rolled-back with execution result recorded by the change tool
-
-Are these action definitions correct, and should we add **canDocumentPostIncidentReview**? 
-Also, for **restoreServiceFromBackup**, is **RecoveryPlan** the right input class, or should the action input be **Backup**? I’m leaning RecoveryPlan because the action is fundamentally part of the recovery workflow and the backup is selected through the relationship. 
-
-
-### Turn 59 — user
-
-Your proposed action definitions for documenting post-incident reviews, restoring service, and executing emergency changes are well-structured. Here’s the evaluation:  1. **documentPostIncidentReview**    - **Input:** PostIncidentReview      - **Preconditions:** **canDocumentPostIncidentReview** (the proposed conditions are valid):      - Post-incident review is linked to an incident.      - Incident status is resolved or closed.      - **Effect:** Review findings are documented, and corrective actions may be identified.      - **Verification:** Retrieve the post-incident review and confirm reviewId exists and it reviews the incident.      - **Confirmed**: This action definition is appropriately detailed, and adding **canDocumentPostIncidentReview** is necessary to ensure proper conditions are met before documenting the review.  2. **restoreServiceFromBackup**    - **Input:** RecoveryPlan      - **Preconditions:** canRestoreServiceFromBackup      - **Effect:** Affected IT service is restored from the selected backup, and recoveryStatus is updated.      - **Verification:** Retrieve the recovery plan and service status/tool result, confirming recoveryStatus is restored or verified.      - **Confirmed**: While there's an argument for using **Backup** as the input class, your reasoning for using **RecoveryPlan** is sound. The context of the action fits better within the recovery workflow overall, and the backup is inherently tied to that through the relationship, thus keeping the focus on the plan is appropriate.  3. **executeEmergencyChange**    - **Input:** EmergencyChange      - **Preconditions:** canExecuteEmergencyChange      - **Effect:** Emergency change is executed against the affected IT service/environment, and changeStatus is updated.      - **Verification:** Retrieve the emergency change and confirm changeStatus is implementing, implemented, failed, or rolled-back, with execution result recorded by the change tool.      - **Confirmed**: This action definition accurately reflects the necessary steps for executing an emergency change.  ### Summary: All proposed action definitions are confirmed as correct, and you should add the **canDocumentPostIncidentReview** as a precondition for the documentation action. Additionally, **RecoveryPlan** is indeed the appropriate input class for the **restoreServiceFromBackup** action. If you're ready to proceed or have other considerations, just let me know!
-
-### Turn 59 — assistant
-
-**Tool call: `apply_ontology_yaml`**
-
-```
-{
-  "yaml": "rules:\n  canDocumentPostIncidentReview:\n    conditions:\n      - post-incident review reviews an incident\n      - incident status is resolved or closed\n\nactions:\n  documentPostIncidentReview:\n    input: PostIncidentReview\n    preconditions: [canDocumentPostIncidentReview]\n    effect: Review findings are documented and corrective actions may be identified.\n    verification: Retrieve the post-incident review and confirm reviewId exists and it reviews the incident.\n  restoreServiceFromBackup:\n    input: RecoveryPlan\n    preconditions: [canRestoreServiceFromBackup]\n    effect: Affected IT service is restored from the selected backup and recoveryStatus is updated.\n    verification: Retrieve the recovery plan and service status or tool result and confirm recoveryStatus is restored or verified.\n  executeEmergencyChange:\n    input: EmergencyChange\n    preconditions: [canExecuteEmergencyChange]\n    effect: Emergency change is executed against the affected IT service and environment and changeStatus is updated.\n    verification: Retrieve the emergency change and confirm changeStatus is implementing, implemented, failed, or rolled-back with execution result recorded by the change tool.\n"
-}
-```
-
-### Turn 59 — tool
-
-Applied. Added 4, updated 0 existing item(s).
-
-### Turn 59 — assistant
-
-Recorded the **canDocumentPostIncidentReview** rule and the three actions.
-
-We have now covered all 10 Phase 1 actions. Before moving to final validation, Phase 8 recap:
-
-**Actions recorded**
-1. **openIncident**
-   - input: Incident
-   - effect: creates new incident record
-   - verification: incidentId exists and status is set
-
-2. **assignIncidentToResolverGroup**
-   - input: Incident
-   - precondition: canAssignIncidentToResolverGroup
-   - effect: assigns incident to selected resolver group
-   - verification: incident shows assignment to that resolver group
-
-3. **escalateIncidentToMajorIncident**
-   - input: Incident
-   - precondition: canEscalateToMajorIncident
-   - effect: creates/links major incident, sets coordination status, identifies commander
-   - verification: major incident is linked back and declared/active
-
-4. **notifyStakeholders**
-   - input: Stakeholder Communication
-   - precondition: canSendStakeholderCommunication
-   - effect: sends communication and records sentAt
-   - verification: sentAt populated and audienceType correct
-
-5. **sendAllStaffCommunicationUpdate**
-   - input: Stakeholder Communication
-   - precondition: canSendStakeholderCommunication
-   - effect: sends all-staff communication and records sentAt
-   - verification: audienceType all-staff and sentAt populated
-
-6. **createRecoveryPlan**
-   - input: Incident
-   - precondition: canCreateRecoveryPlan
-   - effect: creates recovery plan linked to incident and impacted IT service
-   - verification: recovery plan is for incident and restores impacted service
-
-7. **runMaterialityAssessment**
-   - input: Incident
-   - precondition: canRunMaterialityAssessment
-   - effect: creates/updates assessment with status and outcome
-   - verification: assessment assesses incident and status is in progress or completed
-
-8. **documentPostIncidentReview**
-   - input: Post-Incident Review
-   - precondition: canDocumentPostIncidentReview
-   - effect: documents findings and may identify corrective actions
-   - verification: reviewId exists and review is linked to incident
-
-9. **restoreServiceFromBackup**
-   - input: Recovery Plan
-   - precondition: canRestoreServiceFromBackup
-   - effect: restores service from selected backup and updates recovery status
-   - verification: recovery status restored/verified and tool/service status confirms result
-
-10. **executeEmergencyChange**
-   - input: Emergency Change
-   - precondition: canExecuteEmergencyChange
-   - effect: executes emergency change and updates change status
-   - verification: change status/result confirms execution outcome
-
-Please confirm or correct this Phase 8 recap. Then I’ll run the final validation pass against the original questions/actions and inspect the live graph state. 
-
-
-### Turn 60 — user
-
-Your Phase 8 recap is accurate and comprehensively captures all the actions defined from Phase 1, along with their corresponding inputs, preconditions, effects, and verification steps. Here’s the confirmation of your recorded actions:  ### Phase 8 Recap — Actions Recorded: 1. **openIncident**    - Input: Incident    - Effect: Creates new incident record.    - Verification: incidentId exists and status is set.  2. **assignIncidentToResolverGroup**    - Input: Incident    - Preconditions: canAssignIncidentToResolverGroup    - Effect: Assigns incident to selected resolver group.    - Verification: incident shows assignment to that resolver group.  3. **escalateIncidentToMajorIncident**    - Input: Incident    - Preconditions: canEscalateToMajorIncident    - Effect: Creates/links major incident, sets coordination status, identifies commander.    - Verification: major incident is linked back and declared/active.  4. **notifyStakeholders**    - Input: Stakeholder Communication    - Preconditions: canSendStakeholderCommunication    - Effect: Sends communication and records sentAt.    - Verification: sentAt populated and audienceType correct.  5. **sendAllStaffCommunicationUpdate**    - Input: Stakeholder Communication    - Preconditions: canSendStakeholderCommunication    - Effect: Sends all-staff communication and records sentAt.    - Verification: audienceType all-staff and sentAt populated.  6. **createRecoveryPlan**    - Input: Incident    - Preconditions: canCreateRecoveryPlan    - Effect: Creates recovery plan linked to incident and impacted IT service.    - Verification: recovery plan is for incident and restores impacted service.  7. **runMaterialityAssessment**    - Input: Incident    - Preconditions: canRunMaterialityAssessment    - Effect: Creates/updates assessment with status and outcome.    - Verification: assessment assesses incident and status is in progress or completed.  8. **documentPostIncidentReview**    - Input: Post-Incident Review    - Preconditions: canDocumentPostIncidentReview    - Effect: Documents findings and may identify corrective actions.    - Verification: reviewId exists and review is linked to incident.  9. **restoreServiceFromBackup**    - Input: Recovery Plan    - Preconditions: canRestoreServiceFromBackup    - Effect: Restores service from selected backup and updates recovery status.    - Verification: recovery status restored/verified and tool/service status confirms result.  10. **executeEmergencyChange**     - Input: Emergency Change     - Preconditions: canExecuteEmergencyChange     - Effect: Executes emergency change and updates change status.     - Verification: change status/result confirms execution outcome.  ### Summary Confirmation: All actions have been accurately recorded, including their inputs, effects, preconditions, and verification steps. If you're ready to run the final validation pass against the original questions/actions and inspect the live graph state, let me know how you’d like to proceed!
-
-### Turn 60 — assistant
-
-**Tool call: `get_graph_state`**
-
-```
-{}
-```
-
-### Turn 60 — tool
-
-classes:
-  Incident:
-    meaning: "An unplanned event or degradation that disrupts, risks, or may disrupt an IT service or normal operations."
-    aliases:
-      - incident ticket
-      - service incident
-    properties:
-      incidentId:
-        type: text
-      status:
-        type: text
-        allowed:
-          - new
-          - acknowledged
-          - investigating
-          - contained
-          - recovering
-          - monitoring
-          - resolved
-          - closed
-          - cancelled
-      severityLevel:
-        type: text
-        allowed:
-          - sev1-critical
-          - sev2-high
-          - sev3-medium
-          - sev4-low
-      firstDetectedAt:
-        type: date
-      affectedUserCount:
-        type: number
-      estimatedRestorationTime:
-        type: date
-      summary:
-        type: text
-  ITService:
-    meaning: "A technology service provided to the business or customers, supported by applications, infrastructure, personnel, and processes."
-    aliases:
-      - technology service
-      - service
-    properties:
-      serviceId:
-        type: text
-      serviceName:
-        type: text
-      criticality:
-        type: text
-        allowed:
-          - critical
-          - important
-          - standard
-          - supporting
-  MajorIncident:
-    meaning: "An incident that has been formally escalated for enhanced coordination, communication, recovery management, and review."
-    aliases:
-      - MI
-      - major incident ticket
-    properties:
-      majorIncidentId:
-        type: text
-      coordinationStatus:
-        type: text
-        allowed:
-          - declared
-          - active
-          - stabilized
-          - closed
-      declaredAt:
-        type: date
-  CybersecurityIncident:
-    meaning: An incident involving suspected or confirmed cybersecurity impact that requires specialized investigation and handling.
-    aliases:
-      - cyber incident
-      - security incident
-    properties:
-      cyberIncidentId:
-        type: text
-  Alert:
-    meaning: "A signal generated by a monitoring tool indicating a potential issue, degradation, threshold breach, or abnormal condition."
-    aliases:
-      - monitoring alert
-    properties:
-      alertId:
-        type: text
-      alertTimestamp:
-        type: date
-      alertSeverity:
-        type: text
-        allowed:
-          - critical
-          - high
-          - medium
-          - low
-  RecoveryPlan:
-    meaning: A documented plan describing how an affected IT service will be restored or stabilized after an incident.
-    aliases:
-      - restoration plan
-      - recovery runbook
-    properties:
-      planId:
-        type: text
-      recoveryStatus:
-        type: text
-        allowed:
-          - not started
-          - in progress
-          - restored
-          - verified
-          - failed
-      targetRecoveryTime:
-        type: date
-  MaterialityAssessment:
-    meaning: "An assessment of an incident's significance, impact, and reportability for operational, business, or regulatory purposes."
-    aliases:
-      - impact assessment
-      - reportability assessment
-    properties:
-      assessmentId:
-        type: text
-      assessmentStatus:
-        type: text
-        allowed:
-          - not started
-          - in progress
-          - completed
-      materialityOutcome:
-        type: text
-        allowed:
-          - not-reportable
-          - potentially-reportable
-          - reportable
-  RegulatoryNotification:
-    meaning: A formal notification or submission to a regulator about an incident or its assessed impact.
-    aliases:
-      - regulator notification
-      - regulatory report
-    properties:
-      notificationId:
-        type: text
-      notificationStatus:
-        type: text
-        allowed:
-          - draft
-          - pending-approval
-          - approved
-          - submitted
-          - accepted
-          - rejected
-          - withdrawn
-      submittedAt:
-        type: date
-  StakeholderCommunication:
-    meaning: "A message or update sent to a defined audience about an incident, its status, impact, or recovery progress."
-    aliases:
-      - incident communication
-      - status update
-    properties:
-      communicationId:
-        type: text
-      sentAt:
-        type: date
-      messageSummary:
-        type: text
-      audienceType:
-        type: text
-        allowed:
-          - business-owner
-          - affected-user-group
-          - all-staff
-  PostIncidentReview:
-    meaning: "A review conducted after an incident to document findings, lessons learned, and corrective actions."
-    aliases:
-      - PIR
-      - postmortem
-      - lessons learned review
-    properties:
-      reviewId:
-        type: text
-  ServiceOwner:
-    meaning: The accountable person responsible for the overall ownership and governance of an IT service.
-    aliases:
-      - service accountable owner
-      - service lead
-    properties:
-      personName:
-        type: text
-  ApplicationOwner:
-    meaning: The accountable person responsible for the operational fitness of an application supporting an IT service.
-    aliases:
-      - app owner
-      - application lead
-    properties:
-      personName:
-        type: text
-  ResolverGroup:
-    meaning: A team assigned to investigate and resolve incidents within its area of technical responsibility.
-    aliases:
-      - support group
-      - assignment group
-      - resolver team
-    properties:
-      groupName:
-        type: text
-  OnCallEngineer:
-    meaning: The individual technically responsible and currently available to respond to incidents for a resolver group.
-    aliases:
-      - on-call
-      - duty engineer
-    properties:
-      personName:
-        type: text
-  IncidentCommander:
-    meaning: "The person leading coordination, decision-making, and communications during a major incident."
-    aliases:
-      - IC
-      - incident lead
-    properties:
-      personName:
-        type: text
-  IncidentResponseTeamMember:
-    meaning: "A person supporting incident coordination, investigation, communications, or recovery activities during an incident or major incident."
-    aliases:
-      - response team member
-      - incident team member
-    properties:
-      personName:
-        type: text
-  BusinessOwner:
-    meaning: The person accountable for a business area affected by an IT service or incident.
-    aliases:
-      - business service owner
-      - business lead
-    properties:
-      personName:
-        type: text
-  ComplianceOfficer:
-    meaning: The person responsible for reviewing incidents or assessments for regulatory and compliance obligations.
-    aliases:
-      - compliance lead
-      - regulatory compliance officer
-    properties:
-      personName:
-        type: text
-  Regulator:
-    meaning: An external supervisory or regulatory authority that may receive formal incident notifications.
-    aliases:
-      - supervisory authority
-      - competent authority
-    properties:
-      regulatorName:
-        type: text
-  ServiceDeskStaff:
-    meaning: "A person providing first-line incident reporting, user support, triage, or communication handling."
-    aliases:
-      - service desk analyst
-      - help desk staff
-    properties:
-      personName:
-        type: text
-  MonitoringTool:
-    meaning: "A system or platform that observes service health, detects abnormal conditions, and generates alerts."
-    aliases:
-      - monitoring platform
-      - observability tool
-    properties:
-      toolName:
-        type: text
-  Workaround:
-    meaning: A temporary mitigation or set of instructions used to reduce impact or restore partial function before permanent resolution.
-    aliases:
-      - temporary fix
-      - mitigation
-    properties:
-      workaroundId:
-        type: text
-      instructions:
-        type: text
-  CorrectiveAction:
-    meaning: An improvement action identified after an incident to prevent recurrence or reduce future impact.
-    aliases:
-      - remediation action
-    properties:
-      actionId:
-        type: text
-      actionStatus:
-        type: text
-        allowed:
-          - open
-          - in-progress
-          - blocked
-          - implemented
-          - verified
-          - closed
-          - cancelled
-  EmergencyChange:
-    meaning: An expedited change performed during or because of an incident to restore service or reduce impact.
-    aliases:
-      - emergency change request
-      - expedited change
-    properties:
-      changeId:
-        type: text
-      changeStatus:
-        type: text
-        allowed:
-          - draft
-          - assessed
-          - approved
-          - scheduled
-          - implementing
-          - implemented
-          - failed
-          - rolled-back
-          - closed
-          - cancelled
-  Backup:
-    meaning: "A restorable copy or backup set of data, configuration, system state, or service components used for recovery."
-    aliases:
-      - backup set
-      - restore point
-    properties:
-      backupId:
-        type: text
-      backupTimestamp:
-        type: date
-  Environment:
-    meaning: "A deployment or operating context such as production, pre-production, test, or disaster recovery."
-    aliases:
-      - deployment environment
-      - runtime environment
-    properties:
-      environmentType:
-        type: text
-        allowed:
-          - production
-          - pre-production
-          - test
-          - disaster recovery
-  BusinessLine:
-    meaning: A business area or line of business that consumes or is supported by IT services.
-    aliases:
-      - line of business
-      - LOB
-    properties:
-      businessLineName:
-        type: text
-  Investigation:
-    meaning: "A structured inquiry into a cybersecurity incident to establish facts, scope, cause, evidence, and required response."
-    aliases:
-      - cyber investigation
-      - security investigation
-    properties:
-      investigationId:
-        type: text
-      investigationStatus:
-        type: text
-        allowed:
-          - not started
-          - in progress
-          - completed
-          - closed
-  AffectedUserGroup:
-    meaning: A defined group of users impacted by an incident or service degradation.
-    aliases:
-      - impacted user group
-      - affected users
-    properties:
-      groupName:
-        type: text
-      estimatedUserCount:
-        type: number
-relationships:
-  - name: impacts
-    from: Incident
-    to: ITService
-    meaning: "The incident disrupts, degrades, risks, or otherwise affects the IT service."
-    aliases:
-      - affects
-      - degrades
-      - disrupts
-  - name: triggeredBy
-    from: Incident
-    to: Alert
-    meaning: "The incident was created from, correlated with, or initiated because of the alert."
-    aliases:
-      - caused by alert
-      - opened from alert
-      - correlated with alert
-  - name: generatedBy
-    from: Alert
-    to: MonitoringTool
-    meaning: The alert originated from the monitoring tool.
-    aliases:
-      - raised by
-      - emitted by
-      - produced by
-  - name: monitors
-    from: MonitoringTool
-    to: ITService
-    meaning: The monitoring tool observes the health or behavior of the IT service.
-    aliases:
-      - observes
-      - assesses
-      - watches
-  - name: dependsOn
-    from: ITService
-    to: ITService
-    meaning: One IT service requires another IT service to operate correctly.
-    aliases:
-      - relies on
-      - requires
-      - has upstream dependency
-  - name: ownedBy
-    from: ITService
-    to: ServiceOwner
-    meaning: The service owner is accountable for the IT service.
-    aliases:
-      - accountable to
-      - owned by service owner
-  - name: supportedBy
-    from: ITService
-    to: ApplicationOwner
-    meaning: The application owner is responsible for the operational fitness of applications supporting the IT service.
-    aliases:
-      - supported by app owner
-  - name: assignedTo
-    from: Incident
-    to: ResolverGroup
-    meaning: The incident is routed to the resolver group responsible for investigation or resolution.
-    aliases:
-      - routed to
-      - allocated to
-      - assigned resolver group
-  - name: staffedBy
-    from: ResolverGroup
-    to: OnCallEngineer
-    meaning: The resolver group has an on-call engineer available for immediate response.
-    aliases:
-      - has on-call
-      - covered by
-      - staffed with
-  - name: triagedBy
-    from: Incident
-    to: ServiceDeskStaff
-    meaning: "Service desk staff perform initial intake, classification, or triage for the incident."
-    aliases:
-      - initially handled by
-      - first-line triaged by
-  - name: escalatedFrom
-    from: MajorIncident
-    to: Incident
-    meaning: The major incident record is created from or formally linked to the incident that was escalated.
-    aliases:
-      - promoted from
-      - declared from
-      - raised from
-  - name: ledBy
-    from: MajorIncident
-    to: IncidentCommander
-    meaning: The incident commander leads coordination and decision-making for the major incident.
-    aliases:
-      - commanded by
-      - coordinated by
-      - led by IC
-  - name: supportedBy
-    from: MajorIncident
-    to: IncidentResponseTeamMember
-    meaning: Incident response team members support the handling of the major incident.
-    aliases:
-      - assisted by
-      - supported by response team
-  - name: about
-    from: StakeholderCommunication
-    to: Incident
-    meaning: "The communication provides information about the incident, its impact, status, or recovery."
-    aliases:
-      - regarding
-      - concerning
-      - update for
-  - name: sentTo
-    from: StakeholderCommunication
-    to: BusinessOwner
-    meaning: The communication is addressed to a business owner as an affected stakeholder.
-    aliases:
-      - addressed to business owner
-      - notified business owner
-  - name: assesses
-    from: MaterialityAssessment
-    to: Incident
-    meaning: "The assessment evaluates the incident's impact, significance, and reportability."
-    aliases:
-      - evaluates
-      - reviews materiality of
-      - assesses impact of
-  - name: reviewedBy
-    from: MaterialityAssessment
-    to: ComplianceOfficer
-    meaning: The compliance officer reviews the assessment for regulatory and compliance implications.
-    aliases:
-      - compliance-reviewed by
-      - reviewed by compliance
-  - name: basedOn
-    from: RegulatoryNotification
-    to: MaterialityAssessment
-    meaning: The notification is prepared or required based on the outcome of the materiality assessment.
-    aliases:
-      - based upon
-      - driven by assessment
-      - required by assessment
-  - name: notifies
-    from: RegulatoryNotification
-    to: Regulator
-    meaning: The notification is submitted to the regulator.
-    aliases:
-      - submitted to
-      - reported to
-      - sent to regulator
-  - name: about
-    from: RegulatoryNotification
-    to: Incident
-    meaning: The notification reports information about the incident.
-    aliases:
-      - reports incident
-      - notification for incident
-  - name: forIncident
-    from: RecoveryPlan
-    to: Incident
-    meaning: The recovery plan is created for or associated with the incident.
-    aliases:
-      - recovery plan for
-      - associated with incident
-  - name: restores
-    from: RecoveryPlan
-    to: ITService
-    meaning: The recovery plan describes how the IT service will be restored or stabilized.
-    aliases:
-      - recovers
-      - restores service
-      - stabilizes
-  - name: uses
-    from: RecoveryPlan
-    to: Backup
-    meaning: The recovery plan relies on the backup for restoration.
-    aliases:
-      - restores from
-      - uses restore point
-  - name: relatedTo
-    from: EmergencyChange
-    to: Incident
-    meaning: The emergency change is raised because of or in response to the incident.
-    aliases:
-      - raised for
-      - linked to
-      - in response to
-  - name: changes
-    from: EmergencyChange
-    to: ITService
-    meaning: The emergency change modifies or affects the IT service.
-    aliases:
-      - modifies
-      - affects
-      - changes service
-  - name: appliesTo
-    from: Workaround
-    to: Incident
-    meaning: The workaround can be used to mitigate or reduce the impact of the incident.
-    aliases:
-      - mitigates
-      - workaround for
-      - temporary fix for
-  - name: reviews
-    from: PostIncidentReview
-    to: Incident
-    meaning: The post-incident review evaluates the incident after recovery or closure.
-    aliases:
-      - reviews
-      - examines
-      - post-review of
-  - name: identifies
-    from: PostIncidentReview
-    to: CorrectiveAction
-    meaning: The review records corrective actions arising from findings or lessons learned.
-    aliases:
-      - raises
-      - records
-      - finds
-  - name: addresses
-    from: CorrectiveAction
-    to: Incident
-    meaning: The corrective action is intended to prevent recurrence or reduce future impact related to the incident.
-    aliases:
-      - remediates
-      - prevents recurrence of
-      - mitigates future impact of
-  - name: isTypeOf
-    from: CybersecurityIncident
-    to: Incident
-    meaning: The cybersecurity incident is a specialized form of incident.
-    aliases:
-      - classified as incident
-      - subtype of
-      - kind of incident
-  - name: investigates
-    from: Investigation
-    to: CybersecurityIncident
-    meaning: The investigation examines the cybersecurity incident.
-    aliases:
-      - examines
-      - investigates cyber incident
-      - looks into
-  - name: supportedBy
-    from: Investigation
-    to: IncidentResponseTeamMember
-    meaning: Incident response team members support the investigation.
-    aliases:
-      - assisted by
-      - supported by response team
-  - name: occursIn
-    from: Incident
-    to: Environment
-    meaning: The incident occurs in a specific deployment or operating environment.
-    aliases:
-      - happens in
-      - detected in
-      - occurs within
-  - name: runsIn
-    from: ITService
-    to: Environment
-    meaning: The IT service operates in the specified environment.
-    aliases:
-      - deployed in
-      - operates in
-      - hosted in
-  - name: appliesIn
-    from: EmergencyChange
-    to: Environment
-    meaning: The emergency change is executed in or affects the specified environment.
-    aliases:
-      - executed in
-      - deployed in
-      - applies to environment
-  - name: serves
-    from: ITService
-    to: BusinessLine
-    meaning: The IT service supports or is consumed by the business line.
-    aliases:
-      - supports
-      - consumed by
-      - used by
-  - name: affects
-    from: Incident
-    to: AffectedUserGroup
-    meaning: The incident affects the specified group of users.
-    aliases:
-      - impacts user group
-      - affects users
-      - impacts affected users
-  - name: forService
-    from: Backup
-    to: ITService
-    meaning: The backup can be used to restore the IT service.
-    aliases:
-      - backup of
-      - restore point for
-  - name: sentTo
-    from: StakeholderCommunication
-    to: AffectedUserGroup
-    meaning: The communication is addressed to a group of users affected by the incident.
-    aliases:
-      - addressed to affected users
-      - notified impacted users
-  - name: preparedBy
-    from: StakeholderCommunication
-    to: IncidentResponseTeamMember
-    meaning: An incident response team member prepares or contributes to the communication.
-    aliases:
-      - drafted by
-      - prepared with
-      - authored by
-rules:
-  canEscalateToMajorIncident:
-    conditions:
-      - incident status is not closed or cancelled
-      - incident has an impacted IT service
-      - incident occurs in an environment
-      - incident commander can be identified before or during escalation
-      - sev1-critical incidents qualify for major-incident escalation
-      - sev2-high incidents qualify only when additional impact criteria such as affected-user count or business-line significance justify major-incident coordination
-      - production or disaster recovery incidents may be escalated when severity and impact justify major-incident coordination
-  requiresRegulatoryNotification:
-    conditions:
-      - materiality assessment status is completed
-      - materiality outcome is reportable
-      - regulatory notification is about the incident
-      - regulatory notification identifies the regulator to notify
-      - compliance officer has reviewed the materiality assessment
-      - incident occurs in production or disaster recovery environment
-  shouldStartDraftRegulatoryNotification:
-    conditions:
-      - materiality assessment status is completed
-      - materiality outcome is potentially-reportable
-      - draft or pending-approval regulatory notification workflow should be started
-      - compliance officer review is needed before formal submission
-      - incident occurs in production or disaster recovery environment
-  canExecuteEmergencyChange:
-    conditions:
-      - emergency change is related to an incident
-      - emergency change changes an impacted IT service
-      - emergency change applies in a known environment
-      - "incident status is investigating, contained, recovering, or monitoring"
-      - emergency change status is approved or scheduled
-      - incident severity level is sev1-critical or sev2-high
-      - production and disaster recovery emergency changes require the environment to be correctly identified before execution
-      - emergency change must not execute when its status is only assessed
-  canRestoreServiceFromBackup:
-    conditions:
-      - recovery plan is for the incident
-      - recovery plan restores the impacted IT service
-      - recovery plan uses a backup for that IT service
-      - backup timestamp is known so the restore point can be selected
-      - "incident status is contained, recovering, or monitoring"
-      - "recovery status is in progress or failed, not already verified"
-      - environment is known before restoring
-      - "for production or disaster recovery, restoration requires the correct backup and affected service to be identified"
-      - restore is not allowed while incident status is still investigating
-  canSendStakeholderCommunication:
-    conditions:
-      - communication is about an incident
-      - communication has a message summary
-      - communication is sent to a business owner or affected user group
-      - "incident has status, severity level, impacted IT service, and environment identified"
-      - "for major incidents, an incident response team member prepares or contributes to the communication"
-      - "for production or disaster recovery incidents, affected audience must be identified before sending"
-  canAssignIncidentToResolverGroup:
-    conditions:
-      - incident is not closed or cancelled
-      - resolver group is identified
-      - impacted IT service is identified or enough routing information exists
-  canCreateRecoveryPlan:
-    conditions:
-      - incident is not closed or cancelled
-      - impacted IT service is identified
-      - environment is identified
-  canRunMaterialityAssessment:
-    conditions:
-      - incident has severity level
-      - incident has impacted IT service
-      - incident occurs in an environment
-      - business line or affected-user impact is available when needed for assessment
-  canDocumentPostIncidentReview:
-    conditions:
-      - post-incident review reviews an incident
-      - incident status is resolved or closed
-actions:
-  openIncident:
-    input: Incident
-    preconditions: []
-    effect: "A new incident record is created with initial status, severity, summary, detected time, and impacted service or environment if known."
-    verification: Retrieve the incident and confirm an incidentId exists and status is set.
-  assignIncidentToResolverGroup:
-    input: Incident
-    preconditions:
-      - canAssignIncidentToResolverGroup
-    effect: Incident is assigned to the selected resolver group.
-    verification: Retrieve the incident and confirm it is assigned to that resolver group.
-  escalateIncidentToMajorIncident:
-    input: Incident
-    preconditions:
-      - canEscalateToMajorIncident
-    effect: "A major incident record is created or linked, coordination status becomes declared or active, and an incident commander is assigned or identified."
-    verification: Retrieve the major incident and confirm it is escalated from the incident and has coordination status declared or active.
-  notifyStakeholders:
-    input: StakeholderCommunication
-    preconditions:
-      - canSendStakeholderCommunication
-    effect: Stakeholder communication is sent to the selected audience and sentAt is recorded.
-    verification: Retrieve the communication and confirm sentAt is populated and audienceType is correct.
-  sendAllStaffCommunicationUpdate:
-    input: StakeholderCommunication
-    preconditions:
-      - canSendStakeholderCommunication
-    effect: Stakeholder communication with audienceType all-staff is sent and sentAt is recorded.
-    verification: Retrieve the communication and confirm audienceType is all-staff and sentAt is populated.
-  createRecoveryPlan:
-    input: Incident
-    preconditions:
-      - canCreateRecoveryPlan
-    effect: Recovery plan is created and linked to the incident and impacted IT service.
-    verification: Retrieve the recovery plan and confirm it is for the incident and restores the impacted IT service.
-  runMaterialityAssessment:
-    input: Incident
-    preconditions:
-      - canRunMaterialityAssessment
-    effect: Materiality assessment is created or updated with assessmentStatus and materialityOutcome.
-    verification: Retrieve the assessment and confirm assessmentStatus is completed or in progress and it assesses the incident.
-  documentPostIncidentReview:
-    input: PostIncidentReview
-    preconditions:
-      - canDocumentPostIncidentReview
-    effect: Review findings are documented and corrective actions may be identified.
-    verification: Retrieve the post-incident review and confirm reviewId exists and it reviews the incident.
-  restoreServiceFromBackup:
-    input: RecoveryPlan
-    preconditions:
-      - canRestoreServiceFromBackup
-    effect: Affected IT service is restored from the selected backup and recoveryStatus is updated.
-    verification: Retrieve the recovery plan and service status or tool result and confirm recoveryStatus is restored or verified.
-  executeEmergencyChange:
-    input: EmergencyChange
-    preconditions:
-      - canExecuteEmergencyChange
-    effect: Emergency change is executed against the affected IT service and environment and changeStatus is updated.
-    verification: "Retrieve the emergency change and confirm changeStatus is implementing, implemented, failed, or rolled-back with execution result recorded by the change tool."
-
-
-### Turn 60 — assistant
-
-I ran the live graph inspection and started the final competency check against the original Phase 1 questions/actions.
-
-Most questions/actions are covered, but I found one **blocking gap** before we can call the model complete:
-
-> **“What incidents have been logged for the same issue previously?”**
-
-Right now, the model has **Incident.summary**, but no confirmed way to determine “same issue.” Earlier we excluded **Incident.issueKey** as optional, but this original question still requires some stable matching mechanism.
-
-**Focused question:** In your process, how should the agent identify previous incidents for the same issue?
-
-Please choose the closest option:
-
-1. Add **Incident.issueKey** as a text property — a stable issue fingerprint/category/problem key used to match repeat incidents.  
-2. Add a relationship **Incident --same issue as--> Incident** — incidents are explicitly linked to prior similar incidents.  
-3. Use another existing identifier or classification you haven’t named yet.  
-4. The agent should not answer this question reliably; remove it from the acceptance scope.
-
-### Turn 61 — user
-
-Given the need to reliably identify previous incidents for the same issue, the best option is:  1. **Add *Incident.issueKey* as a text property — a stable issue fingerprint/category/problem key used to match repeat incidents.**  ### Rationale: - By adding an **issueKey** property, each incident can be tagged with a unique identifier that represents the underlying problem or issue. This allows for straightforward querying and matching against other incidents that share the same issue, enhancing the model's ability to track repeated problems efficiently. - This approach also allows for better reporting and analytics, enabling the organization to address recurring issues systematically.  While the alternative of linking incidents through a **Incident --same issue as--> Incident** relationship could be useful, it may result in a more complex structure that could complicate querying and tracking over time. Using an **issueKey** offers a simpler, more effective solution.  Implementing this property will enable the agent to satisfactorily answer the question regarding previously logged incidents for the same issue.  If you agree with this approach, I can help record the addition of the **issueKey** property for the Incident class!
-
-### Turn 61 — assistant
-
-**Tool call: `apply_ontology_yaml`**
-
-```
-{
-  "yaml": "classes:\n  Incident:\n    properties:\n      issueKey:\n        type: text\n"
-}
-```
-
-### Turn 61 — tool
-
-Applied. Added 0, updated 1 existing item(s).
-
-### Turn 61 — assistant
-
-Recorded **Incident.issueKey** as a decision-bearing property because it is required to answer “What incidents have been logged for the same issue previously?”
-
-I’ll now re-run the final validation pass against the live graph state. 
-
-
-### Turn 62 — user
-
-That sounds excellent! Adding the **Incident.issueKey** as a decision-bearing property will definitely enhance the model's capability to address that particular question effectively.   Once you complete the validation pass against the live graph state, feel free to let me know the results or if you need assistance with any further adjustments, clarifications, or next steps. I'm here to help!
-
-### Turn 62 — assistant
-
-**Tool call: `get_graph_state`**
-
-```
-{}
-```
-
-### Turn 62 — tool
-
-classes:
-  Incident:
-    meaning: "An unplanned event or degradation that disrupts, risks, or may disrupt an IT service or normal operations."
-    aliases:
-      - incident ticket
-      - service incident
-    properties:
-      incidentId:
-        type: text
-      status:
-        type: text
-        allowed:
-          - new
-          - acknowledged
-          - investigating
-          - contained
-          - recovering
-          - monitoring
-          - resolved
-          - closed
-          - cancelled
-      severityLevel:
-        type: text
-        allowed:
-          - sev1-critical
-          - sev2-high
-          - sev3-medium
-          - sev4-low
-      firstDetectedAt:
-        type: date
-      affectedUserCount:
-        type: number
-      estimatedRestorationTime:
-        type: date
-      summary:
-        type: text
-      issueKey:
-        type: text
-  ITService:
-    meaning: "A technology service provided to the business or customers, supported by applications, infrastructure, personnel, and processes."
-    aliases:
-      - technology service
-      - service
-    properties:
-      serviceId:
-        type: text
-      serviceName:
-        type: text
-      criticality:
-        type: text
-        allowed:
-          - critical
-          - important
-          - standard
-          - supporting
-  MajorIncident:
-    meaning: "An incident that has been formally escalated for enhanced coordination, communication, recovery management, and review."
-    aliases:
-      - MI
-      - major incident ticket
-    properties:
-      majorIncidentId:
-        type: text
-      coordinationStatus:
-        type: text
-        allowed:
-          - declared
-          - active
-          - stabilized
-          - closed
-      declaredAt:
-        type: date
-  CybersecurityIncident:
-    meaning: An incident involving suspected or confirmed cybersecurity impact that requires specialized investigation and handling.
-    aliases:
-      - cyber incident
-      - security incident
-    properties:
-      cyberIncidentId:
-        type: text
-  Alert:
-    meaning: "A signal generated by a monitoring tool indicating a potential issue, degradation, threshold breach, or abnormal condition."
-    aliases:
-      - monitoring alert
-    properties:
-      alertId:
-        type: text
-      alertTimestamp:
-        type: date
-      alertSeverity:
-        type: text
-        allowed:
-          - critical
-          - high
-          - medium
-          - low
-  RecoveryPlan:
-    meaning: A documented plan describing how an affected IT service will be restored or stabilized after an incident.
-    aliases:
-      - restoration plan
-      - recovery runbook
-    properties:
-      planId:
-        type: text
-      recoveryStatus:
-        type: text
-        allowed:
-          - not started
-          - in progress
-          - restored
-          - verified
-          - failed
-      targetRecoveryTime:
-        type: date
-  MaterialityAssessment:
-    meaning: "An assessment of an incident's significance, impact, and reportability for operational, business, or regulatory purposes."
-    aliases:
-      - impact assessment
-      - reportability assessment
-    properties:
-      assessmentId:
-        type: text
-      assessmentStatus:
-        type: text
-        allowed:
-          - not started
-          - in progress
-          - completed
-      materialityOutcome:
-        type: text
-        allowed:
-          - not-reportable
-          - potentially-reportable
-          - reportable
-  RegulatoryNotification:
-    meaning: A formal notification or submission to a regulator about an incident or its assessed impact.
-    aliases:
-      - regulator notification
-      - regulatory report
-    properties:
-      notificationId:
-        type: text
-      notificationStatus:
-        type: text
-        allowed:
-          - draft
-          - pending-approval
-          - approved
-          - submitted
-          - accepted
-          - rejected
-          - withdrawn
-      submittedAt:
-        type: date
-  StakeholderCommunication:
-    meaning: "A message or update sent to a defined audience about an incident, its status, impact, or recovery progress."
-    aliases:
-      - incident communication
-      - status update
-    properties:
-      communicationId:
-        type: text
-      sentAt:
-        type: date
-      messageSummary:
-        type: text
-      audienceType:
-        type: text
-        allowed:
-          - business-owner
-          - affected-user-group
-          - all-staff
-  PostIncidentReview:
-    meaning: "A review conducted after an incident to document findings, lessons learned, and corrective actions."
-    aliases:
-      - PIR
-      - postmortem
-      - lessons learned review
-    properties:
-      reviewId:
-        type: text
-  ServiceOwner:
-    meaning: The accountable person responsible for the overall ownership and governance of an IT service.
-    aliases:
-      - service accountable owner
-      - service lead
-    properties:
-      personName:
-        type: text
-  ApplicationOwner:
-    meaning: The accountable person responsible for the operational fitness of an application supporting an IT service.
-    aliases:
-      - app owner
-      - application lead
-    properties:
-      personName:
-        type: text
-  ResolverGroup:
-    meaning: A team assigned to investigate and resolve incidents within its area of technical responsibility.
-    aliases:
-      - support group
-      - assignment group
-      - resolver team
-    properties:
-      groupName:
-        type: text
-  OnCallEngineer:
-    meaning: The individual technically responsible and currently available to respond to incidents for a resolver group.
-    aliases:
-      - on-call
-      - duty engineer
-    properties:
-      personName:
-        type: text
-  IncidentCommander:
-    meaning: "The person leading coordination, decision-making, and communications during a major incident."
-    aliases:
-      - IC
-      - incident lead
-    properties:
-      personName:
-        type: text
-  IncidentResponseTeamMember:
-    meaning: "A person supporting incident coordination, investigation, communications, or recovery activities during an incident or major incident."
-    aliases:
-      - response team member
-      - incident team member
-    properties:
-      personName:
-        type: text
-  BusinessOwner:
-    meaning: The person accountable for a business area affected by an IT service or incident.
-    aliases:
-      - business service owner
-      - business lead
-    properties:
-      personName:
-        type: text
-  ComplianceOfficer:
-    meaning: The person responsible for reviewing incidents or assessments for regulatory and compliance obligations.
-    aliases:
-      - compliance lead
-      - regulatory compliance officer
-    properties:
-      personName:
-        type: text
-  Regulator:
-    meaning: An external supervisory or regulatory authority that may receive formal incident notifications.
-    aliases:
-      - supervisory authority
-      - competent authority
-    properties:
-      regulatorName:
-        type: text
-  ServiceDeskStaff:
-    meaning: "A person providing first-line incident reporting, user support, triage, or communication handling."
-    aliases:
-      - service desk analyst
-      - help desk staff
-    properties:
-      personName:
-        type: text
-  MonitoringTool:
-    meaning: "A system or platform that observes service health, detects abnormal conditions, and generates alerts."
-    aliases:
-      - monitoring platform
-      - observability tool
-    properties:
-      toolName:
-        type: text
-  Workaround:
-    meaning: A temporary mitigation or set of instructions used to reduce impact or restore partial function before permanent resolution.
-    aliases:
-      - temporary fix
-      - mitigation
-    properties:
-      workaroundId:
-        type: text
-      instructions:
-        type: text
-  CorrectiveAction:
-    meaning: An improvement action identified after an incident to prevent recurrence or reduce future impact.
-    aliases:
-      - remediation action
-    properties:
-      actionId:
-        type: text
-      actionStatus:
-        type: text
-        allowed:
-          - open
-          - in-progress
-          - blocked
-          - implemented
-          - verified
-          - closed
-          - cancelled
-  EmergencyChange:
-    meaning: An expedited change performed during or because of an incident to restore service or reduce impact.
-    aliases:
-      - emergency change request
-      - expedited change
-    properties:
-      changeId:
-        type: text
-      changeStatus:
-        type: text
-        allowed:
-          - draft
-          - assessed
-          - approved
-          - scheduled
-          - implementing
-          - implemented
-          - failed
-          - rolled-back
-          - closed
-          - cancelled
-  Backup:
-    meaning: "A restorable copy or backup set of data, configuration, system state, or service components used for recovery."
-    aliases:
-      - backup set
-      - restore point
-    properties:
-      backupId:
-        type: text
-      backupTimestamp:
-        type: date
-  Environment:
-    meaning: "A deployment or operating context such as production, pre-production, test, or disaster recovery."
-    aliases:
-      - deployment environment
-      - runtime environment
-    properties:
-      environmentType:
-        type: text
-        allowed:
-          - production
-          - pre-production
-          - test
-          - disaster recovery
-  BusinessLine:
-    meaning: A business area or line of business that consumes or is supported by IT services.
-    aliases:
-      - line of business
-      - LOB
-    properties:
-      businessLineName:
-        type: text
-  Investigation:
-    meaning: "A structured inquiry into a cybersecurity incident to establish facts, scope, cause, evidence, and required response."
-    aliases:
-      - cyber investigation
-      - security investigation
-    properties:
-      investigationId:
-        type: text
-      investigationStatus:
-        type: text
-        allowed:
-          - not started
-          - in progress
-          - completed
-          - closed
-  AffectedUserGroup:
-    meaning: A defined group of users impacted by an incident or service degradation.
-    aliases:
-      - impacted user group
-      - affected users
-    properties:
-      groupName:
-        type: text
-      estimatedUserCount:
-        type: number
-relationships:
-  - name: impacts
-    from: Incident
-    to: ITService
-    meaning: "The incident disrupts, degrades, risks, or otherwise affects the IT service."
-    aliases:
-      - affects
-      - degrades
-      - disrupts
-  - name: triggeredBy
-    from: Incident
-    to: Alert
-    meaning: "The incident was created from, correlated with, or initiated because of the alert."
-    aliases:
-      - caused by alert
-      - opened from alert
-      - correlated with alert
-  - name: generatedBy
-    from: Alert
-    to: MonitoringTool
-    meaning: The alert originated from the monitoring tool.
-    aliases:
-      - raised by
-      - emitted by
-      - produced by
-  - name: monitors
-    from: MonitoringTool
-    to: ITService
-    meaning: The monitoring tool observes the health or behavior of the IT service.
-    aliases:
-      - observes
-      - assesses
-      - watches
-  - name: dependsOn
-    from: ITService
-    to: ITService
-    meaning: One IT service requires another IT service to operate correctly.
-    aliases:
-      - relies on
-      - requires
-      - has upstream dependency
-  - name: ownedBy
-    from: ITService
-    to: ServiceOwner
-    meaning: The service owner is accountable for the IT service.
-    aliases:
-      - accountable to
-      - owned by service owner
-  - name: supportedBy
-    from: ITService
-    to: ApplicationOwner
-    meaning: The application owner is responsible for the operational fitness of applications supporting the IT service.
-    aliases:
-      - supported by app owner
-  - name: assignedTo
-    from: Incident
-    to: ResolverGroup
-    meaning: The incident is routed to the resolver group responsible for investigation or resolution.
-    aliases:
-      - routed to
-      - allocated to
-      - assigned resolver group
-  - name: staffedBy
-    from: ResolverGroup
-    to: OnCallEngineer
-    meaning: The resolver group has an on-call engineer available for immediate response.
-    aliases:
-      - has on-call
-      - covered by
-      - staffed with
-  - name: triagedBy
-    from: Incident
-    to: ServiceDeskStaff
-    meaning: "Service desk staff perform initial intake, classification, or triage for the incident."
-    aliases:
-      - initially handled by
-      - first-line triaged by
-  - name: escalatedFrom
-    from: MajorIncident
-    to: Incident
-    meaning: The major incident record is created from or formally linked to the incident that was escalated.
-    aliases:
-      - promoted from
-      - declared from
-      - raised from
-  - name: ledBy
-    from: MajorIncident
-    to: IncidentCommander
-    meaning: The incident commander leads coordination and decision-making for the major incident.
-    aliases:
-      - commanded by
-      - coordinated by
-      - led by IC
-  - name: supportedBy
-    from: MajorIncident
-    to: IncidentResponseTeamMember
-    meaning: Incident response team members support the handling of the major incident.
-    aliases:
-      - assisted by
-      - supported by response team
-  - name: about
-    from: StakeholderCommunication
-    to: Incident
-    meaning: "The communication provides information about the incident, its impact, status, or recovery."
-    aliases:
-      - regarding
-      - concerning
-      - update for
-  - name: sentTo
-    from: StakeholderCommunication
-    to: BusinessOwner
-    meaning: The communication is addressed to a business owner as an affected stakeholder.
-    aliases:
-      - addressed to business owner
-      - notified business owner
-  - name: assesses
-    from: MaterialityAssessment
-    to: Incident
-    meaning: "The assessment evaluates the incident's impact, significance, and reportability."
-    aliases:
-      - evaluates
-      - reviews materiality of
-      - assesses impact of
-  - name: reviewedBy
-    from: MaterialityAssessment
-    to: ComplianceOfficer
-    meaning: The compliance officer reviews the assessment for regulatory and compliance implications.
-    aliases:
-      - compliance-reviewed by
-      - reviewed by compliance
-  - name: basedOn
-    from: RegulatoryNotification
-    to: MaterialityAssessment
-    meaning: The notification is prepared or required based on the outcome of the materiality assessment.
-    aliases:
-      - based upon
-      - driven by assessment
-      - required by assessment
-  - name: notifies
-    from: RegulatoryNotification
-    to: Regulator
-    meaning: The notification is submitted to the regulator.
-    aliases:
-      - submitted to
-      - reported to
-      - sent to regulator
-  - name: about
-    from: RegulatoryNotification
-    to: Incident
-    meaning: The notification reports information about the incident.
-    aliases:
-      - reports incident
-      - notification for incident
-  - name: forIncident
-    from: RecoveryPlan
-    to: Incident
-    meaning: The recovery plan is created for or associated with the incident.
-    aliases:
-      - recovery plan for
-      - associated with incident
-  - name: restores
-    from: RecoveryPlan
-    to: ITService
-    meaning: The recovery plan describes how the IT service will be restored or stabilized.
-    aliases:
-      - recovers
-      - restores service
-      - stabilizes
-  - name: uses
-    from: RecoveryPlan
-    to: Backup
-    meaning: The recovery plan relies on the backup for restoration.
-    aliases:
-      - restores from
-      - uses restore point
-  - name: relatedTo
-    from: EmergencyChange
-    to: Incident
-    meaning: The emergency change is raised because of or in response to the incident.
-    aliases:
-      - raised for
-      - linked to
-      - in response to
-  - name: changes
-    from: EmergencyChange
-    to: ITService
-    meaning: The emergency change modifies or affects the IT service.
-    aliases:
-      - modifies
-      - affects
-      - changes service
-  - name: appliesTo
-    from: Workaround
-    to: Incident
-    meaning: The workaround can be used to mitigate or reduce the impact of the incident.
-    aliases:
-      - mitigates
-      - workaround for
-      - temporary fix for
-  - name: reviews
-    from: PostIncidentReview
-    to: Incident
-    meaning: The post-incident review evaluates the incident after recovery or closure.
-    aliases:
-      - reviews
-      - examines
-      - post-review of
-  - name: identifies
-    from: PostIncidentReview
-    to: CorrectiveAction
-    meaning: The review records corrective actions arising from findings or lessons learned.
-    aliases:
-      - raises
-      - records
-      - finds
-  - name: addresses
-    from: CorrectiveAction
-    to: Incident
-    meaning: The corrective action is intended to prevent recurrence or reduce future impact related to the incident.
-    aliases:
-      - remediates
-      - prevents recurrence of
-      - mitigates future impact of
-  - name: isTypeOf
-    from: CybersecurityIncident
-    to: Incident
-    meaning: The cybersecurity incident is a specialized form of incident.
-    aliases:
-      - classified as incident
-      - subtype of
-      - kind of incident
-  - name: investigates
-    from: Investigation
-    to: CybersecurityIncident
-    meaning: The investigation examines the cybersecurity incident.
-    aliases:
-      - examines
-      - investigates cyber incident
-      - looks into
-  - name: supportedBy
-    from: Investigation
-    to: IncidentResponseTeamMember
-    meaning: Incident response team members support the investigation.
-    aliases:
-      - assisted by
-      - supported by response team
-  - name: occursIn
-    from: Incident
-    to: Environment
-    meaning: The incident occurs in a specific deployment or operating environment.
-    aliases:
-      - happens in
-      - detected in
-      - occurs within
-  - name: runsIn
-    from: ITService
-    to: Environment
-    meaning: The IT service operates in the specified environment.
-    aliases:
-      - deployed in
-      - operates in
-      - hosted in
-  - name: appliesIn
-    from: EmergencyChange
-    to: Environment
-    meaning: The emergency change is executed in or affects the specified environment.
-    aliases:
-      - executed in
-      - deployed in
-      - applies to environment
-  - name: serves
-    from: ITService
-    to: BusinessLine
-    meaning: The IT service supports or is consumed by the business line.
-    aliases:
-      - supports
-      - consumed by
-      - used by
-  - name: affects
-    from: Incident
-    to: AffectedUserGroup
-    meaning: The incident affects the specified group of users.
-    aliases:
-      - impacts user group
-      - affects users
-      - impacts affected users
-  - name: forService
-    from: Backup
-    to: ITService
-    meaning: The backup can be used to restore the IT service.
-    aliases:
-      - backup of
-      - restore point for
-  - name: sentTo
-    from: StakeholderCommunication
-    to: AffectedUserGroup
-    meaning: The communication is addressed to a group of users affected by the incident.
-    aliases:
-      - addressed to affected users
-      - notified impacted users
-  - name: preparedBy
-    from: StakeholderCommunication
-    to: IncidentResponseTeamMember
-    meaning: An incident response team member prepares or contributes to the communication.
-    aliases:
-      - drafted by
-      - prepared with
-      - authored by
-rules:
-  canEscalateToMajorIncident:
-    conditions:
-      - incident status is not closed or cancelled
-      - incident has an impacted IT service
-      - incident occurs in an environment
-      - incident commander can be identified before or during escalation
-      - sev1-critical incidents qualify for major-incident escalation
-      - sev2-high incidents qualify only when additional impact criteria such as affected-user count or business-line significance justify major-incident coordination
-      - production or disaster recovery incidents may be escalated when severity and impact justify major-incident coordination
-  requiresRegulatoryNotification:
-    conditions:
-      - materiality assessment status is completed
-      - materiality outcome is reportable
-      - regulatory notification is about the incident
-      - regulatory notification identifies the regulator to notify
-      - compliance officer has reviewed the materiality assessment
-      - incident occurs in production or disaster recovery environment
-  shouldStartDraftRegulatoryNotification:
-    conditions:
-      - materiality assessment status is completed
-      - materiality outcome is potentially-reportable
-      - draft or pending-approval regulatory notification workflow should be started
-      - compliance officer review is needed before formal submission
-      - incident occurs in production or disaster recovery environment
-  canExecuteEmergencyChange:
-    conditions:
-      - emergency change is related to an incident
-      - emergency change changes an impacted IT service
-      - emergency change applies in a known environment
-      - "incident status is investigating, contained, recovering, or monitoring"
-      - emergency change status is approved or scheduled
-      - incident severity level is sev1-critical or sev2-high
-      - production and disaster recovery emergency changes require the environment to be correctly identified before execution
-      - emergency change must not execute when its status is only assessed
-  canRestoreServiceFromBackup:
-    conditions:
-      - recovery plan is for the incident
-      - recovery plan restores the impacted IT service
-      - recovery plan uses a backup for that IT service
-      - backup timestamp is known so the restore point can be selected
-      - "incident status is contained, recovering, or monitoring"
-      - "recovery status is in progress or failed, not already verified"
-      - environment is known before restoring
-      - "for production or disaster recovery, restoration requires the correct backup and affected service to be identified"
-      - restore is not allowed while incident status is still investigating
-  canSendStakeholderCommunication:
-    conditions:
-      - communication is about an incident
-      - communication has a message summary
-      - communication is sent to a business owner or affected user group
-      - "incident has status, severity level, impacted IT service, and environment identified"
-      - "for major incidents, an incident response team member prepares or contributes to the communication"
-      - "for production or disaster recovery incidents, affected audience must be identified before sending"
-  canAssignIncidentToResolverGroup:
-    conditions:
-      - incident is not closed or cancelled
-      - resolver group is identified
-      - impacted IT service is identified or enough routing information exists
-  canCreateRecoveryPlan:
-    conditions:
-      - incident is not closed or cancelled
-      - impacted IT service is identified
-      - environment is identified
-  canRunMaterialityAssessment:
-    conditions:
-      - incident has severity level
-      - incident has impacted IT service
-      - incident occurs in an environment
-      - business line or affected-user impact is available when needed for assessment
-  canDocumentPostIncidentReview:
-    conditions:
-      - post-incident review reviews an incident
-      - incident status is resolved or closed
-actions:
-  openIncident:
-    input: Incident
-    preconditions: []
-    effect: "A new incident record is created with initial status, severity, summary, detected time, and impacted service or environment if known."
-    verification: Retrieve the incident and confirm an incidentId exists and status is set.
-  assignIncidentToResolverGroup:
-    input: Incident
-    preconditions:
-      - canAssignIncidentToResolverGroup
-    effect: Incident is assigned to the selected resolver group.
-    verification: Retrieve the incident and confirm it is assigned to that resolver group.
-  escalateIncidentToMajorIncident:
-    input: Incident
-    preconditions:
-      - canEscalateToMajorIncident
-    effect: "A major incident record is created or linked, coordination status becomes declared or active, and an incident commander is assigned or identified."
-    verification: Retrieve the major incident and confirm it is escalated from the incident and has coordination status declared or active.
-  notifyStakeholders:
-    input: StakeholderCommunication
-    preconditions:
-      - canSendStakeholderCommunication
-    effect: Stakeholder communication is sent to the selected audience and sentAt is recorded.
-    verification: Retrieve the communication and confirm sentAt is populated and audienceType is correct.
-  sendAllStaffCommunicationUpdate:
-    input: StakeholderCommunication
-    preconditions:
-      - canSendStakeholderCommunication
-    effect: Stakeholder communication with audienceType all-staff is sent and sentAt is recorded.
-    verification: Retrieve the communication and confirm audienceType is all-staff and sentAt is populated.
-  createRecoveryPlan:
-    input: Incident
-    preconditions:
-      - canCreateRecoveryPlan
-    effect: Recovery plan is created and linked to the incident and impacted IT service.
-    verification: Retrieve the recovery plan and confirm it is for the incident and restores the impacted IT service.
-  runMaterialityAssessment:
-    input: Incident
-    preconditions:
-      - canRunMaterialityAssessment
-    effect: Materiality assessment is created or updated with assessmentStatus and materialityOutcome.
-    verification: Retrieve the assessment and confirm assessmentStatus is completed or in progress and it assesses the incident.
-  documentPostIncidentReview:
-    input: PostIncidentReview
-    preconditions:
-      - canDocumentPostIncidentReview
-    effect: Review findings are documented and corrective actions may be identified.
-    verification: Retrieve the post-incident review and confirm reviewId exists and it reviews the incident.
-  restoreServiceFromBackup:
-    input: RecoveryPlan
-    preconditions:
-      - canRestoreServiceFromBackup
-    effect: Affected IT service is restored from the selected backup and recoveryStatus is updated.
-    verification: Retrieve the recovery plan and service status or tool result and confirm recoveryStatus is restored or verified.
-  executeEmergencyChange:
-    input: EmergencyChange
-    preconditions:
-      - canExecuteEmergencyChange
-    effect: Emergency change is executed against the affected IT service and environment and changeStatus is updated.
-    verification: "Retrieve the emergency change and confirm changeStatus is implementing, implemented, failed, or rolled-back with execution result recorded by the change tool."
-
-
-### Turn 62 — assistant
-
-**Tool call: `apply_ontology_yaml`**
-
-```
-{
-  "yaml": "rules:\n  canSendStakeholderCommunication:\n    conditions:\n      - communication is about an incident\n      - communication has a message summary\n      - communication has an allowed audienceType of business-owner, affected-user-group, or all-staff\n      - if audienceType is business-owner, communication is sent to a business owner\n      - if audienceType is affected-user-group, communication is sent to an affected user group\n      - if audienceType is all-staff, the all-staff audience type is recorded before sending\n      - incident has status, severity level, impacted IT service, and environment identified\n      - for major incidents, an incident response team member prepares or contributes to the communication\n      - for production or disaster recovery incidents, affected audience must be identified before sending\n"
-}
-```
-
-### Turn 62 — tool
-
-Applied. Added 0, updated 1 existing item(s).
-
-### Turn 62 — assistant
-
-Final validation pass completed. I also updated **canSendStakeholderCommunication** so it now explicitly supports the newly confirmed **all-staff** audience type, not only Business Owner / Affected User Group.
-
-## Competency check against Phase 1
-
-The current ontology can support the original questions:
-
-1. **Which service is impacted by this incident?**  
-   Incident --impacts--> IT Service.
-
-2. **Who owns the affected IT service?**  
-   Incident --impacts--> IT Service --owned by--> Service Owner.
-
-3. **What is the current status of the incident?**  
-   Incident.status.
-
-4. **What is the severity level of this incident?**  
-   Incident.severityLevel.
-
-5. **Who should be assigned to resolve this incident?**  
-   Incident --assigned to--> Resolver Group, with ResolverGroup.groupName and assignment rule.
-
-6. **What are the main dependencies of the affected IT service?**  
-   IT Service --depends on--> IT Service.
-
-7. **Is there a known workaround for this issue?**  
-   Workaround --applies to--> Incident, with workaround instructions.
-
-8. **What incidents have been logged for the same issue previously?**  
-   Incident.issueKey now supports matching repeat incidents.
-
-9. **What alerts have triggered this incident?**  
-   Incident --triggered by--> Alert.
-
-10. **When was the incident first detected?**  
-   Incident.firstDetectedAt.
-
-11. **Has a materiality assessment been conducted?**  
-   Materiality Assessment --assesses--> Incident, with assessmentStatus.
-
-12. **Do we need to notify regulators?**  
-   requiresRegulatoryNotification and shouldStartDraftRegulatoryNotification rules, using materialityOutcome, Compliance Officer review, Regulator, and environment.
-
-13. **What recovery plan is in place?**  
-   Recovery Plan --forIncident--> Incident and Recovery Plan --restores--> IT Service.
-
-14. **Have any communications been sent to stakeholders?**  
-   StakeholderCommunication --about--> Incident, sentAt, audienceType.
-
-15. **What corrective actions have been identified from past incidents?**  
-   Post-Incident Review --identifies--> Corrective Action; Corrective Action --addresses--> Incident.
-
-16. **Is there an active investigation for this cybersecurity incident?**  
-   Investigation --investigates--> Cybersecurity Incident, with investigationStatus.
-
-17. **What is the timeline for restoring normal operations?**  
-   Incident.estimatedRestorationTime and RecoveryPlan.targetRecoveryTime.
-
-18. **How many users are affected by this service degradation?**  
-   Incident.affectedUserCount and AffectedUserGroup.estimatedUserCount.
-
-19. **What monitoring tools are currently assessing the impacted service?**  
-   Monitoring Tool --monitors--> IT Service; Alert --generated by--> Monitoring Tool.
-
-20. **Who is the incident commander for this major incident?**  
-   Major Incident --led by--> Incident Commander.
-
-The current ontology also supports all 10 original actions with recorded inputs, preconditions, effects, and verification steps.
-
-## Final checklist result
-
-From the live graph state:
+Final validation pass completed against the live ontology.
+
+## 1. Competency check against Phase 1 questions/actions
+
+The model can now support the original questions:
+
+- **Impacted business services**: `Incident --impacts--> BusinessService`, plus `ITService --supports--> BusinessService`.
+- **IT service dependencies**: `ITService --dependsOn--> ITService`, `Application --dependsOn--> Application`.
+- **Service owner for application**: `Application --ownedBy--> ServiceOwner`.
+- **Incident status / severity / priority / major classification**: Incident properties `status`, `severity`, `priority`, `isMajorIncident`.
+- **Resolver group assignment**: `Incident --assignedTo--> ResolverGroup`, derived via `Incident --affects--> ITService` and `ITService --supportedBy--> ResolverGroup`, with environment context.
+- **Runbook/workaround**: `Incident --usesRunbook--> Runbook`, `ITService --hasRunbook--> Runbook`, `Runbook --documents--> Workaround`, `Incident --mitigatedBy--> Workaround`.
+- **Evidence preservation**: `Incident --hasEvidence--> Evidence`, `Evidence --preservedFor--> Incident`, plus preservation properties.
+- **Stakeholder communications and cadence**: `Incident --hasStakeholder--> Stakeholder`, `CommunicationUpdate --sentTo--> Stakeholder`, `IncidentCommander.communicationCadence`.
+- **Corrective actions from review**: `Incident --reviewedBy--> PostIncidentReview`, `PostIncidentReview --identifies--> CorrectiveAction`.
+- **Regulatory notification / materiality**: `Incident --hasMaterialityAssessment--> MaterialityAssessment`, `MaterialityAssessment --determinesNeedFor--> RegulatoryNotification`, `RegulatoryNotification --notifiesAbout--> Incident`.
+- **Recovery plan and risks**: `ITService --hasRecoveryPlan--> RecoveryPlan`, `Incident --usesRecoveryPlan--> RecoveryPlan`, `Incident --hasRisk--> Risk`, `RecoveryPlan --hasRisk--> Risk`.
+- **Alert acknowledgement timing**: `Alert --triggers--> Incident`, `Alert.status`, `Alert.triggeredAt`, `Alert.acknowledgedAt`.
+- **Closure readiness**: `canCloseIncident` plus `Incident.status`, `closedAt`, evidence, emergency change, and notification conditions.
+
+The model also covers all 10 actions:
+
+- Assign resolver group.
+- Acknowledge alert.
+- Declare major incident.
+- Send communication update.
+- Initiate regulatory notification.
+- Execute recovery plan.
+- Perform materiality assessment.
+- Execute emergency change.
+- Conduct post-incident review.
+- Close incident.
+
+Each action has one input class, precondition rule(s), effect, and verification step.
+
+## 2. Final checklist result
+
+Checked directly from the live graph:
 
 - Every class has at least one relationship.
-- Every pair of classes jointly needed by Phase 1 questions/actions has a direct relationship or a confirmed property path. The one gap found — repeat/same-issue incidents — was closed with **Incident.issueKey**.
-- Distinctly named roles from Phase 1 are represented as separate classes: Service Owner, Application Owner, Resolver Group, On-call Engineer, Incident Commander, Incident Response Team Member, Business Owner, Compliance Officer, Regulator, Service Desk Staff.
-- Every class is something users in the domain talk about.
-- Every relationship has a clear direction and verb phrase.
-- Properties are tied to identification, filtering, decisions, explanations, or tool actions.
-- Common synonyms and aliases are captured for classes and relationships.
-- Fixed value lists are captured where appropriate.
-- Important actions have explicit precondition rules.
-- The all-staff communication workflow is now represented through **StakeholderCommunication.audienceType = all-staff**.
+- Distinct roles from Phase 1 are separate classes: **Service Owner**, **Resolver Group**, **On-call Engineer**, **Technical Owner**, **Incident Commander**, **Stakeholder**.
+- No role was collapsed into a generic “owner” or “role” bucket.
+- Every relationship has a directed verb phrase.
+- Class and relationship meanings are populated.
+- Conservative aliases are captured for classes and relationships.
+- Decision-bearing properties are included only where they support the listed questions/actions.
+- Fixed value lists are captured for standardized properties.
+- Important actions are protected by explicit precondition rules.
+- Class pairs jointly mentioned in the original questions/actions have direct relationships where needed, including incident/service, incident/business service, alert/incident, application/service owner, incident/resolver group, incident/runbook, incident/risk, incident/materiality assessment, regulatory notification/incident, emergency change/incident, and review/corrective action.
 
 ## Result
 
-The ontology is in a complete and internally consistent state for the questions and actions you provided.
+The ontology is internally consistent and complete for the acceptance-test questions and actions we collected. No validation gaps are currently open.
