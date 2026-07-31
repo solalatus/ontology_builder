@@ -15,6 +15,22 @@ Branch: `helper_agent`, branched from `origin/main` at `533820e` (tip after PR #
   file, no server, no external files fetched at runtime** — including the
   knowledge content used to ground the agent, which must be baked into the
   page as a JS string constant, not loaded from a sibling file.
+- **This is a general-purpose ontology-building tool for any domain — never an
+  IT-operations tool**, even though the eval's only fixture happens to model
+  an IT incident-management domain (`tests/evals/fixtures/itops_mtsr.yaml`).
+  Every round of prompt-tuning driven by that eval necessarily reads
+  IT-ops-flavored transcripts for ideas — that's expected and fine — but a
+  fix's illustrative wording must always be translated to something
+  domain-neutral (an abstract placeholder like Class A/B, Role X/Y, Team 1/2,
+  or something grounded dynamically in the live conversation) before it goes
+  into `index.html`'s GROUND RULES/INTERVIEW PROCESS text, never copied in
+  verbatim from the transcript or domain that motivated it. Found and
+  retrofitted across three severity tiers on 2026-07-31 (literal outbound
+  question text, reasoning-guidance examples, one hardcoded transcript
+  quote) — see `helper_agent_todo.md`'s dated Log entry for the specifics.
+  `tests/helper-agent-phase4.spec.mjs` enforces this going forward with a
+  standing IT-ops-vocabulary blocklist test against that prompt section, not
+  just a one-time cleanup — keep it green on every future prompt edit.
 
 ## 1. Vision recap (for traceability, not new content)
 

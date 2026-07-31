@@ -92,7 +92,7 @@ test("the system prompt's final checklist also covers jointly-named relationship
   await withPage(async (page) => {
     const prompt = await systemPrompt(page);
     assert.match(prompt, /every pair of classes jointly\s*mentioned in a Phase 1 question or action has a direct relationship\s*between that specific pair/);
-    assert.match(prompt, /every distinctly-named actor or role from Phase 1\s*became its own class, not folded into one generic bucket type/);
+    assert.match(prompt, /distinctly-named actor or role from Phase 1 became its own class,\s*not folded into one generic bucket type/);
   });
 });
 
@@ -112,7 +112,7 @@ test("the system prompt requires one deliberate follow-up probe for omitted role
     const prompt = await systemPrompt(page);
     assert.match(prompt, /An expert's first-pass list, given freely,\s*reliably omits things they'd still confirm as real if asked directly/);
     assert.match(prompt, /especially a secondary role standing next to one already named/);
-    assert.match(prompt, /Before\s*moving to Phase 2, ask ONE closed, narrow follow-up covering exactly\s*these two things/);
+    assert.match(prompt, /ask ONE closed, narrow follow-up covering exactly these two\s*things/);
   });
 });
 
@@ -130,7 +130,7 @@ test("the system prompt requires one deliberate follow-up probe for omitted role
 test("the system prompt's Phase 1 probe is narrow and closed (two named categories), not an open invitation that risks inviting scope creep", async () => {
   await withPage(async (page) => {
     const prompt = await systemPrompt(page);
-    assert.match(prompt, /is there a closely related\s*role that actually does the day-to-day work \(on-call\/staffing\), and\s*does any of this depend on a specific environment or deployment\s*context/);
+    assert.match(prompt, /is there a closely related role that\s*actually does the day-to-day work under it, and does any of this\s*depend on a specific operating context that changes how it's\s*handled/);
     assert.match(prompt, /do not invite open-ended extra scope \("is\s*there anything else at all\?" tends to produce elaboration well past\s*what's needed, more classes than the acceptance test calls for, not\s*fewer\)/);
     assert.match(prompt, /Add only what the expert ties to answering one of the already-/);
   });
@@ -177,8 +177,8 @@ test("the system prompt requires per-item justification for classes in small bat
 test("the system prompt requires the interviewer to flag likely-overlapping class candidates itself and reject a bare \"keep all\" without an operational reason", async () => {
   await withPage(async (page) => {
     const prompt = await systemPrompt(page);
-    assert.match(prompt, /several plausible-\s*sounding candidates that only differ by department or naming\s*convention, not by anything the agent actually needs to do differently\s*with them/);
-    assert.match(prompt, /a bare "keep them separate" or "keep all" doesn't\s*settle it without a specific operational reason attached/);
+    assert.match(prompt, /several plausible-sounding\s*candidates that only differ by department or naming convention, not by\s*anything the agent actually needs to do differently with them/);
+    assert.match(prompt, /a bare "keep them separate" or "keep all"\s*doesn't settle it without a specific operational reason attached/);
   });
 });
 
@@ -264,7 +264,7 @@ test("the system prompt warns against collapsing several distinctly-named roles 
   await withPage(async (page) => {
     const prompt = await systemPrompt(page);
     assert.match(prompt, /Watch\s*for several distinctly-named actors or roles collapsing into one\s*generic bucket class/);
-    assert.match(prompt, /each one that matters earns its own class, not a\s*shared generic type/);
+    assert.match(prompt, /each one that matters earns its own class, not a shared\s*generic type/);
   });
 });
 
@@ -280,8 +280,8 @@ test("the system prompt tells the interviewer actions take exactly one input cla
   await withPage(async (page) => {
     const prompt = await systemPrompt(page);
     assert.match(prompt, /exactly ONE input class in this tool\s*—\s*not a list/);
-    assert.match(prompt, /represent the other participant through a relationship,\s*a property, or a precondition/);
-    assert.match(prompt, /deliberate limit of this tool, not something to\s*work around or apologize for/);
+    assert.match(prompt, /represent the other\s*participant through a relationship, a property, or a precondition/);
+    assert.match(prompt, /deliberate limit of this tool, not something to work around or\s*apologize for/);
   });
 });
 
@@ -334,7 +334,7 @@ test("Phase 2 treats a role surfaced only by the Phase 1 probe as a candidate, n
     const prompt = await systemPrompt(page);
     assert.match(prompt, /A role that only surfaced from the Phase 1 follow-up probe/);
     assert.match(prompt, /is a candidate, not a\s*pre-approved inclusion/);
-    assert.match(prompt, /without tying it to a specific still-open question or action\s*stays out/);
+    assert.match(prompt, /without tying\s*it to a specific still-open question or action stays out/);
   });
 });
 
@@ -368,6 +368,75 @@ test("Phase 3 asks for a routing/derivation relationship, not just a recording r
   });
 });
 
+// Round 3: a review of the round-2 fixes themselves found the fixes had
+// quietly baked IT-ops vocabulary into the prompt's own text at three
+// severity tiers -- worst, a literal question sent verbatim to every user
+// regardless of domain ("on-call/staffing", "environment or deployment
+// context"); reasoning-guidance examples all drawn from the same one
+// domain (Resolver Group, Compliance Officer); and one instance of a
+// hardcoded quote from a specific eval transcript ("what incidents have
+// been logged for the same issue previously"). This tool is general-
+// purpose for any domain, not an IT-ops tool -- every round of fixes
+// after this one is required to translate its illustrative wording to an
+// abstract placeholder or the live conversation's own content, never copy
+// a transcript's domain nouns in verbatim (see helper_agent_plan.md §0).
+test("the system prompt's GROUND RULES/INTERVIEW PROCESS section never carries IT-ops (or any other single domain's) vocabulary, only abstract placeholders", async () => {
+  await withPage(async (page) => {
+    const prompt = await systemPrompt(page);
+    const start = prompt.indexOf("GROUND RULES");
+    const end = prompt.indexOf("SCOPE (this agent");
+    assert.ok(start >= 0 && end > start, "expected to find both section boundaries");
+    const section = prompt.slice(start, end);
+    const forbiddenDomainTerms = [
+      /resolver group/i, /on-call/i, /service desk/i, /compliance officer/i,
+      /incident commander/i, /major incident/i, /\bincident\b/i, /\bregulator/i,
+      /cybersecurity/i, /materiality/i, /emergency change/i,
+      /deployment context/i, /configuration item/i,
+    ];
+    for (const re of forbiddenDomainTerms) {
+      assert.doesNotMatch(section, re, `found IT-ops-specific vocabulary (${re}) in the general-purpose interview guidance`);
+    }
+    // The rule itself must be stated, not just incidentally true this run.
+    assert.match(prompt, /general-purpose ontology-building tool for ANY domain/);
+    assert.match(prompt, /use an abstract placeholder \(Class A,\s*Role X, Team 1\)/);
+  });
+});
+
+// Findings 2 and 3 from a detailed read-through of two round-2 confirmatory
+// transcripts, cross-checked against the fixture's real gold relationships
+// and properties -- written domain-neutrally from the start, per the rule
+// above.
+test("Phase 3 asks whether an actor reached only through a group/parent-record chain also needs a direct relationship", async () => {
+  // A round-2 transcript built Incident->ResolverGroup->OnCallEngineer as a
+  // two-hop chain but never a direct Incident->OnCallEngineer edge -- gold
+  // scores "resolves" (Group->Incident) and "is handled by" (Incident->
+  // individual) as two separate facts, and the existing "jointly mentioned
+  // pair" check can't catch this because the persona never phrases the
+  // specific individual and Incident together in one sentence (only the
+  // individual and their group).
+  await withPage(async (page) => {
+    const prompt = await systemPrompt(page);
+    assert.match(prompt, /when an actor is only reached through a chain/);
+    assert.match(prompt, /don't assume the chain substitutes for a\s*direct relationship/);
+    assert.match(prompt, /the\s*"jointly mentioned pair" check below won't catch this case/);
+    assert.match(prompt, /every actor reached only through a group or\s*parent-record chain also has a direct relationship/);
+  });
+});
+
+test("Phase 4 asks whether a class tracked over time needs its own current-state property, not just identity/ownership fields", async () => {
+  // Across both round-2 transcripts, the IT-Service-equivalent reference
+  // class reliably got identity/ownership properties but never a live
+  // status/health field, even though the transactional classes (Incident,
+  // Alert, Change) reliably got one without having to be asked -- a
+  // property-recall gap gold explicitly scores, not an eval artifact.
+  await withPage(async (page) => {
+    const prompt = await systemPrompt(page);
+    assert.match(prompt, /when a class is something the agent monitors, tracks, or\s*reports on over time/);
+    assert.match(prompt, /ask\s*explicitly whether it needs its own current-state or status property/);
+    assert.match(prompt, /every class the agent tracks over time \(not just looks up\) has\s*its own current-state property/);
+  });
+});
+
 test("Phase 4 checks an excluded property against the still-open Phase 1 list before accepting the exclusion", async () => {
   // The merged baseline's transcript proposed Incident.issueKey, the
   // expert called it optional, and the interviewer accepted the exclusion
@@ -378,7 +447,7 @@ test("Phase 4 checks an excluded property against the still-open Phase 1 list be
     const prompt = await systemPrompt(page);
     assert.match(prompt, /Before accepting the\s*expert calling a property "optional"/);
     assert.match(prompt, /don't accept the exclusion at\s*face value/);
-    assert.match(prompt, /A property genuinely unneeded by anything on the\s*list stays excluded as normal/);
+    assert.match(prompt, /A property genuinely unneeded by anything on the list\s*stays excluded as normal/);
   });
 });
 
