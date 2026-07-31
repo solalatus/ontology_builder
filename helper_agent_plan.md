@@ -769,15 +769,35 @@ and root-cause analysis.
 
 ## 9. Post-plan extension — agent conversation persistence & restart
 
-**Not yet implemented — this section is the plan only, written after the
-user asked for a real-world time estimate for a full elicitation interview
-and worked through the implication directly: a genuinely thorough interview
-realistically takes multiple sessions across days (fact-finding, expert
-availability, cognitive fatigue on questions this dense — see
-`helper_agent_todo.md`'s dated Log entry for the reasoning), and a browser
-tab simply will not stay open that long. This explicitly supersedes §5's
-prior non-goal ("No conversation persistence across reloads by default...
-revisit only if requested") — this is that request.**
+Written after the user asked for a real-world time estimate for a full
+elicitation interview and worked through the implication directly: a
+genuinely thorough interview realistically takes multiple sessions across
+days, and a browser tab simply will not stay open that long. This
+explicitly supersedes §5's prior non-goal ("No conversation persistence
+across reloads by default... revisit only if requested") — this is that
+request.
+
+**The concrete numbers behind that reasoning** (full derivation and
+caveats in `tests/evals/README.md`'s "Translating a simulated run into a
+real engagement's time/effort" section — this is the summary):
+- The best confirmed real eval run took 48 turns / 909s (~15 min) at pure
+  LLM-to-LLM speed — not remotely comparable to a real subject's pace.
+- Estimated real-subject engaged time for an interview of this depth:
+  roughly **2.5-4 hours**, read+think+answer, done back-to-back.
+- **Company-side commitment estimate, per the user's own explicit
+  scoping: two domain experts, two days each** (~4 person-days total,
+  compressed rather than spread over calendar weeks) — realistic sizing
+  that covers not just raw Q&A but fact-finding, prep, and review, split
+  by domain (operational vs. regulatory/compliance, since this fixture
+  spans both).
+- **This 2-expert/2-day estimate targets *full* practical-scope recovery**
+  — explicitly *not* the partial recovery (composite scores in the 40-65%
+  range even on the best confirmed simulated runs as of this writing) this
+  eval's own simulated persona lands on. That ceiling is a property of a
+  single-pass, non-fact-checking simulated persona, not a ceiling on what
+  a real, resourced, two-session engagement with real subject-matter
+  access could achieve — the eval's own numbers should not be read as
+  evidence against the 2-expert/2-day estimate.
 
 ### 9.1 What already exists (don't rebuild it)
 
@@ -945,12 +965,12 @@ not just relying on existing guidance to infer it:
 
 ### 9.6 Implementation phases
 
-- [ ] **Phase A** -- conversation persistence: new storage keys/payload
+- [x] **Phase A** -- conversation persistence: new storage keys/payload
       shape, save-loop reuse, `boot()`-time restore, restore toast/note.
-- [ ] **Phase B** -- Restart Conversation button, confirm-dialog wiring,
+- [x] **Phase B** -- Restart Conversation button, confirm-dialog wiring,
       i18n strings, explicit non-interaction with graph state verified.
-- [ ] **Phase C** -- resume-after-gap synthetic system note (9.4).
-- [ ] **Phase D** -- tests: persistence survives `page.reload()` (new
+- [x] **Phase C** -- resume-after-gap synthetic system note (9.4).
+- [x] **Phase D** -- tests: persistence survives `page.reload()` (new
       territory -- no existing `helper-agent-phase*` test currently
       reloads the page, per the graph's own analogous tests in
       `tests/phase3.spec.mjs` for the *negative* case, undo history is
@@ -964,7 +984,9 @@ not just relying on existing guidance to infer it:
       storage byte-identical before/after); a restored conversation
       resumes into a modified-since-last-save graph correctly (Phase 3's
       gap-note fires, `get_graph_state` gets called on the next turn).
-- [ ] **Phase E** -- docs: this section itself (done), §5's superseded
+      Delivered as a new `tests/helper-agent-conversation-persistence.spec.mjs`
+      (10 tests) -- see `helper_agent_todo.md`'s Log for the full list.
+- [x] **Phase E** -- docs: this section itself (done), §5's superseded
       non-goal line updated to point here rather than silently
       contradicted, `helper_agent_todo.md` Log entry once implemented and
       live-confirmed.

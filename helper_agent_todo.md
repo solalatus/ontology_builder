@@ -1599,3 +1599,62 @@ rule as a standing ground rule for the subproject.
 - Per explicit instruction, this round's PR happens regardless of composite score against baseline -- the
   point is correctness (not overfitting a general-purpose tool to one eval domain), not chasing this specific
   run's number.
+
+## Post-plan extension -- agent conversation persistence & restart (helper_agent_plan.md §9)
+
+**2026-07-31.** Motivated by a scoping conversation with the user: the interviewer side of the eval runs in
+15 minutes at LLM-to-LLM speed, but a real engagement with a real expert subject was estimated at roughly
+2.5-4 hours of engaged time, and the user's own scoping put company-side commitment at two domain experts,
+two days each (~4 person-days, compressed rather than spread over weeks) -- see `tests/evals/README.md`'s
+"Translating a simulated run into a real engagement's time/effort" section for the full derivation, and this
+same section's caveat that the 2-expert/2-day estimate targets *full* recovery, not the eval's own partial-
+recovery numbers. A multi-day, multi-expert engagement will not fit in one open browser tab, so the UI/graph
+being stateful while the agent conversation was not needed fixing before that scoping was realistic in
+practice. All four phases from `helper_agent_plan.md` §9 implemented in one continuous pass per explicit
+instruction ("implement, extend tests, test it (but not the perf eval), then PR").
+
+- [x] **Phase A -- conversation persistence.** A second, fully independent storage channel from the graph's
+      own Tier 1 (`kg-agent-conversation.json` / `kg-agent-conversation`, OPFS-first with localStorage
+      fallback, its own coalescing save loop) -- deliberately not a refactor of the existing Tier 1
+      primitives, to keep a large/malformed conversation record from ever threatening the ontology's own
+      save reliability and to keep the two save loops from ever blocking or interleaving. `boot()` restores
+      both `agentState.transcript` and `agentState.apiMessages` before any BYOK connection is made (restoring
+      is silent data hydration, never an auto-action -- same posture as `loadGraphFromStorage()`), and
+      appends a visible `agentConversationRestored` system note naming the restored message count.
+- [x] **Phase B -- Restart Conversation control.** A new toolbar button in `.agent-panel-header`, reusing the
+      existing `showConfirmDialog()` pattern verbatim (the same dialog `#btn-clear` uses) with strongly
+      worded copy making explicit that the ontology is never touched. Confirming clears
+      `transcript`/`apiMessages` and rotates `promptCacheKey` (same as a fresh connect); unlike Disconnect,
+      it does not clear `apiKey`/`model`/`connected` -- restarting the conversation shouldn't force
+      re-entering the API key. `disconnectAgent()` was also given a `scheduleAgentConversationSave()` call
+      (not originally specified in §9's text, decided during implementation) so a reload after an explicit
+      disconnect doesn't silently resurrect the pre-disconnect conversation from storage.
+- [x] **Phase C -- resume-after-gap synthetic note.** Directly modeled on the existing context-compaction
+      convention's shape (an invisible `apiMessages` splice paired with a visible transcript note): if the
+      gap since a restored payload's `savedAt` exceeds `AGENT_RESUME_GAP_THRESHOLD_MS` (5 minutes), a
+      synthetic `{role:"user", ...}` message instructing the model to call `get_graph_state` before
+      continuing is spliced into `apiMessages`, paired with a visible `agentConversationResumeGapNote`
+      transcript note -- the one genuinely new prompt-level mechanism this feature needed, since nothing in
+      `apiMessages` alone gives the model any way to perceive that real wall-clock time passed between
+      sessions.
+- [x] **Phase D -- tests.** New `tests/helper-agent-conversation-persistence.spec.mjs` (10 tests): chat
+      persists and restores correctly across `page.reload()` with the restore note present; a fresh profile
+      shows no restore note; Restart Conversation's confirm dialog (cancel leaves the conversation untouched,
+      confirm clears both arrays and rotates the cache key); Restart Conversation never touches
+      `state.nodes`/`state.edges` (deep-equal before/after); the restart clears persist across a reload;
+      disconnecting persists its own clear; a short gap injects no synthetic note; a gap past the threshold
+      injects both the synthetic `apiMessages` entry and the visible transcript note, verified against the
+      actual outgoing chat-completions request body (no live model call); `loadConversationFromStorage()`'s
+      return value for both the fresh and seeded cases. One real bug caught and fixed during this phase: the
+      gap-threshold test's `waitForFunction` originally waited for an intermediate transcript length (3) that
+      never actually occurs, since the restore note and gap note are both appended synchronously during boot
+      and the count can jump straight from 0 to 4 between polls -- fixed by waiting on the final length
+      directly. A second, test-only issue (not an app bug): the app's real default language is Hungarian, and
+      a `page.evaluate()` language toggle run *after* `page.goto()` is too late to affect notes already
+      localized at boot time -- fixed by seeding `localStorage["kg-lang"]="en"` in the same `addInitScript()`
+      that seeds the stale conversation payload, before navigation.
+- [x] **Phase E -- docs + regression.** `helper_agent_plan.md` §9.6's phase checkboxes marked done. Full
+      repo suite (`node --test tests/*.spec.mjs`, matching this subproject's established "full regression
+      pass" convention, which naturally excludes `tests/evals/`): 495/495 green, zero regressions. The live
+      ontology-recovery eval (`tests/evals/*.eval.spec.mjs`) was explicitly excluded from this round per the
+      user's own instruction.
