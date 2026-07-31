@@ -496,6 +496,8 @@ acceptable trade for a first version.
 - No multi-provider support (OpenAI only, matching the existing MyGPT).
 - No conversation persistence across reloads by default (mirrors the API
   key's own default-in-memory stance) — revisit only if requested.
+  **Superseded by §9 (planned, not yet implemented)** — a real-world
+  multi-day, multi-expert interview timeline made this the requested case.
 - No cost/usage tracking or budget limits.
 - No file upload/vision support in the panel.
 
@@ -764,3 +766,205 @@ elicited" stayed never-elicited) -- a single-run variance question the
 prompt fixes weren't targeted at and don't resolve by themselves. See
 `helper_agent_todo.md`'s own further dated addendum for the full numbers
 and root-cause analysis.
+
+## 9. Post-plan extension — agent conversation persistence & restart
+
+**Not yet implemented — this section is the plan only, written after the
+user asked for a real-world time estimate for a full elicitation interview
+and worked through the implication directly: a genuinely thorough interview
+realistically takes multiple sessions across days (fact-finding, expert
+availability, cognitive fatigue on questions this dense — see
+`helper_agent_todo.md`'s dated Log entry for the reasoning), and a browser
+tab simply will not stay open that long. This explicitly supersedes §5's
+prior non-goal ("No conversation persistence across reloads by default...
+revisit only if requested") — this is that request.**
+
+### 9.1 What already exists (don't rebuild it)
+
+- **The ontology graph already has robust persistence** (`index.html`'s
+  Tier 1: `writeGraphToStorage`/`loadGraphFromStorage`, OPFS-first with a
+  `localStorage` fallback, a coalescing `scheduleSave`/`runSaveLoop` pair
+  that collapses a burst of edits into one trailing write, `boot()`-time
+  restore with a visible `sessionRestoredToast`). This section reuses that
+  exact pattern for a *second, independent* storage channel — same backend
+  detection, same coalescing-save shape, same "make a silent restore
+  visible" toast convention — not a new mechanism.
+- **The confirmation-dialog pattern already exists and is directly
+  reusable**: `showConfirmDialog({message, confirmLabel, onConfirm,
+  onCancel})`, the same generic `#confirm-overlay` the graph's own "Clear"
+  button already uses. The restart-conversation control below reuses this
+  verbatim with new, more explicit wording — it does not need a new
+  confirmation UI.
+- **The agent already knows how to resume into a partially-built
+  ontology.** `INTERVIEW PROCESS` step 0 (Orientation) already says: call
+  `get_graph_state` first; if it's not empty, recap what's already there
+  instead of assuming a blank slate. This is real, working behavior today
+  — "restart the conversation, keep the ontology" is not a new prompt
+  capability to build, it is the existing orientation step, correctly
+  triggered by clearing `apiMessages` to empty (see 9.3). The one gap is
+  9.4 below: a *restored* (not restarted) conversation doesn't go through
+  step 0 again on its own.
+
+### 9.2 What's genuinely new: two independent state lifecycles, not one
+
+Today `agentState.transcript` (UI-facing, human-readable, never trimmed)
+and `agentState.apiMessages` (API-shaped, gets compacted per §4.10) live
+purely in JS memory — confirmed nothing writes either to storage anywhere,
+and reload always starts both empty even with a remembered API key. The
+core design decision: **the conversation gets its own storage channel,
+separate from the graph's `kg-canvas-live` key**, not folded into the same
+payload. Reasons: a multi-day, many-turn transcript can grow large (a
+single real eval transcript this session hit ~200KB+) and shouldn't bloat
+or risk the graph's own save reliability; the two already have independent
+lifecycles in the UI (Clear Graph vs. the new Restart Conversation); and it
+keeps a corrupted/oversized conversation blob from being able to threaten
+the ontology's own restore path at all.
+
+- New keys, naming-matched to the existing pair: `AGENT_CONVERSATION_
+  LOCALSTORAGE_KEY = "kg-agent-conversation"`, `AGENT_CONVERSATION_OPFS_
+  FILENAME = "kg-agent-conversation.json"`. Reuses the graph's already-
+  resolved `storageBackend` detection (OPFS / localStorage / none) rather
+  than detecting a second time.
+- Payload: `{ transcript, apiMessages, savedAt }`. Deliberately **not**
+  `promptCacheKey` — that exists to keep one OpenAI prompt-cache prefix
+  warm within a single connection session; OpenAI's own cache TTL is short
+  (minutes, not days), so reusing a stale one across a multi-day gap is
+  pointless at best. Always regenerate a fresh `promptCacheKey` on
+  reconnect, persisted or not. Deliberately **not** `apiKey`/`model`/
+  `connected`/`sending` either — those already have their own lifecycle
+  (remember-key localStorage, explicit-click-to-connect) and mixing them
+  into the conversation record would blur "is there a saved conversation"
+  with "is there a remembered key," which are genuinely independent
+  questions (e.g. a shared/kiosk machine might want the second but never
+  the first).
+- Save trigger: same coalescing shape as Tier 1 -- schedule a save after
+  every turn settles (successful reply, a completed tool-call round, or an
+  error that still updated the transcript) rather than on a fixed timer.
+- Restore: `boot()` gains a sibling to `loadGraphFromStorage()` that reads
+  the conversation payload into `agentState` *before* any connection is
+  made. Mirrors the existing remembered-key UX exactly: restoring never
+  auto-connects or fires an API call on its own — the user still clicks
+  Connect. Once they do, if a restored conversation exists, render it into
+  `#agent-transcript` immediately (visible before they've typed anything)
+  and the next message continues the restored `apiMessages`, not a fresh
+  array. Needs its own visible restore signal distinct from the graph's
+  (e.g. a transcript system-note, same convention as the existing
+  `agentContextCompacted` note) — "Restored previous conversation from
+  <relative time>," not a silent hydration.
+- Failure posture: apply the same defensive-normalization discipline the
+  graph restore already uses (`normalizeLoadedNode`/`normalizeLoadedEdge`,
+  backfilling missing fields rather than trusting the payload blindly) --
+  a malformed or schema-mismatched conversation record should degrade to
+  "start fresh, "with a clear toast, never throw and never block the app
+  from loading.
+- Known limitation, not solved in v1 (matches the graph's own current
+  posture -- no size cap exists there either): an unusually long-running,
+  many-session engagement could theoretically approach `localStorage`'s
+  typical ~5-10MB origin quota on the fallback backend. Worth a follow-up
+  if it's ever hit in practice, not a blocker for this plan.
+
+### 9.3 Restart Conversation: a new control, explicitly scoped to conversation state only
+
+- New button in the agent panel, next to (not replacing) the existing
+  Disconnect. Working name **"Restart Conversation"** -- deliberately not
+  "Restart Process" (the user's own working phrase) to avoid reading as
+  "restart the whole app/ontology"; open to a better label, but whatever
+  it's called, it must be visually and textually distinct from "Clear"
+  (the graph's own destructive action) so the two are never confused.
+- Behavior: clears `agentState.transcript`, `apiMessages`, and regenerates
+  `promptCacheKey`; writes an empty conversation record through the same
+  save path as any other turn (no special delete-the-file code path,
+  matching how the graph's own Clear button writes a fresh empty graph
+  rather than deleting the storage file). **Explicitly and only this** --
+  never calls `markDirty()`/`pushHistory()`, never touches `state` (the
+  ontology), never touches Tier 1/Tier 2 graph storage in any way. Stays
+  connected (does not clear `apiKey`/`model`/`connected` the way
+  Disconnect does) -- restarting the conversation shouldn't force
+  re-entering the API key.
+- Confirmation: reuse `showConfirmDialog()` (same dialog the graph's Clear
+  button already uses), with wording that states **both** halves plainly,
+  since the entire point of a strong confirmation here is that the two
+  kinds of state now have different, easy-to-conflate lifecycles: (1) this
+  permanently deletes the conversation history and cannot be undone, and
+  (2) the ontology/graph itself is not touched. A first draft: *"This will
+  permanently delete the current conversation history with the agent. The
+  ontology on the canvas will NOT be affected. This cannot be undone."*
+  If that's judged not strong enough once it's actually in front of a
+  user, the natural escalation already has a name in UI design (type the
+  word "RESTART" to confirm) -- flagged here as the fallback, not the
+  default, since it's more engineering for a control that's used rarely
+  and `showConfirmDialog` is already the established pattern for every
+  other destructive action in this app.
+- i18n: new `agentRestartConfirmMessage`/`agentRestartConfirmLabel` (or
+  similar) keys in both `en`/`hu`, following the exact convention already
+  used for `clearConfirmMessage`/`clearConfirmLabel`.
+
+### 9.4 The one real gap: a *restored* conversation doesn't know time passed
+
+`INTERVIEW PROCESS` step 0 and the "STAYING IN SYNC WITH THE LIVE
+ONTOLOGY" section already tell the agent to call `get_graph_state` "after
+any unusually long pause" -- but the model has no way to *perceive* that a
+pause happened just from `apiMessages` alone; nothing marks a session
+boundary. Across a real multi-day, multi-expert engagement, the canvas is
+exactly the kind of thing likely to have been edited directly (by either
+expert, or a third person) in the gap. This needs one concrete new piece,
+not just relying on existing guidance to infer it:
+
+- When a restored conversation resumes (9.2's restore path, not a fresh
+  Restart), inject one synthetic message ahead of the user's next turn --
+  a `system` or tagged `user` message, same convention as the existing
+  compaction summary note (`"[Earlier conversation summary]: ..."`) --
+  stating the gap explicitly, e.g. `"[Session resumed after a gap of
+  roughly <N hours/days> -- the ontology may have changed outside this
+  conversation since the last message. Call get_graph_state before
+  continuing.]"`, computed from `savedAt` vs. the current time at restore.
+  This forces the existing "call it after an unusual pause" instruction to
+  actually fire on the very next turn, rather than depending on the model
+  noticing a gap it has no direct signal for.
+- This is the only prompt-level change this section needs. Everything
+  else about "resume correctly into a partially-built ontology" is already
+  working behavior (9.1).
+
+### 9.5 Non-goals for this extension (keep scope tight)
+
+- **No multiple/named conversation threads or session switching.** The
+  two-expert, multi-day scenario that motivated this is handled as one
+  continuous, shared, persisted conversation (sequential handoff between
+  experts, same as reload-and-continue) -- not separate threads per
+  expert. A real need for that is a plausible future ask, not this one.
+- **No cross-device/cross-browser sync** -- persistence is exactly as
+  local as the graph's own Tier 1 today (this browser, this origin).
+  Tier 2's folder-sync is out of scope for the conversation entirely in
+  v1; revisit only if asked.
+- **No size cap or transcript pruning** in v1 (see 9.2's known
+  limitation) -- matches the graph's own current unbounded-growth
+  posture, not a new gap being introduced.
+- **No auto-connect on restore.** A restored conversation is loaded into
+  memory and rendered once the user connects, same click-to-connect
+  requirement as today; never fires an API call before the user acts.
+
+### 9.6 Implementation phases
+
+- [ ] **Phase A** -- conversation persistence: new storage keys/payload
+      shape, save-loop reuse, `boot()`-time restore, restore toast/note.
+- [ ] **Phase B** -- Restart Conversation button, confirm-dialog wiring,
+      i18n strings, explicit non-interaction with graph state verified.
+- [ ] **Phase C** -- resume-after-gap synthetic system note (9.4).
+- [ ] **Phase D** -- tests: persistence survives `page.reload()` (new
+      territory -- no existing `helper-agent-phase*` test currently
+      reloads the page, per the graph's own analogous tests in
+      `tests/phase3.spec.mjs` for the *negative* case, undo history is
+      *not* persisted, as the pattern to mirror positively here);
+      `tests/helper-agent-phase2.spec.mjs`'s existing disconnect-clears-
+      everything and reconnect-starts-fresh tests (lines ~491-526) need
+      to keep passing unchanged -- Disconnect and Restart Conversation
+      are deliberately different actions with different scope, and both
+      need their own coverage, not one test standing in for both; Restart
+      Conversation never touches graph state (assert `state`/Tier 1
+      storage byte-identical before/after); a restored conversation
+      resumes into a modified-since-last-save graph correctly (Phase 3's
+      gap-note fires, `get_graph_state` gets called on the next turn).
+- [ ] **Phase E** -- docs: this section itself (done), §5's superseded
+      non-goal line updated to point here rather than silently
+      contradicted, `helper_agent_todo.md` Log entry once implemented and
+      live-confirmed.
