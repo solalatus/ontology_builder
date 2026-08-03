@@ -1,0 +1,190 @@
+{
+  "fullDomain": {
+    "classes": [
+      {
+        "goldId": "itService",
+        "recoveredId": "n4"
+      }
+    ],
+    "relationships": [
+      {
+        "goldId": "stakeholder_has_interest_in_businessService",
+        "recoveredId": "e18"
+      },
+      {
+        "goldId": "backupSet_protects_configurationItem",
+        "recoveredId": "e35"
+      },
+      {
+        "goldId": "incident_is_correlated_from_event",
+        "recoveredId": "e5"
+      },
+      {
+        "goldId": "incident_is_handled_with_runbook",
+        "recoveredId": "e13"
+      },
+      {
+        "goldId": "incident_is_supported_by_evidenceItem",
+        "recoveredId": "e15"
+      },
+      {
+        "goldId": "incident_is_evaluated_by_materialityAssessment",
+        "recoveredId": "e19"
+      },
+      {
+        "goldId": "change_modifies_configurationItem",
+        "recoveredId": "e23"
+      },
+      {
+        "goldId": "postIncidentReview_produces_correctiveAction",
+        "recoveredId": "e31"
+      },
+      {
+        "goldId": "communication_is_addressed_to_stakeholder",
+        "recoveredId": "e17"
+      },
+      {
+        "goldId": "regulatoryNotification_reports_incident",
+        "recoveredId": "e21"
+      }
+    ],
+    "properties": [
+      {
+        "goldId": "businessService_has_health_state_serviceHealthState",
+        "matchedPropertyName": "status"
+      },
+      {
+        "goldId": "change_has_planned_start_timestamp",
+        "matchedPropertyName": "scheduledStartAt"
+      },
+      {
+        "goldId": "change_has_planned_end_timestamp",
+        "matchedPropertyName": "scheduledEndAt"
+      },
+      {
+        "goldId": "materialityAssessment_has_result_materialityResult",
+        "matchedPropertyName": "outcome"
+      }
+    ],
+    "valueFidelity": [
+      {
+        "id": "stakeholder_has_audience_type_communicationAudience",
+        "semanticFidelity": 0.25
+      },
+      {
+        "id": "businessService_has_criticality_tier_criticalityTier",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "alert_has_status_alertStatus",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "incident_has_status_incidentStatus",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "incident_has_severity_severityLevel",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "incident_has_priority_priorityLevel",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "change_has_status_changeStatus",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "backupSet_has_status_backupStatus",
+        "semanticFidelity": 0.86
+      },
+      {
+        "id": "communication_has_status_notificationStatus",
+        "semanticFidelity": 0.5
+      },
+      {
+        "id": "regulatoryNotification_has_status_notificationStatus",
+        "semanticFidelity": 0.75
+      },
+      {
+        "id": "correctiveAction_has_status_correctiveActionStatus",
+        "semanticFidelity": 0.86
+      }
+    ]
+  },
+  "scoped": {
+    "classes": [
+      {
+        "goldId": "itService",
+        "recoveredId": "n4"
+      }
+    ],
+    "relationships": [
+      {
+        "goldId": "backupSet_protects_configurationItem",
+        "recoveredId": "e35"
+      },
+      {
+        "goldId": "incident_is_handled_with_runbook",
+        "recoveredId": "e13"
+      },
+      {
+        "goldId": "incident_is_supported_by_evidenceItem",
+        "recoveredId": "e15"
+      },
+      {
+        "goldId": "incident_is_evaluated_by_materialityAssessment",
+        "recoveredId": "e19"
+      },
+      {
+        "goldId": "change_modifies_configurationItem",
+        "recoveredId": "e23"
+      },
+      {
+        "goldId": "communication_is_addressed_to_stakeholder",
+        "recoveredId": "e17"
+      },
+      {
+        "goldId": "regulatoryNotification_reports_incident",
+        "recoveredId": "e21"
+      }
+    ],
+    "properties": [
+      {
+        "goldId": "materialityAssessment_has_result_materialityResult",
+        "matchedPropertyName": "outcome"
+      }
+    ],
+    "valueFidelity": [
+      {
+        "id": "alert_has_status_alertStatus",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "incident_has_status_incidentStatus",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "incident_has_severity_severityLevel",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "change_has_status_changeStatus",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "backupSet_has_status_backupStatus",
+        "semanticFidelity": 0.86
+      },
+      {
+        "id": "communication_has_status_notificationStatus",
+        "semanticFidelity": 0.5
+      },
+      {
+        "id": "regulatoryNotification_has_status_notificationStatus",
+        "semanticFidelity": 0.71
+      }
+    ]
+  }
+}
