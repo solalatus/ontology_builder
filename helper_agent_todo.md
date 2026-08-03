@@ -1737,3 +1737,48 @@ the reviewer's word alone.
       / 56.3% -- not compared against any prior run's numbers as a pass/fail bar, since every run is an
       independent two-LLM conversation and the point of this round was measurement correctness, not chasing
       a specific score (same standing principle as the earlier domain-overfitting fix round).
+
+## Three-run replication set, per the reviewer's follow-up request
+
+**2026-08-03.** After the class-matching fix PR (above) merged, the same reviewer sent a follow-up: the
+single largest remaining empirical limitation was that only one run's numbers were ever reported, with no
+way to tell interview-technique signal from ordinary run-to-run variance between two independent LLM
+conversations. Explicit recommendation: freeze the prompt/fixture/models/scorer code, archive the existing
+(already-reviewed) run as an immutable anchor, run two more replications under the identical frozen
+configuration with **no further tuning**, and report all three honestly rather than picking the best. Not
+a fix for the development-case-overlap or unseen-domain-transfer limitations (explicitly out of scope, per
+the reviewer's own list) -- narrowly targeted at the single-run objection specifically.
+
+- [x] Started a fresh branch off the now-merged `helper_agent` (the matching-fix PR had already merged by
+      the time this request arrived), per this subproject's established per-round branching convention.
+- [x] **Archived the anchor run** (`results/runs/run-01/`) before touching anything else -- verbatim copy
+      of all seven result files from the run the matching fix was already verified against. Confirmed via
+      `git diff` that no prompt/fixture/orchestrator/scoring code differed from that merged commit before
+      starting any new run (the frozen-configuration precondition).
+- [x] **Two replications**, `results/runs/run-02/` and `results/runs/run-03/`, run back to back immediately
+      after, same frozen configuration, nothing tuned in response to either result. Each archived
+      immediately after completion, before the next run could overwrite the shared `results/` directory
+      (its own long-standing "always overwrite" convention is exactly what the reviewer's condition was
+      guarding against).
+- [x] `results/runs/README.md` -- full run-stats and metrics tables for all three runs side by side (both
+      heuristic and semantic, both full-domain and practical-scope denominators), plus honest findings
+      answering the reviewer's three specific questions:
+      - **Concept-structure gap repeats in all three runs** -- classes recovered at roughly 2-10x the rate
+        of relationships in every run, the single most stable pattern across the set.
+      - **Run-to-run variance is substantial and metric-dependent** -- the composite is tight (2.2-point
+        range, full-domain heuristic) because sub-metric swings partly cancel; individual sub-metrics swing
+        far more (relationship recall 3x, controlled-value fidelity 33.5 points -- likely a small-sample
+        artifact given how few controlled-value properties get matched per run).
+      - **Low property recall repeats, it's not a one-off of the anchor** -- low in 2 of 3 runs (12.6%,
+        14.4%), the anchor's own number is the majority pattern, not an unlucky outlier; run-02's higher
+        number (26.1%) is the actual outlier.
+      - A fourth, explicitly-labeled-as-correlational-not-causal observation: run-03 called
+        `get_graph_state` only 5 times (vs. 43-46 in the other two runs) despite the most turns and most
+        applied edits, coinciding with its own lowest relationship recall -- noted as worth investigating,
+        not asserted as an explanation a 3-run set can't establish.
+- [x] `tests/evals/README.md` gained a new section pointing at this replication set and stating precisely
+      what it does and doesn't resolve (narrows the single-run objection; does not touch the development-
+      case-overlap, unseen-domain-transfer, or human-subject-data limitations already documented elsewhere
+      in that file).
+- [x] Also manifested the same comparison as a standalone published artifact (side-by-side tables, the four
+      findings above) at the user's request, for a quicker read than the raw markdown tables.

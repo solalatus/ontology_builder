@@ -1,0 +1,668 @@
+<title>Ontology-Recovery Eval — 3-Run Replication Set</title>
+<style>
+:root {
+  --bg: #f6f6f4;
+  --surface: #ffffff;
+  --border: #dcdad4;
+  --border-strong: #b8b5ac;
+  --text: #1c1c1a;
+  --text-dim: #5c5a54;
+  --text-faint: #8a8780;
+  --accent: #8a5a1e;
+  --accent-bg: #f3e6d3;
+  --accent-border: #d9b781;
+  --good: #2c6e4f;
+  --warn: #a15c1f;
+  --mono: ui-monospace, "SF Mono", "Cascadia Mono", "Roboto Mono", Consolas, monospace;
+  --sans: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #17181a;
+    --surface: #1e1f22;
+    --border: #35373b;
+    --border-strong: #4a4c51;
+    --text: #e9e8e4;
+    --text-dim: #a7a49b;
+    --text-faint: #78766f;
+    --accent: #d8a24f;
+    --accent-bg: #3a2f1c;
+    --accent-border: #6b5326;
+    --good: #6fbd94;
+    --warn: #d99a52;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #17181a; --surface: #1e1f22; --border: #35373b; --border-strong: #4a4c51;
+  --text: #e9e8e4; --text-dim: #a7a49b; --text-faint: #78766f;
+  --accent: #d8a24f; --accent-bg: #3a2f1c; --accent-border: #6b5326;
+  --good: #6fbd94; --warn: #d99a52;
+}
+:root[data-theme="light"] {
+  --bg: #f6f6f4; --surface: #ffffff; --border: #dcdad4; --border-strong: #b8b5ac;
+  --text: #1c1c1a; --text-dim: #5c5a54; --text-faint: #8a8780;
+  --accent: #8a5a1e; --accent-bg: #f3e6d3; --accent-border: #d9b781;
+  --good: #2c6e4f; --warn: #a15c1f;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  line-height: 1.5;
+  margin: 0;
+  padding: 2.5rem 1.5rem 4rem;
+}
+.page {
+  max-width: 1080px;
+  margin: 0 auto;
+}
+
+header.top {
+  border-bottom: 2px solid var(--border-strong);
+  padding-bottom: 1.25rem;
+  margin-bottom: 1.75rem;
+}
+header.top .eyebrow {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-weight: 600;
+}
+h1 {
+  font-size: 1.7rem;
+  font-weight: 700;
+  margin: 0.3rem 0 0.5rem;
+  text-wrap: balance;
+  letter-spacing: -0.01em;
+}
+.subtitle {
+  color: var(--text-dim);
+  font-size: 0.98rem;
+  max-width: 68ch;
+}
+
+.config-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+  margin: 1.5rem 0 2rem;
+}
+.config-strip .cell {
+  background: var(--surface);
+  padding: 0.7rem 0.9rem;
+}
+.config-strip .cell .k {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-faint);
+  margin-bottom: 0.2rem;
+}
+.config-strip .cell .v {
+  font-family: var(--mono);
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
+section {
+  margin-bottom: 2.75rem;
+}
+h2 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin: 0 0 0.3rem;
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+}
+h2 .tag {
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  font-weight: 500;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.1rem 0.4rem;
+}
+.section-note {
+  color: var(--text-dim);
+  font-size: 0.88rem;
+  margin: 0 0 1rem;
+  max-width: 78ch;
+}
+
+.table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  min-width: 640px;
+  font-size: 0.9rem;
+}
+th, td {
+  padding: 0.55rem 0.85rem;
+  text-align: right;
+  border-bottom: 1px solid var(--border);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+th:first-child, td:first-child {
+  text-align: left;
+  font-variant-numeric: normal;
+  white-space: normal;
+  min-width: 190px;
+}
+thead th {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-dim);
+  font-weight: 600;
+  background: var(--bg);
+  border-bottom: 2px solid var(--border-strong);
+}
+thead th.anchor-col { color: var(--accent); }
+tbody tr:last-child td { border-bottom: none; }
+tbody tr.composite td {
+  font-weight: 700;
+  background: var(--accent-bg);
+  border-top: 1px solid var(--accent-border);
+  border-bottom: 1px solid var(--accent-border);
+}
+td.anchor-col { background: var(--accent-bg); font-weight: 600; }
+td.mean { color: var(--text-dim); font-weight: 500; }
+td.range { color: var(--text-faint); font-size: 0.83rem; }
+td.range .bar-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  justify-content: flex-end;
+}
+.bar-track {
+  width: 46px;
+  height: 5px;
+  background: var(--border);
+  border-radius: 3px;
+  position: relative;
+  overflow: hidden;
+}
+.bar-fill {
+  position: absolute;
+  top: 0; bottom: 0;
+  background: var(--warn);
+  border-radius: 3px;
+}
+.detail-cell {
+  color: var(--text-faint);
+  font-size: 0.78rem;
+  font-family: var(--mono);
+}
+
+.anchor-badge {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--accent);
+  border: 1px solid var(--accent-border);
+  background: var(--accent-bg);
+  border-radius: 3px;
+  padding: 0.05rem 0.35rem;
+  margin-left: 0.35rem;
+  vertical-align: middle;
+}
+
+.findings {
+  display: grid;
+  gap: 1.1rem;
+}
+.finding {
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 6px;
+  background: var(--surface);
+  padding: 1rem 1.2rem;
+}
+.finding .verdict {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--accent);
+  font-weight: 700;
+  margin-bottom: 0.35rem;
+}
+.finding h3 {
+  font-size: 1rem;
+  margin: 0 0 0.4rem;
+}
+.finding p {
+  margin: 0.4rem 0 0;
+  color: var(--text-dim);
+  font-size: 0.9rem;
+}
+.finding p:first-of-type { margin-top: 0.5rem; }
+.finding .evidence {
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.55rem 0.75rem;
+  margin-top: 0.6rem;
+}
+
+.caveats {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1.1rem 1.3rem;
+}
+.caveats h2 { margin-bottom: 0.7rem; }
+.caveats ul {
+  margin: 0;
+  padding-left: 1.2rem;
+  color: var(--text-dim);
+  font-size: 0.9rem;
+}
+.caveats li { margin-bottom: 0.4rem; }
+.caveats li:last-child { margin-bottom: 0; }
+
+footer {
+  margin-top: 3rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border);
+  color: var(--text-faint);
+  font-size: 0.8rem;
+  font-family: var(--mono);
+}
+footer a { color: var(--text-dim); }
+
+@media (max-width: 640px) {
+  h1 { font-size: 1.4rem; }
+  body { padding: 1.5rem 1rem 3rem; }
+}
+</style>
+
+<div class="page">
+
+<header class="top">
+  <div class="eyebrow">Ontology-Recovery Eval — helper_agent</div>
+  <h1>Three-run replication set under a frozen configuration</h1>
+  <p class="subtitle">
+    Same interviewer prompt, same fixture, same models, same scoring code across all three runs —
+    no tuning between runs. Run-01 is the pre-designated anchor (the already-reviewed run the
+    class-matching fix landed against); run-02 and run-03 are pure replications, run back to back
+    immediately after. All three are reported below; none is presented as "the" result.
+  </p>
+</header>
+
+<div class="config-strip">
+  <div class="cell"><div class="k">Interviewer</div><div class="v">gpt-5.5-2026-04-23</div></div>
+  <div class="cell"><div class="k">Persona</div><div class="v">gpt-4o-mini</div></div>
+  <div class="cell"><div class="k">Classifier</div><div class="v">gpt-5.5-2026-04-23</div></div>
+  <div class="cell"><div class="k">Fixture</div><div class="v">itops_mtsr.yaml</div></div>
+  <div class="cell"><div class="k">Matching</div><div class="v">one-to-one (fixed)</div></div>
+</div>
+
+<section>
+  <h2>Run stats</h2>
+  <p class="section-note">Each run is an independent two-LLM conversation — turn count and stopping point are themselves outcomes, not inputs.</p>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Run</th>
+          <th>Turns</th>
+          <th>Wall-clock</th>
+          <th>App-agent calls</th>
+          <th>apply_ontology_yaml</th>
+          <th>get_graph_state</th>
+          <th>Applied / Skipped</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Run-01 <span class="anchor-badge">anchor</span></td>
+          <td class="anchor-col">52</td>
+          <td class="anchor-col">1062s</td>
+          <td class="anchor-col">138</td>
+          <td class="anchor-col">40×</td>
+          <td class="anchor-col">46×</td>
+          <td class="anchor-col">40 / 0</td>
+        </tr>
+        <tr>
+          <td>Run-02</td>
+          <td>51</td>
+          <td>961s</td>
+          <td>133</td>
+          <td>39×</td>
+          <td>43×</td>
+          <td>39 / 0</td>
+        </tr>
+        <tr>
+          <td>Run-03</td>
+          <td>57</td>
+          <td>882s</td>
+          <td>110</td>
+          <td>49×</td>
+          <td class="range">5× ⚠</td>
+          <td>48 / 3</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <h2>Heuristic metrics <span class="tag">regex / token-overlap</span></h2>
+  <p class="section-note">Free, deterministic, first-pass matcher — the same one-to-one bipartite-matched code across all three runs.</p>
+
+  <h3 style="font-size:0.95rem; margin: 1.3rem 0 0.5rem; color: var(--text-dim);">Full domain (68 classes / 108 relationships / 111 properties)</h3>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Metric</th>
+          <th class="anchor-col">Run-01</th>
+          <th>Run-02</th>
+          <th>Run-03</th>
+          <th>Mean</th>
+          <th>Range</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="composite">
+          <td>Recovery effectiveness</td>
+          <td class="anchor-col">36.4%</td>
+          <td>36.6%</td>
+          <td>38.6%</td>
+          <td class="mean">37.2%</td>
+          <td class="range"><span class="bar-wrap">2.2 pt <span class="bar-track"><span class="bar-fill" style="left:0%;width:7%;"></span></span></span></td>
+        </tr>
+        <tr>
+          <td>Class recall / precision / F1</td>
+          <td class="anchor-col">30.9 / 80.8 / 44.7</td>
+          <td>30.9 / 87.5 / 45.7</td>
+          <td>26.5 / 81.8 / 40.0</td>
+          <td class="mean">29.4 / 83.4 / 43.5</td>
+          <td class="range"><span class="bar-wrap">4.4 pt <span class="bar-track"><span class="bar-fill" style="left:0%;width:14%;"></span></span></span></td>
+        </tr>
+        <tr>
+          <td>Relationship recall / precision / F1</td>
+          <td class="anchor-col">9.3 / 23.8 / 13.3</td>
+          <td>8.3 / 22.5 / 12.2</td>
+          <td>2.8 / 7.7 / 4.1</td>
+          <td class="mean">6.8 / 18.0 / 9.9</td>
+          <td class="range"><span class="bar-wrap">6.5 pt <span class="bar-track"><span class="bar-fill" style="left:0%;width:21%;"></span></span></span></td>
+        </tr>
+        <tr>
+          <td>Property recall</td>
+          <td class="anchor-col">12.6%</td>
+          <td>26.1%</td>
+          <td>14.4%</td>
+          <td class="mean">17.7%</td>
+          <td class="range"><span class="bar-wrap">13.5 pt <span class="bar-track"><span class="bar-fill" style="left:0%;width:43%;"></span></span></span></td>
+        </tr>
+        <tr>
+          <td>Controlled-value fidelity</td>
+          <td class="anchor-col">75.2%</td>
+          <td>62.4%</td>
+          <td>95.9%</td>
+          <td class="mean">77.8%</td>
+          <td class="range"><span class="bar-wrap">33.5 pt <span class="bar-track"><span class="bar-fill" style="left:0%;width:100%;"></span></span></span></td>
+        </tr>
+        <tr>
+          <td class="detail-cell">Matched / recovered</td>
+          <td class="anchor-col detail-cell">21c · 10r · 14p / 26n</td>
+          <td class="detail-cell">21c · 9r · 18p / 26n</td>
+          <td class="detail-cell">18c · 3r · 16p / 22n</td>
+          <td class="detail-cell">—</td>
+          <td class="detail-cell">—</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3 style="font-size:0.95rem; margin: 1.6rem 0 0.5rem; color: var(--text-dim);">Practical scope (28 classes / 41 relationships / 26 properties)</h3>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Metric</th>
+          <th class="anchor-col">Run-01</th>
+          <th>Run-02</th>
+          <th>Run-03</th>
+          <th>Mean</th>
+          <th>Range</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="composite">
+          <td>Recovery effectiveness</td>
+          <td class="anchor-col">50.6%</td>
+          <td>50.7%</td>
+          <td>45.1%</td>
+          <td class="mean">48.8%</td>
+          <td class="range"><span class="bar-wrap">5.6 pt <span class="bar-track"><span class="bar-fill" style="left:0%;width:17%;"></span></span></span></td>
+        </tr>
+        <tr>
+          <td>Class recall / precision / F1</td>
+          <td class="anchor-col">67.9 / 73.1 / 70.4</td>
+          <td>60.7 / 70.8 / 65.4</td>
+          <td>50.0 / 63.6 / 56.0</td>
+          <td class="mean">59.5 / 69.2 / 63.9</td>
+          <td class="range"><span class="bar-wrap">17.9 pt <span class="bar-track"><span class="bar-fill" style="left:0%;width:58%;"></span></span></span></td>
+        </tr>
+        <tr>
+          <td>Relationship recall / precision / F1</td>
+          <td class="anchor-col">24.4 / 23.8 / 24.1</td>
+          <td>17.1 / 17.5 / 17.3</td>
+          <td>4.9 / 5.1 / 5.0</td>
+          <td class="mean">15.5 / 15.5 / 15.5</td>
+          <td class="range"><span class="bar-wrap">19.5 pt <span class="bar-track"><span class="bar-fill" style="left:0%;width:63%;"></span></span></span></td>
+        </tr>
+        <tr>
+          <td>Property recall</td>
+          <td class="anchor-col">26.9%</td>
+          <td>50.0%</td>
+          <td>23.1%</td>
+          <td class="mean">33.3%</td>
+          <td class="range"><span class="bar-wrap">26.9 pt <span class="bar-track"><span class="bar-fill" style="left:0%;width:87%;"></span></span></span></td>
+        </tr>
+        <tr>
+          <td>Controlled-value fidelity</td>
+          <td class="anchor-col">80.8%</td>
+          <td>70.1%</td>
+          <td>96.4%</td>
+          <td class="mean">82.4%</td>
+          <td class="range"><span class="bar-wrap">26.3 pt <span class="bar-track"><span class="bar-fill" style="left:0%;width:85%;"></span></span></span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <h2>Semantic metrics <span class="tag">LLM-adjudicated</span></h2>
+  <p class="section-note">Heuristic pass above, plus a strict LLM judge on every residual near-miss. Adds matches only — never removes a heuristic match, so these numbers are always ≥ the heuristic table on every recall metric.</p>
+
+  <h3 style="font-size:0.95rem; margin: 1.3rem 0 0.5rem; color: var(--text-dim);">Full domain</h3>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Metric</th>
+          <th class="anchor-col">Run-01</th>
+          <th>Run-02</th>
+          <th>Run-03</th>
+          <th>Mean</th>
+          <th>Range</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="composite">
+          <td>Recovery effectiveness</td>
+          <td class="anchor-col">40.0%</td>
+          <td>46.8%</td>
+          <td>43.3%</td>
+          <td class="mean">43.4%</td>
+          <td class="range"><span class="bar-wrap">6.8 pt <span class="bar-track"><span class="bar-fill" style="left:0%;width:22%;"></span></span></span></td>
+        </tr>
+        <tr>
+          <td>Class recall / precision / F1</td>
+          <td class="anchor-col">33.8 / 88.5 / 48.9</td>
+          <td>32.4 / 91.7 / 47.8</td>
+          <td>29.4 / 90.9 / 44.4</td>
+          <td class="mean">31.9 / 90.4 / 47.0</td>
+          <td class="range"><span class="bar-wrap">4.4 pt <span class="bar-track"><span class="bar-fill" style="left:0%;width:14%;"></span></span></span></td>
+        </tr>
+        <tr>
+          <td>Relationship recall / precision / F1</td>
+          <td class="anchor-col">13.0 / 33.3 / 18.7</td>
+          <td>17.6 / 47.5 / 25.7</td>
+          <td>12.0 / 33.3 / 17.7</td>
+          <td class="mean">14.2 / 38.0 / 20.7</td>
+          <td class="range"><span class="bar-wrap">5.6 pt <span class="bar-track"><span class="bar-fill" style="left:0%;width:18%;"></span></span></span></td>
+        </tr>
+        <tr>
+          <td>Property recall</td>
+          <td class="anchor-col">16.2%</td>
+          <td>29.7%</td>
+          <td>15.3%</td>
+          <td class="mean">20.4%</td>
+          <td class="range"><span class="bar-wrap">14.4 pt <span class="bar-track"><span class="bar-fill" style="left:0%;width:47%;"></span></span></span></td>
+        </tr>
+        <tr>
+          <td>Controlled-value fidelity</td>
+          <td class="anchor-col">76.3%</td>
+          <td>83.8%</td>
+          <td>95.7%</td>
+          <td class="mean">85.3%</td>
+          <td class="range"><span class="bar-wrap">19.4 pt <span class="bar-track"><span class="bar-fill" style="left:0%;width:63%;"></span></span></span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3 style="font-size:0.95rem; margin: 1.6rem 0 0.5rem; color: var(--text-dim);">Practical scope</h3>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Metric</th>
+          <th class="anchor-col">Run-01</th>
+          <th>Run-02</th>
+          <th>Run-03</th>
+          <th>Mean</th>
+          <th>Range</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="composite">
+          <td>Recovery effectiveness</td>
+          <td class="anchor-col">56.3%</td>
+          <td>61.1%</td>
+          <td>50.9%</td>
+          <td class="mean">56.1%</td>
+          <td class="range"><span class="bar-wrap">10.2 pt <span class="bar-track"><span class="bar-fill" style="left:0%;width:33%;"></span></span></span></td>
+        </tr>
+        <tr>
+          <td>Class recall / precision / F1</td>
+          <td class="anchor-col">75.0 / 80.8 / 77.8</td>
+          <td>64.3 / 75.0 / 69.2</td>
+          <td>53.6 / 68.2 / 60.0</td>
+          <td class="mean">64.3 / 74.7 / 69.0</td>
+          <td class="range"><span class="bar-wrap">21.4 pt <span class="bar-track"><span class="bar-fill" style="left:0%;width:69%;"></span></span></span></td>
+        </tr>
+        <tr>
+          <td>Relationship recall / precision / F1</td>
+          <td class="anchor-col">31.7 / 31.0 / 31.3</td>
+          <td>34.1 / 35.0 / 34.6</td>
+          <td>19.5 / 20.5 / 20.0</td>
+          <td class="mean">28.4 / 28.8 / 28.6</td>
+          <td class="range"><span class="bar-wrap">14.6 pt <span class="bar-track"><span class="bar-fill" style="left:0%;width:47%;"></span></span></span></td>
+        </tr>
+        <tr>
+          <td>Property recall</td>
+          <td class="anchor-col">34.6%</td>
+          <td>53.8%</td>
+          <td>26.9%</td>
+          <td class="mean">38.4%</td>
+          <td class="range"><span class="bar-wrap">26.9 pt <span class="bar-track"><span class="bar-fill" style="left:0%;width:87%;"></span></span></span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <h2>Findings</h2>
+  <p class="section-note">Addressing the three specific questions this replication set was designed to answer, honestly — including where the anchor run turned out not to be representative.</p>
+  <div class="findings">
+
+    <div class="finding">
+      <div class="verdict">Repeats — confirmed in all 3 runs</div>
+      <h3>The concept–structure gap</h3>
+      <p>Classes are recovered at roughly 2–10× the rate of relationships in <em>every</em> run, both heuristic and semantic, both denominators. This is the single most stable pattern across the replication set — more stable than any individual metric's own value.</p>
+      <div class="evidence">Full-domain class vs. relationship recall (heuristic): 30.9→9.3, 30.9→8.3, 26.5→2.8</div>
+    </div>
+
+    <div class="finding">
+      <div class="verdict">Substantial, metric-dependent</div>
+      <h3>Run-to-run variance</h3>
+      <p>The equal-weighted composite is tight (full-domain heuristic: 36.4–38.6%, a 2.2-point range) because sub-metric swings partly offset each other. Individual sub-metrics vary far more: full-domain relationship recall swings more than 3× (2.8%–9.3%), and controlled-value fidelity swings 33.5 points (62.4%–95.9%) — plausibly a small-sample artifact, since only a handful of controlled-value properties get matched in any single run and a couple of wording differences move the average sharply.</p>
+      <div class="evidence">Composite range: 2.2 pt (full-domain heuristic) vs. 33.5 pt (value fidelity, same table)</div>
+    </div>
+
+    <div class="finding">
+      <div class="verdict">Repeated, not a one-off — the anchor undersold it further</div>
+      <h3>Low property recall</h3>
+      <p>Full-domain property recall is low in <strong>2 of 3</strong> runs (run-01: 12.6%, run-03: 14.4%) and markedly higher only in run-02 (26.1%). The anchor run's own number is representative of the majority pattern, not an unlucky outlier — if anything, run-02 is the outlier, and reading only the anchor would have <em>understated</em> how variable this metric is, not overstated the problem.</p>
+      <div class="evidence">Full-domain property recall: 12.6%, 26.1%, 14.4% — median 14.4%, matches run-01 and run-03</div>
+    </div>
+
+    <div class="finding">
+      <div class="verdict">Observed, not confirmed as causal</div>
+      <h3>Run-03's behavioral outlier: far fewer state-checks</h3>
+      <p>Run-03 called <code>get_graph_state</code> only 5 times against 43–46 times in runs 1–2, despite having the most turns (57) and the most applied edits (48). This coincides with run-03 also being the run with the lowest relationship recall by a wide margin. Presented as a correlation worth investigating in future work, not asserted as the cause — a 3-run set can't establish that on its own.</p>
+      <div class="evidence">get_graph_state calls: 46 (run-01), 43 (run-02), 5 (run-03) · relationship recall (full, heuristic): 9.3%, 8.3%, 2.8%</div>
+    </div>
+
+  </div>
+</section>
+
+<section class="caveats">
+  <h2>What this does and doesn't resolve</h2>
+  <ul>
+    <li><strong>Removes:</strong> the "single stochastic run" objection — the reported anchor numbers are now shown alongside two independent replications under the identical frozen configuration, not presented as if they were the only possible outcome.</li>
+    <li><strong>Does not resolve:</strong> the development–evaluation overlap (the prompt was iteratively tuned against this same fixture before this replication set existed).</li>
+    <li><strong>Does not resolve:</strong> the absence of unseen-domain transfer evidence — all three runs use the same fixture.</li>
+    <li><strong>Does not resolve:</strong> the absence of real human–agent interview data — the persona side remains a single-pass simulated LLM.</li>
+    <li><strong>No further tuning:</strong> runs 2 and 3 are replications under a configuration frozen after run-01 — nothing about the prompt, fixture, models, or scoring code was changed in response to their results.</li>
+  </ul>
+</section>
+
+<footer>
+  All seven result files per run (report.md, conversation-log.md, tool-calls.md, recovered-model.yaml,
+  heuristic-matches.json, semantic-judgments.json, semantic-matches.json) are committed verbatim under
+  <code>tests/evals/results/runs/run-01/</code>, <code>run-02/</code>, <code>run-03/</code> in the repository.
+</footer>
+
+</div>

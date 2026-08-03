@@ -374,6 +374,21 @@ measure that gap directly — reading these scores as "how well this general-
 purpose interview technique performs on unseen domains" would be reading
 more into them than a single, repeatedly-tuned-against fixture can support.
 
+## Single-run design: partially addressed via a 3-run replication set
+
+The other major empirical limitation an external review flagged was that only one run's numbers were ever
+reported — no way to tell how much of any given score reflects the interview technique versus ordinary
+run-to-run variance between two independent LLM conversations. `results/runs/` holds three runs under an
+explicitly **frozen configuration** (same prompt, same fixture, same models, same scoring code, zero tuning
+between runs): `run-01` is the pre-designated anchor (the same run this repo's other analysis already
+reviewed in detail), `run-02` and `run-03` are pure replications. All three are reported side by side in
+`results/runs/README.md`, including the honest finding that the concept–structure gap (classes recovered far
+more reliably than relationships) repeats in all three, and that run-to-run variance on individual sub-
+metrics is often much larger than the composite score's own apparent stability suggests. This narrows the
+"single stochastic run" objection specifically — it does **not** address the development-case-overlap
+limitation above, the lack of unseen-domain transfer evidence, or the lack of real human-subject data (see
+`results/runs/README.md`'s own closing section for the precise scope of what three runs can and can't show).
+
 ## Translating a simulated run into a real engagement's time/effort
 
 The interviewer side of this eval is the real app agent — its numbers here
