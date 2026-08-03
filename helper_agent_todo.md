@@ -1658,3 +1658,82 @@ instruction ("implement, extend tests, test it (but not the perf eval), then PR"
       pass" convention, which naturally excludes `tests/evals/`): 495/495 green, zero regressions. The live
       ontology-recovery eval (`tests/evals/*.eval.spec.mjs`) was explicitly excluded from this round per the
       user's own instruction.
+
+## Fixing a real measurement bug + reproducibility/packaging gaps, from an external methodology review
+
+**2026-08-03.** The user relayed a detailed external review of the accompanying manuscript's repo artifact
+(explicitly out of scope: the manuscript text itself -- threats-section wording, the architecture diagram,
+a few sentences about run variance/human time estimates -- the user's own words, "which is none of your
+concern now"). The review's central finding was a real, confirmed code bug; the rest were reproducibility
+and packaging gaps. All were verified independently by direct code inspection before any fix, not taken on
+the reviewer's word alone.
+
+- [x] **Critical fix: one-to-one class matching, heuristic and semantic-judge alike.**
+      `recoveryMetrics.mjs`'s `matchClasses()` used to accept *every* gold-class/recovered-node pair
+      clearing the Jaccard threshold, with no exclusivity constraint -- confirmed exactly as reported: a
+      single recovered node whose aliases happened to overlap two different gold classes counted as
+      recovering *both* (recall counts per gold class; precision dedupes per node), inflating recall without
+      inflating precision. The exact same asymmetry existed one level up in `llmMatcher.mjs`'s semantic-judge
+      aggregation (the judge prompt only says "pick the single best candidate" *per reference line*, nothing
+      stops two different lines from picking the same candidate). Fixed with a new, dependency-free
+      `tests/evals/lib/bipartiteMatching.mjs` (classic O(n^3) Hungarian/Kuhn-Munkres algorithm for
+      maximum-weight bipartite matching -- confirmed nothing reusable already existed in this repo or its
+      dependencies), wired into `matchClasses()` (weighted by the actual Jaccard similarity score, not just
+      the boolean threshold pass) and into `computeSemanticRecoveryMetrics()`'s class/relationship aggregation
+      (uniform weight, since a judge verdict is binary). Relationship- and property-matching needed no
+      changes of their own -- confirmed they only ever consume the class-identity maps as data, never
+      re-deriving correspondence themselves, so the one fix at the class level was structurally sufficient
+      (independently corroborated by the reviewer's own manual reconstruction: heuristic relationship matches
+      didn't change under a correct one-to-one class assignment). New tests: `tests/bipartite-matching.spec.mjs`
+      (10 tests, including the reviewer's exact reported scenario and a case proving the algorithm finds the
+      true global optimum, not a greedy local one), plus regression tests in
+      `tests/ontology-recovery-metrics.spec.mjs` and `tests/ontology-recovery-llm-matching.spec.mjs`
+      reproducing the exact duplicate-match bug and asserting it's resolved.
+- [x] **Reproducibility: persist per-item judgments and match-pairs, not just aggregates.** Confirmed the
+      gap directly: `report.md` only ever showed aggregate percentages; the judge's raw response text and
+      every per-item verdict were computed inside `llmMatcher.mjs` and then discarded before ever reaching
+      disk, and the heuristic match-pairs (`matchClasses()`'s own assignment) were similarly computed and
+      discarded at both call sites. Four new files under `results/`: `recovered-model.yaml` (the exact YAML
+      `get_graph_state` would return, captured directly via `window.buildDomainYamlExport()` -- confirmed
+      already globally callable, already used by other test files, so no `index.html` changes needed),
+      `heuristic-matches.json`, `semantic-judgments.json`, `semantic-matches.json` (the last two split by
+      full-domain/practical-scope, since those are two genuinely separate sets of real judge API calls, not
+      one result shown twice -- same convention as `report.md`'s own two-column tables). New
+      `computeHeuristicMatchPairs()` in `recoveryMetrics.mjs` (a third additive pass over the same matching
+      logic, same accepted-duplication rationale as `computeMatchDetail`'s own module comment). `llmMatcher.mjs`'s
+      four judge functions gained an optional `onRawResponse` callback (undefined for every existing
+      caller/test, so zero blast radius) to capture raw judge text without a breaking change to their
+      established return-an-array contract. New writer functions in `reportGenerator.mjs`
+      (`writeRecoveredModelYaml`/`writeHeuristicMatches`/`writeSemanticJudgments`/`writeSemanticMatches`),
+      wired into `ontology-recovery.eval.spec.mjs`. New tests in `tests/ontology-recovery-transparency.spec.mjs`
+      (11 tests) and `tests/ontology-recovery-metrics.spec.mjs` (3 tests for `computeHeuristicMatchPairs`).
+- [x] **`tests/evals/README.md` corrections and additions**, each independently verified against the code
+      before writing, not just transcribed from the review: (1) the results-file contract updated from three
+      files to seven; (2) a new paragraph documenting that practical-scope *relationships* are an induced
+      subgraph over already-scoped classes (`groundTruthModel.mjs`'s `scopeGroundTruth`:
+      `classIds.has(r.fromClassId) && classIds.has(r.toClassId)`), not filtered by their own textual mention
+      the way classes/properties are -- confirmed the README was previously silent on this, a real
+      documentation-accuracy gap independent of the reviewer's own suggested manuscript prose; (3) a new
+      "Metrics" paragraph documenting the one-to-one matching fix itself; (4) a new section on the same-fixture
+      development/evaluation overlap -- `helper_agent_todo.md`'s own dated Log entries already honestly
+      document the interviewer prompt being iteratively tuned against this exact fixture's results across
+      several rounds, including explicit merge-gate language -- stating plainly that reported numbers are
+      development-case results, not evidence of transfer to an unseen domain. This is a repo-artifact-level
+      documentation improvement, independent of and not a substitute for whatever the manuscript's own
+      threats section ends up saying (explicitly out of scope for this round).
+- [x] **Packaging.** Root `LICENSE` (MIT). Root `README.md` (previously only `tests/README.md` existed,
+      buried) -- concise, points to the existing detailed docs rather than duplicating them. `package.json`
+      gained `playwright` as a pinned `devDependency` (`^1.56.1`, the version actually resolving in this
+      environment, confirmed via `npx playwright --version`) instead of requiring a separate manual install
+      step; `tests/README.md` updated to match. Release tag/GitHub release/Zenodo DOI intentionally **not**
+      automated this round -- flagged as the user's own follow-up decision (picking a release point, minting
+      a DOI are both outside what a PR should do unilaterally).
+- [x] Full mocked regression (`node --test tests/*.spec.mjs`): 521/521 green. **Live eval re-run**
+      (`node --test tests/evals/*.eval.spec.mjs`, ~20 minutes, 52 turns): completed cleanly, all seven
+      `results/` files regenerated with the corrected one-to-one numbers, independently spot-checked
+      afterward (zero duplicate `goldId`/`recoveredId` pairs in either `heuristic-matches.json` or
+      `semantic-matches.json`, confirming the fix is actually active on a real run, not just in the unit
+      tests). Composite scores this run: heuristic 36.4% full-domain / 50.6% practical-scope; semantic 40.0%
+      / 56.3% -- not compared against any prior run's numbers as a pass/fail bar, since every run is an
+      independent two-LLM conversation and the point of this round was measurement correctness, not chasing
+      a specific score (same standing principle as the earlier domain-overfitting fix round).

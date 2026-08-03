@@ -1,0 +1,233 @@
+{
+  "classes": [
+    {
+      "goldId": "resolverGroup",
+      "recoveredId": "n18",
+      "weight": 1
+    },
+    {
+      "goldId": "incidentCommander",
+      "recoveredId": "n19",
+      "weight": 1
+    },
+    {
+      "goldId": "serviceOwner",
+      "recoveredId": "n17",
+      "weight": 1
+    },
+    {
+      "goldId": "applicationOwner",
+      "recoveredId": "n22",
+      "weight": 1
+    },
+    {
+      "goldId": "technicalOwner",
+      "recoveredId": "n23",
+      "weight": 1
+    },
+    {
+      "goldId": "regulator",
+      "recoveredId": "n20",
+      "weight": 1
+    },
+    {
+      "goldId": "stakeholder",
+      "recoveredId": "n21",
+      "weight": 1
+    },
+    {
+      "goldId": "configurationItem",
+      "recoveredId": "n3",
+      "weight": 1
+    },
+    {
+      "goldId": "backupSet",
+      "recoveredId": "n13",
+      "weight": 1
+    },
+    {
+      "goldId": "event",
+      "recoveredId": "n4",
+      "weight": 1
+    },
+    {
+      "goldId": "incident",
+      "recoveredId": "n1",
+      "weight": 1
+    },
+    {
+      "goldId": "majorIncident",
+      "recoveredId": "n7",
+      "weight": 0.6666666666666666
+    },
+    {
+      "goldId": "change",
+      "recoveredId": "n12",
+      "weight": 1
+    },
+    {
+      "goldId": "workaround",
+      "recoveredId": "n6",
+      "weight": 1
+    },
+    {
+      "goldId": "runbook",
+      "recoveredId": "n5",
+      "weight": 1
+    },
+    {
+      "goldId": "recoveryPlan",
+      "recoveredId": "n11",
+      "weight": 1
+    },
+    {
+      "goldId": "evidenceItem",
+      "recoveredId": "n8",
+      "weight": 1
+    },
+    {
+      "goldId": "materialityAssessment",
+      "recoveredId": "n9",
+      "weight": 1
+    },
+    {
+      "goldId": "regulatoryNotification",
+      "recoveredId": "n10",
+      "weight": 1
+    },
+    {
+      "goldId": "postIncidentReview",
+      "recoveredId": "n15",
+      "weight": 1
+    },
+    {
+      "goldId": "correctiveAction",
+      "recoveredId": "n16",
+      "weight": 1
+    }
+  ],
+  "relationships": [
+    {
+      "goldId": "resolverGroup_resolves_incident",
+      "edgeId": "e3",
+      "direction": "reciprocal"
+    },
+    {
+      "goldId": "regulator_receives_regulatoryNotification",
+      "edgeId": "e21",
+      "direction": "reciprocal"
+    },
+    {
+      "goldId": "backupSet_protects_configurationItem",
+      "edgeId": "e14",
+      "direction": "forward"
+    },
+    {
+      "goldId": "incident_affects_configurationItem",
+      "edgeId": "e6",
+      "direction": "forward"
+    },
+    {
+      "goldId": "incident_is_coordinated_by_incidentCommander",
+      "edgeId": "e5",
+      "direction": "forward"
+    },
+    {
+      "goldId": "incident_is_supported_by_evidenceItem",
+      "edgeId": "e23",
+      "direction": "reciprocal"
+    },
+    {
+      "goldId": "incident_is_evaluated_by_materialityAssessment",
+      "edgeId": "e18",
+      "direction": "reciprocal"
+    },
+    {
+      "goldId": "incident_is_reviewed_in_postIncidentReview",
+      "edgeId": "e28",
+      "direction": "reciprocal"
+    },
+    {
+      "goldId": "change_modifies_configurationItem",
+      "edgeId": "e37",
+      "direction": "forward"
+    },
+    {
+      "goldId": "regulatoryNotification_reports_incident",
+      "edgeId": "e20",
+      "direction": "forward"
+    }
+  ],
+  "properties": [
+    {
+      "goldId": "stakeholder_has_audience_type_communicationAudience",
+      "hostNodeId": "n21",
+      "matchedPropertyName": "stakeholderType"
+    },
+    {
+      "goldId": "event_has_event_type_text",
+      "hostNodeId": "n4",
+      "matchedPropertyName": "signalType"
+    },
+    {
+      "goldId": "incident_has_status_incidentStatus",
+      "hostNodeId": "n1",
+      "matchedPropertyName": "status"
+    },
+    {
+      "goldId": "incident_has_severity_severityLevel",
+      "hostNodeId": "n1",
+      "matchedPropertyName": "severity"
+    },
+    {
+      "goldId": "incident_has_impact_impactLevel",
+      "hostNodeId": "n1",
+      "matchedPropertyName": "impactLevel"
+    },
+    {
+      "goldId": "majorIncident_is_declared_at_timestamp",
+      "hostNodeId": "n7",
+      "matchedPropertyName": "declaredAt"
+    },
+    {
+      "goldId": "change_has_status_changeStatus",
+      "hostNodeId": "n12",
+      "matchedPropertyName": "approvalStatus"
+    },
+    {
+      "goldId": "backupSet_has_status_backupStatus",
+      "hostNodeId": "n13",
+      "matchedPropertyName": "successStatus"
+    },
+    {
+      "goldId": "evidenceItem_is_collected_at_timestamp",
+      "hostNodeId": "n8",
+      "matchedPropertyName": "collectedAt"
+    },
+    {
+      "goldId": "evidenceItem_has_integrity_status_evidenceIntegrityStatus",
+      "hostNodeId": "n8",
+      "matchedPropertyName": "collectionStatus"
+    },
+    {
+      "goldId": "regulatoryNotification_has_status_notificationStatus",
+      "hostNodeId": "n10",
+      "matchedPropertyName": "notificationStatus"
+    },
+    {
+      "goldId": "correctiveAction_has_action_description_text",
+      "hostNodeId": "n16",
+      "matchedPropertyName": "actionStatus"
+    },
+    {
+      "goldId": "correctiveAction_has_status_correctiveActionStatus",
+      "hostNodeId": "n16",
+      "matchedPropertyName": "actionStatus"
+    },
+    {
+      "goldId": "correctiveAction_has_due_date_date",
+      "hostNodeId": "n16",
+      "matchedPropertyName": "dueDate"
+    }
+  ]
+}

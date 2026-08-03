@@ -1,6 +1,6 @@
 # Ontology-recovery eval report
 
-Generated: 2026-07-31T11:28:25.263Z
+Generated: 2026-08-03T11:50:51.736Z
 
 ## Heuristic (regex/token-overlap) metrics
 
@@ -8,11 +8,11 @@ Two denominators, side by side: **full domain** is every class/relationship/prop
 
 | Metric | Full domain | Practical scope | Detail |
 |---|---|---|---|
-| **Recovery effectiveness (composite)** | **40.1%** | **53.4%** | equal-weighted: class F1, relationship F1, property recall, value fidelity |
-| Class recall / precision / F1 | 30.9% / 82.6% / 45.0% | 57.1% / 69.6% / 62.7% | 21/68 full · 16/28 scoped ground-truth classes matched; 23 recovered |
-| Relationship recall / precision / F1 | 6.5% / 13.7% / 8.8% | 12.2% / 9.8% / 10.9% | 7/108 full · 5/41 scoped ground-truth relationships matched; 51 recovered (subclass/"is a" predicates excluded from both -- see README) |
-| Property recall | 23.4% | 57.7% | 26/111 full · 15/26 scoped ground-truth properties matched (technical identifier/URI fields excluded — see tests/evals/README.md) |
-| Controlled-value fidelity | 83.3% | 82.4% | average allowed-value overlap across matched controlled-value properties |
+| **Recovery effectiveness (composite)** | **36.4%** | **50.6%** | equal-weighted: class F1, relationship F1, property recall, value fidelity |
+| Class recall / precision / F1 | 30.9% / 80.8% / 44.7% | 67.9% / 73.1% / 70.4% | 21/68 full · 19/28 scoped ground-truth classes matched; 26 recovered |
+| Relationship recall / precision / F1 | 9.3% / 23.8% / 13.3% | 24.4% / 23.8% / 24.1% | 10/108 full · 10/41 scoped ground-truth relationships matched; 42 recovered (subclass/"is a" predicates excluded from both -- see README) |
+| Property recall | 12.6% | 26.9% | 14/111 full · 7/26 scoped ground-truth properties matched (technical identifier/URI fields excluded — see tests/evals/README.md) |
+| Controlled-value fidelity | 75.2% | 80.8% | average allowed-value overlap across matched controlled-value properties |
 
 ## Semantic (LLM-adjudicated) metrics
 
@@ -20,42 +20,41 @@ Same two denominators, same table shape, computed by `llmMatcher.mjs`'s `compute
 
 | Metric | Full domain | Practical scope | Detail |
 |---|---|---|---|
-| **Recovery effectiveness (composite)** | **46.2%** | **62.5%** | equal-weighted: class F1, relationship F1, property recall, value fidelity |
-| Class recall / precision / F1 | 32.4% / 87.0% / 47.2% | 60.7% / 73.9% / 66.7% | 22/68 full · 17/28 scoped ground-truth classes matched; 23 recovered |
-| Relationship recall / precision / F1 | 16.7% / 35.3% / 22.6% | 31.7% / 25.5% / 28.3% | 18/108 full · 13/41 scoped ground-truth relationships matched; 51 recovered (subclass/"is a" predicates excluded from both -- see README) |
-| Property recall | 25.2% | 65.4% | 28/111 full · 17/26 scoped ground-truth properties matched (technical identifier/URI fields excluded — see tests/evals/README.md) |
-| Controlled-value fidelity | 89.8% | 89.7% | average allowed-value overlap across matched controlled-value properties |
+| **Recovery effectiveness (composite)** | **40.0%** | **56.3%** | equal-weighted: class F1, relationship F1, property recall, value fidelity |
+| Class recall / precision / F1 | 33.8% / 88.5% / 48.9% | 75.0% / 80.8% / 77.8% | 23/68 full · 21/28 scoped ground-truth classes matched; 26 recovered |
+| Relationship recall / precision / F1 | 13.0% / 33.3% / 18.7% | 31.7% / 31.0% / 31.3% | 14/108 full · 13/41 scoped ground-truth relationships matched; 42 recovered (subclass/"is a" predicates excluded from both -- see README) |
+| Property recall | 16.2% | 34.6% | 18/111 full · 9/26 scoped ground-truth properties matched (technical identifier/URI fields excluded — see tests/evals/README.md) |
+| Controlled-value fidelity | 76.3% | 81.6% | average allowed-value overlap across matched controlled-value properties |
 
 ## Run stats
 
 - Interviewer model: `gpt-5.5-2026-04-23` · Persona model: `gpt-4o-mini` · Classifier model: `gpt-5.5-2026-04-23`
-- Stopped: **app_agent_appears_finished**, after 48 turns, 909s wall-clock
-- Real app-agent API calls: 88 (apply_ontology_yaml called 36× · get_graph_state called 4×)
-- Tool outcomes seen in transcript: 36 applied · 0 skipped · 0 no-op · 0 error
+- Stopped: **app_agent_appears_finished**, after 52 turns, 1062s wall-clock
+- Real app-agent API calls: 138 (apply_ontology_yaml called 40× · get_graph_state called 46×)
+- Tool outcomes seen in transcript: 40 applied · 0 skipped · 0 no-op · 0 error
 
 ## LLM review of the conversation
 
 ## Errors
 
-- **Turn 41–42:** `canCloseIncident` includes conditions that are not fully modeled: “root cause explicitly not required for closure,” “required stakeholder communications,” and “corrective action needed before closure” have no corresponding properties/relationships to evaluate them reliably.
-- **Turn 41–42:** `requiresRegulatoryNotification` mixes the decision “is notification required?” with submission-readiness checks such as authority/jurisdiction linkage and `submissionDueAt`. If `submissionDueAt` is missing, the rule could incorrectly say notification is not required rather than “required but incomplete.”
-- **Turn 45–46:** `isolateConfigurationItem` has input class `ConfigurationItem` but uses `canContainIncident`, whose conditions depend on an incident and containment action. The action definition does not specify how the related Incident/ContainmentAction is selected from the single input, so the precondition may be under-bound.
-- **Turn 32 / Turn 48:** The live graph normalized `supportedByITService` as `supportedByItservice`. The assistant notes this, but it is still an implementation naming defect that may cause awkward or inconsistent API/query behavior.
-- **Turn 39–40:** Some fixed-choice lists were malformed in the transcript formatting, e.g. `Communication.status` and `RootCause.status` have the “Breaks If Missing or Wrong” text visually nested under the last allowed value. The assistant did not explicitly guard against accidentally capturing explanatory text as a value.
+- **Turn 46–48:** Several recorded rules depend on concepts not modeled as properties/classes or explicitly marked as external checks, e.g. business impact, incident history, implementation/backout plans, target environment readiness, SLO milestones, stakeholder concern, propagation risk, isolation procedures, findings, and policy mandates. This makes some rules hard to execute against the ontology.
+- **Turn 50:** The interviewer added a new supporting rule, **containmentReady**, even though the persona only said it “might not” need a separate named rule and did not provide a formal condition list for it.
+- **Turn 52:** Final validation overstates coverage for “What evidence do we need to gather?” The model has actual `Evidence` records and `evidenceCollectionRequired`, but earlier the persona explicitly rejected direct evidence-requirement tracking; there is no clear way to enumerate required evidence types for a specific incident.
+- **Turn 52:** “No blocking gaps found” is too strong given the unmodeled inputs embedded in the recorded decision rules.
 
 ## Noteworthy observations
 
-- **Turn 1–4:** Strong opening technique: the interviewer began with real competency questions/actions before modeling, then summarized and confirmed scope.
-- **Turn 5–9:** Good incremental class elicitation with explicit inclusion/exclusion decisions; avoided modeling Incident Response Team Member, Technical Team, and Regulatory Compliance Team when not needed.
-- **Turn 10–21:** Relationship elicitation was systematic and tied back to acceptance questions/actions. The live-graph check at turn 20 caught the missing direct `Incident → ConfigurationItem` relationship.
-- **Turn 16–18:** The interviewer handled derived-vs-direct links well, asking whether stakeholder and jurisdiction relationships should be direct or inferred.
-- **Turn 22–26:** Property elicitation stayed mostly decision/action focused, but the persona largely rubber-stamped proposed fields. The interviewer could have pushed harder for bank-specific terminology rather than accepting generic ITSM values.
-- **Turn 24–25:** Good discipline excluding `RegulatoryAuthority.submissionChannel` as “nice to know,” though this might merit a follow-up because `submitRegulatoryNotification` could depend on submission channel in real workflows.
-- **Turn 30–35:** Alias elicitation was useful and explicitly warned against keeping merely related terms. However, some accepted aliases are questionable as true synonyms, e.g. `ConfigurationItem` = “asset/component,” `Workaround` = “mitigation,” and `RootCause` = “cause.”
-- **Turn 36–40:** Fixed-choice elicitation was comprehensive, but many values appear generic/simulated. Missed opportunity to ask for exact lifecycle state machines or valid transitions, especially for Incident, Change, Communication, and RegulatoryNotification.
-- **Turn 41–43:** Decision-rule phase was valuable, but the interviewer proposed complex rules and received confirmation without probing edge cases, exceptions, or “all vs any” logic.
-- **Turn 44–46:** Action definitions were clear and consistently included input class, precondition, effect, and verification. The “exactly one input class” constraint, however, created under-specification for actions involving multiple operational objects.
-- **Turn 47–48:** Final validation against the original 20 questions and 10 actions was a good closing step and caught one remaining language-layer gap.
+- **Turn 1–4:** Strong opening structure: collected real competency questions/actions first, then confirmed a concise acceptance-test recap before modeling.
+- **Turn 5–11:** Good class-elicitation technique: small batches, explicit “identify/retrieve/connect/pass to tools” criterion, and a useful follow-up on role granularity.
+- **Turn 10:** Good correction probe distinguishing internal **Compliance Officer** from external **Regulator**; prevented a bad merge.
+- **Turn 14–16:** Good handling of conditional relationship inclusion: did not add `Incident — contained by → Workaround` until the persona confirmed it is actually tracked.
+- **Turn 18:** Good coverage check caught the missing **Change Approver** class needed for the “who approved the last change?” question.
+- **Turn 20–23:** Efficient relationship gap-closing before moving on; interviewer checked direct-vs-derived links instead of adding everything automatically.
+- **Turn 24–28:** Property elicitation was disciplined and tied to decisions/actions, though it could have challenged date vs datetime precision for operational timestamps.
+- **Turn 32–40:** Alias elicitation was thorough and allowed “not an alias” responses, which helped avoid overbroad synonym capture.
+- **Turn 41–44:** Good prompt for allowed values plus “what breaks if missing/wrong,” capturing operational importance rather than just enums.
+- **Turn 45–48:** Rule elicitation captured important decision logic, but the interviewer should have followed up to bind vague rule criteria to modeled fields, external tools, or new properties.
+- **Turn 49–51:** Action definitions were clear and tool-oriented, with input class, preconditions, effects, and verification steps.
 
 ## Full conversation log
 

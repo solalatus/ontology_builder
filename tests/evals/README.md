@@ -62,17 +62,43 @@ check, or run it for real via `node --test`.
    above that actually stop it.
 4. Diffs the final recovered canvas model against the ground-truth fixture
    (`lib/recoveryMetrics.mjs`), against both the full domain and the
-   practical-scope subset (see below), and writes `results/report.md` +
-   `results/conversation-log.md` + `results/tool-calls.md` — three fixed
-   filenames, **overwritten every run, never accumulated**.
+   practical-scope subset (see below), and writes seven files under
+   `results/` — **overwritten every run, never accumulated**:
+   - `report.md`, `conversation-log.md`, `tool-calls.md` — the original
+     three (aggregate metrics table, human-readable turn-by-turn log, raw
+     API-level tool-call transparency log; see "Full transparency" below).
+   - `recovered-model.yaml` — the exact YAML `get_graph_state` itself would
+     return for the final canvas state, captured directly via
+     `window.buildDomainYamlExport()` rather than left for a reader to
+     reconstruct by hand from `tool-calls.md`'s last `get_graph_state`
+     block (which can go stale if the model kept editing afterward without
+     calling the tool again).
+   - `heuristic-matches.json` — `lib/recoveryMetrics.mjs`'s
+     `computeHeuristicMatchPairs()` output: exactly which gold
+     class/relationship/property matched which recovered
+     node/edge/property name (one-to-one for classes — see "Metrics"
+     below), full domain only (practical-scope matches are always a subset
+     of the same ids).
+   - `semantic-judgments.json` / `semantic-matches.json` — the LLM judge's
+     full per-item verdicts (MATCH *and* NO MATCH, judgments.json) or just
+     the resolved MATCH pairs (matches.json), plus each judge call's raw
+     response text, for **both** the full-domain and practical-scope
+     passes (two genuinely separate sets of real judge calls, each with
+     its own narrower-or-wider unmatched-item list — not one result shown
+     twice). Before these existed, this data was computed and then
+     discarded before ever reaching disk — an external review of this
+     eval's methodology flagged that gap; see "Metrics" below for the
+     correctness issue it was found alongside.
+
    **Committed to the repo as of the run bundled with each PR** (not
    gitignored — see `.gitignore`'s own comment on this): only the most
    recent run's files are ever present, so anyone browsing the repo can
    read the latest real transcript/report directly, or re-run the eval
-   themselves and get a fresh version of the exact same three files in the
+   themselves and get a fresh version of the exact same seven files in the
    exact same place. If you're looking for "what did the last live run
-   actually do," these three files under `tests/evals/results/` *are* that
-   record — no separate archive or changelog to hunt for.
+   actually do, and exactly why did it score what it scored," these seven
+   files under `tests/evals/results/` *are* that record — no separate
+   archive or changelog to hunt for.
    `tests/evals/lib/reportGenerator.mjs`'s `write*` functions default to
    this real, shared path; they accept an optional `{ dir }` override used
    only by this project's own *mocked* unit tests
@@ -213,6 +239,26 @@ scope, while decision-bearing ones like `has status`/`has severity` do.
 `scopeGroundTruth()` takes an optional third `propertyIds` argument for
 this (omit it to keep the old class-only property filtering).
 
+**Relationships are scoped differently from classes and properties, and it
+matters for how to read the number.** Classes and properties are each
+independently filtered by their *own* textual mention in the competency-
+question/action corpus (above). Relationships are not: `scopeGroundTruth()`
+keeps a gold relationship whenever *both* its endpoint classes are already
+in scope (`groundTruthModel.mjs`'s `scopeGroundTruth`:
+`classIds.has(r.fromClassId) && classIds.has(r.toClassId)`) — an **induced
+subgraph** over the scoped class set, not a filter on the relationship's
+own mention anywhere in the competency/action text. Against the bundled
+fixture this is 41 practical-scope relationships. Practically: the scoped
+relationship denominator can include a relationship whose two endpoint
+classes are each independently justified by the competency material, but
+where that *specific connection between them* was never actually needed to
+answer any competency question or resolve any action — so a low
+practical-scope relationship recall is not automatically evidence that the
+interview under-elicited relative to what the competency material actually
+demanded; some of the denominator is there because of what its endpoints
+individually talk about, not because the fixture ever posed a question that
+specifically required that edge.
+
 ## Metrics (see `lib/recoveryMetrics.mjs`)
 
 Matching is heuristic token-set-overlap string comparison (normalized,
@@ -247,6 +293,29 @@ different word choice with zero token overlap at all (gold's "impacts" vs a
 recorded "affects" — Jaccard 0) — that residual gap is accepted, not
 silently hidden behind a synonym dictionary this eval deliberately doesn't
 maintain.
+
+**Class matching is one-to-one, both heuristically and under the semantic
+judge.** An external methodology review of this eval found that
+`matchClasses()` used to accept *every* gold-class/recovered-node pair that
+cleared the Jaccard threshold, with no exclusivity constraint — a single
+recovered node whose aliases happened to overlap two different gold classes
+(a real, confirmed case: an "Incident Commander" node's "major incident
+manager" alias also clearing the threshold against the separate
+`majorIncident` gold class) counted as recovering *both*, inflating class
+recall (which counts per gold class) without inflating precision (which
+dedupes per recovered node) — the same asymmetry existed one level up in
+the semantic judge's aggregation, since its prompt only constrains one gold
+item's own line ("pick the single best candidate"), not different lines
+from independently picking the same candidate. Both are now resolved via a
+proper one-to-one assignment: every candidate pair becomes a weighted edge
+(the Jaccard score, for the heuristic pass; uniform weight, since a judge
+verdict is binary, for the semantic pass) in a bipartite graph, and
+`lib/bipartiteMatching.mjs`'s from-scratch Hungarian-algorithm implementation
+picks the globally optimal assignment where each gold item and each
+recovered item is used at most once. `results/heuristic-matches.json` and
+`results/semantic-matches.json` (see "What it does" above) make the
+resulting pairing directly auditable, rather than trusting the aggregate
+percentage alone.
 
 - **Class / relationship recall, precision, F1** — standard set-comparison
   metrics between the ground truth and the recovered canvas model.
@@ -284,6 +353,26 @@ trend-tracking on both columns (did a prompt or heuristic change move
 practical-scope recovery up or down, did full-domain scope itself widen,
 did tool-call errors increase, did the interview get less efficient) rather
 than expecting either composite score to approach 100%.
+
+## A methodological limitation: the same fixture was used to develop the prompt and to score the reported run
+
+`helper_agent_todo.md`'s dated Log entries document, honestly and in detail,
+that the interviewer's system prompt (`index.html`'s `INTERVIEW PROCESS`/
+`GROUND RULES`) went through several rounds of changes directly motivated by
+this eval's own results against this same `itops_mtsr.yaml` fixture — some
+of those changes were accepted specifically because they raised this
+fixture's own composite or sub-metric scores over a prior baseline run
+("merge gate" language appears in that log more than once). Domain-specific
+wording that crept in during that process was later found and removed (see
+the "general-purpose, not domain-specific" retrofit recorded in
+`helper_agent_todo.md`'s own Log), so the prompt itself is not simply
+overfit to IT-operations vocabulary today. That does not remove the more
+basic issue: **the numbers reported for any given run are development-case
+results, not evidence of transfer to a fixture the prompt was never
+iterated against.** No held-out-domain fixture exists in this repo to
+measure that gap directly — reading these scores as "how well this general-
+purpose interview technique performs on unseen domains" would be reading
+more into them than a single, repeatedly-tuned-against fixture can support.
 
 ## Translating a simulated run into a real engagement's time/effort
 

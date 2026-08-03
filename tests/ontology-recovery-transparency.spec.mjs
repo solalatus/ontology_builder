@@ -4,12 +4,16 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { tagApiMessagesWithTurn, looksLikeEarlyPhaseCheckpoint, looksLikePureAcknowledgment } from "./evals/lib/conversationOrchestrator.mjs";
-import { writeConversationLog, writeToolCallLog, writeReport, pathsFor, RESULTS_DIR } from "./evals/lib/reportGenerator.mjs";
+import {
+  writeConversationLog, writeToolCallLog, writeReport, pathsFor, RESULTS_DIR,
+  writeRecoveredModelYaml, writeHeuristicMatches, writeSemanticJudgments, writeSemanticMatches,
+} from "./evals/lib/reportGenerator.mjs";
 
 // Own throwaway directory, not the real tests/evals/results/ -- these are
 // mocked unit tests writing synthetic fixture content ("first run marker",
 // "opening line"), and a real live eval run writes its actual transcript to
-// that same shared, gitignored directory. Before this existed, running the
+// that same shared directory (committed with every PR, not gitignored --
+// see the .gitignore's own comment). Before this existed, running the
 // full mocked suite (`node --test tests/*.spec.mjs`) right after a real live
 // eval run silently clobbered that run's real conversation-log.md/
 // tool-calls.md/report.md with this file's own test fixtures -- discovered
@@ -18,7 +22,11 @@ import { writeConversationLog, writeToolCallLog, writeReport, pathsFor, RESULTS_
 // addendum). reportGenerator.mjs's write* functions accept this `{ dir }`
 // override specifically so these tests never touch the real results files.
 const TEST_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "ontology-eval-transparency-test-"));
-const { logPath: LOG_PATH, toolCallLogPath: TOOL_CALL_LOG_PATH, reportPath: REPORT_PATH } = pathsFor(TEST_DIR);
+const {
+  logPath: LOG_PATH, toolCallLogPath: TOOL_CALL_LOG_PATH, reportPath: REPORT_PATH,
+  recoveredModelYamlPath: RECOVERED_MODEL_YAML_PATH, heuristicMatchesPath: HEURISTIC_MATCHES_PATH,
+  semanticJudgmentsPath: SEMANTIC_JUDGMENTS_PATH, semanticMatchesPath: SEMANTIC_MATCHES_PATH,
+} = pathsFor(TEST_DIR);
 
 // Fast, deterministic unit tests for the eval's full-transparency logging
 // (tests/evals/lib/conversationOrchestrator.mjs's rawApiLog capture and
@@ -313,4 +321,103 @@ test("writeReport shows a clear \"not computed\" note for the semantic section, 
 
   assert.match(text, /## Semantic \(LLM-adjudicated\) metrics/);
   assert.match(text, /Not computed for this run/);
+});
+
+// REPRODUCIBILITY ARTIFACTS -- writeRecoveredModelYaml/writeHeuristicMatches/
+// writeSemanticJudgments/writeSemanticMatches (added in response to an
+// external review: report.md only ever showed aggregate percentages, so
+// verifying the specific pairing/judgment behind any number required
+// hand-parsing tool-calls.md, or wasn't possible at all for discarded judge
+// data). Same {dir} isolation, same overwrite-not-accumulate convention as
+// every write* function above.
+
+test("writeRecoveredModelYaml writes the exact YAML text given to it, verbatim", () => {
+  const yamlText = "classes:\n  incident:\n    label: Incident\n";
+  writeRecoveredModelYaml(yamlText, { dir: TEST_DIR });
+  assert.equal(fs.readFileSync(RECOVERED_MODEL_YAML_PATH, "utf8"), yamlText);
+});
+
+test("writeHeuristicMatches serializes computeHeuristicMatchPairs's shape as JSON, round-trippable", () => {
+  const matchPairs = {
+    classes: [{ goldId: "incident", recoveredId: "n1", weight: 1 }],
+    relationships: [{ goldId: "rel1", edgeId: "e1", direction: "forward" }],
+    properties: [{ goldId: "prop1", hostNodeId: "n1", matchedPropertyName: "severity" }],
+  };
+  writeHeuristicMatches(matchPairs, { dir: TEST_DIR });
+  const parsed = JSON.parse(fs.readFileSync(HEURISTIC_MATCHES_PATH, "utf8"));
+  assert.deepEqual(parsed, matchPairs);
+});
+
+function fakeSemanticResult(overrides = {}) {
+  return {
+    judgments: {
+      classes: [{ goldId: "g1", recoveredId: "r1", verdict: "MATCH" }, { goldId: "g2", recoveredId: null, verdict: "NO MATCH" }],
+      relationships: [],
+      properties: [],
+      valueFidelity: [],
+    },
+    rawResponses: { classes: "1: MATCH 1 -- same role\n2: NO MATCH -- unrelated" },
+    resolvedMatches: {
+      classes: [{ goldId: "g1", recoveredId: "r1" }],
+      relationships: [],
+      properties: [],
+      valueFidelity: [],
+    },
+    ...overrides,
+  };
+}
+
+test("writeSemanticJudgments writes both denominators' full per-item judgments (MATCH and NO MATCH alike) plus each one's raw judge response text", () => {
+  const fullDomain = fakeSemanticResult();
+  const scoped = fakeSemanticResult({ rawResponses: { classes: "1: NO MATCH -- different role entirely" } });
+  writeSemanticJudgments({ fullDomain, scoped }, { dir: TEST_DIR });
+  const parsed = JSON.parse(fs.readFileSync(SEMANTIC_JUDGMENTS_PATH, "utf8"));
+  assert.deepEqual(parsed.fullDomain.judgments, fullDomain.judgments);
+  assert.deepEqual(parsed.scoped.judgments, scoped.judgments);
+  assert.equal(parsed.fullDomain.judgments.classes.length, 2, "NO MATCH verdicts must be included too, not filtered out");
+  assert.match(parsed.fullDomain.rawResponses.classes, /same role/);
+  assert.match(parsed.scoped.rawResponses.classes, /different role entirely/, "full-domain and scoped are two separate real judge calls, not one result shown twice");
+});
+
+test("writeSemanticJudgments writes a clear null/note for either denominator that wasn't computed, independently of the other", () => {
+  writeSemanticJudgments({ fullDomain: fakeSemanticResult(), scoped: null }, { dir: TEST_DIR });
+  const parsed = JSON.parse(fs.readFileSync(SEMANTIC_JUDGMENTS_PATH, "utf8"));
+  assert.ok(parsed.fullDomain.judgments, "the denominator that WAS computed must still be written in full");
+  assert.equal(parsed.scoped.judgments, null);
+  assert.match(parsed.scoped.note, /not computed/i);
+});
+
+test("writeSemanticMatches writes only the resolved MATCH pairs for both denominators, not the full judgment record", () => {
+  const fullDomain = fakeSemanticResult();
+  const scoped = fakeSemanticResult();
+  writeSemanticMatches({ fullDomain, scoped }, { dir: TEST_DIR });
+  const parsed = JSON.parse(fs.readFileSync(SEMANTIC_MATCHES_PATH, "utf8"));
+  assert.deepEqual(parsed.fullDomain, fullDomain.resolvedMatches);
+  assert.deepEqual(parsed.scoped, scoped.resolvedMatches);
+  assert.equal(parsed.fullDomain.classes.length, 1, "the NO MATCH item from judgments.classes must not appear here");
+});
+
+test("writeSemanticMatches writes a clear note, not a crash, when a denominator's semantic pass wasn't computed for this run", () => {
+  writeSemanticMatches({ fullDomain: null, scoped: null }, { dir: TEST_DIR });
+  const parsed = JSON.parse(fs.readFileSync(SEMANTIC_MATCHES_PATH, "utf8"));
+  assert.match(parsed.fullDomain.note, /not computed/i);
+  assert.match(parsed.scoped.note, /not computed/i);
+});
+
+test("all four reproducibility-artifact writers overwrite the previous run's file rather than accumulating", () => {
+  writeRecoveredModelYaml("run one", { dir: TEST_DIR });
+  writeRecoveredModelYaml("run two", { dir: TEST_DIR });
+  assert.equal(fs.readFileSync(RECOVERED_MODEL_YAML_PATH, "utf8"), "run two");
+
+  writeHeuristicMatches({ classes: [{ goldId: "a" }] }, { dir: TEST_DIR });
+  writeHeuristicMatches({ classes: [{ goldId: "b" }] }, { dir: TEST_DIR });
+  assert.deepEqual(JSON.parse(fs.readFileSync(HEURISTIC_MATCHES_PATH, "utf8")), { classes: [{ goldId: "b" }] });
+});
+
+test("this file's own reproducibility-artifact write calls never touch the real, shared RESULTS_DIR -- only TEST_DIR", () => {
+  writeRecoveredModelYaml("isolation probe -- must not land in the real results dir", { dir: TEST_DIR });
+  const realPath = pathsFor(RESULTS_DIR).recoveredModelYamlPath;
+  if (fs.existsSync(realPath)) {
+    assert.doesNotMatch(fs.readFileSync(realPath, "utf8"), /isolation probe/);
+  }
 });

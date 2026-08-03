@@ -9,6 +9,8 @@
 // as a known limitation in tests/evals/README.md rather than solved with a
 // second LLM-matching pass, to keep this eval's own moving parts small.
 
+import { maxWeightBipartiteMatching } from "./bipartiteMatching.mjs";
+
 // Recovered relationship names come out of the app in its own camelCase
 // dialect ("isImplementedBy", "dependsOn" -- the YAML shape the agent's
 // own tool schema uses), while the ground truth's predicate labels are
@@ -52,8 +54,10 @@ function tokenize(s) {
 // Two different thresholds, not one: classes get every one of the ground
 // truth's own declared aliases *and* the recovered node's own
 // label/meaning/aliases cross-checked against each other (matchClasses,
-// below) -- a rich many-to-many comparison with real tolerance for
-// rephrasing built in. Relationships and properties get none of that: the
+// below) -- a rich many-to-many *candidate-label* comparison with real
+// tolerance for rephrasing built in, feeding a one-to-one bipartite match
+// at the class/node level itself (see matchClasses's own comment).
+// Relationships and properties get none of that: the
 // fixture's `predicates:` section (both object- and datatype-kind) has no
 // `aliases:` field at all, and the app's own edge/property data model has
 // no alias concept either (unlike nodes) -- so it's always exactly one
@@ -79,17 +83,25 @@ function tokenize(s) {
 // module doc) -- that residual gap is accepted, not silently hidden.
 const CLASS_LABEL_MATCH_THRESHOLD = 0.6;
 const REL_PROP_LABEL_MATCH_THRESHOLD = 0.3;
-function labelsMatch(a, b, threshold = CLASS_LABEL_MATCH_THRESHOLD) {
+
+// The raw Jaccard score behind labelsMatch's threshold check, exposed
+// separately so matchClasses (below) can use it as an edge weight for
+// one-to-one bipartite matching instead of just a boolean pass/fail.
+function labelSimilarity(a, b) {
   const na = normalize(a), nb = normalize(b);
-  if (!na || !nb) return false;
-  if (na === nb) return true;
+  if (!na || !nb) return 0;
+  if (na === nb) return 1;
   const ta = tokenize(a), tb = tokenize(b);
-  if (!ta.length || !tb.length) return false;
+  if (!ta.length || !tb.length) return 0;
   const sa = new Set(ta), sb = new Set(tb);
   let intersection = 0;
   for (const t of sa) if (sb.has(t)) intersection++;
   const union = new Set([...sa, ...sb]).size;
-  return union > 0 && intersection / union >= threshold;
+  return union > 0 ? intersection / union : 0;
+}
+
+function labelsMatch(a, b, threshold = CLASS_LABEL_MATCH_THRESHOLD) {
+  return labelSimilarity(a, b) >= threshold;
 }
 
 function jaccard(a, b) {
@@ -107,24 +119,54 @@ function f1(recall, precision) {
   return (2 * recall * precision) / (recall + precision);
 }
 
-// Builds { gtClassId -> [recoveredNodeIds] } by matching each ground-truth
+// Builds { gtClassId -> [recoveredNodeId] } by matching each ground-truth
 // class's label/aliases against each recovered node's label/meaning/aliases.
+//
+// One-to-one by construction: every gold-class/recovered-node pair whose
+// best alias/label similarity clears CLASS_LABEL_MATCH_THRESHOLD becomes a
+// weighted candidate edge, and maxWeightBipartiteMatching (bipartiteMatching.mjs)
+// picks the globally optimal assignment where each gold class and each
+// recovered node is used at most once. Before this fix, every
+// threshold-passing pair was accepted directly -- a single recovered node
+// whose aliases happened to overlap two different gold classes (a real,
+// confirmed case: an "Incident Commander" node's "major incident manager"
+// alias clearing the threshold against both the incidentCommander and
+// majorIncident gold classes) counted as recovering *both*, inflating class
+// recall (counted per gold class) without inflating precision (deduped per
+// node) -- an external review of this eval caught it. gtToRecovered's
+// values are still arrays for call-site compatibility, just capped at
+// length 1 now; no downstream relationship/property-matching code needed to
+// change, since it only ever consumes these two maps as data.
 export function matchClasses(groundTruth, recoveredNodes) {
-  const gtToRecovered = new Map();
-  const recoveredToGt = new Map();
+  const candidateEdges = [];
   for (const gtClass of Object.values(groundTruth.classes)) {
-    const matches = [];
     for (const node of recoveredNodes) {
       const candidateLabels = [node.label, node.meaning, ...(node.aliases || [])].filter(Boolean);
-      const isMatch = gtClass.aliases.some((gtAlias) => candidateLabels.some((c) => labelsMatch(gtAlias, c)));
-      if (isMatch) {
-        matches.push(node.id);
-        if (!recoveredToGt.has(node.id)) recoveredToGt.set(node.id, gtClass.id);
+      let bestScore = 0;
+      for (const gtAlias of gtClass.aliases) {
+        for (const c of candidateLabels) {
+          const score = labelSimilarity(gtAlias, c);
+          if (score > bestScore) bestScore = score;
+        }
+      }
+      if (bestScore >= CLASS_LABEL_MATCH_THRESHOLD) {
+        candidateEdges.push({ left: gtClass.id, right: node.id, weight: bestScore });
       }
     }
-    if (matches.length) gtToRecovered.set(gtClass.id, matches);
   }
-  return { gtToRecovered, recoveredToGt };
+  const assignment = maxWeightBipartiteMatching(candidateEdges);
+  const gtToRecovered = new Map();
+  const recoveredToGt = new Map();
+  for (const { left, right } of assignment) {
+    gtToRecovered.set(left, [right]);
+    recoveredToGt.set(right, left);
+  }
+  // `matches` (the raw {left, right, weight}[] assignment, renamed goldId/
+  // recoveredId for readability) is additive -- existing callers destructure
+  // only gtToRecovered/recoveredToGt and are unaffected. Exposed for
+  // computeHeuristicMatchPairs below, which reuses it directly instead of
+  // re-deriving the same assignment a third time.
+  return { gtToRecovered, recoveredToGt, matches: assignment.map(({ left, right, weight }) => ({ goldId: left, recoveredId: right, weight })) };
 }
 
 export function computeRecoveryMetrics(groundTruth, recoveredState) {
@@ -367,4 +409,54 @@ export function computeMatchDetail(groundTruth, recoveredState) {
       matchedGoldCount: propMatchedCount, eligibleGoldCount: propEligibleCount, goldTotal: groundTruth.properties.length,
     },
   };
+}
+
+// MATCHED-PAIR DETAIL, for reproducibility artifacts (tests/evals/results/
+// heuristic-matches.json). A third, additive pass over the same matching
+// logic as computeRecoveryMetrics/computeMatchDetail above -- same accepted
+// duplication, same reasoning as computeMatchDetail's own module comment:
+// zero risk of behavior drift in either existing, already-tested function.
+//
+// Unlike computeMatchDetail (which reports what *didn't* match, for the LLM
+// judge), this reports exactly which gold item matched which recovered
+// item and why -- the gap an external review flagged: today only aggregate
+// percentages ever reach disk, so verifying which specific pairing produced
+// them required hand-parsing tool-calls.md. Classes reuse matchClasses's
+// own `matches` field directly rather than re-deriving it a third time,
+// since that one-to-one assignment is exactly what's needed here too.
+export function computeHeuristicMatchPairs(groundTruth, recoveredState) {
+  const nodes = recoveredState.nodes || [];
+  const edges = recoveredState.edges || [];
+  const { gtToRecovered, matches: classMatches } = matchClasses(groundTruth, nodes);
+
+  function edgeLabelMatchesGt(gtLabel, edge) {
+    const candidates = [edge.relation, ...(edge.aliases || [])];
+    return candidates.some((c) => labelsMatch(gtLabel, c, REL_PROP_LABEL_MATCH_THRESHOLD));
+  }
+
+  const relationshipMatches = [];
+  for (const rel of groundTruth.relationships) {
+    const fromNodeIds = new Set(gtToRecovered.get(rel.fromClassId) || []);
+    const toNodeIds = new Set(gtToRecovered.get(rel.toClassId) || []);
+    if (!fromNodeIds.size || !toNodeIds.size) continue;
+    const forwardEdge = edges.find((e) => fromNodeIds.has(e.source) && toNodeIds.has(e.target) && edgeLabelMatchesGt(rel.label, e));
+    if (forwardEdge) { relationshipMatches.push({ goldId: rel.id, edgeId: forwardEdge.id, direction: "forward" }); continue; }
+    if (rel.reciprocalLabel) {
+      const reciprocalEdge = edges.find((e) => toNodeIds.has(e.source) && fromNodeIds.has(e.target) && edgeLabelMatchesGt(rel.reciprocalLabel, e));
+      if (reciprocalEdge) relationshipMatches.push({ goldId: rel.id, edgeId: reciprocalEdge.id, direction: "reciprocal" });
+    }
+  }
+
+  const propertyMatches = [];
+  for (const prop of groundTruth.properties) {
+    const nodeIds = gtToRecovered.get(prop.classId) || [];
+    for (const nodeId of nodeIds) {
+      const node = nodes.find((n) => n.id === nodeId);
+      if (!node) continue;
+      const hit = (node.properties || []).find((p) => labelsMatch(prop.label, p.name, REL_PROP_LABEL_MATCH_THRESHOLD));
+      if (hit) { propertyMatches.push({ goldId: prop.id, hostNodeId: nodeId, matchedPropertyName: hit.name }); break; }
+    }
+  }
+
+  return { classes: classMatches, relationships: relationshipMatches, properties: propertyMatches };
 }

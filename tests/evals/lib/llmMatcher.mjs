@@ -1,5 +1,6 @@
 import { CHAT_URL, RATE_LIMIT_MAX_ATTEMPTS, rateLimitBackoffMs, sleepMs, isInsufficientQuotaError } from "../../lib/liveOpenAi.mjs";
 import { computeRecoveryMetrics, computeMatchDetail } from "./recoveryMetrics.mjs";
+import { maxWeightBipartiteMatching } from "./bipartiteMatching.mjs";
 
 // LLM-JUDGE SUPPLEMENT to recoveryMetrics.mjs's heuristic token-overlap
 // matcher -- built specifically to catch the failure mode a real live run
@@ -205,7 +206,7 @@ export function parseValueFidelityJudgeResponse(text, matchedControlledValue) {
 // call to call -- this file's own live determinism test checks for a
 // stable discrete verdict on a clear-cut case, not an identical continuous
 // score on an inherently ambiguous one.
-async function callJudge({ apiKey, model, system, user }) {
+async function callJudge({ apiKey, model, system, user, onRawResponse }) {
   let res, data;
   for (let attempt = 1; attempt <= RATE_LIMIT_MAX_ATTEMPTS; attempt++) {
     res = await fetch(CHAT_URL, {
@@ -219,43 +220,85 @@ async function callJudge({ apiKey, model, system, user }) {
     if (retryable) { await sleepMs(rateLimitBackoffMs(attempt)); continue; }
     throw new Error(`llmMatcher judge call failed (HTTP ${res.status}, model "${model}"): ${(data.error && data.error.message) || "unknown error"}`);
   }
-  return (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || "";
+  const text = (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || "";
+  if (onRawResponse) onRawResponse(text);
+  return text;
 }
 
-export async function judgeClasses({ apiKey, model, unmatchedGold, unmatchedRecovered }) {
+// onRawResponse is optional everywhere below (undefined for every existing
+// caller/test) -- purely additive, so no existing call site's return shape
+// or behavior changes. computeSemanticRecoveryMetrics (below) is the one
+// caller that passes it, to capture the judge's raw response text for the
+// semantic-judgments.json reproducibility artifact (tests/evals/README.md)
+// without needing a breaking change to these four functions' established
+// return-an-array contract, which several existing tests already assert on
+// directly.
+export async function judgeClasses({ apiKey, model, unmatchedGold, unmatchedRecovered, onRawResponse }) {
   if (!unmatchedGold.length || !unmatchedRecovered.length) return unmatchedGold.map((g) => ({ goldId: g.id, recoveredId: null, verdict: "NO MATCH" }));
   const { system, user } = buildClassJudgePrompt(unmatchedGold, unmatchedRecovered);
-  const text = await callJudge({ apiKey, model, system, user });
+  const text = await callJudge({ apiKey, model, system, user, onRawResponse });
   return parseClassJudgeResponse(text, unmatchedGold, unmatchedRecovered);
 }
 
-export async function judgeRelationships({ apiKey, model, unmatchedGold, unmatchedRecovered }) {
+export async function judgeRelationships({ apiKey, model, unmatchedGold, unmatchedRecovered, onRawResponse }) {
   if (!unmatchedGold.length || !unmatchedRecovered.length) return unmatchedGold.map((g) => ({ goldId: g.id, recoveredId: null, verdict: "NO MATCH" }));
   const { system, user } = buildRelationshipJudgePrompt(unmatchedGold, unmatchedRecovered);
-  const text = await callJudge({ apiKey, model, system, user });
+  const text = await callJudge({ apiKey, model, system, user, onRawResponse });
   return parseRelationshipJudgeResponse(text, unmatchedGold, unmatchedRecovered);
 }
 
-export async function judgeProperties({ apiKey, model, unmatchedGold }) {
+export async function judgeProperties({ apiKey, model, unmatchedGold, onRawResponse }) {
   const withCandidates = unmatchedGold.filter((p) => p.recoveredHostProperties.length);
   if (!withCandidates.length) return unmatchedGold.map((p) => ({ goldId: p.id, matchedPropertyName: null, verdict: "NO MATCH" }));
   const { system, user } = buildPropertyJudgePrompt(withCandidates);
-  const text = await callJudge({ apiKey, model, system, user });
+  const text = await callJudge({ apiKey, model, system, user, onRawResponse });
   const judged = parsePropertyJudgeResponse(text, withCandidates);
   const byId = new Map(judged.map((j) => [j.goldId, j]));
   return unmatchedGold.map((p) => byId.get(p.id) || { goldId: p.id, matchedPropertyName: null, verdict: "NO MATCH" });
 }
 
-export async function judgeValueFidelity({ apiKey, model, matchedControlledValue }) {
+export async function judgeValueFidelity({ apiKey, model, matchedControlledValue, onRawResponse }) {
   if (!matchedControlledValue.length) return [];
   const { system, user } = buildValueFidelityJudgePrompt(matchedControlledValue);
-  const text = await callJudge({ apiKey, model, system, user });
+  const text = await callJudge({ apiKey, model, system, user, onRawResponse });
   return parseValueFidelityJudgeResponse(text, matchedControlledValue);
 }
 
 function f1(recall, precision) {
   if (recall + precision === 0) return 0;
   return (2 * recall * precision) / (recall + precision);
+}
+
+// Reduces a list of {goldId, recoveredId, verdict} judge verdicts to a
+// one-to-one assignment via maxWeightBipartiteMatching (weight 1 for every
+// MATCH edge, since a judge verdict is binary -- this becomes plain maximum
+// bipartite matching). Without this, nothing stops two different REFERENCE
+// lines in the judge prompt from independently picking the same CANDIDATE
+// (buildPairingJudgePrompt's "pick the single best" instruction only
+// constrains one gold item's own line, not different lines from claiming
+// the same candidate) -- the exact same recall-inflates/precision-doesn't
+// asymmetry recoveryMetrics.mjs's matchClasses() had, one level up, caught
+// by the same external review. Used for classes and relationships, the two
+// judge passes that share one candidate pool across multiple gold items;
+// the property judge (below) already scopes each gold property to its own
+// already-matched host node's property list, so no cross-item conflict of
+// this shape can arise there.
+export function oneToOneMatchedIds(judgments) {
+  const edges = judgments
+    .filter((j) => j.verdict === "MATCH" && j.recoveredId)
+    .map((j) => ({ left: j.goldId, right: j.recoveredId, weight: 1 }));
+  const assignment = maxWeightBipartiteMatching(edges);
+  return {
+    goldIds: new Set(assignment.map((e) => e.left)),
+    recoveredIds: new Set(assignment.map((e) => e.right)),
+    // The resolved {goldId, recoveredId} pairs themselves, additive to the
+    // two Sets above (existing callers destructure only goldIds/recoveredIds
+    // for counting) -- for tests/evals/results/semantic-matches.json, which
+    // needs the actual one-to-one-resolved pairing, not just a raw MATCH-
+    // verdict filter that could still contain the very duplicate-recoveredId
+    // conflict this function exists to resolve.
+    matches: assignment.map(({ left, right }) => ({ goldId: left, recoveredId: right })),
+  };
 }
 
 // Orchestrates the full semantic pass: heuristic first (computeRecoveryMetrics/
@@ -268,18 +311,23 @@ export async function computeSemanticRecoveryMetrics({ groundTruth, recoveredSta
   const heuristic = computeRecoveryMetrics(groundTruth, recoveredState);
   const detail = computeMatchDetail(groundTruth, recoveredState);
 
-  const classJudgments = await judgeClasses({ apiKey, model, unmatchedGold: detail.classes.unmatchedGold, unmatchedRecovered: detail.classes.unmatchedRecovered });
-  const extraGoldClassIds = new Set(classJudgments.filter((j) => j.verdict === "MATCH").map((j) => j.goldId));
-  const extraRecoveredNodeIds = new Set(classJudgments.filter((j) => j.verdict === "MATCH").map((j) => j.recoveredId));
+  // Raw judge response text, captured via the onRawResponse callback rather
+  // than changing judgeClasses/etc.'s own return shape (see their shared
+  // comment above) -- for the semantic-judgments.json reproducibility
+  // artifact (tests/evals/README.md), the missing piece an external review
+  // flagged: today only aggregate percentages ever reach disk.
+  const rawResponses = {};
 
-  const relJudgments = await judgeRelationships({ apiKey, model, unmatchedGold: detail.relationships.unmatchedGold, unmatchedRecovered: detail.relationships.unmatchedRecovered });
-  const extraGoldRelIds = new Set(relJudgments.filter((j) => j.verdict === "MATCH").map((j) => j.goldId));
-  const extraRecoveredEdgeIds = new Set(relJudgments.filter((j) => j.verdict === "MATCH").map((j) => j.recoveredId));
+  const classJudgments = await judgeClasses({ apiKey, model, unmatchedGold: detail.classes.unmatchedGold, unmatchedRecovered: detail.classes.unmatchedRecovered, onRawResponse: (t) => { rawResponses.classes = t; } });
+  const { goldIds: extraGoldClassIds, recoveredIds: extraRecoveredNodeIds, matches: resolvedClassMatches } = oneToOneMatchedIds(classJudgments);
 
-  const propJudgments = await judgeProperties({ apiKey, model, unmatchedGold: detail.properties.unmatchedGold });
+  const relJudgments = await judgeRelationships({ apiKey, model, unmatchedGold: detail.relationships.unmatchedGold, unmatchedRecovered: detail.relationships.unmatchedRecovered, onRawResponse: (t) => { rawResponses.relationships = t; } });
+  const { goldIds: extraGoldRelIds, recoveredIds: extraRecoveredEdgeIds, matches: resolvedRelMatches } = oneToOneMatchedIds(relJudgments);
+
+  const propJudgments = await judgeProperties({ apiKey, model, unmatchedGold: detail.properties.unmatchedGold, onRawResponse: (t) => { rawResponses.properties = t; } });
   const extraGoldPropIds = new Set(propJudgments.filter((j) => j.verdict === "MATCH").map((j) => j.goldId));
 
-  const fidelityJudgments = await judgeValueFidelity({ apiKey, model, matchedControlledValue: detail.properties.matchedControlledValue });
+  const fidelityJudgments = await judgeValueFidelity({ apiKey, model, matchedControlledValue: detail.properties.matchedControlledValue, onRawResponse: (t) => { rawResponses.valueFidelity = t; } });
   const semanticFidelityById = new Map(fidelityJudgments.filter((j) => j.semanticFidelity !== null).map((j) => [j.id, j.semanticFidelity]));
 
   const classMatched = detail.classes.matchedGoldCount + extraGoldClassIds.size;
@@ -320,5 +368,26 @@ export async function computeSemanticRecoveryMetrics({ groundTruth, recoveredSta
       detail.relationships.unmatchedGold.length && detail.relationships.unmatchedRecovered.length,
       detail.properties.unmatchedGold.some((p) => p.recoveredHostProperties.length),
       detail.properties.matchedControlledValue.length].filter(Boolean).length,
+    // Additive fields (existing callers only ever destructured the metrics
+    // fields above, via `"x" in result`-style checks, not a strict shape
+    // match -- see tests/ontology-recovery-llm-matching.spec.mjs's own live
+    // shape test) -- the full per-item judgments (MATCH and NO MATCH alike)
+    // plus each judge call's raw response text, for
+    // tests/evals/results/semantic-judgments.json and
+    // semantic-matches.json (reportGenerator.mjs's new writers).
+    judgments: { classes: classJudgments, relationships: relJudgments, properties: propJudgments, valueFidelity: fidelityJudgments },
+    rawResponses,
+    // The one-to-one-*resolved* MATCH pairs only (a subset of judgments.* --
+    // excludes NO MATCH items and, for classes/relationships, excludes any
+    // judge verdict that lost its conflict to a better-scoring rival under
+    // oneToOneMatchedIds). Properties/value-fidelity have no such conflict
+    // to resolve (see oneToOneMatchedIds's own comment), so their MATCH
+    // items are used directly. For tests/evals/results/semantic-matches.json.
+    resolvedMatches: {
+      classes: resolvedClassMatches,
+      relationships: resolvedRelMatches,
+      properties: propJudgments.filter((j) => j.verdict === "MATCH").map(({ goldId, matchedPropertyName }) => ({ goldId, matchedPropertyName })),
+      valueFidelity: fidelityJudgments.filter((j) => j.semanticFidelity !== null),
+    },
   };
 }

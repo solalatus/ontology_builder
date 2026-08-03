@@ -7,7 +7,7 @@ import {
   buildPropertyJudgePrompt, parsePropertyJudgeResponse,
   buildValueFidelityJudgePrompt, parseValueFidelityJudgeResponse,
   judgeClasses, judgeRelationships, judgeProperties, judgeValueFidelity,
-  computeSemanticRecoveryMetrics,
+  computeSemanticRecoveryMetrics, oneToOneMatchedIds,
 } from "./evals/lib/llmMatcher.mjs";
 
 // This file is the LLM-judge supplement's own test file -- deliberately
@@ -61,6 +61,47 @@ test("parseClassJudgeResponse ignores a MATCH referencing a candidate index that
   const recovered = [{ id: "r1", label: "X" }];
   const result = parseClassJudgeResponse("1: MATCH 99 -- hallucinated index", gold, recovered);
   assert.deepEqual(result, [{ goldId: "g1", recoveredId: null, verdict: "NO MATCH" }]);
+});
+
+// ONE-TO-ONE AGGREGATION -- fixes an external reviewer's confirmed finding:
+// the judge prompt only says "pick the single best [candidate]" per
+// REFERENCE line, so nothing stops two different REFERENCE lines from
+// independently picking the same CANDIDATE -- the same recall-inflates/
+// precision-doesn't asymmetry recoveryMetrics.mjs's matchClasses() had.
+// oneToOneMatchedIds (used inside computeSemanticRecoveryMetrics for both
+// classes and relationships) is what resolves that; tested directly here
+// since it's a pure function, no API call needed.
+
+test("oneToOneMatchedIds resolves two different gold items both judged MATCH against the same recovered id to only one of them", () => {
+  // Mirrors the reviewer's reported case: two different REFERENCE lines
+  // (e.g. "incidentCommander" and "majorIncident") both independently
+  // judged MATCH against the same CANDIDATE node.
+  const judgments = [
+    { goldId: "incidentCommander", recoveredId: "n7", verdict: "MATCH" },
+    { goldId: "majorIncident", recoveredId: "n7", verdict: "MATCH" },
+  ];
+  const { goldIds, recoveredIds } = oneToOneMatchedIds(judgments);
+  assert.equal(goldIds.size, 1, "only one gold item may keep its MATCH once the shared candidate is resolved one-to-one");
+  assert.equal(recoveredIds.size, 1);
+  assert.ok(goldIds.has("incidentCommander") || goldIds.has("majorIncident"));
+});
+
+test("oneToOneMatchedIds keeps every match when there's no conflict at all", () => {
+  const judgments = [
+    { goldId: "g1", recoveredId: "r1", verdict: "MATCH" },
+    { goldId: "g2", recoveredId: "r2", verdict: "MATCH" },
+    { goldId: "g3", recoveredId: null, verdict: "NO MATCH" },
+  ];
+  const { goldIds, recoveredIds } = oneToOneMatchedIds(judgments);
+  assert.deepEqual([...goldIds].sort(), ["g1", "g2"]);
+  assert.deepEqual([...recoveredIds].sort(), ["r1", "r2"]);
+});
+
+test("oneToOneMatchedIds on an all-NO-MATCH list returns empty sets, not a crash", () => {
+  const judgments = [{ goldId: "g1", recoveredId: null, verdict: "NO MATCH" }];
+  const { goldIds, recoveredIds } = oneToOneMatchedIds(judgments);
+  assert.equal(goldIds.size, 0);
+  assert.equal(recoveredIds.size, 0);
 });
 
 test("buildRelationshipJudgePrompt shows the reciprocal phrasing alongside the primary label and includes both endpoint class labels", () => {
@@ -190,7 +231,14 @@ test("live: computeSemanticRecoveryMetrics returns the same shape as the heurist
   const gt = loadGroundTruthModel();
   const scoped = scopeGroundTruth(gt, gt.practicalScopeClassIds, gt.practicalScopePropertyIds);
   const recoveredState = {
-    nodes: [{ id: "n1", label: "Incident", meaning: "an unplanned event", aliases: [], properties: [{ name: "sevLevel", allowed: ["sev1", "sev2"] }] }],
+    nodes: [
+      { id: "n1", label: "Incident", meaning: "an unplanned event", aliases: [], properties: [{ name: "sevLevel", allowed: ["sev1", "sev2"] }] },
+      // Deliberately unmatchable by the heuristic pass (no gold class in
+      // this fixture plausibly shares tokens with this label) -- guarantees
+      // detail.classes.unmatchedRecovered is non-empty, so judgeClasses
+      // actually makes its real API call below rather than short-circuiting.
+      { id: "n2", label: "Xyzzy Quux Zorbnak", meaning: "a deliberately unmatchable placeholder node", aliases: [] },
+    ],
     edges: [],
   };
   const heuristic = computeRecoveryMetrics(scoped, recoveredState);
@@ -199,4 +247,21 @@ test("live: computeSemanticRecoveryMetrics returns the same shape as the heurist
   assert.ok(semantic.classes.recall >= heuristic.classes.recall);
   assert.ok(semantic.relationships.recall >= heuristic.relationships.recall);
   assert.ok(semantic.properties.recall >= heuristic.properties.recall);
+
+  // The new reproducibility-artifact fields (tests/evals/results/
+  // semantic-judgments.json's source data): the class judge call this
+  // fixture actually triggers (recoveredState above leaves real unmatched
+  // gold classes and an unmatched recovered node) must have both its
+  // parsed per-item judgments and its raw response text captured, not
+  // silently discarded.
+  assert.ok(Array.isArray(semantic.judgments.classes) && semantic.judgments.classes.length > 0);
+  assert.equal(typeof semantic.rawResponses.classes, "string");
+  assert.ok(semantic.rawResponses.classes.length > 0, "the judge's raw class-judgment response text should be captured, not empty");
+  // judgments.* is always an array (even [] when that judge call never
+  // fired, e.g. valueFidelity here since this fixture's one property never
+  // heuristically matched a controlled-value gold property) -- structural
+  // shape, not a claim every judge call always fires for every fixture.
+  assert.ok(Array.isArray(semantic.judgments.relationships));
+  assert.ok(Array.isArray(semantic.judgments.properties));
+  assert.ok(Array.isArray(semantic.judgments.valueFidelity));
 });

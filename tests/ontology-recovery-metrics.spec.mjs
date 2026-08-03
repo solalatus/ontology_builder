@@ -6,7 +6,7 @@ import {
   isRecoverableProperty, isRecoverableRelationship, buildReducedActions,
   mergeReciprocalRelationshipPairs,
 } from "./evals/lib/groundTruthModel.mjs";
-import { computeRecoveryMetrics, computeMatchDetail, matchClasses } from "./evals/lib/recoveryMetrics.mjs";
+import { computeRecoveryMetrics, computeMatchDetail, matchClasses, computeHeuristicMatchPairs } from "./evals/lib/recoveryMetrics.mjs";
 
 // This file covers recoveryMetrics.mjs's own regex/token-overlap matcher
 // only -- deterministic, no API key, no network. The LLM-judge supplement
@@ -487,6 +487,55 @@ test("matchClasses is exported and produces the same class pairing computeRecove
   assert.equal(recoveredToGt.get("n1"), "incident");
 });
 
+// Regression test for an external reviewer's confirmed finding: one
+// recovered node whose aliases Jaccard-overlap two different gold classes
+// used to be counted as recovering *both* (recall inflated, since it counts
+// per gold class; precision not, since it dedupes per node) -- the reported
+// real example was an "Incident Commander" node's "major incident manager"
+// alias clearing the threshold against both incidentCommander and
+// majorIncident. matchClasses must now assign that node to only the
+// better-scoring gold class, one-to-one.
+test("matchClasses assigns one recovered node overlapping two gold classes to only the better-scoring class, not both", () => {
+  const groundTruth = {
+    classes: {
+      incidentCommander: { id: "incidentCommander", label: "Incident Commander", aliases: ["incident commander"] },
+      majorIncident: { id: "majorIncident", label: "Major Incident", aliases: ["major incident", "major incident manager"] },
+    },
+  };
+  // A single recovered node whose own alias list happens to also clear the
+  // Jaccard threshold against the majorIncident class's alias (0.6, right at
+  // CLASS_LABEL_MATCH_THRESHOLD -- confirmed by direct computation), in
+  // addition to its primary label matching incidentCommander exactly (1.0).
+  const nodes = [{ id: "n7", label: "Incident Commander", meaning: "", aliases: ["major incident manager on call"] }];
+  const { gtToRecovered, recoveredToGt } = matchClasses(groundTruth, nodes);
+
+  const matchedClassCount = [...gtToRecovered.values()].filter((ids) => ids.length).length;
+  assert.equal(matchedClassCount, 1, "only one gold class may claim the single recovered node");
+  assert.equal(recoveredToGt.get("n7"), "incidentCommander", "the exact-label match should win over the looser alias-only match");
+  assert.equal(gtToRecovered.has("majorIncident"), false, "majorIncident must be left unmatched, not double-counted");
+});
+
+// Same shape, but the conflict is on the recovered side: two different
+// recovered nodes both plausibly match one gold class. Only one may claim
+// it -- the other stays unmatched rather than inflating precision's
+// denominator coverage for a class it didn't actually distinguish.
+test("matchClasses assigns one gold class claimed by two recovered nodes to only the better-scoring node", () => {
+  const groundTruth = {
+    classes: { serviceOwner: { id: "serviceOwner", label: "Service Owner", aliases: ["service owner", "business service owner"] } },
+  };
+  const nodes = [
+    { id: "n1", label: "Service Owner", meaning: "", aliases: [] },
+    // Scores 0.75 against the gold class's "business service owner" alias
+    // (confirmed by direct computation) -- above threshold, but below n1's
+    // 1.0 exact match, so this is a real but losing candidate, not a tie.
+    { id: "n2", label: "Business Owner", meaning: "", aliases: ["business service owner group"] },
+  ];
+  const { gtToRecovered, recoveredToGt } = matchClasses(groundTruth, nodes);
+  assert.deepEqual(gtToRecovered.get("serviceOwner"), ["n1"], "the exact label match should win");
+  assert.equal(recoveredToGt.get("n1"), "serviceOwner");
+  assert.equal(recoveredToGt.has("n2"), false, "the displaced node must not also claim the class");
+});
+
 function twoClassGroundTruth(overrides = {}) {
   return {
     classes: {
@@ -595,4 +644,56 @@ test("computeMatchDetail reports a matched controlled-value property's heuristic
   assert.deepEqual(m.recoveredAllowedValues, ["Critical", "High"]);
   // Real heuristic score is low here (different label conventions) -- the whole point of the LLM re-score.
   assert.ok(m.heuristicFidelity < 0.5, `expected a low token-overlap fidelity score, got ${m.heuristicFidelity}`);
+});
+
+// computeHeuristicMatchPairs -- the tests/evals/results/heuristic-matches.json
+// source data (reportGenerator.mjs's new writer). Exercises all three
+// matched-pair kinds against one shared fixture.
+test("computeHeuristicMatchPairs reports exactly which gold item matched which recovered item, for classes, relationships, and properties", () => {
+  const groundTruth = twoClassGroundTruth({
+    relationships: [{ id: "rel1", label: "is supported by", fromClassId: "incident", toClassId: "evidence" }],
+    properties: [{ id: "prop1", label: "severity", classId: "incident" }],
+  });
+  const recoveredState = {
+    nodes: [
+      { id: "n1", label: "Incident", meaning: "", aliases: [], properties: [{ name: "severity", allowed: [] }] },
+      { id: "n2", label: "Evidence Item", meaning: "", aliases: [] },
+      { id: "n3", label: "Unrelated Node", meaning: "", aliases: [] }, // matches nothing, must not appear anywhere
+    ],
+    edges: [{ id: "e1", source: "n1", target: "n2", relation: "is supported by", aliases: [] }],
+  };
+  const pairs = computeHeuristicMatchPairs(groundTruth, recoveredState);
+
+  assert.equal(pairs.classes.length, 2);
+  const classById = new Map(pairs.classes.map((p) => [p.goldId, p]));
+  assert.equal(classById.get("incident").recoveredId, "n1");
+  assert.equal(classById.get("evidence").recoveredId, "n2");
+  assert.ok(classById.get("incident").weight > 0, "class matches should carry the similarity weight, not just the pairing");
+
+  assert.deepEqual(pairs.relationships, [{ goldId: "rel1", edgeId: "e1", direction: "forward" }]);
+  assert.deepEqual(pairs.properties, [{ goldId: "prop1", hostNodeId: "n1", matchedPropertyName: "severity" }]);
+});
+
+test("computeHeuristicMatchPairs returns empty arrays, not a crash, when nothing matches at all", () => {
+  const groundTruth = twoClassGroundTruth({
+    relationships: [{ id: "rel1", label: "is supported by", fromClassId: "incident", toClassId: "evidence" }],
+    properties: [{ id: "prop1", label: "severity", classId: "incident" }],
+  });
+  const pairs = computeHeuristicMatchPairs(groundTruth, { nodes: [], edges: [] });
+  assert.deepEqual(pairs, { classes: [], relationships: [], properties: [] });
+});
+
+test("computeHeuristicMatchPairs records a reciprocal-direction relationship match with direction: \"reciprocal\"", () => {
+  const groundTruth = twoClassGroundTruth({
+    relationships: [{ id: "rel1", label: "is supported by", reciprocalLabel: "documents", fromClassId: "incident", toClassId: "evidence" }],
+  });
+  const recoveredState = {
+    nodes: [
+      { id: "n1", label: "Incident", meaning: "", aliases: [] },
+      { id: "n2", label: "Evidence Item", meaning: "", aliases: [] },
+    ],
+    edges: [{ id: "e1", source: "n2", target: "n1", relation: "documents", aliases: [] }],
+  };
+  const pairs = computeHeuristicMatchPairs(groundTruth, recoveredState);
+  assert.deepEqual(pairs.relationships, [{ goldId: "rel1", edgeId: "e1", direction: "reciprocal" }]);
 });

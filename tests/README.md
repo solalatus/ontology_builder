@@ -20,9 +20,14 @@ Requires Playwright and a Chromium binary. If this repo has no local
 `node_modules`, install it first:
 
 ```sh
-npm install -D playwright
+npm install
 npx playwright install chromium
 ```
+
+Playwright is a pinned `devDependency` in `package.json` (`^1.56.1`, the
+version this project was actually developed and tested against), so plain
+`npm install` resolves it reproducibly — no separate `npm install -D
+playwright` step needed.
 
 `tests/lib/browser.mjs` also tolerates a Playwright installed globally
 outside the project (as pre-configured in the Claude Code sandbox this
@@ -32,11 +37,11 @@ as a normal project dependency, it falls back to that fixed path. That
 fallback is sandbox-specific and may not exist on your machine; the
 `npm install` path above is the portable one.
 
-`package.json`'s only committed dependency is `js-yaml`, used solely by the
-ontology-recovery eval (below) to parse its ground-truth fixture — plain
-`npm install` in the repo root picks it up. `index.html` itself remains a
-single dependency-free file regardless (spec.md Section 2); this is
-dev-only test tooling, same as Playwright.
+`package.json`'s other committed dependency is `js-yaml`, used solely by
+the ontology-recovery eval (below) to parse its ground-truth fixture —
+plain `npm install` in the repo root picks it up too. `index.html` itself
+remains a single dependency-free file regardless (spec.md Section 2); this
+is dev-only test tooling, same as Playwright.
 
 ## Layout
 
