@@ -1,0 +1,154 @@
+{
+  "fullDomain": {
+    "classes": [
+      {
+        "goldId": "itService",
+        "recoveredId": "n2"
+      },
+      {
+        "goldId": "communication",
+        "recoveredId": "n14"
+      }
+    ],
+    "relationships": [
+      {
+        "goldId": "incident_is_correlated_from_event",
+        "recoveredId": "e9"
+      },
+      {
+        "goldId": "incident_is_handled_with_runbook",
+        "recoveredId": "e10"
+      },
+      {
+        "goldId": "incident_is_recovered_with_recoveryPlan",
+        "recoveredId": "e35"
+      },
+      {
+        "goldId": "postIncidentReview_produces_correctiveAction",
+        "recoveredId": "e29"
+      }
+    ],
+    "properties": [
+      {
+        "goldId": "event_is_observed_at_timestamp",
+        "matchedPropertyName": "alertTime"
+      },
+      {
+        "goldId": "incident_has_category_incidentCategory",
+        "matchedPropertyName": "incidentType"
+      },
+      {
+        "goldId": "materialityAssessment_has_result_materialityResult",
+        "matchedPropertyName": "materialityOutcome"
+      },
+      {
+        "goldId": "regulatoryNotification_is_due_at_timestamp",
+        "matchedPropertyName": "reportingDeadline"
+      }
+    ],
+    "valueFidelity": [
+      {
+        "id": "stakeholder_has_audience_type_communicationAudience",
+        "semanticFidelity": 0.3
+      },
+      {
+        "id": "incident_has_status_incidentStatus",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "incident_has_severity_severityLevel",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "incident_has_impact_impactLevel",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "change_has_status_changeStatus",
+        "semanticFidelity": 0.8
+      },
+      {
+        "id": "backupSet_has_status_backupStatus",
+        "semanticFidelity": 0.71
+      },
+      {
+        "id": "evidenceItem_has_integrity_status_evidenceIntegrityStatus",
+        "semanticFidelity": 0.2
+      },
+      {
+        "id": "regulatoryNotification_has_status_notificationStatus",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "correctiveAction_has_status_correctiveActionStatus",
+        "semanticFidelity": 0.86
+      }
+    ]
+  },
+  "scoped": {
+    "classes": [
+      {
+        "goldId": "itService",
+        "recoveredId": "n2"
+      },
+      {
+        "goldId": "communication",
+        "recoveredId": "n14"
+      }
+    ],
+    "relationships": [
+      {
+        "goldId": "incident_is_handled_with_runbook",
+        "recoveredId": "e10"
+      },
+      {
+        "goldId": "incident_is_recovered_with_recoveryPlan",
+        "recoveredId": "e35"
+      },
+      {
+        "goldId": "materialityAssessment_triggers_regulatoryNotification",
+        "recoveredId": "e41"
+      }
+    ],
+    "properties": [
+      {
+        "goldId": "materialityAssessment_has_result_materialityResult",
+        "matchedPropertyName": "materialityOutcome"
+      },
+      {
+        "goldId": "regulatoryNotification_is_due_at_timestamp",
+        "matchedPropertyName": "reportingDeadline"
+      }
+    ],
+    "valueFidelity": [
+      {
+        "id": "incident_has_status_incidentStatus",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "incident_has_severity_severityLevel",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "incident_has_impact_impactLevel",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "change_has_status_changeStatus",
+        "semanticFidelity": 0.8
+      },
+      {
+        "id": "backupSet_has_status_backupStatus",
+        "semanticFidelity": 0.71
+      },
+      {
+        "id": "evidenceItem_has_integrity_status_evidenceIntegrityStatus",
+        "semanticFidelity": 0.2
+      },
+      {
+        "id": "regulatoryNotification_has_status_notificationStatus",
+        "semanticFidelity": 1
+      }
+    ]
+  }
+}
