@@ -5,9 +5,12 @@ import { loadEnvKey } from "../lib/env.mjs";
 import { connectAgentLive } from "../lib/liveOpenAi.mjs";
 import { runOntologyRecoveryConversation } from "./lib/conversationOrchestrator.mjs";
 import { loadGroundTruthModel, scopeGroundTruth } from "./lib/groundTruthModel.mjs";
-import { computeRecoveryMetrics } from "./lib/recoveryMetrics.mjs";
+import { computeRecoveryMetrics, computeHeuristicMatchPairs } from "./lib/recoveryMetrics.mjs";
 import { computeSemanticRecoveryMetrics } from "./lib/llmMatcher.mjs";
-import { writeConversationLog, computeOperationalStats, generateLlmReview, writeReport, writeToolCallLog } from "./lib/reportGenerator.mjs";
+import {
+  writeConversationLog, computeOperationalStats, generateLlmReview, writeReport, writeToolCallLog,
+  writeRecoveredModelYaml, writeHeuristicMatches, writeSemanticJudgments, writeSemanticMatches,
+} from "./lib/reportGenerator.mjs";
 
 // Ontology-recovery eval — see tests/evals/README.md for the full design
 // writeup. Not part of the default `node --test tests/*.spec.mjs` run
@@ -101,6 +104,14 @@ test(
         nodes: window.__kg.state.nodes,
         edges: window.__kg.state.edges,
       }));
+      // The exact YAML get_graph_state itself would return, captured
+      // directly rather than reconstructed by hand from tool-calls.md's
+      // last get_graph_state block (which can be stale if the model kept
+      // editing afterward without re-calling the tool) -- an external
+      // review flagged this as a real reproducibility gap.
+      const recoveredModelYaml = await page.evaluate(() => window.buildDomainYamlExport());
+      writeRecoveredModelYaml(recoveredModelYaml);
+
       const groundTruth = loadGroundTruthModel();
       const metrics = computeRecoveryMetrics(groundTruth, recoveredState);
       const scopedGroundTruth = scopeGroundTruth(groundTruth, groundTruth.practicalScopeClassIds, groundTruth.practicalScopePropertyIds);
@@ -109,6 +120,14 @@ test(
       assert.ok(Number.isFinite(metrics.recoveryEffectiveness), "composite score must be a real number, not NaN");
       assert.ok(metrics.classes.recall >= 0 && metrics.classes.recall <= 1);
       assert.ok(Number.isFinite(scopedMetrics.recoveryEffectiveness), "scoped composite score must be a real number, not NaN");
+
+      // Exactly which gold class/relationship/property matched which
+      // recovered node/edge/property name -- full domain only (practical
+      // scope's matches are always a subset of the same ids, so a second
+      // scoped pass would be redundant here, unlike the semantic judge
+      // passes below, which make genuinely separate API calls per
+      // denominator).
+      writeHeuristicMatches(computeHeuristicMatchPairs(groundTruth, recoveredState));
 
       const operationalStats = computeOperationalStats(orchestratorResult);
       writeConversationLog(orchestratorResult);
@@ -132,6 +151,8 @@ test(
         semanticMetrics = null;
         semanticScopedMetrics = null;
       }
+      writeSemanticJudgments({ fullDomain: semanticMetrics, scoped: semanticScopedMetrics });
+      writeSemanticMatches({ fullDomain: semanticMetrics, scoped: semanticScopedMetrics });
 
       writeReport({ metrics, scopedMetrics, semanticMetrics, semanticScopedMetrics, operationalStats, orchestratorResult, llmReviewText, interviewerModel, personaModel: PERSONA_MODEL, classifierModel });
     });

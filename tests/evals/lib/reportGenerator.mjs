@@ -30,6 +30,10 @@ export function pathsFor(dir = RESULTS_DIR) {
     logPath: path.join(dir, "conversation-log.md"),
     reportPath: path.join(dir, "report.md"),
     toolCallLogPath: path.join(dir, "tool-calls.md"),
+    recoveredModelYamlPath: path.join(dir, "recovered-model.yaml"),
+    heuristicMatchesPath: path.join(dir, "heuristic-matches.json"),
+    semanticJudgmentsPath: path.join(dir, "semantic-judgments.json"),
+    semanticMatchesPath: path.join(dir, "semantic-matches.json"),
   };
 }
 
@@ -41,7 +45,8 @@ function pct(x) {
 
 // Overwritten every run, not accumulated -- "full conversation logs,
 // overwritten at each pass" per the user's own instruction. Fixed filename,
-// gitignored (tests/evals/README.md).
+// committed with every PR that includes a live run, not gitignored (see the
+// .gitignore's own comment, and tests/evals/README.md).
 //
 // Also the live progress view: the eval spec's onProgress callback (see
 // conversationOrchestrator.mjs) calls this same function after every turn
@@ -255,6 +260,67 @@ export function writeReport({ metrics, scopedMetrics, semanticMetrics, semanticS
     "",
   );
   fs.writeFileSync(pathsFor(dir).reportPath, lines.join("\n"));
+}
+
+// REPRODUCIBILITY ARTIFACTS ------------------------------------------------
+// report.md only ever shows aggregate percentages -- verifying which
+// specific recovered item satisfied which gold item, or what a judge call
+// actually said before its verdict got folded into a Set, previously
+// required hand-parsing tool-calls.md (for the final graph) or wasn't
+// possible at all (judge raw text/per-item verdicts were computed then
+// discarded -- see llmMatcher.mjs's computeSemanticRecoveryMetrics). An
+// external review flagged this gap; these four files close it. Same
+// overwritten-every-run convention as the three files above, same {dir}
+// override for the mocked test suite.
+
+// The exact YAML get_graph_state itself would return, captured directly via
+// window.buildDomainYamlExport() rather than reconstructed from the last
+// get_graph_state tool call in tool-calls.md (which can be stale if the
+// model edited the ontology again afterward without re-calling the tool).
+export function writeRecoveredModelYaml(recoveredModelYaml, { dir = RESULTS_DIR } = {}) {
+  fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(pathsFor(dir).recoveredModelYamlPath, recoveredModelYaml);
+}
+
+// recoveryMetrics.mjs's computeHeuristicMatchPairs(groundTruth, recoveredState)
+// output, verbatim -- exactly which gold class/relationship/property matched
+// which recovered node/edge/property name, one-to-one for classes.
+export function writeHeuristicMatches(matchPairs, { dir = RESULTS_DIR } = {}) {
+  fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(pathsFor(dir).heuristicMatchesPath, JSON.stringify(matchPairs, null, 2));
+}
+
+// llmMatcher.mjs's computeSemanticRecoveryMetrics(...).judgments and
+// .rawResponses, verbatim, for both denominators -- every judge call's full
+// per-item verdicts (MATCH and NO MATCH alike, with the judge's own stated
+// reason where the parser captured one) plus the judge's raw response text
+// for each of the (up to four) calls actually made. Full-domain and
+// practical-scope are two genuinely separate sets of real API calls (a
+// narrower unmatchedGold under the scoped ground truth), not one result
+// shown twice -- same "always show both denominators, never one silently
+// replacing the other" convention as writeReport's own metrics/scopedMetrics
+// pair (see this file's module doc). Either `fullDomain`/`scoped` argument
+// is `null` when that semantic pass wasn't computed for this run at all (no
+// API budget, etc -- same condition writeReport already handles).
+export function writeSemanticJudgments({ fullDomain, scoped }, { dir = RESULTS_DIR } = {}) {
+  fs.mkdirSync(dir, { recursive: true });
+  const summarize = (semanticResult) => semanticResult
+    ? { judgments: semanticResult.judgments, rawResponses: semanticResult.rawResponses }
+    : { judgments: null, rawResponses: null, note: "Semantic pass not computed for this run." };
+  const body = { fullDomain: summarize(fullDomain), scoped: summarize(scoped) };
+  fs.writeFileSync(pathsFor(dir).semanticJudgmentsPath, JSON.stringify(body, null, 2));
+}
+
+// The MATCH-only, one-to-one-*resolved* subset of the above
+// (computeSemanticRecoveryMetrics's .resolvedMatches) -- the pairs actually
+// used to compute the semantic recall/precision numbers in report.md,
+// distinct from judgments.json's full MATCH-and-NO-MATCH record. Same
+// full-domain/practical-scope pairing as writeSemanticJudgments above.
+export function writeSemanticMatches({ fullDomain, scoped }, { dir = RESULTS_DIR } = {}) {
+  fs.mkdirSync(dir, { recursive: true });
+  const summarize = (semanticResult) => semanticResult ? semanticResult.resolvedMatches : { note: "Semantic pass not computed for this run." };
+  const body = { fullDomain: summarize(fullDomain), scoped: summarize(scoped) };
+  fs.writeFileSync(pathsFor(dir).semanticMatchesPath, JSON.stringify(body, null, 2));
 }
 
 // FULL TRANSPARENCY LOG ---------------------------------------------------
