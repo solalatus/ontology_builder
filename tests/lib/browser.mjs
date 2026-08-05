@@ -17,12 +17,28 @@ async function loadPlaywright() {
   }
 }
 
-const pw = await loadPlaywright();
-export const chromium = pw.default?.chromium ?? pw.chromium;
+// Resolved on first launch, not at import time. Top-level `await
+// loadPlaywright()` used to run whenever anything in this module's import
+// graph was loaded, so a script that only ever reads saved JSON off disk --
+// rescore-saved-run.mjs, which reaches this file transitively through
+// llmMatcher -> liveOpenAi -> page -- failed on a missing browser it never
+// intended to open. Offline re-scoring has to work without a browser or an
+// API key; that is the whole point of it.
+let pwPromise = null;
+async function playwright() {
+  if (!pwPromise) pwPromise = loadPlaywright();
+  return pwPromise;
+}
+
+export async function getChromium() {
+  const pw = await playwright();
+  return pw.default?.chromium ?? pw.chromium;
+}
 
 // This sandbox pre-installs Chromium outside Playwright's usual cache dir;
 // fall back to that explicit path if the default launch can't find a browser.
 export async function launchChromium(opts = {}) {
+  const chromium = await getChromium();
   try {
     return await chromium.launch(opts);
   } catch (err) {

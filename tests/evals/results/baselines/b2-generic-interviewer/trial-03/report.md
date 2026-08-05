@@ -2,16 +2,24 @@
 
 Generated: 2026-08-05T10:23:38.981Z
 
+> **Metric tables re-scored offline.** Properties were matched many-to-one when this run
+> executed; `matchProperties()` (`lib/recoveryMetrics.mjs`) now assigns them one-to-one, which
+> also gives the dimension a precision and an F1, and the composite averages property F1
+> rather than property recall. The two tables below are the current scorer's numbers over this
+> run's own persisted model and its own stored judge verdicts
+> (`node tests/evals/rescore-saved-run.mjs <this directory>`); no interview was re-run and no
+> judge was re-asked. Every other section is as this run wrote it.
+
 ## Heuristic (regex/token-overlap) metrics
 
 Two denominators, side by side: **full domain** is every class/relationship/property in the fixture's 68-class comprehensive reference model; **practical scope** is the subset the fixture's own canonical competency questions and actions actually talk about (see tests/evals/README.md) -- the ceiling a real, single-session, competency-driven interview could reach even with perfect elicitation. Full-domain numbers give context and cross-run comparability; practical-scope numbers are the more meaningful read of interview quality on their own.
 
 | Metric | Full domain | Practical scope | Detail |
 |---|---|---|---|
-| **Recovery effectiveness (composite)** | **15.6%** | **19.2%** | equal-weighted: class F1, relationship F1, property recall, value fidelity |
+| **Recovery effectiveness (composite)** | **16.1%** | **16.7%** | equal-weighted: class F1, relationship F1, property F1, value fidelity |
 | Class recall / precision / F1 | 26.5% / 78.3% / 39.6% | 46.4% / 56.5% / 51.0% | 18/68 full · 13/28 scoped ground-truth classes matched; 23 recovered |
 | Relationship recall / precision / F1 | 6.5% / 13.5% / 8.8% | 7.3% / 5.8% / 6.5% | 7/108 full · 3/41 scoped ground-truth relationships matched; 52 recovered (subclass/"is a" predicates excluded from both -- see README) |
-| Property recall | 11.7% | 19.2% | 13/111 full · 5/26 scoped ground-truth properties matched (technical identifier/URI fields excluded — see tests/evals/README.md) |
+| Property recall / precision / F1 | 11.7% / 16.3% / 13.6% | 19.2% / 6.3% / 9.4% | 13/111 full · 5/26 scoped ground-truth properties matched; 80 recovered (technical identifier/URI fields excluded — see tests/evals/README.md) |
 | Controlled-value fidelity | 2.5% | 0.0% | average allowed-value overlap across matched controlled-value properties |
 
 ## Semantic (LLM-adjudicated) metrics
@@ -20,10 +28,10 @@ Same two denominators, same table shape, computed by `llmMatcher.mjs`'s `compute
 
 | Metric | Full domain | Practical scope | Detail |
 |---|---|---|---|
-| **Recovery effectiveness (composite)** | **30.0%** | **35.2%** | equal-weighted: class F1, relationship F1, property recall, value fidelity |
+| **Recovery effectiveness (composite)** | **30.5%** | **32.3%** | equal-weighted: class F1, relationship F1, property F1, value fidelity |
 | Class recall / precision / F1 | 27.9% / 82.6% / 41.8% | 50.0% / 60.9% / 54.9% | 19/68 full · 14/28 scoped ground-truth classes matched; 23 recovered |
 | Relationship recall / precision / F1 | 11.1% / 23.1% / 15.0% | 14.6% / 11.5% / 12.9% | 12/108 full · 6/41 scoped ground-truth relationships matched; 52 recovered (subclass/"is a" predicates excluded from both -- see README) |
-| Property recall | 11.7% | 23.1% | 13/111 full · 6/26 scoped ground-truth properties matched (technical identifier/URI fields excluded — see tests/evals/README.md) |
+| Property recall / precision / F1 | 11.7% / 16.3% / 13.6% | 23.1% / 7.5% / 11.3% | 13/111 full · 6/26 scoped ground-truth properties matched; 80 recovered (technical identifier/URI fields excluded — see tests/evals/README.md) |
 | Controlled-value fidelity | 51.7% | 50.0% | average allowed-value overlap across matched controlled-value properties |
 
 ## Run stats

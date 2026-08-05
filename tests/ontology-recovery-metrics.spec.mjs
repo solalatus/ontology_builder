@@ -6,7 +6,7 @@ import {
   isRecoverableProperty, isRecoverableRelationship, buildReducedActions,
   mergeReciprocalRelationshipPairs,
 } from "./evals/lib/groundTruthModel.mjs";
-import { computeRecoveryMetrics, computeMatchDetail, matchClasses, computeHeuristicMatchPairs } from "./evals/lib/recoveryMetrics.mjs";
+import { computeRecoveryMetrics, computeMatchDetail, matchClasses, matchProperties, computeHeuristicMatchPairs, MATCH_THRESHOLDS } from "./evals/lib/recoveryMetrics.mjs";
 
 // This file covers recoveryMetrics.mjs's own regex/token-overlap matcher
 // only -- deterministic, no API key, no network. The LLM-judge supplement
@@ -696,4 +696,85 @@ test("computeHeuristicMatchPairs records a reciprocal-direction relationship mat
   };
   const pairs = computeHeuristicMatchPairs(groundTruth, recoveredState);
   assert.deepEqual(pairs.relationships, [{ goldId: "rel1", edgeId: "e1", direction: "reciprocal" }]);
+});
+
+// PROPERTY MATCHING IS ONE-TO-ONE, AND HAS A PRECISION -----------------
+// The property-level form of the many-to-one defect an external review found
+// at class level: one recovered property could satisfy several gold
+// properties at once, inflating recall against a dimension that had no
+// precision figure to pay for it.
+test("matchProperties assigns one recovered property overlapping two gold properties to only the better-scoring one", () => {
+  const groundTruth = {
+    classes: { incident: { id: "incident", label: "Incident", aliases: ["incident"] } },
+    relationships: [],
+    properties: [
+      { id: "incident_has_status", label: "has status", classId: "incident", allowedValues: null },
+      { id: "incident_has_status_reason", label: "has status reason", classId: "incident", allowedValues: null },
+    ],
+  };
+  const recovered = {
+    nodes: [{ id: "n1", label: "Incident", meaning: "", aliases: [], properties: [{ name: "status", type: "text", allowed: [] }] }],
+    edges: [],
+  };
+  const metrics = computeRecoveryMetrics(groundTruth, recovered);
+  assert.equal(metrics.properties.matched, 1, "one recovered property can satisfy exactly one gold property, not both");
+  assert.equal(metrics.properties.precision, 1, "and that single recovered property is fully accounted for on the precision side");
+});
+
+test("property precision is denominated on every recovered property, including ones on classes gold never matched", () => {
+  const groundTruth = {
+    classes: { incident: { id: "incident", label: "Incident", aliases: ["incident"] } },
+    relationships: [],
+    properties: [{ id: "incident_has_status", label: "has status", classId: "incident", allowedValues: null }],
+  };
+  const recovered = {
+    nodes: [
+      { id: "n1", label: "Incident", meaning: "", aliases: [], properties: [{ name: "status", type: "text", allowed: [] }, { name: "colour", type: "text", allowed: [] }] },
+      // A class gold has no counterpart for at all -- its properties still
+      // count against precision, the same way the class itself counts
+      // against class precision.
+      { id: "n2", label: "Weather", meaning: "", aliases: [], properties: [{ name: "temperature", type: "number", allowed: [] }] },
+    ],
+    edges: [],
+  };
+  const metrics = computeRecoveryMetrics(groundTruth, recovered);
+  assert.equal(metrics.properties.matched, 1);
+  assert.equal(metrics.properties.recall, 1);
+  assert.equal(metrics.properties.recoveredTotal, 3);
+  assert.equal(metrics.properties.precision, 1 / 3);
+  assert.equal(metrics.properties.f1, (2 * 1 * (1 / 3)) / (1 + 1 / 3));
+});
+
+test("computeMatchDetail never offers the LLM judge a recovered property the deterministic assignment already consumed", () => {
+  const groundTruth = {
+    classes: { incident: { id: "incident", label: "Incident", aliases: ["incident"] } },
+    relationships: [],
+    properties: [
+      { id: "incident_has_status", label: "has status", classId: "incident", allowedValues: null },
+      { id: "incident_has_severity", label: "has severity", classId: "incident", allowedValues: null },
+    ],
+  };
+  const recovered = {
+    nodes: [{ id: "n1", label: "Incident", meaning: "", aliases: [], properties: [{ name: "status", type: "text", allowed: [] }] }],
+    edges: [],
+  };
+  const detail = computeMatchDetail(groundTruth, recovered);
+  const severity = detail.properties.unmatchedGold.find((g) => g.id === "incident_has_severity");
+  assert.ok(severity, "severity is unmatched and should be offered to the judge");
+  assert.deepEqual(severity.recoveredHostProperties, [], "but 'status' is already taken by has-status, so there is nothing left to offer");
+});
+
+// Thresholds are parameters, so threshold-sensitivity.mjs can sweep them.
+test("computeRecoveryMetrics accepts explicit thresholds and defaults to MATCH_THRESHOLDS", () => {
+  const groundTruth = {
+    classes: { incident: { id: "incident", label: "Major Incident", aliases: ["major incident"] } },
+    relationships: [],
+    properties: [],
+  };
+  const recovered = { nodes: [{ id: "n1", label: "Incident", meaning: "", aliases: [], properties: [] }], edges: [] };
+  // "incident" vs "major incident": Jaccard 0.5 -- below the 0.6 default,
+  // above a 0.4 sweep point.
+  assert.equal(computeRecoveryMetrics(groundTruth, recovered).classes.matched, 0);
+  assert.equal(computeRecoveryMetrics(groundTruth, recovered, MATCH_THRESHOLDS).classes.matched, 0);
+  assert.equal(computeRecoveryMetrics(groundTruth, recovered, { class: 0.4, relationshipOrProperty: 0.3 }).classes.matched, 1);
 });

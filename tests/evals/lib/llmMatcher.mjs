@@ -301,6 +301,49 @@ export function oneToOneMatchedIds(judgments) {
   };
 }
 
+// Resolves the property judge's verdicts into a one-to-one assignment over
+// the *recovered* properties, the way oneToOneMatchedIds does for classes and
+// relationships.
+//
+// This used to be unnecessary: the property judge scopes each gold property
+// to its own already-matched host node's property list, so no two gold
+// properties on *different* classes can collide. Two gold properties on the
+// *same* class still can, and once properties gained a precision figure the
+// collision stopped being merely cosmetic -- crediting one recovered property
+// to two gold properties would count it twice in the recall numerator while
+// the precision denominator sees it once. Each judge MATCH is therefore
+// resolved to a concrete recovered-property key (node id + index within that
+// node, computeMatchDetail's own `recoveredHostPropertyKeys`), and a key
+// already taken by an earlier verdict is not handed out again.
+//
+// A judgment naming a property that is not on its gold item's offered list at
+// all (a judge hallucinating a name) resolves to no key: it still counts for
+// recall, exactly as before this function existed, but contributes nothing to
+// precision, since there is no recovered property it can be pointing at.
+export function resolvePropertyJudgments(judgments, propertyDetail) {
+  const offeredByGoldId = new Map(
+    (propertyDetail.unmatchedGold || []).map((g) => [g.id, { names: g.recoveredHostProperties || [], keys: g.recoveredHostPropertyKeys || [] }])
+  );
+  const taken = new Set(propertyDetail.matchedKeys || []);
+  const goldIds = new Set();
+  const recoveredKeys = new Set();
+  const resolved = [];
+  for (const j of judgments) {
+    if (j.verdict !== "MATCH") continue;
+    goldIds.add(j.goldId);
+    const offered = offeredByGoldId.get(j.goldId);
+    let key = null;
+    if (offered) {
+      for (let i = 0; i < offered.names.length; i++) {
+        if (offered.names[i] === j.matchedPropertyName && !taken.has(offered.keys[i])) { key = offered.keys[i]; break; }
+      }
+    }
+    if (key) { taken.add(key); recoveredKeys.add(key); }
+    resolved.push({ goldId: j.goldId, matchedPropertyName: j.matchedPropertyName, recoveredKey: key });
+  }
+  return { goldIds, recoveredKeys, matches: resolved };
+}
+
 // Orchestrates the full semantic pass: heuristic first (computeRecoveryMetrics/
 // computeMatchDetail, both untouched), then judges every residual, then
 // recomputes recall/precision/F1/composite on top of the heuristic counts
@@ -308,7 +351,6 @@ export function oneToOneMatchedIds(judgments) {
 // shape as computeRecoveryMetrics so reportGenerator.mjs can render both
 // side by side with one shared table-building function.
 export async function computeSemanticRecoveryMetrics({ groundTruth, recoveredState, apiKey, model }) {
-  const heuristic = computeRecoveryMetrics(groundTruth, recoveredState);
   const detail = computeMatchDetail(groundTruth, recoveredState);
 
   // Raw judge response text, captured via the onRawResponse callback rather
@@ -318,16 +360,47 @@ export async function computeSemanticRecoveryMetrics({ groundTruth, recoveredSta
   // flagged: today only aggregate percentages ever reach disk.
   const rawResponses = {};
 
-  const classJudgments = await judgeClasses({ apiKey, model, unmatchedGold: detail.classes.unmatchedGold, unmatchedRecovered: detail.classes.unmatchedRecovered, onRawResponse: (t) => { rawResponses.classes = t; } });
+  const classes = await judgeClasses({ apiKey, model, unmatchedGold: detail.classes.unmatchedGold, unmatchedRecovered: detail.classes.unmatchedRecovered, onRawResponse: (t) => { rawResponses.classes = t; } });
+  const relationships = await judgeRelationships({ apiKey, model, unmatchedGold: detail.relationships.unmatchedGold, unmatchedRecovered: detail.relationships.unmatchedRecovered, onRawResponse: (t) => { rawResponses.relationships = t; } });
+  const properties = await judgeProperties({ apiKey, model, unmatchedGold: detail.properties.unmatchedGold, onRawResponse: (t) => { rawResponses.properties = t; } });
+  const valueFidelity = await judgeValueFidelity({ apiKey, model, matchedControlledValue: detail.properties.matchedControlledValue, onRawResponse: (t) => { rawResponses.valueFidelity = t; } });
+
+  return { ...aggregateSemanticMetrics({ groundTruth, recoveredState, judgments: { classes, relationships, properties, valueFidelity } }), rawResponses };
+}
+
+// The pure, model-call-free half of the semantic pass: given a set of judge
+// verdicts (fresh from computeSemanticRecoveryMetrics above, or replayed from
+// a saved run's semantic-judgments.json), recompute every semantic metric.
+//
+// Split out so rescore-saved-run.mjs can re-derive a past run's numbers after
+// a scoring change with zero API calls and zero new verdicts -- which is the
+// only honest way to rescore: the judge was asked about the near-misses that
+// run left, and those questions and answers are fixed artifacts. Re-running
+// the judge would be a different measurement, not a re-score.
+export function aggregateSemanticMetrics({ groundTruth, recoveredState, judgments }) {
+  const heuristic = computeRecoveryMetrics(groundTruth, recoveredState);
+  const detail = computeMatchDetail(groundTruth, recoveredState);
+
+  // A verdict only ever *adds* to the heuristic pass, so it may only speak
+  // about an item that pass left unmatched. Live, that is automatic -- the
+  // judge is handed exactly those items. On a replay it is not: a scoring
+  // change can promote an item the judge was once asked about into a
+  // heuristic match, and counting the stored verdict too would credit the
+  // same gold item twice (recall) while precision saw it once. Verdicts about
+  // items the current heuristic pass already matched are therefore dropped,
+  // not added -- they cost nothing, since that item is already counted.
+  const stillUnmatched = (list) => new Set(list.map((g) => g.id));
+  const unmatchedClassIds = stillUnmatched(detail.classes.unmatchedGold);
+  const unmatchedRelIds = stillUnmatched(detail.relationships.unmatchedGold);
+  const unmatchedPropIds = stillUnmatched(detail.properties.unmatchedGold);
+  const classJudgments = (judgments.classes || []).filter((j) => unmatchedClassIds.has(j.goldId));
+  const relJudgments = (judgments.relationships || []).filter((j) => unmatchedRelIds.has(j.goldId));
+  const propJudgments = (judgments.properties || []).filter((j) => unmatchedPropIds.has(j.goldId));
+  const fidelityJudgments = judgments.valueFidelity || [];
+
   const { goldIds: extraGoldClassIds, recoveredIds: extraRecoveredNodeIds, matches: resolvedClassMatches } = oneToOneMatchedIds(classJudgments);
-
-  const relJudgments = await judgeRelationships({ apiKey, model, unmatchedGold: detail.relationships.unmatchedGold, unmatchedRecovered: detail.relationships.unmatchedRecovered, onRawResponse: (t) => { rawResponses.relationships = t; } });
   const { goldIds: extraGoldRelIds, recoveredIds: extraRecoveredEdgeIds, matches: resolvedRelMatches } = oneToOneMatchedIds(relJudgments);
-
-  const propJudgments = await judgeProperties({ apiKey, model, unmatchedGold: detail.properties.unmatchedGold, onRawResponse: (t) => { rawResponses.properties = t; } });
-  const extraGoldPropIds = new Set(propJudgments.filter((j) => j.verdict === "MATCH").map((j) => j.goldId));
-
-  const fidelityJudgments = await judgeValueFidelity({ apiKey, model, matchedControlledValue: detail.properties.matchedControlledValue, onRawResponse: (t) => { rawResponses.valueFidelity = t; } });
+  const { goldIds: extraGoldPropIds, recoveredKeys: extraRecoveredPropKeys } = resolvePropertyJudgments(propJudgments, detail.properties);
   const semanticFidelityById = new Map(fidelityJudgments.filter((j) => j.semanticFidelity !== null).map((j) => [j.id, j.semanticFidelity]));
 
   const classMatched = detail.classes.matchedGoldCount + extraGoldClassIds.size;
@@ -344,6 +417,9 @@ export async function computeSemanticRecoveryMetrics({ groundTruth, recoveredSta
 
   const propMatched = detail.properties.matchedGoldCount + extraGoldPropIds.size;
   const propertyRecall = detail.properties.goldTotal ? propMatched / detail.properties.goldTotal : 0;
+  const propPrecisionMatched = detail.properties.matchedRecoveredCount + extraRecoveredPropKeys.size;
+  const propertyPrecision = detail.properties.recoveredTotal ? propPrecisionMatched / detail.properties.recoveredTotal : 0;
+  const propertyF1 = f1(propertyRecall, propertyPrecision);
 
   // Value fidelity: the judge's semantic score replaces the heuristic
   // Jaccard score for a matched property only when it actually returned
@@ -354,14 +430,16 @@ export async function computeSemanticRecoveryMetrics({ groundTruth, recoveredSta
   );
   const controlledValueFidelity = fidelityScores.length ? fidelityScores.reduce((a, b) => a + b, 0) / fidelityScores.length : null;
 
-  const components = [classF1, relF1, propertyRecall];
+  // Same equal-weighted composite as computeRecoveryMetrics, and the property
+  // term is F1 there now too -- see its own comment on why that changed.
+  const components = [classF1, relF1, propertyF1];
   if (controlledValueFidelity !== null) components.push(controlledValueFidelity);
   const recoveryEffectiveness = components.reduce((a, b) => a + b, 0) / components.length;
 
   return {
     classes: { recall: classRecall, precision: classPrecision, f1: classF1, matched: classMatched, groundTruthTotal: detail.classes.goldTotal, recoveredTotal: detail.classes.recoveredTotal },
     relationships: { recall: relRecall, precision: relPrecision, f1: relF1, matched: relMatched, groundTruthTotal: detail.relationships.goldTotal, recoveredTotal: detail.relationships.recoveredTotal },
-    properties: { recall: propertyRecall, matched: propMatched, groundTruthTotal: detail.properties.goldTotal },
+    properties: { recall: propertyRecall, precision: propertyPrecision, f1: propertyF1, matched: propMatched, groundTruthTotal: detail.properties.goldTotal, recoveredTotal: detail.properties.recoveredTotal },
     controlledValueFidelity,
     recoveryEffectiveness,
     judgeCallCount: [detail.classes.unmatchedGold.length && detail.classes.unmatchedRecovered.length,
@@ -376,18 +454,19 @@ export async function computeSemanticRecoveryMetrics({ groundTruth, recoveredSta
     // tests/evals/results/semantic-judgments.json and
     // semantic-matches.json (reportGenerator.mjs's new writers).
     judgments: { classes: classJudgments, relationships: relJudgments, properties: propJudgments, valueFidelity: fidelityJudgments },
-    rawResponses,
     // The one-to-one-*resolved* MATCH pairs only (a subset of judgments.* --
-    // excludes NO MATCH items and, for classes/relationships, excludes any
-    // judge verdict that lost its conflict to a better-scoring rival under
-    // oneToOneMatchedIds). Properties/value-fidelity have no such conflict
-    // to resolve (see oneToOneMatchedIds's own comment), so their MATCH
-    // items are used directly. For tests/evals/results/semantic-matches.json.
+    // excludes NO MATCH items and any judge verdict that lost its conflict to
+    // a rival under oneToOneMatchedIds / resolvePropertyJudgments). For
+    // tests/evals/results/semantic-matches.json. Heuristic counts the run was
+    // built on travel alongside them, so a rescore can be checked against the
+    // pass it was layered onto.
     resolvedMatches: {
       classes: resolvedClassMatches,
       relationships: resolvedRelMatches,
-      properties: propJudgments.filter((j) => j.verdict === "MATCH").map(({ goldId, matchedPropertyName }) => ({ goldId, matchedPropertyName })),
+      properties: resolvePropertyJudgments(propJudgments, detail.properties).matches
+        .map(({ goldId, matchedPropertyName }) => ({ goldId, matchedPropertyName })),
       valueFidelity: fidelityJudgments.filter((j) => j.semanticFidelity !== null),
     },
+    heuristic,
   };
 }

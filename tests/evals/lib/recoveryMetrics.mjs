@@ -147,7 +147,7 @@ function f1(recall, precision) {
 // values are still arrays for call-site compatibility, just capped at
 // length 1 now; no downstream relationship/property-matching code needed to
 // change, since it only ever consumes these two maps as data.
-export function matchClasses(groundTruth, recoveredNodes) {
+export function matchClasses(groundTruth, recoveredNodes, thresholds = MATCH_THRESHOLDS) {
   const candidateEdges = [];
   for (const gtClass of Object.values(groundTruth.classes)) {
     for (const node of recoveredNodes) {
@@ -159,7 +159,7 @@ export function matchClasses(groundTruth, recoveredNodes) {
           if (score > bestScore) bestScore = score;
         }
       }
-      if (bestScore >= CLASS_LABEL_MATCH_THRESHOLD) {
+      if (bestScore >= thresholds.class) {
         candidateEdges.push({ left: gtClass.id, right: node.id, weight: bestScore });
       }
     }
@@ -179,10 +179,68 @@ export function matchClasses(groundTruth, recoveredNodes) {
   return { gtToRecovered, recoveredToGt, matches: assignment.map(({ left, right, weight }) => ({ goldId: left, recoveredId: right, weight })) };
 }
 
-export function computeRecoveryMetrics(groundTruth, recoveredState) {
+// Builds { goldPropertyId -> recovered property } the same way matchClasses
+// builds its class assignment: every gold property whose host class matched
+// contributes a weighted candidate edge to each property of that matched
+// node clearing REL_PROP_LABEL_MATCH_THRESHOLD, and maxWeightBipartiteMatching
+// picks the globally optimal assignment.
+//
+// One-to-one for the same reason classes are. The earlier per-gold-property
+// `.find()` accepted the first threshold-passing property independently for
+// each gold property, so one recovered property could be credited to several
+// gold properties at once -- the property-level form of the many-to-one
+// defect an external review found at class level. It also left the dimension
+// with no precision figure at all, because a recovered property was never
+// consumed by exactly one gold property and so could not be counted against
+// a denominator. The assignment below fixes both: `matchedKeys.size` is
+// simultaneously the recall numerator and the precision numerator.
+//
+// Recovered properties are keyed by node id plus their index within that
+// node, not by name, so two same-named properties on one node stay distinct
+// candidates instead of silently collapsing into one.
+export function matchProperties(groundTruth, recoveredNodes, gtToRecovered, thresholds = MATCH_THRESHOLDS) {
+  const nodesById = new Map(recoveredNodes.map((n) => [n.id, n]));
+  const propertyByKey = new Map();
+  const candidateEdges = [];
+  for (const prop of groundTruth.properties) {
+    for (const nodeId of gtToRecovered.get(prop.classId) || []) {
+      const node = nodesById.get(nodeId);
+      if (!node) continue;
+      (node.properties || []).forEach((p, index) => {
+        const key = `${nodeId}::${index}`;
+        propertyByKey.set(key, { nodeId, index, property: p });
+        const score = labelSimilarity(prop.label, p.name);
+        if (score >= thresholds.relationshipOrProperty) {
+          candidateEdges.push({ left: prop.id, right: key, weight: score });
+        }
+      });
+    }
+  }
+  const assignment = maxWeightBipartiteMatching(candidateEdges);
+  const goldToRecovered = new Map();
+  for (const { left, right } of assignment) {
+    goldToRecovered.set(left, { key: right, ...propertyByKey.get(right) });
+  }
+  // Precision denominator: every property of every recovered class, matched
+  // host class or not -- the same "complete recovered set of that kind" rule
+  // classes and relationships already use, so a model that invents
+  // properties on classes gold never had is penalised the same way one that
+  // invents whole classes is.
+  const recoveredTotal = recoveredNodes.reduce((a, n) => a + (n.properties || []).length, 0);
+  return {
+    goldToRecovered,
+    matchedKeys: new Set(assignment.map((e) => e.right)),
+    recoveredTotal,
+    matches: assignment.map(({ left, right, weight }) => ({
+      goldId: left, recoveredId: right, recoveredName: (propertyByKey.get(right) || {}).property?.name, weight,
+    })),
+  };
+}
+
+export function computeRecoveryMetrics(groundTruth, recoveredState, thresholds = MATCH_THRESHOLDS) {
   const nodes = recoveredState.nodes || [];
   const edges = recoveredState.edges || [];
-  const { gtToRecovered, recoveredToGt } = matchClasses(groundTruth, nodes);
+  const { gtToRecovered, recoveredToGt } = matchClasses(groundTruth, nodes, thresholds);
 
   // Classes
   const classMatchedCount = gtToRecovered.size;
@@ -202,7 +260,7 @@ export function computeRecoveryMetrics(groundTruth, recoveredState) {
   // one-sided widening on the recovered side only.
   function edgeLabelMatchesGt(gtLabel, edge) {
     const candidates = [edge.relation, ...(edge.aliases || [])];
-    return candidates.some((c) => labelsMatch(gtLabel, c, REL_PROP_LABEL_MATCH_THRESHOLD));
+    return candidates.some((c) => labelsMatch(gtLabel, c, thresholds.relationshipOrProperty));
   }
   // A gt relationship carrying `reciprocalLabel` (groundTruthModel.mjs's
   // mergeReciprocalRelationshipPairs) represents one real-world connection
@@ -239,46 +297,43 @@ export function computeRecoveryMetrics(groundTruth, recoveredState) {
   const relPrecision = edges.length ? recoveredRelMatchedToGt / edges.length : 0;
 
   // Properties (+ controlled-value fidelity for matched controlled-value properties)
-  let propMatched = 0;
+  const propMatch = matchProperties(groundTruth, nodes, gtToRecovered, thresholds);
+  const propMatched = propMatch.goldToRecovered.size;
   const fidelityScores = [];
   for (const prop of groundTruth.properties) {
-    const nodeIds = gtToRecovered.get(prop.classId) || [];
-    let matchedProp = null;
-    for (const nodeId of nodeIds) {
-      const node = nodes.find((n) => n.id === nodeId);
-      if (!node) continue;
-      const hit = (node.properties || []).find((p) => labelsMatch(prop.label, p.name, REL_PROP_LABEL_MATCH_THRESHOLD));
-      if (hit) { matchedProp = hit; break; }
-    }
-    if (matchedProp) {
-      propMatched++;
-      if (prop.allowedValues && prop.allowedValues.length) {
-        fidelityScores.push(jaccard(prop.allowedValues, matchedProp.allowed || []));
-      }
+    const hit = propMatch.goldToRecovered.get(prop.id);
+    if (hit && prop.allowedValues && prop.allowedValues.length) {
+      fidelityScores.push(jaccard(prop.allowedValues, hit.property.allowed || []));
     }
   }
   const propertyRecall = groundTruth.properties.length ? propMatched / groundTruth.properties.length : 0;
+  const propertyPrecision = propMatch.recoveredTotal ? propMatch.matchedKeys.size / propMatch.recoveredTotal : 0;
   const controlledValueFidelity = fidelityScores.length
     ? fidelityScores.reduce((a, b) => a + b, 0) / fidelityScores.length : null;
 
   const classF1 = f1(classRecall, classPrecision);
   const relationshipF1 = f1(relRecall, relPrecision);
+  const propertyF1 = f1(propertyRecall, propertyPrecision);
 
   // Composite "recovery effectiveness": equal-weighted average of the four
-  // headline dimensions (class F1, relationship F1, property recall, value
+  // headline dimensions (class F1, relationship F1, property F1, value
   // fidelity) -- a documented default, not a derived/statistically-fit
   // weighting. Value fidelity is excluded from the average (treated as 0
   // contribution weight) when no controlled-value property was ever
   // matched, rather than penalizing a short interview that just never
-  // reached that territory.
-  const components = [classF1, relationshipF1, propertyRecall];
+  // reached that territory. The property term was property *recall* until
+  // that dimension gained a precision figure (matchProperties above); it is
+  // F1 now, so all three dimensions enter the composite like for like and a
+  // model that lists many unmatched properties no longer scores as well here
+  // as one that lists only the ones gold actually has.
+  const components = [classF1, relationshipF1, propertyF1];
   if (controlledValueFidelity !== null) components.push(controlledValueFidelity);
   const recoveryEffectiveness = components.reduce((a, b) => a + b, 0) / components.length;
 
   return {
     classes: { recall: classRecall, precision: classPrecision, f1: classF1, matched: classMatchedCount, groundTruthTotal: Object.keys(groundTruth.classes).length, recoveredTotal: nodes.length },
     relationships: { recall: relRecall, precision: relPrecision, f1: relationshipF1, matched: relMatched, groundTruthTotal: groundTruth.relationships.length, recoveredTotal: edges.length },
-    properties: { recall: propertyRecall, matched: propMatched, groundTruthTotal: groundTruth.properties.length },
+    properties: { recall: propertyRecall, precision: propertyPrecision, f1: propertyF1, matched: propMatched, groundTruthTotal: groundTruth.properties.length, recoveredTotal: propMatch.recoveredTotal },
     controlledValueFidelity,
     recoveryEffectiveness,
   };
@@ -305,10 +360,10 @@ export function computeRecoveryMetrics(groundTruth, recoveredState) {
 // unmatched classes. This keeps the LLM judge's job to exactly the "same
 // concept, different words" question it's actually good at, not asked to
 // also re-derive class-level matching from scratch.
-export function computeMatchDetail(groundTruth, recoveredState) {
+export function computeMatchDetail(groundTruth, recoveredState, thresholds = MATCH_THRESHOLDS) {
   const nodes = recoveredState.nodes || [];
   const edges = recoveredState.edges || [];
-  const { gtToRecovered, recoveredToGt } = matchClasses(groundTruth, nodes);
+  const { gtToRecovered, recoveredToGt } = matchClasses(groundTruth, nodes, thresholds);
 
   const matchedGtClassIds = new Set(gtToRecovered.keys());
   const matchedRecoveredNodeIds = new Set(recoveredToGt.keys());
@@ -321,7 +376,7 @@ export function computeMatchDetail(groundTruth, recoveredState) {
 
   function edgeLabelMatchesGt(gtLabel, edge) {
     const candidates = [edge.relation, ...(edge.aliases || [])];
-    return candidates.some((c) => labelsMatch(gtLabel, c, REL_PROP_LABEL_MATCH_THRESHOLD));
+    return candidates.some((c) => labelsMatch(gtLabel, c, thresholds.relationshipOrProperty));
   }
   function relationshipHeuristicMatch(rel, fromNodeIds, toNodeIds) {
     const forward = edges.some((e) => fromNodeIds.has(e.source) && toNodeIds.has(e.target) && edgeLabelMatchesGt(rel.label, e));
@@ -369,6 +424,7 @@ export function computeMatchDetail(groundTruth, recoveredState) {
     }
   }
 
+  const propMatch = matchProperties(groundTruth, nodes, gtToRecovered, thresholds);
   const unmatchedGoldProperties = [];
   const matchedControlledValueProperties = [];
   let propEligibleCount = 0, propMatchedCount = 0;
@@ -376,18 +432,25 @@ export function computeMatchDetail(groundTruth, recoveredState) {
     const nodeIds = gtToRecovered.get(prop.classId) || [];
     if (!nodeIds.length) continue; // host class never matched -- not a wording question
     propEligibleCount++;
-    let matchedProp = null;
-    for (const nodeId of nodeIds) {
-      const node = nodes.find((n) => n.id === nodeId);
-      if (!node) continue;
-      const hit = (node.properties || []).find((p) => labelsMatch(prop.label, p.name, REL_PROP_LABEL_MATCH_THRESHOLD));
-      if (hit) { matchedProp = hit; break; }
-    }
+    const hit = propMatch.goldToRecovered.get(prop.id);
+    const matchedProp = hit ? hit.property : null;
     if (!matchedProp) {
       const hostNode = nodes.find((n) => nodeIds.includes(n.id));
+      // The judge is offered the host node's properties that the
+      // deterministic assignment did not already consume -- offering it one
+      // another gold property already owns would let the semantic pass
+      // reintroduce exactly the many-to-one crediting matchProperties exists
+      // to prevent. The parallel `...Keys` array lets llmMatcher.mjs resolve
+      // a judge's chosen name back to the one recovered property it refers
+      // to, for the semantic pass's own precision denominator.
+      const offered = (hostNode && hostNode.properties || [])
+        .map((p, index) => ({ name: p.name, key: `${hostNode.id}::${index}` }))
+        .filter((p) => !propMatch.matchedKeys.has(p.key));
       unmatchedGoldProperties.push({
         id: prop.id, label: prop.label, hostClassLabel: labelOf(prop.classId),
-        recoveredHostProperties: (hostNode && hostNode.properties || []).map((p) => p.name),
+        hostNodeId: (hostNode && hostNode.id) || null,
+        recoveredHostProperties: offered.map((p) => p.name),
+        recoveredHostPropertyKeys: offered.map((p) => p.key),
       });
     } else {
       propMatchedCount++;
@@ -417,6 +480,11 @@ export function computeMatchDetail(groundTruth, recoveredState) {
     properties: {
       unmatchedGold: unmatchedGoldProperties, matchedControlledValue: matchedControlledValueProperties,
       matchedGoldCount: propMatchedCount, eligibleGoldCount: propEligibleCount, goldTotal: groundTruth.properties.length,
+      // Precision-side counts, mirroring the class/relationship blocks above,
+      // so the semantic pass can compute a property precision on the same
+      // denominator the deterministic pass uses.
+      matchedRecoveredCount: propMatch.matchedKeys.size, recoveredTotal: propMatch.recoveredTotal,
+      matchedKeys: [...propMatch.matchedKeys],
     },
   };
 }
@@ -434,14 +502,14 @@ export function computeMatchDetail(groundTruth, recoveredState) {
 // them required hand-parsing tool-calls.md. Classes reuse matchClasses's
 // own `matches` field directly rather than re-deriving it a third time,
 // since that one-to-one assignment is exactly what's needed here too.
-export function computeHeuristicMatchPairs(groundTruth, recoveredState) {
+export function computeHeuristicMatchPairs(groundTruth, recoveredState, thresholds = MATCH_THRESHOLDS) {
   const nodes = recoveredState.nodes || [];
   const edges = recoveredState.edges || [];
-  const { gtToRecovered, matches: classMatches } = matchClasses(groundTruth, nodes);
+  const { gtToRecovered, matches: classMatches } = matchClasses(groundTruth, nodes, thresholds);
 
   function edgeLabelMatchesGt(gtLabel, edge) {
     const candidates = [edge.relation, ...(edge.aliases || [])];
-    return candidates.some((c) => labelsMatch(gtLabel, c, REL_PROP_LABEL_MATCH_THRESHOLD));
+    return candidates.some((c) => labelsMatch(gtLabel, c, thresholds.relationshipOrProperty));
   }
 
   const relationshipMatches = [];
@@ -457,16 +525,12 @@ export function computeHeuristicMatchPairs(groundTruth, recoveredState) {
     }
   }
 
-  const propertyMatches = [];
-  for (const prop of groundTruth.properties) {
-    const nodeIds = gtToRecovered.get(prop.classId) || [];
-    for (const nodeId of nodeIds) {
-      const node = nodes.find((n) => n.id === nodeId);
-      if (!node) continue;
-      const hit = (node.properties || []).find((p) => labelsMatch(prop.label, p.name, REL_PROP_LABEL_MATCH_THRESHOLD));
-      if (hit) { propertyMatches.push({ goldId: prop.id, hostNodeId: nodeId, matchedPropertyName: hit.name }); break; }
-    }
-  }
+  // Properties reuse matchProperties's one-to-one assignment for the same
+  // reason classes reuse matchClasses's: it is exactly the pairing the
+  // reported numbers were computed from, so heuristic-matches.json records
+  // what actually produced them rather than a second, looser re-derivation.
+  const propertyMatches = [...matchProperties(groundTruth, nodes, gtToRecovered, thresholds).goldToRecovered]
+    .map(([goldId, hit]) => ({ goldId, hostNodeId: hit.nodeId, matchedPropertyName: hit.property.name }));
 
   return { classes: classMatches, relationships: relationshipMatches, properties: propertyMatches };
 }

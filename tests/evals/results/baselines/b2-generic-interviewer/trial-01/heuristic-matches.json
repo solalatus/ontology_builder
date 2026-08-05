@@ -205,11 +205,6 @@
       "matchedPropertyName": "communicationStatus"
     },
     {
-      "goldId": "correctiveAction_has_action_description_text",
-      "hostNodeId": "n85",
-      "matchedPropertyName": "actionStatus"
-    },
-    {
       "goldId": "correctiveAction_has_status_correctiveActionStatus",
       "hostNodeId": "n85",
       "matchedPropertyName": "actionStatus"

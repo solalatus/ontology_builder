@@ -54,9 +54,15 @@ készült változat kerülhet.
 
 A `score-baseline.mjs` dimenziónként (osztály / kapcsolat / property),
 mindkét nevezőn (full domain, practical scope) kiírja a baseline és az
-interaktív futás számát — osztály/kapcsolat: F1; property: recall (ennek a
-dimenziónak jelenleg nincs saját precision/F1 mutatója a kódban) —, plusz a
-különbséget. Pozitív delta = az interaktív ágens jobb.
+interaktív futás **F1**-ét, plusz a különbséget. Pozitív delta = az interaktív
+ágens jobb.
+
+Mind a három dimenzió F1-et kap: a property-k párosítása is egy-az-egyben megy
+(`matchProperties()`), így ennek a dimenziónak is van precision-je. Ez pont itt
+számít a legtöbbet — egy olyan feltétel, ami sok, a referenciában nem létező
+property-t sorol fel, a puszta lefedettségen jól nézne ki.
+
+Az összesített eredmény: `results/baselines/README.md`.
 
 ## Két dolog, amit a szkript szándékosan így csinál
 

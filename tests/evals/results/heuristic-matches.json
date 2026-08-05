@@ -135,11 +135,6 @@
       "matchedPropertyName": "summary"
     },
     {
-      "goldId": "incident_is_detected_at_timestamp",
-      "hostNodeId": "n1",
-      "matchedPropertyName": "openedAt"
-    },
-    {
       "goldId": "incident_is_opened_at_timestamp",
       "hostNodeId": "n1",
       "matchedPropertyName": "openedAt"
@@ -147,12 +142,7 @@
     {
       "goldId": "incident_is_resolved_at_timestamp",
       "hostNodeId": "n1",
-      "matchedPropertyName": "openedAt"
-    },
-    {
-      "goldId": "incident_is_closed_at_timestamp",
-      "hostNodeId": "n1",
-      "matchedPropertyName": "openedAt"
+      "matchedPropertyName": "resolvedAt"
     },
     {
       "goldId": "incident_has_status_incidentStatus",

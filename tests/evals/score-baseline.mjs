@@ -24,13 +24,15 @@
 // so in its output. That is the honest comparison: the same fixed rule
 // applied to both models.
 //
-// NOTE on properties: computeRecoveryMetrics()'s `properties` dimension has
-// only `recall` (no `f1`/`precision` -- properties are matched by a one-sided
-// lookup against each matched class's recovered fields, with no equivalent
-// "does every recovered property correspond to a real gold property"
-// precision computation anywhere in this codebase). The class/relationship
-// rows below compare F1; the property row compares recall -- this is not an
-// oversight, it's the only number that dimension actually has.
+// NOTE on properties: all three dimensions compare F1. Properties used to
+// have recall only, because they were matched by a one-sided lookup that
+// could credit one recovered property to several gold properties and so
+// supported no precision denominator. matchProperties() (recoveryMetrics.mjs)
+// now assigns them one-to-one like classes and relationships, which is what
+// makes a property precision -- and therefore a like-for-like comparison
+// across all three dimensions -- well defined. This matters most here: a
+// condition that emits many properties gold never had used to look strong on
+// coverage alone.
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -110,12 +112,12 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   console.log("the judge was asked about the interactive runs' specific near-misses, not this condition's.\n");
   console.log("run      scope      dimension      baseline   interactive   delta");
   for (const { runId, scopeLabel, b, i } of rows) {
-    for (const [dim, key, metric] of [["class", "classes", "f1"], ["relationship", "relationships", "f1"], ["property", "properties", "recall"]]) {
-      const bf = b[key][metric], inf = i[key][metric];
+    for (const [dim, key] of [["class", "classes"], ["relationship", "relationships"], ["property", "properties"]]) {
+      const bf = b[key].f1, inf = i[key].f1;
       const delta = (inf - bf) * 100;
       const sign = delta > 0 ? "+" : "";
       console.log(
-        `${runId}  ${scopeLabel.padEnd(9)}  ${(dim + (metric === "recall" ? " (recall)" : " (F1)")).padEnd(19)}  ${pct(bf).padStart(7)}   ${pct(inf).padStart(9)}   ${sign}${delta.toFixed(0)} pts`
+        `${runId}  ${scopeLabel.padEnd(9)}  ${(dim + " (F1)").padEnd(19)}  ${pct(bf).padStart(7)}   ${pct(inf).padStart(9)}   ${sign}${delta.toFixed(1)} pts`
       );
     }
   }

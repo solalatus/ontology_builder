@@ -215,11 +215,6 @@
       "matchedPropertyName": "notificationStatus"
     },
     {
-      "goldId": "correctiveAction_has_action_description_text",
-      "hostNodeId": "n16",
-      "matchedPropertyName": "actionStatus"
-    },
-    {
       "goldId": "correctiveAction_has_status_correctiveActionStatus",
       "hostNodeId": "n16",
       "matchedPropertyName": "actionStatus"

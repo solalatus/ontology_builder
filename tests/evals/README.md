@@ -76,7 +76,7 @@ check, or run it for real via `node --test`.
    - `heuristic-matches.json` — `lib/recoveryMetrics.mjs`'s
      `computeHeuristicMatchPairs()` output: exactly which gold
      class/relationship/property matched which recovered
-     node/edge/property name (one-to-one for classes — see "Metrics"
+     node/edge/property name (one-to-one throughout — see "Metrics"
      below), full domain only (practical-scope matches are always a subset
      of the same ids).
    - `semantic-judgments.json` / `semantic-matches.json` — the LLM judge's
@@ -317,13 +317,19 @@ recovered item is used at most once. `results/heuristic-matches.json` and
 resulting pairing directly auditable, rather than trusting the aggregate
 percentage alone.
 
-- **Class / relationship recall, precision, F1** — standard set-comparison
-  metrics between the ground truth and the recovered canvas model.
-- **Property recall** — ground-truth properties (post-filter) recovered as
-  a property on the matched class.
+- **Class / relationship / property recall, precision, F1** — standard
+  set-comparison metrics between the ground truth and the recovered canvas
+  model. A property is recovered when it appears on the matched host class;
+  all three dimensions are matched one-to-one (`matchClasses()`,
+  `matchProperties()`), so each precision is denominated on the complete
+  recovered set of that kind and no recovered element can be credited twice.
+  Property precision matters more than it might sound: recovered models list
+  41–135 properties each, and most of them match nothing in the reference, so
+  property coverage read on its own overstates that layer substantially.
 - **Controlled-value fidelity** — average allowed-value-list overlap
   (Jaccard) across matched controlled-value properties.
-- **Recovery effectiveness** — equal-weighted average of the four above
+- **Recovery effectiveness** — equal-weighted average of the three F1s and
+  value fidelity above
   (value fidelity excluded from the average on runs that never matched a
   controlled-value property, rather than penalizing a short interview that
   never reached that territory). A documented default weighting, not a

@@ -187,7 +187,7 @@
     {
       "goldId": "event_has_event_type_text",
       "hostNodeId": "n3",
-      "matchedPropertyName": "eventId"
+      "matchedPropertyName": "eventType"
     },
     {
       "goldId": "alert_is_raised_at_timestamp",
@@ -202,7 +202,7 @@
     {
       "goldId": "incident_is_detected_at_timestamp",
       "hostNodeId": "n1",
-      "matchedPropertyName": "openedAt"
+      "matchedPropertyName": "acknowledgedAt"
     },
     {
       "goldId": "incident_is_opened_at_timestamp",
@@ -212,12 +212,12 @@
     {
       "goldId": "incident_is_resolved_at_timestamp",
       "hostNodeId": "n1",
-      "matchedPropertyName": "openedAt"
+      "matchedPropertyName": "resolvedAt"
     },
     {
       "goldId": "incident_is_closed_at_timestamp",
       "hostNodeId": "n1",
-      "matchedPropertyName": "openedAt"
+      "matchedPropertyName": "closedAt"
     },
     {
       "goldId": "incident_has_status_incidentStatus",
@@ -272,7 +272,7 @@
     {
       "goldId": "regulatoryNotification_is_due_at_timestamp",
       "hostNodeId": "n17",
-      "matchedPropertyName": "submittedAt"
+      "matchedPropertyName": "deadlineAt"
     },
     {
       "goldId": "regulatoryNotification_is_submitted_at_timestamp",
@@ -287,7 +287,7 @@
     {
       "goldId": "correctiveAction_has_action_description_text",
       "hostNodeId": "n24",
-      "matchedPropertyName": "actionId"
+      "matchedPropertyName": "description"
     },
     {
       "goldId": "correctiveAction_has_status_correctiveActionStatus",

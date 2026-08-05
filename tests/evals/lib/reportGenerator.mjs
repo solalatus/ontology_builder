@@ -175,10 +175,10 @@ function metricsTableLines(m, s) {
   return [
     "| Metric | Full domain | Practical scope | Detail |",
     "|---|---|---|---|",
-    `| **Recovery effectiveness (composite)** | **${pct(m.recoveryEffectiveness)}** | **${pct(s.recoveryEffectiveness)}** | equal-weighted: class F1, relationship F1, property recall, value fidelity |`,
+    `| **Recovery effectiveness (composite)** | **${pct(m.recoveryEffectiveness)}** | **${pct(s.recoveryEffectiveness)}** | equal-weighted: class F1, relationship F1, property F1, value fidelity |`,
     `| Class recall / precision / F1 | ${pct(m.classes.recall)} / ${pct(m.classes.precision)} / ${pct(m.classes.f1)} | ${pct(s.classes.recall)} / ${pct(s.classes.precision)} / ${pct(s.classes.f1)} | ${m.classes.matched}/${m.classes.groundTruthTotal} full · ${s.classes.matched}/${s.classes.groundTruthTotal} scoped ground-truth classes matched; ${m.classes.recoveredTotal} recovered |`,
     `| Relationship recall / precision / F1 | ${pct(m.relationships.recall)} / ${pct(m.relationships.precision)} / ${pct(m.relationships.f1)} | ${pct(s.relationships.recall)} / ${pct(s.relationships.precision)} / ${pct(s.relationships.f1)} | ${m.relationships.matched}/${m.relationships.groundTruthTotal} full · ${s.relationships.matched}/${s.relationships.groundTruthTotal} scoped ground-truth relationships matched; ${m.relationships.recoveredTotal} recovered (subclass/"is a" predicates excluded from both -- see README) |`,
-    `| Property recall | ${pct(m.properties.recall)} | ${pct(s.properties.recall)} | ${m.properties.matched}/${m.properties.groundTruthTotal} full · ${s.properties.matched}/${s.properties.groundTruthTotal} scoped ground-truth properties matched (technical identifier/URI fields excluded — see tests/evals/README.md) |`,
+    `| Property recall / precision / F1 | ${pct(m.properties.recall)} / ${pct(m.properties.precision)} / ${pct(m.properties.f1)} | ${pct(s.properties.recall)} / ${pct(s.properties.precision)} / ${pct(s.properties.f1)} | ${m.properties.matched}/${m.properties.groundTruthTotal} full · ${s.properties.matched}/${s.properties.groundTruthTotal} scoped ground-truth properties matched; ${m.properties.recoveredTotal} recovered (technical identifier/URI fields excluded — see tests/evals/README.md) |`,
     `| Controlled-value fidelity | ${pct(m.controlledValueFidelity)} | ${pct(s.controlledValueFidelity)} | average allowed-value overlap across matched controlled-value properties |`,
   ];
 }
