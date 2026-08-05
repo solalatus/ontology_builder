@@ -12,10 +12,36 @@ and bring it back in. Full design rationale: `spec.md`.
 Built on top of that base editor, an **Agent Ontology** layer
 (`agent_ontology_spec.md`) adds domain-model authoring — classes,
 relationships, rules, and actions, exportable as a structured YAML domain
-model — and a **Helper Agent** (`helper_agent_plan.md`, on the `helper_agent`
-branch) adds an embedded, bring-your-own-key chat panel that can interview a
-user and build/edit that same domain model live on the canvas through tool
-calls, with its own conversation persisted across reloads.
+model — and a **Helper Agent** (`helper_agent_plan.md`) adds an embedded,
+bring-your-own-key chat panel that can interview a user and build/edit that
+same domain model live on the canvas through tool calls, with its own
+conversation persisted across reloads.
+
+## Companion paper
+
+This repository is the reference implementation and evaluation artifact for
+the paper *"Conversational Elicitation of Shared Domain Representations for
+Human–Agent Collaboration"* (Szabados & Kiss). Every number in the paper's
+tables is re-derivable from the persisted artifacts in this repository
+without an API key:
+
+- **Reference fixture & persona** (paper Table 1): `tests/evals/fixtures/itops_mtsr.yaml`,
+  `tests/evals/fixtures/persona-eszter.md`.
+- **Interactive runs** (Tables 2–4): `tests/evals/results/runs/run-01..03/` —
+  each with full transcript (`conversation-log.md`), raw tool-call log,
+  recovered model (`recovered-model.yaml`), per-item heuristic matches,
+  semantic-judge verdicts, and aggregate metrics; rescore offline with
+  `tests/evals/rescore-saved-run.mjs`.
+- **Comparison conditions B1/B2/B3** (Table 5):
+  `tests/evals/results/baselines/{b1-one-shot,b2-generic-interviewer,b3-no-commit}/`,
+  scored via `tests/evals/score-baseline.mjs`.
+- **Endpoint-conditioned analysis and set-level stability**: `tests/evals/cross-run-analyses.mjs`.
+- **Threshold sweep**: `tests/evals/threshold-sensitivity.mjs`.
+- **Interviewer system prompt**: in `index.html` (search for the staged
+  interview prompt); persona and stopping configuration are recorded per run.
+
+See `tests/evals/README.md` for the full methodology and its documented
+limitations.
 
 ## Running it
 
@@ -41,7 +67,7 @@ See `tests/README.md` for the full test-suite layout, and
 
 ## Reproducing the ontology-recovery eval
 
-The `helper_agent` branch includes a separate, opt-in eval
+The repository includes a separate, opt-in eval
 (`tests/evals/`) that simulates a full ontology-elicitation interview
 between the real Helper Agent and a second, independent LLM playing a
 domain-expert persona, then scores how much of a hidden ground-truth
@@ -66,9 +92,7 @@ node --test tests/evals/*.eval.spec.mjs
 - `agent_ontology_spec.md` / `agent_ontology_todo.md` — the domain-model
   authoring layer's spec and progress log.
 - `helper_agent_plan.md` / `helper_agent_todo.md` — the embedded chat
-  agent's design plan and progress log (a standalone subproject on the
-  `helper_agent` branch — see that document's own §0 for why it's never
-  merged into `main`).
+  agent's design plan and progress log.
 - `tests/` — the Node-based Playwright test suite for `index.html`,
   including the `tests/evals/` ontology-recovery eval.
 - `tools/` — a small Python utility (`load_edge_list.py`) for
