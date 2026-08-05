@@ -4730,6 +4730,16 @@ const agentState = {
   // makes it useful; cleared on disconnect so a later connection gets its
   // own fresh key rather than inheriting a stale one.
   promptCacheKey: null,
+  // Eval-only, no UI ever sets these — used exclusively by the comparison-
+  // condition test harnesses (tests/evals/baseline-b2-generic-interviewer.eval.spec.mjs,
+  // baseline-b3-no-commit.eval.spec.mjs) to isolate one factor at a time
+  // against the real interactive loop, per EXPERIMENT_BRIEF.md. Both default
+  // to values that reproduce exactly today's behavior — a real user, and
+  // every existing test, never touches either field, so nothing here changes
+  // any existing behavior. Read directly off window.__kg.agent.state (already
+  // exposed by reference), no new setter functions needed.
+  systemPromptOverride: null, // when set, replaces the real staged interview prompt entirely (B2)
+  toolsDisabled: false, // when true, no tools array is sent at all -- nothing can commit mid-conversation (B3)
 };
 
 // ---------------------------------------------------------------------------
@@ -5947,6 +5957,13 @@ function agentLanguageDirective() {
 }
 
 function buildAgentSystemPrompt() {
+  // Eval-only escape hatch (agentState.systemPromptOverride, see its own
+  // comment) -- lets a comparison-condition test harness swap in a different
+  // interviewer prompt entirely (EXPERIMENT_BRIEF.md's B2 "generic
+  // interviewer" condition) without touching AGENT_SYSTEM_PROMPT_BASE/
+  // AGENT_KNOWLEDGE. Never set by any real UI. The language directive still
+  // applies -- it's an output-language instruction, not domain content.
+  if (agentState.systemPromptOverride) return agentState.systemPromptOverride + agentLanguageDirective();
   const knowledge = AGENT_KNOWLEDGE ? `\n\n${AGENT_KNOWLEDGE}` : "";
   return AGENT_SYSTEM_PROMPT_BASE + knowledge + agentLanguageDirective();
 }
@@ -6190,8 +6207,13 @@ async function sendAgentChatMessage(userText) {
   for (;;) {
     try {
       const messages = [{ role: "system", content: buildAgentSystemPrompt() }, ...agentState.apiMessages];
+      // Eval-only escape hatch (agentState.toolsDisabled, see its own
+      // comment) -- omitting the tools array entirely means the model can
+      // never emit a tool_call, so nothing can commit mid-conversation
+      // (EXPERIMENT_BRIEF.md's B3 "structured interview without tool calls"
+      // condition). Never set by any real UI.
       const message = await callAgentChatRaw(messages, {
-        tools: [APPLY_ONTOLOGY_YAML_TOOL, GET_GRAPH_STATE_TOOL],
+        tools: agentState.toolsDisabled ? undefined : [APPLY_ONTOLOGY_YAML_TOOL, GET_GRAPH_STATE_TOOL],
         promptCacheKey: agentState.promptCacheKey,
       });
 

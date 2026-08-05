@@ -1,0 +1,79 @@
+{
+  "fullDomain": {
+    "classes": [
+      {
+        "goldId": "evidenceItem",
+        "recoveredId": "n29"
+      }
+    ],
+    "relationships": [],
+    "properties": [
+      {
+        "goldId": "recoveryPlan_has_recovery_point_objective_durationMinutes",
+        "matchedPropertyName": "data-loss exposure"
+      }
+    ],
+    "valueFidelity": [
+      {
+        "id": "businessService_has_criticality_tier_criticalityTier",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "itService_has_criticality_tier_criticalityTier",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "thirdPartyService_has_criticality_tier_criticalityTier",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "incident_has_status_incidentStatus",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "incident_has_severity_severityLevel",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "incident_has_impact_impactLevel",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "correctiveAction_has_status_correctiveActionStatus",
+        "semanticFidelity": 0
+      }
+    ]
+  },
+  "scoped": {
+    "classes": [
+      {
+        "goldId": "evidenceItem",
+        "recoveredId": "n29"
+      },
+      {
+        "goldId": "communication",
+        "recoveredId": "n35"
+      },
+      {
+        "goldId": "regulatoryNotification",
+        "recoveredId": "n45"
+      }
+    ],
+    "relationships": [],
+    "properties": [],
+    "valueFidelity": [
+      {
+        "id": "incident_has_status_incidentStatus",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "incident_has_severity_severityLevel",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "incident_has_impact_impactLevel",
+        "semanticFidelity": 0
+      }
+    ]
+  }
+}

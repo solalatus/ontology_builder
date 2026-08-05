@@ -1,0 +1,90 @@
+{
+  "fullDomain": {
+    "classes": [
+      {
+        "goldId": "materialityAssessment",
+        "recoveredId": "n44"
+      },
+      {
+        "goldId": "regulatoryNotification",
+        "recoveredId": "n45"
+      }
+    ],
+    "relationships": [
+      {
+        "goldId": "serviceOwner_owns_itService",
+        "recoveredId": "e13"
+      },
+      {
+        "goldId": "applicationOwner_owns_application",
+        "recoveredId": "e14"
+      },
+      {
+        "goldId": "businessService_depends_on_itService",
+        "recoveredId": "e8"
+      },
+      {
+        "goldId": "incident_is_coordinated_by_incidentCommander",
+        "recoveredId": "e20"
+      }
+    ],
+    "properties": [
+      {
+        "goldId": "incident_has_status_incidentStatus",
+        "matchedPropertyName": "state"
+      }
+    ],
+    "valueFidelity": [
+      {
+        "id": "incident_has_severity_severityLevel",
+        "semanticFidelity": 0.75
+      },
+      {
+        "id": "incident_has_impact_impactLevel",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "correctiveAction_has_status_correctiveActionStatus",
+        "semanticFidelity": 0.3
+      }
+    ]
+  },
+  "scoped": {
+    "classes": [
+      {
+        "goldId": "materialityAssessment",
+        "recoveredId": "n44"
+      },
+      {
+        "goldId": "regulatoryNotification",
+        "recoveredId": "n45"
+      }
+    ],
+    "relationships": [
+      {
+        "goldId": "serviceOwner_owns_itService",
+        "recoveredId": "e13"
+      },
+      {
+        "goldId": "incident_is_coordinated_by_incidentCommander",
+        "recoveredId": "e20"
+      }
+    ],
+    "properties": [
+      {
+        "goldId": "incident_has_status_incidentStatus",
+        "matchedPropertyName": "state"
+      }
+    ],
+    "valueFidelity": [
+      {
+        "id": "incident_has_severity_severityLevel",
+        "semanticFidelity": 0.75
+      },
+      {
+        "id": "incident_has_impact_impactLevel",
+        "semanticFidelity": 0
+      }
+    ]
+  }
+}

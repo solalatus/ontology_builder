@@ -1,0 +1,698 @@
+classes:
+  Business Service:
+    meaning: null
+    aliases: []
+    properties:
+      criticality/tier:
+        type: text
+      regulatory status:
+        type: text
+      RTO:
+        type: text
+      RPO:
+        type: text
+      customer impact tolerance:
+        type: text
+      support hours:
+        type: text
+      region:
+        type: text
+  IT Service:
+    meaning: null
+    aliases: []
+    properties:
+      criticality/tier:
+        type: text
+      regulatory status:
+        type: text
+      RTO:
+        type: text
+      RPO:
+        type: text
+      support hours:
+        type: text
+      region:
+        type: text
+  Application:
+    meaning: null
+    aliases: []
+    properties:
+      criticality/tier:
+        type: text
+      regulatory status:
+        type: text
+      RTO:
+        type: text
+      RPO:
+        type: text
+      support hours:
+        type: text
+      region:
+        type: text
+  Database:
+    meaning: null
+    aliases: []
+    properties:
+      criticality/tier:
+        type: text
+      regulatory status:
+        type: text
+      RTO:
+        type: text
+      RPO:
+        type: text
+      region:
+        type: text
+  Infrastructure Component:
+    meaning: null
+    aliases: []
+    properties:
+      criticality/tier:
+        type: text
+      support hours:
+        type: text
+      region:
+        type: text
+  Third-party Service:
+    meaning: null
+    aliases: []
+    properties:
+      criticality/tier:
+        type: text
+      regulatory status:
+        type: text
+      RTO:
+        type: text
+      RPO:
+        type: text
+      support hours:
+        type: text
+      region:
+        type: text
+  Owner:
+    meaning: null
+    aliases: []
+    properties: {}
+  Incident:
+    meaning: null
+    aliases: []
+    properties:
+      severity:
+        type: text
+      status:
+        type: text
+      start time:
+        type: text
+      detected time:
+        type: text
+      impact scope:
+        type: text
+      current workaround:
+        type: text
+      suspected root cause:
+        type: text
+  Major Incident:
+    meaning: null
+    aliases: []
+    properties:
+      customer impact:
+        type: text
+      expected disruption duration:
+        type: text
+      regulatory threshold met:
+        type: text
+      data integrity or security concern:
+        type: text
+  Detection Channel:
+    meaning: null
+    aliases: []
+    properties:
+      channel type:
+        type: text
+  Incident Commander:
+    meaning: null
+    aliases: []
+    properties: {}
+  Technical Lead:
+    meaning: null
+    aliases: []
+    properties: {}
+  Major Incident Manager:
+    meaning: null
+    aliases: []
+    properties: {}
+  Duty Manager:
+    meaning: null
+    aliases: []
+    properties: {}
+  Decision Point:
+    meaning: null
+    aliases: []
+    properties:
+      decision type:
+        type: text
+      decision status:
+        type: text
+      decision time:
+        type: text
+  Resolver Group:
+    meaning: null
+    aliases: []
+    properties: {}
+  Crisis Team:
+    meaning: null
+    aliases: []
+    properties: {}
+  Technology Command Bridge:
+    meaning: null
+    aliases: []
+    properties: {}
+  Business Command Bridge:
+    meaning: null
+    aliases: []
+    properties: {}
+  Executive Stakeholder Group:
+    meaning: null
+    aliases: []
+    properties: {}
+  Recovery Plan:
+    meaning: null
+    aliases: []
+    properties:
+      expected recovery time:
+        type: text
+      risk:
+        type: text
+      approval required:
+        type: text
+      customer impact:
+        type: text
+      data-loss exposure:
+        type: text
+      rollback plan:
+        type: text
+  Disaster Recovery Plan:
+    meaning: null
+    aliases: []
+    properties:
+      expected recovery time:
+        type: text
+      risk:
+        type: text
+      approval required:
+        type: text
+      customer impact:
+        type: text
+      data-loss exposure:
+        type: text
+      rollback plan:
+        type: text
+  Runbook:
+    meaning: null
+    aliases: []
+    properties:
+      expected recovery time:
+        type: text
+      risk:
+        type: text
+      approval required:
+        type: text
+      rollback plan:
+        type: text
+  Service Continuity Plan:
+    meaning: null
+    aliases: []
+    properties:
+      approval required:
+        type: text
+      customer impact:
+        type: text
+      risk:
+        type: text
+  Recovery Option:
+    meaning: null
+    aliases: []
+    properties:
+      option type:
+        type: text
+      expected recovery time:
+        type: text
+      risk:
+        type: text
+      approval required:
+        type: text
+      customer impact:
+        type: text
+      data-loss exposure:
+        type: text
+      rollback plan:
+        type: text
+  Emergency Change:
+    meaning: null
+    aliases: []
+    properties:
+      approval status:
+        type: text
+      rationale:
+        type: text
+      implementation record:
+        type: text
+      retrospective review required:
+        type: text
+  Emergency-change Authority:
+    meaning: null
+    aliases: []
+    properties: {}
+  Service Restoration:
+    meaning: null
+    aliases: []
+    properties:
+      technical recovery complete:
+        type: text
+      business validation:
+        type: text
+      customer validation:
+        type: text
+      monitoring stable period:
+        type: text
+  Evidence Artifact:
+    meaning: null
+    aliases: []
+    properties:
+      evidence type:
+        type: text
+      retention requirement:
+        type: text
+  Incident Timeline:
+    meaning: null
+    aliases: []
+    properties:
+      entry type:
+        type: text
+      entry time:
+        type: text
+      actor:
+        type: text
+  Bridge Notes:
+    meaning: null
+    aliases: []
+    properties: {}
+  Monitoring Screenshots/Metrics:
+    meaning: null
+    aliases: []
+    properties: {}
+  Change Record:
+    meaning: null
+    aliases: []
+    properties: {}
+  Customer Impact Analysis:
+    meaning: null
+    aliases: []
+    properties:
+      affected customer count:
+        type: text
+      affected business function:
+        type: text
+      impact duration:
+        type: text
+      impact severity:
+        type: text
+  Communication Artifact:
+    meaning: null
+    aliases: []
+    properties:
+      communication type:
+        type: text
+      audience:
+        type: text
+      sent time:
+        type: text
+      approval status:
+        type: text
+  Communications Team:
+    meaning: null
+    aliases: []
+    properties: {}
+  Legal/Compliance:
+    meaning: null
+    aliases: []
+    properties: {}
+  Executive Group:
+    meaning: null
+    aliases: []
+    properties: {}
+  Post-Incident Review:
+    meaning: null
+    aliases:
+      - PIR
+    properties:
+      root cause:
+        type: text
+      contributing factors:
+        type: text
+      timeline validation:
+        type: text
+      lessons learned:
+        type: text
+      control improvements:
+        type: text
+      risk acceptance:
+        type: text
+      closure status:
+        type: text
+      due date:
+        type: text
+  Remediation Action:
+    meaning: null
+    aliases: []
+    properties:
+      action owner:
+        type: text
+      due date:
+        type: text
+      priority:
+        type: text
+      status:
+        type: text
+      evidence of completion:
+        type: text
+  Problem Manager:
+    meaning: null
+    aliases: []
+    properties: {}
+  Risk/Compliance:
+    meaning: null
+    aliases: []
+    properties: {}
+  Reportability Assessment:
+    meaning: null
+    aliases: []
+    properties:
+      customer harm:
+        type: text
+      critical business service disruption:
+        type: text
+      data/security impact:
+        type: text
+      duration threshold:
+        type: text
+      transaction impact:
+        type: text
+      geographic or regulator-specific threshold:
+        type: text
+      assessment status:
+        type: text
+      assessment due time:
+        type: text
+  Legal:
+    meaning: null
+    aliases: []
+    properties: {}
+  Regulatory Reporting Artifact:
+    meaning: null
+    aliases: []
+    properties:
+      artifact type:
+        type: text
+      due time:
+        type: text
+      submission status:
+        type: text
+      submitted time:
+        type: text
+  Regulator:
+    meaning: null
+    aliases: []
+    properties: {}
+  Jurisdiction:
+    meaning: null
+    aliases: []
+    properties: {}
+  Regulation:
+    meaning: null
+    aliases: []
+    properties: {}
+  Major Incident Review Board:
+    meaning: null
+    aliases: []
+    properties: {}
+  Operational Resilience Forum:
+    meaning: null
+    aliases: []
+    properties: {}
+  Change Advisory Board:
+    meaning: null
+    aliases:
+      - CAB
+    properties: {}
+  Risk Committee:
+    meaning: null
+    aliases: []
+    properties: {}
+  Metric:
+    meaning: null
+    aliases: []
+    properties:
+      metric type:
+        type: text
+      threshold:
+        type: text
+      reporting period:
+        type: text
+      trend:
+        type: text
+  Control:
+    meaning: null
+    aliases: []
+    properties:
+      control type:
+        type: text
+      control status:
+        type: text
+      test frequency:
+        type: text
+      breach status:
+        type: text
+  Policy or Standard Document:
+    meaning: null
+    aliases: []
+    properties:
+      document type:
+        type: text
+      applicability:
+        type: text
+  Governance Report:
+    meaning: null
+    aliases: []
+    properties:
+      reporting period:
+        type: text
+      key findings:
+        type: text
+      corrective action required:
+        type: text
+  Executive Management:
+    meaning: null
+    aliases: []
+    properties: {}
+  Operational Leader:
+    meaning: null
+    aliases: []
+    properties: {}
+relationships: []
+rules:
+  Major Incident declaration authority:
+    conditions: []
+  Major Incident severity authority:
+    conditions: []
+  Sev1 time-based executive escalation:
+    conditions: []
+  Recovery option selection:
+    conditions: []
+  Emergency Change governance:
+    conditions: []
+  Service restoration confirmation:
+    conditions: []
+  Major Incident evidence retention:
+    conditions: []
+  Incident Timeline required entries:
+    conditions: []
+  Communication approval:
+    conditions: []
+  Sev1 executive communication cadence:
+    conditions: []
+  PIR required outputs:
+    conditions: []
+  Remediation tracking:
+    conditions: []
+  PIR closure approval:
+    conditions: []
+  Sev1 or Major Incident PIR deadline:
+    conditions: []
+  Reportability criteria:
+    conditions: []
+  Reportability Assessment authority:
+    conditions: []
+  Reportability Assessment deadline:
+    conditions: []
+  Initial regulator notification deadline:
+    conditions: []
+  Final regulatory report deadline:
+    conditions: []
+  Governance metrics tracked:
+    conditions: []
+  Governance controls monitored:
+    conditions: []
+  Corrective action authority:
+    conditions: []
+actions:
+  Declare Major Incident:
+    input: null
+    preconditions: []
+    effect: ""
+    verification: ""
+  Invoke Workaround:
+    input: null
+    preconditions: []
+    effect: ""
+    verification: ""
+  Fail Over to DR:
+    input: null
+    preconditions: []
+    effect: ""
+    verification: ""
+  Initiate Emergency Change:
+    input: null
+    preconditions: []
+    effect: ""
+    verification: ""
+  Notify Executives:
+    input: null
+    preconditions: []
+    effect: ""
+    verification: ""
+  Trigger Regulatory Assessment/Reporting:
+    input: null
+    preconditions: []
+    effect: ""
+    verification: ""
+  Declare Service Restored:
+    input: null
+    preconditions: []
+    effect: ""
+    verification: ""
+  Execute Technical Fix:
+    input: null
+    preconditions: []
+    effect: ""
+    verification: ""
+  Full Disaster Recovery Invocation:
+    input: null
+    preconditions: []
+    effect: ""
+    verification: ""
+  Complete Retrospective Approval:
+    input: null
+    preconditions: []
+    effect: ""
+    verification: ""
+  Record Service Restoration:
+    input: null
+    preconditions: []
+    effect: ""
+    verification: ""
+  Retain Major Incident Evidence:
+    input: null
+    preconditions: []
+    effect: ""
+    verification: ""
+  Send Executive Update:
+    input: null
+    preconditions: []
+    effect: ""
+    verification: ""
+  Send Business Stakeholder Update:
+    input: null
+    preconditions: []
+    effect: ""
+    verification: ""
+  Send Customer Communication:
+    input: null
+    preconditions: []
+    effect: ""
+    verification: ""
+  Send Regulator Notification:
+    input: null
+    preconditions: []
+    effect: ""
+    verification: ""
+  Send Internal Technology Update:
+    input: null
+    preconditions: []
+    effect: ""
+    verification: ""
+  Complete Post-Incident Review:
+    input: null
+    preconditions: []
+    effect: ""
+    verification: ""
+  Validate Incident Timeline:
+    input: null
+    preconditions: []
+    effect: ""
+    verification: ""
+  Create Remediation Action:
+    input: null
+    preconditions: []
+    effect: ""
+    verification: ""
+  Approve PIR Closure:
+    input: null
+    preconditions: []
+    effect: ""
+    verification: ""
+  Accept Residual Risk:
+    input: null
+    preconditions: []
+    effect: ""
+    verification: ""
+  Complete Reportability Assessment:
+    input: null
+    preconditions: []
+    effect: ""
+    verification: ""
+  Submit Initial Notification:
+    input: null
+    preconditions: []
+    effect: ""
+    verification: ""
+  Submit Interim Update:
+    input: null
+    preconditions: []
+    effect: ""
+    verification: ""
+  Submit Final Report:
+    input: null
+    preconditions: []
+    effect: ""
+    verification: ""
+  Compile Evidence Pack:
+    input: null
+    preconditions: []
+    effect: ""
+    verification: ""
+  Produce Governance Report:
+    input: null
+    preconditions: []
+    effect: ""
+    verification: ""
+  Monitor Governance Control:
+    input: null
+    preconditions: []
+    effect: ""
+    verification: ""
+  Require Corrective Action:
+    input: null
+    preconditions: []
+    effect: ""
+    verification: ""

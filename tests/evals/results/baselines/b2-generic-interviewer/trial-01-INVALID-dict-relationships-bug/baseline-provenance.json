@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "condition": "generic-interviewer",
+  "trialId": "trial-01",
+  "generatedAt": "2026-08-05T09:54:14.302Z",
+  "interviewerModel": "gpt-5.5-2026-04-23",
+  "personaModel": "gpt-4o-mini",
+  "classifierModel": "gpt-5.5-2026-04-23",
+  "systemPromptSha256": "ab1a72f23f96118f247453510f3f16a868d1f70fbb02d69506b04110e7412d44",
+  "systemPrompt": "Interview this domain expert and build a compact domain model of what they describe.\n\nAsk questions, confirm what you've understood, and use the apply_ontology_yaml tool to add or update classes, relationships, rules, and actions in the model as you go -- call it whenever you've confirmed something new or changed, not only once at the end. Use the get_graph_state tool if you need to check the model's current state.\n\nThe model has flat classes and directed relationship edges: there is no subclassing (express a specialization as a relationship instead), and each real-world connection should be exactly one directed edge, never also its inverse. Include a property only when it is decision-relevant -- something the expert would filter, compare, or act on -- not a purely technical identifier or record-keeping field. Use the expert's own vocabulary for class, relationship, and property names and aliases.\n\nWhen you believe the interview has covered what the expert needs, say so clearly.",
+  "turnsUsed": 9,
+  "stoppedReason": "app_agent_appears_finished",
+  "durationMs": 314827,
+  "note": "Real, fresh interview against the persona -- tools left enabled, so apply_ontology_yaml commits mid-conversation exactly like an interactive run. Only the interviewer's own system prompt differs from tests/evals/ontology-recovery.eval.spec.mjs."
+}

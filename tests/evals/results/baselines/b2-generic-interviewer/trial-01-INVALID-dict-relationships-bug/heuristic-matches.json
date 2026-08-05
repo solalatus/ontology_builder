@@ -1,0 +1,172 @@
+{
+  "classes": [
+    {
+      "goldId": "resolverGroup",
+      "recoveredId": "n16",
+      "weight": 1
+    },
+    {
+      "goldId": "incidentCommander",
+      "recoveredId": "n11",
+      "weight": 1
+    },
+    {
+      "goldId": "regulator",
+      "recoveredId": "n46",
+      "weight": 1
+    },
+    {
+      "goldId": "businessService",
+      "recoveredId": "n1",
+      "weight": 1
+    },
+    {
+      "goldId": "itService",
+      "recoveredId": "n2",
+      "weight": 1
+    },
+    {
+      "goldId": "application",
+      "recoveredId": "n3",
+      "weight": 1
+    },
+    {
+      "goldId": "database",
+      "recoveredId": "n4",
+      "weight": 1
+    },
+    {
+      "goldId": "infrastructureComponent",
+      "recoveredId": "n5",
+      "weight": 1
+    },
+    {
+      "goldId": "thirdPartyService",
+      "recoveredId": "n6",
+      "weight": 1
+    },
+    {
+      "goldId": "metric",
+      "recoveredId": "n53",
+      "weight": 1
+    },
+    {
+      "goldId": "incident",
+      "recoveredId": "n8",
+      "weight": 1
+    },
+    {
+      "goldId": "majorIncident",
+      "recoveredId": "n9",
+      "weight": 1
+    },
+    {
+      "goldId": "emergencyChange",
+      "recoveredId": "n26",
+      "weight": 1
+    },
+    {
+      "goldId": "runbook",
+      "recoveredId": "n23",
+      "weight": 1
+    },
+    {
+      "goldId": "recoveryPlan",
+      "recoveredId": "n21",
+      "weight": 1
+    },
+    {
+      "goldId": "materialityAssessment",
+      "recoveredId": "n43",
+      "weight": 1
+    },
+    {
+      "goldId": "postIncidentReview",
+      "recoveredId": "n39",
+      "weight": 1
+    },
+    {
+      "goldId": "correctiveAction",
+      "recoveredId": "n40",
+      "weight": 1
+    }
+  ],
+  "relationships": [],
+  "properties": [
+    {
+      "goldId": "businessService_has_criticality_tier_criticalityTier",
+      "hostNodeId": "n1",
+      "matchedPropertyName": "criticality/tier"
+    },
+    {
+      "goldId": "itService_has_criticality_tier_criticalityTier",
+      "hostNodeId": "n2",
+      "matchedPropertyName": "criticality/tier"
+    },
+    {
+      "goldId": "thirdPartyService_has_criticality_tier_criticalityTier",
+      "hostNodeId": "n6",
+      "matchedPropertyName": "criticality/tier"
+    },
+    {
+      "goldId": "metric_has_metric_name_text",
+      "hostNodeId": "n53",
+      "matchedPropertyName": "metric type"
+    },
+    {
+      "goldId": "incident_is_detected_at_timestamp",
+      "hostNodeId": "n8",
+      "matchedPropertyName": "detected time"
+    },
+    {
+      "goldId": "incident_has_status_incidentStatus",
+      "hostNodeId": "n8",
+      "matchedPropertyName": "status"
+    },
+    {
+      "goldId": "incident_has_severity_severityLevel",
+      "hostNodeId": "n8",
+      "matchedPropertyName": "severity"
+    },
+    {
+      "goldId": "incident_has_impact_impactLevel",
+      "hostNodeId": "n8",
+      "matchedPropertyName": "impact scope"
+    },
+    {
+      "goldId": "incident_has_time_to_acknowledge_durationMinutes",
+      "hostNodeId": "n8",
+      "matchedPropertyName": "start time"
+    },
+    {
+      "goldId": "incident_has_time_to_restore_durationMinutes",
+      "hostNodeId": "n8",
+      "matchedPropertyName": "start time"
+    },
+    {
+      "goldId": "recoveryPlan_has_recovery_time_objective_durationMinutes",
+      "hostNodeId": "n21",
+      "matchedPropertyName": "expected recovery time"
+    },
+    {
+      "goldId": "materialityAssessment_has_reporting_due_time_timestamp",
+      "hostNodeId": "n43",
+      "matchedPropertyName": "assessment due time"
+    },
+    {
+      "goldId": "correctiveAction_has_action_description_text",
+      "hostNodeId": "n40",
+      "matchedPropertyName": "action owner"
+    },
+    {
+      "goldId": "correctiveAction_has_status_correctiveActionStatus",
+      "hostNodeId": "n40",
+      "matchedPropertyName": "status"
+    },
+    {
+      "goldId": "correctiveAction_has_due_date_date",
+      "hostNodeId": "n40",
+      "matchedPropertyName": "due date"
+    }
+  ]
+}

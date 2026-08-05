@@ -1,0 +1,2214 @@
+classes:
+  BusinessService:
+    meaning: "Customer- or business-facing capability delivered by the bank, often revenue-driving and directly serving customers."
+    aliases:
+      - business service
+    properties:
+      criticalityTier:
+        type: text
+        allowed:
+          - Tier 1 Critical
+          - Tier 2 Important
+          - Tier 3 Standard
+          - Tier 4 Supporting
+      regulatoryImpact:
+        type: text
+      customerImpact:
+        type: text
+      recoveryTimeObjective:
+        type: number
+        unit: hours
+      operationalResilienceTier:
+        type: text
+        allowed:
+          - Tier 1 Critical
+          - Tier 2 Important
+          - Tier 3 Standard
+          - Tier 4 Supporting
+      geography:
+        type: text
+      paymentSystemRelevance:
+        type: boolean
+  CustomerFacingService:
+    meaning: A specific channel through which customers access banking services.
+    aliases:
+      - customer-facing service
+      - channel
+    properties:
+      criticalityTier:
+        type: text
+        allowed:
+          - Tier 1 Critical
+          - Tier 2 Important
+          - Tier 3 Standard
+          - Tier 4 Supporting
+      customerImpact:
+        type: text
+      geography:
+        type: text
+  ITService:
+    meaning: Managed technology capability that supports one or more business services.
+    aliases:
+      - IT service
+      - technology service
+    properties:
+      criticalityTier:
+        type: text
+        allowed:
+          - Tier 1 Critical
+          - Tier 2 Important
+          - Tier 3 Standard
+          - Tier 4 Supporting
+      recoveryTimeObjective:
+        type: number
+        unit: hours
+      operationalResilienceTier:
+        type: text
+        allowed:
+          - Tier 1 Critical
+          - Tier 2 Important
+          - Tier 3 Standard
+          - Tier 4 Supporting
+      geography:
+        type: text
+      paymentSystemRelevance:
+        type: boolean
+  Application:
+    meaning: Software system implementing business functionality; not equivalent to an IT service itself.
+    aliases:
+      - application
+      - software system
+    properties:
+      criticalityTier:
+        type: text
+        allowed:
+          - Tier 1 Critical
+          - Tier 2 Important
+          - Tier 3 Standard
+          - Tier 4 Supporting
+      recoveryTimeObjective:
+        type: number
+        unit: hours
+      operationalResilienceTier:
+        type: text
+        allowed:
+          - Tier 1 Critical
+          - Tier 2 Important
+          - Tier 3 Standard
+          - Tier 4 Supporting
+      geography:
+        type: text
+      paymentSystemRelevance:
+        type: boolean
+  InfrastructureComponent:
+    meaning: "Physical or virtual technology component such as a server, storage system, virtual machine, or network device supporting IT services."
+    aliases:
+      - infrastructure component
+      - server
+      - storage system
+      - virtual machine
+      - network device
+    properties:
+      criticalityTier:
+        type: text
+        allowed:
+          - Tier 1 Critical
+          - Tier 2 Important
+          - Tier 3 Standard
+          - Tier 4 Supporting
+      geography:
+        type: text
+  Database:
+    meaning: Data store that underpins applications.
+    aliases:
+      - database
+      - data store
+    properties:
+      criticalityTier:
+        type: text
+        allowed:
+          - Tier 1 Critical
+          - Tier 2 Important
+          - Tier 3 Standard
+          - Tier 4 Supporting
+      recoveryTimeObjective:
+        type: number
+        unit: hours
+      geography:
+        type: text
+  NetworkSegment:
+    meaning: "Connectivity segment pivotal to functioning of IT services, especially during connectivity incidents."
+    aliases:
+      - network segment
+    properties:
+      criticalityTier:
+        type: text
+        allowed:
+          - Tier 1 Critical
+          - Tier 2 Important
+          - Tier 3 Standard
+          - Tier 4 Supporting
+      geography:
+        type: text
+  ThirdPartyService:
+    meaning: Externally provided service the bank relies on for business functionality.
+    aliases:
+      - third-party service
+      - externally provided service
+      - vendor service
+    properties:
+      criticalityTier:
+        type: text
+        allowed:
+          - Tier 1 Critical
+          - Tier 2 Important
+          - Tier 3 Standard
+          - Tier 4 Supporting
+      regulatoryImpact:
+        type: text
+      recoveryTimeObjective:
+        type: number
+        unit: hours
+      operationalResilienceTier:
+        type: text
+        allowed:
+          - Tier 1 Critical
+          - Tier 2 Important
+          - Tier 3 Standard
+          - Tier 4 Supporting
+      geography:
+        type: text
+      paymentSystemRelevance:
+        type: boolean
+  DataCenterOrSite:
+    meaning: Physical location where infrastructure and services are hosted.
+    aliases:
+      - data center
+      - site
+      - physical location
+    properties:
+      geography:
+        type: text
+  ServiceOwner:
+    meaning: Accountable owner for a service or application who supports escalation and decision-making.
+    aliases:
+      - service owner
+      - owner
+    properties: {}
+  Incident:
+    meaning: "An unplanned interruption, degradation, or security condition requiring managed response; major-incident status is represented on the incident rather than as a separate real-world object."
+    aliases:
+      - incident
+      - unplanned disruption
+    properties:
+      conditionType:
+        type: text
+        allowed:
+          - service degradation
+          - outage
+          - security condition
+          - data issue
+          - third-party failure
+      severityLevel:
+        type: text
+        allowed:
+          - Sev 1 Critical
+          - Sev 2 High
+          - Sev 3 Medium
+          - Sev 4 Low
+      priorityLevel:
+        type: text
+        allowed:
+          - P1 Critical
+          - P2 High
+          - P3 Medium
+          - P4 Low
+      customerImpact:
+        type: text
+      businessImpact:
+        type: text
+      regulatoryImpact:
+        type: text
+      reputationalRisk:
+        type: text
+      paymentSystemImpact:
+        type: boolean
+      duration:
+        type: number
+        unit: hours
+      majorIncidentDeclared:
+        type: boolean
+      lifecycleStatus:
+        type: text
+        allowed:
+          - New
+          - Acknowledged
+          - Investigating
+          - Contained
+          - Recovering
+          - Monitoring
+          - Resolved
+          - Closed
+          - Cancelled
+  MajorIncident:
+    meaning: Deprecated modeling convenience; use Incident with majorIncidentDeclared set to true.
+    aliases:
+      - major incident
+    properties:
+      severityLevel:
+        type: text
+        allowed:
+          - Sev 1 Critical
+          - Sev 2 High
+          - Sev 3 Medium
+          - Sev 4 Low
+      priorityLevel:
+        type: text
+        allowed:
+          - P1 Critical
+          - P2 High
+          - P3 Medium
+          - P4 Low
+      customerImpact:
+        type: text
+      businessImpact:
+        type: text
+      regulatoryImpact:
+        type: text
+      reputationalRisk:
+        type: text
+      paymentSystemImpact:
+        type: boolean
+      duration:
+        type: number
+        unit: hours
+      executiveConcern:
+        type: boolean
+  MonitoringAlert:
+    meaning: Alert generated by monitoring tools or SIEM that may raise an incident.
+    aliases:
+      - monitoring alert
+      - SIEM alert
+    properties: {}
+  CustomerComplaint:
+    meaning: Complaint from a customer that may raise or evidence an incident.
+    aliases:
+      - customer complaint
+    properties: {}
+  ServiceDeskTicket:
+    meaning: Ticket initiated by users or staff that may raise an incident.
+    aliases:
+      - service desk ticket
+    properties: {}
+  BusinessEscalation:
+    meaning: Escalation from internal business stakeholders that may raise an incident.
+    aliases:
+      - business escalation
+    properties: {}
+  ThirdPartyNotification:
+    meaning: Notification from a third-party supplier regarding disruption or risk in their service.
+    aliases:
+      - third-party supplier notification
+      - supplier notification
+    properties: {}
+  RegulatoryAlert:
+    meaning: Alert indicating potential compliance or regulatory issue that may raise an incident.
+    aliases:
+      - regulatory alert
+    properties: {}
+  SecurityAlert:
+    meaning: Alert from the Security Operations Centre indicating a possible security event affecting data or services.
+    aliases:
+      - SOC alert
+      - security alert
+    properties: {}
+  IncidentCommander:
+    meaning: Role that can declare a major incident and assumes command once declared.
+    aliases:
+      - incident commander
+    properties: {}
+  DutyManager:
+    meaning: Designated duty manager with authority to assess the situation and declare a major incident.
+    aliases:
+      - duty manager
+    properties: {}
+  TechnicalLead:
+    meaning: Role responsible for diagnosing technical issues and coordinating resolution efforts during an incident.
+    aliases:
+      - technical lead
+    properties: {}
+  TechnicalOwner:
+    meaning: Role accountable for the technical ownership of an affected technology component or change decision.
+    aliases:
+      - technical owner
+    properties: {}
+  BusinessLead:
+    meaning: Role that represents business considerations and manages operational and customer impact during an incident.
+    aliases:
+      - business lead
+    properties: {}
+  CommunicationsLead:
+    meaning: Role that manages internal and external incident communications and consistent messaging.
+    aliases:
+      - communications lead
+    properties: {}
+  RegulatoryLiaison:
+    meaning: Role that handles regulatory considerations and coordinates regulatory notifications during an incident.
+    aliases:
+      - regulatory liaison
+    properties: {}
+  CyberLead:
+    meaning: Role focused on cybersecurity implications and required security response during an incident.
+    aliases:
+      - cyber lead
+    properties: {}
+  VendorManager:
+    meaning: Role that coordinates with vendors involved in disrupted services.
+    aliases:
+      - vendor manager
+    properties: {}
+  ExecutiveSponsor:
+    meaning: Senior management role providing authority for high-level decisions during an incident.
+    aliases:
+      - executive sponsor
+    properties: {}
+  Scribe:
+    meaning: Role that records decisions and action items during incident response.
+    aliases:
+      - scribe
+    properties: {}
+  ProblemManager:
+    meaning: Role involved in identifying root cause if an incident evolves into a problem.
+    aliases:
+      - problem manager
+    properties: {}
+  MajorIncidentBridge:
+    meaning: Central physical or virtual location for real-time collaboration during a major incident.
+    aliases:
+      - major incident bridge
+    properties: {}
+  TechnicalBridge:
+    meaning: Subgroup or bridge focused on technical diagnosis and resolution during an incident.
+    aliases:
+      - technical bridge
+    properties: {}
+  ExecutiveBridge:
+    meaning: Senior leadership bridge used for executive awareness and high-level decision-making during an incident.
+    aliases:
+      - executive bridge
+    properties: {}
+  CrisisManagementTeam:
+    meaning: Broader team dealing with operational and reputational impact of a major incident.
+    aliases:
+      - crisis management team
+      - CMT
+    properties: {}
+  WarRoom:
+    meaning: Physical or virtual space where key stakeholders convene during major incidents.
+    aliases:
+      - war room
+    properties: {}
+  CyberResponse:
+    meaning: Specialized response capability invoked when an incident has major cybersecurity concern.
+    aliases:
+      - cyber response
+    properties: {}
+  LegalCompliance:
+    meaning: Legal and compliance function engaged when incidents have regulatory implications or potential breaches.
+    aliases:
+      - legal/compliance
+      - legal and compliance
+    properties: {}
+  EmergencyChange:
+    meaning: Urgent change used during incident response to restore service or mitigate impact.
+    aliases:
+      - emergency change
+    properties: {}
+  DisasterRecovery:
+    meaning: Recovery approach invoked to restore services using disaster recovery capabilities.
+    aliases:
+      - disaster recovery
+      - DR
+    properties: {}
+  CustomerCommunication:
+    meaning: External communication issued to customers about an incident or its impact.
+    aliases:
+      - customer communication
+    properties: {}
+  RegulatoryNotification:
+    meaning: "Notification made to regulators based on incident nature, extent, or compliance risk."
+    aliases:
+      - regulatory notification
+    properties: {}
+  ResidualRiskAcceptance:
+    meaning: Decision to accept remaining risk and continue operations after mitigation or workaround.
+    aliases:
+      - residual risk acceptance
+      - accepting residual risk
+    properties: {}
+  Workaround:
+    meaning: Temporary method that reduces or bypasses incident impact without necessarily resolving the underlying cause.
+    aliases:
+      - workaround
+      - temporary solution
+    properties:
+      enablesContinuedOperation:
+        type: boolean
+      residualImpact:
+        type: text
+  PermanentFix:
+    meaning: Long-lasting resolution that addresses the root cause and eliminates the need for the workaround.
+    aliases:
+      - permanent fix
+      - fix
+    properties:
+      tested:
+        type: boolean
+      resolvesRootCause:
+        type: boolean
+  ImplementationPlan:
+    meaning: Plan describing the steps for executing an emergency change or implementing corrective actions.
+    aliases:
+      - implementation plan
+    properties: {}
+  BackoutPlan:
+    meaning: Plan describing rollback actions if an emergency change causes deterioration or fails criteria.
+    aliases:
+      - backout plan
+      - rollback plan
+    properties: {}
+  EmergencyChangeEvidence:
+    meaning: "Evidence captured before and after an emergency change to support approval, execution, verification, and stakeholder notification."
+    aliases:
+      - emergency change evidence
+      - change evidence
+    properties:
+      evidenceStage:
+        type: text
+        allowed:
+          - Before implementation
+          - After implementation
+      evidenceType:
+        type: text
+        allowed:
+          - incident details and impact
+          - approval
+          - implementation plan
+          - backout plan
+          - execution verification
+          - service state change
+          - performance change
+          - stability change
+          - stakeholder notification
+  ServiceState:
+    meaning: "Observed state of a service after implementation, including performance or stability changes."
+    aliases:
+      - service state
+    properties:
+      performance:
+        type: text
+      stability:
+        type: text
+  Failover:
+    meaning: Bringing a system online in a secondary environment to maintain service continuity during an outage of the primary system.
+    aliases:
+      - failover
+    properties: {}
+  ServiceIsolation:
+    meaning: Disconnecting a component from network or dependencies to prevent it from affecting other services.
+    aliases:
+      - service isolation
+      - isolate an application
+    properties: {}
+  IncidentRecord:
+    meaning: "Authoritative record maintained for an incident, containing evidence, timeline, decisions, approvals, communications, and supporting material."
+    aliases:
+      - incident record
+    properties:
+      retentionBasis:
+        type: text
+  IncidentTimeline:
+    meaning: "Chronological log of significant incident actions, events, decisions, and status changes."
+    aliases:
+      - timeline of events
+      - incident timeline
+    properties: {}
+  TimelineEvent:
+    meaning: Required dated event captured in the incident timeline to show incident progression.
+    aliases:
+      - timeline event
+      - event type
+    properties:
+      eventType:
+        type: text
+        allowed:
+          - Detected
+          - Acknowledged
+          - Major incident declared
+          - Customer impact started
+          - Workaround applied
+          - Emergency change approved
+          - Recovery started
+          - Service restored
+          - Monitoring complete
+          - Closed
+      eventTime:
+        type: date
+  IncidentEvidence:
+    meaning: "Evidence captured during a major incident to support review, audit, regulatory assessment, and accountability."
+    aliases:
+      - evidence
+      - major incident evidence
+    properties:
+      evidenceType:
+        type: text
+        allowed:
+          - timeline of events
+          - decisions and approvals
+          - bridge notes
+          - impact assessment
+          - communications
+          - technical logs
+          - screenshots
+          - monitoring graphs
+          - vendor updates
+      authenticity:
+        type: boolean
+      accuracy:
+        type: boolean
+      completeness:
+        type: boolean
+      traceability:
+        type: boolean
+      retentionBasis:
+        type: text
+  BridgeNotes:
+    meaning: Notes and discussions captured from the incident management bridge where stakeholders collaborate.
+    aliases:
+      - bridge notes
+    properties: {}
+  ImpactAssessment:
+    meaning: "Assessment of business, technical, customer, and regulatory impacts of an incident."
+    aliases:
+      - impact assessment
+    properties:
+      businessImpact:
+        type: text
+      technicalImpact:
+        type: text
+      customerImpact:
+        type: text
+      regulatoryImpact:
+        type: text
+  TechnicalLog:
+    meaning: Log from a relevant system that provides technical context for an incident.
+    aliases:
+      - technical log
+      - system log
+    properties: {}
+  MonitoringGraph:
+    meaning: "Visual evidence of system state, performance metrics, or anomalies observed during an incident."
+    aliases:
+      - monitoring graph
+      - screenshot
+    properties: {}
+  VendorUpdate:
+    meaning: "Documentation of correspondence, status, or support received from a third-party vendor during an incident."
+    aliases:
+      - vendor update
+    properties: {}
+  Communication:
+    meaning: "Message or update issued during incident response to internal, external, customer, regulatory, or vendor audiences."
+    aliases:
+      - communication
+      - incident communication
+    properties:
+      communicationType:
+        type: text
+        allowed:
+          - Internal Stakeholder Update
+          - Executive Update
+          - Customer Communication
+          - Branch/Contact-centre Advisory
+          - Status Page Update
+          - Regulator Notification
+          - Third-party/Vendor Communication
+      communicationStatus:
+        type: text
+        allowed:
+          - Drafted
+          - Approved
+          - Issued
+          - Updated
+          - Withdrawn
+      deadline:
+        type: date
+  InternalStakeholderUpdate:
+    meaning: Regular update for internal teams involved in incident response.
+    aliases:
+      - internal stakeholder update
+    properties:
+      communicationStatus:
+        type: text
+        allowed:
+          - Drafted
+          - Approved
+          - Issued
+          - Updated
+          - Withdrawn
+      deadline:
+        type: date
+  ExecutiveUpdate:
+    meaning: Summary report or update for senior management on incident status.
+    aliases:
+      - executive update
+    properties:
+      communicationStatus:
+        type: text
+        allowed:
+          - Drafted
+          - Approved
+          - Issued
+          - Updated
+          - Withdrawn
+      deadline:
+        type: date
+  BranchContactCentreAdvisory:
+    meaning: Advisory to branches and contact centres to assist customer inquiries and concerns during incidents.
+    aliases:
+      - branch/contact-centre advisory
+      - branch advisory
+      - contact-centre advisory
+    properties:
+      communicationStatus:
+        type: text
+        allowed:
+          - Drafted
+          - Approved
+          - Issued
+          - Updated
+          - Withdrawn
+      deadline:
+        type: date
+  StatusPageUpdate:
+    meaning: "Public-facing update posted on the bank's status page about current service status."
+    aliases:
+      - status page update
+    properties:
+      communicationStatus:
+        type: text
+        allowed:
+          - Drafted
+          - Approved
+          - Issued
+          - Updated
+          - Withdrawn
+      deadline:
+        type: date
+  RegulatoryReportingClock:
+    meaning: Time-bound regulatory reporting timeline tracked to ensure external regulatory obligations are met.
+    aliases:
+      - regulatory reporting clock
+      - reporting clock
+    properties:
+      deadline:
+        type: date
+      clockTrigger:
+        type: text
+  CommunicationDeadline:
+    meaning: Time-bound deadline tracked for incident communications.
+    aliases:
+      - communication deadline
+    properties:
+      deadline:
+        type: date
+  DataBreach:
+    meaning: "Confirmed breach or issue affecting data confidentiality, integrity, or related regulatory obligations."
+    aliases:
+      - data breach
+      - data integrity issue
+    properties: {}
+  OperationalResilienceThreshold:
+    meaning: Regulatory or internal threshold for operational resilience that may trigger notification or escalation when breached.
+    aliases:
+      - operational resilience threshold
+    properties:
+      thresholdDescription:
+        type: text
+  MaterialCustomerDetriment:
+    meaning: Material harm or detriment affecting numerous customers or services as a result of an incident.
+    aliases:
+      - material customer detriment
+    properties: {}
+  FinancialStabilityConcern:
+    meaning: Broad concern that an incident may affect financial stability.
+    aliases:
+      - financial stability concern
+    properties: {}
+  InitialRegulatorNotification:
+    meaning: First report to regulators indicating that an incident has occurred and outlining initial findings and impacts.
+    aliases:
+      - initial regulator notification
+    properties:
+      communicationStatus:
+        type: text
+        allowed:
+          - Drafted
+          - Approved
+          - Issued
+          - Updated
+          - Withdrawn
+      deadline:
+        type: date
+  InterimRegulatorUpdate:
+    meaning: "Subsequent regulator communication providing updates on incident status, emerging insights, and ongoing actions."
+    aliases:
+      - interim update
+      - interim regulator update
+    properties:
+      communicationStatus:
+        type: text
+        allowed:
+          - Drafted
+          - Approved
+          - Issued
+          - Updated
+          - Withdrawn
+      deadline:
+        type: date
+  FinalReportClosureNotification:
+    meaning: "Comprehensive final regulator report or closure notification covering incident details, final outcomes, actions taken, and remedial measures."
+    aliases:
+      - final report
+      - closure notification
+      - final report/closure notification
+    properties:
+      communicationStatus:
+        type: text
+        allowed:
+          - Drafted
+          - Approved
+          - Issued
+          - Updated
+          - Withdrawn
+      deadline:
+        type: date
+  CustomerCommunicationTemplate:
+    meaning: Pre-approved template for common customer communication scenarios used to expedite incident communications.
+    aliases:
+      - pre-approved template
+      - customer communication template
+    properties: {}
+  CommunicationChannel:
+    meaning: Delivery channel for customer communications with channel-specific strategy and approval needs.
+    aliases:
+      - channel
+      - communication channel
+    properties:
+      channelType:
+        type: text
+        allowed:
+          - social media
+          - email
+          - status page
+          - branch
+          - contact centre
+          - SMS
+          - mobile app
+  LegalComplianceReview:
+    meaning: Review by legal or compliance teams for significant communications with potential legal or regulatory implications.
+    aliases:
+      - legal/compliance review
+    properties: {}
+  PostIncidentReview:
+    meaning: "Review held after qualifying incidents to assess response, document findings, and identify improvements."
+    aliases:
+      - post-incident review
+      - PIR
+    properties:
+      reviewStatus:
+        type: text
+        allowed:
+          - Open
+          - In progress
+          - Actions assigned
+          - Implementation plan in place
+          - Closed
+  ProblemRecord:
+    meaning: "Record created to investigate unknown root cause, recurring incidents, or mandatory underlying issue management after a major incident."
+    aliases:
+      - problem record
+      - problem
+    properties:
+      rootCauseKnown:
+        type: boolean
+      recurring:
+        type: boolean
+      problemStatus:
+        type: text
+        allowed:
+          - Open
+          - In progress
+          - Root cause identified
+          - Corrective actions assigned
+          - Resolved
+          - Closed
+  RiskComplianceRepresentative:
+    meaning: Role that evaluates regulatory implications and compliance adherence during post-incident review.
+    aliases:
+      - risk/compliance representative
+      - risk representative
+      - compliance representative
+    properties: {}
+  RootCauseAnalysis:
+    meaning: Analysis identifying the underlying cause of an incident or problem.
+    aliases:
+      - root cause analysis
+      - RCA
+    properties: {}
+  ContributingFactor:
+    meaning: Factor that contributed to an incident occurring or worsening.
+    aliases:
+      - contributing factor
+    properties: {}
+  ControlGap:
+    meaning: Missing or ineffective control that allowed an incident to occur or worsen.
+    aliases:
+      - control gap
+    properties: {}
+  LessonLearned:
+    meaning: Documented learning from incident response intended to improve future operational resilience and response capability.
+    aliases:
+      - lesson learned
+    properties: {}
+  CorrectiveAction:
+    meaning: Action proposed or assigned to prevent incident recurrence or address a control gap.
+    aliases:
+      - corrective action
+      - remedial action
+    properties:
+      dueDate:
+        type: date
+      riskRating:
+        type: text
+      actionStatus:
+        type: text
+        allowed:
+          - Open
+          - In progress
+          - Implemented
+          - Verified
+          - Closed
+      executiveOversight:
+        type: boolean
+  ActionOwner:
+    meaning: Person or role assigned responsibility for implementing a corrective action.
+    aliases:
+      - assigned owner
+      - action owner
+    properties: {}
+  RegulatoryFollowUp:
+    meaning: Follow-up activity with regulators based on post-incident findings and regulatory implications.
+    aliases:
+      - regulatory follow-up
+    properties: {}
+  Playbook:
+    meaning: "Predefined response procedure outlining actions for incident handlers based on service, scenario, or severity."
+    aliases:
+      - playbook
+      - response procedure
+    properties:
+      scenario:
+        type: text
+      severityLevel:
+        type: text
+        allowed:
+          - Sev 1 Critical
+          - Sev 2 High
+          - Sev 3 Medium
+          - Sev 4 Low
+  Runbook:
+    meaning: Step-by-step operational procedure used to execute a consistent incident response for known incident types.
+    aliases:
+      - runbook
+    properties:
+      scenario:
+        type: text
+      severityLevel:
+        type: text
+        allowed:
+          - Sev 1 Critical
+          - Sev 2 High
+          - Sev 3 Medium
+          - Sev 4 Low
+  OperationalResilienceExercise:
+    meaning: "Preparedness exercise used to test operational resilience response strategies, readiness, and compliance obligations."
+    aliases:
+      - operational resilience testing
+      - operational resilience exercise
+    properties:
+      exerciseType:
+        type: text
+        allowed:
+          - Tabletop Exercise
+          - Failover Test
+          - Cyber Simulation
+          - Regulatory Scenario Test
+      exerciseDate:
+        type: date
+  ControlObligation:
+    meaning: "Policy or control requirement governing incident response, escalation, evidence, communications, recovery, or testing."
+    aliases:
+      - control obligation
+      - policy requirement
+    properties:
+      obligationType:
+        type: text
+        allowed:
+          - evidence completeness
+          - communication cadence
+          - escalation timeframe
+          - RTO compliance
+          - RPO compliance
+          - disaster recovery test frequency
+      requiredCadence:
+        type: text
+  RecoveryPointObjective:
+    meaning: Target maximum tolerable data loss for a service or application.
+    aliases:
+      - Recovery Point Objective
+      - RPO
+    properties:
+      recoveryPointObjective:
+        type: number
+        unit: hours
+  GovernanceMetric:
+    meaning: "Metric reported to governance committees to monitor incident performance, resilience, regulatory activity, and corrective-action management."
+    aliases:
+      - metric
+      - reporting metric
+    properties:
+      metricType:
+        type: text
+        allowed:
+          - incident count by severity
+          - time to detect
+          - time unresolved
+          - time to restore
+          - SLA breach
+          - RTO breach
+          - repeat incidents
+          - overdue corrective actions
+          - regulatory notification status
+      metricValue:
+        type: number
+  GovernanceForum:
+    meaning: "Committee or board overseeing incident trends, operational resilience risks, corrective-action closure, and regulatory themes."
+    aliases:
+      - governance forum
+      - committee
+      - board
+    properties:
+      forumFocus:
+        type: text
+        allowed:
+          - incident trends
+          - operational resilience risks
+          - corrective-action closure
+          - regulatory themes
+relationships:
+  - name: supports
+    from: Application
+    to: BusinessService
+    meaning: An application implements functionality that supports a business service.
+    aliases: []
+  - name: underpins
+    from: Database
+    to: Application
+    meaning: A database provides required data capability for an application.
+    aliases: []
+  - name: reliesOn
+    from: ITService
+    to: InfrastructureComponent
+    meaning: An IT service depends on infrastructure components such as servers or storage.
+    aliases: []
+  - name: isEssentialFor
+    from: ThirdPartyService
+    to: BusinessService
+    meaning: A third-party service is essential for business functionality of a business service.
+    aliases: []
+  - name: enablesConnectivityFor
+    from: NetworkSegment
+    to: ITService
+    meaning: A network segment provides connectivity needed for an IT service to function.
+    aliases: []
+  - name: hostedAt
+    from: InfrastructureComponent
+    to: DataCenterOrSite
+    meaning: An infrastructure component is hosted at a data center or site.
+    aliases: []
+  - name: owns
+    from: ServiceOwner
+    to: BusinessService
+    meaning: A service owner is accountable for a business service.
+    aliases: []
+  - name: owns
+    from: ServiceOwner
+    to: ITService
+    meaning: A service owner is accountable for an IT service.
+    aliases: []
+  - name: owns
+    from: ServiceOwner
+    to: Application
+    meaning: A service owner is accountable for an application.
+    aliases: []
+  - name: providesAccessTo
+    from: CustomerFacingService
+    to: BusinessService
+    meaning: A customer-facing service acts as a channel or conduit through which customers access a business service.
+    aliases: []
+  - name: supports
+    from: ITService
+    to: Application
+    meaning: An IT service supports business outcomes through applications that enact business functionality.
+    aliases: []
+  - name: affects
+    from: Incident
+    to: BusinessService
+    meaning: "An incident affects a business service through interruption, degradation, security condition, data issue, or supplier failure."
+    aliases: []
+  - name: affects
+    from: Incident
+    to: ITService
+    meaning: "An incident affects an IT service through interruption, degradation, security condition, data issue, or supplier failure."
+    aliases: []
+  - name: affects
+    from: Incident
+    to: Application
+    meaning: "An incident affects an application through interruption, degradation, security condition, data issue, or supplier failure."
+    aliases: []
+  - name: affects
+    from: Incident
+    to: ThirdPartyService
+    meaning: An incident affects or originates from a third-party service failure.
+    aliases: []
+  - name: raises
+    from: MonitoringAlert
+    to: Incident
+    meaning: A monitoring or SIEM alert can raise an incident.
+    aliases: []
+  - name: raises
+    from: CustomerComplaint
+    to: Incident
+    meaning: A customer complaint can raise an incident.
+    aliases: []
+  - name: raises
+    from: ServiceDeskTicket
+    to: Incident
+    meaning: A service desk ticket can raise an incident.
+    aliases: []
+  - name: raises
+    from: BusinessEscalation
+    to: Incident
+    meaning: A business escalation can raise an incident.
+    aliases: []
+  - name: raises
+    from: ThirdPartyNotification
+    to: Incident
+    meaning: A third-party supplier notification can raise an incident.
+    aliases: []
+  - name: raises
+    from: RegulatoryAlert
+    to: Incident
+    meaning: A regulatory alert can raise an incident.
+    aliases: []
+  - name: raises
+    from: SecurityAlert
+    to: Incident
+    meaning: A SOC security alert can raise an incident.
+    aliases: []
+  - name: canDeclare
+    from: IncidentCommander
+    to: MajorIncident
+    meaning: An incident commander has authority to declare a major incident.
+    aliases: []
+  - name: canDeclare
+    from: DutyManager
+    to: MajorIncident
+    meaning: A duty manager has authority to declare a major incident.
+    aliases: []
+  - name: commands
+    from: IncidentCommander
+    to: MajorIncident
+    meaning: "Once a major incident is declared, the incident commander leads coordination, communication, and decision-making."
+    aliases: []
+  - name: declaresMajorIncidentStatusFor
+    from: IncidentCommander
+    to: Incident
+    meaning: An incident commander can declare major-incident status for an incident.
+    aliases: []
+  - name: declaresMajorIncidentStatusFor
+    from: DutyManager
+    to: Incident
+    meaning: A duty manager can declare major-incident status for an incident.
+    aliases: []
+  - name: commands
+    from: IncidentCommander
+    to: Incident
+    meaning: "Once major-incident status is declared, the incident commander leads coordination, communication, and decision-making for the incident."
+    aliases: []
+  - name: ownsCoordinationOf
+    from: IncidentCommander
+    to: Incident
+    meaning: The incident commander owns end-to-end coordination and management of the incident.
+    aliases: []
+  - name: ownsRestorationOf
+    from: ServiceOwner
+    to: BusinessService
+    meaning: A service owner is responsible for restoration of an affected business service during an incident.
+    aliases: []
+  - name: ownsRestorationOf
+    from: ServiceOwner
+    to: ITService
+    meaning: A service owner is responsible for restoration of an affected IT service during an incident.
+    aliases: []
+  - name: ownsRestorationOf
+    from: ServiceOwner
+    to: Application
+    meaning: A service owner is responsible for restoration of an affected application during an incident.
+    aliases: []
+  - name: participatesIn
+    from: TechnicalLead
+    to: MajorIncidentBridge
+    meaning: The technical lead participates in the major incident bridge.
+    aliases: []
+  - name: participatesIn
+    from: BusinessLead
+    to: MajorIncidentBridge
+    meaning: The business lead participates in the major incident bridge.
+    aliases: []
+  - name: participatesIn
+    from: CommunicationsLead
+    to: MajorIncidentBridge
+    meaning: The communications lead participates in the major incident bridge.
+    aliases: []
+  - name: participatesIn
+    from: RegulatoryLiaison
+    to: MajorIncidentBridge
+    meaning: The regulatory liaison participates in the major incident bridge when regulatory considerations apply.
+    aliases: []
+  - name: participatesIn
+    from: CyberLead
+    to: MajorIncidentBridge
+    meaning: The cyber lead participates in the major incident bridge when cybersecurity implications apply.
+    aliases: []
+  - name: participatesIn
+    from: VendorManager
+    to: MajorIncidentBridge
+    meaning: The vendor manager participates in the major incident bridge when vendors are involved.
+    aliases: []
+  - name: participatesIn
+    from: ExecutiveSponsor
+    to: ExecutiveBridge
+    meaning: The executive sponsor participates in the executive bridge.
+    aliases: []
+  - name: records
+    from: Scribe
+    to: Incident
+    meaning: The scribe records incident decisions and action items.
+    aliases: []
+  - name: investigatesRootCauseFor
+    from: ProblemManager
+    to: Incident
+    meaning: The problem manager investigates root cause when an incident evolves into a problem.
+    aliases: []
+  - name: coordinatesWith
+    from: VendorManager
+    to: ThirdPartyService
+    meaning: The vendor manager coordinates with vendors for disrupted third-party services.
+    aliases: []
+  - name: approves
+    from: IncidentCommander
+    to: EmergencyChange
+    meaning: The incident commander approves or agrees to an emergency change during incident response.
+    aliases: []
+  - name: agreesTo
+    from: TechnicalOwner
+    to: EmergencyChange
+    meaning: The relevant technical owner agrees to an emergency change during incident response.
+    aliases: []
+  - name: invokes
+    from: IncidentCommander
+    to: DisasterRecovery
+    meaning: The incident commander can invoke disaster recovery with business and crisis-management input.
+    aliases: []
+  - name: agreesToInvoke
+    from: BusinessLead
+    to: DisasterRecovery
+    meaning: The business lead agrees to invoking disaster recovery based on business impact.
+    aliases: []
+  - name: supportsInvocationOf
+    from: CrisisManagementTeam
+    to: DisasterRecovery
+    meaning: The crisis management team may support disaster recovery invocation for broader operational or reputational impact.
+    aliases: []
+  - name: approvesTakingOffline
+    from: IncidentCommander
+    to: BusinessService
+    meaning: The incident commander approves taking an affected service offline.
+    aliases: []
+  - name: decidesToTakeOffline
+    from: TechnicalLead
+    to: BusinessService
+    meaning: The technical lead may decide to take a service offline with incident commander approval.
+    aliases: []
+  - name: decidesToTakeOffline
+    from: ServiceOwner
+    to: BusinessService
+    meaning: The service owner may decide to take a service offline with incident commander approval.
+    aliases: []
+  - name: issues
+    from: CommunicationsLead
+    to: CustomerCommunication
+    meaning: The communications lead issues customer communications.
+    aliases: []
+  - name: approves
+    from: IncidentCommander
+    to: CustomerCommunication
+    meaning: The incident commander approves customer communications.
+    aliases: []
+  - name: approves
+    from: BusinessLead
+    to: CustomerCommunication
+    meaning: The business lead approves customer communications.
+    aliases: []
+  - name: manages
+    from: RegulatoryLiaison
+    to: RegulatoryNotification
+    meaning: The regulatory liaison manages regulatory notification.
+    aliases: []
+  - name: coordinatesWith
+    from: RegulatoryLiaison
+    to: IncidentCommander
+    meaning: The regulatory liaison coordinates with the incident commander on regulatory notifications.
+    aliases: []
+  - name: accepts
+    from: BusinessLead
+    to: ResidualRiskAcceptance
+    meaning: The business lead accepts residual risk based on business impact considerations.
+    aliases: []
+  - name: accepts
+    from: ExecutiveSponsor
+    to: ResidualRiskAcceptance
+    meaning: The executive sponsor accepts residual risk for high-level business decisions.
+    aliases: []
+  - name: escalatesTo
+    from: Incident
+    to: ExecutiveBridge
+    meaning: An incident escalates to executives when customer or operational impact is significant.
+    aliases: []
+  - name: escalatesTo
+    from: Incident
+    to: CrisisManagementTeam
+    meaning: An incident escalates to crisis management when reputational or broader operational risk is evident.
+    aliases: []
+  - name: escalatesTo
+    from: Incident
+    to: CyberResponse
+    meaning: An incident escalates to cyber response when major cybersecurity concern arises.
+    aliases: []
+  - name: escalatesTo
+    from: Incident
+    to: LegalCompliance
+    meaning: An incident escalates to legal/compliance when regulatory implications or potential breaches exist.
+    aliases: []
+  - name: triggers
+    from: Incident
+    to: RegulatoryNotification
+    meaning: "An incident triggers regulatory notification based on its nature, extent, or compliance risk."
+    aliases: []
+  - name: approvesTakingOffline
+    from: IncidentCommander
+    to: CustomerFacingService
+    meaning: The incident commander approves taking an affected customer-facing service offline.
+    aliases: []
+  - name: approvesTakingOffline
+    from: IncidentCommander
+    to: ITService
+    meaning: The incident commander approves taking an affected IT service offline.
+    aliases: []
+  - name: approvesTakingOffline
+    from: IncidentCommander
+    to: Application
+    meaning: The incident commander approves taking an affected application offline or isolating it.
+    aliases: []
+  - name: decidesToTakeOffline
+    from: TechnicalLead
+    to: CustomerFacingService
+    meaning: The technical lead may decide to take a customer-facing service offline with incident commander approval.
+    aliases: []
+  - name: decidesToTakeOffline
+    from: TechnicalLead
+    to: ITService
+    meaning: The technical lead may decide to take an IT service offline with incident commander approval.
+    aliases: []
+  - name: decidesToTakeOffline
+    from: TechnicalLead
+    to: Application
+    meaning: The technical lead may decide to take an application offline or isolate it with incident commander approval.
+    aliases: []
+  - name: decidesToTakeOffline
+    from: ServiceOwner
+    to: CustomerFacingService
+    meaning: The service owner may decide to take a customer-facing service offline with incident commander approval.
+    aliases: []
+  - name: decidesToTakeOffline
+    from: ServiceOwner
+    to: ITService
+    meaning: The service owner may decide to take an IT service offline with incident commander approval.
+    aliases: []
+  - name: decidesToTakeOffline
+    from: ServiceOwner
+    to: Application
+    meaning: The service owner may decide to take an application offline or isolate it with incident commander approval.
+    aliases: []
+  - name: hasWorkaround
+    from: Incident
+    to: Workaround
+    meaning: An incident may have a temporary workaround to reduce impact while a fix is developed.
+    aliases: []
+  - name: hasPermanentFix
+    from: Incident
+    to: PermanentFix
+    meaning: An incident may have a permanent fix that addresses the underlying cause.
+    aliases: []
+  - name: implementedThrough
+    from: PermanentFix
+    to: EmergencyChange
+    meaning: A permanent fix may be implemented immediately through an emergency change during a live incident.
+    aliases: []
+  - name: approves
+    from: IncidentCommander
+    to: PermanentFix
+    meaning: "During a live incident, the incident commander approves implementation of a fix."
+    aliases: []
+  - name: consults
+    from: IncidentCommander
+    to: TechnicalOwner
+    meaning: The incident commander may consult the relevant technical owner before approving implementation during a live incident.
+    aliases: []
+  - name: consults
+    from: IncidentCommander
+    to: ServiceOwner
+    meaning: The incident commander may consult the relevant service owner before approving implementation during a live incident.
+    aliases: []
+  - name: hasImplementationPlan
+    from: EmergencyChange
+    to: ImplementationPlan
+    meaning: An emergency change has an implementation plan describing execution steps.
+    aliases: []
+  - name: hasBackoutPlan
+    from: EmergencyChange
+    to: BackoutPlan
+    meaning: An emergency change has a backout plan describing rollback actions.
+    aliases: []
+  - name: requiresEvidence
+    from: EmergencyChange
+    to: EmergencyChangeEvidence
+    meaning: An emergency change requires evidence before and after implementation.
+    aliases: []
+  - name: changes
+    from: EmergencyChange
+    to: ServiceState
+    meaning: "An emergency change may change service state, performance, or stability."
+    aliases: []
+  - name: triggersRollbackOf
+    from: ServiceState
+    to: EmergencyChange
+    meaning: Deterioration in post-implementation service state can trigger rollback of the emergency change.
+    aliases: []
+  - name: triggersRollbackOf
+    from: BackoutPlan
+    to: EmergencyChange
+    meaning: Predefined criteria in the backout plan can trigger rollback of the emergency change.
+    aliases: []
+  - name: invokes
+    from: IncidentCommander
+    to: Failover
+    meaning: The incident commander may invoke failover to a secondary environment to maintain service continuity.
+    aliases: []
+  - name: invokes
+    from: IncidentCommander
+    to: ServiceIsolation
+    meaning: The incident commander may invoke service isolation to prevent wider impact.
+    aliases: []
+  - name: usedFor
+    from: Failover
+    to: Incident
+    meaning: Failover is used during an outage of the primary system to maintain service continuity.
+    aliases: []
+  - name: usedFor
+    from: ServiceIsolation
+    to: Incident
+    meaning: Service isolation is used during security threats or severe malfunctions to prevent wider impact.
+    aliases: []
+  - name: hasRecord
+    from: Incident
+    to: IncidentRecord
+    meaning: An incident has an authoritative incident record.
+    aliases: []
+  - name: maintains
+    from: Scribe
+    to: IncidentRecord
+    meaning: The scribe is primarily responsible for capturing and maintaining the incident record.
+    aliases: []
+  - name: ensuresCollectionFor
+    from: IncidentCommander
+    to: IncidentRecord
+    meaning: The incident commander ensures necessary evidence is collected and logged in the incident record.
+    aliases: []
+  - name: hasTimeline
+    from: IncidentRecord
+    to: IncidentTimeline
+    meaning: The incident record contains the formal incident timeline.
+    aliases: []
+  - name: contains
+    from: IncidentTimeline
+    to: TimelineEvent
+    meaning: The incident timeline contains required timeline events.
+    aliases: []
+  - name: contains
+    from: IncidentRecord
+    to: IncidentEvidence
+    meaning: The incident record contains evidence captured during the incident.
+    aliases: []
+  - name: includes
+    from: IncidentEvidence
+    to: BridgeNotes
+    meaning: Incident evidence may include bridge notes.
+    aliases: []
+  - name: includes
+    from: IncidentEvidence
+    to: ImpactAssessment
+    meaning: Incident evidence may include impact assessments.
+    aliases: []
+  - name: includes
+    from: IncidentEvidence
+    to: TechnicalLog
+    meaning: Incident evidence may include technical logs.
+    aliases: []
+  - name: includes
+    from: IncidentEvidence
+    to: MonitoringGraph
+    meaning: Incident evidence may include screenshots or monitoring graphs.
+    aliases: []
+  - name: includes
+    from: IncidentEvidence
+    to: VendorUpdate
+    meaning: Incident evidence may include vendor updates.
+    aliases: []
+  - name: linksTo
+    from: IncidentEvidence
+    to: IncidentRecord
+    meaning: "Acceptable evidence is traceable back to the incident record, approvals, and actions taken."
+    aliases: []
+  - name: provides
+    from: ThirdPartyService
+    to: VendorUpdate
+    meaning: A third-party service provider may provide updates during an incident.
+    aliases: []
+  - name: hasCommunication
+    from: Incident
+    to: Communication
+    meaning: An incident has communications issued or managed as part of response.
+    aliases: []
+  - name: contains
+    from: IncidentRecord
+    to: Communication
+    meaning: The incident record contains copies of all communications sent regarding the incident.
+    aliases: []
+  - name: approves
+    from: IncidentCommander
+    to: InternalStakeholderUpdate
+    meaning: The incident commander approves internal stakeholder updates.
+    aliases: []
+  - name: approves
+    from: IncidentCommander
+    to: ExecutiveUpdate
+    meaning: The incident commander approves executive updates.
+    aliases: []
+  - name: approves
+    from: BusinessLead
+    to: ExecutiveUpdate
+    meaning: The business lead may approve executive updates.
+    aliases: []
+  - name: manages
+    from: CommunicationsLead
+    to: BranchContactCentreAdvisory
+    meaning: The communications lead manages branch and contact-centre advisories aligned with the incident communication plan.
+    aliases: []
+  - name: prepares
+    from: CommunicationsLead
+    to: StatusPageUpdate
+    meaning: The communications lead prepares status page updates.
+    aliases: []
+  - name: approves
+    from: IncidentCommander
+    to: StatusPageUpdate
+    meaning: The incident commander approves status page updates.
+    aliases: []
+  - name: prepares
+    from: RegulatoryLiaison
+    to: RegulatoryNotification
+    meaning: The regulatory liaison prepares regulator notifications.
+    aliases: []
+  - name: approves
+    from: IncidentCommander
+    to: RegulatoryNotification
+    meaning: The incident commander approves regulator notifications.
+    aliases: []
+  - name: coordinates
+    from: VendorManager
+    to: Communication
+    meaning: The vendor manager coordinates third-party/vendor communications.
+    aliases: []
+  - name: approves
+    from: IncidentCommander
+    to: Communication
+    meaning: The incident commander approves third-party/vendor communications and may approve internal stakeholder updates.
+    aliases: []
+  - name: hasReportingClock
+    from: RegulatoryNotification
+    to: RegulatoryReportingClock
+    meaning: A regulator notification may have a tracked regulatory reporting clock.
+    aliases: []
+  - name: hasDeadline
+    from: Communication
+    to: CommunicationDeadline
+    meaning: Communications may have tracked deadlines.
+    aliases: []
+  - name: triggers
+    from: Incident
+    to: CustomerCommunication
+    meaning: An incident triggers customer communication when customer-facing communication criteria are met.
+    aliases: []
+  - name: triggers
+    from: DataBreach
+    to: RegulatoryNotification
+    meaning: A confirmed data breach or data integrity issue triggers regulatory notification assessment.
+    aliases: []
+  - name: triggers
+    from: OperationalResilienceThreshold
+    to: RegulatoryNotification
+    meaning: Failure to meet an operational resilience threshold triggers regulatory notification assessment.
+    aliases: []
+  - name: triggers
+    from: MaterialCustomerDetriment
+    to: RegulatoryNotification
+    meaning: Material customer detriment triggers regulatory notification assessment.
+    aliases: []
+  - name: triggers
+    from: FinancialStabilityConcern
+    to: RegulatoryNotification
+    meaning: Financial stability concern triggers regulatory notification assessment.
+    aliases: []
+  - name: hasInitialNotification
+    from: RegulatoryNotification
+    to: InitialRegulatorNotification
+    meaning: A regulatory notification workflow includes an initial regulator notification.
+    aliases: []
+  - name: hasInterimUpdate
+    from: RegulatoryNotification
+    to: InterimRegulatorUpdate
+    meaning: A regulatory notification workflow may include interim regulator updates.
+    aliases: []
+  - name: hasFinalReport
+    from: RegulatoryNotification
+    to: FinalReportClosureNotification
+    meaning: A regulatory notification workflow includes a final report or closure notification once the incident is resolved.
+    aliases: []
+  - name: startsFrom
+    from: RegulatoryReportingClock
+    to: TimelineEvent
+    meaning: "The regulatory reporting clock typically starts from the initial detection timeline event, and in some cases from major incident declaration."
+    aliases: []
+  - name: usesTemplate
+    from: CustomerCommunication
+    to: CustomerCommunicationTemplate
+    meaning: Customer communications use pre-approved templates for common incident scenarios.
+    aliases: []
+  - name: deliveredThrough
+    from: CustomerCommunication
+    to: CommunicationChannel
+    meaning: "Customer communications are delivered through channels such as social media, email, status page, branch, contact centre, SMS, or mobile app."
+    aliases: []
+  - name: requiresReview
+    from: CustomerCommunication
+    to: LegalComplianceReview
+    meaning: Significant customer communications with potential legal implications require legal or compliance review.
+    aliases: []
+  - name: requiresApprovalFor
+    from: CommunicationChannel
+    to: CustomerCommunication
+    meaning: Channel-specific communication strategies may require specific approval depending on audience and delivery method.
+    aliases: []
+  - name: hasPostIncidentReview
+    from: Incident
+    to: PostIncidentReview
+    meaning: A qualifying incident has a post-incident review.
+    aliases: []
+  - name: owns
+    from: IncidentCommander
+    to: PostIncidentReview
+    meaning: The incident commander typically owns the post-incident review process.
+    aliases: []
+  - name: participatesIn
+    from: ProblemManager
+    to: PostIncidentReview
+    meaning: The problem manager participates in post-incident review and contributes to root cause identification.
+    aliases: []
+  - name: participatesIn
+    from: ServiceOwner
+    to: PostIncidentReview
+    meaning: The service owner participates in post-incident review and provides affected-service and operational impact insight.
+    aliases: []
+  - name: participatesIn
+    from: TechnicalLead
+    to: PostIncidentReview
+    meaning: The technical lead participates in post-incident review and provides technical perspective on resolution and system behavior.
+    aliases: []
+  - name: participatesIn
+    from: BusinessLead
+    to: PostIncidentReview
+    meaning: The business lead participates in post-incident review and ensures business implications are considered.
+    aliases: []
+  - name: participatesIn
+    from: RiskComplianceRepresentative
+    to: PostIncidentReview
+    meaning: The risk/compliance representative participates in post-incident review to evaluate regulatory implications and compliance adherence.
+    aliases: []
+  - name: participatesIn
+    from: VendorManager
+    to: PostIncidentReview
+    meaning: The vendor manager participates in post-incident review when third-party services were factors in the incident.
+    aliases: []
+  - name: produces
+    from: PostIncidentReview
+    to: RootCauseAnalysis
+    meaning: A post-incident review produces root cause analysis.
+    aliases: []
+  - name: identifies
+    from: PostIncidentReview
+    to: ContributingFactor
+    meaning: A post-incident review identifies contributing factors.
+    aliases: []
+  - name: identifies
+    from: PostIncidentReview
+    to: ControlGap
+    meaning: A post-incident review identifies control gaps.
+    aliases: []
+  - name: documents
+    from: PostIncidentReview
+    to: LessonLearned
+    meaning: A post-incident review documents lessons learned.
+    aliases: []
+  - name: proposes
+    from: PostIncidentReview
+    to: CorrectiveAction
+    meaning: A post-incident review proposes corrective actions to prevent recurrence.
+    aliases: []
+  - name: records
+    from: PostIncidentReview
+    to: ResidualRiskAcceptance
+    meaning: A post-incident review records risk acceptance discussions when not all risks can be mitigated.
+    aliases: []
+  - name: requires
+    from: PostIncidentReview
+    to: RegulatoryFollowUp
+    meaning: A post-incident review may require regulatory follow-up based on findings and implications.
+    aliases: []
+  - name: creates
+    from: Incident
+    to: ProblemRecord
+    meaning: "An incident creates a problem record when root cause is unknown, recurrence is evident, or major-incident governance requires it."
+    aliases: []
+  - name: investigates
+    from: ProblemManager
+    to: ProblemRecord
+    meaning: The problem manager oversees root cause investigation for the problem record.
+    aliases: []
+  - name: assignedTo
+    from: CorrectiveAction
+    to: ActionOwner
+    meaning: Each corrective action is assigned to an owner responsible for implementation.
+    aliases: []
+  - name: hasImplementationPlan
+    from: CorrectiveAction
+    to: ImplementationPlan
+    meaning: A corrective action has an implementation plan before the post-incident review can close.
+    aliases: []
+  - name: oversees
+    from: ExecutiveSponsor
+    to: CorrectiveAction
+    meaning: The executive sponsor may provide oversight for significant corrective actions affecting high-priority services or business functions.
+    aliases: []
+  - name: guidedBy
+    from: Incident
+    to: Playbook
+    meaning: "Incident response may be guided by a playbook selected by service, scenario, or severity."
+    aliases: []
+  - name: guidedBy
+    from: Incident
+    to: Runbook
+    meaning: Incident handlers may use a runbook for step-by-step response to known incident types.
+    aliases: []
+  - name: appliesTo
+    from: Playbook
+    to: BusinessService
+    meaning: A playbook may apply to a specific business service.
+    aliases: []
+  - name: appliesTo
+    from: Playbook
+    to: ITService
+    meaning: A playbook may apply to a specific IT service.
+    aliases: []
+  - name: appliesTo
+    from: Runbook
+    to: Application
+    meaning: A runbook may apply to a specific application or known technical scenario.
+    aliases: []
+  - name: validates
+    from: OperationalResilienceExercise
+    to: Playbook
+    meaning: Operational resilience exercises validate readiness and response strategies described in playbooks.
+    aliases: []
+  - name: validates
+    from: OperationalResilienceExercise
+    to: DisasterRecovery
+    meaning: Failover tests validate disaster recovery readiness and effectiveness of failover procedures.
+    aliases: []
+  - name: tests
+    from: OperationalResilienceExercise
+    to: CyberResponse
+    meaning: Cyber simulations test response to cyber incidents and effectiveness of security measures.
+    aliases: []
+  - name: tests
+    from: OperationalResilienceExercise
+    to: RegulatoryNotification
+    meaning: Regulatory scenario tests exercise preparedness for regulatory challenges and compliance obligations.
+    aliases: []
+  - name: governs
+    from: ControlObligation
+    to: IncidentEvidence
+    meaning: Evidence completeness obligations govern incident evidence collection.
+    aliases: []
+  - name: governs
+    from: ControlObligation
+    to: Communication
+    meaning: Communication cadence obligations govern incident communication updates.
+    aliases: []
+  - name: governs
+    from: ControlObligation
+    to: Incident
+    meaning: Escalation timeframe obligations govern incident escalation based on severity and impact.
+    aliases: []
+  - name: governs
+    from: ControlObligation
+    to: BusinessService
+    meaning: RTO and RPO obligations govern critical business services.
+    aliases: []
+  - name: governs
+    from: ControlObligation
+    to: DisasterRecovery
+    meaning: Disaster recovery test-frequency obligations govern recovery capability validation.
+    aliases: []
+  - name: hasRecoveryPointObjective
+    from: BusinessService
+    to: RecoveryPointObjective
+    meaning: A business service may have an RPO target for maximum tolerable data loss.
+    aliases: []
+  - name: hasRecoveryPointObjective
+    from: ITService
+    to: RecoveryPointObjective
+    meaning: An IT service may have an RPO target for maximum tolerable data loss.
+    aliases: []
+  - name: hasRecoveryPointObjective
+    from: Application
+    to: RecoveryPointObjective
+    meaning: An application may have an RPO target for maximum tolerable data loss.
+    aliases: []
+  - name: reports
+    from: GovernanceForum
+    to: GovernanceMetric
+    meaning: "Governance forums receive and review metrics on incidents, resilience, corrective actions, and regulatory notifications."
+    aliases: []
+  - name: oversees
+    from: GovernanceForum
+    to: CorrectiveAction
+    meaning: Governance forums oversee closure of corrective actions from post-incident reviews and problem records.
+    aliases: []
+  - name: oversees
+    from: GovernanceForum
+    to: Incident
+    meaning: Governance forums oversee incident trends and patterns.
+    aliases: []
+  - name: oversees
+    from: GovernanceForum
+    to: OperationalResilienceThreshold
+    meaning: Governance forums oversee operational resilience risks and vulnerabilities.
+    aliases: []
+  - name: oversees
+    from: GovernanceForum
+    to: RegulatoryFollowUp
+    meaning: Governance forums oversee regulatory themes and follow-up activity.
+    aliases: []
+rules:
+  majorIncidentCriteria:
+    conditions:
+      - Incident has significant impact on customers or business operations.
+      - Incident affects a critical or high-tier business service.
+      - "Incident duration exceeds the bank's escalation threshold."
+      - Incident impacts payment systems.
+      - Incident meets a regulatory reporting or regulatory concern threshold.
+      - Incident presents material reputational risk.
+      - Senior executive concern or involvement triggers the major-incident process.
+  severityAndPriorityCanDiffer:
+    conditions:
+      - Severity reflects technical impact while priority reflects required response speed based on business considerations.
+      - A workaround may reduce priority even when technical severity remains high.
+  durationBasedMajorIncidentAssessment:
+    conditions:
+      - Duration-based escalation thresholds are fixed by criticality tier and service type.
+      - A Tier 1 outage lasting over 15 minutes triggers major-incident assessment.
+  executiveEscalationCriteria:
+    conditions:
+      - Incident has significant impact on customers or operations.
+  crisisManagementEscalationCriteria:
+    conditions:
+      - Incident presents evident reputational risk or broader operational impact.
+  cyberResponseEscalationCriteria:
+    conditions:
+      - Incident has a major cybersecurity concern.
+  legalComplianceEscalationCriteria:
+    conditions:
+      - Incident has regulatory implications or potential breaches.
+  regulatoryNotificationCriteria:
+    conditions:
+      - Incident nature and extent indicate compliance risk or regulatory notification obligation.
+  emergencyChangeApprovalCriteria:
+    conditions:
+      - "Emergency change requires agreement of the Incident Commander and relevant stakeholders, often including the Technical Owner."
+  disasterRecoveryInvocationCriteria:
+    conditions:
+      - "Disaster recovery invocation requires Incident Commander and Business Lead involvement, and may involve the Crisis Management Team."
+  customerCommunicationApprovalCriteria:
+    conditions:
+      - Customer communication is managed by the Communications Lead and approved by the Incident Commander and Business Lead.
+  residualRiskAcceptanceCriteria:
+    conditions:
+      - Residual risk acceptance is a business impact decision made by the Business Lead and Executive Sponsor.
+  recoveryWorkflowSequence:
+    conditions:
+      - "Incident response normally proceeds through diagnosis, workaround, fix, emergency change when immediate implementation is required, recovery, and monitoring."
+  emergencyChangeImplementationApprovalCriteria:
+    conditions:
+      - "During a live incident, the Incident Commander approves implementation of emergency changes."
+      - The Incident Commander may consult the relevant Technical Owner or Service Owner before approving implementation.
+  emergencyChangeEvidenceCriteria:
+    conditions:
+      - "Before implementation, emergency change evidence includes incident details and impact, approval, implementation plan, and backout plan."
+      - "After implementation, emergency change evidence includes successful execution verification, observed service state, performance or stability changes, and stakeholder notifications."
+  rollbackCriteria:
+    conditions:
+      - Rollback is evaluated when post-implementation monitoring indicates deterioration rather than improvement.
+      - Rollback is evaluated when stakeholder feedback reports unresolved issues or service degradation after the change.
+      - Rollback is evaluated when predefined implementation-plan or backout-plan performance criteria are not met.
+  disasterRecoveryUsageCriteria:
+    conditions:
+      - Disaster recovery is invoked when a significant incident causes complete service unavailability and requires execution of a predefined recovery plan.
+  failoverUsageCriteria:
+    conditions:
+      - Failover is used when a secondary environment must be brought online to maintain service continuity during an outage of the primary system.
+  serviceIsolationUsageCriteria:
+    conditions:
+      - Service isolation is used when a component must be disconnected from the network or dependencies to prevent impact to other services.
+      - Service isolation is often used for detected security threats or severe malfunctions.
+  auditEvidenceAcceptabilityCriteria:
+    conditions:
+      - "Evidence must be authentic, with integrity supported by timestamps or secure storage."
+      - Evidence must be accurate and represent actual events or actions taken.
+      - Evidence must be complete enough to support incident assessment and response decisions.
+      - "Evidence must be traceable to incident records, approvals, and actions taken."
+  evidenceRetentionCriteria:
+    conditions:
+      - Evidence retention is influenced by incident severity and regulatory impact.
+      - "Critical incidents require longer retention, usually a minimum of several years in line with compliance obligations."
+  customerCommunicationTriggerCriteria:
+    conditions:
+      - Customer communication is triggered by confirmed customer impact.
+      - Customer communication is triggered by prolonged outages affecting service availability.
+      - Customer communication is triggered by payment-system or transaction impact.
+      - Customer communication is triggered by demonstrable reputational risk or loss of customer trust.
+      - Customer communication is triggered by regulatory expectations regarding incident communication.
+  regulatorNotificationTriggerCriteria:
+    conditions:
+      - Regulator notification is triggered by significant payment-system impact affecting financial transactions.
+      - Regulator notification is triggered by confirmed data breach or data integrity issue.
+      - Regulator notification is triggered by failure to meet operational resilience thresholds.
+      - Regulator notification is triggered by material customer detriment affecting numerous customers or services.
+      - Regulator notification is triggered by broad financial stability concern.
+      - Regulator notification is triggered by extended incident duration that could raise compliance flags.
+  communicationLifecycleCriteria:
+    conditions:
+      - "Incident communications follow fixed statuses of Drafted, Approved, Issued, Updated, and Withdrawn."
+  regulatoryReportingClockCriteria:
+    conditions:
+      - Communication deadlines and regulatory reporting timelines are tracked to ensure internal and external obligations are met.
+  regulatorNotificationWorkflowCriteria:
+    conditions:
+      - "Regulatory notification workflows distinguish initial regulator notification, interim updates, and final report or closure notification."
+      - Initial regulator notification outlines initial findings and impacts.
+      - "Interim updates provide incident status, emerging insights, and ongoing actions."
+      - "Final report or closure notification provides full incident details, final outcomes, actions taken, and remedial measures once resolved."
+  regulatoryReportingClockStartCriteria:
+    conditions:
+      - Regulatory reporting clocks are typically based on initial detection time.
+      - "In some cases, major incident declaration time may start the clock for specific reporting requirements."
+  customerCommunicationGovernanceCriteria:
+    conditions:
+      - Customer communications use pre-approved templates for common scenarios.
+      - Significant customer communications with potential legal implications require legal or compliance review.
+      - Channel-specific approval may be required depending on audience and delivery method.
+  postIncidentReviewRequiredCriteria:
+    conditions:
+      - Post-incident review is required for all incidents with majorIncidentDeclared true.
+      - Post-incident review is required for Sev 1 or Sev 2 incidents with substantial customer impact or significant operational response.
+      - Post-incident review is required for regulatory incidents with compliance obligations.
+      - Post-incident review is required for repeat incidents where unresolved issues reoccur.
+  problemRecordCreationCriteria:
+    conditions:
+      - A problem record is created when root cause is unknown and requires further investigation.
+      - A problem record is created when an incident is recurring.
+      - A problem record is typically mandatory for major incidents.
+  correctiveActionTrackingCriteria:
+    conditions:
+      - Each corrective action has an assigned owner.
+      - Each corrective action has a due date.
+      - Corrective actions may have risk ratings to evaluate impact and urgency.
+      - "Corrective actions are tracked through Open, In progress, Implemented, Verified, and Closed statuses."
+      - Significant corrective actions affecting high-priority services or business functions may require executive oversight.
+  incidentClosureCriteria:
+    conditions:
+      - An incident cannot be closed until the incident timeline is fully documented and complete.
+      - An incident cannot be closed until evidence is fully documented and complete.
+  postIncidentReviewClosureCriteria:
+    conditions:
+      - A post-incident review cannot be closed until all identified actions have been assigned.
+      - A post-incident review cannot be closed until an implementation plan is in place.
+  playbookRunbookUsageCriteria:
+    conditions:
+      - "Playbooks and runbooks provide predefined response procedures by service, scenario, and severity level."
+      - Incident handlers use playbooks and runbooks to ensure consistent and efficient response to known incident types.
+  operationalResilienceExerciseCriteria:
+    conditions:
+      - Tabletop exercises evaluate response strategies and team readiness using hypothetical scenarios.
+      - Failover tests validate disaster recovery readiness and failover procedures.
+      - Cyber simulations assess cyber incident response and security measure effectiveness.
+      - Regulatory scenario tests test readiness to meet compliance obligations.
+  controlObligationCriteria:
+    conditions:
+      - "Control obligations cover evidence completeness, communication update cadence, escalation timeframes, RTO and RPO compliance, and disaster recovery test frequency."
+  governanceReportingCriteria:
+    conditions:
+      - "Governance committee reporting includes incident count by severity, time to detect, time unresolved, time to restore, SLA or RTO breaches, repeat incidents, overdue corrective actions, and regulatory notification status."
+  governanceForumOversightCriteria:
+    conditions:
+      - Governance forums oversee incident trends and patterns.
+      - Governance forums oversee operational resilience risks and vulnerabilities.
+      - Governance forums oversee corrective-action closure.
+      - Governance forums oversee regulatory compliance themes and follow-up.
+actions:
+  declareMajorIncident:
+    input: Incident
+    preconditions:
+      - majorIncidentCriteria
+    effect: ""
+    verification: ""
+  assessForMajorIncident:
+    input: Incident
+    preconditions:
+      - durationBasedMajorIncidentAssessment
+    effect: ""
+    verification: ""
+  approveEmergencyChange:
+    input: EmergencyChange
+    preconditions:
+      - emergencyChangeApprovalCriteria
+    effect: ""
+    verification: ""
+  invokeDisasterRecovery:
+    input: Incident
+    preconditions:
+      - disasterRecoveryInvocationCriteria
+    effect: ""
+    verification: ""
+  issueCustomerCommunication:
+    input: CustomerCommunication
+    preconditions:
+      - customerCommunicationApprovalCriteria
+    effect: ""
+    verification: ""
+  notifyRegulator:
+    input: RegulatoryNotification
+    preconditions:
+      - regulatoryNotificationCriteria
+    effect: ""
+    verification: ""
+  acceptResidualRisk:
+    input: ResidualRiskAcceptance
+    preconditions:
+      - residualRiskAcceptanceCriteria
+    effect: ""
+    verification: ""
+  implementEmergencyChange:
+    input: EmergencyChange
+    preconditions:
+      - emergencyChangeImplementationApprovalCriteria
+      - emergencyChangeEvidenceCriteria
+    effect: ""
+    verification: ""
+  rollbackEmergencyChange:
+    input: EmergencyChange
+    preconditions:
+      - rollbackCriteria
+    effect: ""
+    verification: ""
+  performFailover:
+    input: Incident
+    preconditions:
+      - failoverUsageCriteria
+    effect: ""
+    verification: ""
+  performServiceIsolation:
+    input: Incident
+    preconditions:
+      - serviceIsolationUsageCriteria
+    effect: ""
+    verification: ""
+  maintainIncidentRecord:
+    input: IncidentRecord
+    preconditions:
+      - auditEvidenceAcceptabilityCriteria
+    effect: ""
+    verification: ""
+  retainIncidentEvidence:
+    input: IncidentEvidence
+    preconditions:
+      - evidenceRetentionCriteria
+    effect: ""
+    verification: ""
+  issueIncidentCommunication:
+    input: Communication
+    preconditions:
+      - communicationLifecycleCriteria
+      - regulatoryReportingClockCriteria
+    effect: ""
+    verification: ""
+  assessCustomerCommunicationNeed:
+    input: Incident
+    preconditions:
+      - customerCommunicationTriggerCriteria
+    effect: ""
+    verification: ""
+  assessRegulatorNotificationNeed:
+    input: Incident
+    preconditions:
+      - regulatorNotificationTriggerCriteria
+    effect: ""
+    verification: ""
+  trackRegulatoryReportingClock:
+    input: RegulatoryNotification
+    preconditions:
+      - regulatoryReportingClockCriteria
+    effect: ""
+    verification: ""
+  prepareInitialRegulatorNotification:
+    input: InitialRegulatorNotification
+    preconditions:
+      - regulatorNotificationWorkflowCriteria
+      - regulatoryReportingClockStartCriteria
+    effect: ""
+    verification: ""
+  prepareInterimRegulatorUpdate:
+    input: InterimRegulatorUpdate
+    preconditions:
+      - regulatorNotificationWorkflowCriteria
+    effect: ""
+    verification: ""
+  prepareFinalReportClosureNotification:
+    input: FinalReportClosureNotification
+    preconditions:
+      - regulatorNotificationWorkflowCriteria
+    effect: ""
+    verification: ""
+  approveCustomerCommunication:
+    input: CustomerCommunication
+    preconditions:
+      - customerCommunicationGovernanceCriteria
+      - customerCommunicationApprovalCriteria
+    effect: ""
+    verification: ""
+  conductPostIncidentReview:
+    input: Incident
+    preconditions:
+      - postIncidentReviewRequiredCriteria
+    effect: ""
+    verification: ""
+  createProblemRecord:
+    input: Incident
+    preconditions:
+      - problemRecordCreationCriteria
+    effect: ""
+    verification: ""
+  trackCorrectiveAction:
+    input: CorrectiveAction
+    preconditions:
+      - correctiveActionTrackingCriteria
+    effect: ""
+    verification: ""
+  closeIncident:
+    input: Incident
+    preconditions:
+      - incidentClosureCriteria
+    effect: ""
+    verification: ""
+  closePostIncidentReview:
+    input: PostIncidentReview
+    preconditions:
+      - postIncidentReviewClosureCriteria
+    effect: ""
+    verification: ""
+  usePlaybook:
+    input: Incident
+    preconditions:
+      - playbookRunbookUsageCriteria
+    effect: ""
+    verification: ""
+  conductOperationalResilienceExercise:
+    input: OperationalResilienceExercise
+    preconditions:
+      - operationalResilienceExerciseCriteria
+    effect: ""
+    verification: ""
+  reportGovernanceMetrics:
+    input: GovernanceForum
+    preconditions:
+      - governanceReportingCriteria
+    effect: ""
+    verification: ""
+  overseeGovernanceControls:
+    input: GovernanceForum
+    preconditions:
+      - governanceForumOversightCriteria
+    effect: ""
+    verification: ""

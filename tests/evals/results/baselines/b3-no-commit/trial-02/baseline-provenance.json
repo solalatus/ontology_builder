@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "condition": "structured-interview-no-commit",
+  "trialId": "trial-02",
+  "generatedAt": "2026-08-05T09:14:40.609Z",
+  "interviewerModel": "gpt-5.5-2026-04-23",
+  "personaModel": "gpt-4o-mini",
+  "classifierModel": "gpt-5.5-2026-04-23",
+  "extractionModel": "gpt-5.5-2026-04-23",
+  "extractionSystemPromptSha256": "41c2e221409507e489f9cab3bced39ec940a523ce85ef94b767eed8bc7202de9",
+  "transcriptSha256": "9c40fb99782d5fd5b5ee2bb908d4116fe13f9d5a365fc54569bc09bcbdf0526c",
+  "transcriptPath": "evals/results/baselines/b3-no-commit/trial-02/conversation-log.md",
+  "turnsUsed": 68,
+  "stoppedReason": "app_agent_appears_finished",
+  "interviewDurationMs": 1389241,
+  "extractionUsage": {
+    "prompt_tokens": 68981,
+    "completion_tokens": 7973,
+    "total_tokens": 76954,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 1468,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "note": "Real, fresh interview against the persona, real staged interviewer prompt, tools disabled so apply_ontology_yaml was structurally unreachable for the whole interview -- confirmed zero tool_calls in rawApiLog. Final model extracted with exactly one more call, same prompt/parsing as baseline-one-shot.mjs (condition B1), fed this run's own transcript."
+}

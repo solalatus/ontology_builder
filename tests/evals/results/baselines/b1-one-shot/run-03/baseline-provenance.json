@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "condition": "one-shot-transcript-to-mtsr",
+  "runId": "run-03",
+  "generatedAt": "2026-08-05T08:16:05.134Z",
+  "model": "gpt-5.5-2026-04-23",
+  "temperature": null,
+  "systemPromptSha256": "41c2e221409507e489f9cab3bced39ec940a523ce85ef94b767eed8bc7202de9",
+  "transcriptSha256": "77c3776308974daa4d83d6e919051b1c971d98305184653e4fedb535e9a72cd9",
+  "transcriptPath": "tests/evals/results/runs/run-03/conversation-log.md",
+  "usage": {
+    "prompt_tokens": 62626,
+    "completion_tokens": 6141,
+    "total_tokens": 68767,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 1454,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "note": "Single chat-completion call over the finished transcript of the interactive run. The persona was not re-invoked and no interactive run artifact was modified. The baseline sees the transcript the interactive agent produced, so it is a generous comparison condition for the baseline side."
+}

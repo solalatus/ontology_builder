@@ -1,0 +1,138 @@
+{
+  "classes": [
+    {
+      "goldId": "incidentCommander",
+      "recoveredId": "n23",
+      "weight": 1
+    },
+    {
+      "goldId": "serviceOwner",
+      "recoveredId": "n17",
+      "weight": 1
+    },
+    {
+      "goldId": "applicationOwner",
+      "recoveredId": "n18",
+      "weight": 1
+    },
+    {
+      "goldId": "technicalOwner",
+      "recoveredId": "n19",
+      "weight": 1
+    },
+    {
+      "goldId": "businessOwner",
+      "recoveredId": "n20",
+      "weight": 1
+    },
+    {
+      "goldId": "regulator",
+      "recoveredId": "n52",
+      "weight": 1
+    },
+    {
+      "goldId": "businessService",
+      "recoveredId": "n12",
+      "weight": 1
+    },
+    {
+      "goldId": "businessProcess",
+      "recoveredId": "n16",
+      "weight": 1
+    },
+    {
+      "goldId": "itService",
+      "recoveredId": "n13",
+      "weight": 1
+    },
+    {
+      "goldId": "configurationItem",
+      "recoveredId": "n21",
+      "weight": 1
+    },
+    {
+      "goldId": "application",
+      "recoveredId": "n14",
+      "weight": 1
+    },
+    {
+      "goldId": "infrastructureComponent",
+      "recoveredId": "n15",
+      "weight": 1
+    },
+    {
+      "goldId": "incident",
+      "recoveredId": "n3",
+      "weight": 1
+    },
+    {
+      "goldId": "majorIncident",
+      "recoveredId": "n4",
+      "weight": 1
+    },
+    {
+      "goldId": "emergencyChange",
+      "recoveredId": "n7",
+      "weight": 1
+    },
+    {
+      "goldId": "evidenceItem",
+      "recoveredId": "n8",
+      "weight": 1
+    },
+    {
+      "goldId": "communication",
+      "recoveredId": "n9",
+      "weight": 1
+    },
+    {
+      "goldId": "postIncidentReview",
+      "recoveredId": "n38",
+      "weight": 1
+    },
+    {
+      "goldId": "correctiveAction",
+      "recoveredId": "n40",
+      "weight": 1
+    }
+  ],
+  "relationships": [
+    {
+      "goldId": "businessOwner_is_accountable_for_businessService",
+      "edgeId": "e16",
+      "direction": "forward"
+    },
+    {
+      "goldId": "application_runs_on_infrastructureComponent",
+      "edgeId": "e10",
+      "direction": "forward"
+    },
+    {
+      "goldId": "postIncidentReview_produces_correctiveAction",
+      "edgeId": "e55",
+      "direction": "forward"
+    }
+  ],
+  "properties": [
+    {
+      "goldId": "incident_has_severity_severityLevel",
+      "hostNodeId": "n3",
+      "matchedPropertyName": "severityLevel"
+    },
+    {
+      "goldId": "incident_has_impact_impactLevel",
+      "hostNodeId": "n3",
+      "matchedPropertyName": "customerImpact"
+    },
+    {
+      "goldId": "correctiveAction_has_status_correctiveActionStatus",
+      "hostNodeId": "n40",
+      "matchedPropertyName": "status"
+    },
+    {
+      "goldId": "correctiveAction_has_due_date_date",
+      "hostNodeId": "n40",
+      "matchedPropertyName": "dueDate"
+    }
+  ]
+}
