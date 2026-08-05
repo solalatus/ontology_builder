@@ -1,0 +1,147 @@
+{
+  "fullDomain": {
+    "classes": [
+      {
+        "goldId": "customerChannel",
+        "recoveredId": "n2"
+      },
+      {
+        "goldId": "alert",
+        "recoveredId": "n13"
+      }
+    ],
+    "relationships": [
+      {
+        "goldId": "serviceDesk_records_incident",
+        "recoveredId": "e18"
+      },
+      {
+        "goldId": "application_uses_database",
+        "recoveredId": "e2"
+      },
+      {
+        "goldId": "incident_impacts_itService",
+        "recoveredId": "e13"
+      },
+      {
+        "goldId": "incident_impacts_businessService",
+        "recoveredId": "e12"
+      },
+      {
+        "goldId": "incident_is_coordinated_by_incidentCommander",
+        "recoveredId": "e29"
+      },
+      {
+        "goldId": "incident_is_handled_with_runbook",
+        "recoveredId": "e149"
+      },
+      {
+        "goldId": "incident_is_communicated_through_communication",
+        "recoveredId": "e101"
+      },
+      {
+        "goldId": "incident_is_reviewed_in_postIncidentReview",
+        "recoveredId": "e128"
+      },
+      {
+        "goldId": "postIncidentReview_produces_correctiveAction",
+        "recoveredId": "e140"
+      }
+    ],
+    "properties": [],
+    "valueFidelity": [
+      {
+        "id": "businessService_has_criticality_tier_criticalityTier",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "itService_has_criticality_tier_criticalityTier",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "thirdPartyService_has_criticality_tier_criticalityTier",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "incident_has_status_incidentStatus",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "incident_has_severity_severityLevel",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "incident_has_priority_priorityLevel",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "incident_has_impact_impactLevel",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "problem_has_status_problemStatus",
+        "semanticFidelity": 0.75
+      },
+      {
+        "id": "problem_has_root_cause_category_rootCauseCategory",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "communication_has_status_notificationStatus",
+        "semanticFidelity": 0.45
+      },
+      {
+        "id": "correctiveAction_has_status_correctiveActionStatus",
+        "semanticFidelity": 0.71
+      }
+    ]
+  },
+  "scoped": {
+    "classes": [],
+    "relationships": [
+      {
+        "goldId": "serviceDesk_records_incident",
+        "recoveredId": "e18"
+      },
+      {
+        "goldId": "incident_impacts_itService",
+        "recoveredId": "e13"
+      },
+      {
+        "goldId": "incident_is_coordinated_by_incidentCommander",
+        "recoveredId": "e29"
+      },
+      {
+        "goldId": "incident_is_handled_with_runbook",
+        "recoveredId": "e148"
+      },
+      {
+        "goldId": "incident_is_communicated_through_communication",
+        "recoveredId": "e101"
+      },
+      {
+        "goldId": "incident_is_reviewed_in_postIncidentReview",
+        "recoveredId": "e128"
+      }
+    ],
+    "properties": [],
+    "valueFidelity": [
+      {
+        "id": "incident_has_status_incidentStatus",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "incident_has_severity_severityLevel",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "incident_has_impact_impactLevel",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "communication_has_status_notificationStatus",
+        "semanticFidelity": 0.4
+      }
+    ]
+  }
+}

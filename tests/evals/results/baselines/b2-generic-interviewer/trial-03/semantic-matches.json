@@ -1,0 +1,117 @@
+{
+  "fullDomain": {
+    "classes": [
+      {
+        "goldId": "regulatoryNotification",
+        "recoveredId": "n18"
+      }
+    ],
+    "relationships": [
+      {
+        "goldId": "itService_is_implemented_by_application",
+        "recoveredId": "e2"
+      },
+      {
+        "goldId": "alert_may_open_incident",
+        "recoveredId": "e48"
+      },
+      {
+        "goldId": "incident_is_correlated_from_event",
+        "recoveredId": "e49"
+      },
+      {
+        "goldId": "incident_is_coordinated_by_incidentCommander",
+        "recoveredId": "e7"
+      },
+      {
+        "goldId": "incident_is_communicated_through_communication",
+        "recoveredId": "e19"
+      }
+    ],
+    "properties": [],
+    "valueFidelity": [
+      {
+        "id": "businessService_has_criticality_tier_criticalityTier",
+        "semanticFidelity": 0.75
+      },
+      {
+        "id": "itService_has_criticality_tier_criticalityTier",
+        "semanticFidelity": 0.75
+      },
+      {
+        "id": "event_has_detection_source_detectionSourceType",
+        "semanticFidelity": 0.45
+      },
+      {
+        "id": "alert_has_severity_severityLevel",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "alert_has_detection_source_detectionSourceType",
+        "semanticFidelity": 0.35
+      },
+      {
+        "id": "incident_has_severity_severityLevel",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "incident_has_impact_impactLevel",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "communication_has_status_notificationStatus",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "correctiveAction_has_status_correctiveActionStatus",
+        "semanticFidelity": 0.35
+      }
+    ]
+  },
+  "scoped": {
+    "classes": [
+      {
+        "goldId": "regulatoryNotification",
+        "recoveredId": "n18"
+      }
+    ],
+    "relationships": [
+      {
+        "goldId": "itService_is_implemented_by_application",
+        "recoveredId": "e2"
+      },
+      {
+        "goldId": "alert_may_open_incident",
+        "recoveredId": "e48"
+      },
+      {
+        "goldId": "incident_is_communicated_through_communication",
+        "recoveredId": "e19"
+      }
+    ],
+    "properties": [
+      {
+        "goldId": "materialityAssessment_has_result_materialityResult",
+        "matchedPropertyName": "reportable"
+      }
+    ],
+    "valueFidelity": [
+      {
+        "id": "alert_has_severity_severityLevel",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "incident_has_severity_severityLevel",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "incident_has_impact_impactLevel",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "communication_has_status_notificationStatus",
+        "semanticFidelity": 0
+      }
+    ]
+  }
+}

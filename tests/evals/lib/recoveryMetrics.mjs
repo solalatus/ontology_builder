@@ -84,6 +84,16 @@ function tokenize(s) {
 const CLASS_LABEL_MATCH_THRESHOLD = 0.6;
 const REL_PROP_LABEL_MATCH_THRESHOLD = 0.3;
 
+// Single exported source of truth for the two thresholds above, for any
+// other module (e.g. a comparison-condition baseline script) that needs to
+// report or reuse them -- kept in sync with the two consts by construction,
+// not a second copy that could drift (EXPERIMENT_BRIEF.md §7.5's own
+// "matching thresholds live in one place" requirement).
+export const MATCH_THRESHOLDS = {
+  class: CLASS_LABEL_MATCH_THRESHOLD,
+  relationshipOrProperty: REL_PROP_LABEL_MATCH_THRESHOLD,
+};
+
 // The raw Jaccard score behind labelsMatch's threshold check, exposed
 // separately so matchClasses (below) can use it as an edge weight for
 // one-to-one bipartite matching instead of just a boolean pass/fail.
