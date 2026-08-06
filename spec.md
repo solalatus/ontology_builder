@@ -67,7 +67,7 @@ Optionally, the app may request a real folder via `showDirectoryPicker({mode: 'r
 | `label` | string | entity name, shown in the box — also the matching key for TXT import (Section 5.3) |
 | `x`, `y` | number | top-left position in canvas space |
 | `w`, `h` | number | box dimensions — fixed at creation, never independently resized |
-| `notes` | string \| null | free-text, optional |
+| `meaning` | string \| null | free-text, optional. Renamed from `notes` when the Agent Ontology layer wired it up as the per-class meaning field — see `agent_ontology_spec.md` §3, Decision Log #2 |
 
 ### 4.2 Edge
 
@@ -105,13 +105,13 @@ The source of truth. Contains everything needed to fully reconstruct the canvas 
       "id": "n1",
       "label": "Andhra Pradesh",
       "x": 120, "y": 340, "w": 160, "h": 60,
-      "notes": null
+      "meaning": null
     },
     {
       "id": "n2",
       "label": "Telugu",
       "x": 380, "y": 340, "w": 160, "h": 60,
-      "notes": null
+      "meaning": null
     }
   ],
   "edges": [
@@ -125,6 +125,8 @@ The source of truth. Contains everything needed to fully reconstruct the canvas 
   ]
 }
 ```
+
+**Agent Ontology additions:** since the `agent_ontology_spec.md` initiative shipped, this same JSON export also carries `aliases`/`properties` on each node, `meaning`/`aliases` on each edge, and two additional top-level arrays, `rules`/`actions` — all additive, optional, defaulting to empty/null on load. Omitted from the minimal example above to keep it focused on the base instance-level shape; see `agent_ontology_spec.md` §4 for the full field set.
 
 ### 5.2 TXT edge list (portable, structure-only, human/Python-editable)
 

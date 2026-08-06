@@ -972,7 +972,7 @@ const STRINGS = {
     saveVersion: "Save Version",
     folderSync: "Folder Sync",
     folderSynced: (name) => `Synced: ${name}`,
-    importButton: "Import", // handles both .txt (spec.md §5.3) and .domain.yaml (agent_ontology_spec.md §8, Phase G)
+    importButton: "Import", // handles both .txt (spec.md §5.3) and .domain.yaml (agent_ontology_spec.md §11, Phase G)
     clear: "Clear",
     zoomOut: "Zoom out",
     zoomIn: "Zoom in",
@@ -993,7 +993,7 @@ const STRINGS = {
     emptyCanvasMessage: (addNodeLabel) => `Canvas is empty — use "${addNodeLabel}" to begin`,
     importMergeSummary: (n, m) => `Merge: ${n} node(s) and ${m} edge(s) would be added. Nothing is ever removed.`,
     importReplaceSummary: (n) => `Replace: same additions, plus ${n} node(s)/edge(s) not in this file would be removed.`,
-    // Agent Ontology (agent_ontology_spec.md §8, Phase G) — Domain Model YAML
+    // Agent Ontology (agent_ontology_spec.md §11, Phase G) — Domain Model YAML
     // import. Deliberately more aggressive than the plain TXT summary above:
     // a matched class/relationship/rule/action is overwritten, not left
     // untouched, on both Merge and Replace.
@@ -4048,7 +4048,7 @@ function commitTxtImport(text, mode) {
 }
 
 // ---------------------------------------------------------------------------
-// Domain Model YAML import (agent_ontology_spec.md §5/§8, Phase G) — the
+// Domain Model YAML import (agent_ontology_spec.md §5/§11, Phase G) — the
 // inverse of buildDomainYamlExport()/toYaml() above. Hand-written to parse
 // exactly the block-style subset that serializer can produce (2-space
 // indent, "- item" lists, "key:"/"key: value" maps, double-quoted/escaped
@@ -4463,7 +4463,7 @@ const importReplaceBtn = document.getElementById("import-replace");
 const importCancelBtn = document.getElementById("import-cancel");
 let pendingImportText = null;
 // "txt" (spec.md §5.3, node/edge merge-never-touches-matches) or "yaml"
-// (agent_ontology_spec.md §8, Phase G — aggressive overwrite-on-match). Set
+// (agent_ontology_spec.md §11, Phase G — aggressive overwrite-on-match). Set
 // alongside pendingImportText so Merge/Replace dispatch to the right
 // parser/commit pair without re-sniffing the file content.
 let pendingImportKind = "txt";
@@ -4577,7 +4577,7 @@ graphTitleEl.addEventListener("keydown", (e) => {
   if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openRenameGraphTitle(); }
 });
 
-// .yaml/.yml -> the Domain Model importer (agent_ontology_spec.md §8, Phase
+// .yaml/.yml -> the Domain Model importer (agent_ontology_spec.md §11, Phase
 // G); everything else falls through to the plain node/edge TXT importer
 // (spec.md §5.3) — matches the .domain.yaml extension Save Version writes,
 // and a bare .yaml/.yml for a hand-trimmed or hand-authored file.
