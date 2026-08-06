@@ -4,13 +4,27 @@ Status: **Phases 1–6 implemented and tested** (Phase-3 addendum:
 `get_graph_state` + prompt-cache key — see §4.5b; per-phase log in
 `helper_agent_todo.md`). Revised after user feedback on the first draft (see
 §3, §4.1, §4.3, §4.9, §4.10 for what changed).
-Branch: `helper_agent`, branched from `origin/main` at `533820e` (tip after PR #30).
+Branch history: work started on `helper_agent`, branched from `origin/main` at
+`533820e` (tip after PR #30). **Superseded almost immediately:** starting with
+Phase 1 itself (PR #31, `helper_agent-phase1`), every subsequent phase and
+follow-up shipped straight to `main` via its own short-lived
+`helper_agent-*`-prefixed PR — the isolation policy in the original ground
+rules below (§0) was abandoned in practice from the start and was never
+actually followed. `main`'s `index.html` has carried the full Helper Agent
+feature since PR #31 and is the authoritative, shipped implementation; the
+`helper_agent` ref itself has long since converged with `main` (see git
+history). The ground rules immediately below are kept verbatim as historical
+context for why this doc reads the way it does — do not rely on them as
+current policy.
 
-## 0. Standing ground rules for this subproject
+## 0. Standing ground rules for this subproject (historical — superseded, see note above)
 
-- All work lives on `helper_agent`. It is **never merged into `main`**. Future PRs
-  for this feature target `helper_agent` as their base branch.
-- `main` is not touched for this subproject unless explicitly instructed otherwise.
+- ~~All work lives on `helper_agent`. It is **never merged into `main`**. Future PRs
+  for this feature target `helper_agent` as their base branch.~~ **Did not hold in
+  practice** — every phase merged into `main` directly from Phase 1 onward.
+- ~~`main` is not touched for this subproject unless explicitly instructed otherwise.~~
+  **Same correction as above** — `main` has been this subproject's actual target
+  throughout.
 - Architecture constraint carries over unchanged from the base app: **one HTML
   file, no server, no external files fetched at runtime** — including the
   knowledge content used to ground the agent, which must be baked into the
@@ -506,19 +520,19 @@ acceptable trade for a first version.
 Mirrors this project's existing lettered-phase convention (Agent Ontology
 Phases A–I), renumbered fresh for this subproject:
 
-- **Phase 1 — Panel scaffold + connect modal + model list.** Collapsed/
+- **Phase 1 — Panel scaffold + connect modal + model list (done).** Collapsed/
   expanded panel UI, connect modal (key capture + in-memory/localStorage
   toggle), the live `GET /v1/models` call (doubles as the real CORS check
   per §3), the default-model heuristic + override dropdown. No chat-turn
   API calls yet — the connected panel shows the model picker and an empty
   transcript with sending disabled, so state machine and network
   validation are both exercised before any conversation logic exists.
-- **Phase 2 — Live chat, no tools yet.** Real Chat Completions calls, plain
+- **Phase 2 — Live chat, no tools yet (done).** Real Chat Completions calls, plain
   back-and-forth text, the language-lock directive (§4.9), and the
   long-context/summarization flow (§4.10) — this is inherent to the chat
   loop itself, not specific to tool-calling, so it belongs here rather than
   later.
-- **Phase 3 — Tool-calling.** Wire `apply_ontology_yaml`, the merge-based
+- **Phase 3 — Tool-calling (done).** Wire `apply_ontology_yaml`, the merge-based
   commit path, the applied-diff transcript line, the single-call-per-turn
   guardrail.
 - **Phase 4 — System prompt + knowledge (done).** `AGENT_KNOWLEDGE` populated
@@ -542,12 +556,15 @@ Phases A–I), renumbered fresh for this subproject:
   non-deterministic model output). `tests/helper-agent-phase4.spec.mjs` (8
   tests) covers the baked knowledge content, the INTERVIEW PROCESS section,
   system-prompt stability/cache-safety, and the corrected `agentNoToolsNote`
-  copy. Full suite green (348 JS tests + 13 Python tests, run twice). Docs
-  (this file + `helper_agent_todo.md`) updated for the subproject on the
-  `helper_agent` branch only.
+  copy. Full suite green (348 JS tests + 13 Python tests, run twice at the
+  time). Docs (this file + `helper_agent_todo.md`) updated for the
+  subproject — merged to `main` along with everything else, per §0's
+  corrected account above, not kept on an isolated branch.
 
-Each phase can be its own PR against `helper_agent`, following the existing
-project convention of phase-sized reviewable increments.
+Each phase was its own PR (`helper_agent-phase1`, `helper_agent-phase2`,
+etc.) merged directly into `main`, following the existing project convention
+of phase-sized reviewable increments — not against an isolated `helper_agent`
+branch as originally planned; see §0.
 
 ## 7. Review resolutions (previously open items)
 
