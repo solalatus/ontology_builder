@@ -17,6 +17,18 @@ bring-your-own-key chat panel that can interview a user and build/edit that
 same domain model live on the canvas through tool calls, with its own
 conversation persisted across reloads.
 
+## Interview field guide
+
+`Ontology_Interview_One_Page_Guide.pdf` is a printable one-page cheat sheet
+for running a domain-expert interview by hand — the same elicitation
+structure the Helper Agent follows. It covers the six building blocks
+(things, properties, relationships, rules/constraints, actions,
+results/states) with worked examples from two domains, a quick
+thing-vs-property classification test, a minimal interview progression, a
+live note-taking format, and the six exact questions to ask. Useful either
+as a human fallback when there's no API key, or as a reviewer's checklist
+for what an agent-run interview should have covered.
+
 ## Companion paper
 
 This repository is the reference implementation and evaluation artifact for
@@ -93,6 +105,8 @@ node --test tests/evals/*.eval.spec.mjs
   authoring layer's spec and progress log.
 - `helper_agent_plan.md` / `helper_agent_todo.md` — the embedded chat
   agent's design plan and progress log.
+- `Ontology_Interview_One_Page_Guide.pdf` — printable one-page field guide
+  for running the elicitation interview by hand.
 - `tests/` — the Node-based Playwright test suite for `index.html`,
   including the `tests/evals/` ontology-recovery eval.
 - `tools/` — a small Python utility (`load_edge_list.py`) for
