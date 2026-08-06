@@ -168,8 +168,11 @@ test("a realistic end-to-end session across many features stays internally consi
     assert.equal(nodes.length, 4, "Dana was added, everyone else untouched");
     const dana = nodes.find((n) => n.label === "Dana");
     assert.ok(dana);
+    // Merge now folds in a full autolayout reflow (issue #57), so Alice's
+    // exact position is no longer preserved across the import — only her
+    // continued existence (not duplicated) is guaranteed.
     const aliceUnchanged = nodes.find((n) => n.label === "Alice");
-    assert.equal(aliceUnchanged.x, aliceAfterReload.x, "Alice's own position is untouched by the import");
+    assert.ok(aliceUnchanged, "Alice survives the import, not duplicated");
 
     // --- Phase 11: Clear the graph, then undo it back ---------------------
     await page.waitForFunction(() => document.getElementById("btn-clear").disabled === false);

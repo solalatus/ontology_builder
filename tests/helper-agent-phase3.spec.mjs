@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { withPage, APP_URL } from "./lib/page.mjs";
+import { withPage, APP_URL, addNodeViaDblClick } from "./lib/page.mjs";
 import { launchChromium } from "./lib/browser.mjs";
 
 // Helper Agent (helper_agent_plan.md), Phase 3: tool-calling. The model can
@@ -119,6 +119,39 @@ test("a tool call with valid YAML actually edits the canvas through the real imp
     const last = await lastTranscriptMessage(page);
     assert.equal(last.role, "assistant");
     assert.equal(last.text, "I've added the Invoice class — what should it connect to?");
+  });
+});
+
+test("a tool-call commit triggers a full autolayout reflow, folded into the same single undo step (issue #57)", async () => {
+  await withPage(async (page) => {
+    // Seed a pre-existing node the agent's YAML never mentions, so any
+    // position change it undergoes can only be explained by a graph-wide
+    // reflow, not by the tool call touching it directly.
+    await addNodeViaDblClick(page, 120, 120, "PreExisting");
+    const before = await page.evaluate(() => window.__kg.state.nodes.find((n) => n.label === "PreExisting"));
+
+    await connectAgent(page);
+    const historyBefore = await page.evaluate(() => window.__kg.history.past.length);
+    mockChatSequence(page, [
+      () => ({ body: toolCallCompletionBody([toolCall("call_1", { yaml: SIMPLE_CLASS_YAML })]) }),
+      () => ({ body: chatCompletionBody("added") }),
+    ]);
+
+    await sendChatMessage(page, "add invoice");
+    await page.waitForFunction(() => !window.__kg.agent.isSending());
+
+    const after = await page.evaluate(() => window.__kg.state.nodes.find((n) => n.label === "PreExisting"));
+    assert.ok(after.x !== before.x || after.y !== before.y, "the pre-existing, untouched node moved — proof of a real graph-wide reflow, not just placement of the new node");
+
+    const historyAfter = await page.evaluate(() => window.__kg.history.past.length);
+    assert.equal(historyAfter - historyBefore, 1, "the reflow must be folded into the same single undo step as the tool-call commit");
+
+    await page.evaluate(() => window.__kg.actions.undo());
+    const restored = await page.evaluate(() => window.__kg.state.nodes.find((n) => n.label === "PreExisting"));
+    assert.equal(restored.x, before.x, "one Undo fully reverts both the content change and the reflow");
+    assert.equal(restored.y, before.y);
+    const nodeLabelsAfterUndo = await page.evaluate(() => window.__kg.state.nodes.map((n) => n.label));
+    assert.ok(!nodeLabelsAfterUndo.includes("Invoice"), "the tool-added class is also reverted by the same single undo");
   });
 });
 

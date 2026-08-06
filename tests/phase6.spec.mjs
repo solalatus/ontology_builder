@@ -74,7 +74,7 @@ test("Merge is idempotent — re-importing the same file adds nothing and create
   });
 });
 
-test("existing nodes keep their position and size untouched on merge — matched purely by label", async () => {
+test("existing nodes are matched (not duplicated) and keep their size on merge — position now shifts because merge folds in a full autolayout reflow (issue #57)", async () => {
   await withPage(async (page) => {
     await addNodeViaDblClick(page, 700, 500, "Andhra Pradesh");
     await dragNode(page, 700, 500, 900, 650); // move it somewhere custom
@@ -87,10 +87,14 @@ test("existing nodes keep their position and size untouched on merge — matched
     const nodes = await page.evaluate(() => window.__kg.state.nodes);
     assert.equal(nodes.length, 5, "Andhra Pradesh matched, not duplicated");
     const after = nodes.find((n) => n.label === "Andhra Pradesh");
-    assert.equal(after.x, before.x);
-    assert.equal(after.y, before.y);
-    assert.equal(after.w, before.w);
+    assert.equal(after.w, before.w, "autolayout only ever touches x/y, never size");
     assert.equal(after.h, before.h);
+    // Position is deliberately not asserted equal here (that was this
+    // test's whole point before issue #57): every commitYamlImport/
+    // commitTxtImport call now folds a full-graph autolayout pass into its
+    // own single undo step, so even a matched, previously hand-placed node
+    // moves along with everything else. See the dedicated reflow test
+    // below for that behavior itself.
   });
 });
 
@@ -110,22 +114,37 @@ test("merge never deletes an edge that's missing from the TXT — additive only"
   });
 });
 
-test("newly created nodes are auto-placed via shelf/grid, not full autolayout, and don't collide with existing content", async () => {
+// issue #57: new content lands via shelf/grid placement first (unchanged --
+// computeImportShelf() still avoids initial overlap with existing content),
+// but the commit now folds a full autolayout reflow on top of that before
+// its own single pushHistory, so the *final* graph is never just "shelf
+// plus whatever was already there" the way it was before this issue.
+test("import triggers a full-graph autolayout reflow, not just shelf placement of the new nodes", async () => {
   await withPage(async (page) => {
     await addNodeViaDblClick(page, 250, 250, "Preexisting"); // rect ~170,220..330,280
+    const preexistingBefore = await page.evaluate(() => window.__kg.state.nodes[0]);
 
     await triggerImport(page, "subset.txt"); // Andhra Pradesh, Telugu — both new
     await page.click("#import-merge");
     await page.waitForTimeout(150);
 
     const nodes = await page.evaluate(() => window.__kg.state.nodes);
-    const preexisting = nodes.find((n) => n.label === "Preexisting");
-    const imported = nodes.filter((n) => n.label !== "Preexisting");
-    assert.equal(imported.length, 2);
-    for (const n of imported) {
-      // shelf starts below the existing content's bounding box
-      assert.ok(n.y >= preexisting.y + preexisting.h, `imported node "${n.label}" should be placed below existing content`);
-    }
+    assert.equal(nodes.length, 3);
+    const preexistingAfter = nodes.find((n) => n.label === "Preexisting");
+    assert.notEqual(
+      `${preexistingAfter.x},${preexistingAfter.y}`,
+      `${preexistingBefore.x},${preexistingBefore.y}`,
+      "a pre-existing node the import didn't even touch should still move -- proof this is a real graph-wide reflow, not just placement of the two new nodes"
+    );
+
+    // Folded into the import's own undo step (see commitTxtImport's own
+    // comment), not a second, separate one -- one Undo restores both the
+    // content and the reflowed position together.
+    await page.click("#btn-undo");
+    const restoredNodes = await page.evaluate(() => window.__kg.state.nodes);
+    assert.equal(restoredNodes.length, 1, "one Undo removes the imported content too, not just the reflow");
+    assert.equal(restoredNodes[0].x, preexistingBefore.x);
+    assert.equal(restoredNodes[0].y, preexistingBefore.y);
   });
 });
 
@@ -197,25 +216,6 @@ test("Replace mode removes nodes/edges absent from the TXT, in exactly one undo 
     assert.equal(nodes.length, 5, "one Undo restores the full pre-Replace graph");
     edges = await page.evaluate(() => window.__kg.state.edges);
     assert.equal(edges.length, 3);
-  });
-});
-
-test("Replace mode preserves position for nodes that survive", async () => {
-  await withPage(async (page) => {
-    await triggerImport(page, "spec-example.txt");
-    await page.click("#import-merge");
-    await page.waitForTimeout(150);
-    const beforeAndhra = await page.evaluate(() =>
-      window.__kg.state.nodes.find((n) => n.label === "Andhra Pradesh"));
-
-    await triggerImport(page, "subset.txt");
-    await page.click("#import-replace");
-    await page.waitForTimeout(150);
-
-    const nodes = await page.evaluate(() => window.__kg.state.nodes);
-    const andhra = nodes.find((n) => n.label === "Andhra Pradesh");
-    assert.equal(andhra.x, beforeAndhra.x);
-    assert.equal(andhra.y, beforeAndhra.y);
   });
 });
 
