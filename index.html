@@ -1723,10 +1723,15 @@ function updateUndoRedoButtons() {
 // iteration count with a cooling schedule guarantees termination (no risk
 // of hanging) regardless of graph shape.
 // ---------------------------------------------------------------------------
-function autoLayout() {
-  if (state.nodes.length < 2) return; // nothing to relax
-  const before = snapshotState();
-
+// Pure position-mutation core, no snapshot/history of its own -- pulled out
+// of autoLayout() below (issue #57) so a commit path that wants the reflow
+// folded into its OWN single undo step (see commitTxtImport/commitYamlImport)
+// can call it directly instead of getting a second, separate history entry
+// the way calling the public autoLayout() wrapper would produce. Callers
+// are responsible for the `state.nodes.length < 2` guard themselves --
+// see autoLayout() below for why that check has to happen before, not
+// inside, this function.
+function computeAutoLayoutPositions() {
   const idealDist = 150; // target inter-node spacing
   const iterations = 200;
   let temperature = 100; // max displacement per iteration, cooled to ~0
@@ -1778,7 +1783,17 @@ function autoLayout() {
     n.x = centers[i].x - n.w / 2;
     n.y = centers[i].y - n.h / 2;
   });
+}
 
+// Public entry point -- the toolbar button and the window.__kg.actions test
+// hook both call this directly, as its own single, independent undo step
+// (see tests/phase8.spec.mjs). The length guard lives here, before the
+// snapshot, so a trivial/no-op call never pays for one or creates a
+// phantom history entry -- unchanged from before this function was split.
+function autoLayout() {
+  if (state.nodes.length < 2) return; // nothing to relax
+  const before = snapshotState();
+  computeAutoLayoutPositions();
   markDirty();
   pushHistory(before, snapshotState());
 }
@@ -4167,6 +4182,16 @@ function commitTxtImport(text, mode) {
     for (const e of edgesToRemove) deleteEdge(e.id);
   }
 
+  // issue #57: a TXT import never carries real coordinates -- new nodes
+  // only ever get shelf/grid placement (nextShelfPosition() above) -- so
+  // the graph gets a full reflow before the single snapshot/pushHistory
+  // below, folding it into the same undo step as the import itself rather
+  // than a second, separate one (an import followed by an automatic-but-
+  // separate autolayout would take two Undo clicks to fully revert, which
+  // is exactly the surprising behavior "exactly one undo step" tests
+  // elsewhere in this app -- phase8.spec.mjs's own autolayout tests among
+  // them -- exist to rule out).
+  if (state.nodes.length >= 2) computeAutoLayoutPositions();
   pushHistory(before, snapshotState()); // clears any stale "just imported" highlight first
   newlyImportedIds = new Set(createdNodeIds);
   markDirty();
@@ -4576,6 +4601,12 @@ function commitYamlImport(text, mode) {
     for (const a of state.actions.filter((a) => !matchedActionIds.has(a.id))) deleteAction(a.id);
   }
 
+  // issue #57: covers all three modes -- "merge"/"replace" from the manual
+  // Import dialog (a YAML import never carries coordinates either) and
+  // "agent-merge" from the live agent's apply_ontology_yaml tool call.
+  // Folded into this same snapshot/pushHistory, not a second one of its
+  // own -- see commitTxtImport's matching comment for why.
+  if (state.nodes.length >= 2) computeAutoLayoutPositions();
   pushHistory(before, snapshotState());
   newlyImportedIds = new Set(); // Section-5.3-style highlight only applies to plain node/edge TXT import
   markDirty();
