@@ -181,6 +181,15 @@ State" so the project can be picked up cold at any time.
   tests + 13 Python tests (up from 287 + 11 before this pass), full suite run
   twice consecutively, both green. See the dated Log entry for the full
   per-bug account.
+- **A "fix the broken tests" follow-up (2026-08-06)** fixed 3 pre-existing
+  failures in `tests/phase4.spec.mjs`'s OPFS-over-http suite (a browser-
+  default `favicon.ico` request 404ing against the test server, tripping
+  the strict no-console-errors assertion) by adding an empty inline favicon
+  link to `index.html` — a real app-level fix, not a test-only workaround,
+  since the same 404 would hit any real user serving the app over their own
+  http(s) server. See the dated Log entry for the full account. Full suite:
+  533 JS tests (522 pass + 11 correctly skipped without `OPENAI_API_KEY`) +
+  13 Python tests, all green, run twice consecutively.
 - **Next action:** Phase 10 (Cross-platform verification — the manual
   hands-on matrix that every deferred Tier-B item from Phases 0–9 above
   finally gets exercised against for real).
@@ -2910,6 +2919,29 @@ and record deltas here instead of editing the spec.)*
   Ran the full suite twice consecutively: `node --test tests/*.spec.mjs`
   (295 tests) and `python3 -m unittest discover -s tools -p "test_*.py"`
   (13 tests), both green both times.
+
+- **2026-08-06 — Fixed 3 pre-existing failures in `tests/phase4.spec.mjs`'s
+  OPFS-over-http suite.** `tests/lib/page.mjs`'s `withPage()` fails any test
+  on so much as one console/page error; the three OPFS tests that load
+  `index.html` over a real http origin (`tests/lib/server.mjs`, required
+  since OPFS throws under `file://` — see the Phase 4 Log entry above) were
+  tripping that assertion on a browser-default `GET /favicon.ico` request,
+  which the test server 404s (it serves only what's actually on disk, and
+  no `favicon.ico` file exists). `file://`-loaded tests never hit this —
+  browsers don't auto-request a favicon for that scheme — which is why only
+  these three, out of 500+ tests, ever saw it. Not a test-infra-only
+  concern: the same 404 would occur for any real user who serves `index.html`
+  over their own local http(s) server (Tier 2/3 usage isn't restricted to
+  `file://`), so fixed at the app level rather than by special-casing the
+  test server — an empty inline `<link rel="icon" href="data:,">` in
+  `index.html`'s `<head>` stops the browser from ever issuing that request,
+  with zero new external fetches (still a `data:` URI, not a file — spec.md
+  §2's single-file constraint holds). Regression: reproduced by running
+  `tests/phase4.spec.mjs` alone before the fix (3 failures, deterministic
+  across repeated runs) and confirmed fixed after (21/21 passing). Full
+  suite (`node --test tests/*.spec.mjs`, 533 tests: 522 pass + 11 correctly
+  skipped without `OPENAI_API_KEY`) run twice consecutively, both green;
+  `python3 -m unittest discover -s tools -p "test_*.py"` (13 tests) green.
 
 ---
 
