@@ -37,10 +37,14 @@ as a normal project dependency, it falls back to that fixed path. That
 fallback is sandbox-specific and may not exist on your machine; the
 `npm install` path above is the portable one.
 
-`package.json`'s other committed dependency is `js-yaml`, used solely by
-the ontology-recovery eval (below) to parse its ground-truth fixture —
-plain `npm install` in the repo root picks it up too. `index.html` itself
-remains a single dependency-free file regardless (spec.md Section 2); this
+`package.json`'s other committed dependency is `js-yaml`, used to parse the
+ontology-recovery ground-truth fixture (`tests/evals/lib/groundTruthModel.mjs`)
+— not only by the opt-in eval itself, but also by
+`tests/ontology-recovery-metrics.spec.mjs`'s always-run, API-free unit tests
+against the same loader, so it's a dependency of the default suite too, not
+just the opt-in one. Plain `npm install` in the repo root picks it up
+regardless. `index.html` itself remains a single dependency-free file
+regardless (spec.md Section 2); this
 is dev-only test tooling, same as Playwright.
 
 ## Layout

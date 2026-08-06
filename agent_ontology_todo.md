@@ -60,6 +60,13 @@ enough that this can be picked up cold.
   further work here (Open Questions #1/#2, or anything beyond the original plan) would start as a fresh,
   explicitly-scoped request, not a continuation of an in-flight phase. The base app's own `TODO.md` still
   has Phase 10 (manual cross-platform verification) outstanding, unrelated to this initiative.
+- **One data-model addition landed here after this file stopped being updated (2026-07-30):** Edge
+  (Relationship) gained an `aliases: string[]` field, matching the one Classes already had — found
+  necessary by a real ontology-recovery eval run on the `helper_agent` line of work, where the
+  interviewer routinely elicited real relationship synonyms with nowhere to store them. `agent_ontology_spec.md`
+  §4.2 and its Decision Log document the field itself; the implementation/test account lives in
+  `helper_agent_todo.md`'s dated addendum, not in this file's own phase checklists, since it landed after
+  this initiative's Phases A–I were already closed out.
 
 ---
 

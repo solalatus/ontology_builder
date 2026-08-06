@@ -2,8 +2,10 @@
 
 Progress tracker for `helper_agent_plan.md`. Same convention as the base app's `TODO.md`: check items
 off as work happens, log deviations/decisions with a dated entry, keep "Current State" accurate enough
-that this can be picked up cold. This branch (`helper_agent`) is a standalone subproject and is never
-merged into `main` — see `helper_agent_plan.md` §0.
+that this can be picked up cold. Work started on a standalone `helper_agent` branch intended to never
+merge into `main`, but that isolation policy was abandoned from Phase 1 onward — every phase since has
+shipped to `main` via its own PR, and `main` is the authoritative, shipped state. See
+`helper_agent_plan.md` §0 for the corrected account.
 
 ---
 
@@ -51,6 +53,15 @@ merged into `main` — see `helper_agent_plan.md` §0.
   built from), `getConnectErrorKind`, `sendMessage`/`buildSystemPrompt`/`isSending`. Phase 3 didn't need
   to add anything new here — tests exercise tool-calling entirely through the existing `sendMessage()` +
   `window.__kg.state`/`window.__kg.history` surfaces.
+
+**This "Current State" section itself was last kept in sync as of Phase 6 (2026-07-28) and was never
+updated afterward**, even though substantial further work has landed since via the dated `## Addendum`
+and `## Post-plan extension` sections below (in chronological order): the `get_graph_state` tool, the
+live-OpenAI integration tests (and two real bugs they found), the full ontology-recovery eval
+infrastructure plus many rounds of methodology/scoring/prompt fixes, relationship aliases (a real app
+feature — `agent_ontology_spec.md` §4.2), agent conversation persistence & restart (plan §9), a 3-run
+replication set, and the B1/B2/B3 comparison-condition baselines. Treat the bullets above as a Phase-6
+snapshot, not the project's actual current state — scroll down for that.
 
 ## Phase 1 — Panel scaffold + connect modal + model list
 
