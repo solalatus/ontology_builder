@@ -168,6 +168,64 @@ test("pressing Enter in the chat input sends the message", async () => {
   });
 });
 
+// Issue #55: the chat input became a <textarea> so it can hold more than
+// one line, with Alt+Enter as the explicit way to add a line break without
+// sending. Confirmed live before writing this that a plain, unmodified
+// <textarea> does NOT insert a newline on Alt+Enter by default in this
+// browser -- only bare Enter does -- so the app has to insert it itself
+// rather than just staying out of the way; this test is what catches a
+// regression back to "does nothing" if that handling is ever removed.
+test("Alt+Enter inserts a line break in the chat input instead of sending", async () => {
+  await withPage(async (page) => {
+    await connectAgent(page);
+    let sent = false;
+    await page.route("https://api.openai.com/v1/chat/completions", (route) => {
+      sent = true;
+      route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(chatCompletionBody("should not be reached")) });
+    });
+
+    await page.type("#agent-chat-input", "first line");
+    await page.keyboard.down("Alt");
+    await page.keyboard.press("Enter");
+    await page.keyboard.up("Alt");
+    await page.type("#agent-chat-input", "second line");
+
+    const value = await page.$eval("#agent-chat-input", (el) => el.value);
+    assert.equal(value, "first line\nsecond line");
+    assert.equal(sent, false, "Alt+Enter must not submit the message");
+  });
+});
+
+test("plain Enter still sends after Alt+Enter added a line break, and sends the full multi-line text", async () => {
+  await withPage(async (page) => {
+    await connectAgent(page);
+    mockChatSequence(page, [() => ({ body: chatCompletionBody("ack") })]);
+
+    await page.type("#agent-chat-input", "first line");
+    await page.keyboard.down("Alt");
+    await page.keyboard.press("Enter");
+    await page.keyboard.up("Alt");
+    await page.type("#agent-chat-input", "second line");
+    await page.press("#agent-chat-input", "Enter");
+
+    await page.waitForFunction(() => window.__kg.agent.state.transcript.length === 2);
+    const transcript = await page.evaluate(() => window.__kg.agent.state.transcript);
+    assert.equal(transcript[0].text, "first line\nsecond line");
+    const valueAfterSend = await page.$eval("#agent-chat-input", (el) => el.value);
+    assert.equal(valueAfterSend, "", "input should be cleared after a real send");
+  });
+});
+
+test("chat input is a multi-line textarea, not a single-line text input", async () => {
+  await withPage(async (page) => {
+    await connectAgent(page);
+    const tag = await page.$eval("#agent-chat-input", (el) => el.tagName);
+    assert.equal(tag, "TEXTAREA");
+    const rows = await page.getAttribute("#agent-chat-input", "rows");
+    assert.equal(rows, "2", "should default to a taller-than-one-line height (issue #55)");
+  });
+});
+
 test("assistant and user message content is rendered as text, never as markup (XSS safety)", async () => {
   await withPage(async (page) => {
     await connectAgent(page);

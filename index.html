@@ -97,7 +97,14 @@
   #toolbar {
     position: fixed;
     top: 0;
-    left: 0;
+    /* Shifts right by the same amount as #canvas-wrap below when the agent
+       panel is expanded (issue #55 -- "shrink the graph area accordingly,
+       and I also mean the header menu here"), so the toolbar never sits
+       underneath the panel. 0 while collapsed (the default and every
+       existing test's state), which is byte-identical to the old fixed
+       `left: 0` -- zero layout change for anything that never opens the
+       panel or drags its resize handle. */
+    left: var(--agent-panel-offset, 0px);
     right: 0;
     z-index: 10;
     display: flex;
@@ -109,6 +116,7 @@
     color: var(--toolbar-fg);
     border-bottom: 1px solid var(--toolbar-border);
     box-shadow: var(--shadow-sm);
+    transition: left var(--transition-fast);
   }
 
   #toolbar button {
@@ -209,7 +217,24 @@
   #canvas-wrap {
     position: fixed;
     inset: 0;
+    /* Overrides just the left edge of `inset: 0` -- see #toolbar's own
+       comment on --agent-panel-offset (issue #55). resizeCanvas() is
+       called after every change to this value (panel expand/collapse and
+       live drag-resize alike) so the canvas's internal buffer and the
+       camera's screen-space math stay in sync with the shrunk box; nothing
+       here needs its own resize handling beyond that. */
+    left: var(--agent-panel-offset, 0px);
     background: var(--canvas-bg);
+    transition: left var(--transition-fast);
+  }
+
+  /* Suppressed during an active drag (see the resize-handle pointer
+     handlers) -- animating every intermediate width during a drag reads as
+     laggy instead of responsive; a live user's own hand movement is already
+     smoother than any CSS transition could be. */
+  #canvas-wrap.resizing-panel,
+  #toolbar.resizing-panel {
+    transition: none;
   }
 
   #canvas {
@@ -556,6 +581,9 @@
 
   #agent-panel-body {
     pointer-events: auto;
+    /* Default/fallback for before JS applies the persisted or dragged
+       width as an inline style (issue #55) -- an inline style always wins
+       over this, so nothing here needs to track that value. */
     width: 320px;
     max-width: 85vw;
     display: none;
@@ -570,6 +598,32 @@
 
   #agent-panel.expanded #agent-panel-body {
     display: flex;
+  }
+
+  /* Drag-to-resize handle (issue #55 -- "make the chat panel resizable").
+     A flex sibling of #agent-panel-body, not an absolutely-positioned
+     overlay on top of it: #agent-panel is already `display: flex; align-
+     items: stretch`, so a plain flex item naturally sits at the body's
+     right edge and spans its full height with no extra positioning rules
+     to keep in sync if the body's own height ever changes. */
+  #agent-panel-resize-handle {
+    display: none;
+    pointer-events: auto;
+    flex: none;
+    width: 6px;
+    margin-left: -3px; /* centers the 6px grab target on the body's own border */
+    cursor: ew-resize;
+    background: transparent;
+    transition: background-color var(--transition-fast);
+  }
+
+  #agent-panel.expanded #agent-panel-resize-handle {
+    display: block;
+  }
+
+  #agent-panel-resize-handle:hover,
+  #agent-panel-resize-handle.dragging {
+    background: var(--accent);
   }
 
   .agent-panel-intro {
@@ -740,14 +794,27 @@
 
   .agent-input-row {
     display: flex;
+    align-items: flex-end; /* keeps Send pinned to the textarea's bottom edge as it grows/resizes */
     gap: 6px;
   }
 
+  /* issue #55: a taller default (rows="2" in the markup, ~2 lines instead
+     of the previous single-line <input>), real multi-line wrapping, and a
+     manual drag handle (resize: vertical) on top of that -- three separate
+     asks in the issue, all satisfied by switching the element itself from
+     <input type="text"> to <textarea>. Plain Enter still submits (see the
+     keydown handler); Alt+Enter inserts a line break, which is a
+     <textarea>'s own native behavior once Enter alone isn't intercepted --
+     no extra handling needed for that half of the toggle. */
   #agent-chat-input {
     flex: 1;
     min-width: 0;
+    min-height: 52px;
+    max-height: 40vh;
+    resize: vertical;
     font: inherit;
     font-size: 14px;
+    line-height: 1.4;
     padding: 7px 9px;
     border-radius: var(--radius-sm);
     border: 1px solid var(--toolbar-border);
@@ -871,7 +938,7 @@
       <p id="agent-typing-indicator" class="agent-typing-indicator" style="display:none;">…</p>
       <p id="agent-no-tools-note" class="agent-no-tools-note">Az ügynök olvassa az aktuális doménmodellt, és változtatásokat is alkalmazhat rajta — kövesd nyomon az egyes szerkesztéseket.</p>
       <div class="agent-input-row">
-        <input id="agent-chat-input" type="text" disabled placeholder="Írj üzenetet…">
+        <textarea id="agent-chat-input" rows="2" disabled placeholder="Írj üzenetet…"></textarea>
         <button id="agent-chat-send" type="button" disabled>Küldés</button>
       </div>
     </div>
@@ -879,6 +946,7 @@
       <button id="agent-forget-key" type="button">Elmentett kulcs törlése</button>
     </p>
   </div>
+  <div id="agent-panel-resize-handle" title="Panel átméretezése"></div>
 </div>
 
 <!-- Agent Ontology (agent_ontology_spec.md §7): Class/Relationship details
@@ -4693,6 +4761,12 @@ document.getElementById("btn-clear").addEventListener("click", () => {
 // ---------------------------------------------------------------------------
 const AGENT_KEY_STORAGE_KEY = "kg-agent-key";
 const AGENT_MODEL_STORAGE_KEY = "kg-agent-model";
+// UI preference, not connection state -- deliberately its own key, same
+// reasoning as THEME_STORAGE_KEY/LANG_STORAGE_KEY (issue #55).
+const AGENT_PANEL_WIDTH_STORAGE_KEY = "kg-agent-panel-width";
+const AGENT_PANEL_WIDTH_DEFAULT = 320; // matches #agent-panel-body's own CSS fallback
+const AGENT_PANEL_WIDTH_MIN = 240;
+const AGENT_PANEL_WIDTH_MAX = 720;
 const OPENAI_MODELS_URL = "https://api.openai.com/v1/models";
 
 // Shared backoff for both real API entry points (model discovery below and
@@ -4768,6 +4842,10 @@ function pickDefaultAgentModel(models) {
 
 const agentState = {
   panelExpanded: false,
+  // Restored from localStorage below, right after this object literal --
+  // needs `document` to exist first, so it can't be inlined here the way
+  // panelExpanded's own static default is.
+  panelWidth: AGENT_PANEL_WIDTH_DEFAULT,
   connected: false,
   apiKey: null,
   rememberKey: false,
@@ -4798,6 +4876,42 @@ const agentState = {
   systemPromptOverride: null, // when set, replaces the real staged interview prompt entirely (B2)
   toolsDisabled: false, // when true, no tools array is sent at all -- nothing can commit mid-conversation (B3)
 };
+
+try {
+  const stored = Number(localStorage.getItem(AGENT_PANEL_WIDTH_STORAGE_KEY));
+  if (Number.isFinite(stored) && stored >= AGENT_PANEL_WIDTH_MIN && stored <= AGENT_PANEL_WIDTH_MAX) {
+    agentState.panelWidth = stored;
+  }
+} catch (err) { /* localStorage unavailable -- stay on the default width */ }
+
+// Panel width (issue #55, "make the chat panel resizable") -- sets the
+// inline style (always wins over #agent-panel-body's own CSS fallback),
+// persists it, and refreshes the layout offset so the change is visible
+// immediately whether it came from a live drag or a restored preference.
+function applyAgentPanelWidth(px) {
+  const clamped = Math.min(AGENT_PANEL_WIDTH_MAX, Math.max(AGENT_PANEL_WIDTH_MIN, Math.round(px)));
+  agentState.panelWidth = clamped;
+  document.getElementById("agent-panel-body").style.width = clamped + "px";
+  try { localStorage.setItem(AGENT_PANEL_WIDTH_STORAGE_KEY, String(clamped)); } catch (err) { /* best-effort only */ }
+  updateAgentPanelOffset();
+}
+
+// Single source of truth for how far the toolbar and canvas shift right
+// (see --agent-panel-offset in both of their own CSS rules). 0 whenever
+// the panel is collapsed -- the default, and every pre-#55 test's state --
+// so this is a pure no-op until a real user (or a test) actually expands
+// the panel or drags its resize handle.
+function updateAgentPanelOffset() {
+  const offset = agentState.panelExpanded ? 40 + agentState.panelWidth : 0; // 40 = #agent-panel-toggle's own fixed width
+  document.documentElement.style.setProperty("--agent-panel-offset", offset + "px");
+  resizeCanvas();
+}
+
+// Applies a restored (or default) width as the real inline style before
+// the panel is ever expanded -- without this, a returning user with a
+// previously-widened panel would see it snap back to the 320px CSS
+// fallback until they touched the resize handle again.
+applyAgentPanelWidth(agentState.panelWidth);
 
 // ---------------------------------------------------------------------------
 // Agent conversation persistence (helper_agent_plan.md §9). A second,
@@ -5041,6 +5155,7 @@ function setAgentPanelExpanded(expanded) {
   const panel = document.getElementById("agent-panel");
   panel.classList.toggle("expanded", expanded);
   document.getElementById("agent-panel-toggle").setAttribute("aria-expanded", String(expanded));
+  updateAgentPanelOffset(); // issue #55 -- push the toolbar/canvas over while expanded, snap back to 0 on collapse
 }
 
 // Two-stage flow so the model list (fetched live, not hardcoded — plan
@@ -5194,6 +5309,42 @@ function forgetStoredAgentKey() {
 document.getElementById("agent-panel-toggle").addEventListener("click", () => {
   setAgentPanelExpanded(!agentState.panelExpanded);
 });
+
+// Drag-to-resize (issue #55). Same pointer-capture pattern as the canvas's
+// own drag interactions (setPointerCapture on down, release on up/cancel)
+// so the drag keeps tracking even if the pointer strays off the 6px handle
+// mid-drag. Live width applied on every pointermove -- no throttling needed,
+// applyAgentPanelWidth() is just a style write + a cheap resizeCanvas() -- so
+// the panel visibly tracks the pointer instead of lagging behind it.
+{
+  const handle = document.getElementById("agent-panel-resize-handle");
+  let dragStartX = 0;
+  let dragStartWidth = 0;
+
+  handle.addEventListener("pointerdown", (e) => {
+    dragStartX = e.clientX;
+    dragStartWidth = agentState.panelWidth;
+    handle.classList.add("dragging");
+    document.getElementById("toolbar").classList.add("resizing-panel");
+    document.getElementById("canvas-wrap").classList.add("resizing-panel");
+    try { handle.setPointerCapture(e.pointerId); } catch (err) { /* pointer no longer active -- drag just won't track off-handle */ }
+  });
+
+  handle.addEventListener("pointermove", (e) => {
+    if (!handle.hasPointerCapture(e.pointerId)) return;
+    applyAgentPanelWidth(dragStartWidth + (e.clientX - dragStartX));
+  });
+
+  function endResizeDrag(e) {
+    handle.classList.remove("dragging");
+    document.getElementById("toolbar").classList.remove("resizing-panel");
+    document.getElementById("canvas-wrap").classList.remove("resizing-panel");
+    try { handle.releasePointerCapture(e.pointerId); } catch (err) { /* already released or never captured */ }
+  }
+  handle.addEventListener("pointerup", endResizeDrag);
+  handle.addEventListener("pointercancel", endResizeDrag);
+}
+
 document.getElementById("agent-connect-open").addEventListener("click", () => openAgentConnectModal());
 document.getElementById("agent-connect-cancel").addEventListener("click", () => closeAgentConnectModal());
 document.getElementById("agent-connect-overlay").addEventListener("click", (e) => {
@@ -6330,7 +6481,27 @@ function submitAgentChatInput() {
 
 document.getElementById("agent-chat-send").addEventListener("click", () => submitAgentChatInput());
 document.getElementById("agent-chat-input").addEventListener("keydown", (e) => {
-  if (e.key === "Enter") { e.preventDefault(); submitAgentChatInput(); }
+  if (e.key !== "Enter") return;
+  if (e.altKey) {
+    // Confirmed live (not assumed): an unmodified <textarea> does NOT
+    // insert a newline on Alt+Enter by default in this browser -- only
+    // plain Enter does. So this is a real insertion, not a "let the
+    // default happen" no-op: setRangeText replaces the current selection
+    // (a collapsed cursor counts as a zero-length selection) with "\n" and
+    // "end" places the cursor right after it, matching where typing a
+    // literal newline would leave it. The manual "input" dispatch is
+    // required too -- programmatic value changes never fire it on their
+    // own, and updateAgentSendButtonEnabled() needs that event to notice
+    // the now-nonblank value (issue #55's "insert a line break with Alt +
+    // Enter").
+    e.preventDefault();
+    const el = e.target;
+    el.setRangeText("\n", el.selectionStart, el.selectionEnd, "end");
+    el.dispatchEvent(new Event("input", { bubbles: true }));
+    return;
+  }
+  e.preventDefault();
+  submitAgentChatInput();
 });
 document.getElementById("agent-chat-input").addEventListener("input", () => updateAgentSendButtonEnabled());
 
@@ -6399,6 +6570,7 @@ window.__kg = {
     state: agentState,
     isExpanded: () => agentState.panelExpanded,
     setExpanded: setAgentPanelExpanded,
+    setPanelWidth: applyAgentPanelWidth, // issue #55 -- lets tests set the width directly instead of simulating a pointer drag
     openConnectModal: openAgentConnectModal,
     closeConnectModal: closeAgentConnectModal,
     submitConnect: submitAgentConnect,

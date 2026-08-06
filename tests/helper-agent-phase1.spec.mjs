@@ -79,6 +79,94 @@ test("agent panel is collapsed by default and expands via its toggle", async () 
   });
 });
 
+// Issue #55: "make the chat panel resizable ... and maybe shrink/resize the
+// graph showing field accordingly, and I also mean the header menu here."
+// Before this, #agent-panel was a fixed-position overlay -- widening it
+// just covered more of the canvas rather than making more usable room, and
+// the toolbar sat underneath it unconditionally. These tests pin the real
+// push-layout behavior: collapsed must stay byte-identical to the old
+// always-0 offset (every test above this one runs in that state), and
+// expanding/resizing must visibly shift both the toolbar and the canvas.
+async function settledLeft(page, id) {
+  await page.waitForTimeout(150); // let the 120ms `left` transition finish -- see index.html's own --transition-fast
+  return page.evaluate((elId) => getComputedStyle(document.getElementById(elId)).left, id);
+}
+
+test("toolbar and canvas sit flush left (0px) while the agent panel is collapsed -- the default, unchanged from before issue #55", async () => {
+  await withPage(async (page) => {
+    assert.equal(await page.evaluate(() => getComputedStyle(document.getElementById("toolbar")).left), "0px");
+    assert.equal(await page.evaluate(() => getComputedStyle(document.getElementById("canvas-wrap")).left), "0px");
+  });
+});
+
+test("expanding the agent panel pushes the toolbar and canvas right by the panel's own width", async () => {
+  await withPage(async (page) => {
+    await openPanel(page);
+    const panelWidth = await page.evaluate(() => document.getElementById("agent-panel-body").getBoundingClientRect().width);
+    const toggleWidth = await page.evaluate(() => document.getElementById("agent-panel-toggle").getBoundingClientRect().width);
+    const expectedOffset = `${Math.round(panelWidth + toggleWidth)}px`;
+
+    assert.equal(await settledLeft(page, "toolbar"), expectedOffset);
+    assert.equal(await settledLeft(page, "canvas-wrap"), expectedOffset);
+  });
+});
+
+test("collapsing the agent panel again snaps the toolbar and canvas back to 0", async () => {
+  await withPage(async (page) => {
+    await openPanel(page);
+    await settledLeft(page, "toolbar"); // let it push out first
+    await page.click("#agent-panel-toggle"); // collapse
+    assert.equal(await settledLeft(page, "toolbar"), "0px");
+    assert.equal(await settledLeft(page, "canvas-wrap"), "0px");
+  });
+});
+
+test("dragging the resize handle widens the panel and pushes the toolbar/canvas by the new width", async () => {
+  await withPage(async (page) => {
+    await openPanel(page);
+    const before = await page.evaluate(() => window.__kg.agent.state.panelWidth);
+
+    const handle = await page.$("#agent-panel-resize-handle");
+    const box = await handle.boundingBox();
+    await page.mouse.move(box.x + box.width / 2, box.y + 50);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 150, box.y + 50, { steps: 5 });
+    await page.mouse.up();
+
+    const after = await page.evaluate(() => window.__kg.agent.state.panelWidth);
+    assert.ok(after > before, `expected the panel to widen past ${before}px, got ${after}px`);
+
+    const bodyWidth = await page.evaluate(() => document.getElementById("agent-panel-body").getBoundingClientRect().width);
+    const toggleWidth = await page.evaluate(() => document.getElementById("agent-panel-toggle").getBoundingClientRect().width);
+    assert.equal(await settledLeft(page, "toolbar"), `${Math.round(bodyWidth + toggleWidth)}px`);
+  });
+});
+
+test("resize width is clamped to a sane range and can't be dragged arbitrarily small or large", async () => {
+  await withPage(async (page) => {
+    await openPanel(page);
+    await page.evaluate(() => window.__kg.agent.setPanelWidth(10));
+    const tooSmall = await page.evaluate(() => window.__kg.agent.state.panelWidth);
+    assert.ok(tooSmall >= 200, `expected a clamped minimum, got ${tooSmall}px`);
+
+    await page.evaluate(() => window.__kg.agent.setPanelWidth(99999));
+    const tooLarge = await page.evaluate(() => window.__kg.agent.state.panelWidth);
+    assert.ok(tooLarge < 99999, `expected a clamped maximum, got ${tooLarge}px`);
+  });
+});
+
+test("resized panel width persists across a reload", async () => {
+  await withPage(async (page) => {
+    await openPanel(page);
+    await page.evaluate(() => window.__kg.agent.setPanelWidth(480));
+
+    await page.reload();
+    await page.waitForFunction(() => Boolean(window.__kg));
+    const restored = await page.evaluate(() => window.__kg.agent.state.panelWidth);
+    assert.equal(restored, 480);
+  });
+});
+
 test("submitting the connect modal with an empty key shows an inline error and makes no network call", async () => {
   await withPage(async (page) => {
     let called = false;
