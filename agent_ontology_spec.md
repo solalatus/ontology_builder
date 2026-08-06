@@ -3,10 +3,13 @@
 **Status:** v1.0 — Implemented in full (Phases A through I complete; see `agent_ontology_todo.md`'s
 Current State and Decision Log for the final account, including the two still-open, non-blocking
 questions #1/#2 in Section 9).
-**Builds on:** `spec.md` (Knowledge Graph Canvas v1.0, shipped, unchanged). This document specifies an
-**additive** layer on top of the existing app. Canvas mechanics, camera, storage tiers, undo/redo,
-theming, i18n, and the existing JSON/TXT export formats all stay exactly as `spec.md` defines them.
-Nothing in this document removes or breaks the app as it exists today.
+**Builds on:** `spec.md` (Knowledge Graph Canvas v1.1 — amended, Groups removed; see its Decision Log
+#11 and Section 2/6 below). Canvas mechanics, camera, storage tiers, undo/redo, theming, i18n, and the
+existing JSON/TXT export formats all stay as `spec.md` defines them, with two exceptions this initiative
+itself introduced and that `spec.md` now reflects directly: the base Node's dormant `notes` field was
+renamed to `meaning` (Section 3, Decision Log #2; `spec.md` §4.1/§5.1), and Groups were removed
+entirely (Section 6; `spec.md` Decision Log #11). Nothing else in this document removes or breaks the
+app as it exists today.
 **Source requirement:** `176ada33-minimal_domain_model_howto.md` (user-supplied, "How to Describe a
 Domain for an AI Agent") — the concrete artifact this app's next iteration must be able to *produce*
 by hand-authoring a graph on canvas, the same way it already produces JSON/TXT exports today.
@@ -99,7 +102,7 @@ value to preserve.
 
 ```
 Property = {
-  id: string,                                   // stable, for rename-safe references — unused today, reserved for Section 6 stretch (Import)
+  id: string,                                   // stable, for rename-safe references — unused today, reserved for Section 11 stretch (Import)
   name: string,                                  // e.g. "amount"
   type: "text" | "number" | "date" | "boolean",  // "boolean" is an addition beyond the howto's examples — Open Question 2
   unit: string | null,                           // only meaningful for type: "number"; e.g. "EUR"
