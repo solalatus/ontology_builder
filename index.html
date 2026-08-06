@@ -4,6 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>Tudásgráf Vászon</title>
+<!-- Empty inline favicon: stops the browser's automatic GET /favicon.ico
+     request. Harmless under file://, but that request 404s (and logs a
+     console error) when the app is served over http(s) — e.g. Tier 2/3
+     real-world usage, or tests/phase4.spec.mjs's OPFS-over-http suite,
+     which asserts on zero console errors. Still zero external requests
+     (spec.md §2): a data: URI, not a fetched file. -->
+<link rel="icon" href="data:,">
 <style>
   :root {
     color-scheme: dark;
