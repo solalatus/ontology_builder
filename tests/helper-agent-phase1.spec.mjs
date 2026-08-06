@@ -374,3 +374,64 @@ test("panel and modal text swap language when the app's language is toggled", as
     assert.notEqual(introEn, introHu);
   }, { lang: "en" });
 });
+
+// Issue #58: #agent-connect-open, #agent-restart-conversation,
+// #agent-disconnect, and #agent-chat-send had no CSS rule at all, so they
+// fell back to the browser's own unstyled button chrome instead of the
+// app's theme tokens -- inconsistent with every other themed button, and
+// unreadable in at least one reported browser. Assert their computed
+// background/color actually match the theme tokens in both themes, in
+// both the disconnected and connected panel states.
+async function themedBtnColors(page, id) {
+  return page.evaluate((elId) => {
+    const cs = getComputedStyle(document.getElementById(elId));
+    return { bg: cs.backgroundColor, color: cs.color };
+  }, id);
+}
+
+test("#agent-connect-open uses the app's themed button colors, not the browser default, in both themes", async () => {
+  await withPage(async (page) => {
+    await openPanel(page);
+    const dark = await themedBtnColors(page, "agent-connect-open");
+    assert.equal(dark.bg, "rgb(44, 44, 44)", "dark --btn-bg");
+    assert.equal(dark.color, "rgb(232, 232, 232)", "dark --toolbar-fg");
+
+    // Toggled via the test hook, not a click on #btn-theme-toggle: the
+    // toolbar can wrap under the open agent panel at this viewport width,
+    // which is an unrelated layout quirk that would otherwise intercept
+    // the click -- window.__kg.theme.toggle() is the same hook
+    // tests/theme.spec.mjs itself uses to sidestep exactly that.
+    await page.evaluate(() => window.__kg.theme.toggle());
+    await page.waitForTimeout(150); // let the 120ms background-color transition settle
+    const light = await themedBtnColors(page, "agent-connect-open");
+    assert.equal(light.bg, "rgb(255, 255, 255)", "light --btn-bg");
+    assert.equal(light.color, "rgb(26, 26, 26)", "light --toolbar-fg");
+  });
+});
+
+test("#agent-restart-conversation, #agent-disconnect, and #agent-chat-send use the app's themed button colors once connected, in both themes", async () => {
+  await withPage(async (page) => {
+    await mockModelsRoute(page);
+    await openPanel(page);
+    await page.click("#agent-connect-open");
+    await page.fill("#agent-key-input", "sk-test-key");
+    await page.click("#agent-connect-submit");
+    await page.waitForFunction(() => !document.getElementById("agent-model-select-modal").disabled);
+    await page.click("#agent-connect-submit"); // finalize with the default model
+    await page.waitForFunction(() => window.__kg.agent.state.connected === true);
+
+    for (const id of ["agent-restart-conversation", "agent-disconnect", "agent-chat-send"]) {
+      const dark = await themedBtnColors(page, id);
+      assert.equal(dark.bg, "rgb(44, 44, 44)", `${id}: dark --btn-bg`);
+      assert.equal(dark.color, "rgb(232, 232, 232)", `${id}: dark --toolbar-fg`);
+    }
+
+    await page.evaluate(() => window.__kg.theme.toggle());
+    await page.waitForTimeout(150); // let the 120ms background-color transition settle
+    for (const id of ["agent-restart-conversation", "agent-disconnect", "agent-chat-send"]) {
+      const light = await themedBtnColors(page, id);
+      assert.equal(light.bg, "rgb(255, 255, 255)", `${id}: light --btn-bg`);
+      assert.equal(light.color, "rgb(26, 26, 26)", `${id}: light --toolbar-fg`);
+    }
+  });
+});

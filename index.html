@@ -586,6 +586,56 @@
     margin-bottom: 10px;
   }
 
+  /* #agent-connect-open, the two icon buttons in .agent-panel-header, and
+     #agent-chat-send had no explicit background/color rule at all, so they
+     fell back to the browser's native unstyled button chrome (opaque white
+     in most browsers, regardless of color-scheme) while still inheriting
+     the panel's light dark-mode text color -- unreadable light-on-white
+     (issue #58). Same tokens as every other themed button in the app. */
+  #agent-connect-open,
+  #agent-chat-send {
+    font-size: 14px;
+    padding: 7px 9px;
+    color: var(--toolbar-fg);
+    background: var(--btn-bg);
+    border: 1px solid var(--toolbar-border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: background-color var(--transition-fast);
+  }
+
+  #agent-connect-open:hover,
+  #agent-chat-send:hover {
+    background: var(--btn-bg-hover);
+  }
+
+  #agent-chat-send:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+
+  .agent-panel-header button {
+    width: 28px;
+    height: 28px;
+    flex: none;
+    border-radius: 50%;
+    border: 1px solid var(--toolbar-border);
+    background: var(--btn-bg);
+    color: var(--toolbar-fg);
+    cursor: pointer;
+    font-size: 13px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    transition: background-color var(--transition-fast);
+  }
+
+  .agent-panel-header button:hover {
+    background: var(--btn-bg-hover);
+  }
+
   #agent-model-select {
     flex: 1;
     min-width: 0;
