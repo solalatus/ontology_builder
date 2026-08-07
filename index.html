@@ -1943,6 +1943,80 @@ function boundingBoxAreaForCenters(centers, nodes) {
   return (Math.max(...xs1) - Math.min(...xs0)) * (Math.max(...ys1) - Math.min(...ys0));
 }
 
+// issue #64 ("Crowded graph layout") iteration 4: an edge's label has
+// always sat at a fixed 50% point along its line, so in a crowded layout
+// it routinely lands on top of an unrelated third node's box or another
+// edge's label (tools/layout-bench-out/*/iter3-*.json's labelCollisions
+// count is still nonzero after iterations 1-3, which only ever moved node
+// boxes, never the labels). This nudges each edge's label along its OWN
+// edge line -- and only along it, never off it, so a label always stays
+// recognizably attached to the relationship it names -- away from node
+// boxes and other labels it would otherwise collide with. Deterministic
+// and bounded, same iterative-pairwise-nudge shape as resolveNodeOverlaps
+// above. Result is stored as edge.labelT (0..1 along the edge, from
+// source to target; undefined/missing -- e.g. an edge created after the
+// last autolayout run -- means "plain midpoint," exactly today's
+// behavior) so rendering and the two existing UI anchors that already key
+// off the label's position (updateSelectionToolbar, beginRenameEdgePrompt
+// -- both go through edgeGeometry()'s `mid`) automatically follow it
+// without their own separate logic.
+const LABEL_T_MIN = 0.15, LABEL_T_MAX = 0.85; // never slide onto either endpoint's own box
+const LABEL_CLEARANCE = 26; // approx. label footprint "radius" for spacing purposes
+const LABEL_PASS_ITERATIONS = 40;
+const LABEL_STEP = 0.015; // max fractional-t nudge per edge per iteration
+
+function resolveEdgeLabelPositions(nodes, edges, indexById) {
+  const t = new Map(edges.map((e) => [e.id, 0.5]));
+  const pointAt = (a, b, tt) => ({ x: a.x + (b.x - a.x) * tt, y: a.y + (b.y - a.y) * tt });
+  const centerOf = (n) => ({ x: n.x + n.w / 2, y: n.y + n.h / 2 });
+
+  for (let iter = 0; iter < LABEL_PASS_ITERATIONS; iter++) {
+    for (const edge of edges) {
+      const i = indexById.get(edge.source), j = indexById.get(edge.target);
+      if (i === undefined || j === undefined || i === j) continue;
+      const a = centerOf(nodes[i]), b = centerOf(nodes[j]);
+      const dx = b.x - a.x, dy = b.y - a.y;
+      const len = Math.hypot(dx, dy) || 1;
+      const tx = dx / len, ty = dy / len; // unit tangent along the edge
+      const p = pointAt(a, b, t.get(edge.id));
+
+      // Signed 1D "push" along the tangent, accumulated from every nearby
+      // box/label, then converted to a t-nudge below (dividing by `len`
+      // turns a world-px push into a fraction-of-this-edge's-length step).
+      let push = 0;
+
+      for (const n of nodes) {
+        if (n.id === edge.source || n.id === edge.target) continue; // an edge is allowed to sit near its own endpoints
+        const nearestX = clamp(p.x, n.x, n.x + n.w);
+        const nearestY = clamp(p.y, n.y, n.y + n.h);
+        const ddx = p.x - nearestX, ddy = p.y - nearestY;
+        const dist = Math.hypot(ddx, ddy);
+        if (dist >= LABEL_CLEARANCE) continue;
+        const boxCx = n.x + n.w / 2, boxCy = n.y + n.h / 2;
+        const proj = (p.x - boxCx) * tx + (p.y - boxCy) * ty;
+        push += (proj >= 0 ? 1 : -1) * (LABEL_CLEARANCE - dist);
+      }
+
+      for (const other of edges) {
+        if (other.id === edge.id) continue;
+        const oi = indexById.get(other.source), oj = indexById.get(other.target);
+        if (oi === undefined || oj === undefined) continue;
+        const op = pointAt(centerOf(nodes[oi]), centerOf(nodes[oj]), t.get(other.id));
+        const ddx = p.x - op.x, ddy = p.y - op.y;
+        const dist = Math.hypot(ddx, ddy) || 0.01;
+        if (dist >= LABEL_CLEARANCE * 2) continue;
+        const proj = ddx * tx + ddy * ty;
+        push += (proj >= 0 ? 1 : -1) * (LABEL_CLEARANCE * 2 - dist);
+      }
+
+      const nudge = clamp(push / len, -LABEL_STEP, LABEL_STEP);
+      t.set(edge.id, clamp(t.get(edge.id) + nudge, LABEL_T_MIN, LABEL_T_MAX));
+    }
+  }
+
+  for (const edge of edges) edge.labelT = t.get(edge.id);
+}
+
 function computeAutoLayoutPositions() {
   const indexById = new Map(state.nodes.map((n, i) => [n.id, i]));
   // Bounding-circle radius (half the box diagonal): the smallest per-node
@@ -1973,6 +2047,7 @@ function computeAutoLayoutPositions() {
   });
 
   resolveNodeOverlaps(state.nodes, REPULSION_MARGIN);
+  resolveEdgeLabelPositions(state.nodes, state.edges, indexById);
 }
 
 // Public entry point -- the toolbar button and the window.__kg.actions test
@@ -2352,9 +2427,14 @@ function edgeGeometry(edge, bendInfo) {
   const anchors = edgeAnchors(edge);
   if (!anchors) return null;
   const control = edgeControlPoint(anchors.a, anchors.b, edge, bendInfo);
+  // issue #64 iteration 4: `t` defaults to the plain midpoint (0.5) --
+  // exactly today's behavior -- for any edge resolveEdgeLabelPositions()
+  // hasn't assigned a labelT to yet (never autolaid-out, or created after
+  // the last autolayout run).
+  const t = edge.labelT ?? 0.5;
   const mid = control
-    ? quadraticBezierPoint(anchors.a, control, anchors.b, 0.5)
-    : { x: (anchors.a.x + anchors.b.x) / 2, y: (anchors.a.y + anchors.b.y) / 2 };
+    ? quadraticBezierPoint(anchors.a, control, anchors.b, t)
+    : { x: anchors.a.x + (anchors.b.x - anchors.a.x) * t, y: anchors.a.y + (anchors.b.y - anchors.a.y) * t };
   return { a: anchors.a, b: anchors.b, control, mid };
 }
 

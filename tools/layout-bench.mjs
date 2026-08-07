@@ -152,14 +152,20 @@ function computeMetrics(nodes, edges) {
   const bboxW = maxX - minX, bboxH = maxY - minY, bboxArea = bboxW * bboxH;
   const totalNodeArea = nodes.reduce((s, n) => s + n.w * n.h, 0);
 
-  // Edge-label collision proxy: label sits at segment midpoint
-  // (index.html's edgeGeometry, unbent case) offset ~4px above the line --
-  // close enough for a midpoint-based collision proxy. A collision is either
-  // two edge-label points within LABEL_MIN_DIST of each other, or a label
-  // point landing inside a third node's box (not one of that edge's own
-  // endpoints).
+  // Edge-label collision proxy: label sits at edge.labelT along the
+  // source->target line (index.html's edgeGeometry, unbent case; iteration
+  // 4's resolveEdgeLabelPositions sets labelT per edge, defaulting to the
+  // plain midpoint -- 0.5 -- for any edge it hasn't touched), offset ~4px
+  // above the line -- close enough for a position-based collision proxy. A
+  // collision is either two edge-label points within LABEL_MIN_DIST of
+  // each other, or a label point landing inside a third node's box (not
+  // one of that edge's own endpoints).
   const LABEL_MIN_DIST = 40;
-  const mids = segs.map((s) => ({ x: (center(s.a).x + center(s.b).x) / 2, y: (center(s.a).y + center(s.b).y) / 2 }));
+  const mids = segs.map((s) => {
+    const t = s.e.labelT ?? 0.5;
+    const ca = center(s.a), cb = center(s.b);
+    return { x: ca.x + (cb.x - ca.x) * t, y: ca.y + (cb.y - ca.y) * t };
+  });
   let labelLabelCollisions = 0;
   for (let i = 0; i < mids.length; i++) {
     for (let j = i + 1; j < mids.length; j++) {
@@ -205,7 +211,7 @@ async function runOne(fixtureName, label) {
     await page.waitForTimeout(50);
     const { nodes, edges } = await page.evaluate(() => ({
       nodes: window.__kg.state.nodes.map(({ id, x, y, w, h, label }) => ({ id, x, y, w, h, label })),
-      edges: window.__kg.state.edges.map(({ id, source, target, relation }) => ({ id, source, target, relation })),
+      edges: window.__kg.state.edges.map(({ id, source, target, relation, labelT }) => ({ id, source, target, relation, labelT })),
     }));
     metrics = computeMetrics(nodes, edges);
     await page.screenshot({ path: path.join(outDir, `${label}.png`) });
