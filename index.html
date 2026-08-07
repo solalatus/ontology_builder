@@ -1722,6 +1722,28 @@ function updateUndoRedoButtons() {
 // starting layout — no RNG involved, and nothing to seed. A fixed
 // iteration count with a cooling schedule guarantees termination (no risk
 // of hanging) regardless of graph shape.
+//
+// issue #64 ("Crowded graph layout") iteration 1: the relaxation's "ideal
+// distance" used to be one flat constant (150px) shared by every pair,
+// completely disconnected from each node's actual footprint
+// (DEFAULT_NODE_W/H = 160x60). That constant is *smaller* than the box
+// width itself, so two nodes at their own force equilibrium could still
+// land with overlapping boxes whenever they happened to end up roughly
+// horizontally aligned — not a rare edge case, but the expected outcome
+// for a meaningful fraction of pairs in any graph with more than a
+// handful of nodes (confirmed against the BME reference ontology in
+// tools/layout-bench-out/*/baseline.*: 8 overlapping node-box pairs out
+// of 50 nodes). Below, the per-pair ideal distance is instead derived
+// from each node's own bounding-circle radius (half its diagonal) — the
+// smallest value that *guarantees* two boxes can't overlap at that
+// separation regardless of their relative angle, since each box sits
+// entirely inside its own circumscribed circle. It's applied identically
+// to repulsion (all pairs) and attraction (edges), so connected nodes
+// still settle near their pair's own ideal distance instead of drifting
+// to whatever the flat constant used to imply. At today's fixed node size
+// this still resolves to one shared value in practice (nothing here reads
+// or wraps label text to vary box size yet), but the computation is
+// correct for whatever size a node actually has, not hardcoded to 160x60.
 // ---------------------------------------------------------------------------
 // Pure position-mutation core, no snapshot/history of its own -- pulled out
 // of autoLayout() below (issue #57) so a commit path that wants the reflow
@@ -1731,13 +1753,62 @@ function updateUndoRedoButtons() {
 // are responsible for the `state.nodes.length < 2` guard themselves --
 // see autoLayout() below for why that check has to happen before, not
 // inside, this function.
+const REPULSION_MARGIN = 24; // extra clearance beyond two boxes' circumscribed circles just touching
+
+// Bounded, deterministic post-pass: the FR relaxation above optimizes
+// average spacing, not a hard non-overlap guarantee, so a small number of
+// dense/awkward pairs can still finish touching or overlapping even with
+// size-aware repulsion (a fixed iteration count trades off against
+// hanging, not against reaching a perfect equilibrium). This directly
+// resolves any node-box pairs still overlapping (beyond REPULSION_MARGIN
+// of clearance) by nudging each apart along whichever axis needs the
+// least movement to separate their rectangles — same "minimum translation
+// vector" technique used for AABB collision resolution. Bounded to
+// OVERLAP_PASS_MAX_ITERATIONS so, like the relaxation above, it always
+// terminates regardless of graph shape.
+const OVERLAP_PASS_MAX_ITERATIONS = 60;
+
+function resolveNodeOverlaps(nodes, margin) {
+  for (let iter = 0; iter < OVERLAP_PASS_MAX_ITERATIONS; iter++) {
+    let anyOverlap = false;
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        const a = nodes[i], b = nodes[j];
+        const overlapX = Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x) + margin;
+        const overlapY = Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y) + margin;
+        if (overlapX <= 0 || overlapY <= 0) continue; // already clear on at least one axis
+        anyOverlap = true;
+        // Separate along whichever axis needs less movement to clear —
+        // the direction (which node moves which way) follows their
+        // current center order on that axis, so neither jumps past the
+        // other.
+        if (overlapX < overlapY) {
+          const dir = (a.x + a.w / 2) < (b.x + b.w / 2) ? -1 : 1;
+          a.x += dir * overlapX / 2;
+          b.x -= dir * overlapX / 2;
+        } else {
+          const dir = (a.y + a.h / 2) < (b.y + b.h / 2) ? -1 : 1;
+          a.y += dir * overlapY / 2;
+          b.y -= dir * overlapY / 2;
+        }
+      }
+    }
+    if (!anyOverlap) break;
+  }
+}
+
 function computeAutoLayoutPositions() {
-  const idealDist = 150; // target inter-node spacing
   const iterations = 200;
   let temperature = 100; // max displacement per iteration, cooled to ~0
 
   const centers = state.nodes.map((n) => ({ x: n.x + n.w / 2, y: n.y + n.h / 2 }));
   const indexById = new Map(state.nodes.map((n, i) => [n.id, i]));
+  // Bounding-circle radius (half the box diagonal): the smallest per-node
+  // "personal space" radius such that two nodes' boxes provably can't
+  // overlap once their centers are at least the sum of their two radii
+  // apart, in any relative orientation.
+  const radii = state.nodes.map((n) => Math.hypot(n.w, n.h) / 2);
+  const pairIdealDist = (i, j) => radii[i] + radii[j] + REPULSION_MARGIN;
 
   for (let iter = 0; iter < iterations; iter++) {
     const disp = centers.map(() => ({ x: 0, y: 0 }));
@@ -1747,6 +1818,7 @@ function computeAutoLayoutPositions() {
         let dx = centers[i].x - centers[j].x;
         let dy = centers[i].y - centers[j].y;
         const dist = Math.hypot(dx, dy) || 0.01; // guard against exact overlap
+        const idealDist = pairIdealDist(i, j);
         const force = (idealDist * idealDist) / dist;
         dx = (dx / dist) * force;
         dy = (dy / dist) * force;
@@ -1762,6 +1834,7 @@ function computeAutoLayoutPositions() {
       let dx = centers[i].x - centers[j].x;
       let dy = centers[i].y - centers[j].y;
       const dist = Math.hypot(dx, dy) || 0.01;
+      const idealDist = pairIdealDist(i, j);
       const force = (dist * dist) / idealDist;
       dx = (dx / dist) * force;
       dy = (dy / dist) * force;
@@ -1783,6 +1856,8 @@ function computeAutoLayoutPositions() {
     n.x = centers[i].x - n.w / 2;
     n.y = centers[i].y - n.h / 2;
   });
+
+  resolveNodeOverlaps(state.nodes, REPULSION_MARGIN);
 }
 
 // Public entry point -- the toolbar button and the window.__kg.actions test
