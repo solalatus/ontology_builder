@@ -1717,11 +1717,10 @@ function updateUndoRedoButtons() {
 // (Fruchterman-Reingold style) relaxation of node *centers* — repulsion
 // between every pair of nodes, not just connected ones, so disconnected
 // components still spread apart instead of piling up; attraction along
-// edges. Starts from the graph's current positions (rather than a fresh
-// random scatter), so the result is deterministic for a given graph +
-// starting layout — no RNG involved, and nothing to seed. A fixed
-// iteration count with a cooling schedule guarantees termination (no risk
-// of hanging) regardless of graph shape.
+// edges. Fully deterministic for a given graph — no RNG involved, and
+// nothing to seed (see the multi-start note below for what that now means
+// in practice). A fixed iteration count with a cooling schedule guarantees
+// termination (no risk of hanging) regardless of graph shape.
 //
 // issue #64 ("Crowded graph layout") iteration 1: the relaxation's "ideal
 // distance" used to be one flat constant (150px) shared by every pair,
@@ -1733,17 +1732,30 @@ function updateUndoRedoButtons() {
 // for a meaningful fraction of pairs in any graph with more than a
 // handful of nodes (confirmed against the BME reference ontology in
 // tools/layout-bench-out/*/baseline.*: 8 overlapping node-box pairs out
-// of 50 nodes). Below, the per-pair ideal distance is instead derived
-// from each node's own bounding-circle radius (half its diagonal) — the
-// smallest value that *guarantees* two boxes can't overlap at that
-// separation regardless of their relative angle, since each box sits
-// entirely inside its own circumscribed circle. It's applied identically
-// to repulsion (all pairs) and attraction (edges), so connected nodes
-// still settle near their pair's own ideal distance instead of drifting
-// to whatever the flat constant used to imply. At today's fixed node size
-// this still resolves to one shared value in practice (nothing here reads
-// or wraps label text to vary box size yet), but the computation is
-// correct for whatever size a node actually has, not hardcoded to 160x60.
+// of 50 nodes). The per-pair ideal distance is instead derived from each
+// node's own bounding-circle radius (half its diagonal) — the smallest
+// value that *guarantees* two boxes can't overlap at that separation
+// regardless of their relative angle, since each box sits entirely inside
+// its own circumscribed circle. It's applied identically to repulsion (all
+// pairs) and attraction (edges), so connected nodes still settle near
+// their pair's own ideal distance instead of drifting to whatever the flat
+// constant used to imply.
+//
+// iteration 2 (superseding an earlier, reverted attempt at scaling spacing
+// by node degree — see git history: it cut crossings on a synthetic
+// hub-heavy fixture but *increased* them on the real BME reference
+// ontology, and a gentler version flipped which fixture it helped,
+// meaning the effect wasn't a real structural fix, just moving which local
+// minimum a single deterministic relaxation happened to land in): rather
+// than trying to out-guess the relaxation's local minima with more spacing
+// heuristics, run it from a small, fixed set of different deterministic
+// starting layouts (today's positions, plus a circular and a grid seed —
+// still no randomness anywhere) and keep whichever settled result has the
+// fewest edge crossings (ties broken by smaller bounding-box area). This
+// is a direct, honest fight against local minima instead of an indirect
+// one, and it can only ever do as well as or better than the old
+// single-start behavior, since "today's positions" is always one of the
+// candidates.
 // ---------------------------------------------------------------------------
 // Pure position-mutation core, no snapshot/history of its own -- pulled out
 // of autoLayout() below (issue #57) so a commit path that wants the reflow
@@ -1797,17 +1809,14 @@ function resolveNodeOverlaps(nodes, margin) {
   }
 }
 
-function computeAutoLayoutPositions() {
+// Runs the FR relaxation itself starting from `initialCenters`, returning a
+// fresh array of settled centers — no state.nodes mutation, so the same
+// core can be scored and compared across several candidate starting
+// layouts before any of them is committed.
+function relaxCenters(initialCenters, radii, indexById, edges) {
   const iterations = 200;
   let temperature = 100; // max displacement per iteration, cooled to ~0
-
-  const centers = state.nodes.map((n) => ({ x: n.x + n.w / 2, y: n.y + n.h / 2 }));
-  const indexById = new Map(state.nodes.map((n, i) => [n.id, i]));
-  // Bounding-circle radius (half the box diagonal): the smallest per-node
-  // "personal space" radius such that two nodes' boxes provably can't
-  // overlap once their centers are at least the sum of their two radii
-  // apart, in any relative orientation.
-  const radii = state.nodes.map((n) => Math.hypot(n.w, n.h) / 2);
+  const centers = initialCenters.map((c) => ({ x: c.x, y: c.y }));
   const pairIdealDist = (i, j) => radii[i] + radii[j] + REPULSION_MARGIN;
 
   for (let iter = 0; iter < iterations; iter++) {
@@ -1827,7 +1836,7 @@ function computeAutoLayoutPositions() {
       }
     }
 
-    for (const edge of state.edges) {
+    for (const edge of edges) {
       const i = indexById.get(edge.source);
       const j = indexById.get(edge.target);
       if (i === undefined || j === undefined || i === j) continue;
@@ -1852,9 +1861,115 @@ function computeAutoLayoutPositions() {
     temperature *= 0.95;
   }
 
+  return centers;
+}
+
+// Evenly spaced around a circle, ordered by each node's index in
+// state.nodes — fixed and reproducible (not by id string, not by
+// position), so the same graph always produces the same seed. Radius is
+// picked so the circle's circumference roughly accommodates every node at
+// its own ideal spacing from its two ring-neighbors.
+function circularSeed(nodes, radii) {
+  const n = nodes.length;
+  const avgRadius = radii.reduce((s, r) => s + r, 0) / n;
+  const circumferenceNeeded = n * (2 * avgRadius + REPULSION_MARGIN);
+  const radius = Math.max(100, circumferenceNeeded / (2 * Math.PI));
+  return nodes.map((_, i) => {
+    const angle = (2 * Math.PI * i) / n;
+    return { x: radius * Math.cos(angle), y: radius * Math.sin(angle) };
+  });
+}
+
+// A plain row-major grid, ordered by node index — mirrors
+// computeImportShelf()'s "shelf" shape but as a from-scratch seed (not
+// anchored to any existing content) so it explores a genuinely different
+// starting configuration than the circle or the current layout.
+function gridSeed(nodes, radii) {
+  const n = nodes.length;
+  const cols = Math.max(1, Math.ceil(Math.sqrt(n)));
+  const avgDiameter = (radii.reduce((s, r) => s + r, 0) / n) * 2;
+  const gap = avgDiameter + REPULSION_MARGIN;
+  return nodes.map((_, i) => ({ x: (i % cols) * gap, y: Math.floor(i / cols) * gap }));
+}
+
+// Edge-crossing count used only to rank candidate layouts against each
+// other (not shown to the user) — center-to-center segments, same
+// simplification tools/layout-bench.mjs's metric uses, applied identically
+// to every candidate so the comparison between them is still meaningful
+// even though it's not the exact border-to-border pixel geometry
+// edgeGeometry() draws.
+function countCrossingsForCenters(centers, edges, indexById) {
+  const segs = [];
+  for (const e of edges) {
+    const i = indexById.get(e.source), j = indexById.get(e.target);
+    if (i === undefined || j === undefined || i === j) continue;
+    segs.push({ source: e.source, target: e.target, a: centers[i], b: centers[j] });
+  }
+  const orient = (ax, ay, bx, by, cx, cy) => (bx - ax) * (cy - ay) - (by - ay) * (cx - ax);
+  const onSeg = (ax, ay, bx, by, px, py) =>
+    Math.min(ax, bx) - 1e-9 <= px && px <= Math.max(ax, bx) + 1e-9 &&
+    Math.min(ay, by) - 1e-9 <= py && py <= Math.max(ay, by) + 1e-9;
+  const intersects = (a1, a2, b1, b2) => {
+    const d1 = orient(b1.x, b1.y, b2.x, b2.y, a1.x, a1.y);
+    const d2 = orient(b1.x, b1.y, b2.x, b2.y, a2.x, a2.y);
+    const d3 = orient(a1.x, a1.y, a2.x, a2.y, b1.x, b1.y);
+    const d4 = orient(a1.x, a1.y, a2.x, a2.y, b2.x, b2.y);
+    if (((d1 > 0 && d2 < 0) || (d1 < 0 && d2 > 0)) && ((d3 > 0 && d4 < 0) || (d3 < 0 && d4 > 0))) return true;
+    if (d1 === 0 && onSeg(b1.x, b1.y, b2.x, b2.y, a1.x, a1.y)) return true;
+    if (d2 === 0 && onSeg(b1.x, b1.y, b2.x, b2.y, a2.x, a2.y)) return true;
+    if (d3 === 0 && onSeg(a1.x, a1.y, a2.x, a2.y, b1.x, b1.y)) return true;
+    if (d4 === 0 && onSeg(a1.x, a1.y, a2.x, a2.y, b2.x, b2.y)) return true;
+    return false;
+  };
+  let crossings = 0;
+  for (let i = 0; i < segs.length; i++) {
+    for (let j = i + 1; j < segs.length; j++) {
+      const s1 = segs[i], s2 = segs[j];
+      const sharesEndpoint = s1.source === s2.source || s1.source === s2.target ||
+        s1.target === s2.source || s1.target === s2.target;
+      if (sharesEndpoint) continue;
+      if (intersects(s1.a, s1.b, s2.a, s2.b)) crossings++;
+    }
+  }
+  return crossings;
+}
+
+function boundingBoxAreaForCenters(centers, nodes) {
+  if (centers.length === 0) return 0;
+  const xs0 = centers.map((c, i) => c.x - nodes[i].w / 2);
+  const xs1 = centers.map((c, i) => c.x + nodes[i].w / 2);
+  const ys0 = centers.map((c, i) => c.y - nodes[i].h / 2);
+  const ys1 = centers.map((c, i) => c.y + nodes[i].h / 2);
+  return (Math.max(...xs1) - Math.min(...xs0)) * (Math.max(...ys1) - Math.min(...ys0));
+}
+
+function computeAutoLayoutPositions() {
+  const indexById = new Map(state.nodes.map((n, i) => [n.id, i]));
+  // Bounding-circle radius (half the box diagonal): the smallest per-node
+  // "personal space" radius such that two nodes' boxes provably can't
+  // overlap once their centers are at least the sum of their two radii
+  // apart, in any relative orientation.
+  const radii = state.nodes.map((n) => Math.hypot(n.w, n.h) / 2);
+
+  const seeds = [
+    state.nodes.map((n) => ({ x: n.x + n.w / 2, y: n.y + n.h / 2 })), // today's positions
+    circularSeed(state.nodes, radii),
+    gridSeed(state.nodes, radii),
+  ];
+
+  let best = null;
+  for (const seed of seeds) {
+    const centers = relaxCenters(seed, radii, indexById, state.edges);
+    const crossings = countCrossingsForCenters(centers, state.edges, indexById);
+    const area = boundingBoxAreaForCenters(centers, state.nodes);
+    if (!best || crossings < best.crossings || (crossings === best.crossings && area < best.area)) {
+      best = { centers, crossings, area };
+    }
+  }
+
   state.nodes.forEach((n, i) => {
-    n.x = centers[i].x - n.w / 2;
-    n.y = centers[i].y - n.h / 2;
+    n.x = best.centers[i].x - n.w / 2;
+    n.y = best.centers[i].y - n.h / 2;
   });
 
   resolveNodeOverlaps(state.nodes, REPULSION_MARGIN);
