@@ -15,6 +15,17 @@ import { APP_URL, addNodeViaDblClick, createEdgeViaConnectMode } from "./lib/pag
 // Every individual piece here is covered elsewhere in isolation; this file
 // exists to catch what only shows up when they interact in one session.
 
+// Preconditions are a checkbox list (one .dm-precondition-option per rule),
+// not a <select multiple> -- see index.html's refreshActionPreconditionOptions()
+// comment. Exact text match (not substring) since rule names in these
+// scenarios can share prefixes.
+async function checkPrecondition(container, ruleName) {
+  await container.locator(".dm-precondition-option")
+    .filter({ hasText: new RegExp(`^${ruleName}$`) })
+    .locator(".dm-precondition-checkbox")
+    .check();
+}
+
 async function withDownloadPage(fn) {
   const browser = await launchChromium();
   const page = await browser.newPage({ viewport: { width: 1200, height: 800 }, acceptDownloads: true });
@@ -117,7 +128,7 @@ test("a realistic Agent Ontology authoring session — classes, a relationship, 
     await page.click("#domain-model-add-action");
     await page.locator(".dm-action-name").fill("approveInvoice");
     await page.locator(".dm-action-input-class").selectOption({ label: "Invoice" });
-    await page.locator(".dm-action-preconditions").selectOption({ label: "canApproveInvoice" });
+    await checkPrecondition(page.locator(".dm-action-preconditions"), "canApproveInvoice");
     await page.locator(".dm-action-effect").fill("invoice status becomes approved");
     await page.locator(".dm-action-verification").fill("confirm the new invoice status");
     await page.click("#domain-model-save");
@@ -247,7 +258,9 @@ test("a longer, realistic chain of rules and actions (a 4-stage invoice workflow
       const card = page.locator(".domain-model-action-card").last();
       await card.locator(".dm-action-name").fill(name);
       await card.locator(".dm-action-input-class").selectOption({ label: "Invoice" });
-      await card.locator(".dm-action-preconditions").selectOption(preconditionNames.map((label) => ({ label })));
+      for (const ruleName of preconditionNames) {
+        await checkPrecondition(card.locator(".dm-action-preconditions"), ruleName);
+      }
       await card.locator(".dm-action-effect").fill(effect);
       await card.locator(".dm-action-verification").fill(verification);
     }

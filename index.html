@@ -25,6 +25,7 @@
     --toolbar-border: #333;
     --btn-bg: #2c2c2c;
     --btn-bg-hover: #3a3a3a;
+    --card-bg: rgba(255, 255, 255, 0.035);
     --btn-bg-active: #4a4a4a;
     --accent: #4da6ff;
     --accent-bg-pressed: rgba(77, 166, 255, 0.16);
@@ -66,6 +67,7 @@
     --btn-bg: #ffffff;
     --btn-bg-hover: #e8e8e8;
     --btn-bg-active: #d5d5d5;
+    --card-bg: rgba(0, 0, 0, 0.025);
     --accent: #1a73e8;
     --accent-bg-pressed: rgba(26, 115, 232, 0.1);
     --shadow-color: rgba(0, 0, 0, 0.15);
@@ -368,13 +370,40 @@
   }
 
   /* Agent Ontology (agent_ontology_spec.md §7): Class/Relationship details
-     dialog. Reuses .modal-overlay/.modal-dialog/.modal-actions above —
-     these rules only add what's specific to this dialog's form fields. */
+     dialog, and the Domain Model (Rules/Actions) dialog below it, which
+     reuses this same structure. Reuses .modal-overlay/.modal-dialog/
+     .modal-actions above — these rules only add what's specific to this
+     dialog's form fields.
+     A Domain Model dialog holding a few dozen rules/actions can run to
+     several thousand pixels of content — this used to be one scrolling
+     column with Save/Cancel at the very bottom, meaning saving or
+     cancelling required scrolling through everything first. Split into a
+     scrollable .details-dialog-body and a non-scrolling
+     .details-dialog-footer so the buttons stay reachable regardless of
+     how long the content is; padding moves from the dialog itself onto
+     the body/footer so the footer's top border can span the full width. */
   .details-dialog {
-    max-width: 460px;
+    max-width: 640px;
     width: 90vw;
     max-height: 85vh;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .details-dialog-body {
+    padding: 20px;
     overflow-y: auto;
+    flex: 1 1 auto;
+    min-height: 0; /* let this actually shrink/scroll inside the flex column instead of forcing the dialog to grow */
+  }
+
+  .details-dialog-footer {
+    flex: 0 0 auto;
+    padding: 12px 20px;
+    margin: 0;
+    border-top: 1px solid var(--toolbar-border);
   }
 
   .modal-title {
@@ -389,6 +418,23 @@
     font-weight: 600;
     opacity: 0.8;
     margin: 14px 0 6px;
+  }
+
+  /* Domain Model dialog's per-section Rules/Actions filter — plain text
+     search, substring/case-insensitive against the card's name field, pure
+     client-side show/hide (see filterDomainModelCards() in the script
+     below). Sits right under the section label, above the card list. */
+  .details-filter-input {
+    width: 100%;
+    box-sizing: border-box;
+    font: inherit;
+    font-size: 13px;
+    padding: 6px 9px;
+    margin-bottom: 8px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--toolbar-border);
+    background: var(--btn-bg);
+    color: var(--toolbar-fg);
   }
 
   /* Sub-field labels inside a Domain Model rule/action card (Conditions,
@@ -432,9 +478,15 @@
   .details-row {
     display: flex;
     gap: 6px;
+    /* top-align rather than stretch: a condition row's remove button
+       shouldn't stretch to match its textarea's (possibly multi-line)
+       height -- it should just sit at the top corner like it did next to
+       a single-line input. */
+    align-items: flex-start;
   }
 
-  .details-row input {
+  .details-row input,
+  .details-row textarea {
     flex: 1;
     min-width: 0;
   }
@@ -472,6 +524,11 @@
   .details-row-remove {
     flex: 0 0 auto;
     width: 28px;
+    /* Matches a single-line input/textarea row's own height (padding +
+       border + line-height) so the button doesn't look squished now that
+       .details-row top-aligns instead of stretching -- was implicitly
+       "whatever height the row stretches it to" before. */
+    min-height: 34px;
     padding: 0;
     border-radius: var(--radius-sm);
     border: 1px solid var(--toolbar-border);
@@ -502,25 +559,65 @@
   }
 
   /* Agent Ontology — Rules/Actions manager cards. Same bordered-card
-     treatment as .details-property-row above, reused here for the same
-     reason: several distinct fields per entry read better as one visually
-     bounded unit than as one long unbroken flex row. */
+     treatment as .details-property-row above, plus a subtle background
+     tint and shadow on top of it -- with a dozen-plus cards stacked in a
+     long scrolling list, a 1px border alone reads as one continuous strip
+     once you're mid-scroll; the tint gives each card a visible boundary
+     even without the border in view. */
   .domain-model-rule-card,
   .domain-model-action-card {
     display: flex;
     flex-direction: column;
     gap: 6px;
-    padding: 8px;
+    padding: 10px;
     border: 1px solid var(--toolbar-border);
     border-radius: var(--radius-sm);
+    background: var(--card-bg);
+    box-shadow: var(--shadow-sm);
   }
 
   .dm-rule-conditions {
     margin-left: 8px;
   }
 
+  /* Preconditions checkbox list (replaces a native <select multiple>,
+     which needed a held Ctrl/Cmd click to select more than one option --
+     see refreshActionPreconditionOptions()'s own comment). Its own
+     scrollable box, separate from the dialog body's scroll, so a long
+     rule list doesn't force the whole action card to be enormous. */
   .dm-action-preconditions {
-    min-height: 60px;
+    display: flex;
+    flex-direction: column;
+    max-height: 160px;
+    overflow-y: auto;
+    border: 1px solid var(--toolbar-border);
+    border-radius: var(--radius-sm);
+    background: var(--btn-bg);
+  }
+
+  .dm-precondition-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 9px;
+    font-size: 14px;
+    cursor: pointer;
+  }
+
+  .dm-precondition-option:hover {
+    background: var(--btn-bg-hover);
+  }
+
+  .dm-precondition-checkbox {
+    flex: 0 0 auto;
+    margin: 0;
+    cursor: pointer;
+  }
+
+  .dm-preconditions-empty {
+    padding: 8px 9px;
+    font-size: 13px;
+    opacity: 0.65;
   }
 
   #restore-toast {
@@ -962,24 +1059,26 @@
      createEdge() comment). -->
 <div id="details-overlay" class="modal-overlay">
   <div id="details-dialog" class="modal-dialog details-dialog" role="dialog" aria-modal="true">
-    <h2 id="details-title" class="modal-title"></h2>
+    <div class="details-dialog-body">
+      <h2 id="details-title" class="modal-title"></h2>
 
-    <label id="details-meaning-label" class="details-field-label" for="details-meaning">Meaning</label>
-    <textarea id="details-meaning" class="details-textarea" rows="2"></textarea>
+      <label id="details-meaning-label" class="details-field-label" for="details-meaning">Meaning</label>
+      <textarea id="details-meaning" class="details-textarea" rows="2"></textarea>
 
-    <div id="details-aliases-section">
-      <label id="details-aliases-label" class="details-field-label">Aliases</label>
-      <div id="details-aliases-list" class="details-list"></div>
-      <button id="details-add-alias" type="button" class="details-add-btn">+ Add alias</button>
+      <div id="details-aliases-section">
+        <label id="details-aliases-label" class="details-field-label">Aliases</label>
+        <div id="details-aliases-list" class="details-list"></div>
+        <button id="details-add-alias" type="button" class="details-add-btn">+ Add alias</button>
+      </div>
+
+      <div id="details-properties-section">
+        <label id="details-properties-label" class="details-field-label">Properties</label>
+        <div id="details-properties-list" class="details-list"></div>
+        <button id="details-add-property" type="button" class="details-add-btn">+ Add property</button>
+      </div>
     </div>
 
-    <div id="details-properties-section">
-      <label id="details-properties-label" class="details-field-label">Properties</label>
-      <div id="details-properties-list" class="details-list"></div>
-      <button id="details-add-property" type="button" class="details-add-btn">+ Add property</button>
-    </div>
-
-    <div class="modal-actions">
+    <div class="modal-actions details-dialog-footer">
       <button id="details-cancel" type="button">Cancel</button>
       <button id="details-save" type="button">Save</button>
     </div>
@@ -994,17 +1093,21 @@
      against an in-DOM draft, never live state, until Save. -->
 <div id="domain-model-overlay" class="modal-overlay">
   <div id="domain-model-dialog" class="modal-dialog details-dialog" role="dialog" aria-modal="true">
-    <h2 id="domain-model-title" class="modal-title">Domain Model</h2>
+    <div class="details-dialog-body">
+      <h2 id="domain-model-title" class="modal-title">Domain Model</h2>
 
-    <label id="domain-model-rules-label" class="details-field-label">Rules</label>
-    <div id="domain-model-rules-list" class="details-list"></div>
-    <button id="domain-model-add-rule" type="button" class="details-add-btn">+ Add rule</button>
+      <label id="domain-model-rules-label" class="details-field-label">Rules</label>
+      <input id="domain-model-rules-filter" type="search" class="details-filter-input" autocomplete="off">
+      <div id="domain-model-rules-list" class="details-list"></div>
+      <button id="domain-model-add-rule" type="button" class="details-add-btn">+ Add rule</button>
 
-    <label id="domain-model-actions-label" class="details-field-label">Actions</label>
-    <div id="domain-model-actions-list" class="details-list"></div>
-    <button id="domain-model-add-action" type="button" class="details-add-btn">+ Add action</button>
+      <label id="domain-model-actions-label" class="details-field-label">Actions</label>
+      <input id="domain-model-actions-filter" type="search" class="details-filter-input" autocomplete="off">
+      <div id="domain-model-actions-list" class="details-list"></div>
+      <button id="domain-model-add-action" type="button" class="details-add-btn">+ Add action</button>
+    </div>
 
-    <div class="modal-actions">
+    <div class="modal-actions details-dialog-footer">
       <button id="domain-model-cancel" type="button">Cancel</button>
       <button id="domain-model-save" type="button">Save</button>
     </div>
@@ -1153,6 +1256,8 @@ const STRINGS = {
     domainModel: "Domain Model",
     rulesLabel: "Rules",
     actionsLabel: "Actions",
+    rulesFilterPlaceholder: "Filter rules by name…",
+    actionsFilterPlaceholder: "Filter actions by name…",
     addRule: "+ Add rule",
     addAction: "+ Add action",
     ruleNamePlaceholder: "rule name",
@@ -1162,7 +1267,8 @@ const STRINGS = {
     actionNamePlaceholder: "action name",
     inputClassLabel: "Input class",
     noClassSelected: "— no class —",
-    preconditionsLabel: "Preconditions (hold Ctrl/Cmd to select multiple)",
+    preconditionsLabel: "Preconditions",
+    noRulesYet: "(no rules yet — add one above)",
     effectLabel: "Effect",
     effectPlaceholder: "effect",
     verificationLabel: "Verification",
@@ -1270,6 +1376,8 @@ const STRINGS = {
     domainModel: "Doménmodell",
     rulesLabel: "Szabályok",
     actionsLabel: "Műveletek",
+    rulesFilterPlaceholder: "Szabályok szűrése név szerint…",
+    actionsFilterPlaceholder: "Műveletek szűrése név szerint…",
     addRule: "+ Szabály hozzáadása",
     addAction: "+ Művelet hozzáadása",
     ruleNamePlaceholder: "szabály neve",
@@ -1279,7 +1387,8 @@ const STRINGS = {
     actionNamePlaceholder: "művelet neve",
     inputClassLabel: "Bemeneti osztály",
     noClassSelected: "— nincs osztály —",
-    preconditionsLabel: "Előfeltételek (Ctrl/Cmd lenyomva több is kiválasztható)",
+    preconditionsLabel: "Előfeltételek",
+    noRulesYet: "(még nincs szabály — adjon hozzá egyet fent)",
     effectLabel: "Hatás",
     effectPlaceholder: "hatás",
     verificationLabel: "Ellenőrzés",
@@ -1398,8 +1507,9 @@ function applyLanguage() {
   byId("details-save").textContent = t("save");
   updateDetailsTitle(); // no-op if the dialog isn't open — see its own definition
   byId("domain-model-title").textContent = t("domainModel");
-  byId("domain-model-rules-label").textContent = t("rulesLabel");
-  byId("domain-model-actions-label").textContent = t("actionsLabel");
+  updateDomainModelCounts(); // sets both section labels, including their "(N)" count
+  byId("domain-model-rules-filter").placeholder = t("rulesFilterPlaceholder");
+  byId("domain-model-actions-filter").placeholder = t("actionsFilterPlaceholder");
   byId("domain-model-add-rule").textContent = t("addRule");
   byId("domain-model-add-action").textContent = t("addAction");
   byId("domain-model-cancel").textContent = t("cancel");
@@ -3316,6 +3426,10 @@ detailsOverlay.addEventListener("click", (e) => {
 const domainModelOverlay = document.getElementById("domain-model-overlay");
 const domainModelRulesList = document.getElementById("domain-model-rules-list");
 const domainModelActionsList = document.getElementById("domain-model-actions-list");
+const domainModelRulesLabel = document.getElementById("domain-model-rules-label");
+const domainModelActionsLabel = document.getElementById("domain-model-actions-label");
+const domainModelRulesFilter = document.getElementById("domain-model-rules-filter");
+const domainModelActionsFilter = document.getElementById("domain-model-actions-filter");
 const domainModelAddRuleBtn = document.getElementById("domain-model-add-rule");
 const domainModelAddActionBtn = document.getElementById("domain-model-add-action");
 const domainModelSaveBtn = document.getElementById("domain-model-save");
@@ -3323,49 +3437,103 @@ const domainModelCancelBtn = document.getElementById("domain-model-cancel");
 
 let domainModelOpen = false;
 
+// A dozen-plus rules/actions used to have no way to tell how many there
+// were short of scrolling to the bottom and counting, and no way to jump
+// to one by name short of scrolling and reading every card. This adds
+// both: a live "(N)" count appended to each section's label (kept current
+// on open, add, remove, and language toggle -- see call sites below), and
+// a plain substring/case-insensitive filter over each section's name
+// field that shows/hides cards without touching the underlying draft data
+// (a hidden card is still saved on Save; the filter is purely a view).
+function updateDomainModelCounts() {
+  domainModelRulesLabel.textContent = `${t("rulesLabel")} (${domainModelRulesList.children.length})`;
+  domainModelActionsLabel.textContent = `${t("actionsLabel")} (${domainModelActionsList.children.length})`;
+}
+
+function filterDomainModelCards(listEl, nameSelector, query) {
+  const q = query.trim().toLowerCase();
+  for (const card of listEl.children) {
+    const name = card.querySelector(nameSelector).value.toLowerCase();
+    card.style.display = !q || name.includes(q) ? "" : "none";
+  }
+}
+
+domainModelRulesFilter.addEventListener("input", () =>
+  filterDomainModelCards(domainModelRulesList, ".dm-rule-name", domainModelRulesFilter.value));
+domainModelActionsFilter.addEventListener("input", () =>
+  filterDomainModelCards(domainModelActionsList, ".dm-action-name", domainModelActionsFilter.value));
+
 function genDraftId() { return `draft_${Math.random().toString(36).slice(2, 9)}`; }
 
 function createConditionRow(text) {
   const row = document.createElement("div");
   row.className = "details-row";
-  const input = document.createElement("input");
-  input.type = "text";
-  input.className = "dm-rule-condition-input";
-  input.placeholder = t("conditionPlaceholder");
-  input.value = text || "";
-  row.append(input, createDetailsRemoveButton(() => row.remove()));
+  // A textarea, not a single-line input: conditions are free-text
+  // sentences (see agent_ontology_spec.md's own worked examples), and a
+  // 640px-wide dialog still isn't wide enough to show a full sentence on
+  // one line without truncating it — this wraps instead, same as the
+  // "Meaning" field already does via .details-textarea.
+  const textarea = document.createElement("textarea");
+  textarea.className = "dm-rule-condition-input details-textarea";
+  textarea.rows = 2;
+  textarea.placeholder = t("conditionPlaceholder");
+  textarea.value = text || "";
+  row.append(textarea, createDetailsRemoveButton(() => row.remove()));
   return row;
 }
 
-// Rebuilds every action card's preconditions <select> options from the
-// rules list's *current* DOM state (id + live name-input value) — called
-// after anything that can invalidate that option list: opening the dialog,
+// Rebuilds every action card's preconditions checkbox list from the rules
+// list's *current* DOM state (id + live name-input value) — called after
+// anything that can invalidate that option list: opening the dialog,
 // adding/removing a rule, or typing in a rule's name. Preserves each
-// select's currently-selected values across the rebuild, except on an
-// action card's very first population (right after it's created from an
-// existing action), where its saved `preconditions` (real rule ids) seed
-// the initial selection instead — see createActionCard()'s own comment.
+// card's currently-checked values across the rebuild, except on an action
+// card's very first population (right after it's created from an existing
+// action), where its saved `preconditions` (real rule ids) seed the
+// initial selection instead — see createActionCard()'s own comment.
+//
+// A checkbox list, not a <select multiple>: the old native multi-select
+// required holding Ctrl/Cmd while clicking to select more than one option
+// -- an interaction with no on-screen hint of its own beyond a text label
+// next to the field, no touch equivalent, and no visible "this one's
+// selected" state beyond a subtle highlight inside a cramped, fixed-height
+// scroll box. A plain checked/unchecked checkbox per rule is discoverable
+// and touch-friendly with no modifier key, and reads correctly at a glance.
 function refreshActionPreconditionOptions() {
   const ruleOptions = [...domainModelRulesList.children].map((card) => ({
     value: card.dataset.ruleId,
     label: card.querySelector(".dm-rule-name").value.trim() || t("untitledRulePlaceholder"),
   }));
   for (const actionCard of domainModelActionsList.children) {
-    const select = actionCard.querySelector(".dm-action-preconditions");
+    const container = actionCard.querySelector(".dm-action-preconditions");
     let selectedValues;
     if (actionCard.dataset.pendingPreconditions !== undefined) {
       selectedValues = new Set(JSON.parse(actionCard.dataset.pendingPreconditions));
       delete actionCard.dataset.pendingPreconditions;
     } else {
-      selectedValues = new Set([...select.selectedOptions].map((o) => o.value));
+      selectedValues = new Set(
+        [...container.querySelectorAll(".dm-precondition-checkbox:checked")].map((cb) => cb.value),
+      );
     }
-    select.textContent = "";
+    container.textContent = "";
+    if (ruleOptions.length === 0) {
+      const empty = document.createElement("span");
+      empty.className = "dm-preconditions-empty";
+      empty.textContent = t("noRulesYet");
+      container.appendChild(empty);
+      continue;
+    }
     for (const { value, label } of ruleOptions) {
-      const opt = document.createElement("option");
-      opt.value = value;
-      opt.textContent = label;
-      opt.selected = selectedValues.has(value);
-      select.appendChild(opt);
+      const optionLabel = document.createElement("label");
+      optionLabel.className = "dm-precondition-option";
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.className = "dm-precondition-checkbox";
+      checkbox.value = value;
+      checkbox.checked = selectedValues.has(value);
+      const text = document.createElement("span");
+      text.textContent = label;
+      optionLabel.append(checkbox, text);
+      container.appendChild(optionLabel);
     }
   }
 }
@@ -3389,6 +3557,18 @@ function createSublabel(key) {
   return label;
 }
 
+// Hover tooltip mirroring a single-line input's own current value. Rule
+// and action names are the one field left as a single-line <input> in
+// this dialog after the free-text fields above became textareas (names
+// are short identifiers by convention) -- but a long one can still
+// overflow the input's width, and this is the fallback for reading it
+// without clicking in and scrolling the cursor through it.
+function bindTitleTooltip(input) {
+  const sync = () => { input.title = input.value; };
+  sync();
+  input.addEventListener("input", sync);
+}
+
 function createRuleCard(rule) {
   const card = document.createElement("div");
   card.className = "domain-model-rule-card";
@@ -3401,8 +3581,9 @@ function createRuleCard(rule) {
   nameInput.className = "dm-rule-name";
   nameInput.placeholder = t("ruleNamePlaceholder");
   nameInput.value = rule ? rule.name : "";
+  bindTitleTooltip(nameInput);
   nameInput.addEventListener("input", refreshActionPreconditionOptions);
-  topRow.append(nameInput, createDetailsRemoveButton(() => { card.remove(); refreshActionPreconditionOptions(); }));
+  topRow.append(nameInput, createDetailsRemoveButton(() => { card.remove(); refreshActionPreconditionOptions(); updateDomainModelCounts(); }));
 
   const conditionsList = document.createElement("div");
   conditionsList.className = "dm-rule-conditions details-list";
@@ -3415,7 +3596,7 @@ function createRuleCard(rule) {
   addConditionBtn.addEventListener("click", () => {
     const row = createConditionRow("");
     conditionsList.appendChild(row);
-    row.querySelector("input").focus();
+    row.querySelector("textarea").focus();
   });
 
   card.append(topRow, createSublabel("conditionsLabel"), conditionsList, addConditionBtn);
@@ -3440,7 +3621,8 @@ function createActionCard(action) {
   nameInput.className = "dm-action-name";
   nameInput.placeholder = t("actionNamePlaceholder");
   nameInput.value = action ? action.name : "";
-  topRow.append(nameInput, createDetailsRemoveButton(() => card.remove()));
+  bindTitleTooltip(nameInput);
+  topRow.append(nameInput, createDetailsRemoveButton(() => { card.remove(); updateDomainModelCounts(); }));
 
   const classSelect = document.createElement("select");
   classSelect.className = "dm-action-input-class";
@@ -3459,28 +3641,31 @@ function createActionCard(action) {
   }
   classSelect.value = (action && action.inputClassId) || "";
 
-  const preconditionsSelect = document.createElement("select");
-  preconditionsSelect.className = "dm-action-preconditions";
-  preconditionsSelect.multiple = true;
-  // Options populated by refreshActionPreconditionOptions(), called by the
-  // caller right after this card is appended to the DOM.
+  const preconditionsList = document.createElement("div");
+  preconditionsList.className = "dm-action-preconditions";
+  preconditionsList.setAttribute("role", "group");
+  // Checkbox rows populated by refreshActionPreconditionOptions(), called
+  // by the caller right after this card is appended to the DOM.
 
-  const effectInput = document.createElement("input");
-  effectInput.type = "text";
-  effectInput.className = "dm-action-effect";
+  // Free-text sentences, same reasoning as createConditionRow() above --
+  // textareas so a full effect/verification sentence is readable without
+  // truncating.
+  const effectInput = document.createElement("textarea");
+  effectInput.className = "dm-action-effect details-textarea";
+  effectInput.rows = 2;
   effectInput.placeholder = t("effectPlaceholder");
   effectInput.value = action ? action.effect : "";
 
-  const verificationInput = document.createElement("input");
-  verificationInput.type = "text";
-  verificationInput.className = "dm-action-verification";
+  const verificationInput = document.createElement("textarea");
+  verificationInput.className = "dm-action-verification details-textarea";
+  verificationInput.rows = 2;
   verificationInput.placeholder = t("verificationPlaceholder");
   verificationInput.value = action ? action.verification : "";
 
   card.append(
     topRow,
     createSublabel("inputClassLabel"), classSelect,
-    createSublabel("preconditionsLabel"), preconditionsSelect,
+    createSublabel("preconditionsLabel"), preconditionsList,
     createSublabel("effectLabel"), effectInput,
     createSublabel("verificationLabel"), verificationInput,
   );
@@ -3493,9 +3678,12 @@ function openDomainModelDialog() {
   domainModelOpen = true;
   domainModelRulesList.textContent = "";
   domainModelActionsList.textContent = "";
+  domainModelRulesFilter.value = "";
+  domainModelActionsFilter.value = "";
   for (const rule of state.rules) domainModelRulesList.appendChild(createRuleCard(rule));
   for (const action of state.actions) domainModelActionsList.appendChild(createActionCard(action));
   refreshActionPreconditionOptions();
+  updateDomainModelCounts();
   domainModelOverlay.style.display = "flex";
 }
 
@@ -3523,8 +3711,8 @@ function saveDomainModelDialog() {
     const realId = draftId.startsWith("draft_") ? genActionId() : draftId;
     const name = card.querySelector(".dm-action-name").value.trim();
     const inputClassId = card.querySelector(".dm-action-input-class").value || null;
-    const preconditions = [...card.querySelector(".dm-action-preconditions").selectedOptions]
-      .map((o) => draftIdToRealId.get(o.value))
+    const preconditions = [...card.querySelectorAll(".dm-action-preconditions .dm-precondition-checkbox:checked")]
+      .map((cb) => draftIdToRealId.get(cb.value))
       .filter((id) => id && survivingRuleIds.has(id)); // drops a reference to a rule that got deleted or left nameless in this same save
     const effect = card.querySelector(".dm-action-effect").value.trim();
     const verification = card.querySelector(".dm-action-verification").value.trim();
@@ -3545,12 +3733,14 @@ domainModelAddRuleBtn.addEventListener("click", () => {
   const card = createRuleCard(null);
   domainModelRulesList.appendChild(card);
   refreshActionPreconditionOptions();
+  updateDomainModelCounts();
   card.querySelector(".dm-rule-name").focus();
 });
 domainModelAddActionBtn.addEventListener("click", () => {
   const card = createActionCard(null);
   domainModelActionsList.appendChild(card);
   refreshActionPreconditionOptions();
+  updateDomainModelCounts();
   card.querySelector(".dm-action-name").focus();
 });
 domainModelSaveBtn.addEventListener("click", saveDomainModelDialog);
