@@ -42,12 +42,14 @@
     --node-fill: #242424;
     --node-stroke: #666666;
     --node-stroke-selected: #4da6ff;
+    --node-stroke-connected: #2dd4bf;
     --connect-source-stroke: #ffb84d;
     --node-text: #e8e8e8;
     --handle-fill: rgba(255, 255, 255, 0.35);
     --imported-stroke: #e0b13f;
     --edge-stroke: #8a8a8a;
     --edge-stroke-selected: #4da6ff;
+    --edge-stroke-connected: #2dd4bf;
     --edge-label-fg: #bbbbbb;
     --ghost-stroke: #4da6ff;
   }
@@ -73,12 +75,14 @@
     --node-fill: #ffffff;
     --node-stroke: #999999;
     --node-stroke-selected: #1a73e8;
+    --node-stroke-connected: #0f766e;
     --connect-source-stroke: #e67700;
     --node-text: #1a1a1a;
     --handle-fill: rgba(0, 0, 0, 0.35);
     --imported-stroke: #b8860b;
     --edge-stroke: #666666;
     --edge-stroke-selected: #1a73e8;
+    --edge-stroke-connected: #0f766e;
     --edge-label-fg: #555555;
     --ghost-stroke: #1a73e8;
   }
@@ -1717,11 +1721,45 @@ function updateUndoRedoButtons() {
 // (Fruchterman-Reingold style) relaxation of node *centers* — repulsion
 // between every pair of nodes, not just connected ones, so disconnected
 // components still spread apart instead of piling up; attraction along
-// edges. Starts from the graph's current positions (rather than a fresh
-// random scatter), so the result is deterministic for a given graph +
-// starting layout — no RNG involved, and nothing to seed. A fixed
-// iteration count with a cooling schedule guarantees termination (no risk
-// of hanging) regardless of graph shape.
+// edges. Fully deterministic for a given graph — no RNG involved, and
+// nothing to seed (see the multi-start note below for what that now means
+// in practice). A fixed iteration count with a cooling schedule guarantees
+// termination (no risk of hanging) regardless of graph shape.
+//
+// issue #64 ("Crowded graph layout") iteration 1: the relaxation's "ideal
+// distance" used to be one flat constant (150px) shared by every pair,
+// completely disconnected from each node's actual footprint
+// (DEFAULT_NODE_W/H = 160x60). That constant is *smaller* than the box
+// width itself, so two nodes at their own force equilibrium could still
+// land with overlapping boxes whenever they happened to end up roughly
+// horizontally aligned — not a rare edge case, but the expected outcome
+// for a meaningful fraction of pairs in any graph with more than a
+// handful of nodes (confirmed during development against a real-world-
+// scale (~50 node) ontology: 8 overlapping node-box pairs). The per-pair
+// ideal distance is instead derived from each
+// node's own bounding-circle radius (half its diagonal) — the smallest
+// value that *guarantees* two boxes can't overlap at that separation
+// regardless of their relative angle, since each box sits entirely inside
+// its own circumscribed circle. It's applied identically to repulsion (all
+// pairs) and attraction (edges), so connected nodes still settle near
+// their pair's own ideal distance instead of drifting to whatever the flat
+// constant used to imply.
+//
+// iteration 2 (superseding an earlier, reverted attempt at scaling spacing
+// by node degree — see git history: it cut crossings on a synthetic
+// hub-heavy fixture but *increased* them on a larger real-world-scale test
+// ontology, and a gentler version flipped which fixture it helped, meaning
+// the effect wasn't a real structural fix, just moving which local
+// minimum a single deterministic relaxation happened to land in): rather
+// than trying to out-guess the relaxation's local minima with more spacing
+// heuristics, run it from a small, fixed set of different deterministic
+// starting layouts (today's positions, plus a circular and a grid seed —
+// still no randomness anywhere) and keep whichever settled result has the
+// fewest edge crossings (ties broken by smaller bounding-box area). This
+// is a direct, honest fight against local minima instead of an indirect
+// one, and it can only ever do as well as or better than the old
+// single-start behavior, since "today's positions" is always one of the
+// candidates.
 // ---------------------------------------------------------------------------
 // Pure position-mutation core, no snapshot/history of its own -- pulled out
 // of autoLayout() below (issue #57) so a commit path that wants the reflow
@@ -1731,13 +1769,59 @@ function updateUndoRedoButtons() {
 // are responsible for the `state.nodes.length < 2` guard themselves --
 // see autoLayout() below for why that check has to happen before, not
 // inside, this function.
-function computeAutoLayoutPositions() {
-  const idealDist = 150; // target inter-node spacing
+const REPULSION_MARGIN = 24; // extra clearance beyond two boxes' circumscribed circles just touching
+
+// Bounded, deterministic post-pass: the FR relaxation above optimizes
+// average spacing, not a hard non-overlap guarantee, so a small number of
+// dense/awkward pairs can still finish touching or overlapping even with
+// size-aware repulsion (a fixed iteration count trades off against
+// hanging, not against reaching a perfect equilibrium). This directly
+// resolves any node-box pairs still overlapping (beyond REPULSION_MARGIN
+// of clearance) by nudging each apart along whichever axis needs the
+// least movement to separate their rectangles — same "minimum translation
+// vector" technique used for AABB collision resolution. Bounded to
+// OVERLAP_PASS_MAX_ITERATIONS so, like the relaxation above, it always
+// terminates regardless of graph shape.
+const OVERLAP_PASS_MAX_ITERATIONS = 60;
+
+function resolveNodeOverlaps(nodes, margin) {
+  for (let iter = 0; iter < OVERLAP_PASS_MAX_ITERATIONS; iter++) {
+    let anyOverlap = false;
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        const a = nodes[i], b = nodes[j];
+        const overlapX = Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x) + margin;
+        const overlapY = Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y) + margin;
+        if (overlapX <= 0 || overlapY <= 0) continue; // already clear on at least one axis
+        anyOverlap = true;
+        // Separate along whichever axis needs less movement to clear —
+        // the direction (which node moves which way) follows their
+        // current center order on that axis, so neither jumps past the
+        // other.
+        if (overlapX < overlapY) {
+          const dir = (a.x + a.w / 2) < (b.x + b.w / 2) ? -1 : 1;
+          a.x += dir * overlapX / 2;
+          b.x -= dir * overlapX / 2;
+        } else {
+          const dir = (a.y + a.h / 2) < (b.y + b.h / 2) ? -1 : 1;
+          a.y += dir * overlapY / 2;
+          b.y -= dir * overlapY / 2;
+        }
+      }
+    }
+    if (!anyOverlap) break;
+  }
+}
+
+// Runs the FR relaxation itself starting from `initialCenters`, returning a
+// fresh array of settled centers — no state.nodes mutation, so the same
+// core can be scored and compared across several candidate starting
+// layouts before any of them is committed.
+function relaxCenters(initialCenters, radii, indexById, edges) {
   const iterations = 200;
   let temperature = 100; // max displacement per iteration, cooled to ~0
-
-  const centers = state.nodes.map((n) => ({ x: n.x + n.w / 2, y: n.y + n.h / 2 }));
-  const indexById = new Map(state.nodes.map((n, i) => [n.id, i]));
+  const centers = initialCenters.map((c) => ({ x: c.x, y: c.y }));
+  const pairIdealDist = (i, j) => radii[i] + radii[j] + REPULSION_MARGIN;
 
   for (let iter = 0; iter < iterations; iter++) {
     const disp = centers.map(() => ({ x: 0, y: 0 }));
@@ -1747,6 +1831,7 @@ function computeAutoLayoutPositions() {
         let dx = centers[i].x - centers[j].x;
         let dy = centers[i].y - centers[j].y;
         const dist = Math.hypot(dx, dy) || 0.01; // guard against exact overlap
+        const idealDist = pairIdealDist(i, j);
         const force = (idealDist * idealDist) / dist;
         dx = (dx / dist) * force;
         dy = (dy / dist) * force;
@@ -1755,13 +1840,14 @@ function computeAutoLayoutPositions() {
       }
     }
 
-    for (const edge of state.edges) {
+    for (const edge of edges) {
       const i = indexById.get(edge.source);
       const j = indexById.get(edge.target);
       if (i === undefined || j === undefined || i === j) continue;
       let dx = centers[i].x - centers[j].x;
       let dy = centers[i].y - centers[j].y;
       const dist = Math.hypot(dx, dy) || 0.01;
+      const idealDist = pairIdealDist(i, j);
       const force = (dist * dist) / idealDist;
       dx = (dx / dist) * force;
       dy = (dy / dist) * force;
@@ -1779,10 +1865,309 @@ function computeAutoLayoutPositions() {
     temperature *= 0.95;
   }
 
-  state.nodes.forEach((n, i) => {
-    n.x = centers[i].x - n.w / 2;
-    n.y = centers[i].y - n.h / 2;
+  return centers;
+}
+
+// Evenly spaced around a circle, ordered by each node's index in
+// state.nodes — fixed and reproducible (not by id string, not by
+// position), so the same graph always produces the same seed. Radius is
+// picked so the circle's circumference roughly accommodates every node at
+// its own ideal spacing from its two ring-neighbors.
+function circularSeed(nodes, radii) {
+  const n = nodes.length;
+  const avgRadius = radii.reduce((s, r) => s + r, 0) / n;
+  const circumferenceNeeded = n * (2 * avgRadius + REPULSION_MARGIN);
+  const radius = Math.max(100, circumferenceNeeded / (2 * Math.PI));
+  return nodes.map((_, i) => {
+    const angle = (2 * Math.PI * i) / n;
+    return { x: radius * Math.cos(angle), y: radius * Math.sin(angle) };
   });
+}
+
+// Same ring layout as circularSeed, but ordered by a breadth-first
+// traversal of the graph -- starting from its highest-degree node, ties
+// broken by lowest index, so the same graph always produces the same seed
+// -- instead of raw node index. issue #64 iteration 5: placing
+// graph-adjacent nodes next to each other on the ring is a standard way to
+// cut a circular layout's own edge crossings versus an arbitrary order.
+// This is an ADDITIONAL candidate alongside circularSeed, not a
+// replacement for it -- an earlier version of this iteration replaced the
+// index-order circle outright and that regressed a larger real-world-scale
+// test ontology's crossing count (58 -> 76): the "smarter" seed happened
+// to land the relaxation in a worse local minimum for that graph's shape,
+// even though it's a reasonable heuristic in general. Since
+// computeAutoLayoutPositions() always picks whichever candidate's relaxed
+// result has the fewest crossings, adding a candidate can only ever match
+// or beat the previous best -- it's never picked when it's worse -- so
+// keeping both circular variants is the safe way to benefit from this
+// heuristic without risking exactly the regression the replacement caused.
+// Any node BFS doesn't reach (a separate connected component) is appended
+// afterward in index order, so every node still gets a ring slot.
+function circularSeedByBFS(nodes, radii, edges, indexById) {
+  const n = nodes.length;
+  const adjacency = nodes.map(() => []);
+  for (const e of edges) {
+    const i = indexById.get(e.source), j = indexById.get(e.target);
+    if (i === undefined || j === undefined || i === j) continue;
+    adjacency[i].push(j);
+    adjacency[j].push(i);
+  }
+  let root = 0;
+  for (let i = 1; i < n; i++) if (adjacency[i].length > adjacency[root].length) root = i;
+  const order = [];
+  const visited = new Array(n).fill(false);
+  const queue = [root];
+  visited[root] = true;
+  while (queue.length) {
+    const cur = queue.shift();
+    order.push(cur);
+    for (const next of adjacency[cur]) {
+      if (!visited[next]) { visited[next] = true; queue.push(next); }
+    }
+  }
+  for (let i = 0; i < n; i++) if (!visited[i]) order.push(i);
+
+  const avgRadius = radii.reduce((s, r) => s + r, 0) / n;
+  const circumferenceNeeded = n * (2 * avgRadius + REPULSION_MARGIN);
+  const radius = Math.max(100, circumferenceNeeded / (2 * Math.PI));
+  const centers = new Array(n);
+  order.forEach((nodeIndex, pos) => {
+    const angle = (2 * Math.PI * pos) / n;
+    centers[nodeIndex] = { x: radius * Math.cos(angle), y: radius * Math.sin(angle) };
+  });
+  return centers;
+}
+
+// A plain row-major grid, ordered by node index — mirrors
+// computeImportShelf()'s "shelf" shape but as a from-scratch seed (not
+// anchored to any existing content) so it explores a genuinely different
+// starting configuration than the circle or the current layout.
+function gridSeed(nodes, radii) {
+  const n = nodes.length;
+  const cols = Math.max(1, Math.ceil(Math.sqrt(n)));
+  const avgDiameter = (radii.reduce((s, r) => s + r, 0) / n) * 2;
+  const gap = avgDiameter + REPULSION_MARGIN;
+  return nodes.map((_, i) => ({ x: (i % cols) * gap, y: Math.floor(i / cols) * gap }));
+}
+
+// Shared by countCrossingsForCenters and nudgeAwayFromCrossings below —
+// standard orientation-based segment intersection (proper + collinear
+// touching cases).
+function segmentsIntersectForLayout(a1, a2, b1, b2) {
+  const orient = (ax, ay, bx, by, cx, cy) => (bx - ax) * (cy - ay) - (by - ay) * (cx - ax);
+  const onSeg = (ax, ay, bx, by, px, py) =>
+    Math.min(ax, bx) - 1e-9 <= px && px <= Math.max(ax, bx) + 1e-9 &&
+    Math.min(ay, by) - 1e-9 <= py && py <= Math.max(ay, by) + 1e-9;
+  const d1 = orient(b1.x, b1.y, b2.x, b2.y, a1.x, a1.y);
+  const d2 = orient(b1.x, b1.y, b2.x, b2.y, a2.x, a2.y);
+  const d3 = orient(a1.x, a1.y, a2.x, a2.y, b1.x, b1.y);
+  const d4 = orient(a1.x, a1.y, a2.x, a2.y, b2.x, b2.y);
+  if (((d1 > 0 && d2 < 0) || (d1 < 0 && d2 > 0)) && ((d3 > 0 && d4 < 0) || (d3 < 0 && d4 > 0))) return true;
+  if (d1 === 0 && onSeg(b1.x, b1.y, b2.x, b2.y, a1.x, a1.y)) return true;
+  if (d2 === 0 && onSeg(b1.x, b1.y, b2.x, b2.y, a2.x, a2.y)) return true;
+  if (d3 === 0 && onSeg(a1.x, a1.y, a2.x, a2.y, b1.x, b1.y)) return true;
+  if (d4 === 0 && onSeg(a1.x, a1.y, a2.x, a2.y, b2.x, b2.y)) return true;
+  return false;
+}
+
+// Edge-endpoint index pairs for every edge, resolved once so both
+// countCrossingsForCenters and nudgeAwayFromCrossings can walk the same
+// list without re-deriving it.
+function edgeIndexPairs(edges, indexById) {
+  const pairs = [];
+  for (const e of edges) {
+    const i = indexById.get(e.source), j = indexById.get(e.target);
+    if (i === undefined || j === undefined || i === j) continue;
+    pairs.push({ source: e.source, target: e.target, i, j });
+  }
+  return pairs;
+}
+
+// Edge-crossing count used to rank candidate layouts against each other
+// (not shown to the user) — center-to-center segments, same simplification
+// tools/layout-bench.mjs's metric uses, applied identically to every
+// candidate so the comparison between them is still meaningful even though
+// it's not the exact border-to-border pixel geometry edgeGeometry() draws.
+function countCrossingsForCenters(centers, edges, indexById) {
+  const segs = edgeIndexPairs(edges, indexById);
+  let crossings = 0;
+  for (let i = 0; i < segs.length; i++) {
+    for (let j = i + 1; j < segs.length; j++) {
+      const s1 = segs[i], s2 = segs[j];
+      const sharesEndpoint = s1.source === s2.source || s1.source === s2.target ||
+        s1.target === s2.source || s1.target === s2.target;
+      if (sharesEndpoint) continue;
+      if (segmentsIntersectForLayout(centers[s1.i], centers[s1.j], centers[s2.i], centers[s2.j])) crossings++;
+    }
+  }
+  return crossings;
+}
+
+// issue #64 iteration 5, second half: for every pair of edges that are
+// still crossing in the current best layout, nudge all four endpoints
+// apart perpendicular to their own edge -- a small, targeted push meant to
+// swing the crossing pair apart rather than through each other. Returns a
+// new seed (not a final layout): the caller re-runs the same full,
+// size-aware relaxCenters() on it so normal spacing/attraction forces get
+// to re-settle around the nudge instead of leaving raw, un-relaxed
+// jitter -- this is a candidate to try, kept only if it actually reduces
+// crossings (see the polish loop in computeAutoLayoutPositions), never
+// applied unconditionally.
+const CROSSING_NUDGE = 30;
+function nudgeAwayFromCrossings(centers, edges, indexById) {
+  const nudged = centers.map((c) => ({ x: c.x, y: c.y }));
+  const segs = edgeIndexPairs(edges, indexById);
+  for (let a = 0; a < segs.length; a++) {
+    for (let b = a + 1; b < segs.length; b++) {
+      const s1 = segs[a], s2 = segs[b];
+      const sharesEndpoint = s1.source === s2.source || s1.source === s2.target ||
+        s1.target === s2.source || s1.target === s2.target;
+      if (sharesEndpoint) continue;
+      if (!segmentsIntersectForLayout(centers[s1.i], centers[s1.j], centers[s2.i], centers[s2.j])) continue;
+      const dx = centers[s1.j].x - centers[s1.i].x, dy = centers[s1.j].y - centers[s1.i].y;
+      const len = Math.hypot(dx, dy) || 1;
+      const px = -dy / len, py = dx / len; // unit perpendicular to edge s1
+      nudged[s1.i].x += px * CROSSING_NUDGE; nudged[s1.i].y += py * CROSSING_NUDGE;
+      nudged[s1.j].x += px * CROSSING_NUDGE; nudged[s1.j].y += py * CROSSING_NUDGE;
+      nudged[s2.i].x -= px * CROSSING_NUDGE; nudged[s2.i].y -= py * CROSSING_NUDGE;
+      nudged[s2.j].x -= px * CROSSING_NUDGE; nudged[s2.j].y -= py * CROSSING_NUDGE;
+    }
+  }
+  return nudged;
+}
+
+function boundingBoxAreaForCenters(centers, nodes) {
+  if (centers.length === 0) return 0;
+  const xs0 = centers.map((c, i) => c.x - nodes[i].w / 2);
+  const xs1 = centers.map((c, i) => c.x + nodes[i].w / 2);
+  const ys0 = centers.map((c, i) => c.y - nodes[i].h / 2);
+  const ys1 = centers.map((c, i) => c.y + nodes[i].h / 2);
+  return (Math.max(...xs1) - Math.min(...xs0)) * (Math.max(...ys1) - Math.min(...ys0));
+}
+
+// issue #64 ("Crowded graph layout") iteration 4: an edge's label has
+// always sat at a fixed 50% point along its line, so in a crowded layout
+// it routinely lands on top of an unrelated third node's box or another
+// edge's label (tools/layout-bench-out/*/iter3-*.json's labelCollisions
+// count is still nonzero after iterations 1-3, which only ever moved node
+// boxes, never the labels). This nudges each edge's label along its OWN
+// edge line -- and only along it, never off it, so a label always stays
+// recognizably attached to the relationship it names -- away from node
+// boxes and other labels it would otherwise collide with. Deterministic
+// and bounded, same iterative-pairwise-nudge shape as resolveNodeOverlaps
+// above. Result is stored as edge.labelT (0..1 along the edge, from
+// source to target; undefined/missing -- e.g. an edge created after the
+// last autolayout run -- means "plain midpoint," exactly today's
+// behavior) so rendering and the two existing UI anchors that already key
+// off the label's position (updateSelectionToolbar, beginRenameEdgePrompt
+// -- both go through edgeGeometry()'s `mid`) automatically follow it
+// without their own separate logic.
+const LABEL_T_MIN = 0.15, LABEL_T_MAX = 0.85; // never slide onto either endpoint's own box
+const LABEL_CLEARANCE = 26; // approx. label footprint "radius" for spacing purposes
+const LABEL_PASS_ITERATIONS = 40;
+const LABEL_STEP = 0.015; // max fractional-t nudge per edge per iteration
+
+function resolveEdgeLabelPositions(nodes, edges, indexById) {
+  const t = new Map(edges.map((e) => [e.id, 0.5]));
+  const pointAt = (a, b, tt) => ({ x: a.x + (b.x - a.x) * tt, y: a.y + (b.y - a.y) * tt });
+  const centerOf = (n) => ({ x: n.x + n.w / 2, y: n.y + n.h / 2 });
+
+  for (let iter = 0; iter < LABEL_PASS_ITERATIONS; iter++) {
+    for (const edge of edges) {
+      const i = indexById.get(edge.source), j = indexById.get(edge.target);
+      if (i === undefined || j === undefined || i === j) continue;
+      const a = centerOf(nodes[i]), b = centerOf(nodes[j]);
+      const dx = b.x - a.x, dy = b.y - a.y;
+      const len = Math.hypot(dx, dy) || 1;
+      const tx = dx / len, ty = dy / len; // unit tangent along the edge
+      const p = pointAt(a, b, t.get(edge.id));
+
+      // Signed 1D "push" along the tangent, accumulated from every nearby
+      // box/label, then converted to a t-nudge below (dividing by `len`
+      // turns a world-px push into a fraction-of-this-edge's-length step).
+      let push = 0;
+
+      for (const n of nodes) {
+        if (n.id === edge.source || n.id === edge.target) continue; // an edge is allowed to sit near its own endpoints
+        const nearestX = clamp(p.x, n.x, n.x + n.w);
+        const nearestY = clamp(p.y, n.y, n.y + n.h);
+        const ddx = p.x - nearestX, ddy = p.y - nearestY;
+        const dist = Math.hypot(ddx, ddy);
+        if (dist >= LABEL_CLEARANCE) continue;
+        const boxCx = n.x + n.w / 2, boxCy = n.y + n.h / 2;
+        const proj = (p.x - boxCx) * tx + (p.y - boxCy) * ty;
+        push += (proj >= 0 ? 1 : -1) * (LABEL_CLEARANCE - dist);
+      }
+
+      for (const other of edges) {
+        if (other.id === edge.id) continue;
+        const oi = indexById.get(other.source), oj = indexById.get(other.target);
+        if (oi === undefined || oj === undefined) continue;
+        const op = pointAt(centerOf(nodes[oi]), centerOf(nodes[oj]), t.get(other.id));
+        const ddx = p.x - op.x, ddy = p.y - op.y;
+        const dist = Math.hypot(ddx, ddy) || 0.01;
+        if (dist >= LABEL_CLEARANCE * 2) continue;
+        const proj = ddx * tx + ddy * ty;
+        push += (proj >= 0 ? 1 : -1) * (LABEL_CLEARANCE * 2 - dist);
+      }
+
+      const nudge = clamp(push / len, -LABEL_STEP, LABEL_STEP);
+      t.set(edge.id, clamp(t.get(edge.id) + nudge, LABEL_T_MIN, LABEL_T_MAX));
+    }
+  }
+
+  for (const edge of edges) edge.labelT = t.get(edge.id);
+}
+
+function computeAutoLayoutPositions() {
+  const indexById = new Map(state.nodes.map((n, i) => [n.id, i]));
+  // Bounding-circle radius (half the box diagonal): the smallest per-node
+  // "personal space" radius such that two nodes' boxes provably can't
+  // overlap once their centers are at least the sum of their two radii
+  // apart, in any relative orientation.
+  const radii = state.nodes.map((n) => Math.hypot(n.w, n.h) / 2);
+
+  const seeds = [
+    state.nodes.map((n) => ({ x: n.x + n.w / 2, y: n.y + n.h / 2 })), // today's positions
+    circularSeed(state.nodes, radii),
+    circularSeedByBFS(state.nodes, radii, state.edges, indexById),
+    gridSeed(state.nodes, radii),
+  ];
+
+  let best = null;
+  for (const seed of seeds) {
+    const centers = relaxCenters(seed, radii, indexById, state.edges);
+    const crossings = countCrossingsForCenters(centers, state.edges, indexById);
+    const area = boundingBoxAreaForCenters(centers, state.nodes);
+    if (!best || crossings < best.crossings || (crossings === best.crossings && area < best.area)) {
+      best = { centers, crossings, area };
+    }
+  }
+
+  // issue #64 iteration 5, polish pass: try nudging the winning layout's
+  // still-crossing edge pairs apart and re-relaxing (nudgeAwayFromCrossings
+  // above), a bounded number of times. Each round is only ever kept if it
+  // strictly reduces the crossing count -- ties or regressions are
+  // discarded and the loop stops there -- so this can only match or beat
+  // the plain multi-seed result above, the same one-directional safety
+  // property the seed selection itself already has.
+  const CROSSING_POLISH_ROUNDS = 5;
+  for (let round = 0; round < CROSSING_POLISH_ROUNDS && best.crossings > 0; round++) {
+    const nudgedSeed = nudgeAwayFromCrossings(best.centers, state.edges, indexById);
+    const centers = relaxCenters(nudgedSeed, radii, indexById, state.edges);
+    const crossings = countCrossingsForCenters(centers, state.edges, indexById);
+    if (crossings >= best.crossings) break; // no further improvement this way -- stop, keep current best
+    const area = boundingBoxAreaForCenters(centers, state.nodes);
+    best = { centers, crossings, area };
+  }
+
+  state.nodes.forEach((n, i) => {
+    n.x = best.centers[i].x - n.w / 2;
+    n.y = best.centers[i].y - n.h / 2;
+  });
+
+  resolveNodeOverlaps(state.nodes, REPULSION_MARGIN);
+  resolveEdgeLabelPositions(state.nodes, state.edges, indexById);
 }
 
 // Public entry point -- the toolbar button and the window.__kg.actions test
@@ -2162,9 +2547,14 @@ function edgeGeometry(edge, bendInfo) {
   const anchors = edgeAnchors(edge);
   if (!anchors) return null;
   const control = edgeControlPoint(anchors.a, anchors.b, edge, bendInfo);
+  // issue #64 iteration 4: `t` defaults to the plain midpoint (0.5) --
+  // exactly today's behavior -- for any edge resolveEdgeLabelPositions()
+  // hasn't assigned a labelT to yet (never autolaid-out, or created after
+  // the last autolayout run).
+  const t = edge.labelT ?? 0.5;
   const mid = control
-    ? quadraticBezierPoint(anchors.a, control, anchors.b, 0.5)
-    : { x: (anchors.a.x + anchors.b.x) / 2, y: (anchors.a.y + anchors.b.y) / 2 };
+    ? quadraticBezierPoint(anchors.a, control, anchors.b, t)
+    : { x: anchors.a.x + (anchors.b.x - anchors.a.x) * t, y: anchors.a.y + (anchors.b.y - anchors.a.y) * t };
   return { a: anchors.a, b: anchors.b, control, mid };
 }
 
@@ -2280,6 +2670,30 @@ const NODE_FONT_SIZE = 16;
 const EDGE_FONT_SIZE = 12;
 const ARROWHEAD_SIZE = 10;
 
+// issue #64 ("Crowded graph layout") iteration 3: text is drawn in world
+// space and the canvas transform itself is scaled by camera.scale
+// (render()'s ctx.setTransform below), so a flat world-space font size
+// shrinks right along with everything else when zoomed out to fit a large
+// graph — at the overview zoom levels tools/layout-bench-out's screenshots
+// are captured at (roughly 0.2x-0.5x for these fixtures), 16px/12px world
+// text lands at only 3-8 actual screen pixels. That's a second, distinct
+// contributor to "relationships hidden" beyond node/edge crowding:
+// legibility, not just occlusion. Below, the *world-space* font size is
+// inflated as camera.scale shrinks, just enough to keep the *on-screen*
+// size from dropping under a fixed floor — normal/close zoom (where the
+// floor is already exceeded) is completely unaffected, only the overview
+// end of the range changes. Capped so an extreme zoom-out (e.g. a very
+// tall/narrow graph where fit-to-view has to shrink a lot on one axis)
+// doesn't inflate letters into something absurd relative to a 60px-tall
+// node box.
+function effectiveFontSize(baseSize, minScreenPx, maxWorldPx) {
+  return clamp(minScreenPx / camera.scale, baseSize, maxWorldPx);
+}
+const NODE_FONT_MIN_SCREEN_PX = 11;
+const NODE_FONT_MAX_WORLD_PX = 42;
+const EDGE_FONT_MIN_SCREEN_PX = 10;
+const EDGE_FONT_MAX_WORLD_PX = 30;
+
 // Resolves the current theme's CSS custom properties (see :root and
 // :root[data-theme="light"] above) into one palette object, computed once
 // per render() call rather than once per node/edge — a canvas fillStyle/
@@ -2293,12 +2707,14 @@ function resolveColors() {
     nodeFill: v("--node-fill", "#242424"),
     nodeStroke: v("--node-stroke", "#666666"),
     nodeStrokeSelected: v("--node-stroke-selected", "#4da6ff"),
+    nodeStrokeConnected: v("--node-stroke-connected", "#2dd4bf"),
     connectSourceStroke: v("--connect-source-stroke", "#ffb84d"),
     nodeText: v("--node-text", "#e8e8e8"),
     handleFill: v("--handle-fill", "rgba(255,255,255,0.35)"),
     importedStroke: v("--imported-stroke", "#e0b13f"), // TXT import: "flagged as newly added" (Section 5.3)
     edgeStroke: v("--edge-stroke", "#8a8a8a"),
     edgeStrokeSelected: v("--edge-stroke-selected", "#4da6ff"),
+    edgeStrokeConnected: v("--edge-stroke-connected", "#2dd4bf"),
     edgeLabelFg: v("--edge-label-fg", "#bbbbbb"),
     ghostStroke: v("--ghost-stroke", "#4da6ff"),
   };
@@ -2367,7 +2783,33 @@ function drawArrowhead(x, y, dx, dy, size) {
   ctx.fill();
 }
 
-function drawEdges(colors) {
+// Single click/tap selection has always highlighted only the exact thing
+// clicked. This extends it one hop further: selecting a node highlights
+// every edge touching it, and selecting an edge highlights the two node
+// boxes at its ends -- so a class's whole immediate neighborhood, or a
+// relationship's two endpoints, is visible at a glance instead of having
+// to trace a thin line by eye through a crowded layout. No new
+// interaction wiring needed for touch: the existing click handler (canvas
+// "click" listener below) already fires uniformly for a desktop click and
+// a mobile tap, and this only changes what render() draws in response to
+// the same state.selection it already tracked. Computed once per render
+// (not once per node/edge) since it only depends on the current
+// selection, never on what's currently being drawn.
+function computeHighlightedConnections() {
+  const nodeIds = new Set();
+  const edgeIds = new Set();
+  if (state.selection.type === "node") {
+    for (const e of state.edges) {
+      if (e.source === state.selection.id || e.target === state.selection.id) edgeIds.add(e.id);
+    }
+  } else if (state.selection.type === "edge") {
+    const edge = state.edges.find((e) => e.id === state.selection.id);
+    if (edge) { nodeIds.add(edge.source); nodeIds.add(edge.target); }
+  }
+  return { nodeIds, edgeIds };
+}
+
+function drawEdges(colors, highlighted) {
   const rect = visibleWorldRect();
   const bendInfo = computeEdgeBendInfo();
   let edgesTotal = 0, edgesDrawn = 0;
@@ -2378,9 +2820,10 @@ function drawEdges(colors) {
     if (!rectsOverlap(edgeBoundingRect(geo, geo.control), rect)) continue; // viewport culling (Section 6/9)
     edgesDrawn++;
     const selected = state.selection.type === "edge" && state.selection.id === edge.id;
-    ctx.strokeStyle = selected ? colors.edgeStrokeSelected : colors.edgeStroke;
+    const isConnected = highlighted.edgeIds.has(edge.id);
+    ctx.strokeStyle = selected ? colors.edgeStrokeSelected : isConnected ? colors.edgeStrokeConnected : colors.edgeStroke;
     ctx.fillStyle = ctx.strokeStyle;
-    ctx.lineWidth = selected ? 3 : 2;
+    ctx.lineWidth = selected || isConnected ? 3 : 2;
     ctx.beginPath();
     ctx.moveTo(geo.a.x, geo.a.y);
     if (geo.control) ctx.quadraticCurveTo(geo.control.x, geo.control.y, geo.b.x, geo.b.y);
@@ -2395,7 +2838,7 @@ function drawEdges(colors) {
       drawArrowhead(geo.b.x, geo.b.y, geo.b.x - tailPoint.x, geo.b.y - tailPoint.y, ARROWHEAD_SIZE);
     }
     ctx.fillStyle = colors.edgeLabelFg;
-    ctx.font = `${EDGE_FONT_SIZE}px system-ui, sans-serif`;
+    ctx.font = `${effectiveFontSize(EDGE_FONT_SIZE, EDGE_FONT_MIN_SCREEN_PX, EDGE_FONT_MAX_WORLD_PX)}px system-ui, sans-serif`;
     ctx.textAlign = "center";
     ctx.textBaseline = "bottom";
     ctx.fillText(edge.relation, geo.mid.x, geo.mid.y - 4);
@@ -2404,7 +2847,7 @@ function drawEdges(colors) {
   renderStats.edgesDrawn = edgesDrawn;
 }
 
-function drawNodes(colors) {
+function drawNodes(colors, highlighted) {
   const rect = visibleWorldRect();
   // Biggest/outermost first so nested boxes always paint on top of their
   // container, regardless of creation order (mirrors hit-test priority).
@@ -2418,13 +2861,15 @@ function drawNodes(colors) {
     const selected = state.selection.type === "node" && state.selection.id === node.id;
     const isConnectSource = state.connectSource === node.id;
     const isNewlyImported = newlyImportedIds.has(node.id);
+    const isConnected = highlighted.nodeIds.has(node.id);
 
     ctx.fillStyle = colors.nodeFill;
     ctx.strokeStyle = isConnectSource ? colors.connectSourceStroke
       : selected ? colors.nodeStrokeSelected
       : isNewlyImported ? colors.importedStroke
+      : isConnected ? colors.nodeStrokeConnected
       : colors.nodeStroke;
-    ctx.lineWidth = selected || isConnectSource || isNewlyImported ? 3 : 1.5;
+    ctx.lineWidth = selected || isConnectSource || isNewlyImported || isConnected ? 3 : 1.5;
     roundRectPath(node.x, node.y, node.w, node.h, 8);
     ctx.fill();
     ctx.stroke();
@@ -2433,7 +2878,7 @@ function drawNodes(colors) {
     roundRectPath(node.x, node.y, node.w, node.h, 8);
     ctx.clip();
     ctx.fillStyle = colors.nodeText;
-    ctx.font = `${NODE_FONT_SIZE}px system-ui, sans-serif`;
+    ctx.font = `${effectiveFontSize(NODE_FONT_SIZE, NODE_FONT_MIN_SCREEN_PX, NODE_FONT_MAX_WORLD_PX)}px system-ui, sans-serif`;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillText(node.label, node.x + node.w / 2, node.y + node.h / 2, node.w - 16);
@@ -2505,10 +2950,11 @@ function render() {
 
   drawGrid(colors);
 
+  const highlighted = computeHighlightedConnections();
   ctx.save();
   ctx.setTransform(dpr * camera.scale, 0, 0, dpr * camera.scale, dpr * camera.panX, dpr * camera.panY);
-  drawEdges(colors);
-  drawNodes(colors);
+  drawEdges(colors, highlighted);
+  drawNodes(colors, highlighted);
   drawGhostEdge(colors);
   ctx.restore();
 
@@ -6550,6 +6996,12 @@ window.__kg = {
   worldToScreen,
   screenToWorld,
   zoomAt,
+  // Click/tap-highlight feature: the set of node/edge ids that render()
+  // will draw with the "connected to current selection" glow, derived
+  // fresh from state.selection each call -- exposed directly so tests can
+  // assert against the same derivation the renderer uses instead of
+  // reading canvas pixels.
+  getHighlightedConnections: computeHighlightedConnections,
   actions: {
     createNode, createEdge, deleteNode, deleteEdge,
     selectNode, selectEdge, clearSelection, setMode,

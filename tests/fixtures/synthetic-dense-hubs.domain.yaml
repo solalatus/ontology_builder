@@ -1,0 +1,173 @@
+# =====================================================================
+# Synthetic layout-bench fixture: dense hub-and-spoke, 20 nodes.
+#
+# Purpose: guards the layout-algorithm experiments for issue #64 against
+# overfitting to any one real-world ontology's specific shape — this
+# fixture instead stresses a small number of very-high-degree hub nodes
+# plus deliberate cross-hub spoke sharing, which is what actually produces
+# edge crossings and label crowding around a few nodes rather than a more
+# evenly-distributed relationship density.
+# =====================================================================
+
+classes:
+  Hub1:
+    meaning: "First high-degree hub."
+  Hub2:
+    meaning: "Second high-degree hub."
+  Hub3:
+    meaning: "Third high-degree hub."
+  S1:
+    meaning: "Spoke 1."
+  S2:
+    meaning: "Spoke 2."
+  S3:
+    meaning: "Spoke 3."
+  S4:
+    meaning: "Spoke 4."
+  S5:
+    meaning: "Spoke 5, shared between Hub1 and Hub2."
+  S6:
+    meaning: "Spoke 6, shared between Hub1 and Hub2."
+  S7:
+    meaning: "Spoke 7, shared between Hub1 and Hub2."
+  S8:
+    meaning: "Spoke 8."
+  S9:
+    meaning: "Spoke 9."
+  S10:
+    meaning: "Spoke 10, shared between Hub2 and Hub3."
+  S11:
+    meaning: "Spoke 11, shared between Hub2 and Hub3."
+  S12:
+    meaning: "Spoke 12, shared between Hub2 and Hub3."
+  S13:
+    meaning: "Spoke 13."
+  S14:
+    meaning: "Spoke 14."
+  S15:
+    meaning: "Spoke 15."
+  S16:
+    meaning: "Spoke 16."
+  S17:
+    meaning: "Spoke 17."
+
+relationships:
+  - name: linksTo
+    from: Hub1
+    to: S1
+    meaning: "Hub1 to S1."
+  - name: linksTo
+    from: Hub1
+    to: S2
+    meaning: "Hub1 to S2."
+  - name: linksTo
+    from: Hub1
+    to: S3
+    meaning: "Hub1 to S3."
+  - name: linksTo
+    from: Hub1
+    to: S4
+    meaning: "Hub1 to S4."
+  - name: linksTo
+    from: Hub1
+    to: S5
+    meaning: "Hub1 to S5."
+  - name: linksTo
+    from: Hub1
+    to: S6
+    meaning: "Hub1 to S6."
+  - name: linksTo
+    from: Hub1
+    to: S7
+    meaning: "Hub1 to S7."
+  - name: linksTo
+    from: Hub2
+    to: S5
+    meaning: "Hub2 to S5 (shared)."
+  - name: linksTo
+    from: Hub2
+    to: S6
+    meaning: "Hub2 to S6 (shared)."
+  - name: linksTo
+    from: Hub2
+    to: S7
+    meaning: "Hub2 to S7 (shared)."
+  - name: linksTo
+    from: Hub2
+    to: S8
+    meaning: "Hub2 to S8."
+  - name: linksTo
+    from: Hub2
+    to: S9
+    meaning: "Hub2 to S9."
+  - name: linksTo
+    from: Hub2
+    to: S10
+    meaning: "Hub2 to S10."
+  - name: linksTo
+    from: Hub2
+    to: S11
+    meaning: "Hub2 to S11."
+  - name: linksTo
+    from: Hub2
+    to: S12
+    meaning: "Hub2 to S12."
+  - name: linksTo
+    from: Hub3
+    to: S10
+    meaning: "Hub3 to S10 (shared)."
+  - name: linksTo
+    from: Hub3
+    to: S11
+    meaning: "Hub3 to S11 (shared)."
+  - name: linksTo
+    from: Hub3
+    to: S12
+    meaning: "Hub3 to S12 (shared)."
+  - name: linksTo
+    from: Hub3
+    to: S13
+    meaning: "Hub3 to S13."
+  - name: linksTo
+    from: Hub3
+    to: S14
+    meaning: "Hub3 to S14."
+  - name: linksTo
+    from: Hub3
+    to: S15
+    meaning: "Hub3 to S15."
+  - name: linksTo
+    from: Hub3
+    to: S16
+    meaning: "Hub3 to S16."
+  - name: linksTo
+    from: Hub3
+    to: S17
+    meaning: "Hub3 to S17."
+  - name: crosses
+    from: S1
+    to: S9
+    meaning: "Deliberate long cross-graph edge."
+  - name: crosses
+    from: S2
+    to: S14
+    meaning: "Deliberate long cross-graph edge."
+  - name: crosses
+    from: S3
+    to: S17
+    meaning: "Deliberate long cross-graph edge."
+  - name: crosses
+    from: S4
+    to: S13
+    meaning: "Deliberate long cross-graph edge."
+  - name: crosses
+    from: S8
+    to: S16
+    meaning: "Deliberate long cross-graph edge."
+  - name: crosses
+    from: Hub1
+    to: Hub3
+    meaning: "Direct hub-to-hub edge."
+
+rules: {}
+actions: {}

@@ -1,0 +1,84 @@
+# =====================================================================
+# Synthetic layout-bench fixture: sparse tree/chain, ~12 nodes.
+#
+# Purpose: guards the layout-algorithm experiments for issue #64 against
+# overfitting to any one denser real-world ontology — a low-degree, mostly
+# linear graph like this should stay compact and uncluttered under any
+# improved algorithm, not just spread out more because the code now
+# assumes "big ontology."
+# =====================================================================
+
+classes:
+  Root:
+    meaning: "Top of the chain."
+  BranchA:
+    meaning: "First branch off Root."
+  BranchB:
+    meaning: "Second branch off Root."
+  A1:
+    meaning: "Child of BranchA."
+  A2:
+    meaning: "Child of A1."
+  A3:
+    meaning: "Child of A2."
+  B1:
+    meaning: "Child of BranchB."
+  B2:
+    meaning: "Child of B1."
+  B3:
+    meaning: "Child of B2."
+  B4:
+    meaning: "Child of B3."
+  Leaf1:
+    meaning: "Leaf off A3."
+  Leaf2:
+    meaning: "Leaf off B4."
+
+relationships:
+  - name: hasChild
+    from: Root
+    to: BranchA
+    meaning: "Root leads to BranchA."
+  - name: hasChild
+    from: Root
+    to: BranchB
+    meaning: "Root leads to BranchB."
+  - name: hasChild
+    from: BranchA
+    to: A1
+    meaning: "BranchA leads to A1."
+  - name: hasChild
+    from: A1
+    to: A2
+    meaning: "A1 leads to A2."
+  - name: hasChild
+    from: A2
+    to: A3
+    meaning: "A2 leads to A3."
+  - name: hasChild
+    from: A3
+    to: Leaf1
+    meaning: "A3 leads to Leaf1."
+  - name: hasChild
+    from: BranchB
+    to: B1
+    meaning: "BranchB leads to B1."
+  - name: hasChild
+    from: B1
+    to: B2
+    meaning: "B1 leads to B2."
+  - name: hasChild
+    from: B2
+    to: B3
+    meaning: "B2 leads to B3."
+  - name: hasChild
+    from: B3
+    to: B4
+    meaning: "B3 leads to B4."
+  - name: hasChild
+    from: B4
+    to: Leaf2
+    meaning: "B4 leads to Leaf2."
+
+rules: {}
+actions: {}

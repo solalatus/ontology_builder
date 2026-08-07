@@ -1,0 +1,27 @@
+{
+  "fixture": "synthetic-dense-hubs.domain.yaml",
+  "label": "iter3-zoom-aware-font",
+  "nodeCount": 20,
+  "edgeCount": 29,
+  "nodeOverlap": {
+    "pairs": 0,
+    "totalArea": 0
+  },
+  "edgeCrossings": 5,
+  "edgeLength": {
+    "mean": 352,
+    "stdev": 69,
+    "min": 247,
+    "max": 457
+  },
+  "boundingBox": {
+    "w": 1254,
+    "h": 1195,
+    "area": 1498869
+  },
+  "density": 0.1281,
+  "labelCollisions": {
+    "labelLabel": 0,
+    "labelNode": 0
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "fixture": "synthetic-medium-mesh.domain.yaml",
+  "label": "regression-baseline",
+  "nodeCount": 36,
+  "edgeCount": 46,
+  "nodeOverlap": {
+    "pairs": 0,
+    "totalArea": 0
+  },
+  "edgeCrossings": 6,
+  "edgeLength": {
+    "mean": 440,
+    "stdev": 106,
+    "min": 239,
+    "max": 767
+  },
+  "boundingBox": {
+    "w": 1924,
+    "h": 1900,
+    "area": 3654742
+  },
+  "density": 0.0946,
+  "labelCollisions": {
+    "labelLabel": 1,
+    "labelNode": 0
+  }
+}
