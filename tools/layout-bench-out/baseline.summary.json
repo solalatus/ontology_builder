@@ -23,5 +23,55 @@
       "labelLabel": 2,
       "labelNode": 10
     }
+  },
+  "synthetic-dense-hubs.domain.yaml": {
+    "nodeCount": 20,
+    "edgeCount": 29,
+    "nodeOverlap": {
+      "pairs": 1,
+      "totalArea": 1667
+    },
+    "edgeCrossings": 9,
+    "edgeLength": {
+      "mean": 271,
+      "stdev": 54,
+      "min": 139,
+      "max": 361
+    },
+    "boundingBox": {
+      "w": 990,
+      "h": 1098,
+      "area": 1087057
+    },
+    "density": 0.1766,
+    "labelCollisions": {
+      "labelLabel": 0,
+      "labelNode": 5
+    }
+  },
+  "synthetic-sparse-tree.domain.yaml": {
+    "nodeCount": 12,
+    "edgeCount": 11,
+    "nodeOverlap": {
+      "pairs": 0,
+      "totalArea": 0
+    },
+    "edgeCrossings": 0,
+    "edgeLength": {
+      "mean": 269,
+      "stdev": 33,
+      "min": 208,
+      "max": 301
+    },
+    "boundingBox": {
+      "w": 2704,
+      "h": 1564,
+      "area": 4228424
+    },
+    "density": 0.0272,
+    "labelCollisions": {
+      "labelLabel": 0,
+      "labelNode": 0
+    }
   }
 }

@@ -30,6 +30,16 @@ function defaultFixtures() {
   return fs.readdirSync(FIXTURES_DIR).filter((f) => f.endsWith(".domain.yaml")).sort();
 }
 
+// Screenshots default to light theme -- easier to read node/edge-label text
+// against than the app's own dark default. Uses the same window.__kg.theme
+// test hook tests/theme.spec.mjs exercises, not a UI click, since it's a
+// one-line no-visible-affordance toggle.
+async function setTheme(page, theme) {
+  await page.evaluate((theme) => {
+    if (window.__kg.theme.get() !== theme) window.__kg.theme.toggle();
+  }, theme);
+}
+
 async function importAndLayout(page, fixturePath) {
   await page.setInputFiles("#import-file-input", fixturePath);
   await page.waitForSelector("#import-overlay", { state: "visible" });
@@ -189,6 +199,7 @@ async function runOne(fixtureName, label) {
 
   let metrics;
   await withPage(async (page) => {
+    await setTheme(page, "light");
     await importAndLayout(page, fixturePath);
     await fitCameraToNodes(page);
     await page.waitForTimeout(50);
