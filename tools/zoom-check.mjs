@@ -14,7 +14,7 @@ import path from "node:path";
 import fs from "node:fs";
 import { fileURLToPath } from "node:url";
 import { withPage } from "../tests/lib/page.mjs";
-import { importAndLayout, setTheme, defaultFixtures, FIXTURES_DIR } from "./layout-bench.mjs";
+import { importAndLayout, setTheme, defaultFixtures, FIXTURES_DIR } from "../tests/lib/layout-fixtures.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const OUT_DIR = path.resolve(__dirname, "layout-bench-out");

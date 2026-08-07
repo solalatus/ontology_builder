@@ -1,0 +1,27 @@
+{
+  "fixture": "synthetic-sparse-tree.domain.yaml",
+  "label": "regression-baseline",
+  "nodeCount": 12,
+  "edgeCount": 11,
+  "nodeOverlap": {
+    "pairs": 0,
+    "totalArea": 0
+  },
+  "edgeCrossings": 0,
+  "edgeLength": {
+    "mean": 332,
+    "stdev": 41,
+    "min": 250,
+    "max": 375
+  },
+  "boundingBox": {
+    "w": 1183,
+    "h": 3213,
+    "area": 3802802
+  },
+  "density": 0.0303,
+  "labelCollisions": {
+    "labelLabel": 0,
+    "labelNode": 0
+  }
+}

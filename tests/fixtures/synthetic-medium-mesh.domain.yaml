@@ -1,0 +1,273 @@
+# =====================================================================
+# Synthetic layout-bench fixture: medium-scale mixed hub/leaf mesh.
+#
+# Purpose: a moderate-scale (36 node), moderately dense stress case for
+# issue #64 autolayout regression tests -- large enough to meaningfully
+# exercise crowding/crossing/overlap behavior without depending on any
+# real-world ontology content. Deterministically generated, not hand-
+# authored -- 4 hub nodes each with 8 leaves, plus a handful of
+# deliberate cross-hub/cross-leaf edges for extra crossings.
+# =====================================================================
+
+classes:
+  Hub1:
+    meaning: "Hub node 1 of the synthetic mesh."
+  Hub2:
+    meaning: "Hub node 2 of the synthetic mesh."
+  Hub3:
+    meaning: "Hub node 3 of the synthetic mesh."
+  Hub4:
+    meaning: "Hub node 4 of the synthetic mesh."
+  H1Leaf1:
+    meaning: "Leaf 1 of hub 1."
+  H1Leaf2:
+    meaning: "Leaf 2 of hub 1."
+  H1Leaf3:
+    meaning: "Leaf 3 of hub 1."
+  H1Leaf4:
+    meaning: "Leaf 4 of hub 1."
+  H1Leaf5:
+    meaning: "Leaf 5 of hub 1."
+  H1Leaf6:
+    meaning: "Leaf 6 of hub 1."
+  H1Leaf7:
+    meaning: "Leaf 7 of hub 1."
+  H1Leaf8:
+    meaning: "Leaf 8 of hub 1."
+  H2Leaf1:
+    meaning: "Leaf 1 of hub 2."
+  H2Leaf2:
+    meaning: "Leaf 2 of hub 2."
+  H2Leaf3:
+    meaning: "Leaf 3 of hub 2."
+  H2Leaf4:
+    meaning: "Leaf 4 of hub 2."
+  H2Leaf5:
+    meaning: "Leaf 5 of hub 2."
+  H2Leaf6:
+    meaning: "Leaf 6 of hub 2."
+  H2Leaf7:
+    meaning: "Leaf 7 of hub 2."
+  H2Leaf8:
+    meaning: "Leaf 8 of hub 2."
+  H3Leaf1:
+    meaning: "Leaf 1 of hub 3."
+  H3Leaf2:
+    meaning: "Leaf 2 of hub 3."
+  H3Leaf3:
+    meaning: "Leaf 3 of hub 3."
+  H3Leaf4:
+    meaning: "Leaf 4 of hub 3."
+  H3Leaf5:
+    meaning: "Leaf 5 of hub 3."
+  H3Leaf6:
+    meaning: "Leaf 6 of hub 3."
+  H3Leaf7:
+    meaning: "Leaf 7 of hub 3."
+  H3Leaf8:
+    meaning: "Leaf 8 of hub 3."
+  H4Leaf1:
+    meaning: "Leaf 1 of hub 4."
+  H4Leaf2:
+    meaning: "Leaf 2 of hub 4."
+  H4Leaf3:
+    meaning: "Leaf 3 of hub 4."
+  H4Leaf4:
+    meaning: "Leaf 4 of hub 4."
+  H4Leaf5:
+    meaning: "Leaf 5 of hub 4."
+  H4Leaf6:
+    meaning: "Leaf 6 of hub 4."
+  H4Leaf7:
+    meaning: "Leaf 7 of hub 4."
+  H4Leaf8:
+    meaning: "Leaf 8 of hub 4."
+
+relationships:
+  - name: linksTo
+    from: Hub1
+    to: H1Leaf1
+    meaning: "Hub1 to its leaf 1."
+  - name: linksTo
+    from: Hub1
+    to: H1Leaf2
+    meaning: "Hub1 to its leaf 2."
+  - name: linksTo
+    from: Hub1
+    to: H1Leaf3
+    meaning: "Hub1 to its leaf 3."
+  - name: linksTo
+    from: Hub1
+    to: H1Leaf4
+    meaning: "Hub1 to its leaf 4."
+  - name: linksTo
+    from: Hub1
+    to: H1Leaf5
+    meaning: "Hub1 to its leaf 5."
+  - name: linksTo
+    from: Hub1
+    to: H1Leaf6
+    meaning: "Hub1 to its leaf 6."
+  - name: linksTo
+    from: Hub1
+    to: H1Leaf7
+    meaning: "Hub1 to its leaf 7."
+  - name: linksTo
+    from: Hub1
+    to: H1Leaf8
+    meaning: "Hub1 to its leaf 8."
+  - name: linksTo
+    from: Hub2
+    to: H2Leaf1
+    meaning: "Hub2 to its leaf 1."
+  - name: linksTo
+    from: Hub2
+    to: H2Leaf2
+    meaning: "Hub2 to its leaf 2."
+  - name: linksTo
+    from: Hub2
+    to: H2Leaf3
+    meaning: "Hub2 to its leaf 3."
+  - name: linksTo
+    from: Hub2
+    to: H2Leaf4
+    meaning: "Hub2 to its leaf 4."
+  - name: linksTo
+    from: Hub2
+    to: H2Leaf5
+    meaning: "Hub2 to its leaf 5."
+  - name: linksTo
+    from: Hub2
+    to: H2Leaf6
+    meaning: "Hub2 to its leaf 6."
+  - name: linksTo
+    from: Hub2
+    to: H2Leaf7
+    meaning: "Hub2 to its leaf 7."
+  - name: linksTo
+    from: Hub2
+    to: H2Leaf8
+    meaning: "Hub2 to its leaf 8."
+  - name: linksTo
+    from: Hub3
+    to: H3Leaf1
+    meaning: "Hub3 to its leaf 1."
+  - name: linksTo
+    from: Hub3
+    to: H3Leaf2
+    meaning: "Hub3 to its leaf 2."
+  - name: linksTo
+    from: Hub3
+    to: H3Leaf3
+    meaning: "Hub3 to its leaf 3."
+  - name: linksTo
+    from: Hub3
+    to: H3Leaf4
+    meaning: "Hub3 to its leaf 4."
+  - name: linksTo
+    from: Hub3
+    to: H3Leaf5
+    meaning: "Hub3 to its leaf 5."
+  - name: linksTo
+    from: Hub3
+    to: H3Leaf6
+    meaning: "Hub3 to its leaf 6."
+  - name: linksTo
+    from: Hub3
+    to: H3Leaf7
+    meaning: "Hub3 to its leaf 7."
+  - name: linksTo
+    from: Hub3
+    to: H3Leaf8
+    meaning: "Hub3 to its leaf 8."
+  - name: linksTo
+    from: Hub4
+    to: H4Leaf1
+    meaning: "Hub4 to its leaf 1."
+  - name: linksTo
+    from: Hub4
+    to: H4Leaf2
+    meaning: "Hub4 to its leaf 2."
+  - name: linksTo
+    from: Hub4
+    to: H4Leaf3
+    meaning: "Hub4 to its leaf 3."
+  - name: linksTo
+    from: Hub4
+    to: H4Leaf4
+    meaning: "Hub4 to its leaf 4."
+  - name: linksTo
+    from: Hub4
+    to: H4Leaf5
+    meaning: "Hub4 to its leaf 5."
+  - name: linksTo
+    from: Hub4
+    to: H4Leaf6
+    meaning: "Hub4 to its leaf 6."
+  - name: linksTo
+    from: Hub4
+    to: H4Leaf7
+    meaning: "Hub4 to its leaf 7."
+  - name: linksTo
+    from: Hub4
+    to: H4Leaf8
+    meaning: "Hub4 to its leaf 8."
+  - name: relatesTo
+    from: Hub1
+    to: Hub2
+    meaning: "Hub1 relates to Hub2."
+  - name: relatesTo
+    from: Hub2
+    to: Hub3
+    meaning: "Hub2 relates to Hub3."
+  - name: relatesTo
+    from: Hub3
+    to: Hub4
+    meaning: "Hub3 relates to Hub4."
+  - name: relatesTo
+    from: Hub4
+    to: Hub1
+    meaning: "Hub4 relates to Hub1."
+  - name: crosses
+    from: H1Leaf1
+    to: H2Leaf3
+    meaning: "Deliberate cross-cluster edge."
+  - name: crosses
+    from: H1Leaf2
+    to: H3Leaf1
+    meaning: "Deliberate cross-cluster edge."
+  - name: crosses
+    from: H1Leaf3
+    to: H4Leaf2
+    meaning: "Deliberate cross-cluster edge."
+  - name: crosses
+    from: H2Leaf2
+    to: H3Leaf4
+    meaning: "Deliberate cross-cluster edge."
+  - name: crosses
+    from: H2Leaf4
+    to: H4Leaf1
+    meaning: "Deliberate cross-cluster edge."
+  - name: crosses
+    from: H3Leaf2
+    to: H4Leaf3
+    meaning: "Deliberate cross-cluster edge."
+  - name: crosses
+    from: H1Leaf5
+    to: H3Leaf5
+    meaning: "Deliberate cross-cluster edge."
+  - name: crosses
+    from: H2Leaf6
+    to: H4Leaf6
+    meaning: "Deliberate cross-cluster edge."
+  - name: crosses
+    from: H1Leaf7
+    to: H2Leaf7
+    meaning: "Deliberate cross-cluster edge."
+  - name: crosses
+    from: H3Leaf7
+    to: H4Leaf7
+    meaning: "Deliberate cross-cluster edge."
+
+rules: {}
+actions: {}
