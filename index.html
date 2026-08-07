@@ -42,12 +42,14 @@
     --node-fill: #242424;
     --node-stroke: #666666;
     --node-stroke-selected: #4da6ff;
+    --node-stroke-connected: #2dd4bf;
     --connect-source-stroke: #ffb84d;
     --node-text: #e8e8e8;
     --handle-fill: rgba(255, 255, 255, 0.35);
     --imported-stroke: #e0b13f;
     --edge-stroke: #8a8a8a;
     --edge-stroke-selected: #4da6ff;
+    --edge-stroke-connected: #2dd4bf;
     --edge-label-fg: #bbbbbb;
     --ghost-stroke: #4da6ff;
   }
@@ -73,12 +75,14 @@
     --node-fill: #ffffff;
     --node-stroke: #999999;
     --node-stroke-selected: #1a73e8;
+    --node-stroke-connected: #0f766e;
     --connect-source-stroke: #e67700;
     --node-text: #1a1a1a;
     --handle-fill: rgba(0, 0, 0, 0.35);
     --imported-stroke: #b8860b;
     --edge-stroke: #666666;
     --edge-stroke-selected: #1a73e8;
+    --edge-stroke-connected: #0f766e;
     --edge-label-fg: #555555;
     --ghost-stroke: #1a73e8;
   }
@@ -2703,12 +2707,14 @@ function resolveColors() {
     nodeFill: v("--node-fill", "#242424"),
     nodeStroke: v("--node-stroke", "#666666"),
     nodeStrokeSelected: v("--node-stroke-selected", "#4da6ff"),
+    nodeStrokeConnected: v("--node-stroke-connected", "#2dd4bf"),
     connectSourceStroke: v("--connect-source-stroke", "#ffb84d"),
     nodeText: v("--node-text", "#e8e8e8"),
     handleFill: v("--handle-fill", "rgba(255,255,255,0.35)"),
     importedStroke: v("--imported-stroke", "#e0b13f"), // TXT import: "flagged as newly added" (Section 5.3)
     edgeStroke: v("--edge-stroke", "#8a8a8a"),
     edgeStrokeSelected: v("--edge-stroke-selected", "#4da6ff"),
+    edgeStrokeConnected: v("--edge-stroke-connected", "#2dd4bf"),
     edgeLabelFg: v("--edge-label-fg", "#bbbbbb"),
     ghostStroke: v("--ghost-stroke", "#4da6ff"),
   };
@@ -2777,7 +2783,33 @@ function drawArrowhead(x, y, dx, dy, size) {
   ctx.fill();
 }
 
-function drawEdges(colors) {
+// Single click/tap selection has always highlighted only the exact thing
+// clicked. This extends it one hop further: selecting a node highlights
+// every edge touching it, and selecting an edge highlights the two node
+// boxes at its ends -- so a class's whole immediate neighborhood, or a
+// relationship's two endpoints, is visible at a glance instead of having
+// to trace a thin line by eye through a crowded layout. No new
+// interaction wiring needed for touch: the existing click handler (canvas
+// "click" listener below) already fires uniformly for a desktop click and
+// a mobile tap, and this only changes what render() draws in response to
+// the same state.selection it already tracked. Computed once per render
+// (not once per node/edge) since it only depends on the current
+// selection, never on what's currently being drawn.
+function computeHighlightedConnections() {
+  const nodeIds = new Set();
+  const edgeIds = new Set();
+  if (state.selection.type === "node") {
+    for (const e of state.edges) {
+      if (e.source === state.selection.id || e.target === state.selection.id) edgeIds.add(e.id);
+    }
+  } else if (state.selection.type === "edge") {
+    const edge = state.edges.find((e) => e.id === state.selection.id);
+    if (edge) { nodeIds.add(edge.source); nodeIds.add(edge.target); }
+  }
+  return { nodeIds, edgeIds };
+}
+
+function drawEdges(colors, highlighted) {
   const rect = visibleWorldRect();
   const bendInfo = computeEdgeBendInfo();
   let edgesTotal = 0, edgesDrawn = 0;
@@ -2788,9 +2820,10 @@ function drawEdges(colors) {
     if (!rectsOverlap(edgeBoundingRect(geo, geo.control), rect)) continue; // viewport culling (Section 6/9)
     edgesDrawn++;
     const selected = state.selection.type === "edge" && state.selection.id === edge.id;
-    ctx.strokeStyle = selected ? colors.edgeStrokeSelected : colors.edgeStroke;
+    const isConnected = highlighted.edgeIds.has(edge.id);
+    ctx.strokeStyle = selected ? colors.edgeStrokeSelected : isConnected ? colors.edgeStrokeConnected : colors.edgeStroke;
     ctx.fillStyle = ctx.strokeStyle;
-    ctx.lineWidth = selected ? 3 : 2;
+    ctx.lineWidth = selected || isConnected ? 3 : 2;
     ctx.beginPath();
     ctx.moveTo(geo.a.x, geo.a.y);
     if (geo.control) ctx.quadraticCurveTo(geo.control.x, geo.control.y, geo.b.x, geo.b.y);
@@ -2814,7 +2847,7 @@ function drawEdges(colors) {
   renderStats.edgesDrawn = edgesDrawn;
 }
 
-function drawNodes(colors) {
+function drawNodes(colors, highlighted) {
   const rect = visibleWorldRect();
   // Biggest/outermost first so nested boxes always paint on top of their
   // container, regardless of creation order (mirrors hit-test priority).
@@ -2828,13 +2861,15 @@ function drawNodes(colors) {
     const selected = state.selection.type === "node" && state.selection.id === node.id;
     const isConnectSource = state.connectSource === node.id;
     const isNewlyImported = newlyImportedIds.has(node.id);
+    const isConnected = highlighted.nodeIds.has(node.id);
 
     ctx.fillStyle = colors.nodeFill;
     ctx.strokeStyle = isConnectSource ? colors.connectSourceStroke
       : selected ? colors.nodeStrokeSelected
       : isNewlyImported ? colors.importedStroke
+      : isConnected ? colors.nodeStrokeConnected
       : colors.nodeStroke;
-    ctx.lineWidth = selected || isConnectSource || isNewlyImported ? 3 : 1.5;
+    ctx.lineWidth = selected || isConnectSource || isNewlyImported || isConnected ? 3 : 1.5;
     roundRectPath(node.x, node.y, node.w, node.h, 8);
     ctx.fill();
     ctx.stroke();
@@ -2915,10 +2950,11 @@ function render() {
 
   drawGrid(colors);
 
+  const highlighted = computeHighlightedConnections();
   ctx.save();
   ctx.setTransform(dpr * camera.scale, 0, 0, dpr * camera.scale, dpr * camera.panX, dpr * camera.panY);
-  drawEdges(colors);
-  drawNodes(colors);
+  drawEdges(colors, highlighted);
+  drawNodes(colors, highlighted);
   drawGhostEdge(colors);
   ctx.restore();
 
@@ -6960,6 +6996,12 @@ window.__kg = {
   worldToScreen,
   screenToWorld,
   zoomAt,
+  // Click/tap-highlight feature: the set of node/edge ids that render()
+  // will draw with the "connected to current selection" glow, derived
+  // fresh from state.selection each call -- exposed directly so tests can
+  // assert against the same derivation the renderer uses instead of
+  // reading canvas pixels.
+  getHighlightedConnections: computeHighlightedConnections,
   actions: {
     createNode, createEdge, deleteNode, deleteEdge,
     selectNode, selectEdge, clearSelection, setMode,
