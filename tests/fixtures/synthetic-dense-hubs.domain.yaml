@@ -2,11 +2,11 @@
 # Synthetic layout-bench fixture: dense hub-and-spoke, 20 nodes.
 #
 # Purpose: guards the layout-algorithm experiments for issue #64 against
-# overfitting to the dense BME reference ontology's specific shape — this
+# overfitting to any one real-world ontology's specific shape — this
 # fixture instead stresses a small number of very-high-degree hub nodes
 # plus deliberate cross-hub spoke sharing, which is what actually produces
-# edge crossings and label crowding around a few nodes rather than the
-# BME graph's more evenly-distributed relationship density.
+# edge crossings and label crowding around a few nodes rather than a more
+# evenly-distributed relationship density.
 # =====================================================================
 
 classes:

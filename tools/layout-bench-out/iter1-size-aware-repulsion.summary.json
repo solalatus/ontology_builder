@@ -1,29 +1,4 @@
 {
-  "bme-tartoszerkezet-claude-dialogussal.domain.yaml": {
-    "nodeCount": 50,
-    "edgeCount": 82,
-    "nodeOverlap": {
-      "pairs": 0,
-      "totalArea": 0
-    },
-    "edgeCrossings": 89,
-    "edgeLength": {
-      "mean": 444,
-      "stdev": 129,
-      "min": 149,
-      "max": 756
-    },
-    "boundingBox": {
-      "w": 3189,
-      "h": 2072,
-      "area": 6607069
-    },
-    "density": 0.0726,
-    "labelCollisions": {
-      "labelLabel": 4,
-      "labelNode": 7
-    }
-  },
   "synthetic-dense-hubs.domain.yaml": {
     "nodeCount": 20,
     "edgeCount": 29,

@@ -1734,9 +1734,9 @@ function updateUndoRedoButtons() {
 // land with overlapping boxes whenever they happened to end up roughly
 // horizontally aligned — not a rare edge case, but the expected outcome
 // for a meaningful fraction of pairs in any graph with more than a
-// handful of nodes (confirmed against the BME reference ontology in
-// tools/layout-bench-out/*/baseline.*: 8 overlapping node-box pairs out
-// of 50 nodes). The per-pair ideal distance is instead derived from each
+// handful of nodes (confirmed during development against a real-world-
+// scale (~50 node) ontology: 8 overlapping node-box pairs). The per-pair
+// ideal distance is instead derived from each
 // node's own bounding-circle radius (half its diagonal) — the smallest
 // value that *guarantees* two boxes can't overlap at that separation
 // regardless of their relative angle, since each box sits entirely inside
@@ -1747,9 +1747,9 @@ function updateUndoRedoButtons() {
 //
 // iteration 2 (superseding an earlier, reverted attempt at scaling spacing
 // by node degree — see git history: it cut crossings on a synthetic
-// hub-heavy fixture but *increased* them on the real BME reference
-// ontology, and a gentler version flipped which fixture it helped,
-// meaning the effect wasn't a real structural fix, just moving which local
+// hub-heavy fixture but *increased* them on a larger real-world-scale test
+// ontology, and a gentler version flipped which fixture it helped, meaning
+// the effect wasn't a real structural fix, just moving which local
 // minimum a single deterministic relaxation happened to land in): rather
 // than trying to out-guess the relaxation's local minima with more spacing
 // heuristics, run it from a small, fixed set of different deterministic
@@ -1892,9 +1892,9 @@ function circularSeed(nodes, radii) {
 // cut a circular layout's own edge crossings versus an arbitrary order.
 // This is an ADDITIONAL candidate alongside circularSeed, not a
 // replacement for it -- an earlier version of this iteration replaced the
-// index-order circle outright and that regressed the BME reference
-// ontology's crossing count (58 -> 76): the "smarter" seed happened to
-// land the relaxation in a worse local minimum for that graph's shape,
+// index-order circle outright and that regressed a larger real-world-scale
+// test ontology's crossing count (58 -> 76): the "smarter" seed happened
+// to land the relaxation in a worse local minimum for that graph's shape,
 // even though it's a reasonable heuristic in general. Since
 // computeAutoLayoutPositions() always picks whichever candidate's relaxed
 // result has the fewest crossings, adding a candidate can only ever match

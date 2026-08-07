@@ -2,7 +2,7 @@
 # Synthetic layout-bench fixture: sparse tree/chain, ~12 nodes.
 #
 # Purpose: guards the layout-algorithm experiments for issue #64 against
-# overfitting to the dense BME reference ontology — a low-degree, mostly
+# overfitting to any one denser real-world ontology — a low-degree, mostly
 # linear graph like this should stay compact and uncluttered under any
 # improved algorithm, not just spread out more because the code now
 # assumes "big ontology."
