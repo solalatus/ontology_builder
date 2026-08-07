@@ -1,0 +1,77 @@
+{
+  "bme-tartoszerkezet-claude-dialogussal.domain.yaml": {
+    "nodeCount": 50,
+    "edgeCount": 82,
+    "nodeOverlap": {
+      "pairs": 0,
+      "totalArea": 0
+    },
+    "edgeCrossings": 53,
+    "edgeLength": {
+      "mean": 449,
+      "stdev": 121,
+      "min": 147,
+      "max": 806
+    },
+    "boundingBox": {
+      "w": 2885,
+      "h": 2351,
+      "area": 6784422
+    },
+    "density": 0.0708,
+    "labelCollisions": {
+      "labelLabel": 0,
+      "labelNode": 0
+    }
+  },
+  "synthetic-dense-hubs.domain.yaml": {
+    "nodeCount": 20,
+    "edgeCount": 29,
+    "nodeOverlap": {
+      "pairs": 0,
+      "totalArea": 0
+    },
+    "edgeCrossings": 5,
+    "edgeLength": {
+      "mean": 352,
+      "stdev": 69,
+      "min": 247,
+      "max": 457
+    },
+    "boundingBox": {
+      "w": 1254,
+      "h": 1195,
+      "area": 1498869
+    },
+    "density": 0.1281,
+    "labelCollisions": {
+      "labelLabel": 0,
+      "labelNode": 0
+    }
+  },
+  "synthetic-sparse-tree.domain.yaml": {
+    "nodeCount": 12,
+    "edgeCount": 11,
+    "nodeOverlap": {
+      "pairs": 0,
+      "totalArea": 0
+    },
+    "edgeCrossings": 0,
+    "edgeLength": {
+      "mean": 332,
+      "stdev": 41,
+      "min": 250,
+      "max": 375
+    },
+    "boundingBox": {
+      "w": 1183,
+      "h": 3213,
+      "area": 3802802
+    },
+    "density": 0.0303,
+    "labelCollisions": {
+      "labelLabel": 0,
+      "labelNode": 0
+    }
+  }
+}

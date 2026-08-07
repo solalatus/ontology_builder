@@ -1,0 +1,27 @@
+{
+  "fixture": "bme-tartoszerkezet-claude-dialogussal.domain.yaml",
+  "label": "iter5-crossing-polish",
+  "nodeCount": 50,
+  "edgeCount": 82,
+  "nodeOverlap": {
+    "pairs": 0,
+    "totalArea": 0
+  },
+  "edgeCrossings": 53,
+  "edgeLength": {
+    "mean": 449,
+    "stdev": 121,
+    "min": 147,
+    "max": 806
+  },
+  "boundingBox": {
+    "w": 2885,
+    "h": 2351,
+    "area": 6784422
+  },
+  "density": 0.0708,
+  "labelCollisions": {
+    "labelLabel": 0,
+    "labelNode": 0
+  }
+}

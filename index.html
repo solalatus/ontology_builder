@@ -1880,6 +1880,60 @@ function circularSeed(nodes, radii) {
   });
 }
 
+// Same ring layout as circularSeed, but ordered by a breadth-first
+// traversal of the graph -- starting from its highest-degree node, ties
+// broken by lowest index, so the same graph always produces the same seed
+// -- instead of raw node index. issue #64 iteration 5: placing
+// graph-adjacent nodes next to each other on the ring is a standard way to
+// cut a circular layout's own edge crossings versus an arbitrary order.
+// This is an ADDITIONAL candidate alongside circularSeed, not a
+// replacement for it -- an earlier version of this iteration replaced the
+// index-order circle outright and that regressed the BME reference
+// ontology's crossing count (58 -> 76): the "smarter" seed happened to
+// land the relaxation in a worse local minimum for that graph's shape,
+// even though it's a reasonable heuristic in general. Since
+// computeAutoLayoutPositions() always picks whichever candidate's relaxed
+// result has the fewest crossings, adding a candidate can only ever match
+// or beat the previous best -- it's never picked when it's worse -- so
+// keeping both circular variants is the safe way to benefit from this
+// heuristic without risking exactly the regression the replacement caused.
+// Any node BFS doesn't reach (a separate connected component) is appended
+// afterward in index order, so every node still gets a ring slot.
+function circularSeedByBFS(nodes, radii, edges, indexById) {
+  const n = nodes.length;
+  const adjacency = nodes.map(() => []);
+  for (const e of edges) {
+    const i = indexById.get(e.source), j = indexById.get(e.target);
+    if (i === undefined || j === undefined || i === j) continue;
+    adjacency[i].push(j);
+    adjacency[j].push(i);
+  }
+  let root = 0;
+  for (let i = 1; i < n; i++) if (adjacency[i].length > adjacency[root].length) root = i;
+  const order = [];
+  const visited = new Array(n).fill(false);
+  const queue = [root];
+  visited[root] = true;
+  while (queue.length) {
+    const cur = queue.shift();
+    order.push(cur);
+    for (const next of adjacency[cur]) {
+      if (!visited[next]) { visited[next] = true; queue.push(next); }
+    }
+  }
+  for (let i = 0; i < n; i++) if (!visited[i]) order.push(i);
+
+  const avgRadius = radii.reduce((s, r) => s + r, 0) / n;
+  const circumferenceNeeded = n * (2 * avgRadius + REPULSION_MARGIN);
+  const radius = Math.max(100, circumferenceNeeded / (2 * Math.PI));
+  const centers = new Array(n);
+  order.forEach((nodeIndex, pos) => {
+    const angle = (2 * Math.PI * pos) / n;
+    centers[nodeIndex] = { x: radius * Math.cos(angle), y: radius * Math.sin(angle) };
+  });
+  return centers;
+}
+
 // A plain row-major grid, ordered by node index — mirrors
 // computeImportShelf()'s "shelf" shape but as a from-scratch seed (not
 // anchored to any existing content) so it explores a genuinely different
@@ -1892,35 +1946,46 @@ function gridSeed(nodes, radii) {
   return nodes.map((_, i) => ({ x: (i % cols) * gap, y: Math.floor(i / cols) * gap }));
 }
 
-// Edge-crossing count used only to rank candidate layouts against each
-// other (not shown to the user) — center-to-center segments, same
-// simplification tools/layout-bench.mjs's metric uses, applied identically
-// to every candidate so the comparison between them is still meaningful
-// even though it's not the exact border-to-border pixel geometry
-// edgeGeometry() draws.
-function countCrossingsForCenters(centers, edges, indexById) {
-  const segs = [];
-  for (const e of edges) {
-    const i = indexById.get(e.source), j = indexById.get(e.target);
-    if (i === undefined || j === undefined || i === j) continue;
-    segs.push({ source: e.source, target: e.target, a: centers[i], b: centers[j] });
-  }
+// Shared by countCrossingsForCenters and nudgeAwayFromCrossings below —
+// standard orientation-based segment intersection (proper + collinear
+// touching cases).
+function segmentsIntersectForLayout(a1, a2, b1, b2) {
   const orient = (ax, ay, bx, by, cx, cy) => (bx - ax) * (cy - ay) - (by - ay) * (cx - ax);
   const onSeg = (ax, ay, bx, by, px, py) =>
     Math.min(ax, bx) - 1e-9 <= px && px <= Math.max(ax, bx) + 1e-9 &&
     Math.min(ay, by) - 1e-9 <= py && py <= Math.max(ay, by) + 1e-9;
-  const intersects = (a1, a2, b1, b2) => {
-    const d1 = orient(b1.x, b1.y, b2.x, b2.y, a1.x, a1.y);
-    const d2 = orient(b1.x, b1.y, b2.x, b2.y, a2.x, a2.y);
-    const d3 = orient(a1.x, a1.y, a2.x, a2.y, b1.x, b1.y);
-    const d4 = orient(a1.x, a1.y, a2.x, a2.y, b2.x, b2.y);
-    if (((d1 > 0 && d2 < 0) || (d1 < 0 && d2 > 0)) && ((d3 > 0 && d4 < 0) || (d3 < 0 && d4 > 0))) return true;
-    if (d1 === 0 && onSeg(b1.x, b1.y, b2.x, b2.y, a1.x, a1.y)) return true;
-    if (d2 === 0 && onSeg(b1.x, b1.y, b2.x, b2.y, a2.x, a2.y)) return true;
-    if (d3 === 0 && onSeg(a1.x, a1.y, a2.x, a2.y, b1.x, b1.y)) return true;
-    if (d4 === 0 && onSeg(a1.x, a1.y, a2.x, a2.y, b2.x, b2.y)) return true;
-    return false;
-  };
+  const d1 = orient(b1.x, b1.y, b2.x, b2.y, a1.x, a1.y);
+  const d2 = orient(b1.x, b1.y, b2.x, b2.y, a2.x, a2.y);
+  const d3 = orient(a1.x, a1.y, a2.x, a2.y, b1.x, b1.y);
+  const d4 = orient(a1.x, a1.y, a2.x, a2.y, b2.x, b2.y);
+  if (((d1 > 0 && d2 < 0) || (d1 < 0 && d2 > 0)) && ((d3 > 0 && d4 < 0) || (d3 < 0 && d4 > 0))) return true;
+  if (d1 === 0 && onSeg(b1.x, b1.y, b2.x, b2.y, a1.x, a1.y)) return true;
+  if (d2 === 0 && onSeg(b1.x, b1.y, b2.x, b2.y, a2.x, a2.y)) return true;
+  if (d3 === 0 && onSeg(a1.x, a1.y, a2.x, a2.y, b1.x, b1.y)) return true;
+  if (d4 === 0 && onSeg(a1.x, a1.y, a2.x, a2.y, b2.x, b2.y)) return true;
+  return false;
+}
+
+// Edge-endpoint index pairs for every edge, resolved once so both
+// countCrossingsForCenters and nudgeAwayFromCrossings can walk the same
+// list without re-deriving it.
+function edgeIndexPairs(edges, indexById) {
+  const pairs = [];
+  for (const e of edges) {
+    const i = indexById.get(e.source), j = indexById.get(e.target);
+    if (i === undefined || j === undefined || i === j) continue;
+    pairs.push({ source: e.source, target: e.target, i, j });
+  }
+  return pairs;
+}
+
+// Edge-crossing count used to rank candidate layouts against each other
+// (not shown to the user) — center-to-center segments, same simplification
+// tools/layout-bench.mjs's metric uses, applied identically to every
+// candidate so the comparison between them is still meaningful even though
+// it's not the exact border-to-border pixel geometry edgeGeometry() draws.
+function countCrossingsForCenters(centers, edges, indexById) {
+  const segs = edgeIndexPairs(edges, indexById);
   let crossings = 0;
   for (let i = 0; i < segs.length; i++) {
     for (let j = i + 1; j < segs.length; j++) {
@@ -1928,10 +1993,43 @@ function countCrossingsForCenters(centers, edges, indexById) {
       const sharesEndpoint = s1.source === s2.source || s1.source === s2.target ||
         s1.target === s2.source || s1.target === s2.target;
       if (sharesEndpoint) continue;
-      if (intersects(s1.a, s1.b, s2.a, s2.b)) crossings++;
+      if (segmentsIntersectForLayout(centers[s1.i], centers[s1.j], centers[s2.i], centers[s2.j])) crossings++;
     }
   }
   return crossings;
+}
+
+// issue #64 iteration 5, second half: for every pair of edges that are
+// still crossing in the current best layout, nudge all four endpoints
+// apart perpendicular to their own edge -- a small, targeted push meant to
+// swing the crossing pair apart rather than through each other. Returns a
+// new seed (not a final layout): the caller re-runs the same full,
+// size-aware relaxCenters() on it so normal spacing/attraction forces get
+// to re-settle around the nudge instead of leaving raw, un-relaxed
+// jitter -- this is a candidate to try, kept only if it actually reduces
+// crossings (see the polish loop in computeAutoLayoutPositions), never
+// applied unconditionally.
+const CROSSING_NUDGE = 30;
+function nudgeAwayFromCrossings(centers, edges, indexById) {
+  const nudged = centers.map((c) => ({ x: c.x, y: c.y }));
+  const segs = edgeIndexPairs(edges, indexById);
+  for (let a = 0; a < segs.length; a++) {
+    for (let b = a + 1; b < segs.length; b++) {
+      const s1 = segs[a], s2 = segs[b];
+      const sharesEndpoint = s1.source === s2.source || s1.source === s2.target ||
+        s1.target === s2.source || s1.target === s2.target;
+      if (sharesEndpoint) continue;
+      if (!segmentsIntersectForLayout(centers[s1.i], centers[s1.j], centers[s2.i], centers[s2.j])) continue;
+      const dx = centers[s1.j].x - centers[s1.i].x, dy = centers[s1.j].y - centers[s1.i].y;
+      const len = Math.hypot(dx, dy) || 1;
+      const px = -dy / len, py = dx / len; // unit perpendicular to edge s1
+      nudged[s1.i].x += px * CROSSING_NUDGE; nudged[s1.i].y += py * CROSSING_NUDGE;
+      nudged[s1.j].x += px * CROSSING_NUDGE; nudged[s1.j].y += py * CROSSING_NUDGE;
+      nudged[s2.i].x -= px * CROSSING_NUDGE; nudged[s2.i].y -= py * CROSSING_NUDGE;
+      nudged[s2.j].x -= px * CROSSING_NUDGE; nudged[s2.j].y -= py * CROSSING_NUDGE;
+    }
+  }
+  return nudged;
 }
 
 function boundingBoxAreaForCenters(centers, nodes) {
@@ -2028,6 +2126,7 @@ function computeAutoLayoutPositions() {
   const seeds = [
     state.nodes.map((n) => ({ x: n.x + n.w / 2, y: n.y + n.h / 2 })), // today's positions
     circularSeed(state.nodes, radii),
+    circularSeedByBFS(state.nodes, radii, state.edges, indexById),
     gridSeed(state.nodes, radii),
   ];
 
@@ -2039,6 +2138,23 @@ function computeAutoLayoutPositions() {
     if (!best || crossings < best.crossings || (crossings === best.crossings && area < best.area)) {
       best = { centers, crossings, area };
     }
+  }
+
+  // issue #64 iteration 5, polish pass: try nudging the winning layout's
+  // still-crossing edge pairs apart and re-relaxing (nudgeAwayFromCrossings
+  // above), a bounded number of times. Each round is only ever kept if it
+  // strictly reduces the crossing count -- ties or regressions are
+  // discarded and the loop stops there -- so this can only match or beat
+  // the plain multi-seed result above, the same one-directional safety
+  // property the seed selection itself already has.
+  const CROSSING_POLISH_ROUNDS = 5;
+  for (let round = 0; round < CROSSING_POLISH_ROUNDS && best.crossings > 0; round++) {
+    const nudgedSeed = nudgeAwayFromCrossings(best.centers, state.edges, indexById);
+    const centers = relaxCenters(nudgedSeed, radii, indexById, state.edges);
+    const crossings = countCrossingsForCenters(centers, state.edges, indexById);
+    if (crossings >= best.crossings) break; // no further improvement this way -- stop, keep current best
+    const area = boundingBoxAreaForCenters(centers, state.nodes);
+    best = { centers, crossings, area };
   }
 
   state.nodes.forEach((n, i) => {
