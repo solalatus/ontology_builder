@@ -23,10 +23,10 @@ import { fileURLToPath } from "node:url";
 import { withPage } from "../tests/lib/page.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const FIXTURES_DIR = path.resolve(__dirname, "..", "tests", "fixtures");
+export const FIXTURES_DIR = path.resolve(__dirname, "..", "tests", "fixtures");
 const OUT_DIR = path.resolve(__dirname, "layout-bench-out");
 
-function defaultFixtures() {
+export function defaultFixtures() {
   return fs.readdirSync(FIXTURES_DIR).filter((f) => f.endsWith(".domain.yaml")).sort();
 }
 
@@ -34,13 +34,13 @@ function defaultFixtures() {
 // against than the app's own dark default. Uses the same window.__kg.theme
 // test hook tests/theme.spec.mjs exercises, not a UI click, since it's a
 // one-line no-visible-affordance toggle.
-async function setTheme(page, theme) {
+export async function setTheme(page, theme) {
   await page.evaluate((theme) => {
     if (window.__kg.theme.get() !== theme) window.__kg.theme.toggle();
   }, theme);
 }
 
-async function importAndLayout(page, fixturePath) {
+export async function importAndLayout(page, fixturePath) {
   await page.setInputFiles("#import-file-input", fixturePath);
   await page.waitForSelector("#import-overlay", { state: "visible" });
   await page.click("#import-merge");
@@ -238,4 +238,6 @@ async function main() {
   console.log(`\n[layout-bench] wrote ${summaryPath}`);
 }
 
-main();
+// Guarded so zoom-check.mjs (and anything else) can import the helpers
+// above without also re-running this file's own CLI entry point.
+if (import.meta.url === `file://${process.argv[1]}`) main();

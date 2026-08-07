@@ -2470,6 +2470,30 @@ const NODE_FONT_SIZE = 16;
 const EDGE_FONT_SIZE = 12;
 const ARROWHEAD_SIZE = 10;
 
+// issue #64 ("Crowded graph layout") iteration 3: text is drawn in world
+// space and the canvas transform itself is scaled by camera.scale
+// (render()'s ctx.setTransform below), so a flat world-space font size
+// shrinks right along with everything else when zoomed out to fit a large
+// graph — at the overview zoom levels tools/layout-bench-out's screenshots
+// are captured at (roughly 0.2x-0.5x for these fixtures), 16px/12px world
+// text lands at only 3-8 actual screen pixels. That's a second, distinct
+// contributor to "relationships hidden" beyond node/edge crowding:
+// legibility, not just occlusion. Below, the *world-space* font size is
+// inflated as camera.scale shrinks, just enough to keep the *on-screen*
+// size from dropping under a fixed floor — normal/close zoom (where the
+// floor is already exceeded) is completely unaffected, only the overview
+// end of the range changes. Capped so an extreme zoom-out (e.g. a very
+// tall/narrow graph where fit-to-view has to shrink a lot on one axis)
+// doesn't inflate letters into something absurd relative to a 60px-tall
+// node box.
+function effectiveFontSize(baseSize, minScreenPx, maxWorldPx) {
+  return clamp(minScreenPx / camera.scale, baseSize, maxWorldPx);
+}
+const NODE_FONT_MIN_SCREEN_PX = 11;
+const NODE_FONT_MAX_WORLD_PX = 42;
+const EDGE_FONT_MIN_SCREEN_PX = 10;
+const EDGE_FONT_MAX_WORLD_PX = 30;
+
 // Resolves the current theme's CSS custom properties (see :root and
 // :root[data-theme="light"] above) into one palette object, computed once
 // per render() call rather than once per node/edge — a canvas fillStyle/
@@ -2585,7 +2609,7 @@ function drawEdges(colors) {
       drawArrowhead(geo.b.x, geo.b.y, geo.b.x - tailPoint.x, geo.b.y - tailPoint.y, ARROWHEAD_SIZE);
     }
     ctx.fillStyle = colors.edgeLabelFg;
-    ctx.font = `${EDGE_FONT_SIZE}px system-ui, sans-serif`;
+    ctx.font = `${effectiveFontSize(EDGE_FONT_SIZE, EDGE_FONT_MIN_SCREEN_PX, EDGE_FONT_MAX_WORLD_PX)}px system-ui, sans-serif`;
     ctx.textAlign = "center";
     ctx.textBaseline = "bottom";
     ctx.fillText(edge.relation, geo.mid.x, geo.mid.y - 4);
@@ -2623,7 +2647,7 @@ function drawNodes(colors) {
     roundRectPath(node.x, node.y, node.w, node.h, 8);
     ctx.clip();
     ctx.fillStyle = colors.nodeText;
-    ctx.font = `${NODE_FONT_SIZE}px system-ui, sans-serif`;
+    ctx.font = `${effectiveFontSize(NODE_FONT_SIZE, NODE_FONT_MIN_SCREEN_PX, NODE_FONT_MAX_WORLD_PX)}px system-ui, sans-serif`;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillText(node.label, node.x + node.w / 2, node.y + node.h / 2, node.w - 16);
