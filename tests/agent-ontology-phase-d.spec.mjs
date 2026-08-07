@@ -19,6 +19,21 @@ async function addRuleWithCondition(page, name, condition) {
   await page.locator(".dm-rule-condition-input").last().fill(condition);
 }
 
+// Preconditions are a checkbox list (one .dm-precondition-option per rule,
+// each a <label> wrapping a checkbox + a <span> with the rule's name), not
+// a <select multiple> — see refreshActionPreconditionOptions()'s own
+// comment on why. `container` is a `.dm-action-preconditions` locator (a
+// specific action card's list, or `page` to fall back to the only/last one
+// on the page). Exact text match matters here: several tests below use
+// names like "rule1".."rule19" where a substring match would pick the
+// wrong checkbox.
+async function checkPrecondition(container, ruleName) {
+  await container.locator(".dm-precondition-option")
+    .filter({ hasText: new RegExp(`^${ruleName}$`) })
+    .locator(".dm-precondition-checkbox")
+    .check();
+}
+
 test("adding a rule with conditions and saving persists it with a real, sequential id", async () => {
   await withPage(async (page) => {
     await openDomainModel(page);
@@ -44,7 +59,7 @@ test("adding an action referencing a class and a same-session rule persists corr
     await page.click("#domain-model-add-action");
     await page.locator(".dm-action-name").fill("approveInvoice");
     await page.locator(".dm-action-input-class").selectOption({ label: "Invoice" });
-    await page.locator(".dm-action-preconditions").selectOption({ label: "canApproveInvoice" });
+    await checkPrecondition(page.locator(".dm-action-preconditions"), "canApproveInvoice");
     await page.locator(".dm-action-effect").fill("invoice status becomes approved");
     await page.locator(".dm-action-verification").fill("confirm the new invoice status");
     await page.click("#domain-model-save");
@@ -73,7 +88,9 @@ test("opening the dialog pre-fills existing rules/actions, including a pre-selec
     assert.equal(await page.locator(".dm-rule-condition-input").inputValue(), "invoice status is matched");
     assert.equal(await page.locator(".dm-action-name").inputValue(), "approveInvoice");
     assert.equal(await page.locator(".dm-action-input-class").inputValue(), "n1");
-    const selected = await page.locator(".dm-action-preconditions").evaluate((el) => [...el.selectedOptions].map((o) => o.textContent));
+    const selected = await page.locator(".dm-action-preconditions").evaluate((el) =>
+      [...el.querySelectorAll(".dm-precondition-checkbox:checked")].map((cb) => cb.nextElementSibling.textContent),
+    );
     assert.deepEqual(selected, ["canApproveInvoice"]);
     assert.equal(await page.locator(".dm-action-effect").inputValue(), "invoice status becomes approved");
     assert.equal(await page.locator(".dm-action-verification").inputValue(), "confirm the new invoice status");
@@ -128,7 +145,7 @@ test("a rule left without a name isn't saved, and an action referencing it drops
     await page.click("#domain-model-add-rule"); // left nameless
     await page.click("#domain-model-add-action");
     await page.locator(".dm-action-name").fill("actionA");
-    await page.locator(".dm-action-preconditions").selectOption({ index: 0 }); // selects the nameless draft rule's option
+    await page.locator(".dm-action-preconditions .dm-precondition-checkbox").first().check(); // the nameless draft rule's checkbox
     await page.click("#domain-model-save");
     await page.waitForSelector("#domain-model-overlay", { state: "hidden" });
 
@@ -145,11 +162,11 @@ test("removing a rule row before saving also removes it from any action's precon
     await addRuleWithCondition(page, "ruleA", "x");
     await page.click("#domain-model-add-action");
     await page.locator(".dm-action-name").fill("actionA");
-    await page.locator(".dm-action-preconditions").selectOption({ label: "ruleA" });
-    assert.equal(await page.locator(".dm-action-preconditions option").count(), 1);
+    await checkPrecondition(page.locator(".dm-action-preconditions"), "ruleA");
+    assert.equal(await page.locator(".dm-action-preconditions .dm-precondition-option").count(), 1);
 
     await page.locator(".domain-model-rule-card .details-row-remove").first().click();
-    assert.equal(await page.locator(".dm-action-preconditions option").count(), 0, "the removed rule's option must disappear from the live preconditions select too");
+    assert.equal(await page.locator(".dm-action-preconditions .dm-precondition-option").count(), 0, "the removed rule's checkbox must disappear from the live preconditions list too");
 
     await page.click("#domain-model-save");
     await page.waitForSelector("#domain-model-overlay", { state: "hidden" });
@@ -213,9 +230,9 @@ test("a no-op save (dialog opened and immediately saved, nothing edited) pushes 
 test("toggling language updates the Domain Model dialog's static labels/title", async () => {
   await withPage(async (page) => {
     await openDomainModel(page);
-    assert.equal(await page.locator("#domain-model-rules-label").textContent(), "Rules");
+    assert.equal(await page.locator("#domain-model-rules-label").textContent(), "Rules (0)");
     await page.evaluate(() => window.__kg.lang.toggle());
-    assert.equal(await page.locator("#domain-model-rules-label").textContent(), "Szabályok");
+    assert.equal(await page.locator("#domain-model-rules-label").textContent(), "Szabályok (0)");
     assert.equal(await page.locator("#domain-model-title").textContent(), "Doménmodell");
   });
 });
@@ -243,7 +260,7 @@ test("an already-open rule/action card's sub-labels retranslate too, not just th
     const actionSublabelsHu = await actionCard.locator(".details-field-sublabel").allTextContents();
     assert.deepEqual(actionSublabelsHu, [
       "Bemeneti osztály",
-      "Előfeltételek (Ctrl/Cmd lenyomva több is kiválasztható)",
+      "Előfeltételek",
       "Hatás",
       "Ellenőrzés",
     ]);
@@ -271,7 +288,7 @@ test("rule and action cards show persistent sub-labels above every field, not ju
     const actionSublabels = await actionCard.locator(".details-field-sublabel").allTextContents();
     assert.deepEqual(actionSublabels, [
       "Input class",
-      "Preconditions (hold Ctrl/Cmd to select multiple)",
+      "Preconditions",
       "Effect",
       "Verification",
     ]);
@@ -300,18 +317,18 @@ test("many rules and actions built through the real UI (25 each) keep every acti
     for (let i = 0; i < 25; i++) {
       await page.click("#domain-model-add-action");
       await page.locator(".dm-action-name").last().fill(`action${i}`);
-      await page.locator(".dm-action-preconditions").last().selectOption({ label: `rule${i}` });
+      await checkPrecondition(page.locator(".dm-action-preconditions").last(), `rule${i}`);
     }
 
-    // Every action's preconditions <select> must offer all 25 rules, live,
-    // not just the ones that existed when that particular action card was
-    // created (rules 0-24 were all added *before* any action, so this also
-    // exercises the ordinary case — but the option *count* per select is the
-    // real regression risk at this scale, since a bug in the rebuild loop
-    // could plausibly leave a stale/truncated list on some cards but not
-    // others).
+    // Every action's preconditions checkbox list must offer all 25 rules,
+    // live, not just the ones that existed when that particular action
+    // card was created (rules 0-24 were all added *before* any action, so
+    // this also exercises the ordinary case — but the option *count* per
+    // list is the real regression risk at this scale, since a bug in the
+    // rebuild loop could plausibly leave a stale/truncated list on some
+    // cards but not others).
     const optionCounts = await page.locator(".dm-action-preconditions").evaluateAll(
-      (selects) => selects.map((s) => s.options.length),
+      (containers) => containers.map((c) => c.querySelectorAll(".dm-precondition-option").length),
     );
     assert.deepEqual(optionCounts, Array(25).fill(25), "every action's precondition list has all 25 rules, on every card");
 
@@ -338,14 +355,14 @@ test("many rules and actions built through the real UI (25 each) keep every acti
     await targetCard.locator(".details-row-remove").first().click();
 
     const optionCountsAfterRemoval = await page.locator(".dm-action-preconditions").evaluateAll(
-      (selects) => selects.map((s) => s.options.length),
+      (containers) => containers.map((c) => c.querySelectorAll(".dm-precondition-option").length),
     );
     assert.deepEqual(optionCountsAfterRemoval, Array(25).fill(24), "removing one rule drops the option count on every action card, immediately");
 
     const stillHasRule12 = await page.locator(".dm-action-preconditions").evaluateAll(
-      (selects) => selects.some((s) => [...s.options].some((o) => o.textContent === "rule12")),
+      (containers) => containers.some((c) => [...c.querySelectorAll(".dm-precondition-option")].some((opt) => opt.textContent.trim() === "rule12")),
     );
-    assert.equal(stillHasRule12, false, "the removed rule's option is gone from every action's list, not just some");
+    assert.equal(stillHasRule12, false, "the removed rule's checkbox is gone from every action's list, not just some");
 
     await page.click("#domain-model-save");
     await page.waitForSelector("#domain-model-overlay", { state: "hidden" });

@@ -135,6 +135,16 @@ test("selecting a different node replaces the previous highlight set rather than
 test("selecting a node actually repaints its connected edge in the highlight color, not the default stroke", async () => {
   await withPage(async (page) => {
     await buildHubGraph(page);
+    // buildHubGraph()'s own createEdgeViaConnectMode calls leave the last
+    // edge created (A-C) selected as a side effect of graph construction --
+    // a real "nothing selected yet" baseline needs that cleared first, both
+    // so the "before" sample isn't itself mid-selection-highlight, and so
+    // the render loop has a stable, settled frame to paint (sampling
+    // getImageData() right after a state change races the dirty-flag
+    // requestAnimationFrame loop otherwise).
+    await page.evaluate(() => window.__kg.actions.clearSelection());
+    await page.waitForTimeout(100);
+
     const samplePoint = async () => page.evaluate(() => {
       const canvas = document.getElementById("canvas");
       const c = canvas.getContext("2d");
