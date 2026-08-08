@@ -18,6 +18,13 @@ async function openDomainModel(page) {
   await page.waitForSelector("#domain-model-overlay", { state: "visible" });
 }
 
+async function checkPrecondition(container, ruleName) {
+  await container.locator(".dm-precondition-option")
+    .filter({ hasText: new RegExp(`^${ruleName}$`) })
+    .locator(".dm-precondition-checkbox")
+    .check();
+}
+
 async function addRuleWithCondition(page, name, condition) {
   await page.click("#domain-model-add-rule");
   await page.locator(".dm-rule-name").last().fill(name);
@@ -237,5 +244,87 @@ test("clearing the filter restores every card, and reopening the dialog starts u
     await openDomainModel(page);
     assert.equal(await page.locator("#domain-model-rules-filter").inputValue(), "", "reopening the dialog doesn't carry over a stale filter from the previous session");
     assert.equal(await page.locator(".domain-model-rule-card:visible").count(), 2);
+  });
+});
+
+test("the dialog holds up at the real scale that motivated this rework: 50 classes, 19 rules, 10 actions", async () => {
+  // b886500's own commit message cites this exact shape (a real user's
+  // domain model) as what surfaced the original overflow/truncation/select
+  // problems this whole file otherwise covers piecemeal (15 rules here, 10
+  // properties in the Details-dialog test) -- nothing previously exercised
+  // the combined scale itself. Classes are seeded directly (state, not the
+  // UI) since node creation isn't what this dialog is testing; rules and
+  // actions go through the real UI, matching every other test in this file.
+  await withPage(async (page) => {
+    await page.evaluate(() => {
+      for (let i = 0; i < 50; i++) window.__kg.actions.createNode((i % 10) * 180, Math.floor(i / 10) * 100, `Class${i}`);
+    });
+
+    await openDomainModel(page);
+    for (let i = 0; i < 19; i++) {
+      await addRuleWithCondition(page, `rule${i}`, `condition text for rule ${i}`);
+    }
+    for (let i = 0; i < 10; i++) {
+      await page.click("#domain-model-add-action");
+      const card = page.locator(".domain-model-action-card").last();
+      await card.locator(".dm-action-name").fill(`action${i}`);
+      await card.locator(".dm-action-input-class").selectOption({ label: `Class${i}` });
+      await checkPrecondition(card.locator(".dm-action-preconditions"), "rule0");
+      await card.locator(".dm-action-effect").fill(`effect text for action ${i}`);
+      await card.locator(".dm-action-verification").fill(`verification text for action ${i}`);
+    }
+
+    assert.equal(await page.locator("#domain-model-rules-label").textContent(), "Rules (19)");
+    assert.equal(await page.locator("#domain-model-actions-label").textContent(), "Actions (10)");
+
+    // Footer must still be reachable at this scale, exactly the guarantee
+    // the first test in this file already pins for the 15-rule case.
+    await page.evaluate(() => {
+      const body = document.querySelector("#domain-model-dialog .details-dialog-body");
+      body.scrollTop = body.scrollHeight;
+    });
+    const saveVisible = await page.evaluate(() => {
+      const dialog = document.getElementById("domain-model-dialog");
+      const sRect = document.getElementById("domain-model-save").getBoundingClientRect();
+      const dRect = dialog.getBoundingClientRect();
+      return sRect.top >= dRect.top && sRect.bottom <= dRect.bottom + 1;
+    });
+    assert.ok(saveVisible, "Save must stay reachable even scrolled to the bottom of 19 rules + 10 actions");
+
+    await page.click("#domain-model-save");
+    await page.waitForSelector("#domain-model-overlay", { state: "hidden" });
+    assert.equal(await page.evaluate(() => window.__kg.state.rules.length), 19);
+    assert.equal(await page.evaluate(() => window.__kg.state.actions.length), 10);
+    assert.equal(await page.evaluate(() => window.__kg.state.nodes.length), 50);
+
+    // Reopening must reflect exactly what was saved, not a truncated or
+    // duplicated subset.
+    await openDomainModel(page);
+    assert.equal(await page.locator(".domain-model-rule-card").count(), 19);
+    assert.equal(await page.locator(".domain-model-action-card").count(), 10);
+  });
+});
+
+test("the class Details dialog holds up with 50 classes worth of siblings on the canvas", async () => {
+  // Confirms the Details dialog itself (not just Domain Model) stays
+  // functional at the same real-world class count, complementing this
+  // file's existing 10-property Details-dialog test with the "many
+  // classes exist" half of the original bug report rather than "one class
+  // has many properties".
+  await withPage(async (page) => {
+    await page.evaluate(() => {
+      for (let i = 0; i < 50; i++) window.__kg.actions.createNode((i % 10) * 180, Math.floor(i / 10) * 100, `Class${i}`);
+    });
+    const targetId = await page.evaluate(() => window.__kg.state.nodes[25].id);
+    await page.evaluate((id) => window.__kg.actions.selectNode(id), targetId);
+    await page.click("#sel-details");
+    await page.waitForSelector("#details-overlay", { state: "visible" });
+
+    await page.locator("#details-meaning").fill("Meaning at scale.");
+    await page.click("#details-save");
+    await page.waitForSelector("#details-overlay", { state: "hidden" });
+
+    const meaning = await page.evaluate((id) => window.__kg.state.nodes.find((n) => n.id === id).meaning, targetId);
+    assert.equal(meaning, "Meaning at scale.");
   });
 });

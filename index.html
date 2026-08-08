@@ -961,6 +961,7 @@
   <div class="zoom-group">
     <button id="btn-zoom-out" type="button" aria-label="Kicsinyítés">&minus;</button>
     <button id="btn-zoom-in" type="button" aria-label="Nagyítás">&plus;</button>
+    <button id="btn-fit-view" type="button" aria-label="Nézet igazítása">&#8862;</button>
   </div>
   <button id="btn-theme-toggle" type="button" aria-pressed="false">Téma: Sötét</button>
   <button id="btn-lang-toggle" type="button" aria-pressed="false">Nyelv: Magyar</button>
@@ -1208,6 +1209,7 @@ const STRINGS = {
     clear: "Clear",
     zoomOut: "Zoom out",
     zoomIn: "Zoom in",
+    fitView: "Fit to view",
     themeDark: "Theme: Dark",
     themeLight: "Theme: Light",
     renameTitle: "Rename",
@@ -1342,6 +1344,7 @@ const STRINGS = {
     clear: "Törlés",
     zoomOut: "Kicsinyítés",
     zoomIn: "Nagyítás",
+    fitView: "Nézet igazítása",
     themeDark: "Téma: Sötét",
     themeLight: "Téma: Világos",
     renameTitle: "Átnevezés",
@@ -1505,6 +1508,7 @@ function applyLanguage() {
   byId("btn-clear").textContent = t("clear");
   byId("btn-zoom-out").setAttribute("aria-label", t("zoomOut"));
   byId("btn-zoom-in").setAttribute("aria-label", t("zoomIn"));
+  byId("btn-fit-view").setAttribute("aria-label", t("fitView"));
   byId("sel-rename").title = t("renameTitle");
   byId("sel-details").title = t("editDetailsTitle");
   byId("sel-toggle-dir").title = t("toggleDirTitle");
@@ -1604,6 +1608,37 @@ function zoomAt(screenX, screenY, factor) {
   camera.scale = newScale;
   camera.panX = screenX - world.x * newScale;
   camera.panY = screenY - world.y * newScale;
+  markDirty();
+}
+
+// Recenters and zooms the camera so every node fits on screen with some
+// margin. The camera starts at (and, absent this, never leaves)
+// panX:0/panY:0/scale:1 — a freshly imported or laid-out graph can easily
+// have a bounding box far larger than one screen, or centered somewhere
+// other than world-origin, leaving nodes and their relationships genuinely
+// off-screen with no built-in way to find them except manual pan/zoom.
+// Camera state isn't part of `state`/history, so calling this has no
+// undo/redo implications. Caps zoom-IN at 1 (never past 100%) — a graph
+// smaller than the viewport should stay at a natural scale, not balloon up
+// to fill it.
+function fitViewToContent() {
+  if (state.nodes.length === 0 || cssWidth === 0 || cssHeight === 0) return;
+  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  for (const n of state.nodes) {
+    minX = Math.min(minX, n.x);
+    minY = Math.min(minY, n.y);
+    maxX = Math.max(maxX, n.x + n.w);
+    maxY = Math.max(maxY, n.y + n.h);
+  }
+  const PADDING = 80;
+  const contentW = Math.max(1, maxX - minX + PADDING * 2);
+  const contentH = Math.max(1, maxY - minY + PADDING * 2);
+  const scale = clamp(Math.min(cssWidth / contentW, cssHeight / contentH), MIN_SCALE, 1);
+  const centerX = (minX + maxX) / 2;
+  const centerY = (minY + maxY) / 2;
+  camera.scale = scale;
+  camera.panX = cssWidth / 2 - centerX * scale;
+  camera.panY = cssHeight / 2 - centerY * scale;
   markDirty();
 }
 
@@ -1970,10 +2005,41 @@ function resolveNodeOverlaps(nodes, margin) {
 // fresh array of settled centers — no state.nodes mutation, so the same
 // core can be scored and compared across several candidate starting
 // layouts before any of them is committed.
+// True exactly when every point shares (near enough) the same x, or the
+// same y -- i.e. the seed is collinear on one axis, or (at n<=1) trivially
+// has no spread to speak of either way.
+function isAxisDegenerate(points) {
+  if (points.length < 2) return true;
+  const xs = points.map((p) => p.x);
+  const ys = points.map((p) => p.y);
+  const spread = (vals) => Math.max(...vals) - Math.min(...vals);
+  return spread(xs) < 1 || spread(ys) < 1;
+}
+
 function relaxCenters(initialCenters, radii, indexById, edges) {
   const iterations = 200;
   let temperature = 100; // max displacement per iteration, cooled to ~0
-  const centers = initialCenters.map((c) => ({ x: c.x, y: c.y }));
+  // A seed that's perfectly collinear (or co-located) on one axis is an
+  // unstable equilibrium for pairwise force relaxation: every repulsion/
+  // attraction vector stays exactly parallel to that one axis, so no number
+  // of iterations can ever introduce the missing axis on its own. This is
+  // not hypothetical -- gridSeed() and circularSeed() both collapse to a
+  // 2-node line at n<=2, and the "today's positions" seed is exactly
+  // collinear whenever computeImportShelf() placed a handful of fresh
+  // imports in a single row (the common case for a first import into an
+  // empty canvas), which used to relax into a perfectly flat, single-row
+  // layout no matter how sparse or cyclic the actual graph was. A
+  // deterministic, per-index sub-pixel offset -- applied only when the seed
+  // actually needs it, so an already-2D seed (in particular, re-running
+  // Auto-layout on its own prior, already-relaxed output) passes through
+  // byte-for-byte unchanged and stays idempotent -- guarantees a non-zero
+  // second axis for the physics to relax into.
+  const centers = isAxisDegenerate(initialCenters)
+    ? initialCenters.map((c, i) => ({
+        x: c.x + ((i % 5) - 2) * 0.2,
+        y: c.y + (((i * 3 + 1) % 5) - 2) * 0.2,
+      }))
+    : initialCenters.map((c) => ({ x: c.x, y: c.y }));
   const pairIdealDist = (i, j) => radii[i] + radii[j] + REPULSION_MARGIN;
 
   for (let iter = 0; iter < iterations; iter++) {
@@ -2071,8 +2137,12 @@ function circularSeedByBFS(nodes, radii, edges, indexById) {
   const visited = new Array(n).fill(false);
   const queue = [root];
   visited[root] = true;
-  while (queue.length) {
-    const cur = queue.shift();
+  // A head pointer instead of Array.shift() keeps this O(n) — shift() is
+  // O(n) per call (re-indexes the whole remaining array), which would make
+  // this BFS O(n^2) on its own before any of the O(n^2)-per-pass relaxation
+  // even starts.
+  for (let head = 0; head < queue.length; head++) {
+    const cur = queue[head];
     order.push(cur);
     for (const next of adjacency[cur]) {
       if (!visited[next]) { visited[next] = true; queue.push(next); }
@@ -2334,6 +2404,7 @@ function autoLayout() {
   computeAutoLayoutPositions();
   markDirty();
   pushHistory(before, snapshotState());
+  fitViewToContent();
 }
 
 // ---------------------------------------------------------------------------
@@ -4919,6 +4990,7 @@ function commitTxtImport(text, mode) {
   pushHistory(before, snapshotState()); // clears any stale "just imported" highlight first
   newlyImportedIds = new Set(createdNodeIds);
   markDirty();
+  fitViewToContent();
 }
 
 // ---------------------------------------------------------------------------
@@ -5504,6 +5576,7 @@ function commitYamlImport(text, mode) {
   pushHistory(before, snapshotState());
   newlyImportedIds = new Set(); // Section-5.3-style highlight only applies to plain node/edge TXT import
   markDirty();
+  fitViewToContent();
 }
 
 // ---------------------------------------------------------------------------
@@ -5900,6 +5973,12 @@ function commitJsonImport(text, mode, sourceFilename) {
 
   pushHistory(before, snapshotState());
   markDirty();
+  // No autolayout runs here (the format's own coordinates are the point —
+  // see hasAnyGraphContent()'s comment above on fullRestore), but the
+  // camera still needs to find the restored/merged content: a restored
+  // graph can be centered anywhere, and a merge's newly-placed nodes can
+  // land far from wherever the camera already was.
+  fitViewToContent();
 }
 
 const importOverlay = document.getElementById("import-overlay");
@@ -6043,6 +6122,7 @@ document.getElementById("btn-zoom-in").addEventListener("click", () => {
 document.getElementById("btn-zoom-out").addEventListener("click", () => {
   zoomAt(cssWidth / 2, cssHeight / 2, 1 / 1.25);
 });
+document.getElementById("btn-fit-view").addEventListener("click", fitViewToContent);
 
 document.getElementById("btn-add-node").addEventListener("click", () => {
   setMode(state.mode === "addNode" ? "idle" : "addNode");
@@ -7968,6 +8048,7 @@ window.__kg = {
   worldToScreen,
   screenToWorld,
   zoomAt,
+  fitViewToContent,
   // Click/tap-highlight feature: the set of node/edge ids that render()
   // will draw with the "connected to current selection" glow, derived
   // fresh from state.selection each call -- exposed directly so tests can

@@ -47,6 +47,46 @@ test("zoom in/out buttons move camera.scale in the expected direction", async ()
   });
 });
 
+test("Fit to view button centers and scales the camera onto all nodes", async () => {
+  await withPage(async (page) => {
+    await page.evaluate(() => {
+      window.__kg.actions.createNode(-2000, -1500, "Far corner");
+      window.__kg.actions.createNode(1800, 1600, "Opposite corner");
+    });
+    // Pan/zoom away first so the button's effect is unambiguous — it isn't
+    // a no-op just because the camera happened to already be centered.
+    await page.evaluate(() => { window.__kg.camera.panX = 5000; window.__kg.camera.panY = 5000; window.__kg.camera.scale = 5; });
+
+    await page.click("#btn-fit-view");
+
+    const info = await page.evaluate(() => {
+      const rects = window.__kg.state.nodes.map((n) => ({
+        screen: window.__kg.worldToScreen(n.x + n.w / 2, n.y + n.h / 2),
+      }));
+      return { camera: window.__kg.camera, points: rects.map((r) => r.screen) };
+    });
+    assert.ok(info.camera.scale <= 1, `fit-to-view should never zoom in past 100%, got ${info.camera.scale}`);
+    const canvasSize = await page.evaluate(() => {
+      const c = document.getElementById("canvas");
+      return { w: c.clientWidth, h: c.clientHeight };
+    });
+    for (const p of info.points) {
+      assert.ok(p.x >= -1 && p.x <= canvasSize.w + 1, `node center x=${p.x} should be within the viewport (0..${canvasSize.w})`);
+      assert.ok(p.y >= -1 && p.y <= canvasSize.h + 1, `node center y=${p.y} should be within the viewport (0..${canvasSize.h})`);
+    }
+  });
+});
+
+test("Fit to view on an empty canvas is a no-op, not a crash", async () => {
+  await withPage(async (page) => {
+    await page.click("#btn-fit-view");
+    const camera = await page.evaluate(() => window.__kg.camera);
+    assert.equal(camera.scale, 1);
+    assert.equal(camera.panX, 0);
+    assert.equal(camera.panY, 0);
+  });
+});
+
 test("window resize keeps the canvas filling its container", async () => {
   await withPage(async (page) => {
     await page.setViewportSize({ width: 900, height: 600 });

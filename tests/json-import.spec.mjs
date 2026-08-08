@@ -178,6 +178,12 @@ test("Accented text, aliases and property allowed-lists all survive intact", asy
 // Identity: version chain, graph name, id counters
 // --------------------------------------------------------------------------
 
+// Subject to the same environment-specific Unicode-`download`-attribute
+// Chromium quirk documented at tests/filename-sanitization.spec.mjs's
+// "An accented graph name reaches the saved filenames intact" test — this
+// fixture's accented graph name can trip the identical browser-side issue
+// in an affected environment. Not an app bug; left as-is for the same
+// reasons given there.
 test("A restore continues the file's version series instead of starting a new graph", async () => {
   await withDownloadPage(async (page, downloads) => {
     await importFixture(page, "accented-roundtrip.json");
@@ -242,7 +248,15 @@ test("Id counters are lifted clear of the restored ids", async () => {
     await page.click("#import-merge");
     await page.waitForTimeout(150);
 
-    await addNodeViaDblClick(page, 700, 500, "Új osztály");
+    // Near the canvas's own corner, not its old (700, 500) near-center spot:
+    // fitViewToContent() (issue #64 follow-up) now recenters/rescales the
+    // camera onto the just-restored graph, and that graph's own small
+    // footprint ends up comfortably centered — a hardcoded near-center
+    // screen coordinate that used to be empty canvas before this change can
+    // now land on top of one of the fixture's own nodes instead. A corner
+    // stays clear of the fitted (padded, centered) content at this
+    // viewport size.
+    await addNodeViaDblClick(page, 1100, 750, "Új osztály");
     const ids = await page.evaluate(() => window.__kg.state.nodes.map((n) => n.id));
     assert.equal(new Set(ids).size, ids.length, `duplicate node ids after import: ${ids}`);
     assert.ok(!["n1", "n2", "n7"].includes(ids[ids.length - 1]), `reused a restored id: ${ids}`);
@@ -362,6 +376,44 @@ test("Merge leaves content the file doesn't mention alone", async () => {
 
     const labels = await page.evaluate(() => window.__kg.state.nodes.map((n) => n.label));
     assert.ok(labels.includes("Sajátom"), "merge must never remove anything");
+  });
+});
+
+test("Merge into a non-empty canvas leaves the existing graph's identity untouched", async () => {
+  // The highest-risk edge case for a preserve-the-ids importer: merging a
+  // second, unrelated graph's file must never let that file's own
+  // graph_id/version/created hijack the canvas's existing identity. Only
+  // the full-restore path (replace, or merge into an empty canvas) may
+  // touch state.meta at all -- see commitJsonImport's own fullRestore
+  // branching.
+  await withPage(async (page) => {
+    await addNodeViaDblClick(page, 800, 600, "Sajátom");
+    const before = await page.evaluate(() => window.__kg.state.meta);
+
+    await importFixture(page, "accented-roundtrip.json");
+    await page.click("#import-merge");
+    await page.waitForTimeout(150);
+
+    const after = await page.evaluate(() => window.__kg.state.meta);
+    assert.deepEqual(after, before, "merging into a non-empty canvas must never adopt the file's own graph_id/version");
+  });
+});
+
+test("Merge is exactly one undo step, regardless of how many entities it touches", async () => {
+  await withPage(async (page) => {
+    await addNodeViaDblClick(page, 800, 600, "Sajátom");
+    const before = await page.evaluate(() => window.__kg.history.past.length);
+
+    await importFixture(page, "accented-roundtrip.json");
+    await page.click("#import-merge");
+    await page.waitForFunction(() => window.__kg.state.nodes.length === 4);
+
+    const after = await page.evaluate(() => window.__kg.history.past.length);
+    assert.equal(after - before, 1, "merge must cost exactly one undo step no matter how many nodes/edges it adds");
+
+    await page.click("#btn-undo");
+    const labels = await page.evaluate(() => window.__kg.state.nodes.map((n) => n.label));
+    assert.deepEqual(labels, ["Sajátom"], "one undo must fully revert the merge, leaving only what predated it");
   });
 });
 
@@ -499,6 +551,26 @@ test("A graph with no nodes at all is reported, not silently imported", async ()
     await dropText(page, JSON.stringify({ meta: { version: 1 }, nodes: [], edges: [] }), "empty.json");
     const summary = await page.locator("#import-summary").textContent();
     assert.match(summary, /nothing to import/i);
+    assert.equal(await page.locator("#import-merge").isVisible(), false);
+    assert.equal(await page.locator("#import-replace").isVisible(), false);
+  });
+});
+
+test("A bare {} is treated the same as an explicitly-empty graph, not an error", async () => {
+  await withPage(async (page) => {
+    await dropText(page, "{}", "bare.json");
+    const summary = await page.locator("#import-summary").textContent();
+    assert.match(summary, /nothing to import/i);
+    assert.equal(await page.locator("#import-merge").isVisible(), false);
+    assert.equal(await page.locator("#import-replace").isVisible(), false);
+  });
+});
+
+test("A top-level JSON array is rejected with a clear message instead of crashing", async () => {
+  await withPage(async (page) => {
+    await dropText(page, "[1,2,3]", "array.json");
+    const summary = await page.locator("#import-summary").textContent();
+    assert.match(summary, /not a JSON object/i);
     assert.equal(await page.locator("#import-merge").isVisible(), false);
     assert.equal(await page.locator("#import-replace").isVisible(), false);
   });

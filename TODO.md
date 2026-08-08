@@ -2943,6 +2943,34 @@ and record deltas here instead of editing the spec.)*
   skipped without `OPENAI_API_KEY`) run twice consecutively, both green;
   `python3 -m unittest discover -s tools -p "test_*.py"` (13 tests) green.
 
+- 2026-08-07 — **Reworked the Domain Model dialog and class Details dialog
+  for scale** (backfilled — this entry was missed when the change itself
+  landed). Loading a real, larger domain model (50 classes, 19 rules, 10
+  actions) into both dialogs exposed problems that don't show up with the
+  small graphs they were built and tested against: the whole dialog was one
+  scrolling column with Save/Cancel at the very bottom (~8500px of content
+  in a 680px-tall dialog for 19 rules + 10 actions, meaning saving or
+  cancelling required scrolling through everything first); rule conditions,
+  action effects and verifications were single-line `<input>`s in a 460px-
+  wide dialog, truncating mid-word with no way to read the rest.
+  Both dialogs now split into a scrollable `.details-dialog-body` and a
+  fixed `.details-dialog-footer`, so Save/Cancel stay reachable regardless
+  of content length; the free-text sentence fields became multi-line
+  textareas. Bundled in the same commit: a pre-existing, unrelated
+  `tests/highlight-connections.spec.mjs` flake (a stale-frame race — its
+  "before" pixel sample could catch a not-yet-repainted canvas frame with no
+  settle time — fixed by explicitly clearing selection and waiting for a
+  settled frame before sampling).
+  New `tests/domain-model-scale-ux.spec.mjs` covers the scale-specific
+  behavior (footer reachability on both dialogs, textarea round-tripping,
+  checkbox-list preconditions, live section counts, per-section filtering)
+  using synthetic rules/actions built through the real UI — verified against
+  a real, larger domain model during development, but that fixture was
+  read-only and never committed, so nothing in the permanent suite actually
+  exercised the 50-class/19-rule/10-action shape that motivated the rework
+  until a later pass added it directly (see the 2026-08-08 investigation
+  entry below).
+
 - 2026-08-08 — **Canonical JSON is importable; the round trip is closed
   (spec.md §5.5/§5.6).** Raised by a user trying to reopen their own
   `*_v0001_*.json` and finding no way to do it. The JSON export had been
@@ -3061,6 +3089,91 @@ and record deltas here instead of editing the spec.)*
     same dialog also offered Replace on a parse of nothing. Now asserts the
     no-action state.
 
+- 2026-08-08 — **Investigation pass across everything that had landed on
+  `main` since the last review, plus fixes.** Requested as "check for bugs,
+  design gaps, test gaps" rather than tied to a specific feature. Found two
+  real bugs, both directly relevant to the still-open issue #64 ("Crowded
+  graph layout"):
+  1. **Autolayout could collapse to a perfectly straight line.**
+     `computeAutoLayoutPositions()` tries several seed layouts including
+     "today's current positions", and `computeImportShelf()` places a fresh
+     import of <=5 nodes into an empty canvas as a single row — i.e. an
+     exactly collinear seed. Pairwise force-directed relaxation can never
+     introduce a missing axis on its own (every force vector stays parallel
+     to the seed's one axis of variation), so whenever that seed won the
+     multi-start selection, the graph relaxed to every node sharing the
+     exact same y coordinate, regardless of the actual topology. Fixed with
+     a deterministic, per-index sub-pixel offset in `relaxCenters()`,
+     applied only when `isAxisDegenerate()` detects a seed that's collinear
+     or co-located on one axis — so an already-2D seed (in particular,
+     re-running Auto-layout on its own prior output) passes through
+     unchanged and stays idempotent. `gridSeed()`/`circularSeed()` turned
+     out to have the same degeneracy at n<=2, so the fix lives in the one
+     shared relaxation function rather than in each seed builder.
+  2. **No camera fit-to-view existed anywhere.** The camera starts at (and,
+     without this, never leaves) `panX:0/panY:0/scale:1`. A freshly
+     imported or laid-out graph can easily have a bounding box far larger
+     than one screen — measured directly: an 8-node graph spanned ~4500x4000
+     world units after layout, with more than 2/3 of a 36-node fixture's
+     nodes landing off-screen after import+layout in a 1600x1000 viewport.
+     This is very plausibly the real story behind issue #64's "many
+     relationships are hidden" complaint — orthogonal to and probably larger
+     than layout quality, and untouched by the prior 5 autolayout
+     iterations. Added `fitViewToContent()` (recenters/rescales the camera
+     onto every node, capped at 100% zoom so a small graph isn't blown up),
+     called after every import (TXT/YAML/JSON, all modes) and after
+     Auto-layout, plus a new manual "Fit to view" toolbar button
+     (`#btn-fit-view`) for general use. Camera state isn't part of
+     `state`/history, so this has no undo/redo implications.
+  A related, pre-existing invariant claim turned out to be not quite true at
+  scale: `resolveNodeOverlaps()` is bounded to a fixed
+  `OVERLAP_PASS_MAX_ITERATIONS`, not a convergence guarantee. Measured
+  directly: zero overlaps (confirmed, reliable) at 500 nodes/~750 edges in
+  ~15s; at 1,000 nodes, dozens of residual overlapping pairs remain and the
+  whole pass takes ~40s of unyielded main-thread time. Nothing previously
+  tested anywhere near index.html's own stated ~1,000-node target (the
+  permanent suite topped out at 36 nodes for quality assertions, 200 nodes
+  for a bare non-crash check) — a real, still-open scaling ceiling somewhere
+  between 500 and 1,000 nodes, **not fixed here** (a proper fix is an
+  architectural question — spatial partitioning, Web Worker offload, or a
+  chunked/yielding relaxation — out of proportion to a bug-fix/coverage
+  pass). `tests/autolayout-quality.spec.mjs`'s own header comment was
+  corrected to stop claiming the overlap guarantee is unconditional, and a
+  new 500-node stress test pins the size where it's actually still true.
+  Also fixed while investigating: `circularSeedByBFS()`'s BFS used
+  `Array.shift()` (O(n) per call, making the whole BFS O(n²)) — switched to
+  a head-index pointer.
+  Test-coverage gaps closed (code read as already-correct, just previously
+  unverified): JSON merge into a non-empty canvas leaves `state.meta`
+  untouched; JSON merge is exactly one undo step; a bare `{}` and a
+  top-level JSON array are handled without crashing. Added a regression test
+  for the Domain Model dialog rework (see the backfilled 2026-08-07 entry
+  above) at its own real motivating scale (50 classes/19 rules/10 actions),
+  plus one for the class Details dialog with 50 sibling classes on the
+  canvas. Backfilled the 2026-08-07 Domain Model dialog rework's own,
+  previously-missing Log entry.
+  One existing test broke as a **direct, intentional** consequence of the
+  fit-view fix, not a regression: "Id counters are lifted clear of the
+  restored ids" (`json-import.spec.mjs`) double-clicked a hardcoded
+  screen position to add a node, assuming the camera never moves — once
+  fit-view correctly recenters onto a just-restored graph, that same fixed
+  position could land on top of a restored node instead of empty canvas,
+  turning the double-click into a rename instead of a node creation.
+  Updated to click a canvas corner, which stays clear of centered content.
+  Two failures are known, pre-existing, environment-specific flakes, left
+  as-is and now documented in-line where they occur: a live-network OpenAI
+  timeout, and a Chromium-build-specific bug where `suggestedFilename()`
+  returns the literal string "download" for a Unicode filename on a `blob:`
+  URL (plain-ASCII filenames are unaffected; the app's own filename code
+  does nothing browser-specific) — reproducible in this sandbox's Chromium
+  141.0.7390.37 but not present in the environment the affected features
+  were originally authored and verified in.
+  Every fix verified against a real regression (red before, green after) by
+  reverting just the fix via `git stash` and confirming the new test failed
+  on the pre-fix code. Full suite (`node --test tests/*.spec.mjs`, 649
+  tests): 647 pass, 2 fail (both the known environment flakes above,
+  confirmed to reproduce identically on unmodified `main`).
+
 ---
 
 ## Open Questions (not yet decided — raise before implementing that part)
@@ -3078,3 +3191,16 @@ and record deltas here instead of editing the spec.)*
   gated behind Save Version at all. (An initial implementation used a
   one-time prompt on first save instead; revised after the user was asked
   and picked the always-visible title. See the Phase 5 Log entry.)
+- **Autolayout's O(n^2)-per-pass scaling ceiling (raised by the 2026-08-08
+  investigation entry above) — not yet decided.** Zero node-overlap is
+  confirmed reliable at 500 nodes (~15s) but not at 1,000 (dozens of
+  residual overlapping pairs, ~40s of unyielded main-thread time), despite
+  index.html's own comments citing ~1,000 nodes as the target scale. Fixing
+  this properly is an architectural question outside the scope of a single
+  bug-fix pass — candidates include spatial partitioning (quadtree-based
+  repulsion instead of all-pairs), moving the relaxation into a Web Worker
+  so it no longer blocks the UI thread, or a chunked/yielding relaxation
+  that trades a progress indicator for staying responsive. Raise with the
+  user before picking a direction if/when this becomes the active issue —
+  the right tradeoff depends on how large real ontologies people actually
+  bring in practice, which isn't established yet.
