@@ -125,6 +125,22 @@ test("Whitespace runs collapse to a single dash", async () => {
 // End to end: the name actually reaches the file
 // --------------------------------------------------------------------------
 
+// Known environment-specific flake, investigated and left as-is: in at
+// least one sandboxed headless Chromium build (141.0.7390.37, this repo's
+// pinned Playwright version otherwise unchanged), `suggestedFilename()`
+// comes back as the browser's literal fallback "download" for every one of
+// the three downloads below, but ONLY when the filename contains non-ASCII
+// characters — a plain-ASCII graph name reaches every download's filename
+// correctly in the same environment (verified directly). The app's own
+// code is not the cause: sanitizeGraphName()/triggerDownload() do nothing
+// browser-specific, and `a.download = filename` is the standard, only way
+// to set a suggested filename. This test passed in the environment the
+// feature was originally written and verified in, so this looks like a
+// Chromium-build-specific bug in how its download manager resolves a
+// Unicode `download` attribute on a `blob:` URL, not an app regression —
+// left failing-when-hit rather than weakened, so a real regression in the
+// app's own Unicode handling still gets caught wherever this bug isn't
+// present.
 test("An accented graph name reaches the saved filenames intact", async () => {
   const browser = await launchChromium();
   const page = await browser.newPage({ viewport: { width: 1200, height: 800 }, acceptDownloads: true });
