@@ -178,10 +178,12 @@ test("Accented text, aliases and property allowed-lists all survive intact", asy
 // Identity: version chain, graph name, id counters
 // --------------------------------------------------------------------------
 
-test("Replace continues the file's version series instead of starting a new graph", async () => {
+test("A restore continues the file's version series instead of starting a new graph", async () => {
   await withDownloadPage(async (page, downloads) => {
     await importFixture(page, "accented-roundtrip.json");
-    await page.click("#import-replace");
+    // Empty canvas, so Replace is hidden and the single offered action is
+    // itself the full restore — see "On an empty canvas..." above.
+    await page.click("#import-merge");
     await page.waitForTimeout(150);
 
     const meta = await page.evaluate(() => window.__kg.state.meta);
@@ -512,7 +514,7 @@ test("A large graph survives the round trip", async () => {
       doc.edges.push({ id: `e${i}`, source: `n${i}`, target: `n${i + 1}`, relation: "next", directed: true, meaning: null, aliases: [] });
     }
     await dropText(page, JSON.stringify(doc), "big_v0001_2026-01-01T0000Z.json");
-    await page.click("#import-replace");
+    await page.click("#import-merge"); // empty canvas — this is the restore path
     await page.waitForTimeout(400);
 
     const s = await graphState(page);

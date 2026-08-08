@@ -189,7 +189,12 @@ test("the JSON export matches Section 5.1's schema exactly and round-trips throu
     assert.equal(parsed.meta.version, 1);
     assert.match(parsed.meta.created, /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/);
     assert.equal(parsed.meta.created, parsed.meta.saved); // same instant, first save
-    assert.ok(!("graph_name" in parsed.meta), "graph name is filename-only, not part of the canonical meta object");
+    // `meta.graph_name` was deliberately absent here until JSON import
+    // shipped (spec.md §5.5): the name lived only in the filename, which
+    // §5.4's sanitization has already reduced to a filesystem-safe form — so
+    // a round trip through export/import could never restore the name the
+    // user actually typed. Now written on export and optional on read.
+    assert.equal(parsed.meta.graph_name, "Untitled Graph");
 
     assert.equal(parsed.nodes.length, 2);
     const member = parsed.nodes.find((n) => n.label === "Andhra Pradesh");

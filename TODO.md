@@ -3034,21 +3034,32 @@ and record deltas here instead of editing the spec.)*
   throughout, non-default geometry, an undirected edge, allowed-value lists,
   rules and actions). `window.__kg.formats` was added as a test surface so
   the format layer can be asserted as the pure functions it is, rather than
-  driving the whole dialog for every construct. **Not yet run in this
-  environment:** the sandbox this was written in blocks `socket()`
-  outright — Node cannot bind even an AF_UNIX socket — so no browser can
-  launch and the Playwright suite could not be executed here. The pure
-  format layer (parsers, router, sanitizer) *was* verified, by slicing those
-  functions out of `index.html` and running them under plain Node: 84 checks
-  green, including the reporting user's real 17-node/26-edge/3-rule/5-action
-  file parsing with zero warnings. Two real bugs were found that way and
-  fixed before commit — `coerceFiniteNumber(null, 160)` returning 0 (so a
-  node with a null width restored as a zero-width, invisible, unclickable
-  box, which is exactly what `JSON.stringify` writes for a NaN), and
-  `splitYamlInlineListItems()` not tracking bracket depth (so a nested flow
-  collection split at the wrong comma). **The full Playwright suite still
-  needs a run on a machine with a browser** before this is considered
-  verified end to end.
+  driving the whole dialog for every construct.
+
+  The pure format layer (parsers, router, sanitizer) was verified first by
+  slicing those functions out of `index.html` and running them under plain
+  Node — the sandbox this was written in blocks `socket()` outright, so no
+  browser could launch there at all. 84 checks green, including the
+  reporting user's real 17-node/26-edge/3-rule/5-action file parsing with
+  zero warnings, and 400 randomized export/parse round trips confirming the
+  rewritten YAML parser agrees with the old one on all exporter-shaped
+  input. Two real bugs were found that way and fixed before commit:
+  `coerceFiniteNumber(null, 160)` returning 0 (so a node with a null width
+  restored as a zero-width, invisible, unclickable box — exactly what
+  `JSON.stringify` writes for a NaN), and `splitYamlInlineListItems()` not
+  tracking bracket depth (so a nested flow collection split at the wrong
+  comma).
+
+  Two **existing** tests asserted contracts this change deliberately breaks,
+  and were updated rather than worked around:
+  - `phase5.spec.mjs` pinned `graph_name` as *absent* from `meta` ("graph
+    name is filename-only") — now asserts it's present, per §5.5's reasoning
+    for adding it.
+  - `agent-ontology-phase-g.spec.mjs` asserted that a garbage file opened
+    the normal dialog and that Merge then imported all-zero without
+    crashing. Not crashing was right; offering the action was not, since the
+    same dialog also offered Replace on a parse of nothing. Now asserts the
+    no-action state.
 
 ---
 
