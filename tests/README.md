@@ -60,7 +60,32 @@ is dev-only test tooling, same as Playwright.
   (the app's own importer) and `../tools/test_load_edge_list.py` (the
   standalone Python reference loader), so both are checked against one
   shared set of examples instead of two that could drift apart.
+- `fixtures/accented-roundtrip.json`, `fixtures/legacy-named_v0007_*.json` —
+  canonical JSON exports for `json-import.spec.mjs`. Synthetic, but shaped
+  after a real user's file: non-ASCII labels, meanings and property names
+  throughout, non-default box geometry, an undirected edge, allowed-value
+  lists, rules and actions. The `legacy-named_*` one is the same graph with
+  `meta.graph_name` removed, standing in for every export written before
+  that field existed — its name has to come back from the filename instead.
 - `phase0.spec.mjs`, `phase1.spec.mjs`, ... — one file per TODO.md phase.
+- `json-import.spec.mjs` — the canonical JSON round trip (`spec.md` §5.5):
+  what Save Version writes must reopen identically, including ids,
+  coordinates, the version chain and the graph name. Also covers merge
+  semantics, id-counter safety, undo, and tolerance of hand-damaged files.
+- `import-routing.spec.mjs` — which file reaches which importer (`spec.md`
+  §5.6), and what the dialog does with a file it can't import. The
+  regression it exists for: an unimportable file used to offer Merge and
+  Replace anyway, with Replace ready to wipe the graph "to match" content
+  the app had never parsed.
+- `yaml-robustness.spec.mjs` — the hand-rolled domain-model YAML parser,
+  construct by construct (flow collections, quoting styles, block scalars,
+  comments, indentation widths). Deliberately granular: unsupported YAML in
+  this parser degrades *silently* into an empty field rather than raising,
+  so happy-path coverage alone would not have caught either of the two real
+  bugs this file now pins.
+- `filename-sanitization.spec.mjs` — graph-name → filename reduction
+  (`spec.md` §5.4), both halves: names in any script survive, and characters
+  that genuinely break filesystems still don't.
 - `python-parity.spec.mjs` — runs `../tools/load_edge_list.py` as a
   subprocess against every fixture and diffs its output against the JS
   importer's `parseTxtImport()`, proving the two agree rather than just

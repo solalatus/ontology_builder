@@ -37,8 +37,10 @@ Verified against current (2026) browser behavior for the three confirmed target 
 |---|---|---|---|---|
 | `showDirectoryPicker` (live, silent, repeated writes to a real folder) | ✅ | ✅ | ❌ *(blocked by default — see note)* | ❌ |
 | `showSaveFilePicker` (one-shot native save dialog) | ✅ | ✅ | ❌ | ❌ |
-| OPFS (fast sandboxed local storage) | ✅ | ✅ | ✅ | ✅ |
+| OPFS (fast sandboxed local storage) | ✅ *(served origins only — see note)* | ✅ *(served origins only)* | ✅ *(served origins only)* | ✅ *(served origins only)* |
 | `<a download>` triggered download | ✅ | ✅ | ✅ | ✅ |
+
+**OPFS note (amended after implementation — see TODO.md's Phase 4 Log entry):** this row originally read as unconditional support, which conflicts with §2's promise that the app "opens directly in a browser" with no server. OPFS throws `SecurityError` under a `file://` origin on every one of these browsers, so double-clicking `index.html` — the deployment mode §2 explicitly promises — gets no OPFS at all. The implementation therefore feature-detects OPFS and falls back to `localStorage`, which does work under `file://`. Tier 1 is genuinely always-on in both deployment modes, but via two backends rather than one; see §3.2.
 
 **Brave note:** despite being Chromium-based, Brave deliberately disables the File System Access API (`showDirectoryPicker`/`showSaveFilePicker`) by default as a privacy hardening measure, with no user-facing toggle to re-enable it in the standard build (confirmed via multiple open Brave GitHub issues, unresolved as of 2025). Treat Brave as **Tier 3-only**, same as Android — do not rely on Tier 2 there.
 
@@ -47,13 +49,17 @@ Verified against current (2026) browser behavior for the three confirmed target 
 ### 3.2 Three-tier storage model
 
 **Tier 1 — Live engine (all platforms, always on).**
-Every edit (add/move/connect/delete) writes immediately to OPFS in the background — instant, no prompts, protects against a crashed tab or dropped tablet. Not a user-visible file.
+Every edit (add/move/connect/delete) writes immediately to a private background store — instant, no prompts, protects against a crashed tab or dropped tablet. Not a user-visible file.
+
+The store is OPFS (file `kg-canvas-live.json`) on a served `http(s)` origin, and `localStorage` (key `kg-canvas-live`) under `file://`, chosen once by feature detection at startup — OPFS is unavailable under `file://` (see §3.1's OPFS note). The Helper Agent's conversation is persisted the same way under its own separate file/key (`kg-agent-conversation`), so a large or malformed conversation record can never threaten the graph's own save reliability.
 
 **Tier 2 — Live folder sync (Chrome/Chromium desktop only, progressive enhancement).**
 Optionally, the app may request a real folder via `showDirectoryPicker({mode: 'readwrite'})`. Once granted, explicit saves write silently into that folder with no further prompts. Not available on Brave or Android — the app must work fully without it.
 
 **Tier 3 — Explicit versioned export/import (all platforms, the confirmed baseline).**
-"Save Version" bundles the current state into two files (`.json` + `.txt`, Section 5.4) and triggers a native save/download. "Import from TXT" opens a native file picker (or accepts drag-drop where supported) and merges or replaces graph structure from a `.txt` file (Section 5.3). This is the universal path — it is what makes the tool work identically on Android and desktop.
+"Save Version" bundles the current state into three files (`.json` + `.txt` + `.domain.yaml`, Section 5.4) and triggers a native save/download. "Import" opens a native file picker (or accepts drag-drop where supported) and reads back any of the three: the canonical `.json` as a full-fidelity restore (Section 5.5), a `.txt` edge list as a structural merge/replace (Section 5.3), or a `.domain.yaml` domain model (`agent_ontology_spec.md` §11). This is the universal path — it is what makes the tool work identically on Android and desktop.
+
+*(Amended after implementation: this section originally specified two files and TXT-only import. The third file arrived with the Agent Ontology layer — `agent_ontology_spec.md` §5 — and JSON import closed the round trip on the canonical format. See TODO.md's dated Log entries.)*
 
 ---
 
@@ -128,6 +134,8 @@ The source of truth. Contains everything needed to fully reconstruct the canvas 
 
 **Agent Ontology additions:** since the `agent_ontology_spec.md` initiative shipped, this same JSON export also carries `aliases`/`properties` on each node, `meaning`/`aliases` on each edge, and two additional top-level arrays, `rules`/`actions` — all additive, optional, defaulting to empty/null on load. Omitted from the minimal example above to keep it focused on the base instance-level shape; see `agent_ontology_spec.md` §4 for the full field set.
 
+**`meta.graph_name`:** also additive, added with the JSON import path (§5.5). The graph's display name previously survived only inside the *filename*, which §5.4's sanitization has already reduced to a filesystem-safe form — so a round trip could never restore the name the user actually typed. Optional on read: a file written before this field existed falls back to deriving the name from the filename.
+
 ### 5.2 TXT edge list (portable, structure-only, human/Python-editable)
 
 Designed to be hand-editable in any text editor and trivially parseable in Python with no dependencies. Positions and box sizes are deliberately omitted — this format captures graph *structure* only.
@@ -166,7 +174,7 @@ This is intentionally the same shape as the "List of Edges" textualization forma
 
 ### 5.3 TXT import (re-import, confirmed required feature)
 
-Triggered via an explicit "Import from TXT" button (native file-open dialog, or drag-and-drop of a `.txt` file onto the canvas as an accelerator). Two modes, both applied as a single undoable action:
+Triggered via the explicit "Import" button (native file-open dialog, or drag-and-drop onto the canvas as an accelerator). The same entry point also accepts the canonical `.json` (§5.5) and a `.domain.yaml` domain model (`agent_ontology_spec.md` §11); which importer runs is decided by extension first and content second — see §5.6. Two modes, both applied as a single undoable action:
 
 - **Merge (default, safe).** Diffs the imported file against the current graph, matched by `label` (case-sensitive):
   - Nodes present in the TXT but not in the current graph are **created**, auto-placed in an unused region of the canvas (simple shelf/grid placement — not full autolayout), and flagged as newly added for easy visual identification.
@@ -182,9 +190,40 @@ Triggered via an explicit "Import from TXT" button (native file-open dialog, or 
 ```
 <graph-name>_v<0000>_<UTC-timestamp>.json
 <graph-name>_v<0000>_<UTC-timestamp>.txt
+<graph-name>_v<0000>_<UTC-timestamp>.domain.yaml
 ```
 
-Example: `frankfurt-ai-ontology_v0042_2026-07-25T1420Z.json` and the matching `.txt`. Both files are always written together on every explicit save.
+Example: `frankfurt-ai-ontology_v0042_2026-07-25T1420Z.json` and its matching `.txt` and `.domain.yaml`. All three files are always written together on every explicit save. *(Originally two files; the `.domain.yaml` was added by `agent_ontology_spec.md` §5.)*
+
+**Graph-name sanitization.** `<graph-name>` is the user's graph title reduced to a filesystem-safe form: any Unicode letter or digit is kept, whitespace runs collapse to `-`, and control characters, the Windows-reserved punctuation `< > : " / \ | ? *`, leading/trailing dots and dashes, and the reserved device names (`CON`, `NUL`, `COM1`…) are removed or escaped. The result is capped at 80 code points (never splitting a surrogate pair) and falls back to `graph` if nothing usable remains.
+
+*(Amended after implementation: the original rule kept only `[A-Za-z0-9_-]`, which is ASCII-safe rather than filesystem-safe — "Ügyfélkérdés ontológia" was written to disk as "gyflkrds-ontolgia", and a name in a non-Latin script emptied out entirely into the `graph` fallback, so every save from such a user collided on one filename. See TODO.md's dated Log entry.)*
+
+### 5.5 JSON import (full-fidelity restore)
+
+The canonical format of §5.1 is also readable, through the same entry point as §5.3. This is the only import path that can restore a graph *as it was* — the TXT format carries no coordinates and the domain-model YAML carries neither coordinates nor ids, so both of those reopen a graph as a fresh layout with fresh ids.
+
+What it restores that the other two cannot: stable node/edge/rule/action ids, box geometry, and `meta` — so a restored graph keeps its `graph_id` and version counter, and the next "Save Version" continues the same numbered series (v0007 → v0008) rather than restarting at v0001 as if it were a new graph.
+
+Two modes, mirroring §5.3, both a single undoable action:
+
+- **Replace (full restore).** The file *is* the graph: ids, positions, box sizes, `meta` and (via `meta.graph_name`, or failing that the §5.4 filename) the graph's name are all adopted verbatim. Anything currently on the canvas is discarded. **On an empty canvas this is what the single offered action does**, whichever button is pressed — merging into an empty graph would discard exactly the ids, coordinates and version chain this format exists to preserve, and nothing can be lost when there is nothing there.
+- **Merge.** Label-matched against the current graph, the same way §5.3 and `agent_ontology_spec.md` §11 match: a matched node keeps its existing id and its on-canvas position, and takes the file's content (meaning, aliases, properties). A new node is placed at its own saved coordinates when that space is free, and falls back to shelf placement when it isn't. Incoming ids are not adopted in this mode.
+
+Unlike §5.3 and the YAML importer, **no autolayout pass runs after a JSON import** — those two reflow because their formats carry no coordinates at all, whereas here the coordinates are the point.
+
+**Tolerance.** The format is documented as hand-editable and is a plausible output for an external pipeline, so a structurally unusable *item* is dropped with a warning shown in the import dialog rather than failing the whole file: a node with no label, an edge pointing at a node the file doesn't contain, an action referencing an unknown class or rule. A duplicated id keeps its content but is reassigned a fresh id, so it cannot shadow the first holder. Missing geometry falls back to the default box size. Only a file that is not a JSON object at all is a hard failure, reported as a syntax error.
+
+**Id-counter safety.** Restoring ids requires lifting the app's own id counters clear of every id the file uses, before any further node is created. Skipping that is the one mistake in a preserve-the-ids importer that corrupts a graph silently rather than loudly: restoring `n1..n40` while the counter still sits at 1 means the next node the user adds is a second `n5`, after which every id-keyed lookup resolves to whichever of the two is found first.
+
+### 5.6 Import routing
+
+Which importer runs is decided per file:
+
+1. **Content first, for JSON only.** If the file parses as a JSON *object*, it goes to §5.5 regardless of its name. Neither an edge list nor a domain-model YAML can parse as one, so this can never misroute a file belonging to another importer. This exists because the file picker's own "All files" escape hatch (and drag-drop) let a canonical `.json` reach the TXT parser, which found no `## NODES` header and imported nothing at all, silently.
+2. **Extension next**, and it stays authoritative for every case that predates this rule: `.json` → §5.5, `.yaml`/`.yml` → domain model, `.txt` → §5.3. A `.json` whose content doesn't parse is reported as a JSON syntax error rather than degrading to the TXT parser — the user named it JSON, so that is the useful thing to say.
+3. **Content sniffing last**, for a file with no extension or one this app doesn't claim: a top-level `classes:`/`relationships:`/`rules:`/`actions:` key routes to the domain model, a `## NODES`/`## EDGES` header or an edge line routes to §5.3.
+4. **Otherwise unrecognized.** The dialog explains that the file isn't in an importable format and offers no import action — previously such a file still offered Merge and Replace, with Replace standing ready to delete the graph "to match" a file the app had never parsed. The same no-action state covers a file that parses correctly but contains nothing to import.
 
 ---
 
@@ -214,7 +253,7 @@ Every action has a button; gestures exist as accelerators where natural.
 | Undo/redo | — (no dedicated gesture; avoids conflicting with pan/zoom) | Undo/Redo buttons — primary and only path, by design |
 | Autolayout | — (deliberately no gesture) | explicit "Auto-layout" button, one undo step |
 | Save Version | — | explicit "Save Version" button |
-| Import from TXT | drag-and-drop a `.txt` file onto canvas (where supported) | explicit "Import from TXT" button |
+| Import | drag-and-drop a file onto the canvas (where supported) | explicit "Import" button |
 
 ---
 

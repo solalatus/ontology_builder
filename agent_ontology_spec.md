@@ -343,11 +343,29 @@ same "symmetric to the app's own grammar, not the whole spec" posture `parseTxtI
 TXT format (`spec.md` §5.3). Malformed or truncated input degrades gracefully (missing pieces default to
 empty) rather than throwing.
 
+*(Amended after implementation.* The exporter's grammar is still the parser's contract, but "only what
+the exporter emits" turned out to be too narrow for the two populations that actually write these files
+— a live agent, and a human hand-editing an export. The accepted subset now additionally covers:
+non-empty inline flow lists `[a, b]` **and** flow maps `{type: number, unit: EUR}`, including nested
+ones; single-quoted scalars; `~` as null; `|` and `>` block scalars with any chomping indicator;
+trailing `# comments` outside quotes; tab indentation; and any consistent indent width rather than
+exactly two spaces. Each of those previously failed *silently* — an unrecognized value token fell
+through to the plain-string branch, so a downstream `Array.isArray`/`typeof === "object"` check saw a
+string and created the field empty, with no error anywhere. Two of them were real reported bugs: inline
+flow lists from a genuine agent tool call, and three-space indentation, where an
+`indent % 2 !== 0 → skip` guard dropped every odd-indented line and reported a valid document as
+containing 0 items. Anchors, aliases, multi-document streams and explicit type tags remain out of
+scope. See `tests/yaml-robustness.spec.mjs`.)*
+
 **Entry point:** the existing "Import from TXT" toolbar button and its file-input/drag-drop accelerator,
 relabeled **"Import"** (both languages) since it now recognizes two formats by extension — `.yaml`/`.yml`
 routes to the Domain Model importer below, everything else (including `.txt`) to the existing TXT
 importer, unchanged. No new toolbar button, matching Decision #4's "minimize new UI surface" reasoning
 for the export side.
+
+*(Amended after implementation: the same entry point now recognizes a third format, the canonical
+`.json` of `spec.md` §5.5, and routing consults file content as well as extension — `spec.md` §5.6 has
+the full rule. The `.yaml`/`.yml` → Domain Model routing described here is unchanged.)*
 
 **Merge/replace semantics (Decision #10) — the one open design question Phase G started with:**
 deliberately more aggressive than the base app's own TXT node/edge merge, which never touches a matched

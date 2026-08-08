@@ -955,7 +955,7 @@
   <button id="btn-save-version" type="button">Verzió mentése</button>
   <button id="btn-folder-sync" type="button" aria-pressed="false" style="display:none;">Mappa szinkronizálás</button>
   <button id="btn-import-txt" type="button">Importálás</button>
-  <input id="import-file-input" type="file" accept=".txt,.yaml,.yml">
+  <input id="import-file-input" type="file" accept=".txt,.json,.yaml,.yml">
   <button id="btn-clear" type="button">Törlés</button>
   <div class="spacer"></div>
   <div class="zoom-group">
@@ -1231,6 +1231,16 @@ const STRINGS = {
     // untouched, on both Merge and Replace.
     importYamlMergeSummary: (added, changed) => `Merge: ${added} item(s) would be added, ${changed} existing item(s) would be updated with the file's values. Nothing is removed.`,
     importYamlReplaceSummary: (n) => `Replace: same additions/updates, plus ${n} item(s) not in this file would be removed.`,
+    // Canonical JSON import (spec.md §5.5). Replace is the round-trip path —
+    // it restores ids, coordinates and the version chain, which neither the
+    // TXT nor the YAML importer can do — so it gets its own wording rather
+    // than reusing the "same additions, plus removals" phrasing above.
+    importJsonMergeSummary: (added, changed) => `Merge: ${added} item(s) would be added, ${changed} existing item(s) would be updated with the file's values. Saved positions are used where the space is free. Nothing is removed.`,
+    importJsonReplaceSummary: (n) => `Replace (full restore): the file's graph is restored exactly as saved — original positions, ids and version history — and ${n} item(s) not in this file would be removed.`,
+    importJsonRestoreSummary: (n) => `Restore: ${n} item(s) open exactly as saved — original positions, ids and version history. The canvas is empty, so nothing can be lost.`,
+    importErrorUnreadableJson: (detail) => `This file looks like JSON but could not be read: ${detail}`,
+    importErrorUnrecognized: "This file isn't in any format this app can import. Expected a canonical .json export, a .domain.yaml domain model, or a .txt edge list.",
+    importErrorEmpty: "This file is a valid import file, but contains nothing to import.",
     defaultRelation: "related to",
     sessionRestoredToast: (n, m) => `Restored last session (${n} node${n === 1 ? "" : "s"}, ${m} edge${m === 1 ? "" : "s"})`,
     // Agent Ontology (agent_ontology_spec.md §7) — Class/Relationship details dialog.
@@ -1351,6 +1361,12 @@ const STRINGS = {
     importReplaceSummary: (n) => `Csere: ugyanazok a hozzáadások, plusz ${n} csomópont/él törlődne, amelyek nincsenek ebben a fájlban.`,
     importYamlMergeSummary: (added, changed) => `Egyesítés: ${added} elem kerülne hozzáadásra, ${changed} meglévő elem frissülne a fájl értékeivel. Semmi nem törlődik.`,
     importYamlReplaceSummary: (n) => `Csere: ugyanazok a hozzáadások/frissítések, plusz ${n} elem törlődne, amelyek nincsenek ebben a fájlban.`,
+    importJsonMergeSummary: (added, changed) => `Egyesítés: ${added} elem kerülne hozzáadásra, ${changed} meglévő elem frissülne a fájl értékeivel. A mentett pozíciókat használjuk, ahol a hely szabad. Semmi nem törlődik.`,
+    importJsonReplaceSummary: (n) => `Csere (teljes visszaállítás): a fájl gráfja pontosan a mentett állapotban áll vissza — eredeti pozíciók, azonosítók és verziótörténet —, és ${n} elem törlődne, amely nincs ebben a fájlban.`,
+    importJsonRestoreSummary: (n) => `Visszaállítás: ${n} elem pontosan a mentett állapotban nyílik meg — eredeti pozíciók, azonosítók és verziótörténet. A vászon üres, így semmi nem veszhet el.`,
+    importErrorUnreadableJson: (detail) => `Ez a fájl JSON-nak tűnik, de nem olvasható: ${detail}`,
+    importErrorUnrecognized: "Ez a fájl nincs olyan formátumban, amelyet az alkalmazás importálni tud. Kanonikus .json export, .domain.yaml domain modell vagy .txt éllista várható.",
+    importErrorEmpty: "Ez a fájl érvényes importfájl, de nincs benne importálható tartalom.",
     defaultRelation: "kapcsolódik",
     sessionRestoredToast: (n, m) => `Visszaállítva az előző munkamenet (${n} csomópont, ${m} él)`,
     // Agent Ontology (agent_ontology_spec.md §7) — Class/Relationship details dialog.
@@ -1777,6 +1793,15 @@ function snapshotState() {
     edges: state.edges.map((e) => ({ ...e, aliases: [...(e.aliases || [])] })),
     rules: state.rules.map((r) => ({ ...r, conditions: [...r.conditions] })),
     actions: state.actions.map((a) => ({ ...a, preconditions: [...a.preconditions] })),
+    // Only the canonical-JSON "Replace (full restore)" path (spec.md §5.5)
+    // rewrites these two, but every snapshot carries them so undo/redo of
+    // *that* action is one step like every other. Deliberately excludes the
+    // nextNodeNum/nextEdgeNum/... counters: those must stay monotonic, since
+    // rewinding them would let a later create hand out an id that a redo is
+    // about to bring back.
+    meta: state.meta ? { ...state.meta } : null,
+    graphName: state.graphName,
+    graphNameIsDefault: state.graphNameIsDefault,
   };
 }
 
@@ -1789,6 +1814,24 @@ function restoreSnapshot(snap) {
   state.edges = snap.edges.map((e) => ({ ...e, aliases: [...(e.aliases || [])] }));
   state.rules = snap.rules.map((r) => ({ ...r, conditions: [...r.conditions] }));
   state.actions = snap.actions.map((a) => ({ ...a, preconditions: [...a.preconditions] }));
+  // Guarded rather than assigned outright: a snapshot taken before these
+  // fields existed (one already sitting in the history stack when this
+  // shipped) has neither, and clobbering the live name with `undefined`
+  // would blank the title bar on the next undo.
+  if (snap.meta !== undefined) state.meta = snap.meta ? { ...snap.meta } : null;
+  if (typeof snap.graphName === "string") {
+    state.graphName = snap.graphName;
+    state.graphNameIsDefault = Boolean(snap.graphNameIsDefault);
+    syncGraphTitleUi();
+  }
+}
+
+// The graph title is plain DOM text kept in sync by hand at every write site
+// (rename, import, undo/redo) rather than re-rendered from state each frame —
+// this is the one shared setter so a new write site can't forget the DOM half.
+function syncGraphTitleUi() {
+  const el = document.getElementById("graph-title");
+  if (el) el.textContent = state.graphName;
 }
 
 function pushHistory(before, after) {
@@ -4282,11 +4325,47 @@ function filenameTimestamp(iso) {
   return `${datePart}T${timePart.slice(0, 5).replace(":", "")}Z`;
 }
 
-// Spec doesn't define graph-name rules (see TODO.md's Open Questions); kept
-// conservative since it lands directly in a filename on every platform.
+// Spec doesn't define graph-name rules (see TODO.md's Open Questions); this
+// lands directly in a filename on every platform, so it has to stay
+// filesystem-safe — but the original `[^A-Za-z0-9_-]` whitelist was *ASCII*-
+// safe rather than filesystem-safe, which silently mangled every non-English
+// name: "Ügyfélkérdés-ontológia" came out as "gyflkrds-ontolgia", and a name
+// written in a non-Latin script vanished entirely into the "graph" fallback.
+// Every modern target filesystem (NTFS, ext4, APFS, OPFS) stores Unicode
+// filenames fine, so the whitelist is now "any Unicode letter or digit" and
+// the blacklist carries the parts that genuinely aren't portable:
+//   - control characters (illegal in filenames everywhere);
+//   - Windows-reserved punctuation < > : " / \ | ? * (the colon also breaks
+//     macOS Finder, and `/` would silently create a subdirectory under the
+//     Tier 2 folder-sync writer);
+//   - leading/trailing dots and dashes ("..", a hidden dotfile, or a name a
+//     shell would read as a flag);
+//   - the Windows reserved device names, which cannot be created even with
+//     an extension appended;
+//   - overlong names — capped by code point (not UTF-16 unit, so an emoji or
+//     an astral-plane character is never cut in half) leaving ample room for
+//     the "_v0000_<timestamp>.domain.yaml" suffix inside the traditional
+//     255-byte limit.
+// NFC normalization first, so a decomposed "o" + combining acute (as macOS
+// hands over from a file dialog) counts as one letter instead of surviving
+// as a bare combining mark.
+const FILENAME_RESERVED_DEVICE = /^(con|prn|aux|nul|com[1-9]|lpt[1-9])$/i;
+const GRAPH_NAME_MAX_CODEPOINTS = 80;
+
 function sanitizeGraphName(raw) {
-  const cleaned = raw.trim().replace(/\s+/g, "-").replace(/[^A-Za-z0-9_-]/g, "");
-  return cleaned || "graph";
+  const normalized = String(raw == null ? "" : raw).normalize("NFC").trim();
+  const cleaned = normalized
+    .replace(/\s+/g, "-")
+    .replace(/[\u0000-\u001f\u007f]/g, "")
+    .replace(/[<>:"/\\|?*]/g, "")
+    .replace(/[^\p{L}\p{N}._-]/gu, "")
+    .replace(/-{2,}/g, "-")
+    .replace(/^[.\-]+/, "")
+    .replace(/[.\-]+$/, "");
+  const capped = [...cleaned].slice(0, GRAPH_NAME_MAX_CODEPOINTS).join("")
+    .replace(/[.\-]+$/, ""); // the cut itself can expose a new trailing dot/dash
+  if (!capped) return "graph";
+  return FILENAME_RESERVED_DEVICE.test(capped) ? `${capped}_` : capped;
 }
 
 function buildJsonExport(savedAt) {
@@ -4297,6 +4376,15 @@ function buildJsonExport(savedAt) {
       version: state.meta.version,
       created: state.meta.created,
       saved: savedAt,
+      // Additive since the JSON re-import path shipped (spec.md §5.5): the
+      // graph's display name previously survived only inside the *filename*,
+      // which sanitizeGraphName() has already stripped down to a filesystem-
+      // safe form — so a round trip through export/import could never restore
+      // the name the user actually typed ("Ügyfél kérdései" → the filename
+      // only knows "Ügyfél-kérdései"). Optional on read: an export written
+      // before this field existed falls back to deriving a name from the
+      // filename, so older files still import cleanly.
+      graph_name: state.graphName,
     },
     nodes: state.nodes.map((n) => ({
       id: n.id, label: n.label,
@@ -4862,14 +4950,20 @@ function yamlUnescapeQuoted(body) {
     .replace(/\\\\/g, "\\");
 }
 
-// Splits the inside of an inline flow-list ("a, b, \"c, d\"" from
+// Splits the inside of an inline flow collection ("a, b, \"c, d\"" from
 // "[a, b, \"c, d\"]") on top-level commas only — a quoted item's own commas
 // don't split it, reusing findYamlClosingQuote's same escape handling so
 // this stays consistent with how quoted scalars are unescaped elsewhere in
 // this parser.
+//
+// Also tracks `[`/`{` nesting depth, so a flow collection *inside* another
+// one stays in one piece: without it, `{type: text, allowed: [draft, sent]}`
+// splits at the comma inside the brackets and the property comes out with
+// `allowed` set to the string "[draft".
 function splitYamlInlineListItems(inner) {
   const items = [];
   let current = "";
+  let depth = 0;
   let i = 0;
   while (i < inner.length) {
     const c = inner[i];
@@ -4880,7 +4974,9 @@ function splitYamlInlineListItems(inner) {
       i = end + 1;
       continue;
     }
-    if (c === ",") { items.push(current); current = ""; i += 1; continue; }
+    if (c === "[" || c === "{") depth += 1;
+    if (c === "]" || c === "}") depth = Math.max(0, depth - 1);
+    if (c === "," && depth === 0) { items.push(current); current = ""; i += 1; continue; }
     current += c;
     i += 1;
   }
@@ -4907,14 +5003,40 @@ function splitYamlInlineListItems(inner) {
 function parseYamlValueToken(token) {
   if (token === "[]") return [];
   if (token === "{}") return {};
-  if (token === "null" || token === "") return null;
+  if (token === "null" || token === "" || token === "~") return null;
   if (token.length >= 2 && token.startsWith('"') && token.endsWith('"')) {
     return yamlUnescapeQuoted(token.slice(1, -1));
+  }
+  // Single-quoted scalars: YAML's other quoting style, where the only escape
+  // is a doubled quote and backslashes are literal. Our own exporter never
+  // emits one (yamlScalar always picks double quotes), but a hand-authored
+  // or agent-authored file reasonably might, and it used to come back as a
+  // string with the quote marks still attached — so `aliases: ['bill']`
+  // produced the alias "'bill'".
+  if (token.length >= 2 && token.startsWith("'") && token.endsWith("'")) {
+    return token.slice(1, -1).replace(/''/g, "'");
   }
   if (token.length >= 2 && token[0] === "[" && token[token.length - 1] === "]") {
     const inner = token.slice(1, -1).trim();
     if (inner === "") return [];
     return splitYamlInlineListItems(inner).map((item) => parseYamlValueToken(item.trim()));
+  }
+  // Non-empty inline flow map, e.g. `amount: {type: number, unit: EUR}`.
+  // Previously only the empty `{}` was recognized, so a flow map fell through
+  // to the plain-string branch and every downstream `typeof v === "object"`
+  // check saw a string — the property was created with no type and no unit,
+  // silently. Same failure mode the inline flow *list* had before it was
+  // fixed; this closes the other half of it.
+  if (token.length >= 2 && token[0] === "{" && token[token.length - 1] === "}") {
+    const inner = token.slice(1, -1).trim();
+    if (inner === "") return {};
+    const obj = {};
+    for (const item of splitYamlInlineListItems(inner)) {
+      const kv = splitYamlKeyValue(item.trim());
+      if (!kv) continue;
+      obj[kv[0]] = kv[1] !== undefined ? parseYamlValueToken(kv[1]) : null;
+    }
+    return obj;
   }
   return token;
 }
@@ -4995,16 +5117,152 @@ function parseYamlBlock(lines, pos, indent) {
   return obj;
 }
 
-function parseDomainYamlImport(text) {
-  const lines = [];
-  for (const raw of text.split(/\r\n|\n|\r/)) {
-    const noTrailing = raw.replace(/[ \t]+$/, "");
-    const trimmed = noTrailing.trim();
-    if (trimmed === "" || trimmed.startsWith("#")) continue;
-    const indentSpaces = noTrailing.length - noTrailing.trimStart().length;
-    if (indentSpaces % 2 !== 0) continue; // malformed indentation — skip defensively
-    lines.push({ indent: indentSpaces / 2, content: noTrailing.trimStart() });
+// Drops a trailing `# comment` that isn't inside a quoted scalar. YAML only
+// starts a comment at a `#` preceded by whitespace (or at the very start), so
+// a bare `status: draft#2` keeps its `#`, while `status: draft  # for now`
+// loses the note — which is what both a human and a real YAML parser expect.
+function stripYamlInlineComment(content) {
+  let out = "";
+  let i = 0;
+  while (i < content.length) {
+    const c = content[i];
+    if (c === '"') {
+      const end = findYamlClosingQuote(content, i);
+      if (end === -1) { out += content.slice(i); break; }
+      out += content.slice(i, end + 1);
+      i = end + 1;
+      continue;
+    }
+    if (c === "'") {
+      let j = i + 1;
+      while (j < content.length) {
+        if (content[j] === "'") {
+          if (content[j + 1] === "'") { j += 2; continue; } // '' is an escaped quote, not the end
+          break;
+        }
+        j += 1;
+      }
+      if (j >= content.length) { out += content.slice(i); break; }
+      out += content.slice(i, j + 1);
+      i = j + 1;
+      continue;
+    }
+    if (c === "#" && (i === 0 || /\s/.test(content[i - 1]))) break;
+    out += c;
+    i += 1;
   }
+  return out.replace(/\s+$/, "");
+}
+
+// Indentation width in columns, counting a leading tab as two columns. Real
+// YAML forbids tabs for indentation outright, but an editor that silently
+// inserts them is a routine way for a hand-edited file to arrive here, and
+// rejecting the file over invisible whitespace is a poor trade.
+function yamlIndentColumns(raw) {
+  const leading = raw.match(/^[ \t]*/)[0];
+  return leading.replace(/\t/g, "  ").length;
+}
+
+const YAML_BLOCK_SCALAR_HEADER = /^([|>])([+-]?)\d*$/;
+
+// Joins the body of a `|`/`>` block scalar that starts after `startIndex`,
+// consuming every following line indented deeper than the header's own
+// column (blank lines included, since a blank line is meaningful inside a
+// block scalar). Returns the joined string plus the index to resume at.
+//
+// Deliberate deviation from the YAML spec: all three chomping indicators
+// (clip, `-` strip, `+` keep) are accepted on the header and all three behave
+// as strip. Clip would leave exactly one trailing newline and keep would
+// preserve every trailing blank line, but these values land in a
+// `meaning`/`effect` text field, where a trailing newline is invisible noise
+// that then round-trips back out as a literal "\n" in the next export.
+function readYamlBlockScalar(rawLines, startIndex, headerColumn, style) {
+  const body = [];
+  let i = startIndex;
+  while (i < rawLines.length) {
+    const raw = rawLines[i];
+    if (raw.trim() === "") { body.push(""); i += 1; continue; }
+    if (yamlIndentColumns(raw) <= headerColumn) break;
+    body.push(raw);
+    i += 1;
+  }
+  while (body.length && body[body.length - 1] === "") body.pop(); // never let trailing blanks set the base indent
+  const firstContent = body.find((l) => l.trim() !== "");
+  const baseColumn = firstContent === undefined ? 0 : yamlIndentColumns(firstContent);
+  const dedented = body.map((l) => (l.trim() === "" ? "" : l.replace(/^[ \t]+/, (m) => {
+    const expanded = m.replace(/\t/g, "  ");
+    return expanded.slice(baseColumn);
+  })));
+
+  let value;
+  if (style === "|") {
+    value = dedented.join("\n");
+  } else {
+    // Folded: a line break between two non-empty lines becomes a space; a
+    // blank line becomes a real newline.
+    value = dedented.reduce((acc, line, idx) => {
+      if (idx === 0) return line;
+      if (line === "" || acc.endsWith("\n")) return `${acc}\n${line}`;
+      return `${acc} ${line}`;
+    }, "");
+  }
+  return { value, nextIndex: i };
+}
+
+// Flattens raw YAML text into the {indent, content} line list parseYamlBlock
+// consumes, where `indent` is a nesting *level*, not a column count.
+//
+// The level comes from a stack of seen indentation columns rather than the
+// old `columns / 2`, which assumed every file in the world indents by exactly
+// two spaces: a 4-space file collapsed (every level read as a deeper number
+// than parseYamlBlock expected), and a 3-space one had every odd-indented
+// line silently dropped on the floor — losing content with no error, in a
+// format this app explicitly invites people to hand-edit. Any consistent
+// indent width now works, and a misaligned line is treated as one level
+// deeper instead of being discarded.
+function flattenYamlLines(text) {
+  const rawLines = text.split(/\r\n|\n|\r/);
+  const lines = [];
+  const columnStack = [0];
+  let i = 0;
+  while (i < rawLines.length) {
+    const raw = rawLines[i];
+    const trimmed = raw.trim();
+    if (trimmed === "" || trimmed.startsWith("#")) { i += 1; continue; }
+
+    const column = yamlIndentColumns(raw);
+    while (columnStack.length > 1 && column < columnStack[columnStack.length - 1]) columnStack.pop();
+    if (column > columnStack[columnStack.length - 1]) columnStack.push(column);
+    const indent = columnStack.length - 1;
+
+    const content = stripYamlInlineComment(trimmed);
+    i += 1;
+
+    // A block scalar's body is raw text, not YAML — so it has to be consumed
+    // here, before the body's own lines reach the indent/comment logic above
+    // (a "# note" line inside a `|` block is content, not a comment).
+    const kv = splitYamlKeyValue(content);
+    const keyedHeader = kv && kv[1] !== undefined ? kv[1].match(YAML_BLOCK_SCALAR_HEADER) : null;
+    if (keyedHeader) {
+      const scalar = readYamlBlockScalar(rawLines, i, column, keyedHeader[1]);
+      i = scalar.nextIndex;
+      lines.push({ indent, content: `${yamlScalar(kv[0])}: ${yamlScalar(scalar.value)}` });
+      continue;
+    }
+    const itemHeader = content.startsWith("- ") ? content.slice(2).match(YAML_BLOCK_SCALAR_HEADER) : null;
+    if (itemHeader) {
+      const scalar = readYamlBlockScalar(rawLines, i, column, itemHeader[1]);
+      i = scalar.nextIndex;
+      lines.push({ indent, content: `- ${yamlScalar(scalar.value)}` });
+      continue;
+    }
+    lines.push({ indent, content });
+  }
+  return lines;
+}
+
+function parseDomainYamlImport(text) {
+  const lines = flattenYamlLines(text);
   const root = parseYamlBlock(lines, { i: 0 }, 0) || {};
   const asMap = (v) => (v && typeof v === "object" && !Array.isArray(v)) ? v : {};
   const asList = (v) => Array.isArray(v) ? v : [];
@@ -5248,34 +5506,500 @@ function commitYamlImport(text, mode) {
   markDirty();
 }
 
+// ---------------------------------------------------------------------------
+// File formats — canonical JSON import (spec.md §5.5).
+//
+// The JSON export was write-only for the app's whole life before this: Save
+// Version wrote a full-fidelity `.json` that nothing could ever read back, so
+// the "canonical, full-fidelity, source of truth" format of §5.1 was the one
+// format you could not reopen. Re-importing meant going through the `.txt`
+// (structure only — every coordinate lost) or the `.domain.yaml` (no
+// coordinates, no ids, no version history), i.e. the round trip was lossy
+// through both of the paths that existed.
+//
+// What this importer restores that the other two cannot: stable ids, box
+// geometry, and `meta` — so a restored graph keeps its `graph_id` and its
+// version counter, and the next Save Version continues the same numbered
+// series (v0007 → v0008) instead of restarting at v0001 as a fresh graph.
+//
+// Deliberately does NOT run computeAutoLayoutPositions() the way the TXT and
+// YAML importers do. Those two reflow because their formats carry no
+// coordinates at all, so anything they create would otherwise pile up at the
+// shelf origin. Here the coordinates are the *point* — reflowing would throw
+// away exactly the fidelity this path exists to preserve.
+// ---------------------------------------------------------------------------
+
+// Highest numeric suffix over ids of the form `<prefix><digits>` ("n12" -> 12),
+// so the id counters can be lifted clear of everything an incoming file
+// already uses. Ids in any other shape (hand-written "customer-node") are
+// preserved as-is and simply don't constrain the counter — they can never
+// collide with a generated `n<number>`. Returns -1 for "no numeric ids at
+// all", so the caller's `+ 1` lands on 0.
+function highestIdNumber(items, prefix) {
+  const re = new RegExp(`^${prefix}(\\d+)$`);
+  let best = -1;
+  for (const item of items) {
+    const m = typeof item.id === "string" ? item.id.match(re) : null;
+    if (m) best = Math.max(best, Number(m[1]));
+  }
+  return best;
+}
+
+// Only a real number, or a string that is entirely one, counts. A bare
+// `Number(value)` would not do: `Number(null)`, `Number("")` and
+// `Number(false)` are all 0, and 0 is finite — so a node whose `w` came
+// through as null (which is exactly what JSON.stringify writes for a NaN
+// width) would be restored as a zero-width, invisible, unclickable box
+// instead of falling back to the default size.
+function coerceFiniteNumber(value, fallback) {
+  if (typeof value === "number") return Number.isFinite(value) ? value : fallback;
+  if (typeof value === "string" && value.trim() !== "") {
+    const n = Number(value);
+    if (Number.isFinite(n)) return n;
+  }
+  return fallback;
+}
+
+function normalizeImportedProperty(p) {
+  if (!p || typeof p !== "object") return null;
+  const name = typeof p.name === "string" ? p.name.trim() : "";
+  if (!name) return null;
+  return {
+    id: (typeof p.id === "string" && p.id) ? p.id : `p_${Math.random().toString(36).slice(2, 9)}`,
+    name,
+    type: (typeof p.type === "string" && p.type) ? p.type : "text",
+    unit: (typeof p.unit === "string" && p.unit) ? p.unit : null,
+    allowed: Array.isArray(p.allowed) ? p.allowed.filter((a) => typeof a === "string") : null,
+  };
+}
+
+function stringArray(value) {
+  return Array.isArray(value) ? value.filter((v) => typeof v === "string") : [];
+}
+
+// Parses and *validates* a canonical JSON export into the shape the plan and
+// commit steps below both consume. Pure — no state reads, no state writes —
+// so the dialog can preview the exact same parse the commit will use.
+//
+// Tolerant by design, because this format is explicitly documented as
+// hand-editable and is also what an external pipeline would emit: anything
+// structurally unusable is dropped with a human-readable warning rather than
+// aborting the whole import, and every field that has a sane default gets
+// one. Only a file that isn't a JSON object at all is a hard failure.
+//
+// Nodes are keyed by their original id string; an incoming node whose id is
+// missing, non-string, or a duplicate keeps its content but loses its key
+// (`key: null`), which means nothing can reference it — so edges and actions
+// pointing at it are dropped as dangling rather than silently re-pointed at
+// whichever node happened to claim that id first.
+function parseJsonImport(text) {
+  const fail = (error) => ({ ok: false, error, graph: null, warnings: [] });
+  let root;
+  try {
+    root = JSON.parse(text);
+  } catch (err) {
+    return fail(String((err && err.message) || err));
+  }
+  if (!root || typeof root !== "object" || Array.isArray(root)) {
+    return fail("the top-level value is not a JSON object");
+  }
+
+  const warnings = [];
+  const nodes = [];
+  const nodeKeys = new Set();
+  const rawNodes = Array.isArray(root.nodes) ? root.nodes : [];
+  if (!Array.isArray(root.nodes) && root.nodes !== undefined) warnings.push("`nodes` was not an array — ignored");
+
+  for (const raw of rawNodes) {
+    if (!raw || typeof raw !== "object") { warnings.push("skipped a node that wasn't an object"); continue; }
+    const label = typeof raw.label === "string" ? raw.label : "";
+    if (!label) { warnings.push("skipped a node with no label"); continue; }
+    let key = (typeof raw.id === "string" && raw.id) ? raw.id : null;
+    if (key !== null && nodeKeys.has(key)) {
+      warnings.push(`node id "${key}" appears more than once — the later one was given a new id`);
+      key = null;
+    }
+    if (key !== null) nodeKeys.add(key);
+    nodes.push({
+      key, label,
+      x: coerceFiniteNumber(raw.x, 0),
+      y: coerceFiniteNumber(raw.y, 0),
+      w: coerceFiniteNumber(raw.w, DEFAULT_NODE_W),
+      h: coerceFiniteNumber(raw.h, DEFAULT_NODE_H),
+      meaning: typeof raw.meaning === "string" ? raw.meaning : null,
+      aliases: stringArray(raw.aliases),
+      properties: (Array.isArray(raw.properties) ? raw.properties : [])
+        .map(normalizeImportedProperty).filter(Boolean),
+    });
+  }
+
+  const edges = [];
+  const edgeKeys = new Set();
+  for (const raw of Array.isArray(root.edges) ? root.edges : []) {
+    if (!raw || typeof raw !== "object") { warnings.push("skipped an edge that wasn't an object"); continue; }
+    if (!nodeKeys.has(raw.source) || !nodeKeys.has(raw.target)) {
+      warnings.push(`skipped a dangling edge (${raw.source} -> ${raw.target})`);
+      continue;
+    }
+    let key = (typeof raw.id === "string" && raw.id) ? raw.id : null;
+    if (key !== null && edgeKeys.has(key)) key = null;
+    if (key !== null) edgeKeys.add(key);
+    edges.push({
+      key, source: raw.source, target: raw.target,
+      relation: typeof raw.relation === "string" ? raw.relation : t("defaultRelation"),
+      // Anything other than an explicit `false` stays directed, matching the
+      // data model's own default in createEdge().
+      directed: raw.directed !== false,
+      meaning: typeof raw.meaning === "string" ? raw.meaning : null,
+      aliases: stringArray(raw.aliases),
+    });
+  }
+
+  const rules = [];
+  const ruleKeys = new Set();
+  for (const raw of Array.isArray(root.rules) ? root.rules : []) {
+    if (!raw || typeof raw !== "object") { warnings.push("skipped a rule that wasn't an object"); continue; }
+    const name = typeof raw.name === "string" ? raw.name : "";
+    if (!name) { warnings.push("skipped a rule with no name"); continue; }
+    let key = (typeof raw.id === "string" && raw.id) ? raw.id : null;
+    if (key !== null && ruleKeys.has(key)) key = null;
+    if (key !== null) ruleKeys.add(key);
+    rules.push({ key, name, conditions: stringArray(raw.conditions) });
+  }
+
+  const actions = [];
+  for (const raw of Array.isArray(root.actions) ? root.actions : []) {
+    if (!raw || typeof raw !== "object") { warnings.push("skipped an action that wasn't an object"); continue; }
+    const name = typeof raw.name === "string" ? raw.name : "";
+    if (!name) { warnings.push("skipped an action with no name"); continue; }
+    const inputKey = nodeKeys.has(raw.inputClassId) ? raw.inputClassId : null;
+    if (raw.inputClassId && !inputKey) warnings.push(`action "${name}" referenced an unknown input class — cleared`);
+    actions.push({
+      key: (typeof raw.id === "string" && raw.id) ? raw.id : null,
+      name, inputClassId: inputKey,
+      preconditions: stringArray(raw.preconditions).filter((rid) => ruleKeys.has(rid)),
+      effect: typeof raw.effect === "string" ? raw.effect : "",
+      verification: typeof raw.verification === "string" ? raw.verification : "",
+    });
+  }
+
+  const rawMeta = (root.meta && typeof root.meta === "object" && !Array.isArray(root.meta)) ? root.meta : {};
+  const meta = {
+    format_version: coerceFiniteNumber(rawMeta.format_version, 1),
+    graph_id: (typeof rawMeta.graph_id === "string" && rawMeta.graph_id) ? rawMeta.graph_id : null,
+    version: Math.max(0, Math.trunc(coerceFiniteNumber(rawMeta.version, 0))),
+    created: typeof rawMeta.created === "string" ? rawMeta.created : null,
+    saved: typeof rawMeta.saved === "string" ? rawMeta.saved : null,
+  };
+  const graphName = (typeof rawMeta.graph_name === "string" && rawMeta.graph_name.trim())
+    ? rawMeta.graph_name.trim() : null;
+
+  return { ok: true, error: null, warnings, graph: { nodes, edges, rules, actions, meta, graphName } };
+}
+
+// "my-graph_v0042_2026-07-25T1420Z.json" -> "my-graph". Only used when the
+// file predates `meta.graph_name` (every export written before the JSON
+// re-import path shipped), so a restored graph still gets its name back
+// rather than staying "Untitled Graph". Strictly anchored on §5.4's own
+// `_v<digits>_<timestamp>` suffix — a filename that doesn't match that shape
+// tells us nothing reliable about the graph's name, so it yields null and the
+// caller leaves the current name alone.
+function graphNameFromImportFilename(filename) {
+  if (typeof filename !== "string") return null;
+  const base = filename.replace(/\.[^./\\]+$/, "");
+  const m = base.match(/^(.+)_v\d+_\d{4}-\d{2}-\d{2}T\d{4}Z$/);
+  return m && m[1] ? m[1] : null;
+}
+
+// Shared by the dialog preview and the commit (same contract as
+// planTxtImport/planYamlImport). Matching is by label/name, exactly like the
+// other two importers, so the three summaries mean the same thing.
+function planJsonImport(parsed) {
+  if (!parsed.ok) return { addedCount: 0, changedCount: 0, removedCount: 0 };
+  const g = parsed.graph;
+  const incomingLabels = new Set(g.nodes.map((n) => n.label));
+  const incomingRuleNames = new Set(g.rules.map((r) => r.name));
+  const incomingActionNames = new Set(g.actions.map((a) => a.name));
+
+  const nodeMatches = g.nodes.filter((n) => state.nodes.some((x) => x.label === n.label)).length;
+  const ruleMatches = g.rules.filter((r) => state.rules.some((x) => x.name === r.name)).length;
+  const actionMatches = g.actions.filter((a) => state.actions.some((x) => x.name === a.name)).length;
+
+  const labelOfNodeKey = new Map(g.nodes.filter((n) => n.key).map((n) => [n.key, n.label]));
+  const edgeMatches = g.edges.filter((e) => state.edges.some((x) => {
+    const src = state.nodes.find((n) => n.id === x.source);
+    const tgt = state.nodes.find((n) => n.id === x.target);
+    return src && tgt && src.label === labelOfNodeKey.get(e.source) &&
+      tgt.label === labelOfNodeKey.get(e.target) &&
+      x.relation === e.relation && x.directed === e.directed;
+  })).length;
+
+  const changedCount = nodeMatches + edgeMatches + ruleMatches + actionMatches;
+  const addedCount = (g.nodes.length + g.edges.length + g.rules.length + g.actions.length) - changedCount;
+
+  const removedNodes = state.nodes.filter((n) => !incomingLabels.has(n.label));
+  const removedNodeIds = new Set(removedNodes.map((n) => n.id));
+  const removedCount = removedNodes.length +
+    state.edges.filter((e) => removedNodeIds.has(e.source) || removedNodeIds.has(e.target)).length +
+    state.rules.filter((r) => !incomingRuleNames.has(r.name)).length +
+    state.actions.filter((a) => !incomingActionNames.has(a.name)).length;
+
+  return { addedCount, changedCount, removedCount };
+}
+
+// Lifts every id counter clear of the ids an incoming file already occupies,
+// *before* anything calls genNodeId()/genEdgeId()/... Skipping this is the
+// one mistake in a preserve-the-ids importer that corrupts a graph silently
+// rather than loudly: restoring nodes n1..n40 while the counter still sits at
+// 1 means the very next node the user adds is a second "n5", and from then on
+// every id-keyed lookup (edge endpoints, action inputs, selection, undo)
+// resolves to whichever of the two `find()` reaches first.
+function reserveIdCountersFor(graph) {
+  state.nextNodeNum = Math.max(state.nextNodeNum, highestIdNumber(graph.nodes.map((n) => ({ id: n.key })), "n") + 1);
+  state.nextEdgeNum = Math.max(state.nextEdgeNum, highestIdNumber(graph.edges.map((e) => ({ id: e.key })), "e") + 1);
+  state.nextRuleNum = Math.max(state.nextRuleNum, highestIdNumber(graph.rules.map((r) => ({ id: r.key })), "r") + 1);
+  state.nextActionNum = Math.max(state.nextActionNum, highestIdNumber(graph.actions.map((a) => ({ id: a.key })), "a") + 1);
+}
+
+// True when this incoming node's saved rectangle doesn't collide with any
+// node already on the canvas — merge honours a saved position when the space
+// is genuinely free, and falls back to the shelf when it isn't, so an import
+// can never drop a box exactly on top of an existing one.
+function importPositionIsFree(candidate) {
+  const rect = { x: candidate.x, y: candidate.y, w: candidate.w, h: candidate.h };
+  return !state.nodes.some((n) => rectsOverlap(rect, { x: n.x, y: n.y, w: n.w, h: n.h }));
+}
+
+function commitJsonImport(text, mode, sourceFilename) {
+  const parsed = parseJsonImport(text);
+  if (!parsed.ok) return; // the dialog never offers an action for an unparseable file
+  const before = snapshotState();
+  const g = parsed.graph;
+  reserveIdCountersFor(g);
+
+  const liveNodeByKey = new Map();
+  const liveRuleByKey = new Map();
+  const createdNodeIds = [];
+
+  // An empty canvas takes the full-restore path whichever button was pressed:
+  // the dialog hides Replace when there's nothing to replace, so "merge" is
+  // the only action available there — and label-matched merging into an empty
+  // graph would silently discard the ids, coordinates and version chain that
+  // are the entire reason this importer exists. Nothing can be lost, since
+  // there is nothing there.
+  const fullRestore = mode === "replace" || !hasAnyGraphContent();
+
+  if (fullRestore) {
+    // Full restore: the file *is* the graph, ids and geometry included.
+    state.nodes = g.nodes.map((n) => ({
+      id: n.key || genNodeId(),
+      label: n.label, x: n.x, y: n.y, w: n.w, h: n.h,
+      meaning: n.meaning, aliases: [...n.aliases],
+      properties: n.properties.map((p) => ({ ...p })),
+    }));
+    g.nodes.forEach((n, i) => liveNodeByKey.set(n.key, state.nodes[i]));
+    state.edges = g.edges.map((e) => ({
+      id: e.key || genEdgeId(),
+      source: liveNodeByKey.get(e.source).id,
+      target: liveNodeByKey.get(e.target).id,
+      relation: e.relation, directed: e.directed,
+      meaning: e.meaning, aliases: [...e.aliases],
+    }));
+    state.rules = g.rules.map((r) => ({ id: r.key || genRuleId(), name: r.name, conditions: [...r.conditions] }));
+    g.rules.forEach((r, i) => liveRuleByKey.set(r.key, state.rules[i]));
+    state.actions = g.actions.map((a) => ({
+      id: a.key || genActionId(), name: a.name,
+      inputClassId: a.inputClassId ? liveNodeByKey.get(a.inputClassId).id : null,
+      preconditions: a.preconditions.map((rid) => liveRuleByKey.get(rid)).filter(Boolean).map((r) => r.id),
+      effect: a.effect, verification: a.verification,
+    }));
+
+    // Continue the file's own version series rather than starting a new one:
+    // this graph is the same graph, reopened. A file with no usable meta (a
+    // hand-authored one) gets a fresh identity instead of inheriting a bogus
+    // half-filled record.
+    state.meta = {
+      format_version: g.meta.format_version,
+      graph_id: g.meta.graph_id || crypto.randomUUID(),
+      version: g.meta.version,
+      created: g.meta.created || isoTimestampSeconds(),
+      saved: g.meta.saved,
+    };
+    const restoredName = g.graphName || graphNameFromImportFilename(sourceFilename);
+    if (restoredName) {
+      state.graphName = restoredName;
+      state.graphNameIsDefault = false;
+      syncGraphTitleUi();
+    }
+    clearSelection();
+    state.connectSource = null;
+    newlyImportedIds = new Set();
+  } else {
+    const nextShelfPosition = computeImportShelf();
+    for (const n of g.nodes) {
+      const existing = state.nodes.find((x) => x.label === n.label);
+      if (existing) {
+        // Matched by label: the file is authoritative for the content it
+        // carries, but never for where the user has put the box — same
+        // contract as the TXT importer's "existing nodes keep their position".
+        existing.meaning = n.meaning;
+        existing.aliases = [...n.aliases];
+        existing.properties = n.properties.map((p) => ({ ...p }));
+        liveNodeByKey.set(n.key, existing);
+        continue;
+      }
+      const pos = importPositionIsFree(n) ? { x: n.x, y: n.y } : nextShelfPosition();
+      const node = createNode(pos.x, pos.y, n.label);
+      node.w = n.w;
+      node.h = n.h;
+      node.meaning = n.meaning;
+      node.aliases = [...n.aliases];
+      node.properties = n.properties.map((p) => ({ ...p }));
+      liveNodeByKey.set(n.key, node);
+      createdNodeIds.push(node.id);
+    }
+
+    for (const e of g.edges) {
+      const src = liveNodeByKey.get(e.source);
+      const tgt = liveNodeByKey.get(e.target);
+      if (!src || !tgt) continue;
+      const existing = state.edges.find((x) => x.source === src.id && x.target === tgt.id &&
+        x.relation === e.relation && x.directed === e.directed);
+      const edge = existing || createEdge(src.id, tgt.id, e.relation, e.directed);
+      edge.meaning = e.meaning;
+      edge.aliases = [...e.aliases];
+    }
+
+    for (const r of g.rules) {
+      const existing = state.rules.find((x) => x.name === r.name);
+      if (existing) {
+        existing.conditions = [...r.conditions];
+        liveRuleByKey.set(r.key, existing);
+      } else {
+        liveRuleByKey.set(r.key, createRule(r.name, r.conditions));
+      }
+    }
+
+    for (const a of g.actions) {
+      const inputNode = a.inputClassId ? liveNodeByKey.get(a.inputClassId) : null;
+      const preconditionIds = a.preconditions
+        .map((rid) => liveRuleByKey.get(rid)).filter(Boolean).map((r) => r.id);
+      const existing = state.actions.find((x) => x.name === a.name);
+      if (existing) {
+        existing.inputClassId = inputNode ? inputNode.id : null;
+        existing.preconditions = preconditionIds;
+        existing.effect = a.effect;
+        existing.verification = a.verification;
+      } else {
+        createAction(a.name, inputNode ? inputNode.id : null, preconditionIds, a.effect, a.verification);
+      }
+    }
+
+    newlyImportedIds = new Set(createdNodeIds);
+  }
+
+  pushHistory(before, snapshotState());
+  markDirty();
+}
+
 const importOverlay = document.getElementById("import-overlay");
 const importSummaryEl = document.getElementById("import-summary");
 const importMergeBtn = document.getElementById("import-merge");
 const importReplaceBtn = document.getElementById("import-replace");
 const importCancelBtn = document.getElementById("import-cancel");
 let pendingImportText = null;
-// "txt" (spec.md §5.3, node/edge merge-never-touches-matches) or "yaml"
-// (agent_ontology_spec.md §11, Phase G — aggressive overwrite-on-match). Set
-// alongside pendingImportText so Merge/Replace dispatch to the right
-// parser/commit pair without re-sniffing the file content.
+// "json" (spec.md §5.5, full-fidelity restore), "txt" (spec.md §5.3,
+// node/edge merge-never-touches-matches) or "yaml" (agent_ontology_spec.md
+// §11, Phase G — aggressive overwrite-on-match). Set alongside
+// pendingImportText so Merge/Replace dispatch to the right parser/commit pair
+// without re-sniffing the file content.
 let pendingImportKind = "txt";
+// The filename the text came from, kept only so a canonical JSON export
+// written before `meta.graph_name` existed can still recover its graph name
+// from §5.4's filename convention. Null for a paste/drop with no real file.
+let pendingImportFilename = null;
 
 function hasAnyGraphContent() {
   return Boolean(state.nodes.length || state.edges.length || state.rules.length || state.actions.length);
 }
 
-function openImportDialog(text, kind = "txt") {
+// Puts the dialog into its no-action state: an explanation, and Cancel as the
+// only way out. Before this existed, an unimportable file (a JSON export
+// picked through the file dialog's "All files" escape hatch, a mistyped
+// extension, a CSV) still opened a dialog offering Merge and Replace, and
+// clicking either imported nothing at all with no feedback — Replace on an
+// empty parse would happily wipe the graph "to match" a file the app hadn't
+// actually understood.
+function showImportError(message) {
+  importSummaryEl.textContent = message;
+  importMergeBtn.style.display = "none";
+  importReplaceBtn.style.display = "none";
+  importOverlay.style.display = "flex";
+}
+
+function openImportDialog(text, kind = "txt", filename = null) {
   if (isAnyModalOpen()) return;
   pendingImportText = text;
   pendingImportKind = kind;
+  pendingImportFilename = filename;
+
+  if (kind === "invalid-json") {
+    const parsed = parseJsonImport(text);
+    showImportError(t("importErrorUnreadableJson", parsed.error || ""));
+    return;
+  }
+  if (kind === "unknown") {
+    showImportError(t("importErrorUnrecognized"));
+    return;
+  }
+
   const lines = [];
-  if (kind === "yaml") {
-    const plan = planYamlImport(parseDomainYamlImport(text));
+  if (kind === "json") {
+    const parsed = parseJsonImport(text);
+    // detectImportKind() only returns "json" for text that already parsed, so
+    // this can't fire from the normal flow — it guards the test/debug hook
+    // (window.__kg.formats.openImportDialog) being handed a kind directly.
+    if (!parsed.ok) {
+      showImportError(t("importErrorUnreadableJson", parsed.error || ""));
+      return;
+    }
+    const g = parsed.graph;
+    if (!g.nodes.length && !g.rules.length && !g.actions.length) {
+      showImportError(t("importErrorEmpty"));
+      return;
+    }
+    const plan = planJsonImport(parsed);
+    if (hasAnyGraphContent()) {
+      lines.push(t("importJsonMergeSummary", plan.addedCount, plan.changedCount));
+      lines.push(t("importJsonReplaceSummary", plan.removedCount));
+    } else {
+      // Reopening a saved file into a fresh session is *the* primary use of
+      // this format, and on an empty canvas the Replace button is hidden
+      // (there is nothing to replace) — so the one remaining button has to be
+      // the full restore, not the label-matched merge, or the round trip
+      // would be unreachable in exactly the case people need it most.
+      lines.push(t("importJsonRestoreSummary", plan.addedCount));
+      importReplaceBtn.style.display = "none";
+    }
+    if (parsed.warnings.length) lines.push(parsed.warnings.join("\n"));
+  } else if (kind === "yaml") {
+    const parsedYaml = parseDomainYamlImport(text);
+    if (!Object.keys(parsedYaml.classes).length && !parsedYaml.relationships.length &&
+        !Object.keys(parsedYaml.rules).length && !Object.keys(parsedYaml.actions).length) {
+      showImportError(t("importErrorEmpty"));
+      return;
+    }
+    const plan = planYamlImport(parsedYaml);
     lines.push(t("importYamlMergeSummary", plan.addedCount, plan.changedCount));
     if (hasAnyGraphContent()) lines.push(t("importYamlReplaceSummary", plan.removedCount));
     else importReplaceBtn.style.display = "none";
   } else {
-    const plan = planTxtImport(parseTxtImport(text));
+    const parsedTxt = parseTxtImport(text);
+    if (!parsedTxt.nodes.length && !parsedTxt.edges.length) {
+      showImportError(t("importErrorEmpty"));
+      return;
+    }
+    const plan = planTxtImport(parsedTxt);
     lines.push(t("importMergeSummary", plan.newNodeCount, plan.newEdgeCount));
     if (state.nodes.length || state.edges.length) lines.push(t("importReplaceSummary", plan.removedCount));
     else importReplaceBtn.style.display = "none";
@@ -5286,24 +6010,23 @@ function openImportDialog(text, kind = "txt") {
 
 function closeImportDialog() {
   importOverlay.style.display = "none";
+  importMergeBtn.style.display = "";
   importReplaceBtn.style.display = "";
   pendingImportText = null;
+  pendingImportFilename = null;
 }
 
-importMergeBtn.addEventListener("click", () => {
-  const text = pendingImportText, kind = pendingImportKind;
+function runPendingImport(mode) {
+  const text = pendingImportText, kind = pendingImportKind, filename = pendingImportFilename;
   closeImportDialog();
   if (text === null) return;
-  if (kind === "yaml") commitYamlImport(text, "merge");
-  else commitTxtImport(text, "merge");
-});
-importReplaceBtn.addEventListener("click", () => {
-  const text = pendingImportText, kind = pendingImportKind;
-  closeImportDialog();
-  if (text === null) return;
-  if (kind === "yaml") commitYamlImport(text, "replace");
-  else commitTxtImport(text, "replace");
-});
+  if (kind === "json") commitJsonImport(text, mode, filename);
+  else if (kind === "yaml") commitYamlImport(text, mode);
+  else commitTxtImport(text, mode);
+}
+
+importMergeBtn.addEventListener("click", () => runPendingImport("merge"));
+importReplaceBtn.addEventListener("click", () => runPendingImport("replace"));
 importCancelBtn.addEventListener("click", () => closeImportDialog());
 importOverlay.addEventListener("click", (e) => { if (e.target === importOverlay) closeImportDialog(); });
 
@@ -5369,13 +6092,69 @@ graphTitleEl.addEventListener("keydown", (e) => {
   if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openRenameGraphTitle(); }
 });
 
-// .yaml/.yml -> the Domain Model importer (agent_ontology_spec.md §11, Phase
-// G); everything else falls through to the plain node/edge TXT importer
-// (spec.md §5.3) — matches the .domain.yaml extension Save Version writes,
-// and a bare .yaml/.yml for a hand-trimmed or hand-authored file.
+// Extension-only routing, kept as the primary signal: .json -> the canonical
+// importer (spec.md §5.5), .yaml/.yml -> the Domain Model importer
+// (agent_ontology_spec.md §11, Phase G), everything else -> the plain
+// node/edge TXT importer (spec.md §5.3). Matches the three extensions Save
+// Version writes, plus a bare .yaml/.yml for a hand-trimmed or hand-authored
+// file. Returns null when the name carries no extension this app claims —
+// the caller then falls back to sniffing the content.
 function importKindForFilename(name) {
-  const lower = name.toLowerCase();
-  return (lower.endsWith(".yaml") || lower.endsWith(".yml")) ? "yaml" : "txt";
+  const lower = String(name || "").toLowerCase();
+  if (lower.endsWith(".json")) return "json";
+  if (lower.endsWith(".yaml") || lower.endsWith(".yml")) return "yaml";
+  if (lower.endsWith(".txt")) return "txt";
+  return null;
+}
+
+// A canonical export is a JSON *object*; neither an edge list nor this app's
+// domain YAML can parse as one, so this test never fires on a file that
+// belongs to one of the other two importers.
+function contentLooksLikeJson(text) {
+  const trimmed = text.trim();
+  if (!trimmed.startsWith("{")) return false;
+  try {
+    const parsed = JSON.parse(trimmed);
+    return Boolean(parsed) && typeof parsed === "object" && !Array.isArray(parsed);
+  } catch (err) {
+    return false;
+  }
+}
+
+function contentLooksLikeDomainYaml(text) {
+  return /^(classes|relationships|rules|actions)\s*:/m.test(text);
+}
+
+function contentLooksLikeEdgeList(text) {
+  return /^##\s*(NODES|EDGES)\s*$/m.test(text) || /^[^#\n]+(<->|->)[^\n]+ : .+$/m.test(text);
+}
+
+// Decides which importer a file goes to, from its name *and* its bytes.
+//
+// The extension stays authoritative for every case that already worked, so
+// nothing about existing .txt/.yaml/.yml behaviour changes. Content only gets
+// a vote in the two places the extension is useless or actively wrong:
+//
+//   - The file picker's own "All files" escape hatch (and drag-drop of any
+//     file at all) let a canonical .json through to the TXT parser, which
+//     found no "## NODES" header, produced an empty graph, and imported
+//     nothing without a word of explanation. JSON content now wins over any
+//     extension, because a JSON object is unambiguous.
+//   - A file with no extension, or one this app doesn't claim, used to be
+//     silently treated as an edge list. It's now sniffed, and reported as
+//     unrecognized if it matches nothing.
+//
+// A `.json` whose content doesn't parse returns "invalid-json" rather than
+// quietly degrading to the TXT parser: the user named it JSON, so a JSON
+// syntax error is the useful thing to say.
+function detectImportKind(filename, text) {
+  if (contentLooksLikeJson(text)) return "json";
+  const byName = importKindForFilename(filename);
+  if (byName === "json") return "invalid-json";
+  if (byName) return byName;
+  if (contentLooksLikeDomainYaml(text)) return "yaml";
+  if (contentLooksLikeEdgeList(text)) return "txt";
+  return "unknown";
 }
 
 const importInput = document.getElementById("import-file-input");
@@ -5384,23 +6163,26 @@ importInput.addEventListener("change", async () => {
   const file = importInput.files && importInput.files[0];
   importInput.value = ""; // allow re-selecting the same filename later
   if (!file) return;
-  openImportDialog(await file.text(), importKindForFilename(file.name));
+  const text = await file.text();
+  openImportDialog(text, detectImportKind(file.name, text), file.name);
 });
 
-// Drag-and-drop of a .txt/.yaml/.yml file onto the canvas, per Section 7's
-// "where supported" accelerator (native file-open dialog above is the
-// baseline).
+// Drag-and-drop onto the canvas, per Section 7's "where supported"
+// accelerator (the native file-open dialog above is the baseline). Takes the
+// first dropped file whatever it's called, rather than pre-filtering on
+// extension: detectImportKind() reads the content, so a correctly-formatted
+// file with an odd name still imports, and anything genuinely unimportable
+// now says so in the dialog instead of the drop being ignored with no
+// feedback at all.
 canvas.addEventListener("dragover", (e) => {
   if ([...e.dataTransfer.items].some((it) => it.kind === "file")) e.preventDefault();
 });
 canvas.addEventListener("drop", async (e) => {
-  const file = [...e.dataTransfer.files].find((f) => {
-    const lower = f.name.toLowerCase();
-    return lower.endsWith(".txt") || lower.endsWith(".yaml") || lower.endsWith(".yml");
-  });
+  const file = [...e.dataTransfer.files][0];
   if (!file) return;
   e.preventDefault();
-  openImportDialog(await file.text(), importKindForFilename(file.name));
+  const text = await file.text();
+  openImportDialog(text, detectImportKind(file.name, text), file.name);
 });
 
 document.getElementById("btn-clear").addEventListener("click", () => {
@@ -7217,6 +7999,28 @@ window.__kg = {
     },
   },
   getNewlyImportedIds: () => newlyImportedIds, // reassigned, not mutated — needs a getter, not a reference
+  // File formats (spec.md §5). Exposed so the format layer can be tested as
+  // the pure functions it is — routing, parsing, filename sanitization —
+  // without driving the whole dialog/UI for every single case.
+  formats: {
+    detectImportKind,
+    importKindForFilename,
+    parseTxtImport,
+    parseDomainYamlImport,
+    parseJsonImport,
+    planJsonImport,
+    graphNameFromImportFilename,
+    sanitizeGraphName,
+    filenameTimestamp,
+    buildJsonExport,
+    buildTxtExport,
+    buildDomainYamlExport,
+    toYaml,
+    // Drives the dialog exactly as a real file drop would, minus the
+    // File/DataTransfer plumbing.
+    openImportDialog,
+    commitJsonImport,
+  },
   theme: {
     get: () => theme,
     toggle: toggleTheme,
