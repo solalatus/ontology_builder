@@ -2943,6 +2943,124 @@ and record deltas here instead of editing the spec.)*
   skipped without `OPENAI_API_KEY`) run twice consecutively, both green;
   `python3 -m unittest discover -s tools -p "test_*.py"` (13 tests) green.
 
+- 2026-08-08 — **Canonical JSON is importable; the round trip is closed
+  (spec.md §5.5/§5.6).** Raised by a user trying to reopen their own
+  `*_v0001_*.json` and finding no way to do it. The JSON export had been
+  write-only for the project's entire life: `buildJsonExport()` had no
+  counterpart, `importKindForFilename()` routed `.yaml`/`.yml` to the domain
+  model and *everything else* to the TXT parser, and the file input's
+  `accept` didn't list `.json` at all. So the format §5.1 calls "canonical,
+  full-fidelity, the source of truth" was the one format that could not be
+  reopened — reimporting meant going through the `.txt` (every coordinate
+  lost) or the `.domain.yaml` (no coordinates, no ids, no version history).
+  Worse, a `.json` chosen through the picker's own "All files" escape hatch
+  reached the TXT parser, found no `## NODES` header, parsed to nothing, and
+  still offered Merge *and* Replace — Replace on an empty parse standing
+  ready to delete the whole graph "to match" a file the app had never
+  understood.
+
+  Implemented as `parseJsonImport()`/`planJsonImport()`/`commitJsonImport()`,
+  mirroring the existing TXT and YAML parse/plan/commit trios so the three
+  importers stay shaped alike. Decisions worth recording:
+  - **Replace means *restore*, not "replace by label".** Ids, geometry and
+    `meta` are adopted verbatim, so the reopened graph keeps its `graph_id`
+    and version counter and the next save continues the series (v0007 →
+    v0008) instead of restarting at v0001 as a new graph.
+  - **An empty canvas takes the restore path whichever button is pressed.**
+    The dialog hides Replace when there is nothing to replace, so "merge" is
+    the only reachable action there — and merging into an empty graph would
+    discard exactly the ids/coordinates/version chain the format exists to
+    carry. Caught while writing the tests, not by review: the first draft
+    shipped a round trip that was unreachable in its own primary use case
+    (opening a saved file in a fresh session).
+  - **No autolayout pass after a JSON import**, unlike the TXT and YAML
+    importers. Those two reflow because their formats carry no coordinates;
+    here the coordinates are the point.
+  - **Id counters are lifted clear of the file's ids before anything else.**
+    Restoring `n1..n40` with the counter still at 1 would hand the next new
+    node a duplicate id, after which every id-keyed lookup resolves to
+    whichever of the two `find()` reaches first — silent corruption rather
+    than a visible failure.
+  - **`meta.graph_name` added to the export** (additive, optional on read).
+    The name previously survived only in the filename, which §5.4's
+    sanitization has already reduced; files written before this field fall
+    back to parsing the name out of the `_v<digits>_<timestamp>` filename.
+  - **`snapshotState()` now carries `meta`/`graphName`** so a full restore
+    undoes in one step like everything else. Deliberately *not* the id
+    counters: those must stay monotonic, or rewinding them would let a later
+    create hand out an id that a redo is about to bring back.
+  - Routing now consults content as well as extension (§5.6), and a file the
+    app can't import — or one that parses to nothing — gets an explanation
+    and no action buttons instead of a silent no-op.
+
+- 2026-08-08 — **Domain-model YAML parser widened past the exporter's own
+  grammar** (`agent_ontology_spec.md` §11, amended). The parser was written
+  as the exact inverse of `buildDomainYamlExport()`, which is a defensible
+  posture for a dependency-free single file — but the two populations that
+  actually write these files are a live agent and a human hand-editing an
+  export, and neither restricts itself to what our exporter emits. The
+  failure mode is what made this worth fixing over just documenting: an
+  unrecognized value token fell through to the plain-string branch, so a
+  downstream `Array.isArray`/`typeof === "object"` check saw a string and
+  created the field *empty*, with no error anywhere. Two real bugs had
+  already landed that way (inline flow lists from a genuine tool call; the
+  `indent % 2 !== 0 → skip` guard silently dropping every line of a
+  three-space file and reporting a valid document as 0 items). Now also
+  accepted: non-empty flow maps and nested flow collections, single-quoted
+  scalars, `~`, `|`/`>` block scalars with any chomping indicator, trailing
+  `#` comments outside quotes, tab indentation, and any consistent indent
+  width (indent *levels* now come from a column stack, not `columns / 2`).
+  Anchors, aliases, multi-document streams and type tags remain out of
+  scope. The exporter is untouched, so its output is byte-identical and the
+  existing Phase F/G assertions still hold.
+
+- 2026-08-08 — **`sanitizeGraphName()` is filesystem-safe rather than
+  ASCII-safe (spec.md §5.4, amended).** The original `[^A-Za-z0-9_-]`
+  whitelist quietly destroyed every non-English graph name — "Ügyfélkérdés
+  ontológia" was written to disk as "gyflkrds-ontolgia", and a name in a
+  non-Latin script emptied out entirely into the `graph` fallback, so every
+  save from such a user collided on a single filename. Now: any Unicode
+  letter or digit is kept (NFC-normalized first, so a decomposed accent
+  counts as one letter), whitespace collapses to `-`, and the blacklist
+  carries what actually isn't portable — control characters, the
+  Windows-reserved punctuation, leading/trailing dots and dashes, the
+  reserved device names, and an 80-code-point cap that never splits a
+  surrogate pair. `/` and `\` specifically matter beyond tidiness: Tier 2's
+  folder-sync writer passes this straight to `getFileHandle()`.
+
+- 2026-08-08 — **Testing.** Four new spec files (`json-import`,
+  `import-routing`, `yaml-robustness`, `filename-sanitization`) plus two
+  synthetic JSON fixtures shaped after a real user's file (non-ASCII
+  throughout, non-default geometry, an undirected edge, allowed-value lists,
+  rules and actions). `window.__kg.formats` was added as a test surface so
+  the format layer can be asserted as the pure functions it is, rather than
+  driving the whole dialog for every construct.
+
+  The pure format layer (parsers, router, sanitizer) was verified first by
+  slicing those functions out of `index.html` and running them under plain
+  Node — the sandbox this was written in blocks `socket()` outright, so no
+  browser could launch there at all. 84 checks green, including the
+  reporting user's real 17-node/26-edge/3-rule/5-action file parsing with
+  zero warnings, and 400 randomized export/parse round trips confirming the
+  rewritten YAML parser agrees with the old one on all exporter-shaped
+  input. Two real bugs were found that way and fixed before commit:
+  `coerceFiniteNumber(null, 160)` returning 0 (so a node with a null width
+  restored as a zero-width, invisible, unclickable box — exactly what
+  `JSON.stringify` writes for a NaN), and `splitYamlInlineListItems()` not
+  tracking bracket depth (so a nested flow collection split at the wrong
+  comma).
+
+  Two **existing** tests asserted contracts this change deliberately breaks,
+  and were updated rather than worked around:
+  - `phase5.spec.mjs` pinned `graph_name` as *absent* from `meta` ("graph
+    name is filename-only") — now asserts it's present, per §5.5's reasoning
+    for adding it.
+  - `agent-ontology-phase-g.spec.mjs` asserted that a garbage file opened
+    the normal dialog and that Merge then imported all-zero without
+    crashing. Not crashing was right; offering the action was not, since the
+    same dialog also offered Replace on a parse of nothing. Now asserts the
+    no-action state.
+
 ---
 
 ## Open Questions (not yet decided — raise before implementing that part)

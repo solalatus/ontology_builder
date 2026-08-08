@@ -1,0 +1,136 @@
+{
+  "meta": {
+    "format_version": 1,
+    "graph_id": "3f2a1c40-0000-4000-8000-abcdefabcdef",
+    "version": 7,
+    "created": "2026-01-02T03:04:00Z",
+    "saved": "2026-03-04T05:06:00Z"
+  },
+  "nodes": [
+    {
+      "id": "n1",
+      "label": "Ügyfélkérdés",
+      "x": 40,
+      "y": 80,
+      "w": 160,
+      "h": 60,
+      "meaning": "Egy ügyféltől érkező konkrét kérdés.",
+      "aliases": [
+        "kérdés",
+        "fórumkérdés"
+      ],
+      "properties": [
+        {
+          "id": "p_a1",
+          "name": "kérdésSzöveg",
+          "type": "text",
+          "unit": null,
+          "allowed": null
+        },
+        {
+          "id": "p_a2",
+          "name": "állapot",
+          "type": "text",
+          "unit": null,
+          "allowed": [
+            "megválaszolt",
+            "megválaszolatlan"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "n2",
+      "label": "Dokumentáció",
+      "x": 400,
+      "y": 80,
+      "w": 160,
+      "h": 60,
+      "meaning": "Hivatalos dokumentációs forrás.",
+      "aliases": [
+        "dokumentáció"
+      ],
+      "properties": [
+        {
+          "id": "p_b1",
+          "name": "cím",
+          "type": "text",
+          "unit": null,
+          "allowed": null
+        }
+      ]
+    },
+    {
+      "id": "n7",
+      "label": "Válaszvázlat",
+      "x": 220,
+      "y": 300,
+      "w": 200,
+      "h": 80,
+      "meaning": null,
+      "aliases": [],
+      "properties": []
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "source": "n1",
+      "target": "n2",
+      "relation": "hivatkozik rá",
+      "directed": true,
+      "meaning": "A kérdés megválaszolásához használt forrás.",
+      "aliases": [
+        "forrása"
+      ]
+    },
+    {
+      "id": "e4",
+      "source": "n1",
+      "target": "n7",
+      "relation": "kapcsolódik",
+      "directed": false,
+      "meaning": null,
+      "aliases": []
+    }
+  ],
+  "rules": [
+    {
+      "id": "r1",
+      "name": "válaszKiadható",
+      "conditions": [
+        "állapot == megválaszolatlan",
+        "van legalább egy forrás"
+      ]
+    },
+    {
+      "id": "r3",
+      "name": "lezárható",
+      "conditions": [
+        "állapot == megválaszolt"
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "id": "a1",
+      "name": "válaszKészítés",
+      "inputClassId": "n1",
+      "preconditions": [
+        "r1"
+      ],
+      "effect": "Válaszvázlat jön létre.",
+      "verification": "A vázlat hivatkozik legalább egy forrásra."
+    },
+    {
+      "id": "a2",
+      "name": "lezárás",
+      "inputClassId": "n1",
+      "preconditions": [
+        "r3"
+      ],
+      "effect": "A kérdés lezárul.",
+      "verification": "Az állapot megválaszolt."
+    }
+  ]
+}

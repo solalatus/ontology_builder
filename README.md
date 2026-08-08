@@ -3,11 +3,24 @@
 A single-file, offline-first visual editor for building small-to-medium
 knowledge graphs / ontologies by hand: draggable entity boxes, labeled
 directional or bidirectional relations, fast infinite-zoom canvas
-interaction, and explicit export/import to versioned files on disk (JSON
-canonical + plain-text edge list). It's meant to sit upstream of a
-GraphRAG/n8n-style pipeline: sketch an ontology by hand, export it in a form
-immediately usable by scripts or an LLM, or edit the exported text directly
-and bring it back in. Full design rationale: `spec.md`.
+interaction, and explicit export/import to versioned files on disk. It's
+meant to sit upstream of a GraphRAG/n8n-style pipeline: sketch an ontology by
+hand, export it in a form immediately usable by scripts or an LLM, or edit
+the exported text directly and bring it back in. Full design rationale:
+`spec.md`.
+
+Every "Save Version" writes three files side by side, and all three can be
+imported back through the same button:
+
+| File | What it is | Re-import restores |
+|---|---|---|
+| `.json` | canonical, full-fidelity (`spec.md` §5.1) | everything — ids, positions, box sizes, and the version history, so the next save continues the same numbered series |
+| `.txt` | portable edge list, structure only (§5.2) | nodes and relations; positions are not in the format, so the graph is re-laid out |
+| `.domain.yaml` | domain model (`agent_ontology_spec.md` §5) | classes, relationships, rules and actions; no positions or ids |
+
+The `.txt` and `.domain.yaml` are the hand-editable, pipeline-friendly ones;
+the `.json` is the one to reopen when you want the canvas back exactly as you
+left it.
 
 Built on top of that base editor, an **Agent Ontology** layer
 (`agent_ontology_spec.md`) adds domain-model authoring — classes,
@@ -111,7 +124,8 @@ node --test tests/evals/*.eval.spec.mjs
   including the `tests/evals/` ontology-recovery eval.
 - `tools/` — a small Python utility (`load_edge_list.py`) for
   programmatically producing the plain-text edge-list import format, plus
-  its own test suite.
+  its own test suite, and `layout-bench.mjs`, the autolayout benchmark
+  harness whose outputs live in `tools/layout-bench-out/`.
 
 ## License
 

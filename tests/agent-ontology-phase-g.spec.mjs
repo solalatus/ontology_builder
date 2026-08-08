@@ -488,12 +488,22 @@ test("malformed/truncated YAML degrades gracefully — missing sections default 
   });
 });
 
-test("a completely empty/garbage file imports as all-zero without crashing", async () => {
+// Contract change (spec.md §5.6): this used to assert that a garbage file
+// opened the normal dialog and that clicking Merge imported all-zero without
+// crashing. Not crashing was the right half; offering the action was not —
+// the same dialog offered *Replace* too, which on an empty parse stood ready
+// to delete the whole graph "to match" a file the app had never understood.
+// A file that yields nothing to import now says so and offers no action.
+test("a completely empty/garbage file is reported, with no import action offered", async () => {
   await withPage(async (page) => {
     await dropYaml(page, "not yaml at all, just some\nrandom text\n", "garbage.yaml");
-    await page.click("#import-merge");
-    await page.waitForTimeout(150);
 
+    assert.match(await page.locator("#import-summary").textContent(), /nothing to import/i);
+    assert.equal(await page.locator("#import-merge").isVisible(), false);
+    assert.equal(await page.locator("#import-replace").isVisible(), false);
+
+    await page.click("#import-cancel");
+    await page.waitForTimeout(100);
     assert.equal(await page.evaluate(() => window.__kg.state.nodes.length), 0);
     assert.equal(await page.evaluate(() => window.__kg.state.edges.length), 0);
   });
