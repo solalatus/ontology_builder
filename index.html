@@ -84,6 +84,24 @@
     --ghost-stroke: #4da6ff;
   }
 
+  /* frontend-design skill's quality floor ("responsive down to mobile,
+     visible keyboard focus, reduced motion respected") -- every animated
+     transition in this file (hover lifts, panel-width changes,
+     background/border-color fades) reads var(--transition-fast) rather
+     than a literal duration, so overriding that one token here is enough
+     to make all of them instant under this media query without touching
+     each rule individually. The end-state change itself (a lifted button,
+     an expanded panel, an armed toggle's new border color) still happens
+     immediately -- only the animated interpolation between states is
+     removed, which is what "reduced motion" means, not "no visual
+     feedback." Canvas2D drawing (Section 6) is imperative JS, not
+     CSS-transition-driven, so it's unaffected either way. */
+  @media (prefers-reduced-motion: reduce) {
+    :root {
+      --transition-fast: 0ms;
+    }
+  }
+
   /* Explicit user toggle (not prefers-color-scheme) — see toggleTheme() in
      the script. Defaults to dark (root, above) so an untouched app looks
      exactly as it always has; this block only applies once the user opts
