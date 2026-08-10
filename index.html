@@ -272,6 +272,23 @@
     font-size: 14px;
     font-weight: 600;
     padding: 8px 10px;
+    /* Clears #agent-panel-toggle -- a fixed z-index:25 overlay always
+       sitting at page x:[0,40], regardless of the agent panel's
+       expand/collapse state (only the panel *body*'s own width is
+       conditional; the toggle itself never moves) -- which otherwise sits
+       on top of the toolbar's own z-index:10 and covers this element's
+       first ~28px whenever the toolbar starts at its default left:0 (i.e.
+       whenever --agent-panel-offset is unset, whether because the panel is
+       collapsed or JS hasn't run yet on first paint). Without this, the
+       graph name's own first couple of characters render invisibly under
+       the toggle button at every viewport width. 36px = the toggle's 40px
+       width, minus #toolbar's own 12px left padding (already providing
+       some clearance), plus an 8px gap -- not tied to --agent-panel-offset
+       itself: that variable already handles shifting everything further
+       right once the panel *expands* past the toggle's own footprint;
+       this is the separate, always-on baseline the toggle needs
+       regardless of expand state. */
+    margin-left: 36px;
     margin-right: 4px;
     border-radius: var(--radius-sm);
     cursor: pointer;

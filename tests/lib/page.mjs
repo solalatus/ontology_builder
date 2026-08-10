@@ -28,9 +28,9 @@ export const APP_URL = "file://" + path.resolve(__dirname, "..", "..", "index.ht
 // with any addInitScript that touches localStorage, regardless of key; it
 // is a test-infra hazard, not an app bug. Setting the pin after load, the
 // same way a real user's click on the language toggle would, avoids it.
-export async function withPage(fn, { url = APP_URL, lang = "en" } = {}) {
+export async function withPage(fn, { url = APP_URL, lang = "en", viewport = { width: 1200, height: 800 } } = {}) {
   const browser = await launchChromium();
-  const page = await browser.newPage({ viewport: { width: 1200, height: 800 } });
+  const page = await browser.newPage({ viewport });
   const consoleErrors = [];
   page.on("console", (msg) => { if (msg.type() === "error") consoleErrors.push(msg.text()); });
   page.on("pageerror", (err) => consoleErrors.push(String(err)));
