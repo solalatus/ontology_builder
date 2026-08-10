@@ -127,14 +127,17 @@ test("the SVG icon renders fully inside the toggle button's own bounds, at both 
   }
 });
 
-test("the toggle's accessible name (aria-label) tracks the active language, in sync with its title tooltip", async () => {
+test("the toggle's accessible name (aria-label) tracks the active language, in sync with its custom tooltip", async () => {
+  // `title` was later removed in favor of a custom data-tooltip (design
+  // critique round 3) -- a native tooltip would otherwise show up doubled
+  // alongside the custom one. aria-label is what actually carries the
+  // accessible name and is asserted here; the data-tooltip <-> language
+  // sync itself is covered in tests/design-critique-round3.spec.mjs.
   await withPage(async (page) => {
     assert.equal(await page.getAttribute("#agent-panel-toggle", "aria-label"), "Helper agent");
-    assert.equal(await page.getAttribute("#agent-panel-toggle", "title"), "Helper agent");
 
     await page.click("#btn-lang-toggle");
     assert.equal(await page.getAttribute("#agent-panel-toggle", "aria-label"), "Segéd ügynök");
-    assert.equal(await page.getAttribute("#agent-panel-toggle", "title"), "Segéd ügynök");
   });
 });
 
