@@ -1793,3 +1793,92 @@ the reviewer's own list) -- narrowly targeted at the single-run objection specif
       in that file).
 - [x] Also manifested the same comparison as a standalone published artifact (side-by-side tables, the four
       findings above) at the user's request, for a quicker read than the raw markdown tables.
+
+## Azure OpenAI support alongside OpenAI (BYOK)
+
+**2026-08-08.** Follow-up request, off the now-merged `main` (this subproject's own branch has been rolled
+into `main` for a while, per the earlier "big reshuffle"): let the connect flow accept either a plain
+OpenAI key or an Azure OpenAI key, seamlessly, with the user aware which is in effect, and both behaving
+uniformly and stably. Explicit instruction: be careful not to introduce bugs from the real API differences
+(temperature, tool calling, anything load-bearing) -- treated as a mandate to verify against the two APIs'
+real differences, not just wire up a plausible-looking URL swap.
+
+Real differences identified and handled, not just the URL:
+- **Auth header.** OpenAI takes the key as `Authorization: Bearer`; Azure's key-based auth takes it as a
+  plain `api-key` header instead. Sending the wrong shape doesn't degrade gracefully, it fails auth
+  outright -- this is the one difference a "just reuse the OpenAI code path" implementation would most
+  easily get wrong.
+- **api-version.** Azure requires an explicit `api-version` query param on every request (OpenAI has no
+  equivalent, versioning implicitly via `/v1/`). Pinned to `2024-10-21`, a long-stable GA release known to
+  support chat completions with tool/function calling -- not a preview version, so behavior doesn't shift
+  under this app without an explicit review.
+- **Model addressing.** OpenAI takes a `model` field in the request body; Azure addresses the model via a
+  *deployment name* in the URL path instead (`.../deployments/{deploymentId}/chat/completions`) -- a
+  `model` body field is meaningless there and omitted entirely for Azure requests, rather than sent and
+  hoped-to-be-ignored.
+- **Model discovery shape.** OpenAI's `GET /v1/models` returns model ids directly; Azure's analogue,
+  `GET .../openai/deployments`, returns *deployments* -- an arbitrary, resource-owner-chosen name (`id`)
+  distinct from the actual underlying model it runs (`model`). The existing default-model heuristics
+  (`isLikelyReasoningModel`/`isLikelyChatModel`/`isStandardTierModel`, all regex-based on OpenAI's own
+  naming convention) were changed to read a new `baseModel` field instead of `id` -- `id` is what's shown
+  in the UI and what's actually sent in requests either way, but only `baseModel` (== `id` for OpenAI, the
+  underlying model name for Azure) carries a naming convention the heuristics can match. Verified with a
+  test asserting a deployment named nothing like a model id (`"team-alpha-endpoint"`, running `gpt-5.5`) is
+  still correctly picked over a deployment whose *name* looks more "standard" but runs the mini tier.
+- **`temperature`.** Checked and confirmed a non-issue either way: the app never sets a `temperature` field
+  at all (relies on API defaults), so there was nothing to get wrong here for either provider -- OpenAI's
+  reasoning-model family already rejects an explicit `temperature`, and not sending one sidesteps that on
+  both platforms identically.
+- **Tool/function calling.** Verified to need no changes at all -- `tools`/`tool_choice: "auto"` are sent
+  identically for both providers; Azure OpenAI's chat completions API has supported the same schema for a
+  long time. Confirmed with a full mocked tool-calling round trip (`apply_ontology_yaml` actually committing
+  to the canvas through the real import pipeline, in exactly one undo step) against a simulated Azure
+  response.
+- **`prompt_cache_key`.** An OpenAI-specific prompt-prefix-caching routing hint with no verified Azure
+  equivalent on the classic chat-completions surface -- left `null` for an Azure connection so it's simply
+  never sent, rather than sending a field whose Azure-side behavior isn't confirmed.
+- **401 vs. 403.** Widened invalid-key detection to treat either status as `invalidKey` (previously 401
+  only) -- a low-risk, strictly-improving change verified against no existing test asserting otherwise;
+  motivated by uncertainty over which exact status a misconfigured Azure resource returns for an auth
+  failure, not a confirmed live discrepancy.
+
+UI: the connect modal's key field is now labeled "API key (OpenAI or Azure OpenAI)" with a new, adjacent
+"Azure OpenAI endpoint (optional)" field and explanatory hint text ("Leave blank to use OpenAI directly...")
+directly beneath it -- entering an endpoint is the *only* signal that switches provider
+(`isAzureProvider(azureEndpoint)`), so leaving it blank reproduces today's exact OpenAI behavior with zero
+change, which every pre-existing `helper-agent-*.spec.mjs` file continues to prove by passing unmodified.
+Malformed endpoints (anything that doesn't parse as an absolute http(s) URL) are rejected with a dedicated
+inline error before any network call is attempted, not pattern-matched against Azure's own hostname
+conventions specifically (those span more than one domain suffix today and could gain more).
+
+- [x] `tests/helper-agent-azure-openai.spec.mjs` -- 25 fully mocked tests (pure URL/header/validation
+      functions, connect-modal UI, blank-endpoint-stays-OpenAI regression proof, deployment-list mapping
+      and the baseModel-heuristic case above, malformed-endpoint and invalid-key/403 error handling, full
+      chat-completion and tool-calling request-shape assertions, 429 retry-with-backoff, remember/forget/
+      disconnect persistence symmetry, language-toggle retranslation). One real bug caught this way and
+      fixed before commit: `agentErrorInvalidEndpoint` was added to both language tables but never wired
+      into `renderAgentConnectError()`'s branch chain, so the validation error kind was set correctly but
+      the modal displayed nothing -- caught by the malformed-endpoint test, verified red before the fix and
+      green after.
+- [x] `tests/helper-agent-live-azure.spec.mjs` + `tests/lib/liveAzureOpenAi.mjs` -- the real-Azure-resource
+      counterpart to `helper-agent-live-openai.spec.mjs`, reusing everything provider-agnostic from
+      `tests/lib/liveOpenAi.mjs` (the shared rate-limit backoff, `openPanel`/`sendChatMessage`) and only
+      re-implementing the two genuinely Azure-shaped pieces: the relay (api-key header, a caller-supplied
+      endpoint pattern rather than a fixed URL) and the connect flow (fills in the endpoint field too).
+      Opt-in, skips every test with a clear reason unless **both** `AZURE_OPENAI_API_KEY` and
+      `AZURE_OPENAI_ENDPOINT` are set -- a key alone can't be used, since (unlike OpenAI) an Azure key is
+      only meaningful against the specific resource it belongs to. **Not yet run against a real resource as
+      of this entry** -- the user provided a real Azure test key but the resource endpoint was still being
+      looked up; `tests/README.md` documents the opt-in convention either way, and this file will get its
+      first live run (and the `2024-10-21` api-version constant adjusted if a real resource requires a
+      newer one) once the endpoint is available.
+- [x] `tests/README.md` gained a new "Azure OpenAI support" section documenting both the mocked and live
+      suites, and clarifying the two live suites (`helper-agent-live-openai`/`helper-agent-live-azure`) are
+      independent of each other -- set only `OPENAI_API_KEY` for the OpenAI live path, only the two Azure
+      variables for the Azure live path, or both for both; the mocked suites for both providers always run
+      regardless.
+- [x] Full mocked regression (`node --test tests/*.spec.mjs`, 750 tests -- `OPENAI_API_KEY` present in this
+      environment's `.env` so the OpenAI live suite ran for real too, not just skipped): 744 pass, 1 fail (a
+      pre-existing, unrelated CSS-tooltip-timing flake under full-suite load, confirmed to pass cleanly in
+      isolation and untouched by this change), 5 skipped (the new Azure live suite, correctly, since no
+      Azure endpoint was available yet).
