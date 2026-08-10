@@ -113,6 +113,43 @@ over `.env` if both are set). Costs a small amount of real money per run (a
 handful of cheap chat-completion calls); never runs in CI, only when a key
 is deliberately provided.
 
+## Azure OpenAI support
+
+The helper agent's BYOK connect flow accepts either an OpenAI key or an
+Azure OpenAI key + resource endpoint — entering an endpoint is the only
+signal that switches provider (see `isAzureProvider()` in `index.html`).
+The two APIs differ in more than just the URL: Azure uses an `api-key`
+header instead of `Authorization: Bearer`, requires an explicit
+`api-version` query param on every request, addresses a model via a
+resource-owner-chosen *deployment* name in the URL path rather than a
+`model` field in the body, and its deployment-list response shapes each
+entry differently from OpenAI's `/v1/models` (an `id` that's the arbitrary
+deployment name, and a separate `model` field for the actual underlying
+model — which is what the reasoning/chat-model default-picking heuristics
+read, not the deployment name).
+
+`helper-agent-azure-openai.spec.mjs` covers all of this fully mocked — no
+key or endpoint needed, always runs, deterministic in CI, same as every
+other non-live `helper-agent-*` spec.
+
+`helper-agent-live-azure.spec.mjs` mirrors `helper-agent-live-openai.spec.mjs`
+for the Azure code path — genuine calls to a real Azure OpenAI resource, to
+catch a mismatch between what the code assumes the live deployments-list/
+chat-completions response shape is and what a real resource actually
+returns. Opt-in: skips every test, with a clear reason, unless **both**
+`AZURE_OPENAI_API_KEY` and `AZURE_OPENAI_ENDPOINT` are set (same `.env`/
+environment convention as `OPENAI_API_KEY` above — `AZURE_OPENAI_ENDPOINT`
+is the resource's own base URL, e.g. `https://your-resource.openai.azure.com`).
+A key alone can't be used to run these: unlike OpenAI's single global API
+host, an Azure OpenAI key is only meaningful against the specific resource
+it belongs to. Costs a small amount of real money per run; never runs in
+CI, only when both are deliberately provided.
+
+Either live suite is independent of the other — set only `OPENAI_API_KEY`
+to exercise the OpenAI live path, only the two Azure variables to exercise
+the Azure live path, or both to exercise both; the mocked suites for both
+providers always run regardless of what's configured.
+
 ## Ontology-recovery eval (opt-in, separate from the main suite)
 
 `tests/evals/ontology-recovery.eval.spec.mjs` simulates a full ontology-

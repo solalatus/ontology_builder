@@ -1043,7 +1043,7 @@
     font-size: 13px;
   }
 
-  #agent-key-input {
+  #agent-key-input, #agent-azure-endpoint-input, #agent-azure-api-version-input {
     width: 100%;
     box-sizing: border-box;
     font: inherit;
@@ -1053,6 +1053,46 @@
     border: 1px solid var(--toolbar-border);
     background: var(--btn-bg);
     color: var(--toolbar-fg);
+  }
+
+  .agent-field-hint {
+    margin: 4px 0 0;
+    font-size: 12px;
+    line-height: 1.4;
+    color: var(--toolbar-fg);
+    opacity: 0.65;
+  }
+
+  /* The small link/summary row that replaces the old always-visible Azure
+     endpoint field in the main connect modal (design critique, 2026-08) --
+     styled like #agent-forget-key's own dashed-border "secondary action"
+     look so it doesn't compete visually with the primary key field above
+     it. Its text doubles as the "is Azure configured" indicator: plain
+     link text when not configured, the endpoint itself once it is. */
+  #agent-azure-config-open {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    margin: 8px 0 0;
+    font-size: 12px;
+    text-align: left;
+    padding: 6px 9px;
+    color: var(--toolbar-fg);
+    background: transparent;
+    border: 1px dashed var(--toolbar-border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+  }
+
+  #agent-azure-config-open:hover {
+    background: var(--btn-bg-hover);
+  }
+
+  /* Remove sits apart from Cancel/Save (a destructive action, not a peer of
+     the other two) -- pushed to the opposite end of .modal-actions' flex
+     row instead of grouped with them. */
+  #agent-azure-config-remove {
+    margin-right: auto;
   }
 
   .agent-transcript {
@@ -1251,6 +1291,7 @@
     <h2 id="agent-connect-title" class="modal-title">Segéd ügynök csatlakoztatása</h2>
     <label id="agent-key-label" class="details-field-label" for="agent-key-input">OpenAI API kulcs</label>
     <input id="agent-key-input" type="password" autocomplete="off" spellcheck="false">
+    <button id="agent-azure-config-open" type="button">Azure OpenAI-t használsz?</button>
     <label id="agent-model-label" class="details-field-label" for="agent-model-select-modal">Modell</label>
     <select id="agent-model-select-modal" disabled></select>
     <label id="agent-remember-row" class="agent-remember-row">
@@ -1261,6 +1302,29 @@
     <div class="modal-actions">
       <button id="agent-connect-cancel" type="button">Mégse</button>
       <button id="agent-connect-submit" type="button">Csatlakozás</button>
+    </div>
+  </div>
+</div>
+
+<!-- Azure OpenAI configuration popup -- reached via the small link/summary
+     button above rather than shown inline, so the default flow reads as a
+     normal single-key OpenAI form. Not true modal stacking (a swap: opening
+     this hides #agent-connect-overlay, Cancel/Save/Remove reverse that) --
+     see submitAgentConnect()'s own comment on why. -->
+<div id="agent-azure-config-overlay" class="modal-overlay">
+  <div id="agent-azure-config-dialog" class="modal-dialog" role="dialog" aria-modal="true">
+    <h2 id="agent-azure-config-title" class="modal-title">Azure OpenAI beállítások</h2>
+    <label id="agent-azure-endpoint-label" class="details-field-label" for="agent-azure-endpoint-input">Azure OpenAI végpont</label>
+    <input id="agent-azure-endpoint-input" type="text" autocomplete="off" spellcheck="false" placeholder="https://your-resource.openai.azure.com">
+    <p id="agent-azure-endpoint-hint" class="agent-field-hint">Hagyd üresen az OpenAI közvetlen használatához. Azure OpenAI esetén add meg az erőforrásod végpontját.</p>
+    <label id="agent-azure-api-version-label" class="details-field-label" for="agent-azure-api-version-input">API verzió</label>
+    <input id="agent-azure-api-version-input" type="text" autocomplete="off" spellcheck="false" placeholder="2023-03-15-preview">
+    <p id="agent-azure-api-version-hint" class="agent-field-hint">Hagyd üresen az alapértelmezett verzió használatához. Csak akkor add meg, ha az erőforrásodhoz másik verzió szükséges.</p>
+    <p id="agent-azure-config-error" class="agent-connect-error" role="alert"></p>
+    <div class="modal-actions">
+      <button id="agent-azure-config-remove" type="button">Azure eltávolítása</button>
+      <button id="agent-azure-config-cancel" type="button">Mégse</button>
+      <button id="agent-azure-config-save" type="button">Mentés</button>
     </div>
   </div>
 </div>
@@ -1541,10 +1605,20 @@ const STRINGS = {
     untitledRulePlaceholder: "(untitled rule)",
     // Helper Agent (helper_agent_plan.md) — BYOK chat panel, Phase 1.
     agentPanelToggle: "Helper agent",
-    agentPanelIntro: "Connect with your own OpenAI API key to a helper agent that assists with building the domain model.",
+    agentPanelIntro: "Connect with your own OpenAI or Azure OpenAI API key to a helper agent that assists with building the domain model.",
     agentConnect: "Connect",
     agentConnectTitle: "Connect helper agent",
     agentKeyLabel: "OpenAI API key",
+    agentKeyLabelAzure: "Azure OpenAI API key",
+    agentAzureConfigLink: "Using Azure OpenAI?",
+    agentAzureConfiguredSummary: (endpoint) => `Azure OpenAI: ${endpoint} (edit)`,
+    agentAzureConfigTitle: "Azure OpenAI settings",
+    agentAzureEndpointLabel: "Azure OpenAI endpoint",
+    agentAzureEndpointHint: "Leave blank to use OpenAI directly. For Azure OpenAI, paste your resource endpoint here.",
+    agentAzureApiVersionLabel: "API version",
+    agentAzureApiVersionHint: "Leave blank to use the default version. Only set this if your resource requires a different one.",
+    agentAzureConfigRemove: "Remove Azure configuration",
+    agentAzureConfigSave: "Save",
     agentModelLabel: "Model",
     agentRememberKey: "Remember this key on this device",
     agentDisconnect: "Disconnect",
@@ -1555,8 +1629,9 @@ const STRINGS = {
     agentConnecting: "Connecting…",
     agentConfirmModel: "Confirm model & connect",
     agentErrorEmptyKey: "Enter an API key.",
-    agentErrorInvalidKey: "OpenAI rejected this key. Check it and try again.",
-    agentErrorNetwork: "Could not reach the OpenAI API (network or CORS error). Check your connection and try again.",
+    agentErrorInvalidKey: "The API rejected this key. Check it and try again.",
+    agentErrorInvalidEndpoint: "That doesn't look like a valid endpoint URL (expected something like https://your-resource.openai.azure.com).",
+    agentErrorNetwork: "Could not reach the API (network or CORS error). Check your connection and try again.",
     agentErrorNoModels: "The key worked, but no chat-capable models were returned for it.",
     agentErrorGeneric: (status) => `Connection failed (HTTP ${status}). Check your key and try again.`,
     // Helper Agent — Phase 2 (live chat).
@@ -1668,10 +1743,20 @@ const STRINGS = {
     untitledRulePlaceholder: "(névtelen szabály)",
     // Helper Agent (helper_agent_plan.md) — BYOK chat panel, Phase 1.
     agentPanelToggle: "Segéd ügynök",
-    agentPanelIntro: "Csatlakozz a saját OpenAI API kulcsoddal egy segéd ügynökhöz, ami a doménmodell felépítésében segít.",
+    agentPanelIntro: "Csatlakozz a saját OpenAI vagy Azure OpenAI API kulcsoddal egy segéd ügynökhöz, ami a doménmodell felépítésében segít.",
     agentConnect: "Csatlakozás",
     agentConnectTitle: "Segéd ügynök csatlakoztatása",
     agentKeyLabel: "OpenAI API kulcs",
+    agentKeyLabelAzure: "Azure OpenAI API kulcs",
+    agentAzureConfigLink: "Azure OpenAI-t használsz?",
+    agentAzureConfiguredSummary: (endpoint) => `Azure OpenAI: ${endpoint} (szerkesztés)`,
+    agentAzureConfigTitle: "Azure OpenAI beállítások",
+    agentAzureEndpointLabel: "Azure OpenAI végpont",
+    agentAzureEndpointHint: "Hagyd üresen az OpenAI közvetlen használatához. Azure OpenAI esetén add meg az erőforrásod végpontját.",
+    agentAzureApiVersionLabel: "API verzió",
+    agentAzureApiVersionHint: "Hagyd üresen az alapértelmezett verzió használatához. Csak akkor add meg, ha az erőforrásodhoz másik verzió szükséges.",
+    agentAzureConfigRemove: "Azure eltávolítása",
+    agentAzureConfigSave: "Mentés",
     agentModelLabel: "Modell",
     agentRememberKey: "A kulcs megjegyzése ezen az eszközön",
     agentDisconnect: "Leválasztás",
@@ -1682,8 +1767,9 @@ const STRINGS = {
     agentConnecting: "Csatlakozás…",
     agentConfirmModel: "Modell megerősítése és csatlakozás",
     agentErrorEmptyKey: "Add meg az API kulcsot.",
-    agentErrorInvalidKey: "Az OpenAI elutasította ezt a kulcsot. Ellenőrizd és próbáld újra.",
-    agentErrorNetwork: "Nem sikerült elérni az OpenAI API-t (hálózati vagy CORS hiba). Ellenőrizd a kapcsolatot és próbáld újra.",
+    agentErrorInvalidKey: "Az API elutasította ezt a kulcsot. Ellenőrizd és próbáld újra.",
+    agentErrorInvalidEndpoint: "Ez nem tűnik érvényes végpont URL-nek (valami ilyesmit várunk: https://your-resource.openai.azure.com).",
+    agentErrorNetwork: "Nem sikerült elérni az API-t (hálózati vagy CORS hiba). Ellenőrizd a kapcsolatot és próbáld újra.",
     agentErrorNoModels: "A kulcs működött, de nem érkezett hozzá csevegésre alkalmas modell.",
     agentErrorGeneric: (status) => `Sikertelen csatlakozás (HTTP ${status}). Ellenőrizd a kulcsot és próbáld újra.`,
     // Helper Agent — Phase 2 (élő beszélgetés).
@@ -1819,7 +1905,16 @@ function applyAgentLanguage() {
   byId("agent-panel-intro").textContent = t("agentPanelIntro");
   byId("agent-connect-open").textContent = t("agentConnect");
   byId("agent-connect-title").textContent = t("agentConnectTitle");
-  byId("agent-key-label").textContent = t("agentKeyLabel");
+  updateAgentKeyLabel(); // dynamic (OpenAI vs. Azure OpenAI) -- see its own definition
+  byId("agent-azure-endpoint-label").textContent = t("agentAzureEndpointLabel");
+  byId("agent-azure-endpoint-hint").textContent = t("agentAzureEndpointHint");
+  byId("agent-azure-api-version-label").textContent = t("agentAzureApiVersionLabel");
+  byId("agent-azure-api-version-hint").textContent = t("agentAzureApiVersionHint");
+  byId("agent-azure-config-title").textContent = t("agentAzureConfigTitle");
+  byId("agent-azure-config-remove").textContent = t("agentAzureConfigRemove");
+  byId("agent-azure-config-cancel").textContent = t("cancel");
+  byId("agent-azure-config-save").textContent = t("agentAzureConfigSave");
+  updateAgentAzureConfigSummary(); // also re-renders the link/summary button's text
   byId("agent-model-label").textContent = t("agentModelLabel");
   byId("agent-remember-text").textContent = t("agentRememberKey");
   byId("agent-connect-cancel").textContent = t("cancel");
@@ -1834,6 +1929,7 @@ function applyAgentLanguage() {
   // copied verbatim, so a language toggle mid-error doesn't leave a
   // stale-language message on screen.
   renderAgentConnectError();
+  renderAgentAzureConfigError();
 }
 
 function updateLangButton() {
@@ -6791,6 +6887,16 @@ document.getElementById("btn-clear").addEventListener("click", () => {
 // ---------------------------------------------------------------------------
 const AGENT_KEY_STORAGE_KEY = "kg-agent-key";
 const AGENT_MODEL_STORAGE_KEY = "kg-agent-model";
+// Only ever holds a value when the remembered connection was Azure OpenAI
+// (see submitAgentConnect) -- absent/empty means "remembered key is a plain
+// OpenAI key," matching how agentState.azureEndpoint itself doubles as the
+// provider signal (see its own comment below).
+const AGENT_AZURE_ENDPOINT_STORAGE_KEY = "kg-agent-azure-endpoint";
+// Only ever holds a value when the remembered connection is Azure AND used
+// a non-default api-version (see the Azure config popup's Save handler) --
+// absent means "use AZURE_OPENAI_API_VERSION," same absent-means-default
+// convention as every other override in this popup.
+const AGENT_AZURE_API_VERSION_STORAGE_KEY = "kg-agent-azure-api-version";
 // UI preference, not connection state -- deliberately its own key, same
 // reasoning as THEME_STORAGE_KEY/LANG_STORAGE_KEY (issue #55).
 const AGENT_PANEL_WIDTH_STORAGE_KEY = "kg-agent-panel-width";
@@ -6798,6 +6904,103 @@ const AGENT_PANEL_WIDTH_DEFAULT = 320; // matches #agent-panel-body's own CSS fa
 const AGENT_PANEL_WIDTH_MIN = 240;
 const AGENT_PANEL_WIDTH_MAX = 720;
 const OPENAI_MODELS_URL = "https://api.openai.com/v1/models";
+// Azure OpenAI requires an explicit api-version query param on every
+// request (unlike OpenAI, which versions implicitly via the /v1/ path) --
+// there is no "latest"/omit-it option.
+//
+// Pinned to this specific old preview version for a live-verified reason,
+// not out of date pinning: `GET .../openai/deployments` (this app's only
+// way to discover a key's available deployments without an interactive
+// Entra ID sign-in this single-file BYOK app has no way to host) 404s under
+// EVERY api-version from 2023-05-15 through at least 2025-04-01-preview --
+// confirmed against a real Azure OpenAI resource, not a guess. Only
+// 2023-03-15-preview and 2022-12-01 still serve that listing route; Azure
+// appears to have dropped API-key-based deployment listing from the
+// data-plane REST surface for newer versions entirely, moving it to the
+// ARM control plane instead (a different, Entra-ID-gated API this app
+// can't use). The same real resource confirmed 2023-03-15-preview also
+// serves chat completions correctly, including tool/function calling, so
+// one shared version covers both needs -- no need to split model-discovery
+// and chat onto separate api-versions. Bump only after re-verifying the
+// listing route still 200s under the candidate version against a real
+// resource (re-run tests/helper-agent-live-azure.spec.mjs), not just
+// because a newer version exists.
+const AZURE_OPENAI_API_VERSION = "2023-03-15-preview";
+
+// True when azureEndpoint is a non-empty string -- the one signal this app
+// uses to decide OpenAI vs. Azure OpenAI throughout (see agentState.azureEndpoint's
+// own comment). Kept as a named predicate rather than repeating the
+// truthiness check at every call site, so "what counts as Azure mode" has
+// exactly one definition.
+function isAzureProvider(azureEndpoint) {
+  return Boolean(azureEndpoint);
+}
+
+// Trims whitespace and a trailing slash (so URL-joining below never
+// produces a doubled "//") -- returns null for blank input, which is what
+// tells the rest of the connect flow "no endpoint was given, use OpenAI."
+function normalizeAzureEndpoint(raw) {
+  const trimmed = (raw || "").trim().replace(/\/+$/, "");
+  return trimmed || null;
+}
+
+// Light validation only: must parse as an absolute http(s) URL with a host.
+// Not trying to specifically pattern-match "*.openai.azure.com" or
+// "*.services.ai.azure.com" -- Azure's own resource-naming conventions
+// span both today and could add more, and a false-negative here would
+// block a legitimate endpoint for no real safety benefit (an actually-wrong
+// endpoint just fails the subsequent fetch with a clear network/404 error
+// instead).
+function isValidAzureEndpoint(normalized) {
+  try {
+    const u = new URL(normalized);
+    return (u.protocol === "https:" || u.protocol === "http:") && Boolean(u.hostname);
+  } catch (err) {
+    return false;
+  }
+}
+
+// GET .../openai/deployments — Azure's analog to OpenAI's GET /v1/models:
+// the set of model *deployments* this key can actually call, since (unlike
+// OpenAI) an Azure OpenAI resource can only serve chat completions for a
+// base model the resource owner has explicitly deployed under a
+// deployment name, never an arbitrary model id.
+// apiVersion is optional (falsy -- including omitted, null, or "" -- falls
+// back to AZURE_OPENAI_API_VERSION) so every existing call site that never
+// deals with the per-connection override (e.g. this file's own pure-function
+// test coverage) keeps working unchanged; only the Azure config popup's
+// Save handler ever passes a real override through, threaded via
+// agentState.azureApiVersion below.
+function agentModelsUrl(azureEndpoint, apiVersion) {
+  return isAzureProvider(azureEndpoint)
+    ? `${azureEndpoint}/openai/deployments?api-version=${apiVersion || AZURE_OPENAI_API_VERSION}`
+    : OPENAI_MODELS_URL;
+}
+
+// Azure's chat completions endpoint addresses the deployment via the URL
+// path itself (.../deployments/{deploymentId}/chat/completions), not a
+// `model` field in the body the way OpenAI's does -- deploymentOrModel is
+// agentState.model either way (a deployment name for Azure, a model id for
+// OpenAI), since callAgentChatRaw never needs to know which. apiVersion is
+// optional, same fallback convention as agentModelsUrl above.
+function agentChatUrl(azureEndpoint, deploymentOrModel, apiVersion) {
+  return isAzureProvider(azureEndpoint)
+    ? `${azureEndpoint}/openai/deployments/${encodeURIComponent(deploymentOrModel)}/chat/completions?api-version=${apiVersion || AZURE_OPENAI_API_VERSION}`
+    : OPENAI_CHAT_URL;
+}
+
+// The one genuinely easy-to-get-wrong difference between the two APIs:
+// OpenAI takes the key as a Bearer token; Azure OpenAI's key-based auth
+// (the only kind a pasted API key can express -- the alternative, Entra ID
+// bearer tokens, needs an interactive sign-in flow this single-file BYOK
+// app has no way to host) takes it as a plain `api-key` header instead. A
+// key that's valid for one provider is never even shaped like a valid
+// credential for the other, so sending the wrong header form doesn't
+// silently degrade -- it fails auth outright, which is exactly why this
+// needs to be right rather than "close enough."
+function agentAuthHeaders(azureEndpoint, apiKey) {
+  return isAzureProvider(azureEndpoint) ? { "api-key": apiKey } : { Authorization: `Bearer ${apiKey}` };
+}
 
 // Shared backoff for both real API entry points (model discovery below and
 // chat turns, see callAgentChatRaw further down) — a 429 with
@@ -6816,6 +7019,18 @@ function sleepMs(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+// Every heuristic below reads model.baseModel, not model.id -- they're the
+// same value for OpenAI (there's no separate "underlying model" concept
+// there), but for an Azure deployment, id is the resource owner's own
+// arbitrary deployment name (e.g. "prod-chat") while baseModel is the
+// actual model it's running (e.g. "gpt-5.5") -- only the latter carries any
+// naming convention these regexes can match. fetchAgentModels() is what
+// guarantees baseModel is always populated on every model object, for
+// either provider, before any of these ever see it.
+function modelNameForHeuristics(model) {
+  return (model && (model.baseModel || model.id)) || "";
+}
+
 // Reasoning/"thinking" models are the current o-series (o1, o3, o4, ...),
 // any GPT major version 5 or above (OpenAI folded reasoning into the
 // mainline GPT lineup starting there — confirmed live: a real key's model
@@ -6824,7 +7039,8 @@ function sleepMs(ms) {
 // so explicitly. Heuristic on purpose (see helper_agent_plan.md §4.1) — the
 // naming scheme is OpenAI's to change, and this stays correct without an
 // edit as long as future reasoning models keep one of these conventions.
-function isLikelyReasoningModel(id) {
+function isLikelyReasoningModel(model) {
+  const id = modelNameForHeuristics(model);
   return /^o[0-9]/i.test(id) || /^gpt-[5-9](\.|-|$)/i.test(id) || /think|reason/i.test(id);
 }
 
@@ -6838,7 +7054,8 @@ function isLikelyReasoningModel(id) {
 // ordinary turn-by-turn tool-calling chat, not general defaults — found via
 // a real key's model list, where the newest-by-created id in the reasoning
 // pool was otherwise a "-deep-research-" variant, not a general chat model.
-function isLikelyChatModel(id) {
+function isLikelyChatModel(model) {
+  const id = modelNameForHeuristics(model);
   return !/whisper|tts|dall-e|embedding|moderation|davinci|babbage|curie|ada|realtime|audio|transcribe|image|deep-research|search-preview|search-api/i.test(id);
 }
 
@@ -6855,14 +7072,15 @@ function isLikelyChatModel(id) {
 // OpenAI's own /v1/models response signals this incompatibility ahead of
 // time; avoiding non-standard-tier ids by default is the safest bet without
 // an extra live capability probe on every connect.
-function isStandardTierModel(id) {
+function isStandardTierModel(model) {
+  const id = modelNameForHeuristics(model);
   return /^(gpt-[0-9]+(\.[0-9]+)?|o[0-9]+)(-\d{4}-\d{2}-\d{2})?$/i.test(id);
 }
 
 function pickDefaultAgentModel(models) {
-  const chatModels = models.filter((m) => isLikelyChatModel(m.id));
-  const reasoningModels = chatModels.filter((m) => isLikelyReasoningModel(m.id));
-  const standardReasoningModels = reasoningModels.filter((m) => isStandardTierModel(m.id));
+  const chatModels = models.filter((m) => isLikelyChatModel(m));
+  const reasoningModels = chatModels.filter((m) => isLikelyReasoningModel(m));
+  const standardReasoningModels = reasoningModels.filter((m) => isStandardTierModel(m));
   const candidates = standardReasoningModels.length ? standardReasoningModels
     : reasoningModels.length ? reasoningModels
     : chatModels;
@@ -6879,8 +7097,19 @@ const agentState = {
   connected: false,
   apiKey: null,
   rememberKey: false,
+  // null = OpenAI; a non-empty string (the resource endpoint) = Azure
+  // OpenAI. Deliberately the one source of truth for "which provider,"
+  // rather than a separate parallel `provider` field that could drift out
+  // of sync with it -- see isAzureProvider()'s own comment. Set once at
+  // connect finalize time (submitAgentConnect), cleared on disconnect.
+  azureEndpoint: null,
+  // Azure-only, per-connection override of AZURE_OPENAI_API_VERSION (see the
+  // Azure config popup) -- null means "use the default." Meaningless when
+  // azureEndpoint is null, same as azureEndpoint itself being the one
+  // provider signal (see isAzureProvider's own comment).
+  azureApiVersion: null,
   model: null,
-  models: [], // [{id, created}], newest-first once sorted for display
+  models: [], // [{id, created, baseModel}], newest-first once sorted for display -- see fetchAgentModels()'s own comment on baseModel
   // Full UI transcript ({role, text}[]) vs. the API-facing working set
   // ({role, content}[], OpenAI's own shape) diverge once context-length
   // compaction kicks in (helper_agent_plan.md §4.10) — transcript keeps
@@ -7112,6 +7341,7 @@ function renderAgentConnectError() {
   if (!agentConnectErrorKind) { el.textContent = ""; return; }
   if (agentConnectErrorKind === "emptyKey") el.textContent = t("agentErrorEmptyKey");
   else if (agentConnectErrorKind === "invalidKey") el.textContent = t("agentErrorInvalidKey");
+  else if (agentConnectErrorKind === "invalidEndpoint") el.textContent = t("agentErrorInvalidEndpoint");
   else if (agentConnectErrorKind === "network") el.textContent = t("agentErrorNetwork");
   else if (agentConnectErrorKind === "noModels") el.textContent = t("agentErrorNoModels");
   else if (agentConnectErrorKind && typeof agentConnectErrorKind === "object") el.textContent = t("agentErrorGeneric", agentConnectErrorKind.status);
@@ -7128,18 +7358,34 @@ function setAgentConnectError(kind) {
 // on failure, so the caller can drive setAgentConnectError() directly. A
 // transient 429 (rate_limit_exceeded) is retried with backoff before that;
 // see AGENT_RATE_LIMIT_MAX_ATTEMPTS's own comment.
-async function fetchOpenAiModels(apiKey) {
+// Azure's deployment-list response shapes each entry as {id (the
+// deployment name -- what a chat request must address), model (the
+// underlying base model, e.g. "gpt-4o" -- what the reasoning/chat-model
+// heuristics below need to look at), created_at (unix seconds), status}.
+// A deployment name is arbitrary (the resource owner's own choice, e.g.
+// "prod-chat" or "team-gpt4o") and carries no naming convention at all, so
+// baseModel is threaded through as its own field precisely so
+// isLikelyReasoningModel() et al. can keep matching against something
+// that's actually a model id, on both providers, without the caller
+// needing to know which provider it's looking at. For OpenAI, baseModel is
+// just id again -- there's no separate underlying name to distinguish.
+// status is checked only when present and explicitly a known-bad value
+// ("failed"/"canceled") -- not requiring an exact "succeeded" match, since
+// an unfamiliar future status string should degrade to "assume usable"
+// rather than silently hide a deployment this app just doesn't recognize
+// the status label for.
+async function fetchAgentModels(apiKey, azureEndpoint, apiVersion) {
+  const azure = isAzureProvider(azureEndpoint);
+  const url = agentModelsUrl(azureEndpoint, apiVersion);
+  const headers = agentAuthHeaders(azureEndpoint, apiKey);
   for (let attempt = 1; attempt <= AGENT_RATE_LIMIT_MAX_ATTEMPTS; attempt++) {
     let res;
     try {
-      res = await fetch(OPENAI_MODELS_URL, {
-        method: "GET",
-        headers: { Authorization: `Bearer ${apiKey}` },
-      });
+      res = await fetch(url, { method: "GET", headers });
     } catch (err) {
       throw { kind: "network" };
     }
-    if (res.status === 401) throw { kind: "invalidKey" };
+    if (res.status === 401 || res.status === 403) throw { kind: "invalidKey" };
     if (res.status === 429) {
       let errJson = null;
       try { errJson = await res.json(); } catch (err) { /* some error bodies aren't JSON */ }
@@ -7158,9 +7404,16 @@ async function fetchOpenAiModels(apiKey) {
       throw { kind: "network" };
     }
     const data = Array.isArray(json && json.data) ? json.data : [];
-    return data
-      .filter((m) => m && typeof m.id === "string")
-      .map((m) => ({ id: m.id, created: typeof m.created === "number" ? m.created : 0 }));
+    const usable = data.filter((m) => m && typeof m.id === "string" &&
+      !(azure && typeof m.status === "string" && /^(failed|canceled|cancelled)$/i.test(m.status)));
+    if (!azure) {
+      return usable.map((m) => ({ id: m.id, created: typeof m.created === "number" ? m.created : 0, baseModel: m.id }));
+    }
+    return usable.map((m) => ({
+      id: m.id,
+      created: typeof m.created_at === "number" ? m.created_at : (typeof m.created === "number" ? m.created : 0),
+      baseModel: typeof m.model === "string" && m.model ? m.model : m.id,
+    }));
   }
 }
 
@@ -7197,23 +7450,114 @@ function setAgentPanelExpanded(expanded) {
 //             using whichever model is currently selected.
 let agentConnectStage = "key";
 let agentPendingKey = null;
+let agentPendingAzureEndpoint = null;
 let agentPendingModels = [];
+// The Azure endpoint/api-version currently attached to the in-progress
+// connect flow -- set via the Azure config popup's Save/Remove (below),
+// never by a field inline in the main modal (design critique, 2026-08: "a
+// normal OpenAI key flow, and a small link that leads to an Azure-specific
+// popup"). null endpoint = plain OpenAI, same convention as
+// agentPendingAzureEndpoint/agentState.azureEndpoint. null apiVersion =
+// use AZURE_OPENAI_API_VERSION's own default.
+let agentConnectAzureEndpoint = null;
+let agentConnectAzureApiVersion = null;
 
 function updateAgentConnectSubmitLabel() {
   document.getElementById("agent-connect-submit").textContent =
     agentConnectStage === "model" ? t("agentConfirmModel") : t("agentConnect");
 }
 
+// Re-renders the key field's label (plain "OpenAI API key" vs. "Azure
+// OpenAI API key") and the Azure link/summary button from whatever's
+// currently attached to the connect flow -- called after every change to
+// agentConnectAzureEndpoint (modal open, popup Save/Remove, language
+// toggle) so the two always agree with each other and with the actual
+// pending state.
+function updateAgentKeyLabel() {
+  document.getElementById("agent-key-label").textContent =
+    t(agentConnectAzureEndpoint ? "agentKeyLabelAzure" : "agentKeyLabel");
+}
+
+function updateAgentAzureConfigSummary() {
+  document.getElementById("agent-azure-config-open").textContent = agentConnectAzureEndpoint
+    ? t("agentAzureConfiguredSummary", agentConnectAzureEndpoint)
+    : t("agentAzureConfigLink");
+  updateAgentKeyLabel();
+}
+
+// Same kind-not-pre-rendered-text convention as agentConnectErrorKind, for
+// the same reason (correct re-render on a language toggle mid-error).
+let agentAzureConfigErrorKind = null; // null | "invalidEndpoint"
+
+function renderAgentAzureConfigError() {
+  document.getElementById("agent-azure-config-error").textContent =
+    agentAzureConfigErrorKind === "invalidEndpoint" ? t("agentErrorInvalidEndpoint") : "";
+}
+
+function setAgentAzureConfigError(kind) {
+  agentAzureConfigErrorKind = kind;
+  renderAgentAzureConfigError();
+}
+
+// Swap, not true modal stacking -- see the popup's own HTML comment for why.
+// Pre-fills from whatever's already attached to the connect flow, not from
+// blank, so reopening the popup to tweak one field doesn't lose the other.
+function openAzureConfigPopup() {
+  document.getElementById("agent-azure-endpoint-input").value = agentConnectAzureEndpoint || "";
+  document.getElementById("agent-azure-api-version-input").value = agentConnectAzureApiVersion || "";
+  setAgentAzureConfigError(null);
+  document.getElementById("agent-connect-overlay").style.display = "none";
+  document.getElementById("agent-azure-config-overlay").style.display = "flex";
+}
+
+// Cancel / backdrop click -- discards whatever's currently typed into the
+// popup's own fields and returns to the main modal exactly as it was.
+function closeAzureConfigPopup() {
+  document.getElementById("agent-azure-config-overlay").style.display = "none";
+  document.getElementById("agent-connect-overlay").style.display = "flex";
+}
+
+function saveAzureConfig() {
+  const endpointRaw = document.getElementById("agent-azure-endpoint-input").value;
+  const apiVersionRaw = document.getElementById("agent-azure-api-version-input").value.trim();
+  const endpoint = normalizeAzureEndpoint(endpointRaw);
+  if (endpoint && !isValidAzureEndpoint(endpoint)) { setAgentAzureConfigError("invalidEndpoint"); return; }
+  agentConnectAzureEndpoint = endpoint;
+  agentConnectAzureApiVersion = endpoint ? (apiVersionRaw || null) : null;
+  updateAgentAzureConfigSummary();
+  closeAzureConfigPopup();
+}
+
+function removeAzureConfig() {
+  agentConnectAzureEndpoint = null;
+  agentConnectAzureApiVersion = null;
+  document.getElementById("agent-azure-endpoint-input").value = "";
+  document.getElementById("agent-azure-api-version-input").value = "";
+  setAgentAzureConfigError(null);
+  updateAgentAzureConfigSummary();
+  closeAzureConfigPopup();
+}
+
 function openAgentConnectModal() {
   agentConnectStage = "key";
   agentPendingKey = null;
+  agentPendingAzureEndpoint = null;
   agentPendingModels = [];
   setAgentConnectError(null);
-  // Pre-fills a remembered key so a returning user doesn't retype it, but
-  // Connect still requires an explicit click either way — persistence is
-  // just a convenience, not a bypass of the "always via the modal" vision.
+  // Pre-fills a remembered key (and, for a remembered Azure connection, its
+  // endpoint + api-version too) so a returning user doesn't retype any of
+  // it, but Connect still requires an explicit click either way —
+  // persistence is just a convenience, not a bypass of the "always via the
+  // modal" vision.
   let storedKey = "";
-  try { storedKey = localStorage.getItem(AGENT_KEY_STORAGE_KEY) || ""; } catch (err) { /* ignore */ }
+  try {
+    storedKey = localStorage.getItem(AGENT_KEY_STORAGE_KEY) || "";
+    agentConnectAzureEndpoint = normalizeAzureEndpoint(localStorage.getItem(AGENT_AZURE_ENDPOINT_STORAGE_KEY) || "");
+    agentConnectAzureApiVersion = localStorage.getItem(AGENT_AZURE_API_VERSION_STORAGE_KEY) || null;
+  } catch (err) {
+    agentConnectAzureEndpoint = null;
+    agentConnectAzureApiVersion = null;
+  }
   document.getElementById("agent-key-input").value = storedKey;
   document.getElementById("agent-remember-key").checked = Boolean(storedKey);
   document.getElementById("agent-connect-submit").disabled = false;
@@ -7221,6 +7565,7 @@ function openAgentConnectModal() {
   modalSelect.textContent = "";
   modalSelect.disabled = true;
   updateAgentConnectSubmitLabel();
+  updateAgentAzureConfigSummary();
   document.getElementById("agent-connect-overlay").style.display = "flex";
 }
 
@@ -7251,13 +7596,21 @@ async function submitAgentConnect() {
   if (agentConnectStage === "key") {
     const key = document.getElementById("agent-key-input").value.trim();
     if (!key) { setAgentConnectError("emptyKey"); return; }
+    // Already validated once by the Azure config popup's own Save handler --
+    // re-checked here defensively too, since agentConnectAzureEndpoint can
+    // also come straight from localStorage (openAgentConnectModal) without
+    // going through Save, e.g. a value hand-edited or left over from an
+    // older version of this app.
+    const azureEndpoint = agentConnectAzureEndpoint;
+    if (azureEndpoint && !isValidAzureEndpoint(azureEndpoint)) { setAgentConnectError("invalidEndpoint"); return; }
     setAgentConnectError(null);
     submitBtn.disabled = true;
     submitBtn.textContent = t("agentConnecting");
     try {
-      const models = await fetchOpenAiModels(key);
+      const models = await fetchAgentModels(key, azureEndpoint, agentConnectAzureApiVersion);
       if (!models.length) { setAgentConnectError("noModels"); return; }
       agentPendingKey = key;
+      agentPendingAzureEndpoint = azureEndpoint;
       agentPendingModels = models;
       const defaultModel = pickDefaultAgentModel(models);
       populateAgentModelSelects(models, defaultModel);
@@ -7277,17 +7630,36 @@ async function submitAgentConnect() {
   const remember = document.getElementById("agent-remember-key").checked;
   agentState.apiKey = agentPendingKey;
   agentState.rememberKey = remember;
+  agentState.azureEndpoint = agentPendingAzureEndpoint;
+  agentState.azureApiVersion = isAzureProvider(agentPendingAzureEndpoint) ? agentConnectAzureApiVersion : null;
   agentState.models = agentPendingModels;
   agentState.model = chosenModel;
-  agentState.promptCacheKey = `kg-agent-${crypto.randomUUID()}`;
+  // prompt_cache_key is an OpenAI-specific routing hint (see
+  // callAgentChatRaw's own comment) with no documented equivalent on Azure
+  // OpenAI's classic chat-completions surface -- left null for Azure so it's
+  // simply never included in the request body (the same `promptCacheKey ?
+  // {...} : {}` spread that already handles a fresh connection's first,
+  // pre-cache-key call handles this too), rather than sending a field whose
+  // Azure-side behavior isn't verified.
+  agentState.promptCacheKey = isAzureProvider(agentPendingAzureEndpoint) ? null : `kg-agent-${crypto.randomUUID()}`;
   agentState.connected = true;
   try {
     if (remember) {
       localStorage.setItem(AGENT_KEY_STORAGE_KEY, agentPendingKey);
       localStorage.setItem(AGENT_MODEL_STORAGE_KEY, chosenModel || "");
+      if (agentPendingAzureEndpoint) {
+        localStorage.setItem(AGENT_AZURE_ENDPOINT_STORAGE_KEY, agentPendingAzureEndpoint);
+        if (agentConnectAzureApiVersion) localStorage.setItem(AGENT_AZURE_API_VERSION_STORAGE_KEY, agentConnectAzureApiVersion);
+        else localStorage.removeItem(AGENT_AZURE_API_VERSION_STORAGE_KEY);
+      } else {
+        localStorage.removeItem(AGENT_AZURE_ENDPOINT_STORAGE_KEY);
+        localStorage.removeItem(AGENT_AZURE_API_VERSION_STORAGE_KEY);
+      }
     } else {
       localStorage.removeItem(AGENT_KEY_STORAGE_KEY);
       localStorage.removeItem(AGENT_MODEL_STORAGE_KEY);
+      localStorage.removeItem(AGENT_AZURE_ENDPOINT_STORAGE_KEY);
+      localStorage.removeItem(AGENT_AZURE_API_VERSION_STORAGE_KEY);
     }
   } catch (err) { /* best-effort only, mirrors the language/theme persistence precedent */ }
   populateAgentModelSelects(agentPendingModels, chosenModel);
@@ -7298,6 +7670,8 @@ async function submitAgentConnect() {
 function disconnectAgent() {
   agentState.connected = false;
   agentState.apiKey = null;
+  agentState.azureEndpoint = null;
+  agentState.azureApiVersion = null;
   agentState.models = [];
   agentState.model = null;
   agentState.transcript = [];
@@ -7332,6 +7706,8 @@ function forgetStoredAgentKey() {
   try {
     localStorage.removeItem(AGENT_KEY_STORAGE_KEY);
     localStorage.removeItem(AGENT_MODEL_STORAGE_KEY);
+    localStorage.removeItem(AGENT_AZURE_ENDPOINT_STORAGE_KEY);
+    localStorage.removeItem(AGENT_AZURE_API_VERSION_STORAGE_KEY);
   } catch (err) { /* best-effort only */ }
   document.getElementById("agent-forget-key-row").style.display = "none";
 }
@@ -7383,6 +7759,19 @@ document.getElementById("agent-connect-overlay").addEventListener("click", (e) =
 document.getElementById("agent-connect-submit").addEventListener("click", () => submitAgentConnect());
 document.getElementById("agent-key-input").addEventListener("keydown", (e) => {
   if (e.key === "Enter") submitAgentConnect();
+});
+document.getElementById("agent-azure-config-open").addEventListener("click", () => openAzureConfigPopup());
+document.getElementById("agent-azure-config-cancel").addEventListener("click", () => closeAzureConfigPopup());
+document.getElementById("agent-azure-config-overlay").addEventListener("click", (e) => {
+  if (e.target === document.getElementById("agent-azure-config-overlay")) closeAzureConfigPopup();
+});
+document.getElementById("agent-azure-config-save").addEventListener("click", () => saveAzureConfig());
+document.getElementById("agent-azure-config-remove").addEventListener("click", () => removeAzureConfig());
+document.getElementById("agent-azure-endpoint-input").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") saveAzureConfig();
+});
+document.getElementById("agent-azure-api-version-input").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") saveAzureConfig();
 });
 document.getElementById("agent-disconnect").addEventListener("click", () => disconnectAgent());
 document.getElementById("agent-restart-conversation").addEventListener("click", () => {
@@ -8262,17 +8651,24 @@ function setAgentSending(sending) {
 // prefix). Reusing one key for a whole connection, not generating a fresh
 // one per call, is what makes that hint meaningful.
 async function callAgentChatRaw(messages, { tools, promptCacheKey } = {}) {
+  const azure = isAzureProvider(agentState.azureEndpoint);
+  const url = agentChatUrl(agentState.azureEndpoint, agentState.model, agentState.azureApiVersion);
+  const authHeaders = agentAuthHeaders(agentState.azureEndpoint, agentState.apiKey);
   for (let attempt = 1; attempt <= AGENT_RATE_LIMIT_MAX_ATTEMPTS; attempt++) {
     let res;
     try {
-      res = await fetch(OPENAI_CHAT_URL, {
+      res = await fetch(url, {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${agentState.apiKey}`,
+          ...authHeaders,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: agentState.model,
+          // Azure addresses the model via the URL's own deployment segment
+          // (agentChatUrl above) -- a `model` field in the body is
+          // meaningless there and, on some API versions, rejected outright
+          // as an unrecognized field, so it's only ever sent for OpenAI.
+          ...(azure ? {} : { model: agentState.model }),
           messages,
           ...(tools ? { tools, tool_choice: "auto" } : {}),
           ...(promptCacheKey ? { prompt_cache_key: promptCacheKey } : {}),
@@ -8289,7 +8685,7 @@ async function callAgentChatRaw(messages, { tools, promptCacheKey } = {}) {
       if (res.status === 400 && (code === "context_length_exceeded" || /context length|maximum context/i.test(message))) {
         throw { kind: "contextLength" };
       }
-      if (res.status === 401) throw { kind: "invalidKey" };
+      if (res.status === 401 || res.status === 403) throw { kind: "invalidKey" };
       // OpenAI uses the same 429 status for two very different situations,
       // distinguished only by error.code: a transient rate_limit_exceeded
       // (worth waiting out, see AGENT_RATE_LIMIT_MAX_ATTEMPTS's own comment)
@@ -8650,6 +9046,30 @@ window.__kg = {
     isLikelyChatModel,
     isStandardTierModel,
     getConnectErrorKind: () => agentConnectErrorKind,
+    // Azure OpenAI support test surface -- pure functions, exercised
+    // directly so the URL/header/validation logic itself is unit-testable
+    // without needing to drive the whole connect flow for every case.
+    isAzureProvider,
+    normalizeAzureEndpoint,
+    isValidAzureEndpoint,
+    modelsUrl: agentModelsUrl,
+    chatUrl: agentChatUrl,
+    authHeaders: agentAuthHeaders,
+    azureApiVersion: AZURE_OPENAI_API_VERSION,
+    // Azure config popup test surface (design critique, 2026-08 -- the
+    // endpoint/api-version fields moved out of the main connect modal into
+    // their own popup, reached via #agent-azure-config-open). Tests mostly
+    // drive this through real clicks on the DOM ids directly, same
+    // convention as the rest of this file; these are exposed for the couple
+    // of assertions that need the pending pre-submit value without a whole
+    // connect flow (e.g. confirming Cancel discards an edit).
+    openAzureConfig: openAzureConfigPopup,
+    closeAzureConfig: closeAzureConfigPopup,
+    saveAzureConfig,
+    removeAzureConfig,
+    getPendingAzureEndpoint: () => agentConnectAzureEndpoint,
+    getPendingAzureApiVersion: () => agentConnectAzureApiVersion,
+    getAzureConfigErrorKind: () => agentAzureConfigErrorKind,
     // Phase 2 — live chat test surface.
     sendMessage: submitAgentChatInput,
     buildSystemPrompt: buildAgentSystemPrompt,
