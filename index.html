@@ -20,6 +20,17 @@
     --radius-sm: 6px;
     --radius-md: 10px;
     --transition-fast: 120ms ease;
+    /* Design critique (2026-08) #1: the app otherwise reads as the generic
+       dark-mode-plus-one-accent default with no point of view of its own.
+       spec.md §2 rules out a web font (zero external requests, single
+       dependency-free file), so the one distinctive choice available is a
+       system monospace stack -- fitting for what this tool actually is
+       (structured, typed knowledge: classes, relations, rules), and
+       spent in exactly one place (the graph name and every dialog's own
+       title) rather than diluted across the whole UI. Body text, buttons,
+       and canvas labels stay on the existing system-ui stack -- legibility
+       for high-frequency reading matters more there than a signature. */
+    --font-display: ui-monospace, "SF Mono", "Cascadia Code", "Consolas", "Liberation Mono", monospace;
     --toolbar-bg: #1e1e1e;
     --toolbar-fg: #e8e8e8;
     --toolbar-border: #333;
@@ -269,6 +280,7 @@
   }
 
   #graph-title {
+    font-family: var(--font-display);
     font-size: 14px;
     font-weight: 600;
     padding: 8px 10px;
@@ -481,6 +493,17 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    /* Design critique (2026-08) #6: this dialog (and #domain-model-dialog,
+       which reuses this same class) is the actual value-prop editor --
+       classes/relationships/rules/actions, the real work of the app --
+       but shared the exact same chrome as a plain "are you sure?" confirm
+       box, with nothing marking it as the bigger, structured, more
+       important screen. A top accent bar (only overriding that one edge
+       of .modal-dialog's own uniform 1px border above, not the shorthand
+       itself) is the one differentiator; the rest of the chrome -- radius,
+       shadow, background -- stays shared with every other dialog so this
+       still reads as "the same app," just this screen's own emphasis. */
+    border-top: 3px solid var(--accent);
   }
 
   .details-dialog-body {
@@ -498,6 +521,7 @@
   }
 
   .modal-title {
+    font-family: var(--font-display);
     margin: 0 0 14px;
     font-size: 16px;
     font-weight: 600;
@@ -755,8 +779,9 @@
     margin: 12px 0 0 0;
     width: 40px;
     height: 40px;
-    font-size: 18px;
-    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     border: 1px solid var(--toolbar-border);
     border-left: none;
     border-radius: 0 var(--radius-md) var(--radius-md) 0;
@@ -764,10 +789,18 @@
     color: var(--toolbar-fg);
     cursor: pointer;
     box-shadow: var(--shadow-sm);
-    transition: background-color var(--transition-fast);
+    transition: background-color var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
   }
 
+  /* Design critique (2026-08) #8: gives the agent toggle the same hover
+     lift #toolbar buttons already have (translateY + a deeper shadow),
+     so the two otherwise-separate fixed-position chrome systems at least
+     agree on what "interactive" feels like, not just what colors they
+     share (already true before this -- both already read
+     var(--toolbar-bg)/var(--btn-bg-hover)/var(--toolbar-border)). */
   #agent-panel-toggle:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
     background: var(--btn-bg-hover);
   }
 
@@ -1131,7 +1164,17 @@
 
 <!-- Helper Agent panel: collapsed by default (helper_agent_plan.md §4.2). -->
 <div id="agent-panel">
-  <button id="agent-panel-toggle" type="button" aria-expanded="false" title="Segéd ügynök">&#129302;</button>
+  <!-- Design critique (2026-08) #5: was a single colored emoji (🤖) among
+       an otherwise monochrome, currentColor icon language (#sel-toolbar's
+       ✎ ℹ ⇌ 🗑 above). An inline SVG (no external request, no dependency
+       on a given platform's font shipping a text-presentation glyph for
+       this concept the way it does for those) keeps this button's icon
+       in the same line-icon style instead of one accent piece of color
+       clip-art. aria-label carries the accessible name since the SVG
+       itself is aria-hidden and there's no visible text glyph as a
+       fallback anymore -- title alone (kept for the same hover tooltip
+       as before) isn't as reliably exposed to every assistive tech. -->
+  <button id="agent-panel-toggle" type="button" aria-expanded="false" title="Segéd ügynök" aria-label="Segéd ügynök"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></button>
   <div id="agent-panel-body">
     <div id="agent-panel-disconnected">
       <p id="agent-panel-intro" class="agent-panel-intro">Csatlakozz a saját OpenAI API kulcsoddal egy segéd ügynökhöz, ami a doménmodell felépítésében segít.</p>
@@ -1662,6 +1705,7 @@ function applyLanguage() {
 function applyAgentLanguage() {
   const byId = (id) => document.getElementById(id);
   byId("agent-panel-toggle").title = t("agentPanelToggle");
+  byId("agent-panel-toggle").setAttribute("aria-label", t("agentPanelToggle"));
   byId("agent-panel-intro").textContent = t("agentPanelIntro");
   byId("agent-connect-open").textContent = t("agentConnect");
   byId("agent-connect-title").textContent = t("agentConnectTitle");
