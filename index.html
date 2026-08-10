@@ -29,6 +29,24 @@
     --btn-bg-active: #4a4a4a;
     --accent: #4da6ff;
     --accent-bg-pressed: rgba(77, 166, 255, 0.16);
+    /* Semantic colors split off from --accent (design critique, 2026-08):
+       one blue was standing in for "selected", "an interaction mode is
+       currently armed", "this persistent setting is on", and "the agent
+       touched this" all at once -- indistinguishable from each other in a
+       real session. --accent now means selection/focus only; these three
+       cover the other meanings. */
+    /* Transient canvas mode (Add Node / Connect) -- same hue as
+       --connect-source-stroke below, deliberately: both mean "actively
+       placing/connecting right now". */
+    --mode-armed: #ffb84d;
+    --mode-armed-bg: rgba(255, 184, 77, 0.16);
+    /* Persistent on/off setting (theme, language, folder sync). */
+    --state-active: #5fbf8f;
+    --state-active-bg: rgba(95, 191, 143, 0.16);
+    /* Helper Agent provenance (chat bubbles, tool-outcome notes). */
+    --agent-accent: #b592f0;
+    --danger: #a64d4d;
+    --danger-fg: #d16a6a;
     --shadow-color: rgba(0, 0, 0, 0.45);
     --shadow-sm: 0 1px 3px var(--shadow-color);
     --shadow-md: 0 6px 20px var(--shadow-color);
@@ -70,6 +88,11 @@
     --card-bg: rgba(0, 0, 0, 0.025);
     --accent: #1a73e8;
     --accent-bg-pressed: rgba(26, 115, 232, 0.1);
+    --mode-armed: #e67700;
+    --mode-armed-bg: rgba(230, 119, 0, 0.1);
+    --state-active: #2f8a5c;
+    --state-active-bg: rgba(47, 138, 92, 0.1);
+    --agent-accent: #7c3aed;
     --shadow-color: rgba(0, 0, 0, 0.15);
     --canvas-bg: #fafafa;
     --grid-dot: #d8d8d8;
@@ -166,6 +189,37 @@
     background: var(--accent-bg-pressed);
   }
 
+  /* Transient interaction mode (Add Node / Connect) -- a different color
+     from plain selection/focus so "the canvas is in a special input mode
+     right now" doesn't read as identical to "something is selected"
+     elsewhere in the UI. */
+  #toolbar button.mode-armed[aria-pressed="true"] {
+    background: var(--mode-armed-bg);
+    border-color: var(--mode-armed);
+    color: var(--mode-armed);
+  }
+
+  #toolbar button.mode-armed[aria-pressed="true"]:hover {
+    background: var(--mode-armed-bg);
+  }
+
+  /* Persistent on/off setting (theme, language, folder sync) -- distinct
+     again from both selection and mode-armed, since it's neither. */
+  #toolbar button.state-toggle[aria-pressed="true"] {
+    background: var(--state-active-bg);
+    border-color: var(--state-active);
+    color: var(--state-active);
+  }
+
+  #toolbar button.state-toggle[aria-pressed="true"]:hover {
+    background: var(--state-active-bg);
+  }
+
+  #toolbar button.toolbar-danger {
+    border-color: var(--danger);
+    color: var(--danger-fg);
+  }
+
   #toolbar button:disabled {
     opacity: 0.4;
     cursor: default;
@@ -180,6 +234,26 @@
 
   #toolbar .spacer {
     flex: 1 1 auto;
+  }
+
+  /* Groups related toolbar buttons (edit / data / view / settings) behind a
+     thin divider instead of one undifferentiated row -- so scanning the
+     toolbar doesn't require reading every label to tell which buttons are
+     related. Purely visual: doesn't change any button's id, so nothing
+     that clicks a button by id needs to change alongside this. */
+  #toolbar .toolbar-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-right: 8px;
+    margin-right: 4px;
+    border-right: 1px solid var(--toolbar-border);
+  }
+
+  #toolbar .toolbar-group.toolbar-group-end {
+    border-right: none;
+    padding-right: 0;
+    margin-right: 0;
   }
 
   #toolbar .zoom-group {
@@ -198,6 +272,23 @@
     font-size: 14px;
     font-weight: 600;
     padding: 8px 10px;
+    /* Clears #agent-panel-toggle -- a fixed z-index:25 overlay always
+       sitting at page x:[0,40], regardless of the agent panel's
+       expand/collapse state (only the panel *body*'s own width is
+       conditional; the toggle itself never moves) -- which otherwise sits
+       on top of the toolbar's own z-index:10 and covers this element's
+       first ~28px whenever the toolbar starts at its default left:0 (i.e.
+       whenever --agent-panel-offset is unset, whether because the panel is
+       collapsed or JS hasn't run yet on first paint). Without this, the
+       graph name's own first couple of characters render invisibly under
+       the toggle button at every viewport width. 36px = the toggle's 40px
+       width, minus #toolbar's own 12px left padding (already providing
+       some clearance), plus an 8px gap -- not tied to --agent-panel-offset
+       itself: that variable already handles shifting everything further
+       right once the panel *expands* past the toggle's own footprint;
+       this is the separate, always-on baseline the toggle needs
+       regardless of expand state. */
+    margin-left: 36px;
     margin-right: 4px;
     border-radius: var(--radius-sm);
     cursor: pointer;
@@ -310,8 +401,8 @@
   }
 
   #sel-trash:hover {
-    border-color: #a64d4d;
-    color: #d16a6a;
+    border-color: var(--danger);
+    color: var(--danger-fg);
   }
 
   .modal-overlay {
@@ -366,7 +457,7 @@
 
   #confirm-ok,
   #import-replace {
-    border-color: #a64d4d !important;
+    border-color: var(--danger) !important;
   }
 
   /* Agent Ontology (agent_ontology_spec.md §7): Class/Relationship details
@@ -856,11 +947,12 @@
     word-break: break-word;
   }
 
-  /* User/assistant bubbles lean on the same accent already used for armed
-     toolbar buttons (--accent) instead of introducing a new color token. */
+  /* User/assistant bubbles use --agent-accent, not --accent -- a chat
+     message and a selected canvas node are different things and shouldn't
+     share a color (design critique, 2026-08). */
   .agent-msg-user {
     align-self: flex-end;
-    border-color: var(--accent);
+    border-color: var(--agent-accent);
   }
 
   .agent-msg-system {
@@ -870,12 +962,12 @@
   }
 
   /* Tool-outcome notes (applied/skipped/nothing-to-apply/error) get the
-     same accent border as a user bubble — a visible, at-a-glance signal
-     that this line is about a real (or attempted) canvas edit, not just
-     conversation, per the vision's "real time presents what the chatbot
-     edited" requirement. */
+     same agent-accent border as a user bubble — a visible, at-a-glance
+     signal that this line is about a real (or attempted) canvas edit, not
+     just conversation, per the vision's "real time presents what the
+     chatbot edited" requirement. */
   .agent-msg-tool {
-    border-color: var(--accent);
+    border-color: var(--agent-accent);
     font-size: 12px;
     opacity: 0.9;
   }
@@ -946,25 +1038,40 @@
 
 <div id="toolbar">
   <span id="graph-title" tabindex="0" role="button" title="Kattints az átnevezéshez">Névtelen gráf</span>
-  <button id="btn-add-node" type="button" aria-pressed="false">Csomópont hozzáadása</button>
-  <button id="btn-connect" type="button" aria-pressed="false">Összekapcsolás</button>
-  <button id="btn-domain-model" type="button">Doménmodell</button>
-  <button id="btn-autolayout" type="button">Automatikus elrendezés</button>
-  <button id="btn-undo" type="button">Visszavonás</button>
-  <button id="btn-redo" type="button">Újra</button>
-  <button id="btn-save-version" type="button">Verzió mentése</button>
-  <button id="btn-folder-sync" type="button" aria-pressed="false" style="display:none;">Mappa szinkronizálás</button>
-  <button id="btn-import-txt" type="button">Importálás</button>
-  <input id="import-file-input" type="file" accept=".txt,.json,.yaml,.yml">
-  <button id="btn-clear" type="button">Törlés</button>
+
+  <div class="toolbar-group">
+    <button id="btn-add-node" type="button" class="mode-armed" aria-pressed="false">Csomópont hozzáadása</button>
+    <button id="btn-connect" type="button" class="mode-armed" aria-pressed="false">Összekapcsolás</button>
+  </div>
+
+  <div class="toolbar-group">
+    <button id="btn-domain-model" type="button">Doménmodell</button>
+    <button id="btn-autolayout" type="button">Automatikus elrendezés</button>
+    <button id="btn-undo" type="button">Visszavonás</button>
+    <button id="btn-redo" type="button">Újra</button>
+  </div>
+
+  <div class="toolbar-group">
+    <button id="btn-save-version" type="button">Verzió mentése</button>
+    <button id="btn-folder-sync" type="button" class="state-toggle" aria-pressed="false" style="display:none;">Mappa szinkronizálás</button>
+    <button id="btn-import-txt" type="button">Importálás</button>
+    <input id="import-file-input" type="file" accept=".txt,.json,.yaml,.yml">
+  </div>
+
+  <button id="btn-clear" type="button" class="toolbar-danger">Törlés</button>
+
   <div class="spacer"></div>
-  <div class="zoom-group">
+
+  <div class="toolbar-group zoom-group">
     <button id="btn-zoom-out" type="button" aria-label="Kicsinyítés">&minus;</button>
     <button id="btn-zoom-in" type="button" aria-label="Nagyítás">&plus;</button>
     <button id="btn-fit-view" type="button" aria-label="Nézet igazítása">&#8862;</button>
   </div>
-  <button id="btn-theme-toggle" type="button" aria-pressed="false">Téma: Sötét</button>
-  <button id="btn-lang-toggle" type="button" aria-pressed="false">Nyelv: Magyar</button>
+
+  <div class="toolbar-group toolbar-group-end">
+    <button id="btn-theme-toggle" type="button" class="state-toggle" aria-pressed="false">Téma: Sötét</button>
+    <button id="btn-lang-toggle" type="button" class="state-toggle" aria-pressed="false">Nyelv: Magyar</button>
+  </div>
 </div>
 
 <div id="canvas-wrap">
@@ -2917,6 +3024,24 @@ const NODE_FONT_MIN_SCREEN_PX = 11;
 const NODE_FONT_MAX_WORLD_PX = 42;
 const EDGE_FONT_MIN_SCREEN_PX = 10;
 const EDGE_FONT_MAX_WORLD_PX = 30;
+const BADGE_FONT_SIZE = 10;
+const BADGE_FONT_MIN_SCREEN_PX = 9;
+const BADGE_FONT_MAX_WORLD_PX = 22;
+const BARE_NODE_DASH = [6, 4];
+
+// Design critique (2026-08), point #7: on canvas a node was just a box with
+// a label regardless of how much of the ontology it actually captures --
+// no visual difference between a placeholder someone typed a name into and
+// a class with a real meaning/aliases/properties behind it. This derives
+// that distinction from the node's own data (never a separate "kind"
+// field -- the data model has no such thing, see createNode()) so drawNodes
+// and any test asserting on it read the exact same thing. "Bare" means
+// nothing has been added beyond the label yet.
+function nodeVisualState(node) {
+  const propertyCount = node.properties.length;
+  const isBare = !node.meaning && node.aliases.length === 0 && propertyCount === 0;
+  return { isBare, propertyCount };
+}
 
 // Resolves the current theme's CSS custom properties (see :root and
 // :root[data-theme="light"] above) into one palette object, computed once
@@ -2941,6 +3066,13 @@ function resolveColors() {
     edgeStrokeConnected: v("--edge-stroke-connected", "#2dd4bf"),
     edgeLabelFg: v("--edge-label-fg", "#bbbbbb"),
     ghostStroke: v("--ghost-stroke", "#4da6ff"),
+    // Property-count badge (drawNodes) -- reuses existing neutral chrome
+    // tokens rather than adding a new hue: the badge is structural
+    // information (how much this class is fleshed out), not interaction
+    // state, so it deliberately doesn't compete with the selection/
+    // connected/imported/connect-source palette above.
+    btnBgActive: v("--btn-bg-active", "#4a4a4a"),
+    canvasBg: v("--canvas-bg", "#121212"),
   };
 }
 
@@ -3086,6 +3218,7 @@ function drawNodes(colors, highlighted) {
     const isConnectSource = state.connectSource === node.id;
     const isNewlyImported = newlyImportedIds.has(node.id);
     const isConnected = highlighted.nodeIds.has(node.id);
+    const { isBare, propertyCount } = nodeVisualState(node);
 
     ctx.fillStyle = colors.nodeFill;
     ctx.strokeStyle = isConnectSource ? colors.connectSourceStroke
@@ -3094,9 +3227,17 @@ function drawNodes(colors, highlighted) {
       : isConnected ? colors.nodeStrokeConnected
       : colors.nodeStroke;
     ctx.lineWidth = selected || isConnectSource || isNewlyImported || isConnected ? 3 : 1.5;
+    // A node nobody has documented yet (no meaning, aliases, or properties
+    // -- just a label) reads as a dashed placeholder instead of looking
+    // identical to a fully-specified class (design critique, 2026-08 #7).
+    // Reset unconditionally each node, not only when true, since canvas
+    // line-dash state persists across draw calls otherwise (would leak
+    // into whichever node/edge/ghost-edge draws next).
+    ctx.setLineDash(isBare ? BARE_NODE_DASH : []);
     roundRectPath(node.x, node.y, node.w, node.h, 8);
     ctx.fill();
     ctx.stroke();
+    ctx.setLineDash([]);
 
     ctx.save();
     roundRectPath(node.x, node.y, node.w, node.h, 8);
@@ -3113,6 +3254,28 @@ function drawNodes(colors, highlighted) {
       ctx.beginPath();
       ctx.arc(h.x, h.y, 5, 0, Math.PI * 2);
       ctx.fill();
+    }
+
+    // Property-count badge: a small corner marker signaling "this class
+    // carries real structure", not just decoration -- a fuller ontology
+    // node should look different from a stub at a glance, without having
+    // to open the details dialog to check (design critique, 2026-08 #7).
+    if (propertyCount > 0) {
+      const badgeFont = effectiveFontSize(BADGE_FONT_SIZE, BADGE_FONT_MIN_SCREEN_PX, BADGE_FONT_MAX_WORLD_PX);
+      const badgeRadius = badgeFont * 0.9;
+      const bx = node.x + node.w, by = node.y;
+      ctx.beginPath();
+      ctx.arc(bx, by, badgeRadius, 0, Math.PI * 2);
+      ctx.fillStyle = colors.btnBgActive;
+      ctx.fill();
+      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = colors.canvasBg;
+      ctx.stroke();
+      ctx.fillStyle = colors.nodeText;
+      ctx.font = `${badgeFont}px system-ui, sans-serif`;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(String(propertyCount), bx, by + 0.5);
     }
   }
 }
@@ -4706,7 +4869,25 @@ function buildDomainYamlExport() {
   return toYaml(buildDomainModel());
 }
 
+// Recorded so tests can assert the app requested the correct filename
+// directly, instead of through the browser's downloaded-file name echo
+// (Playwright Download#suggestedFilename()) -- at least one sandboxed
+// headless Chromium build (141.0.7390.37) resolves that echo to the
+// literal fallback "download" for every Unicode `download` attribute on a
+// blob: URL regardless of how it's set (property, setAttribute, a File
+// object in place of Blob, or a dispatched MouseEvent instead of
+// a.click() -- all four verified to fail identically in that build, while
+// a plain-ASCII filename resolves correctly in the same build). Not
+// fixable here without a worse regression: percent-encoding the filename
+// does get a real value back from that echo, but it's the percent-encoded
+// string itself, so every user's downloaded file would save under a
+// garbled name like "%C3%9Cgyf%C3%A9l...txt" instead of the readable
+// Unicode name the app computed. This array is what actually reached
+// a.download, decoupled from whichever browser/build reports it back.
+const recordedDownloadFilenames = [];
+
 function triggerDownload(filename, content, mimeType) {
+  recordedDownloadFilenames.push(filename);
   const blob = new Blob([content], { type: mimeType });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
@@ -8055,6 +8236,10 @@ window.__kg = {
   // assert against the same derivation the renderer uses instead of
   // reading canvas pixels.
   getHighlightedConnections: computeHighlightedConnections,
+  // Design critique (2026-08) #7 -- exposed so tests can assert against the
+  // same bare/documented + property-count derivation drawNodes() renders
+  // from, instead of sampling canvas pixels for dash patterns.
+  getNodeVisualState: nodeVisualState,
   actions: {
     createNode, createEdge, deleteNode, deleteEdge,
     selectNode, selectEdge, clearSelection, setMode,
@@ -8080,6 +8265,11 @@ window.__kg = {
     },
   },
   getNewlyImportedIds: () => newlyImportedIds, // reassigned, not mutated — needs a getter, not a reference
+  // The exact filenames triggerDownload() actually requested from the
+  // browser, in call order -- see the comment above that function for why
+  // tests should assert against this instead of a Download's own
+  // suggestedFilename() for names containing non-ASCII characters.
+  getRecordedDownloadFilenames: () => [...recordedDownloadFilenames],
   // File formats (spec.md §5). Exposed so the format layer can be tested as
   // the pure functions it is — routing, parsing, filename sanitization —
   // without driving the whole dialog/UI for every single case.
