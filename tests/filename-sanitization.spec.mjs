@@ -125,22 +125,23 @@ test("Whitespace runs collapse to a single dash", async () => {
 // End to end: the name actually reaches the file
 // --------------------------------------------------------------------------
 
-// Known environment-specific flake, investigated and left as-is: in at
-// least one sandboxed headless Chromium build (141.0.7390.37, this repo's
-// pinned Playwright version otherwise unchanged), `suggestedFilename()`
-// comes back as the browser's literal fallback "download" for every one of
-// the three downloads below, but ONLY when the filename contains non-ASCII
-// characters — a plain-ASCII graph name reaches every download's filename
-// correctly in the same environment (verified directly). The app's own
-// code is not the cause: sanitizeGraphName()/triggerDownload() do nothing
-// browser-specific, and `a.download = filename` is the standard, only way
-// to set a suggested filename. This test passed in the environment the
-// feature was originally written and verified in, so this looks like a
-// Chromium-build-specific bug in how its download manager resolves a
-// Unicode `download` attribute on a `blob:` URL, not an app regression —
-// left failing-when-hit rather than weakened, so a real regression in the
-// app's own Unicode handling still gets caught wherever this bug isn't
-// present.
+// Asserts against window.__kg.getRecordedDownloadFilenames() -- the exact
+// strings the app itself handed to `a.download` -- rather than a Download's
+// own suggestedFilename(). At least one sandboxed headless Chromium build
+// (141.0.7390.37, this repo's pinned Playwright version otherwise
+// unchanged) resolves suggestedFilename() to the browser's literal fallback
+// "download" for every filename containing non-ASCII characters, no matter
+// how the download is triggered (a.download as a property or via
+// setAttribute, a File object in place of Blob, a.click() vs. a dispatched
+// MouseEvent -- all four verified to fail identically); the same build
+// resolves a plain-ASCII filename correctly. Percent-encoding the filename
+// does make that echo return a non-fallback value, but the real fix would
+// then be worse than the bug: every user's downloaded file would save under
+// a garbled name like "%C3%9Cgyf%C3%A9l...txt" instead of the readable
+// Unicode name the app computed, just to satisfy this one sandbox's
+// browser build. The recorded-filenames hook (see triggerDownload()'s own
+// comment) sidesteps the browser-side echo entirely and still proves the
+// actual value handed to the browser was correct.
 test("An accented graph name reaches the saved filenames intact", async () => {
   const browser = await launchChromium();
   const page = await browser.newPage({ viewport: { width: 1200, height: 800 }, acceptDownloads: true });
@@ -157,8 +158,13 @@ test("An accented graph name reaches the saved filenames intact", async () => {
     await page.click("#btn-save-version");
     await page.waitForTimeout(250);
 
+    // A real download still has to actually fire for each of the three
+    // files -- this doesn't depend on the browser resolving the Unicode
+    // filename correctly, only on triggerDownload() having run three times.
     assert.equal(downloads.length, 3);
-    const names = downloads.map((d) => d.suggestedFilename()).sort();
+
+    const names = (await page.evaluate(() => window.__kg.getRecordedDownloadFilenames())).sort();
+    assert.equal(names.length, 3);
     for (const name of names) {
       assert.ok(name.startsWith("Ügyfélkérdés-ontológia_v0001_"), `unexpected filename: ${name}`);
     }

@@ -178,12 +178,13 @@ test("Accented text, aliases and property allowed-lists all survive intact", asy
 // Identity: version chain, graph name, id counters
 // --------------------------------------------------------------------------
 
-// Subject to the same environment-specific Unicode-`download`-attribute
-// Chromium quirk documented at tests/filename-sanitization.spec.mjs's
-// "An accented graph name reaches the saved filenames intact" test — this
-// fixture's accented graph name can trip the identical browser-side issue
-// in an affected environment. Not an app bug; left as-is for the same
-// reasons given there.
+// This fixture's accented graph name would otherwise trip the same
+// environment-specific Unicode-`download`-attribute Chromium quirk
+// documented at triggerDownload()'s own comment in index.html and at
+// tests/filename-sanitization.spec.mjs's "An accented graph name reaches
+// the saved filenames intact" test — asserting against
+// window.__kg.getRecordedDownloadFilenames() instead of a Download's own
+// suggestedFilename() sidesteps it the same way that test does.
 test("A restore continues the file's version series instead of starting a new graph", async () => {
   await withDownloadPage(async (page, downloads) => {
     await importFixture(page, "accented-roundtrip.json");
@@ -201,7 +202,9 @@ test("A restore continues the file's version series instead of starting a new gr
     await page.click("#btn-save-version");
     await page.waitForTimeout(250);
     assert.equal(downloads.length, 3);
-    for (const dl of downloads) assert.match(dl.suggestedFilename(), /_v0008_/);
+    const names = await page.evaluate(() => window.__kg.getRecordedDownloadFilenames());
+    assert.equal(names.length, 3);
+    for (const name of names) assert.match(name, /_v0008_/);
   });
 });
 

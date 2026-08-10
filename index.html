@@ -4852,7 +4852,25 @@ function buildDomainYamlExport() {
   return toYaml(buildDomainModel());
 }
 
+// Recorded so tests can assert the app requested the correct filename
+// directly, instead of through the browser's downloaded-file name echo
+// (Playwright Download#suggestedFilename()) -- at least one sandboxed
+// headless Chromium build (141.0.7390.37) resolves that echo to the
+// literal fallback "download" for every Unicode `download` attribute on a
+// blob: URL regardless of how it's set (property, setAttribute, a File
+// object in place of Blob, or a dispatched MouseEvent instead of
+// a.click() -- all four verified to fail identically in that build, while
+// a plain-ASCII filename resolves correctly in the same build). Not
+// fixable here without a worse regression: percent-encoding the filename
+// does get a real value back from that echo, but it's the percent-encoded
+// string itself, so every user's downloaded file would save under a
+// garbled name like "%C3%9Cgyf%C3%A9l...txt" instead of the readable
+// Unicode name the app computed. This array is what actually reached
+// a.download, decoupled from whichever browser/build reports it back.
+const recordedDownloadFilenames = [];
+
 function triggerDownload(filename, content, mimeType) {
+  recordedDownloadFilenames.push(filename);
   const blob = new Blob([content], { type: mimeType });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
@@ -8230,6 +8248,11 @@ window.__kg = {
     },
   },
   getNewlyImportedIds: () => newlyImportedIds, // reassigned, not mutated — needs a getter, not a reference
+  // The exact filenames triggerDownload() actually requested from the
+  // browser, in call order -- see the comment above that function for why
+  // tests should assert against this instead of a Download's own
+  // suggestedFilename() for names containing non-ASCII characters.
+  getRecordedDownloadFilenames: () => [...recordedDownloadFilenames],
   // File formats (spec.md §5). Exposed so the format layer can be tested as
   // the pure functions it is — routing, parsing, filename sanitization —
   // without driving the whole dialog/UI for every single case.
