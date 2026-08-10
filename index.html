@@ -249,6 +249,24 @@
     color: var(--danger-fg);
   }
 
+  /* User request (2026-08): "some more design emphasis on the domain model
+     option... since it is one of the main things on this app." Uses
+     --accent, the same token #details-dialog's top border already uses
+     (design critique round 2, #6) for the Class/Relationship Details and
+     Domain Model dialogs specifically -- a deliberate visual thread from
+     this entry point to where it leads, not decoration picked
+     arbitrarily. No background tint at rest (unlike a pressed/armed
+     toggle) -- this is a permanent identity for the button, not a
+     transient state, so it shouldn't read as "currently active." */
+  #toolbar button.toolbar-primary {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  #toolbar button.toolbar-primary:hover {
+    background: var(--accent-bg-pressed);
+  }
+
   #toolbar button:disabled {
     opacity: 0.4;
     cursor: default;
@@ -287,6 +305,7 @@
 
   #toolbar .zoom-group {
     display: flex;
+    align-items: center;
     gap: 3px;
   }
 
@@ -295,6 +314,65 @@
     padding: 8px 0;
     text-align: center;
     font-size: 16px;
+  }
+
+  /* Custom, app-styled tooltips (user request, 2026-08) for controls whose
+     icon alone doesn't self-explain: zoom in/out, fit view, and the
+     agent-panel toggle. Native `title` tooltips are slow to appear
+     (~1s in Chrome), inconsistently styled across platforms, and easy to
+     miss entirely -- these are pure CSS (:hover/:focus-visible plus a
+     ::after pseudo-element reading data-tooltip) so they show up
+     immediately and match the rest of the app's chrome. data-tooltip is
+     kept in sync with the active language by the same code that sets
+     aria-label (see applyLanguage()/applyAgentLanguage()) -- aria-label
+     alone (not `title`, dropped from the agent toggle's markup for this)
+     carries the accessible name, so there's exactly one tooltip shown,
+     not a custom one plus a redundant native one layered on top. */
+  [data-tooltip] {
+    position: relative;
+  }
+
+  [data-tooltip]::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%) translateY(4px);
+    padding: 4px 8px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--toolbar-border);
+    background: var(--toolbar-bg);
+    color: var(--toolbar-fg);
+    font-size: 12px;
+    font-weight: 400;
+    white-space: nowrap;
+    box-shadow: var(--shadow-sm);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--transition-fast);
+    z-index: 45;
+  }
+
+  [data-tooltip]:hover::after,
+  [data-tooltip]:focus-visible::after {
+    opacity: 1;
+  }
+
+  /* A bit more design emphasis for the chat icon specifically (user
+     request): its tooltip uses --agent-accent, the same violet already
+     used everywhere else for Helper Agent provenance (chat bubbles,
+     tool-outcome notes), instead of the neutral styling above -- the
+     entry point to that whole feature is otherwise just one small icon in
+     the corner, easy to miss. Anchored to the left edge rather than
+     centered: the toggle itself sits flush against the viewport's left
+     edge (x:0), so a centered tooltip would clip off-screen the same way
+     #graph-title used to collide with this exact button before its own
+     left-margin fix. */
+  #agent-panel-toggle::after {
+    left: 0;
+    transform: translateY(4px);
+    border-color: var(--agent-accent);
+    color: var(--agent-accent);
   }
 
   #graph-title {
@@ -1096,7 +1174,7 @@
   </div>
 
   <div class="toolbar-group">
-    <button id="btn-domain-model" type="button">Doménmodell</button>
+    <button id="btn-domain-model" type="button" class="toolbar-primary">Doménmodell</button>
     <button id="btn-autolayout" type="button">Automatikus elrendezés</button>
     <button id="btn-undo" type="button">Visszavonás</button>
     <button id="btn-redo" type="button">Újra</button>
@@ -1113,13 +1191,20 @@
 
   <div class="spacer"></div>
 
-  <div class="toolbar-group zoom-group">
-    <button id="btn-zoom-out" type="button" aria-label="Kicsinyítés">&minus;</button>
-    <button id="btn-zoom-in" type="button" aria-label="Nagyítás">&plus;</button>
-    <button id="btn-fit-view" type="button" aria-label="Nézet igazítása">&#8862;</button>
-  </div>
-
+  <!-- User request (2026-08): zoom, theme, and language all "fit more the
+       zoom side of the screen" -- one combined group instead of two
+       separate ones with a divider between them. .zoom-group nested (not
+       given its own .toolbar-group class) keeps its tighter 3px spacing
+       for just the three zoom buttons, while the outer .toolbar-group's
+       normal 8px gap separates that cluster from Theme/Language -- same
+       "sub-group inside a group" shape as the zoom-group already had, just
+       one level deeper now. -->
   <div class="toolbar-group toolbar-group-end">
+    <div class="zoom-group">
+      <button id="btn-zoom-out" type="button" aria-label="Kicsinyítés" data-tooltip="Kicsinyítés">&minus;</button>
+      <button id="btn-zoom-in" type="button" aria-label="Nagyítás" data-tooltip="Nagyítás">&plus;</button>
+      <button id="btn-fit-view" type="button" aria-label="Nézet igazítása" data-tooltip="Nézet igazítása">&#8862;</button>
+    </div>
     <button id="btn-theme-toggle" type="button" class="state-toggle" aria-pressed="false">Téma: Sötét</button>
     <button id="btn-lang-toggle" type="button" class="state-toggle" aria-pressed="false">Nyelv: Magyar</button>
   </div>
@@ -1192,7 +1277,7 @@
        itself is aria-hidden and there's no visible text glyph as a
        fallback anymore -- title alone (kept for the same hover tooltip
        as before) isn't as reliably exposed to every assistive tech. -->
-  <button id="agent-panel-toggle" type="button" aria-expanded="false" title="Segéd ügynök" aria-label="Segéd ügynök"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></button>
+  <button id="agent-panel-toggle" type="button" aria-expanded="false" aria-label="Segéd ügynök" data-tooltip="Segéd ügynök"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></button>
   <div id="agent-panel-body">
     <div id="agent-panel-disconnected">
       <p id="agent-panel-intro" class="agent-panel-intro">Csatlakozz a saját OpenAI API kulcsoddal egy segéd ügynökhöz, ami a doménmodell felépítésében segít.</p>
@@ -1675,8 +1760,11 @@ function applyLanguage() {
   byId("btn-import-txt").textContent = t("importButton");
   byId("btn-clear").textContent = t("clear");
   byId("btn-zoom-out").setAttribute("aria-label", t("zoomOut"));
+  byId("btn-zoom-out").setAttribute("data-tooltip", t("zoomOut"));
   byId("btn-zoom-in").setAttribute("aria-label", t("zoomIn"));
+  byId("btn-zoom-in").setAttribute("data-tooltip", t("zoomIn"));
   byId("btn-fit-view").setAttribute("aria-label", t("fitView"));
+  byId("btn-fit-view").setAttribute("data-tooltip", t("fitView"));
   byId("sel-rename").title = t("renameTitle");
   byId("sel-details").title = t("editDetailsTitle");
   byId("sel-toggle-dir").title = t("toggleDirTitle");
@@ -1722,8 +1810,12 @@ function applyLanguage() {
 // the agent panel's markup stays easy to find/maintain together.
 function applyAgentLanguage() {
   const byId = (id) => document.getElementById(id);
-  byId("agent-panel-toggle").title = t("agentPanelToggle");
+  // No `title` here (removed, 2026-08) -- data-tooltip's custom CSS
+  // tooltip (see its own comment in <style>) is the visible one now;
+  // aria-label alone carries the accessible name, so there's exactly one
+  // tooltip, not a custom one plus a redundant native one layered on top.
   byId("agent-panel-toggle").setAttribute("aria-label", t("agentPanelToggle"));
+  byId("agent-panel-toggle").setAttribute("data-tooltip", t("agentPanelToggle"));
   byId("agent-panel-intro").textContent = t("agentPanelIntro");
   byId("agent-connect-open").textContent = t("agentConnect");
   byId("agent-connect-title").textContent = t("agentConnectTitle");
@@ -1790,6 +1882,19 @@ function zoomAt(screenX, screenY, factor) {
 // undo/redo implications. Caps zoom-IN at 1 (never past 100%) — a graph
 // smaller than the viewport should stay at a natural scale, not balloon up
 // to fill it.
+// User-reported bug: "fit to screen cuts half of a node box on the top."
+// #canvas-wrap is `position: fixed; inset: 0` -- the canvas is genuinely
+// full-bleed behind #toolbar (a separate, higher z-index, fixed-position
+// overlay -- see #toolbar's own CSS comment), so cssWidth/cssHeight (the
+// canvas element's own raw dimensions) include the strip the toolbar
+// physically sits on top of. Fitting content into that *whole* rectangle
+// happily centers a node partway under the toolbar, since mathematically
+// it's "in view" even though it's actually hidden behind opaque chrome.
+// The toolbar's live height (it wraps to more rows at narrow widths, or
+// whenever there isn't horizontal room for every button on one line -- see
+// tests/visual-coherence.spec.mjs) is read fresh on every call rather than
+// assumed, so this stays correct regardless of viewport width or how many
+// toolbar buttons currently exist.
 function fitViewToContent() {
   if (state.nodes.length === 0 || cssWidth === 0 || cssHeight === 0) return;
   let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
@@ -1800,14 +1905,18 @@ function fitViewToContent() {
     maxY = Math.max(maxY, n.y + n.h);
   }
   const PADDING = 80;
+  const toolbarEl = document.getElementById("toolbar");
+  const obstructedTop = toolbarEl ? toolbarEl.getBoundingClientRect().height : 0;
+  const availTop = Math.min(obstructedTop, cssHeight - 1); // never let a degenerate/huge toolbar reading collapse the available area to nothing
+  const availH = Math.max(1, cssHeight - availTop);
   const contentW = Math.max(1, maxX - minX + PADDING * 2);
   const contentH = Math.max(1, maxY - minY + PADDING * 2);
-  const scale = clamp(Math.min(cssWidth / contentW, cssHeight / contentH), MIN_SCALE, 1);
+  const scale = clamp(Math.min(cssWidth / contentW, availH / contentH), MIN_SCALE, 1);
   const centerX = (minX + maxX) / 2;
   const centerY = (minY + maxY) / 2;
   camera.scale = scale;
   camera.panX = cssWidth / 2 - centerX * scale;
-  camera.panY = cssHeight / 2 - centerY * scale;
+  camera.panY = availTop + availH / 2 - centerY * scale;
   markDirty();
 }
 
@@ -2993,6 +3102,72 @@ function findEdgeAt(wx, wy) {
   return null;
 }
 
+// The world-space rectangle drawEdges() actually paints an edge's relation
+// label into -- textAlign "center"/textBaseline "bottom" at (geo.mid.x,
+// geo.mid.y - 4), see drawEdges() below. Used both to hit-test a click/drag
+// specifically on the visible label text (findEdgeLabelAt(), below --
+// distinct from findEdgeAt()'s path-proximity test: a label typically sits
+// several pixels *above* the line itself, outside that function's tight
+// 6px-of-the-path threshold) and, implicitly, to keep that hit target sized
+// to what's actually on screen rather than a guessed constant.
+function edgeLabelBoundingBox(edge, geo) {
+  const fontSize = effectiveFontSize(EDGE_FONT_SIZE, EDGE_FONT_MIN_SCREEN_PX, EDGE_FONT_MAX_WORLD_PX);
+  ctx.font = `${fontSize}px system-ui, sans-serif`;
+  const textWidth = ctx.measureText(edge.relation || "").width;
+  const padding = 4 / camera.scale; // generous enough for a touch-sized grab, matching findEdgeAt's own threshold order of magnitude
+  return {
+    x: geo.mid.x - textWidth / 2 - padding,
+    y: geo.mid.y - 4 - fontSize - padding,
+    w: textWidth + padding * 2,
+    h: fontSize + padding * 2,
+  };
+}
+
+// Design critique follow-up (2026-08): dragging an edge's own label was
+// previously not a real interaction at all (see the canvas pointerdown
+// handler's own comment on dragMode "moveEdgeLabel"). Hit-tests only the
+// rendered label text, not the rest of the edge path -- pointerdown falls
+// back to findEdgeAt() for the line itself, which still selects/arms the
+// long-press-delete gesture but does not reposition anything.
+function findEdgeLabelAt(wx, wy) {
+  const rect = visibleWorldRect();
+  const bendInfo = computeEdgeBendInfo();
+  for (let i = state.edges.length - 1; i >= 0; i--) {
+    const e = state.edges[i];
+    const geo = edgeGeometry(e, bendInfo);
+    if (!geo) continue;
+    const box = edgeLabelBoundingBox(e, geo);
+    if (!rectsOverlap(box, rect)) continue;
+    if (wx >= box.x && wx <= box.x + box.w && wy >= box.y && wy <= box.y + box.h) return e;
+  }
+  return null;
+}
+
+// Finds the position along an edge's path (straight segment, or the
+// quadratic bezier a bent/parallel edge uses -- see edgeControlPoint())
+// closest to a given world point, expressed the same way edge.labelT
+// already is (0 = the `a` anchor, 1 = the `b` anchor). Unclamped -- callers
+// that are about to assign this to edge.labelT are expected to clamp(0, 1)
+// themselves, exactly as they already do for every other 0..1 parameter in
+// this file, rather than this helper silently having its own opinion about
+// range.
+function projectPointToEdgeT(pt, geo) {
+  if (!geo.control) {
+    const dx = geo.b.x - geo.a.x, dy = geo.b.y - geo.a.y;
+    const lenSq = dx * dx + dy * dy;
+    if (lenSq === 0) return 0.5;
+    return ((pt.x - geo.a.x) * dx + (pt.y - geo.a.y) * dy) / lenSq;
+  }
+  let bestT = 0.5, bestDist = Infinity;
+  for (let i = 0; i <= EDGE_CURVE_SAMPLES; i++) {
+    const t = i / EDGE_CURVE_SAMPLES;
+    const p = quadraticBezierPoint(geo.a, geo.control, geo.b, t);
+    const d = Math.hypot(pt.x - p.x, pt.y - p.y);
+    if (d < bestDist) { bestDist = d; bestT = t; }
+  }
+  return bestT;
+}
+
 // ---------------------------------------------------------------------------
 // Canvas sizing (devicePixelRatio-aware)
 // ---------------------------------------------------------------------------
@@ -4115,12 +4290,25 @@ function safeReleasePointerCapture(id) {
 let panPointerId = null;
 let panLast = { x: 0, y: 0 };
 
-let dragMode = null; // 'pan' | 'moveNode' | 'createEdge' | null
+let dragMode = null; // 'pan' | 'moveNode' | 'createEdge' | 'moveEdgeLabel' | null
 let movingNodeId = null;
 let moveOffset = { x: 0, y: 0 };
 let edgeDragSourceId = null;
 let edgeDragCurrentWorld = null;
-let dragBeforeSnapshot = null; // captured at drag-start, for moveNode undo steps
+// Bug fix + feature (design critique follow-up, 2026-08): pointerdown on an
+// edge used to arm the same long-press-delete timer as a node does, but
+// unlike moveNode, nothing ever cancelled it on movement -- the edge branch
+// below never set dragMode to anything, so pointermove's move-cancels-the-
+// timer check (which is keyed on dragMode) never ran for it. Any press held
+// past LONG_PRESS_MS deleted the edge outright, even mid-drag, regardless
+// of how far the pointer had moved -- "drag the relationship down a lot"
+// and it vanishes. dragMode "moveEdgeLabel" gives edges the same
+// press/hold/move handling nodes already had (see the pointerdown/
+// pointermove/pointerup branches below), and doubles as the drag needed to
+// reposition edge.labelT -- previously an autolayout-only field (see
+// resolveEdgeLabelPositions()) never exposed to the user directly.
+let movingEdgeId = null;
+let dragBeforeSnapshot = null; // captured at drag-start, for moveNode/moveEdgeLabel undo steps
 let longPressTimer = null;
 let pointerDownScreen = null;
 let suppressNextClick = false;
@@ -4180,17 +4368,35 @@ canvas.addEventListener("pointerdown", (e) => {
     return;
   }
 
-  const edgeHit = findEdgeAt(world.x, world.y);
+  // Label hit-test first: the label typically renders a few pixels *above*
+  // the line itself (see edgeLabelBoundingBox()'s own comment), outside
+  // findEdgeAt()'s tight path-proximity threshold, so a click squarely on
+  // the visible text wouldn't otherwise reliably register as hitting the
+  // edge at all. Either hit arms the same drag/long-press-delete handling;
+  // only a genuine label hit is guaranteed to have started inside the
+  // label's own box, but pointermove repositions labelT based on the
+  // pointer's current projection onto the path regardless of exactly where
+  // the press started, so dragging from anywhere on the line still works.
+  const edgeHit = findEdgeLabelAt(world.x, world.y) || findEdgeAt(world.x, world.y);
   if (edgeHit) {
     selectEdge(edgeHit.id);
+    dragMode = "moveEdgeLabel";
+    activePointerId = e.pointerId;
+    movingEdgeId = edgeHit.id;
+    dragBeforeSnapshot = snapshotState();
+    safeSetPointerCapture(e.pointerId);
     longPressTimer = setTimeout(() => {
       const before = snapshotState();
       deleteEdge(edgeHit.id);
       pushHistory(before, snapshotState());
+      dragMode = null;
+      activePointerId = null;
+      movingEdgeId = null;
+      dragBeforeSnapshot = null;
       longPressTimer = null;
     }, LONG_PRESS_MS);
     markDirty();
-    return; // no pan/move originates from an edge
+    return; // no pan originates from an edge
   }
 
   panPointerId = e.pointerId;
@@ -4212,7 +4418,7 @@ canvas.addEventListener("pointermove", (e) => {
     return;
   }
 
-  if (dragMode === "moveNode" || dragMode === "createEdge") {
+  if (dragMode === "moveNode" || dragMode === "createEdge" || dragMode === "moveEdgeLabel") {
     if (e.pointerId !== activePointerId) return;
     if (pointerDownScreen && longPressTimer) {
       const moved = Math.hypot(e.clientX - pointerDownScreen.x, e.clientY - pointerDownScreen.y);
@@ -4228,6 +4434,13 @@ canvas.addEventListener("pointermove", (e) => {
       if (node) {
         node.x = world.x - moveOffset.x;
         node.y = world.y - moveOffset.y;
+        markDirty();
+      }
+    } else if (dragMode === "moveEdgeLabel") {
+      const edge = state.edges.find((ed) => ed.id === movingEdgeId);
+      const geo = edge ? edgeGeometry(edge, computeEdgeBendInfo()) : null;
+      if (geo) {
+        edge.labelT = clamp(projectPointToEdgeT(world, geo), 0, 1);
         markDirty();
       }
     } else {
@@ -4277,6 +4490,20 @@ canvas.addEventListener("pointerup", (e) => {
     return;
   }
 
+  if (dragMode === "moveEdgeLabel") {
+    if (e.pointerId !== activePointerId) return;
+    const moved = pointerDownScreen ? Math.hypot(e.clientX - pointerDownScreen.x, e.clientY - pointerDownScreen.y) : 0;
+    if (moved > MOVE_THRESHOLD) {
+      suppressNextClick = true;
+      if (dragBeforeSnapshot) pushHistory(dragBeforeSnapshot, snapshotState());
+    }
+    movingEdgeId = null;
+    dragBeforeSnapshot = null;
+    dragMode = null;
+    activePointerId = null;
+    return;
+  }
+
   if (dragMode === "createEdge") {
     if (e.pointerId !== activePointerId) return;
     const rect = canvas.getBoundingClientRect();
@@ -4315,11 +4542,11 @@ function commitDragIfChanged() {
 function abortActiveDrag() {
   // A pending long-press-delete timer must die with the interrupted drag
   // too — otherwise it still fires ~600ms later using its own closed-over
-  // node reference, deleting a node the user has already moved on from
-  // (e.g. into a pinch gesture) with no warning and no undo step recorded
-  // for it.
+  // node/edge reference, deleting something the user has already moved on
+  // from (e.g. into a pinch gesture) with no warning and no undo step
+  // recorded for it.
   if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
-  if (dragMode === "moveNode" && movingNodeId) {
+  if ((dragMode === "moveNode" && movingNodeId) || (dragMode === "moveEdgeLabel" && movingEdgeId)) {
     commitDragIfChanged();
   }
   // createEdge has nothing persistent to commit (no edge exists until a
@@ -4328,6 +4555,7 @@ function abortActiveDrag() {
   dragMode = null;
   activePointerId = null;
   movingNodeId = null;
+  movingEdgeId = null;
   edgeDragSourceId = null;
   edgeDragCurrentWorld = null;
   dragBeforeSnapshot = null;
@@ -4696,6 +4924,15 @@ function buildJsonExport(savedAt) {
       relation: e.relation, directed: e.directed,
       meaning: e.meaning, // agent_ontology_spec.md §4.2
       aliases: [...(e.aliases || [])],
+      // Design critique follow-up (2026-08): a hand-dragged label position
+      // is a deliberate user edit now (see the canvas pointerdown handler's
+      // "moveEdgeLabel" comment), not just an autolayout scratch value --
+      // it has to round-trip through Save Version/reopen like any other
+      // edit, or repositioning a label would silently reset to the
+      // midpoint on the very next reload. null (not the historical
+      // "unset" value here, `undefined`, which JSON can't represent
+      // anyway) for an edge nobody has ever touched or auto-laid-out.
+      labelT: typeof e.labelT === "number" ? e.labelT : null,
     })),
     // agent_ontology_spec.md §4.3 — additive top-level collections, empty
     // arrays when nothing's been authored yet.
@@ -5968,6 +6205,11 @@ function parseJsonImport(text) {
       directed: raw.directed !== false,
       meaning: typeof raw.meaning === "string" ? raw.meaning : null,
       aliases: stringArray(raw.aliases),
+      // A file written before this field existed (or a hand-edited one)
+      // just has no labelT at all -- edgeGeometry()'s own `?? 0.5` fallback
+      // already treats null the same as never-set, so no separate
+      // backward-compat branch is needed here.
+      labelT: typeof raw.labelT === "number" ? raw.labelT : null,
     });
   }
 
@@ -6120,6 +6362,15 @@ function commitJsonImport(text, mode, sourceFilename) {
       target: liveNodeByKey.get(e.target).id,
       relation: e.relation, directed: e.directed,
       meaning: e.meaning, aliases: [...e.aliases],
+      // Full restore: the file's own label placement is part of "the file
+      // *is* the graph, ids and geometry included" (see this function's own
+      // comment above) -- same treatment as node x/y right below. Spread in
+      // conditionally, not a plain `labelT: ... : undefined`, so an edge
+      // nobody ever repositioned round-trips with no labelT key at all --
+      // exactly the shape createEdge() itself produces, rather than an
+      // explicit-but-undefined property a strict shape/deep-equality check
+      // elsewhere would see as an extra key.
+      ...(typeof e.labelT === "number" ? { labelT: e.labelT } : {}),
     }));
     state.rules = g.rules.map((r) => ({ id: r.key || genRuleId(), name: r.name, conditions: [...r.conditions] }));
     g.rules.forEach((r, i) => liveRuleByKey.set(r.key, state.rules[i]));
@@ -6184,6 +6435,13 @@ function commitJsonImport(text, mode, sourceFilename) {
       const edge = existing || createEdge(src.id, tgt.id, e.relation, e.directed);
       edge.meaning = e.meaning;
       edge.aliases = [...e.aliases];
+      // Same rule as node positions on merge (see the comment above on "the
+      // file is authoritative for the content it carries, but never for
+      // where the user has put the box"): a brand-new edge inherits the
+      // file's label placement, but merging into an *existing* edge must
+      // never silently move a label the user may have already hand-placed
+      // in this session.
+      if (!existing && typeof e.labelT === "number") edge.labelT = e.labelT;
     }
 
     for (const r of g.rules) {
