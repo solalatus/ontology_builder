@@ -1882,3 +1882,63 @@ conventions specifically (those span more than one domain suffix today and could
       pre-existing, unrelated CSS-tooltip-timing flake under full-suite load, confirmed to pass cleanly in
       isolation and untouched by this change), 5 skipped (the new Azure live suite, correctly, since no
       Azure endpoint was available yet).
+
+## UI refactor: a plain OpenAI key flow, with Azure behind a small link + dedicated popup
+
+**2026-08-10.** Follow-up design critique on the feature above, still on `add-azure-openai-support`
+(PR #73, still draft -- live Azure verification is still pending the endpoint): "refactor the ui to have a
+normal openai key flow, and a small link that leads to an azure specific popup that enables full endpoint
+and such edit, beyond the key." The prior connect modal put the Azure endpoint field inline, always
+visible, right under the key field, with a combined "API key (OpenAI or Azure OpenAI)" label -- correct but
+not what "a normal OpenAI key flow" asks for: Azure should be reachable, not upfront.
+
+Restructured the connect modal (`#agent-connect-overlay`) to show only the key field by default, plus a
+small `#agent-azure-config-open` link/button ("Using Azure OpenAI?"). Clicking it hides the connect modal
+and shows a new, separate `#agent-azure-config-dialog` popup (same `.modal-overlay`/`.modal-dialog`/
+`.modal-actions` structure as every other dialog in this app) -- a **swap, not true modal stacking**:
+`agent-connect-overlay` was never part of `isAnyModalOpen()`'s tracked list to begin with (a pre-existing
+gap, confirmed by reading that function, and left alone -- out of scope for this refactor), so rather than
+extending that guard, opening the popup explicitly hides the main modal and Cancel/Save/Remove explicitly
+reverse it. The two overlays are never visible at the same time.
+
+The popup does more than relocate the endpoint field -- per "such edit, beyond the key," it also exposes
+the previously-hardcoded `AZURE_OPENAI_API_VERSION` constant as an optional per-connection override (a new
+`#agent-azure-api-version-input`, blank by default, remembered alongside the endpoint under a new
+`kg-agent-azure-api-version` localStorage key). `agentModelsUrl()`/`agentChatUrl()`/`fetchAgentModels()`
+now take an optional `apiVersion` parameter (falsy -- omitted, `null`, or `""` -- still falls back to the
+constant, so every pre-existing call site and test is unaffected); a new `agentState.azureApiVersion` field
+threads the override from connect through to `callAgentChatRaw()`. This directly answers the earlier
+"don't introduce API-difference bugs" concern from a different angle: if a specific Azure resource ever
+needs a different `api-version` than the one this app assumes, the user can now unblock themselves without
+a code change.
+
+Once Azure is configured, two things change to keep the user aware which provider is active (the original
+"the user should know" requirement, now expressed differently): the link's own text becomes a live summary
+("Azure OpenAI: https://... (edit)"), and the key field's label switches from "OpenAI API key" to "Azure
+OpenAI API key" -- both driven by `updateAgentAzureConfigSummary()`/`updateAgentKeyLabel()`, called after
+every state change (popup Save/Remove, modal open, language toggle) so the two never drift out of sync
+with each other or with `agentConnectAzureEndpoint` (the module-level var the popup's Save/Remove now own,
+replacing direct reads of `#agent-azure-endpoint-input` from the main modal's own submit handler).
+Validation moved earlier too: an invalid-looking endpoint is now rejected right at Save time in the popup
+itself (never even reaches the pending connect state), with `submitAgentConnect()` keeping its own
+defensive re-check for the one path that bypasses Save -- a remembered endpoint loaded straight from
+localStorage on modal open, pinned by a new test that seeds a malformed value there directly.
+
+- [x] Verified visually with three screenshots (default modal: only the key field + link; the popup: both
+      fields + Remove/Cancel/Save; the configured modal: dynamic label + summary) -- matches the intended
+      design exactly, including Remove being visually separated from Cancel/Save in `.modal-actions`.
+- [x] `tests/helper-agent-azure-openai.spec.mjs` -- rewrote every test that used to fill
+      `#agent-azure-endpoint-input` directly in the main modal (it now lives in the popup, hidden until the
+      link is clicked) via a new `configureAzure()` helper; added new coverage for the popup itself (open/
+      Cancel-discards/Save-persists/Remove-clears), the dynamic key label, the api-version override
+      (including a live request-shape assertion that the overridden version reaches both the deployments
+      list and the chat completions URL), and the malformed-endpoint-in-storage defensive path. 35 tests
+      total (up from 25), all verified to fail against the pre-refactor modal structure before passing
+      against the new one.
+- [x] `tests/lib/liveAzureOpenAi.mjs`/`tests/helper-agent-live-azure.spec.mjs` updated to drive the popup
+      too (`configureAzureEndpoint()`, exported and reused by both) -- still all skipped pending the real
+      endpoint, but structurally correct for when it's provided.
+- [x] Full regression (`node --test tests/*.spec.mjs`, 760 tests, same environment as the addendum above):
+      **755 pass, 0 fail, 5 skipped** (the live Azure suite only) -- a clean run, no flakes this time.
+- [x] `tests/README.md` reviewed -- its Azure section documents env-var/opt-in behavior, not exact UI
+      mechanics, so it stays accurate as written; no changes needed.

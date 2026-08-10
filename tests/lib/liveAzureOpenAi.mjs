@@ -52,6 +52,16 @@ export function forwardToRealAzure(page, urlPattern) {
   return responses;
 }
 
+// The endpoint field lives in its own popup now, reached via the small
+// #agent-azure-config-open link/summary button in the main connect modal
+// (design critique, 2026-08) -- not inline anymore. Opens the popup, fills
+// the endpoint, and Saves (which returns to the main modal).
+export async function configureAzureEndpoint(page, endpoint) {
+  await page.click("#agent-azure-config-open");
+  await page.fill("#agent-azure-endpoint-input", endpoint);
+  await page.click("#agent-azure-config-save");
+}
+
 // Drives the real connect flow with a real Azure key + endpoint: real GET
 // .../openai/deployments (relayed, see forwardToRealAzure above), real
 // default-deployment selection against the real returned list, then
@@ -62,7 +72,7 @@ export async function connectAgentLiveAzure(page, apiKey, endpoint) {
   await openPanel(page);
   await page.click("#agent-connect-open");
   await page.fill("#agent-key-input", apiKey);
-  await page.fill("#agent-azure-endpoint-input", endpoint);
+  await configureAzureEndpoint(page, endpoint);
   await page.click("#agent-connect-submit");
   await page.waitForFunction(() => !document.getElementById("agent-model-select-modal").disabled, null, { timeout: 30000 });
   await page.click("#agent-connect-submit");

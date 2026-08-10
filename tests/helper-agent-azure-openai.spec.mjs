@@ -105,13 +105,25 @@ async function openPanel(page) {
   if (!expanded) await page.click("#agent-panel-toggle");
 }
 
+// The endpoint (and, optionally, api-version) fields live in their own
+// popup, reached via the small #agent-azure-config-open link/summary button
+// in the main connect modal (design critique, 2026-08) -- not inline
+// anymore. Opens the popup, fills it, and Saves (which returns to the main
+// modal with the summary/key-label updated).
+async function configureAzure(page, endpoint, apiVersion = "") {
+  await page.click("#agent-azure-config-open");
+  await page.fill("#agent-azure-endpoint-input", endpoint);
+  if (apiVersion) await page.fill("#agent-azure-api-version-input", apiVersion);
+  await page.click("#agent-azure-config-save");
+}
+
 // Drives the connect flow with an optional Azure endpoint -- blank
 // (default) reproduces the plain-OpenAI flow every other spec file uses.
-async function connectAgent(page, { key = "sk-test-key", azureEndpoint = "" } = {}) {
+async function connectAgent(page, { key = "sk-test-key", azureEndpoint = "", azureApiVersion = "" } = {}) {
   await openPanel(page);
   await page.click("#agent-connect-open");
   await page.fill("#agent-key-input", key);
-  await page.fill("#agent-azure-endpoint-input", azureEndpoint);
+  if (azureEndpoint) await configureAzure(page, azureEndpoint, azureApiVersion);
   await page.click("#agent-connect-submit");
   await page.waitForFunction(() => !document.getElementById("agent-model-select-modal").disabled);
   await page.click("#agent-connect-submit");
@@ -213,10 +225,23 @@ test("the app's own AZURE_OPENAI_API_VERSION matches what this test file assumes
 // Connect modal UI
 // --------------------------------------------------------------------------
 
-test("the connect modal shows an Azure endpoint field with explanatory hint text, separate from the key field", async () => {
+test("the connect modal's default flow shows only the key field, with a small link to a separate Azure config popup", async () => {
   await withPage(async (page) => {
     await openPanel(page);
     await page.click("#agent-connect-open");
+    assert.ok(await page.locator("#agent-key-input").isVisible());
+    assert.ok(await page.locator("#agent-azure-config-open").isVisible(), "expected a small link/button to the Azure config popup");
+    assert.equal(await page.locator("#agent-azure-endpoint-input").isVisible(), false, "the endpoint field must not be inline in the main modal");
+  });
+});
+
+test("the Azure link opens a dedicated popup with the endpoint field and explanatory hint text", async () => {
+  await withPage(async (page) => {
+    await openPanel(page);
+    await page.click("#agent-connect-open");
+    await page.click("#agent-azure-config-open");
+    assert.ok(await page.locator("#agent-azure-config-overlay").isVisible());
+    assert.equal(await page.locator("#agent-connect-overlay").isVisible(), false, "opening the popup should hide the main connect modal, not stack on top of it");
     assert.ok(await page.locator("#agent-azure-endpoint-input").isVisible());
     const label = await page.locator("#agent-azure-endpoint-label").textContent();
     assert.match(label, /Azure/i);
@@ -228,13 +253,67 @@ test("the connect modal shows an Azure endpoint field with explanatory hint text
   });
 });
 
-test("the key label no longer claims to be OpenAI-only, now that it accepts either provider's key", async () => {
+test("the popup also has an editable, optional API-version field", async () => {
   await withPage(async (page) => {
     await openPanel(page);
     await page.click("#agent-connect-open");
-    const label = await page.locator("#agent-key-label").textContent();
-    assert.match(label, /OpenAI/i);
-    assert.match(label, /Azure/i);
+    await page.click("#agent-azure-config-open");
+    assert.ok(await page.locator("#agent-azure-api-version-input").isVisible());
+    const hint = await page.locator("#agent-azure-api-version-hint").textContent();
+    assert.ok(hint.length > 0);
+  });
+});
+
+test("Cancel in the popup discards unsaved edits and returns to the main modal", async () => {
+  await withPage(async (page) => {
+    await openPanel(page);
+    await page.click("#agent-connect-open");
+    await page.click("#agent-azure-config-open");
+    await page.fill("#agent-azure-endpoint-input", AZURE_ENDPOINT);
+    await page.click("#agent-azure-config-cancel");
+    assert.ok(await page.locator("#agent-connect-overlay").isVisible());
+    assert.equal(await page.evaluate(() => window.__kg.agent.getPendingAzureEndpoint()), null);
+    const linkText = await page.locator("#agent-azure-config-open").textContent();
+    assert.doesNotMatch(linkText, new RegExp(AZURE_ENDPOINT.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+  });
+});
+
+test("Save in the popup persists the pending endpoint and shows it in the main modal's summary", async () => {
+  await withPage(async (page) => {
+    await openPanel(page);
+    await page.click("#agent-connect-open");
+    await configureAzure(page, AZURE_ENDPOINT);
+    assert.ok(await page.locator("#agent-connect-overlay").isVisible());
+    assert.equal(await page.evaluate(() => window.__kg.agent.getPendingAzureEndpoint()), AZURE_ENDPOINT);
+    const linkText = await page.locator("#agent-azure-config-open").textContent();
+    assert.match(linkText, /openai\.azure\.com/i);
+  });
+});
+
+test("Remove in the popup clears a configured endpoint and reverts the summary to the plain link", async () => {
+  await withPage(async (page) => {
+    await openPanel(page);
+    await page.click("#agent-connect-open");
+    await configureAzure(page, AZURE_ENDPOINT);
+    await page.click("#agent-azure-config-open");
+    await page.click("#agent-azure-config-remove");
+    assert.equal(await page.evaluate(() => window.__kg.agent.getPendingAzureEndpoint()), null);
+    const linkText = await page.locator("#agent-azure-config-open").textContent();
+    assert.doesNotMatch(linkText, /openai\.azure\.com/i);
+  });
+});
+
+test("the key label reads plainly as OpenAI by default, and switches to Azure OpenAI once an endpoint is configured", async () => {
+  await withPage(async (page) => {
+    await openPanel(page);
+    await page.click("#agent-connect-open");
+    const defaultLabel = await page.locator("#agent-key-label").textContent();
+    assert.match(defaultLabel, /OpenAI/i);
+    assert.doesNotMatch(defaultLabel, /Azure/i);
+
+    await configureAzure(page, AZURE_ENDPOINT);
+    const azureLabel = await page.locator("#agent-key-label").textContent();
+    assert.match(azureLabel, /Azure/i);
   });
 });
 
@@ -289,7 +368,7 @@ test("the deployment list populates the model select with deployment names, not 
     await openPanel(page);
     await page.click("#agent-connect-open");
     await page.fill("#agent-key-input", "azure-key");
-    await page.fill("#agent-azure-endpoint-input", AZURE_ENDPOINT);
+    await configureAzure(page, AZURE_ENDPOINT);
     await page.click("#agent-connect-submit");
     await page.waitForFunction(() => !document.getElementById("agent-model-select-modal").disabled);
     const options = await page.locator("#agent-model-select-modal option").allTextContents();
@@ -313,7 +392,7 @@ test("a deployment whose arbitrary name doesn't look like a model id is still co
     await openPanel(page);
     await page.click("#agent-connect-open");
     await page.fill("#agent-key-input", "azure-key");
-    await page.fill("#agent-azure-endpoint-input", AZURE_ENDPOINT);
+    await configureAzure(page, AZURE_ENDPOINT);
     await page.click("#agent-connect-submit");
     await page.waitForFunction(() => !document.getElementById("agent-model-select-modal").disabled);
     const selected = await page.locator("#agent-model-select-modal").inputValue();
@@ -350,7 +429,7 @@ test("an unfamiliar/unrecognized status string on a deployment is not treated as
 // Validation and errors
 // --------------------------------------------------------------------------
 
-test("an invalid-looking endpoint shows a dedicated validation error and never attempts a fetch", async () => {
+test("an invalid-looking endpoint is rejected at Save time in the popup itself, before it ever reaches the connect flow", async () => {
   await withPage(async (page) => {
     let fetchAttempted = false;
     await page.route("**/*", (route) => {
@@ -359,8 +438,36 @@ test("an invalid-looking endpoint shows a dedicated validation error and never a
     });
     await openPanel(page);
     await page.click("#agent-connect-open");
-    await page.fill("#agent-key-input", "sk-test");
+    await page.click("#agent-azure-config-open");
     await page.fill("#agent-azure-endpoint-input", "not-a-real-endpoint");
+    await page.click("#agent-azure-config-save");
+    await page.waitForFunction(() => window.__kg.agent.getAzureConfigErrorKind() === "invalidEndpoint");
+    const errorText = await page.textContent("#agent-azure-config-error");
+    assert.match(errorText, /valid|endpoint|url/i);
+    // Save should refuse and keep the popup open, not silently fall back to
+    // the main modal with a bad value pending.
+    assert.ok(await page.locator("#agent-azure-config-overlay").isVisible());
+    assert.equal(await page.evaluate(() => window.__kg.agent.getPendingAzureEndpoint()), null);
+    assert.equal(fetchAttempted, false, "a malformed endpoint should be rejected before any network call");
+  });
+});
+
+test("a malformed endpoint left over in storage (e.g. from an older version) is still caught defensively on Connect", async () => {
+  // Save's own validation (above) means a real user can never get a bad
+  // endpoint into agentConnectAzureEndpoint through the UI -- but
+  // openAgentConnectModal() also loads a remembered endpoint straight from
+  // localStorage without re-running that check, so submitAgentConnect()
+  // keeps its own defensive validation too. This pins that fallback path.
+  await withPage(async (page) => {
+    let fetchAttempted = false;
+    await page.route("**/*", (route) => {
+      if (route.request().url().includes("not-a-real-endpoint")) fetchAttempted = true;
+      route.continue();
+    });
+    await page.evaluate(() => localStorage.setItem("kg-agent-azure-endpoint", "not-a-real-endpoint"));
+    await openPanel(page);
+    await page.click("#agent-connect-open");
+    await page.fill("#agent-key-input", "sk-test");
     await page.click("#agent-connect-submit");
     await page.waitForFunction(() => window.__kg.agent.getConnectErrorKind() === "invalidEndpoint");
     const errorText = await page.textContent("#agent-connect-error");
@@ -375,7 +482,7 @@ test("an invalid Azure key surfaces the same inline error as an invalid OpenAI k
     await openPanel(page);
     await page.click("#agent-connect-open");
     await page.fill("#agent-key-input", "bad-azure-key");
-    await page.fill("#agent-azure-endpoint-input", AZURE_ENDPOINT);
+    await configureAzure(page, AZURE_ENDPOINT);
     await page.click("#agent-connect-submit");
     await page.waitForFunction(() => window.__kg.agent.getConnectErrorKind() === "invalidKey");
     assert.equal(await page.evaluate(() => window.__kg.agent.state.connected), false);
@@ -388,7 +495,7 @@ test("a 403 on the deployments endpoint is also treated as an invalid-key error"
     await openPanel(page);
     await page.click("#agent-connect-open");
     await page.fill("#agent-key-input", "forbidden-key");
-    await page.fill("#agent-azure-endpoint-input", AZURE_ENDPOINT);
+    await configureAzure(page, AZURE_ENDPOINT);
     await page.click("#agent-connect-submit");
     await page.waitForFunction(() => window.__kg.agent.getConnectErrorKind() === "invalidKey");
   });
@@ -515,7 +622,7 @@ test("remembering an Azure connection persists both the key and the endpoint, an
     await openPanel(page);
     await page.click("#agent-connect-open");
     await page.fill("#agent-key-input", "sk-remember-azure");
-    await page.fill("#agent-azure-endpoint-input", AZURE_ENDPOINT);
+    await configureAzure(page, AZURE_ENDPOINT);
     await page.click("#agent-connect-submit");
     await page.waitForFunction(() => !document.getElementById("agent-model-select-modal").disabled);
     await page.check("#agent-remember-key");
@@ -533,6 +640,12 @@ test("remembering an Azure connection persists both the key and the endpoint, an
     await openPanel(page);
     await page.click("#agent-connect-open");
     assert.equal(await page.locator("#agent-key-input").inputValue(), "sk-remember-azure");
+    // The endpoint itself is pre-loaded into the pending connect state (and
+    // reflected in the summary link) even though the popup isn't open yet.
+    assert.equal(await page.evaluate(() => window.__kg.agent.getPendingAzureEndpoint()), AZURE_ENDPOINT);
+    const linkText = await page.locator("#agent-azure-config-open").textContent();
+    assert.match(linkText, /openai\.azure\.com/i);
+    await page.click("#agent-azure-config-open");
     assert.equal(await page.locator("#agent-azure-endpoint-input").inputValue(), AZURE_ENDPOINT);
   });
 });
@@ -556,7 +669,7 @@ test("forgetting a remembered Azure connection clears the endpoint from storage 
     await openPanel(page);
     await page.click("#agent-connect-open");
     await page.fill("#agent-key-input", "sk-forget-me-azure");
-    await page.fill("#agent-azure-endpoint-input", AZURE_ENDPOINT);
+    await configureAzure(page, AZURE_ENDPOINT);
     await page.click("#agent-connect-submit");
     await page.waitForFunction(() => !document.getElementById("agent-model-select-modal").disabled);
     await page.check("#agent-remember-key");
@@ -596,10 +709,97 @@ test("the Azure endpoint label and hint retranslate on language toggle, same as 
   await withPage(async (page) => {
     await openPanel(page);
     await page.click("#agent-connect-open");
+    await page.click("#agent-azure-config-open");
     const enLabel = await page.locator("#agent-azure-endpoint-label").textContent();
     await page.evaluate(() => window.__kg.lang.toggle());
     const otherLabel = await page.locator("#agent-azure-endpoint-label").textContent();
     assert.notEqual(enLabel, otherLabel);
     assert.ok(otherLabel.length > 0);
+  });
+});
+
+test("the configured-endpoint summary re-renders (still showing the endpoint) on language toggle", async () => {
+  await withPage(async (page) => {
+    await openPanel(page);
+    await page.click("#agent-connect-open");
+    await configureAzure(page, AZURE_ENDPOINT);
+    await page.evaluate(() => window.__kg.lang.toggle());
+    const linkText = await page.locator("#agent-azure-config-open").textContent();
+    assert.match(linkText, /openai\.azure\.com/i, "the endpoint itself must survive a language toggle, only the surrounding text translates");
+  });
+});
+
+// --------------------------------------------------------------------------
+// API-version override (the popup's second field, beyond just the key --
+// "full endpoint and such edit, beyond the key," design critique 2026-08)
+// --------------------------------------------------------------------------
+
+test("an overridden API version is used for both model discovery and chat requests, and the default is used when left blank", async () => {
+  await withPage(async (page) => {
+    const customVersion = "2025-01-01-preview";
+    const customDeploymentsUrl = `${AZURE_ENDPOINT}/openai/deployments?api-version=${customVersion}`;
+    let requestedUrl = null;
+    await page.route(customDeploymentsUrl, (route) => {
+      requestedUrl = route.request().url();
+      route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ object: "list", data: [{ id: "d1", model: "gpt-4o-mini", created_at: 1, status: "succeeded" }] }) });
+    });
+
+    await openPanel(page);
+    await page.click("#agent-connect-open");
+    await page.fill("#agent-key-input", "azure-key");
+    await configureAzure(page, AZURE_ENDPOINT, customVersion);
+    assert.equal(await page.evaluate(() => window.__kg.agent.getPendingAzureApiVersion()), customVersion);
+    await page.click("#agent-connect-submit");
+    await page.waitForFunction(() => !document.getElementById("agent-model-select-modal").disabled);
+    assert.equal(requestedUrl, customDeploymentsUrl, "model discovery should have used the overridden api-version, not the default");
+
+    let chatUrl = null;
+    await page.route(`${AZURE_ENDPOINT}/openai/deployments/d1/chat/completions?api-version=${customVersion}`, (route) => {
+      chatUrl = route.request().url();
+      route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(chatCompletionBody("ok")) });
+    });
+    await page.click("#agent-connect-submit");
+    await page.waitForFunction(() => window.__kg.agent.state.connected === true);
+    assert.equal(await page.evaluate(() => window.__kg.agent.state.azureApiVersion), customVersion);
+
+    await sendChatMessage(page, "hi");
+    await page.waitForFunction(() => !window.__kg.agent.isSending());
+    assert.equal(chatUrl, `${AZURE_ENDPOINT}/openai/deployments/d1/chat/completions?api-version=${customVersion}`);
+  });
+});
+
+test("leaving the API-version field blank in the popup keeps using the app's default version", async () => {
+  await withPage(async (page) => {
+    mockAzureDeploymentsRoute(page);
+    await connectAgent(page, { azureEndpoint: AZURE_ENDPOINT }); // no azureApiVersion passed -- field left blank
+    assert.equal(await page.evaluate(() => window.__kg.agent.state.azureApiVersion), null);
+  });
+});
+
+test("remembering an Azure connection with a custom API version persists and restores it", async () => {
+  await withPage(async (page) => {
+    const customVersion = "2025-01-01-preview";
+    await page.route(`${AZURE_ENDPOINT}/openai/deployments?api-version=${customVersion}`, (route) => {
+      route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ object: "list", data: [{ id: "d1", model: "gpt-4o-mini", created_at: 1, status: "succeeded" }] }) });
+    });
+    await openPanel(page);
+    await page.click("#agent-connect-open");
+    await page.fill("#agent-key-input", "sk-remember-version");
+    await configureAzure(page, AZURE_ENDPOINT, customVersion);
+    await page.click("#agent-connect-submit");
+    await page.waitForFunction(() => !document.getElementById("agent-model-select-modal").disabled);
+    await page.check("#agent-remember-key");
+    await page.click("#agent-connect-submit");
+    await page.waitForFunction(() => window.__kg.agent.state.connected === true);
+
+    const stored = await page.evaluate(() => localStorage.getItem("kg-agent-azure-api-version"));
+    assert.equal(stored, customVersion);
+
+    await page.evaluate(() => window.__kg.agent.disconnect());
+    await openPanel(page);
+    await page.click("#agent-connect-open");
+    assert.equal(await page.evaluate(() => window.__kg.agent.getPendingAzureApiVersion()), customVersion);
+    await page.click("#agent-azure-config-open");
+    assert.equal(await page.locator("#agent-azure-api-version-input").inputValue(), customVersion);
   });
 });

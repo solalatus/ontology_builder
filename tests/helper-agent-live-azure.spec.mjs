@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { withPage } from "./lib/page.mjs";
 import { loadEnvKey } from "./lib/env.mjs";
 import { withPageAllowingResourceErrors } from "./lib/liveOpenAi.mjs";
-import { openPanel, sendChatMessage, forwardToRealAzure, connectAgentLiveAzure } from "./lib/liveAzureOpenAi.mjs";
+import { openPanel, sendChatMessage, forwardToRealAzure, connectAgentLiveAzure, configureAzureEndpoint } from "./lib/liveAzureOpenAi.mjs";
 
 // Helper Agent — live Azure OpenAI integration tests. Mirrors
 // tests/helper-agent-live-openai.spec.mjs's own rationale exactly (a
@@ -50,7 +50,7 @@ test("live: GET .../openai/deployments returns a real, non-empty, correctly-shap
     await openPanel(page);
     await page.click("#agent-connect-open");
     await page.fill("#agent-key-input", AZURE_OPENAI_API_KEY);
-    await page.fill("#agent-azure-endpoint-input", AZURE_OPENAI_ENDPOINT);
+    await configureAzureEndpoint(page, AZURE_OPENAI_ENDPOINT);
     await page.click("#agent-connect-submit");
     await page.waitForFunction(() => !document.getElementById("agent-model-select-modal").disabled, null, { timeout: 30000 });
 
@@ -81,7 +81,7 @@ test("live: an actually-invalid key against the real endpoint gets a real 401/40
     await openPanel(page);
     await page.click("#agent-connect-open");
     await page.fill("#agent-key-input", "deliberately-invalid-azure-key-000000000000");
-    await page.fill("#agent-azure-endpoint-input", AZURE_OPENAI_ENDPOINT);
+    await configureAzureEndpoint(page, AZURE_OPENAI_ENDPOINT);
     await page.click("#agent-connect-submit");
     await page.waitForFunction(() => window.__kg.agent.getConnectErrorKind() === "invalidKey", null, { timeout: 30000 });
 
