@@ -1318,7 +1318,7 @@
     <input id="agent-azure-endpoint-input" type="text" autocomplete="off" spellcheck="false" placeholder="https://your-resource.openai.azure.com">
     <p id="agent-azure-endpoint-hint" class="agent-field-hint">Hagyd üresen az OpenAI közvetlen használatához. Azure OpenAI esetén add meg az erőforrásod végpontját.</p>
     <label id="agent-azure-api-version-label" class="details-field-label" for="agent-azure-api-version-input">API verzió</label>
-    <input id="agent-azure-api-version-input" type="text" autocomplete="off" spellcheck="false" placeholder="2024-10-21">
+    <input id="agent-azure-api-version-input" type="text" autocomplete="off" spellcheck="false" placeholder="2023-03-15-preview">
     <p id="agent-azure-api-version-hint" class="agent-field-hint">Hagyd üresen az alapértelmezett verzió használatához. Csak akkor add meg, ha az erőforrásodhoz másik verzió szükséges.</p>
     <p id="agent-azure-config-error" class="agent-connect-error" role="alert"></p>
     <div class="modal-actions">
@@ -6906,12 +6906,26 @@ const AGENT_PANEL_WIDTH_MAX = 720;
 const OPENAI_MODELS_URL = "https://api.openai.com/v1/models";
 // Azure OpenAI requires an explicit api-version query param on every
 // request (unlike OpenAI, which versions implicitly via the /v1/ path) --
-// there is no "latest"/omit-it option. Pinned to a long-stable, non-preview
-// GA release that supports chat completions with tool/function calling, so
-// behavior doesn't shift under this app without an explicit review; bump
-// here (and re-run tests/helper-agent-live-azure.spec.mjs against a real
-// resource) if a specific deployment ever requires a newer version.
-const AZURE_OPENAI_API_VERSION = "2024-10-21";
+// there is no "latest"/omit-it option.
+//
+// Pinned to this specific old preview version for a live-verified reason,
+// not out of date pinning: `GET .../openai/deployments` (this app's only
+// way to discover a key's available deployments without an interactive
+// Entra ID sign-in this single-file BYOK app has no way to host) 404s under
+// EVERY api-version from 2023-05-15 through at least 2025-04-01-preview --
+// confirmed against a real Azure OpenAI resource, not a guess. Only
+// 2023-03-15-preview and 2022-12-01 still serve that listing route; Azure
+// appears to have dropped API-key-based deployment listing from the
+// data-plane REST surface for newer versions entirely, moving it to the
+// ARM control plane instead (a different, Entra-ID-gated API this app
+// can't use). The same real resource confirmed 2023-03-15-preview also
+// serves chat completions correctly, including tool/function calling, so
+// one shared version covers both needs -- no need to split model-discovery
+// and chat onto separate api-versions. Bump only after re-verifying the
+// listing route still 200s under the candidate version against a real
+// resource (re-run tests/helper-agent-live-azure.spec.mjs), not just
+// because a newer version exists.
+const AZURE_OPENAI_API_VERSION = "2023-03-15-preview";
 
 // True when azureEndpoint is a non-empty string -- the one signal this app
 // uses to decide OpenAI vs. Azure OpenAI throughout (see agentState.azureEndpoint's

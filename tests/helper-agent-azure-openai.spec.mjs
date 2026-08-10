@@ -31,7 +31,7 @@ import { launchChromium } from "./lib/browser.mjs";
 const OPENAI_MODELS_URL = "https://api.openai.com/v1/models";
 const OPENAI_CHAT_URL = "https://api.openai.com/v1/chat/completions";
 const AZURE_ENDPOINT = "https://test-resource.openai.azure.com";
-const AZURE_API_VERSION = "2024-10-21"; // must track AZURE_OPENAI_API_VERSION in index.html
+const AZURE_API_VERSION = "2023-03-15-preview"; // must track AZURE_OPENAI_API_VERSION in index.html
 const AZURE_DEPLOYMENTS_URL = `${AZURE_ENDPOINT}/openai/deployments?api-version=${AZURE_API_VERSION}`;
 const AZURE_CHAT_URL_PREFIX = `${AZURE_ENDPOINT}/openai/deployments/`;
 

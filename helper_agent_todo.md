@@ -1942,3 +1942,58 @@ localStorage on modal open, pinned by a new test that seeds a malformed value th
       **755 pass, 0 fail, 5 skipped** (the live Azure suite only) -- a clean run, no flakes this time.
 - [x] `tests/README.md` reviewed -- its Azure section documents env-var/opt-in behavior, not exact UI
       mechanics, so it stays accurate as written; no changes needed.
+
+## Live Azure verification: a real deployment-listing bug the mocked suite couldn't have caught
+
+**2026-08-10.** The user supplied the real resource endpoint
+(`https://briandemoopenai.openai.azure.com/`) for the Azure test key, unblocking
+`tests/helper-agent-live-azure.spec.mjs` for the first time. Wired it into `.env` as
+`AZURE_OPENAI_ENDPOINT` (gitignored, never committed, same convention as the other two keys already
+there) and ran the live suite -- **all 5 tests timed out waiting for a connect that never succeeded.**
+
+Root cause, found by hand-probing the real endpoint directly with Node's own `fetch()` outside the test
+harness (bypassing the app to isolate whether this was an app bug or an environment/connectivity issue):
+`GET {endpoint}/openai/deployments?api-version=2024-10-21` -- the exact call `fetchAgentModels()` makes for
+Azure model discovery -- returned a real `404 Resource not found`. Swept every api-version from
+`2022-12-01` through `2025-04-01-preview` against the same real resource: **every version from
+`2023-05-15` onward 404s on this specific listing route**, while `2022-12-01` and `2023-03-15-preview` both
+return a real `200` with the exact `{data: [{id, model, status, created_at, ...}]}` shape this app's
+`fetchAgentModels()` already assumes (confirmed against 10 real deployments on the resource, including
+`gpt-4o`, `gpt-5-mini`, and a `gpt-5.6-sol` preview-codename deployment -- a live example of exactly the
+`isStandardTierModel()` exclusion case already documented in that function's own comment). Direct
+chat-completion probes against a few plausible deployment names (`gpt-4o` succeeded with a real 200;
+several others correctly 404'd as `DeploymentNotFound`) confirmed the key/endpoint/auth were never the
+problem -- only the deployments-*listing* route was broken under the pinned version.
+
+This was never specific to this one demo resource: Azure appears to have removed the API-key-authenticated
+deployment-listing route from the data-plane REST surface for every API version after `2023-03-15-preview`,
+moving deployment management fully to the ARM control plane (a separate, Entra-ID-gated API this
+single-file BYOK app has no way to call, per `agentAuthHeaders()`'s own comment on why Entra ID isn't an
+option here). The `AZURE_OPENAI_API_VERSION = "2024-10-21"` pin -- chosen at implementation time for being
+"a long-stable, non-preview GA release," a reasonable-sounding but untested assumption -- would have broken
+Azure model discovery for **every** real Azure OpenAI resource, not just this one. This is precisely the
+class of bug `tests/helper-agent-live-azure.spec.mjs` exists to catch (see its own file header) and that no
+amount of careful mocked-test authorship could have found, since the mock's shape was correct -- the bug
+was in which URL actually resolves, not in how the response is parsed.
+
+Fix: re-verified `2023-03-15-preview` also serves chat completions correctly against the same real
+resource, including tool/function calling (`tools`/`tool_choice: "auto"`, a real `tool_calls` response) --
+so one shared api-version still covers both model discovery and chat, no need to split them. Changed
+`AZURE_OPENAI_API_VERSION` from `"2024-10-21"` to `"2023-03-15-preview"`, with its own comment now
+explaining the live-verified reason instead of an untested assumption -- rewritten to make clear that
+bumping this constant again requires re-verifying the listing route still 200s against a real resource
+first, not just picking a newer-looking version. Updated the matching `AZURE_API_VERSION` test constant in
+`tests/helper-agent-azure-openai.spec.mjs` and the popup's placeholder text in `index.html` to match.
+
+- [x] All 5 tests in `tests/helper-agent-live-azure.spec.mjs` now pass for real against the actual Azure
+      resource: deployment-list shape, invalid-key 401/403 classification, connect finalizing with
+      `azureEndpoint`/`isAzureProvider`/`promptCacheKey` all correctly set, a real chat completion
+      round-tripping through the live UI, and a real tool call (`apply_ontology_yaml`) actually committing
+      an Invoice class to the canvas through the real import pipeline in one undo step.
+- [x] Full mocked `tests/helper-agent-azure-openai.spec.mjs` re-run after the constant change: 35/35 still
+      pass (the version string is used consistently throughout, so this was a value change, not a shape
+      change).
+- [x] Full regression (`node --test tests/*.spec.mjs`) re-run with all three env vars now present
+      (`OPENAI_API_KEY`, `AZURE_OPENAI_API_KEY`, `AZURE_OPENAI_ENDPOINT`) -- both live suites (OpenAI and
+      Azure) exercised for real this time, not just OpenAI's.
+- [ ] PR #73 to be flipped from draft to ready-for-review now that live Azure verification is complete.
