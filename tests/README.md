@@ -91,6 +91,15 @@ is dev-only test tooling, same as Playwright.
   importer's `parseTxtImport()`, proving the two agree rather than just
   asserting it in a comment. Skips gracefully (with a console warning, not
   a failure) if `python3` isn't on `PATH` — see "Python tests" below.
+- `review-changes.spec.mjs` — the Ontology Change Review facility (issue
+  #74): the semantic diff engine (`buildDomainModel`-normalized, so
+  identity is label/name, never internal ids), the dependency-free YAML
+  line diff, the 4-level dialog's navigation and read-only guarantee, Undo
+  reuse, `source`/`evidenceIndex` tagging for manual vs. agent edits
+  (including that metadata surviving an undo→redo round trip when
+  manual and agent edits are interleaved), the graph-diff view's
+  position-noise regression, and the agent panel's welcome-message
+  placeholder + Review changes tooltip added in the same round.
 
 ## Live OpenAI integration tests (opt-in)
 

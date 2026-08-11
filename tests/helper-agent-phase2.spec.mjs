@@ -560,8 +560,11 @@ test("disconnecting mid-conversation clears both the visible transcript and the 
       sending: window.__kg.agent.isSending(),
     }));
     assert.deepEqual(state, { transcript: 0, apiMessages: 0, sending: false });
+    // An empty transcript array renders one child now, not zero -- the
+    // static pre-first-message welcome placeholder (issue #74 round),
+    // never a real transcript entry itself.
     const transcriptDom = await page.evaluate(() => document.getElementById("agent-transcript").children.length);
-    assert.equal(transcriptDom, 0);
+    assert.equal(transcriptDom, 1);
   });
 });
 

@@ -1007,3 +1007,135 @@ not just relying on existing guidance to infer it:
       non-goal line updated to point here rather than silently
       contradicted, `helper_agent_todo.md` Log entry once implemented and
       live-confirmed.
+
+## 10. Post-plan extension — Ontology Change Review (issue #74)
+
+Planned with the `frontend-design` skill loaded for visual guidance (never
+committed to this repo) after the user asked for a crisp, question-first
+plan rather than immediate implementation. Confirmed scope, via
+`AskUserQuestion`: **retrospective only** this round (preview
+mode — Apply/Reject a not-yet-applied candidate, staleness hashing, a
+structured metadata API — is out of scope, seams reserved only);
+**both** agent and manual edits are in scope; visual direction **stays
+strictly disciplined** (no new colors/patterns beyond what the app already
+has); history depth **mirrors undo exactly** (no separate cap).
+
+### 10.1 What already existed (don't rebuild it)
+
+- Every edit, manual or agent, already funnels through one function,
+  `pushHistory(before, after)`. Extending its signature with an optional
+  third `meta` argument (`{source, evidenceIndex}`, both optional) gave
+  every existing call site free "user-edit" tagging with zero code changes
+  at any of them — only `commitYamlImport`'s own call site needed to
+  actually pass `{source: "agent-auto-edit", evidenceIndex:
+  agentState.transcript.length}`, gated on `mode === "agent-merge"` (the
+  only mode the live agent's own tool call ever passes).
+- `buildDomainModel()` was already the one place export and import agree
+  on what "the same ontology" means (name-keyed, no internal ids). Adding
+  an optional `source = state` parameter let the diff engine reuse that
+  exact definition against arbitrary before/after snapshots instead of
+  inventing a second, possibly-drifting notion of semantic identity.
+- Undo itself (`undo()`) is reused verbatim by the dialog's "Undo this
+  edit" button — not a second undo mechanism. It only enables when viewing
+  the current top of `history.past`, since `undo()` always pops that top
+  entry regardless of which entry the dialog happens to be showing.
+
+### 10.2 What's genuinely new
+
+- **Semantic diff engine**: `diffMapSection` (generic added/removed/
+  changed over a name-keyed section — classes, rules, actions, and a
+  class's own properties), `diffRelationshipsSection` (its own two-pass
+  match: exact `(name,from,to)` first, then the same name with `from`/`to`
+  swapped — a distinct "direction changed" category, not an unrelated
+  remove+add), `computeSemanticDiff` (composes both over two full
+  `buildDomainModel()`-normalized snapshots), `isSemanticDiffEmpty`.
+  Comparison is by label/name, never by internally-generated node/edge
+  ids, since those aren't stable across arbitrary before/after pairs —
+  the graph-diff view (10.3) deliberately uses a separate, simpler
+  id-based match instead, since *within one entry's own before/after*
+  ids genuinely are stable (`commitYamlImport` mutates matched entities
+  in place).
+- **Dependency-free YAML line diff** (`diffLines`, LCS-based) for the
+  dialog's Level 4 (YAML diff) tab.
+- **Evidence resolution without a new LLM call** (explicitly forbidden by
+  the issue): `evidenceIndex` is just `agentState.transcript.length`
+  captured at commit time — a forward-looking marker. `resolveReviewEvidence`
+  scans `agentState.transcript` forward from that index for the model's
+  own next assistant reply, since `sendAgentChatMessage`'s own loop
+  appends that reply *after* the tool call already returned. No rationale
+  is ever manufactured; if the turn hasn't produced a follow-up reply yet,
+  evidence resolves to nothing, gracefully.
+- **A 4-level dialog** (Summary → Details → Graph diff → YAML diff),
+  Previous/Next navigation over `history.past` (default: latest entry),
+  read-only by construction (every render function only reads `state`/the
+  entry's own snapshots — verified both by design and by a dedicated
+  test that opening/navigating/switching tabs never calls `pushHistory`
+  or mutates `state`).
+- **An independent, pure graph-diff renderer** (`renderReviewGraphCanvas`,
+  `computeReviewGraphDiffSets`) for Level 3, rather than repointing the
+  live canvas/camera at a snapshot — deliberately, to remove any risk of
+  autosave or a stray timer persisting the wrong graph while the dialog
+  has the global state swapped out from under it.
+- **Position-noise bug, found and fixed before the automated tests were
+  even written** (via a manual visual smoke-test screenshot):
+  `computeAutoLayoutPositions()` repositions every node on any import, so
+  a naive full-object node comparison flagged untouched nodes as
+  "changed" purely because their x/y moved. Fixed with
+  `nodeSemanticFingerprint()`, which excludes position/size fields from
+  the graph-diff status classification; pinned by a dedicated regression
+  test (`tests/review-changes.spec.mjs`).
+- **A pre-first-message welcome note** in the agent chat panel (added
+  after this section was first implemented, per direct user request),
+  bilingual via the same `t()`/STRINGS mechanism as everything else. It's
+  derived purely from `t()` on every render, not a stored
+  `agentState.transcript` entry, so it never affects `evidenceIndex` or
+  the persisted conversation payload, and it correctly disappears once a
+  real message exists and reappears after Restart Conversation.
+- **A short explanatory tooltip** on the Review changes toolbar button
+  (also added per direct user request), reusing the app's existing
+  `data-tooltip` CSS mechanism. Its first draft overflowed the viewport's
+  right edge because the shared `[data-tooltip]` rule assumes a short,
+  single-line label (true for the zoom/fit-view buttons it already
+  serves) — fixed by both shortening the copy and giving this specific
+  button its own upward-opening override (`#btn-review-changes::after`,
+  matching the existing `#agent-panel-toggle::after` per-button-override
+  precedent), since it sits directly above the toolbar's second row and a
+  downward tooltip would otherwise land on top of those buttons.
+
+### 10.3 Non-goals this round
+
+Preview mode in full (Apply/Reject a not-yet-committed candidate,
+staleness hashing against a live-edited canvas, a structured metadata API
+for a future caller) — the retrospective-only scope explicitly confirmed
+with the user. Renamed classes/properties/rules/actions surface as a
+remove+add pair, not a guessed "renamed" pairing — there is no identity
+signal beyond the name itself, the same limitation `buildDomainModel()`'s
+own export/import round trip already has; this is a documented boundary,
+not an attempted heuristic.
+
+### 10.4 Implementation phases
+
+- [x] Extend `pushHistory` with optional `source`/`evidenceIndex` meta;
+      wire the one real call site that needs non-default values
+      (`commitYamlImport`, agent-merge mode).
+- [x] Parameterize `buildDomainModel(source = state)`.
+- [x] Semantic diff engine + dependency-free YAML line diff.
+- [x] Toolbar button + 4-level dialog UI, CSS, i18n, `window.__kg.reviewChanges` test hooks.
+- [x] Extensive tests (`tests/review-changes.spec.mjs`): diff-engine unit
+      tests, navigation, read-only guarantee, Undo integration, source/
+      evidence tagging (including the empty-reply edge case), the
+      "ordinary edits still auto-apply" regression proof, graph-diff
+      status classification (including the position-noise regression),
+      language toggle, YAML-diff content accuracy, empty-diff edge case.
+- [x] Adjacent coverage: mixed manual+agent edits interleaved through the
+      same undo stack keep their own correct `source`/`evidenceIndex`, in
+      order, and that metadata survives an undo→future→redo round trip
+      unchanged; a fresh edit after undoing past an agent entry still
+      discards the redo stack regardless of entry type.
+- [x] Welcome message + Review changes tooltip (direct user request,
+      folded into this same round): i18n strings, CSS, tests.
+- [x] Docs: this section, `helper_agent_todo.md` Log entry, confirmed
+      `AGENT_SYSTEM_PROMPT_BASE`/`AGENT_KNOWLEDGE` byte-identical to
+      `origin/main` via `git diff`.
+- [x] Full regression (`node --test tests/*.spec.mjs`), then PR against
+      issue #74.
