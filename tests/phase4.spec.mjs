@@ -108,6 +108,7 @@ test("a saved payload with no aliases field on its edges at all (pre-feature) st
   });
   await page.goto(APP_URL);
   await page.waitForFunction(() => Boolean(window.__kg));
+  await page.evaluate(() => window.__kg.welcome.close()); // issue #78: this test opens its own page, not tests/lib/page.mjs's withPage()
   await page.waitForFunction(() => window.__kg.state.edges.length === 1);
 
   const edge = await page.evaluate(() => window.__kg.state.edges[0]);
@@ -132,6 +133,7 @@ test("boot requests persistent storage (best-effort, doesn't block or throw)", a
   });
   await page.goto(APP_URL);
   await page.waitForFunction(() => Boolean(window.__kg));
+  await page.evaluate(() => window.__kg.welcome.close()); // issue #78: this test opens its own page, not tests/lib/page.mjs's withPage()
   await page.waitForFunction(() => window.__persistCalled === true);
   await browser.close();
   assert.deepEqual(consoleErrors, []);
@@ -216,6 +218,7 @@ test("a corrupted saved payload is ignored gracefully — the app boots to an em
   });
   await page.goto(APP_URL);
   await page.waitForFunction(() => Boolean(window.__kg));
+  await page.evaluate(() => window.__kg.welcome.close()); // issue #78: this test opens its own page, not tests/lib/page.mjs's withPage()
   const nodes = await page.evaluate(() => window.__kg.state.nodes);
   assert.equal(nodes.length, 0);
   await browser.close();
@@ -245,6 +248,7 @@ test("a malformed rule/action in a saved payload doesn't break undo/save for the
   });
   await page.goto(APP_URL);
   await page.waitForFunction(() => Boolean(window.__kg));
+  await page.evaluate(() => window.__kg.welcome.close()); // issue #78: this test opens its own page, not tests/lib/page.mjs's withPage()
 
   const loaded = await page.evaluate(() => ({
     rule: window.__kg.state.rules[0],
