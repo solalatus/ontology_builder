@@ -375,6 +375,15 @@
     color: var(--agent-accent);
   }
 
+  /* Opens upward instead of the shared rule's default downward -- this
+     button sits directly above the toolbar's second row, so a downward
+     tooltip would land on top of those buttons instead of below them. */
+  #btn-review-changes::after {
+    top: auto;
+    bottom: 100%;
+    transform: translateX(-50%) translateY(-4px);
+  }
+
   #graph-title {
     font-family: var(--font-display);
     font-size: 14px;
@@ -1154,6 +1163,15 @@
     margin: 0 0 10px;
   }
 
+  /* Shown in place of the transcript before the first message exists --
+     explanatory chrome, not a conversation turn, so it's visually
+     distinguished from a real message bubble with a dashed border rather
+     than a new color (design critique, 2026-08: stay disciplined). */
+  .agent-welcome-message {
+    opacity: 0.85;
+    border-style: dashed;
+  }
+
   .agent-input-row {
     display: flex;
     align-items: flex-end; /* keeps Send pinned to the textarea's bottom edge as it grows/resizes */
@@ -1201,6 +1219,184 @@
   #agent-forget-key:hover {
     background: var(--btn-bg-hover);
   }
+
+  /* Ontology Change Review (issue #74) -- deliberately no new colors here:
+     added/removed/changed reuse --state-active/--danger-fg/--agent-accent,
+     already established elsewhere in this file for unrelated purposes but
+     with the right connotation (positive/negative/agent-attributable) for
+     this feature too, per the "stay strictly disciplined" design decision. */
+  .review-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    margin: 0 0 12px;
+    font-size: 13px;
+  }
+
+  #review-changes-position {
+    opacity: 0.75;
+    min-width: 90px;
+    text-align: center;
+  }
+
+  .review-nav button {
+    font: inherit;
+    font-size: 12px;
+    padding: 5px 9px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--toolbar-border);
+    background: var(--btn-bg);
+    color: var(--toolbar-fg);
+    cursor: pointer;
+  }
+
+  .review-nav button:hover:not(:disabled) {
+    background: var(--btn-bg-hover);
+  }
+
+  .review-nav button:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+
+  .review-tablist {
+    display: flex;
+    gap: 2px;
+    border-bottom: 1px solid var(--toolbar-border);
+    margin-bottom: 14px;
+  }
+
+  .review-tablist [role="tab"] {
+    font: inherit;
+    font-size: 13px;
+    padding: 8px 12px;
+    border: none;
+    border-bottom: 2px solid transparent;
+    background: transparent;
+    color: var(--toolbar-fg);
+    opacity: 0.7;
+    cursor: pointer;
+  }
+
+  .review-tablist [role="tab"]:hover {
+    opacity: 1;
+  }
+
+  .review-tablist [role="tab"][aria-selected="true"] {
+    opacity: 1;
+    border-bottom-color: var(--accent);
+    font-weight: 600;
+  }
+
+  .review-panel {
+    font-size: 13px;
+  }
+
+  .review-diff-heading {
+    font-size: 12px;
+    font-weight: 600;
+    opacity: 0.8;
+    margin: 16px 0 6px;
+  }
+
+  .review-diff-heading:first-child {
+    margin-top: 0;
+  }
+
+  .review-diff-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .review-diff-item {
+    padding: 4px 8px;
+    border-left: 3px solid var(--toolbar-border);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    background: var(--btn-bg);
+  }
+
+  .review-diff-item--added { border-left-color: var(--state-active); }
+  .review-diff-item--removed { border-left-color: var(--danger-fg); }
+  .review-diff-item--changed, .review-diff-item--direction-changed { border-left-color: var(--agent-accent); }
+
+  .review-diff-item-before {
+    opacity: 0.65;
+    text-decoration: line-through;
+  }
+
+  .review-diff-empty {
+    opacity: 0.65;
+    font-style: italic;
+  }
+
+  .review-graph-toggle {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+
+  .review-graph-toggle button {
+    font: inherit;
+    font-size: 12px;
+    padding: 5px 10px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--toolbar-border);
+    background: var(--btn-bg);
+    color: var(--toolbar-fg);
+    cursor: pointer;
+  }
+
+  .review-graph-toggle button[aria-pressed="true"] {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .review-graph-canvas-wrap {
+    height: 320px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--toolbar-border);
+    background: var(--canvas-bg);
+    overflow: hidden;
+  }
+
+  #review-graph-canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  .review-yaml-diff {
+    font-family: var(--font-display);
+    font-size: 12px;
+    line-height: 1.5;
+    margin: 0;
+    padding: 10px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--toolbar-border);
+    background: var(--btn-bg);
+    overflow: auto;
+    max-height: 45vh;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .review-yaml-diff .diff-line-added { color: var(--state-active); }
+  .review-yaml-diff .diff-line-removed { color: var(--danger-fg); }
+
+  .review-evidence {
+    margin: 16px 0 0;
+    padding: 8px 10px;
+    border-radius: var(--radius-sm);
+    border-left: 3px solid var(--agent-accent);
+    background: var(--btn-bg);
+    font-size: 13px;
+  }
+
+  .review-evidence .details-field-label {
+    margin: 0 0 4px;
+  }
 </style>
 </head>
 <body>
@@ -1218,6 +1414,7 @@
     <button id="btn-autolayout" type="button">Automatikus elrendezés</button>
     <button id="btn-undo" type="button">Visszavonás</button>
     <button id="btn-redo" type="button">Újra</button>
+    <button id="btn-review-changes" type="button" disabled data-tooltip="Korábbi módosítások — a sajátjaid és az ügynöké — áttekintése és visszavonása.">Változtatások áttekintése</button>
   </div>
 
   <div class="toolbar-group">
@@ -1432,6 +1629,61 @@
   </div>
 </div>
 
+<!-- Ontology Change Review (issue #74), retrospective scope only this round
+     -- reuses .modal-overlay/.modal-dialog/.details-dialog like every other
+     large dialog. Read-only: opening/navigating/switching tabs here never
+     touches `state` or calls pushHistory -- see openReviewChanges()'s own
+     comment. -->
+<div id="review-changes-overlay" class="modal-overlay">
+  <div id="review-changes-dialog" class="modal-dialog details-dialog" role="dialog" aria-modal="true">
+    <div class="details-dialog-body">
+      <h2 id="review-changes-title" class="modal-title">Változtatások áttekintése</h2>
+
+      <div id="review-changes-nav" class="review-nav">
+        <button id="review-changes-prev" type="button">&lt; Előző módosítás</button>
+        <span id="review-changes-position"></span>
+        <button id="review-changes-next" type="button">Következő módosítás &gt;</button>
+      </div>
+
+      <div id="review-changes-tablist" class="review-tablist" role="tablist" aria-label="Áttekintés részletessége">
+        <button id="review-tab-summary" type="button" role="tab" aria-selected="true" aria-controls="review-panel-summary">Összegzés</button>
+        <button id="review-tab-details" type="button" role="tab" aria-selected="false" aria-controls="review-panel-details">Részletek</button>
+        <button id="review-tab-graph" type="button" role="tab" aria-selected="false" aria-controls="review-panel-graph">Gráf különbség</button>
+        <button id="review-tab-yaml" type="button" role="tab" aria-selected="false" aria-controls="review-panel-yaml">YAML különbség</button>
+      </div>
+
+      <div id="review-panel-summary" class="review-panel" role="tabpanel" aria-labelledby="review-tab-summary"></div>
+
+      <div id="review-panel-details" class="review-panel" role="tabpanel" aria-labelledby="review-tab-details" hidden></div>
+
+      <div id="review-panel-graph" class="review-panel" role="tabpanel" aria-labelledby="review-tab-graph" hidden>
+        <div id="review-graph-toggle" class="review-graph-toggle">
+          <button id="review-graph-before" type="button" aria-pressed="false">Előtte</button>
+          <button id="review-graph-after" type="button" aria-pressed="false">Utána</button>
+          <button id="review-graph-difference" type="button" aria-pressed="true">Különbség</button>
+        </div>
+        <div id="review-graph-canvas-wrap" class="review-graph-canvas-wrap">
+          <canvas id="review-graph-canvas"></canvas>
+        </div>
+      </div>
+
+      <div id="review-panel-yaml" class="review-panel" role="tabpanel" aria-labelledby="review-tab-yaml" hidden>
+        <pre id="review-yaml-diff" class="review-yaml-diff"></pre>
+      </div>
+
+      <p id="review-changes-evidence" class="review-evidence" hidden>
+        <span id="review-changes-evidence-label" class="details-field-label">Miért történt ez a változás</span>
+        <span id="review-changes-evidence-text"></span>
+      </p>
+    </div>
+
+    <div class="modal-actions details-dialog-footer">
+      <button id="review-changes-undo" type="button">Módosítás visszavonása</button>
+      <button id="review-changes-close" type="button">Bezárás</button>
+    </div>
+  </div>
+</div>
+
 <script>
 "use strict";
 
@@ -1533,6 +1785,7 @@ const STRINGS = {
     toggleDirTitle: "Toggle direction",
     deleteTitle: "Delete",
     cancel: "Cancel",
+    close: "Close",
     ok: "OK",
     replace: "Replace",
     merge: "Merge",
@@ -1603,6 +1856,41 @@ const STRINGS = {
     verificationLabel: "Verification",
     verificationPlaceholder: "verification",
     untitledRulePlaceholder: "(untitled rule)",
+    // Ontology Change Review (issue #74), retrospective scope this round.
+    reviewChangesButton: "Review changes",
+    reviewChangesTooltip: "Step through past edits — yours and the agent's — and undo any of them.",
+    reviewChangesTitle: "Review changes",
+    reviewChangesPrev: "Previous edit",
+    reviewChangesNext: "Next edit",
+    reviewChangesPosition: (i, n) => `Edit ${i} of ${n}`,
+    reviewTabSummary: "Summary",
+    reviewTabDetails: "Details",
+    reviewTabGraph: "Graph diff",
+    reviewTabYaml: "YAML diff",
+    reviewGraphBefore: "Before",
+    reviewGraphAfter: "After",
+    reviewGraphDifference: "Difference",
+    reviewEvidenceLabel: "Why this changed",
+    reviewChangesUndo: "Undo this edit",
+    reviewSummaryHeadingAgent: "Last agent edit",
+    reviewSummaryHeadingUser: "Last edit",
+    reviewNoChanges: "No changes in this edit.",
+    reviewAddedHeading: "Added:",
+    reviewConnectedHeading: "Connected:",
+    // Shared by both the Level 1 count lines ("2 classes added") and the
+    // Level 2 category headings ("Classes added") -- one small lookup
+    // table per language instead of ~17 near-duplicate flat STRINGS keys.
+    reviewCountLine: (n, section, kind) => {
+      const nouns = { classes: ["class", "classes"], relationships: ["relationship", "relationships"], properties: ["property", "properties"], rules: ["rule", "rules"], actions: ["action", "actions"] };
+      const kinds = { added: "added", removed: "removed", changed: "changed", directionChanged: "direction changed" };
+      const [sing, plur] = nouns[section];
+      return `${n} ${n === 1 ? sing : plur} ${kinds[kind]}`;
+    },
+    reviewSectionHeading: (section, kind) => {
+      const nouns = { classes: "Classes", relationships: "Relationships", properties: "Properties", rules: "Rules", actions: "Actions" };
+      const kinds = { added: "added", removed: "removed", changed: "changed", directionChanged: "direction changed" };
+      return `${nouns[section]} ${kinds[kind]}`;
+    },
     // Helper Agent (helper_agent_plan.md) — BYOK chat panel, Phase 1.
     agentPanelToggle: "Helper agent",
     agentPanelIntro: "Connect with your own OpenAI or Azure OpenAI API key to a helper agent that assists with building the domain model.",
@@ -1624,6 +1912,7 @@ const STRINGS = {
     agentDisconnect: "Disconnect",
     agentForgetKey: "Forget saved key",
     agentNoToolsNote: "This agent can read the current domain model and apply changes to it — review each edit as it lands.",
+    agentWelcomeMessage: "This panel connects you to a helper chatbot that guides you through an interview using methodically grounded questions. Based on your answers, it edits and updates the ontology and domain model (the concepts/entities that matter in your domain, their relationships, and the rules that apply to them). You can follow every edit — both your own and the chatbot's — step by step, and undo it if needed, in the \"Review changes\" panel on the right.\n\nKeep in mind that although building general-purpose ontologies is also possible, the tool's primary purpose is to give a future agent — a \"virtual employee\" — orientation points, along with tasks and rules to follow.",
     agentChatSend: "Send",
     agentChatInputPlaceholder: "Type a message…",
     agentConnecting: "Connecting…",
@@ -1679,6 +1968,7 @@ const STRINGS = {
     toggleDirTitle: "Irány váltása",
     deleteTitle: "Törlés",
     cancel: "Mégse",
+    close: "Bezárás",
     ok: "OK",
     replace: "Csere",
     merge: "Egyesítés",
@@ -1741,6 +2031,39 @@ const STRINGS = {
     verificationLabel: "Ellenőrzés",
     verificationPlaceholder: "ellenőrzés",
     untitledRulePlaceholder: "(névtelen szabály)",
+    // Ontology Change Review (issue #74), retrospective scope this round.
+    reviewChangesButton: "Változtatások áttekintése",
+    reviewChangesTooltip: "Korábbi módosítások — a sajátjaid és az ügynöké — áttekintése és visszavonása.",
+    reviewChangesTitle: "Változtatások áttekintése",
+    reviewChangesPrev: "Előző módosítás",
+    reviewChangesNext: "Következő módosítás",
+    reviewChangesPosition: (i, n) => `${i}. módosítás / ${n}`,
+    reviewTabSummary: "Összegzés",
+    reviewTabDetails: "Részletek",
+    reviewTabGraph: "Gráf különbség",
+    reviewTabYaml: "YAML különbség",
+    reviewGraphBefore: "Előtte",
+    reviewGraphAfter: "Utána",
+    reviewGraphDifference: "Különbség",
+    reviewEvidenceLabel: "Miért történt ez a változás",
+    reviewChangesUndo: "Módosítás visszavonása",
+    reviewSummaryHeadingAgent: "Legutóbbi ügynöki módosítás",
+    reviewSummaryHeadingUser: "Legutóbbi módosítás",
+    reviewNoChanges: "Nincs változás ebben a módosításban.",
+    reviewAddedHeading: "Hozzáadva:",
+    reviewConnectedHeading: "Összekapcsolva:",
+    // Hungarian keeps the noun singular after a numeral (standard
+    // grammar), so this needs no separate plural form the way English does.
+    reviewCountLine: (n, section, kind) => {
+      const nouns = { classes: "osztály", relationships: "kapcsolat", properties: "tulajdonság", rules: "szabály", actions: "művelet" };
+      const kinds = { added: "hozzáadva", removed: "törölve", changed: "módosítva", directionChanged: "iránya megváltozott" };
+      return `${n} ${nouns[section]} ${kinds[kind]}`;
+    },
+    reviewSectionHeading: (section, kind) => {
+      const nouns = { classes: "Osztályok", relationships: "Kapcsolatok", properties: "Tulajdonságok", rules: "Szabályok", actions: "Műveletek" };
+      const kinds = { added: "hozzáadva", removed: "törölve", changed: "módosítva", directionChanged: "iránya megváltozott" };
+      return `${nouns[section]} ${kinds[kind]}`;
+    },
     // Helper Agent (helper_agent_plan.md) — BYOK chat panel, Phase 1.
     agentPanelToggle: "Segéd ügynök",
     agentPanelIntro: "Csatlakozz a saját OpenAI vagy Azure OpenAI API kulcsoddal egy segéd ügynökhöz, ami a doménmodell felépítésében segít.",
@@ -1762,6 +2085,7 @@ const STRINGS = {
     agentDisconnect: "Leválasztás",
     agentForgetKey: "Elmentett kulcs törlése",
     agentNoToolsNote: "Az ügynök olvassa az aktuális doménmodellt, és változtatásokat is alkalmazhat rajta — kövesd nyomon az egyes szerkesztéseket.",
+    agentWelcomeMessage: "Ezen a panelon egy segéd chatbothoz férhetsz hozzá, mely módszertanilag megalapozott kérdésekkel igyekszik végigvezetni egy interjú folyamaton. A kérdésekre adott válaszaid alapján szerkeszti és frissíti az ontológiát és doménmodellt (azaz a területeden fontos fogalmak / entitások és kapcsolataik, valamint a rájuk vonatkozó szabályok összességét). Mind a saját, mind a chatbot szerkesztési műveleteit lépésenként követheted, és adott esetben visszavonhatod a jobb oldalon látható \"változáskövetés\" panelen.\n\nKérlek emlékezz, hogy bár általános ontológiák létrehozása is lehetséges, az eszköz elsődleges célja azonban, hogy egy későbbi ágens, azaz \"virtuális munkavállaló\" számára nyújtson tájékozódási fogódzókat és egyben teendőket, szabályokat.",
     agentChatSend: "Küldés",
     agentChatInputPlaceholder: "Írj üzenetet…",
     agentConnecting: "Csatlakozás…",
@@ -1842,6 +2166,8 @@ function applyLanguage() {
   byId("btn-autolayout").textContent = t("autoLayout");
   byId("btn-undo").textContent = t("undo");
   byId("btn-redo").textContent = t("redo");
+  byId("btn-review-changes").textContent = t("reviewChangesButton");
+  byId("btn-review-changes").setAttribute("data-tooltip", t("reviewChangesTooltip"));
   byId("btn-save-version").textContent = t("saveVersion");
   byId("btn-import-txt").textContent = t("importButton");
   byId("btn-clear").textContent = t("clear");
@@ -1876,6 +2202,24 @@ function applyLanguage() {
   byId("domain-model-add-action").textContent = t("addAction");
   byId("domain-model-cancel").textContent = t("cancel");
   byId("domain-model-save").textContent = t("save");
+  byId("review-changes-title").textContent = t("reviewChangesTitle");
+  byId("review-changes-prev").textContent = `< ${t("reviewChangesPrev")}`;
+  byId("review-changes-next").textContent = `${t("reviewChangesNext")} >`;
+  byId("review-tab-summary").textContent = t("reviewTabSummary");
+  byId("review-tab-details").textContent = t("reviewTabDetails");
+  byId("review-tab-graph").textContent = t("reviewTabGraph");
+  byId("review-tab-yaml").textContent = t("reviewTabYaml");
+  byId("review-graph-before").textContent = t("reviewGraphBefore");
+  byId("review-graph-after").textContent = t("reviewGraphAfter");
+  byId("review-graph-difference").textContent = t("reviewGraphDifference");
+  byId("review-changes-evidence-label").textContent = t("reviewEvidenceLabel");
+  byId("review-changes-undo").textContent = t("reviewChangesUndo");
+  byId("review-changes-close").textContent = t("close");
+  // Dynamic content (counts, category headings, evidence text) is all
+  // re-derived from t() too, so a language toggle mid-review needs a full
+  // re-render, not just the static chrome above — no-op if the dialog
+  // isn't currently open, same convention as updateDetailsTitle() above.
+  if (reviewIndex !== null) renderReviewDialog();
   // Unlike this dialog's own top-level labels above, a rule/action card's
   // sub-labels (Conditions/Input class/Preconditions/Effect/Verification)
   // are baked into the DOM once at card-creation time (createSublabel()) —
@@ -1925,6 +2269,11 @@ function applyAgentLanguage() {
   byId("agent-chat-send").textContent = t("agentChatSend");
   byId("agent-chat-input").setAttribute("placeholder", t("agentChatInputPlaceholder"));
   byId("agent-forget-key").textContent = t("agentForgetKey");
+  // Re-renders the transcript so the pre-first-message welcome text (which
+  // isn't a stored transcript entry, just derived from t() on every render)
+  // retranslates on a language toggle; a no-op re-draw of the same content
+  // once real messages exist, since those are frozen text, not t() keys.
+  renderAgentTranscript();
   // Error text is re-rendered from the last known error *kind*, not just
   // copied verbatim, so a language toggle mid-error doesn't leave a
   // stale-language message on screen.
@@ -2243,9 +2592,23 @@ function syncGraphTitleUi() {
   if (el) el.textContent = state.graphName;
 }
 
-function pushHistory(before, after) {
+// meta is optional: { source: "agent-auto-edit", evidenceIndex } — omitted
+// (or source omitted within it) defaults to "user-edit", so every existing
+// call site needs zero changes to keep working exactly as before (issue
+// #74's Review Changes facility reads source/evidenceIndex; nothing else
+// does). evidenceIndex is agentState.transcript.length at commit time, not
+// a copy of any transcript text — resolveReviewEvidence() (below) looks
+// forward from it for the model's own follow-up reply, since that reply is
+// appended to the transcript *after* this call returns (see
+// sendAgentChatMessage's tool-call loop), not before.
+function pushHistory(before, after, meta) {
   newlyImportedIds = new Set(); // any new discrete action retires the "just imported" highlight
-  history.past.push({ before, after });
+  history.past.push({
+    before,
+    after,
+    source: (meta && meta.source) || "user-edit",
+    evidenceIndex: (meta && typeof meta.evidenceIndex === "number") ? meta.evidenceIndex : null,
+  });
   history.future = [];
   updateUndoRedoButtons();
   scheduleSave();
@@ -2276,6 +2639,11 @@ function redo() {
 function updateUndoRedoButtons() {
   document.getElementById("btn-undo").disabled = history.past.length === 0;
   document.getElementById("btn-redo").disabled = history.future.length === 0;
+  // Review Changes (issue #74) mirrors Undo's own disabled condition
+  // exactly -- both read history.past.length === 0 -- so it's updated
+  // alongside it here rather than needing its own call at every one of
+  // pushHistory/undo/redo/boot's call sites.
+  updateReviewButtonState();
 }
 
 // ---------------------------------------------------------------------------
@@ -5211,13 +5579,20 @@ function assignUniqueExportNames(items, getName) {
   return idToName;
 }
 
-function buildDomainModel() {
-  const nodeNameById = assignUniqueExportNames(state.nodes, (n) => n.label);
-  const ruleNameById = assignUniqueExportNames(state.rules, (r) => r.name);
-  const actionNameById = assignUniqueExportNames(state.actions, (a) => a.name);
+// source defaults to the live `state` (every pre-existing call site is
+// unaffected) but accepts any {nodes,edges,rules,actions} shape — in
+// particular a history.past/.future snapshot — so issue #74's semantic
+// diff engine (computeSemanticDiff, below) can normalize a before/after
+// pair through this exact same name-keyed, internal-id-free logic instead
+// of a second normalizer that could drift from what Export/Import already
+// agree "semantic identity" means.
+function buildDomainModel(source = state) {
+  const nodeNameById = assignUniqueExportNames(source.nodes, (n) => n.label);
+  const ruleNameById = assignUniqueExportNames(source.rules, (r) => r.name);
+  const actionNameById = assignUniqueExportNames(source.actions, (a) => a.name);
 
   const classes = {};
-  for (const n of state.nodes) {
+  for (const n of source.nodes) {
     const properties = {};
     for (const p of n.properties) {
       const prop = { type: p.type };
@@ -5228,9 +5603,9 @@ function buildDomainModel() {
     classes[nodeNameById.get(n.id)] = { meaning: n.meaning, aliases: [...n.aliases], properties };
   }
 
-  const relationships = state.edges.map((e) => {
-    const src = state.nodes.find((n) => n.id === e.source);
-    const tgt = state.nodes.find((n) => n.id === e.target);
+  const relationships = source.edges.map((e) => {
+    const src = source.nodes.find((n) => n.id === e.source);
+    const tgt = source.nodes.find((n) => n.id === e.target);
     return {
       name: toCamelCaseId(e.relation),
       from: src ? nodeNameById.get(src.id) : null,
@@ -5241,11 +5616,11 @@ function buildDomainModel() {
   });
 
   const rules = {};
-  for (const r of state.rules) rules[ruleNameById.get(r.id)] = { conditions: [...r.conditions] };
+  for (const r of source.rules) rules[ruleNameById.get(r.id)] = { conditions: [...r.conditions] };
 
   const actions = {};
-  for (const a of state.actions) {
-    const inputNode = state.nodes.find((n) => n.id === a.inputClassId);
+  for (const a of source.actions) {
+    const inputNode = source.nodes.find((n) => n.id === a.inputClassId);
     const preconditionNames = a.preconditions
       .map((ruleId) => ruleNameById.get(ruleId))
       .filter(Boolean);
@@ -5263,6 +5638,625 @@ function buildDomainModel() {
 function buildDomainYamlExport() {
   return toYaml(buildDomainModel());
 }
+
+// ---------------------------------------------------------------------------
+// Ontology Change Review (issue #74) — semantic diff engine, retrospective
+// scope only this round (see helper_agent_todo.md's dated log entry for
+// what preview mode still needs before a future normalization caller can
+// use this). Compares two full state snapshots (the same shape
+// history.past/.future entries already store) by normalizing each through
+// buildDomainModel(source) — the exact name-keyed, internal-id-free shape
+// the export/import pipeline already agrees is "semantic identity" — so
+// there's exactly one definition of that term in this file, not a second
+// one that could drift. An identical before/after pair deterministically
+// produces an empty diff: it's the same comparison in both directions, not
+// a special-cased "nothing changed" branch.
+// ---------------------------------------------------------------------------
+
+// Generic added/removed/changed over a name-keyed object section (classes,
+// rules, actions, and — nested — a class's own properties). Equality is a
+// plain JSON.stringify compare, the same shortcut commitDragIfChanged
+// already uses for its own before/after check, rather than a bespoke deep-
+// equal — every value here is already plain, JSON-safe data.
+function diffMapSection(beforeMap, afterMap) {
+  const added = [], removed = [], changed = [];
+  for (const [name, beforeVal] of Object.entries(beforeMap)) {
+    if (!(name in afterMap)) { removed.push({ name, value: beforeVal }); continue; }
+    if (JSON.stringify(beforeVal) !== JSON.stringify(afterMap[name])) {
+      changed.push({ name, before: beforeVal, after: afterMap[name] });
+    }
+  }
+  for (const [name, afterVal] of Object.entries(afterMap)) {
+    if (!(name in beforeMap)) added.push({ name, value: afterVal });
+  }
+  return { added, removed, changed };
+}
+
+// Relationships need their own pass, not diffMapSection, for two reasons:
+// (1) their identity is the (name, from, to) triple, not a single key, and
+// (2) a relationship whose from/to were swapped must be reported as
+// "direction-changed," not as an unrelated removed+added pair — the whole
+// reason issue #5 calls it out as its own category. First pass matches
+// exact (name,from,to) triples (unchanged or changed-in-place); second
+// pass looks, among what's left, for the same name with from/to swapped;
+// anything still unmatched after both passes is a genuine removal/addition.
+function diffRelationshipsSection(beforeList, afterList) {
+  const key = (r) => `${r.name}::${r.from}::${r.to}`;
+  const swappedKey = (r) => `${r.name}::${r.to}::${r.from}`;
+  const beforeByKey = new Map(beforeList.map((r) => [key(r), r]));
+  const afterByKey = new Map(afterList.map((r) => [key(r), r]));
+  const consumedBefore = new Set(), consumedAfter = new Set();
+
+  const changed = [];
+  for (const [k, beforeRel] of beforeByKey) {
+    const afterRel = afterByKey.get(k);
+    if (!afterRel) continue;
+    consumedBefore.add(k); consumedAfter.add(k);
+    if (JSON.stringify(beforeRel) !== JSON.stringify(afterRel)) changed.push({ name: beforeRel.name, before: beforeRel, after: afterRel });
+  }
+
+  const directionChanged = [];
+  for (const [k, beforeRel] of beforeByKey) {
+    if (consumedBefore.has(k)) continue;
+    const sk = swappedKey(beforeRel);
+    const afterRel = afterByKey.get(sk);
+    if (!afterRel || consumedAfter.has(sk)) continue;
+    consumedBefore.add(k); consumedAfter.add(sk);
+    directionChanged.push({ name: beforeRel.name, before: beforeRel, after: afterRel });
+  }
+
+  const removed = [...beforeByKey.entries()].filter(([k]) => !consumedBefore.has(k)).map(([, r]) => r);
+  const added = [...afterByKey.entries()].filter(([k]) => !consumedAfter.has(k)).map(([, r]) => r);
+  return { added, removed, changed, directionChanged };
+}
+
+function computeSemanticDiff(beforeSnapshot, afterSnapshot) {
+  const beforeModel = buildDomainModel(beforeSnapshot);
+  const afterModel = buildDomainModel(afterSnapshot);
+  const classes = diffMapSection(beforeModel.classes, afterModel.classes);
+
+  // Properties get their own top-level section (issue §5 lists it
+  // separately from "classes"), flattened across every matched class that
+  // changed — a brand-new class's properties aren't "property added" (the
+  // whole class already reports that), and a removed class's properties
+  // aren't "property removed" for the same reason.
+  const properties = { added: [], removed: [], changed: [] };
+  for (const { name: className, before: beforeClass, after: afterClass } of classes.changed) {
+    const propDiff = diffMapSection(beforeClass.properties, afterClass.properties);
+    for (const p of propDiff.added) properties.added.push({ className, name: p.name, value: p.value });
+    for (const p of propDiff.removed) properties.removed.push({ className, name: p.name, value: p.value });
+    for (const c of propDiff.changed) properties.changed.push({ className, name: c.name, before: c.before, after: c.after });
+  }
+
+  return {
+    classes,
+    relationships: diffRelationshipsSection(beforeModel.relationships, afterModel.relationships),
+    properties,
+    rules: diffMapSection(beforeModel.rules, afterModel.rules),
+    actions: diffMapSection(beforeModel.actions, afterModel.actions),
+  };
+}
+
+function isSemanticDiffEmpty(diff) {
+  return diff.classes.added.length === 0 && diff.classes.removed.length === 0 && diff.classes.changed.length === 0 &&
+    diff.relationships.added.length === 0 && diff.relationships.removed.length === 0 &&
+    diff.relationships.changed.length === 0 && diff.relationships.directionChanged.length === 0 &&
+    diff.properties.added.length === 0 && diff.properties.removed.length === 0 && diff.properties.changed.length === 0 &&
+    diff.rules.added.length === 0 && diff.rules.removed.length === 0 && diff.rules.changed.length === 0 &&
+    diff.actions.added.length === 0 && diff.actions.removed.length === 0 && diff.actions.changed.length === 0;
+}
+
+// Looks forward from entry.evidenceIndex (agentState.transcript.length at
+// commit time — see pushHistory's own comment) for the model's own next
+// assistant reply, since that text is appended to the transcript strictly
+// *after* the tool call that caused this edit returns (sendAgentChatMessage's
+// tool-call loop continues to fetch a follow-up reply before appending it —
+// see that function's own comment), never before. Returns null for a
+// manual edit, or for an agent edit with no reply yet on record (the turn
+// errored before one arrived, or the conversation was restarted since) —
+// the review UI's "Why this changed" section simply doesn't render then,
+// per issue §7's "if no reliable rationale exists, the semantic diff
+// remains sufficient."
+function resolveReviewEvidence(entry) {
+  if (entry.source !== "agent-auto-edit" || entry.evidenceIndex === null) return null;
+  for (let i = entry.evidenceIndex; i < agentState.transcript.length; i++) {
+    const msg = agentState.transcript[i];
+    if (msg.role === "assistant" && msg.text && msg.text.trim()) return msg.text;
+  }
+  return null;
+}
+
+// Classic O(n·m) LCS line diff — dependency-free per spec.md §2 (no
+// off-the-shelf diff library to reach for). Fine at this app's actual
+// scale: the largest domain-model YAML this app is stress-tested against
+// (150 classes/100 relationships/50 rules/50 actions, see
+// tests/agent-ontology-phase-g.spec.mjs) is on the order of a few hundred
+// lines, not the thousands where an O(n·m) table would actually hurt.
+// Returns an ordered list of {type: "same"|"added"|"removed", line} — the
+// review dialog's raw-YAML view renders this directly rather than a
+// unified-diff text block it would have to re-parse.
+function diffLines(beforeText, afterText) {
+  const a = beforeText.split("\n");
+  const b = afterText.split("\n");
+  const n = a.length, m = b.length;
+  const dp = Array.from({ length: n + 1 }, () => new Array(m + 1).fill(0));
+  for (let i = n - 1; i >= 0; i--) {
+    for (let j = m - 1; j >= 0; j--) {
+      dp[i][j] = a[i] === b[j] ? dp[i + 1][j + 1] + 1 : Math.max(dp[i + 1][j], dp[i][j + 1]);
+    }
+  }
+  const result = [];
+  let i = 0, j = 0;
+  while (i < n && j < m) {
+    if (a[i] === b[j]) { result.push({ type: "same", line: a[i] }); i++; j++; }
+    else if (dp[i + 1][j] >= dp[i][j + 1]) { result.push({ type: "removed", line: a[i] }); i++; }
+    else { result.push({ type: "added", line: b[j] }); j++; }
+  }
+  while (i < n) { result.push({ type: "removed", line: a[i] }); i++; }
+  while (j < m) { result.push({ type: "added", line: b[j] }); j++; }
+  return result;
+}
+
+// ---------------------------------------------------------------------------
+// Ontology Change Review — dialog UI (issue #74). Read-only throughout:
+// opening/navigating/switching tabs/toggling graph mode only ever reads
+// history.past and calls the pure functions above (buildDomainModel,
+// computeSemanticDiff, diffLines) — never touches `state` and never calls
+// pushHistory, so reviewing a change can never itself become one (§9's own
+// requirement). Every entry in history.past is reviewable regardless of
+// source (agent-auto-edit or user-edit), navigation mirrors undo's own
+// unbounded depth exactly — no separate cap.
+// ---------------------------------------------------------------------------
+let reviewIndex = null; // index into history.past, or null when the dialog is closed
+let reviewActiveTab = "summary"; // "summary" | "details" | "graph" | "yaml"
+let reviewGraphMode = "difference"; // "before" | "after" | "difference"
+
+function updateReviewButtonState() {
+  document.getElementById("btn-review-changes").disabled = history.past.length === 0;
+}
+
+function openReviewChanges() {
+  if (history.past.length === 0) return;
+  reviewIndex = history.past.length - 1; // latest edit — "the primary use case" (issue §3)
+  reviewActiveTab = "summary";
+  reviewGraphMode = "difference";
+  renderReviewDialog();
+  document.getElementById("review-changes-overlay").style.display = "flex";
+}
+
+function closeReviewChanges() {
+  document.getElementById("review-changes-overlay").style.display = "none";
+  reviewIndex = null;
+}
+
+function navigateReviewChanges(delta) {
+  if (reviewIndex === null) return;
+  const next = reviewIndex + delta;
+  if (next < 0 || next >= history.past.length) return;
+  reviewIndex = next;
+  renderReviewDialog();
+}
+
+function setReviewTab(tab) {
+  reviewActiveTab = tab;
+  renderReviewDialog();
+}
+
+function setReviewGraphMode(mode) {
+  reviewGraphMode = mode;
+  renderReviewDialog();
+}
+
+function reviewDiffItemAdded(text) {
+  const d = document.createElement("div");
+  d.className = "review-diff-item review-diff-item--added";
+  d.textContent = text;
+  return d;
+}
+
+function reviewDiffItemRemoved(text) {
+  const d = document.createElement("div");
+  d.className = "review-diff-item review-diff-item--removed";
+  d.textContent = text;
+  return d;
+}
+
+function reviewDiffItemChanged(beforeText, afterText, extraClass) {
+  const d = document.createElement("div");
+  d.className = `review-diff-item review-diff-item--${extraClass || "changed"}`;
+  const b = document.createElement("div");
+  b.className = "review-diff-item-before";
+  b.textContent = beforeText;
+  const a = document.createElement("div");
+  a.textContent = afterText;
+  d.append(b, a);
+  return d;
+}
+
+function reviewSectionCounts(diff) {
+  return [["classes", diff.classes], ["relationships", diff.relationships], ["properties", diff.properties], ["rules", diff.rules], ["actions", diff.actions]];
+}
+
+// Level 1 — concise semantic summary (issue §4, "the purpose is immediate
+// understanding"): a count line per non-zero kind, then, only when there's
+// something to show, the two conceptual lists the issue's own worked
+// example uses (newly added classes; newly connected relationships).
+function renderReviewSummary(container, diff, entry) {
+  container.textContent = "";
+  const heading = document.createElement("div");
+  heading.className = "review-diff-heading";
+  heading.textContent = entry.source === "agent-auto-edit" ? t("reviewSummaryHeadingAgent") : t("reviewSummaryHeadingUser");
+  container.appendChild(heading);
+
+  const countsList = document.createElement("div");
+  countsList.className = "review-diff-list";
+  let anyCounts = false;
+  for (const [section, sec] of reviewSectionCounts(diff)) {
+    for (const kind of ["added", "changed", "removed"]) {
+      const n = sec[kind].length;
+      if (n === 0) continue;
+      anyCounts = true;
+      const row = document.createElement("div");
+      row.className = "review-diff-item";
+      row.textContent = t("reviewCountLine", n, section, kind);
+      countsList.appendChild(row);
+    }
+    if (section === "relationships" && sec.directionChanged.length) {
+      anyCounts = true;
+      const row = document.createElement("div");
+      row.className = "review-diff-item";
+      row.textContent = t("reviewCountLine", sec.directionChanged.length, section, "directionChanged");
+      countsList.appendChild(row);
+    }
+  }
+  if (!anyCounts) {
+    const empty = document.createElement("p");
+    empty.className = "review-diff-empty";
+    empty.textContent = t("reviewNoChanges");
+    container.appendChild(empty);
+    return;
+  }
+  container.appendChild(countsList);
+
+  if (diff.classes.added.length) {
+    const h2 = document.createElement("div");
+    h2.className = "review-diff-heading";
+    h2.textContent = t("reviewAddedHeading");
+    container.appendChild(h2);
+    const list = document.createElement("div");
+    list.className = "review-diff-list";
+    for (const { name } of diff.classes.added) list.appendChild(reviewDiffItemAdded(name));
+    container.appendChild(list);
+  }
+
+  if (diff.relationships.added.length) {
+    const h2 = document.createElement("div");
+    h2.className = "review-diff-heading";
+    h2.textContent = t("reviewConnectedHeading");
+    container.appendChild(h2);
+    const list = document.createElement("div");
+    list.className = "review-diff-list";
+    for (const rel of diff.relationships.added) list.appendChild(reviewDiffItemAdded(`${rel.from} → ${rel.to} (${rel.name})`));
+    container.appendChild(list);
+  }
+}
+
+function formatClassSummary(cls) {
+  return (cls && cls.meaning) || "";
+}
+
+function formatPropertyValue(val) {
+  if (!val) return "";
+  const parts = [val.type];
+  if (val.unit) parts.push(`(${val.unit})`);
+  if (val.allowed && val.allowed.length) parts.push(`[${val.allowed.join(", ")}]`);
+  return parts.join(" ");
+}
+
+// Level 2 — grouped, human-readable before/after per category (issue §4
+// Level 2, "avoid making raw YAML the primary interface"). A property (or
+// rule/class) *rename* has no distinct identity signal beyond its own name
+// (the same limitation buildDomainModel()'s own export/import round trip
+// already has — see agent_ontology_spec.md §11), so it surfaces here as a
+// removed old-named entry plus an added new-named one, not as a guessed
+// "renamed" pairing; documented, not silently pretended away.
+function renderReviewDetails(container, diff) {
+  container.textContent = "";
+  let any = false;
+
+  function section(headingText, items, mapper) {
+    if (!items.length) return;
+    any = true;
+    const h = document.createElement("div");
+    h.className = "review-diff-heading";
+    h.textContent = headingText;
+    container.appendChild(h);
+    const list = document.createElement("div");
+    list.className = "review-diff-list";
+    for (const item of items) list.appendChild(mapper(item));
+    container.appendChild(list);
+  }
+
+  const classText = (name, val) => (formatClassSummary(val) ? `${name}: ${formatClassSummary(val)}` : name);
+  section(t("reviewSectionHeading", "classes", "added"), diff.classes.added, ({ name, value }) => reviewDiffItemAdded(classText(name, value)));
+  section(t("reviewSectionHeading", "classes", "removed"), diff.classes.removed, ({ name, value }) => reviewDiffItemRemoved(classText(name, value)));
+  section(t("reviewSectionHeading", "classes", "changed"), diff.classes.changed,
+    ({ name, before, after }) => reviewDiffItemChanged(classText(name, before), classText(name, after)));
+
+  const relText = (r) => `${r.from} → ${r.to} (${r.name})`;
+  section(t("reviewSectionHeading", "relationships", "added"), diff.relationships.added, (r) => reviewDiffItemAdded(relText(r)));
+  section(t("reviewSectionHeading", "relationships", "removed"), diff.relationships.removed, (r) => reviewDiffItemRemoved(relText(r)));
+  section(t("reviewSectionHeading", "relationships", "changed"), diff.relationships.changed,
+    ({ before, after }) => reviewDiffItemChanged(relText(before), relText(after)));
+  section(t("reviewSectionHeading", "relationships", "directionChanged"), diff.relationships.directionChanged,
+    ({ before, after }) => reviewDiffItemChanged(relText(before), relText(after), "direction-changed"));
+
+  const propText = (p) => `${p.className}.${p.name}`;
+  section(t("reviewSectionHeading", "properties", "added"), diff.properties.added, (p) => reviewDiffItemAdded(`${propText(p)}: ${formatPropertyValue(p.value)}`));
+  section(t("reviewSectionHeading", "properties", "removed"), diff.properties.removed, (p) => reviewDiffItemRemoved(`${propText(p)}: ${formatPropertyValue(p.value)}`));
+  section(t("reviewSectionHeading", "properties", "changed"), diff.properties.changed,
+    (p) => reviewDiffItemChanged(`${propText(p)}: ${formatPropertyValue(p.before)}`, `${propText(p)}: ${formatPropertyValue(p.after)}`));
+
+  const ruleText = (name, val) => ((val.conditions || []).length ? `${name}: ${val.conditions.join("; ")}` : name);
+  section(t("reviewSectionHeading", "rules", "added"), diff.rules.added, ({ name, value }) => reviewDiffItemAdded(ruleText(name, value)));
+  section(t("reviewSectionHeading", "rules", "removed"), diff.rules.removed, ({ name, value }) => reviewDiffItemRemoved(ruleText(name, value)));
+  section(t("reviewSectionHeading", "rules", "changed"), diff.rules.changed,
+    ({ name, before, after }) => reviewDiffItemChanged(ruleText(name, before), ruleText(name, after)));
+
+  const actionText = (name, val) => (val.effect ? `${name}: ${val.effect}` : name);
+  section(t("reviewSectionHeading", "actions", "added"), diff.actions.added, ({ name, value }) => reviewDiffItemAdded(actionText(name, value)));
+  section(t("reviewSectionHeading", "actions", "removed"), diff.actions.removed, ({ name, value }) => reviewDiffItemRemoved(actionText(name, value)));
+  section(t("reviewSectionHeading", "actions", "changed"), diff.actions.changed,
+    ({ name, before, after }) => reviewDiffItemChanged(actionText(name, before), actionText(name, after)));
+
+  if (!any) {
+    const empty = document.createElement("p");
+    empty.className = "review-diff-empty";
+    empty.textContent = t("reviewNoChanges");
+    container.appendChild(empty);
+  }
+}
+
+// Level 3 — graph Before/After/Difference (issue §4 Level 3). Its own
+// small, pure, non-interactive renderer rather than repointing the live
+// canvas/state at a snapshot: this dialog can be open while autosave
+// timers etc. are still running against the real `state`, and even
+// briefly swapping that global would risk persisting the wrong graph to
+// storage. "May use the existing graph renderer" (issue §4) is taken here
+// as reusing its drawing PRIMITIVES (rectBorderPoint, the theme's color
+// tokens via resolveColors) rather than its stateful render()/loop() —
+// deliberately simplified beyond that (no parallel-edge bend offsets, no
+// property-count badges): this view's job is structural overview, not
+// full-fidelity editing, matching the "match complexity to the vision"
+// design guidance for a disciplined, non-maximalist treatment.
+function reviewGraphColors() {
+  const cs = getComputedStyle(document.documentElement);
+  const v = (name, fallback) => cs.getPropertyValue(name).trim() || fallback;
+  return {
+    ...resolveColors(),
+    added: v("--state-active", "#5fbf8f"),
+    removed: v("--danger-fg", "#d16a6a"),
+    changed: v("--agent-accent", "#b592f0"),
+  };
+}
+
+function renderReviewGraphCanvas(canvasEl, nodes, edges, statusByNodeId, statusByEdgeId) {
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvasEl.getBoundingClientRect();
+  const w = Math.max(1, rect.width), h = Math.max(1, rect.height);
+  canvasEl.width = w * dpr;
+  canvasEl.height = h * dpr;
+  const rctx = canvasEl.getContext("2d");
+  rctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const colors = reviewGraphColors();
+  rctx.clearRect(0, 0, w, h);
+  rctx.fillStyle = colors.canvasBg;
+  rctx.fillRect(0, 0, w, h);
+  if (!nodes.length) return;
+
+  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  for (const n of nodes) {
+    minX = Math.min(minX, n.x); minY = Math.min(minY, n.y);
+    maxX = Math.max(maxX, n.x + n.w); maxY = Math.max(maxY, n.y + n.h);
+  }
+  const contentW = Math.max(1, maxX - minX), contentH = Math.max(1, maxY - minY);
+  const pad = 40;
+  const scale = Math.min((w - pad * 2) / contentW, (h - pad * 2) / contentH, 2);
+  const panX = w / 2 - (minX + contentW / 2) * scale;
+  const panY = h / 2 - (minY + contentH / 2) * scale;
+
+  rctx.save();
+  rctx.setTransform(dpr * scale, 0, 0, dpr * scale, dpr * panX, dpr * panY);
+  rctx.font = "13px system-ui, sans-serif";
+  rctx.textAlign = "center";
+  rctx.textBaseline = "middle";
+
+  const strokeFor = (status) => status === "added" ? colors.added : status === "removed" ? colors.removed : status === "changed" ? colors.changed : colors.edgeStroke;
+
+  for (const e of edges) {
+    const src = nodes.find((n) => n.id === e.source);
+    const tgt = nodes.find((n) => n.id === e.target);
+    if (!src || !tgt) continue;
+    const scx = src.x + src.w / 2, scy = src.y + src.h / 2;
+    const tcx = tgt.x + tgt.w / 2, tcy = tgt.y + tgt.h / 2;
+    const a = rectBorderPoint(src, tcx - scx, tcy - scy);
+    const b = rectBorderPoint(tgt, scx - tcx, scy - tcy);
+    const status = statusByEdgeId.get(e.id) || "same";
+    rctx.strokeStyle = strokeFor(status);
+    rctx.lineWidth = status === "same" ? 1.5 : 2.5;
+    rctx.setLineDash(status === "removed" ? [5, 4] : []);
+    rctx.beginPath();
+    rctx.moveTo(a.x, a.y);
+    rctx.lineTo(b.x, b.y);
+    rctx.stroke();
+    rctx.setLineDash([]);
+    const angle = Math.atan2(b.y - a.y, b.x - a.x);
+    const ah = 8;
+    rctx.beginPath();
+    rctx.moveTo(b.x, b.y);
+    rctx.lineTo(b.x - ah * Math.cos(angle - Math.PI / 6), b.y - ah * Math.sin(angle - Math.PI / 6));
+    rctx.lineTo(b.x - ah * Math.cos(angle + Math.PI / 6), b.y - ah * Math.sin(angle + Math.PI / 6));
+    rctx.closePath();
+    rctx.fillStyle = rctx.strokeStyle;
+    rctx.fill();
+    if (e.relation) {
+      rctx.fillStyle = colors.edgeLabelFg;
+      rctx.fillText(e.relation, (a.x + b.x) / 2, (a.y + b.y) / 2 - 8);
+    }
+  }
+
+  for (const n of nodes) {
+    const status = statusByNodeId.get(n.id) || "same";
+    rctx.fillStyle = colors.nodeFill;
+    rctx.strokeStyle = strokeFor(status);
+    rctx.lineWidth = status === "same" ? 1.5 : 2.5;
+    rctx.setLineDash(status === "removed" ? [5, 4] : []);
+    rctx.beginPath();
+    if (rctx.roundRect) rctx.roundRect(n.x, n.y, n.w, n.h, 8);
+    else rctx.rect(n.x, n.y, n.w, n.h);
+    rctx.fill();
+    rctx.stroke();
+    rctx.setLineDash([]);
+    rctx.fillStyle = colors.nodeText;
+    rctx.fillText(n.label, n.x + n.w / 2, n.y + n.h / 2);
+  }
+  rctx.restore();
+}
+
+// Node/edge identity within one review entry's own before/after pair is
+// its internal id, not its label — unlike computeSemanticDiff (which must
+// work across broader before/after states and therefore matches by
+// label/name), a matched entity here is *the same object being mutated in
+// place* by commitYamlImport/the manual edit, so it keeps the same id
+// (see commitYamlImport's own "existing = state.nodes.find(...); ... in
+// place" logic). Simpler and correct for this narrower job.
+// A node's semantic identity for "did this actually change" purposes --
+// deliberately excludes x/y/w/h. Position moves constantly for reasons
+// that have nothing to do with this edit's own content (most commonly
+// commitYamlImport's own computeAutoLayoutPositions() re-flowing the
+// *whole* graph whenever it runs, confirmed live: a second unrelated
+// import was enough to make every pre-existing node compare as "changed"
+// under a raw full-object comparison, which is exactly the kind of noise
+// that would make this indicator meaningless).
+function nodeSemanticFingerprint(n) {
+  return JSON.stringify({ label: n.label, meaning: n.meaning, aliases: n.aliases, properties: n.properties });
+}
+
+function computeReviewGraphDiffSets(beforeSnap, afterSnap) {
+  const beforeNodeIds = new Set(beforeSnap.nodes.map((n) => n.id));
+  const afterNodeIds = new Set(afterSnap.nodes.map((n) => n.id));
+  const statusByNodeId = new Map();
+  for (const n of beforeSnap.nodes) if (!afterNodeIds.has(n.id)) statusByNodeId.set(n.id, "removed");
+  for (const n of afterSnap.nodes) {
+    if (!beforeNodeIds.has(n.id)) { statusByNodeId.set(n.id, "added"); continue; }
+    const beforeNode = beforeSnap.nodes.find((b) => b.id === n.id);
+    if (nodeSemanticFingerprint(beforeNode) !== nodeSemanticFingerprint(n)) statusByNodeId.set(n.id, "changed");
+  }
+  const beforeEdgeIds = new Set(beforeSnap.edges.map((e) => e.id));
+  const afterEdgeIds = new Set(afterSnap.edges.map((e) => e.id));
+  const statusByEdgeId = new Map();
+  for (const e of beforeSnap.edges) if (!afterEdgeIds.has(e.id)) statusByEdgeId.set(e.id, "removed");
+  for (const e of afterSnap.edges) {
+    if (!beforeEdgeIds.has(e.id)) { statusByEdgeId.set(e.id, "added"); continue; }
+    const beforeEdge = beforeSnap.edges.find((b) => b.id === e.id);
+    if (JSON.stringify(beforeEdge) !== JSON.stringify(e)) statusByEdgeId.set(e.id, "changed");
+  }
+  // Union for "difference" mode: a removed node/edge only exists in
+  // `before`, so it keeps its before-position; everything else (unchanged,
+  // changed, or newly added) uses its current after-position.
+  const unionNodes = [...afterSnap.nodes, ...beforeSnap.nodes.filter((n) => !afterNodeIds.has(n.id))];
+  const unionEdges = [...afterSnap.edges, ...beforeSnap.edges.filter((e) => !afterEdgeIds.has(e.id))];
+  return { statusByNodeId, statusByEdgeId, unionNodes, unionEdges };
+}
+
+function renderReviewGraphPanel(entry) {
+  const canvasEl = document.getElementById("review-graph-canvas");
+  if (reviewGraphMode === "before") {
+    renderReviewGraphCanvas(canvasEl, entry.before.nodes, entry.before.edges, new Map(), new Map());
+  } else if (reviewGraphMode === "after") {
+    renderReviewGraphCanvas(canvasEl, entry.after.nodes, entry.after.edges, new Map(), new Map());
+  } else {
+    const { statusByNodeId, statusByEdgeId, unionNodes, unionEdges } = computeReviewGraphDiffSets(entry.before, entry.after);
+    renderReviewGraphCanvas(canvasEl, unionNodes, unionEdges, statusByNodeId, statusByEdgeId);
+  }
+}
+
+// Level 4 — raw Domain Model YAML diff (issue §4 Level 4), the expert view.
+function renderReviewYamlDiff(entry) {
+  const beforeYaml = toYaml(buildDomainModel(entry.before));
+  const afterYaml = toYaml(buildDomainModel(entry.after));
+  const pre = document.getElementById("review-yaml-diff");
+  pre.textContent = "";
+  for (const { type, line } of diffLines(beforeYaml, afterYaml)) {
+    const span = document.createElement("span");
+    if (type === "added") span.className = "diff-line-added";
+    else if (type === "removed") span.className = "diff-line-removed";
+    span.textContent = `${type === "added" ? "+ " : type === "removed" ? "- " : "  "}${line}\n`;
+    pre.appendChild(span);
+  }
+}
+
+function renderReviewDialog() {
+  if (reviewIndex === null) return;
+  const entry = history.past[reviewIndex];
+  const diff = computeSemanticDiff(entry.before, entry.after);
+
+  document.getElementById("review-changes-position").textContent = t("reviewChangesPosition", reviewIndex + 1, history.past.length);
+  document.getElementById("review-changes-prev").disabled = reviewIndex === 0;
+  document.getElementById("review-changes-next").disabled = reviewIndex === history.past.length - 1;
+
+  for (const tab of ["summary", "details", "graph", "yaml"]) {
+    const isActive = tab === reviewActiveTab;
+    document.getElementById(`review-tab-${tab}`).setAttribute("aria-selected", String(isActive));
+    document.getElementById(`review-panel-${tab}`).hidden = !isActive;
+  }
+
+  renderReviewSummary(document.getElementById("review-panel-summary"), diff, entry);
+  renderReviewDetails(document.getElementById("review-panel-details"), diff);
+  if (reviewActiveTab === "graph") {
+    for (const mode of ["before", "after", "difference"]) {
+      document.getElementById(`review-graph-${mode}`).setAttribute("aria-pressed", String(mode === reviewGraphMode));
+    }
+    renderReviewGraphPanel(entry); // sized off the panel's real layout box -- only safe to call once it's un-hidden, above
+  }
+  if (reviewActiveTab === "yaml") renderReviewYamlDiff(entry);
+
+  const evidenceText = resolveReviewEvidence(entry);
+  const evidenceEl = document.getElementById("review-changes-evidence");
+  if (evidenceText) {
+    document.getElementById("review-changes-evidence-text").textContent = evidenceText;
+    evidenceEl.hidden = false;
+  } else {
+    evidenceEl.hidden = true;
+  }
+
+  // Only the current top of history.past can be undone directly here —
+  // undo() always pops the top of the stack, so undoing an older entry
+  // would silently discard everything after it too. An older entry stays
+  // fully reviewable, just not one-click-undoable — issue §9's own "where
+  // technically safe" phrase.
+  document.getElementById("review-changes-undo").disabled = reviewIndex !== history.past.length - 1;
+}
+
+document.getElementById("btn-review-changes").addEventListener("click", () => openReviewChanges());
+document.getElementById("review-changes-close").addEventListener("click", () => closeReviewChanges());
+document.getElementById("review-changes-overlay").addEventListener("click", (e) => {
+  if (e.target === document.getElementById("review-changes-overlay")) closeReviewChanges();
+});
+document.getElementById("review-changes-prev").addEventListener("click", () => navigateReviewChanges(-1));
+document.getElementById("review-changes-next").addEventListener("click", () => navigateReviewChanges(1));
+document.getElementById("review-tab-summary").addEventListener("click", () => setReviewTab("summary"));
+document.getElementById("review-tab-details").addEventListener("click", () => setReviewTab("details"));
+document.getElementById("review-tab-graph").addEventListener("click", () => setReviewTab("graph"));
+document.getElementById("review-tab-yaml").addEventListener("click", () => setReviewTab("yaml"));
+document.getElementById("review-graph-before").addEventListener("click", () => setReviewGraphMode("before"));
+document.getElementById("review-graph-after").addEventListener("click", () => setReviewGraphMode("after"));
+document.getElementById("review-graph-difference").addEventListener("click", () => setReviewGraphMode("difference"));
+document.getElementById("review-changes-undo").addEventListener("click", () => {
+  if (reviewIndex !== history.past.length - 1) return; // defensive -- the button is disabled otherwise
+  undo();
+  closeReviewChanges();
+});
 
 // Recorded so tests can assert the app requested the correct filename
 // directly, instead of through the browser's downloaded-file name echo
@@ -6160,7 +7154,17 @@ function commitYamlImport(text, mode) {
   // Folded into this same snapshot/pushHistory, not a second one of its
   // own -- see commitTxtImport's matching comment for why.
   if (state.nodes.length >= 2) computeAutoLayoutPositions();
-  pushHistory(before, snapshotState());
+  // "agent-merge" is the one mode only the live agent's apply_ontology_yaml
+  // tool call ever passes (see this function's own comment) -- "merge"/
+  // "replace" are always the manual Import dialog, so this is the exact
+  // and only place that distinguishes agent-authored edits for issue #74's
+  // Review Changes facility. agentState.transcript.length is captured now,
+  // before the model's follow-up reply (if any) has been appended -- see
+  // pushHistory's own comment on why evidenceIndex is a forward-looking
+  // marker, not the reply text itself.
+  pushHistory(before, snapshotState(), mode === "agent-merge"
+    ? { source: "agent-auto-edit", evidenceIndex: agentState.transcript.length }
+    : undefined);
   newlyImportedIds = new Set(); // Section-5.3-style highlight only applies to plain node/edge TXT import
   markDirty();
   fitViewToContent();
@@ -8613,6 +9617,14 @@ function buildAgentSystemPrompt() {
 function renderAgentTranscript() {
   const el = document.getElementById("agent-transcript");
   el.textContent = "";
+  if (agentState.transcript.length === 0) {
+    const welcome = document.createElement("div");
+    welcome.id = "agent-welcome-message";
+    welcome.className = "agent-transcript-msg agent-welcome-message";
+    welcome.textContent = t("agentWelcomeMessage");
+    el.appendChild(welcome);
+    return;
+  }
   for (const msg of agentState.transcript) {
     const div = document.createElement("div");
     div.className = `agent-transcript-msg agent-msg-${msg.role}`;
@@ -9018,6 +10030,28 @@ window.__kg = {
     // File/DataTransfer plumbing.
     openImportDialog,
     commitJsonImport,
+    buildDomainModel,
+  },
+  // Ontology Change Review (issue #74) test surface -- both the pure diff
+  // engine (usable directly, without driving the whole dialog UI) and the
+  // dialog's own open/navigate/tab/graph-mode actions plus its live state,
+  // mirroring the agent/theme/lang sub-objects' own get()-function
+  // convention above for values that change over time.
+  reviewChanges: {
+    computeSemanticDiff,
+    isSemanticDiffEmpty,
+    diffLines,
+    resolveReviewEvidence,
+    open: openReviewChanges,
+    close: closeReviewChanges,
+    navigate: navigateReviewChanges,
+    setTab: setReviewTab,
+    setGraphMode: setReviewGraphMode,
+    undoFromDialog: () => document.getElementById("review-changes-undo").click(),
+    getIndex: () => reviewIndex,
+    getActiveTab: () => reviewActiveTab,
+    getGraphMode: () => reviewGraphMode,
+    computeReviewGraphDiffSets,
   },
   theme: {
     get: () => theme,

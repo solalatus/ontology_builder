@@ -2052,3 +2052,78 @@ reaches the new guard) was independently re-verified against `yamlScalar()` dire
       both test files.
 - [x] Full regression (`node --test tests/*.spec.mjs`): all pass, no other file touches this parser's
       list-item path in a way the new tests didn't already cover.
+
+## Ontology Change Review (issue #74) — `helper_agent_plan.md` §10
+
+**2026-08-11.** Planned first with the `frontend-design` skill loaded for visual guidance (never committed
+to this repo — loaded from a separate sparse clone outside this working tree) after the user asked for a
+crisp, question-first plan rather than immediate implementation. Scope confirmed via `AskUserQuestion`
+before any code was written: retrospective only this round (preview mode — Apply/Reject a not-yet-applied
+candidate, staleness hashing, a structured metadata API for a future normalization caller — stays out of
+scope, seams reserved only); both agent and manual edits covered; visual direction stays strictly
+disciplined (every new UI element reuses existing color tokens — `--state-active`, `--danger-fg`,
+`--agent-accent` — nothing new introduced); history depth mirrors undo exactly, no separate cap. Full
+design rationale lives in `helper_agent_plan.md` §10, not repeated here.
+
+- [x] **`pushHistory(before, after, meta)`** gained an optional third argument (`{source,
+      evidenceIndex}`, both optional, defaulting to `"user-edit"`/`null`) — every pre-existing call site
+      (13+) needed zero changes; only `commitYamlImport`'s own call site (gated on `mode ===
+      "agent-merge"`, the only mode the live agent's tool call ever passes) tags `source:
+      "agent-auto-edit"` and `evidenceIndex: agentState.transcript.length`.
+- [x] **`buildDomainModel(source = state)`** parameterized (was zero-arg, `state`-only) so the diff engine
+      reuses the exact same name-keyed, internal-id-free "semantic identity" the export/import pipeline
+      already agrees on, against arbitrary snapshots — `buildDomainYamlExport()` is unaffected, still
+      calling it with no arguments.
+- [x] **Semantic diff engine**: `diffMapSection`/`diffRelationshipsSection` (two-pass match — exact
+      `(name,from,to)` first, then the same name with `from`/`to` swapped, so a direction change reports
+      as its own category, not remove+add)/`computeSemanticDiff`/`isSemanticDiffEmpty`, plus a
+      dependency-free LCS line-diff (`diffLines`) for the YAML tab. Identity is label/name throughout, not
+      internal ids, which aren't stable across arbitrary before/after pairs.
+- [x] **Evidence without a new LLM call** (explicitly forbidden by the issue): `evidenceIndex` is a
+      forward-looking transcript-length marker captured at commit time; `resolveReviewEvidence` scans
+      `agentState.transcript` forward from it for the model's own natural next reply, since
+      `sendAgentChatMessage`'s loop appends that reply only after the tool call already returned.
+- [x] **4-level dialog** (Summary/Details/Graph diff/YAML diff) + Previous/Next navigation over
+      `history.past` (default: latest), read-only by construction (verified by a dedicated test that
+      opening/navigating/switching tabs never calls `pushHistory` or mutates `state`). "Undo this edit"
+      reuses the real `undo()` directly — only enabled while viewing the current top of the stack, since
+      `undo()` always pops that top entry.
+- [x] **Independent, pure graph-diff renderer** for Level 3 (`renderReviewGraphCanvas`,
+      `computeReviewGraphDiffSets`) rather than repointing the live canvas at a snapshot, to remove any
+      risk of autosave/timers persisting the wrong graph while the dialog has swapped state.
+- [x] **Bug found and fixed via manual visual smoke-testing, before the automated suite existed**:
+      `computeAutoLayoutPositions()` repositions every node on any import, so a naive full-object node
+      comparison flagged untouched nodes as "changed" purely from x/y drift. Fixed with
+      `nodeSemanticFingerprint()` (excludes position/size fields); pinned by a dedicated regression test.
+- [x] **Real bug found by the test suite itself, not by inspection**: `computeSemanticDiff`'s
+      properties-added/removed loop iterated `diffMapSection`'s returned `{name, value}` objects as if
+      they were bare name strings (`for (const name of propDiff.added) properties.added.push({className,
+      name, ...})` — `name` was actually the whole object). A newly written diff-engine test caught it
+      immediately (asserting `.added[0].name === "dueDate"` got back the nested object instead); fixed by
+      destructuring the loop variable properly. Verified red before the fix, green after.
+- [x] **Direct user requests folded into this same round** (after the dialog/diff engine were already
+      built and screenshotted for review): a bilingual, pre-first-message welcome note in the agent chat
+      panel (derived purely from `t()` on every `renderAgentTranscript()` call, never a stored
+      `agentState.transcript` entry, so it can't affect `evidenceIndex` or the persisted conversation
+      payload — confirmed to disappear once a real message exists and reappear after Restart
+      Conversation), and a short explanatory tooltip on the Review changes toolbar button. The tooltip's
+      first draft overflowed the viewport's right edge (the shared `[data-tooltip]` CSS rule assumes a
+      short, single-line label, true for the zoom/fit-view buttons it already serves but not a full
+      sentence) — fixed by shortening the copy and giving this one button its own upward-opening
+      override, following the existing `#agent-panel-toggle::after` per-button-override precedent.
+- [x] `tests/review-changes.spec.mjs` — 36 tests: diff-engine unit tests (every add/remove/changed
+      category, direction-changed, internal-id independence, empty-diff determinism), `diffLines`,
+      toolbar button state, navigation (default-latest, both bounds, 12-entry depth), the read-only
+      guarantee, Undo integration, source/evidence tagging (manual vs. agent, the empty-reply edge case,
+      a mixed session), the "ordinary edits still auto-apply, no gating introduced" regression proof,
+      graph-diff status classification (including the position-noise regression), language toggle, YAML
+      diff content accuracy, the empty-diff dialog edge case, the welcome message (appears/disappears/
+      retranslates/reappears-after-restart), the tooltip (both languages, a length guard against
+      regressing the overflow bug), and three tests covering adjacent, previously-uncovered territory:
+      manual+agent edits interleaved in one session each keep their own correct `source` tag; that
+      metadata survives a full undo→future→redo round trip unchanged; and a fresh manual edit after
+      undoing past an agent entry still discards the redo stack regardless of entry type.
+- [x] Confirmed `AGENT_SYSTEM_PROMPT_BASE`/`AGENT_KNOWLEDGE` byte-identical to `origin/main` via `git
+      diff origin/main -- index.html` (no output for either constant) — this feature never touches
+      prompt text, and that's now verified, not just assumed.
+- [x] Full regression (`node --test tests/*.spec.mjs`), then PR against issue #74.

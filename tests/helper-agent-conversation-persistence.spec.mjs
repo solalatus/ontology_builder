@@ -137,8 +137,11 @@ test("confirming Restart Conversation clears the transcript and API history and 
     assert.notEqual(state.promptCacheKey, cacheKeyBefore, "restarting should rotate the cache key, same as a fresh connect");
     // Restarting the conversation shouldn't force re-entering the API key.
     assert.equal(state.connected, true);
+    // An empty transcript array renders one child now, not zero -- the
+    // static pre-first-message welcome placeholder (issue #74 round),
+    // never a real transcript entry itself.
     const transcriptDom = await page.evaluate(() => document.getElementById("agent-transcript").children.length);
-    assert.equal(transcriptDom, 0);
+    assert.equal(transcriptDom, 1);
   });
 });
 
