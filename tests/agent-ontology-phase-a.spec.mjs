@@ -24,6 +24,7 @@ async function withDownloadPage(fn) {
   page.on("download", (dl) => downloads.push(dl));
   await page.goto(APP_URL);
   await page.waitForFunction(() => Boolean(window.__kg));
+  await page.evaluate(() => window.__kg.welcome.close()); // issue #78: this file has its own page-open helper, not tests/lib/page.mjs's withPage()
   try {
     await fn(page, downloads);
   } finally {

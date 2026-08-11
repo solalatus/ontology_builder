@@ -123,6 +123,7 @@ export async function withPageAllowingResourceErrors(fn) {
   page.on("pageerror", (err) => consoleErrors.push(String(err)));
   await page.goto(APP_URL);
   await page.waitForFunction(() => Boolean(window.__kg));
+  await page.evaluate(() => window.__kg.welcome.close()); // issue #78: this shared helper opens its own page, not tests/lib/page.mjs's withPage()
   try {
     await fn(page);
   } finally {

@@ -26,6 +26,7 @@ async function launchWithMotionPreference(reducedMotion) {
   await page.goto("file://" + process.cwd() + "/index.html");
   await page.waitForFunction(() => Boolean(window.__kg));
   await page.evaluate(() => { if (window.__kg.lang.get() !== "en") window.__kg.lang.toggle(); });
+  await page.evaluate(() => window.__kg.welcome.close()); // issue #78: this file has its own page-open helper, not tests/lib/page.mjs's withPage()
   return { browser, page };
 }
 

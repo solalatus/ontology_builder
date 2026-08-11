@@ -151,6 +151,7 @@ test("An accented graph name reaches the saved filenames intact", async () => {
     await page.goto(APP_URL);
     await page.waitForFunction(() => Boolean(window.__kg));
     await page.evaluate(() => { if (window.__kg.lang.get() !== "en") window.__kg.lang.toggle(); });
+    await page.evaluate(() => window.__kg.welcome.close()); // issue #78: this test opens its own page, not tests/lib/page.mjs's withPage()
     await page.evaluate(() => {
       window.__kg.state.graphName = "Ügyfélkérdés ontológia";
       window.__kg.actions.createNode(0, 0, "A");

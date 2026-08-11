@@ -29,6 +29,7 @@ async function withFolderPage(fn, { initScript } = {}) {
   // an addInitScript localStorage write racing with page.reload() is
   // intermittently destructive to Tier 1 data on file:// origins.
   await page.evaluate(() => { if (window.__kg.lang.get() !== "en") window.__kg.lang.toggle(); });
+  await page.evaluate(() => window.__kg.welcome.close()); // issue #78: this file has its own page-open helper, not tests/lib/page.mjs's withPage()
   try {
     await fn(page, downloads);
   } finally {
