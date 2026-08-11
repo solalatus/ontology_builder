@@ -1996,4 +1996,59 @@ first, not just picking a newer-looking version. Updated the matching `AZURE_API
 - [x] Full regression (`node --test tests/*.spec.mjs`) re-run with all three env vars now present
       (`OPENAI_API_KEY`, `AZURE_OPENAI_API_KEY`, `AZURE_OPENAI_ENDPOINT`) -- both live suites (OpenAI and
       Azure) exercised for real this time, not just OpenAI's.
-- [ ] PR #73 to be flipped from draft to ready-for-review now that live Azure verification is complete.
+- [x] PR #73 flipped from draft to ready-for-review now that live Azure verification is complete.
+
+## Fix: a flow map used as a relationships list item was silently discarded (issue #76)
+
+**2026-08-11.** External bug report, filed against `023a054` (post-merge `main`) by whoever vendors
+`parseDomainYamlImport()` and its helpers verbatim into an independent analysis toolchain
+(`solalatus/BME_ontology`) so that tool agrees with this app about what a domain YAML file means — found
+by testing the vendored copy against the grammar `agent_ontology_spec.md` §11 documents as accepted,
+rather than only against files actually at hand. Nothing in that corpus was affected (every real artifact
+uses block style), but the report came with the exact failing input, root cause, a four-line diff, and a
+suggested test list, all independently re-verified before applying rather than taken on faith.
+
+**Bug:** §11's "non-empty inline flow maps... including nested ones" covers a flow map used as a *value*
+(`amount: {type: number, unit: EUR}`), which already worked. It did not cover one used as a *list item*
+(`relationships:\n  - {name: issuedBy, from: Invoice, to: Supplier}`) — exactly the shape a relationships
+list invites. `parseYamlBlock()`'s list branch ran `splitYamlKeyValue()` on the item's raw text before
+ever checking whether it was a flow collection; that function splits on the first colon, so
+`{name: issuedBy, from: Invoice, to: Supplier}` became the well-formed-*looking* pair
+`["{name", "issuedBy, from: Invoice, to: Supplier"]` instead of reaching `parseYamlValueToken()`, which
+already parses flow maps correctly (including nested ones) and was never called. No error anywhere:
+`relationships[0].name`/`.from`/`.to` all came back `undefined`, so `commitYamlImport()`'s
+undeclared-endpoint guard defensively (and silently) dropped the whole entry — the diff summary reported
+one fewer item with nothing explaining why. Same "looks like nothing happened" failure class as the two
+bugs §11 already documents (inline flow lists; three-space indentation), and precisely the case those
+fixes' own tests didn't happen to cover, since neither used a flow map as a list item.
+
+**Fix (four lines, from the report, re-verified rather than trusted):** before `splitYamlKeyValue()` runs
+on a list item's content, check whether it's brace-delimited (`itemContent[0] === "{" &&
+itemContent[itemContent.length-1] === "}"`) and if so route straight to `parseYamlValueToken()` — the
+same flow-map parser the value case already used, so the two paths can't disagree. `- {}` and `- [a, b]`
+already reached that function via the pre-existing `!kv` fallback (neither contains a colon to split on),
+so they're unaffected. The one input whose meaning changes is a list item whose text starts with a
+literal `{` and ends with `}`; the report's own backwards-compatibility argument (this app's exporter
+always quotes a key that begins with `{`, since `yamlScalar()` treats `{` as an indicator character, so a
+key genuinely starting with `{` is emitted as `- "{name": value`, which starts with `"` not `{` and never
+reaches the new guard) was independently re-verified against `yamlScalar()` directly, not just re-read.
+
+- [x] `tests/yaml-robustness.spec.mjs` -- 4 new tests, exactly the report's suggested list: a flow-map
+      relationship list item parses into a real `{name, from, to}` object; a nested flow map inside a
+      flow-map list item; `- {}` and `- [a, b]` as list items still parse unchanged (pinning the "already
+      worked" half of the fix, not just the "was broken" half); and `- "{name": literal` still yields a
+      key of `{name`, pinning the backwards-compatibility argument directly instead of leaving it as
+      prose. All 4 individually verified red (2 genuinely failing, 2 already passing) before the fix and
+      green after, by stashing `index.html` alone and re-running.
+- [x] `tests/agent-ontology-phase-g.spec.mjs` -- one new integration-level test proving the fix reaches
+      the real import pipeline, not just the standalone parser: the same worked-example
+      Invoice/Supplier/`issuedBy` relationship as the file's existing block-style and inline-flow-*list*
+      worked examples, but with the relationship written as a flow-map list item, dropped onto the canvas
+      through the real drag-and-drop import dialog and Merge button, asserting the edge actually exists
+      with the correct source/target/relation/meaning. Verified red (relationship silently missing, exact
+      symptom from the report) before the fix, green after.
+- [x] `agent_ontology_spec.md` §11 gained a second "(Amended again, issue #76.*...)" paragraph, matching
+      the existing amendment's own style, documenting the value-vs-list-item distinction and pointing at
+      both test files.
+- [x] Full regression (`node --test tests/*.spec.mjs`): all pass, no other file touches this parser's
+      list-item path in a way the new tests didn't already cover.

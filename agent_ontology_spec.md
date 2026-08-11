@@ -357,6 +357,18 @@ flow lists from a genuine agent tool call, and three-space indentation, where an
 containing 0 items. Anchors, aliases, multi-document streams and explicit type tags remain out of
 scope. See `tests/yaml-robustness.spec.mjs`.)*
 
+*(Amended again, issue #76.* "Flow maps... including nested ones," above, held for a flow map used as a
+**value** (`amount: {type: number}`) but not for one used as a **list item** —
+`relationships:\n  - {name: r, from: A, to: B}`, exactly the shape a relationships list invites. The
+list branch tried `splitYamlKeyValue()` on the item's raw text before ever checking whether it was a
+flow collection, so it split on the first colon *inside* the braces and returned a plausible-looking but
+wrong `{"{name": "r, from: A, to: B"}` — no error, and the relationship's `name`/`from`/`to` all came
+back `undefined`, so `commitYamlImport()`'s undeclared-endpoint guard silently dropped the entry. Same
+"looks like nothing happened" failure class as the two bugs above. Fixed by checking for a
+brace-delimited item before the key/value split, routing it to the same `parseYamlValueToken()` flow-map
+parsing the value case already used. See `tests/yaml-robustness.spec.mjs` and
+`tests/agent-ontology-phase-g.spec.mjs`.)*
+
 **Entry point:** the existing "Import from TXT" toolbar button and its file-input/drag-drop accelerator,
 relabeled **"Import"** (both languages) since it now recognizes two formats by extension — `.yaml`/`.yml`
 routes to the Domain Model importer below, everything else (including `.txt`) to the existing TXT

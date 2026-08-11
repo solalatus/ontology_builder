@@ -5741,6 +5741,17 @@ function parseYamlBlock(lines, pos, indent) {
       const itemContent = lines[pos.i].content === "-" ? "" : lines[pos.i].content.slice(2);
       pos.i += 1;
       if (itemContent === "") { arr.push(parseYamlBlock(lines, pos, indent + 1)); continue; }
+      // A list item that is itself an inline flow map: `- {name: r, from: A, to: B}`.
+      // Checked before splitYamlKeyValue(), which would otherwise split on the
+      // first colon *inside* the braces and return `["{name", "r, from: A…"]` —
+      // a plausible-looking pair that silently discards the whole entry.
+      // parseYamlValueToken() already parses flow maps, including nested ones;
+      // this only routes to it. (`- {}` and `- [a, b]` reach it already, via the
+      // `!kv` fallback below, because they contain no colon to be split on.)
+      if (itemContent[0] === "{" && itemContent[itemContent.length - 1] === "}") {
+        arr.push(parseYamlValueToken(itemContent));
+        continue;
+      }
       const kv = splitYamlKeyValue(itemContent);
       if (!kv) { arr.push(parseYamlValueToken(itemContent)); continue; }
       const obj = {};
