@@ -28,7 +28,7 @@ export const APP_URL = "file://" + path.resolve(__dirname, "..", "..", "index.ht
 // with any addInitScript that touches localStorage, regardless of key; it
 // is a test-infra hazard, not an app bug. Setting the pin after load, the
 // same way a real user's click on the language toggle would, avoids it.
-export async function withPage(fn, { url = APP_URL, lang = "en", viewport = { width: 1200, height: 800 } } = {}) {
+export async function withPage(fn, { url = APP_URL, lang = "en", viewport = { width: 1200, height: 800 }, welcome = false } = {}) {
   const browser = await launchChromium();
   const page = await browser.newPage({ viewport });
   const consoleErrors = [];
@@ -37,6 +37,14 @@ export async function withPage(fn, { url = APP_URL, lang = "en", viewport = { wi
   await page.goto(url);
   await page.waitForFunction(() => Boolean(window.__kg));
   if (lang) await page.evaluate((l) => { if (window.__kg.lang.get() !== l) window.__kg.lang.toggle(); }, lang);
+  // Welcome popup (issue #78): shown once, automatically, on a genuinely
+  // fresh profile -- exactly what every withPage() call starts as. Every
+  // test written before this feature existed assumes an interactive
+  // toolbar/canvas the instant the page loads, not a full-screen modal
+  // blocking it, so it's auto-dismissed by default here; pass
+  // `welcome: true` to see the real first-visit behavior, same "opt in to
+  // the real default" pattern `lang` above already uses.
+  if (!welcome) await page.evaluate(() => window.__kg.welcome.close());
   try {
     await fn(page);
   } finally {

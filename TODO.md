@@ -1336,6 +1336,82 @@ and a visual/aesthetic polish of the toolbar and buttons.
         fixed the same way, by waiting out the transition
         (`page.waitForTimeout`) before sampling.
 
+### Welcome popup and Help guide (issue #78)
+
+A first-run welcome popup and a persistent Help guide, reachable from a single toolbar button, with two
+subcategories: a usage guide and a concepts/terminology glossary — both fully bilingual. The user
+explicitly framed this as "technically trivial" but asked for real design thought and grounding in the
+app's actual methodology and goals, not boilerplate copy, and to apply the same design-critique posture
+this project already uses for its visual choices.
+
+- [x] **Content, deliberately grounded rather than generic**: read `README.md`, `agent_ontology_spec.md`
+      §1-3, and `spec.md` §7 before writing a word, so the welcome text and glossary describe what this
+      app *actually* does and *actually* calls things — including the real Node-vs-Class distinction
+      (`agent_ontology_spec.md` §3: the canvas/toolbar still says "Add Node," "Class" is the conceptual
+      term used once meaning/aliases/properties are added), the real property types (`text`/`number`/
+      `date`/`boolean`, from `PROPERTY_TYPES`), and the real gestures from `spec.md` §7's own interaction
+      table — not invented ones. The "why this matters" framing (a domain model precise enough for a
+      future agent — a "virtual employee" — to use as its own map of the business) mirrors the same
+      framing already established in the Helper Agent's own welcome message (see `helper_agent_todo.md`'s
+      review-changes entry) rather than introducing a second, possibly-inconsistent account of the app's
+      purpose.
+- [x] **Welcome popup**: shown once, automatically, on a genuinely fresh profile (`kg-welcome-seen` in
+      `localStorage`, checked last in `boot()` so it opens on top of an already-initialized app); never
+      again once dismissed — via "Got it," "Open the guide first" (which also opens Help directly), or
+      clicking the backdrop, all three of which mark it seen. Explicitly mentions the Help button's
+      existence, per the issue's own requirement.
+- [x] **Help guide**: one `?` toolbar button (rightmost, same icon-button footprint as the zoom buttons),
+      opening a dialog with two tabs — Usage guide (5 sections: building by hand, the Helper Agent, rules
+      and actions, reviewing/undoing changes, saving/exporting/importing) and a Concepts glossary (12
+      terms, including a definition *and* a worked example for the ones that benefit from one, e.g.
+      `Invoice → issuedBy → Supplier` for Relationship). Both dialogs reuse `.details-dialog` and the
+      Review Changes dialog's own `.review-tablist`/`.review-panel` tab styling verbatim — no new tab
+      visual language invented for a second dialog that needs the exact same thing, matching this
+      project's "stay strictly disciplined" visual direction (no new colors anywhere in this feature).
+- [x] **Content is structured data, not markup strings**: `STRINGS.welcome*`/`help*` hold arrays of
+      paragraphs/sections/terms; `renderWelcomeDialog()`/`renderHelpUsage()`/`renderHelpConcepts()` build
+      real DOM from them via `createElement`/`textContent`, same "never innerHTML on app-controlled
+      content" rule as the rest of this file. Both dialogs retranslate live on a language toggle while
+      open, mirroring the Review Changes dialog's own established pattern.
+- [x] **Modal-stacking guard extended**: `welcome-overlay`/`help-overlay` added to `isAnyModalOpen()`'s
+      list, so neither can stack on top of an already-open dialog and vice versa (issue #77's own
+      regression class).
+- [x] **A real tooltip-overflow bug found and fixed, twice in one round**: the Help button's own tooltip
+      (rightmost in the toolbar) overflowed the viewport's right edge the same way the Review Changes
+      button's tooltip did in the previous round — the shared `[data-tooltip]` CSS rule assumes a short,
+      centered, single-line label. Fixed the same way as before: a scoped per-button override
+      (`#btn-help::after`, right-anchored instead of centered), following the `#agent-panel-toggle::after`/
+      `#btn-review-changes::after` precedent rather than touching the shared rule.
+- [x] **A real shared-test-infrastructure gap found by actually running the suite, not just the new
+      file**: `tests/lib/withPage()` had no way to avoid the welcome popup, which — correctly, by
+      design — blocks the entire toolbar/canvas on every fresh page load. Every one of the ~800
+      pre-existing tests in this suite calls `withPage()` expecting an interactive app the instant the
+      page loads, not a full-screen modal in front of it. Fixed by giving `withPage()` a `welcome`
+      option, defaulting to `false` (auto-dismissed via `window.__kg.welcome.close()`, applied after
+      `window.__kg` exists, same timing convention `lang`'s own pin already uses and for the same
+      file:// + localStorage race reason documented there) — mirroring the existing `lang` parameter's
+      own "opt in to the real default" shape exactly. The 6 tests that verify the welcome popup's own
+      first-visit behavior pass `{ welcome: true }` to see it.
+- [x] New `tests/help-and-welcome.spec.mjs` (17 tests): first-visit auto-show, dismiss via all three
+      paths (button/Open Help/backdrop) and the `localStorage` flag each sets, never reappearing across
+      a reload, both Help tabs' content and switching between them, the modal-stacking guard in both
+      directions (verified via a programmatic `.click()` rather than a real mouse click or
+      `force: true` — a real click on a covered button either can't land at all or actually lands on
+      the overlay itself and exercises its own click-outside handler instead, neither of which tests
+      the guard function; a programmatic click is the faithful proxy for the real, previously-fixed
+      regression class this guards against — a keyboard Enter on a focused-but-covered button, since
+      focus isn't trapped by this overlay), language-toggle retranslation for both dialogs, the
+      `window.__kg.welcome`/`window.__kg.help` test hooks, a read-only guarantee (never touches
+      `state`/history), and a regression test for the tooltip-overflow fix.
+- [x] Two subtle test-correctness bugs caught and fixed while writing this suite, not shipped: checking
+      `.style.display` (the inline attribute) instead of `getComputedStyle(...).display` (the resolved
+      value) for an overlay that was *never opened* — the inline attribute stays `""`, not the literal
+      string `"none"`, so the naive check silently asserted the wrong thing; and checking Hungarian
+      substrings in the Concepts-glossary test against `withPage()`'s own English-by-default pin (see
+      its own comment), which would never match.
+- [x] Full regression (`node --test tests/*.spec.mjs`): all pass, including a spot-check that the
+      `withPage()` change doesn't regress any pre-existing file before trusting the full run.
+
 ---
 
 ## Log / Decisions
