@@ -245,6 +245,7 @@ test("a gap past the threshold injects a synthetic resume note into apiMessages 
 
   await page.goto(APP_URL);
   await page.waitForFunction(() => Boolean(window.__kg));
+  await page.evaluate(() => window.__kg.welcome.close()); // issue #78: this test opens its own page, not tests/lib/page.mjs's withPage()
   // Both the restore note and the gap note are appended synchronously during
   // boot, so the count can jump straight from 0 to 4 between polls -- wait
   // for the final length directly rather than an intermediate one that may

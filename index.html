@@ -316,6 +316,17 @@
     font-size: 16px;
   }
 
+  /* Help button (issue #78) -- same icon-button footprint as the zoom
+     buttons above, kept as its own rule rather than moved into
+     .zoom-group since it isn't a zoom control. */
+  #btn-help {
+    width: 36px;
+    padding: 8px 0;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 600;
+  }
+
   /* Custom, app-styled tooltips (user request, 2026-08) for controls whose
      icon alone doesn't self-explain: zoom in/out, fit view, and the
      agent-panel toggle. Native `title` tooltips are slow to appear
@@ -382,6 +393,18 @@
     top: auto;
     bottom: 100%;
     transform: translateX(-50%) translateY(-4px);
+  }
+
+  /* Right-anchored instead of the shared rule's default centered -- this
+     is the rightmost button in the toolbar (issue #78), so a centered
+     tooltip overflows the viewport's right edge exactly like
+     #btn-review-changes did above before its own fix; same fix, mirrored
+     to the right edge instead of flipped vertically, since nothing sits
+     below this button in the way the second toolbar row did there. */
+  #btn-help::after {
+    left: auto;
+    right: 0;
+    transform: translateY(4px);
   }
 
   #graph-title {
@@ -1397,6 +1420,106 @@
   .review-evidence .details-field-label {
     margin: 0 0 4px;
   }
+
+  /* Welcome popup + Help guide (issue #78). Reuses .details-dialog for
+     sizing/scroll and .review-tablist/.review-panel verbatim for the Help
+     dialog's two tabs -- same visual language as Review changes, no new
+     tab styling invented for a second dialog that needs the exact same
+     thing. Only what's genuinely new (paragraph/list/term layout) gets its
+     own rules here, and still reuses existing tokens throughout -- no new
+     colors, per this app's established "stay disciplined" direction. */
+  .welcome-body p {
+    margin: 0 0 12px;
+    font-size: 14px;
+    line-height: 1.55;
+  }
+
+  .welcome-functions-heading {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    opacity: 0.7;
+    margin: 18px 0 8px;
+  }
+
+  .welcome-functions-list {
+    margin: 0 0 16px;
+    padding-left: 20px;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .welcome-functions-list li {
+    margin-bottom: 6px;
+  }
+
+  .welcome-help-mention {
+    font-size: 13px;
+    opacity: 0.8;
+    padding: 8px 10px;
+    border-radius: var(--radius-sm);
+    border: 1px dashed var(--toolbar-border);
+    background: var(--btn-bg);
+  }
+
+  .help-usage-section {
+    margin: 0 0 20px;
+  }
+
+  .help-usage-section:last-child {
+    margin-bottom: 0;
+  }
+
+  .help-usage-heading {
+    font-family: var(--font-display);
+    font-size: 14px;
+    font-weight: 600;
+    margin: 0 0 8px;
+    color: var(--accent);
+  }
+
+  .help-usage-section p {
+    margin: 0 0 8px;
+    font-size: 13px;
+    line-height: 1.55;
+  }
+
+  .help-usage-section p:last-child {
+    margin-bottom: 0;
+  }
+
+  .help-term {
+    margin: 0 0 16px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--toolbar-border);
+  }
+
+  .help-term:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+
+  .help-term-name {
+    font-family: var(--font-display);
+    font-size: 13px;
+    font-weight: 600;
+    margin: 0 0 4px;
+  }
+
+  .help-term-def {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .help-term-example {
+    margin: 4px 0 0;
+    font-size: 12px;
+    opacity: 0.75;
+    font-style: italic;
+  }
 </style>
 </head>
 <body>
@@ -1444,6 +1567,12 @@
     </div>
     <button id="btn-theme-toggle" type="button" class="state-toggle" aria-pressed="false">Téma: Sötét</button>
     <button id="btn-lang-toggle" type="button" class="state-toggle" aria-pressed="false">Nyelv: Magyar</button>
+    <!-- Help + welcome popup (issue #78). A single entry point, deliberately
+         last/rightmost -- always reachable, never in the way of the editing
+         tools. Same icon-button footprint as .zoom-group's buttons (own
+         rule below, not nested inside .zoom-group itself -- this isn't a
+         zoom control) and the same custom data-tooltip mechanism as those. -->
+    <button id="btn-help" type="button" aria-label="Súgó" data-tooltip="Használati útmutató és fogalomtár">?</button>
   </div>
 </div>
 
@@ -1680,6 +1809,46 @@
     <div class="modal-actions details-dialog-footer">
       <button id="review-changes-undo" type="button">Módosítás visszavonása</button>
       <button id="review-changes-close" type="button">Bezárás</button>
+    </div>
+  </div>
+</div>
+
+<!-- Welcome popup (issue #78) -- shown once, on the very first visit on
+     this machine (kg-welcome-seen in localStorage), never again after
+     dismissed. Static text lives in STRINGS.welcome* and is rendered via
+     renderWelcomeDialog(), same "build real DOM, never innerHTML" rule as
+     everything else in this file. -->
+<div id="welcome-overlay" class="modal-overlay">
+  <div id="welcome-dialog" class="modal-dialog details-dialog" role="dialog" aria-modal="true" aria-labelledby="welcome-title">
+    <div class="details-dialog-body">
+      <h2 id="welcome-title" class="modal-title">Tudásgráf Vászon</h2>
+      <div id="welcome-body" class="welcome-body"></div>
+    </div>
+    <div class="modal-actions details-dialog-footer">
+      <button id="welcome-open-help" type="button">Előbb megnézem a súgót</button>
+      <button id="welcome-dismiss" type="button" class="toolbar-primary">Értem, kezdjünk neki</button>
+    </div>
+  </div>
+</div>
+
+<!-- Help guide (issue #78) -- reachable any time from the toolbar's (?)
+     button, two subcategories per the issue: usage guide and a
+     concepts/terminology glossary. Reuses .review-tablist/.review-panel
+     verbatim (see the CSS comment above) rather than inventing a second
+     tab visual language. -->
+<div id="help-overlay" class="modal-overlay">
+  <div id="help-dialog" class="modal-dialog details-dialog" role="dialog" aria-modal="true" aria-labelledby="help-title">
+    <div class="details-dialog-body">
+      <h2 id="help-title" class="modal-title">Súgó</h2>
+      <div id="help-tablist" class="review-tablist" role="tablist" aria-label="Súgó kategóriák">
+        <button id="help-tab-usage" type="button" role="tab" aria-selected="true" aria-controls="help-panel-usage">Használati útmutató</button>
+        <button id="help-tab-concepts" type="button" role="tab" aria-selected="false" aria-controls="help-panel-concepts">Fogalmak és kifejezések</button>
+      </div>
+      <div id="help-panel-usage" class="review-panel" role="tabpanel" aria-labelledby="help-tab-usage"></div>
+      <div id="help-panel-concepts" class="review-panel" role="tabpanel" aria-labelledby="help-tab-concepts" hidden></div>
+    </div>
+    <div class="modal-actions details-dialog-footer">
+      <button id="help-close" type="button">Bezárás</button>
     </div>
   </div>
 </div>
@@ -1944,6 +2113,84 @@ const STRINGS = {
     agentRestartConfirmLabel: "Restart conversation",
     agentConversationRestored: (n) => `Restored previous conversation (${n} message${n === 1 ? "" : "s"}).`,
     agentConversationResumeGapNote: (gapText) => `This conversation resumed after a gap of about ${gapText} — the agent will check the ontology for changes before continuing.`,
+    // Welcome popup + Help guide (issue #78). welcomeParagraphs/
+    // helpUsageSections/helpConceptTerms are structured (arrays/objects),
+    // not plain strings -- t() just returns whatever STRINGS[lang][key] is,
+    // and the render code below builds real DOM from the structure (see
+    // renderWelcomeDialog()/renderHelpUsage()/renderHelpConcepts()).
+    welcomeTitle: "Knowledge Graph Canvas",
+    welcomeParagraphs: [
+      "This is a visual editor for building a small, structured description of a business domain by hand: the kinds of things that matter (classes), how they relate to each other (relationships), the constraints that govern them (rules), and the operations that can be performed (actions).",
+      "The point isn't a diagram — it's a shared, explicit domain model precise enough for an AI agent, a future “virtual employee,” to use as its own map of your business: what exists, how it connects, and what rules and tasks apply. Sketch it by hand on the canvas, or connect the built-in Helper Agent and let it build the model with you through a guided conversation.",
+    ],
+    welcomeFunctionsHeading: "Main functions",
+    welcomeFunctions: [
+      "Build by hand — add classes, connect them with relationships, add meaning and properties directly on the canvas.",
+      "Or describe it in conversation — connect the Helper Agent with your own API key and let it interview you, editing the model live as you talk.",
+      "Capture rules and actions — the Domain Model panel holds the parts that aren't graph-shaped: plain-language constraints and operations.",
+      "Track every change — Undo/Redo, plus a full Review changes history for both your own edits and the agent's.",
+      "Take it with you — export to full-fidelity JSON, a plain-text edge list, or a Domain Model YAML file any script or LLM can read, and re-import any of them.",
+    ],
+    welcomeHelpMention: "Look for the (?) button in the toolbar whenever you want a refresher — it opens a short usage guide and a glossary of every term this app uses.",
+    welcomeDismiss: "Got it, let's start",
+    welcomeOpenHelp: "Open the guide first",
+    helpButtonLabel: "Help",
+    helpButtonTooltip: "Usage guide and glossary",
+    helpTitle: "Help",
+    helpTabUsage: "Usage guide",
+    helpTabConcepts: "Concepts & terms",
+    helpClose: "Close",
+    helpUsageSections: [
+      {
+        heading: "Building the model by hand",
+        paragraphs: [
+          "Double-click empty canvas, or use “Add Node,” to create a class — a kind of thing in your domain (Invoice, Supplier). Drag from a class's edge handle to another class to connect them with a relationship, or use “Connect” mode and tap the source then the target.",
+          "Click a class or relationship to select it, then use the small toolbar that appears above it (rename, edit details, toggle direction, delete). The details view is where you add a class's meaning, aliases, and properties, or a relationship's meaning.",
+          "Drag a class to move it. “Auto-layout” rearranges everything automatically as one step, undoable like any other edit.",
+        ],
+      },
+      {
+        heading: "Working with the Helper Agent",
+        paragraphs: [
+          "Open the chat icon in the bottom-left corner and connect with your own OpenAI or Azure OpenAI API key — nothing is sent anywhere else, and the key can optionally be remembered on this device only.",
+          "The agent interviews you with structured questions and edits the model on the canvas live as you answer, the same way you'd edit it by hand. Every edit it makes is undoable and shows up in Review changes just like your own.",
+        ],
+      },
+      {
+        heading: "Rules and actions",
+        paragraphs: [
+          "Not everything is a box and an arrow. Rules are named, plain-language conditions (“an invoice is overdue if…”); actions are named operations with preconditions, an effect, and how to verify it worked. Open both from the “Domain Model” button.",
+          "This app doesn't evaluate rules or run actions — it captures them as structured text for an agent, or a person, to read and follow.",
+        ],
+      },
+      {
+        heading: "Reviewing and undoing changes",
+        paragraphs: [
+          "Undo/Redo work exactly as you'd expect, on every edit regardless of who made it. “Review changes” goes further: a full history of past edits, exactly what changed in each one (down to a class, relationship, or property level, or a raw YAML diff), and — for agent edits, where available — which part of the conversation prompted it.",
+        ],
+      },
+      {
+        heading: "Saving, exporting, and importing",
+        paragraphs: [
+          "“Save Version” writes three files side by side: a full-fidelity JSON (reopen this to get the canvas back exactly as you left it), a plain-text edge list, and a Domain Model YAML file — the one meant for a script or an LLM to read. All three re-import through the same button, or by dragging a file onto the canvas.",
+          "“Folder Sync,” where your browser supports it, keeps a chosen folder automatically up to date instead of downloading a file every time.",
+        ],
+      },
+    ],
+    helpConceptTerms: [
+      { term: "Ontology / Domain Model", definition: "A structured description of a business domain: the kinds of things in it, how they relate, and the rules and actions that apply. This app calls the exported form a “Domain Model” (a YAML file); “ontology” is the general term for the same idea." },
+      { term: "Class", definition: "A kind of thing, not a specific one. On the canvas this is a node/box. Every class can have a meaning, aliases, and properties.", example: "Invoice, Supplier, Employee — not “Invoice #4021.”" },
+      { term: "Relationship", definition: "A named connection between two classes, drawn as an arrow. Directed by default (the arrow means something specific), or toggled bidirectional when direction doesn't matter. Can have its own meaning.", example: "Invoice → issuedBy → Supplier" },
+      { term: "Meaning", definition: "A short, plain-language description attached to a class or relationship — what an agent, or a new team member, would need to read to understand what it actually refers to, beyond the name alone." },
+      { term: "Aliases", definition: "Other names people actually use for the same class or relationship, so the model still matches real conversation even when the canonical name is more formal." },
+      { term: "Property", definition: "A decision-relevant fact about a class: a name, a type (text, number, date, or boolean), optionally a unit, and optionally a fixed list of allowed values.", example: "Invoice.amount — number, unit EUR." },
+      { term: "Rule", definition: "A named, plain-language condition. This app doesn't evaluate it — it's captured as text for an agent or person to apply.", example: "“isOverdue”: the invoice's due date has passed and it isn't marked paid." },
+      { term: "Action", definition: "A named operation with preconditions (which rules must hold), an effect (what it does), and a verification step (how to confirm it worked). Like Rules, this app records the description; it doesn't execute anything." },
+      { term: "Helper Agent", definition: "An optional, bring-your-own-key chat panel that interviews you and edits the Domain Model live, through the same kind of edits you'd make by hand. Its conversation is remembered across reloads, separately from the ontology itself." },
+      { term: "“Virtual employee” — why this matters", definition: "The Domain Model this app produces isn't just documentation. It's meant to be precise enough that a future AI agent can use it as its own map of the business: what exists, how it connects, and what rules and tasks govern it. General-purpose ontology sketching works fine here too — but that's the use case everything is actually designed around." },
+      { term: "Review changes / undo history", definition: "Every edit, yours or the agent's, is tracked. Undo/Redo reverse the most recent one; “Review changes” lets you look back further, see exactly what changed in each past edit, and undo any of them from there — reusing the same undo mechanism, not a second one." },
+      { term: "Export formats", definition: ".json — full fidelity (positions, ids, version history). .txt — a portable edge list, structure only. .domain.yaml — the Domain Model (classes/relationships/rules/actions, no positions or ids), the one meant for a script or an LLM to read." },
+    ],
   },
   hu: {
     appTitle: "Tudásgráf Vászon",
@@ -2117,6 +2364,80 @@ const STRINGS = {
     agentRestartConfirmLabel: "Beszélgetés újraindítása",
     agentConversationRestored: (n) => `Visszaállítva az előző beszélgetés (${n} üzenet).`,
     agentConversationResumeGapNote: (gapText) => `Ez a beszélgetés kb. ${gapText} szünet után folytatódik — az ügynök az ontológia változásait fogja ellenőrizni, mielőtt folytatná.`,
+    // Üdvözlő ablak + Súgó (issue #78) — lásd az angol blokk saját megjegyzését.
+    welcomeTitle: "Tudásgráf Vászon",
+    welcomeParagraphs: [
+      "Ez egy vizuális szerkesztő egy üzleti terület kis, strukturált leírásának kézi felépítéséhez: a fontos dolgok fajtái (osztályok), ezek kapcsolatai egymással, a rájuk vonatkozó megkötések (szabályok), és az elvégezhető műveletek.",
+      "A cél nem egy diagram — hanem egy közös, explicit doménmodell, amely elég pontos ahhoz, hogy egy AI-ügynök, egy jövőbeli „virtuális munkavállaló”, a saját térképeként használhassa a vállalkozásodról: mi létezik, hogyan kapcsolódnak egymáshoz, és milyen szabályok, teendők vonatkoznak rájuk. Felépítheted kézzel a vásznon, vagy csatlakoztasd a beépített segéd ügynököt, és építsétek fel együtt egy vezetett beszélgetésen keresztül.",
+    ],
+    welcomeFunctionsHeading: "Fő funkciók",
+    welcomeFunctions: [
+      "Kézi felépítés — adj hozzá osztályokat, kapcsold össze őket kapcsolatokkal, add meg a jelentésüket és tulajdonságaikat közvetlenül a vásznon.",
+      "Vagy mondd el beszélgetve — csatlakoztasd a segéd ügynököt a saját API kulcsoddal, és hagyd, hogy interjút készítsen veled, élőben szerkesztve a modellt, ahogy beszéltek.",
+      "Rögzíts szabályokat és műveleteket — a Doménmodell panel tartalmazza azt, ami nem gráf alakú: a köznyelvi megkötéseket és műveleteket.",
+      "Kövess nyomon minden változást — Visszavonás/Újra, plusz egy teljes „Változtatások áttekintése” előzmény mind a saját, mind az ügynök szerkesztéseihez.",
+      "Vidd magaddal — exportálhatsz teljes hűségű JSON-t, egyszerű szöveges éllistát, vagy egy Doménmodell YAML fájlt, amit bármilyen szkript vagy LLM el tud olvasni, és bármelyiket vissza is importálhatod.",
+    ],
+    welcomeHelpMention: "Ha bármikor felfrissítésre van szükséged, keresd az eszköztár (?) gombját — egy rövid használati útmutatót és az app összes fogalmának szótárát nyitja meg.",
+    welcomeDismiss: "Értem, kezdjünk neki",
+    welcomeOpenHelp: "Előbb megnézem a súgót",
+    helpButtonLabel: "Súgó",
+    helpButtonTooltip: "Használati útmutató és fogalomtár",
+    helpTitle: "Súgó",
+    helpTabUsage: "Használati útmutató",
+    helpTabConcepts: "Fogalmak és kifejezések",
+    helpClose: "Bezárás",
+    helpUsageSections: [
+      {
+        heading: "A modell kézi felépítése",
+        paragraphs: [
+          "Dupla kattintás az üres vászonra, vagy a „Csomópont hozzáadása” gomb, létrehoz egy osztályt — egy dolog fajtáját a területeden (Számla, Beszállító). Húzd egy osztály szélén lévő fogantyútól egy másik osztályig, hogy kapcsolattal összekösd őket, vagy használd az „Összekapcsolás” módot, és érintsd meg előbb a forrást, majd a célt.",
+          "Kattints egy osztályra vagy kapcsolatra a kijelöléséhez, majd használd a fölötte megjelenő kis eszköztárat (átnevezés, részletek szerkesztése, irány váltása, törlés). A részletek nézetben adhatod meg egy osztály jelentését, alias neveit és tulajdonságait, vagy egy kapcsolat jelentését.",
+          "Húzással mozgathatod az osztályokat. Az „Automatikus elrendezés” egyetlen lépésben rendez el mindent, ugyanúgy visszavonható, mint bármely más szerkesztés.",
+        ],
+      },
+      {
+        heading: "Munka a segéd ügynökkel",
+        paragraphs: [
+          "Nyisd meg a bal alsó sarokban lévő chat ikont, és csatlakozz a saját OpenAI vagy Azure OpenAI API kulcsoddal — semmi nem kerül máshova, és a kulcs opcionálisan megjegyezhető, kizárólag ezen az eszközön.",
+          "Az ügynök strukturált kérdésekkel készít veled interjút, és élőben szerkeszti a modellt a vásznon, ahogy válaszolsz — ugyanúgy, mintha te szerkesztenéd kézzel. Minden szerkesztése visszavonható, és megjelenik a „Változtatások áttekintése” nézetben, ugyanúgy, mint a sajátjaid.",
+        ],
+      },
+      {
+        heading: "Szabályok és műveletek",
+        paragraphs: [
+          "Nem minden doboz és nyíl. A szabályok elnevezett, köznyelvi feltételek („egy számla akkor késett, ha…”); a műveletek elnevezett műveletek előfeltételekkel, egy hatással, és annak módjával, hogyan ellenőrizhető, hogy sikerült. Mindkettőt a „Doménmodell” gombból éred el.",
+          "Ez az app nem értékeli ki a szabályokat, és nem futtatja a műveleteket — strukturált szövegként rögzíti őket, hogy egy ügynök, vagy egy ember, elolvassa és kövesse.",
+        ],
+      },
+      {
+        heading: "Változtatások áttekintése és visszavonása",
+        paragraphs: [
+          "A Visszavonás/Újra pontosan úgy működik, ahogy várnád, minden szerkesztésen, attól függetlenül, ki végezte. A „Változtatások áttekintése” ennél tovább megy: a korábbi szerkesztések teljes előzményét mutatja, pontosan mi változott mindegyikben (egészen osztály, kapcsolat vagy tulajdonság szintig, vagy nyers YAML eltérésként), és — ügynöki szerkesztéseknél, ahol elérhető — a beszélgetés mely részéből következett.",
+        ],
+      },
+      {
+        heading: "Mentés, exportálás, importálás",
+        paragraphs: [
+          "A „Verzió mentése” három fájlt ír ki egymás mellé: egy teljes hűségű JSON-t (ezt nyisd meg újra, ha pontosan úgy szeretnéd visszakapni a vásznat, ahogy hagytad), egy egyszerű szöveges éllistát, és egy Doménmodell YAML fájlt — ez utóbbi egy szkriptnek vagy LLM-nek szól. Mindhárom ugyanazon a gombon keresztül importálható vissza, vagy fájl vászonra húzásával.",
+          "A „Mappa szinkronizálás”, ahol a böngésződ támogatja, automatikusan naprakészen tart egy kiválasztott mappát ahelyett, hogy minden alkalommal fájlt kellene letölteni.",
+        ],
+      },
+    ],
+    helpConceptTerms: [
+      { term: "Ontológia / Doménmodell", definition: "Egy üzleti terület strukturált leírása: a benne lévő dolgok fajtái, ezek kapcsolatai, valamint a rájuk vonatkozó szabályok és műveletek. Az app az exportált formát „Doménmodellnek” nevezi (egy YAML fájl); az „ontológia” ugyanennek az elképzelésnek az általános elnevezése." },
+      { term: "Osztály", definition: "Egy dolog fajtája, nem egy konkrét dolog. A vásznon ez egy csomópont/doboz. Minden osztálynak lehet jelentése, alias nevei és tulajdonságai.", example: "Számla, Beszállító, Alkalmazott — nem „Számla #4021”." },
+      { term: "Kapcsolat", definition: "Két osztály közötti elnevezett összeköttetés, nyílként rajzolva. Alapértelmezésben irányított (a nyíl valami konkrétat jelent), vagy kétirányúra kapcsolható, ha az irány nem számít. Lehet saját jelentése.", example: "Számla → issuedBy → Beszállító" },
+      { term: "Jelentés", definition: "Egy osztályhoz vagy kapcsolathoz fűzött rövid, köznyelvi leírás — amit egy ügynöknek, vagy egy új csapattagnak, el kellene olvasnia ahhoz, hogy megértse, mire is utal valójában, a néven túl." },
+      { term: "Alias nevek", definition: "Más nevek, amiket az emberek valójában használnak ugyanarra az osztályra vagy kapcsolatra, hogy a modell akkor is illeszkedjen a valós beszélgetéshez, ha a hivatalos név formálisabb." },
+      { term: "Tulajdonság", definition: "Egy osztályra vonatkozó, döntés szempontjából releváns tény: egy név, egy típus (szöveg, szám, dátum vagy logikai érték), opcionálisan egy mértékegység, és opcionálisan egy rögzített megengedett-érték lista.", example: "Számla.összeg — szám, mértékegység EUR." },
+      { term: "Szabály", definition: "Egy elnevezett, köznyelvi feltétel. Az app nem értékeli ki — szövegként rögzíti, hogy egy ügynök vagy ember alkalmazza.", example: "„isOverdue”: a számla esedékessége lejárt, és nincs kifizetettként megjelölve." },
+      { term: "Művelet", definition: "Egy elnevezett művelet előfeltételekkel (mely szabályoknak kell teljesülniük), egy hatással (mit csinál), és egy ellenőrzési lépéssel (hogyan igazolható, hogy sikerült). A Szabályokhoz hasonlóan az app csak a leírást rögzíti — semmit nem hajt végre." },
+      { term: "Segéd ügynök", definition: "Egy opcionális, saját API kulccsal használható chat panel, amely interjút készít veled, és élőben szerkeszti a Doménmodellt, ugyanolyan szerkesztésekkel, mint amilyeneket te végeznél kézzel. A beszélgetése újratöltés után is megmarad, függetlenül magától az ontológiától." },
+      { term: "„Virtuális munkavállaló” — miért számít ez", definition: "Az app által készített Doménmodell nem csupán dokumentáció. Elég pontosnak van szánva ahhoz, hogy egy jövőbeli AI-ügynök a saját térképeként használhassa a vállalkozásról: mi létezik, hogyan kapcsolódik, és milyen szabályok, teendők vonatkoznak rá. Az általános célú ontológia-vázolás is jól működik itt — de valójában erre a felhasználási esetre lett tervezve minden." },
+      { term: "Változtatások áttekintése / előzmények", definition: "Minden szerkesztés, akár a tiéd, akár az ügynöké, nyomon van követve. A Visszavonás/Újra a legutóbbit fordítja vissza; a „Változtatások áttekintése” ennél messzebbre enged visszatekinteni, megmutatja, pontosan mi változott az egyes korábbi szerkesztésekben, és onnan bármelyiket vissza is vonhatod — ugyanazt a visszavonási mechanizmust újrahasznosítva, nem egy másodikat." },
+      { term: "Export formátumok", definition: ".json — teljes hűségű (pozíciók, azonosítók, verzióelőzmény). .txt — hordozható éllista, csak a szerkezet. .domain.yaml — a Doménmodell (osztályok/kapcsolatok/szabályok/műveletek, pozíciók és azonosítók nélkül), ez szól egy szkriptnek vagy LLM-nek." },
+    ],
   },
 };
 
@@ -2220,6 +2541,14 @@ function applyLanguage() {
   // re-render, not just the static chrome above — no-op if the dialog
   // isn't currently open, same convention as updateDetailsTitle() above.
   if (reviewIndex !== null) renderReviewDialog();
+  byId("btn-help").setAttribute("aria-label", t("helpButtonLabel"));
+  byId("btn-help").setAttribute("data-tooltip", t("helpButtonTooltip"));
+  // Both the welcome popup and the Help guide are entirely t()-derived
+  // (STRINGS.welcome*/help*), so a language toggle while either is open
+  // needs the same "re-render if currently open" treatment as Review
+  // changes above -- no-op otherwise.
+  if (welcomeOverlayOpen) renderWelcomeDialog();
+  if (helpOverlayOpen) renderHelpDialog();
   // Unlike this dialog's own top-level labels above, a rule/action card's
   // sub-labels (Conditions/Input class/Preconditions/Effect/Verification)
   // are baked into the DOM once at card-creation time (createSublabel()) —
@@ -4150,7 +4479,7 @@ let activeConfirm = null;
 // regardless of where in the file it's called from relative to those
 // consts' own declaration order.
 function isAnyModalOpen() {
-  return ["confirm-overlay", "details-overlay", "domain-model-overlay", "import-overlay"]
+  return ["confirm-overlay", "details-overlay", "domain-model-overlay", "import-overlay", "welcome-overlay", "help-overlay"]
     .some((id) => document.getElementById(id).style.display === "flex");
 }
 
@@ -6257,6 +6586,166 @@ document.getElementById("review-changes-undo").addEventListener("click", () => {
   undo();
   closeReviewChanges();
 });
+
+// ---------------------------------------------------------------------------
+// Welcome popup + Help guide (issue #78). Two independent, deliberately
+// simple pieces:
+//  - a one-time welcome shown on first visit (localStorage-gated, never
+//    again after dismissed on this machine), explaining what the app is
+//    for and mentioning Help exists;
+//  - a persistent Help guide, reachable any time from one toolbar button,
+//    with two subcategories (usage guide, concepts/terminology glossary).
+// Both render from structured STRINGS entries (arrays of paragraphs/
+// sections/terms, not flat blobs of text) via createElement/textContent,
+// same "never innerHTML on app-controlled-but-still-just-data" rule as
+// the rest of this file, and both retranslate live on a language toggle
+// while open, same pattern as the Review changes dialog.
+// ---------------------------------------------------------------------------
+const WELCOME_STORAGE_KEY = "kg-welcome-seen";
+let welcomeOverlayOpen = false;
+let helpOverlayOpen = false;
+let helpActiveTab = "usage";
+
+function hasSeenWelcome() {
+  try { return localStorage.getItem(WELCOME_STORAGE_KEY) === "1"; }
+  catch (err) { return false; /* localStorage unavailable -- treat as unseen every time, same fail-open posture as theme/lang */ }
+}
+
+function markWelcomeSeen() {
+  try { localStorage.setItem(WELCOME_STORAGE_KEY, "1"); } catch (err) { /* best-effort only */ }
+}
+
+function renderWelcomeDialog() {
+  document.getElementById("welcome-title").textContent = t("welcomeTitle");
+  const body = document.getElementById("welcome-body");
+  body.textContent = "";
+  for (const paragraph of t("welcomeParagraphs")) {
+    const p = document.createElement("p");
+    p.textContent = paragraph;
+    body.appendChild(p);
+  }
+  const functionsHeading = document.createElement("p");
+  functionsHeading.className = "welcome-functions-heading";
+  functionsHeading.textContent = t("welcomeFunctionsHeading");
+  body.appendChild(functionsHeading);
+  const list = document.createElement("ul");
+  list.className = "welcome-functions-list";
+  for (const item of t("welcomeFunctions")) {
+    const li = document.createElement("li");
+    li.textContent = item;
+    list.appendChild(li);
+  }
+  body.appendChild(list);
+  const helpMention = document.createElement("p");
+  helpMention.className = "welcome-help-mention";
+  helpMention.textContent = t("welcomeHelpMention");
+  body.appendChild(helpMention);
+  document.getElementById("welcome-open-help").textContent = t("welcomeOpenHelp");
+  document.getElementById("welcome-dismiss").textContent = t("welcomeDismiss");
+}
+
+function openWelcome() {
+  if (isAnyModalOpen()) return;
+  welcomeOverlayOpen = true;
+  renderWelcomeDialog();
+  document.getElementById("welcome-overlay").style.display = "flex";
+}
+
+function closeWelcome() {
+  welcomeOverlayOpen = false;
+  markWelcomeSeen();
+  document.getElementById("welcome-overlay").style.display = "none";
+}
+
+function renderHelpUsage(container) {
+  container.textContent = "";
+  for (const section of t("helpUsageSections")) {
+    const sectionEl = document.createElement("div");
+    sectionEl.className = "help-usage-section";
+    const heading = document.createElement("h3");
+    heading.className = "help-usage-heading";
+    heading.textContent = section.heading;
+    sectionEl.appendChild(heading);
+    for (const paragraph of section.paragraphs) {
+      const p = document.createElement("p");
+      p.textContent = paragraph;
+      sectionEl.appendChild(p);
+    }
+    container.appendChild(sectionEl);
+  }
+}
+
+function renderHelpConcepts(container) {
+  container.textContent = "";
+  for (const entry of t("helpConceptTerms")) {
+    const termEl = document.createElement("div");
+    termEl.className = "help-term";
+    const name = document.createElement("p");
+    name.className = "help-term-name";
+    name.textContent = entry.term;
+    termEl.appendChild(name);
+    const def = document.createElement("p");
+    def.className = "help-term-def";
+    def.textContent = entry.definition;
+    termEl.appendChild(def);
+    if (entry.example) {
+      const example = document.createElement("p");
+      example.className = "help-term-example";
+      example.textContent = entry.example;
+      termEl.appendChild(example);
+    }
+    container.appendChild(termEl);
+  }
+}
+
+function renderHelpDialog() {
+  document.getElementById("help-title").textContent = t("helpTitle");
+  document.getElementById("help-tab-usage").textContent = t("helpTabUsage");
+  document.getElementById("help-tab-concepts").textContent = t("helpTabConcepts");
+  document.getElementById("help-close").textContent = t("helpClose");
+  for (const tab of ["usage", "concepts"]) {
+    const isActive = tab === helpActiveTab;
+    document.getElementById(`help-tab-${tab}`).setAttribute("aria-selected", String(isActive));
+    document.getElementById(`help-panel-${tab}`).hidden = !isActive;
+  }
+  renderHelpUsage(document.getElementById("help-panel-usage"));
+  renderHelpConcepts(document.getElementById("help-panel-concepts"));
+}
+
+function openHelp(tab = "usage") {
+  if (isAnyModalOpen()) return;
+  helpOverlayOpen = true;
+  helpActiveTab = tab;
+  renderHelpDialog();
+  document.getElementById("help-overlay").style.display = "flex";
+}
+
+function closeHelp() {
+  helpOverlayOpen = false;
+  document.getElementById("help-overlay").style.display = "none";
+}
+
+function setHelpTab(tab) {
+  if (tab !== "usage" && tab !== "concepts") return;
+  helpActiveTab = tab;
+  renderHelpDialog();
+}
+
+document.getElementById("btn-help").addEventListener("click", () => openHelp("usage"));
+document.getElementById("welcome-dismiss").addEventListener("click", () => closeWelcome());
+document.getElementById("welcome-open-help").addEventListener("click", () => {
+  closeWelcome();
+  openHelp("usage");
+});
+document.getElementById("welcome-overlay").addEventListener("click", (e) => {
+  if (e.target === document.getElementById("welcome-overlay")) closeWelcome();
+});
+document.getElementById("help-close").addEventListener("click", () => closeHelp());
+document.getElementById("help-overlay").addEventListener("click", (e) => {
+  if (e.target === document.getElementById("help-overlay")) closeHelp();
+});
+document.getElementById("help-tab-usage").addEventListener("click", () => setHelpTab("usage"));
+document.getElementById("help-tab-concepts").addEventListener("click", () => setHelpTab("concepts"));
 
 // Recorded so tests can assert the app requested the correct filename
 // directly, instead of through the browser's downloaded-file name echo
@@ -10053,6 +10542,21 @@ window.__kg = {
     getGraphMode: () => reviewGraphMode,
     computeReviewGraphDiffSets,
   },
+  // Welcome popup + Help guide (issue #78).
+  welcome: {
+    open: openWelcome,
+    close: closeWelcome,
+    isOpen: () => welcomeOverlayOpen,
+    hasSeenBefore: hasSeenWelcome,
+    storageKey: WELCOME_STORAGE_KEY,
+  },
+  help: {
+    open: openHelp,
+    close: closeHelp,
+    isOpen: () => helpOverlayOpen,
+    setTab: setHelpTab,
+    getActiveTab: () => helpActiveTab,
+  },
   theme: {
     get: () => theme,
     toggle: toggleTheme,
@@ -10174,6 +10678,10 @@ async function boot() {
     updateFolderSyncButton();
   }
   setAgentConnectedUi(false); // shows the "forget key" affordance if one was persisted in a prior session
+  // Welcome popup (issue #78): the first thing a genuinely new visitor
+  // sees, once, ever, on this machine -- checked last so it opens on top
+  // of an already-fully-initialized app underneath, not a half-booted one.
+  if (!hasSeenWelcome()) openWelcome();
 }
 
 boot();
