@@ -144,6 +144,59 @@ test("A nested flow list inside a flow map parses", async () => {
   });
 });
 
+// --------------------------------------------------------------------------
+// Flow maps as list items (issue #76) -- a flow map used as a *value*
+// (`amount: {type: number}`, covered above) already worked; a flow map used
+// as a list item (`- {name: r, from: A, to: B}`, exactly the shape a
+// `relationships:` entry invites) did not. parseYamlBlock()'s list branch
+// ran splitYamlKeyValue() on the item's raw text before ever checking
+// whether it was a flow collection, so `{name: r, from: A, to: B}` split on
+// its first colon into a bogus key/value pair (`{"{name": "r, from: A, to:
+// B}"}`) instead of reaching parseYamlValueToken(), which already knows how
+// to parse flow maps correctly. No error was raised -- relationship.name/
+// from/to all came back undefined, and commitYamlImport()'s undeclared-
+// endpoint guard silently dropped the entry.
+// --------------------------------------------------------------------------
+
+test("A flow map as a list item parses into a real object, not a garbage key (issue #76)", async () => {
+  await withPage(async (page) => {
+    const p = await parse(page,
+      "classes:\n  Invoice:\n    meaning: A bill.\n  Supplier:\n    meaning: Who sends it.\n" +
+      "relationships:\n  - {name: issuedBy, from: Invoice, to: Supplier}\n");
+    assert.equal(p.relationships.length, 1);
+    assert.deepEqual(p.relationships[0], { name: "issuedBy", from: "Invoice", to: "Supplier" });
+  });
+});
+
+test("A nested flow map inside a flow-map list item parses", async () => {
+  await withPage(async (page) => {
+    const p = await parse(page, "relationships:\n  - {name: r, from: A, to: B, x: {y: 1}}\n");
+    assert.deepEqual(p.relationships[0], { name: "r", from: "A", to: "B", x: { y: "1" } });
+  });
+});
+
+test("An empty flow map and a flow list as list items still parse as before", async () => {
+  await withPage(async (page) => {
+    const p1 = await parse(page, "relationships:\n  - {}\n");
+    assert.deepEqual(p1.relationships, [{}]);
+    const p2 = await parse(page, "relationships:\n  - [a, b]\n");
+    assert.deepEqual(p2.relationships, [["a", "b"]]);
+  });
+});
+
+// Backwards-compatibility pin: the only way a list item could legitimately
+// start with a literal `{` is a key that itself begins with `{`, and the
+// exporter always quotes such a key (yamlScalar() treats `{` as an
+// indicator character) -- so this guard can never fire on this app's own
+// output or on a hand-written file that quotes the key the way the format
+// requires. Pinned directly rather than left as an argument in prose.
+test("A quoted brace-initial key as a list item is unaffected by the flow-map guard", async () => {
+  await withPage(async (page) => {
+    const p = await parse(page, 'relationships:\n  - "{name": literal\n');
+    assert.deepEqual(p.relationships, [{ "{name": "literal" }]);
+  });
+});
+
 test("Single-quoted scalars lose their quotes", async () => {
   await withPage(async (page) => {
     const p = await parse(page, "classes:\n  Invoice:\n    meaning: 'it''s a bill'\n    aliases: ['bill', 'inv']\n");

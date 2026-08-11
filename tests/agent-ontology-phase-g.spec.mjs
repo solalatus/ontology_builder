@@ -165,6 +165,47 @@ test("Merge parses inline flow-list syntax (\"aliases: [bill]\", \"preconditions
   });
 });
 
+// Regression coverage for issue #76: a relationship written as an inline
+// flow *map* list item (`- {name: issuedBy, from: Invoice, to: Supplier}`)
+// used to parse into a garbage single-key object instead of a real
+// {name, from, to} triple, so name/from/to all came back undefined and
+// commitYamlImport()'s undeclared-endpoint guard silently dropped the whole
+// relationship — no error, no edge, one fewer item in the diff summary with
+// nothing explaining why. Same worked example as above, but the
+// relationship uses flow-map-as-list-item syntax instead of block style, to
+// prove both now parse identically and the edge actually reaches the canvas
+// through the real import pipeline, not just the standalone parser.
+const FLOW_MAP_RELATIONSHIP_WORKED_EXAMPLE_YAML = [
+  "classes:",
+  "  Invoice:",
+  "    meaning: A request from a supplier to receive payment.",
+  "  Supplier:",
+  "    meaning: An organization providing goods or services.",
+  "relationships:",
+  "  - {name: issuedBy, from: Invoice, to: Supplier, meaning: The supplier that submitted the invoice.}",
+  "",
+].join("\n");
+
+test("Merge parses a relationship written as a flow-map list item (\"- {name: r, from: A, to: B}\") the same as block-style syntax (issue #76)", async () => {
+  await withPage(async (page) => {
+    await dropYaml(page, FLOW_MAP_RELATIONSHIP_WORKED_EXAMPLE_YAML);
+    await page.click("#import-merge");
+    await page.waitForTimeout(150);
+
+    const { nodes, edges } = await page.evaluate(() => ({
+      nodes: window.__kg.state.nodes,
+      edges: window.__kg.state.edges,
+    }));
+    const invoice = nodes.find((n) => n.label === "Invoice");
+    const supplier = nodes.find((n) => n.label === "Supplier");
+    assert.equal(edges.length, 1, "the flow-map relationship must actually reach the canvas as a real edge, not be silently dropped");
+    assert.equal(edges[0].source, invoice.id);
+    assert.equal(edges[0].target, supplier.id);
+    assert.equal(edges[0].relation, "issuedBy");
+    assert.equal(edges[0].meaning, "The supplier that submitted the invoice.");
+  });
+});
+
 test("An inline flow-list item that's a quoted string containing a comma doesn't get split on that inner comma", async () => {
   await withPage(async (page) => {
     const text = [
