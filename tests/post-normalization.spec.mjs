@@ -276,6 +276,11 @@ test("a positional verdict is un-blinded to the right subject in both assignment
 test("judge replies without a usable verdict fail loudly", () => {
   assert.equal(parseJudgeVerdict('```json\n{"preferred":"A","confidence":"low"}\n```').preferred, "A");
   assert.equal(parseJudgeVerdict('{"preferred":"tie"}').preferred, "tie");
+  // An UNTERMINATED fence: a real reply shape that aborted the first judge
+  // batch (see results/.../judge/raw-aborted-parser-bug/). The verdict object
+  // is perfectly well formed; only the closing fence is missing.
+  assert.equal(parseJudgeVerdict('```json\n{"preferred":"B","confidence":"high"}').preferred, "B");
+  assert.equal(parseJudgeVerdict('Here is my verdict.\n\n{"preferred":"A"}\n\nThanks.').preferred, "A");
   assert.throws(() => parseJudgeVerdict("Model A is better."), /no parseable verdict/);
   assert.throws(() => parseJudgeVerdict('```json\n{"preferred":"maybe"}\n```'), /no parseable verdict/);
 });
@@ -384,7 +389,7 @@ test("every committed candidate still loads into the real app without losing con
       const exported = await page.evaluate((text) => {
         window.__kg.formats.openImportDialog(text, "yaml");
         document.getElementById("import-replace").click();
-        return window.__kg.exports.buildDomainYamlExport();
+        return window.__kg.formats.buildDomainYamlExport();
       }, candidateYaml);
       const diff = computeOntologyDiff(parseCandidate(candidateYaml), parseCandidate(exported));
       assert.deepEqual(diff.classes.removed, [], `${runId}: the app dropped classes on import`);

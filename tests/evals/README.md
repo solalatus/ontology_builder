@@ -468,3 +468,28 @@ while changing this eval itself, override the turn cap down, e.g.:
 ```sh
 ONTOLOGY_EVAL_MAX_TURNS=6 node --test tests/evals/*.eval.spec.mjs
 ```
+
+## Conditions built on top of this eval
+
+Two separate specifications extend the eval rather than being part of it, and
+neither is run by `node --test tests/evals/*.eval.spec.mjs`:
+
+- **`EXPERIMENT_BRIEF.md`** — the B1/B2/B3 comparison conditions, each varying
+  one factor of the pipeline that *produces* a model (how a transcript becomes
+  a model; the interviewer prompt; whether anything can be committed
+  mid-conversation). Results: `results/baselines/README.md`.
+- **`POST_NORMALIZATION.md`** — condition `post-normalization-v1` (issue #75):
+  a post-interview **structural review pass** over a finished transcript and
+  the ontology built from it. Unlike B1–B3 it does not replace any part of the
+  pipeline; it starts from the interactive run's own output, so the comparison
+  is paired, and its primary endpoint is a blind transcript-grounded A/B judge
+  rather than recovery F1 — because, as that document argues in advance and
+  the result then confirmed, recovery F1 cannot see structural change at all.
+  Result and recommendation:
+  `results/baselines/post-normalization-v1/REPORT.md`.
+
+Both are evaluation-only with respect to the shipped app. The production
+interviewer's system prompt and tool surface are pinned by
+`tests/agent-production-invariants.spec.mjs` in the default suite, so a
+condition cannot quietly change the thing it is supposed to be measuring
+against.

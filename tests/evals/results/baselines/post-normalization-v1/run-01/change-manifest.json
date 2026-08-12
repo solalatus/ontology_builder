@@ -1,0 +1,11 @@
+[
+  {
+    "changeType": "split-conflated-concept",
+    "summary": "Split the overloaded escalatedTo relationship into three distinct relationships",
+    "reason": "The ontology used one relationship name for three different target role classes, but the transcript treats escalation to IT Service Owner, Application Owner, and Technical Owner as separately tracked relationships.",
+    "agentImpact": "The agent can now distinguish which owner role an incident was escalated to without ambiguous predicate overloading.",
+    "before": "Three relationships all named escalatedTo from Incident to ITServiceOwner, ApplicationOwner, and TechnicalOwner.",
+    "after": "Three separately named relationships: escalatedToServiceOwner, escalatedToApplicationOwner, and escalatedToTechnicalOwner.",
+    "evidence": "\"Escalation relationships to the IT Service Owner, Application Owner, and Technical Owner should all be captured as relationships.\""
+  }
+]

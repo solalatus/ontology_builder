@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "condition": "post-normalization-v1",
+  "runId": "run-01",
+  "generatedAt": "2026-08-12T10:06:19.882Z",
+  "wallClockMs": 45225,
+  "model": "gpt-5.4",
+  "modelReported": "gpt-5.4-2026-03-05",
+  "finishReason": "stop",
+  "requestParams": {
+    "provider": "azure",
+    "endpoint": "https://briandemoopenai.openai.azure.com",
+    "apiVersion": "2024-12-01-preview",
+    "model": "gpt-5.4",
+    "temperature": null,
+    "maxTokens": null
+  },
+  "normalizerPromptVersion": "v1",
+  "normalizerPromptSha256": "a0f52cb08189eb4de142fa4b5c4b10299c3ccb101d574924274c60a423956489",
+  "sourceTranscriptPath": "tests/evals/results/runs/run-01/conversation-log.md",
+  "sourceTranscriptSha256": "c8064f40638fa28d8050c45519bf04fb79694b74a0b0a420f19658c1d6974523",
+  "sourceOntologyPath": "tests/evals/results/runs/run-01/recovered-model.yaml",
+  "sourceOntologySha256": "ce50d79e932e53d9b2140813c9dced1fdd8e778a7e88da64f0f93fd9a2c3ac0e",
+  "candidateSha256": "3e15923d1ff80c2d050696542415d76faf8b3597837a7c61940dd206bbbb2f8e",
+  "usage": {
+    "completion_tokens": 6121,
+    "completion_tokens_details": {
+      "accepted_prediction_tokens": 0,
+      "audio_tokens": 0,
+      "reasoning_tokens": 0,
+      "rejected_prediction_tokens": 0
+    },
+    "latency_checkpoint": {
+      "engine_tbt_ms": 6,
+      "engine_ttft_ms": 1214,
+      "engine_ttlt_ms": 40827,
+      "pre_inference_ms": 322,
+      "service_tbt_ms": 6,
+      "service_ttft_ms": 2049,
+      "service_ttlt_ms": 41576,
+      "total_duration_ms": 41263,
+      "user_visible_ttft_ms": 1726
+    },
+    "prompt_tokens": 68441,
+    "prompt_tokens_details": {
+      "audio_tokens": 0,
+      "cached_tokens": 0
+    },
+    "total_tokens": 74562
+  },
+  "validation": {
+    "errors": [],
+    "warnings": [
+      "relationship containedBy (Incident -> Workaround) may be an inverse of mitigates (Workaround -> Incident)",
+      "relationship identifies (PostIncidentReview -> CorrectiveAction) may be an inverse of arisesFrom (CorrectiveAction -> PostIncidentReview)"
+    ]
+  },
+  "changeManifestEntries": 1,
+  "changeManifestWarning": null,
+  "diffSummary": {
+    "classes": {
+      "added": 0,
+      "removed": 0,
+      "changed": 0
+    },
+    "properties": {
+      "added": 0,
+      "removed": 0,
+      "changed": 0
+    },
+    "relationships": {
+      "added": 3,
+      "removed": 3,
+      "changed": 0,
+      "directionChanged": 0
+    },
+    "rules": {
+      "added": 0,
+      "removed": 0,
+      "changed": 0
+    },
+    "actions": {
+      "added": 0,
+      "removed": 0,
+      "changed": 0
+    },
+    "totalChanges": 6
+  },
+  "note": "One chat-completion call over the frozen interactive run's transcript and its own produced ontology. The interview was not re-run, the persona was not invoked, the fixture was never shown to the normalizer, and nothing under results/runs/ was modified. The deterministic diff in normalization-diff.json is the authoritative record of what changed; change-manifest.json is the model's own account of it and is not trusted as evidence of what it actually did."
+}

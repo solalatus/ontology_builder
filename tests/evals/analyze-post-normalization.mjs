@@ -21,6 +21,7 @@ import { recoveredStateFromYaml } from "./score-baseline.mjs";
 import { loadGroundTruthModel, scopeGroundTruth } from "./lib/groundTruthModel.mjs";
 import { computeRecoveryMetrics } from "./lib/recoveryMetrics.mjs";
 import { CONDITION } from "./post-normalization.mjs";
+import { parseCandidate, validateCandidate } from "./lib/normalizerPromptV1.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const RUNS_DIR = path.join(__dirname, "results", "runs");
@@ -117,6 +118,19 @@ export function aggregateJudge(judgments, runIds) {
       unsupportedAdditionsOriginal: count("unsupported_additions_original"),
       competencyLossNormalized: count("competency_coverage_loss_normalized"),
       competencyLossOriginal: count("competency_coverage_loss_original"),
+      // POST HOC, NOT PRE-REGISTERED. A judge asked to review two nearly
+      // identical models frequently reports the same pre-existing defect
+      // against both of them; the pre-registered counts above cannot tell
+      // "the normalizer introduced this" from "the interview already had
+      // this". These count only the verdicts where the normalized arm drew an
+      // adverse finding and the original arm drew none from the same verdict.
+      // Reported alongside the pre-registered numbers, never in place of them:
+      // the criteria table below uses the pre-registered counts.
+      normalizedOnly: {
+        materialRegressions: forRun.filter((j) => nonEmpty(j.material_regressions_normalized) && !nonEmpty(j.material_regressions_original)).length,
+        unsupportedAdditions: forRun.filter((j) => nonEmpty(j.unsupported_additions_normalized) && !nonEmpty(j.unsupported_additions_original)).length,
+        competencyLoss: forRun.filter((j) => nonEmpty(j.competency_coverage_loss_normalized) && !nonEmpty(j.competency_coverage_loss_original)).length,
+      },
       // "materially worse in this run" = the run went to the original model, or
       // a majority of this run's verdicts (>= 3 of 4) named a material
       // regression in the normalized model.
@@ -155,8 +169,16 @@ export function collectChanges(runIds) {
     // Criterion §10.4: a rule or action that disappears without the manifest
     // claiming a deliberate removal is an accidental loss, not a normalization.
     const claimsRemoval = manifest.some((e) => /remove|merge|consolidat/i.test(`${e.changeType} ${e.summary}`));
+    // The same validator is run over the ORIGINAL ontology too. Without this,
+    // a profile violation the interview already contained (an inverse pair, a
+    // subclassing-shaped predicate) would be reported against the candidate as
+    // though the normalizer had introduced it. What the condition is entitled
+    // to claim is the *delta*: violations it removed, and violations it left.
+    const originalValidation = validateCandidate(parseCandidate(
+      fs.readFileSync(path.join(RUNS_DIR, runId, "recovered-model.yaml"), "utf8")
+    ));
     return {
-      runId, provenance, diff, manifest, byType,
+      runId, provenance, diff, manifest, byType, originalValidation,
       rulesRemoved: diff.rules.removed.map((r) => r.name),
       actionsRemoved: diff.actions.removed.map((a) => a.name),
       unexplainedRemovals: (diff.rules.removed.length + diff.actions.removed.length) > 0 && !claimsRemoval,
@@ -240,6 +262,13 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     md.push("");
     md.push(`Order-bias check: ${judge.flips.map((f) => `${f.judgeModel} flipped ${f.flipped}/${f.pairs}`).join("; ")}.`);
     md.push(`Inter-judge agreement: ${judge.interJudge.agreeing}/${judge.interJudge.comparable} runs where both judges were stable.`, "");
+    md.push("**Post hoc, not pre-registered.** The counts above include defects a judge reported against *both* models — pre-existing weaknesses of the interview, not something the normalizer introduced. These are the verdicts where only the normalized arm drew the finding:", "");
+    md.push("| Run | Material regressions, normalized-only | Unsupported additions, normalized-only | Competency loss, normalized-only |");
+    md.push("|---|---|---|---|");
+    for (const r of judge.perRun) {
+      md.push(`| ${r.runId} | ${r.normalizedOnly.materialRegressions}/${r.total} | ${r.normalizedOnly.unsupportedAdditions}/${r.total} | ${r.normalizedOnly.competencyLoss}/${r.total} |`);
+    }
+    md.push("");
   }
 
   // -- what the normalizer did ----------------------------------------------
@@ -272,13 +301,19 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     }
   }
   md.push("");
-  md.push("### Candidate validation", "");
-  md.push("| Run | Hard errors | Warnings |");
-  md.push("|---|---|---|");
-  for (const c of changes) md.push(`| ${c.runId} | ${c.validation.errors.length} | ${c.validation.warnings.length} |`);
+  md.push("### Grammar and profile validation, both arms", "");
+  md.push("Warnings are profile violations (inverse pairs, subclassing-shaped predicates). Reported for the original too, so nothing pre-existing is charged to the normalizer.", "");
+  md.push("| Run | Original errors / warnings | Candidate errors / warnings | Pre-existing violations fixed |");
+  md.push("|---|---|---|---|");
   for (const c of changes) {
-    for (const e of c.validation.errors) md.push(`- ERROR ${c.runId}: ${e}`);
-    for (const w of c.validation.warnings) md.push(`- warning ${c.runId}: ${w}`);
+    const fixed = c.originalValidation.warnings.filter((w) => !c.validation.warnings.includes(w));
+    md.push(`| ${c.runId} | ${c.originalValidation.errors.length} / ${c.originalValidation.warnings.length} | ${c.validation.errors.length} / ${c.validation.warnings.length} | ${fixed.length} |`);
+  }
+  md.push("");
+  for (const c of changes) {
+    for (const e of c.validation.errors) md.push(`- ERROR ${c.runId} (candidate): ${e}`);
+    for (const w of c.validation.warnings) md.push(`- warning ${c.runId} (candidate, also in the original): ${w}`);
+    for (const w of c.originalValidation.warnings.filter((w) => !c.validation.warnings.includes(w))) md.push(`- FIXED ${c.runId}: ${w}`);
   }
   md.push("");
 
@@ -314,8 +349,16 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const nTok = normUsage.reduce((a, u) => a + (u.total_tokens || 0), 0);
   md.push(`- Normalizer: ${changes.length} calls, model \`${changes[0] && changes[0].provenance.modelReported}\`, ${nTok.toLocaleString("en-US")} total tokens.`);
   if (judgeDoc) {
-    md.push(`- Judge: ${judgeDoc.usageTotal.calls} calls across ${judgeDoc.judgeModels.join(" + ")}, ${judgeDoc.usageTotal.total_tokens.toLocaleString("en-US")} total tokens.`);
-    md.push(`- Combined: ${(judgeDoc.usageTotal.calls + changes.length)} model calls, ${(nTok + judgeDoc.usageTotal.total_tokens).toLocaleString("en-US")} tokens. No interview was re-run.`);
+    // Only calls actually issued by the final execution carry a usage record;
+    // a verdict whose reply was reused from disk was billed by an earlier,
+    // interrupted execution whose usage block was lost with it. Reporting the
+    // measured figure and the shortfall separately is more useful than an
+    // average-based estimate presented as a measurement.
+    const reused = judgeDoc.judgments.filter((j) => j.replyReusedFromDisk).length;
+    const measured = judgeDoc.usageTotal.calls;
+    const perCall = measured ? Math.round(judgeDoc.usageTotal.total_tokens / measured) : 0;
+    md.push(`- Judge: ${judgeDoc.judgments.length} verdicts. ${measured} of them carry a usage record (${judgeDoc.usageTotal.total_tokens.toLocaleString("en-US")} tokens, ~${perCall.toLocaleString("en-US")}/call); the other ${reused} were reused from replies billed by an earlier interrupted execution whose usage block was lost. Estimated judge total ~${(perCall * judgeDoc.judgments.length).toLocaleString("en-US")} tokens.`);
+    md.push(`- Combined, measured: ${measured + changes.length} calls, ${(nTok + judgeDoc.usageTotal.total_tokens).toLocaleString("en-US")} tokens. Estimated all-in, including the discarded batches: see REPORT.md §5. No interview was re-run.`);
   }
   md.push("");
 

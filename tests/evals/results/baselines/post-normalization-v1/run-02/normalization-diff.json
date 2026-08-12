@@ -1,0 +1,41 @@
+{
+  "classes": {
+    "added": [],
+    "removed": [],
+    "changed": []
+  },
+  "properties": {
+    "added": [],
+    "removed": [],
+    "changed": [
+      {
+        "className": "RegulatoryNotification",
+        "name": "status",
+        "typeBefore": "text",
+        "typeAfter": "text",
+        "unitBefore": "",
+        "unitAfter": "",
+        "allowedAdded": [
+          "approved"
+        ],
+        "allowedRemoved": []
+      }
+    ]
+  },
+  "relationships": {
+    "added": [],
+    "removed": [],
+    "changed": [],
+    "directionChanged": []
+  },
+  "rules": {
+    "added": [],
+    "removed": [],
+    "changed": []
+  },
+  "actions": {
+    "added": [],
+    "removed": [],
+    "changed": []
+  }
+}

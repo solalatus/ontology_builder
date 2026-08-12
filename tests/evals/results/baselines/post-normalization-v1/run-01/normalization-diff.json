@@ -1,0 +1,66 @@
+{
+  "classes": {
+    "added": [],
+    "removed": [],
+    "changed": []
+  },
+  "properties": {
+    "added": [],
+    "removed": [],
+    "changed": []
+  },
+  "relationships": {
+    "added": [
+      {
+        "name": "escalatedToApplicationOwner",
+        "from": "Incident",
+        "to": "ApplicationOwner",
+        "label": "Incident --escalatedToApplicationOwner--> ApplicationOwner"
+      },
+      {
+        "name": "escalatedToServiceOwner",
+        "from": "Incident",
+        "to": "ITServiceOwner",
+        "label": "Incident --escalatedToServiceOwner--> ITServiceOwner"
+      },
+      {
+        "name": "escalatedToTechnicalOwner",
+        "from": "Incident",
+        "to": "TechnicalOwner",
+        "label": "Incident --escalatedToTechnicalOwner--> TechnicalOwner"
+      }
+    ],
+    "removed": [
+      {
+        "name": "escalatedTo",
+        "from": "Incident",
+        "to": "ApplicationOwner",
+        "label": "Incident --escalatedTo--> ApplicationOwner"
+      },
+      {
+        "name": "escalatedTo",
+        "from": "Incident",
+        "to": "ITServiceOwner",
+        "label": "Incident --escalatedTo--> ITServiceOwner"
+      },
+      {
+        "name": "escalatedTo",
+        "from": "Incident",
+        "to": "TechnicalOwner",
+        "label": "Incident --escalatedTo--> TechnicalOwner"
+      }
+    ],
+    "changed": [],
+    "directionChanged": []
+  },
+  "rules": {
+    "added": [],
+    "removed": [],
+    "changed": []
+  },
+  "actions": {
+    "added": [],
+    "removed": [],
+    "changed": []
+  }
+}

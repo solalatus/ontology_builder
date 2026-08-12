@@ -139,8 +139,17 @@ Assess both models against the transcript and return your verdict as the single 
 }
 
 export function parseJudgeVerdict(text) {
-  const blocks = [...text.matchAll(/```(?:json)?\s*\n([\s\S]*?)```/g)].map((m) => m[1].trim());
-  const candidates = blocks.length ? blocks : [text.trim()];
+  // Three shapes, in order of how much guessing they involve. A reasoning-tier
+  // model that runs long can emit an *unterminated* fence -- "```json\n{...}"
+  // with no closing fence -- which the closed-fence pattern alone misses
+  // entirely, and which then fails as raw JSON because of the leading marker.
+  // That happened for real on the first judge batch (see
+  // judge/raw-aborted-parser-bug/), so all three shapes are handled and
+  // regression-tested rather than left to chance.
+  const closed = [...text.matchAll(/```(?:json)?\s*\n([\s\S]*?)```/g)].map((m) => m[1].trim());
+  const unfenced = text.replace(/^\s*```(?:json)?\s*$/gm, "").trim();
+  const braced = text.slice(text.indexOf("{"), text.lastIndexOf("}") + 1);
+  const candidates = [...closed, unfenced, braced].filter(Boolean);
   for (const block of candidates) {
     try {
       const parsed = JSON.parse(block);
@@ -184,6 +193,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 
   const judgments = [];
   const usages = [];
+  const parseFailures = [];
 
   for (const runId of runIds) {
     const transcript = fs.readFileSync(path.join(RUNS_DIR, runId, "conversation-log.md"), "utf8");
@@ -205,16 +215,43 @@ if (import.meta.url === `file://${process.argv[1]}`) {
         const modelA = originalIsA ? originalYaml : candidateYaml;
         const modelB = originalIsA ? candidateYaml : originalYaml;
 
-        const call = await chatOnce({
-          config, model: judgeModel,
-          systemPrompt: JUDGE_SYSTEM_PROMPT,
-          userPrompt: buildJudgeUserPrompt(transcript, modelA, modelB),
-          label: `${runId}/${judgeModel}/${order} judge`,
-        });
+        // RESUMABLE, AND STRICTLY ONE-WAY. A raw reply that already exists on
+        // disk is reused instead of re-asking: an Azure tokens-per-minute limit
+        // aborted this batch once mid-way, and re-running from scratch would
+        // both waste the calls already paid for and -- much worse -- give a
+        // second sample of verdicts that had already been observed. Reusing the
+        // stored reply is identical to having recorded it the first time.
+        // A raw file is therefore never deleted or overwritten to "try again";
+        // if a reply is unreadable, that is recorded as a parse failure below,
+        // not re-rolled.
+        const rawPath = path.join(JUDGE_DIR, "raw", `${judgeModel}-${runId}-${order}.md`);
+        let call;
+        if (fs.existsSync(rawPath)) {
+          call = { reply: fs.readFileSync(rawPath, "utf8"), usage: null, modelReported: null, reused: true };
+        } else {
+          call = await chatOnce({
+            config, model: judgeModel,
+            systemPrompt: JUDGE_SYSTEM_PROMPT,
+            userPrompt: buildJudgeUserPrompt(transcript, modelA, modelB),
+            label: `${runId}/${judgeModel}/${order} judge`,
+          });
+          fs.writeFileSync(rawPath, call.reply);
+        }
         usages.push(call.usage);
-        fs.writeFileSync(path.join(JUDGE_DIR, "raw", `${judgeModel}-${runId}-${order}.md`), call.reply);
 
-        const verdict = parseJudgeVerdict(call.reply);
+        // A reply this script cannot read is recorded and the batch continues:
+        // aborting would throw away the verdicts already paid for, and a single
+        // unreadable reply is a fact about that call, not a reason to lose the
+        // other eleven. The run still exits non-zero, so it can never pass
+        // silently with a hole in it.
+        let verdict;
+        try {
+          verdict = parseJudgeVerdict(call.reply);
+        } catch (err) {
+          parseFailures.push({ runId, judgeModel, order, message: err.message });
+          console.log(`${runId} · ${judgeModel} · ${order.padEnd(8)} · UNREADABLE REPLY -- recorded, continuing`);
+          continue;
+        }
         const resolved = resolveVerdict(verdict, { originalIsA });
         judgments.push({
           runId, judgeModel, order,
@@ -223,8 +260,9 @@ if (import.meta.url === `file://${process.argv[1]}`) {
           ...resolved,
           modelReported: call.modelReported,
           usage: call.usage,
+          replyReusedFromDisk: Boolean(call.reused),
         });
-        console.log(`${runId} · ${judgeModel} · ${order.padEnd(8)} · original=${originalIsA ? "A" : "B"} · prefers ${resolved.preferred} (${resolved.confidence})`);
+        console.log(`${runId} · ${judgeModel} · ${order.padEnd(8)} · original=${originalIsA ? "A" : "B"} · prefers ${resolved.preferred} (${resolved.confidence})${call.reused ? " [reused stored reply]" : ""}`);
       }
     }
   }
@@ -237,6 +275,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     blindingSalt: BLINDING_SALT,
     judgeModels,
     provider: config.provider,
+    parseFailures,
     note: "Blind transcript-grounded A/B comparison of the interactive run's ontology against the "
       + "post-normalization-v1 candidate. The judge never saw the fixture, the normalizer prompt, any "
       + "score, or which model was which. Every pair was judged in both orderings by two judge models, "
@@ -247,4 +286,8 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 
   console.log(`\nWrote ${judgments.length} verdicts -> ${path.relative(process.cwd(), path.join(JUDGE_DIR, "judgments.json"))}`);
   console.log(`Analyse with:  node tests/evals/analyze-post-normalization.mjs ${runIds.join(" ")}`);
+  if (parseFailures.length) {
+    console.error(`\n${parseFailures.length} judge repl${parseFailures.length === 1 ? "y was" : "ies were"} unreadable -- see judgments.json parseFailures and judge/raw/.`);
+    process.exit(2);
+  }
 }

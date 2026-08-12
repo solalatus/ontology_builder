@@ -100,6 +100,25 @@ is dev-only test tooling, same as Playwright.
   manual and agent edits are interleaved), the graph-diff view's
   position-noise regression, and the agent panel's welcome-message
   placeholder + Review changes tooltip added in the same round.
+- `agent-production-invariants.spec.mjs` — hard regression guards on the
+  shipped interviewer (issue #75 §1): a golden SHA-256 of the real system
+  prompt in both languages, and a runtime assertion, captured off a real
+  outgoing request, that an ordinary interview exposes exactly
+  `apply_ontology_yaml` and `get_graph_state` and no normalization tool.
+  Offline — no key, no network. **Read that file's header before touching
+  either constant:** an intentional prompt change makes a new treatment and
+  needs its own non-regression evaluation, and an unintentional one must be
+  reverted rather than blessed.
+- `post-normalization.spec.mjs` — the offline half of the
+  `post-normalization-v1` experiment (issue #75): the deterministic ontology
+  diff engine, reply extraction and candidate validation, the blinding and
+  verdict-resolution logic, `EXPERIMENT_BRIEF.md` §8's identity/degenerate/
+  extraction acceptance checks, and — over the committed condition artifacts
+  — that no frozen anchor input has changed, that each stored diff matches a
+  fresh recomputation, and that every candidate still loads into the real app
+  through its own YAML import path without losing content. The
+  artifact-dependent tests skip cleanly if the condition has not been
+  generated.
 
 ## Live OpenAI integration tests (opt-in)
 
@@ -187,6 +206,22 @@ overwrites the previous run, never accumulates), so those three files under
 `tests/evals/results/` are always the current, real record of the most
 recent run — read them directly, no need to re-run the eval just to see
 what the last one found.
+
+### Comparison conditions and the post-normalization experiment
+
+`tests/evals/EXPERIMENT_BRIEF.md` specifies the B1/B2/B3 comparison
+conditions; their results are in `tests/evals/results/baselines/README.md`.
+
+`tests/evals/POST_NORMALIZATION.md` specifies a different kind of condition
+(issue #75): a post-interview **structural review pass** over a finished
+transcript and the ontology built from it, evaluated against a blind
+transcript-grounded judge rather than against recovery F1. It is
+evaluation-only — the production interviewer is guarded byte-for-byte while
+it runs — and its scripts are `post-normalization.mjs` (one call per run),
+`judge-post-normalization.mjs` (blind A/B, both orderings, two judge models)
+and `analyze-post-normalization.mjs` (offline, applies the pre-registered
+decision rule). Result and recommendation:
+`tests/evals/results/baselines/post-normalization-v1/REPORT.md`.
 
 ## Python tests
 

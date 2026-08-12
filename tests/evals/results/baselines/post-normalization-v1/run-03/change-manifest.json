@@ -1,0 +1,38 @@
+[
+  {
+    "changeType": "repair-action-reachability",
+    "summary": "Removed MonitoringSystem → generates → Alert inverse duplicate",
+    "reason": "The instructions require one directed relationship per real-world connection and no inverse duplicate. The transcript established Alert → originated from → Monitoring System for acknowledgment workflow; the reverse edge is not needed for any listed action input or competency question.",
+    "agentImpact": "The graph is less ambiguous while still supporting alert acknowledgment from Alert to its Monitoring System.",
+    "before": "Both Alert → originated from → MonitoringSystem and MonitoringSystem → generates → Alert were modeled.",
+    "after": "Only Alert → originated from → MonitoringSystem remains.",
+    "evidence": "\"Alert → originated from → Monitoring System ... is crucial for alert acknowledgment\"; the action is \"Acknowledge an incoming alert from the monitoring system.\""
+  },
+  {
+    "changeType": "repair-action-reachability",
+    "summary": "Rewrote canNotifyStakeholders to make Incident data reachable from StakeholderCommunication input",
+    "reason": "The action input is StakeholderCommunication, but the original rule referred directly to Incident status and impacted Business Services without stating the needed Incident association path. The transcript confirmed Incident → has communication → Stakeholder Communication, so the rule must reference the related Incident explicitly.",
+    "agentImpact": "An agent can evaluate notifyStakeholders preconditions starting from the action input class without relying on unstated traversal assumptions.",
+    "before": "canNotifyStakeholders used conditions 'Incident status is present and valid' and 'Incident impacts at least one Business Service.'",
+    "after": "canNotifyStakeholders now uses 'The related Incident has status present and valid' and 'The related Incident impacts at least one Business Service.'",
+    "evidence": "\"Incident → has communication → Stakeholder Communication\" and action \"Notify stakeholders about the incident status update.\""
+  },
+  {
+    "changeType": "repair-action-reachability",
+    "summary": "Rewrote canGeneratePostIncidentReview to anchor incident-state check from PostIncidentReview input",
+    "reason": "The action input is PostIncidentReview, but the original rule started from Incident. The transcript established Incident → has review → Post-Incident Review, so the rule should state that the review is associated with an Incident whose status is resolved or closed.",
+    "agentImpact": "The agent can validate generatePostIncidentReviewReport preconditions from the review record directly and reliably.",
+    "before": "canGeneratePostIncidentReview included separate conditions 'Incident status is resolved or closed' and 'Incident has a Post-Incident Review record.'",
+    "after": "canGeneratePostIncidentReview now states 'Post-Incident Review is associated with an Incident whose status is resolved or closed' plus the review-status condition.",
+    "evidence": "\"Incident → has review → Post-Incident Review\" and action \"Generate a post-incident review report for the major incident.\""
+  },
+  {
+    "changeType": "repair-action-reachability",
+    "summary": "Clarified canCloseIncident references to related communication and notification records",
+    "reason": "The action input is Incident, but two original conditions named StakeholderCommunication.status and RegulatoryNotification.status without making the incident-linked records explicit. The transcript modeled Incident → has communication and Incident → has regulatory notification, so the rule should refer to related records.",
+    "agentImpact": "Closure checks are operationally clearer and safer for an agent evaluating incident closure from an Incident input.",
+    "before": "canCloseIncident referred generically to Stakeholder Communication status and Regulatory Notification status.",
+    "after": "canCloseIncident now refers to any related Stakeholder Communication and the related Regulatory Notification.",
+    "evidence": "\"Incident → has communication → Stakeholder Communication\" and \"Incident → has regulatory notification → Regulatory Notification\" with action \"Close the incident once all conditions for closure have been met.\""
+  }
+]

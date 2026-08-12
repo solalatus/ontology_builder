@@ -27,6 +27,21 @@ import {
 
 export const DEFAULT_AZURE_API_VERSION = "2024-12-01-preview";
 
+// Azure OpenAI meters a *tokens-per-minute* budget per deployment, not just a
+// requests-per-second one. A judge call in this condition carries ~80k prompt
+// tokens, so two of them back to back can exhaust a minute's budget outright,
+// and the shared backoff (4 attempts, capped at 4s) cannot outlast a window
+// that is measured in minutes. This is an extension of that shared policy, not
+// a replacement: the imported constants still govern ordinary transient
+// failures, and insufficient_quota is still never retried. A 429 that reports
+// a Retry-After is honoured exactly; one that does not gets a minute-scale
+// backoff, because that is the granularity the limit is actually enforced on.
+export const TPM_MAX_ATTEMPTS = 6;
+export function tpmBackoffMs(attempt, retryAfterSeconds) {
+  if (Number.isFinite(retryAfterSeconds) && retryAfterSeconds > 0) return Math.min(retryAfterSeconds * 1000 + 2000, 180000);
+  return Math.min(30000 * attempt, 180000); // 30s, 60s, 90s, 120s, 150s
+}
+
 // Resolves the provider from the environment. Azure wins when an endpoint is
 // configured, because supplying one is an explicit choice; otherwise OpenAI.
 export function resolveProvider(env = process.env) {
@@ -82,14 +97,24 @@ export async function chatOnce({ config, model, systemPrompt, userPrompt, label 
     ],
   };
 
+  const maxAttempts = Math.max(RATE_LIMIT_MAX_ATTEMPTS, TPM_MAX_ATTEMPTS);
   let res, data;
-  for (let attempt = 1; attempt <= RATE_LIMIT_MAX_ATTEMPTS; attempt++) {
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     res = await fetch(url, { method: "POST", headers, body: JSON.stringify(body) });
     const text = await res.text();
     try { data = JSON.parse(text); } catch (err) { data = { error: { message: text.slice(0, 500) } }; }
     if (res.ok) break;
-    const retryable = (res.status === 429 || res.status >= 500) && attempt < RATE_LIMIT_MAX_ATTEMPTS && !isInsufficientQuotaError(data);
-    if (retryable) { await sleepMs(rateLimitBackoffMs(attempt)); continue; }
+    if (isInsufficientQuotaError(data) || attempt >= maxAttempts) {
+      throw new Error(`${label}: chat call failed: HTTP ${res.status} ${data && data.error && data.error.message}`);
+    }
+    if (res.status === 429) {
+      const retryAfter = Number(res.headers.get("retry-after"));
+      const waitMs = tpmBackoffMs(attempt, retryAfter);
+      console.log(`  ${label}: rate limited (429), waiting ${Math.round(waitMs / 1000)}s before attempt ${attempt + 1}/${maxAttempts}`);
+      await sleepMs(waitMs);
+      continue;
+    }
+    if (res.status >= 500 && attempt < RATE_LIMIT_MAX_ATTEMPTS) { await sleepMs(rateLimitBackoffMs(attempt)); continue; }
     throw new Error(`${label}: chat call failed: HTTP ${res.status} ${data && data.error && data.error.message}`);
   }
 
