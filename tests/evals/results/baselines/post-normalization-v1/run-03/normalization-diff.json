@@ -1,0 +1,68 @@
+{
+  "classes": {
+    "added": [],
+    "removed": [],
+    "changed": []
+  },
+  "properties": {
+    "added": [],
+    "removed": [],
+    "changed": []
+  },
+  "relationships": {
+    "added": [],
+    "removed": [
+      {
+        "name": "generates",
+        "from": "MonitoringSystem",
+        "to": "Alert",
+        "label": "MonitoringSystem --generates--> Alert"
+      }
+    ],
+    "changed": [],
+    "directionChanged": []
+  },
+  "rules": {
+    "added": [],
+    "removed": [],
+    "changed": [
+      {
+        "name": "canCloseIncident",
+        "conditionsAdded": [
+          "Any related Stakeholder Communication is sent or archived.",
+          "If regulatory notification is required, the related Regulatory Notification status is submitted or accepted."
+        ],
+        "conditionsRemoved": [
+          "If regulatory notification is required, Regulatory Notification status is submitted or accepted.",
+          "Stakeholder Communication status is sent or archived."
+        ]
+      },
+      {
+        "name": "canGeneratePostIncidentReview",
+        "conditionsAdded": [
+          "Post-Incident Review is associated with an Incident whose status is resolved or closed."
+        ],
+        "conditionsRemoved": [
+          "Incident has a Post-Incident Review record.",
+          "Incident status is resolved or closed."
+        ]
+      },
+      {
+        "name": "canNotifyStakeholders",
+        "conditionsAdded": [
+          "The related Incident has status present and valid.",
+          "The related Incident impacts at least one Business Service."
+        ],
+        "conditionsRemoved": [
+          "Incident impacts at least one Business Service.",
+          "Incident status is present and valid."
+        ]
+      }
+    ]
+  },
+  "actions": {
+    "added": [],
+    "removed": [],
+    "changed": []
+  }
+}

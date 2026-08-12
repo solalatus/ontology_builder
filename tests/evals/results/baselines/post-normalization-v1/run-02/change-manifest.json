@@ -1,0 +1,11 @@
+[
+  {
+    "changeType": "repair-action-reachability",
+    "summary": "Added approved as an allowed RegulatoryNotification status",
+    "reason": "A rule requires Regulatory Notification status to be approved before submission, but the class property value set omitted approved.",
+    "agentImpact": "The agent can now evaluate and execute sendRegulatoryNotification without referencing a status value outside the model.",
+    "before": "RegulatoryNotification.status allowed: draft, pending-approval, submitted, accepted, rejected",
+    "after": "RegulatoryNotification.status allowed: draft, pending-approval, approved, submitted, accepted, rejected",
+    "evidence": "“The agent should only be allowed to submit the regulatory notification when the status is approved.” (Turn 42 persona)"
+  }
+]

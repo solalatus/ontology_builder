@@ -12,8 +12,23 @@ specification is `../../EXPERIMENT_BRIEF.md`; nothing under `../runs/` was modif
 | **B1** `b1-one-shot/` | how a conversation becomes a model | one extraction call over the *interactive runs' own* finished transcripts | (reuses those transcripts) |
 | **B2** `b2-generic-interviewer/` | the interviewer's system prompt | incremental commits, exactly as interactive | 12 / 7 / 9 |
 | **B3** `b3-no-commit/` | whether anything can be committed mid-conversation | one extraction call over this run's own transcript | 72 / 68 / 84 |
+| **post-normalization-v1** `post-normalization-v1/` | whether a finished ontology gets a dedicated structural review pass | one review call over the interactive run's own transcript **and its own ontology** | (reuses those transcripts) |
+| **post-normalization-v2** `post-normalization-v2/` | v1's prompt plus exactly two constraints (mechanically derived from it) | same, one review call per run | (reuses those transcripts) |
 
 B4 (private scratch model) and B5 (held-out fixture) were not run.
+
+The two `post-normalization-*` conditions are the odd ones out and are read differently from B1–B3.
+The B-conditions each replace some part of the pipeline that *produces* a model,
+so they are alternatives to the interactive run. This one starts *from* the
+interactive run's own output and asks whether reviewing it afterwards improves
+it, so its comparison is paired rather than between-groups, and its primary
+endpoint is a blind transcript-grounded judge rather than recovery F1 — for
+reasons the condition's own pre-registration argues before any result existed
+(`../../POST_NORMALIZATION.md` §5.1). v2 is v1's prompt plus exactly two constraints,
+constructed from v1's own string so the single-factor variation is mechanically
+enforced rather than asserted. Reports: `post-normalization-v1/REPORT.md` and
+`post-normalization-v2/REPORT.md` (which carries the final recommendation);
+issue #75 is the specification.
 
 ## Results
 
@@ -33,6 +48,8 @@ Reproduce with `node tests/evals/score-baseline.mjs <condition> <run-id> [...]`.
 | B1 one-shot | 44.7 / 45.7 / 40.0 (**43.5**) | 13.4 / 12.2 / 4.1 (**9.9**) | 16.7 / 32.0 / 18.4 (**22.4**) |
 | B2 generic interviewer | 30.9 / 31.7 / 39.6 (**34.1**) | 2.6 / 3.3 / 8.8 (**4.9**) | 12.3 / 5.3 / 13.6 (**10.4**) |
 | B3 no commit | 54.2 / 51.9 / 44.4 (**50.2**) | 4.9 / 6.3 / 6.9 (**6.0**) | 27.6 / 27.1 / 23.7 (**26.1**) |
+| post-normalization-v1 | 44.7 / 45.7 / 40.0 (**43.4**) | 13.3 / 12.2 / 4.1 (**9.9**) | 14.8 / 28.4 / 18.4 (**20.5**) |
+| post-normalization-v2 | 44.7 / 45.7 / 40.0 (**43.4**) | 13.3 / 12.2 / 4.0 (**9.8**) | 14.8 / 28.4 / 18.4 (**20.5**) |
 
 ### Practical scope (28 / 41 / 26)
 
@@ -42,6 +59,8 @@ Reproduce with `node tests/evals/score-baseline.mjs <condition> <run-id> [...]`.
 | B1 one-shot | 70.4 / 65.4 / 56.0 (**63.9**) | 24.4 / 17.5 / 5.1 (**15.7**) | 19.7 / 27.1 / 17.9 (**21.6**) |
 | B2 generic interviewer | 24.6 / 32.5 / 51.0 (**36.0**) | 2.6 / 0.0 / 6.5 (**3.0**) | 5.6 / 6.0 / 9.4 (**7.0**) |
 | B3 no commit | 59.7 / 62.5 / 57.6 (**59.9**) | 6.2 / 6.6 / 9.3 (**7.4**) | 17.4 / 21.3 / 16.4 (**18.4**) |
+| post-normalization-v1 | 70.4 / 65.4 / 56.0 (**63.9**) | 24.1 / 17.3 / 5.1 (**15.5**) | 15.4 / 21.8 / 17.9 (**18.4**) |
+| post-normalization-v2 | 70.4 / 65.4 / 56.0 (**63.9**) | 24.1 / 17.3 / 4.9 (**15.4**) | 15.4 / 21.8 / 17.9 (**18.4**) |
 
 No edge was discarded for naming an undeclared endpoint class in any condition.
 
@@ -75,10 +94,33 @@ counts differ, and B3's model comes from B1's extraction call rather than from c
 calls — so B3 vs interactive varies committing *and* the model-building path, while B3 vs B1
 isolates the effect of tool availability on the conversation itself.
 
+**post-normalization — a structural review pass is invisible to this scorer, and the treatment did not
+survive a minimal prompt change.** Two conditions were run. v1's blind structural judge preferred the
+reviewed model in 2 of 3 runs; v2 -- v1's prompt plus exactly two constraints, each written against one of
+the two causes v1's single failure was traced to -- preferred it in **0 of 3**, losing 20 of 24 blind
+verdicts on a four-model panel that had just reproduced v1's outcome exactly. v2 destroyed an elicited
+action verification step by pasting its own template placeholder over it, invented a relationship and made
+it an action precondition, and ignored, verbatim, the one-sentence prohibition written for the single case
+in the corpus it applied to. The experiment's final recommendation is **REJECT**:
+`post-normalization-v2/REPORT.md`.
+
+**post-normalization-v1 — a structural review pass is invisible to this scorer.** The condition's
+figures above are identical to the interactive arm's to the decimal, and that is the result, not a
+copy-paste error: 17 of 18 run × dimension × scope cells moved by exactly 0.0 points and the
+eighteenth by +0.1, while the blind structural judge preferred the reviewed model in 2 of 3 runs and
+rejected it unanimously in the third. `cross-run-analyses.mjs` and `threshold-sensitivity.mjs`
+likewise return output indistinguishable from the interactive arm's. Recovery F1 measures agreement
+with a fixed reference model; splitting an overloaded predicate, repairing a value set, or
+rewriting rule conditions does not move it in either direction. Criteria "F1 did not decrease"
+passed here **vacuously**, and should be read as a guardrail against catastrophe rather than as
+evidence that quality was preserved. Full result and the B (insufficient evidence) recommendation:
+`post-normalization-v1/REPORT.md`.
+
 **The concept–structure gap is condition-invariant.** Class F1 exceeds relationship F1 in all 12
 condition-runs under both denominators, and exceeds property F1 in all 24 condition-run-scope
-combinations. The gap survives one-shot extraction, a generic interviewer, and an interview that
-never commits. Whatever produces it, it is not the tool-calling loop.
+combinations. The gap survives one-shot extraction, a generic interviewer, an interview that
+never commits, and both versions of a dedicated post-hoc structural review pass. Whatever produces it,
+it is not the tool-calling loop.
 
 ## Methodological notes
 

@@ -1,0 +1,43 @@
+{
+  "classes": {
+    "added": [],
+    "removed": [],
+    "changed": []
+  },
+  "properties": {
+    "added": [],
+    "removed": [],
+    "changed": []
+  },
+  "relationships": {
+    "added": [],
+    "removed": [
+      {
+        "name": "generates",
+        "from": "MonitoringSystem",
+        "to": "Alert",
+        "label": "MonitoringSystem --generates--> Alert"
+      }
+    ],
+    "changed": [],
+    "directionChanged": []
+  },
+  "rules": {
+    "added": [],
+    "removed": [],
+    "changed": [
+      {
+        "name": "canGeneratePostIncidentReview",
+        "conditionsAdded": [],
+        "conditionsRemoved": [
+          "Incident has a Post-Incident Review record."
+        ]
+      }
+    ]
+  },
+  "actions": {
+    "added": [],
+    "removed": [],
+    "changed": []
+  }
+}

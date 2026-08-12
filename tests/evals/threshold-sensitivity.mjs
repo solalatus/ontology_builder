@@ -55,24 +55,30 @@ export function sweep(states, gold, classGrid = CLASS_GRID, relPropGrid = REL_PR
 if (import.meta.url === `file://${process.argv[1]}`) {
   const args = process.argv.slice(2);
   const scopeName = (args.find((a) => a.startsWith("--scope=")) || "--scope=full").split("=")[1];
+  // --condition=<name> sweeps a comparison condition's models instead of the
+  // interactive runs' (EXPERIMENT_BRIEF.md §6). The sweep is deterministic-only
+  // either way, so nothing else changes.
+  const conditionArg = args.find((a) => a.startsWith("--condition="));
+  const condition = conditionArg ? conditionArg.split("=")[1] : null;
   const runIds = args.filter((a) => !a.startsWith("--"));
   if (!runIds.length) {
-    console.error("Usage: node tests/evals/threshold-sensitivity.mjs [--scope=full|practical] <run-id> [...]");
+    console.error("Usage: node tests/evals/threshold-sensitivity.mjs [--scope=full|practical] [--condition=<name>] <run-id> [...]");
     console.error("Example: node tests/evals/threshold-sensitivity.mjs run-01 run-02 run-03");
     process.exit(1);
   }
 
   const full = loadGroundTruthModel();
   const gold = scopeName === "full" ? full : scopeGroundTruth(full, full.practicalScopeClassIds, full.practicalScopePropertyIds);
+  const sourceDir = condition ? path.join(__dirname, "results", "baselines", condition) : RUNS_DIR;
   const states = runIds.map((runId) => ({
     runId,
-    state: recoveredStateFromYaml(fs.readFileSync(path.join(RUNS_DIR, runId, "recovered-model.yaml"), "utf8")).state,
+    state: recoveredStateFromYaml(fs.readFileSync(path.join(sourceDir, runId, "recovered-model.yaml"), "utf8")).state,
   }));
 
   const cells = sweep(states, gold);
   const pct = (x) => `${(x * 100).toFixed(0)}%`;
 
-  console.log(`Scope: ${scopeName}. Heuristic pass only (see this file's header). Default thresholds: class ${MATCH_THRESHOLDS.class}, rel/prop ${MATCH_THRESHOLDS.relationshipOrProperty}.`);
+  console.log(`Source: ${condition || "interactive runs"}. Scope: ${scopeName}. Heuristic pass only (see this file's header). Default thresholds: class ${MATCH_THRESHOLDS.class}, rel/prop ${MATCH_THRESHOLDS.relationshipOrProperty}.`);
   console.log(`Grid: class ${CLASS_GRID.join(", ")} x rel/prop ${REL_PROP_GRID.join(", ")} over ${runIds.length} run(s) = ${cells.length} combinations.\n`);
   console.log("run       class thr  rel/prop thr   class F1   rel F1   prop F1   class > rel");
   for (const c of cells) {

@@ -1,0 +1,29 @@
+[
+  {
+    "changeType": "repair-action-reachability",
+    "summary": "Added direct PostIncidentReview-to-ITService relationship for service-based review retrieval",
+    "reason": "The transcript requires answering prior root cause and open corrective actions 'for this service', but the existing model only links PostIncidentReview to Incident. Since Incident points to ITService in the opposite direction, a review cannot reach a service from the review input or be directly retrieved by service without an accidental inverse traversal.",
+    "agentImpact": "The agent can now reliably retrieve prior post-incident reviews for a service and use them for service-based root-cause and corrective-action questions.",
+    "before": "PostIncidentReview reviewed Incident only; service lookup depended on traversing incoming Incident→ITService links.",
+    "after": "Added PostIncidentReview —about→ ITService.",
+    "evidence": "Question 12: 'What was the root cause identified for previous incidents related to this service?' and Question 13: 'Are there any open corrective actions from past post-incident reviews for this service?'"
+  },
+  {
+    "changeType": "repair-action-reachability",
+    "summary": "Adjusted regulatory notification rule to start from the action input's reachable graph",
+    "reason": "The action input is RegulatoryNotification. The prior rule began with 'Incident has a Materiality Assessment,' but from RegulatoryNotification the model can only reach Incident through RegulatoryNotification —about→ Incident. The graph already supports the needed path, so the rule should reflect reachable conditions.",
+    "agentImpact": "The agent can evaluate sendRegulatoryNotification preconditions from the RegulatoryNotification input without relying on an unreachable starting point.",
+    "before": "canSendRegulatoryNotification began with conditions phrased from Incident outward.",
+    "after": "canSendRegulatoryNotification now starts from 'Regulatory Notification is about an Incident' and then follows the reachable Incident→MaterialityAssessment path.",
+    "evidence": "Action definition: 'sendRegulatoryNotification - Input class: Regulatory Notification' and confirmed relationships 'Regulatory Notification —about→ Incident' plus 'Incident —has materiality assessment→ Materiality Assessment'."
+  },
+  {
+    "changeType": "repair-action-reachability",
+    "summary": "Updated post-incident review rule to use the newly modeled service link",
+    "reason": "The transcript requires service-based retrieval of prior reviews. Once PostIncidentReview —about→ ITService is added, the rule for conducting a review should include the service linkage actually used operationally.",
+    "agentImpact": "The agent can verify that a post-incident review is connected not only to an incident but also to the service context needed for later service-based questions.",
+    "before": "canConductPostIncidentReview required only review-to-incident linkage.",
+    "after": "canConductPostIncidentReview also requires that the Post-Incident Review is about an IT Service.",
+    "evidence": "Question 12 asks for previous incidents 'related to this service,' and the expert kept Post-Incident Review as a separate class for retrieving prior reviews."
+  }
+]

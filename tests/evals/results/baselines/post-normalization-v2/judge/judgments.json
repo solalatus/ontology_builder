@@ -1,0 +1,1387 @@
+{
+  "schemaVersion": 1,
+  "condition": "post-normalization-v2",
+  "generatedAt": "2026-08-12T11:28:15.663Z",
+  "judgePromptSha256": "3f3f01825fdc32d0bd0542ab53f3af92a8116a9feb24acf708f82a5bcf1bb011",
+  "blindingSalt": "post-normalization-v1/blind-order",
+  "judgeModels": [
+    "gpt-5.6-sol",
+    "gpt-5.1",
+    "gpt-4.1-internal",
+    "o4-mini"
+  ],
+  "preregisteredJudgeModels": [
+    "gpt-5.6-sol",
+    "gpt-5.1"
+  ],
+  "provider": "azure",
+  "parseFailures": [],
+  "note": "Blind transcript-grounded A/B comparison of the interactive run's ontology against the post-normalization-v1 candidate. The judge never saw the fixture, the normalizer prompt, any score, or which model was which. Every pair was judged in both orderings by two judge models, neither of which is the normalizer's model.",
+  "usageTotal": {
+    "prompt_tokens": 1700758,
+    "completion_tokens": 23011,
+    "total_tokens": 1723769,
+    "calls": 24
+  },
+  "judgments": [
+    {
+      "runId": "run-01",
+      "judgeModel": "gpt-5.6-sol",
+      "order": "primary",
+      "blindingKey": "27ad9d43bdd5170546e8b7721c0d01441670d4912245fd3e3e234fe282686bba",
+      "originalPresentedAs": "B",
+      "preferred": "original",
+      "preferredPosition": "B",
+      "confidence": "high",
+      "shortReason": "The models are otherwise substantively identical and closely trace the transcript, including their shared rule-reachability defects. Model B is preferable because it preserves the explicitly confirmed verification for acknowledgeIncident, while Model A replaces it with a non-operational placeholder.",
+      "material_regressions_original": [
+        "Several action preconditions are not reachable or representable from their input classes: isolateConfigurationItem cannot traverse from ConfigurationItem to the Incident, and emergency-change, restoration, notification, communication, SLO, and review rules rely on unmodeled facts such as plans, target readiness, policy requirements, history, requests, milestones, and findings."
+      ],
+      "material_regressions_normalized": [
+        "acknowledgeIncident has the placeholder verification 'how to confirm it worked' rather than the confirmed read-back check, so the agent cannot verify the action correctly.",
+        "Several action preconditions are not reachable or representable from their input classes: isolateConfigurationItem cannot traverse from ConfigurationItem to the Incident, and emergency-change, restoration, notification, communication, SLO, and review rules rely on unmodeled facts such as plans, target readiness, policy requirements, history, requests, milestones, and findings."
+      ],
+      "unsupported_additions_original": [],
+      "unsupported_additions_normalized": [],
+      "competency_coverage_loss_original": [
+        "The agent cannot reliably evaluate multiple named decision rules or safely gate their associated actions because required condition data is absent or unreachable."
+      ],
+      "competency_coverage_loss_normalized": [
+        "The agent cannot perform the transcript-confirmed verification for acknowledgeIncident.",
+        "The agent cannot reliably evaluate multiple named decision rules or safely gate their associated actions because required condition data is absent or unreachable."
+      ],
+      "sideCheck": {
+        "A": "normalized",
+        "B": "original"
+      },
+      "modelReported": "gpt-5.6-sol-2026-07-09",
+      "usage": {
+        "completion_tokens": 1219,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 825,
+          "rejected_prediction_tokens": 0
+        },
+        "latency_checkpoint": {
+          "engine_tbt_ms": 13,
+          "engine_ttft_ms": 721,
+          "engine_ttlt_ms": 17144,
+          "pre_inference_ms": 513,
+          "service_tbt_ms": 13,
+          "service_ttft_ms": 1438,
+          "service_ttlt_ms": 17823,
+          "total_duration_ms": 17320,
+          "user_visible_ttft_ms": 925
+        },
+        "prompt_tokens": 73897,
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 0
+        },
+        "total_tokens": 75116
+      },
+      "replyReusedFromDisk": false
+    },
+    {
+      "runId": "run-01",
+      "judgeModel": "gpt-5.6-sol",
+      "order": "reversed",
+      "blindingKey": "27ad9d43bdd5170546e8b7721c0d01441670d4912245fd3e3e234fe282686bba",
+      "originalPresentedAs": "A",
+      "preferred": "original",
+      "preferredPosition": "A",
+      "confidence": "high",
+      "shortReason": "The models are otherwise effectively identical and closely trace the transcript, including its shared reachability and rule-field gaps. Model A is preferable because it preserves the expert-confirmed acknowledgement verification, while Model B replaces it with a non-operational placeholder.",
+      "material_regressions_original": [
+        "Several action preconditions reference unmodeled facts, including emergency-change implementation/backout plans, restoration target readiness/process, CI source and propagation risk, stakeholder requests, and policy requirements.",
+        "isolateConfigurationItem takes ConfigurationItem as input, but configurationItemIsolationRequired depends on Incident facts that are not reachable through an outgoing relationship from ConfigurationItem.",
+        "Some regulatory and post-incident-review rule inputs are unreachable or absent, including incident history, mandatory-reporting evidence criteria, major-incident lifecycle classification, multi-team involvement, and policy mandates."
+      ],
+      "material_regressions_normalized": [
+        "Several action preconditions reference unmodeled facts, including emergency-change implementation/backout plans, restoration target readiness/process, CI source and propagation risk, stakeholder requests, and policy requirements.",
+        "isolateConfigurationItem takes ConfigurationItem as input, but configurationItemIsolationRequired depends on Incident facts that are not reachable through an outgoing relationship from ConfigurationItem.",
+        "Some regulatory and post-incident-review rule inputs are unreachable or absent, including incident history, mandatory-reporting evidence criteria, major-incident lifecycle classification, multi-team involvement, and policy mandates.",
+        "acknowledgeIncident replaces the confirmed verification procedure with the meaningless placeholder 'how to confirm it worked', so the agent cannot verify acknowledgement."
+      ],
+      "unsupported_additions_original": [],
+      "unsupported_additions_normalized": [],
+      "competency_coverage_loss_original": [
+        "The agent cannot reliably evaluate all preconditions for isolation, emergency change, backup restoration, regulatory notification, stakeholder communication, or post-incident review from the modeled information."
+      ],
+      "competency_coverage_loss_normalized": [
+        "The agent cannot reliably evaluate all preconditions for isolation, emergency change, backup restoration, regulatory notification, stakeholder communication, or post-incident review from the modeled information.",
+        "The agent cannot perform the transcript-confirmed read-back verification for acknowledgeIncident."
+      ],
+      "sideCheck": {
+        "A": "original",
+        "B": "normalized"
+      },
+      "modelReported": "gpt-5.6-sol-2026-07-09",
+      "usage": {
+        "completion_tokens": 1495,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 1005,
+          "rejected_prediction_tokens": 0
+        },
+        "latency_checkpoint": {
+          "engine_tbt_ms": 14,
+          "engine_ttft_ms": 749,
+          "engine_ttlt_ms": 21605,
+          "pre_inference_ms": 270,
+          "service_tbt_ms": 14,
+          "service_ttft_ms": 1088,
+          "service_ttlt_ms": 21960,
+          "total_duration_ms": 21715,
+          "user_visible_ttft_ms": 818
+        },
+        "prompt_tokens": 73897,
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 0
+        },
+        "total_tokens": 75392
+      },
+      "replyReusedFromDisk": false
+    },
+    {
+      "runId": "run-01",
+      "judgeModel": "gpt-5.1",
+      "order": "primary",
+      "blindingKey": "103a2af869743f469dfcbc00aa2ef05ba24946424bcd56bd5b1ff6ec092e1dab",
+      "originalPresentedAs": "A",
+      "preferred": "original",
+      "preferredPosition": "A",
+      "confidence": "high",
+      "shortReason": "Model A mirrors the expert-confirmed ontology, including detailed verification steps for actions, with no deviations from the transcript. Model B is effectively identical except for a degraded, non-specific verification for acknowledgeIncident, which breaks fidelity to the expert’s specified action definition and slightly weakens operational coherence, so Model A is preferred.",
+      "material_regressions_original": [],
+      "material_regressions_normalized": [
+        "acknowledgeIncident.action.verification is given as the vague text 'how to confirm it worked' instead of the concrete verification step the expert confirmed, weakening action coherence and leaving the agent without modeled confirmation behavior."
+      ],
+      "unsupported_additions_original": [],
+      "unsupported_additions_normalized": [],
+      "competency_coverage_loss_original": [],
+      "competency_coverage_loss_normalized": [
+        "Missing explicit verification for acknowledgeIncident means the model does not encode how to confirm acknowledgement and status update, slightly reducing operational action coverage compared to what the expert endorsed."
+      ],
+      "sideCheck": {
+        "A": "original",
+        "B": "normalized"
+      },
+      "modelReported": "gpt-5.1-2025-11-13",
+      "usage": {
+        "completion_tokens": 235,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": 0
+        },
+        "latency_checkpoint": {
+          "engine_tbt_ms": 9,
+          "engine_ttft_ms": 2169,
+          "engine_ttlt_ms": 4191,
+          "pre_inference_ms": 618,
+          "service_tbt_ms": 9,
+          "service_ttft_ms": 3319,
+          "service_ttlt_ms": 5338,
+          "total_duration_ms": 4730,
+          "user_visible_ttft_ms": 2702
+        },
+        "prompt_tokens": 73897,
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 0
+        },
+        "total_tokens": 74132
+      },
+      "replyReusedFromDisk": false
+    },
+    {
+      "runId": "run-01",
+      "judgeModel": "gpt-5.1",
+      "order": "reversed",
+      "blindingKey": "103a2af869743f469dfcbc00aa2ef05ba24946424bcd56bd5b1ff6ec092e1dab",
+      "originalPresentedAs": "B",
+      "preferred": "normalized",
+      "preferredPosition": "A",
+      "confidence": "high",
+      "shortReason": "Both models closely mirror the recovered ontology, but Model A preserves the structure and phrasing of rules and actions more cleanly, with all conditions expressed as discrete, machine-usable bullets and no extra narrative quoting. Model B is effectively the same ontology but introduces quoted, less-structured rule lines and minor formatting deviations that make it slightly less suitable for an agent, so Model A is preferred.",
+      "material_regressions_original": [
+        "Several rule condition lines in Model B are stored as quoted free-text strings (e.g., \"Incident status is not resolved, closed, or cancelled.\"), making them less structured and harder for an agent to reliably evaluate compared to Model A's cleaner phrasing.",
+        "Model B omits the EvidenceCollectionRequired, StakeholderCommunicationRequired, etc. being clearly tied to the detailed operational consequences captured in Phase 6 recap; its rules are present but retain more narrative-style text, which may require additional parsing."
+      ],
+      "material_regressions_normalized": [
+        "Incident.acknowledgeIncident action's verification text is incomplete ('how to confirm it worked') and should explicitly describe checking acknowledged and status, but this is a minor documentation issue rather than a structural defect."
+      ],
+      "unsupported_additions_original": [
+        "ITService.meaning in Model B is unquoted and slightly rephrased; while semantically similar, the omission of quotes departs from the transcript’s wording and introduces a minor inconsistency.",
+        "Certain rule conditions in Model B embed additional descriptive text (e.g., quoted sentences) that are not clearly delimited into separate, machine-usable predicates beyond what was agreed in the transcript."
+      ],
+      "unsupported_additions_normalized": [],
+      "competency_coverage_loss_original": [],
+      "competency_coverage_loss_normalized": [],
+      "sideCheck": {
+        "A": "normalized",
+        "B": "original"
+      },
+      "modelReported": "gpt-5.1-2025-11-13",
+      "usage": {
+        "completion_tokens": 402,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": 0
+        },
+        "latency_checkpoint": {
+          "engine_tbt_ms": 10,
+          "engine_ttft_ms": 678,
+          "engine_ttlt_ms": 4803,
+          "pre_inference_ms": 449,
+          "service_tbt_ms": 10,
+          "service_ttft_ms": 1618,
+          "service_ttlt_ms": 5739,
+          "total_duration_ms": 5300,
+          "user_visible_ttft_ms": 1169
+        },
+        "prompt_tokens": 73897,
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 62208
+        },
+        "total_tokens": 74299
+      },
+      "replyReusedFromDisk": false
+    },
+    {
+      "runId": "run-01",
+      "judgeModel": "gpt-4.1-internal",
+      "order": "primary",
+      "blindingKey": "d52827527f1cb2982af15d595511370d0147993fa41f79d7cd9d44f02ffa1c42",
+      "originalPresentedAs": "B",
+      "preferred": "tie",
+      "preferredPosition": "tie",
+      "confidence": "high",
+      "shortReason": "Models A and B are functionally identical in structure, coverage, and content, with no substantive differences traceable to the transcript: all classes, properties, relationships, rules, and actions exactly match the expert's statements. Neither model includes unsupported additions, omits required content, or suffers operational gaps, so either is equally suitable for agent use.",
+      "material_regressions_original": [],
+      "material_regressions_normalized": [],
+      "unsupported_additions_original": [],
+      "unsupported_additions_normalized": [],
+      "competency_coverage_loss_original": [],
+      "competency_coverage_loss_normalized": [],
+      "sideCheck": {
+        "A": "normalized",
+        "B": "original"
+      },
+      "modelReported": "gpt-4.1-2025-04-14",
+      "usage": {
+        "completion_tokens": 150,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": 0
+        },
+        "latency_checkpoint": {
+          "engine_tbt_ms": 7,
+          "engine_ttft_ms": 2597,
+          "engine_ttlt_ms": 3589,
+          "pre_inference_ms": 671,
+          "service_tbt_ms": 7,
+          "service_ttft_ms": 3362,
+          "service_ttlt_ms": 4338,
+          "total_duration_ms": 3677,
+          "user_visible_ttft_ms": 2690
+        },
+        "prompt_tokens": 73898,
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 0
+        },
+        "total_tokens": 74048
+      },
+      "replyReusedFromDisk": false
+    },
+    {
+      "runId": "run-01",
+      "judgeModel": "gpt-4.1-internal",
+      "order": "reversed",
+      "blindingKey": "d52827527f1cb2982af15d595511370d0147993fa41f79d7cd9d44f02ffa1c42",
+      "originalPresentedAs": "A",
+      "preferred": "original",
+      "preferredPosition": "A",
+      "confidence": "high",
+      "shortReason": "Model A is fully evidence-aligned and operationally complete; Model B omits the verification detail for acknowledgeIncident, introducing ambiguity that could impair agent workflow. Otherwise, both models are nearly identical, but this subtle omission caused by an incomplete action definition gives Model A a clear edge.",
+      "material_regressions_original": [],
+      "material_regressions_normalized": [
+        "Action acknowledgeIncident missing explicit verification steps; effect 'how to confirm it worked' is ambiguous and not operationally usable."
+      ],
+      "unsupported_additions_original": [],
+      "unsupported_additions_normalized": [],
+      "competency_coverage_loss_original": [],
+      "competency_coverage_loss_normalized": [
+        "Action acknowledgeIncident lacks transcript-supported operational verification; could lead to ambiguous workflow; otherwise coverage is equivalent."
+      ],
+      "sideCheck": {
+        "A": "original",
+        "B": "normalized"
+      },
+      "modelReported": "gpt-4.1-2025-04-14",
+      "usage": {
+        "completion_tokens": 183,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": 0
+        },
+        "latency_checkpoint": {
+          "engine_tbt_ms": 8,
+          "engine_ttft_ms": 596,
+          "engine_ttlt_ms": 2084,
+          "pre_inference_ms": 322,
+          "service_tbt_ms": 8,
+          "service_ttft_ms": 1009,
+          "service_ttlt_ms": 2509,
+          "total_duration_ms": 2191,
+          "user_visible_ttft_ms": 687
+        },
+        "prompt_tokens": 73898,
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 62208
+        },
+        "total_tokens": 74081
+      },
+      "replyReusedFromDisk": false
+    },
+    {
+      "runId": "run-01",
+      "judgeModel": "o4-mini",
+      "order": "primary",
+      "blindingKey": "7ff937602feb763713f03d9333355ef2e9f712d20122a2fc4d5d19182737dcb0",
+      "originalPresentedAs": "B",
+      "preferred": "tie",
+      "preferredPosition": "tie",
+      "confidence": "high",
+      "shortReason": "Both models are identical, fully traceable to the transcript, and cover all required questions and actions without unsupported content.",
+      "material_regressions_original": [],
+      "material_regressions_normalized": [],
+      "unsupported_additions_original": [],
+      "unsupported_additions_normalized": [],
+      "competency_coverage_loss_original": [],
+      "competency_coverage_loss_normalized": [],
+      "sideCheck": {
+        "A": "normalized",
+        "B": "original"
+      },
+      "modelReported": "o4-mini-2025-04-16",
+      "usage": {
+        "completion_tokens": 314,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 192,
+          "rejected_prediction_tokens": 0
+        },
+        "latency_checkpoint": {
+          "engine_tbt_ms": 26,
+          "engine_ttft_ms": 3798,
+          "engine_ttlt_ms": 12610,
+          "pre_inference_ms": 467,
+          "service_tbt_ms": 26,
+          "service_ttft_ms": 5508,
+          "service_ttlt_ms": 14315,
+          "total_duration_ms": 13857,
+          "user_visible_ttft_ms": 5041
+        },
+        "prompt_tokens": 73897,
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 0
+        },
+        "total_tokens": 74211
+      },
+      "replyReusedFromDisk": false
+    },
+    {
+      "runId": "run-01",
+      "judgeModel": "o4-mini",
+      "order": "reversed",
+      "blindingKey": "7ff937602feb763713f03d9333355ef2e9f712d20122a2fc4d5d19182737dcb0",
+      "originalPresentedAs": "A",
+      "preferred": "original",
+      "preferredPosition": "A",
+      "confidence": "high",
+      "shortReason": "Model B’s acknowledgeIncident action lacks a concrete verification step, compromising its operational completeness, whereas Model A fully specifies it.",
+      "material_regressions_original": [],
+      "material_regressions_normalized": [
+        "acknowledgeIncident action has a placeholder verification instead of concrete steps"
+      ],
+      "unsupported_additions_original": [],
+      "unsupported_additions_normalized": [],
+      "competency_coverage_loss_original": [],
+      "competency_coverage_loss_normalized": [],
+      "sideCheck": {
+        "A": "original",
+        "B": "normalized"
+      },
+      "modelReported": "o4-mini-2025-04-16",
+      "usage": {
+        "completion_tokens": 717,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 576,
+          "rejected_prediction_tokens": 0
+        },
+        "latency_checkpoint": {
+          "engine_tbt_ms": 26,
+          "engine_ttft_ms": 1234,
+          "engine_ttlt_ms": 21297,
+          "pre_inference_ms": 513,
+          "service_tbt_ms": 26,
+          "service_ttft_ms": 2415,
+          "service_ttlt_ms": 22476,
+          "total_duration_ms": 21973,
+          "user_visible_ttft_ms": 1901
+        },
+        "prompt_tokens": 73897,
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 62208
+        },
+        "total_tokens": 74614
+      },
+      "replyReusedFromDisk": false
+    },
+    {
+      "runId": "run-02",
+      "judgeModel": "gpt-5.6-sol",
+      "order": "primary",
+      "blindingKey": "7202e4542d4fc86c50446d74db4f84375de82ab653520da169955663e87f8ba0",
+      "originalPresentedAs": "A",
+      "preferred": "original",
+      "preferredPosition": "A",
+      "confidence": "high",
+      "shortReason": "The models are nearly identical, but Model B adds an unestablished PostIncidentReview-to-ITService relationship and makes it an action-blocking requirement. Model A therefore has better evidence fidelity while retaining the transcript-confirmed incident-to-service path for finding prior reviews.",
+      "material_regressions_original": [
+        "canSendRegulatoryNotification requires status approved, but approved is absent from RegulatoryNotification.status allowed values, making the action unsatisfiable under enforced choices.",
+        "acknowledgeAlert starts from Alert but cannot reach the triggering Incident through the directed relationships needed by its precondition.",
+        "restoreFromBackupSet starts from BackupSet but cannot reach the Incident whose status and affected target its precondition must validate.",
+        "documentCorrectiveAction starts from CorrectiveAction but cannot reach its Incident or PostIncidentReview because both modeled links point toward CorrectiveAction.",
+        "declareMajorIncident verifies that an Incident Commander is identified or assigned, but neither its precondition nor effect guarantees that outcome.",
+        "conductPostIncidentReview says findings are documented, but PostIncidentReview has no general findings property beyond rootCause."
+      ],
+      "material_regressions_normalized": [
+        "canSendRegulatoryNotification requires status approved, but approved is absent from RegulatoryNotification.status allowed values, making the action unsatisfiable under enforced choices.",
+        "acknowledgeAlert starts from Alert but cannot reach the triggering Incident through the directed relationships needed by its precondition.",
+        "restoreFromBackupSet starts from BackupSet but cannot reach the Incident whose status and affected target its precondition must validate.",
+        "documentCorrectiveAction starts from CorrectiveAction but cannot reach its Incident or PostIncidentReview because both modeled links point toward CorrectiveAction.",
+        "declareMajorIncident verifies that an Incident Commander is identified or assigned, but neither its precondition nor effect guarantees that outcome.",
+        "conductPostIncidentReview says findings are documented, but PostIncidentReview has no general findings property beyond rootCause.",
+        "canConductPostIncidentReview additionally requires a direct PostIncidentReview-to-ITService link, unnecessarily blocking reviews that satisfy the transcript-confirmed incident-based conditions."
+      ],
+      "unsupported_additions_original": [],
+      "unsupported_additions_normalized": [
+        "PostIncidentReview —about→ ITService was never established; the transcript explicitly supported finding service-related reviews through PostIncidentReview —reviews→ Incident and Incident —affects→ ITService.",
+        "The added canConductPostIncidentReview condition requiring the review to be about an IT Service was not part of the expert-confirmed rule."
+      ],
+      "competency_coverage_loss_original": [
+        "Regulatory notification submission can be blocked for every valid modeled notification because approved is not an allowed status.",
+        "Directed action-input reachability is incomplete for alert acknowledgement, backup restoration, and corrective-action documentation.",
+        "Post-incident review findings other than root cause cannot be represented explicitly."
+      ],
+      "competency_coverage_loss_normalized": [
+        "Regulatory notification submission can be blocked for every valid modeled notification because approved is not an allowed status.",
+        "Directed action-input reachability is incomplete for alert acknowledgement, backup restoration, and corrective-action documentation.",
+        "Post-incident review findings other than root cause cannot be represented explicitly.",
+        "A valid post-incident review may be rejected solely because the unsupported direct IT-service relationship is absent."
+      ],
+      "sideCheck": {
+        "A": "original",
+        "B": "normalized"
+      },
+      "modelReported": "gpt-5.6-sol-2026-07-09",
+      "usage": {
+        "completion_tokens": 2138,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 1407,
+          "rejected_prediction_tokens": 0
+        },
+        "latency_checkpoint": {
+          "engine_tbt_ms": 14,
+          "engine_ttft_ms": 728,
+          "engine_ttlt_ms": 29733,
+          "pre_inference_ms": 351,
+          "service_tbt_ms": 14,
+          "service_ttft_ms": 1132,
+          "service_ttlt_ms": 30146,
+          "total_duration_ms": 29813,
+          "user_visible_ttft_ms": 781
+        },
+        "prompt_tokens": 66509,
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cache_write_tokens": 66506,
+          "cached_tokens": 0
+        },
+        "total_tokens": 68647
+      },
+      "replyReusedFromDisk": false
+    },
+    {
+      "runId": "run-02",
+      "judgeModel": "gpt-5.6-sol",
+      "order": "reversed",
+      "blindingKey": "7202e4542d4fc86c50446d74db4f84375de82ab653520da169955663e87f8ba0",
+      "originalPresentedAs": "B",
+      "preferred": "original",
+      "preferredPosition": "B",
+      "confidence": "high",
+      "shortReason": "Model B is more faithful because it omits Model A's unsupported PostIncidentReview-to-ITService relationship and the resulting extra action precondition. Both models otherwise share serious coherence and action-reachability defects, especially the impossible regulatory-notification approval state.",
+      "material_regressions_original": [
+        "Regulatory notification submission is impossible because canSendRegulatoryNotification requires status approved, but approved is not an allowed RegulatoryNotification.status.",
+        "Alert acknowledgement, backup restoration, and corrective-action documentation cannot reach required Incident facts from their input classes through the directed relationships.",
+        "declareMajorIncident verifies that an Incident Commander is assigned although neither its precondition nor effect ensures that assignment."
+      ],
+      "material_regressions_normalized": [
+        "Regulatory notification submission is impossible because canSendRegulatoryNotification requires status approved, but approved is not an allowed RegulatoryNotification.status.",
+        "Alert acknowledgement, backup restoration, and corrective-action documentation cannot reach required Incident facts from their input classes through the directed relationships.",
+        "canConductPostIncidentReview adds an unsupported requirement that every review be directly about an IT Service, potentially blocking valid reviews linked only to an Incident.",
+        "declareMajorIncident verifies that an Incident Commander is assigned although neither its precondition nor effect ensures that assignment."
+      ],
+      "unsupported_additions_original": [],
+      "unsupported_additions_normalized": [
+        "PostIncidentReview —about→ ITService was never established; the transcript explicitly modeled service-related prior reviews through PostIncidentReview —reviews→ Incident and Incident —affects→ ITService.",
+        "The corresponding requirement that a Post-Incident Review be about an IT Service was not confirmed in the rule interview."
+      ],
+      "competency_coverage_loss_original": [
+        "Sending a regulatory notification is blocked by the nonexistent approved status.",
+        "Several actions cannot evaluate incident-dependent preconditions from their declared input class."
+      ],
+      "competency_coverage_loss_normalized": [
+        "Sending a regulatory notification is blocked by the nonexistent approved status.",
+        "Valid post-incident reviews may be blocked when they review an Incident but lack the invented direct IT Service link.",
+        "Several actions cannot evaluate incident-dependent preconditions from their declared input class."
+      ],
+      "sideCheck": {
+        "A": "normalized",
+        "B": "original"
+      },
+      "modelReported": "gpt-5.6-sol-2026-07-09",
+      "usage": {
+        "completion_tokens": 1419,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 929,
+          "rejected_prediction_tokens": 0
+        },
+        "latency_checkpoint": {
+          "engine_tbt_ms": 13,
+          "engine_ttft_ms": 661,
+          "engine_ttlt_ms": 19663,
+          "pre_inference_ms": 479,
+          "service_tbt_ms": 13,
+          "service_ttft_ms": 1232,
+          "service_ttlt_ms": 20261,
+          "total_duration_ms": 19799,
+          "user_visible_ttft_ms": 753
+        },
+        "prompt_tokens": 66509,
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 0
+        },
+        "total_tokens": 67928
+      },
+      "replyReusedFromDisk": false
+    },
+    {
+      "runId": "run-02",
+      "judgeModel": "gpt-5.1",
+      "order": "primary",
+      "blindingKey": "834bd2c6b93fee44c6c0b23fb11c0e8def79c24e77125b01c8dcb5e815edb00d",
+      "originalPresentedAs": "B",
+      "preferred": "original",
+      "preferredPosition": "B",
+      "confidence": "high",
+      "shortReason": "Model B faithfully mirrors the final validated ontology from the transcript, while Model A introduces an extra PostIncidentReview→ITService relationship that the expert did not agree and that alters review scope. Both otherwise cover all required questions and actions, so the unsupported addition makes A strictly worse and B preferable.",
+      "material_regressions_original": [],
+      "material_regressions_normalized": [
+        "Adds relationship PostIncidentReview —about→ ITService, which was never agreed and shifts review scope from incident-focused to service-focused, potentially confusing retrieval of prior reviews for a service versus for an incident."
+      ],
+      "unsupported_additions_original": [],
+      "unsupported_additions_normalized": [
+        "Relationship PostIncidentReview —about→ ITService is not present in the validated ontology and was explicitly not mentioned or confirmed in the transcript."
+      ],
+      "competency_coverage_loss_original": [],
+      "competency_coverage_loss_normalized": [],
+      "sideCheck": {
+        "A": "normalized",
+        "B": "original"
+      },
+      "modelReported": "gpt-5.1-2025-11-13",
+      "usage": {
+        "completion_tokens": 223,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": 0
+        },
+        "latency_checkpoint": {
+          "engine_tbt_ms": 8,
+          "engine_ttft_ms": 1905,
+          "engine_ttlt_ms": 3617,
+          "pre_inference_ms": 362,
+          "service_tbt_ms": 8,
+          "service_ttft_ms": 2740,
+          "service_ttlt_ms": 4448,
+          "total_duration_ms": 4095,
+          "user_visible_ttft_ms": 2378
+        },
+        "prompt_tokens": 66509,
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 0
+        },
+        "total_tokens": 66732
+      },
+      "replyReusedFromDisk": false
+    },
+    {
+      "runId": "run-02",
+      "judgeModel": "gpt-5.1",
+      "order": "reversed",
+      "blindingKey": "834bd2c6b93fee44c6c0b23fb11c0e8def79c24e77125b01c8dcb5e815edb00d",
+      "originalPresentedAs": "A",
+      "preferred": "original",
+      "preferredPosition": "A",
+      "confidence": "high",
+      "shortReason": "Model A matches the fully validated ontology described in the transcript, with all classes, relationships, rules, and actions traceable to the expert’s confirmations. Model B is nearly identical but introduces an unsupported PostIncidentReview–ITService relationship and relies on it in a rule, which departs from the agreed model and slightly distorts review handling. Therefore Model A is preferred.",
+      "material_regressions_original": [],
+      "material_regressions_normalized": [
+        "Adds relationship PostIncidentReview —about→ ITService which was not defined or required in the transcript and alters the rule canConductPostIncidentReview to depend on it, potentially changing how prior reviews for a service are located compared to the validated model."
+      ],
+      "unsupported_additions_original": [],
+      "unsupported_additions_normalized": [
+        "Relationship PostIncidentReview —about→ ITService is introduced only in Model B; the interview never defined this relationship or required reviews to be explicitly about services beyond reviewing incidents.",
+        "Rule condition 'Post-Incident Review is about an IT Service' in canConductPostIncidentReview depends on the unsupported relationship and was not part of the validated rule set in the transcript."
+      ],
+      "competency_coverage_loss_original": [],
+      "competency_coverage_loss_normalized": [
+        "By requiring PostIncidentReview to be about an ITService in canConductPostIncidentReview, Model B could block valid reviews that are incident-focused as per the transcript, slightly misaligning with how post-incident reviews were described.",
+        "The extra PostIncidentReview —about→ ITService relationship in Model B creates an alternative access path to prior reviews that is not grounded in the transcript, risking inconsistent behavior compared to the validated model."
+      ],
+      "sideCheck": {
+        "A": "original",
+        "B": "normalized"
+      },
+      "modelReported": "gpt-5.1-2025-11-13",
+      "usage": {
+        "completion_tokens": 385,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": 0
+        },
+        "latency_checkpoint": {
+          "engine_tbt_ms": 9,
+          "engine_ttft_ms": 649,
+          "engine_ttlt_ms": 4096,
+          "pre_inference_ms": 542,
+          "service_tbt_ms": 9,
+          "service_ttft_ms": 1676,
+          "service_ttlt_ms": 5117,
+          "total_duration_ms": 4583,
+          "user_visible_ttft_ms": 1134
+        },
+        "prompt_tokens": 66509,
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 55552
+        },
+        "total_tokens": 66894
+      },
+      "replyReusedFromDisk": false
+    },
+    {
+      "runId": "run-02",
+      "judgeModel": "gpt-4.1-internal",
+      "order": "primary",
+      "blindingKey": "235dd4e3bfe7cd8bd2c9c650ac859f1add7fabf90748866ea29c9e0c8edcedc8",
+      "originalPresentedAs": "B",
+      "preferred": "normalized",
+      "preferredPosition": "A",
+      "confidence": "high",
+      "shortReason": "Model B omits the PostIncidentReview --about--> ITService relationship required for retrieving prior reviews and root causes for a service, as established in the transcript. This causes material coverage loss for two core agent questions/actions. Model A contains all transcript-supported structures without unsupported additions.",
+      "material_regressions_original": [
+        "Missing relationship: PostIncidentReview --about--> ITService, causing competency gap for retrieving prior reviews/root cause for a service; this blocks answering 'What was the root cause identified for previous incidents related to this service?' and 'Are there any open corrective actions from past post-incident reviews for this service?'"
+      ],
+      "material_regressions_normalized": [],
+      "unsupported_additions_original": [],
+      "unsupported_additions_normalized": [],
+      "competency_coverage_loss_original": [
+        "Cannot answer prior root cause/corrective action questions tied to a specific IT service, due to missing PostIncidentReview --about--> ITService relationship; agent cannot fulfill two core acceptance-test questions."
+      ],
+      "competency_coverage_loss_normalized": [],
+      "sideCheck": {
+        "A": "normalized",
+        "B": "original"
+      },
+      "modelReported": "gpt-4.1-2025-04-14",
+      "usage": {
+        "completion_tokens": 238,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": 0
+        },
+        "latency_checkpoint": {
+          "engine_tbt_ms": 8,
+          "engine_ttft_ms": 2206,
+          "engine_ttlt_ms": 4122,
+          "pre_inference_ms": 361,
+          "service_tbt_ms": 8,
+          "service_ttft_ms": 2658,
+          "service_ttlt_ms": 4570,
+          "total_duration_ms": 4249,
+          "user_visible_ttft_ms": 2297
+        },
+        "prompt_tokens": 66510,
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 0
+        },
+        "total_tokens": 66748
+      },
+      "replyReusedFromDisk": false
+    },
+    {
+      "runId": "run-02",
+      "judgeModel": "gpt-4.1-internal",
+      "order": "reversed",
+      "blindingKey": "235dd4e3bfe7cd8bd2c9c650ac859f1add7fabf90748866ea29c9e0c8edcedc8",
+      "originalPresentedAs": "A",
+      "preferred": "original",
+      "preferredPosition": "A",
+      "confidence": "high",
+      "shortReason": "Model A preserves direct relationships and class boundaries exactly as established in the transcript while Model B invents a PostIncidentReview —about→ ITService relationship and rule precondition absent from the transcript, introducing an unsupported and potentially confusing retrieval path. Model A is fully evidence-aligned and suitable for agent use.",
+      "material_regressions_original": [],
+      "material_regressions_normalized": [
+        "PostIncidentReview —about→ ITService relationship is an unsupported addition and likely to cause ambiguity; PostIncidentReview can reference Incident directly, per transcript.",
+        "canConductPostIncidentReview rule in B requires PostIncidentReview —about→ ITService, which is not established or operationally supported.",
+        "No established evidence in transcript that 'PostIncidentReview is about ITService so prior reviews can be found for that service'—retrieval of prior reviews should be via Incident and ITService relationships already present."
+      ],
+      "unsupported_additions_original": [],
+      "unsupported_additions_normalized": [
+        "PostIncidentReview —about→ ITService relationship not supported by transcript but present in B.",
+        "Additional condition in canConductPostIncidentReview rule ('Post-Incident Review is about an IT Service') is not established in transcript.",
+        "Meaning for PostIncidentReview —about→ ITService relationship is not transcript-supported."
+      ],
+      "competency_coverage_loss_original": [],
+      "competency_coverage_loss_normalized": [
+        "The misplacement and over-specification of the PostIncidentReview —about→ ITService relationship in B could confuse or block retrieval of prior root causes and corrective actions, which by transcript are tied to incidents/reviews, not arbitrary IT services."
+      ],
+      "sideCheck": {
+        "A": "original",
+        "B": "normalized"
+      },
+      "modelReported": "gpt-4.1-2025-04-14",
+      "usage": {
+        "completion_tokens": 367,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": 0
+        },
+        "latency_checkpoint": {
+          "engine_tbt_ms": 10,
+          "engine_ttft_ms": 554,
+          "engine_ttlt_ms": 4056,
+          "pre_inference_ms": 453,
+          "service_tbt_ms": 10,
+          "service_ttft_ms": 1095,
+          "service_ttlt_ms": 4579,
+          "total_duration_ms": 4137,
+          "user_visible_ttft_ms": 642
+        },
+        "prompt_tokens": 66510,
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 55552
+        },
+        "total_tokens": 66877
+      },
+      "replyReusedFromDisk": false
+    },
+    {
+      "runId": "run-02",
+      "judgeModel": "o4-mini",
+      "order": "primary",
+      "blindingKey": "4af0f1c98c1e9995aaa599bd16d6ffecf458efc2408a992be19ff99c2b658182",
+      "originalPresentedAs": "A",
+      "preferred": "original",
+      "preferredPosition": "A",
+      "confidence": "high",
+      "shortReason": "Model B adds an unsupported Post-Incident Review→ITService relationship and rule condition that would prevent valid reviews, whereas Model A matches the transcript precisely.",
+      "material_regressions_original": [],
+      "material_regressions_normalized": [
+        "canConductPostIncidentReview precondition requires unsupported 'about an IT Service' relationship, blocking the review action"
+      ],
+      "unsupported_additions_original": [],
+      "unsupported_additions_normalized": [
+        "relationship PostIncidentReview —about→ ITService",
+        "rule canConductPostIncidentReview includes unsupported condition 'Post-Incident Review is about an IT Service'"
+      ],
+      "competency_coverage_loss_original": [],
+      "competency_coverage_loss_normalized": [
+        "post-incident review action blocked by extra review→ITService precondition"
+      ],
+      "sideCheck": {
+        "A": "original",
+        "B": "normalized"
+      },
+      "modelReported": "o4-mini-2025-04-16",
+      "usage": {
+        "completion_tokens": 3216,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 3008,
+          "rejected_prediction_tokens": 0
+        },
+        "latency_checkpoint": {
+          "engine_tbt_ms": 24,
+          "engine_ttft_ms": 3238,
+          "engine_ttlt_ms": 83222,
+          "pre_inference_ms": 418,
+          "service_tbt_ms": 24,
+          "service_ttft_ms": 4678,
+          "service_ttlt_ms": 84659,
+          "total_duration_ms": 84301,
+          "user_visible_ttft_ms": 4260
+        },
+        "prompt_tokens": 66509,
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 0
+        },
+        "total_tokens": 69725
+      },
+      "replyReusedFromDisk": false
+    },
+    {
+      "runId": "run-02",
+      "judgeModel": "o4-mini",
+      "order": "reversed",
+      "blindingKey": "4af0f1c98c1e9995aaa599bd16d6ffecf458efc2408a992be19ff99c2b658182",
+      "originalPresentedAs": "B",
+      "preferred": "original",
+      "preferredPosition": "B",
+      "confidence": "high",
+      "shortReason": "Model A introduces a PostIncidentReview→ITService relationship absent from the transcript, whereas Model B matches the expert’s specifications without unsupported additions.",
+      "material_regressions_original": [],
+      "material_regressions_normalized": [
+        "Includes unsupported relationship about from PostIncidentReview to ITService"
+      ],
+      "unsupported_additions_original": [],
+      "unsupported_additions_normalized": [
+        "Relationship 'about' from PostIncidentReview to ITService not established in transcript"
+      ],
+      "competency_coverage_loss_original": [],
+      "competency_coverage_loss_normalized": [],
+      "sideCheck": {
+        "A": "normalized",
+        "B": "original"
+      },
+      "modelReported": "o4-mini-2025-04-16",
+      "usage": {
+        "completion_tokens": 2149,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 1984,
+          "rejected_prediction_tokens": 0
+        },
+        "latency_checkpoint": {
+          "engine_tbt_ms": 24,
+          "engine_ttft_ms": 1181,
+          "engine_ttlt_ms": 54652,
+          "pre_inference_ms": 347,
+          "service_tbt_ms": 24,
+          "service_ttft_ms": 2236,
+          "service_ttlt_ms": 55697,
+          "total_duration_ms": 55358,
+          "user_visible_ttft_ms": 1889
+        },
+        "prompt_tokens": 66509,
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 55552
+        },
+        "total_tokens": 68658
+      },
+      "replyReusedFromDisk": false
+    },
+    {
+      "runId": "run-03",
+      "judgeModel": "gpt-5.6-sol",
+      "order": "primary",
+      "blindingKey": "c0205abf2bec45dc46805661837cdb5b1e448b5f982fbc67651f6bc7a7798142",
+      "originalPresentedAs": "A",
+      "preferred": "original",
+      "preferredPosition": "A",
+      "confidence": "high",
+      "shortReason": "Model A more faithfully preserves the confirmed relationship and rule set. Both models have serious action-input reachability defects, but Model B additionally drops MonitoringSystem → generates → Alert and one confirmed post-incident-review condition.",
+      "material_regressions_original": [
+        "notifyStakeholders starts from StakeholderCommunication but cannot navigate to its Incident to evaluate incident status or impacted Business Services.",
+        "submitRegulatoryNotification starts from RegulatoryNotification but cannot navigate to the associated MaterialityAssessment or Incident needed by its preconditions.",
+        "executeEmergencyChange starts from EmergencyChange but cannot navigate to the associated Incident required by canExecuteEmergencyChange.",
+        "generatePostIncidentReviewReport starts from PostIncidentReview but cannot navigate to the Incident whose status and review association its precondition requires."
+      ],
+      "material_regressions_normalized": [
+        "notifyStakeholders starts from StakeholderCommunication but cannot navigate to its Incident to evaluate incident status or impacted Business Services.",
+        "submitRegulatoryNotification starts from RegulatoryNotification but cannot navigate to the associated MaterialityAssessment or Incident needed by its preconditions.",
+        "executeEmergencyChange starts from EmergencyChange but cannot navigate to the associated Incident required by canExecuteEmergencyChange.",
+        "generatePostIncidentReviewReport starts from PostIncidentReview but cannot navigate to the Incident whose status its precondition requires.",
+        "The confirmed MonitoringSystem-to-Alert generates relationship is absent, preventing the required source-oriented retrieval of alerts.",
+        "canGeneratePostIncidentReview omits the confirmed requirement that the Incident have a Post-Incident Review record."
+      ],
+      "unsupported_additions_original": [],
+      "unsupported_additions_normalized": [],
+      "competency_coverage_loss_original": [],
+      "competency_coverage_loss_normalized": [
+        "Cannot list or manage alerts starting from a Monitoring System through the explicitly required generates relationship."
+      ],
+      "sideCheck": {
+        "A": "original",
+        "B": "normalized"
+      },
+      "modelReported": "gpt-5.6-sol-2026-07-09",
+      "usage": {
+        "completion_tokens": 1436,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 1023,
+          "rejected_prediction_tokens": 0
+        },
+        "latency_checkpoint": {
+          "engine_tbt_ms": 14,
+          "engine_ttft_ms": 713,
+          "engine_ttlt_ms": 20705,
+          "pre_inference_ms": 440,
+          "service_tbt_ms": 14,
+          "service_ttft_ms": 1245,
+          "service_ttlt_ms": 21232,
+          "total_duration_ms": 20803,
+          "user_visible_ttft_ms": 805
+        },
+        "prompt_tokens": 72188,
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 0
+        },
+        "total_tokens": 73624
+      },
+      "replyReusedFromDisk": false
+    },
+    {
+      "runId": "run-03",
+      "judgeModel": "gpt-5.6-sol",
+      "order": "reversed",
+      "blindingKey": "c0205abf2bec45dc46805661837cdb5b1e448b5f982fbc67651f6bc7a7798142",
+      "originalPresentedAs": "B",
+      "preferred": "original",
+      "preferredPosition": "B",
+      "confidence": "high",
+      "shortReason": "Model B preserves the complete confirmed relationship set and the full confirmed post-incident-review rule, while Model A drops one of each. Both retain several shared action-input reachability and action-representation defects, but B is materially more faithful to the transcript.",
+      "material_regressions_original": [
+        "notifyStakeholders, submitRegulatoryNotification, executeEmergencyChange, and generatePostIncidentReviewReport cannot reach required Incident or Materiality Assessment facts from their input classes because only incoming relationships exist.",
+        "canDeclareMajorIncident incorrectly requires an impacted Business Service to be tier-1 or tier-2, whereas the expert originally confirmed impact to any Business Service as sufficient alongside the severity threshold.",
+        "generatePostIncidentReviewReport claims to generate report content, but PostIncidentReview has no property capable of representing that content."
+      ],
+      "material_regressions_normalized": [
+        "The confirmed MonitoringSystem → generates → Alert relationship is missing, preventing direct retrieval of alerts by monitoring-system source.",
+        "canGeneratePostIncidentReview omits the confirmed condition that the Incident has a Post-Incident Review record, allowing generation of an orphan review.",
+        "notifyStakeholders, submitRegulatoryNotification, executeEmergencyChange, and generatePostIncidentReviewReport cannot reach required Incident or Materiality Assessment facts from their input classes because only incoming relationships exist.",
+        "canDeclareMajorIncident incorrectly requires an impacted Business Service to be tier-1 or tier-2, whereas the expert originally confirmed impact to any Business Service as sufficient alongside the severity threshold.",
+        "generatePostIncidentReviewReport claims to generate report content, but PostIncidentReview has no property capable of representing that content."
+      ],
+      "unsupported_additions_original": [],
+      "unsupported_additions_normalized": [],
+      "competency_coverage_loss_original": [],
+      "competency_coverage_loss_normalized": [
+        "The agent cannot list alerts generated by a specified Monitoring System through the confirmed direct relationship.",
+        "Post-incident review generation does not enforce the confirmed incident-to-review association."
+      ],
+      "sideCheck": {
+        "A": "normalized",
+        "B": "original"
+      },
+      "modelReported": "gpt-5.6-sol-2026-07-09",
+      "usage": {
+        "completion_tokens": 1476,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 1024,
+          "rejected_prediction_tokens": 0
+        },
+        "latency_checkpoint": {
+          "engine_tbt_ms": 13,
+          "engine_ttft_ms": 796,
+          "engine_ttlt_ms": 20691,
+          "pre_inference_ms": 256,
+          "service_tbt_ms": 13,
+          "service_ttft_ms": 1139,
+          "service_ttlt_ms": 21028,
+          "total_duration_ms": 20782,
+          "user_visible_ttft_ms": 883
+        },
+        "prompt_tokens": 72188,
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 0
+        },
+        "total_tokens": 73664
+      },
+      "replyReusedFromDisk": false
+    },
+    {
+      "runId": "run-03",
+      "judgeModel": "gpt-5.1",
+      "order": "primary",
+      "blindingKey": "eb3fa22499d816736282b74ef927ab80d31402b0cd7d600af5053faacb109639",
+      "originalPresentedAs": "B",
+      "preferred": "original",
+      "preferredPosition": "B",
+      "confidence": "high",
+      "shortReason": "Both models closely follow the transcript, but Model B includes the MonitoringSystem→generates→Alert relationship the expert explicitly required, whereas Model A omits it, reducing action-input reachability for alert handling. Otherwise they are nearly identical, so B is preferred.",
+      "material_regressions_original": [],
+      "material_regressions_normalized": [],
+      "unsupported_additions_original": [],
+      "unsupported_additions_normalized": [
+        "Missing MonitoringSystem → generates → Alert relationship that the expert explicitly confirmed as needed."
+      ],
+      "competency_coverage_loss_original": [],
+      "competency_coverage_loss_normalized": [
+        "Without MonitoringSystem → generates → Alert, the agent cannot navigate from a monitoring system to its alerts as the expert required for alert-source/acknowledgement workflows."
+      ],
+      "sideCheck": {
+        "A": "normalized",
+        "B": "original"
+      },
+      "modelReported": "gpt-5.1-2025-11-13",
+      "usage": {
+        "completion_tokens": 199,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": 0
+        },
+        "latency_checkpoint": {
+          "engine_tbt_ms": 8,
+          "engine_ttft_ms": 2006,
+          "engine_ttlt_ms": 3556,
+          "pre_inference_ms": 438,
+          "service_tbt_ms": 8,
+          "service_ttft_ms": 2918,
+          "service_ttlt_ms": 4464,
+          "total_duration_ms": 4035,
+          "user_visible_ttft_ms": 2480
+        },
+        "prompt_tokens": 72188,
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 0
+        },
+        "total_tokens": 72387
+      },
+      "replyReusedFromDisk": false
+    },
+    {
+      "runId": "run-03",
+      "judgeModel": "gpt-5.1",
+      "order": "reversed",
+      "blindingKey": "eb3fa22499d816736282b74ef927ab80d31402b0cd7d600af5053faacb109639",
+      "originalPresentedAs": "A",
+      "preferred": "original",
+      "preferredPosition": "A",
+      "confidence": "high",
+      "shortReason": "Model A closely matches the final ontology the expert validated, including all rules and preconditions. Model B drops a confirmed rule condition for generating post-incident reviews, creating a structural mismatch that could lead the agent to act outside the agreed process. Therefore Model A is preferred.",
+      "material_regressions_original": [],
+      "material_regressions_normalized": [
+        "Rule canGeneratePostIncidentReview in Model B omits the confirmed condition that the Incident has a Post-Incident Review record, weakening the precondition compared to the transcripted design."
+      ],
+      "unsupported_additions_original": [
+        "Minor phrasing changes in rules and actions (missing quotation marks around some condition texts) that do not alter semantics but slightly diverge from the transcript’s exact wording."
+      ],
+      "unsupported_additions_normalized": [
+        "Omission of the confirmed condition 'Incident has a Post-Incident Review record' from canGeneratePostIncidentReview, changing the rule from what the expert agreed to.",
+        "Slightly altered condition text in canGeneratePostIncidentReview compared to the finalized ontology recap, indicating a deviation from the recorded model."
+      ],
+      "competency_coverage_loss_original": [],
+      "competency_coverage_loss_normalized": [
+        "Because canGeneratePostIncidentReview in Model B does not require an Incident to have a linked Post-Incident Review record, an agent could attempt to generate a review in contexts the expert’s ontology would block, misaligning operational behavior."
+      ],
+      "sideCheck": {
+        "A": "original",
+        "B": "normalized"
+      },
+      "modelReported": "gpt-5.1-2025-11-13",
+      "usage": {
+        "completion_tokens": 338,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": 0
+        },
+        "latency_checkpoint": {
+          "engine_tbt_ms": 8,
+          "engine_ttft_ms": 587,
+          "engine_ttlt_ms": 3150,
+          "pre_inference_ms": 283,
+          "service_tbt_ms": 8,
+          "service_ttft_ms": 1194,
+          "service_ttlt_ms": 3752,
+          "total_duration_ms": 3478,
+          "user_visible_ttft_ms": 911
+        },
+        "prompt_tokens": 72188,
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 63104
+        },
+        "total_tokens": 72526
+      },
+      "replyReusedFromDisk": false
+    },
+    {
+      "runId": "run-03",
+      "judgeModel": "gpt-4.1-internal",
+      "order": "primary",
+      "blindingKey": "902616996c6dc0670f87fd89ea0f9adacdf20e3765a34557a7d909198836eed0",
+      "originalPresentedAs": "A",
+      "preferred": "original",
+      "preferredPosition": "A",
+      "confidence": "high",
+      "shortReason": "Model A matches the transcript at every stage with no competency or structure gaps. Model B omits a required rule precondition and relies on indirect or incomplete incident-to-specialist relationships, which could break action correctness or decision traceability for the agent.",
+      "material_regressions_original": [],
+      "material_regressions_normalized": [
+        "PostIncidentReview rule (canGeneratePostIncidentReview) omits 'Incident has a Post-Incident Review record' as required condition, breaking the operational closure check.",
+        "Incident → involves → TechnicalSpecialist relationship missing from IncidentResponseTeam relationships, meaning some incident-to-specialist links rely only on accidental multi-hop paths.",
+        "IncidentResponseTeam → includes → TechnicalSpecialist relationship present but lacks full alias structure approved in transcript.",
+        "EmergencyChange relationships missing effect-validation of ITService/ConfigurationItem relationship in action verification."
+      ],
+      "unsupported_additions_original": [],
+      "unsupported_additions_normalized": [],
+      "competency_coverage_loss_original": [],
+      "competency_coverage_loss_normalized": [
+        "Rule canGeneratePostIncidentReview in B omits precondition for incident review existence, so agent may erroneously allow review action for non-existent record."
+      ],
+      "sideCheck": {
+        "A": "original",
+        "B": "normalized"
+      },
+      "modelReported": "gpt-4.1-2025-04-14",
+      "usage": {
+        "completion_tokens": 274,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": 0
+        },
+        "latency_checkpoint": {
+          "engine_tbt_ms": 11,
+          "engine_ttft_ms": 2471,
+          "engine_ttlt_ms": 5462,
+          "pre_inference_ms": 301,
+          "service_tbt_ms": 11,
+          "service_ttft_ms": 2876,
+          "service_ttlt_ms": 5876,
+          "total_duration_ms": 5623,
+          "user_visible_ttft_ms": 2574
+        },
+        "prompt_tokens": 72189,
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 0
+        },
+        "total_tokens": 72463
+      },
+      "replyReusedFromDisk": false
+    },
+    {
+      "runId": "run-03",
+      "judgeModel": "gpt-4.1-internal",
+      "order": "reversed",
+      "blindingKey": "902616996c6dc0670f87fd89ea0f9adacdf20e3765a34557a7d909198836eed0",
+      "originalPresentedAs": "B",
+      "preferred": "tie",
+      "preferredPosition": "tie",
+      "confidence": "high",
+      "shortReason": "Both Model A and Model B are structurally identical and fully evidence-supported, with no deviations from the transcript, full coverage of required questions/actions, appropriate property and relationship placement, and no hidden or missing operational relationships. There are no substantive differences between A and B that would affect agent suitability or answer/action correctness.",
+      "material_regressions_original": [],
+      "material_regressions_normalized": [],
+      "unsupported_additions_original": [],
+      "unsupported_additions_normalized": [],
+      "competency_coverage_loss_original": [],
+      "competency_coverage_loss_normalized": [],
+      "sideCheck": {
+        "A": "normalized",
+        "B": "original"
+      },
+      "modelReported": "gpt-4.1-2025-04-14",
+      "usage": {
+        "completion_tokens": 143,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": 0
+        },
+        "latency_checkpoint": {
+          "engine_tbt_ms": 8,
+          "engine_ttft_ms": 474,
+          "engine_ttlt_ms": 1578,
+          "pre_inference_ms": 418,
+          "service_tbt_ms": 8,
+          "service_ttft_ms": 964,
+          "service_ttlt_ms": 2064,
+          "total_duration_ms": 1653,
+          "user_visible_ttft_ms": 547
+        },
+        "prompt_tokens": 72189,
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 63104
+        },
+        "total_tokens": 72332
+      },
+      "replyReusedFromDisk": false
+    },
+    {
+      "runId": "run-03",
+      "judgeModel": "o4-mini",
+      "order": "primary",
+      "blindingKey": "a65c0f5663a1654c0ea21b4932abbf391bc4635308034c1675d91da4e0282bcd",
+      "originalPresentedAs": "A",
+      "preferred": "original",
+      "preferredPosition": "A",
+      "confidence": "high",
+      "shortReason": "Model B drops the condition checking for an existing Post-Incident Review record in its canGeneratePostIncidentReview rule, breaking the review generation action precondition.",
+      "material_regressions_original": [],
+      "material_regressions_normalized": [
+        "canGeneratePostIncidentReview rule missing requirement that a Post-Incident Review record exists"
+      ],
+      "unsupported_additions_original": [],
+      "unsupported_additions_normalized": [],
+      "competency_coverage_loss_original": [],
+      "competency_coverage_loss_normalized": [
+        "generatePostIncidentReviewReport may proceed without an existing Post-Incident Review record due to missing precondition"
+      ],
+      "sideCheck": {
+        "A": "original",
+        "B": "normalized"
+      },
+      "modelReported": "o4-mini-2025-04-16",
+      "usage": {
+        "completion_tokens": 1390,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 1216,
+          "rejected_prediction_tokens": 0
+        },
+        "latency_checkpoint": {
+          "engine_tbt_ms": 26,
+          "engine_ttft_ms": 3559,
+          "engine_ttlt_ms": 40106,
+          "pre_inference_ms": 300,
+          "service_tbt_ms": 26,
+          "service_ttft_ms": 5066,
+          "service_ttlt_ms": 41609,
+          "total_duration_ms": 41321,
+          "user_visible_ttft_ms": 4767
+        },
+        "prompt_tokens": 72188,
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 0
+        },
+        "total_tokens": 73578
+      },
+      "replyReusedFromDisk": false
+    },
+    {
+      "runId": "run-03",
+      "judgeModel": "o4-mini",
+      "order": "reversed",
+      "blindingKey": "a65c0f5663a1654c0ea21b4932abbf391bc4635308034c1675d91da4e0282bcd",
+      "originalPresentedAs": "B",
+      "preferred": "original",
+      "preferredPosition": "B",
+      "confidence": "high",
+      "shortReason": "Model A dropped the reverse alert→monitoring system link and a key precondition in the post-incident review rule, both explicitly required by the transcript; Model B preserves full fidelity.",
+      "material_regressions_original": [],
+      "material_regressions_normalized": [
+        "Missing MonitoringSystem → generates → Alert relationship",
+        "Rule canGeneratePostIncidentReview omits the required condition that an Incident must already have a Post-Incident Review record"
+      ],
+      "unsupported_additions_original": [],
+      "unsupported_additions_normalized": [],
+      "competency_coverage_loss_original": [],
+      "competency_coverage_loss_normalized": [
+        "Cannot list alerts generated by a given MonitoringSystem due to missing generates relationship",
+        "May generate a post-incident review without an existing PostIncidentReview record because rule lacks that precondition"
+      ],
+      "sideCheck": {
+        "A": "normalized",
+        "B": "original"
+      },
+      "modelReported": "o4-mini-2025-04-16",
+      "usage": {
+        "completion_tokens": 2905,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 2688,
+          "rejected_prediction_tokens": 0
+        },
+        "latency_checkpoint": {
+          "engine_tbt_ms": 26,
+          "engine_ttft_ms": 1092,
+          "engine_ttlt_ms": 76754,
+          "pre_inference_ms": 339,
+          "service_tbt_ms": 26,
+          "service_ttft_ms": 2074,
+          "service_ttlt_ms": 77729,
+          "total_duration_ms": 77400,
+          "user_visible_ttft_ms": 1736
+        },
+        "prompt_tokens": 72188,
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 63104
+        },
+        "total_tokens": 75093
+      },
+      "replyReusedFromDisk": false
+    }
+  ]
+}

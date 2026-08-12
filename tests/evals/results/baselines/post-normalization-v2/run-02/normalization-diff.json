@@ -1,0 +1,54 @@
+{
+  "classes": {
+    "added": [],
+    "removed": [],
+    "changed": []
+  },
+  "properties": {
+    "added": [],
+    "removed": [],
+    "changed": []
+  },
+  "relationships": {
+    "added": [
+      {
+        "name": "about",
+        "from": "PostIncidentReview",
+        "to": "ITService",
+        "label": "PostIncidentReview --about--> ITService"
+      }
+    ],
+    "removed": [],
+    "changed": [],
+    "directionChanged": []
+  },
+  "rules": {
+    "added": [],
+    "removed": [],
+    "changed": [
+      {
+        "name": "canConductPostIncidentReview",
+        "conditionsAdded": [
+          "Post-Incident Review is about an IT Service."
+        ],
+        "conditionsRemoved": []
+      },
+      {
+        "name": "canSendRegulatoryNotification",
+        "conditionsAdded": [
+          "Regulatory Notification is about an Incident.",
+          "The Incident has a Materiality Assessment."
+        ],
+        "conditionsRemoved": [
+          "Incident has a Materiality Assessment.",
+          "Regulatory Notification is about the Incident."
+        ]
+      }
+    ]
+  },
+  "actions": {
+    "added": [],
+    "removed": [],
+    "changed": []
+  }
+}

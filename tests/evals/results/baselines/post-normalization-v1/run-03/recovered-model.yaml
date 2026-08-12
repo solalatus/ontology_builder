@@ -1,0 +1,664 @@
+classes:
+  Incident:
+    meaning: "An unplanned event or disruption that affects, or may affect, IT services, business services, or operational continuity."
+    aliases:
+      - ticket
+      - incident ticket
+      - incident record
+    properties:
+      incidentId:
+        type: text
+      severity:
+        type: text
+        allowed:
+          - sev1-critical
+          - sev2-high
+          - sev3-medium
+          - sev4-low
+      priority:
+        type: text
+        allowed:
+          - p1-critical
+          - p2-high
+          - p3-medium
+          - p4-low
+      status:
+        type: text
+        allowed:
+          - new
+          - acknowledged
+          - investigating
+          - contained
+          - recovering
+          - monitoring
+          - resolved
+          - closed
+          - cancelled
+      openedAt:
+        type: date
+      resolvedAt:
+        type: date
+      summary:
+        type: text
+  BusinessService:
+    meaning: "A business-facing capability or service whose operation may depend on one or more IT services."
+    aliases:
+      - business capability
+      - customer-facing service
+    properties:
+      name:
+        type: text
+      criticality:
+        type: text
+        allowed:
+          - tier-1-critical
+          - tier-2-important
+          - tier-3-standard
+          - tier-4-supporting
+  ITService:
+    meaning: "A technology service that supports business services and may have owners, resolver groups, recovery plans, and affected configuration items."
+    aliases:
+      - technology service
+    properties:
+      name:
+        type: text
+      criticality:
+        type: text
+        allowed:
+          - tier-1-critical
+          - tier-2-important
+          - tier-3-standard
+          - tier-4-supporting
+  ServiceOwner:
+    meaning: "The accountable person or role responsible for an IT service."
+    aliases:
+      - service accountable owner
+      - IT service owner
+    properties:
+      name:
+        type: text
+  OnCallEngineer:
+    meaning: "The engineer assigned to respond to incidents during an on-call period."
+    aliases:
+      - on-call
+    properties:
+      name:
+        type: text
+  ConfigurationItem:
+    meaning: "A managed technical component or asset that can support an IT service and may be affected by incidents, alerts, or emergency changes."
+    aliases:
+      - CI
+    properties:
+      name:
+        type: text
+      type:
+        type: text
+        allowed:
+          - physical device
+          - virtual machine
+          - application
+          - database
+          - network device
+          - service
+  MajorIncidentDeclaration:
+    meaning: "A record or process that tracks whether an incident has been declared and managed as a major incident."
+    aliases:
+      - major incident process
+      - MI declaration
+      - major incident record
+    properties:
+      status:
+        type: text
+        allowed:
+          - in progress
+          - declaration confirmed
+          - declared as non-major
+          - closed
+  Workaround:
+    meaning: "A temporary solution or procedure used to reduce impact or restore service before permanent resolution."
+    aliases:
+      - temporary fix
+      - interim solution
+    properties:
+      status:
+        type: text
+        allowed:
+          - proposed
+          - validated
+          - implemented
+          - obsolete
+      description:
+        type: text
+  Alert:
+    meaning: "A monitoring signal or event that may indicate a condition related to an incident or configuration item."
+    aliases:
+      - monitoring alert
+    properties:
+      status:
+        type: text
+        allowed:
+          - new
+          - acknowledged
+          - suppressed
+          - escalated
+          - closed
+      alertId:
+        type: text
+  PostIncidentReview:
+    meaning: "A review record or report that documents findings, lessons learned, and follow-up actions after an incident."
+    aliases:
+      - PIR
+      - incident review
+      - lessons learned review
+    properties:
+      status:
+        type: text
+        allowed:
+          - draft
+          - in review
+          - completed
+          - action required
+      completedAt:
+        type: date
+  CorrectiveAction:
+    meaning: "A recommended or tracked action intended to prevent recurrence or address findings from a post-incident review."
+    aliases:
+      - remediation action
+    properties:
+      status:
+        type: text
+        allowed:
+          - open
+          - in progress
+          - implemented
+          - verified
+          - closed
+          - cancelled
+      description:
+        type: text
+  RegulatoryNotification:
+    meaning: "A compliance communication or submission made to a regulator about an incident when required."
+    aliases:
+      - regulator notification
+      - supervisory notification
+    properties:
+      status:
+        type: text
+        allowed:
+          - draft
+          - pending approval
+          - submitted
+          - accepted
+          - rejected
+          - withdrawn
+      notificationId:
+        type: text
+  MaterialityAssessment:
+    meaning: "An assessment that determines and explains whether an incident is material enough to require regulatory notification."
+    aliases:
+      - materiality review
+    properties:
+      status:
+        type: text
+        allowed:
+          - new
+          - in progress
+          - completed
+          - reviewed
+      outcome:
+        type: text
+        allowed:
+          - not reportable
+          - potentially reportable
+          - reportable
+          - undetermined
+      rationale:
+        type: text
+  ResolverGroup:
+    meaning: "A group responsible for investigating or resolving incidents for specific services or configuration items."
+    aliases:
+      - support group
+    properties:
+      name:
+        type: text
+  RecoveryPlan:
+    meaning: "A documented plan for restoring or recovering an IT service after disruption."
+    aliases:
+      - service recovery plan
+    properties:
+      name:
+        type: text
+      summary:
+        type: text
+  StakeholderCommunication:
+    meaning: "A communication record or workflow used to inform relevant business-side recipients about incident status."
+    aliases:
+      - stakeholder update
+      - incident communication
+    properties:
+      status:
+        type: text
+        allowed:
+          - draft
+          - approved
+          - sent
+          - archived
+      messageSummary:
+        type: text
+  TechnicalSpecialist:
+    meaning: "A person with specific technical expertise who may support incident resolution."
+    aliases:
+      - SME
+      - subject matter expert
+      - technical SME
+    properties:
+      name:
+        type: text
+  IncidentResponseTeam:
+    meaning: "A team engaged to coordinate and manage response during a major incident."
+    aliases:
+      - major incident team
+      - response team
+    properties:
+      name:
+        type: text
+  BusinessServiceOwner:
+    meaning: "The accountable business-side owner for a business service impacted by an incident."
+    aliases:
+      - BSO
+    properties:
+      name:
+        type: text
+  ProductManager:
+    meaning: "A business-side role that helps assess service implications, stakeholder needs, or prioritization for an impacted business service."
+    aliases:
+      - product owner
+    properties:
+      name:
+        type: text
+  EmergencyChange:
+    meaning: "A change executed under urgent conditions to respond to or recover from an incident."
+    aliases:
+      - urgent change
+      - emergency change request
+      - ECR
+    properties:
+      status:
+        type: text
+        allowed:
+          - draft
+          - approved
+          - in progress
+          - successful
+          - failed
+          - rolled back
+      changeId:
+        type: text
+  MonitoringSystem:
+    meaning: "A system that generates alerts about monitored technical or service conditions."
+    aliases:
+      - monitoring tool
+      - observability platform
+    properties:
+      name:
+        type: text
+relationships:
+  - name: impacts
+    from: Incident
+    to: BusinessService
+    meaning: "The incident affects the operation, availability, or experience of the business service."
+    aliases:
+      - affects business service
+      - impacted business service
+  - name: affects
+    from: Incident
+    to: ITService
+    meaning: "The incident affects the operation or availability of the IT service."
+    aliases:
+      - impacted IT service
+      - affected service
+  - name: affects
+    from: Incident
+    to: ConfigurationItem
+    meaning: "The incident affects a specific managed technical component or asset."
+    aliases:
+      - impacted CI
+      - affected CI
+  - name: supports
+    from: ITService
+    to: BusinessService
+    meaning: "The IT service helps enable or deliver the business service."
+    aliases:
+      - underpins
+      - enables
+  - name: supports
+    from: ConfigurationItem
+    to: ITService
+    meaning: "The configuration item helps enable or deliver the IT service."
+    aliases:
+      - underpins
+  - name: hasRecoveryPlan
+    from: ITService
+    to: RecoveryPlan
+    meaning: "The IT service has an associated plan used to restore or recover it after disruption."
+    aliases:
+      - uses recovery plan
+  - name: ownedBy
+    from: ITService
+    to: ServiceOwner
+    meaning: "The service owner is accountable for the IT service."
+    aliases:
+      - service owner
+      - accountable owner
+  - name: assignedTo
+    from: Incident
+    to: OnCallEngineer
+    meaning: "The on-call engineer is assigned to respond to the incident."
+    aliases:
+      - on-call assignment
+  - name: assignedTo
+    from: Incident
+    to: ResolverGroup
+    meaning: "The resolver group is assigned responsibility for investigating or resolving the incident."
+    aliases:
+      - routed to
+      - resolver assignment
+  - name: supportedBy
+    from: ITService
+    to: ResolverGroup
+    meaning: "The resolver group supports incidents or work for the IT service."
+    aliases: []
+  - name: supportedBy
+    from: ConfigurationItem
+    to: ResolverGroup
+    meaning: "The resolver group supports incidents or work for the configuration item."
+    aliases: []
+  - name: includes
+    from: ResolverGroup
+    to: TechnicalSpecialist
+    meaning: "The resolver group includes the technical specialist as an available source of expertise."
+    aliases:
+      - has specialist
+      - contains SME
+  - name: hasDeclaration
+    from: Incident
+    to: MajorIncidentDeclaration
+    meaning: "The incident has a declaration record or process for determining or managing major-incident status."
+    aliases:
+      - MI process
+      - declared as major incident
+  - name: engages
+    from: MajorIncidentDeclaration
+    to: IncidentResponseTeam
+    meaning: "The declaration process engages the response team for major-incident coordination."
+    aliases:
+      - activates response team
+      - engages major incident team
+  - name: hasAlert
+    from: Incident
+    to: Alert
+    meaning: "The incident has one or more related alerts."
+    aliases:
+      - related alert
+      - associated alert
+  - name: indicates
+    from: Alert
+    to: ConfigurationItem
+    meaning: "The alert points to a configuration item associated with the monitored condition."
+    aliases:
+      - points to CI
+  - name: hasWorkaround
+    from: Incident
+    to: Workaround
+    meaning: "The incident has a documented temporary solution or mitigation."
+    aliases:
+      - workaround identified
+      - temporary fix for incident
+  - name: hasReview
+    from: Incident
+    to: PostIncidentReview
+    meaning: "The incident has an associated post-incident review record or report."
+    aliases:
+      - has PIR
+  - name: recommends
+    from: PostIncidentReview
+    to: CorrectiveAction
+    meaning: "The review recommends corrective actions to address findings or reduce recurrence."
+    aliases:
+      - suggests remediation
+      - recommends action
+  - name: hasMaterialityAssessment
+    from: Incident
+    to: MaterialityAssessment
+    meaning: "The incident has an associated assessment of regulatory materiality."
+    aliases:
+      - materiality review for incident
+  - name: determinesNeedFor
+    from: MaterialityAssessment
+    to: RegulatoryNotification
+    meaning: "The assessment determines whether a regulatory notification is required."
+    aliases:
+      - notification required by assessment
+  - name: hasRegulatoryNotification
+    from: Incident
+    to: RegulatoryNotification
+    meaning: "The incident has an associated regulatory notification record or workflow."
+    aliases:
+      - regulatory notification for incident
+  - name: hasCommunication
+    from: Incident
+    to: StakeholderCommunication
+    meaning: "The incident has a communication record or workflow for stakeholder updates."
+    aliases:
+      - stakeholder update for incident
+      - incident communication
+  - name: sentTo
+    from: StakeholderCommunication
+    to: BusinessServiceOwner
+    meaning: "The communication is sent to the business service owner as a recipient."
+    aliases:
+      - sent to BSO
+  - name: sentTo
+    from: StakeholderCommunication
+    to: ProductManager
+    meaning: "The communication is sent to the product manager as a recipient."
+    aliases:
+      - sent to product owner
+  - name: ownedBy
+    from: BusinessService
+    to: BusinessServiceOwner
+    meaning: "The business service owner is accountable for the business service."
+    aliases:
+      - business service owner
+      - owned by BSO
+  - name: managedBy
+    from: BusinessService
+    to: ProductManager
+    meaning: "The product manager helps manage or prioritize the business service."
+    aliases:
+      - product owner
+      - managed by product owner
+  - name: hasEmergencyChange
+    from: Incident
+    to: EmergencyChange
+    meaning: "The incident has an associated emergency change used to support response or recovery."
+    aliases:
+      - emergency change for incident
+      - ECR for incident
+  - name: affects
+    from: EmergencyChange
+    to: ConfigurationItem
+    meaning: "The emergency change modifies or affects a configuration item."
+    aliases:
+      - changes CI
+      - modifies CI
+  - name: affects
+    from: EmergencyChange
+    to: ITService
+    meaning: "The emergency change affects the operation or recovery of an IT service."
+    aliases:
+      - impacts IT service
+  - name: involves
+    from: Incident
+    to: ServiceOwner
+    meaning: "The service owner is directly involved in handling or communication for the incident."
+    aliases:
+      - service owner involved
+      - engage service owner
+  - name: involves
+    from: Incident
+    to: BusinessServiceOwner
+    meaning: "The business service owner is directly involved in handling or communication for the incident."
+    aliases:
+      - BSO involved
+      - engage BSO
+  - name: involves
+    from: Incident
+    to: ProductManager
+    meaning: "The product manager is directly involved in handling, prioritization, or communication for the incident."
+    aliases:
+      - product owner involved
+      - engage product owner
+  - name: escalatedTo
+    from: Incident
+    to: IncidentResponseTeam
+    meaning: "The incident has been escalated to the incident response team."
+    aliases:
+      - escalated to major incident team
+  - name: involves
+    from: Incident
+    to: TechnicalSpecialist
+    meaning: "The technical specialist is directly involved in supporting resolution of the incident."
+    aliases:
+      - SME involved
+      - engage SME
+  - name: originatedFrom
+    from: Alert
+    to: MonitoringSystem
+    meaning: "The alert came from the monitoring system that generated or tracks it."
+    aliases:
+      - source monitoring system
+      - alert source
+  - name: includes
+    from: IncidentResponseTeam
+    to: TechnicalSpecialist
+    meaning: "The incident response team includes the technical specialist as part of its available expertise."
+    aliases:
+      - includes SME
+      - has technical specialist
+  - name: coordinatesWith
+    from: IncidentResponseTeam
+    to: ResolverGroup
+    meaning: "The incident response team coordinates response work with the resolver group."
+    aliases:
+      - works with resolver group
+      - coordinates resolver group
+rules:
+  canRecommendResolverGroup:
+    conditions:
+      - "Incident severity, priority, and status are present and valid."
+      - "Incident affects at least one IT Service or Configuration Item."
+      - "Affected IT Service or Configuration Item has a supported-by Resolver Group relationship."
+  canDeclareMajorIncident:
+    conditions:
+      - "Incident severity is sev1-critical or sev2-high."
+      - "Incident impacts at least one Business Service with criticality tier-1-critical or tier-2-important, or affects at least one IT Service with criticality tier-1-critical or tier-2-important."
+      - "Major Incident Declaration status is not already declaration confirmed or closed."
+  regulatoryNotificationRequired:
+    conditions:
+      - "Materiality Assessment status is completed or reviewed."
+      - "Materiality Assessment outcome is reportable."
+  canSubmitRegulatoryNotification:
+    conditions:
+      - "Materiality Assessment outcome is reportable."
+      - "Regulatory Notification status is draft or pending approval."
+      - "Regulatory Notification has a notificationId."
+      - "Incident has an associated Regulatory Notification."
+  canAcknowledgeAlert:
+    conditions:
+      - "Alert status is new or escalated."
+      - "Alert has an alertId."
+      - "Alert originated from a Monitoring System."
+  canExecuteEmergencyChange:
+    conditions:
+      - "Emergency Change status is approved."
+      - "Emergency Change has a changeId."
+      - "Emergency Change affects at least one IT Service or Configuration Item."
+      - "Incident has the Emergency Change associated with it."
+  canNotifyStakeholders:
+    conditions:
+      - "Stakeholder Communication status is approved."
+      - "Stakeholder Communication is sent to at least one Business Service Owner or Product Manager."
+      - "The related Incident has status present and valid."
+      - "The related Incident impacts at least one Business Service."
+  canGeneratePostIncidentReview:
+    conditions:
+      - "Post-Incident Review is associated with an Incident whose status is resolved or closed."
+      - "Post-Incident Review status is draft or in review."
+  canCloseIncident:
+    conditions:
+      - "Incident status is resolved or monitoring."
+      - "No related Alert has status new, acknowledged, or escalated."
+      - "Any related Emergency Change is successful or rolled back."
+      - "Any related Stakeholder Communication is sent or archived."
+      - "If regulatory notification is required, the related Regulatory Notification status is submitted or accepted."
+actions:
+  createIncidentRecord:
+    input: Incident
+    preconditions: []
+    effect: "A new Incident record is created with required identifying and initial lifecycle details such as incidentId, summary, severity, priority, status, and openedAt."
+    verification: "Retrieve the Incident and confirm incidentId exists and status is new or acknowledged."
+  assignIncidentToResolverGroup:
+    input: Incident
+    preconditions:
+      - canRecommendResolverGroup
+    effect: "The Incident is assigned to the appropriate Resolver Group using the affected IT Service or Configuration Item support relationship."
+    verification: "Retrieve the Incident and confirm it has an assigned-to Resolver Group relationship."
+  acknowledgeAlert:
+    input: Alert
+    preconditions:
+      - canAcknowledgeAlert
+    effect: "Alert status becomes acknowledged in the originating Monitoring System."
+    verification: "Retrieve the Alert and confirm status is acknowledged."
+  notifyStakeholders:
+    input: StakeholderCommunication
+    preconditions:
+      - canNotifyStakeholders
+    effect: "The approved stakeholder communication is sent to the relevant Business Service Owner and/or Product Manager, and communication status becomes sent."
+    verification: "Retrieve the Stakeholder Communication and confirm status is sent and recipients are recorded."
+  declareMajorIncident:
+    input: Incident
+    preconditions:
+      - canDeclareMajorIncident
+    effect: "Major Incident Declaration status becomes declaration confirmed, and the Incident is escalated to the Incident Response Team."
+    verification: "Retrieve the Major Incident Declaration and Incident; confirm declaration status is declaration confirmed and Incident has escalated-to Incident Response Team."
+  documentWorkaround:
+    input: Workaround
+    preconditions: []
+    effect: "Workaround description is recorded or updated, and Workaround status becomes proposed, validated, or implemented depending on operational state."
+    verification: "Retrieve the Workaround and confirm description is present and status is one of the allowed Workaround.status values."
+  submitRegulatoryNotification:
+    input: RegulatoryNotification
+    preconditions:
+      - regulatoryNotificationRequired
+      - canSubmitRegulatoryNotification
+    effect: "Regulatory Notification is submitted and status becomes submitted."
+    verification: "Retrieve the Regulatory Notification and confirm status is submitted and notificationId is present."
+  executeEmergencyChange:
+    input: EmergencyChange
+    preconditions:
+      - canExecuteEmergencyChange
+    effect: "Emergency Change is executed; status becomes in progress, then successful, failed, or rolled back based on execution result."
+    verification: "Retrieve the Emergency Change and confirm status is no longer approved; confirm the affected IT Service or Configuration Item relationship remains recorded."
+  generatePostIncidentReviewReport:
+    input: PostIncidentReview
+    preconditions:
+      - canGeneratePostIncidentReview
+    effect: "Post-Incident Review report content is generated or updated, and review status becomes completed or action required."
+    verification: "Retrieve the Post-Incident Review and confirm status is completed or action required, with completedAt present if completed."
+  closeIncident:
+    input: Incident
+    preconditions:
+      - canCloseIncident
+    effect: "Incident status becomes closed."
+    verification: "Retrieve the Incident and confirm status is closed."

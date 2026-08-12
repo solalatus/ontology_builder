@@ -1,0 +1,1069 @@
+{
+  "schemaVersion": 1,
+  "condition": "post-normalization-v1",
+  "generatedAt": "2026-08-12T11:34:20.401Z",
+  "judgePromptSha256": "3f3f01825fdc32d0bd0542ab53f3af92a8116a9feb24acf708f82a5bcf1bb011",
+  "blindingSalt": "post-normalization-v1/blind-order",
+  "judgeModels": [
+    "gpt-5.6-sol",
+    "gpt-5.1",
+    "gpt-4.1-internal",
+    "o4-mini"
+  ],
+  "preregisteredJudgeModels": [
+    "gpt-5.6-sol",
+    "gpt-5.1"
+  ],
+  "provider": "azure",
+  "parseFailures": [],
+  "note": "Blind transcript-grounded A/B comparison of the interactive run's ontology against the post-normalization-v1 candidate. The judge never saw the fixture, the normalizer prompt, any score, or which model was which. Every pair was judged in both orderings by two judge models, neither of which is the normalizer's model.",
+  "usageTotal": {
+    "prompt_tokens": 850386,
+    "completion_tokens": 14105,
+    "total_tokens": 864491,
+    "calls": 12
+  },
+  "judgments": [
+    {
+      "runId": "run-01",
+      "judgeModel": "gpt-5.6-sol",
+      "order": "primary",
+      "blindingKey": "27ad9d43bdd5170546e8b7721c0d01441670d4912245fd3e3e234fe282686bba",
+      "originalPresentedAs": "B",
+      "preferred": "normalized",
+      "preferredPosition": "A",
+      "confidence": "medium",
+      "shortReason": "The models are nearly identical and share substantial rule-reachability and missing-input defects. Model A is marginally preferable because it gives the three confirmed escalation paths distinct predicates and role-specific meanings, whereas Model B overloads one relationship name.",
+      "material_regressions_original": [
+        "Several rules require unmodeled facts, including implementation/backout plans, restoration environment/process readiness, CI source and propagation risk, stakeholder requests, incident history, reporting criteria, and policy mandates.",
+        "isolateConfigurationItem starts from ConfigurationItem but its precondition requires Incident facts that are not reachable through outgoing relationships; its failure verification also references unmodeled failure details.",
+        "submitRegulatoryNotification cannot reach supporting Evidence through the directed graph, and conductPostIncidentReview cannot reach the MajorIncidentDeclaration needed to establish prior major-incident classification.",
+        "conductPostIncidentReview says findings are captured, but PostIncidentReview has no findings property or finding class.",
+        "The three role-specific escalation relationships reuse the same escalatedTo name and generic meaning, creating predicate ambiguity or collision in a flat named-relationship model."
+      ],
+      "material_regressions_normalized": [
+        "Several rules require unmodeled facts, including implementation/backout plans, restoration environment/process readiness, CI source and propagation risk, stakeholder requests, incident history, reporting criteria, and policy mandates.",
+        "isolateConfigurationItem starts from ConfigurationItem but its precondition requires Incident facts that are not reachable through outgoing relationships; its failure verification also references unmodeled failure details.",
+        "submitRegulatoryNotification cannot reach supporting Evidence through the directed graph, and conductPostIncidentReview cannot reach the MajorIncidentDeclaration needed to establish prior major-incident classification.",
+        "conductPostIncidentReview says findings are captured, but PostIncidentReview has no findings property or finding class."
+      ],
+      "unsupported_additions_original": [],
+      "unsupported_additions_normalized": [],
+      "competency_coverage_loss_original": [
+        "The agent cannot reliably evaluate all preconditions for isolation, emergency change, backup restoration, regulatory submission, or post-incident review.",
+        "Regulatory-notification, SLO-escalation, evidence-collection, and review-required decisions are only partially computable because several confirmed decision inputs are absent.",
+        "Role-specific escalation retrieval may be ambiguous because all three escalation links share one relationship name and an undifferentiated meaning."
+      ],
+      "competency_coverage_loss_normalized": [
+        "The agent cannot reliably evaluate all preconditions for isolation, emergency change, backup restoration, regulatory submission, or post-incident review.",
+        "Regulatory-notification, SLO-escalation, evidence-collection, and review-required decisions are only partially computable because several confirmed decision inputs are absent."
+      ],
+      "sideCheck": {
+        "A": "normalized",
+        "B": "original"
+      },
+      "modelReported": null,
+      "usage": null,
+      "replyReusedFromDisk": true
+    },
+    {
+      "runId": "run-01",
+      "judgeModel": "gpt-5.6-sol",
+      "order": "reversed",
+      "blindingKey": "27ad9d43bdd5170546e8b7721c0d01441670d4912245fd3e3e234fe282686bba",
+      "originalPresentedAs": "A",
+      "preferred": "normalized",
+      "preferredPosition": "B",
+      "confidence": "medium",
+      "shortReason": "The models are nearly identical and both closely follow the confirmed transcript, but both contain substantial action-reachability and rule-grounding defects. Model B is marginally preferable because it gives the three owner-escalation relationships distinct names and role-specific meanings instead of conflating their operational purposes.",
+      "material_regressions_original": [
+        "isolateConfigurationItem starts from ConfigurationItem, but its precondition requires incident impact, source confirmation, propagation risk, and isolation procedures that are not reachable or represented.",
+        "executeEmergencyChange cannot evaluate its required implementation and backout plans because neither is modeled.",
+        "canRestoreFromBackup references backup availability, a prepared target environment, an approved restoration process, and validation steps that the model cannot represent.",
+        "submitRegulatoryNotification cannot fully evaluate regulatoryNotificationRequired because supporting Evidence points toward Incident and incident history and jurisdictional requirements are not modeled.",
+        "conductPostIncidentReview cannot reliably evaluate prior major-incident classification or policy mandates from its input because declarations point toward Incident and policy requirements are absent.",
+        "The three escalatedTo relationships share an over-broad meaning that fails to distinguish service-owner oversight, application-owner input, and technical-owner escalation."
+      ],
+      "material_regressions_normalized": [
+        "isolateConfigurationItem starts from ConfigurationItem, but its precondition requires incident impact, source confirmation, propagation risk, and isolation procedures that are not reachable or represented.",
+        "executeEmergencyChange cannot evaluate its required implementation and backout plans because neither is modeled.",
+        "canRestoreFromBackup references backup availability, a prepared target environment, an approved restoration process, and validation steps that the model cannot represent.",
+        "submitRegulatoryNotification cannot fully evaluate regulatoryNotificationRequired because supporting Evidence points toward Incident and incident history and jurisdictional requirements are not modeled.",
+        "conductPostIncidentReview cannot reliably evaluate prior major-incident classification or policy mandates from its input because declarations point toward Incident and policy requirements are absent."
+      ],
+      "unsupported_additions_original": [],
+      "unsupported_additions_normalized": [],
+      "competency_coverage_loss_original": [
+        "The agent cannot operationally determine how to isolate a configuration item because the required isolation procedure is not modeled.",
+        "Emergency-change, backup-restoration, regulatory-submission, and post-incident-review actions have preconditions that cannot be fully checked from their inputs.",
+        "Several decision rules hide required inputs such as business impact, milestones, stakeholder requests, incident history, policy mandates, and propagation risk in ungrounded condition text."
+      ],
+      "competency_coverage_loss_normalized": [
+        "The agent cannot operationally determine how to isolate a configuration item because the required isolation procedure is not modeled.",
+        "Emergency-change, backup-restoration, regulatory-submission, and post-incident-review actions have preconditions that cannot be fully checked from their inputs.",
+        "Several decision rules hide required inputs such as business impact, milestones, stakeholder requests, incident history, policy mandates, and propagation risk in ungrounded condition text."
+      ],
+      "sideCheck": {
+        "A": "original",
+        "B": "normalized"
+      },
+      "modelReported": null,
+      "usage": null,
+      "replyReusedFromDisk": true
+    },
+    {
+      "runId": "run-01",
+      "judgeModel": "gpt-5.1",
+      "order": "primary",
+      "blindingKey": "103a2af869743f469dfcbc00aa2ef05ba24946424bcd56bd5b1ff6ec092e1dab",
+      "originalPresentedAs": "A",
+      "preferred": "normalized",
+      "preferredPosition": "B",
+      "confidence": "high",
+      "shortReason": "Both models closely match the co-designed ontology and fully cover the expert’s questions and actions, but Model A reuses a single 'escalatedTo' relationship name for three different owner roles, blurring distinct escalation semantics that the expert separated. Model B keeps the escalation relationships distinct and otherwise mirrors the validated structure, so it is the safer shared representation for an agent.",
+      "material_regressions_original": [
+        "Uses three separate relationships all named 'escalatedTo' from Incident to different owner roles, which makes the escalation type ambiguous and conflates distinct escalation paths the expert differentiated (service, application, technical)."
+      ],
+      "material_regressions_normalized": [],
+      "unsupported_additions_original": [],
+      "unsupported_additions_normalized": [],
+      "competency_coverage_loss_original": [],
+      "competency_coverage_loss_normalized": [],
+      "sideCheck": {
+        "A": "original",
+        "B": "normalized"
+      },
+      "modelReported": null,
+      "usage": null,
+      "replyReusedFromDisk": true
+    },
+    {
+      "runId": "run-01",
+      "judgeModel": "gpt-5.1",
+      "order": "reversed",
+      "blindingKey": "103a2af869743f469dfcbc00aa2ef05ba24946424bcd56bd5b1ff6ec092e1dab",
+      "originalPresentedAs": "B",
+      "preferred": "normalized",
+      "preferredPosition": "A",
+      "confidence": "high",
+      "shortReason": "Both models closely mirror the expert-approved ontology and cover all questions and actions, but Model A keeps escalation relationships distinct and its rules more structurally precise. Model B’s reuse of a generic 'escalatedTo' relationship and more free-text-like rule conditions slightly degrade structural clarity for an agent, so Model A is preferred.",
+      "material_regressions_original": [
+        "Uses a single generic 'escalatedTo' relationship name instantiated three times from Incident to ITServiceOwner, ApplicationOwner, and TechnicalOwner, which conflates distinct escalation paths and weakens the ability to treat these differently.",
+        "Several rule condition lines in Model B are quoted as arbitrary strings (e.g. \"Incident status is new, acknowledged, or investigating.\"), which risks them being handled as opaque text rather than structured, decision-usable conditions."
+      ],
+      "material_regressions_normalized": [],
+      "unsupported_additions_original": [],
+      "unsupported_additions_normalized": [],
+      "competency_coverage_loss_original": [],
+      "competency_coverage_loss_normalized": [],
+      "sideCheck": {
+        "A": "normalized",
+        "B": "original"
+      },
+      "modelReported": null,
+      "usage": null,
+      "replyReusedFromDisk": true
+    },
+    {
+      "runId": "run-01",
+      "judgeModel": "gpt-4.1-internal",
+      "order": "primary",
+      "blindingKey": "d52827527f1cb2982af15d595511370d0147993fa41f79d7cd9d44f02ffa1c42",
+      "originalPresentedAs": "B",
+      "preferred": "normalized",
+      "preferredPosition": "A",
+      "confidence": "high",
+      "shortReason": "Model A maintains transcript-faithful, explicit relationships for escalation to Service Owner, Application Owner, and Technical Owner, as demanded by the transcript, while Model B incorrectly merges these into one non-distinct relationship, compromising agent operational competence in routing and escalation. All other core aspects are equivalent, making escalation distinctions decisive.",
+      "material_regressions_original": [
+        "Escalation relationships (Incident — escalatedTo) in B conflate distinct escalation paths (service, application, technical) into a single non-differentiated relationship, misaligning with explicit transcript confirmation of separate operational escalations.",
+        "Relationship meanings for escalatedTo in B are ambiguous and do not align with the separate meanings prepared in A.",
+        "Relationship aliases for escalation in B are missing and merged, as opposed to the individually tracked and transcript-verified escalation relationships in A.",
+        "Action-input reachability for escalation and routing is less explicit, potentially requiring the agent to interpret ambiguous paths in B."
+      ],
+      "material_regressions_normalized": [],
+      "unsupported_additions_original": [],
+      "unsupported_additions_normalized": [],
+      "competency_coverage_loss_original": [
+        "Loss of explicit operational distinction for escalation to Service Owner, Application Owner, and Technical Owner means agent cannot correctly answer questions or perform actions that depend on identifying the correct escalation path as per transcript.",
+        "Relationship structure for escalation in B is at odds with agent's requirement to differentiate these paths and roles, risking incorrect or incomplete agent actions."
+      ],
+      "competency_coverage_loss_normalized": [],
+      "sideCheck": {
+        "A": "normalized",
+        "B": "original"
+      },
+      "modelReported": "gpt-4.1-2025-04-14",
+      "usage": {
+        "completion_tokens": 344,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": 0
+        },
+        "latency_checkpoint": {
+          "engine_tbt_ms": 10,
+          "engine_ttft_ms": 647,
+          "engine_ttlt_ms": 4190,
+          "pre_inference_ms": 334,
+          "service_tbt_ms": 10,
+          "service_ttft_ms": 1081,
+          "service_ttlt_ms": 4596,
+          "total_duration_ms": 4269,
+          "user_visible_ttft_ms": 748
+        },
+        "prompt_tokens": 73889,
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 65920
+        },
+        "total_tokens": 74233
+      },
+      "replyReusedFromDisk": false
+    },
+    {
+      "runId": "run-01",
+      "judgeModel": "gpt-4.1-internal",
+      "order": "reversed",
+      "blindingKey": "d52827527f1cb2982af15d595511370d0147993fa41f79d7cd9d44f02ffa1c42",
+      "originalPresentedAs": "A",
+      "preferred": "original",
+      "preferredPosition": "A",
+      "confidence": "high",
+      "shortReason": "Model A matches the transcript's confirmed structure for incident escalation by using a single relationship to all owner roles, while Model B invents three distinct escalation relationships without expert confirmation or operational reason. This is a material structural defect and unsupported addition in Model B.",
+      "material_regressions_original": [],
+      "material_regressions_normalized": [
+        "Incident escalation relationships are split into escalatedToServiceOwner, escalatedToApplicationOwner, escalatedToTechnicalOwner, which introduces artificial distinctions not supported by the transcript; the expert confirmed a single escalatedTo relationship for all owner roles.",
+        "Relationship meanings for escalation in Model B ('incident has been directly escalated to the IT service owner for oversight', etc) diverge from the transcript, which states escalation is handled to owner roles and does not require distinction in relationship names.",
+        "Model B introduces unnecessary relationship name proliferation for escalation, which could impair operational reachability and answer quality for escalation actions/questions."
+      ],
+      "unsupported_additions_original": [],
+      "unsupported_additions_normalized": [
+        "Model B splits escalation into three relationships (escalatedToServiceOwner, escalatedToApplicationOwner, escalatedToTechnicalOwner) instead of a single escalatedTo relationship, without transcript support.",
+        "Relationship meanings and descriptions of escalation in Model B do not match the transcript's confirmed class/relationship structure.",
+        "No evidence in transcript supports needing distinct escalation relationships per owner type.",
+        "Semantic distinction in relationship naming for escalation in Model B is an invented domain structure.",
+        "All other content is matched between models—no further unsupported additions noted."
+      ],
+      "competency_coverage_loss_original": [],
+      "competency_coverage_loss_normalized": [
+        "Artificial splitting of escalation relationships in Model B risks breaking question/action coverage for 'Who should this incident be escalated to?' and operational assignment, as agent would need to know which relationship to use and nothing in the transcript provides this guidance."
+      ],
+      "sideCheck": {
+        "A": "original",
+        "B": "normalized"
+      },
+      "modelReported": "gpt-4.1-2025-04-14",
+      "usage": {
+        "completion_tokens": 425,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": 0
+        },
+        "latency_checkpoint": {
+          "engine_tbt_ms": 9,
+          "engine_ttft_ms": 216,
+          "engine_ttlt_ms": 4175,
+          "pre_inference_ms": 345,
+          "service_tbt_ms": 9,
+          "service_ttft_ms": 624,
+          "service_ttlt_ms": 4578,
+          "total_duration_ms": 4241,
+          "user_visible_ttft_ms": 279
+        },
+        "prompt_tokens": 73889,
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 71936
+        },
+        "total_tokens": 74314
+      },
+      "replyReusedFromDisk": false
+    },
+    {
+      "runId": "run-01",
+      "judgeModel": "o4-mini",
+      "order": "primary",
+      "blindingKey": "7ff937602feb763713f03d9333355ef2e9f712d20122a2fc4d5d19182737dcb0",
+      "originalPresentedAs": "B",
+      "preferred": "normalized",
+      "preferredPosition": "A",
+      "confidence": "high",
+      "shortReason": "Model A preserves distinct escalation relationships to different owner roles, whereas Model B conflates them under a single ambiguous relationship name.",
+      "material_regressions_original": [
+        "Uses the same relationship name \"escalatedTo\" for escalations to ITServiceOwner, ApplicationOwner, and TechnicalOwner, conflating distinct target roles and hampering precise routing and queries"
+      ],
+      "material_regressions_normalized": [],
+      "unsupported_additions_original": [],
+      "unsupported_additions_normalized": [],
+      "competency_coverage_loss_original": [],
+      "competency_coverage_loss_normalized": [],
+      "sideCheck": {
+        "A": "normalized",
+        "B": "original"
+      },
+      "modelReported": "o4-mini-2025-04-16",
+      "usage": {
+        "completion_tokens": 1703,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 1536,
+          "rejected_prediction_tokens": 0
+        },
+        "latency_checkpoint": {
+          "engine_tbt_ms": 26,
+          "engine_ttft_ms": 980,
+          "engine_ttlt_ms": 46712,
+          "pre_inference_ms": 335,
+          "service_tbt_ms": 26,
+          "service_ttft_ms": 1985,
+          "service_ttlt_ms": 47713,
+          "total_duration_ms": 47390,
+          "user_visible_ttft_ms": 1649
+        },
+        "prompt_tokens": 73888,
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 65920
+        },
+        "total_tokens": 75591
+      },
+      "replyReusedFromDisk": false
+    },
+    {
+      "runId": "run-01",
+      "judgeModel": "o4-mini",
+      "order": "reversed",
+      "blindingKey": "7ff937602feb763713f03d9333355ef2e9f712d20122a2fc4d5d19182737dcb0",
+      "originalPresentedAs": "A",
+      "preferred": "tie",
+      "preferredPosition": "tie",
+      "confidence": "medium",
+      "shortReason": "Both models faithfully implement the expert’s requirements with no unsupported additions or dropped competencies; the only difference is minor naming of escalation relationships, which does not affect functionality.",
+      "material_regressions_original": [],
+      "material_regressions_normalized": [],
+      "unsupported_additions_original": [],
+      "unsupported_additions_normalized": [],
+      "competency_coverage_loss_original": [],
+      "competency_coverage_loss_normalized": [],
+      "sideCheck": {
+        "A": "original",
+        "B": "normalized"
+      },
+      "modelReported": "o4-mini-2025-04-16",
+      "usage": {
+        "completion_tokens": 1091,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 960,
+          "rejected_prediction_tokens": 0
+        },
+        "latency_checkpoint": {
+          "engine_tbt_ms": 26,
+          "engine_ttft_ms": 572,
+          "engine_ttlt_ms": 29285,
+          "pre_inference_ms": 312,
+          "service_tbt_ms": 26,
+          "service_ttft_ms": 1512,
+          "service_ttlt_ms": 30221,
+          "total_duration_ms": 29918,
+          "user_visible_ttft_ms": 1201
+        },
+        "prompt_tokens": 73888,
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 71936
+        },
+        "total_tokens": 74979
+      },
+      "replyReusedFromDisk": false
+    },
+    {
+      "runId": "run-02",
+      "judgeModel": "gpt-5.6-sol",
+      "order": "primary",
+      "blindingKey": "7202e4542d4fc86c50446d74db4f84375de82ab653520da169955663e87f8ba0",
+      "originalPresentedAs": "A",
+      "preferred": "normalized",
+      "preferredPosition": "B",
+      "confidence": "high",
+      "shortReason": "Model B is preferable because it adds the explicitly established approved status needed by the regulatory-notification rule and action. Model A otherwise closely matches B, but its status constraint makes that workflow internally impossible; both retain the same directed-reachability and findings-representation defects.",
+      "material_regressions_original": [
+        "RegulatoryNotification.status omits approved even though canSendRegulatoryNotification requires approved, making the regulatory-notification action impossible under the modeled allowed values.",
+        "From Alert, the Incident required by canAcknowledgeAlert is not reachable through directed relationships because triggeredBy points from Incident to Alert.",
+        "From BackupSet, the active Incident required by canRestoreFromBackupSet is not reachable through directed relationships.",
+        "From CorrectiveAction, the Incident or PostIncidentReview required by canDocumentCorrectiveAction is not reachable through directed relationships because both links point toward CorrectiveAction.",
+        "conductPostIncidentReview says findings are documented, but PostIncidentReview has no findings property beyond rootCause."
+      ],
+      "material_regressions_normalized": [
+        "From Alert, the Incident required by canAcknowledgeAlert is not reachable through directed relationships because triggeredBy points from Incident to Alert.",
+        "From BackupSet, the active Incident required by canRestoreFromBackupSet is not reachable through directed relationships.",
+        "From CorrectiveAction, the Incident or PostIncidentReview required by canDocumentCorrectiveAction is not reachable through directed relationships because both links point toward CorrectiveAction.",
+        "conductPostIncidentReview says findings are documented, but PostIncidentReview has no findings property beyond rootCause."
+      ],
+      "unsupported_additions_original": [],
+      "unsupported_additions_normalized": [],
+      "competency_coverage_loss_original": [
+        "The agent cannot validly send a regulatory notification because the required pre-submission status approved is disallowed by the class schema."
+      ],
+      "competency_coverage_loss_normalized": [],
+      "sideCheck": {
+        "A": "original",
+        "B": "normalized"
+      },
+      "modelReported": null,
+      "usage": null,
+      "replyReusedFromDisk": true
+    },
+    {
+      "runId": "run-02",
+      "judgeModel": "gpt-5.6-sol",
+      "order": "reversed",
+      "blindingKey": "7202e4542d4fc86c50446d74db4f84375de82ab653520da169955663e87f8ba0",
+      "originalPresentedAs": "B",
+      "preferred": "normalized",
+      "preferredPosition": "A",
+      "confidence": "high",
+      "shortReason": "The models are otherwise effectively identical, but Model A includes the approved regulatory-notification status explicitly required by the later confirmed submission rule. Model B omits that value, making a required action internally unsatisfiable.",
+      "material_regressions_original": [
+        "RegulatoryNotification.status does not allow approved, while canSendRegulatoryNotification requires approved, making sendRegulatoryNotification impossible under the model.",
+        "acknowledgeAlert takes Alert as input, but the triggering Incident and its status are only connected through incoming Incident-to-Alert relationships, so its preconditions are not reachable.",
+        "restoreFromBackupSet takes BackupSet as input, but the relevant Incident and its status cannot be reached in the modeled relationship direction.",
+        "documentCorrectiveAction takes CorrectiveAction as input, but its Incident or Post-Incident Review linkage is represented only by incoming relationships, making key preconditions and verification unreachable."
+      ],
+      "material_regressions_normalized": [
+        "acknowledgeAlert takes Alert as input, but the triggering Incident and its status are only connected through incoming Incident-to-Alert relationships, so its preconditions are not reachable.",
+        "restoreFromBackupSet takes BackupSet as input, but the relevant Incident and its status cannot be reached in the modeled relationship direction.",
+        "documentCorrectiveAction takes CorrectiveAction as input, but its Incident or Post-Incident Review linkage is represented only by incoming relationships, making key preconditions and verification unreachable."
+      ],
+      "unsupported_additions_original": [],
+      "unsupported_additions_normalized": [],
+      "competency_coverage_loss_original": [
+        "Regulatory notification submission cannot be performed because its required approved state is disallowed.",
+        "Reliable alert acknowledgement, backup restoration, and corrective-action documentation are impaired by action-input reachability defects."
+      ],
+      "competency_coverage_loss_normalized": [
+        "Reliable alert acknowledgement, backup restoration, and corrective-action documentation are impaired by action-input reachability defects."
+      ],
+      "sideCheck": {
+        "A": "normalized",
+        "B": "original"
+      },
+      "modelReported": null,
+      "usage": null,
+      "replyReusedFromDisk": true
+    },
+    {
+      "runId": "run-02",
+      "judgeModel": "gpt-5.1",
+      "order": "primary",
+      "blindingKey": "834bd2c6b93fee44c6c0b23fb11c0e8def79c24e77125b01c8dcb5e815edb00d",
+      "originalPresentedAs": "B",
+      "preferred": "original",
+      "preferredPosition": "B",
+      "confidence": "high",
+      "shortReason": "The two models are effectively identical in classes, properties, relationships, rules, and actions, with only trivial formatting differences. Both faithfully reflect the transcript and fully support the expert’s questions and actions, so the choice is a tie.",
+      "material_regressions_original": [],
+      "material_regressions_normalized": [],
+      "unsupported_additions_original": [],
+      "unsupported_additions_normalized": [],
+      "competency_coverage_loss_original": [],
+      "competency_coverage_loss_normalized": [],
+      "sideCheck": {
+        "A": "normalized",
+        "B": "original"
+      },
+      "modelReported": null,
+      "usage": null,
+      "replyReusedFromDisk": true
+    },
+    {
+      "runId": "run-02",
+      "judgeModel": "gpt-5.1",
+      "order": "reversed",
+      "blindingKey": "834bd2c6b93fee44c6c0b23fb11c0e8def79c24e77125b01c8dcb5e815edb00d",
+      "originalPresentedAs": "A",
+      "preferred": "tie",
+      "preferredPosition": "tie",
+      "confidence": "high",
+      "shortReason": "Both models faithfully mirror the expert-built ontology, including all classes, relationships, properties, rules, and actions needed for the acceptance-test questions and actions. Model B introduces one extra status value for RegulatoryNotification not supported by the transcript, but this does not materially affect agent behavior; otherwise the two are operationally equivalent, so the difference is too small to justify a preference.",
+      "material_regressions_original": [],
+      "material_regressions_normalized": [],
+      "unsupported_additions_original": [],
+      "unsupported_additions_normalized": [
+        "RegulatoryNotification.status includes value 'approved', which was not in the allowed list provided in the transcript (draft, pending-approval, submitted, accepted, rejected)."
+      ],
+      "competency_coverage_loss_original": [],
+      "competency_coverage_loss_normalized": [],
+      "sideCheck": {
+        "A": "original",
+        "B": "normalized"
+      },
+      "modelReported": null,
+      "usage": null,
+      "replyReusedFromDisk": true
+    },
+    {
+      "runId": "run-02",
+      "judgeModel": "gpt-4.1-internal",
+      "order": "primary",
+      "blindingKey": "235dd4e3bfe7cd8bd2c9c650ac859f1add7fabf90748866ea29c9e0c8edcedc8",
+      "originalPresentedAs": "B",
+      "preferred": "tie",
+      "preferredPosition": "tie",
+      "confidence": "high",
+      "shortReason": "Models A and B are structurally and content-wise indistinguishable. Every class, property, relationship, rule, and action precisely matches what the transcript established. No material evidence-fidelity differences or unsupported content are present; both fully and faithfully cover the acceptance test and operational needs. Neither has a defect that would warrant preference.",
+      "material_regressions_original": [],
+      "material_regressions_normalized": [],
+      "unsupported_additions_original": [],
+      "unsupported_additions_normalized": [],
+      "competency_coverage_loss_original": [],
+      "competency_coverage_loss_normalized": [],
+      "sideCheck": {
+        "A": "normalized",
+        "B": "original"
+      },
+      "modelReported": "gpt-4.1-2025-04-14",
+      "usage": {
+        "completion_tokens": 146,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": 0
+        },
+        "latency_checkpoint": {
+          "engine_tbt_ms": 7,
+          "engine_ttft_ms": 497,
+          "engine_ttlt_ms": 1525,
+          "pre_inference_ms": 242,
+          "service_tbt_ms": 7,
+          "service_ttft_ms": 801,
+          "service_ttlt_ms": 1815,
+          "total_duration_ms": 1585,
+          "user_visible_ttft_ms": 559
+        },
+        "prompt_tokens": 66504,
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 57088
+        },
+        "total_tokens": 66650
+      },
+      "replyReusedFromDisk": false
+    },
+    {
+      "runId": "run-02",
+      "judgeModel": "gpt-4.1-internal",
+      "order": "reversed",
+      "blindingKey": "235dd4e3bfe7cd8bd2c9c650ac859f1add7fabf90748866ea29c9e0c8edcedc8",
+      "originalPresentedAs": "A",
+      "preferred": "tie",
+      "preferredPosition": "tie",
+      "confidence": "high",
+      "shortReason": "Both models are structurally identical in all significant respects and trace precisely to the interview transcript. All classes, properties, relationships, rules, and actions are supported, mapped, and named as in the transcript; there are no unsupported additions, omissions, or context-placement errors. No agent-relevant gaps or defects are evident in either, so the choice is a tie.",
+      "material_regressions_original": [],
+      "material_regressions_normalized": [],
+      "unsupported_additions_original": [],
+      "unsupported_additions_normalized": [],
+      "competency_coverage_loss_original": [],
+      "competency_coverage_loss_normalized": [],
+      "sideCheck": {
+        "A": "original",
+        "B": "normalized"
+      },
+      "modelReported": "gpt-4.1-2025-04-14",
+      "usage": {
+        "completion_tokens": 154,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": 0
+        },
+        "latency_checkpoint": {
+          "engine_tbt_ms": 7,
+          "engine_ttft_ms": 231,
+          "engine_ttlt_ms": 1289,
+          "pre_inference_ms": 325,
+          "service_tbt_ms": 7,
+          "service_ttft_ms": 643,
+          "service_ttlt_ms": 1696,
+          "total_duration_ms": 1380,
+          "user_visible_ttft_ms": 318
+        },
+        "prompt_tokens": 66504,
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 62592
+        },
+        "total_tokens": 66658
+      },
+      "replyReusedFromDisk": false
+    },
+    {
+      "runId": "run-02",
+      "judgeModel": "o4-mini",
+      "order": "primary",
+      "blindingKey": "4af0f1c98c1e9995aaa599bd16d6ffecf458efc2408a992be19ff99c2b658182",
+      "originalPresentedAs": "A",
+      "preferred": "normalized",
+      "preferredPosition": "B",
+      "confidence": "high",
+      "shortReason": "Model A omits 'approved' for RegulatoryNotification.status, breaking the canSendRegulatoryNotification rule, while Model B includes it and satisfies all preconditions.",
+      "material_regressions_original": [
+        "RegulatoryNotification.status missing 'approved', so canSendRegulatoryNotification precondition can never be satisfied"
+      ],
+      "material_regressions_normalized": [],
+      "unsupported_additions_original": [],
+      "unsupported_additions_normalized": [],
+      "competency_coverage_loss_original": [
+        "sendRegulatoryNotification cannot proceed due to missing 'approved' status value"
+      ],
+      "competency_coverage_loss_normalized": [],
+      "sideCheck": {
+        "A": "original",
+        "B": "normalized"
+      },
+      "modelReported": "o4-mini-2025-04-16",
+      "usage": {
+        "completion_tokens": 3245,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 3072,
+          "rejected_prediction_tokens": 0
+        },
+        "latency_checkpoint": {
+          "engine_tbt_ms": 24,
+          "engine_ttft_ms": 728,
+          "engine_ttlt_ms": 80752,
+          "pre_inference_ms": 568,
+          "service_tbt_ms": 24,
+          "service_ttft_ms": 2007,
+          "service_ttlt_ms": 82026,
+          "total_duration_ms": 81470,
+          "user_visible_ttft_ms": 1439
+        },
+        "prompt_tokens": 66503,
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 62592
+        },
+        "total_tokens": 69748
+      },
+      "replyReusedFromDisk": false
+    },
+    {
+      "runId": "run-02",
+      "judgeModel": "o4-mini",
+      "order": "reversed",
+      "blindingKey": "4af0f1c98c1e9995aaa599bd16d6ffecf458efc2408a992be19ff99c2b658182",
+      "originalPresentedAs": "B",
+      "preferred": "normalized",
+      "preferredPosition": "A",
+      "confidence": "high",
+      "shortReason": "Model B’s RegulatoryNotification.status lacks the 'approved' value required by the rule, breaking regulatory notification competency; Model A aligns with the transcript’s rule and fixes this inconsistency.",
+      "material_regressions_original": [
+        "RegulatoryNotification.status omits 'approved', so canSendRegulatoryNotification precondition can never be met"
+      ],
+      "material_regressions_normalized": [],
+      "unsupported_additions_original": [],
+      "unsupported_additions_normalized": [],
+      "competency_coverage_loss_original": [
+        "sendRegulatoryNotification action blocked because required 'approved' status is missing"
+      ],
+      "competency_coverage_loss_normalized": [],
+      "sideCheck": {
+        "A": "normalized",
+        "B": "original"
+      },
+      "modelReported": "o4-mini-2025-04-16",
+      "usage": {
+        "completion_tokens": 2674,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 2496,
+          "rejected_prediction_tokens": 0
+        },
+        "latency_checkpoint": {
+          "engine_tbt_ms": 24,
+          "engine_ttft_ms": 1053,
+          "engine_ttlt_ms": 66150,
+          "pre_inference_ms": 303,
+          "service_tbt_ms": 24,
+          "service_ttft_ms": 2028,
+          "service_ttlt_ms": 67121,
+          "total_duration_ms": 66825,
+          "user_visible_ttft_ms": 1725
+        },
+        "prompt_tokens": 66503,
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 57088
+        },
+        "total_tokens": 69177
+      },
+      "replyReusedFromDisk": false
+    },
+    {
+      "runId": "run-03",
+      "judgeModel": "gpt-5.6-sol",
+      "order": "primary",
+      "blindingKey": "c0205abf2bec45dc46805661837cdb5b1e448b5f982fbc67651f6bc7a7798142",
+      "originalPresentedAs": "A",
+      "preferred": "original",
+      "preferredPosition": "A",
+      "confidence": "high",
+      "shortReason": "Model A preserves the explicitly confirmed bidirectional alert-source navigation, while Model B omits MonitoringSystem → generates → Alert. Both otherwise share serious action-input reachability defects, an unsupported major-incident rule narrowing, and no representation for generated review content.",
+      "material_regressions_original": [
+        "canDeclareMajorIncident wrongly restricts the Business Service branch to tier-1 or tier-2, although the confirmed rule allowed any impacted Business Service and applied criticality only to the IT Service branch.",
+        "From the inputs to notifyStakeholders, submitRegulatoryNotification, executeEmergencyChange, and generatePostIncidentReviewReport, required Incident-side context is not directionally reachable because all linking relationships point from Incident toward the input record.",
+        "generatePostIncidentReviewReport claims to generate or update report content, but PostIncidentReview has no property or related class capable of representing that content."
+      ],
+      "material_regressions_normalized": [
+        "canDeclareMajorIncident wrongly restricts the Business Service branch to tier-1 or tier-2, although the confirmed rule allowed any impacted Business Service and applied criticality only to the IT Service branch.",
+        "From the inputs to notifyStakeholders, submitRegulatoryNotification, executeEmergencyChange, and generatePostIncidentReviewReport, required Incident-side context is not directionally reachable because all linking relationships point from Incident toward the input record.",
+        "generatePostIncidentReviewReport claims to generate or update report content, but PostIncidentReview has no property or related class capable of representing that content.",
+        "The confirmed MonitoringSystem → generates → Alert relationship is missing, preventing source-first retrieval and management of alerts."
+      ],
+      "unsupported_additions_original": [
+        "The tier-1/tier-2 criticality restriction added to the Business Service branch of canDeclareMajorIncident was not established by the expert."
+      ],
+      "unsupported_additions_normalized": [
+        "The tier-1/tier-2 criticality restriction added to the Business Service branch of canDeclareMajorIncident was not established by the expert."
+      ],
+      "competency_coverage_loss_original": [],
+      "competency_coverage_loss_normalized": [
+        "The agent cannot list alerts generated by a Monitoring System through the explicitly requested direct relationship."
+      ],
+      "sideCheck": {
+        "A": "original",
+        "B": "normalized"
+      },
+      "modelReported": null,
+      "usage": null,
+      "replyReusedFromDisk": true
+    },
+    {
+      "runId": "run-03",
+      "judgeModel": "gpt-5.6-sol",
+      "order": "reversed",
+      "blindingKey": "c0205abf2bec45dc46805661837cdb5b1e448b5f982fbc67651f6bc7a7798142",
+      "originalPresentedAs": "B",
+      "preferred": "original",
+      "preferredPosition": "B",
+      "confidence": "high",
+      "shortReason": "The models are nearly identical, but Model B retains the explicitly confirmed MonitoringSystem-to-Alert relationship that Model A drops. Both share significant action-input reachability and report-content representation defects, so B is preferred solely because it avoids that additional confirmed-coverage loss.",
+      "material_regressions_original": [
+        "notifyStakeholders, submitRegulatoryNotification, executeEmergencyChange, and generatePostIncidentReviewReport cannot reach incident or assessment facts required by their preconditions because the necessary relationships point toward their input objects.",
+        "generatePostIncidentReviewReport claims to generate report content, but PostIncidentReview has no property capable of representing that content.",
+        "canDeclareMajorIncident restricts impacted Business Services to tier-1 or tier-2, although the expert only applied that threshold refinement to IT Services; this can wrongly block declaration."
+      ],
+      "material_regressions_normalized": [
+        "Omits the confirmed MonitoringSystem → generates → Alert relationship, so alerts cannot be retrieved starting from their monitoring system.",
+        "notifyStakeholders, submitRegulatoryNotification, executeEmergencyChange, and generatePostIncidentReviewReport cannot reach incident or assessment facts required by their preconditions because the necessary relationships point toward their input objects.",
+        "generatePostIncidentReviewReport claims to generate report content, but PostIncidentReview has no property capable of representing that content.",
+        "canDeclareMajorIncident restricts impacted Business Services to tier-1 or tier-2, although the expert only applied that threshold refinement to IT Services; this can wrongly block declaration."
+      ],
+      "unsupported_additions_original": [
+        "The tier-1/tier-2 criticality restriction on Business Services in canDeclareMajorIncident was not established by the expert."
+      ],
+      "unsupported_additions_normalized": [
+        "The tier-1/tier-2 criticality restriction on Business Services in canDeclareMajorIncident was not established by the expert."
+      ],
+      "competency_coverage_loss_original": [
+        "Several actions cannot evaluate their confirmed preconditions from their declared input class without unmodeled reverse navigation."
+      ],
+      "competency_coverage_loss_normalized": [
+        "Cannot list or manage alerts by starting from a Monitoring System.",
+        "Several actions cannot evaluate their confirmed preconditions from their declared input class without unmodeled reverse navigation."
+      ],
+      "sideCheck": {
+        "A": "normalized",
+        "B": "original"
+      },
+      "modelReported": null,
+      "usage": null,
+      "replyReusedFromDisk": true
+    },
+    {
+      "runId": "run-03",
+      "judgeModel": "gpt-5.1",
+      "order": "primary",
+      "blindingKey": "eb3fa22499d816736282b74ef927ab80d31402b0cd7d600af5053faacb109639",
+      "originalPresentedAs": "B",
+      "preferred": "original",
+      "preferredPosition": "B",
+      "confidence": "high",
+      "shortReason": "Model B matches the expert-derived ontology, including all confirmed classes, relationships, rules, and actions. Model A omits the MonitoringSystem → generates → Alert relationship that the expert said was needed, reducing reachable information for alert-related actions, while B preserves full competency and evidence fidelity.",
+      "material_regressions_original": [],
+      "material_regressions_normalized": [],
+      "unsupported_additions_original": [],
+      "unsupported_additions_normalized": [
+        "Missing relationship MonitoringSystem → generates → Alert which the expert explicitly required in Phase 3",
+        "Rule canGeneratePostIncidentReview refers to a Post-Incident Review associated with an Incident whose status is resolved or closed, but this association condition was only present in the transcript version of the rule for Model B, not this variant"
+      ],
+      "competency_coverage_loss_original": [],
+      "competency_coverage_loss_normalized": [
+        "Agent cannot navigate from Monitoring System to its generated alerts because MonitoringSystem → generates → Alert is absent, reducing coverage for acknowledging alerts from a specific monitoring system"
+      ],
+      "sideCheck": {
+        "A": "normalized",
+        "B": "original"
+      },
+      "modelReported": null,
+      "usage": null,
+      "replyReusedFromDisk": true
+    },
+    {
+      "runId": "run-03",
+      "judgeModel": "gpt-5.1",
+      "order": "reversed",
+      "blindingKey": "eb3fa22499d816736282b74ef927ab80d31402b0cd7d600af5053faacb109639",
+      "originalPresentedAs": "A",
+      "preferred": "original",
+      "preferredPosition": "A",
+      "confidence": "high",
+      "shortReason": "Both models closely match the expert-approved ontology, but Model A’s rules align cleanly with the confirmed relationships and input classes, whereas Model B’s rules introduce references to 'related Incident' from StakeholderCommunication and PostIncidentReview that the graph does not support. This creates reachability and consistency issues for some actions in Model B, so Model A is the safer, fully coherent choice.",
+      "material_regressions_original": [],
+      "material_regressions_normalized": [
+        "Rule canNotifyStakeholders in Model B refers to 'The related Incident' and its impact and status, but StakeholderCommunication has no modeled relationship back to Incident, making those conditions unreachable from the rule’s perspective.",
+        "Rule canGeneratePostIncidentReview in Model B is written as if starting from Post-IncidentReview ('associated with an Incident') while the relationship in the model is Incident → hasReview → PostIncidentReview, so the rule’s phrasing does not align cleanly with the modeled direction.",
+        "Rule canCloseIncident in Model B uses 'Any related StakeholderCommunication is sent or archived' but only models Incident → hasCommunication → StakeholderCommunication; the wording suggests starting from StakeholderCommunication, creating a slight mismatch between rule semantics and relationship direction."
+      ],
+      "unsupported_additions_original": [],
+      "unsupported_additions_normalized": [
+        "Model B’s rules for canNotifyStakeholders and canGeneratePostIncidentReview introduce 'related Incident' phrasing that implies a StakeholderCommunication → Incident or PostIncidentReview → Incident relationship, which is not present in the confirmed ontology.",
+        "Model B’s rule conditions for canCloseIncident refer to 'related StakeholderCommunication' and 'related Regulatory Notification' in ways that presume reverse navigation not explicitly discussed in the transcript."
+      ],
+      "competency_coverage_loss_original": [],
+      "competency_coverage_loss_normalized": [
+        "Because canNotifyStakeholders in Model B cannot reliably evaluate Incident status or impact from the StakeholderCommunication input (no StakeholderCommunication → Incident link), the preconditions for the notifyStakeholders action are not operationally checkable as modeled.",
+        "The slight misalignment in Model B’s rule canGeneratePostIncidentReview between rule wording and relationship direction could hinder an agent reasoning strictly from the PostIncidentReview input class."
+      ],
+      "sideCheck": {
+        "A": "original",
+        "B": "normalized"
+      },
+      "modelReported": null,
+      "usage": null,
+      "replyReusedFromDisk": true
+    },
+    {
+      "runId": "run-03",
+      "judgeModel": "gpt-4.1-internal",
+      "order": "primary",
+      "blindingKey": "902616996c6dc0670f87fd89ea0f9adacdf20e3765a34557a7d909198836eed0",
+      "originalPresentedAs": "A",
+      "preferred": "original",
+      "preferredPosition": "A",
+      "confidence": "high",
+      "shortReason": "Model A uses only direct, transcript-confirmed relationships and rule conditions, so all actions and verifications are reliably reachable and contextually placed. Model B introduces reverse relationship dependency and indirect language ('the related Incident'), which is not present in the transcript and would undermine the agent's runtime clarity and traceability for several actions and conditions. Thus, Model A is structurally preferable and more evidence-faithful.",
+      "material_regressions_original": [],
+      "material_regressions_normalized": [
+        "Rule preconditions 'canNotifyStakeholders', 'canGeneratePostIncidentReview', and 'canCloseIncident' reference 'the related Incident' and 'any related Stakeholder Communication', but StakeholderCommunication does not have a direct incident reference; only Incident hasCommunication StakeholderCommunication, making action verifications and rule evaluations ambiguous at runtime.",
+        "Rule 'canGeneratePostIncidentReview' uses 'Post-Incident Review is associated with an Incident whose status is resolved or closed', but PostIncidentReview does not have a direct incident reference; only Incident hasReview PostIncidentReview, which may complicate rule evaluation.",
+        "Rule 'canCloseIncident' references 'Any related Stakeholder Communication is sent or archived', but incident closure should require that all stakeholder communications associated with the incident are in this state; ambiguity in language and verification could cause erroneous closure checks.",
+        "Actions and rules in Model B refer to relationships from StakeholderCommunication and PostIncidentReview back to Incident via phrases like 'related Incident', which requires reverse traversal not explicitly modeled or confirmed in the ontology structures of the transcript."
+      ],
+      "unsupported_additions_original": [],
+      "unsupported_additions_normalized": [],
+      "competency_coverage_loss_original": [],
+      "competency_coverage_loss_normalized": [
+        "Action/rule input ambiguity: 'notifyStakeholders' in Model B uses StakeholderCommunication as input but expects clarification or linkage to Incident for precondition evaluation, which is less structurally reliable than Model A.",
+        "Potential error pathways in action/rule verification due to ambiguity and lack of direct navigability between stakeholder communications/reviews and incidents."
+      ],
+      "sideCheck": {
+        "A": "original",
+        "B": "normalized"
+      },
+      "modelReported": "gpt-4.1-2025-04-14",
+      "usage": {
+        "completion_tokens": 456,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": 0
+        },
+        "latency_checkpoint": {
+          "engine_tbt_ms": 9,
+          "engine_ttft_ms": 138,
+          "engine_ttlt_ms": 4067,
+          "pre_inference_ms": 350,
+          "service_tbt_ms": 8,
+          "service_ttft_ms": 666,
+          "service_ttlt_ms": 4520,
+          "total_duration_ms": 4177,
+          "user_visible_ttft_ms": 317
+        },
+        "prompt_tokens": 72205,
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 71296
+        },
+        "total_tokens": 72661
+      },
+      "replyReusedFromDisk": false
+    },
+    {
+      "runId": "run-03",
+      "judgeModel": "gpt-4.1-internal",
+      "order": "reversed",
+      "blindingKey": "902616996c6dc0670f87fd89ea0f9adacdf20e3765a34557a7d909198836eed0",
+      "originalPresentedAs": "B",
+      "preferred": "tie",
+      "preferredPosition": "tie",
+      "confidence": "high",
+      "shortReason": "Both models are nearly identical in structure, content, property/value lists, relationships, rules, and actions, reflecting the transcript's requirements with no material omissions or invented additions. Operational semantics, class boundaries, action reachability, and competency are fully matched, and neither model contains structural errors or loss. No evidence justifies preferring one over the other.",
+      "material_regressions_original": [],
+      "material_regressions_normalized": [],
+      "unsupported_additions_original": [],
+      "unsupported_additions_normalized": [],
+      "competency_coverage_loss_original": [],
+      "competency_coverage_loss_normalized": [],
+      "sideCheck": {
+        "A": "normalized",
+        "B": "original"
+      },
+      "modelReported": "gpt-4.1-2025-04-14",
+      "usage": {
+        "completion_tokens": 151,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": 0
+        },
+        "latency_checkpoint": {
+          "engine_tbt_ms": 6,
+          "engine_ttft_ms": 326,
+          "engine_ttlt_ms": 1295,
+          "pre_inference_ms": 549,
+          "service_tbt_ms": 7,
+          "service_ttft_ms": 1000,
+          "service_ttlt_ms": 1999,
+          "total_duration_ms": 1459,
+          "user_visible_ttft_ms": 451
+        },
+        "prompt_tokens": 72205,
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 66688
+        },
+        "total_tokens": 72356
+      },
+      "replyReusedFromDisk": false
+    },
+    {
+      "runId": "run-03",
+      "judgeModel": "o4-mini",
+      "order": "primary",
+      "blindingKey": "a65c0f5663a1654c0ea21b4932abbf391bc4635308034c1675d91da4e0282bcd",
+      "originalPresentedAs": "A",
+      "preferred": "original",
+      "preferredPosition": "A",
+      "confidence": "high",
+      "shortReason": "Model A faithfully preserves all rule conditions exactly as given in the transcript, while Model B merges or omits a transcript-specified condition in canGeneratePostIncidentReview.",
+      "material_regressions_original": [],
+      "material_regressions_normalized": [
+        "canGeneratePostIncidentReview omits explicit condition 'Incident has a Post-Incident Review record' as separately listed in the transcript"
+      ],
+      "unsupported_additions_original": [],
+      "unsupported_additions_normalized": [],
+      "competency_coverage_loss_original": [],
+      "competency_coverage_loss_normalized": [],
+      "sideCheck": {
+        "A": "original",
+        "B": "normalized"
+      },
+      "modelReported": "o4-mini-2025-04-16",
+      "usage": {
+        "completion_tokens": 1824,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 1664,
+          "rejected_prediction_tokens": 0
+        },
+        "latency_checkpoint": {
+          "engine_tbt_ms": 26,
+          "engine_ttft_ms": 498,
+          "engine_ttlt_ms": 48934,
+          "pre_inference_ms": 414,
+          "service_tbt_ms": 26,
+          "service_ttft_ms": 2155,
+          "service_ttlt_ms": 50588,
+          "total_duration_ms": 50185,
+          "user_visible_ttft_ms": 1742
+        },
+        "prompt_tokens": 72204,
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 71296
+        },
+        "total_tokens": 74028
+      },
+      "replyReusedFromDisk": false
+    },
+    {
+      "runId": "run-03",
+      "judgeModel": "o4-mini",
+      "order": "reversed",
+      "blindingKey": "a65c0f5663a1654c0ea21b4932abbf391bc4635308034c1675d91da4e0282bcd",
+      "originalPresentedAs": "B",
+      "preferred": "original",
+      "preferredPosition": "B",
+      "confidence": "high",
+      "shortReason": "Model A omits the MonitoringSystem → generates → Alert relationship required by the transcript, while Model B includes it and fully supports alert source navigation.",
+      "material_regressions_original": [],
+      "material_regressions_normalized": [
+        "Missing relationship MonitoringSystem → generates → Alert needed to list alerts by system"
+      ],
+      "unsupported_additions_original": [],
+      "unsupported_additions_normalized": [],
+      "competency_coverage_loss_original": [],
+      "competency_coverage_loss_normalized": [
+        "Cannot retrieve alerts originating from a specific MonitoringSystem due to missing generates relationship"
+      ],
+      "sideCheck": {
+        "A": "normalized",
+        "B": "original"
+      },
+      "modelReported": "o4-mini-2025-04-16",
+      "usage": {
+        "completion_tokens": 1892,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 1728,
+          "rejected_prediction_tokens": 0
+        },
+        "latency_checkpoint": {
+          "engine_tbt_ms": 26,
+          "engine_ttft_ms": 830,
+          "engine_ttlt_ms": 50583,
+          "pre_inference_ms": 464,
+          "service_tbt_ms": 26,
+          "service_ttft_ms": 2532,
+          "service_ttlt_ms": 52279,
+          "total_duration_ms": 51826,
+          "user_visible_ttft_ms": 2068
+        },
+        "prompt_tokens": 72204,
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 66688
+        },
+        "total_tokens": 74096
+      },
+      "replyReusedFromDisk": false
+    }
+  ]
+}

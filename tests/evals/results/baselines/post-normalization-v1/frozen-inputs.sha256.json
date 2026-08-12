@@ -1,0 +1,23 @@
+{
+  "note": "SHA-256 of every frozen anchor artifact this condition read. tests/post-normalization.spec.mjs re-computes these, so a later modification of a frozen input fails the default test suite (EXPERIMENT_BRIEF.md §4.1).",
+  "inputs": {
+    "run-01": {
+      "transcriptPath": "tests/evals/results/runs/run-01/conversation-log.md",
+      "transcriptSha256": "c8064f40638fa28d8050c45519bf04fb79694b74a0b0a420f19658c1d6974523",
+      "ontologyPath": "tests/evals/results/runs/run-01/recovered-model.yaml",
+      "ontologySha256": "ce50d79e932e53d9b2140813c9dced1fdd8e778a7e88da64f0f93fd9a2c3ac0e"
+    },
+    "run-02": {
+      "transcriptPath": "tests/evals/results/runs/run-02/conversation-log.md",
+      "transcriptSha256": "c35b0921e87c7342b71921e3fea023ea8ca22e706cf8083cbec86c3ad3faa771",
+      "ontologyPath": "tests/evals/results/runs/run-02/recovered-model.yaml",
+      "ontologySha256": "3f3663d5d697ea93fc88bffef8f88f006b230b3196b381862c8de79ac009f3ec"
+    },
+    "run-03": {
+      "transcriptPath": "tests/evals/results/runs/run-03/conversation-log.md",
+      "transcriptSha256": "77c3776308974daa4d83d6e919051b1c971d98305184653e4fedb535e9a72cd9",
+      "ontologyPath": "tests/evals/results/runs/run-03/recovered-model.yaml",
+      "ontologySha256": "3e969660f8c2de515a260c27b1e0bf3f5f8be510346193a6788e53c19bf684d5"
+    }
+  }
+}
