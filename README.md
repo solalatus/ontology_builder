@@ -38,7 +38,10 @@ endpoint class does not exist. It is deterministic and needs no API key; a
 `Check` button in the toolbar opens the findings, and stays quiet while a model
 is merely unfinished. An optional pass that also asks the connected model to
 look for contradictions can be switched on from the same panel; it is off by
-default.
+default. Importing a domain-model file reports the same way before you commit:
+the dialog says how many contradictions Merge or Replace would each leave
+behind — separately, because they give you different models — and neither is
+blocked.
 
 ## Interview field guide
 

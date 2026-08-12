@@ -116,6 +116,11 @@ is dev-only test tooling, same as Playwright.
   exactly one undo entry that Review changes still renders correctly, the full
   sweep riding on `get_graph_state`, and the transcript note when a turn leaves
   an error behind. Mocked API throughout — no key, no network.
+- `import-consistency.spec.mjs` — the import-path consistency warning (issue
+  #88): a file that would introduce a contradiction says so before anything is
+  committed, a clean one says nothing, notes never reach the dialog, Merge and
+  Replace are counted separately because they leave different models, and the
+  projection never edits the graph. Offline.
 - `agent-production-invariants.spec.mjs` — hard regression guards on the
   shipped interviewer (issue #75 §1): a golden SHA-256 of the real system
   prompt in both languages, and a runtime assertion, captured off a real

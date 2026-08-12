@@ -2026,7 +2026,9 @@ const STRINGS = {
     // import. Deliberately more aggressive than the plain TXT summary above:
     // a matched class/relationship/rule/action is overwritten, not left
     // untouched, on both Merge and Replace.
-    importYamlDroppedWarning: (list) => `Warning: ${list.length} relationship(s) cannot be stored, because a class they connect does not exist in the file or on the canvas: ${list}. Add those classes and import again if you need these relationships.`,
+    importConsistencyOne: (e, w) => `Consistency: importing this would leave ${e} contradiction(s) and ${w} likely problem(s) in the model. Open “Check” after importing to see them.`,
+    importConsistencyBoth: (me, mw, re, rw) => `Consistency: Merge would leave ${me} contradiction(s) and ${mw} likely problem(s); Replace would leave ${re} and ${rw}. Open “Check” after importing to see them.`,
+    importYamlDroppedWarning: (dropped) => `Warning: ${dropped.length} relationship(s) cannot be stored, because a class they connect does not exist in the file or on the canvas: ${dropped.join("; ")}. Add those classes and import again if you need these relationships.`,
     importYamlMergeSummary: (added, changed) => `Merge: ${added} item(s) would be added, ${changed} existing item(s) would be updated with the file's values. Nothing is removed.`,
     importYamlReplaceSummary: (n) => `Replace: same additions/updates, plus ${n} item(s) not in this file would be removed.`,
     // Canonical JSON import (spec.md §5.5). Replace is the round-trip path —
@@ -2302,7 +2304,9 @@ const STRINGS = {
     emptyCanvasMessage: (addNodeLabel) => `A vászon üres — kattints a(z) "${addNodeLabel}" gombra a kezdéshez`,
     importMergeSummary: (n, m) => `Egyesítés: ${n} csomópont és ${m} él kerülne hozzáadásra. Semmi nem törlődik.`,
     importReplaceSummary: (n) => `Csere: ugyanazok a hozzáadások, plusz ${n} csomópont/él törlődne, amelyek nincsenek ebben a fájlban.`,
-    importYamlDroppedWarning: (list) => `Figyelem: ${list.length} kapcsolat nem tárolható, mert az általa összekötött egyik osztály nem szerepel sem a fájlban, sem a vásznon: ${list}. Ha ezekre a kapcsolatokra szükség van, vedd fel az osztályokat, és importáld újra.`,
+    importConsistencyOne: (e, w) => `Konzisztencia: az importálás után ${e} ellentmondás és ${w} valószínű hiba maradna a modellben. Az „Ellenőrzés” panelen nézheted meg őket.`,
+    importConsistencyBoth: (me, mw, re, rw) => `Konzisztencia: az Egyesítés után ${me} ellentmondás és ${mw} valószínű hiba maradna; a Csere után ${re} és ${rw}. Az „Ellenőrzés” panelen nézheted meg őket.`,
+    importYamlDroppedWarning: (dropped) => `Figyelem: ${dropped.length} kapcsolat nem tárolható, mert az általa összekötött egyik osztály nem szerepel sem a fájlban, sem a vásznon: ${dropped.join("; ")}. Ha ezekre a kapcsolatokra szükség van, vedd fel az osztályokat, és importáld újra.`,
     importYamlMergeSummary: (added, changed) => `Egyesítés: ${added} elem kerülne hozzáadásra, ${changed} meglévő elem frissülne a fájl értékeivel. Semmi nem törlődik.`,
     importYamlReplaceSummary: (n) => `Csere: ugyanazok a hozzáadások/frissítések, plusz ${n} elem törlődne, amelyek nincsenek ebben a fájlban.`,
     importJsonMergeSummary: (added, changed) => `Egyesítés: ${added} elem kerülne hozzáadásra, ${changed} meglévő elem frissülne a fájl értékeivel. A mentett pozíciókat használjuk, ahol a hely szabad. Semmi nem törlődik.`,
@@ -7020,6 +7024,60 @@ function computeOntologyFindings(model, options = {}) {
   return findings.filter((f) => (seen.has(f.id) ? false : (seen.add(f.id), true)));
 }
 
+// What the model would look like if an import were committed, without
+// committing it (issue #88). Two modes because they genuinely differ: Replace
+// leaves you with the file, Merge leaves you with the file laid over what is
+// already on the canvas -- so "how many contradictions would this import
+// introduce" has two different honest answers, and a check that only looked at
+// the file would give the wrong one for Merge. A file that is perfectly
+// consistent alone can still contradict the graph it lands on.
+//
+// A projection, not a simulation: it merges by name at the document level the
+// way commitYamlImport does, but it is only ever used to count findings for a
+// warning. The commit path remains the only thing that actually edits.
+function projectImportedModel(currentDoc, incomingDoc, mode) {
+  if (mode === "replace") return incomingDoc;
+  const current = asFindingMap(currentDoc);
+  const incoming = asFindingMap(incomingDoc);
+  const classes = { ...asFindingMap(current.classes) };
+  for (const [name, body] of Object.entries(asFindingMap(incoming.classes))) {
+    const existing = asFindingMap(classes[name]);
+    classes[name] = {
+      ...existing, ...asFindingMap(body),
+      properties: { ...asFindingMap(existing.properties), ...asFindingMap(asFindingMap(body).properties) },
+    };
+  }
+  const relationships = [...asFindingList(current.relationships)];
+  const relKey = (r) => [r && r.name, r && r.from, r && r.to].map(consistencyNormalizeText).join("|");
+  const seen = new Set(relationships.map(relKey));
+  for (const rel of asFindingList(incoming.relationships)) {
+    if (!rel || typeof rel !== "object") continue;
+    const key = relKey(rel);
+    if (!seen.has(key)) { relationships.push(rel); seen.add(key); }
+  }
+  return {
+    classes, relationships,
+    rules: { ...asFindingMap(current.rules), ...asFindingMap(incoming.rules) },
+    actions: { ...asFindingMap(current.actions), ...asFindingMap(incoming.actions) },
+  };
+}
+
+// Errors and warnings only. A file that merely leaves a class unconnected is
+// not a broken file, and saying so in a modal the user sees on every import is
+// how you train someone to stop reading the line -- the same reasoning that
+// keeps `note` away from the agent in issue #84.
+function importFindingCounts(incomingDoc, mode) {
+  const projected = projectImportedModel(buildDomainModel(), incomingDoc, mode);
+  // Deliberately NOT passed droppedReferences: the projection still contains
+  // the relationship whose endpoint is missing, so the engine finds it there.
+  // droppedReferences exists for the sweep *after* a commit, where the edge is
+  // gone from the model and nothing else could see it. Passing both counted
+  // the same defect twice.
+  const findings = computeOntologyFindings(projected)
+    .filter((f) => f.severity !== "note");
+  return { total: findings.length, ...summarizeFindings(findings) };
+}
+
 function summarizeFindings(findings) {
   const counts = { error: 0, warning: 0, note: 0 };
   for (const f of findings) counts[f.severity] = (counts[f.severity] || 0) + 1;
@@ -9293,11 +9351,22 @@ function openImportDialog(text, kind = "txt", filename = null) {
     // and Replace -- the user was told what would be added and updated, and
     // simply not told about the part that would be thrown away (issue #83 §1).
     if (plan.droppedReferences.length) {
-      lines.push(t("importYamlDroppedWarning", plan.droppedReferences.map((r) => `${r.from} --${r.name}--> ${r.to}`).join("; ")));
+      lines.push(t("importYamlDroppedWarning", plan.droppedReferences.map((r) => `${r.from} --${r.name}--> ${r.to}`)));
     }
     lines.push(t("importYamlMergeSummary", plan.addedCount, plan.changedCount));
     if (hasAnyGraphContent()) lines.push(t("importYamlReplaceSummary", plan.removedCount));
     else importReplaceBtn.style.display = "none";
+    // Counted separately per button, because Merge and Replace leave you with
+    // different models (issue #88). Nothing is blocked: both buttons stay
+    // enabled and the graph is untouched until one is pressed -- this only
+    // means the choice is made knowing what it costs.
+    const mergeFindings = importFindingCounts(parsedYaml, "merge");
+    const replaceFindings = hasAnyGraphContent() ? importFindingCounts(parsedYaml, "replace") : null;
+    if (mergeFindings.total || (replaceFindings && replaceFindings.total)) {
+      lines.push(replaceFindings
+        ? t("importConsistencyBoth", mergeFindings.error, mergeFindings.warning, replaceFindings.error, replaceFindings.warning)
+        : t("importConsistencyOne", mergeFindings.error, mergeFindings.warning));
+    }
   } else {
     const parsedTxt = parseTxtImport(text);
     if (!parsedTxt.nodes.length && !parsedTxt.edges.length) {
@@ -11802,6 +11871,9 @@ window.__kg = {
     checks: CONSISTENCY_CHECKS,
     // Live findings for the current canvas, recomputed on demand.
     forCurrentGraph: (options) => computeOntologyFindings(buildDomainModel(), options),
+    // Issue #88: what an import would leave behind, without committing it.
+    projectImport: projectImportedModel,
+    countForImport: importFindingCounts,
     // Panel surface, mirroring the reviewChanges sub-object's convention.
     open: openConsistency,
     close: closeConsistency,
