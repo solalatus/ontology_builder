@@ -1,0 +1,20 @@
+[
+  {
+    "changeType": "remove-unsupported-structure",
+    "summary": "Removed MonitoringSystem -> generates -> Alert inverse duplicate",
+    "reason": "The model profile allows one directed relationship per real-world connection. The action needs Alert -> MonitoringSystem reachability for acknowledgement, but no competency question or action requires starting from a MonitoringSystem to list generated alerts.",
+    "agentImpact": "The graph is less contradictory while still supporting alert acknowledgement and alert-source lookup.",
+    "before": "Both Alert -> originatedFrom -> MonitoringSystem and MonitoringSystem -> generates -> Alert were modeled for the same source connection.",
+    "after": "Only Alert -> originatedFrom -> MonitoringSystem remains.",
+    "evidence": "\"Acknowledge an incoming alert from the monitoring system\" and \"Alert → originated from → Monitoring System ... crucial for alert acknowledgment.\""
+  },
+  {
+    "changeType": "repair-action-reachability",
+    "summary": "Removed unreachable incident condition from canGeneratePostIncidentReview",
+    "reason": "The action input is PostIncidentReview, but the graph only links Incident -> hasReview -> PostIncidentReview. From a PostIncidentReview input, the agent cannot reach Incident because there is no reverse edge. The rule had referred to Incident status and Incident having a review record.",
+    "agentImpact": "The generatePostIncidentReviewReport action now depends only on information reachable from its input class.",
+    "before": "canGeneratePostIncidentReview required Incident status is resolved or closed and Incident has a Post-Incident Review record.",
+    "after": "canGeneratePostIncidentReview keeps only Post-Incident Review status is draft or in review.",
+    "evidence": "\"generatePostIncidentReviewReport — Input class: PostIncidentReview\" and relationship confirmed only as \"Incident → has review → Post-Incident Review\"."
+  }
+]

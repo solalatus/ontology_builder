@@ -149,11 +149,15 @@ export function aggregateJudge(judgments, runIds) {
     flips.push({ judgeModel, pairs: pairs.length, flipped: pairs.filter((x) => !x).length });
   }
 
-  // Inter-judge agreement over the runs where both judges were stable.
-  const bothStable = perRun.filter((r) => r.perJudge.every((j) => j.verdict !== "unstable"));
-  const agreeing = bothStable.filter((r) => new Set(r.perJudge.map((j) => j.verdict)).size === 1);
+  // Inter-judge agreement, over the runs where at least two judges produced a
+  // stable verdict. Requiring *every* judge to be stable was fine for a
+  // two-model panel but degenerates to zero comparable runs on a four-model one
+  // (some judge is almost always unstable somewhere), which reports nothing
+  // rather than reporting agreement. An unstable judge simply does not vote.
+  const comparable = perRun.filter((r) => r.perJudge.filter((j) => j.verdict !== "unstable").length >= 2);
+  const agreeing = comparable.filter((r) => new Set(r.perJudge.filter((j) => j.verdict !== "unstable").map((j) => j.verdict)).size === 1);
 
-  return { judgeModels, perRun, flips, interJudge: { comparable: bothStable.length, agreeing: agreeing.length } };
+  return { judgeModels, perRun, flips, interJudge: { comparable: comparable.length, agreeing: agreeing.length } };
 }
 
 // ---------------------------------------------------------------------------

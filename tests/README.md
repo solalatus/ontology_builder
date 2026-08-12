@@ -110,15 +110,16 @@ is dev-only test tooling, same as Playwright.
   needs its own non-regression evaluation, and an unintentional one must be
   reverted rather than blessed.
 - `post-normalization.spec.mjs` — the offline half of the
-  `post-normalization-v1` experiment (issue #75): the deterministic ontology
+  `post-normalization-v1`/`-v2` experiment (issue #75): the deterministic ontology
   diff engine, reply extraction and candidate validation, the blinding and
   verdict-resolution logic, `EXPERIMENT_BRIEF.md` §8's identity/degenerate/
   extraction acceptance checks, and — over the committed condition artifacts
   — that no frozen anchor input has changed, that each stored diff matches a
   fresh recomputation, and that every candidate still loads into the real app
-  through its own YAML import path without losing content. The
-  artifact-dependent tests skip cleanly if the condition has not been
-  generated.
+  through its own YAML import path without losing content. Also pins that the
+  v2 prompt is v1's plus exactly its two added constraints, which is what makes
+  the two conditions comparable. The artifact-dependent tests skip cleanly for
+  any condition not generated in this checkout.
 
 ## Live OpenAI integration tests (opt-in)
 
@@ -221,7 +222,8 @@ it runs — and its scripts are `post-normalization.mjs` (one call per run),
 `judge-post-normalization.mjs` (blind A/B, both orderings, two judge models)
 and `analyze-post-normalization.mjs` (offline, applies the pre-registered
 decision rule). Result and recommendation:
-`tests/evals/results/baselines/post-normalization-v1/REPORT.md`.
+`tests/evals/results/baselines/post-normalization-v2/REPORT.md` (final recommendation) and
+  `post-normalization-v1/REPORT.md`.
 
 ## Python tests
 

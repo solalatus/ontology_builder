@@ -1,10 +1,16 @@
 {
   "schemaVersion": 1,
   "condition": "post-normalization-v1",
-  "generatedAt": "2026-08-12T10:23:57.111Z",
+  "generatedAt": "2026-08-12T11:34:20.401Z",
   "judgePromptSha256": "3f3f01825fdc32d0bd0542ab53f3af92a8116a9feb24acf708f82a5bcf1bb011",
   "blindingSalt": "post-normalization-v1/blind-order",
   "judgeModels": [
+    "gpt-5.6-sol",
+    "gpt-5.1",
+    "gpt-4.1-internal",
+    "o4-mini"
+  ],
+  "preregisteredJudgeModels": [
     "gpt-5.6-sol",
     "gpt-5.1"
   ],
@@ -12,10 +18,10 @@
   "parseFailures": [],
   "note": "Blind transcript-grounded A/B comparison of the interactive run's ontology against the post-normalization-v1 candidate. The judge never saw the fixture, the normalizer prompt, any score, or which model was which. Every pair was judged in both orderings by two judge models, neither of which is the normalizer's model.",
   "usageTotal": {
-    "prompt_tokens": 355319,
-    "completion_tokens": 5040,
-    "total_tokens": 360359,
-    "calls": 5
+    "prompt_tokens": 850386,
+    "completion_tokens": 14105,
+    "total_tokens": 864491,
+    "calls": 12
   },
   "judgments": [
     {
@@ -159,6 +165,224 @@
       "replyReusedFromDisk": true
     },
     {
+      "runId": "run-01",
+      "judgeModel": "gpt-4.1-internal",
+      "order": "primary",
+      "blindingKey": "d52827527f1cb2982af15d595511370d0147993fa41f79d7cd9d44f02ffa1c42",
+      "originalPresentedAs": "B",
+      "preferred": "normalized",
+      "preferredPosition": "A",
+      "confidence": "high",
+      "shortReason": "Model A maintains transcript-faithful, explicit relationships for escalation to Service Owner, Application Owner, and Technical Owner, as demanded by the transcript, while Model B incorrectly merges these into one non-distinct relationship, compromising agent operational competence in routing and escalation. All other core aspects are equivalent, making escalation distinctions decisive.",
+      "material_regressions_original": [
+        "Escalation relationships (Incident — escalatedTo) in B conflate distinct escalation paths (service, application, technical) into a single non-differentiated relationship, misaligning with explicit transcript confirmation of separate operational escalations.",
+        "Relationship meanings for escalatedTo in B are ambiguous and do not align with the separate meanings prepared in A.",
+        "Relationship aliases for escalation in B are missing and merged, as opposed to the individually tracked and transcript-verified escalation relationships in A.",
+        "Action-input reachability for escalation and routing is less explicit, potentially requiring the agent to interpret ambiguous paths in B."
+      ],
+      "material_regressions_normalized": [],
+      "unsupported_additions_original": [],
+      "unsupported_additions_normalized": [],
+      "competency_coverage_loss_original": [
+        "Loss of explicit operational distinction for escalation to Service Owner, Application Owner, and Technical Owner means agent cannot correctly answer questions or perform actions that depend on identifying the correct escalation path as per transcript.",
+        "Relationship structure for escalation in B is at odds with agent's requirement to differentiate these paths and roles, risking incorrect or incomplete agent actions."
+      ],
+      "competency_coverage_loss_normalized": [],
+      "sideCheck": {
+        "A": "normalized",
+        "B": "original"
+      },
+      "modelReported": "gpt-4.1-2025-04-14",
+      "usage": {
+        "completion_tokens": 344,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": 0
+        },
+        "latency_checkpoint": {
+          "engine_tbt_ms": 10,
+          "engine_ttft_ms": 647,
+          "engine_ttlt_ms": 4190,
+          "pre_inference_ms": 334,
+          "service_tbt_ms": 10,
+          "service_ttft_ms": 1081,
+          "service_ttlt_ms": 4596,
+          "total_duration_ms": 4269,
+          "user_visible_ttft_ms": 748
+        },
+        "prompt_tokens": 73889,
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 65920
+        },
+        "total_tokens": 74233
+      },
+      "replyReusedFromDisk": false
+    },
+    {
+      "runId": "run-01",
+      "judgeModel": "gpt-4.1-internal",
+      "order": "reversed",
+      "blindingKey": "d52827527f1cb2982af15d595511370d0147993fa41f79d7cd9d44f02ffa1c42",
+      "originalPresentedAs": "A",
+      "preferred": "original",
+      "preferredPosition": "A",
+      "confidence": "high",
+      "shortReason": "Model A matches the transcript's confirmed structure for incident escalation by using a single relationship to all owner roles, while Model B invents three distinct escalation relationships without expert confirmation or operational reason. This is a material structural defect and unsupported addition in Model B.",
+      "material_regressions_original": [],
+      "material_regressions_normalized": [
+        "Incident escalation relationships are split into escalatedToServiceOwner, escalatedToApplicationOwner, escalatedToTechnicalOwner, which introduces artificial distinctions not supported by the transcript; the expert confirmed a single escalatedTo relationship for all owner roles.",
+        "Relationship meanings for escalation in Model B ('incident has been directly escalated to the IT service owner for oversight', etc) diverge from the transcript, which states escalation is handled to owner roles and does not require distinction in relationship names.",
+        "Model B introduces unnecessary relationship name proliferation for escalation, which could impair operational reachability and answer quality for escalation actions/questions."
+      ],
+      "unsupported_additions_original": [],
+      "unsupported_additions_normalized": [
+        "Model B splits escalation into three relationships (escalatedToServiceOwner, escalatedToApplicationOwner, escalatedToTechnicalOwner) instead of a single escalatedTo relationship, without transcript support.",
+        "Relationship meanings and descriptions of escalation in Model B do not match the transcript's confirmed class/relationship structure.",
+        "No evidence in transcript supports needing distinct escalation relationships per owner type.",
+        "Semantic distinction in relationship naming for escalation in Model B is an invented domain structure.",
+        "All other content is matched between models—no further unsupported additions noted."
+      ],
+      "competency_coverage_loss_original": [],
+      "competency_coverage_loss_normalized": [
+        "Artificial splitting of escalation relationships in Model B risks breaking question/action coverage for 'Who should this incident be escalated to?' and operational assignment, as agent would need to know which relationship to use and nothing in the transcript provides this guidance."
+      ],
+      "sideCheck": {
+        "A": "original",
+        "B": "normalized"
+      },
+      "modelReported": "gpt-4.1-2025-04-14",
+      "usage": {
+        "completion_tokens": 425,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": 0
+        },
+        "latency_checkpoint": {
+          "engine_tbt_ms": 9,
+          "engine_ttft_ms": 216,
+          "engine_ttlt_ms": 4175,
+          "pre_inference_ms": 345,
+          "service_tbt_ms": 9,
+          "service_ttft_ms": 624,
+          "service_ttlt_ms": 4578,
+          "total_duration_ms": 4241,
+          "user_visible_ttft_ms": 279
+        },
+        "prompt_tokens": 73889,
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 71936
+        },
+        "total_tokens": 74314
+      },
+      "replyReusedFromDisk": false
+    },
+    {
+      "runId": "run-01",
+      "judgeModel": "o4-mini",
+      "order": "primary",
+      "blindingKey": "7ff937602feb763713f03d9333355ef2e9f712d20122a2fc4d5d19182737dcb0",
+      "originalPresentedAs": "B",
+      "preferred": "normalized",
+      "preferredPosition": "A",
+      "confidence": "high",
+      "shortReason": "Model A preserves distinct escalation relationships to different owner roles, whereas Model B conflates them under a single ambiguous relationship name.",
+      "material_regressions_original": [
+        "Uses the same relationship name \"escalatedTo\" for escalations to ITServiceOwner, ApplicationOwner, and TechnicalOwner, conflating distinct target roles and hampering precise routing and queries"
+      ],
+      "material_regressions_normalized": [],
+      "unsupported_additions_original": [],
+      "unsupported_additions_normalized": [],
+      "competency_coverage_loss_original": [],
+      "competency_coverage_loss_normalized": [],
+      "sideCheck": {
+        "A": "normalized",
+        "B": "original"
+      },
+      "modelReported": "o4-mini-2025-04-16",
+      "usage": {
+        "completion_tokens": 1703,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 1536,
+          "rejected_prediction_tokens": 0
+        },
+        "latency_checkpoint": {
+          "engine_tbt_ms": 26,
+          "engine_ttft_ms": 980,
+          "engine_ttlt_ms": 46712,
+          "pre_inference_ms": 335,
+          "service_tbt_ms": 26,
+          "service_ttft_ms": 1985,
+          "service_ttlt_ms": 47713,
+          "total_duration_ms": 47390,
+          "user_visible_ttft_ms": 1649
+        },
+        "prompt_tokens": 73888,
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 65920
+        },
+        "total_tokens": 75591
+      },
+      "replyReusedFromDisk": false
+    },
+    {
+      "runId": "run-01",
+      "judgeModel": "o4-mini",
+      "order": "reversed",
+      "blindingKey": "7ff937602feb763713f03d9333355ef2e9f712d20122a2fc4d5d19182737dcb0",
+      "originalPresentedAs": "A",
+      "preferred": "tie",
+      "preferredPosition": "tie",
+      "confidence": "medium",
+      "shortReason": "Both models faithfully implement the expert’s requirements with no unsupported additions or dropped competencies; the only difference is minor naming of escalation relationships, which does not affect functionality.",
+      "material_regressions_original": [],
+      "material_regressions_normalized": [],
+      "unsupported_additions_original": [],
+      "unsupported_additions_normalized": [],
+      "competency_coverage_loss_original": [],
+      "competency_coverage_loss_normalized": [],
+      "sideCheck": {
+        "A": "original",
+        "B": "normalized"
+      },
+      "modelReported": "o4-mini-2025-04-16",
+      "usage": {
+        "completion_tokens": 1091,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 960,
+          "rejected_prediction_tokens": 0
+        },
+        "latency_checkpoint": {
+          "engine_tbt_ms": 26,
+          "engine_ttft_ms": 572,
+          "engine_ttlt_ms": 29285,
+          "pre_inference_ms": 312,
+          "service_tbt_ms": 26,
+          "service_ttft_ms": 1512,
+          "service_ttlt_ms": 30221,
+          "total_duration_ms": 29918,
+          "user_visible_ttft_ms": 1201
+        },
+        "prompt_tokens": 73888,
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 71936
+        },
+        "total_tokens": 74979
+      },
+      "replyReusedFromDisk": false
+    },
+    {
       "runId": "run-02",
       "judgeModel": "gpt-5.6-sol",
       "order": "primary",
@@ -279,9 +503,33 @@
         "A": "original",
         "B": "normalized"
       },
-      "modelReported": "gpt-5.1-2025-11-13",
+      "modelReported": null,
+      "usage": null,
+      "replyReusedFromDisk": true
+    },
+    {
+      "runId": "run-02",
+      "judgeModel": "gpt-4.1-internal",
+      "order": "primary",
+      "blindingKey": "235dd4e3bfe7cd8bd2c9c650ac859f1add7fabf90748866ea29c9e0c8edcedc8",
+      "originalPresentedAs": "B",
+      "preferred": "tie",
+      "preferredPosition": "tie",
+      "confidence": "high",
+      "shortReason": "Models A and B are structurally and content-wise indistinguishable. Every class, property, relationship, rule, and action precisely matches what the transcript established. No material evidence-fidelity differences or unsupported content are present; both fully and faithfully cover the acceptance test and operational needs. Neither has a defect that would warrant preference.",
+      "material_regressions_original": [],
+      "material_regressions_normalized": [],
+      "unsupported_additions_original": [],
+      "unsupported_additions_normalized": [],
+      "competency_coverage_loss_original": [],
+      "competency_coverage_loss_normalized": [],
+      "sideCheck": {
+        "A": "normalized",
+        "B": "original"
+      },
+      "modelReported": "gpt-4.1-2025-04-14",
       "usage": {
-        "completion_tokens": 202,
+        "completion_tokens": 146,
         "completion_tokens_details": {
           "accepted_prediction_tokens": 0,
           "audio_tokens": 0,
@@ -289,22 +537,177 @@
           "rejected_prediction_tokens": 0
         },
         "latency_checkpoint": {
-          "engine_tbt_ms": 6,
-          "engine_ttft_ms": 623,
-          "engine_ttlt_ms": 1909,
-          "pre_inference_ms": 396,
-          "service_tbt_ms": 6,
-          "service_ttft_ms": 1541,
-          "service_ttlt_ms": 2822,
-          "total_duration_ms": 2440,
-          "user_visible_ttft_ms": 1145
+          "engine_tbt_ms": 7,
+          "engine_ttft_ms": 497,
+          "engine_ttlt_ms": 1525,
+          "pre_inference_ms": 242,
+          "service_tbt_ms": 7,
+          "service_ttft_ms": 801,
+          "service_ttlt_ms": 1815,
+          "total_duration_ms": 1585,
+          "user_visible_ttft_ms": 559
+        },
+        "prompt_tokens": 66504,
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 57088
+        },
+        "total_tokens": 66650
+      },
+      "replyReusedFromDisk": false
+    },
+    {
+      "runId": "run-02",
+      "judgeModel": "gpt-4.1-internal",
+      "order": "reversed",
+      "blindingKey": "235dd4e3bfe7cd8bd2c9c650ac859f1add7fabf90748866ea29c9e0c8edcedc8",
+      "originalPresentedAs": "A",
+      "preferred": "tie",
+      "preferredPosition": "tie",
+      "confidence": "high",
+      "shortReason": "Both models are structurally identical in all significant respects and trace precisely to the interview transcript. All classes, properties, relationships, rules, and actions are supported, mapped, and named as in the transcript; there are no unsupported additions, omissions, or context-placement errors. No agent-relevant gaps or defects are evident in either, so the choice is a tie.",
+      "material_regressions_original": [],
+      "material_regressions_normalized": [],
+      "unsupported_additions_original": [],
+      "unsupported_additions_normalized": [],
+      "competency_coverage_loss_original": [],
+      "competency_coverage_loss_normalized": [],
+      "sideCheck": {
+        "A": "original",
+        "B": "normalized"
+      },
+      "modelReported": "gpt-4.1-2025-04-14",
+      "usage": {
+        "completion_tokens": 154,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": 0
+        },
+        "latency_checkpoint": {
+          "engine_tbt_ms": 7,
+          "engine_ttft_ms": 231,
+          "engine_ttlt_ms": 1289,
+          "pre_inference_ms": 325,
+          "service_tbt_ms": 7,
+          "service_ttft_ms": 643,
+          "service_ttlt_ms": 1696,
+          "total_duration_ms": 1380,
+          "user_visible_ttft_ms": 318
+        },
+        "prompt_tokens": 66504,
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 62592
+        },
+        "total_tokens": 66658
+      },
+      "replyReusedFromDisk": false
+    },
+    {
+      "runId": "run-02",
+      "judgeModel": "o4-mini",
+      "order": "primary",
+      "blindingKey": "4af0f1c98c1e9995aaa599bd16d6ffecf458efc2408a992be19ff99c2b658182",
+      "originalPresentedAs": "A",
+      "preferred": "normalized",
+      "preferredPosition": "B",
+      "confidence": "high",
+      "shortReason": "Model A omits 'approved' for RegulatoryNotification.status, breaking the canSendRegulatoryNotification rule, while Model B includes it and satisfies all preconditions.",
+      "material_regressions_original": [
+        "RegulatoryNotification.status missing 'approved', so canSendRegulatoryNotification precondition can never be satisfied"
+      ],
+      "material_regressions_normalized": [],
+      "unsupported_additions_original": [],
+      "unsupported_additions_normalized": [],
+      "competency_coverage_loss_original": [
+        "sendRegulatoryNotification cannot proceed due to missing 'approved' status value"
+      ],
+      "competency_coverage_loss_normalized": [],
+      "sideCheck": {
+        "A": "original",
+        "B": "normalized"
+      },
+      "modelReported": "o4-mini-2025-04-16",
+      "usage": {
+        "completion_tokens": 3245,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 3072,
+          "rejected_prediction_tokens": 0
+        },
+        "latency_checkpoint": {
+          "engine_tbt_ms": 24,
+          "engine_ttft_ms": 728,
+          "engine_ttlt_ms": 80752,
+          "pre_inference_ms": 568,
+          "service_tbt_ms": 24,
+          "service_ttft_ms": 2007,
+          "service_ttlt_ms": 82026,
+          "total_duration_ms": 81470,
+          "user_visible_ttft_ms": 1439
         },
         "prompt_tokens": 66503,
         "prompt_tokens_details": {
           "audio_tokens": 0,
-          "cached_tokens": 55552
+          "cached_tokens": 62592
         },
-        "total_tokens": 66705
+        "total_tokens": 69748
+      },
+      "replyReusedFromDisk": false
+    },
+    {
+      "runId": "run-02",
+      "judgeModel": "o4-mini",
+      "order": "reversed",
+      "blindingKey": "4af0f1c98c1e9995aaa599bd16d6ffecf458efc2408a992be19ff99c2b658182",
+      "originalPresentedAs": "B",
+      "preferred": "normalized",
+      "preferredPosition": "A",
+      "confidence": "high",
+      "shortReason": "Model B’s RegulatoryNotification.status lacks the 'approved' value required by the rule, breaking regulatory notification competency; Model A aligns with the transcript’s rule and fixes this inconsistency.",
+      "material_regressions_original": [
+        "RegulatoryNotification.status omits 'approved', so canSendRegulatoryNotification precondition can never be met"
+      ],
+      "material_regressions_normalized": [],
+      "unsupported_additions_original": [],
+      "unsupported_additions_normalized": [],
+      "competency_coverage_loss_original": [
+        "sendRegulatoryNotification action blocked because required 'approved' status is missing"
+      ],
+      "competency_coverage_loss_normalized": [],
+      "sideCheck": {
+        "A": "normalized",
+        "B": "original"
+      },
+      "modelReported": "o4-mini-2025-04-16",
+      "usage": {
+        "completion_tokens": 2674,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 2496,
+          "rejected_prediction_tokens": 0
+        },
+        "latency_checkpoint": {
+          "engine_tbt_ms": 24,
+          "engine_ttft_ms": 1053,
+          "engine_ttlt_ms": 66150,
+          "pre_inference_ms": 303,
+          "service_tbt_ms": 24,
+          "service_ttft_ms": 2028,
+          "service_ttlt_ms": 67121,
+          "total_duration_ms": 66825,
+          "user_visible_ttft_ms": 1725
+        },
+        "prompt_tokens": 66503,
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 57088
+        },
+        "total_tokens": 69177
       },
       "replyReusedFromDisk": false
     },
@@ -343,34 +746,9 @@
         "A": "original",
         "B": "normalized"
       },
-      "modelReported": "gpt-5.6-sol-2026-07-09",
-      "usage": {
-        "completion_tokens": 2243,
-        "completion_tokens_details": {
-          "accepted_prediction_tokens": 0,
-          "audio_tokens": 0,
-          "reasoning_tokens": 1730,
-          "rejected_prediction_tokens": 0
-        },
-        "latency_checkpoint": {
-          "engine_tbt_ms": 15,
-          "engine_ttft_ms": 795,
-          "engine_ttlt_ms": 33542,
-          "pre_inference_ms": 495,
-          "service_tbt_ms": 15,
-          "service_ttft_ms": 1379,
-          "service_ttlt_ms": 34121,
-          "total_duration_ms": 33640,
-          "user_visible_ttft_ms": 884
-        },
-        "prompt_tokens": 72204,
-        "prompt_tokens_details": {
-          "audio_tokens": 0,
-          "cached_tokens": 0
-        },
-        "total_tokens": 74447
-      },
-      "replyReusedFromDisk": false
+      "modelReported": null,
+      "usage": null,
+      "replyReusedFromDisk": true
     },
     {
       "runId": "run-03",
@@ -410,34 +788,9 @@
         "A": "normalized",
         "B": "original"
       },
-      "modelReported": "gpt-5.6-sol-2026-07-09",
-      "usage": {
-        "completion_tokens": 1841,
-        "completion_tokens_details": {
-          "accepted_prediction_tokens": 0,
-          "audio_tokens": 0,
-          "reasoning_tokens": 1324,
-          "rejected_prediction_tokens": 0
-        },
-        "latency_checkpoint": {
-          "engine_tbt_ms": 13,
-          "engine_ttft_ms": 706,
-          "engine_ttlt_ms": 25279,
-          "pre_inference_ms": 346,
-          "service_tbt_ms": 13,
-          "service_ttft_ms": 1204,
-          "service_ttlt_ms": 25726,
-          "total_duration_ms": 25388,
-          "user_visible_ttft_ms": 858
-        },
-        "prompt_tokens": 72204,
-        "prompt_tokens_details": {
-          "audio_tokens": 0,
-          "cached_tokens": 0
-        },
-        "total_tokens": 74045
-      },
-      "replyReusedFromDisk": false
+      "modelReported": null,
+      "usage": null,
+      "replyReusedFromDisk": true
     },
     {
       "runId": "run-03",
@@ -464,34 +817,9 @@
         "A": "normalized",
         "B": "original"
       },
-      "modelReported": "gpt-5.1-2025-11-13",
-      "usage": {
-        "completion_tokens": 251,
-        "completion_tokens_details": {
-          "accepted_prediction_tokens": 0,
-          "audio_tokens": 0,
-          "reasoning_tokens": 0,
-          "rejected_prediction_tokens": 0
-        },
-        "latency_checkpoint": {
-          "engine_tbt_ms": 8,
-          "engine_ttft_ms": 2066,
-          "engine_ttlt_ms": 3966,
-          "pre_inference_ms": 348,
-          "service_tbt_ms": 8,
-          "service_ttft_ms": 2908,
-          "service_ttlt_ms": 4803,
-          "total_duration_ms": 4463,
-          "user_visible_ttft_ms": 2560
-        },
-        "prompt_tokens": 72204,
-        "prompt_tokens_details": {
-          "audio_tokens": 0,
-          "cached_tokens": 0
-        },
-        "total_tokens": 72455
-      },
-      "replyReusedFromDisk": false
+      "modelReported": null,
+      "usage": null,
+      "replyReusedFromDisk": true
     },
     {
       "runId": "run-03",
@@ -523,9 +851,41 @@
         "A": "original",
         "B": "normalized"
       },
-      "modelReported": "gpt-5.1-2025-11-13",
+      "modelReported": null,
+      "usage": null,
+      "replyReusedFromDisk": true
+    },
+    {
+      "runId": "run-03",
+      "judgeModel": "gpt-4.1-internal",
+      "order": "primary",
+      "blindingKey": "902616996c6dc0670f87fd89ea0f9adacdf20e3765a34557a7d909198836eed0",
+      "originalPresentedAs": "A",
+      "preferred": "original",
+      "preferredPosition": "A",
+      "confidence": "high",
+      "shortReason": "Model A uses only direct, transcript-confirmed relationships and rule conditions, so all actions and verifications are reliably reachable and contextually placed. Model B introduces reverse relationship dependency and indirect language ('the related Incident'), which is not present in the transcript and would undermine the agent's runtime clarity and traceability for several actions and conditions. Thus, Model A is structurally preferable and more evidence-faithful.",
+      "material_regressions_original": [],
+      "material_regressions_normalized": [
+        "Rule preconditions 'canNotifyStakeholders', 'canGeneratePostIncidentReview', and 'canCloseIncident' reference 'the related Incident' and 'any related Stakeholder Communication', but StakeholderCommunication does not have a direct incident reference; only Incident hasCommunication StakeholderCommunication, making action verifications and rule evaluations ambiguous at runtime.",
+        "Rule 'canGeneratePostIncidentReview' uses 'Post-Incident Review is associated with an Incident whose status is resolved or closed', but PostIncidentReview does not have a direct incident reference; only Incident hasReview PostIncidentReview, which may complicate rule evaluation.",
+        "Rule 'canCloseIncident' references 'Any related Stakeholder Communication is sent or archived', but incident closure should require that all stakeholder communications associated with the incident are in this state; ambiguity in language and verification could cause erroneous closure checks.",
+        "Actions and rules in Model B refer to relationships from StakeholderCommunication and PostIncidentReview back to Incident via phrases like 'related Incident', which requires reverse traversal not explicitly modeled or confirmed in the ontology structures of the transcript."
+      ],
+      "unsupported_additions_original": [],
+      "unsupported_additions_normalized": [],
+      "competency_coverage_loss_original": [],
+      "competency_coverage_loss_normalized": [
+        "Action/rule input ambiguity: 'notifyStakeholders' in Model B uses StakeholderCommunication as input but expects clarification or linkage to Incident for precondition evaluation, which is less structurally reliable than Model A.",
+        "Potential error pathways in action/rule verification due to ambiguity and lack of direct navigability between stakeholder communications/reviews and incidents."
+      ],
+      "sideCheck": {
+        "A": "original",
+        "B": "normalized"
+      },
+      "modelReported": "gpt-4.1-2025-04-14",
       "usage": {
-        "completion_tokens": 503,
+        "completion_tokens": 456,
         "completion_tokens_details": {
           "accepted_prediction_tokens": 0,
           "audio_tokens": 0,
@@ -533,22 +893,175 @@
           "rejected_prediction_tokens": 0
         },
         "latency_checkpoint": {
-          "engine_tbt_ms": 8,
-          "engine_ttft_ms": 591,
-          "engine_ttlt_ms": 4718,
-          "pre_inference_ms": 427,
+          "engine_tbt_ms": 9,
+          "engine_ttft_ms": 138,
+          "engine_ttlt_ms": 4067,
+          "pre_inference_ms": 350,
           "service_tbt_ms": 8,
-          "service_ttft_ms": 1554,
-          "service_ttlt_ms": 5664,
-          "total_duration_ms": 5250,
-          "user_visible_ttft_ms": 1126
+          "service_ttft_ms": 666,
+          "service_ttlt_ms": 4520,
+          "total_duration_ms": 4177,
+          "user_visible_ttft_ms": 317
+        },
+        "prompt_tokens": 72205,
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 71296
+        },
+        "total_tokens": 72661
+      },
+      "replyReusedFromDisk": false
+    },
+    {
+      "runId": "run-03",
+      "judgeModel": "gpt-4.1-internal",
+      "order": "reversed",
+      "blindingKey": "902616996c6dc0670f87fd89ea0f9adacdf20e3765a34557a7d909198836eed0",
+      "originalPresentedAs": "B",
+      "preferred": "tie",
+      "preferredPosition": "tie",
+      "confidence": "high",
+      "shortReason": "Both models are nearly identical in structure, content, property/value lists, relationships, rules, and actions, reflecting the transcript's requirements with no material omissions or invented additions. Operational semantics, class boundaries, action reachability, and competency are fully matched, and neither model contains structural errors or loss. No evidence justifies preferring one over the other.",
+      "material_regressions_original": [],
+      "material_regressions_normalized": [],
+      "unsupported_additions_original": [],
+      "unsupported_additions_normalized": [],
+      "competency_coverage_loss_original": [],
+      "competency_coverage_loss_normalized": [],
+      "sideCheck": {
+        "A": "normalized",
+        "B": "original"
+      },
+      "modelReported": "gpt-4.1-2025-04-14",
+      "usage": {
+        "completion_tokens": 151,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": 0
+        },
+        "latency_checkpoint": {
+          "engine_tbt_ms": 6,
+          "engine_ttft_ms": 326,
+          "engine_ttlt_ms": 1295,
+          "pre_inference_ms": 549,
+          "service_tbt_ms": 7,
+          "service_ttft_ms": 1000,
+          "service_ttlt_ms": 1999,
+          "total_duration_ms": 1459,
+          "user_visible_ttft_ms": 451
+        },
+        "prompt_tokens": 72205,
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 66688
+        },
+        "total_tokens": 72356
+      },
+      "replyReusedFromDisk": false
+    },
+    {
+      "runId": "run-03",
+      "judgeModel": "o4-mini",
+      "order": "primary",
+      "blindingKey": "a65c0f5663a1654c0ea21b4932abbf391bc4635308034c1675d91da4e0282bcd",
+      "originalPresentedAs": "A",
+      "preferred": "original",
+      "preferredPosition": "A",
+      "confidence": "high",
+      "shortReason": "Model A faithfully preserves all rule conditions exactly as given in the transcript, while Model B merges or omits a transcript-specified condition in canGeneratePostIncidentReview.",
+      "material_regressions_original": [],
+      "material_regressions_normalized": [
+        "canGeneratePostIncidentReview omits explicit condition 'Incident has a Post-Incident Review record' as separately listed in the transcript"
+      ],
+      "unsupported_additions_original": [],
+      "unsupported_additions_normalized": [],
+      "competency_coverage_loss_original": [],
+      "competency_coverage_loss_normalized": [],
+      "sideCheck": {
+        "A": "original",
+        "B": "normalized"
+      },
+      "modelReported": "o4-mini-2025-04-16",
+      "usage": {
+        "completion_tokens": 1824,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 1664,
+          "rejected_prediction_tokens": 0
+        },
+        "latency_checkpoint": {
+          "engine_tbt_ms": 26,
+          "engine_ttft_ms": 498,
+          "engine_ttlt_ms": 48934,
+          "pre_inference_ms": 414,
+          "service_tbt_ms": 26,
+          "service_ttft_ms": 2155,
+          "service_ttlt_ms": 50588,
+          "total_duration_ms": 50185,
+          "user_visible_ttft_ms": 1742
         },
         "prompt_tokens": 72204,
         "prompt_tokens_details": {
           "audio_tokens": 0,
-          "cached_tokens": 63104
+          "cached_tokens": 71296
         },
-        "total_tokens": 72707
+        "total_tokens": 74028
+      },
+      "replyReusedFromDisk": false
+    },
+    {
+      "runId": "run-03",
+      "judgeModel": "o4-mini",
+      "order": "reversed",
+      "blindingKey": "a65c0f5663a1654c0ea21b4932abbf391bc4635308034c1675d91da4e0282bcd",
+      "originalPresentedAs": "B",
+      "preferred": "original",
+      "preferredPosition": "B",
+      "confidence": "high",
+      "shortReason": "Model A omits the MonitoringSystem → generates → Alert relationship required by the transcript, while Model B includes it and fully supports alert source navigation.",
+      "material_regressions_original": [],
+      "material_regressions_normalized": [
+        "Missing relationship MonitoringSystem → generates → Alert needed to list alerts by system"
+      ],
+      "unsupported_additions_original": [],
+      "unsupported_additions_normalized": [],
+      "competency_coverage_loss_original": [],
+      "competency_coverage_loss_normalized": [
+        "Cannot retrieve alerts originating from a specific MonitoringSystem due to missing generates relationship"
+      ],
+      "sideCheck": {
+        "A": "normalized",
+        "B": "original"
+      },
+      "modelReported": "o4-mini-2025-04-16",
+      "usage": {
+        "completion_tokens": 1892,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 1728,
+          "rejected_prediction_tokens": 0
+        },
+        "latency_checkpoint": {
+          "engine_tbt_ms": 26,
+          "engine_ttft_ms": 830,
+          "engine_ttlt_ms": 50583,
+          "pre_inference_ms": 464,
+          "service_tbt_ms": 26,
+          "service_ttft_ms": 2532,
+          "service_ttlt_ms": 52279,
+          "total_duration_ms": 51826,
+          "user_visible_ttft_ms": 2068
+        },
+        "prompt_tokens": 72204,
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 66688
+        },
+        "total_tokens": 74096
       },
       "replyReusedFromDisk": false
     }

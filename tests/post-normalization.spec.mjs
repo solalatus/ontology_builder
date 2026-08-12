@@ -29,11 +29,17 @@ import { computeRecoveryMetrics } from "./evals/lib/recoveryMetrics.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const RUNS_DIR = path.join(__dirname, "evals", "results", "runs");
-const COND_DIR = path.join(__dirname, "evals", "results", "baselines", "post-normalization-v1");
+const BASELINES = path.join(__dirname, "evals", "results", "baselines");
+const CONDITIONS = ["post-normalization-v1", "post-normalization-v2"];
+const condDir = (name) => path.join(BASELINES, name);
+const COND_DIR = condDir(CONDITIONS[0]); // v1 -- the condition whose frozen-input manifest is checked below
 const RUN_IDS = ["run-01", "run-02", "run-03"];
 
 const doc = (text) => yaml.load(text);
-const hasCandidates = () => RUN_IDS.every((r) => fs.existsSync(path.join(COND_DIR, r, "recovered-model.yaml")));
+// Only the conditions actually generated in this checkout are checked; a fresh
+// clone with neither of them still runs green.
+const generatedConditions = () => CONDITIONS.filter((c) => RUN_IDS.every((r) => fs.existsSync(path.join(condDir(c), r, "recovered-model.yaml"))));
+const hasCandidates = () => generatedConditions().length > 0;
 
 // ---------------------------------------------------------------------------
 // The deterministic semantic diff (issue #75 §7)
@@ -385,8 +391,8 @@ test("no frozen anchor artifact this condition read has changed since it ran", {
 // ---------------------------------------------------------------------------
 
 test("every committed candidate parses, validates, and carries complete provenance", { skip: !hasCandidates() && "condition not generated yet" }, () => {
-  for (const runId of RUN_IDS) {
-    const dir = path.join(COND_DIR, runId);
+  for (const [condition, runId] of generatedConditions().flatMap((c) => RUN_IDS.map((r) => [c, r]))) {
+    const dir = path.join(condDir(condition), runId);
     const candidate = parseCandidate(fs.readFileSync(path.join(dir, "recovered-model.yaml"), "utf8"));
     const { errors } = validateCandidate(candidate);
     assert.deepEqual(errors, [], `${runId}: candidate has hard validation errors`);
@@ -396,19 +402,21 @@ test("every committed candidate parses, validates, and carries complete provenan
       "normalizerPromptSha256", "sourceTranscriptSha256", "sourceOntologySha256", "usage", "diffSummary"]) {
       assert.ok(prov[field] !== undefined && prov[field] !== null, `${runId}: provenance is missing ${field}`);
     }
-    assert.equal(prov.normalizerPromptSha256, NORMALIZER_PROMPT_SHA256, `${runId}: candidate was produced by a different prompt version`);
+    assert.equal(prov.condition, condition, `${runId}: provenance names a different condition`);
+    assert.equal(prov.normalizerPromptSha256, resolveCondition(condition).promptSha256,
+      `${condition}/${runId}: candidate was produced by a different prompt version`);
   }
 });
 
 test("each committed diff matches what the committed before/after pair actually says", { skip: !hasCandidates() && "condition not generated yet" }, () => {
   // The stored diff is the report's evidence, so it has to be reproducible
   // from the two ontologies rather than trusted as a by-product of the run.
-  for (const runId of RUN_IDS) {
+  for (const [condition, runId] of generatedConditions().flatMap((c) => RUN_IDS.map((r) => [c, r]))) {
     const before = parseCandidate(fs.readFileSync(path.join(RUNS_DIR, runId, "recovered-model.yaml"), "utf8"));
-    const after = parseCandidate(fs.readFileSync(path.join(COND_DIR, runId, "recovered-model.yaml"), "utf8"));
+    const after = parseCandidate(fs.readFileSync(path.join(condDir(condition), runId, "recovered-model.yaml"), "utf8"));
     const recomputed = computeOntologyDiff(before, after);
-    const stored = JSON.parse(fs.readFileSync(path.join(COND_DIR, runId, "normalization-diff.json"), "utf8"));
-    assert.deepEqual(JSON.parse(JSON.stringify(recomputed)), stored, `${runId}: stored diff does not match a fresh recomputation`);
+    const stored = JSON.parse(fs.readFileSync(path.join(condDir(condition), runId, "normalization-diff.json"), "utf8"));
+    assert.deepEqual(JSON.parse(JSON.stringify(recomputed)), stored, `${condition}/${runId}: stored diff does not match a fresh recomputation`);
   }
 });
 
@@ -419,8 +427,8 @@ test("every committed candidate still loads into the real app without losing con
   // parseDomainYamlImport/commitYamlImport pipeline `Apply` would use -- with
   // "replace" semantics, then re-exports and diffs. Anything the app silently
   // drops shows up here rather than in production.
-  for (const runId of RUN_IDS) {
-    const candidateYaml = fs.readFileSync(path.join(COND_DIR, runId, "recovered-model.yaml"), "utf8");
+  for (const [condition, runId] of generatedConditions().flatMap((c) => RUN_IDS.map((r) => [c, r]))) {
+    const candidateYaml = fs.readFileSync(path.join(condDir(condition), runId, "recovered-model.yaml"), "utf8");
     await withPage(async (page) => {
       const exported = await page.evaluate((text) => {
         window.__kg.formats.openImportDialog(text, "yaml");
@@ -428,11 +436,11 @@ test("every committed candidate still loads into the real app without losing con
         return window.__kg.formats.buildDomainYamlExport();
       }, candidateYaml);
       const diff = computeOntologyDiff(parseCandidate(candidateYaml), parseCandidate(exported));
-      assert.deepEqual(diff.classes.removed, [], `${runId}: the app dropped classes on import`);
-      assert.deepEqual(diff.relationships.removed, [], `${runId}: the app dropped relationships on import`);
-      assert.deepEqual(diff.properties.removed, [], `${runId}: the app dropped properties on import`);
-      assert.deepEqual(diff.rules.removed, [], `${runId}: the app dropped rules on import`);
-      assert.deepEqual(diff.actions.removed, [], `${runId}: the app dropped actions on import`);
+      assert.deepEqual(diff.classes.removed, [], `${condition}/${runId}: the app dropped classes on import`);
+      assert.deepEqual(diff.relationships.removed, [], `${condition}/${runId}: the app dropped relationships on import`);
+      assert.deepEqual(diff.properties.removed, [], `${condition}/${runId}: the app dropped properties on import`);
+      assert.deepEqual(diff.rules.removed, [], `${condition}/${runId}: the app dropped rules on import`);
+      assert.deepEqual(diff.actions.removed, [], `${condition}/${runId}: the app dropped actions on import`);
     });
   }
 });

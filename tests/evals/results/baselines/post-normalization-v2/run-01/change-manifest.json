@@ -1,0 +1,11 @@
+[
+  {
+    "changeType": "remove-unsupported-structure",
+    "summary": "Removed unsupported non-verification text from acknowledgeIncident",
+    "reason": "The provided ontology used a placeholder rather than the confirmed verification statement, so the action was not faithfully represented.",
+    "agentImpact": "The action now has a concrete verification step the agent can check.",
+    "before": "acknowledgeIncident.verification was 'how to confirm it worked'.",
+    "after": "acknowledgeIncident.verification is 'Read the incident again and confirm acknowledged is true and status is acknowledged.'",
+    "evidence": "Turn 49: 'Verification: Read the incident again and confirm acknowledged is true and status is acknowledged.'"
+  }
+]

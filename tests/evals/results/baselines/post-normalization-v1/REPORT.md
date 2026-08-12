@@ -1,5 +1,14 @@
 # `post-normalization-v1` — results and recommendation
 
+> **Superseded as a recommendation, not as a result.** This report's B
+> ("promising, insufficient evidence") was the correct call on the evidence
+> available when it was written, and every number in it still stands. The
+> follow-up condition it asked for was then run: `../post-normalization-v2/REPORT.md`
+> reports that v2 reversed the result, and the experiment's final recommendation
+> is **REJECT**. See §8 below for the one thing that changed about *this*
+> condition's own numbers — the judge panel was widened from two models to four,
+> and it reproduced all three outcomes exactly.
+
 Experiment specified by [issue #75](https://github.com/solalatus/ontology_builder/issues/75).
 Methodology and the **pre-registered** analysis plan: `../../../POST_NORMALIZATION.md`
 (committed before any candidate existed — see `git log`).
@@ -384,3 +393,40 @@ classifier has already been observed running 160+ turns past a finished
 interview (`README.md`, "What it does").
 
 **Implementation stops here and waits for an explicit decision** (issue #75 §11).
+
+---
+
+## 8. Addendum: the widened judge panel (added after v2 was run)
+
+§7 asked for the judge panel to be widened before any verdict at this margin was
+trusted. It was: `gpt-4.1-internal` and `o4-mini` were added to `gpt-5.6-sol` and
+`gpt-5.1`, both orderings, 24 verdicts for this condition. The twelve original
+replies were reused from disk verbatim — no cell was ever sampled twice.
+
+**All three run outcomes are unchanged.**
+
+| Run | Pre-registered two-judge panel | Full four-judge panel | Agree? |
+|---|---|---|---|
+| run-01 | normalized | **normalized** | yes |
+| run-02 | normalized | **normalized** | yes |
+| run-03 | original | **original** | yes |
+
+Adverse findings over all eight verdicts per run:
+
+| Run | Material regressions (norm / orig) | Unsupported additions (norm / orig) | Competency loss (norm / orig) |
+|---|---|---|---|
+| run-01 | 3/8 vs 6/8 | 1/8 vs 0/8 | 3/8 vs 3/8 |
+| run-02 | 2/8 vs 4/8 | 1/8 vs 0/8 | 1/8 vs 4/8 |
+| run-03 | 6/8 vs 2/8 | 4/8 vs 2/8 | 6/8 vs 1/8 |
+
+Order-bias on the widened panel: `gpt-4.1-internal` flipped on 2 of 3 runs,
+`gpt-5.1` and `o4-mini` on 1 of 3 each, `gpt-5.6-sol` on 0 of 3. The two added
+judges are noticeably noisier than the original pair; the outcome does not depend
+on them, because an unstable judge casts no vote.
+
+Nothing in §§1–7 is revised. The pre-registered criteria still fail on 3, 5 and
+6, and the recommendation this condition reached on its own evidence was still B.
+What the addendum establishes is that B was not a thin-panel artefact: the
+endpoint reproduced, which is what makes v2's reversal (0 of 3 runs, on the same
+panel, same blinding, same models) a real difference between the two prompts
+rather than noise.

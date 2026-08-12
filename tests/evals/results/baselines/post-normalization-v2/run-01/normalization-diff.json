@@ -1,0 +1,36 @@
+{
+  "classes": {
+    "added": [],
+    "removed": [],
+    "changed": []
+  },
+  "properties": {
+    "added": [],
+    "removed": [],
+    "changed": []
+  },
+  "relationships": {
+    "added": [],
+    "removed": [],
+    "changed": [],
+    "directionChanged": []
+  },
+  "rules": {
+    "added": [],
+    "removed": [],
+    "changed": []
+  },
+  "actions": {
+    "added": [],
+    "removed": [],
+    "changed": [
+      {
+        "name": "acknowledgeIncident",
+        "effectChanged": false,
+        "verificationChanged": true,
+        "preconditionsAdded": [],
+        "preconditionsRemoved": []
+      }
+    ]
+  }
+}
