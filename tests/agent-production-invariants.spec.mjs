@@ -39,9 +39,17 @@ import { withPage } from "./lib/page.mjs";
 // + AGENT_KNOWLEDGE + the output-language directive, exactly as sent to the
 // model on a real request. Recorded per language because the directive names
 // the language (agentLanguageDirective()), so the two differ by design.
+// Updated deliberately in the commit that added the CONSISTENCY CHECK section
+// to AGENT_SYSTEM_PROMPT_BASE (issue #84 §4). That change makes a new
+// treatment: the anchor distribution in tests/evals/results/runs/ was produced
+// under the previous prompt, whose hashes were
+// 3554cef3…/e484350e…, and comparisons against those three runs are only
+// meaningful once the fresh non-regression evaluation in issue #85 has been
+// run. This is the intentional case the header above describes -- not a hash
+// updated to make a failing test go away.
 export const PRODUCTION_SYSTEM_PROMPT_SHA256 = {
-  en: "3554cef37978da3cf8eeef502182fd722e229d881260e7324cf4e6a75a2c173f",
-  hu: "e484350e1e111505d949b89c3218bb8040c99fca2e09c2e95c6518940e8775f5",
+  en: "eff34f3e70f85419e078cbc3bfb827d7e0d58066b33a74c8db09df1e9f337fa2",
+  hu: "a2194212cb81df8de467973f1cf583b0d0c92a19e06858ad925df229eed0ecb6",
 };
 
 // The complete ontology tool surface an ordinary interview request exposes.

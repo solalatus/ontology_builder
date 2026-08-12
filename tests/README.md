@@ -109,6 +109,13 @@ is dev-only test tooling, same as Playwright.
   `fixtures/consistency-corpus/labels.json` — every documented defect marked
   detectable is found, and exactly one error is reported across all three,
   which is the documented one. Offline: no key, no network.
+- `agent-self-correction.spec.mjs` — the agent half of the checker (issue
+  #84): findings reaching the tool result delta-scoped, notes never reaching
+  it, the three-apply budget and its refusal of a fourth, the extra applies
+  being refused when there is nothing to remediate, a whole turn folding into
+  exactly one undo entry that Review changes still renders correctly, the full
+  sweep riding on `get_graph_state`, and the transcript note when a turn leaves
+  an error behind. Mocked API throughout — no key, no network.
 - `agent-production-invariants.spec.mjs` — hard regression guards on the
   shipped interviewer (issue #75 §1): a golden SHA-256 of the real system
   prompt in both languages, and a runtime assertion, captured off a real

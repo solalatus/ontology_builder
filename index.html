@@ -2084,6 +2084,7 @@ const STRINGS = {
     untitledRulePlaceholder: "(untitled rule)",
     // Ontology Change Review (issue #74), retrospective scope this round.
     // Consistency checker (issue #83).
+    agentLeftFindingsNote: (n) => `The agent left ${n} consistency problem(s) unresolved — see Check.`,
     consistencyButton: "Check",
     consistencyButtonWithCount: (n) => `Check (${n})`,
     consistencyTooltip: "Contradictions and gaps found in the model.",
@@ -2355,6 +2356,7 @@ const STRINGS = {
     untitledRulePlaceholder: "(névtelen szabály)",
     // Ontology Change Review (issue #74), retrospective scope this round.
     // Konzisztencia-ellenőrzés (#83).
+    agentLeftFindingsNote: (n) => `Az ügynök ${n} ellentmondást nem oldott fel — lásd az Ellenőrzés panelt.`,
     consistencyButton: "Ellenőrzés",
     consistencyButtonWithCount: (n) => `Ellenőrzés (${n})`,
     consistencyTooltip: "Ellentmondások és hiányosságok a modellben.",
@@ -3028,6 +3030,38 @@ function syncGraphTitleUi() {
 // forward from it for the model's own follow-up reply, since that reply is
 // appended to the transcript *after* this call returns (see
 // sendAgentChatMessage's tool-call loop), not before.
+// Where an agent turn's edits fold to (issue #84 §3). `null` outside an agent
+// turn, -1 inside one that has not committed yet, otherwise the index in
+// history.past that this turn's applies all collapse into.
+//
+// The alternative -- one history entry per apply -- would mean an agent that
+// wrote something, saw a contradiction and corrected it left the expert three
+// undo steps for one exchange, two of which restore a state the agent already
+// knew was wrong. The turn is the unit the expert experiences, so it is the
+// unit Undo works on, which is also the rule the app has always followed; it
+// only becomes work once a turn can commit more than once.
+let agentTurnFoldIndex = null;
+
+// Same contract as pushHistory, except that inside an agent turn every call
+// after the first widens that turn's single entry rather than adding one.
+// `before` is therefore captured once, at the turn's first commit, and the
+// entry's `after` keeps moving forward -- so Undo restores the state as it was
+// before the agent replied, which is what it did when a turn could only
+// commit once.
+function pushOrFoldAgentHistory(before, after, meta) {
+  const folding = agentTurnFoldIndex !== null && agentTurnFoldIndex >= 0 && history.past[agentTurnFoldIndex];
+  if (!folding) {
+    pushHistory(before, after, meta);
+    if (agentTurnFoldIndex !== null) agentTurnFoldIndex = history.past.length - 1;
+    return;
+  }
+  history.past[agentTurnFoldIndex].after = after;
+  history.future = [];
+  newlyImportedIds = new Set();
+  updateUndoRedoButtons();
+  scheduleSave();
+}
+
 function pushHistory(before, after, meta) {
   newlyImportedIds = new Set(); // any new discrete action retires the "just imported" highlight
   history.past.push({
@@ -8732,9 +8766,12 @@ function commitYamlImport(text, mode) {
   // before the model's follow-up reply (if any) has been appended -- see
   // pushHistory's own comment on why evidenceIndex is a forward-looking
   // marker, not the reply text itself.
-  pushHistory(before, snapshotState(), mode === "agent-merge"
-    ? { source: "agent-auto-edit", evidenceIndex: agentState.transcript.length }
-    : undefined);
+  if (mode === "agent-merge") {
+    pushOrFoldAgentHistory(before, snapshotState(),
+      { source: "agent-auto-edit", evidenceIndex: agentState.transcript.length });
+  } else {
+    pushHistory(before, snapshotState(), undefined);
+  }
   newlyImportedIds = new Set(); // Section-5.3-style highlight only applies to plain node/edge TXT import
   markDirty();
   fitViewToContent();
@@ -9726,6 +9763,14 @@ const agentState = {
   // exposed by reference), no new setter functions needed.
   systemPromptOverride: null, // when set, replaces the real staged interview prompt entirely (B2)
   toolsDisabled: false, // when true, no tools array is sent at all -- nothing can commit mid-conversation (B3)
+  // Eval-only, same family as toolsDisabled and systemPromptOverride: when
+  // true the turn behaves exactly as it did before issue #84 -- one commit per
+  // turn, no consistency findings appended to any tool result. It exists so
+  // issue #85 can run its control arm against the shipped code rather than
+  // against a separate checkout, which is what makes the two arms differ by
+  // the treatment alone and nothing else (not a Chromium version, not a
+  // harness revision). Never set by any real UI.
+  selfCorrectionDisabled: false,
 };
 
 try {
@@ -11159,6 +11204,19 @@ actions:
     effect: <plain text>
     verification: <plain text>
 
+CONSISTENCY CHECK
+After each apply_ontology_yaml call the tool result may list consistency
+problems the app found in the live ontology. Problems marked [error] are exact
+contradictions; [warning] are likely contradictions found by text matching and
+can occasionally be wrong. Fix what you can before replying to the expert — you
+may make up to two further apply_ontology_yaml calls in this same turn purely to
+resolve them. Only fix a problem when the correction is unambiguous from what
+the expert has already told you, and never by weakening or deleting the rule,
+property or relationship that surfaced it. If resolving it needs information the
+expert has not given you, leave it and ask them about it in your reply. If you
+are certain a reported problem is not real, you may leave it and carry on — but
+say so briefly rather than passing over it silently.
+
 TONE
 Precise, patient, and collaborative — like a knowledge engineer who respects
 the expert's domain knowledge and treats their own modeling opinions as
@@ -11334,7 +11392,9 @@ function handleAgentToolCall(call, alreadyCommittedThisTurn) {
   }
   if (alreadyCommittedThisTurn) {
     appendTranscriptMessage("tool", t("agentToolSkippedNote"));
-    return { applied: false, resultText: "Skipped: only one apply_ontology_yaml call is applied per message." };
+    return { applied: false, resultText: "Skipped: no further apply_ontology_yaml call is available this turn. "
+      + "The extra calls in a turn are for resolving consistency problems your own edit introduced, not for further edits. "
+      + "Reply to the expert instead." };
   }
   const yamlText = typeof args.yaml === "string" ? args.yaml : "";
   if (!yamlText.trim()) {
@@ -11370,7 +11430,24 @@ function handleAgentToolCall(call, alreadyCommittedThisTurn) {
 // limit every tool-calling round already respects.
 function handleGetGraphStateCall() {
   appendTranscriptMessage("tool", t("agentToolCheckedState"));
-  return { applied: false, resultText: buildDomainYamlExport() };
+  // The full sweep rides along here rather than being triggered by detecting
+  // "Phase 9" in the agent's prose (issue #84 §2 asks for one full sweep at
+  // the validation pass). Phase detection would mean parsing the model's own
+  // description of what it is doing, which is exactly the kind of claim this
+  // repository has already caught being wrong. get_graph_state is the
+  // read-the-whole-model tool, the interview prompt's own Phase 9(b) tells the
+  // agent to call it and confirm "directly from that result, not from
+  // memory", and the whole model is what a full findings list is about. So
+  // the reliable signal is the tool call, not the narration.
+  if (agentState.selfCorrectionDisabled) return { applied: false, resultText: buildDomainYamlExport() };
+  const findings = computeOntologyFindings(buildDomainModel())
+    .filter((f) => f.severity !== "note");
+  const appendix = findings.length
+    ? `\n\n# CONSISTENCY CHECK — ${findings.length} outstanding problem(s) in the whole model:\n`
+      + findings.slice(0, 25).map((f) => `#   [${f.severity}] ${f.check} — ${f.message}`).join("\n")
+      + (findings.length > 25 ? `\n#   …and ${findings.length - 25} more.` : "")
+    : "\n\n# CONSISTENCY CHECK — no outstanding problems in the model.";
+  return { applied: false, resultText: buildDomainYamlExport() + appendix };
 }
 
 function agentChatErrorText(err) {
@@ -11432,6 +11509,38 @@ const AGENT_MAX_COMPACTIONS = 2;
 // loop forever rather than fail visibly.
 const AGENT_MAX_TOOL_ROUNDS = 5;
 
+// How many apply_ontology_yaml calls one turn may commit (issue #84 §3). The
+// first is the edit; the other two exist so the agent can resolve consistency
+// problems its own edit introduced before it replies. All three fold into one
+// undo step. Three rather than more because the point is to let an obvious
+// self-correction land, not to let a turn become an unbounded repair loop --
+// past that, the right move is to tell the expert what is still wrong.
+const AGENT_MAX_APPLIES_PER_TURN = 3;
+
+// Findings, as the agent sees them. Delta-scoped on purpose: over a 50-turn
+// interview, re-sending the whole backlog every turn is expensive, dilutes
+// attention, and pressures the agent to go fix things the expert has not
+// discussed yet. It is told what it just did and how much else is outstanding.
+function formatFindingsForAgent(newFindings, backlogCount, budgetExhausted) {
+  const parts = [];
+  if (newFindings.length) {
+    parts.push(`\n\nCONSISTENCY CHECK — ${newFindings.length} new problem(s) from this edit:`);
+    for (const finding of newFindings.slice(0, 10)) {
+      parts.push(`\n  [${finding.severity}] ${finding.check} — ${finding.message}`
+        + (finding.suggestion ? ` ${finding.suggestion}` : ""));
+    }
+    if (newFindings.length > 10) parts.push(`\n  …and ${newFindings.length - 10} more.`);
+    if (budgetExhausted) {
+      parts.push(`\n\nNo further apply_ontology_yaml calls are available this turn. `
+        + `Tell the expert what is still unresolved rather than leaving it unsaid.`);
+    }
+  } else {
+    parts.push("\n\nCONSISTENCY CHECK — no new problems from this edit.");
+  }
+  if (backlogCount) parts.push(`\n${backlogCount} pre-existing problem(s) remain unresolved (not from this edit).`);
+  return parts.join("");
+}
+
 async function sendAgentChatMessage(userText) {
   appendTranscriptMessage("user", userText);
   agentState.apiMessages.push({ role: "user", content: userText });
@@ -11439,14 +11548,24 @@ async function sendAgentChatMessage(userText) {
 
   let compactionAttempt = 0;
   let toolRounds = 0;
-  // Only the *first* tool call that actually changes the ontology commits,
-  // per turn — mirroring the plan's "one undo step per agent turn" decision
-  // via the simplest robust mechanism: apply the first real call, skip any
-  // others (in this response or a later one this same turn) with a visible
-  // note, rather than trying to merge multiple YAML snippets into one
-  // commit (helper_agent_plan.md §4.5 speculated the latter; skip-the-rest
-  // gives the identical guarantee with far less surface area).
-  let committedThisTurn = false;
+  // A turn used to commit exactly once: apply the first real call, skip the
+  // rest. That guaranteed one undo step per turn, which is the property that
+  // actually mattered, by the bluntest available means.
+  //
+  // The budget is now three (issue #84 §3), and the guarantee is preserved
+  // directly instead: every commit in a turn folds into one history entry
+  // (pushOrFoldAgentHistory). The extra two exist for one purpose — letting
+  // the agent resolve consistency problems its own edit introduced before it
+  // replies to the expert — and are refused for anything else, so a turn
+  // cannot quietly become three turns of elicitation.
+  let appliesThisTurn = 0;
+  agentTurnFoldIndex = -1;
+  // Findings outstanding at the top of the turn. Anything not on this list
+  // afterwards is something this turn introduced, which is what the agent is
+  // asked to deal with; the rest is a backlog it is merely told the size of.
+  let findingsAtTurnStart = computeOntologyFindings(buildDomainModel());
+  let turnFindingIdsAtStart = new Set(findingsAtTurnStart.map((f) => f.id));
+  let unresolvedFromThisTurn = [];
 
   for (;;) {
     try {
@@ -11470,10 +11589,35 @@ async function sendAgentChatMessage(userText) {
         agentState.apiMessages.push({ role: "assistant", content: message.content || null, tool_calls: message.tool_calls });
         for (const call of message.tool_calls) {
           const name = call.function && call.function.name;
-          const { applied, resultText } = name === "get_graph_state"
-            ? handleGetGraphStateCall()
-            : handleAgentToolCall(call, committedThisTurn);
-          if (applied) committedThisTurn = true;
+          if (name === "get_graph_state") {
+            const { resultText } = handleGetGraphStateCall();
+            agentState.apiMessages.push({ role: "tool", tool_call_id: call.id, content: resultText });
+            continue;
+          }
+          // The second and third applies are remediation only: they are
+          // available while this turn's own edits have left something
+          // unresolved, and refused otherwise. Without that condition the
+          // budget would just be "three edits per turn", which is a different
+          // and much larger change than the one being made here.
+          const remediationOpen = unresolvedFromThisTurn.length > 0;
+          const budget = appliesThisTurn === 0 ? true
+            : (!agentState.selfCorrectionDisabled
+               && appliesThisTurn < AGENT_MAX_APPLIES_PER_TURN && remediationOpen);
+          const { applied, resultText } = handleAgentToolCall(call, !budget);
+          if (applied) {
+            appliesThisTurn++;
+            const findings = computeOntologyFindings(buildDomainModel(), { droppedReferences: lastDroppedReferences });
+            lastDroppedReferences = [];
+            unresolvedFromThisTurn = findings.filter((f) => f.severity !== "note" && !turnFindingIdsAtStart.has(f.id));
+            const backlog = findings.filter((f) => f.severity !== "note" && turnFindingIdsAtStart.has(f.id));
+            agentState.apiMessages.push({
+              role: "tool", tool_call_id: call.id,
+              content: agentState.selfCorrectionDisabled ? resultText
+                : resultText + formatFindingsForAgent(unresolvedFromThisTurn, backlog.length,
+                  appliesThisTurn >= AGENT_MAX_APPLIES_PER_TURN),
+            });
+            continue;
+          }
           agentState.apiMessages.push({ role: "tool", tool_call_id: call.id, content: resultText });
         }
         continue; // ask the model for its follow-up reply now that it's seen the tool result(s)
@@ -11498,6 +11642,14 @@ async function sendAgentChatMessage(userText) {
       break;
     }
   }
+  agentTurnFoldIndex = null;
+  // Overriding the checker is allowed (see the CONSISTENCY CHECK prompt
+  // section) but never silent: whatever the agent chose to leave behind is
+  // named in the transcript, where the expert can see it, rather than only in
+  // a tool result they never read.
+  const leftUnresolved = agentState.selfCorrectionDisabled ? []
+    : unresolvedFromThisTurn.filter((f) => f.severity === "error");
+  if (leftUnresolved.length) appendTranscriptMessage("system", t("agentLeftFindingsNote", leftUnresolved.length));
   setAgentSending(false);
   // Every exit path above (a real reply, the too-many-rounds note, or an
   // unrecoverable error) reaches here — the one common point where the
@@ -11742,6 +11894,8 @@ window.__kg = {
     getAzureConfigErrorKind: () => agentAzureConfigErrorKind,
     // Phase 2 — live chat test surface.
     sendMessage: submitAgentChatInput,
+    // Eval-only (issue #85's control arm) -- see agentState.selfCorrectionDisabled.
+    setSelfCorrectionDisabled: (off) => { agentState.selfCorrectionDisabled = Boolean(off); },
     buildSystemPrompt: buildAgentSystemPrompt,
     isSending: () => agentState.sending,
     // Post-plan extension (helper_agent_plan.md §9) — conversation

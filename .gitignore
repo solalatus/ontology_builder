@@ -13,3 +13,18 @@ node_modules/
 # audit) the latest run's real transcript without re-running it themselves.
 # Only the latest run's files are ever committed -- each write overwrites
 # the previous run's content, never accumulates -- see tests/evals/README.md.
+
+# Scratch driver scripts for long eval batches. They carry endpoint/key values
+# in the environment and must never be committed -- GitHub's secret scanning
+# caught exactly that once. The runner itself reads credentials from the
+# environment and hardcodes nothing.
+*.tmp.sh
+*.tmp.mjs
+
+# Transient per-run scratch from a live eval batch. `progress.json` is a live
+# status file rewritten every turn, and `checkpoint/` is the partial transcript
+# and model kept so an interrupted run is recoverable. Both are superseded by
+# the run's real artifacts on a clean finish, so the repo tracks the results
+# and not the machinery that produced them.
+tests/evals/results/baselines/*/*/*/progress.json
+tests/evals/results/baselines/*/*/*/checkpoint/

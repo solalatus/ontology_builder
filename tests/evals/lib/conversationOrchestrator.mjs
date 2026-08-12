@@ -86,8 +86,44 @@ export function looksLikePureAcknowledgment(text) {
 // might connect with, standard and reasoning-tier alike. A `res.ok`/
 // `data.error` check now also makes any *future* incompatibility a loud,
 // immediate test failure instead of a silent multi-hour hang.
-export async function appearsFinished(text, { apiKey, model }) {
+// The classifier's prompt and verdict parsing, in one place so the OpenAI path
+// below and any injected provider (issue #85 runs on Azure) ask exactly the
+// same question and read the answer exactly the same way. Two copies of this
+// would drift, and a classifier that drifts between arms would put a
+// difference into the comparison that has nothing to do with the treatment.
+export function classifierMessages(text) {
+  return [
+    { role: "system", content: "You judge a single message from an AI conducting a domain-modeling interview, which " +
+              "runs through 10 numbered phases: 0 orientation, 1 real questions/actions, 2 classes, " +
+              "3 relationships, 4 decision properties, 5 language/aliases, 6 constraints, 7 rules, 8 actions, " +
+              "9 final validation pass (competency-question check, final checklist). It recaps and asks for " +
+              "confirmation at the end of EVERY phase, not just the last one -- a recap of phase 1, 2, 3, etc. " +
+              "asking to proceed to the next phase is completely normal mid-interview behavior, not completion. " +
+              "First, on one line, name which phase (0-9) this message's content most resembles, or say " +
+              "'final wrap-up' if it's phase 9 or equivalent. Then, on the next line by itself, answer with " +
+              "exactly one word, YES or NO: does this specific message indicate the *entire* 10-phase " +
+              "interview is finished (this is the phase-9-equivalent final wrap-up, referencing a completed " +
+              "model as a whole, not just one earlier phase's recap)? Default to NO whenever the message reads " +
+              "like an earlier phase's checkpoint rather than a true final summary." },
+    { role: "user", content: text },
+  ];
+}
+
+// The model answers on two lines: a phase name, then YES or NO alone.
+export function classifierVerdict(answer) {
+  const lines = String(answer || "").trim().split("\n").map((l) => l.trim()).filter(Boolean);
+  return /^\s*yes/i.test(lines[lines.length - 1] || "");
+}
+
+export async function appearsFinished(text, { apiKey, model, chat = null }) {
   if (looksLikeEarlyPhaseCheckpoint(text)) return false;
+  // Same injection point as personaAgent's: issue #85 runs against Azure,
+  // where the fixed api.openai.com URL and Bearer header below are wrong.
+  // The deterministic pre-filter above still runs either way.
+  if (chat) {
+    const { text: verdict } = await chat(classifierMessages(text));
+    return classifierVerdict(verdict);
+  }
   let res, data;
   // Retries a transient 429 with backoff, same as every other real API call
   // site (index.html, the relay, personaAgent.mjs) -- this classifier call
@@ -99,24 +135,7 @@ export async function appearsFinished(text, { apiKey, model }) {
       headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({
         model,
-        messages: [
-          {
-            role: "system",
-            content: "You judge a single message from an AI conducting a domain-modeling interview, which " +
-              "runs through 10 numbered phases: 0 orientation, 1 real questions/actions, 2 classes, " +
-              "3 relationships, 4 decision properties, 5 language/aliases, 6 constraints, 7 rules, 8 actions, " +
-              "9 final validation pass (competency-question check, final checklist). It recaps and asks for " +
-              "confirmation at the end of EVERY phase, not just the last one -- a recap of phase 1, 2, 3, etc. " +
-              "asking to proceed to the next phase is completely normal mid-interview behavior, not completion. " +
-              "First, on one line, name which phase (0-9) this message's content most resembles, or say " +
-              "'final wrap-up' if it's phase 9 or equivalent. Then, on the next line by itself, answer with " +
-              "exactly one word, YES or NO: does this specific message indicate the *entire* 10-phase " +
-              "interview is finished (this is the phase-9-equivalent final wrap-up, referencing a completed " +
-              "model as a whole, not just one earlier phase's recap)? Default to NO whenever the message reads " +
-              "like an earlier phase's checkpoint rather than a true final summary.",
-          },
-          { role: "user", content: text },
-        ],
+        messages: classifierMessages(text),
       }),
     });
     data = await res.json();
@@ -128,10 +147,7 @@ export async function appearsFinished(text, { apiKey, model }) {
     }
     throw new Error(`appearsFinished classifier call failed (HTTP ${res.status}, model "${model}"): ${(data.error && data.error.message) || "unknown error"}`);
   }
-  const answer = (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || "";
-  const lines = answer.trim().split("\n").map((l) => l.trim()).filter(Boolean);
-  const verdictLine = lines[lines.length - 1] || "";
-  return /^\s*yes/i.test(verdictLine);
+  return classifierVerdict((data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || "");
 }
 
 // Pure, unit-testable tagging step: given a slice of raw apiMessages
@@ -179,9 +195,22 @@ export async function runOntologyRecoveryConversation({
   maxTurns = 100,
   wallClockMs = 45 * 60 * 1000,
   onProgress,
+  // How the app's outgoing chat call reaches a real provider. Defaults to the
+  // OpenAI relay every existing caller uses; issue #85's runner passes an
+  // Azure one, because the model family this repository's anchors were
+  // produced on is not reachable on OpenAI from that environment. Nothing else
+  // about the loop is provider-aware.
+  installRelay = (p) => forwardToRealOpenAi(p, CHAT_URL),
+  // The harness's own two model calls -- the simulated expert and the
+  // "is this interview finished?" classifier. They are separate from the relay
+  // above, which only carries the *app's* traffic; these are Node-side calls
+  // that would otherwise go straight to api.openai.com with a Bearer header.
+  // Injected together so an eval cannot end up with the persona on one
+  // provider and the classifier on another.
+  chat = null,
 }) {
-  const persona = createPersonaAgent({ apiKey, model: personaModel });
-  const chatResponses = forwardToRealOpenAi(page, CHAT_URL);
+  const persona = createPersonaAgent({ apiKey, model: personaModel, chat: chat ? (m) => chat(m, personaModel) : null });
+  const chatResponses = installRelay(page);
   const log = [{ turn: 0, speaker: "persona", text: OPENING_LINE }];
   const rawApiLog = [];
 
@@ -253,7 +282,7 @@ export async function runOntologyRecoveryConversation({
     }
 
     if (Date.now() - startedAt > wallClockMs) { stoppedReason = "wallclock_timeout"; break; }
-    if (await appearsFinished(appText, { apiKey, model: classifierModel })) {
+    if (await appearsFinished(appText, { apiKey, model: classifierModel, chat: chat ? (m) => chat(m, classifierModel) : null })) {
       stoppedReason = "app_agent_appears_finished";
       break;
     }

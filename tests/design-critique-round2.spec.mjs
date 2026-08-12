@@ -231,7 +231,16 @@ test("the agent toggle lifts on hover the same way toolbar buttons do", async ()
     const restShadow = await computedStyle(page, "#agent-panel-toggle", "boxShadow");
 
     await page.hover("#agent-panel-toggle");
-    await page.waitForTimeout(200); // let the transition finish, matching this suite's existing pattern for transition-backed assertions
+    // Poll for the transform to stop moving instead of assuming 200ms is
+    // enough -- the same race that flaked the tooltip assertions in
+    // design-critique-round3.spec.mjs under a full-suite run.
+    await page.waitForFunction(() => {
+      const el = document.getElementById("agent-panel-toggle");
+      const now = getComputedStyle(el).transform;
+      const settled = el.dataset.lastTransform === now;
+      el.dataset.lastTransform = now;
+      return settled && now !== "none";
+    }, null, { timeout: 5000, polling: 60 });
 
     const hoverTransform = await computedStyle(page, "#agent-panel-toggle", "transform");
     const hoverShadow = await computedStyle(page, "#agent-panel-toggle", "boxShadow");

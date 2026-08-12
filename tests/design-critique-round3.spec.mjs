@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { withPage, addNodeViaDblClick } from "./lib/page.mjs";
+import { withPage, addNodeViaDblClick, waitForComputedStyle } from "./lib/page.mjs";
 
 // Round 3 of the 2026-08 design work: five user-reported items, each paired
 // with both a visual/token assertion and a functional one where relevant.
@@ -35,9 +35,9 @@ test("zoom in/out/fit-view show a tooltip on hover, hidden at rest", async () =>
       assert.equal(restOpacity, "0", `#${id}'s tooltip should be invisible at rest`);
 
       await page.hover(`#${id}`);
-      await page.waitForTimeout(150);
-      const hoverOpacity = await pseudoStyle(page, `#${id}`, "::after", "opacity");
-      assert.equal(hoverOpacity, "1", `#${id}'s tooltip should appear on hover`);
+      // Waits for the transition to finish rather than guessing at 150ms --
+      // see waitForComputedStyle's own comment for why the guess flaked.
+      await waitForComputedStyle(page, `#${id}`, "opacity", "1", { pseudo: "::after" });
 
       const content = await pseudoStyle(page, `#${id}`, "::after", "content");
       assert.notEqual(content, "none", `#${id}'s tooltip must have real text`);
@@ -60,9 +60,7 @@ test("the agent (chat) toggle's tooltip is visible and visually emphasized, dist
     assert.equal(restOpacity, "0");
 
     await page.hover("#agent-panel-toggle");
-    await page.waitForTimeout(150);
-    const hoverOpacity = await pseudoStyle(page, "#agent-panel-toggle", "::after", "opacity");
-    assert.equal(hoverOpacity, "1");
+    await waitForComputedStyle(page, "#agent-panel-toggle", "opacity", "1", { pseudo: "::after" });
 
     const chatTooltipColor = await pseudoStyle(page, "#agent-panel-toggle", "::after", "color");
     const zoomTooltipColor = await pseudoStyle(page, "#btn-fit-view", "::after", "color");
@@ -88,7 +86,7 @@ test("the chat tooltip stays fully on-screen instead of clipping off the left ed
   // tooltip would have the same problem.
   await withPage(async (page) => {
     await page.hover("#agent-panel-toggle");
-    await page.waitForTimeout(150);
+    await waitForComputedStyle(page, "#agent-panel-toggle", "opacity", "1", { pseudo: "::after" });
     const left = await page.evaluate(() => {
       const btn = document.getElementById("agent-panel-toggle");
       return parseFloat(getComputedStyle(btn, "::after").left);

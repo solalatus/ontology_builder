@@ -31,7 +31,11 @@ function buildSystemPrompt() {
 // not the production code path being evaluated. Node's own fetch() reaches
 // the real OpenAI API directly in this sandbox (confirmed while building
 // the live-openai suite), so no relay trick is needed here.
-export function createPersonaAgent({ apiKey, model }) {
+// `chat` lets a caller supply the provider call itself -- issue #85 runs the
+// whole eval against Azure, where this file's fixed api.openai.com URL and
+// Bearer header are simply wrong. Defaults to the OpenAI path every existing
+// caller already uses, so nothing else changes.
+export function createPersonaAgent({ apiKey, model, chat = null }) {
   const messages = [{ role: "system", content: buildSystemPrompt() }];
 
   // Retries a transient 429 with backoff, same as every other real API call
@@ -43,6 +47,11 @@ export function createPersonaAgent({ apiKey, model }) {
   // never retried.
   async function reply(incomingText) {
     messages.push({ role: "user", content: incomingText });
+    if (chat) {
+      const { text, usage } = await chat(messages);
+      messages.push({ role: "assistant", content: text });
+      return { text, usage: usage || null };
+    }
     let res, data;
     for (let attempt = 1; attempt <= RATE_LIMIT_MAX_ATTEMPTS; attempt++) {
       res = await fetch(CHAT_URL, {
