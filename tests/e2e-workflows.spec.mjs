@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { withPage, addNodeViaDblClick, createEdgeViaConnectMode } from "./lib/page.mjs";
+import { withPage, addNodeViaDblClick, createEdgeViaConnectMode, applyImport, settle, waitForComputedStyle, waitForGeometrySettled, waitForDownloads } from "./lib/page.mjs";
 import { launchChromium } from "./lib/browser.mjs";
 import { APP_URL } from "./lib/page.mjs";
 
@@ -80,7 +80,7 @@ test("E2E: building a small ontology end to end survives Save Version -> reopen 
     await page.waitForSelector("#domain-model-overlay", { state: "hidden" });
 
     await page.click("#btn-save-version");
-    await page.waitForTimeout(250);
+    await waitForDownloads(downloads, 3);
     const jsonDl = downloads.find((d) => d.suggestedFilename().endsWith(".json"));
     const jsonText = await readDownload(jsonDl);
 
@@ -92,8 +92,8 @@ test("E2E: building a small ontology end to end survives Save Version -> reopen 
       document.getElementById("canvas").dispatchEvent(new DragEvent("drop", { bubbles: true, cancelable: true, dataTransfer: dt }));
     }, jsonText);
     await page.waitForSelector("#import-overlay", { state: "visible" });
-    await page.click("#import-merge"); // empty canvas: Replace hidden, Merge is the full restore
-    await page.waitForTimeout(200);
+    // empty canvas: Replace hidden, Merge is the full restore
+    await applyImport(page, "#import-merge");
 
     const finalState = await page.evaluate(() => ({
       nodeCount: window.__kg.state.nodes.length,
@@ -134,9 +134,7 @@ test("E2E: toggling theme and language repeatedly mid-workflow never breaks tool
 
     // The toolbar must still be fully functional after all that state churn.
     await page.hover("#btn-fit-view");
-    await page.waitForTimeout(150);
-    const tooltipOpacity = await page.evaluate(() => getComputedStyle(document.getElementById("btn-fit-view"), "::after").opacity);
-    assert.equal(tooltipOpacity, "1");
+    await waitForComputedStyle(page, "#btn-fit-view", "opacity", "1", { pseudo: "::after" });
     assert.equal(await page.locator("#btn-theme-toggle").textContent(), "Theme: Dark");
     assert.equal(await page.locator("#btn-lang-toggle").textContent(), "Language: English");
   });
@@ -214,8 +212,7 @@ test("E2E: auto-layout followed by fit-to-view at a narrow viewport leaves every
     await page.evaluate(() => window.__kg.actions.setMode("idle"));
 
     await page.click("#btn-autolayout");
-    await page.click("#btn-fit-view");
-    await page.waitForTimeout(50);
+    await settle(page, () => page.click("#btn-fit-view"));
 
     const toolbarBottom = await page.evaluate(() => document.getElementById("toolbar").getBoundingClientRect().bottom);
     const canvasBox = await page.locator("#canvas").boundingBox();
@@ -258,7 +255,12 @@ test("E2E: dragging one parallel edge's label and long-press-deleting a sibling 
     const thirdGeo = await page.evaluate((id) => window.__kg.getEdgeGeometry(id), edgesBefore[2].id);
     await page.mouse.move(box.x + thirdGeo.mid.x, box.y + thirdGeo.mid.y - 6);
     await page.mouse.down();
-    await page.waitForTimeout(700);
+    // The long press is a real 600ms timer in the app (LONG_PRESS_MS), so the
+    // button genuinely has to stay down -- but wait for the deletion it fires
+    // rather than for a wall-clock 700ms. If the press never registers this
+    // fails saying so, instead of releasing early and failing later on a
+    // confusing edge count (issue #91).
+    await page.waitForFunction((id) => !window.__kg.state.edges.some((e) => e.id === id), edgesBefore[2].id);
     await page.mouse.up();
 
     const edgesAfter = await page.evaluate(() => window.__kg.state.edges.map((e) => ({ id: e.id, relation: e.relation })));
@@ -289,7 +291,7 @@ test("E2E: bare-node dashing and property badges render correctly again after a 
     await page.evaluate(() => { window.__kg.state.edges[0].labelT = 0.8; window.__kg.markDirty(); });
 
     await page.click("#btn-save-version");
-    await page.waitForTimeout(250);
+    await waitForDownloads(downloads, 3);
     const jsonDl = downloads.find((d) => d.suggestedFilename().endsWith(".json"));
     const jsonText = await readDownload(jsonDl);
 
@@ -300,8 +302,7 @@ test("E2E: bare-node dashing and property badges render correctly again after a 
       document.getElementById("canvas").dispatchEvent(new DragEvent("drop", { bubbles: true, cancelable: true, dataTransfer: dt }));
     }, jsonText);
     await page.waitForSelector("#import-overlay", { state: "visible" });
-    await page.click("#import-merge");
-    await page.waitForTimeout(200);
+    await applyImport(page, "#import-merge");
 
     const visual = await page.evaluate(() => {
       const bare = window.__kg.state.nodes.find((n) => n.label === "Bare");
@@ -360,7 +361,7 @@ test("E2E: a mixed mouse+keyboard create/select/delete/undo sequence keeps the U
 test("E2E: the reorganized zoom/theme/language group and its tooltips still work correctly with the agent panel expanded", async () => {
   await withPage(async (page) => {
     await page.evaluate(() => window.__kg.agent.setExpanded(true));
-    await page.waitForTimeout(150); // let the toolbar's left-shift transition settle
+    await waitForGeometrySettled(page, "#graph-title"); // the toolbar's left-shift transition
 
     // The toggle vs. title overlap fix, and the toolbar-fits-in-viewport
     // guarantees, must both still hold once the toolbar has shifted right.
@@ -369,9 +370,7 @@ test("E2E: the reorganized zoom/theme/language group and its tooltips still work
     assert.ok(toggleBox.x + toggleBox.width <= titleBoxExpanded.x + 1 || titleBoxExpanded.x + titleBoxExpanded.width <= toggleBox.x, "title and toggle must not overlap once the panel is expanded");
 
     await page.hover("#btn-zoom-in");
-    await page.waitForTimeout(150);
-    const opacity = await page.evaluate(() => getComputedStyle(document.getElementById("btn-zoom-in"), "::after").opacity);
-    assert.equal(opacity, "1", "the zoom tooltip should still work with the toolbar shifted");
+    await waitForComputedStyle(page, "#btn-zoom-in", "opacity", "1", { pseudo: "::after" });
 
     await page.click("#btn-theme-toggle");
     assert.equal(await page.locator("#btn-theme-toggle").textContent(), "Theme: Light");
@@ -382,7 +381,7 @@ test("E2E: the reorganized zoom/theme/language group and its tooltips still work
     // --agent-panel-offset. Collapsing should bring the title back left,
     // toward where it started before the panel ever expanded.
     await page.evaluate(() => window.__kg.agent.setExpanded(false));
-    await page.waitForTimeout(150);
+    await waitForGeometrySettled(page, "#graph-title");
     const titleBoxCollapsed = await page.locator("#graph-title").boundingBox();
     assert.ok(titleBoxCollapsed.x < titleBoxExpanded.x, "collapsing the panel should move the title back toward the left edge");
   });
@@ -461,8 +460,7 @@ test("E2E: a full add/connect/drag-label/domain-model/fit-view workflow complete
     await page.waitForSelector("#domain-model-overlay", { state: "visible" });
     await page.click("#domain-model-cancel");
 
-    await page.click("#btn-fit-view");
-    await page.waitForTimeout(50);
+    await settle(page, () => page.click("#btn-fit-view"));
 
     const finalState = await page.evaluate(() => ({
       nodes: window.__kg.state.nodes.length,

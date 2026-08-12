@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import path from "node:path";
 import fs from "node:fs";
 import { fileURLToPath } from "node:url";
-import { withPage, addNodeViaDblClick, dragNode, createEdgeViaConnectMode } from "./lib/page.mjs";
+import { withPage, addNodeViaDblClick, dragNode, createEdgeViaConnectMode, applyImport } from "./lib/page.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const fixture = (name) => path.resolve(__dirname, "fixtures", name);
@@ -34,8 +34,7 @@ async function dropText(page, text, filename = "import.txt") {
 test("Merge on an empty graph reproduces the spec's own worked example exactly", async () => {
   await withPage(async (page) => {
     await triggerImport(page, "spec-example.txt");
-    await page.click("#import-merge");
-    await page.waitForTimeout(150);
+    await applyImport(page, "#import-merge");
 
     const nodes = await page.evaluate(() => window.__kg.state.nodes);
     const edges = await page.evaluate(() => window.__kg.state.edges);
@@ -58,14 +57,12 @@ test("Merge on an empty graph reproduces the spec's own worked example exactly",
 test("Merge is idempotent — re-importing the same file adds nothing and creates no duplicates", async () => {
   await withPage(async (page) => {
     await triggerImport(page, "spec-example.txt");
-    await page.click("#import-merge");
-    await page.waitForTimeout(150);
+    await applyImport(page, "#import-merge");
 
     await triggerImport(page, "spec-example.txt");
     const summary = await importSummary(page);
     assert.match(summary, /Merge: 0 node\(s\) and 0 edge\(s\) would be added/);
-    await page.click("#import-merge");
-    await page.waitForTimeout(150);
+    await applyImport(page, "#import-merge");
 
     const nodes = await page.evaluate(() => window.__kg.state.nodes);
     const edges = await page.evaluate(() => window.__kg.state.edges);
@@ -81,8 +78,7 @@ test("existing nodes are matched (not duplicated) and keep their size on merge �
     const before = await page.evaluate(() => window.__kg.state.nodes[0]);
 
     await triggerImport(page, "spec-example.txt");
-    await page.click("#import-merge");
-    await page.waitForTimeout(150);
+    await applyImport(page, "#import-merge");
 
     const nodes = await page.evaluate(() => window.__kg.state.nodes);
     assert.equal(nodes.length, 5, "Andhra Pradesh matched, not duplicated");
@@ -106,8 +102,7 @@ test("merge never deletes an edge that's missing from the TXT — additive only"
     await page.evaluate(() => window.__kg.actions.setMode("idle"));
 
     await triggerImport(page, "spec-example.txt");
-    await page.click("#import-merge");
-    await page.waitForTimeout(150);
+    await applyImport(page, "#import-merge");
 
     const edges = await page.evaluate(() => window.__kg.state.edges);
     assert.ok(edges.some((e) => e.relation === "not in the TXT"), "pre-existing edge must survive a merge");
@@ -125,8 +120,7 @@ test("import triggers a full-graph autolayout reflow, not just shelf placement o
     const preexistingBefore = await page.evaluate(() => window.__kg.state.nodes[0]);
 
     await triggerImport(page, "subset.txt"); // Andhra Pradesh, Telugu — both new
-    await page.click("#import-merge");
-    await page.waitForTimeout(150);
+    await applyImport(page, "#import-merge");
 
     const nodes = await page.evaluate(() => window.__kg.state.nodes);
     assert.equal(nodes.length, 3);
@@ -151,8 +145,7 @@ test("import triggers a full-graph autolayout reflow, not just shelf placement o
 test("newly imported nodes are flagged (highlighted) until the next discrete action clears it", async () => {
   await withPage(async (page) => {
     await triggerImport(page, "subset.txt");
-    await page.click("#import-merge");
-    await page.waitForTimeout(150);
+    await applyImport(page, "#import-merge");
 
     let flagged = await page.evaluate(() => [...window.__kg.getNewlyImportedIds()]);
     assert.equal(flagged.length, 2);
@@ -174,8 +167,7 @@ test("Replace button is hidden when the current graph is already empty (nothing 
 test("Import dialog's diff summary counts match what actually happens on commit", async () => {
   await withPage(async (page) => {
     await triggerImport(page, "spec-example.txt");
-    await page.click("#import-merge");
-    await page.waitForTimeout(150);
+    await applyImport(page, "#import-merge");
 
     await triggerImport(page, "subset.txt"); // fully already present -> 0/0, but graph has content now
     const summary = await importSummary(page);
@@ -184,8 +176,7 @@ test("Import dialog's diff summary counts match what actually happens on commit"
     await page.click("#import-cancel");
 
     await triggerImport(page, "subset.txt");
-    await page.click("#import-replace");
-    await page.waitForTimeout(150);
+    await applyImport(page, "#import-replace");
 
     const nodes = await page.evaluate(() => window.__kg.state.nodes.map((n) => n.label));
     assert.deepEqual(nodes.sort(), ["Andhra Pradesh", "Telugu"]);
@@ -195,13 +186,11 @@ test("Import dialog's diff summary counts match what actually happens on commit"
 test("Replace mode removes nodes/edges absent from the TXT, in exactly one undo step, fully reversible", async () => {
   await withPage(async (page) => {
     await triggerImport(page, "spec-example.txt");
-    await page.click("#import-merge");
-    await page.waitForTimeout(150);
+    await applyImport(page, "#import-merge");
     const before = await page.evaluate(() => window.__kg.history.past.length);
 
     await triggerImport(page, "subset.txt");
-    await page.click("#import-replace");
-    await page.waitForTimeout(150);
+    await applyImport(page, "#import-replace");
 
     const after = await page.evaluate(() => window.__kg.history.past.length);
     assert.equal(after, before + 1, "Replace is exactly one undo step regardless of how much changed");
@@ -223,7 +212,7 @@ test("Cancel on the import dialog applies nothing", async () => {
   await withPage(async (page) => {
     await triggerImport(page, "spec-example.txt");
     await page.click("#import-cancel");
-    await page.waitForTimeout(100);
+    await page.waitForSelector("#import-overlay", { state: "hidden" });
     const nodes = await page.evaluate(() => window.__kg.state.nodes);
     assert.equal(nodes.length, 0);
     const overlayDisplay = await page.evaluate(() => getComputedStyle(document.getElementById("import-overlay")).display);
@@ -235,7 +224,7 @@ test("clicking outside the import dialog (the backdrop) also cancels", async () 
   await withPage(async (page) => {
     await triggerImport(page, "spec-example.txt");
     await page.mouse.click(20, 20);
-    await page.waitForTimeout(100);
+    await page.waitForSelector("#import-overlay", { state: "hidden" });
     const nodes = await page.evaluate(() => window.__kg.state.nodes);
     assert.equal(nodes.length, 0);
   });
@@ -245,8 +234,7 @@ test("label matching is case-sensitive — a differently-cased label is a distin
   await withPage(async (page) => {
     await addNodeViaDblClick(page, 250, 250, "andhra pradesh"); // lowercase
     await triggerImport(page, "subset.txt"); // has "Andhra Pradesh"
-    await page.click("#import-merge");
-    await page.waitForTimeout(150);
+    await applyImport(page, "#import-merge");
 
     const labels = await page.evaluate(() => window.__kg.state.nodes.map((n) => n.label));
     assert.equal(labels.length, 3, "distinct casing means a new node, not a match");
@@ -278,8 +266,7 @@ test("malformed edge lines (no connector, no relation separator) are skipped wit
       canvas.dispatchEvent(evt);
     }, text);
     await page.waitForSelector("#import-overlay", { state: "visible" });
-    await page.click("#import-merge");
-    await page.waitForTimeout(150);
+    await applyImport(page, "#import-merge");
 
     const nodes = await page.evaluate(() => window.__kg.state.nodes);
     const edges = await page.evaluate(() => window.__kg.state.edges);
@@ -300,8 +287,7 @@ test("drag-and-drop of a .txt file onto the canvas opens the same import dialog 
       canvas.dispatchEvent(new DragEvent("drop", { bubbles: true, cancelable: true, dataTransfer: dt }));
     }, text);
     await page.waitForSelector("#import-overlay", { state: "visible" });
-    await page.click("#import-merge");
-    await page.waitForTimeout(150);
+    await applyImport(page, "#import-merge");
 
     const nodes = await page.evaluate(() => window.__kg.state.nodes.map((n) => n.label));
     assert.deepEqual(nodes.sort(), ["Andhra Pradesh", "Telugu"]);
@@ -341,8 +327,7 @@ test("blank lines, trailing whitespace, and extra spacing throughout the file do
       "",
     ].join("\n");
     await dropText(page, text, "whitespace.txt");
-    await page.click("#import-merge");
-    await page.waitForTimeout(150);
+    await applyImport(page, "#import-merge");
 
     const nodes = await page.evaluate(() => window.__kg.state.nodes.map((n) => n.label));
     const edges = await page.evaluate(() => window.__kg.state.edges);
@@ -355,8 +340,7 @@ test("blank lines, trailing whitespace, and extra spacing throughout the file do
 test("merging a file that references a node previously deleted from the current graph re-creates it fresh", async () => {
   await withPage(async (page) => {
     await triggerImport(page, "subset.txt");
-    await page.click("#import-merge");
-    await page.waitForTimeout(150);
+    await applyImport(page, "#import-merge");
     assert.equal(await page.evaluate(() => window.__kg.state.nodes.length), 2);
 
     // Delete "Telugu" from the live graph — merging the same file again
@@ -376,8 +360,7 @@ test("merging a file that references a node previously deleted from the current 
     assert.equal(await page.evaluate(() => window.__kg.state.nodes.length), 1);
 
     await triggerImport(page, "subset.txt");
-    await page.click("#import-merge");
-    await page.waitForTimeout(150);
+    await applyImport(page, "#import-merge");
 
     const nodes = await page.evaluate(() => window.__kg.state.nodes.map((n) => n.label));
     assert.deepEqual(nodes.sort(), ["Andhra Pradesh", "Telugu"], "Telugu is back after re-merging");

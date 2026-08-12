@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { launchChromium } from "./lib/browser.mjs";
-import { APP_URL, addNodeViaDblClick, createEdgeViaConnectMode } from "./lib/page.mjs";
+import { APP_URL, addNodeViaDblClick, createEdgeViaConnectMode, applyImport, settle, waitForDownloads } from "./lib/page.mjs";
 
 // Agent Ontology, Phase I (agent_ontology_todo.md): a single, long, realistic
 // authoring session exercising Phases A through H *together* — the same
@@ -143,7 +143,7 @@ test("a realistic Agent Ontology authoring session — classes, a relationship, 
 
     // --- Phase 4: Save Version — all three files, YAML content matches ---
     await page.click("#btn-save-version");
-    await page.waitForTimeout(200);
+    await waitForDownloads(downloads, 3);
     assert.equal(downloads.length, 3);
 
     const yamlDl = downloads.find((d) => d.suggestedFilename().endsWith(".domain.yaml"));
@@ -203,8 +203,7 @@ test("a realistic Agent Ontology authoring session — classes, a relationship, 
     assert.equal((await nodeByLabel(page, "Invoice")).meaning, "DRIFTED — someone edited this by hand.");
 
     await dropYaml(page, exportedYaml);
-    await page.click("#import-merge");
-    await page.waitForTimeout(150);
+    await applyImport(page, "#import-merge");
 
     const restoredInvoice = await nodeByLabel(page, "Invoice");
     assert.equal(restoredInvoice.meaning, "A request from a supplier to receive payment.", "the re-import overwrote the drifted meaning back to the exported value");
@@ -218,8 +217,7 @@ test("a realistic Agent Ontology authoring session — classes, a relationship, 
 
     // --- Phase 8: Clear, then Undo restores the fully-reconciled graph ---
     await page.click("#btn-clear");
-    await page.click("#confirm-ok");
-    await page.waitForTimeout(50);
+    await settle(page, () => page.click("#confirm-ok"));
     assert.equal((await page.evaluate(() => window.__kg.state.nodes)).length, 0);
 
     await page.click("#btn-undo");
@@ -302,7 +300,7 @@ test("a longer, realistic chain of rules and actions (a 4-stage invoice workflow
     // Save Version — the exported YAML should read as one coherent chain,
     // not four disconnected fragments.
     await page.click("#btn-save-version");
-    await page.waitForTimeout(200);
+    await waitForDownloads(downloads, 3);
     const yamlDl = downloads.find((d) => d.suggestedFilename().endsWith(".domain.yaml"));
     const yaml = await readDownload(yamlDl);
     for (const name of ["invoiceReceived", "invoiceMatched", "supplierRiskClear", "invoiceApproved"]) {

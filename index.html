@@ -4162,7 +4162,11 @@ function edgeBoundingRect(anchors, control) {
 // shrinks the drawn set when zoomed into a small region of a large graph,
 // rather than only inferring it indirectly from wall-clock timing (noisy
 // in CI) — see Phase 9 in TODO.md.
-const renderStats = { nodesDrawn: 0, nodesTotal: 0, edgesDrawn: 0, edgesTotal: 0 };
+// `frames` counts completed render() calls. It exists so a test can wait for
+// "the canvas has caught up with state" instead of sleeping a fixed number of
+// milliseconds and hoping (issue #91): read it, act, then wait for it to move.
+// Nothing in the app reads it.
+const renderStats = { nodesDrawn: 0, nodesTotal: 0, edgesDrawn: 0, edgesTotal: 0, frames: 0 };
 
 // ---------------------------------------------------------------------------
 // Render loop — dirty-flag driven, not a constant loop.
@@ -4519,6 +4523,7 @@ function render() {
 
   updateSelectionToolbar();
   updateClearButton();
+  renderStats.frames++;
 }
 
 function loop() {
@@ -7569,9 +7574,20 @@ let consistencyLlmFindings = []; // kept separate: cleared by any edit, never ca
 let consistencyLlmStatusKey = null;
 let consistencyLlmPending = false;
 
+// On unless the user turns it off. Switched from opt-in to opt-out by issue
+// #89's evaluation (tests/evals/results/baselines/tier-c/TIER_C_REPORT.md),
+// which ran this exact prompt over nine finished ontologies and adjudicated
+// all 59 findings: 34 real contradictions the deterministic checks structurally
+// cannot reach, against 8 false ones and no invented classes, properties or
+// rules in any run. That met the rule pre-registered before the first call.
+//
+// "On" costs nothing on its own: this flag only decides whether the Run button
+// is shown. Nothing is sent anywhere until a connected user clicks it, and one
+// click is one call. So the offline-single-file premise is intact -- an
+// unconnected user sees a button that stays disabled, not a network request.
 function consistencyLlmEnabled() {
-  try { return localStorage.getItem(CONSISTENCY_LLM_STORAGE_KEY) === "1"; }
-  catch (err) { return false; /* storage unavailable — stay off, the safe direction */ }
+  try { return localStorage.getItem(CONSISTENCY_LLM_STORAGE_KEY) !== "0"; }
+  catch (err) { return true; /* storage unavailable: fall back to the default, which is on */ }
 }
 
 function setConsistencyLlmEnabled(on) {
@@ -11883,6 +11899,9 @@ window.__kg = {
       isEnabled: consistencyLlmEnabled,
       setEnabled: setConsistencyLlmEnabled,
       run: runConsistencyLlmCheck,
+      // Exposed so issue #89's evaluation measures the shipped prompt rather
+      // than a copy of it that could drift out of sync with this file.
+      prompt: CONSISTENCY_LLM_PROMPT,
       results: () => [...consistencyLlmFindings],
       storageKey: CONSISTENCY_LLM_STORAGE_KEY,
     },

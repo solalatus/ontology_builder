@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { launchChromium } from "./lib/browser.mjs";
-import { APP_URL, addNodeViaDblClick, addNodeViaButton, dragNode, createEdgeViaConnectMode } from "./lib/page.mjs";
+import { APP_URL, addNodeViaDblClick, addNodeViaButton, dragNode, createEdgeViaConnectMode, waitForDownloads } from "./lib/page.mjs";
 
 // Phase 5 needs to intercept real browser downloads, which the shared
 // withPage() helper doesn't set up (acceptDownloads) and doesn't expose a
@@ -45,8 +45,16 @@ async function setGraphTitle(page, name) {
   await page.waitForSelector(".kg-inline-input", { state: "detached" });
 }
 
-async function saveVersion(page) {
+// Save Version writes three files (JSON + TXT + domain YAML), asynchronously
+// as far as the test process is concerned. Waiting for those three download
+// events is what the fixed `waitForTimeout(200)` at every call site used to
+// approximate; this waits for the events themselves, so it cannot read a
+// half-filled array, and it reports what did arrive if they never all do
+// (issue #91).
+async function saveVersion(page, downloads) {
+  const before = downloads ? downloads.length : 0;
   await page.click("#btn-save-version");
+  if (downloads) await waitForDownloads(downloads, before + 3);
 }
 
 async function readDownload(dl) {
@@ -129,8 +137,7 @@ test("a renamed graph title survives a reload", async () => {
 test("Save Version never blocks on a prompt — clicking it immediately produces three downloads using the current title", async () => {
   await withDownloadPage(async (page, downloads) => {
     await addNodeViaDblClick(page, 300, 300, "Alpha");
-    await saveVersion(page);
-    await page.waitForTimeout(200);
+    await saveVersion(page, downloads);
 
     assert.equal(downloads.length, 3);
     const names = downloads.map((d) => d.suggestedFilename()).sort();
@@ -144,8 +151,7 @@ test("Save Version writes exactly three downloads named after a custom title, pe
   await withDownloadPage(async (page, downloads) => {
     await addNodeViaDblClick(page, 300, 300, "Alpha");
     await setGraphTitle(page, "Frankfurt AI Ontology");
-    await saveVersion(page);
-    await page.waitForTimeout(200);
+    await saveVersion(page, downloads);
 
     assert.equal(downloads.length, 3);
     const names = downloads.map((d) => d.suggestedFilename()).sort();
@@ -162,8 +168,7 @@ test("graph name is sanitized for filename safety (spaces and punctuation) at sa
     // The displayed title keeps the raw, human-readable form...
     assert.equal(await page.locator("#graph-title").textContent(), "My!! Graph///Name");
 
-    await saveVersion(page);
-    await page.waitForTimeout(200);
+    await saveVersion(page, downloads);
 
     // ...only the filename is sanitized.
     const jsonName = downloads.find((d) => d.suggestedFilename().endsWith(".json")).suggestedFilename();
@@ -179,8 +184,7 @@ test("the JSON export matches Section 5.1's schema exactly and round-trips throu
     await createEdgeViaConnectMode(page, 250, 250, 650, 250, "language used");
     await page.evaluate(() => window.__kg.actions.setMode("idle")); // Connect mode is sticky
 
-    await saveVersion(page);
-    await page.waitForTimeout(200);
+    await saveVersion(page, downloads);
 
     const jsonDl = downloads.find((d) => d.suggestedFilename().endsWith(".json"));
     const parsed = JSON.parse(await readDownload(jsonDl));
@@ -230,8 +234,7 @@ test("the TXT export matches Section 5.2's grammar exactly", async () => {
     await createEdgeViaConnectMode(page, 250, 250, 650, 250, "language used");
     await page.evaluate(() => window.__kg.actions.setMode("idle")); // Connect mode is sticky
 
-    await saveVersion(page);
-    await page.waitForTimeout(200);
+    await saveVersion(page, downloads);
 
     const txtDl = downloads.find((d) => d.suggestedFilename().endsWith(".txt"));
     const text = await readDownload(txtDl);
@@ -264,8 +267,7 @@ test("a bidirectional edge exports with <-> in the TXT edge list", async () => {
     await page.mouse.click(box.x + 460, box.y + 250); // select the new edge (its midpoint)
     await page.click("#sel-toggle-dir"); // flip to bidirectional
 
-    await saveVersion(page);
-    await page.waitForTimeout(200);
+    await saveVersion(page, downloads);
 
     const txtDl = downloads.find((d) => d.suggestedFilename().endsWith(".txt"));
     const text = await readDownload(txtDl);
@@ -276,10 +278,8 @@ test("a bidirectional edge exports with <-> in the TXT edge list", async () => {
 test("saving twice increments the version number monotonically, both in the filename and the JSON meta", async () => {
   await withDownloadPage(async (page, downloads) => {
     await addNodeViaDblClick(page, 300, 300, "Alpha");
-    await saveVersion(page);
-    await page.waitForTimeout(200);
-    await saveVersion(page);
-    await page.waitForTimeout(200);
+    await saveVersion(page, downloads);
+    await saveVersion(page, downloads);
 
     assert.equal(downloads.length, 6);
     const jsonNames = downloads.filter((d) => d.suggestedFilename().endsWith(".json")).map((d) => d.suggestedFilename());
@@ -296,8 +296,7 @@ test("graph_id and version survive a reload and keep incrementing across session
   await withDownloadPage(async (page, downloads) => {
     await addNodeViaDblClick(page, 300, 300, "Alpha");
     await setGraphTitle(page, "Persistent Graph");
-    await saveVersion(page);
-    await page.waitForTimeout(200);
+    await saveVersion(page, downloads);
     const firstGraphId = await page.evaluate(() => window.__kg.state.meta.graph_id);
     await page.evaluate(() => window.__kg.storage.whenIdle());
 
@@ -307,8 +306,7 @@ test("graph_id and version survive a reload and keep incrementing across session
 
     assert.equal(await page.locator("#graph-title").textContent(), "Persistent Graph");
 
-    await saveVersion(page);
-    await page.waitForTimeout(300);
+    await saveVersion(page, downloads);
 
     assert.equal(downloads.length, 6);
     const secondJson = downloads.filter((d) => d.suggestedFilename().endsWith(".json"))[1];
@@ -321,11 +319,10 @@ test("graph_id and version survive a reload and keep incrementing across session
 });
 
 test("Save Version does not create an undo step — it's an export, not a graph mutation", async () => {
-  await withDownloadPage(async (page) => {
+  await withDownloadPage(async (page, downloads) => {
     await addNodeViaDblClick(page, 300, 300, "Alpha");
     const before = await page.evaluate(() => window.__kg.history.past.length);
-    await saveVersion(page);
-    await page.waitForTimeout(200);
+    await saveVersion(page, downloads);
     const after = await page.evaluate(() => window.__kg.history.past.length);
     assert.equal(after, before);
   });
@@ -343,8 +340,7 @@ test("renaming the graph title also does not create an undo step", async () => {
 test("saving an empty graph produces valid, structurally-correct (empty) JSON, TXT, and domain YAML", async () => {
   await withDownloadPage(async (page, downloads) => {
     // Save Version isn't gated on having content, unlike Clear.
-    await saveVersion(page);
-    await page.waitForTimeout(200);
+    await saveVersion(page, downloads);
 
     assert.equal(downloads.length, 3);
     const jsonDl = downloads.find((d) => d.suggestedFilename().endsWith(".json"));
@@ -372,8 +368,7 @@ test("unicode and special characters in labels/relations survive both JSON and T
     await createEdgeViaConnectMode(page, 250, 250, 650, 250, relation);
     await page.evaluate(() => window.__kg.actions.setMode("idle"));
 
-    await saveVersion(page);
-    await page.waitForTimeout(200);
+    await saveVersion(page, downloads);
 
     const jsonDl = downloads.find((d) => d.suggestedFilename().endsWith(".json"));
     const parsedJson = JSON.parse(await readDownload(jsonDl));
@@ -392,14 +387,12 @@ test("unicode and special characters in labels/relations survive both JSON and T
 test("undoing an unrelated action after a save does not reset or duplicate the version counter on the next save", async () => {
   await withDownloadPage(async (page, downloads) => {
     await addNodeViaDblClick(page, 300, 300, "Alpha");
-    await saveVersion(page); // v1
-    await page.waitForTimeout(200);
+    await saveVersion(page, downloads); // v1
 
     await addNodeViaDblClick(page, 600, 300, "Beta");
     await page.click("#btn-undo"); // undo the Beta add — unrelated to meta/version at all
 
-    await saveVersion(page); // v2
-    await page.waitForTimeout(200);
+    await saveVersion(page, downloads); // v2
 
     assert.equal(downloads.length, 6);
     const jsonNames = downloads.filter((d) => d.suggestedFilename().endsWith(".json")).map((d) => d.suggestedFilename());
@@ -422,8 +415,7 @@ test("TXT export lists nodes and edges in creation order, not some other implici
     await createEdgeViaConnectMode(page, 250, 250, 450, 450, "second edge");
     await page.evaluate(() => window.__kg.actions.setMode("idle"));
 
-    await saveVersion(page);
-    await page.waitForTimeout(200);
+    await saveVersion(page, downloads);
 
     const txtDl = downloads.find((d) => d.suggestedFilename().endsWith(".txt"));
     const text = await readDownload(txtDl);

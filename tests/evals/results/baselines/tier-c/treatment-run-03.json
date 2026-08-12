@@ -1,0 +1,64 @@
+{
+ "id": "treatment-run-03",
+ "generatedAt": "2026-08-12T17:50:55.922Z",
+ "model": "gpt-5.4",
+ "promptSha256": "9704f9a4210e954e2e1cf41b08c0ba0c1c5baad373de0104fa69c201b9ae1296",
+ "sourceSha256": "fddcc1c9a9e444ec124a67aaf847c1af4d84a690d867367bbd2850d3204b1653",
+ "sourcePath": "tests/evals/results/baselines/self-correcting-interviewer/treatment/run-03/recovered-model.yaml",
+ "usage": {
+  "completion_tokens": 196,
+  "completion_tokens_details": {
+   "accepted_prediction_tokens": 0,
+   "audio_tokens": 0,
+   "reasoning_tokens": 0,
+   "rejected_prediction_tokens": 0
+  },
+  "latency_checkpoint": {
+   "engine_tbt_ms": 7,
+   "engine_ttft_ms": 86,
+   "engine_ttlt_ms": 1525,
+   "pre_inference_ms": 104,
+   "service_tbt_ms": 7,
+   "service_ttft_ms": 291,
+   "service_ttlt_ms": 1726,
+   "total_duration_ms": 1629,
+   "user_visible_ttft_ms": 187
+  },
+  "prompt_tokens": 3635,
+  "prompt_tokens_details": {
+   "audio_tokens": 0,
+   "cached_tokens": 0
+  },
+  "total_tokens": 3831
+ },
+ "error": null,
+ "deterministicFindings": [
+  {
+   "check": "inverse-pair",
+   "severity": "warning",
+   "message": "Post-Incident Review --reviews--> Incident looks like the inverse of Incident --hasPostIncidentReview--> Post-Incident Review. The profile is one directed relationship per real-world connection, never also its inverse."
+  },
+  {
+   "check": "unreachable-from-action-input",
+   "severity": "warning",
+   "message": "Action \"startRegulatoryNotificationWorkflow\" has input class Incident, and its precondition shouldStartRegulatoryNotificationWorkflow refers to Alert, which is only reachable against the direction of the relationships between them."
+  }
+ ],
+ "llmFindings": [
+  {
+   "severity": "warning",
+   "subject": "canCloseIncident",
+   "message": "The rule requires all impacted services to have health state healthy or an accepted residual condition, but IT Service.healthState does not allow 'accepted residual condition'."
+  },
+  {
+   "severity": "warning",
+   "subject": "shouldStartRegulatoryNotificationWorkflow / startRegulatoryNotificationWorkflow",
+   "message": "The rule depends on whether the incident is reportable to regulatory authorities, but no class, property, or relationship in the model can represent that reportable criterion while the action relies on the rule being satisfied."
+  },
+  {
+   "severity": "warning",
+   "subject": "canCloseIncident",
+   "message": "The rule requires major incidents to have undergone a scheduled or completed post-incident review, but Post-Incident Review.status does not allow 'scheduled'."
+  }
+ ]
+}

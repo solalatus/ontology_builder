@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { withPage } from "./lib/page.mjs";
+import { withPage, waitForComputedStyle } from "./lib/page.mjs";
 
 // Welcome popup + Help guide (issue #78): a one-time first-visit welcome
 // (localStorage-gated, never again once dismissed on this machine), and a
@@ -37,9 +37,9 @@ test("the welcome popup never shows again after being dismissed, across a reload
     await page.click("#welcome-dismiss");
     await page.reload();
     await page.waitForFunction(() => Boolean(window.__kg));
-    await page.waitForTimeout(100);
-    const display = await page.evaluate(() => getComputedStyle(document.getElementById("welcome-overlay")).display);
-    assert.equal(display, "none");
+    // The popup decides whether to show itself during init, so poll for the
+    // settled display rather than sleeping past the decision (issue #91).
+    await waitForComputedStyle(page, "#welcome-overlay", "display", "none");
   }, { welcome: true });
 });
 
@@ -230,7 +230,7 @@ test("the Help toolbar button's tooltip stays fully within the viewport (regress
   await withPage(async (page) => {
     const viewport = page.viewportSize();
     await page.hover("#btn-help");
-    await page.waitForTimeout(150);
+    await waitForComputedStyle(page, "#btn-help", "opacity", "1", { pseudo: "::after" });
     const box = await page.evaluate(() => {
       const el = document.getElementById("btn-help");
       const cs = getComputedStyle(el, "::after");

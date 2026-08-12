@@ -1,0 +1,99 @@
+{
+ "id": "anchor-run-01",
+ "generatedAt": "2026-08-12T17:50:14.466Z",
+ "model": "gpt-5.4",
+ "promptSha256": "9704f9a4210e954e2e1cf41b08c0ba0c1c5baad373de0104fa69c201b9ae1296",
+ "sourceSha256": "ce50d79e932e53d9b2140813c9dced1fdd8e778a7e88da64f0f93fd9a2c3ac0e",
+ "sourcePath": "tests/evals/results/runs/run-01/recovered-model.yaml",
+ "usage": {
+  "completion_tokens": 399,
+  "completion_tokens_details": {
+   "accepted_prediction_tokens": 0,
+   "audio_tokens": 0,
+   "reasoning_tokens": 0,
+   "rejected_prediction_tokens": 0
+  },
+  "latency_checkpoint": {
+   "engine_tbt_ms": 10,
+   "engine_ttft_ms": 165,
+   "engine_ttlt_ms": 4212,
+   "pre_inference_ms": 85,
+   "service_tbt_ms": 10,
+   "service_ttft_ms": 337,
+   "service_ttlt_ms": 4379,
+   "total_duration_ms": 4302,
+   "user_visible_ttft_ms": 253
+  },
+  "prompt_tokens": 6107,
+  "prompt_tokens_details": {
+   "audio_tokens": 0,
+   "cached_tokens": 0
+  },
+  "total_tokens": 6506
+ },
+ "error": null,
+ "deterministicFindings": [
+  {
+   "check": "inverse-pair",
+   "severity": "warning",
+   "message": "PostIncidentReview --identifies--> CorrectiveAction looks like the inverse of CorrectiveAction --arisesFrom--> PostIncidentReview. The profile is one directed relationship per real-world connection, never also its inverse."
+  },
+  {
+   "check": "inverse-pair",
+   "severity": "warning",
+   "message": "Incident --containedBy--> Workaround looks like the inverse of Workaround --mitigates--> Incident. The profile is one directed relationship per real-world connection, never also its inverse."
+  },
+  {
+   "check": "unreachable-from-action-input",
+   "severity": "warning",
+   "message": "Action \"declareMajorIncident\" has input class Incident, and its effect refers to MajorIncidentDeclaration, which is only reachable against the direction of the relationships between them."
+  },
+  {
+   "check": "unreachable-from-action-input",
+   "severity": "warning",
+   "message": "Action \"isolateConfigurationItem\" has input class ConfigurationItem, and its precondition configurationItemIsolationRequired refers to Incident, which is only reachable against the direction of the relationships between them."
+  },
+  {
+   "check": "unreachable-from-action-input",
+   "severity": "warning",
+   "message": "Action \"sendStakeholderCommunication\" has input class StakeholderCommunication, and its precondition stakeholderCommunicationRequired refers to Change, which is only reachable against the direction of the relationships between them."
+  },
+  {
+   "check": "unreachable-from-action-input",
+   "severity": "warning",
+   "message": "Action \"submitRegulatoryNotification\" has input class RegulatoryNotification, and its precondition regulatoryNotificationRequired refers to Evidence, which is only reachable against the direction of the relationships between them."
+  }
+ ],
+ "llmFindings": [
+  {
+   "severity": "warning",
+   "subject": "isolateConfigurationItem / configurationItemIsolationRequired",
+   "message": "The action takes ConfigurationItem as input but its required rule is stated in terms of an Incident and the configuration item being the source of that incident, which the action input alone cannot satisfy."
+  },
+  {
+   "severity": "warning",
+   "subject": "sendStakeholderCommunication / stakeholderCommunicationRequired",
+   "message": "The action input is StakeholderCommunication but its precondition rule is expressed on Incident conditions, so the required check is not usable from the action's input object alone."
+  },
+  {
+   "severity": "warning",
+   "subject": "submitRegulatoryNotification / regulatoryNotificationRequired",
+   "message": "The action input is RegulatoryNotification but its precondition rule depends on MaterialityAssessment, Incident significance, jurisdictional requirements, and Evidence, which are not provided from the action input alone."
+  },
+  {
+   "severity": "warning",
+   "subject": "conductPostIncidentReview / postIncidentReviewRequired",
+   "message": "The action input is PostIncidentReview but its required rule depends on lifecycle facts about an Incident, so the precondition cannot be evaluated from the action input alone."
+  },
+  {
+   "severity": "warning",
+   "subject": "restoreServiceFromBackup / canRestoreFromBackup",
+   "message": "The action verifies impacted IT Service status changes, but the effect only links the Incident to a Backup and there is no relationship from Incident to Backup or Backup to Incident that identifies which impacted IT Service must have changed."
+  },
+  {
+   "severity": "warning",
+   "subject": "isolateConfigurationItem verification",
+   "message": "The verification requires failure details in the incident record when isolation fails, but the effect only changes ConfigurationItem isolationState and records nothing on Incident."
+  }
+ ]
+}
