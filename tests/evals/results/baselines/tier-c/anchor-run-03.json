@@ -1,0 +1,99 @@
+{
+ "id": "anchor-run-03",
+ "generatedAt": "2026-08-12T17:50:21.824Z",
+ "model": "gpt-5.4",
+ "promptSha256": "9704f9a4210e954e2e1cf41b08c0ba0c1c5baad373de0104fa69c201b9ae1296",
+ "sourceSha256": "3e969660f8c2de515a260c27b1e0bf3f5f8be510346193a6788e53c19bf684d5",
+ "sourcePath": "tests/evals/results/runs/run-03/recovered-model.yaml",
+ "usage": {
+  "completion_tokens": 222,
+  "completion_tokens_details": {
+   "accepted_prediction_tokens": 0,
+   "audio_tokens": 0,
+   "reasoning_tokens": 0,
+   "rejected_prediction_tokens": 0
+  },
+  "latency_checkpoint": {
+   "engine_tbt_ms": 8,
+   "engine_ttft_ms": 157,
+   "engine_ttlt_ms": 2021,
+   "pre_inference_ms": 93,
+   "service_tbt_ms": 9,
+   "service_ttft_ms": 328,
+   "service_ttlt_ms": 2198,
+   "total_duration_ms": 2143,
+   "user_visible_ttft_ms": 235
+  },
+  "prompt_tokens": 4756,
+  "prompt_tokens_details": {
+   "audio_tokens": 0,
+   "cached_tokens": 0
+  },
+  "total_tokens": 4978
+ },
+ "error": null,
+ "deterministicFindings": [
+  {
+   "check": "effect-verification-mismatch",
+   "severity": "warning",
+   "message": "Action \"generatePostIncidentReviewReport\" verifies PostIncidentReview.completedAt, but its effect never says that property changes."
+  },
+  {
+   "check": "effect-verification-mismatch",
+   "severity": "warning",
+   "message": "Action \"submitRegulatoryNotification\" verifies RegulatoryNotification.notificationId, but its effect never says that property changes."
+  },
+  {
+   "check": "inverse-pair",
+   "severity": "warning",
+   "message": "MonitoringSystem --generates--> Alert looks like the inverse of Alert --originatedFrom--> MonitoringSystem. The profile is one directed relationship per real-world connection, never also its inverse."
+  },
+  {
+   "check": "unreachable-from-action-input",
+   "severity": "warning",
+   "message": "Action \"executeEmergencyChange\" has input class EmergencyChange, and its precondition canExecuteEmergencyChange refers to Incident, which is only reachable against the direction of the relationships between them."
+  },
+  {
+   "check": "unreachable-from-action-input",
+   "severity": "warning",
+   "message": "Action \"generatePostIncidentReviewReport\" has input class PostIncidentReview, and its precondition canGeneratePostIncidentReview refers to Incident, which is only reachable against the direction of the relationships between them."
+  },
+  {
+   "check": "unreachable-from-action-input",
+   "severity": "warning",
+   "message": "Action \"notifyStakeholders\" has input class StakeholderCommunication, and its precondition canNotifyStakeholders refers to BusinessService, which is only reachable against the direction of the relationships between them."
+  },
+  {
+   "check": "unreachable-from-action-input",
+   "severity": "warning",
+   "message": "Action \"notifyStakeholders\" has input class StakeholderCommunication, and its precondition canNotifyStakeholders refers to Incident, which is only reachable against the direction of the relationships between them."
+  },
+  {
+   "check": "unreachable-from-action-input",
+   "severity": "warning",
+   "message": "Action \"submitRegulatoryNotification\" has input class RegulatoryNotification, and its precondition canSubmitRegulatoryNotification refers to Incident, which is only reachable against the direction of the relationships between them."
+  },
+  {
+   "check": "unreachable-from-action-input",
+   "severity": "warning",
+   "message": "Action \"submitRegulatoryNotification\" has input class RegulatoryNotification, and its precondition regulatoryNotificationRequired refers to MaterialityAssessment, which is only reachable against the direction of the relationships between them."
+  }
+ ],
+ "llmFindings": [
+  {
+   "severity": "warning",
+   "subject": "canNotifyStakeholders / notifyStakeholders",
+   "message": "The rule requires Stakeholder Communication to already be sent to at least one Business Service Owner or Product Manager before sending, but the action's effect is what sends the communication and records recipients."
+  },
+  {
+   "severity": "warning",
+   "subject": "canGeneratePostIncidentReview / generatePostIncidentReviewReport",
+   "message": "The rule is written against Incident state and Incident-to-PostIncidentReview relationship, but the action input is PostIncidentReview, so the precondition cannot be evaluated from the action input class alone."
+  },
+  {
+   "severity": "warning",
+   "subject": "regulatoryNotificationRequired / submitRegulatoryNotification",
+   "message": "The rule is defined from Materiality Assessment status and outcome, but the action input is RegulatoryNotification and no relationship from RegulatoryNotification back to MaterialityAssessment exists to make that precondition usable on the action input."
+  }
+ ]
+}

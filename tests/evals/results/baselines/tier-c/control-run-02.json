@@ -1,0 +1,159 @@
+{
+ "id": "control-run-02",
+ "generatedAt": "2026-08-12T17:50:36.450Z",
+ "model": "gpt-5.4",
+ "promptSha256": "9704f9a4210e954e2e1cf41b08c0ba0c1c5baad373de0104fa69c201b9ae1296",
+ "sourceSha256": "e37e5dd930ea3ed9611ca11c74f813bff47de66c0762c8ecc06a4fb05234552b",
+ "sourcePath": "tests/evals/results/baselines/self-correcting-interviewer/control/run-02/recovered-model.yaml",
+ "usage": {
+  "completion_tokens": 870,
+  "completion_tokens_details": {
+   "accepted_prediction_tokens": 0,
+   "audio_tokens": 0,
+   "reasoning_tokens": 0,
+   "rejected_prediction_tokens": 0
+  },
+  "latency_checkpoint": {
+   "engine_tbt_ms": 9,
+   "engine_ttft_ms": 105,
+   "engine_ttlt_ms": 8130,
+   "pre_inference_ms": 106,
+   "service_tbt_ms": 9,
+   "service_ttft_ms": 302,
+   "service_ttlt_ms": 8321,
+   "total_duration_ms": 8226,
+   "user_visible_ttft_ms": 196
+  },
+  "prompt_tokens": 3664,
+  "prompt_tokens_details": {
+   "audio_tokens": 0,
+   "cached_tokens": 0
+  },
+  "total_tokens": 4534
+ },
+ "error": null,
+ "deterministicFindings": [
+  {
+   "check": "value-not-allowed",
+   "severity": "error",
+   "message": "Action \"acknowledgeAlert\" (verification) requires Alert.status to be \"now acknowledged\", but that property allows only: new, acknowledged, suppressed, escalated, closed."
+  },
+  {
+   "check": "value-not-allowed",
+   "severity": "error",
+   "message": "Action \"closeIncident\" (verification) requires Incident.status to be \"now closed\", but that property allows only: new, acknowledged, investigating, contained, recovering, monitoring, resolved, closed, cancelled."
+  },
+  {
+   "check": "effect-verification-mismatch",
+   "severity": "warning",
+   "message": "Action \"declareMajorIncident\" verifies Incident.status, but its effect never says that property changes."
+  },
+  {
+   "check": "effect-verification-mismatch",
+   "severity": "warning",
+   "message": "Action \"initiateBackupRestore\" verifies RecoveryPlan.status, but its effect never says that property changes."
+  },
+  {
+   "check": "effect-verification-mismatch",
+   "severity": "warning",
+   "message": "Action \"sendStakeholderCommunication\" verifies Incident.status, but its effect never says that property changes."
+  },
+  {
+   "check": "inverse-pair",
+   "severity": "warning",
+   "message": "Change --forIncident--> Incident looks like the inverse of Incident --associatedWith--> Change. The profile is one directed relationship per real-world connection, never also its inverse."
+  },
+  {
+   "check": "inverse-pair",
+   "severity": "warning",
+   "message": "StakeholderCommunication --about--> Incident looks like the inverse of Incident --hasStakeholderCommunication--> StakeholderCommunication. The profile is one directed relationship per real-world connection, never also its inverse."
+  },
+  {
+   "check": "inverse-pair",
+   "severity": "warning",
+   "message": "Incident --hasRegulatoryNotification--> RegulatoryNotification looks like the inverse of RegulatoryNotification --regardsIncident--> Incident. The profile is one directed relationship per real-world connection, never also its inverse."
+  },
+  {
+   "check": "inverse-pair",
+   "severity": "warning",
+   "message": "RecoveryPlan --appliesTo--> Service looks like the inverse of Service --coveredBy--> RecoveryPlan. The profile is one directed relationship per real-world connection, never also its inverse."
+  },
+  {
+   "check": "unreachable-from-action-input",
+   "severity": "warning",
+   "message": "Action \"containIncident\" has input class Incident, and its precondition canContainIncident refers to ContainmentSteps, which is only reachable against the direction of the relationships between them."
+  },
+  {
+   "check": "unreachable-from-action-input",
+   "severity": "warning",
+   "message": "Action \"initiateBackupRestore\" has input class RecoveryPlan, and its precondition canInitiateBackupRestore refers to Incident, which is only reachable against the direction of the relationships between them."
+  }
+ ],
+ "llmFindings": [
+  {
+   "severity": "warning",
+   "subject": "canDeclareMajorIncident / declaredBy relationship",
+   "message": "The rule requires an IncidentCommander to be assigned and authorized, but the model only provides Incident declaredBy IncidentCommander for declaration and no way to represent assignment or authorization."
+  },
+  {
+   "severity": "warning",
+   "subject": "canCloseIncident",
+   "message": "The rule allows closure when incident status is monitoring, resolved or monitoring, but also requires all affected services to be healthy or have an accepted residual condition, and 'accepted residual condition' cannot be represented anywhere in the model."
+  },
+  {
+   "severity": "warning",
+   "subject": "canCloseIncident / closeIncident",
+   "message": "The rule and action verification require recording resolution evidence and a closure timestamp, but the Incident class has neither a closure timestamp property nor any property for recorded resolution/restoration state beyond generic linked Evidence."
+  },
+  {
+   "severity": "warning",
+   "subject": "canCloseIncident",
+   "message": "The rule requires all required StakeholderCommunication items for the incident to be complete, but the model has no notion of which communications are required or any 'complete' state for StakeholderCommunication."
+  },
+  {
+   "severity": "warning",
+   "subject": "canSendStakeholderCommunication / sendStakeholderCommunication",
+   "message": "The rule depends on a StakeholderCommunication being prepared and matched to an Incident, but the action input is only Incident and there is no way in the action to identify which StakeholderCommunication is being sent."
+  },
+  {
+   "severity": "warning",
+   "subject": "canSendStakeholderCommunication / StakeholderCommunication status",
+   "message": "The action says the communication is sent and timestamped, but StakeholderCommunication.status allowed values do not include any sent state while verification asks to confirm delivery status."
+  },
+  {
+   "severity": "warning",
+   "subject": "canSendStakeholderCommunication",
+   "message": "The rule requires the StakeholderCommunication content to match the latest verified state of the Incident, but the model has no concept of a verified incident state to compare against."
+  },
+  {
+   "severity": "warning",
+   "subject": "canExecuteEmergencyChange / executeEmergencyChange",
+   "message": "The rule requires a Change to be for an Incident, but the action effect only says the change status is updated without any allowed Change status that specifically represents 'implemented' unless chosen externally, so the verification cannot follow directly from the effect."
+  },
+  {
+   "severity": "warning",
+   "subject": "canDocumentIncidentFindings / documentIncidentFindings",
+   "message": "The action effect and verification require findings and lessons learned to be recorded in the Incident, but the Incident class has no property for findings, lessons learned, or documentation content."
+  },
+  {
+   "severity": "warning",
+   "subject": "canInitiateBackupRestore",
+   "message": "The rule is expressed against both a RecoveryPlan and an Incident ('appliesTo at least one Service affected by the Incident'), but the action input is only RecoveryPlan and there is no relationship from RecoveryPlan to Incident to bind which incident is being evaluated."
+  },
+  {
+   "severity": "warning",
+   "subject": "canInitiateBackupRestore / initiateBackupRestore",
+   "message": "The rule requires RecoveryPlan status to be approved, but RecoveryPlan.status has no allowed values defined, so the required approved state is not grounded in the model."
+  },
+  {
+   "severity": "warning",
+   "subject": "acknowledgeAlert",
+   "message": "The action effect records an acknowledgment timestamp, but the Alert class has no timestamp property to hold that recorded value."
+  },
+  {
+   "severity": "warning",
+   "subject": "canContainIncident",
+   "message": "The rule requires approved ContainmentSteps defined for the Incident, but the model only has ContainmentSteps relatesToIncident Incident and no inverse/navigation from Incident to its containment steps, making the rule unusable from the Incident input."
+  }
+ ]
+}

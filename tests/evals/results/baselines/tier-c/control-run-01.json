@@ -1,0 +1,109 @@
+{
+ "id": "control-run-01",
+ "generatedAt": "2026-08-12T17:50:27.286Z",
+ "model": "gpt-5.4",
+ "promptSha256": "9704f9a4210e954e2e1cf41b08c0ba0c1c5baad373de0104fa69c201b9ae1296",
+ "sourceSha256": "dc0054d16ccf7e04b2a951b59dee163638c35c4af2a3521222a15467d696ebd3",
+ "sourcePath": "tests/evals/results/baselines/self-correcting-interviewer/control/run-01/recovered-model.yaml",
+ "usage": {
+  "completion_tokens": 488,
+  "completion_tokens_details": {
+   "accepted_prediction_tokens": 0,
+   "audio_tokens": 0,
+   "reasoning_tokens": 0,
+   "rejected_prediction_tokens": 0
+  },
+  "latency_checkpoint": {
+   "engine_tbt_ms": 9,
+   "engine_ttft_ms": 111,
+   "engine_ttlt_ms": 4419,
+   "pre_inference_ms": 104,
+   "service_tbt_ms": 9,
+   "service_ttft_ms": 298,
+   "service_ttlt_ms": 4603,
+   "total_duration_ms": 4508,
+   "user_visible_ttft_ms": 193
+  },
+  "prompt_tokens": 4064,
+  "prompt_tokens_details": {
+   "audio_tokens": 0,
+   "cached_tokens": 0
+  },
+  "total_tokens": 4552
+ },
+ "error": null,
+ "deterministicFindings": [
+  {
+   "check": "effect-verification-mismatch",
+   "severity": "warning",
+   "message": "Action \"sendStakeholderCommunication\" verifies CommunicationUpdate.sentAt, but its effect never says that property changes."
+  },
+  {
+   "check": "inverse-pair",
+   "severity": "warning",
+   "message": "Incident --mayRequire--> RegulatoryNotification looks like the inverse of RegulatoryNotification --reports--> Incident. The profile is one directed relationship per real-world connection, never also its inverse."
+  },
+  {
+   "check": "unreachable-from-action-input",
+   "severity": "warning",
+   "message": "Action \"closeIncident\" has input class Incident, and its precondition canCloseIncident refers to CommunicationUpdate, which is only reachable against the direction of the relationships between them."
+  },
+  {
+   "check": "unreachable-from-action-input",
+   "severity": "warning",
+   "message": "Action \"closeIncident\" has input class Incident, and its precondition canCloseIncident refers to Evidence, which is only reachable against the direction of the relationships between them."
+  },
+  {
+   "check": "unreachable-from-action-input",
+   "severity": "warning",
+   "message": "Action \"closeIncident\" has input class Incident, and its precondition canCloseIncident refers to PostIncidentReview, which is only reachable against the direction of the relationships between them."
+  },
+  {
+   "check": "unreachable-from-action-input",
+   "severity": "warning",
+   "message": "Action \"executeEmergencyChange\" has input class Change, and its verification refers to Incident, which is only reachable against the direction of the relationships between them."
+  },
+  {
+   "check": "unreachable-from-action-input",
+   "severity": "warning",
+   "message": "Action \"submitRegulatoryNotification\" has input class RegulatoryNotification, and its precondition canSubmitRegulatoryNotification refers to Evidence, which is only reachable against the direction of the relationships between them."
+  }
+ ],
+ "llmFindings": [
+  {
+   "severity": "warning",
+   "subject": "requiresRegulatoryNotification / canSubmitRegulatoryNotification / submitRegulatoryNotification",
+   "message": "These require a regulatory notification to be approved by the designated regulatory-reporting authority, but the model only relates RegulatoryReportingAuthority to Incident and provides no relationship or property by which a specific RegulatoryNotification can be approved by that authority."
+  },
+  {
+   "severity": "warning",
+   "subject": "canSubmitRegulatoryNotification",
+   "message": "The rule requires 'the incident associated with the notification' to be classified as reportable, but the only notification-to-incident relationship is directed as RegulatoryNotification reports Incident, so the stated associated incident cannot be reached in the rule phrasing as written."
+  },
+  {
+   "severity": "warning",
+   "subject": "executeEmergencyChange",
+   "message": "The action input is Change, but its verification requires 'the associated incident is updated accordingly' even though the model only relates Incident causedBy Change and provides no navigable Change-to-Incident association from the action input."
+  },
+  {
+   "severity": "warning",
+   "subject": "conductMaterialityAssessment",
+   "message": "The effect says a materiality assessment is produced, but the verification requires an assessment record with a timestamp even though MaterialityAssessment has no timestamp property to satisfy that verification."
+  },
+  {
+   "severity": "warning",
+   "subject": "submitRegulatoryNotification",
+   "message": "The effect records submissionReceipt but does not set submittedAt, while the rule and action are about submission before a deadline, so the model cannot verify submission timing from the action effect."
+  },
+  {
+   "severity": "warning",
+   "subject": "sendStakeholderCommunication",
+   "message": "The verification requires delivery to intended stakeholders to be recorded, but the effect only sets communication status to sent and there is no property or action effect that records delivery outcomes."
+  },
+  {
+   "severity": "warning",
+   "subject": "closeIncident / canCloseIncident",
+   "message": "The rule requires 'resolution and restoration evidence is documented and available,' but the only Evidence model supports collectedFor Incident and status values unrelated to restoration, so the required restoration evidence cannot be specifically represented from the model."
+  }
+ ]
+}

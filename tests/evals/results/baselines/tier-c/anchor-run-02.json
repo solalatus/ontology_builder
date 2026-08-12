@@ -1,0 +1,119 @@
+{
+ "id": "anchor-run-02",
+ "generatedAt": "2026-08-12T17:50:18.759Z",
+ "model": "gpt-5.4",
+ "promptSha256": "9704f9a4210e954e2e1cf41b08c0ba0c1c5baad373de0104fa69c201b9ae1296",
+ "sourceSha256": "3f3663d5d697ea93fc88bffef8f88f006b230b3196b381862c8de79ac009f3ec",
+ "sourcePath": "tests/evals/results/runs/run-02/recovered-model.yaml",
+ "usage": {
+  "completion_tokens": 226,
+  "completion_tokens_details": {
+   "accepted_prediction_tokens": 0,
+   "audio_tokens": 0,
+   "reasoning_tokens": 0,
+   "rejected_prediction_tokens": 0
+  },
+  "latency_checkpoint": {
+   "engine_tbt_ms": 9,
+   "engine_ttft_ms": 1144,
+   "engine_ttlt_ms": 3154,
+   "pre_inference_ms": 104,
+   "service_tbt_ms": 9,
+   "service_ttft_ms": 1354,
+   "service_ttlt_ms": 3340,
+   "total_duration_ms": 3244,
+   "user_visible_ttft_ms": 1250
+  },
+  "prompt_tokens": 5598,
+  "prompt_tokens_details": {
+   "audio_tokens": 0,
+   "cached_tokens": 0
+  },
+  "total_tokens": 5824
+ },
+ "error": null,
+ "deterministicFindings": [
+  {
+   "check": "value-not-allowed",
+   "severity": "error",
+   "message": "Rule \"canSendRegulatoryNotification\" (condition 4) requires RegulatoryNotification.status to be \"approved\", but that property allows only: draft, pending-approval, submitted, accepted, rejected."
+  },
+  {
+   "check": "effect-verification-mismatch",
+   "severity": "warning",
+   "message": "Action \"conductPostIncidentReview\" verifies PostIncidentReview.completedAt, but its effect never says that property changes."
+  },
+  {
+   "check": "effect-verification-mismatch",
+   "severity": "warning",
+   "message": "Action \"documentCorrectiveAction\" verifies CorrectiveAction.description, but its effect never says that property changes."
+  },
+  {
+   "check": "effect-verification-mismatch",
+   "severity": "warning",
+   "message": "Action \"executeEmergencyChange\" verifies EmergencyChange.executedAt, but its effect never says that property changes."
+  },
+  {
+   "check": "effect-verification-mismatch",
+   "severity": "warning",
+   "message": "Action \"restoreFromBackupSet\" verifies BackupSet.status, but its effect never says that property changes."
+  },
+  {
+   "check": "inverse-pair",
+   "severity": "warning",
+   "message": "ConfigurationItem --hasBackupSet--> BackupSet looks like the inverse of BackupSet --restores--> ConfigurationItem. The profile is one directed relationship per real-world connection, never also its inverse."
+  },
+  {
+   "check": "self-loop",
+   "severity": "warning",
+   "message": "Relationship \"dependsOn\" points from ITService to itself."
+  },
+  {
+   "check": "unreachable-from-action-input",
+   "severity": "warning",
+   "message": "Action \"acknowledgeAlert\" has input class Alert, and its precondition canAcknowledgeAlert refers to Incident, which is only reachable against the direction of the relationships between them."
+  },
+  {
+   "check": "unreachable-from-action-input",
+   "severity": "warning",
+   "message": "Action \"documentCorrectiveAction\" has input class CorrectiveAction, and its precondition canDocumentCorrectiveAction refers to Incident, which is only reachable against the direction of the relationships between them."
+  },
+  {
+   "check": "unreachable-from-action-input",
+   "severity": "warning",
+   "message": "Action \"documentCorrectiveAction\" has input class CorrectiveAction, and its precondition canDocumentCorrectiveAction refers to PostIncidentReview, which is only reachable against the direction of the relationships between them."
+  },
+  {
+   "check": "unreachable-from-action-input",
+   "severity": "warning",
+   "message": "Action \"executeEmergencyChange\" has input class EmergencyChange, and its precondition canExecuteEmergencyChange refers to Change, which is only reachable against the direction of the relationships between them."
+  },
+  {
+   "check": "unreachable-from-action-input",
+   "severity": "warning",
+   "message": "Action \"restoreFromBackupSet\" has input class BackupSet, and its precondition canRestoreFromBackupSet refers to Incident, which is only reachable against the direction of the relationships between them."
+  }
+ ],
+ "llmFindings": [
+  {
+   "severity": "warning",
+   "subject": "canSendRegulatoryNotification",
+   "message": "The rule requires Regulatory Notification status to be approved, but the RegulatoryNotification class allowed statuses do not include approved."
+  },
+  {
+   "severity": "warning",
+   "subject": "sendRegulatoryNotification",
+   "message": "The action depends on canSendRegulatoryNotification requiring Regulatory Notification status approved, but the effect can only start from statuses allowed on RegulatoryNotification, which never include approved."
+  },
+  {
+   "severity": "warning",
+   "subject": "declareMajorIncident",
+   "message": "The verification requires an Incident Commander to be identified or assigned, but the action effect only sets majorIncidentDeclared to true and does not establish the managedBy relationship."
+  },
+  {
+   "severity": "warning",
+   "subject": "executeEmergencyChange",
+   "message": "The verification requires executedAt to be present, but the action effect states only that status becomes executed and does not record executedAt."
+  }
+ ]
+}

@@ -11883,6 +11883,9 @@ window.__kg = {
       isEnabled: consistencyLlmEnabled,
       setEnabled: setConsistencyLlmEnabled,
       run: runConsistencyLlmCheck,
+      // Exposed so issue #89's evaluation measures the shipped prompt rather
+      // than a copy of it that could drift out of sync with this file.
+      prompt: CONSISTENCY_LLM_PROMPT,
       results: () => [...consistencyLlmFindings],
       storageKey: CONSISTENCY_LLM_STORAGE_KEY,
     },

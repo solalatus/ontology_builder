@@ -1,0 +1,129 @@
+{
+ "id": "control-run-03",
+ "generatedAt": "2026-08-12T17:50:43.126Z",
+ "model": "gpt-5.4",
+ "promptSha256": "9704f9a4210e954e2e1cf41b08c0ba0c1c5baad373de0104fa69c201b9ae1296",
+ "sourceSha256": "bc736951d87b5471371ec7724dd32b68dd2cb5b410ad577d7d18f834e7ea2d4e",
+ "sourcePath": "tests/evals/results/baselines/self-correcting-interviewer/control/run-03/recovered-model.yaml",
+ "usage": {
+  "completion_tokens": 570,
+  "completion_tokens_details": {
+   "accepted_prediction_tokens": 0,
+   "audio_tokens": 0,
+   "reasoning_tokens": 0,
+   "rejected_prediction_tokens": 0
+  },
+  "latency_checkpoint": {
+   "engine_tbt_ms": 10,
+   "engine_ttft_ms": 123,
+   "engine_ttlt_ms": 5900,
+   "pre_inference_ms": 96,
+   "service_tbt_ms": 10,
+   "service_ttft_ms": 329,
+   "service_ttlt_ms": 6087,
+   "total_duration_ms": 5998,
+   "user_visible_ttft_ms": 233
+  },
+  "prompt_tokens": 4161,
+  "prompt_tokens_details": {
+   "audio_tokens": 0,
+   "cached_tokens": 0
+  },
+  "total_tokens": 4731
+ },
+ "error": null,
+ "deterministicFindings": [
+  {
+   "check": "value-not-allowed",
+   "severity": "error",
+   "message": "Action \"closeIncident\" (verification) requires Incident.status to be \"marked as\", but that property allows only: new, acknowledged, investigating, contained, recovering, monitoring, resolved, closed, cancelled."
+  },
+  {
+   "check": "effect-verification-mismatch",
+   "severity": "warning",
+   "message": "Action \"acknowledgeAlert\" verifies Alert.acknowledgementTime, but its effect never says that property changes."
+  },
+  {
+   "check": "effect-verification-mismatch",
+   "severity": "warning",
+   "message": "Action \"assignIncident\" verifies Incident.incidentType, but its effect never says that property changes."
+  },
+  {
+   "check": "effect-verification-mismatch",
+   "severity": "warning",
+   "message": "Action \"sendStakeholderCommunication\" verifies Incident.status, but its effect never says that property changes."
+  },
+  {
+   "check": "inverse-pair",
+   "severity": "warning",
+   "message": "RecoveryPlan --restores--> ITService looks like the inverse of ITService --hasRecoveryPlan--> RecoveryPlan. The profile is one directed relationship per real-world connection, never also its inverse."
+  },
+  {
+   "check": "inverse-pair",
+   "severity": "warning",
+   "message": "CorrectiveAction --arisesFrom--> Problem looks like the inverse of Problem --hasCorrectiveAction--> CorrectiveAction. The profile is one directed relationship per real-world connection, never also its inverse."
+  },
+  {
+   "check": "unreachable-from-action-input",
+   "severity": "warning",
+   "message": "Action \"restoreBackup\" has input class BackupSet, and its effect refers to ConfigurationItem, which is only reachable against the direction of the relationships between them."
+  },
+  {
+   "check": "unreachable-from-action-input",
+   "severity": "warning",
+   "message": "Action \"submitRegulatoryNotification\" has input class RegulatoryNotification, and its precondition canSubmitRegulatoryNotification refers to Communication, which is only reachable against the direction of the relationships between them."
+  },
+  {
+   "check": "unreachable-from-action-input",
+   "severity": "warning",
+   "message": "Action \"submitRegulatoryNotification\" has input class RegulatoryNotification, and its precondition canSubmitRegulatoryNotification refers to Incident, which is only reachable against the direction of the relationships between them."
+  }
+ ],
+ "llmFindings": [
+  {
+   "severity": "warning",
+   "subject": "rule canDeclareMajorIncident",
+   "message": "The rule requires 'an incident commander or designated duty manager' to be assigned, but the model only provides IncidentCommander and has no Duty Manager class or relationship to satisfy the alternative."
+  },
+  {
+   "severity": "warning",
+   "subject": "rule canCloseIncident",
+   "message": "The rule requires all impacted services to have health state 'healthy' or an accepted residual condition, but ITService.healthState has no allowed values and nowhere defines either 'healthy' or residual-condition states."
+  },
+  {
+   "severity": "warning",
+   "subject": "rule canConductPostIncidentReview and action conductPostIncidentReview",
+   "message": "The rule requires a post-incident review to be scheduled before it can be conducted, but PostIncidentReview has no scheduling property or status model and the action effect only documents a review after the fact."
+  },
+  {
+   "severity": "warning",
+   "subject": "action declareMajorIncident",
+   "message": "The verification checks that communication records are present, but the effect only says enhanced communication processes are initiated and does not create or link any Communication records."
+  },
+  {
+   "severity": "warning",
+   "subject": "action acknowledgeAlert",
+   "message": "The verification requires acknowledgementTime to be recorded, but the effect only updates the alert status to acknowledged."
+  },
+  {
+   "severity": "warning",
+   "subject": "action sendStakeholderCommunication",
+   "message": "The action input is Incident and the effect updates a communication, but the precondition rule canSendStakeholderCommunication is stated over Communication properties and recipients, making the action's required object inconsistent with its rule and effect."
+  },
+  {
+   "severity": "warning",
+   "subject": "action sendStakeholderCommunication",
+   "message": "The verification requires delivery status to confirm successful delivery, but the effect only says the communication is sent and sent time is recorded."
+  },
+  {
+   "severity": "warning",
+   "subject": "action assignIncident",
+   "message": "The verification requires assignment routing to align with incident type and service environment, but incident type is just a property on Incident and service environment is only reachable from ITService while the effect only assigns a resolver group without establishing those routing facts."
+  },
+  {
+   "severity": "warning",
+   "subject": "action restoreBackup",
+   "message": "The effect restores backup data to a target configuration item, but BackupSet has no relationship to any target beyond its source ConfigurationItem and the verification depends on a target configuration item the model cannot represent."
+  }
+ ]
+}
