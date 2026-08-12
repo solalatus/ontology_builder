@@ -1,0 +1,788 @@
+classes:
+  Incident:
+    meaning: A disruption or degradation being managed through the incident process.
+    aliases:
+      - issue
+      - case
+      - ticket
+    properties:
+      severityLevel:
+        type: text
+        allowed:
+          - sev1-critical
+          - sev2-high
+          - sev3-medium
+          - sev4-low
+      status:
+        type: text
+        allowed:
+          - new
+          - acknowledged
+          - investigating
+          - contained
+          - recovering
+          - monitoring
+          - resolved
+          - closed
+          - cancelled
+      majorIncidentDeclared:
+        type: boolean
+      regulatoryNotificationRequired:
+        type: boolean
+      detectedAt:
+        type: date
+      customerImpactLevel:
+        type: text
+        allowed:
+          - enterprise-wide
+          - multiple-services
+          - single-service
+          - limited-users
+          - no-observed-impact
+      resolutionSummary:
+        type: text
+      vendorInvolvement:
+        type: boolean
+      expectedDuration:
+        type: text
+      complexityLevel:
+        type: text
+      businessImpactSummary:
+        type: text
+      majorIncidentRecommended:
+        type: boolean
+      dataIntegrityImpact:
+        type: boolean
+      availabilityImpact:
+        type: boolean
+      majorIncidentDeclaredAt:
+        type: date
+      containmentScope:
+        type: text
+      expectedSideEffects:
+        type: text
+      closedAt:
+        type: date
+  BusinessService:
+    meaning: A service delivered to the business whose availability or performance may be affected by an incident.
+    aliases:
+      - service
+      - offering
+    properties:
+      serviceCriticality:
+        type: text
+        allowed:
+          - tier-1-critical
+          - tier-2-important
+          - tier-3-standard
+          - tier-4-supporting
+      status:
+        type: text
+        allowed:
+          - active
+          - inactive
+          - under-review
+          - deprecated
+      communicationCadence:
+        type: text
+      regulatorySensitive:
+        type: boolean
+      healthState:
+        type: text
+  Alert:
+    meaning: A signal indicating a condition that may require incident investigation or response.
+    aliases:
+      - notification
+      - warning
+    properties:
+      acknowledged:
+        type: boolean
+      status:
+        type: text
+        allowed:
+          - new
+          - acknowledged
+          - suppressed
+          - escalated
+          - closed
+      raisedAt:
+        type: date
+      acknowledgedAt:
+        type: date
+  IncidentCommander:
+    meaning: A role responsible for leading and coordinating the response to an incident.
+    aliases:
+      - incident manager
+      - lead
+    properties: {}
+  ServiceOwner:
+    meaning: A role accountable for a business service and for decisions or approvals affecting it.
+    aliases:
+      - service manager
+    properties: {}
+  ResolverGroup:
+    meaning: A team responsible for investigating and resolving assigned incidents.
+    aliases:
+      - support team
+      - service team
+    properties:
+      responsePriority:
+        type: number
+      availabilityStatus:
+        type: text
+        allowed:
+          - available
+          - partially-available
+          - constrained
+          - unavailable
+  ConfigurationItem:
+    meaning: "A managed technical component whose state, dependencies, or checks may be relevant to an incident."
+    aliases:
+      - CI
+      - asset
+    properties:
+      lastSuccessfulCheckAt:
+        type: date
+      status:
+        type: text
+        allowed:
+          - operational
+          - under-maintenance
+          - decommissioned
+          - isolated
+      isIsolated:
+        type: boolean
+      checkResult:
+        type: text
+        allowed:
+          - passed
+          - failed
+          - not-completed
+      isolationImpact:
+        type: text
+      rollbackMethod:
+        type: text
+  KnownError:
+    meaning: A documented issue with a recognized cause or pattern that may be associated with incidents.
+    aliases:
+      - documented issue
+      - recognized fault
+    properties:
+      status:
+        type: text
+        allowed:
+          - active
+          - retired
+      rootCauseSummary:
+        type: text
+  Workaround:
+    meaning: A temporary mitigation that reduces the impact of an incident without fully resolving its underlying cause.
+    aliases:
+      - temporary fix
+      - bypass
+    properties:
+      status:
+        type: text
+        allowed:
+          - active
+          - retired
+          - invalid
+      instructions:
+        type: text
+  RecoveryPlan:
+    meaning: A plan that defines how a service or component should be recovered and the objectives for recovery.
+    aliases:
+      - restoration plan
+      - continuity plan
+    properties:
+      recoveryObjective:
+        type: text
+      status:
+        type: text
+        allowed:
+          - active
+          - under-review
+          - outdated
+  BackupSet:
+    meaning: A stored backup that may be available for restoration of an affected component or service.
+    aliases:
+      - backup collection
+      - saved data set
+    properties:
+      status:
+        type: text
+        allowed:
+          - scheduled
+          - running
+          - successful
+          - failed
+          - expired
+          - corrupted
+          - verified
+      createdAt:
+        type: date
+      restorePoint:
+        type: text
+  Evidence:
+    meaning: "A record or artifact collected to support investigation, decisions, communications, or reporting for an incident."
+    aliases:
+      - record
+      - proof
+      - artifact
+    properties:
+      status:
+        type: text
+        allowed:
+          - collected
+          - verified
+          - archived
+      collectedAt:
+        type: date
+  CorrectiveAction:
+    meaning: An action item created to prevent recurrence or improve handling after an incident.
+    aliases:
+      - remediation action
+      - fix
+    properties:
+      status:
+        type: text
+        allowed:
+          - open
+          - in-progress
+          - blocked
+          - implemented
+          - verified
+          - closed
+          - cancelled
+      dueDate:
+        type: date
+  PostIncidentReview:
+    meaning: A review conducted after an incident to assess what happened and identify lessons or follow-up actions.
+    aliases:
+      - after-action review
+      - incident analysis
+    properties:
+      heldAt:
+        type: date
+      status:
+        type: text
+        allowed:
+          - planned
+          - in-progress
+          - completed
+  RegulatoryNotification:
+    meaning: A notification prepared or submitted to a regulator in response to an incident.
+    aliases:
+      - compliance notification
+      - regulatory report
+    properties:
+      status:
+        type: text
+        allowed:
+          - draft
+          - pending-approval
+          - approved
+          - submitted
+          - accepted
+          - rejected
+          - withdrawn
+      submittedAt:
+        type: date
+      submissionReceipt:
+        type: text
+      dueDate:
+        type: date
+  MaterialityAssessment:
+    meaning: An assessment used to determine the significance of an incident and whether reporting or escalation obligations apply.
+    aliases:
+      - reportability assessment
+    properties:
+      status:
+        type: text
+        allowed:
+          - not-assessed
+          - in-progress
+          - completed
+      outcome:
+        type: text
+        allowed:
+          - not-reportable
+          - potentially-reportable
+          - reportable
+          - undetermined
+  StakeholderCommunication:
+    meaning: A communication sent or prepared to update stakeholders about an incident.
+    aliases:
+      - stakeholder update
+      - stakeholder notice
+    properties:
+      status:
+        type: text
+        allowed:
+          - draft
+          - sent
+          - archived
+      sentAt:
+        type: date
+      audience:
+        type: text
+      messageContent:
+        type: text
+      owner:
+        type: text
+      approvalState:
+        type: text
+        allowed:
+          - draft
+          - pending-approval
+          - approved
+          - sent
+          - archived
+      deliveryStatus:
+        type: text
+      archivedMessage:
+        type: text
+  EmergencyChange:
+    meaning: "A change implemented urgently during incident response to restore service, reduce impact, or prevent further harm."
+    aliases:
+      - urgent change
+      - rapid fix
+    properties:
+      status:
+        type: text
+        allowed:
+          - draft
+          - approved
+          - implemented
+          - rolled-back
+          - closed
+      implementedAt:
+        type: date
+      implementationPlan:
+        type: text
+      backoutPlan:
+        type: text
+      riskAccepted:
+        type: boolean
+  Regulator:
+    meaning: A supervisory authority that may receive formal notifications about an incident.
+    aliases:
+      - supervisory authority
+      - oversight body
+    properties: {}
+relationships:
+  - name: affectsService
+    from: Incident
+    to: BusinessService
+    meaning: The business service affected by an incident.
+    aliases:
+      - impacts service
+      - disrupts service
+  - name: hasIncidentCommander
+    from: Incident
+    to: IncidentCommander
+    meaning: The incident commander assigned to lead and coordinate the incident response.
+    aliases:
+      - led by
+      - managed by
+  - name: hasServiceOwner
+    from: BusinessService
+    to: ServiceOwner
+    meaning: The service owner accountable for the business service.
+    aliases:
+      - accountable for service
+      - responsible for service
+  - name: assignedToResolverGroup
+    from: Incident
+    to: ResolverGroup
+    meaning: The resolver group assigned to investigate or resolve the incident.
+    aliases:
+      - designated to support group
+      - routed to resolver
+  - name: impactsConfigurationItem
+    from: Incident
+    to: ConfigurationItem
+    meaning: A configuration item impacted by the incident.
+    aliases:
+      - affects CI
+      - relates to configuration item
+  - name: hasDependencyOn
+    from: ConfigurationItem
+    to: ConfigurationItem
+    meaning: A configuration item that another configuration item depends on.
+    aliases:
+      - relies on
+      - linked to
+  - name: correlatesWithIncident
+    from: Alert
+    to: Incident
+    meaning: The incident that an alert is correlated with.
+    aliases:
+      - linked to incident
+      - associated with incident
+  - name: hasKnownError
+    from: Incident
+    to: KnownError
+    meaning: A known error associated with the incident.
+    aliases:
+      - is linked to known issue
+      - associated with known error
+  - name: hasWorkaround
+    from: KnownError
+    to: Workaround
+    meaning: A workaround documented for a known error.
+    aliases:
+      - includes workaround
+      - has temporary fix
+  - name: hasRecoveryPlan
+    from: BusinessService
+    to: RecoveryPlan
+    meaning: A recovery plan defined for the business service.
+    aliases:
+      - attached to recovery plan
+      - linked to recovery strategy
+  - name: hasRecoveryPlan
+    from: ConfigurationItem
+    to: RecoveryPlan
+    meaning: A recovery plan defined for the configuration item.
+    aliases:
+      - attached to recovery plan
+      - linked to recovery strategy
+  - name: hasBackupSet
+    from: ConfigurationItem
+    to: BackupSet
+    meaning: A backup set available for the configuration item.
+    aliases:
+      - associated with backup
+      - includes backup set
+  - name: hasEvidence
+    from: Incident
+    to: Evidence
+    meaning: Evidence collected in relation to the incident.
+    aliases:
+      - contains evidence
+      - supported by record
+  - name: hasOpenCorrectiveAction
+    from: BusinessService
+    to: CorrectiveAction
+    meaning: A corrective action that is still open for the business service.
+    aliases:
+      - linked to open remediation
+      - has outstanding actions
+  - name: hasPostIncidentReview
+    from: BusinessService
+    to: PostIncidentReview
+    meaning: A post-incident review held for the business service.
+    aliases:
+      - includes after-action review
+      - has incident review
+  - name: hasMaterialityAssessment
+    from: Incident
+    to: MaterialityAssessment
+    meaning: The materiality assessment performed for the incident.
+    aliases:
+      - linked to materiality evaluation
+      - includes reportability assessment
+  - name: hasRegulatoryNotification
+    from: Incident
+    to: RegulatoryNotification
+    meaning: A regulatory notification associated with the incident.
+    aliases:
+      - linked to compliance notice
+      - has regulatory alert
+  - name: hasStakeholderCommunication
+    from: Incident
+    to: StakeholderCommunication
+    meaning: A stakeholder communication prepared or sent for the incident.
+    aliases:
+      - includes stakeholder update
+      - has communication notice
+  - name: hasEmergencyChange
+    from: Incident
+    to: EmergencyChange
+    meaning: An emergency change executed or proposed in response to the incident.
+    aliases:
+      - linked to urgent change
+      - includes rapid fix
+  - name: includesConfigurationItem
+    from: BusinessService
+    to: ConfigurationItem
+    meaning: A configuration item that supports or is part of the business service.
+    aliases:
+      - contains CI
+      - encompasses configuration item
+  - name: requiresApprovalFromServiceOwner
+    from: Incident
+    to: ServiceOwner
+    meaning: The service owner whose approval is required for the incident.
+    aliases:
+      - needs service owner approval
+      - requires service oversight
+  - name: recommendedResolverGroup
+    from: Incident
+    to: ResolverGroup
+    meaning: The resolver group recommended to handle the incident.
+    aliases:
+      - suggested support group
+      - advised resolver group
+  - name: usesWorkaround
+    from: Incident
+    to: Workaround
+    meaning: A workaround used to mitigate the impact of the incident.
+    aliases:
+      - applies workaround
+      - implements temporary fix
+  - name: triggersStakeholderCommunication
+    from: Incident
+    to: StakeholderCommunication
+    meaning: A stakeholder communication that the incident triggers or requires.
+    aliases:
+      - initiates stakeholder communication
+      - prompts stakeholder update
+  - name: triggersRegulatoryNotification
+    from: Incident
+    to: RegulatoryNotification
+    meaning: A regulatory notification that the incident triggers or requires.
+    aliases:
+      - initiates regulatory alert
+      - prompts compliance notification
+  - name: affectsConfigurationItem
+    from: EmergencyChange
+    to: ConfigurationItem
+    meaning: A configuration item affected by the emergency change.
+    aliases:
+      - affects CI
+      - relates to configuration item
+  - name: restoresConfigurationItem
+    from: BackupSet
+    to: ConfigurationItem
+    meaning: The configuration item that can be restored from the backup set.
+    aliases: []
+  - name: arisesFromPostIncidentReview
+    from: CorrectiveAction
+    to: PostIncidentReview
+    meaning: The post-incident review that identified or created the corrective action.
+    aliases:
+      - generated from review
+      - results from post-incident analysis
+  - name: reviewsIncident
+    from: PostIncidentReview
+    to: Incident
+    meaning: The incident examined by the post-incident review.
+    aliases:
+      - assesses incident
+      - evaluates incident
+  - name: basedOnMaterialityAssessment
+    from: RegulatoryNotification
+    to: MaterialityAssessment
+    meaning: The materiality assessment used to justify or support the regulatory notification.
+    aliases:
+      - determined by materiality evaluation
+      - linked to materiality assessment
+  - name: implementedForIncident
+    from: EmergencyChange
+    to: Incident
+    meaning: The incident for which the emergency change was implemented.
+    aliases: []
+  - name: aboutIncident
+    from: StakeholderCommunication
+    to: Incident
+    meaning: The incident that the stakeholder communication concerns.
+    aliases: []
+  - name: supportsRegulatoryNotification
+    from: Evidence
+    to: RegulatoryNotification
+    meaning: The regulatory notification supported by the collected evidence.
+    aliases: []
+  - name: affectsConfigurationItem
+    from: KnownError
+    to: ConfigurationItem
+    meaning: A configuration item affected by the known error.
+    aliases:
+      - affects CI
+      - relates to configuration item
+  - name: supportedByResolverGroup
+    from: ConfigurationItem
+    to: ResolverGroup
+    meaning: The resolver group responsible for supporting the configuration item.
+    aliases:
+      - assisted by support group
+      - managed by resolver team
+  - name: supportedByResolverGroup
+    from: BusinessService
+    to: ResolverGroup
+    meaning: The resolver group responsible for supporting the business service.
+    aliases:
+      - assisted by support group
+      - managed by resolver team
+  - name: ownedByResolverGroup
+    from: KnownError
+    to: ResolverGroup
+    meaning: The resolver group responsible for managing the known error.
+    aliases:
+      - managed by resolver team
+      - responsible group for issue
+  - name: sentToRegulator
+    from: RegulatoryNotification
+    to: Regulator
+    meaning: The regulator to which the regulatory notification is sent.
+    aliases:
+      - submitted to regulatory authority
+      - delivered to oversight body
+  - name: impactedByIncident
+    from: ConfigurationItem
+    to: Incident
+    meaning: The incident that impacts the configuration item.
+    aliases:
+      - affected by incident
+      - related to incident
+      - linked to incident
+      - affected by issue
+  - name: affectedByKnownError
+    from: ConfigurationItem
+    to: KnownError
+    meaning: The known error affecting the configuration item.
+    aliases:
+      - linked to known issue
+      - associated with known error
+      - associated with known issue
+      - related to known error
+  - name: forIncident
+    from: RegulatoryNotification
+    to: Incident
+    meaning: The incident for which the regulatory notification is prepared or submitted.
+    aliases:
+      - related to incident
+      - linked to incident report
+  - name: supportedByEvidence
+    from: RegulatoryNotification
+    to: Evidence
+    meaning: Evidence that supports the regulatory notification.
+    aliases:
+      - backed by evidence
+      - verified by documentation
+rules:
+  meetsMajorIncidentThreshold:
+    conditions:
+      - either all of the following are true: incident severity level is sev1-critical or sev2-high; at least one impacted business service is identified; and the expected duration indicates significant disruption to services
+      - or the incident commander recommends major incident declaration based on incident complexity or business impact
+  requiresRegulatoryNotification:
+    conditions:
+      - materiality assessment outcome is reportable or potentially-reportable
+      - at least one affected business service is regulatory-sensitive
+      - customer impact is significant
+      - incident has data integrity impact or availability impact
+      - a regulatory notification has not already been submitted for the incident
+  determineRecommendedResolverGroup:
+    conditions:
+      - prefer the resolver group supporting the affected configuration item
+      - "if no configuration-item-supported resolver group is available, prefer the resolver group owning the known error"
+      - "if no known-error-owned resolver group applies, prefer the resolver group supporting the affected business service"
+      - "if multiple candidate resolver groups remain, choose the one with the lowest responsePriority number"
+      - "if candidates still tie, choose the one with the best availabilityStatus in this order": "available, partially-available, constrained, unavailable"
+  determineRequiredServiceOwnerApproval:
+    conditions:
+      - the primary service owner of each affected business service must approve
+      - "if multiple business services are affected, all affected services' primary service owners must approve"
+      - "consider the approval context, including emergency change, major-incident declaration, incident closure, or regulatory matters"
+  canSendStakeholderCommunication:
+    conditions:
+      - stakeholder communication audience is recorded
+      - stakeholder communication message content is recorded
+      - stakeholder communication owner is recorded
+      - stakeholder communication approvalState is approved
+      - the message content matches the latest verified incident state
+  canContainIncident:
+    conditions:
+      - incident status is acknowledged or investigating
+      - containment scope is documented
+      - expected side effects are documented
+  canExecuteEmergencyChange:
+    conditions:
+      - "the emergency change is linked to an incident whose status is new, acknowledged, investigating, contained, recovering, or monitoring"
+      - at least one affected configuration item is linked to the emergency change
+      - the implementation plan is documented
+      - the backout plan is documented
+      - riskAccepted is true
+  canSubmitRegulatoryNotification:
+    conditions:
+      - the linked materiality assessment outcome is reportable
+      - the regulatory notification is linked to an incident and a regulator
+      - all required fields and supporting evidence are complete
+      - the regulatory notification status is approved
+      - the regulatory notification is submitted before its due date
+  canCloseIncident:
+    conditions:
+      - incident status is resolved or monitoring
+      - all impacted business services have healthy healthState or an accepted residual condition
+      - resolution and restoration evidence are recorded
+      - required stakeholder communications are complete
+      - "for a major or cybersecurity incident, a post-incident review is scheduled or completed"
+  canRestoreBackup:
+    conditions:
+      - backup set status is successful or verified
+      - the backup set protects the target configuration item
+      - the restore point is approved for restoration
+  canIsolateConfigurationItem:
+    conditions:
+      - the configuration item is linked to an active incident or a known error
+      - the isolation impact is documented
+      - a rollback or reconnection method is available
+actions:
+  acknowledgeAlert:
+    input: Alert
+    preconditions: []
+    effect: The alert status changes from new to acknowledged and the acknowledgement timestamp is recorded.
+    verification: Confirm the alert status is acknowledged and the acknowledgement timestamp is present.
+  declareMajorIncident:
+    input: Incident
+    preconditions:
+      - meetsMajorIncidentThreshold
+    effect: "The incident majorIncidentDeclared property is set to true, the incident is marked as a major incident, the declaration time is recorded in majorIncidentDeclaredAt, and enhanced coordination and communication cadence are initiated."
+    verification: "Confirm the incident is marked as a major incident, the majorIncidentDeclared property is true, the incident commander is recorded, and majorIncidentDeclaredAt is present."
+  assignIncidentToResolverGroup:
+    input: Incident
+    preconditions: []
+    effect: The incident is assigned to the specified resolver group.
+    verification: Confirm the incident record shows the resolver group assignment.
+  containIncident:
+    input: Incident
+    preconditions:
+      - canContainIncident
+    effect: Approved containment steps are executed and the incident status changes to contained when containment is verified.
+    verification: Confirm the incident status is contained and the defined containment indicators show reduced impact or risk.
+  executeEmergencyChange:
+    input: EmergencyChange
+    preconditions:
+      - canExecuteEmergencyChange
+    effect: The emergency change is implemented and its status is updated to reflect execution.
+    verification: "Confirm technical checks succeed, service health is verified, and implementation evidence is recorded."
+  sendStakeholderCommunication:
+    input: StakeholderCommunication
+    preconditions: []
+    effect: "The stakeholder communication status is set to sent, the communication is sent, the sentAt timestamp is recorded, and the deliveryStatus is updated to reflect delivery outcome."
+    verification: "Confirm the stakeholder communication status is sent, the deliveryStatus shows successful delivery, and the final message is archived."
+  submitRegulatoryNotification:
+    input: RegulatoryNotification
+    preconditions:
+      - canSubmitRegulatoryNotification
+    effect: The regulatory notification status changes to submitted and the submission receipt is stored.
+    verification: Confirm the regulatory notification status is submitted and the submission receipt is retained.
+  closeIncident:
+    input: Incident
+    preconditions:
+      - canCloseIncident
+    effect: The incident status changes to closed and the closedAt timestamp is recorded.
+    verification: "Confirm the incident status is closed and the closure conditions, including recorded evidence and impacted service health states, are satisfied."
+  restoreBackup:
+    input: BackupSet
+    preconditions:
+      - canRestoreBackup
+    effect: The backup data is restored to the target configuration item according to the approved restoration point and procedures.
+    verification: "Confirm the target configuration item's data integrity and functionality after restore."
+  isolateConfigurationItem:
+    input: ConfigurationItem
+    preconditions:
+      - canIsolateConfigurationItem
+    effect: The configuration item is isolated from defined networks or dependencies to prevent impact on other services.
+    verification: Confirm the configuration item is isolated and service health indicators are checked during or after isolation.
