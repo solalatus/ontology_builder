@@ -113,6 +113,95 @@ export async function createEdgeViaConnectMode(page, ax, ay, bx, by, relation) {
   await page.waitForSelector(".kg-inline-input", { state: "detached" });
 }
 
+// Waits until the canvas has actually repainted at least once since `since`
+// (a frame count previously read from renderFrame()).
+//
+// render() is not called synchronously by the actions that mutate state — they
+// set a dirty flag and a requestAnimationFrame loop picks it up (index.html,
+// `function loop()`). So "click, then read the canvas" needs a wait, and the
+// pattern this replaces was `waitForTimeout(150)`: a guess that a frame will
+// have landed within 150ms. On a loaded machine running the whole suite it
+// sometimes has not, and the test fails having asserted nothing about the app.
+//
+// This is strictly stronger. It waits for the event the old form was guessing
+// at, so it cannot pass early, and it stops as soon as the frame lands rather
+// than always paying the full 150ms.
+export const renderFrame = (page) => page.evaluate(() => window.__kg.perf.getRenderStats().frames);
+
+export async function waitForRender(page, since, { timeout = 5000 } = {}) {
+  await page.waitForFunction((n) => window.__kg.perf.getRenderStats().frames > n, since, { timeout });
+}
+
+// Click, wait for the whole action to have landed: the state mutation (which
+// runs synchronously inside the click handler) and the repaint that follows it.
+// `settle` runs the pair in one call for any click that redraws the canvas.
+export async function settle(page, fn) {
+  const before = await renderFrame(page);
+  await fn();
+  await waitForRender(page, before);
+}
+
+// Waits until `downloads` (the array a test's own download page helper fills
+// from page.on("download")) holds at least `count` entries.
+//
+// Replaces `waitForTimeout(250)` after a Save Version click. That form asserted
+// nothing: if the browser had not raised the download events yet, the test read
+// an empty array and failed on a missing file that was merely late. This waits
+// for the events themselves, and on timeout says how many actually arrived.
+export async function waitForDownloads(downloads, count, { timeout = 5000 } = {}) {
+  const deadline = Date.now() + timeout;
+  while (downloads.length < count) {
+    if (Date.now() > deadline) {
+      throw new Error(`expected ${count} download(s), saw ${downloads.length}: ${downloads.map((d) => d.suggestedFilename()).join(", ")}`);
+    }
+    await new Promise((r) => setTimeout(r, 20));
+  }
+  return downloads;
+}
+
+// Applies a pending import dialog through the real Merge/Replace button and
+// waits for the import to have fully landed.
+//
+// runPendingImport() (index.html) hides the overlay *before* committing, but
+// both happen inside one click handler, so the hidden overlay is only ever
+// observable from outside once the commit has also run — waiting for it is a
+// real signal, not a race. The repaint that follows is separate, hence the
+// frame wait.
+export async function applyImport(page, buttonId = "#import-merge") {
+  const before = await renderFrame(page);
+  await page.click(buttonId);
+  await page.waitForSelector("#import-overlay", { state: "hidden" });
+  await waitForRender(page, before);
+}
+
+// Waits until an element's box has stopped moving — i.e. the CSS transition
+// that was animating it has finished.
+//
+// Replaces `waitForTimeout(150)` after toggling something that shifts layout
+// (the agent panel's `--agent-panel-offset`, for one). A fixed sleep both
+// over-waits when the transition is quick and, on a loaded machine, samples
+// mid-flight geometry and asserts against a position the element was only
+// passing through. This polls until `stableFrames` consecutive animation
+// frames report an identical box, so it observes the settled layout by
+// construction.
+export async function waitForGeometrySettled(page, selector, { stableFrames = 3, timeout = 5000 } = {}) {
+  await page.waitForFunction(
+    ({ selector, stableFrames }) => {
+      const el = document.querySelector(selector);
+      if (!el) return false;
+      const r = el.getBoundingClientRect();
+      const key = `${r.x},${r.y},${r.width},${r.height}`;
+      window.__kgBoxProbe = window.__kgBoxProbe || {};
+      const prev = window.__kgBoxProbe[selector];
+      window.__kgBoxProbe[selector] = prev && prev.key === key ? { key, n: prev.n + 1 } : { key, n: 1 };
+      return window.__kgBoxProbe[selector].n >= stableFrames;
+    },
+    { selector, stableFrames },
+    { timeout, polling: "raf" },
+  );
+  await page.evaluate((s) => { if (window.__kgBoxProbe) delete window.__kgBoxProbe[s]; }, selector);
+}
+
 // Waits until a computed style (optionally of a pseudo-element) settles on
 // `expected`, then returns it.
 //

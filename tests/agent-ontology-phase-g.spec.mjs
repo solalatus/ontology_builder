@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { withPage, addNodeViaDblClick } from "./lib/page.mjs";
+import { withPage, addNodeViaDblClick, applyImport } from "./lib/page.mjs";
 
 // Agent Ontology, Phase G (agent_ontology_todo.md): Domain Model YAML import
 // — the inverse of Phase F's export. Deliberately more aggressive than the
@@ -64,8 +64,7 @@ const WORKED_EXAMPLE_YAML = [
 test("Merge on an empty graph reproduces a full worked-example YAML exactly — classes, relationships, rules, and actions all land correctly", async () => {
   await withPage(async (page) => {
     await dropYaml(page, WORKED_EXAMPLE_YAML);
-    await page.click("#import-merge");
-    await page.waitForTimeout(150);
+    await applyImport(page, "#import-merge");
 
     const { nodes, edges, rules, actions } = await page.evaluate(() => ({
       nodes: window.__kg.state.nodes,
@@ -147,8 +146,7 @@ const INLINE_LIST_WORKED_EXAMPLE_YAML = [
 test("Merge parses inline flow-list syntax (\"aliases: [bill]\", \"preconditions: [canApproveInvoice]\") the same as block-list syntax", async () => {
   await withPage(async (page) => {
     await dropYaml(page, INLINE_LIST_WORKED_EXAMPLE_YAML);
-    await page.click("#import-merge");
-    await page.waitForTimeout(150);
+    await applyImport(page, "#import-merge");
 
     const { nodes, rules, actions } = await page.evaluate(() => ({
       nodes: window.__kg.state.nodes,
@@ -189,8 +187,7 @@ const FLOW_MAP_RELATIONSHIP_WORKED_EXAMPLE_YAML = [
 test("Merge parses a relationship written as a flow-map list item (\"- {name: r, from: A, to: B}\") the same as block-style syntax (issue #76)", async () => {
   await withPage(async (page) => {
     await dropYaml(page, FLOW_MAP_RELATIONSHIP_WORKED_EXAMPLE_YAML);
-    await page.click("#import-merge");
-    await page.waitForTimeout(150);
+    await applyImport(page, "#import-merge");
 
     const { nodes, edges } = await page.evaluate(() => ({
       nodes: window.__kg.state.nodes,
@@ -215,8 +212,7 @@ test("An inline flow-list item that's a quoted string containing a comma doesn't
       "",
     ].join("\n");
     await dropYaml(page, text);
-    await page.click("#import-merge");
-    await page.waitForTimeout(150);
+    await applyImport(page, "#import-merge");
 
     const invoice = (await page.evaluate(() => window.__kg.state.nodes))[0];
     assert.deepEqual(invoice.aliases, ["bill, formal", "memo"]);
@@ -226,12 +222,10 @@ test("An inline flow-list item that's a quoted string containing a comma doesn't
 test("Merge is idempotent — re-importing the exact same file produces no duplicates", async () => {
   await withPage(async (page) => {
     await dropYaml(page, WORKED_EXAMPLE_YAML);
-    await page.click("#import-merge");
-    await page.waitForTimeout(150);
+    await applyImport(page, "#import-merge");
 
     await dropYaml(page, WORKED_EXAMPLE_YAML);
-    await page.click("#import-merge");
-    await page.waitForTimeout(150);
+    await applyImport(page, "#import-merge");
 
     const { nodes, edges, rules, actions } = await page.evaluate(() => ({
       nodes: window.__kg.state.nodes.length,
@@ -271,8 +265,7 @@ test("Merge overwrites a matched class's meaning/aliases/properties wholesale �
       "",
     ].join("\n");
     await dropYaml(page, text);
-    await page.click("#import-merge");
-    await page.waitForTimeout(150);
+    await applyImport(page, "#import-merge");
 
     const nodes = await page.evaluate(() => window.__kg.state.nodes);
     assert.equal(nodes.length, 1, "matched by label, not duplicated");
@@ -304,8 +297,7 @@ test("Merge never removes a class/rule/action that isn't mentioned in the file �
       "",
     ].join("\n");
     await dropYaml(page, text);
-    await page.click("#import-merge");
-    await page.waitForTimeout(150);
+    await applyImport(page, "#import-merge");
 
     const labels = await page.evaluate(() => window.__kg.state.nodes.map((n) => n.label));
     assert.deepEqual(labels.sort(), ["Newcomer", "Outsider"]);
@@ -317,8 +309,7 @@ test("Merge never removes a class/rule/action that isn't mentioned in the file �
 test("Replace mode removes classes/relationships/rules/actions absent from the file, in exactly one undo step, fully reversible", async () => {
   await withPage(async (page) => {
     await dropYaml(page, WORKED_EXAMPLE_YAML);
-    await page.click("#import-merge");
-    await page.waitForTimeout(150);
+    await applyImport(page, "#import-merge");
     await page.evaluate(() => {
       window.__kg.actions.createNode(900, 900, "ToBeRemoved");
       window.__kg.markDirty();
@@ -338,8 +329,7 @@ test("Replace mode removes classes/relationships/rules/actions absent from the f
       "",
     ].join("\n");
     await dropYaml(page, trimmed);
-    await page.click("#import-replace");
-    await page.waitForTimeout(150);
+    await applyImport(page, "#import-replace");
 
     const after = await page.evaluate(() => window.__kg.history.past.length);
     assert.equal(after, before + 1, "Replace is exactly one undo step regardless of how much changed");
@@ -389,8 +379,7 @@ test("a matched relationship gets its meaning overwritten and its relation label
       "",
     ].join("\n");
     await dropYaml(page, text);
-    await page.click("#import-merge");
-    await page.waitForTimeout(150);
+    await applyImport(page, "#import-merge");
 
     const edges = await page.evaluate(() => window.__kg.state.edges);
     assert.equal(edges.length, 1, "matched by (from, to, derived camelCase name) — not duplicated");
@@ -417,8 +406,7 @@ test("a relationship referencing a class not declared in the file and not on can
       "",
     ].join("\n");
     await dropYaml(page, text);
-    await page.click("#import-merge");
-    await page.waitForTimeout(150);
+    await applyImport(page, "#import-merge");
 
     const nodes = await page.evaluate(() => window.__kg.state.nodes.map((n) => n.label));
     assert.deepEqual(nodes, ["A"]);
@@ -438,7 +426,7 @@ test("Cancel on the import dialog applies nothing", async () => {
   await withPage(async (page) => {
     await dropYaml(page, WORKED_EXAMPLE_YAML);
     await page.click("#import-cancel");
-    await page.waitForTimeout(100);
+    await page.waitForSelector("#import-overlay", { state: "hidden" });
     assert.equal(await page.evaluate(() => window.__kg.state.nodes.length), 0);
     const overlayDisplay = await page.evaluate(() => getComputedStyle(document.getElementById("import-overlay")).display);
     assert.equal(overlayDisplay, "none");
@@ -476,8 +464,7 @@ test("commit order resolves references regardless of the YAML file's own section
       "",
     ].join("\n");
     await dropYaml(page, text);
-    await page.click("#import-merge");
-    await page.waitForTimeout(150);
+    await applyImport(page, "#import-merge");
 
     const { nodes, edges, rules, actions } = await page.evaluate(() => ({
       nodes: window.__kg.state.nodes,
@@ -505,8 +492,7 @@ test("unicode and quoted-scalar class names/meanings survive an export-then-reim
 
     await page.evaluate(() => { window.__kg.state.nodes.length = 0; window.__kg.markDirty(); });
     await dropYaml(page, yaml);
-    await page.click("#import-merge");
-    await page.waitForTimeout(150);
+    await applyImport(page, "#import-merge");
 
     const node = await page.evaluate(() => window.__kg.state.nodes[0]);
     assert.equal(node.label, 'Café: "Müller" #1 日本語');
@@ -518,8 +504,7 @@ test("unicode and quoted-scalar class names/meanings survive an export-then-reim
 test("malformed/truncated YAML degrades gracefully — missing sections default to empty, no crash", async () => {
   await withPage(async (page) => {
     await dropYaml(page, "classes:\n  Only:\n    meaning: null\n    aliases: []\n    properties: {}\n", "truncated.domain.yaml");
-    await page.click("#import-merge");
-    await page.waitForTimeout(150);
+    await applyImport(page, "#import-merge");
 
     const nodes = await page.evaluate(() => window.__kg.state.nodes.map((n) => n.label));
     assert.deepEqual(nodes, ["Only"]);
@@ -544,7 +529,7 @@ test("a completely empty/garbage file is reported, with no import action offered
     assert.equal(await page.locator("#import-replace").isVisible(), false);
 
     await page.click("#import-cancel");
-    await page.waitForTimeout(100);
+    await page.waitForSelector("#import-overlay", { state: "hidden" });
     assert.equal(await page.evaluate(() => window.__kg.state.nodes.length), 0);
     assert.equal(await page.evaluate(() => window.__kg.state.edges.length), 0);
   });
@@ -563,8 +548,7 @@ test("the diff-summary counts match what actually happens on commit", async () =
     await dropYaml(page, WORKED_EXAMPLE_YAML);
     const summary = await importSummary(page);
     assert.match(summary, /Merge: 5 item\(s\) would be added, 0 existing item\(s\) would be updated/);
-    await page.click("#import-merge");
-    await page.waitForTimeout(150);
+    await applyImport(page, "#import-merge");
 
     // Re-importing the same file again: everything now matches (0 added, 5 changed).
     await dropYaml(page, WORKED_EXAMPLE_YAML);

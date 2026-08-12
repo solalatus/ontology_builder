@@ -4162,7 +4162,11 @@ function edgeBoundingRect(anchors, control) {
 // shrinks the drawn set when zoomed into a small region of a large graph,
 // rather than only inferring it indirectly from wall-clock timing (noisy
 // in CI) — see Phase 9 in TODO.md.
-const renderStats = { nodesDrawn: 0, nodesTotal: 0, edgesDrawn: 0, edgesTotal: 0 };
+// `frames` counts completed render() calls. It exists so a test can wait for
+// "the canvas has caught up with state" instead of sleeping a fixed number of
+// milliseconds and hoping (issue #91): read it, act, then wait for it to move.
+// Nothing in the app reads it.
+const renderStats = { nodesDrawn: 0, nodesTotal: 0, edgesDrawn: 0, edgesTotal: 0, frames: 0 };
 
 // ---------------------------------------------------------------------------
 // Render loop — dirty-flag driven, not a constant loop.
@@ -4519,6 +4523,7 @@ function render() {
 
   updateSelectionToolbar();
   updateClearButton();
+  renderStats.frames++;
 }
 
 function loop() {

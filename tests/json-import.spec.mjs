@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import path from "node:path";
 import fs from "node:fs";
 import { fileURLToPath } from "node:url";
-import { withPage, addNodeViaDblClick, createEdgeViaConnectMode, APP_URL } from "./lib/page.mjs";
+import { withPage, addNodeViaDblClick, createEdgeViaConnectMode, applyImport, settle, waitForDownloads, APP_URL } from "./lib/page.mjs";
 import { launchChromium } from "./lib/browser.mjs";
 
 // Canonical JSON import — spec.md §5.5.
@@ -97,15 +97,14 @@ test("Save Version's own JSON output re-imports into an identical graph", async 
     });
 
     await page.click("#btn-save-version");
-    await page.waitForTimeout(250);
+    await waitForDownloads(downloads, 3);
     const jsonDl = downloads.find((d) => d.suggestedFilename().endsWith(".json"));
     assert.ok(jsonDl, "Save Version must have written a .json");
     const exported = await readDownload(jsonDl);
     const before = await graphState(page);
 
     await dropText(page, exported, jsonDl.suggestedFilename());
-    await page.click("#import-replace");
-    await page.waitForTimeout(150);
+    await applyImport(page, "#import-replace");
     const after = await graphState(page);
 
     assert.deepEqual(after.nodes, before.nodes, "nodes must survive the round trip untouched");
@@ -121,8 +120,7 @@ test("Save Version's own JSON output re-imports into an identical graph", async 
 test("Replace restores coordinates exactly rather than re-laying out", async () => {
   await withPage(async (page) => {
     await importFixture(page, "accented-roundtrip.json");
-    await page.click("#import-merge");
-    await page.waitForTimeout(150);
+    await applyImport(page, "#import-merge");
 
     const nodes = await page.evaluate(() => window.__kg.state.nodes);
     const byLabel = Object.fromEntries(nodes.map((n) => [n.label, n]));
@@ -140,8 +138,7 @@ test("Replace restores coordinates exactly rather than re-laying out", async () 
 test("Replace preserves ids, so edges and actions keep pointing at the right things", async () => {
   await withPage(async (page) => {
     await importFixture(page, "accented-roundtrip.json");
-    await page.click("#import-merge");
-    await page.waitForTimeout(150);
+    await applyImport(page, "#import-merge");
 
     const s = await graphState(page);
     assert.deepEqual(s.nodes.map((n) => n.id), ["n1", "n2", "n7"]);
@@ -158,8 +155,7 @@ test("Replace preserves ids, so edges and actions keep pointing at the right thi
 test("Accented text, aliases and property allowed-lists all survive intact", async () => {
   await withPage(async (page) => {
     await importFixture(page, "accented-roundtrip.json");
-    await page.click("#import-merge");
-    await page.waitForTimeout(150);
+    await applyImport(page, "#import-merge");
 
     const s = await graphState(page);
     const q = s.nodes.find((n) => n.label === "Ügyfélkérdés");
@@ -191,8 +187,7 @@ test("A restore continues the file's version series instead of starting a new gr
     await importFixture(page, "accented-roundtrip.json");
     // Empty canvas, so Replace is hidden and the single offered action is
     // itself the full restore — see "On an empty canvas..." above.
-    await page.click("#import-merge");
-    await page.waitForTimeout(150);
+    await applyImport(page, "#import-merge");
 
     const meta = await page.evaluate(() => window.__kg.state.meta);
     assert.equal(meta.graph_id, "3f2a1c40-0000-4000-8000-abcdefabcdef");
@@ -201,7 +196,7 @@ test("A restore continues the file's version series instead of starting a new gr
 
     // The next Save Version must continue at v0008, not restart at v0001.
     await page.click("#btn-save-version");
-    await page.waitForTimeout(250);
+    await waitForDownloads(downloads, 3);
     assert.equal(downloads.length, 3);
     const names = await page.evaluate(() => window.__kg.getRecordedDownloadFilenames());
     assert.equal(names.length, 3);
@@ -212,8 +207,7 @@ test("A restore continues the file's version series instead of starting a new gr
 test("The graph name comes back from meta.graph_name", async () => {
   await withPage(async (page) => {
     await importFixture(page, "accented-roundtrip.json");
-    await page.click("#import-merge");
-    await page.waitForTimeout(150);
+    await applyImport(page, "#import-merge");
 
     assert.equal(await page.evaluate(() => window.__kg.state.graphName), "Ügyfélkérdés ontológia");
     assert.equal(await page.locator("#graph-title").textContent(), "Ügyfélkérdés ontológia");
@@ -223,8 +217,7 @@ test("The graph name comes back from meta.graph_name", async () => {
 test("An export written before meta.graph_name recovers its name from the filename", async () => {
   await withPage(async (page) => {
     await importFixture(page, "legacy-named_v0007_2026-03-04T0506Z.json");
-    await page.click("#import-merge");
-    await page.waitForTimeout(150);
+    await applyImport(page, "#import-merge");
 
     assert.equal(await page.evaluate(() => window.__kg.state.graphName), "legacy-named");
   });
@@ -235,8 +228,7 @@ test("A filename that doesn't match the versioned convention leaves the name alo
     const text = readFixture("legacy-named_v0007_2026-03-04T0506Z.json");
     const nameBefore = await page.evaluate(() => window.__kg.state.graphName);
     await dropText(page, text, "some-random-export.json");
-    await page.click("#import-merge");
-    await page.waitForTimeout(150);
+    await applyImport(page, "#import-merge");
     assert.equal(await page.evaluate(() => window.__kg.state.graphName), nameBefore);
   });
 });
@@ -249,8 +241,7 @@ test("A filename that doesn't match the versioned convention leaves the name alo
 test("Id counters are lifted clear of the restored ids", async () => {
   await withPage(async (page) => {
     await importFixture(page, "accented-roundtrip.json");
-    await page.click("#import-merge");
-    await page.waitForTimeout(150);
+    await applyImport(page, "#import-merge");
 
     // Near the canvas's own corner, not its old (700, 500) near-center spot:
     // fitViewToContent() (issue #64 follow-up) now recenters/rescales the
@@ -284,8 +275,7 @@ test("On an empty canvas the only offered action is the full restore", async () 
     assert.equal(await page.locator("#import-replace").isVisible(), false);
     assert.match(await page.locator("#import-summary").textContent(), /exactly as saved/i);
 
-    await page.click("#import-merge");
-    await page.waitForTimeout(150);
+    await applyImport(page, "#import-merge");
 
     const s = await graphState(page);
     assert.deepEqual(s.nodes.map((n) => n.id), ["n1", "n2", "n7"], "ids must be preserved, not regenerated");
@@ -305,8 +295,7 @@ test("Merge keeps an existing node's position but takes the file's content", asy
     const placed = await page.evaluate(() => ({ ...window.__kg.state.nodes[0] }));
 
     await importFixture(page, "accented-roundtrip.json");
-    await page.click("#import-merge");
-    await page.waitForTimeout(150);
+    await applyImport(page, "#import-merge");
 
     const node = await page.evaluate(() => window.__kg.state.nodes.find((n) => n.label === "Ügyfélkérdés"));
     assert.equal(node.id, placed.id, "a label match must update in place, not duplicate");
@@ -322,8 +311,7 @@ test("Merge uses a new node's saved position when that space is free", async () 
     // Placed far away from every fixture coordinate, so nothing collides.
     await addNodeViaDblClick(page, 900, 700, "Máshol");
     await importFixture(page, "accented-roundtrip.json");
-    await page.click("#import-merge");
-    await page.waitForTimeout(150);
+    await applyImport(page, "#import-merge");
 
     const node = await page.evaluate(() => window.__kg.state.nodes.find((n) => n.label === "Dokumentáció"));
     assert.equal(node.x, 400);
@@ -340,8 +328,7 @@ test("Merge never drops a new box exactly on top of an existing one", async () =
       n.w = 160; n.h = 60;
     });
     await importFixture(page, "accented-roundtrip.json");
-    await page.click("#import-merge");
-    await page.waitForTimeout(150);
+    await applyImport(page, "#import-merge");
 
     const nodes = await page.evaluate(() => window.__kg.state.nodes);
     const incoming = nodes.find((n) => n.label === "Ügyfélkérdés");
@@ -355,13 +342,11 @@ test("Merge never drops a new box exactly on top of an existing one", async () =
 test("Merge adds nothing twice when the same file is imported again", async () => {
   await withPage(async (page) => {
     await importFixture(page, "accented-roundtrip.json");
-    await page.click("#import-merge");
-    await page.waitForTimeout(150);
+    await applyImport(page, "#import-merge");
     const first = await graphState(page);
 
     await importFixture(page, "accented-roundtrip.json");
-    await page.click("#import-merge");
-    await page.waitForTimeout(150);
+    await applyImport(page, "#import-merge");
     const second = await graphState(page);
 
     assert.equal(second.nodes.length, first.nodes.length);
@@ -375,8 +360,7 @@ test("Merge leaves content the file doesn't mention alone", async () => {
   await withPage(async (page) => {
     await addNodeViaDblClick(page, 800, 600, "Sajátom");
     await importFixture(page, "accented-roundtrip.json");
-    await page.click("#import-merge");
-    await page.waitForTimeout(150);
+    await applyImport(page, "#import-merge");
 
     const labels = await page.evaluate(() => window.__kg.state.nodes.map((n) => n.label));
     assert.ok(labels.includes("Sajátom"), "merge must never remove anything");
@@ -395,8 +379,7 @@ test("Merge into a non-empty canvas leaves the existing graph's identity untouch
     const before = await page.evaluate(() => window.__kg.state.meta);
 
     await importFixture(page, "accented-roundtrip.json");
-    await page.click("#import-merge");
-    await page.waitForTimeout(150);
+    await applyImport(page, "#import-merge");
 
     const after = await page.evaluate(() => window.__kg.state.meta);
     assert.deepEqual(after, before, "merging into a non-empty canvas must never adopt the file's own graph_id/version");
@@ -425,8 +408,7 @@ test("Replace discards content the file doesn't mention", async () => {
   await withPage(async (page) => {
     await addNodeViaDblClick(page, 800, 600, "Sajátom");
     await importFixture(page, "accented-roundtrip.json");
-    await page.click("#import-replace");
-    await page.waitForTimeout(150);
+    await applyImport(page, "#import-replace");
 
     const labels = await page.evaluate(() => window.__kg.state.nodes.map((n) => n.label));
     assert.deepEqual(labels, ["Ügyfélkérdés", "Dokumentáció", "Válaszvázlat"]);
@@ -443,11 +425,9 @@ test("A full JSON restore is a single undo step, name and version included", asy
     const before = await graphState(page);
 
     await importFixture(page, "accented-roundtrip.json");
-    await page.click("#import-replace");
-    await page.waitForTimeout(150);
+    await applyImport(page, "#import-replace");
 
-    await page.click("#btn-undo");
-    await page.waitForTimeout(100);
+    await settle(page, () => page.click("#btn-undo"));
     const after = await graphState(page);
 
     assert.deepEqual(after.nodes.map((n) => n.label), before.nodes.map((n) => n.label));
@@ -461,12 +441,9 @@ test("Redo re-applies the restore", async () => {
   await withPage(async (page) => {
     await addNodeViaDblClick(page, 300, 300, "Eredeti");
     await importFixture(page, "accented-roundtrip.json");
-    await page.click("#import-replace");
-    await page.waitForTimeout(150);
-    await page.click("#btn-undo");
-    await page.waitForTimeout(100);
-    await page.click("#btn-redo");
-    await page.waitForTimeout(100);
+    await applyImport(page, "#import-replace");
+    await settle(page, () => page.click("#btn-undo"));
+    await settle(page, () => page.click("#btn-redo"));
 
     const labels = await page.evaluate(() => window.__kg.state.nodes.map((n) => n.label));
     assert.deepEqual(labels, ["Ügyfélkérdés", "Dokumentáció", "Válaszvázlat"]);
@@ -487,8 +464,7 @@ test("A dangling edge is dropped with a warning instead of breaking the import",
     await dropText(page, JSON.stringify(doc), "damaged.json");
     const summary = await page.locator("#import-summary").textContent();
     assert.match(summary, /dangling/i);
-    await page.click("#import-merge");
-    await page.waitForTimeout(150);
+    await applyImport(page, "#import-merge");
 
     const s = await graphState(page);
     assert.equal(s.nodes.length, 1);
@@ -500,8 +476,7 @@ test("A duplicated node id is repaired rather than allowed to shadow", async () 
   await withPage(async (page) => {
     const doc = { nodes: [{ id: "n1", label: "A" }, { id: "n1", label: "B" }] };
     await dropText(page, JSON.stringify(doc), "dupes.json");
-    await page.click("#import-merge");
-    await page.waitForTimeout(150);
+    await applyImport(page, "#import-merge");
 
     const ids = await page.evaluate(() => window.__kg.state.nodes.map((n) => n.id));
     assert.equal(new Set(ids).size, 2, `ids must stay unique: ${ids}`);
@@ -512,8 +487,7 @@ test("A node with a null width is restored at the default size, not zero-width",
   await withPage(async (page) => {
     const doc = { nodes: [{ id: "n1", label: "A", x: 10, y: 10, w: null, h: null }] };
     await dropText(page, JSON.stringify(doc), "nullsize.json");
-    await page.click("#import-merge");
-    await page.waitForTimeout(150);
+    await applyImport(page, "#import-merge");
 
     const node = await page.evaluate(() => window.__kg.state.nodes[0]);
     assert.ok(node.w > 0, "a zero-width box is invisible and unclickable");
@@ -525,8 +499,7 @@ test("Nodes with no label are skipped, the rest still import", async () => {
   await withPage(async (page) => {
     const doc = { nodes: [{ id: "n1" }, { id: "n2", label: "Kept" }] };
     await dropText(page, JSON.stringify(doc), "partial.json");
-    await page.click("#import-merge");
-    await page.waitForTimeout(150);
+    await applyImport(page, "#import-merge");
 
     const labels = await page.evaluate(() => window.__kg.state.nodes.map((n) => n.label));
     assert.deepEqual(labels, ["Kept"]);
@@ -540,8 +513,7 @@ test("An action pointing at a class the file doesn't contain imports without it"
       actions: [{ id: "a1", name: "act", inputClassId: "n99", preconditions: ["r99"], effect: "e", verification: "v" }],
     };
     await dropText(page, JSON.stringify(doc), "orphan-action.json");
-    await page.click("#import-merge");
-    await page.waitForTimeout(150);
+    await applyImport(page, "#import-merge");
 
     const action = await page.evaluate(() => window.__kg.state.actions[0]);
     assert.equal(action.inputClassId, null);
@@ -590,8 +562,8 @@ test("A large graph survives the round trip", async () => {
       doc.edges.push({ id: `e${i}`, source: `n${i}`, target: `n${i + 1}`, relation: "next", directed: true, meaning: null, aliases: [] });
     }
     await dropText(page, JSON.stringify(doc), "big_v0001_2026-01-01T0000Z.json");
-    await page.click("#import-merge"); // empty canvas — this is the restore path
-    await page.waitForTimeout(400);
+    // empty canvas — this is the restore path
+    await applyImport(page, "#import-merge");
 
     const s = await graphState(page);
     assert.equal(s.nodes.length, 200);
