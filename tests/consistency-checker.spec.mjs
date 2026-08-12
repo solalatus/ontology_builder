@@ -324,14 +324,57 @@ test("the panel retranslates live on a language toggle", async () => {
 // Tier C -- the optional model pass
 // ---------------------------------------------------------------------------
 
-test("the model pass is off by default, and its control is hidden until enabled", async () => {
+// Issue #89 switched this default from off to on. The evaluation behind that
+// is in tests/evals/results/baselines/tier-c/TIER_C_REPORT.md; this test pins
+// the resulting behavior in both directions, and the one below pins the
+// property that makes "on by default" defensible at all -- that being enabled
+// is not the same as being used.
+test("the model pass is on by default, and the toggle turns it back off", async () => {
   await withPage(async (page) => {
-    assert.equal(await page.evaluate(() => window.__kg.consistency.llm.isEnabled()), false);
+    assert.equal(await page.evaluate(() => window.__kg.consistency.llm.isEnabled()), true);
     await page.evaluate(() => window.__kg.consistency.open());
-    assert.equal(await page.locator("#consistency-llm-run").isVisible(), false);
-    await page.evaluate(() => { window.__kg.consistency.llm.setEnabled(true); window.__kg.consistency.close(); window.__kg.consistency.open(); });
     assert.equal(await page.locator("#consistency-llm-run").isVisible(), true);
     assert.equal(await page.locator("#consistency-llm-run").isDisabled(), true, "unusable without a connected agent");
+    assert.equal(await page.locator("#consistency-llm-toggle").isChecked(), true, "the dialog's toggle must reflect the default");
+
+    await page.evaluate(() => { window.__kg.consistency.llm.setEnabled(false); window.__kg.consistency.close(); window.__kg.consistency.open(); });
+    assert.equal(await page.evaluate(() => window.__kg.consistency.llm.isEnabled()), false);
+    assert.equal(await page.locator("#consistency-llm-run").isVisible(), false, "turning it off must hide the control again");
+    assert.equal(await page.locator("#consistency-llm-toggle").isChecked(), false);
+  });
+});
+
+test("turning it off persists across a reload — the default only applies to a profile that has never chosen", async () => {
+  await withPage(async (page) => {
+    await page.evaluate(() => window.__kg.consistency.llm.setEnabled(false));
+    await page.reload();
+    await page.waitForFunction(() => Boolean(window.__kg));
+    assert.equal(await page.evaluate(() => window.__kg.consistency.llm.isEnabled()), false,
+      "an explicit off must survive; otherwise the default would silently re-enable it every visit");
+    // ...and an explicit on is stored too, not just implied by the default.
+    await page.evaluate(() => window.__kg.consistency.llm.setEnabled(true));
+    assert.equal(await page.evaluate(() => localStorage.getItem(window.__kg.consistency.llm.storageKey)), "1");
+  });
+});
+
+// The load-bearing claim of the default-on decision (issue #89's report §6):
+// enabling the pass shows a button, it does not send anything. A default that
+// made an outbound call on load would contradict the app's whole premise, so
+// this asserts no request is made without a click.
+test("being enabled by default sends nothing — no call happens until the user asks for one", async () => {
+  await withPage(async (page) => {
+    const requests = [];
+    await page.route("**/v1/**", (route) => { requests.push(route.request().url()); route.abort(); });
+
+    assert.equal(await page.evaluate(() => window.__kg.consistency.llm.isEnabled()), true);
+    await page.evaluate(() => window.__kg.actions.createNode(0, 0, "Invoice"));
+    await page.evaluate(() => window.__kg.consistency.open());
+    await page.evaluate(() => window.__kg.consistency.close());
+    await page.evaluate(() => window.__kg.consistency.open());
+
+    assert.deepEqual(requests, [], "opening the panel with the pass enabled must not call anything");
+    assert.deepEqual(await page.evaluate(() => window.__kg.consistency.llm.results()), [],
+      "and no model findings should exist without a run");
   });
 });
 

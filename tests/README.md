@@ -128,8 +128,9 @@ is dev-only test tooling, same as Playwright.
 - `consistency-checker.spec.mjs` — the consistency checker (issue #83): each
   exact and text check on hand-built models, determinism, fingerprint
   stability, the gating that keeps a half-built model quiet, the findings
-  panel, and the optional model pass (off by default, and harmless when it
-  fails). Also runs the checker over the three frozen anchor models and
+  panel, and the model pass (on by default since issue #89 -- but "on" only
+  shows the Run button, so a test asserts that nothing is sent until a
+  connected user clicks it -- and harmless when it fails). Also runs the checker over the three frozen anchor models and
   asserts the labelled-corpus claims in
   `fixtures/consistency-corpus/labels.json` — every documented defect marked
   detectable is found, and exactly one error is reported across all three,

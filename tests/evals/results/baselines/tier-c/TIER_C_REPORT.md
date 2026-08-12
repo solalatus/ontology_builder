@@ -263,11 +263,26 @@ classes, properties, or rules in any of the nine runs. That is the failure mode
 #75 found when an LLM was given authority to rewrite, and it did not appear when
 the same family of model was asked only to report.
 
-## 6. What "switch on" should and should not mean
+## 6. What "switch on" means — and what it turned out not to mean
 
-Following the rule, `consistencyLlmEnabled()` (index.html) should default to on
-rather than requiring `kg-consistency-llm === "1"`. Three constraints that this
-evaluation supports and that the change should carry:
+**Done.** `consistencyLlmEnabled()` (index.html) now reads
+`localStorage.getItem(CONSISTENCY_LLM_STORAGE_KEY) !== "0"`: on unless the user
+has explicitly turned it off, instead of off unless they have explicitly turned
+it on. An explicit "off" persists across reloads, so the new default only
+applies to a profile that has never chosen.
+
+One correction to how this section originally read. It closed by weighing a
+counter-argument — that switching on makes an outbound model call the default in
+an app whose premise is a single offline file. Reading the code to make the
+change shows that argument does not apply: this flag only decides whether the
+**Run button is shown**. Nothing is sent until a connected user clicks it, and
+one click is one call. An unconnected user sees a disabled button, not a
+request. So "default on" here means "the second opinion is offered by default",
+not "the app phones home by default", and the offline premise is untouched.
+`consistency-checker.spec.mjs` now pins that directly: with the pass enabled,
+opening and reopening the panel must produce zero requests.
+
+Three constraints that this evaluation supports and that the change carries:
 
 1. **Findings panel only, never the agent.** The #84 self-correction loop feeds
    the agent deterministic findings. Nothing here justifies extending that to

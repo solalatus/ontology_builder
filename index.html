@@ -7574,9 +7574,20 @@ let consistencyLlmFindings = []; // kept separate: cleared by any edit, never ca
 let consistencyLlmStatusKey = null;
 let consistencyLlmPending = false;
 
+// On unless the user turns it off. Switched from opt-in to opt-out by issue
+// #89's evaluation (tests/evals/results/baselines/tier-c/TIER_C_REPORT.md),
+// which ran this exact prompt over nine finished ontologies and adjudicated
+// all 59 findings: 34 real contradictions the deterministic checks structurally
+// cannot reach, against 8 false ones and no invented classes, properties or
+// rules in any run. That met the rule pre-registered before the first call.
+//
+// "On" costs nothing on its own: this flag only decides whether the Run button
+// is shown. Nothing is sent anywhere until a connected user clicks it, and one
+// click is one call. So the offline-single-file premise is intact -- an
+// unconnected user sees a button that stays disabled, not a network request.
 function consistencyLlmEnabled() {
-  try { return localStorage.getItem(CONSISTENCY_LLM_STORAGE_KEY) === "1"; }
-  catch (err) { return false; /* storage unavailable — stay off, the safe direction */ }
+  try { return localStorage.getItem(CONSISTENCY_LLM_STORAGE_KEY) !== "0"; }
+  catch (err) { return true; /* storage unavailable: fall back to the default, which is on */ }
 }
 
 function setConsistencyLlmEnabled(on) {
