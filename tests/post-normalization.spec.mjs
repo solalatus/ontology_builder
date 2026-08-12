@@ -8,6 +8,8 @@ import { withPage } from "./lib/page.mjs";
 import { computeOntologyDiff, isOntologyDiffEmpty, summarizeOntologyDiff, formatOntologyDiffMarkdown } from "./evals/lib/ontologyDiff.mjs";
 import { extractCandidateYaml, extractChangeManifest, validateCandidate, parseCandidate, sha256, NORMALIZER_PROMPT_SHA256, POST_INTERVIEW_NORMALIZER_SYSTEM_PROMPT_V1 } from "./evals/lib/normalizerPromptV1.mjs";
 import { blindingFor, parseJudgeVerdict, resolveVerdict } from "./evals/judge-post-normalization.mjs";
+import { POST_INTERVIEW_NORMALIZER_SYSTEM_PROMPT_V2, NORMALIZER_PROMPT_SHA256_V2, V2_ADDED_CONSTRAINTS } from "./evals/lib/normalizerPromptV2.mjs";
+import { resolveCondition, parseConditionArgs } from "./evals/lib/conditions.mjs";
 import { recoveredStateFromYaml } from "./evals/score-baseline.mjs";
 import { loadGroundTruthModel, scopeGroundTruth } from "./evals/lib/groundTruthModel.mjs";
 import { computeRecoveryMetrics } from "./evals/lib/recoveryMetrics.mjs";
@@ -330,6 +332,40 @@ test("the v1 normalizer prompt is frozen at its published hash", () => {
   // and a new condition directory, not an edit to this one.
   assert.equal(NORMALIZER_PROMPT_SHA256, sha256(POST_INTERVIEW_NORMALIZER_SYSTEM_PROMPT_V1));
   assert.equal(NORMALIZER_PROMPT_SHA256, "a0f52cb08189eb4de142fa4b5c4b10299c3ccb101d574924274c60a423956489");
+});
+
+test("v2 is v1 plus exactly the two added constraints, and nothing else", () => {
+  // This is the single-factor guarantee for the v1-vs-v2 comparison, and it is
+  // asserted rather than asserted-in-a-comment: if a later edit reworded any
+  // part of the shared prompt while adding a third rule, the two conditions
+  // would stop being comparable and this fails.
+  const a = POST_INTERVIEW_NORMALIZER_SYSTEM_PROMPT_V1.split("\n");
+  const b = POST_INTERVIEW_NORMALIZER_SYSTEM_PROMPT_V2.split("\n");
+  const added = V2_ADDED_CONSTRAINTS.split("\n");
+  assert.equal(b.length - a.length, added.length);
+
+  // Removing the inserted block from v2 must give back v1 byte for byte.
+  const start = b.findIndex((line, i) => line !== a[i]);
+  assert.ok(start > 0, "v2 must differ from v1 somewhere after the first line");
+  assert.deepEqual(b.slice(start, start + added.length), added);
+  assert.equal([...b.slice(0, start), ...b.slice(start + added.length)].join("\n"), POST_INTERVIEW_NORMALIZER_SYSTEM_PROMPT_V1);
+
+  assert.equal(NORMALIZER_PROMPT_SHA256_V2, sha256(POST_INTERVIEW_NORMALIZER_SYSTEM_PROMPT_V2));
+  assert.equal(NORMALIZER_PROMPT_SHA256_V2, "d0e35420331c153b901cc7a620e54fe0b1afd27f9bce36dfed649d5e3fbb93c3");
+  assert.notEqual(NORMALIZER_PROMPT_SHA256_V2, NORMALIZER_PROMPT_SHA256);
+});
+
+test("the condition registry resolves both versions and holds the model fixed between them", () => {
+  const v1 = resolveCondition("post-normalization-v1");
+  const v2 = resolveCondition("post-normalization-v2");
+  assert.equal(v1.promptSha256, NORMALIZER_PROMPT_SHA256);
+  assert.equal(v2.promptSha256, NORMALIZER_PROMPT_SHA256_V2);
+  // Same normalizer model, or the prompt is not the only thing that varied.
+  assert.equal(v1.defaultModel, v2.defaultModel);
+  assert.equal(resolveCondition().name, "post-normalization-v1", "the default must stay v1 so older invocations keep working");
+  assert.throws(() => resolveCondition("post-normalization-v99"), /unknown condition/);
+  assert.deepEqual(parseConditionArgs(["--condition=post-normalization-v2", "run-01", "run-02"]).runIds, ["run-01", "run-02"]);
+  assert.equal(parseConditionArgs(["--condition=post-normalization-v2", "run-01"]).condition.name, "post-normalization-v2");
 });
 
 test("no frozen anchor artifact this condition read has changed since it ran", { skip: !fs.existsSync(path.join(COND_DIR, "frozen-inputs.sha256.json")) && "condition not generated yet" }, () => {

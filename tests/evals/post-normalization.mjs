@@ -1,12 +1,19 @@
-// POST-INTERVIEW STRUCTURAL NORMALIZATION -- condition `post-normalization-v1`
+// POST-INTERVIEW STRUCTURAL NORMALIZATION -- conditions `post-normalization-v1`/`-v2`
 //
 //   AZURE_OPENAI_ENDPOINT=https://<resource>.openai.azure.com \
 //   AZURE_OPENAI_API_KEY=... \
 //   node tests/evals/post-normalization.mjs run-01 run-02 run-03
 //
+//   # v2 (v1 plus exactly two constraints -- see lib/normalizerPromptV2.mjs):
+//   node tests/evals/post-normalization.mjs --condition=post-normalization-v2 run-01 run-02 run-03
+//
 //   # or, against OpenAI directly:
 //   OPENAI_API_KEY=sk-... EVAL_PROVIDER=openai NORMALIZER_MODEL=gpt-5.5-2026-04-23 \
 //   node tests/evals/post-normalization.mjs run-01 run-02 run-03
+//
+// The prompt each condition runs comes from lib/conditions.mjs; everything else
+// in this file is version-agnostic, so v1's numbers stay reproducible by the
+// same script that produces v2's.
 //
 // WHAT THIS IS FOR (issue #75)
 // ----------------------------
@@ -57,25 +64,18 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import {
-  POST_INTERVIEW_NORMALIZER_SYSTEM_PROMPT_V1, NORMALIZER_PROMPT_SHA256, NORMALIZER_PROMPT_VERSION,
   buildNormalizerUserPrompt, extractCandidateYaml, extractChangeManifest, parseCandidate,
   validateCandidate, sha256,
 } from "./lib/normalizerPromptV1.mjs";
+import { parseConditionArgs, DEFAULT_CONDITION, DEFAULT_NORMALIZER_MODEL } from "./lib/conditions.mjs";
 import { computeOntologyDiff, formatOntologyDiffMarkdown, summarizeOntologyDiff, isOntologyDiffEmpty } from "./lib/ontologyDiff.mjs";
 import { chatOnce, resolveClientConfig } from "./lib/chatClient.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const RUNS_DIR = path.join(__dirname, "results", "runs");
-export const CONDITION = "post-normalization-v1";
-const OUT_DIR = path.join(__dirname, "results", "baselines", CONDITION);
-
-// The anchor interviewer ran on gpt-5.5-2026-04-23. That exact model is not
-// reachable on the endpoint this condition was executed against, so the
-// default here is the nearest available *predecessor*, not a successor -- see
-// POST_NORMALIZATION.md §2. Deliberately the conservative direction: a
-// normalizer no stronger than the interviewer that produced the ontology
-// cannot turn a capability advantage into an apparent structural benefit.
-export const DEFAULT_NORMALIZER_MODEL = "gpt-5.4";
+export const CONDITION = DEFAULT_CONDITION; // re-exported for callers that only ever meant "the first one"
+export const conditionOutputDir = (name) => path.join(__dirname, "results", "baselines", name);
+export { DEFAULT_NORMALIZER_MODEL };
 
 export function readSourceArtifacts(runId) {
   const transcriptPath = path.join(RUNS_DIR, runId, "conversation-log.md");
@@ -94,16 +94,17 @@ export function readSourceArtifacts(runId) {
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
-  const runIds = process.argv.slice(2);
+  const { condition, runIds } = parseConditionArgs(process.argv.slice(2));
   if (!runIds.length) {
-    console.error("Usage: node tests/evals/post-normalization.mjs <run-id> [...]");
-    console.error("Example: node tests/evals/post-normalization.mjs run-01 run-02 run-03");
+    console.error("Usage: node tests/evals/post-normalization.mjs [--condition=post-normalization-v1|v2] <run-id> [...]");
+    console.error("Example: node tests/evals/post-normalization.mjs --condition=post-normalization-v2 run-01 run-02 run-03");
     process.exit(1);
   }
+  const OUT_DIR = conditionOutputDir(condition.name);
 
   const config = resolveClientConfig();
-  const model = process.env.NORMALIZER_MODEL || DEFAULT_NORMALIZER_MODEL;
-  console.log(`Condition ${CONDITION} · normalizer prompt ${NORMALIZER_PROMPT_VERSION} (${NORMALIZER_PROMPT_SHA256.slice(0, 12)}…)`);
+  const model = process.env.NORMALIZER_MODEL || condition.defaultModel;
+  console.log(`Condition ${condition.name} · normalizer prompt ${condition.promptVersion} (${condition.promptSha256.slice(0, 12)}…)`);
   console.log(`Provider ${config.provider} · model/deployment ${model} · one call per run\n`);
 
   const frozenInputs = {};
@@ -119,7 +120,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     const started = Date.now();
     const call = await chatOnce({
       config, model,
-      systemPrompt: POST_INTERVIEW_NORMALIZER_SYSTEM_PROMPT_V1,
+      systemPrompt: condition.systemPrompt,
       userPrompt: buildNormalizerUserPrompt(src.transcript, src.ontologyYaml),
       label: `${runId} normalizer`,
     });
@@ -143,13 +144,13 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     fs.writeFileSync(path.join(outDir, "recovered-model.yaml"), candidateYaml);
     fs.writeFileSync(path.join(outDir, "normalization-diff.json"), `${JSON.stringify(diff, null, 2)}\n`);
     fs.writeFileSync(path.join(outDir, "normalization-diff.md"), formatOntologyDiffMarkdown(diff, {
-      title: `Semantic diff -- ${runId}: interactive ontology vs. ${CONDITION} candidate`,
+      title: `Semantic diff -- ${runId}: interactive ontology vs. ${condition.name} candidate`,
     }));
     fs.writeFileSync(path.join(outDir, "change-manifest.json"), `${JSON.stringify(manifest === null ? [] : manifest, null, 2)}\n`);
 
     fs.writeFileSync(path.join(outDir, "baseline-provenance.json"), `${JSON.stringify({
       schemaVersion: 1,
-      condition: CONDITION,
+      condition: condition.name,
       runId,
       generatedAt: new Date().toISOString(),
       wallClockMs: Date.now() - started,
@@ -157,8 +158,8 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       modelReported: call.modelReported,
       finishReason: call.finishReason,
       requestParams: call.requestParams,
-      normalizerPromptVersion: NORMALIZER_PROMPT_VERSION,
-      normalizerPromptSha256: NORMALIZER_PROMPT_SHA256,
+      normalizerPromptVersion: condition.promptVersion,
+      normalizerPromptSha256: condition.promptSha256,
       sourceTranscriptPath: src.transcriptPath,
       sourceTranscriptSha256: src.transcriptSha256,
       sourceOntologyPath: src.ontologyPath,
@@ -193,7 +194,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     inputs: frozenInputs,
   }, null, 2)}\n`);
 
-  console.log(`\nDone. Score with:  node tests/evals/score-baseline.mjs ${CONDITION} ${runIds.join(" ")}`);
+  console.log(`\nDone. Score with:  node tests/evals/score-baseline.mjs ${condition.name} ${runIds.join(" ")}`);
   if (hardFailures) {
     console.error(`\n${hardFailures} validation error(s) across the candidates -- see baseline-provenance.json per run.`);
     process.exit(2);

@@ -2,6 +2,7 @@
 //
 //   AZURE_OPENAI_ENDPOINT=... AZURE_OPENAI_API_KEY=... \
 //   node tests/evals/judge-post-normalization.mjs run-01 run-02 run-03
+//   node tests/evals/judge-post-normalization.mjs --condition=post-normalization-v2 run-01 run-02 run-03
 //
 // WHY THIS EXISTS
 // ---------------
@@ -29,16 +30,23 @@
 // 3. Every pair is judged TWICE, in both orderings. A judge whose preference
 //    follows the position rather than the content shows up as a flip, and the
 //    flip rate is reported. Order bias is measured, not assumed absent.
-// 4. Two independent judge models are used, neither of which is the normalizer
-//    model. A single judge sharing a model with the normalizer would make
-//    self-preference indistinguishable from a real quality difference; two
-//    different judges also give an inter-judge agreement rate, which is the
-//    only available read on how noisy this endpoint is at n=3.
+// 4. Four independent judge models are used, none of which is the normalizer
+//    model or a variant of it. A judge sharing a model with the normalizer would
+//    make self-preference indistinguishable from a real quality difference, and
+//    a panel gives an inter-judge agreement rate -- the only available read on
+//    how noisy this endpoint is at n=3. The panel was two models when v1 was
+//    reported and was widened afterwards because v1's outcome turned on a single
+//    run; PREREGISTERED_JUDGE_MODELS below preserves the original panel so that
+//    result can still be reported exactly as it was decided.
+// 5. The blinding salt is deliberately shared across conditions, so a given
+//    (run, judge) pair sees the same A/B assignment for v1 and v2. A difference
+//    between the two conditions is then not confounded by a different ordering.
 //
-// COST: (runs x 2 orderings x judges) calls -- 12 for three runs and two
-// judges. Nothing under results/runs/ is written to.
+// COST: (runs x 2 orderings x judges) calls -- 24 for three runs and four
+// judges, minus any cell whose reply is already on disk. Nothing under
+// results/runs/ is written to.
 //
-// OUTPUT: results/baselines/post-normalization-v1/judge/
+// OUTPUT: results/baselines/<condition>/judge/
 //   judgments.json                   every verdict, with its blinding key and provenance
 //   raw/<judge>-<run>-<order>.md     each judge reply untouched, for audit
 import fs from "node:fs";
@@ -46,20 +54,29 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { sha256 } from "./lib/normalizerPromptV1.mjs";
 import { chatOnce, resolveClientConfig, sumUsage } from "./lib/chatClient.mjs";
-import { CONDITION } from "./post-normalization.mjs";
+import { parseConditionArgs } from "./lib/conditions.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const RUNS_DIR = path.join(__dirname, "results", "runs");
-const COND_DIR = path.join(__dirname, "results", "baselines", CONDITION);
-const JUDGE_DIR = path.join(COND_DIR, "judge");
+const conditionDir = (name) => path.join(__dirname, "results", "baselines", name);
 
-// Neither of these is the normalizer's model (gpt-5.4). Fixed here rather than
-// chosen at run time so the condition is reproducible from the file alone.
-export const DEFAULT_JUDGE_MODELS = ["gpt-5.6-sol", "gpt-5.1"];
+// The panel v1's pre-registered result was decided by. Kept as its own constant
+// so the analysis can still report that result exactly, unchanged, after the
+// panel was widened -- widening it retroactively must not silently redefine an
+// already-reported outcome (POST_NORMALIZATION.md §7).
+export const PREREGISTERED_JUDGE_MODELS = ["gpt-5.6-sol", "gpt-5.1"];
 
-// Fixed, published salt. The blinding has to be *reproducible* -- a reader
-// re-deriving the assignment must get the same answer -- while still not being
-// a constant "normalized is always B" that a judge could learn within a batch.
+// The widened panel. v1's own report found the endpoint decided by a single run
+// at n=3, with one of the two judges flipping on order once; two more
+// independent judges is the cheapest way to put an error bar on that. None of
+// the four is the normalizer's model (gpt-5.4) or a variant of it, so
+// self-preference stays distinguishable from a real quality difference.
+export const DEFAULT_JUDGE_MODELS = [...PREREGISTERED_JUDGE_MODELS, "gpt-4.1-internal", "o4-mini"];
+
+// Fixed, published salt, shared by every condition (see point 5 above). The
+// literal string still names v1 because that is where it was introduced;
+// changing it would change the recorded blinding keys of results already
+// reported, which is exactly what a published salt exists to prevent.
 export const BLINDING_SALT = "post-normalization-v1/blind-order";
 
 // Deterministic A/B assignment. Even first byte -> the ORIGINAL ontology is
@@ -180,16 +197,18 @@ export function resolveVerdict(verdict, { originalIsA }) {
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
-  const runIds = process.argv.slice(2);
+  const { condition, runIds } = parseConditionArgs(process.argv.slice(2));
   if (!runIds.length) {
-    console.error("Usage: node tests/evals/judge-post-normalization.mjs <run-id> [...]");
+    console.error("Usage: node tests/evals/judge-post-normalization.mjs [--condition=post-normalization-v1|v2] <run-id> [...]");
     process.exit(1);
   }
+  const COND_DIR = conditionDir(condition.name);
+  const JUDGE_DIR = path.join(COND_DIR, "judge");
   const config = resolveClientConfig();
   const judgeModels = (process.env.JUDGE_MODELS || DEFAULT_JUDGE_MODELS.join(",")).split(",").map((s) => s.trim()).filter(Boolean);
 
   fs.mkdirSync(path.join(JUDGE_DIR, "raw"), { recursive: true });
-  console.log(`Blind structural A/B judge · judges: ${judgeModels.join(", ")} · ${runIds.length} runs x 2 orderings\n`);
+  console.log(`Blind structural A/B judge · ${condition.name} · judges: ${judgeModels.join(", ")} · ${runIds.length} runs x 2 orderings\n`);
 
   const judgments = [];
   const usages = [];
@@ -269,11 +288,12 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 
   fs.writeFileSync(path.join(JUDGE_DIR, "judgments.json"), `${JSON.stringify({
     schemaVersion: 1,
-    condition: CONDITION,
+    condition: condition.name,
     generatedAt: new Date().toISOString(),
     judgePromptSha256: sha256(JUDGE_SYSTEM_PROMPT),
     blindingSalt: BLINDING_SALT,
     judgeModels,
+    preregisteredJudgeModels: PREREGISTERED_JUDGE_MODELS,
     provider: config.provider,
     parseFailures,
     note: "Blind transcript-grounded A/B comparison of the interactive run's ontology against the "
@@ -285,7 +305,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   }, null, 2)}\n`);
 
   console.log(`\nWrote ${judgments.length} verdicts -> ${path.relative(process.cwd(), path.join(JUDGE_DIR, "judgments.json"))}`);
-  console.log(`Analyse with:  node tests/evals/analyze-post-normalization.mjs ${runIds.join(" ")}`);
+  console.log(`Analyse with:  node tests/evals/analyze-post-normalization.mjs --condition=${condition.name} ${runIds.join(" ")}`);
   if (parseFailures.length) {
     console.error(`\n${parseFailures.length} judge repl${parseFailures.length === 1 ? "y was" : "ies were"} unreadable -- see judgments.json parseFailures and judge/raw/.`);
     process.exit(2);

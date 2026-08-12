@@ -286,3 +286,110 @@ explicit integration decision (issue #75 §11).
 5. **The deterministic scorer cannot see agent-readiness** (§5.1). It is a
    guardrail here, not a target.
 6. **No human-subject data.** Same as everything else in this repository.
+
+---
+
+# Part II — condition `post-normalization-v2`
+
+**Status: pre-registration.** Written and committed before the v2 normalizer was
+ever called, for the same reason Part I was. Part I's result is already reported
+in `results/baselines/post-normalization-v1/REPORT.md` and is not revised by
+anything here.
+
+## 7. Why v2, and what single factor it varies
+
+v1 failed pre-registered criterion 6 on run-03, unanimously and at high
+confidence, for two causes that the report traced to gaps in the *prompt* rather
+than to unreliability in the model (REPORT.md §4):
+
+* **(a)** v1 permits an action-input reachability defect to be "repaired" by
+  rewording a rule condition rather than by changing the graph, which leaves the
+  rule asserting navigation the model cannot support.
+* **(b)** v1 gives no precedence rule when the one-edge-per-connection profile
+  rule conflicts with a relationship the expert explicitly confirmed — and did
+  not apply that profile rule consistently across runs anyway.
+
+v2 adds exactly two constraints, one per cause, to v1's own `CONSTRAINTS` list.
+**Single factor varied: those two constraints.** Everything else — role, evidence
+boundary, the eight-category audit, the objective, the output grammar, the
+manifest shape, the normalizer model (`gpt-5.4`), the three frozen anchor runs,
+the judge prompt, the blinding salt, and the entire analysis path — is held
+fixed.
+
+That is enforced mechanically, not by inspection: `lib/normalizerPromptV2.mjs`
+*constructs* v2 by inserting the two constraints into v1's string, and
+`tests/post-normalization.spec.mjs` asserts that deleting the inserted block from
+v2 reproduces v1 byte for byte. A future edit that reworded any shared part while
+adding a third rule fails the default test suite.
+
+v1 stays frozen at `a0f52cb0…`. v2 is `d0e35420…`, in its own module and its own
+condition directory.
+
+## 8. The widened judge panel
+
+v1's outcome was decided by one run out of three, on a two-judge panel, one of
+whose members flipped on the order swap once. That is not enough resolution to
+carry an integration decision, and the fix is cheap.
+
+The panel becomes **four** models — `gpt-5.6-sol`, `gpt-5.1` (the original pair),
+plus `gpt-4.1-internal` and `o4-mini`. None is the normalizer's model or a
+variant of it. Both orderings are still judged, so the design is 4 judges × 2
+orderings × 3 runs = 24 verdicts per condition.
+
+Two rules govern this, and both are fixed now rather than after the numbers
+arrive:
+
+1. **The widened panel is applied to v1 as well as v2.** Comparing a v2 judged by
+   four models against a v1 judged by two would confound the treatment with the
+   panel. v1's existing twelve replies are reused from disk verbatim — the judge
+   never re-requests a cell it already has — so only the twelve new
+   (judge × run × order) cells are called.
+2. **v1's pre-registered result is preserved exactly.** The analysis reports the
+   original two-judge panel's outcome, recomputed by filtering the same stored
+   verdicts, alongside the full-panel outcome, and flags any run where the two
+   disagree. Widening the panel is allowed to *add* information; it is not
+   allowed to quietly redefine an outcome already published.
+
+## 9. Success criteria
+
+**Unchanged from §5.3.** The same ten criteria, the same aggregation rules in
+§5.2, the same exception clause. They are evaluated on the full four-judge panel
+for both conditions.
+
+Additionally, and specific to v2, the two constraints are only shown to have
+worked if the *specific* v1 failures are gone:
+
+* no v2 candidate rewords a rule condition to reference a path the graph does not
+  contain (checked by reading the rule diffs against the relationship diffs, and
+  by whether any judge raises it);
+* no v2 candidate removes a relationship the transcript shows the expert
+  explicitly confirming.
+
+A v2 that passes the ten criteria by making *no changes at all* has not
+succeeded either — it has only become inert. The deterministic diff is reported
+alongside, and a near-empty diff is called what it is.
+
+## 10. The final keep/reject rule
+
+Part I ended in "B — insufficient evidence", which was the honest answer but is
+not a decision. This experiment ends in a binary recommendation:
+
+* **KEEP** — the approach earns production integration, as **A1** only (a manual,
+  opt-in "Review structure" action routed through the Ontology Change Review
+  facility in preview mode; no interviewer change). Requires **all** of criteria
+  3–8 to pass on the full panel, **and** both v2-specific checks in §9 to hold,
+  **and** the deterministic diff to show the normalizer still doing substantive
+  work rather than nothing.
+* **REJECT** — do not integrate. Recommended if v2 is materially worse in any
+  run, or introduces unsupported content or competency loss in a majority of any
+  run's verdicts, or turns out to have gone inert.
+
+**If the evidence lands ambiguous, the recommendation is REJECT.** Integration is
+the action that carries the risk — it puts a component that can rewrite a model
+the user has already confirmed into a shipping product — so the burden of proof
+sits on integration, not on leaving things as they are. An ambiguous REJECT will
+say exactly what it is and what would overturn it, rather than being dressed up
+as a clean negative.
+
+Either way, implementation stops at the recommendation and waits for an explicit
+decision (issue #75 §11).
