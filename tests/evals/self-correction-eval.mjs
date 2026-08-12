@@ -57,6 +57,7 @@ import { launchChromium } from "../lib/browser.mjs";
 import { APP_URL } from "../lib/page.mjs";
 import { forwardToRealAzure, configureAzureEndpoint, openPanel } from "../lib/liveAzureOpenAi.mjs";
 import { runOntologyRecoveryConversation } from "./lib/conversationOrchestrator.mjs";
+import { chatOnce, DEFAULT_AZURE_API_VERSION } from "./lib/chatClient.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const OUT_ROOT = path.join(__dirname, "results", "baselines", "self-correcting-interviewer");
@@ -75,7 +76,10 @@ const arg = (name, fallback = null) => {
 };
 
 const MODEL = process.env.EVAL_INTERVIEWER_MODEL || "gpt-5.4";
-const PERSONA_MODEL = process.env.ONTOLOGY_EVAL_PERSONA_MODEL || "gpt-4o-mini";
+// A deployment NAME, not a model id -- on Azure the two are independent, and
+// this resource deploys gpt-4o-mini under "gpt-4o-mini-internal". Passing the
+// model id produced an HTTP 404 that reads like a missing resource.
+const PERSONA_MODEL = process.env.ONTOLOGY_EVAL_PERSONA_MODEL || "gpt-4o-mini-internal";
 const MAX_TURNS = Number(process.env.ONTOLOGY_EVAL_MAX_TURNS) || 120;
 const WALLCLOCK_MINUTES = Number(process.env.ONTOLOGY_EVAL_WALLCLOCK_MINUTES) || 45;
 
@@ -176,6 +180,18 @@ async function main() {
       maxTurns: MAX_TURNS,
       wallClockMs: WALLCLOCK_MINUTES * 60 * 1000,
       installRelay: (p) => forwardToRealAzure(p, `${endpoint}/openai/deployments/**`),
+      // The persona and the completion classifier are Node-side calls, not the
+      // app's — the relay above does not touch them. Without this they go to
+      // api.openai.com with an Azure key and 401 immediately.
+      chat: async (messages, model) => {
+        const call = await chatOnce({
+          config: { provider: "azure", endpoint, apiKey, apiVersion: process.env.AZURE_OPENAI_API_VERSION || DEFAULT_AZURE_API_VERSION },
+          model, systemPrompt: messages[0].content,
+          userPrompt: messages.slice(1).map((m) => m.content).join("\n\n"),
+          label: `${armName}/${runId} harness`,
+        });
+        return { text: call.reply, usage: call.usage };
+      },
       onProgress: ({ phase, turn, turnsUsed, durationMs, log, rawApiLog }) => {
         const lastApp = [...log].reverse().find((e) => String(e.speaker).startsWith("app-assistant"));
         const applies = rawApiLog.filter((m) => m.role === "tool" && typeof m.content === "string"

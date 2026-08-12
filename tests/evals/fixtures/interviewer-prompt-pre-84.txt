@@ -353,20 +353,20 @@ Use familiar singular names. Avoid database table names.
 
 Use one plain sentence.
 
-\`\`\`yaml
+```yaml
 Invoice:
   meaning: A request from a supplier to receive payment.
-\`\`\`
+```
 
 ## 3. Add common alternative names
 
 Include words that users may use for the same concept.
 
-\`\`\`yaml
+```yaml
 Supplier:
   meaning: An organization providing goods or services.
   aliases: [vendor]
-\`\`\`
+```
 
 Use aliases only when the words mean the same thing in your setting.
 
@@ -374,17 +374,17 @@ Use aliases only when the words mean the same thing in your setting.
 
 Write each connection as:
 
-\`\`\`text
+```text
 Thing --relationship--> Other thing
-\`\`\`
+```
 
 Example:
 
-\`\`\`text
+```text
 Invoice --issued by--> Supplier
 Invoice --matches--> Purchase order
 Employee --works for--> Department
-\`\`\`
+```
 
 Give every relationship a clear verb phrase.
 
@@ -403,7 +403,7 @@ Good examples:
 
 Do not include technical fields that users never ask about.
 
-\`\`\`yaml
+```yaml
 Invoice:
   properties:
     invoiceNumber:
@@ -415,16 +415,16 @@ Invoice:
       allowed: [draft, matched, disputed, approved, paid]
     dueDate:
       type: date
-\`\`\`
+```
 
 ## 6. Use fixed choices where possible
 
 When a property has a small set of valid values, list them.
 
-\`\`\`yaml
+```yaml
 riskStatus:
   allowed: [clear, review-required, blocked]
-\`\`\`
+```
 
 This prevents inconsistent wording.
 
@@ -432,13 +432,13 @@ This prevents inconsistent wording.
 
 Write rules as ordinary conditions.
 
-\`\`\`yaml
+```yaml
 canApproveInvoice:
   conditions:
     - invoice status is matched
     - supplier risk status is clear
     - invoice amount is within the employee approval limit
-\`\`\`
+```
 
 Keep rules separate from descriptions.
 
@@ -451,7 +451,7 @@ For each action, state:
 - what changes;
 - how success is checked.
 
-\`\`\`yaml
+```yaml
 action: approveInvoice
 input: Invoice
 preconditions:
@@ -460,11 +460,11 @@ effect:
   - invoice status becomes approved
 verification:
   - read the invoice again and confirm the status
-\`\`\`
+```
 
 ## Complete compact example
 
-\`\`\`yaml
+```yaml
 classes:
   Invoice:
     meaning: A request from a supplier to receive payment.
@@ -506,7 +506,7 @@ actions:
     preconditions: [canApproveInvoice]
     effect: invoice status becomes approved
     verification: confirm the new invoice status
-\`\`\`
+```
 
 ## Final check
 
@@ -525,7 +525,7 @@ If an item does not help the agent perform a real task, leave it out.
 
 ## Reference TXT edge-list loader (Python, for describing the .txt export/import format precisely if asked)
 
-\`\`\`python
+```python
 """Reference loader for the Knowledge Graph Canvas TXT edge-list format
 (spec.md Section 5.2). Standard library only, no dependencies.
 
@@ -596,7 +596,7 @@ if __name__ == "__main__":
     import json
     parsed_nodes, parsed_edges = load_edge_list(sys.argv[1])
     print(json.dumps({"nodes": parsed_nodes, "edges": parsed_edges}, indent=2))
-\`\`\`
+```
 
 ---
 
@@ -615,25 +615,25 @@ relationship.
 
 The key move: a "relationship" and a "property" are not different kinds of
 thing. Both are predicates, distinguished only by what they point at — a
-predicate whose target is another class (like \`issuedBy: Invoice ->
-Supplier\`) is what this tool's YAML calls a relationship; a predicate whose
-target is a datatype or a fixed value set (like \`status: Invoice ->
-{draft, matched, ...}\`) is what this tool calls a property. That's why the
-YAML shape has both \`relationships\` and per-class \`properties\` instead of
+predicate whose target is another class (like `issuedBy: Invoice ->
+Supplier`) is what this tool's YAML calls a relationship; a predicate whose
+target is a datatype or a fixed value set (like `status: Invoice ->
+{draft, matched, ...}`) is what this tool calls a property. That's why the
+YAML shape has both `relationships` and per-class `properties` instead of
 forcing everything into one or the other.
 
 Two things earn their place for reasons beyond "seemed useful": the lexical
 layer (meaning/aliases) exists because a purely symbolic schema is
 invariant under renaming, while a natural-language user's phrasing is not
-— so without labels/aliases an LLM can't reliably map "vendor" to \`Supplier\`.
+— so without labels/aliases an LLM can't reliably map "vendor" to `Supplier`.
 Boundary constraints (required, allowed values, numeric bounds) are kept
 separate from the core model because open-world semantic entailment cannot
 treat an absent value as invalid — a closed-world check is a genuinely
 different kind of thing, evaluated only at query/action boundaries, not
 baked into what a class or predicate "means."
 
-Actions in the full paper's formal model are \`<name, inputs, preconditions,
-effect, authorization, verification>\` — this tool's own action fields
+Actions in the full paper's formal model are `<name, inputs, preconditions,
+effect, authorization, verification>` — this tool's own action fields
 (input, preconditions, effect, verification) are the operational subset;
 authorization/enforcement is deliberately left to systems outside this
 tool, same as the paper's own worked example ("the language model may
@@ -651,7 +651,7 @@ skip to a higher level than a class actually needs:
   to identify, filter, compare, decide, explain, or populate a tool call.
   A practical target is 3-10 agent-visible properties per important class
   — not every field a database happens to have.
-- **Level 2 — action-boundary constraints.** Add \`required\`/\`allowed\`/
+- **Level 2 — action-boundary constraints.** Add `required`/`allowed`/
   numeric bounds only where invalid or missing data must actually block an
   action.
 - **Level 3 — optional extensions** (subclassing, inverse predicates,
