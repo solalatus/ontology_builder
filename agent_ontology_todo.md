@@ -68,6 +68,15 @@ enough that this can be picked up cold.
   `helper_agent_todo.md`'s dated addendum, not in this file's own phase checklists, since it landed after
   this initiative's Phases A–I were already closed out.
 
+**The "Test suite: 287 JS tests... + 11 Python tests" bullet above is a Phase-I-era snapshot (2026-07-28),
+not the project's current total.** Base-app work landed after this file stopped being updated, most
+notably the Consistency Checker arc (issues #83, #84, #85, #88, #89 — a deterministic contradiction
+checker, agent self-correction against its findings, import-time warnings, and an optional
+model-assisted pass), which is a base-app initiative with its own domain-model-shaped input
+(`buildDomainModel()`/`parseDomainYamlImport()`, the same functions this initiative's own export/import
+code produces and consumes) but is tracked in the base app's own `TODO.md`, not here. See `TODO.md`'s
+dated 2026-08-12 Log entry for the full account and its own current test count.
+
 ---
 
 ## How to resume this initiative

@@ -1,0 +1,8 @@
+## NODES
+A
+B -> C
+X <-> Y <-> Z
+
+## EDGES
+A -> B -> C : repeated directed arrow
+X <-> Y <-> Z : repeated bidirectional arrow

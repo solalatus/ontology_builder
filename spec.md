@@ -232,6 +232,8 @@ Which importer runs is decided per file:
 - **Renderer:** Canvas2D (not DOM/SVG), driven by a single camera transform (pan offset + zoom scale) applied per frame.
 - **Zoom:** continuous, effectively unbounded in both directions (practical clamp at extreme values to avoid float precision issues, e.g. 0.01×–100×).
 - **Performance target:** smooth interaction (60fps drag/pan/zoom) up to ~1,000 nodes, with typical real-world usage in the low hundreds. Viewport culling (only draw/hit-test what intersects the visible camera rect) is sufficient at this scale without a spatial index; a quadtree can be added later without any format or interaction changes if real usage exceeds this comfortably.
+
+  *(Amended after implementation: this target holds for drag/pan/zoom of an already-laid-out graph, but not for Auto-layout's own overlap resolution. The 2026-08-08 investigation (TODO.md's dated Log entry) measured zero residual node overlap reliably at 500 nodes (~15s) but dozens of residual overlapping pairs and ~40s of unyielded main-thread time at 1,000 — an open, unresolved scaling ceiling in `resolveNodeOverlaps()`'s all-pairs relaxation, tracked in TODO.md's Open Questions rather than fixed here.)*
 - **Disconnected layouts:** the camera and culling logic make no assumption of a single connected component — scattered snippets render and pan/zoom identically to a single connected graph.
 - **Redraw model:** dirty-flag driven `requestAnimationFrame` — redraw only on interaction, not a constant loop, to conserve battery on tablet.
 
@@ -279,8 +281,10 @@ Every action has a button; gestures exist as accelerators where natural.
 - Real-time collaboration / multi-user editing
 - Concurrent multi-device editing / merge-conflict resolution — explicitly out of scope; the tool assumes one device edits a given graph at a time
 - Automatic version pruning or cloud sync
-- OWL/RDF reasoning, validation, or consistency checking (this is a sketching tool, not a formal ontology editor)
+- OWL/RDF reasoning — this remains out of scope; the tool does no formal-logic inference over the model
 - Graph library / multi-graph switcher within one app instance (v1 is single-graph-per-session)
+
+*(Amended after implementation: this section originally also listed "consistency checking" itself as out of scope. A deterministic consistency checker — plus an optional, user-triggered LLM pass — shipped instead (issues #83/#84/#88/#89): it proves contradictions the model already states (a rule requiring a value its property disallows, an action's preconditions reasoning about an unreachable class, a relationship dropped for a missing endpoint) rather than doing OWL/RDF-style inference, so it doesn't contradict the OWL/RDF line above, just the original blanket phrasing. See README.md's own description and TODO.md's dated Log entries.)*
 
 ---
 

@@ -177,17 +177,22 @@ test("autolayout at 500 nodes: zero overlaps, completes within a real time budge
   // 500 nodes/~750 edges this settles with zero overlaps in ~15s; at 1,000
   // nodes the overlap-resolution pass (bounded to
   // OVERLAP_PASS_MAX_ITERATIONS, a fixed cost/hang tradeoff, not a
-  // convergence guarantee) leaves dozens of pairs still touching, and the
-  // whole pass takes ~40s of unyielded main-thread time. That's a real,
-  // currently-open scaling ceiling somewhere between 500 and 1,000 nodes --
-  // tracked in TODO.md rather than silently asserted away here. This test
-  // pins the size where the app's own "overlap is a hard invariant, not a
-  // budget" claim (see this file's header comment) is actually still true,
-  // so a future change that narrows that ceiling further fails loudly.
+  // convergence guarantee) leaves dozens of pairs still touching. That's a
+  // real, currently-open scaling ceiling somewhere between 500 and 1,000
+  // nodes -- tracked in TODO.md rather than silently asserted away here.
+  // This test pins the size where the app's own "overlap is a hard
+  // invariant, not a budget" claim (see this file's header comment) is
+  // actually still true, so a future change that narrows that ceiling
+  // further fails loudly. The other half of the original finding --
+  // ~40s of *unyielded* main-thread time at 1,000 nodes -- is addressed
+  // separately: relaxCenters()/resolveNodeOverlaps() now yield back to the
+  // browser periodically above AUTOLAYOUT_YIELD_NODE_THRESHOLD, so the tab
+  // stays responsive during a layout this size even though the wall-clock
+  // budget and the residual-overlap ceiling asserted below are unchanged.
   await withPage(async (page) => {
     const n = 500;
     const start = Date.now();
-    await page.evaluate((n) => {
+    await page.evaluate(async (n) => {
       for (let i = 0; i < n; i++) {
         window.__kg.actions.createNode((i % 40) * 90, Math.floor(i / 40) * 60, "Node" + i);
       }
@@ -200,7 +205,12 @@ test("autolayout at 500 nodes: zero overlaps, completes within a real time budge
         const b = nodes[(i * 37 + 11) % n];
         if (a.id !== b.id) window.__kg.actions.createEdge(a.id, b.id, "r" + i, true);
       }
-      window.__kg.actions.autoLayout();
+      // autoLayout() now yields periodically above
+      // AUTOLAYOUT_YIELD_NODE_THRESHOLD (500 > 250) so the tab stays
+      // responsive during a layout this size -- await it explicitly rather
+      // than relying on same-tick completion, which no longer holds at
+      // this scale.
+      await window.__kg.actions.autoLayout();
     }, n);
     const elapsed = Date.now() - start;
     assert.ok(elapsed < 45000, `500-node autolayout took ${elapsed}ms, expected well under 45s`);
@@ -217,5 +227,66 @@ test("autolayout at 500 nodes: zero overlaps, completes within a real time budge
       return count;
     });
     assert.equal(overlaps, 0, `expected zero node-box overlaps at 500 nodes, got ${overlaps}`);
+  });
+});
+
+test("autolayout above the yield threshold actually hands control back to the browser, not just a long single block", async () => {
+  // The test above pins wall-clock time and residual overlaps, but a
+  // synchronous 15s block and a chunked-but-still-15s layout both pass a
+  // plain elapsed-time assertion equally well. This proves the yielding
+  // itself happened: a setInterval() ticking throughout the layout can only
+  // fire if the main thread is actually handed back between chunks, so a
+  // regression back to a fully synchronous relaxation (e.g. someone
+  // "simplifying" AUTOLAYOUT_YIELD_NODE_THRESHOLD's guard away) fails this
+  // even though the 500-node test above would still pass.
+  await withPage(async (page) => {
+    const n = 600; // > AUTOLAYOUT_YIELD_NODE_THRESHOLD (250)
+    const tickCount = await page.evaluate(async (n) => {
+      for (let i = 0; i < n; i++) {
+        window.__kg.actions.createNode((i % 40) * 90, Math.floor(i / 40) * 60, "Node" + i);
+      }
+      const nodes = window.__kg.state.nodes;
+      for (let i = 0; i < n * 1.5; i++) {
+        const a = nodes[i % n];
+        const b = nodes[(i * 37 + 11) % n];
+        if (a.id !== b.id) window.__kg.actions.createEdge(a.id, b.id, "r" + i, true);
+      }
+      let ticks = 0;
+      const interval = setInterval(() => { ticks++; }, 0);
+      await window.__kg.actions.autoLayout();
+      clearInterval(interval);
+      return ticks;
+    }, n);
+    assert.ok(tickCount > 5,
+      `expected the main thread to be handed back repeatedly during a ${n}-node layout, saw only ${tickCount} interval tick(s)`);
+  });
+});
+
+test("a second Auto-layout click while a large layout is still running is ignored, not interleaved", async () => {
+  // autoLayout() now spans multiple event-loop turns above the yield
+  // threshold, so two overlapping calls both mutating the same live
+  // state.nodes array is a real possibility it didn't used to be.
+  // autoLayoutRunning guards against that -- the second call should be a
+  // silent no-op, leaving exactly one undo step behind, not two (or a
+  // corrupted mid-relaxation position set from the interleaving).
+  await withPage(async (page) => {
+    const n = 600;
+    const historyDelta = await page.evaluate(async (n) => {
+      for (let i = 0; i < n; i++) {
+        window.__kg.actions.createNode((i % 40) * 90, Math.floor(i / 40) * 60, "Node" + i);
+      }
+      const nodes = window.__kg.state.nodes;
+      for (let i = 0; i < n * 1.5; i++) {
+        const a = nodes[i % n];
+        const b = nodes[(i * 37 + 11) % n];
+        if (a.id !== b.id) window.__kg.actions.createEdge(a.id, b.id, "r" + i, true);
+      }
+      const before = window.__kg.history.past.length;
+      const first = window.__kg.actions.autoLayout();
+      const second = window.__kg.actions.autoLayout(); // still running `first` -- must be ignored
+      await Promise.all([first, second]);
+      return window.__kg.history.past.length - before;
+    }, n);
+    assert.equal(historyDelta, 1, `expected exactly one undo step from the overlapping autoLayout() calls, got ${historyDelta}`);
   });
 });
