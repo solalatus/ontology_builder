@@ -100,6 +100,15 @@ is dev-only test tooling, same as Playwright.
   manual and agent edits are interleaved), the graph-diff view's
   position-noise regression, and the agent panel's welcome-message
   placeholder + Review changes tooltip added in the same round.
+- `consistency-checker.spec.mjs` — the consistency checker (issue #83): each
+  exact and text check on hand-built models, determinism, fingerprint
+  stability, the gating that keeps a half-built model quiet, the findings
+  panel, and the optional model pass (off by default, and harmless when it
+  fails). Also runs the checker over the three frozen anchor models and
+  asserts the labelled-corpus claims in
+  `fixtures/consistency-corpus/labels.json` — every documented defect marked
+  detectable is found, and exactly one error is reported across all three,
+  which is the documented one. Offline: no key, no network.
 - `agent-production-invariants.spec.mjs` — hard regression guards on the
   shipped interviewer (issue #75 §1): a golden SHA-256 of the real system
   prompt in both languages, and a runtime assertion, captured off a real

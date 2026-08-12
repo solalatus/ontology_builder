@@ -1344,6 +1344,40 @@
   .review-diff-item--removed { border-left-color: var(--danger-fg); }
   .review-diff-item--changed, .review-diff-item--direction-changed { border-left-color: var(--agent-accent); }
 
+  /* Consistency findings (issue #83) borrow the review dialog's own item
+     language deliberately -- same left-rule, same weight -- so a findings row
+     and a diff row read as the same kind of object rather than two competing
+     inventions. Only the accent colour carries the severity. */
+  .finding-item {
+    padding: 6px 10px;
+    margin-bottom: 6px;
+    border-left: 3px solid var(--toolbar-border);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    background: var(--btn-bg);
+  }
+  .finding-item--error { border-left-color: var(--danger-fg); }
+  .finding-item--warning { border-left-color: var(--agent-accent); }
+  .finding-item--note { border-left-color: var(--toolbar-border); }
+  .finding-check {
+    font-size: 0.78rem;
+    opacity: 0.65;
+    letter-spacing: 0.02em;
+  }
+  .finding-suggestion {
+    font-size: 0.85rem;
+    opacity: 0.8;
+    margin-top: 2px;
+  }
+  .finding-group-title {
+    font-weight: 600;
+    margin: 10px 0 4px;
+  }
+  #consistency-list { max-height: 46vh; overflow-y: auto; }
+  /* A quiet badge: the count only becomes loud when something is actually
+     wrong. A model with nothing but notes should not nag. */
+  #btn-consistency.has-error { border-color: var(--danger-fg); color: var(--danger-fg); }
+  #btn-consistency.has-warning { border-color: var(--agent-accent); }
+
   .review-diff-item-before {
     opacity: 0.65;
     text-decoration: line-through;
@@ -1538,6 +1572,7 @@
     <button id="btn-undo" type="button">Visszavonás</button>
     <button id="btn-redo" type="button">Újra</button>
     <button id="btn-review-changes" type="button" disabled data-tooltip="Korábbi módosítások — a sajátjaid és az ügynöké — áttekintése és visszavonása.">Változtatások áttekintése</button>
+    <button id="btn-consistency" type="button" data-tooltip="Ellentmondások és hiányosságok a modellben.">Ellenőrzés</button>
   </div>
 
   <div class="toolbar-group">
@@ -1604,6 +1639,27 @@
       <button id="import-cancel" type="button">Mégse</button>
       <button id="import-replace" type="button">Csere</button>
       <button id="import-merge" type="button">Egyesítés</button>
+    </div>
+  </div>
+</div>
+
+<!-- Consistency checker (issue #83). Read-only: opening it, re-checking, and
+     toggling the optional model pass never touch `state` and never call
+     pushHistory, so looking at the findings can never become an edit -- the
+     same rule the Review changes dialog follows. -->
+<div id="consistency-overlay" class="modal-overlay">
+  <div id="consistency-dialog" class="modal-dialog details-dialog" role="dialog" aria-modal="true">
+    <h2 id="consistency-title" class="modal-title">Ellenőrzés</h2>
+    <p id="consistency-summary" class="modal-message"></p>
+    <div id="consistency-list"></div>
+    <label id="consistency-llm-row" class="agent-remember-row">
+      <input id="consistency-llm-toggle" type="checkbox">
+      <span id="consistency-llm-text"></span>
+    </label>
+    <p id="consistency-llm-status" class="agent-field-hint"></p>
+    <div class="modal-actions">
+      <button id="consistency-llm-run" type="button">Ellenőrzés modellel</button>
+      <button id="consistency-close" type="button">Bezárás</button>
     </div>
   </div>
 </div>
@@ -2026,6 +2082,23 @@ const STRINGS = {
     verificationPlaceholder: "verification",
     untitledRulePlaceholder: "(untitled rule)",
     // Ontology Change Review (issue #74), retrospective scope this round.
+    // Consistency checker (issue #83).
+    consistencyButton: "Check",
+    consistencyButtonWithCount: (n) => `Check (${n})`,
+    consistencyTooltip: "Contradictions and gaps found in the model.",
+    consistencyTitle: "Consistency check",
+    consistencyNone: "No contradictions found in the current model.",
+    consistencySummary: (e, w, n) => `${e} contradiction(s), ${w} likely problem(s), ${n} note(s).`,
+    consistencyGroupError: "Contradictions",
+    consistencyGroupWarning: "Likely problems",
+    consistencyGroupNote: "Notes",
+    consistencyLlmToggle: "Also let the connected model review the structure (optional, uses your API key)",
+    consistencyLlmRun: "Check with model",
+    consistencyLlmNotConnected: "Connect the helper agent first to use this.",
+    consistencyLlmRunning: "Asking the model…",
+    consistencyLlmDone: (n) => `The model added ${n} observation(s). They are marked as coming from the model, not from the deterministic checks.`,
+    consistencyLlmFailed: "The model check could not be completed. The deterministic findings above are unaffected.",
+    consistencyClose: "Close",
     reviewChangesButton: "Review changes",
     reviewChangesTooltip: "Step through past edits — yours and the agent's — and undo any of them.",
     reviewChangesTitle: "Review changes",
@@ -2279,6 +2352,23 @@ const STRINGS = {
     verificationPlaceholder: "ellenőrzés",
     untitledRulePlaceholder: "(névtelen szabály)",
     // Ontology Change Review (issue #74), retrospective scope this round.
+    // Konzisztencia-ellenőrzés (#83).
+    consistencyButton: "Ellenőrzés",
+    consistencyButtonWithCount: (n) => `Ellenőrzés (${n})`,
+    consistencyTooltip: "Ellentmondások és hiányosságok a modellben.",
+    consistencyTitle: "Konzisztencia-ellenőrzés",
+    consistencyNone: "Nem található ellentmondás a jelenlegi modellben.",
+    consistencySummary: (e, w, n) => `${e} ellentmondás, ${w} valószínű hiba, ${n} megjegyzés.`,
+    consistencyGroupError: "Ellentmondások",
+    consistencyGroupWarning: "Valószínű hibák",
+    consistencyGroupNote: "Megjegyzések",
+    consistencyLlmToggle: "A csatlakoztatott modell is nézze át a szerkezetet (opcionális, az API kulcsodat használja)",
+    consistencyLlmRun: "Ellenőrzés modellel",
+    consistencyLlmNotConnected: "Ehhez előbb csatlakoztasd a segéd ügynököt.",
+    consistencyLlmRunning: "Modell kérdezése…",
+    consistencyLlmDone: (n) => `A modell ${n} észrevételt adott hozzá. Ezek jelölve vannak, hogy a modelltől származnak, nem a determinisztikus ellenőrzésektől.`,
+    consistencyLlmFailed: "A modelles ellenőrzés nem fejeződött be. A fenti determinisztikus találatokat ez nem érinti.",
+    consistencyClose: "Bezárás",
     reviewChangesButton: "Változtatások áttekintése",
     reviewChangesTooltip: "Korábbi módosítások — a sajátjaid és az ügynöké — áttekintése és visszavonása.",
     reviewChangesTitle: "Változtatások áttekintése",
@@ -2482,6 +2572,12 @@ function applyLanguage() {
     titleEl.textContent = state.graphName;
   }
   byId("btn-add-node").textContent = t("addNode");
+  byId("btn-consistency").dataset.tooltip = t("consistencyTooltip");
+  // The button's own label carries a count, so it is produced by the badge
+  // updater rather than assigned here; re-running it without recomputing keeps
+  // both the label and an open dialog in the new language.
+  updateConsistencyBadge({ recompute: false });
+  if (consistencyOverlayOpen) renderConsistencyDialog();
   byId("btn-connect").textContent = t("connect");
   byId("btn-domain-model").textContent = t("domainModel");
   byId("btn-autolayout").textContent = t("autoLayout");
@@ -2973,6 +3069,10 @@ function updateUndoRedoButtons() {
   // alongside it here rather than needing its own call at every one of
   // pushHistory/undo/redo/boot's call sites.
   updateReviewButtonState();
+  // Same reasoning for the consistency badge (issue #83): every edit that
+  // matters -- the agent's, the user's own, an import, an undo -- passes
+  // through here, so this is the one place the findings need recomputing.
+  updateConsistencyBadge();
 }
 
 // ---------------------------------------------------------------------------
@@ -6127,6 +6227,770 @@ function diffLines(beforeText, afterText) {
 }
 
 // ---------------------------------------------------------------------------
+// Consistency checker (issue #83). Pure, synchronous, offline. Takes a domain
+// model *document* -- the {classes, relationships, rules, actions} shape both
+// buildDomainModel() and parseDomainYamlImport() produce -- and returns a list
+// of findings. It never edits anything, never blocks anything, and never needs
+// a key: it is a detector, not a reviewer.
+//
+// WHY IT EXISTS. Issue #75 ran a full experiment on giving an LLM authority to
+// restructure a finished ontology, and the answer was no, twice. But that
+// experiment surfaced one durable positive: a candidate found that
+// `canSendRegulatoryNotification` required RegulatoryNotification.status to be
+// "approved" while that property's allowed list never contained "approved" --
+// a contradiction that survived a 51-turn staged interview *and* its own
+// Phase-9 validation pass. That needs no judgement about what the model should
+// look like. It is a mechanical fact about the model, and so are most of the
+// 30 defects the three anchor runs already have on record.
+//
+// TWO TIERS, AND THE DIFFERENCE MATTERS.
+//   "exact"  -- facts about identifiers and references. No language involved,
+//               so no false positives are possible by construction.
+//   "text"   -- lexical analysis of the free-text fields the model genuinely
+//               stores as prose (rule conditions, action effect/verification).
+//               Deterministic (tokenise and match against the model, never
+//               infer) but *not* infallible, which is why these are reported
+//               at a lower severity and each one can be switched off alone.
+//
+// SEVERITY IS THE LOAD-BEARING DESIGN DECISION.
+//   error   -- the model asserts two things that cannot both hold.
+//   warning -- probably that, found by text matching, occasionally wrong.
+//   note    -- incompleteness or profile drift. NORMAL mid-interview.
+// A half-built model is not a broken one. During early interview phases every
+// class legitimately has no relationships, every rule is referenced by no
+// action, and no action has a verification yet. If those were errors, the
+// agent loop in issue #84 would chase them instead of interviewing. Nothing
+// that is merely *unfinished* is ever allowed above `note`.
+// ---------------------------------------------------------------------------
+
+// Every check, individually switchable. A check that turns out to be too noisy
+// in practice gets demoted or disabled here without unpicking the engine --
+// issue #83 §5 requires that to be possible per check, not per tier.
+const CONSISTENCY_CHECKS = {
+  // Tier A -- exact.
+  "relationship-dropped": true,
+  "action-input-missing": true,
+  "precondition-unknown-rule": true,
+  "duplicate-export-name": true,
+  "alias-collision": true,
+  "subclassing-predicate": true,
+  "inverse-pair": true,
+  "duplicate-edge": true,
+  "self-loop": true,
+  "unit-on-non-number": true,
+  "duplicate-allowed-values": true,
+  "single-value-allowed-list": true,
+  "orphan-rule": true,
+  "class-no-relationships": true,
+  "action-missing-verification": true,
+  "action-missing-effect": true,
+  // Tier B -- text.
+  "value-not-allowed": true,
+  "unknown-property-reference": true,
+  "unreachable-from-action-input": true,
+  "effect-verification-mismatch": true,
+  // Off by default: the highest false-positive risk in the set by a wide
+  // margin (any capitalised noun phrase in ordinary prose looks like a class
+  // name). Kept implemented and tested so the decision is reversible with a
+  // one-word edit rather than a rewrite, but not inflicted on users until it
+  // has evidence behind it.
+  "unknown-class-reference": false,
+};
+
+const SEVERITY_ORDER = { error: 0, warning: 1, note: 2 };
+
+// Words that follow a copula but are never a controlled value -- "status is
+// present", "plan is valid", "commander is identified". Without this list,
+// value-not-allowed fires on every one of them. Note this only suppresses a
+// token that is NOT in the property's allowed list: a domain whose real
+// allowed values include "completed" still matches normally.
+const CONSISTENCY_NON_VALUE_WORDS = new Set([
+  "present", "absent", "valid", "invalid", "set", "unset", "empty", "blank",
+  "recorded", "identified", "missing", "required", "defined", "known",
+  "unknown", "available", "unavailable", "true", "false", "null", "none",
+  "any", "all", "either", "both", "the", "a", "an", "its", "their", "this",
+  "that", "no", "in", "at", "on", "to", "of", "for", "and", "or", "already",
+  "still", "also", "one", "more", "less", "than", "least", "most", "same",
+  "different", "other", "such", "before", "after", "within", "assigned",
+  "confirmed", "provided", "given", "listed", "linked", "related", "there",
+]);
+
+// camelCase -> "camel case", then fold. The model's own export writes
+// relationship names and property names in camelCase while the expert's prose
+// in a rule condition spells them out, so every comparison here has to survive
+// that round trip.
+function consistencyNormalizeText(s) {
+  return String(s == null ? "" : s)
+    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+    .toLowerCase()
+    .replace(/[_\-]+/g, " ")
+    .replace(/[^a-z0-9\s]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+// Naive singular folding, deliberately: "incidents" and "incident" are the
+// same class to a reader and should be to this too, but anything cleverer
+// (a stemmer, a plural dictionary) stops being predictable, and predictability
+// is the whole reason this checker exists rather than a second LLM pass.
+function consistencySingular(word) {
+  if (word.length > 3 && word.endsWith("ies")) return `${word.slice(0, -3)}y`;
+  if (word.length > 3 && word.endsWith("ses")) return word.slice(0, -2);
+  // "status" is not a plural, and neither is "analysis" or "progress". Folding
+  // them anyway produced "statu", which then failed to match the property
+  // named `status` and got reported as an asserted *value* instead -- a whole
+  // class of nonsense findings from one missing guard.
+  if (/(?:ss|us|is|as|os)$/.test(word)) return word;
+  if (word.length > 3 && word.endsWith("s")) return word.slice(0, -1);
+  return word;
+}
+
+function consistencyTokens(s) {
+  return consistencyNormalizeText(s).split(" ").filter(Boolean).map(consistencySingular);
+}
+
+// True when `phrase` occurs as a whole-word run inside `tokens`. Substring
+// matching would let "Alert" match "alerting" and "Change" match "exchange";
+// this is why every comparison here goes through token runs rather than
+// indexOf.
+function consistencyContainsPhrase(tokens, phrase) {
+  const want = consistencyTokens(phrase);
+  if (!want.length) return false;
+  for (let i = 0; i + want.length <= tokens.length; i++) {
+    let hit = true;
+    for (let j = 0; j < want.length; j++) {
+      if (tokens[i + j] !== want[j]) { hit = false; break; }
+    }
+    if (hit) return true;
+  }
+  return false;
+}
+
+const asFindingMap = (v) => (v && typeof v === "object" && !Array.isArray(v) ? v : {});
+const asFindingList = (v) => (Array.isArray(v) ? v : []);
+
+// The index every check reads from, built once per sweep: names, aliases,
+// properties, and the adjacency needed for reachability.
+function buildConsistencyIndex(model) {
+  const doc = asFindingMap(model);
+  const classes = asFindingMap(doc.classes);
+  const rules = asFindingMap(doc.rules);
+  const actions = asFindingMap(doc.actions);
+  const relationships = asFindingList(doc.relationships).filter((r) => r && typeof r === "object");
+
+  const classNames = Object.keys(classes);
+  // Longest first, so "Major Incident Declaration" is recognised before
+  // "Incident" swallows the mention.
+  const byMentionLength = [...classNames].sort((a, b) => consistencyTokens(b).length - consistencyTokens(a).length);
+
+  const mentions = []; // {className, phrase} for every label and alias
+  for (const name of byMentionLength) {
+    mentions.push({ className: name, phrase: name });
+    for (const alias of asFindingList(asFindingMap(classes[name]).aliases)) {
+      if (alias) mentions.push({ className: name, phrase: String(alias) });
+    }
+  }
+
+  const outgoing = new Map(); // className -> Set(className), following from->to
+  const undirected = new Map();
+  const link = (map, a, b) => {
+    if (!map.has(a)) map.set(a, new Set());
+    map.get(a).add(b);
+  };
+  for (const name of classNames) { outgoing.set(name, new Set()); undirected.set(name, new Set()); }
+  for (const rel of relationships) {
+    if (!classes[rel.from] || !classes[rel.to]) continue;
+    link(outgoing, rel.from, rel.to);
+    link(undirected, rel.from, rel.to);
+    link(undirected, rel.to, rel.from);
+  }
+
+  return { doc, classes, rules, actions, relationships, classNames, mentions, outgoing, undirected };
+}
+
+// Unbounded, deliberately. A hop limit would be an arbitrary constant that
+// changes which findings appear, and "reachable through a long chain" is a
+// weaker claim than "not reachable at all" but a true one -- this check is
+// only entitled to report the latter.
+function consistencyReachable(index, from, to, edges) {
+  if (from === to) return true;
+  const seen = new Set([from]);
+  const queue = [from];
+  while (queue.length) {
+    const at = queue.shift();
+    for (const next of edges.get(at) || []) {
+      if (next === to) return true;
+      if (seen.has(next)) continue;
+      seen.add(next);
+      queue.push(next);
+    }
+  }
+  return false;
+}
+
+// Which classes a piece of free text mentions, by label or alias. Longest
+// phrase wins and its span is consumed, so "Major Incident Declaration status"
+// reports the declaration rather than also reporting Incident.
+// Longest-phrase-first matching with span consumption, shared by class
+// mentions and property mentions. Consumption is what stops a short name from
+// matching inside a longer one: without it "declarationStatus" (normalised to
+// "declaration status") also matches the property `status`, and every
+// "declarationStatus becomes complete" in the corpus turned into a claim about
+// some other class's `status` property.
+function consistencyMatchSpans(tokens, candidates) {
+  const consumed = new Array(tokens.length).fill(false);
+  const spans = [];
+  const ordered = [...candidates].sort((a, b) => b.tokens.length - a.tokens.length);
+  for (const candidate of ordered) {
+    const want = candidate.tokens;
+    if (!want.length) continue;
+    for (let i = 0; i + want.length <= tokens.length; i++) {
+      let hit = true;
+      for (let j = 0; j < want.length; j++) {
+        if (consumed[i + j] || tokens[i + j] !== want[j]) { hit = false; break; }
+      }
+      if (!hit) continue;
+      for (let j = 0; j < want.length; j++) consumed[i + j] = true;
+      spans.push({ ...candidate, start: i, end: i + want.length });
+    }
+  }
+  return spans.sort((a, b) => a.start - b.start);
+}
+
+function consistencyClassSpans(index, tokens) {
+  return consistencyMatchSpans(tokens, index.mentions.map((m) => ({ className: m.className, tokens: consistencyTokens(m.phrase) })));
+}
+
+function consistencyMentionedClasses(index, text) {
+  return new Set(consistencyClassSpans(index, consistencyTokens(text)).map((s) => s.className));
+}
+
+function makeFinding(check, severity, tier, subject, message, suggestion) {
+  return {
+    id: `${check}:${subject.key}`,
+    check, tier, severity, subject,
+    message,
+    ...(suggestion ? { suggestion } : {}),
+  };
+}
+
+// --- Tier A: exact checks --------------------------------------------------
+// Every one of these is a statement about identifiers and references. None of
+// them reads prose, so none of them can be wrong about what it reports.
+
+const SUBCLASSING_PREDICATE = /^(is|are)?\s*(a|an|kind of|type of|sort of|classified as|subclass of|instance of|subtype of)$/;
+
+function consistencyExactChecks(index, options) {
+  const out = [];
+  const { classes, rules, actions, relationships, classNames } = index;
+  const on = (check) => CONSISTENCY_CHECKS[check];
+  const push = (...args) => out.push(makeFinding(...args));
+
+  // A relationship whose endpoint class is not declared. commitYamlImport's
+  // planYamlImport() drops exactly these on the floor with a bare `continue`,
+  // and until now nothing said so -- not to the user, and (issue #84) not to
+  // the agent, which is told "Applied. Added 3, updated 2" while an edge it
+  // just wrote silently vanished.
+  if (on("relationship-dropped")) {
+    for (const rel of relationships) {
+      for (const [side, name] of [["from", rel.from], ["to", rel.to]]) {
+        if (name && classes[name]) continue;
+        push("relationship-dropped", "error", "exact",
+          { kind: "relationship", key: `${rel.name}|${rel.from}|${rel.to}|${side}`, name: rel.name },
+          `Relationship "${rel.name}" (${rel.from} → ${rel.to}) names ${side === "from" ? "a source" : "a target"} class "${name || "(none)"}" that does not exist, so the relationship is dropped and not stored.`,
+          `Add the class "${name}", or correct the ${side} endpoint.`);
+      }
+    }
+    // References the import path itself skipped, handed in by the caller --
+    // these never reach the committed model, so they cannot be found by
+    // inspecting it afterwards.
+    for (const dropped of asFindingList(options.droppedReferences)) {
+      push("relationship-dropped", "error", "exact",
+        { kind: "relationship", key: `dropped|${dropped.name}|${dropped.from}|${dropped.to}`, name: dropped.name },
+        `Relationship "${dropped.name}" (${dropped.from} → ${dropped.to}) was not stored: one of its endpoint classes does not exist.`,
+        `Add the missing class first, then re-add the relationship.`);
+    }
+  }
+
+  for (const [name, action] of Object.entries(actions)) {
+    const body = asFindingMap(action);
+    if (on("action-input-missing")) {
+      if (!body.input) {
+        push("action-input-missing", "error", "exact",
+          { kind: "action", key: name, name },
+          `Action "${name}" has no input class.`,
+          `Give it the one class the action is fundamentally about.`);
+      } else if (!classes[body.input]) {
+        push("action-input-missing", "error", "exact",
+          { kind: "action", key: `${name}|${body.input}`, name },
+          `Action "${name}" has input class "${body.input}", which does not exist.`,
+          `Add the class, or point the action at an existing one.`);
+      }
+    }
+    if (on("precondition-unknown-rule")) {
+      for (const pre of asFindingList(body.preconditions)) {
+        if (rules[pre]) continue;
+        push("precondition-unknown-rule", "error", "exact",
+          { kind: "action", key: `${name}|${pre}`, name },
+          `Action "${name}" has precondition "${pre}", but no rule with that name exists.`,
+          `Define the rule, or remove the precondition.`);
+      }
+    }
+    if (on("action-missing-verification") && !String(body.verification || "").trim()) {
+      push("action-missing-verification", "note", "exact",
+        { kind: "action", key: name, name },
+        `Action "${name}" has no verification step.`);
+    }
+    if (on("action-missing-effect") && !String(body.effect || "").trim()) {
+      push("action-missing-effect", "note", "exact",
+        { kind: "action", key: name, name },
+        `Action "${name}" has no effect.`);
+    }
+  }
+
+  // Two items whose *export* names collide. assignUniqueExportNames() silently
+  // renames the second one to `name_2` on every export, so the file the user
+  // takes away does not say what the canvas says.
+  if (on("duplicate-export-name")) {
+    for (const [kind, names] of [["class", classNames], ["rule", Object.keys(rules)], ["action", Object.keys(actions)]]) {
+      const seen = new Map();
+      for (const name of names) {
+        const key = consistencyNormalizeText(name);
+        if (!key) continue;
+        if (seen.has(key) && seen.get(key) !== name) {
+          push("duplicate-export-name", "error", "exact",
+            { kind, key: `${kind}|${key}`, name },
+            `Two ${kind}es named "${seen.get(key)}" and "${name}" differ only by case or punctuation, so one is silently renamed on export.`,
+            `Rename one of them, or merge them if they are the same thing.`);
+        } else if (!seen.has(key)) {
+          seen.set(key, name);
+        }
+      }
+    }
+  }
+
+  // An alias that equals another class's label or alias makes every reference
+  // to that word ambiguous -- including the agent's own.
+  if (on("alias-collision")) {
+    const owners = new Map(); // normalized term -> [className]
+    const claim = (term, className) => {
+      const key = consistencyNormalizeText(term);
+      if (!key) return;
+      if (!owners.has(key)) owners.set(key, []);
+      if (!owners.get(key).includes(className)) owners.get(key).push(className);
+    };
+    for (const name of classNames) {
+      claim(name, name);
+      for (const alias of asFindingList(asFindingMap(classes[name]).aliases)) claim(alias, name);
+    }
+    for (const [term, ownerList] of owners) {
+      if (ownerList.length < 2) continue;
+      push("alias-collision", "error", "exact",
+        { kind: "class", key: term, name: ownerList[0] },
+        `The term "${term}" refers to more than one class (${ownerList.join(", ")}), so a mention of it is ambiguous.`,
+        `Drop the alias from all but one of them.`);
+    }
+  }
+
+  const pairSeen = new Map();
+  for (const rel of relationships) {
+    if (!classes[rel.from] || !classes[rel.to]) continue; // already reported above
+    const label = `${rel.from} --${rel.name}--> ${rel.to}`;
+    if (on("self-loop") && rel.from === rel.to) {
+      push("self-loop", "warning", "exact",
+        { kind: "relationship", key: `${rel.name}|${rel.from}`, name: rel.name },
+        `Relationship "${rel.name}" points from ${rel.from} to itself.`);
+    }
+    if (on("subclassing-predicate") && SUBCLASSING_PREDICATE.test(consistencyNormalizeText(rel.name))) {
+      push("subclassing-predicate", "warning", "exact",
+        { kind: "relationship", key: `${rel.name}|${rel.from}|${rel.to}`, name: rel.name },
+        `Relationship ${label} is disguised subclassing, which this tool cannot represent (there are classes and directed relationships only).`,
+        `Either make the specific one a property value on the general one, or find the real operational connector between them.`);
+    }
+    const forward = `${rel.from} ${rel.to}`;
+    const backward = `${rel.to} ${rel.from}`;
+    if (on("duplicate-edge")) {
+      const exact = `${rel.name} ${forward}`;
+      if (pairSeen.has(exact)) {
+        push("duplicate-edge", "warning", "exact",
+          { kind: "relationship", key: exact, name: rel.name },
+          `Relationship ${label} is recorded twice.`);
+      }
+      pairSeen.set(exact, true);
+    }
+    if (on("inverse-pair") && rel.from !== rel.to) {
+      const back = pairSeen.get(`rev ${backward}`);
+      if (back) {
+        push("inverse-pair", "warning", "exact",
+          { kind: "relationship", key: `${back}||${label}`, name: rel.name },
+          `${label} looks like the inverse of ${back}. The profile is one directed relationship per real-world connection, never also its inverse.`,
+          `Keep whichever direction the questions and actions actually navigate.`);
+      }
+      if (!pairSeen.has(`rev ${forward}`)) pairSeen.set(`rev ${forward}`, label);
+    }
+  }
+
+  // Gated: a class with no relationships is the normal state of a model that
+  // is three questions old. This only means anything once the graph has
+  // started connecting things up at all.
+  if (on("class-no-relationships") && relationships.length > 0) {
+    const connected = new Set();
+    for (const rel of relationships) { connected.add(rel.from); connected.add(rel.to); }
+    const exempt = new Set(asFindingList(options.createdNow));
+    for (const name of classNames) {
+      if (connected.has(name) || exempt.has(name)) continue;
+      push("class-no-relationships", "note", "exact",
+        { kind: "class", key: name, name },
+        `Class "${name}" has no relationships to anything else.`);
+    }
+  }
+
+  if (on("orphan-rule")) {
+    const used = new Set();
+    for (const action of Object.values(actions)) {
+      for (const pre of asFindingList(asFindingMap(action).preconditions)) used.add(pre);
+    }
+    for (const name of Object.keys(rules)) {
+      if (used.has(name)) continue;
+      push("orphan-rule", "note", "exact",
+        { kind: "rule", key: name, name },
+        `Rule "${name}" is not used as a precondition by any action.`);
+    }
+  }
+
+  for (const [className, body] of Object.entries(classes)) {
+    for (const [propName, prop] of Object.entries(asFindingMap(asFindingMap(body).properties))) {
+      const p = asFindingMap(prop);
+      const allowed = asFindingList(p.allowed).map(String);
+      if (on("unit-on-non-number") && p.unit && p.type !== "number") {
+        push("unit-on-non-number", "warning", "exact",
+          { kind: "property", key: `${className}.${propName}`, name: propName, className },
+          `${className}.${propName} has a unit ("${p.unit}") but its type is ${p.type || "unset"}, not number.`);
+      }
+      if (on("duplicate-allowed-values") && allowed.length) {
+        const seen = new Set();
+        for (const v of allowed) {
+          const key = consistencyNormalizeText(v);
+          if (seen.has(key)) {
+            push("duplicate-allowed-values", "warning", "exact",
+              { kind: "property", key: `${className}.${propName}|${key}`, name: propName, className },
+              `${className}.${propName} lists the allowed value "${v}" more than once.`);
+          }
+          seen.add(key);
+        }
+      }
+      if (on("single-value-allowed-list") && allowed.length === 1) {
+        push("single-value-allowed-list", "note", "exact",
+          { kind: "property", key: `${className}.${propName}`, name: propName, className },
+          `${className}.${propName} has exactly one allowed value ("${allowed[0]}"), so it cannot distinguish anything.`);
+      }
+    }
+  }
+
+  return out;
+}
+
+// --- Tier B: text checks ---------------------------------------------------
+// Rules store their conditions as prose, and actions store their effect and
+// verification the same way -- that is the model's own grammar, not an
+// oversight, and it is why the exact tier cannot reach the contradictions that
+// matter most. These checks tokenise that prose and match it against the model.
+// Deterministic, but fallible: a finding here says "these words do not line up
+// with the model", which is usually a real contradiction and occasionally a
+// turn of phrase. Hence `warning`, and hence a kill switch per check.
+
+const COPULA = /\b(?:is|are|was|were|be|becomes|become|equals|equal)\b/i;
+const SEGMENT_SPLIT = /,|;|\bor\b|\band\b|\bbut\b|\bthen\b/i;
+const NEGATION = new Set(["not", "no", "longer", "never", "already", "still", "only", "also"]);
+// The only words allowed to stand between a class mention and a property
+// mention while still counting as "this class's property": determiners and
+// the handful of adjectives an expert naturally writes there.
+const CONSISTENCY_PROPERTY_FILLERS = new Set([
+  "the", "a", "an", "its", "their", "this", "that", "s", "current", "new",
+  "own", "overall", "latest", "record", "recorded",
+]);
+const CONSISTENCY_PREPOSITIONS = new Set([
+  "to", "by", "with", "from", "against", "into", "for", "on", "at", "in",
+  "onto", "upon", "via", "through", "across", "over", "under", "about",
+]);
+// A camelCase run in prose is almost always a field reference rather than an
+// English word -- `executedAt`, `acknowledgedAt`, `deadlineAt`. That specificity
+// is what makes unknown-property-reference safe enough to report; a bare
+// lowercase word like "findings" is indistinguishable from ordinary prose and
+// is deliberately not chased.
+const CAMEL_IDENTIFIER = /\b[a-z][a-z0-9]*(?:[A-Z][A-Za-z0-9]*)+\b/g;
+
+// Everything in the model that a camelCase identifier could legitimately name.
+function consistencyKnownIdentifiers(index) {
+  const known = new Set();
+  const add = (s) => { const k = consistencyNormalizeText(s); if (k) known.add(k); };
+  for (const [className, body] of Object.entries(index.classes)) {
+    add(className);
+    for (const alias of asFindingList(asFindingMap(body).aliases)) add(alias);
+    for (const propName of Object.keys(asFindingMap(asFindingMap(body).properties))) add(propName);
+  }
+  for (const rel of index.relationships) add(rel.name);
+  for (const name of Object.keys(index.rules)) add(name);
+  for (const name of Object.keys(index.actions)) add(name);
+  return known;
+}
+
+// What a sentence asserts about ONE named property: the alternatives that
+// follow the copula *immediately after that property is mentioned*.
+//
+// Adjacency is the entire precision story here. A first attempt scanned for
+// any copula anywhere in the text, which meant "Emergency Change is executed
+// against the affected Configuration Item" reported `ConfigurationItem.status`
+// as being required to equal "executed against". Requiring the copula to
+// follow the property mention within a token or two turns that from a
+// coin-flip into a claim worth making: "<property> is/becomes <value>" is a
+// statement about that property, and almost nothing else is.
+//
+// Negation is stripped rather than skipped, because "status is not resolved"
+// still names a value the property ought to allow.
+function consistencyAssertedPhrasesAt(tokens, at) {
+  let k = at;
+  // "must be", "should be", "has been", "set to" -- one filler word then the
+  // copula. Anything longer stops being an assertion about this property.
+  if (k < tokens.length && /^(?:must|should|will|shall|has|have|had)$/.test(tokens[k]) &&
+      k + 1 < tokens.length && /^(?:be|been)$/.test(tokens[k + 1])) k += 2;
+  else if (k < tokens.length && tokens[k] === "set" && k + 1 < tokens.length && tokens[k + 1] === "to") k += 2;
+  else if (k < tokens.length && /^(?:is|are|was|were|be|becomes|become|equals|equal|remains|remain)$/.test(tokens[k])) k += 1;
+  else return [];
+
+  while (k < tokens.length && NEGATION.has(tokens[k])) k++;
+  const segments = [];
+  let current = [];
+  for (const token of tokens.slice(k, k + 8)) {
+    if (token === "or" || token === "and") { if (current.length) segments.push(current); current = []; continue; }
+    current.push(token);
+  }
+  if (current.length) segments.push(current);
+  return segments.length ? [segments.map((s) => s.slice(0, 3))] : [];
+}
+
+const tokensStartWith = (tokens, prefix) =>
+  prefix.length > 0 && prefix.length <= tokens.length && prefix.every((w, i) => tokens[i] === w);
+
+function consistencyTextChecks(index, options) {
+  const out = [];
+  const on = (check) => CONSISTENCY_CHECKS[check];
+  const push = (...args) => out.push(makeFinding(...args));
+  if (!on("value-not-allowed") && !on("unknown-property-reference") &&
+      !on("unreachable-from-action-input") && !on("effect-verification-mismatch") &&
+      !on("unknown-class-reference")) return out;
+
+  const known = consistencyKnownIdentifiers(index);
+
+  // Every free-text field in the model, tagged with what owns it.
+  const texts = [];
+  for (const [ruleName, rule] of Object.entries(index.rules)) {
+    for (const [i, condition] of asFindingList(asFindingMap(rule).conditions).entries()) {
+      texts.push({ kind: "rule", owner: ruleName, field: `condition ${i + 1}`, key: `${ruleName}#${i}`, text: String(condition || "") });
+    }
+  }
+  for (const [actionName, action] of Object.entries(index.actions)) {
+    const body = asFindingMap(action);
+    if (body.effect) texts.push({ kind: "action", owner: actionName, field: "effect", key: `${actionName}#effect`, text: String(body.effect) });
+    if (body.verification) texts.push({ kind: "action", owner: actionName, field: "verification", key: `${actionName}#verification`, text: String(body.verification) });
+  }
+
+  for (const entry of texts) {
+    const mentioned = consistencyMentionedClasses(index, entry.text);
+    const tokens = consistencyTokens(entry.text);
+
+    // value-not-allowed -- the check that motivated this whole feature.
+    //
+    // Three things have to line up before anything is reported, and each one
+    // was added because its absence produced nonsense on the corpus:
+    //   1. the property is mentioned as a *maximal* phrase, so `status` does
+    //      not match inside `declarationStatus`;
+    //   2. the property is attributed to the nearest class named before it, so
+    //      "Emergency Change status becomes executed" is a claim about
+    //      EmergencyChange and not about every other class in the sentence
+    //      that also happens to have a `status`;
+    //   3. a copula follows the property mention immediately (§
+    //      consistencyAssertedPhrases), so the value really is being asserted
+    //      *of that property*.
+    if (CONSISTENCY_CHECKS["value-not-allowed"]) {
+      const classSpans = consistencyClassSpans(index, tokens);
+      const propertyCandidates = [];
+      const seenProperty = new Set();
+      for (const body of Object.values(index.classes)) {
+        for (const propName of Object.keys(asFindingMap(asFindingMap(body).properties))) {
+          const key = consistencyNormalizeText(propName);
+          if (!key || seenProperty.has(key)) continue;
+          seenProperty.add(key);
+          propertyCandidates.push({ propName, tokens: consistencyTokens(propName) });
+        }
+      }
+      for (const span of consistencyMatchSpans(tokens, propertyCandidates)) {
+        // The class has to be named *immediately* before the property, with
+        // nothing between them but determiners. A wider window looked
+        // reasonable and was not: "...to mitigate the Incident, and status
+        // becomes executed" then reads as a claim about `Incident.status`,
+        // when the sentence is plainly still talking about the Emergency
+        // Change it opened with. A bare property mention several words after
+        // some class name is genuinely ambiguous, and this check declines to
+        // guess rather than reporting a contradiction that is not there.
+        let owner = null;
+        for (const classSpan of classSpans) {
+          if (classSpan.end > span.start) break;
+          const gap = tokens.slice(classSpan.end, span.start);
+          if (gap.length <= 2 && gap.every((w) => CONSISTENCY_PROPERTY_FILLERS.has(w))) owner = classSpan;
+        }
+        if (!owner) continue;
+        const properties = asFindingMap(asFindingMap(index.classes[owner.className]).properties);
+        const propName = Object.keys(properties).find((p) => consistencyNormalizeText(p) === consistencyNormalizeText(span.propName));
+        if (!propName) continue;
+        const allowed = asFindingList(asFindingMap(properties[propName]).allowed).map(String).filter(Boolean);
+        if (!allowed.length) continue;
+        const allowedTokens = allowed.map((v) => consistencyTokens(v));
+        for (const segments of consistencyAssertedPhrasesAt(tokens, span.end)) {
+          // The leading alternative is judged on its own. Later ones are
+          // judged only once the leading one matched an allowed value -- that
+          // is what establishes the sentence really is enumerating this
+          // property's values rather than running on into unrelated prose.
+          let enumerating = false;
+          for (const [pos, phrase] of segments.entries()) {
+            if (allowedTokens.some((a) => tokensStartWith(phrase, a))) { enumerating = true; continue; }
+            if (pos > 0 && (!enumerating || phrase.length > 2)) break;
+            const head = phrase[0];
+            if (!head || CONSISTENCY_NON_VALUE_WORDS.has(head)) break;
+            // "status is updated to ...", "is executed against ..." -- a verb
+            // taking a preposition is prose describing what happens, not a
+            // controlled value being named.
+            if (phrase.length > 1 && CONSISTENCY_PREPOSITIONS.has(phrase[1])) break;
+            const shown = phrase.slice(0, 2).join(" ");
+            push("value-not-allowed", "error", "text",
+              { kind: entry.kind, key: `${entry.key}|${owner.className}.${propName}|${shown}`, name: entry.owner, className: owner.className },
+              `${entry.kind === "rule" ? "Rule" : "Action"} "${entry.owner}" (${entry.field}) requires ${owner.className}.${propName} to be "${shown}", but that property allows only: ${allowed.join(", ")}.`,
+              `Either add "${shown}" to the allowed values, or use one that is already there. Do not drop the condition to make this go away.`);
+            break;
+          }
+        }
+      }
+    }
+
+    // unknown-property-reference -- a camelCase field name that the model does
+    // not have anywhere. run-02's report has three of these on record
+    // (`acknowledgedAt`, `executedAt`, `findings`), each one an action
+    // promising to read or write something that does not exist.
+    if (on("unknown-property-reference")) {
+      for (const raw of entry.text.match(CAMEL_IDENTIFIER) || []) {
+        const key = consistencyNormalizeText(raw);
+        if (!key || known.has(key)) continue;
+        push("unknown-property-reference", "warning", "text",
+          { kind: entry.kind, key: `${entry.key}|${key}`, name: entry.owner },
+          `${entry.kind === "rule" ? "Rule" : "Action"} "${entry.owner}" (${entry.field}) refers to "${raw}", which is not a property, relationship, class, rule or action in this model.`,
+          `Add it as a property of the class it belongs to, or reword the text to use something the model actually has.`);
+      }
+    }
+
+    if (on("unknown-class-reference")) {
+      for (const raw of entry.text.match(/\b(?:[A-Z][a-z]+\s+){1,3}[A-Z][a-z]+\b/g) || []) {
+        const key = consistencyNormalizeText(raw);
+        if (!key || known.has(key)) continue;
+        push("unknown-class-reference", "warning", "text",
+          { kind: entry.kind, key: `${entry.key}|${key}`, name: entry.owner },
+          `${entry.kind === "rule" ? "Rule" : "Action"} "${entry.owner}" (${entry.field}) mentions "${raw}", which is not a class in this model.`);
+      }
+    }
+  }
+
+  // unreachable-from-action-input -- an action's preconditions, effect or
+  // verification talking about a class the agent cannot actually get to from
+  // the action's own input. This is the defect issue #75's normalizer
+  // diagnosed correctly in run-03 and then "fixed" by rewording the rule so it
+  // *read* as reachable, which is why the message below says what it says.
+  if (on("unreachable-from-action-input")) {
+    for (const [actionName, action] of Object.entries(index.actions)) {
+      const body = asFindingMap(action);
+      const input = body.input;
+      if (!input || !index.classes[input]) continue;
+      const sources = [];
+      for (const pre of asFindingList(body.preconditions)) {
+        const rule = index.rules[pre];
+        if (!rule) continue;
+        for (const condition of asFindingList(asFindingMap(rule).conditions)) {
+          sources.push({ where: `precondition ${pre}`, text: String(condition || "") });
+        }
+      }
+      if (body.effect) sources.push({ where: "effect", text: String(body.effect) });
+      if (body.verification) sources.push({ where: "verification", text: String(body.verification) });
+
+      const reported = new Set();
+      for (const source of sources) {
+        for (const className of consistencyMentionedClasses(index, source.text)) {
+          if (className === input || reported.has(className)) continue;
+          if (consistencyReachable(index, input, className, index.outgoing)) continue;
+          reported.add(className);
+          const viaReverse = consistencyReachable(index, input, className, index.undirected);
+          push("unreachable-from-action-input", "warning", "text",
+            { kind: "action", key: `${actionName}|${className}`, name: actionName, className },
+            viaReverse
+              ? `Action "${actionName}" has input class ${input}, and its ${source.where} refers to ${className}, which is only reachable against the direction of the relationships between them.`
+              : `Action "${actionName}" has input class ${input}, and its ${source.where} refers to ${className}, which is not connected to it at all.`,
+            `Add or redirect a relationship so the agent can navigate from ${input} to ${className}. Rewording the text does not create the path it assumes.`);
+        }
+      }
+    }
+  }
+
+  // effect-verification-mismatch -- the verification checks a field the effect
+  // never claims to set. run-02: "verification requires executedAt present,
+  // but the effect only says status becomes executed."
+  if (on("effect-verification-mismatch")) {
+    for (const [actionName, action] of Object.entries(index.actions)) {
+      const body = asFindingMap(action);
+      if (!body.effect || !body.verification || !body.input) continue;
+      const properties = Object.keys(asFindingMap(asFindingMap(index.classes[body.input]).properties));
+      const effectTokens = consistencyTokens(body.effect);
+      const verificationTokens = consistencyTokens(body.verification);
+      for (const propName of properties) {
+        if (!consistencyContainsPhrase(verificationTokens, propName)) continue;
+        if (consistencyContainsPhrase(effectTokens, propName)) continue;
+        push("effect-verification-mismatch", "warning", "text",
+          { kind: "action", key: `${actionName}|${propName}`, name: actionName, className: body.input },
+          `Action "${actionName}" verifies ${body.input}.${propName}, but its effect never says that property changes.`,
+          `Either say in the effect what sets it, or verify something the effect actually does.`);
+      }
+    }
+  }
+
+  return out;
+}
+
+// The one entry point. `model` is a domain-model document -- what
+// buildDomainModel() returns for the live canvas, and what
+// parseDomainYamlImport() returns for a file or an agent tool call. Options:
+//   droppedReferences  relationships the import path skipped before they ever
+//                      reached the model, so they cannot be found in it
+//   createdNow         class names created by the edit being reported on, held
+//                      exempt from class-no-relationships for one sweep
+function computeOntologyFindings(model, options = {}) {
+  const index = buildConsistencyIndex(model);
+  const findings = [...consistencyExactChecks(index, options), ...consistencyTextChecks(index, options)];
+  // Stable order: severity, then check, then id. The list is compared between
+  // sweeps to decide what is new (issue #84's delta scoping), so a stable
+  // order is not cosmetic -- it is what makes those comparisons meaningful.
+  findings.sort((a, b) =>
+    SEVERITY_ORDER[a.severity] - SEVERITY_ORDER[b.severity] ||
+    a.check.localeCompare(b.check) ||
+    a.id.localeCompare(b.id));
+  // Two checks can legitimately produce the same id for the same defect seen
+  // twice (a relationship listed twice with two bad endpoints, say).
+  const seen = new Set();
+  return findings.filter((f) => (seen.has(f.id) ? false : (seen.add(f.id), true)));
+}
+
+function summarizeFindings(findings) {
+  const counts = { error: 0, warning: 0, note: 0 };
+  for (const f of findings) counts[f.severity] = (counts[f.severity] || 0) + 1;
+  return { ...counts, total: findings.length, worst: counts.error ? "error" : counts.warning ? "warning" : counts.note ? "note" : null };
+}
+
+// ---------------------------------------------------------------------------
 // Ontology Change Review — dialog UI (issue #74). Read-only throughout:
 // opening/navigating/switching tabs/toggling graph mode only ever reads
 // history.past and calls the pure functions above (buildDomainModel,
@@ -6586,6 +7450,205 @@ document.getElementById("review-changes-undo").addEventListener("click", () => {
   undo();
   closeReviewChanges();
 });
+
+// ---------------------------------------------------------------------------
+// Consistency checker — panel UI (issue #83). Read-only throughout: opening
+// it, re-checking, and toggling the model pass only ever call
+// computeOntologyFindings() over buildDomainModel() and never touch `state`
+// or pushHistory, so looking at the findings can never itself become an edit
+// — the same guarantee the Review changes dialog gives.
+//
+// The badge is deliberately quiet. A model three questions old is *supposed*
+// to have notes; if the button shouted about them, the honest response would
+// be to stop reading it. Only errors and warnings colour it.
+// ---------------------------------------------------------------------------
+// What the most recent YAML import could not store, held only until the next
+// sweep reads it (issue #83 §4). Not part of `state`: it describes an event,
+// not the model, so it must never reach a saved file or an undo step. Declared
+// here, with the checker's other module state, rather than next to
+// commitYamlImport -- updateConsistencyBadge() reads it and runs from boot.
+let lastDroppedReferences = [];
+const CONSISTENCY_LLM_STORAGE_KEY = "kg-consistency-llm";
+let consistencyOverlayOpen = false;
+let consistencyFindings = [];
+let consistencyLlmFindings = []; // kept separate: cleared by any edit, never cached across one
+let consistencyLlmStatusKey = null;
+let consistencyLlmPending = false;
+
+function consistencyLlmEnabled() {
+  try { return localStorage.getItem(CONSISTENCY_LLM_STORAGE_KEY) === "1"; }
+  catch (err) { return false; /* storage unavailable — stay off, the safe direction */ }
+}
+
+function setConsistencyLlmEnabled(on) {
+  try { localStorage.setItem(CONSISTENCY_LLM_STORAGE_KEY, on ? "1" : "0"); } catch (err) { /* best effort */ }
+}
+
+// Recomputed from every mutation site via updateUndoRedoButtons(). The model
+// pass's findings are dropped here on purpose: they were about the previous
+// model, and silently carrying them forward would show the user an
+// observation about something they have just changed.
+function updateConsistencyBadge({ recompute = true } = {}) {
+  if (recompute) {
+    consistencyFindings = computeOntologyFindings(buildDomainModel(), { droppedReferences: lastDroppedReferences });
+    lastDroppedReferences = [];
+    // The model pass's observations were about the *previous* model. Carrying
+    // them across an edit would show the user a remark about something they
+    // have just changed, so they are dropped rather than aged. A language
+    // toggle is not an edit, which is why it passes recompute: false.
+    consistencyLlmFindings = [];
+    consistencyLlmStatusKey = null;
+  }
+  const summary = summarizeFindings(consistencyFindings);
+  const button = document.getElementById("btn-consistency");
+  if (!button) return;
+  const actionable = summary.error + summary.warning;
+  button.textContent = actionable > 0 ? t("consistencyButtonWithCount", actionable) : t("consistencyButton");
+  button.classList.toggle("has-error", summary.error > 0);
+  button.classList.toggle("has-warning", summary.error === 0 && summary.warning > 0);
+  if (consistencyOverlayOpen) renderConsistencyDialog();
+}
+
+function consistencyFindingRow(finding) {
+  const row = document.createElement("div");
+  row.className = `finding-item finding-item--${finding.severity}`;
+  const head = document.createElement("div");
+  head.className = "finding-check";
+  // The model pass's observations are labelled wherever they appear. A reader
+  // has to be able to tell a deterministic finding from a probabilistic one
+  // without going looking for the difference.
+  head.textContent = finding.tier === "llm" ? `${finding.check} · model` : finding.check;
+  const body = document.createElement("div");
+  body.textContent = finding.message;
+  row.append(head, body);
+  if (finding.suggestion) {
+    const suggestion = document.createElement("div");
+    suggestion.className = "finding-suggestion";
+    suggestion.textContent = finding.suggestion;
+    row.appendChild(suggestion);
+  }
+  return row;
+}
+
+function renderConsistencyDialog() {
+  document.getElementById("consistency-title").textContent = t("consistencyTitle");
+  document.getElementById("consistency-close").textContent = t("consistencyClose");
+  document.getElementById("consistency-llm-text").textContent = t("consistencyLlmToggle");
+  document.getElementById("consistency-llm-run").textContent = t("consistencyLlmRun");
+  document.getElementById("consistency-llm-toggle").checked = consistencyLlmEnabled();
+
+  const all = [...consistencyFindings, ...consistencyLlmFindings];
+  const summary = summarizeFindings(all);
+  document.getElementById("consistency-summary").textContent =
+    all.length === 0 ? t("consistencyNone") : t("consistencySummary", summary.error, summary.warning, summary.note);
+
+  const list = document.getElementById("consistency-list");
+  list.textContent = "";
+  for (const [severity, titleKey] of [["error", "consistencyGroupError"], ["warning", "consistencyGroupWarning"], ["note", "consistencyGroupNote"]]) {
+    const group = all.filter((f) => f.severity === severity);
+    if (!group.length) continue;
+    const title = document.createElement("div");
+    title.className = "finding-group-title";
+    title.textContent = t(titleKey);
+    list.appendChild(title);
+    for (const finding of group) list.appendChild(consistencyFindingRow(finding));
+  }
+
+  const runButton = document.getElementById("consistency-llm-run");
+  const enabled = consistencyLlmEnabled();
+  const connected = Boolean(agentState && agentState.connected);
+  runButton.style.display = enabled ? "" : "none";
+  runButton.disabled = !connected || consistencyLlmPending;
+  const status = document.getElementById("consistency-llm-status");
+  status.textContent = !enabled ? ""
+    : consistencyLlmStatusKey ? t(consistencyLlmStatusKey, consistencyLlmFindings.length)
+    : connected ? "" : t("consistencyLlmNotConnected");
+}
+
+function openConsistency() {
+  if (isAnyModalOpen()) return;
+  consistencyOverlayOpen = true;
+  renderConsistencyDialog();
+  document.getElementById("consistency-overlay").style.display = "flex";
+}
+
+function closeConsistency() {
+  consistencyOverlayOpen = false;
+  document.getElementById("consistency-overlay").style.display = "none";
+}
+
+// --- Tier C: the optional model pass ---------------------------------------
+// Off unless the user turns it on, and user-triggered even then rather than
+// firing on every keystroke-sized edit. Its findings are merged into the same
+// list, tagged `tier: "llm"`, and dropped the moment the model changes. It
+// cannot block, delay or roll back anything: the deterministic findings are
+// already on screen before this runs, and every failure path leaves them
+// exactly as they were.
+const CONSISTENCY_LLM_PROMPT = `You are reviewing a domain model for internal contradictions.
+
+You will be given a domain model in YAML: classes with properties, directed relationships, named rules, and actions with an input class, preconditions, an effect and a verification.
+
+Report only CONTRADICTIONS AND INCONSISTENCIES INSIDE THIS MODEL — a rule that requires something the model cannot provide, an action whose verification cannot follow from its effect, two statements that cannot both hold, a relationship direction that makes a stated rule unusable.
+
+Do NOT report missing content, do NOT suggest new classes or properties the model "should" have, and do NOT comment on style, naming or completeness. An unfinished model is not a broken one. If you find nothing, return an empty array.
+
+Return exactly one \`\`\`json block containing an array, and nothing else:
+
+[{"severity":"warning","subject":"the rule or action involved","message":"one sentence naming both halves of the contradiction"}]`;
+
+async function runConsistencyLlmCheck() {
+  if (consistencyLlmPending || !agentState.connected) return;
+  consistencyLlmPending = true;
+  consistencyLlmStatusKey = "consistencyLlmRunning";
+  renderConsistencyDialog();
+  try {
+    const message = await callAgentChatRaw([
+      { role: "system", content: CONSISTENCY_LLM_PROMPT },
+      { role: "user", content: buildDomainYamlExport() },
+    ]);
+    const reply = (message && typeof message.content === "string") ? message.content : "";
+    const blocks = [...reply.matchAll(/```(?:json)?\s*\n([\s\S]*?)```/g)].map((m) => m[1].trim());
+    const braced = reply.slice(reply.indexOf("["), reply.lastIndexOf("]") + 1);
+    let parsed = null;
+    for (const block of [...blocks, braced].filter(Boolean)) {
+      try {
+        const value = JSON.parse(block);
+        if (Array.isArray(value)) { parsed = value; break; }
+      } catch (err) { /* try the next candidate */ }
+    }
+    if (!parsed) throw new Error("no parseable findings array");
+    consistencyLlmFindings = parsed.slice(0, 25).map((raw, i) => ({
+      id: `llm:${i}:${String((raw && raw.subject) || "")}`,
+      check: "model-review",
+      tier: "llm",
+      // Never `error`. A probabilistic observation does not get to outrank a
+      // deterministic contradiction in the same list.
+      severity: "warning",
+      subject: { kind: "model", key: `llm-${i}`, name: String((raw && raw.subject) || "") },
+      message: String((raw && raw.message) || "").slice(0, 400),
+    })).filter((f) => f.message);
+    consistencyLlmStatusKey = "consistencyLlmDone";
+  } catch (err) {
+    consistencyLlmFindings = [];
+    consistencyLlmStatusKey = "consistencyLlmFailed";
+  } finally {
+    consistencyLlmPending = false;
+    if (consistencyOverlayOpen) renderConsistencyDialog();
+  }
+}
+
+document.getElementById("btn-consistency").addEventListener("click", () => openConsistency());
+document.getElementById("consistency-close").addEventListener("click", () => closeConsistency());
+document.getElementById("consistency-overlay").addEventListener("click", (e) => {
+  if (e.target === document.getElementById("consistency-overlay")) closeConsistency();
+});
+document.getElementById("consistency-llm-toggle").addEventListener("change", (e) => {
+  setConsistencyLlmEnabled(e.target.checked);
+  consistencyLlmFindings = [];
+  consistencyLlmStatusKey = null;
+  renderConsistencyDialog();
+});
+document.getElementById("consistency-llm-run").addEventListener("click", () => { runConsistencyLlmCheck(); });
 
 // ---------------------------------------------------------------------------
 // Welcome popup + Help guide (issue #78). Two independent, deliberately
@@ -7440,9 +8503,20 @@ function planYamlImport(parsed) {
   const labelIsKnown = new Set(classLabels);
   for (const n of state.nodes) labelIsKnown.add(n.label);
   const relationshipPlans = [];
+  // Relationships this import cannot store, because an endpoint class is
+  // neither declared here nor already on the canvas. They used to be dropped
+  // with a bare `continue` and nothing said so -- not to the user, and not to
+  // the agent, which is told "Applied. Added 3, updated 2" while an edge it
+  // just wrote silently vanished (issue #83 §1). Collected rather than
+  // discarded so the consistency checker can report them; they cannot be found
+  // by inspecting the resulting model, because they never reach it.
+  const droppedReferences = [];
   for (const rel of parsed.relationships) {
     if (!rel || typeof rel !== "object") continue;
-    if (!labelIsKnown.has(rel.from) || !labelIsKnown.has(rel.to)) continue; // dangling reference — skip
+    if (!labelIsKnown.has(rel.from) || !labelIsKnown.has(rel.to)) {
+      droppedReferences.push({ name: rel.name, from: rel.from, to: rel.to });
+      continue;
+    }
     const existing = state.edges.find((e) => {
       const src = state.nodes.find((n) => n.id === e.source);
       const tgt = state.nodes.find((n) => n.id === e.target);
@@ -7475,7 +8549,7 @@ function planYamlImport(parsed) {
     removedCount = removedNodes + removedEdges + removedRules + removedActions;
   }
 
-  return { classPlans, relationshipPlans, rulePlans, actionPlans, addedCount, changedCount, removedCount };
+  return { classPlans, relationshipPlans, rulePlans, actionPlans, addedCount, changedCount, removedCount, droppedReferences };
 }
 
 // Upserts incoming properties (name -> {type, unit, allowed}) into an
@@ -7527,6 +8601,11 @@ function mergePropertiesByName(existingProperties, incomingByName) {
 function commitYamlImport(text, mode) {
   const before = snapshotState();
   const parsed = parseDomainYamlImport(text);
+  // Hand whatever this import cannot store to the next consistency sweep. It
+  // is recorded here rather than inside the loop below because that loop skips
+  // these silently by design, and by the time it has finished there is nothing
+  // left to see (issue #83 §1).
+  lastDroppedReferences = planYamlImport(parsed).droppedReferences;
   const nextShelfPosition = computeImportShelf();
   const fieldLevelMerge = mode === "agent-merge";
 
@@ -10541,6 +11620,29 @@ window.__kg = {
     getActiveTab: () => reviewActiveTab,
     getGraphMode: () => reviewGraphMode,
     computeReviewGraphDiffSets,
+  },
+  // Consistency checker (issue #83). The engine is exposed as the pure
+  // function it is, so tests can run it over an arbitrary domain-model
+  // document -- including the three frozen anchor models under
+  // tests/evals/results/runs/ -- without driving any UI or touching `state`.
+  consistency: {
+    compute: computeOntologyFindings,
+    summarize: summarizeFindings,
+    checks: CONSISTENCY_CHECKS,
+    // Live findings for the current canvas, recomputed on demand.
+    forCurrentGraph: (options) => computeOntologyFindings(buildDomainModel(), options),
+    // Panel surface, mirroring the reviewChanges sub-object's convention.
+    open: openConsistency,
+    close: closeConsistency,
+    isOpen: () => consistencyOverlayOpen,
+    current: () => [...consistencyFindings],
+    llm: {
+      isEnabled: consistencyLlmEnabled,
+      setEnabled: setConsistencyLlmEnabled,
+      run: runConsistencyLlmCheck,
+      results: () => [...consistencyLlmFindings],
+      storageKey: CONSISTENCY_LLM_STORAGE_KEY,
+    },
   },
   // Welcome popup + Help guide (issue #78).
   welcome: {

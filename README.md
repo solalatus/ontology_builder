@@ -30,6 +30,16 @@ bring-your-own-key chat panel that can interview a user and build/edit that
 same domain model live on the canvas through tool calls, with its own
 conversation persisted across reloads.
 
+A **consistency checker** runs over the model after every edit — yours or the
+agent's — and reports contradictions it can prove: a rule requiring a value its
+property does not allow, an action whose preconditions reason about a class
+unreachable from its own input, a relationship silently dropped because an
+endpoint class does not exist. It is deterministic and needs no API key; a
+`Check` button in the toolbar opens the findings, and stays quiet while a model
+is merely unfinished. An optional pass that also asks the connected model to
+look for contradictions can be switched on from the same panel; it is off by
+default.
+
 ## Interview field guide
 
 `Ontology_Interview_One_Page_Guide.pdf` is a printable one-page cheat sheet
