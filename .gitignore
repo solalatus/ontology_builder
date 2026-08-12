@@ -20,3 +20,11 @@ node_modules/
 # environment and hardcodes nothing.
 *.tmp.sh
 *.tmp.mjs
+
+# Transient per-run scratch from a live eval batch. `progress.json` is a live
+# status file rewritten every turn, and `checkpoint/` is the partial transcript
+# and model kept so an interrupted run is recoverable. Both are superseded by
+# the run's real artifacts on a clean finish, so the repo tracks the results
+# and not the machinery that produced them.
+tests/evals/results/baselines/*/*/*/progress.json
+tests/evals/results/baselines/*/*/*/checkpoint/
