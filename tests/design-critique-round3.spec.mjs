@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { withPage, addNodeViaDblClick, waitForComputedStyle } from "./lib/page.mjs";
+import { withPage, addNodeViaDblClick, waitForComputedStyle, waitForStyleSettled, settle } from "./lib/page.mjs";
 
 // Round 3 of the 2026-08 design work: five user-reported items, each paired
 // with both a visual/token assertion and a functional one where relevant.
@@ -114,8 +114,7 @@ test("fit-to-view never places a node's top edge under the toolbar", async () =>
   for (const width of [1400, 480]) { // 480 forces the toolbar to wrap onto extra rows, growing its height
     await withPage(async (page) => {
       await addNodeViaDblClick(page, 300, 300, "Alpha");
-      await page.click("#btn-fit-view");
-      await page.waitForTimeout(50);
+      await settle(page, () => page.click("#btn-fit-view"));
 
       const nodeTopScreen = await page.evaluate(() => {
         const n = window.__kg.state.nodes[0];
@@ -133,8 +132,7 @@ test("fit-to-view never places a node's top edge under the toolbar", async () =>
 test("fit-to-view still centers content reasonably (not pushed entirely to one edge) once the toolbar is accounted for", async () => {
   await withPage(async (page) => {
     await addNodeViaDblClick(page, 300, 300, "Alpha");
-    await page.click("#btn-fit-view");
-    await page.waitForTimeout(50);
+    await settle(page, () => page.click("#btn-fit-view"));
 
     const nodeScreen = await page.evaluate(() => {
       const n = window.__kg.state.nodes[0];
@@ -220,8 +218,7 @@ test("the Domain Model button's emphasis holds in both themes", async () => {
   await withPage(async (page) => {
     const darkBorder = await computedStyle(page, "#btn-domain-model", "borderColor");
     await page.click("#btn-theme-toggle");
-    await page.waitForTimeout(200); // let the border-color transition finish before sampling it
-    const lightBorder = await computedStyle(page, "#btn-domain-model", "borderColor");
+    const lightBorder = await waitForStyleSettled(page, "#btn-domain-model", "borderColor");
     assert.notEqual(darkBorder, lightBorder, "the accent token differs between themes, so the button's border should too");
   });
 });

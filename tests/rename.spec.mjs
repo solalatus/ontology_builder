@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { withPage, addNodeViaDblClick, addNodeViaButton, createEdgeViaConnectMode, dragNode } from "./lib/page.mjs";
+import { withPage, addNodeViaDblClick, addNodeViaButton, createEdgeViaConnectMode, dragNode, waitForViewSettled } from "./lib/page.mjs";
 
 async function historyLengths(page) {
   return page.evaluate(() => ({ past: window.__kg.history.past.length, future: window.__kg.history.future.length }));
@@ -207,7 +207,7 @@ test("the rename field's anchor tracks the node after zoom/pan, matching worldTo
     await page.mouse.down();
     await page.mouse.move(box.x + 350, box.y + 350, { steps: 5 });
     await page.mouse.up();
-    await page.waitForTimeout(50);
+    await waitForViewSettled(page);
 
     const expected = await page.evaluate(() => {
       const n = window.__kg.state.nodes[0];
@@ -286,7 +286,7 @@ test("a rename field near the top of the viewport is clamped below the toolbar, 
     await page.mouse.down();
     await page.mouse.move(box.x + 20, box.y + 100, { steps: 10 });
     await page.mouse.up();
-    await page.waitForTimeout(50);
+    await waitForViewSettled(page);
 
     const nodeScreen = await page.evaluate(() => {
       const n = window.__kg.state.nodes[0];
@@ -327,7 +327,7 @@ test("renaming a node holds up under zoom + pan-near-edge combined: the field an
     await page.mouse.down();
     await page.mouse.move(box.x + 100, box.y + 300, { steps: 8 });
     await page.mouse.up();
-    await page.waitForTimeout(50);
+    await waitForViewSettled(page);
 
     const trueAnchor = await page.evaluate(() => {
       const n = window.__kg.state.nodes.find((l) => l.label === "Member");
@@ -366,7 +366,7 @@ test("a rename field near the right/bottom viewport edge is clamped fully on-scr
     await page.mouse.down();
     await page.mouse.move(box.x + viewport.width - 15, box.y + viewport.height - 10, { steps: 10 });
     await page.mouse.up();
-    await page.waitForTimeout(50);
+    await waitForViewSettled(page);
 
     const nodeScreen = await page.evaluate(() => {
       const n = window.__kg.state.nodes[0];

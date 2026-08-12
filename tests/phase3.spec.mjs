@@ -141,7 +141,9 @@ test("long-press delete is also exactly one undo step", async () => {
     const box = await page.locator("#canvas").boundingBox();
     await page.mouse.move(box.x + 300, box.y + 300);
     await page.mouse.down();
-    await page.waitForTimeout(700);
+    // LONG_PRESS_MS is a real 600ms timer, so the button stays down -- but wait
+    // for the deletion it fires, not a wall-clock 700ms (issue #91).
+    await page.waitForFunction(() => window.__kg.state.nodes.length === 0);
     await page.mouse.up();
     assert.equal((await page.evaluate(() => window.__kg.state.nodes)).length, 0);
 

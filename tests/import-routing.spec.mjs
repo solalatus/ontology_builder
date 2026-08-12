@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { withPage, addNodeViaDblClick } from "./lib/page.mjs";
+import { withPage, addNodeViaDblClick, applyImport } from "./lib/page.mjs";
 
 // Import routing — which file goes to which parser, and what happens to a
 // file that belongs to none of them (spec.md §5.3/§5.5).
@@ -134,7 +134,7 @@ test("An unimportable file cannot be used to wipe the graph", async () => {
     await dropFile(page, "a,b,c\n1,2,3\n", "data.csv");
     await page.waitForSelector("#import-overlay", { state: "visible" });
     await page.click("#import-cancel");
-    await page.waitForTimeout(100);
+    await page.waitForSelector("#import-overlay", { state: "hidden" });
 
     const labels = await page.evaluate(() => window.__kg.state.nodes.map((n) => n.label));
     assert.deepEqual(labels, ["Keep me"]);
@@ -146,7 +146,7 @@ test("The action buttons come back for the next, valid file", async () => {
     await dropFile(page, "a,b,c\n", "data.csv");
     await page.waitForSelector("#import-overlay", { state: "visible" });
     await page.click("#import-cancel");
-    await page.waitForTimeout(100);
+    await page.waitForSelector("#import-overlay", { state: "hidden" });
 
     await dropFile(page, TXT_DOC, "graph.txt");
     await page.waitForSelector("#import-overlay", { state: "visible" });
@@ -163,8 +163,7 @@ test("Dropping a .json opens the JSON importer", async () => {
   await withPage(async (page) => {
     await dropFile(page, JSON_DOC, "graph_v0001_2026-01-01T0000Z.json");
     await page.waitForSelector("#import-overlay", { state: "visible" });
-    await page.click("#import-merge");
-    await page.waitForTimeout(150);
+    await applyImport(page, "#import-merge");
 
     const nodes = await page.evaluate(() => window.__kg.state.nodes);
     assert.equal(nodes.length, 1);

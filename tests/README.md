@@ -53,6 +53,31 @@ is dev-only test tooling, same as Playwright.
 - `lib/page.mjs` — shared `withPage()` helper (opens `index.html`, fails
   the test on any console/page error, always closes the browser) and small
   UI-flow helpers reused across spec files.
+  `lib/page.mjs` also holds the waiting helpers that replaced this suite's
+  fixed `page.waitForTimeout(...)` sleeps (issue #91). A sleep asserts
+  "whatever had happened by t=150ms", which passes on an idle machine and
+  flakes under a loaded full-suite run; each helper waits for the event the
+  sleep was approximating, so it cannot sample mid-flight and it stops as soon
+  as the event lands:
+
+  | helper | waits for |
+  |---|---|
+  | `settle(page, fn)` / `waitForRender(page, since)` | a `render()` actually completed — `renderStats.frames` in index.html counts them and nothing in the app reads it |
+  | `applyImport(page, btn)` | the import dialog closed (which, since `runPendingImport()` commits inside the same click handler, is only observable once the commit ran) plus the repaint after it |
+  | `waitForDownloads(downloads, n)` | the download events arrived; reports how many did if they never all do |
+  | `waitForComputedStyle(page, sel, prop, expected)` | a style settled on a known value (tooltip fade-ins) |
+  | `waitForStyleSettled(page, sel, prop)` | a style stopped changing, returning the value it landed on — for "armed border must differ from ordinary", where the target is not known up front |
+  | `waitForGeometrySettled(page, sel)` | an element's box stopped moving, i.e. its CSS transition finished |
+  | `waitForViewSettled(page)` | the canvas pan/zoom transform stopped changing |
+
+  Twelve fixed sleeps deliberately remain, each with a comment saying why.
+  They fall into two kinds that no event wait can express: **negative
+  assertions** (proving a long-press delete *does not* fire means outlasting
+  the window in which it would have) and **gesture timing** (a slow drag whose
+  point is that it spans more than the app's 600ms `LONG_PRESS_MS`). Do not
+  convert those; a wait for an event that must never arrive is a wait that
+  never returns.
+
 - `lib/server.mjs` — tiny dependency-free static file server, used only by
   `phase4.spec.mjs` to exercise the OPFS storage backend for real (it
   throws under `file://`, see TODO.md's Phase 4 Log entry).

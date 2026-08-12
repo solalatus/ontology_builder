@@ -18,6 +18,8 @@ test("dblclick on an existing node does not create a duplicate", async () => {
     await addNodeViaDblClick(page, 300, 300, "Alpha");
     const box = await page.locator("#canvas").boundingBox();
     await page.mouse.dblclick(box.x + 300, box.y + 300);
+    // Negative assertion -- no second node may appear -- so there is no event to
+    // wait for, only a window to outlast (issue #91, category 3).
     await page.waitForTimeout(100);
     const nodes = await page.evaluate(() => window.__kg.state.nodes);
     assert.equal(nodes.length, 1);
@@ -171,7 +173,10 @@ test("long-press on a node deletes it", async () => {
     const box = await page.locator("#canvas").boundingBox();
     await page.mouse.move(box.x + 300, box.y + 300);
     await page.mouse.down();
-    await page.waitForTimeout(700);
+    // LONG_PRESS_MS is a real 600ms timer, so the button genuinely stays down --
+    // but wait for the deletion it fires rather than a wall-clock 700ms, so a
+    // press that never registers fails here and says so (issue #91).
+    await page.waitForFunction(() => window.__kg.state.nodes.length === 0);
     await page.mouse.up();
     const nodes = await page.evaluate(() => window.__kg.state.nodes);
     assert.equal(nodes.length, 0);
@@ -184,6 +189,8 @@ test("a short press (below long-press threshold) does not delete, just selects",
     const box = await page.locator("#canvas").boundingBox();
     await page.mouse.move(box.x + 300, box.y + 300);
     await page.mouse.down();
+    // Deliberately SHORT of the 600ms long-press threshold: the assertion is
+    // that a quick press does not delete, so the duration is the test.
     await page.waitForTimeout(100);
     await page.mouse.up();
     const nodes = await page.evaluate(() => window.__kg.state.nodes);
@@ -333,7 +340,7 @@ test("long-press on an edge deletes it", async () => {
     // midpoint between the two nodes, on the edge line
     await page.mouse.move(box.x + 490, box.y + 250);
     await page.mouse.down();
-    await page.waitForTimeout(700);
+    await page.waitForFunction(() => window.__kg.state.edges.length === 0);
     await page.mouse.up();
     const edges = await page.evaluate(() => window.__kg.state.edges);
     assert.equal(edges.length, 0);
@@ -383,6 +390,7 @@ test("dragging from a handle and releasing on empty canvas creates no edge and n
     await page.mouse.down();
     await page.mouse.move(box.x + 900, box.y + 700, { steps: 8 }); // empty canvas
     await page.mouse.up();
+    // Negative assertion: no inline editor may open. Nothing to await.
     await page.waitForTimeout(100);
     const editorCount = await page.locator(".kg-inline-input").count();
     const edges = await page.evaluate(() => window.__kg.state.edges);
@@ -399,6 +407,7 @@ test("dragging from a handle back onto its own node creates no self-loop edge", 
     await page.mouse.down();
     await page.mouse.move(box.x + 260, box.y + 260, { steps: 4 }); // still over Alpha
     await page.mouse.up();
+    // Negative assertion: no edge may be created. Nothing to await.
     await page.waitForTimeout(100);
     const edges = await page.evaluate(() => window.__kg.state.edges);
     assert.equal(edges.length, 0);

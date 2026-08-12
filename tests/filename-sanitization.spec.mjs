@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { APP_URL } from "./lib/page.mjs";
+import { APP_URL, waitForDownloads } from "./lib/page.mjs";
 import { launchChromium } from "./lib/browser.mjs";
 import { withPage } from "./lib/page.mjs";
 
@@ -157,7 +157,7 @@ test("An accented graph name reaches the saved filenames intact", async () => {
       window.__kg.actions.createNode(0, 0, "A");
     });
     await page.click("#btn-save-version");
-    await page.waitForTimeout(250);
+    await waitForDownloads(downloads, 3);
 
     // A real download still has to actually fire for each of the three
     // files -- this doesn't depend on the browser resolving the Unicode

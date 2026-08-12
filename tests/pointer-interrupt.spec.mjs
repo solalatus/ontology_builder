@@ -84,10 +84,13 @@ test("a pinch starting cancels a pending long-press-delete timer — the node su
     const box = await page.locator("#canvas").boundingBox();
 
     await dispatchTouch(page, [pe("pointerdown", 1, box.x + 400, box.y + 300)]);
+    // Real elapsed time on purpose: this test is about WHEN the second pointer
+    // arrives relative to the app's 600ms LONG_PRESS_MS, so the durations are
+    // the test itself, not a wait for an event (issue #91, category 3).
     await page.waitForTimeout(150); // well before the 600ms long-press threshold
     await dispatchTouch(page, [pe("pointerdown", 2, box.x + 20, box.y + 20, false)]);
 
-    await page.waitForTimeout(700); // past the long-press threshold
+    await page.waitForTimeout(700); // past the threshold: the node must still be there
     const nodeCount = await page.evaluate(() => window.__kg.state.nodes.length);
     assert.equal(nodeCount, 1, "the node must not be deleted once the interaction has moved on to a pinch");
   });
@@ -108,9 +111,11 @@ test("a pinch starting cancels a pending edge long-press-delete timer too", asyn
     await page.evaluate(() => window.__kg.actions.setMode("idle"));
 
     await dispatchTouch(page, [pe("pointerdown", 1, box.x + 450, box.y + 250)]); // edge midpoint
+    // Same deliberate timing as the test above: before the threshold...
     await page.waitForTimeout(150);
     await dispatchTouch(page, [pe("pointerdown", 2, box.x + 20, box.y + 20, false)]);
 
+    // ...then past it, to prove the delete never fires.
     await page.waitForTimeout(700);
     const edgeCount = await page.evaluate(() => window.__kg.state.edges.length);
     assert.equal(edgeCount, 1, "the edge must not be deleted once the interaction has moved on to a pinch");

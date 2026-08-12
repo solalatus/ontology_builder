@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { withPage, addNodeViaDblClick, addNodeViaButton, dragNode, createEdgeViaConnectMode } from "./lib/page.mjs";
+import { withPage, addNodeViaDblClick, addNodeViaButton, dragNode, createEdgeViaConnectMode, applyImport, settle } from "./lib/page.mjs";
 
 // Every other file in this suite verifies one feature or edge case in
 // isolation. This one is different on purpose: a single, long, realistic
@@ -105,8 +105,7 @@ test("a realistic end-to-end session across many features stays internally consi
     const historyBeforeLayout = await page.evaluate(() => window.__kg.history.past.length);
     const nodeCountBeforeLayout = (await page.evaluate(() => window.__kg.state.nodes)).length;
     const edgeCountBeforeLayout = (await page.evaluate(() => window.__kg.state.edges)).length;
-    await page.click("#btn-autolayout");
-    await page.waitForTimeout(150);
+    await settle(page, () => page.click("#btn-autolayout"));
     const historyAfterLayout = await page.evaluate(() => window.__kg.history.past.length);
     assert.equal(historyAfterLayout, historyBeforeLayout + 1, "autolayout is exactly one undo step");
     assert.equal((await page.evaluate(() => window.__kg.state.nodes)).length, nodeCountBeforeLayout);
@@ -115,7 +114,7 @@ test("a realistic end-to-end session across many features stays internally consi
     // --- Phase 7: Save Version — increments the version counter ---------
     const versionBefore = await page.evaluate(() => (window.__kg.state.meta ? window.__kg.state.meta.version : 0));
     await page.click("#btn-save-version");
-    await page.waitForTimeout(150);
+    await page.waitForFunction((v) => window.__kg.state.meta.version === v + 1, versionBefore);
     const versionAfter = await page.evaluate(() => window.__kg.state.meta.version);
     assert.equal(versionAfter, versionBefore + 1);
 
@@ -161,8 +160,7 @@ test("a realistic end-to-end session across many features stays internally consi
       document.getElementById("canvas").dispatchEvent(new DragEvent("drop", { bubbles: true, cancelable: true, dataTransfer: dt }));
     }, importText);
     await page.waitForSelector("#import-overlay", { state: "visible" });
-    await page.click("#import-merge");
-    await page.waitForTimeout(150);
+    await applyImport(page, "#import-merge");
 
     nodes = await page.evaluate(() => window.__kg.state.nodes);
     assert.equal(nodes.length, 4, "Dana was added, everyone else untouched");
@@ -177,8 +175,7 @@ test("a realistic end-to-end session across many features stays internally consi
     // --- Phase 11: Clear the graph, then undo it back ---------------------
     await page.waitForFunction(() => document.getElementById("btn-clear").disabled === false);
     await page.click("#btn-clear");
-    await page.click("#confirm-ok");
-    await page.waitForTimeout(50);
+    await settle(page, () => page.click("#confirm-ok"));
     assert.equal((await page.evaluate(() => window.__kg.state.nodes)).length, 0);
     assert.equal((await page.evaluate(() => window.__kg.state.edges)).length, 0);
 

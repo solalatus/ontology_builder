@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { withPage, addNodeViaDblClick, createEdgeViaConnectMode } from "./lib/page.mjs";
+import { withPage, addNodeViaDblClick, createEdgeViaConnectMode, settle } from "./lib/page.mjs";
 
 // issue #64 ("Crowded graph layout") follow-up feature: selecting a node
 // highlights every edge touching it, and selecting an edge highlights the
@@ -142,8 +142,7 @@ test("selecting a node actually repaints its connected edge in the highlight col
     // the render loop has a stable, settled frame to paint (sampling
     // getImageData() right after a state change races the dirty-flag
     // requestAnimationFrame loop otherwise).
-    await page.evaluate(() => window.__kg.actions.clearSelection());
-    await page.waitForTimeout(100);
+    await settle(page, () => page.evaluate(() => window.__kg.actions.clearSelection()));
 
     const samplePoint = async () => page.evaluate(() => {
       const canvas = document.getElementById("canvas");
@@ -158,8 +157,8 @@ test("selecting a node actually repaints its connected edge in the highlight col
     });
 
     const beforePixel = await samplePoint();
-    await page.mouse.click(...(await canvasPoint(page, 400, 300))); // select A
-    await page.waitForTimeout(100); // let the dirty-flag render loop repaint
+    // select A, and wait for the dirty-flag render loop to actually repaint
+    await settle(page, async () => page.mouse.click(...(await canvasPoint(page, 400, 300))));
     const afterPixel = await samplePoint();
 
     assert.notDeepEqual(beforePixel, afterPixel, "the A-B edge's rendered pixel should change once A is selected");

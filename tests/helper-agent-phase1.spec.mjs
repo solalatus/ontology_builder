@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { withPage, APP_URL, waitForComputedStyle } from "./lib/page.mjs";
+import { withPage, APP_URL, waitForComputedStyle, waitForStyleSettled } from "./lib/page.mjs";
 import { launchChromium } from "./lib/browser.mjs";
 
 // Helper Agent (helper_agent_plan.md), Phase 1: collapsed/expanded panel,
@@ -94,15 +94,7 @@ test("agent panel is collapsed by default and expands via its toggle", async () 
 // suite run while passing every time in isolation: the value sampled was a
 // mid-transition `84.3px` instead of the settled width.
 async function settledLeft(page, id) {
-  const read = () => page.evaluate((elId) => getComputedStyle(document.getElementById(elId)).left, id);
-  let last = await read();
-  for (let i = 0; i < 40; i++) {
-    await page.waitForTimeout(25);
-    const next = await read();
-    if (next === last) return next;
-    last = next;
-  }
-  return last;
+  return waitForStyleSettled(page, `#${id}`, "left");
 }
 
 test("toolbar and canvas sit flush left (0px) while the agent panel is collapsed -- the default, unchanged from before issue #55", async () => {

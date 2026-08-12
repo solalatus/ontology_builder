@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { launchChromium } from "./lib/browser.mjs";
-import { APP_URL, withPage, addNodeViaDblClick, createEdgeViaConnectMode } from "./lib/page.mjs";
+import { APP_URL, withPage, addNodeViaDblClick, createEdgeViaConnectMode, waitForDownloads } from "./lib/page.mjs";
 
 // Agent Ontology, Phase A (agent_ontology_todo.md): data-model additions only
 // — meaning/aliases/properties on Node, meaning on Edge, and two new
@@ -221,7 +221,7 @@ test("the JSON export includes meaning/aliases/properties on nodes, meaning on e
     });
 
     await page.click("#btn-save-version");
-    await page.waitForTimeout(200);
+    await waitForDownloads(downloads, 3);
 
     const jsonDl = downloads.find((d) => d.suggestedFilename().endsWith(".json"));
     const parsed = JSON.parse(await readDownload(jsonDl));

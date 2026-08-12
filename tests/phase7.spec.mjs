@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { launchChromium } from "./lib/browser.mjs";
-import { APP_URL, addNodeViaDblClick } from "./lib/page.mjs";
+import { APP_URL, addNodeViaDblClick, waitForDownloads } from "./lib/page.mjs";
 
 // Phase 7 (Tier 2 storage) needs two things withPage()/withDownloadPage()
 // (see phase5.spec.mjs) don't offer: (a) an init script installed *before*
@@ -201,6 +201,9 @@ test("granting a second folder while already connected switches the write target
 test("a cancelled picker (AbortError) leaves Tier 2 disconnected, with no console error", async () => {
   await withFolderPage(async (page) => {
     await page.click("#btn-folder-sync");
+    // Negative assertion: a cancelled picker must leave Tier 2 disconnected, so
+    // there is no connection event to wait for -- only a window to outlast
+    // during which one must not appear (issue #91, category 3).
     await page.waitForTimeout(200);
 
     assert.equal(await page.evaluate(() => window.__kg.tier2.getDirHandle()), null);
@@ -242,7 +245,7 @@ test("if a Tier 2 write fails after grant, Save Version falls back to a Tier 3 d
 
     await page.click("#btn-save-version");
     await page.evaluate(() => window.__kg.tier2.waitForSaveVersion());
-    await page.waitForTimeout(200);
+    await waitForDownloads(downloads, 3);
 
     assert.equal(downloads.length, 3, "a failed folder write should still produce the usual three downloads");
     const names = downloads.map((d) => d.suggestedFilename()).sort();
@@ -256,7 +259,7 @@ test("without ever connecting Folder Sync, Save Version behaves exactly like Tie
   await withFolderPage(async (page, downloads) => {
     await addNodeViaDblClick(page, 300, 300, "Alpha");
     await page.click("#btn-save-version");
-    await page.waitForTimeout(200);
+    await waitForDownloads(downloads, 3);
 
     assert.equal(downloads.length, 3);
     assert.equal(await page.evaluate(() => window.__kg.tier2.getDirHandle()), null);
@@ -295,7 +298,7 @@ test("a Tier 2 write failure AND a simultaneous Tier 1 (localStorage) write fail
     await page.click("#btn-save-version");
     await page.evaluate(() => window.__kg.tier2.waitForSaveVersion()); // Tier 2/3 side must still resolve
     await page.evaluate(() => window.__kg.storage.whenIdle()); // Tier 1 side must still resolve too, not hang
-    await page.waitForTimeout(200);
+    await waitForDownloads(downloads, 3);
 
     assert.equal(downloads.length, 3, "the Tier 2 failure still falls back to the usual three Tier 3 downloads");
     const nodeCount = await page.evaluate(() => window.__kg.state.nodes.length);

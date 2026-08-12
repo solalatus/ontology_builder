@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { withPage, addNodeViaDblClick } from "./lib/page.mjs";
+import { withPage, addNodeViaDblClick, applyImport } from "./lib/page.mjs";
 
 // Ontology Change Review (issue #74), retrospective scope this round: a
 // persistent, optional "Review changes" facility over history.past — a
@@ -73,8 +73,7 @@ async function dropYaml(page, text, filename = "import.domain.yaml") {
 
 async function mergeYaml(page, text) {
   await dropYaml(page, text);
-  await page.click("#import-merge");
-  await page.waitForTimeout(120);
+  await applyImport(page, "#import-merge");
 }
 
 // Plain snapshot builders for the diff-engine's own pure-function tests --

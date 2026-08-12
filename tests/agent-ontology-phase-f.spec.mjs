@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { launchChromium } from "./lib/browser.mjs";
-import { APP_URL, withPage, addNodeViaDblClick, createEdgeViaConnectMode } from "./lib/page.mjs";
+import { APP_URL, withPage, addNodeViaDblClick, createEdgeViaConnectMode, waitForDownloads } from "./lib/page.mjs";
 
 // Agent Ontology, Phase F (agent_ontology_todo.md): Domain Model YAML export
 // — the load-bearing deliverable the whole initiative exists for
@@ -350,7 +350,7 @@ test("Save Version bundles the domain YAML as a third file, named per the versio
   await withDownloadPage(async (page, downloads) => {
     await addNodeViaDblClick(page, 300, 300, "Invoice");
     await page.click("#btn-save-version");
-    await page.waitForTimeout(200);
+    await waitForDownloads(downloads, 3);
 
     assert.equal(downloads.length, 3);
     const yamlDl = downloads.find((d) => d.suggestedFilename().endsWith(".domain.yaml"));
@@ -369,7 +369,7 @@ test("Save Version does not change JSON/TXT content or shape — the YAML export
     await createEdgeViaConnectMode(page, 250, 250, 650, 250, "relates to");
     await page.evaluate(() => window.__kg.actions.setMode("idle"));
     await page.click("#btn-save-version");
-    await page.waitForTimeout(200);
+    await waitForDownloads(downloads, 3);
 
     const jsonDl = downloads.find((d) => d.suggestedFilename().endsWith(".json"));
     const parsed = JSON.parse(await readDownload(jsonDl));

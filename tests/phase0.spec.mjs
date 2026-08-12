@@ -90,7 +90,9 @@ test("Fit to view on an empty canvas is a no-op, not a crash", async () => {
 test("window resize keeps the canvas filling its container", async () => {
   await withPage(async (page) => {
     await page.setViewportSize({ width: 900, height: 600 });
-    await page.waitForTimeout(50);
+    // Wait for the resize to reach the canvas rather than assuming 50ms of
+    // layout is enough; the assertions below then read a settled size.
+    await page.waitForFunction(() => document.getElementById("canvas").clientWidth === 900);
     const canvasSize = await page.evaluate(() => {
       const c = document.getElementById("canvas");
       return { w: c.clientWidth, h: c.clientHeight };

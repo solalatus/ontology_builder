@@ -167,7 +167,8 @@ test("a cleared (now-empty) graph is what gets persisted — reload doesn't brin
 
     await page.reload();
     await page.waitForFunction(() => Boolean(window.__kg));
-    await page.waitForTimeout(150); // let the (empty) restore, if any, settle
+    // Wait for the restore path itself to finish rather than sleeping past it.
+    await page.evaluate(() => window.__kg.storage.whenIdle());
 
     const nodes = await page.evaluate(() => window.__kg.state.nodes);
     assert.equal(nodes.length, 0);

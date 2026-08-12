@@ -202,6 +202,56 @@ export async function waitForGeometrySettled(page, selector, { stableFrames = 3,
   await page.evaluate((s) => { if (window.__kgBoxProbe) delete window.__kgBoxProbe[s]; }, selector);
 }
 
+// Waits until the canvas view transform (pan + zoom) stops changing.
+//
+// Replaces the `waitForTimeout(50)` that followed a pan or zoom drag before a
+// test read worldToScreen(). Probing the transform itself means the read
+// happens after it has actually settled, however long that takes, rather than
+// after a fixed 50ms that was only ever a guess about it.
+export async function waitForViewSettled(page, { stableFrames = 3, timeout = 5000 } = {}) {
+  await page.waitForFunction(
+    (stableFrames) => {
+      const a = window.__kg.worldToScreen(0, 0), b = window.__kg.worldToScreen(1000, 1000);
+      const key = `${a.x},${a.y},${b.x},${b.y}`;
+      const prev = window.__kgViewProbe;
+      window.__kgViewProbe = prev && prev.key === key ? { key, n: prev.n + 1 } : { key, n: 1 };
+      return window.__kgViewProbe.n >= stableFrames;
+    },
+    stableFrames,
+    { timeout, polling: "raf" },
+  );
+  await page.evaluate(() => { delete window.__kgViewProbe; });
+}
+
+// Waits until a computed style stops changing, and returns the settled value.
+//
+// The sibling of waitForComputedStyle() for the case where the test does not
+// know the target value up front — "an armed button's border must read
+// differently from an ordinary one" needs the border-color transition to have
+// finished, but has no constant to wait for. Sleeping 200ms and sampling
+// leaves the assertion comparing whatever the transition happened to be
+// passing through; this returns the value the property actually lands on.
+export async function waitForStyleSettled(page, selector, prop, { stableFrames = 3, timeout = 5000 } = {}) {
+  await page.waitForFunction(
+    ({ selector, prop, stableFrames }) => {
+      const el = document.querySelector(selector);
+      if (!el) return false;
+      const value = getComputedStyle(el)[prop];
+      window.__kgStyleProbe = window.__kgStyleProbe || {};
+      const at = `${selector}|${prop}`;
+      const prev = window.__kgStyleProbe[at];
+      window.__kgStyleProbe[at] = prev && prev.value === value ? { value, n: prev.n + 1 } : { value, n: 1 };
+      return window.__kgStyleProbe[at].n >= stableFrames;
+    },
+    { selector, prop, stableFrames },
+    { timeout, polling: "raf" },
+  );
+  return page.evaluate(({ selector, prop }) => {
+    if (window.__kgStyleProbe) delete window.__kgStyleProbe[`${selector}|${prop}`];
+    return getComputedStyle(document.querySelector(selector))[prop];
+  }, { selector, prop });
+}
+
 // Waits until a computed style (optionally of a pseudo-element) settles on
 // `expected`, then returns it.
 //

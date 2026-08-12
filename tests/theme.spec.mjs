@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { withPage, addNodeViaDblClick } from "./lib/page.mjs";
+import { withPage, addNodeViaDblClick, settle } from "./lib/page.mjs";
 
 async function htmlThemeAttr(page) {
   return page.evaluate(() => document.documentElement.dataset.theme);
@@ -51,8 +51,8 @@ test("toggling theme actually repaints the canvas — a node's fill pixel change
     await addNodeViaDblClick(page, 400, 300, "Alpha");
     const darkPixel = await nodeFillPixel(page);
 
-    await page.click("#btn-theme-toggle");
-    await page.waitForTimeout(100); // let the dirty-flag render loop repaint
+    // wait for the dirty-flag render loop to actually repaint before sampling
+    await settle(page, () => page.click("#btn-theme-toggle"));
     const lightPixel = await nodeFillPixel(page);
 
     assert.notDeepEqual(darkPixel, lightPixel, "node fill pixel should differ between dark and light themes");

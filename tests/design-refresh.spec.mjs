@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { withPage, addNodeViaDblClick } from "./lib/page.mjs";
+import { withPage, addNodeViaDblClick, waitForStyleSettled } from "./lib/page.mjs";
 
 // Regression coverage for the 2026-08 design-critique refactor: three
 // unrelated visual problems, each with its own group of tests below.
@@ -46,10 +46,10 @@ test("a transient mode-armed button (Add Node) and a persistent state-toggle but
     assert.equal(await page.getAttribute("#btn-add-node", "aria-pressed"), "true");
     await page.click("#btn-theme-toggle");
     assert.equal(await page.getAttribute("#btn-theme-toggle", "aria-pressed"), "true");
-    await page.waitForTimeout(200); // let border-color transitions finish before sampling
-
-    const armedBorder = await computedStyle(page, "#btn-add-node", "borderColor");
-    const activeBorder = await computedStyle(page, "#btn-theme-toggle", "borderColor");
+    // Both borders transition at once; each is sampled only once it has settled,
+    // rather than both after one fixed sleep (issue #91).
+    const armedBorder = await waitForStyleSettled(page, "#btn-add-node", "borderColor");
+    const activeBorder = await waitForStyleSettled(page, "#btn-theme-toggle", "borderColor");
     assert.notEqual(armedBorder, activeBorder, "an armed tool mode must not look identical to an active persistent setting");
   });
 });

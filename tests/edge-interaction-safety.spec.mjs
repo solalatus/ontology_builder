@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { withPage, addNodeViaDblClick, createEdgeViaConnectMode, APP_URL } from "./lib/page.mjs";
+import { withPage, addNodeViaDblClick, createEdgeViaConnectMode, applyImport, waitForDownloads, APP_URL } from "./lib/page.mjs";
 import { launchChromium } from "./lib/browser.mjs";
 
 // User-reported bug pair (2026-08): dragging an edge for longer than
@@ -44,6 +44,9 @@ test("dragging an edge for longer than the long-press threshold never deletes it
     await page.mouse.down();
     // Slowly drag downward across a span exceeding LONG_PRESS_MS (600ms) —
     // exactly "dragging the relationship down a lot."
+    // Real elapsed time on purpose: the point of the slow drag is that it
+    // spans more than LONG_PRESS_MS, so the pauses between moves ARE the test.
+    // Nothing to wait for here but the clock (issue #91, category 3).
     for (let i = 1; i <= 8; i++) {
       await page.mouse.move(box.x + 450, box.y + 250 + i * 25, { steps: 3 });
       await page.waitForTimeout(100);
@@ -67,7 +70,11 @@ test("a stationary long-press on an edge still deletes it (unchanged behavior)",
 
     await page.mouse.move(box.x + 450, box.y + 250);
     await page.mouse.down();
-    await page.waitForTimeout(700);
+    // Real elapsed time, deliberately: LONG_PRESS_MS is a 600ms timer in the
+    // app and this test is asserting that holding past it deletes the edge.
+    // Waiting for the deletion itself is the stronger form, so that a press
+    // that never registers fails here rather than later (issue #91).
+    await page.waitForFunction(() => window.__kg.state.edges.length === 0);
     await page.mouse.up();
 
     const edges = await page.evaluate(() => window.__kg.state.edges);
@@ -86,7 +93,11 @@ test("a quick drag well under the threshold cancels the delete timer and leaves 
     await page.mouse.down();
     await page.mouse.move(box.x + 450, box.y + 280, { steps: 5 }); // past MOVE_THRESHOLD immediately
     await page.mouse.up();
-    // Give any (incorrectly still-armed) delete timer a chance to fire.
+    // Real elapsed time, and it has to be: this asserts a NEGATIVE -- that no
+    // delete timer is still armed -- and the only way to observe something not
+    // happening is to outlast the window in which it would have. 700ms clears
+    // the app's 600ms LONG_PRESS_MS. Not convertible to an event wait, since
+    // the event must never arrive (issue #91, category 3).
     await page.waitForTimeout(700);
 
     const edges = await page.evaluate(() => window.__kg.state.edges);
@@ -155,7 +166,10 @@ test("dragging on the edge's line (not precisely the label) still repositions th
     await page.mouse.move(box.x + 500, box.y + 250); // squarely on the line itself
     await page.mouse.down();
     await page.mouse.move(box.x + 700, box.y + 250, { steps: 10 });
-    await page.waitForTimeout(700); // long enough to have deleted it under the old bug
+    // Negative assertion again: long enough to have deleted the edge under the
+    // old bug, so the surviving edge below means the fix holds. See the note on
+    // the previous test for why this one stays a real sleep.
+    await page.waitForTimeout(700);
     await page.mouse.up();
 
     const edges = await page.evaluate(() => window.__kg.state.edges);
@@ -209,7 +223,7 @@ test("a custom label position survives Save Version -> reopen (JSON round trip)"
     });
 
     await page.click("#btn-save-version");
-    await page.waitForTimeout(250);
+    await waitForDownloads(downloads, 3);
     const jsonDl = downloads.find((d) => d.suggestedFilename().endsWith(".json"));
     const jsonText = await readDownload(jsonDl);
 
@@ -226,8 +240,7 @@ test("a custom label position survives Save Version -> reopen (JSON round trip)"
     // Merge is the only offered action, and it behaves as a full restore
     // onto nothing to merge with (same convention json-import.spec.mjs's
     // own tests use).
-    await page.click("#import-merge");
-    await page.waitForTimeout(150);
+    await applyImport(page, "#import-merge");
 
     const labelT = await page.evaluate(() => window.__kg.state.edges[0].labelT);
     assert.equal(labelT, 0.75, "a dragged label position must not silently reset to the midpoint on reopen");
@@ -261,8 +274,7 @@ test("merging a file into an existing graph does not move an already-placed labe
         new DragEvent("drop", { bubbles: true, cancelable: true, dataTransfer: dt }));
     }, importedJson);
     await page.waitForSelector("#import-overlay", { state: "visible" });
-    await page.click("#import-merge");
-    await page.waitForTimeout(150);
+    await applyImport(page, "#import-merge");
 
     const edges = await page.evaluate(() => window.__kg.state.edges);
     assert.equal(edges.length, 1, "same source/target/relation/directed should have matched the existing edge, not duplicated it");
@@ -291,8 +303,7 @@ test("merging a file that introduces a brand-new edge does carry over that edge'
         new DragEvent("drop", { bubbles: true, cancelable: true, dataTransfer: dt }));
     }, importedJson);
     await page.waitForSelector("#import-overlay", { state: "visible" });
-    await page.click("#import-merge");
-    await page.waitForTimeout(150);
+    await applyImport(page, "#import-merge");
 
     const edges = await page.evaluate(() => window.__kg.state.edges);
     assert.equal(edges.length, 1);
