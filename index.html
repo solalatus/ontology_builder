@@ -2026,6 +2026,7 @@ const STRINGS = {
     // import. Deliberately more aggressive than the plain TXT summary above:
     // a matched class/relationship/rule/action is overwritten, not left
     // untouched, on both Merge and Replace.
+    importYamlDroppedWarning: (list) => `Warning: ${list.length} relationship(s) cannot be stored, because a class they connect does not exist in the file or on the canvas: ${list}. Add those classes and import again if you need these relationships.`,
     importYamlMergeSummary: (added, changed) => `Merge: ${added} item(s) would be added, ${changed} existing item(s) would be updated with the file's values. Nothing is removed.`,
     importYamlReplaceSummary: (n) => `Replace: same additions/updates, plus ${n} item(s) not in this file would be removed.`,
     // Canonical JSON import (spec.md §5.5). Replace is the round-trip path —
@@ -2300,6 +2301,7 @@ const STRINGS = {
     emptyCanvasMessage: (addNodeLabel) => `A vászon üres — kattints a(z) "${addNodeLabel}" gombra a kezdéshez`,
     importMergeSummary: (n, m) => `Egyesítés: ${n} csomópont és ${m} él kerülne hozzáadásra. Semmi nem törlődik.`,
     importReplaceSummary: (n) => `Csere: ugyanazok a hozzáadások, plusz ${n} csomópont/él törlődne, amelyek nincsenek ebben a fájlban.`,
+    importYamlDroppedWarning: (list) => `Figyelem: ${list.length} kapcsolat nem tárolható, mert az általa összekötött egyik osztály nem szerepel sem a fájlban, sem a vásznon: ${list}. Ha ezekre a kapcsolatokra szükség van, vedd fel az osztályokat, és importáld újra.`,
     importYamlMergeSummary: (added, changed) => `Egyesítés: ${added} elem kerülne hozzáadásra, ${changed} meglévő elem frissülne a fájl értékeivel. Semmi nem törlődik.`,
     importYamlReplaceSummary: (n) => `Csere: ugyanazok a hozzáadások/frissítések, plusz ${n} elem törlődne, amelyek nincsenek ebben a fájlban.`,
     importJsonMergeSummary: (added, changed) => `Egyesítés: ${added} elem kerülne hozzáadásra, ${changed} meglévő elem frissülne a fájl értékeivel. A mentett pozíciókat használjuk, ahol a hely szabad. Semmi nem törlődik.`,
@@ -9249,6 +9251,13 @@ function openImportDialog(text, kind = "txt", filename = null) {
       return;
     }
     const plan = planYamlImport(parsedYaml);
+    // Say so BEFORE the user commits. This import path has always dropped a
+    // relationship whose endpoint class is missing, silently, on both Merge
+    // and Replace -- the user was told what would be added and updated, and
+    // simply not told about the part that would be thrown away (issue #83 §1).
+    if (plan.droppedReferences.length) {
+      lines.push(t("importYamlDroppedWarning", plan.droppedReferences.map((r) => `${r.from} --${r.name}--> ${r.to}`).join("; ")));
+    }
     lines.push(t("importYamlMergeSummary", plan.addedCount, plan.changedCount));
     if (hasAnyGraphContent()) lines.push(t("importYamlReplaceSummary", plan.removedCount));
     else importReplaceBtn.style.display = "none";
@@ -11339,7 +11348,17 @@ function handleAgentToolCall(call, alreadyCommittedThisTurn) {
   }
   commitYamlImport(yamlText, "agent-merge"); // never "replace"; not "merge" either — see commitYamlImport's own comment
   appendTranscriptMessage("tool", t("agentToolApplied", plan.addedCount, plan.changedCount));
-  return { applied: true, resultText: `Applied. Added ${plan.addedCount}, updated ${plan.changedCount} existing item(s).` };
+  // The same silent drop, told to the agent rather than to the user. Until
+  // now the reply was "Applied. Added 3, updated 2" even when a relationship
+  // in that very call had been discarded, which is how a model ends up
+  // sincerely reporting that it recorded something it did not -- a pattern
+  // run-02's own eval report documents repeatedly. This is a truthfulness fix
+  // to an existing message, not the findings feed: that is issue #84.
+  const dropped = plan.droppedReferences.length
+    ? ` ${plan.droppedReferences.length} relationship(s) were NOT stored because a class they connect does not exist: `
+      + `${plan.droppedReferences.map((r) => `${r.from} --${r.name}--> ${r.to}`).join("; ")}. Add the missing class first, then re-add the relationship.`
+    : "";
+  return { applied: true, resultText: `Applied. Added ${plan.addedCount}, updated ${plan.changedCount} existing item(s).${dropped}` };
 }
 
 // Read-only — reuses the exact same, already-tested exporter the manual

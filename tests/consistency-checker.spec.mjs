@@ -419,3 +419,65 @@ test("a relationship the import silently dropped is surfaced after a real import
     assert.match(dropped[0].message, /Ghost/);
   });
 });
+
+// ---------------------------------------------------------------------------
+// The silent-drop bug itself, fixed rather than merely reported
+// ---------------------------------------------------------------------------
+
+test("the import dialog warns about relationships it cannot store, before anything is committed", async () => {
+  await withPage(async (page) => {
+    await page.evaluate(() => window.__kg.formats.openImportDialog(
+      "classes:\n  Incident:\n    properties: {}\nrelationships:\n  - name: causedBy\n    from: Incident\n    to: Ghost\nrules: {}\nactions: {}\n", "yaml"));
+    const summary = await page.locator("#import-summary").textContent();
+    assert.match(summary, /cannot be stored/);
+    assert.match(summary, /Incident --causedBy--> Ghost/);
+    // Still just a warning: the import is not blocked, and the graph has not
+    // changed yet either.
+    assert.equal(await page.locator("#import-merge").isVisible(), true);
+    assert.equal(await page.evaluate(() => window.__kg.state.nodes.length), 0);
+  });
+});
+
+test("the agent is told when a relationship in its own call was not stored", async () => {
+  // The bug this fixes: the reply used to be "Applied. Added 1, updated 0"
+  // even when a relationship in that very call had been discarded, which is
+  // how a model ends up sincerely reporting it recorded something it did not.
+  const MODELS_URL = "https://api.openai.com/v1/models";
+  const CHAT_URL = "https://api.openai.com/v1/chat/completions";
+  await withPage(async (page) => {
+    await page.route(MODELS_URL, (route) => route.fulfill({
+      status: 200, contentType: "application/json",
+      body: JSON.stringify({ object: "list", data: [{ id: "gpt-4o-mini", created: 1, object: "model", owned_by: "openai" }] }),
+    }));
+    const bodies = [];
+    let call = 0;
+    await page.route(CHAT_URL, (route) => {
+      bodies.push(route.request().postDataJSON());
+      call += 1;
+      const message = call === 1
+        ? { role: "assistant", content: null, tool_calls: [{ id: "t1", type: "function", function: { name: "apply_ontology_yaml", arguments: JSON.stringify({ yaml: "classes:\n  Incident:\n    properties: {}\nrelationships:\n  - name: causedBy\n    from: Incident\n    to: Ghost\n" }) } }] }
+        : { role: "assistant", content: "Understood." };
+      route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ choices: [{ index: 0, message, finish_reason: call === 1 ? "tool_calls" : "stop" }] }) });
+    });
+
+    if (!(await page.evaluate(() => window.__kg.agent.isExpanded()))) await page.click("#agent-panel-toggle");
+    await page.click("#agent-connect-open");
+    await page.fill("#agent-key-input", "sk-test-key");
+    await page.click("#agent-connect-submit");
+    await page.waitForFunction(() => !document.getElementById("agent-model-select-modal").disabled);
+    await page.click("#agent-connect-submit");
+    await page.waitForFunction(() => window.__kg.agent.state.connected === true);
+
+    await page.fill("#agent-chat-input", "Record that.");
+    await page.click("#agent-chat-send");
+    await page.waitForFunction(() => window.__kg.agent.isSending() === false);
+
+    const toolResult = bodies[1].messages.find((m) => m.role === "tool").content;
+    assert.match(toolResult, /Applied\. Added 1, updated 0/);
+    assert.match(toolResult, /were NOT stored/);
+    assert.match(toolResult, /Incident --causedBy--> Ghost/);
+    // And the checker independently agrees the edge is gone.
+    const dropped = (await page.evaluate(() => window.__kg.consistency.current())).filter((f) => f.check === "relationship-dropped");
+    assert.equal(dropped.length, 1);
+  });
+});
