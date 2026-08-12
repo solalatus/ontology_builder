@@ -69,8 +69,16 @@ function jaccard(a, b) {
   return union ? inter / union : 1;
 }
 
-export function loadRun(runId, scopeName) {
-  const dir = path.join(RUNS_DIR, runId);
+// `condition` selects a comparison condition's directory under
+// results/baselines/ instead of the interactive runs (EXPERIMENT_BRIEF.md §6:
+// "Extend it for new conditions rather than forking it"). A condition has no
+// stored judge verdicts of its own -- the judge was asked about the
+// *interactive* runs' near-misses -- so it is only ever read under the
+// heuristic policy, enforced at the call site below (§4.5).
+export function loadRun(runId, scopeName, condition = null) {
+  const dir = condition
+    ? path.join(__dirname, "results", "baselines", condition, runId)
+    : path.join(RUNS_DIR, runId);
   const { state } = recoveredStateFromYaml(fs.readFileSync(path.join(dir, "recovered-model.yaml"), "utf8"));
   const judgmentsPath = path.join(dir, "semantic-judgments.json");
   const saved = fs.existsSync(judgmentsPath) ? JSON.parse(fs.readFileSync(judgmentsPath, "utf8")) : null;
@@ -81,22 +89,31 @@ export function loadRun(runId, scopeName) {
 if (import.meta.url === `file://${process.argv[1]}`) {
   const args = process.argv.slice(2);
   const scopeName = (args.find((a) => a.startsWith("--scope=")) || "--scope=practical").split("=")[1];
-  const policy = (args.find((a) => a.startsWith("--policy=")) || "--policy=semantic").split("=")[1];
+  const conditionArg = args.find((a) => a.startsWith("--condition="));
+  const condition = conditionArg ? conditionArg.split("=")[1] : null;
+  // A condition defaults to (and is restricted to) the heuristic policy: its
+  // near-misses are not the ones the stored judge verdicts cover.
+  const policy = (args.find((a) => a.startsWith("--policy=")) || (condition ? "--policy=heuristic" : "--policy=semantic")).split("=")[1];
   const runIds = args.filter((a) => !a.startsWith("--"));
   if (!runIds.length) {
-    console.error("Usage: node tests/evals/cross-run-analyses.mjs [--scope=full|practical] [--policy=semantic|heuristic] <run-id> [...]");
+    console.error("Usage: node tests/evals/cross-run-analyses.mjs [--scope=full|practical] [--policy=semantic|heuristic] [--condition=<name>] <run-id> [...]");
     console.error("Example: node tests/evals/cross-run-analyses.mjs run-01 run-02 run-03");
+    process.exit(1);
+  }
+  if (condition && policy === "semantic") {
+    console.error(`--condition=${condition} cannot be read under --policy=semantic: the stored judge verdicts were`);
+    console.error("asked about the interactive runs' near-misses, not this condition's (EXPERIMENT_BRIEF.md §4.5).");
     process.exit(1);
   }
 
   const full = loadGroundTruthModel();
   const gold = scopeName === "full" ? full : scopeGroundTruth(full, full.practicalScopeClassIds, full.practicalScopePropertyIds);
   const runs = runIds.map((id) => {
-    const r = loadRun(id, scopeName);
+    const r = loadRun(id, scopeName, condition);
     return { runId: id, ids: recoveredGoldIds(gold, r.state, r.judgments, policy) };
   });
 
-  console.log(`Scope: ${scopeName}. Policy: ${policy}. Offline -- no model calls; stored judge verdicts replayed as-is.\n`);
+  console.log(`Source: ${condition || "interactive runs"}. Scope: ${scopeName}. Policy: ${policy}. Offline -- no model calls; stored judge verdicts replayed as-is.\n`);
 
   console.log("=== Set-level stability ===");
   console.log("dimension       gold   >=1 run   all runs   pairwise Jaccard");
