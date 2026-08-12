@@ -1,0 +1,266 @@
+{
+ "note": "See README.md. Documented defects come from the Errors sections of tests/evals/results/runs/run-0{1,2,3}/report.md, written by an independent reviewer at the time of each run.",
+ "totals": {
+  "documented": 30,
+  "out-of-scope": 5,
+  "process": 22,
+  "detectable": 3
+ },
+ "documented_defects": [
+  {
+   "run": "run-01",
+   "turn": "46-48",
+   "defect": "Rules depend on concepts not modeled as properties/classes (business impact, incident history, implementation/backout plans, SLO milestones...)",
+   "verdict": "out-of-scope",
+   "reason": "The unmodeled concepts appear only as ordinary prose ('business impact'), not as camelCase field references. Distinguishing a domain concept from a turn of phrase here needs semantics a lexical checker does not have."
+  },
+  {
+   "run": "run-01",
+   "turn": "50",
+   "defect": "Interviewer added rule containmentReady though the persona never gave a condition list for it",
+   "verdict": "process",
+   "reason": "About what the interviewer did during elicitation, not about the model. The rule exists and is well-formed."
+  },
+  {
+   "run": "run-01",
+   "turn": "52",
+   "defect": "Final validation overstates coverage for 'What evidence do we need to gather?'",
+   "verdict": "process",
+   "reason": "An over-claim in the interviewer's closing summary."
+  },
+  {
+   "run": "run-01",
+   "turn": "52",
+   "defect": "'No blocking gaps found' too strong given unmodeled inputs in the rules",
+   "verdict": "process",
+   "reason": "Same over-claim."
+  },
+  {
+   "run": "run-02",
+   "turn": "18",
+   "defect": "Tool said '0 added, 3 updated' but assistant claimed all properties recorded",
+   "verdict": "process",
+   "reason": "A mismatch between the tool result and the agent's narration. Invisible in the finished model -- the model is exactly what was applied. This is what #84's richer tool result addresses."
+  },
+  {
+   "run": "run-02",
+   "turn": "36",
+   "defect": "Four properties given fixed values, tool result said 2 updated",
+   "verdict": "process",
+   "reason": "Tool-count ambiguity; see Turn 18."
+  },
+  {
+   "run": "run-02",
+   "turn": "37",
+   "defect": "Six properties given values, tool result said 4 updated",
+   "verdict": "process",
+   "reason": "Tool-count ambiguity; see Turn 18."
+  },
+  {
+   "run": "run-02",
+   "turn": "38",
+   "defect": "Eight properties given values, tool result said 7 updated",
+   "verdict": "process",
+   "reason": "Tool-count ambiguity; see Turn 18."
+  },
+  {
+   "run": "run-02",
+   "turn": "39",
+   "defect": "Ten properties given values, tool result said 8 updated",
+   "verdict": "process",
+   "reason": "Tool-count ambiguity; see Turn 18."
+  },
+  {
+   "run": "run-02",
+   "turn": "40",
+   "defect": "Constraint logic elicited and confirmed but never committed by a tool call",
+   "verdict": "process",
+   "reason": "An omission during the conversation. Nothing in the resulting model is wrong; something is simply absent, and absence of an unstated thing is not detectable."
+  },
+  {
+   "run": "run-02",
+   "turn": "42",
+   "defect": "Assistant said it recorded a rule 'with your clarifications'; transcript does not show the stored rule",
+   "verdict": "process",
+   "reason": "Narration versus tool result again."
+  },
+  {
+   "run": "run-02",
+   "turn": "43",
+   "defect": "canSendRegulatoryNotification requires status `approved`, but RegulatoryNotification.status allows only draft, pending-approval, submitted, accepted, rejected",
+   "verdict": "detectable",
+   "check": "value-not-allowed",
+   "reason": "The defect this whole feature was built around. Found."
+  },
+  {
+   "run": "run-02",
+   "turn": "46",
+   "defect": "declareMajorIncident verification requires an Incident Commander, but canDeclareMajorIncident does not and no action assigns one",
+   "verdict": "out-of-scope",
+   "reason": "Requires cross-checking a verification's obligations against the action's preconditions and the available action set -- a semantic inference, not a lexical match. A candidate for a future check."
+  },
+  {
+   "run": "run-02",
+   "turn": "46",
+   "defect": "acknowledgeAlert effect records an acknowledgement timestamp, but Alert has only triggeredAt",
+   "verdict": "out-of-scope",
+   "reason": "The effect says 'acknowledgement timestamp' in prose. Only a camelCase identifier is safe to treat as a field reference (see unknown-property-reference); a bare noun phrase is indistinguishable from ordinary English."
+  },
+  {
+   "run": "run-02",
+   "turn": "48",
+   "defect": "executeEmergencyChange verification requires executedAt present, but the effect never says it is recorded",
+   "verdict": "detectable",
+   "check": "effect-verification-mismatch",
+   "reason": "Found."
+  },
+  {
+   "run": "run-02",
+   "turn": "48",
+   "defect": "restoreFromBackupSet verification expects 'restore/recovery completed' but the effect defines no state change",
+   "verdict": "detectable",
+   "check": "effect-verification-mismatch",
+   "reason": "Found, reported against BackupSet.status."
+  },
+  {
+   "run": "run-02",
+   "turn": "49",
+   "defect": "conductPostIncidentReview effect documents 'findings', but no findings property exists",
+   "verdict": "out-of-scope",
+   "reason": "'findings' is a bare lowercase word. Treating every such noun as a field reference is exactly the false-positive source unknown-class-reference was disabled for."
+  },
+  {
+   "run": "run-02",
+   "turn": "51",
+   "defect": "Final validation claims all allowed values captured despite the `approved` contradiction",
+   "verdict": "process",
+   "reason": "An over-claim. The underlying contradiction is caught separately (Turn 43)."
+  },
+  {
+   "run": "run-03",
+   "turn": "1",
+   "defect": "app-user repeats the persona's opening verbatim",
+   "verdict": "process",
+   "reason": "Transcript plumbing, not a model defect."
+  },
+  {
+   "run": "run-03",
+   "turn": "22",
+   "defect": "Tool reported '0 added, 1 updated' after seven properties confirmed",
+   "verdict": "process",
+   "reason": "Tool-count ambiguity; see run-02 Turn 18."
+  },
+  {
+   "run": "run-03",
+   "turn": "23",
+   "defect": "Tool reported '0 added, 5 updated' after six properties",
+   "verdict": "process",
+   "reason": "Tool-count ambiguity."
+  },
+  {
+   "run": "run-03",
+   "turn": "24",
+   "defect": "Tool reported '0 added, 4 updated' after six properties",
+   "verdict": "process",
+   "reason": "Tool-count ambiguity."
+  },
+  {
+   "run": "run-03",
+   "turn": "25",
+   "defect": "Tool reported '0 added, 4 updated' after six properties",
+   "verdict": "process",
+   "reason": "Tool-count ambiguity."
+  },
+  {
+   "run": "run-03",
+   "turn": "27",
+   "defect": "Tool reported '0 added, 4 updated' after five properties",
+   "verdict": "process",
+   "reason": "Tool-count ambiguity."
+  },
+  {
+   "run": "run-03",
+   "turn": "33",
+   "defect": "Persona misfiled two notification terms; interviewer caught it",
+   "verdict": "process",
+   "reason": "Explicitly recorded as the interviewer behaving correctly."
+  },
+  {
+   "run": "run-03",
+   "turn": "44",
+   "defect": "Tool reported '0 added, 2 updated' after four allowed-value lists",
+   "verdict": "process",
+   "reason": "Tool-count ambiguity."
+  },
+  {
+   "run": "run-03",
+   "turn": "46",
+   "defect": "Tool reported '0 added, 5 updated' after six allowed-value lists",
+   "verdict": "process",
+   "reason": "Tool-count ambiguity."
+  },
+  {
+   "run": "run-03",
+   "turn": "55",
+   "defect": "Several edits skipped and the agent stopped for too many tool uses, leaving state possibly incomplete",
+   "verdict": "process",
+   "reason": "A turn-level control-flow failure. #84's apply budget and folded history address this directly."
+  },
+  {
+   "run": "run-03",
+   "turn": "56",
+   "defect": "Agent claimed it applied a rule refinement only after the over-tooling failure",
+   "verdict": "process",
+   "reason": "Narration versus tool result."
+  },
+  {
+   "run": "run-03",
+   "turn": "57",
+   "defect": "Final recap says canDeclareMajorIncident evaluates both Business Service and IT Service criticality, but only IT Service criticality was confirmed",
+   "verdict": "out-of-scope",
+   "reason": "A claim about what the expert confirmed, checkable only against the transcript. This checker never reads the transcript -- by design, since it must work with no conversation at all."
+  }
+ ],
+ "unlabelled_findings": [
+  {
+   "finding": "value-not-allowed (run-02, canSendRegulatoryNotification)",
+   "adjudication": "documented",
+   "note": "Matches run-02 Turn 43 exactly."
+  },
+  {
+   "finding": "effect-verification-mismatch x4 (run-02: conductPostIncidentReview.completedAt, documentCorrectiveAction.description, executeEmergencyChange.executedAt, restoreFromBackupSet.status)",
+   "adjudication": "two documented, two real defects the original review missed",
+   "note": "executedAt and BackupSet.status are run-02 Turn 48. completedAt and description are the same defect shape and equally real: the verification reads a field the effect never claims to write."
+  },
+  {
+   "finding": "effect-verification-mismatch x2 (run-03: generatePostIncidentReviewReport.completedAt, submitRegulatoryNotification.notificationId)",
+   "adjudication": "real, not previously documented",
+   "note": "Same shape. Both verifications check a field their effect does not set."
+  },
+  {
+   "finding": "inverse-pair x4 (run-01 x2, run-02 x1, run-03 x1)",
+   "adjudication": "real profile violations",
+   "note": "All four are genuine reciprocal pairs against a profile that allows one directed edge per connection. run-03's MonitoringSystem/Alert pair is the one #75's normalizer removed and all four blind judges objected to -- which is why this is a warning and not an error: the profile and the expert's confirmed content genuinely conflict here, and the checker reports rather than decides."
+  },
+  {
+   "finding": "self-loop (run-02, ITService dependsOn ITService)",
+   "adjudication": "acceptable noise",
+   "note": "A service depending on another service is a real modelling pattern that this flat check cannot distinguish from a genuine self-loop. Warning severity is right; if it proves annoying, demote to note."
+  },
+  {
+   "finding": "unreachable-from-action-input x15 (4 in run-01, 5 in run-02, 6 in run-03)",
+   "adjudication": "real, systematic, and the most valuable output",
+   "note": "Every one is an action whose preconditions reason about a class the agent cannot navigate to from the action's own input. This is the same defect class #75's normalizer diagnosed correctly in run-03 and then failed to repair by rewording. That it appears 15 times across three independent interviews says the concept-structure gap the eval program has been chasing has a concrete, mechanical signature."
+  },
+  {
+   "finding": "orphan-rule x2 (run-01: evidenceCollectionRequired, sloEscalationRequired)",
+   "adjudication": "correct, and correctly a note",
+   "note": "Both rules exist and are referenced by no action. Normal mid-interview; reported to the human, never to the agent."
+  },
+  {
+   "finding": "false positives",
+   "adjudication": "none at error severity",
+   "note": "value-not-allowed fires once across all three models and that instance is the documented Turn 43 defect. Reaching that took three precision fixes -- a singulariser that was turning 'status' into 'statu', property mentions matching inside longer names ('status' inside 'declarationStatus'), and properties being attributed to any class named anywhere in the sentence rather than the one named immediately before them."
+  }
+ ]
+}
