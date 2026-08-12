@@ -179,9 +179,15 @@ export async function runOntologyRecoveryConversation({
   maxTurns = 100,
   wallClockMs = 45 * 60 * 1000,
   onProgress,
+  // How the app's outgoing chat call reaches a real provider. Defaults to the
+  // OpenAI relay every existing caller uses; issue #85's runner passes an
+  // Azure one, because the model family this repository's anchors were
+  // produced on is not reachable on OpenAI from that environment. Nothing else
+  // about the loop is provider-aware.
+  installRelay = (p) => forwardToRealOpenAi(p, CHAT_URL),
 }) {
   const persona = createPersonaAgent({ apiKey, model: personaModel });
-  const chatResponses = forwardToRealOpenAi(page, CHAT_URL);
+  const chatResponses = installRelay(page);
   const log = [{ turn: 0, speaker: "persona", text: OPENING_LINE }];
   const rawApiLog = [];
 

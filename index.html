@@ -9763,6 +9763,14 @@ const agentState = {
   // exposed by reference), no new setter functions needed.
   systemPromptOverride: null, // when set, replaces the real staged interview prompt entirely (B2)
   toolsDisabled: false, // when true, no tools array is sent at all -- nothing can commit mid-conversation (B3)
+  // Eval-only, same family as toolsDisabled and systemPromptOverride: when
+  // true the turn behaves exactly as it did before issue #84 -- one commit per
+  // turn, no consistency findings appended to any tool result. It exists so
+  // issue #85 can run its control arm against the shipped code rather than
+  // against a separate checkout, which is what makes the two arms differ by
+  // the treatment alone and nothing else (not a Chromium version, not a
+  // harness revision). Never set by any real UI.
+  selfCorrectionDisabled: false,
 };
 
 try {
@@ -11431,6 +11439,7 @@ function handleGetGraphStateCall() {
   // agent to call it and confirm "directly from that result, not from
   // memory", and the whole model is what a full findings list is about. So
   // the reliable signal is the tool call, not the narration.
+  if (agentState.selfCorrectionDisabled) return { applied: false, resultText: buildDomainYamlExport() };
   const findings = computeOntologyFindings(buildDomainModel())
     .filter((f) => f.severity !== "note");
   const appendix = findings.length
@@ -11592,7 +11601,8 @@ async function sendAgentChatMessage(userText) {
           // and much larger change than the one being made here.
           const remediationOpen = unresolvedFromThisTurn.length > 0;
           const budget = appliesThisTurn === 0 ? true
-            : (appliesThisTurn < AGENT_MAX_APPLIES_PER_TURN && remediationOpen);
+            : (!agentState.selfCorrectionDisabled
+               && appliesThisTurn < AGENT_MAX_APPLIES_PER_TURN && remediationOpen);
           const { applied, resultText } = handleAgentToolCall(call, !budget);
           if (applied) {
             appliesThisTurn++;
@@ -11602,8 +11612,9 @@ async function sendAgentChatMessage(userText) {
             const backlog = findings.filter((f) => f.severity !== "note" && turnFindingIdsAtStart.has(f.id));
             agentState.apiMessages.push({
               role: "tool", tool_call_id: call.id,
-              content: resultText + formatFindingsForAgent(unresolvedFromThisTurn, backlog.length,
-                appliesThisTurn >= AGENT_MAX_APPLIES_PER_TURN),
+              content: agentState.selfCorrectionDisabled ? resultText
+                : resultText + formatFindingsForAgent(unresolvedFromThisTurn, backlog.length,
+                  appliesThisTurn >= AGENT_MAX_APPLIES_PER_TURN),
             });
             continue;
           }
@@ -11636,7 +11647,8 @@ async function sendAgentChatMessage(userText) {
   // section) but never silent: whatever the agent chose to leave behind is
   // named in the transcript, where the expert can see it, rather than only in
   // a tool result they never read.
-  const leftUnresolved = unresolvedFromThisTurn.filter((f) => f.severity === "error");
+  const leftUnresolved = agentState.selfCorrectionDisabled ? []
+    : unresolvedFromThisTurn.filter((f) => f.severity === "error");
   if (leftUnresolved.length) appendTranscriptMessage("system", t("agentLeftFindingsNote", leftUnresolved.length));
   setAgentSending(false);
   // Every exit path above (a real reply, the too-many-rounds note, or an
@@ -11882,6 +11894,8 @@ window.__kg = {
     getAzureConfigErrorKind: () => agentAzureConfigErrorKind,
     // Phase 2 — live chat test surface.
     sendMessage: submitAgentChatInput,
+    // Eval-only (issue #85's control arm) -- see agentState.selfCorrectionDisabled.
+    setSelfCorrectionDisabled: (off) => { agentState.selfCorrectionDisabled = Boolean(off); },
     buildSystemPrompt: buildAgentSystemPrompt,
     isSending: () => agentState.sending,
     // Post-plan extension (helper_agent_plan.md §9) — conversation
