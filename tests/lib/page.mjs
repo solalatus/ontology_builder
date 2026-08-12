@@ -112,3 +112,41 @@ export async function createEdgeViaConnectMode(page, ax, ay, bx, by, relation) {
   await page.keyboard.press("Enter");
   await page.waitForSelector(".kg-inline-input", { state: "detached" });
 }
+
+// Waits until a computed style (optionally of a pseudo-element) settles on
+// `expected`, then returns it.
+//
+// The pattern this replaces is `page.hover(...)` followed by
+// `page.waitForTimeout(150)` and an equality assertion. That samples the style
+// at one arbitrary instant: if a CSS transition has not finished — which under
+// a loaded machine running the whole suite it often has not — the value read
+// is a mid-flight `0.73` rather than the `1` the test means, and the test
+// fails for reasons that have nothing to do with the app. Three different
+// tooltip and panel-geometry tests in this suite have flaked exactly that way.
+//
+// Polling for the settled value is *stronger*, not weaker: the old form
+// asserted "at t=150ms this happened to be right", while this asserts "this
+// genuinely reaches the expected end state", and fails with the last value it
+// saw if it never does.
+export async function waitForComputedStyle(page, selector, prop, expected, { pseudo = null, timeout = 5000 } = {}) {
+  try {
+    await page.waitForFunction(
+      ({ selector, prop, expected, pseudo }) => {
+        const el = document.querySelector(selector);
+        return Boolean(el) && getComputedStyle(el, pseudo)[prop] === expected;
+      },
+      { selector, prop, expected, pseudo },
+      { timeout },
+    );
+  } catch (err) {
+    const actual = await page.evaluate(
+      ({ selector, prop, pseudo }) => {
+        const el = document.querySelector(selector);
+        return el ? getComputedStyle(el, pseudo)[prop] : "(no such element)";
+      },
+      { selector, prop, pseudo },
+    );
+    throw new Error(`${selector}${pseudo || ""} ${prop}: expected ${JSON.stringify(expected)}, settled on ${JSON.stringify(actual)}`);
+  }
+  return expected;
+}

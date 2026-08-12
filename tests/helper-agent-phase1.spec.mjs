@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { withPage, APP_URL } from "./lib/page.mjs";
+import { withPage, APP_URL, waitForComputedStyle } from "./lib/page.mjs";
 import { launchChromium } from "./lib/browser.mjs";
 
 // Helper Agent (helper_agent_plan.md), Phase 1: collapsed/expanded panel,
@@ -88,9 +88,21 @@ test("agent panel is collapsed by default and expands via its toggle", async () 
 // push-layout behavior: collapsed must stay byte-identical to the old
 // always-0 offset (every test above this one runs in that state), and
 // expanding/resizing must visibly shift both the toolbar and the canvas.
+// Waits for the 120ms `left` transition to actually finish rather than
+// guessing at 150ms. The guess is right on an idle machine and wrong on a
+// loaded one, which is how this file's push-layout assertions flaked in a full
+// suite run while passing every time in isolation: the value sampled was a
+// mid-transition `84.3px` instead of the settled width.
 async function settledLeft(page, id) {
-  await page.waitForTimeout(150); // let the 120ms `left` transition finish -- see index.html's own --transition-fast
-  return page.evaluate((elId) => getComputedStyle(document.getElementById(elId)).left, id);
+  const read = () => page.evaluate((elId) => getComputedStyle(document.getElementById(elId)).left, id);
+  let last = await read();
+  for (let i = 0; i < 40; i++) {
+    await page.waitForTimeout(25);
+    const next = await read();
+    if (next === last) return next;
+    last = next;
+  }
+  return last;
 }
 
 test("toolbar and canvas sit flush left (0px) while the agent panel is collapsed -- the default, unchanged from before issue #55", async () => {
@@ -491,7 +503,8 @@ test("#agent-connect-open uses the app's themed button colors, not the browser d
     // the click -- window.__kg.theme.toggle() is the same hook
     // tests/theme.spec.mjs itself uses to sidestep exactly that.
     await page.evaluate(() => window.__kg.theme.toggle());
-    await page.waitForTimeout(150); // let the 120ms background-color transition settle
+    // Wait for the settled colour rather than a fixed 150ms -- see settledLeft.
+    await waitForComputedStyle(page, "#agent-connect-open", "backgroundColor", "rgb(255, 255, 255)");
     const light = await themedBtnColors(page, "agent-connect-open");
     assert.equal(light.bg, "rgb(255, 255, 255)", "light --btn-bg");
     assert.equal(light.color, "rgb(26, 26, 26)", "light --toolbar-fg");
@@ -516,7 +529,7 @@ test("#agent-restart-conversation, #agent-disconnect, and #agent-chat-send use t
     }
 
     await page.evaluate(() => window.__kg.theme.toggle());
-    await page.waitForTimeout(150); // let the 120ms background-color transition settle
+    await waitForComputedStyle(page, "#agent-restart-conversation", "backgroundColor", "rgb(255, 255, 255)");
     for (const id of ["agent-restart-conversation", "agent-disconnect", "agent-chat-send"]) {
       const light = await themedBtnColors(page, id);
       assert.equal(light.bg, "rgb(255, 255, 255)", `${id}: light --btn-bg`);

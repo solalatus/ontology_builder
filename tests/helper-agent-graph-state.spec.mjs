@@ -91,6 +91,18 @@ async function lastTranscriptMessage(page) {
   });
 }
 
+// The tool result is buildDomainYamlExport() followed by a commented-out
+// consistency appendix (issue #84 §2 -- the full sweep rides on this tool
+// rather than on detecting "Phase 9" in the agent's prose). The export half is
+// still exactly what the exporter produces, which is what these two tests were
+// written to pin; splitting on the appendix marker keeps that assertion exact
+// rather than relaxing it to a substring match.
+// A lookahead, so splitting on it leaves the appendix intact -- otherwise the
+// marker itself is eaten and the first appendix line loses its `#`, which
+// makes the "every line is commented out" assertion below meaningless.
+const CONSISTENCY_APPENDIX = /\n\n(?=# CONSISTENCY CHECK — )/;
+const exportHalf = (content) => content.split(CONSISTENCY_APPENDIX)[0];
+
 test("get_graph_state on an empty graph returns the same minimal YAML buildDomainYamlExport() would", async () => {
   await withPage(async (page) => {
     await connectAgent(page);
@@ -104,7 +116,8 @@ test("get_graph_state on an empty graph returns the same minimal YAML buildDomai
 
     const expected = await page.evaluate(() => window.buildDomainYamlExport());
     const toolResultMessage = bodies[1].messages.find((m) => m.role === "tool" && m.tool_call_id === "call_1");
-    assert.equal(toolResultMessage.content, expected);
+    assert.equal(exportHalf(toolResultMessage.content), expected);
+    assert.match(toolResultMessage.content, /# CONSISTENCY CHECK — no outstanding problems/);
   });
 });
 
@@ -128,7 +141,8 @@ test("get_graph_state reflects real canvas content, including a class added by a
     const expected = await page.evaluate(() => window.buildDomainYamlExport());
     assert.match(expected, /Invoice:/); // sanity check the fixture itself
     const toolResultMessage = bodies[1].messages.find((m) => m.role === "tool" && m.tool_call_id === "call_2");
-    assert.equal(toolResultMessage.content, expected);
+    assert.equal(exportHalf(toolResultMessage.content), expected);
+    assert.match(toolResultMessage.content, CONSISTENCY_APPENDIX, "the sweep must ride along on every get_graph_state, not only an empty one");
   });
 });
 
@@ -299,5 +313,39 @@ test("an unrecognized tool name is handled gracefully rather than crashing the c
     const last = await lastTranscriptMessage(page);
     assert.equal(last.role, "assistant");
     assert.equal(last.text, "recovered");
+  });
+});
+
+test("the consistency appendix on get_graph_state names real problems and stays out of the YAML", async () => {
+  // The full sweep rides on this tool (issue #84 §2). Two things have to hold
+  // at once: it must actually report what is wrong with the whole model, and
+  // it must not corrupt the export it is appended to — the agent parses that
+  // half as YAML, so every appendix line is commented out.
+  await withPage(async (page) => {
+    await connectAgent(page);
+    await page.evaluate(() => {
+      window.__kg.formats.openImportDialog(
+        "classes:\n  Incident:\n    properties:\n      status:\n        type: text\n        allowed:\n          - new\nrules:\n  canClose:\n    conditions:\n      - Incident status is archived.\nactions:\n  close:\n    input: Incident\n    preconditions:\n      - canClose\n    effect: e\n    verification: v\n",
+        "yaml");
+      document.getElementById("import-replace").click();
+    });
+
+    const bodies = mockChatSequence(page, [
+      () => ({ body: toolCallCompletionBody([toolCall("call_1", "get_graph_state", {})]) }),
+      () => ({ body: chatCompletionBody("ok") }),
+    ]);
+    await sendChatMessage(page, "check the state");
+    await page.waitForFunction(() => !window.__kg.agent.isSending());
+
+    const content = bodies[1].messages.find((m) => m.role === "tool" && m.tool_call_id === "call_1").content;
+    assert.match(content, /# CONSISTENCY CHECK — 1 outstanding problem/);
+    assert.match(content, /value-not-allowed/);
+    assert.match(content, /"archived"/);
+    // Every appendix line is a YAML comment, so the export half still parses.
+    const appendix = content.split(CONSISTENCY_APPENDIX)[1];
+    for (const line of appendix.split("\n").filter(Boolean)) {
+      assert.match(line, /^#/, `appendix line must be commented out, got: ${line}`);
+    }
+    assert.equal(/\[note\]/.test(content), false, "notes are for the human panel, not for the agent");
   });
 });
