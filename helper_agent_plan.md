@@ -323,7 +323,7 @@ Execution path when the model calls it:
    chatbot edited" requirement, beyond just the canvas repainting).
 3. `commitYamlImport(args.yaml, "merge")` → applies it. This function
    already does its own `snapshotState()`/`pushHistory()` internally
-   (`index.html:3751-3856`), so **one call already equals exactly one undo
+   (`index.html:8756-8897`), so **one call already equals exactly one undo
    step** — no new history-batching code is needed for the common case of a
    single tool call per turn.
 4. The existing render loop already reacts to any state mutation via
@@ -424,12 +424,12 @@ New `STRINGS` keys (en/hu) for: panel toggle label, Connect button, modal
 field labels/placeholder, connection error messages, chat input placeholder,
 send button, the "✓ applied: +N / ~N / -N" transcript line template,
 disconnect/forget-key action. Follows the exact existing `STRINGS` table
-pattern (`index.html:704`) — no new i18n mechanism.
+pattern (`index.html:1989`) — no new i18n mechanism.
 
 ### 4.9 Output-language lock (added per user feedback)
 
 The agent's *reply* language should track the app's current UI language
-(`lang` — `en`/`hu`, `index.html:864`), not whatever language the
+(`lang` — `en`/`hu`, `index.html:2543`), not whatever language the
 conversation happens to drift into. Two things enforce this together:
 
 - A short, clearly-delimited directive appended to the system prompt on
@@ -446,7 +446,7 @@ conversation happens to drift into. Two things enforce this together:
   buried at the very top of a long, stale-feeling history is exactly the
   kind of thing models start deprioritizing after enough turns.
 - If the user toggles the app's language mid-conversation (`toggleLanguage()`,
-  `index.html:952`), the next outgoing request picks up the new value
+  `index.html:2727`), the next outgoing request picks up the new value
   automatically, since the directive is generated fresh per-request from
   the live `lang` variable rather than baked in once at connect time.
 - The directive text itself only needs an `en` and `hu` copy (two short

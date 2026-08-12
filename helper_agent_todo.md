@@ -63,6 +63,13 @@ feature — `agent_ontology_spec.md` §4.2), agent conversation persistence & re
 replication set, and the B1/B2/B3 comparison-condition baselines. Treat the bullets above as a Phase-6
 snapshot, not the project's actual current state — scroll down for that.
 
+Also landed after this section stopped being updated, and tracked in the base app's own `TODO.md` rather
+than here since it's a base-app initiative: the Consistency Checker arc (issues #83, #84, #85, #88, #89),
+which gives the agent tool loop itself a self-correction step — `apply_ontology_yaml`'s tool result now
+carries delta-scoped consistency findings, and the agent gets a small per-turn budget to fix what its own
+edit broke before replying, gated on issue #85's eval showing this doesn't damage the interview. See
+`TODO.md`'s dated 2026-08-12 Log entry for the full account.
+
 ## Phase 1 — Panel scaffold + connect modal + model list
 
 - [x] Collapsed/expanded panel state machine (`#agent-panel`, `agentState.panelExpanded`).

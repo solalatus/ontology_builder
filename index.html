@@ -3170,6 +3170,24 @@ function updateUndoRedoButtons() {
 // inside, this function.
 const REPULSION_MARGIN = 24; // extra clearance beyond two boxes' circumscribed circles just touching
 
+// Yield knobs for large-graph autolayout (TODO.md's "Autolayout's
+// O(n^2)-per-pass scaling ceiling" open question). This addresses only the
+// "unyielded main-thread time" half of that finding -- periodically handing
+// control back to the browser so a large layout doesn't freeze the tab --
+// NOT the residual-overlap-at-1,000-nodes half, which stays exactly what it
+// was (a separate, still-open question about the relaxation's own accuracy
+// at scale, not its responsiveness). AUTOLAYOUT_YIELD_NODE_THRESHOLD sits
+// comfortably above every fixture the permanent test suite exercises (the
+// largest is the 200-node phase6.spec.mjs stress test), so below it neither
+// loop below ever actually awaits — the whole computation still runs to
+// completion in one synchronous stretch, exactly as before this change, and
+// only a graph large enough for the freeze to matter pays for the yields.
+const AUTOLAYOUT_YIELD_NODE_THRESHOLD = 250;
+const AUTOLAYOUT_YIELD_EVERY_N_ITERATIONS = 10;
+function yieldToMainThread() {
+  return new Promise((resolve) => setTimeout(resolve, 0));
+}
+
 // Bounded, deterministic post-pass: the FR relaxation above optimizes
 // average spacing, not a hard non-overlap guarantee, so a small number of
 // dense/awkward pairs can still finish touching or overlapping even with
@@ -3183,8 +3201,11 @@ const REPULSION_MARGIN = 24; // extra clearance beyond two boxes' circumscribed 
 // terminates regardless of graph shape.
 const OVERLAP_PASS_MAX_ITERATIONS = 60;
 
-function resolveNodeOverlaps(nodes, margin) {
+async function resolveNodeOverlaps(nodes, margin) {
   for (let iter = 0; iter < OVERLAP_PASS_MAX_ITERATIONS; iter++) {
+    if (nodes.length > AUTOLAYOUT_YIELD_NODE_THRESHOLD && iter > 0 && iter % AUTOLAYOUT_YIELD_EVERY_N_ITERATIONS === 0) {
+      await yieldToMainThread();
+    }
     let anyOverlap = false;
     for (let i = 0; i < nodes.length; i++) {
       for (let j = i + 1; j < nodes.length; j++) {
@@ -3227,7 +3248,7 @@ function isAxisDegenerate(points) {
   return spread(xs) < 1 || spread(ys) < 1;
 }
 
-function relaxCenters(initialCenters, radii, indexById, edges) {
+async function relaxCenters(initialCenters, radii, indexById, edges) {
   const iterations = 200;
   let temperature = 100; // max displacement per iteration, cooled to ~0
   // A seed that's perfectly collinear (or co-located) on one axis is an
@@ -3254,6 +3275,9 @@ function relaxCenters(initialCenters, radii, indexById, edges) {
   const pairIdealDist = (i, j) => radii[i] + radii[j] + REPULSION_MARGIN;
 
   for (let iter = 0; iter < iterations; iter++) {
+    if (centers.length > AUTOLAYOUT_YIELD_NODE_THRESHOLD && iter > 0 && iter % AUTOLAYOUT_YIELD_EVERY_N_ITERATIONS === 0) {
+      await yieldToMainThread();
+    }
     const disp = centers.map(() => ({ x: 0, y: 0 }));
 
     for (let i = 0; i < centers.length; i++) {
@@ -3553,7 +3577,7 @@ function resolveEdgeLabelPositions(nodes, edges, indexById) {
   for (const edge of edges) edge.labelT = t.get(edge.id);
 }
 
-function computeAutoLayoutPositions() {
+async function computeAutoLayoutPositions() {
   const indexById = new Map(state.nodes.map((n, i) => [n.id, i]));
   // Bounding-circle radius (half the box diagonal): the smallest per-node
   // "personal space" radius such that two nodes' boxes provably can't
@@ -3570,7 +3594,7 @@ function computeAutoLayoutPositions() {
 
   let best = null;
   for (const seed of seeds) {
-    const centers = relaxCenters(seed, radii, indexById, state.edges);
+    const centers = await relaxCenters(seed, radii, indexById, state.edges);
     const crossings = countCrossingsForCenters(centers, state.edges, indexById);
     const area = boundingBoxAreaForCenters(centers, state.nodes);
     if (!best || crossings < best.crossings || (crossings === best.crossings && area < best.area)) {
@@ -3588,7 +3612,7 @@ function computeAutoLayoutPositions() {
   const CROSSING_POLISH_ROUNDS = 5;
   for (let round = 0; round < CROSSING_POLISH_ROUNDS && best.crossings > 0; round++) {
     const nudgedSeed = nudgeAwayFromCrossings(best.centers, state.edges, indexById);
-    const centers = relaxCenters(nudgedSeed, radii, indexById, state.edges);
+    const centers = await relaxCenters(nudgedSeed, radii, indexById, state.edges);
     const crossings = countCrossingsForCenters(centers, state.edges, indexById);
     if (crossings >= best.crossings) break; // no further improvement this way -- stop, keep current best
     const area = boundingBoxAreaForCenters(centers, state.nodes);
@@ -3600,22 +3624,35 @@ function computeAutoLayoutPositions() {
     n.y = best.centers[i].y - n.h / 2;
   });
 
-  resolveNodeOverlaps(state.nodes, REPULSION_MARGIN);
+  await resolveNodeOverlaps(state.nodes, REPULSION_MARGIN);
   resolveEdgeLabelPositions(state.nodes, state.edges, indexById);
 }
+
+// Guards against two overlapping autoLayout() calls corrupting each other's
+// in-progress relaxation of the same live state.nodes array -- only a real
+// concern now that a large graph's layout genuinely spans multiple event-loop
+// turns (see AUTOLAYOUT_YIELD_NODE_THRESHOLD above); a second click before
+// the first finishes is simply ignored rather than interleaved.
+let autoLayoutRunning = false;
 
 // Public entry point -- the toolbar button and the window.__kg.actions test
 // hook both call this directly, as its own single, independent undo step
 // (see tests/phase8.spec.mjs). The length guard lives here, before the
 // snapshot, so a trivial/no-op call never pays for one or creates a
 // phantom history entry -- unchanged from before this function was split.
-function autoLayout() {
+async function autoLayout() {
   if (state.nodes.length < 2) return; // nothing to relax
-  const before = snapshotState();
-  computeAutoLayoutPositions();
-  markDirty();
-  pushHistory(before, snapshotState());
-  fitViewToContent();
+  if (autoLayoutRunning) return;
+  autoLayoutRunning = true;
+  try {
+    const before = snapshotState();
+    await computeAutoLayoutPositions();
+    markDirty();
+    pushHistory(before, snapshotState());
+    fitViewToContent();
+  } finally {
+    autoLayoutRunning = false;
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -4624,7 +4661,8 @@ let activeConfirm = null;
 // regardless of where in the file it's called from relative to those
 // consts' own declaration order.
 function isAnyModalOpen() {
-  return ["confirm-overlay", "details-overlay", "domain-model-overlay", "import-overlay", "welcome-overlay", "help-overlay"]
+  return ["confirm-overlay", "details-overlay", "domain-model-overlay", "import-overlay", "welcome-overlay", "help-overlay",
+      "consistency-overlay", "review-changes-overlay", "agent-connect-overlay", "agent-azure-config-overlay"]
     .some((id) => document.getElementById(id).style.display === "flex");
 }
 
@@ -5674,6 +5712,34 @@ window.addEventListener("keydown", (e) => {
     if (e.key === "Escape") { e.preventDefault(); closeDomainModelDialog(); }
     return;
   }
+  if (consistencyOverlayOpen) {
+    if (e.key === "Escape") { e.preventDefault(); closeConsistency(); }
+    return;
+  }
+  if (reviewIndex !== null) {
+    if (e.key === "Escape") { e.preventDefault(); closeReviewChanges(); }
+    return;
+  }
+  if (welcomeOverlayOpen) {
+    if (e.key === "Escape") { e.preventDefault(); closeWelcome(); }
+    return;
+  }
+  if (helpOverlayOpen) {
+    if (e.key === "Escape") { e.preventDefault(); closeHelp(); }
+    return;
+  }
+  if (document.getElementById("import-overlay").style.display === "flex") {
+    if (e.key === "Escape") { e.preventDefault(); closeImportDialog(); }
+    return;
+  }
+  if (document.getElementById("agent-azure-config-overlay").style.display === "flex") {
+    if (e.key === "Escape") { e.preventDefault(); closeAzureConfigPopup(); }
+    return;
+  }
+  if (document.getElementById("agent-connect-overlay").style.display === "flex") {
+    if (e.key === "Escape") { e.preventDefault(); closeAgentConnectModal(); }
+    return;
+  }
   if (activeInlineEditor) return; // don't hijack while typing
   if (e.key === "Escape") {
     if (state.mode !== "idle") setMode("idle");
@@ -6461,8 +6527,12 @@ function consistencyReachable(index, from, to, edges) {
   if (from === to) return true;
   const seen = new Set([from]);
   const queue = [from];
-  while (queue.length) {
-    const at = queue.shift();
+  // A head pointer instead of Array.shift() keeps this O(n) per call --
+  // shift() is O(n) per call (re-indexes the whole remaining array), which
+  // would make this O(n^2) on its own, same as circularSeedByBFS's own fix
+  // (see its comment) for the same anti-pattern.
+  for (let head = 0; head < queue.length; head++) {
+    const at = queue[head];
     for (const next of edges.get(at) || []) {
       if (next === to) return true;
       if (seen.has(next)) continue;
@@ -7108,6 +7178,7 @@ function updateReviewButtonState() {
 }
 
 function openReviewChanges() {
+  if (isAnyModalOpen()) return;
   if (history.past.length === 0) return;
   reviewIndex = history.past.length - 1; // latest edit — "the primary use case" (issue §3)
   reviewActiveTab = "summary";
@@ -7688,7 +7759,7 @@ function closeConsistency() {
 }
 
 // --- Tier C: the optional model pass ---------------------------------------
-// Off unless the user turns it on, and user-triggered even then rather than
+// On by default since issue #89, user-togglable off, and user-triggered even when on rather than
 // firing on every keystroke-sized edit. Its findings are merged into the same
 // list, tagged `tier: "llm"`, and dropped the moment the model changes. It
 // cannot block, delay or roll back anything: the deterministic findings are
@@ -8053,6 +8124,17 @@ function performSaveVersion() {
 // gated), while Replace's diff-summary requirement is satisfied by the same
 // dialog. This is a necessary UI addition beyond Section 7's literal table.
 // ---------------------------------------------------------------------------
+// Python's str.split(sep, 1): splits on the FIRST occurrence only, joining
+// everything after it back into the second element. JS's split(sep, limit)
+// does something else entirely (truncates the result array instead of
+// rejoining the remainder), so parseTxtImport needs this to actually match
+// tools/load_edge_list.py's conn.split("<->"/"->" , 1) on a connector
+// segment that contains the separator more than once.
+function splitOnce(str, sep) {
+  const idx = str.indexOf(sep);
+  return idx === -1 ? [str] : [str.slice(0, idx), str.slice(idx + sep.length)];
+}
+
 function parseTxtImport(text) {
   const nodes = [];
   const edges = [];
@@ -8078,10 +8160,10 @@ function parseTxtImport(text) {
       let directed, src, tgt;
       if (conn.includes("<->")) {
         directed = false;
-        [src, tgt] = conn.split("<->");
+        [src, tgt] = splitOnce(conn, "<->");
       } else if (conn.includes("->")) {
         directed = true;
-        [src, tgt] = conn.split("->");
+        [src, tgt] = splitOnce(conn, "->");
       } else {
         continue; // malformed — no connector, skip
       }
@@ -8161,7 +8243,7 @@ function computeImportShelf() {
 
 let newlyImportedIds = new Set();
 
-function commitTxtImport(text, mode) {
+async function commitTxtImport(text, mode) {
   const before = snapshotState();
   const parsed = parseTxtImport(text);
   const nextShelfPosition = computeImportShelf();
@@ -8218,7 +8300,7 @@ function commitTxtImport(text, mode) {
   // is exactly the surprising behavior "exactly one undo step" tests
   // elsewhere in this app -- phase8.spec.mjs's own autolayout tests among
   // them -- exist to rule out).
-  if (state.nodes.length >= 2) computeAutoLayoutPositions();
+  if (state.nodes.length >= 2) await computeAutoLayoutPositions();
   pushHistory(before, snapshotState()); // clears any stale "just imported" highlight first
   newlyImportedIds = new Set(createdNodeIds);
   markDirty();
@@ -8708,7 +8790,7 @@ function mergePropertiesByName(existingProperties, incomingByName) {
 // `properties` specifically upserts by name (see mergePropertiesByName)
 // instead of replacing the whole array. Newly-created entities are
 // unaffected by any of this -- there's nothing to preserve yet.
-function commitYamlImport(text, mode) {
+async function commitYamlImport(text, mode) {
   const before = snapshotState();
   const parsed = parseDomainYamlImport(text);
   // Hand whatever this import cannot store to the next consistency sweep. It
@@ -8831,7 +8913,7 @@ function commitYamlImport(text, mode) {
   // "agent-merge" from the live agent's apply_ontology_yaml tool call.
   // Folded into this same snapshot/pushHistory, not a second one of its
   // own -- see commitTxtImport's matching comment for why.
-  if (state.nodes.length >= 2) computeAutoLayoutPositions();
+  if (state.nodes.length >= 2) await computeAutoLayoutPositions();
   // "agent-merge" is the one mode only the live agent's apply_ontology_yaml
   // tool call ever passes (see this function's own comment) -- "merge"/
   // "replace" are always the manual Import dialog, so this is the exact
@@ -9406,13 +9488,13 @@ function closeImportDialog() {
   pendingImportFilename = null;
 }
 
-function runPendingImport(mode) {
+async function runPendingImport(mode) {
   const text = pendingImportText, kind = pendingImportKind, filename = pendingImportFilename;
   closeImportDialog();
   if (text === null) return;
   if (kind === "json") commitJsonImport(text, mode, filename);
-  else if (kind === "yaml") commitYamlImport(text, mode);
-  else commitTxtImport(text, mode);
+  else if (kind === "yaml") await commitYamlImport(text, mode);
+  else await commitTxtImport(text, mode);
 }
 
 importMergeBtn.addEventListener("click", () => runPendingImport("merge"));
@@ -9423,10 +9505,6 @@ importOverlay.addEventListener("click", (e) => { if (e.target === importOverlay)
 // ---------------------------------------------------------------------------
 // Toolbar
 // ---------------------------------------------------------------------------
-function notImplemented(label) {
-  console.warn(`[KG Canvas] "${label}" is not implemented yet (see TODO.md).`);
-}
-
 document.getElementById("btn-zoom-in").addEventListener("click", () => {
   zoomAt(cssWidth / 2, cssHeight / 2, 1.25);
 });
@@ -9838,6 +9916,16 @@ const agentState = {
   // makes it useful; cleared on disconnect so a later connection gets its
   // own fresh key rather than inheriting a stale one.
   promptCacheKey: null,
+  // The in-flight chat turn's AbortController, if any -- disconnectAgent()
+  // and restartAgentConversation() abort it so a reply that was already on
+  // the wire doesn't land after the conversation it belongs to is gone.
+  abortController: null,
+  // Bumped on every disconnect/restart. sendAgentChatMessage() captures the
+  // value at the start of a turn and re-checks it after every await; a
+  // mismatch means the conversation was cleared out from under this turn,
+  // so the turn discards its own result instead of writing into (or
+  // persisting) a conversation the user already asked to reset.
+  requestGeneration: 0,
   // Eval-only, no UI ever sets these — used exclusively by the comparison-
   // condition test harnesses (tests/evals/baseline-b2-generic-interviewer.eval.spec.mjs,
   // baseline-b3-no-commit.eval.spec.mjs) to isolate one factor at a time
@@ -10261,6 +10349,7 @@ function removeAzureConfig() {
 }
 
 function openAgentConnectModal() {
+  if (isAnyModalOpen()) return;
   agentConnectStage = "key";
   agentPendingKey = null;
   agentPendingAzureEndpoint = null;
@@ -10390,6 +10479,8 @@ async function submitAgentConnect() {
 }
 
 function disconnectAgent() {
+  if (agentState.abortController) { agentState.abortController.abort(); agentState.abortController = null; }
+  agentState.requestGeneration++;
   agentState.connected = false;
   agentState.apiKey = null;
   agentState.azureEndpoint = null;
@@ -10417,10 +10508,18 @@ function disconnectAgent() {
 // apiKey/model/connected — restarting the conversation shouldn't force
 // re-entering the API key.
 function restartAgentConversation() {
+  if (agentState.abortController) { agentState.abortController.abort(); agentState.abortController = null; }
+  agentState.requestGeneration++;
   agentState.transcript = [];
   agentState.apiMessages = [];
   agentState.promptCacheKey = `kg-agent-${crypto.randomUUID()}`;
   renderAgentTranscript();
+  // If a turn was still in flight, aborting it above means its own
+  // sendAgentChatMessage() call now discards itself on the generation
+  // mismatch rather than ever reaching its trailing setAgentSending(false)
+  // -- so restart has to re-enable the input itself, the same way
+  // disconnectAgent() already does directly.
+  setAgentSending(false);
   scheduleAgentConversationSave();
 }
 
@@ -11393,7 +11492,7 @@ function setAgentSending(sending) {
 // comment for why that content is a pull tool rather than injected into the
 // prefix). Reusing one key for a whole connection, not generating a fresh
 // one per call, is what makes that hint meaningful.
-async function callAgentChatRaw(messages, { tools, promptCacheKey } = {}) {
+async function callAgentChatRaw(messages, { tools, promptCacheKey, signal } = {}) {
   const azure = isAzureProvider(agentState.azureEndpoint);
   const url = agentChatUrl(agentState.azureEndpoint, agentState.model, agentState.azureApiVersion);
   const authHeaders = agentAuthHeaders(agentState.azureEndpoint, agentState.apiKey);
@@ -11416,8 +11515,10 @@ async function callAgentChatRaw(messages, { tools, promptCacheKey } = {}) {
           ...(tools ? { tools, tool_choice: "auto" } : {}),
           ...(promptCacheKey ? { prompt_cache_key: promptCacheKey } : {}),
         }),
+        ...(signal ? { signal } : {}),
       });
     } catch (err) {
+      if (err && err.name === "AbortError") throw { kind: "aborted" };
       throw { kind: "network" };
     }
     let json = null;
@@ -11467,7 +11568,7 @@ async function callAgentChat(messages) {
 // outcome is visible to the user, not just to the model (plan §4.5's
 // transparency requirement, extended here to cover the skip/error/no-op
 // cases the plan didn't spell out line-by-line).
-function handleAgentToolCall(call, alreadyCommittedThisTurn) {
+async function handleAgentToolCall(call, alreadyCommittedThisTurn) {
   let args;
   try {
     args = JSON.parse((call.function && call.function.arguments) || "{}");
@@ -11491,7 +11592,7 @@ function handleAgentToolCall(call, alreadyCommittedThisTurn) {
     appendTranscriptMessage("tool", t("agentToolNothingNote"));
     return { applied: false, resultText: "Nothing to apply — no new or changed classes, relationships, rules, or actions were found in that yaml." };
   }
-  commitYamlImport(yamlText, "agent-merge"); // never "replace"; not "merge" either — see commitYamlImport's own comment
+  await commitYamlImport(yamlText, "agent-merge"); // never "replace"; not "merge" either — see commitYamlImport's own comment
   appendTranscriptMessage("tool", t("agentToolApplied", plan.addedCount, plan.changedCount));
   // The same silent drop, told to the agent rather than to the user. Until
   // now the reply was "Applied. Added 3, updated 2" even when a relationship
@@ -11627,6 +11728,15 @@ function formatFindingsForAgent(newFindings, backlogCount, budgetExhausted) {
 }
 
 async function sendAgentChatMessage(userText) {
+  // Captured once per turn so every await point below can tell whether
+  // disconnectAgent()/restartAgentConversation() cleared the conversation
+  // out from under this turn while it was on the wire -- see agentState's
+  // own comment on requestGeneration.
+  agentState.requestGeneration++;
+  const myGeneration = agentState.requestGeneration;
+  const controller = new AbortController();
+  agentState.abortController = controller;
+
   appendTranscriptMessage("user", userText);
   agentState.apiMessages.push({ role: "user", content: userText });
   setAgentSending(true);
@@ -11663,7 +11773,12 @@ async function sendAgentChatMessage(userText) {
       const message = await callAgentChatRaw(messages, {
         tools: agentState.toolsDisabled ? undefined : [APPLY_ONTOLOGY_YAML_TOOL, GET_GRAPH_STATE_TOOL],
         promptCacheKey: agentState.promptCacheKey,
+        signal: controller.signal,
       });
+      // The conversation was disconnected or restarted while this reply was
+      // in flight -- discard it rather than writing into (and persisting)
+      // whatever conversation exists now.
+      if (myGeneration !== agentState.requestGeneration) return;
 
       if (Array.isArray(message.tool_calls) && message.tool_calls.length) {
         toolRounds++;
@@ -11688,7 +11803,7 @@ async function sendAgentChatMessage(userText) {
           const budget = appliesThisTurn === 0 ? true
             : (!agentState.selfCorrectionDisabled
                && appliesThisTurn < AGENT_MAX_APPLIES_PER_TURN && remediationOpen);
-          const { applied, resultText } = handleAgentToolCall(call, !budget);
+          const { applied, resultText } = await handleAgentToolCall(call, !budget);
           if (applied) {
             appliesThisTurn++;
             const findings = computeOntologyFindings(buildDomainModel(), { droppedReferences: lastDroppedReferences });
@@ -11713,6 +11828,7 @@ async function sendAgentChatMessage(userText) {
       appendTranscriptMessage("assistant", reply);
       break;
     } catch (err) {
+      if (myGeneration !== agentState.requestGeneration) return;
       if (err && err.kind === "contextLength" && compactionAttempt < AGENT_MAX_COMPACTIONS) {
         compactionAttempt++;
         let compacted = false;
@@ -11721,12 +11837,14 @@ async function sendAgentChatMessage(userText) {
         } catch (summarizeErr) {
           compacted = false;
         }
+        if (myGeneration !== agentState.requestGeneration) return;
         if (compacted) continue;
       }
       appendTranscriptMessage("system", agentChatErrorText(err));
       break;
     }
   }
+  if (agentState.abortController === controller) agentState.abortController = null;
   agentTurnFoldIndex = null;
   // Overriding the checker is allowed (see the CONSISTENCY CHECK prompt
   // section) but never silent: whatever the agent chose to leave behind is

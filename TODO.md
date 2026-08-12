@@ -190,6 +190,23 @@ State" so the project can be picked up cold at any time.
   http(s) server. See the dated Log entry for the full account. Full suite:
   533 JS tests (522 pass + 11 correctly skipped without `OPENAI_API_KEY`) +
   13 Python tests, all green, run twice consecutively.
+- **A follow-up autolayout/fit-view bug-fix and coverage pass (2026-08-08)**
+  found and fixed a real degenerate-seed bug in `relaxCenters()`, added a
+  missing `fitViewToContent()` (nothing previously recentered the camera
+  onto a freshly imported/laid-out graph), and confirmed a real, still-open
+  O(n²) scaling ceiling in `resolveNodeOverlaps()` between 500 and 1,000
+  nodes — architectural, not fixed in that pass, see "Open Questions" below.
+  Full suite: 649 tests, 647 pass, 2 known environment flakes.
+- **The Consistency Checker arc (issues #83, #84, #85, #88, #89)** —
+  a deterministic contradiction checker, agent self-correction against its
+  findings, import-time warnings, and an optional model-assisted pass now
+  on by default — shipped after that but was never logged here until the
+  2026-08-12 backfill entry above; see that entry for the full account.
+  Two entirely separate initiatives (Agent Ontology and Helper Agent, each
+  with their own spec/TODO pair below) have also shipped substantial work
+  on top of this base editor since Phase 9. "Next action: Phase 10" below
+  reflects only the base canvas editor's own remaining Tier-B item — it is
+  not a statement that nothing else has happened since.
 - **Next action:** Phase 10 (Cross-platform verification — the manual
   hands-on matrix that every deferred Tier-B item from Phases 0–9 above
   finally gets exercised against for real).
@@ -3249,6 +3266,174 @@ and record deltas here instead of editing the spec.)*
   on the pre-fix code. Full suite (`node --test tests/*.spec.mjs`, 649
   tests): 647 pass, 2 fail (both the known environment flakes above,
   confirmed to reproduce identically on unmodified `main`).
+- **2026-08-12 — Consistency Checker, agent self-correction, import warnings,
+  and the optional model pass (issues #83, #84, #85, #88, #89) — a
+  previously undocumented feature arc, backfilled here from its own commits
+  and eval reports.** #75 had rejected giving an LLM authority to restructure
+  a finished ontology, twice, but surfaced one durable positive: a candidate
+  found a contradiction (`canSendRegulatoryNotification` required a status
+  value its own property's `allowed` list never contained) that survived a
+  51-turn interview undetected. That's what this arc builds a detector for,
+  in two parts:
+  1. **#83 — the deterministic engine and human surface.** `computeOntologyFindings()`
+     takes a domain-model document (the same shape `buildDomainModel()` and
+     `parseDomainYamlImport()` both produce) and returns fingerprinted
+     findings: 16 exact checks over identifiers/references (no false
+     positives possible) plus 5 text checks over the model's free-text
+     fields. Severity matters — `error` means two things the model asserts
+     cannot both hold, `note` means merely unfinished, and nothing
+     incomplete-but-not-contradictory can rise above `note` (an agent
+     chasing "this class has no relationships yet" at question three would
+     stop interviewing). Labelling the three anchor interviews' own 30
+     recorded defects found only 8 were model-level at all — the rest were
+     interviewer-process defects invisible to any checker over the finished
+     model, which is what #84 addresses. Also fixed in the same arc: the
+     YAML importer had always silently discarded relationships whose
+     endpoint class doesn't exist (both the manual import dialog's summary
+     and the agent's own `apply_ontology_yaml` tool result said "Applied,
+     added N" while quietly dropping the edge) — both surfaces now name what
+     they can't store, before anything commits. A findings panel
+     (`Issues (N)` toolbar button) recomputes from the same site that
+     already drives undo/redo, so agent edits, manual edits, import, and
+     undo all pass through it.
+  2. **#84 — the agent acts on its own findings before replying.** Delta-
+     scoped findings (what this turn's edit introduced or newly implicated,
+     plus a backlog count; `note`-severity never reaches the model) now
+     flow back through the tool result, with a 3-applies-per-turn budget
+     (up from 1) — the extra two are remediation-only, available only while
+     this turn's own edits left something unresolved, folded into the same
+     single undo step via history-folding rather than becoming three undo
+     steps for one exchange. The system prompt gained an explicit
+     instruction never to clear a finding by weakening or deleting the
+     rule/property/relationship that raised it (the cheap fix #75's own
+     failed normalizer took) — permitted to leave a finding and say so, not
+     permitted to silently make it disappear. #85 (an eval gated on this not
+     making the interviewer worse) passed outright: across six interviews,
+     three per arm, not one finding was resolved by weakening the model;
+     controlled-value fidelity rose 17-19 points; turns fell from a mean of
+     83 to 57 with coverage held. Full report:
+     `tests/evals/results/baselines/self-correcting-interviewer/REPORT.md`.
+  3. **#88 — the same warning for a human importing a file**, closing the
+     asymmetry #84 left (the agent got told about its own contradictions, a
+     person importing one didn't): the import dialog now reports, per
+     button, how many contradictions Merge vs. Replace would each
+     introduce, computed via a non-committing projection of the prospective
+     merged model — nothing is blocked, the choice is just informed.
+  4. **#89 — the optional model-assisted pass (Tier C), pre-registered then
+     evaluated.** The decision rule was fixed before the first call: switch
+     the default on only if novel-true findings appear in a majority of
+     models and false findings average under one per model, otherwise
+     default stays off. Run over the three anchor models plus the six #85
+     arm models (nine finished ontologies, one call each): 34 novel-true,
+     16 duplicate, 8 false, 1 out-of-scope findings, structurally
+     unreachable by the deterministic engine (ungrounded status values,
+     circular preconditions, unbound action inputs). The rule passed on
+     both clauses — narrowly on the false-positive clause — so the default
+     was switched on (`consistencyLlmEnabled()` now reads `!== "0"` rather
+     than `=== "1"`). It remains user-triggered per click, never per edit,
+     and a new test pins that opening/reopening the findings panel with the
+     pass enabled produces zero network requests on its own. Full report:
+     `tests/evals/results/baselines/tier-c/TIER_C_REPORT.md`.
+  Per-commit test counts recorded at the time (`node --test tests/*.spec.mjs`
+  plus the Python suite, 13/13 throughout): 871 after #83 part 1, 873 after
+  #83's drop-warning fix, 886 after #84, 895 after #88. No count was recorded
+  in the #89 commits themselves. This entry is a backfill — none of #83,
+  #84, #85, #88 or #89 had a Log entry here despite being fully implemented,
+  tested and merged; see spec.md's own amendment note (§10, Out of Scope)
+  and README.md for the user-facing description.
+- **2026-08-12 — code-review and docs-consistency pass** (user-requested: a
+  read-only audit for bugs/loose-ends/stubs plus a docs-vs-code consistency
+  check, then "fix everything except the api key encryption"). Findings and
+  fixes:
+  1. **Modal-exclusivity guard gap.** `isAnyModalOpen()` (index.html) never
+     had the Consistency, Review Changes, or Agent Connect overlays added to
+     its guarded list, and `openReviewChanges()`/`openAgentConnectModal()`
+     never called it at all — so any of the three could stack on top of an
+     already-open dialog, and (since they weren't in the list either) other
+     dialogs could stack on top of them. All three added to the list; both
+     missing guard calls added. `tests/modal-exclusivity.spec.mjs` (4 tests).
+  2. **Escape did nothing for most dialogs.** Only Confirm/Details/Domain
+     Model had Escape handling in the global keydown listener. Added
+     Consistency, Review Changes, Import, Welcome, Help, Agent Connect, and
+     Azure Config. `tests/escape-key-dialogs.spec.mjs` (7 tests).
+  3. **Agent chat disconnect/restart race.** No `AbortController` existed
+     anywhere in the agent chat path; disconnecting or restarting mid-reply
+     let the stale response land afterward, re-persisting content into a
+     conversation the user had just asked to clear. Added
+     `agentState.abortController` + `agentState.requestGeneration` — every
+     `sendAgentChatMessage()` turn captures the generation at its start and
+     discards its own result if a disconnect/restart bumped it before the
+     turn settled; `callAgentChatRaw()` now accepts and forwards an
+     `AbortSignal`. Caught one second bug while testing the fix itself:
+     `restartAgentConversation()` didn't reset `agentState.sending`, so an
+     aborted in-flight turn (which now discards itself before ever reaching
+     its own `setAgentSending(false)`) left the chat input permanently
+     disabled after a restart — fixed by having `restartAgentConversation()`
+     call `setAgentSending(false)` directly, the same way `disconnectAgent()`
+     already did. Two new tests in `tests/helper-agent-phase2.spec.mjs`.
+  4. **TXT importer diverged from its own claimed "exact port" of
+     `tools/load_edge_list.py`.** Python splits a connector segment on the
+     first `->`/`<->` only (`str.split(sep, 1)`); the JS importer split on
+     every occurrence with no limit, silently dropping everything after the
+     second arrow for a line whose connector contains the separator more
+     than once. Added `splitOnce()` (JS has no direct equivalent to Python's
+     `maxsplit` — it truncates the result array instead of rejoining the
+     remainder) and switched both call sites to it.
+     `tests/fixtures/repeated-connector.txt` extends the existing JS/Python
+     parity suite to cover it.
+  5. **Dead code removed:** `notImplemented()` — a Phase-0-era stub with
+     zero remaining call sites (every toolbar action has been fully wired
+     for a long time).
+  6. **`consistencyReachable()`'s BFS used `Array.shift()`**, the same
+     O(n)-per-call-making-the-whole-BFS-O(n²) anti-pattern the project had
+     already found and fixed once in `circularSeedByBFS()` (2026-08-08
+     entry above) — switched to the same head-index-pointer fix.
+  7. **Autolayout's O(n²)-per-pass scaling ceiling** (raised 2026-08-08,
+     left as an open architectural question below): the maintainer picked
+     "chunked/yielding relaxation" specifically — fix the *unyielded main-
+     thread time* half, leave the *residual-overlap-at-1,000-nodes* half
+     open. `relaxCenters()` and `resolveNodeOverlaps()` now yield to the
+     browser (`await` a `setTimeout(resolve, 0)`) every 10 iterations, but
+     only once the graph exceeds `AUTOLAYOUT_YIELD_NODE_THRESHOLD` (250
+     nodes, comfortably above every fixture the permanent suite exercises)
+     — below that threshold neither function ever actually awaits, so the
+     whole computation still completes in one synchronous stretch exactly
+     as before, and no existing test needed to change its own assumptions
+     about same-tick completion. `computeAutoLayoutPositions()`,
+     `autoLayout()`, `commitTxtImport()`, `commitYamlImport()`,
+     `runPendingImport()`, and `handleAgentToolCall()` all became `async`/
+     `await`-threaded to carry this through; a new `autoLayoutRunning` guard
+     stops a second Auto-layout click from interleaving with an in-flight
+     large-graph layout on the same live `state.nodes` array. Two new tests
+     in `tests/autolayout-quality.spec.mjs` pin the yielding itself (a
+     `setInterval` ticking throughout a 600-node layout) and the reentrancy
+     guard; the existing 500-node stress test's own `page.evaluate()` now
+     awaits `autoLayout()` explicitly rather than relying on same-tick
+     completion, which no longer holds above the threshold.
+  Documentation fixes from the same pass, not repeated here in full — see
+  the diffs: README.md's Tier C "off by default" claim corrected to "on by
+  default, issue #89"; spec.md amended on both the consistency-checking
+  out-of-scope claim and the unqualified ~1,000-node performance target (see
+  this same entry's item 7); `tools/zoom-check.mjs` added to README's
+  Repository layout; `helper_agent_plan.md`'s four stale `index.html:LINE`
+  citations corrected; `tests/evals/EXPERIMENT_BRIEF.md`'s claimed
+  deterministic-suite count corrected from a stale 107/107 to the actual
+  62/62; `agent_ontology_todo.md` and `helper_agent_todo.md` both given a
+  staleness caveat on their own "Current State" test counts, cross-
+  referencing this file's 2026-08-12 backfill entry above.
+  Every fix verified red-before/green-after: reverted just that fix (or, for
+  the agent-chat race, swapped in the unmodified `index.html` from `HEAD`)
+  and confirmed the new test failed on the pre-fix code, then restored the
+  fix and confirmed it passed again. Full suite (`node --test
+  tests/*.spec.mjs`): 913 tests, 897 pass + 16 correctly skipped without
+  `OPENAI_API_KEY`, 0 fail — run clean on the first full pass with every fix
+  in place (897 was the pre-existing baseline; a from-scratch baseline run
+  against unmodified `main` separately confirmed 1 pre-existing,
+  environment-specific color/timing flake in this sandbox, reproducing on
+  a *different* random test each run, consistent with the known flakes
+  already documented in the 2026-08-08 entry above — not present in this
+  pass's own run, and not something this pass introduced or needed to
+  chase). Python: 13/13, unchanged.
 
 ---
 
@@ -3267,16 +3452,19 @@ and record deltas here instead of editing the spec.)*
   gated behind Save Version at all. (An initial implementation used a
   one-time prompt on first save instead; revised after the user was asked
   and picked the always-visible title. See the Phase 5 Log entry.)
-- **Autolayout's O(n^2)-per-pass scaling ceiling (raised by the 2026-08-08
-  investigation entry above) — not yet decided.** Zero node-overlap is
-  confirmed reliable at 500 nodes (~15s) but not at 1,000 (dozens of
-  residual overlapping pairs, ~40s of unyielded main-thread time), despite
-  index.html's own comments citing ~1,000 nodes as the target scale. Fixing
-  this properly is an architectural question outside the scope of a single
-  bug-fix pass — candidates include spatial partitioning (quadtree-based
-  repulsion instead of all-pairs), moving the relaxation into a Web Worker
-  so it no longer blocks the UI thread, or a chunked/yielding relaxation
-  that trades a progress indicator for staying responsive. Raise with the
-  user before picking a direction if/when this becomes the active issue —
-  the right tradeoff depends on how large real ontologies people actually
-  bring in practice, which isn't established yet.
+- ~~Autolayout's O(n^2)-per-pass scaling ceiling (raised by the 2026-08-08
+  investigation entry above)~~ — **half-resolved in the 2026-08-12 entry
+  above; the other half is still open.** That entry offered three
+  candidates (spatial partitioning, Web Worker offload, chunked/yielding
+  relaxation) and the maintainer picked chunked/yielding, deliberately
+  scoped to only the "~40s of *unyielded* main-thread time" half of the
+  original finding — `relaxCenters()`/`resolveNodeOverlaps()` now yield to
+  the browser periodically above 250 nodes, so a large layout no longer
+  freezes the tab. The "dozens of residual overlapping pairs at 1,000
+  nodes" half is untouched by that fix (it doesn't reduce the total work or
+  improve the relaxation's own accuracy at scale, only its responsiveness)
+  and remains open: spatial partitioning (quadtree-based repulsion instead
+  of all-pairs) or a fundamentally different relaxation approach would be
+  needed to close it, and that's still an architectural question outside
+  the scope of a bug-fix pass. Raise with the user before picking a
+  direction if/when this becomes the active issue.

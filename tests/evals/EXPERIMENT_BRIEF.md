@@ -251,7 +251,7 @@ already been fixed once.
                 tests/ontology-recovery-metrics.spec.mjs
    python -m unittest discover -s tools -p "test_*.py"
    ```
-   Full deterministic (non-browser) suite is 107/107; Python is 13/13.
+   Full deterministic (non-browser) suite is 62/62; Python is 13/13.
 6. **Dry run before spending calls.** Exercise the whole path on a synthetic or
    cached reply first. Checks 1–3 are all doable with zero API calls.
 

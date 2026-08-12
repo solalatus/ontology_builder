@@ -586,3 +586,74 @@ test("reconnecting after a disconnect starts a fresh conversation", async () => 
     assert.equal(transcript[1].text, "reply two");
   });
 });
+
+// Both tests below exercise agentState.requestGeneration/abortController: a
+// reply that was already on the wire when the user cleared the conversation
+// must not resurrect itself into whatever conversation exists afterward.
+// Prior to that guard, the in-flight turn had no way to notice the clear and
+// would push its reply onto (and re-persist) the fresh state regardless.
+
+test("disconnecting while a reply is still in flight discards that reply instead of resurrecting it after the clear", async () => {
+  await withPage(async (page) => {
+    await connectAgent(page);
+    let resolveRoute;
+    const gate = new Promise((resolve) => { resolveRoute = resolve; });
+    await page.route(CHAT_URL, async (route) => {
+      await gate;
+      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(chatCompletionBody("stale reply, must never be seen")) });
+    });
+
+    await sendChatMessage(page, "hello");
+    await page.waitForFunction(() => window.__kg.agent.isSending());
+
+    await page.click("#agent-disconnect");
+    assert.deepEqual(await page.evaluate(() => ({
+      transcript: window.__kg.agent.state.transcript.length,
+      apiMessages: window.__kg.agent.state.apiMessages.length,
+    })), { transcript: 0, apiMessages: 0 });
+
+    resolveRoute(); // let the stale response land now, after the clear
+    await page.evaluate(() => new Promise((r) => setTimeout(r, 0))); // flush the turn's own .then chain
+
+    const state = await page.evaluate(() => ({
+      transcript: window.__kg.agent.state.transcript.length,
+      apiMessages: window.__kg.agent.state.apiMessages.length,
+      connected: window.__kg.agent.state.connected,
+    }));
+    assert.deepEqual(state, { transcript: 0, apiMessages: 0, connected: false },
+      "the stale reply must not resurrect into the cleared conversation, and disconnect must stay in effect");
+  });
+});
+
+test("restarting the conversation while a reply is still in flight discards that reply instead of resurrecting it into the fresh one", async () => {
+  await withPage(async (page) => {
+    await connectAgent(page);
+    let resolveRoute;
+    const gate = new Promise((resolve) => { resolveRoute = resolve; });
+    await page.route(CHAT_URL, async (route) => {
+      await gate;
+      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(chatCompletionBody("stale reply, must never be seen")) });
+    });
+
+    await sendChatMessage(page, "hello");
+    await page.waitForFunction(() => window.__kg.agent.isSending());
+
+    await page.click("#agent-restart-conversation");
+    await page.click("#confirm-ok"); // restart is confirm-gated, see agent-restart-conversation's own click handler
+    assert.equal(await page.evaluate(() => window.__kg.agent.state.transcript.length), 0);
+
+    // A real new turn in the fresh conversation, started before the stale
+    // reply above is allowed to land.
+    mockChatSequence(page, [() => ({ body: chatCompletionBody("real reply in the fresh conversation") })]);
+    await sendChatMessage(page, "fresh start");
+    await page.waitForFunction(() => window.__kg.agent.state.transcript.length === 2 && !window.__kg.agent.isSending());
+
+    resolveRoute(); // now let the old, pre-restart turn's stale response land
+    await page.evaluate(() => new Promise((r) => setTimeout(r, 0)));
+
+    const transcript = await page.evaluate(() => window.__kg.agent.state.transcript);
+    assert.equal(transcript.length, 2, "the stale reply must not be appended on top of the fresh conversation");
+    assert.equal(transcript[0].text, "fresh start");
+    assert.equal(transcript[1].text, "real reply in the fresh conversation");
+  });
+});

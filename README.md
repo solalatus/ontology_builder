@@ -37,11 +37,12 @@ unreachable from its own input, a relationship silently dropped because an
 endpoint class does not exist. It is deterministic and needs no API key; a
 `Check` button in the toolbar opens the findings, and stays quiet while a model
 is merely unfinished. An optional pass that also asks the connected model to
-look for contradictions can be switched on from the same panel; it is off by
-default. Importing a domain-model file reports the same way before you commit:
-the dialog says how many contradictions Merge or Replace would each leave
-behind — separately, because they give you different models — and neither is
-blocked.
+look for contradictions runs from the same panel; it is on by default (issue
+#89) but can be switched off there, and only ever runs on an explicit click —
+nothing is sent anywhere on its own. Importing a domain-model file reports
+the same way before you commit: the dialog says how many contradictions
+Merge or Replace would each leave behind — separately, because they give you
+different models — and neither is blocked.
 
 ## Interview field guide
 
@@ -137,8 +138,10 @@ node --test tests/evals/*.eval.spec.mjs
   including the `tests/evals/` ontology-recovery eval.
 - `tools/` — a small Python utility (`load_edge_list.py`) for
   programmatically producing the plain-text edge-list import format, plus
-  its own test suite, and `layout-bench.mjs`, the autolayout benchmark
-  harness whose outputs live in `tools/layout-bench-out/`.
+  its own test suite; `layout-bench.mjs`, the autolayout benchmark harness
+  whose outputs live in `tools/layout-bench-out/`; and `zoom-check.mjs`, a
+  multi-zoom visual-QA script that screenshots the same laid-out graph at
+  several zoom levels (issue #64).
 
 ## License
 
