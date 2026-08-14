@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "condition": "competency-questions/control",
+  "arm": "control",
+  "runId": "run-02",
+  "generatedAt": "2026-08-14T16:39:18.193Z",
+  "model": "gpt-5.4",
+  "personaModel": "gpt-4o-mini-internal",
+  "classifierModel": "gpt-5.4",
+  "provider": "azure",
+  "endpoint": "https://briandemoopenai.openai.azure.com",
+  "interviewerPromptSha256": "eff34f3e70f85419e078cbc3bfb827d7e0d58066b33a74c8db09df1e9f337fa2",
+  "competencyQuestionsEnabled": false,
+  "stoppedReason": "app_agent_appears_finished",
+  "turnsUsed": 91,
+  "wallClockSec": 713,
+  "applyToolCalls": 54,
+  "getGraphStateCalls": 4,
+  "competencyQuestionsRecorded": 0,
+  "competencyQuestions": [],
+  "note": "Fresh interview under issue #94's within-model design. The control arm runs the frozen pre-#94 interviewer prompt from this same checkout, so the two arms differ by the interviewer prompt alone. The deployment LISTING is stubbed (this resource returns an empty list for deployments that are callable); every chat call is a real relayed Azure call. Nothing under results/runs/ was read or written."
+}
