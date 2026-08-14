@@ -33,6 +33,39 @@ export function looksLikeEarlyPhaseCheckpoint(text) {
   return EARLY_PHASE_CHECKPOINT_PATTERNS.some((re) => re.test(text));
 }
 
+// Third deterministic pre-filter, and the same failure class as the first:
+// the LLM classifier being fooled by rhetorical shape. Issue #94's first
+// gpt-5.4 batch found ALL SIX interviews stopped on a message that recapped
+// the model so far and then ASKED THE EXPERT WHETHER TO CONTINUE -- in one
+// case naming the domain areas still unmodelled ("continue into additional
+// scope you mentioned earlier such as emergency changes, communications,
+// reviews, or regulatory-reporting workflows?"). The classifier read the
+// recap and said YES; the offer sitting right next to it says the interview
+// is manifestly not over.
+//
+// An interview is not finished while the interviewer is still asking whether
+// to do more work. The published anchor runs confirm the distinction is real
+// rather than invented here: all three end on a flat terminal statement with
+// no question mark at all ("No blocking gaps found. The ontology is now
+// usable...", "...is ready for use in the tool.", "The ontology is complete
+// for the questions and actions you gave."), so this filter would never have
+// fired on them -- the anchor set is unaffected by the defect and by the fix.
+//
+// Requires BOTH a question mark and an explicit offer of further work, so a
+// genuine final summary that happens to contain a rhetorical question is not
+// caught. Like the phase-recap filter, it only ever forces NO, never YES.
+const CONTINUATION_OFFER_PATTERNS = [
+  /\b(would you like|do you want|shall i|should i|want me to|if you(?:'d| would| wish to)? ?(?:like|want)?)\b[^?]{0,160}?\b(continue|carry on|keep going|proceed|move (?:on|to)|go on|expand|extend|add more|next phase|further|fix|clean ?up|refine|tackle|work on)\b/i,
+  /\bstop here\b[^?]{0,120}?\bor\b[^?]{0,120}?\b(continue|carry on|keep going|proceed|expand|extend)\b/i,
+  /\b(the )?next step (can|could|would) be\b/i,
+  /\bnext i can do\b/i,
+];
+export function looksLikeContinuationOffer(text) {
+  if (!text) return false;
+  if (!text.includes("?")) return false; // a final summary states; it does not ask
+  return CONTINUATION_OFFER_PATTERNS.some((re) => re.test(text));
+}
+
 // Second, independent safety net -- catches the actual failure mode a real
 // run hit (helper_agent_todo.md's dated Log entry: 160+ turns of pure
 // "Thank you" / "You're welcome" / "Take care" after the interview had
@@ -117,6 +150,7 @@ export function classifierVerdict(answer) {
 
 export async function appearsFinished(text, { apiKey, model, chat = null }) {
   if (looksLikeEarlyPhaseCheckpoint(text)) return false;
+  if (looksLikeContinuationOffer(text)) return false;
   // Same injection point as personaAgent's: issue #85 runs against Azure,
   // where the fixed api.openai.com URL and Bearer header below are wrong.
   // The deterministic pre-filter above still runs either way.

@@ -120,6 +120,11 @@ Property = {
 ### 4.3 New top-level collections
 
 ```
+CompetencyQuestion = {
+  id: string,              // e.g. "cq1" — stable, never reused
+  text: string,            // the real question, e.g. "Which escalation policy applies to this support request?"
+}
+
 Rule = {
   id: string,
   name: string,            // e.g. "canApproveInvoice"
@@ -136,6 +141,26 @@ Action = {
 }
 ```
 
+`state.competencyQuestions` (issue #94) is the third such array. A **Competency Question (CQ)** is a
+requirement *on* the Agent Ontology, not an element of it: the real question the future domain agent
+must be able to answer, or have enough domain orientation to work out how to answer. It is deliberately
+**not** runtime instance data and **not** a query — a satisfactory ontology does not contain the answer
+to "which escalation policy applies to this support request?", it contains enough orientation for the
+future agent to know which concepts, relationships, rules, actions, sources and verification steps are
+involved in obtaining it. CQs are therefore stored alongside classes/relationships/rules/actions but
+never become canvas nodes, and carry no bindings to individual model elements.
+
+They may be **elicited conversationally** (the Helper Agent's Phase 1 — see `helper_agent_plan.md`) or
+**imported** from an external process that produced them (a `.domain.yaml` containing only a
+`competency_questions:` section is a valid import — the external-requirements-seed workflow). Both
+Domain Model YAML and canonical JSON preserve them; the `.txt` edge list deliberately does not, since it
+remains the lossy nodes/edges representation.
+
+The minimal item shape is `{id, text}` and nothing else — no `status`, `source`, `priority`, `tags`,
+`votes`, `versions`, `provenance`, `formalQuery` or `bindings`. The stable id exists from the start so a
+question can be *reworded* without becoming a different requirement, which is what makes merge/import
+semantics, Review Changes and coverage results able to refer to the right question.
+
 `state.rules` and `state.actions` — two new top-level arrays alongside `state.nodes`/`state.edges`,
 persisted through Tier 1 exactly like nodes/edges already are, and included in every future JSON/domain
 export. Referencing by id (not name) for `inputClassId` and `preconditions` follows the same pattern
@@ -149,6 +174,20 @@ feature existed loads exactly as it does today; `rules`/`actions` default to `[]
 loaded payload. No version bump or migration step needed in Tier 1's payload — this is strictly
 additive to the existing shape `spec.md` §5.1 already documents.
 
+`competencyQuestions`/`nextCqNum` (issue #94) are additive in exactly the same way, and deliberately do
+**not** bump `format_version` either. The compatibility contract in all four directions:
+
+* **New app, old file** (JSON, Domain Model YAML, or stored payload with no competency questions):
+  loads as `[]`, `nextCqNum: 1`. No migration dialog, no error.
+* **New app, new file**: CQs load normally, ids preserved exactly through canonical JSON.
+* **Old app, new file**: the existing parsers tolerate unknown top-level fields, so an older build keeps
+  loading the parts it understands and ignores the questions. An old-build round trip is therefore
+  **forward-tolerant but lossy** — opening a new file in an old build and saving it again can discard
+  the competency questions. That is accepted for an additive v1 extension and documented here rather
+  than defended against.
+* A future *incompatible reinterpretation* of an existing field would justify `format_version: 2`; this
+  addition does not.
+
 ---
 
 ## 5. Export: Domain Model YAML
@@ -161,6 +200,10 @@ Structure mirrors the howto's own compact example, with one deliberate deviation
 `relationships` bullet below, resolving Open Question 3):
 
 ```yaml
+competency_questions:
+  - id: cq1
+    text: Which escalation policy applies to this support request?
+
 classes:
   Invoice:
     meaning: A request from a supplier to receive payment.
@@ -219,6 +262,10 @@ actions:
   uniqueness constraint to violate. `meaning` is included even when `null`, for a uniform shape across
   entries (unlike `classes`' properties, where `unit`/`allowed` are omitted rather than null — those are
   per-property optional attributes, not a top-level field every entry has).
+- `competency_questions` is a **list** of `{id, text}` and comes **first**, because it states the
+  requirements the rest of the document exists to satisfy. It is the one section that carries a real
+  internal id rather than being keyed by name: a question has no name to key on, and its identity has to
+  survive a rewording of its own text.
 - `rules`/`actions` map close to directly onto Section 4.3's shapes, keyed by `name`.
 - A hand-written minimal YAML serializer is used, **block style only** — every list renders as `- item`
   lines, never an inline `[a, b, c]` flow sequence, and every nested object renders as indented `key:`
@@ -269,6 +316,12 @@ group→hierarchy export logic to write; every node is simply a Class.
   section — edges have no property concept). Originally shipped Meaning-only; aliases were added after a
   real ontology-recovery eval run found the interviewer routinely eliciting real relationship synonyms
   from a domain expert with nowhere to store them — see `helper_agent_todo.md`'s dated addendum.
+- **Competency questions.** No new toolbar button and no dedicated application: one more section inside
+  the existing "Domain Model" modal, placed **before** Rules. Each question is a single multiline text
+  field plus a remove button, with an Add button and a plain text filter, following the same draft-then-
+  Save behaviour Rules/Actions already use, so editing several questions is one undo step. Ids are not
+  editable — they ride along in a data attribute. Deliberately absent: any CQ dashboard, voting,
+  tagging, priority, or provenance UI.
 - **Rules manager.** One new toolbar button, "Domain Model," opening a modal with two sections/tabs:
   Rules (name + an editable list of condition strings, add/edit/delete) and Actions (name + input-class
   dropdown populated from current nodes + preconditions multi-select populated from current rules +
@@ -408,6 +461,17 @@ node/edge's fields. Here:
   camelCase string (e.g. one this importer already normalized) must reproduce that same string, not
   flatten it further, or a second import would fail to recognize its own prior normalization and
   duplicate the edge instead of matching it.
+
+**Competency questions (issue #94).** Accepted only with non-empty `text`; a missing `id` is minted at
+commit time (never at parse time — the preview must not advance a counter for a dialog the user may
+cancel), and an incoming id that matches nothing is honoured as-is, with `nextCqNum` lifted clear of any
+`cqN`-shaped id so a later mint can never collide with it. Matching is by id; failing that, an entry
+with **no** id whose trimmed text is already present is treated as the same question rather than an
+obvious duplicate. That fallback is defensive interoperability with an external producer that emits text
+without ids — it is not semantic duplicate detection, which stays out of scope. Merge/agent-merge
+add-or-update; Replace additionally removes questions the file does not mention, exactly like the other
+sections. A file containing **only** `competency_questions` is valid import input, so an external
+requirements process can seed a fresh model with nothing else in the file.
 
 **Commit order:** classes, then rules, then relationships, then actions — regardless of the order those
 sections actually appear in the source file, since relationships reference classes by label and actions

@@ -1,0 +1,541 @@
+competency_questions: []
+classes:
+  ITService:
+    meaning: A managed technology capability supporting one or more business services.
+    aliases:
+      - informatics service
+      - informatikai szolgáltatás
+    properties:
+      serviceId:
+        type: text
+      businessImpactLevel:
+        type: text
+        allowed:
+          - low
+          - medium
+          - high
+          - critical
+      slaTier:
+        type: text
+      recoveryPointObjective:
+        type: number
+        unit: hours
+  BusinessService:
+    meaning: A customer- or business-facing capability delivered by the bank.
+    aliases:
+      - üzleti szolgáltatás
+    properties: {}
+  ConfigurationItem:
+    meaning: A managed component recorded in the configuration-management scope.
+    aliases:
+      - CI
+      - konfigurációs elem
+    properties:
+      ciId:
+        type: text
+      lastBackupAt:
+        type: date
+  Incident:
+    meaning: "An unplanned interruption, degradation, or security condition requiring managed response."
+    aliases:
+      - outage
+      - hibajegy
+      - probléma
+    properties:
+      incidentNumber:
+        type: text
+      status:
+        type: text
+        allowed:
+          - detected
+          - investigating
+          - mitigated
+          - restored
+          - closed
+      severity:
+        type: text
+        allowed:
+          - critical
+          - high
+          - medium
+          - low
+      priority:
+        type: text
+      majorIncidentDeclared:
+        type: boolean
+      isCybersecurity:
+        type: boolean
+      materialityAssessment:
+        type: text
+        allowed:
+          - none
+          - non-material
+          - material
+          - undetermined
+      rootCauseSummary:
+        type: text
+      detectedAt:
+        type: date
+      restoredAt:
+        type: date
+      readyForClosure:
+        type: boolean
+      regulatoryReviewFlag:
+        type: boolean
+      postIncidentReviewStatus:
+        type: text
+        allowed:
+          - not-scheduled
+          - scheduled
+          - completed
+  ServiceOwner:
+    meaning: The role accountable for an IT service across its lifecycle.
+    aliases:
+      - owner
+      - service manager
+      - szolgáltatásgazda
+    properties:
+      contactDetails:
+        type: text
+  ResolverGroup:
+    meaning: A team assigned to diagnose and restore a specific technology or service area.
+    aliases:
+      - resolver
+      - support group
+      - megoldócsoport
+    properties:
+      contactDetails:
+        type: text
+  OnCallEngineer:
+    meaning: A technical specialist available for time-critical operational response.
+    aliases:
+      - on-call
+      - duty engineer
+      - ügyeletes mérnök
+    properties:
+      contactDetails:
+        type: text
+  IncidentCommander:
+    meaning: "The person accountable for command, coordination, and decision cadence during a major incident."
+    aliases:
+      - IC
+      - incident lead
+      - incident manager
+      - incidensparancsnok
+      - MIM lead
+    properties:
+      contactDetails:
+        type: text
+  Vendor:
+    meaning: An external organization supplying or supporting technology or services.
+    aliases:
+      - third-party
+      - supplier
+      - szállító
+      - beszállító
+    properties:
+      contactDetails:
+        type: text
+  Stakeholder:
+    meaning: "A person, group, or organization affected by or responsible for an operational outcome."
+    aliases:
+      - audience
+      - interested party
+      - érintett
+    properties:
+      contactDetails:
+        type: text
+  RecoveryPlan:
+    meaning: A documented plan for restoring an IT service and its dependencies.
+    aliases:
+      - runbook
+      - workaround
+      - helyreállítási terv
+      - DR plan
+    properties:
+      lastValidatedAt:
+        type: date
+      hasWorkaroundSteps:
+        type: boolean
+      documentLink:
+        type: text
+      reviewValidityDays:
+        type: number
+        unit: days
+  Backup:
+    meaning: A defined collection of recoverable backup data for protected components.
+    aliases:
+      - restore point
+      - mentéskészlet
+      - mentés
+    properties:
+      createdAt:
+        type: date
+      verified:
+        type: boolean
+      verifiedAt:
+        type: date
+      recoverable:
+        type: boolean
+      storageLocation:
+        type: text
+  Change:
+    meaning: "A controlled addition, modification, or removal that may affect an IT service."
+    aliases:
+      - deployment
+      - patch
+      - változás
+      - módosítás
+    properties:
+      changeId:
+        type: text
+      changeDate:
+        type: date
+      changeType:
+        type: text
+        allowed:
+          - deployment
+          - patch
+          - configuration
+      emergencyChange:
+        type: boolean
+  EvidencePackage:
+    meaning: A preserved record or artifact supporting incident analysis and accountability.
+    aliases:
+      - evidence
+      - forensic package
+      - bizonyítéki csomag
+    properties:
+      preservedAt:
+        type: date
+      chainOfCustodyRecorded:
+        type: boolean
+      storageLocation:
+        type: text
+  RegulatoryNotification:
+    meaning: A formal incident-related submission to a competent authority.
+    aliases:
+      - regulatory report
+      - regulator notification
+      - report
+      - supervisory notification
+      - felügyeleti bejelentés
+    properties:
+      deadline:
+        type: date
+      submissionStatus:
+        type: text
+        allowed:
+          - not-required
+          - planned
+          - submitted
+          - overdue
+      regulatorName:
+        type: text
+  CorrectiveAction:
+    meaning: "A tracked action intended to remove a cause, reduce risk, or improve response capability."
+    aliases:
+      - remediation
+      - post-incident action
+      - remediation action
+      - helyesbítő intézkedés
+    properties:
+      actionId:
+        type: text
+      status:
+        type: text
+        allowed:
+          - open
+          - in-progress
+          - resolved
+          - closed
+      dueDate:
+        type: date
+      assignedToContact:
+        type: text
+  TechnicalOwner:
+    meaning: "The role responsible for technical decisions, architecture, and hands-on remediation for a service."
+    aliases:
+      - tech owner
+      - technical lead
+    properties:
+      contactDetails:
+        type: text
+relationships:
+  - name: incidentImpacts
+    from: Incident
+    to: ITService
+    meaning: Links an incident to the IT service it disrupts or degrades.
+    aliases:
+      - impacts
+      - affects
+  - name: serviceSupports
+    from: ITService
+    to: BusinessService
+    meaning: The IT service supports or enables this business service or customer channel.
+    aliases:
+      - supports
+  - name: serviceDependsOn
+    from: ITService
+    to: ConfigurationItem
+    meaning: Indicates that an IT service depends on a specific configuration item.
+    aliases:
+      - dependsOn
+  - name: incidentRelatedTo
+    from: Incident
+    to: Incident
+    meaning: "Relates one incident to another due to correlation, shared cause, or shared impact."
+    aliases:
+      - relatedTo
+  - name: incidentAssignedToResolverGroup
+    from: Incident
+    to: ResolverGroup
+    meaning: Assigns an incident to a team responsible for resolution.
+    aliases:
+      - assignedToResolverGroup
+  - name: incidentAssignedToEngineer
+    from: Incident
+    to: OnCallEngineer
+    meaning: The on-call engineer assigned to handle or escalate this incident.
+    aliases:
+      - assignedToOnCall
+  - name: incidentLedBy
+    from: Incident
+    to: IncidentCommander
+    meaning: The incident commander leading coordination and decisions for this incident.
+    aliases:
+      - ledBy
+      - incidentCommander
+  - name: serviceOwnedBy
+    from: ITService
+    to: ServiceOwner
+    meaning: The service owner accountable for business-level decisions about this IT service.
+    aliases:
+      - ownedBy
+  - name: groupResponsibleForService
+    from: ResolverGroup
+    to: ITService
+    meaning: The resolver group that supports or is responsible for this IT service (used to derive assignment targets).
+    aliases:
+      - responsibleFor
+  - name: engineerMemberOfGroup
+    from: OnCallEngineer
+    to: ResolverGroup
+    meaning: The on-call engineer belongs to this resolver group.
+    aliases:
+      - memberOf
+  - name: serviceProvidedBy
+    from: ITService
+    to: Vendor
+    meaning: The vendor or third-party that provides this service or component.
+    aliases:
+      - providedBy
+  - name: incidentShouldNotify
+    from: Incident
+    to: Stakeholder
+    meaning: Stakeholders who should be notified or informed about this incident.
+    aliases:
+      - shouldNotify
+  - name: serviceHasRecoveryPlan
+    from: ITService
+    to: RecoveryPlan
+    meaning: "A recovery plan, runbook, or workaround that applies to this IT service."
+    aliases:
+      - hasRunbook
+  - name: backupForCi
+    from: Backup
+    to: ConfigurationItem
+    meaning: A backup or restore point created for this configuration item.
+    aliases:
+      - backupOf
+  - name: changeAffectsCi
+    from: Change
+    to: ConfigurationItem
+    meaning: A deployment or change that affects this configuration item.
+    aliases:
+      - affects
+  - name: changeDeployedTo
+    from: Change
+    to: ITService
+    meaning: The change was deployed to this IT service.
+    aliases:
+      - deployedTo
+  - name: incidentCausedByChange
+    from: Incident
+    to: Change
+    meaning: Relates an incident to a recent change that may have triggered it.
+    aliases:
+      - causedBy
+  - name: evidenceForIncident
+    from: EvidencePackage
+    to: Incident
+    meaning: Shows that an evidence package supports understanding the incident.
+    aliases:
+      - evidenceFor
+  - name: notificationForIncident
+    from: RegulatoryNotification
+    to: Incident
+    meaning: Links a regulatory notification to the incident it concerns.
+    aliases:
+      - regulatoryFor
+  - name: incidentHasCorrectiveAction
+    from: Incident
+    to: CorrectiveAction
+    meaning: Relates an incident to tracked corrective actions derived from it.
+    aliases:
+      - hasCorrectiveAction
+  - name: serviceHasOpenCorrectiveAction
+    from: ITService
+    to: CorrectiveAction
+    meaning: Shows that a service has unresolved corrective actions linked to past incidents.
+    aliases:
+      - openCorrectiveAction
+  - name: incidentInvolvesVendor
+    from: Incident
+    to: Vendor
+    meaning: A vendor involved in responding to or causing this incident.
+    aliases:
+      - involvesVendor
+  - name: incidentUsesRecoveryPlan
+    from: Incident
+    to: RecoveryPlan
+    meaning: The incident is being handled using this recovery plan or runbook.
+    aliases:
+      - usesRunbook
+  - name: incidentHasEvidence
+    from: Incident
+    to: EvidencePackage
+    meaning: The incident has one or more preserved evidence packages used for investigation.
+    aliases:
+      - evidenceFor
+  - name: incidentHasRegulatoryNotification
+    from: Incident
+    to: RegulatoryNotification
+    meaning: The incident has one or more regulatory notifications or reports associated with it.
+    aliases:
+      - regulatoryFor
+      - hasNotification
+  - name: evidenceForIncident
+    from: Incident
+    to: EvidencePackage
+    meaning: The incident has one or more preserved evidence packages used for investigation.
+    aliases:
+      - evidenceFor
+  - name: notificationForIncident
+    from: Incident
+    to: RegulatoryNotification
+    meaning: The incident has one or more regulatory notifications or reports associated with it.
+    aliases:
+      - regulatoryFor
+  - name: serviceTechnicalOwner
+    from: ITService
+    to: TechnicalOwner
+    meaning: The technical owner responsible for the technical aspects of this IT service.
+    aliases:
+      - technicalOwnerOf
+rules:
+  majorIncidentCriteria:
+    conditions:
+      - incident.severity is critical
+      - incident.majorIncidentDeclared is true
+      - the incident affects multiple ITService records with businessImpactLevel high or critical
+      - incident.materialityAssessment is material
+  regulatoryNotificationRequired:
+    conditions:
+      - incident.materialityAssessment is material
+      - incident.materialityAssessment is undetermined AND incident has regulatory-review flag
+      - incident.isCybersecurity is true AND data-exfiltration or personal data impacted
+      - any regulator-specific threshold (placeholder)
+  canCloseIncident:
+    conditions:
+      - incident.status is restored OR incident.status is closed
+      - incident.readyForClosure is true
+      - "there are no incidentHasCorrectiveAction with status in [open, in-progress]"
+      - if incident.isCybersecurity is true then evidenceForIncident exists AND EvidencePackage.chainOfCustodyRecorded is true
+      - if incident.majorIncidentDeclared is true then a post-incident review is scheduled or completed
+  useRecoveryPlan:
+    conditions:
+      - ITService has serviceHasRecoveryPlan
+      - RecoveryPlan.hasWorkaroundSteps is true
+      - RecoveryPlan.lastValidatedAt is within RecoveryPlan.reviewValidityDays (per-plan)
+      - incident.status is investigating OR incident.status is mitigated
+  assignDefaultResolver:
+    conditions:
+      - if ITService has groupResponsibleForService then recommend that ResolverGroup
+      - if current time is outside business hours then recommend an OnCallEngineer who is engineerMemberOfGroup
+      - if incident.severity is critical then include escalation to IncidentCommander
+  backupUsableForRecovery:
+    conditions:
+      - Backup.verified is true
+      - Backup.recoverable is true
+      - Backup.createdAt is newer than ITService.recoveryPointObjective (hours)
+  changeCorrelation:
+    conditions:
+      - there exists a Change where changeDeployedTo matches the affected ITService AND changeDate is within the incident window
+      - OR incidentCausedByChange is already recorded
+  evidencePreservationRequired:
+    conditions:
+      - incident.isCybersecurity is true
+  shouldSchedulePostIncidentReview:
+    conditions:
+      - incident.majorIncidentDeclared is true
+      - incident.status is restored OR incident.status is closed
+actions:
+  assignResolver:
+    input: Incident
+    preconditions:
+      - assignDefaultResolver
+    effect: Assigns a ResolverGroup or OnCallEngineer to the incident (creates incidentAssignedToResolverGroup or incidentAssignedToEngineer relationship).
+    verification: Confirm the incident has incidentAssignedToResolverGroup or incidentAssignedToEngineer set.
+  declareMajorIncident:
+    input: Incident
+    preconditions:
+      - majorIncidentCriteria
+    effect: Sets incident.majorIncidentDeclared to true and recommends or assigns an IncidentCommander (creates incidentLedBy relationship).
+    verification: incident.majorIncidentDeclared is true and incidentLedBy is set if assigned.
+  openRegulatoryNotification:
+    input: Incident
+    preconditions:
+      - regulatoryNotificationRequired
+    effect: Creates or updates a RegulatoryNotification linked to the incident (notificationForIncident) and sets submissionStatus to planned.
+    verification: A RegulatoryNotification exists with notificationForIncident linking to the incident and submissionStatus set to planned.
+  preserveEvidence:
+    input: Incident
+    preconditions:
+      - evidencePreservationRequired
+    effect: Creates an EvidencePackage linked to the incident (evidenceForIncident) and records chain-of-custody.
+    verification: An EvidencePackage exists for the incident and EvidencePackage.chainOfCustodyRecorded is true.
+  validateBackupAndRestore:
+    input: Backup
+    preconditions: []
+    effect: "Runs backup validation; sets Backup.verified true. If validation shows restore is required, initiates a restore job for the associated ConfigurationItem."
+    verification: "Backup.verified is true and, if a restore was needed, a restore job record or log entry exists."
+  applyRecoveryPlan:
+    input: Incident
+    preconditions:
+      - useRecoveryPlan
+    effect: Links the chosen RecoveryPlan to the incident (incidentUsesRecoveryPlan) and applies its steps; updates incident.status toward mitigated or restored as appropriate.
+    verification: incidentUsesRecoveryPlan relationship exists and incident.status is updated to mitigated or restored.
+  notifyStakeholders:
+    input: Incident
+    preconditions: []
+    effect: Sends notifications to stakeholders listed by incidentShouldNotify (emails/messages) with the current incident summary and status.
+    verification: Notification log entries exist showing stakeholders and timestamps for the sent notifications.
+  schedulePostIncidentReview:
+    input: Incident
+    preconditions:
+      - shouldSchedulePostIncidentReview
+    effect: Sets Incident.postIncidentReviewStatus to scheduled and creates a calendar/task entry for the review.
+    verification: Incident.postIncidentReviewStatus is scheduled and a review calendar entry exists.
+  linkIncidentToChange:
+    input: Incident
+    preconditions:
+      - changeCorrelation
+    effect: Creates incidentCausedByChange linking the incident to the identified Change.
+    verification: incidentCausedByChange relationship exists linking the incident and the Change.
+  markReadyToClose:
+    input: Incident
+    preconditions:
+      - canCloseIncident
+    effect: Sets incident.readyForClosure to true and updates incident.status to closed.
+    verification: incident.readyForClosure is true and incident.status is closed.

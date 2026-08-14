@@ -39,17 +39,22 @@ import { withPage } from "./lib/page.mjs";
 // + AGENT_KNOWLEDGE + the output-language directive, exactly as sent to the
 // model on a real request. Recorded per language because the directive names
 // the language (agentLanguageDirective()), so the two differ by design.
-// Updated deliberately in the commit that added the CONSISTENCY CHECK section
-// to AGENT_SYSTEM_PROMPT_BASE (issue #84 §4). That change makes a new
-// treatment: the anchor distribution in tests/evals/results/runs/ was produced
-// under the previous prompt, whose hashes were
-// 3554cef3…/e484350e…, and comparisons against those three runs are only
-// meaningful once the fresh non-regression evaluation in issue #85 has been
-// run. This is the intentional case the header above describes -- not a hash
-// updated to make a failing test go away.
+// Updated deliberately in the commit that made competency questions a
+// first-class, persisted part of the model (issue #94): Phase 1 now names them
+// and persists confirmed ones through apply_ontology_yaml, Phase 9 replays the
+// persisted list read back from get_graph_state instead of the agent's own
+// memory of the conversation, and the tool descriptions/YAML shape gained the
+// competency_questions section. The previous hashes were
+// eff34f3e…/a2194212…, recorded when issue #84 added the CONSISTENCY CHECK
+// section. That makes a new treatment, so issue #94's own acceptance comment
+// asks for a non-regression evaluation of the interview before merging -- see
+// tests/evals/CQ_NON_REGRESSION.md for the design, and
+// tests/evals/results/baselines/competency-questions/REPORT.md for the run executed
+// against this exact prompt. This is the intentional case the header above
+// describes -- not a hash updated to make a failing test go away.
 export const PRODUCTION_SYSTEM_PROMPT_SHA256 = {
-  en: "eff34f3e70f85419e078cbc3bfb827d7e0d58066b33a74c8db09df1e9f337fa2",
-  hu: "a2194212cb81df8de467973f1cf583b0d0c92a19e06858ad925df229eed0ecb6",
+  en: "0173b3f31cd00b5e776cffa2f2e6d3016686d98df6cbfa9e3a6ab4e1a0b0dee0",
+  hu: "3a147149b7e389667c6498f9bda4cd3e7df6a6314562f89b5d49b8f91565b778",
 };
 
 // The complete ontology tool surface an ordinary interview request exposes.

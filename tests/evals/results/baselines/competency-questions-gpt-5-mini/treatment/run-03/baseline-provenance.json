@@ -1,0 +1,103 @@
+{
+  "schemaVersion": 1,
+  "condition": "competency-questions/treatment",
+  "arm": "treatment",
+  "runId": "run-03",
+  "generatedAt": "2026-08-14T15:57:31.900Z",
+  "model": "gpt-5-mini",
+  "personaModel": "gpt-4o",
+  "classifierModel": "gpt-5-mini",
+  "provider": "azure",
+  "endpoint": "https://briandemoopenai.openai.azure.com",
+  "interviewerPromptSha256": "0173b3f31cd00b5e776cffa2f2e6d3016686d98df6cbfa9e3a6ab4e1a0b0dee0",
+  "competencyQuestionsEnabled": true,
+  "stoppedReason": "app_agent_appears_finished",
+  "turnsUsed": 29,
+  "wallClockSec": 1158,
+  "applyToolCalls": 21,
+  "getGraphStateCalls": 16,
+  "competencyQuestionsRecorded": 20,
+  "competencyQuestions": [
+    {
+      "id": "cq1",
+      "text": "Which services are currently impacted by the incident?"
+    },
+    {
+      "id": "cq2",
+      "text": "Who owns the affected IT service, and which resolver group and on-call engineer should be assigned to the incident?"
+    },
+    {
+      "id": "cq3",
+      "text": "What is the current status of the incident, and how does it align with our service-level objectives for time to acknowledge and restore?"
+    },
+    {
+      "id": "cq4",
+      "text": "What evidence supports the incident's detection and diagnosis, and has it been verified and preserved?"
+    },
+    {
+      "id": "cq5",
+      "text": "Have any active alerts, events, or recent changes correlated to this incident?"
+    },
+    {
+      "id": "cq6",
+      "text": "Does this incident meet the criteria for declaring a major incident, and has a commander been assigned?"
+    },
+    {
+      "id": "cq7",
+      "text": "What are the approved recovery plans, workarounds, backup sets, or runbooks that can mitigate the impact of this incident?"
+    },
+    {
+      "id": "cq8",
+      "text": "What emergency change is required to resolve or contain the incident, and who has approved it?"
+    },
+    {
+      "id": "cq9",
+      "text": "What communications have been sent to stakeholders, and has a communication cadence been established or met?"
+    },
+    {
+      "id": "cq10",
+      "text": "Is a regulatory notification required for the incident, and what is the due time for submission?"
+    },
+    {
+      "id": "cq11",
+      "text": "What materiality assessment has been conducted for this incident, and what was the rationale for the result?"
+    },
+    {
+      "id": "cq12",
+      "text": "Which business processes or customer channels are affected by the impacted business service?"
+    },
+    {
+      "id": "cq13",
+      "text": "Which configuration items and third-party services are on the dependency path of the affected IT service?"
+    },
+    {
+      "id": "cq14",
+      "text": "What is the recovery progress, and has any failover or backup restore been executed successfully?"
+    },
+    {
+      "id": "cq15",
+      "text": "What unresolved corrective actions from prior incidents are linked to the same affected service?"
+    },
+    {
+      "id": "cq16",
+      "text": "Are there any runbooks or workarounds previously used for similar incidents, and were they effective?"
+    },
+    {
+      "id": "cq17",
+      "text": "Has the incident been escalated to a vendor, and what is the current status of their response?"
+    },
+    {
+      "id": "cq18",
+      "text": "What evidence is linked to this incident and included in any regulatory notification?"
+    },
+    {
+      "id": "cq19",
+      "text": "Has a post-incident review been scheduled or completed for this major incident?"
+    },
+    {
+      "id": "cq20",
+      "text": "What is the root-cause category for this incident, and is it linked to a known problem or error?"
+    }
+  ],
+  "note": "Fresh interview under issue #94's within-model design. The control arm runs the frozen pre-#94 interviewer prompt from this same checkout, so the two arms differ by the interviewer prompt alone. The deployment LISTING is stubbed (this resource returns an empty list for deployments that are callable); every chat call is a real relayed Azure call. Nothing under results/runs/ was read or written."
+}

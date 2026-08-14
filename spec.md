@@ -132,13 +132,13 @@ The source of truth. Contains everything needed to fully reconstruct the canvas 
 }
 ```
 
-**Agent Ontology additions:** since the `agent_ontology_spec.md` initiative shipped, this same JSON export also carries `aliases`/`properties` on each node, `meaning`/`aliases` on each edge, and two additional top-level arrays, `rules`/`actions` — all additive, optional, defaulting to empty/null on load. Omitted from the minimal example above to keep it focused on the base instance-level shape; see `agent_ontology_spec.md` §4 for the full field set.
+**Agent Ontology additions:** since the `agent_ontology_spec.md` initiative shipped, this same JSON export also carries `aliases`/`properties` on each node, `meaning`/`aliases` on each edge, and three additional top-level arrays — `rules`/`actions`, and (issue #94) `competencyQuestions`, a list of `{id, text}` recording the questions the future agent must be able to address. All additive, optional, defaulting to empty/null on load, with no `format_version` bump. Omitted from the minimal example above to keep it focused on the base instance-level shape; see `agent_ontology_spec.md` §4 for the full field set and the four-way compatibility contract.
 
 **`meta.graph_name`:** also additive, added with the JSON import path (§5.5). The graph's display name previously survived only inside the *filename*, which §5.4's sanitization has already reduced to a filesystem-safe form — so a round trip could never restore the name the user actually typed. Optional on read: a file written before this field existed falls back to deriving the name from the filename.
 
 ### 5.2 TXT edge list (portable, structure-only, human/Python-editable)
 
-Designed to be hand-editable in any text editor and trivially parseable in Python with no dependencies. Positions and box sizes are deliberately omitted — this format captures graph *structure* only.
+Designed to be hand-editable in any text editor and trivially parseable in Python with no dependencies. Positions and box sizes are deliberately omitted — this format captures graph *structure* only. Deliberately lossy in the same way for everything that isn't a node or an edge: meanings, properties, rules, actions and (issue #94) competency questions are not written here and never will be. The canonical JSON and the Domain Model YAML are the formats that carry them.
 
 Grammar:
 - Lines starting with `#` are comments/metadata, ignored by parsers.

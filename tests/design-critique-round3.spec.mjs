@@ -218,7 +218,10 @@ test("the Domain Model button's emphasis holds in both themes", async () => {
   await withPage(async (page) => {
     const darkBorder = await computedStyle(page, "#btn-domain-model", "borderColor");
     await page.click("#btn-theme-toggle");
-    const lightBorder = await waitForStyleSettled(page, "#btn-domain-model", "borderColor");
+    // `differentFrom` matters here: the border animates (see #toolbar
+    // button's transition), and the frames between the theme swap and the
+    // transition actually starting read as a perfectly stable dark value.
+    const lightBorder = await waitForStyleSettled(page, "#btn-domain-model", "borderColor", { differentFrom: darkBorder });
     assert.notEqual(darkBorder, lightBorder, "the accent token differs between themes, so the button's border should too");
   });
 });

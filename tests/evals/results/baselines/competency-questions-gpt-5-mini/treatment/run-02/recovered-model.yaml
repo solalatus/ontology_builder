@@ -1,0 +1,433 @@
+competency_questions:
+  - id: cq1
+    text: Which active alerts are correlated with the incident?
+  - id: cq2
+    text: What is the priority and severity level of this incident?
+  - id: cq3
+    text: "What is the current status of this incident (e.g., investigating, recovering)?"
+  - id: cq4
+    text: "When was the incident detected, acknowledged, and opened?"
+  - id: cq5
+    text: Which IT services and business services are impacted by this incident?
+  - id: cq6
+    text: Which configuration items are affected by the incident?
+  - id: cq7
+    text: What is the estimated time to restore the affected service?
+  - id: cq8
+    text: Does this incident originate from a specific change or deployment?
+  - id: cq9
+    text: Which resolver group or on-call engineer is currently assigned to this incident?
+  - id: cq10
+    text: Are any related incidents or recurring patterns associated with this case?
+  - id: cq11
+    text: Should this incident be classified as a major incident based on severity and impact?
+  - id: cq12
+    text: "Are there any open workarounds, runbooks, or recovery plans for this affected service or configuration item?"
+  - id: cq13
+    text: Was the incident triggered by any active monitoring or automated control?
+  - id: cq14
+    text: Which alerts require immediate triage from a specific priority level or detection source?
+  - id: cq15
+    text: "How did this incident affect service-level objectives (e.g., availability target)?"
+  - id: cq16
+    text: "Is this incident being escalated to an external vendor, and how is it being tracked?"
+  - id: cq17
+    text: What options exist for isolating an affected configuration item to contain the issue?
+classes:
+  Incident:
+    meaning: A record of an unplanned event causing disruption to IT or business services that requires coordinated response.
+    aliases:
+      - incidentRecord
+    properties:
+      status:
+        type: text
+        allowed:
+          - new
+          - acknowledged
+          - investigating
+          - mitigating
+          - recovering
+          - resolved
+          - closed
+      priority:
+        type: text
+        allowed:
+          - P1
+          - P2
+          - P3
+          - P4
+      severity:
+        type: text
+        allowed:
+          - critical
+          - high
+          - medium
+          - low
+      detectedAt:
+        type: date
+      acknowledgedAt:
+        type: date
+      openedAt:
+        type: date
+      resolvedAt:
+        type: date
+      estimatedTimeToRestore:
+        type: number
+        unit: minutes
+      isMajor:
+        type: boolean
+      estimatedImpactMinutesOnSLO:
+        type: number
+        unit: minutes
+      vendorTicketId:
+        type: text
+      vendorEscalationStatus:
+        type: text
+        allowed:
+          - open
+          - waiting_vendor
+          - vendor_acknowledged
+          - resolved
+          - closed
+      vendorEscalatedAt:
+        type: date
+  Alert:
+    meaning: A monitoring-generated or manual notification indicating a potential issue that may require triage or escalation.
+    aliases:
+      - alertEvent
+    properties:
+      status:
+        type: text
+        allowed:
+          - new
+          - acknowledged
+          - suppressed
+          - closed
+      priority:
+        type: text
+        allowed:
+          - P1
+          - P2
+          - P3
+          - P4
+      detectionSource:
+        type: text
+      detectedAt:
+        type: date
+      acknowledgedAt:
+        type: date
+  ConfigurationItem:
+    meaning: A technical asset or component tracked in the configuration management system that supports IT and business services.
+    aliases:
+      - CI
+      - Configuration Item
+    properties:
+      status:
+        type: text
+        allowed:
+          - operational
+          - degraded
+          - isolated
+          - under_maintenance
+          - offline
+      isIsolated:
+        type: boolean
+      lastIsolationAt:
+        type: date
+  ITService:
+    meaning: A technical service or capability provided by IT that supports business processes or customer-facing functionality.
+    aliases:
+      - IT Service
+    properties:
+      status:
+        type: text
+        allowed:
+          - operational
+          - degraded
+          - partial_outage
+          - major_outage
+          - maintenance
+      criticality:
+        type: text
+        allowed:
+          - low
+          - medium
+          - high
+          - critical
+  BusinessService:
+    meaning: A business-facing service that delivers value to customers or internal stakeholders and is supported by one or more IT services.
+    aliases:
+      - Business Service
+    properties:
+      status:
+        type: text
+        allowed:
+          - operational
+          - degraded
+          - partial_outage
+          - major_outage
+          - maintenance
+      criticality:
+        type: text
+        allowed:
+          - low
+          - medium
+          - high
+          - critical
+  ResolverGroup:
+    meaning: "A team or group responsible for investigating and resolving incidents for specific services, platforms, or domains."
+    aliases:
+      - Resolver Group
+    properties: {}
+  Person:
+    meaning: "An individual (on-call engineer, SME, vendor contact) who participates in incident response, escalation, or recovery activities."
+    aliases:
+      - On-call Contact
+    properties: {}
+  Vendor:
+    meaning: "A third-party organization contracted to provide products, services, or support relevant to the bank's IT environment."
+    aliases:
+      - Third-party Vendor
+    properties: {}
+  Change:
+    meaning: "A recorded deployment, change request, or configuration change that may be the origin or remediation for an incident."
+    aliases:
+      - Change Record
+      - Change Request
+    properties:
+      status:
+        type: text
+        allowed:
+          - proposed
+          - scheduled
+          - in_progress
+          - implemented
+          - rolled_back
+          - failed
+          - closed
+      createdAt:
+        type: date
+      implementedAt:
+        type: date
+  MonitoringEvent:
+    meaning: "A raw observation or measurement (metric, log, or synthetic check) emitted by monitoring systems that may indicate service health issues."
+    aliases:
+      - Monitoring Event
+      - Metric Event
+    properties:
+      status:
+        type: text
+        allowed:
+          - firing
+          - cleared
+          - suppressed
+      observedAt:
+        type: date
+  Runbook:
+    meaning: A documented procedure or recovery plan providing step-by-step guidance to contain and remediate incidents.
+    aliases:
+      - Playbook
+      - Recovery Plan
+    properties: {}
+  Workaround:
+    meaning: A temporary mitigation or configuration change applied to reduce impact until a permanent fix is implemented.
+    aliases:
+      - Temporary Mitigation
+    properties:
+      status:
+        type: text
+        allowed:
+          - proposed
+          - applied
+          - revoked
+          - superseded
+      appliedAt:
+        type: date
+      expiresAt:
+        type: date
+  ServiceLevelObjective:
+    meaning: "A defined target (e.g., availability, latency) that an IT or business service is expected to meet over a measurement period."
+    aliases:
+      - SLO
+      - Service Level Objective
+    properties: {}
+relationships:
+  - name: correlatedAlert
+    from: Incident
+    to: Alert
+    meaning: An alert that has been correlated with this incident for triage and investigation.
+    aliases:
+      - is correlated with
+  - name: impactsItservice
+    from: Incident
+    to: ITService
+    meaning: An IT service that is affected by the incident.
+    aliases:
+      - impacts
+  - name: impactsBusinessService
+    from: Incident
+    to: BusinessService
+    meaning: A business-facing service that is affected by the incident.
+    aliases:
+      - impacts
+  - name: affectsConfigurationItem
+    from: Incident
+    to: ConfigurationItem
+    meaning: A configuration item (CI) that is impacted by the incident.
+    aliases:
+      - affects
+  - name: causedByChange
+    from: Incident
+    to: Change
+    meaning: The change or deployment that is the suspected or confirmed origin of the incident.
+    aliases:
+      - is caused by
+  - name: assignedToResolverGroup
+    from: Incident
+    to: ResolverGroup
+    meaning: The resolver group responsible for handling or currently assigned to the incident.
+    aliases:
+      - is assigned to
+  - name: assignedToPerson
+    from: Incident
+    to: Person
+    meaning: "The individual (engineer, on-call contact, or SME) currently assigned responsibility for the incident."
+    aliases:
+      - is assigned to
+  - name: escalatedToVendor
+    from: Incident
+    to: Vendor
+    meaning: A vendor organization to which the incident has been escalated for support or resolution.
+    aliases:
+      - is escalated to
+  - name: triggeredByMonitoringEvent
+    from: Incident
+    to: MonitoringEvent
+    meaning: A monitoring event or observation that triggered or detected the incident.
+    aliases:
+      - is triggered by
+  - name: relatedRunbook
+    from: Incident
+    to: Runbook
+    meaning: A runbook or recovery plan relevant to the incident for containment and remediation.
+    aliases:
+      - is handled with
+  - name: hasWorkaround
+    from: Incident
+    to: Workaround
+    meaning: A temporary mitigation applied to reduce impact while a permanent fix is developed.
+    aliases:
+      - has
+  - name: affectsSlo
+    from: Incident
+    to: ServiceLevelObjective
+    meaning: A service-level objective whose target is affected by this incident.
+    aliases:
+      - affects
+  - name: relatedIncident
+    from: Incident
+    to: Incident
+    meaning: "A link between this incident and another incident that is related, duplicated, or part of the same recurring problem."
+    aliases:
+      - is related to
+      - recurs with
+  - name: appliesToItservice
+    from: Runbook
+    to: ITService
+    meaning: A runbook that applies to and provides recovery steps for a specific IT service.
+    aliases:
+      - applies to
+  - name: appliesToConfigurationItem
+    from: Runbook
+    to: ConfigurationItem
+    meaning: A runbook that applies to a specific configuration item or component.
+    aliases:
+      - applies to
+  - name: vendorContact
+    from: Vendor
+    to: Person
+    meaning: The primary vendor contact (account manager or technical support specialist) for vendor escalations.
+    aliases:
+      - has contact
+  - name: createsIncident
+    from: Alert
+    to: Incident
+    meaning: An incident that was created from this alert.
+    aliases:
+      - creates incident
+      - createdIncident
+  - name: hasIncident
+    from: ConfigurationItem
+    to: Incident
+    meaning: An incident that affects this configuration item.
+    aliases:
+      - affectingIncident
+rules:
+  incidentOpen:
+    conditions:
+      - incident status is not closed
+  determineMajorIncident:
+    conditions:
+      - incident severity is critical
+      - affected business service criticality is critical
+      - "estimatedImpactMinutesOnSLO exceeds the organisation's major-incident threshold"
+      - multiple critical IT services are impacted or customer impact is high
+actions:
+  acknowledgeAlert:
+    input: Alert
+    preconditions: []
+    effect: Alert.status becomes acknowledged and Alert.acknowledgedAt is set to the current time.
+    verification: Read the alert and confirm status is acknowledged and acknowledgedAt exists.
+  assignIncident:
+    input: Incident
+    preconditions:
+      - incidentOpen
+    effect: Incident is assigned to the specified ResolverGroup or Person; assignment recorded on the incident.
+    verification: Read the incident assignment fields and confirm the assigned ResolverGroup or Person.
+  declareMajorIncident:
+    input: Incident
+    preconditions:
+      - incidentOpen
+      - determineMajorIncident
+    effect: "Incident.isMajor becomes true and incident status is updated to a major-incident coordination state (e.g., mitigating or recovering); notify stakeholders."
+    verification: Confirm Incident.isMajor is true and incident status reflects the major incident state.
+  containIncident:
+    input: Incident
+    preconditions:
+      - incidentOpen
+    effect: Record containment actions on the incident (references to Runbooks or Workarounds) and update incident status as appropriate.
+    verification: Confirm containment actions are recorded and any referenced Runbook or Workaround is linked to the incident.
+  isolateConfigurationItem:
+    input: ConfigurationItem
+    preconditions:
+      - incidentOpen
+    effect: ConfigurationItem.isIsolated becomes true and ConfigurationItem.status becomes isolated; record lastIsolationAt.
+    verification: Read the CI properties and confirm isIsolated=true and lastIsolationAt is set.
+  escalateToVendor:
+    input: Incident
+    preconditions:
+      - incidentOpen
+    effect: "Create or record a vendor escalation entry on the incident including vendorTicketId and vendorEscalationStatus; link to Vendor and Vendor->Person contact where available."
+    verification: Confirm vendorTicketId and vendorEscalationStatus are present on the incident and the Vendor is linked.
+  surveyDependencies:
+    input: Incident
+    preconditions:
+      - incidentOpen
+    effect: Analyze and attach a list of dependent ITService and ConfigurationItem records to the incident for prioritization.
+    verification: Confirm the incident has links to impacted ITService and ConfigurationItem records.
+  createIncidentRecord:
+    input: Alert
+    preconditions: []
+    effect: "Create a new Incident linked to the provided Alert, set openedAt and detectedAt where available, and initialize status to new."
+    verification: Confirm a new Incident exists linked to the Alert with openedAt and detectedAt populated.
+  updateIncidentStatus:
+    input: Incident
+    preconditions:
+      - incidentOpen
+    effect: "Update the Incident.status to the requested value and record timestamps as appropriate (e.g., resolvedAt when moving to resolved)."
+    verification: Read the incident and confirm the new status and any timestamp changes.
+  reviewMonitoringEvents:
+    input: Incident
+    preconditions: []
+    effect: Attach or reference MonitoringEvent records correlated with the incident and document findings.
+    verification: Confirm MonitoringEvent links exist on the incident and that review notes are recorded.

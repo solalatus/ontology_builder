@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "condition": "competency-questions/treatment",
+  "arm": "treatment",
+  "runId": "run-02",
+  "generatedAt": "2026-08-14T16:47:47.068Z",
+  "model": "gpt-5.4",
+  "personaModel": "gpt-4o-mini-internal",
+  "classifierModel": "gpt-5.4",
+  "provider": "azure",
+  "endpoint": "https://briandemoopenai.openai.azure.com",
+  "interviewerPromptSha256": "0173b3f31cd00b5e776cffa2f2e6d3016686d98df6cbfa9e3a6ab4e1a0b0dee0",
+  "competencyQuestionsEnabled": true,
+  "stoppedReason": "app_agent_appears_finished",
+  "turnsUsed": 49,
+  "wallClockSec": 509,
+  "applyToolCalls": 34,
+  "getGraphStateCalls": 34,
+  "competencyQuestionsRecorded": 10,
+  "competencyQuestions": [
+    {
+      "id": "cq1",
+      "text": "Which business services are impacted by this incident?"
+    },
+    {
+      "id": "cq2",
+      "text": "What configuration items are affected by the current incident?"
+    },
+    {
+      "id": "cq3",
+      "text": "Who is the service owner responsible for the affected IT service?"
+    },
+    {
+      "id": "cq4",
+      "text": "Which resolver group should be assigned to triage and resolve this incident?"
+    },
+    {
+      "id": "cq5",
+      "text": "What is the status of the regulatory notification for this incident?"
+    },
+    {
+      "id": "cq6",
+      "text": "Does this incident meet the criteria for major incident declaration?"
+    },
+    {
+      "id": "cq7",
+      "text": "Which alerts and events are correlated with the ongoing incident?"
+    },
+    {
+      "id": "cq8",
+      "text": "What recovery plan is applicable for the service affected by this incident?"
+    },
+    {
+      "id": "cq9",
+      "text": "Are there any outstanding corrective actions from previous post-incident reviews that could assist in resolution?"
+    },
+    {
+      "id": "cq10",
+      "text": "Who must approve the emergency change related to this incident?"
+    }
+  ],
+  "note": "Fresh interview under issue #94's within-model design. The control arm runs the frozen pre-#94 interviewer prompt from this same checkout, so the two arms differ by the interviewer prompt alone. The deployment LISTING is stubbed (this resource returns an empty list for deployments that are callable); every chat call is a real relayed Azure call. Nothing under results/runs/ was read or written."
+}

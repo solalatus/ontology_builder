@@ -1,0 +1,446 @@
+competency_questions:
+  - id: cq1
+    text: Which business services are impacted by this incident?
+  - id: cq2
+    text: Which customer channels are impacted by this incident?
+  - id: cq3
+    text: Who is the service owner for the affected IT service?
+  - id: cq4
+    text: Which resolver group should manage this incident?
+  - id: cq5
+    text: Does this incident meet the criteria for a major incident declaration?
+  - id: cq6
+    text: Who should be the incident commander for this incident?
+  - id: cq7
+    text: "What dependencies does the affected IT service have, including configuration items and third-party services?"
+  - id: cq8
+    text: Is there a current workaround that can temporarily mitigate the impact of this incident?
+  - id: cq9
+    text: Has a materiality assessment been completed for this incident?
+  - id: cq10
+    text: Does this incident require a regulatory notification?
+  - id: cq11
+    text: Which alerts correlate with this incident?
+  - id: cq12
+    text: Which security events correlate with this incident?
+  - id: cq13
+    text: What status did each correlated alert have?
+  - id: cq14
+    text: What status did each correlated security event have?
+  - id: cq15
+    text: What evidence has been collected for this incident?
+  - id: cq16
+    text: How is the integrity of incident evidence being handled?
+  - id: cq17
+    text: Are there open corrective actions from previous incidents that are relevant to this incident?
+  - id: cq18
+    text: What recovery plan exists for restoring the affected service?
+  - id: cq19
+    text: What steps should be followed to execute the recovery plan for this incident if necessary?
+classes:
+  Incident:
+    meaning: "An unplanned interruption, degradation, or security condition that requires a managed response to restore normal operations."
+    aliases:
+      - hibajegy
+    properties:
+      incidentType:
+        type: text
+        allowed:
+          - operational
+          - cybersecurity
+          - compliance
+          - other
+      status:
+        type: text
+        allowed:
+          - new
+          - acknowledged
+          - investigating
+          - contained
+          - recovering
+          - monitoring
+          - resolved
+          - closed
+          - cancelled
+      severity:
+        type: text
+        allowed:
+          - sev1
+          - sev2
+          - sev3
+          - sev4
+      isMajorIncident:
+        type: boolean
+  ITService:
+    meaning: A managed technology capability that supports one or more business services provided by the bank.
+    aliases:
+      - informatikai szolgáltatás
+    properties:
+      serviceCriticality:
+        type: text
+        allowed:
+          - tier-1-critical
+          - tier-2-important
+          - tier-3-standard
+          - tier-4-supporting
+      status:
+        type: text
+        allowed:
+          - healthy
+          - degraded
+          - partially-unavailable
+          - unavailable
+          - unknown
+  BusinessService:
+    meaning: A customer-facing capability or function delivered by the bank to meet business needs or provide a specific service to customers.
+    aliases:
+      - üzleti szolgáltatás
+    properties: {}
+  CustomerChannel:
+    meaning: "The means through which customers access and interact with banking services, such as online banking, mobile apps, or branch visits."
+    aliases:
+      - ügyfélcsatorna
+    properties: {}
+  ServiceOwner:
+    meaning: "The individual accountable for the overall management, performance, and maintenance of a specific IT service throughout its lifecycle."
+    aliases:
+      - szolgáltatásgazda
+    properties: {}
+  ApplicationOwner:
+    meaning: "The person responsible for the operational fitness, performance, and support of a specific application within the bank's IT environment."
+    aliases:
+      - alkalmazásgazda
+    properties: {}
+  ResolverGroup:
+    meaning: "A team of technical specialists responsible for diagnosing and resolving specific types of incidents or issues within the bank's IT environment."
+    aliases:
+      - megoldócsoport
+    properties: {}
+  IncidentCommander:
+    meaning: "The designated leader responsible for coordinating the response to a major incident, ensuring effective communication and decision-making."
+    aliases:
+      - incidensparancsnok
+    properties: {}
+  IncidentResponseTeamMember:
+    meaning: A member of the cross-functional team tasked with supporting the incident commander and executing tasks during the response to significant incidents.
+    aliases:
+      - incidenskezelő csapattag
+    properties: {}
+  ConfigurationItem:
+    meaning: "Any managed component of the IT environment that is recorded in a configuration management database, such as hardware, software, or network resources, that supports IT services."
+    aliases:
+      - konfigurációs elem
+    properties: {}
+  ThirdPartyService:
+    meaning: An external service provided by a vendor or supplier that the bank relies on to support its IT services and operations.
+    aliases:
+      - külső szolgáltatás
+    properties: {}
+  Workaround:
+    meaning: A temporary solution or method implemented to reduce or bypass the impact of an incident or problem without necessarily addressing the root cause.
+    aliases:
+      - kerülőmegoldás
+    properties:
+      status:
+        type: text
+        allowed:
+          - available
+          - unavailable
+          - under-review
+          - deprecated
+  MaterialityAssessment:
+    meaning: A documented evaluation that determines the significance of an incident and whether it needs to be reported to regulatory authorities.
+    aliases:
+      - lényegességi értékelés
+    properties:
+      status:
+        type: text
+        allowed:
+          - not-completed
+          - in-progress
+          - completed
+          - reviewed
+      outcome:
+        type: text
+        allowed:
+          - not-reportable
+          - potentially-reportable
+          - reportable
+          - undetermined
+  RegulatoryNotification:
+    meaning: A formal communication submitted to a regulatory body that informs them of an incident meeting specific reporting criteria and supporting documentation.
+    aliases:
+      - felügyeleti bejelentés
+    properties:
+      status:
+        type: text
+        allowed:
+          - draft
+          - pending-approval
+          - approved
+          - submitted
+          - accepted
+          - rejected
+          - withdrawn
+      required:
+        type: boolean
+  Alert:
+    meaning: "A signal generated by monitoring systems indicating a condition that requires attention, typically related to performance, security, or system issues."
+    aliases:
+      - riasztás
+    properties:
+      status:
+        type: text
+        allowed:
+          - new
+          - acknowledged
+          - suppressed
+          - escalated
+          - closed
+  SecurityEvent:
+    meaning: "An event related to the security of information systems that indicates potential or actual breaches of confidentiality, integrity, or availability of data."
+    aliases:
+      - biztonsági esemény
+    properties:
+      status:
+        type: text
+        allowed:
+          - observed
+          - investigated
+          - contained
+          - resolved
+          - irrelevant
+  Evidence:
+    meaning: "A documented record, artifact, or observation collected during an incident that supports analysis, accountability, and resolution efforts."
+    aliases:
+      - bizonyíték
+    properties:
+      integrityStatus:
+        type: text
+        allowed:
+          - collected
+          - hashed
+          - verified
+          - sealed
+          - compromised
+      evidenceType:
+        type: text
+        allowed:
+          - log
+          - screenshot
+          - document
+          - configuration
+          - report
+          - interview_notes
+          - ticket
+          - other
+  CorrectiveAction:
+    meaning: "A tracked action intended to eliminate the cause of an incident or problem, reduce risk, and improve future response capabilities."
+    aliases:
+      - helyesbítő intézkedés
+    properties:
+      status:
+        type: text
+        allowed:
+          - open
+          - in-progress
+          - blocked
+          - implemented
+          - verified
+          - closed
+          - cancelled
+  RecoveryPlan:
+    meaning: A documented strategy outlining the steps and procedures to restore an IT service or system to normal operation after an incident or disruption.
+    aliases:
+      - helyreállítási terv
+    properties:
+      currentStatus:
+        type: text
+        allowed:
+          - current
+          - outdated
+          - invoked
+          - tested
+      stepSummary:
+        type: text
+      executionSteps:
+        type: text
+relationships:
+  - name: affects
+    from: Incident
+    to: ITService
+    meaning: Indicates that an incident has a direct impact or consequence on the functionality or operation of a specific IT service.
+    aliases:
+      - hatással van
+  - name: impacts
+    from: Incident
+    to: BusinessService
+    meaning: Shows that an incident disrupts or influences the delivery of a business service or the accessibility of a customer channel.
+    aliases:
+      - befolyásolja
+  - name: impacts
+    from: Incident
+    to: CustomerChannel
+    meaning: Shows that an incident disrupts or influences the delivery of a business service or the accessibility of a customer channel.
+    aliases:
+      - befolyásolja
+  - name: ownedBy
+    from: ITService
+    to: ServiceOwner
+    meaning: Defines the accountability relationship where a specific service owner is responsible for the management and performance of the IT service.
+    aliases:
+      - tulajdonosa
+  - name: hasApplicationOwner
+    from: ITService
+    to: ApplicationOwner
+    meaning: Indicates that a particular application owner is responsible for the operational fitness and support of the application associated with the IT service.
+    aliases:
+      - alkalmazásgazdája van
+  - name: assignedTo
+    from: Incident
+    to: ResolverGroup
+    meaning: Indicates that the incident has been designated to a specific resolver group for diagnosis and resolution.
+    aliases:
+      - kiosztva van
+  - name: supportedBy
+    from: ITService
+    to: ResolverGroup
+    meaning: Shows that the IT service relies on a particular resolver group for support and technical assistance to maintain service functionality.
+    aliases:
+      - támogatott
+  - name: hasIncidentCommander
+    from: Incident
+    to: IncidentCommander
+    meaning: Identifies the individual designated as the incident commander responsible for leading the response to the incident.
+    aliases:
+      - incidens parancsnoka van
+  - name: supportedBy
+    from: IncidentCommander
+    to: IncidentResponseTeamMember
+    meaning: Indicates that the incident commander receives support from specific team members who assist in coordinating the incident response efforts.
+    aliases:
+      - támogatja
+  - name: dependsOn
+    from: ITService
+    to: ConfigurationItem
+    meaning: Indicates that the operation of the IT service is reliant on one or more configuration items or third-party services for successful delivery.
+    aliases:
+      - függ
+  - name: dependsOn
+    from: ITService
+    to: ThirdPartyService
+    meaning: Indicates that the operation of the IT service is reliant on one or more configuration items or third-party services for successful delivery.
+    aliases:
+      - függ
+  - name: hasWorkaround
+    from: Incident
+    to: Workaround
+    meaning: Shows that there is a temporary solution or method in place to mitigate the impact of the incident while a permanent resolution is being pursued.
+    aliases:
+      - kerülőmegoldás van
+  - name: hasMaterialityAssessment
+    from: Incident
+    to: MaterialityAssessment
+    meaning: Indicates that the incident is linked to a materiality assessment that evaluates its significance and reporting implications.
+    aliases:
+      - anyagossági értékelés van
+  - name: hasRegulatoryNotification
+    from: Incident
+    to: RegulatoryNotification
+    meaning: Defines the relationship where an incident is associated with a formal notification that may need to be submitted to regulatory authorities.
+    aliases:
+      - felügyeleti bejelentés van
+  - name: correlatesWith
+    from: Incident
+    to: Alert
+    meaning: Indicates that the incident is connected to specific alerts or security events that provide context or information regarding its occurrence.
+    aliases:
+      - korrelál
+  - name: correlatesWith
+    from: Incident
+    to: SecurityEvent
+    meaning: Indicates that the incident is connected to specific alerts or security events that provide context or information regarding its occurrence.
+    aliases:
+      - korrelál
+  - name: hasEvidence
+    from: Incident
+    to: Evidence
+    meaning: Shows that there are documented records or artifacts collected during the incident that support analysis and accountability.
+    aliases:
+      - bizonyíték van
+  - name: hasRelevantCorrectiveAction
+    from: Incident
+    to: CorrectiveAction
+    meaning: Indicates that there are specific corrective actions related to the incident aimed at addressing underlying issues and preventing recurrence.
+    aliases:
+      - releváns helyesbítő intézkedés van
+  - name: hasRecoveryPlan
+    from: ITService
+    to: RecoveryPlan
+    meaning: Defines the relationship where an IT service is associated with a documented plan outlining the steps to restore service after an incident or disruption.
+    aliases:
+      - helyreállítási terv van
+  - name: originatesFrom
+    from: CorrectiveAction
+    to: Incident
+    meaning: "Indicates that a corrective action is linked to the specific incident that prompted it, providing a historical connection for tracking and accountability."
+    aliases:
+      - ered
+  - name: relatesTo
+    from: RegulatoryNotification
+    to: Incident
+    meaning: Indicates that the regulatory notification pertains to and provides formal reporting context for a specific incident.
+    aliases: []
+  - name: usedFor
+    from: RecoveryPlan
+    to: Incident
+    meaning: Indicates that the recovery plan is being used to restore service in response to a specific incident.
+    aliases: []
+rules:
+  canDeclareMajorIncident:
+    conditions:
+      - "incident status is not resolved, closed, or cancelled"
+      - incident severity is sev1 or sev2
+      - incident affects at least one IT service
+      - incident has an incident commander assigned
+  requiresRegulatoryNotification:
+    conditions:
+      - incident has a materiality assessment
+      - materiality assessment status is completed or reviewed
+      - materiality assessment outcome is potentially-reportable or reportable
+      - incident has a regulatory notification prepared for submission
+  canRouteIncidentToResolverGroup:
+    conditions:
+      - incident affects an IT service
+      - the affected IT service is supported by a resolver group
+      - incident type and severity are considered when selecting among supporting resolver groups
+  canExecuteRecoveryPlan:
+    conditions:
+      - the affected IT service is unavailable or impaired
+      - recovery plan current status is current
+      - "the related incident status is not resolved, closed, or cancelled"
+actions:
+  declareMajorIncident:
+    input: Incident
+    preconditions:
+      - canDeclareMajorIncident
+    effect: Set incident isMajorIncident to true so the incident is formally treated as a major incident.
+    verification: Re-read the incident and confirm isMajorIncident is true and an IncidentCommander is linked to the incident.
+  submitRegulatoryNotification:
+    input: RegulatoryNotification
+    preconditions:
+      - requiresRegulatoryNotification
+    effect: Set regulatory notification status to submitted so the incident is formally notified to the regulator.
+    verification: Re-read the regulatory notification and confirm its status is submitted.
+  routeIncidentToResolverGroup:
+    input: Incident
+    preconditions:
+      - canRouteIncidentToResolverGroup
+    effect: Assign the incident to the selected ResolverGroup.
+    verification: Re-read the incident and confirm it is assigned to the intended ResolverGroup.
+  executeRecoveryPlan:
+    input: RecoveryPlan
+    preconditions:
+      - canExecuteRecoveryPlan
+    effect: Execute the documented recovery steps to restore the affected IT service toward normal operation.
+    verification: Confirm the affected IT service is functioning normally again and that the recovery steps were completed and validated.

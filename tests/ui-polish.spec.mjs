@@ -19,13 +19,16 @@ test("an armed toggle button (aria-pressed=true) gets a visually distinct border
 
     await page.click("#btn-add-node");
     assert.equal(await page.getAttribute("#btn-add-node", "aria-pressed"), "true");
-    const armedBorder = await waitForStyleSettled(page, "#btn-add-node", "borderColor");
+    // `differentFrom` for the same reason design-critique-round3 needs it: the
+    // border animates, and the frames between the click and the transition
+    // starting read as a perfectly stable *un*armed value under load.
+    const armedBorder = await waitForStyleSettled(page, "#btn-add-node", "borderColor", { differentFrom: ordinaryBorder });
 
     assert.notEqual(armedBorder, ordinaryBorder, "an armed button's border must read differently from an ordinary button's");
 
     await page.keyboard.press("Escape"); // disarm
     assert.equal(await page.getAttribute("#btn-add-node", "aria-pressed"), "false");
-    const disarmedBorder = await waitForStyleSettled(page, "#btn-add-node", "borderColor");
+    const disarmedBorder = await waitForStyleSettled(page, "#btn-add-node", "borderColor", { differentFrom: armedBorder });
     assert.equal(disarmedBorder, ordinaryBorder, "disarming reverts to the same border as an ordinary button");
   });
 });
@@ -64,13 +67,17 @@ test("modal dialogs cast a shadow distinguishing them from the darkened backdrop
 
 test("toggling theme swaps the accent/shadow tokens too, not just the base palette — an armed button's border differs between themes", async () => {
   await withPage(async (page) => {
+    const restingBorder = await computedStyle(page, "#btn-connect", "borderColor");
     await page.click("#btn-connect");
-    const darkBorder = await waitForStyleSettled(page, "#btn-connect", "borderColor");
+    const darkBorder = await waitForStyleSettled(page, "#btn-connect", "borderColor", { differentFrom: restingBorder });
 
     await page.click("#btn-theme-toggle");
     // This test previously sampled immediately after the click, racing the
-    // border-color transition — a rare full-suite-under-load flake.
-    const lightBorder = await waitForStyleSettled(page, "#btn-connect", "borderColor");
+    // border-color transition — a rare full-suite-under-load flake. Waiting
+    // for "N identical frames" alone is not enough either: the frames before
+    // the transition starts are identical at the OLD value, so each sample
+    // has to be told what it is moving away from.
+    const lightBorder = await waitForStyleSettled(page, "#btn-connect", "borderColor", { differentFrom: darkBorder });
 
     assert.notEqual(darkBorder, lightBorder, "the accent color used for an armed button's border should differ between dark and light themes");
     assert.equal(await page.getAttribute("#btn-connect", "aria-pressed"), "true", "toggling theme must not disarm an unrelated armed mode");

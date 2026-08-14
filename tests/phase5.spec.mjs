@@ -354,7 +354,11 @@ test("saving an empty graph produces valid, structurally-correct (empty) JSON, T
 
     const yamlDl = downloads.find((d) => d.suggestedFilename().endsWith(".domain.yaml"));
     const yaml = await readDownload(yamlDl);
-    assert.equal(yaml, "classes: {}\nrelationships: []\nrules: {}\nactions: {}\n");
+    assert.equal(yaml, "competency_questions: []\nclasses: {}\nrelationships: []\nrules: {}\nactions: {}\n");
+    // Issue #94: the canonical JSON carries the same additive collection, so
+    // an empty graph round-trips with an explicit empty list rather than a
+    // missing key.
+    assert.deepEqual(parsed.competencyQuestions, []);
   });
 });
 
