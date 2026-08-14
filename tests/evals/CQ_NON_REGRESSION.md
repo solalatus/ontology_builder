@@ -31,21 +31,20 @@ both arms — see §6.
 ## 2. Design, and the deviations stated up front
 
 The anchor distribution in `results/runs/` was produced on `gpt-5.5-2026-04-23`
-via OpenAI, and issue #85's arms on `gpt-5.4`. **Neither is reachable on the
-Azure endpoint available here.** Comparing fresh interviews against those
-anchors would vary the model and the treatment at once, so — exactly as in
-`SELF_CORRECTION_EVAL.md` §2 — **both arms are re-run** and the comparison is
-within-model.
+via OpenAI. **That model is not deployed on the Azure endpoint available here**
+— the same deviation `SELF_CORRECTION_EVAL.md` §2 records. Comparing fresh
+interviews against those anchors would vary the model and the treatment at
+once, so **both arms are re-run** and the comparison is within-model.
 
 | Arm | Interviewer prompt | Records competency questions |
 |---|---|---|
 | `control` | frozen pre-#94 prompt (`fixtures/interviewer-prompt-pre-94.txt`) | no — it does not know they exist |
 | `treatment` | shipped #94 prompt | yes |
 
-**Six interviews, `n = 3` per arm**, `gpt-5-mini` throughout as the interviewer,
-persona `gpt-4o`, same stopping conditions, 120 turns / 45 minutes — the
-established budget, not a new one. **The published anchors are untouched and are
-not the comparison surface.**
+**Six interviews, `n = 3` per arm**, interviewer `gpt-5.4`, persona
+`gpt-4o-mini-internal`, same stopping conditions, 120 turns / 45 minutes —
+issue #85's exact configuration, on the same Azure resource it used, not a new
+one. **The published anchors are untouched and are not the comparison surface.**
 
 The control arm runs from **this same checkout** via the eval-only
 `agentState.systemPromptOverride` switch that already has precedent here, and
@@ -54,31 +53,25 @@ that shipped before #94** (`eff34f3e…`), refusing to run if it does not match 
 a control arm that is not actually the old interviewer would void the whole
 comparison silently.
 
-Four deviations from the established setup, each forced by this environment and
-each minimal:
+Two deviations from the established setup remain, both forced by this
+environment and both minimal:
 
-1. **Interviewer model `gpt-5-mini`.** `gpt-5.4`/`gpt-5.5` are not deployed
-   here. Of the three deployments this resource answers on (`gpt-4o`,
-   `gpt-5-mini`, `o4-mini`), `gpt-5-mini` is the closest to the gpt-5 family the
-   methodology was developed against. A first attempt on `gpt-4o` was discarded:
-   it skipped class declaration entirely, leaving an empty ontology after
-   thirteen turns — measuring a weaker model's phase discipline, not the
-   treatment.
-2. **Persona `gpt-4o`.** The established persona is `gpt-4o-mini`, which is not
-   deployed here; `gpt-4o` is the nearest cheap non-reasoning deployment. Same
-   in both arms, so it cancels out.
-3. **The deployment *listing* is stubbed.** This resource answers
+1. **The deployment *listing* is stubbed.** This resource answers
    `GET /openai/deployments` with an empty list even though its deployments are
    real and callable. The app populates its model dropdown from that listing, so
    the runner fulfills that one request locally. Every chat call — the
    interviewer's included — is a real relayed Azure call. Nothing about the
    interviewer, its tools or its prompt is stubbed.
-4. **The harness's own model calls preserve message roles.** The shared
+2. **The harness's own model calls preserve message roles.** The shared
    `chatOnce` helper takes a single system + user pair, so routing a running
    conversation through it flattens every prior turn into one blob with the
    roles stripped. A first attempt did that and the persona re-emitted its
    scripted opening line on all 19 turns of the run; it was discarded. The
    runner sends a real multi-turn array instead.
+
+A third condition, `gpt-5-mini`, was run before `gpt-5.4` was found to be
+deployed. It is kept as a deliberate weaker-interviewer replication rather than
+discarded — see §7.
 
 ## 3. Measures
 
@@ -154,7 +147,44 @@ The residual effect is small and, if anything, favours the control: the old
 prompt never tells it to use that section, so the descriptions are inert text.
 It is recorded here rather than assumed away.
 
-## 7. Results
+## 7. Two interviewer models, both kept
+
+The first batch ran on `gpt-5-mini` because a probe of generic deployment names
+(`gpt-4o`, `gpt-4.1`, `gpt-5-mini`, `o4-mini`) suggested nothing stronger was
+deployed. That was wrong: this is the same Azure resource issue #85 ran on, and
+`gpt-5.4` and `gpt-4o-mini-internal` are both live under exactly the deployment
+names `self-correction-eval.mjs` already hardcodes. The probe never tried them.
+
+The `gpt-5-mini` batch is **kept rather than discarded**, under
+`results/baselines/competency-questions-gpt-5-mini/`, because it is a result in
+its own right and not merely a failed attempt:
+
+- It is a **weaker-interviewer replication** of the same two arms. Whether the
+  treatment degrades recovery when the interviewer has less capacity to spare is
+  a harder question than whether it degrades recovery on a strong one, and
+  arguably the more informative one — Phase 1 front-loading should bite hardest
+  where there is least headroom.
+- It is an **independent second within-model comparison**. Two model conditions
+  agreeing is stronger evidence than either alone; two disagreeing is a finding
+  that neither would have surfaced.
+- It demonstrates the feature works end to end on a small model: 20 and 17
+  competency questions elicited, confirmed and persisted through real interviews.
+- Its interviews all terminated naturally (`app_agent_appears_finished`), so it
+  is a valid comparison, not a truncated one.
+
+Its known weakness is stated plainly: recovery is lower and **more variable**
+than any previous generation (practical class F1 27.9–62.2, against 55.3–70.8
+across the anchors and issue #85's arms). At n = 3 that spread is wide enough
+that only a large effect could clear it, so this batch is expected to be
+low-powered — informative about direction and about robustness under a weak
+interviewer, not decisive on its own.
+
+The primary batch is therefore re-run on `gpt-5.4` with persona
+`gpt-4o-mini-internal` — issue #85's exact configuration, which removes two of
+the four deviations §2 records, leaving only the stubbed deployment listing and
+the role-preserving harness calls.
+
+## 8. Results
 
 Populated after the batch completes. Until then this document is the
 pre-registration, and nothing in it has been adjusted to fit an outcome.

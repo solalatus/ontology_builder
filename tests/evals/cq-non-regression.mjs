@@ -74,7 +74,21 @@ import { DEFAULT_AZURE_API_VERSION } from "./lib/chatClient.mjs";
 import { RATE_LIMIT_MAX_ATTEMPTS, rateLimitBackoffMs, sleepMs } from "../lib/liveOpenAi.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const OUT_ROOT = path.join(__dirname, "results", "baselines", "competency-questions");
+
+// Which condition directory this batch writes to. A batch is defined by its
+// interviewer model as much as by its arms, so a second model gets its own
+// condition rather than overwriting or (through this runner's own idempotence
+// skip) silently refusing to run into the first one's directory. Same
+// convention post-normalization-v1/-v2 already uses for two variants of one
+// experiment.
+//
+//   competency-questions            the primary batch, gpt-5.4 (issue #85's model)
+//   competency-questions-gpt-5-mini a weaker-interviewer replication of the
+//                                   same two arms — kept deliberately, see
+//                                   CQ_NON_REGRESSION.md §8
+const CONDITION = (process.argv.slice(2).find((a) => a.startsWith("--condition=")) || "").split("=")[1]
+  || "competency-questions";
+const OUT_ROOT = path.join(__dirname, "results", "baselines", CONDITION);
 const PRE_94_PROMPT = path.join(__dirname, "fixtures", "interviewer-prompt-pre-94.txt");
 
 // The hash tests/agent-production-invariants.spec.mjs pinned before issue #94
@@ -94,38 +108,27 @@ const arg = (name, fallback = null) => {
 // comparison to mean anything, so it is pinned rather than left to the app's
 // own default-pick heuristic.
 //
-// gpt-5-mini, not gpt-4o: this repository's anchor runs were produced on
-// gpt-5.5 and issue #85's arms on gpt-5.4, so the gpt-5 family is the one the
-// whole methodology was developed and validated against. Of the three
-// deployments this resource actually answers on (gpt-4o, gpt-5-mini,
-// o4-mini), gpt-5-mini is the closest to that family. A first attempt on
-// gpt-4o was discarded: it skipped class declaration entirely and sent
-// relationship-only calls whose endpoints did not exist, leaving an empty
-// ontology after thirteen turns — measuring a weaker model's phase discipline
-// rather than the treatment. (That attempt did surface a real app defect,
-// since fixed: see handleAgentToolCall's dropped-reference early return.)
-const MODEL = process.env.EVAL_INTERVIEWER_MODEL || "gpt-5-mini";
-// The persona and the completion classifier are HARNESS machinery, not the
-// thing under test, and they deliberately do NOT run on the interviewer's
-// model. The persona answers from a fixture it was handed; it has nothing to
-// reason about. Measured on this resource with an identical trivial call:
-// gpt-4o returned in 2466ms spending 0 reasoning tokens, gpt-5-mini in 4812ms
-// spending 256 — 79% of its output was hidden reasoning. Since roughly half of
-// every conversation turn is these two calls, putting them on a reasoning
-// model doubled the harness's share of wall-clock for no benefit. The
-// repository's own eval default is a cheap non-reasoning persona
-// (gpt-4o-mini) for exactly this reason; gpt-4o is the closest deployment
-// this resource answers on. Validity is unaffected: both arms use the same
-// persona and the same classifier, so it cancels out of the comparison.
-const PERSONA_MODEL = process.env.ONTOLOGY_EVAL_PERSONA_MODEL || "gpt-4o";
+// gpt-5.4 and gpt-4o-mini-internal are exactly what self-correction-eval.mjs
+// (issue #85) hardcodes, on this same Azure resource. Deployment names on Azure
+// are independent of model ids, which is why a probe of generic names
+// (gpt-4o, gpt-4.1, gpt-5-mini, o4-mini) appeared to show nothing stronger
+// deployed and led a first batch onto gpt-5-mini. That batch is kept as a
+// deliberate weaker-interviewer replication under the
+// competency-questions-gpt-5-mini condition (CQ_NON_REGRESSION.md §7), not
+// discarded — but the primary comparison runs on the established pair, which
+// is one minor version from the anchors' gpt-5.5 and identical to #85's arms.
+const MODEL = process.env.EVAL_INTERVIEWER_MODEL || "gpt-5.4";
+// The persona answers from a fixture it was handed and has nothing to reason
+// about, so it stays on the cheap non-reasoning deployment #85 used.
+const PERSONA_MODEL = process.env.ONTOLOGY_EVAL_PERSONA_MODEL || "gpt-4o-mini-internal";
 // The completion classifier stays on the INTERVIEWER's model, matching
 // self-correction-eval.mjs and ontology-recovery.eval.spec.mjs. That default is
 // deliberate upstream, not an oversight: a cheap classifier was hard to
 // instruction away from false "the interview is finished" positives, and a run
-// once looped 160+ turns because of it. The persona is the one harness call
-// that is safe to run cheaply — it reads answers off a fixture.
+// once looped 160+ turns because of it.
 const CLASSIFIER_MODEL = process.env.ONTOLOGY_EVAL_CLASSIFIER_MODEL || MODEL;
-const REACHABLE_DEPLOYMENTS = (process.env.EVAL_AZURE_DEPLOYMENTS || "gpt-4o,gpt-5-mini,o4-mini").split(",");
+const REACHABLE_DEPLOYMENTS = (process.env.EVAL_AZURE_DEPLOYMENTS
+  || "gpt-5.4,gpt-4o-mini-internal,gpt-4o,gpt-5-mini,o4-mini").split(",");
 // 45 minutes and 120 turns are the established values (self-correction-eval.mjs
 // and ontology-recovery.eval.spec.mjs both use them); they are not re-derived
 // here. The published anchor stopped naturally after 52 turns in 1062s, well

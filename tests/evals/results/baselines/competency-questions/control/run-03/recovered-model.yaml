@@ -1,0 +1,508 @@
+competency_questions: []
+classes:
+  Incident:
+    meaning: "A record of an operational event affecting one or more IT services that may require triage, containment, recovery, and stakeholder communication."
+    aliases: []
+    properties:
+      priority:
+        type: text
+        allowed:
+          - P1
+          - P2
+          - P3
+          - P4
+      severity:
+        type: text
+        allowed:
+          - critical
+          - high
+          - medium
+          - low
+      isMajor:
+        type: boolean
+        allowed:
+          - "true"
+          - "false"
+      declaredAt:
+        type: date
+      materialityAssessed:
+        type: boolean
+        allowed:
+          - "true"
+          - "false"
+      materiality:
+        type: text
+        allowed:
+          - material
+          - non-material
+          - unknown
+      rootCauseIdentified:
+        type: boolean
+        allowed:
+          - "true"
+          - "false"
+      rootCause:
+        type: text
+      containmentVerified:
+        type: boolean
+        allowed:
+          - "true"
+          - "false"
+      recoveryStatus:
+        type: text
+        allowed:
+          - notStarted
+          - inProgress
+          - recovered
+          - failed
+      postIncidentReviewDate:
+        type: date
+      lastCommunicationTime:
+        type: date
+      regulatoryNotificationRequired:
+        type: boolean
+        allowed:
+          - "true"
+          - "false"
+      regulatoryNotificationDueDate:
+        type: date
+      status:
+        type: text
+        allowed:
+          - open
+          - inProgress
+          - resolved
+          - closed
+          - cancelled
+  ITService:
+    meaning: "A technical service provided by IT that supports business functionality and may be failed over, isolated, or restored during incidents."
+    aliases: []
+    properties:
+      healthState:
+        type: text
+        allowed:
+          - operational
+          - degraded
+          - partial_outage
+          - major_outage
+      serviceTier:
+        type: text
+        allowed:
+          - Tier1
+          - Tier2
+          - Tier3
+      backupAvailable:
+        type: boolean
+        allowed:
+          - "true"
+          - "false"
+  BusinessService:
+    meaning: A business-facing capability or service that depends on IT services and is used to assess customer or regulatory impact.
+    aliases: []
+    properties: {}
+  ConfigurationItem:
+    meaning: "An identifiable configuration asset (for example a server, network device, database, or application component) that can be isolated, restored, or changed during incident response."
+    aliases: []
+    properties:
+      healthState:
+        type: text
+        allowed:
+          - operational
+          - degraded
+          - partial_outage
+          - major_outage
+      serviceTier:
+        type: text
+        allowed:
+          - Tier1
+          - Tier2
+          - Tier3
+      backupAvailable:
+        type: boolean
+        allowed:
+          - "true"
+          - "false"
+  Alert:
+    meaning: A monitoring or detection signal indicating potential problems that may be correlated into an incident.
+    aliases: []
+    properties:
+      status:
+        type: text
+        allowed:
+          - active
+          - acknowledged
+          - resolved
+      severity:
+        type: text
+        allowed:
+          - critical
+          - high
+          - medium
+          - low
+      timestamp:
+        type: date
+  IncidentCommander:
+    meaning: A person designated to lead and coordinate response activities during a declared major incident.
+    aliases: []
+    properties: {}
+  ResolverGroup:
+    meaning: A technical or operational team responsible for investigating and resolving incidents affecting specific IT services or technologies.
+    aliases: []
+    properties: {}
+  ServiceOwner:
+    meaning: The accountable individual listed in the service catalogue who owns the IT service and decisions about its restoration and change.
+    aliases: []
+    properties: {}
+  StakeholderGroup:
+    meaning: A named group of business or regulatory stakeholders who should receive communications and updates about an incident.
+    aliases: []
+    properties: {}
+  ThirdPartyProvider:
+    meaning: An external vendor or service provider whose systems or services the bank relies on and who may be involved in incident resolution.
+    aliases: []
+    properties:
+      vendorTier:
+        type: text
+        allowed:
+          - Tier1
+          - Tier2
+          - Tier3
+      contractJurisdiction:
+        type: text
+  EvidenceItem:
+    meaning: "A collected record, log, snapshot, or artifact preserved for audit, investigation, or regulatory reporting purposes."
+    aliases: []
+    properties:
+      evidenceType:
+        type: text
+        allowed:
+          - log
+          - snapshot
+          - configExport
+          - communication
+          - file
+          - other
+      collectedAt:
+        type: date
+      retainedForRegulatory:
+        type: boolean
+        allowed:
+          - "true"
+          - "false"
+      configExportFormat:
+        type: text
+  Change:
+    meaning: A record of a planned or emergency modification or deployment that may have affected configuration items or services.
+    aliases: []
+    properties:
+      changeType:
+        type: text
+        allowed:
+          - planned
+          - emergency
+      approved:
+        type: boolean
+        allowed:
+          - "true"
+          - "false"
+      changedAt:
+        type: date
+      changeAuthor:
+        type: text
+  RecoveryPlan:
+    meaning: A documented set of steps and resources for restoring an IT service or configuration item to operational state.
+    aliases: []
+    properties:
+      planStatus:
+        type: text
+        allowed:
+          - approved
+          - draft
+          - unavailable
+      lastTestedAt:
+        type: date
+  DetectionSource:
+    meaning: "The origin or mechanism by which an incident or alert was detected (for example monitoring system, user report, or external vendor notification)."
+    aliases: []
+    properties:
+      sourceType:
+        type: text
+        allowed:
+          - monitoring
+          - userReport
+          - externalVendor
+          - automatedAlert
+          - manualTicket
+          - other
+  CorrectiveAction:
+    meaning: A tracked remediation or preventive task identified to address the root cause of an incident.
+    aliases: []
+    properties:
+      status:
+        type: text
+        allowed:
+          - open
+          - in-progress
+          - resolved
+          - deferred
+      dueDate:
+        type: date
+relationships:
+  - name: impactsService
+    from: Incident
+    to: ITService
+    meaning: The incident impacts or degrades the specified IT service.
+    aliases:
+      - impacts
+  - name: affectsConfigurationItem
+    from: Incident
+    to: ConfigurationItem
+    meaning: The incident affects the specified configuration item.
+    aliases:
+      - affectsCI
+  - name: hasAlert
+    from: Incident
+    to: Alert
+    meaning: An alert is correlated with or recorded against this incident.
+    aliases:
+      - correlatesWithAlert
+  - name: ledBy
+    from: Incident
+    to: IncidentCommander
+    meaning: The incident is led or coordinated by the named incident commander.
+    aliases:
+      - incidentCommander
+  - name: handledBy
+    from: Incident
+    to: ResolverGroup
+    meaning: The resolver group currently assigned to investigate and resolve the incident.
+    aliases:
+      - assignedToResolverGroup
+  - name: hasRecoveryPlan
+    from: Incident
+    to: RecoveryPlan
+    meaning: A recovery plan has been identified and linked to this incident.
+    aliases:
+      - recoveryPlanLinked
+  - name: notifiesStakeholders
+    from: Incident
+    to: StakeholderGroup
+    meaning: Stakeholder groups that should receive communications about this incident.
+    aliases:
+      - notifications
+  - name: detectedBy
+    from: Incident
+    to: DetectionSource
+    meaning: The incident was detected via the specified detection source.
+    aliases:
+      - detectionSource
+  - name: dependsOn
+    from: BusinessService
+    to: ITService
+    meaning: The business service depends on the listed IT service.
+    aliases:
+      - businessDependsOn
+  - name: supportsService
+    from: ConfigurationItem
+    to: ITService
+    meaning: The configuration item supports or provides part of the IT service.
+    aliases:
+      - ciSupportsService
+  - name: ownedBy
+    from: ITService
+    to: ServiceOwner
+    meaning: The service owner accountable for the IT service.
+    aliases:
+      - serviceOwner
+  - name: providesService
+    from: ThirdPartyProvider
+    to: ITService
+    meaning: The third-party provider supplies or hosts the IT service or a component of it.
+    aliases:
+      - vendorProvides
+  - name: involvedInIncident
+    from: ThirdPartyProvider
+    to: Incident
+    meaning: Indicates the third-party provider is involved in the incident response or is the source of the outage.
+    aliases:
+      - vendorInvolved
+  - name: supports
+    from: ResolverGroup
+    to: ITService
+    meaning: The resolver group provides operational support for the IT service.
+    aliases:
+      - resolverSupports
+  - name: changeAffectsConfigurationItem
+    from: Change
+    to: ConfigurationItem
+    meaning: The recorded change or deployment affected the configuration item.
+    aliases:
+      - changeAffectsCI
+  - name: mayHaveCaused
+    from: Change
+    to: Incident
+    meaning: The change is suspected to have caused or contributed to the incident.
+    aliases:
+      - changeRelatedToIncident
+  - name: collectedFor
+    from: EvidenceItem
+    to: Incident
+    meaning: The evidence item was collected for or linked to the incident for audit or investigation.
+    aliases:
+      - evidenceForIncident
+  - name: appliesToService
+    from: RecoveryPlan
+    to: ITService
+    meaning: The recovery plan is intended to restore the specified IT service.
+    aliases:
+      - recoveryForService
+  - name: appliesToConfigurationItem
+    from: RecoveryPlan
+    to: ConfigurationItem
+    meaning: The recovery plan targets the specified configuration item.
+    aliases:
+      - recoveryForCI
+  - name: alertDetectedBy
+    from: Alert
+    to: DetectionSource
+    meaning: The alert originated from the specified detection source.
+    aliases:
+      - alertSource
+  - name: correctiveActionForIncident
+    from: CorrectiveAction
+    to: Incident
+    meaning: The corrective action was identified for or recorded against this incident.
+    aliases:
+      - actionForIncident
+  - name: targetsService
+    from: CorrectiveAction
+    to: ITService
+    meaning: The corrective action applies to or is intended to prevent recurrence on the specified IT service.
+    aliases:
+      - appliesToService
+  - name: collectedEvidence
+    from: Incident
+    to: EvidenceItem
+    meaning: Evidence items collected during or for this incident.
+    aliases:
+      - evidenceItems
+  - name: collectedFor
+    from: Incident
+    to: EvidenceItem
+    meaning: "Legacy alias: evidence items collected during or for this incident (kept for backward compatibility)."
+    aliases:
+      - evidenceForIncident
+  - name: evidenceSentTo
+    from: EvidenceItem
+    to: StakeholderGroup
+    meaning: The stakeholder groups that an evidence communication was sent to.
+    aliases:
+      - sentTo
+rules:
+  declareMajorIncident:
+    conditions:
+      - incident.severity is critical or high
+      - "incident.status is not resolved, closed, or cancelled"
+      - at least one ITService impacted has serviceTier Tier1
+      - incident.isMajor is not already true
+      - an incidentCommander is assigned and available
+  regulatoryNotificationRequired:
+    conditions:
+      - incident.materialityAssessed is true
+      - incident.materiality is material
+      - incident.isMajor is true or the incident is cybersecurity-related
+      - incident.regulatoryNotificationRequired is false
+  allowEmergencyChange:
+    conditions:
+      - the emergency change is linked to an active incident
+      - change.changeType is emergency
+      - implementation and backout plans are documented in the change record
+      - change affects at least one ConfigurationItem and those ConfigurationItem(s) are assessed
+      - explicit risk acceptance approval is documented
+  assignIncidentCommander:
+    conditions:
+      - "during business hours, the Major Incident Manager (MIM) is assigned if available"
+      - "during after-hours, the Duty Manager is assigned as default"
+      - "if the incident is P1-critical or sev1-critical, the Duty Manager may escalate to a senior-level manager or executive based on impact and availability"
+      - "if both the MIM and Duty Manager are unavailable, the role falls to an appropriate on-call escalation contact"
+  similarIncidentByServiceAndRootCause:
+    conditions:
+      - the current incident.rootCauseIdentified is true
+      - another incident impacts at least one of the same ITService(s) as the current incident
+      - another incident.rootCause equals the current incident.rootCause
+  evidenceCompletenessRequired:
+    conditions:
+      - incident.isMajor is true or incident.regulatoryNotificationRequired is true
+  evidenceComplete_regulatory:
+    conditions:
+      - evidenceCompletenessRequired
+      - "exists collectedEvidence where (EvidenceItem.evidenceType equals 'log')"
+      - "exists collectedEvidence where (EvidenceItem.evidenceType equals 'configExport')"
+      - "exists collectedEvidence where (EvidenceItem.evidenceType equals 'communication')"
+      - "for every collectedEvidence where (EvidenceItem.evidenceType equals 'communication'), that EvidenceItem evidenceSentTo includes all StakeholderGroup nodes linked from the incident via notifiesStakeholders"
+  evidenceComplete_major_nonreg:
+    conditions:
+      - incident.isMajor is true and incident.regulatoryNotificationRequired is false
+      - "exists collectedEvidence where (EvidenceItem.evidenceType equals 'log')"
+      - "exists collectedEvidence where (EvidenceItem.evidenceType equals 'communication')"
+      - "for every collectedEvidence where (EvidenceItem.evidenceType equals 'communication'), that EvidenceItem evidenceSentTo includes all StakeholderGroup nodes linked from the incident via notifiesStakeholders"
+  communicationsUpToDate:
+    conditions:
+      - "if incident.priority is P1 or incident.severity is critical, the most recent incident.lastCommunicationTime is within 15 minutes of now"
+      - "if incident.priority is P2 or incident.severity is high, the most recent incident.lastCommunicationTime is within 30 minutes of now"
+      - "otherwise, the most recent incident.lastCommunicationTime is within 4 hours of now"
+actions:
+  acknowledgeAlert:
+    input: Alert
+    preconditions: []
+    effect: alert.status becomes acknowledged
+    verification: confirm the alert.status is acknowledged
+  assignIncidentToResolverGroup:
+    input: Incident
+    preconditions: []
+    effect: set the Incident handledBy relationship to the chosen ResolverGroup
+    verification: confirm the Incident handledBy relationship points to the ResolverGroup
+  declareMajorIncident:
+    input: Incident
+    preconditions:
+      - declareMajorIncident
+      - assignIncidentCommander
+    effect: incident.isMajor becomes true and incident.declaredAt is set; assign an IncidentCommander per assignIncidentCommander rule
+    verification: "confirm incident.isMajor is true, declaredAt is set, and ledBy relationship points to the assigned IncidentCommander"
+  containIncident:
+    input: Incident
+    preconditions: []
+    effect: "set incident.containmentVerified to true; set incident.recoveryStatus to 'inProgress'"
+    verification: "confirm incident.containmentVerified is true and incident.recoveryStatus equals 'inProgress'"
+  isolateConfigurationItem:
+    input: ConfigurationItem
+    preconditions: []
+    effect: configurationItem.healthState becomes degraded (isolated)
+    verification: confirm ConfigurationItem.healthState is degraded
+  failOverService:
+    input: ITService
+    preconditions: []
+    effect: ITService.healthState becomes operational (service failed over to DR environment)
+    verification: confirm ITService.healthState is operational
+  restoreBackup:
+    input: ConfigurationItem
+    preconditions: []
+    effect: restore the ConfigurationItem from backup and set ConfigurationItem.healthState to operational and backupAvailable to true
+    verification: confirm ConfigurationItem.healthState is operational
+  executeEmergencyChange:
+    input: Change
+    preconditions:
+      - allowEmergencyChange
+    effect: change.approved becomes true and change.changedAt is set when the emergency change is executed
+    verification: confirm change.approved is true and change.changedAt is recorded
+  sendStakeholderCommunication:
+    input: Incident
+    preconditions: []
+    effect: create an EvidenceItem of evidenceType communication and link it from the Incident via collectedEvidence; update incident.lastCommunicationTime
+    verification: confirm an EvidenceItem of type communication exists linked via collectedEvidence and incident.lastCommunicationTime is set
+  submitRegulatoryNotification:
+    input: Incident
+    preconditions:
+      - regulatoryNotificationRequired
+    effect: set incident.regulatoryNotificationRequired to true and create an EvidenceItem of evidenceType communication linked from the Incident via collectedEvidence
+    verification: confirm incident.regulatoryNotificationRequired is true and an EvidenceItem of type communication exists and is linked via collectedEvidence

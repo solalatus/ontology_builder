@@ -20,7 +20,11 @@ import { loadGroundTruthModel, scopeGroundTruth } from "./lib/groundTruthModel.m
 import { computeRecoveryMetrics } from "./lib/recoveryMetrics.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const ROOT = path.join(__dirname, "results", "baselines", "competency-questions");
+// Defaults to the primary (gpt-5.4) batch; pass a condition directory to read
+// the weaker-interviewer replication instead, e.g.
+//   node tests/evals/analyze-cq-non-regression.mjs competency-questions-gpt-5-mini
+const CONDITION = process.argv[2] || "competency-questions";
+const ROOT = path.join(__dirname, "results", "baselines", CONDITION);
 const RUNS = ["run-01", "run-02", "run-03"];
 const full = loadGroundTruthModel();
 const scoped = scopeGroundTruth(full, full.practicalScopeClassIds, full.practicalScopePropertyIds);
