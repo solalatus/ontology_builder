@@ -49,6 +49,7 @@ const scoped = scopeGroundTruth(full, full.practicalScopeClassIds, full.practica
 const pct = (x) => `${(x * 100).toFixed(0)}%`;
 
 const rows = [];
+const invalidRuns = [];
 for (const runId of runIds) {
   const arms = {};
   let missing = false;
@@ -79,6 +80,22 @@ for (const runId of runIds) {
       + `turns=${p.turnsUsed} stopped=${p.stoppedReason} applies=${p.applyToolCalls} `
       + `cqs=${p.competencyQuestionsRecorded ?? 0} droppedEdges=${arms[arm].droppedEdges}`);
   }
+
+  // Validity gate, printed loudly rather than left for a reader to notice in
+  // the provenance line. An arm stopped by the clock was cut off mid-interview,
+  // and in THIS experiment that truncation is not symmetric: the treatment's
+  // Phase 1 front-loads competency-question work before class modeling begins,
+  // so a binding clock takes time from the treatment's modeling phases and not
+  // from the control's — biased against the treatment, which is the direction
+  // that manufactures a false regression. Numbers from a truncated arm measure
+  // the budget, not the interviewer.
+  const truncated = ARMS.filter((arm) => arms[arm].provenance.stoppedReason === "wallclock_timeout");
+  if (truncated.length) {
+    console.log(`\n  !! ${runId}: ${truncated.join(" and ")} hit the wall-clock budget rather than`);
+    console.log("     finishing. Raise ONTOLOGY_EVAL_WALLCLOCK_MINUTES and re-run — this comparison");
+    console.log("     is not valid as a non-regression result.");
+    invalidRuns.push(runId);
+  }
 }
 
 console.log("\nOntology recovery against tests/evals/fixtures/itops_mtsr.yaml — deterministic");
@@ -98,6 +115,11 @@ for (const { runId, scopeLabel, control, treatment } of rows) {
   console.log(
     `${runId}  ${scopeLabel.padEnd(9)}  ${"composite".padEnd(19)}  ${pct(cComposite).padStart(7)}   ${pct(tComposite).padStart(9)}   ${delta > 0 ? "+" : ""}${delta.toFixed(1)} pts`
   );
+}
+
+if (invalidRuns.length) {
+  console.log(`\nVERDICT WITHHELD — ${invalidRuns.join(", ")} truncated by the clock. See above.`);
+  process.exitCode = 1;
 }
 
 console.log("\nReading: a delta at or above zero means the rewritten interviewer recovered at least");
