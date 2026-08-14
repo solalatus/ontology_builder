@@ -1,0 +1,103 @@
+{
+  "schemaVersion": 1,
+  "condition": "competency-questions/treatment",
+  "arm": "treatment",
+  "runId": "run-01",
+  "generatedAt": "2026-08-14T14:57:33.277Z",
+  "model": "gpt-5-mini",
+  "personaModel": "gpt-4o",
+  "classifierModel": "gpt-5-mini",
+  "provider": "azure",
+  "endpoint": "https://briandemoopenai.openai.azure.com",
+  "interviewerPromptSha256": "0173b3f31cd00b5e776cffa2f2e6d3016686d98df6cbfa9e3a6ab4e1a0b0dee0",
+  "competencyQuestionsEnabled": true,
+  "stoppedReason": "app_agent_appears_finished",
+  "turnsUsed": 18,
+  "wallClockSec": 751,
+  "applyToolCalls": 22,
+  "getGraphStateCalls": 16,
+  "competencyQuestionsRecorded": 20,
+  "competencyQuestions": [
+    {
+      "id": "cq1",
+      "text": "Which business services and customer channels are impacted by an incident?"
+    },
+    {
+      "id": "cq2",
+      "text": "Which IT services are affected by an ongoing outage or alert?"
+    },
+    {
+      "id": "cq3",
+      "text": "What configuration items or infrastructure components are contributing to a service issue?"
+    },
+    {
+      "id": "cq4",
+      "text": "Who owns the affected IT service, and who is the resolver group responsible for it?"
+    },
+    {
+      "id": "cq5",
+      "text": "Are there any correlated alerts, events, or logs tied to an ongoing incident?"
+    },
+    {
+      "id": "cq6",
+      "text": "Does the incident meet the criteria for a major-incident declaration?"
+    },
+    {
+      "id": "cq7",
+      "text": "Which recovery plans are available for restoring the affected service?"
+    },
+    {
+      "id": "cq8",
+      "text": "Is the incident linked to a known problem or a known error?"
+    },
+    {
+      "id": "cq9",
+      "text": "Was the incident caused by a recent change or deployment?"
+    },
+    {
+      "id": "cq10",
+      "text": "Is the service running on production or a disaster-recovery environment?"
+    },
+    {
+      "id": "cq11",
+      "text": "Are backup sets available and verified for recovering the affected data or system?"
+    },
+    {
+      "id": "cq12",
+      "text": "What communication updates have been sent to stakeholders about the incident status?"
+    },
+    {
+      "id": "cq13",
+      "text": "Have all regulatory reporting requirements been fulfilled for a cybersecurity incident?"
+    },
+    {
+      "id": "cq14",
+      "text": "What is the complete evidence trail collected for an incident or regulatory report submission?"
+    },
+    {
+      "id": "cq15",
+      "text": "Were the containment actions and isolated components consistent with the approved incident plan?"
+    },
+    {
+      "id": "cq16",
+      "text": "What corrective actions are open for the affected service from prior incidents?"
+    },
+    {
+      "id": "cq17",
+      "text": "How does the incident affect service-level objectives for availability and restoration?"
+    },
+    {
+      "id": "cq18",
+      "text": "Was the root cause categorized as human error, a third-party failure, or a cyber-attack?"
+    },
+    {
+      "id": "cq19",
+      "text": "Which vendors need to be engaged to support mitigation or resolution of the issue?"
+    },
+    {
+      "id": "cq20",
+      "text": "Is the incident still active under investigation, or is it resolved and awaiting closure?"
+    }
+  ],
+  "note": "Fresh interview under issue #94's within-model design. The control arm runs the frozen pre-#94 interviewer prompt from this same checkout, so the two arms differ by the interviewer prompt alone. The deployment LISTING is stubbed (this resource returns an empty list for deployments that are callable); every chat call is a real relayed Azure call. Nothing under results/runs/ was read or written."
+}
