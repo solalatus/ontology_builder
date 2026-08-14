@@ -186,32 +186,34 @@ the role-preserving harness calls.
 
 ## 8. Results
 
-Both conditions have run. Neither this document's design, measures nor pass
+All conditions have run. Neither this document's design, measures nor pass
 criteria were altered after the fact.
 
-- **Primary, `gpt-5.4`** — `results/baselines/competency-questions/REPORT.md`.
-  **FAIL.** Full-domain class F1 −7.6 (spread 5.6) and property F1 −8.8
-  (spread 7.2): both decreases clear the n = 3 rule, and the deficit is
-  directionally consistent across all three paired runs. Mechanism: the
-  treatment interview terminates ~29% earlier with ~27% fewer applies, leaving
-  a model ~27% smaller in classes and ~50% smaller in properties.
-  Competency-question work displaces modeling turns rather than adding to them.
-  Value fidelity improves substantially (62.0 → 87.4), so the honest reading is
-  a smaller, tighter, higher-fidelity model — but breadth is what these criteria
-  measure, deliberately.
+- **Primary, `gpt-5.4`, fixed harness** —
+  `results/baselines/competency-questions/REPORT.md`. **No regression.** All six
+  F1 deltas favour the treatment (full: classes +4.6, relationships +5.9,
+  properties +0.7; practical: +6.0, +6.8, +5.0); none clears the n = 3 spread
+  individually, but six of six pointing one way is a direction worth stating.
+  Against the `gpt-5.5` anchors the treatment arm is higher on **all three** F1
+  dimensions at full scope and two of three at practical.
+  **One real weakness:** controlled-value capture. The treatment recorded 1 / 9
+  / 11 allowed-value lists against the control's 17 / 37 / 26 — several-fold
+  lower, consistent across all three pairs, and not explained by interview
+  length. The fidelity *percentage* is too unstable to score (averaged over as
+  few as one matched property), but the coverage gap under it is real. Phase 6
+  was not edited by this issue, so this is a side effect and a tractable
+  follow-up.
+- **Superseded, `gpt-5.4`, tainted** —
+  `results/baselines/competency-questions-tainted-early-stop/REPORT.md`. All six
+  interviews stopped prematurely by `appearsFinished()` reading an
+  offer-to-continue as completion. Retained as the evidence for that defect.
+  Its FAIL verdict does not stand.
 - **Secondary, `gpt-5-mini`** —
-  `results/baselines/competency-questions-gpt-5-mini/REPORT.md`. No regression
-  detected; full-domain property F1 *gained* 5.7 clearing its spread.
+  `results/baselines/competency-questions-gpt-5-mini/REPORT.md`. No regression;
+  a property-F1 gain clearing its spread. Note this batch predates the harness
+  fix; its interviews terminated naturally under the old rule, but the same
+  stopping behaviour applies, so treat it as directional.
 
-The two conditions disagree, which §7 anticipated as a finding neither would
-surface alone: on a weak interviewer the control is already turn-limited, so
-focusing the interview costs little; on a strong one there is real headroom to
-forfeit. The change trades breadth for focus, and the stronger the interviewer,
-the more breadth there is to lose.
-
-**Consequence, per §5: issue #94 does not merge as written.** The first
-fallback is indicated — stop competency-question work displacing modeling
-turns, then re-run this batch. Nothing in the data model, file formats, Domain
-Model UI, Review Changes integration or coverage check is implicated; the
-narrower third fallback (ship all of that, revert the interviewer prompt alone)
-remains available.
+**Consequence: the change may merge**, with the Phase 6 constraint-capture
+follow-up recorded as the one open item. The fallbacks in §5 are not triggered:
+recovery did not regress on any structural dimension.

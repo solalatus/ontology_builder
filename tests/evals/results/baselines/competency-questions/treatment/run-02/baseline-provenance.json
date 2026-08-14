@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "condition": "competency-questions/treatment",
+  "arm": "treatment",
+  "runId": "run-02",
+  "generatedAt": "2026-08-14T18:11:34.080Z",
+  "model": "gpt-5.4",
+  "personaModel": "gpt-4o-mini-internal",
+  "classifierModel": "gpt-5.4",
+  "provider": "azure",
+  "endpoint": "https://briandemoopenai.openai.azure.com",
+  "interviewerPromptSha256": "0173b3f31cd00b5e776cffa2f2e6d3016686d98df6cbfa9e3a6ab4e1a0b0dee0",
+  "competencyQuestionsEnabled": true,
+  "stoppedReason": "app_agent_appears_finished",
+  "turnsUsed": 50,
+  "wallClockSec": 570,
+  "applyToolCalls": 36,
+  "getGraphStateCalls": 38,
+  "competencyQuestionsRecorded": 11,
+  "competencyQuestions": [
+    {
+      "id": "cq1",
+      "text": "Which business services are impacted by an incident, and how do they relate to customer channels?"
+    },
+    {
+      "id": "cq2",
+      "text": "What IT services support the affected business services, and which configuration items are in their dependency path?"
+    },
+    {
+      "id": "cq3",
+      "text": "Who owns the affected IT service, and which resolver group should be assigned to address the incident?"
+    },
+    {
+      "id": "cq4",
+      "text": "Does an incident meet the criteria to be declared a major incident?"
+    },
+    {
+      "id": "cq5",
+      "text": "What steps must be taken to declare a major incident?"
+    },
+    {
+      "id": "cq6",
+      "text": "What runbook or workaround can be used to address an incident temporarily, and what recovery plans exist?"
+    },
+    {
+      "id": "cq7",
+      "text": "Was an incident triggered by any recent changes or deployments, and which specific changes are relevant?"
+    },
+    {
+      "id": "cq8",
+      "text": "Is a materiality assessment required for an incident, and has it been completed?"
+    },
+    {
+      "id": "cq9",
+      "text": "Are there open corrective actions from prior post-incident reviews that apply to an incident or an affected service?"
+    },
+    {
+      "id": "cq10",
+      "text": "What evidence must be collected and preserved for an incident?"
+    },
+    {
+      "id": "cq11",
+      "text": "What communications must be sent to stakeholders about an incident, and who is responsible for approving them?"
+    }
+  ],
+  "note": "Fresh interview under issue #94's within-model design. The control arm runs the frozen pre-#94 interviewer prompt from this same checkout, so the two arms differ by the interviewer prompt alone. The deployment LISTING is stubbed (this resource returns an empty list for deployments that are callable); every chat call is a real relayed Azure call. Nothing under results/runs/ was read or written."
+}
