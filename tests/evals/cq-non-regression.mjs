@@ -70,7 +70,8 @@ import { launchChromium } from "../lib/browser.mjs";
 import { APP_URL } from "../lib/page.mjs";
 import { forwardToRealAzure, configureAzureEndpoint, openPanel } from "../lib/liveAzureOpenAi.mjs";
 import { runOntologyRecoveryConversation } from "./lib/conversationOrchestrator.mjs";
-import { chatOnce, DEFAULT_AZURE_API_VERSION } from "./lib/chatClient.mjs";
+import { DEFAULT_AZURE_API_VERSION } from "./lib/chatClient.mjs";
+import { RATE_LIMIT_MAX_ATTEMPTS, rateLimitBackoffMs, sleepMs } from "../lib/liveOpenAi.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const OUT_ROOT = path.join(__dirname, "results", "baselines", "competency-questions");
@@ -97,6 +98,47 @@ const PERSONA_MODEL = process.env.ONTOLOGY_EVAL_PERSONA_MODEL || "gpt-4o";
 const REACHABLE_DEPLOYMENTS = (process.env.EVAL_AZURE_DEPLOYMENTS || "gpt-4o,gpt-5-mini,o4-mini").split(",");
 const MAX_TURNS = Number(process.env.ONTOLOGY_EVAL_MAX_TURNS) || 120;
 const WALLCLOCK_MINUTES = Number(process.env.ONTOLOGY_EVAL_WALLCLOCK_MINUTES) || 30;
+
+// The harness's own two model calls (the simulated expert and the "is this
+// interview finished?" classifier), sent as a REAL multi-turn message array.
+//
+// Deliberately not chatClient.mjs's chatOnce(): that helper takes a single
+// systemPrompt + userPrompt pair, so routing a running conversation through it
+// means flattening every prior turn into one unstructured blob with the roles
+// stripped out. A first attempt at this runner did exactly that (copied from
+// self-correction-eval.mjs) and the persona re-emitted its own scripted opening
+// line on all 19 turns of the run: with no role boundaries, the strongest
+// pattern left in the prompt is the persona document's own "Opening response"
+// section. The interview never advanced past turn 1's content, and the run was
+// discarded. Preserving roles is what makes it a conversation.
+async function azureChatMessages({ endpoint, apiKey, apiVersion, model, messages, label }) {
+  const url = `${endpoint}/openai/deployments/${model}/chat/completions?api-version=${apiVersion}`;
+  for (let attempt = 1; attempt <= RATE_LIMIT_MAX_ATTEMPTS; attempt++) {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "api-key": apiKey, "Content-Type": "application/json" },
+      body: JSON.stringify({ messages }),
+    });
+    const text = await res.text();
+    let data;
+    try { data = JSON.parse(text); } catch (err) { data = { error: { message: text.slice(0, 500) } }; }
+    if (res.ok) {
+      const choice = data.choices && data.choices[0];
+      const reply = (choice && choice.message && choice.message.content) || "";
+      if (!reply.trim()) throw new Error(`${label}: provider returned an empty reply (finish_reason=${choice && choice.finish_reason})`);
+      return { text: reply, usage: data.usage || null };
+    }
+    const retryable = res.status === 429 || res.status >= 500;
+    if (!retryable || attempt >= RATE_LIMIT_MAX_ATTEMPTS) {
+      throw new Error(`${label}: chat call failed: HTTP ${res.status} ${data && data.error && data.error.message}`);
+    }
+    const retryAfter = Number(res.headers.get("retry-after"));
+    const waitMs = Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter * 1000 : rateLimitBackoffMs(attempt);
+    console.log(`  ${label}: HTTP ${res.status}, waiting ${Math.round(waitMs / 1000)}s before attempt ${attempt + 1}/${RATE_LIMIT_MAX_ATTEMPTS}`);
+    await sleepMs(waitMs);
+  }
+  throw new Error(`${label}: exhausted retries`);
+}
 
 // See "THE ONE HARNESS DEVIATION" above. Fulfilled locally rather than relayed,
 // because the real listing is empty on this resource and the app would report
@@ -199,15 +241,11 @@ async function main() {
       maxTurns: MAX_TURNS,
       wallClockMs: WALLCLOCK_MINUTES * 60 * 1000,
       installRelay: (p) => forwardToRealAzure(p, `${endpoint}/openai/deployments/**`),
-      chat: async (messages, model) => {
-        const call = await chatOnce({
-          config: { provider: "azure", endpoint, apiKey, apiVersion: process.env.AZURE_OPENAI_API_VERSION || DEFAULT_AZURE_API_VERSION },
-          model, systemPrompt: messages[0].content,
-          userPrompt: messages.slice(1).map((m) => m.content).join("\n\n"),
-          label: `${armName}/${runId} harness`,
-        });
-        return { text: call.reply, usage: call.usage };
-      },
+      chat: async (messages, model) => azureChatMessages({
+        endpoint, apiKey,
+        apiVersion: process.env.AZURE_OPENAI_API_VERSION || DEFAULT_AZURE_API_VERSION,
+        model, messages, label: `${armName}/${runId} harness`,
+      }),
       onProgress: ({ phase, turn, turnsUsed, durationMs, log, rawApiLog }) => {
         const lastApp = [...log].reverse().find((e) => String(e.speaker).startsWith("app-assistant"));
         const applies = rawApiLog.filter((m) => m.role === "tool" && typeof m.content === "string"

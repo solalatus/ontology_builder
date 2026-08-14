@@ -52,8 +52,8 @@ import { withPage } from "./lib/page.mjs";
 // against this exact prompt. This is the intentional case the header above
 // describes -- not a hash updated to make a failing test go away.
 export const PRODUCTION_SYSTEM_PROMPT_SHA256 = {
-  en: "e1cde8e57f5f0bf336dbe212c30a2fde65edb91fe0ea31bc74893611e59d04ec",
-  hu: "7e4540b5c52859a1b7df6f74a9fce53a5535218e26df64b77df5a4168a8845a9",
+  en: "0173b3f31cd00b5e776cffa2f2e6d3016686d98df6cbfa9e3a6ab4e1a0b0dee0",
+  hu: "3a147149b7e389667c6498f9bda4cd3e7df6a6314562f89b5d49b8f91565b778",
 };
 
 // The complete ontology tool surface an ordinary interview request exposes.

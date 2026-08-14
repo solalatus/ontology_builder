@@ -124,6 +124,39 @@ test("Phase 1 normalizes compound and instance-specific questions, without an ap
   });
 });
 
+// Caught in review of this very issue's first draft: the Phase 1 wording
+// illustrated "avoid one-off instance wording" with a worked example borrowed
+// straight from IT operations ("which escalation policy applies to a support
+// request of this severity"). GROUND RULES forbids exactly that — the tool is
+// domain-general, and the interviewer is told never to reach for one field's
+// vocabulary for its own examples. It is also the domain of this repository's
+// own eval fixture, so the wording would have leaked fixture vocabulary into
+// the interviewer being scored against that fixture. Pinned here so a future
+// edit cannot quietly reintroduce it.
+test("the competency-question wording uses abstract placeholders, never a borrowed domain's vocabulary", async () => {
+  await withPage(async (page) => {
+    const prompt = await systemPrompt(page);
+    assert.match(prompt, /ask "which \[Role X\] should handle a \[Class A\]\s*of this kind\?"/);
+    // The GROUND RULES entry these examples have to obey is still stated.
+    assert.match(prompt, /general-purpose ontology-building tool for ANY domain/);
+    // Scoped to the INTERVIEW PROCESS section alone. The baked knowledge
+    // block after it is a different thing entirely — a reference document
+    // with its own worked invoice example, which GROUND RULES governs the
+    // *interviewer's* behaviour around rather than forbidding outright.
+    const processSection = prompt.slice(
+      prompt.indexOf("INTERVIEW PROCESS"),
+      prompt.indexOf("SCOPE (this agent is embedded"),
+    );
+    assert.ok(processSection.length > 1000, "failed to isolate the interview-process section");
+    // Spot-check the vocabulary of this repo's own eval fixture specifically:
+    // an interviewer primed with it would score against that fixture unfairly.
+    for (const borrowed of ["escalation policy", "support request", "incident", "invoice", "severity"]) {
+      assert.doesNotMatch(processSection, new RegExp(borrowed, "i"),
+        `the interview process must not name "${borrowed}" — that is one domain's vocabulary`);
+    }
+  });
+});
+
 test("Phase 0 recognizes already-present competency questions instead of regenerating them", async () => {
   await withPage(async (page) => {
     const prompt = await systemPrompt(page);

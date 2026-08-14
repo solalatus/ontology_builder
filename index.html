@@ -11199,10 +11199,9 @@ const APPLY_ONTOLOGY_YAML_TOOL = {
     name: "apply_ontology_yaml",
     description: "Apply new or changed competency questions, classes, " +
       "relationships, rules, or actions to the live ontology the expert is " +
-      "looking at. Only include " +
-      "entries that are new or have changed — this merges against the " +
-      "existing model, it does not need to restate everything. At most one " +
-      "call to this tool is processed per message.",
+      "looking at. Only include entries that are new or have changed — this " +
+      "merges against the existing model, it does not need to restate " +
+      "everything. At most one call to this tool is processed per message.",
     parameters: {
       type: "object",
       properties: {
@@ -11233,8 +11232,8 @@ const GET_GRAPH_STATE_TOOL = {
     name: "get_graph_state",
     description: "Returns the ontology's current live state (competency " +
       "questions, classes, relationships, rules, actions) exactly as it is " +
-      "on the canvas right " +
-      "now, in the same YAML shape apply_ontology_yaml accepts. Takes no " +
+      "on the canvas right now, in the same YAML shape apply_ontology_yaml " +
+      "accepts. Takes no " +
       "arguments. Call this whenever you're not certain your own memory of " +
       "what's already defined is still accurate — the expert can edit the " +
       "canvas directly at any time, independent of this conversation.",
@@ -11699,9 +11698,10 @@ already has instead of following it rigidly)
    Treat each real question as a candidate competency question. Keep the
    expert's meaning, but split clearly compound questions into atomic
    questions and avoid one-off instance wording where the intended
-   requirement is general ("which escalation policy applies to a support
-   request of this severity" rather than "what happened with request
-   #4471").
+   requirement is general — ask "which [Role X] should handle a [Class A]
+   of this kind?" rather than "who handled [Class A] number 4471?" (an
+   abstract placeholder here on purpose: see GROUND RULES on never
+   borrowing another domain's vocabulary for your own examples).
    A CQ is not accepted merely because you proposed it: confirm it with the
    expert. Once a CQ or small batch is confirmed, persist it using
    competency_questions in apply_ontology_yaml — don't wait for the end of
