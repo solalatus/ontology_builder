@@ -105,7 +105,20 @@ const arg = (name, fallback = null) => {
 // rather than the treatment. (That attempt did surface a real app defect,
 // since fixed: see handleAgentToolCall's dropped-reference early return.)
 const MODEL = process.env.EVAL_INTERVIEWER_MODEL || "gpt-5-mini";
-const PERSONA_MODEL = process.env.ONTOLOGY_EVAL_PERSONA_MODEL || "gpt-5-mini";
+// The persona and the completion classifier are HARNESS machinery, not the
+// thing under test, and they deliberately do NOT run on the interviewer's
+// model. The persona answers from a fixture it was handed; it has nothing to
+// reason about. Measured on this resource with an identical trivial call:
+// gpt-4o returned in 2466ms spending 0 reasoning tokens, gpt-5-mini in 4812ms
+// spending 256 — 79% of its output was hidden reasoning. Since roughly half of
+// every conversation turn is these two calls, putting them on a reasoning
+// model doubled the harness's share of wall-clock for no benefit. The
+// repository's own eval default is a cheap non-reasoning persona
+// (gpt-4o-mini) for exactly this reason; gpt-4o is the closest deployment
+// this resource answers on. Validity is unaffected: both arms use the same
+// persona and the same classifier, so it cancels out of the comparison.
+const PERSONA_MODEL = process.env.ONTOLOGY_EVAL_PERSONA_MODEL || "gpt-4o";
+const CLASSIFIER_MODEL = process.env.ONTOLOGY_EVAL_CLASSIFIER_MODEL || "gpt-4o";
 const REACHABLE_DEPLOYMENTS = (process.env.EVAL_AZURE_DEPLOYMENTS || "gpt-4o,gpt-5-mini,o4-mini").split(",");
 // The wallclock must NOT be the thing that ends an interview here, and this
 // default is deliberately far above the repo's usual 45.
@@ -266,7 +279,7 @@ async function main() {
       page,
       apiKey,
       personaModel: PERSONA_MODEL,
-      classifierModel: MODEL,
+      classifierModel: CLASSIFIER_MODEL,
       maxTurns: MAX_TURNS,
       wallClockMs: WALLCLOCK_MINUTES * 60 * 1000,
       installRelay: (p) => forwardToRealAzure(p, `${endpoint}/openai/deployments/**`),
@@ -309,7 +322,7 @@ async function main() {
       condition: `competency-questions/${armName}`,
       arm: armName, runId,
       generatedAt: new Date().toISOString(),
-      model: MODEL, personaModel: PERSONA_MODEL,
+      model: MODEL, personaModel: PERSONA_MODEL, classifierModel: CLASSIFIER_MODEL,
       provider: "azure", endpoint,
       interviewerPromptSha256: promptSha,
       competencyQuestionsEnabled: armName === "treatment",
