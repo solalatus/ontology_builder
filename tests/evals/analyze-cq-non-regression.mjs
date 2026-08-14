@@ -97,9 +97,14 @@ if (truncated.length) {
 // (CQ_NON_REGRESSION.md §5, mirroring SELF_CORRECTION_EVAL.md's own rule).
 console.log("\n=== Is any delta larger than the run-to-run spread? ===");
 for (const scope of ["full", "practical"]) {
-  for (const dim of ["classes", "relationships", "properties"]) {
-    const c = data.control.map((r) => r[scope][dim].f1);
-    const t = data.treatment.map((r) => r[scope][dim].f1);
+  // Controlled-value fidelity is a pass criterion too (CQ_NON_REGRESSION.md
+  // §5), so it gets the same spread test as the F1 dimensions rather than
+  // being reported as a bare delta a reader might mistake for a finding — its
+  // own within-arm spread has been the widest of any measure here.
+  for (const dim of ["classes", "relationships", "properties", "value fidelity"]) {
+    const pick = (r) => (dim === "value fidelity" ? (r[scope].controlledValueFidelity ?? 0) : r[scope][dim].f1);
+    const c = data.control.map(pick);
+    const t = data.treatment.map(pick);
     const delta = Math.abs(mean(t) - mean(c)) * 100;
     const widest = Math.max(spread(c), spread(t)) * 100;
     const verdict = delta > widest ? "larger than spread — inspect" : "within spread — not a finding at n=3";

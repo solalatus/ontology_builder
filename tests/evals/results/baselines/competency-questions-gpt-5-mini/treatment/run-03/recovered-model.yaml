@@ -1,0 +1,767 @@
+competency_questions:
+  - id: cq1
+    text: Which services are currently impacted by the incident?
+  - id: cq2
+    text: "Who owns the affected IT service, and which resolver group and on-call engineer should be assigned to the incident?"
+  - id: cq3
+    text: "What is the current status of the incident, and how does it align with our service-level objectives for time to acknowledge and restore?"
+  - id: cq4
+    text: "What evidence supports the incident's detection and diagnosis, and has it been verified and preserved?"
+  - id: cq5
+    text: "Have any active alerts, events, or recent changes correlated to this incident?"
+  - id: cq6
+    text: "Does this incident meet the criteria for declaring a major incident, and has a commander been assigned?"
+  - id: cq7
+    text: "What are the approved recovery plans, workarounds, backup sets, or runbooks that can mitigate the impact of this incident?"
+  - id: cq8
+    text: "What emergency change is required to resolve or contain the incident, and who has approved it?"
+  - id: cq9
+    text: "What communications have been sent to stakeholders, and has a communication cadence been established or met?"
+  - id: cq10
+    text: "Is a regulatory notification required for the incident, and what is the due time for submission?"
+  - id: cq11
+    text: "What materiality assessment has been conducted for this incident, and what was the rationale for the result?"
+  - id: cq12
+    text: Which business processes or customer channels are affected by the impacted business service?
+  - id: cq13
+    text: Which configuration items and third-party services are on the dependency path of the affected IT service?
+  - id: cq14
+    text: "What is the recovery progress, and has any failover or backup restore been executed successfully?"
+  - id: cq15
+    text: What unresolved corrective actions from prior incidents are linked to the same affected service?
+  - id: cq16
+    text: "Are there any runbooks or workarounds previously used for similar incidents, and were they effective?"
+  - id: cq17
+    text: "Has the incident been escalated to a vendor, and what is the current status of their response?"
+  - id: cq18
+    text: What evidence is linked to this incident and included in any regulatory notification?
+  - id: cq19
+    text: Has a post-incident review been scheduled or completed for this major incident?
+  - id: cq20
+    text: "What is the root-cause category for this incident, and is it linked to a known problem or error?"
+classes:
+  Incident:
+    meaning: An occurrence that disrupts or degrades an IT or business service requiring investigation or remediation.
+    aliases: []
+    properties:
+      severity:
+        type: text
+        allowed:
+          - P0
+          - P1
+          - P2
+          - P3
+          - P4
+      status:
+        type: text
+        allowed:
+          - detected
+          - acknowledged
+          - investigating
+          - mitigated
+          - resolved
+          - closed
+      detectedAt:
+        type: date
+      acknowledgedAt:
+        type: date
+      restoredAt:
+        type: date
+      majorDeclared:
+        type: boolean
+      materiality:
+        type: text
+        allowed:
+          - none
+          - low
+          - medium
+          - high
+          - critical
+      regulatoryNotificationRequired:
+        type: boolean
+      regulatoryNotificationDue:
+        type: date
+      recoveryProgress:
+        type: number
+        unit: percent
+      failoverExecuted:
+        type: boolean
+      backupRestoreSuccessful:
+        type: boolean
+      rootCauseCategory:
+        type: text
+        allowed:
+          - infrastructure
+          - application
+          - configuration
+          - capacity
+          - data
+          - human
+          - security
+          - thirdParty
+          - unknown
+      detectionSource:
+        type: text
+        allowed:
+          - monitoring
+          - userReport
+          - automatedControl
+          - vendorReport
+          - regulator
+          - other
+      slaAcknowledgeTarget:
+        type: number
+        unit: minutes
+      slaRestoreTarget:
+        type: number
+        unit: minutes
+      materialityRationale:
+        type: text
+  ITService:
+    meaning: A defined IT capability or system that supports business processes and has measurable service-level objectives.
+    aliases: []
+    properties:
+      serviceId:
+        type: text
+      name:
+        type: text
+      ownerRole:
+        type: text
+        allowed:
+          - ServiceOwner
+          - BusinessOwner
+          - Shared
+      sloAcknowledgeTarget:
+        type: number
+        unit: minutes
+      sloRestoreTarget:
+        type: number
+        unit: minutes
+      businessImpact:
+        type: text
+        allowed:
+          - none
+          - low
+          - medium
+          - high
+          - critical
+      dependencyGraphVersion:
+        type: text
+  ResolverGroup:
+    meaning: An operational team responsible for diagnosing and resolving incidents for one or more IT services.
+    aliases: []
+    properties: {}
+  Person:
+    meaning: "An individual (employee or contractor) involved in incident handling, ownership, approval, or communication."
+    aliases: []
+    properties:
+      role:
+        type: text
+        allowed:
+          - IncidentCommander
+          - ServiceOwner
+          - Resolver
+          - Approver
+          - VendorContact
+          - DutyManager
+          - Other
+      availability:
+        type: text
+        allowed:
+          - available
+          - busy
+          - on_leave
+          - unknown
+      contactInfo:
+        type: text
+      onCall:
+        type: boolean
+      timezone:
+        type: text
+  BusinessService:
+    meaning: A customer-facing business capability or process supported by one or more IT services.
+    aliases: []
+    properties:
+      channels:
+        type: text
+  ConfigurationItem:
+    meaning: "A hardware, software, or infrastructure component that is part of the IT environment and may be on a service's dependency path."
+    aliases: []
+    properties:
+      ciId:
+        type: text
+      ciType:
+        type: text
+        allowed:
+          - server
+          - database
+          - network
+          - storage
+          - application
+          - middleware
+          - other
+      operationalOwner:
+        type: text
+      deployedVersion:
+        type: text
+      slaCriticality:
+        type: text
+        allowed:
+          - low
+          - medium
+          - high
+          - critical
+  ThirdPartyService:
+    meaning: "An external service provided by a third party that an IT service depends on, often with its own SLAs."
+    aliases: []
+    properties:
+      vendorName:
+        type: text
+      contractSLAResponse:
+        type: number
+        unit: minutes
+      vendorCriticality:
+        type: text
+        allowed:
+          - low
+          - medium
+          - high
+          - critical
+      responseStatus:
+        type: text
+        allowed:
+          - pending
+          - engaged
+          - resolved
+          - noResponse
+  Alert/Event:
+    meaning: A monitoring alert or detected event that may indicate or be correlated with an incident.
+    aliases: []
+    properties: {}
+  ChangeRecord:
+    meaning: "A record of a planned or emergency change to configuration or deployment, including approvals and outcomes."
+    aliases: []
+    properties:
+      changeId:
+        type: text
+      isEmergency:
+        type: boolean
+      approvedBy:
+        type: text
+      approvalTime:
+        type: date
+      changeStatus:
+        type: text
+        allowed:
+          - draft
+          - approved
+          - implementing
+          - completed
+          - failed
+          - rolled_back
+          - closed
+      emergencyJustification:
+        type: text
+      emergencyApprovalMethod:
+        type: text
+        allowed:
+          - portal
+          - phone
+          - verbal
+          - delegated
+      executedAt:
+        type: date
+  Evidence:
+    meaning: "An artifact (log, snapshot, ticket, or file) collected to support detection, diagnosis, forensics, or regulatory reporting for an incident."
+    aliases: []
+    properties:
+      type:
+        type: text
+        allowed:
+          - log
+          - snapshot
+          - ticket
+          - file
+          - packetCapture
+          - screenshot
+          - other
+      evidenceId:
+        type: text
+      collectedAt:
+        type: date
+      verified:
+        type: boolean
+      preserved:
+        type: boolean
+      storageUri:
+        type: text
+      summary:
+        type: text
+  Problem:
+    meaning: "A documented underlying fault, defect, or known error that may be linked to one or more incidents and corrective actions."
+    aliases: []
+    properties:
+      problemId:
+        type: text
+      problemStatus:
+        type: text
+        allowed:
+          - open
+          - investigating
+          - fixed
+          - closed
+      rootCauseSummary:
+        type: text
+      linkedKnownError:
+        type: boolean
+  PostIncidentReview:
+    meaning: "A governance record of the review of an incident, including findings, corrective actions, and lessons learned."
+    aliases: []
+    properties:
+      pirId:
+        type: text
+      scheduledAt:
+        type: date
+      completedAt:
+        type: date
+      findingsSummary:
+        type: text
+      regulatoryIncluded:
+        type: boolean
+      correctiveActionsCount:
+        type: number
+  Communication:
+    meaning: "A message or bulletin sent to stakeholders during an incident (email, portal post, phone alert)."
+    aliases: []
+    properties:
+      cadence:
+        type: text
+        allowed:
+          - ad_hoc
+          - hourly
+          - daily
+          - weekly
+          - permanent
+      communicationId:
+        type: text
+      channel:
+        type: text
+        allowed:
+          - email
+          - portal
+          - sms
+          - phone
+          - chat
+          - broadcast
+      sentAt:
+        type: date
+      audienceSummary:
+        type: text
+      communicationType:
+        type: text
+        allowed:
+          - internal
+          - external
+          - regulator
+          - allStaff
+  Runbook:
+    meaning: A documented recovery or mitigation procedure used to restore service or contain incidents.
+    aliases: []
+    properties:
+      runbookId:
+        type: text
+      stepsCount:
+        type: number
+      lastTestedAt:
+        type: date
+      automatedAction:
+        type: boolean
+      effectiveness:
+        type: text
+        allowed:
+          - effective
+          - partially_effective
+          - ineffective
+          - unknown
+  BackupSet:
+    meaning: A named backup target or failover configuration used to restore service during recovery.
+    aliases: []
+    properties: {}
+  CorrectiveAction:
+    meaning: "A tracked action item arising from incidents or post-incident reviews, monitored until closure."
+    aliases: []
+    properties:
+      status:
+        type: text
+        allowed:
+          - open
+          - in_progress
+          - blocked
+          - resolved
+          - closed
+      actionId:
+        type: text
+      description:
+        type: text
+      createdAt:
+        type: date
+      dueDate:
+        type: date
+      priority:
+        type: text
+        allowed:
+          - none
+          - low
+          - medium
+          - high
+          - critical
+  Vendor:
+    meaning: An external supplier organization that provides third-party services or products used by the IT environment.
+    aliases: []
+    properties: {}
+relationships:
+  - name: incidentImpactsService
+    from: Incident
+    to: ITService
+    meaning: The incident impacts or affects this IT service.
+    aliases:
+      - impacts
+      - affects
+  - name: serviceSupportsBusiness
+    from: ITService
+    to: BusinessService
+    meaning: The IT service supports or underpins the listed business service.
+    aliases:
+      - underpins
+      - enables
+  - name: ciPartOfService
+    from: ConfigurationItem
+    to: ITService
+    meaning: DELETED
+    aliases:
+      - belongs to
+      - used by
+  - name: commanderOverseesIncident
+    from: Person
+    to: Incident
+    meaning: DELETED
+    aliases:
+      - coordinates
+      - commands
+  - name: resolverGroupResolvesIncident
+    from: ResolverGroup
+    to: Incident
+    meaning: The resolver group assigned to work on and resolve the incident.
+    aliases:
+      - assigned to
+      - works on
+  - name: personActsAsServiceOwner
+    from: Person
+    to: ITService
+    meaning: A person acts as the service owner or is accountable for the IT service.
+    aliases:
+      - accountable for
+      - owner of
+  - name: ciDependsOnThirdParty
+    from: ConfigurationItem
+    to: ThirdPartyService
+    meaning: This configuration item depends on or integrates with the third-party service.
+    aliases:
+      - relies on
+      - integrates with
+  - name: personOperatesConfigurationItem
+    from: Person
+    to: ConfigurationItem
+    meaning: A person is the operational owner or primary operator responsible for this configuration item.
+    aliases:
+      - operational owner
+      - maintains
+  - name: vendorProvides
+    from: Vendor
+    to: ThirdPartyService
+    meaning: DELETED
+    aliases:
+      - provides
+      - supplies
+  - name: evidenceLinkedTo
+    from: Evidence
+    to: Incident
+    meaning: DELETED
+    aliases:
+      - linked to
+  - name: evidenceLinkedToPir
+    from: Evidence
+    to: PostIncidentReview
+    meaning: Evidence preserved and attached to the post-incident review.
+    aliases:
+      - linked to
+  - name: evidenceLinkedToChange
+    from: Evidence
+    to: ChangeRecord
+    meaning: Evidence associated with a change record relevant to an incident.
+    aliases:
+      - linked to
+  - name: changeRelatesToIncident
+    from: ChangeRecord
+    to: Incident
+    meaning: DELETED
+    aliases:
+      - related incident
+  - name: correctiveAssignedTo
+    from: CorrectiveAction
+    to: Person
+    meaning: A corrective action is assigned to a person for remediation.
+    aliases:
+      - assigned to
+  - name: correctiveAssignedToGroup
+    from: CorrectiveAction
+    to: ResolverGroup
+    meaning: A corrective action is assigned to a resolver group for remediation.
+    aliases:
+      - assigned to
+  - name: problemLinksIncident
+    from: Problem
+    to: Incident
+    meaning: A problem record links to one or more incidents that it affects or caused.
+    aliases:
+      - linked incident
+  - name: communicationSentBy
+    from: Communication
+    to: Person
+    meaning: The person who sent or authored the communication.
+    aliases:
+      - sent by
+      - author
+  - name: changeRollbackRunbook
+    from: ChangeRecord
+    to: Runbook
+    meaning: The runbook used to rollback or recover when executing this change.
+    aliases:
+      - rollback runbook
+  - name: personMemberOfResolverGroup
+    from: Person
+    to: ResolverGroup
+    meaning: DELETED
+    aliases:
+      - member of
+      - belongs to
+  - name: serviceSupportedByResolverGroup
+    from: ITService
+    to: ResolverGroup
+    meaning: The resolver group that supports or is responsible for this IT service.
+    aliases:
+      - supported by
+      - supported by team
+  - name: alertCorrelatesToIncident
+    from: Alert/Event
+    to: Incident
+    meaning: An alert or event correlated to the incident.
+    aliases:
+      - correlated to
+  - name: alertRelatedToCi
+    from: Alert/Event
+    to: ConfigurationItem
+    meaning: An alert or event that pertains to a specific configuration item.
+    aliases:
+      - related to
+  - name: incidentHasRunbook
+    from: Incident
+    to: Runbook
+    meaning: A runbook or playbook applicable to this incident.
+    aliases:
+      - uses runbook
+      - applicable runbook
+  - name: incidentUsesBackupSet
+    from: Incident
+    to: BackupSet
+    meaning: A backup set or failover configuration used for recovery in this incident.
+    aliases:
+      - used backup
+      - backup set used
+  - name: changeApprovedBy
+    from: ChangeRecord
+    to: Person
+    meaning: The person who approved the change.
+    aliases:
+      - approved by
+  - name: communicationRelatesToIncident
+    from: Communication
+    to: Incident
+    meaning: DELETED
+    aliases:
+      - about incident
+  - name: materialityAssessedBy
+    from: Person
+    to: Incident
+    meaning: The person who performed the materiality assessment for this incident.
+    aliases:
+      - assessed by
+  - name: runbookUsedInIncident
+    from: Runbook
+    to: Incident
+    meaning: DELETED
+    aliases:
+      - deprecated
+  - name: incidentEscalatedToThirdParty
+    from: Incident
+    to: ThirdPartyService
+    meaning: The incident was escalated to an external third-party service or provider.
+    aliases:
+      - escalated to
+  - name: pirReviewsIncident
+    from: PostIncidentReview
+    to: Incident
+    meaning: The post-incident review record for this incident.
+    aliases:
+      - reviews
+  - name: correctiveActionRelatedToService
+    from: CorrectiveAction
+    to: ITService
+    meaning: A corrective action that applies to or was raised for this IT service.
+    aliases:
+      - applies to
+  - name: correctiveActionRelatedToIncident
+    from: CorrectiveAction
+    to: Incident
+    meaning: A corrective action that is linked to a specific incident.
+    aliases:
+      - linked incident
+  - name: incidentAssignedCommander
+    from: Incident
+    to: Person
+    meaning: The person assigned as incident commander for this incident.
+    aliases:
+      - assigned commander
+  - name: incidentHasChange
+    from: Incident
+    to: ChangeRecord
+    meaning: A change record created for or associated with this incident.
+    aliases:
+      - related change
+  - name: incidentHasCommunication
+    from: Incident
+    to: Communication
+    meaning: "A communication message that concerns this incident (from the incident's perspective)."
+    aliases:
+      - communications
+  - name: incidentHasEvidence
+    from: Incident
+    to: Evidence
+    meaning: "Evidence items associated with this incident (from the incident's perspective)."
+    aliases:
+      - evidence items
+  - name: serviceHasConfigurationItem
+    from: ITService
+    to: ConfigurationItem
+    meaning: The IT service includes or is composed of these configuration items.
+    aliases:
+      - has CI
+      - includes
+  - name: resolverGroupHasMember
+    from: ResolverGroup
+    to: Person
+    meaning: A person who is a member of the resolver group.
+    aliases:
+      - member
+  - name: thirdPartyProvidedBy
+    from: ThirdPartyService
+    to: Vendor
+    meaning: The vendor organization that provides or supplies this third-party service.
+    aliases:
+      - provided by
+rules:
+  majorIncidentRecommendationRule:
+    conditions:
+      - incident severity is P0
+      - incident materiality is critical
+      - predicted SLO breach for acknowledge or restore based on sla targets and elapsed time
+      - affected business service businessImpact is critical
+      - regulatory notification is required
+  hasMappedServiceRule:
+    conditions:
+      - the incident has an incidentImpactsService link to an ITService
+  emergencyChangeNeededRule:
+    conditions:
+      - immediate mitigation required and no viable workaround exists
+      - incident is causing significant customer impact or regulatory exposure
+  evidenceCollectedRule:
+    conditions:
+      - Evidence.collectedAt is present
+  communicationPolicyRule:
+    conditions:
+      - incident materiality is not none
+      - or an IncidentCommander has requested a communication
+  incidentHasRunbookRule:
+    conditions:
+      - the incident has an incidentHasRunbook link to a Runbook
+  runbookAutoExecutionPrecondition:
+    conditions:
+      - runbook.automatedAction is true
+      - confirmation received from an IncidentCommander or resolver group lead
+  pirSchedulingRule:
+    conditions:
+      - incident status is resolved or closed
+      - or incident.majorDeclared is true and initial findings are available
+  incidentEscalationPolicyRule:
+    conditions:
+      - incident rootCauseCategory is thirdParty
+      - a configuration item on the dependency path has a ThirdPartyService with vendorCriticality is high
+  problemExistsRule:
+    conditions:
+      - Problem.problemId is present
+actions:
+  recommendMajorIncident:
+    input: Incident
+    preconditions:
+      - majorIncidentRecommendationRule
+    effect: Create a recommendation artifact linked to the incident containing a rationale and a per-condition weight/score for each rule condition; do NOT change Incident.majorDeclared.
+    verification: "Recommendation record exists with rationale, per-condition scores, and a target confirmer (Person with role IncidentCommander or DutyManager)."
+  assignResolverGroup:
+    input: Incident
+    preconditions:
+      - hasMappedServiceRule
+    effect: "Attempt to set resolverGroupResolvesIncident for the incident and identify on-call Person candidates via serviceSupportedByResolverGroup + personMemberOfResolverGroup + Person.onCall. If automatic assignment fails, log an auto-assignment failure record and suggest manual assignees."
+    verification: resolverGroupResolvesIncident relationship exists or an auto-assignment failure log entry exists with suggested assignees.
+  createEmergencyChangeDraft:
+    input: Incident
+    preconditions:
+      - emergencyChangeNeededRule
+    effect: "Create a ChangeRecord with isEmergency=true, link changeRelatesToIncident, populate emergencyJustification, and pre-fill changeRollbackRunbook relationship to a Runbook if available."
+    verification: "A ChangeRecord exists with isEmergency=true, changeRelatesToIncident link, and emergencyJustification populated."
+  attachEvidenceToIncident:
+    input: Evidence
+    preconditions:
+      - evidenceCollectedRule
+    effect: Create an evidenceLinkedTo relationship from Evidence to the Incident and set preserved/verified fields as provided.
+    verification: evidenceLinkedTo relation exists and Evidence.preserved/verified values are set.
+  draftCommunicationForIncident:
+    input: Incident
+    preconditions:
+      - communicationPolicyRule
+    effect: "Create a Communication draft linked to the incident (communicationRelatesToIncident) with suggested channel, audience, cadence and text; set sender as a role or Person."
+    verification: A Communication draft exists and is linked to the incident.
+  recommendRunbookExecution:
+    input: Incident
+    preconditions:
+      - incidentHasRunbookRule
+      - runbookAutoExecutionPrecondition
+    effect: "Record a runbook execution recommendation. If the runbook.automatedAction is true and confirmation has been received from an IncidentCommander or resolver group lead, trigger the automated execution via tooling; otherwise leave as a recommendation for confirmation. The recommendation must record which confirmer (IncidentCommander or resolver group lead) is required."
+    verification: "Recommendation recorded; if automated and confirmed, an automation job is queued or executed; otherwise the recommendation awaits confirmer action."
+  openPostIncidentReview:
+    input: Incident
+    preconditions:
+      - pirSchedulingRule
+    effect: "Create a PostIncidentReview linked to the incident (pirReviewsIncident), schedule the PIR, and seed findingsSummary with available evidence."
+    verification: A PIR record exists with scheduledAt or completedAt and is linked to the incident.
+  escalateToThirdPartyVendor:
+    input: Incident
+    preconditions:
+      - incidentEscalationPolicyRule
+    effect: "Create or ensure incidentEscalatedToThirdParty link to the ThirdPartyService, update ThirdPartyService.responseStatus to engaged or pending, and create a vendor ticket/communication."
+    verification: incidentEscalatedToThirdParty exists and ThirdPartyService.responseStatus is set to pending or engaged; a vendor ticket or communication record exists.
+  associateProblemWithIncident:
+    input: Problem
+    preconditions:
+      - problemExistsRule
+    effect: Create a problemLinksIncident relationship from Problem to Incident and populate Problem.rootCauseSummary with provisional notes if provided.
+    verification: problemLinksIncident relation exists and Problem.rootCauseSummary updated if applicable.
