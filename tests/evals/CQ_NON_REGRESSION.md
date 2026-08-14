@@ -186,5 +186,32 @@ the role-preserving harness calls.
 
 ## 8. Results
 
-Populated after the batch completes. Until then this document is the
-pre-registration, and nothing in it has been adjusted to fit an outcome.
+Both conditions have run. Neither this document's design, measures nor pass
+criteria were altered after the fact.
+
+- **Primary, `gpt-5.4`** — `results/baselines/competency-questions/REPORT.md`.
+  **FAIL.** Full-domain class F1 −7.6 (spread 5.6) and property F1 −8.8
+  (spread 7.2): both decreases clear the n = 3 rule, and the deficit is
+  directionally consistent across all three paired runs. Mechanism: the
+  treatment interview terminates ~29% earlier with ~27% fewer applies, leaving
+  a model ~27% smaller in classes and ~50% smaller in properties.
+  Competency-question work displaces modeling turns rather than adding to them.
+  Value fidelity improves substantially (62.0 → 87.4), so the honest reading is
+  a smaller, tighter, higher-fidelity model — but breadth is what these criteria
+  measure, deliberately.
+- **Secondary, `gpt-5-mini`** —
+  `results/baselines/competency-questions-gpt-5-mini/REPORT.md`. No regression
+  detected; full-domain property F1 *gained* 5.7 clearing its spread.
+
+The two conditions disagree, which §7 anticipated as a finding neither would
+surface alone: on a weak interviewer the control is already turn-limited, so
+focusing the interview costs little; on a strong one there is real headroom to
+forfeit. The change trades breadth for focus, and the stronger the interviewer,
+the more breadth there is to lose.
+
+**Consequence, per §5: issue #94 does not merge as written.** The first
+fallback is indicated — stop competency-question work displacing modeling
+turns, then re-run this batch. Nothing in the data model, file formats, Domain
+Model UI, Review Changes integration or coverage check is implicated; the
+narrower third fallback (ship all of that, revert the interviewer prompt alone)
+remains available.
