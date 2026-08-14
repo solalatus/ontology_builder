@@ -93,8 +93,19 @@ const arg = (name, fallback = null) => {
 // independent. Both arms must run on the same interviewer model for the
 // comparison to mean anything, so it is pinned rather than left to the app's
 // own default-pick heuristic.
-const MODEL = process.env.EVAL_INTERVIEWER_MODEL || "gpt-4o";
-const PERSONA_MODEL = process.env.ONTOLOGY_EVAL_PERSONA_MODEL || "gpt-4o";
+//
+// gpt-5-mini, not gpt-4o: this repository's anchor runs were produced on
+// gpt-5.5 and issue #85's arms on gpt-5.4, so the gpt-5 family is the one the
+// whole methodology was developed and validated against. Of the three
+// deployments this resource actually answers on (gpt-4o, gpt-5-mini,
+// o4-mini), gpt-5-mini is the closest to that family. A first attempt on
+// gpt-4o was discarded: it skipped class declaration entirely and sent
+// relationship-only calls whose endpoints did not exist, leaving an empty
+// ontology after thirteen turns — measuring a weaker model's phase discipline
+// rather than the treatment. (That attempt did surface a real app defect,
+// since fixed: see handleAgentToolCall's dropped-reference early return.)
+const MODEL = process.env.EVAL_INTERVIEWER_MODEL || "gpt-5-mini";
+const PERSONA_MODEL = process.env.ONTOLOGY_EVAL_PERSONA_MODEL || "gpt-5-mini";
 const REACHABLE_DEPLOYMENTS = (process.env.EVAL_AZURE_DEPLOYMENTS || "gpt-4o,gpt-5-mini,o4-mini").split(",");
 const MAX_TURNS = Number(process.env.ONTOLOGY_EVAL_MAX_TURNS) || 120;
 const WALLCLOCK_MINUTES = Number(process.env.ONTOLOGY_EVAL_WALLCLOCK_MINUTES) || 30;

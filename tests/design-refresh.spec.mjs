@@ -42,14 +42,19 @@ async function computedBorderColorOfClass(page, className) {
 
 test("a transient mode-armed button (Add Node) and a persistent state-toggle button (Theme) get different accent colors when both are pressed", async () => {
   await withPage(async (page) => {
+    const restingAddNode = await computedStyle(page, "#btn-add-node", "borderColor");
+    const restingTheme = await computedStyle(page, "#btn-theme-toggle", "borderColor");
     await page.click("#btn-add-node");
     assert.equal(await page.getAttribute("#btn-add-node", "aria-pressed"), "true");
     await page.click("#btn-theme-toggle");
     assert.equal(await page.getAttribute("#btn-theme-toggle", "aria-pressed"), "true");
     // Both borders transition at once; each is sampled only once it has settled,
-    // rather than both after one fixed sleep (issue #91).
-    const armedBorder = await waitForStyleSettled(page, "#btn-add-node", "borderColor");
-    const activeBorder = await waitForStyleSettled(page, "#btn-theme-toggle", "borderColor");
+    // rather than both after one fixed sleep (issue #91). `differentFrom` is
+    // what makes "settled" mean settled: the frames before a transition starts
+    // are identical at the resting value, so without it a loaded machine can
+    // hand back the un-clicked colour for both buttons and fail the compare.
+    const armedBorder = await waitForStyleSettled(page, "#btn-add-node", "borderColor", { differentFrom: restingAddNode });
+    const activeBorder = await waitForStyleSettled(page, "#btn-theme-toggle", "borderColor", { differentFrom: restingTheme });
     assert.notEqual(armedBorder, activeBorder, "an armed tool mode must not look identical to an active persistent setting");
   });
 });

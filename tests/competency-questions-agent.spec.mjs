@@ -299,3 +299,73 @@ test("get_graph_state hands the agent the persisted competency questions, so Pha
     assert.match(toolResult.content, /Which escalation policy applies\?/);
   });
 });
+
+// Caught by a live run of this issue's own non-regression evaluation, not by
+// reading the code: the interviewer sent four consecutive relationship-only
+// apply_ontology_yaml calls whose endpoint classes it had never declared, was
+// told "Nothing to apply — no new or changed ... were found in that yaml"
+// every time, and spent thirteen turns building an ontology that stayed
+// completely empty. The message was simply false — the relationships WERE
+// found, and were dropped for a specific, fixable reason the agent was never
+// told. Issue #83 fixed exactly this truthfulness problem for the path where
+// something else did apply, but its fix never reached this early return.
+test("a call whose every relationship is dropped tells the agent why, instead of claiming nothing was found", async () => {
+  await withPage(async (page) => {
+    await connectAgent(page);
+    mockChatSequence(page, [
+      () => toolCallReply("call_1", [
+        "relationships:",
+        "  - name: owns",
+        "    from: ServiceOwner",
+        "    to: ITService",
+        "",
+      ].join("\n")),
+      () => assistantReply("Understood — I'll declare the classes first."),
+    ]);
+
+    const bodies = [];
+    page.on("request", (req) => { if (req.url() === CHAT_URL) bodies.push(req.postDataJSON()); });
+    await page.fill("#agent-chat-input", "Service owners own IT services.");
+    await page.click("#agent-chat-send");
+    await page.waitForFunction(() => !window.__kg.agent.isSending());
+
+    const toolResult = bodies.at(-1).messages.find((m) => m.role === "tool");
+    assert.ok(toolResult, "the follow-up request carries the tool result");
+    assert.doesNotMatch(toolResult.content, /no new or changed .* were found in that yaml/,
+      "claiming nothing was found is false — the relationship was found and then dropped");
+    assert.match(toolResult.content, /1 relationship\(s\) were NOT stored because a class they connect does not exist/);
+    assert.match(toolResult.content, /ServiceOwner --owns--> ITService/);
+    assert.match(toolResult.content, /Add the missing class first/,
+      "the agent needs the corrective action, not just the diagnosis");
+    assert.deepEqual(await page.evaluate(() => window.__kg.state.edges), [],
+      "and nothing may actually land on the canvas");
+  });
+});
+
+// The genuinely-empty case must keep its original wording: a call that really
+// carries nothing new is not the same event as one whose contents were
+// dropped, and collapsing the two would trade one misleading message for
+// another.
+test("a call that really contains nothing new still says so plainly", async () => {
+  await withPage(async (page) => {
+    await connectAgent(page);
+    mockChatSequence(page, [
+      // A document with every section present and every section empty. Note
+      // that re-sending an entry that already exists is NOT this case — that
+      // counts as `changed` and applies, which is existing behaviour and
+      // deliberately left alone.
+      () => toolCallReply("call_1", "classes: {}\nrelationships: []\nrules: {}\nactions: {}\n"),
+      () => assistantReply("Nothing new to record."),
+    ]);
+
+    const bodies = [];
+    page.on("request", (req) => { if (req.url() === CHAT_URL) bodies.push(req.postDataJSON()); });
+    await page.fill("#agent-chat-input", "Nothing new for now.");
+    await page.click("#agent-chat-send");
+    await page.waitForFunction(() => !window.__kg.agent.isSending());
+
+    const toolResult = bodies.at(-1).messages.find((m) => m.role === "tool");
+    assert.match(toolResult.content, /Nothing to apply/);
+    assert.doesNotMatch(toolResult.content, /were NOT stored/);
+  });
+});

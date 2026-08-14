@@ -12195,22 +12195,34 @@ async function handleAgentToolCall(call, alreadyCommittedThisTurn) {
     return { applied: false, resultText: "Error: no yaml provided." };
   }
   const plan = planYamlImport(parseDomainYamlImport(yamlText));
-  if (plan.addedCount === 0 && plan.changedCount === 0) {
-    appendTranscriptMessage("tool", t("agentToolNothingNote"));
-    return { applied: false, resultText: "Nothing to apply — no new or changed competency questions, classes, relationships, rules, or actions were found in that yaml." };
-  }
-  await commitYamlImport(yamlText, "agent-merge"); // never "replace"; not "merge" either — see commitYamlImport's own comment
-  appendTranscriptMessage("tool", t("agentToolApplied", plan.addedCount, plan.changedCount));
   // The same silent drop, told to the agent rather than to the user. Until
-  // now the reply was "Applied. Added 3, updated 2" even when a relationship
-  // in that very call had been discarded, which is how a model ends up
-  // sincerely reporting that it recorded something it did not -- a pattern
-  // run-02's own eval report documents repeatedly. This is a truthfulness fix
-  // to an existing message, not the findings feed: that is issue #84.
+  // issue #83 the reply was "Applied. Added 3, updated 2" even when a
+  // relationship in that very call had been discarded, which is how a model
+  // ends up sincerely reporting that it recorded something it did not -- a
+  // pattern run-02's own eval report documents repeatedly. This is a
+  // truthfulness fix to an existing message, not the findings feed (#84).
   const dropped = plan.droppedReferences.length
     ? ` ${plan.droppedReferences.length} relationship(s) were NOT stored because a class they connect does not exist: `
       + `${plan.droppedReferences.map((r) => `${r.from} --${r.name}--> ${r.to}`).join("; ")}. Add the missing class first, then re-add the relationship.`
     : "";
+  if (plan.addedCount === 0 && plan.changedCount === 0) {
+    appendTranscriptMessage("tool", t("agentToolNothingNote"));
+    // "Nothing was found in that yaml" is FALSE when everything in the call
+    // was found and then dropped for a missing endpoint class -- and it is
+    // the one case where the agent most needs to be told why, because it
+    // cannot see the model change and has no other signal to correct from.
+    // A live #94 evaluation run caught this: the interviewer sent four
+    // consecutive relationship-only calls whose endpoint classes it had
+    // never declared, was told "nothing was found" each time, and spent
+    // thirteen turns building an ontology that stayed completely empty.
+    // Issue #83's own transparency fix covered the applied path below but
+    // never this early return.
+    return { applied: false, resultText: dropped
+      ? `Nothing was applied.${dropped}`
+      : "Nothing to apply — no new or changed competency questions, classes, relationships, rules, or actions were found in that yaml." };
+  }
+  await commitYamlImport(yamlText, "agent-merge"); // never "replace"; not "merge" either — see commitYamlImport's own comment
+  appendTranscriptMessage("tool", t("agentToolApplied", plan.addedCount, plan.changedCount));
   return { applied: true, resultText: `Applied. Added ${plan.addedCount}, updated ${plan.changedCount} existing item(s).${dropped}` };
 }
 
