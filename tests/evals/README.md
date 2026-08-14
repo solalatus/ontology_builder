@@ -497,3 +497,28 @@ interviewer's system prompt and tool surface are pinned by
 `tests/agent-production-invariants.spec.mjs` in the default suite, so a
 condition cannot quietly change the thing it is supposed to be measuring
 against.
+
+## Non-regression runners (a different shape from the conditions above)
+
+Some changes *do* alter the shipped interviewer. When that happens the golden
+hash in `tests/agent-production-invariants.spec.mjs` fails by design, and the
+change owes a fresh evaluation before merge — the anchor runs were produced
+under a different prompt, so nothing may be compared against them until one
+exists. Two runners exist for that, both two-arm and within-model:
+
+- **`self-correction-eval.mjs`** (issue #85) — the self-correcting interviewer.
+  Control arm: the frozen pre-#84 prompt with self-correction disabled.
+  Results: `results/baselines/self-correcting-interviewer/`.
+- **`cq-non-regression.mjs`** (issue #94) — the competency-question
+  interviewer. Control arm: the frozen pre-#94 prompt
+  (`fixtures/interviewer-prompt-pre-94.txt`, verified against the golden hash
+  that shipped before the change, so a drifted fixture aborts the run rather
+  than producing a void comparison). Scored offline, arm against arm, by
+  `score-cq-non-regression.mjs`. Results and reading:
+  `results/CQ_NON_REGRESSION.md`.
+
+Both run the *same* harness, fixture, persona and scorer for both arms, so the
+arms differ by the interviewer prompt alone; both re-run the control rather
+than reuse `results/runs/`, because the anchors' model is not reachable from
+the environment these were executed in. Neither reads or writes anything under
+`results/runs/`.
