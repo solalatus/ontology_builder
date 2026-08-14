@@ -1139,3 +1139,154 @@ not an attempted heuristic.
       `origin/main` via `git diff`.
 - [x] Full regression (`node --test tests/*.spec.mjs`), then PR against
       issue #74.
+
+---
+
+## 11. Post-plan extension — Competency Questions (issue #94)
+
+The methodology change this repository's interviewer already half-implemented,
+finished. Phase 1 has always elicited the real questions the future agent must
+answer and called that list the acceptance test for everything after it — but
+those questions lived only in the conversation. They were not in `state`, not
+in any export, not importable, not reviewable, and not undoable. A compaction,
+a restart, or simply a long interview could take the acceptance test away,
+which meant Phase 9's competency check graded the model against whatever the
+model still remembered having asked.
+
+### 11.1 What a competency question is here
+
+A **Competency Question (CQ)** is a real question the future domain agent must
+be able to answer, or have enough domain orientation to work out how to
+answer. It is a requirement *on* the Agent Ontology, not an element of it, and
+not a query against stored instance data. The ontology does not need to
+contain the runtime answer to "which escalation policy applies to this support
+request?" — it needs to make clear which concepts, relationships, decision
+properties, rules, actions and verification steps are involved in obtaining
+one. Data model, file formats and import semantics are specified in
+`agent_ontology_spec.md` §4.3/§5/§11; this section covers only the
+interviewer.
+
+### 11.2 Interviewer changes (no new phase)
+
+Deliberately not another interview phase — the existing Phase 1 is renamed and
+sharpened instead:
+
+- **Phase 1 becomes "Competency questions and actions."** The prompt now names
+  the artefact, defines it in the future-agent sense above, and replaces the
+  old "Do not model anything yet — just collect these verbatim" with an
+  instruction to defer classes/relationships/properties/rules/actions until
+  the competency questions and required actions are established, then persist
+  each confirmed question (or small confirmed batch) through
+  `apply_ontology_yaml`'s new `competency_questions` section. Confirmation is
+  explicit — a question the interviewer proposed is a candidate, not an
+  accepted requirement — but batching is allowed, so this does not become one
+  ceremony turn per question.
+- **Atomicity and abstraction**, borrowed from IDEA2: clearly compound
+  questions are split, and one-off instance wording is generalized where the
+  intended requirement is conceptual. Deliberately *not* borrowed: IDEA2's
+  iterative voting, provenance and automatic reformulation architecture.
+- **Phase 0 recognizes imported questions.** `get_graph_state` now exposes
+  any competency questions already attached to the model, so an interview that
+  opens on an externally-seeded set neither throws them away nor immediately
+  regenerates a set of its own — it says how many it found and asks whether to
+  accept them as the starting requirements or review them together first. Both
+  intended workflows (external process → import → interview validates, and
+  external validated set → import → use directly) work with no separate
+  application mode.
+- **Phases 2–8** now justify classes, relationships and properties against the
+  persisted competency questions rather than against "Phase 1 material."
+- **Phase 9(a) reads the list back.** The competency check calls
+  `get_graph_state`, reads the persisted `competency_questions`, and replays
+  each against the current model, explicitly *not* from the agent's own memory
+  of the conversation — which is what makes the pass reproducible after a
+  compaction, a restart, a manual canvas edit, or a continued import. An empty
+  persisted list is reported plainly rather than papered over by inventing a
+  list to grade against.
+- **`summarizeAgentHistory()`** is instructed to preserve the confirmed
+  competency questions verbatim through a compaction, for the same reason.
+
+### 11.3 Coverage checking, and what it is not
+
+A separate, optional, user-triggered model pass in the existing Check dialog
+(`runCqCoverageCheck()`), shown only when the model actually has competency
+questions. It has its own prompt, its own result state, and its own staleness
+lifecycle; it is never merged into the deterministic consistency checker or
+into the existing optional contradiction pass, because it answers a different
+question. A model can be perfectly internally consistent and cover its
+questions badly, and vice versa, so there is no combined score.
+
+The existing contradiction pass keeps receiving the exact ontology-only
+projection it received before this issue
+(`buildDomainYamlExport({ includeCompetencyQuestions: false })`) — its task was
+evaluated in issue #89 against that input, and silently adding a new section
+for it to reason about would have changed an already-evaluated subsystem
+rather than leaving it alone.
+
+Validation of a coverage result is mechanical only: a verdict must name a
+competency question that currently exists and carry one of `covered` /
+`partial` / `missing`; anything else is discarded, text is length-bounded,
+malformed output produces a visible failed state rather than a silently empty
+one, results are read-only, and no ontology edit ever follows from them. The
+division of labour is deliberate — **the model proposes the semantic
+judgement, the application validates the shape, the human decides what to
+change.**
+
+### 11.4 Non-goals
+
+No RDF/OWL conversion, no SHACL shapes, no SPARQL/Comunica, no Ajv, no
+CQ-to-element binding language, no executable CQ DSL, no embeddings, no
+semantic deduplication or clustering, no provenance/version history,
+priorities, tags or multi-expert voting, and no automatic ontology
+modification driven by a failed coverage verdict. See issue #94 §18/§24 for
+the reasoning; each remains independently possible later.
+
+### 11.5 Literature basis
+
+- Grüninger, M. & Fox, M. S. (1995). *The Role of Competency Questions in
+  Enterprise Engineering.* CQs as benchmarks that characterize and drive
+  ontology development. https://doi.org/10.1007/978-0-387-34847-6_3 —
+  https://link.springer.com/book/10.1007/978-0-387-34847-6
+- Zhang, B. et al. (2024). *OntoChat: a Framework for Conversational Ontology
+  Engineering using Language Models.* Conversational CQ elicitation and
+  CQ-based ontology testing. https://arxiv.org/abs/2403.05921
+- Watkiss-Leek, E. et al. (2026). *IDEA2: Expert-in-the-loop competency
+  question elicitation for collaborative ontology engineering.* Separating CQ
+  generation from expert validation; atomicity/abstraction normalization; the
+  principle that generated CQs do not enter requirements without domain
+  validation. https://arxiv.org/abs/2604.01344
+- Wiśniewski, D., Potoniec, J., Ławrynowicz, A. & Keet, C. M. *Competency
+  Questions and SPARQL-OWL Queries Dataset and Analysis.* The many-to-many
+  relationship between CQ patterns and query signatures — why natural-language
+  CQ coverage is not prematurely equated with a single formal SPARQL test.
+  https://arxiv.org/abs/1811.09529
+- Keet, C. M. & Khan, Z. C. (2024). *Discerning and Characterising Types of
+  Competency Questions for Ontologies.* Useful if this project later needs to
+  distinguish CQ purposes; no CQ-type taxonomy is used here.
+  https://arxiv.org/abs/2412.13688
+
+### 11.6 Implementation phases
+
+- [x] `state.competencyQuestions`/`nextCqNum`, `genCqId()`,
+      create/delete helpers, `snapshotState()`/`restoreSnapshot()`.
+- [x] Tier 1 persistence + load normalization + counter collision guard.
+- [x] Canonical JSON: export, parse, plan, commit (full restore / merge /
+      replace), `reserveIdCountersFor()`, empty-content detection.
+- [x] Domain Model YAML: `buildDomainModel()`, export, parse, plan, commit,
+      `hasAnyGraphContent()`, import counts, empty-content detection.
+- [x] Domain Model dialog section (list, count, filter, add/remove,
+      draft-then-Save as one undo step), en/hu strings.
+- [x] Review Changes: `computeSemanticDiff()` section keyed by id,
+      `isSemanticDiffEmpty()`, rendering, localized nouns.
+- [x] Interviewer prompt (Phases 0/1/2/3/4/8/9), tool descriptions and
+      documented YAML shape, `summarizeAgentHistory()`.
+- [x] CQ coverage pass: prompt, run function, mechanical result validation,
+      rendering, staleness clearing, `window.__kg.consistency.cqCoverage`.
+- [x] Tests: `tests/competency-questions.spec.mjs` (20),
+      `tests/cq-coverage.spec.mjs` (10, mocked API),
+      `tests/competency-questions-agent.spec.mjs` (9).
+- [x] Docs: this section, `agent_ontology_spec.md` §4.3/§4.4/§5/§7/§11,
+      `spec.md` §5.1/§5.2, `README.md`.
+- [x] Interviewer non-regression evaluation before merge (issue #94's own
+      acceptance comment) — see `tests/evals/results/CQ_NON_REGRESSION.md`,
+      and the updated golden prompt hashes in
+      `tests/agent-production-invariants.spec.mjs`.

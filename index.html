@@ -807,6 +807,7 @@
      long scrolling list, a 1px border alone reads as one continuous strip
      once you're mid-scroll; the tint gives each card a visible boundary
      even without the border in view. */
+  .domain-model-cq-card,
   .domain-model-rule-card,
   .domain-model-action-card {
     display: flex;
@@ -821,6 +822,14 @@
 
   .dm-rule-conditions {
     margin-left: 8px;
+  }
+
+  /* A competency question is one free-text sentence next to its remove
+     button, so the textarea takes the row's remaining width (its own
+     .details-textarea width:100% would otherwise push the button out). */
+  .dm-cq-text {
+    flex: 1;
+    min-width: 0;
   }
 
   /* Preconditions checkbox list (replaces a native <select multiple>,
@@ -1372,6 +1381,37 @@
     font-weight: 600;
     margin: 10px 0 4px;
   }
+
+  /* Competency-question coverage (issue #94). Visually a sibling of the
+     findings list, deliberately fenced off by its own heading and rule so a
+     reader can see at a glance that it is a separate, model-based judgement
+     rather than one more deterministic finding. */
+  #cq-coverage-section {
+    border-top: 1px solid var(--toolbar-border);
+    margin-top: 12px;
+    padding-top: 8px;
+  }
+  .cq-coverage-item {
+    padding: 6px 10px;
+    margin-bottom: 6px;
+    border-left: 3px solid var(--toolbar-border);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    background: var(--btn-bg);
+  }
+  .cq-coverage-item--covered { border-left-color: var(--state-active); }
+  .cq-coverage-item--partial { border-left-color: var(--agent-accent); }
+  .cq-coverage-item--missing { border-left-color: var(--danger-fg); }
+  .cq-coverage-item-head {
+    font-size: 0.78rem;
+    opacity: 0.65;
+    letter-spacing: 0.02em;
+  }
+  .cq-coverage-item-evidence,
+  .cq-coverage-item-gap {
+    font-size: 0.85rem;
+    opacity: 0.8;
+    margin-top: 2px;
+  }
   #consistency-list { max-height: 46vh; overflow-y: auto; }
   /* A quiet badge: the count only becomes loud when something is actually
      wrong. A model with nothing but notes should not nag. */
@@ -1657,6 +1697,19 @@
       <span id="consistency-llm-text"></span>
     </label>
     <p id="consistency-llm-status" class="agent-field-hint"></p>
+    <!-- Competency-question coverage (issue #94 §14). A separate, visibly
+         distinct block below the consistency findings, shown only when the
+         model actually has competency questions: it answers a different
+         question ("does this orient the future agent well enough?") and is
+         model-based, so it must never read as part of the deterministic
+         verdict above. -->
+    <div id="cq-coverage-section">
+      <h3 id="cq-coverage-heading" class="details-field-label"></h3>
+      <p id="cq-coverage-summary" class="modal-message"></p>
+      <div id="cq-coverage-list"></div>
+      <p id="cq-coverage-status" class="agent-field-hint"></p>
+      <button id="cq-coverage-run" type="button">Check CQ coverage with model</button>
+    </div>
     <div class="modal-actions">
       <button id="consistency-llm-run" type="button">Ellenőrzés modellel</button>
       <button id="consistency-close" type="button">Bezárás</button>
@@ -1795,6 +1848,16 @@
   <div id="domain-model-dialog" class="modal-dialog details-dialog" role="dialog" aria-modal="true">
     <div class="details-dialog-body">
       <h2 id="domain-model-title" class="modal-title">Domain Model</h2>
+
+      <!-- Competency questions (issue #94 §8) come first: they are the
+           requirements the rules/actions below exist to satisfy. Same
+           filter + list + add-button shape as the two sections after it, so
+           this is one more section in an existing dialog, not a new
+           sub-application. -->
+      <label id="domain-model-cq-label" class="details-field-label">Competency questions</label>
+      <input id="domain-model-cq-filter" type="search" class="details-filter-input" autocomplete="off">
+      <div id="domain-model-cq-list" class="details-list"></div>
+      <button id="domain-model-add-cq" type="button" class="details-add-btn">+ Add competency question</button>
 
       <label id="domain-model-rules-label" class="details-field-label">Rules</label>
       <input id="domain-model-rules-filter" type="search" class="details-filter-input" autocomplete="off">
@@ -2064,6 +2127,11 @@ const STRINGS = {
     save: "Save",
     // Agent Ontology (agent_ontology_spec.md §7) — Rules/Actions manager.
     domainModel: "Domain Model",
+    // Competency Questions (issue #94).
+    competencyQuestionsLabel: "Competency questions",
+    competencyQuestionsFilterPlaceholder: "Filter competency questions…",
+    addCompetencyQuestion: "+ Add competency question",
+    competencyQuestionPlaceholder: "a question the future agent must be able to answer",
     rulesLabel: "Rules",
     actionsLabel: "Actions",
     rulesFilterPlaceholder: "Filter rules by name…",
@@ -2102,6 +2170,21 @@ const STRINGS = {
     consistencyLlmRunning: "Asking the model…",
     consistencyLlmDone: (n) => `The model added ${n} observation(s). They are marked as coming from the model, not from the deterministic checks.`,
     consistencyLlmFailed: "The model check could not be completed. The deterministic findings above are unaffected.",
+    // Competency-question coverage (issue #94 §14). Worded throughout as a
+    // model's judgement, never as proof — it sits next to a deterministic
+    // checker and must not borrow its authority.
+    cqCoverageHeading: "Competency-question coverage",
+    cqCoverageIntro: "Ask the connected model whether the ontology gives a future agent enough orientation to address each competency question. This is a model judgement, not a deterministic check.",
+    cqCoverageRun: "Check CQ coverage with model",
+    cqCoverageRunning: "Asking the model…",
+    cqCoverageDone: "Model judgement, not a deterministic result — read it as a lead, not a verdict.",
+    cqCoverageFailed: "The coverage check could not be completed. The consistency findings above are unaffected.",
+    cqCoverageSummary: (covered, partial, missing) => `${covered} covered, ${partial} partial, ${missing} not covered.`,
+    cqCoverageStatus_covered: "COVERED",
+    cqCoverageStatus_partial: "PARTIAL",
+    cqCoverageStatus_missing: "NOT COVERED",
+    cqCoverageEvidenceLabel: "Evidence:",
+    cqCoverageGapLabel: "Gap:",
     consistencyClose: "Close",
     reviewChangesButton: "Review changes",
     reviewChangesTooltip: "Step through past edits — yours and the agent's — and undo any of them.",
@@ -2127,13 +2210,13 @@ const STRINGS = {
     // Level 2 category headings ("Classes added") -- one small lookup
     // table per language instead of ~17 near-duplicate flat STRINGS keys.
     reviewCountLine: (n, section, kind) => {
-      const nouns = { classes: ["class", "classes"], relationships: ["relationship", "relationships"], properties: ["property", "properties"], rules: ["rule", "rules"], actions: ["action", "actions"] };
+      const nouns = { competencyQuestions: ["competency question", "competency questions"], classes: ["class", "classes"], relationships: ["relationship", "relationships"], properties: ["property", "properties"], rules: ["rule", "rules"], actions: ["action", "actions"] };
       const kinds = { added: "added", removed: "removed", changed: "changed", directionChanged: "direction changed" };
       const [sing, plur] = nouns[section];
       return `${n} ${n === 1 ? sing : plur} ${kinds[kind]}`;
     },
     reviewSectionHeading: (section, kind) => {
-      const nouns = { classes: "Classes", relationships: "Relationships", properties: "Properties", rules: "Rules", actions: "Actions" };
+      const nouns = { competencyQuestions: "Competency questions", classes: "Classes", relationships: "Relationships", properties: "Properties", rules: "Rules", actions: "Actions" };
       const kinds = { added: "added", removed: "removed", changed: "changed", directionChanged: "direction changed" };
       return `${nouns[section]} ${kinds[kind]}`;
     },
@@ -2338,6 +2421,11 @@ const STRINGS = {
     save: "Mentés",
     // Agent Ontology (agent_ontology_spec.md §7) — Rules/Actions manager.
     domainModel: "Doménmodell",
+    // Kompetenciakérdések (issue #94).
+    competencyQuestionsLabel: "Kompetenciakérdések",
+    competencyQuestionsFilterPlaceholder: "Kompetenciakérdések szűrése…",
+    addCompetencyQuestion: "+ Kompetenciakérdés hozzáadása",
+    competencyQuestionPlaceholder: "kérdés, amit a jövőbeli ágensnek meg kell tudnia válaszolni",
     rulesLabel: "Szabályok",
     actionsLabel: "Műveletek",
     rulesFilterPlaceholder: "Szabályok szűrése név szerint…",
@@ -2376,6 +2464,19 @@ const STRINGS = {
     consistencyLlmRunning: "Modell kérdezése…",
     consistencyLlmDone: (n) => `A modell ${n} észrevételt adott hozzá. Ezek jelölve vannak, hogy a modelltől származnak, nem a determinisztikus ellenőrzésektől.`,
     consistencyLlmFailed: "A modelles ellenőrzés nem fejeződött be. A fenti determinisztikus találatokat ez nem érinti.",
+    // Kompetenciakérdés-lefedettség (issue #94 §14).
+    cqCoverageHeading: "Kompetenciakérdések lefedettsége",
+    cqCoverageIntro: "Kérdezd meg a csatlakoztatott modellt, hogy az ontológia elég tájékozódási pontot ad-e egy jövőbeli ágensnek az egyes kompetenciakérdések megválaszolásához. Ez modelles megítélés, nem determinisztikus ellenőrzés.",
+    cqCoverageRun: "Lefedettség ellenőrzése modellel",
+    cqCoverageRunning: "Kérdezzük a modellt…",
+    cqCoverageDone: "Modelles megítélés, nem determinisztikus eredmény — nyomravezetőként olvasd, ne ítéletként.",
+    cqCoverageFailed: "A lefedettség-ellenőrzés nem fejeződött be. A fenti találatokat ez nem érinti.",
+    cqCoverageSummary: (covered, partial, missing) => `${covered} lefedve, ${partial} részleges, ${missing} nincs lefedve.`,
+    cqCoverageStatus_covered: "LEFEDVE",
+    cqCoverageStatus_partial: "RÉSZLEGES",
+    cqCoverageStatus_missing: "NINCS LEFEDVE",
+    cqCoverageEvidenceLabel: "Alátámasztás:",
+    cqCoverageGapLabel: "Hiányosság:",
     consistencyClose: "Bezárás",
     reviewChangesButton: "Változtatások áttekintése",
     reviewChangesTooltip: "Korábbi módosítások — a sajátjaid és az ügynöké — áttekintése és visszavonása.",
@@ -2400,12 +2501,12 @@ const STRINGS = {
     // Hungarian keeps the noun singular after a numeral (standard
     // grammar), so this needs no separate plural form the way English does.
     reviewCountLine: (n, section, kind) => {
-      const nouns = { classes: "osztály", relationships: "kapcsolat", properties: "tulajdonság", rules: "szabály", actions: "művelet" };
+      const nouns = { competencyQuestions: "kompetenciakérdés", classes: "osztály", relationships: "kapcsolat", properties: "tulajdonság", rules: "szabály", actions: "művelet" };
       const kinds = { added: "hozzáadva", removed: "törölve", changed: "módosítva", directionChanged: "iránya megváltozott" };
       return `${n} ${nouns[section]} ${kinds[kind]}`;
     },
     reviewSectionHeading: (section, kind) => {
-      const nouns = { classes: "Osztályok", relationships: "Kapcsolatok", properties: "Tulajdonságok", rules: "Szabályok", actions: "Műveletek" };
+      const nouns = { competencyQuestions: "Kompetenciakérdések", classes: "Osztályok", relationships: "Kapcsolatok", properties: "Tulajdonságok", rules: "Szabályok", actions: "Műveletek" };
       const kinds = { added: "hozzáadva", removed: "törölve", changed: "módosítva", directionChanged: "iránya megváltozott" };
       return `${nouns[section]} ${kinds[kind]}`;
     },
@@ -2620,9 +2721,11 @@ function applyLanguage() {
   byId("details-save").textContent = t("save");
   updateDetailsTitle(); // no-op if the dialog isn't open — see its own definition
   byId("domain-model-title").textContent = t("domainModel");
-  updateDomainModelCounts(); // sets both section labels, including their "(N)" count
+  updateDomainModelCounts(); // sets every section label, including its "(N)" count
+  byId("domain-model-cq-filter").placeholder = t("competencyQuestionsFilterPlaceholder");
   byId("domain-model-rules-filter").placeholder = t("rulesFilterPlaceholder");
   byId("domain-model-actions-filter").placeholder = t("actionsFilterPlaceholder");
+  byId("domain-model-add-cq").textContent = t("addCompetencyQuestion");
   byId("domain-model-add-rule").textContent = t("addRule");
   byId("domain-model-add-action").textContent = t("addAction");
   byId("domain-model-cancel").textContent = t("cancel");
@@ -2833,6 +2936,17 @@ const state = {
   nextActionNum: 1,
   rules: [],
   actions: [],
+  // Competency Questions (issue #94): the real questions the future agent
+  // must be able to answer, or have enough orientation to work out how to
+  // answer. They are *requirements on* the ontology, not elements of it —
+  // which is why they live here next to rules/actions rather than becoming
+  // canvas nodes. Minimal on purpose: {id, text} and nothing else (no
+  // status, source, priority, tags or provenance — see the issue's own
+  // "only id and text exist" constraint). The stable id is the one piece of
+  // metadata kept from the start, so an edit stays the same requirement
+  // across import/merge, Review Changes and coverage results.
+  nextCqNum: 1,
+  competencyQuestions: [],
 };
 
 const DEFAULT_NODE_W = 160;
@@ -2842,6 +2956,7 @@ function genNodeId() { return `n${state.nextNodeNum++}`; }
 function genEdgeId() { return `e${state.nextEdgeNum++}`; }
 function genRuleId() { return `r${state.nextRuleNum++}`; }
 function genActionId() { return `a${state.nextActionNum++}`; }
+function genCqId() { return `cq${state.nextCqNum++}`; }
 
 // Every node is a Class (agent_ontology_spec.md §2 — groups were removed
 // entirely, see the dated Log entry, so this is no longer a "non-group
@@ -2923,6 +3038,26 @@ function deleteAction(id) {
   markDirty();
 }
 
+// Competency Questions (issue #94) — same bare constructor/destructor shape
+// as createRule()/createAction() above, undo history left to the caller.
+// Nothing references a CQ by id from inside the model (they are requirements
+// *on* it, deliberately unbound to any element — no CQ-to-element bindings
+// in this issue), so deletion needs no reference cleanup the way deleteRule()
+// does.
+function createCompetencyQuestion(text) {
+  const cq = { id: genCqId(), text };
+  state.competencyQuestions.push(cq);
+  markDirty();
+  return cq;
+}
+
+function deleteCompetencyQuestion(id) {
+  const idx = state.competencyQuestions.findIndex((cq) => cq.id === id);
+  if (idx === -1) return;
+  state.competencyQuestions.splice(idx, 1);
+  markDirty();
+}
+
 function deleteNode(id) {
   const idx = state.nodes.findIndex((n) => n.id === id);
   if (idx === -1) return;
@@ -2984,6 +3119,7 @@ function snapshotState() {
     edges: state.edges.map((e) => ({ ...e, aliases: [...(e.aliases || [])] })),
     rules: state.rules.map((r) => ({ ...r, conditions: [...r.conditions] })),
     actions: state.actions.map((a) => ({ ...a, preconditions: [...a.preconditions] })),
+    competencyQuestions: state.competencyQuestions.map((cq) => ({ ...cq })),
     // Only the canonical-JSON "Replace (full restore)" path (spec.md §5.5)
     // rewrites these two, but every snapshot carries them so undo/redo of
     // *that* action is one step like every other. Deliberately excludes the
@@ -3005,6 +3141,12 @@ function restoreSnapshot(snap) {
   state.edges = snap.edges.map((e) => ({ ...e, aliases: [...(e.aliases || [])] }));
   state.rules = snap.rules.map((r) => ({ ...r, conditions: [...r.conditions] }));
   state.actions = snap.actions.map((a) => ({ ...a, preconditions: [...a.preconditions] }));
+  // Guarded like meta/graphName below rather than assigned outright: a
+  // snapshot pushed before competency questions existed (one already sitting
+  // in the history stack when this shipped) has no such field at all, and
+  // `undefined.map` would throw mid-undo.
+  state.competencyQuestions = Array.isArray(snap.competencyQuestions)
+    ? snap.competencyQuestions.map((cq) => ({ ...cq })) : [];
   // Guarded rather than assigned outright: a snapshot taken before these
   // fields existed (one already sitting in the history stack when this
   // shipped) has neither, and clobbering the live name with `undefined`
@@ -3761,6 +3903,10 @@ async function writeGraphToStorage() {
     nextActionNum: state.nextActionNum,
     rules: state.rules,
     actions: state.actions,
+    // Competency Questions (issue #94) — additive in exactly the same way,
+    // so a payload written by this build still loads in an older one.
+    nextCqNum: state.nextCqNum,
+    competencyQuestions: state.competencyQuestions,
   });
 }
 
@@ -3848,6 +3994,18 @@ function normalizeLoadedAction(a) {
   };
 }
 
+// Same reasoning as normalizeLoadedRule/normalizeLoadedAction above, applied
+// to the one field a competency question actually has. An id is minted rather
+// than preserved-as-undefined so every loaded CQ is addressable (Review
+// Changes, coverage results and import matching all key on it).
+function normalizeLoadedCompetencyQuestion(cq) {
+  const source = (cq && typeof cq === "object") ? cq : {};
+  return {
+    id: typeof source.id === "string" && source.id ? source.id : genCqId(),
+    text: typeof source.text === "string" ? source.text : "",
+  };
+}
+
 async function loadGraphFromStorage() {
   const data = await readGraphPayload();
   if (!data || !Array.isArray(data.nodes) || !Array.isArray(data.edges)) return false;
@@ -3857,8 +4015,19 @@ async function loadGraphFromStorage() {
   state.nextEdgeNum = typeof data.nextEdgeNum === "number" ? data.nextEdgeNum : state.nextEdgeNum;
   state.nextRuleNum = typeof data.nextRuleNum === "number" ? data.nextRuleNum : state.nextRuleNum;
   state.nextActionNum = typeof data.nextActionNum === "number" ? data.nextActionNum : state.nextActionNum;
+  state.nextCqNum = typeof data.nextCqNum === "number" ? data.nextCqNum : state.nextCqNum;
   state.rules = Array.isArray(data.rules) ? data.rules.map(normalizeLoadedRule) : [];
   state.actions = Array.isArray(data.actions) ? data.actions.map(normalizeLoadedAction) : [];
+  // A payload predating competency questions simply has none — `[]`, no
+  // migration dialog and no error (issue #94 §3). Empty questions are dropped
+  // rather than kept as blank rows, matching import normalization.
+  state.competencyQuestions = Array.isArray(data.competencyQuestions)
+    ? data.competencyQuestions.map(normalizeLoadedCompetencyQuestion).filter((cq) => cq.text.trim())
+    : [];
+  // A hand-edited payload can carry `cq7` with `nextCqNum: 1` (or no counter
+  // at all); minting `cq1`..`cq7` again from there would hand out a duplicate
+  // id. Same collision guard reserveIdCountersFor() applies on JSON restore.
+  state.nextCqNum = Math.max(state.nextCqNum, highestIdNumber(state.competencyQuestions, "cq") + 1);
   if (typeof data.graphName === "string" && data.graphName) state.graphName = data.graphName;
   // Migration fallback for a payload saved before graphNameIsDefault
   // existed: fall back to the old string-equality heuristic rather than
@@ -4914,6 +5083,10 @@ detailsOverlay.addEventListener("click", (e) => {
 // whether or not anything on them was actually edited.
 // ---------------------------------------------------------------------------
 const domainModelOverlay = document.getElementById("domain-model-overlay");
+const domainModelCqList = document.getElementById("domain-model-cq-list");
+const domainModelCqLabel = document.getElementById("domain-model-cq-label");
+const domainModelCqFilter = document.getElementById("domain-model-cq-filter");
+const domainModelAddCqBtn = document.getElementById("domain-model-add-cq");
 const domainModelRulesList = document.getElementById("domain-model-rules-list");
 const domainModelActionsList = document.getElementById("domain-model-actions-list");
 const domainModelRulesLabel = document.getElementById("domain-model-rules-label");
@@ -4936,6 +5109,7 @@ let domainModelOpen = false;
 // field that shows/hides cards without touching the underlying draft data
 // (a hidden card is still saved on Save; the filter is purely a view).
 function updateDomainModelCounts() {
+  domainModelCqLabel.textContent = `${t("competencyQuestionsLabel")} (${domainModelCqList.children.length})`;
   domainModelRulesLabel.textContent = `${t("rulesLabel")} (${domainModelRulesList.children.length})`;
   domainModelActionsLabel.textContent = `${t("actionsLabel")} (${domainModelActionsList.children.length})`;
 }
@@ -4948,6 +5122,8 @@ function filterDomainModelCards(listEl, nameSelector, query) {
   }
 }
 
+domainModelCqFilter.addEventListener("input", () =>
+  filterDomainModelCards(domainModelCqList, ".dm-cq-text", domainModelCqFilter.value));
 domainModelRulesFilter.addEventListener("input", () =>
   filterDomainModelCards(domainModelRulesList, ".dm-rule-name", domainModelRulesFilter.value));
 domainModelActionsFilter.addEventListener("input", () =>
@@ -5059,6 +5235,29 @@ function bindTitleTooltip(input) {
   input.addEventListener("input", sync);
 }
 
+// One competency question: a single multiline text field and a remove
+// button, nothing else (issue #94 §8 — no status, tags, priority or
+// provenance UI). The id rides along in a data attribute rather than an
+// editable field: it is bookkeeping that has to survive an edit to the text,
+// not something a user has any reason to type.
+function createCompetencyQuestionCard(cq) {
+  const card = document.createElement("div");
+  card.className = "domain-model-cq-card";
+  card.dataset.cqId = cq ? cq.id : genDraftId();
+
+  const topRow = document.createElement("div");
+  topRow.className = "details-property-row-top";
+  const textInput = document.createElement("textarea");
+  textInput.className = "dm-cq-text details-textarea";
+  textInput.rows = 2;
+  textInput.placeholder = t("competencyQuestionPlaceholder");
+  textInput.value = cq ? cq.text : "";
+  topRow.append(textInput, createDetailsRemoveButton(() => { card.remove(); updateDomainModelCounts(); }));
+
+  card.append(topRow);
+  return card;
+}
+
 function createRuleCard(rule) {
   const card = document.createElement("div");
   card.className = "domain-model-rule-card";
@@ -5166,10 +5365,13 @@ function openDomainModelDialog() {
   if (isAnyModalOpen()) return;
   cancelInlineInput();
   domainModelOpen = true;
+  domainModelCqList.textContent = "";
   domainModelRulesList.textContent = "";
   domainModelActionsList.textContent = "";
+  domainModelCqFilter.value = "";
   domainModelRulesFilter.value = "";
   domainModelActionsFilter.value = "";
+  for (const cq of state.competencyQuestions) domainModelCqList.appendChild(createCompetencyQuestionCard(cq));
   for (const rule of state.rules) domainModelRulesList.appendChild(createRuleCard(rule));
   for (const action of state.actions) domainModelActionsList.appendChild(createActionCard(action));
   refreshActionPreconditionOptions();
@@ -5185,6 +5387,17 @@ function closeDomainModelDialog() {
 function saveDomainModelDialog() {
   const before = snapshotState();
   const draftIdToRealId = new Map();
+
+  // Same draft-then-Save discipline as rules/actions below, so editing
+  // several questions is one undo step, and an empty card is dropped rather
+  // than saved as a blank requirement.
+  const newCompetencyQuestions = [...domainModelCqList.children].map((card) => {
+    const draftId = card.dataset.cqId;
+    return {
+      id: draftId.startsWith("draft_") ? genCqId() : draftId,
+      text: card.querySelector(".dm-cq-text").value.trim(),
+    };
+  }).filter((cq) => cq.text);
 
   const newRules = [...domainModelRulesList.children].map((card) => {
     const draftId = card.dataset.ruleId;
@@ -5209,9 +5422,12 @@ function saveDomainModelDialog() {
     return { id: realId, name, inputClassId, preconditions, effect, verification };
   }).filter((a) => a.name);
 
-  const changed = JSON.stringify(newRules) !== JSON.stringify(state.rules) || JSON.stringify(newActions) !== JSON.stringify(state.actions);
+  const changed = JSON.stringify(newRules) !== JSON.stringify(state.rules) ||
+    JSON.stringify(newActions) !== JSON.stringify(state.actions) ||
+    JSON.stringify(newCompetencyQuestions) !== JSON.stringify(state.competencyQuestions);
   closeDomainModelDialog();
   if (changed) {
+    state.competencyQuestions = newCompetencyQuestions;
     state.rules = newRules;
     state.actions = newActions;
     pushHistory(before, snapshotState());
@@ -5219,6 +5435,12 @@ function saveDomainModelDialog() {
   }
 }
 
+domainModelAddCqBtn.addEventListener("click", () => {
+  const card = createCompetencyQuestionCard(null);
+  domainModelCqList.appendChild(card);
+  updateDomainModelCounts();
+  card.querySelector(".dm-cq-text").focus();
+});
 domainModelAddRuleBtn.addEventListener("click", () => {
   const card = createRuleCard(null);
   domainModelRulesList.appendChild(card);
@@ -5942,9 +6164,15 @@ function buildJsonExport(savedAt) {
     // arrays when nothing's been authored yet.
     rules: state.rules.map((r) => ({ ...r, conditions: [...r.conditions] })),
     actions: state.actions.map((a) => ({ ...a, preconditions: [...a.preconditions] })),
+    // issue #94 — additive too, and full-fidelity: JSON is the format whose
+    // whole job is exact round-tripping, so CQ ids are written out verbatim
+    // and restored verbatim.
+    competencyQuestions: state.competencyQuestions.map((cq) => ({ id: cq.id, text: cq.text })),
   };
 }
 
+// The .txt edge list stays deliberately unchanged (issue #94 §2): it is the
+// lossy nodes/edges view, and competency questions are neither.
 function buildTxtExport(savedAt) {
   const lines = [
     "# KG Canvas export",
@@ -6172,11 +6400,24 @@ function buildDomainModel(source = state) {
     };
   }
 
-  return { classes, relationships, rules, actions };
+  // competency_questions comes first because they are the requirements that
+  // motivate everything below them (issue #94 §2). They carry their real id,
+  // unlike every other section here, which is keyed by name: a CQ has no name
+  // to key on, and its identity has to survive an edit to its own text.
+  const competencyQuestions = (source.competencyQuestions || []).map((cq) => ({ id: cq.id, text: cq.text }));
+
+  return { competency_questions: competencyQuestions, classes, relationships, rules, actions };
 }
 
-function buildDomainYamlExport() {
-  return toYaml(buildDomainModel());
+// `includeCompetencyQuestions: false` returns the exact ontology-only
+// projection this function produced before issue #94 — used by the existing
+// LLM contradiction pass, whose task was evaluated against that input and
+// must not silently acquire a new section to reason about (issue #94 §21).
+function buildDomainYamlExport({ includeCompetencyQuestions = true } = {}) {
+  const model = buildDomainModel();
+  if (includeCompetencyQuestions) return toYaml(model);
+  const { competency_questions, ...ontologyOnly } = model;
+  return toYaml(ontologyOnly);
 }
 
 // ---------------------------------------------------------------------------
@@ -6250,6 +6491,27 @@ function diffRelationshipsSection(beforeList, afterList) {
   return { added, removed, changed, directionChanged };
 }
 
+// Competency questions are the one section whose identity is a real id, not
+// a name (issue #94 §1 keeps the id precisely so editing a question's text
+// stays the same requirement instead of reading as delete + add). So they get
+// their own small pass rather than diffMapSection: matched by id, "changed"
+// when the text differs, and reported by text — the id is bookkeeping, the
+// question is what a reader recognizes.
+function diffCompetencyQuestionsSection(beforeList, afterList) {
+  const beforeById = new Map(beforeList.map((cq) => [cq.id, cq]));
+  const afterById = new Map(afterList.map((cq) => [cq.id, cq]));
+  const added = [], removed = [], changed = [];
+  for (const [id, before] of beforeById) {
+    const after = afterById.get(id);
+    if (!after) { removed.push({ id, text: before.text }); continue; }
+    if (before.text !== after.text) changed.push({ id, before: before.text, after: after.text });
+  }
+  for (const [id, after] of afterById) {
+    if (!beforeById.has(id)) added.push({ id, text: after.text });
+  }
+  return { added, removed, changed };
+}
+
 function computeSemanticDiff(beforeSnapshot, afterSnapshot) {
   const beforeModel = buildDomainModel(beforeSnapshot);
   const afterModel = buildDomainModel(afterSnapshot);
@@ -6269,6 +6531,8 @@ function computeSemanticDiff(beforeSnapshot, afterSnapshot) {
   }
 
   return {
+    competencyQuestions: diffCompetencyQuestionsSection(
+      beforeModel.competency_questions, afterModel.competency_questions),
     classes,
     relationships: diffRelationshipsSection(beforeModel.relationships, afterModel.relationships),
     properties,
@@ -6278,7 +6542,9 @@ function computeSemanticDiff(beforeSnapshot, afterSnapshot) {
 }
 
 function isSemanticDiffEmpty(diff) {
-  return diff.classes.added.length === 0 && diff.classes.removed.length === 0 && diff.classes.changed.length === 0 &&
+  return diff.competencyQuestions.added.length === 0 && diff.competencyQuestions.removed.length === 0 &&
+    diff.competencyQuestions.changed.length === 0 &&
+    diff.classes.added.length === 0 && diff.classes.removed.length === 0 && diff.classes.changed.length === 0 &&
     diff.relationships.added.length === 0 && diff.relationships.removed.length === 0 &&
     diff.relationships.changed.length === 0 && diff.relationships.directionChanged.length === 0 &&
     diff.properties.added.length === 0 && diff.properties.removed.length === 0 && diff.properties.changed.length === 0 &&
@@ -7237,7 +7503,7 @@ function reviewDiffItemChanged(beforeText, afterText, extraClass) {
 }
 
 function reviewSectionCounts(diff) {
-  return [["classes", diff.classes], ["relationships", diff.relationships], ["properties", diff.properties], ["rules", diff.rules], ["actions", diff.actions]];
+  return [["competencyQuestions", diff.competencyQuestions], ["classes", diff.classes], ["relationships", diff.relationships], ["properties", diff.properties], ["rules", diff.rules], ["actions", diff.actions]];
 }
 
 // Level 1 — concise semantic summary (issue §4, "the purpose is immediate
@@ -7339,6 +7605,13 @@ function renderReviewDetails(container, diff) {
     for (const item of items) list.appendChild(mapper(item));
     container.appendChild(list);
   }
+
+  // First, matching their position in the Domain Model dialog and the YAML
+  // export: they are the requirements the rest of the model answers to.
+  section(t("reviewSectionHeading", "competencyQuestions", "added"), diff.competencyQuestions.added, ({ text }) => reviewDiffItemAdded(text));
+  section(t("reviewSectionHeading", "competencyQuestions", "removed"), diff.competencyQuestions.removed, ({ text }) => reviewDiffItemRemoved(text));
+  section(t("reviewSectionHeading", "competencyQuestions", "changed"), diff.competencyQuestions.changed,
+    ({ before, after }) => reviewDiffItemChanged(before, after));
 
   const classText = (name, val) => (formatClassSummary(val) ? `${name}: ${formatClassSummary(val)}` : name);
   section(t("reviewSectionHeading", "classes", "added"), diff.classes.added, ({ name, value }) => reviewDiffItemAdded(classText(name, value)));
@@ -7679,6 +7952,11 @@ function updateConsistencyBadge({ recompute = true } = {}) {
     // toggle is not an edit, which is why it passes recompute: false.
     consistencyLlmFindings = [];
     consistencyLlmStatusKey = null;
+    // Coverage results describe one particular ontology *and* one particular
+    // question list, so any edit to either invalidates them (issue #94 §17).
+    // Cleared, never re-run automatically: one click stays one API call.
+    cqCoverageFindings = [];
+    cqCoverageStatusKey = null;
   }
   const summary = summarizeFindings(consistencyFindings);
   const button = document.getElementById("btn-consistency");
@@ -7744,6 +8022,8 @@ function renderConsistencyDialog() {
   status.textContent = !enabled ? ""
     : consistencyLlmStatusKey ? t(consistencyLlmStatusKey, consistencyLlmFindings.length)
     : connected ? "" : t("consistencyLlmNotConnected");
+
+  renderCqCoverageSection();
 }
 
 function openConsistency() {
@@ -7785,7 +8065,12 @@ async function runConsistencyLlmCheck() {
   try {
     const message = await callAgentChatRaw([
       { role: "system", content: CONSISTENCY_LLM_PROMPT },
-      { role: "user", content: buildDomainYamlExport() },
+      // Ontology-only on purpose: this pass was evaluated (issue #89) on a
+      // model with no competency_questions section, and its task is
+      // contradiction detection, not coverage. Handing it the new section
+      // would silently change the input of an already-evaluated subsystem
+      // (issue #94 §21). Coverage has its own prompt and its own result state.
+      { role: "user", content: buildDomainYamlExport({ includeCompetencyQuestions: false }) },
     ]);
     const reply = (message && typeof message.content === "string") ? message.content : "";
     const blocks = [...reply.matchAll(/```(?:json)?\s*\n([\s\S]*?)```/g)].map((m) => m[1].trim());
@@ -7817,6 +8102,177 @@ async function runConsistencyLlmCheck() {
     if (consistencyOverlayOpen) renderConsistencyDialog();
   }
 }
+
+// --- Competency-question coverage: the other optional model pass ----------
+// Deliberately NOT folded into the consistency checker (issue #94 §14/§19).
+// That one answers "does this model contradict itself?" deterministically;
+// this one answers "does this model give a future agent enough orientation to
+// address its stated requirements?" and can only ever be a model's opinion.
+// A model can be perfectly consistent and cover its questions badly, or the
+// reverse, so the two never merge into one score.
+//
+// Same lifecycle rules as the LLM contradiction pass: user-triggered (one
+// click, one API call), never cached across an edit, read-only — running it
+// cannot modify the ontology, and a failure leaves the deterministic findings
+// exactly as they were.
+let cqCoverageFindings = [];
+let cqCoveragePending = false;
+let cqCoverageStatusKey = null;
+
+const CQ_COVERAGE_ALLOWED_STATUSES = new Set(["covered", "partial", "missing"]);
+const CQ_COVERAGE_MAX_EVIDENCE = 12;
+const CQ_COVERAGE_MAX_TEXT = 400;
+
+const CQ_COVERAGE_LLM_PROMPT = `You are checking whether an Agent Ontology covers its competency questions.
+
+The ontology is an orientation model for a future AI agent. It describes domain classes, relationships, decision-bearing properties, rules, actions, preconditions, effects and verification steps.
+
+It is NOT expected to contain runtime instances or the final factual answer to each question.
+
+For each competency question, judge whether the ontology gives a future agent sufficient domain orientation to know what concepts, relationships, constraints, actions or verification paths are needed to address the question at runtime.
+
+Use only information actually present in the supplied model.
+
+covered:
+The model contains a coherent and sufficiently complete route for the future agent to address the CQ.
+
+partial:
+Relevant orientation exists, but an important concept, relationship, decision property, rule, action or constraint is missing or ambiguous.
+
+missing:
+The model contains no credible route for addressing the CQ.
+
+Do not propose unrelated improvements.
+Do not penalize the model merely because runtime instance data is absent.
+
+Return exactly one \`\`\`json block containing an array, and nothing else. One entry per competency question, using its exact id:
+
+[{"cq_id":"cq1","status":"covered","evidence":["Class or relationship or rule name","..."],"gap":""}]`;
+
+// Mechanical validation only (issue #94 §16): the model proposes the semantic
+// judgement, the application checks the *shape* of what came back, and the
+// human decides what to change. Anything referring to a CQ that isn't
+// currently in the model, or carrying a status outside the three allowed
+// values, is discarded rather than guessed at.
+function normalizeCqCoverageResults(parsed) {
+  const byId = new Map(state.competencyQuestions.map((cq) => [cq.id, cq]));
+  const seen = new Set();
+  const results = [];
+  for (const raw of Array.isArray(parsed) ? parsed : []) {
+    if (!raw || typeof raw !== "object") continue;
+    const cqId = typeof raw.cq_id === "string" ? raw.cq_id : "";
+    const cq = byId.get(cqId);
+    if (!cq || seen.has(cqId)) continue;
+    const status = typeof raw.status === "string" ? raw.status.trim().toLowerCase() : "";
+    if (!CQ_COVERAGE_ALLOWED_STATUSES.has(status)) continue;
+    seen.add(cqId);
+    results.push({
+      cqId,
+      text: cq.text,
+      status,
+      evidence: (Array.isArray(raw.evidence) ? raw.evidence : [])
+        .filter((e) => typeof e === "string" && e.trim())
+        .slice(0, CQ_COVERAGE_MAX_EVIDENCE)
+        .map((e) => e.trim().slice(0, CQ_COVERAGE_MAX_TEXT)),
+      gap: typeof raw.gap === "string" ? raw.gap.slice(0, CQ_COVERAGE_MAX_TEXT) : "",
+    });
+  }
+  return results;
+}
+
+function cqCoverageItemRow(result) {
+  const row = document.createElement("div");
+  row.className = `cq-coverage-item cq-coverage-item--${result.status}`;
+  const head = document.createElement("div");
+  head.className = "cq-coverage-item-head";
+  head.textContent = `[${result.cqId}] ${t(`cqCoverageStatus_${result.status}`)}`;
+  const body = document.createElement("div");
+  body.textContent = result.text;
+  row.append(head, body);
+  if (result.evidence.length) {
+    const evidence = document.createElement("div");
+    evidence.className = "cq-coverage-item-evidence";
+    evidence.textContent = `${t("cqCoverageEvidenceLabel")} ${result.evidence.join("; ")}`;
+    row.appendChild(evidence);
+  }
+  if (result.gap) {
+    const gap = document.createElement("div");
+    gap.className = "cq-coverage-item-gap";
+    gap.textContent = `${t("cqCoverageGapLabel")} ${result.gap}`;
+    row.appendChild(gap);
+  }
+  return row;
+}
+
+function renderCqCoverageSection() {
+  const section = document.getElementById("cq-coverage-section");
+  // Hidden outright with no competency questions: there is nothing to check,
+  // and an always-visible dead control teaches people to ignore the panel.
+  section.style.display = state.competencyQuestions.length ? "" : "none";
+  document.getElementById("cq-coverage-heading").textContent = t("cqCoverageHeading");
+  const runButton = document.getElementById("cq-coverage-run");
+  runButton.textContent = t("cqCoverageRun");
+  const connected = Boolean(agentState && agentState.connected);
+  runButton.disabled = !connected || cqCoveragePending || state.competencyQuestions.length === 0;
+
+  const summary = document.getElementById("cq-coverage-summary");
+  const counts = { covered: 0, partial: 0, missing: 0 };
+  for (const r of cqCoverageFindings) counts[r.status] += 1;
+  summary.textContent = cqCoverageFindings.length
+    ? t("cqCoverageSummary", counts.covered, counts.partial, counts.missing)
+    : t("cqCoverageIntro");
+
+  const list = document.getElementById("cq-coverage-list");
+  list.textContent = "";
+  for (const status of ["missing", "partial", "covered"]) {
+    for (const result of cqCoverageFindings.filter((r) => r.status === status)) {
+      list.appendChild(cqCoverageItemRow(result));
+    }
+  }
+
+  const status = document.getElementById("cq-coverage-status");
+  status.textContent = cqCoverageStatusKey ? t(cqCoverageStatusKey)
+    : connected ? "" : t("consistencyLlmNotConnected");
+}
+
+async function runCqCoverageCheck() {
+  if (cqCoveragePending || !agentState.connected || !state.competencyQuestions.length) return;
+  cqCoveragePending = true;
+  cqCoverageStatusKey = "cqCoverageRunning";
+  if (consistencyOverlayOpen) renderCqCoverageSection();
+  try {
+    // The full domain model, competency_questions section included — unlike
+    // the contradiction pass, the questions ARE the task here.
+    const message = await callAgentChatRaw([
+      { role: "system", content: CQ_COVERAGE_LLM_PROMPT },
+      { role: "user", content: buildDomainYamlExport() },
+    ]);
+    const reply = (message && typeof message.content === "string") ? message.content : "";
+    const blocks = [...reply.matchAll(/```(?:json)?\s*\n([\s\S]*?)```/g)].map((m) => m[1].trim());
+    const braced = reply.slice(reply.indexOf("["), reply.lastIndexOf("]") + 1);
+    let parsed = null;
+    for (const block of [...blocks, braced].filter(Boolean)) {
+      try {
+        const value = JSON.parse(block);
+        if (Array.isArray(value)) { parsed = value; break; }
+      } catch (err) { /* try the next candidate */ }
+    }
+    if (!parsed) throw new Error("no parseable coverage array");
+    cqCoverageFindings = normalizeCqCoverageResults(parsed);
+    // Every entry discarded by the validation above (unknown ids, bad
+    // statuses) leaves nothing to show — that is a failed check, not a
+    // model with zero questions covered.
+    cqCoverageStatusKey = cqCoverageFindings.length ? "cqCoverageDone" : "cqCoverageFailed";
+  } catch (err) {
+    cqCoverageFindings = [];
+    cqCoverageStatusKey = "cqCoverageFailed";
+  } finally {
+    cqCoveragePending = false;
+    if (consistencyOverlayOpen) renderCqCoverageSection();
+  }
+}
+
+document.getElementById("cq-coverage-run").addEventListener("click", () => { runCqCoverageCheck(); });
 
 document.getElementById("btn-consistency").addEventListener("click", () => openConsistency());
 document.getElementById("consistency-close").addEventListener("click", () => closeConsistency());
@@ -8663,12 +9119,43 @@ function parseDomainYamlImport(text) {
   const root = parseYamlBlock(lines, { i: 0 }, 0) || {};
   const asMap = (v) => (v && typeof v === "object" && !Array.isArray(v)) ? v : {};
   const asList = (v) => Array.isArray(v) ? v : [];
+  // Competency questions (issue #94 §6): a list of {id, text}. Only entries
+  // with real text survive — an id on its own is not a requirement. A missing
+  // id is left null here rather than minted, because parsing must stay pure
+  // (planYamlImport previews the same parse the commit will use, and minting
+  // an id in a preview would advance the counter for a dialog the user may
+  // still cancel); commitYamlImport mints it instead.
+  const competencyQuestions = [];
+  for (const raw of asList(root.competency_questions)) {
+    const item = (raw && typeof raw === "object" && !Array.isArray(raw)) ? raw : null;
+    const text = item && typeof item.text === "string" ? item.text.trim() : "";
+    if (!text) continue;
+    competencyQuestions.push({ id: typeof item.id === "string" && item.id ? item.id : null, text });
+  }
+
   return {
     classes: asMap(root.classes),
     relationships: asList(root.relationships),
     rules: asMap(root.rules),
     actions: asMap(root.actions),
+    competencyQuestions,
   };
+}
+
+// Resolves one incoming competency question against the live list, shared by
+// the plan/preview and the commit so both agree on what counts as "the same
+// CQ". Id wins when it matches something real. Failing that, an entry with no
+// id whose trimmed text is already present is treated as the same CQ rather
+// than an obvious duplicate — defensive interoperability with an external
+// producer (IDEA2 or a preprocessing script) that emits text without ids, not
+// semantic duplicate detection, which is explicitly out of scope.
+function findExistingCompetencyQuestion(incoming, list = state.competencyQuestions) {
+  if (incoming.id) {
+    const byId = list.find((cq) => cq.id === incoming.id);
+    if (byId) return byId;
+    return null;
+  }
+  return list.find((cq) => cq.text.trim() === incoming.text) || null;
 }
 
 // Shared by the dialog's diff-count preview and the real commit (mirrors
@@ -8690,6 +9177,9 @@ function planYamlImport(parsed) {
   }));
   const actionPlans = actionNames.map((name) => ({
     name, existing: state.actions.find((a) => a.name === name) || null,
+  }));
+  const competencyQuestionPlans = parsed.competencyQuestions.map((cq) => ({
+    cq, existing: findExistingCompetencyQuestion(cq),
   }));
 
   const labelIsKnown = new Set(classLabels);
@@ -8721,14 +9211,17 @@ function planYamlImport(parsed) {
   const addedCount = classPlans.filter((p) => !p.existing).length +
     relationshipPlans.filter((p) => !p.existing).length +
     rulePlans.filter((p) => !p.existing).length +
-    actionPlans.filter((p) => !p.existing).length;
+    actionPlans.filter((p) => !p.existing).length +
+    competencyQuestionPlans.filter((p) => !p.existing).length;
   const changedCount = classPlans.filter((p) => p.existing).length +
     relationshipPlans.filter((p) => p.existing).length +
     rulePlans.filter((p) => p.existing).length +
-    actionPlans.filter((p) => p.existing).length;
+    actionPlans.filter((p) => p.existing).length +
+    competencyQuestionPlans.filter((p) => p.existing).length;
 
   let removedCount = 0;
-  if (state.nodes.length || state.edges.length || state.rules.length || state.actions.length) {
+  if (state.nodes.length || state.edges.length || state.rules.length || state.actions.length ||
+      state.competencyQuestions.length) {
     const matchedNodeIds = new Set(classPlans.filter((p) => p.existing).map((p) => p.existing.id));
     const matchedEdgeIds = new Set(relationshipPlans.filter((p) => p.existing).map((p) => p.existing.id));
     const matchedRuleIds = new Set(rulePlans.filter((p) => p.existing).map((p) => p.existing.id));
@@ -8738,10 +9231,12 @@ function planYamlImport(parsed) {
       !state.nodes.some((n) => (n.id === e.source || n.id === e.target) && !matchedNodeIds.has(n.id))).length;
     const removedRules = state.rules.filter((r) => !matchedRuleIds.has(r.id)).length;
     const removedActions = state.actions.filter((a) => !matchedActionIds.has(a.id)).length;
-    removedCount = removedNodes + removedEdges + removedRules + removedActions;
+    const matchedCqIds = new Set(competencyQuestionPlans.filter((p) => p.existing).map((p) => p.existing.id));
+    const removedCqs = state.competencyQuestions.filter((cq) => !matchedCqIds.has(cq.id)).length;
+    removedCount = removedNodes + removedEdges + removedRules + removedActions + removedCqs;
   }
 
-  return { classPlans, relationshipPlans, rulePlans, actionPlans, addedCount, changedCount, removedCount, droppedReferences };
+  return { classPlans, relationshipPlans, rulePlans, actionPlans, competencyQuestionPlans, addedCount, changedCount, removedCount, droppedReferences };
 }
 
 // Upserts incoming properties (name -> {type, unit, allowed}) into an
@@ -8901,7 +9396,29 @@ async function commitYamlImport(text, mode) {
     }
   }
 
+  // Competency questions (issue #94 §6). Text-only, so there is no
+  // field-level-merge distinction to make: an incoming CQ either updates the
+  // one it matches or is created. An incoming id that matches nothing is
+  // honoured as-is (an external producer's `cq_external_17` stays that), with
+  // the counter lifted clear of any `cqN` shape so a later genCqId() can
+  // never re-mint one of them.
+  state.nextCqNum = Math.max(state.nextCqNum,
+    highestIdNumber(parsed.competencyQuestions.filter((cq) => cq.id), "cq") + 1);
+  const matchedCqIds = new Set();
+  for (const incoming of parsed.competencyQuestions) {
+    const existing = findExistingCompetencyQuestion(incoming);
+    if (existing) {
+      existing.text = incoming.text;
+      matchedCqIds.add(existing.id);
+      continue;
+    }
+    const id = incoming.id || genCqId();
+    state.competencyQuestions.push({ id, text: incoming.text });
+    matchedCqIds.add(id);
+  }
+
   if (mode === "replace") {
+    for (const cq of state.competencyQuestions.filter((cq) => !matchedCqIds.has(cq.id))) deleteCompetencyQuestion(cq.id);
     for (const n of state.nodes.filter((n) => !matchedNodeIds.has(n.id))) deleteNode(n.id);
     for (const e of state.edges.filter((e) => !matchedEdgeIds.has(e.id))) deleteEdge(e.id);
     for (const r of state.rules.filter((r) => !matchedRuleIds.has(r.id))) deleteRule(r.id);
@@ -9115,6 +9632,22 @@ function parseJsonImport(text) {
     });
   }
 
+  // Competency questions (issue #94 §7). Same key-or-null convention as
+  // nodes/rules above: a duplicate or unusable id loses the key and gets a
+  // fresh one at commit time. A file written before this field existed simply
+  // has none, which is an empty list, not an error.
+  const competencyQuestions = [];
+  const cqKeys = new Set();
+  for (const raw of Array.isArray(root.competencyQuestions) ? root.competencyQuestions : []) {
+    if (!raw || typeof raw !== "object") { warnings.push("skipped a competency question that wasn't an object"); continue; }
+    const text = typeof raw.text === "string" ? raw.text.trim() : "";
+    if (!text) { warnings.push("skipped a competency question with no text"); continue; }
+    let key = (typeof raw.id === "string" && raw.id) ? raw.id : null;
+    if (key !== null && cqKeys.has(key)) key = null;
+    if (key !== null) cqKeys.add(key);
+    competencyQuestions.push({ key, text });
+  }
+
   const rawMeta = (root.meta && typeof root.meta === "object" && !Array.isArray(root.meta)) ? root.meta : {};
   const meta = {
     format_version: coerceFiniteNumber(rawMeta.format_version, 1),
@@ -9126,7 +9659,7 @@ function parseJsonImport(text) {
   const graphName = (typeof rawMeta.graph_name === "string" && rawMeta.graph_name.trim())
     ? rawMeta.graph_name.trim() : null;
 
-  return { ok: true, error: null, warnings, graph: { nodes, edges, rules, actions, meta, graphName } };
+  return { ok: true, error: null, warnings, graph: { nodes, edges, rules, actions, competencyQuestions, meta, graphName } };
 }
 
 // "my-graph_v0042_2026-07-25T1420Z.json" -> "my-graph". Only used when the
@@ -9166,15 +9699,27 @@ function planJsonImport(parsed) {
       x.relation === e.relation && x.directed === e.directed;
   })).length;
 
-  const changedCount = nodeMatches + edgeMatches + ruleMatches + actionMatches;
-  const addedCount = (g.nodes.length + g.edges.length + g.rules.length + g.actions.length) - changedCount;
+  // Competency questions match on id, falling back to identical text — the
+  // same rule the YAML importer uses (findExistingCompetencyQuestion), so the
+  // two summaries keep meaning the same thing.
+  const matchedCqIds = new Set();
+  for (const cq of g.competencyQuestions) {
+    const existing = findExistingCompetencyQuestion({ id: cq.key, text: cq.text });
+    if (existing) matchedCqIds.add(existing.id);
+  }
+  const cqMatches = matchedCqIds.size;
+
+  const changedCount = nodeMatches + edgeMatches + ruleMatches + actionMatches + cqMatches;
+  const addedCount = (g.nodes.length + g.edges.length + g.rules.length + g.actions.length +
+    g.competencyQuestions.length) - changedCount;
 
   const removedNodes = state.nodes.filter((n) => !incomingLabels.has(n.label));
   const removedNodeIds = new Set(removedNodes.map((n) => n.id));
   const removedCount = removedNodes.length +
     state.edges.filter((e) => removedNodeIds.has(e.source) || removedNodeIds.has(e.target)).length +
     state.rules.filter((r) => !incomingRuleNames.has(r.name)).length +
-    state.actions.filter((a) => !incomingActionNames.has(a.name)).length;
+    state.actions.filter((a) => !incomingActionNames.has(a.name)).length +
+    state.competencyQuestions.filter((cq) => !matchedCqIds.has(cq.id)).length;
 
   return { addedCount, changedCount, removedCount };
 }
@@ -9191,6 +9736,8 @@ function reserveIdCountersFor(graph) {
   state.nextEdgeNum = Math.max(state.nextEdgeNum, highestIdNumber(graph.edges.map((e) => ({ id: e.key })), "e") + 1);
   state.nextRuleNum = Math.max(state.nextRuleNum, highestIdNumber(graph.rules.map((r) => ({ id: r.key })), "r") + 1);
   state.nextActionNum = Math.max(state.nextActionNum, highestIdNumber(graph.actions.map((a) => ({ id: a.key })), "a") + 1);
+  state.nextCqNum = Math.max(state.nextCqNum,
+    highestIdNumber((graph.competencyQuestions || []).map((cq) => ({ id: cq.key })), "cq") + 1);
 }
 
 // True when this incoming node's saved rectangle doesn't collide with any
@@ -9254,6 +9801,10 @@ function commitJsonImport(text, mode, sourceFilename) {
       preconditions: a.preconditions.map((rid) => liveRuleByKey.get(rid)).filter(Boolean).map((r) => r.id),
       effect: a.effect, verification: a.verification,
     }));
+
+    // Full restore keeps CQ ids exactly as written (issue #94 §7) — the same
+    // promise this path makes for node/edge/rule/action ids.
+    state.competencyQuestions = g.competencyQuestions.map((cq) => ({ id: cq.key || genCqId(), text: cq.text }));
 
     // Continue the file's own version series rather than starting a new one:
     // this graph is the same graph, reopened. A file with no usable meta (a
@@ -9343,6 +9894,16 @@ function commitJsonImport(text, mode, sourceFilename) {
       }
     }
 
+    // Merge: matched CQs (by id, else by identical text) take the file's
+    // text; unmatched ones are created keeping the file's own id where it is
+    // free. Nothing on the canvas is removed — that is Replace's job, and
+    // Replace takes the full-restore branch above.
+    for (const cq of g.competencyQuestions) {
+      const existing = findExistingCompetencyQuestion({ id: cq.key, text: cq.text });
+      if (existing) { existing.text = cq.text; continue; }
+      state.competencyQuestions.push({ id: cq.key || genCqId(), text: cq.text });
+    }
+
     newlyImportedIds = new Set(createdNodeIds);
   }
 
@@ -9374,7 +9935,8 @@ let pendingImportKind = "txt";
 let pendingImportFilename = null;
 
 function hasAnyGraphContent() {
-  return Boolean(state.nodes.length || state.edges.length || state.rules.length || state.actions.length);
+  return Boolean(state.nodes.length || state.edges.length || state.rules.length || state.actions.length ||
+    state.competencyQuestions.length);
 }
 
 // Puts the dialog into its no-action state: an explanation, and Cancel as the
@@ -9418,7 +9980,7 @@ function openImportDialog(text, kind = "txt", filename = null) {
       return;
     }
     const g = parsed.graph;
-    if (!g.nodes.length && !g.rules.length && !g.actions.length) {
+    if (!g.nodes.length && !g.rules.length && !g.actions.length && !g.competencyQuestions.length) {
       showImportError(t("importErrorEmpty"));
       return;
     }
@@ -9438,8 +10000,11 @@ function openImportDialog(text, kind = "txt", filename = null) {
     if (parsed.warnings.length) lines.push(parsed.warnings.join("\n"));
   } else if (kind === "yaml") {
     const parsedYaml = parseDomainYamlImport(text);
+    // A file carrying only competency_questions is a legitimate import — the
+    // external-requirements-seed workflow (issue #94 §6) is exactly that file.
     if (!Object.keys(parsedYaml.classes).length && !parsedYaml.relationships.length &&
-        !Object.keys(parsedYaml.rules).length && !Object.keys(parsedYaml.actions).length) {
+        !Object.keys(parsedYaml.rules).length && !Object.keys(parsedYaml.actions).length &&
+        !parsedYaml.competencyQuestions.length) {
       showImportError(t("importErrorEmpty"));
       return;
     }
@@ -10632,8 +11197,9 @@ const APPLY_ONTOLOGY_YAML_TOOL = {
   type: "function",
   function: {
     name: "apply_ontology_yaml",
-    description: "Apply new or changed classes, relationships, rules, or " +
-      "actions to the live ontology the expert is looking at. Only include " +
+    description: "Apply new or changed competency questions, classes, " +
+      "relationships, rules, or actions to the live ontology the expert is " +
+      "looking at. Only include " +
       "entries that are new or have changed — this merges against the " +
       "existing model, it does not need to restate everything. At most one " +
       "call to this tool is processed per message.",
@@ -10642,7 +11208,7 @@ const APPLY_ONTOLOGY_YAML_TOOL = {
       properties: {
         yaml: {
           type: "string",
-          description: "Domain-model YAML using the classes/relationships/rules/actions block-style shape.",
+          description: "Domain-model YAML using the competency_questions/classes/relationships/rules/actions block-style shape.",
         },
       },
       required: ["yaml"],
@@ -10665,8 +11231,9 @@ const GET_GRAPH_STATE_TOOL = {
   type: "function",
   function: {
     name: "get_graph_state",
-    description: "Returns the ontology's current live state (classes, " +
-      "relationships, rules, actions) exactly as it is on the canvas right " +
+    description: "Returns the ontology's current live state (competency " +
+      "questions, classes, relationships, rules, actions) exactly as it is " +
+      "on the canvas right " +
       "now, in the same YAML shape apply_ontology_yaml accepts. Takes no " +
       "arguments. Call this whenever you're not certain your own memory of " +
       "what's already defined is still accurate — the expert can edit the " +
@@ -11112,11 +11679,37 @@ already has instead of following it rigidly)
    business domain/agent this is for, in one or two sentences, and briefly
    explain the process (about 9 short phases; the expert can stop early
    with whatever is captured so far). If it's not empty, recap what's
-   already there instead of assuming a blank slate.
-1. Real questions and actions: elicit 10-20 real questions the agent must
-   answer and 5-10 actions it must perform. Do not model anything yet —
-   just collect these verbatim. This list is the acceptance test for
-   everything that follows. An expert's first-pass list, given freely,
+   already there instead of assuming a blank slate. If it already contains
+   competency_questions (they can be imported from an external process, not
+   only elicited here), do NOT discard them and do NOT immediately generate
+   a fresh set of your own. Say how many you found and ask whether to use
+   them as the accepted starting requirements or review them together
+   first. If accepted, drive Phase 2 onward from those; if reviewed, refine
+   them conversationally and persist the changes.
+1. Competency questions and actions: elicit 10-20 real questions the agent
+   must answer and 5-10 actions it must perform. A COMPETENCY QUESTION (CQ)
+   is a real question the future domain agent must be able to answer, or
+   have enough domain orientation to work out how to answer. It is a
+   requirement on the ontology, not a query against stored data — the model
+   does not need to hold the runtime answer, it needs to make clear which
+   concepts, relationships, rules, actions and verification steps are
+   involved in getting there.
+   Do not create classes, relationships, properties, rules, or actions yet.
+   First establish the competency questions and required actions.
+   Treat each real question as a candidate competency question. Keep the
+   expert's meaning, but split clearly compound questions into atomic
+   questions and avoid one-off instance wording where the intended
+   requirement is general ("which escalation policy applies to a support
+   request of this severity" rather than "what happened with request
+   #4471").
+   A CQ is not accepted merely because you proposed it: confirm it with the
+   expert. Once a CQ or small batch is confirmed, persist it using
+   competency_questions in apply_ontology_yaml — don't wait for the end of
+   the phase, and don't leave confirmed questions living only in this
+   conversation. Confirm in small batches where that reads naturally; one
+   confirmation turn per question is not required.
+   This confirmed list is the acceptance test for everything that follows.
+   An expert's first-pass list, given freely,
    reliably omits things they'd still confirm as real if asked directly —
    especially a secondary role standing next to one already named (e.g.
    naming a manager without naming who reports to them and does the
@@ -11148,7 +11741,7 @@ already has instead of following it rigidly)
    already cover it?") before moving on, not a silent substitution either
    way.
 2. Classes: from that list, propose candidate classes (kinds of things,
-   not instances). For each one, state the specific Phase 1 question or
+   not instances). For each one, state the specific competency question or
    action it's needed for, then confirm: "does the agent need to
    identify, retrieve, connect, or pass this to a tool?" Don't propose a
    long list all at once and ask one single "which of these should stay"
@@ -11206,10 +11799,10 @@ already has instead of following it rigidly)
    (see GROUND RULES) across as many questions as it takes. A confirmed
    class left with no relationships to anything else is a sign you moved on
    too early, not that it's naturally standalone. Ground candidates in the
-   Phase 1 material itself: for each real question or action, ask what
+   competency questions themselves: for each confirmed CQ or action, ask what
    real-world connection it implies (e.g. "which [Role X] should this be
    assigned to" implies [Class A] needs a relationship to [Role X]) rather
-   than only free-associating from the class list on its own. When a Phase 1
+   than only free-associating from the class list on its own. When a competency
    question asks who or what *should* be assigned, selected, or routed
    (rather than just who handled it after the fact), that implies two
    different relationships, not one: a relationship that *records* the
@@ -11233,18 +11826,18 @@ already has instead of following it rigidly)
    count directly — don't rely on memory of what you've already asked;
    anything still at zero is unfinished, not naturally standalone. Having at
    least one relationship isn't the real bar, though: two classes that
-   appear together in the same original Phase 1 question or action almost
+   appear together in the same competency question or action almost
    always need a direct relationship between them specifically, not just
-   each one separately connected to something else. Re-read the Phase 1
-   list once more before moving on, and confirm every pair of classes it
+   each one separately connected to something else. Re-read the confirmed
+   competency questions once more before moving on, and confirm every pair of classes it
    jointly mentions has an explicit relationship between that exact pair.
 4. Decision-bearing properties: for each class, propose ONLY properties
-   that trace back to a Phase 1 question or action (filter, compare,
+   that trace back to a competency question or action (filter, compare,
    decide, explain, or act). Reject "nice to know" fields. Once you're
    proposing similar properties across several classes, batch them (see
    GROUND RULES) instead of one class at a time. Before accepting the
    expert calling a property "optional" or something to exclude, check it
-   the same way Phase 1 checks a substituted term: is there a Phase 1
+   the same way Phase 1 checks a substituted term: is there a competency
    question or action still on the list that has no other confirmed way to
    be answered without this property? If so, don't accept the exclusion at
    face value — quote that specific question back to the expert verbatim
@@ -11277,7 +11870,7 @@ already has instead of following it rigidly)
    value question across several properties that clearly need one.
 7. Rules: capture named, plain-language condition lists only where a real
    decision depends on them.
-8. Actions: for each Phase-1 action, capture its input class,
+8. Actions: for each action from Phase 1, capture its input class,
    precondition rule(s), effect, and a verification step. An action has
    exactly ONE input class in this tool — not a list. If a real action
    genuinely involves more than one class (e.g. an action like "assign
@@ -11289,13 +11882,23 @@ already has instead of following it rigidly)
    apologize for.
 9. Validation pass — run BOTH checks before considering a class,
    relationship, rule, or action finished:
-   (a) Competency check: replay every relevant Phase-1 question/action
-       against the current model out loud; if it can't be answered, go
-       back to the relevant earlier phase.
+   (a) Competency check: call get_graph_state and read the persisted
+       competency_questions from that result — do NOT work from your own
+       memory of what was asked in Phase 1, which may have been compacted,
+       restarted or edited on the canvas since. Replay each competency
+       question, and each action, against the current model out loud, and
+       say for each whether the model gives the future agent enough
+       orientation to address it (which classes, relationships, properties,
+       rules, actions and verification steps it would use). If a question
+       is uncovered or only partly covered, go back to the relevant earlier
+       phase and close the gap. If the persisted list is empty, say so
+       plainly — an ontology with no recorded competency questions has no
+       acceptance test, and the fix is to capture them, not to invent a
+       list now and grade against it.
    (b) Final checklist: call get_graph_state and confirm directly from that
        result, not from memory, that every class has at least one
        relationship recorded, AND that every pair of classes jointly
-       mentioned in a Phase 1 question or action has a direct relationship
+       mentioned in a competency question or action has a direct relationship
        between that specific pair (not just each side connected to
        something else); every actor reached only through a group or
        parent-record chain also has a direct relationship where the
@@ -11349,8 +11952,8 @@ the expert's own work is not.
 
 EDITING THE LIVE ONTOLOGY
 You can call the apply_ontology_yaml tool at any point to add or update
-classes, relationships, rules, or actions in the ontology the expert is
-looking at. Call it as soon as something is concrete enough to record —
+competency questions, classes, relationships, rules, or actions in the
+ontology the expert is looking at. Call it as soon as something is concrete enough to record —
 don't wait until the end of the interview to batch everything into one
 call. Only include entries that are new or have changed; the tool merges
 against the live model, so it never needs a full restated model. Make at
@@ -11358,6 +11961,10 @@ most one apply_ontology_yaml call per message — if you have several things
 to record, put them all in that one call's yaml.
 
 Use this YAML shape:
+
+competency_questions:
+  - id: <omit for a new question; use the exact existing id to reword one>
+    text: <one real question the future agent must be able to address>
 
 classes:
   ClassName:
@@ -11590,7 +12197,7 @@ async function handleAgentToolCall(call, alreadyCommittedThisTurn) {
   const plan = planYamlImport(parseDomainYamlImport(yamlText));
   if (plan.addedCount === 0 && plan.changedCount === 0) {
     appendTranscriptMessage("tool", t("agentToolNothingNote"));
-    return { applied: false, resultText: "Nothing to apply — no new or changed classes, relationships, rules, or actions were found in that yaml." };
+    return { applied: false, resultText: "Nothing to apply — no new or changed competency questions, classes, relationships, rules, or actions were found in that yaml." };
   }
   await commitYamlImport(yamlText, "agent-merge"); // never "replace"; not "merge" either — see commitYamlImport's own comment
   appendTranscriptMessage("tool", t("agentToolApplied", plan.addedCount, plan.changedCount));
@@ -11656,10 +12263,13 @@ async function summarizeAgentHistory(messagesToSummarize) {
   const instruction = {
     role: "system",
     content: "Summarize the following ontology-building conversation " +
-      "concisely for your own future reference. Preserve: confirmed " +
-      "classes, relationships, rules, and actions; open questions; and " +
-      "which interview phase the conversation is in. Be brief — a few " +
-      "sentences, not a transcript.",
+      "concisely for your own future reference. Preserve: the confirmed " +
+      "competency questions (verbatim — they are the acceptance test for " +
+      "the whole model, and they are what the final validation pass is " +
+      "graded against); confirmed classes, relationships, rules, and " +
+      "actions; open questions; and which interview phase the conversation " +
+      "is in. Be brief — a few sentences, not a transcript, except for the " +
+      "competency questions themselves.",
   };
   return callAgentChat([instruction, ...messagesToSummarize]);
 }
@@ -11928,6 +12538,10 @@ window.__kg = {
     // Agent Ontology data-model constructors (agent_ontology_spec.md §4.3)
     // — no UI calls these yet (Phase D/E), so tests reach them here.
     createRule, createAction, deleteRule, deleteAction,
+    // Competency questions (issue #94) — same reason: the Domain Model
+    // dialog is the only UI that writes them, so tests that aren't about
+    // that dialog reach the constructors directly.
+    createCompetencyQuestion, deleteCompetencyQuestion,
   },
   storage: {
     detectBackend: detectStorageBackend,
@@ -11972,6 +12586,10 @@ window.__kg = {
     // File/DataTransfer plumbing.
     openImportDialog,
     commitJsonImport,
+    // The YAML commit, exposed like commitJsonImport above so a test can
+    // exercise "agent-merge" (the mode only apply_ontology_yaml ever uses)
+    // as the function it is, without driving a whole mocked chat turn.
+    commitYamlImport,
     buildDomainModel,
   },
   // Ontology Change Review (issue #74) test surface -- both the pure diff
@@ -12013,6 +12631,19 @@ window.__kg = {
     close: closeConsistency,
     isOpen: () => consistencyOverlayOpen,
     current: () => [...consistencyFindings],
+    // Competency-question coverage (issue #94 §14) — a sibling of `llm`
+    // below, never folded into it: separate prompt, separate results,
+    // separate lifecycle.
+    cqCoverage: {
+      run: runCqCoverageCheck,
+      // Exposed for the same reason the contradiction prompt is: an
+      // evaluation should measure the shipped prompt, not a copy of it.
+      prompt: CQ_COVERAGE_LLM_PROMPT,
+      results: () => cqCoverageFindings.map((r) => ({ ...r, evidence: [...r.evidence] })),
+      normalize: normalizeCqCoverageResults,
+      isPending: () => cqCoveragePending,
+      statusKey: () => cqCoverageStatusKey,
+    },
     llm: {
       isEnabled: consistencyLlmEnabled,
       setEnabled: setConsistencyLlmEnabled,

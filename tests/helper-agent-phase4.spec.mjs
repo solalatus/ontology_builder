@@ -57,7 +57,8 @@ test("the system prompt includes the INTERVIEW PROCESS section with all 10 phase
     const prompt = await systemPrompt(page);
     assert.match(prompt, /INTERVIEW PROCESS/);
     assert.match(prompt, /0\. Orientation: call get_graph_state first/);
-    assert.match(prompt, /1\. Real questions and actions/);
+    // Renamed by issue #94: the phase now names the artefact it produces.
+    assert.match(prompt, /1\. Competency questions and actions/);
     assert.match(prompt, /9\. Validation pass/);
     assert.match(prompt, /Competency check/);
     assert.match(prompt, /Final checklist/);
@@ -91,7 +92,7 @@ test("the system prompt's final checklist requires a get_graph_state check, not 
 test("the system prompt's final checklist also covers jointly-named relationship pairs and distinctly-named roles, matching the upgraded Phase 2/3 bars", async () => {
   await withPage(async (page) => {
     const prompt = await systemPrompt(page);
-    assert.match(prompt, /every pair of classes jointly\s*mentioned in a Phase 1 question or action has a direct relationship\s*between that specific pair/);
+    assert.match(prompt, /every pair of classes jointly\s*mentioned in a competency question or action has a direct relationship\s*between that specific pair/);
     assert.match(prompt, /distinctly-named actor or role from Phase 1 became its own class,\s*not folded into one generic bucket type/);
   });
 });
@@ -169,7 +170,7 @@ test("the system prompt requires checking back when the expert's Phase 1 probe a
 test("the system prompt requires per-item justification for classes in small batches, not one omnibus \"which should stay\" question over a large proposed list", async () => {
   await withPage(async (page) => {
     const prompt = await systemPrompt(page);
-    assert.match(prompt, /For each one, state the specific Phase 1 question or\s*action it's needed for/);
+    assert.match(prompt, /For each one, state the specific competency question or\s*action it's needed for/);
     assert.match(prompt, /Don't propose a\s*long list all at once and ask one single "which of these should stay"\s*question over the whole batch — that shape reliably gets a blanket\s*"keep all" back with no real scrutiny of any individual item/);
   });
 });
@@ -230,7 +231,7 @@ test("the system prompt pushes Phase 3 (relationships) to systematically cover a
 test("the system prompt grounds relationship candidates in Phase 1 material and requires a get_graph_state coverage check before leaving Phase 3", async () => {
   await withPage(async (page) => {
     const prompt = await systemPrompt(page);
-    assert.match(prompt, /Ground candidates in the\s*Phase 1 material itself/);
+    assert.match(prompt, /Ground candidates in the\s*competency questions themselves/);
     assert.match(prompt, /Before leaving\s*this phase, call get_graph_state and check every class's relationship\s*count directly/);
   });
 });
@@ -248,7 +249,7 @@ test("the system prompt grounds relationship candidates in Phase 1 material and 
 test("the system prompt requires checking that classes jointly named in the same Phase 1 item have a direct relationship between them, not just individually connected", async () => {
   await withPage(async (page) => {
     const prompt = await systemPrompt(page);
-    assert.match(prompt, /two classes that\s*appear together in the same original Phase 1 question or action almost\s*always need a direct relationship between them specifically/);
+    assert.match(prompt, /two classes that\s*appear together in the same competency question or action almost\s*always need a direct relationship between them specifically/);
     assert.match(prompt, /confirm every pair of classes it\s*jointly mentions has an explicit relationship between that exact pair/);
   });
 });

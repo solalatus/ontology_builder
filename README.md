@@ -16,19 +16,36 @@ imported back through the same button:
 |---|---|---|
 | `.json` | canonical, full-fidelity (`spec.md` §5.1) | everything — ids, positions, box sizes, and the version history, so the next save continues the same numbered series |
 | `.txt` | portable edge list, structure only (§5.2) | nodes and relations; positions are not in the format, so the graph is re-laid out |
-| `.domain.yaml` | domain model (`agent_ontology_spec.md` §5) | classes, relationships, rules and actions; no positions or ids |
+| `.domain.yaml` | domain model (`agent_ontology_spec.md` §5) | competency questions, classes, relationships, rules and actions; no positions or ids |
 
 The `.txt` and `.domain.yaml` are the hand-editable, pipeline-friendly ones;
 the `.json` is the one to reopen when you want the canvas back exactly as you
 left it.
 
 Built on top of that base editor, an **Agent Ontology** layer
-(`agent_ontology_spec.md`) adds domain-model authoring — classes,
-relationships, rules, and actions, exportable as a structured YAML domain
-model — and a **Helper Agent** (`helper_agent_plan.md`) adds an embedded,
-bring-your-own-key chat panel that can interview a user and build/edit that
-same domain model live on the canvas through tool calls, with its own
-conversation persisted across reloads.
+(`agent_ontology_spec.md`) adds domain-model authoring — competency
+questions, classes, relationships, rules, and actions, exportable as a
+structured YAML domain model — and a **Helper Agent**
+(`helper_agent_plan.md`) adds an embedded, bring-your-own-key chat panel
+that can interview a user and build/edit that same domain model live on the
+canvas through tool calls, with its own conversation persisted across
+reloads.
+
+**Competency questions** (issue #94) are the requirements the rest of the
+model answers to: the real questions the future agent must be able to answer,
+or have enough domain orientation to work out how to answer. They are
+requirements *on* the ontology rather than elements of it — they never become
+canvas boxes, and they are explicitly not runtime instance data. A
+satisfactory model does not contain the answer to "which escalation policy
+applies to this support request?"; it contains enough orientation for the
+future agent to know which concepts, relationships, rules, actions and
+verification steps are involved in getting there. You can elicit them
+conversationally (the Helper Agent's first interview phase), write them by
+hand in the Domain Model panel, or import them — a `.domain.yaml` containing
+nothing but a `competency_questions:` section is a valid import, so an
+external requirements process can seed a model with them. The canonical
+`.json` and the `.domain.yaml` both preserve them; the `.txt` edge list
+deliberately does not, since it remains the lossy nodes/edges view.
 
 A **consistency checker** runs over the model after every edit — yours or the
 agent's — and reports contradictions it can prove: a rule requiring a value its
@@ -43,6 +60,21 @@ nothing is sent anywhere on its own. Importing a domain-model file reports
 the same way before you commit: the dialog says how many contradictions
 Merge or Replace would each leave behind — separately, because they give you
 different models — and neither is blocked.
+
+A separate, optional **competency-question coverage** check lives in the same
+panel, shown only once the model has questions to check. It asks the connected
+model whether the ontology gives a future agent enough orientation to address
+each question, and reports `covered` / `partial` / `not covered` with concise
+evidence and, where relevant, the specific gap. It answers a genuinely
+different question from the consistency checker — a model can be perfectly
+self-consistent and cover its questions badly, or the reverse — so the two are
+never merged into one score, and a coverage verdict is always labelled as the
+model judgement it is, never as deterministic proof. One click is one API
+call, results are read-only (nothing is ever auto-edited from them), and any
+edit to the ontology or the question list clears them rather than showing you
+a verdict about a model you have already changed. No RDF, SPARQL, SHACL or
+OWL formalization is performed anywhere in this: the questions stay natural
+language, and so does the judgement.
 
 ## Interview field guide
 

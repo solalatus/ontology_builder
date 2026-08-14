@@ -71,6 +71,10 @@ test("the exported YAML reproduces the howto's own worked example structure exac
 
     const yaml = await domainYaml(page);
     assert.equal(yaml, [
+      // Issue #94: competency_questions leads the document (empty here —
+      // this graph has none), because they are the requirements the rest of
+      // the model answers to. Additive: everything below is unchanged.
+      "competency_questions: []",
       "classes:",
       "  Invoice:",
       "    meaning: A request from a supplier to receive payment.",
@@ -140,7 +144,7 @@ test("a relationship's aliases are included in the export, same shape as a class
 test("an empty graph exports valid, minimal YAML — no crash, no undefined leaking through", async () => {
   await withPage(async (page) => {
     const yaml = await domainYaml(page);
-    assert.equal(yaml, "classes: {}\nrelationships: []\nrules: {}\nactions: {}\n");
+    assert.equal(yaml, "competency_questions: []\nclasses: {}\nrelationships: []\nrules: {}\nactions: {}\n");
   });
 });
 

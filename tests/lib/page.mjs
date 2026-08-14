@@ -231,19 +231,31 @@ export async function waitForViewSettled(page, { stableFrames = 3, timeout = 500
 // finished, but has no constant to wait for. Sleeping 200ms and sampling
 // leaves the assertion comparing whatever the transition happened to be
 // passing through; this returns the value the property actually lands on.
-export async function waitForStyleSettled(page, selector, prop, { stableFrames = 3, timeout = 5000 } = {}) {
+// `differentFrom` closes the one gap "N identical frames" alone cannot: a
+// transition that has not *started* yet reads as perfectly stable at its old
+// value, so a caller that toggled something and then waited would be handed
+// back the pre-toggle value as if it had settled there. raf polling makes that
+// likely rather than exotic — the predicate runs before the frame's style
+// recalc, so the first few samples after a class/attribute swap can all
+// predate the transition. Pass the value the property is moving *away* from
+// and those samples stop counting as settled.
+export async function waitForStyleSettled(page, selector, prop, { stableFrames = 3, timeout = 5000, differentFrom = null } = {}) {
   await page.waitForFunction(
-    ({ selector, prop, stableFrames }) => {
+    ({ selector, prop, stableFrames, differentFrom }) => {
       const el = document.querySelector(selector);
       if (!el) return false;
       const value = getComputedStyle(el)[prop];
       window.__kgStyleProbe = window.__kgStyleProbe || {};
       const at = `${selector}|${prop}`;
+      if (differentFrom !== null && value === differentFrom) {
+        window.__kgStyleProbe[at] = { value, n: 0 };
+        return false;
+      }
       const prev = window.__kgStyleProbe[at];
       window.__kgStyleProbe[at] = prev && prev.value === value ? { value, n: prev.n + 1 } : { value, n: 1 };
       return window.__kgStyleProbe[at].n >= stableFrames;
     },
-    { selector, prop, stableFrames },
+    { selector, prop, stableFrames, differentFrom },
     { timeout, polling: "raf" },
   );
   return page.evaluate(({ selector, prop }) => {
