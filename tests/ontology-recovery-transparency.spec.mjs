@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { tagApiMessagesWithTurn, looksLikeEarlyPhaseCheckpoint, looksLikePureAcknowledgment } from "./evals/lib/conversationOrchestrator.mjs";
+import { tagApiMessagesWithTurn, looksLikeEarlyPhaseCheckpoint, looksLikePureAcknowledgment, looksLikeContinuationOffer } from "./evals/lib/conversationOrchestrator.mjs";
 import {
   writeConversationLog, writeToolCallLog, writeReport, pathsFor, RESULTS_DIR,
   writeRecoveredModelYaml, writeHeuristicMatches, writeSemanticJudgments, writeSemanticMatches,
@@ -420,4 +420,56 @@ test("this file's own reproducibility-artifact write calls never touch the real,
   if (fs.existsSync(realPath)) {
     assert.doesNotMatch(fs.readFileSync(realPath, "utf8"), /isolation probe/);
   }
+});
+
+
+// Issue #94's first gpt-5.4 batch stopped ALL SIX interviews on a message that
+// recapped the model and then asked the expert whether to continue. The
+// classifier read the recap and said YES. These are the real closing messages
+// from that batch, verbatim, and the real closing messages from the three
+// published anchor runs -- which must keep classifying as finished, since they
+// are what a genuine wrap-up looks like and the anchor set must not be
+// retroactively invalidated by this filter.
+const REAL_CONTINUATION_OFFERS = [
+  // treatment/run-03 -- names the domain areas still unmodelled
+  "At this point, we have a solid working ontology slice.\n\nOne focused question to finish this interview cleanly:\n"
+    + "Would you like me to stop here with this validated incident-management core, or continue into additional scope "
+    + "you mentioned earlier such as **emergency changes, communications, reviews, or regulatory-reporting workflows**?",
+  // control/run-03
+  "One final confirmation:\nWould you like to stop here with the model in its current validated state, or continue "
+    + "with cleanup-oriented refinement of the remaining inverse-pair and duplicate-edge warnings?",
+  // control/run-01
+  "**Would you like me to fix the `isolateConfigurationItem` warning now, then move to `Contain an Incident`?**",
+  // treatment/run-01
+  "If you\u2019d like, I can continue with that gap-closing step now. Shall I proceed?",
+  // treatment/run-02 / control/run-02
+  "If you want, the next step can be either: (a) add the missing property, or (b) review the actions. Which?",
+];
+
+const REAL_ANCHOR_ENDINGS = [
+  "## Result\n\nNo blocking gaps found. The ontology is now usable as a compact MTSR model for the bank\u2019s "
+    + "IT operations governance and major-incident management agent.",
+  "## Status\n\nThe ontology is validated against the questions and actions we collected and is ready for use in the tool.",
+  "## Result\n\nThe ontology is complete for the questions and actions you gave.",
+];
+
+test("looksLikeContinuationOffer catches every real closing message that prematurely ended issue #94's first gpt-5.4 batch", () => {
+  for (const message of REAL_CONTINUATION_OFFERS) {
+    assert.equal(looksLikeContinuationOffer(message), true, `should catch: ${message.slice(0, 70)}...`);
+  }
+});
+
+test("looksLikeContinuationOffer leaves the three published anchor endings alone — the anchor set is not retroactively invalidated", () => {
+  for (const message of REAL_ANCHOR_ENDINGS) {
+    assert.equal(looksLikeContinuationOffer(message), false, `must not catch: ${message.slice(0, 70)}...`);
+  }
+});
+
+test("looksLikeContinuationOffer needs both a question and an offer — a final summary with a rhetorical question is not caught", () => {
+  // No question mark at all: a statement, however it is phrased.
+  assert.equal(looksLikeContinuationOffer("I could continue, but the ontology is complete for the questions you gave."), false);
+  // A question, but no offer of further modeling work.
+  assert.equal(looksLikeContinuationOffer("The model is complete. Does that match your understanding?"), false);
+  assert.equal(looksLikeContinuationOffer(""), false);
+  assert.equal(looksLikeContinuationOffer(null), false);
 });

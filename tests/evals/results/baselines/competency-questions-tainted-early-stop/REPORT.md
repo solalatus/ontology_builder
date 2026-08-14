@@ -4,7 +4,40 @@ Design, measures and pass criteria were pre-registered in
 `tests/evals/CQ_NON_REGRESSION.md` before these arms ran. Nothing below was
 adjusted to fit the outcome.
 
-## Verdict: FAIL. The interviewer prompt change does not merge as written.
+## ⚠️ TAINTED — superseded, retained only as the record of a harness defect
+
+**Do not read the verdict below as a result about issue #94.** After this batch
+ran, a qualitative inspection found that **all six interviews were stopped
+prematurely by a defect in the eval harness**, not by the interview finishing.
+
+Every one of the six ended on a message that recapped the model and then *asked
+the expert whether to continue* — in one case naming the domain areas still
+unmodelled ("continue into additional scope you mentioned earlier such as
+emergency changes, communications, reviews, or regulatory-reporting
+workflows?"). The orchestrator's `appearsFinished()` classifier read the recap
+and answered YES. An interview is not finished while the interviewer is still
+asking whether to do more work.
+
+The defect is not symmetric in effect, which is what makes this batch
+unusable rather than merely noisy: competency-question work shifts *where* the
+first checkpoint-shaped utterance falls, so the treatment arm reached its
+premature stop having covered less domain than the control did at its own. The
+measured deficit therefore mixes the treatment with an interaction between the
+treatment and the stopping rule.
+
+Fixed by `looksLikeContinuationOffer()` in
+`tests/evals/lib/conversationOrchestrator.mjs`, a deterministic pre-filter in
+the same spirit as the existing phase-recap one, pinned by tests built from
+these six real closing messages. **The three published anchor runs are
+unaffected**: all three end on a flat terminal statement containing no question
+mark at all, so neither the defect nor the fix touches them — verified, and
+pinned by its own test.
+
+The superseding batch is in `results/baselines/competency-questions/`.
+
+---
+
+## Original verdict as recorded at the time: FAIL (now known to be tainted)
 
 Two dimensions decrease by more than the run-to-run spread, and both are core
 recovery measures. Per §5, that is a fail, and the change owes a fallback.
