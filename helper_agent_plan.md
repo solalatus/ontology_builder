@@ -1287,6 +1287,8 @@ the reasoning; each remains independently possible later.
 - [x] Docs: this section, `agent_ontology_spec.md` §4.3/§4.4/§5/§7/§11,
       `spec.md` §5.1/§5.2, `README.md`.
 - [x] Interviewer non-regression evaluation before merge (issue #94's own
-      acceptance comment) — see `tests/evals/results/CQ_NON_REGRESSION.md`,
+      acceptance comment) — design and pass criteria pre-registered in
+      `tests/evals/CQ_NON_REGRESSION.md`, results in
+      `tests/evals/results/baselines/competency-questions/REPORT.md`,
       and the updated golden prompt hashes in
       `tests/agent-production-invariants.spec.mjs`.

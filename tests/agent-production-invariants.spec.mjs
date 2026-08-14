@@ -48,7 +48,8 @@ import { withPage } from "./lib/page.mjs";
 // eff34f3e…/a2194212…, recorded when issue #84 added the CONSISTENCY CHECK
 // section. That makes a new treatment, so issue #94's own acceptance comment
 // asks for a non-regression evaluation of the interview before merging -- see
-// tests/evals/results/CQ_NON_REGRESSION.md for the run that was executed
+// tests/evals/CQ_NON_REGRESSION.md for the design, and
+// tests/evals/results/baselines/competency-questions/REPORT.md for the run executed
 // against this exact prompt. This is the intentional case the header above
 // describes -- not a hash updated to make a failing test go away.
 export const PRODUCTION_SYSTEM_PROMPT_SHA256 = {

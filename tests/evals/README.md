@@ -514,8 +514,9 @@ exists. Two runners exist for that, both two-arm and within-model:
   (`fixtures/interviewer-prompt-pre-94.txt`, verified against the golden hash
   that shipped before the change, so a drifted fixture aborts the run rather
   than producing a void comparison). Scored offline, arm against arm, by
-  `score-cq-non-regression.mjs`. Results and reading:
-  `results/CQ_NON_REGRESSION.md`.
+  `analyze-cq-non-regression.mjs`. Design and pass criteria:
+  `CQ_NON_REGRESSION.md`. Results:
+  `results/baselines/competency-questions/REPORT.md`.
 
 Both run the *same* harness, fixture, persona and scorer for both arms, so the
 arms differ by the interviewer prompt alone; both re-run the control rather

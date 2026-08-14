@@ -118,28 +118,29 @@ const MODEL = process.env.EVAL_INTERVIEWER_MODEL || "gpt-5-mini";
 // this resource answers on. Validity is unaffected: both arms use the same
 // persona and the same classifier, so it cancels out of the comparison.
 const PERSONA_MODEL = process.env.ONTOLOGY_EVAL_PERSONA_MODEL || "gpt-4o";
-const CLASSIFIER_MODEL = process.env.ONTOLOGY_EVAL_CLASSIFIER_MODEL || "gpt-4o";
+// The completion classifier stays on the INTERVIEWER's model, matching
+// self-correction-eval.mjs and ontology-recovery.eval.spec.mjs. That default is
+// deliberate upstream, not an oversight: a cheap classifier was hard to
+// instruction away from false "the interview is finished" positives, and a run
+// once looped 160+ turns because of it. The persona is the one harness call
+// that is safe to run cheaply — it reads answers off a fixture.
+const CLASSIFIER_MODEL = process.env.ONTOLOGY_EVAL_CLASSIFIER_MODEL || MODEL;
 const REACHABLE_DEPLOYMENTS = (process.env.EVAL_AZURE_DEPLOYMENTS || "gpt-4o,gpt-5-mini,o4-mini").split(",");
-// The wallclock must NOT be the thing that ends an interview here, and this
-// default is deliberately far above the repo's usual 45.
+// 45 minutes and 120 turns are the established values (self-correction-eval.mjs
+// and ontology-recovery.eval.spec.mjs both use them); they are not re-derived
+// here. The published anchor stopped naturally after 52 turns in 1062s, well
+// inside that budget.
 //
-// An interview that is cut off mid-phase does not measure "how much of the
-// domain did this interviewer recover" — it measures "how much had it got to
-// when the clock ran out", and that is not a fair comparison in this
-// experiment specifically. The treatment's Phase 1 front-loads competency-
-// question elicitation, confirmation and persistence BEFORE class modeling
-// starts, so a binding clock steals time from the treatment's modeling phases
-// and not from the control's. The bias runs against the treatment, which is
-// exactly the direction that would manufacture a false regression.
-//
-// Sizing comes from the published anchor run: it stopped naturally
-// (app_agent_appears_finished) after 52 turns in 1062s. Turn count is the
-// stable quantity; wall-clock per turn is not, because this environment runs a
-// rate-limited reasoning deployment at roughly 2.6x the anchors' seconds per
-// turn. A budget that lets ~70 turns happen is therefore ~75 minutes here. The
-// run still stops the moment the interview actually concludes.
+// What the wallclock must NOT do is decide when an interview ends. An interview
+// cut off mid-phase measures the budget, not the interviewer, and the
+// truncation is not symmetric in this experiment: the treatment's Phase 1
+// front-loads competency-question elicitation before class modeling begins, so
+// a binding clock costs the treatment its modeling phases and not the
+// control's — the direction that manufactures a false regression. The analyzer
+// therefore refuses to report any run that stopped on wallclock_timeout; if
+// that happens, raise this and re-run rather than reading the numbers.
 const MAX_TURNS = Number(process.env.ONTOLOGY_EVAL_MAX_TURNS) || 120;
-const WALLCLOCK_MINUTES = Number(process.env.ONTOLOGY_EVAL_WALLCLOCK_MINUTES) || 75;
+const WALLCLOCK_MINUTES = Number(process.env.ONTOLOGY_EVAL_WALLCLOCK_MINUTES) || 45;
 
 // The harness's own two model calls (the simulated expert and the "is this
 // interview finished?" classifier), sent as a REAL multi-turn message array.
