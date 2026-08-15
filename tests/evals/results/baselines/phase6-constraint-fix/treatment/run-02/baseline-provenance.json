@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "condition": "phase6-constraint-fix/treatment",
+  "arm": "treatment",
+  "runId": "run-02",
+  "generatedAt": "2026-08-15T09:57:56.723Z",
+  "model": "gpt-5.4",
+  "personaModel": "gpt-4o-mini-internal",
+  "classifierModel": "gpt-5.4",
+  "provider": "azure",
+  "endpoint": "https://briandemoopenai.openai.azure.com",
+  "interviewerPromptSha256": "8cbaf7ee68237fa373da220b846a4349a26c1e90df843f4cddbcb69b99e8c59e",
+  "phase6FixApplied": true,
+  "stoppedReason": "app_agent_appears_finished",
+  "turnsUsed": 49,
+  "wallClockSec": 592,
+  "applyToolCalls": 34,
+  "getGraphStateCalls": 37,
+  "allowedValueListCount": 19,
+  "note": "Issue #96 follow-up to CQ_NON_REGRESSION.md. The control arm runs the genuinely live, unmodified shipped prompt (verified against that eval's own recorded treatment-arm hash); the treatment arm applies exactly two verified String.replace() edits (Phase 6 paragraph, Phase 9(b) checklist clause) to that same live text. See PHASE6_CONSTRAINT_FIX.md for the full design. The deployment LISTING is stubbed (this resource returns an empty list for deployments that are callable); every chat call is a real relayed Azure call. Nothing under results/runs/ was read or written."
+}
