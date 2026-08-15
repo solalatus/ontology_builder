@@ -3434,6 +3434,29 @@ and record deltas here instead of editing the spec.)*
   already documented in the 2026-08-08 entry above — not present in this
   pass's own run, and not something this pass introduced or needed to
   chase). Python: 13/13, unchanged.
+- **2026-08-15 — competency questions (#94) and welcome/help (#78) backfilled
+  into `helper_agent_todo.md`/here; issue #96 investigated, fix attempted and
+  rejected on its own pre-registered eval; stability re-confirmed on `main`.**
+  Both #94 and #78 had already shipped (PRs #95/#81) without ever getting a
+  narrative `## Addendum` entry in `helper_agent_todo.md` — backfilled there
+  from their own commits and eval reports (issue #94's `helper_agent_plan.md`
+  §11 implementation checklist was already complete; this only added the
+  missing narrative account and the pointer to `CQ_NON_REGRESSION.md`'s own
+  open item). Issue #96 — that open item, a Phase 6 "constraints and fixed
+  choices" prompt fix — was investigated, designed, and run through this
+  project's standard pre-registered eval process
+  (`tests/evals/PHASE6_CONSTRAINT_FIX.md`, branch `fix-96-phase6-crowding`,
+  not merged): it **failed its own pass criteria** (allowed-value-list
+  recovery not consistent across all three runs, structural F1 regressed on
+  all three dimensions) and `index.html` was left untouched. Logged on the
+  issue itself, kept open, with a smaller untried fallback recorded for
+  whoever picks it up next — full account in `helper_agent_todo.md`'s own
+  dated entry. Full regression re-run on `main` directly (no code changes
+  went in) to confirm stability after rejecting that change: `node --test
+  tests/*.spec.mjs` — **958 tests, 958 pass, 0 fail** (run with
+  `OPENAI_API_KEY` set, so the live-gated tests executed rather than being
+  skipped, unlike the 2026-08-12 entry's 897+16-skipped count above — not a
+  regression, a different environment). Python: unchanged.
 
 ---
 
