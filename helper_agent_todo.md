@@ -2134,3 +2134,102 @@ design rationale lives in `helper_agent_plan.md` §10, not repeated here.
       diff origin/main -- index.html` (no output for either constant) — this feature never touches
       prompt text, and that's now verified, not just assumed.
 - [x] Full regression (`node --test tests/*.spec.mjs`), then PR against issue #74.
+
+## Competency Questions (issue #94) — `helper_agent_plan.md` §11
+
+**Backfilled here from its own commits and eval reports** — implemented and merged (PR #95) without ever
+getting a narrative entry in this file; `helper_agent_plan.md` §11's implementation checklist is the
+authoritative detail, not repeated here.
+
+Made competency questions a first-class, persisted artefact instead of implicit interview context. Phase 1
+is renamed "Competency questions and actions": it elicits 10-20 real questions and 5-10 real actions
+*before* any class/relationship/property modeling starts, confirms each with the expert, and persists
+confirmed ones through `apply_ontology_yaml`'s new `competency_questions` field as soon as they're
+confirmed — not batched to the end of the phase. Phase 0 recognizes competency questions already attached
+to an imported model rather than discarding or regenerating them. Phases 2/3/4/8 justify candidates against
+the persisted list instead of loose "Phase 1 material," and Phase 4 in particular gained a quote-back-and-
+challenge mechanism: an expert calling a property "optional" gets that property checked against every
+still-open competency question before the exclusion is accepted. Phase 9(a) reads the persisted list back
+from `get_graph_state` rather than from the model's own memory of the conversation, so a compacted or
+edited-on-canvas history can't silently drop coverage. New UI: a Domain Model dialog section (list, count,
+filter, add/remove, draft-then-Save as one undo step) plus a CQ coverage pass (`window.__kg.consistency.cqCoverage`)
+that runs each persisted question against the current model and reports `covered`/`partial`/`uncovered`.
+
+**Non-regression evaluation before merge**, per the issue's own acceptance comment: design and pass
+criteria pre-registered in `tests/evals/CQ_NON_REGRESSION.md` before any live run, mirroring
+`SELF_CORRECTION_EVAL.md` (issue #85) section for section. Two arms, `n=3` each, within-model (this build's
+Azure resource doesn't have the anchor runs' original model deployed): `control` reconstructs the frozen
+pre-#94 prompt via the eval-only `agentState.systemPromptOverride` hook, verified against a golden hash
+before running; `treatment` is the shipped #94 prompt, unmodified. Result:
+`tests/evals/results/baselines/competency-questions/REPORT.md` — no regression, all six F1 deltas favour
+the treatment (full-domain: classes +4.6, relationships +5.9, properties +0.7; practical scope: +6.0,
++6.8, +5.0), and the treatment arm scores higher than the original `gpt-5.5` anchors on all three full-scope
+dimensions. **One real weakness found and disclosed at merge time, not hidden:** controlled-value-list
+capture regressed — treatment recorded 1/9/11 allowed-value lists against the control's 17/37/26,
+several-fold lower and consistent across all three run pairs. Root cause: Phase 6 ("Constraints and fixed
+choices") was not itself edited by #94, but the surrounding changes (front-loaded Phase 1, Phase 4's
+justification pressure) crowd it out — competency-question breadth appears to come at the expense of the
+pass that bounds property values. The report's own recommendation — "restore Phase 6's constraint pass...
+re-run and check that controlled-value coverage returns to the control's range while the F1 gains hold" —
+is issue #96, tracked separately (see the addendum below; the attempted fix did not pass its own eval and
+was not merged).
+
+Tests: `tests/competency-questions.spec.mjs` (20), `tests/cq-coverage.spec.mjs` (10, mocked API),
+`tests/competency-questions-agent.spec.mjs` (9) — 39 new tests, all mocked, no live API required. Docs:
+`helper_agent_plan.md` §11, `agent_ontology_spec.md` §4.3/§4.4/§5/§7/§11, `spec.md` §5.1/§5.2, `README.md`,
+plus the updated golden prompt hashes in `tests/agent-production-invariants.spec.mjs`.
+
+## Phase 6 constraint-capture follow-up (issue #96) — investigated, fix attempted, did not pass, left open
+
+**2026-08-15.** The one open item the #94 merge left behind (previous addendum). Read the actual failure
+mechanism firsthand from `competency-questions/treatment/run-01` and `run-02`'s transcripts, not just the
+`REPORT.md` summary, before designing anything: `run-02` shows narrow self-selection (the interviewer named
+only 8 of 109 captured properties as "clearly" needing a constraint before moving on); `run-01` shows the
+interviewer explicitly offering to skip straight to the validation pass instead of doing allowed-value
+capture, and Phase 9(b)'s own final-checklist read-back never surfaces the resulting gap — its "what
+passes"/"remaining issues" bullets don't mention controlled vocabularies at all, despite the gap already
+existing at that point in the conversation.
+
+Designed a targeted, two-edit fix on that evidence: Phase 6's wording rewritten from open, self-selecting
+discretion ("properties that clearly need one") to a systematic pass — classify *every* captured property
+as fixed-set or not, out loud, with a closing "call `get_graph_state` and check the actual property list"
+requirement mirroring Phase 3's own relationship-coverage discipline; Phase 9(b)'s checklist bullet
+sharpened from "fixed value lists are used where appropriate" to a concrete criterion naming the property
+shapes that should have one. Pre-registered before any live run in
+`tests/evals/PHASE6_CONSTRAINT_FIX.md`, following `CQ_NON_REGRESSION.md`'s own structure. Same two-arm,
+`n=3`-per-arm design, but simpler than that eval's control mechanism: this fix's `control` arm is the live,
+unmodified shipped prompt (no fixture reconstruction needed, since nothing pre-#94 is being compared to),
+and `treatment` applies the two edits via two verified, exactly-once `String.replace()` calls against that
+same live text — the runner aborts rather than silently testing stale text if either substring isn't found
+exactly once. One real harness bug was caught and fixed *before* any run was scored: the eval-only
+`systemPromptOverride` hook drops `AGENT_KNOWLEDGE` and double-appends the language directive by design
+(built for a different condition that wants neither); the treatment arm now recovers `AGENT_KNOWLEDGE`
+algebraically via a sentinel probe rather than silently losing it, a confound the design's own "nothing
+else changes" claim would otherwise have quietly violated.
+
+**Result, from `tests/evals/PHASE6_CONSTRAINT_FIX.md` §7 (commit `df432ac` on branch
+`fix-96-phase6-crowding`, not merged): fails its own pre-registered pass criteria.** Allowed-value-list
+counts: control 22/13/22, treatment 29/19/20 — not the required "clear, consistent multi-fold recovery";
+`run-03` actually favours control, and the mean delta (+3.7) is smaller than either arm's own run-to-run
+spread. Notably, this batch's own control landed far higher than `CQ_NON_REGRESSION.md`'s original
+treatment-arm numbers (1/9/11) that motivated the fix, on the *identical* prompt — the crowding effect has
+substantial run-to-run variance and isn't a deterministic per-run severity. Full-domain structural F1
+(treatment − control) moved the wrong way on all three dimensions (classes -9.9, relationships -4.7,
+properties -13.9), the opposite of #94's own six-of-six positive deltas, and the classes drop clears the
+pre-registered spread-significance bar. Qualitative read confirms the prompt edits changed interviewer
+*behaviour* exactly as intended in every treatment run (Phase 6 ran as a genuine systematic pass; Phase
+9(b)'s checklist actively engaged with constraint coverage instead of staying silent) — but the likely
+mechanism for the F1 cost is that satisfying a heavier Phase 6 pass draws down the same finite interview
+budget from class/relationship coverage elsewhere, without turn count increasing to pay for it (treatment
+mean 46 turns vs control's 50 — fewer, if anything). The same crowding dynamic, relocated rather than
+removed.
+
+**Consequence: `index.html` was not changed.** Per the pre-registered fallback order, issue #96 stays open,
+logged at
+[github.com/solalatus/ontology_builder/issues/96#issuecomment-5301819226](https://github.com/solalatus/ontology_builder/issues/96#issuecomment-5301819226)
+referencing the eval commit. Recorded for whoever picks this up next: a smaller, untried fallback —
+sharpen Phase 9(b)'s checklist bullet alone, without Phase 6's heavier rewrite, since the checklist
+engagement was the more unambiguous win here and Phase 6's added weight is the more plausible source of
+the structural cost. That is a new experiment needing its own pre-registration, not an extension of this
+one — the eval infrastructure (`tests/evals/phase6-constraint-fix.mjs`,
+`tests/evals/analyze-phase6-constraint-fix.mjs`) is reusable for it with a smaller edit set.
