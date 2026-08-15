@@ -39,22 +39,36 @@ import { withPage } from "./lib/page.mjs";
 // + AGENT_KNOWLEDGE + the output-language directive, exactly as sent to the
 // model on a real request. Recorded per language because the directive names
 // the language (agentLanguageDirective()), so the two differ by design.
-// Updated deliberately in the commit that made competency questions a
-// first-class, persisted part of the model (issue #94): Phase 1 now names them
-// and persists confirmed ones through apply_ontology_yaml, Phase 9 replays the
-// persisted list read back from get_graph_state instead of the agent's own
-// memory of the conversation, and the tool descriptions/YAML shape gained the
-// competency_questions section. The previous hashes were
-// eff34f3e…/a2194212…, recorded when issue #84 added the CONSISTENCY CHECK
-// section. That makes a new treatment, so issue #94's own acceptance comment
-// asks for a non-regression evaluation of the interview before merging -- see
-// tests/evals/CQ_NON_REGRESSION.md for the design, and
-// tests/evals/results/baselines/competency-questions/REPORT.md for the run executed
-// against this exact prompt. This is the intentional case the header above
-// describes -- not a hash updated to make a failing test go away.
+// Updated deliberately in the commit that shipped a ground-up prompt/behavior-
+// tuning bundle (6 of 8 ideas from a research review, 2 left ambiguous for a
+// future targeted eval): rule/action authoring-time consistency checks
+// (Phase 7/8), no false "skip this phase?" framing on incomplete required work
+// (GROUND RULES), a Phase 5 closing check for meaning-sentence coverage plus a
+// reconciled Phase 9(b) checklist and AGENT_KNOWLEDGE "Final check" item,
+// Phase 6's batch cap + per-item justification, adaptive alias-elicitation
+// stopping, naming inverse-relationship-pair duplicates explicitly in
+// CONSISTENCY CHECK, and never ending the interview on a dangling open
+// question. The previous hashes were 0173b3f3…/3a147149…, recorded when issue
+// #94 made competency questions first-class. That makes a new treatment, so
+// this bundle got the same non-regression discipline before merging -- see
+// tests/evals/PROMPT_TUNING_BUNDLE.md for the design and n=5 results (all six
+// F1 dimensions within spread, zero regressions, 6 of 8 ideas showing their
+// intended behavior change in a majority of treatment runs). This is the
+// intentional case the header above describes -- not a hash updated to make a
+// failing test go away.
+//
+// One word-level fix landed after the eval, not before: the shipped example
+// lists ("status, type, category, priority, and similar") originally also
+// named "severity", which collided with the fixture-vocabulary blocklist
+// competency-questions-agent.spec.mjs pins (severity is a real property in
+// this repo's own eval fixture). Removed rather than re-run -- it's one
+// illustrative word among several already followed by "and similar", not a
+// structural change, and the eval's qualitative findings (checklist
+// engagement, meaning-sentence coverage) don't depend on which example word
+// appears in that one list.
 export const PRODUCTION_SYSTEM_PROMPT_SHA256 = {
-  en: "0173b3f31cd00b5e776cffa2f2e6d3016686d98df6cbfa9e3a6ab4e1a0b0dee0",
-  hu: "3a147149b7e389667c6498f9bda4cd3e7df6a6314562f89b5d49b8f91565b778",
+  en: "3684db5c4eb426406005a44a99f8ff9588206da0c061a42aef7e80c3a18b96a7",
+  hu: "a92324e50de806c1ec20ba27d82c0cbe82b570e6c2a4eb668ab9c6d2be5c8db0",
 };
 
 // The complete ontology tool surface an ordinary interview request exposes.
