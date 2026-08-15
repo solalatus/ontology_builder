@@ -178,5 +178,69 @@ rather than as a scored percentage.
 
 ## 7. Results
 
-Not yet run. Nothing above has been altered since this document was written and
-frozen.
+All six runs have completed. Neither this document's design, measures nor pass
+criteria were altered after the results were seen.
+
+**Allowed-value-list count (the decisive measure, §3/§5):**
+
+| | run-01 | run-02 | run-03 | mean | spread |
+|---|---|---|---|---|---|
+| control | 22 | 13 | 22 | 19.0 | 9 |
+| treatment | 29 | 19 | 20 | 22.7 | 10 |
+| delta | +7 | +6 | **-2** | +3.7 | |
+
+**Fails the pre-registered pass criterion.** §5 required "a clear, consistent
+multi-fold recovery across all three runs, not a one-off" — this is neither
+clear, nor multi-fold, nor consistent: `run-03` favours the *control*. The
+delta (+3.7) is smaller than either arm's own run-to-run spread (9 and 10).
+Notably, this batch's own control — the identical, unmodified shipped prompt
+`CQ_NON_REGRESSION.md` measured at 1/9/11 — landed at 22/13/22 here: far
+higher than that eval's own treatment-arm numbers, and closer to *that* eval's
+control range (17/37/26) than to its own treatment range. The severe crowding
+`REPORT.md` documented is real (its qualitative evidence — the explicit
+Phase 6 deferral in `run-01`, the narrow 8-of-109 self-selection in `run-02`
+— was read directly from those transcripts, not inferred) but it is evidently
+not a deterministic per-run outcome; run-to-run variance in the *baseline*
+is large enough that this fix's effect, if any, is not distinguishable from
+noise at n=3.
+
+**Full-domain structural F1, treatment − control:** classes -9.9, relationships
+-4.7, properties -13.9 (`analyze-phase6-constraint-fix.mjs` output). All three
+point the *wrong* direction — the opposite of what `CQ_NON_REGRESSION.md`
+found for #94 itself (all six of its deltas favoured treatment). The classes
+delta (9.9) **exceeds the run-to-run spread** (9.7) — the one dimension in
+this batch that clears the significance bar §5 sets, and it is a real
+regression, not a wash. Practical-scope classes shows the same -9.9 (within
+spread there, 11.3). Controlled-value fidelity is mixed: full scope +6.5
+(favours treatment), practical scope -4.6 (favours control) — both within
+spread, and, per §5's own limitation note, this percentage is unstable at
+n=3 regardless of direction.
+
+**Qualitative read confirms the mechanism worked exactly as designed — Phase 6
+now runs as a genuine systematic pass** ("Before we leave the constraints
+phase, I need to classify the remaining properties that have not yet been
+explicitly classified as fixed-set or open," `treatment/run-02`) **and
+Phase 9(b)'s checklist engages with constraint coverage instead of staying
+silent on it** ("Fixed value lists captured for small decision-bearing sets:
+yes," `treatment/run-01`) in every treatment run. Both §4.1 and §4.3's
+questions resolve in the fix's favour. What the qualitative read cannot show,
+and what the F1 numbers surface instead, is the plausible cost: a heavier,
+more thorough Phase 6 is still a phase that costs conversation turns and
+model attention, and turn count did **not** increase to pay for it (treatment
+mean 46 turns vs control's 50 — *fewer*, if anything). The more likely
+account is that the same finite interview budget that used to under-serve
+Phase 6 now serves it adequately by drawing down from elsewhere — Phase 2/3's
+class and relationship coverage — which is the same crowding dynamic
+`REPORT.md` diagnosed, relocated rather than removed.
+
+**Consequence: the fix does not merge.** Per §5's stated fallback order,
+`index.html` is not changed. Issue #96 stays open. The qualitative evidence
+this eval produced — that a systematic Phase 6 pass and a sharpened Phase 9(b)
+checklist bullet reliably change interviewer *behaviour* in the intended way,
+even though the net *ontology-recovery* effect at n=3 is a wash-to-negative —
+is worth recording against the issue for whoever picks it up next: the
+untried fallback this batch's evidence points toward is sharpening Phase 9(b)
+**alone**, without Phase 6's heavier rewrite, since Phase 9(b)'s engagement
+was the more unambiguous win here and Phase 6's added weight is the more
+plausible source of the structural cost. That is a new, smaller experiment
+that would need its own pre-registration, not an extension of this one.
