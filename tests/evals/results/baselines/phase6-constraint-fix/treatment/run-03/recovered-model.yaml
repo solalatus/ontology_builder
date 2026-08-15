@@ -1,0 +1,469 @@
+competency_questions:
+  - id: cq1
+    text: Which business services are affected by an incident?
+  - id: cq2
+    text: Which IT service is impacted by an incident?
+  - id: cq3
+    text: Who owns the impacted IT service?
+  - id: cq4
+    text: Which resolver group should be assigned to an incident?
+  - id: cq5
+    text: What critical dependencies does the impacted IT service have?
+  - id: cq6
+    text: Does an incident qualify for major-incident declaration?
+  - id: cq7
+    text: Which runbook can be used for an incident?
+  - id: cq8
+    text: Which workaround can be used for an incident?
+  - id: cq9
+    text: Is the materiality assessment for an incident complete?
+  - id: cq10
+    text: Does an incident require regulatory notification?
+  - id: cq11
+    text: What are the current statuses of open corrective actions related to the affected service?
+  - id: cq12
+    text: Who owns the open corrective actions related to the affected service?
+  - id: cq13
+    text: Which alerts are correlated with an incident?
+  - id: cq14
+    text: Which events are correlated with an incident?
+classes:
+  Incident:
+    meaning: An unplanned interruption or degradation of service that requires managed response and coordination.
+    aliases:
+      - incident ticket
+      - service incident
+    properties:
+      severity:
+        type: text
+        allowed:
+          - sev1-critical
+          - sev2-high
+          - sev3-medium
+          - sev4-low
+      impact:
+        type: text
+        allowed:
+          - enterprise-wide
+          - multiple-services
+          - single-service
+          - limited-users
+          - no-observed-impact
+      status:
+        type: text
+        allowed:
+          - new
+          - acknowledged
+          - investigating
+          - contained
+          - recovering
+          - monitoring
+          - resolved
+          - closed
+          - cancelled
+      details:
+        type: text
+      majorIncidentDeclared:
+        type: boolean
+      openedAt:
+        type: date
+  BusinessService:
+    meaning: A customer-facing capability delivered by the bank that supports business processes and objectives.
+    aliases:
+      - business offering
+    properties:
+      status:
+        type: text
+        allowed:
+          - available
+          - degraded
+          - unavailable
+  ITService:
+    meaning: A managed technology capability that supports one or more business services and is essential for their operation.
+    aliases:
+      - application service
+    properties:
+      status:
+        type: text
+        allowed:
+          - healthy
+          - degraded
+          - partially-unavailable
+          - unavailable
+          - recovering
+          - unknown
+      criticality:
+        type: text
+        allowed:
+          - tier-1-critical
+          - tier-2-important
+          - tier-3-standard
+          - tier-4-supporting
+  ResolverGroup:
+    meaning: A team responsible for diagnosing and restoring a specific technology or service area affected by an incident.
+    aliases:
+      - support group
+    properties:
+      status:
+        type: text
+        allowed:
+          - active
+          - inactive
+  ITServiceOwner:
+    meaning: "The individual accountable for the lifecycle, performance, and management of a specific IT service."
+    aliases:
+      - service owner
+    properties:
+      status:
+        type: text
+        allowed:
+          - active
+          - inactive
+  ServiceDependency:
+    meaning: A critical relationship indicating that an IT service relies on one or more other services or components to function effectively.
+    aliases: []
+    properties:
+      status:
+        type: text
+        allowed:
+          - up
+          - down
+          - degraded
+  Runbook:
+    meaning: "A documented operational procedure that provides guidance for diagnosing, responding to, or recovering from incidents."
+    aliases:
+      - operational procedure
+    properties:
+      status:
+        type: text
+        allowed:
+          - current
+          - approved
+          - retired
+  Workaround:
+    meaning: A temporary solution that reduces or bypasses the impact of an incident or problem without addressing the root cause.
+    aliases: []
+    properties:
+      status:
+        type: text
+        allowed:
+          - active
+          - approved
+          - obsolete
+  MaterialityAssessment:
+    meaning: "A process of evaluating an incident's significance to determine whether it requires regulatory notification or special handling."
+    aliases: []
+    properties:
+      status:
+        type: text
+        allowed:
+          - new
+          - completed
+          - under-review
+      completedAt:
+        type: date
+      outcome:
+        type: text
+        allowed:
+          - not-reportable
+          - potentially-reportable
+          - reportable
+  RegulatoryNotification:
+    meaning: A formal submission to a competent authority that provides information about an incident as required by regulation.
+    aliases: []
+    properties:
+      status:
+        type: text
+        allowed:
+          - draft
+          - pending-approval
+          - approved
+          - submitted
+          - accepted
+          - rejected
+          - withdrawn
+      submittedAt:
+        type: date
+      details:
+        type: text
+  CorrectiveAction:
+    meaning: "A tracked action designed to remove a cause, reduce risk, or improve response capability in relation to an incident or issue."
+    aliases:
+      - remediation action
+    properties:
+      status:
+        type: text
+        allowed:
+          - open
+          - in-progress
+          - blocked
+          - implemented
+          - verified
+          - closed
+          - cancelled
+      details:
+        type: text
+      openedAt:
+        type: date
+  Alert:
+    meaning: A monitoring signal that indicates a condition requiring review due to potential issues or anomalies within IT services.
+    aliases:
+      - notification
+    properties:
+      status:
+        type: text
+        allowed:
+          - new
+          - acknowledged
+          - suppressed
+          - escalated
+          - closed
+      severity:
+        type: text
+        allowed:
+          - sev1-critical
+          - sev2-high
+          - sev3-medium
+          - sev4-low
+  Event:
+    meaning: A time-stamped observation representing a noteworthy occurrence or state change in the IT environment.
+    aliases: []
+    properties:
+      status:
+        type: text
+        allowed:
+          - logged
+          - acknowledged
+          - processed
+          - resolved
+      severity:
+        type: text
+        allowed:
+          - low
+          - medium
+          - high
+          - critical
+  Stakeholder:
+    meaning: "A person, group, or organization that has an interest in or is affected by the operational outcomes and status of incidents or services."
+    aliases: []
+    properties: {}
+  LegalEntity:
+    meaning: "A distinct organization or entity that has legal standing, especially in relation to regulatory obligations and compliance requirements."
+    aliases: []
+    properties: {}
+  CorrectiveActionOwner:
+    meaning: The individual or role responsible for managing and ensuring the implementation of corrective actions related to incidents or issues.
+    aliases: []
+    properties:
+      status:
+        type: text
+        allowed:
+          - active
+          - inactive
+relationships:
+  - name: impactsItservice
+    from: Incident
+    to: ITService
+    meaning: The IT service impacted by an incident.
+    aliases:
+      - affects IT service
+  - name: affectsBusinessService
+    from: Incident
+    to: BusinessService
+    meaning: A business service affected by an incident.
+    aliases: []
+  - name: ownedBy
+    from: ITService
+    to: ITServiceOwner
+    meaning: The owner accountable for the IT service.
+    aliases:
+      - managed by
+  - name: assignedToResolverGroup
+    from: Incident
+    to: ResolverGroup
+    meaning: The resolver group currently assigned to the incident.
+    aliases:
+      - designated resolver group
+  - name: supportedBy
+    from: ITService
+    to: ResolverGroup
+    meaning: The resolver group that normally supports the IT service.
+    aliases: []
+  - name: hasCriticalDependency
+    from: ITService
+    to: ServiceDependency
+    meaning: A critical dependency required by the IT service.
+    aliases:
+      - depends on
+  - name: hasRunbook
+    from: Incident
+    to: Runbook
+    meaning: A runbook linked to the incident for handling guidance.
+    aliases:
+      - linked to runbook
+  - name: hasWorkaround
+    from: Incident
+    to: Workaround
+    meaning: A workaround linked to the incident for handling guidance.
+    aliases: []
+  - name: hasMaterialityAssessment
+    from: Incident
+    to: MaterialityAssessment
+    meaning: The materiality assessment performed for the incident.
+    aliases: []
+  - name: hasRegulatoryNotification
+    from: Incident
+    to: RegulatoryNotification
+    meaning: A regulatory notification created or associated with the incident.
+    aliases: []
+  - name: hasCorrectiveAction
+    from: ITService
+    to: CorrectiveAction
+    meaning: A corrective action related to the IT service.
+    aliases: []
+  - name: ownedBy
+    from: CorrectiveAction
+    to: CorrectiveActionOwner
+    meaning: The owner accountable for the corrective action.
+    aliases:
+      - assigned to
+  - name: correlatesAlert
+    from: Incident
+    to: Alert
+    meaning: An alert correlated with the incident.
+    aliases:
+      - related to alert
+  - name: correlatesEvent
+    from: Incident
+    to: Event
+    meaning: An event correlated with the incident.
+    aliases:
+      - related to event
+  - name: notifiesStakeholder
+    from: Incident
+    to: Stakeholder
+    meaning: "A stakeholder to be notified about the incident's status or impact."
+    aliases:
+      - informs stakeholder
+  - name: appliesToLegalEntity
+    from: RegulatoryNotification
+    to: LegalEntity
+    meaning: The legal entity the regulatory notification is for.
+    aliases: []
+  - name: dependsOnItservice
+    from: BusinessService
+    to: ITService
+    meaning: A business service depends on one or more IT services to function properly.
+    aliases:
+      - relies on IT service
+  - name: hasCorrectiveAction
+    from: Incident
+    to: CorrectiveAction
+    meaning: A corrective action specifically linked to the incident.
+    aliases:
+      - associated corrective action
+  - name: determinesRegulatoryNotification
+    from: MaterialityAssessment
+    to: RegulatoryNotification
+    meaning: The materiality assessment leads to or determines the regulatory notification.
+    aliases:
+      - triggers regulatory notification
+  - name: determinedByMaterialityAssessment
+    from: RegulatoryNotification
+    to: MaterialityAssessment
+    meaning: The regulatory notification is determined by the materiality assessment.
+    aliases: []
+  - name: supportsItservice
+    from: Runbook
+    to: ITService
+    meaning: The runbook provides guidance for handling the IT service.
+    aliases: []
+  - name: appliesToItservice
+    from: Workaround
+    to: ITService
+    meaning: The workaround is relevant for addressing an IT service issue.
+    aliases: []
+  - name: relatesToItservice
+    from: Alert
+    to: ITService
+    meaning: The alert pertains to the IT service.
+    aliases: []
+  - name: relatesToItservice
+    from: Event
+    to: ITService
+    meaning: The event pertains to the IT service.
+    aliases: []
+  - name: interestedInBusinessService
+    from: Stakeholder
+    to: BusinessService
+    meaning: The stakeholder has an interest in the business service.
+    aliases: []
+  - name: ownsCorrectiveAction
+    from: CorrectiveActionOwner
+    to: CorrectiveAction
+    meaning: The corrective action owner owns the corrective action.
+    aliases: []
+  - name: receivesRegulatoryNotification
+    from: LegalEntity
+    to: RegulatoryNotification
+    meaning: The legal entity receives the regulatory notification.
+    aliases: []
+rules:
+  qualifiesForMajorIncident:
+    conditions:
+      - incident severity is sev1-critical or sev2-high
+      - incident impact is enterprise-wide or multiple-services
+      - at least one impacted IT service is identified
+  requiresRegulatoryNotification:
+    conditions:
+      - a materiality assessment is completed
+      - the outcome of the materiality assessment is reportable
+      - the regulatory notification applies to the relevant legal entity based on regulatory obligations
+actions:
+  declareMajorIncident:
+    input: Incident
+    preconditions:
+      - qualifiesForMajorIncident
+    effect: incident majorIncidentDeclared becomes true
+    verification: retrieve the incident and confirm majorIncidentDeclared is true
+  assignResolverGroup:
+    input: Incident
+    preconditions: []
+    effect: incident is assigned to the selected resolver group
+    verification: retrieve the incident and confirm the assigned resolver group is recorded
+  updateIncident:
+    input: Incident
+    preconditions: []
+    effect: incident status and details are updated
+    verification: retrieve the incident and confirm the updated status and details are recorded
+  notifyStakeholders:
+    input: Incident
+    preconditions: []
+    effect: stakeholders linked to the incident are notified about its status or impact
+    verification: confirm the intended stakeholders were notified for the incident
+  linkRunbook:
+    input: Incident
+    preconditions: []
+    effect: a relevant runbook is linked to the incident
+    verification: retrieve the incident and confirm the linked runbook is recorded
+  linkWorkaround:
+    input: Incident
+    preconditions: []
+    effect: a relevant workaround is linked to the incident
+    verification: retrieve the incident and confirm the linked workaround is recorded
+  conductMaterialityAssessment:
+    input: Incident
+    preconditions: []
+    effect: a materiality assessment is created or updated for the incident
+    verification: "retrieve the incident and confirm a linked materiality assessment is recorded, and that the materiality assessment has status and outcome values"
+  submitRegulatoryNotification:
+    input: RegulatoryNotification
+    preconditions:
+      - requiresRegulatoryNotification
+    effect: regulatory notification status becomes submitted
+    verification: retrieve the regulatory notification and confirm its status is submitted
+  documentCorrectiveAction:
+    input: CorrectiveAction
+    preconditions: []
+    effect: corrective action details and status are recorded or updated
+    verification: retrieve the corrective action and confirm its details and status are recorded
