@@ -188,5 +188,87 @@ not as a pass or a fail.
 
 ## 7. Results
 
-Not yet run. Nothing above has been altered since this document was written
-and frozen.
+All ten runs completed (`n = 5` per arm), all terminated via
+`app_agent_appears_finished` (none truncated by the wallclock), so all ten
+are scoreable. Nothing in §1–§6 was altered after seeing any result. One gap
+in this document's own coverage was caught and closed during scoring, noted
+below rather than silently patched over.
+
+### Quantitative (`analyze-prompt-tuning-bundle.mjs`)
+
+**No regression on any F1 dimension — a materially different outcome from
+the failed #96 bundle.** All six full/practical F1 deltas (classes,
+relationships, properties) fall within the run-to-run spread; nothing clears
+the significance bar in either direction. Turn count is essentially
+unchanged (control mean 48, treatment mean 50) — the bundle did not cost
+disproportionate turns, the mechanism that sank both #94's Phase 6
+side-effect and #96's own fix.
+
+**Idea #5's own measure (allowed-value-list count) shows a real, mostly
+consistent gain**, well past the deliberately modest bar this document set
+for it: control 13/9/8/12/10 (mean 10.4), treatment 9/24/20/25/18 (mean
+19.2) — treatment ahead in 4 of 5 run pairs, only `run-01` favoring control
+(13 vs 9, a small margin). Mean nearly doubled. Given this idea was scoped
+as a light, isolated edit (batch cap + per-item justification, deliberately
+*not* Phase 6's full systematic-pass rewrite), this result is stronger than
+expected going in.
+
+### Qualitative (all ten transcripts read in full against §3's per-idea table)
+
+| Idea | Control | Treatment | Verdict |
+|---|---|---|---|
+| #1 rule/action consistency | 4/5 general hygiene; 0/5 the literal "value not in allowed list" catch | 5/5 general; 2/5 literal catch, explicitly named and fixed | **weak PASS** |
+| #2 no false skip-ahead framing | 0/5 (the targeted bug never appeared) | 0/5 (never appeared) | **AMBIGUOUS** — not evidence either way per §5's own rule |
+| #3 reconciled checklists / closing discipline | 0/5 show the new meaning-sentence closing check or checklist wording | 5/5 Phase 5 closing check; 4-5/5 Phase 9(b) checklist uses the new wording | **PASS — the clearest result in the batch** |
+| #6 adaptive alias-stopping | 0/5 (no such instruction exists in control) | 2/5 explicitly articulate and follow the rule, in near the edit's own words | **PASS** |
+| #7 echoed-state confusion hardening | 0/5 (the targeted bug never appeared) | 0/5 (never appeared) | **AMBIGUOUS** — same reasoning as #2 |
+| #8 inverse-duplicate resolution | 1/3 applicable runs pick a direction and resolve | 3/4 applicable runs resolve | **weak PASS** |
+| #10 never end on a dangling question | 4/5 already end well; 1/5 (`run-01`) trails off unresolved | 5/5 end with an itemized gap list or full resolution | **weak PASS** |
+
+Idea #6 was not actually covered by this document's own §3 table when
+written — an oversight caught during scoring, not before. Checked directly
+against the transcripts rather than left unscored: treatment `run-02` and
+`run-04` both explicitly narrate the stopping rule firing (*"That's now two
+alias batches in a row with relatively limited extras beyond what's already
+captured, so I'll stop actively probing for more class aliases and move on,
+as planned"* — `run-02`; *"We've now had two alias batches with very few
+real aliases, so I'll stop actively probing for more unless they arise
+naturally later"* — `run-04`), in language close enough to the prompt edit's
+own wording that it's clearly the edit firing, not coincidence. Zero control
+runs show anything like it, unsurprising since control has no such
+instruction at all.
+
+**Quote for idea #3, the standout result** — treatment `run-03`'s Phase 9(b)
+checklist: *"Every class and relationship has a meaning sentence: yes ...
+Rules and actions only reference modeled properties/relationships/values:
+yes."* No control transcript's final checklist contains either line; all
+five use the old, thinner wording verbatim.
+
+**Quote for idea #1** — treatment `run-01`: *"I also corrected one
+consistency issue from the tool: the first wording of the
+`declareMajorIncident` effect implied an Incident status value not in your
+allowed list, so I changed it to use the existing allowed status
+`investigating`."*
+
+### Overall verdict
+
+**Six of eight ideas pass (#1, #3, #5, #6, #8, #10 — one of them, #3,
+unambiguously so); two are genuinely ambiguous, not failed (#2, #7 — the
+specific failure modes they target simply didn't recur in this batch's
+control arm, so there was nothing for treatment to demonstrably prevent).
+Zero ideas show any evidence of regression or of reproducing a previously-
+rejected failure pattern** (no open-ended precision-wrecking probe, no
+runaway turn count, no interaction problem per §4). This clears §5's pass
+bar for every idea except the two ambiguous ones, and nothing here
+triggers the §2 bisection fallback — there's no failing cluster to isolate.
+
+**Consequence: recommend shipping #1, #3, #5, #6, #8, #10.** #2 and #7 are
+not disproven — they simply weren't tested by this batch, since neither
+targeted bug occurred in any of the ten runs. Two honest options for them,
+both reasonable: ship them anyway (they're low-risk guardrail wording with
+no observed downside, and the original evidence for both came from *other*
+eval batches' transcripts, not this one — CQ_NON_REGRESSION's tainted-batch
+investigation for #2, a phase6-constraint-fix transcript for #7), or hold
+them for a future batch that happens to exercise the relevant failure mode.
+Recorded here for discussion, not decided unilaterally — the user asked to
+discuss the verdict before any PR.
