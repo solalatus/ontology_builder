@@ -2233,3 +2233,120 @@ engagement was the more unambiguous win here and Phase 6's added weight is the m
 the structural cost. That is a new experiment needing its own pre-registration, not an extension of this
 one — the eval infrastructure (`tests/evals/phase6-constraint-fix.mjs`,
 `tests/evals/analyze-phase6-constraint-fix.mjs`) is reusable for it with a smaller edit set.
+
+**Update, prompt-tuning-bundle round (below): issue #96 is now closed.** Exactly the "smaller fallback"
+shape this entry speculated about — a lighter, isolated edit rather than the rejected full rewrite —
+turned out to work when actually tested: the batch-cap-plus-per-item-justification idea (isolated from a
+separate ground-up review, not this entry's own suggested Phase-9(b)-alone variant) passed its own n=5
+eval and shipped. See that entry for the numbers.
+
+## Ground-up prompt/behavior-tuning bundle — 6 of 8 ideas shipped, 2 held for a future targeted test
+
+**2026-08-15.** Not a response to one specific defect report — a deliberate, ground-up review of the whole
+interviewer prompt, requested explicitly rather than confined to whatever had already been noted. Three
+parallel research passes fed it: a full read of every dated Log/Addendum entry in this file for prior
+prompt-tuning history (so nothing already tried, and either adopted or rejected, got re-proposed); a read
+of every eval report's qualitative findings across the program (`SELF_CORRECTION_EVAL.md`,
+`CQ_NON_REGRESSION.md`, `PHASE6_CONSTRAINT_FIX.md`, `POST_NORMALIZATION.md`, and the B1/B2/B3 baselines);
+and a fresh, open-ended read of transcripts across several conditions looking for anything not yet flagged.
+Combined with direct reading of the live prompt text, this surfaced findings not previously written down
+anywhere in this project: `AGENT_KNOWLEDGE`'s own "Final check" list duplicates Phase 9(b)'s checklist
+almost verbatim, including the identical weak "fixed value lists are used where appropriate" wording, and
+was never touched by the #96 fix attempt above; Phase 7 (rules) has zero closing discipline, zero
+corresponding Phase 9(b) checklist item, and is completely unscored by `recoveryMetrics.mjs`/
+`groundTruthModel.mjs` (confirmed directly — actions are extracted from the ground-truth fixture but
+explicitly commented "not currently scored," and rules aren't even extracted); the persona fixture
+(`persona-eszter.md`) explicitly states it "does not deliver a complete data dictionary unless the
+interviewer systematically elicits it" and only gives complete controlled-value lists "when the interviewer
+explicitly asks... otherwise mention only the values relevant to the current scenario" — meaning Phase
+6-style precise, explicit-ask phrasing is structurally necessary, not just a nice-to-have; and a systemic
+pattern where phases with strong in-phase closing discipline (Phase 3, Phase 4) also get elaborate Phase
+9(b) checklist items, while phases without (Phase 5, Phase 6 pre-fix, Phase 7) get thin-to-absent ones.
+
+Twelve candidate ideas came out of this. The user selected 8 and explicitly rejected 4 (an
+illustrative-vs-confirmed-policy distinction, an atomization dedup guard, recap-redundancy reduction, and a
+`get_graph_state`-frequency nudge) as not worth pursuing this round.
+
+**Strategy, agreed explicitly before implementing anything**: testing all 8 ideas individually at this
+project's usual `n=3` would cost `8 × 6 = 48` live interviews — prohibitive. Bundling all 8 into one
+candidate prompt and testing once is far cheaper but risks exactly the failure this project has already
+hit twice (#94's Phase 6 side-effect, the rejected #96 fix): a bundle whose net score obscures whether any
+individual idea helped or hurt. The agreed middle ground: bundle everything, but stage commitment (one
+trial per arm first, reviewed, before committing to the rest) and pre-register a bisection fallback (split
+into a low-risk cluster — guardrails/efficiency ideas unlikely to compete for interview budget — and a
+higher-risk cluster — elicitation-additive ideas most likely to reproduce the known crowding dynamic — and
+retest only the implicated cluster if the bundle fails, rather than retesting all 8 from scratch). Also
+raised `n` from the usual 3 to 5 per arm, since `PHASE6_CONSTRAINT_FIX.md`'s own confound hunt had already
+proven `n=3` isn't always enough to separate a real effect from this project's demonstrated baseline
+variance, and a bundle carrying eight hypotheses needed more protection against reading noise as signal
+than a single-factor eval does.
+
+Design pre-registered in `tests/evals/PROMPT_TUNING_BUNDLE.md` before any live run, with one deliberate
+departure from every prior eval in this line: **qualitative-first pass criteria**, not F1-first. Six of the
+eight ideas (rule/action consistency, no false "skip ahead?" framing, reconciled checklists, echoed-state
+hardening, inverse-duplicate naming, no dangling endings) are invisible to `recoveryMetrics.mjs` by
+construction — an F1-only read would have scored the eval blind on 6 of 8 ideas. An explicit per-idea
+transcript-reading checklist was written into the design up front, specifying exactly what evidence would
+count as pass/fail for each, mirroring the numeric pass criteria's own rigor.
+
+`tests/evals/prompt-tuning-bundle.mjs` reused `phase6-constraint-fix.mjs`'s verified exactly-once
+`String.replace()` discipline across all nine edit locations (some ideas touch more than one spot — the
+checklist-reconciliation idea alone edits Phase 5, Phase 9(b), and `AGENT_KNOWLEDGE`). Ten live interviews
+ran (`n=5` per arm, `gpt-5.4`/`gpt-4o-mini-internal`, same Azure resource as every eval in this line);
+several needed retries after the shared `gpt-4o-mini-internal` persona deployment hit sustained rate limits
+under 8-way parallel launch — an infrastructure lesson, not a prompt-quality one, resolved by retrying
+sequentially rather than re-launching everything at once.
+
+**Result: no regression on any F1 dimension** — full/practical class, relationship and property F1 all
+fell within the run-to-run spread, a materially different (and better) outcome than the failed #96 bundle,
+whose classes-F1 regression had cleared that same significance bar. Turn count was essentially unchanged
+(control mean 48, treatment mean 50) — the bundle did not reproduce the budget-crowding mechanism that sank
+both #94's Phase 6 side-effect and #96's own fix. One of the two quantitatively-measurable ideas showed a
+strong, mostly consistent gain past its own deliberately modest bar: the isolated Phase 6 batch-cap idea
+nearly doubled its own allowed-value-list count (control mean 10.4 → treatment mean 19.2, favouring
+treatment in 4 of 5 run pairs) — issue #96's own problem, fixed by a lighter, different edit than the one
+that failed there.
+
+Qualitative review (all ten transcripts read in full against the pre-registered per-idea criteria) found
+**6 of 8 ideas passing**, one unambiguously (the reconciled-checklist idea: 5/5 treatment runs show the new
+Phase 5 meaning-sentence closing check and Phase 9(b) checklist wording, 0/5 control runs show either), the
+rest with real but more modest evidence — including a genuine gap caught during scoring, not before: the
+adaptive alias-stopping idea had no assigned measure in the pre-registered §3 table at all, an oversight
+found and closed by checking the transcripts directly rather than silently left unscored (2 of 5 treatment
+runs explicitly narrate the stopping rule firing, in language close to the edit's own wording; 0 of 5
+control runs show anything like it, unsurprising since control has no such instruction). **Two ideas (no
+false skip-ahead framing, echoed-state-confusion hardening) came back genuinely ambiguous, not failed**:
+the specific bugs they target simply didn't recur in any of the ten transcripts this batch happened to
+produce, so there was nothing for the treatment arm to demonstrably prevent — the same "not evidence either
+way" reporting discipline `analyze-phase6-constraint-fix.mjs` already established for a within-spread
+delta, applied here to a qualitative dimension instead of a numeric one.
+
+**Shipped: 6 of 8 ideas** — rule/action authoring-time consistency in Phase 7/8, the reconciled checklists
+across Phase 5/9(b)/`AGENT_KNOWLEDGE`, the Phase 6 batch cap, adaptive alias-stopping, inverse-
+relationship-pair naming in CONSISTENCY CHECK, and never ending on a dangling question. **Held back: the
+two ambiguous ideas** (no false "skip ahead?" framing, echoed-state-confusion hardening) — not shipped
+blind, filed as a separate follow-up issue for a future eval batch that happens to actually exercise the
+relevant failure mode. Of the six shipped, three (rule/action consistency, inverse-duplicate resolution, no
+dangling endings) had real but modest ("weak pass") evidence rather than the reconciled-checklist idea's
+clean, near-total result — shipped because the evidence was genuine and nothing in the batch suggested any
+downside, but also filed as a second follow-up issue for a stronger, more isolated confirmation later.
+
+One word-level fix, not a design change, landed between the eval and the ship: the shipped example lists
+originally also named "severity" (matching the eval-tested text exactly), which collided with
+`competency-questions-agent.spec.mjs`'s fixture-vocabulary blocklist (severity is a real property in this
+repo's own eval fixture) — caught by the full regression suite, not by inspection. Removed rather than
+re-run: one illustrative word among several already followed by "and similar," with no bearing on the
+eval's actual qualitative findings.
+
+Golden hashes in `tests/agent-production-invariants.spec.mjs` updated to match (`en`/`hu`), verified
+against the live app directly (`window.__kg.agent.buildSystemPrompt()`) rather than reconstructed by hand,
+after an earlier manual reconstruction attempt turned out to have its own bug — a `diff` against the
+eval's own tested prompt text is what actually caught and resolved the discrepancy.
+
+- [x] All nine prompt edits applied to `AGENT_SYSTEM_PROMPT_BASE`/`AGENT_KNOWLEDGE`, verified byte-for-byte
+      against the eval-tested text before the two post-eval fixes above.
+- [x] Domain-vocabulary blocklist re-verified against the edited `index.html` directly (not just the eval's
+      copy).
+- [x] Full regression (`node --test tests/*.spec.mjs`): 958/958 pass after both fixes.
+- [x] Docs: this entry; issue #96 closed (see the updated entry above); two follow-up issues filed for the
+      two ambiguous ideas and the three weak-but-shipped ones.

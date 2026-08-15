@@ -1,0 +1,548 @@
+competency_questions:
+  - id: cq1
+    text: "What services were impacted by an incident, and who are the affected stakeholders?"
+  - id: cq2
+    text: Can the agent identify the configuration items and third-party services related to an affected service?
+  - id: cq3
+    text: "Which alerts or events led to the creation of an incident, and what is their current status?"
+  - id: cq4
+    text: Who is the service owner of an affected service?
+  - id: cq5
+    text: Which resolver group should address an incident?
+  - id: cq6
+    text: Does an incident qualify for major incident declaration?
+  - id: cq7
+    text: What criteria are used to decide whether an incident qualifies for major incident declaration?
+  - id: cq8
+    text: What runbook or workaround can be used to mitigate the impact of an incident while resolution is in progress?
+  - id: cq9
+    text: Has a materiality assessment been conducted for an incident?
+  - id: cq10
+    text: Does an incident require regulatory notification?
+  - id: cq11
+    text: What corrective actions from previous incidents are still outstanding for an impacted service?
+  - id: cq12
+    text: How do outstanding corrective actions relate to an incident?
+  - id: cq13
+    text: What timelines and conditions must be followed to close an incident properly once resolved?
+  - id: cq14
+    text: How is evidence integrity maintained during incident management?
+  - id: cq15
+    text: What documentation steps must be followed during incident management?
+classes:
+  Incident:
+    meaning: An incident is an unplanned interruption or reduction in the quality of an IT service that requires managed response to restore normal operations.
+    aliases: []
+    properties:
+      identifier:
+        type: text
+      summary:
+        type: text
+      status:
+        type: text
+        allowed:
+          - new
+          - acknowledged
+          - investigating
+          - contained
+          - recovering
+          - monitoring
+          - resolved
+          - closed
+          - cancelled
+      severity:
+        type: text
+        allowed:
+          - sev1-critical
+          - sev2-high
+          - sev3-medium
+          - sev4-low
+      priority:
+        type: text
+        allowed:
+          - p1-critical
+          - p2-high
+          - p3-medium
+          - p4-low
+  Service:
+    meaning: "A service is a capability provided by the bank to deliver value to customers, supported by IT and operational processes."
+    aliases:
+      - szolgáltatás
+    properties:
+      identifier:
+        type: text
+      name:
+        type: text
+      status:
+        type: text
+        allowed:
+          - healthy
+          - degraded
+          - partially-unavailable
+          - unavailable
+          - recovering
+          - unknown
+      criticality:
+        type: text
+        allowed:
+          - tier-1-critical
+          - tier-2-important
+          - tier-3-standard
+          - tier-4-supporting
+      description:
+        type: text
+  Alert:
+    meaning: An alert is a notification raised by monitoring systems that indicates a potential issue within IT services or infrastructure that requires attention.
+    aliases:
+      - riasztás
+    properties:
+      identifier:
+        type: text
+      status:
+        type: text
+        allowed:
+          - new
+          - acknowledged
+          - suppressed
+          - escalated
+          - closed
+      severity:
+        type: text
+        allowed:
+          - sev1-critical
+          - sev2-high
+          - sev3-medium
+          - sev4-low
+      triggerTimestamp:
+        type: date
+  Event:
+    meaning: An event is an observable occurrence in the IT environment that may indicate a change in the state of a service or system and can be monitored for potential incidents.
+    aliases:
+      - esemény
+    properties:
+      identifier:
+        type: text
+      timestamp:
+        type: date
+      eventType:
+        type: text
+        allowed:
+          - incident
+          - maintenance
+          - upgrade
+          - outage
+          - service change
+      source:
+        type: text
+  Stakeholder:
+    meaning: "A stakeholder is any individual or group that has an interest in or is affected by the operations and services of the bank, including employees, customers, and regulators."
+    aliases:
+      - érintett
+    properties:
+      identifier:
+        type: text
+      name:
+        type: text
+      role:
+        type: text
+  ConfigurationItem:
+    meaning: A configuration item is a component of the bank’s IT infrastructure that is managed and recorded to ensure service quality and operational integrity.
+    aliases:
+      - konfigurációs elem
+    properties:
+      identifier:
+        type: text
+      name:
+        type: text
+      status:
+        type: text
+        allowed:
+          - operational
+          - under-maintenance
+          - retired
+  ThirdPartyService:
+    meaning: A third-party service is an external capability or service provided by a vendor that the bank relies on to support its operation.
+    aliases:
+      - külső szolgáltatás
+    properties:
+      identifier:
+        type: text
+      name:
+        type: text
+      status:
+        type: text
+        allowed:
+          - active
+          - inactive
+      criticality:
+        type: text
+        allowed:
+          - tier-1-critical
+          - tier-2-important
+          - tier-3-standard
+          - tier-4-supporting
+  ServiceOwner:
+    meaning: A service owner is the individual responsible for the overall management and performance of a specific IT service throughout its lifecycle.
+    aliases:
+      - szolgáltatásgazda
+    properties:
+      identifier:
+        type: text
+      name:
+        type: text
+  ResolverGroup:
+    meaning: A resolver group is a team of technical experts assigned to diagnose and resolve incidents affecting specific technology or services.
+    aliases:
+      - megoldócsoport
+    properties:
+      identifier:
+        type: text
+      name:
+        type: text
+      status:
+        type: text
+        allowed:
+          - available
+          - on-call
+          - busy
+  Runbook:
+    meaning: "A runbook is a documented set of procedures and instructions for responding to specific operational scenarios, incidents, or maintenance tasks."
+    aliases:
+      - üzemeltetési eljárás
+    properties:
+      identifier:
+        type: text
+      name:
+        type: text
+      version:
+        type: text
+  Workaround:
+    meaning: A workaround is a temporary solution implemented to reduce or bypass the impact of an incident before a permanent fix is available.
+    aliases:
+      - kerülőmegoldás
+    properties:
+      identifier:
+        type: text
+      description:
+        type: text
+      status:
+        type: text
+        allowed:
+          - available
+          - under-evaluation
+          - deprecated
+  MaterialityAssessment:
+    meaning: A materiality assessment is an evaluation process that determines the significance of an incident and whether it triggers regulatory reporting obligations.
+    aliases:
+      - lényegességi értékelés
+    properties:
+      identifier:
+        type: text
+      status:
+        type: text
+        allowed:
+          - not-reportable
+          - potentially-reportable
+          - reportable
+          - undetermined
+      assessmentDate:
+        type: date
+      rationale:
+        type: text
+  CorrectiveAction:
+    meaning: A corrective action is a tracked step aimed at addressing the root cause of an incident to prevent future occurrences.
+    aliases:
+      - helyesbítő intézkedés
+    properties:
+      identifier:
+        type: text
+      description:
+        type: text
+      status:
+        type: text
+        allowed:
+          - open
+          - in-progress
+          - blocked
+          - implemented
+          - verified
+          - closed
+          - cancelled
+      dueDate:
+        type: date
+  EvidenceItem:
+    meaning: An evidence item is a preserved record or artifact collected during incident management to support analysis and accountability.
+    aliases:
+      - bizonyíték
+    properties:
+      identifier:
+        type: text
+      captureDate:
+        type: date
+      integrityStatus:
+        type: text
+        allowed:
+          - collected
+          - verified
+          - sealed
+          - compromised
+      link:
+        type: text
+  RegulatoryNotification:
+    meaning: A regulatory notification is a formal communication submitted to a regulatory authority to inform them of incidents affecting compliance or operational integrity.
+    aliases:
+      - felügyeleti bejelentés
+    properties:
+      identifier:
+        type: text
+      status:
+        type: text
+        allowed:
+          - draft
+          - pending-approval
+          - approved
+          - submitted
+          - accepted
+          - rejected
+          - withdrawn
+      dueDate:
+        type: date
+      submissionTimestamp:
+        type: date
+  Regulator:
+    meaning: A regulator is a governmental or authoritative body responsible for overseeing and enforcing compliance within the banking sector.
+    aliases:
+      - felügyeleti hatóság
+    properties:
+      identifier:
+        type: text
+      name:
+        type: text
+  BackupSet:
+    meaning: A backup set is a defined collection of data that has been backed up and can be restored in case of data loss or system failure.
+    aliases:
+      - mentéskészlet
+    properties:
+      identifier:
+        type: text
+      status:
+        type: text
+        allowed:
+          - scheduled
+          - running
+          - successful
+          - failed
+          - expired
+          - corrupted
+          - verified
+      lastBackupDate:
+        type: date
+      backupType:
+        type: text
+        allowed:
+          - full
+          - incremental
+          - differential
+  SecondaryEnvironment:
+    meaning: "A secondary environment is an alternate operating setting used for testing, recovery, or operational continuity, such as a disaster recovery site."
+    aliases: []
+    properties:
+      identifier:
+        type: text
+      name:
+        type: text
+      status:
+        type: text
+        allowed:
+          - operational
+          - in-maintenance
+          - out-of-service
+relationships:
+  - name: impacts
+    from: Incident
+    to: Service
+    meaning: An incident impacts a service when it causes disruption or degradation in its availability or performance.
+    aliases: []
+  - name: affects
+    from: Incident
+    to: Stakeholder
+    meaning: "An incident affects a stakeholder when it has an influence on their ability to perform tasks or deliver services, impacting their interests."
+    aliases: []
+  - name: assignedTo
+    from: Incident
+    to: ResolverGroup
+    meaning: An incident is assigned to a resolver group when responsibility for managing and resolving the incident is delegated to that team.
+    aliases: []
+  - name: ownedBy
+    from: Service
+    to: ServiceOwner
+    meaning: "A service is owned by a service owner who is accountable for its overall management, performance, and alignment with business needs."
+    aliases: []
+  - name: hasConfigurationItem
+    from: Service
+    to: ConfigurationItem
+    meaning: A service has a configuration item when it includes specific components necessary for its operation and delivery.
+    aliases: []
+  - name: dependsOnThirdPartyService
+    from: Service
+    to: ThirdPartyService
+    meaning: A service depends on a third-party service when its functionality or availability relies on that external service.
+    aliases: []
+  - name: triggeredByAlert
+    from: Incident
+    to: Alert
+    meaning: An incident is triggered by an alert when the alert notification initiates the creation or acknowledgment of the incident.
+    aliases: []
+  - name: triggeredByEvent
+    from: Incident
+    to: Event
+    meaning: An incident is triggered by an event when the occurrence of that event leads to the identification or reporting of the incident.
+    aliases: []
+  - name: hasMaterialityAssessment
+    from: Incident
+    to: MaterialityAssessment
+    meaning: An incident has a materiality assessment when it is evaluated to determine its significance and potential regulatory reporting requirements.
+    aliases: []
+  - name: hasRegulatoryNotification
+    from: Incident
+    to: RegulatoryNotification
+    meaning: An incident has a regulatory notification when a formal communication related to the incident is prepared for submission to a regulatory authority.
+    aliases: []
+  - name: sentTo
+    from: RegulatoryNotification
+    to: Regulator
+    meaning: A regulatory notification is sent to a regulator when it is formally submitted to the relevant authority for compliance purposes.
+    aliases: []
+  - name: hasEvidenceItem
+    from: Incident
+    to: EvidenceItem
+    meaning: An incident has an evidence item when a record or artifact supporting the incident investigation is collected and documented.
+    aliases: []
+  - name: hasOutstandingCorrectiveAction
+    from: Service
+    to: CorrectiveAction
+    meaning: A service has an outstanding corrective action when there are identified steps that need to be taken to address issues or risks associated with that service.
+    aliases: []
+  - name: relatesTo
+    from: CorrectiveAction
+    to: Incident
+    meaning: A corrective action relates to an incident when it is intended to address or resolve the underlying cause of that specific incident.
+    aliases: []
+  - name: hasRunbook
+    from: Service
+    to: Runbook
+    meaning: A service has a runbook when there is a documented procedure available for responding to incidents or operational tasks related to that service.
+    aliases: []
+  - name: hasWorkaround
+    from: Service
+    to: Workaround
+    meaning: A service has a workaround when a temporary solution is available to mitigate issues impacting the service’s performance.
+    aliases: []
+  - name: hasBackupSet
+    from: Service
+    to: BackupSet
+    meaning: A service has a backup set when there are defined collections of data that can be restored to recover the service in case of data loss.
+    aliases: []
+  - name: hasSecondaryEnvironment
+    from: Service
+    to: SecondaryEnvironment
+    meaning: "A service has a secondary environment when an alternate operational setting is available for testing, recovery, or continuity purposes."
+    aliases: []
+  - name: supportedBy
+    from: Service
+    to: ResolverGroup
+    meaning: A service is supported by a resolver group that provides the necessary technical expertise and resources to troubleshoot and resolve issues affecting that service.
+    aliases: []
+rules:
+  qualifiesForMajorIncident:
+    conditions:
+      - "incident status is not resolved, closed, or cancelled"
+      - incident severity is sev1-critical or sev2-high
+      - incident impacts at least one service
+  requiresRegulatoryNotification:
+    conditions:
+      - incident has a materiality assessment
+      - materiality assessment status is potentially-reportable or reportable
+  canCloseIncident:
+    conditions:
+      - incident status is resolved or monitoring
+      - all services impacted by the incident are healthy
+      - incident has evidence items recorded
+  canAssignIncident:
+    conditions:
+      - incident impacts at least one service
+  canRestoreBackup:
+    conditions:
+      - service has a backup set
+  canExecuteServiceFailover:
+    conditions:
+      - service has a secondary environment
+  canDocumentEvidenceItem:
+    conditions:
+      - incident status is not closed or cancelled
+  canAcknowledgeAlert:
+    conditions:
+      - alert status is new
+  canContainIncident:
+    conditions:
+      - incident status is acknowledged or investigating
+actions:
+  acknowledgeAlert:
+    input: Alert
+    preconditions:
+      - canAcknowledgeAlert
+    effect: Record that the alert has been received and is under investigation.
+    verification: Confirm the alert shows as acknowledged or under investigation.
+  assignIncident:
+    input: Incident
+    preconditions:
+      - canAssignIncident
+    effect: Record the resolver group or on-call engineer responsible for handling the incident.
+    verification: Confirm the incident shows an assigned handling party.
+  declareMajorIncident:
+    input: Incident
+    preconditions:
+      - qualifiesForMajorIncident
+    effect: Record the incident as a major incident.
+    verification: Confirm the incident is marked as a major incident.
+  containIncident:
+    input: Incident
+    preconditions:
+      - canContainIncident
+    effect: Record containment measures taken to reduce service impact.
+    verification: Confirm containment measures are documented and impact is reduced or stabilized.
+  executeServiceFailover:
+    input: Service
+    preconditions:
+      - canExecuteServiceFailover
+    effect: Shift service operation to a secondary environment.
+    verification: Confirm the service is operating from the secondary environment.
+  restoreBackup:
+    input: Service
+    preconditions:
+      - canRestoreBackup
+    effect: Restore service data or components from a backup set.
+    verification: Confirm the service or data has been restored from backup and is usable.
+  sendStakeholderCommunication:
+    input: Incident
+    preconditions: []
+    effect: Send incident information to relevant stakeholders.
+    verification: Confirm the communication was issued to the intended stakeholders.
+  submitRegulatoryNotification:
+    input: Incident
+    preconditions:
+      - requiresRegulatoryNotification
+    effect: Submit a formal notification about the incident to the regulator.
+    verification: Confirm the notification was submitted and recorded.
+  closeIncident:
+    input: Incident
+    preconditions:
+      - canCloseIncident
+    effect: Mark the incident as closed after resolution and verification are complete.
+    verification: Confirm the incident is marked closed.
+  documentEvidenceItem:
+    input: Incident
+    preconditions:
+      - canDocumentEvidenceItem
+    effect: Record and preserve evidence associated with an incident.
+    verification: Confirm evidence associated with the incident is recorded and preserved.

@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "condition": "prompt-tuning-bundle/treatment",
+  "arm": "treatment",
+  "runId": "run-04",
+  "generatedAt": "2026-08-15T13:05:22.478Z",
+  "model": "gpt-5.4",
+  "personaModel": "gpt-4o-mini-internal",
+  "classifierModel": "gpt-5.4",
+  "provider": "azure",
+  "endpoint": "https://briandemoopenai.openai.azure.com",
+  "interviewerPromptSha256": "099d0aabafb0549c628722ae2f5052767161635b41e330843eb6477434a01404",
+  "bundleApplied": true,
+  "stoppedReason": "app_agent_appears_finished",
+  "turnsUsed": 44,
+  "wallClockSec": 973,
+  "applyToolCalls": 35,
+  "getGraphStateCalls": 32,
+  "allowedValueListCount": 25,
+  "note": "8-idea prompt/behavior-tuning bundle from the ground-up review (ideas 1,2,3,5,6,7,8,10; 4,9,11,12 excluded per user selection). The control arm runs the genuinely live, unmodified shipped prompt (verified against the recorded hash); the treatment arm applies nine verified String.replace() edits (see PROMPT_TUNING_BUNDLE.md §1 for the idea-to-edit map) to that same live text. The deployment LISTING is stubbed (this resource returns an empty list for deployments that are callable); every chat call is a real relayed Azure call. Nothing under results/runs/ was read or written."
+}
