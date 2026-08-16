@@ -127,7 +127,19 @@ Rules for this shape:
   other mapping.
 - Object properties may become relationships **only** when the source
   semantics clearly support a direction and both endpoints resolve to
-  classes you are including.
+  classes you are including. Many source ontologies declare an object
+  property's *existence and general meaning* (e.g. "X hasPoint Y means X
+  has a source of telemetry Y") without declaring per-class domain/range —
+  so a *specific* endpoint pair (e.g. "an AHU specifically hasPoint an
+  AirTemperatureSetpoint") is frequently standard, well-established domain
+  practice rather than something the source states as a per-pair axiom.
+  That is fine to include, but **cite it as such explicitly** in
+  `translation.json` — e.g. "standard practice: an AHU is commonly
+  equipped with an air temperature setpoint for control" — rather than
+  only citing the generic property definition, which does not by itself
+  justify *that specific pair*. This is the same standard-practice
+  grounding already described above for rules/actions/inferred properties;
+  it applies to relationship endpoint pairs too.
 - Enumerations (`owl:oneOf`) may become a property's `allowed` list **only**
   when clearly associated with one specific property.
 - **`rdfs:subClassOf` edges MUST NOT become `relationships` entries.**
