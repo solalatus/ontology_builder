@@ -96,6 +96,37 @@ class StructuralErrorTests(unittest.TestCase):
         report = validate_domain(bad)
         self.assertIn("dangling_relationship_endpoint", [i.code for i in report.errors])
 
+    def test_same_relationship_name_across_different_endpoints_is_not_a_duplicate(self):
+        # agent_ontology_spec.md Section 5 chose a list over a name-keyed
+        # map specifically so "hasPoint" (etc.) can repeat between many
+        # different class pairs -- this must never be flagged.
+        good = {
+            "classes": {"AHU": {"meaning": "x"}, "Fan": {"meaning": "x"}, "Sensor": {"meaning": "x"}, "Point": {"meaning": "x"}},
+            "relationships": [
+                {"name": "hasPoint", "from": "AHU", "to": "Sensor", "meaning": "x", "aliases": []},
+                {"name": "hasPoint", "from": "Fan", "to": "Point", "meaning": "x", "aliases": []},
+            ],
+            "rules": {},
+            "actions": {},
+            "competency_questions": [],
+        }
+        report = validate_domain(good)
+        self.assertNotIn("duplicate_identifier", [i.code for i in report.errors])
+
+    def test_exact_duplicate_relationship_entry_is_flagged(self):
+        bad = {
+            "classes": {"AHU": {"meaning": "x"}, "Sensor": {"meaning": "x"}},
+            "relationships": [
+                {"name": "hasPoint", "from": "AHU", "to": "Sensor", "meaning": "x", "aliases": []},
+                {"name": "hasPoint", "from": "AHU", "to": "Sensor", "meaning": "x", "aliases": []},
+            ],
+            "rules": {},
+            "actions": {},
+            "competency_questions": [],
+        }
+        report = validate_domain(bad)
+        self.assertIn("duplicate_identifier", [i.code for i in report.errors])
+
     def test_action_input_unresolved(self):
         bad = {
             "classes": {"Fan": {"meaning": "x"}},

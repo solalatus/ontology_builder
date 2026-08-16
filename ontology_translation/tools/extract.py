@@ -84,6 +84,18 @@ def extract_classes(graph: rdflib.Graph, source_ontology: str) -> list[dict]:
         record["parents"] = sorted(
             str(p) for p in graph.objects(subject, RDFS.subClassOf) if not isinstance(p, rdflib.BNode)
         )
+        # owl:equivalentClass is a standard OWL construct (not specific to
+        # any one source ontology) that many real ontologies use for
+        # deprecated/alternate names of the same concept -- e.g. Brick's
+        # "AHU" is owl:equivalentClass of "Air_Handling_Unit". Fold the
+        # equivalent term's own label(s) in as extra alt-label evidence,
+        # since that is exactly what an alias is.
+        for equivalent in graph.objects(subject, OWL.equivalentClass):
+            if isinstance(equivalent, rdflib.BNode):
+                continue
+            for label in _literals(graph, equivalent, LABEL_PREDICATES):
+                if label not in record["altLabels"]:
+                    record["altLabels"].append(label)
         records.append(record)
     return records
 
@@ -218,7 +230,19 @@ def select_scope(ir: dict, roots: list[str], max_depth: int | None = None) -> di
     scoped_classes = [c for c in ir["classes"] if c["iri"] in selected]
 
     def _property_in_scope(prop: dict) -> bool:
-        endpoints = set(prop.get("domain", [])) | set(prop.get("range", []))
+        domain, range_ = prop.get("domain", []), prop.get("range", [])
+        if not domain and not range_:
+            # No rdfs:domain/rdfs:range declared at all -- common in
+            # SHACL-styled ontologies (Brick included: relationships are
+            # constrained via sh:property shapes on individual classes, not
+            # global domain/range triples on the property itself). There is
+            # nothing to filter by, so include rather than silently drop --
+            # global property counts are small enough (in the hundreds, not
+            # thousands) that keeping them all is cheap, and dropping every
+            # relationship property is worse than including a few
+            # irrelevant ones.
+            return True
+        endpoints = set(domain) | set(range_)
         return bool(endpoints & selected) or _matches_root(prop, roots_lower)
 
     return {

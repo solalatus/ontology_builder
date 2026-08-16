@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 import time
 from collections import Counter
@@ -60,8 +61,12 @@ def _iter_generated_elements(domain_data: dict) -> list[dict]:
     for idx, rel in enumerate(domain_data.get("relationships") or []):
         if not isinstance(rel, dict):
             continue
-        name = rel.get("name") or f"[{idx}]"
-        elements.append({"target_path": f"relationships.{name}", "kind": "relationship"})
+        # Indexed, not `relationships.<name>` -- the same relationship name
+        # legitimately repeats across different from/to pairs (see
+        # validate_domain.py), so a name alone can't address one specific
+        # instance for provenance. Matches the addressing scheme
+        # compile.py's prompt now instructs the compiler to use.
+        elements.append({"target_path": f"relationships[{idx}]", "kind": "relationship"})
     for rule_name in (domain_data.get("rules") or {}).keys():
         elements.append({"target_path": f"rules.{rule_name}", "kind": "rule"})
     for action_name in (domain_data.get("actions") or {}).keys():
@@ -234,10 +239,43 @@ def _call_cost(usage: dict) -> float:
 # ---------------------------------------------------------------------------
 
 JUDGE_SYSTEM_PROMPT = """You are an independent judge evaluating whether a translated Agent Ontology
-element is supported by its cited source evidence. You do not see any other judge's answer.
-Classify the mapping as exactly one of: "supported", "partially_supported", "unsupported".
+element is adequately grounded by its cited evidence. You do not see any other judge's answer.
+
+The evidence you are given is one of two legitimate kinds for this pipeline -- judge each on its own
+terms, do not require a literal source quote for everything:
+
+1. A literal or paraphrased snippet from the source ontology (an RDF label, comment, or definition).
+2. A citation of standard, well-established domain practice tied to the *specific* named concepts the
+   target element actually involves (e.g. "standard HVAC practice relating a Temperature Sensor to a
+   Temperature Setpoint for the same zone"). This is a deliberately sanctioned evidence category for
+   this pipeline's compiler -- do not classify an element "unsupported" merely because its evidence is
+   a standard-practice citation rather than a literal source quote.
+
+Classify the mapping as exactly one of:
+- "supported" -- the evidence (of either kind) genuinely and specifically justifies the target element,
+  at the level of detail the target element actually states.
+- "partially_supported" -- the evidence is directionally right but the target element states more
+  specific detail (a numeric threshold, a precise mechanism) than the evidence actually supports.
+- "unsupported" -- the evidence is absent, contradicts the target element, is so generic it could
+  apply to almost any domain (not tied to the specific named concepts involved), or the target element
+  is not a plausible/standard interpretation of what's cited.
+
 Respond with exactly one JSON object, no prose, no markdown fences:
 {"verdict": "supported" | "partially_supported" | "unsupported", "rationale": "one sentence"}"""
+
+
+def _majority_verdict(raw_judgments: list[dict]) -> str | None:
+    """A verdict wins only with a strict majority (> half the votes) --
+    `Counter.most_common(1)` alone silently picks whichever verdict was
+    voted *first* when judges are evenly split (e.g. one each of
+    supported/partially_supported/unsupported), which is not a majority at
+    all and must not be treated as one: issue #103 says "reject ... when a
+    majority considers it unsupported", not "when no two judges agree.\""""
+    verdicts = [j["verdict"] for j in raw_judgments]
+    if not verdicts:
+        return None
+    top_verdict, top_count = Counter(verdicts).most_common(1)[0]
+    return top_verdict if top_count > len(verdicts) / 2 else None
 
 
 def judge_mappings(client, deployment: str, translation: dict, logger: RunLogger, judges: int = 3) -> dict:
@@ -260,9 +298,7 @@ def judge_mappings(client, deployment: str, translation: dict, logger: RunLogger
             )
             raw_judgments.append({"verdict": parsed.get("verdict"), "rationale": parsed.get("rationale")})
             total_cost += _call_cost(usage)
-        verdicts = [j["verdict"] for j in raw_judgments]
-        majority_verdict = Counter(verdicts).most_common(1)[0][0] if verdicts else None
-        results.append({"target_path": target_path, "raw_judgments": raw_judgments, "majority_verdict": majority_verdict})
+        results.append({"target_path": target_path, "raw_judgments": raw_judgments, "majority_verdict": _majority_verdict(raw_judgments)})
 
     unsupported = [r for r in results if r["majority_verdict"] == "unsupported"]
     return {
@@ -286,18 +322,41 @@ should match. Score how well they agree from 0.0 (unrelated) to 1.0 (same meanin
 Respond with exactly one JSON object: {"score": <float 0-1>, "rationale": "one sentence"}"""
 
 
+_PATH_TOKEN_RE = re.compile(r"[^.\[\]]+|\[\d+\]")
+
+
 def _describe_target_element(domain_data: dict, target_path: str):
+    """Resolves a target_path like "classes.Fan.properties.status" (dict
+    keys) or "relationships[3]" (list index -- relationship names aren't
+    addressable alone, see _iter_generated_elements) against domain_data."""
     node = domain_data
-    for part in target_path.split("."):
-        if isinstance(node, dict):
-            node = node.get(part)
-        elif isinstance(node, list):
-            node = next((item for item in node if isinstance(item, dict) and item.get("name") == part), None)
+    for token in _PATH_TOKEN_RE.findall(target_path):
+        if token.startswith("[") and token.endswith("]"):
+            index = int(token[1:-1])
+            node = node[index] if isinstance(node, list) and 0 <= index < len(node) else None
+        elif isinstance(node, dict):
+            node = node.get(token)
         else:
             return None
         if node is None:
             return None
     return node
+
+
+_LEAF_LABEL_SKIP = {"classes", "properties", "rules", "actions"}
+
+
+def _leaf_label(target_path: str) -> str:
+    """A short human-readable label for a target_path, e.g. "Building.yearBuilt"
+    for classes.Building.properties.yearBuilt. A property's own dict value
+    (e.g. {"type": "number"}) carries no name or owning-class context by
+    itself -- without this, round_trip_sample was handing the reconstruction
+    prompt something as uninformative as {"type": "number"} and then
+    penalizing it for guessing "some generic numeric value" instead of
+    "year a building was built", which the property's raw content alone
+    could never have revealed."""
+    tokens = [t for t in _PATH_TOKEN_RE.findall(target_path) if t not in _LEAF_LABEL_SKIP]
+    return ".".join(tokens) if tokens else target_path
 
 
 def round_trip_sample(client, deployment: str, domain_data: dict, translation: dict, logger: RunLogger, sample_size: int = 5) -> dict:
@@ -310,8 +369,9 @@ def round_trip_sample(client, deployment: str, domain_data: dict, translation: d
         element = _describe_target_element(domain_data, target_path)
         if element is None:
             continue
+        element_payload = {"name": _leaf_label(target_path), "content": element}
         reconstruction, usage_a = chat_json_call(
-            client, deployment, ROUND_TRIP_RECONSTRUCT_PROMPT, json.dumps({"element": element}), logger, f"roundtrip-reconstruct:{target_path}"
+            client, deployment, ROUND_TRIP_RECONSTRUCT_PROMPT, json.dumps({"element": element_payload}), logger, f"roundtrip-reconstruct:{target_path}"
         )
         compare_input = json.dumps(
             {"reconstruction": reconstruction.get("reconstruction"), "source_definition": mapping.get("source_evidence")}

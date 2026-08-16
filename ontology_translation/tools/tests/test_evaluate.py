@@ -36,7 +36,7 @@ TRANSLATION_FULL = {
         {"target_path": "classes.Fan", "source_iris": ["http://ex.org#Fan"], "source_evidence": "A device that moves air.", "confidence": "high", "rationale": "renamed"},
         {"target_path": "classes.Fan.properties.status", "source_iris": ["http://ex.org#status"], "source_evidence": "status prop", "confidence": "high", "rationale": "renamed"},
         {"target_path": "classes.Zone", "source_iris": ["http://ex.org#Zone"], "source_evidence": "A controlled area.", "confidence": "high", "rationale": "renamed"},
-        {"target_path": "relationships.serves", "source_iris": ["http://ex.org#serves"], "source_evidence": "serves relation", "confidence": "medium", "rationale": "renamed"},
+        {"target_path": "relationships[0]", "source_iris": ["http://ex.org#serves"], "source_evidence": "serves relation", "confidence": "medium", "rationale": "renamed"},
         {"target_path": "rules.canRunFan", "source_iris": [], "source_evidence": "inferred from operational text", "confidence": "low", "rationale": "no direct source"},
         {"target_path": "actions.startFan", "source_iris": [], "source_evidence": "inferred", "confidence": "low", "rationale": "no direct source"},
     ],
@@ -84,7 +84,7 @@ class IterGeneratedElementsTests(unittest.TestCase):
                 "classes.Fan",
                 "classes.Fan.properties.status",
                 "classes.Zone",
-                "relationships.serves",
+                "relationships[0]",
                 "rules.canRunFan",
                 "actions.startFan",
             },
@@ -167,12 +167,29 @@ class DescribeTargetElementTests(unittest.TestCase):
         element = evaluate_mod._describe_target_element(DOMAIN_DATA, "classes.Fan")
         self.assertEqual(element["meaning"], "A device that moves air.")
 
-    def test_relationship_path_via_list_search(self):
-        element = evaluate_mod._describe_target_element(DOMAIN_DATA, "relationships.serves")
+    def test_relationship_path_via_index(self):
+        element = evaluate_mod._describe_target_element(DOMAIN_DATA, "relationships[0]")
         self.assertEqual(element["to"], "Zone")
 
     def test_missing_path_returns_none(self):
         self.assertIsNone(evaluate_mod._describe_target_element(DOMAIN_DATA, "classes.GhostClass"))
+
+    def test_out_of_range_relationship_index_returns_none(self):
+        self.assertIsNone(evaluate_mod._describe_target_element(DOMAIN_DATA, "relationships[7]"))
+
+
+class LeafLabelTests(unittest.TestCase):
+    def test_property_gets_owning_class_context(self):
+        # A property's raw dict value (e.g. {"type": "number"}) carries no
+        # name of its own -- round_trip_sample needs this label so the
+        # reconstruction prompt has something to work with beyond a bare type.
+        self.assertEqual(evaluate_mod._leaf_label("classes.Building.properties.yearBuilt"), "Building.yearBuilt")
+
+    def test_class_path(self):
+        self.assertEqual(evaluate_mod._leaf_label("classes.Fan"), "Fan")
+
+    def test_rule_path(self):
+        self.assertEqual(evaluate_mod._leaf_label("rules.canRunFan"), "canRunFan")
 
 
 def _fake_client_class(responder):
@@ -247,6 +264,40 @@ class JudgeMappingsTests(unittest.TestCase):
             logger.close()
 
         self.assertEqual(result["unsupported_count"], len(TRANSLATION_FULL["mappings"]))
+
+    def test_three_way_split_is_not_a_majority(self):
+        # Each mapping's 3 judges give three different verdicts -- a real
+        # 3-way tie, not a majority for any of them. Counter.most_common(1)
+        # alone would silently pick whichever verdict was voted first
+        # (here, "unsupported", since it cycles first) and wrongly flag it
+        # as majority-unsupported; _majority_verdict must return None instead.
+        verdicts_cycle = ["unsupported", "supported", "partially_supported"]
+
+        def responder(i, kw):
+            return json.dumps({"verdict": verdicts_cycle[i % 3], "rationale": "r"})
+
+        FakeClient, calls = _fake_client_class(responder)
+        client = FakeClient()
+        with tempfile.TemporaryDirectory() as tmp:
+            logger = evaluate_mod.RunLogger(Path(tmp) / "log.jsonl")
+            result = evaluate_mod.judge_mappings(client, "gpt-5.4", TRANSLATION_FULL, logger, judges=3)
+            logger.close()
+
+        self.assertTrue(all(r["majority_verdict"] is None for r in result["results"]))
+        self.assertEqual(result["unsupported_count"], 0)
+
+
+class MajorityVerdictTests(unittest.TestCase):
+    def test_strict_majority_wins(self):
+        judgments = [{"verdict": "unsupported"}, {"verdict": "unsupported"}, {"verdict": "supported"}]
+        self.assertEqual(evaluate_mod._majority_verdict(judgments), "unsupported")
+
+    def test_three_way_tie_has_no_majority(self):
+        judgments = [{"verdict": "unsupported"}, {"verdict": "supported"}, {"verdict": "partially_supported"}]
+        self.assertIsNone(evaluate_mod._majority_verdict(judgments))
+
+    def test_empty_judgments_has_no_majority(self):
+        self.assertIsNone(evaluate_mod._majority_verdict([]))
 
 
 class RoundTripSampleTests(unittest.TestCase):

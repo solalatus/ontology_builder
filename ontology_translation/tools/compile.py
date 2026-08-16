@@ -16,6 +16,7 @@ costs money -- always run that first on a new domain.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import sys
 import time
@@ -29,7 +30,18 @@ from source_manifest import load_manifest
 from validate_domain import validate_domain
 
 TOOLS_DIR = Path(__file__).resolve().parent
-DEFAULT_PROMPT_PATH = TOOLS_DIR / "prompts" / "compiler-v1.md"
+PROMPT_PATH = TOOLS_DIR / "prompts" / "compiler-prompt.md"
+
+# There is deliberately one current prompt file, not a compiler-v1.md/
+# compiler-v2.md/... lineage sitting in the repo -- past wording is
+# recovered from git history (`git log -p -- <PROMPT_PATH>`), not from
+# parallel files. `prompt_sha256()` is what actually pins a specific run to
+# specific wording, recorded in run-manifest.json alongside a manifest's
+# free-text `compiler.prompt_version` label.
+
+
+def prompt_sha256(text: str) -> str:
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 # Azure OpenAI GPT-5.4 Global Standard, <=272K context (see the Aug-2026
 # cost-estimate artifact this pipeline was budgeted from). Only used for the
@@ -174,7 +186,7 @@ def run_compile(
 ) -> int:
     manifest = load_manifest(manifest_path)
     source_ir = json.loads(source_ir_path.read_text(encoding="utf-8"))
-    system_prompt = DEFAULT_PROMPT_PATH.read_text(encoding="utf-8")
+    system_prompt = PROMPT_PATH.read_text(encoding="utf-8")
     user_prompt = build_user_prompt(source_ir, manifest.id, scope_note, previous_chunks=None)
     run_count = runs if runs is not None else manifest.compiler_runs
 
@@ -211,7 +223,8 @@ def run_compile(
         domain=manifest.id,
         runs=run_count,
         deployment=azure_config["deployment"],
-        prompt_version="compiler-v1",
+        prompt_version=manifest.compiler_prompt_version,
+        prompt_sha256=prompt_sha256(system_prompt),
     )
 
     total_cost = 0.0
@@ -256,7 +269,8 @@ def run_compile(
         json.dumps(
             {
                 "domain": manifest.id,
-                "prompt_version": "compiler-v1",
+                "prompt_version": manifest.compiler_prompt_version,
+                "prompt_sha256": prompt_sha256(system_prompt),
                 "deployment": azure_config["deployment"],
                 "api_version": azure_config["api_version"],
                 "runs": run_manifest_entries,

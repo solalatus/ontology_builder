@@ -144,7 +144,7 @@ def validate_domain(data: dict) -> ValidationReport:
                 report.error("allowed_not_list", f"property '{prop_name}'.allowed must be a list", prop_path)
 
     relationships = _get_typed(report, data, "relationships", list, [], "relationships_not_list", "'relationships' must be a list")
-    rel_names = []
+    rel_signatures = []
     for idx, rel in enumerate(relationships):
         path = f"relationships[{idx}]"
         if not isinstance(rel, dict):
@@ -153,8 +153,14 @@ def validate_domain(data: dict) -> ValidationReport:
         for key in ("name", "from", "to", "meaning"):
             if key not in rel:
                 report.error("relationship_missing_key", f"relationship at index {idx} missing '{key}'", path)
-        if rel.get("name"):
-            rel_names.append(rel["name"])
+        # The same relationship *name* legitimately repeats across
+        # different class pairs (agent_ontology_spec.md Section 5 chose a
+        # list over a name-keyed map specifically to allow this -- e.g.
+        # "hasPoint" between many different equipment/point pairs is
+        # normal, not a duplicate). Only an exact (name, from, to) repeat
+        # is a genuine redundant entry.
+        if rel.get("name") and rel.get("from") and rel.get("to"):
+            rel_signatures.append(f"{rel['name']}::{rel['from']}::{rel['to']}")
         for endpoint_key in ("from", "to"):
             endpoint = rel.get(endpoint_key)
             if endpoint and endpoint not in class_names:
@@ -163,7 +169,7 @@ def validate_domain(data: dict) -> ValidationReport:
                     f"relationship '{rel.get('name', idx)}'.{endpoint_key} references unknown class '{endpoint}'",
                     path,
                 )
-    _check_duplicates(report, rel_names, "relationship")
+    _check_duplicates(report, rel_signatures, "relationship (name+from+to)")
 
     rules = _get_typed(report, data, "rules", dict, {}, "rules_not_mapping", "'rules' must be a mapping of name -> rule")
     rule_names = set(rules.keys())
