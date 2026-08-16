@@ -52,20 +52,26 @@ succeeds end to end. Until then, this file is the only record.
   wording is recovered from git history, and every real compile run pins
   itself to exact wording via a SHA-256 recorded in `run-manifest.json`
   (`compile.py`'s `prompt_sha256()`) rather than via a versioned filename.
-- **#106 (Brick HVAC v1.4.4): in progress**, first real domain translation.
-  Real source fetched and checksum-pinned; scoped to 81 classes via 6
-  hand-picked HVAC entry points (`ontology_translation/domains/brick-hvac/
-  source-manifest.yaml`). Two real pipeline bugs found and fixed by
-  actually running this (not caught by any synthetic test) — see today's
-  Log entry. Compiler re-run in flight with the fixed pipeline; not yet
-  evaluated or accepted.
+- **#106 (Brick HVAC v1.4.4): pipeline work done, all hard gates pass,
+  PR open — issue stays open pending the user's own manual review**
+  (explicit instruction: the manual spot-check in this file is mine, not
+  a substitute for theirs; we'll discuss that process after the PR
+  merges, and #106 does not get closed until then). Real source fetched
+  and checksum-pinned; scoped to 81 classes via 6 hand-picked HVAC entry
+  points. Four real pipeline bugs found and fixed by actually running
+  this on real data (none caught by any synthetic test) — full account in
+  today's Log entry. Final accepted candidate: 175 elements, structurally
+  clean, 100% provenance, zero majority-unsupported, assembled under
+  `ontology_translation/domains/brick-hvac/`.
 - Real Azure spend so far this session: smoke tests are a handful of cents
   (re-spent lightly every time the full suite is run locally with
-  credentials present — see `tools/README.md`'s testing section); the
-  first (now-superseded, pre-bugfix) 3-pass Brick compile cost ~$0.97; a
-  second 3-pass compile with the fixed pipeline is in flight as this is
-  written — final total to be confirmed once it completes.
-- **#104–#111: not started.**
+  credentials present — see `tools/README.md`'s testing section); Brick
+  HVAC's full iteration history (2 superseded 3-pass compiles + 1 final
+  single-pass compile + 2 full QA-suite runs, the first superseded) cost
+  **~$5.36** total — see today's Log entry for the full breakdown. Well
+  inside the ~$21.57 "Large tier, 3 correction rounds" ceiling from the
+  original cost estimate.
+- **#104–#105, #107–#111: not started.**
 - No domain has been translated yet. No `ontology_translation/domains/`
   directory exists yet.
 
@@ -322,4 +328,91 @@ reference and record deltas/decisions here instead.)*
     classes, no CRAC/CRAH-to-space linkage) rather than looking like a
     prompt artifact. No change made there.
 
-  Re-running the full QA suite now with both fixes in place.
+  **Re-run: 58 -> 16 unsupported / 181.** Rules/actions/properties all
+  cleared. All 16 remaining were relationships, and reading them showed a
+  *third* instance of the same root cause: the compiler's relationship
+  evidence cited only the generic property definition (e.g. `hasPoint`'s
+  Brick-wide "has a source of telemetry" text), never framing the specific
+  endpoint pair as standard-practice-grounded the way rules/actions/
+  properties already were. Fixed by extending that same authorization to
+  relationship endpoint pairs in the compiler prompt, with a worked
+  example. Also, while reading these results closely (per explicit
+  instruction to sanity-check the actual output, not just the pass/fail
+  number): found a **fourth** real bug — `judge_mappings`'s majority
+  computation used `Counter.most_common(1)` alone, which silently treats a
+  genuine 3-way judge split (one each of supported/partially_supported/
+  unsupported) as "majority unsupported" purely because that verdict
+  happened to be judge-1's answer and got inserted into the Counter first.
+  Fixed: `_majority_verdict()` now requires a strict majority
+  (> half the votes); a real tie returns no verdict and isn't rejected.
+
+  **Single fresh compile pass** with the relationship-grounding fix (not a
+  full 3 -- translation-stability was already well-established from the
+  earlier 3-run set, no need to re-earn it for a wording-only prompt
+  change): 48 classes, 60 relationships, 9 rules, 9 actions, 12 CQs, 52
+  properties, structurally clean, 100% provenance, $0.5054. Full QA suite
+  on it: only 4/178 unsupported this time, and reading *those* rationales
+  individually (not just trusting the count) found:
+  - 2 genuine, defensible rejections: `Chiller hasPart Compressor` — the
+    cited evidence actually described a *Condensing Unit* having a
+    compressor, not a Chiller directly, a real conflation; and
+    `AHU hasPart AirPlenum` — evidence was indirect ("receives air from")
+    rather than a real part-of claim.
+  - 1 more genuine rejection revealed once the tie-break fix was applied
+    directly to the raw judgments already on hand (no need to re-call the
+    LLM): `Zone hasPoint TemperatureDeadbandSetpoint`, unanimous 3/3
+    unsupported — its own cited evidence hedged ("zones *may* use..."),
+    and the judges correctly caught that the standard-practice claim was
+    weaker for a deadband setpoint than for the more universal
+    heating/cooling setpoints.
+  - 1 false rejection killed by the tie-break fix:
+    `Zone hasPoint HeatingTemperatureSetpoint` had one each of
+    supported/partially_supported/unsupported -- a real split, not a
+    majority, correctly no longer rejected.
+
+  **Final candidate: surgically removed the 3 genuinely-rejected
+  relationships** (not a 4th full re-compile+re-evaluate cycle — cheaper
+  and just as principled, since the 3 judges' own verdicts are the reason
+  for removal): reindexed the remaining relationships and their
+  `translation.json` mapping entries, re-ran structural validation and
+  provenance/reverse-coverage checks (both clean, both still 100%),
+  recomputed semantic-judging results for the survivors with the fixed
+  tie-break rule. **Result: 175 elements, all hard gates pass — structural
+  clean, provenance 100%, zero majority-unsupported.**
+
+  **Manual read-through of the final content** (per explicit instruction:
+  check it actually makes sense, don't just trust the numbers) — read
+  every class name, every rule's conditions, every action's precondition/
+  effect/verification, every competency question, and a relationship
+  sample: 48 classes cover real HVAC vocabulary end to end (central plant
+  through terminal units, sensors, setpoints, spatial containment); the 9
+  rules are textbook BAS control sequences (temperature-vs-setpoint calls,
+  a deadband to stop hunting, CO2-driven ventilation, frost protection,
+  chilled/hot water enable, scheduled setpoints, occupancy-based
+  conditioning) — genuine domain knowledge, not filler; actions properly
+  reference their preconditions by rule name; competency questions are all
+  real operational questions, none of the "what classes exist" style the
+  issue explicitly warns against; `AHU` correctly carries "Air Handling
+  Unit"/"Air Handler Unit" as aliases (the `owl:equivalentClass` fix
+  working as intended); relationships read coherently (`Site hasPart
+  Building`, `AHU serves Zone`, etc.); no subclass-shaped relationship
+  names leaked through. This genuinely holds up.
+
+  **Total real Azure spend, this domain, all iterations:** two full 3-run
+  compiles ($1.2761 + $1.2506) that were superseded by the bug-fixing
+  process, one final single-run compile ($0.5054), two full QA-suite runs
+  ($1.1548 + $1.1723, the first also superseded) = **~$5.36** across every
+  iteration including the throwaway ones. Well inside the ~$21.57 "Large
+  tier, 3 correction rounds" ceiling from the original cost estimate,
+  despite four real pipeline bugs being found and fixed along the way —
+  the token estimates that budget was built on were conservative, and
+  reusing already-established stability data instead of re-earning it on
+  wording-only prompt changes saved real money.
+
+  **Assembled and PASSING**: `ontology_translation/domains/brick-hvac/`
+  now has `source-manifest.yaml`, `reference.domain.yaml`,
+  `translation.json`, `translation-evaluation.json`,
+  `translation-report.md`, `persona.md`. Per explicit instruction, #106
+  stays **open** after this PR merges — the manual spot-check above is
+  mine, not the user's; they want to do their own review before the issue
+  closes, and we'll discuss what that process looks like after merge.

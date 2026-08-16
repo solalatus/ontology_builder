@@ -1,0 +1,3364 @@
+{
+  "domain": "brick-hvac",
+  "structural_validity": {
+    "ok": true,
+    "error_count": 0,
+    "warning_count": 0,
+    "issues": []
+  },
+  "provenance_completeness": {
+    "ok": true,
+    "element_provenance_coverage": 1.0,
+    "source_disposition_coverage": 1.0,
+    "missing_evidence": [],
+    "missing_dispositions": [],
+    "unknown_dispositions": [
+      "http://data.ashrae.org/bacnet/2020",
+      "http://datashapes.org/dash",
+      "http://qudt.org/3.1.0/vocab/quantitykind",
+      "http://qudt.org/3.1.0/vocab/unit",
+      "https://brickschema.org/schema/Brick/ref",
+      "https://w3id.org/rec/brickpatches",
+      "https://w3id.org/rec/recimports"
+    ]
+  },
+  "reverse_coverage": {
+    "coverage": 1.0,
+    "silently_dropped": []
+  },
+  "translation_stability": {
+    "pairs": [
+      {
+        "run_a": 1,
+        "run_b": 2,
+        "classes": {
+          "precision": 0.9433962264150944,
+          "recall": 0.8928571428571429,
+          "f1": 0.9174311926605505
+        },
+        "relationships": {
+          "precision": 0.625,
+          "recall": 1.0,
+          "f1": 0.7692307692307693
+        },
+        "properties": {
+          "precision": 0.4727272727272727,
+          "recall": 0.7222222222222222,
+          "f1": 0.5714285714285714
+        },
+        "allowed_values": {
+          "precision": 0.175,
+          "recall": 0.875,
+          "f1": 0.29166666666666663
+        }
+      },
+      {
+        "run_a": 1,
+        "run_b": 3,
+        "classes": {
+          "precision": 0.7169811320754716,
+          "recall": 1.0,
+          "f1": 0.8351648351648352
+        },
+        "relationships": {
+          "precision": 0.625,
+          "recall": 1.0,
+          "f1": 0.7692307692307693
+        },
+        "properties": {
+          "precision": 0.6545454545454545,
+          "recall": 0.8181818181818182,
+          "f1": 0.7272727272727274
+        },
+        "allowed_values": {
+          "precision": 0.425,
+          "recall": 0.5862068965517241,
+          "f1": 0.4927536231884058
+        }
+      },
+      {
+        "run_a": 2,
+        "run_b": 3,
+        "classes": {
+          "precision": 0.6607142857142857,
+          "recall": 0.9736842105263158,
+          "f1": 0.7872340425531915
+        },
+        "relationships": {
+          "precision": 0.8,
+          "recall": 0.8,
+          "f1": 0.8000000000000002
+        },
+        "properties": {
+          "precision": 0.6944444444444444,
+          "recall": 0.5681818181818182,
+          "f1": 0.625
+        },
+        "allowed_values": {
+          "precision": 0.75,
+          "recall": 0.20689655172413793,
+          "f1": 0.32432432432432434
+        }
+      }
+    ],
+    "average_f1": {
+      "classes": 0.8466100234595256,
+      "relationships": 0.7794871794871795,
+      "properties": 0.6412337662337663,
+      "allowed_values": 0.36958153805979893
+    }
+  },
+  "semantic_judging": {
+    "results": [
+      {
+        "target_path": "classes.AHU",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition and equivalent labels directly identify AHU/Air Handler Unit/Air Handling Unit as the same class concept and justify merging them with aliases into one operational class."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition and equivalent labels directly identify AHU/Air Handler Unit/Air Handling Unit as the same class of equipment, justifying a merged AHU class with aliases."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The source evidence directly names AHU/Air Handler Unit/Air Handling Unit as equivalent labels and defines the assembly\u2019s function, which fully supports merging those class variants into one AHU class with aliases."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.AHU.properties.status",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited REC datatype property \"status\" together with standard HVAC practice specifically supports modeling an AHU with an operational status property, and the target adds no unsupported extra detail."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited REC datatype property \"status\" together with standard HVAC practice for equipment operating state specifically supports modeling an AHU with a status property for its operational state."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited datatype property \"status\" together with standard HVAC practice specifically grounds an operational status attribute for an AHU, matching the target element without adding extra unsupported detail."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.AirPlenum",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition directly describes an AirPlenum as an HVAC component that receives air from an air handling unit or room for distribution or exhaust, which adequately grounds the class mapping."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition directly describes an AirPlenum as an HVAC component that receives air and distributes or exhausts it, which adequately grounds the target class."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition directly describes an HVAC component that receives air from an AHU or room for distribution or exhaust, which adequately grounds the AirPlenum class."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.AirPlenum.properties.status",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited datatype property \"status\" together with standard HVAC practice about plenum availability/restriction adequately grounds a generic operational state property on AirPlenum without asserting extra unsupported detail."
+          },
+          {
+            "verdict": "partially_supported",
+            "rationale": "The cited datatype property and standard practice support having some operational state for an AirPlenum, but they do not specifically ground the narrower notion of plenum availability or restriction state beyond a generic status property."
+          },
+          {
+            "verdict": "partially_supported",
+            "rationale": "The cited REC datatype property \"status\" and general standard practice support having an operational state for an AirPlenum, but they do not specifically justify the more detailed notion of plenum availability or restriction state."
+          }
+        ],
+        "majority_verdict": "partially_supported"
+      },
+      {
+        "target_path": "classes.AirQualitySensor",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The source definition exactly states that this is a sensor providing a measure of air quality, which directly grounds the AirQualitySensor class."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The source definition directly states that an AirQualitySensor is a sensor providing a measure of air quality, which fully matches the target class."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The source definition explicitly states that this is a sensor providing a measure of air quality, which directly grounds the AirQualitySensor class."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.AirQualitySensor.properties.value",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "If the source class is an AirQualitySensor that provides a measure of air quality, mapping its measured reading to a generic datatype property 'value' is a standard and adequately specific interpretation."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "If the source class is an AirQualitySensor that provides a measure of air quality, mapping its measured reading to a generic datatype property value is a standard and sufficiently specific representation of that measurement."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "If the source class is an AirQualitySensor that provides a measure of air quality, mapping that measured reading to a generic datatype property value is a standard and sufficiently specific interpretation."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.AirQualitySensor.properties.status",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited source explicitly indicates a datatype property named \"status,\" and standard sensor-health practice specifically supports interpreting an AirQualitySensor status field as conveying availability or fault state."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "A generic datatype property named \"status\" together with standard sensor-health practice specifically supports adding a status field for an AirQualitySensor to indicate availability or faults."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "A generic ontology datatype property named \"status\" together with standard sensor health/status practice specifically supports modeling an AirQualitySensor status for availability or fault indication, and the target adds no narrower detail than that."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.AirTemperatureSensor",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The source definition explicitly states that this class measures the temperature of air, which directly grounds the target class AirTemperatureSensor."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The evidence directly defines the concept as measuring air temperature, which adequately grounds the class AirTemperatureSensor."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition directly states that the class measures air temperature, which adequately grounds the target class AirTemperatureSensor."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.AirTemperatureSensor.properties.value",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "Given that the source class is explicitly an air temperature sensor, assigning it a generic datatype property 'value' to hold the measured air temperature is a standard and sufficiently specific interpretation."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "Given that the source class is an AirTemperatureSensor and the cited datatype property is \"value,\" interpreting this as the numeric measured air temperature is a standard and specific mapping for that named sensor concept."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "If the source class is an AirTemperatureSensor and there is a datatype property 'value', it is a standard and specific interpretation that this property holds the sensor's measured air-temperature reading."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.AirTemperatureSensor.properties.status",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "A datatype property named \"status\" together with standard sensor-status practice specifically supports assigning an AirTemperatureSensor a status property for health/availability state."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "A datatype property named \"status\" together with standard sensor-status practice specifically supports adding a status field for an AirTemperatureSensor to represent health or availability."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "A datatype property named \"status\" together with standard sensor-status practice specifically supports adding a status field for an AirTemperatureSensor to represent health or availability."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.AirTemperatureSetpoint",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The source definition explicitly states that this concept sets the temperature of air, which directly grounds the class AirTemperatureSetpoint."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The source definition 'Sets temperature of air' directly and specifically grounds the class AirTemperatureSetpoint as a setpoint for air temperature."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The source definition 'Sets temperature of air' directly and specifically grounds the class AirTemperatureSetpoint as a setpoint for air temperature."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.AirTemperatureSetpoint.properties.value",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited source indicates an AirTemperatureSetpoint sets air temperature, and mapping its quantitative content to a generic numeric 'value' property is a standard, appropriate interpretation at the stated level of detail."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "A datatype property named \"value\" on an AirTemperatureSetpoint that is described as setting air temperature specifically supports mapping this class property to a numeric value."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "Given a source class explicitly about setting air temperature, mapping its setpoint target to a generic numeric datatype property named \"value\" is a plausible and adequately grounded representation of the stated detail."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.Boiler",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition directly and specifically describes a Boiler as a closed pressure vessel that heats water or other fluids to provide steam or hot water, matching the target class."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The evidence explicitly defines a boiler as a closed pressure vessel heating water or other fluids to supply steam or hot water, which directly grounds the class Boiler."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition directly describes a Boiler as a closed pressure vessel using fuel or electricity to heat water or other fluids for steam or hot water, which adequately grounds the class mapping."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.Boiler.properties.status",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited REC datatype property \"status\" together with standard boiler operating-state practice specifically supports assigning an operational status property to a Boiler for control and monitoring."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "A boiler operational status property is a standard, specific concept in boiler monitoring/control practice, so the cited datatype property plus standard boiler operating state practice adequately grounds this element."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "A boiler operational state/status property is a standard, specific concept for boiler monitoring and control, so the cited REC datatype property plus standard boiler operating-state practice adequately grounds this target element."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.Building",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited source definition directly describes a Building as an independent unit of the built environment with characteristic spatial structure, which adequately grounds the class mapping."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source definition directly describes a Building as an independent unit of the built environment with spatial structure, which adequately grounds the class mapping."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source definition directly describes a Building as an independent unit of the built environment with spatial structure, which adequately grounds the class mapping."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.Building.properties.yearBuilt",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick property explicitly defines Year built as the four-digit year a building was first built, which directly grounds a Building.yearBuilt property."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick definition explicitly names the 'Year built' property for a building and defines it as the four-digit year the building was first built, which directly grounds classes.Building.properties.yearBuilt."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick property explicitly defines 'Year built' as the four-digit year a building was first built, which directly supports a Building.yearBuilt property."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.BypassValve",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The source definition directly states that a BypassValve is a valve installed in a bypass pipeline, which fully grounds the target class."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source definition directly states that a BypassValve is a valve installed in a bypass pipeline, which exactly grounds the target class."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The source definition explicitly states that a BypassValve is a type of valve installed in a bypass pipeline, which directly grounds the class mapping."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.BypassValve.properties.status",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited ontology datatype property \"status\" together with standard valve operating-state practice specifically supports assigning an operational status/state property to a BypassValve, without adding unsupported extra detail."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source property \"status\" together with standard valve operating-state practice specifically supports assigning an operational state/status property to a BypassValve, and the target element does not add unsupported extra detail."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "A generic datatype property named \"status\" together with standard valve operating-state practice adequately supports assigning an operational state property to a BypassValve at the general level stated."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.CO2DifferentialSensor",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition directly states that this sensor measures the difference between indoor and outdoor CO2 levels, which adequately grounds the class CO2DifferentialSensor."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The source definition explicitly states that this class measures the difference between indoor and outdoor CO2 levels, which directly grounds CO2DifferentialSensor."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition directly states that this class measures the difference between indoor and outdoor CO2 levels, which matches CO2DifferentialSensor."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.CO2DifferentialSensor.properties.value",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "If the source class is a CO2 differential sensor and the cited datatype property is \"value,\" it specifically supports representing the measured CO2 difference as a numeric value."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "If the source class is explicitly a CO2 differential sensor, assigning its measured differential reading to a datatype property named 'value' is a standard and sufficiently specific interpretation."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "If the source class is a CO2 differential sensor and the source ontology has a datatype property \"value,\" mapping its differential reading to a numeric value property is a direct and standard grounding."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.CO2DifferentialSensor.properties.status",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "A generic datatype property named \"status\" together with standard sensor-status practice adequately supports adding a status property to a CO2DifferentialSensor for monitoring, without asserting extra specifics."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "A generic datatype property \"status\" plus standard sensor-status practice specifically supports assigning a status property to a CO2DifferentialSensor for monitoring, without adding unsupported extra detail."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited datatype property \"status\" together with standard sensor-status practice specifically supports assigning a status property to a CO2DifferentialSensor for monitoring."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.CO2LevelSensor",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The evidence directly defines a sensor that measures CO2 concentration in air, which specifically grounds the class CO2LevelSensor."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition directly states that the class measures CO2 concentration in air, which adequately grounds the target class CO2LevelSensor."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The evidence directly defines a sensor that measures CO2 concentration in air, which specifically grounds the class CO2LevelSensor."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.CO2LevelSensor.properties.value",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "Given the source class is a CO2 level sensor that measures CO2 concentration, mapping its reading to a generic datatype property named \"value\" is a standard and appropriately specific representation."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "A generic datatype property 'value' is an appropriate and standard way to represent the numeric reading of a CO2LevelSensor whose source definition says it measures CO2 concentration."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "Given a datatype property \"value\" and a source class defined as measuring CO2 concentration, representing the sensor's reading as a numeric value property is a direct and standard grounding."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.CO2LevelSensor.properties.status",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "A datatype property named \"status\" together with standard sensor-status practice specifically supports assigning a status property to a CO2LevelSensor for health/availability state."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "A datatype property named \"status\" together with standard practice for sensor status specifically supports adding a status property to a CO2LevelSensor for health/availability indication."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "A generic datatype property named \"status\" together with standard sensor-status practice specifically supports adding a status field for a CO2 level sensor's health/availability at this level of detail."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.Chiller",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The source definition directly describes a chiller as a refrigerating machine that transfers heat between fluids, which adequately grounds the class mapping."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The source definition explicitly describes a refrigerating machine that transfers heat between fluids, which directly grounds the class Chiller."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The source definition directly describes a chiller as a refrigerating machine that transfers heat between fluids, which adequately grounds the class mapping."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.Chiller.properties.coolingCapacity",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick definition specifically names cooling capacity as the measurement of a chiller's ability to remove heat, which directly grounds a chiller property representing that capability as a numeric value."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick definition specifically ties cooling capacity to a chiller's heat-removal ability, which adequately grounds representing it as the Chiller's coolingCapacity property."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick definition specifically ties cooling capacity to a chiller's ability to remove heat, which directly grounds representing that capability as the Chiller's coolingCapacity property."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.Chiller.properties.status",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited datatype property \"status\" directly supports a status field, and standard chiller operating-state practice specifically justifies interpreting it as an operational status used for monitoring and control."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "A datatype property named \"status\" together with standard chiller operating-state practice specifically supports adding an operational status property for a Chiller, without asserting finer details than the evidence provides."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited datatype property \"status\" directly matches a Chiller status property, and standard chiller operating-state practice specifically supports using such an operational status attribute for chillers."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.ColdDeck",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited source definition directly states that a ColdDeck is part of a dual duct air handling unit that supplies cooling to a building, which matches the target class."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source definition directly states that a ColdDeck is part of a dual duct air handling unit supplying cooling to a building, which adequately grounds the class mapping."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition directly describes a ColdDeck as the cooling-supply part of a dual duct air handling unit, which matches the target class exactly."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.ColdDeck.properties.status",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited datatype property \"status\" together with standard HVAC practice of marking a supply path as active or inactive specifically supports adding a simple operational status property for a ColdDeck."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited datatype property \"status\" together with standard HVAC practice about active/inactive supply path state specifically supports adding a simple operational status property to a ColdDeck without asserting extra detail."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited datatype property \"status\" together with standard HVAC practice about active/inactive supply path state specifically supports adding a simple operational status for a ColdDeck without asserting extra detail."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.Compressor",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited definitions directly describe a compressor as a device that increases gas pressure, specifically including refrigerant vapor, which adequately grounds the Compressor class mapping."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The evidence explicitly defines a compressor as a device that increases gas pressure and specifically as a machine compressing refrigerant vapor, which directly grounds the class Compressor."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definitions directly describe a compressor as a device/machine that increases gas pressure by compressing refrigerant vapor, which specifically grounds the class mapping to Compressor."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.Compressor.properties.status",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited datatype property name \"status\" directly matches the target property and standard practice specifically supports representing a compressor's operating state with a status field."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited datatype property name 'status' together with standard compressor operating-state practice specifically supports assigning a status property to a Compressor for operation monitoring."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited datatype property name \"status\" together with standard compressor operating-state practice specifically supports adding a compressor status property for operation monitoring."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.CondensingUnit",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition directly describes a CondensingUnit as an outdoor HVAC unit that condenses refrigerant from gas to liquid, which matches the target class."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition directly describes a condensing unit as an outdoor HVAC unit that condenses refrigerant from gas to liquid, which matches the target class."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition specifically describes a CondensingUnit as an outdoor HVAC unit that condenses refrigerant from gas to liquid, which directly grounds the class mapping."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.CondensingUnit.properties.status",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited datatype property \"status\" directly matches an operational status property, and standard practice specifically supports tracking a condensing unit's operating state."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited REC datatype property \"status\" together with standard condensing-unit operating-state practice specifically supports assigning an operational status property to a CondensingUnit."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited datatype property \"status\" directly matches an operational state/status field, and standard practice specifically supports monitoring a condensing unit's operating status."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.CoolingTemperatureSetpoint",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The source definition 'Sets temperature for cooling' directly and specifically grounds the class CoolingTemperatureSetpoint."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The source definition directly states that this class sets temperature for cooling, which specifically grounds the class CoolingTemperatureSetpoint."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The source definition \"Sets temperature for cooling\" directly and specifically grounds a class named CoolingTemperatureSetpoint."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.CoolingTemperatureSetpoint.properties.value",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited datatype property \"value\" directly supports assigning a numeric value to a CoolingTemperatureSetpoint, and the source class context specifies that this setpoint is for cooling temperature."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited datatype property \"value\" together with the source class indicating it sets temperature for cooling adequately supports that a CoolingTemperatureSetpoint has a value property representing its numeric setting."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "A datatype property named \"value\" is an appropriate and specifically grounded way to represent the numeric temperature setpoint for a CoolingTemperatureSetpoint when the source class is defined as setting temperature for cooling."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.CoolingTower",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition explicitly identifies a CoolingTower as a heat rejection device that rejects waste heat to the atmosphere, which directly grounds the class mapping."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition explicitly identifies a cooling tower as a heat rejection device, directly grounding the class mapping to CoolingTower."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition directly names and defines a cooling tower as a heat rejection device, which adequately grounds the class CoolingTower."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.CoolingTower.properties.status",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited REC datatype property \"status\" directly grounds a status attribute, and standard cooling-tower operating-state practice specifically supports applying such a status property to a CoolingTower."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited REC datatype property \"status\" together with standard cooling-tower operating-state practice specifically supports assigning a status property to a CoolingTower without adding unsupported extra detail."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source explicitly names a datatype property \"status,\" and standard cooling-tower operating-state practice adequately grounds assigning a status property to the CoolingTower class."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.CoolingValve",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition directly matches a CoolingValve as a valve that modulates cold-water flow through a cooling coil to control air temperature."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition directly describes a valve modulating cold water through a cooling coil to control air temperature, which specifically grounds the CoolingValve class."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition directly describes a valve modulating cold water through a cooling coil to control air temperature, which specifically grounds the class CoolingValve."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.CoolingValve.properties.status",
+        "raw_judgments": [
+          {
+            "verdict": "partially_supported",
+            "rationale": "Evidence that a cooling valve modulates cold water flow supports having an operational state/position notion, but it does not specifically justify a generic property named \"status\" rather than a more precise commanded or actual valve position."
+          },
+          {
+            "verdict": "partially_supported",
+            "rationale": "The evidence supports that a cooling valve has an operational/modulating state related to cold water flow, but it does not specifically justify a generic property named 'status' rather than a more precise position or command value."
+          },
+          {
+            "verdict": "partially_supported",
+            "rationale": "The evidence supports that a cooling valve has an operational/modulating state tied to cold water flow, but it does not specifically justify a generic property named \"status\" beyond that broad interpretation."
+          }
+        ],
+        "majority_verdict": "partially_supported"
+      },
+      {
+        "target_path": "classes.Damper",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition specifically describes a damper as an element in an air-distribution system used to vary or shut off airflow, which directly grounds the class Damper."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition specifically describes a damper as an element in an air-distribution system used to vary or stop airflow, which directly grounds the Damper class mapping."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition specifically describes a damper as an element in an air-distribution system that changes or shuts off airflow, which directly grounds the target class Damper."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.Damper.properties.status",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited datatype property \"status\" explicitly supports open, closed, or modulating states, which directly matches a damper operating position/status property."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited datatype property 'status' explicitly supports open, closed, or modulating states, which directly matches a damper operating-position status property."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited datatype property \"status\" with a definition covering open, closed, or modulating states directly supports representing a damper\u2019s operating position as a status property."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.Economizer",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition directly describes an economizer as a device that senses variables and initiates control actions to conserve energy, which adequately grounds the class mapping."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition directly describes an economizer as a device that senses variables and initiates actions to conserve energy, which adequately grounds the class mapping to Economizer."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The source definition directly describes a device that senses variables and initiates actions to conserve energy, which adequately grounds the class Economizer at that level of generality."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.Economizer.properties.status",
+        "raw_judgments": [
+          {
+            "verdict": "partially_supported",
+            "rationale": "The cited evidence supports that a control device may have an enabled/active status, but it does not specifically ground a status property for the Economizer class beyond that general control-device interpretation."
+          },
+          {
+            "verdict": "partially_supported",
+            "rationale": "The cited evidence supports that a control device can have some enabled/active status, but it does not specifically ground a status property for the Economizer class beyond that general operational-state interpretation."
+          },
+          {
+            "verdict": "partially_supported",
+            "rationale": "The cited evidence supports that a control device can have a status indicating enabled or active state, but it does not specifically ground an economizer status property beyond that general operational-state interpretation."
+          }
+        ],
+        "majority_verdict": "partially_supported"
+      },
+      {
+        "target_path": "classes.Fan",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition directly describes a fan as a device with blades or vanes on a rotating shaft used to produce airflow, which fully grounds the target class Fan."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition directly describes a fan as a device with blades or vanes on a rotating shaft used to produce airflow, which adequately grounds the target class Fan."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition directly describes a fan as a device with blades on a rotating shaft used to produce airflow, which fully grounds the target class Fan."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.Fan.properties.status",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited REC datatype property \"status\" directly supports a status field, and standard fan operating-state practice specifically justifies applying such a status property to a Fan for operational reasoning."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source explicitly indicates a datatype property named \"status,\" and standard fan operating-state practice specifically supports interpreting a Fan.status property for operational state reasoning."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source explicitly names a datatype property \"status,\" and standard practice clearly supports interpreting a fan's status as its operating state without adding unsupported extra detail."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.Filter",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited source definition directly describes a Filter as a device that removes contaminants from gases or fluids, which adequately grounds the class mapping."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source definition directly describes a Filter as a device that removes gases or solids from a fluid, which adequately grounds the target class mapping."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source definition directly describes a filter as a device that removes gases or solid material from fluids, which adequately grounds the class mapping to Filter."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.Filter.properties.status",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited REC datatype property \"status\" directly supports a status field, and standard HVAC practice specifically grounds using it for filter condition states such as clean or clogged."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited REC datatype property \"status\" directly supports a status property, and standard HVAC practice specifically grounds using values like clean or clogged for a filter's condition."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited REC datatype property named \"status\" plus standard HVAC practice specifically concerning filter condition (e.g., clean or clogged) adequately grounds a Filter.status property expressing operational condition."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.Floor",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition directly describes a floor/storey as a level representing a horizontal aggregation of spaces, which adequately grounds merging equivalent Floor/Storey labels into one class with an alias."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The source definition explicitly describes a level as a horizontal aggregation of spaces and the Floor/Storey label equivalence directly supports merging them into a single Floor class with an alias."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition of a level as a horizontal aggregation of spaces, together with the explicit Floor/Storey equivalence, directly supports modeling a merged Floor class with Storey as an alias."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.FrostSensor",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited source definition directly describes a FrostSensor as sensing frost presence or frost-causing conditions, which adequately grounds the target class."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The source definition directly matches the class FrostSensor by describing a sensor that detects frost or frost-causing conditions."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition directly describes a sensor whose function is to detect frost or frost-causing conditions, which adequately grounds the class FrostSensor."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.FrostSensor.properties.value",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The evidence specifically says the source class indicates the presence or risk of frost, which adequately grounds mapping it to a value property representing that indication as a boolean."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The evidence explicitly states the source class indicates the presence or risk of frost, which adequately grounds mapping FrostSensor.value to a boolean-style value property conveying frost indication."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source indicates the FrostSensor conveys presence or risk of frost, which adequately grounds mapping its reading to a boolean-like value property indicating frost/no frost."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.HeatExchanger",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The evidence directly defines HeatExchanger and explicitly provides the common alias HX, which fully justifies an operational class for that concept with the alias retained."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The evidence directly defines HeatExchanger and explicitly provides the alias HX, which fully supports an operational class named HeatExchanger with that alias."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The evidence directly defines HeatExchanger as equipment for transferring heat between media, and the alias HX is a standard equivalent label for the same concept."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.HeatExchanger.properties.status",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "A generic datatype property named \"status\" plus standard practice of tracking equipment operating state adequately grounds adding a status property for a HeatExchanger at this level of specificity."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "A datatype property named \"status\" together with standard practice of tracking a heat exchanger's operating state specifically supports adding a status property for HeatExchanger operation monitoring."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited datatype property \"status\" together with standard practice of monitoring a heat exchanger's operating state specifically supports assigning a status property to HeatExchanger."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.HeatingTemperatureSetpoint",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The source definition directly states that this concept sets temperature for heating, which adequately grounds the class HeatingTemperatureSetpoint."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The source definition explicitly states that this concept sets temperature for heating, which directly grounds the class HeatingTemperatureSetpoint."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The source definition \"Sets temperature for heating\" directly and specifically grounds the class HeatingTemperatureSetpoint."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.HeatingTemperatureSetpoint.properties.value",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "A datatype property named \"value\" is an appropriate and sufficiently specific grounding for the numeric value of a HeatingTemperatureSetpoint, given the source class is explicitly about setting heating temperature."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "A datatype property named \"value\" is an appropriate grounding for the numeric amount of a HeatingTemperatureSetpoint, and the source indication that the class sets temperature for heating specifically ties that value to the heating target."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "A datatype property named \"value\" is an appropriate grounding for the numeric magnitude of a HeatingTemperatureSetpoint, and the source indication that the class sets temperature for heating specifically ties that value to the heating target."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.HeatingValve",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition directly describes a valve modulating hot water through a heating coil to control air temperature, which specifically grounds the HeatingValve class."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source definition directly describes a valve that modulates hot water through a heating coil to control air temperature, which adequately grounds the HeatingValve class."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition directly describes a heating valve as modulating hot water through a heating coil to control air temperature, which adequately grounds the class HeatingValve."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.HeatingValve.properties.status",
+        "raw_judgments": [
+          {
+            "verdict": "partially_supported",
+            "rationale": "The evidence supports that a heating valve has a modulating position controlling hot water flow, but it does not specifically justify representing that as a generic status property rather than a position/opening level."
+          },
+          {
+            "verdict": "partially_supported",
+            "rationale": "The evidence supports that a heating valve has some notion of position/modulation, but it does not specifically justify collapsing valve position into a generic operational status property."
+          },
+          {
+            "verdict": "partially_supported",
+            "rationale": "The evidence supports that a heating valve has a modulating position/flow-control aspect, but it does not specifically justify representing that as a generic operational 'status' property rather than a position or opening level."
+          }
+        ],
+        "majority_verdict": "partially_supported"
+      },
+      {
+        "target_path": "classes.HotDeck",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition directly describes a HotDeck as the heating-supply part of a dual-duct air handling unit, matching the target class exactly."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition directly describes a HotDeck as the heating-supply part of a dual-duct air handling unit, matching the target class."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition directly describes a HotDeck as the heating-supplying part of a dual duct air handling unit, which matches the target class exactly."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.HotDeck.properties.status",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited REC datatype property \"status\" together with standard HVAC practice about an active/inactive heating supply path specifically supports assigning a simple operational status to a HotDeck."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited ontology datatype property \"status\" together with standard HVAC practice of marking a heating supply path as active/inactive specifically supports adding a simple operational status property to HotDeck."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited ontology datatype property \"status\" together with standard HVAC practice about an active/inactive heating supply path adequately grounds a simple operational status property for a HotDeck without adding unsupported detail."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.Humidifier",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The evidence directly defines a Humidifier as a device that adds moisture to air or other gases, which fully grounds the target class mapping."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition directly matches the class Humidifier as a device whose function is to add moisture to air or other gases."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition directly matches the target class Humidifier as a device that adds moisture to air or other gases."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.Humidifier.properties.status",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "A datatype property named \"status\" together with standard humidifier operating-state practice specifically supports adding an operational status property for a Humidifier for control and monitoring."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "A datatype property named \"status\" together with standard humidifier operating-state practice specifically supports adding a humidifier operational status property for control and monitoring."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "A datatype property named \"status\" together with standard humidifier operating-state practice specifically supports adding an operational status property for a Humidifier for control and monitoring."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.IsolationValve",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition directly describes an isolation valve as a valve used to stop fluid flow for maintenance or safety, which matches the target class."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The evidence directly defines an isolation valve as a valve used to stop fluid flow for maintenance or safety, which matches the target class."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition directly describes an isolation valve as a valve used to stop fluid flow for maintenance or safety, which matches the target class."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.IsolationValve.properties.status",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited source explicitly defines a datatype property named \"status\" with open/closed states, which directly supports representing an isolation valve's position as a status property."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited datatype property 'status' explicitly supporting open or closed states directly grounds representing an isolation valve's position as a status property."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited datatype property 'status' with a definition supporting open or closed states directly justifies representing an isolation valve's position as a status property."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.OccupancySensor",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited source label and definition directly justify an OccupancySensor class as a sensor that detects occupancy in a space or area."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source definition and recommended class both directly identify an OccupancySensor as a sensor that detects occupancy in a space or area, which matches the target class."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source definition and class label directly describe an OccupancySensor as a sensor that detects occupancy in a space or area, matching the target class without adding unsupported detail."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.OccupancySensor.properties.value",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited datatype property \"value\" together with the specific note that occupancy sensors indicate occupied or unoccupied state adequately grounds representing an OccupancySensor's value as a boolean-like occupancy state."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited datatype property \"value\" together with the domain-specific note that occupancy sensors indicate occupied or unoccupied state adequately supports modeling OccupancySensor.value as a boolean-like occupancy state."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited datatype property \"value\" together with the specific note that occupancy sensors indicate occupied or unoccupied state adequately grounds representing OccupancySensor.value as a boolean-like occupancy state."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.OccupancySensor.properties.status",
+        "raw_judgments": [
+          {
+            "verdict": "partially_supported",
+            "rationale": "The cited datatype property name and general standard sensor-status practice support having a status field on an OccupancySensor, but they do not specifically justify the added semantics of occupancy point health and availability."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited REC datatype property \"status\" together with standard sensor-status practice specifically supports assigning a status property to an OccupancySensor for indicating its health or availability."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited REC datatype property \"status\" together with standard sensor-status practice specifically supports assigning a status property to an OccupancySensor for indicating health/availability at the general level stated."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.OutsideAirCO2Sensor",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition directly states that this class measures CO2 concentration in outside air, which specifically grounds the target class OutsideAirCO2Sensor."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition directly states that this class measures CO2 concentration in outside air, which specifically matches the target class OutsideAirCO2Sensor."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition directly and specifically states that this class measures CO2 concentration in outside air, which fully grounds the target class OutsideAirCO2Sensor."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.OutsideAirCO2Sensor.properties.value",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "If the source class is an outside air CO2 sensor that measures outside air CO2 concentration, assigning its reading to a datatype property named \"value\" is a standard and sufficiently specific interpretation."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "If the source class measures outside air CO2 concentration, mapping its reading to a generic datatype property 'value' is a standard and sufficiently specific representation of that measurement."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "If the source class measures outside air CO2 concentration, assigning its reading to a generic datatype property 'value' is a standard and directly appropriate interpretation with no extra unsupported detail."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.OutsideAirCO2Sensor.properties.status",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "A recommended datatype property named \"status\" plus standard practice for sensor status specifically supports adding a status field to an OutsideAirCO2Sensor for health/availability indication."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited datatype property \"status,\" together with standard practice for sensor status indicating health/availability, specifically supports assigning a status property to an OutsideAirCO2Sensor."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "A recommended datatype property named \"status\" together with standard sensor-status practice specifically supports assigning a status field to an OutsideAirCO2Sensor for health/availability state."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.Pump",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition directly describes a pump as a machine that adds energy to fluid and expels it, which adequately grounds the class mapping to Pump."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition directly describes a pump as a machine that adds energy to a fluid to move it out through an outlet, which adequately grounds the class Pump."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition directly describes a pump as a machine that imparts energy to a fluid and forces it out, which adequately grounds the class mapping to Pump."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.Pump.properties.status",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "A datatype property named \"status\" together with standard pump operating-state practice specifically supports assigning pumps a status property for operation monitoring."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "A datatype property named \"status\" together with standard pump operating-state practice specifically supports adding a pump status property for operation monitoring."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "A datatype property named \"status\" together with standard pump operating-state practice specifically supports adding a pump status property for operation monitoring."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.ReturnAirCO2Sensor",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The source definition explicitly states that this class measures CO2 concentration in return air, which directly matches ReturnAirCO2Sensor."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The source definition explicitly states that the class measures CO2 concentration in return air, which directly matches ReturnAirCO2Sensor."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition directly states that the class measures CO2 concentration in return air, which exactly matches the target class ReturnAirCO2Sensor."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.ReturnAirCO2Sensor.properties.value",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "If the source class measures return air CO2 concentration, assigning its reading to a datatype property named \"value\" is a standard and appropriately specific representation of that measured quantity."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "Given that the source class is a Return Air CO2 Sensor that measures return air CO2 concentration, mapping its reading to a datatype property named \"value\" as a numeric value is a standard and specifically appropriate interpretation."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "Given the source class measures return air CO2 concentration, mapping its reading to a generic datatype property \"value\" as the numeric sensor output is a standard and specific interpretation."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.ReturnAirCO2Sensor.properties.status",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited datatype property \"status\" plus standard practice for sensor status specifically supports adding a status field for a ReturnAirCO2Sensor to indicate health/availability at the general level stated."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "A generic datatype property named \"status\" together with standard sensor-status practice specifically supports assigning a status property to a ReturnAirCO2Sensor for health/availability indication."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "A generic ontology datatype property named \"status\" together with standard sensor-status practice specifically supports assigning a status property to a ReturnAirCO2Sensor for health/availability indication."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.ScheduleTemperatureSetpoint",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The evidence directly defines a setpoint indicated by a schedule, which adequately grounds the class name ScheduleTemperatureSetpoint."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The source definition explicitly describes a current setpoint indicated by a schedule, which directly grounds the class ScheduleTemperatureSetpoint."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The source definition explicitly describes a setpoint indicated by a schedule, which directly matches the class name ScheduleTemperatureSetpoint without adding unsupported detail."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.ScheduleTemperatureSetpoint.properties.value",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited source explicitly describes the schedule class as indicating a current setpoint, which adequately grounds mapping its value to a numeric setpoint property."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The source explicitly describes the schedule class as indicating a current setpoint, so mapping its value to a numeric setpoint property is a direct and appropriately specific interpretation."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source explicitly describes this as the current setpoint indicated by the schedule, which directly supports mapping ScheduleTemperatureSetpoint to a numeric value property."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.Site",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The source definition directly states that a Site is a geographic region containing zero or more buildings, which adequately grounds the class mapping."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source definition directly matches the class meaning of Site as a geographic region containing zero or more buildings."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source definition directly states that a Site is a geographic region containing zero or more buildings, which adequately grounds the class mapping."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.Space",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "Both cited ontology definitions describe Space as a bounded or contiguous part of the physical world that can contain sub-spaces, which directly supports the merged operational location class at this level of detail."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "Both cited ontology definitions describe Space as a bounded/contiguous part of the physical world that may contain sub-spaces, which directly supports the target class."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "Both cited ontology definitions describe Space as a bounded/contiguous part of the physical world that may contain sub-spaces, which directly supports the merged operational location class."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.SpaceHeater",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The evidence directly defines a heater used to warm air in an enclosed area like a room or office, which specifically grounds the class SpaceHeater."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition specifically describes a heater for warming air in an enclosed area, which directly grounds the class SpaceHeater."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The evidence directly defines a heater used to warm air in an enclosed area, which specifically matches the class concept of a SpaceHeater."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.SpaceHeater.properties.status",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "A datatype property named \"status\" together with standard practice of tracking a heater's operating state specifically supports adding a status property for a SpaceHeater."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source explicitly names a datatype property \"status,\" and standard practice specifically supports using status to represent a heater's operating state for monitoring."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source explicitly names a datatype property \"status,\" and standard heater operating-state practice specifically supports using a status property for monitoring a SpaceHeater's operational state."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.SteamValve",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The source class label explicitly names the concept \"Steam Valve,\" which directly grounds the target class at the same level of specificity."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The source class label explicitly names the concept 'Steam Valve', which directly grounds the target class at the same level of specificity."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The source class label explicitly names the concept 'Steam Valve', which directly and adequately grounds the target class at the same level of specificity."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.SteamValve.properties.status",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited REC datatype property \"status\" directly supports a status field, and standard steam-valve operating practice specifically justifies interpreting it as the valve's operating state/position for a SteamValve."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited datatype property \"status\" plus standard steam-valve operating-state practice specifically grounds assigning a status property to SteamValve, and the target adds no unsupported extra detail."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited REC datatype property \"status\" plus standard practice for steam valves specifically supports assigning an operating-state/status property to a SteamValve, and the target adds no unsupported extra detail."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.TemperatureDeadbandSetpoint",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The source definition explicitly states that this class sets the size of a temperature deadband, which directly grounds the target class TemperatureDeadbandSetpoint."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source definition directly states that this concept sets the size of a temperature deadband, which specifically grounds the class TemperatureDeadbandSetpoint."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The source definition directly states that this class sets the size of a temperature deadband, which specifically matches TemperatureDeadbandSetpoint."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.TemperatureDeadbandSetpoint.properties.value",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited source explicitly describes TemperatureDeadbandSetpoint as setting the size of a temperature deadband, so mapping its amount to a numeric value property is directly justified."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source indicates this class sets the size of a temperature deadband, so mapping that amount to a datatype property named \"value\" is a direct and appropriate grounding."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "If the source class defines temperature deadband setpoint as setting the size of a temperature deadband, mapping its amount to a generic numeric 'value' property is a direct and standard grounding."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.TerminalUnit",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition directly describes a device that regulates flow rate and/or temperature of a medium, which adequately grounds the TerminalUnit class mapping."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition directly describes a device that regulates flow rate and/or temperature of a controlled medium, which adequately grounds the TerminalUnit class mapping."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source definition directly describes a device regulating flow rate and/or temperature of a controlled medium, which adequately grounds the TerminalUnit class mapping."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.TerminalUnit.properties.status",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited REC datatype property \"status\" directly supports a status property on a TerminalUnit, and standard terminal-unit operating-state practice specifically justifies its use for control and monitoring without adding unsupported extra detail."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited REC datatype property \"status\" directly supports a status property, and standard practice specifically for terminal units plausibly grounds its use for operational state monitoring and control without adding unsupported detail."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited REC datatype property \"status\" directly grounds a status property on a TerminalUnit, and standard terminal-unit operating-state practice specifically supports its use for control and monitoring."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.Thermostat",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition directly describes a thermostat as an automatic control device maintaining temperature at a fixed or adjustable setpoint, matching the target class exactly."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition directly and specifically describes a thermostat as an automatic control device that maintains temperature at a fixed or adjustable setpoint, matching the target class."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition directly describes a thermostat as an automatic control device that maintains temperature at a fixed or adjustable setpoint, matching the target class."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.Thermostat.properties.status",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "A datatype property named \"status\" together with standard thermostat operating-state practice specifically supports adding an operational status property for a Thermostat."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "A datatype property named \"status\" together with standard thermostat operating-state practice specifically supports adding an operational status property for a Thermostat."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "A datatype property named \"status\" together with standard thermostat operating-state practice specifically supports modeling a thermostat's operational status for monitoring."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.WallAirConditioner",
+        "raw_judgments": [
+          {
+            "verdict": "partially_supported",
+            "rationale": "The evidence supports a room-cooling self-contained air-conditioner, but it does not specifically justify the more precise class 'WallAirConditioner' as opposed to another self-contained room unit type such as a window unit."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The evidence directly defines a self-contained room-cooling air-conditioning unit, which adequately grounds the WallAirConditioner class at the stated level of specificity."
+          },
+          {
+            "verdict": "partially_supported",
+            "rationale": "The evidence supports a room-cooling self-contained air conditioner generally, but it does not specifically establish the more precise class of a wall-mounted air conditioner as opposed to another self-contained room unit type."
+          }
+        ],
+        "majority_verdict": "partially_supported"
+      },
+      {
+        "target_path": "classes.WallAirConditioner.properties.status",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "A datatype property named \"status\" together with standard wall air conditioner operating-state practice specifically supports adding an operational status property for a WallAirConditioner."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source explicitly names a generic datatype property \"status,\" and standard practice specifically supports representing a wall air conditioner\u2019s operating state for monitoring and control with such a status property."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited REC datatype property \"status\" together with standard wall air-conditioner operating-state practice specifically supports assigning an operational status property to WallAirConditioner for control and monitoring."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.WaterTemperatureSensor",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The evidence directly states that this class measures the temperature of water, which specifically matches the target class WaterTemperatureSensor."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition directly states that the class measures the temperature of water, which specifically grounds the target class WaterTemperatureSensor."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition directly states that this class measures the temperature of water, which exactly grounds the target class WaterTemperatureSensor."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.WaterTemperatureSensor.properties.value",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "If the source class is a WaterTemperatureSensor that measures water temperature, mapping its measured quantity to a generic datatype property value is a standard and specifically appropriate representation."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "If the source class is a WaterTemperatureSensor that measures water temperature, mapping its measured quantity to a datatype property named \"value\" is a standard and appropriately specific interpretation."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "If the source class is a WaterTemperatureSensor that measures water temperature, mapping its measurement to a generic datatype property value is a standard and specific interpretation with no extra unsupported detail."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.WaterTemperatureSensor.properties.status",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "A generic datatype property named \"status\" together with standard sensor-status practice adequately supports adding a status field for a WaterTemperatureSensor to represent health or availability."
+          },
+          {
+            "verdict": "partially_supported",
+            "rationale": "The cited generic datatype property \"status\" and standard sensor-status practice support that a WaterTemperatureSensor may have some status, but they do not specifically justify the added semantics of sensor health and availability."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "A generic datatype property named \"status\" together with standard sensor-status practice adequately supports adding a status field for a WaterTemperatureSensor to represent health or availability."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.WaterTemperatureSetpoint",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The source definition 'Sets temperature of water' directly and specifically grounds a class for a water temperature setpoint."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The source definition directly states that this concept sets the temperature of water, which adequately grounds the class WaterTemperatureSetpoint."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition directly indicates a concept whose function is to set the temperature of water, which adequately grounds the class WaterTemperatureSetpoint."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.WaterTemperatureSetpoint.properties.value",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "A datatype property named \"value\" is a standard and specifically appropriate way to represent the numeric setting of a WaterTemperatureSetpoint whose source class is defined as setting water temperature."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "A generic datatype property named \"value\" is an appropriate and standard grounding for the numeric magnitude of a WaterTemperatureSetpoint, and the cited class context specifically ties that value to setting water temperature."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited datatype property \"value\" combined with the source class indicating it sets water temperature specifically supports modeling WaterTemperatureSetpoint with a numeric value property."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.Wing",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition directly states that a wing is a part of a building subordinate to the main structure, which adequately grounds the class Wing."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition directly states that a wing is a part of a building subordinate to the main central structure, which adequately grounds the class Wing."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source definition directly describes a wing as a subordinate part of a building, which adequately grounds the class mapping to Wing."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.Zone",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited source definitions specifically describe a zone as a separately controlled heated/cooled space or group of spaces under one controlling device, which directly grounds the Zone class mapping."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definitions specifically describe a zone as a separately controlled space or group of spaces maintained by a single controlling device, which directly grounds classes.Zone."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definitions specifically describe a zone as a separately controlled heated or cooled space or group of spaces maintained by a single controlling device, which directly grounds the class Zone."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.CRAC",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The evidence explicitly equates CRAC with Computer Room Air Conditioning and defines its data-center environmental control function, which directly supports a merged CRAC class with that alias."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The evidence explicitly equates CRAC with Computer Room Air Conditioning and defines its data-center environmental control function, which directly supports a merged CRAC class with that alias."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The evidence explicitly identifies CRAC as equivalent to Computer Room Air Conditioning and defines its function in data-center/network-room environmental control, which matches the merged class with alias."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.CRAC.properties.status",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "A generic datatype property named \"status\" together with standard CRAC operating-state practice specifically supports modeling an operational status property for a CRAC, without asserting extra unsupported detail."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited REC datatype property \"status\" together with standard CRAC operating-state practice specifically supports modeling a CRAC with an operational status property for monitoring/control."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited REC datatype property \"status\" directly supports a status field, and standard CRAC operating-state practice specifically justifies applying it to a CRAC for monitoring/control."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.CRAH",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The evidence directly identifies CRAH as equivalent to Computer Room Air Handler and defines its cooling mechanism, which justifies a single merged class with an alias."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The evidence directly identifies CRAH as equivalent to Computer Room Air Handler and defines its heat-removal mechanism, which supports a merged class with an alias."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The evidence explicitly identifies CRAH as equivalent to Computer Room Air Handler and defines its cooling mechanism, which directly supports merging the class variants with an alias."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "classes.CRAH.properties.status",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "A datatype property named \"status\" plus standard CRAH operating-state practice specifically supports assigning an operational status property to the CRAH class."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "A CRAH commonly has an operational status in standard HVAC monitoring/control practice, and the target element states only that such a status property exists without adding unsupported specifics."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "A CRAH having an operational status property is a standard, specific HVAC interpretation of a generic datatype property named \"status,\" and the target element states no extra unsupported detail beyond that."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "relationships[0]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick property definition directly expresses part-whole composition, and applying it to site-to-building containment is a specific, standard interpretation of those named concepts."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick hasPart-style composition property plus standard site/building composition practice specifically supports representing a site-to-building containment/composition relationship as hasPart."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick hasPart-style definition directly supports a site being composed in part of a building, and standard building composition practice specifically fits the named site-to-building relationship."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "relationships[1]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The Brick property definition directly expresses whole\u2013part composition, and using it for a building composed of floors is a standard, specific building-composition interpretation of hasPart."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "Brick's hasPart-style composition property directly supports a building being composed in part of floors, and standard building composition practice specifically justifies this building-to-floor relationship."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick hasPart property explicitly covers part-whole composition, and applying it to a Building\u2013Floor relation is a standard, specific building composition interpretation of that property."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "relationships[2]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick hasPart property explicitly covers part-whole composition, and using it for a building-to-wing composition relation is a specific, standard spatial interpretation of those named concepts."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick hasPart-style composition property plus standard building composition practice specifically supports modeling a building as having a wing as a part."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick hasPart-style composition property plus standard building spatial composition practice specifically supports modeling a building as having a wing as a part."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "relationships[3]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick hasPart-style composition property together with standard floor/space composition practice specifically supports modeling a floor as having spaces as parts."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick hasPart property definition directly matches a floor being composed in part of spaces, and standard floor/space composition practice specifically grounds this spatial part-whole mapping."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick hasPart-style composition property plus standard floor/space composition practice specifically supports modeling a floor as having spaces as parts."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "relationships[4]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick property explicitly denotes part-whole composition, and applying it to a wing containing spaces is a specific, standard spatial composition interpretation of the named concepts."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick property explicitly denotes part-whole composition, and applying it to a wing containing spaces is a standard, specific spatial composition consistent with the named concepts."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick hasPart-style composition property together with standard building spatial composition practice specifically supports modeling a wing as composed in part of spaces."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "relationships[5]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "Brick's composition property explicitly supports part-whole containment, and the Zone definition stating a zone can be a group of spaces specifically grounds a zone-to-space composition relationship."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "Brick's composition property directly supports a part-whole relation, and the Zone definition explicitly allowing a zone to be a group of spaces specifically grounds a zone-to-space containment/composition mapping."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick composition property directly supports a part-whole relation, and the Zone definition explicitly allows a zone to be a group of spaces, justifying a zone-to-space containment/composition mapping."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "relationships[6]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick location property directly supports a physical-location relationship, and standard HVAC practice specifically justifies relating an AHU to a building as its containing location."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick location property directly supports a physical-location relation, and the standard HVAC fact that AHUs are located within buildings specifically justifies an AHU-to-building location mapping."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick location property directly supports a physical-location relationship, and standard HVAC practice specifically supports interpreting an AHU as being located within a building."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "relationships[7]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick location property directly expresses physical containment/location, and pairing it with standard practice that a CRAH unit is located within a building specifically supports a CRAH-to-building location relationship."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick location property directly expresses physical location, and the standard practice evidence specifically supports interpreting a CRAH unit as physically located within a building."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick location property directly expresses physical containment/location, and standard HVAC practice specifically supports interpreting a CRAH unit as physically located within a building."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "relationships[8]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick location property directly supports a physical-location relation, and standard HVAC practice specifically makes a CRAC-to-building location mapping a plausible and adequately grounded use of that property."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick location property directly supports a physical-location relationship, and standard HVAC practice specifically makes a CRAC unit being located within a building a plausible, concept-specific instantiation of that property."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick location property directly supports a physical-location relationship, and the standard practice specifically ties CRAC units to buildings, justifying a CRAC-to-building located-in mapping."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "relationships[9]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick location property directly expresses physical location, and standard HVAC practice specifically supports interpreting a thermostat as physically located in the space it senses or controls."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick location property directly supports a physical-location relation, and the standard HVAC practice specifically grounds interpreting a thermostat as physically located in the space it serves."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick location property directly supports a physical-location relation, and the standard HVAC practice specifically justifies applying it to a thermostat being located in the space it serves."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "relationships[10]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick location property directly supports a physical-location relation, and standard practice specifically justifies applying it from an occupancy sensor to the space it monitors."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick location property directly expresses physical placement in a location, and standard practice specifically supports that an occupancy sensor is physically located in the space it monitors."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick location property directly expresses physical location, and standard practice specifically supports that an occupancy sensor is physically located in the space whose occupancy it detects."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "relationships[11]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick location property directly supports a physical-location relation, and standard practice specifically for wall air conditioners being installed in particular spaces adequately grounds mapping the unit to a space as its location."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick location property directly supports a physical-location relationship, and standard practice specifically ties wall air conditioners to the spaces in which they are installed, matching the stated wall air conditioner-to-space location mapping."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick location property directly supports a physical-location relation, and standard practice specifically for wall air conditioners being installed in particular spaces adequately grounds mapping the unit to a space location."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "relationships[12]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited standard HVAC practice specifically links an AHU to one or more control zones via service of conditioned air, which directly grounds a generic serves relationship between those named concepts."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited standard HVAC practice specifically links AHUs to the control zones they serve via conditioned air delivery, which directly grounds a serves relationship at that level of detail."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited standard HVAC practice specifically links an AHU to the control zones it serves by delivering conditioned air, which directly justifies a generic serves relationship between those named concepts."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "relationships[13]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited standard HVAC practice specifically links terminal units to the zones whose conditions they regulate, which adequately grounds a generic serves relationship at that level."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited standard HVAC practice specifically links terminal units to the zones they regulate, which directly grounds a serves relationship at that level of detail."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited standard HVAC practice specifically links terminal units to the zones whose conditions they regulate, which adequately grounds a generic serves relationship at that level of detail."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "relationships[14]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited zone definition plus standard HVAC practice specifically supports a control/service relationship between a thermostat and the zone it controls, without adding unsupported extra detail."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited zone definition about being maintained by a single controlling device, together with standard HVAC practice that thermostats are the controlling devices for zones, specifically supports a thermostat-to-zone control/service relationship."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited zone definition about a single controlling device together with standard HVAC practice that thermostats control zones specifically supports a thermostat-to-zone control/service relationship."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "relationships[15]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "Brick's hasPart/composition meaning plus the AHU definition explicitly including one or more fans specifically grounds an AHU-to-fan part-of relationship."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick hasPart semantics and the AHU definition explicitly including fan(s) specifically justify an AHU-to-fan composition relationship."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick hasPart meaning plus the AHU definition explicitly including fan(s) specifically grounds an AHU-to-fan composition relationship."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "relationships[16]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "Brick's composition property directly supports a part-of relation, and the AHU definition's explicit inclusion of filtration specifically grounds modeling a filter as a component of an AHU."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The Brick composition property directly supports a part-of relation, and because AHU definitions explicitly include filtration, modeling an AHU as composed in part of a filter is a specific and standard grounding of that relationship."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "Brick's composition property directly supports a part-of relation, and because AHU definitions explicitly include filtration, interpreting a filter as a component of an AHU is a specific, standard grounding for the mapped composition."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "relationships[17]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick composition property directly fits a whole-part AHU-to-damper relation, and the standard HVAC practice named specifically justifies that dampers are plausibly components of AHUs."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The generic composition property explicitly supports part-whole relations, and standard HVAC practice specifically ties AHUs to dampers as constituent components, justifying an AHU-to-damper composition mapping."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick composition property directly fits a part-of relation, and standard HVAC practice specifically supports that an AHU commonly includes dampers as components."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "relationships[18]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick composition property directly matches a part-whole relation, and the standard HVAC practice specifically grounds modeling an economizer as a component of an AHU airside section."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick composition property directly fits a whole-part relation, and the standard HVAC practice specifically ties an economizer to the AHU airside section, adequately grounding an AHU-to-economizer composition mapping."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick composition property directly matches a part-of relation, and the standard HVAC practice specifically supports modeling an economizer as a component of an AHU airside section."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "relationships[19]",
+        "raw_judgments": [
+          {
+            "verdict": "partially_supported",
+            "rationale": "The evidence supports that an AHU may include humidifying functionality and that a composition relation exists in Brick, but it does not specifically justify that every AHU is composed of a distinct Humidifier entity rather than providing humidification by some other means."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick composition property directly matches a part-whole relation, and the AHU definition explicitly naming humidifying adequately grounds an AHU being composed in part of a humidifier."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick composition property directly matches a part-of relation, and an AHU definition that explicitly includes humidifying reasonably grounds an AHU being composed in part of a humidifier."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "relationships[20]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick composition property directly matches a part-of relationship, and standard HVAC practice specifically supports that an AHU commonly includes a cooling coil valve as one of its components."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick composition property directly supports a part-of relationship, and the standard HVAC practice specifically ties AHUs to cooling coil valve control as a plausible component pairing."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick composition property directly supports a part-whole relation, and standard HVAC practice specifically tying AHUs to cooling coil valve control adequately grounds an AHU-to-cooling-valve composition mapping."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "relationships[21]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick composition property directly supports a part-of relationship, and standard HVAC practice specifically justifies modeling a heating valve as a component of an AHU."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick composition property directly supports a part-whole relation, and the standard HVAC practice specifically ties AHUs to heating coil valve components, adequately grounding an AHU-to-heating valve composition mapping."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "Brick's composition property directly supports a whole-part relation, and standard HVAC practice specifically ties AHUs to heating coil valve components, justifying the mapped AHU-to-heating valve composition."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "relationships[22]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick property explicitly denotes part-whole composition, and the Cold Deck definition specifically states it is part of a dual duct AHU, directly grounding an AHU-to-cold-deck composition relationship."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick composition property and the Cold Deck definition explicitly support that a dual-duct AHU has a Cold Deck as a component/part."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick property explicitly denotes part-whole composition, and the Cold Deck definition specifically states it is part of a dual duct air handling unit, directly grounding an AHU-to-cold-deck composition relationship."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "relationships[23]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick composition property and the Hot Deck definition as part of a dual duct AHU directly justify an AHU-to-hot-deck part-of/composition relationship."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick composition property and the Hot Deck definition explicitly indicating it is part of a dual duct air handling unit directly justify an AHU-to-Hot Deck part-of/composition relationship."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick composition property and the Hot Deck definition explicitly indicate that a Hot Deck is a component of a dual-duct AHU, which supports an AHU-to-hot-deck part-of/composed-of relationship."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "relationships[24]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick composition property directly matches a part-whole relation, and standard refrigeration practice specifically supports interpreting a condensing unit as a component of a chiller-associated refrigeration system."
+          },
+          {
+            "verdict": "partially_supported",
+            "rationale": "The Brick property definition supports a part-whole composition relation, but the cited standard practice only generally links condensing-unit functionality to refrigeration systems associated with chillers rather than specifically justifying that a chiller is composed in part of a condensing unit."
+          },
+          {
+            "verdict": "partially_supported",
+            "rationale": "The Brick property definition supports a part-whole composition relation, and standard practice plausibly links condensing-unit functionality to chiller-related refrigeration systems, but it does not specifically justify that a chiller itself is directly composed in part of a condensing unit in all cases."
+          }
+        ],
+        "majority_verdict": "partially_supported"
+      },
+      {
+        "target_path": "relationships[25]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick composition property together with the CRAH definition stating that a CRAH uses fans specifically grounds a CRAH-to-fan part/composition relationship."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick composition property directly expresses part-whole membership, and the CRAH definition stating it uses fans specifically grounds a CRAH-to-fan composition relationship."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick composition property directly expresses part-whole membership, and the CRAH definition stating it uses fans specifically grounds a CRAH-to-fan composition relationship."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "relationships[26]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick composition property directly matches a part-whole relation, and the standard-practice evidence specifically supports that a CRAC unit is plausibly composed in part of a fan."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The Brick composition property directly fits a part-whole relation, and standard HVAC practice specifically supports that a CRAC unit is composed in part of a fan."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick composition property directly matches a part-whole relation, and standard HVAC/CRAC practice specifically supports that a CRAC unit includes fans as component parts."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "relationships[27]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The Brick telemetry-source property directly supports an AHU-to-sensor telemetry relationship, and standard HVAC practice specifically justifies air temperature sensors as common AHU telemetry sources."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The Brick telemetry-source property directly fits an AHU-to-sensor relationship, and citing standard HVAC practice specifically about AHUs having air temperature sensors adequately grounds this mapping."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The Brick telemetry-source property directly supports an AHU-to-sensor telemetry relationship, and the cited standard HVAC practice specifically grounds using an air temperature sensor as a plausible telemetry source for an AHU."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "relationships[28]",
+        "raw_judgments": [
+          {
+            "verdict": "partially_supported",
+            "rationale": "The evidence supports that an AHU can have a telemetry/control source point and that supply/discharge air temperature setpoints are standard for AHUs, but it does not by itself justify a more specific AHU-to-air-temperature-setpoint control relationship beyond that general association."
+          },
+          {
+            "verdict": "partially_supported",
+            "rationale": "The evidence supports that an AHU may be related to a telemetry/control point and that supply/discharge air temperature setpoints are standard for AHUs, but it does not by itself justify the exact AHU-to-air-temperature-setpoint relationship detail beyond that general practice."
+          },
+          {
+            "verdict": "partially_supported",
+            "rationale": "The evidence supports that an AHU can be related to a telemetry/control point and that supply/discharge air temperature setpoints are standard for AHUs, but it does not by itself fully justify a specific AHU-to-air-temperature-setpoint control relationship beyond that general practice."
+          }
+        ],
+        "majority_verdict": "partially_supported"
+      },
+      {
+        "target_path": "relationships[29]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The Brick telemetry-source property directly supports an AHU-to-sensor telemetry link, and return-air CO2 sensing on AHUs is a specific, standard ventilation practice matching the named concepts."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick telemetry-source property directly fits an AHU-to-sensor relationship, and return-air CO2 sensing on AHUs is a specific, standard HVAC practice that adequately grounds this mapping."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick telemetry-source property directly fits an AHU-to-sensor relationship, and return-air CO2 sensing on AHUs is a specific, standard HVAC practice that plausibly grounds the stated telemetry link without adding unsupported extra detail."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "relationships[30]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick telemetry-source property directly fits an AHU-to-sensor telemetry link, and the standard-practice citation specifically ties AHUs to outside-air CO2 sensing/reference points, adequately grounding this relationship."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The Brick property explicitly supports a telemetry-source relationship, and the cited HVAC practice specifically ties AHUs to outside-air CO2 sensing/reference points, adequately grounding an AHU-to-outside-air-CO2-sensor telemetry mapping."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The Brick property explicitly covers an equipment-to-telemetry-source relation, and the cited standard HVAC practice specifically ties AHUs to outside-air CO2 sensing/reference points, which adequately grounds an AHU-to-outside-air-CO2-sensor telemetry relationship."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "relationships[31]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick telemetry-source property directly supports an AHU-to-sensor telemetry relationship, and the standard HVAC practice specifically involving AHUs and frost sensing adequately grounds interpreting the sensor as a frost sensor."
+          },
+          {
+            "verdict": "partially_supported",
+            "rationale": "The Brick property supports a generic telemetry-source relationship, and standard practice makes an AHU-to-frost-sensor link plausible, but the evidence does not specifically establish that this exact ontology element names a Frost Sensor as telemetry for the AHU rather than some other freeze-protection configuration."
+          },
+          {
+            "verdict": "partially_supported",
+            "rationale": "The Brick property supports a generic telemetry-source relationship, and standard AHU freeze-protection practice makes an AHU-to-frost-sensor link plausible, but the evidence does not specifically establish that this exact ontology element or named concepts are defined in the source."
+          }
+        ],
+        "majority_verdict": "partially_supported"
+      },
+      {
+        "target_path": "relationships[32]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick telemetry-source property directly fits a chiller-to-sensor relationship, and the standard-practice evidence specifically ties chillers to water temperature sensors, adequately grounding this mapping."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick telemetry-source property plus standard HVAC practice specifically relating chillers to water temperature sensors adequately grounds a chiller-to-water-temperature-sensor telemetry relationship."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick telemetry-source property directly matches a chiller-to-sensor telemetry relationship, and the standard-practice note specifically ties chillers to water temperature sensors, adequately grounding this mapping."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "relationships[33]",
+        "raw_judgments": [
+          {
+            "verdict": "partially_supported",
+            "rationale": "The evidence supports that a chiller can be related to a water temperature setpoint in standard practice, but the cited Brick property is specifically about telemetry sources rather than a control/setpoint relationship."
+          },
+          {
+            "verdict": "unsupported",
+            "rationale": "The cited Brick property is about a telemetry source and the standard-practice note only says chillers commonly have water temperature setpoints, neither specifically supports a chiller-to-water-temperature-setpoint control relationship via this property."
+          },
+          {
+            "verdict": "partially_supported",
+            "rationale": "The evidence supports that a chiller may be associated with telemetry and that chillers commonly involve water temperature setpoints, but it does not specifically justify a precise chiller-to-water-temperature-setpoint control relationship via the cited Brick 'has source of telemetry' property."
+          }
+        ],
+        "majority_verdict": "partially_supported"
+      },
+      {
+        "target_path": "relationships[34]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick property explicitly covers a telemetry-source relationship, and the domain-practice evidence specifically and plausibly grounds a boiler having a water temperature sensor as that telemetry source."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick property explicitly supports a telemetry-source relationship, and standard boiler practice specifically justifies using a water temperature sensor as plausible telemetry for a boiler."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick property explicitly covers a telemetry-source relationship, and the standard domain practice specifically ties boilers to water temperature sensors, justifying a boiler-to-water-temperature-sensor telemetry mapping."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "relationships[35]",
+        "raw_judgments": [
+          {
+            "verdict": "partially_supported",
+            "rationale": "The evidence supports that a boiler can have a telemetry source and that boilers commonly have water temperature setpoints, but it does not specifically justify a precise boiler-to-water-temperature-setpoint control relationship beyond that general standard practice."
+          },
+          {
+            "verdict": "partially_supported",
+            "rationale": "The evidence supports that a boiler can have a telemetry source and that boiler water temperature setpoints are standard practice, but it does not specifically justify the exact boiler-to-water-temperature-setpoint control relationship stated."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick property supports a telemetry/source relationship and the standard domain practice specifically ties boilers to water temperature setpoints, adequately grounding a boiler-to-water-temperature-setpoint control/association relationship at this level of detail."
+          }
+        ],
+        "majority_verdict": "partially_supported"
+      },
+      {
+        "target_path": "relationships[36]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick property explicitly covers a telemetry-source relationship, and the standard practice specifically ties zones to air temperature sensors as their monitoring telemetry source."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick property explicitly denotes a telemetry source relationship, and standard HVAC practice specifically supports using an air temperature sensor as the telemetry source for a zone."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The Brick telemetry-source property plus standard HVAC practice specifically supports relating a zone to its air temperature sensor as a source of telemetry without adding unsupported extra detail."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "relationships[37]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick property explicitly denotes a telemetry source relationship, and the standard HVAC practice that zones have cooling setpoints specifically supports interpreting this as a zone-to-cooling-setpoint relation."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick telemetry-source property together with standard HVAC practice that zones have cooling setpoints specifically supports a zone-to-cooling-setpoint relationship at the stated level of detail."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick property explicitly covers a telemetry-source relationship, and the standard HVAC practice that zones have cooling setpoints specifically supports interpreting this as a zone-to-cooling-setpoint relation."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "relationships[38]",
+        "raw_judgments": [
+          {
+            "verdict": "unsupported",
+            "rationale": "The cited Brick property only supports a generic telemetry-source relation and the added statement that zones have heating setpoints is too generic and not specifically tied to a zone-to-heating-setpoint telemetry relationship."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The Brick telemetry-source property supports a relationship from a zone to a telemetry point, and the cited standard HVAC practice specifically justifies that the point can be a heating setpoint for the zone."
+          },
+          {
+            "verdict": "partially_supported",
+            "rationale": "The cited standard practice supports that zones commonly have heating setpoints, but the Brick telemetry-source property specifically concerns a source of telemetry and does not by itself justify a generic zone-to-heating-setpoint relationship."
+          }
+        ],
+        "majority_verdict": null
+      },
+      {
+        "target_path": "relationships[39]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick telemetry-source property plus the standard HVAC practice that zones are commonly monitored by occupancy sensors specifically supports a zone-to-occupancy-sensor relationship without asserting extra unsupported detail."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick telemetry-source property plus the standard HVAC/BAS practice of associating zones with occupancy sensing specifically supports a zone-to-occupancy-sensor relationship without adding unsupported extra detail."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick telemetry-source property together with standard HVAC practice specifically supports a Zone having an Occupancy Sensor as a telemetry source for occupied/unoccupied control."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "relationships[40]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick telemetry-source property plus the thermostat concept and standard HVAC control practice specifically support relating a thermostat to its associated air temperature sensor."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick telemetry-source property plus the thermostat concept and standard HVAC practice specifically support a relationship from a thermostat to its associated air-temperature sensor without adding unsupported extra detail."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick telemetry-source property plus standard thermostat practice specifically supports relating a Thermostat to an Air Temperature Sensor as the thermostat's local sensed temperature source."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "relationships[41]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick telemetry-source property together with the thermostat's implied adjustable cooling setpoints and standard HVAC control practice specifically supports a thermostat-to-cooling-setpoint relationship at this stated level of detail."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick telemetry-source property plus the thermostat concept implying adjustable cooling targets specifically grounds a thermostat-to-cooling-setpoint relationship as a standard and plausible interpretation."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick telemetry-source property plus the thermostat concept's adjustable setpoints and standard HVAC practice specifically justify a thermostat-to-cooling-setpoint relationship at the stated level."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "relationships[42]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick telemetry-source property plus the thermostat concept implying adjustable heating targets and standard HVAC control practice specifically justify a thermostat-to-heating-setpoint relationship at this level of detail."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "Brick's telemetry-source property directly supports linking a thermostat to a heating setpoint it exposes or references, and thermostat/setpoint association is a specific, standard HVAC interpretation rather than a generic inference."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick telemetry-source property together with the thermostat's implied adjustable heating targets and standard HVAC control practice specifically supports a thermostat-to-heating-setpoint relationship."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "relationships[43]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick telemetry-source property plus the schedule temperature setpoint concept and standard thermostat scheduling practice specifically justify a thermostat having telemetry sourced from a schedule-derived current temperature setpoint."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick telemetry-source property plus the schedule temperature setpoint definition and standard thermostat scheduling practice specifically support a thermostat having a telemetry/source relationship to a schedule-derived current temperature setpoint."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick telemetry-source property together with the specific Schedule Temperature Setpoint concept and standard thermostat scheduling practice adequately grounds a thermostat-to-schedule-temperature-setpoint relationship."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "relationships[44]",
+        "raw_judgments": [
+          {
+            "verdict": "partially_supported",
+            "rationale": "The Brick telemetry-source property can plausibly relate a thermostat to an occupancy sensor and the cited domain practice supports such pairings, but the evidence does not specifically establish that this exact thermostat-to-occupancy-sensor relationship is the intended ontology assertion rather than a more general possible arrangement."
+          },
+          {
+            "verdict": "partially_supported",
+            "rationale": "The Brick property supports a telemetry-source relationship in general and the standard-practice note makes thermostat/occupancy pairing plausible, but it does not specifically justify that the occupancy sensor is the thermostat's telemetry source rather than merely associated with it."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The Brick telemetry-source property supports relating a thermostat to an occupancy sensor as a source of telemetry, and the cited standard HVAC practice specifically ties those named concepts together as a common arrangement."
+          }
+        ],
+        "majority_verdict": "partially_supported"
+      },
+      {
+        "target_path": "relationships[45]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick telemetry-source property plus standard HVAC practice specifically support a terminal unit having an associated local air temperature sensor as a plausible telemetry source relationship."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick property explicitly covers a telemetry-source relationship, and standard HVAC practice specifically supports terminal units having local air temperature sensors, matching a terminal-unit-to-air-temperature-sensor relation."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick property directly expresses an equipment-to-telemetry-source relation, and standard HVAC practice specifically supports terminal units having local air temperature sensors, justifying the terminal-unit-to-air-temperature-sensor mapping."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "relationships[46]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick telemetry-source property plus standard HVAC practice specifically support a relationship from a terminal unit to its air temperature setpoint as a plausible telemetry source."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick telemetry-source property plus standard HVAC practice specifically supports relating a terminal unit to its local air temperature setpoint as a plausible source of telemetry."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick property supports a telemetry-source relationship and the standard HVAC practice specifically ties terminal units to local air temperature setpoints, adequately grounding a terminal-unit-to-air-temperature-setpoint relation at that level of detail."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "relationships[47]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "Given a CRAH uses a water-chiller system, asserting the chiller is upstream of the CRAH in that cooling process is a specific and standard interpretation of Brick's upstream/feeds-style relation."
+          },
+          {
+            "verdict": "partially_supported",
+            "rationale": "The evidence supports that a chiller can plausibly be upstream of a CRAH in a chilled-water sequential process, but it only gives a generic upstream property and a general CRAH/chiller-system definition rather than specifically asserting this exact chiller-to-CRAH relationship."
+          },
+          {
+            "verdict": "partially_supported",
+            "rationale": "The evidence supports that a chiller can be upstream of a CRAH in a chilled-water process, but it does not specifically justify the exact mapped relationship if it was claimed as a direct 'feeds' relation rather than the more general upstream sequencing."
+          }
+        ],
+        "majority_verdict": "partially_supported"
+      },
+      {
+        "target_path": "relationships[48]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The Brick property defines a generic upstream relation in a sequential process, and standard HVAC practice specifically supports a boiler being upstream of an AHU heating coil in the hot-water/steam heating loop."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick upstream property definition plus standard HVAC practice that boilers supply AHU heating coils via hot water or steam specifically supports a boiler-to-AHU upstream relationship in a sequential heating process."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick property defines a generic upstream relation in a sequential process, and standard HVAC practice specifically supports a boiler being upstream of an AHU heating coil in the heating medium flow path."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "relationships[49]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick upstream property definition together with standard HVAC practice specifically supports modeling a chiller as upstream of an AHU cooling coil in the chilled-water flow sequence."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick upstream property definition directly matches a sequential-process relation, and standard HVAC practice specifically supports modeling a chiller as upstream of an AHU cooling coil in a chilled-water flow path."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick property defines a generic upstream relation in a sequential process, and the standard HVAC practice specifically ties chillers to AHU cooling coils via chilled water, which adequately grounds a chiller-to-AHU upstream relationship."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "relationships[50]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick property definition directly matches an upstream/downstream sequential-process relation, and standard HVAC practice specifically supports an AHU being upstream of downstream terminal units in air distribution."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick property definition matches an upstream/downstream sequential-process relation, and standard HVAC practice specifically supports AHUs being upstream of downstream terminal units in air distribution."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick property definition directly matches an upstream/downstream sequential-process relation, and standard HVAC practice specifically supports AHUs being upstream of downstream terminal units in air distribution."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "relationships[51]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick property definition for upstream and the Air Plenum definition that it receives air from the air handling unit together specifically justify an AHU being upstream of an air plenum in the airflow process."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick property explicitly defines an upstream relation in a sequential process, and the Air Plenum definition stating it receives air from the AHU specifically supports modeling the AHU as upstream of the air plenum."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick property explicitly defines an upstream relationship in a sequential process, and the Air Plenum definition that it receives air from the air handling unit specifically supports modeling the AHU as upstream of the air plenum."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "relationships[52]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick property definition directly matches an upstream relation in a sequential flow process, and standard hydronic practice specifically supports interpreting a pump as upstream of an AHU coil/AHU in that circulation context."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick property directly matches an upstream relation in a sequential process, and standard HVAC hydronic practice specifically supports a pump being upstream of an AHU coil/AHU in the circulation path."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick property explicitly denotes an upstream relation in a sequential process, and standard hydronic practice specifically supports a pump being upstream of an AHU coil it serves."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "relationships[53]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick upstream property directly fits a sequential flow relation, and standard hydronic practice specifically supports a pump being upstream of a boiler in a boiler loop."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick upstream property directly matches a sequential flow relationship, and standard hydronic practice specifically supports interpreting a pump as upstream of a boiler in a boiler loop."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited Brick upstream property directly matches a sequential flow relationship, and standard hydronic practice specifically supports a pump being upstream of a boiler in a boiler loop."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "relationships[54]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The Brick property 'Connected To' directly covers physical connectivity, and standard HVAC practice specifically supports that dampers are physically connected within the air path to plenums."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The Brick property 'Connected To' denotes a physical connection, and standard HVAC practice specifically supports that dampers are physically connected in the air path with plenums, matching a damper-to-air-plenum connectivity claim."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The Brick property label \"Connected To\" supports a generic physical connectivity relation, and standard HVAC practice specifically tying dampers and plenums within the air path adequately grounds a damper-to-air-plenum connection."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "relationships[55]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The Brick property label \"Connected To\" supports a general connectivity relation, and the cited standard HVAC practice specifically justifies applying it between a cooling valve and an AHU cooling coil control assembly."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The Brick property label \"Connected To\" together with standard HVAC practice specifically supports asserting a connectivity relationship between a cooling valve and an AHU cooling coil/control assembly."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The Brick property label 'Connected To' together with standard HVAC practice specifically linking cooling valves to AHU cooling coil control assemblies adequately grounds a cooling-valve-to-AHU connectivity relationship."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "relationships[56]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The Brick property label \"Connected To\" supports a generic connectivity relation, and the cited standard HVAC practice specifically ties heating valves to AHU heating coil control assemblies, matching the stated heating-valve-to-AHU connection."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The Brick property label 'Connected To' supports a generic connectivity relation, and the cited standard HVAC practice specifically grounds a plausible connection between a heating valve and an AHU heating coil control assembly."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The Brick property label 'Connected To' supports a generic connectivity relation, and the cited standard HVAC practice specifically grounds a plausible heating-valve-to-AHU heating-coil control assembly connection at that same level of detail."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "rules.zoneNeedsCooling",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited standard HVAC practice specifically links zone air temperature and a cooling temperature setpoint to determining cooling demand, which adequately grounds a rule like zoneNeedsCooling at this level of detail."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited standard HVAC practice specifically links zone air temperature and a cooling temperature setpoint to determining cooling demand, which adequately grounds a rule that a zone needs cooling."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited standard HVAC practice specifically links zone air temperature and a cooling temperature setpoint to determining cooling demand, which adequately grounds a rule named zoneNeedsCooling at this level of detail."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "rules.zoneNeedsHeating",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited standard HVAC practice specifically links zone air temperature and a heating temperature setpoint to determining heating demand for a zone, which adequately grounds a rule named zoneNeedsHeating without adding unsupported extra detail."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited standard HVAC practice specifically ties the named concepts of zone air temperature and heating temperature setpoint to determining heating demand, which adequately grounds a rule like zoneNeedsHeating at this level."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited standard HVAC practice specifically supports a rule that determines a zone's heating need by comparing zone air temperature with the heating temperature setpoint, which matches the target element at the stated level of detail."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "rules.zoneWithinDeadband",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited standard HVAC practice specifically connects zone temperature control with heating setpoint, cooling setpoint, and a temperature deadband setpoint, which adequately grounds a rule named zoneWithinDeadband without adding unsupported extra detail."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited standard HVAC practice specifically ties heating setpoint, cooling setpoint, and temperature deadband setpoint to a zone deadband condition, which adequately grounds a generic rule named zoneWithinDeadband."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited standard HVAC practice specifically connects heating setpoint, cooling setpoint, and a temperature deadband setpoint to a zone deadband rule, matching the target element at the stated level of detail."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "rules.increaseOutdoorAirForCO2",
+        "raw_judgments": [
+          {
+            "verdict": "partially_supported",
+            "rationale": "The cited standard practice supports a CO2-based ventilation increase rule involving return-air and outdoor-air CO2 concepts, but it does not specifically justify the exact target rule name or any particular control logic details beyond that general idea."
+          },
+          {
+            "verdict": "partially_supported",
+            "rationale": "The cited standard practice supports using CO2 measurements in demand-controlled ventilation to increase outdoor air, but it does not specifically justify the stated comparison between return-air CO2 and outdoor-air condition at the exact level implied by the target rule."
+          },
+          {
+            "verdict": "partially_supported",
+            "rationale": "The cited DCV practice supports using CO2 measurements to increase ventilation, but it does not specifically justify the exact rule stated as increasing outdoor air based on the named return-air and outside-air CO2 comparison without further detail."
+          }
+        ],
+        "majority_verdict": "partially_supported"
+      },
+      {
+        "target_path": "rules.protectAgainstFrost",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited standard HVAC freeze-protection practice is specifically tied to AHU frost sensing and adequately grounds a general protect-against-frost rule without asserting extra unsupported mechanism detail."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited standard HVAC practice specifically links AHU frost sensing to freeze-protection behavior, which adequately grounds a general protectAgainstFrost rule without adding unsupported extra detail."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited standard HVAC practice specifically connects AHU frost sensing to implementing freeze/frost protection behavior, which adequately grounds a rule named protectAgainstFrost at this level of detail."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "rules.enableChilledWaterCooling",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited standard chilled-water control practice specifically links a water temperature sensor and water temperature setpoint to determining cooling demand, which adequately grounds an enableChilledWaterCooling rule at that stated level."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited standard chilled-water control practice specifically ties water temperature and a water temperature setpoint to deciding when cooling is needed, which adequately grounds an enableChilledWaterCooling rule at that level of detail."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited standard chilled-water control practice specifically ties the named concepts of water temperature and water temperature setpoint to enabling cooling, which adequately grounds a rule to enable chilled water cooling."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "rules.enableHotWaterHeating",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited standard hot-water plant practice specifically ties water temperature and its setpoint to deciding when heating should be enabled, which directly grounds an enableHotWaterHeating rule."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited standard hot-water plant practice specifically ties water temperature and its setpoint to deciding when heating is needed, which adequately grounds an enableHotWaterHeating rule at that level of detail."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited standard hot-water plant practice specifically supports a rule that enables hot water heating based on comparing water temperature to a water temperature setpoint."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "rules.useScheduledSetpoint",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited standard thermostat practice specifically ties a schedule temperature setpoint to the active control target, which directly grounds a rule to use the scheduled setpoint."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited standard thermostat practice specifically ties a scheduled temperature setpoint to the active control target, which adequately grounds a rule named useScheduledSetpoint without adding unsupported extra detail."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited standard thermostat practice specifically supports a rule that uses a scheduled temperature setpoint as the active target, which is exactly what the target element states."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "rules.occupiedZoneRequiresConditioning",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited standard HVAC practice specifically ties occupancy status to acting on zone conditioning demand, which directly supports an occupancy-aware rule for zone conditioning."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited standard HVAC practice specifically links occupancy status to acting on zone conditioning demand, which directly supports an occupancy-aware conditioning rule for a zone."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited standard HVAC practice specifically links occupancy status to acting on zone conditioning demand, which directly supports an occupancy-aware zone conditioning rule at this level of detail."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "actions.openCoolingValve",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited standard HVAC practice specifically links zone cooling demand to opening or modulating an AHU cooling valve, which directly grounds the action openCoolingValve without adding unsupported extra detail."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited standard HVAC practice specifically connects a need for zone cooling to opening or modulating an AHU cooling valve, which directly supports an action named openCoolingValve without adding unsupported extra detail."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited standard HVAC practice specifically ties zone cooling demand to opening or modulating an AHU cooling valve, which directly grounds the action openCoolingValve without adding unsupported detail."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "actions.openHeatingValve",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited standard HVAC practice specifically links zone heating demand to opening or modulating an AHU heating valve, which directly grounds the action openHeatingValve at the stated level of detail."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited standard HVAC practice specifically links zone heating demand to opening or modulating an AHU heating valve, which directly supports an action named openHeatingValve."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited standard HVAC practice specifically links zone heating demand to opening or modulating an AHU heating valve, which directly grounds the action openHeatingValve at the stated level of detail."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "actions.holdDeadband",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited standard HVAC practice specifically supports an action that holds/suppresses active heating and cooling when temperature is within the deadband, matching holdDeadband at the stated level of detail."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited standard HVAC practice specifically supports an action that holds/suppresses active heating and cooling when temperature is within the deadband, which matches holdDeadband."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited standard HVAC practice specifically supports an action that holds/suppresses active heating and cooling when temperature is within the deadband, matching the stated holdDeadband concept."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "actions.increaseVentilation",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited standard HVAC demand-controlled ventilation practice specifically connects CO2 conditions to increasing outdoor air via dampers or economizer, which directly justifies an action named increaseVentilation."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited standard HVAC demand-controlled ventilation practice specifically links CO2 conditions to increasing outdoor air via dampers or economizer, which directly grounds an action named increaseVentilation."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited standard HVAC demand-controlled ventilation practice specifically links CO2 conditions to increasing outdoor air via dampers or an economizer, which directly grounds an increaseVentilation action at the stated level of detail."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "actions.initiateFrostProtection",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited standard AHU practice specifically ties frost sensing to initiating freeze/frost protection, which directly grounds an action named initiateFrostProtection at the stated level of detail."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited standard AHU freeze-protection practice specifically links frost sensing to initiating a frost-protection action, which directly grounds the target action at the stated level of detail."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited standard AHU freeze-protection practice tied specifically to frost sensing adequately grounds an action to initiate frost protection without adding unsupported extra detail."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "actions.startChillerCooling",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited standard chiller-plant practice specifically supports an action to start/run a chiller for cooling in order to move water temperature toward a setpoint, which matches the target element at the stated level of detail."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited standard chiller plant practice specifically ties the named chiller concept to an action of starting/running it in order to move water temperature toward a setpoint, which matches the target action at the stated level."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited standard chiller-plant practice specifically supports an action to start/run a chiller for moving water temperature toward a setpoint, which matches the target element at this level of detail."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "actions.startBoilerHeating",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited standard boiler practice specifically links the named boiler, water temperature, and setpoint concepts to an action of starting/running the boiler, which adequately grounds actions.startBoilerHeating."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited standard boiler-plant practice specifically links a boiler action to raising water temperature toward a setpoint, which adequately grounds an action named startBoilerHeating."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited standard boiler plant practice specifically ties the named boiler concept to an action of starting/running it in order to move water temperature toward a setpoint, which matches the target action at the stated level of detail."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "actions.applyScheduledSetpoint",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited standard thermostat practice specifically supports an action that applies a scheduled setpoint as the active control target given the involved thermostat and schedule setpoint concepts."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited standard thermostat practice specifically ties a schedule setpoint to becoming the active control target, which adequately grounds an action that applies a scheduled setpoint."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited standard thermostat practice specifically connects a schedule setpoint to the active control target, which adequately grounds an action that applies the scheduled setpoint."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "actions.conditionOccupiedZone",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited standard HVAC practice specifically connects serving control devices, occupied zones, and applicable setpoints, which directly grounds an action to condition an occupied zone."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited standard HVAC practice specifically ties serving control devices, occupied zones, and applicable setpoints to the action of conditioning the zone, matching the target element at the stated level of detail."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited standard HVAC practice specifically links serving control devices, occupied zones, and movement toward applicable setpoints, which directly grounds an occupancy-aware zone conditioning action at this level of detail."
+          }
+        ],
+        "majority_verdict": "supported"
+      }
+    ],
+    "unsupported_count": 0,
+    "unsupported_paths": [],
+    "total_cost_usd": 0.9716,
+    "note": "3 elements removed after genuine majority-unsupported verdicts (AHU hasPart AirPlenum, Chiller hasPart Compressor -- evidence actually described a Condensing Unit, not a Chiller, having a compressor -- and Zone hasPoint TemperatureDeadbandSetpoint). Remaining elements re-scored with a corrected strict-majority tie-break rule (a real 3-way judge split, e.g. Zone hasPoint HeatingTemperatureSetpoint, is no longer miscounted as majority-unsupported). See ontology_translation/TODO.md for the full account."
+  },
+  "round_trip": {
+    "sampled": 5,
+    "results": [
+      {
+        "target_path": "classes.AHU",
+        "reconstruction": "This most likely represents an Air Handling Unit (AHU), a HVAC system component that conditions and circulates air through a building\u2019s air-distribution system. The included status property suggests an operational state indicator for whether the unit is on, off, in standby, or in alarm.",
+        "score": 0.93,
+        "rationale": "The reconstruction correctly identifies an Air Handling Unit and its core role in conditioning and circulating air, but it adds unsupported detail about a status property that is not part of the source definition."
+      },
+      {
+        "target_path": "classes.AHU.properties.status",
+        "reconstruction": "A status property for an Air Handling Unit (AHU) indicating its current operating state. It likely represents whether the unit is off/on (false/true) or in special conditions such as standby or alarm.",
+        "score": 0.9,
+        "rationale": "The reconstruction closely matches the source by describing an AHU status property for operating state, though it adds specific boolean and special-state interpretations not explicitly stated."
+      },
+      {
+        "target_path": "classes.AirPlenum",
+        "reconstruction": "An AirPlenum most likely represents an HVAC plenum chamber or duct space that serves as an air distribution or return/exhaust pathway, receiving air from an air handling unit or occupied space and routing it through the building. The status property likely indicates whether the plenum is operating normally, under restricted airflow, or closed off.",
+        "score": 0.92,
+        "rationale": "The reconstruction captures the core meaning of an HVAC component/plenum that receives air from an air handling unit or room for distribution or exhaust, though it adds speculative details about status not present in the source."
+      },
+      {
+        "target_path": "classes.AirPlenum.properties.status",
+        "reconstruction": "A status property for an air plenum (an HVAC air-distribution space) indicating its current airflow availability or accessibility. The allowed values suggest whether it is operating normally, partially blocked or limited ('restricted'), or fully shut off ('closed').",
+        "score": 0.89,
+        "rationale": "The reconstruction closely matches the source by identifying a plenum status property about availability/restriction state, though it adds HVAC context and specific example values not explicitly stated in the source."
+      },
+      {
+        "target_path": "classes.AirQualitySensor",
+        "reconstruction": "This most likely represents a physical or virtual air quality sensing device/entity that reports a quantitative air quality reading and an operational state. It models both the measured value and whether the sensor is functioning normally, has a fault, or is offline.",
+        "score": 0.88,
+        "rationale": "The reconstruction captures the core concept of a sensor that measures air quality, but adds unsupported details about operational states and specific reporting behavior not present in the source definition."
+      }
+    ],
+    "average_score": 0.9040000000000001,
+    "total_cost_usd": 0.0123
+  },
+  "cq_support": {
+    "results": [
+      {
+        "question": "Which AHUs and air handling units serve each building, floor, wing, zone, or space, and what air-distribution components such as plenums, dampers, filters, fans, humidifiers, heating valves, and cooling valves are associated with them?",
+        "supported": true,
+        "rationale": "The ontology provides AHU aliases, spatial containment for buildings/floors/wings/zones/spaces, AHU-to-zone service relations, and AHU component relations for plenums, dampers, filters, fans, humidifiers, heating valves, and cooling valves, which is sufficient to reason about which AHUs serve areas and what air-distribution components are associated with them."
+      },
+      {
+        "question": "For each zone or space, which temperature-controlling devices and points are available\u2014such as thermostats, temperature sensors, occupancy sensors, air temperature setpoints, heating setpoints, cooling setpoints, schedule setpoints, and deadband setpoints\u2014to support control of occupied conditions?",
+        "supported": true,
+        "rationale": "The ontology includes zones and spaces plus relevant device and point classes and relationships\u2014such as Thermostat, OccupancySensor, AirTemperatureSensor, multiple temperature setpoints, and links like serves, hasLocation, hasPoint, and Zone-to-Space containment\u2014sufficient to reason about what occupied-condition control devices and points are available for each zone or space."
+      },
+      {
+        "question": "Where are indoor, return-air, and outside-air CO2 and air-quality sensors located, and how can their readings be compared to identify spaces or air systems with inadequate ventilation or elevated contaminant levels?",
+        "supported": false,
+        "rationale": "The ontology supports locating return-air and outside-air CO2 sensors on AHUs and comparing their readings, but it lacks explicit indoor/space CO2 sensor placement and links between generic air-quality sensors and specific spaces or air systems needed to reason fully about the question."
+      },
+      {
+        "question": "Which equipment feeds or is connected to each major HVAC asset\u2014such as boilers, chillers, cooling towers, pumps, condensing units, branch selectors, compressors, heat exchangers, terminal units, CRAHs, and packaged heat pumps\u2014and what does that reveal about heating, cooling, and refrigerant distribution paths?",
+        "supported": false,
+        "rationale": "The ontology has some relevant HVAC asset classes and a few feeds/connectedTo links, but it lacks key classes and relationships for several named assets and for tracing refrigerant, heating, and cooling distribution paths across them comprehensively."
+      },
+      {
+        "question": "Which valves are installed in each HVAC fluid path, including cooling valves, heating valves, steam valves, bypass valves, and isolation valves, and what functions do they support in regulating temperature, enabling bypass, or isolating equipment for maintenance or safety?",
+        "supported": false,
+        "rationale": "The ontology includes valve classes and some AHU part relations, but it lacks explicit fluid-path modeling and relationships tying valves\u2014especially steam, bypass, and isolation valves\u2014to specific HVAC paths and supported functions such as bypass routing or equipment isolation."
+      },
+      {
+        "question": "In dual-duct or mixed-air systems, which AHUs include hot decks, cold decks, plenums, dampers, and economizer-related components, and how are these arranged to supply heating, cooling, or energy-saving outdoor air operation?",
+        "supported": true,
+        "rationale": "The ontology includes AHUs with hasPart relations to HotDeck, ColdDeck, AirPlenum, Damper, and Economizer plus feeding/connection relations and ventilation actions, providing enough structure to reason about which AHUs include these components and their functional arrangement for heating, cooling, and economizer outdoor-air operation."
+      },
+      {
+        "question": "Which sensors and setpoints are associated with water-side and refrigerant-side equipment\u2014such as water temperature sensors, water temperature setpoints, natural gas temperature sensors, frost sensors, heat sink temperature sensors, and refrigerant metering devices\u2014to monitor operating conditions and support safe control?",
+        "supported": false,
+        "rationale": "The ontology covers water temperature sensors/setpoints and frost sensors on some HVAC equipment, but it lacks key refrigerant-side and fuel-side classes/points such as natural gas temperature sensors, heat sink temperature sensors, refrigerant metering devices, and relationships associating them with equipment."
+      },
+      {
+        "question": "How is the HVAC asset model organized spatially from site to building to storey or floor to wing to zone or space, and which pieces of equipment and points are located in or serve each level of that hierarchy?",
+        "supported": false,
+        "rationale": "The ontology supports much of the site-building-floor/wing-space/zone hierarchy and some equipment location/service relations, but it lacks key spatial links such as floor-to-wing, building/floor/wing-to-zone, and general location relations for many equipment and point types needed to fully reason across each hierarchy level."
+      },
+      {
+        "question": "Which data-center cooling assets are present, such as CRAHs, CRACs, computer room air conditioners, computer room air handlers, chillers, pumps, and cooling towers, and what points exist to monitor and control temperature, humidity, and airflow for critical rooms?",
+        "supported": false,
+        "rationale": "The ontology includes some relevant cooling asset classes and basic point relations, but it lacks key orientation for this question such as humidity and airflow point classes/relations, critical-room semantics, and location/point coverage for chillers, pumps, and cooling towers."
+      },
+      {
+        "question": "Where do aliases, deprecations, or replacements occur among HVAC classes and assets\u2014for example between AHU, Air Handler Unit, and Air Handling Unit\u2014and how should an agent normalize those terms when identifying equipment and answering operational questions?",
+        "supported": true,
+        "rationale": "The ontology includes explicit class aliases (e.g., AHU/Air Handling Unit/Air Handler Unit, CRAH, CRAC, Floor, HeatExchanger), giving enough orientation for an agent to normalize synonymous HVAC terms even though it does not model deprecations or replacements explicitly."
+      }
+    ],
+    "support_score": 0.4,
+    "total_cost_usd": 0.1711,
+    "generation_cost_usd": 0.0173
+  },
+  "hard_gates_ok": true
+}
