@@ -265,6 +265,40 @@ class JudgeMappingsTests(unittest.TestCase):
 
         self.assertEqual(result["unsupported_count"], len(TRANSLATION_FULL["mappings"]))
 
+    def test_three_way_split_is_not_a_majority(self):
+        # Each mapping's 3 judges give three different verdicts -- a real
+        # 3-way tie, not a majority for any of them. Counter.most_common(1)
+        # alone would silently pick whichever verdict was voted first
+        # (here, "unsupported", since it cycles first) and wrongly flag it
+        # as majority-unsupported; _majority_verdict must return None instead.
+        verdicts_cycle = ["unsupported", "supported", "partially_supported"]
+
+        def responder(i, kw):
+            return json.dumps({"verdict": verdicts_cycle[i % 3], "rationale": "r"})
+
+        FakeClient, calls = _fake_client_class(responder)
+        client = FakeClient()
+        with tempfile.TemporaryDirectory() as tmp:
+            logger = evaluate_mod.RunLogger(Path(tmp) / "log.jsonl")
+            result = evaluate_mod.judge_mappings(client, "gpt-5.4", TRANSLATION_FULL, logger, judges=3)
+            logger.close()
+
+        self.assertTrue(all(r["majority_verdict"] is None for r in result["results"]))
+        self.assertEqual(result["unsupported_count"], 0)
+
+
+class MajorityVerdictTests(unittest.TestCase):
+    def test_strict_majority_wins(self):
+        judgments = [{"verdict": "unsupported"}, {"verdict": "unsupported"}, {"verdict": "supported"}]
+        self.assertEqual(evaluate_mod._majority_verdict(judgments), "unsupported")
+
+    def test_three_way_tie_has_no_majority(self):
+        judgments = [{"verdict": "unsupported"}, {"verdict": "supported"}, {"verdict": "partially_supported"}]
+        self.assertIsNone(evaluate_mod._majority_verdict(judgments))
+
+    def test_empty_judgments_has_no_majority(self):
+        self.assertIsNone(evaluate_mod._majority_verdict([]))
+
 
 class RoundTripSampleTests(unittest.TestCase):
     def test_sample_size_caps_calls(self):

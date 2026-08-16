@@ -264,6 +264,20 @@ Respond with exactly one JSON object, no prose, no markdown fences:
 {"verdict": "supported" | "partially_supported" | "unsupported", "rationale": "one sentence"}"""
 
 
+def _majority_verdict(raw_judgments: list[dict]) -> str | None:
+    """A verdict wins only with a strict majority (> half the votes) --
+    `Counter.most_common(1)` alone silently picks whichever verdict was
+    voted *first* when judges are evenly split (e.g. one each of
+    supported/partially_supported/unsupported), which is not a majority at
+    all and must not be treated as one: issue #103 says "reject ... when a
+    majority considers it unsupported", not "when no two judges agree.\""""
+    verdicts = [j["verdict"] for j in raw_judgments]
+    if not verdicts:
+        return None
+    top_verdict, top_count = Counter(verdicts).most_common(1)[0]
+    return top_verdict if top_count > len(verdicts) / 2 else None
+
+
 def judge_mappings(client, deployment: str, translation: dict, logger: RunLogger, judges: int = 3) -> dict:
     results = []
     total_cost = 0.0
@@ -284,9 +298,7 @@ def judge_mappings(client, deployment: str, translation: dict, logger: RunLogger
             )
             raw_judgments.append({"verdict": parsed.get("verdict"), "rationale": parsed.get("rationale")})
             total_cost += _call_cost(usage)
-        verdicts = [j["verdict"] for j in raw_judgments]
-        majority_verdict = Counter(verdicts).most_common(1)[0][0] if verdicts else None
-        results.append({"target_path": target_path, "raw_judgments": raw_judgments, "majority_verdict": majority_verdict})
+        results.append({"target_path": target_path, "raw_judgments": raw_judgments, "majority_verdict": _majority_verdict(raw_judgments)})
 
     unsupported = [r for r in results if r["majority_verdict"] == "unsupported"]
     return {
