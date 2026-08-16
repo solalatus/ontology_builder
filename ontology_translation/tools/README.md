@@ -80,15 +80,20 @@ Every real `compile.py` run:
 python3 -m unittest discover -s ontology_translation/tools/tests -p "test_*.py" -t ontology_translation/tools
 ```
 
-All tests here are offline and deterministic — mocked Azure client, no
-network, no credentials, no cost — matching this repo's existing
+Every test except one is offline and deterministic — mocked Azure client,
+no network, no credentials, no cost — matching this repo's existing
 `tests/README.md` convention of keeping the default suite free to run.
-Unlike `helper-agent-live-azure.spec.mjs` (a handful of cheap chat-
-completion calls, opt-in via env var), there is **no** opt-in live variant
-wired into this test suite: an ontology compile call is not cheap or small
-enough to risk running automatically just because a credential happens to
-be present in the environment. The real pipeline is only ever invoked
-explicitly via the CLI commands above.
+
+`test_compile_live.py` is the one exception, mirroring
+`helper-agent-live-azure.spec.mjs` exactly: included in normal discovery,
+but skips with a clear reason unless `AZURE_OPENAI_ENDPOINT` and
+`AZURE_OPENAI_API_KEY` are both set (env or `.env`). When they are, running
+the suite makes one real, cheap compiler pass (a 2-class synthetic
+ontology, a fraction of a cent) against the live Azure resource — this is
+what actually caught real integration issues a mocked client cannot (see
+`ontology_translation/TODO.md`'s Log). Never runs in CI; only when
+credentials are deliberately provided locally. Beyond that one file, the
+real pipeline is only ever invoked explicitly via the CLI commands above.
 
 ## Scope selection
 
