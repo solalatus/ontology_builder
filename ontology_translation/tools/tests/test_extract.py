@@ -160,6 +160,16 @@ class SelectScopeTests(unittest.TestCase):
         names = {p["labels"][0] for p in scoped["object_properties"]}
         self.assertIn("hasPoint", names)
 
+    def test_scope_includes_property_without_domain_or_range_declared(self):
+        # isPointOf has no rdfs:domain/rdfs:range at all in the fixture --
+        # common in SHACL-styled ontologies (Brick included) that constrain
+        # relationships via property shapes rather than domain/range
+        # triples. There's nothing to filter by, so it must be included
+        # rather than silently dropped, even though it doesn't match "Fan".
+        scoped = select_scope(self.ir, roots=["Fan"])
+        names = {p["labels"][0] for p in scoped["object_properties"]}
+        self.assertIn("isPointOf", names)
+
     def test_no_roots_returns_full_extraction_unchanged(self):
         scoped = select_scope(self.ir, roots=[])
         self.assertEqual(scoped, self.ir)
@@ -169,6 +179,30 @@ class SelectScopeTests(unittest.TestCase):
         scoped = select_scope(self.ir, roots=["Fan"], max_depth=0)
         labels = {c["labels"][0] for c in scoped["classes"]}
         self.assertEqual(labels, {"Fan"})
+
+
+EQUIVALENT_CLASS_TTL = """
+@prefix : <http://example.org/onto#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+:AHU a owl:Class ;
+    rdfs:label "AHU" ;
+    owl:equivalentClass :AirHandlingUnit .
+
+:AirHandlingUnit a owl:Class ;
+    rdfs:label "Air Handling Unit" .
+"""
+
+
+class EquivalentClassTests(unittest.TestCase):
+    def test_equivalent_class_label_folded_into_alt_labels(self):
+        # owl:equivalentClass is a standard OWL construct many real
+        # ontologies (Brick included -- "AHU" equivalentClass
+        # "Air_Handling_Unit") use for alternate names of the same concept.
+        ir = extract_all(_parse(EQUIVALENT_CLASS_TTL), "test-onto")
+        ahu = next(c for c in ir["classes"] if c["labels"][0] == "AHU")
+        self.assertIn("Air Handling Unit", ahu["altLabels"])
 
 
 class ParseGraphFromFileTests(unittest.TestCase):

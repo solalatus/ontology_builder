@@ -11,8 +11,14 @@ Shape (see issue #102):
     scope:
       roots: [...]            # IRIs or label substrings extract.py scopes to
     compiler:
-      prompt_version: compiler-v1
+      prompt_version: compiler-prompt
       runs: 3
+
+`compiler.prompt_version` is a free-text label recorded for context, not a
+filename selector -- compile.py always loads the single current
+`prompts/compiler-prompt.md` and pins the run to its exact wording via a
+content hash (see compile.py's `prompt_sha256()`); past wording is
+recovered from git history, not from multiple prompt files.
 
 This module only reads/writes/validates the manifest structure; fetch.py
 owns actually downloading and checksumming the source file.

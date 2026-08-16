@@ -113,11 +113,17 @@ enforces this on the LLM side; `validate_domain.py` cannot detect a
 smuggled-in taxonomy edge structurally, since it would look like any other
 relationship — that's part of what #103's semantic judging layer is for.
 
-## Prompt versioning
+## The prompt file
 
-`prompts/compiler-v1.md` is self-contained (it embeds its own copy of the
-target `.domain.yaml` schema rather than referencing `agent_ontology_spec.md`
-live) so a pinned `compiler.prompt_version` in a domain's
-`source-manifest.yaml` stays reproducible even if the spec doc changes
-later for unrelated reasons. A wording change to that file is a new
-version (`compiler-v2.md`, ...), never an in-place edit.
+There is one current prompt, `prompts/compiler-prompt.md` -- deliberately
+not a `compiler-v1.md`/`compiler-v2.md`/... lineage of parallel files.
+Past wording is recovered from git history
+(`git log -p -- ontology_translation/tools/prompts/compiler-prompt.md`),
+not from multiple files sitting in this folder. It's self-contained (it
+embeds its own copy of the target `.domain.yaml` schema rather than
+referencing `agent_ontology_spec.md` live) so a run stays reproducible even
+if the spec doc changes later for unrelated reasons. Every real compile run
+records the prompt file's SHA-256 in `run-manifest.json`
+(`compile.py`'s `prompt_sha256()`), which is what actually pins a specific
+run to specific wording -- a manifest's `compiler.prompt_version` is just a
+free-text label for context, not a file selector.

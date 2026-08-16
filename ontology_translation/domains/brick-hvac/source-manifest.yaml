@@ -1,0 +1,23 @@
+id: brick-hvac
+source_url: https://github.com/BrickSchema/Brick/releases/download/v1.4.4/Brick.ttl
+source_version: v1.4.4
+source_sha256: b65720b7b9b64c646745c689777e6138c0d59ce0088df0aeb78fbd444d04d8e7
+scope:
+  # Hand-picked HVAC/building entry points (see ontology_translation/TODO.md
+  # for the full rationale): "HVAC Equipment" and "Location" are already
+  # well-scoped Brick sub-hierarchies; "Temperature Sensor"/"Temperature
+  # Setpoint"/"CO2 Sensor"/"Occupancy Sensor" are specific point-side leaves
+  # picked individually rather than via the broad "Sensor"/"Setpoint"/"Point"
+  # hubs, which span non-HVAC domains (fire, security, lighting, electrical)
+  # far outside issue #106's scope.
+  roots:
+    - HVAC Equipment
+    - Temperature Sensor
+    - Temperature Setpoint
+    - CO2 Sensor
+    - Occupancy Sensor
+    - Location
+  max_depth: 1
+compiler:
+  prompt_version: compiler-prompt
+  runs: 3
