@@ -36,7 +36,7 @@ TRANSLATION_FULL = {
         {"target_path": "classes.Fan", "source_iris": ["http://ex.org#Fan"], "source_evidence": "A device that moves air.", "confidence": "high", "rationale": "renamed"},
         {"target_path": "classes.Fan.properties.status", "source_iris": ["http://ex.org#status"], "source_evidence": "status prop", "confidence": "high", "rationale": "renamed"},
         {"target_path": "classes.Zone", "source_iris": ["http://ex.org#Zone"], "source_evidence": "A controlled area.", "confidence": "high", "rationale": "renamed"},
-        {"target_path": "relationships.serves", "source_iris": ["http://ex.org#serves"], "source_evidence": "serves relation", "confidence": "medium", "rationale": "renamed"},
+        {"target_path": "relationships[0]", "source_iris": ["http://ex.org#serves"], "source_evidence": "serves relation", "confidence": "medium", "rationale": "renamed"},
         {"target_path": "rules.canRunFan", "source_iris": [], "source_evidence": "inferred from operational text", "confidence": "low", "rationale": "no direct source"},
         {"target_path": "actions.startFan", "source_iris": [], "source_evidence": "inferred", "confidence": "low", "rationale": "no direct source"},
     ],
@@ -84,7 +84,7 @@ class IterGeneratedElementsTests(unittest.TestCase):
                 "classes.Fan",
                 "classes.Fan.properties.status",
                 "classes.Zone",
-                "relationships.serves",
+                "relationships[0]",
                 "rules.canRunFan",
                 "actions.startFan",
             },
@@ -167,12 +167,15 @@ class DescribeTargetElementTests(unittest.TestCase):
         element = evaluate_mod._describe_target_element(DOMAIN_DATA, "classes.Fan")
         self.assertEqual(element["meaning"], "A device that moves air.")
 
-    def test_relationship_path_via_list_search(self):
-        element = evaluate_mod._describe_target_element(DOMAIN_DATA, "relationships.serves")
+    def test_relationship_path_via_index(self):
+        element = evaluate_mod._describe_target_element(DOMAIN_DATA, "relationships[0]")
         self.assertEqual(element["to"], "Zone")
 
     def test_missing_path_returns_none(self):
         self.assertIsNone(evaluate_mod._describe_target_element(DOMAIN_DATA, "classes.GhostClass"))
+
+    def test_out_of_range_relationship_index_returns_none(self):
+        self.assertIsNone(evaluate_mod._describe_target_element(DOMAIN_DATA, "relationships[7]"))
 
 
 def _fake_client_class(responder):

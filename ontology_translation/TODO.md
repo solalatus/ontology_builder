@@ -229,4 +229,40 @@ reference and record deltas/decisions here instead.)*
   free-text label, not a file selector.
 
   Re-running the 3-pass compile with the fixed extractor + rewritten prompt
-  now; not yet validated/evaluated/accepted.
+  gave 3 structurally-clean, genuinely rich outputs (all details below) —
+  but a *third* real bug surfaced at the provenance-completeness hard gate,
+  which none of the 3 runs passed (68-86% element-provenance coverage, not
+  the required 100%):
+
+  - **All 3 real compile runs (structural + richness), for the record:**
+    run-1: 47 classes, 57 relationships, 9 rules, 5 actions, 12 CQs, 70
+    properties, 6 aliases, $0.4851. run-2: 48 classes, 52 relationships, 10
+    rules, 7 actions, 12 CQs, 73 properties, 10 aliases, $0.3537. run-3: 46
+    classes, 59 relationships, 14 rules, 12 actions, 12 CQs, 56 properties,
+    4 aliases, $0.4373. Total $1.2761. All 3 structurally clean (0 errors)
+    once the relationship-duplicate validator bug above was fixed — sample
+    rule (run-1): `canCallForCooling` = "zone air temperature is above the
+    applicable cooling temperature setpoint" + "the zone is served by HVAC
+    equipment capable of cooling"; sample action: `startCoolingForZone`,
+    preconditions `[canCallForCooling, shouldRunFanForDelivery]`, effect
+    "cooling-serving equipment and related cooling valves/dampers are
+    commanded...". Heuristic translation-stability across the 3: classes
+    F1=0.91, relationships F1=0.81, properties F1=0.71 — solid agreement.
+  - **Bug 3 — root cause of the provenance gate failure:** the compiler's
+    own `target_path` addressing for relationships was `relationships.
+    <name>`, which is exactly the same ambiguity as bug 2 (a name can
+    address several different relationship instances). The model
+    frequently skipped provenance entries for relationships whose name
+    repeated (e.g. `hasPart` had zero mapping entries in run-1 and run-3,
+    despite non-zero `hasPart` relationships existing in the output), and
+    was inconsistent about per-property mapping entries too (run-2: 1
+    mapping for the `AirHandlingUnit` class, 0 for any of its properties).
+    Fixed at the root, not just patched around: relationships are now
+    addressed by list index (`relationships[<idx>]`, never by name) in
+    both the compiler prompt (explicit addressing spec + a worked example
+    + "every element needs its own mapping entry, this is checked
+    automatically" framing) and `evaluate.py`'s `_iter_generated_elements`/
+    `_describe_target_element` (now a small path tokenizer handling both
+    `.key` and `[index]` segments, not a naive `.split(".")`). Re-running
+    the 3-pass compile now with this fix; not yet validated/evaluated/
+    accepted.

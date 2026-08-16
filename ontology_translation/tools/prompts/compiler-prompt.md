@@ -194,12 +194,32 @@ with the classes/relationships/rules/actions you produced.
 ## Provenance — you must also produce `translation.json`
 
 For **every** target element you emit (class, property, relationship, rule,
-action), record: target path/name, source IRI(s) it came from (empty list
-`[]` is valid for a rule/action grounded in standard practice rather than a
-literal source IRI — say so in the rationale instead), a short quoted
-source evidence snippet or a one-line statement of the standard-practice
-grounding, your confidence (`high`/`medium`/`low`), and one sentence of
-transformation rationale.
+action), record a mapping entry with: `target_path`, `source_iris` (empty
+list `[]` is valid for a rule/action grounded in standard practice rather
+than a literal source IRI — say so in `rationale` instead), `source_evidence`
+(a short quoted source snippet, or a one-line statement of the
+standard-practice grounding), `confidence` (`high`/`medium`/`low`), and
+`rationale` (one sentence).
+
+`target_path` addressing, exactly:
+
+- `classes.<ClassName>`
+- `classes.<ClassName>.properties.<propertyName>`
+- `relationships[<0-based index in the relationships list>]` — **by index,
+  never by name.** The same relationship `name` legitimately repeats
+  across different `from`/`to` pairs, so a name alone cannot address one
+  specific entry; the index into the `relationships` list you emitted is
+  the only unambiguous address. Emit **one mapping entry per relationship
+  list entry**, even when several share the same `name`.
+- `rules.<ruleName>`
+- `actions.<actionName>`
+
+**Every element you emit needs its own mapping entry** — this is a hard
+requirement checked automatically (100% coverage), not a best-effort
+target. A class with 4 properties needs 5 mapping entries (1 for the class,
+1 per property), not 1. A relationships list with 3 entries named `feeds`
+needs 3 separate mapping entries (`relationships[2]`, `relationships[5]`,
+`relationships[9]`, or whatever their actual indices are), not 1.
 
 For **every** source candidate in the input IR — mapped or not — record a
 disposition, exactly one of:
@@ -231,6 +251,13 @@ markdown code fences:
         "source_evidence": "rdfs:comment \"A request from a supplier...\"",
         "confidence": "high",
         "rationale": "Directly renamed from the source class with its comment as meaning."
+      },
+      {
+        "target_path": "relationships[0]",
+        "source_iris": ["https://.../issuedBy"],
+        "source_evidence": "owl:ObjectProperty issuedBy, rdfs:domain Invoice, rdfs:range Supplier",
+        "confidence": "high",
+        "rationale": "First entry in the relationships list; direct object property with matching domain/range."
       }
     ],
     "dispositions": [

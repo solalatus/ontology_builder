@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 import time
 from collections import Counter
@@ -60,8 +61,12 @@ def _iter_generated_elements(domain_data: dict) -> list[dict]:
     for idx, rel in enumerate(domain_data.get("relationships") or []):
         if not isinstance(rel, dict):
             continue
-        name = rel.get("name") or f"[{idx}]"
-        elements.append({"target_path": f"relationships.{name}", "kind": "relationship"})
+        # Indexed, not `relationships.<name>` -- the same relationship name
+        # legitimately repeats across different from/to pairs (see
+        # validate_domain.py), so a name alone can't address one specific
+        # instance for provenance. Matches the addressing scheme
+        # compile.py's prompt now instructs the compiler to use.
+        elements.append({"target_path": f"relationships[{idx}]", "kind": "relationship"})
     for rule_name in (domain_data.get("rules") or {}).keys():
         elements.append({"target_path": f"rules.{rule_name}", "kind": "rule"})
     for action_name in (domain_data.get("actions") or {}).keys():
@@ -286,13 +291,20 @@ should match. Score how well they agree from 0.0 (unrelated) to 1.0 (same meanin
 Respond with exactly one JSON object: {"score": <float 0-1>, "rationale": "one sentence"}"""
 
 
+_PATH_TOKEN_RE = re.compile(r"[^.\[\]]+|\[\d+\]")
+
+
 def _describe_target_element(domain_data: dict, target_path: str):
+    """Resolves a target_path like "classes.Fan.properties.status" (dict
+    keys) or "relationships[3]" (list index -- relationship names aren't
+    addressable alone, see _iter_generated_elements) against domain_data."""
     node = domain_data
-    for part in target_path.split("."):
-        if isinstance(node, dict):
-            node = node.get(part)
-        elif isinstance(node, list):
-            node = next((item for item in node if isinstance(item, dict) and item.get("name") == part), None)
+    for token in _PATH_TOKEN_RE.findall(target_path):
+        if token.startswith("[") and token.endswith("]"):
+            index = int(token[1:-1])
+            node = node[index] if isinstance(node, list) and 0 <= index < len(node) else None
+        elif isinstance(node, dict):
+            node = node.get(token)
         else:
             return None
         if node is None:
