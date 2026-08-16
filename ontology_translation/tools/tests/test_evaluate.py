@@ -178,6 +178,20 @@ class DescribeTargetElementTests(unittest.TestCase):
         self.assertIsNone(evaluate_mod._describe_target_element(DOMAIN_DATA, "relationships[7]"))
 
 
+class LeafLabelTests(unittest.TestCase):
+    def test_property_gets_owning_class_context(self):
+        # A property's raw dict value (e.g. {"type": "number"}) carries no
+        # name of its own -- round_trip_sample needs this label so the
+        # reconstruction prompt has something to work with beyond a bare type.
+        self.assertEqual(evaluate_mod._leaf_label("classes.Building.properties.yearBuilt"), "Building.yearBuilt")
+
+    def test_class_path(self):
+        self.assertEqual(evaluate_mod._leaf_label("classes.Fan"), "Fan")
+
+    def test_rule_path(self):
+        self.assertEqual(evaluate_mod._leaf_label("rules.canRunFan"), "canRunFan")
+
+
 def _fake_client_class(responder):
     """responder(call_index, kwargs) -> content string. Mirrors
     test_compile.py's fake-client pattern but with a callback so different

@@ -239,8 +239,27 @@ def _call_cost(usage: dict) -> float:
 # ---------------------------------------------------------------------------
 
 JUDGE_SYSTEM_PROMPT = """You are an independent judge evaluating whether a translated Agent Ontology
-element is supported by its cited source evidence. You do not see any other judge's answer.
-Classify the mapping as exactly one of: "supported", "partially_supported", "unsupported".
+element is adequately grounded by its cited evidence. You do not see any other judge's answer.
+
+The evidence you are given is one of two legitimate kinds for this pipeline -- judge each on its own
+terms, do not require a literal source quote for everything:
+
+1. A literal or paraphrased snippet from the source ontology (an RDF label, comment, or definition).
+2. A citation of standard, well-established domain practice tied to the *specific* named concepts the
+   target element actually involves (e.g. "standard HVAC practice relating a Temperature Sensor to a
+   Temperature Setpoint for the same zone"). This is a deliberately sanctioned evidence category for
+   this pipeline's compiler -- do not classify an element "unsupported" merely because its evidence is
+   a standard-practice citation rather than a literal source quote.
+
+Classify the mapping as exactly one of:
+- "supported" -- the evidence (of either kind) genuinely and specifically justifies the target element,
+  at the level of detail the target element actually states.
+- "partially_supported" -- the evidence is directionally right but the target element states more
+  specific detail (a numeric threshold, a precise mechanism) than the evidence actually supports.
+- "unsupported" -- the evidence is absent, contradicts the target element, is so generic it could
+  apply to almost any domain (not tied to the specific named concepts involved), or the target element
+  is not a plausible/standard interpretation of what's cited.
+
 Respond with exactly one JSON object, no prose, no markdown fences:
 {"verdict": "supported" | "partially_supported" | "unsupported", "rationale": "one sentence"}"""
 
@@ -312,6 +331,22 @@ def _describe_target_element(domain_data: dict, target_path: str):
     return node
 
 
+_LEAF_LABEL_SKIP = {"classes", "properties", "rules", "actions"}
+
+
+def _leaf_label(target_path: str) -> str:
+    """A short human-readable label for a target_path, e.g. "Building.yearBuilt"
+    for classes.Building.properties.yearBuilt. A property's own dict value
+    (e.g. {"type": "number"}) carries no name or owning-class context by
+    itself -- without this, round_trip_sample was handing the reconstruction
+    prompt something as uninformative as {"type": "number"} and then
+    penalizing it for guessing "some generic numeric value" instead of
+    "year a building was built", which the property's raw content alone
+    could never have revealed."""
+    tokens = [t for t in _PATH_TOKEN_RE.findall(target_path) if t not in _LEAF_LABEL_SKIP]
+    return ".".join(tokens) if tokens else target_path
+
+
 def round_trip_sample(client, deployment: str, domain_data: dict, translation: dict, logger: RunLogger, sample_size: int = 5) -> dict:
     # First-N, not random -- a fixed, reproducible sample for a given translation.json.
     sample = translation.get("mappings", [])[:sample_size]
@@ -322,8 +357,9 @@ def round_trip_sample(client, deployment: str, domain_data: dict, translation: d
         element = _describe_target_element(domain_data, target_path)
         if element is None:
             continue
+        element_payload = {"name": _leaf_label(target_path), "content": element}
         reconstruction, usage_a = chat_json_call(
-            client, deployment, ROUND_TRIP_RECONSTRUCT_PROMPT, json.dumps({"element": element}), logger, f"roundtrip-reconstruct:{target_path}"
+            client, deployment, ROUND_TRIP_RECONSTRUCT_PROMPT, json.dumps({"element": element_payload}), logger, f"roundtrip-reconstruct:{target_path}"
         )
         compare_input = json.dumps(
             {"reconstruction": reconstruction.get("reconstruction"), "source_definition": mapping.get("source_evidence")}
