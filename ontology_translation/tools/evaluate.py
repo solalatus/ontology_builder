@@ -1,0 +1,558 @@
+"""Automatic translation-quality evaluation (issue #103): makes translation
+errors observable, measurable and rejectable without requiring manual
+approval of every converted ontology. Layers 1-2 are deterministic hard
+gates (free, always run); layers 3/6/7 call the LLM as an independent
+judge; layer 4 is a deterministic heuristic comparison across a domain's N
+independent compiler runs; layer 5 is deterministic disposition bookkeeping.
+
+Reuses validate_domain.py as-is for layer 1, and compile.py's cost/JSON-
+parsing primitives rather than duplicating them.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+import time
+from collections import Counter
+from pathlib import Path
+
+import yaml
+
+from compile import RunLogger, _extract_json_object, estimate_cost, approx_tokens
+from env import load_azure_config
+from source_manifest import load_manifest
+from validate_domain import validate_domain
+
+# ---------------------------------------------------------------------------
+# Layer 1: structural validity (hard gate) -- just validate_domain.py.
+# ---------------------------------------------------------------------------
+
+
+def structural_gate(domain_data: dict) -> dict:
+    report = validate_domain(domain_data)
+    return {
+        "ok": report.ok,
+        "error_count": len(report.errors),
+        "warning_count": len(report.issues) - len(report.errors),
+        "issues": [i.__dict__ for i in report.issues],
+    }
+
+
+# ---------------------------------------------------------------------------
+# Layer 2: provenance completeness (hard gate).
+# ---------------------------------------------------------------------------
+
+
+def _iter_generated_elements(domain_data: dict) -> list[dict]:
+    """Flattens classes/properties/relationships/rules/actions into
+    {"target_path", "kind"} records -- the unit provenance/judging operate
+    on. Deliberately excludes competency_questions: CQs are requirements on
+    the ontology, not generated elements needing source provenance."""
+    elements = []
+    for class_name, class_def in (domain_data.get("classes") or {}).items():
+        if not isinstance(class_def, dict):
+            continue
+        elements.append({"target_path": f"classes.{class_name}", "kind": "class"})
+        for prop_name in (class_def.get("properties") or {}).keys():
+            elements.append({"target_path": f"classes.{class_name}.properties.{prop_name}", "kind": "property"})
+    for idx, rel in enumerate(domain_data.get("relationships") or []):
+        if not isinstance(rel, dict):
+            continue
+        name = rel.get("name") or f"[{idx}]"
+        elements.append({"target_path": f"relationships.{name}", "kind": "relationship"})
+    for rule_name in (domain_data.get("rules") or {}).keys():
+        elements.append({"target_path": f"rules.{rule_name}", "kind": "rule"})
+    for action_name in (domain_data.get("actions") or {}).keys():
+        elements.append({"target_path": f"actions.{action_name}", "kind": "action"})
+    return elements
+
+
+def _all_source_iris(source_ir: dict) -> set[str]:
+    iris = set()
+    for key in ("classes", "object_properties", "datatype_properties", "enumerations", "restrictions", "imports"):
+        for record in source_ir.get(key, []):
+            iris.add(record["iri"])
+    return iris
+
+
+def provenance_gate(domain_data: dict, translation: dict, source_ir: dict) -> dict:
+    elements = _iter_generated_elements(domain_data)
+    mapped_paths = {m.get("target_path") for m in translation.get("mappings", [])}
+    missing_evidence = [e["target_path"] for e in elements if e["target_path"] not in mapped_paths]
+    element_coverage = 1.0 if not elements else (len(elements) - len(missing_evidence)) / len(elements)
+
+    all_iris = _all_source_iris(source_ir)
+    dispositioned_iris = {d.get("source_iri") for d in translation.get("dispositions", [])}
+    missing_dispositions = sorted(all_iris - dispositioned_iris)
+    unknown_dispositions = sorted(dispositioned_iris - all_iris)
+    disposition_coverage = 1.0 if not all_iris else (len(all_iris) - len(missing_dispositions)) / len(all_iris)
+
+    return {
+        "ok": not missing_evidence and not missing_dispositions,
+        "element_provenance_coverage": element_coverage,
+        "source_disposition_coverage": disposition_coverage,
+        "missing_evidence": missing_evidence,
+        "missing_dispositions": missing_dispositions,
+        "unknown_dispositions": unknown_dispositions,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Layer 5: reverse coverage (deterministic -- silent information loss check).
+# ---------------------------------------------------------------------------
+
+
+def reverse_coverage(source_ir: dict, translation: dict) -> dict:
+    """Every source candidate must be either mapped, or carry a disposition
+    with a non-empty justification note. Distinct from provenance_gate's
+    disposition-coverage check: that one only asks "does a disposition
+    entry exist at all", this one also asks "is it actually justified"."""
+    all_iris = _all_source_iris(source_ir)
+    disposition_by_iri = {d.get("source_iri"): d for d in translation.get("dispositions", [])}
+    silent = []
+    justified = 0
+    for iri in all_iris:
+        disposition = disposition_by_iri.get(iri)
+        if disposition is None:
+            silent.append(iri)
+            continue
+        if disposition.get("disposition") == "mapped" or (disposition.get("note") or "").strip():
+            justified += 1
+        else:
+            silent.append(iri)
+    coverage = 1.0 if not all_iris else justified / len(all_iris)
+    return {"coverage": coverage, "silently_dropped": sorted(silent)}
+
+
+# ---------------------------------------------------------------------------
+# Layer 4: translation stability -- heuristic, report-only, no LLM.
+# ---------------------------------------------------------------------------
+
+
+def _normalize_name(name) -> str:
+    return " ".join(str(name).strip().lower().split())
+
+
+def _collect_named_sets(domain_data: dict) -> dict:
+    classes = domain_data.get("classes") or {}
+    return {
+        "classes": set(classes.keys()),
+        "relationships": {r.get("name") for r in (domain_data.get("relationships") or []) if r.get("name")},
+        "properties": {
+            f"{c}.{p}" for c, cdef in classes.items() if isinstance(cdef, dict) for p in (cdef.get("properties") or {}).keys()
+        },
+        "allowed_values": {
+            f"{c}.{p}={v}"
+            for c, cdef in classes.items()
+            if isinstance(cdef, dict)
+            for p, pdef in (cdef.get("properties") or {}).items()
+            for v in (pdef.get("allowed") or [])
+        },
+    }
+
+
+def _prf1(a: set, b: set) -> dict:
+    a_norm = {_normalize_name(x) for x in a}
+    b_norm = {_normalize_name(x) for x in b}
+    true_positive = len(a_norm & b_norm)
+    precision = true_positive / len(a_norm) if a_norm else 1.0
+    recall = true_positive / len(b_norm) if b_norm else 1.0
+    f1 = 2 * precision * recall / (precision + recall) if (precision + recall) else 0.0
+    return {"precision": precision, "recall": recall, "f1": f1}
+
+
+def translation_stability(domain_datas: list[dict]) -> dict:
+    """Pairwise heuristic (normalized-name overlap) agreement across
+    independent compiler runs of the same domain. Report-only per issue
+    #103 -- not a hard gate. This is a heuristic first pass; a semantic
+    (LLM-judged) upgrade, matching the JS eval harness's two-tier pattern,
+    is a reasonable follow-up once real run data exists to tune it against."""
+    if len(domain_datas) < 2:
+        return {"note": "fewer than 2 runs supplied -- stability requires at least 2", "pairs": [], "average_f1": None}
+    kinds = ["classes", "relationships", "properties", "allowed_values"]
+    sets_per_run = [_collect_named_sets(d) for d in domain_datas]
+    pairs = []
+    for i in range(len(sets_per_run)):
+        for j in range(i + 1, len(sets_per_run)):
+            pair_result = {kind: _prf1(sets_per_run[i][kind], sets_per_run[j][kind]) for kind in kinds}
+            pairs.append({"run_a": i + 1, "run_b": j + 1, **pair_result})
+    average_f1 = {kind: sum(p[kind]["f1"] for p in pairs) / len(pairs) for kind in kinds}
+    return {"pairs": pairs, "average_f1": average_f1}
+
+
+# ---------------------------------------------------------------------------
+# Shared LLM-call helper for the judging/generation layers (3, 6, 7).
+# ---------------------------------------------------------------------------
+
+
+def chat_json_call(client, deployment: str, system_prompt: str, user_prompt: str, logger: RunLogger, label: str) -> tuple[dict, dict]:
+    logger.event("api_call_start", call=label, prompt_chars=len(system_prompt) + len(user_prompt))
+    start = time.monotonic()
+    try:
+        response = client.chat.completions.create(
+            model=deployment,
+            messages=[{"role": "system", "content": system_prompt}, {"role": "user", "content": user_prompt}],
+            response_format={"type": "json_object"},
+        )
+    except TypeError:
+        response = client.chat.completions.create(
+            model=deployment,
+            messages=[{"role": "system", "content": system_prompt}, {"role": "user", "content": user_prompt}],
+        )
+    elapsed = time.monotonic() - start
+
+    usage = getattr(response, "usage", None)
+    prompt_tokens = getattr(usage, "prompt_tokens", 0) or 0
+    completion_tokens = getattr(usage, "completion_tokens", 0) or 0
+    cached_tokens = 0
+    details = getattr(usage, "prompt_tokens_details", None)
+    if details is not None:
+        cached_tokens = getattr(details, "cached_tokens", 0) or 0
+
+    parsed = _extract_json_object(response.choices[0].message.content)
+    cost = estimate_cost(prompt_tokens, completion_tokens, cached_tokens)
+    logger.event(
+        "api_call_end",
+        call=label,
+        seconds=round(elapsed, 1),
+        prompt_tokens=prompt_tokens,
+        completion_tokens=completion_tokens,
+        cached_tokens=cached_tokens,
+        cost_usd=round(cost, 4),
+    )
+    return parsed, {"prompt_tokens": prompt_tokens, "completion_tokens": completion_tokens, "cached_tokens": cached_tokens}
+
+
+def _call_cost(usage: dict) -> float:
+    return estimate_cost(usage["prompt_tokens"], usage["completion_tokens"], usage["cached_tokens"])
+
+
+# ---------------------------------------------------------------------------
+# Layer 3: independent semantic judging.
+# ---------------------------------------------------------------------------
+
+JUDGE_SYSTEM_PROMPT = """You are an independent judge evaluating whether a translated Agent Ontology
+element is supported by its cited source evidence. You do not see any other judge's answer.
+Classify the mapping as exactly one of: "supported", "partially_supported", "unsupported".
+Respond with exactly one JSON object, no prose, no markdown fences:
+{"verdict": "supported" | "partially_supported" | "unsupported", "rationale": "one sentence"}"""
+
+
+def judge_mappings(client, deployment: str, translation: dict, logger: RunLogger, judges: int = 3) -> dict:
+    results = []
+    total_cost = 0.0
+    for mapping in translation.get("mappings", []):
+        target_path = mapping.get("target_path")
+        user_prompt = json.dumps(
+            {
+                "target_path": target_path,
+                "source_evidence": mapping.get("source_evidence"),
+                "rationale": mapping.get("rationale"),
+            },
+            indent=2,
+        )
+        raw_judgments = []
+        for judge_index in range(1, judges + 1):
+            parsed, usage = chat_json_call(
+                client, deployment, JUDGE_SYSTEM_PROMPT, user_prompt, logger, f"judge-{judge_index}:{target_path}"
+            )
+            raw_judgments.append({"verdict": parsed.get("verdict"), "rationale": parsed.get("rationale")})
+            total_cost += _call_cost(usage)
+        verdicts = [j["verdict"] for j in raw_judgments]
+        majority_verdict = Counter(verdicts).most_common(1)[0][0] if verdicts else None
+        results.append({"target_path": target_path, "raw_judgments": raw_judgments, "majority_verdict": majority_verdict})
+
+    unsupported = [r for r in results if r["majority_verdict"] == "unsupported"]
+    return {
+        "results": results,
+        "unsupported_count": len(unsupported),
+        "unsupported_paths": [r["target_path"] for r in unsupported],
+        "total_cost_usd": round(total_cost, 4),
+    }
+
+
+# ---------------------------------------------------------------------------
+# Layer 6: round-trip semantic test (diagnostic, report-only).
+# ---------------------------------------------------------------------------
+
+ROUND_TRIP_RECONSTRUCT_PROMPT = """Given only this Agent Ontology element -- no source ontology
+information -- describe in one or two sentences what real-world concept or relationship it most
+likely represents. Respond with exactly one JSON object: {"reconstruction": "..."}"""
+
+ROUND_TRIP_COMPARE_PROMPT = """Compare a blind reconstruction against the real source definition it
+should match. Score how well they agree from 0.0 (unrelated) to 1.0 (same meaning).
+Respond with exactly one JSON object: {"score": <float 0-1>, "rationale": "one sentence"}"""
+
+
+def _describe_target_element(domain_data: dict, target_path: str):
+    node = domain_data
+    for part in target_path.split("."):
+        if isinstance(node, dict):
+            node = node.get(part)
+        elif isinstance(node, list):
+            node = next((item for item in node if isinstance(item, dict) and item.get("name") == part), None)
+        else:
+            return None
+        if node is None:
+            return None
+    return node
+
+
+def round_trip_sample(client, deployment: str, domain_data: dict, translation: dict, logger: RunLogger, sample_size: int = 5) -> dict:
+    # First-N, not random -- a fixed, reproducible sample for a given translation.json.
+    sample = translation.get("mappings", [])[:sample_size]
+    results = []
+    total_cost = 0.0
+    for mapping in sample:
+        target_path = mapping.get("target_path")
+        element = _describe_target_element(domain_data, target_path)
+        if element is None:
+            continue
+        reconstruction, usage_a = chat_json_call(
+            client, deployment, ROUND_TRIP_RECONSTRUCT_PROMPT, json.dumps({"element": element}), logger, f"roundtrip-reconstruct:{target_path}"
+        )
+        compare_input = json.dumps(
+            {"reconstruction": reconstruction.get("reconstruction"), "source_definition": mapping.get("source_evidence")}
+        )
+        comparison, usage_b = chat_json_call(
+            client, deployment, ROUND_TRIP_COMPARE_PROMPT, compare_input, logger, f"roundtrip-compare:{target_path}"
+        )
+        total_cost += _call_cost(usage_a) + _call_cost(usage_b)
+        results.append(
+            {
+                "target_path": target_path,
+                "reconstruction": reconstruction.get("reconstruction"),
+                "score": comparison.get("score"),
+                "rationale": comparison.get("rationale"),
+            }
+        )
+    scores = [r["score"] for r in results if isinstance(r["score"], (int, float))]
+    average_score = sum(scores) / len(scores) if scores else None
+    return {"sampled": len(results), "results": results, "average_score": average_score, "total_cost_usd": round(total_cost, 4)}
+
+
+# ---------------------------------------------------------------------------
+# Layer 7: competency-question support (report-only).
+# ---------------------------------------------------------------------------
+
+CQ_GENERATION_PROMPT = """Given this source ontology material, generate source-grounded competency
+questions -- real operational questions a domain agent should be able to orient around, never
+"what classes exist?" style questions. Respond with exactly one JSON object:
+{"questions": ["...", "..."]}"""
+
+CQ_SUPPORT_PROMPT = """Given a competency question and an Agent Ontology (.domain.yaml content), judge
+whether the ontology contains enough orientation -- relevant classes, relationships, rules, actions --
+to reason toward an answer. This is not asking whether the ontology contains the answer itself.
+Respond with exactly one JSON object: {"supported": true|false, "rationale": "one sentence"}"""
+
+
+def _summarize_source_ir(source_ir: dict) -> dict:
+    return {
+        "classes": [{"label": c["labels"][0], "definitions": c.get("definitions", [])} for c in source_ir.get("classes", [])],
+        "object_properties": [{"label": p["labels"][0]} for p in source_ir.get("object_properties", [])],
+    }
+
+
+def generate_cqs(client, deployment: str, source_ir: dict, logger: RunLogger, n: int = 10) -> tuple[list[str], float]:
+    user_prompt = json.dumps({"requested_count": n, "source_material": _summarize_source_ir(source_ir)})
+    parsed, usage = chat_json_call(client, deployment, CQ_GENERATION_PROMPT, user_prompt, logger, "cq-generate")
+    return parsed.get("questions", []), _call_cost(usage)
+
+
+def judge_cq_support(client, deployment: str, domain_yaml_text: str, cqs: list[str], logger: RunLogger) -> dict:
+    results = []
+    total_cost = 0.0
+    for index, cq in enumerate(cqs, start=1):
+        user_prompt = json.dumps({"competency_question": cq, "domain_yaml": domain_yaml_text})
+        parsed, usage = chat_json_call(client, deployment, CQ_SUPPORT_PROMPT, user_prompt, logger, f"cq-support:{index}")
+        results.append({"question": cq, "supported": parsed.get("supported"), "rationale": parsed.get("rationale")})
+        total_cost += _call_cost(usage)
+    supported_count = sum(1 for r in results if r["supported"])
+    support_score = supported_count / len(results) if results else None
+    return {"results": results, "support_score": support_score, "total_cost_usd": round(total_cost, 4)}
+
+
+# ---------------------------------------------------------------------------
+# Report writing.
+# ---------------------------------------------------------------------------
+
+
+def _pct(value) -> str:
+    return f"{value:.1%}" if isinstance(value, (int, float)) else "n/a"
+
+
+def _render_markdown(domain_id: str, report: dict) -> str:
+    lines = [f"# Translation quality report: {domain_id}", "", f"**Hard gates: {'PASS' if report['hard_gates_ok'] else 'FAIL'}**", ""]
+
+    lines += ["## Structural validity (hard gate)", f"- ok: {report['structural_validity']['ok']}",
+              f"- errors: {report['structural_validity']['error_count']}, warnings: {report['structural_validity']['warning_count']}", ""]
+
+    prov = report["provenance_completeness"]
+    lines += ["## Provenance completeness (hard gate)", f"- ok: {prov['ok']}",
+              f"- element provenance coverage: {_pct(prov['element_provenance_coverage'])}",
+              f"- source disposition coverage: {_pct(prov['source_disposition_coverage'])}", ""]
+
+    rc = report["reverse_coverage"]
+    lines += ["## Reverse coverage", f"- coverage: {_pct(rc['coverage'])}", f"- silently dropped: {len(rc['silently_dropped'])}", ""]
+
+    if report.get("semantic_judging"):
+        sj = report["semantic_judging"]
+        lines += ["## Independent semantic judging (hard gate: zero majority-unsupported)",
+                  f"- majority-unsupported elements: {sj['unsupported_count']}", ""]
+
+    stability = report.get("translation_stability")
+    if stability and stability.get("average_f1"):
+        lines.append("## Translation stability (report-only, heuristic)")
+        for kind, f1 in stability["average_f1"].items():
+            lines.append(f"- {kind}: F1={f1:.2f}")
+        lines.append("")
+
+    if report.get("round_trip"):
+        rt = report["round_trip"]
+        avg = f"{rt['average_score']:.2f}" if isinstance(rt["average_score"], (int, float)) else "n/a"
+        lines += ["## Round-trip score (diagnostic, report-only)", f"- sampled: {rt['sampled']}, average score: {avg}", ""]
+
+    if report.get("cq_support"):
+        cq = report["cq_support"]
+        lines += ["## Competency-question support (report-only)",
+                  f"- support score: {_pct(cq['support_score'])} ({len(cq['results'])} CQs)", ""]
+
+    return "\n".join(lines)
+
+
+def _write_reports(out_dir: Path, domain_id: str, report: dict) -> None:
+    out_dir.mkdir(parents=True, exist_ok=True)
+    (out_dir / f"{domain_id}.translation-evaluation.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
+    (out_dir / f"{domain_id}.translation-report.md").write_text(_render_markdown(domain_id, report), encoding="utf-8")
+
+
+# ---------------------------------------------------------------------------
+# Orchestration.
+# ---------------------------------------------------------------------------
+
+
+def run_evaluation(
+    domain_yaml_path: Path,
+    translation_path: Path,
+    source_ir_path: Path,
+    manifest_path: Path,
+    out_dir: Path,
+    stability_run_paths: list[Path] | None = None,
+    judges: int = 3,
+    round_trip_sample_size: int = 5,
+    cq_count: int = 10,
+    dry_run: bool = False,
+) -> int:
+    manifest = load_manifest(manifest_path)
+    domain_data = yaml.safe_load(domain_yaml_path.read_text(encoding="utf-8")) or {}
+    translation = json.loads(translation_path.read_text(encoding="utf-8"))
+    source_ir = json.loads(source_ir_path.read_text(encoding="utf-8"))
+
+    structural = structural_gate(domain_data)
+    provenance = provenance_gate(domain_data, translation, source_ir)
+    reverse = reverse_coverage(source_ir, translation)
+
+    stability = {"note": "no stability_run_paths supplied", "pairs": [], "average_f1": None}
+    if stability_run_paths:
+        domain_datas = [yaml.safe_load(p.read_text(encoding="utf-8")) or {} for p in stability_run_paths]
+        stability = translation_stability(domain_datas)
+
+    hard_gates_ok = structural["ok"] and provenance["ok"]
+
+    report = {
+        "domain": manifest.id,
+        "structural_validity": structural,
+        "provenance_completeness": provenance,
+        "reverse_coverage": reverse,
+        "translation_stability": stability,
+        "semantic_judging": None,
+        "round_trip": None,
+        "cq_support": None,
+        "hard_gates_ok": hard_gates_ok,
+    }
+
+    if dry_run:
+        n_mappings = len(translation.get("mappings", []))
+        est_judge_cost = n_mappings * judges * estimate_cost(approx_tokens(JUDGE_SYSTEM_PROMPT) + 300, 60)
+        est_roundtrip_cost = round_trip_sample_size * (estimate_cost(400, 150) + estimate_cost(300, 80))
+        est_cq_cost = estimate_cost(approx_tokens(json.dumps(_summarize_source_ir(source_ir))) + 200, 800) + cq_count * estimate_cost(
+            approx_tokens(domain_yaml_path.read_text(encoding="utf-8")) + 200, 100
+        )
+        est_total = est_judge_cost + est_roundtrip_cost + est_cq_cost
+        print(f"[evaluate] DRY RUN -- {manifest.id}: hard gates {'PASS' if hard_gates_ok else 'FAIL'}")
+        print(f"[evaluate] DRY RUN -- {n_mappings} mappings x {judges} judges = {n_mappings * judges} judge calls (~${est_judge_cost:.2f})")
+        print(f"[evaluate] DRY RUN -- {round_trip_sample_size} round-trip samples x 2 calls (~${est_roundtrip_cost:.2f})")
+        print(f"[evaluate] DRY RUN -- {cq_count} CQs generated + judged (~${est_cq_cost:.2f})")
+        print(f"[evaluate] DRY RUN -- approx total LLM-layer cost ~${est_total:.2f}")
+        print("[evaluate] DRY RUN -- no API call made; hard-gate report written, LLM layers left null")
+        _write_reports(out_dir, manifest.id, report)
+        return 0 if hard_gates_ok else 1
+
+    if not hard_gates_ok:
+        print("[evaluate] hard gates failed -- skipping LLM-based layers, a rejected translation isn't worth spending on")
+        _write_reports(out_dir, manifest.id, report)
+        return 1
+
+    azure_config = load_azure_config()
+    missing = [k for k in ("endpoint", "api_key") if not azure_config[k]]
+    if missing:
+        print(f"[evaluate] ERROR: missing Azure config: {missing}. Set AZURE_OPENAI_ENDPOINT / AZURE_OPENAI_API_KEY.", file=sys.stderr)
+        _write_reports(out_dir, manifest.id, report)
+        return 1
+
+    from openai import AzureOpenAI
+
+    client = AzureOpenAI(api_version=azure_config["api_version"], azure_endpoint=azure_config["endpoint"], api_key=azure_config["api_key"])
+    logger = RunLogger(out_dir / "evaluate.log.jsonl")
+    logger.event("evaluate_start", domain=manifest.id)
+    try:
+        report["semantic_judging"] = judge_mappings(client, azure_config["deployment"], translation, logger, judges=judges)
+        report["round_trip"] = round_trip_sample(
+            client, azure_config["deployment"], domain_data, translation, logger, sample_size=round_trip_sample_size
+        )
+        cqs, cq_gen_cost = generate_cqs(client, azure_config["deployment"], source_ir, logger, n=cq_count)
+        report["cq_support"] = judge_cq_support(client, azure_config["deployment"], domain_yaml_path.read_text(encoding="utf-8"), cqs, logger)
+        report["cq_support"]["generation_cost_usd"] = round(cq_gen_cost, 4)
+    finally:
+        logger.event("evaluate_end", domain=manifest.id)
+        logger.close()
+
+    zero_majority_unsupported = report["semantic_judging"]["unsupported_count"] == 0
+    report["hard_gates_ok"] = hard_gates_ok and zero_majority_unsupported
+    _write_reports(out_dir, manifest.id, report)
+    print(f"[evaluate] {manifest.id}: done, hard_gates_ok={report['hard_gates_ok']}")
+    return 0 if report["hard_gates_ok"] else 1
+
+
+def main(argv=None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--domain-yaml", type=Path, required=True)
+    parser.add_argument("--translation", type=Path, required=True)
+    parser.add_argument("--source-ir", type=Path, required=True)
+    parser.add_argument("--manifest", type=Path, required=True)
+    parser.add_argument("--out-dir", type=Path, required=True)
+    parser.add_argument("--stability-runs", type=Path, nargs="*", default=None, help="other runs' domain.yaml files, for layer 4")
+    parser.add_argument("--judges", type=int, default=3)
+    parser.add_argument("--round-trip-sample", type=int, default=5)
+    parser.add_argument("--cq-count", type=int, default=10)
+    parser.add_argument("--dry-run", action="store_true")
+    args = parser.parse_args(argv)
+
+    return run_evaluation(
+        args.domain_yaml,
+        args.translation,
+        args.source_ir,
+        args.manifest,
+        args.out_dir,
+        stability_run_paths=args.stability_runs,
+        judges=args.judges,
+        round_trip_sample_size=args.round_trip_sample,
+        cq_count=args.cq_count,
+        dry_run=args.dry_run,
+    )
+
+
+if __name__ == "__main__":
+    sys.exit(main())
