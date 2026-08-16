@@ -263,6 +263,28 @@ reference and record deltas/decisions here instead.)*
     + "every element needs its own mapping entry, this is checked
     automatically" framing) and `evaluate.py`'s `_iter_generated_elements`/
     `_describe_target_element` (now a small path tokenizer handling both
-    `.key` and `[index]` segments, not a naive `.split(".")`). Re-running
-    the 3-pass compile now with this fix; not yet validated/evaluated/
-    accepted.
+    `.key` and `[index]` segments, not a naive `.split(".")`).
+
+  **Re-run with the addressing fix — provenance now passes.** run-1:
+  53 classes, 56 relationships, 10 rules, 7 actions, 12 CQs, 55 properties,
+  6 aliases, structurally clean, 100% provenance coverage, $0.4859. run-2:
+  56 classes, 54 relationships, 8 rules, 7 actions, 10 CQs, 36 properties,
+  8 aliases, structurally clean, 100% provenance coverage, $0.3923. run-3:
+  38 classes, 45 relationships, 8 rules, 6 actions, 12 CQs, 44 properties,
+  4 aliases, **1 structural error** (`relationships[9]` references a
+  `Compressor` class this run didn't emit — a real, if minor, compiler
+  slip; disqualifies it from direct acceptance, still usable for
+  stability comparison), 100% provenance coverage anyway, $0.3724. Total
+  this pass: $1.2506. Stability across all 3: classes F1=0.85,
+  relationships F1=0.78, properties F1=0.64.
+
+  **Adjudicated candidate: run-1** — both structural and provenance hard
+  gates clean, richest properties (55 vs 36/44) and most rules (10 vs 8/8),
+  highest class-level agreement with run-2 (F1=0.92, the best pairwise
+  score of any pair). No automated adjudication logic exists yet (noted as
+  a gap in #102's PR); this was a manual, reasoned selection, recorded here
+  for exactly that reason.
+
+  Running the full evaluate.py QA suite (semantic judging, round-trip, CQ
+  support) on run-1 next — dry-run estimated ~$1.25 (543 judge calls
+  dominate: 181 generated elements × 3 judges).
