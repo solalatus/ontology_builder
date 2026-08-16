@@ -285,6 +285,41 @@ reference and record deltas/decisions here instead.)*
   a gap in #102's PR); this was a manual, reasoned selection, recorded here
   for exactly that reason.
 
-  Running the full evaluate.py QA suite (semantic judging, round-trip, CQ
-  support) on run-1 next — dry-run estimated ~$1.25 (543 judge calls
-  dominate: 181 generated elements × 3 judges).
+  **First full QA suite run (real, $0.60 judging + ~$0.05 round-trip +
+  ~$0.20 CQ layer) surfaced two more real bugs — this is exactly the
+  "check at the end if things are really making sense" the user asked
+  for, and they didn't, on first look:**
+
+  - 58/181 elements (32%) came back majority-`unsupported`, and reading
+    the actual judge rationales showed why: every single standard-practice-
+    grounded rule/action was unanimously rejected with rationales like
+    "only a general assertion about standard HVAC practice... does not
+    provide specific source text" — precisely the evidence category the
+    *compiler* prompt was just told is legitimate. `JUDGE_SYSTEM_PROMPT`
+    had never been updated to know that category exists, so it was
+    grading the compiler's now-richer output against a stricter standard
+    than the compiler was ever told to meet. The two prompts were working
+    against each other. Fixed: judge prompt now explicitly names both
+    evidence kinds (literal source snippet vs. named standard-practice
+    citation) as legitimate and grades each on its own terms — still
+    rejects evidence that's absent, contradictory, too generic to tie to
+    the specific concepts involved, or more specific than the evidence
+    supports.
+  - Round-trip average score was 0.398, and reading the actual
+    reconstructions showed a second, unrelated bug: `round_trip_sample`
+    handed the reconstruction model a property's bare dict value (e.g.
+    `{"type": "number"}`) with **no name and no owning class** — so
+    `classes.Building.properties.yearBuilt` got reconstructed as "a
+    generic numeric value... measurement, count, or identifier" (score
+    0.18) and `grossArea` similarly (score 0.04), because the payload
+    genuinely never told the model which property it was looking at.
+    Fixed: added `_leaf_label()` (e.g. `"Building.yearBuilt"`) alongside
+    the raw content in the payload.
+  - CQ support (60%, 6/10) was checked too and found to be a genuine,
+    working-as-intended signal — the rationales for the 4 "not supported"
+    CQs cited real, specific gaps (no hydronic/refrigerant distribution
+    path relationships from boilers/chillers to terminal units, no coil
+    classes, no CRAC/CRAH-to-space linkage) rather than looking like a
+    prompt artifact. No change made there.
+
+  Re-running the full QA suite now with both fixes in place.
