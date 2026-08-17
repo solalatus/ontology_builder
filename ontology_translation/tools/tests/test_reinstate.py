@@ -125,6 +125,9 @@ class BuildReinstateUserPromptTests(unittest.TestCase):
         self.assertNotIn("Existing relationships", prompt)
 
 
+EVIDENCE = {"source_evidence": "e", "confidence": "high", "rationale": "r"}
+
+
 class ValidateReinstatementsTests(unittest.TestCase):
     def test_valid_reinstate_and_reground_pass(self):
         reinstatements = [
@@ -132,11 +135,10 @@ class ValidateReinstatementsTests(unittest.TestCase):
                 "source_iri": "http://ex.org#Compressor",
                 "action": "reinstate",
                 "class_name": "Compressor",
-                "class_content": {"meaning": "Compresses refrigerant gas.", "aliases": [], "properties": {}},
-                "new_relationships": [{"name": "hasPart", "from": "CondensingUnit", "to": "Compressor", "meaning": "x"}],
-                "source_evidence": "e",
-                "confidence": "high",
-                "rationale": "r",
+                "class_content": {"meaning": "Compresses refrigerant gas.", "aliases": [], "properties": {"status": {"type": "text", "allowed": ["off", "on"]}}},
+                "class_evidence": dict(EVIDENCE),
+                "property_evidence": {"status": dict(EVIDENCE)},
+                "new_relationships": [{"name": "hasPart", "from": "CondensingUnit", "to": "Compressor", "meaning": "x", **EVIDENCE}],
             },
             {"source_iri": "http://ex.org#Wing", "action": "reground", "new_note": "A specific reason.", "rationale": "r"},
         ]
@@ -145,27 +147,88 @@ class ValidateReinstatementsTests(unittest.TestCase):
 
     def test_reinstate_missing_meaning_flagged(self):
         reinstatements = [
-            {"source_iri": "http://ex.org#Compressor", "action": "reinstate", "class_name": "Compressor", "class_content": {}, "source_evidence": "e", "confidence": "high", "rationale": "r"},
+            {"source_iri": "http://ex.org#Compressor", "action": "reinstate", "class_name": "Compressor", "class_content": {}, "class_evidence": dict(EVIDENCE)},
             {"source_iri": "http://ex.org#Wing", "action": "reground", "new_note": "n", "rationale": "r"},
         ]
         errors = reinstate_mod.validate_reinstatements(reinstatements, FLAGGED, {"Chiller"})
         self.assertTrue(any("meaning" in e for e in errors))
 
+    def test_reinstate_missing_class_evidence_flagged(self):
+        reinstatements = [
+            {"source_iri": "http://ex.org#Compressor", "action": "reinstate", "class_name": "Compressor", "class_content": {"meaning": "m"}},
+            {"source_iri": "http://ex.org#Wing", "action": "reground", "new_note": "n", "rationale": "r"},
+        ]
+        errors = reinstate_mod.validate_reinstatements(reinstatements, FLAGGED, {"Chiller"})
+        self.assertTrue(any("class_evidence" in e for e in errors))
+
     def test_reinstate_class_name_collision_flagged(self):
         reinstatements = [
-            {"source_iri": "http://ex.org#Compressor", "action": "reinstate", "class_name": "Chiller", "class_content": {"meaning": "m"}, "source_evidence": "e", "confidence": "high", "rationale": "r"},
+            {"source_iri": "http://ex.org#Compressor", "action": "reinstate", "class_name": "Chiller", "class_content": {"meaning": "m"}, "class_evidence": dict(EVIDENCE)},
             {"source_iri": "http://ex.org#Wing", "action": "reground", "new_note": "n", "rationale": "r"},
         ]
         errors = reinstate_mod.validate_reinstatements(reinstatements, FLAGGED, {"Chiller"})
         self.assertTrue(any("already exists" in e for e in errors))
 
+    def test_property_missing_its_own_evidence_is_flagged(self):
+        # A class's own definition doesn't itself justify a specific
+        # property -- found for real when a shared evidence block let
+        # every reinstated property through unjustified. property_evidence
+        # must have its own entry per property key.
+        reinstatements = [
+            {
+                "source_iri": "http://ex.org#Compressor", "action": "reinstate", "class_name": "Compressor",
+                "class_content": {"meaning": "m", "properties": {"status": {"type": "text", "allowed": ["off", "on"]}}},
+                "class_evidence": dict(EVIDENCE),
+                "property_evidence": {},
+            },
+            {"source_iri": "http://ex.org#Wing", "action": "reground", "new_note": "n", "rationale": "r"},
+        ]
+        errors = reinstate_mod.validate_reinstatements(reinstatements, FLAGGED, {"Chiller"})
+        self.assertTrue(any("property_evidence" in e and "status" in e for e in errors))
+
+    def test_property_evidence_incomplete_block_is_flagged(self):
+        reinstatements = [
+            {
+                "source_iri": "http://ex.org#Compressor", "action": "reinstate", "class_name": "Compressor",
+                "class_content": {"meaning": "m", "properties": {"status": {"type": "text", "allowed": ["off", "on"]}}},
+                "class_evidence": dict(EVIDENCE),
+                "property_evidence": {"status": {"source_evidence": "e"}},  # missing confidence/rationale
+            },
+            {"source_iri": "http://ex.org#Wing", "action": "reground", "new_note": "n", "rationale": "r"},
+        ]
+        errors = reinstate_mod.validate_reinstatements(reinstatements, FLAGGED, {"Chiller"})
+        self.assertTrue(any("confidence" in e for e in errors))
+
+    def test_no_properties_needs_no_property_evidence(self):
+        reinstatements = [
+            {
+                "source_iri": "http://ex.org#Compressor", "action": "reinstate", "class_name": "Compressor",
+                "class_content": {"meaning": "m", "properties": {}},
+                "class_evidence": dict(EVIDENCE),
+            },
+            {"source_iri": "http://ex.org#Wing", "action": "reground", "new_note": "n", "rationale": "r"},
+        ]
+        errors = reinstate_mod.validate_reinstatements(reinstatements, FLAGGED, {"Chiller"})
+        self.assertEqual(errors, [])
+
+    def test_relationship_missing_its_own_evidence_is_flagged(self):
+        reinstatements = [
+            {
+                "source_iri": "http://ex.org#Compressor", "action": "reinstate", "class_name": "Compressor",
+                "class_content": {"meaning": "m"}, "class_evidence": dict(EVIDENCE),
+                "new_relationships": [{"name": "hasPart", "from": "CondensingUnit", "to": "Compressor", "meaning": "x"}],
+            },
+            {"source_iri": "http://ex.org#Wing", "action": "reground", "new_note": "n", "rationale": "r"},
+        ]
+        errors = reinstate_mod.validate_reinstatements(reinstatements, FLAGGED, {"CondensingUnit"})
+        self.assertTrue(any("new_relationships[0]" in e for e in errors))
+
     def test_relationship_endpoint_must_be_existing_or_batch_class(self):
         reinstatements = [
             {
                 "source_iri": "http://ex.org#Compressor", "action": "reinstate", "class_name": "Compressor",
-                "class_content": {"meaning": "m"},
-                "new_relationships": [{"name": "hasPart", "from": "TotallyUnknown", "to": "Compressor", "meaning": "x"}],
-                "source_evidence": "e", "confidence": "high", "rationale": "r",
+                "class_content": {"meaning": "m"}, "class_evidence": dict(EVIDENCE),
+                "new_relationships": [{"name": "hasPart", "from": "TotallyUnknown", "to": "Compressor", "meaning": "x", **EVIDENCE}],
             },
             {"source_iri": "http://ex.org#Wing", "action": "reground", "new_note": "n", "rationale": "r"},
         ]
@@ -183,13 +246,12 @@ class ValidateReinstatementsTests(unittest.TestCase):
         reinstatements = [
             {
                 "source_iri": "http://ex.org#Compressor", "action": "reinstate", "class_name": "Compressor",
-                "class_content": {"meaning": "m"},
-                "new_relationships": [{"name": "feeds", "from": "CoolingTower", "to": "Compressor", "meaning": "x"}],
-                "source_evidence": "e", "confidence": "high", "rationale": "r",
+                "class_content": {"meaning": "m"}, "class_evidence": dict(EVIDENCE),
+                "new_relationships": [{"name": "feeds", "from": "CoolingTower", "to": "Compressor", "meaning": "x", **EVIDENCE}],
             },
             {
                 "source_iri": "http://ex.org#CoolingTower", "action": "reinstate", "class_name": "CoolingTower",
-                "class_content": {"meaning": "m"}, "source_evidence": "e", "confidence": "high", "rationale": "r",
+                "class_content": {"meaning": "m"}, "class_evidence": dict(EVIDENCE),
             },
             {"source_iri": "http://ex.org#Wing", "action": "reground", "new_note": "n", "rationale": "r"},
         ]
@@ -223,10 +285,12 @@ class ApplyReinstatementsTests(unittest.TestCase):
                     "meaning": "Compresses refrigerant gas.", "aliases": [],
                     "properties": {"status": {"type": "text", "allowed": ["off", "on", "alarm"]}},
                 },
-                "new_relationships": [{"name": "hasPart", "from": "CondensingUnit", "to": "Compressor", "meaning": "x"}],
-                "source_evidence": "e",
-                "confidence": "high",
-                "rationale": "r",
+                "class_evidence": {"source_evidence": "class-e", "confidence": "high", "rationale": "class-r"},
+                "property_evidence": {"status": {"source_evidence": "prop-e", "confidence": "medium", "rationale": "prop-r"}},
+                "new_relationships": [
+                    {"name": "hasPart", "from": "CondensingUnit", "to": "Compressor", "meaning": "x",
+                     "source_evidence": "rel-e", "confidence": "high", "rationale": "rel-r"}
+                ],
             }
         ]
         summary = reinstate_mod.apply_reinstatements(domain, translation, reinstatements)
@@ -236,11 +300,12 @@ class ApplyReinstatementsTests(unittest.TestCase):
         self.assertEqual(domain["relationships"][1]["from"], "CondensingUnit")
         self.assertEqual(domain["relationships"][1]["to"], "Compressor")
         self.assertEqual(domain["relationships"][1]["aliases"], [])
+        self.assertNotIn("source_evidence", domain["relationships"][1])  # provenance stays out of domain.yaml content
 
-        target_paths = {m["target_path"] for m in translation["mappings"]}
-        self.assertIn("classes.Compressor", target_paths)
-        self.assertIn("classes.Compressor.properties.status", target_paths)
-        self.assertIn("relationships[1]", target_paths)
+        mapping_by_path = {m["target_path"]: m for m in translation["mappings"]}
+        self.assertEqual(mapping_by_path["classes.Compressor"]["source_evidence"], "class-e")
+        self.assertEqual(mapping_by_path["classes.Compressor.properties.status"]["source_evidence"], "prop-e")
+        self.assertEqual(mapping_by_path["relationships[1]"]["source_evidence"], "rel-e")
 
         disposition = next(d for d in translation["dispositions"] if d["source_iri"] == "http://ex.org#Compressor")
         self.assertEqual(disposition["disposition"], "mapped")
@@ -264,7 +329,7 @@ class ApplyReinstatementsTests(unittest.TestCase):
             {
                 "source_iri": "http://ex.org#Compressor", "action": "reinstate", "class_name": "Compressor",
                 "class_content": {"meaning": "m", "aliases": [], "properties": {}},
-                "source_evidence": "e", "confidence": "high", "rationale": "r",
+                "class_evidence": dict(EVIDENCE),
             }
         ]
         reinstate_mod.apply_reinstatements(domain, translation, reinstatements)
@@ -272,7 +337,7 @@ class ApplyReinstatementsTests(unittest.TestCase):
         self.assertIn("classes.Compressor", target_paths)
         self.assertFalse(any(p.startswith("classes.Compressor.properties.") for p in target_paths))
 
-    def test_reinstate_with_multiple_properties_maps_each_one(self):
+    def test_reinstate_with_multiple_properties_maps_each_one_with_its_own_evidence(self):
         domain = json.loads(json.dumps(SAMPLE_DOMAIN))
         translation = json.loads(json.dumps(SAMPLE_TRANSLATION))
         reinstatements = [
@@ -285,13 +350,17 @@ class ApplyReinstatementsTests(unittest.TestCase):
                         "capacity": {"type": "number", "unit": "kW"},
                     },
                 },
-                "source_evidence": "e", "confidence": "high", "rationale": "r",
+                "class_evidence": dict(EVIDENCE),
+                "property_evidence": {
+                    "status": {"source_evidence": "status-e", "confidence": "high", "rationale": "status-r"},
+                    "capacity": {"source_evidence": "capacity-e", "confidence": "low", "rationale": "capacity-r"},
+                },
             }
         ]
         reinstate_mod.apply_reinstatements(domain, translation, reinstatements)
-        target_paths = {m["target_path"] for m in translation["mappings"]}
-        self.assertIn("classes.Compressor.properties.status", target_paths)
-        self.assertIn("classes.Compressor.properties.capacity", target_paths)
+        mapping_by_path = {m["target_path"]: m for m in translation["mappings"]}
+        self.assertEqual(mapping_by_path["classes.Compressor.properties.status"]["source_evidence"], "status-e")
+        self.assertEqual(mapping_by_path["classes.Compressor.properties.capacity"]["source_evidence"], "capacity-e")
 
     def test_reground_updates_the_note_and_leaves_disposition_category_unchanged(self):
         domain = json.loads(json.dumps(SAMPLE_DOMAIN))
@@ -312,7 +381,7 @@ class ApplyReinstatementsTests(unittest.TestCase):
             {
                 "source_iri": "http://ex.org#Compressor", "action": "reinstate", "class_name": "Compressor",
                 "class_content": {"meaning": "m", "aliases": [], "properties": {}},
-                "source_evidence": "e", "confidence": "high", "rationale": "r",
+                "class_evidence": dict(EVIDENCE),
             }
         ]
         summary = reinstate_mod.apply_reinstatements(domain, translation, reinstatements)
@@ -377,8 +446,11 @@ class RunReinstateLiveMockedTests(unittest.TestCase):
                 {
                     "source_iri": "http://ex.org#Compressor", "action": "reinstate", "class_name": "Compressor",
                     "class_content": {"meaning": "Compresses refrigerant gas.", "aliases": [], "properties": {}},
-                    "new_relationships": [{"name": "hasPart", "from": "CondensingUnit", "to": "Compressor", "meaning": "x"}],
-                    "source_evidence": "e", "confidence": "high", "rationale": "r",
+                    "class_evidence": {"source_evidence": "e", "confidence": "high", "rationale": "r"},
+                    "new_relationships": [
+                        {"name": "hasPart", "from": "CondensingUnit", "to": "Compressor", "meaning": "x",
+                         "source_evidence": "e", "confidence": "high", "rationale": "r"}
+                    ],
                 },
                 {"source_iri": "http://ex.org#Wing", "action": "reground", "new_note": "A specific reason.", "rationale": "r"},
             ]

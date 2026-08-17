@@ -153,9 +153,23 @@ def call_reinstate(client, deployment: str, system_prompt: str, user_prompt: str
     return reinstatements, {"prompt_tokens": prompt_tokens, "completion_tokens": completion_tokens, "cached_tokens": cached_tokens}
 
 
+def _validate_evidence_block(evidence, label: str, errors: list[str]) -> None:
+    if not isinstance(evidence, dict):
+        errors.append(f"{label}: missing evidence block (source_evidence/confidence/rationale)")
+        return
+    for key in ("source_evidence", "confidence", "rationale"):
+        if not evidence.get(key):
+            errors.append(f"{label}: evidence missing '{key}'")
+
+
 def validate_reinstatements(reinstatements: list[dict], flagged: list[FlaggedDisposition], domain_classes: set[str]) -> list[str]:
     """Structural sanity checks on the model's decisions, mechanical, no LLM
-    calls -- mirrors repair.py's validate_repairs role."""
+    calls -- mirrors repair.py's validate_repairs role. Requires *separate*
+    evidence per class/property/relationship (not one blurb covering the
+    whole item) -- a class's own definition doesn't by itself justify a
+    specific property or a specific connection to another class, and an
+    earlier version of this schema let exactly that slide, which judges
+    then correctly rejected across the board (see reinstate-prompt.md)."""
     errors = []
     expected_iris = {it.source_iri for it in flagged}
     seen_iris = set()
@@ -195,10 +209,18 @@ def validate_reinstatements(reinstatements: list[dict], flagged: list[FlaggedDis
         class_content = r.get("class_content")
         if not isinstance(class_content, dict) or not (class_content.get("meaning") or "").strip():
             errors.append(f"{source_iri}: reinstate missing a real 'class_content.meaning'")
-        for key in ("source_evidence", "confidence", "rationale"):
-            if not r.get(key):
-                errors.append(f"{source_iri}: reinstate missing '{key}'")
-        for rel in r.get("new_relationships") or []:
+        _validate_evidence_block(r.get("class_evidence"), f"{source_iri}: class_evidence", errors)
+
+        property_names = set((class_content or {}).get("properties") or {})
+        property_evidence = r.get("property_evidence") or {}
+        if property_names:
+            missing_evidence = property_names - set(property_evidence)
+            for prop_name in sorted(missing_evidence):
+                errors.append(f"{source_iri}: property_evidence missing entry for '{prop_name}'")
+            for prop_name in property_names & set(property_evidence):
+                _validate_evidence_block(property_evidence[prop_name], f"{source_iri}: property_evidence.{prop_name}", errors)
+
+        for idx, rel in enumerate(r.get("new_relationships") or []):
             if not isinstance(rel, dict):
                 errors.append(f"{source_iri}: new_relationships entries must be mappings")
                 continue
@@ -209,6 +231,7 @@ def validate_reinstatements(reinstatements: list[dict], flagged: list[FlaggedDis
                 endpoint = rel.get(endpoint_key)
                 if endpoint and endpoint not in all_class_names:
                     errors.append(f"{source_iri}: new_relationships entry.{endpoint_key} {endpoint!r} is not an existing or newly-reinstated class")
+            _validate_evidence_block(rel, f"{source_iri}: new_relationships[{idx}]", errors)
 
     missing = expected_iris - seen_iris
     for source_iri in sorted(missing):
@@ -239,26 +262,31 @@ def apply_reinstatements(domain_data: dict, translation_data: dict, reinstatemen
 
         class_name = r["class_name"]
         classes[class_name] = r["class_content"]
-        provenance = {"source_evidence": r["source_evidence"], "confidence": r["confidence"], "rationale": r["rationale"]}
-        mappings.append({"target_path": f"classes.{class_name}", "source_iris": [source_iri], **provenance})
+        mappings.append({"target_path": f"classes.{class_name}", "source_iris": [source_iri], **r["class_evidence"]})
         # Every property is its own generated element for the provenance
         # hard gate (_iter_generated_elements in evaluate.py), same as a
-        # normal compile -- found for real: reinstating 9 classes with real
-        # properties but only ever mapping the class itself dropped
-        # provenance coverage to 93.6%. The property was grounded in the
-        # same single reinstate call as its owning class (the prompt never
-        # asked for separate per-property evidence), so it inherits that
-        # same evidence/confidence/rationale rather than going unmapped.
+        # normal compile -- found for real twice: first, reinstating 9
+        # classes with real properties but only ever mapping the class
+        # itself dropped provenance coverage to 93.6%; then, once mappings
+        # existed but all reused the class's own bare-definition evidence,
+        # judges correctly rejected almost every one (a class's definition
+        # doesn't itself justify a specific property). property_evidence
+        # is now required per property precisely so each one has its own
+        # real grounding, not a borrowed one.
+        property_evidence = r.get("property_evidence") or {}
         for prop_name in (r["class_content"].get("properties") or {}).keys():
-            mappings.append({"target_path": f"classes.{class_name}.properties.{prop_name}", "source_iris": [source_iri], **provenance})
+            mappings.append(
+                {"target_path": f"classes.{class_name}.properties.{prop_name}", "source_iris": [source_iri], **property_evidence[prop_name]}
+            )
 
         new_relationship_paths = []
         for rel in r.get("new_relationships") or []:
-            rel_content = dict(rel)
+            rel_evidence = {"source_evidence": rel["source_evidence"], "confidence": rel["confidence"], "rationale": rel["rationale"]}
+            rel_content = {k: v for k, v in rel.items() if k not in ("source_evidence", "confidence", "rationale")}
             rel_content.setdefault("aliases", [])
             relationships.append(rel_content)
             rel_path = f"relationships[{len(relationships) - 1}]"
-            mappings.append({"target_path": rel_path, "source_iris": [source_iri], **provenance})
+            mappings.append({"target_path": rel_path, "source_iris": [source_iri], **rel_evidence})
             new_relationship_paths.append(rel_path)
 
         if disposition is not None:

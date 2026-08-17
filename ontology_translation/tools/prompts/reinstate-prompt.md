@@ -53,15 +53,29 @@ classes already exist in the domain. Decide exactly one of:
   taxonomy-only rung with no distinct operational role) rather than a
   template reused across many elements.
 
-Every `reinstate` needs the same provenance rigor as the original compile:
-`source_evidence` (a short quoted snippet from `source_definition`, or an
-explicit standard-practice statement tied to the specific concept),
-`confidence` (`high`/`medium`/`low`), `rationale` (one sentence). Do not
-invent evidence that isn't either a direct quote from what you were given or
-a standard-practice claim tied to the specific named concept — the same bar
-as the original compiler prompt, not a lower one just because this is a
-reinstatement pass. This applies to whatever domain is actually in front of
-you, not any one domain's expected content.
+Every `reinstate` needs the same provenance rigor as the original compile —
+and, critically, **separate** evidence for each separate claim, not one
+blurb reused everywhere. A class's own definition justifies that the class
+exists and what it means; it does **not** by itself justify that the class
+has a specific property, or that it connects to another specific class in a
+specific way — those are each their own claim needing their own grounding
+(a specific standard-practice statement, e.g. "off/on/alarm status
+monitoring is standard practice for HVAC equipment, as already modeled for
+Fan and Chiller in this domain" — not just "Compressor is a real HVAC
+component"). Found for real: an earlier version of this prompt let one
+evidence block cover a whole reinstated item, and judges correctly rejected
+every property and relationship that block was stretched to cover, because
+the class's bare definition text said nothing about a status property or a
+specific equipment pairing. So, separately for the class, for **each**
+property, and for **each** new relationship, provide `source_evidence` (a
+short quoted snippet, or an explicit standard-practice statement tied to
+*that specific* property/relationship, not a restatement of the class's own
+definition), `confidence` (`high`/`medium`/`low`), `rationale` (one
+sentence). Do not invent evidence that isn't either a direct quote from what
+you were given or a standard-practice claim tied to the specific named
+concept — the same bar as the original compiler prompt, not a lower one just
+because this is a reinstatement pass. This applies to whatever domain is
+actually in front of you, not any one domain's expected content.
 
 ## Output contract
 
@@ -81,18 +95,30 @@ Respond with **exactly one JSON object**, no prose, no markdown fences:
           "status": {"type": "text", "allowed": ["off", "on", "alarm"]}
         }
       },
+      "class_evidence": {
+        "source_evidence": "\"device for mechanically increasing the pressure of a gas\"",
+        "confidence": "high",
+        "rationale": "Directly quoted from the source definition."
+      },
+      "property_evidence": {
+        "status": {
+          "source_evidence": "off/on/alarm status monitoring is standard practice for HVAC mechanical equipment, already modeled the same way for Fan and Chiller in this domain.",
+          "confidence": "medium",
+          "rationale": "Same standard-practice basis already accepted for comparable equipment in this domain."
+        }
+      },
       "new_relationships": [
         {
           "name": "hasPart",
           "from": "CondensingUnit",
           "to": "Compressor",
           "meaning": "A condensing unit is composed in part of a compressor.",
-          "aliases": []
+          "aliases": [],
+          "source_evidence": "\"comprises a condenser coil, compressor, fan\" (Condensing Unit's own source definition).",
+          "confidence": "high",
+          "rationale": "The Condensing Unit source definition directly names the compressor as one of its components."
         }
-      ],
-      "source_evidence": "...",
-      "confidence": "high",
-      "rationale": "..."
+      ]
     },
     {
       "source_iri": "https://example.org/onto#Wing",
@@ -107,4 +133,9 @@ Respond with **exactly one JSON object**, no prose, no markdown fences:
 One entry per element you were given, addressed by the exact `source_iri`
 you were given for it. `class_name` must not collide with a class name
 already in the domain, and must be PascalCase, matching this domain's
-existing naming convention.
+existing naming convention. `class_evidence` is required for every
+`reinstate`. `property_evidence` must have exactly one entry per key in
+`class_content.properties` (omit `property_evidence` entirely, or leave it
+`{}`, only when `class_content.properties` is itself empty). Every entry in
+`new_relationships` must carry its own `source_evidence`/`confidence`/
+`rationale` alongside `name`/`from`/`to`/`meaning`.
