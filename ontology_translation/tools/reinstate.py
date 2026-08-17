@@ -61,14 +61,42 @@ class FlaggedDisposition:
     judge_rationale: str
 
 
-def build_reinstate_user_prompt(flagged: list[FlaggedDisposition], domain_classes: list[str]) -> str:
+def build_reinstate_user_prompt(
+    flagged: list[FlaggedDisposition],
+    domain_classes: list[str],
+    domain_relationships: list[dict] | None = None,
+) -> str:
     parts = [
         "Classes already in this domain (new relationships must connect to one of "
         "these, or to a class you are adding in this same response):",
         json.dumps(sorted(domain_classes)),
+    ]
+    if domain_relationships:
+        # Without seeing the domain's *actual* relationship conventions, a
+        # reinstated class tends to come back as an unconnected orphan --
+        # found for real: a first pass with only class names in this prompt
+        # (no relationship examples) added 10 well-grounded classes with
+        # zero relationships each, even for equipment (CondensingUnit,
+        # Pump, CoolingTower) whose real physical connections to classes
+        # already in the domain are exactly the kind of thing this
+        # domain's existing hasPart/feeds relationships already model for
+        # comparable equipment. Showing the real relationship list lets the
+        # model reuse the same names/patterns instead of guessing whether
+        # inventing one is allowed.
+        parts.append(
+            "Existing relationships in this domain, for naming/pattern precedent -- reuse "
+            "these same relationship names and conventions (e.g. hasPart for physical "
+            "composition, feeds for a flow/supply path, serves for service provision, "
+            "hasPoint for a sensor/setpoint association, hasLocation for spatial placement) "
+            "rather than inventing new ones where an existing pattern already fits:"
+        )
+        parts.append(json.dumps(domain_relationships, indent=2))
+    parts += [
         "Flagged exclusions to reconsider, each with its real source definition, the "
         "compiler's own disposition/note, sibling classes that WERE kept for "
-        "comparison, and the independent judge's rationale for flagging it:",
+        "comparison (including that sibling's own properties, as precedent for whether "
+        "a comparable property is standard practice for the element you're deciding on), "
+        "and the independent judge's rationale for flagging it:",
         json.dumps(
             [
                 {
@@ -248,7 +276,7 @@ def run_reinstate(
     domain_classes = set((domain_data.get("classes") or {}).keys())
 
     system_prompt = PROMPT_PATH.read_text(encoding="utf-8")
-    user_prompt = build_reinstate_user_prompt(flagged, sorted(domain_classes))
+    user_prompt = build_reinstate_user_prompt(flagged, sorted(domain_classes), domain_data.get("relationships") or [])
 
     if dry_run:
         est_tokens = approx_tokens(system_prompt) + approx_tokens(user_prompt)

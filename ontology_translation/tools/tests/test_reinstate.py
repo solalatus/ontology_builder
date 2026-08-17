@@ -108,6 +108,23 @@ class BuildReinstateUserPromptTests(unittest.TestCase):
         self.assertIn("Chiller", prompt)
 
 
+    def test_includes_existing_relationships_when_given(self):
+        # Regression: a first real run against Brick HVAC with only class
+        # names in the prompt (no relationship examples) added 10
+        # well-grounded classes with zero relationships each, even for
+        # equipment whose real physical connections were exactly what this
+        # domain's existing hasPart/feeds relationships already model for
+        # comparable equipment.
+        relationships = [{"name": "hasPart", "from": "Chiller", "to": "CondensingUnit", "meaning": "x", "aliases": []}]
+        prompt = reinstate_mod.build_reinstate_user_prompt(FLAGGED, ["Chiller", "CondensingUnit"], relationships)
+        self.assertIn("Existing relationships", prompt)
+        self.assertIn("hasPart", prompt)
+
+    def test_omits_relationship_section_when_none_given(self):
+        prompt = reinstate_mod.build_reinstate_user_prompt(FLAGGED, ["Chiller", "CondensingUnit"])
+        self.assertNotIn("Existing relationships", prompt)
+
+
 class ValidateReinstatementsTests(unittest.TestCase):
     def test_valid_reinstate_and_reground_pass(self):
         reinstatements = [
