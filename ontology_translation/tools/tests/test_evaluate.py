@@ -256,6 +256,35 @@ class ClassNamesInvolvedTests(unittest.TestCase):
         self.assertEqual(evaluate_mod._class_names_involved(DOMAIN_DATA, "relationships[99]"), [])
 
 
+class NormalizeClassNameTests(unittest.TestCase):
+    def test_pascal_case_compiled_name_matches_spaced_source_label(self):
+        # The actual bug: compiled class names are PascalCase
+        # (CondensingUnit), source labels are space-separated (Condensing
+        # Unit). _normalize_name alone ("condensingunit" vs "condensing
+        # unit") never matches these -- ground-truth resolution silently
+        # failed for every multi-word class until this existed.
+        self.assertEqual(evaluate_mod._normalize_class_name("CondensingUnit"), evaluate_mod._normalize_class_name("Condensing Unit"))
+
+    def test_three_word_pascal_case_name(self):
+        self.assertEqual(
+            evaluate_mod._normalize_class_name("WaterTemperatureSetpoint"), evaluate_mod._normalize_class_name("Water Temperature Setpoint")
+        )
+
+    def test_leading_acronym_with_digit_is_split_correctly(self):
+        # "CO2DifferentialSensor" -> "CO2 Differential Sensor": the digit-to-
+        # uppercase boundary (2|D) must split too, not just lower-to-upper.
+        self.assertEqual(
+            evaluate_mod._normalize_class_name("CO2DifferentialSensor"), evaluate_mod._normalize_class_name("CO2 Differential Sensor")
+        )
+
+    def test_single_word_or_acronym_name_is_unaffected(self):
+        self.assertEqual(evaluate_mod._normalize_class_name("Chiller"), "chiller")
+        self.assertEqual(evaluate_mod._normalize_class_name("AHU"), "ahu")
+
+    def test_already_spaced_label_is_unaffected(self):
+        self.assertEqual(evaluate_mod._normalize_class_name("Condensing Unit"), "condensing unit")
+
+
 class IndexSourceClassesByLabelTests(unittest.TestCase):
     def test_indexes_by_normalized_label(self):
         index = evaluate_mod._index_source_classes_by_label(SOURCE_IR)
@@ -308,6 +337,29 @@ class GroundTruthForTargetTests(unittest.TestCase):
         # with no source backing whatsoever.
         domain_data = {"classes": {"TotallyInvented": {"meaning": "x"}}, "relationships": []}
         self.assertIsNone(evaluate_mod._ground_truth_for_target(domain_data, self.source_index, "classes.TotallyInvented"))
+
+    def test_multi_word_pascal_case_endpoints_both_resolve(self):
+        # Regression for the real bug: relationships[57] in the live Brick
+        # HVAC re-judge (CondensingUnit hasPart Compressor) silently lost
+        # CondensingUnit's ground truth -- the judge saw only Compressor's
+        # definition (which says nothing about composition) and rejected a
+        # genuinely well-grounded claim, because "condensingunit" (no
+        # camelCase splitting) never matched source label "Condensing Unit".
+        domain_data = {
+            "classes": {"CondensingUnit": {"meaning": "x"}, "Compressor": {"meaning": "y"}},
+            "relationships": [{"name": "hasPart", "from": "CondensingUnit", "to": "Compressor", "meaning": "z", "aliases": []}],
+        }
+        source_ir = {
+            "classes": [
+                {"iri": "http://ex.org#CU", "labels": ["Condensing Unit"], "definitions": ["Comprises a condenser coil, compressor, fan."]},
+                {"iri": "http://ex.org#C", "labels": ["Compressor"], "definitions": ["A device for compressing gas."]},
+            ]
+        }
+        source_index = evaluate_mod._index_source_classes_by_label(source_ir)
+        ground_truth = evaluate_mod._ground_truth_for_target(domain_data, source_index, "relationships[0]")
+        self.assertIn("CondensingUnit", ground_truth)
+        self.assertIn("Compressor", ground_truth)
+        self.assertIn("compressor", ground_truth["CondensingUnit"][0]["definitions"][0].lower())
 
 
 class JudgeMappingsTests(unittest.TestCase):

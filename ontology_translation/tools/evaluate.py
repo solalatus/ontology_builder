@@ -276,6 +276,27 @@ def _class_names_involved(domain_data: dict, target_path: str) -> list[str]:
     return []
 
 
+_CAMEL_BOUNDARY_RE = re.compile(r"(?<=[a-z0-9])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])")
+
+
+def _normalize_class_name(name: str) -> str:
+    """Like _normalize_name, but also splits camelCase/PascalCase word
+    boundaries before lowercasing. Compiled .domain.yaml class names are
+    virtually always PascalCase (`CondensingUnit`, `WaterTemperatureSensor`),
+    while source ontology labels are virtually always space-separated
+    (`Condensing Unit`, `Water Temperature Sensor`) -- _normalize_name alone
+    (lowercase + whitespace-collapse only) treats these as different
+    strings, so ground-truth resolution silently failed for almost every
+    multi-word class name. Found for real, and it was actively misleading,
+    not just incomplete: a judge shown only a *different*, unrelated class's
+    definition (because the real one failed to resolve) rejected a
+    genuinely well-grounded claim, reading the absence as real evidence
+    against it. Single-word/acronym names (`Chiller`, `AHU`) are unaffected
+    -- there's no boundary to split, so this is a pure superset fix."""
+    spaced = _CAMEL_BOUNDARY_RE.sub(" ", name)
+    return _normalize_name(spaced)
+
+
 def _index_source_classes_by_label(source_ir: dict) -> dict[str, list[dict]]:
     """Normalized label/altLabel -> matching source_ir class record(s).
     Multiple records can share a label (e.g. two source classes the compiler
@@ -284,7 +305,7 @@ def _index_source_classes_by_label(source_ir: dict) -> dict[str, list[dict]]:
     index: dict[str, list[dict]] = {}
     for record in source_ir.get("classes", []):
         for label in (record.get("labels") or []) + (record.get("altLabels") or []):
-            index.setdefault(_normalize_name(label), []).append(record)
+            index.setdefault(_normalize_class_name(label), []).append(record)
     return index
 
 
@@ -298,7 +319,7 @@ def _ground_truth_for_target(domain_data: dict, source_index: dict, target_path:
         return None
     found = {}
     for name in class_names:
-        records = source_index.get(_normalize_name(name))
+        records = source_index.get(_normalize_class_name(name))
         if records:
             found[name] = [
                 {"iri": r.get("iri"), "labels": r.get("labels"), "altLabels": r.get("altLabels"), "definitions": r.get("definitions")}
