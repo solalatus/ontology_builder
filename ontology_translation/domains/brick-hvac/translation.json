@@ -820,10 +820,14 @@
     },
     {
       "target_path": "relationships[31]",
-      "source_iris": [],
-      "source_evidence": "Zone definition: \"maintained throughout by a single controlling device\"; thermostat definition identifies a temperature control device.",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#Zone",
+        "https://brickschema.org/schema/Brick#Thermostat",
+        "https://w3id.org/rec#servicedBy"
+      ],
+      "source_evidence": "Zone is defined as a \"space or group of spaces ... for which the heating, cooling, or lighting requirements are sufficiently similar that desired conditions can be maintained throughout by a single controlling device,\" and a Thermostat is \"an automatic control device used to maintain temperature at a fixed or adjustable setpoint\"; this supports a thermostat serving the zone it controls.",
       "confidence": "high",
-      "rationale": "The thermostat-to-zone serves relationship is directly supported by the two class definitions together."
+      "rationale": "The existing Thermostat\u2192Zone serves relationship is directly grounded by Zone's single-controlling-device definition together with Thermostat being a control device, and the cited servicedBy relation matches this semantics."
     },
     {
       "target_path": "rules.economizerReducesMechanicalConditioning",

@@ -1089,3 +1089,37 @@ reference and record deltas/decisions here instead.)*
   `prompts/reinstate-prompt.md`.
 
   **#106 still open** — still the user's call.
+
+- 2026-08-17 (continued) — **Second manual spot-check round**, against the
+  domain's current state (post disposition-judging fix, post reinstate.py).
+  10%-stratified sample (13 of 127 artefacts, seed 106), reviewer
+  szablevi@gmail.com in-session. Full detail:
+  `domains/brick-hvac/manual-spot-check.md`/`.json`.
+
+  Result: **13/13 accepted**, one real defect found and fixed along the
+  way. `relationships[31]` (Thermostat serves Zone) was flagged for having
+  empty `source_iris` despite quoting what looked like real evidence; asked
+  to investigate rather than accept on the flag alone, the agent confirmed
+  the quote was a genuine verbatim substring of Zone's real source
+  definition and found an additional real, uncited match
+  (`rec#servicedBy`). Root cause was general, not specific to this one
+  mapping: **`repair.py`'s `reground` action asked for evidence as free
+  text but never asked for `source_iris` as structured data** — so even an
+  accurate prose citation left a mapping just as unverifiable as before the
+  repair. Fixed in `repair.py` itself (schema, validation, and
+  `apply_repairs` all updated; ~13 test fixtures + 2 new tests), then
+  reapplied to this specific item and independently re-verified: unanimous
+  supported.
+
+  One process note, not an artefact defect: the agent initially misflagged
+  `actions.maintainWithinDeadband`'s rationale as a "stale" leftover
+  (wording references the action's pre-rename name). Challenged directly by
+  the reviewer given the session's full-rerun claim. Verified by diffing
+  against the pre-repair compile output that the current text is genuinely
+  different, proving it was written fresh during the repair-driven rename —
+  the old name is referenced to explain the rename, not left unrefreshed.
+  Flag withdrawn; logged transparently rather than silently corrected.
+
+  Full offline test suite: **200/200 passing**.
+
+  **#106 still open** — still the user's call.
