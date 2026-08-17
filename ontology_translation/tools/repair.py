@@ -111,6 +111,82 @@ def call_repair(client, deployment: str, system_prompt: str, user_prompt: str, l
 
 
 _REL_INDEX_RE = re.compile(r"^relationships\[(\d+)\]$")
+_PATH_TOKEN_RE = re.compile(r"[^.\[\]]+|\[\d+\]")
+
+# Which top-level collection a target_path's first token addresses, and
+# whether that collection is a list (index-addressed) or a mapping
+# (name-addressed) -- drives both in-place resolution and the
+# retroactive-append fallback below.
+_COLLECTION_BY_PREFIX = {"classes": ("classes", False), "relationships": ("relationships", True), "rules": ("rules", False), "actions": ("actions", False)}
+
+
+def _target_kind(target_path: str) -> str | None:
+    """classes.X -> "class", classes.X.properties.Y -> "property",
+    relationships[i] -> "relationship", rules.X -> "rule", actions.X ->
+    "action". None if the path doesn't start with a recognized collection."""
+    tokens = _PATH_TOKEN_RE.findall(target_path)
+    if not tokens:
+        return None
+    if tokens[0] == "classes":
+        return "property" if len(tokens) >= 4 and tokens[2] == "properties" else "class"
+    if tokens[0] == "relationships":
+        return "relationship"
+    if tokens[0] == "rules":
+        return "rule"
+    if tokens[0] == "actions":
+        return "action"
+    return None
+
+
+def _resolve_container_and_key(domain_data: dict, target_path: str):
+    """(container, key) such that container[key] is the addressed element
+    -- key is an int index for relationships[i], a string key otherwise.
+    None if target_path doesn't resolve against domain_data at all: either
+    a malformed path, or (the real, expected case) a *synthetic* label for
+    an element that was already removed before this repair pass ever ran --
+    e.g. Brick HVAC's original "relationships[dropped-1]"-style labels from
+    before repair.py existed. Callers use that distinction to choose
+    in-place mutation (the normal case: the element is still there right
+    now) vs. append (the retroactive case: there's nothing to mutate)."""
+    tokens = _PATH_TOKEN_RE.findall(target_path)
+    if not tokens:
+        return None
+    node = domain_data
+    for token in tokens[:-1]:
+        if token.startswith("[") and token.endswith("]"):
+            idx = int(token[1:-1])
+            if not isinstance(node, list) or not (0 <= idx < len(node)):
+                return None
+            node = node[idx]
+        elif isinstance(node, dict):
+            node = node.get(token)
+            if node is None:
+                return None
+        else:
+            return None
+    last = tokens[-1]
+    if last.startswith("[") and last.endswith("]"):
+        idx = int(last[1:-1])
+        if not isinstance(node, list) or not (0 <= idx < len(node)):
+            return None
+        return node, idx
+    if not isinstance(node, dict) or last not in node:
+        return None
+    return node, last
+
+
+def _reindex_relationship_mappings(translation_data: dict, removed_index: int) -> None:
+    """After removing relationships[removed_index] in place, every
+    relationships[j] target_path for j > removed_index must shift down by
+    one to stay correct -- both the mapping being removed itself and every
+    later one still need addressing that matches the list's real new
+    shape."""
+    for m in translation_data.get("mappings", []):
+        match = _REL_INDEX_RE.match(m.get("target_path", ""))
+        if match:
+            idx = int(match.group(1))
+            if idx > removed_index:
+                m["target_path"] = f"relationships[{idx - 1}]"
 
 
 def validate_repairs(repairs: list[dict], rejected_items: list[RejectedItem], domain_classes: set[str]) -> list[str]:
@@ -139,17 +215,23 @@ def validate_repairs(repairs: list[dict], rejected_items: list[RejectedItem], do
             if not r.get(key):
                 errors.append(f"{target_path}: {action} missing '{key}'")
         if action == "replace":
-            new_rel = r.get("new_relationship")
-            if not isinstance(new_rel, dict):
-                errors.append(f"{target_path}: replace missing 'new_relationship'")
+            new_content = r.get("new_content")
+            if not isinstance(new_content, dict):
+                errors.append(f"{target_path}: replace missing 'new_content'")
                 continue
-            for key in ("name", "from", "to", "meaning"):
-                if not new_rel.get(key):
-                    errors.append(f"{target_path}: new_relationship missing '{key}'")
-            for endpoint_key in ("from", "to"):
-                endpoint = new_rel.get(endpoint_key)
-                if endpoint and endpoint not in domain_classes:
-                    errors.append(f"{target_path}: new_relationship.{endpoint_key} '{endpoint}' is not an existing domain class")
+            # Only a relationship's shape has a checkable structural
+            # invariant here (endpoints must be real classes) -- a
+            # property/rule/action/class's new_content shape is whatever
+            # validate_domain.py already checks once applied, no need to
+            # duplicate that here.
+            if _target_kind(target_path) == "relationship":
+                for key in ("name", "from", "to", "meaning"):
+                    if not new_content.get(key):
+                        errors.append(f"{target_path}: new_content missing '{key}'")
+                for endpoint_key in ("from", "to"):
+                    endpoint = new_content.get(endpoint_key)
+                    if endpoint and endpoint not in domain_classes:
+                        errors.append(f"{target_path}: new_content.{endpoint_key} '{endpoint}' is not an existing domain class")
     missing = expected_paths - seen_paths
     for target_path in sorted(missing):
         errors.append(f"no repair decision returned for {target_path}")
@@ -157,45 +239,90 @@ def validate_repairs(repairs: list[dict], rejected_items: list[RejectedItem], do
 
 
 def apply_repairs(domain_data: dict, translation_data: dict, repairs: list[dict], rejected_items: list[RejectedItem]) -> dict:
-    """Appends accepted (reground/replace) relationships to the end of
-    domain_data['relationships'] with fresh translation.json mapping
-    entries at their new indices -- never rewrites an existing index in
-    place, so nothing else in either file needs renumbering. Returns a
-    summary dict for logging/reporting; mutates domain_data and
+    """Applies each repair decision at its target_path:
+
+    - If the path resolves against domain_data (the normal case -- the
+      element is still there right now, this is a repair pass over a
+      currently-live translation): mutates in place. `reground` only ever
+      touches translation.json's mapping (the element's own content is
+      already fine, just under-evidenced); `replace` overwrites the
+      element's content at that same path (renaming a property is
+      supported via an optional `new_target_path` in the repair decision);
+      `drop` removes the element itself, its mapping entry, and -- for a
+      relationships[i] removal specifically -- renumbers every later
+      relationship's target_path so nothing drifts out of sync.
+    - If the path does *not* resolve (the retroactive case: a synthetic
+      label for something already removed before this repair pass ever
+      ran, e.g. Brick HVAC's original three relationships, repaired before
+      this in-place support existed) -- appends fresh content to the
+      matching top-level collection instead, since there's nothing at that
+      path to mutate.
+
+    Returns a summary dict for logging/reporting; mutates domain_data and
     translation_data in place.
     """
     by_path = {it.target_path: it for it in rejected_items}
     summary = {"reground": [], "replace": [], "drop": []}
-    relationships = domain_data.setdefault("relationships", [])
     mappings = translation_data.setdefault("mappings", [])
+    mapping_index = {m.get("target_path"): m for m in mappings}
 
     for r in repairs:
         target_path = r["target_path"]
         item = by_path[target_path]
         action = r["action"]
+        resolved = _resolve_container_and_key(domain_data, target_path)
+
         if action == "drop":
+            if resolved is not None:
+                container, key = resolved
+                del container[key]
+                mappings[:] = [m for m in mappings if m.get("target_path") != target_path]
+                if isinstance(key, int):
+                    _reindex_relationship_mappings(translation_data, key)
             summary["drop"].append({"target_path": target_path, "rationale": r.get("rationale")})
             continue
 
-        if action == "reground":
-            new_rel = dict(item.current_shape)
-        else:  # replace
-            new_rel = dict(r["new_relationship"])
-            new_rel.setdefault("aliases", [])
+        new_content = dict(item.current_shape) if action == "reground" else dict(r["new_content"])
+        if _target_kind(target_path) == "relationship":
+            new_content.setdefault("aliases", [])
+        provenance = {"source_evidence": r["source_evidence"], "confidence": r["confidence"], "rationale": r["rationale"]}
 
+        if resolved is not None:
+            container, key = resolved
+            new_target_path = r.get("new_target_path") or target_path
+            if action == "replace" and new_target_path != target_path:
+                # A rename (e.g. a property key change) -- remove the old
+                # entry, insert the new one, retarget the mapping.
+                del container[key]
+                new_key = _PATH_TOKEN_RE.findall(new_target_path)[-1]
+                container[new_key] = new_content
+            elif action == "replace":
+                container[key] = new_content
+            # reground: domain_data is untouched, content was already fine.
+            mapping = mapping_index.get(target_path)
+            if mapping is not None:
+                mapping["target_path"] = new_target_path
+                mapping.update(provenance)
+            else:
+                mappings.append({"target_path": new_target_path, "source_iris": [], **provenance})
+            summary[action].append({"original_target_path": target_path, "new_target_path": new_target_path, "content": new_content})
+            continue
+
+        # Retroactive fallback: nothing to mutate, append instead. Only
+        # relationships are supported here, matching the one historical
+        # case this path exists for -- a class/property/rule/action being
+        # "removed before repair.py existed and needing retroactive
+        # re-addition" has never actually happened and would need a real
+        # target_path to append at (a bare class/rule/action name is
+        # already unambiguous, but a property needs its owning class,
+        # which the rejected item's target_path already encodes -- add
+        # support here if that case ever arises for real).
+        relationships = domain_data.setdefault("relationships", [])
         new_index = len(relationships)
-        relationships.append(new_rel)
+        relationships.append(new_content)
         new_path = f"relationships[{new_index}]"
-        mappings.append(
-            {
-                "target_path": new_path,
-                "source_iris": [],
-                "source_evidence": r["source_evidence"],
-                "confidence": r["confidence"],
-                "rationale": r["rationale"],
-            }
-        )
-        summary[action].append({"original_target_path": target_path, "new_target_path": new_path, "relationship": new_rel})
+        mappings.append({"target_path": new_path, "source_iris": [], **provenance})
+        summary[action].append({"original_target_path": target_path, "new_target_path": new_path, "content": new_content})
 
     return summary
 

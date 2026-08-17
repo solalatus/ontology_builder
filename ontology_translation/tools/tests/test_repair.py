@@ -18,14 +18,17 @@ import repair as repair_mod
 
 SAMPLE_DOMAIN = {
     "classes": {
-        "AHU": {"meaning": "An air handling unit."},
+        "AHU": {"meaning": "An air handling unit.", "properties": {"status": {"type": "text", "allowed": ["on", "off"]}}},
         "AirPlenum": {"meaning": "An air plenum."},
         "Chiller": {"meaning": "A chiller."},
         "CondensingUnit": {"meaning": "A condensing unit."},
         "Compressor": {"meaning": "A compressor."},
+        "Zone": {"meaning": "A controlled area."},
     },
     "relationships": [
         {"name": "feeds", "from": "AHU", "to": "AirPlenum", "meaning": "x", "aliases": []},
+        {"name": "serves", "from": "AHU", "to": "Zone", "meaning": "y", "aliases": []},
+        {"name": "hasPart", "from": "AHU", "to": "Chiller", "meaning": "z", "aliases": []},
     ],
     "rules": {},
     "actions": {},
@@ -34,7 +37,10 @@ SAMPLE_DOMAIN = {
 
 SAMPLE_TRANSLATION = {
     "mappings": [
+        {"target_path": "classes.AHU.properties.status", "source_iris": [], "source_evidence": "e0", "confidence": "high", "rationale": "r0"},
         {"target_path": "relationships[0]", "source_iris": [], "source_evidence": "e", "confidence": "high", "rationale": "r"},
+        {"target_path": "relationships[1]", "source_iris": [], "source_evidence": "e1", "confidence": "high", "rationale": "r1"},
+        {"target_path": "relationships[2]", "source_iris": [], "source_evidence": "e2", "confidence": "high", "rationale": "r2"},
     ],
     "dispositions": [],
 }
@@ -102,7 +108,7 @@ class ValidateRepairsTests(unittest.TestCase):
             {
                 "target_path": "relationships[dropped-1]",
                 "action": "replace",
-                "new_relationship": {"name": "hasPart", "from": "CondensingUnit", "to": "Compressor", "meaning": "x"},
+                "new_content": {"name": "hasPart", "from": "CondensingUnit", "to": "Compressor", "meaning": "x"},
                 "source_evidence": "e",
                 "confidence": "high",
                 "rationale": "r",
@@ -146,7 +152,7 @@ class ValidateRepairsTests(unittest.TestCase):
             {
                 "target_path": "relationships[dropped-1]",
                 "action": "replace",
-                "new_relationship": {"name": "hasPart", "from": "GhostClass", "to": "Compressor", "meaning": "x"},
+                "new_content": {"name": "hasPart", "from": "GhostClass", "to": "Compressor", "meaning": "x"},
                 "source_evidence": "e",
                 "confidence": "high",
                 "rationale": "r",
@@ -162,7 +168,11 @@ class ValidateRepairsTests(unittest.TestCase):
 
 
 class ApplyRepairsTests(unittest.TestCase):
-    def test_reground_appends_original_shape_with_new_provenance(self):
+    # --- Retroactive fallback: target_path doesn't resolve (the historical
+    # Brick HVAC case -- these 3 relationships were already removed before
+    # repair.py's in-place support existed), so these still append. ---
+
+    def test_retroactive_reground_appends_original_shape_with_new_provenance(self):
         domain = json.loads(json.dumps(SAMPLE_DOMAIN))
         translation = json.loads(json.dumps(SAMPLE_TRANSLATION))
         repairs = [
@@ -170,22 +180,22 @@ class ApplyRepairsTests(unittest.TestCase):
         ]
         summary = repair_mod.apply_repairs(domain, translation, repairs, [REJECTED[0]])
 
-        self.assertEqual(len(domain["relationships"]), 2)
-        self.assertEqual(domain["relationships"][1], REJECTED[0].current_shape)
-        self.assertEqual(translation["mappings"][-1]["target_path"], "relationships[1]")
+        self.assertEqual(len(domain["relationships"]), 4)  # 3 original + 1 appended
+        self.assertEqual(domain["relationships"][3], REJECTED[0].current_shape)
+        self.assertEqual(translation["mappings"][-1]["target_path"], "relationships[3]")
         self.assertEqual(translation["mappings"][-1]["source_evidence"], "e2")
         self.assertEqual(len(summary["reground"]), 1)
-        self.assertEqual(summary["reground"][0]["new_target_path"], "relationships[1]")
+        self.assertEqual(summary["reground"][0]["new_target_path"], "relationships[3]")
 
-    def test_replace_appends_new_relationship_not_the_old_one(self):
+    def test_retroactive_replace_appends_new_content_not_the_old_pairing(self):
         domain = json.loads(json.dumps(SAMPLE_DOMAIN))
         translation = json.loads(json.dumps(SAMPLE_TRANSLATION))
-        new_rel = {"name": "hasPart", "from": "CondensingUnit", "to": "Compressor", "meaning": "The compressor is part of the condensing unit."}
+        new_content = {"name": "hasPart", "from": "CondensingUnit", "to": "Compressor", "meaning": "The compressor is part of the condensing unit."}
         repairs = [
             {
                 "target_path": "relationships[dropped-1]",
                 "action": "replace",
-                "new_relationship": new_rel,
+                "new_content": new_content,
                 "source_evidence": "e",
                 "confidence": "high",
                 "rationale": "r",
@@ -193,8 +203,8 @@ class ApplyRepairsTests(unittest.TestCase):
         ]
         summary = repair_mod.apply_repairs(domain, translation, repairs, [REJECTED[0]])
 
-        self.assertEqual(len(domain["relationships"]), 2)
-        appended = domain["relationships"][1]
+        self.assertEqual(len(domain["relationships"]), 4)
+        appended = domain["relationships"][3]
         self.assertEqual(appended["from"], "CondensingUnit")
         self.assertEqual(appended["to"], "Compressor")
         self.assertEqual(appended["aliases"], [])  # defaulted, since the model wasn't required to include it
@@ -203,17 +213,17 @@ class ApplyRepairsTests(unittest.TestCase):
             {k: v for k, v in r.items() if k in ("name", "from", "to")} for r in domain["relationships"]
         ])
 
-    def test_drop_appends_nothing(self):
+    def test_retroactive_drop_appends_nothing(self):
         domain = json.loads(json.dumps(SAMPLE_DOMAIN))
         translation = json.loads(json.dumps(SAMPLE_TRANSLATION))
         repairs = [{"target_path": "relationships[dropped-1]", "action": "drop", "rationale": "no honest grounding"}]
         summary = repair_mod.apply_repairs(domain, translation, repairs, [REJECTED[0]])
 
-        self.assertEqual(len(domain["relationships"]), 1)
-        self.assertEqual(len(translation["mappings"]), 1)
+        self.assertEqual(len(domain["relationships"]), 3)
+        self.assertEqual(len(translation["mappings"]), 4)
         self.assertEqual(summary["drop"][0]["rationale"], "no honest grounding")
 
-    def test_multiple_repairs_get_sequential_fresh_indices(self):
+    def test_retroactive_multiple_repairs_get_sequential_fresh_indices(self):
         domain = json.loads(json.dumps(SAMPLE_DOMAIN))
         translation = json.loads(json.dumps(SAMPLE_TRANSLATION))
         repairs = [
@@ -222,8 +232,115 @@ class ApplyRepairsTests(unittest.TestCase):
         ]
         repair_mod.apply_repairs(domain, translation, repairs, REJECTED)
 
-        self.assertEqual(len(domain["relationships"]), 2)  # 1 original + 1 reground (drop adds nothing)
-        self.assertEqual(translation["mappings"][-1]["target_path"], "relationships[1]")
+        self.assertEqual(len(domain["relationships"]), 4)  # 3 original + 1 reground (drop adds nothing)
+        self.assertEqual(translation["mappings"][-1]["target_path"], "relationships[3]")
+
+    # --- In-place: target_path resolves against domain_data right now --
+    # the normal case for any future domain's ordinary QA cycle, where
+    # repair runs *before* anything gets removed. ---
+
+    def test_in_place_reground_only_touches_the_mapping_not_the_content(self):
+        domain = json.loads(json.dumps(SAMPLE_DOMAIN))
+        translation = json.loads(json.dumps(SAMPLE_TRANSLATION))
+        item = repair_mod.RejectedItem(
+            target_path="classes.AHU.properties.status",
+            current_shape={"type": "text", "allowed": ["on", "off"]},
+            rejection_rationale="Evidence is a generic template reused across many classes.",
+        )
+        repairs = [{"target_path": "classes.AHU.properties.status", "action": "reground", "source_evidence": "e3", "confidence": "high", "rationale": "r3"}]
+        summary = repair_mod.apply_repairs(domain, translation, repairs, [item])
+
+        self.assertEqual(domain["classes"]["AHU"]["properties"]["status"], {"type": "text", "allowed": ["on", "off"]})
+        self.assertEqual(len(translation["mappings"]), 4)  # unchanged count -- updated in place, not appended
+        mapping = next(m for m in translation["mappings"] if m["target_path"] == "classes.AHU.properties.status")
+        self.assertEqual(mapping["source_evidence"], "e3")
+        self.assertEqual(summary["reground"][0]["new_target_path"], "classes.AHU.properties.status")
+
+    def test_in_place_replace_overwrites_content_at_the_same_path(self):
+        domain = json.loads(json.dumps(SAMPLE_DOMAIN))
+        translation = json.loads(json.dumps(SAMPLE_TRANSLATION))
+        item = repair_mod.RejectedItem(
+            target_path="classes.AHU.properties.status",
+            current_shape={"type": "text", "allowed": ["on", "off"]},
+            rejection_rationale="r",
+        )
+        repairs = [
+            {
+                "target_path": "classes.AHU.properties.status",
+                "action": "replace",
+                "new_content": {"type": "text", "allowed": ["on", "off", "fault"]},
+                "source_evidence": "e",
+                "confidence": "medium",
+                "rationale": "r",
+            }
+        ]
+        repair_mod.apply_repairs(domain, translation, repairs, [item])
+
+        self.assertEqual(domain["classes"]["AHU"]["properties"]["status"]["allowed"], ["on", "off", "fault"])
+        self.assertEqual(len(translation["mappings"]), 4)
+
+    def test_in_place_replace_with_rename_moves_the_property_key(self):
+        domain = json.loads(json.dumps(SAMPLE_DOMAIN))
+        translation = json.loads(json.dumps(SAMPLE_TRANSLATION))
+        item = repair_mod.RejectedItem(
+            target_path="classes.AHU.properties.status",
+            current_shape={"type": "text", "allowed": ["on", "off"]},
+            rejection_rationale="r",
+        )
+        repairs = [
+            {
+                "target_path": "classes.AHU.properties.status",
+                "action": "replace",
+                "new_target_path": "classes.AHU.properties.operatingState",
+                "new_content": {"type": "text", "allowed": ["on", "off"]},
+                "source_evidence": "e",
+                "confidence": "medium",
+                "rationale": "renamed to a name the evidence actually supports",
+            }
+        ]
+        summary = repair_mod.apply_repairs(domain, translation, repairs, [item])
+
+        self.assertNotIn("status", domain["classes"]["AHU"]["properties"])
+        self.assertIn("operatingState", domain["classes"]["AHU"]["properties"])
+        mapping = next(m for m in translation["mappings"] if m["target_path"] == "classes.AHU.properties.operatingState")
+        self.assertEqual(mapping["source_evidence"], "e")
+        self.assertFalse(any(m["target_path"] == "classes.AHU.properties.status" for m in translation["mappings"]))
+        self.assertEqual(summary["replace"][0]["new_target_path"], "classes.AHU.properties.operatingState")
+
+    def test_in_place_drop_removes_the_element_and_its_mapping(self):
+        domain = json.loads(json.dumps(SAMPLE_DOMAIN))
+        translation = json.loads(json.dumps(SAMPLE_TRANSLATION))
+        item = repair_mod.RejectedItem(target_path="classes.AHU.properties.status", current_shape={}, rejection_rationale="r")
+        repairs = [{"target_path": "classes.AHU.properties.status", "action": "drop", "rationale": "no honest grounding"}]
+        repair_mod.apply_repairs(domain, translation, repairs, [item])
+
+        self.assertNotIn("status", domain["classes"]["AHU"]["properties"])
+        self.assertFalse(any(m["target_path"] == "classes.AHU.properties.status" for m in translation["mappings"]))
+
+    def test_in_place_drop_of_a_relationship_reindexes_later_ones(self):
+        # SAMPLE_DOMAIN's relationships: [0]=feeds AHU->AirPlenum,
+        # [1]=serves AHU->Zone, [2]=hasPart AHU->Chiller. Dropping [0] must
+        # shift both surviving relationships' mappings down by one, or
+        # they'd silently point at the wrong list entries afterward.
+        domain = json.loads(json.dumps(SAMPLE_DOMAIN))
+        translation = json.loads(json.dumps(SAMPLE_TRANSLATION))
+        item = repair_mod.RejectedItem(
+            target_path="relationships[0]",
+            current_shape={"name": "feeds", "from": "AHU", "to": "AirPlenum", "meaning": "x", "aliases": []},
+            rejection_rationale="redundant with a taxonomy-only relationship elsewhere",
+        )
+        repairs = [{"target_path": "relationships[0]", "action": "drop", "rationale": "r"}]
+        repair_mod.apply_repairs(domain, translation, repairs, [item])
+
+        self.assertEqual(len(domain["relationships"]), 2)
+        self.assertEqual(domain["relationships"][0]["name"], "serves")
+        self.assertEqual(domain["relationships"][1]["name"], "hasPart")
+        paths = sorted(m["target_path"] for m in translation["mappings"] if m["target_path"].startswith("relationships["))
+        self.assertEqual(paths, ["relationships[0]", "relationships[1]"])
+        # the surviving mappings' own evidence must have moved with them, not been overwritten
+        by_path = {m["target_path"]: m for m in translation["mappings"]}
+        self.assertEqual(by_path["relationships[0]"]["source_evidence"], "e1")  # was relationships[1]
+        self.assertEqual(by_path["relationships[1]"]["source_evidence"], "e2")  # was relationships[2]
 
 
 class RunRepairDryRunTests(unittest.TestCase):
@@ -285,7 +402,7 @@ class RunRepairLiveMockedTests(unittest.TestCase):
                 {
                     "target_path": "relationships[dropped-1]",
                     "action": "replace",
-                    "new_relationship": {"name": "hasPart", "from": "CondensingUnit", "to": "Compressor", "meaning": "x"},
+                    "new_content": {"name": "hasPart", "from": "CondensingUnit", "to": "Compressor", "meaning": "x"},
                     "source_evidence": "e",
                     "confidence": "high",
                     "rationale": "r",
@@ -318,11 +435,10 @@ class RunRepairLiveMockedTests(unittest.TestCase):
             self.assertEqual(summary["drop_count"], 1)
             self.assertTrue(summary["structural_validation_ok"])
 
-            repaired_domain = json.loads((out_dir / "repaired.domain.yaml").read_text(encoding="utf-8")) if False else None
             import yaml as _yaml
 
             repaired_domain = _yaml.safe_load((out_dir / "repaired.domain.yaml").read_text(encoding="utf-8"))
-            self.assertEqual(len(repaired_domain["relationships"]), 2)
+            self.assertEqual(len(repaired_domain["relationships"]), 4)  # 3 original + 1 appended (retroactive fallback)
 
     def test_invalid_response_is_rejected_and_nothing_is_applied(self):
         response = json.dumps({
