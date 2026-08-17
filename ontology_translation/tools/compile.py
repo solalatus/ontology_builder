@@ -110,6 +110,64 @@ def build_user_prompt(source_ir: dict, manifest_id: str, scope_note: str | None,
     return "\n\n".join(p for p in parts if p)
 
 
+# Maps the non-string YAML scalars the model actually produces for a
+# binary `allowed` entry onto the string convention already established by
+# hand for this exact defect (see the 463937d fix: false/true -> "off"/"on").
+# Anything else non-string (int, float, null, ...) has no established
+# convention, so it's stringified rather than guessed at semantically.
+_BOOL_TO_ALLOWED_STRING = {True: "on", False: "off"}
+
+
+def normalize_allowed_lists(domain_data: dict) -> tuple[dict, list[str]]:
+    """Coerces non-string `allowed` entries (bare YAML booleans, mainly) to
+    strings in place, per `agent_ontology_spec.md`'s `allowed: string[] |
+    null` typing.
+
+    Added after a real, clean 3-run compile (issue #106 rerun) reproduced
+    the exact `[False, True]`-in-`allowed` defect on all 3 independent runs
+    despite an explicit prompt instruction against it -- proof that prompt
+    text alone doesn't reliably prevent this class of defect. This is the
+    deterministic code-level safety net: every compile run is normalized
+    before being written to disk and structurally validated, for any
+    domain, not just Brick HVAC.
+    """
+    changes: list[str] = []
+    classes = domain_data.get("classes")
+    if not isinstance(classes, dict):
+        return domain_data, changes
+
+    for class_name, class_body in classes.items():
+        if not isinstance(class_body, dict):
+            continue
+        properties = class_body.get("properties")
+        if not isinstance(properties, dict):
+            continue
+        for prop_name, prop_body in properties.items():
+            if not isinstance(prop_body, dict):
+                continue
+            allowed = prop_body.get("allowed")
+            if not isinstance(allowed, list):
+                continue
+            fixed = []
+            changed = False
+            for value in allowed:
+                if isinstance(value, str):
+                    fixed.append(value)
+                    continue
+                changed = True
+                if isinstance(value, bool):
+                    new_value = _BOOL_TO_ALLOWED_STRING[value]
+                else:
+                    new_value = str(value)
+                fixed.append(new_value)
+            if changed:
+                prop_body["allowed"] = fixed
+                changes.append(
+                    f"classes.{class_name}.properties.{prop_name}.allowed: {allowed!r} -> {fixed!r}"
+                )
+    return domain_data, changes
+
+
 def _extract_json_object(text: str) -> dict:
     """The prompt asks for exactly one JSON object with no fences, but
     models occasionally wrap it in ```json anyway -- strip that defensively
@@ -237,10 +295,18 @@ def run_compile(
 
             domain_yaml_path = out_dir / f"{run_label}.domain.yaml"
             translation_path = out_dir / f"{run_label}.translation.json"
-            domain_yaml_path.write_text(result.domain_yaml, encoding="utf-8")
+
+            domain_data, allowed_fixes = normalize_allowed_lists(yaml.safe_load(result.domain_yaml) or {})
+            if allowed_fixes:
+                logger.event("run_normalized", run=run_label, fix_count=len(allowed_fixes), fixes=allowed_fixes)
+                normalized_yaml = yaml.safe_dump(domain_data, sort_keys=False, allow_unicode=True)
+            else:
+                normalized_yaml = result.domain_yaml
+
+            domain_yaml_path.write_text(normalized_yaml, encoding="utf-8")
             translation_path.write_text(json.dumps(result.translation, indent=2), encoding="utf-8")
 
-            report = validate_domain(yaml.safe_load(result.domain_yaml) or {})
+            report = validate_domain(domain_data)
             logger.event(
                 "run_validated",
                 run=run_label,
