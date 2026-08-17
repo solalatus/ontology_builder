@@ -214,6 +214,15 @@ def validate_repairs(repairs: list[dict], rejected_items: list[RejectedItem], do
         for key in ("source_evidence", "confidence", "rationale"):
             if not r.get(key):
                 errors.append(f"{target_path}: {action} missing '{key}'")
+        # source_iris is required as a field (an empty list is a legitimate
+        # pure-standard-practice claim) but must actually be present and a
+        # list -- found for real: a reground call wrote a stronger, accurate
+        # evidence quote naming a specific class by name in the prose, but
+        # with no source_iris field at all the mapping stayed exactly as
+        # unverifiable as before the repair. Prose a human has to trust
+        # isn't the same as an IRI a machine can check against the source.
+        if not isinstance(r.get("source_iris"), list):
+            errors.append(f"{target_path}: {action} missing 'source_iris' (must be a list, [] if genuinely none)")
         if action == "replace":
             new_content = r.get("new_content")
             if not isinstance(new_content, dict):
@@ -333,7 +342,7 @@ def apply_repairs(domain_data: dict, translation_data: dict, repairs: list[dict]
         new_content = dict(item.current_shape) if action == "reground" else dict(r["new_content"])
         if _target_kind(target_path) == "relationship":
             new_content.setdefault("aliases", [])
-        provenance = {"source_evidence": r["source_evidence"], "confidence": r["confidence"], "rationale": r["rationale"]}
+        provenance = {"source_evidence": r["source_evidence"], "confidence": r["confidence"], "rationale": r["rationale"], "source_iris": r["source_iris"]}
 
         if resolved is not None:
             container, key = resolved
@@ -359,7 +368,7 @@ def apply_repairs(domain_data: dict, translation_data: dict, repairs: list[dict]
                 mapping["target_path"] = new_target_path
                 mapping.update(provenance)
             else:
-                mappings.append({"target_path": new_target_path, "source_iris": [], **provenance})
+                mappings.append({"target_path": new_target_path, **provenance})
             summary[action].append({"original_target_path": target_path, "new_target_path": new_target_path, "content": new_content})
             continue
 
@@ -376,7 +385,7 @@ def apply_repairs(domain_data: dict, translation_data: dict, repairs: list[dict]
         new_index = len(relationships)
         relationships.append(new_content)
         new_path = f"relationships[{new_index}]"
-        mappings.append({"target_path": new_path, "source_iris": [], **provenance})
+        mappings.append({"target_path": new_path, **provenance})
         summary[action].append({"original_target_path": target_path, "new_target_path": new_path, "content": new_content})
 
     return summary

@@ -64,11 +64,22 @@ definitions for the classes involved. For each one, decide exactly one of:
 Every `reground`/`replace` decision needs the same provenance rigor as the
 original compile: `source_evidence` (a short quoted snippet, or an explicit
 standard-practice statement tied to the specific classes involved),
-`confidence` (`high`/`medium`/`low`), `rationale` (one sentence). Do not
-invent evidence that is not either a direct quote from what you were given
-or a standard-practice claim tied to the specific named classes in scope —
-the same bar as the original compiler prompt, not a lower one just because
-this is a repair.
+`confidence` (`high`/`medium`/`low`), `rationale` (one sentence), and
+`source_iris` — the actual `iri` value(s) from the source class definitions
+you were given in `source_context` that your `source_evidence` is quoting
+or drawing on. Include every IRI your evidence text actually cites or
+paraphrases; use an empty list `[]` only when the evidence is genuinely a
+pure standard-practice claim with no specific source IRI behind it, not as
+a default you reach for without checking. Do not invent evidence that is
+not either a direct quote from what you were given or a standard-practice
+claim tied to the specific named classes in scope — the same bar as the
+original compiler prompt, not a lower one just because this is a repair.
+Found for real: a repair reground call wrote a stronger, accurate evidence
+quote naming a specific class and even a specific relation by name in the
+prose, but the schema never asked for `source_iris` as structured data, so
+the mapping stayed just as unverifiable as before the repair — evidence a
+human has to trust by reading prose isn't the same as evidence a machine
+can check against the source.
 
 ## Output contract
 
@@ -81,6 +92,7 @@ Respond with **exactly one JSON object**, no prose, no markdown fences:
       "target_path": "relationships[40]",
       "action": "reground",
       "source_evidence": "...",
+      "source_iris": ["https://example.org/onto#SomeClass"],
       "confidence": "high",
       "rationale": "..."
     },
@@ -95,6 +107,7 @@ Respond with **exactly one JSON object**, no prose, no markdown fences:
         "aliases": []
       },
       "source_evidence": "...",
+      "source_iris": ["https://example.org/onto#CorrectWholeClass"],
       "confidence": "high",
       "rationale": "..."
     },
@@ -107,6 +120,7 @@ Respond with **exactly one JSON object**, no prose, no markdown fences:
         "allowed": ["stateA", "stateB"]
       },
       "source_evidence": "...",
+      "source_iris": [],
       "confidence": "medium",
       "rationale": "..."
     },

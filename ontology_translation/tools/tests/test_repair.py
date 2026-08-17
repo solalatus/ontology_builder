@@ -111,6 +111,7 @@ class ValidateRepairsTests(unittest.TestCase):
                 "action": "replace",
                 "new_content": {"name": "hasPart", "from": "CondensingUnit", "to": "Compressor", "meaning": "x"},
                 "source_evidence": "e",
+                "source_iris": ["https://brickschema.org/schema/Brick#Condensing_Unit"],
                 "confidence": "high",
                 "rationale": "r",
             },
@@ -121,11 +122,16 @@ class ValidateRepairsTests(unittest.TestCase):
 
     def test_valid_reground_passes(self):
         repairs = [
-            {"target_path": "relationships[dropped-1]", "action": "reground", "source_evidence": "e", "confidence": "high", "rationale": "r"},
+            {"target_path": "relationships[dropped-1]", "action": "reground", "source_evidence": "e", "source_iris": [], "confidence": "high", "rationale": "r"},
             {"target_path": "relationships[dropped-2]", "action": "drop", "rationale": "r"},
         ]
         errors = repair_mod.validate_repairs(repairs, REJECTED, self.classes)
         self.assertEqual(errors, [])
+
+    def test_reground_missing_source_iris_flagged(self):
+        repairs = [{"target_path": "relationships[dropped-1]", "action": "reground", "source_evidence": "e", "confidence": "high", "rationale": "r"}]
+        errors = repair_mod.validate_repairs(repairs, REJECTED, self.classes)
+        self.assertTrue(any("source_iris" in e for e in errors))
 
     def test_unknown_target_path_flagged(self):
         repairs = [{"target_path": "relationships[999]", "action": "drop", "rationale": "r"}]
@@ -155,6 +161,7 @@ class ValidateRepairsTests(unittest.TestCase):
                 "action": "replace",
                 "new_content": {"name": "hasPart", "from": "GhostClass", "to": "Compressor", "meaning": "x"},
                 "source_evidence": "e",
+                "source_iris": [],
                 "confidence": "high",
                 "rationale": "r",
             }
@@ -177,7 +184,7 @@ class ApplyRepairsTests(unittest.TestCase):
         domain = json.loads(json.dumps(SAMPLE_DOMAIN))
         translation = json.loads(json.dumps(SAMPLE_TRANSLATION))
         repairs = [
-            {"target_path": "relationships[dropped-1]", "action": "reground", "source_evidence": "e2", "confidence": "high", "rationale": "r2"},
+            {"target_path": "relationships[dropped-1]", "action": "reground", "source_evidence": "e2", "source_iris": ["https://brickschema.org/schema/Brick#CondensingUnit"], "confidence": "high", "rationale": "r2"},
         ]
         summary = repair_mod.apply_repairs(domain, translation, repairs, [REJECTED[0]])
 
@@ -198,6 +205,7 @@ class ApplyRepairsTests(unittest.TestCase):
                 "action": "replace",
                 "new_content": new_content,
                 "source_evidence": "e",
+                "source_iris": [],
                 "confidence": "high",
                 "rationale": "r",
             }
@@ -228,7 +236,7 @@ class ApplyRepairsTests(unittest.TestCase):
         domain = json.loads(json.dumps(SAMPLE_DOMAIN))
         translation = json.loads(json.dumps(SAMPLE_TRANSLATION))
         repairs = [
-            {"target_path": "relationships[dropped-1]", "action": "reground", "source_evidence": "e1", "confidence": "high", "rationale": "r1"},
+            {"target_path": "relationships[dropped-1]", "action": "reground", "source_evidence": "e1", "source_iris": [], "confidence": "high", "rationale": "r1"},
             {"target_path": "relationships[dropped-2]", "action": "drop", "rationale": "already covered by an existing feeds relationship"},
         ]
         repair_mod.apply_repairs(domain, translation, repairs, REJECTED)
@@ -248,7 +256,7 @@ class ApplyRepairsTests(unittest.TestCase):
             current_shape={"type": "text", "allowed": ["on", "off"]},
             rejection_rationale="Evidence is a generic template reused across many classes.",
         )
-        repairs = [{"target_path": "classes.AHU.properties.status", "action": "reground", "source_evidence": "e3", "confidence": "high", "rationale": "r3"}]
+        repairs = [{"target_path": "classes.AHU.properties.status", "action": "reground", "source_evidence": "e3", "source_iris": [], "confidence": "high", "rationale": "r3"}]
         summary = repair_mod.apply_repairs(domain, translation, repairs, [item])
 
         self.assertEqual(domain["classes"]["AHU"]["properties"]["status"], {"type": "text", "allowed": ["on", "off"]})
@@ -256,6 +264,27 @@ class ApplyRepairsTests(unittest.TestCase):
         mapping = next(m for m in translation["mappings"] if m["target_path"] == "classes.AHU.properties.status")
         self.assertEqual(mapping["source_evidence"], "e3")
         self.assertEqual(summary["reground"][0]["new_target_path"], "classes.AHU.properties.status")
+
+    def test_reground_overwrites_source_iris_not_just_prose(self):
+        # Regression: a real reground call once wrote a stronger, accurate
+        # evidence quote naming a specific class and relation by name in
+        # the prose, but the mapping's source_iris stayed empty because
+        # apply_repairs never wrote it -- the schema never asked for it
+        # separately from source_evidence. A mapping that's only
+        # human-readable-plausible, not machine-checkable, is exactly the
+        # gap this fixes.
+        domain = json.loads(json.dumps(SAMPLE_DOMAIN))
+        translation = json.loads(json.dumps(SAMPLE_TRANSLATION))
+        item = repair_mod.RejectedItem(
+            target_path="classes.AHU.properties.status", current_shape={"type": "text", "allowed": ["on", "off"]}, rejection_rationale="r",
+        )
+        repairs = [{
+            "target_path": "classes.AHU.properties.status", "action": "reground",
+            "source_evidence": "e4", "source_iris": ["https://brickschema.org/schema/Brick#AHU"], "confidence": "high", "rationale": "r4",
+        }]
+        repair_mod.apply_repairs(domain, translation, repairs, [item])
+        mapping = next(m for m in translation["mappings"] if m["target_path"] == "classes.AHU.properties.status")
+        self.assertEqual(mapping["source_iris"], ["https://brickschema.org/schema/Brick#AHU"])
 
     def test_in_place_replace_overwrites_content_at_the_same_path(self):
         domain = json.loads(json.dumps(SAMPLE_DOMAIN))
@@ -271,6 +300,7 @@ class ApplyRepairsTests(unittest.TestCase):
                 "action": "replace",
                 "new_content": {"type": "text", "allowed": ["on", "off", "fault"]},
                 "source_evidence": "e",
+                "source_iris": [],
                 "confidence": "medium",
                 "rationale": "r",
             }
@@ -295,6 +325,7 @@ class ApplyRepairsTests(unittest.TestCase):
                 "new_target_path": "classes.AHU.properties.operatingState",
                 "new_content": {"type": "text", "allowed": ["on", "off"]},
                 "source_evidence": "e",
+                "source_iris": [],
                 "confidence": "medium",
                 "rationale": "renamed to a name the evidence actually supports",
             }
@@ -336,6 +367,7 @@ class ApplyRepairsTests(unittest.TestCase):
                 "new_target_path": "rules.economizerReducesMechanicalConditioning",
                 "new_content": {"conditions": ["c2"]},
                 "source_evidence": "e2",
+                "source_iris": [],
                 "confidence": "high",
                 "rationale": "renamed to match the evidence",
             }
@@ -368,6 +400,7 @@ class ApplyRepairsTests(unittest.TestCase):
                 "new_target_path": "classes.AirHandlingUnit",
                 "new_content": {"meaning": "x"},
                 "source_evidence": "e2",
+                "source_iris": [],
                 "confidence": "high",
                 "rationale": "renamed to the full source label",
             }
@@ -400,6 +433,7 @@ class ApplyRepairsTests(unittest.TestCase):
                 "new_target_path": "classes.AHU.properties.operatingState",
                 "new_content": {"type": "text", "allowed": ["on", "off"]},
                 "source_evidence": "e",
+                "source_iris": [],
                 "confidence": "medium",
                 "rationale": "renamed",
             }
@@ -504,6 +538,7 @@ class RunRepairLiveMockedTests(unittest.TestCase):
                     "action": "replace",
                     "new_content": {"name": "hasPart", "from": "CondensingUnit", "to": "Compressor", "meaning": "x"},
                     "source_evidence": "e",
+                    "source_iris": [],
                     "confidence": "high",
                     "rationale": "r",
                 },
