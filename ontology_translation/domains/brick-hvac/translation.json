@@ -77,11 +77,12 @@
     {
       "target_path": "classes.AirTemperatureSensor.properties.value",
       "source_iris": [
-        "https://w3id.org/rec#value"
+        "https://w3id.org/rec#value",
+        "https://brickschema.org/schema/Brick#Air_Temperature_Sensor"
       ],
-      "source_evidence": "Datatype property label \"value\" and class definition \"Measures the temperature of air\"",
+      "source_evidence": "\"Air Temperature Sensor\" \u2014 \"Measures the temperature of air\" supports a numeric temperature value property in degrees Celsius.",
       "confidence": "high",
-      "rationale": "An air temperature sensor obviously reports a numeric measured value."
+      "rationale": "Because the class is explicitly defined as measuring air temperature, a numeric value property with temperature units is directly grounded on this sensor class."
     },
     {
       "target_path": "classes.CO2Sensor",
@@ -95,11 +96,12 @@
     {
       "target_path": "classes.CO2Sensor.properties.value",
       "source_iris": [
-        "https://w3id.org/rec#value"
+        "https://w3id.org/rec#value",
+        "https://brickschema.org/schema/Brick#CO2_Sensor"
       ],
-      "source_evidence": "Datatype property label \"value\" and CO2 sensor definition describing measurement of CO2 in air.",
-      "confidence": "high",
-      "rationale": "A CO2 sensor naturally reports a numeric concentration or related value."
+      "source_evidence": "\"CO2 Sensor\" \u2014 \"Measures properties of CO2 in air\" supports a numeric concentration value property, commonly represented in ppm for building CO2 sensing.",
+      "confidence": "medium",
+      "rationale": "Because the class is defined as measuring CO2 in air, a numeric sensor value is grounded, and ppm is the standard-practice unit for indoor CO2 concentration."
     },
     {
       "target_path": "classes.OutsideAirCO2Sensor",
@@ -185,11 +187,12 @@
     {
       "target_path": "classes.AirTemperatureSetpoint.properties.value",
       "source_iris": [
-        "https://w3id.org/rec#value"
+        "https://w3id.org/rec#value",
+        "https://brickschema.org/schema/Brick#Air_Temperature_Setpoint"
       ],
-      "source_evidence": "Datatype property label \"value\" and class definition \"Sets temperature of air\"",
+      "source_evidence": "\"Air Temperature Setpoint\" \u2014 \"Sets temperature of air\" supports a numeric temperature setpoint value in degrees Celsius.",
       "confidence": "high",
-      "rationale": "An air temperature setpoint directly implies a numeric target value."
+      "rationale": "Because the class explicitly sets air temperature, a numeric value property with temperature units is directly supported."
     },
     {
       "target_path": "classes.CoolingTemperatureSetpoint",
@@ -203,11 +206,12 @@
     {
       "target_path": "classes.CoolingTemperatureSetpoint.properties.value",
       "source_iris": [
-        "https://w3id.org/rec#value"
+        "https://w3id.org/rec#value",
+        "https://brickschema.org/schema/Brick#Cooling_Temperature_Setpoint"
       ],
-      "source_evidence": "Datatype property label \"value\" and class definition about setting temperature for cooling.",
+      "source_evidence": "\"Cooling Temperature Setpoint\" \u2014 \"Sets temperature for cooling\" supports a numeric cooling temperature setpoint value in degrees Celsius.",
       "confidence": "high",
-      "rationale": "A cooling temperature setpoint directly implies a numeric target value."
+      "rationale": "Because the class explicitly defines a temperature setpoint for cooling, a numeric temperature value property is directly grounded."
     },
     {
       "target_path": "classes.HeatingTemperatureSetpoint",
@@ -221,11 +225,12 @@
     {
       "target_path": "classes.HeatingTemperatureSetpoint.properties.value",
       "source_iris": [
-        "https://w3id.org/rec#value"
+        "https://w3id.org/rec#value",
+        "https://brickschema.org/schema/Brick#Heating_Temperature_Setpoint"
       ],
-      "source_evidence": "Datatype property label \"value\" and class definition about setting temperature for heating.",
+      "source_evidence": "\"Heating Temperature Setpoint\" \u2014 \"Sets temperature for heating\" supports a numeric heating temperature setpoint value in degrees Celsius.",
       "confidence": "high",
-      "rationale": "A heating temperature setpoint directly implies a numeric target value."
+      "rationale": "Because the class explicitly defines a temperature setpoint for heating, a numeric temperature value property is directly grounded."
     },
     {
       "target_path": "classes.TemperatureDeadbandSetpoint",
@@ -285,11 +290,12 @@
     {
       "target_path": "classes.Thermostat.properties.status",
       "source_iris": [
-        "https://w3id.org/rec#status"
+        "https://w3id.org/rec#status",
+        "https://brickschema.org/schema/Brick#Thermostat"
       ],
-      "source_evidence": "Datatype property label \"status\" and standard practice for thermostat device health/status monitoring.",
+      "source_evidence": "\"Thermostat\" \u2014 \"An automatic control device used to maintain temperature at a fixed or adjustable setpoint.\" As an active control device, recording operational status such as normal, fault, or offline is standard practice for thermostatic controls.",
       "confidence": "medium",
-      "rationale": "Thermostats are operational devices for which status is decision-relevant."
+      "rationale": "Because the class is an automatic control device, an operational status property is a defensible standard-practice attribute for monitoring its state."
     },
     {
       "target_path": "classes.TerminalUnit",
@@ -303,11 +309,12 @@
     {
       "target_path": "classes.TerminalUnit.properties.status",
       "source_iris": [
-        "https://w3id.org/rec#status"
+        "https://w3id.org/rec#status",
+        "https://brickschema.org/schema/Brick#Terminal_Unit"
       ],
-      "source_evidence": "Datatype property label \"status\" and standard practice for monitoring terminal unit operating state.",
+      "source_evidence": "\"Terminal Unit\" \u2014 \"A device that regulates the volumetric flow rate and/or the temperature of the controlled medium.\" As an HVAC regulating device, recording whether it is off, on, or in alarm is standard practice.",
       "confidence": "medium",
-      "rationale": "A controllable HVAC device supports an operational status property."
+      "rationale": "Because the class is an active regulating device, an operational status property is a standard-practice way to represent whether it is running or in alarm."
     },
     {
       "target_path": "classes.Damper",
@@ -339,11 +346,12 @@
     {
       "target_path": "classes.Filter.properties.status",
       "source_iris": [
-        "https://w3id.org/rec#status"
+        "https://w3id.org/rec#status",
+        "https://brickschema.org/schema/Brick#Filter"
       ],
-      "source_evidence": "Datatype property label \"status\" and standard HVAC maintenance practice for filter condition.",
+      "source_evidence": "\"Filter\" \u2014 \"Device to remove gases from a mixture of gases or to remove solid material from a fluid.\" For filtration equipment, lifecycle/condition states such as clean, dirty, or replacement_due are standard-practice status values.",
       "confidence": "medium",
-      "rationale": "Filter condition is operationally relevant for maintenance and air quality decisions."
+      "rationale": "Because the class is filtration equipment whose condition directly affects operation, a status property capturing cleanliness or replacement condition is standard practice."
     },
     {
       "target_path": "classes.Fan",
@@ -375,11 +383,12 @@
     {
       "target_path": "classes.Economizer.properties.status",
       "source_iris": [
-        "https://w3id.org/rec#status"
+        "https://w3id.org/rec#status",
+        "https://brickschema.org/schema/Brick#Economizer"
       ],
-      "source_evidence": "Datatype property label \"status\" and economizer definition about initiating control actions.",
+      "source_evidence": "\"Economizer\" \u2014 \"Device that, on proper variable sensing, initiates control signals or actions to conserve energy. A control system that reduces the mechanical heating and cooling requirement.\" As a control device/system, disabled, enabled, and active are standard operational states.",
       "confidence": "medium",
-      "rationale": "An economizer's control function supports an operational status property."
+      "rationale": "Because the class is defined as an energy-conserving control system, representing whether it is enabled or actively operating is a standard operational status pattern."
     },
     {
       "target_path": "classes.CoolingValve",
@@ -429,11 +438,12 @@
     {
       "target_path": "classes.Boiler.properties.status",
       "source_iris": [
-        "https://w3id.org/rec#status"
+        "https://w3id.org/rec#status",
+        "https://brickschema.org/schema/Brick#Boiler"
       ],
-      "source_evidence": "Datatype property label \"status\" and standard HVAC practice for boiler operating state.",
+      "source_evidence": "\"Boiler\" \u2014 \"A closed, pressure vessel that uses fuel or electricity for heating water or other fluids...\" For major plant equipment such as a boiler, off, on, and alarm are standard operational status values.",
       "confidence": "medium",
-      "rationale": "Boilers are operational assets for which status is routinely needed."
+      "rationale": "Because the class is primary HVAC plant equipment, an operational status property indicating running or alarm state is standard practice."
     },
     {
       "target_path": "classes.Chiller",
@@ -447,20 +457,22 @@
     {
       "target_path": "classes.Chiller.properties.status",
       "source_iris": [
-        "https://w3id.org/rec#status"
+        "https://w3id.org/rec#status",
+        "https://brickschema.org/schema/Brick#Chiller"
       ],
-      "source_evidence": "Datatype property label \"status\" and standard HVAC practice for chiller operating state.",
+      "source_evidence": "\"Chiller\" \u2014 \"Refrigerating machine used to transfer heat between fluids.\" For major cooling plant equipment such as a chiller, off, on, and alarm are standard operational status values.",
       "confidence": "medium",
-      "rationale": "Chillers are operational assets for which status is routinely needed."
+      "rationale": "Because the class is primary cooling plant equipment, an operational status property indicating running or alarm state is standard practice."
     },
     {
       "target_path": "classes.Chiller.properties.coolingCapacity",
       "source_iris": [
-        "https://brickschema.org/schema/Brick#coolingCapacity"
+        "https://brickschema.org/schema/Brick#coolingCapacity",
+        "https://brickschema.org/schema/Brick#Chiller"
       ],
-      "source_evidence": "Object property definition: \"Measurement of a chiller ability to remove heat\"",
-      "confidence": "high",
-      "rationale": "The source property directly supports a cooling capacity attribute on chillers."
+      "source_evidence": "\"Chiller\" \u2014 \"Refrigerating machine used to transfer heat between fluids.\" A chiller's cooling capacity is a standard defining performance attribute for this equipment type.",
+      "confidence": "medium",
+      "rationale": "Because the class is cooling equipment whose function is heat transfer for cooling, cooling capacity is a standard-practice attribute for characterizing the equipment."
     },
     {
       "target_path": "classes.PackagedHeatPump",
@@ -492,11 +504,12 @@
     {
       "target_path": "classes.Building.properties.yearBuilt",
       "source_iris": [
-        "https://brickschema.org/schema/Brick#yearBuilt"
+        "https://brickschema.org/schema/Brick#yearBuilt",
+        "https://brickschema.org/schema/Brick#Building"
       ],
-      "source_evidence": "Object property definition: \"Four digit year that a building was first built.\"",
-      "confidence": "high",
-      "rationale": "The source property directly supports a building year-built attribute."
+      "source_evidence": "\"Building\" \u2014 \"An independent unit of the built environment with a characteristic spatial structure...\" Year built is a standard descriptive attribute for a building asset.",
+      "confidence": "medium",
+      "rationale": "Because the class is a building asset in the built environment, yearBuilt is a standard metadata property used to describe it."
     },
     {
       "target_path": "classes.Floor",
@@ -511,11 +524,12 @@
     {
       "target_path": "classes.Floor.properties.levelNumber",
       "source_iris": [
-        "https://w3id.org/rec#levelNumber"
+        "https://w3id.org/rec#levelNumber",
+        "https://brickschema.org/schema/Brick#Floor"
       ],
-      "source_evidence": "Datatype property label \"levelNumber\"",
+      "source_evidence": "\"Floor\" \u2014 \"A level, typically representing a horizontal aggregation of spaces that are vertically bound.\" A floor's level number is a standard descriptive attribute for identifying its vertical position in a building.",
       "confidence": "high",
-      "rationale": "The REC datatype directly supports numbering a floor level."
+      "rationale": "Because the class is explicitly a building level, a numeric levelNumber directly captures the vertical level it represents."
     },
     {
       "target_path": "classes.Space",
@@ -651,11 +665,13 @@
     {
       "target_path": "relationships[10]",
       "source_iris": [
-        "https://brickschema.org/schema/Brick#hasPoint"
+        "https://brickschema.org/schema/Brick#hasPoint",
+        "https://brickschema.org/schema/Brick#AHU",
+        "https://brickschema.org/schema/Brick#Heating_Temperature_Setpoint"
       ],
-      "source_evidence": "Brick hasPoint definition; standard HVAC control practice associates heating setpoints with AHU control.",
-      "confidence": "high",
-      "rationale": "The AHU-to-HeatingTemperatureSetpoint pairing is a routine control relationship."
+      "source_evidence": "\"AHU\" (altLabel \"Air Handling Unit\") is an assembly for air circulation, filtration, heating, cooling, heat recovery, humidifying, dehumidifying, and mixing of air, and \"Heating Temperature Setpoint\" \u2014 \"Sets temperature for heating\"; a heating temperature setpoint is therefore a plausible control point on an air handling unit.",
+      "confidence": "medium",
+      "rationale": "Because the air handling unit definition includes heating functions and the target class is explicitly a heating temperature setpoint, the hasPoint relationship is a defensible control-point linkage."
     },
     {
       "target_path": "relationships[11]",
@@ -669,20 +685,22 @@
     {
       "target_path": "relationships[12]",
       "source_iris": [
-        "https://brickschema.org/schema/Brick#hasPoint"
+        "https://brickschema.org/schema/Brick#hasPoint",
+        "https://brickschema.org/schema/Brick#Thermostat"
       ],
-      "source_evidence": "Brick hasPoint definition; thermostat definition says it maintains temperature at a setpoint, implying sensor input.",
-      "confidence": "high",
-      "rationale": "A thermostat necessarily uses a temperature sensor input as part of its control context."
+      "source_evidence": "\"Thermostat\" \u2014 \"An automatic control device used to maintain temperature at a fixed or adjustable setpoint.\" Maintaining temperature in practice requires a temperature sensing input, so a TemperatureSensor is a standard control point for a thermostat.",
+      "confidence": "medium",
+      "rationale": "Because the thermostat is defined as an automatic temperature control device, associating it with a temperature sensor as a point used for control is standard practice."
     },
     {
       "target_path": "relationships[13]",
       "source_iris": [
-        "https://brickschema.org/schema/Brick#hasPoint"
+        "https://brickschema.org/schema/Brick#hasPoint",
+        "https://brickschema.org/schema/Brick#Thermostat"
       ],
-      "source_evidence": "Brick hasPoint definition; thermostat definition explicitly mentions maintaining temperature at a fixed or adjustable setpoint.",
+      "source_evidence": "\"Thermostat\" \u2014 \"An automatic control device used to maintain temperature at a fixed or adjustable setpoint.\" A TemperatureSetpoint is therefore a standard point associated with thermostat control.",
       "confidence": "high",
-      "rationale": "A thermostat directly relates to a temperature setpoint point."
+      "rationale": "Because the thermostat definition explicitly mentions maintaining temperature at a fixed or adjustable setpoint, linking it to a temperature setpoint as a point is directly supported."
     },
     {
       "target_path": "relationships[14]",
@@ -754,11 +772,13 @@
     {
       "target_path": "relationships[21]",
       "source_iris": [
-        "https://brickschema.org/schema/Brick#hasLocation"
+        "https://brickschema.org/schema/Brick#hasLocation",
+        "https://brickschema.org/schema/Brick#Outside_Air_CO2_Sensor",
+        "https://brickschema.org/schema/Brick#Building"
       ],
-      "source_evidence": "Brick hasLocation definition; outside air CO2 sensors are associated with a building installation context in standard building systems.",
+      "source_evidence": "\"Outside Air CO2 Sensor\" \u2014 \"Measures the concentration of CO2 in outside air\" and \"Building\" \u2014 \"An independent unit of the built environment...\"; an outside-air CO2 sensor is commonly located in the building context it serves or is installed for.",
       "confidence": "medium",
-      "rationale": "The sensor is physically installed as part of the building's HVAC system, making building-level location a reasonable specific pairing."
+      "rationale": "Because the class is a building-system sensor for outside air measurement, associating it with a building location or installation context is a defensible standard-practice relationship."
     },
     {
       "target_path": "relationships[22]",
@@ -831,20 +851,22 @@
     {
       "target_path": "relationships[29]",
       "source_iris": [
-        "https://brickschema.org/schema/Brick#feeds"
+        "https://brickschema.org/schema/Brick#feeds",
+        "https://brickschema.org/schema/Brick#Packaged_Heat_Pump"
       ],
-      "source_evidence": "Brick feeds definition; packaged heat pump definition says it transfers heat to or from a designated space, commonly serving downstream terminal conditioning paths.",
-      "confidence": "medium",
-      "rationale": "The PackagedHeatPump-to-TerminalUnit upstream relationship is a standard specific pairing in HVAC delivery contexts."
+      "source_evidence": "\"Packaged Heat Pump\" \u2014 \"A self-contained unit designed to transfer heat energy to or from a designated space, capable of offering both heating and cooling functions\"; such equipment can be upstream of downstream distribution or terminal equipment, making a feeds relationship to a Terminal Unit a defensible HVAC topology assertion.",
+      "confidence": "low",
+      "rationale": "Because the packaged heat pump is defined as space-conditioning equipment, modeling it as feeding downstream terminal equipment is plausible though not explicit in the class definition alone."
     },
     {
       "target_path": "relationships[30]",
       "source_iris": [
-        "https://brickschema.org/schema/Brick#Space"
+        "https://brickschema.org/schema/Brick#Space",
+        "https://brickschema.org/schema/Brick#Terminal_Unit"
       ],
-      "source_evidence": "A \"Space\" is a bounded physical extent that \"provides for certain functions,\" and standard HVAC practice assigns terminal units to serve the conditioning needs of spaces.",
-      "confidence": "medium",
-      "rationale": "The space definition supports it as the served environmental area for a terminal unit, and the cited class IRI should be included."
+      "source_evidence": "\"Terminal Unit\" \u2014 \"A device that regulates the volumetric flow rate and/or the temperature of the controlled medium.\" In HVAC practice, terminal units regulate delivery to occupied areas and therefore serve spaces.",
+      "confidence": "high",
+      "rationale": "Because the class is terminal regulating equipment at the point of delivery, serving a space is the standard functional relationship for such units."
     },
     {
       "target_path": "relationships[31]",
