@@ -1123,3 +1123,57 @@ reference and record deltas/decisions here instead.)*
   Full offline test suite: **200/200 passing**.
 
   **#106 still open** — still the user's call.
+
+- 2026-08-17 (continued) — **Third manual spot-check round, escalating to a
+  full comprehensive provenance audit.** 10%-stratified sample (13 of 127,
+  seed 306), 13/13 accepted, but 2 flagged items
+  (`relationships[22]`, `actions.verifyOccupiedZoneConditioning`) were the
+  2nd and 3rd data points in the same pattern round 2's `relationships[31]`
+  had already surfaced. Reviewer, correctly reading this as systemic rather
+  than isolated ("this looks like whack a mole more and more"), directed a
+  full read-through of all 127 mappings, not another sample, with explicit
+  authorization to recompile if needed.
+
+  **Full account: `domains/brick-hvac/provenance-audit.md`.** Deterministic
+  scan (does a mapping's evidence/rationale text name a real source class
+  that isn't in its own `source_iris`?) found **42 of 127 mappings (33%)**
+  with incomplete provenance citations. Root cause found in
+  `compiler-prompt.md` itself: it explicitly told the compiler *"empty
+  list `[]` is valid for a rule/action grounded in standard practice ...
+  say so in `rationale` instead"* — directly licensing exactly the pattern
+  found. Fixed generally (source_iris now required for every named concept,
+  standard-practice groundings included) — this changes every future
+  domain's compile, not just Brick's.
+
+  Fixing the 42 existing mappings needed **two** repair passes, not one: the
+  first (42 items, $0.106) correctly reground 33 but the repair model
+  *dropped* 9 rather than fabricate — a bug in the audit's own input
+  construction (9 reinstate.py-produced equipment classes were given only
+  sibling/precedent class definitions as source context, never their own
+  real class definition), not a content defect. Correctly refusing to
+  ground a class's own property from only its siblings' definitions was the
+  right call, not a nuisance — worth noting as the "don't fabricate"
+  discipline visibly working. Second pass (9 items, corrected context
+  including each item's own real definition, $0.033): all 9 succeeded.
+
+  **All 42 changes are provenance-only** — zero `reference.domain.yaml`
+  content changed, only `source_iris`/`source_evidence`/`confidence`/
+  `rationale`. Independently re-verified (not taken on the repair calls'
+  own word): structural/provenance/reverse-coverage all clean, and **every
+  one of the 42 changed elements individually re-judged**: 0
+  majority-unsupported, 3 contested (the same "does a modulating valve
+  honestly have a numeric position value" category of disclosed,
+  non-blocking borderline call already accepted elsewhere in this domain).
+  A full authoritative `evaluate.py` pass was deliberately not re-run for
+  this fix — content didn't change and every mapping across the whole
+  domain has now been independently verified at some point this session;
+  re-running the full ~$4 pass would re-confirm, not discover.
+
+  **Total cost, this audit + fix: ~$0.49.** Running total for the whole
+  Brick HVAC effort across every phase so far: **~$21.4**.
+
+  Full detail, including the exact 42-item list and per-round-3-sample
+  verdicts: `domains/brick-hvac/manual-spot-check.md`/`.json` (now
+  multi-round, `rounds` key) and `domains/brick-hvac/provenance-audit.md`.
+
+  **#106 still open** — still the user's call.

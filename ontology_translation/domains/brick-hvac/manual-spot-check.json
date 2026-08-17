@@ -1,375 +1,756 @@
 {
   "domain": "brick-hvac",
-  "date": "2026-08-17",
-  "reviewer": "repo owner (szablevi@gmail.com), in-session review with the coding agent",
-  "purpose": "Second manual spot-check of a random sample of translated artefacts against their original source material, human evidence supplementing the automated QA suite (issue #103), run against the domain's current state after the disposition-judging fix and reinstate.py additions. Supersedes the first spot-check round (2026-08-17, pre-rerun) whose sampled artefact population no longer exists after the full clean pipeline rerun.",
-  "artefact_definition": "Every individually source-mapped element in translation.json's `mappings` list: classes, class properties, relationships, rules, actions (127 total at sampling time). Competency questions excluded (synthesized from the whole domain, not mapped from specific source IRIs).",
-  "sampling_method": {
-    "description": "Stratified sample by artefact type, proportional allocation with round-to-nearest, fixed random seed for reproducibility.",
-    "seed": 106,
-    "population_total": 127,
-    "sample_target_fraction": 0.1,
-    "sample_size": 13,
-    "allocation": {
-      "class": 4,
-      "property": 4,
-      "relationship": 3,
-      "rule": 1,
-      "action": 1
-    }
-  },
-  "verdict_summary": {
-    "accept": 13,
-    "reject": 0,
-    "total": 13
-  },
-  "notes": [
-    "One real defect found and fixed during this round: relationships[31] (Thermostat serves Zone) had genuinely strong evidence -- a verbatim quote from Zone's real source definition, plus an unclaimed matching real relation (rec#servicedBy) -- but source_iris was empty, making the mapping unverifiable by anything except a human reading the prose. Root cause was general (repair.py's reground action never asked for source_iris as structured data), fixed in repair.py itself (not just this one mapping) with tests, then reapplied to this item and independently re-verified (unanimous supported).",
-    "One agent self-correction during this round: the agent initially misflagged actions.maintainWithinDeadband's rationale as a 'stale' leftover from before the clean rerun, referencing the action's pre-rename name (maintainCurrentMode). Challenged by the reviewer ('how can stale things be in there' given the full rerun claim). Investigated by diffing against the pre-repair compile output: the current rationale text is genuinely different from the original, proving it was freshly written during the repair-driven rename, not left untouched. The old name is referenced to explain the rename decision, which is legitimate, not a bug. Flag withdrawn."
-  ],
-  "items": [
+  "rounds": [
     {
-      "idx": 1,
-      "target_path": "classes.CondensingUnit",
-      "artefact_type": "class",
-      "mapping": {
-        "target_path": "classes.CondensingUnit",
-        "source_iris": [
-          "https://brickschema.org/schema/Brick#Condensing_Unit"
-        ],
-        "source_evidence": "\"An outdoor HVAC unit that typically condenses refrigerant from gas to liquid, integral to the refrigeration cycle.\"",
-        "confidence": "high",
-        "rationale": "The source definition directly identifies Condensing Unit as a distinct HVAC equipment type."
-      },
-      "result": {
-        "meaning": "An outdoor HVAC unit that condenses refrigerant from gas to liquid as part of the refrigeration cycle.",
-        "aliases": [],
-        "properties": {
-          "status": {
-            "type": "text",
-            "allowed": [
-              "off",
-              "on",
-              "alarm"
-            ]
-          }
+      "domain": "brick-hvac",
+      "date": "2026-08-17",
+      "reviewer": "repo owner (szablevi@gmail.com), in-session review with the coding agent",
+      "purpose": "Second manual spot-check of a random sample of translated artefacts against their original source material, human evidence supplementing the automated QA suite (issue #103), run against the domain's current state after the disposition-judging fix and reinstate.py additions. Supersedes the first spot-check round (2026-08-17, pre-rerun) whose sampled artefact population no longer exists after the full clean pipeline rerun.",
+      "artefact_definition": "Every individually source-mapped element in translation.json's `mappings` list: classes, class properties, relationships, rules, actions (127 total at sampling time). Competency questions excluded (synthesized from the whole domain, not mapped from specific source IRIs).",
+      "sampling_method": {
+        "description": "Stratified sample by artefact type, proportional allocation with round-to-nearest, fixed random seed for reproducibility.",
+        "seed": 106,
+        "population_total": 127,
+        "sample_target_fraction": 0.1,
+        "sample_size": 13,
+        "allocation": {
+          "class": 4,
+          "property": 4,
+          "relationship": 3,
+          "rule": 1,
+          "action": 1
         }
       },
-      "sample_id": "S1",
-      "verdict": "accept",
-      "reviewer_comment": null,
-      "finding": null
-    },
-    {
-      "idx": 2,
-      "target_path": "classes.AirPlenum",
-      "artefact_type": "class",
-      "mapping": {
-        "target_path": "classes.AirPlenum",
-        "source_iris": [
-          "https://brickschema.org/schema/Brick#Air_Plenum"
-        ],
-        "source_evidence": "\"A component of the HVAC the receives air from the air handling unit or room to distribute or exhaust to or from the building\"",
-        "confidence": "high",
-        "rationale": "Direct class mapping from the source definition."
+      "verdict_summary": {
+        "accept": 13,
+        "reject": 0,
+        "total": 13
       },
-      "result": {
-        "meaning": "An HVAC component that receives air from an air handling unit or room for distribution or exhaust.",
-        "properties": {
-          "airflowState": {
+      "notes": [
+        "One real defect found and fixed during this round: relationships[31] (Thermostat serves Zone) had genuinely strong evidence -- a verbatim quote from Zone's real source definition, plus an unclaimed matching real relation (rec#servicedBy) -- but source_iris was empty, making the mapping unverifiable by anything except a human reading the prose. Root cause was general (repair.py's reground action never asked for source_iris as structured data), fixed in repair.py itself (not just this one mapping) with tests, then reapplied to this item and independently re-verified (unanimous supported).",
+        "One agent self-correction during this round: the agent initially misflagged actions.maintainWithinDeadband's rationale as a 'stale' leftover from before the clean rerun, referencing the action's pre-rename name (maintainCurrentMode). Challenged by the reviewer ('how can stale things be in there' given the full rerun claim). Investigated by diffing against the pre-repair compile output: the current rationale text is genuinely different from the original, proving it was freshly written during the repair-driven rename, not left untouched. The old name is referenced to explain the rename decision, which is legitimate, not a bug. Flag withdrawn."
+      ],
+      "items": [
+        {
+          "idx": 1,
+          "target_path": "classes.CondensingUnit",
+          "artefact_type": "class",
+          "mapping": {
+            "target_path": "classes.CondensingUnit",
+            "source_iris": [
+              "https://brickschema.org/schema/Brick#Condensing_Unit"
+            ],
+            "source_evidence": "\"An outdoor HVAC unit that typically condenses refrigerant from gas to liquid, integral to the refrigeration cycle.\"",
+            "confidence": "high",
+            "rationale": "The source definition directly identifies Condensing Unit as a distinct HVAC equipment type."
+          },
+          "result": {
+            "meaning": "An outdoor HVAC unit that condenses refrigerant from gas to liquid as part of the refrigeration cycle.",
+            "aliases": [],
+            "properties": {
+              "status": {
+                "type": "text",
+                "allowed": [
+                  "off",
+                  "on",
+                  "alarm"
+                ]
+              }
+            }
+          },
+          "sample_id": "S1",
+          "verdict": "accept",
+          "reviewer_comment": null,
+          "finding": null
+        },
+        {
+          "idx": 2,
+          "target_path": "classes.AirPlenum",
+          "artefact_type": "class",
+          "mapping": {
+            "target_path": "classes.AirPlenum",
+            "source_iris": [
+              "https://brickschema.org/schema/Brick#Air_Plenum"
+            ],
+            "source_evidence": "\"A component of the HVAC the receives air from the air handling unit or room to distribute or exhaust to or from the building\"",
+            "confidence": "high",
+            "rationale": "Direct class mapping from the source definition."
+          },
+          "result": {
+            "meaning": "An HVAC component that receives air from an air handling unit or room for distribution or exhaust.",
+            "properties": {
+              "airflowState": {
+                "type": "text",
+                "allowed": [
+                  "supply",
+                  "return",
+                  "exhaust"
+                ]
+              }
+            }
+          },
+          "sample_id": "S2",
+          "verdict": "accept",
+          "reviewer_comment": null,
+          "finding": null
+        },
+        {
+          "idx": 3,
+          "target_path": "classes.Pump",
+          "artefact_type": "class",
+          "mapping": {
+            "target_path": "classes.Pump",
+            "source_iris": [
+              "https://brickschema.org/schema/Brick#Pump"
+            ],
+            "source_evidence": "\"Machine for imparting energy to a fluid, causing it to do work, drawing a fluid into itself through an entrance port, and forcing the fluid out through an exhaust port.\"",
+            "confidence": "high",
+            "rationale": "The source definition directly establishes Pump as a distinct equipment class."
+          },
+          "result": {
+            "meaning": "A machine that imparts energy to a fluid by drawing it in through an entrance port and forcing it out through an exhaust port.",
+            "aliases": [],
+            "properties": {
+              "status": {
+                "type": "text",
+                "allowed": [
+                  "off",
+                  "on",
+                  "alarm"
+                ]
+              }
+            }
+          },
+          "sample_id": "S3",
+          "verdict": "accept",
+          "reviewer_comment": null,
+          "finding": null
+        },
+        {
+          "idx": 4,
+          "target_path": "classes.Humidifier",
+          "artefact_type": "class",
+          "mapping": {
+            "target_path": "classes.Humidifier",
+            "source_iris": [
+              "https://brickschema.org/schema/Brick#Humidifier"
+            ],
+            "source_evidence": "\"A device that adds moisture to air or other gases\"",
+            "confidence": "high",
+            "rationale": "The source definition directly states the class meaning."
+          },
+          "result": {
+            "meaning": "A device that adds moisture to air or other gases.",
+            "aliases": [],
+            "properties": {
+              "status": {
+                "type": "text",
+                "allowed": [
+                  "off",
+                  "on",
+                  "alarm"
+                ]
+              }
+            }
+          },
+          "sample_id": "S4",
+          "verdict": "accept",
+          "reviewer_comment": null,
+          "finding": null
+        },
+        {
+          "idx": 5,
+          "target_path": "classes.Space.properties.maxOccupancy",
+          "artefact_type": "property",
+          "mapping": {
+            "target_path": "classes.Space.properties.maxOccupancy",
+            "source_iris": [
+              "https://w3id.org/rec#maxOccupancy"
+            ],
+            "source_evidence": "Datatype property label \"maxOccupancy\"",
+            "confidence": "high",
+            "rationale": "The REC datatype directly supports an occupancy-related property on spaces."
+          },
+          "result": {
+            "type": "number"
+          },
+          "sample_id": "S5",
+          "verdict": "accept",
+          "reviewer_comment": "Flagged: source_iri (rec#maxOccupancy) has zero definition text, grounded only in the property name being self-explanatory.",
+          "finding": "Label-only grounding, no real definition to check against. Accepted as a reasonable case for a self-evident property name, but flagged for visibility since it can't be independently verified beyond the name itself."
+        },
+        {
+          "idx": 6,
+          "target_path": "classes.TemperatureSensor.properties.status",
+          "artefact_type": "property",
+          "mapping": {
+            "target_path": "classes.TemperatureSensor.properties.status",
+            "source_iris": [
+              "https://w3id.org/rec#status"
+            ],
+            "source_evidence": "The source includes the generic datatype property label \"status\" and the class definition \"Temperature Sensor ... Measures temperature\"; by standard practice for sensors, a status field denotes operational/health state, but the provided material does not justify enumerating specific values.",
+            "confidence": "medium",
+            "rationale": "The property itself is defensible for TemperatureSensor, but the allowed list must be removed because only a broad status notion, not specific states, is grounded."
+          },
+          "result": {
+            "type": "text"
+          },
+          "sample_id": "S6",
+          "verdict": "accept",
+          "reviewer_comment": null,
+          "finding": null
+        },
+        {
+          "idx": 7,
+          "target_path": "classes.Thermostat.properties.status",
+          "artefact_type": "property",
+          "mapping": {
+            "target_path": "classes.Thermostat.properties.status",
+            "source_iris": [
+              "https://w3id.org/rec#status"
+            ],
+            "source_evidence": "Datatype property label \"status\" and standard practice for thermostat device health/status monitoring.",
+            "confidence": "medium",
+            "rationale": "Thermostats are operational devices for which status is decision-relevant."
+          },
+          "result": {
             "type": "text",
             "allowed": [
-              "supply",
-              "return",
-              "exhaust"
+              "normal",
+              "fault",
+              "offline"
             ]
-          }
-        }
-      },
-      "sample_id": "S2",
-      "verdict": "accept",
-      "reviewer_comment": null,
-      "finding": null
-    },
-    {
-      "idx": 3,
-      "target_path": "classes.Pump",
-      "artefact_type": "class",
-      "mapping": {
-        "target_path": "classes.Pump",
-        "source_iris": [
-          "https://brickschema.org/schema/Brick#Pump"
-        ],
-        "source_evidence": "\"Machine for imparting energy to a fluid, causing it to do work, drawing a fluid into itself through an entrance port, and forcing the fluid out through an exhaust port.\"",
-        "confidence": "high",
-        "rationale": "The source definition directly establishes Pump as a distinct equipment class."
-      },
-      "result": {
-        "meaning": "A machine that imparts energy to a fluid by drawing it in through an entrance port and forcing it out through an exhaust port.",
-        "aliases": [],
-        "properties": {
-          "status": {
-            "type": "text",
-            "allowed": [
-              "off",
-              "on",
-              "alarm"
+          },
+          "sample_id": "S7",
+          "verdict": "accept",
+          "reviewer_comment": "Flagged: allowed:[normal,fault,offline] uses a different vocabulary than every other equipment class's status:[off,on,alarm] convention in this domain.",
+          "finding": "Accepted as a deliberate distinction (Thermostat is a control device reporting fault/offline health state, not an on/off piece of equipment), not an unnoticed inconsistency."
+        },
+        {
+          "idx": 8,
+          "target_path": "classes.AirTemperatureSensor.properties.value",
+          "artefact_type": "property",
+          "mapping": {
+            "target_path": "classes.AirTemperatureSensor.properties.value",
+            "source_iris": [
+              "https://w3id.org/rec#value"
+            ],
+            "source_evidence": "Datatype property label \"value\" and class definition \"Measures the temperature of air\"",
+            "confidence": "high",
+            "rationale": "An air temperature sensor obviously reports a numeric measured value."
+          },
+          "result": {
+            "type": "number",
+            "unit": "degC"
+          },
+          "sample_id": "S8",
+          "verdict": "accept",
+          "reviewer_comment": null,
+          "finding": null
+        },
+        {
+          "idx": 9,
+          "target_path": "relationships[12]",
+          "artefact_type": "relationship",
+          "mapping": {
+            "target_path": "relationships[12]",
+            "source_iris": [
+              "https://brickschema.org/schema/Brick#hasPoint"
+            ],
+            "source_evidence": "Brick hasPoint definition; thermostat definition says it maintains temperature at a setpoint, implying sensor input.",
+            "confidence": "high",
+            "rationale": "A thermostat necessarily uses a temperature sensor input as part of its control context."
+          },
+          "result": {
+            "name": "hasPoint",
+            "from": "Thermostat",
+            "to": "TemperatureSensor",
+            "meaning": "A thermostat has a temperature sensor input used for control.",
+            "aliases": []
+          },
+          "sample_id": "S9",
+          "verdict": "accept",
+          "reviewer_comment": "Flagged: rationale says thermostat's setpoint-maintenance definition 'implies' sensor input, rather than stating it directly.",
+          "finding": "Accepted as a reasonable, disclosed inference (a device that maintains temperature at a setpoint necessarily has a temperature input) rather than a fabrication."
+        },
+        {
+          "idx": 10,
+          "target_path": "relationships[31]",
+          "artefact_type": "relationship",
+          "mapping": {
+            "target_path": "relationships[31]",
+            "source_iris": [
+              "https://brickschema.org/schema/Brick#Zone",
+              "https://brickschema.org/schema/Brick#Thermostat",
+              "https://w3id.org/rec#servicedBy"
+            ],
+            "source_evidence": "Zone is defined as a \"space or group of spaces ... for which the heating, cooling, or lighting requirements are sufficiently similar that desired conditions can be maintained throughout by a single controlling device,\" and a Thermostat is \"an automatic control device used to maintain temperature at a fixed or adjustable setpoint\"; this supports a thermostat serving the zone it controls.",
+            "confidence": "high",
+            "rationale": "The existing Thermostat\u2192Zone serves relationship is directly grounded by Zone's single-controlling-device definition together with Thermostat being a control device, and the cited servicedBy relation matches this semantics."
+          },
+          "result": {
+            "name": "serves",
+            "from": "Thermostat",
+            "to": "Zone",
+            "meaning": "A thermostat serves as a controlling device for a zone.",
+            "aliases": []
+          },
+          "sample_id": "S10",
+          "verdict": "accept",
+          "reviewer_comment": "Flagged: source_iris was empty despite evidence text quoting Zone's real definition -- investigated further per reviewer request.",
+          "finding": "REAL FINDING, FIXED: independently verified the quoted evidence (\"maintained throughout by a single controlling device\") is a genuine verbatim substring of Zone's real source definition, and found an additional real match (rec#servicedBy, an object property directly matching the 'serves' relationship concept) that also wasn't cited. Root cause: repair.py's reground action asked the LLM for source_evidence/confidence/rationale as free text, but never asked for source_iris as structured data -- so even an accurate, well-written evidence quote left the mapping unverifiable by anything except a human reading the prose. Fixed generally in repair.py (source_iris now required and validated on every reground/replace, not just this one item), and re-ran the reground call for this item with the fix: source_iris now correctly lists brick#Zone, brick#Thermostat, and rec#servicedBy. Independently re-judged after the fix: unanimous supported."
+        },
+        {
+          "idx": 11,
+          "target_path": "relationships[23]",
+          "artefact_type": "relationship",
+          "mapping": {
+            "target_path": "relationships[23]",
+            "source_iris": [
+              "https://brickschema.org/schema/Brick#hasPart"
+            ],
+            "source_evidence": "Floor definition: \"A level, typically representing a horizontal aggregation of spaces\"; Brick hasPart definition.",
+            "confidence": "high",
+            "rationale": "The Floor-to-Space composition is directly supported by the floor definition."
+          },
+          "result": {
+            "name": "hasPart",
+            "from": "Floor",
+            "to": "Space",
+            "meaning": "A floor is composed in part of spaces.",
+            "aliases": []
+          },
+          "sample_id": "S11",
+          "verdict": "accept",
+          "reviewer_comment": null,
+          "finding": null
+        },
+        {
+          "idx": 12,
+          "target_path": "rules.temperatureWithinDeadband",
+          "artefact_type": "rule",
+          "mapping": {
+            "target_path": "rules.temperatureWithinDeadband",
+            "source_iris": [
+              "https://brickschema.org/schema/Brick#Temperature_Deadband_Setpoint"
+            ],
+            "source_evidence": "Temperature deadband setpoint definition: \"Sets the size of a deadband of temperature\"",
+            "confidence": "high",
+            "rationale": "The source definition directly supports a rule about remaining within an allowed temperature band."
+          },
+          "result": {
+            "conditions": [
+              "measured temperature is within the configured temperature deadband around the active setpoint"
             ]
-          }
+          },
+          "sample_id": "S12",
+          "verdict": "accept",
+          "reviewer_comment": null,
+          "finding": null
+        },
+        {
+          "idx": 13,
+          "target_path": "actions.maintainWithinDeadband",
+          "artefact_type": "action",
+          "mapping": {
+            "target_path": "actions.maintainWithinDeadband",
+            "source_iris": [
+              "https://brickschema.org/schema/Brick#Temperature_Deadband_Setpoint"
+            ],
+            "source_evidence": "The source defines \"Temperature Deadband Setpoint\" as one that \"Sets the size of a deadband of temperature,\" and the AHU definition includes heating and cooling among its functions.",
+            "confidence": "medium",
+            "rationale": "The evidence supports maintaining control without heating/cooling adjustment while temperature remains in deadband, but it does not specifically ground the stronger action name maintainCurrentMode."
+          },
+          "result": {
+            "input": "AirHandlingUnit",
+            "preconditions": [
+              "temperatureWithinDeadband"
+            ],
+            "effect": "no heating or cooling change is required while temperature remains within the configured deadband",
+            "verification": "confirm temperature remains within the configured deadband"
+          },
+          "sample_id": "S13",
+          "verdict": "accept",
+          "reviewer_comment": "Initially misflagged as 'stale' by the agent (rationale text mentions the action's old pre-rename name, maintainCurrentMode) -- reviewer challenged this given the full clean rerun. Investigated and corrected: verified against the pre-repair translation.json that this rationale text is different from the original compile's text, proving it was freshly written by the repair call during the rename, not a leftover. The old name is referenced deliberately to explain why the rename happened, not because anything was left unrefreshed.",
+          "finding": null
         }
-      },
-      "sample_id": "S3",
-      "verdict": "accept",
-      "reviewer_comment": null,
-      "finding": null
+      ],
+      "round": 2
     },
     {
-      "idx": 4,
-      "target_path": "classes.Humidifier",
-      "artefact_type": "class",
-      "mapping": {
-        "target_path": "classes.Humidifier",
-        "source_iris": [
-          "https://brickschema.org/schema/Brick#Humidifier"
-        ],
-        "source_evidence": "\"A device that adds moisture to air or other gases\"",
-        "confidence": "high",
-        "rationale": "The source definition directly states the class meaning."
-      },
-      "result": {
-        "meaning": "A device that adds moisture to air or other gases.",
-        "aliases": [],
-        "properties": {
-          "status": {
-            "type": "text",
-            "allowed": [
-              "off",
-              "on",
-              "alarm"
-            ]
-          }
-        }
-      },
-      "sample_id": "S4",
-      "verdict": "accept",
-      "reviewer_comment": null,
-      "finding": null
-    },
-    {
-      "idx": 5,
-      "target_path": "classes.Space.properties.maxOccupancy",
-      "artefact_type": "property",
-      "mapping": {
-        "target_path": "classes.Space.properties.maxOccupancy",
-        "source_iris": [
-          "https://w3id.org/rec#maxOccupancy"
-        ],
-        "source_evidence": "Datatype property label \"maxOccupancy\"",
-        "confidence": "high",
-        "rationale": "The REC datatype directly supports an occupancy-related property on spaces."
-      },
-      "result": {
-        "type": "number"
-      },
-      "sample_id": "S5",
-      "verdict": "accept",
-      "reviewer_comment": "Flagged: source_iri (rec#maxOccupancy) has zero definition text, grounded only in the property name being self-explanatory.",
-      "finding": "Label-only grounding, no real definition to check against. Accepted as a reasonable case for a self-evident property name, but flagged for visibility since it can't be independently verified beyond the name itself."
-    },
-    {
-      "idx": 6,
-      "target_path": "classes.TemperatureSensor.properties.status",
-      "artefact_type": "property",
-      "mapping": {
-        "target_path": "classes.TemperatureSensor.properties.status",
-        "source_iris": [
-          "https://w3id.org/rec#status"
-        ],
-        "source_evidence": "The source includes the generic datatype property label \"status\" and the class definition \"Temperature Sensor ... Measures temperature\"; by standard practice for sensors, a status field denotes operational/health state, but the provided material does not justify enumerating specific values.",
-        "confidence": "medium",
-        "rationale": "The property itself is defensible for TemperatureSensor, but the allowed list must be removed because only a broad status notion, not specific states, is grounded."
-      },
-      "result": {
-        "type": "text"
-      },
-      "sample_id": "S6",
-      "verdict": "accept",
-      "reviewer_comment": null,
-      "finding": null
-    },
-    {
-      "idx": 7,
-      "target_path": "classes.Thermostat.properties.status",
-      "artefact_type": "property",
-      "mapping": {
-        "target_path": "classes.Thermostat.properties.status",
-        "source_iris": [
-          "https://w3id.org/rec#status"
-        ],
-        "source_evidence": "Datatype property label \"status\" and standard practice for thermostat device health/status monitoring.",
-        "confidence": "medium",
-        "rationale": "Thermostats are operational devices for which status is decision-relevant."
-      },
-      "result": {
-        "type": "text",
-        "allowed": [
-          "normal",
-          "fault",
-          "offline"
+      "round": 3,
+      "date": "2026-08-17",
+      "reviewer": "repo owner (szablevi@gmail.com), in-session review with the coding agent",
+      "sampling_method": {
+        "description": "Stratified sample by artefact type, proportional allocation, new seed.",
+        "seed": 306,
+        "population_total": 127,
+        "sample_target_fraction": 0.1,
+        "sample_size": 13,
+        "allocation": {
+          "class": 4,
+          "property": 4,
+          "relationship": 3,
+          "rule": 1,
+          "action": 1
+        },
+        "overlap_with_round_2": [
+          "classes.Humidifier"
         ]
       },
-      "sample_id": "S7",
-      "verdict": "accept",
-      "reviewer_comment": "Flagged: allowed:[normal,fault,offline] uses a different vocabulary than every other equipment class's status:[off,on,alarm] convention in this domain.",
-      "finding": "Accepted as a deliberate distinction (Thermostat is a control device reporting fault/offline health state, not an on/off piece of equipment), not an unnoticed inconsistency."
-    },
-    {
-      "idx": 8,
-      "target_path": "classes.AirTemperatureSensor.properties.value",
-      "artefact_type": "property",
-      "mapping": {
-        "target_path": "classes.AirTemperatureSensor.properties.value",
-        "source_iris": [
-          "https://w3id.org/rec#value"
-        ],
-        "source_evidence": "Datatype property label \"value\" and class definition \"Measures the temperature of air\"",
-        "confidence": "high",
-        "rationale": "An air temperature sensor obviously reports a numeric measured value."
+      "verdict_summary": {
+        "accept": 13,
+        "reject": 0,
+        "total": 13
       },
-      "result": {
-        "type": "number",
-        "unit": "degC"
-      },
-      "sample_id": "S8",
-      "verdict": "accept",
-      "reviewer_comment": null,
-      "finding": null
-    },
-    {
-      "idx": 9,
-      "target_path": "relationships[12]",
-      "artefact_type": "relationship",
-      "mapping": {
-        "target_path": "relationships[12]",
-        "source_iris": [
-          "https://brickschema.org/schema/Brick#hasPoint"
-        ],
-        "source_evidence": "Brick hasPoint definition; thermostat definition says it maintains temperature at a setpoint, implying sensor input.",
-        "confidence": "high",
-        "rationale": "A thermostat necessarily uses a temperature sensor input as part of its control context."
-      },
-      "result": {
-        "name": "hasPoint",
-        "from": "Thermostat",
-        "to": "TemperatureSensor",
-        "meaning": "A thermostat has a temperature sensor input used for control.",
-        "aliases": []
-      },
-      "sample_id": "S9",
-      "verdict": "accept",
-      "reviewer_comment": "Flagged: rationale says thermostat's setpoint-maintenance definition 'implies' sensor input, rather than stating it directly.",
-      "finding": "Accepted as a reasonable, disclosed inference (a device that maintains temperature at a setpoint necessarily has a temperature input) rather than a fabrication."
-    },
-    {
-      "idx": 10,
-      "target_path": "relationships[31]",
-      "artefact_type": "relationship",
-      "mapping": {
-        "target_path": "relationships[31]",
-        "source_iris": [
-          "https://brickschema.org/schema/Brick#Zone",
-          "https://brickschema.org/schema/Brick#Thermostat",
-          "https://w3id.org/rec#servicedBy"
-        ],
-        "source_evidence": "Zone is defined as a \"space or group of spaces ... for which the heating, cooling, or lighting requirements are sufficiently similar that desired conditions can be maintained throughout by a single controlling device,\" and a Thermostat is \"an automatic control device used to maintain temperature at a fixed or adjustable setpoint\"; this supports a thermostat serving the zone it controls.",
-        "confidence": "high",
-        "rationale": "The existing Thermostat\u2192Zone serves relationship is directly grounded by Zone's single-controlling-device definition together with Thermostat being a control device, and the cited servicedBy relation matches this semantics."
-      },
-      "result": {
-        "name": "serves",
-        "from": "Thermostat",
-        "to": "Zone",
-        "meaning": "A thermostat serves as a controlling device for a zone.",
-        "aliases": []
-      },
-      "sample_id": "S10",
-      "verdict": "accept",
-      "reviewer_comment": "Flagged: source_iris was empty despite evidence text quoting Zone's real definition -- investigated further per reviewer request.",
-      "finding": "REAL FINDING, FIXED: independently verified the quoted evidence (\"maintained throughout by a single controlling device\") is a genuine verbatim substring of Zone's real source definition, and found an additional real match (rec#servicedBy, an object property directly matching the 'serves' relationship concept) that also wasn't cited. Root cause: repair.py's reground action asked the LLM for source_evidence/confidence/rationale as free text, but never asked for source_iris as structured data -- so even an accurate, well-written evidence quote left the mapping unverifiable by anything except a human reading the prose. Fixed generally in repair.py (source_iris now required and validated on every reground/replace, not just this one item), and re-ran the reground call for this item with the fix: source_iris now correctly lists brick#Zone, brick#Thermostat, and rec#servicedBy. Independently re-judged after the fix: unanimous supported."
-    },
-    {
-      "idx": 11,
-      "target_path": "relationships[23]",
-      "artefact_type": "relationship",
-      "mapping": {
-        "target_path": "relationships[23]",
-        "source_iris": [
-          "https://brickschema.org/schema/Brick#hasPart"
-        ],
-        "source_evidence": "Floor definition: \"A level, typically representing a horizontal aggregation of spaces\"; Brick hasPart definition.",
-        "confidence": "high",
-        "rationale": "The Floor-to-Space composition is directly supported by the floor definition."
-      },
-      "result": {
-        "name": "hasPart",
-        "from": "Floor",
-        "to": "Space",
-        "meaning": "A floor is composed in part of spaces.",
-        "aliases": []
-      },
-      "sample_id": "S11",
-      "verdict": "accept",
-      "reviewer_comment": null,
-      "finding": null
-    },
-    {
-      "idx": 12,
-      "target_path": "rules.temperatureWithinDeadband",
-      "artefact_type": "rule",
-      "mapping": {
-        "target_path": "rules.temperatureWithinDeadband",
-        "source_iris": [
-          "https://brickschema.org/schema/Brick#Temperature_Deadband_Setpoint"
-        ],
-        "source_evidence": "Temperature deadband setpoint definition: \"Sets the size of a deadband of temperature\"",
-        "confidence": "high",
-        "rationale": "The source definition directly supports a rule about remaining within an allowed temperature band."
-      },
-      "result": {
-        "conditions": [
-          "measured temperature is within the configured temperature deadband around the active setpoint"
-        ]
-      },
-      "sample_id": "S12",
-      "verdict": "accept",
-      "reviewer_comment": null,
-      "finding": null
-    },
-    {
-      "idx": 13,
-      "target_path": "actions.maintainWithinDeadband",
-      "artefact_type": "action",
-      "mapping": {
-        "target_path": "actions.maintainWithinDeadband",
-        "source_iris": [
-          "https://brickschema.org/schema/Brick#Temperature_Deadband_Setpoint"
-        ],
-        "source_evidence": "The source defines \"Temperature Deadband Setpoint\" as one that \"Sets the size of a deadband of temperature,\" and the AHU definition includes heating and cooling among its functions.",
-        "confidence": "medium",
-        "rationale": "The evidence supports maintaining control without heating/cooling adjustment while temperature remains in deadband, but it does not specifically ground the stronger action name maintainCurrentMode."
-      },
-      "result": {
-        "input": "AirHandlingUnit",
-        "preconditions": [
-          "temperatureWithinDeadband"
-        ],
-        "effect": "no heating or cooling change is required while temperature remains within the configured deadband",
-        "verification": "confirm temperature remains within the configured deadband"
-      },
-      "sample_id": "S13",
-      "verdict": "accept",
-      "reviewer_comment": "Initially misflagged as 'stale' by the agent (rationale text mentions the action's old pre-rename name, maintainCurrentMode) -- reviewer challenged this given the full clean rerun. Investigated and corrected: verified against the pre-repair translation.json that this rationale text is different from the original compile's text, proving it was freshly written by the repair call during the rename, not a leftover. The old name is referenced deliberately to explain why the rename happened, not because anything was left unrefreshed.",
-      "finding": null
+      "notes": [
+        "Two flagged items in this round (relationships[22], actions.verifyOccupiedZoneConditioning) turned out to be data points in a systemic pattern, not isolated slips. Reviewer directed a full comprehensive audit of all 127 mappings rather than another sampled round -- see provenance-audit.md for the full account (42 of 127 mappings, 33%, had incomplete source_iris; root cause was in compiler-prompt.md itself, fixed generally)."
+      ],
+      "items": [
+        {
+          "idx": 1,
+          "target_path": "classes.Space",
+          "artefact_type": "class",
+          "mapping": {
+            "target_path": "classes.Space",
+            "source_iris": [
+              "https://brickschema.org/schema/Brick#Space",
+              "https://w3id.org/rec#Space"
+            ],
+            "source_evidence": "Brick: \"A part of the physical world or a virtual world whose 3D spatial extent is bounded...\"; REC: \"A contiguous part of the physical world that contains or can contain sub-spaces.\"",
+            "confidence": "high",
+            "rationale": "The Brick and REC classes represent the same core space concept and are consolidated."
+          },
+          "result": {
+            "meaning": "A bounded physical or virtual area that provides for certain functions within a containing zone.",
+            "properties": {
+              "maxOccupancy": {
+                "type": "number"
+              }
+            }
+          },
+          "sample_id": "S1",
+          "verdict": "accept",
+          "reviewer_comment": null,
+          "finding": null
+        },
+        {
+          "idx": 2,
+          "target_path": "classes.Humidifier",
+          "artefact_type": "class",
+          "mapping": {
+            "target_path": "classes.Humidifier",
+            "source_iris": [
+              "https://brickschema.org/schema/Brick#Humidifier"
+            ],
+            "source_evidence": "\"A device that adds moisture to air or other gases\"",
+            "confidence": "high",
+            "rationale": "The source definition directly states the class meaning."
+          },
+          "result": {
+            "meaning": "A device that adds moisture to air or other gases.",
+            "aliases": [],
+            "properties": {
+              "status": {
+                "type": "text",
+                "allowed": [
+                  "off",
+                  "on",
+                  "alarm"
+                ]
+              }
+            }
+          },
+          "sample_id": "S2",
+          "verdict": "accept",
+          "reviewer_comment": null,
+          "finding": null
+        },
+        {
+          "idx": 3,
+          "target_path": "classes.TemperatureDeadbandSetpoint",
+          "artefact_type": "class",
+          "mapping": {
+            "target_path": "classes.TemperatureDeadbandSetpoint",
+            "source_iris": [
+              "https://brickschema.org/schema/Brick#Temperature_Deadband_Setpoint"
+            ],
+            "source_evidence": "\"Sets the size of a deadband of temperature\"",
+            "confidence": "high",
+            "rationale": "Direct class mapping from the source definition."
+          },
+          "result": {
+            "meaning": "A setpoint that defines the size of an allowed temperature deadband.",
+            "properties": {
+              "value": {
+                "type": "number",
+                "unit": "degC"
+              }
+            }
+          },
+          "sample_id": "S3",
+          "verdict": "accept",
+          "reviewer_comment": null,
+          "finding": null
+        },
+        {
+          "idx": 4,
+          "target_path": "classes.Filter",
+          "artefact_type": "class",
+          "mapping": {
+            "target_path": "classes.Filter",
+            "source_iris": [
+              "https://brickschema.org/schema/Brick#Filter"
+            ],
+            "source_evidence": "\"Device to remove gases from a mixture of gases or to remove solid material from a fluid\"",
+            "confidence": "high",
+            "rationale": "Direct class mapping from the source definition."
+          },
+          "result": {
+            "meaning": "A device that removes gases from a gas mixture or removes solid material from a fluid.",
+            "properties": {
+              "status": {
+                "type": "text",
+                "allowed": [
+                  "clean",
+                  "dirty",
+                  "replacement_due"
+                ]
+              }
+            }
+          },
+          "sample_id": "S4",
+          "verdict": "accept",
+          "reviewer_comment": null,
+          "finding": null
+        },
+        {
+          "idx": 5,
+          "target_path": "classes.SpaceHeater.properties.status",
+          "artefact_type": "property",
+          "mapping": {
+            "target_path": "classes.SpaceHeater.properties.status",
+            "source_iris": [
+              "https://brickschema.org/schema/Brick#Space_Heater",
+              "https://brickschema.org/schema/Brick#Boiler"
+            ],
+            "source_evidence": "\"Space Heater\" is \"A heater used to warm the air in an enclosed area, such as a room or office\"; as active heating equipment, and consistent with sibling heating equipment such as a \"Boiler\", it reasonably uses the standard operational status values off/on/alarm.",
+            "confidence": "medium",
+            "rationale": "The source definition makes Space Heater an active heating device whose operating state is meaningful, and the sibling heating-equipment convention supports retaining the modeled status property."
+          },
+          "result": {
+            "type": "text",
+            "allowed": [
+              "off",
+              "on",
+              "alarm"
+            ]
+          },
+          "sample_id": "S5",
+          "verdict": "accept",
+          "reviewer_comment": null,
+          "finding": null
+        },
+        {
+          "idx": 6,
+          "target_path": "classes.TemperatureDeadbandSetpoint.properties.value",
+          "artefact_type": "property",
+          "mapping": {
+            "target_path": "classes.TemperatureDeadbandSetpoint.properties.value",
+            "source_iris": [
+              "https://w3id.org/rec#value"
+            ],
+            "source_evidence": "Datatype property label \"value\" and class definition about deadband size.",
+            "confidence": "high",
+            "rationale": "The deadband setpoint concept directly implies a numeric value."
+          },
+          "result": {
+            "type": "number",
+            "unit": "degC"
+          },
+          "sample_id": "S6",
+          "verdict": "accept",
+          "reviewer_comment": "Flagged: same label-only grounding pattern as maxOccupancy (round 2, accepted).",
+          "finding": "Consistent with prior accepted precedent."
+        },
+        {
+          "idx": 7,
+          "target_path": "classes.Chiller.properties.coolingCapacity",
+          "artefact_type": "property",
+          "mapping": {
+            "target_path": "classes.Chiller.properties.coolingCapacity",
+            "source_iris": [
+              "https://brickschema.org/schema/Brick#coolingCapacity"
+            ],
+            "source_evidence": "Object property definition: \"Measurement of a chiller ability to remove heat\"",
+            "confidence": "high",
+            "rationale": "The source property directly supports a cooling capacity attribute on chillers."
+          },
+          "result": {
+            "type": "number"
+          },
+          "sample_id": "S7",
+          "verdict": "accept",
+          "reviewer_comment": "Checked: evidence calls it an Object property definition -- verified coolingCapacity really is typed owl:ObjectProperty in Brick's own RDF (a real quirk in Brick, not a compiler error), even though it's correctly translated as type:number.",
+          "finding": null
+        },
+        {
+          "idx": 8,
+          "target_path": "classes.Boiler.properties.status",
+          "artefact_type": "property",
+          "mapping": {
+            "target_path": "classes.Boiler.properties.status",
+            "source_iris": [
+              "https://w3id.org/rec#status"
+            ],
+            "source_evidence": "Datatype property label \"status\" and standard HVAC practice for boiler operating state.",
+            "confidence": "medium",
+            "rationale": "Boilers are operational assets for which status is routinely needed."
+          },
+          "result": {
+            "type": "text",
+            "allowed": [
+              "off",
+              "on",
+              "alarm"
+            ]
+          },
+          "sample_id": "S8",
+          "verdict": "accept",
+          "reviewer_comment": null,
+          "finding": null
+        },
+        {
+          "idx": 9,
+          "target_path": "relationships[2]",
+          "artefact_type": "relationship",
+          "mapping": {
+            "target_path": "relationships[2]",
+            "source_iris": [
+              "https://brickschema.org/schema/Brick#AHU",
+              "https://brickschema.org/schema/Brick#Damper"
+            ],
+            "source_evidence": "\"AHU\" is \"usually connected to an air-distribution system,\" and a \"Damper\" is an element of an air-distribution system that changes airflow rate or shuts off airflow, so a damper is a supported part of an AHU assembly.",
+            "confidence": "high",
+            "rationale": "The AHU and Damper definitions together support a hasPart relation because dampers are standard airflow-control components in AHU-connected air-distribution assemblies."
+          },
+          "result": {
+            "name": "hasPart",
+            "from": "AirHandlingUnit",
+            "to": "Damper",
+            "meaning": "An air handling unit is composed in part of a damper.",
+            "aliases": []
+          },
+          "sample_id": "S9",
+          "verdict": "accept",
+          "reviewer_comment": null,
+          "finding": null
+        },
+        {
+          "idx": 10,
+          "target_path": "relationships[3]",
+          "artefact_type": "relationship",
+          "mapping": {
+            "target_path": "relationships[3]",
+            "source_iris": [
+              "https://brickschema.org/schema/Brick#hasPart",
+              "https://brickschema.org/schema/Brick#Cooling_Valve"
+            ],
+            "source_evidence": "Cooling valve definition describes modulating cold water through a cooling coil; standard HVAC practice places such valves in AHU coil assemblies.",
+            "confidence": "medium",
+            "rationale": "The AHU-to-CoolingValve composition is standard practice for the specific included equipment concepts."
+          },
+          "result": {
+            "name": "hasPart",
+            "from": "AirHandlingUnit",
+            "to": "CoolingValve",
+            "meaning": "An air handling unit is composed in part of a cooling valve used for coil control.",
+            "aliases": []
+          },
+          "sample_id": "S10",
+          "verdict": "accept",
+          "reviewer_comment": null,
+          "finding": null
+        },
+        {
+          "idx": 11,
+          "target_path": "relationships[22]",
+          "artefact_type": "relationship",
+          "mapping": {
+            "target_path": "relationships[22]",
+            "source_iris": [
+              "https://brickschema.org/schema/Brick#Building",
+              "https://brickschema.org/schema/Brick#Floor"
+            ],
+            "source_evidence": "A \"Building\" has a \"characteristic spatial structure,\" and a \"Floor\" is \"A level, typically representing a horizontal aggregation of spaces,\" so floors are natural constituent parts of a building.",
+            "confidence": "high",
+            "rationale": "The building and floor definitions directly support a building-hasPart-floor relation."
+          },
+          "result": {
+            "name": "hasPart",
+            "from": "Building",
+            "to": "Floor",
+            "meaning": "A building is composed in part of floors.",
+            "aliases": []
+          },
+          "sample_id": "S11",
+          "verdict": "accept",
+          "reviewer_comment": "REAL FINDING, LED TO A FULL 127-MAPPING AUDIT: cited evidence was borrowed from an unrelated third class (Site) that documents Brick's general hasPart/isPartOf convention, rather than from Building or Floor's own definitions -- neither endpoint's real definition was cited at all. This one flag, once investigated, revealed the same 'names a real class without citing it' pattern across 42 of 127 mappings (33%). Root cause fixed in compiler-prompt.md (an explicit 'empty source_iris is fine, describe in prose instead' instruction was directly licensing it); all 42 existing mappings reground with real, verified source_iris.",
+          "finding": "Full account: provenance-audit.md."
+        },
+        {
+          "idx": 12,
+          "target_path": "rules.economizerReducesMechanicalConditioning",
+          "artefact_type": "rule",
+          "mapping": {
+            "target_path": "rules.economizerReducesMechanicalConditioning",
+            "source_iris": [
+              "https://brickschema.org/schema/Brick#Economizer"
+            ],
+            "source_evidence": "An Economizer is a \"Device that, on proper variable sensing, initiates control signals or actions to conserve energy\" and is \"A control system that reduces the mechanical heating and cooling requirement.\"",
+            "confidence": "high",
+            "rationale": "The source supports a general economizer applicability/purpose rule tied to variable sensing and reduced mechanical conditioning, but not the more specific claim about when an AHU can use economizer based on outside-air suitability."
+          },
+          "result": {
+            "conditions": [
+              "an economizer uses proper variable sensing",
+              "economizer operation is intended to conserve energy by reducing mechanical heating and cooling requirement"
+            ]
+          },
+          "sample_id": "S12",
+          "verdict": "accept",
+          "reviewer_comment": null,
+          "finding": null
+        },
+        {
+          "idx": 13,
+          "target_path": "actions.verifyOccupiedZoneConditioning",
+          "artefact_type": "action",
+          "mapping": {
+            "target_path": "actions.verifyOccupiedZoneConditioning",
+            "source_iris": [
+              "https://brickschema.org/schema/Brick#Zone",
+              "https://brickschema.org/schema/Brick#Occupancy_Sensor",
+              "https://brickschema.org/schema/Brick#Thermostat"
+            ],
+            "source_evidence": "A \"Zone\" is a \"separately controlled heated or cooled space,\" an \"Occupancy Sensor\" \"Detects occupancy of some space or area,\" and a \"Thermostat\" is an automatic control device used to maintain temperature, supporting an action to verify control availability for an occupied zone.",
+            "confidence": "high",
+            "rationale": "The cited classes jointly ground the idea of checking that occupied zones have active conditioning control."
+          },
+          "result": {
+            "input": "Zone",
+            "preconditions": [
+              "occupiedZoneRequiresControl"
+            ],
+            "effect": "the served zone is checked to ensure active control is available for occupied conditions",
+            "verification": "confirm a serving thermostat or terminal unit is assigned and operating"
+          },
+          "sample_id": "S13",
+          "verdict": "accept",
+          "reviewer_comment": "Flagged: source_iris was entirely empty despite the rationale explicitly naming 4 specific classes (Zone, OccupancySensor, Thermostat, TerminalUnit) with real, citable IRIs. Confirmed via diff against the original fresh-compile output that this was never touched by any repair pass -- the defect exists in compile.py's own original output, not just repair.py's. This was the second data point (after relationships[22]) that triggered the full-population audit.",
+          "finding": "Fixed as part of the 42-item audit batch: now cites Zone, OccupancySensor, and Thermostat directly."
+        }
+      ]
     }
   ]
 }

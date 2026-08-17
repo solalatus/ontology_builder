@@ -1,12 +1,60 @@
-# Manual spot-check — Brick HVAC translation (round 2)
+# Manual spot-check — Brick HVAC translation
 
 Human evidence supplementing the automated QA suite (issue #103), done
-in-session. Full structured data (all 13 sampled items, verbatim
-source/result pairs) is in `manual-spot-check.json`; this file is the
-readable summary. This round supersedes the first spot-check round
-(2026-08-17, pre-rerun) — its sampled artefact population no longer exists
-after the full clean pipeline rerun and the disposition-judging fix that
-followed it.
+in-session across multiple rounds. Full structured data (every sampled
+item, verbatim source/result pairs, all rounds) is in
+`manual-spot-check.json`, keyed by `rounds`; this file is the readable
+summary, newest round first.
+
+## Round 3 (2026-08-17)
+
+10%-stratified sample (13 of 127 artefacts, seed 306 — a fresh sample, one
+item overlapping round 2's by chance: `classes.Humidifier`, still solid).
+**Result: 13/13 accepted.**
+
+Two flags in this round were not one-off slips — they were the second and
+third data points (after round 2's `relationships[31]`) in a systemic
+pattern the reviewer directed a full investigation into rather than
+accepting piecemeal:
+
+- **`relationships[22]`** (Building hasPart Floor): cited evidence was
+  borrowed from an unrelated third class (`Site`) documenting Brick's
+  general hasPart/isPartOf convention, not from Building's or Floor's own
+  definitions — neither endpoint's real definition was cited at all.
+- **`actions.verifyOccupiedZoneConditioning`**: `source_iris` was entirely
+  empty despite the rationale explicitly naming 4 specific classes (Zone,
+  OccupancySensor, Thermostat, TerminalUnit) with real, citable IRIs.
+  Confirmed via diff against the original fresh-compile output that this
+  was never touched by any repair pass — the defect was in `compile.py`'s
+  own original output, not just `repair.py`'s reground path (already fixed
+  after round 2).
+
+Given the pattern, the reviewer asked for a full comprehensive audit of all
+127 mappings rather than another sample. **Full account:
+`provenance-audit.md`** — 42 of 127 mappings (33%) had incomplete
+`source_iris`; root cause was `compiler-prompt.md` itself explicitly
+licensing empty citations for standard-practice claims. Fixed generally in
+the prompt (affects every future domain) and reground for all 42 existing
+mappings, independently re-verified (0 majority-unsupported across all 42).
+
+All other 11 of 13 sampled items in this round: accepted with no flag —
+`classes.Space` (Brick+REC consolidation), `classes.TemperatureDeadbandSetpoint`,
+`classes.Filter`, `classes.SpaceHeater.properties.status`,
+`classes.Boiler.properties.status`, `relationships[2]`, `relationships[3]`,
+`rules.economizerReducesMechanicalConditioning` matched their source
+material directly. `classes.TemperatureDeadbandSetpoint.properties.value`
+flagged for the same label-only-grounding pattern already accepted in round
+2 (`maxOccupancy`) — accepted for the same reason. `classes.Chiller.
+properties.coolingCapacity` checked and confirmed correct: Brick really does
+type `coolingCapacity` as `owl:ObjectProperty` (a real quirk in Brick's own
+RDF), and the compiler correctly still modeled it as `type: number` in the
+Agent Ontology regardless.
+
+## Round 2 (2026-08-17)
+
+Supersedes the first spot-check round (2026-08-17, pre-rerun) — its sampled
+artefact population no longer exists after the full clean pipeline rerun
+and the disposition-judging fix that followed it.
 
 **Date:** 2026-08-17
 **Reviewer:** repo owner (szablevi@gmail.com), in-session with the coding agent
