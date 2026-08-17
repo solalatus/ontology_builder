@@ -52,7 +52,8 @@
     {
       "target_path": "classes.TemperatureSensor.properties.value",
       "source_iris": [
-        "https://w3id.org/rec#value"
+        "https://w3id.org/rec#value",
+        "https://brickschema.org/schema/Brick#Temperature_Sensor"
       ],
       "source_evidence": "Datatype property label \"value\"; temperature sensor definition says it measures temperature.",
       "confidence": "high",
@@ -287,7 +288,7 @@
       ],
       "source_evidence": "\"Thermostat\" is defined as \"An automatic control device used to maintain temperature at a fixed or adjustable setpoint,\" which in HVAC practice entails operating modes such as heating, cooling, auto, and off for how the device maintains that setpoint.",
       "confidence": "high",
-      "rationale": "The thermostat definition directly supports a control-oriented mode property, and the cited class IRI was missing."
+      "rationale": "The thermostat definition directly supports a control-oriented mode property."
     },
     {
       "target_path": "classes.Thermostat.properties.status",
@@ -651,7 +652,8 @@
       "target_path": "relationships[7]",
       "source_iris": [
         "https://brickschema.org/schema/Brick#hasPoint",
-        "https://brickschema.org/schema/Brick#AHU"
+        "https://brickschema.org/schema/Brick#AHU",
+        "https://brickschema.org/schema/Brick#CO2_Sensor"
       ],
       "source_evidence": "Brick hasPoint definition; standard HVAC practice for air handlers uses CO2 sensing in ventilation-related control contexts.",
       "confidence": "medium",
@@ -705,7 +707,8 @@
       "target_path": "relationships[12]",
       "source_iris": [
         "https://brickschema.org/schema/Brick#hasPoint",
-        "https://brickschema.org/schema/Brick#Thermostat"
+        "https://brickschema.org/schema/Brick#Thermostat",
+        "https://brickschema.org/schema/Brick#Temperature_Sensor"
       ],
       "source_evidence": "\"Thermostat\" \u2014 \"An automatic control device used to maintain temperature at a fixed or adjustable setpoint.\" Maintaining temperature in practice requires a temperature sensing input, so a TemperatureSensor is a standard control point for a thermostat.",
       "confidence": "medium",
@@ -715,7 +718,8 @@
       "target_path": "relationships[13]",
       "source_iris": [
         "https://brickschema.org/schema/Brick#hasPoint",
-        "https://brickschema.org/schema/Brick#Thermostat"
+        "https://brickschema.org/schema/Brick#Thermostat",
+        "https://brickschema.org/schema/Brick#Temperature_Setpoint"
       ],
       "source_evidence": "\"Thermostat\" \u2014 \"An automatic control device used to maintain temperature at a fixed or adjustable setpoint.\" A TemperatureSetpoint is therefore a standard point associated with thermostat control.",
       "confidence": "high",
@@ -724,11 +728,12 @@
     {
       "target_path": "relationships[14]",
       "source_iris": [
-        "https://brickschema.org/schema/Brick#Occupancy_Sensor"
+        "https://brickschema.org/schema/Brick#Occupancy_Sensor",
+        "https://brickschema.org/schema/Brick#Space"
       ],
       "source_evidence": "\"Occupancy Sensor\" \"Detects occupancy of some space or area\"; standard building/HVAC practice places such a point on the space whose occupancy is being detected.",
       "confidence": "medium",
-      "rationale": "The occupancy sensor definition supports the point semantics for a space, and the missing cited class IRI should be included."
+      "rationale": "The occupancy sensor definition supports point semantics for a space, and Space's own definition is now cited alongside it."
     },
     {
       "target_path": "relationships[15]",
@@ -763,11 +768,12 @@
     {
       "target_path": "relationships[18]",
       "source_iris": [
-        "https://brickschema.org/schema/Brick#Space"
+        "https://brickschema.org/schema/Brick#Space",
+        "https://brickschema.org/schema/Brick#Terminal_Unit"
       ],
       "source_evidence": "A \"Space\" is \"A part of the physical world ... whose 3D spatial extent is bounded,\" and standard HVAC practice physically locates terminal equipment within the space it conditions.",
       "confidence": "medium",
-      "rationale": "The space definition supports it as a physical location container for terminal units, and that cited class should be included."
+      "rationale": "The space definition supports it as a physical location container for terminal units, and TerminalUnit's own definition is now cited alongside it."
     },
     {
       "target_path": "relationships[19]",
@@ -782,11 +788,12 @@
     {
       "target_path": "relationships[20]",
       "source_iris": [
-        "https://brickschema.org/schema/Brick#Occupancy_Sensor"
+        "https://brickschema.org/schema/Brick#Occupancy_Sensor",
+        "https://brickschema.org/schema/Brick#Space"
       ],
       "source_evidence": "\"Occupancy Sensor\" \"Detects occupancy of some space or area\"; standard practice places the sensor in the physical space whose occupancy it detects.",
       "confidence": "medium",
-      "rationale": "The occupancy sensor definition supports location in a space, and the cited class IRI needs to be present."
+      "rationale": "The occupancy sensor definition supports location in a physical space, and Space's own definition is cited alongside it."
     },
     {
       "target_path": "relationships[21]",
@@ -979,7 +986,8 @@
     {
       "target_path": "actions.enableEconomizer",
       "source_iris": [
-        "https://brickschema.org/schema/Brick#Economizer"
+        "https://brickschema.org/schema/Brick#Economizer",
+        "https://brickschema.org/schema/Brick#AHU"
       ],
       "source_evidence": "Economizer definition states it initiates control signals or actions to conserve energy and reduce mechanical cooling requirement.",
       "confidence": "high",
@@ -1199,7 +1207,8 @@
     {
       "target_path": "relationships[33]",
       "source_iris": [
-        "https://brickschema.org/schema/Brick#Space_Heater"
+        "https://brickschema.org/schema/Brick#Space_Heater",
+        "https://brickschema.org/schema/Brick#Space"
       ],
       "source_evidence": "\"A heater used to warm the air in an enclosed area, such as a room or office\"",
       "confidence": "medium",
@@ -1244,6 +1253,32 @@
       "source_evidence": "\"Dry Cooler\" is \"a fluid cooler that uses air ... to accomplish process cooling\"; as active cooling equipment comparable to sibling plant equipment including \"Chiller\", \"Condensing Unit\", and \"Cooling Tower\", it is appropriately represented with the standard operational status states off/on/alarm.",
       "confidence": "medium",
       "rationale": "The Dry Cooler definition establishes it as active process-cooling equipment, and the cited sibling cooling equipment supports preserving the same status convention."
+    },
+    {
+      "target_path": "relationships[34]",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#hasPoint",
+        "https://brickschema.org/schema/Brick#AHU",
+        "https://brickschema.org/schema/Brick#Air_Handler_Unit",
+        "https://brickschema.org/schema/Brick#Air_Handling_Unit",
+        "https://brickschema.org/schema/Brick#Outside_Air_CO2_Sensor"
+      ],
+      "source_evidence": "Brick hasPoint definition; \"Outside Air CO2 Sensor\" \u2014 \"Measures the concentration of CO2 in outside air\"; standard HVAC practice for air handlers uses outside-air CO2 sensing in ventilation/economizer-related control contexts, the same standard-practice basis already used for the generic CO2Sensor point (relationships[7]).",
+      "confidence": "medium",
+      "rationale": "The outside-air CO2 sensor definition supports a telemetry point on the air handling unit that draws outside air, using the same hasPoint convention already established for the generic CO2Sensor case in this domain."
+    },
+    {
+      "target_path": "relationships[35]",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#hasPoint",
+        "https://brickschema.org/schema/Brick#AHU",
+        "https://brickschema.org/schema/Brick#Air_Handler_Unit",
+        "https://brickschema.org/schema/Brick#Air_Handling_Unit",
+        "https://brickschema.org/schema/Brick#Return_Air_CO2_Sensor"
+      ],
+      "source_evidence": "Brick hasPoint definition; \"Return Air CO2 Sensor\" \u2014 \"Measures the concentration of CO2 in return air\"; standard HVAC practice for air handlers uses return-air CO2 sensing in ventilation-related control contexts, the same standard-practice basis already used for the generic CO2Sensor point (relationships[7]).",
+      "confidence": "medium",
+      "rationale": "The return-air CO2 sensor definition supports a telemetry point on the air handling unit that circulates return air, using the same hasPoint convention already established for the generic CO2Sensor case in this domain."
     }
   ],
   "dispositions": [

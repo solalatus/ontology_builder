@@ -548,6 +548,18 @@ relationships:
   to: Space
   meaning: A space heater serves the heating needs of a space.
   aliases: []
+- name: hasPoint
+  from: AirHandlingUnit
+  to: OutsideAirCO2Sensor
+  meaning: An air handling unit has an outside-air CO2 sensor as a telemetry or control
+    point.
+  aliases: []
+- name: hasPoint
+  from: AirHandlingUnit
+  to: ReturnAirCO2Sensor
+  meaning: An air handling unit has a return-air CO2 sensor as a telemetry or control
+    point.
+  aliases: []
 rules:
   needsCoolingFromSetpoint:
     conditions:
