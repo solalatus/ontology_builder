@@ -15,6 +15,7 @@ from pathlib import Path as _Path
 _sys.path.insert(0, str(_Path(__file__).resolve().parents[1]))
 
 import repair as repair_mod
+from validate_domain import validate_domain
 
 SAMPLE_DOMAIN = {
     "classes": {
@@ -306,6 +307,105 @@ class ApplyRepairsTests(unittest.TestCase):
         self.assertEqual(mapping["source_evidence"], "e")
         self.assertFalse(any(m["target_path"] == "classes.AHU.properties.status" for m in translation["mappings"]))
         self.assertEqual(summary["replace"][0]["new_target_path"], "classes.AHU.properties.operatingState")
+
+    def test_renaming_a_rule_cascades_to_actions_that_precondition_on_it(self):
+        # Regression: repairing rules.canUseEconomizer into
+        # rules.economizerReducesMechanicalConditioning on the real Brick
+        # HVAC clean rerun left actions.enableEconomizer's precondition
+        # still pointing at the old name -- structurally valid right after
+        # the rename call, but validate_domain.py's own re-check caught the
+        # resulting dangling reference. This must update the precondition.
+        domain = {
+            "classes": {"AHU": {"meaning": "x"}},
+            "relationships": [],
+            "rules": {"canUseEconomizer": {"conditions": ["c1"]}},
+            "actions": {
+                "enableEconomizer": {
+                    "input": "AHU", "preconditions": ["canUseEconomizer"],
+                    "effect": "e", "verification": "v",
+                }
+            },
+            "competency_questions": [],
+        }
+        translation = {"mappings": [{"target_path": "rules.canUseEconomizer", "source_iris": [], "source_evidence": "e", "confidence": "high", "rationale": "r"}]}
+        item = repair_mod.RejectedItem(target_path="rules.canUseEconomizer", current_shape={"conditions": ["c1"]}, rejection_rationale="r")
+        repairs = [
+            {
+                "target_path": "rules.canUseEconomizer",
+                "action": "replace",
+                "new_target_path": "rules.economizerReducesMechanicalConditioning",
+                "new_content": {"conditions": ["c2"]},
+                "source_evidence": "e2",
+                "confidence": "high",
+                "rationale": "renamed to match the evidence",
+            }
+        ]
+        summary = repair_mod.apply_repairs(domain, translation, repairs, [item])
+
+        self.assertNotIn("canUseEconomizer", domain["rules"])
+        self.assertIn("economizerReducesMechanicalConditioning", domain["rules"])
+        self.assertEqual(domain["actions"]["enableEconomizer"]["preconditions"], ["economizerReducesMechanicalConditioning"])
+        self.assertEqual(len(summary["cascaded_renames"]), 1)
+        self.assertEqual(summary["cascaded_renames"][0]["touched"], ["actions.enableEconomizer"])
+
+        report = validate_domain(domain)
+        self.assertTrue(report.ok, report.errors)
+
+    def test_renaming_a_class_cascades_to_relationship_endpoints_and_action_inputs(self):
+        domain = {
+            "classes": {"AHU": {"meaning": "x"}, "Zone": {"meaning": "y"}},
+            "relationships": [{"name": "serves", "from": "AHU", "to": "Zone", "meaning": "z", "aliases": []}],
+            "rules": {},
+            "actions": {"startAHU": {"input": "AHU", "preconditions": [], "effect": "e", "verification": "v"}},
+            "competency_questions": [],
+        }
+        translation = {"mappings": [{"target_path": "classes.AHU", "source_iris": [], "source_evidence": "e", "confidence": "high", "rationale": "r"}]}
+        item = repair_mod.RejectedItem(target_path="classes.AHU", current_shape={"meaning": "x"}, rejection_rationale="r")
+        repairs = [
+            {
+                "target_path": "classes.AHU",
+                "action": "replace",
+                "new_target_path": "classes.AirHandlingUnit",
+                "new_content": {"meaning": "x"},
+                "source_evidence": "e2",
+                "confidence": "high",
+                "rationale": "renamed to the full source label",
+            }
+        ]
+        summary = repair_mod.apply_repairs(domain, translation, repairs, [item])
+
+        self.assertEqual(domain["relationships"][0]["from"], "AirHandlingUnit")
+        self.assertEqual(domain["actions"]["startAHU"]["input"], "AirHandlingUnit")
+        touched = {c["kind"]: c["touched"] for c in summary["cascaded_renames"]}
+        self.assertIn("relationships[0]", touched["class"])
+        self.assertIn("actions.startAHU", touched["class"])
+
+        report = validate_domain(domain)
+        self.assertTrue(report.ok, report.errors)
+
+    def test_property_rename_does_not_trigger_a_cascade(self):
+        # Properties aren't referenced by name anywhere else structurally --
+        # a cascade here would be a no-op at best, wrong at worst if a rule
+        # or action field ever happened to share the same string by
+        # coincidence.
+        domain = json.loads(json.dumps(SAMPLE_DOMAIN))
+        translation = json.loads(json.dumps(SAMPLE_TRANSLATION))
+        item = repair_mod.RejectedItem(
+            target_path="classes.AHU.properties.status", current_shape={"type": "text", "allowed": ["on", "off"]}, rejection_rationale="r"
+        )
+        repairs = [
+            {
+                "target_path": "classes.AHU.properties.status",
+                "action": "replace",
+                "new_target_path": "classes.AHU.properties.operatingState",
+                "new_content": {"type": "text", "allowed": ["on", "off"]},
+                "source_evidence": "e",
+                "confidence": "medium",
+                "rationale": "renamed",
+            }
+        ]
+        summary = repair_mod.apply_repairs(domain, translation, repairs, [item])
+        self.assertEqual(summary["cascaded_renames"], [])
 
     def test_in_place_drop_removes_the_element_and_its_mapping(self):
         domain = json.loads(json.dumps(SAMPLE_DOMAIN))

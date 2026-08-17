@@ -238,6 +238,54 @@ def validate_repairs(repairs: list[dict], rejected_items: list[RejectedItem], do
     return errors
 
 
+def _cascade_rename(domain_data: dict, kind: str, old_name: str, new_name: str) -> list[str]:
+    """When a repair renames a class or rule (`replace` with a
+    `new_target_path` whose leaf key differs from the original), anything
+    else that addresses it by exact name goes dangling unless updated too.
+
+    Found for real: repairing `rules.canUseEconomizer` into
+    `rules.economizerReducesMechanicalConditioning` left
+    `actions.enableEconomizer`'s precondition still pointing at the old
+    name, failing validate_domain.py's `action_precondition_unresolved`
+    hard-gate check -- repair.py's own structural re-validation caught it,
+    but nothing had *fixed* it. Only classes and rules are name-addressed
+    top-level collections that anything else references by exact string
+    (relationship endpoints/action inputs point at class names, action
+    preconditions point at rule names); properties and relationships
+    (index-addressed) have no such downstream references to cascade.
+
+    Returns the target_paths actually touched, for logging/transparency --
+    a silent cascade would be just as bad as a silent drop.
+    """
+    if old_name == new_name:
+        return []
+    touched = []
+    if kind == "class":
+        for idx, rel in enumerate(domain_data.get("relationships") or []):
+            if not isinstance(rel, dict):
+                continue
+            changed = False
+            for key in ("from", "to"):
+                if rel.get(key) == old_name:
+                    rel[key] = new_name
+                    changed = True
+            if changed:
+                touched.append(f"relationships[{idx}]")
+        for action_name, action_def in (domain_data.get("actions") or {}).items():
+            if isinstance(action_def, dict) and action_def.get("input") == old_name:
+                action_def["input"] = new_name
+                touched.append(f"actions.{action_name}")
+    elif kind == "rule":
+        for action_name, action_def in (domain_data.get("actions") or {}).items():
+            if not isinstance(action_def, dict):
+                continue
+            preconditions = action_def.get("preconditions")
+            if isinstance(preconditions, list) and old_name in preconditions:
+                action_def["preconditions"] = [new_name if p == old_name else p for p in preconditions]
+                touched.append(f"actions.{action_name}")
+    return touched
+
+
 def apply_repairs(domain_data: dict, translation_data: dict, repairs: list[dict], rejected_items: list[RejectedItem]) -> dict:
     """Applies each repair decision at its target_path:
 
@@ -262,7 +310,7 @@ def apply_repairs(domain_data: dict, translation_data: dict, repairs: list[dict]
     translation_data in place.
     """
     by_path = {it.target_path: it for it in rejected_items}
-    summary = {"reground": [], "replace": [], "drop": []}
+    summary = {"reground": [], "replace": [], "drop": [], "cascaded_renames": []}
     mappings = translation_data.setdefault("mappings", [])
     mapping_index = {m.get("target_path"): m for m in mappings}
 
@@ -296,6 +344,13 @@ def apply_repairs(domain_data: dict, translation_data: dict, repairs: list[dict]
                 del container[key]
                 new_key = _PATH_TOKEN_RE.findall(new_target_path)[-1]
                 container[new_key] = new_content
+                kind = _target_kind(target_path)
+                if kind in ("class", "rule") and isinstance(key, str):
+                    touched = _cascade_rename(domain_data, kind, key, new_key)
+                    if touched:
+                        summary["cascaded_renames"].append(
+                            {"kind": kind, "old_name": key, "new_name": new_key, "touched": touched}
+                        )
             elif action == "replace":
                 container[key] = new_content
             # reground: domain_data is untouched, content was already fine.
@@ -400,6 +455,7 @@ def run_repair(
                 "reground_count": len(summary["reground"]),
                 "replace_count": len(summary["replace"]),
                 "drop_count": len(summary["drop"]),
+                "cascaded_rename_count": len(summary["cascaded_renames"]),
                 "summary": summary,
                 "structural_validation_ok": report.ok,
                 "structural_validation_errors": len(report.errors),
@@ -411,7 +467,8 @@ def run_repair(
     )
     print(
         f"[repair] done: {len(summary['reground'])} reground, {len(summary['replace'])} replaced, "
-        f"{len(summary['drop'])} dropped, structural_ok={report.ok}, cost=${cost:.4f} -> {summary_path}"
+        f"{len(summary['drop'])} dropped, {len(summary['cascaded_renames'])} cascaded rename(s), "
+        f"structural_ok={report.ok}, cost=${cost:.4f} -> {summary_path}"
     )
     return 0 if report.ok else 1
 
