@@ -1392,3 +1392,46 @@ reference and record deltas/decisions here instead.)*
   Full account: `domains/brick-hvac/manual-spot-check.md`/`.json` (round 7).
 
   **#106 still open** — still the user's call.
+
+- 2026-08-17 (continued) — **Closed two real gaps surfaced by direct
+  questions: no single-command pipeline facility, and an out-of-date
+  README.** Asked plainly whether a "run it all and get a flawless
+  ontology" facility existed and was documented -- answer was no on both
+  counts, and the README gap was worse than assumed: its own "Pipeline"
+  section never mentioned `reinstate.py` at all, despite it being
+  load-bearing (it's what fixed `cq5` this round), and still said
+  `evaluate.py` has "7 layers" after round 6 added an 8th
+  (`endpoint_citation_gate`) -- which, on checking, `_render_markdown()`
+  never rendered the status of either, despite it being a hard gate in the
+  JSON report since round 6.
+
+  Added **`run_pipeline.py`**: chains fetch -> extract -> compile ->
+  evaluate -> repair/reinstate (looped up to `--max-fix-rounds`) -> final
+  evaluate, using each tool's own CLI conventions and file layout. Its
+  repair/reinstate batch-builders generalize the exact process this whole
+  session followed by hand every round -- read `evaluate.py`'s own report,
+  derive the next tool's input from it -- reusing the same generic helpers
+  `evaluate.py`'s own judges already use internally
+  (`_class_names_involved`, `_ground_truth_for_target`,
+  `_sibling_context_for_iri`), so nothing domain-specific was reinvented.
+  Does not attempt to auto-fix `structural_validity`/
+  `endpoint_citation_completeness` failures (real compile defects, not
+  judged-content problems) and does not loop forever or fabricate its way
+  to a passing report.
+
+  Fixed `evaluate.py`'s `_render_markdown()` to actually show
+  `endpoint_citation_completeness`'s status. Rewrote `tools/README.md`'s
+  Pipeline section to include `reinstate.py` and `run_pipeline.py`, added
+  worked CLI examples for `evaluate.py`/`repair.py`/`reinstate.py` (only
+  fetch/extract/compile had one before), and corrected the layer count.
+
+  Re-confirmed domain-agnosticism of everything added: `run_pipeline.py`
+  and its tests grepped clean, no Brick/HVAC terms anywhere.
+
+  Tests: batch-builder unit tests (pure, deterministic) + one dry-run
+  integration test (fetch-skip -> real extract -> compile `--dry-run`
+  against a local fixture, no network/credentials/cost) for
+  `run_pipeline.py`; one new test for the markdown-rendering fix. Full
+  offline suite: 217/217 passing.
+
+  **#106 still open** — still the user's call.
