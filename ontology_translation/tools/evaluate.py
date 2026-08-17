@@ -347,11 +347,23 @@ looked-up source text for the class(es) the target element involves (resolved fr
 itself, not supplied by whoever produced the mapping). Treat this as ground truth, not as more
 self-reporting: it exists specifically so you can check the cited evidence and rationale *against* what
 the source material actually says, rather than judging only whether the rationale reads plausibly in
-isolation. A confident, well-written rationale is not itself evidence -- if the ground truth definitions
-given to you don't actually contain or reasonably imply what's being claimed (no relevant text, or the
-claim doesn't follow from what's genuinely there), that is real grounds for "unsupported" even when the
-prose sounds authoritative. When `actual_source_class_definitions` is absent for a target (its class(es)
-couldn't be structurally resolved, e.g. a rule), judge the cited evidence on its own terms as before.
+isolation. A confident, well-written rationale is not itself evidence -- if a ground truth definition
+directly contradicts what's being claimed, or a claim rests entirely on a class's ground truth definition
+saying something it plainly doesn't say, that is real grounds for "unsupported" even when the prose
+sounds authoritative.
+
+Know what `actual_source_class_definitions` does and doesn't cover, and don't over-read an absence: for a
+class or property, it's that class's own definition -- reasonably complete for judging a claim about that
+class. For a relationship, it's both endpoint classes -- also reasonably complete for judging that specific
+pair. For an **action**, it is *only* the action's declared input class, never every class the action's
+effect/precondition/verification text might reasonably involve (e.g. a class that triggers or is checked
+by the action but isn't the input itself) -- silence there about some other concept the action mentions is
+expected and not itself evidence against the action, so weigh the cited evidence on its own terms in that
+case, using the input class's definition mainly to catch an outright contradiction, not as an exhaustive
+completeness check. **Rules** get no `actual_source_class_definitions` at all (conditions are free text
+with no structural class reference) -- judge those purely on the cited evidence, same as when the field is
+absent for any other target. When `actual_source_class_definitions` is absent entirely, judge the cited
+evidence on its own terms, same as before this field existed.
 
 Classify the mapping as exactly one of:
 - "supported" -- the evidence (of either kind) genuinely and specifically justifies the target element,
