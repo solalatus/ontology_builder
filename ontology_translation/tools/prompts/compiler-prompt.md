@@ -260,6 +260,26 @@ IR; never cite one whose real definition contradicts what you are claiming
 just because its name is convenient — that is fabrication, not grounding,
 the same failure mode this prompt already warns against elsewhere.
 
+**Every relationship's own mapping entry must cite both its `from` class's
+and `to` class's own IRI; every action's own mapping entry must cite its
+`input` class's own IRI** — even when your `source_evidence`/`rationale`
+prose only explicitly discusses one side, or discusses the connection in
+general terms (the predicate's own meaning, a standard-practice pairing)
+without re-describing each endpoint. The relationship's existence as
+"X relates to Y" inherently rests on what X and Y each are; a reader
+checking that specific mapping entry must be able to verify both endpoints
+from it alone, not have to separately go find and trust the endpoint
+class's own, different mapping entry elsewhere in the file. Found for real,
+repeatedly: a relationship's mapping citing only the predicate plus one
+endpoint (or an action's mapping citing nothing about its own input class)
+while the other endpoint's real, citable class was sitting right there,
+unmentioned. This is checked automatically and will fail the translation —
+not by scanning your prose for names, but by directly checking, for every
+relationship and action, whether its own mapping's `source_iris` includes
+at least one IRI already established (in that same class's own
+`classes.<Name>` mapping) for its `from`/`to`/`input` class — so there is no
+phrasing that avoids the check.
+
 `target_path` addressing, exactly:
 
 - `classes.<ClassName>`

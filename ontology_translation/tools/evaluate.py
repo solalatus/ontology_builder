@@ -105,6 +105,70 @@ def provenance_gate(domain_data: dict, translation: dict, source_ir: dict) -> di
 
 
 # ---------------------------------------------------------------------------
+# Layer 2b: relationship/action endpoint citation completeness (hard gate).
+# ---------------------------------------------------------------------------
+#
+# provenance_gate above only checks that every element HAS a source_iris
+# list; it says nothing about whether that list actually names the specific
+# classes the element structurally connects. Found for real, three separate
+# times (manual spot-check rounds 3-5 on Brick HVAC): a relationship's own
+# mapping cites the predicate (hasPart/hasPoint/feeds/...) and maybe ONE
+# endpoint, while its evidence prose explicitly discusses the OTHER endpoint
+# by name -- but that endpoint's own class citation is missing from this
+# specific mapping, even though the endpoint class has its own, separate,
+# perfectly-cited classes.<Name> mapping elsewhere in the same file.
+#
+# Every attempt to catch this with text-matching against evidence/rationale
+# prose (case-insensitive label search, no-space compiled-name search,
+# stoplists for generic words, synonym clusters...) caught real instances
+# but also missed real instances, because it depends on how the compiler
+# happened to phrase the sentence. This check needs no prose at all: a
+# relationship's `from`/`to` and an action's `input` are structural fields
+# every domain has (agent_ontology_spec.md), and each named class already
+# has its own canonical source_iris from its own classes.<Name> mapping --
+# so this just checks set membership. It cannot be fooled by phrasing,
+# and it generalizes to any domain, not just Brick HVAC.
+
+
+def endpoint_citation_gate(domain_data: dict, translation: dict) -> dict:
+    mapping_by_path = {m.get("target_path"): m for m in translation.get("mappings", [])}
+    class_iris = {
+        name: set(mapping_by_path.get(f"classes.{name}", {}).get("source_iris") or [])
+        for name in (domain_data.get("classes") or {})
+    }
+
+    gaps = []
+    for idx, rel in enumerate(domain_data.get("relationships") or []):
+        if not isinstance(rel, dict):
+            continue
+        target_path = f"relationships[{idx}]"
+        mapping = mapping_by_path.get(target_path)
+        if mapping is None:
+            continue
+        cited = set(mapping.get("source_iris") or [])
+        for end in ("from", "to"):
+            cls = rel.get(end)
+            known = class_iris.get(cls)
+            if known and not (cited & known):
+                gaps.append({"target_path": target_path, "endpoint": end, "class": cls, "known_class_iris": sorted(known)})
+
+    for action_name, action_def in (domain_data.get("actions") or {}).items():
+        if not isinstance(action_def, dict):
+            continue
+        target_path = f"actions.{action_name}"
+        mapping = mapping_by_path.get(target_path)
+        if mapping is None:
+            continue
+        cited = set(mapping.get("source_iris") or [])
+        inp = action_def.get("input")
+        known = class_iris.get(inp)
+        if known and not (cited & known):
+            gaps.append({"target_path": target_path, "endpoint": "input", "class": inp, "known_class_iris": sorted(known)})
+
+    return {"ok": not gaps, "gaps": gaps}
+
+
+# ---------------------------------------------------------------------------
 # Layer 5: reverse coverage (deterministic -- silent information loss check).
 # ---------------------------------------------------------------------------
 
@@ -878,6 +942,7 @@ def run_evaluation(
 
     structural = structural_gate(domain_data)
     provenance = provenance_gate(domain_data, translation, source_ir)
+    endpoint_citations = endpoint_citation_gate(domain_data, translation)
     reverse = reverse_coverage(source_ir, translation)
 
     stability = {"note": "no stability_run_paths supplied", "pairs": [], "average_f1": None}
@@ -885,12 +950,13 @@ def run_evaluation(
         domain_datas = [yaml.safe_load(p.read_text(encoding="utf-8")) or {} for p in stability_run_paths]
         stability = translation_stability(domain_datas)
 
-    hard_gates_ok = structural["ok"] and provenance["ok"]
+    hard_gates_ok = structural["ok"] and provenance["ok"] and endpoint_citations["ok"]
 
     report = {
         "domain": manifest.id,
         "structural_validity": structural,
         "provenance_completeness": provenance,
+        "endpoint_citation_completeness": endpoint_citations,
         "reverse_coverage": reverse,
         "translation_stability": stability,
         "semantic_judging": None,

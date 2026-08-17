@@ -81,6 +81,22 @@ the mapping stayed just as unverifiable as before the repair — evidence a
 human has to trust by reading prose isn't the same as evidence a machine
 can check against the source.
 
+If you are reground/replace-ing a **relationship**, `source_iris` must
+include the `from` class's own IRI *and* the `to` class's own IRI — not
+just the predicate's, and not just whichever endpoint your prose happens to
+discuss. If you are reground/replace-ing an **action**, `source_iris` must
+include its `input` class's own IRI. Found for real, repeatedly: a
+relationship reground kept citing the predicate plus one endpoint while the
+other endpoint's real, citable class sat right there in `source_context`,
+unmentioned. **Also actually perform the fix, not just describe it**: a
+rationale that says something like "the missing class IRI should be
+included" or "that citation needs to be present" is not a completed repair
+— it is prose *about* a repair with no `source_iris` entry backing it,
+found for real slipping through a batch that got the intended new citation
+added to `source_iris` on some items but not others. Write the rationale as
+if the fix already happened, because by the time anyone reads it, it must
+have.
+
 ## Output contract
 
 Respond with **exactly one JSON object**, no prose, no markdown fences:

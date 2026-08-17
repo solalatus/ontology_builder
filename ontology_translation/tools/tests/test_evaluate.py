@@ -36,9 +36,9 @@ TRANSLATION_FULL = {
         {"target_path": "classes.Fan", "source_iris": ["http://ex.org#Fan"], "source_evidence": "A device that moves air.", "confidence": "high", "rationale": "renamed"},
         {"target_path": "classes.Fan.properties.status", "source_iris": ["http://ex.org#status"], "source_evidence": "status prop", "confidence": "high", "rationale": "renamed"},
         {"target_path": "classes.Zone", "source_iris": ["http://ex.org#Zone"], "source_evidence": "A controlled area.", "confidence": "high", "rationale": "renamed"},
-        {"target_path": "relationships[0]", "source_iris": ["http://ex.org#serves"], "source_evidence": "serves relation", "confidence": "medium", "rationale": "renamed"},
+        {"target_path": "relationships[0]", "source_iris": ["http://ex.org#serves", "http://ex.org#Fan", "http://ex.org#Zone"], "source_evidence": "serves relation", "confidence": "medium", "rationale": "renamed"},
         {"target_path": "rules.canRunFan", "source_iris": [], "source_evidence": "inferred from operational text", "confidence": "low", "rationale": "no direct source"},
-        {"target_path": "actions.startFan", "source_iris": [], "source_evidence": "inferred", "confidence": "low", "rationale": "no direct source"},
+        {"target_path": "actions.startFan", "source_iris": ["http://ex.org#Fan"], "source_evidence": "inferred", "confidence": "low", "rationale": "no direct source"},
     ],
     "dispositions": [
         {"source_iri": "http://ex.org#Fan", "disposition": "mapped"},
@@ -121,6 +121,65 @@ class ProvenanceGateTests(unittest.TestCase):
         result = evaluate_mod.provenance_gate(DOMAIN_DATA, translation, SOURCE_IR)
         self.assertTrue(result["ok"])
         self.assertIn("http://ex.org#NeverExisted", result["unknown_dispositions"])
+
+
+class EndpointCitationGateTests(unittest.TestCase):
+    def test_fully_covered_is_ok(self):
+        result = evaluate_mod.endpoint_citation_gate(DOMAIN_DATA, TRANSLATION_FULL)
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["gaps"], [])
+
+    def test_relationship_missing_to_endpoint_citation_flagged(self):
+        translation = json.loads(json.dumps(TRANSLATION_FULL))
+        rel = next(m for m in translation["mappings"] if m["target_path"] == "relationships[0]")
+        rel["source_iris"] = ["http://ex.org#serves", "http://ex.org#Fan"]  # Zone's own IRI dropped
+        result = evaluate_mod.endpoint_citation_gate(DOMAIN_DATA, translation)
+        self.assertFalse(result["ok"])
+        gap = result["gaps"][0]
+        self.assertEqual(gap["target_path"], "relationships[0]")
+        self.assertEqual(gap["endpoint"], "to")
+        self.assertEqual(gap["class"], "Zone")
+
+    def test_relationship_missing_from_endpoint_citation_flagged(self):
+        translation = json.loads(json.dumps(TRANSLATION_FULL))
+        rel = next(m for m in translation["mappings"] if m["target_path"] == "relationships[0]")
+        rel["source_iris"] = ["http://ex.org#serves", "http://ex.org#Zone"]  # Fan's own IRI dropped
+        result = evaluate_mod.endpoint_citation_gate(DOMAIN_DATA, translation)
+        self.assertFalse(result["ok"])
+        gap = result["gaps"][0]
+        self.assertEqual(gap["endpoint"], "from")
+        self.assertEqual(gap["class"], "Fan")
+
+    def test_action_missing_input_citation_flagged(self):
+        translation = json.loads(json.dumps(TRANSLATION_FULL))
+        action = next(m for m in translation["mappings"] if m["target_path"] == "actions.startFan")
+        action["source_iris"] = []
+        result = evaluate_mod.endpoint_citation_gate(DOMAIN_DATA, translation)
+        self.assertFalse(result["ok"])
+        gap = result["gaps"][0]
+        self.assertEqual(gap["target_path"], "actions.startFan")
+        self.assertEqual(gap["endpoint"], "input")
+        self.assertEqual(gap["class"], "Fan")
+
+    def test_endpoint_class_with_no_known_citations_of_its_own_is_not_flagged(self):
+        # If the endpoint class's OWN classes.<Name> mapping has no
+        # source_iris either (nothing to cross-check against), this gate
+        # has nothing to compare and must not manufacture a false gap --
+        # that's provenance_gate's job (every element needs *a* mapping),
+        # not this one's (a mapping's own citations must cover its
+        # structural endpoints, when those endpoints have known citations).
+        domain = json.loads(json.dumps(DOMAIN_DATA))
+        translation = json.loads(json.dumps(TRANSLATION_FULL))
+        zone_mapping = next(m for m in translation["mappings"] if m["target_path"] == "classes.Zone")
+        zone_mapping["source_iris"] = []
+        result = evaluate_mod.endpoint_citation_gate(domain, translation)
+        self.assertTrue(result["ok"])
+
+    def test_relationship_with_no_own_mapping_is_skipped_not_crashed(self):
+        translation = json.loads(json.dumps(TRANSLATION_FULL))
+        translation["mappings"] = [m for m in translation["mappings"] if m["target_path"] != "relationships[0]"]
+        result = evaluate_mod.endpoint_citation_gate(DOMAIN_DATA, translation)
+        self.assertTrue(result["ok"])
 
 
 class ReverseCoverageTests(unittest.TestCase):
