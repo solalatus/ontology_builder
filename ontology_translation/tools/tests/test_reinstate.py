@@ -317,6 +317,60 @@ class ApplyReinstatementsTests(unittest.TestCase):
         report = validate_domain(domain)
         self.assertTrue(report.ok, report.errors)
 
+    def test_new_relationship_cites_the_other_endpoints_own_iri_too(self):
+        # Regression: apply_reinstatements() used to cite only the newly
+        # reinstated class's own source_iri on a new relationship mapping,
+        # never the pre-existing endpoint's -- exactly the defect class
+        # evaluate.py's endpoint_citation_gate (added the same session this
+        # was found) exists to catch. CondensingUnit's own citation
+        # (established in SAMPLE_TRANSLATION) must appear on the new
+        # relationships[1] mapping alongside Compressor's.
+        domain = json.loads(json.dumps(SAMPLE_DOMAIN))
+        translation = json.loads(json.dumps(SAMPLE_TRANSLATION))
+        reinstatements = [
+            {
+                "source_iri": "http://ex.org#Compressor", "action": "reinstate", "class_name": "Compressor",
+                "class_content": {"meaning": "m", "aliases": [], "properties": {}},
+                "class_evidence": dict(EVIDENCE),
+                "new_relationships": [
+                    {"name": "hasPart", "from": "CondensingUnit", "to": "Compressor", "meaning": "x", **EVIDENCE}
+                ],
+            }
+        ]
+        reinstate_mod.apply_reinstatements(domain, translation, reinstatements)
+        mapping_by_path = {m["target_path"]: m for m in translation["mappings"]}
+        rel_iris = mapping_by_path["relationships[1]"]["source_iris"]
+        self.assertIn("http://ex.org#Compressor", rel_iris)
+        self.assertIn("http://ex.org#CondensingUnit", rel_iris)
+
+    def test_new_relationship_between_two_classes_reinstated_in_the_same_batch(self):
+        # The "other" endpoint can itself be a class reinstated earlier in
+        # the same batch, not just a pre-existing one -- its mapping must
+        # already be indexed by the time the later relationship is applied.
+        domain = json.loads(json.dumps(SAMPLE_DOMAIN))
+        translation = json.loads(json.dumps(SAMPLE_TRANSLATION))
+        reinstatements = [
+            {
+                "source_iri": "http://ex.org#Compressor", "action": "reinstate", "class_name": "Compressor",
+                "class_content": {"meaning": "m", "aliases": [], "properties": {}},
+                "class_evidence": dict(EVIDENCE),
+            },
+            {
+                "source_iri": "http://ex.org#ReversingValve", "action": "reinstate", "class_name": "ReversingValve",
+                "class_content": {"meaning": "m", "aliases": [], "properties": {}},
+                "class_evidence": dict(EVIDENCE),
+                "new_relationships": [
+                    {"name": "hasPart", "from": "Compressor", "to": "ReversingValve", "meaning": "x", **EVIDENCE}
+                ],
+            },
+        ]
+        reinstate_mod.apply_reinstatements(domain, translation, reinstatements)
+        mapping_by_path = {m["target_path"]: m for m in translation["mappings"]}
+        self.assertEqual(len(domain["relationships"]), 2)  # original relationships[0] + this one
+        rel_iris = mapping_by_path["relationships[1]"]["source_iris"]
+        self.assertIn("http://ex.org#Compressor", rel_iris)
+        self.assertIn("http://ex.org#ReversingValve", rel_iris)
+
     def test_reinstate_with_no_properties_adds_only_the_class_mapping(self):
         # Regression: a real reinstate run on Brick HVAC dropped provenance
         # coverage to 93.6% because reinstated classes' properties never

@@ -248,6 +248,11 @@ def apply_reinstatements(domain_data: dict, translation_data: dict, reinstatemen
     mappings = translation_data.setdefault("mappings", [])
     relationships = domain_data.setdefault("relationships", [])
     classes = domain_data.setdefault("classes", {})
+    # Kept current as we append below, so a new relationship's *other*
+    # endpoint (the pre-existing class, or one reinstated earlier in this
+    # same batch) always has its own known source_iris available to cite
+    # alongside the reinstated class's -- see the mappings.append() below.
+    mapping_by_path = {m.get("target_path"): m for m in mappings}
 
     for r in reinstatements:
         source_iri = r["source_iri"]
@@ -262,7 +267,9 @@ def apply_reinstatements(domain_data: dict, translation_data: dict, reinstatemen
 
         class_name = r["class_name"]
         classes[class_name] = r["class_content"]
-        mappings.append({"target_path": f"classes.{class_name}", "source_iris": [source_iri], **r["class_evidence"]})
+        class_mapping = {"target_path": f"classes.{class_name}", "source_iris": [source_iri], **r["class_evidence"]}
+        mappings.append(class_mapping)
+        mapping_by_path[class_mapping["target_path"]] = class_mapping
         # Every property is its own generated element for the provenance
         # hard gate (_iter_generated_elements in evaluate.py), same as a
         # normal compile -- found for real twice: first, reinstating 9
@@ -286,7 +293,20 @@ def apply_reinstatements(domain_data: dict, translation_data: dict, reinstatemen
             rel_content.setdefault("aliases", [])
             relationships.append(rel_content)
             rel_path = f"relationships[{len(relationships) - 1}]"
-            mappings.append({"target_path": rel_path, "source_iris": [source_iri], **rel_evidence})
+            # Cite the reinstated class's own IRI *and* the other endpoint's
+            # already-known IRI(s) -- a relationship mapping that cites only
+            # one side is exactly the defect class evaluate.py's
+            # endpoint_citation_gate now catches (found for real: every
+            # relationship reinstate.py ever created cited only the newly
+            # reinstated class, never the pre-existing endpoint it connects
+            # to, even when that endpoint's own citation was sitting right
+            # there in translation.json already).
+            other_endpoint = rel["to"] if rel["from"] == class_name else rel["from"]
+            other_iris = mapping_by_path.get(f"classes.{other_endpoint}", {}).get("source_iris") or []
+            rel_source_iris = list(dict.fromkeys([source_iri, *other_iris]))
+            rel_mapping = {"target_path": rel_path, "source_iris": rel_source_iris, **rel_evidence}
+            mappings.append(rel_mapping)
+            mapping_by_path[rel_path] = rel_mapping
             new_relationship_paths.append(rel_path)
 
         if disposition is not None:
