@@ -1308,3 +1308,73 @@ reference and record deltas/decisions here instead.)*
   far: **~$21.7**.
 
   **#106 still open** — still the user's call.
+
+- 2026-08-17 (continued) — **Sixth manual spot-check round, escalated to a
+  full non-sampled audit of the entire domain plus, for the first time,
+  every competency question.** User: *"do an utterly complete check.
+  Basically everything. the whole ontology. all rules. EVERYTHING... when
+  the pass is ready, fix fundamentally and systematically ALL errors! most
+  general and stable way possible, no matter the effort or token cost."*
+
+  Sample (13/127, seed 1147): 12/13 clean including confirmation all four
+  round-5 fixes held; 1 flagged (`classes.TemperatureSensor.properties.
+  value`, same recurring citation-completeness defect, fresh instance).
+
+  **Replaced the text-heuristic scanning approach entirely** for
+  relationship/action endpoint completeness, after three rounds of it
+  needing new patches every time (case-sensitivity, no-space matching, an
+  ever-growing stoplist, synonym clusters). New **`endpoint_citation_gate`**
+  in `evaluate.py`, added as a real pipeline layer and permanent hard gate:
+  purely structural, no prose-reading at all — checks that every
+  relationship's own `source_iris` includes an already-known IRI for its
+  `from` and `to` classes, and every action's for its `input` class, drawn
+  from each class's own `classes.<Name>` mapping. Can't be fooled by
+  phrasing, and applies to any future domain, not just Brick HVAC.
+
+  Found **8 real gaps** across all 127 mappings this way. 3 of them
+  (`relationships[14,18,20]`) had rationale text that literally *described*
+  a fix ("...the missing cited class IRI should be included") without
+  actually performing it — leftover meta-commentary from round 3's original
+  repair pass, undetected until a check finally looked at prose *content*
+  instead of just citation presence. A 4th item's identical leftover
+  phrasing turned out cosmetic (citation was already correct). Fixed all 9
+  directly, cleaned all 4 leftover-commentary rationales.
+
+  **Fixed at the source too, not just detected**: added explicit
+  "cite both endpoints" instructions to `compiler-prompt.md` and
+  `repair-prompt.md` (with an explicit warning against describing a fix
+  instead of performing it). Found the *same* defect as a real code bug in
+  `reinstate.py`: `apply_reinstatements()` had always cited only the newly
+  reinstated class's own IRI on new relationships, never the pre-existing
+  other endpoint's already-known one. Fixed generally, 2 new regression
+  tests.
+
+  **First competency-question audit this session** (CQs were excluded from
+  every prior round as "requirements, not generated elements"): 3 of 12 not
+  supported. `cq5` (outside-air vs. return-air CO2 sensing) had real,
+  citable source material that just hadn't been connected — fixed by adding
+  2 new relationships (AHU hasPoint OutsideAirCO2Sensor/ReturnAirCO2Sensor),
+  same standard-practice grounding already used elsewhere in this domain.
+  `cq11`/`cq12` were checked against the real scoped source IR and found to
+  have **no material to ground them on at all** (no path/connection concept
+  in Brick, no outside-air-temperature/enthalpy sensor classes in scope) —
+  fabricating content to force these to pass would violate this session's
+  standing no-fabrication rule, so both are left honestly unsupported and
+  documented as genuine scope limits, not defects.
+
+  Verified: structural clean, `endpoint_citation_gate` 0 gaps (was 8),
+  0/129 mappings with empty `source_iris`, reverse coverage 100%. Full
+  127-mapping independent semantic re-judge (not sampled): 0 unsupported,
+  5 contested (same disclosed non-blocking category throughout this
+  domain), $1.123. New relationships independently re-judged: 0
+  unsupported, 0 contested. `cq_support` re-run after the fix: `cq5` now
+  `True`. Full offline test suite: 209/209 (82 in `test_evaluate.py` incl.
+  6 new tests; 26 in `test_reinstate.py` incl. 2 new regression tests).
+
+  Full account: `domains/brick-hvac/provenance-audit.md` (third follow-up
+  section) and `domains/brick-hvac/manual-spot-check.md`/`.json` (round 6).
+
+  **Total cost this round: $1.53.** Running total for the whole Brick HVAC
+  effort across every phase so far: **~$23.2**.
+
+  **#106 still open** — still the user's call.

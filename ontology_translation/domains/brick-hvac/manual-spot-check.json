@@ -1500,6 +1500,399 @@
           "finding": null
         }
       ]
+    },
+    {
+      "round": 6,
+      "date": "2026-08-17",
+      "reviewer": "repo owner (szablevi@gmail.com), in-session review with the coding agent",
+      "sampling_method": {
+        "description": "Stratified sample by artefact type, proportional allocation, new seed. Escalated mid-round, per explicit direction, to a full non-sampled audit of all 127 mappings plus all 12 competency questions.",
+        "seed": 1147,
+        "population_total": 127,
+        "sample_target_fraction": 0.1,
+        "sample_size": 13,
+        "allocation": {
+          "class": 4,
+          "property": 4,
+          "relationship": 3,
+          "rule": 1,
+          "action": 1
+        },
+        "overlap_with_prior_rounds": [
+          "classes.AirTemperatureSetpoint",
+          "classes.Filter",
+          "classes.CoolingValve.properties.position",
+          "relationships[2]",
+          "rules.investigateAirQuality",
+          "actions.maintainWithinDeadband"
+        ]
+      },
+      "verdict_summary": {
+        "accept": 12,
+        "flag": 1,
+        "total": 13
+      },
+      "notes": [
+        "12 of 13 sampled items clean, including confirmation that all four round-5 fixes held (relationships[2], relationships[29] -- a third-round recurring miss, finally resolved -- relationships[32], actions.maintainWithinDeadband).",
+        "1 flagged: classes.TemperatureSensor.properties.value paraphrased Temperature_Sensor's own real definition ('temperature sensor definition says it measures temperature') without citing it -- the same defect family as rounds 3-5, but this time on a fresh item never touched before.",
+        "User directed: 'do an utterly complete check. Basically everything. the whole ontology. all rules. EVERYTHING. Give me only the flagged problems, but all of them.' Escalated beyond the sample to a full audit of all 127 mappings (all classes/properties/relationships/rules/actions) plus, for the first time this session, all 12 competency questions (previously excluded from every manual round as 'requirements, not generated elements').",
+        "Text-based rescans (the round-4/5 style: case/no-space label matching, stoplists, synonym clusters) kept finding real gaps but also kept needing new stoplist entries and cluster rules to suppress fresh false positives -- an approach that was clearly still fragile after three rounds of patching it. Replaced it for relationship/action endpoint completeness specifically with a precise, deterministic STRUCTURAL check instead of any text matching: for every relationship, does its own source_iris include at least one already-known IRI for its 'from' class and at least one for its 'to' class (drawn from that class's own classes.<Name> mapping)? Same for every action's 'input' class. This cannot be fooled by phrasing (spaced label vs. compiled name, case, synonyms) because it does not read prose at all -- it only compares structural fields (from/to/input, present in any domain per agent_ontology_spec.md) against already-established citations.",
+        "That structural check found 7 relationship gaps and 1 action gap: relationships[7,12,13,14,18,20,33], actions.enableEconomizer. Three of them (relationships[14,18,20]) had rationale text literally reading like '...and the missing cited class IRI should be included' or '...that cited class should be included' -- leftover meta-commentary from round 3's original repair pass that DESCRIBED the fix instead of performing it, undetected until now because nothing checked prose content for this pattern. A fourth item (classes.Thermostat.properties.mode) had the same leftover phrasing but its citation was actually already correct -- cosmetic only.",
+        "All 9 real gaps fixed directly (the evidence prose was already correct in every case; only the citation was missing), the 3 leftover-meta-commentary items' rationale text rewritten to be clean and direct, and the cosmetic one cleaned too. Made the fix permanent and general, not another one-off patch: added evaluate.py's new endpoint_citation_gate as a real pipeline layer (2b) and a permanent hard gate -- domain-agnostic, applies to any future domain, not just Brick HVAC -- plus a matching instruction added to compiler-prompt.md and repair-prompt.md so future compiles and repairs are told the requirement up front, not just caught after the fact.",
+        "Root-cause code bug found and fixed in reinstate.py, not just Brick HVAC's data: apply_reinstatements() cited only the newly-reinstated class's own IRI on every new relationship it created, never the pre-existing (or same-batch-reinstated) OTHER endpoint's already-known IRI -- exactly the defect class the new gate exists to catch, this time baked into the tool itself rather than a compiler/repair output. Fixed generally with 2 new regression tests.",
+        "Full 129-mapping (127 original + 2 added below) independent semantic re-judge: 0 unsupported, 5 contested (disclosed non-blocking borderline splits, same category accepted throughout this domain).",
+        "First-ever competency-question audit this session: 3 of 12 (cq5, cq11, cq12) judged not supported by the model as it stood. Investigated each against the real, scoped source material rather than fabricating content to force a pass: cq5 (outside-air vs. return-air CO2 sensing) had real, citable source material (OutsideAirCO2Sensor and ReturnAirCO2Sensor both real Brick classes with real definitions) that simply hadn't been connected to AirHandlingUnit via hasPoint -- fixed by adding two new relationships (relationships[34], relationships[35]), same standard-practice hasPoint grounding already used for the domain's other AHU sensor points. cq11 (chiller/boiler/heat-pump path connectivity) and cq12 (economizer-vs-mechanical-cooling decision logic) were checked against the actual scoped source IR and found to have NO real material to ground the specific claims each CQ asks for (no path/connection-model concept, no outside-air-temperature/enthalpy/mixed-air sensor classes anywhere in this domain's scope) -- fabricating relationships or rules to force these to pass would violate this session's standing no-fabrication rule, so both are left honestly unsupported and documented as genuine scope limits, not defects.",
+        "Independent re-judge of the 2 new relationships: 0 unsupported, 0 contested. Re-run cq_support after the fix: cq5 now True; cq11/cq12 remain False, confirmed as real scope limits."
+      ],
+      "items": [
+        {
+          "idx": 1,
+          "target_path": "classes.AirTemperatureSetpoint",
+          "artefact_type": "class",
+          "mapping": {
+            "target_path": "classes.AirTemperatureSetpoint",
+            "source_iris": [
+              "https://brickschema.org/schema/Brick#Air_Temperature_Setpoint"
+            ],
+            "source_evidence": "\"Sets temperature of air\"",
+            "confidence": "high",
+            "rationale": "Direct class mapping from the source definition."
+          },
+          "result": {
+            "meaning": "A setpoint that sets the temperature of air.",
+            "properties": {
+              "value": {
+                "type": "number",
+                "unit": "degC"
+              }
+            }
+          },
+          "sample_id": "S1",
+          "verdict": "accept",
+          "reviewer_comment": null,
+          "finding": null
+        },
+        {
+          "idx": 2,
+          "target_path": "classes.CO2DifferentialSensor",
+          "artefact_type": "class",
+          "mapping": {
+            "target_path": "classes.CO2DifferentialSensor",
+            "source_iris": [
+              "https://brickschema.org/schema/Brick#CO2_Differential_Sensor"
+            ],
+            "source_evidence": "\"Measures the difference between CO2 levels of inside and outside air\"",
+            "confidence": "high",
+            "rationale": "The source definition directly states the class meaning."
+          },
+          "result": {
+            "meaning": "A sensor that measures the difference between CO2 levels of inside and outside air.",
+            "aliases": [],
+            "properties": {
+              "value": {
+                "type": "number",
+                "unit": "ppm"
+              }
+            }
+          },
+          "sample_id": "S2",
+          "verdict": "accept",
+          "reviewer_comment": null,
+          "finding": null
+        },
+        {
+          "idx": 3,
+          "target_path": "classes.Filter",
+          "artefact_type": "class",
+          "mapping": {
+            "target_path": "classes.Filter",
+            "source_iris": [
+              "https://brickschema.org/schema/Brick#Filter"
+            ],
+            "source_evidence": "\"Device to remove gases from a mixture of gases or to remove solid material from a fluid\"",
+            "confidence": "high",
+            "rationale": "Direct class mapping from the source definition."
+          },
+          "result": {
+            "meaning": "A device that removes gases from a gas mixture or removes solid material from a fluid.",
+            "properties": {
+              "status": {
+                "type": "text",
+                "allowed": [
+                  "clean",
+                  "dirty",
+                  "replacement_due"
+                ]
+              }
+            }
+          },
+          "sample_id": "S3",
+          "verdict": "accept",
+          "reviewer_comment": null,
+          "finding": null
+        },
+        {
+          "idx": 4,
+          "target_path": "classes.HeatExchanger",
+          "artefact_type": "class",
+          "mapping": {
+            "target_path": "classes.HeatExchanger",
+            "source_iris": [
+              "https://brickschema.org/schema/Brick#Heat_Exchanger"
+            ],
+            "source_evidence": "\"A heat exchanger is a piece of equipment built for efficient heat transfer from one medium to another.\"",
+            "confidence": "high",
+            "rationale": "The source definition directly establishes Heat Exchanger as a distinct equipment concept."
+          },
+          "result": {
+            "meaning": "A piece of equipment built for efficient heat transfer from one medium to another.",
+            "aliases": [
+              "HX"
+            ],
+            "properties": {
+              "status": {
+                "type": "text",
+                "allowed": [
+                  "off",
+                  "on",
+                  "alarm"
+                ]
+              }
+            }
+          },
+          "sample_id": "S4",
+          "verdict": "accept",
+          "reviewer_comment": null,
+          "finding": null
+        },
+        {
+          "idx": 5,
+          "target_path": "classes.CoolingValve.properties.position",
+          "artefact_type": "property",
+          "mapping": {
+            "target_path": "classes.CoolingValve.properties.position",
+            "source_iris": [
+              "https://brickschema.org/schema/Brick#Cooling_Valve"
+            ],
+            "source_evidence": "\"Cooling Valve\" is defined as \"A valve that controls air temperature by modulating the amount of cold water flowing through a cooling coil,\" which standardly implies a modulating valve position represented as a percentage.",
+            "confidence": "high",
+            "rationale": "The definition explicitly describes modulation, which supports a percent position property for the cooling valve."
+          },
+          "result": {
+            "type": "number",
+            "unit": "percent"
+          },
+          "sample_id": "S5",
+          "verdict": "accept",
+          "reviewer_comment": null,
+          "finding": null
+        },
+        {
+          "idx": 6,
+          "target_path": "classes.TemperatureSensor.properties.value",
+          "artefact_type": "property",
+          "mapping": {
+            "target_path": "classes.TemperatureSensor.properties.value",
+            "source_iris": [
+              "https://w3id.org/rec#value"
+            ],
+            "source_evidence": "Datatype property label \"value\"; temperature sensor definition says it measures temperature.",
+            "confidence": "high",
+            "rationale": "A measured sensor concept naturally carries a numeric value property, supported by the generic value datatype property."
+          },
+          "result": {
+            "type": "number",
+            "unit": "degC"
+          },
+          "sample_id": "S6",
+          "verdict": "flag",
+          "reviewer_comment": null,
+          "finding": "Evidence paraphrased the owning class's real source definition without citing it. Fixed as part of this round's full audit."
+        },
+        {
+          "idx": 7,
+          "target_path": "classes.CondensingUnit.properties.status",
+          "artefact_type": "property",
+          "mapping": {
+            "target_path": "classes.CondensingUnit.properties.status",
+            "source_iris": [
+              "https://brickschema.org/schema/Brick#Condensing_Unit",
+              "https://brickschema.org/schema/Brick#Boiler",
+              "https://brickschema.org/schema/Brick#Chiller"
+            ],
+            "source_evidence": "\"Condensing Unit\" is \"An outdoor HVAC unit that typically condenses refrigerant from gas to liquid, integral to the refrigeration cycle\"; as an active HVAC unit analogous to sibling equipment such as a \"Boiler\" and \"Chiller\", it is appropriately modeled with an operational status property using the established equipment-state convention off/on/alarm.",
+            "confidence": "medium",
+            "rationale": "The class definition clearly describes Condensing Unit as active equipment, and the cited sibling HVAC equipment supports reusing the same operational status convention without changing the property content."
+          },
+          "result": {
+            "type": "text",
+            "allowed": [
+              "off",
+              "on",
+              "alarm"
+            ]
+          },
+          "sample_id": "S7",
+          "verdict": "accept",
+          "reviewer_comment": null,
+          "finding": null
+        },
+        {
+          "idx": 8,
+          "target_path": "classes.WaterTemperatureSensor.properties.value",
+          "artefact_type": "property",
+          "mapping": {
+            "target_path": "classes.WaterTemperatureSensor.properties.value",
+            "source_iris": [
+              "https://brickschema.org/schema/Brick#Water_Temperature_Sensor",
+              "https://brickschema.org/schema/Brick#Air_Temperature_Sensor"
+            ],
+            "source_evidence": "\"Water Temperature Sensor\" \"Measures the temperature of water\"; by direct analogy to the sibling \"Air Temperature Sensor\" that \"Measures the temperature of air\", the grounded value property is a numeric temperature measurement in degrees Celsius.",
+            "confidence": "high",
+            "rationale": "The class definition directly supports a measured temperature value, and the sibling temperature-sensor definition reinforces the same numeric degC property shape."
+          },
+          "result": {
+            "type": "number",
+            "unit": "degC"
+          },
+          "sample_id": "S8",
+          "verdict": "accept",
+          "reviewer_comment": null,
+          "finding": null
+        },
+        {
+          "idx": 9,
+          "target_path": "relationships[32]",
+          "artefact_type": "relationship",
+          "mapping": {
+            "target_path": "relationships[32]",
+            "source_iris": [
+              "https://brickschema.org/schema/Brick#Condensing_Unit",
+              "https://brickschema.org/schema/Brick#Fan"
+            ],
+            "source_evidence": "\"It comprises a condenser coil, compressor, fan, and potentially a reversing valve\"",
+            "confidence": "high",
+            "rationale": "The source definition explicitly lists fan as a component of a condensing unit."
+          },
+          "result": {
+            "name": "hasPart",
+            "from": "CondensingUnit",
+            "to": "Fan",
+            "meaning": "A condensing unit is composed in part of a fan.",
+            "aliases": []
+          },
+          "sample_id": "S9",
+          "verdict": "accept",
+          "reviewer_comment": null,
+          "finding": null
+        },
+        {
+          "idx": 10,
+          "target_path": "relationships[2]",
+          "artefact_type": "relationship",
+          "mapping": {
+            "target_path": "relationships[2]",
+            "source_iris": [
+              "https://brickschema.org/schema/Brick#AHU",
+              "https://brickschema.org/schema/Brick#Damper",
+              "https://brickschema.org/schema/Brick#hasPart"
+            ],
+            "source_evidence": "\"AHU\" is \"usually connected to an air-distribution system,\" and a \"Damper\" is an element of an air-distribution system that changes airflow rate or shuts off airflow, so a damper is a supported part of an AHU assembly.",
+            "confidence": "high",
+            "rationale": "The AHU and Damper definitions together support a hasPart relation because dampers are standard airflow-control components in AHU-connected air-distribution assemblies."
+          },
+          "result": {
+            "name": "hasPart",
+            "from": "AirHandlingUnit",
+            "to": "Damper",
+            "meaning": "An air handling unit is composed in part of a damper.",
+            "aliases": []
+          },
+          "sample_id": "S10",
+          "verdict": "accept",
+          "reviewer_comment": null,
+          "finding": null
+        },
+        {
+          "idx": 11,
+          "target_path": "relationships[29]",
+          "artefact_type": "relationship",
+          "mapping": {
+            "target_path": "relationships[29]",
+            "source_iris": [
+              "https://brickschema.org/schema/Brick#feeds",
+              "https://brickschema.org/schema/Brick#Packaged_Heat_Pump",
+              "https://brickschema.org/schema/Brick#Terminal_Unit"
+            ],
+            "source_evidence": "\"Packaged Heat Pump\" \u2014 \"A self-contained unit designed to transfer heat energy to or from a designated space, capable of offering both heating and cooling functions\"; such equipment can be upstream of downstream distribution or terminal equipment, making a feeds relationship to a Terminal Unit a defensible HVAC topology assertion.",
+            "confidence": "low",
+            "rationale": "Because the packaged heat pump is defined as space-conditioning equipment, modeling it as feeding downstream terminal equipment is plausible though not explicit in the class definition alone."
+          },
+          "result": {
+            "name": "feeds",
+            "from": "PackagedHeatPump",
+            "to": "TerminalUnit",
+            "meaning": "A packaged heat pump can be upstream of a terminal unit or served space conditioning path.",
+            "aliases": []
+          },
+          "sample_id": "S11",
+          "verdict": "accept",
+          "reviewer_comment": null,
+          "finding": null
+        },
+        {
+          "idx": 12,
+          "target_path": "rules.investigateAirQuality",
+          "artefact_type": "rule",
+          "mapping": {
+            "target_path": "rules.investigateAirQuality",
+            "source_iris": [
+              "https://brickschema.org/schema/Brick#CO2_Sensor",
+              "https://brickschema.org/schema/Brick#Outside_Air_CO2_Sensor",
+              "https://brickschema.org/schema/Brick#Return_Air_CO2_Sensor"
+            ],
+            "source_evidence": "A \"CO2 Sensor\" \"Measures properties of CO2 in air,\" an \"Outside Air CO2 Sensor\" measures CO2 \"in outside air,\" and a \"Return Air CO2 Sensor\" measures CO2 \"in return air,\" supporting investigation when observed CO2 is elevated relative to the expected served air-stream condition.",
+            "confidence": "high",
+            "rationale": "The rule is grounded by the complementary CO2 sensing contexts explicitly defined by the cited sensor classes."
+          },
+          "result": {
+            "conditions": [
+              "a CO2 sensor indicates elevated CO2 relative to the expected condition for the served air stream"
+            ]
+          },
+          "sample_id": "S12",
+          "verdict": "accept",
+          "reviewer_comment": null,
+          "finding": null
+        },
+        {
+          "idx": 13,
+          "target_path": "actions.maintainWithinDeadband",
+          "artefact_type": "action",
+          "mapping": {
+            "target_path": "actions.maintainWithinDeadband",
+            "source_iris": [
+              "https://brickschema.org/schema/Brick#Temperature_Deadband_Setpoint",
+              "https://brickschema.org/schema/Brick#AHU"
+            ],
+            "source_evidence": "The source defines \"Temperature Deadband Setpoint\" as one that \"Sets the size of a deadband of temperature,\" and the AHU definition includes heating and cooling among its functions.",
+            "confidence": "medium",
+            "rationale": "The evidence supports maintaining control without heating/cooling adjustment while temperature remains in deadband, but it does not specifically ground the stronger action name maintainCurrentMode."
+          },
+          "result": {
+            "input": "AirHandlingUnit",
+            "preconditions": [
+              "temperatureWithinDeadband"
+            ],
+            "effect": "no heating or cooling change is required while temperature remains within the configured deadband",
+            "verification": "confirm temperature remains within the configured deadband"
+          },
+          "sample_id": "S13",
+          "verdict": "accept",
+          "reviewer_comment": null,
+          "finding": null
+        }
+      ]
     }
   ]
 }

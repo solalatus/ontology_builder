@@ -289,3 +289,138 @@ twice. The fix that finally stuck for the recurring part was moving the
 invariant into code (`repair.py`'s merge-not-replace) instead of trusting
 each future batch to be constructed correctly by hand. Full account of the
 round-5 sample that triggered this: `manual-spot-check.md`.
+
+## Third follow-up: from text-heuristic scanning to a structural check, plus a first competency-question audit (round 6)
+
+Round 6's 13-item sample found one more instance of the same defect
+family, on a fresh item (`classes.TemperatureSensor.properties.value`).
+Directed to go further: *"do an utterly complete check. Basically
+everything. the whole ontology. all rules. EVERYTHING."*
+
+### The text-heuristic approach had run its course
+
+Every prior round's fix was a rescan using progressively more careful text
+matching against evidence/rationale prose — case-insensitive matching,
+no-space compiled-name matching, a growing stoplist, synonym clusters.
+Each pass caught real gaps *and* needed new patches to suppress fresh false
+positives it introduced. Rather than add a fourth patch on the same
+approach, replaced it — for relationship/action endpoint completeness
+specifically, the single most common recurring instance of this defect —
+with a check that never reads prose at all.
+
+**`endpoint_citation_gate`** (new, in `evaluate.py`, added as pipeline
+layer 2b and a permanent hard gate): for every relationship, does its own
+`source_iris` include at least one already-known IRI for its `from` class
+and at least one for its `to` class, drawn from that class's own
+`classes.<Name>` mapping? Same for every action's `input` class. Purely
+structural — `from`/`to`/`input` are fields every domain has, per
+`agent_ontology_spec.md` — so it can't be fooled by phrasing (spaced label
+vs. compiled name, case, synonyms, generic-word collisions) the way every
+text-based attempt before it could. It also generalizes: this is not
+Brick-specific, it will run identically on any future domain.
+
+### What it found, deterministically, across all 127 mappings
+
+**8 gaps**: `relationships[7,12,13,14,18,20,33]` (a named endpoint class
+never cited in that relationship's own mapping) and `actions.
+enableEconomizer` (its `input` class, `AirHandlingUnit`, never cited).
+`relationships[13]` was the item flagged in round 5's sample that got
+*told* it would be fixed as part of that round's escalation, but wasn't —
+own process miss, corrected here.
+
+**A worse pattern inside 3 of those 8**: `relationships[14,18,20]` had
+rationale text reading, verbatim, like *"...and the missing cited class IRI
+should be included"* or *"...that cited class should be included"* —
+leftover meta-commentary from round 3's original 42-item repair pass. The
+repair call **described** the fix instead of performing it, and nothing
+before now checked prose *content* for this specific failure — every
+existing check only asked "does the citation exist," never "does the
+rationale claim a fix that isn't actually there." A 4th item
+(`classes.Thermostat.properties.mode`) had the identical phrasing but its
+citation was, on inspection, already correct — the leftover text was
+purely cosmetic there.
+
+All 9 real gaps fixed directly (prose already correct in every case, only
+the citation missing) and the leftover-commentary text rewritten clean in
+all 4.
+
+### Fixed at the source, not just detected after the fact
+
+- `compiler-prompt.md`: added an explicit instruction that every
+  relationship's mapping must cite both its `from` and `to` classes' own
+  IRIs, and every action's must cite its `input` class's — spelling out
+  exactly how this is checked (structurally, not by prose-scanning) so
+  there's no ambiguity about what "cite it" means.
+- `repair-prompt.md`: same explicit instruction, plus an explicit warning
+  against the leftover-meta-commentary failure mode found this round:
+  "write the rationale as if the fix already happened, because by the time
+  anyone reads it, it must have."
+- **`reinstate.py` itself had this exact bug in its code**, not just in
+  Brick HVAC's data: `apply_reinstatements()` wrote `source_iris:
+  [source_iri]` for every new relationship it created — only the newly
+  reinstated class's own IRI, never the pre-existing (or same-batch
+  -reinstated) *other* endpoint's already-known IRI, even when that
+  endpoint's citation was sitting right there in `translation.json`
+  already. Fixed generally: the other endpoint's known `source_iris` are
+  now looked up (from an index kept current across the whole reinstatement
+  batch, so a same-batch sibling's citations are found too) and unioned
+  in. Two new regression tests cover both cases (pre-existing other
+  endpoint; other endpoint reinstated earlier in the same batch).
+
+### First competency-question audit this session
+
+Every prior round explicitly excluded competency questions ("requirements
+on the ontology, not generated elements needing source provenance" —
+`evaluate.py`'s own comment). Checked all 12 of the domain's actual stored
+CQs against the current model for the first time: **3 not supported**
+(`cq5`, `cq11`, `cq12`).
+
+Investigated each against the real, scoped source IR rather than adding
+content to force a pass:
+
+- **`cq5`** ("Which CO2 sensors monitor outside air versus return air...")
+  — `OutsideAirCO2Sensor` and `ReturnAirCO2Sensor` are both real, already-
+  included Brick classes with real definitions; they just weren't
+  connected to `AirHandlingUnit` via `hasPoint` the way the domain's other
+  AHU sensor points already are. Real, groundable gap. **Fixed**: added
+  `relationships[34]` (AHU hasPoint OutsideAirCO2Sensor) and
+  `relationships[35]` (AHU hasPoint ReturnAirCO2Sensor), same
+  standard-practice `hasPoint` grounding already accepted throughout this
+  domain (e.g. `relationships[7]`'s own AHU-to-CO2Sensor point).
+- **`cq11`** ("...connected to a given chiller, boiler, or heat pump
+  path") and **`cq12`** ("When can an economizer be used instead of
+  mechanical cooling...") — checked directly against `scoped_ir.json`.
+  Neither has real material behind it: Brick has no "path"/connection-model
+  concept anywhere in scope, and there is no outside-air-temperature,
+  enthalpy, or mixed-air sensor class anywhere in this domain's scope for
+  `cq12` to ground a real comparison rule on. `Economizer`'s own real
+  definition ("on proper variable sensing, initiates control signals... to
+  conserve energy") never says which variables or how. Inventing a path
+  concept or sensor classes not present in the source IR to force these to
+  pass would be fabrication — the one thing this pipeline's whole
+  provenance discipline exists to prevent. **Left honestly unsupported**,
+  recorded here as genuine scope limits of the source material this
+  domain was compiled from, not defects in the compile.
+
+### Verification
+
+- Structural validity: 0 errors. `endpoint_citation_gate`: 0 gaps (was 8).
+- 0/129 mappings with empty `source_iris` (127 original + 2 new
+  relationships); reverse coverage 100%.
+- Independent re-judge of the 9 fixed + 1 cosmetic element: 0 unsupported,
+  1 contested (`relationships[13]`, disclosed non-blocking borderline).
+- **Full 127-mapping independent semantic re-judge** (not a sample — every
+  mapping that existed before this round's content additions): 0
+  unsupported, 5 contested (all the same disclosed, non-blocking borderline
+  category already accepted throughout this domain). Cost $1.123.
+- Independent re-judge of the 2 new relationships: 0 unsupported, 0
+  contested. Re-ran `cq_support` on all 12 CQs after the fix: `cq5` now
+  `True`; `cq11`/`cq12` remain `False`, confirming they are genuine scope
+  limits rather than something a citation fix could resolve.
+- Full offline test suite: 209/209 passing (82 in `test_evaluate.py`
+  including 6 new `endpoint_citation_gate` tests; 26 in `test_reinstate.py`
+  including 2 new regression tests).
+
+**Total cost, this round's full audit + fixes: $1.53.**
+
+Full account of the round-6 sample that triggered this: `manual-spot-check.md`.

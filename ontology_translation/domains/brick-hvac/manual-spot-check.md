@@ -6,6 +6,117 @@ item, verbatim source/result pairs, all rounds) is in
 `manual-spot-check.json`, keyed by `rounds`; this file is the readable
 summary, newest round first.
 
+## Round 6 (2026-08-17) — escalated to a full, non-sampled audit
+
+10%-stratified sample (13 of 127, seed 1147) as the starting point: **12/13
+accepted**, including confirmation that all four round-5 fixes held
+(`relationships[2]`, `relationships[29]` — a *third*-round recurring miss,
+finally resolved — `relationships[32]`, `actions.maintainWithinDeadband`).
+**1/13 flagged**: `classes.TemperatureSensor.properties.value` paraphrased
+`Temperature_Sensor`'s own real definition without citing it — same defect
+family as rounds 3-5, a fresh instance never touched before.
+
+Reviewer's direction at this point: *"do an utterly complete check.
+Basically everything. the whole ontology. all rules. EVERYTHING. Give me
+only the flagged problems, but all of them."* Escalated beyond the sample
+to a full audit of all 127 mappings, and — for the first time this session
+— all 12 competency questions, previously excluded from every manual round
+as requirements rather than generated elements.
+
+### Replacing text-heuristic scanning with a precise structural check
+
+Three rounds of text-based rescanning (case/no-space label matching,
+stoplists, synonym clusters) kept finding real gaps but also kept needing
+new patches to suppress fresh false positives — clearly still fragile.
+Replaced it, for relationship/action endpoint completeness specifically,
+with a check that reads no prose at all: for every relationship, does its
+own `source_iris` include at least one already-known IRI for its `from`
+class and at least one for its `to` class (drawn from that class's own
+`classes.<Name>` mapping)? Same for every action's `input` class. This
+can't be fooled by phrasing — spaced label vs. compiled name, case,
+synonyms — because it only compares structural fields every domain has
+(per `agent_ontology_spec.md`) against citations already established
+elsewhere in the same file.
+
+That check found **7 relationship gaps and 1 action gap**:
+`relationships[7,12,13,14,18,20,33]`, `actions.enableEconomizer`. Three of
+them (`relationships[14,18,20]`) had rationale text that literally read
+like *"...and the missing cited class IRI should be included"* or *"...that
+cited class should be included"* — **leftover meta-commentary from round
+3's original repair pass that described the fix instead of performing
+it**, undetected until now because nothing checked prose content for this
+pattern rather than for named-but-uncited concepts. A fourth item
+(`classes.Thermostat.properties.mode`) had the same leftover phrasing but
+its citation was actually already correct — cosmetic only.
+
+All 9 real gaps fixed directly (prose was already correct in every case;
+only the citation was missing), the 3 leftover-commentary items' rationale
+rewritten clean and direct, the cosmetic one cleaned too.
+
+### Made the fix permanent, not another one-off patch
+
+- Added `evaluate.py`'s `endpoint_citation_gate` as a real pipeline layer
+  (2b) and permanent hard gate — domain-agnostic, applies to any future
+  domain compiled by this pipeline, not just Brick HVAC.
+- Added matching explicit instructions to `compiler-prompt.md` and
+  `repair-prompt.md` so future compiles/repairs are told the requirement
+  up front, not just caught after the fact.
+- **Root-cause code bug found and fixed in `reinstate.py` itself**, not
+  just in Brick HVAC's data: `apply_reinstatements()` cited only the
+  newly-reinstated class's own IRI on every new relationship it created,
+  never the pre-existing (or same-batch-reinstated) *other* endpoint's
+  already-known IRI — exactly the defect class the new gate exists to
+  catch, this time baked into a tool rather than a compiler/repair output.
+  Fixed generally, with 2 new regression tests.
+
+### Competency-question audit (first time this session)
+
+3 of 12 (`cq5`, `cq11`, `cq12`) judged not supported. Investigated each
+against the real, scoped source material rather than fabricating content
+to force a pass:
+
+- **`cq5`** (outside-air vs. return-air CO2 sensing) had real, citable
+  material — `OutsideAirCO2Sensor`/`ReturnAirCO2Sensor` are both real Brick
+  classes with real definitions — that simply hadn't been connected to
+  `AirHandlingUnit` via `hasPoint`. **Fixed**: added two new relationships
+  (`relationships[34]`, `relationships[35]`), the same standard-practice
+  `hasPoint` grounding already used for this domain's other AHU sensor
+  points.
+- **`cq11`** (chiller/boiler/heat-pump path connectivity) and **`cq12`**
+  (economizer-vs-mechanical-cooling decision logic): checked against the
+  actual scoped source IR and found to have **no real material** to ground
+  what each CQ asks for — no path/connection-model concept anywhere in
+  Brick, no outside-air-temperature/enthalpy/mixed-air sensor classes
+  anywhere in this domain's scope. Fabricating relationships or rules to
+  force these to pass would violate this session's standing no-fabrication
+  rule. **Left honestly unsupported**, documented here as genuine scope
+  limits, not defects.
+
+### Verification
+
+- Structural validity: 0 errors. `endpoint_citation_gate`: 0 gaps (was 8).
+- 0/129 mappings with empty `source_iris` (127 original + 2 new); reverse
+  coverage 100%.
+- Independent re-judge of the 9 fixed elements + the cosmetic one: 0
+  unsupported, 1 contested (`relationships[13]`, disclosed borderline).
+- Full 129-mapping independent semantic re-judge: 0 unsupported, 5
+  contested (disclosed non-blocking splits, same category accepted
+  throughout this domain all session). Cost $1.123.
+- Independent re-judge of the 2 new relationships: 0 unsupported, 0
+  contested. Re-ran `cq_support` after the fix: `cq5` now `True`; `cq11`/
+  `cq12` remain `False`, confirmed genuine scope limits rather than errors.
+- Full offline test suite: 209/209 passing (207 + 2 new `reinstate.py`
+  regression tests).
+
+**Full account: `provenance-audit.md`** (fourth follow-up section).
+
+### Cost
+
+Full 127-mapping semantic re-judge: $1.123. First CQ support check (12
+CQs): $0.1495. 9-item fix re-judge: $0.0866. New-relationships re-judge +
+CQ re-check: $0.0195 + $0.1521. Provenance/structural rescans and the
+fixes themselves: no LLM cost (deterministic). **Total this round: $1.53.**
+
 ## Round 5 (2026-08-17)
 
 10%-stratified sample (13 of 127 artefacts, seed 823; two items overlap
