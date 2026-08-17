@@ -1060,6 +1060,22 @@ class RenderMarkdownTests(unittest.TestCase):
         self.assertIn("Reverse coverage", markdown)
         self.assertNotIn("Independent judging of exclusions", markdown)
 
+    def test_endpoint_citation_completeness_section_renders_when_present(self):
+        report = {
+            "hard_gates_ok": False,
+            "structural_validity": {"ok": True, "error_count": 0, "warning_count": 0},
+            "provenance_completeness": {"ok": True, "element_provenance_coverage": 1.0, "source_disposition_coverage": 1.0},
+            "endpoint_citation_completeness": {"ok": False, "gaps": [{"target_path": "relationships[0]", "endpoint": "to", "class": "Zone", "known_class_iris": ["http://ex.org#Zone"]}]},
+            "reverse_coverage": {"coverage": 1.0, "silently_dropped": []},
+            "translation_stability": {"average_f1": None},
+            "semantic_judging": None,
+            "round_trip": None,
+            "cq_support": None,
+        }
+        markdown = evaluate_mod._render_markdown("test-domain", report)
+        self.assertIn("endpoint citation completeness", markdown.lower())
+        self.assertIn("gaps: 1", markdown)
+
     def test_disposition_judging_section_renders_when_present(self):
         report = {
             "hard_gates_ok": False,

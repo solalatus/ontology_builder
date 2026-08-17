@@ -878,6 +878,11 @@ def _render_markdown(domain_id: str, report: dict) -> str:
               f"- element provenance coverage: {_pct(prov['element_provenance_coverage'])}",
               f"- source disposition coverage: {_pct(prov['source_disposition_coverage'])}", ""]
 
+    endpoint = report.get("endpoint_citation_completeness")
+    if endpoint is not None:
+        lines += ["## Relationship/action endpoint citation completeness (hard gate)",
+                  f"- ok: {endpoint['ok']}", f"- gaps: {len(endpoint['gaps'])}", ""]
+
     rc = report["reverse_coverage"]
     lines += ["## Reverse coverage", f"- coverage: {_pct(rc['coverage'])}", f"- silently dropped: {len(rc['silently_dropped'])}", ""]
 
