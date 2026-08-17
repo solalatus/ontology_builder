@@ -238,6 +238,75 @@ def _call_cost(usage: dict) -> float:
 # Layer 3: independent semantic judging.
 # ---------------------------------------------------------------------------
 
+# A judge that only ever sees the compiler's own self-reported
+# source_evidence/rationale is judging the compiler's *description* of the
+# evidence, not the evidence itself -- a confidently-worded fabrication and a
+# genuinely-grounded claim read identically from that vantage point. Found
+# for real on Brick HVAC: `Chiller hasPart CondensingUnit` passed judging
+# with a plausible-sounding "standard practice" rationale, but Brick's own
+# source has zero property/restriction linking those two classes at all --
+# nothing a judge could have caught without the real source text in front of
+# it. The functions below resolve the actual source_ir class definitions for
+# whatever classes a target_path involves (when structurally resolvable) so
+# judge_mappings can hand judges real ground truth to check claims against,
+# not just the claim's own retelling of itself. Fully domain-agnostic: keys
+# off source_ir's generic extract.py shape and target_path's generic
+# addressing scheme, nothing here is Brick-specific.
+
+
+def _class_names_involved(domain_data: dict, target_path: str) -> list[str]:
+    """Which class name(s) a target_path structurally references, when
+    resolvable at all: the class itself for classes.<Name>[.properties.<P>],
+    both endpoints for relationships[<idx>], the input class for
+    actions.<Name>. Rules have no structural class reference (conditions are
+    free text) -- returns [] rather than guessing by parsing prose."""
+    tokens = _PATH_TOKEN_RE.findall(target_path)
+    if not tokens:
+        return []
+    if tokens[0] == "classes" and len(tokens) >= 2:
+        return [tokens[1]]
+    if tokens[0] == "relationships":
+        element = _describe_target_element(domain_data, target_path)
+        if isinstance(element, dict):
+            return [n for n in (element.get("from"), element.get("to")) if n]
+    if tokens[0] == "actions":
+        element = _describe_target_element(domain_data, target_path)
+        if isinstance(element, dict) and element.get("input"):
+            return [element["input"]]
+    return []
+
+
+def _index_source_classes_by_label(source_ir: dict) -> dict[str, list[dict]]:
+    """Normalized label/altLabel -> matching source_ir class record(s).
+    Multiple records can share a label (e.g. two source classes the compiler
+    merged into one target class), so this returns a list, not a single
+    record."""
+    index: dict[str, list[dict]] = {}
+    for record in source_ir.get("classes", []):
+        for label in (record.get("labels") or []) + (record.get("altLabels") or []):
+            index.setdefault(_normalize_name(label), []).append(record)
+    return index
+
+
+def _ground_truth_for_target(domain_data: dict, source_index: dict, target_path: str) -> dict | None:
+    """The real source_ir definitions for the class(es) a target_path
+    involves, when resolvable -- None (not an empty dict) when nothing could
+    be resolved, so callers can tell "checked, nothing relevant" from
+    "class name doesn't match any source label" apart if they need to."""
+    class_names = _class_names_involved(domain_data, target_path)
+    if not class_names:
+        return None
+    found = {}
+    for name in class_names:
+        records = source_index.get(_normalize_name(name))
+        if records:
+            found[name] = [
+                {"iri": r.get("iri"), "labels": r.get("labels"), "altLabels": r.get("altLabels"), "definitions": r.get("definitions")}
+                for r in records
+            ]
+    return found or None
+
+
 JUDGE_SYSTEM_PROMPT = """You are an independent judge evaluating whether a translated Agent Ontology
 element is adequately grounded by its cited evidence. You do not see any other judge's answer.
 
@@ -246,19 +315,34 @@ terms, do not require a literal source quote for everything:
 
 1. A literal or paraphrased snippet from the source ontology (an RDF label, comment, or definition).
 2. A citation of standard, well-established domain practice tied to the *specific* named concepts the
-   target element actually involves (e.g. "standard HVAC practice relating a Temperature Sensor to a
-   Temperature Setpoint for the same zone"). This is a deliberately sanctioned evidence category for
-   this pipeline's compiler -- do not classify an element "unsupported" merely because its evidence is
-   a standard-practice citation rather than a literal source quote.
+   target element actually involves (e.g. "standard practice for a temperature sensor and a temperature
+   setpoint on the same controlled unit", or, in an unrelated domain, "standard practice requiring an
+   approved purchase order before an invoice is paid"). This is a deliberately sanctioned evidence
+   category for this pipeline's compiler, valid in *any* domain it's applied to -- do not classify an
+   element "unsupported" merely because its evidence is a standard-practice citation rather than a
+   literal source quote.
+
+When present, you will also be given `actual_source_class_definitions` -- the real, independently
+looked-up source text for the class(es) the target element involves (resolved from the source ontology
+itself, not supplied by whoever produced the mapping). Treat this as ground truth, not as more
+self-reporting: it exists specifically so you can check the cited evidence and rationale *against* what
+the source material actually says, rather than judging only whether the rationale reads plausibly in
+isolation. A confident, well-written rationale is not itself evidence -- if the ground truth definitions
+given to you don't actually contain or reasonably imply what's being claimed (no relevant text, or the
+claim doesn't follow from what's genuinely there), that is real grounds for "unsupported" even when the
+prose sounds authoritative. When `actual_source_class_definitions` is absent for a target (its class(es)
+couldn't be structurally resolved, e.g. a rule), judge the cited evidence on its own terms as before.
 
 Classify the mapping as exactly one of:
 - "supported" -- the evidence (of either kind) genuinely and specifically justifies the target element,
-  at the level of detail the target element actually states.
+  at the level of detail the target element actually states, and is consistent with the ground truth
+  definitions when given.
 - "partially_supported" -- the evidence is directionally right but the target element states more
   specific detail (a numeric threshold, a precise mechanism) than the evidence actually supports.
 - "unsupported" -- the evidence is absent, contradicts the target element, is so generic it could
-  apply to almost any domain (not tied to the specific named concepts involved), or the target element
-  is not a plausible/standard interpretation of what's cited.
+  apply to almost any domain (not tied to the specific named concepts involved), is not a plausible/
+  standard interpretation of what's cited, or -- when ground truth definitions were given -- has no real
+  connection to what those definitions actually say.
 
 Respond with exactly one JSON object, no prose, no markdown fences:
 {"verdict": "supported" | "partially_supported" | "unsupported", "rationale": "one sentence"}"""
@@ -278,19 +362,36 @@ def _majority_verdict(raw_judgments: list[dict]) -> str | None:
     return top_verdict if top_count > len(verdicts) / 2 else None
 
 
-def judge_mappings(client, deployment: str, translation: dict, logger: RunLogger, judges: int = 3) -> dict:
+def judge_mappings(
+    client,
+    deployment: str,
+    translation: dict,
+    logger: RunLogger,
+    judges: int = 3,
+    domain_data: dict | None = None,
+    source_ir: dict | None = None,
+) -> dict:
+    """`domain_data`/`source_ir` are optional so existing callers (and
+    mocked tests) that only have `translation` keep working unchanged --
+    but pass both whenever they're available, since without them judges
+    only ever see the mapping's own self-reported evidence/rationale and
+    cannot catch a confidently-worded claim with no real backing (see the
+    module-level comment above `_class_names_involved`)."""
+    source_index = _index_source_classes_by_label(source_ir) if source_ir is not None else None
     results = []
     total_cost = 0.0
     for mapping in translation.get("mappings", []):
         target_path = mapping.get("target_path")
-        user_prompt = json.dumps(
-            {
-                "target_path": target_path,
-                "source_evidence": mapping.get("source_evidence"),
-                "rationale": mapping.get("rationale"),
-            },
-            indent=2,
-        )
+        payload = {
+            "target_path": target_path,
+            "source_evidence": mapping.get("source_evidence"),
+            "rationale": mapping.get("rationale"),
+        }
+        if domain_data is not None and source_index is not None:
+            ground_truth = _ground_truth_for_target(domain_data, source_index, target_path)
+            if ground_truth is not None:
+                payload["actual_source_class_definitions"] = ground_truth
+        user_prompt = json.dumps(payload, indent=2)
         raw_judgments = []
         for judge_index in range(1, judges + 1):
             parsed, usage = chat_json_call(
@@ -298,13 +399,30 @@ def judge_mappings(client, deployment: str, translation: dict, logger: RunLogger
             )
             raw_judgments.append({"verdict": parsed.get("verdict"), "rationale": parsed.get("rationale")})
             total_cost += _call_cost(usage)
-        results.append({"target_path": target_path, "raw_judgments": raw_judgments, "majority_verdict": _majority_verdict(raw_judgments)})
+        contested = len({j["verdict"] for j in raw_judgments}) > 1
+        results.append(
+            {"target_path": target_path, "raw_judgments": raw_judgments, "majority_verdict": _majority_verdict(raw_judgments), "contested": contested}
+        )
 
     unsupported = [r for r in results if r["majority_verdict"] == "unsupported"]
+    # Report-only, not a hard gate: an element where judges *agree* to
+    # majority-unsupported is already caught above, but one where they
+    # split (e.g. 2 supported + 1 partially_supported) still passes that
+    # gate while genuine disagreement about it exists -- found for real on
+    # Brick HVAC's Chiller-hasPart-CondensingUnit, which a 2/3 majority
+    # still called "supported" even with real source ground truth in front
+    # of it, but the third judge explicitly flagged it as only indirectly
+    # justified. Rejecting on anything less than a real majority would
+    # over-reject; surfacing it instead gives manual spot-checks (or a
+    # repair pass) a prioritized list of exactly the borderline calls worth
+    # a second look, rather than only a random sample.
+    contested = [r for r in results if r["contested"]]
     return {
         "results": results,
         "unsupported_count": len(unsupported),
         "unsupported_paths": [r["target_path"] for r in unsupported],
+        "contested_count": len(contested),
+        "contested_paths": [r["target_path"] for r in contested],
         "total_cost_usd": round(total_cost, 4),
     }
 
@@ -568,7 +686,9 @@ def run_evaluation(
     logger = RunLogger(out_dir / "evaluate.log.jsonl")
     logger.event("evaluate_start", domain=manifest.id)
     try:
-        report["semantic_judging"] = judge_mappings(client, azure_config["deployment"], translation, logger, judges=judges)
+        report["semantic_judging"] = judge_mappings(
+            client, azure_config["deployment"], translation, logger, judges=judges, domain_data=domain_data, source_ir=source_ir
+        )
         report["round_trip"] = round_trip_sample(
             client, azure_config["deployment"], domain_data, translation, logger, sample_size=round_trip_sample_size
         )

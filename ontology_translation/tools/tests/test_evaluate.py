@@ -234,6 +234,82 @@ class ChatJsonCallTests(unittest.TestCase):
         self.assertEqual(len(calls), 1)
 
 
+class ClassNamesInvolvedTests(unittest.TestCase):
+    def test_class_path_resolves_the_class_itself(self):
+        self.assertEqual(evaluate_mod._class_names_involved(DOMAIN_DATA, "classes.Fan"), ["Fan"])
+
+    def test_property_path_resolves_the_owning_class(self):
+        self.assertEqual(evaluate_mod._class_names_involved(DOMAIN_DATA, "classes.Fan.properties.status"), ["Fan"])
+
+    def test_relationship_path_resolves_both_endpoints(self):
+        self.assertEqual(evaluate_mod._class_names_involved(DOMAIN_DATA, "relationships[0]"), ["Fan", "Zone"])
+
+    def test_action_path_resolves_its_input_class(self):
+        self.assertEqual(evaluate_mod._class_names_involved(DOMAIN_DATA, "actions.startFan"), ["Fan"])
+
+    def test_rule_path_resolves_nothing(self):
+        # Rule conditions are free text with no structural class reference --
+        # returning [] (not guessing by parsing prose) is deliberate.
+        self.assertEqual(evaluate_mod._class_names_involved(DOMAIN_DATA, "rules.canRunFan"), [])
+
+    def test_unresolvable_index_returns_nothing(self):
+        self.assertEqual(evaluate_mod._class_names_involved(DOMAIN_DATA, "relationships[99]"), [])
+
+
+class IndexSourceClassesByLabelTests(unittest.TestCase):
+    def test_indexes_by_normalized_label(self):
+        index = evaluate_mod._index_source_classes_by_label(SOURCE_IR)
+        self.assertIn("fan", index)
+        self.assertEqual(index["fan"][0]["iri"], "http://ex.org#Fan")
+
+    def test_indexes_by_alt_label_too(self):
+        source_ir = {"classes": [{"iri": "http://ex.org#AHU", "labels": ["AHU"], "altLabels": ["Air Handling Unit"], "definitions": []}]}
+        index = evaluate_mod._index_source_classes_by_label(source_ir)
+        self.assertIn("air handling unit", index)
+
+    def test_multiple_source_classes_sharing_a_label_are_both_kept(self):
+        source_ir = {
+            "classes": [
+                {"iri": "http://ex.org#A", "labels": ["Widget"], "definitions": ["def A"]},
+                {"iri": "http://ex.org#B", "labels": ["Widget"], "definitions": ["def B"]},
+            ]
+        }
+        index = evaluate_mod._index_source_classes_by_label(source_ir)
+        self.assertEqual(len(index["widget"]), 2)
+
+
+class GroundTruthForTargetTests(unittest.TestCase):
+    def setUp(self):
+        self.source_index = evaluate_mod._index_source_classes_by_label(SOURCE_IR)
+
+    def test_resolves_ground_truth_for_a_class(self):
+        ground_truth = evaluate_mod._ground_truth_for_target(DOMAIN_DATA, self.source_index, "classes.Fan")
+        self.assertIn("Fan", ground_truth)
+        self.assertEqual(ground_truth["Fan"][0]["definitions"], ["A device that moves air."])
+
+    def test_resolves_ground_truth_for_both_relationship_endpoints(self):
+        ground_truth = evaluate_mod._ground_truth_for_target(DOMAIN_DATA, self.source_index, "relationships[0]")
+        self.assertIn("Fan", ground_truth)
+        self.assertIn("Zone", ground_truth)
+
+    def test_returns_none_when_nothing_resolves(self):
+        # "canRunFan" isn't a class name and rules have no structural class
+        # reference at all -- must be None, not an empty dict, so a judge
+        # correctly falls back to evidence-only judging rather than being
+        # shown a misleading "we checked, found nothing" block for a target
+        # type that was never checkable in the first place.
+        self.assertIsNone(evaluate_mod._ground_truth_for_target(DOMAIN_DATA, self.source_index, "rules.canRunFan"))
+
+    def test_returns_none_when_class_name_has_no_source_match(self):
+        # This is the exact real-world case that motivated this feature: a
+        # class the compiler named doesn't match any real source label at
+        # all -- e.g. it was merged/renamed beyond recognition, or (as with
+        # the Brick HVAC repair) the compiler simply invented an association
+        # with no source backing whatsoever.
+        domain_data = {"classes": {"TotallyInvented": {"meaning": "x"}}, "relationships": []}
+        self.assertIsNone(evaluate_mod._ground_truth_for_target(domain_data, self.source_index, "classes.TotallyInvented"))
+
+
 class JudgeMappingsTests(unittest.TestCase):
     def test_majority_verdict_computed_per_mapping(self):
         # 3 judges per mapping x 6 mappings = 18 calls. Alternate verdicts
@@ -285,6 +361,135 @@ class JudgeMappingsTests(unittest.TestCase):
 
         self.assertTrue(all(r["majority_verdict"] is None for r in result["results"]))
         self.assertEqual(result["unsupported_count"], 0)
+
+    def test_without_domain_data_and_source_ir_no_ground_truth_is_sent(self):
+        # Backward compatibility: existing callers that only have
+        # `translation` (and every test above) must keep working unchanged.
+        FakeClient, calls = _fake_client_class(lambda i, kw: json.dumps({"verdict": "supported", "rationale": "r"}))
+        client = FakeClient()
+        with tempfile.TemporaryDirectory() as tmp:
+            logger = evaluate_mod.RunLogger(Path(tmp) / "log.jsonl")
+            evaluate_mod.judge_mappings(client, "gpt-5.4", TRANSLATION_FULL, logger, judges=1)
+            logger.close()
+
+        for call in calls:
+            user_message = call["messages"][1]["content"]
+            self.assertNotIn("actual_source_class_definitions", user_message)
+
+    def test_with_domain_data_and_source_ir_ground_truth_is_sent_when_resolvable(self):
+        # This is the actual fix: a judge must be able to see the real
+        # source class definitions, not just the compiler's own retelling
+        # of what the evidence supposedly says (see the module-level
+        # comment above _class_names_involved -- this is what would have
+        # caught Chiller hasPart CondensingUnit having zero real backing).
+        FakeClient, calls = _fake_client_class(lambda i, kw: json.dumps({"verdict": "supported", "rationale": "r"}))
+        client = FakeClient()
+        with tempfile.TemporaryDirectory() as tmp:
+            logger = evaluate_mod.RunLogger(Path(tmp) / "log.jsonl")
+            evaluate_mod.judge_mappings(
+                client, "gpt-5.4", TRANSLATION_FULL, logger, judges=1, domain_data=DOMAIN_DATA, source_ir=SOURCE_IR
+            )
+            logger.close()
+
+        # classes.Fan (call 0) resolves against the real source -- must carry ground truth.
+        fan_call_message = calls[0]["messages"][1]["content"]
+        self.assertIn("actual_source_class_definitions", fan_call_message)
+        self.assertIn("A device that moves air.", fan_call_message)
+
+        # rules.canRunFan (call 4, see TRANSLATION_FULL's mapping order) has
+        # no structural class reference at all -- must fall back cleanly,
+        # not send a misleading empty/wrong ground-truth block.
+        rule_call_message = calls[4]["messages"][1]["content"]
+        self.assertNotIn("actual_source_class_definitions", rule_call_message)
+
+    def test_ground_truth_catches_a_fabricated_standard_practice_claim(self):
+        # The real motivating scenario, reproduced directly: a relationship
+        # between two classes that really exist, evidenced only by a
+        # confident-sounding standard-practice rationale that has no actual
+        # connection to either class's real source definition. A judge
+        # given the real ground truth should be able to tell -- simulated
+        # here by having the fake judge's response itself depend on whether
+        # ground truth was present in what it was asked to judge, which is
+        # exactly the information judge_mappings must make available.
+        domain_data = {
+            "classes": {"Chiller": {"meaning": "x"}, "Compressor": {"meaning": "y"}},
+            "relationships": [{"name": "hasPart", "from": "Chiller", "to": "Compressor", "meaning": "z", "aliases": []}],
+        }
+        translation = {
+            "mappings": [
+                {
+                    "target_path": "relationships[0]",
+                    "source_iris": [],
+                    "source_evidence": "Standard practice: chillers commonly include a compressor.",
+                    "confidence": "medium",
+                    "rationale": "Grounded in general refrigeration knowledge.",
+                }
+            ]
+        }
+        source_ir = {
+            "classes": [
+                {"iri": "http://ex.org#Chiller", "labels": ["Chiller"], "definitions": ["Refrigerating machine used to transfer heat."]},
+                {"iri": "http://ex.org#Compressor", "labels": ["Compressor"], "definitions": ["A device for compressing gas."]},
+            ]
+        }
+
+        def responder(i, kw):
+            user_message = kw["messages"][1]["content"]
+            # A judge actually using the ground truth notices neither
+            # definition says anything about composition/parts at all.
+            if "actual_source_class_definitions" in user_message and "part" not in user_message.lower():
+                return json.dumps({"verdict": "unsupported", "rationale": "ground truth definitions say nothing about composition"})
+            return json.dumps({"verdict": "supported", "rationale": "sounds plausible"})
+
+        FakeClient, calls = _fake_client_class(responder)
+        client = FakeClient()
+        with tempfile.TemporaryDirectory() as tmp:
+            logger = evaluate_mod.RunLogger(Path(tmp) / "log.jsonl")
+            result = evaluate_mod.judge_mappings(
+                client, "gpt-5.4", translation, logger, judges=1, domain_data=domain_data, source_ir=source_ir
+            )
+            logger.close()
+
+        self.assertEqual(result["results"][0]["majority_verdict"], "unsupported")
+
+    def test_contested_elements_are_flagged_even_when_majority_still_supports(self):
+        # The exact real-world shape found on Brick HVAC's
+        # Chiller-hasPart-CondensingUnit: 2 judges say "supported", 1 says
+        # "partially_supported" -- a real majority for "supported" (so the
+        # unsupported hard gate correctly stays quiet), but genuine
+        # disagreement exists that a random 10% manual sample could easily
+        # miss entirely. contested_count/contested_paths must surface it as
+        # a report-only diagnostic regardless of what the majority says.
+        verdicts_by_call = ["supported", "partially_supported", "supported"]
+
+        def responder(i, kw):
+            return json.dumps({"verdict": verdicts_by_call[i], "rationale": "r"})
+
+        FakeClient, calls = _fake_client_class(responder)
+        client = FakeClient()
+        with tempfile.TemporaryDirectory() as tmp:
+            logger = evaluate_mod.RunLogger(Path(tmp) / "log.jsonl")
+            translation = {"mappings": [TRANSLATION_FULL["mappings"][0]]}
+            result = evaluate_mod.judge_mappings(client, "gpt-5.4", translation, logger, judges=3)
+            logger.close()
+
+        self.assertEqual(result["results"][0]["majority_verdict"], "supported")
+        self.assertTrue(result["results"][0]["contested"])
+        self.assertEqual(result["contested_count"], 1)
+        self.assertEqual(result["contested_paths"], ["classes.Fan"])
+        self.assertEqual(result["unsupported_count"], 0)  # the hard gate itself is unaffected
+
+    def test_unanimous_verdicts_are_not_contested(self):
+        FakeClient, calls = _fake_client_class(lambda i, kw: json.dumps({"verdict": "supported", "rationale": "r"}))
+        client = FakeClient()
+        with tempfile.TemporaryDirectory() as tmp:
+            logger = evaluate_mod.RunLogger(Path(tmp) / "log.jsonl")
+            result = evaluate_mod.judge_mappings(client, "gpt-5.4", TRANSLATION_FULL, logger, judges=3)
+            logger.close()
+
+        self.assertTrue(all(not r["contested"] for r in result["results"]))
+        self.assertEqual(result["contested_count"], 0)
+        self.assertEqual(result["contested_paths"], [])
 
 
 class MajorityVerdictTests(unittest.TestCase):
