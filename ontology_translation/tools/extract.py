@@ -264,7 +264,11 @@ def main(argv=None) -> int:
     parser.add_argument("--manifest", type=Path, required=True, help="source-manifest.yaml (for id + scope.roots)")
     parser.add_argument("--out", type=Path, required=True, help="path to write the extracted source_ir.json")
     parser.add_argument("--no-scope", action="store_true", help="skip scope filtering, emit the full extraction")
-    parser.add_argument("--max-depth", type=int, default=None, help="cap the subClassOf BFS depth from scope roots")
+    parser.add_argument(
+        "--max-depth", type=int, default=None,
+        help="cap the subClassOf BFS depth from scope roots; overrides manifest scope.max_depth when given, "
+        "same precedence pattern as compile.py's --runs",
+    )
     args = parser.parse_args(argv)
 
     manifest = load_manifest(args.manifest)
@@ -277,9 +281,10 @@ def main(argv=None) -> int:
     print(f"[extract] {manifest.id}: full extraction {counts}")
 
     if not args.no_scope and manifest.scope_roots:
-        ir = select_scope(ir, manifest.scope_roots, max_depth=args.max_depth)
+        max_depth = args.max_depth if args.max_depth is not None else manifest.scope_max_depth
+        ir = select_scope(ir, manifest.scope_roots, max_depth=max_depth)
         counts = {k: len(v) for k, v in ir.items()}
-        print(f"[extract] {manifest.id}: scoped to roots {manifest.scope_roots} -> {counts}")
+        print(f"[extract] {manifest.id}: scoped to roots {manifest.scope_roots} (max_depth={max_depth}) -> {counts}")
 
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(ir, indent=2, sort_keys=False), encoding="utf-8")
