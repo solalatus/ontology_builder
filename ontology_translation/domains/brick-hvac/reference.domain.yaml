@@ -40,8 +40,8 @@ classes:
       status:
         type: text
         allowed:
-        - false
-        - true
+        - "off"
+        - "on"
         - standby
         - alarm
   AirPlenum:
@@ -91,8 +91,8 @@ classes:
       status:
         type: text
         allowed:
-        - false
-        - true
+        - "off"
+        - "on"
         - standby
         - alarm
   Building:
@@ -143,8 +143,8 @@ classes:
       status:
         type: text
         allowed:
-        - false
-        - true
+        - "off"
+        - "on"
         - standby
         - alarm
   ColdDeck:
@@ -163,8 +163,8 @@ classes:
       status:
         type: text
         allowed:
-        - false
-        - true
+        - "off"
+        - "on"
         - alarm
   CondensingUnit:
     meaning: An outdoor HVAC unit that condenses refrigerant from gas to liquid as
@@ -173,8 +173,8 @@ classes:
       status:
         type: text
         allowed:
-        - false
-        - true
+        - "off"
+        - "on"
         - alarm
   CoolingTemperatureSetpoint:
     meaning: A setpoint that specifies a temperature target for cooling.
@@ -189,8 +189,8 @@ classes:
       status:
         type: text
         allowed:
-        - false
-        - true
+        - "off"
+        - "on"
         - alarm
   CoolingValve:
     meaning: A valve that controls air temperature by modulating the amount of cold
@@ -229,8 +229,8 @@ classes:
       status:
         type: text
         allowed:
-        - false
-        - true
+        - "off"
+        - "on"
         - alarm
   Filter:
     meaning: A device that removes gases from a mixture of gases or removes solid
@@ -261,8 +261,8 @@ classes:
       status:
         type: text
         allowed:
-        - false
-        - true
+        - "off"
+        - "on"
         - alarm
   HeatingTemperatureSetpoint:
     meaning: A setpoint that specifies a temperature target for heating.
@@ -295,8 +295,8 @@ classes:
       status:
         type: text
         allowed:
-        - false
-        - true
+        - "off"
+        - "on"
         - alarm
   IsolationValve:
     meaning: A valve that stops the flow of a fluid, usually for maintenance or safety
@@ -336,8 +336,8 @@ classes:
       status:
         type: text
         allowed:
-        - false
-        - true
+        - "off"
+        - "on"
         - alarm
   ReturnAirCO2Sensor:
     meaning: A sensor that measures the concentration of CO2 in return air.
@@ -371,8 +371,8 @@ classes:
       status:
         type: text
         allowed:
-        - false
-        - true
+        - "off"
+        - "on"
         - alarm
   SteamValve:
     meaning: A valve used to regulate steam flow in an HVAC system.
@@ -396,8 +396,8 @@ classes:
       status:
         type: text
         allowed:
-        - false
-        - true
+        - "off"
+        - "on"
         - standby
         - alarm
   Thermostat:
@@ -407,8 +407,8 @@ classes:
       status:
         type: text
         allowed:
-        - false
-        - true
+        - "off"
+        - "on"
         - alarm
   WallAirConditioner:
     meaning: A self-contained unit that cools a room by drawing in warm air, cooling
@@ -417,8 +417,8 @@ classes:
       status:
         type: text
         allowed:
-        - false
-        - true
+        - "off"
+        - "on"
         - cooling
         - alarm
   WaterTemperatureSensor:
@@ -455,8 +455,8 @@ classes:
       status:
         type: text
         allowed:
-        - false
-        - true
+        - "off"
+        - "on"
         - cooling
         - alarm
   CRAH:
@@ -468,8 +468,8 @@ classes:
       status:
         type: text
         allowed:
-        - false
-        - true
+        - "off"
+        - "on"
         - cooling
         - alarm
 relationships:

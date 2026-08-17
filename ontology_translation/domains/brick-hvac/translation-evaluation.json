@@ -4,7 +4,8 @@
     "ok": true,
     "error_count": 0,
     "warning_count": 0,
-    "issues": []
+    "issues": [],
+    "note": "Re-checked 2026-08-17 against tools/validate_domain.py after it was extended to flag non-string allowed entries (allowed_not_all_strings) and after the manual off/on fix described in manual_spot_check -- still 0 errors, 0 warnings under the stricter check."
   },
   "provenance_completeness": {
     "ok": true,
@@ -3360,5 +3361,18 @@
     "total_cost_usd": 0.1711,
     "generation_cost_usd": 0.0173
   },
-  "hard_gates_ok": true
+  "hard_gates_ok": true,
+  "manual_spot_check": {
+    "performed": true,
+    "date": "2026-08-17",
+    "file_md": "manual-spot-check.md",
+    "file_json": "manual-spot-check.json",
+    "sample_size": 18,
+    "population": 175,
+    "verdicts": {
+      "accept": 17,
+      "reject": 1
+    },
+    "reject_summary": "S10 classes.CRAH.properties.status: allowed list mixed YAML booleans with strings, violating agent_ontology_spec.md's allowed: string[] | null typing. Same defect found on 16 classes total via full scan; manually corrected in reference.domain.yaml (false/true -> \"off\"/\"on\"), no LLM rerun. See manual-spot-check.md for full detail."
+  }
 }

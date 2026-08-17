@@ -29,3 +29,17 @@
 
 ## Competency-question support (report-only)
 - support score: 40.0% (10 CQs)
+
+## Manual spot-check (human evidence, in-session, 2026-08-17)
+- 10% stratified sample of the 175 source-mapped artefacts (18 items):
+  17 accepted, 1 rejected. See `manual-spot-check.md` / `.json` for the
+  full sample and verdicts.
+- The 1 reject (`classes.CRAH.properties.status`) found a real,
+  spec-violating defect (bool/string-mixed `allowed` list) present on 16
+  classes' `status` property. Manually corrected in this file (no LLM
+  rerun); `validate_domain.py` was extended to catch this automatically
+  going forward.
+- Note in hindsight: the `allowed_values` stability F1 of 0.37 above (the
+  lowest of any stability metric) was already a signal that the compiler
+  was inconsistent about `allowed` lists across its 3 independent runs —
+  worth watching on future domains even where the structural gate passes.

@@ -140,8 +140,25 @@ def validate_domain(data: dict) -> ValidationReport:
                     f"property '{prop_name}' has 'unit' but type is '{prop_type}', not 'number'",
                     prop_path,
                 )
-            if "allowed" in prop_def and not isinstance(prop_def["allowed"], list):
-                report.error("allowed_not_list", f"property '{prop_name}'.allowed must be a list", prop_path)
+            if "allowed" in prop_def:
+                allowed = prop_def["allowed"]
+                if not isinstance(allowed, list):
+                    report.error("allowed_not_list", f"property '{prop_name}'.allowed must be a list", prop_path)
+                else:
+                    # agent_ontology_spec.md Section 5 types `allowed` as
+                    # `string[] | null` -- a bare YAML `true`/`false` parses
+                    # as a Python bool, not a str, so a mixed list like
+                    # [false, true, "alarm"] is a real type violation, not
+                    # just a style nit (found via manual spot-check on the
+                    # Brick HVAC translation, see domains/brick-hvac/).
+                    non_strings = [v for v in allowed if not isinstance(v, str)]
+                    if non_strings:
+                        report.error(
+                            "allowed_not_all_strings",
+                            f"property '{prop_name}'.allowed must be a list of strings; "
+                            f"found non-string value(s): {non_strings!r}",
+                            prop_path,
+                        )
 
     relationships = _get_typed(report, data, "relationships", list, [], "relationships_not_list", "'relationships' must be a list")
     rel_signatures = []

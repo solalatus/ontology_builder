@@ -94,7 +94,14 @@ Rules for this shape:
   `properties` is a mapping keyed by property name; `type` is always one of
   `text`, `number`, `date`, `boolean`; `unit` only appears when
   `type: number`; `allowed` is an independent, optional fixed-choice list on
-  any type.
+  any type. **Every entry in `allowed` must be a plain string, always** —
+  e.g. `["off", "on", "alarm"]`, never `[false, true, "alarm"]`. Do not
+  emit bare YAML booleans in `allowed` even for what feels like a two-state
+  status; write the states out as strings like `"off"`/`"on"` instead. This
+  matches `agent_ontology_spec.md`'s `allowed: string[] | null` typing
+  exactly, and mixing bool/string in one list is a real type violation, not
+  a style choice (found on the Brick HVAC translation's equipment `status`
+  properties via manual spot-check — see `domains/brick-hvac/`).
 - `relationships` is a **list**, not a mapping — one entry per relationship,
   `{name, from, to, meaning, aliases}`, where `from`/`to` are class names
   that must exist in `classes`. `name` is camelCase, derived from how a

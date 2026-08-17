@@ -52,17 +52,25 @@ succeeds end to end. Until then, this file is the only record.
   wording is recovered from git history, and every real compile run pins
   itself to exact wording via a SHA-256 recorded in `run-manifest.json`
   (`compile.py`'s `prompt_sha256()`) rather than via a versioned filename.
-- **#106 (Brick HVAC v1.4.4): pipeline work done, all hard gates pass,
-  PR open — issue stays open pending the user's own manual review**
-  (explicit instruction: the manual spot-check in this file is mine, not
-  a substitute for theirs; we'll discuss that process after the PR
-  merges, and #106 does not get closed until then). Real source fetched
-  and checksum-pinned; scoped to 81 classes via 6 hand-picked HVAC entry
-  points. Four real pipeline bugs found and fixed by actually running
-  this on real data (none caught by any synthetic test) — full account in
-  today's Log entry. Final accepted candidate: 175 elements, structurally
-  clean, 100% provenance, zero majority-unsupported, assembled under
+- **#106 (Brick HVAC v1.4.4): pipeline work done, all hard gates pass, PR
+  #115 merged into `main`.** Real source fetched and checksum-pinned;
+  scoped to 81 classes via 6 hand-picked HVAC entry points. Six real
+  pipeline bugs found and fixed by actually running this on real data
+  (none caught by any synthetic test) — full account in the 2026-08-16
+  Log entry. Final accepted candidate: 175 elements, structurally clean,
+  100% provenance, zero majority-unsupported, assembled under
   `ontology_translation/domains/brick-hvac/`.
+- **In-session manual spot-check done, 2026-08-17: 17/18 accept, 1
+  reject, real bug found and fixed.** 10%-stratified sample (18 of 175
+  artefacts, seed 106) reviewed live against original Brick source docs.
+  One rejection (`classes.CRAH.properties.status`) surfaced a genuine,
+  spec-violating defect — `allowed` lists mixing YAML booleans with
+  strings — present on 16 classes, not just the sampled one.
+  `validate_domain.py` and the compiler prompt were both fixed so this
+  can't recur on any future domain; `reference.domain.yaml` was
+  hand-corrected (no LLM rerun). Full detail:
+  `domains/brick-hvac/manual-spot-check.md`. **#106 still not closed** —
+  no instruction yet to close it; that remains the user's call.
 - Real Azure spend so far this session: smoke tests are a handful of cents
   (re-spent lightly every time the full suite is run locally with
   credentials present — see `tools/README.md`'s testing section); Brick
@@ -72,8 +80,8 @@ succeeds end to end. Until then, this file is the only record.
   inside the ~$21.57 "Large tier, 3 correction rounds" ceiling from the
   original cost estimate.
 - **#104–#105, #107–#111: not started.**
-- No domain has been translated yet. No `ontology_translation/domains/`
-  directory exists yet.
+- One domain translated and merged: `ontology_translation/domains/brick-hvac/`.
+  No other domain started yet.
 
 ## Log / Decisions
 
@@ -416,3 +424,72 @@ reference and record deltas/decisions here instead.)*
   stays **open** after this PR merges — the manual spot-check above is
   mine, not the user's; they want to do their own review before the issue
   closes, and we'll discuss what that process looks like after merge.
+
+- 2026-08-17 — **PR #115 merged.** User then defined a standing term for
+  the review process: everything with a `translation.json` mapping entry
+  (classes, class properties, relationships, rules, actions — 175 total
+  for Brick HVAC) is an "artefact," and asked for 10% of them sampled and
+  reviewed live in-session, original source info shown against the
+  resulting translation, with accept/reject/comment per item, materialized
+  afterward as a file in the repo as evidence.
+
+  **Sampling:** stratified by artefact type (not pure random — with only 9
+  rules and 9 actions in the population, a flat random draw could plausibly
+  miss a whole category), proportional allocation via largest-remainder
+  rounding, seed `106` for reproducibility. 18 of 175 sampled: 5 classes, 5
+  properties, 6 relationships, 1 rule, 1 action. Competency questions
+  excluded from the artefact population — they're synthesized, not
+  source-mapped, so there's no "original source info" to check them
+  against.
+
+  **Review, live in chat:** all 18 presented with source IRIs/evidence
+  side by side with the resulting `.domain.yaml` content. User accepted 17
+  outright and flagged one (`classes.CRAH.properties.status`, `allowed:
+  [false, true, "cooling", "alarm"]`) for a source-doc check rather than
+  taking it on faith.
+
+  **The check found a real bug.** `rec:status` in the pinned Brick source
+  (`Brick.ttl:32600`) is a bare `owl:DatatypeProperty` with only a label —
+  no comment, no range, no enumeration — so there's no source basis for
+  any `status` enum at all. Separately and more concretely:
+  `agent_ontology_spec.md` types `allowed` as `string[] | null`, and this
+  property's `allowed` list mixed literal YAML booleans with strings — a
+  real type violation of our own spec, not a grounding nuance. A full scan
+  turned up the identical pattern on **16 classes**, not just the sampled
+  one: `AHU`, `Boiler`, `Chiller`, `Compressor`, `CondensingUnit`,
+  `CoolingTower`, `Fan`, `HeatExchanger`, `Humidifier`, `Pump`,
+  `SpaceHeater`, `TerminalUnit`, `Thermostat`, `WallAirConditioner`,
+  `CRAC`, `CRAH`. In hindsight, the translation-stability report already
+  had a signal for this — `allowed_values` F1 was 0.37, the lowest of any
+  stability metric, meaning the compiler was already visibly inconsistent
+  about `allowed` lists across its 3 independent runs. Worth watching on
+  every future domain even when the structural gate is green.
+
+  **Fixed per explicit instruction: fix the code, don't rerun the
+  pipeline, log the review as-is, hand-correct the data, and log that the
+  fix was manual.**
+  - Code: `validate_domain.py`'s structural gate now flags
+    `allowed_not_all_strings` when any `allowed` entry isn't a plain `str`
+    (previously it only checked `allowed` was *a list at all* —
+    `[false, true, "alarm"]` passed silently). Test added. Compiler prompt
+    (`prompts/compiler-prompt.md`) now explicitly forbids bare YAML
+    booleans in `allowed`, citing this finding, so future compiles on any
+    domain don't reproduce it.
+  - Data: hand-edited `reference.domain.yaml` — replaced the YAML `false`/
+    `true` values with the strings `"off"`/`"on"` in all 16 affected
+    classes' `status.allowed` lists. Diff is exactly those 32 lines,
+    nothing else touched. **No LLM call was made for this fix** — the
+    compiler was not re-invoked, and every other mapping's content and
+    rationale in `translation.json` is untouched.
+  - Re-validation: re-ran the free, offline `validate_domain.py` against
+    the corrected file with the new check active (0 errors, 0 warnings)
+    and the full offline suite (95 tests, all passing). No live/paid API
+    calls were made anywhere in this fix.
+  - Evidence materialized: `domains/brick-hvac/manual-spot-check.md` and
+    `.json` (full sample, verdicts, the S10 finding, and the remediation
+    account above); `translation-evaluation.json` and
+    `translation-report.md` both cross-reference it.
+
+  **#106 still open.** This spot-check is the evidence the user asked for,
+  not itself an instruction to close the issue — that's still their call,
+  to be given explicitly.
