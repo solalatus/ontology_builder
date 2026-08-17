@@ -1177,3 +1177,72 @@ reference and record deltas/decisions here instead.)*
   multi-round, `rounds` key) and `domains/brick-hvac/provenance-audit.md`.
 
   **#106 still open** — still the user's call.
+
+- 2026-08-17 (continued) — **Fourth manual spot-check round: the round-3
+  audit had missed things.** 10%-stratified sample (13 of 127, seed 512),
+  10/13 clean, but 3 flagged (`classes.Chiller.properties.status`,
+  `classes.Chiller.properties.coolingCapacity`, `relationships[10]`) had
+  the *exact same* uncited-paraphrase defect the round-3 audit was
+  supposed to have already eliminated everywhere. Rather than patch these
+  3 in isolation (already ruled out as an approach), audited the round-3
+  audit's own scan and found two real bugs in it: a case-sensitive label
+  match that missed lowercased paraphrases ("chiller" vs. label
+  "Chiller"), and a `len(label) > 3` filter that excluded valid short
+  labels like "AHU". Re-scanned case-insensitively with no length filter
+  (107 raw hits — mostly noise from generic short labels that collide
+  with common English words), filtered with an explicit stoplist (→27),
+  manually read every one, landed on **20 genuine items** (these 3 plus
+  17 more the original audit never caught). Reground with the same
+  provenance-only discipline as before.
+
+  A second bug was found and fixed while applying that fix, not in
+  `repair.py` itself: the fix batch's `source_context` per item only
+  listed the *new* citation to add, never the item's pre-existing correct
+  ones — and `repair.py`'s `apply_repairs()` replaces `source_iris`
+  wholesale rather than merging, so all 20 items silently lost previously
+  -correct citations. Fixed directly with a pure Python union of old+new
+  `source_iris`, no re-run needed. Verified: structural clean, 0/127
+  mappings with empty `source_iris`, independent re-judge of all 20
+  changed elements — 0 unsupported, 3 contested (same disclosed,
+  non-blocking borderline category as before). Cost: $0.1475.
+
+  Full account, including the corrected scan methodology and the "a
+  comprehensive audit is only as comprehensive as its own scan logic"
+  lesson: `domains/brick-hvac/provenance-audit.md` (follow-up section) and
+  `domains/brick-hvac/manual-spot-check.md`/`.json` (round 4).
+
+  Running total for the whole Brick HVAC effort across every phase so
+  far: **~$21.5**.
+
+  **#106 still open** — still the user's call.
+
+- 2026-08-17 (continued) — **Domain-agnosticism audit, user-directed
+  ("the whole extraction pipeline is generic... it MUST BE A GENERAL
+  PIPELINE FOR ANY FRIGGIN ONTOLOGY OUT THERE! is it so? if not, FIX").**
+  Grepped and AST-scanned (Python string-constant walk, to distinguish
+  hardcoded runtime logic from comments) every `.py` file in
+  `ontology_translation/tools/`, and grepped every `.md` prompt file, for
+  HVAC/Brick/building-domain terms.
+
+  Runtime logic was already fully clean everywhere. Two real violations
+  found in illustrative prompt examples, both introduced/left this
+  session:
+
+  - `compiler-prompt.md`: the "standard practice needs citations" example
+    (added earlier this session, in the round-3 audit's own fix) used a
+    concrete Boiler/Chiller/AHU example.
+  - `reinstate-prompt.md` (written fresh this session, never went through
+    the earlier de-biasing pass other prompts got): its "separate
+    evidence" paragraph and full worked JSON output example both used
+    HVAC equipment (Compressor/CondensingUnit/Fan/Chiller).
+
+  Both replaced with an abstract Invoice/PurchaseOrder/LineItem example
+  matching the files' existing vocabulary, each file now ending with an
+  explicit "examples are illustrative, not domain guidance" disclaimer.
+  `repair-prompt.md`, `evaluate.py`'s embedded judge prompts,
+  `agent_ontology_spec.md`, and `index.html` were all already clean (only
+  benign generic-English false positives, e.g. "building the model").
+  Full offline test suite re-run clean: 200/200. No LLM cost (deterministic
+  scan + manual read-through only).
+
+  **#106 still open** — still the user's call.

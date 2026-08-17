@@ -6,6 +6,82 @@ item, verbatim source/result pairs, all rounds) is in
 `manual-spot-check.json`, keyed by `rounds`; this file is the readable
 summary, newest round first.
 
+## Round 4 (2026-08-17)
+
+10%-stratified sample (13 of 127 artefacts, seed 512, all fresh from
+round 3's). **Result: 10/13 accepted clean, 3/13 flagged** —
+`classes.Chiller.properties.coolingCapacity`, `classes.Chiller.properties.status`,
+`relationships[10]` (AHU hasPoint HeatingTemperatureSetpoint) — each an
+evidence text that named/paraphrased a real source class without citing
+it, the same category round 3's comprehensive audit was supposed to have
+already eliminated.
+
+Rather than treat these as three more one-off patches (the reviewer had
+already ruled that out as a pattern in round 3 — *"this looks like whack
+a mole more and more"*), the finding was escalated to auditing the round-3
+audit's own methodology. Two real gaps were found:
+
+- **Case-sensitivity**: the round-3 scan matched real class labels
+  case-sensitively (e.g. `Chiller`), but `classes.Chiller.properties.status`'s
+  evidence text used lowercase — *"standard HVAC practice for chiller
+  operating state"* — and was never matched.
+- **Short-label filtering**: the round-3 scan's label-collection step
+  dropped labels of length ≤ 3, excluding "AHU" — so
+  `relationships[10]`'s evidence, *"standard HVAC control practice
+  associates heating setpoints with AHU control"*, was missed even by a
+  case-insensitive rescan until the filter itself was found and removed.
+
+**Fix**: re-ran the scan case-insensitively with no length filter — 107
+raw hits, dominated by generic short Brick labels that collide with
+common English words (`Class`, `Equipment`, `Space`, `Sensor`, `Setpoint`,
+`Location`, `Entity`, `Outside`, `Pump`, `Point`, etc.). Filtered with an
+explicit stoplist of those terms (107 → 27), then manually read the full
+evidence/rationale text for each of the 27 to separate genuine uncited
+paraphrases from false positives (ordinary English usage of a word that
+happens to double as a class label; or a class name appearing incidentally
+inside a quote that was already correctly cited). Landed on **20 genuine
+items** (the 3 from this round's sample plus 17 more found only by the
+comprehensive rescan, not sampling) — reground with corrected `source_iris`,
+same provenance-only, zero-content-change discipline as round 3's fix.
+
+**A second defect found while building the fix, not in the mappings
+themselves**: the repair batch's `source_context` for each item listed
+only the *new* citation to add, not the item's pre-existing correct ones
+(bare property IRIs like `rec#value`/`rec#status`, relationship
+predicates like `hasPart`/`hasPoint`/`feeds`, and in `relationships[30]`'s
+case, a previously-correct `Space` citation). `repair.py`'s
+`apply_repairs()` replaces `source_iris` wholesale rather than merging, so
+all 20 items lost their previously-correct citations the moment the new
+one was added — confirmed by diffing `relationships[30]` and then
+systematically checking all 20. Fixed directly (pure Python union of
+old+new `source_iris`, no re-run needed) rather than by re-calling the
+repair model.
+
+**Verification**: structural validation 0 errors, 0/127 mappings with
+empty `source_iris`, mapping count unchanged (127, provenance-only edit).
+Independent re-judge of all 20 changed elements: **0 unsupported**, 3
+contested (`classes.CO2Sensor.properties.value`, `relationships[13]`,
+`relationships[29]` — disclosed borderline supported/partially_supported
+splits, same non-blocking category already accepted elsewhere in this
+domain), cost $0.1475.
+
+The other 10 of 13 sampled items this round: accepted with no flag —
+`classes.AirPlenum`, `classes.Zone`, `classes.AirTemperatureSetpoint`,
+`classes.HeatingValve`, `classes.HeatingValve.properties.position`,
+`classes.SpaceHeater.properties.status`, `relationships[14]`,
+`relationships[15]`, `rules.needsCoolingFromSetpoint`,
+`actions.enableEconomizer` — matched their source material directly, with
+correctly-cited `source_iris` in every case.
+
+**Full account of the audit-methodology gap and corrected scan
+methodology: `provenance-audit.md`.**
+
+### Cost
+
+Round-4 sample review: no LLM calls (manual only). Second-pass rescan +
+stoplist filtering: no LLM calls (deterministic scan + manual review).
+Reground fix + re-judge: $0.1475.
+
 ## Round 3 (2026-08-17)
 
 10%-stratified sample (13 of 127 artefacts, seed 306 — a fresh sample, one

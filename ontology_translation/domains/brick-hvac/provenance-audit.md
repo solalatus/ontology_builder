@@ -101,3 +101,74 @@ instead of trusting the compiler's own prose.
 
 **Total cost, this audit + fix:** ~$0.49 (two repair passes, one
 comprehensive re-judge of all 42 changed elements).
+
+## Follow-up: two real gaps in this audit's own scan, found in round 4
+
+Manual spot-check round 4 sampled 3 items with the exact same defect this
+audit was meant to have eliminated (`classes.Chiller.properties.status`,
+`classes.Chiller.properties.coolingCapacity`, `relationships[10]`). Rather
+than patch those 3 in isolation, the scan above was itself audited and two
+real bugs were found in it:
+
+1. **Case-sensitivity.** The label-match regex compared real Brick labels
+   (stored capitalized, e.g. `Chiller`) against evidence text
+   case-sensitively. Compiler-generated evidence sometimes lowercased them
+   ("standard HVAC practice for **chiller** operating state") and was never
+   matched.
+2. **Short-label filtering.** The label-collection step excluded labels of
+   length ≤ 3, dropping "AHU" — so `relationships[10]`'s evidence
+   ("...associates heating setpoints with **AHU** control") was missed even
+   after fixing (1), until the length filter itself was found and removed.
+
+**Corrected scan**: case-insensitive matching, no length filter. This
+surfaced 107 raw hits — far noisier than the original 72, because it now
+also matches ordinary English words that coincide with short/generic Brick
+labels (`Class`, `Equipment`, `HVAC Equipment`, `Space`, `Setpoint`,
+`Temperature Setpoint`, `Sensor`, `Temperature Sensor`, `Location`,
+`Entity`, `Outside`, `Pump`, `Point`). Filtered with an explicit stoplist
+of those terms (107 → 27), then every one of the 27 was manually read in
+full — evidence and rationale text against the real candidate class's
+definition — to separate genuine uncited paraphrases from false positives:
+plain English usage of a word that happens to double as a class label, or
+a class name appearing incidentally inside a quote from a *different,
+already-correctly-cited* source class's own definition.
+
+**Result: 20 genuine items** (the 3 from round 4's sample, plus 17 more
+that only the corrected comprehensive rescan caught — never sampled,
+never flagged before). Reground with the same provenance-only discipline
+as the original 42: zero `reference.domain.yaml` content changed, only
+`source_iris`/`source_evidence`/`confidence`/`rationale` corrected.
+
+### A second defect, found while applying this fix (not in repair.py itself)
+
+Building the 20-item repair batch, each item's `source_context` listed
+only the *new* citation to add — not the item's pre-existing correct ones
+(bare property IRIs like `rec#value`/`rec#status`, relationship predicates
+like `hasPart`/`hasPoint`/`hasLocation`/`feeds`, and in `relationships[30]`'s
+case a previously-correct `Space` class citation). `repair.py`'s
+`apply_repairs()` does `mapping.update(provenance)`, which **replaces**
+`source_iris` wholesale rather than merging — so all 20 items silently lost
+their previously-correct citations the moment the new one was added. This
+is a process bug in how the audit's fix batch was constructed, not a
+`repair.py` code defect; found by diffing `relationships[30]`'s before/after
+`source_iris` and confirmed present in all 20 of 20 items in the batch.
+
+**Fixed directly**, no further LLM call: a pure Python union of each item's
+old and new `source_iris` (old first, then new, deduplicated), applied to
+`translation.json`.
+
+### Verification
+
+- Structural validity: 0 errors.
+- 0/127 mappings with empty `source_iris`; mapping count unchanged (127).
+- **Independent re-judge of all 20 changed elements**: 0 unsupported, 3
+  contested (`classes.CO2Sensor.properties.value`, `relationships[13]`,
+  `relationships[29]` — disclosed borderline supported/partially_supported
+  splits, the same non-blocking category already accepted elsewhere in
+  this domain). Cost: $0.1475.
+
+**Lesson, stated plainly**: a "comprehensive" audit is only as
+comprehensive as its own scan logic. Continued independent spot-checking
+after this audit was first declared complete found two real gaps in the
+scan itself, not just in the mappings it was meant to catch. Full account
+of the round-4 sample that triggered this: `manual-spot-check.md`.

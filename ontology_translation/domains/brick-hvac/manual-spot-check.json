@@ -751,6 +751,373 @@
           "finding": "Fixed as part of the 42-item audit batch: now cites Zone, OccupancySensor, and Thermostat directly."
         }
       ]
+    },
+    {
+      "round": 4,
+      "date": "2026-08-17",
+      "reviewer": "repo owner (szablevi@gmail.com), in-session review with the coding agent",
+      "sampling_method": {
+        "description": "Stratified sample by artefact type, proportional allocation, new seed.",
+        "seed": 512,
+        "population_total": 127,
+        "sample_target_fraction": 0.1,
+        "sample_size": 13,
+        "allocation": {
+          "class": 4,
+          "property": 4,
+          "relationship": 3,
+          "rule": 1,
+          "action": 1
+        }
+      },
+      "verdict_summary": {
+        "accept": 10,
+        "flag_escalated_to_audit": 3,
+        "total": 13
+      },
+      "notes": [
+        "3 of 13 flagged items (classes.Chiller.properties.coolingCapacity, classes.Chiller.properties.status, relationships[10]) were uncited-paraphrase defects of the exact same kind round 3's comprehensive audit was meant to have eliminated. Escalated to auditing the audit itself rather than patching these 3 in isolation -- found and fixed two real gaps in the round-3 scan methodology (case-sensitivity, a short-label length filter that excluded 'AHU'). Re-scanned case-insensitively with a stoplist for generic short labels, manually reviewed 27 candidates, found 20 genuine items (these 3 plus 17 more only the comprehensive rescan caught). See provenance-audit.md for the full account, including a second defect (a source_iris merge-vs-replace bug in how the fix batch was constructed, not in repair.py itself) found and fixed while applying the 20-item correction."
+      ],
+      "items": [
+        {
+          "idx": 1,
+          "target_path": "classes.AirPlenum",
+          "artefact_type": "class",
+          "mapping": {
+            "target_path": "classes.AirPlenum",
+            "source_iris": [
+              "https://brickschema.org/schema/Brick#Air_Plenum"
+            ],
+            "source_evidence": "\"A component of the HVAC the receives air from the air handling unit or room to distribute or exhaust to or from the building\"",
+            "confidence": "high",
+            "rationale": "Direct class mapping from the source definition."
+          },
+          "result": {
+            "meaning": "An HVAC component that receives air from an air handling unit or room for distribution or exhaust.",
+            "properties": {
+              "airflowState": {
+                "type": "text",
+                "allowed": [
+                  "supply",
+                  "return",
+                  "exhaust"
+                ]
+              }
+            }
+          },
+          "sample_id": "S1",
+          "verdict": "accept",
+          "reviewer_comment": null,
+          "finding": null
+        },
+        {
+          "idx": 2,
+          "target_path": "classes.Zone",
+          "artefact_type": "class",
+          "mapping": {
+            "target_path": "classes.Zone",
+            "source_iris": [
+              "https://brickschema.org/schema/Brick#Zone"
+            ],
+            "source_evidence": "\"a separately controlled heated or cooled space... maintained throughout by a single controlling device\"",
+            "confidence": "high",
+            "rationale": "Direct class mapping from the source definition."
+          },
+          "result": {
+            "meaning": "A separately controlled heated or cooled space, or a group of spaces with sufficiently similar requirements to be maintained by a single controlling device.",
+            "properties": {
+              "occupancyStatus": {
+                "type": "text",
+                "allowed": [
+                  "occupied",
+                  "unoccupied",
+                  "unknown"
+                ]
+              }
+            }
+          },
+          "sample_id": "S2",
+          "verdict": "accept",
+          "reviewer_comment": null,
+          "finding": null
+        },
+        {
+          "idx": 3,
+          "target_path": "classes.AirTemperatureSetpoint",
+          "artefact_type": "class",
+          "mapping": {
+            "target_path": "classes.AirTemperatureSetpoint",
+            "source_iris": [
+              "https://brickschema.org/schema/Brick#Air_Temperature_Setpoint"
+            ],
+            "source_evidence": "\"Sets temperature of air\"",
+            "confidence": "high",
+            "rationale": "Direct class mapping from the source definition."
+          },
+          "result": {
+            "meaning": "A setpoint that sets the temperature of air.",
+            "properties": {
+              "value": {
+                "type": "number",
+                "unit": "degC"
+              }
+            }
+          },
+          "sample_id": "S3",
+          "verdict": "accept",
+          "reviewer_comment": null,
+          "finding": null
+        },
+        {
+          "idx": 4,
+          "target_path": "classes.HeatingValve",
+          "artefact_type": "class",
+          "mapping": {
+            "target_path": "classes.HeatingValve",
+            "source_iris": [
+              "https://brickschema.org/schema/Brick#Heating_Valve"
+            ],
+            "source_evidence": "\"A valve that controls air temperature by modulating the amount of hot water flowing through a heating coil\"",
+            "confidence": "high",
+            "rationale": "Direct class mapping from the source definition."
+          },
+          "result": {
+            "meaning": "A valve that controls air temperature by modulating the amount of hot water flowing through a heating coil.",
+            "properties": {
+              "position": {
+                "type": "number",
+                "unit": "percent"
+              }
+            }
+          },
+          "sample_id": "S4",
+          "verdict": "accept",
+          "reviewer_comment": null,
+          "finding": null
+        },
+        {
+          "idx": 5,
+          "target_path": "classes.Chiller.properties.coolingCapacity",
+          "artefact_type": "property",
+          "mapping": {
+            "target_path": "classes.Chiller.properties.coolingCapacity",
+            "source_iris": [
+              "https://brickschema.org/schema/Brick#coolingCapacity"
+            ],
+            "source_evidence": "Object property definition: \"Measurement of a chiller ability to remove heat\"",
+            "confidence": "high",
+            "rationale": "The source property directly supports a cooling capacity attribute on chillers."
+          },
+          "result": {
+            "type": "number"
+          },
+          "sample_id": "S5",
+          "verdict": "flag_escalated_to_audit",
+          "reviewer_comment": null,
+          "finding": "Second-pass audit finding (a case-sensitivity and short-label bug in the first audit's scan missed these): source_evidence/rationale names or paraphrases Chiller, whose real definition(s) exist in the source IR, but source_iris does not cite them (current: ['https://brickschema.org/schema/Brick#coolingCapacity']). Reground with the same content, citing the specific class(es) actually drawn on. If the current rationale contains leftover meta-commentary about a fix (e.g. 'the missing cited class IRI should be included'), replace it with a clean, direct rationale."
+        },
+        {
+          "idx": 6,
+          "target_path": "classes.HeatingValve.properties.position",
+          "artefact_type": "property",
+          "mapping": {
+            "target_path": "classes.HeatingValve.properties.position",
+            "source_iris": [
+              "https://brickschema.org/schema/Brick#Heating_Valve"
+            ],
+            "source_evidence": "\"Heating Valve\" is defined as \"A valve that controls air temperature by modulating the amount of hot water flowing through a heating coil,\" which standardly implies a modulating valve position represented as a percentage.",
+            "confidence": "high",
+            "rationale": "The definition explicitly describes modulation, which supports a percent position property for the heating valve."
+          },
+          "result": {
+            "type": "number",
+            "unit": "percent"
+          },
+          "sample_id": "S6",
+          "verdict": "accept",
+          "reviewer_comment": null,
+          "finding": null
+        },
+        {
+          "idx": 7,
+          "target_path": "classes.SpaceHeater.properties.status",
+          "artefact_type": "property",
+          "mapping": {
+            "target_path": "classes.SpaceHeater.properties.status",
+            "source_iris": [
+              "https://brickschema.org/schema/Brick#Space_Heater",
+              "https://brickschema.org/schema/Brick#Boiler"
+            ],
+            "source_evidence": "\"Space Heater\" is \"A heater used to warm the air in an enclosed area, such as a room or office\"; as active heating equipment, and consistent with sibling heating equipment such as a \"Boiler\", it reasonably uses the standard operational status values off/on/alarm.",
+            "confidence": "medium",
+            "rationale": "The source definition makes Space Heater an active heating device whose operating state is meaningful, and the sibling heating-equipment convention supports retaining the modeled status property."
+          },
+          "result": {
+            "type": "text",
+            "allowed": [
+              "off",
+              "on",
+              "alarm"
+            ]
+          },
+          "sample_id": "S7",
+          "verdict": "accept",
+          "reviewer_comment": null,
+          "finding": null
+        },
+        {
+          "idx": 8,
+          "target_path": "classes.Chiller.properties.status",
+          "artefact_type": "property",
+          "mapping": {
+            "target_path": "classes.Chiller.properties.status",
+            "source_iris": [
+              "https://w3id.org/rec#status"
+            ],
+            "source_evidence": "Datatype property label \"status\" and standard HVAC practice for chiller operating state.",
+            "confidence": "medium",
+            "rationale": "Chillers are operational assets for which status is routinely needed."
+          },
+          "result": {
+            "type": "text",
+            "allowed": [
+              "off",
+              "on",
+              "alarm"
+            ]
+          },
+          "sample_id": "S8",
+          "verdict": "flag_escalated_to_audit",
+          "reviewer_comment": null,
+          "finding": "Second-pass audit finding (a case-sensitivity and short-label bug in the first audit's scan missed these): source_evidence/rationale names or paraphrases Chiller, whose real definition(s) exist in the source IR, but source_iris does not cite them (current: ['https://w3id.org/rec#status']). Reground with the same content, citing the specific class(es) actually drawn on. If the current rationale contains leftover meta-commentary about a fix (e.g. 'the missing cited class IRI should be included'), replace it with a clean, direct rationale."
+        },
+        {
+          "idx": 9,
+          "target_path": "relationships[10]",
+          "artefact_type": "relationship",
+          "mapping": {
+            "target_path": "relationships[10]",
+            "source_iris": [
+              "https://brickschema.org/schema/Brick#hasPoint"
+            ],
+            "source_evidence": "Brick hasPoint definition; standard HVAC control practice associates heating setpoints with AHU control.",
+            "confidence": "high",
+            "rationale": "The AHU-to-HeatingTemperatureSetpoint pairing is a routine control relationship."
+          },
+          "result": {
+            "name": "hasPoint",
+            "from": "AirHandlingUnit",
+            "to": "HeatingTemperatureSetpoint",
+            "meaning": "An air handling unit has a heating temperature setpoint used for control.",
+            "aliases": []
+          },
+          "sample_id": "S9",
+          "verdict": "flag_escalated_to_audit",
+          "reviewer_comment": null,
+          "finding": "Second-pass audit finding (a case-sensitivity and short-label bug in the first audit's scan missed these): source_evidence/rationale names or paraphrases AHU, Heating Temperature Setpoint, whose real definition(s) exist in the source IR, but source_iris does not cite them (current: ['https://brickschema.org/schema/Brick#hasPoint']). Reground with the same content, citing the specific class(es) actually drawn on. If the current rationale contains leftover meta-commentary about a fix (e.g. 'the missing cited class IRI should be included'), replace it with a clean, direct rationale."
+        },
+        {
+          "idx": 10,
+          "target_path": "relationships[14]",
+          "artefact_type": "relationship",
+          "mapping": {
+            "target_path": "relationships[14]",
+            "source_iris": [
+              "https://brickschema.org/schema/Brick#Occupancy_Sensor"
+            ],
+            "source_evidence": "\"Occupancy Sensor\" \"Detects occupancy of some space or area\"; standard building/HVAC practice places such a point on the space whose occupancy is being detected.",
+            "confidence": "medium",
+            "rationale": "The occupancy sensor definition supports the point semantics for a space, and the missing cited class IRI should be included."
+          },
+          "result": {
+            "name": "hasPoint",
+            "from": "Space",
+            "to": "OccupancySensor",
+            "meaning": "A space has an occupancy sensor used to detect occupancy.",
+            "aliases": []
+          },
+          "sample_id": "S10",
+          "verdict": "accept",
+          "reviewer_comment": null,
+          "finding": null
+        },
+        {
+          "idx": 11,
+          "target_path": "relationships[15]",
+          "artefact_type": "relationship",
+          "mapping": {
+            "target_path": "relationships[15]",
+            "source_iris": [
+              "https://brickschema.org/schema/Brick#Zone",
+              "https://brickschema.org/schema/Brick#Occupancy_Sensor"
+            ],
+            "source_evidence": "\"Zone\" is a \"separately controlled heated or cooled space\" or group of spaces, and an \"Occupancy Sensor\" \"Detects occupancy of some space or area,\" so a zone can have an occupancy point relevant to control.",
+            "confidence": "high",
+            "rationale": "The zone and occupancy sensor definitions together support an occupancy point associated with a controllable zone."
+          },
+          "result": {
+            "name": "hasPoint",
+            "from": "Zone",
+            "to": "OccupancySensor",
+            "meaning": "A zone has an occupancy sensor used to detect occupancy relevant to control.",
+            "aliases": []
+          },
+          "sample_id": "S11",
+          "verdict": "accept",
+          "reviewer_comment": null,
+          "finding": null
+        },
+        {
+          "idx": 12,
+          "target_path": "rules.needsCoolingFromSetpoint",
+          "artefact_type": "rule",
+          "mapping": {
+            "target_path": "rules.needsCoolingFromSetpoint",
+            "source_iris": [
+              "https://brickschema.org/schema/Brick#Air_Temperature_Sensor",
+              "https://brickschema.org/schema/Brick#Cooling_Temperature_Setpoint"
+            ],
+            "source_evidence": "\"Air Temperature Sensor\" \"Measures the temperature of air\" and \"Cooling Temperature Setpoint\" \"Sets temperature for cooling,\" so a condition where measured air temperature is above the cooling setpoint is a grounded cooling-demand rule.",
+            "confidence": "high",
+            "rationale": "The rule directly combines the measurement and setpoint semantics defined by the cited classes."
+          },
+          "result": {
+            "conditions": [
+              "measured air temperature is above the applicable cooling temperature setpoint"
+            ]
+          },
+          "sample_id": "S12",
+          "verdict": "accept",
+          "reviewer_comment": null,
+          "finding": null
+        },
+        {
+          "idx": 13,
+          "target_path": "actions.enableEconomizer",
+          "artefact_type": "action",
+          "mapping": {
+            "target_path": "actions.enableEconomizer",
+            "source_iris": [
+              "https://brickschema.org/schema/Brick#Economizer"
+            ],
+            "source_evidence": "Economizer definition states it initiates control signals or actions to conserve energy and reduce mechanical cooling requirement.",
+            "confidence": "high",
+            "rationale": "The action is a direct operational reading of the economizer concept."
+          },
+          "result": {
+            "input": "AirHandlingUnit",
+            "preconditions": [
+              "economizerReducesMechanicalConditioning"
+            ],
+            "effect": "the air handling unit operates in economizer mode to reduce mechanical cooling",
+            "verification": "confirm the unit mode or economizer status indicates economizer operation"
+          },
+          "sample_id": "S13",
+          "verdict": "accept",
+          "reviewer_comment": null,
+          "finding": null
+        }
+      ]
     }
   ]
 }
