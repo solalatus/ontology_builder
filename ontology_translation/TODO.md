@@ -968,3 +968,124 @@ reference and record deltas/decisions here instead.)*
   Not yet merged to `main` — this candidate is meaningfully different in
   scope-breadth from the one already on `main` via PR #115, so that's
   flagged to the user rather than assumed as an automatic replacement.
+
+- 2026-08-17 (continued) — **A real question exposed a real QA gap: "is
+  the narrower candidate's judgment actually *right*, not just
+  different?"** Checked honestly: no. `reverse_coverage` only ever verified
+  a dropped source element carried a non-empty `note`, never that the note
+  was a *sound* reason, and `judge_mappings` only ever judged elements that
+  made it **into** the domain, nothing symmetric existed for exclusions.
+  Manual inspection of the "narrower" candidate's `out_of_scope` notes
+  found the same shallow, templated-justification failure mode already
+  fixed once this session for a fabricated `status` property — reused
+  near-verbatim ("not needed in/for selected subset") across dozens of
+  real, well-defined source classes, several of them direct
+  `HVAC_Equipment` siblings of classes the domain modeled in detail
+  (Compressor, CondensingUnit, CoolingTower, Pump, HeatExchanger) with no
+  principled distinction drawn.
+
+  **Built the missing hard gate, generally, not Brick-specific.**
+  `evaluate.py` layer 3b, `judge_dispositions`: an independent judge sees
+  each non-mapped disposition's real source definition (ground truth by
+  IRI, not self-reported), the compiler's own disposition/note, and
+  `included_siblings` — other source elements from the same immediate
+  taxonomy area that WERE kept, with what they were mapped to, so a judge
+  can catch an exclusion inconsistent with what similar concepts received,
+  not just implausible in isolation. New hard gate: zero
+  majority-unjustified exclusions. 11 new tests.
+
+  **Ran it for real (233 exclusions × 3 judges, $1.94).** 10 unanimous
+  `unjustified` (CO2DifferentialSensor, CondensingUnit, CoolingTower,
+  HVAC_Valve, HeatExchanger, IsolationValve, Pump, SpaceHeater, SteamValve,
+  WaterTemperatureSensor), plus `Compressor` unanimous `partially_justified`
+  ("the note doesn't explain why this wasn't kept like Boiler/Chiller") and
+  `Humidifier` contested leaning unjustified — confirming the manual
+  finding with real, specific (not templated) judge reasoning.
+
+  **Built `reinstate.py`, the symmetric counterpart to `repair.py` for
+  exclusions**, since an excluded element has no `target_path` for
+  `repair.py` to mutate — it was never in the domain to begin with. Given
+  each flagged exclusion's real source definition, decides per item
+  `reinstate` (add real, provenance-backed domain content) or `reground`
+  (the exclusion was right, but replace the boilerplate note with one that
+  actually engages with the element).
+
+  **Two more real bugs found and fixed while using it for real:**
+  1. A first reinstate call added 10 well-grounded classes with **zero
+     relationships and zero properties each** — the prompt only ever
+     showed bare class names, no relationship-naming precedent to reuse.
+     Fixed: `build_reinstate_user_prompt` now shows the domain's actual
+     relationship list and each sibling's actual domain properties, not
+     just names.
+  2. A second attempt (now with real relationships/properties) came back
+     with **17 of 35 new elements majority-unsupported** on independent
+     re-check — the schema let one evidence block cover a whole reinstated
+     item, and `apply_reinstatements` then reused that same class-level
+     evidence for every property and relationship mapping. A class's bare
+     definition doesn't itself justify a specific property or a specific
+     connection to another class — the exact same root failure mode as the
+     original `status`-property fabrication, reintroduced fresh in this
+     module's first version. Fixed: `class_evidence`, one
+     `property_evidence` entry per property, and inline evidence on every
+     `new_relationships` entry are now all separately required and
+     mechanically validated before anything is applied. 9 more tests.
+
+  **Redid the reinstate call with the fixed schema (12 items, $0.078):** 9
+  reinstated (properly grounded per-property/per-relationship evidence
+  this time — genuinely fewer, tighter relationships than the broken
+  attempt, e.g. `CondensingUnit hasPart Fan` directly quoting Condensing
+  Unit's own definition, rather than the earlier attempt's broader
+  guessed-at plant-loop connections with no direct textual support), 3
+  reground with real specific reasoning (`Compressor`, `HVAC_Valve`,
+  `SteamValve` — on reflection genuinely better modeled as subsumed
+  by/redundant with classes already in the domain). Independently
+  re-verified, not taken on the tool's own word: all 20 new/changed
+  elements unanimous supported, all 3 reground notes unanimous justified.
+
+  **Ran one truly-final, full authoritative `evaluate.py` pass** (all 7
+  layers, ~$3.16) on the merged result — and it found **one more real,
+  genuinely new** majority-unjustified exclusion: `Dry_Cooler`, unanimous
+  3/3, specifically *because* it's now clearly comparable to `CoolingTower`
+  and `CondensingUnit` — both of which only became real sibling context
+  once the reinstatement round above added them. This is the mechanism
+  working as intended, not noise: richer domain content sharpens what
+  counts as an inconsistent exclusion. Reinstated it too (`DryCooler`,
+  $0.017, independently re-verified unanimous supported).
+
+  **Ran a second full pass to check convergence (~$3.20) — clean.** All 4
+  hard gates pass: structural clean, provenance 100%/100%, reverse
+  coverage 100%, zero majority-unsupported mappings, **zero
+  majority-unjustified exclusions**. 22 contested exclusions remain,
+  report-only — almost all administrative/metadata RDF properties
+  (`serialNumber`, `modelNumber`, `timestamp`, `documentation`, rated-*
+  electrical properties) plus 3 genuinely borderline scope calls already
+  examined and left as-is (`Site`, `WallAirConditioner`,
+  `Water_Temperature_Setpoint` — real, defensible scope-narrowing, not the
+  shallow-justification pattern that got fixed). Same "report don't hide"
+  principle as every other disclosed-but-not-forced item this session.
+
+  **Known, disclosed limitation:** several reinstated classes remain
+  relationship-isolated (Pump, CoolingTower, HeatExchanger, IsolationValve,
+  Humidifier, DryCooler, CO2DifferentialSensor, WaterTemperatureSensor) —
+  real, correctly-defined, provenance-backed classes, but not wired into
+  the rest of the equipment graph, because Brick's source text doesn't
+  state their specific connections to other kept classes precisely enough
+  to ground a relationship without inventing structure beyond what's
+  given. Judged the honest tradeoff: sparser connectivity over a repeat of
+  the fabricated-relationship failure mode. Left as-is, not force-connected.
+
+  **Final state:** `reference.domain.yaml` 39 classes / 34 relationships /
+  7 rules / 5 actions. `persona.md` regenerated again to include the new
+  plant-side equipment while still correctly deferring on
+  compressor-internals-level detail.
+
+  **Total real Azure cost, this disposition-judging sub-effort:** ~$9.06
+  (initial disposition scan $1.94, three reinstate iterations, four
+  targeted re-checks, two full authoritative eval passes). Running total
+  for the whole Brick HVAC effort across every phase so far: **~$20.95**.
+
+  Full offline test suite: **198/198 passing** (up from 163 at the start
+  of this sub-effort). New modules this sub-effort: `reinstate.py` +
+  `prompts/reinstate-prompt.md`.
+
+  **#106 still open** — still the user's call.

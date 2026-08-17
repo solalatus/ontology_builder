@@ -18,6 +18,10 @@
 ## Independent semantic judging (hard gate: zero majority-unsupported)
 - majority-unsupported elements: 0
 
+## Independent judging of exclusions (hard gate: zero majority-unjustified)
+- majority-unjustified exclusions: 0
+- contested exclusions: 22
+
 ## Translation stability (report-only, heuristic)
 - classes: F1=0.98
 - relationships: F1=0.80
@@ -25,7 +29,7 @@
 - allowed_values: F1=0.49
 
 ## Round-trip score (diagnostic, report-only)
-- sampled: 5, average score: 0.89
+- sampled: 5, average score: 0.86
 
 ## Competency-question support (report-only)
-- support score: 0.0% (10 CQs)
+- support score: 10.0% (10 CQs)
