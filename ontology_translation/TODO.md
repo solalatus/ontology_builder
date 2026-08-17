@@ -71,14 +71,40 @@ succeeds end to end. Until then, this file is the only record.
   hand-corrected (no LLM rerun). Full detail:
   `domains/brick-hvac/manual-spot-check.md`. **#106 still not closed** —
   no instruction yet to close it; that remains the user's call.
+- **Standing policy, applies to every domain, not just Brick, going
+  forward: a rejected element gets a real repair attempt before it's
+  dropped.** New `repair.py` + `prompts/repair-prompt.md` (reground /
+  replace / drop, same provenance bar as a full compile, mechanically
+  validated before anything is applied, always appends at fresh indices
+  rather than rewriting in place). Applied to Brick's 3 previously-dropped
+  relationships: 1 replaced (wrong-class evidence corrected — `Chiller
+  hasPart Compressor` → `CondensingUnit hasPart Compressor`), 1 regrounded
+  with stronger evidence (`Zone hasPoint TemperatureDeadbandSetpoint`), 1
+  confirmed as a genuine drop (`AHU hasPart AirPlenum` — redundant with
+  the already-present `AHU feeds AirPlenum`). Both additions independently
+  re-judged (not just the repair call's own say-so): unanimously
+  supported, twice. `reference.domain.yaml`: 57 → 59 relationships. Full
+  account in today's later Log entry.
+- **`index.html`'s own `.domain.yaml` importer did not enforce the same
+  format the Python pipeline does, and it was worse than a missing check
+  — it flat-out could not read the pipeline's real output.** Two real
+  parser bugs found and fixed (same-column block sequences; plain-scalar
+  line wrapping), plus one more, pre-existing and unrelated, found along
+  the way (a blank-line paragraph break inside an explicit `>` block
+  scalar double-newlined). All backward-compatible by construction — no
+  separate migration step, the fix is "parse this correctly." 16 new
+  tests in `tests/yaml-robustness.spec.mjs` (46/46 passing); full existing
+  suite re-run twice, 974 tests, only one unrelated pre-existing flake
+  (agent-panel CSS timing, confirmed by re-running that file alone). Full
+  account in today's later Log entry.
 - Real Azure spend so far this session: smoke tests are a handful of cents
   (re-spent lightly every time the full suite is run locally with
   credentials present — see `tools/README.md`'s testing section); Brick
   HVAC's full iteration history (2 superseded 3-pass compiles + 1 final
-  single-pass compile + 2 full QA-suite runs, the first superseded) cost
-  **~$5.36** total — see today's Log entry for the full breakdown. Well
-  inside the ~$21.57 "Large tier, 3 correction rounds" ceiling from the
-  original cost estimate.
+  single-pass compile + 2 full QA-suite runs, the first superseded, plus
+  the repair pass above) cost **~$5.39** total — see the Log for the full
+  breakdown. Well inside the ~$21.57 "Large tier, 3 correction rounds"
+  ceiling from the original cost estimate.
 - **#104–#105, #107–#111: not started.**
 - One domain translated and merged: `ontology_translation/domains/brick-hvac/`.
   No other domain started yet.
@@ -493,3 +519,121 @@ reference and record deltas/decisions here instead.)*
   **#106 still open.** This spot-check is the evidence the user asked for,
   not itself an instruction to close the issue — that's still their call,
   to be given explicitly.
+
+- 2026-08-17 (later) — **Two standing-policy asks, both acted on: (1)
+  don't silently drop rejected elements, repair first, rerun the LLM if
+  that's what it takes; (2) `.domain.yaml` format enforcement has to be
+  uniform everywhere it's parsed, not just here — asked specifically
+  whether `index.html` (the main interviewer app, which also imports/
+  exports this exact format per `agent_ontology_spec.md` §11 Phase G)
+  agrees with `validate_domain.py`.**
+
+  **Checked index.html — it did not agree, and worse than expected.**
+  Traced (and empirically ran, by extracting the real parser functions
+  into Node) `index.html`'s hand-rolled YAML importer against the actual
+  committed `reference.domain.yaml`. Two independent, real bugs, not one:
+
+  1. **Same-column block sequences.** PyYAML's own `yaml.safe_dump()`
+     default (a list's dashes at the *same* column as the key that owns
+     it, e.g. `allowed:` / `- off` both at column 8) is what the
+     compiler's LLM-authored output actually uses throughout — and
+     `index.html`'s column-stack indentation tracker had no way to tell
+     that apart from a *sibling key* at that column, so the first such
+     list desynced every enclosing loop above it and silently lost the
+     rest of the document (`classes: {}`, zero classes, on the real
+     file). Fixed in `flattenYamlLines()`: each stack frame now also
+     tracks whether it was opened to hold a same-column sequence
+     (`isSeq`), opened the first time a dash line follows a bare `key:`
+     at the frame's own column, closed again the moment a later
+     same-column line isn't a dash. Purely additive — the app's own
+     one-deeper-indented export style is unaffected.
+  2. **Plain-scalar line wrapping.** The LLM's own long prose fields
+     (`meaning`/`text`/`effect`/`conditions`/...) wrap across physical
+     lines the way plain YAML scalars are allowed to (folding, like an
+     explicit `>` block scalar) — `index.html` only ever handled that for
+     an *explicit* `|`/`>` header, never a plain unquoted value, so an
+     unconsumed continuation line desynced everything after it the same
+     way. Fixed by extending the same lookahead used for explicit block
+     scalars to plain scalars too (both `key: value` and bare `- value`
+     list items), reusing `readYamlBlockScalar()`'s own fold/dedent logic
+     rather than duplicating it — added an optional `firstLine` param so
+     the inline first line folds through the *same* reduce as the rest of
+     the body (a separate string-join afterward can't tell "fresh
+     paragraph" from "same-paragraph space-join" the way the reduce
+     already does).
+  3. **Found and fixed a third, pre-existing bug along the way,
+     unrelated to either fix above:** a blank-line paragraph break inside
+     an *explicit* `>` block scalar already double-newlined
+     (`"a\n\nb"` instead of `"a\nb"`) — untested until the plain-scalar
+     fold path needed the exact same blank-line behavior and exposed it.
+     One-line fix to the reduce in `readYamlBlockScalar()`.
+
+  **Verified, not assumed:** both fixes are backward-compatible by
+  construction — they only add recognition for two additional, 100%
+  YAML-spec-legal shapes the parser previously mishandled; the app's own
+  export style still takes the same code path as before and is untouched.
+  No separate "migration" step was needed for old files, since the fix is
+  "parse this correctly," not "detect and patch a broken file." Confirmed
+  with the real `reference.domain.yaml` (extracted the real parser
+  functions into Node): now parses to the exact expected counts (48
+  classes, 57→59 relationships after the repair pass below, 9 rules, 9
+  actions, 12 CQs) instead of 0 classes. Added 16 new tests to
+  `tests/yaml-robustness.spec.mjs` (same-column sequences incl. the exact
+  Brick CRAH `allowed`-list shape, plain-scalar folding incl. the blank-
+  line-paragraph-break case, a full PyYAML-style document exercising
+  every section at once, plus the pre-existing block-scalar bug) — 46/46
+  passing. Ran the *entire* existing suite twice (66 spec files, 974
+  tests) to check for regressions: first run (before the blank-line
+  reduce fix) was already 0 failures; second run had exactly 1 failure,
+  `helper-agent-phase1.spec.mjs`'s agent-panel-width test, which is
+  layout/CSS-timing and has nothing to do with YAML — re-ran that file
+  alone and it passed cleanly, confirming flake under the loaded
+  full-suite run rather than a real regression.
+
+  **Repair pass, not just a drop, for the 3 relationships removed
+  earlier.** Built `repair.py` + `prompts/repair-prompt.md`: a small,
+  separate, narrowly-scoped prompt (not a variant of `compiler-prompt.md`)
+  that takes already-rejected elements plus their rejection rationale plus
+  the *specific* source class definitions involved, and returns one of
+  `reground` (same element, stronger evidence), `replace` (the claim was
+  attached to the wrong class — fix the target), or `drop` (genuinely no
+  honest grounding, last resort) per item — with the same provenance rigor
+  as a real compile, mechanically checked before anything is applied
+  (`validate_repairs()`). `apply_repairs()` always *appends* accepted
+  items at fresh indices rather than rewriting in place, so nothing else
+  needs renumbering. 17 new offline/mocked tests in `test_repair.py`.
+
+  Ran it for real on Brick's 3 dropped relationships (~$0.04 dry-run
+  estimate, $0.0127 actual):
+  - `Chiller hasPart Compressor` → **replace** → `CondensingUnit hasPart
+    Compressor`. Matches the original rejection exactly: CondensingUnit's
+    own source definition explicitly says "It comprises a condenser coil,
+    **compressor**, fan..." — Chiller's own definition never says that.
+    The domain already has `Chiller hasPart CondensingUnit`, so this also
+    completes a coherent, non-redundant composition chain instead of a
+    wrong shortcut.
+  - `Zone hasPoint TemperatureDeadbandSetpoint` → **reground**, same
+    shape, now grounded against the zone's own already-accepted sibling
+    relationships (`Zone hasPoint Heating/CoolingTemperatureSetpoint`)
+    instead of the original hedged "zones may use..." evidence.
+  - `AHU hasPart AirPlenum` → **drop**, confirmed correct, not a gap: the
+    domain already has `AHU feeds AirPlenum`, which is what the original
+    evidence ("receives air from the air handling unit") actually
+    supports — `hasPart` was simply the wrong relationship type, nothing
+    lost by leaving it out.
+
+  **Closed the loop rather than trusting the repair call's own
+  self-assessment:** independently re-judged both additions with the same
+  3-judge `judge_mappings()` process used for the rest of the domain (not
+  reused from the repair call) — **unanimously supported, 0
+  unsupported**, twice (re-ran it a second time to double check
+  consistency), $0.0126/run. Re-ran the free structural/provenance/
+  reverse-coverage gates against the updated file: all still clean at
+  100%. `reference.domain.yaml`: 57 → 59 relationships.
+  `translation-evaluation.json`/`translation-report.md` updated with the
+  full account. Total this repair effort: ~$0.026 (one repair call + two
+  independent re-judging passes).
+
+  **#106 still open** — none of this changes that; still the user's call,
+  still pending their own review, which was explicitly deferred until
+  after this round of fixes.

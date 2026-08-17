@@ -15,8 +15,22 @@ fetch.py        source_url (+ pinned SHA-256) -> local RDF/OWL file
 extract.py      RDF/OWL file -> source_ir.json  (deterministic, RDFLib, no LLM)
 compile.py      source_ir.json -> N x {run-i.domain.yaml, run-i.translation.json}  (Azure OpenAI GPT-5.4)
 validate_domain.py   structural hard gate on a .domain.yaml (also called by compile.py after every run,
-                     and reused by evaluate.py's layer-1 gate — see issue #103, not yet built)
+                     and reused by evaluate.py's layer-1 gate)
+evaluate.py     automatic translation-quality evaluation, issue #103 (7 layers: structural + provenance
+                     hard gates, independent semantic judging, stability, reverse coverage, round-trip,
+                     competency-question support)
+repair.py       targeted repair pass for elements evaluate.py's semantic judging rejected -- standing
+                     policy: reground/replace before drop, drop only as a last resort (see prompts/repair-prompt.md)
 ```
+
+`index.html` also imports/exports this exact `.domain.yaml` format
+(`agent_ontology_spec.md` §11 Phase G) — nothing in this `tools/` folder
+touches it, and it stays a single dependency-free file regardless of what's
+installed here, but the *format* has to actually agree between the two
+independent parsers (this pipeline's Python/PyYAML side and `index.html`'s
+own hand-rolled JS importer). It didn't, for real committed output, until
+2026-08-17 — see `ontology_translation/TODO.md`'s Log for the two parser
+bugs that were found and fixed in `index.html` itself.
 
 `source_manifest.py` reads/writes the `source-manifest.yaml` every domain
 carries — the reproducibility record (source URL, pinned SHA-256, scope
@@ -95,6 +109,11 @@ what actually caught real integration issues a mocked client cannot (see
 credentials are deliberately provided locally. Beyond that one file, the
 real pipeline is only ever invoked explicitly via the CLI commands above.
 
+`test_repair.py` follows `test_compile.py`'s convention exactly (mocked
+client, no live variant of its own yet) — the actual live repair pass on
+Brick HVAC was run directly via `repair.py`'s CLI, not through this test
+file, same as every other real domain run.
+
 ## Scope selection
 
 `extract.py --manifest` reads `scope.roots` from the manifest and walks
@@ -108,7 +127,7 @@ class whose name happens to contain "fan".
 
 Taxonomy (`subClassOf`) is used for scope selection and interpretation
 only — per issue #102, it must never itself become a `relationships` entry
-in the compiled output. `compile.py`'s prompt (`prompts/compiler-v1.md`)
+in the compiled output. `compile.py`'s prompt (`prompts/compiler-prompt.md`)
 enforces this on the LLM side; `validate_domain.py` cannot detect a
 smuggled-in taxonomy edge structurally, since it would look like any other
 relationship — that's part of what #103's semantic judging layer is for.
@@ -127,3 +146,10 @@ records the prompt file's SHA-256 in `run-manifest.json`
 (`compile.py`'s `prompt_sha256()`), which is what actually pins a specific
 run to specific wording -- a manifest's `compiler.prompt_version` is just a
 free-text label for context, not a file selector.
+
+`prompts/repair-prompt.md` is a second, separate prompt file for
+`repair.py`'s narrower repair pass (see the Pipeline section above) --
+deliberately not a variant of `compiler-prompt.md`, since it's a genuinely
+different task (fix a handful of already-rejected elements, not compile a
+whole domain), not an alternate version of the same one. Same
+reproducibility convention: `repair.py` has its own `prompt_sha256()`.

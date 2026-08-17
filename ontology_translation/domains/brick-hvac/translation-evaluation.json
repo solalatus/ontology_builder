@@ -5,7 +5,7 @@
     "error_count": 0,
     "warning_count": 0,
     "issues": [],
-    "note": "Re-checked 2026-08-17 against tools/validate_domain.py after it was extended to flag non-string allowed entries (allowed_not_all_strings) and after the manual off/on fix described in manual_spot_check -- still 0 errors, 0 warnings under the stricter check."
+    "note": "Re-checked 2026-08-17 after the repair pass added relationships[57]/[58] -- still 0 errors, 0 warnings."
   },
   "provenance_completeness": {
     "ok": true,
@@ -21,7 +21,8 @@
       "https://brickschema.org/schema/Brick/ref",
       "https://w3id.org/rec/brickpatches",
       "https://w3id.org/rec/recimports"
-    ]
+    ],
+    "note": "Re-checked 2026-08-17 after the repair pass -- still 100%/100%."
   },
   "reverse_coverage": {
     "coverage": 1.0,
@@ -3260,12 +3261,48 @@
           }
         ],
         "majority_verdict": "supported"
+      },
+      {
+        "target_path": "relationships[57]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The evidence explicitly states that a Condensing Unit comprises a compressor, so it specifically supports a hasPart-style composition relationship retargeted to CondensingUnit rather than Chiller."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The evidence explicitly states that a Condensing Unit comprises a compressor, so it specifically supports a hasPart-style relationship retargeted to CondensingUnit rather than Chiller."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source explicitly states that a Condensing Unit comprises a compressor, so it specifically supports a hasPart-style composition relationship retargeted to CondensingUnit rather than Chiller."
+          }
+        ],
+        "majority_verdict": "supported"
+      },
+      {
+        "target_path": "relationships[58]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited standard HVAC practice specifically links a TemperatureDeadbandSetpoint to the same Zone that is the unit of heating/cooling control, which directly grounds a Zone-to-TemperatureDeadbandSetpoint hasPoint relationship."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited standard HVAC practice specifically connects a TemperatureDeadbandSetpoint to the same controlled Zone that holds the heating and cooling setpoints, which adequately grounds a Zone-to-TemperatureDeadbandSetpoint hasPoint relationship."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited standard HVAC practice specifically links a temperature deadband setpoint to the same controlled zone that owns the heating and cooling temperature setpoints, which adequately grounds a Zone-to-TemperatureDeadbandSetpoint hasPoint relationship."
+          }
+        ],
+        "majority_verdict": "supported"
       }
     ],
     "unsupported_count": 0,
     "unsupported_paths": [],
-    "total_cost_usd": 0.9716,
-    "note": "3 elements removed after genuine majority-unsupported verdicts (AHU hasPart AirPlenum, Chiller hasPart Compressor -- evidence actually described a Condensing Unit, not a Chiller, having a compressor -- and Zone hasPoint TemperatureDeadbandSetpoint). Remaining elements re-scored with a corrected strict-majority tie-break rule (a real 3-way judge split, e.g. Zone hasPoint HeatingTemperatureSetpoint, is no longer miscounted as majority-unsupported). See ontology_translation/TODO.md for the full account."
+    "total_cost_usd": 0.9842,
+    "note": "3 elements removed after genuine majority-unsupported verdicts (AHU hasPart AirPlenum, Chiller hasPart Compressor -- evidence actually described a Condensing Unit, not a Chiller, having a compressor -- and Zone hasPoint TemperatureDeadbandSetpoint). Remaining elements re-scored with a corrected strict-majority tie-break rule (a real 3-way judge split, e.g. Zone hasPoint HeatingTemperatureSetpoint, is no longer miscounted as majority-unsupported). See ontology_translation/TODO.md for the full account. Repair pass (2026-08-17, see manual-spot-check-driven TODO.md log): rather than leaving the 3 removed relationships dropped, ran a targeted repair call (repair.py) grounded in the specific source class definitions involved. Outcome: relationships[57] (CondensingUnit hasPart Compressor, replacing the wrongly-targeted Chiller hasPart Compressor -- CondensingUnit's own definition explicitly says it comprises a compressor) and relationships[58] (Zone hasPoint TemperatureDeadbandSetpoint, regrounded with stronger evidence tying it to the zone's existing heating/cooling setpoints) were both independently re-judged by the same 3-judge process and unanimously supported (0 unsupported, $0.0126 cost). The third (AHU hasPart AirPlenum) was confirmed as a genuine drop: the domain already has 'AHU feeds AirPlenum', which is what the original evidence actually supported."
   },
   "round_trip": {
     "sampled": 5,

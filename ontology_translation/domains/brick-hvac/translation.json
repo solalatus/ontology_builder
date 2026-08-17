@@ -1540,6 +1540,20 @@
       "source_evidence": "Standard HVAC practice: serving control devices condition an occupied zone toward applicable setpoints",
       "confidence": "high",
       "rationale": "Added an occupancy-aware zone conditioning action grounded in the included serving equipment and zone setpoint concepts."
+    },
+    {
+      "target_path": "relationships[57]",
+      "source_iris": [],
+      "source_evidence": "Condensing Unit: \"It comprises a condenser coil, compressor, fan, and potentially a reversing valve in heat pump applications.\"",
+      "confidence": "high",
+      "rationale": "The rejected evidence supports a composition relationship on CondensingUnit, not directly on Chiller, so the honest repair is to retarget the hasPart edge to the class explicitly defined as comprising a compressor."
+    },
+    {
+      "target_path": "relationships[58]",
+      "source_iris": [],
+      "source_evidence": "Standard practice tied to the specific classes in scope: a Zone is a \"separately controlled heated or cooled space\" / \"space or group of spaces ... for which the heating [and] cooling requirements are sufficiently similar that desired conditions can be maintained throughout by a single controlling device,\" and a TemperatureDeadbandSetpoint \"sets the size of a deadband of temperature\"; in zone control, the deadband belongs with the same controlled zone that already carries the heating and cooling temperature setpoints.",
+      "confidence": "medium",
+      "rationale": "Given the zone definition as the unit of temperature control and the deadband setpoint definition as the parameter that sizes the heating/cooling deadband, the original Zone-to-TemperatureDeadbandSetpoint hasPoint claim is a defensible, specific standard-practice grounding rather than a merely hedged possibility."
     }
   ],
   "dispositions": [
