@@ -628,6 +628,135 @@ class JudgeMappingsTests(unittest.TestCase):
         self.assertEqual(result["contested_paths"], [])
 
 
+class SiblingContextForIriTests(unittest.TestCase):
+    def setUp(self):
+        self.source_ir = {
+            "classes": [
+                {"iri": "http://ex.org#Compressor", "kind": "class", "labels": ["Compressor"], "definitions": ["Compresses gas."], "parents": ["http://ex.org#HVACEquipment"]},
+                {"iri": "http://ex.org#Fan", "kind": "class", "labels": ["Fan"], "definitions": ["Moves air."], "parents": ["http://ex.org#HVACEquipment"]},
+                {"iri": "http://ex.org#Filter", "kind": "class", "labels": ["Filter"], "definitions": ["Removes particulates."], "parents": ["http://ex.org#HVACEquipment"]},
+                {"iri": "http://ex.org#Building", "kind": "class", "labels": ["Building"], "definitions": ["A building."], "parents": []},
+            ],
+        }
+        self.iri_index = evaluate_mod._index_source_records_by_iri(self.source_ir)
+
+    def test_finds_mapped_siblings_sharing_a_parent(self):
+        mapped = {"http://ex.org#Fan": "classes.Fan", "http://ex.org#Filter": "classes.Filter"}
+        siblings = evaluate_mod._sibling_context_for_iri("http://ex.org#Compressor", self.iri_index, mapped)
+        iris = {s["iri"] for s in siblings}
+        self.assertEqual(iris, {"http://ex.org#Fan", "http://ex.org#Filter"})
+        self.assertEqual(next(s for s in siblings if s["iri"] == "http://ex.org#Fan")["mapped_to"], "classes.Fan")
+
+    def test_unmapped_siblings_are_excluded(self):
+        # Only siblings that actually made it into the domain are useful
+        # comparison context -- an unmapped sibling proves nothing.
+        siblings = evaluate_mod._sibling_context_for_iri("http://ex.org#Compressor", self.iri_index, {})
+        self.assertEqual(siblings, [])
+
+    def test_class_with_no_parents_has_no_siblings(self):
+        siblings = evaluate_mod._sibling_context_for_iri("http://ex.org#Building", self.iri_index, {"http://ex.org#Fan": "classes.Fan"})
+        self.assertEqual(siblings, [])
+
+    def test_non_class_record_has_no_siblings(self):
+        source_ir = {"object_properties": [{"iri": "http://ex.org#hasPoint", "kind": "object_property", "labels": ["hasPoint"]}]}
+        iri_index = evaluate_mod._index_source_records_by_iri(source_ir)
+        siblings = evaluate_mod._sibling_context_for_iri("http://ex.org#hasPoint", iri_index, {})
+        self.assertEqual(siblings, [])
+
+    def test_unresolvable_iri_has_no_siblings(self):
+        siblings = evaluate_mod._sibling_context_for_iri("http://ex.org#DoesNotExist", self.iri_index, {})
+        self.assertEqual(siblings, [])
+
+
+class JudgeDispositionsTests(unittest.TestCase):
+    def test_only_non_mapped_resolvable_dispositions_are_judged(self):
+        # "mapped" dispositions are judge_mappings' job, not this layer's.
+        # A disposition whose source_iri doesn't resolve to a real class/
+        # property (e.g. a restriction/enumeration/import) has nothing to
+        # check the exclusion against, so it's skipped, not force-judged.
+        translation = {
+            "dispositions": [
+                {"source_iri": "http://ex.org#Fan", "disposition": "mapped", "note": "renamed"},
+                {"source_iri": "http://ex.org#Compressor", "disposition": "out_of_scope", "note": "not needed"},
+                {"source_iri": "http://ex.org#SomeRestriction", "disposition": "not_agent_relevant", "note": "structural only"},
+            ]
+        }
+        source_ir = {
+            "classes": [
+                {"iri": "http://ex.org#Fan", "kind": "class", "labels": ["Fan"], "definitions": ["Moves air."], "parents": []},
+                {"iri": "http://ex.org#Compressor", "kind": "class", "labels": ["Compressor"], "definitions": ["Compresses gas."], "parents": []},
+            ]
+        }
+        FakeClient, calls = _fake_client_class(lambda i, kw: json.dumps({"verdict": "justified", "rationale": "r"}))
+        client = FakeClient()
+        with tempfile.TemporaryDirectory() as tmp:
+            logger = evaluate_mod.RunLogger(Path(tmp) / "log.jsonl")
+            result = evaluate_mod.judge_dispositions(client, "gpt-5.4", translation, source_ir, logger, judges=1)
+            logger.close()
+
+        self.assertEqual(len(result["results"]), 1)
+        self.assertEqual(result["results"][0]["source_iri"], "http://ex.org#Compressor")
+        self.assertEqual(len(calls), 1)
+
+    def test_majority_unjustified_is_flagged(self):
+        translation = {"dispositions": [{"source_iri": "http://ex.org#Compressor", "disposition": "out_of_scope", "note": "not needed for selected subset"}]}
+        source_ir = {
+            "classes": [
+                {"iri": "http://ex.org#Compressor", "kind": "class", "labels": ["Compressor"], "definitions": ["Compresses gas."], "parents": ["http://ex.org#HVACEquipment"]},
+                {"iri": "http://ex.org#Fan", "kind": "class", "labels": ["Fan"], "definitions": ["Moves air."], "parents": ["http://ex.org#HVACEquipment"]},
+            ]
+        }
+        FakeClient, calls = _fake_client_class(lambda i, kw: json.dumps({"verdict": "unjustified", "rationale": "generic boilerplate reused verbatim"}))
+        client = FakeClient()
+        with tempfile.TemporaryDirectory() as tmp:
+            logger = evaluate_mod.RunLogger(Path(tmp) / "log.jsonl")
+            result = evaluate_mod.judge_dispositions(client, "gpt-5.4", translation, source_ir, logger, judges=3)
+            logger.close()
+
+        self.assertEqual(result["unjustified_count"], 1)
+        self.assertEqual(result["unjustified_iris"], ["http://ex.org#Compressor"])
+
+    def test_contested_dispositions_are_flagged_even_when_majority_justified(self):
+        verdicts_by_call = ["justified", "partially_justified", "justified"]
+
+        def responder(i, kw):
+            return json.dumps({"verdict": verdicts_by_call[i], "rationale": "r"})
+
+        translation = {"dispositions": [{"source_iri": "http://ex.org#Compressor", "disposition": "out_of_scope", "note": "n"}]}
+        source_ir = {"classes": [{"iri": "http://ex.org#Compressor", "kind": "class", "labels": ["Compressor"], "definitions": [], "parents": []}]}
+        FakeClient, calls = _fake_client_class(responder)
+        client = FakeClient()
+        with tempfile.TemporaryDirectory() as tmp:
+            logger = evaluate_mod.RunLogger(Path(tmp) / "log.jsonl")
+            result = evaluate_mod.judge_dispositions(client, "gpt-5.4", translation, source_ir, logger, judges=3)
+            logger.close()
+
+        self.assertEqual(result["contested_count"], 1)
+        self.assertEqual(result["unjustified_count"], 0)
+
+    def test_sibling_context_is_included_in_the_judge_prompt(self):
+        translation = {
+            "dispositions": [{"source_iri": "http://ex.org#Compressor", "disposition": "out_of_scope", "note": "n"}],
+            "mappings": [{"target_path": "classes.Fan", "source_iris": ["http://ex.org#Fan"], "source_evidence": "e", "confidence": "high", "rationale": "r"}],
+        }
+        source_ir = {
+            "classes": [
+                {"iri": "http://ex.org#Compressor", "kind": "class", "labels": ["Compressor"], "definitions": [], "parents": ["http://ex.org#HVACEquipment"]},
+                {"iri": "http://ex.org#Fan", "kind": "class", "labels": ["Fan"], "definitions": ["Moves air."], "parents": ["http://ex.org#HVACEquipment"]},
+            ]
+        }
+        FakeClient, calls = _fake_client_class(lambda i, kw: json.dumps({"verdict": "justified", "rationale": "r"}))
+        client = FakeClient()
+        with tempfile.TemporaryDirectory() as tmp:
+            logger = evaluate_mod.RunLogger(Path(tmp) / "log.jsonl")
+            evaluate_mod.judge_dispositions(client, "gpt-5.4", translation, source_ir, logger, judges=1)
+            logger.close()
+
+        user_message = calls[0]["messages"][1]["content"]
+        self.assertIn("included_siblings", user_message)
+        self.assertIn("classes.Fan", user_message)
+
+
 class MajorityVerdictTests(unittest.TestCase):
     def test_strict_majority_wins(self):
         judgments = [{"verdict": "unsupported"}, {"verdict": "unsupported"}, {"verdict": "supported"}]
@@ -737,6 +866,8 @@ class RunEvaluationLiveMockedTests(unittest.TestCase):
     def test_full_flow_with_mocked_client(self):
         def responder(i, kw):
             content = kw["messages"][0]["content"]
+            if "EXCLUDE a source ontology element" in content:
+                return json.dumps({"verdict": "justified", "rationale": "ok"})
             if "independent judge" in content:
                 return json.dumps({"verdict": "supported", "rationale": "ok"})
             if "Compare a blind reconstruction" in content:
@@ -789,9 +920,65 @@ class RunEvaluationLiveMockedTests(unittest.TestCase):
             eval_json = json.loads((out_dir / "test-domain.translation-evaluation.json").read_text(encoding="utf-8"))
             self.assertTrue(eval_json["hard_gates_ok"])
             self.assertEqual(eval_json["semantic_judging"]["unsupported_count"], 0)
+            self.assertEqual(eval_json["disposition_judging"]["unjustified_count"], 0)
             self.assertIsNotNone(eval_json["round_trip"]["average_score"])
             self.assertEqual(eval_json["cq_support"]["support_score"], 1.0)
             self.assertTrue((out_dir / "evaluate.log.jsonl").exists())
+
+    def test_majority_unjustified_disposition_fails_the_overall_hard_gate(self):
+        def responder(i, kw):
+            content = kw["messages"][0]["content"]
+            if "EXCLUDE a source ontology element" in content:
+                return json.dumps({"verdict": "unjustified", "rationale": "boilerplate reused with no real reason"})
+            if "independent judge" in content:
+                return json.dumps({"verdict": "supported", "rationale": "ok"})
+            if "Compare a blind reconstruction" in content:
+                return json.dumps({"score": 0.9, "rationale": "close"})
+            if "real-world concept" in content:
+                return json.dumps({"reconstruction": "a device that moves air"})
+            if "generate source-grounded competency" in content:
+                return json.dumps({"questions": ["Which fan serves which zone?"]})
+            if "judge" in content.lower() and "orientation" in content:
+                return json.dumps({"supported": True, "rationale": "covered"})
+            raise AssertionError(f"unexpected prompt: {content[:80]}")
+
+        FakeClient, calls = _fake_client_class(responder)
+
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            manifest_path = tmp_path / "source-manifest.yaml"
+            manifest_path.write_text(
+                "id: test-domain\nsource_url: https://example.org/x.rdf\nscope:\n  roots: []\ncompiler:\n  prompt_version: compiler-v1\n  runs: 3\n",
+                encoding="utf-8",
+            )
+            import yaml
+
+            domain_yaml_path = tmp_path / "run-1.domain.yaml"
+            domain_yaml_path.write_text(yaml.safe_dump(DOMAIN_DATA), encoding="utf-8")
+            translation_path = tmp_path / "run-1.translation.json"
+            translation_path.write_text(json.dumps(TRANSLATION_FULL), encoding="utf-8")
+            source_ir_path = tmp_path / "source_ir.json"
+            source_ir_path.write_text(json.dumps(SOURCE_IR), encoding="utf-8")
+            out_dir = tmp_path / "out"
+
+            with mock.patch.object(
+                evaluate_mod,
+                "load_azure_config",
+                return_value={"endpoint": "https://fake/", "api_key": "fake", "api_version": "v1", "deployment": "gpt-5.4"},
+            ), mock.patch("openai.AzureOpenAI", FakeClient):
+                rc = evaluate_mod.run_evaluation(
+                    domain_yaml_path, translation_path, source_ir_path, manifest_path, out_dir,
+                    judges=1, round_trip_sample_size=1, cq_count=1, dry_run=False,
+                )
+
+            # SOURCE_IR's "Irrelevant" class is the one non-mapped, resolvable
+            # disposition in TRANSLATION_FULL -- structural/provenance/
+            # semantic-judging all pass, but a majority-unjustified exclusion
+            # must still fail the overall hard gate on its own.
+            self.assertEqual(rc, 1)
+            eval_json = json.loads((out_dir / "test-domain.translation-evaluation.json").read_text(encoding="utf-8"))
+            self.assertFalse(eval_json["hard_gates_ok"])
+            self.assertEqual(eval_json["disposition_judging"]["unjustified_count"], 1)
 
 
 class RenderMarkdownTests(unittest.TestCase):
@@ -812,6 +999,23 @@ class RenderMarkdownTests(unittest.TestCase):
         self.assertIn("Structural validity", markdown)
         self.assertIn("Provenance completeness", markdown)
         self.assertIn("Reverse coverage", markdown)
+        self.assertNotIn("Independent judging of exclusions", markdown)
+
+    def test_disposition_judging_section_renders_when_present(self):
+        report = {
+            "hard_gates_ok": False,
+            "structural_validity": {"ok": True, "error_count": 0, "warning_count": 0},
+            "provenance_completeness": {"ok": True, "element_provenance_coverage": 1.0, "source_disposition_coverage": 1.0},
+            "reverse_coverage": {"coverage": 1.0, "silently_dropped": []},
+            "translation_stability": {"average_f1": None},
+            "semantic_judging": None,
+            "disposition_judging": {"unjustified_count": 2, "contested_count": 1},
+            "round_trip": None,
+            "cq_support": None,
+        }
+        markdown = evaluate_mod._render_markdown("test-domain", report)
+        self.assertIn("Independent judging of exclusions", markdown)
+        self.assertIn("majority-unjustified exclusions: 2", markdown)
 
 
 if __name__ == "__main__":

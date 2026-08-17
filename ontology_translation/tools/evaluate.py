@@ -506,6 +506,170 @@ def judge_mappings(
 
 
 # ---------------------------------------------------------------------------
+# Layer 3b: independent judging of *exclusions* (hard gate).
+# ---------------------------------------------------------------------------
+#
+# judge_mappings above only ever looks at elements that made it INTO the
+# domain. Nothing symmetric ever checked whether an element the compiler
+# left OUT was correctly left out -- reverse_coverage (layer 5) only checks
+# that a disposition carries a *non-empty* note, never that the note is
+# actually a *sound* reason. Found for real on the Brick HVAC clean rerun:
+# asked directly whether the judges had actually verified out_of_scope
+# calls were right, the honest answer was no -- only that a sentence
+# existed. Manual inspection then found the exact same shallow, templated-
+# justification failure mode already fixed once this session for a
+# fabricated `status` property enum, this time on the exclusion side:
+# "not needed for/in selected subset", reused near-verbatim across dozens
+# of real, well-defined, directly-relevant source classes (Compressor,
+# CondensingUnit, CoolingTower, Pump, HeatExchanger -- all direct
+# HVAC_Equipment siblings of classes the compiler DID keep, with the
+# accepted domain modeling other equipment's real components in detail but
+# giving these zero treatment, no principled distinction drawn). This is
+# general, not Brick-specific: any domain's compiler can take the cheap way
+# out on a source element it doesn't feel like translating, and nothing
+# before this caught it.
+
+_SIBLING_CONTEXT_LIMIT = 8
+
+
+def _sibling_context_for_iri(iri: str, iri_index: dict, mapped_source_iris: dict[str, str]) -> list[dict]:
+    """Other source classes sharing at least one subClassOf parent with
+    `iri` that the compiler actually mapped into the domain -- gives a
+    disposition judge the comparison context needed to catch an exclusion
+    that's inconsistent with what similar concepts at the same taxonomy
+    depth received, not just plausible-sounding in isolation. Empty for
+    non-class records (object/datatype properties carry no `parents`) and
+    for classes with no source-declared parent -- there is nothing to
+    compare against, not a sign the sibling check failed."""
+    record = iri_index.get(iri)
+    if record is None or record.get("kind") != "class":
+        return []
+    parents = set(record.get("parents") or [])
+    if not parents:
+        return []
+    siblings = []
+    for other_iri, other_record in iri_index.items():
+        if other_iri == iri or other_record.get("kind") != "class":
+            continue
+        if not parents & set(other_record.get("parents") or []):
+            continue
+        target_path = mapped_source_iris.get(other_iri)
+        if not target_path:
+            continue
+        siblings.append(
+            {"iri": other_iri, "labels": other_record.get("labels"), "definitions": other_record.get("definitions"), "mapped_to": target_path}
+        )
+        if len(siblings) >= _SIBLING_CONTEXT_LIMIT:
+            break
+    return siblings
+
+
+DISPOSITION_JUDGE_SYSTEM_PROMPT = """You are an independent judge evaluating whether a compiler's decision to
+EXCLUDE a source ontology element from a generated Agent Ontology was actually justified -- not just
+whether it wrote a plausible-sounding sentence. You do not see any other judge's answer.
+
+You are given: the excluded element's real source definition (`source_definition`, independently
+looked up from the source ontology itself, not supplied by whoever made the exclusion decision), the
+compiler's own stated `disposition` category and `note` explaining why it was excluded, and
+`included_siblings` -- other source elements from the same immediate area of the source ontology
+(sharing a direct parent, when the excluded element is a class) that the compiler DID keep, with what
+they were mapped to. `included_siblings` is empty when no such comparison exists to make (e.g. the
+excluded element is a property, or a class with no siblings) -- that is not itself evidence for or
+against the exclusion.
+
+Judge the SUBSTANCE of the exclusion, not just whether a note exists:
+- A generic, boilerplate-sounding note ("not needed in selected subset", "outside selected scope") is
+  not on its own grounds for "unjustified" -- some genuinely out-of-scope elements deserve exactly that
+  brief a note. But when the excluded element is well-defined, clearly on-topic for the domain, and
+  `included_siblings` shows materially similar concepts (same immediate source-ontology neighborhood,
+  comparable specificity and real-world operational relevance) that WERE kept with no principled reason
+  given to treat this one differently, that inconsistency is real grounds for "unjustified" even though
+  the note itself reads plausibly in isolation.
+- A note that engages with something specific about the element (why it's out of the domain's chosen
+  operational slice, why it's redundant with something already modeled, why it's a name-only taxonomy
+  rung rather than an operational concept) is a real reason and should be judged as such, even briefly
+  worded.
+- This is domain-agnostic: judge substance and consistency for whatever domain and element are actually
+  in front of you, not against any one domain's expected content.
+
+Classify the exclusion as exactly one of:
+- "justified" -- the note engages with something real and specific about this element, and nothing in
+  `included_siblings` contradicts it.
+- "partially_justified" -- the note is plausible but generic/templated, or a comparably relevant sibling
+  was kept without a clear principled distinction, but the exclusion is not obviously wrong.
+- "unjustified" -- the excluded element is clearly on-topic, well-defined, and operationally comparable
+  to elements that were kept, with the note giving no real reason to treat it differently -- or the note
+  is generic boilerplate reused with no engagement with this specific element at all.
+
+Respond with exactly one JSON object, no prose, no markdown fences:
+{"verdict": "justified" | "partially_justified" | "unjustified", "rationale": "one sentence"}"""
+
+
+def judge_dispositions(
+    client,
+    deployment: str,
+    translation: dict,
+    source_ir: dict,
+    logger: RunLogger,
+    judges: int = 3,
+) -> dict:
+    """Independent judging of every non-`mapped` disposition that resolves
+    to a real source class/property (layer 3b, hard gate: zero
+    majority-unjustified). Dispositions whose `source_iri` doesn't resolve
+    in `iri_index` (restrictions, enumerations, imports -- kinds
+    `_index_source_records_by_iri` doesn't cover) are skipped: there is no
+    real source definition to check the exclusion against, same "nothing
+    to compare, not a failure" stance `_ground_truth_for_target` already
+    takes elsewhere in this module."""
+    iri_index = _index_source_records_by_iri(source_ir)
+    mapped_source_iris: dict[str, str] = {}
+    for mapping in translation.get("mappings", []):
+        for src_iri in mapping.get("source_iris") or []:
+            mapped_source_iris.setdefault(src_iri, mapping["target_path"])
+
+    results = []
+    total_cost = 0.0
+    for disposition in translation.get("dispositions", []):
+        if disposition.get("disposition") == "mapped":
+            continue
+        iri = disposition.get("source_iri")
+        record = iri_index.get(iri)
+        if record is None:
+            continue
+        payload = {
+            "source_iri": iri,
+            "source_definition": {"labels": record.get("labels"), "altLabels": record.get("altLabels"), "definitions": record.get("definitions")},
+            "disposition": disposition.get("disposition"),
+            "note": disposition.get("note"),
+            "included_siblings": _sibling_context_for_iri(iri, iri_index, mapped_source_iris),
+        }
+        user_prompt = json.dumps(payload, indent=2)
+        raw_judgments = []
+        for judge_index in range(1, judges + 1):
+            parsed, usage = chat_json_call(
+                client, deployment, DISPOSITION_JUDGE_SYSTEM_PROMPT, user_prompt, logger, f"disposition-judge-{judge_index}:{iri}"
+            )
+            raw_judgments.append({"verdict": parsed.get("verdict"), "rationale": parsed.get("rationale")})
+            total_cost += _call_cost(usage)
+        contested = len({j["verdict"] for j in raw_judgments}) > 1
+        results.append(
+            {"source_iri": iri, "disposition": disposition.get("disposition"), "raw_judgments": raw_judgments,
+             "majority_verdict": _majority_verdict(raw_judgments), "contested": contested}
+        )
+
+    unjustified = [r for r in results if r["majority_verdict"] == "unjustified"]
+    contested = [r for r in results if r["contested"]]
+    return {
+        "results": results,
+        "unjustified_count": len(unjustified),
+        "unjustified_iris": [r["source_iri"] for r in unjustified],
+        "contested_count": len(contested),
+        "contested_iris": [r["source_iri"] for r in contested],
+        "total_cost_usd": round(total_cost, 4),
+    }
+
+
+# ---------------------------------------------------------------------------
 # Layer 6: round-trip semantic test (diagnostic, report-only).
 # ---------------------------------------------------------------------------
 
@@ -658,6 +822,12 @@ def _render_markdown(domain_id: str, report: dict) -> str:
         lines += ["## Independent semantic judging (hard gate: zero majority-unsupported)",
                   f"- majority-unsupported elements: {sj['unsupported_count']}", ""]
 
+    if report.get("disposition_judging"):
+        dj = report["disposition_judging"]
+        lines += ["## Independent judging of exclusions (hard gate: zero majority-unjustified)",
+                  f"- majority-unjustified exclusions: {dj['unjustified_count']}",
+                  f"- contested exclusions: {dj['contested_count']}", ""]
+
     stability = report.get("translation_stability")
     if stability and stability.get("average_f1"):
         lines.append("## Translation stability (report-only, heuristic)")
@@ -724,21 +894,30 @@ def run_evaluation(
         "reverse_coverage": reverse,
         "translation_stability": stability,
         "semantic_judging": None,
+        "disposition_judging": None,
         "round_trip": None,
         "cq_support": None,
         "hard_gates_ok": hard_gates_ok,
     }
 
+    iri_index_for_estimate = _index_source_records_by_iri(source_ir)
+    n_judgeable_dispositions = sum(
+        1 for d in translation.get("dispositions", [])
+        if d.get("disposition") != "mapped" and d.get("source_iri") in iri_index_for_estimate
+    )
+
     if dry_run:
         n_mappings = len(translation.get("mappings", []))
         est_judge_cost = n_mappings * judges * estimate_cost(approx_tokens(JUDGE_SYSTEM_PROMPT) + 300, 60)
+        est_disposition_cost = n_judgeable_dispositions * judges * estimate_cost(approx_tokens(DISPOSITION_JUDGE_SYSTEM_PROMPT) + 300, 60)
         est_roundtrip_cost = round_trip_sample_size * (estimate_cost(400, 150) + estimate_cost(300, 80))
         est_cq_cost = estimate_cost(approx_tokens(json.dumps(_summarize_source_ir(source_ir))) + 200, 800) + cq_count * estimate_cost(
             approx_tokens(domain_yaml_path.read_text(encoding="utf-8")) + 200, 100
         )
-        est_total = est_judge_cost + est_roundtrip_cost + est_cq_cost
+        est_total = est_judge_cost + est_disposition_cost + est_roundtrip_cost + est_cq_cost
         print(f"[evaluate] DRY RUN -- {manifest.id}: hard gates {'PASS' if hard_gates_ok else 'FAIL'}")
         print(f"[evaluate] DRY RUN -- {n_mappings} mappings x {judges} judges = {n_mappings * judges} judge calls (~${est_judge_cost:.2f})")
+        print(f"[evaluate] DRY RUN -- {n_judgeable_dispositions} exclusions x {judges} judges = {n_judgeable_dispositions * judges} disposition-judge calls (~${est_disposition_cost:.2f})")
         print(f"[evaluate] DRY RUN -- {round_trip_sample_size} round-trip samples x 2 calls (~${est_roundtrip_cost:.2f})")
         print(f"[evaluate] DRY RUN -- {cq_count} CQs generated + judged (~${est_cq_cost:.2f})")
         print(f"[evaluate] DRY RUN -- approx total LLM-layer cost ~${est_total:.2f}")
@@ -767,6 +946,9 @@ def run_evaluation(
         report["semantic_judging"] = judge_mappings(
             client, azure_config["deployment"], translation, logger, judges=judges, domain_data=domain_data, source_ir=source_ir
         )
+        report["disposition_judging"] = judge_dispositions(
+            client, azure_config["deployment"], translation, source_ir, logger, judges=judges
+        )
         report["round_trip"] = round_trip_sample(
             client, azure_config["deployment"], domain_data, translation, logger, sample_size=round_trip_sample_size
         )
@@ -778,7 +960,8 @@ def run_evaluation(
         logger.close()
 
     zero_majority_unsupported = report["semantic_judging"]["unsupported_count"] == 0
-    report["hard_gates_ok"] = hard_gates_ok and zero_majority_unsupported
+    zero_majority_unjustified = report["disposition_judging"]["unjustified_count"] == 0
+    report["hard_gates_ok"] = hard_gates_ok and zero_majority_unsupported and zero_majority_unjustified
     _write_reports(out_dir, manifest.id, report)
     print(f"[evaluate] {manifest.id}: done, hard_gates_ok={report['hard_gates_ok']}")
     return 0 if report["hard_gates_ok"] else 1
