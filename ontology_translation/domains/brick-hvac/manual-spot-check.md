@@ -6,6 +6,39 @@ item, verbatim source/result pairs, all rounds) is in
 `manual-spot-check.json`, keyed by `rounds`; this file is the readable
 summary, newest round first.
 
+## Round 7 (2026-08-17) — first clean round, zero findings
+
+10%-stratified sample (13 of 129 — population grew by 2 after round 6's
+`cq5` fix — seed 3301). **Result: 13/13 accepted, nothing flagged.**
+
+Directly re-confirmed three separate fixes from rounds 5-6 held under
+fresh sampling: `relationships[4]` (AHU hasPart HeatingValve, round-5 fix)
+and `relationships[25]` (AHU feeds AirPlenum, round-5 fix) both still
+correctly cite both endpoints plus the predicate; `relationships[18]`
+(TerminalUnit hasLocation Space, round-6 fix) still cites both endpoints,
+and its rewritten, leftover-commentary-free rationale is intact.
+`actions.verifyOccupiedZoneConditioning`'s `input` class (`Zone`) is
+correctly cited, consistent with the new `endpoint_citation_gate`
+requirement. `classes.Space.properties.maxOccupancy` re-checked against
+round 2's original acceptance (grounded purely in its own self-explanatory
+name, no Space-definition claim needing Space's own citation) — still
+holds.
+
+The rest — `classes.OccupancySensor`, `classes.TemperatureDeadbandSetpoint`,
+`classes.HeatingTemperatureSetpoint`, `classes.CO2DifferentialSensor`,
+`classes.CO2Sensor.properties.value`, `classes.PackagedHeatPump.
+properties.mode`, `classes.Chiller.properties.coolingCapacity`,
+`rules.investigateAirQuality` — all matched their source material
+directly, complete and correctly cited.
+
+Re-ran the deterministic gates on the full 129-mapping population as a
+final check: structural validity 0 errors, `endpoint_citation_gate` 0
+gaps, 0/129 mappings with empty `source_iris`.
+
+### Cost
+
+$0 — sample review and gate checks only, no LLM calls needed.
+
 ## Round 6 (2026-08-17) — escalated to a full, non-sampled audit
 
 10%-stratified sample (13 of 127, seed 1147) as the starting point: **12/13

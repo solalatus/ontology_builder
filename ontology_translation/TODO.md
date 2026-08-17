@@ -1378,3 +1378,17 @@ reference and record deltas/decisions here instead.)*
   effort across every phase so far: **~$23.2**.
 
   **#106 still open** — still the user's call.
+
+- 2026-08-17 (continued) — **Seventh manual spot-check round: first clean
+  round, zero findings.** 10%-stratified sample (13 of 129 -- population
+  grew by 2 after round 6's cq5 fix -- seed 3301). All 13 accepted,
+  including direct re-confirmation that three separate round-5/6 fixes
+  (`relationships[4]`, `relationships[25]`, `relationships[18]`) held under
+  fresh sampling, and that `actions.verifyOccupiedZoneConditioning`'s input
+  class is correctly cited per the new `endpoint_citation_gate`. Full
+  129-mapping deterministic gate re-check: structural clean,
+  `endpoint_citation_gate` 0 gaps, 0/129 empty citations. No LLM cost.
+
+  Full account: `domains/brick-hvac/manual-spot-check.md`/`.json` (round 7).
+
+  **#106 still open** — still the user's call.
