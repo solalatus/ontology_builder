@@ -358,6 +358,18 @@ classes:
       value:
         type: number
         unit: degC
+  DryCooler:
+    meaning: A fluid cooler that uses air, a relatively dry, non-liquid fluid to accomplish
+      process cooling.
+    aliases:
+    - Dry Cooler
+    properties:
+      status:
+        type: text
+        allowed:
+        - 'off'
+        - 'on'
+        - alarm
 relationships:
 - name: hasPart
   from: AirHandlingUnit

@@ -1099,6 +1099,24 @@
       "source_evidence": "Included comparable class Air Temperature Sensor uses property \"value\" with unit \"degC\" for measured temperature.",
       "confidence": "medium",
       "rationale": "Using a numeric degC value follows the same temperature-sensor convention already used for AirTemperatureSensor in this domain."
+    },
+    {
+      "target_path": "classes.DryCooler",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#Dry_Cooler"
+      ],
+      "source_evidence": "\"A dry cooler is a fluid cooler that uses air, a relatively dry, non-liquid fluid to accomplish process cooling.\"",
+      "confidence": "high",
+      "rationale": "The source definition directly identifies Dry Cooler as a distinct cooling equipment type."
+    },
+    {
+      "target_path": "classes.DryCooler.properties.status",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#Dry_Cooler"
+      ],
+      "source_evidence": "off/on/alarm status monitoring is standard practice for HVAC plant equipment, and this same status property is already modeled in this domain for comparable equipment including Boiler, Chiller, CondensingUnit, and CoolingTower.",
+      "confidence": "medium",
+      "rationale": "Dry Cooler is comparable operational plant equipment, so the same equipment-status convention used for its included peers applies here."
     }
   ],
   "dispositions": [
@@ -1244,8 +1262,8 @@
     },
     {
       "source_iri": "https://brickschema.org/schema/Brick#Dry_Cooler",
-      "disposition": "out_of_scope",
-      "note": "plant equipment outside selected subset"
+      "disposition": "mapped",
+      "note": "mapped to classes.DryCooler"
     },
     {
       "source_iri": "https://brickschema.org/schema/Brick#Economizer",
