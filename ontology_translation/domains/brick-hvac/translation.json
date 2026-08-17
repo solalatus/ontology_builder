@@ -600,9 +600,9 @@
         "https://brickschema.org/schema/Brick#Damper",
         "https://brickschema.org/schema/Brick#hasPart"
       ],
-      "source_evidence": "\"AHU\" is \"usually connected to an air-distribution system,\" and a \"Damper\" is an element of an air-distribution system that changes airflow rate or shuts off airflow, so a damper is a supported part of an AHU assembly.",
-      "confidence": "high",
-      "rationale": "The AHU and Damper definitions together support a hasPart relation because dampers are standard airflow-control components in AHU-connected air-distribution assemblies."
+      "source_evidence": "\"Damper\" is \"Element inserted into an air-distribution system or element of an air-distribution system permitting modification of the air resistance of the system and consequently changing the airflow rate or shutting off the airflow\"; standard HVAC practice places a damper section directly within an AHU assembly (the same standard-practice compositional basis already used for this domain's other AHU section components, e.g. its economizer section).",
+      "confidence": "medium",
+      "rationale": "Dampers are standard airflow-control sections built into an AHU assembly itself, the same compositional basis already accepted for this domain's other AHU-internal components."
     },
     {
       "target_path": "relationships[3]",
