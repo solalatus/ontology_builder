@@ -365,6 +365,22 @@ def apply_repairs(domain_data: dict, translation_data: dict, repairs: list[dict]
             # reground: domain_data is untouched, content was already fine.
             mapping = mapping_index.get(target_path)
             if mapping is not None:
+                if action == "reground":
+                    # reground only ever strengthens evidence for content
+                    # that's already correct -- it never has a legitimate
+                    # reason to drop a previously-valid citation. A repair
+                    # batch's source_context sometimes only lists the *new*
+                    # citation to add (found for real: round-4 manual
+                    # spot-check, 20/20 items in one batch silently lost
+                    # correct pre-existing source_iris this way when the
+                    # provenance was written wholesale). Union instead of
+                    # replace so an incomplete batch can only ever add
+                    # citations, never lose one.
+                    old_iris = mapping.get("source_iris") or []
+                    provenance = {
+                        **provenance,
+                        "source_iris": list(dict.fromkeys([*old_iris, *provenance["source_iris"]])),
+                    }
                 mapping["target_path"] = new_target_path
                 mapping.update(provenance)
             else:

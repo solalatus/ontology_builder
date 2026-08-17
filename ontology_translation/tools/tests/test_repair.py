@@ -286,6 +286,39 @@ class ApplyRepairsTests(unittest.TestCase):
         mapping = next(m for m in translation["mappings"] if m["target_path"] == "classes.AHU.properties.status")
         self.assertEqual(mapping["source_iris"], ["https://brickschema.org/schema/Brick#AHU"])
 
+    def test_reground_merges_source_iris_instead_of_replacing(self):
+        # Regression: manual spot-check rounds 3 and 4 both found real
+        # mappings where a reground fix's source_context only listed the
+        # *new* citation to add, never the item's pre-existing correct
+        # ones. Because reground documents itself as "content is already
+        # fine, just under-evidenced" -- never a reason to drop a
+        # previously-valid citation -- apply_repairs must union old and
+        # new source_iris, not trust the repair decision to have restated
+        # every citation it should keep.
+        domain = json.loads(json.dumps(SAMPLE_DOMAIN))
+        translation = json.loads(json.dumps(SAMPLE_TRANSLATION))
+        mapping = next(m for m in translation["mappings"] if m["target_path"] == "relationships[2]")
+        mapping["source_iris"] = ["https://brickschema.org/schema/Brick#hasPart", "https://brickschema.org/schema/Brick#Chiller"]
+        item = repair_mod.RejectedItem(
+            target_path="relationships[2]",
+            current_shape={"name": "hasPart", "from": "AHU", "to": "Chiller", "meaning": "z", "aliases": []},
+            rejection_rationale="r",
+        )
+        repairs = [{
+            "target_path": "relationships[2]", "action": "reground",
+            "source_evidence": "e5", "source_iris": ["https://brickschema.org/schema/Brick#AHU"], "confidence": "high", "rationale": "r5",
+        }]
+        repair_mod.apply_repairs(domain, translation, repairs, [item])
+        mapping = next(m for m in translation["mappings"] if m["target_path"] == "relationships[2]")
+        self.assertEqual(
+            mapping["source_iris"],
+            [
+                "https://brickschema.org/schema/Brick#hasPart",
+                "https://brickschema.org/schema/Brick#Chiller",
+                "https://brickschema.org/schema/Brick#AHU",
+            ],
+        )
+
     def test_in_place_replace_overwrites_content_at_the_same_path(self):
         domain = json.loads(json.dumps(SAMPLE_DOMAIN))
         translation = json.loads(json.dumps(SAMPLE_TRANSLATION))
