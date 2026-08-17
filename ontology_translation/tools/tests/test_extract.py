@@ -11,7 +11,7 @@ from pathlib import Path as _Path
 
 _sys.path.insert(0, str(_Path(__file__).resolve().parents[1]))
 
-from extract import extract_all, local_name, parse_graph, select_scope
+from extract import extract_all, local_name, main, parse_graph, select_scope
 
 SAMPLE_TTL = """
 @prefix : <http://example.org/onto#> .
@@ -219,6 +219,93 @@ class ParseGraphFromFileTests(unittest.TestCase):
             path.write_text(SAMPLE_TTL, encoding="utf-8")
             graph = parse_graph(path)
         self.assertGreater(len(graph), 0)
+
+
+class MainCliMaxDepthTests(unittest.TestCase):
+    """Regression coverage for a real bug: SourceManifest never parsed
+    scope.max_depth at all, and extract.py's CLI only ever respected a
+    separate, easy-to-forget --max-depth flag -- silently unlimited whenever
+    that flag wasn't repeated by hand, even though the manifest documented a
+    specific depth as part of its reproducibility record. Found by actually
+    re-running the real Brick HVAC pipeline from a clean slate: the exact
+    same manifest/source/roots produced 1622 classes instead of the
+    originally-accepted 81. SelectScopeTests above only ever tested the
+    library function directly with an explicit max_depth kwarg -- it could
+    never have caught a CLI *wiring* bug, which is why this exists as a
+    real end-to-end main() invocation instead."""
+
+    def _write_manifest(self, tmp_path: Path, max_depth_line: str = "") -> Path:
+        manifest_path = tmp_path / "source-manifest.yaml"
+        manifest_path.write_text(
+            "id: test-onto\n"
+            "source_url: https://example.org/onto.ttl\n"
+            "scope:\n"
+            f"{max_depth_line}"
+            "  roots:\n"
+            "    - Fan\n"
+            "compiler:\n"
+            "  prompt_version: compiler-prompt\n"
+            "  runs: 1\n",
+            encoding="utf-8",
+        )
+        return manifest_path
+
+    def test_manifest_max_depth_is_applied_without_a_cli_flag(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            ttl_path = tmp_path / "sample.ttl"
+            ttl_path.write_text(SAMPLE_TTL, encoding="utf-8")
+            manifest_path = self._write_manifest(tmp_path, "  max_depth: 0\n")
+            out_path = tmp_path / "out.json"
+
+            rc = main(["--input", str(ttl_path), "--manifest", str(manifest_path), "--out", str(out_path)])
+
+            self.assertEqual(rc, 0)
+            import json
+
+            ir = json.loads(out_path.read_text(encoding="utf-8"))
+            labels = {c["labels"][0] for c in ir["classes"]}
+            # max_depth: 0 in the manifest, no --max-depth on the command
+            # line -- must select only the root match itself, not its
+            # parent/sibling too. Before this fix, the CLI ignored the
+            # manifest field entirely and this would come back unlimited.
+            self.assertEqual(labels, {"Fan"})
+
+    def test_explicit_cli_flag_overrides_the_manifest_value(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            ttl_path = tmp_path / "sample.ttl"
+            ttl_path.write_text(SAMPLE_TTL, encoding="utf-8")
+            manifest_path = self._write_manifest(tmp_path, "  max_depth: 0\n")
+            out_path = tmp_path / "out.json"
+
+            rc = main(
+                ["--input", str(ttl_path), "--manifest", str(manifest_path), "--out", str(out_path), "--max-depth", "5"]
+            )
+
+            self.assertEqual(rc, 0)
+            import json
+
+            ir = json.loads(out_path.read_text(encoding="utf-8"))
+            labels = {c["labels"][0] for c in ir["classes"]}
+            self.assertEqual(labels, {"Fan", "Equipment", "Damper"})
+
+    def test_manifest_without_max_depth_stays_unlimited(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            ttl_path = tmp_path / "sample.ttl"
+            ttl_path.write_text(SAMPLE_TTL, encoding="utf-8")
+            manifest_path = self._write_manifest(tmp_path)  # no max_depth line at all
+            out_path = tmp_path / "out.json"
+
+            rc = main(["--input", str(ttl_path), "--manifest", str(manifest_path), "--out", str(out_path)])
+
+            self.assertEqual(rc, 0)
+            import json
+
+            ir = json.loads(out_path.read_text(encoding="utf-8"))
+            labels = {c["labels"][0] for c in ir["classes"]}
+            self.assertEqual(labels, {"Fan", "Equipment", "Damper"})
 
 
 def _parse(ttl_text: str):

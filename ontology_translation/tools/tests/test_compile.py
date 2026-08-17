@@ -139,6 +139,56 @@ class CallCompilerTests(unittest.TestCase):
         self.assertEqual(events, ["api_call_start", "api_call_end"])
 
 
+class NormalizeAllowedListsTests(unittest.TestCase):
+    def test_bools_are_coerced_to_on_off_strings(self):
+        domain_data = {
+            "classes": {
+                "Fan": {
+                    "properties": {
+                        "status": {"type": "text", "allowed": [False, True, "alarm"]},
+                    }
+                }
+            }
+        }
+        normalized, changes = compile_mod.normalize_allowed_lists(domain_data)
+        self.assertEqual(
+            normalized["classes"]["Fan"]["properties"]["status"]["allowed"],
+            ["off", "on", "alarm"],
+        )
+        self.assertEqual(len(changes), 1)
+        self.assertIn("classes.Fan.properties.status.allowed", changes[0])
+
+    def test_all_string_allowed_list_is_left_unchanged(self):
+        domain_data = {
+            "classes": {
+                "Fan": {"properties": {"status": {"type": "text", "allowed": ["on", "off"]}}}
+            }
+        }
+        normalized, changes = compile_mod.normalize_allowed_lists(domain_data)
+        self.assertEqual(normalized["classes"]["Fan"]["properties"]["status"]["allowed"], ["on", "off"])
+        self.assertEqual(changes, [])
+
+    def test_missing_classes_or_properties_is_a_no_op(self):
+        normalized, changes = compile_mod.normalize_allowed_lists({})
+        self.assertEqual(normalized, {})
+        self.assertEqual(changes, [])
+
+        domain_data = {"classes": {"Fan": {"meaning": "no properties key"}}}
+        normalized, changes = compile_mod.normalize_allowed_lists(domain_data)
+        self.assertEqual(normalized, domain_data)
+        self.assertEqual(changes, [])
+
+    def test_non_bool_non_string_value_is_stringified(self):
+        domain_data = {
+            "classes": {"Fan": {"properties": {"level": {"type": "text", "allowed": [1, 2, "high"]}}}}
+        }
+        normalized, changes = compile_mod.normalize_allowed_lists(domain_data)
+        self.assertEqual(
+            normalized["classes"]["Fan"]["properties"]["level"]["allowed"], ["1", "2", "high"]
+        )
+        self.assertEqual(len(changes), 1)
+
+
 class RunCompileDryRunTests(unittest.TestCase):
     def test_dry_run_makes_no_api_call_and_writes_nothing(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -219,6 +269,47 @@ class RunCompileLiveTests(unittest.TestCase):
             self.assertEqual(len(run_manifest["runs"]), 2)
             self.assertTrue(all(r["structural_validation_ok"] for r in run_manifest["runs"]))
             self.assertGreater(run_manifest["total_estimated_cost_usd"], 0)
+
+    def test_bool_allowed_list_from_the_llm_is_normalized_before_write_and_validation(self):
+        # Regression: a real clean 3-run compile (issue #106 rerun) reproduced
+        # `allowed: [false, true, ...]` on every run despite an explicit
+        # prompt instruction against it -- the pipeline needs a deterministic
+        # code-level fix, not reliance on the model following instructions.
+        bad_domain_yaml = SAMPLE_DOMAIN_YAML.replace(
+            '        allowed:\n          - "on"\n          - "off"\n',
+            "        allowed:\n          - false\n          - true\n",
+        )
+        response_content = json.dumps({"domain_yaml": bad_domain_yaml, "translation": SAMPLE_TRANSLATION})
+        FakeClient, calls = _fake_client_class([response_content])
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            manifest_path, source_ir_path = self._write_inputs(tmp_path, runs=1)
+            out_dir = tmp_path / "out"
+
+            with mock.patch.object(
+                compile_mod,
+                "load_azure_config",
+                return_value={
+                    "endpoint": "https://fake.openai.azure.com/",
+                    "api_key": "fake-key",
+                    "api_version": "2024-12-01-preview",
+                    "deployment": "gpt-5.4",
+                },
+            ), mock.patch("openai.AzureOpenAI", FakeClient):
+                rc = compile_mod.run_compile(source_ir_path, manifest_path, out_dir, runs=None, scope_note=None, dry_run=False)
+
+            self.assertEqual(rc, 0)
+            written = (out_dir / "run-1.domain.yaml").read_text(encoding="utf-8")
+            self.assertNotIn("false", written)
+            self.assertIn("off", written)
+            self.assertIn("on", written)
+
+            run_manifest = json.loads((out_dir / "run-manifest.json").read_text(encoding="utf-8"))
+            self.assertTrue(run_manifest["runs"][0]["structural_validation_ok"])
+
+            log_lines = (out_dir / "run.log.jsonl").read_text(encoding="utf-8").strip().splitlines()
+            events = [json.loads(line)["event"] for line in log_lines]
+            self.assertIn("run_normalized", events)
 
     def test_runs_override_beats_manifest_runs(self):
         FakeClient, calls = _fake_client_class([SAMPLE_RESPONSE_CONTENT])

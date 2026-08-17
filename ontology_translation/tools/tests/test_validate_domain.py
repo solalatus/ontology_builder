@@ -85,6 +85,32 @@ class StructuralErrorTests(unittest.TestCase):
         report = validate_domain(bad)
         self.assertIn("unit_on_non_number", [i.code for i in report.errors])
 
+    def test_allowed_with_non_string_values_is_flagged(self):
+        # agent_ontology_spec.md types `allowed` as `string[] | null`; a bare
+        # YAML true/false parses as a Python bool, not a str, so mixing them
+        # into a status enum (e.g. [false, true, "alarm"]) is a type
+        # violation -- found via manual spot-check on Brick HVAC (S10).
+        bad = {
+            "classes": {"AHU": {"meaning": "x", "properties": {"status": {"type": "text", "allowed": [False, True, "alarm"]}}}},
+            "relationships": [],
+            "rules": {},
+            "actions": {},
+            "competency_questions": [],
+        }
+        report = validate_domain(bad)
+        self.assertIn("allowed_not_all_strings", [i.code for i in report.errors])
+
+    def test_allowed_with_all_string_values_is_not_flagged(self):
+        good = {
+            "classes": {"AHU": {"meaning": "x", "properties": {"status": {"type": "text", "allowed": ["off", "on", "alarm"]}}}},
+            "relationships": [],
+            "rules": {},
+            "actions": {},
+            "competency_questions": [],
+        }
+        report = validate_domain(good)
+        self.assertNotIn("allowed_not_all_strings", [i.code for i in report.errors])
+
     def test_relationship_endpoint_dangling(self):
         bad = {
             "classes": {"Fan": {"meaning": "x"}},

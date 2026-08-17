@@ -9029,7 +9029,17 @@ const YAML_BLOCK_SCALAR_HEADER = /^([|>])([+-]?)\d*$/;
 // preserve every trailing blank line, but these values land in a
 // `meaning`/`effect` text field, where a trailing newline is invisible noise
 // that then round-trips back out as a literal "\n" in the next export.
-function readYamlBlockScalar(rawLines, startIndex, headerColumn, style) {
+// `firstLine`, when given, is an already-dedented line of content that
+// precedes the raw body being read here -- used by flattenYamlLines'
+// plain-scalar folding, where a "key: value"/"- value" line's own inline
+// text is the fold's real first line, not `rawLines[startIndex]`. Folding
+// it in via `dedented.unshift()` (rather than the caller string-joining
+// `value` onto it afterwards) keeps the blank-line-means-a-real-newline
+// rule working correctly even when the paragraph break is the very first
+// continuation line -- string-joining afterward can't tell "this is a
+// fresh paragraph" from "this is a same-paragraph space join" the way the
+// reduce below already does.
+function readYamlBlockScalar(rawLines, startIndex, headerColumn, style, firstLine) {
   const body = [];
   let i = startIndex;
   while (i < rawLines.length) {
@@ -9046,16 +9056,22 @@ function readYamlBlockScalar(rawLines, startIndex, headerColumn, style) {
     const expanded = m.replace(/\t/g, "  ");
     return expanded.slice(baseColumn);
   })));
+  if (firstLine !== undefined) dedented.unshift(firstLine);
 
   let value;
   if (style === "|") {
     value = dedented.join("\n");
   } else {
     // Folded: a line break between two non-empty lines becomes a space; a
-    // blank line becomes a real newline.
+    // blank line becomes a real newline. The blank line itself is what
+    // inserts that "\n" (the `line === ""` branch) -- the *next* non-blank
+    // line must only ever see `acc` already ending in it and append
+    // directly, never add a second one of its own, or a single blank-line
+    // paragraph break comes out doubled ("a\n\nb" instead of "a\nb").
     value = dedented.reduce((acc, line, idx) => {
       if (idx === 0) return line;
-      if (line === "" || acc.endsWith("\n")) return `${acc}\n${line}`;
+      if (line === "") return `${acc}\n`;
+      if (acc.endsWith("\n")) return `${acc}${line}`;
       return `${acc} ${line}`;
     }, "");
   }
@@ -9073,10 +9089,30 @@ function readYamlBlockScalar(rawLines, startIndex, headerColumn, style) {
 // format this app explicitly invites people to hand-edit. Any consistent
 // indent width now works, and a misaligned line is treated as one level
 // deeper instead of being discarded.
+//
+// One more indentation shape needs its own handling: YAML explicitly allows
+// a block sequence to sit at the *same* column as the mapping key that owns
+// it (`allowed:` / `- off` both at column 8), not just one column deeper.
+// That's PyYAML's own default `yaml.safe_dump()` style, and it's what the
+// ontology_translation compiler's real LLM-authored output actually used
+// throughout `domains/brick-hvac/reference.domain.yaml` — found the hard
+// way, because a file in that style used to import as completely empty,
+// losing every class: a same-column dash line looked to the plain
+// column-stack logic like a *sibling key* of whatever introduced it, not
+// that key's value, and the whole document desynced from there on. Each
+// stack frame now also remembers whether it was opened to hold a
+// same-column sequence (`isSeq`): the first dash line right after a bare
+// `key:` at the current frame's own column opens one extra level for it,
+// held open across that sequence's own items (they're dash lines at the
+// same column too), and closed again the moment a later same-column line
+// is *not* a dash — e.g. the next sibling key once the list ends. This is
+// purely additive: a list already indented one column deeper than its key
+// (this app's own `yamlLines()` export style) still takes the ordinary
+// `column > top.column` push below and is unaffected.
 function flattenYamlLines(text) {
   const rawLines = text.split(/\r\n|\n|\r/);
   const lines = [];
-  const columnStack = [0];
+  const stack = [{ column: 0, isSeq: false }];
   let i = 0;
   while (i < rawLines.length) {
     const raw = rawLines[i];
@@ -9084,9 +9120,26 @@ function flattenYamlLines(text) {
     if (trimmed === "" || trimmed.startsWith("#")) { i += 1; continue; }
 
     const column = yamlIndentColumns(raw);
-    while (columnStack.length > 1 && column < columnStack[columnStack.length - 1]) columnStack.pop();
-    if (column > columnStack[columnStack.length - 1]) columnStack.push(column);
-    const indent = columnStack.length - 1;
+    const isDashLine = trimmed === "-" || trimmed.startsWith("- ");
+    let top = stack[stack.length - 1];
+    while (stack.length > 1 && (column < top.column || (column === top.column && top.isSeq && !isDashLine))) {
+      stack.pop();
+      top = stack[stack.length - 1];
+    }
+    if (column > top.column) {
+      stack.push({ column, isSeq: false });
+    } else if (column === top.column && isDashLine && !top.isSeq) {
+      // Only fires the first time: once open, top.isSeq is already true, so
+      // this whole branch is skipped for the rest of the list's own items
+      // (they hit the ordinary "stay at this frame" path below instead of
+      // each pushing a fresh one).
+      const last = lines[lines.length - 1];
+      const lastKv = last && last.indent === stack.length - 1 ? splitYamlKeyValue(last.content) : null;
+      if (lastKv && lastKv[1] === undefined) {
+        stack.push({ column, isSeq: true });
+      }
+    }
+    const indent = stack.length - 1;
 
     const content = stripYamlInlineComment(trimmed);
     i += 1;
@@ -9109,6 +9162,47 @@ function flattenYamlLines(text) {
       lines.push({ indent, content: `- ${yamlScalar(scalar.value)}` });
       continue;
     }
+
+    // A *plain* (unquoted, no `|`/`>` header) scalar -- a "key: value" pair's
+    // value, or a bare "- value" list item -- is also allowed by YAML to
+    // keep going onto further, more-indented lines, folding the same way a
+    // ">" block scalar does (blank line = a real break, otherwise a line
+    // break becomes a space). Real, not hypothetical: the
+    // ontology_translation compiler's LLM-authored output wraps long prose
+    // fields (meaning/text/effect/conditions/...) exactly this way, and an
+    // unconsumed continuation line used to desync every enclosing loop
+    // above it, silently truncating the rest of the document from that
+    // point on (found via the Brick HVAC file). isPlainScalarToken is the
+    // same "not quoted, not [..]/{..}, not empty" fallback
+    // parseYamlValueToken() already uses for its own last branch.
+    const isPlainScalarToken = (token) => token !== "" && token !== "[]" && token !== "{}" &&
+      token !== "null" && token !== "~" &&
+      !(token[0] === '"' && token[token.length - 1] === '"') &&
+      !(token[0] === "'" && token[token.length - 1] === "'") &&
+      !(token[0] === "[" && token[token.length - 1] === "]") &&
+      !(token[0] === "{" && token[token.length - 1] === "}");
+    // Look past any blank lines to the next real one -- a blank line is a
+    // legitimate paragraph break *within* a folded continuation (readYamlBlockScalar
+    // already handles that), not a terminator, so it must not by itself make
+    // this look like there's no continuation to fold.
+    let peekIndex = i;
+    while (peekIndex < rawLines.length && rawLines[peekIndex].trim() === "") peekIndex += 1;
+    const nextRaw = rawLines[peekIndex];
+    const nextLineIsDeeper = nextRaw !== undefined && yamlIndentColumns(nextRaw) > column;
+    if (!content.startsWith("- ") && kv && kv[1] !== undefined && isPlainScalarToken(kv[1]) && nextLineIsDeeper) {
+      const folded = readYamlBlockScalar(rawLines, i, column, ">", kv[1]);
+      i = folded.nextIndex;
+      lines.push({ indent, content: `${yamlScalar(kv[0])}: ${yamlScalar(folded.value)}` });
+      continue;
+    }
+    const itemKv = content.startsWith("- ") ? splitYamlKeyValue(content.slice(2)) : null;
+    if (content.startsWith("- ") && !itemKv && isPlainScalarToken(content.slice(2)) && nextLineIsDeeper) {
+      const folded = readYamlBlockScalar(rawLines, i, column, ">", content.slice(2));
+      i = folded.nextIndex;
+      lines.push({ indent, content: `- ${yamlScalar(folded.value)}` });
+      continue;
+    }
+
     lines.push({ indent, content });
   }
   return lines;

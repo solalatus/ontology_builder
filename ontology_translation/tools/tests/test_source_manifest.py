@@ -42,6 +42,29 @@ class LoadManifestTests(unittest.TestCase):
         self.assertEqual(manifest.compiler_prompt_version, "compiler-v1")
         self.assertEqual(manifest.compiler_runs, 3)
 
+    def test_missing_max_depth_defaults_to_none(self):
+        # VALID_MANIFEST_YAML has no scope.max_depth at all -- must come back
+        # None (meaning "unlimited"), not silently 0 or some other default
+        # that would mask the field being entirely absent.
+        manifest = load_manifest(self._write(VALID_MANIFEST_YAML))
+        self.assertIsNone(manifest.scope_max_depth)
+
+    def test_max_depth_is_parsed_when_present(self):
+        # Regression: extract.py's CLI used to ignore this field entirely,
+        # only ever reading a separate --max-depth flag -- re-running the
+        # real Brick HVAC pipeline from a clean slate without repeating that
+        # flag produced 1622 classes instead of the originally-accepted 81,
+        # because scope.max_depth: 1 in the manifest was never actually
+        # applied. This field being read at all is the fix's foundation.
+        text = VALID_MANIFEST_YAML.replace("scope:\n  roots:", "scope:\n  max_depth: 1\n  roots:")
+        manifest = load_manifest(self._write(text))
+        self.assertEqual(manifest.scope_max_depth, 1)
+
+    def test_non_integer_max_depth_raises(self):
+        text = VALID_MANIFEST_YAML.replace("scope:\n  roots:", "scope:\n  max_depth: deep\n  roots:")
+        with self.assertRaises(ManifestError):
+            load_manifest(self._write(text))
+
     def test_missing_source_sha256_is_allowed_pre_pin(self):
         text = VALID_MANIFEST_YAML.replace("source_sha256: abc123\n", "")
         manifest = load_manifest(self._write(text))
@@ -79,6 +102,17 @@ class LoadManifestTests(unittest.TestCase):
         self.assertEqual(reloaded.source_sha256, "deadbeef")
         self.assertEqual(reloaded.scope_roots, ["MaintenanceActivity", "FailureMode"])
         self.assertEqual(reloaded.compiler_runs, 3)
+
+    def test_round_trip_preserves_max_depth(self):
+        text = VALID_MANIFEST_YAML.replace("scope:\n  roots:", "scope:\n  max_depth: 1\n  roots:")
+        manifest = load_manifest(self._write(text))
+
+        with tempfile.TemporaryDirectory() as tmp:
+            out_path = Path(tmp) / "source-manifest.yaml"
+            write_manifest(out_path, manifest)
+            reloaded = load_manifest(out_path)
+
+        self.assertEqual(reloaded.scope_max_depth, 1)
 
 
 if __name__ == "__main__":

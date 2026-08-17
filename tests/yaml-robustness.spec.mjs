@@ -117,6 +117,206 @@ test("A list of maps at any indent width keeps its items separate", async () => 
 });
 
 // --------------------------------------------------------------------------
+// Same-column block sequences (PyYAML's own default `yaml.safe_dump()`
+// style: a list's dashes sit at the *same* column as the key that owns
+// it, not one column deeper). Both styles are equally valid YAML, but this
+// app's own exporter only ever writes the "one deeper" style, so this half
+// went untested until the ontology_translation compiler's real LLM-authored
+// output (domains/brick-hvac/reference.domain.yaml) turned out to use the
+// same-column style throughout and imported as completely empty -- the
+// first same-column list silently desynced every enclosing loop above it,
+// losing the rest of the document with no error at all.
+// --------------------------------------------------------------------------
+
+test("A same-column top-level list (dash aligned with its own key) parses", async () => {
+  await withPage(async (page) => {
+    const p = await parse(page, "competency_questions:\n- id: cq1\n  text: hello\n- id: cq2\n  text: world\n");
+    assert.equal(p.competencyQuestions.length, 2);
+    assert.deepEqual(p.competencyQuestions[0], { id: "cq1", text: "hello" });
+    assert.deepEqual(p.competencyQuestions[1], { id: "cq2", text: "world" });
+  });
+});
+
+test("A same-column list of scalars parses", async () => {
+  await withPage(async (page) => {
+    const p = await parse(page, "classes:\n  Invoice:\n    meaning: x\n    aliases:\n    - bill\n    - receipt\n");
+    assert.deepEqual(p.classes.Invoice.aliases, ["bill", "receipt"]);
+  });
+});
+
+test("A same-column allowed list keeps every entry as a string, never a real boolean (regression: Brick CRAH)", async () => {
+  await withPage(async (page) => {
+    const p = await parse(page,
+      "classes:\n  CRAH:\n    meaning: x\n    properties:\n      status:\n        type: text\n        allowed:\n        - false\n        - true\n        - alarm\n");
+    const allowed = p.classes.CRAH.properties.status.allowed;
+    assert.deepEqual(allowed, ["false", "true", "alarm"]);
+    assert.ok(allowed.every((v) => typeof v === "string"), "every allowed entry must come back as a string");
+  });
+});
+
+test("A same-column list correctly closes before the next sibling key at that same column", async () => {
+  await withPage(async (page) => {
+    const p = await parse(page,
+      "competency_questions:\n- id: cq1\n  text: hello\nclasses:\n  AHU:\n    meaning: x\n");
+    assert.equal(p.competencyQuestions.length, 1);
+    assert.ok(p.classes.AHU, "classes: after the list must still be reached, not lost");
+    assert.equal(p.classes.AHU.meaning, "x");
+  });
+});
+
+test("Same-column relationships with multi-field list items parse (not confused with a plain-scalar list item)", async () => {
+  await withPage(async (page) => {
+    const p = await parse(page,
+      "classes:\n  AHU:\n    meaning: x\n  Zone:\n    meaning: y\nrelationships:\n- name: serves\n  from: AHU\n  to: Zone\n  meaning: z\n  aliases: []\n");
+    assert.equal(p.relationships.length, 1);
+    assert.deepEqual(p.relationships[0], { name: "serves", from: "AHU", to: "Zone", meaning: "z", aliases: [] });
+  });
+});
+
+test("Same-column sequences nested several levels deep all resolve correctly", async () => {
+  await withPage(async (page) => {
+    const p = await parse(page,
+      "classes:\n  AHU:\n    meaning: x\n    properties:\n      status:\n        type: text\n        allowed:\n        - off\n        - on\n");
+    assert.deepEqual(p.classes.AHU.properties.status.allowed, ["off", "on"]);
+  });
+});
+
+test("Same-column and one-deeper-indented lists both parse correctly within a single mixed document", async () => {
+  await withPage(async (page) => {
+    const p = await parse(page,
+      "classes:\n  Fan:\n    meaning: x\n    aliases:\n    - blower\n    - fan\nrelationships:\n  - name: serves\n    from: Fan\n    to: Zone\n    meaning: z\n    aliases: []\n");
+    assert.deepEqual(p.classes.Fan.aliases, ["blower", "fan"]);
+    assert.equal(p.relationships.length, 1);
+    assert.equal(p.relationships[0].name, "serves");
+  });
+});
+
+// The shape of the real bug: a full, PyYAML-style document (same-column
+// dashes throughout -- competency_questions, aliases, allowed, and
+// relationships) exercising every section of the target format at once,
+// the way `yaml.safe_dump()` (and the compiler's real LLM output) actually
+// writes it. Before the fix this parsed to zero classes.
+test("A full PyYAML-style document (same-column dashes throughout every section) parses completely", async () => {
+  await withPage(async (page) => {
+    const doc = [
+      "competency_questions:",
+      "- id: cq1",
+      "  text: Which AHU serves a given zone?",
+      "classes:",
+      "  AHU:",
+      "    meaning: An air handling unit.",
+      "    aliases:",
+      "    - Air Handler Unit",
+      "    properties:",
+      "      status:",
+      "        type: text",
+      "        allowed:",
+      "        - off",
+      "        - on",
+      "  Zone:",
+      "    meaning: A controlled area.",
+      "relationships:",
+      "- name: serves",
+      "  from: AHU",
+      "  to: Zone",
+      "  meaning: The AHU conditions the zone.",
+      "  aliases: []",
+      "rules:",
+      "  needsCooling:",
+      "    conditions:",
+      "    - zone temperature exceeds cooling setpoint",
+      "actions:",
+      "  enableCooling:",
+      "    input: AHU",
+      "    preconditions:",
+      "    - needsCooling",
+      "    effect: cooling is enabled",
+      "    verification: confirm supply air temperature drops",
+      "",
+    ].join("\n");
+    const p = await parse(page, doc);
+    assert.equal(Object.keys(p.classes).length, 2, "both classes must be reached");
+    assert.equal(p.classes.AHU.meaning, "An air handling unit.");
+    assert.deepEqual(p.classes.AHU.aliases, ["Air Handler Unit"]);
+    assert.deepEqual(p.classes.AHU.properties.status.allowed, ["off", "on"]);
+    assert.equal(p.relationships.length, 1);
+    assert.equal(p.relationships[0].name, "serves");
+    assert.deepEqual(p.rules.needsCooling.conditions, ["zone temperature exceeds cooling setpoint"]);
+    assert.equal(p.actions.enableCooling.input, "AHU");
+    assert.deepEqual(p.actions.enableCooling.preconditions, ["needsCooling"]);
+    assert.equal(p.competencyQuestions.length, 1);
+  });
+});
+
+// --------------------------------------------------------------------------
+// Plain-scalar line folding: YAML lets an unquoted scalar continue onto
+// further, more-indented lines (both a "key: value" pair's value and a
+// bare "- value" list item), folding them together the same way an
+// explicit ">" block scalar does. The compiler's real LLM-authored output
+// wraps long prose fields (meaning/text/effect/conditions/...) exactly
+// this way; without support for it, the unconsumed continuation line
+// desynced every enclosing loop above it, silently truncating the rest of
+// the document (found via the same Brick HVAC file).
+// --------------------------------------------------------------------------
+
+test("A wrapped 'key: value' plain scalar folds onto one line", async () => {
+  await withPage(async (page) => {
+    const p = await parse(page,
+      "classes:\n  AHU:\n    meaning: An assembly consisting of sections containing a fan,\n      filters and coils.\n");
+    assert.equal(p.classes.AHU.meaning, "An assembly consisting of sections containing a fan, filters and coils.");
+  });
+});
+
+test("A wrapped '- value' plain scalar list item folds onto one line", async () => {
+  await withPage(async (page) => {
+    const p = await parse(page,
+      "rules:\n  protectAgainstFrost:\n    conditions:\n    - frost sensor indicates frost risk on the\n      AHU's coil\n");
+    assert.deepEqual(p.rules.protectAgainstFrost.conditions, ["frost sensor indicates frost risk on the AHU's coil"]);
+  });
+});
+
+test("A wrapped scalar spanning three physical lines folds all of them", async () => {
+  await withPage(async (page) => {
+    const p = await parse(page,
+      "classes:\n  AHU:\n    meaning: line one,\n      line two,\n      line three\n");
+    assert.equal(p.classes.AHU.meaning, "line one, line two, line three");
+  });
+});
+
+test("A blank line inside a wrapped scalar becomes a real line break, not a space (folds like '>')", async () => {
+  await withPage(async (page) => {
+    const p = await parse(page,
+      "classes:\n  AHU:\n    meaning: first paragraph\n\n      second paragraph\n");
+    assert.equal(p.classes.AHU.meaning, "first paragraph\nsecond paragraph");
+  });
+});
+
+test("Wrapping does not fire when the next line is a sibling key, not deeper", async () => {
+  await withPage(async (page) => {
+    const p = await parse(page, "classes:\n  Invoice:\n    meaning: short\n    aliases:\n      - bill\n");
+    assert.equal(p.classes.Invoice.meaning, "short");
+    assert.deepEqual(p.classes.Invoice.aliases, ["bill"]);
+  });
+});
+
+test("Wrapping does not swallow a dash list item's own nested fields (regression: multi-field list items)", async () => {
+  await withPage(async (page) => {
+    const p = await parse(page,
+      "competency_questions:\n- id: cq1\n  text: hello world\n");
+    assert.deepEqual(p.competencyQuestions[0], { id: "cq1", text: "hello world" });
+  });
+});
+
+test("Wrapping never fires on quoted, flow-collection, null or empty values", async () => {
+  await withPage(async (page) => {
+    const p = await parse(page,
+      'classes:\n  Invoice:\n    meaning: "quoted"\n    aliases: [a, b]\n    properties: {}\n');
+    assert.equal(p.classes.Invoice.meaning, "quoted");
+    assert.deepEqual(p.classes.Invoice.aliases, ["a", "b"]);
+  });
+});
+
+// --------------------------------------------------------------------------
 // Scalars and flow collections
 // --------------------------------------------------------------------------
 
@@ -276,6 +476,19 @@ test("A folded block scalar joins its lines", async () => {
   await withPage(async (page) => {
     const p = await parse(page, "classes:\n  Invoice:\n    meaning: >\n      first part\n      second part\n");
     assert.equal(p.classes.Invoice.meaning, "first part second part");
+  });
+});
+
+// Pre-existing bug, unrelated to plain-scalar folding: a blank line inside
+// an explicit ">" scalar is *itself* what inserts the paragraph break's
+// "\n", so the next non-blank line must just append to that -- adding a
+// second "\n" of its own doubled it ("first\n\nsecond" instead of
+// "first\nsecond"). Untested until plain-scalar folding needed the exact
+// same blank-line behavior and exposed it.
+test("A blank line inside a folded block scalar becomes exactly one line break", async () => {
+  await withPage(async (page) => {
+    const p = await parse(page, "classes:\n  Invoice:\n    meaning: >\n      first paragraph\n\n      second paragraph\n");
+    assert.equal(p.classes.Invoice.meaning, "first paragraph\nsecond paragraph");
   });
 });
 

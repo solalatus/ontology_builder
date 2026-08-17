@@ -94,7 +94,13 @@ Rules for this shape:
   `properties` is a mapping keyed by property name; `type` is always one of
   `text`, `number`, `date`, `boolean`; `unit` only appears when
   `type: number`; `allowed` is an independent, optional fixed-choice list on
-  any type.
+  any type. **Every entry in `allowed` must be a plain string, always** —
+  e.g. `["off", "on", "alarm"]`, never `[false, true, "alarm"]`. Do not
+  emit bare YAML booleans in `allowed` even for what feels like a two-state
+  status; write the states out as strings like `"off"`/`"on"` instead. This
+  matches `agent_ontology_spec.md`'s `allowed: string[] | null` typing
+  exactly, and mixing bool/string in one list is a real type violation, not
+  a style choice.
 - `relationships` is a **list**, not a mapping — one entry per relationship,
   `{name, from, to, meaning, aliases}`, where `from`/`to` are class names
   that must exist in `classes`. `name` is camelCase, derived from how a
@@ -119,27 +125,39 @@ Rules for this shape:
 - Datatype properties may become class properties. Map XSD datatypes
   *approximately* to `text`, `number`, `date`, `boolean` — there is no exact
   round-trip requirement. **Beyond the datatype properties handed to you
-  explicitly**, also consider properties a domain expert would obviously
-  attribute to a class from its name and definition alone (a
-  `CO2_Level_Sensor` measures a CO2 level/concentration; a `Fan` has an
-  on/off `status`) — ground each such inferred property in the class's own
-  label/definition text in `translation.json`'s rationale, the same as any
-  other mapping.
+  explicitly**, also consider properties a domain expert in *whatever
+  domain you are actually compiling* would obviously attribute to a class
+  from its name and definition alone — a class whose name and definition
+  describe it as measuring, holding, or classifying something usually
+  implies a property for that value or state, even when the source never
+  declared it as a formal datatype property. Ground each such inferred
+  property in the class's own label/definition text in `translation.json`'s
+  rationale, the same as any other mapping.
 - Object properties may become relationships **only** when the source
   semantics clearly support a direction and both endpoints resolve to
   classes you are including. Many source ontologies declare an object
-  property's *existence and general meaning* (e.g. "X hasPoint Y means X
-  has a source of telemetry Y") without declaring per-class domain/range —
-  so a *specific* endpoint pair (e.g. "an AHU specifically hasPoint an
-  AirTemperatureSetpoint") is frequently standard, well-established domain
-  practice rather than something the source states as a per-pair axiom.
-  That is fine to include, but **cite it as such explicitly** in
-  `translation.json` — e.g. "standard practice: an AHU is commonly
-  equipped with an air temperature setpoint for control" — rather than
-  only citing the generic property definition, which does not by itself
-  justify *that specific pair*. This is the same standard-practice
-  grounding already described above for rules/actions/inferred properties;
-  it applies to relationship endpoint pairs too.
+  property's *existence and general meaning* (what the relationship type
+  itself represents) without declaring which specific pairs of classes it
+  actually connects — so a *specific* endpoint pair is frequently standard,
+  well-established practice for the domain at hand rather than something
+  the source states as a per-pair axiom. That is fine to include, but
+  **cite it as such explicitly** in `translation.json` — as a standard-
+  practice claim tied to those two *specific* classes — rather than only
+  citing the generic property definition, which does not by itself justify
+  *that specific pair*. This is the same standard-practice grounding
+  already described above for rules/actions/inferred properties; it
+  applies to relationship endpoint pairs too.
+- **Composition claims (`hasPart` and its equivalents) need the strongest
+  evidence of any relationship, because a fluent-sounding standard-practice
+  sentence is easiest to write — and easiest to over-trust — for exactly
+  this kind of claim.** Before emitting any composition edge, check that
+  the evidence you're citing is actually about the *specific* class named
+  as the whole, not merely about something related, upstream, downstream,
+  or otherwise associated with it. If your best evidence for "X hasPart Y"
+  is really evidence about a different class Z containing Y, the honest
+  edge is "Z hasPart Y", not "X hasPart Y" — even when X and Z are closely
+  related (e.g. one commonly appears alongside the other, or one is itself
+  built in part from the other).
 - Enumerations (`owl:oneOf`) may become a property's `allowed` list **only**
   when clearly associated with one specific property.
 - **`rdfs:subClassOf` edges MUST NOT become `relationships` entries.**
@@ -167,14 +185,17 @@ of evidence:
    precondition).
 2. **Standard, well-established domain practice directly tied to the named
    concepts you are including**, even when the source ontology itself is
-   purely descriptive/structural and never states it as an RDF axiom. If
-   you are compiling a building/HVAC ontology and it includes both a
-   `Temperature_Sensor` and a `Temperature_Setpoint` for the same kind of
-   zone, it is standard, well-known HVAC practice — not a fabrication —
-   that a control decision compares the two; write that as a rule, and cite
-   "standard domain practice for Sensor/Setpoint pairs of this kind" (or
-   the equivalent for your domain) as the rationale in `translation.json`,
-   the same as any other mapping.
+   purely descriptive/structural and never states it as an RDF axiom. This
+   principle applies identically regardless of what domain you're actually
+   compiling — do not calibrate how readily you apply it based on which
+   domain this happens to be. If the classes and relationships you're
+   including imply an obvious operational fact any practitioner in *that*
+   domain would recognize as routine (e.g. two included concepts that are
+   commonly compared, checked against each other, or required together
+   before some action proceeds), that is standard practice, not a
+   fabrication — write it as a rule. Cite "standard domain practice for
+   <the specific concepts involved>" as the rationale in
+   `translation.json`, the same as any other mapping.
 
 This is still bounded, not free invention:
 
@@ -183,9 +204,10 @@ This is still bounded, not free invention:
   never a generic industry platitude unconnected to any included class.
 - Do not invent numeric thresholds, specific values, or procedural details
   the source and standard practice don't support — state the condition/
-  effect at the level of generality the evidence actually supports (e.g.
-  "zone temperature deviates from setpoint" is supportable; "deviates by
-  more than 2°F for 10 minutes" usually is not, unless the source says so).
+  effect at the level of generality the evidence actually supports (a
+  qualitative comparison between two included concepts is often
+  supportable; an invented precise threshold or timing usually is not,
+  unless the source itself states one).
 - **Empty `rules: {}` / `actions: {}` is still the correct output** when a
   domain is genuinely and entirely descriptive with no operational angle
   even at the standard-practice level (this is expected for some domains,
@@ -206,12 +228,57 @@ with the classes/relationships/rules/actions you produced.
 ## Provenance — you must also produce `translation.json`
 
 For **every** target element you emit (class, property, relationship, rule,
-action), record a mapping entry with: `target_path`, `source_iris` (empty
-list `[]` is valid for a rule/action grounded in standard practice rather
-than a literal source IRI — say so in `rationale` instead), `source_evidence`
-(a short quoted source snippet, or a one-line statement of the
-standard-practice grounding), `confidence` (`high`/`medium`/`low`), and
+action), record a mapping entry with: `target_path`, `source_iris`,
+`source_evidence` (a short quoted source snippet, or a one-line statement of
+the standard-practice grounding), `confidence` (`high`/`medium`/`low`), and
 `rationale` (one sentence).
+
+`source_iris` must include the IRI of **every** specific class or property
+your `source_evidence`/`rationale` names, quotes, or paraphrases — even when
+the grounding is standard-practice rather than a literal quote. "A status
+property is standard practice for this kind of record, already modeled the
+same way for Invoice and PurchaseOrder" must cite Invoice's and
+PurchaseOrder's IRIs, not just describe them in prose; "a LineItem belongs to
+an Invoice because Invoice's own definition lists its line items among its
+parts" must cite Invoice's IRI, not just the `hasPart` relation's. A reader
+(human or another tool) must be able to look up every IRI in `source_iris`
+and independently verify it says what `source_evidence` claims — prose that
+*names* a concept without citing its IRI leaves that claim just as
+unverifiable as citing nothing at all. Found for real: told that an empty
+list was acceptable "for a rule/action grounded in standard practice ... say
+so in rationale instead," roughly a quarter of one domain's elements ended up
+with zero or incomplete `source_iris` despite their own rationale explicitly
+naming specific classes with real, citable IRIs sitting right there in the
+input IR. This applies to whatever domain is actually in front of you — the
+examples above are illustrative, not a hint about what any real domain
+contains.
+
+`source_iris` being empty is legitimate only when the claim is genuinely not
+tied to any specific named class or property at all — which is rare. Never
+cite a class or property whose IRI you were not actually given in the source
+IR; never cite one whose real definition contradicts what you are claiming
+just because its name is convenient — that is fabrication, not grounding,
+the same failure mode this prompt already warns against elsewhere.
+
+**Every relationship's own mapping entry must cite both its `from` class's
+and `to` class's own IRI; every action's own mapping entry must cite its
+`input` class's own IRI** — even when your `source_evidence`/`rationale`
+prose only explicitly discusses one side, or discusses the connection in
+general terms (the predicate's own meaning, a standard-practice pairing)
+without re-describing each endpoint. The relationship's existence as
+"X relates to Y" inherently rests on what X and Y each are; a reader
+checking that specific mapping entry must be able to verify both endpoints
+from it alone, not have to separately go find and trust the endpoint
+class's own, different mapping entry elsewhere in the file. Found for real,
+repeatedly: a relationship's mapping citing only the predicate plus one
+endpoint (or an action's mapping citing nothing about its own input class)
+while the other endpoint's real, citable class was sitting right there,
+unmentioned. This is checked automatically and will fail the translation —
+not by scanning your prose for names, but by directly checking, for every
+relationship and action, whether its own mapping's `source_iris` includes
+at least one IRI already established (in that same class's own
+`classes.<Name>` mapping) for its `from`/`to`/`input` class — so there is no
+phrasing that avoids the check.
 
 `target_path` addressing, exactly:
 
