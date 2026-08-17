@@ -37,11 +37,11 @@ classes already exist in the domain. Decide exactly one of:
   bar as the original compile — do not invent an enumerated `allowed` list
   with no real backing, same failure mode already fixed once this session).
   If the element is a real component, output, or input of an existing
-  class (e.g. a piece of equipment that is physically part of another, or
-  feeds/serves another), also add the relationship(s) that connect it into
-  the domain — do not add an unconnected class when the source material
-  supports a real connection; a class with no connections should raise your
-  own doubt about whether reinstating it is actually right. Every new
+  class (e.g. one record is a structural part of another, or one process
+  step feeds into another), also add the relationship(s) that connect it
+  into the domain — do not add an unconnected class when the source
+  material supports a real connection; a class with no connections should
+  raise your own doubt about whether reinstating it is actually right. Every new
   relationship's `from`/`to` must be either a class already in the domain,
   or the `class_name` you are adding in this same response — never a class
   that doesn't exist anywhere.
@@ -59,23 +59,24 @@ blurb reused everywhere. A class's own definition justifies that the class
 exists and what it means; it does **not** by itself justify that the class
 has a specific property, or that it connects to another specific class in a
 specific way — those are each their own claim needing their own grounding
-(a specific standard-practice statement, e.g. "off/on/alarm status
-monitoring is standard practice for HVAC equipment, as already modeled for
-Fan and Chiller in this domain" — not just "Compressor is a real HVAC
-component"). Found for real: an earlier version of this prompt let one
-evidence block cover a whole reinstated item, and judges correctly rejected
-every property and relationship that block was stretched to cover, because
-the class's bare definition text said nothing about a status property or a
-specific equipment pairing. So, separately for the class, for **each**
-property, and for **each** new relationship, provide `source_evidence` (a
-short quoted snippet, or an explicit standard-practice statement tied to
-*that specific* property/relationship, not a restatement of the class's own
-definition), `confidence` (`high`/`medium`/`low`), `rationale` (one
-sentence). Do not invent evidence that isn't either a direct quote from what
-you were given or a standard-practice claim tied to the specific named
-concept — the same bar as the original compiler prompt, not a lower one just
-because this is a reinstatement pass. This applies to whatever domain is
-actually in front of you, not any one domain's expected content.
+(a specific standard-practice statement, e.g. "a status property is standard
+practice for this kind of record, as already modeled for Invoice and
+PurchaseOrder in this domain" — not just "LineItem is a real record type").
+Found for real: an earlier version of this prompt let one evidence block
+cover a whole reinstated item, and judges correctly rejected every property
+and relationship that block was stretched to cover, because the class's bare
+definition text said nothing about a status property or a specific
+composition pairing. So, separately for the class, for **each** property,
+and for **each** new relationship, provide `source_evidence` (a short quoted
+snippet, or an explicit standard-practice statement tied to *that specific*
+property/relationship, not a restatement of the class's own definition),
+`confidence` (`high`/`medium`/`low`), `rationale` (one sentence). Do not
+invent evidence that isn't either a direct quote from what you were given or
+a standard-practice claim tied to the specific named concept — the same bar
+as the original compiler prompt, not a lower one just because this is a
+reinstatement pass. This applies to whatever domain is actually in front of
+you — the examples above are illustrative, not a hint about what any real
+domain contains.
 
 ## Output contract
 
@@ -85,45 +86,45 @@ Respond with **exactly one JSON object**, no prose, no markdown fences:
 {
   "reinstatements": [
     {
-      "source_iri": "https://example.org/onto#Compressor",
+      "source_iri": "https://example.org/onto#LineItem",
       "action": "reinstate",
-      "class_name": "Compressor",
+      "class_name": "LineItem",
       "class_content": {
-        "meaning": "A device for mechanically increasing the pressure of a refrigerant gas.",
+        "meaning": "A single priced entry within a larger record, identifying a quantity of some item and its cost.",
         "aliases": [],
         "properties": {
-          "status": {"type": "text", "allowed": ["off", "on", "alarm"]}
+          "status": {"type": "text", "allowed": ["pending", "approved", "disputed"]}
         }
       },
       "class_evidence": {
-        "source_evidence": "\"device for mechanically increasing the pressure of a gas\"",
+        "source_evidence": "\"a single priced entry identifying a quantity and cost\"",
         "confidence": "high",
         "rationale": "Directly quoted from the source definition."
       },
       "property_evidence": {
         "status": {
-          "source_evidence": "off/on/alarm status monitoring is standard practice for HVAC mechanical equipment, already modeled the same way for Fan and Chiller in this domain.",
+          "source_evidence": "pending/approved/disputed status tracking is standard practice for this kind of record, already modeled the same way for Invoice and PurchaseOrder in this domain.",
           "confidence": "medium",
-          "rationale": "Same standard-practice basis already accepted for comparable equipment in this domain."
+          "rationale": "Same standard-practice basis already accepted for comparable records in this domain."
         }
       },
       "new_relationships": [
         {
           "name": "hasPart",
-          "from": "CondensingUnit",
-          "to": "Compressor",
-          "meaning": "A condensing unit is composed in part of a compressor.",
+          "from": "Invoice",
+          "to": "LineItem",
+          "meaning": "An invoice is composed in part of its line items.",
           "aliases": [],
-          "source_evidence": "\"comprises a condenser coil, compressor, fan\" (Condensing Unit's own source definition).",
+          "source_evidence": "\"an invoice consists of one or more line items\" (Invoice's own source definition).",
           "confidence": "high",
-          "rationale": "The Condensing Unit source definition directly names the compressor as one of its components."
+          "rationale": "The Invoice source definition directly names line items as one of its components."
         }
       ]
     },
     {
-      "source_iri": "https://example.org/onto#Wing",
+      "source_iri": "https://example.org/onto#RegionCode",
       "action": "reground",
-      "new_note": "Optional intra-floor subdivision with no distinct control role in this domain's spatial containment model (Building/Floor/Space/Zone already covers every level control decisions are made at).",
+      "new_note": "A bare enumeration code with no distinct operational role in this domain's model -- the concrete records it would tag (Invoice, PurchaseOrder) already carry their own location fields, so it adds a lookup layer without a corresponding decision this domain needs to make.",
       "rationale": "..."
     }
   ]

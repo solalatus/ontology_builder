@@ -236,19 +236,22 @@ the standard-practice grounding), `confidence` (`high`/`medium`/`low`), and
 `source_iris` must include the IRI of **every** specific class or property
 your `source_evidence`/`rationale` names, quotes, or paraphrases — even when
 the grounding is standard-practice rather than a literal quote. "A status
-property is standard practice for HVAC equipment, already modeled the same
-way for Boiler and Chiller" must cite Boiler's and Chiller's IRIs, not just
-describe them in prose; "an AHU has a filter because its own definition
-lists filtration among its functions" must cite the AHU's IRI, not just the
-`hasPart` relation's. A reader (human or another tool) must be able to look
-up every IRI in `source_iris` and independently verify it says what
-`source_evidence` claims — prose that *names* a concept without citing its
-IRI leaves that claim just as unverifiable as citing nothing at all. Found
-for real: told that an empty list was acceptable "for a rule/action grounded
-in standard practice ... say so in rationale instead," roughly a quarter of
-one domain's elements ended up with zero or incomplete `source_iris` despite
-their own rationale explicitly naming specific classes with real, citable
-IRIs sitting right there in the input IR.
+property is standard practice for this kind of record, already modeled the
+same way for Invoice and PurchaseOrder" must cite Invoice's and
+PurchaseOrder's IRIs, not just describe them in prose; "a LineItem belongs to
+an Invoice because Invoice's own definition lists its line items among its
+parts" must cite Invoice's IRI, not just the `hasPart` relation's. A reader
+(human or another tool) must be able to look up every IRI in `source_iris`
+and independently verify it says what `source_evidence` claims — prose that
+*names* a concept without citing its IRI leaves that claim just as
+unverifiable as citing nothing at all. Found for real: told that an empty
+list was acceptable "for a rule/action grounded in standard practice ... say
+so in rationale instead," roughly a quarter of one domain's elements ended up
+with zero or incomplete `source_iris` despite their own rationale explicitly
+naming specific classes with real, citable IRIs sitting right there in the
+input IR. This applies to whatever domain is actually in front of you — the
+examples above are illustrative, not a hint about what any real domain
+contains.
 
 `source_iris` being empty is legitimate only when the claim is genuinely not
 tied to any specific named class or property at all — which is rare. Never
