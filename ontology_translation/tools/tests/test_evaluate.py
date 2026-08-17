@@ -848,6 +848,26 @@ class RoundTripSampleTests(unittest.TestCase):
         self.assertAlmostEqual(result["average_score"], 0.8)
 
 
+class SummarizeDomainForCqGenerationTests(unittest.TestCase):
+    def test_reflects_domain_content_not_source_ir(self):
+        # Regression: generate_cqs() used to summarize source_ir instead --
+        # the full scoped source ontology, virtually always broader than
+        # what any one compiled domain deliberately models. It generated
+        # plausible questions about real source concepts the domain had
+        # already correctly, deliberately excluded, and judge_cq_support
+        # then reported them unsupported -- a misleadingly low score
+        # reflecting scope mismatch, not an actual compile gap. The
+        # summary must be built from domain_data (what was actually kept),
+        # never from source_ir (everything that was in scope to consider).
+        summary = evaluate_mod._summarize_domain_for_cq_generation(DOMAIN_DATA)
+        class_names = {c["name"] for c in summary["classes"]}
+        self.assertEqual(class_names, {"Fan", "Zone"})
+        self.assertNotIn("Irrelevant", class_names)  # only in SOURCE_IR, correctly excluded from DOMAIN_DATA
+        self.assertEqual(summary["relationships"][0]["name"], "serves")
+        self.assertIn("canRunFan", summary["rules"])
+        self.assertIn("startFan", summary["actions"])
+
+
 class CqSupportTests(unittest.TestCase):
     def test_generate_then_judge(self):
         def responder(i, kw):
@@ -859,7 +879,7 @@ class CqSupportTests(unittest.TestCase):
         client = FakeClient()
         with tempfile.TemporaryDirectory() as tmp:
             logger = evaluate_mod.RunLogger(Path(tmp) / "log.jsonl")
-            cqs, gen_cost = evaluate_mod.generate_cqs(client, "gpt-5.4", SOURCE_IR, logger, n=2)
+            cqs, gen_cost = evaluate_mod.generate_cqs(client, "gpt-5.4", DOMAIN_DATA, logger, n=2)
             result = evaluate_mod.judge_cq_support(client, "gpt-5.4", "classes: {}\n", cqs, logger)
             logger.close()
 
@@ -933,7 +953,7 @@ class RunEvaluationLiveMockedTests(unittest.TestCase):
                 return json.dumps({"score": 0.9, "rationale": "close"})
             if "real-world concept" in content:
                 return json.dumps({"reconstruction": "a device that moves air"})
-            if "generate source-grounded competency" in content:
+            if "not the broader source material it was compiled from" in content:
                 return json.dumps({"questions": ["Which fan serves which zone?"]})
             if "judge" in content.lower() and "orientation" in content:
                 return json.dumps({"supported": True, "rationale": "covered"})
@@ -995,7 +1015,7 @@ class RunEvaluationLiveMockedTests(unittest.TestCase):
                 return json.dumps({"score": 0.9, "rationale": "close"})
             if "real-world concept" in content:
                 return json.dumps({"reconstruction": "a device that moves air"})
-            if "generate source-grounded competency" in content:
+            if "not the broader source material it was compiled from" in content:
                 return json.dumps({"questions": ["Which fan serves which zone?"]})
             if "judge" in content.lower() and "orientation" in content:
                 return json.dumps({"supported": True, "rationale": "covered"})

@@ -821,9 +821,14 @@ def round_trip_sample(client, deployment: str, domain_data: dict, translation: d
 # Layer 7: competency-question support (report-only).
 # ---------------------------------------------------------------------------
 
-CQ_GENERATION_PROMPT = """Given this source ontology material, generate source-grounded competency
-questions -- real operational questions a domain agent should be able to orient around, never
-"what classes exist?" style questions. Respond with exactly one JSON object:
+CQ_GENERATION_PROMPT = """Given this Agent Ontology's actual modeled content -- its classes, relationships,
+rules and actions, not the broader source material it was compiled from -- generate competency questions
+answerable USING what is actually here: real operational questions a domain agent should be able to orient
+around, never "what classes exist?" style questions, and never questions that reach for a concept, class, or
+relationship this content does not include. A source ontology is almost always broader than any one compiled
+domain deliberately scoped from it -- a good competency question tests whether the domain that was actually
+built hangs together, not whether it happens to cover everything the wider source ontology could have
+supported. Respond with exactly one JSON object:
 {"questions": ["...", "..."]}"""
 
 CQ_SUPPORT_PROMPT = """Given a competency question and an Agent Ontology (.domain.yaml content), judge
@@ -832,15 +837,36 @@ to reason toward an answer. This is not asking whether the ontology contains the
 Respond with exactly one JSON object: {"supported": true|false, "rationale": "one sentence"}"""
 
 
-def _summarize_source_ir(source_ir: dict) -> dict:
+def _summarize_domain_for_cq_generation(domain_data: dict) -> dict:
+    """What the domain actually contains, not the broader source material it
+    was compiled from. Found for real: generate_cqs() used to summarize the
+    *source_ir* instead -- the full scoped source ontology, virtually always
+    broader than what any one compiled domain deliberately models (that's
+    the entire point of scope selection and the compiler's own inclusion/
+    exclusion decisions). It generated plausible-sounding questions about
+    real source concepts the domain had already correctly, deliberately
+    excluded (confirmed by disposition_judging finding those exclusions
+    justified), then judge_cq_support correctly reported them unsupported --
+    a misleadingly low score reflecting a mismatch between what was asked
+    and what the domain was ever scoped to cover, not an actual gap in the
+    compile. Grounding generation in the domain's own content instead means
+    every generated question is at least asking about something the domain
+    was scoped to model."""
     return {
-        "classes": [{"label": c["labels"][0], "definitions": c.get("definitions", [])} for c in source_ir.get("classes", [])],
-        "object_properties": [{"label": p["labels"][0]} for p in source_ir.get("object_properties", [])],
+        "classes": [
+            {"name": name, "meaning": c.get("meaning")} for name, c in (domain_data.get("classes") or {}).items() if isinstance(c, dict)
+        ],
+        "relationships": [
+            {"name": r.get("name"), "from": r.get("from"), "to": r.get("to"), "meaning": r.get("meaning")}
+            for r in (domain_data.get("relationships") or []) if isinstance(r, dict)
+        ],
+        "rules": list((domain_data.get("rules") or {}).keys()),
+        "actions": list((domain_data.get("actions") or {}).keys()),
     }
 
 
-def generate_cqs(client, deployment: str, source_ir: dict, logger: RunLogger, n: int = 10) -> tuple[list[str], float]:
-    user_prompt = json.dumps({"requested_count": n, "source_material": _summarize_source_ir(source_ir)})
+def generate_cqs(client, deployment: str, domain_data: dict, logger: RunLogger, n: int = 10) -> tuple[list[str], float]:
+    user_prompt = json.dumps({"requested_count": n, "domain_content": _summarize_domain_for_cq_generation(domain_data)})
     parsed, usage = chat_json_call(client, deployment, CQ_GENERATION_PROMPT, user_prompt, logger, "cq-generate")
     return parsed.get("questions", []), _call_cost(usage)
 
@@ -982,7 +1008,7 @@ def run_evaluation(
         est_judge_cost = n_mappings * judges * estimate_cost(approx_tokens(JUDGE_SYSTEM_PROMPT) + 300, 60)
         est_disposition_cost = n_judgeable_dispositions * judges * estimate_cost(approx_tokens(DISPOSITION_JUDGE_SYSTEM_PROMPT) + 300, 60)
         est_roundtrip_cost = round_trip_sample_size * (estimate_cost(400, 150) + estimate_cost(300, 80))
-        est_cq_cost = estimate_cost(approx_tokens(json.dumps(_summarize_source_ir(source_ir))) + 200, 800) + cq_count * estimate_cost(
+        est_cq_cost = estimate_cost(approx_tokens(json.dumps(_summarize_domain_for_cq_generation(domain_data))) + 200, 800) + cq_count * estimate_cost(
             approx_tokens(domain_yaml_path.read_text(encoding="utf-8")) + 200, 100
         )
         est_total = est_judge_cost + est_disposition_cost + est_roundtrip_cost + est_cq_cost
@@ -1023,7 +1049,7 @@ def run_evaluation(
         report["round_trip"] = round_trip_sample(
             client, azure_config["deployment"], domain_data, translation, logger, sample_size=round_trip_sample_size
         )
-        cqs, cq_gen_cost = generate_cqs(client, azure_config["deployment"], source_ir, logger, n=cq_count)
+        cqs, cq_gen_cost = generate_cqs(client, azure_config["deployment"], domain_data, logger, n=cq_count)
         report["cq_support"] = judge_cq_support(client, azure_config["deployment"], domain_yaml_path.read_text(encoding="utf-8"), cqs, logger)
         report["cq_support"]["generation_cost_usd"] = round(cq_gen_cost, 4)
     finally:
