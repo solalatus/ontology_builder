@@ -23,7 +23,8 @@
     {
       "target_path": "classes.AirPlenum",
       "source_iris": [
-        "https://brickschema.org/schema/Brick#Air_Plenum"
+        "https://brickschema.org/schema/Brick#Air_Plenum",
+        "https://brickschema.org/schema/Brick#AHU"
       ],
       "source_evidence": "\"A component of the HVAC the receives air from the air handling unit or room to distribute or exhaust to or from the building\"",
       "confidence": "high",
@@ -32,7 +33,8 @@
     {
       "target_path": "classes.AirPlenum.properties.airflowState",
       "source_iris": [
-        "https://brickschema.org/schema/Brick#Air_Plenum"
+        "https://brickschema.org/schema/Brick#Air_Plenum",
+        "https://brickschema.org/schema/Brick#AHU"
       ],
       "source_evidence": "Air plenum definition mentions distribute or exhaust and receiving air from AHU or room.",
       "confidence": "medium",
@@ -365,7 +367,8 @@
     {
       "target_path": "classes.Fan.properties.status",
       "source_iris": [
-        "https://w3id.org/rec#status"
+        "https://w3id.org/rec#status",
+        "https://brickschema.org/schema/Brick#Fan"
       ],
       "source_evidence": "Datatype property label \"status\" and standard practice for monitoring fan operating state.",
       "confidence": "medium",
@@ -571,7 +574,9 @@
     {
       "target_path": "relationships[0]",
       "source_iris": [
-        "https://brickschema.org/schema/Brick#hasPart"
+        "https://brickschema.org/schema/Brick#hasPart",
+        "https://brickschema.org/schema/Brick#AHU",
+        "https://brickschema.org/schema/Brick#Fan"
       ],
       "source_evidence": "Brick hasPart: \"The subject is composed in part of the entity given by the object\"; AHU definition says it is an assembly containing a fan or fans.",
       "confidence": "high",
@@ -580,7 +585,8 @@
     {
       "target_path": "relationships[1]",
       "source_iris": [
-        "https://brickschema.org/schema/Brick#AHU"
+        "https://brickschema.org/schema/Brick#AHU",
+        "https://brickschema.org/schema/Brick#Filter"
       ],
       "source_evidence": "\"AHU\" is an assembly containing \"other necessary equipment\" to perform functions including \"filtration,\" which specifically supports a filter being part of an air handling unit.",
       "confidence": "high",
@@ -590,7 +596,8 @@
       "target_path": "relationships[2]",
       "source_iris": [
         "https://brickschema.org/schema/Brick#AHU",
-        "https://brickschema.org/schema/Brick#Damper"
+        "https://brickschema.org/schema/Brick#Damper",
+        "https://brickschema.org/schema/Brick#hasPart"
       ],
       "source_evidence": "\"AHU\" is \"usually connected to an air-distribution system,\" and a \"Damper\" is an element of an air-distribution system that changes airflow rate or shuts off airflow, so a damper is a supported part of an AHU assembly.",
       "confidence": "high",
@@ -600,7 +607,8 @@
       "target_path": "relationships[3]",
       "source_iris": [
         "https://brickschema.org/schema/Brick#hasPart",
-        "https://brickschema.org/schema/Brick#Cooling_Valve"
+        "https://brickschema.org/schema/Brick#Cooling_Valve",
+        "https://brickschema.org/schema/Brick#AHU"
       ],
       "source_evidence": "Cooling valve definition describes modulating cold water through a cooling coil; standard HVAC practice places such valves in AHU coil assemblies.",
       "confidence": "medium",
@@ -610,7 +618,8 @@
       "target_path": "relationships[4]",
       "source_iris": [
         "https://brickschema.org/schema/Brick#hasPart",
-        "https://brickschema.org/schema/Brick#Heating_Valve"
+        "https://brickschema.org/schema/Brick#Heating_Valve",
+        "https://brickschema.org/schema/Brick#AHU"
       ],
       "source_evidence": "Heating valve definition describes modulating hot water through a heating coil; standard HVAC practice places such valves in AHU coil assemblies.",
       "confidence": "medium",
@@ -620,7 +629,8 @@
       "target_path": "relationships[5]",
       "source_iris": [
         "https://brickschema.org/schema/Brick#hasPart",
-        "https://brickschema.org/schema/Brick#Economizer"
+        "https://brickschema.org/schema/Brick#Economizer",
+        "https://brickschema.org/schema/Brick#AHU"
       ],
       "source_evidence": "Economizer definition describes a device/control system reducing mechanical heating and cooling requirements; standard HVAC practice includes economizer sections in AHUs.",
       "confidence": "medium",
@@ -629,7 +639,9 @@
     {
       "target_path": "relationships[6]",
       "source_iris": [
-        "https://brickschema.org/schema/Brick#hasPoint"
+        "https://brickschema.org/schema/Brick#hasPoint",
+        "https://brickschema.org/schema/Brick#AHU",
+        "https://brickschema.org/schema/Brick#Air_Temperature_Sensor"
       ],
       "source_evidence": "Brick hasPoint: \"The subject has a source of telemetry identified by the object\"; standard practice for AHUs includes air temperature sensing points.",
       "confidence": "high",
@@ -638,7 +650,8 @@
     {
       "target_path": "relationships[7]",
       "source_iris": [
-        "https://brickschema.org/schema/Brick#hasPoint"
+        "https://brickschema.org/schema/Brick#hasPoint",
+        "https://brickschema.org/schema/Brick#AHU"
       ],
       "source_evidence": "Brick hasPoint definition; standard HVAC practice for air handlers uses CO2 sensing in ventilation-related control contexts.",
       "confidence": "medium",
@@ -647,7 +660,9 @@
     {
       "target_path": "relationships[8]",
       "source_iris": [
-        "https://brickschema.org/schema/Brick#hasPoint"
+        "https://brickschema.org/schema/Brick#hasPoint",
+        "https://brickschema.org/schema/Brick#AHU",
+        "https://brickschema.org/schema/Brick#Air_Temperature_Setpoint"
       ],
       "source_evidence": "Brick hasPoint definition; standard HVAC control practice associates air temperature setpoints with AHU control.",
       "confidence": "high",
@@ -656,7 +671,9 @@
     {
       "target_path": "relationships[9]",
       "source_iris": [
-        "https://brickschema.org/schema/Brick#hasPoint"
+        "https://brickschema.org/schema/Brick#hasPoint",
+        "https://brickschema.org/schema/Brick#AHU",
+        "https://brickschema.org/schema/Brick#Cooling_Temperature_Setpoint"
       ],
       "source_evidence": "Brick hasPoint definition; standard HVAC control practice associates cooling setpoints with AHU control.",
       "confidence": "high",
@@ -676,7 +693,9 @@
     {
       "target_path": "relationships[11]",
       "source_iris": [
-        "https://brickschema.org/schema/Brick#hasPoint"
+        "https://brickschema.org/schema/Brick#hasPoint",
+        "https://brickschema.org/schema/Brick#AHU",
+        "https://brickschema.org/schema/Brick#Temperature_Deadband_Setpoint"
       ],
       "source_evidence": "Brick hasPoint definition; standard HVAC control practice uses deadband setpoints in AHU control sequences.",
       "confidence": "medium",
@@ -784,7 +803,8 @@
       "target_path": "relationships[22]",
       "source_iris": [
         "https://brickschema.org/schema/Brick#Building",
-        "https://brickschema.org/schema/Brick#Floor"
+        "https://brickschema.org/schema/Brick#Floor",
+        "https://brickschema.org/schema/Brick#hasPart"
       ],
       "source_evidence": "A \"Building\" has a \"characteristic spatial structure,\" and a \"Floor\" is \"A level, typically representing a horizontal aggregation of spaces,\" so floors are natural constituent parts of a building.",
       "confidence": "high",
@@ -793,7 +813,10 @@
     {
       "target_path": "relationships[23]",
       "source_iris": [
-        "https://brickschema.org/schema/Brick#Floor"
+        "https://brickschema.org/schema/Brick#Floor",
+        "https://brickschema.org/schema/Brick#hasPart",
+        "https://brickschema.org/schema/Brick#Space",
+        "https://w3id.org/rec#Space"
       ],
       "source_evidence": "A \"Floor\" is \"A level, typically representing a horizontal aggregation of spaces,\" which directly supports spaces as parts of a floor.",
       "confidence": "high",
@@ -813,7 +836,8 @@
       "target_path": "relationships[25]",
       "source_iris": [
         "https://brickschema.org/schema/Brick#AHU",
-        "https://brickschema.org/schema/Brick#Air_Plenum"
+        "https://brickschema.org/schema/Brick#Air_Plenum",
+        "https://brickschema.org/schema/Brick#feeds"
       ],
       "source_evidence": "An \"AHU\" performs air-side functions and is connected to an air-distribution system, while an \"Air Plenum\" is \"a component of the HVAC\" that \"receives air from the air handling unit ... to distribute or exhaust,\" directly supporting that the AHU feeds the air plenum.",
       "confidence": "high",
@@ -822,7 +846,9 @@
     {
       "target_path": "relationships[26]",
       "source_iris": [
-        "https://brickschema.org/schema/Brick#feeds"
+        "https://brickschema.org/schema/Brick#feeds",
+        "https://brickschema.org/schema/Brick#AHU",
+        "https://brickschema.org/schema/Brick#Terminal_Unit"
       ],
       "source_evidence": "Brick feeds definition; standard HVAC practice has AHUs upstream of terminal units in air-distribution processes.",
       "confidence": "high",
@@ -852,7 +878,8 @@
       "target_path": "relationships[29]",
       "source_iris": [
         "https://brickschema.org/schema/Brick#feeds",
-        "https://brickschema.org/schema/Brick#Packaged_Heat_Pump"
+        "https://brickschema.org/schema/Brick#Packaged_Heat_Pump",
+        "https://brickschema.org/schema/Brick#Terminal_Unit"
       ],
       "source_evidence": "\"Packaged Heat Pump\" \u2014 \"A self-contained unit designed to transfer heat energy to or from a designated space, capable of offering both heating and cooling functions\"; such equipment can be upstream of downstream distribution or terminal equipment, making a feeds relationship to a Terminal Unit a defensible HVAC topology assertion.",
       "confidence": "low",
@@ -983,7 +1010,8 @@
     {
       "target_path": "actions.maintainWithinDeadband",
       "source_iris": [
-        "https://brickschema.org/schema/Brick#Temperature_Deadband_Setpoint"
+        "https://brickschema.org/schema/Brick#Temperature_Deadband_Setpoint",
+        "https://brickschema.org/schema/Brick#AHU"
       ],
       "source_evidence": "The source defines \"Temperature Deadband Setpoint\" as one that \"Sets the size of a deadband of temperature,\" and the AHU definition includes heating and cooling among its functions.",
       "confidence": "medium",
@@ -1042,7 +1070,8 @@
     {
       "target_path": "relationships[32]",
       "source_iris": [
-        "https://brickschema.org/schema/Brick#Condensing_Unit"
+        "https://brickschema.org/schema/Brick#Condensing_Unit",
+        "https://brickschema.org/schema/Brick#Fan"
       ],
       "source_evidence": "\"It comprises a condenser coil, compressor, fan, and potentially a reversing valve\"",
       "confidence": "high",

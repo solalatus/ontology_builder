@@ -6,6 +6,116 @@ item, verbatim source/result pairs, all rounds) is in
 `manual-spot-check.json`, keyed by `rounds`; this file is the readable
 summary, newest round first.
 
+## Round 5 (2026-08-17)
+
+10%-stratified sample (13 of 127 artefacts, seed 823; two items overlap
+prior rounds by chance, `classes.HeatingValve` and `relationships[23]`,
+both re-checked fresh). **Result: 10/13 accepted clean, 3/13 flagged.**
+
+- **`relationships[11]`** (AHU hasPoint TemperatureDeadbandSetpoint):
+  `source_iris` cited only `hasPoint`. The rationale explicitly discusses
+  "the AHU-to-TemperatureDeadbandSetpoint pairing" — neither endpoint's
+  real, citable class was cited.
+- **`relationships[13]`** (Thermostat hasPoint TemperatureSetpoint): cited
+  `hasPoint` + `Thermostat`, but the rationale said *"A TemperatureSetpoint
+  is therefore a standard point..."* — `Temperature_Setpoint` (a real,
+  distinct Brick class) was never cited.
+- **`relationships[23]`** (Floor hasPart Space): cited only `Floor`.
+  Neither `hasPart` nor `Space` was cited.
+
+`relationships[13]` had already gone through a round-4 reground once — for
+a *different* gap (it was missing `Thermostat`'s citation). Diffing the
+before/after showed the round-4 fix's own rewritten prose introduced a
+fresh, previously-vaguer mention of `TemperatureSetpoint` that became
+citation-worthy — and nothing rescanned that fix's own output afterward.
+That, combined with `relationships[11]`'s target endpoint
+(`TemperatureDeadbandSetpoint`) never having a space in the evidence text
+(`"AHU-to-TemperatureDeadbandSetpoint"`, the domain's own compiled
+PascalCase name, not Brick's spaced label `"Temperature Deadband
+Setpoint"`), pointed to a **third distinct scan-methodology gap** beyond
+round 4's case-sensitivity and short-label-filter fixes: the scan never
+matched evidence text that names a concept via the domain's own compiled
+class name rather than the source ontology's spaced label.
+
+Reviewer directed escalation (*"yes, escalate and fix the normalization
+gap for all 3"*). Rather than patch only these 3, re-scanned all 127
+mappings with a corrected matcher (word-boundary case-insensitive, plus a
+second check for a label's no-space form as an exact contiguous alphabetic
+token in the text — catching compiled-name mentions without the
+substring-collision false positives a naive no-space substring search
+would produce, e.g. `"Wing"` inside `"flowing"`). Filtered the raw hits
+with an expanded stoplist (`area`, `regulates`, `capacity`, `includes`
+joined the round-4 stoplist — all real Brick/REC labels that double as
+generic English words) and a synonym-cluster check (citing one member of a
+real synonym pair/triple — e.g. `AHU`/`Air_Handler_Unit`/
+`Air_Handling_Unit`, or Brick's/REC's `area` — already covers a mention of
+another member, not a fresh gap). Every remaining candidate was manually
+checked against `reference.domain.yaml`'s actual relationship endpoints to
+separate genuine uncited endpoints from incidental mentions inside an
+already-cited class's own quoted definition (e.g. `"fan"` appearing only
+because it's part of `AirHandlingUnit`'s own quoted definition, not
+because a given mapping is actually about `Fan`) or self-critical caveat
+text (a rationale explicitly disclaiming that a claim *isn't* well-grounded
+is not itself a citation gap).
+
+**Result: 21 genuine items**, dominated by `AirHandlingUnit`-family
+relationships (`hasPart`/`hasPoint`/`feeds`) whose `from` or `to` endpoint
+was named in evidence prose but never cited in that same mapping's
+`source_iris`, plus a handful of predicate citations (`hasPart`, `feeds`)
+described in prose but never formally cited. `relationships[29]` is now a
+**third-round finding on the same target_path** — flagged in round 3's raw
+scan, never made that round's final 42-item fix, still uncited after round
+4's fix pass (which touched a different citation gap on a different item)
+— a reminder that "no longer flagged in the last audit" isn't the same
+guarantee as "genuinely fixed" until a rescan with the corrected matcher
+actually re-clears it.
+
+**A root-cause fix, not just another data patch:** confirmed the same
+replace-not-merge regression from round 4 had *also* independently hit
+round 3's own fix for `relationships[23]` — its `hasPart` citation was
+silently dropped by that repair batch, and `Space` (which round 3's own
+raw scan had correctly flagged as also missing) was never even included in
+that batch's `source_context` in the first place. Given this is now the
+**second time** this exact failure mode has surfaced across two different
+repair batches, fixed it in `repair.py` itself rather than relying on
+batch-construction discipline again: `apply_repairs()` now unions old and
+new `source_iris` for `reground` decisions instead of replacing wholesale
+— reground is documented as "content is already fine, just
+under-evidenced," so it never has a legitimate reason to drop a
+previously-valid citation. New regression test:
+`tests/test_repair.py::test_reground_merges_source_iris_instead_of_replacing`.
+
+The 21-item fix itself was applied directly (pure Python `source_iris`
+addition, no LLM repair call needed) — unlike rounds 3-4, the
+evidence/rationale prose in every one of these 21 already correctly named
+the concept; only the citation itself was missing.
+
+**Verification**: structural validation 0 errors, 0/127 mappings with
+empty `source_iris`. Independent re-judge of all 21 changed elements:
+**0 unsupported**, 1 contested (`classes.AirPlenum.properties.airflowState`
+— 2 judges `supported`, 1 `partially_supported` on whether the plenum's
+definition specifically supports an `airflowState` property vs. just a
+general functional role; the same disclosed, non-blocking borderline
+category already accepted elsewhere in this domain), cost $0.1821.
+
+The other 10 of 13 sampled items this round: accepted with no flag —
+`classes.HeatingValve`, `classes.DryCooler`, `classes.TerminalUnit`,
+`classes.CoolingTemperatureSetpoint`, `classes.CO2Sensor.properties.value`,
+`classes.CoolingTower.properties.status`,
+`classes.CoolingValve.properties.position`,
+`classes.HeatingTemperatureSetpoint.properties.value`,
+`rules.investigateAirQuality`, `actions.increaseHeating` — every named
+source class in each mapping's evidence was already present in its
+`source_iris`.
+
+**Full account: `provenance-audit.md`** (third follow-up section).
+
+### Cost
+
+Round-5 sample review + comprehensive rescan: no LLM calls (manual +
+deterministic scan only). 21-item fix: no LLM call (direct correction).
+Independent re-judge of all 21 changed elements: $0.1821.
+
 ## Round 4 (2026-08-17)
 
 10%-stratified sample (13 of 127 artefacts, seed 512, all fresh from

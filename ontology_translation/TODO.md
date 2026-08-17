@@ -1246,3 +1246,65 @@ reference and record deltas/decisions here instead.)*
   scan + manual read-through only).
 
   **#106 still open** — still the user's call.
+
+- 2026-08-17 (continued) — **Fifth manual spot-check round, and a
+  root-cause code fix in `repair.py`.** 10%-stratified sample (13 of 127,
+  seed 823), 10/13 clean, 3 flagged (`relationships[11]`,
+  `relationships[13]`, `relationships[23]`) — the same uncited-paraphrase
+  defect rounds 3-4 were meant to have eliminated. `relationships[13]` had
+  even been "fixed" once already in round 4, for a different gap on the
+  same mapping — that fix's own rewritten prose introduced a fresh
+  uncited mention nothing rescanned afterward.
+
+  User directed escalation. Root cause: a **third** scan-methodology gap
+  (after round 4's case-sensitivity and short-label-filter fixes) — the
+  scan only matched evidence text using the source ontology's spaced
+  label ("Temperature Deadband Setpoint"), never the domain's own compiled
+  PascalCase name ("TemperatureDeadbandSetpoint") that compiler-generated
+  evidence sometimes uses instead. Fixed with a second matcher: exact
+  whole-token comparison against the label's no-space form (not a raw
+  substring search, which would create real false positives across word
+  boundaries, e.g. "Wing" inside "flowing").
+
+  Full rescan (all 127, not just the sample) with the corrected matcher,
+  an expanded stoplist (`area`, `regulates`, `capacity`, `includes` — real
+  Brick/REC labels that double as generic English words), and a new
+  synonym-cluster check (citing one member of a real synonym set, e.g.
+  AHU/Air_Handler_Unit/Air_Handling_Unit, already covers a mention of
+  another member). **21 genuine items** found, dominated by
+  `AirHandlingUnit`-family relationships whose endpoint was named in
+  evidence prose but never cited. `relationships[29]` turned out to be a
+  **third-round finding on the same path** — flagged in round 3's raw
+  scan, never fixed, still uncited after round 4 touched it for an
+  unrelated reason. Fixed directly (pure Python citation addition, no LLM
+  call needed — the prose was already correct in all 21, only the
+  citation was missing).
+
+  **Real root-cause fix, not another data patch**: investigating
+  `relationships[23]` found the round-4-style replace-not-merge regression
+  had *also* independently hit round 3's own fix for the same mapping —
+  its `hasPart` citation silently dropped, and `Space` (which round 3's
+  own scan had already correctly flagged) never even included in that
+  batch's construction. Second independent occurrence of the same failure
+  mode crossed the line from "be more careful next time" to "fix it in
+  the code." **`repair.py`'s `apply_repairs()` now unions old and new
+  `source_iris` for `reground` decisions instead of replacing wholesale**
+  — reground is documented as strengthening evidence for content that's
+  already correct, so it never has a legitimate reason to drop a
+  previously-valid citation. New regression test:
+  `test_reground_merges_source_iris_instead_of_replacing`.
+
+  Verified: structural clean, 0/127 mappings with empty `source_iris`,
+  independent re-judge of all 21 changed elements — 0 unsupported, 1
+  contested (same disclosed, non-blocking borderline category as before).
+  Full offline suite: 201/201. Cost: $0.1821 (re-judge only; the scan and
+  fix themselves were free).
+
+  Full account: `domains/brick-hvac/provenance-audit.md` (second
+  follow-up section) and `domains/brick-hvac/manual-spot-check.md`/`.json`
+  (round 5).
+
+  Running total for the whole Brick HVAC effort across every phase so
+  far: **~$21.7**.
+
+  **#106 still open** — still the user's call.

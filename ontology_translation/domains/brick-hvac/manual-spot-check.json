@@ -1118,6 +1118,388 @@
           "finding": null
         }
       ]
+    },
+    {
+      "round": 5,
+      "date": "2026-08-17",
+      "reviewer": "repo owner (szablevi@gmail.com), in-session review with the coding agent",
+      "sampling_method": {
+        "description": "Stratified sample by artefact type, proportional allocation, new seed.",
+        "seed": 823,
+        "population_total": 127,
+        "sample_target_fraction": 0.1,
+        "sample_size": 13,
+        "allocation": {
+          "class": 4,
+          "property": 4,
+          "relationship": 3,
+          "rule": 1,
+          "action": 1
+        },
+        "overlap_with_prior_rounds": [
+          "classes.HeatingValve",
+          "relationships[23]"
+        ]
+      },
+      "verdict_summary": {
+        "accept": 10,
+        "flag_escalated_to_normalization_fix": 3,
+        "total": 13
+      },
+      "notes": [
+        "3 of 13 flagged items (relationships[11], relationships[13], relationships[23]) all shared the same defect: an evidence/rationale text naming or paraphrasing a real, citable source class/predicate that wasn't in the mapping's own source_iris -- the same category rounds 3-4 were meant to have eliminated. relationships[13] had actually already been 'fixed' once in round 4 (for a different, unrelated citation gap on the same item) -- its round-4 reground rewrite introduced fresh prose that itself named TemperatureSetpoint without citing it, and nothing rescanned the fix's own output afterward.",
+        "User directed escalation ('yes, escalate and fix the normalization gap for all 3'). Investigation found the round-3/4 scan's label-matching never accounted for evidence text using the domain's own compiled PascalCase class name (e.g. 'TemperatureDeadbandSetpoint') instead of the source ontology's spaced label ('Temperature Deadband Setpoint') -- a third distinct scan-methodology gap, after case-sensitivity (round 4) and short-label filtering (round 4).",
+        "Comprehensive rescan (all 127 mappings, not just the sample) with a corrected matcher: word-boundary case-insensitive matching PLUS a second check for the label's no-space form appearing as an exact contiguous alphabetic token in the evidence text (catching compiled-name mentions without the substring-collision false positives a naive no-space substring search produces, e.g. 'Wing' inside 'flowing'). Raw hits filtered by an expanded stoplist (generic English words that double as real but non-specific Brick/REC labels: area, regulates, capacity, includes, plus the round-4 stoplist) and by a synonym-cluster check (AHU/Air_Handler_Unit/Air_Handling_Unit; Brick/REC area; Brick/REC Occupancy_Sensor/OccupancySensorEquipment; Heat_Exchanger/HX -- citing any one member of a real synonym cluster already covers a mention of another member, not a fresh gap). Every remaining candidate manually read against its actual relationship endpoints (from reference.domain.yaml) to separate genuine uncited endpoints from incidental mentions inside an already-cited class's own quoted definition (e.g. 'Fan' appearing only because it's part of AirHandlingUnit's own quoted definition, not because this specific mapping is about Fan) or self-critical caveat text (a rationale explicitly disclaiming a claim isn't well-grounded is not a citation gap).",
+        "Result: 21 genuine items, dominated by AirHandlingUnit-family relationships (hasPart/hasPoint/feeds) whose 'from' or 'to' endpoint was named in evidence prose but never cited in that same mapping's source_iris, plus a few predicate citations (hasPart, feeds) that were described in prose but never formally cited. relationships[29] is now a third-round finding on the same target_path (flagged in round 3's raw scan, never made the final 42; still uncited after round 4's fix pass touched a different item) -- worth noting as a reminder that 'no longer flagged' isn't the same guarantee as 'genuinely fixed' until a rescan with the corrected matcher actually re-clears it.",
+        "Root-cause fix, not just a data patch: repair.py's apply_repairs() now unions old and new source_iris for reground decisions instead of replacing wholesale (the same defect class found in round 4, now also confirmed to have independently caused relationships[23]'s hasPart citation to be dropped during round 3's own fix, and to partly explain why round 3's own scan-flagged 'Space' endpoint for relationships[23] was silently dropped from that batch's construction and never applied). New regression test: tests/test_repair.py::test_reground_merges_source_iris_instead_of_replacing.",
+        "Fix applied directly (pure Python source_iris addition, no LLM repair call needed -- the evidence/rationale prose already correctly named every concept added; only the citation itself was missing, unlike rounds 3-4's fixes which also needed the prose rewritten)."
+      ],
+      "items": [
+        {
+          "idx": 1,
+          "target_path": "classes.HeatingValve",
+          "artefact_type": "class",
+          "mapping": {
+            "target_path": "classes.HeatingValve",
+            "source_iris": [
+              "https://brickschema.org/schema/Brick#Heating_Valve"
+            ],
+            "source_evidence": "\"A valve that controls air temperature by modulating the amount of hot water flowing through a heating coil\"",
+            "confidence": "high",
+            "rationale": "Direct class mapping from the source definition."
+          },
+          "result": {
+            "meaning": "A valve that controls air temperature by modulating the amount of hot water flowing through a heating coil.",
+            "properties": {
+              "position": {
+                "type": "number",
+                "unit": "percent"
+              }
+            }
+          },
+          "sample_id": "S1",
+          "verdict": "accept",
+          "reviewer_comment": null,
+          "finding": null
+        },
+        {
+          "idx": 2,
+          "target_path": "classes.DryCooler",
+          "artefact_type": "class",
+          "mapping": {
+            "target_path": "classes.DryCooler",
+            "source_iris": [
+              "https://brickschema.org/schema/Brick#Dry_Cooler"
+            ],
+            "source_evidence": "\"A dry cooler is a fluid cooler that uses air, a relatively dry, non-liquid fluid to accomplish process cooling.\"",
+            "confidence": "high",
+            "rationale": "The source definition directly identifies Dry Cooler as a distinct cooling equipment type."
+          },
+          "result": {
+            "meaning": "A fluid cooler that uses air, a relatively dry, non-liquid fluid to accomplish process cooling.",
+            "aliases": [
+              "Dry Cooler"
+            ],
+            "properties": {
+              "status": {
+                "type": "text",
+                "allowed": [
+                  "off",
+                  "on",
+                  "alarm"
+                ]
+              }
+            }
+          },
+          "sample_id": "S2",
+          "verdict": "accept",
+          "reviewer_comment": null,
+          "finding": null
+        },
+        {
+          "idx": 3,
+          "target_path": "classes.TerminalUnit",
+          "artefact_type": "class",
+          "mapping": {
+            "target_path": "classes.TerminalUnit",
+            "source_iris": [
+              "https://brickschema.org/schema/Brick#Terminal_Unit"
+            ],
+            "source_evidence": "\"A device that regulates the volumetric flow rate and/or the temperature of the controlled medium.\"",
+            "confidence": "high",
+            "rationale": "Direct class mapping from the source definition."
+          },
+          "result": {
+            "meaning": "A device that regulates the volumetric flow rate or temperature of the controlled medium for a served area.",
+            "properties": {
+              "status": {
+                "type": "text",
+                "allowed": [
+                  "off",
+                  "on",
+                  "alarm"
+                ]
+              }
+            }
+          },
+          "sample_id": "S3",
+          "verdict": "accept",
+          "reviewer_comment": null,
+          "finding": null
+        },
+        {
+          "idx": 4,
+          "target_path": "classes.CoolingTemperatureSetpoint",
+          "artefact_type": "class",
+          "mapping": {
+            "target_path": "classes.CoolingTemperatureSetpoint",
+            "source_iris": [
+              "https://brickschema.org/schema/Brick#Cooling_Temperature_Setpoint"
+            ],
+            "source_evidence": "\"Sets temperature for cooling\"",
+            "confidence": "high",
+            "rationale": "Direct class mapping from the source definition."
+          },
+          "result": {
+            "meaning": "A setpoint that sets the temperature target for cooling.",
+            "properties": {
+              "value": {
+                "type": "number",
+                "unit": "degC"
+              }
+            }
+          },
+          "sample_id": "S4",
+          "verdict": "accept",
+          "reviewer_comment": null,
+          "finding": null
+        },
+        {
+          "idx": 5,
+          "target_path": "classes.CO2Sensor.properties.value",
+          "artefact_type": "property",
+          "mapping": {
+            "target_path": "classes.CO2Sensor.properties.value",
+            "source_iris": [
+              "https://w3id.org/rec#value",
+              "https://brickschema.org/schema/Brick#CO2_Sensor"
+            ],
+            "source_evidence": "\"CO2 Sensor\" \u2014 \"Measures properties of CO2 in air\" supports a numeric concentration value property, commonly represented in ppm for building CO2 sensing.",
+            "confidence": "medium",
+            "rationale": "Because the class is defined as measuring CO2 in air, a numeric sensor value is grounded, and ppm is the standard-practice unit for indoor CO2 concentration."
+          },
+          "result": {
+            "type": "number",
+            "unit": "ppm"
+          },
+          "sample_id": "S5",
+          "verdict": "accept",
+          "reviewer_comment": null,
+          "finding": null
+        },
+        {
+          "idx": 6,
+          "target_path": "classes.CoolingTower.properties.status",
+          "artefact_type": "property",
+          "mapping": {
+            "target_path": "classes.CoolingTower.properties.status",
+            "source_iris": [
+              "https://brickschema.org/schema/Brick#Cooling_Tower",
+              "https://brickschema.org/schema/Brick#Boiler",
+              "https://brickschema.org/schema/Brick#Chiller"
+            ],
+            "source_evidence": "\"Cooling Tower\" is \"a heat rejection device that rejects waste heat to the atmosphere through the cooling of a water stream to a lower temperature\"; as equipment performing an active heat-rejection function like sibling plant equipment such as a \"Boiler\" and \"Chiller\", it is reasonably given the standard operational status states off/on/alarm.",
+            "confidence": "medium",
+            "rationale": "The source definition establishes Cooling Tower as active plant equipment, and the sibling equipment precedent grounds retaining the same status enumeration."
+          },
+          "result": {
+            "type": "text",
+            "allowed": [
+              "off",
+              "on",
+              "alarm"
+            ]
+          },
+          "sample_id": "S6",
+          "verdict": "accept",
+          "reviewer_comment": null,
+          "finding": null
+        },
+        {
+          "idx": 7,
+          "target_path": "classes.CoolingValve.properties.position",
+          "artefact_type": "property",
+          "mapping": {
+            "target_path": "classes.CoolingValve.properties.position",
+            "source_iris": [
+              "https://brickschema.org/schema/Brick#Cooling_Valve"
+            ],
+            "source_evidence": "\"Cooling Valve\" is defined as \"A valve that controls air temperature by modulating the amount of cold water flowing through a cooling coil,\" which standardly implies a modulating valve position represented as a percentage.",
+            "confidence": "high",
+            "rationale": "The definition explicitly describes modulation, which supports a percent position property for the cooling valve."
+          },
+          "result": {
+            "type": "number",
+            "unit": "percent"
+          },
+          "sample_id": "S7",
+          "verdict": "accept",
+          "reviewer_comment": null,
+          "finding": null
+        },
+        {
+          "idx": 8,
+          "target_path": "classes.HeatingTemperatureSetpoint.properties.value",
+          "artefact_type": "property",
+          "mapping": {
+            "target_path": "classes.HeatingTemperatureSetpoint.properties.value",
+            "source_iris": [
+              "https://w3id.org/rec#value",
+              "https://brickschema.org/schema/Brick#Heating_Temperature_Setpoint"
+            ],
+            "source_evidence": "\"Heating Temperature Setpoint\" \u2014 \"Sets temperature for heating\" supports a numeric heating temperature setpoint value in degrees Celsius.",
+            "confidence": "high",
+            "rationale": "Because the class explicitly defines a temperature setpoint for heating, a numeric temperature value property is directly grounded."
+          },
+          "result": {
+            "type": "number",
+            "unit": "degC"
+          },
+          "sample_id": "S8",
+          "verdict": "accept",
+          "reviewer_comment": null,
+          "finding": null
+        },
+        {
+          "idx": 9,
+          "target_path": "relationships[13]",
+          "artefact_type": "relationship",
+          "mapping": {
+            "target_path": "relationships[13]",
+            "source_iris": [
+              "https://brickschema.org/schema/Brick#hasPoint",
+              "https://brickschema.org/schema/Brick#Thermostat"
+            ],
+            "source_evidence": "\"Thermostat\" \u2014 \"An automatic control device used to maintain temperature at a fixed or adjustable setpoint.\" A TemperatureSetpoint is therefore a standard point associated with thermostat control.",
+            "confidence": "high",
+            "rationale": "Because the thermostat definition explicitly mentions maintaining temperature at a fixed or adjustable setpoint, linking it to a temperature setpoint as a point is directly supported."
+          },
+          "result": {
+            "name": "hasPoint",
+            "from": "Thermostat",
+            "to": "TemperatureSetpoint",
+            "meaning": "A thermostat has a temperature setpoint used to maintain desired conditions.",
+            "aliases": []
+          },
+          "sample_id": "S9",
+          "verdict": "flag_escalated_to_normalization_fix",
+          "reviewer_comment": null,
+          "finding": "Evidence/rationale named a real, citable source class not present in source_iris -- see round-5 notes for the corrected scan methodology and 21-item fix."
+        },
+        {
+          "idx": 10,
+          "target_path": "relationships[23]",
+          "artefact_type": "relationship",
+          "mapping": {
+            "target_path": "relationships[23]",
+            "source_iris": [
+              "https://brickschema.org/schema/Brick#Floor"
+            ],
+            "source_evidence": "A \"Floor\" is \"A level, typically representing a horizontal aggregation of spaces,\" which directly supports spaces as parts of a floor.",
+            "confidence": "high",
+            "rationale": "The floor definition explicitly describes it as an aggregation of spaces, supporting the hasPart relation."
+          },
+          "result": {
+            "name": "hasPart",
+            "from": "Floor",
+            "to": "Space",
+            "meaning": "A floor is composed in part of spaces.",
+            "aliases": []
+          },
+          "sample_id": "S10",
+          "verdict": "flag_escalated_to_normalization_fix",
+          "reviewer_comment": null,
+          "finding": "Evidence/rationale named a real, citable source class not present in source_iris -- see round-5 notes for the corrected scan methodology and 21-item fix."
+        },
+        {
+          "idx": 11,
+          "target_path": "relationships[11]",
+          "artefact_type": "relationship",
+          "mapping": {
+            "target_path": "relationships[11]",
+            "source_iris": [
+              "https://brickschema.org/schema/Brick#hasPoint"
+            ],
+            "source_evidence": "Brick hasPoint definition; standard HVAC control practice uses deadband setpoints in AHU control sequences.",
+            "confidence": "medium",
+            "rationale": "The AHU-to-TemperatureDeadbandSetpoint pairing is a standard control relationship for the included concepts."
+          },
+          "result": {
+            "name": "hasPoint",
+            "from": "AirHandlingUnit",
+            "to": "TemperatureDeadbandSetpoint",
+            "meaning": "An air handling unit has a temperature deadband setpoint used for control logic.",
+            "aliases": []
+          },
+          "sample_id": "S11",
+          "verdict": "flag_escalated_to_normalization_fix",
+          "reviewer_comment": null,
+          "finding": "Evidence/rationale named a real, citable source class not present in source_iris -- see round-5 notes for the corrected scan methodology and 21-item fix."
+        },
+        {
+          "idx": 12,
+          "target_path": "rules.investigateAirQuality",
+          "artefact_type": "rule",
+          "mapping": {
+            "target_path": "rules.investigateAirQuality",
+            "source_iris": [
+              "https://brickschema.org/schema/Brick#CO2_Sensor",
+              "https://brickschema.org/schema/Brick#Outside_Air_CO2_Sensor",
+              "https://brickschema.org/schema/Brick#Return_Air_CO2_Sensor"
+            ],
+            "source_evidence": "A \"CO2 Sensor\" \"Measures properties of CO2 in air,\" an \"Outside Air CO2 Sensor\" measures CO2 \"in outside air,\" and a \"Return Air CO2 Sensor\" measures CO2 \"in return air,\" supporting investigation when observed CO2 is elevated relative to the expected served air-stream condition.",
+            "confidence": "high",
+            "rationale": "The rule is grounded by the complementary CO2 sensing contexts explicitly defined by the cited sensor classes."
+          },
+          "result": {
+            "conditions": [
+              "a CO2 sensor indicates elevated CO2 relative to the expected condition for the served air stream"
+            ]
+          },
+          "sample_id": "S12",
+          "verdict": "accept",
+          "reviewer_comment": null,
+          "finding": null
+        },
+        {
+          "idx": 13,
+          "target_path": "actions.increaseHeating",
+          "artefact_type": "action",
+          "mapping": {
+            "target_path": "actions.increaseHeating",
+            "source_iris": [
+              "https://brickschema.org/schema/Brick#AHU",
+              "https://brickschema.org/schema/Brick#Air_Temperature_Sensor",
+              "https://brickschema.org/schema/Brick#Heating_Temperature_Setpoint"
+            ],
+            "source_evidence": "An \"AHU\" performs functions including \"heating,\" an \"Air Temperature Sensor\" \"Measures the temperature of air,\" and a \"Heating Temperature Setpoint\" \"Sets temperature for heating,\" so increasing heating on an AHU in response to below-setpoint air temperature is a grounded action.",
+            "confidence": "high",
+            "rationale": "The AHU, air-temperature sensing, and heating setpoint definitions jointly support the action and its verification intent."
+          },
+          "result": {
+            "input": "AirHandlingUnit",
+            "preconditions": [
+              "needsHeatingFromSetpoint"
+            ],
+            "effect": "the heating path is commanded to raise air temperature toward the heating setpoint",
+            "verification": "confirm subsequent air temperature trends upward toward setpoint"
+          },
+          "sample_id": "S13",
+          "verdict": "accept",
+          "reviewer_comment": null,
+          "finding": null
+        }
+      ]
     }
   ]
 }

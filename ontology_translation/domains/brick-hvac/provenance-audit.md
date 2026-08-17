@@ -172,3 +172,120 @@ comprehensive as its own scan logic. Continued independent spot-checking
 after this audit was first declared complete found two real gaps in the
 scan itself, not just in the mappings it was meant to catch. Full account
 of the round-4 sample that triggered this: `manual-spot-check.md`.
+
+## Second follow-up: a third scan gap, and a root-cause code fix (round 5)
+
+Manual spot-check round 5 sampled 3 more items with the same uncited-
+paraphrase defect (`relationships[11]`, `relationships[13]`,
+`relationships[23]`). One of them, `relationships[13]`, had already been
+"fixed" once by round 4 — for a *different* citation gap on the same
+mapping. Diffing showed round 4's own reground rewrite introduced fresh
+prose that itself named `TemperatureSetpoint` without citing it, and
+nothing rescanned that fix's own output afterward.
+
+### A third scan-methodology gap
+
+Round 4's scan still missed real gaps because it only matched evidence
+text against the source ontology's *spaced* label form (`"Temperature
+Deadband Setpoint"`). Compiler-generated evidence sometimes instead names
+the concept using the domain's own compiled PascalCase class name
+(`"TemperatureDeadbandSetpoint"`, no space) — a string that never contains
+the spaced label as a substring, so it was never matched, regardless of
+case-sensitivity or label length.
+
+**Corrected matcher**: in addition to the existing case-insensitive,
+word-boundary spaced-label check, added a second check that extracts every
+maximal contiguous alphabetic token from the evidence text (`re.findall(
+r'[A-Za-z]+', text)`) and compares each, lowercased, for **exact equality**
+against the label's no-space form. Exact-token comparison (not a raw
+substring search over the whole no-space-stripped text) was deliberate:
+substring search produces real false positives across word boundaries once
+spaces are stripped (`"Wing"` inside `"flowing"`, `"city"` inside
+`"capacity"`) — comparing whole tokens avoids that class of noise entirely.
+
+### Full rescan, all 127 mappings
+
+Raw hits with the corrected matcher: 125. Applying the round-4 stoplist
+alone still left 66 — nearly all from `AHU`/`Air Handling Unit`/`Air
+Handler Unit` being three genuinely distinct Brick class IRIs for the same
+real-world concept, so any mapping citing only one already-correct synonym
+still showed as "missing" the others. Added a **synonym-cluster check**:
+if a mapping already cites *any* IRI from the same real-world-concept
+cluster as a flagged label, that label is not a fresh gap (clusters:
+AHU/Air_Handler_Unit/Air_Handling_Unit; Brick's/REC's `area`; Brick's
+Occupancy_Sensor/REC's OccupancySensorEquipment; Brick's Heat_Exchanger/HX).
+Also expanded the stoplist with `area`, `regulates`, `capacity`, `includes`
+— real Brick/REC labels that are also common English words, found
+producing false positives from ordinary prose ("regulates" appearing
+inside `TerminalUnit`'s own already-cited definition, not as a separate
+predicate claim; "capacity" inside a "cooling capacity" standard-practice
+phrase, not the specific `rec#capacity` property).
+
+That left 46 candidates, each manually checked against
+`reference.domain.yaml`'s actual relationship `from`/`to` endpoints to
+separate genuine uncited endpoints from two remaining false-positive
+shapes: a label appearing only incidentally inside a *different*,
+already-cited class's own quoted definition (e.g. `"fan"` inside
+`AirHandlingUnit`'s own definition, cited for `AirHandlingUnit` itself, not
+evidence that a *different* mapping about `Fan` needs its own citation);
+and self-critical caveat text (a rationale explicitly saying a claim
+*isn't* well-grounded is not a citation gap for the thing it declines to
+claim).
+
+**Result: 21 genuine items** — dominated by `AirHandlingUnit`-family
+`hasPart`/`hasPoint`/`feeds` relationships whose endpoint was named in
+evidence prose but never cited in that mapping's own `source_iris`, plus a
+few bare predicate citations (`hasPart`, `feeds`) described in prose but
+never formally cited. Fixed directly (pure Python addition of the missing
+IRI(s) to each mapping's `source_iris`) — every one of the 21 already had
+correct prose; only the citation was missing, unlike the earlier two
+audits which also needed prose rewritten.
+
+`relationships[29]` is a **third-round finding on the same target_path**:
+flagged in round 3's raw 72, dropped as (apparently) not real, still
+uncited after round 4's fix pass (which happened to touch this path for an
+unrelated reason). Worth stating plainly: "not flagged in the last audit"
+is not the same guarantee as "genuinely fixed" until a rescan with a
+corrected matcher actually re-clears it.
+
+### A root-cause code fix, not another data patch
+
+Investigating `relationships[23]` specifically found the round-4-style
+replace-not-merge regression had **also** independently hit round 3's own
+fix for this exact mapping: its `hasPart` citation was silently dropped by
+that repair batch, and `Space` — which round 3's own raw scan had *already
+correctly flagged* as missing — was never even included in that batch's
+`source_context` to begin with. This is the **second separate occurrence**
+of the same failure mode (round 3's batch, then round 4's batch,
+independently), which crosses the line from "be more careful constructing
+the next batch" to "fix it in the code so it can't recur no matter how the
+next batch is built."
+
+Fixed in `repair.py`'s `apply_repairs()`: for `reground` decisions
+specifically, `source_iris` is now the union of the mapping's existing
+citations and the new decision's citations, not a wholesale replace.
+`reground` is documented as "the element's own content is already fine,
+just under-evidenced" — there is no legitimate case where it should drop a
+previously-valid citation, so union is always correct for this action
+(left `replace` untouched, since replaced content can genuinely mean the
+old citations no longer apply). New regression test:
+`tests/test_repair.py::test_reground_merges_source_iris_instead_of_replacing`.
+
+### Verification
+
+- Structural validity: 0 errors.
+- 0/127 mappings with empty `source_iris`; mapping count unchanged (127).
+- **Independent re-judge of all 21 changed elements**: 0 unsupported, 1
+  contested (`classes.AirPlenum.properties.airflowState` — 2 `supported`,
+  1 `partially_supported`, the same disclosed, non-blocking borderline
+  category already accepted elsewhere in this domain). Cost: $0.1821.
+- Full offline test suite: 201/201 passing (200 + 1 new regression test).
+
+**Lesson, stated plainly, again**: three rounds in a row have now found a
+real gap in the *previous* round's own "comprehensive" fix — first the
+scan's case-sensitivity and length filter, then its label-normalization
+assumption, then a data-construction bug that recurred independently
+twice. The fix that finally stuck for the recurring part was moving the
+invariant into code (`repair.py`'s merge-not-replace) instead of trusting
+each future batch to be constructed correctly by hand. Full account of the
+round-5 sample that triggered this: `manual-spot-check.md`.
