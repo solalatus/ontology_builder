@@ -307,6 +307,18 @@ class IndexSourceClassesByLabelTests(unittest.TestCase):
         self.assertEqual(len(index["widget"]), 2)
 
 
+class IndexSourceRecordsByIriTests(unittest.TestCase):
+    def test_indexes_classes_and_both_property_kinds_by_iri(self):
+        index = evaluate_mod._index_source_records_by_iri(SOURCE_IR)
+        self.assertEqual(index["http://ex.org#Fan"]["labels"], ["Fan"])
+        self.assertEqual(index["http://ex.org#serves"]["kind"], "object_property")
+        self.assertEqual(index["http://ex.org#status"]["kind"], "datatype_property")
+
+    def test_unknown_iri_is_absent(self):
+        index = evaluate_mod._index_source_records_by_iri(SOURCE_IR)
+        self.assertNotIn("http://ex.org#DoesNotExist", index)
+
+
 class GroundTruthForTargetTests(unittest.TestCase):
     def setUp(self):
         self.source_index = evaluate_mod._index_source_classes_by_label(SOURCE_IR)
@@ -360,6 +372,47 @@ class GroundTruthForTargetTests(unittest.TestCase):
         self.assertIn("CondensingUnit", ground_truth)
         self.assertIn("Compressor", ground_truth)
         self.assertIn("compressor", ground_truth["CondensingUnit"][0]["definitions"][0].lower())
+
+    def test_iri_fallback_resolves_a_rule_that_has_no_structural_class_reference(self):
+        # The real gap: rules.canRunFan structurally resolves to zero class
+        # names (_class_names_involved returns [] for rules -- conditions
+        # are free text), so it always got None ground truth even when its
+        # own translation.json mapping cited a real source_iri. Found for
+        # real via a repair pass that nearly dropped rules.canUseEconomizer
+        # for "no source definition provided" when one genuinely existed and
+        # was simply never looked up.
+        iri_index = evaluate_mod._index_source_records_by_iri(SOURCE_IR)
+        ground_truth = evaluate_mod._ground_truth_for_target(
+            DOMAIN_DATA, self.source_index, "rules.canRunFan",
+            source_iris=["http://ex.org#Fan"], iri_index=iri_index,
+        )
+        self.assertIsNotNone(ground_truth)
+        self.assertIn("cited:Fan", ground_truth)
+        self.assertEqual(ground_truth["cited:Fan"][0]["definitions"], ["A device that moves air."])
+
+    def test_iri_fallback_is_additive_not_a_replacement(self):
+        # A target that already resolves structurally (a class) should keep
+        # that entry and gain the IRI-cited one alongside it, not have one
+        # clobber the other.
+        iri_index = evaluate_mod._index_source_records_by_iri(SOURCE_IR)
+        ground_truth = evaluate_mod._ground_truth_for_target(
+            DOMAIN_DATA, self.source_index, "classes.Fan",
+            source_iris=["http://ex.org#Zone"], iri_index=iri_index,
+        )
+        self.assertIn("Fan", ground_truth)
+        self.assertIn("cited:Zone", ground_truth)
+
+    def test_unresolvable_iri_is_silently_skipped(self):
+        iri_index = evaluate_mod._index_source_records_by_iri(SOURCE_IR)
+        ground_truth = evaluate_mod._ground_truth_for_target(
+            DOMAIN_DATA, self.source_index, "rules.canRunFan",
+            source_iris=["http://ex.org#DoesNotExist"], iri_index=iri_index,
+        )
+        self.assertIsNone(ground_truth)
+
+    def test_no_source_iris_or_iri_index_behaves_as_before(self):
+        ground_truth = evaluate_mod._ground_truth_for_target(DOMAIN_DATA, self.source_index, "rules.canRunFan")
+        self.assertIsNone(ground_truth)
 
 
 class JudgeMappingsTests(unittest.TestCase):
@@ -453,6 +506,37 @@ class JudgeMappingsTests(unittest.TestCase):
         # not send a misleading empty/wrong ground-truth block.
         rule_call_message = calls[4]["messages"][1]["content"]
         self.assertNotIn("actual_source_class_definitions", rule_call_message)
+
+    def test_a_rule_that_cites_a_real_source_iri_gets_ground_truth_via_iri_fallback(self):
+        # Companion to the test above: TRANSLATION_FULL's rule has an empty
+        # source_iris, which is why it correctly gets no ground truth there.
+        # A rule that *does* cite a real source_iri in its own mapping --
+        # which rules.canUseEconomizer genuinely did on the live Brick HVAC
+        # rerun -- must now get it, closing the gap that nearly caused a
+        # repair pass to drop a well-grounded rule for "no source material".
+        translation = {
+            "mappings": [
+                {
+                    "target_path": "rules.canRunFan",
+                    "source_iris": ["http://ex.org#Fan"],
+                    "source_evidence": "Fan definition supports a run-condition rule.",
+                    "confidence": "high",
+                    "rationale": "Directly tied to the Fan concept.",
+                }
+            ]
+        }
+        FakeClient, calls = _fake_client_class(lambda i, kw: json.dumps({"verdict": "supported", "rationale": "r"}))
+        client = FakeClient()
+        with tempfile.TemporaryDirectory() as tmp:
+            logger = evaluate_mod.RunLogger(Path(tmp) / "log.jsonl")
+            evaluate_mod.judge_mappings(
+                client, "gpt-5.4", translation, logger, judges=1, domain_data=DOMAIN_DATA, source_ir=SOURCE_IR
+            )
+            logger.close()
+
+        rule_call_message = calls[0]["messages"][1]["content"]
+        self.assertIn("actual_source_class_definitions", rule_call_message)
+        self.assertIn("A device that moves air.", rule_call_message)
 
     def test_ground_truth_catches_a_fabricated_standard_practice_claim(self):
         # The real motivating scenario, reproduced directly: a relationship

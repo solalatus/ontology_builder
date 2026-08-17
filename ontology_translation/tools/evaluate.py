@@ -309,14 +309,45 @@ def _index_source_classes_by_label(source_ir: dict) -> dict[str, list[dict]]:
     return index
 
 
-def _ground_truth_for_target(domain_data: dict, source_index: dict, target_path: str) -> dict | None:
+def _index_source_records_by_iri(source_ir: dict) -> dict[str, dict]:
+    """iri -> the full source_ir record (class, object/datatype property),
+    for direct IRI-based ground-truth lookup. This is the fallback
+    `_ground_truth_for_target` needs for target kinds `_class_names_involved`
+    cannot resolve structurally at all -- rules (conditions are free text,
+    no structural class reference) and actions whose real grounding is a
+    class other than their declared `input` (e.g. an action citing a
+    setpoint/sensor concept). Found for real on a rule
+    (`rules.canUseEconomizer`, cited `Economizer` by IRI in its own
+    `translation.json` mapping) that a repair pass nearly dropped for lack
+    of *any* source context, purely because rules structurally resolve to
+    no class names -- not because the source material didn't exist."""
+    index: dict[str, dict] = {}
+    for key in ("classes", "object_properties", "datatype_properties"):
+        for record in source_ir.get(key, []):
+            index[record["iri"]] = record
+    return index
+
+
+def _ground_truth_for_target(
+    domain_data: dict,
+    source_index: dict,
+    target_path: str,
+    source_iris: list[str] | None = None,
+    iri_index: dict | None = None,
+) -> dict | None:
     """The real source_ir definitions for the class(es) a target_path
     involves, when resolvable -- None (not an empty dict) when nothing could
     be resolved, so callers can tell "checked, nothing relevant" from
-    "class name doesn't match any source label" apart if they need to."""
+    "class name doesn't match any source label" apart if they need to.
+
+    `source_iris`/`iri_index` are optional: when given, any of the mapping's
+    own cited `source_iris` that resolve by exact IRI are folded in too,
+    under a `cited:<label>` key so they're distinguishable from the
+    structurally-inferred entries. This is strictly additive -- it never
+    replaces the structural class-name resolution, only supplements it for
+    target kinds (rules especially) that resolve to no class names at all.
+    """
     class_names = _class_names_involved(domain_data, target_path)
-    if not class_names:
-        return None
     found = {}
     for name in class_names:
         records = source_index.get(_normalize_class_name(name))
@@ -325,6 +356,17 @@ def _ground_truth_for_target(domain_data: dict, source_index: dict, target_path:
                 {"iri": r.get("iri"), "labels": r.get("labels"), "altLabels": r.get("altLabels"), "definitions": r.get("definitions")}
                 for r in records
             ]
+    if source_iris and iri_index:
+        for iri in source_iris:
+            record = iri_index.get(iri)
+            if record is None:
+                continue
+            label = (record.get("labels") or [iri])[0]
+            key = f"cited:{label}"
+            if key not in found:
+                found[key] = [
+                    {"iri": record.get("iri"), "labels": record.get("labels"), "altLabels": record.get("altLabels"), "definitions": record.get("definitions")}
+                ]
     return found or None
 
 
@@ -410,6 +452,7 @@ def judge_mappings(
     cannot catch a confidently-worded claim with no real backing (see the
     module-level comment above `_class_names_involved`)."""
     source_index = _index_source_classes_by_label(source_ir) if source_ir is not None else None
+    iri_index = _index_source_records_by_iri(source_ir) if source_ir is not None else None
     results = []
     total_cost = 0.0
     for mapping in translation.get("mappings", []):
@@ -420,7 +463,10 @@ def judge_mappings(
             "rationale": mapping.get("rationale"),
         }
         if domain_data is not None and source_index is not None:
-            ground_truth = _ground_truth_for_target(domain_data, source_index, target_path)
+            ground_truth = _ground_truth_for_target(
+                domain_data, source_index, target_path,
+                source_iris=mapping.get("source_iris"), iri_index=iri_index,
+            )
             if ground_truth is not None:
                 payload["actual_source_class_definitions"] = ground_truth
         user_prompt = json.dumps(payload, indent=2)
