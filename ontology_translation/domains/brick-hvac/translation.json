@@ -57,15 +57,6 @@
       "rationale": "Mapped the sensor's measured reading to a numeric value property."
     },
     {
-      "target_path": "classes.AirQualitySensor.properties.status",
-      "source_iris": [
-        "https://w3id.org/rec#status"
-      ],
-      "source_evidence": "rec datatype property \"status\"; standard sensor health/status practice",
-      "confidence": "medium",
-      "rationale": "Added a sensor status property for monitoring availability and faults."
-    },
-    {
       "target_path": "classes.AirTemperatureSensor",
       "source_iris": [
         "https://brickschema.org/schema/Brick#Air_Temperature_Sensor"
@@ -178,9 +169,9 @@
       "source_iris": [
         "https://w3id.org/rec#value"
       ],
-      "source_evidence": "rec datatype property \"value\"; source class says it measures a CO2 difference",
+      "source_evidence": "\"Measures the difference between CO2 levels of inside and outside air\" directly supports a numeric measured reading for CO2DifferentialSensor, represented here as a value in ppm.",
       "confidence": "high",
-      "rationale": "Mapped the differential reading to a numeric value property."
+      "rationale": "The class definition explicitly describes a quantitative CO2 difference, so a numeric value property is the appropriate grounded representation."
     },
     {
       "target_path": "classes.CO2DifferentialSensor.properties.status",
@@ -208,15 +199,6 @@
       "source_evidence": "rec datatype property \"value\"; source class says it measures CO2 concentration",
       "confidence": "high",
       "rationale": "Mapped the CO2 concentration reading to a numeric value property."
-    },
-    {
-      "target_path": "classes.CO2LevelSensor.properties.status",
-      "source_iris": [
-        "https://w3id.org/rec#status"
-      ],
-      "source_evidence": "rec datatype property \"status\"; standard sensor status practice",
-      "confidence": "medium",
-      "rationale": "Added a status property for sensor health and availability."
     },
     {
       "target_path": "classes.Chiller",
@@ -500,13 +482,13 @@
       "rationale": "Direct class mapping from the source definition."
     },
     {
-      "target_path": "classes.HeatingValve.properties.status",
+      "target_path": "classes.HeatingValve.properties.position",
       "source_iris": [
         "https://w3id.org/rec#status"
       ],
-      "source_evidence": "rec datatype property \"status\"; source definition describes modulation of hot water flow",
+      "source_evidence": "\"A valve that controls air temperature by modulating the amount of hot water flowing through a heating coil\" supports a valve-position notion rather than a generic equipment-health status.",
       "confidence": "high",
-      "rationale": "Mapped the heating valve position to an operational status property."
+      "rationale": "The definition grounds commanded or observed flow-control position states for the valve, so the property should be narrowed from generic status to position."
     },
     {
       "target_path": "classes.HotDeck",
@@ -554,13 +536,13 @@
       "rationale": "Direct class mapping from the source definition."
     },
     {
-      "target_path": "classes.IsolationValve.properties.status",
+      "target_path": "classes.IsolationValve.properties.position",
       "source_iris": [
         "https://w3id.org/rec#status"
       ],
-      "source_evidence": "rec datatype property \"status\"; source definition supports open or closed states",
+      "source_evidence": "\"A valve that stops the flow of a fluid, usually for maintenance or safety purposes\" supports a binary flow-isolating position state of open versus closed.",
       "confidence": "high",
-      "rationale": "Mapped the isolation valve position to a status property."
+      "rationale": "The definition grounds whether the valve is open or closed as a position/flow state, not a generic status property."
     },
     {
       "target_path": "classes.OccupancySensor",
@@ -658,9 +640,9 @@
       "source_iris": [
         "https://w3id.org/rec#status"
       ],
-      "source_evidence": "rec datatype property \"status\"; standard sensor status practice",
+      "source_evidence": "Standard practice for the specifically named sensor class ReturnAirCO2Sensor: devices that \"Measure[] the concentration of CO2 in return air\" are commonly tracked with a simple health/availability state such as normal, fault, or offline so their readings can be trusted in control logic.",
       "confidence": "medium",
-      "rationale": "Added a status property for sensor health and availability."
+      "rationale": "For this specific sensor class, a basic operational status is a defensible standard-practice property even though the class definition itself only states the sensing function."
     },
     {
       "target_path": "classes.ScheduleTemperatureSetpoint",
@@ -727,13 +709,13 @@
       "rationale": "Mapped the named HVAC valve class despite sparse source definition because it has clear operational meaning."
     },
     {
-      "target_path": "classes.SteamValve.properties.status",
+      "target_path": "classes.SteamValve.properties.position",
       "source_iris": [
         "https://w3id.org/rec#status"
       ],
-      "source_evidence": "rec datatype property \"status\"; standard steam valve operating state practice",
+      "source_evidence": "Standard valve practice tied to the specific class SteamValve and its parent concept Valve: steam valves are characterized by flow-control position states such as open, closed, or modulating, which describe valve position rather than generic status.",
       "confidence": "medium",
-      "rationale": "Added a valve position status property appropriate to steam control."
+      "rationale": "Because the allowed values describe valve opening behavior, the property should be named as position instead of status."
     },
     {
       "target_path": "classes.TemperatureDeadbandSetpoint",
@@ -824,15 +806,6 @@
       "source_evidence": "rec datatype property \"value\"; source class says it measures water temperature",
       "confidence": "high",
       "rationale": "Mapped the measured water temperature to a numeric value property."
-    },
-    {
-      "target_path": "classes.WaterTemperatureSensor.properties.status",
-      "source_iris": [
-        "https://w3id.org/rec#status"
-      ],
-      "source_evidence": "rec datatype property \"status\"; standard sensor status practice",
-      "confidence": "medium",
-      "rationale": "Added a status property for sensor health and availability."
     },
     {
       "target_path": "classes.WaterTemperatureSetpoint",
@@ -1439,9 +1412,9 @@
     {
       "target_path": "rules.increaseOutdoorAirForCO2",
       "source_iris": [],
-      "source_evidence": "Standard HVAC practice for demand-controlled ventilation: compare return air CO2 with outdoor air condition to decide ventilation increase",
-      "confidence": "high",
-      "rationale": "Added a ventilation rule grounded in the included AHU, return-air CO2, and outside-air CO2 concepts."
+      "source_evidence": "Standard HVAC demand-controlled ventilation practice tied to the named classes: comparing ReturnAirCO2Sensor (\"Measures the concentration of CO2 in return air\") with OutsideAirCO2Sensor (\"Measures the concentration of CO2 in outside air\") on an AHU (which performs \"mixing of air\") supports increasing outdoor air intake when return-air CO2 is elevated relative to outside-air CO2.",
+      "confidence": "medium",
+      "rationale": "The rule is a standard control interpretation specifically anchored to the provided AHU, ReturnAirCO2Sensor, and OutsideAirCO2Sensor class meanings."
     },
     {
       "target_path": "rules.protectAgainstFrost",

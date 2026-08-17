@@ -65,3 +65,51 @@
 - Relationship count: 57 → 59. All hard gates re-checked and still clean
   (structural 0 errors, provenance 100%/100%, reverse coverage 100%,
   semantic judging 0 majority-unsupported).
+
+## Systemic judging fix + second repair pass (2026-08-17, same day)
+
+A manual review of the two additions above raised a real concern about a
+*different*, never-independently-scrutinized relationship
+(`Chiller hasPart CondensingUnit`) — checking it revealed judges only ever
+saw the compiler's own self-reported evidence text, never the real source
+material, so a confident-sounding but ungrounded claim could sail through
+unchallenged. Fixed generally in `evaluate.py` (not specific to this
+domain): judges now see real, independently-resolved source class
+definitions, and non-unanimous verdicts are now tracked as "contested"
+even when a majority still passes.
+
+Found and fixed two further real bugs surfaced by actually running the
+fix at full scale (177 elements × 3 judges) rather than trusting unit
+tests alone:
+- PascalCase/camelCase class names (`CondensingUnit`) never matched
+  spaced source labels (`Condensing Unit`) — ground truth silently failed
+  for almost every multi-word class.
+- The judge prompt let partial-by-design ground truth (an action only
+  ever resolves its input class) read as evidence *against* an action,
+  producing false negatives.
+
+With both fixed, a full re-judge found the real pattern: every `status`
+property in the file shared one identical templated justification, which
+held up for equipment (AHU, Fan, Chiller...) but not consistently for
+sensors/valves — 6 unsupported, 15 contested, all traced to this. Ran the
+9 affected properties/rule through a **generalized** `repair.py` (rebuilt
+to repair any element kind in place, not just retroactively-append
+relationships — the original version only worked for the one case it was
+first written against):
+- 3 valve properties **renamed** `status` → `position` (the allowed
+  values were fine; the property name was the ungrounded part —
+  `HeatingValve`, `IsolationValve`, `SteamValve`).
+- 3 items **regrounded** with stronger, specific evidence (majority was
+  already supported, just contested — the CO2 ventilation rule, and two
+  sensor properties).
+- 3 sensor `status` properties **genuinely dropped**
+  (`CO2LevelSensor`, `WaterTemperatureSensor`, `AirQualitySensor`) — no
+  defensible grounding and no honestly-supported narrower replacement.
+
+All resulting elements independently re-judged afterward: **unanimous
+supported, 0 unsupported.** Final state: 174 elements (177 − 3 genuine
+drops), **0 unsupported, 8 contested** (real, disclosed judge
+disagreement on otherwise-passing elements — left as-is, not
+force-resolved, per the same "report, don't hide" principle). Total real
+Azure cost across this entire re-judge/fix/repair/verify lineage: ~$1.64
+(judging) + ~$0.024 (repair) ≈ **$1.66**.

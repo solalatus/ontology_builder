@@ -59,12 +59,6 @@ classes:
     properties:
       value:
         type: number
-      status:
-        type: text
-        allowed:
-        - normal
-        - fault
-        - offline
   AirTemperatureSensor:
     meaning: A sensor that measures the temperature of air.
     properties:
@@ -129,12 +123,6 @@ classes:
       value:
         type: number
         unit: ppm
-      status:
-        type: text
-        allowed:
-        - normal
-        - fault
-        - offline
   Chiller:
     meaning: A refrigerating machine used to transfer heat between fluids.
     properties:
@@ -274,7 +262,7 @@ classes:
     meaning: A valve that controls air temperature by modulating the amount of hot
       water flowing through a heating coil.
     properties:
-      status:
+      position:
         type: text
         allowed:
         - open
@@ -302,7 +290,7 @@ classes:
     meaning: A valve that stops the flow of a fluid, usually for maintenance or safety
       purposes.
     properties:
-      status:
+      position:
         type: text
         allowed:
         - open
@@ -377,7 +365,7 @@ classes:
   SteamValve:
     meaning: A valve used to regulate steam flow in an HVAC system.
     properties:
-      status:
+      position:
         type: text
         allowed:
         - open
@@ -427,12 +415,6 @@ classes:
       value:
         type: number
         unit: degC
-      status:
-        type: text
-        allowed:
-        - normal
-        - fault
-        - offline
   WaterTemperatureSetpoint:
     meaning: A setpoint that specifies a desired water temperature.
     properties:

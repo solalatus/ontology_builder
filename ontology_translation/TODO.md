@@ -72,19 +72,23 @@ succeeds end to end. Until then, this file is the only record.
   `domains/brick-hvac/manual-spot-check.md`. **#106 still not closed** —
   no instruction yet to close it; that remains the user's call.
 - **Standing policy, applies to every domain, not just Brick, going
-  forward: a rejected element gets a real repair attempt before it's
-  dropped.** New `repair.py` + `prompts/repair-prompt.md` (reground /
+  forward: a rejected/contested element gets a real repair attempt before
+  it's dropped.** `repair.py` + `prompts/repair-prompt.md` (reground /
   replace / drop, same provenance bar as a full compile, mechanically
-  validated before anything is applied, always appends at fresh indices
-  rather than rewriting in place). Applied to Brick's 3 previously-dropped
-  relationships: 1 replaced (wrong-class evidence corrected — `Chiller
-  hasPart Compressor` → `CondensingUnit hasPart Compressor`), 1 regrounded
-  with stronger evidence (`Zone hasPoint TemperatureDeadbandSetpoint`), 1
-  confirmed as a genuine drop (`AHU hasPart AirPlenum` — redundant with
-  the already-present `AHU feeds AirPlenum`). Both additions independently
-  re-judged (not just the repair call's own say-so): unanimously
-  supported, twice. `reference.domain.yaml`: 57 → 59 relationships. Full
-  account in today's later Log entry.
+  validated before anything is applied). Applied twice on Brick: first to
+  the 3 originally-dropped relationships (1 replaced — wrong-class
+  evidence corrected, `Chiller hasPart Compressor` → `CondensingUnit
+  hasPart Compressor`; 1 regrounded — `Zone hasPoint
+  TemperatureDeadbandSetpoint`; 1 confirmed genuine drop — `AHU hasPart
+  AirPlenum`, redundant with the already-present `AHU feeds AirPlenum`).
+  `repair.py` was later **generalized** (it originally only worked
+  retroactively and only for relationships) to repair any element kind
+  *in place* while still live in the file, then applied a second time to
+  9 flagged `status` properties/a rule surfaced by the systemic judging
+  fix below (3 valve properties renamed `status`→`position`, 3
+  regrounded, 3 genuinely dropped). Every addition/change independently
+  re-judged, never taken on the repair call's own word. Full account in
+  today's later Log entries.
 - **`index.html`'s own `.domain.yaml` importer did not enforce the same
   format the Python pipeline does, and it was worse than a missing check
   — it flat-out could not read the pipeline's real output.** Two real
@@ -97,14 +101,27 @@ succeeds end to end. Until then, this file is the only record.
   suite re-run twice, 974 tests, only one unrelated pre-existing flake
   (agent-panel CSS timing, confirmed by re-running that file alone). Full
   account in today's later Log entry.
+- **Semantic judging had a systemic soundness gap: judges only ever saw
+  the compiler's own self-reported evidence, never real source material
+  to check it against.** Fixed generally in `evaluate.py` (ground-truth
+  enrichment + contested-elements tracking), found and fixed two further
+  real bugs by actually running it at full scale (PascalCase class-name
+  normalization; judge-prompt calibration for actions' partial ground
+  truth), then used it for real: found and repaired a genuine pattern (6
+  of Brick's `status` properties/a rule had no real per-class grounding
+  behind a shared templated justification). **Overfitting audit** done
+  explicitly ahead of #107–#110: stripped all HVAC/finance-flavored
+  vocabulary from every LLM-facing prompt, stated principles abstractly
+  instead. Full account in today's later Log entries.
 - Real Azure spend so far this session: smoke tests are a handful of cents
   (re-spent lightly every time the full suite is run locally with
   credentials present — see `tools/README.md`'s testing section); Brick
   HVAC's full iteration history (2 superseded 3-pass compiles + 1 final
-  single-pass compile + 2 full QA-suite runs, the first superseded, plus
-  the repair pass above) cost **~$5.39** total — see the Log for the full
-  breakdown. Well inside the ~$21.57 "Large tier, 3 correction rounds"
-  ceiling from the original cost estimate.
+  single-pass compile + 2 full QA-suite runs, the first superseded, both
+  repair passes, and the full systemic-judging-fix re-verification lineage)
+  cost **~$8.61** total — see the Log for the full breakdown. Still well
+  inside the ~$21.57 "Large tier, 3 correction rounds" ceiling from the
+  original cost estimate.
 - **#104–#105, #107–#111: not started.**
 - One domain translated and merged: `ontology_translation/domains/brick-hvac/`.
   No other domain started yet.
@@ -637,3 +654,151 @@ reference and record deltas/decisions here instead.)*
   **#106 still open** — none of this changes that; still the user's call,
   still pending their own review, which was explicitly deferred until
   after this round of fixes.
+
+- 2026-08-17 (later still) — **A manual look at the two repaired
+  relationships above, asked for by the user during a live spot-check
+  round, surfaced a systemic gap: "how could we handle this suspect
+  case?"** Checking `Chiller hasPart CondensingUnit` (a never-
+  independently-scrutinized relationship, accepted in the original run)
+  against the real Brick source found *zero* grounding — no `sh:property`,
+  no restriction, nothing. The root cause was general, not specific to
+  this one relationship: `judge_mappings()` only ever showed judges the
+  compiler's own self-reported `source_evidence`/`rationale` — a
+  confident-sounding fabrication and a genuinely-grounded claim read
+  identically from that vantage point, since the judge was judging the
+  claim's description of itself, never the claim against reality. User
+  instruction: **"attempt a systematic fix... be general, good for later
+  ontologies also... check we did not overfit."**
+
+  **Systemic fix in `evaluate.py`** (applies to every future domain, not
+  just Brick): `_class_names_involved()` / `_index_source_classes_by_label()`
+  / `_ground_truth_for_target()` resolve the real `source_ir` class
+  definitions for whatever classes a `target_path` structurally involves
+  (both relationship endpoints, a property's owning class, an action's
+  input class) and `judge_mappings()` now includes that as
+  `actual_source_class_definitions` in the judge prompt when resolvable.
+  New **contested-elements tracking** (report-only): flags any element
+  where judges disagree even when a majority still says "supported" —
+  found for real that the flagged relationship came back 2-supported/
+  1-partially_supported even with ground truth in front of the judges, a
+  real majority so the hard gate stayed quiet, but genuine disagreement
+  existed that a random sample could miss.
+
+  **Overfitting audit, done explicitly because more domain conversions
+  are coming (#107–#110).** The pipeline *code* was already domain-
+  agnostic, but every worked example for "standard-practice grounding" in
+  `compiler-prompt.md` and `JUDGE_SYSTEM_PROMPT` was HVAC-flavored — real
+  risk of anchoring reasoning before this exact prompt runs unchanged on
+  FIBO Loans, IOF Supply Chain, SOSA/SSN. First pass added a *second*,
+  contrasting finance example alongside each one; on a stronger, more
+  explicit user directive ("must not contain specific guidance that
+  overfits it to one ontology" — not even balanced across two named
+  domains), rewrote all of them a second time to state the underlying
+  principle *abstractly*, with no named-domain vocabulary at all (neither
+  HVAC nor finance). Confirmed with a full grep across every prompt string
+  constant sent to any model: zero domain-vocabulary hits remain anywhere.
+  The one deliberate exception: `compiler-prompt.md`'s top-level
+  Invoice/Supplier YAML-syntax example, which predates this session, has
+  no reasoning content, and needs *some* concrete illustration to be
+  legible — a different category from the reasoning/decision guidance
+  fixed here.
+
+  **Two more real bugs found by actually running the fix at full scale**
+  (177 elements × 3 judges), not just trusting the unit tests:
+  1. **PascalCase/camelCase class-name normalization.** Compiled class
+     names are virtually always PascalCase (`CondensingUnit`); source
+     labels are virtually always space-separated (`Condensing Unit`).
+     `_normalize_name` alone never split camelCase boundaries, so ground-
+     truth resolution silently failed for almost every multi-word class —
+     and it was actively *misleading*, not just incomplete: the first
+     full re-judge flipped `relationships[57]`
+     (`CondensingUnit hasPart Compressor`, just added by the earlier
+     repair pass and independently verified supported) to
+     majority-unsupported, because judges saw only `Compressor`'s
+     definition (says nothing about composition) and never
+     `CondensingUnit`'s own definition (which explicitly says it
+     comprises a compressor) — the missing ground truth read as evidence
+     *against* the claim. Fixed with `_normalize_class_name()` (splits
+     camelCase/digit-to-uppercase boundaries before normalizing, applied
+     to both sides of the lookup); 6 new tests including a direct
+     regression reproducing the exact scenario. Verified live:
+     `relationships[57]` back to unanimous supported.
+  2. **Judge-prompt calibration for actions' necessarily-partial ground
+     truth.** `actions.holdDeadband` and `actions.initiateFrostProtection`
+     both came back unanimous unsupported with rationales all saying the
+     same thing — the only ground truth given was the action's `input`
+     class (Zone/AHU), which doesn't itself mention deadbands or frost
+     sensing. True, but never meant to be the whole picture: an action's
+     real grounding often depends on a *different* class (a sensor that
+     triggers it) that isn't its declared input, and ground-truth
+     resolution was only ever designed to cover the input class for
+     actions. The prompt didn't say that, so judges over-read a gap that
+     was always expected to be there. Reworded `JUDGE_SYSTEM_PROMPT` to
+     say plainly what `actual_source_class_definitions` does and doesn't
+     cover per target kind. Verified live: both actions back to unanimous
+     supported.
+
+  **With both fixes in place, ran the corrected full 177×3 re-judge for
+  real ($1.55).** Result: 6 elements majority-unsupported, 15 contested —
+  all converging on one real, coherent pattern: *every* `status` property
+  in the whole file shares one identical templated justification
+  (`rec datatype property "status"; standard <X> operating state
+  practice"`, just the noun swapped in) with zero real per-class
+  grounding behind any of them. Under genuine scrutiny this held up for
+  **equipment** status (AHU, Fan, Chiller, Boiler, Pump...) but not
+  consistently for **sensor/valve** status (a passive sensor's
+  health/availability field, or calling a valve's state "status" rather
+  than "position," are both real but shakier standard-practice claims
+  than "this fan has an on/off state").
+
+  **Generalized `repair.py` before using it for real** — it only ever
+  worked for the one historical case it was first written against
+  (retroactively re-appending Brick's original 3 already-*removed*
+  relationships), and only understood relationships. That's backwards
+  from the actual policy: repair is supposed to run *while an element is
+  still in the file*, on any kind of element, before anything gets
+  dropped. Rebuilt `apply_repairs()` to resolve a `target_path` against
+  live `domain_data` and mutate in place when it exists (`reground`
+  updates only the mapping; `replace` overwrites content at the same path
+  or moves it via an optional `new_target_path` for a rename; `drop`
+  removes the element, its mapping, and renumbers every later
+  `relationships[j]` mapping if the dropped element was itself a
+  relationship) — falling back to the old append behavior only when the
+  path doesn't resolve at all (the genuine retroactive case). Generalized
+  `repair-prompt.md`'s contract (`new_relationship` → `new_content`,
+  works for any element kind; added `new_target_path` for renames). 11
+  new/renamed tests, 141 total passing.
+
+  **Ran the real repair batch** on the 9 flagged status-property/rule
+  items (~$0.024, real): 3 valve properties **renamed**
+  `status` → `position` (`HeatingValve`, `IsolationValve`, `SteamValve` —
+  the allowed values were fine, the *name* was ungrounded); 3 items
+  **regrounded** with stronger specific evidence (majority already
+  supported, just contested — the CO2 ventilation rule plus two sensor
+  properties); 3 sensor `status` properties **genuinely dropped**
+  (`CO2LevelSensor`, `WaterTemperatureSensor`, `AirQualitySensor` — no
+  defensible grounding, and correctly no forced narrower replacement
+  invented). All 6 kept elements independently re-judged afterward:
+  unanimous supported, 0 unsupported, 0 contested — confirmed twice, not
+  taken on the repair call's own word. Structural/provenance/reverse-
+  coverage gates re-checked and still 100%/clean; `index.html`'s (now-
+  fixed) importer re-verified against the file too.
+
+  **Final state:** `reference.domain.yaml` 48 classes / 59 relationships
+  / 9 rules / 9 actions, 174 source-mapped elements (177 − 3 genuine
+  drops). Hard gates: structural clean, provenance 100%/100%, reverse
+  coverage 100%, semantic judging **0 majority-unsupported**. 8 elements
+  remain genuinely **contested** (real, disclosed judge disagreement on
+  otherwise-passing elements, e.g. whether `Space`'s merge is stated at
+  exactly the right level of generality) — left as-is, not force-resolved,
+  same "report don't hide" principle as everything else here.
+  `translation-evaluation.json`/`translation-report.md` updated with the
+  full account.
+
+  **Total real Azure cost, this entire sub-effort** (the original 2-item
+  repair + verification, sanity checks, two full 177×3 re-judge passes,
+  the action-calibration check, the 9-item repair batch, and all
+  verification, summed from every logged call): **$3.22**. Running total
+  for the whole Brick HVAC effort across every phase so far: **~$8.61**.
+
+  **#106 still open.**
