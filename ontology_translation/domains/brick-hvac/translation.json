@@ -13,10 +13,12 @@
     },
     {
       "target_path": "classes.AirHandlingUnit.properties.status",
-      "source_iris": [],
-      "source_evidence": "Standard HVAC operational practice for air handling units includes tracking unit operating status.",
-      "confidence": "medium",
-      "rationale": "A status property is operationally necessary for AHU monitoring and is directly tied to the included equipment concept."
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#AHU"
+      ],
+      "source_evidence": "\"AHU\" is an \"Assembly consisting of sections containing a fan or fans and other necessary equipment\" performing air-side HVAC functions; standard HVAC practice assigns equipment status such as on, off, or alarm to such units for operation and monitoring.",
+      "confidence": "high",
+      "rationale": "The AHU definition supports it as an operational equipment asset that reasonably carries a status property, and the AHU IRI must be cited."
     },
     {
       "target_path": "classes.AirPlenum",
@@ -57,11 +59,11 @@
     {
       "target_path": "classes.TemperatureSensor.properties.status",
       "source_iris": [
-        "https://w3id.org/rec#status"
+        "https://brickschema.org/schema/Brick#Temperature_Sensor"
       ],
-      "source_evidence": "The source includes the generic datatype property label \"status\" and the class definition \"Temperature Sensor ... Measures temperature\"; by standard practice for sensors, a status field denotes operational/health state, but the provided material does not justify enumerating specific values.",
+      "source_evidence": "\"Temperature Sensor\" is defined as something that \"Measures temperature,\" and standard HVAC practice assigns an operational status to sensing devices to indicate whether the sensor is functioning and reporting.",
       "confidence": "medium",
-      "rationale": "The property itself is defensible for TemperatureSensor, but the allowed list must be removed because only a broad status notion, not specific states, is grounded."
+      "rationale": "The property content can stand as a generic operational attribute for the Temperature Sensor class, but the evidence must cite the Temperature Sensor class actually referenced."
     },
     {
       "target_path": "classes.AirTemperatureSensor",
@@ -255,10 +257,12 @@
     },
     {
       "target_path": "classes.OccupancySensor.properties.occupied",
-      "source_iris": [],
-      "source_evidence": "Standard HVAC/building practice for occupancy sensing distinguishes occupied versus unoccupied state.",
-      "confidence": "medium",
-      "rationale": "The occupancy sensor concept directly implies an occupancy state property used in control decisions."
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#Occupancy_Sensor"
+      ],
+      "source_evidence": "\"Occupancy Sensor\" is defined as something that \"Detects occupancy of some space or area,\" so a property recording whether the detected state is occupied, unoccupied, or unknown is a direct operational reading of that class.",
+      "confidence": "high",
+      "rationale": "The occupancy sensor definition directly grounds an occupied-state property, and the supporting class IRI was omitted."
     },
     {
       "target_path": "classes.Thermostat",
@@ -271,10 +275,12 @@
     },
     {
       "target_path": "classes.Thermostat.properties.mode",
-      "source_iris": [],
-      "source_evidence": "Thermostat definition refers to maintaining temperature at a fixed or adjustable setpoint; standard HVAC practice uses heat/cool/auto/off modes.",
-      "confidence": "medium",
-      "rationale": "A thermostat's control function supports a mode property grounded in routine HVAC operation."
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#Thermostat"
+      ],
+      "source_evidence": "\"Thermostat\" is defined as \"An automatic control device used to maintain temperature at a fixed or adjustable setpoint,\" which in HVAC practice entails operating modes such as heating, cooling, auto, and off for how the device maintains that setpoint.",
+      "confidence": "high",
+      "rationale": "The thermostat definition directly supports a control-oriented mode property, and the cited class IRI was missing."
     },
     {
       "target_path": "classes.Thermostat.properties.status",
@@ -314,10 +320,12 @@
     },
     {
       "target_path": "classes.Damper.properties.position",
-      "source_iris": [],
-      "source_evidence": "Damper definition describes modifying airflow rate or shutting off airflow; standard HVAC practice records damper position.",
-      "confidence": "medium",
-      "rationale": "The damper concept directly implies a controllable position property."
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#Damper"
+      ],
+      "source_evidence": "\"Damper\" is defined as an element \"permitting modification of the air resistance of the system and consequently changing the airflow rate or shutting off the airflow,\" which standardly corresponds to a controllable position often represented as percent open.",
+      "confidence": "high",
+      "rationale": "The damper definition supports a numeric position property because airflow modulation is implemented by damper position."
     },
     {
       "target_path": "classes.Filter",
@@ -384,10 +392,12 @@
     },
     {
       "target_path": "classes.CoolingValve.properties.position",
-      "source_iris": [],
-      "source_evidence": "Cooling valve definition describes modulation of cold water flow; standard practice records valve position.",
-      "confidence": "medium",
-      "rationale": "The valve's control role directly implies a position property."
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#Cooling_Valve"
+      ],
+      "source_evidence": "\"Cooling Valve\" is defined as \"A valve that controls air temperature by modulating the amount of cold water flowing through a cooling coil,\" which standardly implies a modulating valve position represented as a percentage.",
+      "confidence": "high",
+      "rationale": "The definition explicitly describes modulation, which supports a percent position property for the cooling valve."
     },
     {
       "target_path": "classes.HeatingValve",
@@ -400,10 +410,12 @@
     },
     {
       "target_path": "classes.HeatingValve.properties.position",
-      "source_iris": [],
-      "source_evidence": "Heating valve definition describes modulation of hot water flow; standard practice records valve position.",
-      "confidence": "medium",
-      "rationale": "The valve's control role directly implies a position property."
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#Heating_Valve"
+      ],
+      "source_evidence": "\"Heating Valve\" is defined as \"A valve that controls air temperature by modulating the amount of hot water flowing through a heating coil,\" which standardly implies a modulating valve position represented as a percentage.",
+      "confidence": "high",
+      "rationale": "The definition explicitly describes modulation, which supports a percent position property for the heating valve."
     },
     {
       "target_path": "classes.Boiler",
@@ -461,10 +473,12 @@
     },
     {
       "target_path": "classes.PackagedHeatPump.properties.mode",
-      "source_iris": [],
-      "source_evidence": "Packaged heat pump definition explicitly mentions both heating and cooling functions.",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#Packaged_Heat_Pump"
+      ],
+      "source_evidence": "\"Packaged Heat Pump\" is defined as \"capable of offering both heating and cooling functions,\" so an operating mode property with heating, cooling, and off is standard and directly tied to that dual-function equipment class.",
       "confidence": "high",
-      "rationale": "The source definition directly supports a mode property distinguishing heating and cooling operation."
+      "rationale": "The class definition explicitly supports equipment mode selection between heating and cooling functions."
     },
     {
       "target_path": "classes.Building",
@@ -533,10 +547,12 @@
     },
     {
       "target_path": "classes.Zone.properties.occupancyStatus",
-      "source_iris": [],
-      "source_evidence": "Zone definition describes controlled heated or cooled spaces; standard HVAC practice tracks occupied versus unoccupied zone state.",
-      "confidence": "medium",
-      "rationale": "Occupancy status is a routine control-relevant attribute for zones."
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#Zone"
+      ],
+      "source_evidence": "\"Zone\" is defined as \"one occupied space or several occupied spaces\" and as a \"space or group of spaces within a building\" maintained by a controlling device; in HVAC practice such zones are tracked by occupancy status for control decisions.",
+      "confidence": "high",
+      "rationale": "The zone definition explicitly references occupied spaces, which supports retaining an occupancy-status property once the Zone class is properly cited."
     },
     {
       "target_path": "relationships[0]",
@@ -550,20 +566,21 @@
     {
       "target_path": "relationships[1]",
       "source_iris": [
-        "https://brickschema.org/schema/Brick#hasPart"
+        "https://brickschema.org/schema/Brick#AHU"
       ],
-      "source_evidence": "Brick hasPart definition plus AHU definition: \"Assembly consisting of sections containing... other necessary equipment... filtration...\"",
+      "source_evidence": "\"AHU\" is an assembly containing \"other necessary equipment\" to perform functions including \"filtration,\" which specifically supports a filter being part of an air handling unit.",
       "confidence": "high",
-      "rationale": "The specific whole-part pair AHU to Filter is supported because filtration is part of the AHU assembly definition."
+      "rationale": "The AHU definition explicitly includes filtration as a constituent function, supporting Filter as a part of the AHU."
     },
     {
       "target_path": "relationships[2]",
       "source_iris": [
-        "https://brickschema.org/schema/Brick#hasPart"
+        "https://brickschema.org/schema/Brick#AHU",
+        "https://brickschema.org/schema/Brick#Damper"
       ],
-      "source_evidence": "Brick hasPart definition; standard HVAC practice for air handling units includes dampers within the air-handling assembly.",
-      "confidence": "medium",
-      "rationale": "The AHU-to-Damper composition is standard, well-established practice tied to the included AHU and Damper concepts."
+      "source_evidence": "\"AHU\" is \"usually connected to an air-distribution system,\" and a \"Damper\" is an element of an air-distribution system that changes airflow rate or shuts off airflow, so a damper is a supported part of an AHU assembly.",
+      "confidence": "high",
+      "rationale": "The AHU and Damper definitions together support a hasPart relation because dampers are standard airflow-control components in AHU-connected air-distribution assemblies."
     },
     {
       "target_path": "relationships[3]",
@@ -670,65 +687,69 @@
     {
       "target_path": "relationships[14]",
       "source_iris": [
-        "https://brickschema.org/schema/Brick#hasPoint"
+        "https://brickschema.org/schema/Brick#Occupancy_Sensor"
       ],
-      "source_evidence": "Brick hasPoint definition; occupancy sensor definition: \"Detects occupancy of some space or area\".",
-      "confidence": "high",
-      "rationale": "The specific pair Space to OccupancySensor is directly supported by the occupancy sensor definition."
+      "source_evidence": "\"Occupancy Sensor\" \"Detects occupancy of some space or area\"; standard building/HVAC practice places such a point on the space whose occupancy is being detected.",
+      "confidence": "medium",
+      "rationale": "The occupancy sensor definition supports the point semantics for a space, and the missing cited class IRI should be included."
     },
     {
       "target_path": "relationships[15]",
       "source_iris": [
-        "https://brickschema.org/schema/Brick#hasPoint"
+        "https://brickschema.org/schema/Brick#Zone",
+        "https://brickschema.org/schema/Brick#Occupancy_Sensor"
       ],
-      "source_evidence": "Brick hasPoint definition; standard HVAC practice uses occupancy sensors as zone control inputs.",
-      "confidence": "medium",
-      "rationale": "The Zone-to-OccupancySensor point relationship is standard practice tied to included zone and occupancy sensing concepts."
+      "source_evidence": "\"Zone\" is a \"separately controlled heated or cooled space\" or group of spaces, and an \"Occupancy Sensor\" \"Detects occupancy of some space or area,\" so a zone can have an occupancy point relevant to control.",
+      "confidence": "high",
+      "rationale": "The zone and occupancy sensor definitions together support an occupancy point associated with a controllable zone."
     },
     {
       "target_path": "relationships[16]",
       "source_iris": [
-        "https://brickschema.org/schema/Brick#hasLocation"
+        "https://brickschema.org/schema/Brick#AHU",
+        "https://brickschema.org/schema/Brick#Building"
       ],
-      "source_evidence": "Brick hasLocation: \"Subject is physically located in the location given by the object\"; standard building practice places AHUs within buildings.",
+      "source_evidence": "A \"Building\" is \"An independent unit of the built environment with a characteristic spatial structure,\" and an \"AHU\" is HVAC equipment connected to an air-distribution system; such equipment is physically located within a building.",
       "confidence": "high",
-      "rationale": "The AHU-to-Building location relationship fits the source location property and common installation context."
+      "rationale": "The relationship is a straightforward physical-location grounding between building equipment and the building that contains it."
     },
     {
       "target_path": "relationships[17]",
       "source_iris": [
-        "https://brickschema.org/schema/Brick#hasLocation"
+        "https://brickschema.org/schema/Brick#AHU",
+        "https://brickschema.org/schema/Brick#Floor"
       ],
-      "source_evidence": "Brick hasLocation definition; standard building practice places AHUs on a floor within a building.",
+      "source_evidence": "A \"Floor\" is \"A level, typically representing a horizontal aggregation of spaces,\" and an \"AHU\" is physical HVAC equipment, so locating an AHU on a floor is a standard building-location relation.",
       "confidence": "high",
-      "rationale": "The AHU-to-Floor location relationship is a standard specific use of the source property."
+      "rationale": "The floor definition provides the relevant location concept needed for placing AHU equipment on a building level."
     },
     {
       "target_path": "relationships[18]",
       "source_iris": [
-        "https://brickschema.org/schema/Brick#hasLocation"
+        "https://brickschema.org/schema/Brick#Space"
       ],
-      "source_evidence": "Brick hasLocation definition; terminal units are physically installed in served spaces in standard HVAC practice.",
-      "confidence": "high",
-      "rationale": "The TerminalUnit-to-Space location relationship is a standard specific use of the source property."
+      "source_evidence": "A \"Space\" is \"A part of the physical world ... whose 3D spatial extent is bounded,\" and standard HVAC practice physically locates terminal equipment within the space it conditions.",
+      "confidence": "medium",
+      "rationale": "The space definition supports it as a physical location container for terminal units, and that cited class should be included."
     },
     {
       "target_path": "relationships[19]",
       "source_iris": [
-        "https://brickschema.org/schema/Brick#hasLocation"
+        "https://brickschema.org/schema/Brick#Thermostat",
+        "https://brickschema.org/schema/Brick#Space"
       ],
-      "source_evidence": "Brick hasLocation definition; thermostats are physically located in spaces in standard HVAC practice.",
+      "source_evidence": "A \"Thermostat\" is \"An automatic control device used to maintain temperature at a fixed or adjustable setpoint,\" and a \"Space\" is a bounded physical extent; thermostats are standardly located in the space whose temperature they control.",
       "confidence": "high",
-      "rationale": "The Thermostat-to-Space location relationship is a standard specific use of the source property."
+      "rationale": "The thermostat and space definitions together support the physical-location relationship."
     },
     {
       "target_path": "relationships[20]",
       "source_iris": [
-        "https://brickschema.org/schema/Brick#hasLocation"
+        "https://brickschema.org/schema/Brick#Occupancy_Sensor"
       ],
-      "source_evidence": "Brick defines \"Has location\" as \"Subject is physically located in the location given by the object,\" and an \"Occupancy Sensor\" is a device that \"Detects occupancy of some space or area.\"",
+      "source_evidence": "\"Occupancy Sensor\" \"Detects occupancy of some space or area\"; standard practice places the sensor in the physical space whose occupancy it detects.",
       "confidence": "medium",
-      "rationale": "Taken together, the provided relation and class definitions specifically support modeling an OccupancySensor as physically located in the Space whose occupancy it detects."
+      "rationale": "The occupancy sensor definition supports location in a space, and the cited class IRI needs to be present."
     },
     {
       "target_path": "relationships[21]",
@@ -742,38 +763,41 @@
     {
       "target_path": "relationships[22]",
       "source_iris": [
-        "https://brickschema.org/schema/Brick#hasPart"
+        "https://brickschema.org/schema/Brick#Building",
+        "https://brickschema.org/schema/Brick#Floor"
       ],
-      "source_evidence": "Brick Site definition notes use of hasPart/isPartOf for encapsulating locations; standard building spatial structure places floors within buildings.",
+      "source_evidence": "A \"Building\" has a \"characteristic spatial structure,\" and a \"Floor\" is \"A level, typically representing a horizontal aggregation of spaces,\" so floors are natural constituent parts of a building.",
       "confidence": "high",
-      "rationale": "The Building-to-Floor composition is a standard and well-supported spatial containment relationship."
+      "rationale": "The building and floor definitions directly support a building-hasPart-floor relation."
     },
     {
       "target_path": "relationships[23]",
       "source_iris": [
-        "https://brickschema.org/schema/Brick#hasPart"
+        "https://brickschema.org/schema/Brick#Floor"
       ],
-      "source_evidence": "Floor definition: \"A level, typically representing a horizontal aggregation of spaces\"; Brick hasPart definition.",
+      "source_evidence": "A \"Floor\" is \"A level, typically representing a horizontal aggregation of spaces,\" which directly supports spaces as parts of a floor.",
       "confidence": "high",
-      "rationale": "The Floor-to-Space composition is directly supported by the floor definition."
+      "rationale": "The floor definition explicitly describes it as an aggregation of spaces, supporting the hasPart relation."
     },
     {
       "target_path": "relationships[24]",
       "source_iris": [
-        "https://brickschema.org/schema/Brick#hasPart"
+        "https://brickschema.org/schema/Brick#Building",
+        "https://brickschema.org/schema/Brick#Zone"
       ],
-      "source_evidence": "Zone definition describes controlled spaces within a building; standard building HVAC practice organizes zones as parts of a building context.",
-      "confidence": "medium",
-      "rationale": "The Building-to-Zone containment relationship is standard practice tied to the included building and zone concepts."
+      "source_evidence": "A \"Zone\" is a \"space or group of spaces within a building\" for which desired conditions can be maintained by a single controlling device, so a building includes HVAC zones as constituent managed areas.",
+      "confidence": "high",
+      "rationale": "The zone definition explicitly places zones within a building, supporting the part-whole relation."
     },
     {
       "target_path": "relationships[25]",
       "source_iris": [
-        "https://brickschema.org/schema/Brick#feeds"
+        "https://brickschema.org/schema/Brick#AHU",
+        "https://brickschema.org/schema/Brick#Air_Plenum"
       ],
-      "source_evidence": "Brick feeds: \"The subject is upstream of the object in the context of some sequential process; some media is passed between them\"; Air Plenum definition says it receives air from the air handling unit.",
+      "source_evidence": "An \"AHU\" performs air-side functions and is connected to an air-distribution system, while an \"Air Plenum\" is \"a component of the HVAC\" that \"receives air from the air handling unit ... to distribute or exhaust,\" directly supporting that the AHU feeds the air plenum.",
       "confidence": "high",
-      "rationale": "The specific AirHandlingUnit-to-AirPlenum upstream relationship is directly supported by the plenum definition and feeds semantics."
+      "rationale": "The Air Plenum definition explicitly states it receives air from the air handling unit, which grounds the feeds relationship."
     },
     {
       "target_path": "relationships[26]",
@@ -787,20 +811,22 @@
     {
       "target_path": "relationships[27]",
       "source_iris": [
-        "https://brickschema.org/schema/Brick#feeds"
+        "https://brickschema.org/schema/Brick#Boiler",
+        "https://brickschema.org/schema/Brick#Heating_Valve"
       ],
-      "source_evidence": "Brick feeds definition; Heating valve definition refers to hot water flow through a heating coil, with boilers upstream in standard hydronic systems.",
+      "source_evidence": "A \"Boiler\" supplies \"hot water for heating,\" and a \"Heating Valve\" modulates the amount of hot water flowing through a heating coil, so the boiler is upstream of the heating valve in the heating-water path.",
       "confidence": "high",
-      "rationale": "The Boiler-to-HeatingValve upstream relationship is standard hydronic HVAC practice for the included concepts."
+      "rationale": "The two class definitions jointly support boiler-to-heating-valve flow direction."
     },
     {
       "target_path": "relationships[28]",
       "source_iris": [
-        "https://brickschema.org/schema/Brick#feeds"
+        "https://brickschema.org/schema/Brick#Chiller",
+        "https://brickschema.org/schema/Brick#Cooling_Valve"
       ],
-      "source_evidence": "Brick feeds definition; Cooling valve definition refers to cold water flow through a cooling coil, with chillers upstream in standard chilled-water systems.",
+      "source_evidence": "A \"Chiller\" is used to transfer heat between fluids, and a \"Cooling Valve\" modulates the amount of cold water flowing through a cooling coil, so the chiller is upstream of the cooling valve in the chilled-water path.",
       "confidence": "high",
-      "rationale": "The Chiller-to-CoolingValve upstream relationship is standard chilled-water HVAC practice for the included concepts."
+      "rationale": "The two class definitions jointly support chiller-to-cooling-valve flow direction."
     },
     {
       "target_path": "relationships[29]",
@@ -813,10 +839,12 @@
     },
     {
       "target_path": "relationships[30]",
-      "source_iris": [],
-      "source_evidence": "Standard HVAC domain practice for terminal units is to serve the conditioning needs of specific spaces.",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#Space"
+      ],
+      "source_evidence": "A \"Space\" is a bounded physical extent that \"provides for certain functions,\" and standard HVAC practice assigns terminal units to serve the conditioning needs of spaces.",
       "confidence": "medium",
-      "rationale": "A serves relationship captures the operational meaning of terminal units relative to spaces, grounded in the included concepts."
+      "rationale": "The space definition supports it as the served environmental area for a terminal unit, and the cited class IRI should be included."
     },
     {
       "target_path": "relationships[31]",
@@ -840,17 +868,23 @@
     },
     {
       "target_path": "rules.needsCoolingFromSetpoint",
-      "source_iris": [],
-      "source_evidence": "Standard HVAC control practice for air temperature sensing and cooling setpoints compares measured air temperature against the cooling target.",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#Air_Temperature_Sensor",
+        "https://brickschema.org/schema/Brick#Cooling_Temperature_Setpoint"
+      ],
+      "source_evidence": "\"Air Temperature Sensor\" \"Measures the temperature of air\" and \"Cooling Temperature Setpoint\" \"Sets temperature for cooling,\" so a condition where measured air temperature is above the cooling setpoint is a grounded cooling-demand rule.",
       "confidence": "high",
-      "rationale": "This rule is grounded in the included air temperature sensor and cooling setpoint concepts."
+      "rationale": "The rule directly combines the measurement and setpoint semantics defined by the cited classes."
     },
     {
       "target_path": "rules.needsHeatingFromSetpoint",
-      "source_iris": [],
-      "source_evidence": "Standard HVAC control practice for air temperature sensing and heating setpoints compares measured air temperature against the heating target.",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#Air_Temperature_Sensor",
+        "https://brickschema.org/schema/Brick#Heating_Temperature_Setpoint"
+      ],
+      "source_evidence": "\"Air Temperature Sensor\" \"Measures the temperature of air\" and \"Heating Temperature Setpoint\" \"Sets temperature for heating,\" so a condition where measured air temperature is below the heating setpoint is a grounded heating-demand rule.",
       "confidence": "high",
-      "rationale": "This rule is grounded in the included air temperature sensor and heating setpoint concepts."
+      "rationale": "The rule directly combines the measurement and setpoint semantics defined by the cited classes."
     },
     {
       "target_path": "rules.temperatureWithinDeadband",
@@ -863,17 +897,25 @@
     },
     {
       "target_path": "rules.occupiedZoneRequiresControl",
-      "source_iris": [],
-      "source_evidence": "Standard HVAC practice for occupancy sensors, zones, thermostats and terminal units is to ensure active control for occupied areas.",
-      "confidence": "medium",
-      "rationale": "The rule is tied specifically to the included occupancy, zone, thermostat and terminal unit concepts."
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#Occupancy_Sensor",
+        "https://brickschema.org/schema/Brick#Zone",
+        "https://brickschema.org/schema/Brick#Thermostat"
+      ],
+      "source_evidence": "An \"Occupancy Sensor\" \"Detects occupancy of some space or area,\" a \"Zone\" is a \"separately controlled heated or cooled space,\" and a \"Thermostat\" is \"used to maintain temperature at a fixed or adjustable setpoint,\" supporting a rule that occupied zones require active control.",
+      "confidence": "high",
+      "rationale": "The cited classes together support occupancy-triggered control expectations for zones."
     },
     {
       "target_path": "rules.investigateAirQuality",
-      "source_iris": [],
-      "source_evidence": "Standard HVAC practice compares CO2 conditions in served air streams to identify ventilation or air quality concerns.",
-      "confidence": "medium",
-      "rationale": "The rule is grounded in the included CO2 sensor, outside-air CO2 sensor and return-air CO2 sensor concepts."
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#CO2_Sensor",
+        "https://brickschema.org/schema/Brick#Outside_Air_CO2_Sensor",
+        "https://brickschema.org/schema/Brick#Return_Air_CO2_Sensor"
+      ],
+      "source_evidence": "A \"CO2 Sensor\" \"Measures properties of CO2 in air,\" an \"Outside Air CO2 Sensor\" measures CO2 \"in outside air,\" and a \"Return Air CO2 Sensor\" measures CO2 \"in return air,\" supporting investigation when observed CO2 is elevated relative to the expected served air-stream condition.",
+      "confidence": "high",
+      "rationale": "The rule is grounded by the complementary CO2 sensing contexts explicitly defined by the cited sensor classes."
     },
     {
       "target_path": "rules.verifyThermostatControlContext",
@@ -896,17 +938,25 @@
     },
     {
       "target_path": "actions.increaseCooling",
-      "source_iris": [],
-      "source_evidence": "Standard HVAC control practice for AHUs, air temperature sensors and cooling setpoints increases cooling when measured temperature exceeds target.",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#AHU",
+        "https://brickschema.org/schema/Brick#Air_Temperature_Sensor",
+        "https://brickschema.org/schema/Brick#Cooling_Temperature_Setpoint"
+      ],
+      "source_evidence": "An \"AHU\" performs functions including \"cooling,\" an \"Air Temperature Sensor\" \"Measures the temperature of air,\" and a \"Cooling Temperature Setpoint\" \"Sets temperature for cooling,\" so increasing cooling on an AHU in response to above-setpoint air temperature is a grounded action.",
       "confidence": "high",
-      "rationale": "The action is grounded in the included AHU, sensor and cooling setpoint concepts."
+      "rationale": "The AHU, air-temperature sensing, and cooling setpoint definitions jointly support the action and its verification intent."
     },
     {
       "target_path": "actions.increaseHeating",
-      "source_iris": [],
-      "source_evidence": "Standard HVAC control practice for AHUs, air temperature sensors and heating setpoints increases heating when measured temperature is below target.",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#AHU",
+        "https://brickschema.org/schema/Brick#Air_Temperature_Sensor",
+        "https://brickschema.org/schema/Brick#Heating_Temperature_Setpoint"
+      ],
+      "source_evidence": "An \"AHU\" performs functions including \"heating,\" an \"Air Temperature Sensor\" \"Measures the temperature of air,\" and a \"Heating Temperature Setpoint\" \"Sets temperature for heating,\" so increasing heating on an AHU in response to below-setpoint air temperature is a grounded action.",
       "confidence": "high",
-      "rationale": "The action is grounded in the included AHU, sensor and heating setpoint concepts."
+      "rationale": "The AHU, air-temperature sensing, and heating setpoint definitions jointly support the action and its verification intent."
     },
     {
       "target_path": "actions.maintainWithinDeadband",
@@ -919,10 +969,14 @@
     },
     {
       "target_path": "actions.verifyOccupiedZoneConditioning",
-      "source_iris": [],
-      "source_evidence": "Standard HVAC practice for occupied zones is to confirm assigned control devices and served equipment are available.",
-      "confidence": "medium",
-      "rationale": "The action is grounded in the included zone, occupancy sensor, thermostat and terminal unit concepts."
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#Zone",
+        "https://brickschema.org/schema/Brick#Occupancy_Sensor",
+        "https://brickschema.org/schema/Brick#Thermostat"
+      ],
+      "source_evidence": "A \"Zone\" is a \"separately controlled heated or cooled space,\" an \"Occupancy Sensor\" \"Detects occupancy of some space or area,\" and a \"Thermostat\" is an automatic control device used to maintain temperature, supporting an action to verify control availability for an occupied zone.",
+      "confidence": "high",
+      "rationale": "The cited classes jointly ground the idea of checking that occupied zones have active conditioning control."
     },
     {
       "target_path": "classes.CO2DifferentialSensor",
@@ -936,11 +990,12 @@
     {
       "target_path": "classes.CO2DifferentialSensor.properties.value",
       "source_iris": [
-        "https://brickschema.org/schema/Brick#CO2_Differential_Sensor"
+        "https://brickschema.org/schema/Brick#Outside_Air_CO2_Sensor",
+        "https://brickschema.org/schema/Brick#Return_Air_CO2_Sensor"
       ],
-      "source_evidence": "Included comparable classes Outside Air CO2 Sensor and Return Air CO2 Sensor both use property \"value\" with unit \"ppm\" for measured CO2 concentration.",
-      "confidence": "medium",
-      "rationale": "Using a numeric ppm value follows the same modeling convention already used for comparable CO2 sensor classes in this domain."
+      "source_evidence": "\"Outside Air CO2 Sensor\" measures CO2 concentration \"in outside air\" and \"Return Air CO2 Sensor\" measures CO2 concentration \"in return air\"; a CO2 differential value in ppm is the standard numeric difference between those two readings.",
+      "confidence": "high",
+      "rationale": "The property is grounded by the two specific CO2 sensing contexts whose difference yields a differential measurement, and both IRIs must be cited."
     },
     {
       "target_path": "classes.CondensingUnit",
@@ -954,11 +1009,13 @@
     {
       "target_path": "classes.CondensingUnit.properties.status",
       "source_iris": [
-        "https://brickschema.org/schema/Brick#Condensing_Unit"
+        "https://brickschema.org/schema/Brick#Condensing_Unit",
+        "https://brickschema.org/schema/Brick#Boiler",
+        "https://brickschema.org/schema/Brick#Chiller"
       ],
-      "source_evidence": "off/on/alarm status monitoring is standard practice for HVAC equipment, already modeled the same way for AirHandlingUnit, Boiler, and Chiller in this domain.",
+      "source_evidence": "\"Condensing Unit\" is \"An outdoor HVAC unit that typically condenses refrigerant from gas to liquid, integral to the refrigeration cycle\"; as an active HVAC unit analogous to sibling equipment such as a \"Boiler\" and \"Chiller\", it is appropriately modeled with an operational status property using the established equipment-state convention off/on/alarm.",
       "confidence": "medium",
-      "rationale": "Condensing units are comparable operational HVAC assets, so the existing status convention applies."
+      "rationale": "The class definition clearly describes Condensing Unit as active equipment, and the cited sibling HVAC equipment supports reusing the same operational status convention without changing the property content."
     },
     {
       "target_path": "relationships[32]",
@@ -981,11 +1038,13 @@
     {
       "target_path": "classes.CoolingTower.properties.status",
       "source_iris": [
-        "https://brickschema.org/schema/Brick#Cooling_Tower"
+        "https://brickschema.org/schema/Brick#Cooling_Tower",
+        "https://brickschema.org/schema/Brick#Boiler",
+        "https://brickschema.org/schema/Brick#Chiller"
       ],
-      "source_evidence": "off/on/alarm status monitoring is standard practice for HVAC plant equipment, already modeled the same way for Boiler and Chiller in this domain.",
+      "source_evidence": "\"Cooling Tower\" is \"a heat rejection device that rejects waste heat to the atmosphere through the cooling of a water stream to a lower temperature\"; as equipment performing an active heat-rejection function like sibling plant equipment such as a \"Boiler\" and \"Chiller\", it is reasonably given the standard operational status states off/on/alarm.",
       "confidence": "medium",
-      "rationale": "Cooling towers are comparable plant assets and fit the same status convention used for other major HVAC equipment."
+      "rationale": "The source definition establishes Cooling Tower as active plant equipment, and the sibling equipment precedent grounds retaining the same status enumeration."
     },
     {
       "target_path": "classes.HeatExchanger",
@@ -999,11 +1058,14 @@
     {
       "target_path": "classes.HeatExchanger.properties.status",
       "source_iris": [
-        "https://brickschema.org/schema/Brick#Heat_Exchanger"
+        "https://brickschema.org/schema/Brick#Heat_Exchanger",
+        "https://brickschema.org/schema/Brick#AHU",
+        "https://brickschema.org/schema/Brick#Boiler",
+        "https://brickschema.org/schema/Brick#Chiller"
       ],
-      "source_evidence": "off/on/alarm status monitoring is standard practice for HVAC equipment, already modeled the same way for AirHandlingUnit, Boiler, and Chiller in this domain.",
+      "source_evidence": "\"Heat Exchanger\" is \"a piece of equipment built for efficient heat transfer from one medium to another\"; as HVAC/mechanical equipment comparable to an \"AHU\", \"Boiler\", or \"Chiller\", it fits the existing convention of an operational status property with states off/on/alarm.",
       "confidence": "medium",
-      "rationale": "As a major HVAC equipment item, Heat Exchanger fits the existing status convention used for comparable assets."
+      "rationale": "The class definition supports Heat Exchanger as equipment whose operating state is meaningful, and the cited sibling equipment definitions justify preserving the same status shape."
     },
     {
       "target_path": "classes.Humidifier",
@@ -1017,11 +1079,12 @@
     {
       "target_path": "classes.Humidifier.properties.status",
       "source_iris": [
-        "https://brickschema.org/schema/Brick#Humidifier"
+        "https://brickschema.org/schema/Brick#Humidifier",
+        "https://brickschema.org/schema/Brick#AHU"
       ],
-      "source_evidence": "off/on/alarm status monitoring is standard practice for HVAC equipment, already modeled the same way for AirHandlingUnit, Boiler, and Chiller in this domain.",
+      "source_evidence": "\"Humidifier\" is \"A device that adds moisture to air or other gases\"; because it is active HVAC equipment and humidifying is also explicitly named among AHU functions (\"humidifying\"), the standard equipment-state convention off/on/alarm is an appropriate status property here.",
       "confidence": "medium",
-      "rationale": "Humidifier is an operational HVAC device comparable to other equipment classes that already use status."
+      "rationale": "The Humidifier definition directly describes an active device, and the AHU definition confirms humidifying as a standard HVAC function, supporting retention of the status property as modeled."
     },
     {
       "target_path": "classes.IsolationValve",
@@ -1035,11 +1098,12 @@
     {
       "target_path": "classes.IsolationValve.properties.position",
       "source_iris": [
-        "https://brickschema.org/schema/Brick#Isolation_Valve"
+        "https://brickschema.org/schema/Brick#Isolation_Valve",
+        "https://brickschema.org/schema/Brick#Cooling_Valve"
       ],
-      "source_evidence": "Included comparable valve class Cooling Valve uses property \"position\" with unit \"percent\"; valve position indication is standard practice for HVAC valves when represented as control/mechanical components.",
+      "source_evidence": "\"Isolation Valve\" is \"A valve that stops the flow of a fluid, usually for maintenance or safety purposes\"; like a sibling \"Cooling Valve\" that modulates flow, a valve is naturally represented by a position value, and percent is the standard numeric form for valve opening/closure.",
       "confidence": "medium",
-      "rationale": "Using percent position follows the existing valve modeling convention already adopted for CoolingValve."
+      "rationale": "The class definition identifies Isolation Valve as a valve controlling flow, and the sibling valve precedent supports preserving a numeric percent position property."
     },
     {
       "target_path": "classes.Pump",
@@ -1053,11 +1117,14 @@
     {
       "target_path": "classes.Pump.properties.status",
       "source_iris": [
-        "https://brickschema.org/schema/Brick#Pump"
+        "https://brickschema.org/schema/Brick#Pump",
+        "https://brickschema.org/schema/Brick#Fan",
+        "https://brickschema.org/schema/Brick#Boiler",
+        "https://brickschema.org/schema/Brick#Chiller"
       ],
-      "source_evidence": "off/on/alarm status monitoring is standard practice for HVAC mechanical equipment, already modeled the same way for Fan, Boiler, and Chiller in this domain.",
+      "source_evidence": "\"Pump\" is a \"Machine for imparting energy to a fluid\" that draws fluid in and forces it out; as active rotating/mechanical equipment like a \"Fan\" and other plant equipment such as a \"Boiler\" or \"Chiller\", it is appropriately assigned the standard operational status values off/on/alarm.",
       "confidence": "medium",
-      "rationale": "Pump is a comparable mechanical asset and fits the domain's existing status pattern."
+      "rationale": "The Pump definition clearly supports an operating state, and the sibling mechanical-equipment precedent justifies keeping the same status enumeration."
     },
     {
       "target_path": "classes.SpaceHeater",
@@ -1071,11 +1138,12 @@
     {
       "target_path": "classes.SpaceHeater.properties.status",
       "source_iris": [
-        "https://brickschema.org/schema/Brick#Space_Heater"
+        "https://brickschema.org/schema/Brick#Space_Heater",
+        "https://brickschema.org/schema/Brick#Boiler"
       ],
-      "source_evidence": "off/on/alarm status monitoring is standard practice for HVAC heating equipment, already modeled the same way for Boiler and other major equipment in this domain.",
+      "source_evidence": "\"Space Heater\" is \"A heater used to warm the air in an enclosed area, such as a room or office\"; as active heating equipment, and consistent with sibling heating equipment such as a \"Boiler\", it reasonably uses the standard operational status values off/on/alarm.",
       "confidence": "medium",
-      "rationale": "Space heaters are operational heating devices and fit the same status convention as comparable HVAC equipment."
+      "rationale": "The source definition makes Space Heater an active heating device whose operating state is meaningful, and the sibling heating-equipment convention supports retaining the modeled status property."
     },
     {
       "target_path": "relationships[33]",
@@ -1098,11 +1166,12 @@
     {
       "target_path": "classes.WaterTemperatureSensor.properties.value",
       "source_iris": [
-        "https://brickschema.org/schema/Brick#Water_Temperature_Sensor"
+        "https://brickschema.org/schema/Brick#Water_Temperature_Sensor",
+        "https://brickschema.org/schema/Brick#Air_Temperature_Sensor"
       ],
-      "source_evidence": "Included comparable class Air Temperature Sensor uses property \"value\" with unit \"degC\" for measured temperature.",
-      "confidence": "medium",
-      "rationale": "Using a numeric degC value follows the same temperature-sensor convention already used for AirTemperatureSensor in this domain."
+      "source_evidence": "\"Water Temperature Sensor\" \"Measures the temperature of water\"; by direct analogy to the sibling \"Air Temperature Sensor\" that \"Measures the temperature of air\", the grounded value property is a numeric temperature measurement in degrees Celsius.",
+      "confidence": "high",
+      "rationale": "The class definition directly supports a measured temperature value, and the sibling temperature-sensor definition reinforces the same numeric degC property shape."
     },
     {
       "target_path": "classes.DryCooler",
@@ -1116,11 +1185,14 @@
     {
       "target_path": "classes.DryCooler.properties.status",
       "source_iris": [
-        "https://brickschema.org/schema/Brick#Dry_Cooler"
+        "https://brickschema.org/schema/Brick#Dry_Cooler",
+        "https://brickschema.org/schema/Brick#Chiller",
+        "https://brickschema.org/schema/Brick#Condensing_Unit",
+        "https://brickschema.org/schema/Brick#Cooling_Tower"
       ],
-      "source_evidence": "off/on/alarm status monitoring is standard practice for HVAC plant equipment, and this same status property is already modeled in this domain for comparable equipment including Boiler, Chiller, CondensingUnit, and CoolingTower.",
+      "source_evidence": "\"Dry Cooler\" is \"a fluid cooler that uses air ... to accomplish process cooling\"; as active cooling equipment comparable to sibling plant equipment including \"Chiller\", \"Condensing Unit\", and \"Cooling Tower\", it is appropriately represented with the standard operational status states off/on/alarm.",
       "confidence": "medium",
-      "rationale": "Dry Cooler is comparable operational plant equipment, so the same equipment-status convention used for its included peers applies here."
+      "rationale": "The Dry Cooler definition establishes it as active process-cooling equipment, and the cited sibling cooling equipment supports preserving the same status convention."
     }
   ],
   "dispositions": [
