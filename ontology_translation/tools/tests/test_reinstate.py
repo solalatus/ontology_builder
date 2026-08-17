@@ -219,7 +219,10 @@ class ApplyReinstatementsTests(unittest.TestCase):
                 "source_iri": "http://ex.org#Compressor",
                 "action": "reinstate",
                 "class_name": "Compressor",
-                "class_content": {"meaning": "Compresses refrigerant gas.", "aliases": [], "properties": {}},
+                "class_content": {
+                    "meaning": "Compresses refrigerant gas.", "aliases": [],
+                    "properties": {"status": {"type": "text", "allowed": ["off", "on", "alarm"]}},
+                },
                 "new_relationships": [{"name": "hasPart", "from": "CondensingUnit", "to": "Compressor", "meaning": "x"}],
                 "source_evidence": "e",
                 "confidence": "high",
@@ -236,6 +239,7 @@ class ApplyReinstatementsTests(unittest.TestCase):
 
         target_paths = {m["target_path"] for m in translation["mappings"]}
         self.assertIn("classes.Compressor", target_paths)
+        self.assertIn("classes.Compressor.properties.status", target_paths)
         self.assertIn("relationships[1]", target_paths)
 
         disposition = next(d for d in translation["dispositions"] if d["source_iri"] == "http://ex.org#Compressor")
@@ -247,6 +251,47 @@ class ApplyReinstatementsTests(unittest.TestCase):
 
         report = validate_domain(domain)
         self.assertTrue(report.ok, report.errors)
+
+    def test_reinstate_with_no_properties_adds_only_the_class_mapping(self):
+        # Regression: a real reinstate run on Brick HVAC dropped provenance
+        # coverage to 93.6% because reinstated classes' properties never
+        # got their own mapping, only the class itself did -- every
+        # property is its own generated element for the provenance hard
+        # gate (evaluate.py's _iter_generated_elements).
+        domain = json.loads(json.dumps(SAMPLE_DOMAIN))
+        translation = json.loads(json.dumps(SAMPLE_TRANSLATION))
+        reinstatements = [
+            {
+                "source_iri": "http://ex.org#Compressor", "action": "reinstate", "class_name": "Compressor",
+                "class_content": {"meaning": "m", "aliases": [], "properties": {}},
+                "source_evidence": "e", "confidence": "high", "rationale": "r",
+            }
+        ]
+        reinstate_mod.apply_reinstatements(domain, translation, reinstatements)
+        target_paths = {m["target_path"] for m in translation["mappings"]}
+        self.assertIn("classes.Compressor", target_paths)
+        self.assertFalse(any(p.startswith("classes.Compressor.properties.") for p in target_paths))
+
+    def test_reinstate_with_multiple_properties_maps_each_one(self):
+        domain = json.loads(json.dumps(SAMPLE_DOMAIN))
+        translation = json.loads(json.dumps(SAMPLE_TRANSLATION))
+        reinstatements = [
+            {
+                "source_iri": "http://ex.org#Compressor", "action": "reinstate", "class_name": "Compressor",
+                "class_content": {
+                    "meaning": "m", "aliases": [],
+                    "properties": {
+                        "status": {"type": "text", "allowed": ["off", "on"]},
+                        "capacity": {"type": "number", "unit": "kW"},
+                    },
+                },
+                "source_evidence": "e", "confidence": "high", "rationale": "r",
+            }
+        ]
+        reinstate_mod.apply_reinstatements(domain, translation, reinstatements)
+        target_paths = {m["target_path"] for m in translation["mappings"]}
+        self.assertIn("classes.Compressor.properties.status", target_paths)
+        self.assertIn("classes.Compressor.properties.capacity", target_paths)
 
     def test_reground_updates_the_note_and_leaves_disposition_category_unchanged(self):
         domain = json.loads(json.dumps(SAMPLE_DOMAIN))

@@ -241,6 +241,16 @@ def apply_reinstatements(domain_data: dict, translation_data: dict, reinstatemen
         classes[class_name] = r["class_content"]
         provenance = {"source_evidence": r["source_evidence"], "confidence": r["confidence"], "rationale": r["rationale"]}
         mappings.append({"target_path": f"classes.{class_name}", "source_iris": [source_iri], **provenance})
+        # Every property is its own generated element for the provenance
+        # hard gate (_iter_generated_elements in evaluate.py), same as a
+        # normal compile -- found for real: reinstating 9 classes with real
+        # properties but only ever mapping the class itself dropped
+        # provenance coverage to 93.6%. The property was grounded in the
+        # same single reinstate call as its owning class (the prompt never
+        # asked for separate per-property evidence), so it inherits that
+        # same evidence/confidence/rationale rather than going unmapped.
+        for prop_name in (r["class_content"].get("properties") or {}).keys():
+            mappings.append({"target_path": f"classes.{class_name}.properties.{prop_name}", "source_iris": [source_iri], **provenance})
 
         new_relationship_paths = []
         for rel in r.get("new_relationships") or []:
