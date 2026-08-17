@@ -315,12 +315,11 @@ terms, do not require a literal source quote for everything:
 
 1. A literal or paraphrased snippet from the source ontology (an RDF label, comment, or definition).
 2. A citation of standard, well-established domain practice tied to the *specific* named concepts the
-   target element actually involves (e.g. "standard practice for a temperature sensor and a temperature
-   setpoint on the same controlled unit", or, in an unrelated domain, "standard practice requiring an
-   approved purchase order before an invoice is paid"). This is a deliberately sanctioned evidence
-   category for this pipeline's compiler, valid in *any* domain it's applied to -- do not classify an
-   element "unsupported" merely because its evidence is a standard-practice citation rather than a
-   literal source quote.
+   target element actually involves -- practice for whatever domain the ontology being judged actually
+   is, not any one domain in particular. This is a deliberately sanctioned evidence category for this
+   pipeline's compiler, valid in *any* domain it's applied to -- do not classify an element "unsupported"
+   merely because its evidence is a standard-practice citation rather than a literal source quote, and do
+   not weigh this evidence category differently depending on which domain happens to be in front of you.
 
 When present, you will also be given `actual_source_class_definitions` -- the real, independently
 looked-up source text for the class(es) the target element involves (resolved from the source ontology

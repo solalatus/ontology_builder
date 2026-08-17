@@ -71,9 +71,9 @@ Respond with **exactly one JSON object**, no prose, no markdown fences:
       "action": "replace",
       "new_relationship": {
         "name": "hasPart",
-        "from": "CondensingUnit",
-        "to": "Compressor",
-        "meaning": "The compressor is a component of the condensing unit.",
+        "from": "CorrectWholeClass",
+        "to": "PartClass",
+        "meaning": "PartClass is a component of CorrectWholeClass.",
         "aliases": []
       },
       "source_evidence": "...",

@@ -100,8 +100,7 @@ Rules for this shape:
   status; write the states out as strings like `"off"`/`"on"` instead. This
   matches `agent_ontology_spec.md`'s `allowed: string[] | null` typing
   exactly, and mixing bool/string in one list is a real type violation, not
-  a style choice (found on the Brick HVAC translation's equipment `status`
-  properties via manual spot-check — see `domains/brick-hvac/`).
+  a style choice.
 - `relationships` is a **list**, not a mapping — one entry per relationship,
   `{name, from, to, meaning, aliases}`, where `from`/`to` are class names
   that must exist in `classes`. `name` is camelCase, derived from how a
@@ -126,44 +125,39 @@ Rules for this shape:
 - Datatype properties may become class properties. Map XSD datatypes
   *approximately* to `text`, `number`, `date`, `boolean` — there is no exact
   round-trip requirement. **Beyond the datatype properties handed to you
-  explicitly**, also consider properties a domain expert would obviously
-  attribute to a class from its name and definition alone — this holds in
-  any domain, not only a physical/sensor one: a `CO2_Level_Sensor` measures
-  a CO2 level/concentration and a `Fan` has an on/off `status` just as
-  plainly as a `Loan` has a `principalAmount` or an `Invoice` has a
-  `dueDate` — ground each such inferred property in the class's own
-  label/definition text in `translation.json`'s rationale, the same as any
-  other mapping.
+  explicitly**, also consider properties a domain expert in *whatever
+  domain you are actually compiling* would obviously attribute to a class
+  from its name and definition alone — a class whose name and definition
+  describe it as measuring, holding, or classifying something usually
+  implies a property for that value or state, even when the source never
+  declared it as a formal datatype property. Ground each such inferred
+  property in the class's own label/definition text in `translation.json`'s
+  rationale, the same as any other mapping.
 - Object properties may become relationships **only** when the source
   semantics clearly support a direction and both endpoints resolve to
   classes you are including. Many source ontologies declare an object
-  property's *existence and general meaning* (e.g. "X hasPoint Y means X
-  has a source of telemetry Y") without declaring per-class domain/range —
-  so a *specific* endpoint pair (e.g. "an AHU specifically hasPoint an
-  AirTemperatureSetpoint" in a building/HVAC ontology, or "a Loan
-  specifically hasParty a Borrower" in a finance ontology) is frequently
-  standard, well-established domain practice rather than something the
-  source states as a per-pair axiom. That is fine to include, but **cite it
-  as such explicitly** in `translation.json` — e.g. "standard practice: an
-  AHU is commonly equipped with an air temperature setpoint for control" —
-  rather than only citing the generic property definition, which does not
-  by itself justify *that specific pair*. This is the same standard-practice
-  grounding already described above for rules/actions/inferred properties;
-  it applies to relationship endpoint pairs too.
+  property's *existence and general meaning* (what the relationship type
+  itself represents) without declaring which specific pairs of classes it
+  actually connects — so a *specific* endpoint pair is frequently standard,
+  well-established practice for the domain at hand rather than something
+  the source states as a per-pair axiom. That is fine to include, but
+  **cite it as such explicitly** in `translation.json` — as a standard-
+  practice claim tied to those two *specific* classes — rather than only
+  citing the generic property definition, which does not by itself justify
+  *that specific pair*. This is the same standard-practice grounding
+  already described above for rules/actions/inferred properties; it
+  applies to relationship endpoint pairs too.
 - **Composition claims (`hasPart` and its equivalents) need the strongest
   evidence of any relationship, because a fluent-sounding standard-practice
   sentence is easiest to write — and easiest to over-trust — for exactly
-  this kind of claim.** Found for real: a compile once produced "Chiller
-  hasPart Compressor" on a rationale that read as confident and plausible,
-  but the source material said no such thing about a Chiller at all — a
-  *different*, related class's definition did. Before emitting any
-  composition edge, check that the evidence you're citing is actually about
-  the *specific* class named as the whole, not merely about something
-  related, upstream, downstream, or in the same subsystem. If your best
-  evidence for "X hasPart Y" is really evidence about a different class Z
-  containing Y, the honest edge is "Z hasPart Y", not "X hasPart Y" — even
-  if X and Z are closely related (e.g. one is composed of the other, or
-  they're commonly deployed together).
+  this kind of claim.** Before emitting any composition edge, check that
+  the evidence you're citing is actually about the *specific* class named
+  as the whole, not merely about something related, upstream, downstream,
+  or otherwise associated with it. If your best evidence for "X hasPart Y"
+  is really evidence about a different class Z containing Y, the honest
+  edge is "Z hasPart Y", not "X hasPart Y" — even when X and Z are closely
+  related (e.g. one commonly appears alongside the other, or one is itself
+  built in part from the other).
 - Enumerations (`owl:oneOf`) may become a property's `allowed` list **only**
   when clearly associated with one specific property.
 - **`rdfs:subClassOf` edges MUST NOT become `relationships` entries.**
@@ -192,18 +186,16 @@ of evidence:
 2. **Standard, well-established domain practice directly tied to the named
    concepts you are including**, even when the source ontology itself is
    purely descriptive/structural and never states it as an RDF axiom. This
-   is a general principle, not a physical/sensor-domain one — apply it
-   equally in whatever domain you're compiling:
-   - A building/HVAC ontology with both a `Temperature_Sensor` and a
-     `Temperature_Setpoint` for the same zone: it's standard, well-known
-     HVAC practice — not a fabrication — that a control decision compares
-     the two; write that as a rule.
-   - A finance ontology with both an `Invoice` and a `PurchaseOrder`: it's
-     standard, well-known accounts-payable practice — equally not a
-     fabrication — that an invoice is matched against its purchase order
-     before approval; write that as a rule just the same.
-   Cite "standard domain practice for <the specific concepts involved>" as
-   the rationale in `translation.json`, the same as any other mapping.
+   principle applies identically regardless of what domain you're actually
+   compiling — do not calibrate how readily you apply it based on which
+   domain this happens to be. If the classes and relationships you're
+   including imply an obvious operational fact any practitioner in *that*
+   domain would recognize as routine (e.g. two included concepts that are
+   commonly compared, checked against each other, or required together
+   before some action proceeds), that is standard practice, not a
+   fabrication — write it as a rule. Cite "standard domain practice for
+   <the specific concepts involved>" as the rationale in
+   `translation.json`, the same as any other mapping.
 
 This is still bounded, not free invention:
 
@@ -212,9 +204,10 @@ This is still bounded, not free invention:
   never a generic industry platitude unconnected to any included class.
 - Do not invent numeric thresholds, specific values, or procedural details
   the source and standard practice don't support — state the condition/
-  effect at the level of generality the evidence actually supports (e.g.
-  "zone temperature deviates from setpoint" is supportable; "deviates by
-  more than 2°F for 10 minutes" usually is not, unless the source says so).
+  effect at the level of generality the evidence actually supports (a
+  qualitative comparison between two included concepts is often
+  supportable; an invented precise threshold or timing usually is not,
+  unless the source itself states one).
 - **Empty `rules: {}` / `actions: {}` is still the correct output** when a
   domain is genuinely and entirely descriptive with no operational angle
   even at the standard-practice level (this is expected for some domains,
