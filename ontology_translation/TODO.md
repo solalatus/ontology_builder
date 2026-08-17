@@ -52,14 +52,24 @@ succeeds end to end. Until then, this file is the only record.
   wording is recovered from git history, and every real compile run pins
   itself to exact wording via a SHA-256 recorded in `run-manifest.json`
   (`compile.py`'s `prompt_sha256()`) rather than via a versioned filename.
-- **#106 (Brick HVAC v1.4.4): pipeline work done, all hard gates pass, PR
-  #115 merged into `main`.** Real source fetched and checksum-pinned;
-  scoped to 81 classes via 6 hand-picked HVAC entry points. Six real
-  pipeline bugs found and fixed by actually running this on real data
-  (none caught by any synthetic test) — full account in the 2026-08-16
-  Log entry. Final accepted candidate: 175 elements, structurally clean,
-  100% provenance, zero majority-unsupported, assembled under
-  `ontology_translation/domains/brick-hvac/`.
+- **#106 (Brick HVAC v1.4.4): pipeline work done, all hard gates pass.**
+  Real source fetched and checksum-pinned; scoped to 81 classes via 6
+  hand-picked HVAC entry points. **2026-08-17: full clean pipeline rerun
+  from a genuinely blank slate** (wiped outputs, re-fetched, re-extracted,
+  re-compiled, re-evaluated, repaired) replaced the earlier iteratively-
+  patched candidate with a fresh one built entirely through the current
+  tooling. Four more real pipeline bugs found and fixed this pass (on top
+  of the six from the original run) — full account in the 2026-08-17 Log
+  entry. Final accepted candidate: `reference.domain.yaml` 29 classes /
+  32 relationships / 7 rules / 5 actions, 105 source-mapped elements,
+  structurally clean, 100% provenance, 100% reverse coverage, zero
+  majority-unsupported, assembled under
+  `ontology_translation/domains/brick-hvac/`. Deliberately narrower than
+  the prior candidate (48 classes) — this run's compiler judged more of
+  the scoped subset out-of-scope for the selected operational slice, and
+  every one of those calls is disclosed via a real `disposition` +
+  justification note, not silently dropped (verified). Not yet merged to
+  `main` — still on `ontology-translation/106-manual-spot-check`.
 - **In-session manual spot-check done, 2026-08-17: 17/18 accept, 1
   reject, real bug found and fixed.** 10%-stratified sample (18 of 175
   artefacts, seed 106) reviewed live against original Brick source docs.
@@ -802,3 +812,159 @@ reference and record deltas/decisions here instead.)*
   for the whole Brick HVAC effort across every phase so far: **~$8.61**.
 
   **#106 still open.**
+
+- 2026-08-17 — **Full clean pipeline rerun from a blank slate**, per
+  explicit instruction: *"irrespective of cost, do a real clean rerun of
+  the full pipeline from scratch. we need to stabilize full pipeline
+  behavior, not just patch things. wipe outputs and temporal results,
+  clean start, run again."* This deliberately rejected the prior pattern
+  of hand-patching an already-compiled artifact, in favor of validating
+  the pipeline itself — fetch → extract → compile → validate → evaluate →
+  repair — end to end, using every fix made so far, starting from nothing.
+  Wiped `/tmp/brick-source/` entirely and all 7 generated
+  `domains/brick-hvac/` artifacts (kept `source-manifest.yaml`).
+
+  **Bug #1 (real, found immediately): `source-manifest.yaml`'s
+  `scope.max_depth: 1` was never actually read.** Re-extracting from the
+  identical checksum-verified source with the identical manifest produced
+  **1622 classes instead of the original 81**. Root cause: `extract.py`'s
+  CLI only ever obeyed a separate, easy-to-forget `--max-depth` flag,
+  defaulting to unlimited whenever it was omitted — `SourceManifest` never
+  parsed `scope.max_depth` from the manifest at all, despite the field
+  being written into every manifest as if it were binding. A
+  reproducibility record that doesn't actually reproduce. Fixed:
+  `source_manifest.py` now parses/validates/round-trips `scope_max_depth`;
+  `extract.py --max-depth` falls back to the manifest's value when the
+  flag isn't given (same precedence pattern as `compile.py --runs`). 7 new
+  tests, including 3 new CLI-level end-to-end tests specifically because
+  the old `SelectScopeTests` only ever called `select_scope()` directly
+  with an explicit kwarg and could never have caught a CLI-wiring bug —
+  worth remembering as a coverage-gap lesson for future tooling. Re-ran
+  extraction: 81 classes, matching the original.
+
+  **Compiled 3 fresh runs (~$1.02).** All 3 failed structural validation
+  on `allowed_not_all_strings` (4/7/4 errors) — the exact same
+  boolean-in-`allowed` defect from the original manual spot-check,
+  reproduced on every single independent run **despite** the explicit
+  prompt instruction against it added back then. Proof that prompt text
+  alone isn't a reliable defense for this class of defect.
+
+  **Bug #2: added a deterministic code-level normalization step to
+  `compile.py`,** rather than relying on the model to comply.
+  `normalize_allowed_lists()` walks every class property's `allowed` list
+  after each run, coerces non-string entries to strings (`True`/`False` ->
+  `"on"`/`"off"`, matching the established manual-fix convention; anything
+  else stringified), and *that* corrected YAML — not the raw LLM output —
+  is what gets written to disk and structurally validated. Corrections are
+  logged (`run_normalized` event), not silent. General for any future
+  domain. Applied by hand to the 3 already-generated, already-paid-for
+  compile outputs rather than re-spending money on a re-call — all 3 now
+  validate with 0 errors. 5 new tests.
+
+  **Adjudicated run-2 as the candidate** (29 classes / 33 properties / 32
+  relationships / 7 rules / 12 CQs — the richest of the 3 fresh runs,
+  both hard gates clean, same "richest + clean gates" criterion used for
+  the original adjudication). No automated adjudication logic exists yet
+  — still a manual, reasoned selection, recorded here for that reason.
+
+  **Ran the full `evaluate.py` QA suite on run-2 (~$1.50, real):**
+  structural/provenance/reverse-coverage all clean, but semantic judging
+  failed the hard gate — 1 majority-unsupported
+  (`classes.AirHandlingUnit.properties.mode`, an invented operating-state
+  enumeration with zero real source backing, same fabrication pattern as
+  the original spot-check's `status` defect) plus 4 contested items.
+
+  **Ran repair on the 5 flagged items (~$0.015) — and found a third real
+  bug in the process.** The first repair call dropped 2 of the 5
+  (`rules.canUseEconomizer`, `actions.maintainCurrentMode`) with
+  rationales explicitly saying no source material was provided for them —
+  correct given what they were shown, but wrong that they were shown
+  nothing: both had real, on-topic source evidence (`Economizer`,
+  `Temperature_Deadband_Setpoint`) cited by IRI in their own
+  `translation.json` mappings, never looked up.
+
+  **Bug #3: `evaluate.py`'s ground-truth resolution only ever worked
+  structurally** (`_class_names_involved` maps a `target_path` to a class
+  name, e.g. `classes.Fan` -> `Fan`) — which returns nothing at all for
+  rules, since a rule's conditions are free text with no structural class
+  reference. This wasn't just a judging blind spot for rules specifically;
+  it fed directly into repair's source-context, so a rule could get
+  rejected — or, as happened here, nearly dropped by repair — for "no
+  source material" when real material existed and was simply never
+  fetched. Fixed generally: `_ground_truth_for_target` now also accepts
+  a mapping's own `source_iris` plus a new IRI-indexed source lookup
+  (`_index_source_records_by_iri`), folding in anything that resolves by
+  exact IRI under a `cited:<label>` key, strictly additive to the
+  structural resolution. `judge_mappings` wires this through
+  automatically, so every future domain's rules (and any element whose
+  real grounding isn't its structural class) get a fair shot at both
+  judging and repair. 7 new tests.
+
+  **Re-ran repair with real source context for all 5 items (~$0.013).**
+  Only 1 now genuinely dropped (`classes.AirHandlingUnit.properties.mode`
+  — confirmed no honest grounding exists even with the Economizer
+  definition in hand, correct call). The other 4: 1 reground, 3 replaced
+  (one of which — `rules.canUseEconomizer` -> a more accurately-named
+  `rules.economizerReducesMechanicalConditioning` — is a rename). Repair's
+  own re-validation caught a new problem: `structural_ok=False`, 1 error
+  (`action_precondition_unresolved`) — the rule rename left
+  `actions.enableEconomizer`'s precondition still pointing at the old
+  name.
+
+  **Bug #4: `repair.py` renames a class or rule in place but never updated
+  anything else that referenced it by name.** Classes and rules are the
+  only name-addressed collections anything else points at by exact string
+  (relationship endpoints/action inputs cite class names; action
+  preconditions cite rule names) — properties and relationships are
+  index-addressed, so they had no such risk. Fixed: `apply_repairs()` now
+  calls a new `_cascade_rename()` after any class/rule rename, updating
+  relationship endpoints, action inputs, and action preconditions that
+  pointed at the old name, and records exactly what it touched
+  (`cascaded_renames`) so the fix stays visible. 4 new tests. Applied by
+  hand to the already-completed repair run (the code fix landed right
+  after the call was made) — verified structurally clean afterward.
+
+  **Independently re-judged the 4 repaired/kept elements (~$0.04, real,
+  not taken on the repair call's own word):** unanimous supported, 0
+  unsupported, 0 contested.
+
+  **Ran one final, authoritative full `evaluate.py` pass on the truly
+  final candidate (~$1.10, real)** — deliberately a fresh full pass rather
+  than stitching together partial re-checks, matching "stabilize, don't
+  patch" for the report itself: structural clean, provenance 100%/100%,
+  reverse coverage 100%, semantic judging **0 majority-unsupported**.
+  3 elements contested (`relationships[8]`, `relationships[13]`,
+  `relationships[20]`) — genuine, disclosed judge disagreement on
+  otherwise-passing elements; one of them (`relationships[20]`, the item
+  just reground) flipped from unanimous-supported on the isolated
+  4-item re-check to majority-`partially_supported`-and-contested on
+  this full pass with zero code or content change in between — a live,
+  reproduced instance of the LLM-judge non-determinism noted earlier this
+  session. Left as-is, not force-resolved, same "report don't hide"
+  principle as the original candidate's 8 contested items.
+
+  **Qualitative read-through, per standing policy:** the final
+  `reference.domain.yaml` reads as a coherent, real air-side HVAC + basic
+  spatial-containment ontology — classes/relationships/rules/actions/CQs
+  all consistent with each other, no dangling references, no fabricated
+  enumerations surviving. Verified against the previous (48-class)
+  candidate that everything present in the old file but absent here has a
+  real, specific `out_of_scope`/`not_agent_relevant`/etc. disposition with
+  a justification note in `translation.json` — not a silent omission, a
+  disclosed compiler judgment call about how much of the scoped subset to
+  treat as first-class for this operational slice. `persona.md`
+  regenerated to match (drops central-plant-internals and data-center
+  framing the old, broader candidate supported but this one doesn't).
+
+  **Total real Azure cost, this clean-rerun sub-effort:** compile $1.02 +
+  first full eval $1.09 + two repair calls $0.03 + targeted re-judge $0.04
+  + final full eval $1.11 = **~$3.28**. Running total for the whole Brick
+  HVAC effort across every phase so far: **~$11.89**.
+
+  Full offline test suite: **163/163 passing** (up from 141 at the start
+  of this sub-effort).
+
+  **#106 still open** — none of this changes that; still the user's call.
+  Not yet merged to `main` — this candidate is meaningfully different in
+  scope-breadth from the one already on `main` via PR #115, so that's
+  flagged to the user rather than assumed as an automatic replacement.

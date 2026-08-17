@@ -1,0 +1,2366 @@
+{
+  "mappings": [
+    {
+      "target_path": "classes.AirHandlingUnit",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#AHU",
+        "https://brickschema.org/schema/Brick#Air_Handler_Unit",
+        "https://brickschema.org/schema/Brick#Air_Handling_Unit"
+      ],
+      "source_evidence": "\"Assembly consisting of sections containing a fan or fans and other necessary equipment...\" plus equivalent labels AHU/Air Handler Unit/Air Handling Unit",
+      "confidence": "high",
+      "rationale": "These source classes are lexical variants of the same HVAC equipment concept and are consolidated into one target class."
+    },
+    {
+      "target_path": "classes.AirHandlingUnit.properties.status",
+      "source_iris": [],
+      "source_evidence": "Standard HVAC operational practice for air handling units includes tracking unit operating status.",
+      "confidence": "medium",
+      "rationale": "A status property is operationally necessary for AHU monitoring and is directly tied to the included equipment concept."
+    },
+    {
+      "target_path": "classes.AirPlenum",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#Air_Plenum"
+      ],
+      "source_evidence": "\"A component of the HVAC the receives air from the air handling unit or room to distribute or exhaust to or from the building\"",
+      "confidence": "high",
+      "rationale": "Direct class mapping from the source definition."
+    },
+    {
+      "target_path": "classes.AirPlenum.properties.airflowState",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#Air_Plenum"
+      ],
+      "source_evidence": "Air plenum definition mentions distribute or exhaust and receiving air from AHU or room.",
+      "confidence": "medium",
+      "rationale": "The class definition itself implies a property describing the plenum's air stream role."
+    },
+    {
+      "target_path": "classes.TemperatureSensor",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#Temperature_Sensor"
+      ],
+      "source_evidence": "\"Measures temperature: the physical property of matter...\"",
+      "confidence": "high",
+      "rationale": "Direct class mapping from the source temperature sensor concept."
+    },
+    {
+      "target_path": "classes.TemperatureSensor.properties.value",
+      "source_iris": [
+        "https://w3id.org/rec#value"
+      ],
+      "source_evidence": "Datatype property label \"value\"; temperature sensor definition says it measures temperature.",
+      "confidence": "high",
+      "rationale": "A measured sensor concept naturally carries a numeric value property, supported by the generic value datatype property."
+    },
+    {
+      "target_path": "classes.TemperatureSensor.properties.status",
+      "source_iris": [
+        "https://w3id.org/rec#status"
+      ],
+      "source_evidence": "The source includes the generic datatype property label \"status\" and the class definition \"Temperature Sensor ... Measures temperature\"; by standard practice for sensors, a status field denotes operational/health state, but the provided material does not justify enumerating specific values.",
+      "confidence": "medium",
+      "rationale": "The property itself is defensible for TemperatureSensor, but the allowed list must be removed because only a broad status notion, not specific states, is grounded."
+    },
+    {
+      "target_path": "classes.AirTemperatureSensor",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#Air_Temperature_Sensor"
+      ],
+      "source_evidence": "\"Measures the temperature of air\"",
+      "confidence": "high",
+      "rationale": "Direct class mapping from the source definition."
+    },
+    {
+      "target_path": "classes.AirTemperatureSensor.properties.value",
+      "source_iris": [
+        "https://w3id.org/rec#value"
+      ],
+      "source_evidence": "Datatype property label \"value\" and class definition \"Measures the temperature of air\"",
+      "confidence": "high",
+      "rationale": "An air temperature sensor obviously reports a numeric measured value."
+    },
+    {
+      "target_path": "classes.CO2Sensor",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#CO2_Sensor"
+      ],
+      "source_evidence": "\"Measures properties of CO2 in air\"",
+      "confidence": "high",
+      "rationale": "Direct class mapping from the source CO2 sensor concept."
+    },
+    {
+      "target_path": "classes.CO2Sensor.properties.value",
+      "source_iris": [
+        "https://w3id.org/rec#value"
+      ],
+      "source_evidence": "Datatype property label \"value\" and CO2 sensor definition describing measurement of CO2 in air.",
+      "confidence": "high",
+      "rationale": "A CO2 sensor naturally reports a numeric concentration or related value."
+    },
+    {
+      "target_path": "classes.OutsideAirCO2Sensor",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#Outside_Air_CO2_Sensor"
+      ],
+      "source_evidence": "\"Measures the concentration of CO2 in outside air\"",
+      "confidence": "high",
+      "rationale": "Direct class mapping from the source definition."
+    },
+    {
+      "target_path": "classes.OutsideAirCO2Sensor.properties.value",
+      "source_iris": [
+        "https://w3id.org/rec#value"
+      ],
+      "source_evidence": "Datatype property label \"value\" and source definition about CO2 concentration in outside air.",
+      "confidence": "high",
+      "rationale": "The class is explicitly a measurement concept and therefore supports a numeric value property."
+    },
+    {
+      "target_path": "classes.ReturnAirCO2Sensor",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#Return_Air_CO2_Sensor"
+      ],
+      "source_evidence": "\"Measures the concentration of CO2 in return air\"",
+      "confidence": "high",
+      "rationale": "Direct class mapping from the source definition."
+    },
+    {
+      "target_path": "classes.ReturnAirCO2Sensor.properties.value",
+      "source_iris": [
+        "https://w3id.org/rec#value"
+      ],
+      "source_evidence": "Datatype property label \"value\" and source definition about CO2 concentration in return air.",
+      "confidence": "high",
+      "rationale": "The class is explicitly a measurement concept and therefore supports a numeric value property."
+    },
+    {
+      "target_path": "classes.AirQualitySensor",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#Air_Quality_Sensor"
+      ],
+      "source_evidence": "\"A sensor which provides a measure of air quality\"",
+      "confidence": "high",
+      "rationale": "Direct class mapping from the source definition."
+    },
+    {
+      "target_path": "classes.AirQualitySensor.properties.value",
+      "source_iris": [
+        "https://w3id.org/rec#value"
+      ],
+      "source_evidence": "Datatype property label \"value\" and source definition says the sensor provides a measure of air quality.",
+      "confidence": "high",
+      "rationale": "A sensor that provides a measure implies a numeric or scalar value property."
+    },
+    {
+      "target_path": "classes.TemperatureSetpoint",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#Temperature_Setpoint"
+      ],
+      "source_evidence": "\"Sets temperature\"",
+      "confidence": "high",
+      "rationale": "Direct class mapping from the source definition."
+    },
+    {
+      "target_path": "classes.TemperatureSetpoint.properties.value",
+      "source_iris": [
+        "https://w3id.org/rec#value"
+      ],
+      "source_evidence": "Datatype property label \"value\" and setpoint definition \"Sets temperature\"",
+      "confidence": "high",
+      "rationale": "A setpoint concept directly implies a numeric target value."
+    },
+    {
+      "target_path": "classes.AirTemperatureSetpoint",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#Air_Temperature_Setpoint"
+      ],
+      "source_evidence": "\"Sets temperature of air\"",
+      "confidence": "high",
+      "rationale": "Direct class mapping from the source definition."
+    },
+    {
+      "target_path": "classes.AirTemperatureSetpoint.properties.value",
+      "source_iris": [
+        "https://w3id.org/rec#value"
+      ],
+      "source_evidence": "Datatype property label \"value\" and class definition \"Sets temperature of air\"",
+      "confidence": "high",
+      "rationale": "An air temperature setpoint directly implies a numeric target value."
+    },
+    {
+      "target_path": "classes.CoolingTemperatureSetpoint",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#Cooling_Temperature_Setpoint"
+      ],
+      "source_evidence": "\"Sets temperature for cooling\"",
+      "confidence": "high",
+      "rationale": "Direct class mapping from the source definition."
+    },
+    {
+      "target_path": "classes.CoolingTemperatureSetpoint.properties.value",
+      "source_iris": [
+        "https://w3id.org/rec#value"
+      ],
+      "source_evidence": "Datatype property label \"value\" and class definition about setting temperature for cooling.",
+      "confidence": "high",
+      "rationale": "A cooling temperature setpoint directly implies a numeric target value."
+    },
+    {
+      "target_path": "classes.HeatingTemperatureSetpoint",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#Heating_Temperature_Setpoint"
+      ],
+      "source_evidence": "\"Sets temperature for heating\"",
+      "confidence": "high",
+      "rationale": "Direct class mapping from the source definition."
+    },
+    {
+      "target_path": "classes.HeatingTemperatureSetpoint.properties.value",
+      "source_iris": [
+        "https://w3id.org/rec#value"
+      ],
+      "source_evidence": "Datatype property label \"value\" and class definition about setting temperature for heating.",
+      "confidence": "high",
+      "rationale": "A heating temperature setpoint directly implies a numeric target value."
+    },
+    {
+      "target_path": "classes.TemperatureDeadbandSetpoint",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#Temperature_Deadband_Setpoint"
+      ],
+      "source_evidence": "\"Sets the size of a deadband of temperature\"",
+      "confidence": "high",
+      "rationale": "Direct class mapping from the source definition."
+    },
+    {
+      "target_path": "classes.TemperatureDeadbandSetpoint.properties.value",
+      "source_iris": [
+        "https://w3id.org/rec#value"
+      ],
+      "source_evidence": "Datatype property label \"value\" and class definition about deadband size.",
+      "confidence": "high",
+      "rationale": "The deadband setpoint concept directly implies a numeric value."
+    },
+    {
+      "target_path": "classes.OccupancySensor",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#Occupancy_Sensor",
+        "https://w3id.org/rec#OccupancySensorEquipment"
+      ],
+      "source_evidence": "Brick: \"Detects occupancy of some space or area\"; REC: \"Occupancy sensor.\"",
+      "confidence": "high",
+      "rationale": "The Brick and REC classes express the same occupancy sensing concept and are consolidated into one target class."
+    },
+    {
+      "target_path": "classes.OccupancySensor.properties.occupied",
+      "source_iris": [],
+      "source_evidence": "Standard HVAC/building practice for occupancy sensing distinguishes occupied versus unoccupied state.",
+      "confidence": "medium",
+      "rationale": "The occupancy sensor concept directly implies an occupancy state property used in control decisions."
+    },
+    {
+      "target_path": "classes.Thermostat",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#Thermostat"
+      ],
+      "source_evidence": "\"An automatic control device used to maintain temperature at a fixed or adjustable setpoint.\"",
+      "confidence": "high",
+      "rationale": "Direct class mapping from the source definition."
+    },
+    {
+      "target_path": "classes.Thermostat.properties.mode",
+      "source_iris": [],
+      "source_evidence": "Thermostat definition refers to maintaining temperature at a fixed or adjustable setpoint; standard HVAC practice uses heat/cool/auto/off modes.",
+      "confidence": "medium",
+      "rationale": "A thermostat's control function supports a mode property grounded in routine HVAC operation."
+    },
+    {
+      "target_path": "classes.Thermostat.properties.status",
+      "source_iris": [
+        "https://w3id.org/rec#status"
+      ],
+      "source_evidence": "Datatype property label \"status\" and standard practice for thermostat device health/status monitoring.",
+      "confidence": "medium",
+      "rationale": "Thermostats are operational devices for which status is decision-relevant."
+    },
+    {
+      "target_path": "classes.TerminalUnit",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#Terminal_Unit"
+      ],
+      "source_evidence": "\"A device that regulates the volumetric flow rate and/or the temperature of the controlled medium.\"",
+      "confidence": "high",
+      "rationale": "Direct class mapping from the source definition."
+    },
+    {
+      "target_path": "classes.TerminalUnit.properties.status",
+      "source_iris": [
+        "https://w3id.org/rec#status"
+      ],
+      "source_evidence": "Datatype property label \"status\" and standard practice for monitoring terminal unit operating state.",
+      "confidence": "medium",
+      "rationale": "A controllable HVAC device supports an operational status property."
+    },
+    {
+      "target_path": "classes.Damper",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#Damper"
+      ],
+      "source_evidence": "\"Element inserted into an air-distribution system... changing the airflow rate or shutting off the airflow.\"",
+      "confidence": "high",
+      "rationale": "Direct class mapping from the source definition."
+    },
+    {
+      "target_path": "classes.Damper.properties.position",
+      "source_iris": [],
+      "source_evidence": "Damper definition describes modifying airflow rate or shutting off airflow; standard HVAC practice records damper position.",
+      "confidence": "medium",
+      "rationale": "The damper concept directly implies a controllable position property."
+    },
+    {
+      "target_path": "classes.Filter",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#Filter"
+      ],
+      "source_evidence": "\"Device to remove gases from a mixture of gases or to remove solid material from a fluid\"",
+      "confidence": "high",
+      "rationale": "Direct class mapping from the source definition."
+    },
+    {
+      "target_path": "classes.Filter.properties.status",
+      "source_iris": [
+        "https://w3id.org/rec#status"
+      ],
+      "source_evidence": "Datatype property label \"status\" and standard HVAC maintenance practice for filter condition.",
+      "confidence": "medium",
+      "rationale": "Filter condition is operationally relevant for maintenance and air quality decisions."
+    },
+    {
+      "target_path": "classes.Fan",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#Fan"
+      ],
+      "source_evidence": "\"Any device with two or more blades or vanes... used to produce an airflow...\"",
+      "confidence": "high",
+      "rationale": "Direct class mapping from the source definition."
+    },
+    {
+      "target_path": "classes.Fan.properties.status",
+      "source_iris": [
+        "https://w3id.org/rec#status"
+      ],
+      "source_evidence": "Datatype property label \"status\" and standard practice for monitoring fan operating state.",
+      "confidence": "medium",
+      "rationale": "Fan operation status is routinely needed for HVAC decisions and diagnostics."
+    },
+    {
+      "target_path": "classes.Economizer",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#Economizer"
+      ],
+      "source_evidence": "\"Device that, on proper variable sensing, initiates control signals or actions to conserve energy. A control system that reduces the mechanical heating and cooling requirement.\"",
+      "confidence": "high",
+      "rationale": "Direct class mapping from the source definition."
+    },
+    {
+      "target_path": "classes.Economizer.properties.status",
+      "source_iris": [
+        "https://w3id.org/rec#status"
+      ],
+      "source_evidence": "Datatype property label \"status\" and economizer definition about initiating control actions.",
+      "confidence": "medium",
+      "rationale": "An economizer's control function supports an operational status property."
+    },
+    {
+      "target_path": "classes.CoolingValve",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#Cooling_Valve"
+      ],
+      "source_evidence": "\"A valve that controls air temperature by modulating the amount of cold water flowing through a cooling coil\"",
+      "confidence": "high",
+      "rationale": "Direct class mapping from the source definition."
+    },
+    {
+      "target_path": "classes.CoolingValve.properties.position",
+      "source_iris": [],
+      "source_evidence": "Cooling valve definition describes modulation of cold water flow; standard practice records valve position.",
+      "confidence": "medium",
+      "rationale": "The valve's control role directly implies a position property."
+    },
+    {
+      "target_path": "classes.HeatingValve",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#Heating_Valve"
+      ],
+      "source_evidence": "\"A valve that controls air temperature by modulating the amount of hot water flowing through a heating coil\"",
+      "confidence": "high",
+      "rationale": "Direct class mapping from the source definition."
+    },
+    {
+      "target_path": "classes.HeatingValve.properties.position",
+      "source_iris": [],
+      "source_evidence": "Heating valve definition describes modulation of hot water flow; standard practice records valve position.",
+      "confidence": "medium",
+      "rationale": "The valve's control role directly implies a position property."
+    },
+    {
+      "target_path": "classes.Boiler",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#Boiler"
+      ],
+      "source_evidence": "\"A closed, pressure vessel that uses fuel or electricity for heating water or other fluids...\"",
+      "confidence": "high",
+      "rationale": "Direct class mapping from the source definition."
+    },
+    {
+      "target_path": "classes.Boiler.properties.status",
+      "source_iris": [
+        "https://w3id.org/rec#status"
+      ],
+      "source_evidence": "Datatype property label \"status\" and standard HVAC practice for boiler operating state.",
+      "confidence": "medium",
+      "rationale": "Boilers are operational assets for which status is routinely needed."
+    },
+    {
+      "target_path": "classes.Chiller",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#Chiller"
+      ],
+      "source_evidence": "\"Refrigerating machine used to transfer heat between fluids.\"",
+      "confidence": "high",
+      "rationale": "Direct class mapping from the source definition."
+    },
+    {
+      "target_path": "classes.Chiller.properties.status",
+      "source_iris": [
+        "https://w3id.org/rec#status"
+      ],
+      "source_evidence": "Datatype property label \"status\" and standard HVAC practice for chiller operating state.",
+      "confidence": "medium",
+      "rationale": "Chillers are operational assets for which status is routinely needed."
+    },
+    {
+      "target_path": "classes.Chiller.properties.coolingCapacity",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#coolingCapacity"
+      ],
+      "source_evidence": "Object property definition: \"Measurement of a chiller ability to remove heat\"",
+      "confidence": "high",
+      "rationale": "The source property directly supports a cooling capacity attribute on chillers."
+    },
+    {
+      "target_path": "classes.PackagedHeatPump",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#Packaged_Heat_Pump"
+      ],
+      "source_evidence": "\"A self-contained unit designed to transfer heat energy to or from a designated space, capable of offering both heating and cooling functions\"",
+      "confidence": "high",
+      "rationale": "Direct class mapping from the source definition."
+    },
+    {
+      "target_path": "classes.PackagedHeatPump.properties.mode",
+      "source_iris": [],
+      "source_evidence": "Packaged heat pump definition explicitly mentions both heating and cooling functions.",
+      "confidence": "high",
+      "rationale": "The source definition directly supports a mode property distinguishing heating and cooling operation."
+    },
+    {
+      "target_path": "classes.Building",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#Building"
+      ],
+      "source_evidence": "\"An independent unit of the built environment with a characteristic spatial structure...\"",
+      "confidence": "high",
+      "rationale": "Direct class mapping from the source definition."
+    },
+    {
+      "target_path": "classes.Building.properties.yearBuilt",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#yearBuilt"
+      ],
+      "source_evidence": "Object property definition: \"Four digit year that a building was first built.\"",
+      "confidence": "high",
+      "rationale": "The source property directly supports a building year-built attribute."
+    },
+    {
+      "target_path": "classes.Floor",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#Floor",
+        "https://brickschema.org/schema/Brick#Storey"
+      ],
+      "source_evidence": "Floor definition: \"A level, typically representing a horizontal aggregation of spaces...\"; Storey alt-label relationship",
+      "confidence": "high",
+      "rationale": "Floor and Storey are lexical equivalents for the same building level concept and are merged."
+    },
+    {
+      "target_path": "classes.Floor.properties.levelNumber",
+      "source_iris": [
+        "https://w3id.org/rec#levelNumber"
+      ],
+      "source_evidence": "Datatype property label \"levelNumber\"",
+      "confidence": "high",
+      "rationale": "The REC datatype directly supports numbering a floor level."
+    },
+    {
+      "target_path": "classes.Space",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#Space",
+        "https://w3id.org/rec#Space"
+      ],
+      "source_evidence": "Brick: \"A part of the physical world or a virtual world whose 3D spatial extent is bounded...\"; REC: \"A contiguous part of the physical world that contains or can contain sub-spaces.\"",
+      "confidence": "high",
+      "rationale": "The Brick and REC classes represent the same core space concept and are consolidated."
+    },
+    {
+      "target_path": "classes.Space.properties.maxOccupancy",
+      "source_iris": [
+        "https://w3id.org/rec#maxOccupancy"
+      ],
+      "source_evidence": "Datatype property label \"maxOccupancy\"",
+      "confidence": "high",
+      "rationale": "The REC datatype directly supports an occupancy-related property on spaces."
+    },
+    {
+      "target_path": "classes.Zone",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#Zone"
+      ],
+      "source_evidence": "\"a separately controlled heated or cooled space... maintained throughout by a single controlling device\"",
+      "confidence": "high",
+      "rationale": "Direct class mapping from the source definition."
+    },
+    {
+      "target_path": "classes.Zone.properties.occupancyStatus",
+      "source_iris": [],
+      "source_evidence": "Zone definition describes controlled heated or cooled spaces; standard HVAC practice tracks occupied versus unoccupied zone state.",
+      "confidence": "medium",
+      "rationale": "Occupancy status is a routine control-relevant attribute for zones."
+    },
+    {
+      "target_path": "relationships[0]",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#hasPart"
+      ],
+      "source_evidence": "Brick hasPart: \"The subject is composed in part of the entity given by the object\"; AHU definition says it is an assembly containing a fan or fans.",
+      "confidence": "high",
+      "rationale": "The specific whole-part pair AHU to Fan is directly supported by the AHU definition plus the generic composition property."
+    },
+    {
+      "target_path": "relationships[1]",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#hasPart"
+      ],
+      "source_evidence": "Brick hasPart definition plus AHU definition: \"Assembly consisting of sections containing... other necessary equipment... filtration...\"",
+      "confidence": "high",
+      "rationale": "The specific whole-part pair AHU to Filter is supported because filtration is part of the AHU assembly definition."
+    },
+    {
+      "target_path": "relationships[2]",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#hasPart"
+      ],
+      "source_evidence": "Brick hasPart definition; standard HVAC practice for air handling units includes dampers within the air-handling assembly.",
+      "confidence": "medium",
+      "rationale": "The AHU-to-Damper composition is standard, well-established practice tied to the included AHU and Damper concepts."
+    },
+    {
+      "target_path": "relationships[3]",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#hasPart",
+        "https://brickschema.org/schema/Brick#Cooling_Valve"
+      ],
+      "source_evidence": "Cooling valve definition describes modulating cold water through a cooling coil; standard HVAC practice places such valves in AHU coil assemblies.",
+      "confidence": "medium",
+      "rationale": "The AHU-to-CoolingValve composition is standard practice for the specific included equipment concepts."
+    },
+    {
+      "target_path": "relationships[4]",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#hasPart",
+        "https://brickschema.org/schema/Brick#Heating_Valve"
+      ],
+      "source_evidence": "Heating valve definition describes modulating hot water through a heating coil; standard HVAC practice places such valves in AHU coil assemblies.",
+      "confidence": "medium",
+      "rationale": "The AHU-to-HeatingValve composition is standard practice for the specific included equipment concepts."
+    },
+    {
+      "target_path": "relationships[5]",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#hasPart",
+        "https://brickschema.org/schema/Brick#Economizer"
+      ],
+      "source_evidence": "Economizer definition describes a device/control system reducing mechanical heating and cooling requirements; standard HVAC practice includes economizer sections in AHUs.",
+      "confidence": "medium",
+      "rationale": "The AHU-to-Economizer composition is a standard real-world pairing tied to the included concepts."
+    },
+    {
+      "target_path": "relationships[6]",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#hasPoint"
+      ],
+      "source_evidence": "Brick hasPoint: \"The subject has a source of telemetry identified by the object\"; standard practice for AHUs includes air temperature sensing points.",
+      "confidence": "high",
+      "rationale": "The AHU-to-AirTemperatureSensor point relationship is standard control practice and fits the source telemetry property."
+    },
+    {
+      "target_path": "relationships[7]",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#hasPoint"
+      ],
+      "source_evidence": "Brick hasPoint definition; standard HVAC practice for air handlers uses CO2 sensing in ventilation-related control contexts.",
+      "confidence": "medium",
+      "rationale": "The AHU-to-CO2Sensor point relationship is a standard control pairing tied to included air-handling and CO2 sensing concepts."
+    },
+    {
+      "target_path": "relationships[8]",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#hasPoint"
+      ],
+      "source_evidence": "Brick hasPoint definition; standard HVAC control practice associates air temperature setpoints with AHU control.",
+      "confidence": "high",
+      "rationale": "The AHU-to-AirTemperatureSetpoint pairing is a routine telemetry/control relationship."
+    },
+    {
+      "target_path": "relationships[9]",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#hasPoint"
+      ],
+      "source_evidence": "Brick hasPoint definition; standard HVAC control practice associates cooling setpoints with AHU control.",
+      "confidence": "high",
+      "rationale": "The AHU-to-CoolingTemperatureSetpoint pairing is a routine control relationship."
+    },
+    {
+      "target_path": "relationships[10]",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#hasPoint"
+      ],
+      "source_evidence": "Brick hasPoint definition; standard HVAC control practice associates heating setpoints with AHU control.",
+      "confidence": "high",
+      "rationale": "The AHU-to-HeatingTemperatureSetpoint pairing is a routine control relationship."
+    },
+    {
+      "target_path": "relationships[11]",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#hasPoint"
+      ],
+      "source_evidence": "Brick hasPoint definition; standard HVAC control practice uses deadband setpoints in AHU control sequences.",
+      "confidence": "medium",
+      "rationale": "The AHU-to-TemperatureDeadbandSetpoint pairing is a standard control relationship for the included concepts."
+    },
+    {
+      "target_path": "relationships[12]",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#hasPoint"
+      ],
+      "source_evidence": "Brick hasPoint definition; thermostat definition says it maintains temperature at a setpoint, implying sensor input.",
+      "confidence": "high",
+      "rationale": "A thermostat necessarily uses a temperature sensor input as part of its control context."
+    },
+    {
+      "target_path": "relationships[13]",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#hasPoint"
+      ],
+      "source_evidence": "Brick hasPoint definition; thermostat definition explicitly mentions maintaining temperature at a fixed or adjustable setpoint.",
+      "confidence": "high",
+      "rationale": "A thermostat directly relates to a temperature setpoint point."
+    },
+    {
+      "target_path": "relationships[14]",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#hasPoint"
+      ],
+      "source_evidence": "Brick hasPoint definition; occupancy sensor definition: \"Detects occupancy of some space or area\".",
+      "confidence": "high",
+      "rationale": "The specific pair Space to OccupancySensor is directly supported by the occupancy sensor definition."
+    },
+    {
+      "target_path": "relationships[15]",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#hasPoint"
+      ],
+      "source_evidence": "Brick hasPoint definition; standard HVAC practice uses occupancy sensors as zone control inputs.",
+      "confidence": "medium",
+      "rationale": "The Zone-to-OccupancySensor point relationship is standard practice tied to included zone and occupancy sensing concepts."
+    },
+    {
+      "target_path": "relationships[16]",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#hasLocation"
+      ],
+      "source_evidence": "Brick hasLocation: \"Subject is physically located in the location given by the object\"; standard building practice places AHUs within buildings.",
+      "confidence": "high",
+      "rationale": "The AHU-to-Building location relationship fits the source location property and common installation context."
+    },
+    {
+      "target_path": "relationships[17]",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#hasLocation"
+      ],
+      "source_evidence": "Brick hasLocation definition; standard building practice places AHUs on a floor within a building.",
+      "confidence": "high",
+      "rationale": "The AHU-to-Floor location relationship is a standard specific use of the source property."
+    },
+    {
+      "target_path": "relationships[18]",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#hasLocation"
+      ],
+      "source_evidence": "Brick hasLocation definition; terminal units are physically installed in served spaces in standard HVAC practice.",
+      "confidence": "high",
+      "rationale": "The TerminalUnit-to-Space location relationship is a standard specific use of the source property."
+    },
+    {
+      "target_path": "relationships[19]",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#hasLocation"
+      ],
+      "source_evidence": "Brick hasLocation definition; thermostats are physically located in spaces in standard HVAC practice.",
+      "confidence": "high",
+      "rationale": "The Thermostat-to-Space location relationship is a standard specific use of the source property."
+    },
+    {
+      "target_path": "relationships[20]",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#hasLocation"
+      ],
+      "source_evidence": "Brick defines \"Has location\" as \"Subject is physically located in the location given by the object,\" and an \"Occupancy Sensor\" is a device that \"Detects occupancy of some space or area.\"",
+      "confidence": "medium",
+      "rationale": "Taken together, the provided relation and class definitions specifically support modeling an OccupancySensor as physically located in the Space whose occupancy it detects."
+    },
+    {
+      "target_path": "relationships[21]",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#hasLocation"
+      ],
+      "source_evidence": "Brick hasLocation definition; outside air CO2 sensors are associated with a building installation context in standard building systems.",
+      "confidence": "medium",
+      "rationale": "The sensor is physically installed as part of the building's HVAC system, making building-level location a reasonable specific pairing."
+    },
+    {
+      "target_path": "relationships[22]",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#hasPart"
+      ],
+      "source_evidence": "Brick Site definition notes use of hasPart/isPartOf for encapsulating locations; standard building spatial structure places floors within buildings.",
+      "confidence": "high",
+      "rationale": "The Building-to-Floor composition is a standard and well-supported spatial containment relationship."
+    },
+    {
+      "target_path": "relationships[23]",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#hasPart"
+      ],
+      "source_evidence": "Floor definition: \"A level, typically representing a horizontal aggregation of spaces\"; Brick hasPart definition.",
+      "confidence": "high",
+      "rationale": "The Floor-to-Space composition is directly supported by the floor definition."
+    },
+    {
+      "target_path": "relationships[24]",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#hasPart"
+      ],
+      "source_evidence": "Zone definition describes controlled spaces within a building; standard building HVAC practice organizes zones as parts of a building context.",
+      "confidence": "medium",
+      "rationale": "The Building-to-Zone containment relationship is standard practice tied to the included building and zone concepts."
+    },
+    {
+      "target_path": "relationships[25]",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#feeds"
+      ],
+      "source_evidence": "Brick feeds: \"The subject is upstream of the object in the context of some sequential process; some media is passed between them\"; Air Plenum definition says it receives air from the air handling unit.",
+      "confidence": "high",
+      "rationale": "The specific AirHandlingUnit-to-AirPlenum upstream relationship is directly supported by the plenum definition and feeds semantics."
+    },
+    {
+      "target_path": "relationships[26]",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#feeds"
+      ],
+      "source_evidence": "Brick feeds definition; standard HVAC practice has AHUs upstream of terminal units in air-distribution processes.",
+      "confidence": "high",
+      "rationale": "The AirHandlingUnit-to-TerminalUnit upstream relationship is standard domain practice tied to the included concepts."
+    },
+    {
+      "target_path": "relationships[27]",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#feeds"
+      ],
+      "source_evidence": "Brick feeds definition; Heating valve definition refers to hot water flow through a heating coil, with boilers upstream in standard hydronic systems.",
+      "confidence": "high",
+      "rationale": "The Boiler-to-HeatingValve upstream relationship is standard hydronic HVAC practice for the included concepts."
+    },
+    {
+      "target_path": "relationships[28]",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#feeds"
+      ],
+      "source_evidence": "Brick feeds definition; Cooling valve definition refers to cold water flow through a cooling coil, with chillers upstream in standard chilled-water systems.",
+      "confidence": "high",
+      "rationale": "The Chiller-to-CoolingValve upstream relationship is standard chilled-water HVAC practice for the included concepts."
+    },
+    {
+      "target_path": "relationships[29]",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#feeds"
+      ],
+      "source_evidence": "Brick feeds definition; packaged heat pump definition says it transfers heat to or from a designated space, commonly serving downstream terminal conditioning paths.",
+      "confidence": "medium",
+      "rationale": "The PackagedHeatPump-to-TerminalUnit upstream relationship is a standard specific pairing in HVAC delivery contexts."
+    },
+    {
+      "target_path": "relationships[30]",
+      "source_iris": [],
+      "source_evidence": "Standard HVAC domain practice for terminal units is to serve the conditioning needs of specific spaces.",
+      "confidence": "medium",
+      "rationale": "A serves relationship captures the operational meaning of terminal units relative to spaces, grounded in the included concepts."
+    },
+    {
+      "target_path": "relationships[31]",
+      "source_iris": [],
+      "source_evidence": "Zone definition: \"maintained throughout by a single controlling device\"; thermostat definition identifies a temperature control device.",
+      "confidence": "high",
+      "rationale": "The thermostat-to-zone serves relationship is directly supported by the two class definitions together."
+    },
+    {
+      "target_path": "rules.economizerReducesMechanicalConditioning",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#Economizer"
+      ],
+      "source_evidence": "An Economizer is a \"Device that, on proper variable sensing, initiates control signals or actions to conserve energy\" and is \"A control system that reduces the mechanical heating and cooling requirement.\"",
+      "confidence": "high",
+      "rationale": "The source supports a general economizer applicability/purpose rule tied to variable sensing and reduced mechanical conditioning, but not the more specific claim about when an AHU can use economizer based on outside-air suitability."
+    },
+    {
+      "target_path": "rules.needsCoolingFromSetpoint",
+      "source_iris": [],
+      "source_evidence": "Standard HVAC control practice for air temperature sensing and cooling setpoints compares measured air temperature against the cooling target.",
+      "confidence": "high",
+      "rationale": "This rule is grounded in the included air temperature sensor and cooling setpoint concepts."
+    },
+    {
+      "target_path": "rules.needsHeatingFromSetpoint",
+      "source_iris": [],
+      "source_evidence": "Standard HVAC control practice for air temperature sensing and heating setpoints compares measured air temperature against the heating target.",
+      "confidence": "high",
+      "rationale": "This rule is grounded in the included air temperature sensor and heating setpoint concepts."
+    },
+    {
+      "target_path": "rules.temperatureWithinDeadband",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#Temperature_Deadband_Setpoint"
+      ],
+      "source_evidence": "Temperature deadband setpoint definition: \"Sets the size of a deadband of temperature\"",
+      "confidence": "high",
+      "rationale": "The source definition directly supports a rule about remaining within an allowed temperature band."
+    },
+    {
+      "target_path": "rules.occupiedZoneRequiresControl",
+      "source_iris": [],
+      "source_evidence": "Standard HVAC practice for occupancy sensors, zones, thermostats and terminal units is to ensure active control for occupied areas.",
+      "confidence": "medium",
+      "rationale": "The rule is tied specifically to the included occupancy, zone, thermostat and terminal unit concepts."
+    },
+    {
+      "target_path": "rules.investigateAirQuality",
+      "source_iris": [],
+      "source_evidence": "Standard HVAC practice compares CO2 conditions in served air streams to identify ventilation or air quality concerns.",
+      "confidence": "medium",
+      "rationale": "The rule is grounded in the included CO2 sensor, outside-air CO2 sensor and return-air CO2 sensor concepts."
+    },
+    {
+      "target_path": "rules.verifyThermostatControlContext",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#Thermostat",
+        "https://brickschema.org/schema/Brick#hasPoint"
+      ],
+      "source_evidence": "Thermostat definition mentions maintaining temperature at a setpoint; hasPoint identifies telemetry/control points.",
+      "confidence": "high",
+      "rationale": "A thermostat control context requires both a sensor input and a setpoint, which is directly supported by the included concepts."
+    },
+    {
+      "target_path": "actions.enableEconomizer",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#Economizer"
+      ],
+      "source_evidence": "Economizer definition states it initiates control signals or actions to conserve energy and reduce mechanical cooling requirement.",
+      "confidence": "high",
+      "rationale": "The action is a direct operational reading of the economizer concept."
+    },
+    {
+      "target_path": "actions.increaseCooling",
+      "source_iris": [],
+      "source_evidence": "Standard HVAC control practice for AHUs, air temperature sensors and cooling setpoints increases cooling when measured temperature exceeds target.",
+      "confidence": "high",
+      "rationale": "The action is grounded in the included AHU, sensor and cooling setpoint concepts."
+    },
+    {
+      "target_path": "actions.increaseHeating",
+      "source_iris": [],
+      "source_evidence": "Standard HVAC control practice for AHUs, air temperature sensors and heating setpoints increases heating when measured temperature is below target.",
+      "confidence": "high",
+      "rationale": "The action is grounded in the included AHU, sensor and heating setpoint concepts."
+    },
+    {
+      "target_path": "actions.maintainWithinDeadband",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#Temperature_Deadband_Setpoint"
+      ],
+      "source_evidence": "The source defines \"Temperature Deadband Setpoint\" as one that \"Sets the size of a deadband of temperature,\" and the AHU definition includes heating and cooling among its functions.",
+      "confidence": "medium",
+      "rationale": "The evidence supports maintaining control without heating/cooling adjustment while temperature remains in deadband, but it does not specifically ground the stronger action name maintainCurrentMode."
+    },
+    {
+      "target_path": "actions.verifyOccupiedZoneConditioning",
+      "source_iris": [],
+      "source_evidence": "Standard HVAC practice for occupied zones is to confirm assigned control devices and served equipment are available.",
+      "confidence": "medium",
+      "rationale": "The action is grounded in the included zone, occupancy sensor, thermostat and terminal unit concepts."
+    }
+  ],
+  "dispositions": [
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#AHU",
+      "disposition": "mapped",
+      "note": "merged into classes.AirHandlingUnit"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#Air_Handler_Unit",
+      "disposition": "mapped",
+      "note": "merged into classes.AirHandlingUnit"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#Air_Handling_Unit",
+      "disposition": "mapped",
+      "note": "merged into classes.AirHandlingUnit"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#Air_Plenum",
+      "disposition": "mapped",
+      "note": "mapped to classes.AirPlenum"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#Air_Quality_Sensor",
+      "disposition": "mapped",
+      "note": "mapped to classes.AirQualitySensor"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#Air_Temperature_Sensor",
+      "disposition": "mapped",
+      "note": "mapped to classes.AirTemperatureSensor"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#Air_Temperature_Setpoint",
+      "disposition": "mapped",
+      "note": "mapped to classes.AirTemperatureSetpoint"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#Air_Wet_Bulb_Temperature_Sensor",
+      "disposition": "out_of_scope",
+      "note": "specialized temperature sensor outside the selected HVAC control core"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#Boiler",
+      "disposition": "mapped",
+      "note": "mapped to classes.Boiler"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#Branch_Selector",
+      "disposition": "out_of_scope",
+      "note": "VRF-specific equipment not needed for the selected control and containment slice"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#Building",
+      "disposition": "mapped",
+      "note": "mapped to classes.Building"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#Bypass_Valve",
+      "disposition": "out_of_scope",
+      "note": "not needed for the selected HVAC control slice"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#CO2_Differential_Sensor",
+      "disposition": "out_of_scope",
+      "note": "specialized CO2 sensor not required for the selected core model"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#CO2_Level_Sensor",
+      "disposition": "taxonomy_only",
+      "note": "more generic than selected CO2Sensor concept and used only for interpretation"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#CO2_Sensor",
+      "disposition": "mapped",
+      "note": "mapped to classes.CO2Sensor"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#CRAC",
+      "disposition": "out_of_scope",
+      "note": "data-center-specific equipment outside selected scope"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#CRAH",
+      "disposition": "out_of_scope",
+      "note": "data-center-specific equipment outside selected scope"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#Chiller",
+      "disposition": "mapped",
+      "note": "mapped to classes.Chiller"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#Class",
+      "disposition": "not_agent_relevant",
+      "note": "ontology infrastructure class"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#Cold_Deck",
+      "disposition": "out_of_scope",
+      "note": "dual-duct specialization not required for the selected model"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#Compressor",
+      "disposition": "out_of_scope",
+      "note": "not needed as a first-class concept in the selected operational slice"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#Computer_Room_Air_Conditioning",
+      "disposition": "out_of_scope",
+      "note": "data-center-specific equipment outside selected scope"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#Computer_Room_Air_Handler",
+      "disposition": "out_of_scope",
+      "note": "data-center-specific equipment outside selected scope"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#Condensing_Unit",
+      "disposition": "out_of_scope",
+      "note": "not needed for the selected HVAC/building control subset"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#Cooling_Temperature_Setpoint",
+      "disposition": "mapped",
+      "note": "mapped to classes.CoolingTemperatureSetpoint"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#Cooling_Tower",
+      "disposition": "out_of_scope",
+      "note": "plant equipment outside selected subset"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#Cooling_Valve",
+      "disposition": "mapped",
+      "note": "mapped to classes.CoolingValve"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#Damper",
+      "disposition": "mapped",
+      "note": "mapped to classes.Damper"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#Dry_Cooler",
+      "disposition": "out_of_scope",
+      "note": "plant equipment outside selected subset"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#Economizer",
+      "disposition": "mapped",
+      "note": "mapped to classes.Economizer"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#Entity",
+      "disposition": "not_agent_relevant",
+      "note": "ontology infrastructure class"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#Equipment",
+      "disposition": "taxonomy_only",
+      "note": "generic parent used for interpretation only"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#Fan",
+      "disposition": "mapped",
+      "note": "mapped to classes.Fan"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#Filter",
+      "disposition": "mapped",
+      "note": "mapped to classes.Filter"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#Floor",
+      "disposition": "mapped",
+      "note": "merged into classes.Floor"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#Frost_Sensor",
+      "disposition": "out_of_scope",
+      "note": "specialized sensor not required for selected subset"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#HVAC_Equipment",
+      "disposition": "taxonomy_only",
+      "note": "generic parent used for scope interpretation only"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#HVAC_Valve",
+      "disposition": "taxonomy_only",
+      "note": "generic parent used for interpretation only"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#HX",
+      "disposition": "out_of_scope",
+      "note": "heat exchanger alias class not needed in selected subset"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#Heat_Exchanger",
+      "disposition": "out_of_scope",
+      "note": "not needed in selected HVAC control subset"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#Heat_Sink_Temperature_Sensor",
+      "disposition": "out_of_scope",
+      "note": "not part of selected HVAC/building spatial control subset"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#Heating_Temperature_Setpoint",
+      "disposition": "mapped",
+      "note": "mapped to classes.HeatingTemperatureSetpoint"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#Heating_Valve",
+      "disposition": "mapped",
+      "note": "mapped to classes.HeatingValve"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#Hot_Deck",
+      "disposition": "out_of_scope",
+      "note": "dual-duct specialization not required for selected subset"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#Humidifier",
+      "disposition": "out_of_scope",
+      "note": "not needed in selected control subset"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#Isolation_Valve",
+      "disposition": "out_of_scope",
+      "note": "not needed in selected subset"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#Location",
+      "disposition": "taxonomy_only",
+      "note": "generic spatial parent used for interpretation only"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#Natural_Gas_Temperature_Sensor",
+      "disposition": "out_of_scope",
+      "note": "not part of selected air/building control subset"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#Occupancy_Sensor",
+      "disposition": "mapped",
+      "note": "merged into classes.OccupancySensor"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#Outdoor_Area",
+      "disposition": "out_of_scope",
+      "note": "outside spatial class not needed for selected subset"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#Outside",
+      "disposition": "out_of_scope",
+      "note": "generic outside location not needed as a class in selected model"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#Outside_Air_CO2_Sensor",
+      "disposition": "mapped",
+      "note": "mapped to classes.OutsideAirCO2Sensor"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#Packaged_Heat_Pump",
+      "disposition": "mapped",
+      "note": "mapped to classes.PackagedHeatPump"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#Pump",
+      "disposition": "out_of_scope",
+      "note": "not needed for selected subset"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#Radiant_Panel_Temperature_Sensor",
+      "disposition": "out_of_scope",
+      "note": "radiant-system-specific point outside selected subset"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#Radiant_Panel_Temperature_Setpoint",
+      "disposition": "out_of_scope",
+      "note": "radiant-system-specific point outside selected subset"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#Refrigerant_Metering_Device",
+      "disposition": "out_of_scope",
+      "note": "not needed in selected subset"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#Region",
+      "disposition": "out_of_scope",
+      "note": "broader geography outside selected building/floor/space containment focus"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#Return_Air_CO2_Sensor",
+      "disposition": "mapped",
+      "note": "mapped to classes.ReturnAirCO2Sensor"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#Schedule_Temperature_Setpoint",
+      "disposition": "out_of_scope",
+      "note": "scheduling specialization not needed in selected core model"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#Sensor",
+      "disposition": "taxonomy_only",
+      "note": "generic point parent used for interpretation only"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#Setpoint",
+      "disposition": "taxonomy_only",
+      "note": "generic point parent used for interpretation only"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#Site",
+      "disposition": "out_of_scope",
+      "note": "site level not needed in selected spatial containment slice"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#Soil_Temperature_Sensor",
+      "disposition": "out_of_scope",
+      "note": "not part of selected HVAC/building interior control subset"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#Space",
+      "disposition": "mapped",
+      "note": "merged into classes.Space"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#Space_Heater",
+      "disposition": "out_of_scope",
+      "note": "not needed in selected subset"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#Steam_Valve",
+      "disposition": "out_of_scope",
+      "note": "not needed in selected subset"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#Storey",
+      "disposition": "mapped",
+      "note": "merged into classes.Floor"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#Temperature_Deadband_Setpoint",
+      "disposition": "mapped",
+      "note": "mapped to classes.TemperatureDeadbandSetpoint"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#Temperature_Sensor",
+      "disposition": "mapped",
+      "note": "mapped to classes.TemperatureSensor"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#Temperature_Setpoint",
+      "disposition": "mapped",
+      "note": "mapped to classes.TemperatureSetpoint"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#Terminal_Unit",
+      "disposition": "mapped",
+      "note": "mapped to classes.TerminalUnit"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#Thermostat",
+      "disposition": "mapped",
+      "note": "mapped to classes.Thermostat"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#Wall_Air_Conditioner",
+      "disposition": "out_of_scope",
+      "note": "room unit outside selected subset"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#Water_Temperature_Sensor",
+      "disposition": "out_of_scope",
+      "note": "hydronic sensor detail outside selected subset"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#Water_Temperature_Setpoint",
+      "disposition": "out_of_scope",
+      "note": "hydronic setpoint detail outside selected subset"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#Wing",
+      "disposition": "out_of_scope",
+      "note": "spatial subdivision not needed for selected containment model"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#Zone",
+      "disposition": "mapped",
+      "note": "mapped to classes.Zone"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#OccupancySensorEquipment",
+      "disposition": "mapped",
+      "note": "merged into classes.OccupancySensor"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#SensorEquipment",
+      "disposition": "taxonomy_only",
+      "note": "generic REC parent used for interpretation only"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#Space",
+      "disposition": "mapped",
+      "note": "merged into classes.Space"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#aggregate",
+      "disposition": "not_agent_relevant",
+      "note": "bookkeeping-style aggregation relation for source point metadata"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#aliasOf",
+      "disposition": "not_agent_relevant",
+      "note": "source alias bookkeeping not needed as domain relationship"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#ambientTemperatureOfMeasurement",
+      "disposition": "unsupported_by_target_model",
+      "note": "formal measurement relation without clear included endpoint classes in scope"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#area",
+      "disposition": "out_of_scope",
+      "note": "not needed for selected HVAC control subset"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#azimuth",
+      "disposition": "out_of_scope",
+      "note": "not needed for selected HVAC control subset"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#buildingPrimaryFunction",
+      "disposition": "out_of_scope",
+      "note": "not needed for selected HVAC control subset"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#buildingThermalTransmittance",
+      "disposition": "out_of_scope",
+      "note": "not needed for selected HVAC control subset"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#connectedTo",
+      "disposition": "unsupported_by_target_model",
+      "note": "generic connection relation too underspecified for honest endpoint pairing in the selected output"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#conversionEfficiency",
+      "disposition": "out_of_scope",
+      "note": "not needed for selected subset"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#coolingCapacity",
+      "disposition": "mapped",
+      "note": "used for classes.Chiller.properties.coolingCapacity"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#coordinates",
+      "disposition": "out_of_scope",
+      "note": "not needed for selected subset"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#currentFlowType",
+      "disposition": "out_of_scope",
+      "note": "electrical property outside scope"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#deprecation",
+      "disposition": "not_agent_relevant",
+      "note": "source ontology maintenance metadata"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#deprecationMitigationRule",
+      "disposition": "not_agent_relevant",
+      "note": "source ontology maintenance metadata"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#electricVehicleChargerDirectionality",
+      "disposition": "out_of_scope",
+      "note": "EV concept outside HVAC/building subset"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#electricVehicleChargerType",
+      "disposition": "out_of_scope",
+      "note": "EV concept outside HVAC/building subset"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#electricVehicleConnectorType",
+      "disposition": "out_of_scope",
+      "note": "EV concept outside HVAC/building subset"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#electricalComplexPower",
+      "disposition": "out_of_scope",
+      "note": "electrical concept outside subset"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#electricalFlow",
+      "disposition": "out_of_scope",
+      "note": "electrical concept outside subset"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#electricalPhaseCount",
+      "disposition": "out_of_scope",
+      "note": "electrical concept outside subset"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#electricalPhases",
+      "disposition": "out_of_scope",
+      "note": "electrical concept outside subset"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#feeds",
+      "disposition": "mapped",
+      "note": "used for relationships[25], relationships[26], relationships[27], relationships[28], relationships[29]"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#grossArea",
+      "disposition": "out_of_scope",
+      "note": "not needed for selected subset"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#hasAmbientTemperature",
+      "disposition": "unsupported_by_target_model",
+      "note": "underspecified relation without honest included endpoint pairing"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#hasAssociatedTag",
+      "disposition": "not_agent_relevant",
+      "note": "tagging infrastructure metadata"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#hasInputSubstance",
+      "disposition": "unsupported_by_target_model",
+      "note": "substance semantics not represented in selected target output"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#hasLocation",
+      "disposition": "mapped",
+      "note": "used for relationships[16], relationships[17], relationships[18], relationships[19], relationships[20], relationships[21]"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#hasOutputSubstance",
+      "disposition": "unsupported_by_target_model",
+      "note": "substance semantics not represented in selected target output"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#hasPart",
+      "disposition": "mapped",
+      "note": "used for relationships[0], relationships[1], relationships[2], relationships[3], relationships[4], relationships[5], relationships[22], relationships[23], relationships[24]"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#hasPoint",
+      "disposition": "mapped",
+      "note": "used for relationships[6], relationships[7], relationships[8], relationships[9], relationships[10], relationships[11], relationships[12], relationships[13], relationships[14], relationships[15]"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#hasQUDTReference",
+      "disposition": "not_agent_relevant",
+      "note": "external semantic reference bookkeeping"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#hasQuantity",
+      "disposition": "unsupported_by_target_model",
+      "note": "formal quantity-kind linkage not surfaced in target model"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#hasSubMeter",
+      "disposition": "out_of_scope",
+      "note": "metering outside selected subset"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#hasSubstance",
+      "disposition": "unsupported_by_target_model",
+      "note": "formal substance linkage not surfaced in target model"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#hasTag",
+      "disposition": "not_agent_relevant",
+      "note": "tagging infrastructure metadata"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#hasUnit",
+      "disposition": "unsupported_by_target_model",
+      "note": "unit bookkeeping exists implicitly in target properties rather than as relationship"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#isAssociatedWith",
+      "disposition": "not_agent_relevant",
+      "note": "tagging infrastructure metadata"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#isFedBy",
+      "disposition": "unsupported_by_target_model",
+      "note": "inverse of feeds omitted to avoid duplicate reverse relationship"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#isLocationOf",
+      "disposition": "unsupported_by_target_model",
+      "note": "inverse of hasLocation omitted to avoid duplicate reverse relationship"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#isMeteredBy",
+      "disposition": "out_of_scope",
+      "note": "metering outside selected subset"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#isPartOf",
+      "disposition": "unsupported_by_target_model",
+      "note": "inverse of hasPart omitted to avoid duplicate reverse relationship"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#isPointOf",
+      "disposition": "unsupported_by_target_model",
+      "note": "inverse of hasPoint omitted to avoid duplicate reverse relationship"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#isReplacedBy",
+      "disposition": "not_agent_relevant",
+      "note": "source ontology maintenance metadata"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#isSubMeterOf",
+      "disposition": "out_of_scope",
+      "note": "metering outside selected subset"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#isTagOf",
+      "disposition": "not_agent_relevant",
+      "note": "tagging infrastructure metadata"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#isVirtualMeter",
+      "disposition": "out_of_scope",
+      "note": "metering outside selected subset"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#lastKnownValue",
+      "disposition": "unsupported_by_target_model",
+      "note": "instance-level telemetry state not modeled as a class property here"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#measuredModuleConversionEfficiency",
+      "disposition": "out_of_scope",
+      "note": "solar/electrical concept outside subset"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#measuredPowerInput",
+      "disposition": "out_of_scope",
+      "note": "electrical concept outside subset"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#measuredPowerOutput",
+      "disposition": "out_of_scope",
+      "note": "electrical concept outside subset"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#meters",
+      "disposition": "out_of_scope",
+      "note": "metering outside selected subset"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#netArea",
+      "disposition": "out_of_scope",
+      "note": "not needed for selected subset"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#operationalStage",
+      "disposition": "out_of_scope",
+      "note": "not needed for selected subset"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#operationalStageCount",
+      "disposition": "out_of_scope",
+      "note": "not needed for selected subset"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#panelArea",
+      "disposition": "out_of_scope",
+      "note": "solar concept outside subset"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#ratedCurrentInput",
+      "disposition": "out_of_scope",
+      "note": "electrical concept outside subset"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#ratedCurrentOutput",
+      "disposition": "out_of_scope",
+      "note": "electrical concept outside subset"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#ratedMaximumCurrentInput",
+      "disposition": "out_of_scope",
+      "note": "electrical concept outside subset"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#ratedMaximumCurrentOutput",
+      "disposition": "out_of_scope",
+      "note": "electrical concept outside subset"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#ratedMaximumVoltageInput",
+      "disposition": "out_of_scope",
+      "note": "electrical concept outside subset"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#ratedMaximumVoltageOutput",
+      "disposition": "out_of_scope",
+      "note": "electrical concept outside subset"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#ratedMinimumCurrentInput",
+      "disposition": "out_of_scope",
+      "note": "electrical concept outside subset"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#ratedMinimumCurrentOutput",
+      "disposition": "out_of_scope",
+      "note": "electrical concept outside subset"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#ratedMinimumVoltageInput",
+      "disposition": "out_of_scope",
+      "note": "electrical concept outside subset"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#ratedMinimumVoltageOutput",
+      "disposition": "out_of_scope",
+      "note": "electrical concept outside subset"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#ratedModuleConversionEfficiency",
+      "disposition": "out_of_scope",
+      "note": "solar/electrical concept outside subset"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#ratedPowerInput",
+      "disposition": "out_of_scope",
+      "note": "electrical concept outside subset"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#ratedPowerOutput",
+      "disposition": "out_of_scope",
+      "note": "electrical concept outside subset"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#ratedVoltageInput",
+      "disposition": "out_of_scope",
+      "note": "electrical concept outside subset"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#ratedVoltageOutput",
+      "disposition": "out_of_scope",
+      "note": "electrical concept outside subset"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#resolution",
+      "disposition": "out_of_scope",
+      "note": "not needed for selected subset"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#temperatureCoefficientofPmax",
+      "disposition": "out_of_scope",
+      "note": "solar/electrical concept outside subset"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#thermalTransmittance",
+      "disposition": "out_of_scope",
+      "note": "building envelope concept outside subset"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#tilt",
+      "disposition": "out_of_scope",
+      "note": "not needed for selected subset"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#volume",
+      "disposition": "out_of_scope",
+      "note": "not needed for selected subset"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#yearBuilt",
+      "disposition": "mapped",
+      "note": "used for classes.Building.properties.yearBuilt"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick/ref#hasExternalReference",
+      "disposition": "not_agent_relevant",
+      "note": "external reference bookkeeping"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick/ref#hasIfcProjectReference",
+      "disposition": "not_agent_relevant",
+      "note": "external reference bookkeeping"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#acknowledgedBy",
+      "disposition": "out_of_scope",
+      "note": "workflow/social relation outside selected subset"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#address",
+      "disposition": "out_of_scope",
+      "note": "not needed for selected subset"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#adjacentElement",
+      "disposition": "out_of_scope",
+      "note": "not needed for selected subset"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#architectedBy",
+      "disposition": "out_of_scope",
+      "note": "lifecycle/provenance relation outside selected subset"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#area",
+      "disposition": "out_of_scope",
+      "note": "not needed for selected subset"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#capacity",
+      "disposition": "out_of_scope",
+      "note": "not needed for selected subset"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#closedBy",
+      "disposition": "out_of_scope",
+      "note": "workflow relation outside selected subset"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#commissionedBy",
+      "disposition": "out_of_scope",
+      "note": "lifecycle/provenance relation outside selected subset"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#constructedBy",
+      "disposition": "out_of_scope",
+      "note": "lifecycle/provenance relation outside selected subset"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#containsElement",
+      "disposition": "unsupported_by_target_model",
+      "note": "generic containment too underspecified relative to selected explicit spatial relationships"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#coordinateSystem",
+      "disposition": "out_of_scope",
+      "note": "not needed for selected subset"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#createdBy",
+      "disposition": "out_of_scope",
+      "note": "provenance relation outside selected subset"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#documentTopic",
+      "disposition": "not_agent_relevant",
+      "note": "documentation relation not needed for agent decisions"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#documentation",
+      "disposition": "not_agent_relevant",
+      "note": "documentation relation not needed for agent decisions"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#georeference",
+      "disposition": "out_of_scope",
+      "note": "not needed for selected subset"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#hasMember",
+      "disposition": "unsupported_by_target_model",
+      "note": "generic membership relation too underspecified for selected output"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#hasPart",
+      "disposition": "unsupported_by_target_model",
+      "note": "duplicate generic part relation from imported ontology not separately surfaced"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#hasPoint",
+      "disposition": "unsupported_by_target_model",
+      "note": "duplicate generic point relation from imported ontology not separately surfaced"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#includes",
+      "disposition": "unsupported_by_target_model",
+      "note": "generic inclusion relation too vague for explicit selected model"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#initialCost",
+      "disposition": "out_of_scope",
+      "note": "financial property outside selected subset"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#installedBy",
+      "disposition": "out_of_scope",
+      "note": "lifecycle/provenance relation outside selected subset"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#intersectingElement",
+      "disposition": "out_of_scope",
+      "note": "not needed for selected subset"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#isFedBy",
+      "disposition": "unsupported_by_target_model",
+      "note": "inverse/feed relation duplicate not separately surfaced"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#isLocationOf",
+      "disposition": "unsupported_by_target_model",
+      "note": "inverse location relation duplicate not separately surfaced"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#isMemberOf",
+      "disposition": "unsupported_by_target_model",
+      "note": "generic membership relation too vague for selected output"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#isPartOf",
+      "disposition": "unsupported_by_target_model",
+      "note": "inverse part relation duplicate not separately surfaced"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#leaseOf",
+      "disposition": "out_of_scope",
+      "note": "lease relation outside selected subset"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#leasee",
+      "disposition": "out_of_scope",
+      "note": "lease relation outside selected subset"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#leasor",
+      "disposition": "out_of_scope",
+      "note": "lease relation outside selected subset"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#locatedIn",
+      "disposition": "unsupported_by_target_model",
+      "note": "duplicate location relation not separately surfaced"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#manufacturedBy",
+      "disposition": "out_of_scope",
+      "note": "lifecycle/provenance relation outside selected subset"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#mountedOn",
+      "disposition": "out_of_scope",
+      "note": "not needed for selected subset"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#objectOfInterest",
+      "disposition": "unsupported_by_target_model",
+      "note": "too abstract for selected output"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#operatedBy",
+      "disposition": "out_of_scope",
+      "note": "organizational relation outside selected subset"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#ownedBy",
+      "disposition": "out_of_scope",
+      "note": "organizational relation outside selected subset"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#owns",
+      "disposition": "out_of_scope",
+      "note": "organizational relation outside selected subset"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#producedBy",
+      "disposition": "unsupported_by_target_model",
+      "note": "too abstract for selected output"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#regulatedBy",
+      "disposition": "unsupported_by_target_model",
+      "note": "generic inverse regulation relation too underspecified"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#regulates",
+      "disposition": "unsupported_by_target_model",
+      "note": "generic regulation relation too underspecified for honest endpoint pairing"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#relatedTo",
+      "disposition": "unsupported_by_target_model",
+      "note": "too generic to surface honestly"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#servicedBy",
+      "disposition": "unsupported_by_target_model",
+      "note": "maintenance relation outside selected operational slice"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#sourcePoint",
+      "disposition": "unsupported_by_target_model",
+      "note": "graph linkage semantics not represented in selected output"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#targetPoint",
+      "disposition": "unsupported_by_target_model",
+      "note": "graph linkage semantics not represented in selected output"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#url",
+      "disposition": "not_agent_relevant",
+      "note": "reference metadata not needed in target model"
+    },
+    {
+      "source_iri": "http://data.ashrae.org/bacnet/2020#description",
+      "disposition": "not_agent_relevant",
+      "note": "external system metadata"
+    },
+    {
+      "source_iri": "http://data.ashrae.org/bacnet/2020#object-identifier",
+      "disposition": "not_agent_relevant",
+      "note": "external system identifier metadata"
+    },
+    {
+      "source_iri": "http://data.ashrae.org/bacnet/2020#object-name",
+      "disposition": "not_agent_relevant",
+      "note": "external system naming metadata"
+    },
+    {
+      "source_iri": "http://data.ashrae.org/bacnet/2020#object-type",
+      "disposition": "not_agent_relevant",
+      "note": "external system type metadata"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#aggregationFunction",
+      "disposition": "not_agent_relevant",
+      "note": "timeseries aggregation metadata"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#aggregationInterval",
+      "disposition": "not_agent_relevant",
+      "note": "timeseries aggregation metadata"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#deprecatedInVersion",
+      "disposition": "not_agent_relevant",
+      "note": "source ontology maintenance metadata"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#deprecationMitigationMessage",
+      "disposition": "not_agent_relevant",
+      "note": "source ontology maintenance metadata"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#latitude",
+      "disposition": "out_of_scope",
+      "note": "not needed for selected subset"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#longitude",
+      "disposition": "out_of_scope",
+      "note": "not needed for selected subset"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick#timestamp",
+      "disposition": "not_agent_relevant",
+      "note": "generic telemetry metadata not modeled here"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick/ref#BACnetURI",
+      "disposition": "not_agent_relevant",
+      "note": "external integration metadata"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick/ref#bacnet-read-property",
+      "disposition": "not_agent_relevant",
+      "note": "external integration metadata"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick/ref#hasTimeseriesId",
+      "disposition": "not_agent_relevant",
+      "note": "timeseries bookkeeping metadata"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick/ref#ifcGlobalID",
+      "disposition": "not_agent_relevant",
+      "note": "external BIM identifier metadata"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick/ref#ifcName",
+      "disposition": "not_agent_relevant",
+      "note": "external BIM naming metadata"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick/ref#ifcProjectID",
+      "disposition": "not_agent_relevant",
+      "note": "external BIM project metadata"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick/ref#preferred",
+      "disposition": "not_agent_relevant",
+      "note": "external reference preference metadata"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick/ref#storedAt",
+      "disposition": "not_agent_relevant",
+      "note": "timeseries storage metadata"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#IPAddress",
+      "disposition": "not_agent_relevant",
+      "note": "network metadata outside selected subset"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#MACAddress",
+      "disposition": "not_agent_relevant",
+      "note": "network metadata outside selected subset"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#acknowledgedTime",
+      "disposition": "out_of_scope",
+      "note": "workflow timestamp outside selected subset"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#addressLine1",
+      "disposition": "out_of_scope",
+      "note": "not needed for selected subset"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#addressLine2",
+      "disposition": "out_of_scope",
+      "note": "not needed for selected subset"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#assetTag",
+      "disposition": "not_agent_relevant",
+      "note": "identifier metadata not modeled here"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#batteryPercentage",
+      "disposition": "out_of_scope",
+      "note": "not needed for selected subset"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#city",
+      "disposition": "out_of_scope",
+      "note": "not needed for selected subset"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#closedTime",
+      "disposition": "out_of_scope",
+      "note": "workflow timestamp outside selected subset"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#commissioningDate",
+      "disposition": "out_of_scope",
+      "note": "lifecycle metadata outside selected subset"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#coordinates",
+      "disposition": "out_of_scope",
+      "note": "not needed for selected subset"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#country",
+      "disposition": "out_of_scope",
+      "note": "not needed for selected subset"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#createdTime",
+      "disposition": "out_of_scope",
+      "note": "provenance timestamp outside selected subset"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#currentLevel",
+      "disposition": "out_of_scope",
+      "note": "not needed for selected subset"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#end",
+      "disposition": "out_of_scope",
+      "note": "generic temporal metadata outside selected subset"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#endLevel",
+      "disposition": "out_of_scope",
+      "note": "not needed for selected subset"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#familyName",
+      "disposition": "out_of_scope",
+      "note": "person metadata outside selected subset"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#gender",
+      "disposition": "out_of_scope",
+      "note": "person metadata outside selected subset"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#generation",
+      "disposition": "out_of_scope",
+      "note": "electrical metadata outside selected subset"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#givenName",
+      "disposition": "out_of_scope",
+      "note": "person metadata outside selected subset"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#grossArea",
+      "disposition": "out_of_scope",
+      "note": "not needed for selected subset"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#heightRUs",
+      "disposition": "out_of_scope",
+      "note": "IT rack metadata outside selected subset"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#heightScaleFactor",
+      "disposition": "out_of_scope",
+      "note": "geometry metadata outside selected subset"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#image",
+      "disposition": "not_agent_relevant",
+      "note": "documentation metadata"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#installationDate",
+      "disposition": "out_of_scope",
+      "note": "lifecycle metadata outside selected subset"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#levelNumber",
+      "disposition": "mapped",
+      "note": "used for classes.Floor.properties.levelNumber"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#logo",
+      "disposition": "not_agent_relevant",
+      "note": "branding metadata outside selected subset"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#maintenanceInterval",
+      "disposition": "out_of_scope",
+      "note": "maintenance metadata not modeled in selected subset"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#maxOccupancy",
+      "disposition": "mapped",
+      "note": "used for classes.Space.properties.maxOccupancy"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#modelNumber",
+      "disposition": "not_agent_relevant",
+      "note": "identifier metadata not modeled here"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#netArea",
+      "disposition": "out_of_scope",
+      "note": "not needed for selected subset"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#numberOfPorts",
+      "disposition": "out_of_scope",
+      "note": "IT/network metadata outside selected subset"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#originX",
+      "disposition": "out_of_scope",
+      "note": "geometry metadata outside selected subset"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#originY",
+      "disposition": "out_of_scope",
+      "note": "geometry metadata outside selected subset"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#poeType",
+      "disposition": "out_of_scope",
+      "note": "IT/network metadata outside selected subset"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#portSpeed",
+      "disposition": "out_of_scope",
+      "note": "IT/network metadata outside selected subset"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#postalCode",
+      "disposition": "out_of_scope",
+      "note": "not needed for selected subset"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#region",
+      "disposition": "out_of_scope",
+      "note": "not needed for selected subset"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#rentableArea",
+      "disposition": "out_of_scope",
+      "note": "real-estate metric outside selected subset"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#seatingCapacity",
+      "disposition": "out_of_scope",
+      "note": "not needed for selected subset"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#serialNumber",
+      "disposition": "not_agent_relevant",
+      "note": "identifier metadata not modeled here"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#severity",
+      "disposition": "out_of_scope",
+      "note": "alarm/workflow metadata outside selected subset"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#standard",
+      "disposition": "out_of_scope",
+      "note": "reference metadata outside selected subset"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#start",
+      "disposition": "out_of_scope",
+      "note": "generic temporal metadata outside selected subset"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#startLevel",
+      "disposition": "out_of_scope",
+      "note": "not needed for selected subset"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#status",
+      "disposition": "mapped",
+      "note": "used as evidence for several operational status properties"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#timestamp",
+      "disposition": "not_agent_relevant",
+      "note": "generic telemetry metadata not modeled here"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#tripDirection",
+      "disposition": "out_of_scope",
+      "note": "transport metadata outside selected subset"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#turnoverDate",
+      "disposition": "out_of_scope",
+      "note": "lifecycle metadata outside selected subset"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#value",
+      "disposition": "mapped",
+      "note": "used as evidence for several sensor and setpoint value properties"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#weight",
+      "disposition": "out_of_scope",
+      "note": "not needed for selected subset"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#widthScaleFactor",
+      "disposition": "out_of_scope",
+      "note": "geometry metadata outside selected subset"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#wifiSignalStrength",
+      "disposition": "out_of_scope",
+      "note": "network metadata outside selected subset"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#xRotationalScaleFactor",
+      "disposition": "out_of_scope",
+      "note": "geometry metadata outside selected subset"
+    },
+    {
+      "source_iri": "https://w3id.org/rec#yRotationalScaleFactor",
+      "disposition": "out_of_scope",
+      "note": "geometry metadata outside selected subset"
+    },
+    {
+      "source_iri": "nabac045b727245c4b942cf454c95355ab4015",
+      "disposition": "unsupported_by_target_model",
+      "note": "substance enumeration present but not clearly tied to one specific emitted property"
+    },
+    {
+      "source_iri": "nabac045b727245c4b942cf454c95355ab4052",
+      "disposition": "unsupported_by_target_model",
+      "note": "duplicate substance enumeration present but not clearly tied to one specific emitted property"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/1.4/Brick",
+      "disposition": "not_agent_relevant",
+      "note": "import bookkeeping entry"
+    },
+    {
+      "source_iri": "http://data.ashrae.org/bacnet/2020",
+      "disposition": "not_agent_relevant",
+      "note": "import target bookkeeping entry"
+    },
+    {
+      "source_iri": "http://qudt.org/3.1.0/vocab/quantitykind",
+      "disposition": "not_agent_relevant",
+      "note": "import target bookkeeping entry"
+    },
+    {
+      "source_iri": "http://qudt.org/3.1.0/vocab/unit",
+      "disposition": "not_agent_relevant",
+      "note": "import target bookkeeping entry"
+    },
+    {
+      "source_iri": "https://brickschema.org/schema/Brick/ref",
+      "disposition": "not_agent_relevant",
+      "note": "import target bookkeeping entry"
+    },
+    {
+      "source_iri": "https://w3id.org/rec/recimports",
+      "disposition": "not_agent_relevant",
+      "note": "import target bookkeeping entry"
+    },
+    {
+      "source_iri": "https://w3id.org/rec",
+      "disposition": "not_agent_relevant",
+      "note": "import bookkeeping entry"
+    },
+    {
+      "source_iri": "http://datashapes.org/dash",
+      "disposition": "not_agent_relevant",
+      "note": "import target bookkeeping entry"
+    },
+    {
+      "source_iri": "https://w3id.org/rec/brickpatches",
+      "disposition": "not_agent_relevant",
+      "note": "import target bookkeeping entry"
+    }
+  ]
+}
