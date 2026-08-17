@@ -270,6 +270,94 @@ classes:
         - occupied
         - unoccupied
         - unknown
+  CO2DifferentialSensor:
+    meaning: A sensor that measures the difference between CO2 levels of inside and
+      outside air.
+    aliases: []
+    properties:
+      value:
+        type: number
+        unit: ppm
+  CondensingUnit:
+    meaning: An outdoor HVAC unit that condenses refrigerant from gas to liquid as
+      part of the refrigeration cycle.
+    aliases: []
+    properties:
+      status:
+        type: text
+        allowed:
+        - 'off'
+        - 'on'
+        - alarm
+  CoolingTower:
+    meaning: A heat rejection device that rejects waste heat to the atmosphere by
+      cooling a water stream to a lower temperature.
+    aliases: []
+    properties:
+      status:
+        type: text
+        allowed:
+        - 'off'
+        - 'on'
+        - alarm
+  HeatExchanger:
+    meaning: A piece of equipment built for efficient heat transfer from one medium
+      to another.
+    aliases:
+    - HX
+    properties:
+      status:
+        type: text
+        allowed:
+        - 'off'
+        - 'on'
+        - alarm
+  Humidifier:
+    meaning: A device that adds moisture to air or other gases.
+    aliases: []
+    properties:
+      status:
+        type: text
+        allowed:
+        - 'off'
+        - 'on'
+        - alarm
+  IsolationValve:
+    meaning: A valve that stops the flow of a fluid, usually for maintenance or safety
+      purposes.
+    aliases: []
+    properties:
+      position:
+        type: number
+        unit: percent
+  Pump:
+    meaning: A machine that imparts energy to a fluid by drawing it in through an
+      entrance port and forcing it out through an exhaust port.
+    aliases: []
+    properties:
+      status:
+        type: text
+        allowed:
+        - 'off'
+        - 'on'
+        - alarm
+  SpaceHeater:
+    meaning: A heater used to warm the air in an enclosed area such as a room or office.
+    aliases: []
+    properties:
+      status:
+        type: text
+        allowed:
+        - 'off'
+        - 'on'
+        - alarm
+  WaterTemperatureSensor:
+    meaning: A sensor that measures the temperature of water.
+    aliases: []
+    properties:
+      value:
+        type: number
+        unit: degC
 relationships:
 - name: hasPart
   from: AirHandlingUnit
@@ -437,6 +525,16 @@ relationships:
   from: Thermostat
   to: Zone
   meaning: A thermostat serves as a controlling device for a zone.
+  aliases: []
+- name: hasPart
+  from: CondensingUnit
+  to: Fan
+  meaning: A condensing unit is composed in part of a fan.
+  aliases: []
+- name: serves
+  from: SpaceHeater
+  to: Space
+  meaning: A space heater serves the heating needs of a space.
   aliases: []
 rules:
   needsCoolingFromSetpoint:

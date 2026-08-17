@@ -919,6 +919,186 @@
       "source_evidence": "Standard HVAC practice for occupied zones is to confirm assigned control devices and served equipment are available.",
       "confidence": "medium",
       "rationale": "The action is grounded in the included zone, occupancy sensor, thermostat and terminal unit concepts."
+    },
+    {
+      "target_path": "classes.CO2DifferentialSensor",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#CO2_Differential_Sensor"
+      ],
+      "source_evidence": "\"Measures the difference between CO2 levels of inside and outside air\"",
+      "confidence": "high",
+      "rationale": "The source definition directly states the class meaning."
+    },
+    {
+      "target_path": "classes.CO2DifferentialSensor.properties.value",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#CO2_Differential_Sensor"
+      ],
+      "source_evidence": "Included comparable classes Outside Air CO2 Sensor and Return Air CO2 Sensor both use property \"value\" with unit \"ppm\" for measured CO2 concentration.",
+      "confidence": "medium",
+      "rationale": "Using a numeric ppm value follows the same modeling convention already used for comparable CO2 sensor classes in this domain."
+    },
+    {
+      "target_path": "classes.CondensingUnit",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#Condensing_Unit"
+      ],
+      "source_evidence": "\"An outdoor HVAC unit that typically condenses refrigerant from gas to liquid, integral to the refrigeration cycle.\"",
+      "confidence": "high",
+      "rationale": "The source definition directly identifies Condensing Unit as a distinct HVAC equipment type."
+    },
+    {
+      "target_path": "classes.CondensingUnit.properties.status",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#Condensing_Unit"
+      ],
+      "source_evidence": "off/on/alarm status monitoring is standard practice for HVAC equipment, already modeled the same way for AirHandlingUnit, Boiler, and Chiller in this domain.",
+      "confidence": "medium",
+      "rationale": "Condensing units are comparable operational HVAC assets, so the existing status convention applies."
+    },
+    {
+      "target_path": "relationships[32]",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#Condensing_Unit"
+      ],
+      "source_evidence": "\"It comprises a condenser coil, compressor, fan, and potentially a reversing valve\"",
+      "confidence": "high",
+      "rationale": "The source definition explicitly lists fan as a component of a condensing unit."
+    },
+    {
+      "target_path": "classes.CoolingTower",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#Cooling_Tower"
+      ],
+      "source_evidence": "\"A cooling tower is a heat rejection device that rejects waste heat to the atmosphere through the cooling of a water stream to a lower temperature.\"",
+      "confidence": "high",
+      "rationale": "The source definition directly provides the equipment meaning."
+    },
+    {
+      "target_path": "classes.CoolingTower.properties.status",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#Cooling_Tower"
+      ],
+      "source_evidence": "off/on/alarm status monitoring is standard practice for HVAC plant equipment, already modeled the same way for Boiler and Chiller in this domain.",
+      "confidence": "medium",
+      "rationale": "Cooling towers are comparable plant assets and fit the same status convention used for other major HVAC equipment."
+    },
+    {
+      "target_path": "classes.HeatExchanger",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#Heat_Exchanger"
+      ],
+      "source_evidence": "\"A heat exchanger is a piece of equipment built for efficient heat transfer from one medium to another.\"",
+      "confidence": "high",
+      "rationale": "The source definition directly establishes Heat Exchanger as a distinct equipment concept."
+    },
+    {
+      "target_path": "classes.HeatExchanger.properties.status",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#Heat_Exchanger"
+      ],
+      "source_evidence": "off/on/alarm status monitoring is standard practice for HVAC equipment, already modeled the same way for AirHandlingUnit, Boiler, and Chiller in this domain.",
+      "confidence": "medium",
+      "rationale": "As a major HVAC equipment item, Heat Exchanger fits the existing status convention used for comparable assets."
+    },
+    {
+      "target_path": "classes.Humidifier",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#Humidifier"
+      ],
+      "source_evidence": "\"A device that adds moisture to air or other gases\"",
+      "confidence": "high",
+      "rationale": "The source definition directly states the class meaning."
+    },
+    {
+      "target_path": "classes.Humidifier.properties.status",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#Humidifier"
+      ],
+      "source_evidence": "off/on/alarm status monitoring is standard practice for HVAC equipment, already modeled the same way for AirHandlingUnit, Boiler, and Chiller in this domain.",
+      "confidence": "medium",
+      "rationale": "Humidifier is an operational HVAC device comparable to other equipment classes that already use status."
+    },
+    {
+      "target_path": "classes.IsolationValve",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#Isolation_Valve"
+      ],
+      "source_evidence": "\"A valve that stops the flow of a fluid, usually for maintenance or safety purposes\"",
+      "confidence": "high",
+      "rationale": "The source definition directly identifies the device and its operational role."
+    },
+    {
+      "target_path": "classes.IsolationValve.properties.position",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#Isolation_Valve"
+      ],
+      "source_evidence": "Included comparable valve class Cooling Valve uses property \"position\" with unit \"percent\"; valve position indication is standard practice for HVAC valves when represented as control/mechanical components.",
+      "confidence": "medium",
+      "rationale": "Using percent position follows the existing valve modeling convention already adopted for CoolingValve."
+    },
+    {
+      "target_path": "classes.Pump",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#Pump"
+      ],
+      "source_evidence": "\"Machine for imparting energy to a fluid, causing it to do work, drawing a fluid into itself through an entrance port, and forcing the fluid out through an exhaust port.\"",
+      "confidence": "high",
+      "rationale": "The source definition directly establishes Pump as a distinct equipment class."
+    },
+    {
+      "target_path": "classes.Pump.properties.status",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#Pump"
+      ],
+      "source_evidence": "off/on/alarm status monitoring is standard practice for HVAC mechanical equipment, already modeled the same way for Fan, Boiler, and Chiller in this domain.",
+      "confidence": "medium",
+      "rationale": "Pump is a comparable mechanical asset and fits the domain's existing status pattern."
+    },
+    {
+      "target_path": "classes.SpaceHeater",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#Space_Heater"
+      ],
+      "source_evidence": "\"A heater used to warm the air in an enclosed area, such as a room or office\"",
+      "confidence": "high",
+      "rationale": "The source definition directly provides the class meaning."
+    },
+    {
+      "target_path": "classes.SpaceHeater.properties.status",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#Space_Heater"
+      ],
+      "source_evidence": "off/on/alarm status monitoring is standard practice for HVAC heating equipment, already modeled the same way for Boiler and other major equipment in this domain.",
+      "confidence": "medium",
+      "rationale": "Space heaters are operational heating devices and fit the same status convention as comparable HVAC equipment."
+    },
+    {
+      "target_path": "relationships[33]",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#Space_Heater"
+      ],
+      "source_evidence": "\"A heater used to warm the air in an enclosed area, such as a room or office\"",
+      "confidence": "medium",
+      "rationale": "Because the source defines the device by warming an enclosed area such as a room or office, serving a space is directly supported."
+    },
+    {
+      "target_path": "classes.WaterTemperatureSensor",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#Water_Temperature_Sensor"
+      ],
+      "source_evidence": "\"Measures the temperature of water\"",
+      "confidence": "high",
+      "rationale": "The source definition directly states the class meaning."
+    },
+    {
+      "target_path": "classes.WaterTemperatureSensor.properties.value",
+      "source_iris": [
+        "https://brickschema.org/schema/Brick#Water_Temperature_Sensor"
+      ],
+      "source_evidence": "Included comparable class Air Temperature Sensor uses property \"value\" with unit \"degC\" for measured temperature.",
+      "confidence": "medium",
+      "rationale": "Using a numeric degC value follows the same temperature-sensor convention already used for AirTemperatureSensor in this domain."
     }
   ],
   "dispositions": [
@@ -984,8 +1164,8 @@
     },
     {
       "source_iri": "https://brickschema.org/schema/Brick#CO2_Differential_Sensor",
-      "disposition": "out_of_scope",
-      "note": "specialized CO2 sensor not required for the selected core model"
+      "disposition": "mapped",
+      "note": "mapped to classes.CO2DifferentialSensor"
     },
     {
       "source_iri": "https://brickschema.org/schema/Brick#CO2_Level_Sensor",
@@ -1025,7 +1205,7 @@
     {
       "source_iri": "https://brickschema.org/schema/Brick#Compressor",
       "disposition": "out_of_scope",
-      "note": "not needed as a first-class concept in the selected operational slice"
+      "note": "Excluded because this domain models refrigeration and airside equipment primarily at the level of standalone assets and explicitly connected control points, while Compressor is presented here as a generic machine/component type and no existing domain class provides a supported equipment assembly relationship to place it without inventing additional enclosing asset structure."
     },
     {
       "source_iri": "https://brickschema.org/schema/Brick#Computer_Room_Air_Conditioning",
@@ -1039,8 +1219,8 @@
     },
     {
       "source_iri": "https://brickschema.org/schema/Brick#Condensing_Unit",
-      "disposition": "out_of_scope",
-      "note": "not needed for the selected HVAC/building control subset"
+      "disposition": "mapped",
+      "note": "mapped to classes.CondensingUnit"
     },
     {
       "source_iri": "https://brickschema.org/schema/Brick#Cooling_Temperature_Setpoint",
@@ -1049,8 +1229,8 @@
     },
     {
       "source_iri": "https://brickschema.org/schema/Brick#Cooling_Tower",
-      "disposition": "out_of_scope",
-      "note": "plant equipment outside selected subset"
+      "disposition": "mapped",
+      "note": "mapped to classes.CoolingTower"
     },
     {
       "source_iri": "https://brickschema.org/schema/Brick#Cooling_Valve",
@@ -1110,7 +1290,7 @@
     {
       "source_iri": "https://brickschema.org/schema/Brick#HVAC_Valve",
       "disposition": "taxonomy_only",
-      "note": "generic parent used for interpretation only"
+      "note": "Excluded as a taxonomy-level superclass rather than a distinct operational role: the source entry provides no definition, and this domain already models concrete valve types with separate behavior and placement (e.g. CoolingValve, HeatingValve) instead of adding an undifferentiated umbrella valve class."
     },
     {
       "source_iri": "https://brickschema.org/schema/Brick#HX",
@@ -1119,8 +1299,8 @@
     },
     {
       "source_iri": "https://brickschema.org/schema/Brick#Heat_Exchanger",
-      "disposition": "out_of_scope",
-      "note": "not needed in selected HVAC control subset"
+      "disposition": "mapped",
+      "note": "mapped to classes.HeatExchanger"
     },
     {
       "source_iri": "https://brickschema.org/schema/Brick#Heat_Sink_Temperature_Sensor",
@@ -1144,13 +1324,13 @@
     },
     {
       "source_iri": "https://brickschema.org/schema/Brick#Humidifier",
-      "disposition": "out_of_scope",
-      "note": "not needed in selected control subset"
+      "disposition": "mapped",
+      "note": "mapped to classes.Humidifier"
     },
     {
       "source_iri": "https://brickschema.org/schema/Brick#Isolation_Valve",
-      "disposition": "out_of_scope",
-      "note": "not needed in selected subset"
+      "disposition": "mapped",
+      "note": "mapped to classes.IsolationValve"
     },
     {
       "source_iri": "https://brickschema.org/schema/Brick#Location",
@@ -1189,8 +1369,8 @@
     },
     {
       "source_iri": "https://brickschema.org/schema/Brick#Pump",
-      "disposition": "out_of_scope",
-      "note": "not needed for selected subset"
+      "disposition": "mapped",
+      "note": "mapped to classes.Pump"
     },
     {
       "source_iri": "https://brickschema.org/schema/Brick#Radiant_Panel_Temperature_Sensor",
@@ -1249,13 +1429,13 @@
     },
     {
       "source_iri": "https://brickschema.org/schema/Brick#Space_Heater",
-      "disposition": "out_of_scope",
-      "note": "not needed in selected subset"
+      "disposition": "mapped",
+      "note": "mapped to classes.SpaceHeater"
     },
     {
       "source_iri": "https://brickschema.org/schema/Brick#Steam_Valve",
       "disposition": "out_of_scope",
-      "note": "not needed in selected subset"
+      "note": "Excluded because this domain already represents heating-side control valves with the more control-specific HeatingValve class, while Steam Valve has no source definition here and would either duplicate that existing role or require additional steam-system distinctions not otherwise modeled in the current subset."
     },
     {
       "source_iri": "https://brickschema.org/schema/Brick#Storey",
@@ -1294,8 +1474,8 @@
     },
     {
       "source_iri": "https://brickschema.org/schema/Brick#Water_Temperature_Sensor",
-      "disposition": "out_of_scope",
-      "note": "hydronic sensor detail outside selected subset"
+      "disposition": "mapped",
+      "note": "mapped to classes.WaterTemperatureSensor"
     },
     {
       "source_iri": "https://brickschema.org/schema/Brick#Water_Temperature_Setpoint",
