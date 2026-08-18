@@ -1619,3 +1619,51 @@ reference and record deltas/decisions here instead.)*
 
   **#109 not yet closed -- manual spot-check (explicitly requested by the
   user before any PR) still pending, and no PR opened yet.**
+
+- 2026-08-18 (continued) -- **Manual spot-check round 1: 9/10 accept, 1/10
+  reject (fixed), pipeline hardened generally as a result.** 10%-stratified
+  sample (10 of 96, seed 109 -- matching issue number, same convention as
+  Brick's seed 106). Agent proactively flagged 3 of 10 before rating:
+  `classes.Load` and `classes.Retailer` accepted (bare-label-plus-context
+  meaning, same pattern already accepted on Brick); `relationships[16]`
+  (Shipment usesContainer FreightContainer) accepted as a legitimate,
+  disclosed standard-practice specialization of the already-real
+  `Shipment usesContainer Container` relationship. **`classes.TrackingEvent.
+  properties.eventType` rejected**: `allowed: [packed, shipped, arrived,
+  received, stored]` justified only by generic "standard domain practice"
+  evidence with zero source text naming any of the 5 specific words --
+  same defect family as this domain's already-dropped `status` properties,
+  but this one had passed automated judging in the final official run
+  (0 unsupported) purely by LLM judge sampling variance, not genuine
+  grounding.
+
+  **Reviewer's direction: "fix S5, but in a principled way. the pipeline
+  should get better than before."** Rather than a one-off hand-drop, added
+  a new elevated-evidence-bar rule to both `compiler-prompt.md` and
+  `repair-prompt.md`, modeled on the existing composition-claims (`hasPart`)
+  rule: an `allowed` list's specific value *strings* need their own source
+  grounding (an `owl:oneOf` enumeration, or values literally named in
+  source text) -- a property's existence being standard practice does not,
+  by itself, justify any particular set of values; when only existence is
+  grounded, the correct shape is plain `type: text`, not invented-but-
+  plausible values. Used the strengthened prompt, via the real `repair.py`
+  tool, to fix the flagged property for real: model correctly kept the
+  property (genuinely grounded) and dropped the invented `allowed` list.
+  Re-verified with a full official `evaluate.py` run: `hard_gates_ok: True`,
+  0 unsupported, 0 unjustified. Full test suite: 227/227. This is a
+  general, domain-agnostic prompt improvement -- every future domain's
+  compiler/repair runs now carry this rule, not just IOF. Full account:
+  `domains/iof-supply-chain/manual-spot-check.md`.
+
+  Also this session: opened **#117** (linked under epic #101), a
+  prioritized punch list of further robustness improvements identified
+  along the way -- a referential-consistency gate (nothing currently
+  checks that dropping a property/rule doesn't leave dangling free-text
+  references in rule/action prose, found only by direct inspection when
+  fixing `PurchaseOrder`/`Shipment.status`), judge-stability hardening
+  (more judges or a confirmation round for contested items, given the
+  repeated verdict flip-flopping observed on identical content across
+  independent real rounds this session), and related prompting work.
+
+  **#109 not yet closed -- still no PR opened. Next: user's call on
+  whether more spot-check rounds are wanted, or proceed straight to PR.**

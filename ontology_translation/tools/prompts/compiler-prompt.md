@@ -160,6 +160,25 @@ Rules for this shape:
   built in part from the other).
 - Enumerations (`owl:oneOf`) may become a property's `allowed` list **only**
   when clearly associated with one specific property.
+- **A property's `allowed` list needs the same elevated evidence bar as a
+  composition claim: the specific value *strings* must be traceable to real
+  source text (an `owl:oneOf` enumeration, or values literally named in a
+  definition/comment) — not inherited from standard-practice justification
+  for the *property's existence*.** These are different claims of very
+  different strength: "a status property is standard practice for Invoice"
+  is a far weaker, far more defensible claim than "invoices go through
+  draft/approved/paid states" — the second needs its own textual or
+  `owl:oneOf` grounding, not a free ride on the first. When only the
+  property's existence is genuinely grounded but its specific values are
+  not, prefer a plain `type: text` property with no `allowed` list over
+  inventing values that sound plausible. Found for real: several properties
+  across one domain (status-style fields on Carrier, Customer, Supplier,
+  MaterialTradeItem, PurchaseOrder, Shipment, and a tracking-event's
+  event-type field) were each given a specific 3-6 value `allowed` list
+  justified only by "standard domain practice," with no source text naming
+  any of those specific words — independent judging later found most of
+  them had no honest grounding for the chosen values, only for the
+  property's general existence.
 - **`rdfs:subClassOf` edges MUST NOT become `relationships` entries.**
   Taxonomy is for scope selection and interpretation only — it never
   appears as a relationship in the output.

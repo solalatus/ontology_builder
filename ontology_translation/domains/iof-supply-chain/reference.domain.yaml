@@ -99,12 +99,6 @@ classes:
         type: date
       eventType:
         type: text
-        allowed:
-        - packed
-        - shipped
-        - arrived
-        - received
-        - stored
   Traceability:
     meaning: A system capability to trace supply-chain resources and events across
       processes.

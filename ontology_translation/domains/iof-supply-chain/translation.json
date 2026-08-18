@@ -251,14 +251,11 @@
     {
       "target_path": "classes.TrackingEvent.properties.eventType",
       "source_iris": [
-        "https://spec.industrialontologies.org/ontology/construct/TrackingEvent",
-        "https://spec.industrialontologies.org/ontology/construct/ShipmentPreparationProcess",
-        "https://spec.industrialontologies.org/ontology/construct/ReceivingProcess",
-        "https://spec.industrialontologies.org/ontology/construct/StorageProcess"
+        "https://spec.industrialontologies.org/ontology/construct/TrackingEvent"
       ],
-      "source_evidence": "Standard domain practice for tracking events over shipment preparation, receiving, and storage activities.",
-      "confidence": "medium",
-      "rationale": "An event type is a standard property because tracking events classify what happened in logistics execution."
+      "source_evidence": "The source provides the class 'tracking event' but gives no definition or enumeration for event categories, so only a generic text field for the event's type is supportable here.",
+      "confidence": "high",
+      "rationale": "The property can be retained as a plain text description of a TrackingEvent's type, but the specific allowed values packed/shipped/arrived/received/stored are unsupported by the provided source and must be removed."
     },
     {
       "target_path": "classes.Traceability",

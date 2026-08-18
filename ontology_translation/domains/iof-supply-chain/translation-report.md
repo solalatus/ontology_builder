@@ -24,16 +24,16 @@
 
 ## Independent judging of exclusions (hard gate: zero majority-unjustified)
 - majority-unjustified exclusions: 0
-- contested exclusions: 20
+- contested exclusions: 13
 
 ## Translation stability (report-only, heuristic)
 - classes: F1=0.89
 - relationships: F1=0.53
 - properties: F1=0.20
-- allowed_values: F1=0.10
+- allowed_values: F1=0.09
 
 ## Round-trip score (diagnostic, report-only)
-- sampled: 10, average score: 0.61
+- sampled: 5, average score: 0.58
 
 ## Competency-question support (report-only)
 - support score: 100.0% (10 CQs)
