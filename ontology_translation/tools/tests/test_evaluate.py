@@ -95,7 +95,42 @@ class IterGeneratedElementsTests(unittest.TestCase):
         self.assertFalse(any("competency" in e["target_path"] for e in elements))
 
 
+class AllSourceIrisTests(unittest.TestCase):
+    def test_import_records_are_excluded(self):
+        # Regression: extract.py's extract_imports() keys an import record
+        # by the *importing* document's own IRI (correct per real
+        # `owl:imports` RDF semantics -- the subject is the file declaring
+        # the import, not the imported target), which is document-level
+        # metadata, not a class/property a compiler could ever legitimately
+        # disposition. Requiring one made provenance_gate/reverse_coverage
+        # unconditionally fail for any source file with an owl:imports at
+        # all -- found for real on IOF Supply Chain (imports IOF Core),
+        # never on Brick HVAC only because Brick.ttl declares none.
+        source_ir = json.loads(json.dumps(SOURCE_IR))
+        source_ir["imports"] = [
+            {"iri": "http://ex.org/this-file#", "kind": "import", "imports": "http://ex.org/core#", "sourceOntology": "test"}
+        ]
+        iris = evaluate_mod._all_source_iris(source_ir)
+        self.assertNotIn("http://ex.org/this-file#", iris)
+
+    def test_classes_properties_and_restrictions_are_included(self):
+        iris = evaluate_mod._all_source_iris(SOURCE_IR)
+        self.assertIn("http://ex.org#Fan", iris)
+        self.assertIn("http://ex.org#serves", iris)
+        self.assertIn("http://ex.org#status", iris)
+
+
 class ProvenanceGateTests(unittest.TestCase):
+    def test_import_record_never_needs_a_disposition(self):
+        source_ir = json.loads(json.dumps(SOURCE_IR))
+        source_ir["imports"] = [
+            {"iri": "http://ex.org/this-file#", "kind": "import", "imports": "http://ex.org/core#", "sourceOntology": "test"}
+        ]
+        result = evaluate_mod.provenance_gate(DOMAIN_DATA, TRANSLATION_FULL, source_ir)
+        self.assertTrue(result["ok"])
+        self.assertNotIn("http://ex.org/this-file#", result["missing_dispositions"])
+
+
     def test_fully_covered_is_ok(self):
         result = evaluate_mod.provenance_gate(DOMAIN_DATA, TRANSLATION_FULL, SOURCE_IR)
         self.assertTrue(result["ok"])

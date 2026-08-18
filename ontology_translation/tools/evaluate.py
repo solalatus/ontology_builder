@@ -75,8 +75,24 @@ def _iter_generated_elements(domain_data: dict) -> list[dict]:
 
 
 def _all_source_iris(source_ir: dict) -> set[str]:
+    """Every source_ir record that is a legitimate candidate for a
+    mapped/excluded disposition -- i.e. something a compiler could actually
+    translate or knowingly leave out. Deliberately excludes `imports`:
+    extract.py's `extract_imports` records that entry keyed by the
+    *importing* ontology document's own IRI (per real `owl:imports A
+    owl:imports B` RDF semantics -- the subject is the document declaring
+    the import, not the imported target), which is correct extraction, but
+    means the record represents "this file imports that other file", not a
+    class/property/restriction a domain could include or exclude. There is
+    no legitimate disposition for a document-level import fact, so
+    requiring one made this hard gate unconditionally fail for any source
+    file with at least one `owl:imports` -- found for real on IOF Supply
+    Chain (which imports IOF Core), never on Brick HVAC only because
+    Brick.ttl happens to declare none. General, not domain-specific: any
+    ontology using `owl:imports` (common practice for modular BFO-based
+    ontologies especially) would hit the same false failure."""
     iris = set()
-    for key in ("classes", "object_properties", "datatype_properties", "enumerations", "restrictions", "imports"):
+    for key in ("classes", "object_properties", "datatype_properties", "enumerations", "restrictions"):
         for record in source_ir.get(key, []):
             iris.add(record["iri"])
     return iris
