@@ -690,13 +690,12 @@
     {
       "target_path": "relationships[14]",
       "source_iris": [
-        "https://spec.industrialontologies.org/ontology/construct/holds",
         "https://spec.industrialontologies.org/ontology/construct/Container",
         "https://spec.industrialontologies.org/ontology/construct/Cargo"
       ],
-      "source_evidence": "Standard domain practice for containerized logistics tied to Container and Cargo concepts, using the source holds property as the semantic basis.",
+      "source_evidence": "The source explicitly names the endpoint classes \"container\" and \"cargo\"; using a generic containment relation between these material entities is supported by standard practice for logistics modeling, whereas the cited property \"holds\" is declared on a different domain.",
       "confidence": "medium",
-      "rationale": "Containers operationally hold cargo, and this is a standard pairing directly tied to the included concepts."
+      "rationale": "The original relationship's specific predicate was structurally mismatched because \"holds\" is not grounded for Container as subject, but the underlying logistics concept is still supportable by replacing it with a generic containment relation between the explicitly sourced classes Container and Cargo."
     },
     {
       "target_path": "relationships[15]",

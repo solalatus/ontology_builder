@@ -147,6 +147,27 @@ Rules for this shape:
   *that specific pair*. This is the same standard-practice grounding
   already described above for rules/actions/inferred properties; it
   applies to relationship endpoint pairs too.
+- **This standard-practice allowance only applies when the source leaves
+  the property's endpoints genuinely unconstrained.** When the source
+  *does* explicitly declare a `domain` and/or `range` for an object
+  property, that is a real structural constraint, not something a
+  standard-practice pairing overrides — even when the resulting sentence
+  reads naturally in plain English. Before citing such a property for a
+  relationship, check whether the endpoint class you want to use actually
+  resolves (directly or transitively, via the input IR's own `parents`
+  chain) to the declared domain/range class. If it does not, that pairing
+  is a structural conflict, not a disclosed inference: either find a
+  specific restriction that directly connects those two exact classes, or
+  use a different, honestly-available basis for the relationship (a
+  different real property, or a standard-practice relationship named and
+  cited as such on its own terms) — never borrow a domain/range-constrained
+  property's name for an endpoint outside what the source itself declares
+  for it. Found for real: a `holds` property the source explicitly
+  declared `domain: Agent` for was used for a `Container holds Cargo`
+  relationship — Container is not an Agent in the source's own hierarchy
+  — while the correctly-domain-matched pairing (`Shipper holds Cargo`,
+  Shipper genuinely being an Agent) existed right alongside it in the same
+  domain, undetected as the actual difference between the two.
 - **Composition claims (`hasPart` and its equivalents) need the strongest
   evidence of any relationship, because a fluent-sounding standard-practice
   sentence is easiest to write — and easiest to over-trust — for exactly

@@ -230,11 +230,13 @@ relationships:
   to: Cargo
   meaning: The shipper holds the cargo being consigned or shipped.
   aliases: []
-- name: holds
+- name: contains
   from: Container
   to: Cargo
-  meaning: The container holds cargo for storage or transport.
-  aliases: []
+  meaning: Cargo is contained in a Container for storage or transport.
+  aliases:
+  - stores
+  - carries
 - name: usesContainer
   from: Shipment
   to: Container

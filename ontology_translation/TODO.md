@@ -1667,3 +1667,43 @@ reference and record deltas/decisions here instead.)*
 
   **#109 not yet closed -- still no PR opened. Next: user's call on
   whether more spot-check rounds are wanted, or proceed straight to PR.**
+
+- 2026-08-18 (continued) -- **Manual spot-check round 2: 9/10 accept, 1/10
+  reject (fixed), pipeline hardened a second time.** Fresh 10%-stratified
+  sample (10 of 96, seed 4417, excluding round 1's already-reviewed
+  paths). `relationships[19]` (TrackingEvent tracks Shipment) accepted
+  as a soft flag (no source property connects the pair, but consistent
+  with 3 structurally-identical siblings); `classes.TrackingEvent.
+  properties.eventTime` noted as a clean confirmation that round 1's
+  prompt fix correctly treats type-only properties as lower-risk than
+  enumerated ones.
+
+  **`relationships[14]` (Container holds Cargo) rejected -- a distinct
+  defect class from round 1's.** The cited object property `holds` has an
+  explicit source-declared `domain: Agent`; Container is not an Agent in
+  the source's own hierarchy, while the correctly-domain-matched
+  `relationships[13]` (`Shipper holds Cargo`, Shipper genuinely being an
+  Agent) sat right alongside it in the same domain. A real, specific
+  structural constraint silently overridden, not just weak/generic
+  evidence.
+
+  **Reviewer's direction again: "fix s6 again in a manner that is
+  generally improving our pipeline."** Added a further rule to both
+  prompts distinguishing the existing standard-practice-endpoint-pairing
+  allowance (genuinely domain/range-unconstrained properties) from
+  properties whose domain/range *is* explicitly declared -- the latter
+  must be checked against the endpoint class's own `parents` chain before
+  citing it. Used the strengthened prompt via `repair.py` to fix the
+  relationship for real: model renamed away from the domain-mismatched
+  `holds` predicate entirely (to `contains`, disclosed as a standard-
+  practice containment relation) rather than keeping a borrowed,
+  structurally false property identity. Re-verified: `hard_gates_ok:
+  True`, 0 unsupported, 0 unjustified. Full test suite: 227/227.
+
+  Second general, domain-agnostic prompt improvement from this domain's
+  spot-check (after round 1's `allowed`-list rule) -- both now apply to
+  every future domain. Full account:
+  `domains/iof-supply-chain/manual-spot-check.md`.
+
+  **#109 not yet closed -- still no PR opened. Next: user's call on
+  further rounds vs. proceeding to PR.**

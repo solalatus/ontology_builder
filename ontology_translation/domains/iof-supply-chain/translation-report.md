@@ -28,12 +28,12 @@
 
 ## Translation stability (report-only, heuristic)
 - classes: F1=0.89
-- relationships: F1=0.53
+- relationships: F1=0.54
 - properties: F1=0.20
 - allowed_values: F1=0.09
 
 ## Round-trip score (diagnostic, report-only)
-- sampled: 5, average score: 0.58
+- sampled: 5, average score: 0.66
 
 ## Competency-question support (report-only)
 - support score: 100.0% (10 CQs)

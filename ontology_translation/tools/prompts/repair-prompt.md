@@ -44,7 +44,16 @@ definitions for the classes involved. For each one, decide exactly one of:
   1. The judges' rejection reveals the claim was attached to the *wrong*
      concept (e.g. rejected evidence that actually describes a different,
      related class) — the source material supports the same kind of claim
-     on the *correct* class/pair/name instead.
+     on the *correct* class/pair/name instead. **A relationship whose cited
+     object property has an explicit source-declared `domain`/`range` needs
+     its endpoint checked against that declaration** (via the endpoint
+     class's own `parents` chain in `source_context`) — a property
+     constrained to one domain does not become evidence for a differently-
+     typed endpoint just because the resulting sentence reads naturally.
+     If the endpoint doesn't resolve to the declared domain/range, either
+     a specific restriction directly connecting those two exact classes is
+     needed, or the relationship needs a different real basis entirely
+     (same elevated bar as `compiler-prompt.md`'s object-property rule).
   2. The underlying concept is right but was named or shaped more
      specifically than the evidence supports (e.g. a property named too
      broadly for what the evidence actually justifies, or an `allowed`

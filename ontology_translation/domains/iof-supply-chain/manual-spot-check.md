@@ -2,7 +2,57 @@
 
 Human evidence supplementing the automated QA suite (issue #103), done
 in-session. Full structured data is in `manual-spot-check.json`; this file
-is the readable summary.
+is the readable summary, newest round first.
+
+## Round 2 (2026-08-18) — 9/10 accept, 1/10 reject (fixed), pipeline hardened again
+
+10%-stratified sample (10 of 96, seed 4417, excluding round 1's already-
+reviewed paths). **Result: 9/10 accept, 1/10 reject (fixed).**
+
+Agent proactively flagged 2 of 10. `relationships[19]` (TrackingEvent
+tracks Shipment) accepted as a soft flag — no source property/restriction
+connects the pair directly, but it's one of 4 structurally-identical
+`tracks` relationships applied consistently across the domain, same risk
+category as round 1's accepted standard-practice items. `classes.
+TrackingEvent.properties.eventTime` (`type: date`, no `allowed` list) was
+noted as a clean confirmation that the round-1 prompt fix correctly
+distinguishes low-risk type-only properties from high-risk enumerated
+ones.
+
+**`relationships[14]` (Container holds Cargo) rejected — real, distinct
+defect class from round 1's.** The cited object property `holds` has an
+explicit source-declared `domain: Agent`. Container is not an Agent in the
+source's own hierarchy (`Container` → `MaterialArtifact`) — compare the
+correctly-domain-matched `relationships[13]` (`Shipper holds Cargo`),
+where Shipper genuinely is an Agent, sitting right alongside it in the
+same domain. This is a specific structural constraint the source declares
+being silently overridden, not just generic/weak evidence.
+
+**Reviewer's direction: "fix s6 again in a manner that is generally
+improving our pipeline."** Added a further elevated-evidence-bar rule to
+both prompts, this time distinguishing the *already-existing*
+standard-practice-endpoint-pairing allowance (for properties whose source
+domain/range is genuinely unconstrained) from properties whose domain/
+range *is* explicitly declared — the latter is a real structural
+constraint that must be checked against the endpoint class's own
+`parents` chain before citing it, not something a natural-sounding
+sentence can override. Used the strengthened prompt via `repair.py` to
+fix the flagged relationship for real: the model renamed the relationship
+away from the domain-mismatched `holds` predicate entirely (to `contains`,
+disclosed as a standard-practice containment relation between the two
+genuinely-cited classes) rather than keeping the borrowed, structurally
+false property identity. Re-verified with a full official `evaluate.py`
+run: `hard_gates_ok: True`, 0 unsupported, 0 unjustified. Full test suite:
+227/227.
+
+This is the second general, domain-agnostic prompt improvement from this
+domain's spot-check (after round 1's `allowed`-list rule) — both now apply
+to every future domain's compiler/repair runs.
+
+### Cost
+
+$0 sample review + ~$0.010 (targeted repair) + ~$1.55 (one full official
+re-evaluate to confirm convergence).
 
 ## Round 1 (2026-08-18) — 9/10 accept, 1/10 reject (fixed), pipeline hardened
 
