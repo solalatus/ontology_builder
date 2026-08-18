@@ -147,6 +147,27 @@ Rules for this shape:
   *that specific pair*. This is the same standard-practice grounding
   already described above for rules/actions/inferred properties; it
   applies to relationship endpoint pairs too.
+- **This standard-practice allowance only applies when the source leaves
+  the property's endpoints genuinely unconstrained.** When the source
+  *does* explicitly declare a `domain` and/or `range` for an object
+  property, that is a real structural constraint, not something a
+  standard-practice pairing overrides — even when the resulting sentence
+  reads naturally in plain English. Before citing such a property for a
+  relationship, check whether the endpoint class you want to use actually
+  resolves (directly or transitively, via the input IR's own `parents`
+  chain) to the declared domain/range class. If it does not, that pairing
+  is a structural conflict, not a disclosed inference: either find a
+  specific restriction that directly connects those two exact classes, or
+  use a different, honestly-available basis for the relationship (a
+  different real property, or a standard-practice relationship named and
+  cited as such on its own terms) — never borrow a domain/range-constrained
+  property's name for an endpoint outside what the source itself declares
+  for it. Found for real: a `holds` property the source explicitly
+  declared `domain: Agent` for was used for a `Container holds Cargo`
+  relationship — Container is not an Agent in the source's own hierarchy
+  — while the correctly-domain-matched pairing (`Shipper holds Cargo`,
+  Shipper genuinely being an Agent) existed right alongside it in the same
+  domain, undetected as the actual difference between the two.
 - **Composition claims (`hasPart` and its equivalents) need the strongest
   evidence of any relationship, because a fluent-sounding standard-practice
   sentence is easiest to write — and easiest to over-trust — for exactly
@@ -160,6 +181,25 @@ Rules for this shape:
   built in part from the other).
 - Enumerations (`owl:oneOf`) may become a property's `allowed` list **only**
   when clearly associated with one specific property.
+- **A property's `allowed` list needs the same elevated evidence bar as a
+  composition claim: the specific value *strings* must be traceable to real
+  source text (an `owl:oneOf` enumeration, or values literally named in a
+  definition/comment) — not inherited from standard-practice justification
+  for the *property's existence*.** These are different claims of very
+  different strength: "a status property is standard practice for Invoice"
+  is a far weaker, far more defensible claim than "invoices go through
+  draft/approved/paid states" — the second needs its own textual or
+  `owl:oneOf` grounding, not a free ride on the first. When only the
+  property's existence is genuinely grounded but its specific values are
+  not, prefer a plain `type: text` property with no `allowed` list over
+  inventing values that sound plausible. Found for real: several properties
+  across one domain (status-style fields on Carrier, Customer, Supplier,
+  MaterialTradeItem, PurchaseOrder, Shipment, and a tracking-event's
+  event-type field) were each given a specific 3-6 value `allowed` list
+  justified only by "standard domain practice," with no source text naming
+  any of those specific words — independent judging later found most of
+  them had no honest grounding for the chosen values, only for the
+  property's general existence.
 - **`rdfs:subClassOf` edges MUST NOT become `relationships` entries.**
   Taxonomy is for scope selection and interpretation only — it never
   appears as a relationship in the output.

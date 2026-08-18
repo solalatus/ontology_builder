@@ -113,10 +113,7 @@ def _build_reinstate_batch(translation: dict, source_ir: dict, disposition_judgi
     results_by_iri = {r["source_iri"]: r for r in disposition_judging.get("results", [])}
     disposition_by_iri = {d["source_iri"]: d for d in translation.get("dispositions", [])}
     iri_index = evaluate_mod._index_source_records_by_iri(source_ir)
-    mapped_source_iris: dict[str, str] = {}
-    for mapping in translation.get("mappings", []):
-        for src_iri in mapping.get("source_iris") or []:
-            mapped_source_iris.setdefault(src_iri, mapping["target_path"])
+    mapped_source_iris = evaluate_mod._mapped_source_iris_by_disposition(translation)
 
     flagged = []
     for iri in unjustified_iris:
@@ -158,21 +155,22 @@ def _fix_round(
     judges: int,
     round_trip_sample: int,
     cq_count: int,
+    stability_run_paths: list[Path] | None = None,
 ) -> tuple[bool, Path, Path]:
     """Runs one evaluate -> (repair + reinstate as needed) round. Returns
     (hard_gates_ok, current_domain_yaml_path, current_translation_path) --
     the paths are unchanged from the input unless a fix was actually
     applied, so the caller can tell whether this round made progress."""
     eval_out_dir = out_dir / f"eval-round-{round_num}"
-    rc = _run_stage(
-        f"evaluate (round {round_num})", evaluate_mod.main,
-        [
-            "--domain-yaml", str(domain_yaml_path), "--translation", str(translation_path),
-            "--source-ir", str(source_ir_path), "--manifest", str(manifest_path),
-            "--out-dir", str(eval_out_dir), "--judges", str(judges),
-            "--round-trip-sample", str(round_trip_sample), "--cq-count", str(cq_count),
-        ],
-    )
+    eval_argv = [
+        "--domain-yaml", str(domain_yaml_path), "--translation", str(translation_path),
+        "--source-ir", str(source_ir_path), "--manifest", str(manifest_path),
+        "--out-dir", str(eval_out_dir), "--judges", str(judges),
+        "--round-trip-sample", str(round_trip_sample), "--cq-count", str(cq_count),
+    ]
+    if stability_run_paths:
+        eval_argv += ["--stability-runs", *(str(p) for p in stability_run_paths)]
+    rc = _run_stage(f"evaluate (round {round_num})", evaluate_mod.main, eval_argv)
     manifest = load_manifest(manifest_path)
     report_path = eval_out_dir / f"{manifest.id}.translation-evaluation.json"
     report = json.loads(report_path.read_text(encoding="utf-8"))
@@ -306,25 +304,37 @@ def run_pipeline(
     domain_yaml_path = out_dir / "run-1.domain.yaml"
     translation_path = out_dir / "run-1.translation.json"
 
+    # compile.py writes one run-N.domain.yaml per manifest.compiler.runs.
+    # run-1 is the one this loop fixes; the rest are only ever used as
+    # independent comparison points for layer 4 (translation_stability) --
+    # never as fallback content. Passed through unconditionally so every
+    # domain run through this single-command pipeline gets a real stability
+    # score, not just the ones a caller happens to wire up by hand.
+    actual_run_count = runs if runs is not None else manifest.compiler_runs
+    stability_run_paths = [
+        p for i in range(2, actual_run_count + 1)
+        if (p := out_dir / f"run-{i}.domain.yaml").exists()
+    ]
+
     hard_gates_ok = False
     for round_num in range(1, max_fix_rounds + 1):
         hard_gates_ok, domain_yaml_path, translation_path = _fix_round(
             domain_yaml_path, translation_path, source_ir_path, manifest_path, out_dir,
-            round_num, judges, round_trip_sample, cq_count,
+            round_num, judges, round_trip_sample, cq_count, stability_run_paths,
         )
         if hard_gates_ok:
             break
 
     final_eval_dir = out_dir / "eval-final"
-    rc = _run_stage(
-        "evaluate (final)", evaluate_mod.main,
-        [
-            "--domain-yaml", str(domain_yaml_path), "--translation", str(translation_path),
-            "--source-ir", str(source_ir_path), "--manifest", str(manifest_path),
-            "--out-dir", str(final_eval_dir), "--judges", str(judges),
-            "--round-trip-sample", str(round_trip_sample), "--cq-count", str(cq_count),
-        ],
-    )
+    final_eval_argv = [
+        "--domain-yaml", str(domain_yaml_path), "--translation", str(translation_path),
+        "--source-ir", str(source_ir_path), "--manifest", str(manifest_path),
+        "--out-dir", str(final_eval_dir), "--judges", str(judges),
+        "--round-trip-sample", str(round_trip_sample), "--cq-count", str(cq_count),
+    ]
+    if stability_run_paths:
+        final_eval_argv += ["--stability-runs", *(str(p) for p in stability_run_paths)]
+    rc = _run_stage("evaluate (final)", evaluate_mod.main, final_eval_argv)
     report_path = final_eval_dir / f"{manifest.id}.translation-evaluation.json"
     report = json.loads(report_path.read_text(encoding="utf-8"))
     print(f"\n[pipeline] === DONE === hard_gates_ok={report.get('hard_gates_ok')}")

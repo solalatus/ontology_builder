@@ -75,8 +75,24 @@ def _iter_generated_elements(domain_data: dict) -> list[dict]:
 
 
 def _all_source_iris(source_ir: dict) -> set[str]:
+    """Every source_ir record that is a legitimate candidate for a
+    mapped/excluded disposition -- i.e. something a compiler could actually
+    translate or knowingly leave out. Deliberately excludes `imports`:
+    extract.py's `extract_imports` records that entry keyed by the
+    *importing* ontology document's own IRI (per real `owl:imports A
+    owl:imports B` RDF semantics -- the subject is the document declaring
+    the import, not the imported target), which is correct extraction, but
+    means the record represents "this file imports that other file", not a
+    class/property/restriction a domain could include or exclude. There is
+    no legitimate disposition for a document-level import fact, so
+    requiring one made this hard gate unconditionally fail for any source
+    file with at least one `owl:imports` -- found for real on IOF Supply
+    Chain (which imports IOF Core), never on Brick HVAC only because
+    Brick.ttl happens to declare none. General, not domain-specific: any
+    ontology using `owl:imports` (common practice for modular BFO-based
+    ontologies especially) would hit the same false failure."""
     iris = set()
-    for key in ("classes", "object_properties", "datatype_properties", "enumerations", "restrictions", "imports"):
+    for key in ("classes", "object_properties", "datatype_properties", "enumerations", "restrictions"):
         for record in source_ir.get(key, []):
             iris.add(record["iri"])
     return iris
@@ -596,6 +612,45 @@ def judge_mappings(
 _SIBLING_CONTEXT_LIMIT = 8
 
 
+def _mapped_source_iris_by_disposition(translation: dict) -> dict[str, str]:
+    """source_iri -> target_path, for every source element the compiler
+    actually dispositioned `mapped` -- i.e. that IRI's own real-world
+    concept became its own domain element, not just something a *different*
+    element's mapping happened to cite as supporting evidence.
+    compiler-prompt.md instructs `mapped`'s `note` to be exactly the
+    target_path ("became a target element (reference its target path)"),
+    so this is the authoritative source for "was this IRI itself included."
+
+    Found for real on IOF Supply Chain: the previous approach scanned every
+    mapping's *entire* `source_iris` list (which, per this session's own
+    citation-completeness discipline, legitimately includes supporting
+    citations beyond the mapping's own primary concept -- e.g.
+    classes.ShipFromLocation's mapping correctly also cites
+    ShipFromLocationRole's IRI as corroborating evidence) and treated ANY
+    IRI appearing there as "mapped to" that target. That conflated "cited
+    as supporting evidence for a different class" with "this concept's own
+    disposition is mapped" -- producing a false "this sibling was kept"
+    signal for ShipFromLocationRole/ShipToLocationRole (both correctly
+    excluded, cited only as supporting evidence for the *location* classes)
+    that misled both reinstate.py's own reinstate decision (it tried to
+    reuse the already-existing ShipFromLocation/ShipToLocation class names,
+    reading the false signal as "this concept already has that identity")
+    and a disposition re-judge (verdicts citing "the parallel sibling...
+    mapped to a location class" as contradicting the exclusion, when no
+    such sibling was ever actually mapped as its own element). General, not
+    domain-specific: any domain where an excluded concept's IRI gets cited
+    as supporting evidence elsewhere -- itself a *good* citation-discipline
+    outcome -- would hit the same false signal."""
+    mapped: dict[str, str] = {}
+    for disposition in translation.get("dispositions", []):
+        if disposition.get("disposition") != "mapped":
+            continue
+        target_path = disposition.get("note")
+        if target_path:
+            mapped[disposition["source_iri"]] = target_path
+    return mapped
+
+
 def _sibling_context_for_iri(iri: str, iri_index: dict, mapped_source_iris: dict[str, str]) -> list[dict]:
     """Other source classes sharing at least one subClassOf parent with
     `iri` that the compiler actually mapped into the domain -- gives a
@@ -686,10 +741,7 @@ def judge_dispositions(
     to compare, not a failure" stance `_ground_truth_for_target` already
     takes elsewhere in this module."""
     iri_index = _index_source_records_by_iri(source_ir)
-    mapped_source_iris: dict[str, str] = {}
-    for mapping in translation.get("mappings", []):
-        for src_iri in mapping.get("source_iris") or []:
-            mapped_source_iris.setdefault(src_iri, mapping["target_path"])
+    mapped_source_iris = _mapped_source_iris_by_disposition(translation)
 
     results = []
     total_cost = 0.0
@@ -978,7 +1030,16 @@ def run_evaluation(
 
     stability = {"note": "no stability_run_paths supplied", "pairs": [], "average_f1": None}
     if stability_run_paths:
-        domain_datas = [yaml.safe_load(p.read_text(encoding="utf-8")) or {} for p in stability_run_paths]
+        # domain_data (the actual --domain-yaml being evaluated) must be one
+        # of the compared runs -- this is a stability report about the
+        # domain actually being shipped, not just an agreement check among
+        # whichever *other* runs happened to be passed as comparison points.
+        # Found for real: this omitted domain_data entirely, so every past
+        # --stability-runs invocation silently measured only how much the
+        # *other* runs agreed with each other, never how much the delivered
+        # domain (which may have gone through real repair/reinstate fixes
+        # the raw sibling runs never saw) differed from either of them.
+        domain_datas = [domain_data] + [yaml.safe_load(p.read_text(encoding="utf-8")) or {} for p in stability_run_paths]
         stability = translation_stability(domain_datas)
 
     hard_gates_ok = structural["ok"] and provenance["ok"] and endpoint_citations["ok"]

@@ -1,0 +1,1163 @@
+{
+  "rounds": [
+    {
+      "round": 1,
+      "date": "2026-08-18",
+      "reviewer": "repo owner (szablevi@gmail.com), in-session with the coding agent",
+      "artefact_definition": "every individually source-mapped element in translation.json mappings list -- classes, class properties, relationships, rules, actions. Competency questions excluded.",
+      "sampling": {
+        "method": "stratified by artefact type, proportional allocation, seed=109 (matching issue number)",
+        "population": 96,
+        "sample_size": 10,
+        "allocation": {
+          "classes": 4,
+          "properties": 1,
+          "relationships": 3,
+          "rules": 1,
+          "actions": 1
+        }
+      },
+      "items": [
+        {
+          "target_path": "classes.Load",
+          "target_content": {
+            "meaning": "A traceable load unit prepared for handling or transport."
+          },
+          "mapping": {
+            "source_iris": [
+              "https://spec.industrialontologies.org/ontology/construct/Load"
+            ],
+            "source_evidence": "Class label \"load\".",
+            "confidence": "high",
+            "rationale": "Load is directly present and is operationally relevant to transport and tracking."
+          },
+          "real_source_defs": [
+            {
+              "iri": "https://spec.industrialontologies.org/ontology/construct/Load",
+              "kind": "class",
+              "labels": [
+                "load"
+              ],
+              "altLabels": [],
+              "definitions": [],
+              "sourceOntology": "iof-supply-chain",
+              "parents": []
+            }
+          ]
+        },
+        {
+          "target_path": "classes.FreightForwardingService",
+          "target_content": {
+            "meaning": "A service that provides freight forwarding capability."
+          },
+          "mapping": {
+            "source_iris": [
+              "https://spec.industrialontologies.org/ontology/construct/FreightForwardingService",
+              "https://spec.industrialontologies.org/ontology/construct/agentIn"
+            ],
+            "source_evidence": "Class label \"freight forwarding service\" and restriction agentIn some FreightForwardingService.",
+            "confidence": "high",
+            "rationale": "FreightForwardingService is directly present and explicitly tied to freight forwarder participation."
+          },
+          "real_source_defs": [
+            {
+              "iri": "https://spec.industrialontologies.org/ontology/construct/FreightForwardingService",
+              "kind": "class",
+              "labels": [
+                "freight forwarding service"
+              ],
+              "altLabels": [],
+              "definitions": [],
+              "sourceOntology": "iof-supply-chain",
+              "parents": []
+            },
+            {
+              "iri": "https://spec.industrialontologies.org/ontology/construct/agentIn",
+              "kind": "object_property",
+              "labels": [
+                "agent in"
+              ],
+              "altLabels": [],
+              "definitions": [],
+              "sourceOntology": "iof-supply-chain",
+              "domain": [
+                "https://spec.industrialontologies.org/ontology/construct/Agent"
+              ],
+              "range": [
+                "http://purl.obolibrary.org/obo/BFO_0000015"
+              ],
+              "inverseOf": [
+                "https://spec.industrialontologies.org/ontology/construct/hasAgent"
+              ]
+            }
+          ]
+        },
+        {
+          "target_path": "classes.ShipFromLocation",
+          "target_content": {
+            "meaning": "A location from which a shipment is sent."
+          },
+          "mapping": {
+            "source_iris": [
+              "https://spec.industrialontologies.org/ontology/construct/ShipFromLocation",
+              "https://spec.industrialontologies.org/ontology/construct/ShipFromLocationRole"
+            ],
+            "source_evidence": "Class label \"ship from location\" plus corresponding ship from location role.",
+            "confidence": "high",
+            "rationale": "ShipFromLocation is directly present and operationally necessary for shipment origin handling."
+          },
+          "real_source_defs": [
+            {
+              "iri": "https://spec.industrialontologies.org/ontology/construct/ShipFromLocation",
+              "kind": "class",
+              "labels": [
+                "ship from location"
+              ],
+              "altLabels": [],
+              "definitions": [],
+              "sourceOntology": "iof-supply-chain",
+              "parents": []
+            },
+            {
+              "iri": "https://spec.industrialontologies.org/ontology/construct/ShipFromLocationRole",
+              "kind": "class",
+              "labels": [
+                "ship from location role"
+              ],
+              "altLabels": [],
+              "definitions": [],
+              "sourceOntology": "iof-supply-chain",
+              "parents": [
+                "https://spec.industrialontologies.org/ontology/construct/LocationRole"
+              ]
+            }
+          ]
+        },
+        {
+          "target_path": "classes.Retailer",
+          "target_content": {
+            "meaning": "An agent that sells goods to end customers."
+          },
+          "mapping": {
+            "source_iris": [
+              "https://spec.industrialontologies.org/ontology/construct/Retailer"
+            ],
+            "source_evidence": "Class label \"retailer\".",
+            "confidence": "high",
+            "rationale": "Retailer is directly present and relevant to downstream supply-chain partner modeling."
+          },
+          "real_source_defs": [
+            {
+              "iri": "https://spec.industrialontologies.org/ontology/construct/Retailer",
+              "kind": "class",
+              "labels": [
+                "retailer"
+              ],
+              "altLabels": [],
+              "definitions": [],
+              "sourceOntology": "iof-supply-chain",
+              "parents": [
+                "https://spec.industrialontologies.org/ontology/construct/Agent"
+              ]
+            }
+          ]
+        },
+        {
+          "target_path": "classes.TrackingEvent.properties.eventType",
+          "target_content": {
+            "type": "text",
+            "allowed": [
+              "packed",
+              "shipped",
+              "arrived",
+              "received",
+              "stored"
+            ]
+          },
+          "mapping": {
+            "source_iris": [
+              "https://spec.industrialontologies.org/ontology/construct/TrackingEvent",
+              "https://spec.industrialontologies.org/ontology/construct/ShipmentPreparationProcess",
+              "https://spec.industrialontologies.org/ontology/construct/ReceivingProcess",
+              "https://spec.industrialontologies.org/ontology/construct/StorageProcess"
+            ],
+            "source_evidence": "Standard domain practice for tracking events over shipment preparation, receiving, and storage activities.",
+            "confidence": "medium",
+            "rationale": "An event type is a standard property because tracking events classify what happened in logistics execution."
+          },
+          "real_source_defs": [
+            {
+              "iri": "https://spec.industrialontologies.org/ontology/construct/TrackingEvent",
+              "kind": "class",
+              "labels": [
+                "tracking event"
+              ],
+              "altLabels": [],
+              "definitions": [],
+              "sourceOntology": "iof-supply-chain",
+              "parents": []
+            },
+            {
+              "iri": "https://spec.industrialontologies.org/ontology/construct/ShipmentPreparationProcess",
+              "kind": "class",
+              "labels": [
+                "shipment preparation process"
+              ],
+              "altLabels": [],
+              "definitions": [],
+              "sourceOntology": "iof-supply-chain",
+              "parents": []
+            },
+            {
+              "iri": "https://spec.industrialontologies.org/ontology/construct/ReceivingProcess",
+              "kind": "class",
+              "labels": [
+                "receiving process"
+              ],
+              "altLabels": [],
+              "definitions": [],
+              "sourceOntology": "iof-supply-chain",
+              "parents": [
+                "https://spec.industrialontologies.org/ontology/construct/BusinessProcess"
+              ]
+            },
+            {
+              "iri": "https://spec.industrialontologies.org/ontology/construct/StorageProcess",
+              "kind": "class",
+              "labels": [
+                "storage process"
+              ],
+              "altLabels": [],
+              "definitions": [],
+              "sourceOntology": "iof-supply-chain",
+              "parents": [
+                "https://spec.industrialontologies.org/ontology/construct/PlannedProcess"
+              ]
+            }
+          ]
+        },
+        {
+          "target_path": "relationships[10]",
+          "target_content": {
+            "name": "occursAt",
+            "from": "ShipmentPreparationProcess",
+            "to": "Facility",
+            "meaning": "The shipment preparation process occurs at the facility.",
+            "aliases": []
+          },
+          "mapping": {
+            "source_iris": [
+              "https://spec.industrialontologies.org/ontology/construct/occursAt",
+              "https://spec.industrialontologies.org/ontology/construct/ShipmentPreparationProcess",
+              "https://spec.industrialontologies.org/ontology/construct/Facility"
+            ],
+            "source_evidence": "Restriction isSiteOf some ShipmentPreparationProcess plus object property occursAt; standard-practice endpoint Facility used as included site class.",
+            "confidence": "medium",
+            "rationale": "Shipment preparation operationally occurs at a facility, and the source explicitly supports site-of shipment preparation semantics."
+          },
+          "real_source_defs": [
+            {
+              "iri": "https://spec.industrialontologies.org/ontology/construct/occursAt",
+              "kind": "object_property",
+              "labels": [
+                "occurs at"
+              ],
+              "altLabels": [],
+              "definitions": [],
+              "sourceOntology": "iof-supply-chain",
+              "domain": [
+                "http://purl.obolibrary.org/obo/BFO_0000015"
+              ],
+              "range": [
+                "Nb7d23dffdc324e78ae7c2f3e14238332"
+              ],
+              "inverseOf": []
+            },
+            {
+              "iri": "https://spec.industrialontologies.org/ontology/construct/ShipmentPreparationProcess",
+              "kind": "class",
+              "labels": [
+                "shipment preparation process"
+              ],
+              "altLabels": [],
+              "definitions": [],
+              "sourceOntology": "iof-supply-chain",
+              "parents": []
+            },
+            {
+              "iri": "https://spec.industrialontologies.org/ontology/construct/Facility",
+              "kind": "class",
+              "labels": [
+                "facility"
+              ],
+              "altLabels": [],
+              "definitions": [],
+              "sourceOntology": "iof-supply-chain",
+              "parents": [
+                "https://spec.industrialontologies.org/ontology/construct/EngineeredSystem"
+              ]
+            }
+          ]
+        },
+        {
+          "target_path": "relationships[12]",
+          "target_content": {
+            "name": "endsAt",
+            "from": "TransportProcess",
+            "to": "SupplyChainNode",
+            "meaning": "The transport process ends at the supply chain node.",
+            "aliases": []
+          },
+          "mapping": {
+            "source_iris": [
+              "https://spec.industrialontologies.org/ontology/construct/endsAt",
+              "https://spec.industrialontologies.org/ontology/construct/TransportProcess",
+              "https://spec.industrialontologies.org/ontology/construct/SupplyChainNode"
+            ],
+            "source_evidence": "Object property \"ends at\" and restriction endsAt some SupplyChainNode.",
+            "confidence": "high",
+            "rationale": "The source directly supports transport processes ending at supply-chain nodes."
+          },
+          "real_source_defs": [
+            {
+              "iri": "https://spec.industrialontologies.org/ontology/construct/endsAt",
+              "kind": "object_property",
+              "labels": [
+                "ends at"
+              ],
+              "altLabels": [],
+              "definitions": [],
+              "sourceOntology": "iof-supply-chain",
+              "domain": [
+                "http://purl.obolibrary.org/obo/BFO_0000015"
+              ],
+              "range": [
+                "N4ee0ef108f1d4765ad0b7560dacbae5f"
+              ],
+              "inverseOf": []
+            },
+            {
+              "iri": "https://spec.industrialontologies.org/ontology/construct/TransportProcess",
+              "kind": "class",
+              "labels": [
+                "transport process"
+              ],
+              "altLabels": [],
+              "definitions": [],
+              "sourceOntology": "iof-supply-chain",
+              "parents": [
+                "https://spec.industrialontologies.org/ontology/construct/MaterialLocationChangeProcess"
+              ]
+            },
+            {
+              "iri": "https://spec.industrialontologies.org/ontology/construct/SupplyChainNode",
+              "kind": "class",
+              "labels": [
+                "supply chain node"
+              ],
+              "altLabels": [],
+              "definitions": [],
+              "sourceOntology": "iof-supply-chain",
+              "parents": []
+            }
+          ]
+        },
+        {
+          "target_path": "relationships[16]",
+          "target_content": {
+            "name": "usesContainer",
+            "from": "Shipment",
+            "to": "FreightContainer",
+            "meaning": "The shipment uses the freight container for freight transport.",
+            "aliases": []
+          },
+          "mapping": {
+            "source_iris": [
+              "https://spec.industrialontologies.org/ontology/construct/Shipment",
+              "https://spec.industrialontologies.org/ontology/construct/FreightContainer"
+            ],
+            "source_evidence": "Standard domain practice for freight transport tied to Shipment and FreightContainer.",
+            "confidence": "medium",
+            "rationale": "Freight shipments routinely use freight containers, which is a standard logistics pairing."
+          },
+          "real_source_defs": [
+            {
+              "iri": "https://spec.industrialontologies.org/ontology/construct/Shipment",
+              "kind": "class",
+              "labels": [
+                "shipment"
+              ],
+              "altLabels": [],
+              "definitions": [],
+              "sourceOntology": "iof-supply-chain",
+              "parents": []
+            },
+            {
+              "iri": "https://spec.industrialontologies.org/ontology/construct/FreightContainer",
+              "kind": "class",
+              "labels": [
+                "freight container"
+              ],
+              "altLabels": [],
+              "definitions": [],
+              "sourceOntology": "iof-supply-chain",
+              "parents": [
+                "https://spec.industrialontologies.org/ontology/construct/Container"
+              ]
+            }
+          ]
+        },
+        {
+          "target_path": "rules.canRecordTrackingEvent",
+          "target_content": {
+            "conditions": [
+              "a shipment, lot, logistic unit, or load is identified",
+              "an event time is available",
+              "an event type is known"
+            ]
+          },
+          "mapping": {
+            "source_iris": [
+              "https://spec.industrialontologies.org/ontology/construct/TrackingEvent",
+              "https://spec.industrialontologies.org/ontology/construct/Shipment",
+              "https://spec.industrialontologies.org/ontology/construct/Lot",
+              "https://spec.industrialontologies.org/ontology/construct/LogisticUnit",
+              "https://spec.industrialontologies.org/ontology/construct/Load"
+            ],
+            "source_evidence": "Standard domain practice for event capture tied to TrackingEvent and tracked supply-chain units.",
+            "confidence": "medium",
+            "rationale": "A tracking event is only useful when the tracked unit, event time, and event type are known."
+          },
+          "real_source_defs": [
+            {
+              "iri": "https://spec.industrialontologies.org/ontology/construct/TrackingEvent",
+              "kind": "class",
+              "labels": [
+                "tracking event"
+              ],
+              "altLabels": [],
+              "definitions": [],
+              "sourceOntology": "iof-supply-chain",
+              "parents": []
+            },
+            {
+              "iri": "https://spec.industrialontologies.org/ontology/construct/Shipment",
+              "kind": "class",
+              "labels": [
+                "shipment"
+              ],
+              "altLabels": [],
+              "definitions": [],
+              "sourceOntology": "iof-supply-chain",
+              "parents": []
+            },
+            {
+              "iri": "https://spec.industrialontologies.org/ontology/construct/Lot",
+              "kind": "class",
+              "labels": [
+                "lot"
+              ],
+              "altLabels": [],
+              "definitions": [],
+              "sourceOntology": "iof-supply-chain",
+              "parents": []
+            },
+            {
+              "iri": "https://spec.industrialontologies.org/ontology/construct/LogisticUnit",
+              "kind": "class",
+              "labels": [
+                "logistic unit"
+              ],
+              "altLabels": [],
+              "definitions": [],
+              "sourceOntology": "iof-supply-chain",
+              "parents": []
+            },
+            {
+              "iri": "https://spec.industrialontologies.org/ontology/construct/Load",
+              "kind": "class",
+              "labels": [
+                "load"
+              ],
+              "altLabels": [],
+              "definitions": [],
+              "sourceOntology": "iof-supply-chain",
+              "parents": []
+            }
+          ]
+        },
+        {
+          "target_path": "actions.receiveShipment",
+          "target_content": {
+            "input": "Shipment",
+            "preconditions": [
+              "canReceiveShipment"
+            ],
+            "effect": "shipment is recorded as having arrived at the destination facility through a receiving process",
+            "verification": "confirm receipt of the shipment at the destination facility and completion of the receiving process"
+          },
+          "mapping": {
+            "source_iris": [
+              "https://spec.industrialontologies.org/ontology/construct/Shipment",
+              "https://spec.industrialontologies.org/ontology/construct/ReceivingProcess",
+              "https://spec.industrialontologies.org/ontology/construct/Facility",
+              "https://spec.industrialontologies.org/ontology/construct/ShipToLocation"
+            ],
+            "source_evidence": "The source classes explicitly include 'shipment', 'receiving process', and 'facility', with 'ship to location' providing the destination context, which supports describing receipt as arrival and receiving-process completion without relying on a shipment status property.",
+            "confidence": "high",
+            "rationale": "Replacing the action removes the unsupported received-status effect and states the outcome in terms of destination arrival and receiving-process completion grounded by the source classes."
+          },
+          "real_source_defs": [
+            {
+              "iri": "https://spec.industrialontologies.org/ontology/construct/Shipment",
+              "kind": "class",
+              "labels": [
+                "shipment"
+              ],
+              "altLabels": [],
+              "definitions": [],
+              "sourceOntology": "iof-supply-chain",
+              "parents": []
+            },
+            {
+              "iri": "https://spec.industrialontologies.org/ontology/construct/ReceivingProcess",
+              "kind": "class",
+              "labels": [
+                "receiving process"
+              ],
+              "altLabels": [],
+              "definitions": [],
+              "sourceOntology": "iof-supply-chain",
+              "parents": [
+                "https://spec.industrialontologies.org/ontology/construct/BusinessProcess"
+              ]
+            },
+            {
+              "iri": "https://spec.industrialontologies.org/ontology/construct/Facility",
+              "kind": "class",
+              "labels": [
+                "facility"
+              ],
+              "altLabels": [],
+              "definitions": [],
+              "sourceOntology": "iof-supply-chain",
+              "parents": [
+                "https://spec.industrialontologies.org/ontology/construct/EngineeredSystem"
+              ]
+            },
+            {
+              "iri": "https://spec.industrialontologies.org/ontology/construct/ShipToLocation",
+              "kind": "class",
+              "labels": [
+                "ship to location"
+              ],
+              "altLabels": [],
+              "definitions": [],
+              "sourceOntology": "iof-supply-chain",
+              "parents": []
+            }
+          ]
+        }
+      ],
+      "verdicts": {
+        "classes.Load": "accept",
+        "classes.FreightForwardingService": "accept",
+        "classes.ShipFromLocation": "accept",
+        "classes.Retailer": "accept",
+        "classes.TrackingEvent.properties.eventType": "reject -- fixed",
+        "relationships[10]": "accept",
+        "relationships[12]": "accept",
+        "relationships[16]": "accept",
+        "rules.canRecordTrackingEvent": "accept",
+        "actions.receiveShipment": "accept"
+      },
+      "result": "9/10 accept, 1/10 reject (fixed)"
+    },
+    {
+      "round": 2,
+      "date": "2026-08-18",
+      "reviewer": "repo owner (szablevi@gmail.com), in-session with the coding agent",
+      "artefact_definition": "every individually source-mapped element in translation.json mappings list -- classes, class properties, relationships, rules, actions. Competency questions excluded.",
+      "sampling": {
+        "method": "stratified by artefact type, proportional allocation, seed=4417, excluding round-1 sampled paths",
+        "population": 96,
+        "sample_size": 10,
+        "allocation": {
+          "classes": 4,
+          "properties": 1,
+          "relationships": 3,
+          "rules": 1,
+          "actions": 1
+        }
+      },
+      "items": [
+        {
+          "target_path": "classes.FreightContainer",
+          "target_content": {
+            "meaning": "A container specifically used for freight transport."
+          },
+          "mapping": {
+            "source_iris": [
+              "https://spec.industrialontologies.org/ontology/construct/FreightContainer",
+              "https://spec.industrialontologies.org/ontology/construct/Container"
+            ],
+            "source_evidence": "Class label \"freight container\" with parent Container.",
+            "confidence": "high",
+            "rationale": "FreightContainer is directly present and is a specific transport container relevant to shipment execution."
+          },
+          "real_source_defs": [
+            {
+              "iri": "https://spec.industrialontologies.org/ontology/construct/FreightContainer",
+              "kind": "class",
+              "labels": [
+                "freight container"
+              ],
+              "altLabels": [],
+              "definitions": [],
+              "sourceOntology": "iof-supply-chain",
+              "parents": [
+                "https://spec.industrialontologies.org/ontology/construct/Container"
+              ]
+            },
+            {
+              "iri": "https://spec.industrialontologies.org/ontology/construct/Container",
+              "kind": "class",
+              "labels": [
+                "container"
+              ],
+              "altLabels": [],
+              "definitions": [],
+              "sourceOntology": "iof-supply-chain",
+              "parents": [
+                "https://spec.industrialontologies.org/ontology/construct/MaterialArtifact"
+              ]
+            }
+          ]
+        },
+        {
+          "target_path": "classes.TransportProcess",
+          "target_content": {
+            "meaning": "A material location change process that transports goods."
+          },
+          "mapping": {
+            "source_iris": [
+              "https://spec.industrialontologies.org/ontology/construct/TransportProcess",
+              "https://spec.industrialontologies.org/ontology/construct/startsAt",
+              "https://spec.industrialontologies.org/ontology/construct/endsAt"
+            ],
+            "source_evidence": "Class label \"transport process\" plus process properties starts at and ends at.",
+            "confidence": "high",
+            "rationale": "TransportProcess is directly present and structurally tied to movement between supply-chain nodes."
+          },
+          "real_source_defs": [
+            {
+              "iri": "https://spec.industrialontologies.org/ontology/construct/TransportProcess",
+              "kind": "class",
+              "labels": [
+                "transport process"
+              ],
+              "altLabels": [],
+              "definitions": [],
+              "sourceOntology": "iof-supply-chain",
+              "parents": [
+                "https://spec.industrialontologies.org/ontology/construct/MaterialLocationChangeProcess"
+              ]
+            },
+            {
+              "iri": "https://spec.industrialontologies.org/ontology/construct/startsAt",
+              "kind": "object_property",
+              "labels": [
+                "starts at"
+              ],
+              "altLabels": [],
+              "definitions": [],
+              "sourceOntology": "iof-supply-chain",
+              "domain": [
+                "http://purl.obolibrary.org/obo/BFO_0000015"
+              ],
+              "range": [
+                "Ne61c13c6e883400f8e07a56b2bb7ff5f"
+              ],
+              "inverseOf": []
+            },
+            {
+              "iri": "https://spec.industrialontologies.org/ontology/construct/endsAt",
+              "kind": "object_property",
+              "labels": [
+                "ends at"
+              ],
+              "altLabels": [],
+              "definitions": [],
+              "sourceOntology": "iof-supply-chain",
+              "domain": [
+                "http://purl.obolibrary.org/obo/BFO_0000015"
+              ],
+              "range": [
+                "N4ee0ef108f1d4765ad0b7560dacbae5f"
+              ],
+              "inverseOf": []
+            }
+          ]
+        },
+        {
+          "target_path": "classes.Distributor",
+          "target_content": {
+            "meaning": "An agent that distributes goods within the supply chain."
+          },
+          "mapping": {
+            "source_iris": [
+              "https://spec.industrialontologies.org/ontology/construct/Distributor"
+            ],
+            "source_evidence": "Class label \"distributor\".",
+            "confidence": "high",
+            "rationale": "Distributor is directly present and is a common supply-chain trading partner role."
+          },
+          "real_source_defs": [
+            {
+              "iri": "https://spec.industrialontologies.org/ontology/construct/Distributor",
+              "kind": "class",
+              "labels": [
+                "distributor"
+              ],
+              "altLabels": [],
+              "definitions": [],
+              "sourceOntology": "iof-supply-chain",
+              "parents": [
+                "https://spec.industrialontologies.org/ontology/construct/Agent"
+              ]
+            }
+          ]
+        },
+        {
+          "target_path": "classes.Shipment",
+          "target_content": {
+            "meaning": "A traceable unit of goods being prepared, moved, or received through the supply chain.",
+            "properties": {}
+          },
+          "mapping": {
+            "source_iris": [
+              "https://spec.industrialontologies.org/ontology/construct/Shipment",
+              "https://spec.industrialontologies.org/ontology/construct/ShipmentPreparationProcess"
+            ],
+            "source_evidence": "Class label \"shipment\" and restriction has specified output some Shipment from ShipmentPreparationProcess.",
+            "confidence": "high",
+            "rationale": "Shipment is directly present and explicitly treated as an output of shipment preparation, making it central to logistics execution."
+          },
+          "real_source_defs": [
+            {
+              "iri": "https://spec.industrialontologies.org/ontology/construct/Shipment",
+              "kind": "class",
+              "labels": [
+                "shipment"
+              ],
+              "altLabels": [],
+              "definitions": [],
+              "sourceOntology": "iof-supply-chain",
+              "parents": []
+            },
+            {
+              "iri": "https://spec.industrialontologies.org/ontology/construct/ShipmentPreparationProcess",
+              "kind": "class",
+              "labels": [
+                "shipment preparation process"
+              ],
+              "altLabels": [],
+              "definitions": [],
+              "sourceOntology": "iof-supply-chain",
+              "parents": []
+            }
+          ]
+        },
+        {
+          "target_path": "classes.TrackingEvent.properties.eventTime",
+          "target_content": {
+            "type": "date"
+          },
+          "mapping": {
+            "source_iris": [
+              "https://spec.industrialontologies.org/ontology/construct/TrackingEvent"
+            ],
+            "source_evidence": "Standard domain practice for tracking events tied to the TrackingEvent concept.",
+            "confidence": "medium",
+            "rationale": "An event time is an obvious property of a tracking event because events are operationally recorded in time."
+          },
+          "real_source_defs": [
+            {
+              "iri": "https://spec.industrialontologies.org/ontology/construct/TrackingEvent",
+              "kind": "class",
+              "labels": [
+                "tracking event"
+              ],
+              "altLabels": [],
+              "definitions": [],
+              "sourceOntology": "iof-supply-chain",
+              "parents": []
+            }
+          ]
+        },
+        {
+          "target_path": "relationships[14]",
+          "target_content": {
+            "name": "holds",
+            "from": "Container",
+            "to": "Cargo",
+            "meaning": "The container holds cargo for storage or transport.",
+            "aliases": []
+          },
+          "mapping": {
+            "source_iris": [
+              "https://spec.industrialontologies.org/ontology/construct/holds",
+              "https://spec.industrialontologies.org/ontology/construct/Container",
+              "https://spec.industrialontologies.org/ontology/construct/Cargo"
+            ],
+            "source_evidence": "Standard domain practice for containerized logistics tied to Container and Cargo concepts, using the source holds property as the semantic basis.",
+            "confidence": "medium",
+            "rationale": "Containers operationally hold cargo, and this is a standard pairing directly tied to the included concepts."
+          },
+          "real_source_defs": [
+            {
+              "iri": "https://spec.industrialontologies.org/ontology/construct/holds",
+              "kind": "object_property",
+              "labels": [
+                "holds"
+              ],
+              "altLabels": [],
+              "definitions": [],
+              "sourceOntology": "iof-supply-chain",
+              "domain": [
+                "https://spec.industrialontologies.org/ontology/construct/Agent"
+              ],
+              "range": [
+                "http://purl.obolibrary.org/obo/BFO_0000040"
+              ],
+              "inverseOf": []
+            },
+            {
+              "iri": "https://spec.industrialontologies.org/ontology/construct/Container",
+              "kind": "class",
+              "labels": [
+                "container"
+              ],
+              "altLabels": [],
+              "definitions": [],
+              "sourceOntology": "iof-supply-chain",
+              "parents": [
+                "https://spec.industrialontologies.org/ontology/construct/MaterialArtifact"
+              ]
+            },
+            {
+              "iri": "https://spec.industrialontologies.org/ontology/construct/Cargo",
+              "kind": "class",
+              "labels": [
+                "cargo"
+              ],
+              "altLabels": [],
+              "definitions": [],
+              "sourceOntology": "iof-supply-chain",
+              "parents": [
+                "http://purl.obolibrary.org/obo/BFO_0000040"
+              ]
+            }
+          ]
+        },
+        {
+          "target_path": "relationships[19]",
+          "target_content": {
+            "name": "tracks",
+            "from": "TrackingEvent",
+            "to": "Shipment",
+            "meaning": "The tracking event records information about the shipment.",
+            "aliases": []
+          },
+          "mapping": {
+            "source_iris": [
+              "https://spec.industrialontologies.org/ontology/construct/TrackingEvent",
+              "https://spec.industrialontologies.org/ontology/construct/Shipment"
+            ],
+            "source_evidence": "Standard domain practice for logistics traceability tied to TrackingEvent and Shipment.",
+            "confidence": "medium",
+            "rationale": "Tracking events routinely record shipment milestones, making this a standard traceability relationship."
+          },
+          "real_source_defs": [
+            {
+              "iri": "https://spec.industrialontologies.org/ontology/construct/TrackingEvent",
+              "kind": "class",
+              "labels": [
+                "tracking event"
+              ],
+              "altLabels": [],
+              "definitions": [],
+              "sourceOntology": "iof-supply-chain",
+              "parents": []
+            },
+            {
+              "iri": "https://spec.industrialontologies.org/ontology/construct/Shipment",
+              "kind": "class",
+              "labels": [
+                "shipment"
+              ],
+              "altLabels": [],
+              "definitions": [],
+              "sourceOntology": "iof-supply-chain",
+              "parents": []
+            }
+          ]
+        },
+        {
+          "target_path": "relationships[6]",
+          "target_content": {
+            "name": "hasAgent",
+            "from": "FreightForwardingService",
+            "to": "FreightForwarder",
+            "meaning": "The freight forwarding service involves the freight forwarder.",
+            "aliases": []
+          },
+          "mapping": {
+            "source_iris": [
+              "https://spec.industrialontologies.org/ontology/construct/agentIn",
+              "https://spec.industrialontologies.org/ontology/construct/FreightForwardingService",
+              "https://spec.industrialontologies.org/ontology/construct/FreightForwarder"
+            ],
+            "source_evidence": "Restriction agentIn some FreightForwardingService plus class FreightForwarder.",
+            "confidence": "medium",
+            "rationale": "Freight forwarding services are standardly carried out by freight forwarders, and the source explicitly places agents in the service."
+          },
+          "real_source_defs": [
+            {
+              "iri": "https://spec.industrialontologies.org/ontology/construct/agentIn",
+              "kind": "object_property",
+              "labels": [
+                "agent in"
+              ],
+              "altLabels": [],
+              "definitions": [],
+              "sourceOntology": "iof-supply-chain",
+              "domain": [
+                "https://spec.industrialontologies.org/ontology/construct/Agent"
+              ],
+              "range": [
+                "http://purl.obolibrary.org/obo/BFO_0000015"
+              ],
+              "inverseOf": [
+                "https://spec.industrialontologies.org/ontology/construct/hasAgent"
+              ]
+            },
+            {
+              "iri": "https://spec.industrialontologies.org/ontology/construct/FreightForwardingService",
+              "kind": "class",
+              "labels": [
+                "freight forwarding service"
+              ],
+              "altLabels": [],
+              "definitions": [],
+              "sourceOntology": "iof-supply-chain",
+              "parents": []
+            },
+            {
+              "iri": "https://spec.industrialontologies.org/ontology/construct/FreightForwarder",
+              "kind": "class",
+              "labels": [
+                "freight forwarder"
+              ],
+              "altLabels": [],
+              "definitions": [],
+              "sourceOntology": "iof-supply-chain",
+              "parents": [
+                "https://spec.industrialontologies.org/ontology/construct/Agent"
+              ]
+            }
+          ]
+        },
+        {
+          "target_path": "rules.canMaintainTraceability",
+          "target_content": {
+            "conditions": [
+              "tracking events are recorded for relevant shipment movements",
+              "traceable resource units are associated with lots, loads, or logistic units"
+            ]
+          },
+          "mapping": {
+            "source_iris": [
+              "https://spec.industrialontologies.org/ontology/construct/Traceability",
+              "https://spec.industrialontologies.org/ontology/construct/TrackingEvent",
+              "https://spec.industrialontologies.org/ontology/construct/TraceableResourceUnit",
+              "https://spec.industrialontologies.org/ontology/construct/Lot",
+              "https://spec.industrialontologies.org/ontology/construct/Load",
+              "https://spec.industrialontologies.org/ontology/construct/LogisticUnit"
+            ],
+            "source_evidence": "Standard domain practice for traceability tied to Traceability, TrackingEvent, TraceableResourceUnit, Lot, Load, and LogisticUnit.",
+            "confidence": "medium",
+            "rationale": "Traceability depends on recorded events and identifiable traceable units."
+          },
+          "real_source_defs": [
+            {
+              "iri": "https://spec.industrialontologies.org/ontology/construct/Traceability",
+              "kind": "class",
+              "labels": [
+                "traceability"
+              ],
+              "altLabels": [],
+              "definitions": [],
+              "sourceOntology": "iof-supply-chain",
+              "parents": [
+                "https://spec.industrialontologies.org/ontology/construct/SystemCapability"
+              ]
+            },
+            {
+              "iri": "https://spec.industrialontologies.org/ontology/construct/TrackingEvent",
+              "kind": "class",
+              "labels": [
+                "tracking event"
+              ],
+              "altLabels": [],
+              "definitions": [],
+              "sourceOntology": "iof-supply-chain",
+              "parents": []
+            },
+            {
+              "iri": "https://spec.industrialontologies.org/ontology/construct/TraceableResourceUnit",
+              "kind": "class",
+              "labels": [
+                "traceable resource unit"
+              ],
+              "altLabels": [],
+              "definitions": [],
+              "sourceOntology": "iof-supply-chain",
+              "parents": [
+                "http://purl.obolibrary.org/obo/BFO_0000040"
+              ]
+            },
+            {
+              "iri": "https://spec.industrialontologies.org/ontology/construct/Lot",
+              "kind": "class",
+              "labels": [
+                "lot"
+              ],
+              "altLabels": [],
+              "definitions": [],
+              "sourceOntology": "iof-supply-chain",
+              "parents": []
+            },
+            {
+              "iri": "https://spec.industrialontologies.org/ontology/construct/Load",
+              "kind": "class",
+              "labels": [
+                "load"
+              ],
+              "altLabels": [],
+              "definitions": [],
+              "sourceOntology": "iof-supply-chain",
+              "parents": []
+            },
+            {
+              "iri": "https://spec.industrialontologies.org/ontology/construct/LogisticUnit",
+              "kind": "class",
+              "labels": [
+                "logistic unit"
+              ],
+              "altLabels": [],
+              "definitions": [],
+              "sourceOntology": "iof-supply-chain",
+              "parents": []
+            }
+          ]
+        },
+        {
+          "target_path": "actions.prepareShipment",
+          "target_content": {
+            "input": "Shipment",
+            "preconditions": [
+              "canPrepareShipment"
+            ],
+            "effect": "shipment is documented with ship-from and ship-to locations and associated with a shipment preparation process and transport arrangement",
+            "verification": "confirm the shipment has assigned shipping locations and an identified preparation and carrier or freight-forwarding arrangement"
+          },
+          "mapping": {
+            "source_iris": [
+              "https://spec.industrialontologies.org/ontology/construct/Shipment",
+              "https://spec.industrialontologies.org/ontology/construct/ShipFromLocation",
+              "https://spec.industrialontologies.org/ontology/construct/ShipToLocation",
+              "https://spec.industrialontologies.org/ontology/construct/Carrier",
+              "https://spec.industrialontologies.org/ontology/construct/ShipmentPreparationProcess"
+            ],
+            "source_evidence": "The source classes explicitly include 'shipment', 'ship from location', 'ship to location', 'carrier', and 'shipment preparation process', so the action can be grounded as establishing those shipment-planning associations without asserting a status property.",
+            "confidence": "medium",
+            "rationale": "Replacing the action removes the unsupported prepared-status effect and recasts preparation as establishing the shipment's grounded logistics associations."
+          },
+          "real_source_defs": [
+            {
+              "iri": "https://spec.industrialontologies.org/ontology/construct/Shipment",
+              "kind": "class",
+              "labels": [
+                "shipment"
+              ],
+              "altLabels": [],
+              "definitions": [],
+              "sourceOntology": "iof-supply-chain",
+              "parents": []
+            },
+            {
+              "iri": "https://spec.industrialontologies.org/ontology/construct/ShipFromLocation",
+              "kind": "class",
+              "labels": [
+                "ship from location"
+              ],
+              "altLabels": [],
+              "definitions": [],
+              "sourceOntology": "iof-supply-chain",
+              "parents": []
+            },
+            {
+              "iri": "https://spec.industrialontologies.org/ontology/construct/ShipToLocation",
+              "kind": "class",
+              "labels": [
+                "ship to location"
+              ],
+              "altLabels": [],
+              "definitions": [],
+              "sourceOntology": "iof-supply-chain",
+              "parents": []
+            },
+            {
+              "iri": "https://spec.industrialontologies.org/ontology/construct/Carrier",
+              "kind": "class",
+              "labels": [
+                "carrier"
+              ],
+              "altLabels": [],
+              "definitions": [],
+              "sourceOntology": "iof-supply-chain",
+              "parents": [
+                "https://spec.industrialontologies.org/ontology/construct/Supplier"
+              ]
+            },
+            {
+              "iri": "https://spec.industrialontologies.org/ontology/construct/ShipmentPreparationProcess",
+              "kind": "class",
+              "labels": [
+                "shipment preparation process"
+              ],
+              "altLabels": [],
+              "definitions": [],
+              "sourceOntology": "iof-supply-chain",
+              "parents": []
+            }
+          ]
+        }
+      ],
+      "verdicts": {
+        "classes.FreightContainer": "accept",
+        "classes.TransportProcess": "accept",
+        "classes.Distributor": "accept",
+        "classes.Shipment": "accept",
+        "classes.TrackingEvent.properties.eventTime": "accept",
+        "relationships[14]": "reject -- fixed",
+        "relationships[19]": "accept",
+        "relationships[6]": "accept",
+        "rules.canMaintainTraceability": "accept",
+        "actions.prepareShipment": "accept"
+      },
+      "result": "9/10 accept, 1/10 reject (fixed)"
+    }
+  ]
+}

@@ -1,0 +1,2653 @@
+{
+  "mappings": [
+    {
+      "target_path": "classes.Supplier",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/dependsOnSupplier",
+        "https://spec.industrialontologies.org/ontology/construct/suppliesToAtSomeTime"
+      ],
+      "source_evidence": "Standard domain practice for supplier in supply-chain trading-partner models, grounded by depends on supplier and supplies to at some time properties naming Supplier explicitly.",
+      "confidence": "medium",
+      "rationale": "Supplier is included as an agent-relevant trading partner because multiple source properties explicitly depend on the Supplier concept."
+    },
+    {
+      "target_path": "classes.Customer",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/dependsOnBuyer",
+        "https://spec.industrialontologies.org/ontology/construct/isSuppliedToAtSomeTime",
+        "https://spec.industrialontologies.org/ontology/construct/suppliesToAtSomeTime"
+      ],
+      "source_evidence": "Standard domain practice for customer in supply-chain trading-partner models, grounded by depends on buyer, is supplied to at some time, and supplies to at some time naming Customer explicitly.",
+      "confidence": "medium",
+      "rationale": "Customer is included as an agent-relevant trading partner because supply relationships and supplier-customer flows explicitly rely on that concept."
+    },
+    {
+      "target_path": "classes.Carrier",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/Carrier",
+        "https://spec.industrialontologies.org/ontology/construct/agentIn",
+        "https://spec.industrialontologies.org/ontology/construct/hasAgent"
+      ],
+      "source_evidence": "Class label \"carrier\" plus restrictions using hasAgent and agentIn with Carrier.",
+      "confidence": "high",
+      "rationale": "Carrier is directly present in the source and operationally central to shipment and transport activities."
+    },
+    {
+      "target_path": "classes.FreightForwarder",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/FreightForwarder",
+        "https://spec.industrialontologies.org/ontology/construct/FreightForwardingService",
+        "https://spec.industrialontologies.org/ontology/construct/FreightForwardingProcess"
+      ],
+      "source_evidence": "Class labels \"freight forwarder\", \"freight forwarding service\", and \"freight forwarding process\" establish the freight forwarder concept in scope.",
+      "confidence": "high",
+      "rationale": "FreightForwarder is directly named and is agent-relevant for arranging transport and forwarding services."
+    },
+    {
+      "target_path": "classes.FreightForwarder.properties.status",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/FreightForwarder"
+      ],
+      "source_evidence": "The source identifies only the class label \"freight forwarder\" and provides no definition or named lifecycle states.",
+      "confidence": "medium",
+      "rationale": "The existence of a FreightForwarder class supports a generic textual status field, but the specific allowed values active and inactive are not grounded by the provided source."
+    },
+    {
+      "target_path": "classes.Consignee",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/Consignee"
+      ],
+      "source_evidence": "Class label \"consignee\".",
+      "confidence": "high",
+      "rationale": "Consignee is directly named and is a core receiving-party concept in logistics."
+    },
+    {
+      "target_path": "classes.Shipper",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/Shipper"
+      ],
+      "source_evidence": "Class label \"consignor\" on class Shipper.",
+      "confidence": "high",
+      "rationale": "Shipper is directly present and its label indicates the consignor role central to shipment creation."
+    },
+    {
+      "target_path": "classes.Distributor",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/Distributor"
+      ],
+      "source_evidence": "Class label \"distributor\".",
+      "confidence": "high",
+      "rationale": "Distributor is directly present and is a common supply-chain trading partner role."
+    },
+    {
+      "target_path": "classes.Retailer",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/Retailer"
+      ],
+      "source_evidence": "Class label \"retailer\".",
+      "confidence": "high",
+      "rationale": "Retailer is directly present and relevant to downstream supply-chain partner modeling."
+    },
+    {
+      "target_path": "classes.Wholesaler",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/Wholesaler"
+      ],
+      "source_evidence": "Class label \"wholesaler\".",
+      "confidence": "high",
+      "rationale": "Wholesaler is directly present and relevant to trading-partner structure in the domain."
+    },
+    {
+      "target_path": "classes.SupplyRelationship",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/SupplyRelationship",
+        "https://spec.industrialontologies.org/ontology/construct/dependsOnSupplier",
+        "https://spec.industrialontologies.org/ontology/construct/dependsOnBuyer",
+        "https://spec.industrialontologies.org/ontology/construct/dependsOnProduct"
+      ],
+      "source_evidence": "Class label \"supply relationship\" plus object properties depends on supplier, depends on buyer, and depends on product with SupplyRelationship as domain.",
+      "confidence": "high",
+      "rationale": "SupplyRelationship is directly grounded by three explicit dependency properties that make it decision-relevant."
+    },
+    {
+      "target_path": "classes.MaterialTradeItem",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/MaterialTradeItem"
+      ],
+      "source_evidence": "Class label \"material trade item\".",
+      "confidence": "high",
+      "rationale": "MaterialTradeItem is directly present and matches the requested product or trade-item scope."
+    },
+    {
+      "target_path": "classes.PurchaseOrder",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/PurchaseOrder"
+      ],
+      "source_evidence": "Class label \"purchase order\".",
+      "confidence": "high",
+      "rationale": "PurchaseOrder is directly present and falls within the requested order or request scope."
+    },
+    {
+      "target_path": "classes.Shipment",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/Shipment",
+        "https://spec.industrialontologies.org/ontology/construct/ShipmentPreparationProcess"
+      ],
+      "source_evidence": "Class label \"shipment\" and restriction has specified output some Shipment from ShipmentPreparationProcess.",
+      "confidence": "high",
+      "rationale": "Shipment is directly present and explicitly treated as an output of shipment preparation, making it central to logistics execution."
+    },
+    {
+      "target_path": "classes.Cargo",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/Cargo"
+      ],
+      "source_evidence": "Class label \"cargo\".",
+      "confidence": "high",
+      "rationale": "Cargo is directly present and central to shipment contents."
+    },
+    {
+      "target_path": "classes.Container",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/Container"
+      ],
+      "source_evidence": "Class label \"container\".",
+      "confidence": "high",
+      "rationale": "Container is directly present and central to handling and transport."
+    },
+    {
+      "target_path": "classes.FreightContainer",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/FreightContainer",
+        "https://spec.industrialontologies.org/ontology/construct/Container"
+      ],
+      "source_evidence": "Class label \"freight container\" with parent Container.",
+      "confidence": "high",
+      "rationale": "FreightContainer is directly present and is a specific transport container relevant to shipment execution."
+    },
+    {
+      "target_path": "classes.Trailer",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/Trailer",
+        "https://spec.industrialontologies.org/ontology/construct/Container"
+      ],
+      "source_evidence": "Class label \"trailer\" with parent Container.",
+      "confidence": "high",
+      "rationale": "Trailer is directly present as transport equipment relevant to logistics."
+    },
+    {
+      "target_path": "classes.Wagon",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/Wagon",
+        "https://spec.industrialontologies.org/ontology/construct/Container"
+      ],
+      "source_evidence": "Class label \"wagon\" with parent Container.",
+      "confidence": "high",
+      "rationale": "Wagon is directly present as transport equipment relevant to logistics."
+    },
+    {
+      "target_path": "classes.LogisticUnit",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/LogisticUnit"
+      ],
+      "source_evidence": "Class label \"logistic unit\".",
+      "confidence": "high",
+      "rationale": "LogisticUnit is directly present and is a standard traceability and handling unit."
+    },
+    {
+      "target_path": "classes.Load",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/Load"
+      ],
+      "source_evidence": "Class label \"load\".",
+      "confidence": "high",
+      "rationale": "Load is directly present and is operationally relevant to transport and tracking."
+    },
+    {
+      "target_path": "classes.Lot",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/Lot"
+      ],
+      "source_evidence": "Class label \"lot\".",
+      "confidence": "high",
+      "rationale": "Lot is directly present and required for batch-level traceability."
+    },
+    {
+      "target_path": "classes.Sublot",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/Sublot"
+      ],
+      "source_evidence": "Class label \"sublot\".",
+      "confidence": "high",
+      "rationale": "Sublot is directly present and relevant as a subdivision used in finer-grained traceability."
+    },
+    {
+      "target_path": "classes.TraceableResourceUnit",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/TraceableResourceUnit"
+      ],
+      "source_evidence": "Class label \"traceable resource unit\".",
+      "confidence": "high",
+      "rationale": "TraceableResourceUnit is directly present and is the generic traceability anchor for lots, loads, and logistic units."
+    },
+    {
+      "target_path": "classes.TrackingEvent",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/TrackingEvent"
+      ],
+      "source_evidence": "Class label \"tracking event\".",
+      "confidence": "high",
+      "rationale": "TrackingEvent is directly present and clearly operational for traceability."
+    },
+    {
+      "target_path": "classes.TrackingEvent.properties.eventTime",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/TrackingEvent"
+      ],
+      "source_evidence": "Standard domain practice for tracking events tied to the TrackingEvent concept.",
+      "confidence": "medium",
+      "rationale": "An event time is an obvious property of a tracking event because events are operationally recorded in time."
+    },
+    {
+      "target_path": "classes.TrackingEvent.properties.eventType",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/TrackingEvent"
+      ],
+      "source_evidence": "The source provides the class 'tracking event' but gives no definition or enumeration for event categories, so only a generic text field for the event's type is supportable here.",
+      "confidence": "high",
+      "rationale": "The property can be retained as a plain text description of a TrackingEvent's type, but the specific allowed values packed/shipped/arrived/received/stored are unsupported by the provided source and must be removed."
+    },
+    {
+      "target_path": "classes.Traceability",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/Traceability",
+        "https://spec.industrialontologies.org/ontology/construct/SystemCapability"
+      ],
+      "source_evidence": "Class label \"traceability\" with parent SystemCapability.",
+      "confidence": "high",
+      "rationale": "Traceability is directly present and is explicitly a system capability for supply-chain tracking."
+    },
+    {
+      "target_path": "classes.Facility",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/Facility"
+      ],
+      "source_evidence": "Class label \"facility\".",
+      "confidence": "high",
+      "rationale": "Facility is directly present and is needed as a site for operational processes."
+    },
+    {
+      "target_path": "classes.StorageFacility",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/StorageFacility",
+        "https://spec.industrialontologies.org/ontology/construct/Facility"
+      ],
+      "source_evidence": "Class label \"storage facility\" with parent Facility.",
+      "confidence": "high",
+      "rationale": "StorageFacility is directly present and clearly operational for storage and warehousing."
+    },
+    {
+      "target_path": "classes.DistributionCenter",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/DistributionCenter",
+        "https://spec.industrialontologies.org/ontology/construct/StorageFacility"
+      ],
+      "source_evidence": "Class label \"distribution center\" with parent StorageFacility.",
+      "confidence": "high",
+      "rationale": "DistributionCenter is directly present and is a supply-chain location type useful for fulfillment operations."
+    },
+    {
+      "target_path": "classes.Factory",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/Factory"
+      ],
+      "source_evidence": "Class label \"factory\".",
+      "confidence": "high",
+      "rationale": "Factory is directly present and operationally relevant as an origin or production site."
+    },
+    {
+      "target_path": "classes.GeospatialLocation",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/GeospatialLocation"
+      ],
+      "source_evidence": "Class label \"geospatial location\".",
+      "confidence": "high",
+      "rationale": "GeospatialLocation is directly present and relevant to physical logistics location modeling."
+    },
+    {
+      "target_path": "classes.ShipFromLocation",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/ShipFromLocation",
+        "https://spec.industrialontologies.org/ontology/construct/ShipFromLocationRole"
+      ],
+      "source_evidence": "Class label \"ship from location\" plus corresponding ship from location role.",
+      "confidence": "high",
+      "rationale": "ShipFromLocation is directly present and operationally necessary for shipment origin handling."
+    },
+    {
+      "target_path": "classes.ShipToLocation",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/ShipToLocation",
+        "https://spec.industrialontologies.org/ontology/construct/ShipToLocationRole"
+      ],
+      "source_evidence": "Class label \"ship to location\" plus corresponding ship to location role.",
+      "confidence": "high",
+      "rationale": "ShipToLocation is directly present and operationally necessary for shipment destination handling."
+    },
+    {
+      "target_path": "classes.SupplyChainNode",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/SupplyChainNode",
+        "https://spec.industrialontologies.org/ontology/construct/startsAt",
+        "https://spec.industrialontologies.org/ontology/construct/endsAt"
+      ],
+      "source_evidence": "Class label \"supply chain node\" plus restrictions using startsAt and endsAt some SupplyChainNode.",
+      "confidence": "high",
+      "rationale": "SupplyChainNode is directly present and explicitly used as a start or end point for processes."
+    },
+    {
+      "target_path": "classes.ShippingRoute",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/ShippingRoute"
+      ],
+      "source_evidence": "Class label \"shipping route\".",
+      "confidence": "high",
+      "rationale": "ShippingRoute is directly present and relevant to shipment movement planning."
+    },
+    {
+      "target_path": "classes.TransportProcess",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/TransportProcess",
+        "https://spec.industrialontologies.org/ontology/construct/startsAt",
+        "https://spec.industrialontologies.org/ontology/construct/endsAt"
+      ],
+      "source_evidence": "Class label \"transport process\" plus process properties starts at and ends at.",
+      "confidence": "high",
+      "rationale": "TransportProcess is directly present and structurally tied to movement between supply-chain nodes."
+    },
+    {
+      "target_path": "classes.SupplyChainTransportProcess",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/SupplyChainTransportProcess"
+      ],
+      "source_evidence": "Class label \"supply chain transport process\".",
+      "confidence": "high",
+      "rationale": "SupplyChainTransportProcess is directly present and relevant to logistics execution scope."
+    },
+    {
+      "target_path": "classes.ShipmentPreparationProcess",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/ShipmentPreparationProcess"
+      ],
+      "source_evidence": "Class label \"shipment preparation process\".",
+      "confidence": "high",
+      "rationale": "ShipmentPreparationProcess is directly present and operationally central to dispatch readiness."
+    },
+    {
+      "target_path": "classes.ReceivingProcess",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/ReceivingProcess"
+      ],
+      "source_evidence": "Class label \"receiving process\".",
+      "confidence": "high",
+      "rationale": "ReceivingProcess is directly present and central to inbound logistics."
+    },
+    {
+      "target_path": "classes.StorageProcess",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/StorageProcess"
+      ],
+      "source_evidence": "Class label \"storage process\".",
+      "confidence": "high",
+      "rationale": "StorageProcess is directly present and relevant to inventory and warehousing operations."
+    },
+    {
+      "target_path": "classes.WarehousingProcess",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/WarehousingProcess"
+      ],
+      "source_evidence": "Class label \"warehousing process\".",
+      "confidence": "high",
+      "rationale": "WarehousingProcess is directly present and relevant to storage operations."
+    },
+    {
+      "target_path": "classes.PackagingProcess",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/PackagingProcess"
+      ],
+      "source_evidence": "Class label \"packaging process\".",
+      "confidence": "high",
+      "rationale": "PackagingProcess is directly present and relevant to preparing goods for shipment."
+    },
+    {
+      "target_path": "classes.ConsigningProcess",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/ConsigningProcess"
+      ],
+      "source_evidence": "Class label \"consigning process\".",
+      "confidence": "high",
+      "rationale": "ConsigningProcess is directly present and relevant to shipper participation in dispatch."
+    },
+    {
+      "target_path": "classes.FreightForwardingProcess",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/FreightForwardingProcess"
+      ],
+      "source_evidence": "Class label \"freight forwarding process\".",
+      "confidence": "high",
+      "rationale": "FreightForwardingProcess is directly present and relevant to arranging freight execution."
+    },
+    {
+      "target_path": "classes.InventoryManagementProcess",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/InventoryManagementProcess"
+      ],
+      "source_evidence": "Class label \"inventory management process\".",
+      "confidence": "high",
+      "rationale": "InventoryManagementProcess is directly present and relevant to traceable unit control."
+    },
+    {
+      "target_path": "classes.SupplyChainProcess",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/SupplyChainProcess"
+      ],
+      "source_evidence": "Class label \"supply chain process\".",
+      "confidence": "high",
+      "rationale": "SupplyChainProcess is directly present and serves as a general process anchor within the domain."
+    },
+    {
+      "target_path": "classes.LogisticsProcess",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/LogisticsProcess"
+      ],
+      "source_evidence": "Class label \"logistics process\".",
+      "confidence": "high",
+      "rationale": "LogisticsProcess is directly present and relevant to supply-chain operational scope."
+    },
+    {
+      "target_path": "classes.LogisticsService",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/LogisticsService",
+        "https://spec.industrialontologies.org/ontology/construct/agentIn"
+      ],
+      "source_evidence": "Class label \"logistics service\" and restriction agentIn some LogisticsService.",
+      "confidence": "high",
+      "rationale": "LogisticsService is directly present and explicitly tied to agent participation."
+    },
+    {
+      "target_path": "classes.TransportationService",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/TransportationService",
+        "https://spec.industrialontologies.org/ontology/construct/agentIn"
+      ],
+      "source_evidence": "Class label \"transportation service\" and restriction agentIn some TransportationService.",
+      "confidence": "high",
+      "rationale": "TransportationService is directly present and explicitly supports transport-provider participation."
+    },
+    {
+      "target_path": "classes.StorageService",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/StorageService",
+        "https://spec.industrialontologies.org/ontology/construct/agentIn"
+      ],
+      "source_evidence": "Class label \"storage service\" and restriction agentIn some StorageService.",
+      "confidence": "high",
+      "rationale": "StorageService is directly present and explicitly tied to service participation."
+    },
+    {
+      "target_path": "classes.PackagingService",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/PackagingService",
+        "https://spec.industrialontologies.org/ontology/construct/agentIn"
+      ],
+      "source_evidence": "Class label \"packaging service\" and restriction agentIn some PackagingService.",
+      "confidence": "high",
+      "rationale": "PackagingService is directly present and operationally relevant for preparing goods."
+    },
+    {
+      "target_path": "classes.FreightForwardingService",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/FreightForwardingService",
+        "https://spec.industrialontologies.org/ontology/construct/agentIn"
+      ],
+      "source_evidence": "Class label \"freight forwarding service\" and restriction agentIn some FreightForwardingService.",
+      "confidence": "high",
+      "rationale": "FreightForwardingService is directly present and explicitly tied to freight forwarder participation."
+    },
+    {
+      "target_path": "classes.ManufacturingService",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/ManufacturingService",
+        "https://spec.industrialontologies.org/ontology/construct/agentIn"
+      ],
+      "source_evidence": "Class label \"manufacturing service\" and restriction agentIn some ManufacturingService.",
+      "confidence": "high",
+      "rationale": "ManufacturingService is directly present and relevant where manufacturing is provided as a service in the supply chain."
+    },
+    {
+      "target_path": "classes.BillOfLading",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/BillOfLading"
+      ],
+      "source_evidence": "Class label \"bill of lading\".",
+      "confidence": "high",
+      "rationale": "BillOfLading is directly present and is decision-relevant shipment documentation."
+    },
+    {
+      "target_path": "relationships[0]",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/suppliesToAtSomeTime",
+        "https://spec.industrialontologies.org/ontology/construct/Supplier",
+        "https://spec.industrialontologies.org/ontology/construct/Customer"
+      ],
+      "source_evidence": "Object property \"supplies to at some time\" with domain Supplier and range Customer.",
+      "confidence": "high",
+      "rationale": "This directly maps the supplier-to-customer supply relationship using the explicit object property and both endpoint classes."
+    },
+    {
+      "target_path": "relationships[1]",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/dependsOnSupplier",
+        "https://spec.industrialontologies.org/ontology/construct/SupplyRelationship",
+        "https://spec.industrialontologies.org/ontology/construct/Supplier"
+      ],
+      "source_evidence": "Object property \"depends on supplier\" with domain SupplyRelationship and range Supplier.",
+      "confidence": "high",
+      "rationale": "This directly maps the explicit dependency of a supply relationship on a supplier."
+    },
+    {
+      "target_path": "relationships[2]",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/dependsOnBuyer",
+        "https://spec.industrialontologies.org/ontology/construct/SupplyRelationship",
+        "https://spec.industrialontologies.org/ontology/construct/Customer"
+      ],
+      "source_evidence": "Object property \"depends on buyer\" with domain SupplyRelationship and range Customer.",
+      "confidence": "high",
+      "rationale": "This maps the explicit buyer or customer dependency of a supply relationship."
+    },
+    {
+      "target_path": "relationships[3]",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/dependsOnProduct",
+        "https://spec.industrialontologies.org/ontology/construct/SupplyRelationship",
+        "https://spec.industrialontologies.org/ontology/construct/MaterialTradeItem"
+      ],
+      "source_evidence": "Object property \"depends on product\" with domain SupplyRelationship and range MaterialProduct; standard-practice endpoint narrowed to MaterialTradeItem as the included product-like class in scope.",
+      "confidence": "medium",
+      "rationale": "The source explicitly states a product dependency, and MaterialTradeItem is the in-scope tradable material class used to represent that operational product endpoint."
+    },
+    {
+      "target_path": "relationships[4]",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/hasAgent",
+        "https://spec.industrialontologies.org/ontology/construct/ShipmentPreparationProcess",
+        "https://spec.industrialontologies.org/ontology/construct/Carrier"
+      ],
+      "source_evidence": "Restriction on hasAgent some Carrier associated with ShipmentPreparationProcess.",
+      "confidence": "medium",
+      "rationale": "The source supports carrier participation in shipment preparation, so this is mapped as a process-to-agent relationship."
+    },
+    {
+      "target_path": "relationships[5]",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/agentIn",
+        "https://spec.industrialontologies.org/ontology/construct/ConsigningProcess",
+        "https://spec.industrialontologies.org/ontology/construct/Shipper"
+      ],
+      "source_evidence": "Standard domain practice for consigning tied to ConsigningProcess and Shipper as consignor; restrictions separately place agents in consigning processes and define Shipper as consignor.",
+      "confidence": "medium",
+      "rationale": "Consigning normally involves the shipper or consignor, so the relationship is operationally grounded in the included concepts."
+    },
+    {
+      "target_path": "relationships[6]",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/agentIn",
+        "https://spec.industrialontologies.org/ontology/construct/FreightForwardingService",
+        "https://spec.industrialontologies.org/ontology/construct/FreightForwarder"
+      ],
+      "source_evidence": "Restriction agentIn some FreightForwardingService plus class FreightForwarder.",
+      "confidence": "medium",
+      "rationale": "Freight forwarding services are standardly carried out by freight forwarders, and the source explicitly places agents in the service."
+    },
+    {
+      "target_path": "relationships[7]",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/agentIn",
+        "https://spec.industrialontologies.org/ontology/construct/TransportationService",
+        "https://spec.industrialontologies.org/ontology/construct/Carrier"
+      ],
+      "source_evidence": "Restriction agentIn some TransportationService plus Carrier class and transport-service provider grounding.",
+      "confidence": "medium",
+      "rationale": "Transportation services are operationally provided by carriers, and the source explicitly supports agent participation in the service."
+    },
+    {
+      "target_path": "relationships[8]",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/occursAt",
+        "https://spec.industrialontologies.org/ontology/construct/ReceivingProcess",
+        "https://spec.industrialontologies.org/ontology/construct/Facility"
+      ],
+      "source_evidence": "Object property \"occurs at\" for processes plus restriction isSiteOf some ReceivingProcess; standard-practice endpoint Facility used as included site class.",
+      "confidence": "medium",
+      "rationale": "Receiving processes occur at physical facilities, and the source explicitly supports site-of receiving process semantics."
+    },
+    {
+      "target_path": "relationships[9]",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/occursAt",
+        "https://spec.industrialontologies.org/ontology/construct/StorageProcess",
+        "https://spec.industrialontologies.org/ontology/construct/StorageFacility"
+      ],
+      "source_evidence": "Restriction on site or location of StorageProcess with StorageFacility and object property occursAt.",
+      "confidence": "high",
+      "rationale": "The source explicitly supports storage processes at storage facilities."
+    },
+    {
+      "target_path": "relationships[10]",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/occursAt",
+        "https://spec.industrialontologies.org/ontology/construct/ShipmentPreparationProcess",
+        "https://spec.industrialontologies.org/ontology/construct/Facility"
+      ],
+      "source_evidence": "Restriction isSiteOf some ShipmentPreparationProcess plus object property occursAt; standard-practice endpoint Facility used as included site class.",
+      "confidence": "medium",
+      "rationale": "Shipment preparation operationally occurs at a facility, and the source explicitly supports site-of shipment preparation semantics."
+    },
+    {
+      "target_path": "relationships[11]",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/startsAt",
+        "https://spec.industrialontologies.org/ontology/construct/TransportProcess",
+        "https://spec.industrialontologies.org/ontology/construct/SupplyChainNode"
+      ],
+      "source_evidence": "Object property \"starts at\" and restriction startsAt some SupplyChainNode.",
+      "confidence": "high",
+      "rationale": "The source directly supports transport processes starting at supply-chain nodes."
+    },
+    {
+      "target_path": "relationships[12]",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/endsAt",
+        "https://spec.industrialontologies.org/ontology/construct/TransportProcess",
+        "https://spec.industrialontologies.org/ontology/construct/SupplyChainNode"
+      ],
+      "source_evidence": "Object property \"ends at\" and restriction endsAt some SupplyChainNode.",
+      "confidence": "high",
+      "rationale": "The source directly supports transport processes ending at supply-chain nodes."
+    },
+    {
+      "target_path": "relationships[13]",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/holds",
+        "https://spec.industrialontologies.org/ontology/construct/Shipper",
+        "https://spec.industrialontologies.org/ontology/construct/Cargo"
+      ],
+      "source_evidence": "Object property \"holds\" with agent-to-material semantics; standard-practice endpoint pair Shipper and Cargo tied to consigning and shipment concepts.",
+      "confidence": "medium",
+      "rationale": "A shipper operationally holds cargo being consigned, and the generic holds property supports the possession relation."
+    },
+    {
+      "target_path": "relationships[14]",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/Container",
+        "https://spec.industrialontologies.org/ontology/construct/Cargo"
+      ],
+      "source_evidence": "The source explicitly names the endpoint classes \"container\" and \"cargo\"; using a generic containment relation between these material entities is supported by standard practice for logistics modeling, whereas the cited property \"holds\" is declared on a different domain.",
+      "confidence": "medium",
+      "rationale": "The original relationship's specific predicate was structurally mismatched because \"holds\" is not grounded for Container as subject, but the underlying logistics concept is still supportable by replacing it with a generic containment relation between the explicitly sourced classes Container and Cargo."
+    },
+    {
+      "target_path": "relationships[15]",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/Shipment",
+        "https://spec.industrialontologies.org/ontology/construct/Container"
+      ],
+      "source_evidence": "Standard domain practice for shipment handling tied to Shipment and Container.",
+      "confidence": "medium",
+      "rationale": "Shipments commonly use containers for handling and transport, which is a routine operational association in this domain."
+    },
+    {
+      "target_path": "relationships[16]",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/Shipment",
+        "https://spec.industrialontologies.org/ontology/construct/FreightContainer"
+      ],
+      "source_evidence": "Standard domain practice for freight transport tied to Shipment and FreightContainer.",
+      "confidence": "medium",
+      "rationale": "Freight shipments routinely use freight containers, which is a standard logistics pairing."
+    },
+    {
+      "target_path": "relationships[17]",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/Shipment",
+        "https://spec.industrialontologies.org/ontology/construct/ShipFromLocation"
+      ],
+      "source_evidence": "Standard domain practice for shipment origin tied to Shipment and ShipFromLocation, supported by explicit ship-from location class and role.",
+      "confidence": "medium",
+      "rationale": "Shipment origin is a core operational association and the source explicitly includes ship-from location concepts."
+    },
+    {
+      "target_path": "relationships[18]",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/Shipment",
+        "https://spec.industrialontologies.org/ontology/construct/ShipToLocation"
+      ],
+      "source_evidence": "Standard domain practice for shipment destination tied to Shipment and ShipToLocation, supported by explicit ship-to location class and role.",
+      "confidence": "medium",
+      "rationale": "Shipment destination is a core operational association and the source explicitly includes ship-to location concepts."
+    },
+    {
+      "target_path": "relationships[19]",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/TrackingEvent",
+        "https://spec.industrialontologies.org/ontology/construct/Shipment"
+      ],
+      "source_evidence": "Standard domain practice for logistics traceability tied to TrackingEvent and Shipment.",
+      "confidence": "medium",
+      "rationale": "Tracking events routinely record shipment milestones, making this a standard traceability relationship."
+    },
+    {
+      "target_path": "relationships[20]",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/TrackingEvent",
+        "https://spec.industrialontologies.org/ontology/construct/Lot"
+      ],
+      "source_evidence": "Standard domain practice for batch traceability tied to TrackingEvent and Lot.",
+      "confidence": "medium",
+      "rationale": "Tracking events routinely support lot-level traceability in supply chains."
+    },
+    {
+      "target_path": "relationships[21]",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/TrackingEvent",
+        "https://spec.industrialontologies.org/ontology/construct/LogisticUnit"
+      ],
+      "source_evidence": "Standard domain practice for logistics execution tied to TrackingEvent and LogisticUnit.",
+      "confidence": "medium",
+      "rationale": "Logistic units are commonly tracked through operational events."
+    },
+    {
+      "target_path": "relationships[22]",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/TrackingEvent",
+        "https://spec.industrialontologies.org/ontology/construct/Load"
+      ],
+      "source_evidence": "Standard domain practice for transport handling tied to TrackingEvent and Load.",
+      "confidence": "medium",
+      "rationale": "Loads are commonly associated with tracking events during movement and handling."
+    },
+    {
+      "target_path": "relationships[23]",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/TrackingEvent",
+        "https://spec.industrialontologies.org/ontology/construct/Traceability"
+      ],
+      "source_evidence": "Standard domain practice for traceability systems tied to TrackingEvent and Traceability.",
+      "confidence": "medium",
+      "rationale": "Tracking events are a core mechanism by which traceability capability is realized."
+    },
+    {
+      "target_path": "relationships[24]",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/Shipment",
+        "https://spec.industrialontologies.org/ontology/construct/PurchaseOrder"
+      ],
+      "source_evidence": "Standard domain practice for order fulfillment tied to Shipment and PurchaseOrder.",
+      "confidence": "medium",
+      "rationale": "Shipments commonly fulfill purchase orders in supply-chain execution."
+    },
+    {
+      "target_path": "relationships[25]",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/PurchaseOrder",
+        "https://spec.industrialontologies.org/ontology/construct/MaterialTradeItem"
+      ],
+      "source_evidence": "Standard domain practice for ordering tied to PurchaseOrder and MaterialTradeItem.",
+      "confidence": "medium",
+      "rationale": "Purchase orders normally specify the trade items being requested."
+    },
+    {
+      "target_path": "relationships[26]",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/Shipment",
+        "https://spec.industrialontologies.org/ontology/construct/MaterialTradeItem"
+      ],
+      "source_evidence": "Standard domain practice for shipping tied to Shipment and MaterialTradeItem.",
+      "confidence": "medium",
+      "rationale": "Shipments move trade items, so this is a routine operational association."
+    },
+    {
+      "target_path": "relationships[27]",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/InventoryManagementProcess",
+        "https://spec.industrialontologies.org/ontology/construct/TraceableResourceUnit"
+      ],
+      "source_evidence": "Standard domain practice for inventory control tied to InventoryManagementProcess and TraceableResourceUnit.",
+      "confidence": "medium",
+      "rationale": "Inventory management operationally manages traceable resource units."
+    },
+    {
+      "target_path": "relationships[28]",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/InventoryManagementProcess",
+        "https://spec.industrialontologies.org/ontology/construct/Lot"
+      ],
+      "source_evidence": "Standard domain practice for inventory control tied to InventoryManagementProcess and Lot.",
+      "confidence": "medium",
+      "rationale": "Lots are routinely managed as inventory units."
+    },
+    {
+      "target_path": "relationships[29]",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/InventoryManagementProcess",
+        "https://spec.industrialontologies.org/ontology/construct/LogisticUnit"
+      ],
+      "source_evidence": "Standard domain practice for inventory control tied to InventoryManagementProcess and LogisticUnit.",
+      "confidence": "medium",
+      "rationale": "Logistic units are routinely managed in inventory operations."
+    },
+    {
+      "target_path": "rules.canPrepareShipment",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/Shipment",
+        "https://spec.industrialontologies.org/ontology/construct/ShipFromLocation",
+        "https://spec.industrialontologies.org/ontology/construct/ShipToLocation",
+        "https://spec.industrialontologies.org/ontology/construct/Carrier",
+        "https://spec.industrialontologies.org/ontology/construct/ShipmentPreparationProcess"
+      ],
+      "source_evidence": "The source classes explicitly include 'shipment', 'ship from location', 'ship to location', 'carrier', and 'shipment preparation process', which supports a preparation rule framed around those identified shipment-planning elements rather than unsupported status values.",
+      "confidence": "medium",
+      "rationale": "Replacing the rule drops the ungrounded purchase-order status condition and restates shipment preparation in terms of named source-grounded shipment, location, carrier/service-arrangement, and preparation-process concepts."
+    },
+    {
+      "target_path": "rules.canReceiveShipment",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/Shipment",
+        "https://spec.industrialontologies.org/ontology/construct/ReceivingProcess",
+        "https://spec.industrialontologies.org/ontology/construct/Facility",
+        "https://spec.industrialontologies.org/ontology/construct/ShipToLocation",
+        "https://spec.industrialontologies.org/ontology/construct/TransportProcess",
+        "https://spec.industrialontologies.org/ontology/construct/SupplyChainNode"
+      ],
+      "source_evidence": "The source classes explicitly include 'shipment', 'receiving process', 'facility', 'ship to location', 'transport process', and 'supply chain node', which supports a receipt rule based on destination and receiving context rather than an unsupported 'in_transit' shipment status.",
+      "confidence": "medium",
+      "rationale": "Replacing the rule keeps the receiving concept but expresses it through identified receiving, facility, destination, and transport-arrival concepts that remain grounded in the source classes."
+    },
+    {
+      "target_path": "rules.canRecordTrackingEvent",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/TrackingEvent",
+        "https://spec.industrialontologies.org/ontology/construct/Shipment",
+        "https://spec.industrialontologies.org/ontology/construct/Lot",
+        "https://spec.industrialontologies.org/ontology/construct/LogisticUnit",
+        "https://spec.industrialontologies.org/ontology/construct/Load"
+      ],
+      "source_evidence": "Standard domain practice for event capture tied to TrackingEvent and tracked supply-chain units.",
+      "confidence": "medium",
+      "rationale": "A tracking event is only useful when the tracked unit, event time, and event type are known."
+    },
+    {
+      "target_path": "rules.canMaintainTraceability",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/Traceability",
+        "https://spec.industrialontologies.org/ontology/construct/TrackingEvent",
+        "https://spec.industrialontologies.org/ontology/construct/TraceableResourceUnit",
+        "https://spec.industrialontologies.org/ontology/construct/Lot",
+        "https://spec.industrialontologies.org/ontology/construct/Load",
+        "https://spec.industrialontologies.org/ontology/construct/LogisticUnit"
+      ],
+      "source_evidence": "Standard domain practice for traceability tied to Traceability, TrackingEvent, TraceableResourceUnit, Lot, Load, and LogisticUnit.",
+      "confidence": "medium",
+      "rationale": "Traceability depends on recorded events and identifiable traceable units."
+    },
+    {
+      "target_path": "rules.canEvaluateSupplyRelationship",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/SupplyRelationship",
+        "https://spec.industrialontologies.org/ontology/construct/Supplier",
+        "https://spec.industrialontologies.org/ontology/construct/Customer",
+        "https://spec.industrialontologies.org/ontology/construct/MaterialTradeItem"
+      ],
+      "source_evidence": "Standard domain practice for supply dependency analysis tied to SupplyRelationship, Supplier, Customer, and MaterialTradeItem.",
+      "confidence": "medium",
+      "rationale": "A supply relationship can be evaluated when its supplier, customer, and product dependencies are known."
+    },
+    {
+      "target_path": "actions.prepareShipment",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/Shipment",
+        "https://spec.industrialontologies.org/ontology/construct/ShipFromLocation",
+        "https://spec.industrialontologies.org/ontology/construct/ShipToLocation",
+        "https://spec.industrialontologies.org/ontology/construct/Carrier",
+        "https://spec.industrialontologies.org/ontology/construct/ShipmentPreparationProcess"
+      ],
+      "source_evidence": "The source classes explicitly include 'shipment', 'ship from location', 'ship to location', 'carrier', and 'shipment preparation process', so the action can be grounded as establishing those shipment-planning associations without asserting a status property.",
+      "confidence": "medium",
+      "rationale": "Replacing the action removes the unsupported prepared-status effect and recasts preparation as establishing the shipment's grounded logistics associations."
+    },
+    {
+      "target_path": "actions.dispatchShipment",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/Shipment"
+      ],
+      "source_evidence": "The source context identifies the class label \"shipment\" for Shipment but provides no grounded rule-level conditions or relations involving containers, transport processes, or nodes.",
+      "confidence": "low",
+      "rationale": "The only honest repair is to narrow the action to a minimal shipment-dispatch action that depends only on the existence of the Shipment class and removes the unsupported precondition rule and unsupported process/container details."
+    },
+    {
+      "target_path": "actions.receiveShipment",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/Shipment",
+        "https://spec.industrialontologies.org/ontology/construct/ReceivingProcess",
+        "https://spec.industrialontologies.org/ontology/construct/Facility",
+        "https://spec.industrialontologies.org/ontology/construct/ShipToLocation"
+      ],
+      "source_evidence": "The source classes explicitly include 'shipment', 'receiving process', and 'facility', with 'ship to location' providing the destination context, which supports describing receipt as arrival and receiving-process completion without relying on a shipment status property.",
+      "confidence": "high",
+      "rationale": "Replacing the action removes the unsupported received-status effect and states the outcome in terms of destination arrival and receiving-process completion grounded by the source classes."
+    },
+    {
+      "target_path": "actions.recordTrackingEvent",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/TrackingEvent",
+        "https://spec.industrialontologies.org/ontology/construct/Shipment",
+        "https://spec.industrialontologies.org/ontology/construct/Lot",
+        "https://spec.industrialontologies.org/ontology/construct/LogisticUnit",
+        "https://spec.industrialontologies.org/ontology/construct/Load"
+      ],
+      "source_evidence": "Standard domain practice for traceability capture tied to TrackingEvent and tracked units.",
+      "confidence": "medium",
+      "rationale": "Recording a tracking event is the standard action that operationalizes traceability."
+    },
+    {
+      "target_path": "actions.evaluateSupplyRelationship",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/SupplyRelationship",
+        "https://spec.industrialontologies.org/ontology/construct/dependsOnSupplier",
+        "https://spec.industrialontologies.org/ontology/construct/dependsOnBuyer",
+        "https://spec.industrialontologies.org/ontology/construct/dependsOnProduct"
+      ],
+      "source_evidence": "Object properties depends on supplier, depends on buyer, and depends on product on SupplyRelationship plus standard evaluation practice.",
+      "confidence": "medium",
+      "rationale": "Evaluating a supply relationship is an operational action directly supported by its explicit dependency structure."
+    }
+  ],
+  "dispositions": [
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/Airway",
+      "disposition": "out_of_scope",
+      "note": "transport path subtype without sufficient supply-chain definition in this file and not needed for the focused agent model"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/AppraisalProcess",
+      "disposition": "out_of_scope",
+      "note": "generic appraisal concept outside the chosen supply-chain operational core"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/ArrivalProcess",
+      "disposition": "out_of_scope",
+      "note": "generic movement-process subtype not needed given shipment, receiving, and transport coverage"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/BillOfLading",
+      "disposition": "mapped",
+      "note": "classes.BillOfLading"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/Cargo",
+      "disposition": "mapped",
+      "note": "classes.Cargo"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/CargoRole",
+      "disposition": "taxonomy_only",
+      "note": "role taxonomy not surfaced separately in the target model"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/Carrier",
+      "disposition": "mapped",
+      "note": "classes.Carrier"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/Change",
+      "disposition": "out_of_scope",
+      "note": "too generic for the selected domain focus"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/Consignee",
+      "disposition": "mapped",
+      "note": "classes.Consignee"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/ConsigneeRole",
+      "disposition": "taxonomy_only",
+      "note": "role taxonomy not surfaced separately in the target model"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/ConsigningProcess",
+      "disposition": "mapped",
+      "note": "classes.ConsigningProcess"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/ConsignorRole",
+      "disposition": "taxonomy_only",
+      "note": "role taxonomy not surfaced separately in the target model"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/Container",
+      "disposition": "mapped",
+      "note": "classes.Container"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/ContainerIdentifier",
+      "disposition": "not_agent_relevant",
+      "note": "identifier bookkeeping omitted per scope note"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/DepartureProcess",
+      "disposition": "out_of_scope",
+      "note": "generic movement-process subtype not needed given shipment dispatch action"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/DistributionCenter",
+      "disposition": "mapped",
+      "note": "classes.DistributionCenter"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/Distributor",
+      "disposition": "mapped",
+      "note": "classes.Distributor"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/DistributorRole",
+      "disposition": "taxonomy_only",
+      "note": "role taxonomy not surfaced separately in the target model"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/Facility",
+      "disposition": "mapped",
+      "note": "classes.Facility"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/Factory",
+      "disposition": "mapped",
+      "note": "classes.Factory"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/FreightContainer",
+      "disposition": "mapped",
+      "note": "classes.FreightContainer"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/FreightForwarder",
+      "disposition": "mapped",
+      "note": "classes.FreightForwarder"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/FreightForwarderRole",
+      "disposition": "taxonomy_only",
+      "note": "role taxonomy not surfaced separately in the target model"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/FreightForwardingBusinessFunction",
+      "disposition": "out_of_scope",
+      "note": "business-function abstraction omitted in favor of service and process concepts"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/FreightForwardingProcess",
+      "disposition": "mapped",
+      "note": "classes.FreightForwardingProcess"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/FreightForwardingService",
+      "disposition": "mapped",
+      "note": "classes.FreightForwardingService"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/GeospatialLocation",
+      "disposition": "mapped",
+      "note": "classes.GeospatialLocation"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/GeospatialSite",
+      "disposition": "taxonomy_only",
+      "note": "used only to interpret location concepts"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/GlobalLocationNumber",
+      "disposition": "not_agent_relevant",
+      "note": "identifier bookkeeping omitted per scope note"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/GroupOfSuppliers",
+      "disposition": "out_of_scope",
+      "note": "grouping construct not needed for the focused operational model"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/IndustrialInventory",
+      "disposition": "out_of_scope",
+      "note": "inventory stock object omitted in favor of traceable units and inventory management process"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/IndustrialInventoryRole",
+      "disposition": "taxonomy_only",
+      "note": "role taxonomy not surfaced separately in the target model"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/Industry",
+      "disposition": "out_of_scope",
+      "note": "sector-level grouping outside the focused operational scope"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/IntegratedCarrierBusinessOrganization",
+      "disposition": "out_of_scope",
+      "note": "organization subtype omitted in favor of direct carrier concept"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/InventoryManagementProcess",
+      "disposition": "mapped",
+      "note": "classes.InventoryManagementProcess"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/Load",
+      "disposition": "mapped",
+      "note": "classes.Load"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/LoadRole",
+      "disposition": "taxonomy_only",
+      "note": "role taxonomy not surfaced separately in the target model"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/LocationIdentificationScheme",
+      "disposition": "not_agent_relevant",
+      "note": "identifier scheme bookkeeping omitted per scope note"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/LocationRole",
+      "disposition": "taxonomy_only",
+      "note": "role taxonomy used only to interpret ship-from and ship-to location concepts"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/LogisticUnit",
+      "disposition": "mapped",
+      "note": "classes.LogisticUnit"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/LogisticUnitRole",
+      "disposition": "taxonomy_only",
+      "note": "role taxonomy not surfaced separately in the target model"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/LogisticsProcess",
+      "disposition": "mapped",
+      "note": "classes.LogisticsProcess"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/LogisticsService",
+      "disposition": "mapped",
+      "note": "classes.LogisticsService"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/LogisticsServiceProviderRole",
+      "disposition": "taxonomy_only",
+      "note": "role taxonomy not surfaced separately in the target model"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/Lot",
+      "disposition": "mapped",
+      "note": "classes.Lot"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/LotIdentifier",
+      "disposition": "not_agent_relevant",
+      "note": "identifier bookkeeping omitted per scope note"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/LotRole",
+      "disposition": "taxonomy_only",
+      "note": "role taxonomy not surfaced separately in the target model"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/Make-To-OrderProductionCapability",
+      "disposition": "out_of_scope",
+      "note": "production-planning subtype not essential to selected logistics-centered scope"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/Make-To-StockProductionCapability",
+      "disposition": "out_of_scope",
+      "note": "production-planning subtype not essential to selected logistics-centered scope"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/ManufacturingService",
+      "disposition": "mapped",
+      "note": "classes.ManufacturingService"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/ManufacturingServiceProviderRole",
+      "disposition": "taxonomy_only",
+      "note": "role taxonomy not surfaced separately in the target model"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/ManufacturingSupplyChain",
+      "disposition": "out_of_scope",
+      "note": "system subtype omitted in favor of process and partner concepts"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/MaterialTradeItem",
+      "disposition": "mapped",
+      "note": "classes.MaterialTradeItem"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/MaterialTradeItemRole",
+      "disposition": "taxonomy_only",
+      "note": "role taxonomy not surfaced separately in the target model"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/PackagingPlanSpecification",
+      "disposition": "out_of_scope",
+      "note": "plan specification omitted in favor of executable process and service concepts"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/PackagingProcess",
+      "disposition": "mapped",
+      "note": "classes.PackagingProcess"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/PackagingService",
+      "disposition": "mapped",
+      "note": "classes.PackagingService"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/PackagingServiceProviderRole",
+      "disposition": "taxonomy_only",
+      "note": "role taxonomy not surfaced separately in the target model"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/PieceofTransportEquipment",
+      "disposition": "out_of_scope",
+      "note": "generic equipment concept omitted in favor of concrete container and trailer classes"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/ProductionCapability",
+      "disposition": "out_of_scope",
+      "note": "capability abstraction omitted in favor of concrete services and processes"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/PurchaseOrder",
+      "disposition": "mapped",
+      "note": "classes.PurchaseOrder"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/ReceivingProcess",
+      "disposition": "mapped",
+      "note": "classes.ReceivingProcess"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/Retailer",
+      "disposition": "mapped",
+      "note": "classes.Retailer"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/RetailerRole",
+      "disposition": "taxonomy_only",
+      "note": "role taxonomy not surfaced separately in the target model"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/Seaway",
+      "disposition": "out_of_scope",
+      "note": "Excluded because the source material here provides only the bare label \"seaway\" with no definition or operational detail, while the domain already includes the broader route concept ShippingRoute. Without source evidence that seaway carries a distinct logistics role beyond being a kind of shipping route, adding it would create an ungrounded subtype rather than a separately operational class."
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/ServiceConsumerRole",
+      "disposition": "taxonomy_only",
+      "note": "role taxonomy not surfaced separately in the target model"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/ServiceSupplyChain",
+      "disposition": "out_of_scope",
+      "note": "system subtype omitted in favor of process and partner concepts"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/ShipFromLocation",
+      "disposition": "mapped",
+      "note": "classes.ShipFromLocation"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/ShipFromLocationRole",
+      "disposition": "taxonomy_only",
+      "note": "This is BFO's role-bearing pattern applied to a shipment's origin location, not distinct operational content: the domain already models the location itself as classes.ShipFromLocation, and already connects it to Shipment via the shipsFrom relationship (relationships[17]). A separate Role class would duplicate content already fully captured, not add anything a location-plus-relationship model doesn't already express."
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/ShipToLocation",
+      "disposition": "mapped",
+      "note": "classes.ShipToLocation"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/ShipToLocationRole",
+      "disposition": "taxonomy_only",
+      "note": "This is BFO's role-bearing pattern applied to a shipment's destination location, not distinct operational content: the domain already models the location itself as classes.ShipToLocation, and already connects it to Shipment via the shipsTo relationship (relationships[18]). A separate Role class would duplicate content already fully captured, not add anything a location-plus-relationship model doesn't already express."
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/Shipment",
+      "disposition": "mapped",
+      "note": "classes.Shipment"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/ShipmentPlanSpecification",
+      "disposition": "out_of_scope",
+      "note": "plan specification omitted in favor of shipment and shipment preparation concepts"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/ShipmentPreparationProcess",
+      "disposition": "mapped",
+      "note": "classes.ShipmentPreparationProcess"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/ShipmentRole",
+      "disposition": "taxonomy_only",
+      "note": "role taxonomy not surfaced separately in the target model"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/ShipmentState",
+      "disposition": "unsupported_by_target_model",
+      "note": "state taxonomy expressed instead as simple shipment status property"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/Shipper",
+      "disposition": "mapped",
+      "note": "classes.Shipper"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/ShippingRoute",
+      "disposition": "mapped",
+      "note": "classes.ShippingRoute"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/StorageCapability",
+      "disposition": "out_of_scope",
+      "note": "capability abstraction omitted in favor of concrete storage service and facility concepts"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/StorageFacility",
+      "disposition": "mapped",
+      "note": "classes.StorageFacility"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/StorageProcess",
+      "disposition": "mapped",
+      "note": "classes.StorageProcess"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/StorageService",
+      "disposition": "mapped",
+      "note": "classes.StorageService"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/StorageServiceProviderRole",
+      "disposition": "taxonomy_only",
+      "note": "role taxonomy not surfaced separately in the target model"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/Sublot",
+      "disposition": "mapped",
+      "note": "classes.Sublot"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/SublotRole",
+      "disposition": "taxonomy_only",
+      "note": "role taxonomy not surfaced separately in the target model"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/SupplierEvaluationProcess",
+      "disposition": "out_of_scope",
+      "note": "evaluation process omitted to keep focus on core logistics execution concepts"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/SupplyChainAgent",
+      "disposition": "out_of_scope",
+      "note": "generic agent superclass omitted in favor of concrete partner roles"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/SupplyChainAgentRole",
+      "disposition": "taxonomy_only",
+      "note": "role taxonomy not surfaced separately in the target model"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/SupplyChainNode",
+      "disposition": "mapped",
+      "note": "classes.SupplyChainNode"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/SupplyChainNodeRole",
+      "disposition": "taxonomy_only",
+      "note": "role taxonomy not surfaced separately in the target model"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/SupplyChainObjectiveSpecification",
+      "disposition": "out_of_scope",
+      "note": "objective specification omitted in favor of directly actionable operational concepts"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/SupplyChainPlanSpecification",
+      "disposition": "out_of_scope",
+      "note": "plan specification omitted in favor of directly actionable operational concepts"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/SupplyChainProcess",
+      "disposition": "mapped",
+      "note": "classes.SupplyChainProcess"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/SupplyChainSystem",
+      "disposition": "out_of_scope",
+      "note": "system abstraction omitted in favor of process and partner concepts"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/SupplyChainTransportProcess",
+      "disposition": "mapped",
+      "note": "classes.SupplyChainTransportProcess"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/SupplyRelationship",
+      "disposition": "mapped",
+      "note": "classes.SupplyRelationship"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/SystemCapability",
+      "disposition": "taxonomy_only",
+      "note": "used only to interpret Traceability as a capability"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/Traceability",
+      "disposition": "mapped",
+      "note": "classes.Traceability"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/TraceableResourceUnit",
+      "disposition": "mapped",
+      "note": "classes.TraceableResourceUnit"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/TraceableResourceUnitRole",
+      "disposition": "taxonomy_only",
+      "note": "role taxonomy not surfaced separately in the target model"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/TrackingEvent",
+      "disposition": "mapped",
+      "note": "classes.TrackingEvent"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/Trailer",
+      "disposition": "mapped",
+      "note": "classes.Trailer"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/TranspoortEquipmentRole",
+      "disposition": "taxonomy_only",
+      "note": "role taxonomy not surfaced separately in the target model"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/TransportProcess",
+      "disposition": "mapped",
+      "note": "classes.TransportProcess"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/TransportationBusinessFunction",
+      "disposition": "out_of_scope",
+      "note": "business-function abstraction omitted in favor of service and process concepts"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/TransportationService",
+      "disposition": "mapped",
+      "note": "classes.TransportationService"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/TransportationServiceProviderRole",
+      "disposition": "taxonomy_only",
+      "note": "role taxonomy not surfaced separately in the target model"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/TravelProcess",
+      "disposition": "out_of_scope",
+      "note": "The source lookup provides only the label 'travel process' and no textual definition, while this domain already models the operational movement concept it needs as TransportProcess. Without source evidence distinguishing TravelProcess from TransportProcess in a supply-chain/logistics role, adding it would likely duplicate the existing transport-process class rather than introduce a separate operationally grounded concept."
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/Wagon",
+      "disposition": "mapped",
+      "note": "classes.Wagon"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/WarehousingPlanSpecification",
+      "disposition": "out_of_scope",
+      "note": "plan specification omitted in favor of warehousing process concept"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/WarehousingProcess",
+      "disposition": "mapped",
+      "note": "classes.WarehousingProcess"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/Wholesaler",
+      "disposition": "mapped",
+      "note": "classes.Wholesaler"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/WholesalerRole",
+      "disposition": "taxonomy_only",
+      "note": "role taxonomy not surfaced separately in the target model"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/agentIn",
+      "disposition": "mapped",
+      "note": "relationships[5], relationships[6], relationships[7]"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/dependsOnBuyer",
+      "disposition": "mapped",
+      "note": "relationships[2]"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/dependsOnProduct",
+      "disposition": "mapped",
+      "note": "relationships[3]"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/dependsOnSupplier",
+      "disposition": "mapped",
+      "note": "relationships[1]"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/endsAt",
+      "disposition": "mapped",
+      "note": "relationships[12]"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/hasAgent",
+      "disposition": "mapped",
+      "note": "relationships[4]"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/holds",
+      "disposition": "mapped",
+      "note": "relationships[13], relationships[14]"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/initiatesRelationship",
+      "disposition": "unsupported_by_target_model",
+      "note": "event-to-relationship axiom not translated because endpoint classes are unresolved or out of scope"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/isSiteOf",
+      "disposition": "mapped",
+      "note": "relationships[8], relationships[9], relationships[10]"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/isSuppliedByAtSomeTime",
+      "disposition": "out_of_scope",
+      "note": "domain endpoint unresolved in this file and redundant with included supplier-to-customer relation"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/isSuppliedToAtSomeTime",
+      "disposition": "out_of_scope",
+      "note": "domain endpoint unresolved in this file and redundant with included supplier-to-customer relation"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/occursAt",
+      "disposition": "mapped",
+      "note": "relationships[8], relationships[9], relationships[10]"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/occursOn",
+      "disposition": "out_of_scope",
+      "note": "time-region linkage omitted because temporal class endpoints are unresolved imports"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/ownedBy",
+      "disposition": "out_of_scope",
+      "note": "ownership relation omitted because endpoint classes are unresolved in this file"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/owns",
+      "disposition": "out_of_scope",
+      "note": "ownership relation omitted because endpoint classes are unresolved in this file"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/relationshipInitiatedBy",
+      "disposition": "unsupported_by_target_model",
+      "note": "event-to-relationship axiom not translated because endpoint classes are unresolved or out of scope"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/startsAt",
+      "disposition": "mapped",
+      "note": "relationships[11]"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/suppliesToAtSomeTime",
+      "disposition": "mapped",
+      "note": "relationships[0]"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/hasTextValue",
+      "disposition": "not_agent_relevant",
+      "note": "generic literal carrier property not specific enough to keep as a domain property"
+    },
+    {
+      "source_iri": "N0133bf62b4834702889e119e16046c9b",
+      "disposition": "unsupported_by_target_model",
+      "note": "formal OWL restriction on imported roleOf property not directly translated"
+    },
+    {
+      "source_iri": "N03349f87dd5c4e4da8a7aaf3af0ad077",
+      "disposition": "unsupported_by_target_model",
+      "note": "formal OWL restriction with unresolved anonymous filler not directly translated"
+    },
+    {
+      "source_iri": "N053cf6a6c7c7478fa10eb84b7c1c28cd",
+      "disposition": "unsupported_by_target_model",
+      "note": "formal OWL restriction not given direct plain-language target shape"
+    },
+    {
+      "source_iri": "N05fed032fb254437909e7ca2288bc508",
+      "disposition": "taxonomy_only",
+      "note": "used only to interpret ship-to location semantics"
+    },
+    {
+      "source_iri": "N076d2f612b2c4e5fb86c3144e659c5da",
+      "disposition": "taxonomy_only",
+      "note": "used only to interpret wholesaler semantics"
+    },
+    {
+      "source_iri": "N0772cbb08c074f1f9546b8e10e673424",
+      "disposition": "not_agent_relevant",
+      "note": "identifier scheme has-value restriction treated as bookkeeping"
+    },
+    {
+      "source_iri": "N08af704324ed4412a672a9b77baf8af4",
+      "disposition": "unsupported_by_target_model",
+      "note": "formal participant restriction not separately surfaced"
+    },
+    {
+      "source_iri": "N0a34e6946ce441f18506cfce52151eb7",
+      "disposition": "unsupported_by_target_model",
+      "note": "formal OWL restriction with unresolved filler not directly translated"
+    },
+    {
+      "source_iri": "N0a9ea3ad50314730b816531e75731786",
+      "disposition": "taxonomy_only",
+      "note": "used only to interpret customer semantics"
+    },
+    {
+      "source_iri": "N0b8d3390b508444281fb7f62449bd99e",
+      "disposition": "unsupported_by_target_model",
+      "note": "unresolved restriction filler"
+    },
+    {
+      "source_iri": "N0bb2d7614cba46a9a86f1427d574393e",
+      "disposition": "unsupported_by_target_model",
+      "note": "generic roleOf restriction not surfaced"
+    },
+    {
+      "source_iri": "N0cc1c7cf5ecd4ae8b7d297ad43527904",
+      "disposition": "out_of_scope",
+      "note": "buying-process aboutness relies on unresolved imported class"
+    },
+    {
+      "source_iri": "N0d7b2fa1567d40adbce1346b3de0ca7c",
+      "disposition": "mapped",
+      "note": "supports relationships[12]"
+    },
+    {
+      "source_iri": "N0de212a5a9804edab7c37b8d442bbe49",
+      "disposition": "taxonomy_only",
+      "note": "used only to interpret supplier role semantics"
+    },
+    {
+      "source_iri": "N0f6d3993e81f4799ab0a88dade948e55",
+      "disposition": "unsupported_by_target_model",
+      "note": "generic process output restriction not separately surfaced"
+    },
+    {
+      "source_iri": "N0f869efc0d414c458d0a4304218a0625",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction filler unresolved"
+    },
+    {
+      "source_iri": "N117151257f6b4f868f516b9d0a9480ac",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction filler unresolved"
+    },
+    {
+      "source_iri": "N13eac0467ef1423c867dfc116e1e1e86",
+      "disposition": "unsupported_by_target_model",
+      "note": "generic roleOf restriction not surfaced"
+    },
+    {
+      "source_iri": "N14db37f1db3a4ad990ef37d989315063",
+      "disposition": "unsupported_by_target_model",
+      "note": "generic roleOf restriction not surfaced"
+    },
+    {
+      "source_iri": "N18a639921788435c825851c18c933bbe",
+      "disposition": "unsupported_by_target_model",
+      "note": "formal OWL restriction with unresolved filler"
+    },
+    {
+      "source_iri": "N1a1453a2039f46d4bf124395fc5f6dba",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction filler unresolved"
+    },
+    {
+      "source_iri": "N1b655c125df247268212dd5f46f1caea",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction filler unresolved"
+    },
+    {
+      "source_iri": "N1c6ce0b5777f493ab53eb0adc58529e2",
+      "disposition": "unsupported_by_target_model",
+      "note": "capability axiom on unresolved filler not directly translated"
+    },
+    {
+      "source_iri": "N1cae1173ecc541ae9f2c44bcf7569949",
+      "disposition": "unsupported_by_target_model",
+      "note": "formal process axiom with unresolved filler"
+    },
+    {
+      "source_iri": "N22e9f4175e884a97b490baf7b34564ab",
+      "disposition": "not_agent_relevant",
+      "note": "identifier designation bookkeeping"
+    },
+    {
+      "source_iri": "N24206aa38fb6452daeaaf58c7efcbb3d",
+      "disposition": "taxonomy_only",
+      "note": "used only to interpret freight forwarding process semantics"
+    },
+    {
+      "source_iri": "N259e9268688e4477a5eb0948bf218cbe",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction filler unresolved"
+    },
+    {
+      "source_iri": "N25c13afdfd054deb8b0f24e1870ac67c",
+      "disposition": "mapped",
+      "note": "supports classes.LogisticsService"
+    },
+    {
+      "source_iri": "N2643136a55f14e828f7b38babaaf25d4",
+      "disposition": "taxonomy_only",
+      "note": "used only to interpret transport process semantics"
+    },
+    {
+      "source_iri": "N2866500815c8473c8baef3d156ae8cb4",
+      "disposition": "taxonomy_only",
+      "note": "used only to interpret packaging process semantics"
+    },
+    {
+      "source_iri": "N2cc6ff0fbf9f41fc849492fd935fe272",
+      "disposition": "unsupported_by_target_model",
+      "note": "formal all-values restriction not directly translated"
+    },
+    {
+      "source_iri": "N31605457363348c8b54db7378a599c7a",
+      "disposition": "unsupported_by_target_model",
+      "note": "generic roleOf restriction not surfaced"
+    },
+    {
+      "source_iri": "N33bc65d4e4f3437da74f86e310dc498b",
+      "disposition": "out_of_scope",
+      "note": "manufacturing-process linkage relies on unresolved imported class"
+    },
+    {
+      "source_iri": "N3507c11370aa40c88dfe74e060750db0",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction filler unresolved"
+    },
+    {
+      "source_iri": "N351b29e1dd4146a68c5c559207e7a7d5",
+      "disposition": "taxonomy_only",
+      "note": "used only to interpret shipment as process output"
+    },
+    {
+      "source_iri": "N358dc410fb764b338f01ef1a47ada06d",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction filler unresolved"
+    },
+    {
+      "source_iri": "N3592baf584ba4a7386b631e000cc3ab8",
+      "disposition": "taxonomy_only",
+      "note": "used only to interpret material trade item semantics"
+    },
+    {
+      "source_iri": "N37a0157da6264d509f5a2cc80018a4b6",
+      "disposition": "taxonomy_only",
+      "note": "used only to interpret storage process semantics"
+    },
+    {
+      "source_iri": "N384616abd2a24c2ba7a476cc5b553bab",
+      "disposition": "not_agent_relevant",
+      "note": "identifier designation bookkeeping"
+    },
+    {
+      "source_iri": "N3c36ea6259624a3da543b5b6da8e182d",
+      "disposition": "mapped",
+      "note": "supports relationships[10]"
+    },
+    {
+      "source_iri": "N3c7434b0ddbe4bfcbd5c44c2f54acbb6",
+      "disposition": "taxonomy_only",
+      "note": "used only to interpret shipment semantics"
+    },
+    {
+      "source_iri": "N3d2b232c02ae4898b9bbcdf12943cb0e",
+      "disposition": "unsupported_by_target_model",
+      "note": "nested anonymous restriction not directly translated"
+    },
+    {
+      "source_iri": "N3dc568472a8644698276412b7c2045b4",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction filler unresolved"
+    },
+    {
+      "source_iri": "N3f81a8fa149c46f2914d98019ec7a518",
+      "disposition": "out_of_scope",
+      "note": "generic supply-chain-agent participation not needed after choosing concrete partner classes"
+    },
+    {
+      "source_iri": "N407b7a57437b4086911480a40c29255d",
+      "disposition": "mapped",
+      "note": "supports relationships[5]"
+    },
+    {
+      "source_iri": "N42848cfbed1049c49476cf96062ecdc5",
+      "disposition": "taxonomy_only",
+      "note": "used only to interpret transportation service provider semantics"
+    },
+    {
+      "source_iri": "N447dce20c8d24ac2879255dc31d8feb9",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction filler unresolved"
+    },
+    {
+      "source_iri": "N45abb1f7f0b64593b4a61dcfec1743d2",
+      "disposition": "unsupported_by_target_model",
+      "note": "formal process axiom with unresolved filler"
+    },
+    {
+      "source_iri": "N45ad63d779084f9d8d5cc0599c9ca6dc",
+      "disposition": "taxonomy_only",
+      "note": "used only to interpret distributor semantics"
+    },
+    {
+      "source_iri": "N473731f48da548acada379115f1b0a25",
+      "disposition": "unsupported_by_target_model",
+      "note": "formal OWL restriction with unresolved filler"
+    },
+    {
+      "source_iri": "N4775ac539ca440489be1be3a1cb3251d",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction filler unresolved"
+    },
+    {
+      "source_iri": "N4901168658a84dbfbd48a71058d734c2",
+      "disposition": "taxonomy_only",
+      "note": "used only to interpret freight forwarder semantics"
+    },
+    {
+      "source_iri": "N4d2f4f59167a44879ee454fe16815a1c",
+      "disposition": "mapped",
+      "note": "supports classes.ShipmentPreparationProcess"
+    },
+    {
+      "source_iri": "N4d53610afcbd466b80947ebcd9e01d64",
+      "disposition": "taxonomy_only",
+      "note": "used only to interpret supply chain agent role semantics"
+    },
+    {
+      "source_iri": "N4d8567c60c264eb397104b68ec353165",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction filler unresolved"
+    },
+    {
+      "source_iri": "N4dc988fbc493438388f3c62a663737ed",
+      "disposition": "taxonomy_only",
+      "note": "used only to interpret shipment output from shipment preparation"
+    },
+    {
+      "source_iri": "N4e7eb7a21b5e43919c9bdc1eed43b026",
+      "disposition": "taxonomy_only",
+      "note": "used only to interpret logistic unit semantics"
+    },
+    {
+      "source_iri": "N4fc7529ff3f141ada49ac16d4d13462a",
+      "disposition": "taxonomy_only",
+      "note": "used only to interpret consignor semantics"
+    },
+    {
+      "source_iri": "N500aa811d29c471a99cc260010753642",
+      "disposition": "not_agent_relevant",
+      "note": "identifier designation bookkeeping for lot"
+    },
+    {
+      "source_iri": "N508a4dcef30848e3a3e154f0ae9b1358",
+      "disposition": "unsupported_by_target_model",
+      "note": "formal process axiom with unresolved filler"
+    },
+    {
+      "source_iri": "N528e434473b24b3889c5a26478aab249",
+      "disposition": "out_of_scope",
+      "note": "agreement prescription axiom omitted because agreement superclass is unresolved import"
+    },
+    {
+      "source_iri": "N52da7bbb384342bab41322ed1f21c61a",
+      "disposition": "out_of_scope",
+      "note": "material product endpoint unresolved import"
+    },
+    {
+      "source_iri": "N5343bd59f0454053938b593ef91a079b",
+      "disposition": "out_of_scope",
+      "note": "manufacturing process unresolved import"
+    },
+    {
+      "source_iri": "N588c071d6b354c34b2160f13afe0c9e0",
+      "disposition": "out_of_scope",
+      "note": "commercial service superclass unresolved import"
+    },
+    {
+      "source_iri": "N58909b5fa0274263b674ba08bcd4dbd1",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction filler unresolved"
+    },
+    {
+      "source_iri": "N59040db1426441f0b6c2ed64f88f4372",
+      "disposition": "taxonomy_only",
+      "note": "used only to interpret load semantics"
+    },
+    {
+      "source_iri": "N59cde95854c8459392f13f5218f309f0",
+      "disposition": "unsupported_by_target_model",
+      "note": "formal process axiom with unresolved filler"
+    },
+    {
+      "source_iri": "N5a953f5213e643de9049d37e682b5682",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction filler unresolved"
+    },
+    {
+      "source_iri": "N5c244340027142a983bbda7a1b935074",
+      "disposition": "unsupported_by_target_model",
+      "note": "formal process axiom with unresolved filler"
+    },
+    {
+      "source_iri": "N5dd07217c98541e8b47f98c85f9bee28",
+      "disposition": "taxonomy_only",
+      "note": "used only to interpret customer role semantics"
+    },
+    {
+      "source_iri": "N5ee18db6c41948b1a2ae3e221deb0018",
+      "disposition": "out_of_scope",
+      "note": "material product endpoint unresolved import"
+    },
+    {
+      "source_iri": "N61dd27fbb91c4c89b7ce0993b68ba676",
+      "disposition": "unsupported_by_target_model",
+      "note": "formal process axiom with unresolved filler"
+    },
+    {
+      "source_iri": "N6471975d5a494028a54c9ef5e5a0c687",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction filler unresolved"
+    },
+    {
+      "source_iri": "N64d3a534c4844762a647782f32142afa",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction filler unresolved"
+    },
+    {
+      "source_iri": "N6557485f5fb7487889dff1142d4cea26",
+      "disposition": "out_of_scope",
+      "note": "supplier-group organization axiom outside focused operational model"
+    },
+    {
+      "source_iri": "N659db3ff77854f8d938ac544f46514d2",
+      "disposition": "unsupported_by_target_model",
+      "note": "formal process axiom with unresolved filler"
+    },
+    {
+      "source_iri": "N660ce4a2d67a48f8918c1fa15d92db9a",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction filler unresolved"
+    },
+    {
+      "source_iri": "N689bdb373a9b469eb96916f427f2b5bd",
+      "disposition": "taxonomy_only",
+      "note": "used only to interpret supply chain node semantics"
+    },
+    {
+      "source_iri": "N69aa1bc7e0b2455587ea5c1f66ce447e",
+      "disposition": "unsupported_by_target_model",
+      "note": "nested anonymous restriction not directly translated"
+    },
+    {
+      "source_iri": "N6ac8163a7ac3494c944627bd33c1ad82",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction filler unresolved"
+    },
+    {
+      "source_iri": "N6b32e9b0cc2e4741ae817fac429e781f",
+      "disposition": "unsupported_by_target_model",
+      "note": "nested anonymous restriction not directly translated"
+    },
+    {
+      "source_iri": "N6c8dd5ef6c46467c84851a6f4a339b82",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction filler unresolved"
+    },
+    {
+      "source_iri": "N6d92f4931c9442a3a1793d3f36e0af76",
+      "disposition": "mapped",
+      "note": "supports classes.FreightForwardingService"
+    },
+    {
+      "source_iri": "N7316034da3704c2288c02812a6940291",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction filler unresolved"
+    },
+    {
+      "source_iri": "N74a4e96ee5c2437dbea550b2fe5bbd11",
+      "disposition": "taxonomy_only",
+      "note": "used only to interpret shipment semantics"
+    },
+    {
+      "source_iri": "N754d682b1a874ce092f589492b1c46fd",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction filler unresolved"
+    },
+    {
+      "source_iri": "N7627f622778f4908a520d0c6ac2175d2",
+      "disposition": "out_of_scope",
+      "note": "storage capability abstraction omitted"
+    },
+    {
+      "source_iri": "N773c305b6bd14858ab53072f43d0f712",
+      "disposition": "out_of_scope",
+      "note": "plan-to-process prescription axiom omitted with warehousing plan specification"
+    },
+    {
+      "source_iri": "N78e69bea5c404d5dbdab493daeb1ebbb",
+      "disposition": "unsupported_by_target_model",
+      "note": "generic capability axiom with imported System endpoint"
+    },
+    {
+      "source_iri": "N797be68b20e643f2aaf5c007de1d4551",
+      "disposition": "out_of_scope",
+      "note": "business organization grouping axiom outside focused model"
+    },
+    {
+      "source_iri": "N7b23dfba2e0e4de6b8445e0c5c14bed4",
+      "disposition": "taxonomy_only",
+      "note": "used only to interpret traceable resource unit semantics"
+    },
+    {
+      "source_iri": "N7cae38ff10d8443fbecbaa4cb8d79e3d",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction filler unresolved"
+    },
+    {
+      "source_iri": "N7db13876a1eb4d86b38e1a7380fa6329",
+      "disposition": "unsupported_by_target_model",
+      "note": "generic roleOf restriction not surfaced"
+    },
+    {
+      "source_iri": "N8120e25439c4402fba296122c0d03e74",
+      "disposition": "unsupported_by_target_model",
+      "note": "acts-on-behalf-of restriction with unresolved filler not translated"
+    },
+    {
+      "source_iri": "N815ff4bdda5b4afd89bcd046e319ccd4",
+      "disposition": "unsupported_by_target_model",
+      "note": "nested anonymous restriction not directly translated"
+    },
+    {
+      "source_iri": "N82455bec02a14b53b94850e88399a819",
+      "disposition": "taxonomy_only",
+      "note": "used only to interpret wholesaler semantics"
+    },
+    {
+      "source_iri": "N82b367017f3d4ac08cc85b78a862a8a2",
+      "disposition": "out_of_scope",
+      "note": "plan-to-process prescription axiom omitted with plan specifications"
+    },
+    {
+      "source_iri": "N82c3198af0f24a69be5d16e1817116e1",
+      "disposition": "mapped",
+      "note": "supports classes.StorageService"
+    },
+    {
+      "source_iri": "N837244715e2c4367bd6e2e13ecfde50c",
+      "disposition": "taxonomy_only",
+      "note": "used only to interpret location semantics"
+    },
+    {
+      "source_iri": "N83afb0b7b5c24c1baa891f31e7e38437",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction filler unresolved"
+    },
+    {
+      "source_iri": "N8632da6b64cb4c4c8ffc8dd2851a4294",
+      "disposition": "mapped",
+      "note": "supports classes.ManufacturingService"
+    },
+    {
+      "source_iri": "N86d8a25cbce3410bae6a862c24d62aa2",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction filler unresolved"
+    },
+    {
+      "source_iri": "N877ec315bc004319b9a1000f01703604",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction filler unresolved"
+    },
+    {
+      "source_iri": "N87874be9f44044e5bd8542c8440225c7",
+      "disposition": "mapped",
+      "note": "supports relationships[6]"
+    },
+    {
+      "source_iri": "N87fd2fe97d434c2b95cc5488f192995c",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction filler unresolved"
+    },
+    {
+      "source_iri": "N880665184d774d1c95ef48ecf5cb1ee5",
+      "disposition": "unsupported_by_target_model",
+      "note": "formal process axiom with unresolved filler"
+    },
+    {
+      "source_iri": "N88eb02588bf645dda6f673aeec2f10df",
+      "disposition": "out_of_scope",
+      "note": "buyer role prescription axiom relies on imported role class"
+    },
+    {
+      "source_iri": "N88fe636791244971babb2ba1ffa69d46",
+      "disposition": "taxonomy_only",
+      "note": "used only to interpret supply chain process site semantics"
+    },
+    {
+      "source_iri": "N8b61504774c94627b42672f92e4578ae",
+      "disposition": "mapped",
+      "note": "supports relationships[6]"
+    },
+    {
+      "source_iri": "N8b66cc9a1bcf4249aca732d49eef893f",
+      "disposition": "unsupported_by_target_model",
+      "note": "generic roleOf restriction not surfaced"
+    },
+    {
+      "source_iri": "N8c28a417edd14ed2a1cb40d5833bb007",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction filler unresolved"
+    },
+    {
+      "source_iri": "N8f724e690aac40c4a7b9475f8e5c65f3",
+      "disposition": "unsupported_by_target_model",
+      "note": "generic material-location-change-process participation axiom not translated"
+    },
+    {
+      "source_iri": "N90027c9e0b7741af9514ca6a7dc7ce7d",
+      "disposition": "unsupported_by_target_model",
+      "note": "formal process-participation axiom not directly translated"
+    },
+    {
+      "source_iri": "N90063b2915004c728d67adba25e21f69",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction filler unresolved"
+    },
+    {
+      "source_iri": "N9192b9cff72944239900319e6b405321",
+      "disposition": "mapped",
+      "note": "supports relationships[8]"
+    },
+    {
+      "source_iri": "N92d1cabe5c84497a839aeb32a2fd0b32",
+      "disposition": "unsupported_by_target_model",
+      "note": "formal process axiom with unresolved filler"
+    },
+    {
+      "source_iri": "N938d753b46554da8bb740d022bd3d3da",
+      "disposition": "unsupported_by_target_model",
+      "note": "formal process axiom with unresolved filler"
+    },
+    {
+      "source_iri": "N93ce2101081a4b62985b190953b8ac79",
+      "disposition": "unsupported_by_target_model",
+      "note": "formal process axiom with unresolved filler"
+    },
+    {
+      "source_iri": "N948c329d1fb14bc3b0be82e7db778463",
+      "disposition": "mapped",
+      "note": "supports relationships[5]"
+    },
+    {
+      "source_iri": "N96552ff5e87c4530a340cc67f4137986",
+      "disposition": "unsupported_by_target_model",
+      "note": "nested anonymous restriction not directly translated"
+    },
+    {
+      "source_iri": "N981e4a5821a14c57a70125f40fc62ec5",
+      "disposition": "taxonomy_only",
+      "note": "used only to interpret shipment as output of shipment preparation"
+    },
+    {
+      "source_iri": "N988d0a5a18964106bd5b3e945b755cb8",
+      "disposition": "taxonomy_only",
+      "note": "used only to interpret consigning process semantics"
+    },
+    {
+      "source_iri": "N993c76623c0843df906a4e87300a191f",
+      "disposition": "unsupported_by_target_model",
+      "note": "formal OWL restriction with unresolved filler"
+    },
+    {
+      "source_iri": "N9bf034e9487d4a3fb80843b2aa3ce52e",
+      "disposition": "out_of_scope",
+      "note": "plan-specification prescription axiom omitted with planning classes"
+    },
+    {
+      "source_iri": "N9c16ae16d1ba4150a0ae2deaae3f7ea8",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction filler unresolved"
+    },
+    {
+      "source_iri": "N9e31433673d94ecda34748bb5c9e854b",
+      "disposition": "unsupported_by_target_model",
+      "note": "formal OWL restriction with unresolved filler"
+    },
+    {
+      "source_iri": "N9ef57b3a93e244bfa1b296762481c574",
+      "disposition": "unsupported_by_target_model",
+      "note": "formal process axiom with unresolved filler"
+    },
+    {
+      "source_iri": "N9fac8516d9924c1593a13dbe497be5a3",
+      "disposition": "unsupported_by_target_model",
+      "note": "formal process axiom with unresolved filler"
+    },
+    {
+      "source_iri": "Na1e9b290a5be4312a152c6a12660081f",
+      "disposition": "taxonomy_only",
+      "note": "used only to interpret supply chain process aboutness"
+    },
+    {
+      "source_iri": "Na2e24d4fa5b4439d8b1c8a0eec7d3401",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction filler unresolved"
+    },
+    {
+      "source_iri": "Na3c57667d95540848a9179dd2f999f0c",
+      "disposition": "unsupported_by_target_model",
+      "note": "formal process axiom with unresolved filler"
+    },
+    {
+      "source_iri": "Na3e6b344a2d44729b3a4c6799932037f",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction filler unresolved"
+    },
+    {
+      "source_iri": "Na3e70ac165864499a9b8d9cef3dd9f54",
+      "disposition": "unsupported_by_target_model",
+      "note": "capability axiom on unresolved filler not translated"
+    },
+    {
+      "source_iri": "Na7559bf793ef4da39a965b5b33783eac",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction filler unresolved"
+    },
+    {
+      "source_iri": "Na8951cb727f04c18a5758590ca425d01",
+      "disposition": "taxonomy_only",
+      "note": "used only to interpret lot semantics"
+    },
+    {
+      "source_iri": "Na952cf57cd5c41bdbe712383e0531374",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction filler unresolved"
+    },
+    {
+      "source_iri": "Naae1915a46444ba8a15629d634b75219",
+      "disposition": "taxonomy_only",
+      "note": "used only to interpret retailer semantics"
+    },
+    {
+      "source_iri": "Naaf68cec040d4fa49a581b11fbb1db4e",
+      "disposition": "mapped",
+      "note": "supports relationships[9]"
+    },
+    {
+      "source_iri": "Nab22b9d3cef148118baefaea7070275a",
+      "disposition": "out_of_scope",
+      "note": "plan-specification prescription axiom omitted with planning classes"
+    },
+    {
+      "source_iri": "Nac412593a80c4fa3a924c5940331fd86",
+      "disposition": "taxonomy_only",
+      "note": "used only to interpret consignor semantics"
+    },
+    {
+      "source_iri": "Nace91c210f5b4465915fe79330c71080",
+      "disposition": "unsupported_by_target_model",
+      "note": "nested anonymous restriction not directly translated"
+    },
+    {
+      "source_iri": "Nacebef753c694c92a129f3b0b1a72fb3",
+      "disposition": "unsupported_by_target_model",
+      "note": "formal process axiom with unresolved filler"
+    },
+    {
+      "source_iri": "Nad29684b5efc48859a5e9e21d6e6c6a0",
+      "disposition": "out_of_scope",
+      "note": "supplier-group organization axiom outside focused operational model"
+    },
+    {
+      "source_iri": "Nb03f65f9781244d8ba302e4ab1731def",
+      "disposition": "taxonomy_only",
+      "note": "used only to interpret ship-from location semantics"
+    },
+    {
+      "source_iri": "Nb0a2381cca7a4fa0a207662b263bc2ce",
+      "disposition": "mapped",
+      "note": "supports relationships[4]"
+    },
+    {
+      "source_iri": "Nb323f5c3eb7740bb89f9dbb358382ce7",
+      "disposition": "not_agent_relevant",
+      "note": "identifier designation bookkeeping for lot"
+    },
+    {
+      "source_iri": "Nb3fecd3a38df40e8a5559e300b37f942",
+      "disposition": "mapped",
+      "note": "supports relationships[7]"
+    },
+    {
+      "source_iri": "Nb482c266c5764725baaeb8677023e459",
+      "disposition": "taxonomy_only",
+      "note": "used only to interpret transport equipment semantics"
+    },
+    {
+      "source_iri": "Nb4bdb545b89c478f96ceb8c156d40dd0",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction filler unresolved"
+    },
+    {
+      "source_iri": "Nb4dfd44b6e9b4b3592177c349a7302fe",
+      "disposition": "taxonomy_only",
+      "note": "used only to interpret cargo semantics"
+    },
+    {
+      "source_iri": "Nb5b0f5ac8f074c9595b85e4f5770d868",
+      "disposition": "unsupported_by_target_model",
+      "note": "generic BFO restriction not directly translated"
+    },
+    {
+      "source_iri": "Nb5e0a956184848b38c33fd55eae15d76",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction filler unresolved"
+    },
+    {
+      "source_iri": "Nb6e564f82b894f1f8a35d5f927024a9d",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction filler unresolved"
+    },
+    {
+      "source_iri": "Nbd44e796f2de4dafa6abd4d9b4d48c57",
+      "disposition": "taxonomy_only",
+      "note": "used only to interpret retailer semantics"
+    },
+    {
+      "source_iri": "Nbd9210052fcc4af7abda5f799765ab2e",
+      "disposition": "not_agent_relevant",
+      "note": "identifier designation bookkeeping with unresolved filler"
+    },
+    {
+      "source_iri": "Nbdb3e5c58821414dbc8cc0409ebb2730",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction filler unresolved"
+    },
+    {
+      "source_iri": "Nbdceade9e5554114b1f75c5858db5c99",
+      "disposition": "unsupported_by_target_model",
+      "note": "nested anonymous restriction not directly translated"
+    },
+    {
+      "source_iri": "Nbf31a23215a94e43b52cb46b7b90ba06",
+      "disposition": "out_of_scope",
+      "note": "business organization grouping axiom outside focused model"
+    },
+    {
+      "source_iri": "Nbf31e78ff54f4648957971096e02ce5e",
+      "disposition": "unsupported_by_target_model",
+      "note": "formal process axiom with unresolved filler"
+    },
+    {
+      "source_iri": "Nc1fa9e719874445f8a878179c7233afd",
+      "disposition": "taxonomy_only",
+      "note": "used only to interpret traceable resource unit participation"
+    },
+    {
+      "source_iri": "Nc485d855ef5b401eb67e2ba8911ea178",
+      "disposition": "unsupported_by_target_model",
+      "note": "nested anonymous restriction not directly translated"
+    },
+    {
+      "source_iri": "Nc71f318986294d958320ae51993e788e",
+      "disposition": "mapped",
+      "note": "supports relationships[11]"
+    },
+    {
+      "source_iri": "Nc72e823d72db464a9e833e3ef6f5a3d5",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction filler unresolved"
+    },
+    {
+      "source_iri": "Nc801970c1c054cad835feb80eeb87ba9",
+      "disposition": "taxonomy_only",
+      "note": "used only to interpret sublot semantics"
+    },
+    {
+      "source_iri": "Ncac9337f313b4f05b489dc25fa9031e6",
+      "disposition": "out_of_scope",
+      "note": "plan prescription abstraction omitted"
+    },
+    {
+      "source_iri": "Ncc56dba69dfb46dc8dc2cbedbb79662b",
+      "disposition": "out_of_scope",
+      "note": "product production process unresolved import"
+    },
+    {
+      "source_iri": "Ncc7efe69415e4b7fbff328d38b145442",
+      "disposition": "taxonomy_only",
+      "note": "used only to interpret storage process semantics"
+    },
+    {
+      "source_iri": "Nd1e094d6328c491394320aadce010f6b",
+      "disposition": "unsupported_by_target_model",
+      "note": "formal process axiom with unresolved filler"
+    },
+    {
+      "source_iri": "Nd8602062a4c0468c908cae880904ef5d",
+      "disposition": "unsupported_by_target_model",
+      "note": "generic roleOf restriction not surfaced"
+    },
+    {
+      "source_iri": "Nd8b7d4dabc4f40c08fa69fe02e390658",
+      "disposition": "mapped",
+      "note": "supports classes.TransportationService"
+    },
+    {
+      "source_iri": "Nd985bdf7adfc4ad290dee4a2e4ce67c9",
+      "disposition": "out_of_scope",
+      "note": "plan-specification prescription axiom omitted with planning classes"
+    },
+    {
+      "source_iri": "Nd9b7d81b1dea48c896ee5785e8cfbb22",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction filler unresolved"
+    },
+    {
+      "source_iri": "Nda8aa14c94814e9dbdf52a515223440d",
+      "disposition": "taxonomy_only",
+      "note": "used only to interpret distributor semantics"
+    },
+    {
+      "source_iri": "Nda97f3d16d6e4575b055b89a3d33a2f8",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction filler unresolved"
+    },
+    {
+      "source_iri": "Ndd13ab69bcc04797b20159bf0d23ac5e",
+      "disposition": "out_of_scope",
+      "note": "designation linkage treated as location-identifier bookkeeping"
+    },
+    {
+      "source_iri": "Ndef52fd3b9234a7a9863fa50aaf6c3f3",
+      "disposition": "mapped",
+      "note": "supports occursAt interpretation generally"
+    },
+    {
+      "source_iri": "Ndf1fca297d9f455992fc21a471f9a9db",
+      "disposition": "out_of_scope",
+      "note": "business-function axiom omitted with business-function abstractions"
+    },
+    {
+      "source_iri": "Ne00463a7fcb34a2092ba121cf0552f56",
+      "disposition": "taxonomy_only",
+      "note": "used only to interpret consignee semantics"
+    },
+    {
+      "source_iri": "Ne0ca1b0a7f1240e9b44f4f5e22c620f2",
+      "disposition": "mapped",
+      "note": "supports supplier participation semantics"
+    },
+    {
+      "source_iri": "Ne31ef1fd7199496fb7fa517bc92a5641",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction filler unresolved"
+    },
+    {
+      "source_iri": "Ne4479f4939cf42d7bd5071b38b73a767",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction filler unresolved"
+    },
+    {
+      "source_iri": "Ne49f076289be41a2a3bd657019112a02",
+      "disposition": "not_agent_relevant",
+      "note": "identifier designation bookkeeping for lot"
+    },
+    {
+      "source_iri": "Ne69aaaa3ea9543e8bdc04f901f0a3b43",
+      "disposition": "mapped",
+      "note": "supports classes.StorageService"
+    },
+    {
+      "source_iri": "Ne7e22421233e4b14be6d873167ae2158",
+      "disposition": "taxonomy_only",
+      "note": "used only to interpret supplier role semantics"
+    },
+    {
+      "source_iri": "Ne97c974362884e24bafd48e92e7356d8",
+      "disposition": "taxonomy_only",
+      "note": "used only to interpret logistic unit participation semantics"
+    },
+    {
+      "source_iri": "Nec119e2334814f41acc9d74a1c452f98",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction filler unresolved"
+    },
+    {
+      "source_iri": "Nec89163e04ee40828b927d1d60e216fb",
+      "disposition": "out_of_scope",
+      "note": "generic supply-chain-agent function axiom omitted in favor of concrete partner classes"
+    },
+    {
+      "source_iri": "Nec9a707b85ec40eaad835cff887a871c",
+      "disposition": "mapped",
+      "note": "supports classes.PackagingService"
+    },
+    {
+      "source_iri": "Nedece264605348a5ba182f2a9294d285",
+      "disposition": "taxonomy_only",
+      "note": "used only to interpret lot participation semantics"
+    },
+    {
+      "source_iri": "Nee92fe5ee3c24a7bb1cc6f0fd6b7a1bb",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction filler unresolved"
+    },
+    {
+      "source_iri": "Needfb020025b4ab09ef699cdf487c2b4",
+      "disposition": "out_of_scope",
+      "note": "ownership restriction omitted because filler unresolved and ownership not central to chosen scope"
+    },
+    {
+      "source_iri": "Nef17191050cd428c89c084dccd122c0b",
+      "disposition": "not_agent_relevant",
+      "note": "designation linkage treated as identifier bookkeeping for container"
+    },
+    {
+      "source_iri": "Nf053e6ee2bd94fef98c7fdfcc86703d5",
+      "disposition": "taxonomy_only",
+      "note": "used only to interpret industrial inventory semantics"
+    },
+    {
+      "source_iri": "Nf11c879555904a91b77a58c004ef4efd",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction filler unresolved"
+    },
+    {
+      "source_iri": "Nf1679ec43c2041a0b0b282a1e581c02c",
+      "disposition": "out_of_scope",
+      "note": "business-function axiom omitted with business-function abstractions"
+    },
+    {
+      "source_iri": "Nf2fc7de753c34724bd7c4c9499617a48",
+      "disposition": "unsupported_by_target_model",
+      "note": "formal process axiom with unresolved filler"
+    },
+    {
+      "source_iri": "Nf40e38a74bb745df83359e85c8909888",
+      "disposition": "out_of_scope",
+      "note": "production capability abstraction omitted"
+    },
+    {
+      "source_iri": "Nf4ccfac8d8744f2b9bee05fb73e34084",
+      "disposition": "out_of_scope",
+      "note": "objective-specification linkage omitted with planning abstractions"
+    },
+    {
+      "source_iri": "Nf549ce2cb96d4b2fb4f71671f26e703a",
+      "disposition": "out_of_scope",
+      "note": "plan-specification prescription axiom omitted with planning classes"
+    },
+    {
+      "source_iri": "Nf5c737eb3ced4affb83966be37fbc59f",
+      "disposition": "out_of_scope",
+      "note": "material product endpoint unresolved import"
+    },
+    {
+      "source_iri": "Nf7014e83aaa84732a4ebd144523e6cc6",
+      "disposition": "taxonomy_only",
+      "note": "used only to interpret site semantics generally"
+    },
+    {
+      "source_iri": "Nfb1b8f02bfc04d81b0f8d5a89dc772ae",
+      "disposition": "taxonomy_only",
+      "note": "used only to interpret transportation service provider semantics"
+    },
+    {
+      "source_iri": "Nfd574a08c37a46ca9677c002e02dcc6d",
+      "disposition": "out_of_scope",
+      "note": "selling business process unresolved import"
+    }
+  ]
+}

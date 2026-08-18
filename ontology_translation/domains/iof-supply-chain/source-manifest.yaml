@@ -1,0 +1,23 @@
+id: iof-supply-chain
+source_url: https://raw.githubusercontent.com/iofoundry/ontology/Release_202602/supplychain/SupplyChain.rdf
+source_version: Release_202602
+source_sha256: 209d13903ac6b91cc0137b50f0deb283dc9c9c766b005571ed1c8671180bf9ce
+scope:
+  # No roots: unlike Brick (a huge multi-domain ontology genuinely needing
+  # scope selection), SupplyChain.rdf is already a single-purpose,
+  # already-scoped module (113 locally-defined classes, all supply-chain/
+  # logistics content per its own dcterms:abstract) -- it doesn't need
+  # further sub-scoping within itself. Its class hierarchy is also flat
+  # relative to this file alone: 95 of 113 classes subclass directly from
+  # IOF Core/BFO terms (Agent, BusinessProcess, MaterialArtifact, ...) that
+  # this file only references, never defines -- walking rdfs:subClassOf
+  # from any in-file root wouldn't meaningfully narrow anything. Empty
+  # roots = extract.py's select_scope is skipped entirely; the full local
+  # extraction (113 classes / 18 object properties / 1 datatype property /
+  # 203 restrictions) goes to the compiler, which does the actual
+  # relevance curation via disposition-judging, same as every out-of-scope
+  # Brick class was handled -- not a special-cased pre-filter here.
+  roots: []
+compiler:
+  prompt_version: compiler-prompt
+  runs: 3

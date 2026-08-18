@@ -95,7 +95,42 @@ class IterGeneratedElementsTests(unittest.TestCase):
         self.assertFalse(any("competency" in e["target_path"] for e in elements))
 
 
+class AllSourceIrisTests(unittest.TestCase):
+    def test_import_records_are_excluded(self):
+        # Regression: extract.py's extract_imports() keys an import record
+        # by the *importing* document's own IRI (correct per real
+        # `owl:imports` RDF semantics -- the subject is the file declaring
+        # the import, not the imported target), which is document-level
+        # metadata, not a class/property a compiler could ever legitimately
+        # disposition. Requiring one made provenance_gate/reverse_coverage
+        # unconditionally fail for any source file with an owl:imports at
+        # all -- found for real on IOF Supply Chain (imports IOF Core),
+        # never on Brick HVAC only because Brick.ttl declares none.
+        source_ir = json.loads(json.dumps(SOURCE_IR))
+        source_ir["imports"] = [
+            {"iri": "http://ex.org/this-file#", "kind": "import", "imports": "http://ex.org/core#", "sourceOntology": "test"}
+        ]
+        iris = evaluate_mod._all_source_iris(source_ir)
+        self.assertNotIn("http://ex.org/this-file#", iris)
+
+    def test_classes_properties_and_restrictions_are_included(self):
+        iris = evaluate_mod._all_source_iris(SOURCE_IR)
+        self.assertIn("http://ex.org#Fan", iris)
+        self.assertIn("http://ex.org#serves", iris)
+        self.assertIn("http://ex.org#status", iris)
+
+
 class ProvenanceGateTests(unittest.TestCase):
+    def test_import_record_never_needs_a_disposition(self):
+        source_ir = json.loads(json.dumps(SOURCE_IR))
+        source_ir["imports"] = [
+            {"iri": "http://ex.org/this-file#", "kind": "import", "imports": "http://ex.org/core#", "sourceOntology": "test"}
+        ]
+        result = evaluate_mod.provenance_gate(DOMAIN_DATA, TRANSLATION_FULL, source_ir)
+        self.assertTrue(result["ok"])
+        self.assertNotIn("http://ex.org/this-file#", result["missing_dispositions"])
+
+
     def test_fully_covered_is_ok(self):
         result = evaluate_mod.provenance_gate(DOMAIN_DATA, TRANSLATION_FULL, SOURCE_IR)
         self.assertTrue(result["ok"])
@@ -727,6 +762,84 @@ class SiblingContextForIriTests(unittest.TestCase):
         self.assertEqual(siblings, [])
 
 
+class MappedSourceIrisByDispositionTests(unittest.TestCase):
+    def test_mapped_disposition_note_becomes_the_target_path(self):
+        translation = {"dispositions": [{"source_iri": "http://ex.org#Fan", "disposition": "mapped", "note": "classes.Fan"}]}
+        result = evaluate_mod._mapped_source_iris_by_disposition(translation)
+        self.assertEqual(result, {"http://ex.org#Fan": "classes.Fan"})
+
+    def test_non_mapped_dispositions_are_excluded(self):
+        translation = {"dispositions": [{"source_iri": "http://ex.org#Compressor", "disposition": "out_of_scope", "note": "not needed"}]}
+        result = evaluate_mod._mapped_source_iris_by_disposition(translation)
+        self.assertEqual(result, {})
+
+    def test_iri_merely_cited_as_supporting_evidence_is_not_treated_as_mapped(self):
+        # Regression: found for real on IOF Supply Chain. A mapping can
+        # legitimately cite another concept's IRI as supporting evidence
+        # (this session's own citation-completeness discipline) without
+        # that concept itself being mapped -- e.g. classes.ShipFromLocation
+        # correctly cites ShipFromLocationRole's IRI too, even though
+        # ShipFromLocationRole's own disposition is (correctly) excluded.
+        # This function must not be fooled by that citation into thinking
+        # ShipFromLocationRole itself was mapped.
+        translation = {
+            "mappings": [
+                {"target_path": "classes.ShipFromLocation", "source_iris": ["http://ex.org#ShipFromLocation", "http://ex.org#ShipFromLocationRole"]}
+            ],
+            "dispositions": [
+                {"source_iri": "http://ex.org#ShipFromLocation", "disposition": "mapped", "note": "classes.ShipFromLocation"},
+                {"source_iri": "http://ex.org#ShipFromLocationRole", "disposition": "taxonomy_only", "note": "role pattern, not distinct content"},
+            ],
+        }
+        result = evaluate_mod._mapped_source_iris_by_disposition(translation)
+        self.assertEqual(result, {"http://ex.org#ShipFromLocation": "classes.ShipFromLocation"})
+        self.assertNotIn("http://ex.org#ShipFromLocationRole", result)
+
+
+class JudgeDispositionsTests(unittest.TestCase):
+    def test_sibling_merely_cited_elsewhere_is_not_shown_as_an_included_sibling(self):
+        # End-to-end regression for the same bug: judge_dispositions used to
+        # build its sibling-comparison context by scanning every mapping's
+        # full source_iris list, so an excluded sibling whose IRI was only
+        # cited as supporting evidence for a *different* mapped class
+        # appeared to a disposition judge as "this materially similar
+        # sibling WAS kept" -- a false signal that misled real judge
+        # verdicts (and reinstate.py's own reinstate decision) into treating
+        # a correctly-excluded, genuinely-redundant concept as an
+        # inconsistent exclusion.
+        translation = {
+            "mappings": [
+                {"target_path": "classes.LocationB", "source_iris": ["http://ex.org#LocationB", "http://ex.org#RoleB"]},
+            ],
+            "dispositions": [
+                {"source_iri": "http://ex.org#RoleA", "disposition": "taxonomy_only", "note": "role pattern, not distinct content"},
+                {"source_iri": "http://ex.org#RoleB", "disposition": "taxonomy_only", "note": "role pattern, not distinct content"},
+                {"source_iri": "http://ex.org#LocationB", "disposition": "mapped", "note": "classes.LocationB"},
+            ],
+        }
+        source_ir = {
+            "classes": [
+                {"iri": "http://ex.org#RoleA", "kind": "class", "labels": ["Role A"], "definitions": [], "parents": ["http://ex.org#Role"]},
+                {"iri": "http://ex.org#RoleB", "kind": "class", "labels": ["Role B"], "definitions": [], "parents": ["http://ex.org#Role"]},
+                {"iri": "http://ex.org#LocationB", "kind": "class", "labels": ["Location B"], "definitions": [], "parents": []},
+            ]
+        }
+        captured = {}
+
+        def responder(i, kw):
+            captured["payload"] = json.loads(kw["messages"][1]["content"])
+            return json.dumps({"verdict": "justified", "rationale": "r"})
+
+        FakeClient, calls = _fake_client_class(responder)
+        client = FakeClient()
+        with tempfile.TemporaryDirectory() as tmp:
+            logger = evaluate_mod.RunLogger(Path(tmp) / "log.jsonl")
+            evaluate_mod.judge_dispositions(client, "gpt-5.4", translation, source_ir, logger, judges=1)
+            logger.close()
+
+        self.assertEqual(captured["payload"]["included_siblings"], [])
+
+
 class JudgeDispositionsTests(unittest.TestCase):
     def test_only_non_mapped_resolvable_dispositions_are_judged(self):
         # "mapped" dispositions are judge_mappings' job, not this layer's.
@@ -795,7 +908,10 @@ class JudgeDispositionsTests(unittest.TestCase):
 
     def test_sibling_context_is_included_in_the_judge_prompt(self):
         translation = {
-            "dispositions": [{"source_iri": "http://ex.org#Compressor", "disposition": "out_of_scope", "note": "n"}],
+            "dispositions": [
+                {"source_iri": "http://ex.org#Compressor", "disposition": "out_of_scope", "note": "n"},
+                {"source_iri": "http://ex.org#Fan", "disposition": "mapped", "note": "classes.Fan"},
+            ],
             "mappings": [{"target_path": "classes.Fan", "source_iris": ["http://ex.org#Fan"], "source_evidence": "e", "confidence": "high", "rationale": "r"}],
         }
         source_ir = {
@@ -1058,6 +1174,68 @@ class RunEvaluationLiveMockedTests(unittest.TestCase):
             eval_json = json.loads((out_dir / "test-domain.translation-evaluation.json").read_text(encoding="utf-8"))
             self.assertFalse(eval_json["hard_gates_ok"])
             self.assertEqual(eval_json["disposition_judging"]["unjustified_count"], 1)
+
+
+    def test_stability_run_paths_compares_the_domain_being_evaluated_not_just_the_others(self):
+        """Found for real: run_evaluation() built domain_datas only from
+        stability_run_paths, never including domain_data (the actual
+        --domain-yaml). Passing exactly one sibling run should, with the fix,
+        give domain_data + that one sibling == 2 runs -> a real pairwise
+        comparison -- not the "fewer than 2 runs" fallback the old buggy
+        code produced (it only ever saw the single sibling on its own)."""
+
+        def responder(i, kw):
+            content = kw["messages"][0]["content"]
+            if "EXCLUDE a source ontology element" in content:
+                return json.dumps({"verdict": "justified", "rationale": "ok"})
+            if "independent judge" in content:
+                return json.dumps({"verdict": "supported", "rationale": "ok"})
+            if "Compare a blind reconstruction" in content:
+                return json.dumps({"score": 0.9, "rationale": "close"})
+            if "real-world concept" in content:
+                return json.dumps({"reconstruction": "a device that moves air"})
+            if "not the broader source material it was compiled from" in content:
+                return json.dumps({"questions": ["Which fan serves which zone?"]})
+            if "judge" in content.lower() and "orientation" in content:
+                return json.dumps({"supported": True, "rationale": "covered"})
+            raise AssertionError(f"unexpected prompt: {content[:80]}")
+
+        FakeClient, calls = _fake_client_class(responder)
+
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            manifest_path = tmp_path / "source-manifest.yaml"
+            manifest_path.write_text(
+                "id: test-domain\nsource_url: https://example.org/x.rdf\nscope:\n  roots: []\ncompiler:\n  prompt_version: compiler-v1\n  runs: 3\n",
+                encoding="utf-8",
+            )
+            import yaml
+
+            domain_yaml_path = tmp_path / "run-1.domain.yaml"
+            domain_yaml_path.write_text(yaml.safe_dump(DOMAIN_DATA), encoding="utf-8")
+            translation_path = tmp_path / "run-1.translation.json"
+            translation_path.write_text(json.dumps(TRANSLATION_FULL), encoding="utf-8")
+            source_ir_path = tmp_path / "source_ir.json"
+            source_ir_path.write_text(json.dumps(SOURCE_IR), encoding="utf-8")
+            sibling_run_path = tmp_path / "run-2.domain.yaml"
+            sibling_run_path.write_text(yaml.safe_dump(DOMAIN_DATA), encoding="utf-8")
+            out_dir = tmp_path / "out"
+
+            with mock.patch.object(
+                evaluate_mod,
+                "load_azure_config",
+                return_value={"endpoint": "https://fake/", "api_key": "fake", "api_version": "v1", "deployment": "gpt-5.4"},
+            ), mock.patch("openai.AzureOpenAI", FakeClient):
+                evaluate_mod.run_evaluation(
+                    domain_yaml_path, translation_path, source_ir_path, manifest_path, out_dir,
+                    stability_run_paths=[sibling_run_path],
+                    judges=1, round_trip_sample_size=1, cq_count=1, dry_run=False,
+                )
+
+            eval_json = json.loads((out_dir / "test-domain.translation-evaluation.json").read_text(encoding="utf-8"))
+            stability = eval_json["translation_stability"]
+            self.assertEqual(len(stability["pairs"]), 1)
+            self.assertEqual(stability["average_f1"]["classes"], 1.0)
 
 
 class RenderMarkdownTests(unittest.TestCase):

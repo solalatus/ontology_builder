@@ -35,10 +35,10 @@ TRANSLATION = {
         {"target_path": "relationships[0]", "source_iris": ["http://ex.org#serves", "http://ex.org#Fan", "http://ex.org#Zone"], "source_evidence": "e", "confidence": "high", "rationale": "r"},
     ],
     "dispositions": [
-        {"source_iri": "http://ex.org#Fan", "disposition": "mapped"},
-        {"source_iri": "http://ex.org#status", "disposition": "mapped"},
-        {"source_iri": "http://ex.org#Zone", "disposition": "mapped"},
-        {"source_iri": "http://ex.org#serves", "disposition": "mapped"},
+        {"source_iri": "http://ex.org#Fan", "disposition": "mapped", "note": "classes.Fan"},
+        {"source_iri": "http://ex.org#status", "disposition": "mapped", "note": "classes.Fan.properties.status"},
+        {"source_iri": "http://ex.org#Zone", "disposition": "mapped", "note": "classes.Zone"},
+        {"source_iri": "http://ex.org#serves", "disposition": "mapped", "note": "relationships[0]"},
         {"source_iri": "http://ex.org#Irrelevant", "disposition": "not_agent_relevant", "note": "identifier bookkeeping only, generic template"},
     ],
 }
@@ -158,6 +158,96 @@ compiler:
   prompt_version: compiler-v1
   runs: 1
 """
+
+
+class FixRoundStabilityRunsTests(unittest.TestCase):
+    """compile.py writes one run-N.domain.yaml per manifest.compiler.runs,
+    but only run-1 ever goes through the fix loop. Found for real: the loop
+    never passed the other runs to evaluate.py's --stability-runs, so every
+    domain that went through run_pipeline.py (as opposed to a hand-assembled
+    evaluate.py invocation) silently got no translation_stability signal at
+    all in its official report. Domain-agnostic by construction -- these
+    tests only check that the sibling run paths, when given, reach
+    evaluate.py's argv; they say nothing about what any particular domain's
+    content should be."""
+
+    def test_stability_run_paths_are_forwarded_to_evaluate(self):
+        captured_argv = []
+
+        def fake_evaluate_main(argv):
+            captured_argv.append(argv)
+            report_path = Path(argv[argv.index("--out-dir") + 1])
+            report_path.mkdir(parents=True, exist_ok=True)
+            manifest = pipeline_mod.load_manifest(Path(argv[argv.index("--manifest") + 1]))
+            (report_path / f"{manifest.id}.translation-evaluation.json").write_text(
+                json.dumps({"hard_gates_ok": True}), encoding="utf-8"
+            )
+            return 0
+
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            manifest_path = tmp_path / "source-manifest.yaml"
+            manifest_path.write_text(MANIFEST_YAML, encoding="utf-8")
+            domain_yaml_path = tmp_path / "run-1.domain.yaml"
+            domain_yaml_path.write_text("classes: {}\n", encoding="utf-8")
+            translation_path = tmp_path / "run-1.translation.json"
+            translation_path.write_text("{}", encoding="utf-8")
+            source_ir_path = tmp_path / "source_ir.json"
+            source_ir_path.write_text("{}", encoding="utf-8")
+            other_run = tmp_path / "run-2.domain.yaml"
+            other_run.write_text("classes: {}\n", encoding="utf-8")
+
+            original_main = pipeline_mod.evaluate_mod.main
+            pipeline_mod.evaluate_mod.main = fake_evaluate_main
+            try:
+                pipeline_mod._fix_round(
+                    domain_yaml_path, translation_path, source_ir_path, manifest_path, tmp_path,
+                    round_num=1, judges=1, round_trip_sample=1, cq_count=1,
+                    stability_run_paths=[other_run],
+                )
+            finally:
+                pipeline_mod.evaluate_mod.main = original_main
+
+            self.assertEqual(len(captured_argv), 1)
+            argv = captured_argv[0]
+            self.assertIn("--stability-runs", argv)
+            self.assertIn(str(other_run), argv)
+
+    def test_no_stability_run_paths_omits_the_flag(self):
+        captured_argv = []
+
+        def fake_evaluate_main(argv):
+            captured_argv.append(argv)
+            report_path = Path(argv[argv.index("--out-dir") + 1])
+            report_path.mkdir(parents=True, exist_ok=True)
+            manifest = pipeline_mod.load_manifest(Path(argv[argv.index("--manifest") + 1]))
+            (report_path / f"{manifest.id}.translation-evaluation.json").write_text(
+                json.dumps({"hard_gates_ok": True}), encoding="utf-8"
+            )
+            return 0
+
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            manifest_path = tmp_path / "source-manifest.yaml"
+            manifest_path.write_text(MANIFEST_YAML, encoding="utf-8")
+            domain_yaml_path = tmp_path / "run-1.domain.yaml"
+            domain_yaml_path.write_text("classes: {}\n", encoding="utf-8")
+            translation_path = tmp_path / "run-1.translation.json"
+            translation_path.write_text("{}", encoding="utf-8")
+            source_ir_path = tmp_path / "source_ir.json"
+            source_ir_path.write_text("{}", encoding="utf-8")
+
+            original_main = pipeline_mod.evaluate_mod.main
+            pipeline_mod.evaluate_mod.main = fake_evaluate_main
+            try:
+                pipeline_mod._fix_round(
+                    domain_yaml_path, translation_path, source_ir_path, manifest_path, tmp_path,
+                    round_num=1, judges=1, round_trip_sample=1, cq_count=1,
+                )
+            finally:
+                pipeline_mod.evaluate_mod.main = original_main
+
+            self.assertNotIn("--stability-runs", captured_argv[0])
 
 
 class RunPipelineDryRunTests(unittest.TestCase):

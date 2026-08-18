@@ -1,4 +1,4 @@
-# Translation quality report: brick-hvac
+# Translation quality report: iof-supply-chain
 
 **Hard gates: PASS**
 
@@ -24,16 +24,16 @@
 
 ## Independent judging of exclusions (hard gate: zero majority-unjustified)
 - majority-unjustified exclusions: 0
-- contested exclusions: 14
+- contested exclusions: 13
 
 ## Translation stability (report-only, heuristic)
-- classes: F1=0.83
-- relationships: F1=1.00
-- properties: F1=0.72
-- allowed_values: F1=0.56
+- classes: F1=0.89
+- relationships: F1=0.54
+- properties: F1=0.20
+- allowed_values: F1=0.09
 
 ## Round-trip score (diagnostic, report-only)
-- sampled: 5, average score: 0.83
+- sampled: 5, average score: 0.66
 
 ## Competency-question support (report-only)
-- support score: 90.0% (10 CQs)
+- support score: 100.0% (10 CQs)

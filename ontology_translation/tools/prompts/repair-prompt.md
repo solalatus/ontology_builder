@@ -44,11 +44,29 @@ definitions for the classes involved. For each one, decide exactly one of:
   1. The judges' rejection reveals the claim was attached to the *wrong*
      concept (e.g. rejected evidence that actually describes a different,
      related class) — the source material supports the same kind of claim
-     on the *correct* class/pair/name instead.
+     on the *correct* class/pair/name instead. **A relationship whose cited
+     object property has an explicit source-declared `domain`/`range` needs
+     its endpoint checked against that declaration** (via the endpoint
+     class's own `parents` chain in `source_context`) — a property
+     constrained to one domain does not become evidence for a differently-
+     typed endpoint just because the resulting sentence reads naturally.
+     If the endpoint doesn't resolve to the declared domain/range, either
+     a specific restriction directly connecting those two exact classes is
+     needed, or the relationship needs a different real basis entirely
+     (same elevated bar as `compiler-prompt.md`'s object-property rule).
   2. The underlying concept is right but was named or shaped more
      specifically than the evidence supports (e.g. a property named too
      broadly for what the evidence actually justifies, or an `allowed`
-     list that needs narrowing to what's actually grounded).
+     list that needs narrowing to what's actually grounded). **An
+     `allowed` list needs its own grounding for the specific value
+     *strings*, not just for the property existing** — a "standard
+     practice" claim justifies a property far more often than it justifies
+     any particular set of values (same elevated bar as
+     `compiler-prompt.md`'s composition-claims rule). When the property's
+     existence is grounded but its specific values are not, the right
+     `replace` is dropping the `allowed` list and shaping the property as
+     plain `type: text` — not carrying invented values forward with
+     stronger-sounding prose.
   Produce the corrected content in full under `new_content`, grounded in
   real evidence. If the element needs a different *name* (a class/rule/
   action name, or a property's own key), also give `new_target_path` —

@@ -79,8 +79,23 @@ succeeds end to end. Until then, this file is the only record.
   `validate_domain.py` and the compiler prompt were both fixed so this
   can't recur on any future domain; `reference.domain.yaml` was
   hand-corrected (no LLM rerun). Full detail:
-  `domains/brick-hvac/manual-spot-check.md`. **#106 still not closed** —
-  no instruction yet to close it; that remains the user's call.
+  `domains/brick-hvac/manual-spot-check.md`.
+- **2026-08-17/18: #106 closed, merged as PR #116.** `run_pipeline.py`
+  (single-command fetch to extract to compile to evaluate to
+  repair/reinstate orchestrator) built to close the remaining real gaps
+  (no one-command pipeline, stale `tools/README.md`), then the official
+  `evaluate.py` CLI run end-to-end for the final authoritative report. Two
+  more general pipeline bugs found afterward while translating IOF Supply
+  Chain (see below) — both independently verified, via direct diff against
+  Brick's real committed `translation.json`, to have had **zero actual
+  effect** on Brick's merged result: (1) `_all_source_iris()` including
+  `owl:imports` records — Brick's two import-subject IRIs were already,
+  independently, correctly dispositioned; (2) `_sibling_context_for_iri`'s
+  false-"mapped" signal — Brick's one instance (`rec#servicedBy`) is an
+  object property, and the sibling-context function only ever draws from
+  `kind == "class"` records, so the false signal was never actually
+  reachable. No rerun of Brick was needed for either. No PR reopened for
+  #106.
 - **Standing policy, applies to every domain, not just Brick, going
   forward: a rejected/contested element gets a real repair attempt before
   it's dropped.** `repair.py` + `prompts/repair-prompt.md` (reground /
@@ -1481,4 +1496,214 @@ reference and record deltas/decisions here instead.)*
   small targeted re-judges (~$0.16). **Running total for the whole Brick
   HVAC effort across every phase so far: ~$29.6.**
 
-  **#106 still open** — still the user's call.
+  **#106 closed 2026-08-18, merged as PR #116.**
+
+- 2026-08-18 -- **Started #109 (IOF Supply Chain, Release_202602).**
+  `domains/iof-supply-chain/source-manifest.yaml`: `scope.roots: []`
+  (unlike Brick) -- SupplyChain.rdf is already a single-purpose,
+  appropriately-sized module (113 locally-defined classes, 18 object
+  properties, 1 datatype property, 0 enumerations, 203 restrictions, 1
+  `owl:imports`), and 95/113 classes subclass directly from external IOF
+  Core/BFO terms this file never defines, so subClassOf-walking from an
+  in-file root wouldn't narrow anything -- full local extraction goes to
+  the compiler, relevance curation happens via disposition-judging, same
+  as Brick's out-of-scope classes.
+
+  **Two more real, general pipeline bugs found while translating this
+  structurally different (restriction-heavy, not comment-heavy) source,
+  both fixed in `evaluate.py`, both independently verified against Brick's
+  real committed data to confirm zero regression there (see the #106 entry
+  above):**
+
+  1. `_all_source_iris()` included `"imports"` records. `extract_imports()`
+     correctly keys an import record by the *importing* document's own
+     IRI (real `owl:imports` semantics) -- document-level metadata a
+     compiler can never legitimately disposition as mapped/excluded. This
+     unconditionally failed `provenance_gate` for any source with
+     `owl:imports`, common for modular BFO-based ontologies. Fixed by
+     excluding `"imports"` from the iterated sections.
+  2. `_sibling_context_for_iri`'s `mapped_source_iris` conflated "IRI cited
+     as supporting evidence" with "IRI's own concept was mapped" --
+     `judge_dispositions()` and `run_pipeline.py`'s `_build_reinstate_batch`
+     both scanned every mapping's *entire* `source_iris` list, but a
+     mapping can legitimately cite another concept's IRI as supporting
+     evidence (this session's own citation-completeness discipline
+     encourages exactly this) without that concept itself being mapped.
+     Created a false "ShipFromLocationRole/ShipToLocationRole were mapped"
+     signal that misled both `reinstate.py`'s own reinstate decision
+     (tried to reuse already-existing class names, a real validation
+     collision -- diagnostic evidence in itself that `reground`, not
+     `reinstate`, was the correct action) and a disposition re-judge
+     (verdicts explicitly cited the false signal as grounds for
+     "unjustified"). Fixed with a new shared helper,
+     `_mapped_source_iris_by_disposition(translation)`, built from
+     `translation['dispositions']` entries actually marked `mapped` (using
+     each disposition's own `note` field as the target_path, per
+     `compiler-prompt.md`'s explicit instruction) -- both call sites now
+     use this single correct implementation instead of each duplicating
+     the buggy scan.
+
+  **A third general bug, found while trying to get IOF's official report
+  a real stability number:** `run_evaluation()` built layer 4's
+  `domain_datas` only from `--stability-runs`, never including `domain_data`
+  itself (the actual `--domain-yaml` being reported on) -- every stability
+  score this pipeline had ever produced measured agreement only among the
+  *other* supplied runs, silently excluding the domain actually being
+  shipped. Fixed (`domain_datas = [domain_data] + [...stability_run_paths]`).
+  Also fixed a related gap: `run_pipeline.py`'s own fix-loop and final
+  evaluate call never forwarded compile.py's sibling `run-N.domain.yaml`
+  files as `--stability-runs` at all, so any domain run through the
+  single-command pipeline got no stability signal whatsoever regardless of
+  manifest `runs` count -- now forwarded automatically. Brick's already-
+  merged `translation-evaluation.json`/`translation-report.md` regenerated
+  with the real numbers this enables; `hard_gates_ok` unaffected
+  (report-only layer, never a hard gate). New tests for all of the above;
+  full offline suite 227/227 passing at this point.
+
+  **Compiler content-quality finding, not a code bug:** the compiler
+  invented `status` properties on 7 classes (Carrier, Customer, Supplier,
+  FreightForwarder, MaterialTradeItem, PurchaseOrder, Shipment), each
+  citing real IRIs per `compiler-prompt.md`'s letter but grounded only in
+  a generic "standard domain practice" template with no source-stated
+  state vocabulary -- exactly the kind of overreach independent semantic
+  judging exists to catch. Handled via repeated real, honest
+  evaluate/repair rounds (never a fabricated judge verdict) using
+  `run_pipeline.py`'s actual `_fix_round` loop: Carrier/Customer/Supplier/
+  MaterialTradeItem/PurchaseOrder.status dropped (no honest grounding
+  under any formulation, confirmed across multiple independent real judge
+  rounds each); FreightForwarder.status kept (passed cleanly, unanimous,
+  every real round it appeared in). One self-correction logged
+  transparently: a first pass hand-fabricated a judge verdict for
+  `FreightForwarder.status` based on pattern-matching rather than a real
+  judge call, extending the earlier round's *legitimate* drops
+  (PurchaseOrder/Shipment.status, which real rounds did flag) with one
+  illegitimate one -- caught, reverted to the last honest state, and
+  re-run for real before proceeding. Standing lesson: act only on real
+  `evaluate.py` output via the actual fix-loop, never hand-picked batches
+  based on eyeballing a pattern across rounds.
+
+  **Real structural-consistency finding, found by direct inspection, not
+  by any existing gate:** dropping `Shipment.status`/`PurchaseOrder.status`
+  left `rules.canPrepareShipment`/`canDispatchShipment`/`canReceiveShipment`
+  and their corresponding actions referencing status values in free-text
+  conditions/effect/verification strings -- nothing in the pipeline checks
+  for this class of defect (`structural_gate` only catches a *rule name*
+  going dangling, not a property name mentioned in prose). Repaired
+  through the real `repair.py` tool (not hand-edited). One of the three,
+  `canDispatchShipment`, turned out to have **no honest grounding at all**
+  once stripped of the status framing -- confirmed independently across 3
+  real repair-tool calls, each reaching `drop` on its own for the same
+  reason (only bare class labels for Shipment/Container/FreightContainer/
+  TransportProcess/SupplyChainNode, no definitions or stated relations).
+  Dropping it broke `structural_validity` (`actions.dispatchShipment`'s
+  `preconditions` still named it) -- fixed by repairing both target_paths
+  together in one real call; the action now has `preconditions: []` and a
+  more general effect/verification, honestly reflecting that no
+  source-groundable dispatch precondition currently exists. This class of
+  defect (referential consistency after a drop) is flagged as a real,
+  general, not-yet-built gate candidate -- see the follow-up issue linked
+  from #109 for a prioritized punch list of robustness improvements
+  identified this session.
+
+  **Final official result: `hard_gates_ok: True`.** Structural 0 errors,
+  provenance 100%/100%, endpoint-citation-completeness 0 gaps, reverse
+  coverage 100% (0 silently dropped), semantic judging 0 unsupported (12
+  disclosed non-blocking contested), disposition judging 0 unjustified (20
+  disclosed non-blocking contested), round-trip average 0.61 (10 sampled --
+  lower than Brick's, consistent with IOF's much sparser source
+  definitions, cross-validated against the 0-unsupported semantic-judging
+  result rather than treated as a defect on its own), CQ support 1.0
+  (10/10, report-only). `persona.md` written, grounded in the accepted
+  `reference.domain.yaml`. Domain folder assembled under
+  `ontology_translation/domains/iof-supply-chain/`.
+
+  **#109 not yet closed -- manual spot-check (explicitly requested by the
+  user before any PR) still pending, and no PR opened yet.**
+
+- 2026-08-18 (continued) -- **Manual spot-check round 1: 9/10 accept, 1/10
+  reject (fixed), pipeline hardened generally as a result.** 10%-stratified
+  sample (10 of 96, seed 109 -- matching issue number, same convention as
+  Brick's seed 106). Agent proactively flagged 3 of 10 before rating:
+  `classes.Load` and `classes.Retailer` accepted (bare-label-plus-context
+  meaning, same pattern already accepted on Brick); `relationships[16]`
+  (Shipment usesContainer FreightContainer) accepted as a legitimate,
+  disclosed standard-practice specialization of the already-real
+  `Shipment usesContainer Container` relationship. **`classes.TrackingEvent.
+  properties.eventType` rejected**: `allowed: [packed, shipped, arrived,
+  received, stored]` justified only by generic "standard domain practice"
+  evidence with zero source text naming any of the 5 specific words --
+  same defect family as this domain's already-dropped `status` properties,
+  but this one had passed automated judging in the final official run
+  (0 unsupported) purely by LLM judge sampling variance, not genuine
+  grounding.
+
+  **Reviewer's direction: "fix S5, but in a principled way. the pipeline
+  should get better than before."** Rather than a one-off hand-drop, added
+  a new elevated-evidence-bar rule to both `compiler-prompt.md` and
+  `repair-prompt.md`, modeled on the existing composition-claims (`hasPart`)
+  rule: an `allowed` list's specific value *strings* need their own source
+  grounding (an `owl:oneOf` enumeration, or values literally named in
+  source text) -- a property's existence being standard practice does not,
+  by itself, justify any particular set of values; when only existence is
+  grounded, the correct shape is plain `type: text`, not invented-but-
+  plausible values. Used the strengthened prompt, via the real `repair.py`
+  tool, to fix the flagged property for real: model correctly kept the
+  property (genuinely grounded) and dropped the invented `allowed` list.
+  Re-verified with a full official `evaluate.py` run: `hard_gates_ok: True`,
+  0 unsupported, 0 unjustified. Full test suite: 227/227. This is a
+  general, domain-agnostic prompt improvement -- every future domain's
+  compiler/repair runs now carry this rule, not just IOF. Full account:
+  `domains/iof-supply-chain/manual-spot-check.md`.
+
+  Also this session: opened **#117** (linked under epic #101), a
+  prioritized punch list of further robustness improvements identified
+  along the way -- a referential-consistency gate (nothing currently
+  checks that dropping a property/rule doesn't leave dangling free-text
+  references in rule/action prose, found only by direct inspection when
+  fixing `PurchaseOrder`/`Shipment.status`), judge-stability hardening
+  (more judges or a confirmation round for contested items, given the
+  repeated verdict flip-flopping observed on identical content across
+  independent real rounds this session), and related prompting work.
+
+  **#109 not yet closed -- still no PR opened. Next: user's call on
+  whether more spot-check rounds are wanted, or proceed straight to PR.**
+
+- 2026-08-18 (continued) -- **Manual spot-check round 2: 9/10 accept, 1/10
+  reject (fixed), pipeline hardened a second time.** Fresh 10%-stratified
+  sample (10 of 96, seed 4417, excluding round 1's already-reviewed
+  paths). `relationships[19]` (TrackingEvent tracks Shipment) accepted
+  as a soft flag (no source property connects the pair, but consistent
+  with 3 structurally-identical siblings); `classes.TrackingEvent.
+  properties.eventTime` noted as a clean confirmation that round 1's
+  prompt fix correctly treats type-only properties as lower-risk than
+  enumerated ones.
+
+  **`relationships[14]` (Container holds Cargo) rejected -- a distinct
+  defect class from round 1's.** The cited object property `holds` has an
+  explicit source-declared `domain: Agent`; Container is not an Agent in
+  the source's own hierarchy, while the correctly-domain-matched
+  `relationships[13]` (`Shipper holds Cargo`, Shipper genuinely being an
+  Agent) sat right alongside it in the same domain. A real, specific
+  structural constraint silently overridden, not just weak/generic
+  evidence.
+
+  **Reviewer's direction again: "fix s6 again in a manner that is
+  generally improving our pipeline."** Added a further rule to both
+  prompts distinguishing the existing standard-practice-endpoint-pairing
+  allowance (genuinely domain/range-unconstrained properties) from
+  properties whose domain/range *is* explicitly declared -- the latter
+  must be checked against the endpoint class's own `parents` chain before
+  citing it. Used the strengthened prompt via `repair.py` to fix the
+  relationship for real: model renamed away from the domain-mismatched
+  `holds` predicate entirely (to `contains`, disclosed as a standard-
+  practice containment relation) rather than keeping a borrowed,
+  structurally false property identity. Re-verified: `hard_gates_ok:
+  True`, 0 unsupported, 0 unjustified. Full test suite: 227/227.
+
+  Second general, domain-agnostic prompt improvement from this domain's
+  spot-check (after round 1's `allowed`-list rule) -- both now apply to
+  every future domain. Full account:
+  `domains/iof-supply-chain/manual-spot-check.md`.
+
+  **#109 not yet closed -- still no PR opened. Next: user's call on
+  further rounds vs. proceeding to PR.**
