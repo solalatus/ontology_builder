@@ -612,6 +612,45 @@ def judge_mappings(
 _SIBLING_CONTEXT_LIMIT = 8
 
 
+def _mapped_source_iris_by_disposition(translation: dict) -> dict[str, str]:
+    """source_iri -> target_path, for every source element the compiler
+    actually dispositioned `mapped` -- i.e. that IRI's own real-world
+    concept became its own domain element, not just something a *different*
+    element's mapping happened to cite as supporting evidence.
+    compiler-prompt.md instructs `mapped`'s `note` to be exactly the
+    target_path ("became a target element (reference its target path)"),
+    so this is the authoritative source for "was this IRI itself included."
+
+    Found for real on IOF Supply Chain: the previous approach scanned every
+    mapping's *entire* `source_iris` list (which, per this session's own
+    citation-completeness discipline, legitimately includes supporting
+    citations beyond the mapping's own primary concept -- e.g.
+    classes.ShipFromLocation's mapping correctly also cites
+    ShipFromLocationRole's IRI as corroborating evidence) and treated ANY
+    IRI appearing there as "mapped to" that target. That conflated "cited
+    as supporting evidence for a different class" with "this concept's own
+    disposition is mapped" -- producing a false "this sibling was kept"
+    signal for ShipFromLocationRole/ShipToLocationRole (both correctly
+    excluded, cited only as supporting evidence for the *location* classes)
+    that misled both reinstate.py's own reinstate decision (it tried to
+    reuse the already-existing ShipFromLocation/ShipToLocation class names,
+    reading the false signal as "this concept already has that identity")
+    and a disposition re-judge (verdicts citing "the parallel sibling...
+    mapped to a location class" as contradicting the exclusion, when no
+    such sibling was ever actually mapped as its own element). General, not
+    domain-specific: any domain where an excluded concept's IRI gets cited
+    as supporting evidence elsewhere -- itself a *good* citation-discipline
+    outcome -- would hit the same false signal."""
+    mapped: dict[str, str] = {}
+    for disposition in translation.get("dispositions", []):
+        if disposition.get("disposition") != "mapped":
+            continue
+        target_path = disposition.get("note")
+        if target_path:
+            mapped[disposition["source_iri"]] = target_path
+    return mapped
+
+
 def _sibling_context_for_iri(iri: str, iri_index: dict, mapped_source_iris: dict[str, str]) -> list[dict]:
     """Other source classes sharing at least one subClassOf parent with
     `iri` that the compiler actually mapped into the domain -- gives a
@@ -702,10 +741,7 @@ def judge_dispositions(
     to compare, not a failure" stance `_ground_truth_for_target` already
     takes elsewhere in this module."""
     iri_index = _index_source_records_by_iri(source_ir)
-    mapped_source_iris: dict[str, str] = {}
-    for mapping in translation.get("mappings", []):
-        for src_iri in mapping.get("source_iris") or []:
-            mapped_source_iris.setdefault(src_iri, mapping["target_path"])
+    mapped_source_iris = _mapped_source_iris_by_disposition(translation)
 
     results = []
     total_cost = 0.0

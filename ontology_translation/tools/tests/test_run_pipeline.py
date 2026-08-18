@@ -35,10 +35,10 @@ TRANSLATION = {
         {"target_path": "relationships[0]", "source_iris": ["http://ex.org#serves", "http://ex.org#Fan", "http://ex.org#Zone"], "source_evidence": "e", "confidence": "high", "rationale": "r"},
     ],
     "dispositions": [
-        {"source_iri": "http://ex.org#Fan", "disposition": "mapped"},
-        {"source_iri": "http://ex.org#status", "disposition": "mapped"},
-        {"source_iri": "http://ex.org#Zone", "disposition": "mapped"},
-        {"source_iri": "http://ex.org#serves", "disposition": "mapped"},
+        {"source_iri": "http://ex.org#Fan", "disposition": "mapped", "note": "classes.Fan"},
+        {"source_iri": "http://ex.org#status", "disposition": "mapped", "note": "classes.Fan.properties.status"},
+        {"source_iri": "http://ex.org#Zone", "disposition": "mapped", "note": "classes.Zone"},
+        {"source_iri": "http://ex.org#serves", "disposition": "mapped", "note": "relationships[0]"},
         {"source_iri": "http://ex.org#Irrelevant", "disposition": "not_agent_relevant", "note": "identifier bookkeeping only, generic template"},
     ],
 }

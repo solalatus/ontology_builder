@@ -762,6 +762,84 @@ class SiblingContextForIriTests(unittest.TestCase):
         self.assertEqual(siblings, [])
 
 
+class MappedSourceIrisByDispositionTests(unittest.TestCase):
+    def test_mapped_disposition_note_becomes_the_target_path(self):
+        translation = {"dispositions": [{"source_iri": "http://ex.org#Fan", "disposition": "mapped", "note": "classes.Fan"}]}
+        result = evaluate_mod._mapped_source_iris_by_disposition(translation)
+        self.assertEqual(result, {"http://ex.org#Fan": "classes.Fan"})
+
+    def test_non_mapped_dispositions_are_excluded(self):
+        translation = {"dispositions": [{"source_iri": "http://ex.org#Compressor", "disposition": "out_of_scope", "note": "not needed"}]}
+        result = evaluate_mod._mapped_source_iris_by_disposition(translation)
+        self.assertEqual(result, {})
+
+    def test_iri_merely_cited_as_supporting_evidence_is_not_treated_as_mapped(self):
+        # Regression: found for real on IOF Supply Chain. A mapping can
+        # legitimately cite another concept's IRI as supporting evidence
+        # (this session's own citation-completeness discipline) without
+        # that concept itself being mapped -- e.g. classes.ShipFromLocation
+        # correctly cites ShipFromLocationRole's IRI too, even though
+        # ShipFromLocationRole's own disposition is (correctly) excluded.
+        # This function must not be fooled by that citation into thinking
+        # ShipFromLocationRole itself was mapped.
+        translation = {
+            "mappings": [
+                {"target_path": "classes.ShipFromLocation", "source_iris": ["http://ex.org#ShipFromLocation", "http://ex.org#ShipFromLocationRole"]}
+            ],
+            "dispositions": [
+                {"source_iri": "http://ex.org#ShipFromLocation", "disposition": "mapped", "note": "classes.ShipFromLocation"},
+                {"source_iri": "http://ex.org#ShipFromLocationRole", "disposition": "taxonomy_only", "note": "role pattern, not distinct content"},
+            ],
+        }
+        result = evaluate_mod._mapped_source_iris_by_disposition(translation)
+        self.assertEqual(result, {"http://ex.org#ShipFromLocation": "classes.ShipFromLocation"})
+        self.assertNotIn("http://ex.org#ShipFromLocationRole", result)
+
+
+class JudgeDispositionsTests(unittest.TestCase):
+    def test_sibling_merely_cited_elsewhere_is_not_shown_as_an_included_sibling(self):
+        # End-to-end regression for the same bug: judge_dispositions used to
+        # build its sibling-comparison context by scanning every mapping's
+        # full source_iris list, so an excluded sibling whose IRI was only
+        # cited as supporting evidence for a *different* mapped class
+        # appeared to a disposition judge as "this materially similar
+        # sibling WAS kept" -- a false signal that misled real judge
+        # verdicts (and reinstate.py's own reinstate decision) into treating
+        # a correctly-excluded, genuinely-redundant concept as an
+        # inconsistent exclusion.
+        translation = {
+            "mappings": [
+                {"target_path": "classes.LocationB", "source_iris": ["http://ex.org#LocationB", "http://ex.org#RoleB"]},
+            ],
+            "dispositions": [
+                {"source_iri": "http://ex.org#RoleA", "disposition": "taxonomy_only", "note": "role pattern, not distinct content"},
+                {"source_iri": "http://ex.org#RoleB", "disposition": "taxonomy_only", "note": "role pattern, not distinct content"},
+                {"source_iri": "http://ex.org#LocationB", "disposition": "mapped", "note": "classes.LocationB"},
+            ],
+        }
+        source_ir = {
+            "classes": [
+                {"iri": "http://ex.org#RoleA", "kind": "class", "labels": ["Role A"], "definitions": [], "parents": ["http://ex.org#Role"]},
+                {"iri": "http://ex.org#RoleB", "kind": "class", "labels": ["Role B"], "definitions": [], "parents": ["http://ex.org#Role"]},
+                {"iri": "http://ex.org#LocationB", "kind": "class", "labels": ["Location B"], "definitions": [], "parents": []},
+            ]
+        }
+        captured = {}
+
+        def responder(i, kw):
+            captured["payload"] = json.loads(kw["messages"][1]["content"])
+            return json.dumps({"verdict": "justified", "rationale": "r"})
+
+        FakeClient, calls = _fake_client_class(responder)
+        client = FakeClient()
+        with tempfile.TemporaryDirectory() as tmp:
+            logger = evaluate_mod.RunLogger(Path(tmp) / "log.jsonl")
+            evaluate_mod.judge_dispositions(client, "gpt-5.4", translation, source_ir, logger, judges=1)
+            logger.close()
+
+        self.assertEqual(captured["payload"]["included_siblings"], [])
+
+
 class JudgeDispositionsTests(unittest.TestCase):
     def test_only_non_mapped_resolvable_dispositions_are_judged(self):
         # "mapped" dispositions are judge_mappings' job, not this layer's.
@@ -830,7 +908,10 @@ class JudgeDispositionsTests(unittest.TestCase):
 
     def test_sibling_context_is_included_in_the_judge_prompt(self):
         translation = {
-            "dispositions": [{"source_iri": "http://ex.org#Compressor", "disposition": "out_of_scope", "note": "n"}],
+            "dispositions": [
+                {"source_iri": "http://ex.org#Compressor", "disposition": "out_of_scope", "note": "n"},
+                {"source_iri": "http://ex.org#Fan", "disposition": "mapped", "note": "classes.Fan"},
+            ],
             "mappings": [{"target_path": "classes.Fan", "source_iris": ["http://ex.org#Fan"], "source_evidence": "e", "confidence": "high", "rationale": "r"}],
         }
         source_ir = {

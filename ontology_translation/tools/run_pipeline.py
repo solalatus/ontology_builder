@@ -113,10 +113,7 @@ def _build_reinstate_batch(translation: dict, source_ir: dict, disposition_judgi
     results_by_iri = {r["source_iri"]: r for r in disposition_judging.get("results", [])}
     disposition_by_iri = {d["source_iri"]: d for d in translation.get("dispositions", [])}
     iri_index = evaluate_mod._index_source_records_by_iri(source_ir)
-    mapped_source_iris: dict[str, str] = {}
-    for mapping in translation.get("mappings", []):
-        for src_iri in mapping.get("source_iris") or []:
-            mapped_source_iris.setdefault(src_iri, mapping["target_path"])
+    mapped_source_iris = evaluate_mod._mapped_source_iris_by_disposition(translation)
 
     flagged = []
     for iri in unjustified_iris:
