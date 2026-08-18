@@ -1176,6 +1176,68 @@ class RunEvaluationLiveMockedTests(unittest.TestCase):
             self.assertEqual(eval_json["disposition_judging"]["unjustified_count"], 1)
 
 
+    def test_stability_run_paths_compares_the_domain_being_evaluated_not_just_the_others(self):
+        """Found for real: run_evaluation() built domain_datas only from
+        stability_run_paths, never including domain_data (the actual
+        --domain-yaml). Passing exactly one sibling run should, with the fix,
+        give domain_data + that one sibling == 2 runs -> a real pairwise
+        comparison -- not the "fewer than 2 runs" fallback the old buggy
+        code produced (it only ever saw the single sibling on its own)."""
+
+        def responder(i, kw):
+            content = kw["messages"][0]["content"]
+            if "EXCLUDE a source ontology element" in content:
+                return json.dumps({"verdict": "justified", "rationale": "ok"})
+            if "independent judge" in content:
+                return json.dumps({"verdict": "supported", "rationale": "ok"})
+            if "Compare a blind reconstruction" in content:
+                return json.dumps({"score": 0.9, "rationale": "close"})
+            if "real-world concept" in content:
+                return json.dumps({"reconstruction": "a device that moves air"})
+            if "not the broader source material it was compiled from" in content:
+                return json.dumps({"questions": ["Which fan serves which zone?"]})
+            if "judge" in content.lower() and "orientation" in content:
+                return json.dumps({"supported": True, "rationale": "covered"})
+            raise AssertionError(f"unexpected prompt: {content[:80]}")
+
+        FakeClient, calls = _fake_client_class(responder)
+
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            manifest_path = tmp_path / "source-manifest.yaml"
+            manifest_path.write_text(
+                "id: test-domain\nsource_url: https://example.org/x.rdf\nscope:\n  roots: []\ncompiler:\n  prompt_version: compiler-v1\n  runs: 3\n",
+                encoding="utf-8",
+            )
+            import yaml
+
+            domain_yaml_path = tmp_path / "run-1.domain.yaml"
+            domain_yaml_path.write_text(yaml.safe_dump(DOMAIN_DATA), encoding="utf-8")
+            translation_path = tmp_path / "run-1.translation.json"
+            translation_path.write_text(json.dumps(TRANSLATION_FULL), encoding="utf-8")
+            source_ir_path = tmp_path / "source_ir.json"
+            source_ir_path.write_text(json.dumps(SOURCE_IR), encoding="utf-8")
+            sibling_run_path = tmp_path / "run-2.domain.yaml"
+            sibling_run_path.write_text(yaml.safe_dump(DOMAIN_DATA), encoding="utf-8")
+            out_dir = tmp_path / "out"
+
+            with mock.patch.object(
+                evaluate_mod,
+                "load_azure_config",
+                return_value={"endpoint": "https://fake/", "api_key": "fake", "api_version": "v1", "deployment": "gpt-5.4"},
+            ), mock.patch("openai.AzureOpenAI", FakeClient):
+                evaluate_mod.run_evaluation(
+                    domain_yaml_path, translation_path, source_ir_path, manifest_path, out_dir,
+                    stability_run_paths=[sibling_run_path],
+                    judges=1, round_trip_sample_size=1, cq_count=1, dry_run=False,
+                )
+
+            eval_json = json.loads((out_dir / "test-domain.translation-evaluation.json").read_text(encoding="utf-8"))
+            stability = eval_json["translation_stability"]
+            self.assertEqual(len(stability["pairs"]), 1)
+            self.assertEqual(stability["average_f1"]["classes"], 1.0)
+
+
 class RenderMarkdownTests(unittest.TestCase):
     def test_contains_expected_sections(self):
         report = {

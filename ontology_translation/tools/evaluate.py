@@ -1030,7 +1030,16 @@ def run_evaluation(
 
     stability = {"note": "no stability_run_paths supplied", "pairs": [], "average_f1": None}
     if stability_run_paths:
-        domain_datas = [yaml.safe_load(p.read_text(encoding="utf-8")) or {} for p in stability_run_paths]
+        # domain_data (the actual --domain-yaml being evaluated) must be one
+        # of the compared runs -- this is a stability report about the
+        # domain actually being shipped, not just an agreement check among
+        # whichever *other* runs happened to be passed as comparison points.
+        # Found for real: this omitted domain_data entirely, so every past
+        # --stability-runs invocation silently measured only how much the
+        # *other* runs agreed with each other, never how much the delivered
+        # domain (which may have gone through real repair/reinstate fixes
+        # the raw sibling runs never saw) differed from either of them.
+        domain_datas = [domain_data] + [yaml.safe_load(p.read_text(encoding="utf-8")) or {} for p in stability_run_paths]
         stability = translation_stability(domain_datas)
 
     hard_gates_ok = structural["ok"] and provenance["ok"] and endpoint_citations["ok"]

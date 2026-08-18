@@ -31,9 +31,86 @@
     "silently_dropped": []
   },
   "translation_stability": {
-    "note": "no stability_run_paths supplied",
-    "pairs": [],
-    "average_f1": null
+    "pairs": [
+      {
+        "run_a": 1,
+        "run_b": 2,
+        "classes": {
+          "precision": 0.7435897435897436,
+          "recall": 1.0,
+          "f1": 0.8529411764705882
+        },
+        "relationships": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        },
+        "properties": {
+          "precision": 0.7619047619047619,
+          "recall": 0.9696969696969697,
+          "f1": 0.8533333333333334
+        },
+        "allowed_values": {
+          "precision": 0.6557377049180327,
+          "recall": 0.851063829787234,
+          "f1": 0.7407407407407407
+        }
+      },
+      {
+        "run_a": 1,
+        "run_b": 3,
+        "classes": {
+          "precision": 0.5897435897435898,
+          "recall": 1.0,
+          "f1": 0.7419354838709677
+        },
+        "relationships": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        },
+        "properties": {
+          "precision": 0.47619047619047616,
+          "recall": 0.7692307692307693,
+          "f1": 0.588235294117647
+        },
+        "allowed_values": {
+          "precision": 0.29508196721311475,
+          "recall": 0.5454545454545454,
+          "f1": 0.3829787234042553
+        }
+      },
+      {
+        "run_a": 2,
+        "run_b": 3,
+        "classes": {
+          "precision": 0.7931034482758621,
+          "recall": 1.0,
+          "f1": 0.8846153846153846
+        },
+        "relationships": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        },
+        "properties": {
+          "precision": 0.6363636363636364,
+          "recall": 0.8076923076923077,
+          "f1": 0.7118644067796609
+        },
+        "allowed_values": {
+          "precision": 0.46808510638297873,
+          "recall": 0.6666666666666666,
+          "f1": 0.55
+        }
+      }
+    ],
+    "average_f1": {
+      "classes": 0.8264973483189801,
+      "relationships": 1.0,
+      "properties": 0.7178110114102138,
+      "allowed_values": 0.5579064880483321
+    }
   },
   "semantic_judging": {
     "results": [

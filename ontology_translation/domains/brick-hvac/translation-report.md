@@ -26,6 +26,12 @@
 - majority-unjustified exclusions: 0
 - contested exclusions: 14
 
+## Translation stability (report-only, heuristic)
+- classes: F1=0.83
+- relationships: F1=1.00
+- properties: F1=0.72
+- allowed_values: F1=0.56
+
 ## Round-trip score (diagnostic, report-only)
 - sampled: 5, average score: 0.83
 
