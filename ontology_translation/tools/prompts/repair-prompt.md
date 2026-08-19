@@ -77,7 +77,18 @@ definitions for the classes involved. For each one, decide exactly one of:
   anywhere in what you were given, including no defensible standard-practice
   reading, and no corrected replacement is possible either. This should be
   your last choice, not your default — justify briefly why neither
-  `reground` nor `replace` worked.
+  `reground` nor `replace` worked. **If you are dropping a property, check
+  whether any rule `conditions` or action `effect`/`verification` text
+  elsewhere in the domain still names it** (e.g. "shipment status is
+  prepared" after `Shipment.status` is dropped) — found for real on IOF
+  Supply Chain (issue #109/#117): a property drop doesn't automatically
+  update free text that used to describe it, and nothing else catches this
+  automatically before a domain-agnostic report-only check runs after the
+  fact. You will only ever be given the specific items flagged for repair,
+  not the whole domain, so this is a best-effort self-check on your own
+  drop decisions, not something you can fully verify from what you're
+  handed — flag it in your `rationale` if you suspect it, rather than
+  silently leaving it for later.
 
 Every `reground`/`replace` decision needs the same provenance rigor as the
 original compile: `source_evidence` (a short quoted snippet, or an explicit

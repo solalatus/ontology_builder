@@ -1705,5 +1705,82 @@ reference and record deltas/decisions here instead.)*
   every future domain. Full account:
   `domains/iof-supply-chain/manual-spot-check.md`.
 
-  **#109 not yet closed -- still no PR opened. Next: user's call on
-  further rounds vs. proceeding to PR.**
+  **#109 closed, merged as PR #118.**
+
+- 2026-08-18 (continued) -- **Implemented #117** (pipeline hardening
+  punch list from #109's manual spot-check), branch
+  `ontology-translation/117-pipeline-hardening`.
+
+  **Referential-consistency check** (`referential_consistency_gate` in
+  `evaluate.py`, layer 2c): flags a rule `conditions` string or action
+  `effect`/`verification` string that names a class alongside a property
+  name that's real *somewhere* in the domain but not actually a property
+  of that specific class -- the exact shape of the `PurchaseOrder`/
+  `Shipment.status` defect found by hand during #109's spot-check.
+  Conservative by design (co-occurrence of both a class name and a real
+  property name required in the *same* string, whole-word matching via
+  camelCase-to-words splitting, no bare word search). **Checked for real
+  against Brick HVAC's own already-accepted `reference.domain.yaml`
+  (same discipline as every other change this session) and found 6 false
+  positives**: "a zone or space is occupied" / "economizer mode" use
+  "occupied"/"mode" as ordinary English, which happen to coincidentally
+  also be real property names elsewhere in the domain
+  (`OccupancySensor.occupied`, `Thermostat.mode`) -- not a dangling
+  reference to either class's own dropped property. No purely mechanical
+  check can fully separate "property name used as a reference" from "the
+  same word used as ordinary English" -- the same lesson this codebase
+  already learned once from `endpoint_citation_gate`'s own text-heuristic
+  predecessors. **Shipped as report-only** (like translation_stability/
+  round_trip/cq_support), not a hard gate, specifically because of this
+  real evidence -- never blocks `hard_gates_ok`. Verified clean (0 issues)
+  against IOF Supply Chain's real accepted domain.
+
+  **Provenance gate extended for the reverse direction**: `provenance_gate`
+  already caught a domain element with no mapping; now also catches a
+  mapping citing a `target_path` that doesn't resolve to any real element
+  (`orphaned_mappings`) -- symmetric with the existing check, made a real
+  hard-gate failure after confirming zero orphaned mappings exist in
+  Brick's or IOF's real committed `translation.json` today.
+
+  **Judge-stability confirmation round**: found for real this session --
+  the *same* unmodified content, judged independently across separate
+  real `evaluate.py` runs on IOF, flipped between `unsupported`/
+  `partially_supported`/a clean pass call to call. New
+  `_judge_item_with_confirmation()` helper (shared by `judge_mappings`/
+  `judge_dispositions`): runs the initial N judges as before, and only
+  when they don't unanimously agree, runs `--confirmation-judges` more
+  (default 2) before finalizing the majority verdict -- costs nothing
+  extra on the large majority of unanimous items, sharpens precisely the
+  contested ones a single run's sample can't be trusted on. Wired through
+  `evaluate.py`'s CLI and `run_pipeline.py`'s fix-loop/final-evaluate calls.
+
+  **Compiler/repair prompt notes**: both `compiler-prompt.md` and
+  `repair-prompt.md` now explicitly instruct against a rule/action naming
+  a property a class doesn't actually have, and instruct `repair.py`'s
+  `drop` decisions to self-check for exactly this before/after dropping a
+  property -- best-effort at generation time, backstopped by the report-
+  only gate after the fact.
+
+  **Investigated, found not a real gap**: issue #117's "cache/reuse a
+  judge verdict for a target_path judged twice" -- `judge_mappings`
+  (mapped elements) and `judge_dispositions` (non-mapped elements only,
+  explicitly skips `disposition == "mapped"`) operate on disjoint sets by
+  construction within one `evaluate.py` run; nothing is ever actually
+  double-judged today. No code added for a problem that doesn't exist.
+
+  **Fixed along the way, unrelated to #117's own scope but found while
+  adding tests here**: `tests/test_evaluate.py` had two classes both
+  named `JudgeDispositionsTests` (introduced earlier this session, an
+  editing artifact from the sibling-context bug fix) -- Python module
+  loading silently let the second definition shadow the first, so
+  `test_sibling_merely_cited_elsewhere_is_not_shown_as_an_included_sibling`
+  (a real regression test for that same earlier bug fix) never actually
+  ran under `python -m unittest`. Renamed the first class to
+  `JudgeDispositionsCoreTests`; both now run.
+
+  Full offline test suite: 253/253 passing (26 new tests for this issue
+  alone). Full account of every finding, including the real Brick false-
+  positive check, is directly in `evaluate.py`'s own module comments
+  above each new/changed function -- not just this log entry.
+
+  **#117 not yet closed -- no PR opened yet.**
