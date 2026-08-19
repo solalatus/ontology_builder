@@ -2509,7 +2509,11 @@ const STRINGS = {
     importReview: "Intelligent Merge",
     importReviewTitle: "Review import",
     importReviewIntro: "Decide what happens to each difference between the current graph and the incoming file. Every item needs a decision — keep the current version, take the incoming one, or write what should actually happen instead.",
-    importReviewFlags: (count) => `${count} class(es) in the incoming file have no relationships at all.`,
+    importReviewFlags: (count) => count === 1
+      ? "1 class in the incoming file has no relationships at all."
+      : `${count} classes in the incoming file have no relationships at all.`,
+    importReviewMeaningChanged: "meaning changed",
+    importReviewAliasesChanged: "aliases changed",
     importReviewMatchedLabel: (decided, total) => `Matched & paired (${decided}/${total} decided)`,
     importReviewSuggestMatches: "Suggest matches",
     importReviewSuggestMatchesRunning: "Suggesting matches…",
@@ -2846,6 +2850,8 @@ const STRINGS = {
     importReviewTitle: "Import áttekintése",
     importReviewIntro: "Döntsd el, mi történjen a jelenlegi gráf és a beérkező fájl minden egyes eltérésével. Minden tételhez döntés szükséges — a jelenlegi verzió megtartása, a beérkező átvétele, vagy leírhatod, mi történjen valójában.",
     importReviewFlags: (count) => `${count} osztálynak nincs semmilyen kapcsolata a beérkező fájlban.`,
+    importReviewMeaningChanged: "jelentés megváltozott",
+    importReviewAliasesChanged: "álnevek megváltoztak",
     importReviewMatchedLabel: (decided, total) => `Egyező és párosított (${decided}/${total} eldöntve)`,
     importReviewSuggestMatches: "Párosítási javaslat",
     importReviewSuggestMatchesRunning: "Javaslatok kérése…",
@@ -11119,10 +11125,18 @@ function importReviewKindLabel(kind) {
   }
 }
 
-function importReviewClassContext(before, after) {
+// Derives a changed class's display context at render time, not build time
+// (buildImportReviewItems() stores the raw before/after values on every
+// class item regardless -- see its own "class" branches) -- so a language
+// toggle while the dialog is open re-translates this the same way every
+// other label already does, instead of baking a stale-language phrase into
+// the item once at diff-build time.
+function importReviewItemDisplayContext(item) {
+  if (item.kind !== "class" || item.diffKind !== "changed") return item.context;
+  const { before, after } = item;
   const bits = [];
-  if (before && after && before.meaning !== after.meaning) bits.push("meaning changed");
-  if (before && after && JSON.stringify(before.aliases) !== JSON.stringify(after.aliases)) bits.push("aliases changed");
+  if (before.meaning !== after.meaning) bits.push(t("importReviewMeaningChanged"));
+  if (JSON.stringify(before.aliases) !== JSON.stringify(after.aliases)) bits.push(t("importReviewAliasesChanged"));
   return bits.join(", ");
 }
 
@@ -11137,7 +11151,9 @@ function buildImportReviewItems(diff) {
 
   for (const c of diff.classes.changed) {
     push({ id: importReviewItemId("class", c.name), section: "matched", kind: "class",
-      diffKind: "changed", label: c.name, context: importReviewClassContext(c.before, c.after),
+      // context is derived at render/serialize time by importReviewItemDisplayContext()
+      // instead of baked in here, so it re-translates on a language toggle.
+      diffKind: "changed", label: c.name, context: "",
       before: c.before, after: c.after });
   }
   for (const c of diff.classes.removed) {
@@ -11592,7 +11608,8 @@ function importReviewAgentItemsAsText(items, sharedNote) {
       : "human wrote reasoning only, no plain pick";
     const pairedText = item.isPaired ? " | this is an accepted cross-label pairing (current and incoming sides use different names/shapes for the same concept)" : "";
     const noteText = d.note.trim() ? ` | reasoning: ${d.note.trim()}` : "";
-    return `- [${importReviewKindLabel(item.kind)}] ${item.label}${item.context ? ` (${item.context})` : ""} -- ${choiceText}${pairedText}${noteText}`;
+    const displayContext = importReviewItemDisplayContext(item);
+    return `- [${importReviewKindLabel(item.kind)}] ${item.label}${displayContext ? ` (${displayContext})` : ""} -- ${choiceText}${pairedText}${noteText}`;
   });
   if (sharedNote.trim()) lines.push(`- [general] ${sharedNote.trim()}`);
   return lines.join("\n");
@@ -11789,10 +11806,11 @@ function createImportReviewItemRow(item) {
   labelEl.className = "import-review-item-label";
   labelEl.textContent = item.label;
   top.append(kindEl, labelEl);
-  if (item.context) {
+  const displayContext = importReviewItemDisplayContext(item);
+  if (displayContext) {
     const contextEl = document.createElement("span");
     contextEl.className = "import-review-item-context";
-    contextEl.textContent = item.context;
+    contextEl.textContent = displayContext;
     top.append(contextEl);
   }
 
@@ -11965,7 +11983,8 @@ function importReviewDecisionsMarkdown() {
     for (const item of items) {
       const d = importReviewDecisionFor(item.id);
       const choiceText = d.choice === "a" ? t("importReviewChoiceKeepCurrent") : d.choice === "b" ? t("importReviewChoiceTakeIncoming") : "—";
-      lines.push(`- **[${importReviewKindLabel(item.kind)}] ${item.label}**${item.context ? ` _(${item.context})_` : ""}`);
+      const displayContext = importReviewItemDisplayContext(item);
+      lines.push(`- **[${importReviewKindLabel(item.kind)}] ${item.label}**${displayContext ? ` _(${displayContext})_` : ""}`);
       lines.push(`  → ${choiceText}${d.note.trim() ? `: ${d.note.trim()}` : ""}`);
     }
     lines.push("");
