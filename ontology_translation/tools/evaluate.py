@@ -100,8 +100,17 @@ def _all_source_iris(source_ir: dict) -> set[str]:
 
 def provenance_gate(domain_data: dict, translation: dict, source_ir: dict) -> dict:
     elements = _iter_generated_elements(domain_data)
+    element_paths = {e["target_path"] for e in elements}
     mapped_paths = {m.get("target_path") for m in translation.get("mappings", [])}
     missing_evidence = [e["target_path"] for e in elements if e["target_path"] not in mapped_paths]
+    # Issue #117: the reverse direction of the same check -- a mapping
+    # citing a target_path that doesn't actually resolve to a real domain
+    # element (e.g. left behind after a manual edit, or a tool outside
+    # repair.py's own drop path that doesn't clean up its mapping entry;
+    # repair.py's own `drop` already removes both together, verified
+    # against real Brick/IOF data to have zero of these today). Symmetric
+    # with `missing_evidence` above, not new logic.
+    orphaned_mappings = sorted(mapped_paths - element_paths)
     element_coverage = 1.0 if not elements else (len(elements) - len(missing_evidence)) / len(elements)
 
     all_iris = _all_source_iris(source_ir)
@@ -111,10 +120,11 @@ def provenance_gate(domain_data: dict, translation: dict, source_ir: dict) -> di
     disposition_coverage = 1.0 if not all_iris else (len(all_iris) - len(missing_dispositions)) / len(all_iris)
 
     return {
-        "ok": not missing_evidence and not missing_dispositions,
+        "ok": not missing_evidence and not missing_dispositions and not orphaned_mappings,
         "element_provenance_coverage": element_coverage,
         "source_disposition_coverage": disposition_coverage,
         "missing_evidence": missing_evidence,
+        "orphaned_mappings": orphaned_mappings,
         "missing_dispositions": missing_dispositions,
         "unknown_dispositions": unknown_dispositions,
     }
@@ -182,6 +192,106 @@ def endpoint_citation_gate(domain_data: dict, translation: dict) -> dict:
             gaps.append({"target_path": target_path, "endpoint": "input", "class": inp, "known_class_iris": sorted(known)})
 
     return {"ok": not gaps, "gaps": gaps}
+
+
+# ---------------------------------------------------------------------------
+# Layer 2c: referential consistency (report-only) -- issue #117.
+# ---------------------------------------------------------------------------
+#
+# Found for real on IOF Supply Chain: repair.py correctly dropped
+# Shipment.status/PurchaseOrder.status as ungrounded, but rules.
+# canPrepareShipment/canDispatchShipment/canReceiveShipment and their
+# matching actions kept referencing "shipment status"/"purchase order
+# status" in free-text conditions/effect/verification strings -- nothing
+# checked those strings, only caught by direct human inspection during a
+# manual spot-check. structural_gate already catches a *rule name* going
+# dangling (an action's `preconditions` naming a rule that no longer
+# exists, a structured field); this catches the same class of defect one
+# level down, in prose.
+#
+# Conservative by design: only flags a (class, property) pair when BOTH the
+# class's own name and a property name that is real *somewhere* in this
+# domain are found, as whole words, in the very same condition/effect/
+# verification string -- never a bare word search. Still, checked for real
+# against Brick HVAC's own already-accepted `reference.domain.yaml` (the
+# same discipline this whole session used for every other change), it flags
+# 6 false positives: "a zone or space is occupied" and "economizer mode"
+# use "occupied"/"mode" as ordinary English adjectives/nouns, which happen
+# to coincidentally also be real property names elsewhere in the domain
+# (OccupancySensor.occupied, Thermostat.mode) -- not a dangling reference to
+# either class's own dropped property. No purely mechanical (non-LLM)
+# heuristic can fully separate "property name used as a property reference"
+# from "the same word used as ordinary English" -- exactly the lesson this
+# codebase already learned once from `endpoint_citation_gate`'s own
+# text-heuristic predecessors (see that gate's module comment above).
+# Report-only, therefore, same as translation_stability/round_trip/
+# cq_support: a real, useful signal for a human or a repair pass to weigh,
+# never a blocking hard gate on its own.
+
+
+def _camel_to_words(name: str) -> list[str]:
+    """'eventType' -> ['event', 'Type']; 'PurchaseOrder' -> ['Purchase',
+    'Order']; 'status' -> ['status']. Purely mechanical case-boundary
+    splitting -- no domain vocabulary, so it works identically for any
+    class/property name in any domain."""
+    return re.findall(r"[A-Z]?[a-z0-9]+|[A-Z]+(?=[A-Z]|$)", name)
+
+
+def _name_word_pattern(name: str) -> re.Pattern | None:
+    words = _camel_to_words(name)
+    if not words:
+        return None
+    return re.compile(r"\b" + r"\s+".join(re.escape(w) for w in words) + r"\b", re.IGNORECASE)
+
+
+def referential_consistency_gate(domain_data: dict) -> dict:
+    """Every rule `conditions` string and every action `effect`/
+    `verification` string is checked for a class name mentioned alongside
+    a property name that is real somewhere in this domain but NOT actually
+    a property of that specific class -- the exact shape of a property
+    being dropped (as ungrounded) without updating the free text that used
+    to describe it. See the module comment above for the conservative,
+    co-occurrence-required matching this uses."""
+    classes = domain_data.get("classes") or {}
+    class_patterns = [(name, pat) for name, pat in ((n, _name_word_pattern(n)) for n in classes) if pat is not None]
+
+    all_property_names = set()
+    for class_def in classes.values():
+        if isinstance(class_def, dict):
+            all_property_names.update((class_def.get("properties") or {}).keys())
+    property_patterns = [(name, pat) for name, pat in ((n, _name_word_pattern(n)) for n in all_property_names) if pat is not None]
+
+    issues = []
+
+    def check_text(location: str, field: str, text) -> None:
+        if not isinstance(text, str) or not text:
+            return
+        matched_classes = [cn for cn, pat in class_patterns if pat.search(text)]
+        if not matched_classes:
+            return
+        matched_props = [pn for pn, pat in property_patterns if pat.search(text)]
+        if not matched_props:
+            return
+        for cn in matched_classes:
+            class_def = classes.get(cn)
+            cprops = set((class_def.get("properties") or {}).keys()) if isinstance(class_def, dict) else set()
+            for pn in matched_props:
+                if pn not in cprops:
+                    issues.append({"location": location, "field": field, "text": text, "class": cn, "property": pn})
+
+    for rule_name, rule_def in (domain_data.get("rules") or {}).items():
+        if not isinstance(rule_def, dict):
+            continue
+        for condition in rule_def.get("conditions") or []:
+            check_text(f"rules.{rule_name}", "conditions", condition)
+
+    for action_name, action_def in (domain_data.get("actions") or {}).items():
+        if not isinstance(action_def, dict):
+            continue
+        for field in ("effect", "verification"):
+            check_text(f"actions.{action_name}", field, action_def.get(field))
+
+    return {"ok": not issues, "issue_count": len(issues), "issues": issues}
 
 
 # ---------------------------------------------------------------------------
@@ -516,6 +626,42 @@ def _majority_verdict(raw_judgments: list[dict]) -> str | None:
     return top_verdict if top_count > len(verdicts) / 2 else None
 
 
+def _judge_item_with_confirmation(
+    client, deployment: str, system_prompt: str, user_prompt: str, logger: RunLogger, label_prefix: str, label_suffix: str,
+    judges: int, confirmation_judges: int,
+) -> tuple[list[dict], str | None, bool, bool, float]:
+    """Runs `judges` independent judge calls, then -- only when they don't
+    unanimously agree -- runs `confirmation_judges` more before finalizing
+    the majority verdict. Found for real (issue #117, from IOF Supply
+    Chain's manual spot-check): the *same* unmodified content, judged
+    independently across separate real evaluate.py runs, flipped between
+    "unsupported", "partially_supported", and a clean pass call to call --
+    a single run's 3-judge sample is a noisy estimate exactly where it
+    matters most (an item judges don't agree on), and doing nothing about
+    that noise before finalizing a hard-gate verdict is itself a gap. Costs
+    nothing extra on the (large majority of) unanimous items -- the
+    confirmation round only fires on contested ones, so this stays cheap in
+    aggregate while sharpening precisely the verdicts a single run can't be
+    trusted on. Returns (raw_judgments, majority_verdict, contested,
+    confirmation_round_ran, total_cost_usd)."""
+    raw_judgments = []
+    total_cost = 0.0
+    for judge_index in range(1, judges + 1):
+        parsed, usage = chat_json_call(client, deployment, system_prompt, user_prompt, logger, f"{label_prefix}-{judge_index}:{label_suffix}")
+        raw_judgments.append({"verdict": parsed.get("verdict"), "rationale": parsed.get("rationale")})
+        total_cost += _call_cost(usage)
+    contested = len({j["verdict"] for j in raw_judgments}) > 1
+    confirmation_ran = False
+    if contested and confirmation_judges > 0:
+        confirmation_ran = True
+        for judge_index in range(judges + 1, judges + confirmation_judges + 1):
+            parsed, usage = chat_json_call(client, deployment, system_prompt, user_prompt, logger, f"{label_prefix}-{judge_index}:{label_suffix}")
+            raw_judgments.append({"verdict": parsed.get("verdict"), "rationale": parsed.get("rationale")})
+            total_cost += _call_cost(usage)
+        contested = len({j["verdict"] for j in raw_judgments}) > 1
+    return raw_judgments, _majority_verdict(raw_judgments), contested, confirmation_ran, total_cost
+
+
 def judge_mappings(
     client,
     deployment: str,
@@ -524,13 +670,18 @@ def judge_mappings(
     judges: int = 3,
     domain_data: dict | None = None,
     source_ir: dict | None = None,
+    confirmation_judges: int = 2,
 ) -> dict:
     """`domain_data`/`source_ir` are optional so existing callers (and
     mocked tests) that only have `translation` keep working unchanged --
     but pass both whenever they're available, since without them judges
     only ever see the mapping's own self-reported evidence/rationale and
     cannot catch a confidently-worded claim with no real backing (see the
-    module-level comment above `_class_names_involved`)."""
+    module-level comment above `_class_names_involved`).
+
+    `confirmation_judges`: extra judge calls run only on items the initial
+    `judges` didn't unanimously agree on, before finalizing the majority
+    verdict -- see `_judge_item_with_confirmation`'s docstring for why."""
     source_index = _index_source_classes_by_label(source_ir) if source_ir is not None else None
     iri_index = _index_source_records_by_iri(source_ir) if source_ir is not None else None
     results = []
@@ -550,16 +701,13 @@ def judge_mappings(
             if ground_truth is not None:
                 payload["actual_source_class_definitions"] = ground_truth
         user_prompt = json.dumps(payload, indent=2)
-        raw_judgments = []
-        for judge_index in range(1, judges + 1):
-            parsed, usage = chat_json_call(
-                client, deployment, JUDGE_SYSTEM_PROMPT, user_prompt, logger, f"judge-{judge_index}:{target_path}"
-            )
-            raw_judgments.append({"verdict": parsed.get("verdict"), "rationale": parsed.get("rationale")})
-            total_cost += _call_cost(usage)
-        contested = len({j["verdict"] for j in raw_judgments}) > 1
+        raw_judgments, majority_verdict, contested, confirmation_ran, item_cost = _judge_item_with_confirmation(
+            client, deployment, JUDGE_SYSTEM_PROMPT, user_prompt, logger, "judge", target_path, judges, confirmation_judges,
+        )
+        total_cost += item_cost
         results.append(
-            {"target_path": target_path, "raw_judgments": raw_judgments, "majority_verdict": _majority_verdict(raw_judgments), "contested": contested}
+            {"target_path": target_path, "raw_judgments": raw_judgments, "majority_verdict": majority_verdict,
+             "contested": contested, "confirmation_round": confirmation_ran}
         )
 
     unsupported = [r for r in results if r["majority_verdict"] == "unsupported"]
@@ -731,6 +879,7 @@ def judge_dispositions(
     source_ir: dict,
     logger: RunLogger,
     judges: int = 3,
+    confirmation_judges: int = 2,
 ) -> dict:
     """Independent judging of every non-`mapped` disposition that resolves
     to a real source class/property (layer 3b, hard gate: zero
@@ -739,7 +888,10 @@ def judge_dispositions(
     `_index_source_records_by_iri` doesn't cover) are skipped: there is no
     real source definition to check the exclusion against, same "nothing
     to compare, not a failure" stance `_ground_truth_for_target` already
-    takes elsewhere in this module."""
+    takes elsewhere in this module.
+
+    `confirmation_judges`: see `judge_mappings`/`_judge_item_with_confirmation`
+    -- same contested-items-only confirmation round, same reasoning."""
     iri_index = _index_source_records_by_iri(source_ir)
     mapped_source_iris = _mapped_source_iris_by_disposition(translation)
 
@@ -760,17 +912,13 @@ def judge_dispositions(
             "included_siblings": _sibling_context_for_iri(iri, iri_index, mapped_source_iris),
         }
         user_prompt = json.dumps(payload, indent=2)
-        raw_judgments = []
-        for judge_index in range(1, judges + 1):
-            parsed, usage = chat_json_call(
-                client, deployment, DISPOSITION_JUDGE_SYSTEM_PROMPT, user_prompt, logger, f"disposition-judge-{judge_index}:{iri}"
-            )
-            raw_judgments.append({"verdict": parsed.get("verdict"), "rationale": parsed.get("rationale")})
-            total_cost += _call_cost(usage)
-        contested = len({j["verdict"] for j in raw_judgments}) > 1
+        raw_judgments, majority_verdict, contested, confirmation_ran, item_cost = _judge_item_with_confirmation(
+            client, deployment, DISPOSITION_JUDGE_SYSTEM_PROMPT, user_prompt, logger, "disposition-judge", iri, judges, confirmation_judges,
+        )
+        total_cost += item_cost
         results.append(
             {"source_iri": iri, "disposition": disposition.get("disposition"), "raw_judgments": raw_judgments,
-             "majority_verdict": _majority_verdict(raw_judgments), "contested": contested}
+             "majority_verdict": majority_verdict, "contested": contested, "confirmation_round": confirmation_ran}
         )
 
     unjustified = [r for r in results if r["majority_verdict"] == "unjustified"]
@@ -961,6 +1109,11 @@ def _render_markdown(domain_id: str, report: dict) -> str:
         lines += ["## Relationship/action endpoint citation completeness (hard gate)",
                   f"- ok: {endpoint['ok']}", f"- gaps: {len(endpoint['gaps'])}", ""]
 
+    referential = report.get("referential_consistency")
+    if referential is not None:
+        lines += ["## Referential consistency (report-only)",
+                  f"- ok: {referential['ok']}", f"- issues: {referential['issue_count']}", ""]
+
     rc = report["reverse_coverage"]
     lines += ["## Reverse coverage", f"- coverage: {_pct(rc['coverage'])}", f"- silently dropped: {len(rc['silently_dropped'])}", ""]
 
@@ -1014,6 +1167,7 @@ def run_evaluation(
     out_dir: Path,
     stability_run_paths: list[Path] | None = None,
     judges: int = 3,
+    confirmation_judges: int = 2,
     round_trip_sample_size: int = 5,
     cq_count: int = 10,
     dry_run: bool = False,
@@ -1026,6 +1180,7 @@ def run_evaluation(
     structural = structural_gate(domain_data)
     provenance = provenance_gate(domain_data, translation, source_ir)
     endpoint_citations = endpoint_citation_gate(domain_data, translation)
+    referential_consistency = referential_consistency_gate(domain_data)
     reverse = reverse_coverage(source_ir, translation)
 
     stability = {"note": "no stability_run_paths supplied", "pairs": [], "average_f1": None}
@@ -1049,6 +1204,7 @@ def run_evaluation(
         "structural_validity": structural,
         "provenance_completeness": provenance,
         "endpoint_citation_completeness": endpoint_citations,
+        "referential_consistency": referential_consistency,
         "reverse_coverage": reverse,
         "translation_stability": stability,
         "semantic_judging": None,
@@ -1102,10 +1258,11 @@ def run_evaluation(
     logger.event("evaluate_start", domain=manifest.id)
     try:
         report["semantic_judging"] = judge_mappings(
-            client, azure_config["deployment"], translation, logger, judges=judges, domain_data=domain_data, source_ir=source_ir
+            client, azure_config["deployment"], translation, logger, judges=judges,
+            domain_data=domain_data, source_ir=source_ir, confirmation_judges=confirmation_judges,
         )
         report["disposition_judging"] = judge_dispositions(
-            client, azure_config["deployment"], translation, source_ir, logger, judges=judges
+            client, azure_config["deployment"], translation, source_ir, logger, judges=judges, confirmation_judges=confirmation_judges,
         )
         report["round_trip"] = round_trip_sample(
             client, azure_config["deployment"], domain_data, translation, logger, sample_size=round_trip_sample_size
@@ -1134,6 +1291,7 @@ def main(argv=None) -> int:
     parser.add_argument("--out-dir", type=Path, required=True)
     parser.add_argument("--stability-runs", type=Path, nargs="*", default=None, help="other runs' domain.yaml files, for layer 4")
     parser.add_argument("--judges", type=int, default=3)
+    parser.add_argument("--confirmation-judges", type=int, default=2, help="extra judges run only on contested items before finalizing a verdict")
     parser.add_argument("--round-trip-sample", type=int, default=5)
     parser.add_argument("--cq-count", type=int, default=10)
     parser.add_argument("--dry-run", action="store_true")
@@ -1147,6 +1305,7 @@ def main(argv=None) -> int:
         args.out_dir,
         stability_run_paths=args.stability_runs,
         judges=args.judges,
+        confirmation_judges=args.confirmation_judges,
         round_trip_sample_size=args.round_trip_sample,
         cq_count=args.cq_count,
         dry_run=args.dry_run,

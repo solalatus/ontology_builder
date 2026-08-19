@@ -250,6 +250,78 @@ class FixRoundStabilityRunsTests(unittest.TestCase):
             self.assertNotIn("--stability-runs", captured_argv[0])
 
 
+class FixRoundConfirmationJudgesTests(unittest.TestCase):
+    """Issue #117: --confirmation-judges must reach evaluate.py's argv when
+    the caller passes one, and stay omitted (falling back to evaluate.py's
+    own default) when not -- same forwarding shape as --stability-runs."""
+
+    @staticmethod
+    def _fake_evaluate_main(captured_argv):
+        def fake(argv):
+            captured_argv.append(argv)
+            report_path = Path(argv[argv.index("--out-dir") + 1])
+            report_path.mkdir(parents=True, exist_ok=True)
+            manifest = pipeline_mod.load_manifest(Path(argv[argv.index("--manifest") + 1]))
+            (report_path / f"{manifest.id}.translation-evaluation.json").write_text(
+                json.dumps({"hard_gates_ok": True}), encoding="utf-8"
+            )
+            return 0
+
+        return fake
+
+    def test_confirmation_judges_is_forwarded_when_given(self):
+        captured_argv = []
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            manifest_path = tmp_path / "source-manifest.yaml"
+            manifest_path.write_text(MANIFEST_YAML, encoding="utf-8")
+            domain_yaml_path = tmp_path / "run-1.domain.yaml"
+            domain_yaml_path.write_text("classes: {}\n", encoding="utf-8")
+            translation_path = tmp_path / "run-1.translation.json"
+            translation_path.write_text("{}", encoding="utf-8")
+            source_ir_path = tmp_path / "source_ir.json"
+            source_ir_path.write_text("{}", encoding="utf-8")
+
+            original_main = pipeline_mod.evaluate_mod.main
+            pipeline_mod.evaluate_mod.main = self._fake_evaluate_main(captured_argv)
+            try:
+                pipeline_mod._fix_round(
+                    domain_yaml_path, translation_path, source_ir_path, manifest_path, tmp_path,
+                    round_num=1, judges=1, round_trip_sample=1, cq_count=1, confirmation_judges=4,
+                )
+            finally:
+                pipeline_mod.evaluate_mod.main = original_main
+
+            argv = captured_argv[0]
+            self.assertIn("--confirmation-judges", argv)
+            self.assertEqual(argv[argv.index("--confirmation-judges") + 1], "4")
+
+    def test_confirmation_judges_omitted_when_not_given(self):
+        captured_argv = []
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            manifest_path = tmp_path / "source-manifest.yaml"
+            manifest_path.write_text(MANIFEST_YAML, encoding="utf-8")
+            domain_yaml_path = tmp_path / "run-1.domain.yaml"
+            domain_yaml_path.write_text("classes: {}\n", encoding="utf-8")
+            translation_path = tmp_path / "run-1.translation.json"
+            translation_path.write_text("{}", encoding="utf-8")
+            source_ir_path = tmp_path / "source_ir.json"
+            source_ir_path.write_text("{}", encoding="utf-8")
+
+            original_main = pipeline_mod.evaluate_mod.main
+            pipeline_mod.evaluate_mod.main = self._fake_evaluate_main(captured_argv)
+            try:
+                pipeline_mod._fix_round(
+                    domain_yaml_path, translation_path, source_ir_path, manifest_path, tmp_path,
+                    round_num=1, judges=1, round_trip_sample=1, cq_count=1,
+                )
+            finally:
+                pipeline_mod.evaluate_mod.main = original_main
+
+            self.assertNotIn("--confirmation-judges", captured_argv[0])
+
+
 class RunPipelineDryRunTests(unittest.TestCase):
     def test_dry_run_skips_fetch_extracts_for_real_and_stops_before_compile_api_call(self):
         with tempfile.TemporaryDirectory() as tmp:

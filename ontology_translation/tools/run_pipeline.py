@@ -156,6 +156,7 @@ def _fix_round(
     round_trip_sample: int,
     cq_count: int,
     stability_run_paths: list[Path] | None = None,
+    confirmation_judges: int | None = None,
 ) -> tuple[bool, Path, Path]:
     """Runs one evaluate -> (repair + reinstate as needed) round. Returns
     (hard_gates_ok, current_domain_yaml_path, current_translation_path) --
@@ -170,6 +171,8 @@ def _fix_round(
     ]
     if stability_run_paths:
         eval_argv += ["--stability-runs", *(str(p) for p in stability_run_paths)]
+    if confirmation_judges is not None:
+        eval_argv += ["--confirmation-judges", str(confirmation_judges)]
     rc = _run_stage(f"evaluate (round {round_num})", evaluate_mod.main, eval_argv)
     manifest = load_manifest(manifest_path)
     report_path = eval_out_dir / f"{manifest.id}.translation-evaluation.json"
@@ -187,6 +190,14 @@ def _fix_round(
         print("[pipeline] structural_validity or endpoint_citation_completeness failed -- "
               "not something repair.py/reinstate.py can fix automatically. Stopping.")
         return False, domain_yaml_path, translation_path
+
+    referential = report.get("referential_consistency") or {}
+    if referential.get("issue_count"):
+        # Report-only (see evaluate.py's own module comment on this gate --
+        # real false positives found against Brick's accepted content), so
+        # this never blocks the loop -- just surfaced for whoever reads the
+        # run, same as translation_stability/round_trip/cq_support.
+        print(f"[pipeline] referential_consistency: {referential['issue_count']} issue(s) flagged (report-only, not blocking) -- see the evaluate report for detail.")
 
     semantic_judging = report.get("semantic_judging") or {}
     disposition_judging = report.get("disposition_judging") or {}
@@ -269,6 +280,7 @@ def run_pipeline(
     round_trip_sample: int,
     cq_count: int,
     dry_run: bool,
+    confirmation_judges: int | None = None,
 ) -> int:
     manifest = load_manifest(manifest_path)
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -320,7 +332,7 @@ def run_pipeline(
     for round_num in range(1, max_fix_rounds + 1):
         hard_gates_ok, domain_yaml_path, translation_path = _fix_round(
             domain_yaml_path, translation_path, source_ir_path, manifest_path, out_dir,
-            round_num, judges, round_trip_sample, cq_count, stability_run_paths,
+            round_num, judges, round_trip_sample, cq_count, stability_run_paths, confirmation_judges,
         )
         if hard_gates_ok:
             break
@@ -334,6 +346,8 @@ def run_pipeline(
     ]
     if stability_run_paths:
         final_eval_argv += ["--stability-runs", *(str(p) for p in stability_run_paths)]
+    if confirmation_judges is not None:
+        final_eval_argv += ["--confirmation-judges", str(confirmation_judges)]
     rc = _run_stage("evaluate (final)", evaluate_mod.main, final_eval_argv)
     report_path = final_eval_dir / f"{manifest.id}.translation-evaluation.json"
     report = json.loads(report_path.read_text(encoding="utf-8"))
@@ -352,6 +366,7 @@ def main(argv=None) -> int:
     parser.add_argument("--runs", type=int, default=None, help="override manifest.compiler.runs")
     parser.add_argument("--max-fix-rounds", type=int, default=2, help="max evaluate+repair/reinstate loop iterations")
     parser.add_argument("--judges", type=int, default=3)
+    parser.add_argument("--confirmation-judges", type=int, default=None, help="extra judges on contested items; omit to use evaluate.py's own default")
     parser.add_argument("--round-trip-sample", type=int, default=5)
     parser.add_argument("--cq-count", type=int, default=10)
     parser.add_argument("--dry-run", action="store_true", help="fetch+extract+compile --dry-run only; no API calls, nothing written past the cost estimate")
@@ -360,6 +375,7 @@ def main(argv=None) -> int:
     return run_pipeline(
         args.manifest, args.out_dir, args.source_file, args.runs, args.max_fix_rounds,
         args.judges, args.round_trip_sample, args.cq_count, args.dry_run,
+        confirmation_judges=args.confirmation_judges,
     )
 
 

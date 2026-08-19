@@ -157,6 +157,23 @@ class ProvenanceGateTests(unittest.TestCase):
         self.assertTrue(result["ok"])
         self.assertIn("http://ex.org#NeverExisted", result["unknown_dispositions"])
 
+    def test_orphaned_mapping_fails(self):
+        # Issue #117: the reverse direction of test_missing_element_mapping_fails
+        # -- a mapping citing a target_path that doesn't resolve to any real
+        # domain element (e.g. left behind by a manual edit or a drop that
+        # didn't clean up its own mapping entry).
+        translation = json.loads(json.dumps(TRANSLATION_FULL))
+        translation["mappings"].append({
+            "target_path": "classes.NoLongerExists", "source_iris": [], "source_evidence": "e", "confidence": "low", "rationale": "r",
+        })
+        result = evaluate_mod.provenance_gate(DOMAIN_DATA, translation, SOURCE_IR)
+        self.assertFalse(result["ok"])
+        self.assertIn("classes.NoLongerExists", result["orphaned_mappings"])
+
+    def test_no_orphaned_mappings_is_ok(self):
+        result = evaluate_mod.provenance_gate(DOMAIN_DATA, TRANSLATION_FULL, SOURCE_IR)
+        self.assertEqual(result["orphaned_mappings"], [])
+
 
 class EndpointCitationGateTests(unittest.TestCase):
     def test_fully_covered_is_ok(self):
@@ -214,6 +231,143 @@ class EndpointCitationGateTests(unittest.TestCase):
         translation = json.loads(json.dumps(TRANSLATION_FULL))
         translation["mappings"] = [m for m in translation["mappings"] if m["target_path"] != "relationships[0]"]
         result = evaluate_mod.endpoint_citation_gate(DOMAIN_DATA, translation)
+        self.assertTrue(result["ok"])
+
+
+class CamelToWordsTests(unittest.TestCase):
+    def test_single_lowercase_word(self):
+        self.assertEqual(evaluate_mod._camel_to_words("status"), ["status"])
+
+    def test_camel_case_property_name(self):
+        self.assertEqual(evaluate_mod._camel_to_words("eventType"), ["event", "Type"])
+
+    def test_camel_case_class_name(self):
+        self.assertEqual(evaluate_mod._camel_to_words("PurchaseOrder"), ["Purchase", "Order"])
+
+    def test_multi_word_camel_case(self):
+        self.assertEqual(evaluate_mod._camel_to_words("maxOccupancy"), ["max", "Occupancy"])
+
+
+class ReferentialConsistencyGateTests(unittest.TestCase):
+    """Issue #117: found for real on IOF Supply Chain -- repair.py dropped
+    Shipment.status/PurchaseOrder.status as ungrounded, but rules/actions
+    kept referencing "shipment status"/"purchase order status" in free
+    text, caught only by a human reading the YAML during a manual
+    spot-check. structural_gate never checked prose at all."""
+
+    def test_clean_domain_is_ok(self):
+        domain = {
+            "classes": {"Shipment": {"meaning": "x", "properties": {"weight": {"type": "number"}}}},
+            "rules": {"canDispatch": {"conditions": ["shipment weight is known"]}},
+            "actions": {},
+        }
+        result = evaluate_mod.referential_consistency_gate(domain)
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["issue_count"], 0)
+
+    def test_dropped_property_still_referenced_in_a_rule_condition_is_flagged(self):
+        # The exact real shape found on IOF: PurchaseOrder.status was
+        # dropped as ungrounded, but the rule condition text (never
+        # touched by the drop) still says "purchase order status is
+        # issued".
+        domain = {
+            "classes": {"PurchaseOrder": {"meaning": "x", "properties": {}}, "Shipment": {"meaning": "y", "properties": {"status": {"type": "text"}}}},
+            "rules": {"canPrepareShipment": {"conditions": ["purchase order status is issued", "shipment has a location"]}},
+            "actions": {},
+        }
+        result = evaluate_mod.referential_consistency_gate(domain)
+        self.assertFalse(result["ok"])
+        self.assertEqual(result["issue_count"], 1)
+        issue = result["issues"][0]
+        self.assertEqual(issue["location"], "rules.canPrepareShipment")
+        self.assertEqual(issue["class"], "PurchaseOrder")
+        self.assertEqual(issue["property"], "status")
+
+    def test_dropped_property_still_referenced_in_an_action_effect_is_flagged(self):
+        # "status" must still be real *somewhere* in the domain (here, on
+        # FreightForwarder) for this gate to consider it at all -- matches
+        # the actual IOF shape, where Shipment.status was dropped while
+        # FreightForwarder.status legitimately survived.
+        domain = {
+            "classes": {
+                "Shipment": {"meaning": "x", "properties": {}},
+                "FreightForwarder": {"meaning": "y", "properties": {"status": {"type": "text"}}},
+            },
+            "rules": {},
+            "actions": {"dispatchShipment": {"input": "Shipment", "preconditions": [], "effect": "shipment status becomes dispatched", "verification": "n/a"}},
+        }
+        result = evaluate_mod.referential_consistency_gate(domain)
+        self.assertFalse(result["ok"])
+        issue = result["issues"][0]
+        self.assertEqual(issue["location"], "actions.dispatchShipment")
+        self.assertEqual(issue["field"], "effect")
+        self.assertEqual(issue["property"], "status")
+
+    def test_property_that_still_exists_on_the_named_class_is_not_flagged(self):
+        # Shipment genuinely has status -- this is a real, current claim,
+        # not a dangling one, and must not be flagged.
+        domain = {
+            "classes": {"Shipment": {"meaning": "x", "properties": {"status": {"type": "text"}}}},
+            "rules": {"canDispatch": {"conditions": ["shipment status is prepared"]}},
+            "actions": {},
+        }
+        result = evaluate_mod.referential_consistency_gate(domain)
+        self.assertTrue(result["ok"])
+
+    def test_property_name_alone_with_no_class_named_in_the_same_string_is_not_flagged(self):
+        # Conservative by design: a property name appearing without its
+        # class named in the SAME string is exactly the false-positive
+        # shape this gate must not raise (generic prose using a common
+        # word that happens to also be some other class's property name).
+        domain = {
+            "classes": {"Shipment": {"meaning": "x", "properties": {"status": {"type": "text"}}}, "Order": {"meaning": "y", "properties": {}}},
+            "rules": {"canDoSomething": {"conditions": ["a status is recorded somewhere"]}},
+            "actions": {},
+        }
+        result = evaluate_mod.referential_consistency_gate(domain)
+        self.assertTrue(result["ok"])
+
+    def test_class_named_alone_with_no_real_property_name_in_the_same_string_is_not_flagged(self):
+        domain = {
+            "classes": {"Shipment": {"meaning": "x", "properties": {}}},
+            "rules": {"canDispatch": {"conditions": ["a shipment is identified"]}},
+            "actions": {},
+        }
+        result = evaluate_mod.referential_consistency_gate(domain)
+        self.assertTrue(result["ok"])
+
+    def test_camel_case_property_name_matches_naturally_worded_prose(self):
+        # The real defect involved multi-word camelCase property names
+        # (eventType) referenced in naturally-spaced prose ("event type"),
+        # not just single-word properties like "status" -- must match both.
+        domain = {
+            "classes": {"TrackingEvent": {"meaning": "x", "properties": {}}, "Other": {"meaning": "y", "properties": {"eventType": {"type": "text"}}}},
+            "rules": {"canRecord": {"conditions": ["the tracking event event type is known"]}},
+            "actions": {},
+        }
+        result = evaluate_mod.referential_consistency_gate(domain)
+        self.assertFalse(result["ok"])
+        self.assertEqual(result["issues"][0]["property"], "eventType")
+
+    def test_word_boundary_prevents_partial_word_false_positives(self):
+        # "Shipment" must not match inside "shipping" or similar --
+        # substring matching without \b would be exactly the fragile
+        # heuristic this gate is designed to avoid.
+        domain = {
+            "classes": {"Ship": {"meaning": "x", "properties": {}}},
+            "rules": {"r": {"conditions": ["the shipment status is known"]}},
+            "actions": {},
+        }
+        result = evaluate_mod.referential_consistency_gate(domain)
+        self.assertTrue(result["ok"])  # "Ship" must not match inside "shipment"
+
+    def test_empty_domain_is_ok(self):
+        result = evaluate_mod.referential_consistency_gate({})
+        self.assertTrue(result["ok"])
+
+    def test_non_dict_class_and_action_entries_are_skipped_not_crashed(self):
+        domain = {"classes": {"Broken": "not a dict"}, "rules": {}, "actions": {"AlsoBroken": "not a dict"}}
+        result = evaluate_mod.referential_consistency_gate(domain)
         self.assertTrue(result["ok"])
 
 
@@ -509,6 +663,147 @@ class GroundTruthForTargetTests(unittest.TestCase):
         self.assertIsNone(ground_truth)
 
 
+class ConfirmationRoundTests(unittest.TestCase):
+    """Issue #117: the *same* unmodified content, judged independently
+    across separate real evaluate.py runs, was found to flip between
+    verdicts (unsupported / partially_supported / a clean pass) on IOF
+    Supply Chain's manual spot-check. A single run's N-judge sample is a
+    noisy estimate exactly where it matters most -- an item judges don't
+    already agree on -- so a confirmation round adds more samples only
+    there, before finalizing anything."""
+
+    def test_contested_initial_round_triggers_confirmation_and_more_calls_are_made(self):
+        verdicts_by_call = ["supported", "unsupported", "partially_supported"]
+
+        def responder(i, kw):
+            return json.dumps({"verdict": verdicts_by_call[i % len(verdicts_by_call)], "rationale": "r"})
+
+        FakeClient, calls = _fake_client_class(responder)
+        client = FakeClient()
+        with tempfile.TemporaryDirectory() as tmp:
+            logger = evaluate_mod.RunLogger(Path(tmp) / "log.jsonl")
+            raw, majority, contested, confirmation_ran, cost = evaluate_mod._judge_item_with_confirmation(
+                client, "gpt-5.4", "system prompt", "user prompt", logger, "judge", "target.path",
+                judges=3, confirmation_judges=2,
+            )
+            logger.close()
+
+        self.assertTrue(confirmation_ran)
+        self.assertEqual(len(raw), 5)  # 3 initial + 2 confirmation
+        self.assertEqual(len(calls), 5)
+        self.assertGreater(cost, 0)
+
+    def test_unanimous_initial_round_never_triggers_confirmation_or_extra_calls(self):
+        FakeClient, calls = _fake_client_class(lambda i, kw: json.dumps({"verdict": "supported", "rationale": "r"}))
+        client = FakeClient()
+        with tempfile.TemporaryDirectory() as tmp:
+            logger = evaluate_mod.RunLogger(Path(tmp) / "log.jsonl")
+            raw, majority, contested, confirmation_ran, cost = evaluate_mod._judge_item_with_confirmation(
+                client, "gpt-5.4", "system prompt", "user prompt", logger, "judge", "target.path",
+                judges=3, confirmation_judges=2,
+            )
+            logger.close()
+
+        self.assertFalse(confirmation_ran)
+        self.assertFalse(contested)
+        self.assertEqual(len(raw), 3)  # no confirmation calls -- stays cheap on the common case
+        self.assertEqual(len(calls), 3)
+        self.assertEqual(majority, "supported")
+
+    def test_confirmation_round_can_resolve_a_three_way_tie_into_a_real_majority(self):
+        # Initial 3: one each of unsupported/supported/partially_supported --
+        # a genuine tie, _majority_verdict returns None. Two more judges
+        # both say "unsupported" -- now 3 of 5, a real majority. This is
+        # exactly the mechanism that should have caught IOF's
+        # PurchaseOrder.status flipping between verdicts run to run: more
+        # samples exactly where the first samples couldn't agree.
+        verdicts_by_call = ["unsupported", "supported", "partially_supported", "unsupported", "unsupported"]
+
+        def responder(i, kw):
+            return json.dumps({"verdict": verdicts_by_call[i], "rationale": "r"})
+
+        FakeClient, calls = _fake_client_class(responder)
+        client = FakeClient()
+        with tempfile.TemporaryDirectory() as tmp:
+            logger = evaluate_mod.RunLogger(Path(tmp) / "log.jsonl")
+            raw, majority, contested, confirmation_ran, cost = evaluate_mod._judge_item_with_confirmation(
+                client, "gpt-5.4", "system prompt", "user prompt", logger, "judge", "target.path",
+                judges=3, confirmation_judges=2,
+            )
+            logger.close()
+
+        self.assertTrue(confirmation_ran)
+        self.assertEqual(len(raw), 5)
+        self.assertEqual(majority, "unsupported")
+
+    def test_confirmation_judges_zero_disables_the_mechanism_entirely(self):
+        # Backward compatibility: existing callers that pass
+        # confirmation_judges=0 (or none at all in a caller that hardcodes
+        # it) must see exactly the pre-#117 behavior -- no extra calls ever,
+        # regardless of how contested the initial round is.
+        verdicts_by_call = ["unsupported", "supported", "partially_supported"]
+
+        def responder(i, kw):
+            return json.dumps({"verdict": verdicts_by_call[i], "rationale": "r"})
+
+        FakeClient, calls = _fake_client_class(responder)
+        client = FakeClient()
+        with tempfile.TemporaryDirectory() as tmp:
+            logger = evaluate_mod.RunLogger(Path(tmp) / "log.jsonl")
+            raw, majority, contested, confirmation_ran, cost = evaluate_mod._judge_item_with_confirmation(
+                client, "gpt-5.4", "system prompt", "user prompt", logger, "judge", "target.path",
+                judges=3, confirmation_judges=0,
+            )
+            logger.close()
+
+        self.assertFalse(confirmation_ran)
+        self.assertEqual(len(raw), 3)
+        self.assertIsNone(majority)
+        self.assertTrue(contested)
+
+    def test_judge_mappings_wires_confirmation_through_and_reports_it(self):
+        # Integration-level: judge_mappings itself must actually use the
+        # confirmation mechanism and surface whether it fired per result,
+        # not just the underlying helper in isolation.
+        verdicts_by_call = ["supported", "unsupported", "partially_supported", "unsupported", "unsupported"]
+
+        def responder(i, kw):
+            return json.dumps({"verdict": verdicts_by_call[i], "rationale": "r"})
+
+        FakeClient, calls = _fake_client_class(responder)
+        client = FakeClient()
+        translation = {"mappings": [TRANSLATION_FULL["mappings"][0]]}
+        with tempfile.TemporaryDirectory() as tmp:
+            logger = evaluate_mod.RunLogger(Path(tmp) / "log.jsonl")
+            result = evaluate_mod.judge_mappings(client, "gpt-5.4", translation, logger, judges=3, confirmation_judges=2)
+            logger.close()
+
+        self.assertEqual(len(calls), 5)
+        self.assertTrue(result["results"][0]["confirmation_round"])
+        self.assertEqual(result["results"][0]["majority_verdict"], "unsupported")
+        self.assertEqual(result["unsupported_count"], 1)
+
+    def test_judge_dispositions_wires_confirmation_through_and_reports_it(self):
+        verdicts_by_call = ["justified", "unjustified", "partially_justified", "unjustified", "unjustified"]
+
+        def responder(i, kw):
+            return json.dumps({"verdict": verdicts_by_call[i], "rationale": "r"})
+
+        translation = {"dispositions": [{"source_iri": "http://ex.org#Compressor", "disposition": "out_of_scope", "note": "n"}]}
+        source_ir = {"classes": [{"iri": "http://ex.org#Compressor", "kind": "class", "labels": ["Compressor"], "definitions": [], "parents": []}]}
+        FakeClient, calls = _fake_client_class(responder)
+        client = FakeClient()
+        with tempfile.TemporaryDirectory() as tmp:
+            logger = evaluate_mod.RunLogger(Path(tmp) / "log.jsonl")
+            result = evaluate_mod.judge_dispositions(client, "gpt-5.4", translation, source_ir, logger, judges=3, confirmation_judges=2)
+            logger.close()
+
+        self.assertEqual(len(calls), 5)
+        self.assertTrue(result["results"][0]["confirmation_round"])
+        self.assertEqual(result["results"][0]["majority_verdict"], "unjustified")
+        self.assertEqual(result["unjustified_count"], 1)
+
+
 class JudgeMappingsTests(unittest.TestCase):
     def test_majority_verdict_computed_per_mapping(self):
         # 3 judges per mapping x 6 mappings = 18 calls. Alternate verdicts
@@ -523,7 +818,11 @@ class JudgeMappingsTests(unittest.TestCase):
         client = FakeClient()
         with tempfile.TemporaryDirectory() as tmp:
             logger = evaluate_mod.RunLogger(Path(tmp) / "log.jsonl")
-            result = evaluate_mod.judge_mappings(client, "gpt-5.4", TRANSLATION_FULL, logger, judges=3)
+            # confirmation_judges=0: every mapping here is deliberately
+            # contested ([S, S, U] each time), which would otherwise trigger
+            # ConfirmationRoundTests' own mechanism -- pinned off so this
+            # test keeps verifying only the base 3-judge majority math.
+            result = evaluate_mod.judge_mappings(client, "gpt-5.4", TRANSLATION_FULL, logger, judges=3, confirmation_judges=0)
             logger.close()
 
         self.assertEqual(len(calls), len(TRANSLATION_FULL["mappings"]) * 3)
@@ -555,7 +854,9 @@ class JudgeMappingsTests(unittest.TestCase):
         client = FakeClient()
         with tempfile.TemporaryDirectory() as tmp:
             logger = evaluate_mod.RunLogger(Path(tmp) / "log.jsonl")
-            result = evaluate_mod.judge_mappings(client, "gpt-5.4", TRANSLATION_FULL, logger, judges=3)
+            # confirmation_judges=0: isolating _majority_verdict's 3-way-tie
+            # handling from ConfirmationRoundTests' separate mechanism.
+            result = evaluate_mod.judge_mappings(client, "gpt-5.4", TRANSLATION_FULL, logger, judges=3, confirmation_judges=0)
             logger.close()
 
         self.assertTrue(all(r["majority_verdict"] is None for r in result["results"]))
@@ -700,7 +1001,12 @@ class JudgeMappingsTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             logger = evaluate_mod.RunLogger(Path(tmp) / "log.jsonl")
             translation = {"mappings": [TRANSLATION_FULL["mappings"][0]]}
-            result = evaluate_mod.judge_mappings(client, "gpt-5.4", translation, logger, judges=3)
+            # confirmation_judges=0: this test is specifically about the raw
+            # 3-judge contested signal itself, not the confirmation-round
+            # mechanism (covered separately by ConfirmationRoundTests) --
+            # verdicts_by_call has exactly 3 entries and would IndexError if
+            # a confirmation round fired.
+            result = evaluate_mod.judge_mappings(client, "gpt-5.4", translation, logger, judges=3, confirmation_judges=0)
             logger.close()
 
         self.assertEqual(result["results"][0]["majority_verdict"], "supported")
@@ -840,7 +1146,7 @@ class JudgeDispositionsTests(unittest.TestCase):
         self.assertEqual(captured["payload"]["included_siblings"], [])
 
 
-class JudgeDispositionsTests(unittest.TestCase):
+class JudgeDispositionsCoreTests(unittest.TestCase):
     def test_only_non_mapped_resolvable_dispositions_are_judged(self):
         # "mapped" dispositions are judge_mappings' job, not this layer's.
         # A disposition whose source_iri doesn't resolve to a real class/
@@ -900,7 +1206,11 @@ class JudgeDispositionsTests(unittest.TestCase):
         client = FakeClient()
         with tempfile.TemporaryDirectory() as tmp:
             logger = evaluate_mod.RunLogger(Path(tmp) / "log.jsonl")
-            result = evaluate_mod.judge_dispositions(client, "gpt-5.4", translation, source_ir, logger, judges=3)
+            # confirmation_judges=0: this test is specifically about the raw
+            # 3-judge contested signal (covered separately by
+            # ConfirmationRoundTests); verdicts_by_call has exactly 3
+            # entries and would IndexError if a confirmation round fired.
+            result = evaluate_mod.judge_dispositions(client, "gpt-5.4", translation, source_ir, logger, judges=3, confirmation_judges=0)
             logger.close()
 
         self.assertEqual(result["contested_count"], 1)
@@ -1119,6 +1429,69 @@ class RunEvaluationLiveMockedTests(unittest.TestCase):
             self.assertIsNotNone(eval_json["round_trip"]["average_score"])
             self.assertEqual(eval_json["cq_support"]["support_score"], 1.0)
             self.assertTrue((out_dir / "evaluate.log.jsonl").exists())
+
+    def test_referential_consistency_issues_do_not_fail_the_overall_hard_gate(self):
+        # Report-only, per evaluate.py's own module comment on this gate --
+        # real false positives were found against Brick's already-accepted
+        # content ("occupied"/"mode" used as ordinary English, coincidentally
+        # also real property names elsewhere). This must never block
+        # hard_gates_ok, only surface in the report.
+        def responder(i, kw):
+            content = kw["messages"][0]["content"]
+            if "EXCLUDE a source ontology element" in content:
+                return json.dumps({"verdict": "justified", "rationale": "ok"})
+            if "independent judge" in content:
+                return json.dumps({"verdict": "supported", "rationale": "ok"})
+            if "Compare a blind reconstruction" in content:
+                return json.dumps({"score": 0.9, "rationale": "close"})
+            if "real-world concept" in content:
+                return json.dumps({"reconstruction": "a device that moves air"})
+            if "not the broader source material it was compiled from" in content:
+                return json.dumps({"questions": ["Which fan serves which zone?"]})
+            if "judge" in content.lower() and "orientation" in content:
+                return json.dumps({"supported": True, "rationale": "covered"})
+            raise AssertionError(f"unexpected prompt: {content[:80]}")
+
+        FakeClient, calls = _fake_client_class(responder)
+
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            manifest_path = tmp_path / "source-manifest.yaml"
+            manifest_path.write_text(
+                "id: test-domain\nsource_url: https://example.org/x.rdf\nscope:\n  roots: []\ncompiler:\n  prompt_version: compiler-v1\n  runs: 3\n",
+                encoding="utf-8",
+            )
+            import yaml
+
+            # Fan.status is real; Zone has no properties at all -- "zone
+            # status" in the rule text below is a genuine dangling
+            # reference, the exact shape found on IOF Supply Chain.
+            domain_data = json.loads(json.dumps(DOMAIN_DATA))
+            domain_data["rules"]["canRunFan"]["conditions"] = ["zone status is above threshold"]
+
+            domain_yaml_path = tmp_path / "run-1.domain.yaml"
+            domain_yaml_path.write_text(yaml.safe_dump(domain_data), encoding="utf-8")
+            translation_path = tmp_path / "run-1.translation.json"
+            translation_path.write_text(json.dumps(TRANSLATION_FULL), encoding="utf-8")
+            source_ir_path = tmp_path / "source_ir.json"
+            source_ir_path.write_text(json.dumps(SOURCE_IR), encoding="utf-8")
+            out_dir = tmp_path / "out"
+
+            with mock.patch.object(
+                evaluate_mod,
+                "load_azure_config",
+                return_value={"endpoint": "https://fake/", "api_key": "fake", "api_version": "v1", "deployment": "gpt-5.4"},
+            ), mock.patch("openai.AzureOpenAI", FakeClient):
+                rc = evaluate_mod.run_evaluation(
+                    domain_yaml_path, translation_path, source_ir_path, manifest_path, out_dir,
+                    judges=1, round_trip_sample_size=1, cq_count=1, dry_run=False,
+                )
+
+            self.assertEqual(rc, 0)
+            eval_json = json.loads((out_dir / "test-domain.translation-evaluation.json").read_text(encoding="utf-8"))
+            self.assertFalse(eval_json["referential_consistency"]["ok"])
+            self.assertEqual(eval_json["referential_consistency"]["issue_count"], 1)
+            self.assertTrue(eval_json["hard_gates_ok"])
 
     def test_majority_unjustified_disposition_fails_the_overall_hard_gate(self):
         def responder(i, kw):

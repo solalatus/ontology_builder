@@ -248,6 +248,14 @@ This is still bounded, not free invention:
   qualitative comparison between two included concepts is often
   supportable; an invented precise threshold or timing usually is not,
   unless the source itself states one).
+- **A rule `conditions` entry or action `effect`/`verification` string that
+  names a specific class property (e.g. "invoice status is approved") is
+  only honest when that class actually has that property** in the
+  `classes` section you are emitting — never describe a property-based
+  state a class doesn't actually carry, even when it reads naturally.
+  Found for real (issue #109/#117): free-text rule/action content is easy
+  to leave stale once written, and nothing else checks it against the
+  actual property list.
 - **Empty `rules: {}` / `actions: {}` is still the correct output** when a
   domain is genuinely and entirely descriptive with no operational angle
   even at the standard-practice level (this is expected for some domains,
