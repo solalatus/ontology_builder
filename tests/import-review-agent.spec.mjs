@@ -241,6 +241,52 @@ test("a free-text note routes to the execution agent, which can touch an element
   });
 });
 
+test("remove_ontology_elements removing a class and a property report correct, singular kind labels -- not the naive-plural-strip bug a live run surfaced", async () => {
+  await withPage(async (page) => {
+    await addNodeViaDblClick(page, 300, 300, "Widget");
+    await addNodeViaDblClick(page, 600, 300, "Obsolete");
+    await page.evaluate(() => {
+      const widget = window.__kg.state.nodes.find((n) => n.label === "Widget");
+      widget.properties.push({ id: "p1", name: "legacyFlag", type: "boolean", unit: null, allowed: null });
+    });
+    await connectAgent(page);
+    const json = await exportJson(page);
+    const mutated = await page.evaluate((text) => {
+      const root = JSON.parse(text);
+      root.nodes.find((n) => n.label === "Widget").meaning = "Trimmed down.";
+      return JSON.stringify(root);
+    }, json);
+
+    mockChatSequence(page, [
+      () => toolCallBody([
+        toolCall("call_1", "apply_ontology_changes", { yaml: "classes:\n  Widget:\n    meaning: Trimmed down.\n" }),
+        toolCall("call_2", "remove_ontology_elements", { classes: ["Obsolete"], properties: [{ className: "Widget", name: "legacyFlag" }] }),
+      ]),
+      () => textBody("Done."),
+    ]);
+
+    await openReviewFor(page, mutated);
+    const items = await page.evaluate(() => window.__kg.importReview.getItems());
+    await page.evaluate((id) => window.__kg.importReview.setNote(id, "Trim the obsolete class and the legacy flag property, they're both dead weight."), items[0].id);
+
+    await page.click("#import-review-apply");
+    await page.waitForFunction(() => !window.__kg.importReview.isApplyPending());
+    const result = await page.evaluate(() => window.__kg.importReview.getLastResult());
+    assert.equal(result.ok, true);
+    const removedKinds = result.touched.filter((t) => t.action === "removed").map((t) => t.kind).sort();
+    assert.deepEqual(removedKinds, ["class", "property"], "must be the singular kind names importReviewKindLabel() actually knows, not a naive plural strip");
+
+    // And the result panel must actually render a real label for each, not a blank one.
+    const resultLines = await page.locator("#import-review-result-list li").allTextContents();
+    assert.ok(resultLines.some((l) => l.startsWith("Class:")), `expected a "Class:" line, got ${JSON.stringify(resultLines)}`);
+    assert.ok(resultLines.some((l) => l.startsWith("Property:")), `expected a "Property:" line, got ${JSON.stringify(resultLines)}`);
+
+    assert.equal(await page.evaluate(() => window.__kg.state.nodes.some((n) => n.label === "Obsolete")), false);
+    const widgetProps = await page.evaluate(() => window.__kg.state.nodes.find((n) => n.label === "Widget").properties.map((p) => p.name));
+    assert.deepEqual(widgetProps, []);
+  });
+});
+
 test("an execution-agent failure leaves the deterministic bucket's changes standing and reports the failure, not silent", async () => {
   await withPageAllowingResourceErrors(async (page) => {
     await addNodeViaDblClick(page, 300, 300, "Widget");

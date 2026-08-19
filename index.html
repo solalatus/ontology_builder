@@ -11586,8 +11586,16 @@ function executeImportReviewMergerTool(call, touched) {
       actions: Array.isArray(args.actions) ? args.actions : [],
       competencyQuestions: Array.isArray(args.competencyQuestions) ? args.competencyQuestions : [],
     });
+    // Explicit map, not a naive /s$/ strip -- "classes" -> "classe" and
+    // "properties" -> "propertie" both fail to match any known kind in
+    // importReviewKindLabel()'s switch, which silently renders as a blank
+    // label in the post-Apply summary. Found live: a real merger call
+    // removing actual classes surfaced this (every mocked test happened to
+    // only exercise "rules"/"actions", where the naive strip works by
+    // coincidence).
+    const REMOVED_KIND_SINGULAR = { classes: "class", relationships: "relationship", properties: "property", rules: "rule", actions: "action", competencyQuestions: "cq" };
     for (const [kind, names] of Object.entries(removed)) {
-      for (const n of names) touched.push({ kind: kind === "competencyQuestions" ? "cq" : kind.replace(/s$/, ""), name: n, action: "removed" });
+      for (const n of names) touched.push({ kind: REMOVED_KIND_SINGULAR[kind] || kind, name: n, action: "removed" });
     }
     const total = Object.values(removed).reduce((s, arr) => s + arr.length, 0);
     return `Removed ${total} element(s).`;
