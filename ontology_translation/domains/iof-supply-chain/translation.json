@@ -424,9 +424,9 @@
       "source_iris": [
         "https://spec.industrialontologies.org/ontology/construct/ConsigningProcess"
       ],
-      "source_evidence": "Class label \"consigning process\".",
+      "source_evidence": "The source defines a class labeled \"consigning process\".",
       "confidence": "high",
-      "rationale": "ConsigningProcess is directly present and relevant to shipper participation in dispatch."
+      "rationale": "The class meaning is a plain restatement of the source label and is supported as the existence of a consigning-related process class, without any added claim about shipper participation or dispatch structure."
     },
     {
       "target_path": "classes.FreightForwardingProcess",

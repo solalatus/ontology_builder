@@ -15,6 +15,10 @@
 - ok: True
 - gaps: 0
 
+## Referential consistency (report-only)
+- ok: True
+- issues: 0
+
 ## Reverse coverage
 - coverage: 100.0%
 - silently dropped: 0
@@ -24,7 +28,7 @@
 
 ## Independent judging of exclusions (hard gate: zero majority-unjustified)
 - majority-unjustified exclusions: 0
-- contested exclusions: 13
+- contested exclusions: 9
 
 ## Translation stability (report-only, heuristic)
 - classes: F1=0.89
@@ -33,7 +37,7 @@
 - allowed_values: F1=0.09
 
 ## Round-trip score (diagnostic, report-only)
-- sampled: 5, average score: 0.66
+- sampled: 5, average score: 0.58
 
 ## Competency-question support (report-only)
-- support score: 100.0% (10 CQs)
+- support score: 90.0% (10 CQs)
