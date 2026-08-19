@@ -801,6 +801,75 @@
     background: var(--btn-bg-hover);
   }
 
+  /* Graph finder (issue #121). Narrower and shorter than the 640px/85vh
+     details-dialog default -- this is a command-palette-style picker, not
+     a form with a lot of fields to scroll through. */
+  .graph-finder-dialog {
+    max-width: 480px;
+    max-height: 60vh;
+  }
+
+  .graph-finder-results {
+    max-height: 50vh;
+    overflow-y: auto;
+  }
+
+  .graph-finder-result {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    padding: 8px 10px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+  }
+
+  .graph-finder-result:hover,
+  .graph-finder-result.finder-active {
+    background: var(--btn-bg-hover);
+  }
+
+  .graph-finder-result-kind {
+    flex: 0 0 auto;
+    font-size: 11px;
+    font-weight: 600;
+    opacity: 0.6;
+    text-transform: uppercase;
+  }
+
+  .graph-finder-result-label {
+    flex: 1 1 auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .graph-finder-result-owner {
+    flex: 0 0 auto;
+    font-size: 12px;
+    opacity: 0.6;
+  }
+
+  .graph-finder-empty {
+    font-size: 13px;
+    opacity: 0.7;
+    margin: 8px 0 0;
+  }
+
+  /* Brief highlight flash for a search result that scrolls a DOM list to
+     an item (a rule/action/CQ card, or a property row inside the Details
+     dialog). Nodes/edges get the existing canvas selection-highlight
+     rendering instead (state.selection, read by drawNodes/drawEdges) --
+     this is only for targets whose "selected" state has no canvas
+     representation of its own. */
+  @keyframes finder-flash {
+    0%, 100% { background-color: transparent; }
+    25%, 75% { background-color: color-mix(in srgb, var(--accent) 30%, transparent); }
+  }
+
+  .finder-flash {
+    animation: finder-flash 1.2s ease-in-out;
+  }
+
   /* Agent Ontology — Rules/Actions manager cards. Same bordered-card
      treatment as .details-property-row above, plus a subtle background
      tint and shadow on top of it -- with a dozen-plus cards stacked in a
@@ -1607,6 +1676,7 @@
   </div>
 
   <div class="toolbar-group">
+    <button id="btn-graph-finder" type="button" data-tooltip="Ctrl+F">Keresés</button>
     <button id="btn-domain-model" type="button" class="toolbar-primary">Doménmodell</button>
     <button id="btn-autolayout" type="button">Automatikus elrendezés</button>
     <button id="btn-undo" type="button">Visszavonás</button>
@@ -1877,6 +1947,24 @@
   </div>
 </div>
 
+<!-- Graph finder (issue #121): Ctrl+F search over every element -- classes,
+     properties, relationships, competency questions, rules, actions -- not
+     just canvas nodes/edges. Reuses .modal-overlay/.modal-dialog/
+     .details-dialog like every other dialog. No footer/Save-Cancel: this is
+     a command-palette-style picker, not a form -- picking a result or
+     pressing Escape are the only two ways out. -->
+<div id="graph-finder-overlay" class="modal-overlay">
+  <div id="graph-finder-dialog" class="modal-dialog details-dialog graph-finder-dialog" role="dialog" aria-modal="true" aria-labelledby="graph-finder-title">
+    <div class="details-dialog-body">
+      <h2 id="graph-finder-title" class="modal-title">Find</h2>
+      <input id="graph-finder-input" type="text" class="details-filter-input" autocomplete="off"
+        role="combobox" aria-expanded="true" aria-controls="graph-finder-results" aria-autocomplete="list">
+      <div id="graph-finder-results" class="details-list graph-finder-results" role="listbox" aria-label="Search results"></div>
+      <p id="graph-finder-empty" class="graph-finder-empty" hidden>No matches</p>
+    </div>
+  </div>
+</div>
+
 <!-- Ontology Change Review (issue #74), retrospective scope only this round
      -- reuses .modal-overlay/.modal-dialog/.details-dialog like every other
      large dialog. Read-only: opening/navigating/switching tabs here never
@@ -2127,6 +2215,18 @@ const STRINGS = {
     save: "Save",
     // Agent Ontology (agent_ontology_spec.md §7) — Rules/Actions manager.
     domainModel: "Domain Model",
+    // Graph finder (issue #121): Ctrl+F search over every element —
+    // classes, properties, relationships, competency questions, rules,
+    // actions — not just nodes/edges on the canvas.
+    finderTitle: "Find",
+    finderPlaceholder: "Search classes, properties, relationships, rules, actions, questions…",
+    finderEmpty: "No matches",
+    finderKindClass: "Class",
+    finderKindProperty: "Property",
+    finderKindRelationship: "Relationship",
+    finderKindRule: "Rule",
+    finderKindAction: "Action",
+    finderKindCq: "Question",
     // Competency Questions (issue #94).
     competencyQuestionsLabel: "Competency questions",
     competencyQuestionsFilterPlaceholder: "Filter competency questions…",
@@ -2421,6 +2521,18 @@ const STRINGS = {
     save: "Mentés",
     // Agent Ontology (agent_ontology_spec.md §7) — Rules/Actions manager.
     domainModel: "Doménmodell",
+    // Kereső (issue #121): Ctrl+F keresés minden elem között — osztályok,
+    // tulajdonságok, kapcsolatok, kompetenciakérdések, szabályok, műveletek
+    // — nem csak a vászon csomópontjai/élei között.
+    finderTitle: "Keresés",
+    finderPlaceholder: "Keresés osztályok, tulajdonságok, kapcsolatok, szabályok, műveletek, kérdések között…",
+    finderEmpty: "Nincs találat",
+    finderKindClass: "Osztály",
+    finderKindProperty: "Tulajdonság",
+    finderKindRelationship: "Kapcsolat",
+    finderKindRule: "Szabály",
+    finderKindAction: "Művelet",
+    finderKindCq: "Kérdés",
     // Kompetenciakérdések (issue #94).
     competencyQuestionsLabel: "Kompetenciakérdések",
     competencyQuestionsFilterPlaceholder: "Kompetenciakérdések szűrése…",
@@ -2688,6 +2800,7 @@ function applyLanguage() {
   updateConsistencyBadge({ recompute: false });
   if (consistencyOverlayOpen) renderConsistencyDialog();
   byId("btn-connect").textContent = t("connect");
+  byId("btn-graph-finder").textContent = t("finderTitle");
   byId("btn-domain-model").textContent = t("domainModel");
   byId("btn-autolayout").textContent = t("autoLayout");
   byId("btn-undo").textContent = t("undo");
@@ -2720,6 +2833,10 @@ function applyLanguage() {
   byId("details-cancel").textContent = t("cancel");
   byId("details-save").textContent = t("save");
   updateDetailsTitle(); // no-op if the dialog isn't open — see its own definition
+  byId("graph-finder-title").textContent = t("finderTitle");
+  byId("graph-finder-input").placeholder = t("finderPlaceholder");
+  byId("graph-finder-empty").textContent = t("finderEmpty");
+  if (finderOpen) renderFinderResults(graphFinderInput.value); // re-render open results so kind labels (Class/Rule/…) re-translate too
   byId("domain-model-title").textContent = t("domainModel");
   updateDomainModelCounts(); // sets every section label, including its "(N)" count
   byId("domain-model-cq-filter").placeholder = t("competencyQuestionsFilterPlaceholder");
@@ -4831,7 +4948,7 @@ let activeConfirm = null;
 // consts' own declaration order.
 function isAnyModalOpen() {
   return ["confirm-overlay", "details-overlay", "domain-model-overlay", "import-overlay", "welcome-overlay", "help-overlay",
-      "consistency-overlay", "review-changes-overlay", "agent-connect-overlay", "agent-azure-config-overlay"]
+      "consistency-overlay", "review-changes-overlay", "agent-connect-overlay", "agent-azure-config-overlay", "graph-finder-overlay"]
     .some((id) => document.getElementById(id).style.display === "flex");
 }
 
@@ -5463,6 +5580,242 @@ domainModelOverlay.addEventListener("click", (e) => {
 document.getElementById("btn-domain-model").addEventListener("click", openDomainModelDialog);
 
 // ---------------------------------------------------------------------------
+// Graph finder (issue #121): Ctrl+F search over every element -- classes,
+// properties, relationships, competency questions, rules, actions -- not
+// just canvas nodes/edges. Each result kind routes differently on selection
+// (design decisions confirmed with the repo owner during planning):
+//   - node/edge: canvas highlight only (selectNode/selectEdge, the same
+//     highlight rendering every ordinary click-select already uses), plus
+//     pan the camera to it (never zoom) if it's currently off-screen.
+//   - competency question / rule / action: opens the Domain Model dialog,
+//     scrolls to, and highlights that item's card.
+//   - property: has no canvas presence of its own and isn't in the Domain
+//     Model dialog either -- it lives in its owning class's Details dialog,
+//     so that's what opens/scrolls/highlights instead.
+// ---------------------------------------------------------------------------
+
+const graphFinderOverlay = document.getElementById("graph-finder-overlay");
+const graphFinderInput = document.getElementById("graph-finder-input");
+const graphFinderResultsEl = document.getElementById("graph-finder-results");
+const graphFinderEmptyEl = document.getElementById("graph-finder-empty");
+
+let finderOpen = false;
+let finderResults = [];
+let finderActiveIndex = -1;
+
+// Flat, rebuilt fresh every time the finder's query changes (it's only ever
+// open briefly, so staleness isn't a real risk) -- {kind, id, label,
+// ownerId?, ownerLabel?}. `kind` is one of 'node', 'edge', 'property',
+// 'rule', 'action', 'cq'. `ownerLabel` is shown next to the result as
+// context (an edge's endpoints, a property's owning class); `ownerId` is
+// only set for 'property', where it's needed to route the result (which
+// class's Details dialog to open).
+function buildFinderIndex() {
+  const index = [];
+  for (const n of state.nodes) index.push({ kind: "node", id: n.id, label: n.label });
+  for (const e of state.edges) {
+    const src = state.nodes.find((n) => n.id === e.source);
+    const tgt = state.nodes.find((n) => n.id === e.target);
+    index.push({
+      kind: "edge", id: e.id, label: e.relation || t("defaultRelation"),
+      ownerLabel: src && tgt ? `${src.label} → ${tgt.label}` : undefined,
+    });
+  }
+  for (const n of state.nodes) {
+    for (const p of n.properties) {
+      if (!p.name) continue;
+      index.push({ kind: "property", id: p.id, label: p.name, ownerId: n.id, ownerLabel: n.label });
+    }
+  }
+  for (const r of state.rules) index.push({ kind: "rule", id: r.id, label: r.name });
+  for (const a of state.actions) index.push({ kind: "action", id: a.id, label: a.name });
+  for (const cq of state.competencyQuestions) index.push({ kind: "cq", id: cq.id, label: cq.text });
+  return index;
+}
+
+function finderKindLabel(kind) {
+  switch (kind) {
+    case "node": return t("finderKindClass");
+    case "edge": return t("finderKindRelationship");
+    case "property": return t("finderKindProperty");
+    case "rule": return t("finderKindRule");
+    case "action": return t("finderKindAction");
+    case "cq": return t("finderKindCq");
+    default: return "";
+  }
+}
+
+// Plain substring/case-insensitive, matching this codebase's one existing
+// filter convention (filterDomainModelCards above) rather than introducing
+// fuzzy matching as a second, inconsistent search behavior.
+function searchFinderIndex(query) {
+  const q = query.trim().toLowerCase();
+  const index = buildFinderIndex();
+  if (!q) return index;
+  return index.filter((item) => item.label.toLowerCase().includes(q) || (item.ownerLabel || "").toLowerCase().includes(q));
+}
+
+function renderFinderResults(query) {
+  finderResults = searchFinderIndex(query);
+  finderActiveIndex = finderResults.length ? 0 : -1;
+  graphFinderResultsEl.textContent = "";
+  graphFinderEmptyEl.hidden = finderResults.length > 0;
+  finderResults.forEach((item, i) => {
+    const row = document.createElement("div");
+    row.className = "graph-finder-result";
+    row.setAttribute("role", "option");
+    row.dataset.index = String(i);
+    if (i === finderActiveIndex) row.classList.add("finder-active");
+
+    const kindEl = document.createElement("span");
+    kindEl.className = "graph-finder-result-kind";
+    kindEl.textContent = finderKindLabel(item.kind);
+
+    const labelEl = document.createElement("span");
+    labelEl.className = "graph-finder-result-label";
+    labelEl.textContent = item.label;
+
+    row.append(kindEl, labelEl);
+
+    if (item.ownerLabel) {
+      const ownerEl = document.createElement("span");
+      ownerEl.className = "graph-finder-result-owner";
+      ownerEl.textContent = item.ownerLabel;
+      row.append(ownerEl);
+    }
+
+    row.addEventListener("click", () => selectFinderResult(item));
+    graphFinderResultsEl.appendChild(row);
+  });
+}
+
+function setFinderActiveIndex(i) {
+  if (!finderResults.length) return;
+  finderActiveIndex = (i + finderResults.length) % finderResults.length;
+  for (const row of graphFinderResultsEl.children) {
+    row.classList.toggle("finder-active", Number(row.dataset.index) === finderActiveIndex);
+  }
+  const activeRow = graphFinderResultsEl.children[finderActiveIndex];
+  if (activeRow) activeRow.scrollIntoView({ block: "nearest" });
+}
+
+// Pans (never zooms) the camera just enough to bring one world point back
+// into the visible viewport -- a no-op if it's already visible. Reuses
+// visibleWorldRect() (the same culling rect drawNodes/drawEdges already use
+// to decide what to bother rendering) rather than a second definition of
+// "on screen." Deliberately separate from fitViewToContent(), which fits
+// *everything*; this only moves the camera when the one specific target
+// actually needs it, so an already-visible result doesn't cause a jarring,
+// unnecessary camera jump.
+function panToWorldPointIfOffscreen(wx, wy) {
+  const rect = visibleWorldRect();
+  const MARGIN = 40; // world units of breathing room, not flush with the edge
+  if (wx >= rect.x + MARGIN && wx <= rect.x + rect.w - MARGIN && wy >= rect.y + MARGIN && wy <= rect.y + rect.h - MARGIN) return;
+  camera.panX = cssWidth / 2 - wx * camera.scale;
+  camera.panY = cssHeight / 2 - wy * camera.scale;
+  markDirty();
+}
+
+function panToNodeIfOffscreen(nodeId) {
+  const n = state.nodes.find((node) => node.id === nodeId);
+  if (!n) return;
+  panToWorldPointIfOffscreen(n.x + n.w / 2, n.y + n.h / 2);
+}
+
+function panToEdgeIfOffscreen(edgeId) {
+  const e = state.edges.find((edge) => edge.id === edgeId);
+  if (!e) return;
+  const src = state.nodes.find((n) => n.id === e.source);
+  const tgt = state.nodes.find((n) => n.id === e.target);
+  if (!src || !tgt) return;
+  panToWorldPointIfOffscreen(
+    (src.x + src.w / 2 + tgt.x + tgt.w / 2) / 2,
+    (src.y + src.h / 2 + tgt.y + tgt.h / 2) / 2,
+  );
+}
+
+// Flashes a brief highlight on a DOM element already scrolled into view --
+// used for the three result kinds with no canvas presence of their own
+// (rule/action/CQ cards, property rows), which get the .finder-flash CSS
+// animation instead of the canvas selection-highlight nodes/edges already
+// have.
+function flashFinderTarget(el) {
+  if (!el) return;
+  el.scrollIntoView({ block: "center" });
+  el.classList.remove("finder-flash");
+  void el.offsetWidth; // force a reflow so re-adding the class restarts the animation even if this same element was just flashed a moment ago
+  el.classList.add("finder-flash");
+}
+
+function selectFinderResult(item) {
+  closeGraphFinder();
+  if (item.kind === "node") {
+    selectNode(item.id);
+    panToNodeIfOffscreen(item.id);
+  } else if (item.kind === "edge") {
+    selectEdge(item.id);
+    panToEdgeIfOffscreen(item.id);
+  } else if (item.kind === "property") {
+    openDetailsDialog("node", item.ownerId);
+    flashFinderTarget(detailsPropertiesList.querySelector(`[data-prop-id="${item.id}"]`));
+  } else if (item.kind === "rule") {
+    openDomainModelDialog();
+    flashFinderTarget(domainModelRulesList.querySelector(`[data-rule-id="${item.id}"]`));
+  } else if (item.kind === "action") {
+    openDomainModelDialog();
+    flashFinderTarget(domainModelActionsList.querySelector(`[data-action-id="${item.id}"]`));
+  } else if (item.kind === "cq") {
+    openDomainModelDialog();
+    flashFinderTarget(domainModelCqList.querySelector(`[data-cq-id="${item.id}"]`));
+  }
+}
+
+// Closes whatever single dialog is currently open, if any. Every close
+// function here already guards "nothing to close" as a safe no-op (see
+// e.g. closeConfirmDialog/closeDetailsDialog above), so this is just an
+// unconditional call to each one, not a conditional dispatch keyed off
+// which flag happens to be set. Used so Ctrl+F is *always* available, even
+// with another dialog already open -- the repo owner's explicit call
+// during planning (issue #121). Every other opener in this file instead
+// just refuses via isAnyModalOpen(), which would make Ctrl+F silently do
+// nothing while, say, the Domain Model dialog was already open.
+function closeAnyOpenModal() {
+  closeConfirmDialog(false);
+  closeDetailsDialog();
+  closeDomainModelDialog();
+  closeConsistency();
+  closeReviewChanges();
+  closeWelcome();
+  closeHelp();
+  closeImportDialog();
+  closeAzureConfigPopup();
+  closeAgentConnectModal();
+}
+
+function openGraphFinder() {
+  closeAnyOpenModal();
+  cancelInlineInput();
+  finderOpen = true;
+  graphFinderInput.value = "";
+  renderFinderResults("");
+  graphFinderOverlay.style.display = "flex";
+  graphFinderInput.focus();
+}
+
+function closeGraphFinder() {
+  graphFinderOverlay.style.display = "none";
+  finderOpen = false;
+  finderResults = [];
+  finderActiveIndex = -1;
+}
+
+graphFinderInput.addEventListener("input", () => renderFinderResults(graphFinderInput.value));
+graphFinderOverlay.addEventListener("click", (e) => {
+  if (e.target === graphFinderOverlay) closeGraphFinder(); // click outside the dialog = cancel
+});
+document.getElementById("btn-graph-finder").addEventListener("click", openGraphFinder);
+
+// ---------------------------------------------------------------------------
 // Primary pointer interaction: pan / node-move / edge-creation-drag, plus a
 // long-press-to-delete timer. A separate 'click' listener (below) handles
 // tap-based flows (select, Add Node placement, Connect mode taps) since
@@ -5916,6 +6269,26 @@ canvas.addEventListener("dblclick", (e) => {
 });
 
 window.addEventListener("keydown", (e) => {
+  // Graph finder (issue #121): available everywhere, even with another
+  // dialog already open (openGraphFinder() calls closeAnyOpenModal() first
+  // and displaces it) -- the one exception is while a text input/textarea/
+  // contenteditable already has focus, so editing a meaning/label field
+  // elsewhere still gets the browser's native find-in-page instead of this
+  // being silently stolen from it. Checked before every other guard below,
+  // not after, since "always available" means never blocked by whichever
+  // dialog happens to be open already.
+  if ((e.key === "f" || e.key === "F") && (e.ctrlKey || e.metaKey)) {
+    const active = document.activeElement;
+    const isTextInput = active && (active.tagName === "INPUT" || active.tagName === "TEXTAREA" || active.isContentEditable);
+    if (!isTextInput) { e.preventDefault(); openGraphFinder(); return; }
+  }
+  if (finderOpen) {
+    if (e.key === "Escape") { e.preventDefault(); closeGraphFinder(); }
+    else if (e.key === "ArrowDown") { e.preventDefault(); setFinderActiveIndex(finderActiveIndex + 1); }
+    else if (e.key === "ArrowUp") { e.preventDefault(); setFinderActiveIndex(finderActiveIndex - 1); }
+    else if (e.key === "Enter") { e.preventDefault(); if (finderActiveIndex >= 0) selectFinderResult(finderResults[finderActiveIndex]); }
+    return;
+  }
   if (activeConfirm) {
     if (e.key === "Escape") { e.preventDefault(); closeConfirmDialog(false); }
     else if (e.key === "Enter") { e.preventDefault(); closeConfirmDialog(true); }
@@ -12797,6 +13170,21 @@ window.__kg = {
       results: () => [...consistencyLlmFindings],
       storageKey: CONSISTENCY_LLM_STORAGE_KEY,
     },
+  },
+  // Graph finder (issue #121) test surface, mirroring the reviewChanges/
+  // consistency sub-objects' own open/close/isOpen/get*-current-state
+  // convention above.
+  finder: {
+    open: openGraphFinder,
+    close: closeGraphFinder,
+    isOpen: () => finderOpen,
+    buildIndex: buildFinderIndex,
+    search: (query) => { renderFinderResults(query); return [...finderResults]; },
+    getResults: () => [...finderResults],
+    getActiveIndex: () => finderActiveIndex,
+    setActiveIndex: setFinderActiveIndex,
+    selectResult: selectFinderResult,
+    selectActive: () => { if (finderActiveIndex >= 0) selectFinderResult(finderResults[finderActiveIndex]); },
   },
   // Welcome popup + Help guide (issue #78).
   welcome: {
