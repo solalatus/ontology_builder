@@ -1705,7 +1705,28 @@ reference and record deltas/decisions here instead.)*
   every future domain. Full account:
   `domains/iof-supply-chain/manual-spot-check.md`.
 
-  **#109 closed, merged as PR #118.**
+  **#109 not yet closed -- still no PR opened. Next: user's call on
+  further rounds vs. proceeding to PR.**
+
+- 2026-08-18 (continued) -- **Manual spot-check round 3: 10/10 accept,
+  clean.** Fresh 10%-stratified sample (10 of 96, seed 7723, excluding
+  rounds 1-2's already-reviewed paths). No real defects found -- notably
+  including `classes.FreightForwarder.properties.status` (the one
+  `status` property that survived the whole earlier saga, confirmed still
+  `type: text` with no invented values) and `relationships[13]` (`Shipper
+  holds Cargo`, confirmed as the correctly-domain-matched sibling to
+  round 2's flagged `Container holds Cargo`). Two items I initially
+  flagged myself turned out to be a gap in my own comparison script, not
+  the translation (`Supplier`/`Customer` IRIs cited by `rules.
+  canEvaluateSupplyRelationship` are real, just not independently
+  extracted as their own `classes` entries -- only reachable via another
+  property's declared `range`, same evidence basis already accepted for
+  `classes.Supplier`/`classes.Customer` themselves).
+
+  **PR opened and merged: #118**, closing #109. Domain-agnostic reviewer
+  discipline held across all 3 rounds: 2 real defects found, both fixed
+  by generalizing into the compiler/repair prompts rather than one-off
+  content patches, third round clean.
 
 - 2026-08-18 (continued) -- **Implemented #117** (pipeline hardening
   punch list from #109's manual spot-check), branch
@@ -1784,3 +1805,22 @@ reference and record deltas/decisions here instead.)*
   above each new/changed function -- not just this log entry.
 
   **#117 not yet closed -- no PR opened yet.**
+
+- 2026-08-18 (continued) -- **Follow-up fix on `ontology-translation/
+  109-followup-consignment`** (separate from #117's own branch --
+  content, not pipeline code, stacked on top of it): a live smoke test of
+  #117's changes (unrelated to #117 itself) surfaced a real, unanimous
+  3/3 "unsupported" verdict on `classes.ConsigningProcess` in a fresh live
+  judging round. Investigated: the domain's actual `meaning` ("A business
+  process in which goods are consigned for shipment") is a plain,
+  self-explanatory restatement of the source label, the same accepted
+  pattern used for dozens of other bare-label classes in this domain --
+  not the problem. The mapping's own `rationale` field was the actual
+  issue: "relevant to shipper participation in dispatch" oversold a
+  structural claim `source_evidence` (just the class label) never backed,
+  and `judge_mappings`' payload sends both `source_evidence` and
+  `rationale` to the judge. Reground via the real `repair.py` tool (kept
+  the class content, corrected only the mapping's own evidence/rationale
+  text); verified live with a targeted re-judge (3/3 unanimous
+  "supported"), then a full official `evaluate.py` run: `hard_gates_ok:
+  True`, 0 unsupported, 0 unjustified.
