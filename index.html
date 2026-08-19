@@ -870,6 +870,231 @@
     animation: finder-flash 1.2s ease-in-out;
   }
 
+  /* Import Review (issue #122). Wider than the 640px/85vh details-dialog
+     default -- this is a report with several sections to read, not a short
+     form -- but otherwise the exact same chrome (border-top accent, body/
+     footer split) as every other large dialog in this file. No new colors:
+     --danger for the quality-flag callout, --mode-armed for "needs a
+     decision," --accent/--state-active for the two decided states, the same
+     four semantic slots the rest of the app already uses for exactly these
+     meanings (mode-armed for an armed-but-not-yet-acted-on tool, state-active
+     for something currently on). */
+  .import-review-dialog {
+    max-width: 760px;
+  }
+
+  .import-review-intro {
+    font-size: 13px;
+    opacity: 0.75;
+    margin: 0 0 14px;
+    line-height: 1.5;
+  }
+
+  .import-review-callout {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 10px 12px;
+    margin-bottom: 16px;
+    border: 1px solid var(--danger);
+    border-radius: var(--radius-sm);
+    background: color-mix(in srgb, var(--danger) 12%, transparent);
+  }
+
+  .import-review-callout-flag {
+    flex: 0 0 auto;
+    font-family: var(--font-display);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--danger-fg);
+    border: 1px solid var(--danger-fg);
+    border-radius: 4px;
+    padding: 1px 5px;
+    margin-top: 1px;
+  }
+
+  .import-review-callout-body p {
+    margin: 0 0 8px;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .import-review-chiprow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .import-review-chip {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    border: 1px solid var(--danger-fg);
+    color: var(--danger-fg);
+  }
+
+  .import-review-section-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .import-review-section-head .details-field-label {
+    margin-bottom: 0;
+  }
+
+  .import-review-empty-note {
+    font-size: 13px;
+    opacity: 0.6;
+    font-style: italic;
+    margin: 4px 0 0;
+  }
+
+  .import-review-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 6px;
+  }
+
+  .import-review-item {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px 12px;
+    border: 1px solid var(--toolbar-border);
+    border-left: 3px solid var(--toolbar-border);
+    border-radius: var(--radius-sm);
+    background: var(--card-bg);
+  }
+
+  .import-review-item.decided {
+    border-left-color: var(--state-active);
+  }
+
+  .import-review-item.undecided {
+    border-left-color: var(--mode-armed);
+  }
+
+  .import-review-item-top {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .import-review-item-kind {
+    flex: 0 0 auto;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    opacity: 0.6;
+  }
+
+  .import-review-item-label {
+    flex: 1 1 auto;
+    font-weight: 600;
+    font-size: 13.5px;
+    min-width: 0;
+  }
+
+  .import-review-item-context {
+    flex: 1 1 100%;
+    font-size: 12px;
+    opacity: 0.65;
+    line-height: 1.4;
+  }
+
+  .import-review-decision {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .import-review-choice {
+    font-size: 12px;
+    padding: 5px 11px;
+    border-radius: 20px;
+    border: 1px solid var(--toolbar-border);
+    background: transparent;
+    color: var(--toolbar-fg);
+    cursor: pointer;
+    transition: background-color var(--transition-fast), border-color var(--transition-fast);
+  }
+
+  .import-review-choice:hover {
+    background: var(--btn-bg-hover);
+  }
+
+  .import-review-choice.on {
+    background: var(--accent-bg-pressed);
+    border-color: var(--accent);
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .import-review-note {
+    flex: 1 1 220px;
+    min-width: 180px;
+    font: inherit;
+    font-size: 12.5px;
+    padding: 6px 9px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--toolbar-border);
+    background: var(--btn-bg);
+    color: var(--toolbar-fg);
+  }
+
+  .import-review-note:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: -1px;
+  }
+
+  .import-review-footer {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .import-review-progress {
+    flex: 1 1 auto;
+    font-size: 12px;
+    opacity: 0.7;
+  }
+
+  .import-review-result {
+    margin-top: 16px;
+    padding: 10px 12px;
+    border: 1px solid var(--toolbar-border);
+    border-radius: var(--radius-sm);
+    background: var(--card-bg);
+  }
+
+  .import-review-result ul {
+    margin: 6px 0 0;
+    padding-left: 18px;
+    font-size: 12.5px;
+    line-height: 1.6;
+  }
+
+  /* The execution agent's own closing remark (issue #122's later "be
+     conservative about removal" hardening) -- visually distinct from the
+     plain status line above it, so a genuine hedge/concern from the model
+     doesn't read as just more status text. */
+  .import-review-result-commentary {
+    margin: 8px 0 0;
+    padding: 8px 10px;
+    border-left: 3px solid var(--agent-accent);
+    background: color-mix(in srgb, var(--agent-accent) 10%, transparent);
+    font-size: 12.5px;
+    font-style: italic;
+    line-height: 1.5;
+  }
+
   /* Agent Ontology — Rules/Actions manager cards. Same bordered-card
      treatment as .details-property-row above, plus a subtle background
      tint and shadow on top of it -- with a dozen-plus cards stacked in a
@@ -1749,6 +1974,71 @@
       <button id="import-cancel" type="button">Mégse</button>
       <button id="import-replace" type="button">Csere</button>
       <button id="import-merge" type="button">Egyesítés</button>
+      <!-- Import Review (issue #122): a third option next to Replace/Merge,
+           JSON/YAML only (see openImportDialog's own comment on why TXT --
+           an edge-list with no properties/rules/actions/CQs -- has nothing
+           rich enough for this feature to add). Hidden by default; shown
+           per-import the same way Replace already is on an empty canvas. -->
+      <button id="import-review" type="button">Intelligens összevonás</button>
+    </div>
+  </div>
+</div>
+
+<!-- Import Review (issue #122): a per-item decision UI for merging an
+     incoming JSON/YAML import against the live graph -- offered as a third
+     option alongside the Import dialog's existing Replace/Merge buttons, not
+     a replacement for either. Reuses .modal-overlay/.modal-dialog/
+     .details-dialog like every other large dialog; wider
+     (.import-review-dialog) since this is a report to read, not a form to
+     fill in. No new visual language beyond that -- same dark theme, same CSS
+     custom properties, same button/list/textarea conventions as the Domain
+     Model and Review Changes dialogs right above it in this file. -->
+<div id="import-review-overlay" class="modal-overlay">
+  <div id="import-review-dialog" class="modal-dialog details-dialog import-review-dialog" role="dialog" aria-modal="true" aria-labelledby="import-review-title">
+    <div class="details-dialog-body">
+      <h2 id="import-review-title" class="modal-title">Review import</h2>
+      <p id="import-review-intro" class="import-review-intro">
+        Decide what happens to each difference between the current graph and the incoming file. Every item needs a decision -- keep the current version, take the incoming one, or write what should actually happen instead.
+      </p>
+
+      <div id="import-review-flags" class="import-review-callout" hidden>
+        <div class="import-review-callout-flag">!</div>
+        <div class="import-review-callout-body">
+          <p id="import-review-flags-text"></p>
+          <div id="import-review-flags-chips" class="import-review-chiprow"></div>
+        </div>
+      </div>
+
+      <div class="import-review-section-head">
+        <label id="import-review-matched-label" class="details-field-label"></label>
+        <button id="import-review-suggest" type="button" class="details-add-btn">Suggest matches</button>
+      </div>
+      <p id="import-review-matched-empty" class="import-review-empty-note" hidden>Nothing here matches by exact name on both sides.</p>
+      <div id="import-review-matched-list" class="import-review-list"></div>
+
+      <label id="import-review-current-only-label" class="details-field-label"></label>
+      <p id="import-review-current-only-empty" class="import-review-empty-note" hidden>Nothing is only in the current graph.</p>
+      <div id="import-review-current-only-list" class="import-review-list"></div>
+
+      <label id="import-review-incoming-only-label" class="details-field-label"></label>
+      <p id="import-review-incoming-only-empty" class="import-review-empty-note" hidden>Nothing is only in the incoming file.</p>
+      <div id="import-review-incoming-only-list" class="import-review-list"></div>
+
+      <label id="import-review-shared-note-label" class="details-field-label">General notes about this review</label>
+      <textarea id="import-review-shared-note" class="details-textarea" rows="3" placeholder="Reasoning that applies to the review as a whole, not tied to one item…"></textarea>
+
+      <div id="import-review-result" class="import-review-result" hidden>
+        <label class="details-field-label" id="import-review-result-label"></label>
+        <p id="import-review-result-status"></p>
+        <p id="import-review-result-commentary" class="import-review-result-commentary" hidden></p>
+        <ul id="import-review-result-list"></ul>
+      </div>
+    </div>
+    <div class="modal-actions details-dialog-footer import-review-footer">
+      <span id="import-review-progress" class="import-review-progress"></span>
+      <button id="import-review-download" type="button">Download decisions</button>
+      <button id="import-review-cancel" type="button">Cancel</button>
+      <button id="import-review-apply" type="button" disabled>Apply</button>
     </div>
   </div>
 </div>
@@ -2227,6 +2517,43 @@ const STRINGS = {
     finderKindRule: "Rule",
     finderKindAction: "Action",
     finderKindCq: "Question",
+    // Import Review (issue #122): a per-item decision UI offered alongside
+    // Replace/Merge for JSON/YAML imports. Element-kind labels reuse the
+    // Graph finder's own finderKind* strings above rather than duplicating
+    // them a second time.
+    importReview: "Intelligent Merge",
+    importReviewTitle: "Review import",
+    importReviewIntro: "Decide what happens to each difference between the current graph and the incoming file. Every item needs a decision — keep the current version, take the incoming one, or write what should actually happen instead.",
+    importReviewFlags: (count) => count === 1
+      ? "1 class in the incoming file has no relationships at all."
+      : `${count} classes in the incoming file have no relationships at all.`,
+    importReviewMeaningChanged: "meaning changed",
+    importReviewAliasesChanged: "aliases changed",
+    importReviewMatchedLabel: (decided, total) => `Matched & paired (${decided}/${total} decided)`,
+    importReviewSuggestMatches: "Suggest matches",
+    importReviewSuggestMatchesRunning: "Suggesting matches…",
+    importReviewSuggestMatchesFailed: "Couldn't get suggestions — you can still decide everything below by hand.",
+    importReviewSuggestMatchesNone: "No cross-label matches suggested.",
+    importReviewMatchedEmpty: "Nothing here matches by exact name on both sides.",
+    importReviewCurrentOnlyLabel: (decided, total) => `Only in the current graph (${decided}/${total} decided)`,
+    importReviewCurrentOnlyEmpty: "Nothing is only in the current graph.",
+    importReviewIncomingOnlyLabel: (decided, total) => `Only in the incoming file (${decided}/${total} decided)`,
+    importReviewIncomingOnlyEmpty: "Nothing is only in the incoming file.",
+    importReviewSharedNoteLabel: "General notes about this review",
+    importReviewSharedNotePlaceholder: "Reasoning that applies to the review as a whole, not tied to one item…",
+    importReviewChoiceKeepCurrent: "Keep current",
+    importReviewChoiceTakeIncoming: "Take incoming",
+    importReviewNotePlaceholder: "Or write reasoning instead…",
+    importReviewDownload: "Download decisions",
+    importReviewApply: "Apply",
+    importReviewApplyRunning: "Applying…",
+    importReviewProgress: (decided, total) => `${decided} of ${total} decided`,
+    importReviewResultLabel: "What changed",
+    importReviewResultOk: "Applied.",
+    importReviewResultFailed: (msg) => `The execution agent couldn't finish (${msg}). Every plain keep/take decision above was still applied — retry, or finish the rest by hand.`,
+    importReviewResultNoAgentItems: "Applied. Nothing needed the execution agent.",
+    importReviewConnectFirst: "Connect the agent (top-right) before applying a decision with written reasoning.",
+    importReviewCancelConfirm: "Discard every decision made in this review?",
     // Competency Questions (issue #94).
     competencyQuestionsLabel: "Competency questions",
     competencyQuestionsFilterPlaceholder: "Filter competency questions…",
@@ -2533,6 +2860,38 @@ const STRINGS = {
     finderKindRule: "Szabály",
     finderKindAction: "Művelet",
     finderKindCq: "Kérdés",
+    // Import áttekintés (issue #122).
+    importReview: "Intelligens összevonás",
+    importReviewTitle: "Import áttekintése",
+    importReviewIntro: "Döntsd el, mi történjen a jelenlegi gráf és a beérkező fájl minden egyes eltérésével. Minden tételhez döntés szükséges — a jelenlegi verzió megtartása, a beérkező átvétele, vagy leírhatod, mi történjen valójában.",
+    importReviewFlags: (count) => `${count} osztálynak nincs semmilyen kapcsolata a beérkező fájlban.`,
+    importReviewMeaningChanged: "jelentés megváltozott",
+    importReviewAliasesChanged: "álnevek megváltoztak",
+    importReviewMatchedLabel: (decided, total) => `Egyező és párosított (${decided}/${total} eldöntve)`,
+    importReviewSuggestMatches: "Párosítási javaslat",
+    importReviewSuggestMatchesRunning: "Javaslatok kérése…",
+    importReviewSuggestMatchesFailed: "Nem sikerült javaslatot kérni — a lenti tételeket kézzel is eldöntheted.",
+    importReviewSuggestMatchesNone: "Nincs javasolt párosítás.",
+    importReviewMatchedEmpty: "Itt semmi nem egyezik pontos névvel mindkét oldalon.",
+    importReviewCurrentOnlyLabel: (decided, total) => `Csak a jelenlegi gráfban (${decided}/${total} eldöntve)`,
+    importReviewCurrentOnlyEmpty: "Semmi nincs csak a jelenlegi gráfban.",
+    importReviewIncomingOnlyLabel: (decided, total) => `Csak a beérkező fájlban (${decided}/${total} eldöntve)`,
+    importReviewIncomingOnlyEmpty: "Semmi nincs csak a beérkező fájlban.",
+    importReviewSharedNoteLabel: "Általános megjegyzések az áttekintéshez",
+    importReviewSharedNotePlaceholder: "Az egész áttekintésre vonatkozó indoklás, nem egy adott tételhez kötve…",
+    importReviewChoiceKeepCurrent: "Jelenlegi megtartása",
+    importReviewChoiceTakeIncoming: "Beérkező átvétele",
+    importReviewNotePlaceholder: "Vagy írd le, mi történjen…",
+    importReviewDownload: "Döntések letöltése",
+    importReviewApply: "Alkalmaz",
+    importReviewApplyRunning: "Alkalmazás…",
+    importReviewProgress: (decided, total) => `${decided}/${total} eldöntve`,
+    importReviewResultLabel: "Mi változott",
+    importReviewResultOk: "Alkalmazva.",
+    importReviewResultFailed: (msg) => `A végrehajtó ágens nem tudta befejezni (${msg}). A fenti egyszerű döntések alkalmazva lettek — próbáld újra, vagy fejezd be kézzel.`,
+    importReviewResultNoAgentItems: "Alkalmazva. Semmihez nem kellett a végrehajtó ágens.",
+    importReviewConnectFirst: "Csatlakoztasd az ágenst (jobb felül), mielőtt indoklással ellátott döntést alkalmazol.",
+    importReviewCancelConfirm: "Eldobod az áttekintés összes döntését?",
     // Kompetenciakérdések (issue #94).
     competencyQuestionsLabel: "Kompetenciakérdések",
     competencyQuestionsFilterPlaceholder: "Kompetenciakérdések szűrése…",
@@ -2825,6 +3184,19 @@ function applyLanguage() {
   byId("import-cancel").textContent = t("cancel");
   byId("import-replace").textContent = t("replace");
   byId("import-merge").textContent = t("merge");
+  byId("import-review").textContent = t("importReview");
+  byId("import-review-title").textContent = t("importReviewTitle");
+  byId("import-review-intro").textContent = t("importReviewIntro");
+  byId("import-review-suggest").textContent = t("importReviewSuggestMatches");
+  byId("import-review-matched-empty").textContent = t("importReviewMatchedEmpty");
+  byId("import-review-current-only-empty").textContent = t("importReviewCurrentOnlyEmpty");
+  byId("import-review-incoming-only-empty").textContent = t("importReviewIncomingOnlyEmpty");
+  byId("import-review-shared-note-label").textContent = t("importReviewSharedNoteLabel");
+  byId("import-review-shared-note").placeholder = t("importReviewSharedNotePlaceholder");
+  byId("import-review-download").textContent = t("importReviewDownload");
+  byId("import-review-cancel").textContent = t("cancel");
+  byId("import-review-apply").textContent = t("importReviewApply");
+  if (importReviewOpen) renderImportReview(); // re-render open items so their labels/counts/progress re-translate too
   byId("details-meaning-label").textContent = t("meaningLabel");
   byId("details-aliases-label").textContent = t("aliasesLabel");
   byId("details-properties-label").textContent = t("propertiesLabel");
@@ -4948,7 +5320,8 @@ let activeConfirm = null;
 // consts' own declaration order.
 function isAnyModalOpen() {
   return ["confirm-overlay", "details-overlay", "domain-model-overlay", "import-overlay", "welcome-overlay", "help-overlay",
-      "consistency-overlay", "review-changes-overlay", "agent-connect-overlay", "agent-azure-config-overlay", "graph-finder-overlay"]
+      "consistency-overlay", "review-changes-overlay", "agent-connect-overlay", "agent-azure-config-overlay", "graph-finder-overlay",
+      "import-review-overlay"]
     .some((id) => document.getElementById(id).style.display === "flex");
 }
 
@@ -5790,6 +6163,7 @@ function closeAnyOpenModal() {
   closeImportDialog();
   closeAzureConfigPopup();
   closeAgentConnectModal();
+  closeImportReview();
 }
 
 function openGraphFinder() {
@@ -6305,6 +6679,10 @@ window.addEventListener("keydown", (e) => {
   }
   if (domainModelOpen) {
     if (e.key === "Escape") { e.preventDefault(); closeDomainModelDialog(); }
+    return;
+  }
+  if (importReviewOpen) {
+    if (e.key === "Escape") { e.preventDefault(); closeImportReview(); }
     return;
   }
   if (consistencyOverlayOpen) {
@@ -6885,9 +7263,13 @@ function diffCompetencyQuestionsSection(beforeList, afterList) {
   return { added, removed, changed };
 }
 
-function computeSemanticDiff(beforeSnapshot, afterSnapshot) {
-  const beforeModel = buildDomainModel(beforeSnapshot);
-  const afterModel = buildDomainModel(afterSnapshot);
+// Split out of computeSemanticDiff() so a second caller can diff two already-
+// built domain models directly (issue #122's Import Review needs to diff the
+// live graph against a *parsed incoming file*, not two history snapshots --
+// see jsonGraphToSnapshot()/yamlModelToSnapshot() below) without paying for a
+// second copy of this section-by-section logic. computeSemanticDiff() itself
+// keeps its exact original signature and behavior for every existing caller.
+function diffDomainModels(beforeModel, afterModel) {
   const classes = diffMapSection(beforeModel.classes, afterModel.classes);
 
   // Properties get their own top-level section (issue §5 lists it
@@ -6914,6 +7296,10 @@ function computeSemanticDiff(beforeSnapshot, afterSnapshot) {
   };
 }
 
+function computeSemanticDiff(beforeSnapshot, afterSnapshot) {
+  return diffDomainModels(buildDomainModel(beforeSnapshot), buildDomainModel(afterSnapshot));
+}
+
 function isSemanticDiffEmpty(diff) {
   return diff.competencyQuestions.added.length === 0 && diff.competencyQuestions.removed.length === 0 &&
     diff.competencyQuestions.changed.length === 0 &&
@@ -6923,6 +7309,124 @@ function isSemanticDiffEmpty(diff) {
     diff.properties.added.length === 0 && diff.properties.removed.length === 0 && diff.properties.changed.length === 0 &&
     diff.rules.added.length === 0 && diff.rules.removed.length === 0 && diff.rules.changed.length === 0 &&
     diff.actions.added.length === 0 && diff.actions.removed.length === 0 && diff.actions.changed.length === 0;
+}
+
+// ---------------------------------------------------------------------------
+// Import Review (issue #122) — diff plumbing. Reuses diffDomainModels() above
+// wholesale rather than a second diff engine: the only new work is turning a
+// *parsed incoming import* (JSON's {nodes,edges,rules,actions,
+// competencyQuestions} shape with nullable `.key` ids from parseJsonImport(),
+// or YAML's {classes,relationships,rules,actions,competencyQuestions} shape
+// from parseDomainYamlImport()) into a plain state-snapshot shape
+// buildDomainModel() already knows how to normalize, the same shape
+// computeSemanticDiff() feeds it for two history snapshots.
+//
+// Ids are synthetic and scoped to one review only (never persisted, never
+// compared across snapshots by value — buildDomainModel() only cares that
+// they're internally consistent within the one snapshot it's normalizing) —
+// a single incrementing counter is enough, no reset needed between calls.
+// ---------------------------------------------------------------------------
+
+let importSnapshotIdCounter = 0;
+function nextImportSnapshotId() { return `__import${importSnapshotIdCounter++}`; }
+
+// JSON import → snapshot. Nearly a pass-through: parseJsonImport() already
+// produces this exact shape, just with the id field called `key` and
+// nullable. A keyless entry gets a synthetic id — safe because parseJsonImport
+// itself already drops any edge referencing an id outside the real (non-null,
+// non-duplicate) key set, so a keyless node can never be an edge endpoint,
+// and the same guarantee holds for rule ids inside action.preconditions.
+function jsonGraphToSnapshot(g) {
+  return {
+    nodes: g.nodes.map((n) => ({
+      id: n.key || nextImportSnapshotId(), label: n.label,
+      meaning: n.meaning, aliases: [...n.aliases], properties: n.properties.map((p) => ({ ...p })),
+    })),
+    edges: g.edges.map((e) => ({
+      id: e.key || nextImportSnapshotId(), source: e.source, target: e.target,
+      relation: e.relation, directed: e.directed, meaning: e.meaning, aliases: [...e.aliases],
+    })),
+    rules: g.rules.map((r) => ({ id: r.key || nextImportSnapshotId(), name: r.name, conditions: [...r.conditions] })),
+    actions: g.actions.map((a) => ({
+      id: a.key || nextImportSnapshotId(), name: a.name, inputClassId: a.inputClassId,
+      preconditions: [...a.preconditions], effect: a.effect, verification: a.verification,
+    })),
+    competencyQuestions: g.competencyQuestions.map((cq) => ({ id: cq.key || nextImportSnapshotId(), text: cq.text })),
+  };
+}
+
+// YAML import → snapshot. parsed.classes/relationships/rules/actions come
+// straight from hand-authored (or agent-authored) YAML, which doesn't
+// promise buildDomainModel()'s own output defaults (e.g. `meaning: null`,
+// never just absent; `aliases: []`, never just absent) — comparing that
+// directly against a real snapshot's normalized shape would read every
+// omitted-but-unchanged field as a false "changed". This mirrors the exact
+// per-field defaulting commitYamlImport() already applies when it writes
+// these fields onto live nodes/edges/rules/actions (meaningGiven/
+// aliasesGiven/conditionsGiven, same names, same behavior) — just building a
+// detached snapshot instead of mutating `state`.
+function yamlModelToSnapshot(parsed) {
+  const nodeIdByLabel = new Map();
+  const nodes = Object.entries(parsed.classes).map(([label, cls]) => {
+    const id = nextImportSnapshotId();
+    nodeIdByLabel.set(label, id);
+    const propertiesByName = cls && cls.properties && typeof cls.properties === "object" ? cls.properties : {};
+    return {
+      id, label,
+      meaning: cls && typeof cls.meaning === "string" ? cls.meaning : null,
+      aliases: cls && Array.isArray(cls.aliases) ? [...cls.aliases] : [],
+      properties: Object.entries(propertiesByName).map(([name, p]) => ({
+        id: nextImportSnapshotId(), name,
+        type: (p && p.type) || "text", unit: (p && p.unit) || null,
+        allowed: (p && Array.isArray(p.allowed)) ? [...p.allowed] : null,
+      })),
+    };
+  });
+
+  const ruleIdByName = new Map();
+  const rules = Object.entries(parsed.rules).map(([name, rule]) => {
+    const id = nextImportSnapshotId();
+    ruleIdByName.set(name, id);
+    return { id, name, conditions: rule && Array.isArray(rule.conditions) ? [...rule.conditions] : [] };
+  });
+
+  const edges = [];
+  for (const rel of parsed.relationships) {
+    if (!rel || typeof rel !== "object") continue;
+    const src = nodeIdByLabel.get(rel.from);
+    const tgt = nodeIdByLabel.get(rel.to);
+    if (!src || !tgt) continue; // dangling reference -- same defensive skip planYamlImport() already applies
+    edges.push({
+      id: nextImportSnapshotId(), source: src, target: tgt,
+      relation: rel.name || "", directed: true,
+      meaning: typeof rel.meaning === "string" ? rel.meaning : null,
+      aliases: Array.isArray(rel.aliases) ? [...rel.aliases] : [],
+    });
+  }
+
+  const actions = Object.entries(parsed.actions).map(([name, action]) => ({
+    id: nextImportSnapshotId(), name,
+    inputClassId: action && typeof action.input === "string" ? (nodeIdByLabel.get(action.input) || null) : null,
+    preconditions: (action && Array.isArray(action.preconditions) ? action.preconditions : [])
+      .map((n) => ruleIdByName.get(n)).filter(Boolean),
+    effect: action && typeof action.effect === "string" ? action.effect : "",
+    verification: action && typeof action.verification === "string" ? action.verification : "",
+  }));
+
+  const competencyQuestions = parsed.competencyQuestions.map((cq) => ({
+    id: cq.id || nextImportSnapshotId(), text: cq.text,
+  }));
+
+  return { nodes, edges, rules, actions, competencyQuestions };
+}
+
+// Top-level entry point the Review dialog calls: `parsedGraph` is
+// parseJsonImport(text).graph for kind "json", or parseDomainYamlImport(text)
+// for kind "yaml" (Review is never offered for "txt" — see openImportDialog's
+// own comment on why a TXT import has nothing rich enough for this feature).
+function computeImportReviewDiff(parsedGraph, kind) {
+  const incomingSnapshot = kind === "json" ? jsonGraphToSnapshot(parsedGraph) : yamlModelToSnapshot(parsedGraph);
+  return diffDomainModels(buildDomainModel(state), buildDomainModel(incomingSnapshot));
 }
 
 // Looks forward from entry.evidenceIndex (agentState.transcript.length at
@@ -9752,17 +10256,18 @@ function mergePropertiesByName(existingProperties, incomingByName) {
 // `properties` specifically upserts by name (see mergePropertiesByName)
 // instead of replacing the whole array. Newly-created entities are
 // unaffected by any of this -- there's nothing to preserve yet.
-async function commitYamlImport(text, mode) {
-  const before = snapshotState();
-  const parsed = parseDomainYamlImport(text);
-  // Hand whatever this import cannot store to the next consistency sweep. It
-  // is recorded here rather than inside the loop below because that loop skips
-  // these silently by design, and by the time it has finished there is nothing
-  // left to see (issue #83 §1).
-  lastDroppedReferences = planYamlImport(parsed).droppedReferences;
+// Upsert-only core of a YAML-model commit: creates or field-patches classes/
+// relationships/rules/actions/competency questions directly on `state`,
+// exactly the logic commitYamlImport()'s "merge"/"agent-merge" modes always
+// ran inline. Extracted (issue #122) so a second caller -- the Import
+// Review execution agent's apply_ontology_changes tool -- can run the
+// identical upsert without pulling in commitYamlImport()'s own snapshot/
+// history/autoLayout/fitView side effects; those stay the sole
+// responsibility of whichever wrapper actually owns "this is one undo
+// step" (commitYamlImport itself, or Import Review's own combined Apply).
+// Returns the matched-id sets "replace" mode needs to know what to delete.
+function applyYamlModelToState(parsed, { fieldLevelMerge }) {
   const nextShelfPosition = computeImportShelf();
-  const fieldLevelMerge = mode === "agent-merge";
-
   const labelToNode = new Map();
   for (const n of state.nodes) labelToNode.set(n.label, n);
   const matchedNodeIds = new Set();
@@ -9883,6 +10388,21 @@ async function commitYamlImport(text, mode) {
     state.competencyQuestions.push({ id, text: incoming.text });
     matchedCqIds.add(id);
   }
+
+  return { matchedNodeIds, matchedRuleIds, matchedEdgeIds, matchedActionIds, matchedCqIds };
+}
+
+async function commitYamlImport(text, mode) {
+  const before = snapshotState();
+  const parsed = parseDomainYamlImport(text);
+  // Hand whatever this import cannot store to the next consistency sweep. It
+  // is recorded here rather than inside the loop below because that loop skips
+  // these silently by design, and by the time it has finished there is nothing
+  // left to see (issue #83 §1).
+  lastDroppedReferences = planYamlImport(parsed).droppedReferences;
+  const fieldLevelMerge = mode === "agent-merge";
+  const { matchedNodeIds, matchedRuleIds, matchedEdgeIds, matchedActionIds, matchedCqIds } =
+    applyYamlModelToState(parsed, { fieldLevelMerge });
 
   if (mode === "replace") {
     for (const cq of state.competencyQuestions.filter((cq) => !matchedCqIds.has(cq.id))) deleteCompetencyQuestion(cq.id);
@@ -10388,6 +10908,7 @@ const importOverlay = document.getElementById("import-overlay");
 const importSummaryEl = document.getElementById("import-summary");
 const importMergeBtn = document.getElementById("import-merge");
 const importReplaceBtn = document.getElementById("import-replace");
+const importReviewBtn = document.getElementById("import-review");
 const importCancelBtn = document.getElementById("import-cancel");
 let pendingImportText = null;
 // "json" (spec.md §5.5, full-fidelity restore), "txt" (spec.md §5.3,
@@ -10417,6 +10938,7 @@ function showImportError(message) {
   importSummaryEl.textContent = message;
   importMergeBtn.style.display = "none";
   importReplaceBtn.style.display = "none";
+  importReviewBtn.style.display = "none";
   importOverlay.style.display = "flex";
 }
 
@@ -10425,6 +10947,10 @@ function openImportDialog(text, kind = "txt", filename = null) {
   pendingImportText = text;
   pendingImportKind = kind;
   pendingImportFilename = filename;
+  // Import Review (issue #122) is only offered for JSON/YAML -- a TXT import
+  // is an edge-list with no properties/rules/actions/CQs, nothing rich enough
+  // for a per-item decision review to add over plain Merge/Replace.
+  importReviewBtn.style.display = (kind === "json" || kind === "yaml") ? "" : "none";
 
   if (kind === "invalid-json") {
     const parsed = parseJsonImport(text);
@@ -10516,6 +11042,7 @@ function closeImportDialog() {
   importOverlay.style.display = "none";
   importMergeBtn.style.display = "";
   importReplaceBtn.style.display = "";
+  importReviewBtn.style.display = "";
   pendingImportText = null;
   pendingImportFilename = null;
 }
@@ -10533,6 +11060,1072 @@ importMergeBtn.addEventListener("click", () => runPendingImport("merge"));
 importReplaceBtn.addEventListener("click", () => runPendingImport("replace"));
 importCancelBtn.addEventListener("click", () => closeImportDialog());
 importOverlay.addEventListener("click", (e) => { if (e.target === importOverlay) closeImportDialog(); });
+
+// ---------------------------------------------------------------------------
+// Import Review (issue #122) — a per-item decision UI offered alongside the
+// Import dialog's existing Replace/Merge for JSON/YAML imports. Design (see
+// the issue's own comment thread for the full reasoning):
+//
+//   - The diff is entirely deterministic (computeImportReviewDiff() above,
+//     which reuses diffDomainModels() -- issue #74's own engine).
+//   - Every listed item gets one of three decisions: keep the current
+//     version, take the incoming version, or write free-text reasoning
+//     instead (which can stand alone or accompany a quick pick).
+//   - "Suggest matches" (a read-only, tool-free one-shot LLM call, run only
+//     on request) proposes that a leftover current-only item and a
+//     leftover incoming-only item are really the same concept under a
+//     different name/shape -- classes, relationships, properties, rules,
+//     and actions all get this treatment, not just classes.
+//   - Apply splits decisions into two buckets: a deterministic one (plain
+//     keep/take, no note, not a cross-label pair -- executed directly
+//     against `state`, no LLM involved at all) and an execution-agent one
+//     (anything with free-text reasoning, or "take incoming" on an accepted
+//     cross-label pair, since that's a real structural transform, not a
+//     value copy). The execution agent is its own thing -- own system
+//     prompt, own two tools (an upsert and, new for this feature, an
+//     explicit named-removal tool) -- not a repurposing of the persistent
+//     interview agent, and not the same call as "Suggest matches" either
+//     (read-only vs. mutating is a real safety boundary, not just an
+//     organizational one -- see the issue's own debate on this).
+//   - Both buckets' edits land as one combined, reviewable, undoable step.
+// ---------------------------------------------------------------------------
+
+const importReviewOverlay = document.getElementById("import-review-overlay");
+const importReviewFlagsEl = document.getElementById("import-review-flags");
+const importReviewFlagsTextEl = document.getElementById("import-review-flags-text");
+const importReviewFlagsChipsEl = document.getElementById("import-review-flags-chips");
+const importReviewMatchedLabelEl = document.getElementById("import-review-matched-label");
+const importReviewMatchedListEl = document.getElementById("import-review-matched-list");
+const importReviewMatchedEmptyEl = document.getElementById("import-review-matched-empty");
+const importReviewCurrentOnlyLabelEl = document.getElementById("import-review-current-only-label");
+const importReviewCurrentOnlyListEl = document.getElementById("import-review-current-only-list");
+const importReviewCurrentOnlyEmptyEl = document.getElementById("import-review-current-only-empty");
+const importReviewIncomingOnlyLabelEl = document.getElementById("import-review-incoming-only-label");
+const importReviewIncomingOnlyListEl = document.getElementById("import-review-incoming-only-list");
+const importReviewIncomingOnlyEmptyEl = document.getElementById("import-review-incoming-only-empty");
+const importReviewSuggestBtn = document.getElementById("import-review-suggest");
+const importReviewSharedNoteEl = document.getElementById("import-review-shared-note");
+const importReviewResultEl = document.getElementById("import-review-result");
+const importReviewResultStatusEl = document.getElementById("import-review-result-status");
+const importReviewResultCommentaryEl = document.getElementById("import-review-result-commentary");
+const importReviewResultListEl = document.getElementById("import-review-result-list");
+const importReviewProgressEl = document.getElementById("import-review-progress");
+const importReviewDownloadBtn = document.getElementById("import-review-download");
+const importReviewCancelBtn = document.getElementById("import-review-cancel");
+const importReviewApplyBtn = document.getElementById("import-review-apply");
+
+let importReviewOpen = false;
+let importReviewKind = null; // "json" | "yaml" -- which parser/snapshot-adapter this review's items came from
+let importReviewParsedGraph = null; // parseJsonImport(...).graph, or parseDomainYamlImport(...)'s return value
+let importReviewItems = []; // flattened {id, section, kind, diffKind, label, context, before, after, isPaired?}
+let importReviewDecisions = {}; // itemId -> { choice: "a" | "b" | null, note: string }
+let importReviewSharedNoteText = "";
+let importReviewOrphanNames = [];
+let importReviewSuggestPending = false;
+let importReviewSuggestFailed = false;
+let importReviewSuggestRun = false; // becomes true once "Suggest matches" has been clicked at least once this review
+let importReviewApplyPending = false;
+let importReviewLastResult = null; // {ok, message, touched: [{kind,name,action}]} | null, cleared on (re)open
+
+function importReviewItemId(kind, ...parts) { return `${kind}:${parts.map(String).join("::")}`; }
+
+function importReviewKindLabel(kind) {
+  switch (kind) {
+    case "class": return t("finderKindClass");
+    case "relationship": return t("finderKindRelationship");
+    case "property": return t("finderKindProperty");
+    case "rule": return t("finderKindRule");
+    case "action": return t("finderKindAction");
+    case "cq": return t("finderKindCq");
+    default: return "";
+  }
+}
+
+// Derives a changed class's display context at render time, not build time
+// (buildImportReviewItems() stores the raw before/after values on every
+// class item regardless -- see its own "class" branches) -- so a language
+// toggle while the dialog is open re-translates this the same way every
+// other label already does, instead of baking a stale-language phrase into
+// the item once at diff-build time.
+function importReviewItemDisplayContext(item) {
+  if (item.kind !== "class" || item.diffKind !== "changed") return item.context;
+  const { before, after } = item;
+  const bits = [];
+  if (before.meaning !== after.meaning) bits.push(t("importReviewMeaningChanged"));
+  if (JSON.stringify(before.aliases) !== JSON.stringify(after.aliases)) bits.push(t("importReviewAliasesChanged"));
+  return bits.join(", ");
+}
+
+// Flattens a computeImportReviewDiff() result into the uniform item shape
+// every other Import Review function works with. Only sections that need a
+// decision are represented -- an unchanged, identically-matched entity never
+// appears in diffDomainModels()'s own output in the first place, so there is
+// nothing to filter out here.
+function buildImportReviewItems(diff) {
+  const items = [];
+  const push = (rec) => items.push(rec);
+
+  for (const c of diff.classes.changed) {
+    push({ id: importReviewItemId("class", c.name), section: "matched", kind: "class",
+      // context is derived at render/serialize time by importReviewItemDisplayContext()
+      // instead of baked in here, so it re-translates on a language toggle.
+      diffKind: "changed", label: c.name, context: "",
+      before: c.before, after: c.after });
+  }
+  for (const c of diff.classes.removed) {
+    push({ id: importReviewItemId("class", c.name), section: "currentOnly", kind: "class",
+      diffKind: "removed", label: c.name, context: "", before: c.value, after: null });
+  }
+  for (const c of diff.classes.added) {
+    push({ id: importReviewItemId("class", c.name), section: "incomingOnly", kind: "class",
+      diffKind: "added", label: c.name, context: "", before: null, after: c.value });
+  }
+
+  const relId = (name, from, to) => importReviewItemId("relationship", name, from, to);
+  for (const r of diff.relationships.changed) {
+    push({ id: relId(r.name, r.before.from, r.before.to), section: "matched", kind: "relationship",
+      diffKind: "changed", label: `${r.name} (${r.before.from} → ${r.before.to})`, context: "",
+      before: r.before, after: r.after });
+  }
+  for (const r of diff.relationships.directionChanged) {
+    push({ id: relId(r.name, r.before.from, r.before.to), section: "matched", kind: "relationship",
+      diffKind: "directionChanged", label: r.name,
+      context: `${r.before.from} → ${r.before.to}, now ${r.after.from} → ${r.after.to}`,
+      before: r.before, after: r.after });
+  }
+  for (const r of diff.relationships.removed) {
+    push({ id: relId(r.name, r.from, r.to), section: "currentOnly", kind: "relationship",
+      diffKind: "removed", label: `${r.name} (${r.from} → ${r.to})`, context: "", before: r, after: null });
+  }
+  for (const r of diff.relationships.added) {
+    push({ id: relId(r.name, r.from, r.to), section: "incomingOnly", kind: "relationship",
+      diffKind: "added", label: `${r.name} (${r.from} → ${r.to})`, context: "", before: null, after: r });
+  }
+
+  const propId = (className, name) => importReviewItemId("property", className, name);
+  for (const p of diff.properties.changed) {
+    push({ id: propId(p.className, p.name), section: "matched", kind: "property",
+      diffKind: "changed", label: p.name, context: `on ${p.className}`, className: p.className,
+      before: p.before, after: p.after });
+  }
+  for (const p of diff.properties.removed) {
+    push({ id: propId(p.className, p.name), section: "currentOnly", kind: "property",
+      diffKind: "removed", label: p.name, context: `on ${p.className}`, className: p.className,
+      before: p.value, after: null });
+  }
+  for (const p of diff.properties.added) {
+    push({ id: propId(p.className, p.name), section: "incomingOnly", kind: "property",
+      diffKind: "added", label: p.name, context: `on ${p.className}`, className: p.className,
+      before: null, after: p.value });
+  }
+
+  for (const r of diff.rules.changed) {
+    push({ id: importReviewItemId("rule", r.name), section: "matched", kind: "rule",
+      diffKind: "changed", label: r.name, context: "", before: r.before, after: r.after });
+  }
+  for (const r of diff.rules.removed) {
+    push({ id: importReviewItemId("rule", r.name), section: "currentOnly", kind: "rule",
+      diffKind: "removed", label: r.name, context: "", before: r.value, after: null });
+  }
+  for (const r of diff.rules.added) {
+    push({ id: importReviewItemId("rule", r.name), section: "incomingOnly", kind: "rule",
+      diffKind: "added", label: r.name, context: "", before: null, after: r.value });
+  }
+
+  for (const a of diff.actions.changed) {
+    push({ id: importReviewItemId("action", a.name), section: "matched", kind: "action",
+      diffKind: "changed", label: a.name, context: "", before: a.before, after: a.after });
+  }
+  for (const a of diff.actions.removed) {
+    push({ id: importReviewItemId("action", a.name), section: "currentOnly", kind: "action",
+      diffKind: "removed", label: a.name, context: "", before: a.value, after: null });
+  }
+  for (const a of diff.actions.added) {
+    push({ id: importReviewItemId("action", a.name), section: "incomingOnly", kind: "action",
+      diffKind: "added", label: a.name, context: "", before: null, after: a.value });
+  }
+
+  for (const cq of diff.competencyQuestions.changed) {
+    push({ id: importReviewItemId("cq", cq.id), section: "matched", kind: "cq",
+      diffKind: "changed", label: cq.after, context: "", before: { text: cq.before }, after: { text: cq.after }, cqId: cq.id });
+  }
+  for (const cq of diff.competencyQuestions.removed) {
+    push({ id: importReviewItemId("cq", cq.id), section: "currentOnly", kind: "cq",
+      diffKind: "removed", label: cq.text, context: "", before: cq, after: null, cqId: cq.id });
+  }
+  for (const cq of diff.competencyQuestions.added) {
+    push({ id: importReviewItemId("cq", cq.id), section: "incomingOnly", kind: "cq",
+      diffKind: "added", label: cq.text, context: "", before: null, after: cq, cqId: cq.id });
+  }
+
+  return items;
+}
+
+function importReviewIncomingSnapshot() {
+  return importReviewKind === "json" ? jsonGraphToSnapshot(importReviewParsedGraph) : yamlModelToSnapshot(importReviewParsedGraph);
+}
+
+function importReviewDecisionFor(id) {
+  return importReviewDecisions[id] || { choice: null, note: "" };
+}
+
+function importReviewIsDecided(id) {
+  const d = importReviewDecisionFor(id);
+  return d.choice !== null || d.note.trim() !== "";
+}
+
+function importReviewAllDecided() {
+  return importReviewItems.every((item) => importReviewIsDecided(item.id));
+}
+
+// Whether one item's decision needs the execution agent: any free-text
+// reasoning does (however short), and so does "take incoming" on an accepted
+// cross-label pair (adopting the incoming side's differently-shaped/labeled
+// version is a structural transform, not a value copy) -- but "keep current"
+// on a pair is just a no-op on both sides, same as declining the pairing,
+// and never needs the agent.
+function importReviewItemNeedsAgent(item) {
+  const d = importReviewDecisionFor(item.id);
+  if (d.note.trim() !== "") return true;
+  if (item.isPaired && d.choice === "b") return true;
+  return false;
+}
+
+// ---------------------------------------------------------------------------
+// Deterministic execution: every plain "keep current" (always a no-op) or
+// "take incoming" decision on an item importReviewItemNeedsAgent() says
+// doesn't need the execution agent. Uses the exact same field-copy/create/
+// delete primitives commitJsonImport()/commitYamlImport() already use for
+// the same purpose, just scoped to one item instead of a whole file.
+// ---------------------------------------------------------------------------
+
+const IMPORT_REVIEW_KIND_ORDER = { class: 0, property: 1, rule: 2, relationship: 3, action: 4, cq: 5 };
+
+function genImportReviewPropertyId() { return `p_${Math.random().toString(36).slice(2, 9)}`; }
+
+// Returns {kind, name, action} for the post-Apply summary, or null for a
+// no-op (kept current, or a dependency this same pass hasn't created yet --
+// see applyDeterministicImportReviewBucket()'s own comment on ordering).
+function applyOneDeterministicImportReviewItem(item, choice, nextShelfPosition) {
+  if (choice !== "b") return null; // "keep current" is always a no-op
+  switch (item.kind) {
+    case "class": {
+      if (item.diffKind === "removed") {
+        const node = state.nodes.find((n) => n.label === item.label);
+        if (!node) return null;
+        deleteNode(node.id);
+        return { kind: "class", name: item.label, action: "removed" };
+      }
+      if (item.diffKind === "added") {
+        const pos = nextShelfPosition();
+        const node = createNode(pos.x, pos.y, item.label);
+        node.meaning = item.after.meaning;
+        node.aliases = [...item.after.aliases];
+        node.properties = Object.entries(item.after.properties).map(([name, p]) => ({
+          id: genImportReviewPropertyId(), name, type: p.type, unit: p.unit || null, allowed: p.allowed || null,
+        }));
+        return { kind: "class", name: item.label, action: "added" };
+      }
+      const node = state.nodes.find((n) => n.label === item.label);
+      if (!node) return null;
+      node.meaning = item.after.meaning;
+      node.aliases = [...item.after.aliases];
+      node.properties = Object.entries(item.after.properties).map(([name, p]) => {
+        const existing = node.properties.find((ep) => ep.name === name);
+        return { id: existing ? existing.id : genImportReviewPropertyId(), name, type: p.type, unit: p.unit || null, allowed: p.allowed || null };
+      });
+      return { kind: "class", name: item.label, action: "updated" };
+    }
+    case "property": {
+      const node = state.nodes.find((n) => n.label === item.className);
+      if (!node) return null;
+      if (item.diffKind === "removed") {
+        const before = node.properties.length;
+        node.properties = node.properties.filter((p) => p.name !== item.label);
+        if (node.properties.length === before) return null;
+        return { kind: "property", name: `${item.className}.${item.label}`, action: "removed" };
+      }
+      const existing = node.properties.find((p) => p.name === item.label);
+      const value = item.after;
+      const record = { id: existing ? existing.id : genImportReviewPropertyId(), name: item.label, type: value.type, unit: value.unit || null, allowed: value.allowed || null };
+      if (existing) Object.assign(existing, record);
+      else node.properties.push(record);
+      return { kind: "property", name: `${item.className}.${item.label}`, action: item.diffKind === "added" ? "added" : "updated" };
+    }
+    case "relationship": {
+      const findEdge = (name, from, to) => state.edges.find((e) => {
+        const s = state.nodes.find((n) => n.id === e.source);
+        const tgt = state.nodes.find((n) => n.id === e.target);
+        return s && tgt && s.label === from && tgt.label === to && toCamelCaseId(e.relation) === name;
+      });
+      if (item.diffKind === "removed") {
+        const edge = findEdge(item.before.name, item.before.from, item.before.to);
+        if (!edge) return null;
+        deleteEdge(edge.id);
+        return { kind: "relationship", name: item.label, action: "removed" };
+      }
+      if (item.diffKind === "added") {
+        const src = state.nodes.find((n) => n.label === item.after.from);
+        const tgt = state.nodes.find((n) => n.label === item.after.to);
+        if (!src || !tgt) return null; // endpoint not taken this pass -- skip defensively, same as planYamlImport()
+        const edge = createEdge(src.id, tgt.id, item.after.name, true);
+        edge.meaning = item.after.meaning;
+        edge.aliases = [...(item.after.aliases || [])];
+        return { kind: "relationship", name: item.label, action: "added" };
+      }
+      const edge = findEdge(item.before.name, item.before.from, item.before.to);
+      if (!edge) return null;
+      if (item.diffKind === "directionChanged") {
+        const src = state.nodes.find((n) => n.label === item.after.from);
+        const tgt = state.nodes.find((n) => n.label === item.after.to);
+        if (!src || !tgt) return null;
+        edge.source = src.id;
+        edge.target = tgt.id;
+      }
+      edge.relation = item.after.name;
+      edge.meaning = item.after.meaning;
+      edge.aliases = [...(item.after.aliases || [])];
+      return { kind: "relationship", name: item.label, action: "updated" };
+    }
+    case "rule": {
+      if (item.diffKind === "removed") {
+        const rule = state.rules.find((r) => r.name === item.label);
+        if (!rule) return null;
+        deleteRule(rule.id);
+        return { kind: "rule", name: item.label, action: "removed" };
+      }
+      const existing = state.rules.find((r) => r.name === item.label);
+      if (existing) existing.conditions = [...item.after.conditions];
+      else createRule(item.label, [...item.after.conditions]);
+      return { kind: "rule", name: item.label, action: item.diffKind === "added" ? "added" : "updated" };
+    }
+    case "action": {
+      if (item.diffKind === "removed") {
+        const action = state.actions.find((a) => a.name === item.label);
+        if (!action) return null;
+        deleteAction(action.id);
+        return { kind: "action", name: item.label, action: "removed" };
+      }
+      const inputNode = item.after.input ? state.nodes.find((n) => n.label === item.after.input) : null;
+      const preconditionIds = item.after.preconditions
+        .map((ruleName) => state.rules.find((r) => r.name === ruleName)).filter(Boolean).map((r) => r.id);
+      const existing = state.actions.find((a) => a.name === item.label);
+      if (existing) {
+        existing.inputClassId = inputNode ? inputNode.id : null;
+        existing.preconditions = preconditionIds;
+        existing.effect = item.after.effect;
+        existing.verification = item.after.verification;
+      } else {
+        createAction(item.label, inputNode ? inputNode.id : null, preconditionIds, item.after.effect, item.after.verification);
+      }
+      return { kind: "action", name: item.label, action: item.diffKind === "added" ? "added" : "updated" };
+    }
+    case "cq": {
+      if (item.diffKind === "removed") {
+        if (!state.competencyQuestions.some((cq) => cq.id === item.cqId)) return null;
+        deleteCompetencyQuestion(item.cqId);
+        return { kind: "cq", name: item.label, action: "removed" };
+      }
+      const existing = state.competencyQuestions.find((cq) => cq.id === item.cqId);
+      if (existing) existing.text = item.after.text;
+      else state.competencyQuestions.push({ id: item.cqId, text: item.after.text });
+      return { kind: "cq", name: item.after.text, action: item.diffKind === "added" ? "added" : "updated" };
+    }
+    default:
+      return null;
+  }
+}
+
+// Order matters: a matched class's own meaning/aliases (kind "class") apply
+// before that same class's individual property items (kind "property") --
+// not because properties depend on the class existing (see buildImportReviewItems's
+// own comment: a property item's owning class is always already-matched,
+// never itself created in this same pass), but so a class *added* this pass
+// exists before any relationship/action that might reference it by label.
+function applyDeterministicImportReviewBucket(items) {
+  const sorted = [...items].sort((a, b) => IMPORT_REVIEW_KIND_ORDER[a.kind] - IMPORT_REVIEW_KIND_ORDER[b.kind]);
+  const nextShelfPosition = computeImportShelf();
+  const touched = [];
+  for (const item of sorted) {
+    const decision = importReviewDecisionFor(item.id);
+    const result = applyOneDeterministicImportReviewItem(item, decision.choice, nextShelfPosition);
+    if (result) touched.push(result);
+  }
+  return touched;
+}
+
+// ---------------------------------------------------------------------------
+// Execution agent (issue #122): a dedicated, non-conversational invocation --
+// its own system prompt, its own two tools -- reusing only the low-level
+// callAgentChatRaw() HTTP plumbing and the existing agentState connection,
+// not the persistent interview agent's own tool loop or system prompt. Runs
+// once per Apply, only when at least one decision needs it
+// (importReviewItemNeedsAgent()).
+//
+// Two tools: apply_ontology_changes is upsert-only (create or field-patch,
+// never clears a field it doesn't mention on an existing match) --
+// literally applyYamlModelToState() with fieldLevelMerge:true, the exact
+// same core the interview agent's own apply_ontology_yaml tool already
+// trusts. remove_ontology_elements is new: named, deliberate removal, the
+// one capability apply_ontology_yaml/agent-merge was deliberately never
+// given (see applyYamlModelToState's own comment) -- necessary because a
+// human's longform reasoning can genuinely call for deleting something, not
+// just creating or patching it.
+// ---------------------------------------------------------------------------
+
+const APPLY_ONTOLOGY_CHANGES_TOOL = {
+  type: "function",
+  function: {
+    name: "apply_ontology_changes",
+    description: "Create or update competency questions, classes, relationships, rules, or actions in the live ontology. Field-level upsert: a field you omit on an existing, matched entity is left exactly as it was, never cleared. Call this as many times as you need.",
+    parameters: {
+      type: "object",
+      properties: {
+        yaml: { type: "string", description: "Domain-model YAML using the competency_questions/classes/relationships/rules/actions block-style shape." },
+      },
+      required: ["yaml"],
+    },
+  },
+};
+
+const REMOVE_ONTOLOGY_ELEMENTS_TOOL = {
+  type: "function",
+  function: {
+    name: "remove_ontology_elements",
+    description: "Permanently remove named classes, relationships, properties, rules, actions, or competency questions from the live ontology. Removes only exactly what is named here -- never a blanket wipe. Use only when a human's own written reasoning genuinely calls for a removal.",
+    parameters: {
+      type: "object",
+      properties: {
+        classes: { type: "array", items: { type: "string" } },
+        relationships: {
+          type: "array",
+          items: { type: "object", properties: { name: { type: "string" }, from: { type: "string" }, to: { type: "string" } }, required: ["from", "to"] },
+        },
+        properties: {
+          type: "array",
+          items: { type: "object", properties: { className: { type: "string" }, name: { type: "string" } }, required: ["className", "name"] },
+        },
+        rules: { type: "array", items: { type: "string" } },
+        actions: { type: "array", items: { type: "string" } },
+        competencyQuestions: { type: "array", items: { type: "string" }, description: "exact question text" },
+      },
+    },
+  },
+};
+
+const IMPORT_REVIEW_MERGER_SYSTEM_PROMPT = `ROLE
+You are executing a batch of merge decisions a human already made between two versions of an ontology: the current live graph, and an incoming file being merged into it.
+
+You will be given the current model, the incoming model, and a list of decisions. Every decision you see here needed a human, not a plain keep/take pick -- either it carries the human's own written reasoning, or it is a pair the human accepted between a current-side item and a differently-named/shaped incoming-side item that really mean the same thing.
+
+Your job: make the live ontology reflect what the human actually decided, INCLUDING THE LOGICAL CONSEQUENCES of their reasoning -- not just the literal item a note was written on. If a note genuinely implies something elsewhere in the model also needs to change (a rename that leaves an existing rule's wording stale, say), make that change too. Prefer minimal, targeted edits over broad rewrites. Never invent a change no decision or its reasoning actually implies.
+
+Use apply_ontology_changes to create or update anything (it never clears a field you don't mention on an existing match). Use remove_ontology_elements to delete something -- only when a human's own reasoning genuinely calls for it.
+
+BE CONSERVATIVE ABOUT REMOVAL. A removal is permanent within this run -- only call remove_ontology_elements on something when the reasoning specifically and clearly calls for removing that exact thing. A vague or general instruction ("this might be redundant," "consider dropping X") is not, by itself, enough justification for removing a concept that is still referenced elsewhere in the model, especially one with many existing relationships -- when you are genuinely unsure whether something should be removed or kept, keep it and say why in your final reply instead of removing it. Never merge or conflate two concepts into one just because a note mentioned trimming redundancy: confirm they are actually the same real-world concept first. Two things an ontology keeps as distinct sides of a comparison (a "demand" and the "resistance" it is checked against, say) are not the same concept just because a note called one of them redundant.
+
+Call either tool as many times as you need, in any order, then stop. Your tool calls are the result -- a separate final answer isn't required -- but you may add one short closing reply noting anything you deliberately chose not to do, or are unsure about; it is shown to the human, never silently discarded.`;
+
+const IMPORT_REVIEW_MERGER_MAX_ROUNDS = 6;
+
+// Named-only removal -- the counterpart applyYamlModelToState() (upsert-only,
+// see its own comment) never had. Deletes only what is named, never a
+// blanket "everything unmatched" sweep the way commitYamlImport()'s
+// "replace" mode does. Used exclusively by remove_ontology_elements.
+function removeNamedOntologyElements({ classes = [], relationships = [], properties = [], rules = [], actions = [], competencyQuestions = [] }) {
+  const removed = { classes: [], relationships: [], properties: [], rules: [], actions: [], competencyQuestions: [] };
+  for (const name of classes) {
+    const node = state.nodes.find((n) => n.label === name);
+    if (node) { deleteNode(node.id); removed.classes.push(name); }
+  }
+  for (const rel of relationships) {
+    if (!rel || typeof rel !== "object") continue;
+    const edge = state.edges.find((e) => {
+      const s = state.nodes.find((n) => n.id === e.source);
+      const t = state.nodes.find((n) => n.id === e.target);
+      return s && t && s.label === rel.from && t.label === rel.to &&
+        (!rel.name || toCamelCaseId(e.relation) === toCamelCaseId(rel.name));
+    });
+    if (edge) { deleteEdge(edge.id); removed.relationships.push(`${rel.name || edge.relation} (${rel.from} → ${rel.to})`); }
+  }
+  for (const p of properties) {
+    if (!p || typeof p !== "object") continue;
+    const node = state.nodes.find((n) => n.label === p.className);
+    if (!node) continue;
+    const before = node.properties.length;
+    node.properties = node.properties.filter((prop) => prop.name !== p.name);
+    if (node.properties.length < before) removed.properties.push(`${p.className}.${p.name}`);
+  }
+  for (const name of rules) {
+    const rule = state.rules.find((r) => r.name === name);
+    if (rule) { deleteRule(rule.id); removed.rules.push(name); }
+  }
+  for (const name of actions) {
+    const action = state.actions.find((a) => a.name === name);
+    if (action) { deleteAction(action.id); removed.actions.push(name); }
+  }
+  for (const text of competencyQuestions) {
+    const cq = state.competencyQuestions.find((c) => c.text === text);
+    if (cq) { deleteCompetencyQuestion(cq.id); removed.competencyQuestions.push(text); }
+  }
+  return removed;
+}
+
+// Executes one tool call, mutating `state` directly (no history/markDirty of
+// its own -- runImportReviewExecutionAgent()'s caller owns the single
+// combined undo step for the whole Apply). Pushes every element actually
+// touched onto `touched`, so the post-Apply summary is built from what
+// really happened, not from the model's own self-report.
+function executeImportReviewMergerTool(call, touched) {
+  const name = call.function && call.function.name;
+  let args;
+  try { args = JSON.parse((call.function && call.function.arguments) || "{}"); }
+  catch (err) { return "Error: could not parse tool arguments as JSON."; }
+
+  if (name === "apply_ontology_changes") {
+    const yaml = typeof args.yaml === "string" ? args.yaml : "";
+    if (!yaml.trim()) return "Error: yaml was empty.";
+    const parsed = parseDomainYamlImport(yaml);
+    applyYamlModelToState(parsed, { fieldLevelMerge: true });
+    for (const cName of Object.keys(parsed.classes)) touched.push({ kind: "class", name: cName, action: "upserted" });
+    for (const rName of Object.keys(parsed.rules)) touched.push({ kind: "rule", name: rName, action: "upserted" });
+    for (const aName of Object.keys(parsed.actions)) touched.push({ kind: "action", name: aName, action: "upserted" });
+    for (const rel of parsed.relationships) {
+      if (rel && typeof rel === "object") touched.push({ kind: "relationship", name: `${rel.name || ""} (${rel.from} → ${rel.to})`, action: "upserted" });
+    }
+    for (const cq of parsed.competencyQuestions) touched.push({ kind: "cq", name: cq.text, action: "upserted" });
+    return "Applied.";
+  }
+
+  if (name === "remove_ontology_elements") {
+    const removed = removeNamedOntologyElements({
+      classes: Array.isArray(args.classes) ? args.classes : [],
+      relationships: Array.isArray(args.relationships) ? args.relationships : [],
+      properties: Array.isArray(args.properties) ? args.properties : [],
+      rules: Array.isArray(args.rules) ? args.rules : [],
+      actions: Array.isArray(args.actions) ? args.actions : [],
+      competencyQuestions: Array.isArray(args.competencyQuestions) ? args.competencyQuestions : [],
+    });
+    // Explicit map, not a naive /s$/ strip -- "classes" -> "classe" and
+    // "properties" -> "propertie" both fail to match any known kind in
+    // importReviewKindLabel()'s switch, which silently renders as a blank
+    // label in the post-Apply summary. Found live: a real merger call
+    // removing actual classes surfaced this (every mocked test happened to
+    // only exercise "rules"/"actions", where the naive strip works by
+    // coincidence).
+    const REMOVED_KIND_SINGULAR = { classes: "class", relationships: "relationship", properties: "property", rules: "rule", actions: "action", competencyQuestions: "cq" };
+    for (const [kind, names] of Object.entries(removed)) {
+      for (const n of names) touched.push({ kind: REMOVED_KIND_SINGULAR[kind] || kind, name: n, action: "removed" });
+    }
+    const total = Object.values(removed).reduce((s, arr) => s + arr.length, 0);
+    return `Removed ${total} element(s).`;
+  }
+
+  return `Error: unknown tool "${name}".`;
+}
+
+function importReviewIncomingYaml() {
+  return toYaml(buildDomainModel(importReviewIncomingSnapshot()));
+}
+
+function importReviewAgentItemsAsText(items, sharedNote) {
+  const lines = items.map((item) => {
+    const d = importReviewDecisionFor(item.id);
+    const choiceText = d.choice === "a" ? "human picked: keep current"
+      : d.choice === "b" ? "human picked: take incoming"
+      : "human wrote reasoning only, no plain pick";
+    const pairedText = item.isPaired
+      ? ` | this is an accepted cross-label pairing -- possibly several current-side concepts mapping to one incoming concept or the reverse; every grouped name on each side is listed in the label above (${item.currentNames.join(", ")}  →  ${item.incomingNames.join(", ")})`
+      : "";
+    const noteText = d.note.trim() ? ` | reasoning: ${d.note.trim()}` : "";
+    const displayContext = importReviewItemDisplayContext(item);
+    return `- [${importReviewKindLabel(item.kind)}] ${item.label}${displayContext ? ` (${displayContext})` : ""} -- ${choiceText}${pairedText}${noteText}`;
+  });
+  if (sharedNote.trim()) lines.push(`- [general] ${sharedNote.trim()}`);
+  return lines.join("\n");
+}
+
+// Runs the execution agent to completion (up to IMPORT_REVIEW_MERGER_MAX_ROUNDS
+// tool-call rounds) and returns everything it actually touched. Throws the
+// same {kind, status?} shape callAgentChatRaw() itself throws on failure --
+// the caller (runImportReviewApply()) is responsible for the partial-failure
+// path (deterministic bucket's changes already stand either way).
+async function runImportReviewExecutionAgent(agentItems, sharedNote) {
+  const messages = [
+    { role: "system", content: IMPORT_REVIEW_MERGER_SYSTEM_PROMPT },
+    {
+      role: "user",
+      content: `CURRENT MODEL:\n${buildDomainYamlExport()}\n\nINCOMING MODEL:\n${importReviewIncomingYaml()}\n\nDECISIONS:\n${importReviewAgentItemsAsText(agentItems, sharedNote)}`,
+    },
+  ];
+  const tools = [APPLY_ONTOLOGY_CHANGES_TOOL, REMOVE_ONTOLOGY_ELEMENTS_TOOL];
+  const touched = [];
+  // The system prompt explicitly invites a short closing reply for anything
+  // deliberately left undone or uncertain (its own "be conservative about
+  // removal" guidance) -- that text is worth surfacing to the human, not
+  // just discarded, so it's captured off whichever round actually ends the
+  // loop (either the first response with no tool_calls, or -- if the round
+  // budget runs out mid-tool-use -- whatever that last round's content was,
+  // possibly empty).
+  let commentary = "";
+  for (let round = 0; round < IMPORT_REVIEW_MERGER_MAX_ROUNDS; round++) {
+    const message = await callAgentChatRaw(messages, { tools });
+    if (!Array.isArray(message.tool_calls) || !message.tool_calls.length) {
+      commentary = typeof message.content === "string" ? message.content.trim() : "";
+      break;
+    }
+    messages.push({ role: "assistant", content: message.content || null, tool_calls: message.tool_calls });
+    for (const call of message.tool_calls) {
+      const resultText = executeImportReviewMergerTool(call, touched);
+      messages.push({ role: "tool", tool_call_id: call.id, content: resultText });
+    }
+  }
+  return { touched, commentary };
+}
+
+// ---------------------------------------------------------------------------
+// Proposer ("Suggest matches"): a read-only, tool-free one-shot LLM call --
+// the exact same shape runConsistencyLlmCheck()/runCqCoverageCheck() already
+// use, deliberately kept separate from the execution agent above (see this
+// section's own top-of-file comment on why: read-only/re-runnable vs.
+// one-shot/mutating is a real safety boundary). Never mutates `state` --
+// only proposes candidate pairs the user still has to accept via the normal
+// decision widget, same as any other matched item.
+// ---------------------------------------------------------------------------
+
+const IMPORT_REVIEW_PROPOSER_SYSTEM_PROMPT = `You compare two versions of an ontology (a "current" model and an "incoming" model being merged into it) and propose which leftover items on one side are really the same real-world concept as a differently-named/shaped leftover item on the other side.
+
+You will be given two lists -- items only in "current" and items only in "incoming" -- across classes, relationships, properties, rules, and actions. Anything that already matched by exact name is not included; you only ever see genuine leftovers. Propose pairs where a current item and an incoming item are plausibly the same concept under a different name or shape: a rename, a generalization (several current items collapse into one incoming item), a specialization (the reverse), or a broader reframing.
+
+Only propose a pair when there is real textual or structural evidence (similar name, same role, same properties/context) -- do not force a pairing just because both lists are non-empty. If nothing plausibly matches, return an empty array. Return exactly one \`\`\`json block containing an array, and nothing else:
+
+[{"currentKind":"class","currentName":"...","incomingKind":"class","incomingName":"...","relationKind":"renamed","note":"one sentence why"}]
+
+relationKind is one of: renamed, generalized, specialized, reframed.`;
+
+// {kind, name, context} for every current-only/incoming-only item not
+// already claimed by an earlier accepted pair -- the only items the
+// proposer is allowed to see, so it can never re-propose something the
+// deterministic diff already resolved by exact name.
+function importReviewLeftoverItemsForPairing() {
+  const currentOnly = importReviewItems
+    .filter((item) => item.section === "currentOnly")
+    .map((item) => ({ kind: item.kind, name: item.label, context: item.context }));
+  const incomingOnly = importReviewItems
+    .filter((item) => item.section === "incomingOnly")
+    .map((item) => ({ kind: item.kind, name: item.label, context: item.context }));
+  return { currentOnly, incomingOnly };
+}
+
+// Moves an accepted (name-matched, kind-matched, both sides still unclaimed)
+// suggested pair out of currentOnly/incomingOnly and into one new "matched"
+// item -- any earlier decision on either original item is discarded, since
+// the pairing changes what the decision is even about.
+function ufFind(parent, x) {
+  while (parent.get(x) !== x) {
+    parent.set(x, parent.get(parent.get(x)));
+    x = parent.get(x);
+  }
+  return x;
+}
+function ufUnion(parent, a, b) {
+  const ra = ufFind(parent, a), rb = ufFind(parent, b);
+  if (ra !== rb) parent.set(ra, rb);
+}
+
+// "generalized"/"specialized" are *defined* as several-to-one or
+// one-to-several by nature -- a naive one-pair-claims-exactly-two-items
+// model silently drops every proposed pair after the first that reuses an
+// already-claimed endpoint (confirmed live: a real proposer response
+// grouping three current classes into one incoming class had two of its
+// three, equally well-reasoned, pairs vanish with no indication to the
+// user). Pairs that share an endpoint describe one real-world grouping, not
+// competing claims, so they're unioned via union-find on endpoint keys into
+// one connected component per real grouping, however many members it has.
+function importReviewApplySuggestedPairs(pairs) {
+  const currentByKey = new Map(); // "kind:name" -> item, currentOnly items still on the board
+  const incomingByKey = new Map(); // "kind:name" -> item, incomingOnly items still on the board
+  for (const item of importReviewItems) {
+    if (item.section === "currentOnly") currentByKey.set(`${item.kind}:${item.label}`, item);
+    else if (item.section === "incomingOnly") incomingByKey.set(`${item.kind}:${item.label}`, item);
+  }
+
+  const parent = new Map();
+  const edges = []; // [{ckey, ikey, relationKind, note}], keys prefixed so a current/incoming name collision can never union the wrong pair
+  for (const raw of pairs) {
+    if (!raw || typeof raw !== "object") continue;
+    const { currentKind, currentName, incomingKind, incomingName, relationKind, note } = raw;
+    if (currentKind !== incomingKind) continue; // cross-kind pairing isn't a supported shape
+    if (!currentByKey.has(`${currentKind}:${currentName}`) || !incomingByKey.has(`${incomingKind}:${incomingName}`)) continue; // hallucinated, or already resolved another way
+    const ckey = `C|${currentKind}:${currentName}`, ikey = `I|${incomingKind}:${incomingName}`;
+    if (!parent.has(ckey)) parent.set(ckey, ckey);
+    if (!parent.has(ikey)) parent.set(ikey, ikey);
+    ufUnion(parent, ckey, ikey);
+    edges.push({ ckey, ikey, relationKind, note });
+  }
+  if (!edges.length) return 0;
+
+  const groups = new Map(); // root -> { currentKeys: Set, incomingKeys: Set, edges: [] }
+  for (const key of parent.keys()) {
+    const root = ufFind(parent, key);
+    if (!groups.has(root)) groups.set(root, { currentKeys: new Set(), incomingKeys: new Set(), edges: [] });
+    (key.startsWith("C|") ? groups.get(root).currentKeys : groups.get(root).incomingKeys).add(key);
+  }
+  for (const e of edges) groups.get(ufFind(parent, e.ckey)).edges.push(e);
+
+  let applied = 0;
+  for (const g of groups.values()) {
+    if (!g.currentKeys.size || !g.incomingKeys.size) continue; // needs a real item on each side to mean anything
+    const currentItems = [...g.currentKeys].map((k) => currentByKey.get(k.slice(2)));
+    const incomingItems = [...g.incomingKeys].map((k) => incomingByKey.get(k.slice(2)));
+    const kind = currentItems[0].kind; // uniform within one component: every edge enforces currentKind === incomingKind, and keys are kind-prefixed, so a component can never mix kinds
+
+    for (const item of [...currentItems, ...incomingItems]) {
+      importReviewItems = importReviewItems.filter((i) => i !== item);
+      delete importReviewDecisions[item.id];
+    }
+
+    const relationKinds = new Set(g.edges.map((e) => (["renamed", "generalized", "specialized", "reframed"].includes(e.relationKind) ? e.relationKind : "renamed")));
+    const relationKindLabel = relationKinds.size === 1 ? [...relationKinds][0] : "renamed";
+    const notes = [...new Set(g.edges.map((e) => e.note).filter(Boolean))];
+    const noteText = notes.length ? `: ${notes.join(" | ").slice(0, 400)}` : "";
+    const currentNames = currentItems.map((i) => i.label);
+    const incomingNames = incomingItems.map((i) => i.label);
+
+    importReviewItems.push({
+      id: importReviewItemId("paired", kind, [...currentNames].sort().join("+"), [...incomingNames].sort().join("+")),
+      section: "matched", kind, diffKind: "paired", isPaired: true,
+      label: `${currentNames.join(", ")}  →  ${incomingNames.join(", ")}`,
+      context: `${relationKindLabel}${noteText}`,
+      // Not a single before/after object like every other diffKind -- a
+      // group can have several members per side. Nothing currently reads
+      // these for a paired item (see importReviewItemDisplayContext()'s own
+      // early return for anything but a "changed" class, and
+      // applyOneDeterministicImportReviewItem()'s choice!=="b" early
+      // return -- a paired item never reaches either read path), kept null
+      // rather than overloading the shape other item kinds rely on.
+      before: null, after: null,
+      currentNames, incomingNames,
+    });
+    applied += currentItems.length + incomingItems.length;
+  }
+  return applied;
+}
+
+async function runImportReviewSuggestMatches() {
+  if (importReviewSuggestPending || !agentState.connected) return;
+  importReviewSuggestPending = true;
+  importReviewSuggestFailed = false;
+  renderImportReview();
+  try {
+    const leftover = importReviewLeftoverItemsForPairing();
+    const message = await callAgentChatRaw([
+      { role: "system", content: IMPORT_REVIEW_PROPOSER_SYSTEM_PROMPT },
+      { role: "user", content: JSON.stringify(leftover) },
+    ]);
+    const reply = (message && typeof message.content === "string") ? message.content : "";
+    const blocks = [...reply.matchAll(/```(?:json)?\s*\n([\s\S]*?)```/g)].map((m) => m[1].trim());
+    const braced = reply.slice(reply.indexOf("["), reply.lastIndexOf("]") + 1);
+    let parsed = null;
+    for (const block of [...blocks, braced].filter(Boolean)) {
+      try {
+        const value = JSON.parse(block);
+        if (Array.isArray(value)) { parsed = value; break; }
+      } catch (err) { /* try the next candidate */ }
+    }
+    importReviewApplySuggestedPairs(Array.isArray(parsed) ? parsed : []);
+  } catch (err) {
+    importReviewSuggestFailed = true;
+  } finally {
+    importReviewSuggestPending = false;
+    importReviewSuggestRun = true;
+    renderImportReview();
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Dialog rendering. Choice-button clicks and note-input typing update just
+// the one row's classes/button-states (refreshImportReviewItemRow) plus the
+// section counts/footer (refreshImportReviewProgress) -- never a full
+// rebuild, or a note input mid-keystroke would lose focus/cursor position.
+// Only the item *set* changing (open, or a "Suggest matches" result) calls
+// the full renderImportReview().
+// ---------------------------------------------------------------------------
+
+function setImportReviewChoice(id, choice) {
+  const cur = importReviewDecisionFor(id);
+  const nextChoice = cur.choice === choice ? null : choice; // click again to un-pick, same as the reference's own widget
+  importReviewDecisions[id] = { ...cur, choice: nextChoice };
+  refreshImportReviewItemRow(id);
+  refreshImportReviewProgress();
+}
+
+function setImportReviewNote(id, note) {
+  const cur = importReviewDecisionFor(id);
+  importReviewDecisions[id] = { ...cur, note };
+  refreshImportReviewItemRow(id);
+  refreshImportReviewProgress();
+}
+
+function importReviewRowEl(id) {
+  return importReviewMatchedListEl.querySelector(`[data-item-id="${CSS.escape(id)}"]`)
+    || importReviewCurrentOnlyListEl.querySelector(`[data-item-id="${CSS.escape(id)}"]`)
+    || importReviewIncomingOnlyListEl.querySelector(`[data-item-id="${CSS.escape(id)}"]`);
+}
+
+function refreshImportReviewItemRow(id) {
+  const row = importReviewRowEl(id);
+  if (!row) return;
+  const decided = importReviewIsDecided(id);
+  row.classList.toggle("decided", decided);
+  row.classList.toggle("undecided", !decided);
+  const d = importReviewDecisionFor(id);
+  row.querySelector(".choice-a").classList.toggle("on", d.choice === "a");
+  row.querySelector(".choice-b").classList.toggle("on", d.choice === "b");
+}
+
+function refreshImportReviewProgress() {
+  const bySection = (section) => importReviewItems.filter((i) => i.section === section);
+  const decidedCount = (items) => items.filter((i) => importReviewIsDecided(i.id)).length;
+
+  const matched = bySection("matched"), currentOnly = bySection("currentOnly"), incomingOnly = bySection("incomingOnly");
+  importReviewMatchedLabelEl.textContent = t("importReviewMatchedLabel", decidedCount(matched), matched.length);
+  importReviewCurrentOnlyLabelEl.textContent = t("importReviewCurrentOnlyLabel", decidedCount(currentOnly), currentOnly.length);
+  importReviewIncomingOnlyLabelEl.textContent = t("importReviewIncomingOnlyLabel", decidedCount(incomingOnly), incomingOnly.length);
+
+  const total = importReviewItems.length;
+  const decided = decidedCount(importReviewItems);
+  importReviewProgressEl.textContent = t("importReviewProgress", decided, total);
+  importReviewApplyBtn.disabled = importReviewApplyPending || decided < total;
+}
+
+function createImportReviewItemRow(item) {
+  const row = document.createElement("div");
+  row.className = "import-review-item";
+  row.dataset.itemId = item.id;
+
+  const top = document.createElement("div");
+  top.className = "import-review-item-top";
+  const kindEl = document.createElement("span");
+  kindEl.className = "import-review-item-kind";
+  kindEl.textContent = importReviewKindLabel(item.kind);
+  const labelEl = document.createElement("span");
+  labelEl.className = "import-review-item-label";
+  labelEl.textContent = item.label;
+  top.append(kindEl, labelEl);
+  const displayContext = importReviewItemDisplayContext(item);
+  if (displayContext) {
+    const contextEl = document.createElement("span");
+    contextEl.className = "import-review-item-context";
+    contextEl.textContent = displayContext;
+    top.append(contextEl);
+  }
+
+  const decision = document.createElement("div");
+  decision.className = "import-review-decision";
+  const choiceA = document.createElement("button");
+  choiceA.type = "button";
+  choiceA.className = "import-review-choice choice-a";
+  choiceA.textContent = t("importReviewChoiceKeepCurrent");
+  choiceA.addEventListener("click", () => setImportReviewChoice(item.id, "a"));
+  const choiceB = document.createElement("button");
+  choiceB.type = "button";
+  choiceB.className = "import-review-choice choice-b";
+  choiceB.textContent = t("importReviewChoiceTakeIncoming");
+  choiceB.addEventListener("click", () => setImportReviewChoice(item.id, "b"));
+  const note = document.createElement("input");
+  note.type = "text";
+  note.className = "import-review-note";
+  note.placeholder = t("importReviewNotePlaceholder");
+  note.value = importReviewDecisionFor(item.id).note;
+  note.addEventListener("input", () => setImportReviewNote(item.id, note.value));
+  decision.append(choiceA, choiceB, note);
+
+  row.append(top, decision);
+  const decided = importReviewIsDecided(item.id);
+  row.classList.toggle("decided", decided);
+  row.classList.toggle("undecided", !decided);
+  const d = importReviewDecisionFor(item.id);
+  choiceA.classList.toggle("on", d.choice === "a");
+  choiceB.classList.toggle("on", d.choice === "b");
+  return row;
+}
+
+function renderImportReviewSection(listEl, emptyEl, items) {
+  listEl.textContent = "";
+  for (const item of items) listEl.appendChild(createImportReviewItemRow(item));
+  emptyEl.hidden = items.length > 0;
+}
+
+function renderImportReview() {
+  const bySection = (section) => importReviewItems.filter((i) => i.section === section);
+  renderImportReviewSection(importReviewMatchedListEl, importReviewMatchedEmptyEl, bySection("matched"));
+  renderImportReviewSection(importReviewCurrentOnlyListEl, importReviewCurrentOnlyEmptyEl, bySection("currentOnly"));
+  renderImportReviewSection(importReviewIncomingOnlyListEl, importReviewIncomingOnlyEmptyEl, bySection("incomingOnly"));
+
+  importReviewFlagsEl.hidden = importReviewOrphanNames.length === 0;
+  if (importReviewOrphanNames.length) {
+    importReviewFlagsTextEl.textContent = t("importReviewFlags", importReviewOrphanNames.length);
+    importReviewFlagsChipsEl.textContent = "";
+    for (const name of importReviewOrphanNames) {
+      const chip = document.createElement("span");
+      chip.className = "import-review-chip";
+      chip.textContent = name;
+      importReviewFlagsChipsEl.appendChild(chip);
+    }
+  }
+
+  importReviewSuggestBtn.disabled = importReviewSuggestPending || !agentState.connected;
+  importReviewSuggestBtn.textContent = importReviewSuggestPending ? t("importReviewSuggestMatchesRunning") : t("importReviewSuggestMatches");
+
+  importReviewSharedNoteEl.value = importReviewSharedNoteText;
+
+  if (importReviewLastResult) {
+    importReviewResultEl.hidden = false;
+    importReviewResultEl.querySelector("#import-review-result-label").textContent = t("importReviewResultLabel");
+    importReviewResultStatusEl.textContent = importReviewLastResult.message;
+    const commentary = importReviewLastResult.commentary || "";
+    importReviewResultCommentaryEl.hidden = !commentary;
+    importReviewResultCommentaryEl.textContent = commentary;
+    importReviewResultListEl.textContent = "";
+    for (const touched of importReviewLastResult.touched) {
+      const li = document.createElement("li");
+      li.textContent = `${importReviewKindLabel(touched.kind === "cq" ? "cq" : touched.kind)}: ${touched.name} (${touched.action})`;
+      importReviewResultListEl.appendChild(li);
+    }
+  } else {
+    importReviewResultEl.hidden = true;
+  }
+
+  refreshImportReviewProgress();
+}
+
+// ---------------------------------------------------------------------------
+// Open/close/apply/download
+// ---------------------------------------------------------------------------
+
+function openImportReview() {
+  if (pendingImportText === null || (pendingImportKind !== "json" && pendingImportKind !== "yaml")) return;
+  const text = pendingImportText, kind = pendingImportKind;
+  closeImportDialog(); // nulls pendingImportText/etc -- already captured above, so this is safe
+  importReviewKind = kind;
+  const parsed = kind === "json" ? parseJsonImport(text) : parseDomainYamlImport(text);
+  importReviewParsedGraph = kind === "json" ? parsed.graph : parsed;
+  const diff = computeImportReviewDiff(importReviewParsedGraph, kind);
+  importReviewItems = buildImportReviewItems(diff);
+  importReviewOrphanNames = computeOntologyFindings(buildDomainModel(importReviewIncomingSnapshot()))
+    .filter((f) => f.check === "class-no-relationships").map((f) => f.subject.name);
+  importReviewDecisions = {};
+  importReviewSharedNoteText = "";
+  importReviewSuggestPending = false;
+  importReviewSuggestFailed = false;
+  importReviewSuggestRun = false;
+  importReviewApplyPending = false;
+  importReviewLastResult = null;
+  importReviewOpen = true;
+  renderImportReview();
+  importReviewOverlay.style.display = "flex";
+}
+
+function closeImportReview() {
+  importReviewOverlay.style.display = "none";
+  importReviewOpen = false;
+}
+
+function importReviewAgentErrorMessage(err) {
+  return agentChatErrorText(err);
+}
+
+async function runImportReviewApply() {
+  if (importReviewApplyPending || !importReviewAllDecided()) return;
+  importReviewApplyPending = true;
+  importReviewApplyBtn.disabled = true;
+  importReviewApplyBtn.textContent = t("importReviewApplyRunning");
+
+  const before = snapshotState();
+  const deterministicItems = importReviewItems.filter((item) => !importReviewItemNeedsAgent(item));
+  const agentItems = importReviewItems.filter((item) => importReviewItemNeedsAgent(item));
+
+  const deterministicTouched = applyDeterministicImportReviewBucket(deterministicItems);
+
+  let agentTouched = [];
+  let agentCommentary = "";
+  let agentError = null;
+  if (agentItems.length) {
+    if (!agentState.connected) {
+      agentError = t("importReviewConnectFirst");
+    } else {
+      try {
+        const agentResult = await runImportReviewExecutionAgent(agentItems, importReviewSharedNoteText);
+        agentTouched = agentResult.touched;
+        agentCommentary = agentResult.commentary;
+      } catch (err) {
+        agentError = importReviewAgentErrorMessage(err);
+      }
+    }
+  }
+
+  const touched = [...deterministicTouched, ...agentTouched];
+  if (touched.length) {
+    pushHistory(before, snapshotState(), undefined);
+    markDirty();
+    fitViewToContent();
+  }
+
+  importReviewLastResult = {
+    ok: !agentError,
+    message: agentError ? t("importReviewResultFailed", agentError)
+      : agentItems.length ? t("importReviewResultOk")
+      : t("importReviewResultNoAgentItems"),
+    // The execution agent's own closing remark (its system prompt invites
+    // one for anything deliberately left undone or uncertain, see the "be
+    // conservative about removal" guidance) -- shown to the human, not
+    // discarded, whenever it wrote one.
+    commentary: agentCommentary,
+    touched,
+  };
+  importReviewApplyPending = false;
+  importReviewApplyBtn.textContent = t("importReviewApply");
+  renderImportReview();
+}
+
+function importReviewDecisionsMarkdown() {
+  const lines = [`# ${t("importReviewTitle")}`, ""];
+  const sectionLabel = { matched: t("importReviewMatchedLabel", 0, 0).replace(/\s*\(.*\)$/, ""),
+    currentOnly: t("importReviewCurrentOnlyLabel", 0, 0).replace(/\s*\(.*\)$/, ""),
+    incomingOnly: t("importReviewIncomingOnlyLabel", 0, 0).replace(/\s*\(.*\)$/, "") };
+  for (const section of ["matched", "currentOnly", "incomingOnly"]) {
+    const items = importReviewItems.filter((i) => i.section === section);
+    if (!items.length) continue;
+    lines.push(`## ${sectionLabel[section]}`, "");
+    for (const item of items) {
+      const d = importReviewDecisionFor(item.id);
+      const choiceText = d.choice === "a" ? t("importReviewChoiceKeepCurrent") : d.choice === "b" ? t("importReviewChoiceTakeIncoming") : "—";
+      const displayContext = importReviewItemDisplayContext(item);
+      lines.push(`- **[${importReviewKindLabel(item.kind)}] ${item.label}**${displayContext ? ` _(${displayContext})_` : ""}`);
+      lines.push(`  → ${choiceText}${d.note.trim() ? `: ${d.note.trim()}` : ""}`);
+    }
+    lines.push("");
+  }
+  if (importReviewSharedNoteText.trim()) {
+    lines.push(`## ${t("importReviewSharedNoteLabel")}`, "", importReviewSharedNoteText.trim());
+  }
+  return lines.join("\n");
+}
+
+function downloadImportReviewDecisions() {
+  const md = importReviewDecisionsMarkdown();
+  const filename = `import-review-decisions_${filenameTimestamp(isoTimestampSeconds())}.md`;
+  triggerDownload(filename, md, "text/markdown");
+}
+
+importReviewBtn.addEventListener("click", () => openImportReview());
+importReviewCancelBtn.addEventListener("click", () => closeImportReview());
+importReviewOverlay.addEventListener("click", (e) => { if (e.target === importReviewOverlay) closeImportReview(); });
+importReviewApplyBtn.addEventListener("click", () => runImportReviewApply());
+importReviewSuggestBtn.addEventListener("click", () => runImportReviewSuggestMatches());
+importReviewDownloadBtn.addEventListener("click", () => downloadImportReviewDecisions());
+importReviewSharedNoteEl.addEventListener("input", () => { importReviewSharedNoteText = importReviewSharedNoteEl.value; });
 
 // ---------------------------------------------------------------------------
 // Toolbar
@@ -13128,6 +14721,43 @@ window.__kg = {
     getActiveTab: () => reviewActiveTab,
     getGraphMode: () => reviewGraphMode,
     computeReviewGraphDiffSets,
+  },
+  // Import Review (issue #122) test surface -- the pure diff-plumbing half
+  // (dialog UI/decision/execution surface is added alongside those pieces).
+  importReview: {
+    diffDomainModels,
+    jsonGraphToSnapshot,
+    yamlModelToSnapshot,
+    computeDiff: computeImportReviewDiff,
+    // Dialog surface, mirroring the reviewChanges/finder sub-objects' own
+    // open/close/isOpen/get*-current-state convention above.
+    open: openImportReview,
+    close: closeImportReview,
+    isOpen: () => importReviewOpen,
+    getItems: () => importReviewItems.map((i) => ({ ...i })),
+    getDecision: (id) => ({ ...importReviewDecisionFor(id) }),
+    setChoice: setImportReviewChoice,
+    setNote: setImportReviewNote,
+    setSharedNote: (text) => { importReviewSharedNoteText = text; importReviewSharedNoteEl.value = text; },
+    getOrphanNames: () => [...importReviewOrphanNames],
+    allDecided: importReviewAllDecided,
+    suggestMatches: runImportReviewSuggestMatches,
+    isSuggestPending: () => importReviewSuggestPending,
+    didSuggestFail: () => importReviewSuggestFailed,
+    apply: runImportReviewApply,
+    isApplyPending: () => importReviewApplyPending,
+    getLastResult: () => importReviewLastResult && { ...importReviewLastResult, touched: [...importReviewLastResult.touched] },
+    decisionsMarkdown: importReviewDecisionsMarkdown,
+    // Removal/upsert primitives + the merger's own tool set, exposed the
+    // same way GET_GRAPH_STATE_TOOL/APPLY_ONTOLOGY_YAML_TOOL are elsewhere,
+    // so a test can exercise the merger's tool contract directly.
+    applyYamlModelToState,
+    removeNamedOntologyElements,
+    tools: { applyOntologyChanges: APPLY_ONTOLOGY_CHANGES_TOOL, removeOntologyElements: REMOVE_ONTOLOGY_ELEMENTS_TOOL },
+    // Exposed so a test/eval measures the shipped prompt, not a copy of it
+    // that could drift out of sync -- same reasoning as CONSISTENCY_LLM_PROMPT/
+    // APPLY_ONTOLOGY_YAML_TOOL's own exposure above.
+    prompts: { proposer: IMPORT_REVIEW_PROPOSER_SYSTEM_PROMPT, merger: IMPORT_REVIEW_MERGER_SYSTEM_PROMPT },
   },
   // Consistency checker (issue #83). The engine is exposed as the pure
   // function it is, so tests can run it over an arbitrary domain-model
