@@ -1081,6 +1081,20 @@
     line-height: 1.6;
   }
 
+  /* The execution agent's own closing remark (issue #122's later "be
+     conservative about removal" hardening) -- visually distinct from the
+     plain status line above it, so a genuine hedge/concern from the model
+     doesn't read as just more status text. */
+  .import-review-result-commentary {
+    margin: 8px 0 0;
+    padding: 8px 10px;
+    border-left: 3px solid var(--agent-accent);
+    background: color-mix(in srgb, var(--agent-accent) 10%, transparent);
+    font-size: 12.5px;
+    font-style: italic;
+    line-height: 1.5;
+  }
+
   /* Agent Ontology — Rules/Actions manager cards. Same bordered-card
      treatment as .details-property-row above, plus a subtle background
      tint and shadow on top of it -- with a dozen-plus cards stacked in a
@@ -2016,6 +2030,7 @@
       <div id="import-review-result" class="import-review-result" hidden>
         <label class="details-field-label" id="import-review-result-label"></label>
         <p id="import-review-result-status"></p>
+        <p id="import-review-result-commentary" class="import-review-result-commentary" hidden></p>
         <ul id="import-review-result-list"></ul>
       </div>
     </div>
@@ -11092,6 +11107,7 @@ const importReviewSuggestBtn = document.getElementById("import-review-suggest");
 const importReviewSharedNoteEl = document.getElementById("import-review-shared-note");
 const importReviewResultEl = document.getElementById("import-review-result");
 const importReviewResultStatusEl = document.getElementById("import-review-result-status");
+const importReviewResultCommentaryEl = document.getElementById("import-review-result-commentary");
 const importReviewResultListEl = document.getElementById("import-review-result-list");
 const importReviewProgressEl = document.getElementById("import-review-progress");
 const importReviewDownloadBtn = document.getElementById("import-review-download");
@@ -11504,7 +11520,11 @@ You will be given the current model, the incoming model, and a list of decisions
 
 Your job: make the live ontology reflect what the human actually decided, INCLUDING THE LOGICAL CONSEQUENCES of their reasoning -- not just the literal item a note was written on. If a note genuinely implies something elsewhere in the model also needs to change (a rename that leaves an existing rule's wording stale, say), make that change too. Prefer minimal, targeted edits over broad rewrites. Never invent a change no decision or its reasoning actually implies.
 
-Use apply_ontology_changes to create or update anything (it never clears a field you don't mention on an existing match). Use remove_ontology_elements to delete something -- only when a human's own reasoning genuinely calls for it. Call either tool as many times as you need, in any order, then stop -- your tool calls are the result, no separate final answer is expected.`;
+Use apply_ontology_changes to create or update anything (it never clears a field you don't mention on an existing match). Use remove_ontology_elements to delete something -- only when a human's own reasoning genuinely calls for it.
+
+BE CONSERVATIVE ABOUT REMOVAL. A removal is permanent within this run -- only call remove_ontology_elements on something when the reasoning specifically and clearly calls for removing that exact thing. A vague or general instruction ("this might be redundant," "consider dropping X") is not, by itself, enough justification for removing a concept that is still referenced elsewhere in the model, especially one with many existing relationships -- when you are genuinely unsure whether something should be removed or kept, keep it and say why in your final reply instead of removing it. Never merge or conflate two concepts into one just because a note mentioned trimming redundancy: confirm they are actually the same real-world concept first. Two things an ontology keeps as distinct sides of a comparison (a "demand" and the "resistance" it is checked against, say) are not the same concept just because a note called one of them redundant.
+
+Call either tool as many times as you need, in any order, then stop. Your tool calls are the result -- a separate final answer isn't required -- but you may add one short closing reply noting anything you deliberately chose not to do, or are unsure about; it is shown to the human, never silently discarded.`;
 
 const IMPORT_REVIEW_MERGER_MAX_ROUNDS = 6;
 
@@ -11614,7 +11634,9 @@ function importReviewAgentItemsAsText(items, sharedNote) {
     const choiceText = d.choice === "a" ? "human picked: keep current"
       : d.choice === "b" ? "human picked: take incoming"
       : "human wrote reasoning only, no plain pick";
-    const pairedText = item.isPaired ? " | this is an accepted cross-label pairing (current and incoming sides use different names/shapes for the same concept)" : "";
+    const pairedText = item.isPaired
+      ? ` | this is an accepted cross-label pairing -- possibly several current-side concepts mapping to one incoming concept or the reverse; every grouped name on each side is listed in the label above (${item.currentNames.join(", ")}  →  ${item.incomingNames.join(", ")})`
+      : "";
     const noteText = d.note.trim() ? ` | reasoning: ${d.note.trim()}` : "";
     const displayContext = importReviewItemDisplayContext(item);
     return `- [${importReviewKindLabel(item.kind)}] ${item.label}${displayContext ? ` (${displayContext})` : ""} -- ${choiceText}${pairedText}${noteText}`;
@@ -11638,16 +11660,27 @@ async function runImportReviewExecutionAgent(agentItems, sharedNote) {
   ];
   const tools = [APPLY_ONTOLOGY_CHANGES_TOOL, REMOVE_ONTOLOGY_ELEMENTS_TOOL];
   const touched = [];
+  // The system prompt explicitly invites a short closing reply for anything
+  // deliberately left undone or uncertain (its own "be conservative about
+  // removal" guidance) -- that text is worth surfacing to the human, not
+  // just discarded, so it's captured off whichever round actually ends the
+  // loop (either the first response with no tool_calls, or -- if the round
+  // budget runs out mid-tool-use -- whatever that last round's content was,
+  // possibly empty).
+  let commentary = "";
   for (let round = 0; round < IMPORT_REVIEW_MERGER_MAX_ROUNDS; round++) {
     const message = await callAgentChatRaw(messages, { tools });
-    if (!Array.isArray(message.tool_calls) || !message.tool_calls.length) break;
+    if (!Array.isArray(message.tool_calls) || !message.tool_calls.length) {
+      commentary = typeof message.content === "string" ? message.content.trim() : "";
+      break;
+    }
     messages.push({ role: "assistant", content: message.content || null, tool_calls: message.tool_calls });
     for (const call of message.tool_calls) {
       const resultText = executeImportReviewMergerTool(call, touched);
       messages.push({ role: "tool", tool_call_id: call.id, content: resultText });
     }
   }
-  return touched;
+  return { touched, commentary };
 }
 
 // ---------------------------------------------------------------------------
@@ -11688,27 +11721,93 @@ function importReviewLeftoverItemsForPairing() {
 // suggested pair out of currentOnly/incomingOnly and into one new "matched"
 // item -- any earlier decision on either original item is discarded, since
 // the pairing changes what the decision is even about.
+function ufFind(parent, x) {
+  while (parent.get(x) !== x) {
+    parent.set(x, parent.get(parent.get(x)));
+    x = parent.get(x);
+  }
+  return x;
+}
+function ufUnion(parent, a, b) {
+  const ra = ufFind(parent, a), rb = ufFind(parent, b);
+  if (ra !== rb) parent.set(ra, rb);
+}
+
+// "generalized"/"specialized" are *defined* as several-to-one or
+// one-to-several by nature -- a naive one-pair-claims-exactly-two-items
+// model silently drops every proposed pair after the first that reuses an
+// already-claimed endpoint (confirmed live: a real proposer response
+// grouping three current classes into one incoming class had two of its
+// three, equally well-reasoned, pairs vanish with no indication to the
+// user). Pairs that share an endpoint describe one real-world grouping, not
+// competing claims, so they're unioned via union-find on endpoint keys into
+// one connected component per real grouping, however many members it has.
 function importReviewApplySuggestedPairs(pairs) {
-  let applied = 0;
+  const currentByKey = new Map(); // "kind:name" -> item, currentOnly items still on the board
+  const incomingByKey = new Map(); // "kind:name" -> item, incomingOnly items still on the board
+  for (const item of importReviewItems) {
+    if (item.section === "currentOnly") currentByKey.set(`${item.kind}:${item.label}`, item);
+    else if (item.section === "incomingOnly") incomingByKey.set(`${item.kind}:${item.label}`, item);
+  }
+
+  const parent = new Map();
+  const edges = []; // [{ckey, ikey, relationKind, note}], keys prefixed so a current/incoming name collision can never union the wrong pair
   for (const raw of pairs) {
     if (!raw || typeof raw !== "object") continue;
     const { currentKind, currentName, incomingKind, incomingName, relationKind, note } = raw;
     if (currentKind !== incomingKind) continue; // cross-kind pairing isn't a supported shape
-    const currentItem = importReviewItems.find((i) => i.section === "currentOnly" && i.kind === currentKind && i.label === currentName);
-    const incomingItem = importReviewItems.find((i) => i.section === "incomingOnly" && i.kind === incomingKind && i.label === incomingName);
-    if (!currentItem || !incomingItem) continue; // already claimed by an earlier pair in this same batch, or hallucinated
-    importReviewItems = importReviewItems.filter((i) => i !== currentItem && i !== incomingItem);
-    delete importReviewDecisions[currentItem.id];
-    delete importReviewDecisions[incomingItem.id];
-    const kindLabel = ["renamed", "generalized", "specialized", "reframed"].includes(relationKind) ? relationKind : "renamed";
+    if (!currentByKey.has(`${currentKind}:${currentName}`) || !incomingByKey.has(`${incomingKind}:${incomingName}`)) continue; // hallucinated, or already resolved another way
+    const ckey = `C|${currentKind}:${currentName}`, ikey = `I|${incomingKind}:${incomingName}`;
+    if (!parent.has(ckey)) parent.set(ckey, ckey);
+    if (!parent.has(ikey)) parent.set(ikey, ikey);
+    ufUnion(parent, ckey, ikey);
+    edges.push({ ckey, ikey, relationKind, note });
+  }
+  if (!edges.length) return 0;
+
+  const groups = new Map(); // root -> { currentKeys: Set, incomingKeys: Set, edges: [] }
+  for (const key of parent.keys()) {
+    const root = ufFind(parent, key);
+    if (!groups.has(root)) groups.set(root, { currentKeys: new Set(), incomingKeys: new Set(), edges: [] });
+    (key.startsWith("C|") ? groups.get(root).currentKeys : groups.get(root).incomingKeys).add(key);
+  }
+  for (const e of edges) groups.get(ufFind(parent, e.ckey)).edges.push(e);
+
+  let applied = 0;
+  for (const g of groups.values()) {
+    if (!g.currentKeys.size || !g.incomingKeys.size) continue; // needs a real item on each side to mean anything
+    const currentItems = [...g.currentKeys].map((k) => currentByKey.get(k.slice(2)));
+    const incomingItems = [...g.incomingKeys].map((k) => incomingByKey.get(k.slice(2)));
+    const kind = currentItems[0].kind; // uniform within one component: every edge enforces currentKind === incomingKind, and keys are kind-prefixed, so a component can never mix kinds
+
+    for (const item of [...currentItems, ...incomingItems]) {
+      importReviewItems = importReviewItems.filter((i) => i !== item);
+      delete importReviewDecisions[item.id];
+    }
+
+    const relationKinds = new Set(g.edges.map((e) => (["renamed", "generalized", "specialized", "reframed"].includes(e.relationKind) ? e.relationKind : "renamed")));
+    const relationKindLabel = relationKinds.size === 1 ? [...relationKinds][0] : "renamed";
+    const notes = [...new Set(g.edges.map((e) => e.note).filter(Boolean))];
+    const noteText = notes.length ? `: ${notes.join(" | ").slice(0, 400)}` : "";
+    const currentNames = currentItems.map((i) => i.label);
+    const incomingNames = incomingItems.map((i) => i.label);
+
     importReviewItems.push({
-      id: importReviewItemId("paired", currentKind, currentName, incomingName),
-      section: "matched", kind: currentKind, diffKind: "paired", isPaired: true,
-      label: `${currentName}  →  ${incomingName}`,
-      context: `${kindLabel}${note ? `: ${String(note).slice(0, 200)}` : ""}`,
-      before: currentItem.before, after: incomingItem.after,
+      id: importReviewItemId("paired", kind, [...currentNames].sort().join("+"), [...incomingNames].sort().join("+")),
+      section: "matched", kind, diffKind: "paired", isPaired: true,
+      label: `${currentNames.join(", ")}  →  ${incomingNames.join(", ")}`,
+      context: `${relationKindLabel}${noteText}`,
+      // Not a single before/after object like every other diffKind -- a
+      // group can have several members per side. Nothing currently reads
+      // these for a paired item (see importReviewItemDisplayContext()'s own
+      // early return for anything but a "changed" class, and
+      // applyOneDeterministicImportReviewItem()'s choice!=="b" early
+      // return -- a paired item never reaches either read path), kept null
+      // rather than overloading the shape other item kinds rely on.
+      before: null, after: null,
+      currentNames, incomingNames,
     });
-    applied += 1;
+    applied += currentItems.length + incomingItems.length;
   }
   return applied;
 }
@@ -11885,6 +11984,9 @@ function renderImportReview() {
     importReviewResultEl.hidden = false;
     importReviewResultEl.querySelector("#import-review-result-label").textContent = t("importReviewResultLabel");
     importReviewResultStatusEl.textContent = importReviewLastResult.message;
+    const commentary = importReviewLastResult.commentary || "";
+    importReviewResultCommentaryEl.hidden = !commentary;
+    importReviewResultCommentaryEl.textContent = commentary;
     importReviewResultListEl.textContent = "";
     for (const touched of importReviewLastResult.touched) {
       const li = document.createElement("li");
@@ -11947,13 +12049,16 @@ async function runImportReviewApply() {
   const deterministicTouched = applyDeterministicImportReviewBucket(deterministicItems);
 
   let agentTouched = [];
+  let agentCommentary = "";
   let agentError = null;
   if (agentItems.length) {
     if (!agentState.connected) {
       agentError = t("importReviewConnectFirst");
     } else {
       try {
-        agentTouched = await runImportReviewExecutionAgent(agentItems, importReviewSharedNoteText);
+        const agentResult = await runImportReviewExecutionAgent(agentItems, importReviewSharedNoteText);
+        agentTouched = agentResult.touched;
+        agentCommentary = agentResult.commentary;
       } catch (err) {
         agentError = importReviewAgentErrorMessage(err);
       }
@@ -11972,6 +12077,11 @@ async function runImportReviewApply() {
     message: agentError ? t("importReviewResultFailed", agentError)
       : agentItems.length ? t("importReviewResultOk")
       : t("importReviewResultNoAgentItems"),
+    // The execution agent's own closing remark (its system prompt invites
+    // one for anything deliberately left undone or uncertain, see the "be
+    // conservative about removal" guidance) -- shown to the human, not
+    // discarded, whenever it wrote one.
+    commentary: agentCommentary,
     touched,
   };
   importReviewApplyPending = false;
@@ -14644,6 +14754,10 @@ window.__kg = {
     applyYamlModelToState,
     removeNamedOntologyElements,
     tools: { applyOntologyChanges: APPLY_ONTOLOGY_CHANGES_TOOL, removeOntologyElements: REMOVE_ONTOLOGY_ELEMENTS_TOOL },
+    // Exposed so a test/eval measures the shipped prompt, not a copy of it
+    // that could drift out of sync -- same reasoning as CONSISTENCY_LLM_PROMPT/
+    // APPLY_ONTOLOGY_YAML_TOOL's own exposure above.
+    prompts: { proposer: IMPORT_REVIEW_PROPOSER_SYSTEM_PROMPT, merger: IMPORT_REVIEW_MERGER_SYSTEM_PROMPT },
   },
   // Consistency checker (issue #83). The engine is exposed as the pure
   // function it is, so tests can run it over an arbitrary domain-model
