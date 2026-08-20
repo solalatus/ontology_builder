@@ -11,7 +11,7 @@ from pathlib import Path as _Path
 
 _sys.path.insert(0, str(_Path(__file__).resolve().parents[1]))
 
-from extract import extract_all, local_name, main, parse_graph, select_scope
+from extract import discover_annotation_predicates, extract_all, local_name, main, parse_graph, select_scope
 
 SAMPLE_TTL = """
 @prefix : <http://example.org/onto#> .
@@ -140,50 +140,69 @@ class ExtractAllTests(unittest.TestCase):
         self.assertEqual(total, 6 + 2 + 1 + 1 + 1 + 1)  # classes, object+datatype props, enum, restriction, import
 
 
-IOF_AV_TTL = """
+CUSTOM_ANNOTATION_TTL = """
 @prefix : <http://example.org/onto#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix iof-av: <https://spec.industrialontologies.org/ontology/annotation/> .
+@prefix acme: <http://example.org/acme-annotation-vocab#> .
 
 :WidgetAssembly a owl:Class ;
     rdfs:label "Widget Assembly" ;
-    iof-av:naturalLanguageDefinition "a component that is joined from parts to form one working unit" ;
-    iof-av:explanatoryNote "used across the whole widget product line" ;
-    iof-av:synonym "assembled widget" ;
-    iof-av:acronym "WA" .
+    acme:naturalLanguageDefinition "a component that is joined from parts to form one working unit" ;
+    acme:explanatoryNote "used across the whole widget product line" ;
+    acme:synonym "assembled widget" ;
+    acme:acronym "WA" ;
+    acme:unrelatedAnnotation "should not be captured as either a definition or an alt-label" .
 """
 
 
-class IofAnnotationVocabularyTests(unittest.TestCase):
-    # Issue #108 (IOF Maintenance): IOF's own annotation vocabulary
-    # (iof-av:, used throughout the whole IOF suite -- Core, Supply Chain,
-    # Maintenance, ...) mints its own predicates for definition/synonym/
-    # acronym roles instead of reusing rdfs:comment/skos:definition/
-    # skos:altLabel. Found for real: every one of IOF Maintenance's 20
-    # classes came out of extraction with `definitions: []` despite 46
-    # real iof-av:naturalLanguageDefinition elements in the source file --
-    # confirmed present in IOF Supply Chain's source file too (133
-    # occurrences), so this is a standing IOF-suite convention, not a
-    # one-file quirk.
+class CustomAnnotationVocabularyTests(unittest.TestCase):
+    # Issue #108 (IOF Maintenance): found for real that IOF's own annotation
+    # vocabulary mints its own predicates for definition/synonym/acronym
+    # roles instead of reusing rdfs:comment/skos:definition/skos:altLabel --
+    # every one of IOF Maintenance's 20 classes came out of extraction with
+    # `definitions: []` despite 46 real definition elements sitting right in
+    # the source file. Rather than hardcode IOF's specific IRIs (which would
+    # only ever fix the *next* ontology already pointed at, not "whatever
+    # ontology possible"), extract.py discovers ANY ontology's own custom
+    # annotation predicates by naming convention. This fixture deliberately
+    # uses a fictional `acme:` vocabulary, not IOF's own, to prove the
+    # mechanism is genuinely general rather than IOF-specific.
     def setUp(self):
-        self.ir = extract_all(_parse(IOF_AV_TTL), "test-onto")
+        self.ir = extract_all(_parse(CUSTOM_ANNOTATION_TTL), "test-onto")
         self.widget = self.ir["classes"][0]
 
-    def test_natural_language_definition_captured(self):
+    def test_definition_shaped_predicate_captured(self):
         self.assertIn(
             "a component that is joined from parts to form one working unit",
             self.widget["definitions"],
         )
 
-    def test_explanatory_note_captured(self):
+    def test_note_shaped_predicate_captured_as_definition(self):
         self.assertIn("used across the whole widget product line", self.widget["definitions"])
 
-    def test_synonym_captured_as_alt_label(self):
+    def test_synonym_shaped_predicate_captured_as_alt_label(self):
         self.assertIn("assembled widget", self.widget["altLabels"])
 
-    def test_acronym_captured_as_alt_label(self):
+    def test_acronym_shaped_predicate_captured_as_alt_label(self):
         self.assertIn("WA", self.widget["altLabels"])
+
+    def test_unmatched_custom_predicate_is_not_captured_at_all(self):
+        # The naming-convention heuristic must stay conservative: a custom
+        # annotation predicate whose name matches neither pattern is simply
+        # not recognized (better to miss an unconventionally-named
+        # annotation than to guess wrong and pollute definitions/altLabels
+        # with unrelated text).
+        self.assertNotIn("should not be captured as either a definition or an alt-label", self.widget["definitions"])
+        self.assertNotIn("should not be captured as either a definition or an alt-label", self.widget["altLabels"])
+
+    def test_discover_annotation_predicates_excludes_well_known_predicates(self):
+        graph = _parse(SAMPLE_TTL)
+        definition_preds, alt_label_preds = discover_annotation_predicates(graph)
+        # SAMPLE_TTL only uses rdfs:comment/skos:altLabel, both already
+        # handled explicitly -- nothing new should be discovered here.
+        self.assertEqual(definition_preds, set())
+        self.assertEqual(alt_label_preds, set())
 
 
 class SelectScopeTests(unittest.TestCase):
