@@ -222,6 +222,14 @@ test("a free-text note routes to the execution agent, which can touch an element
     await page.click("#import-review-apply");
     await page.waitForFunction(() => !window.__kg.importReview.isApplyPending());
 
+    // The execution agent's own mutations land as a dry-run preview first
+    // (issue #126) -- nothing is committed until Confirm.
+    const preview = await page.evaluate(() => window.__kg.importReview.getAgentPreview());
+    assert.ok(preview, "the agent's touches should surface as a preview to confirm, not commit silently");
+    assert.equal(await page.evaluate(() => window.__kg.importReview.getLastResult()), null, "nothing is in the result panel yet -- only the preview");
+    await page.click("#import-review-agent-preview-confirm");
+    await page.waitForFunction(() => window.__kg.importReview.getAgentPreview() === null);
+
     assert.equal(requestBodies.length, 2, "one round with tool calls, then one follow-up round to confirm no more tools are needed");
     const result = await page.evaluate(() => window.__kg.importReview.getLastResult());
     assert.equal(result.ok, true);
@@ -271,6 +279,9 @@ test("remove_ontology_elements removing a class and a property report correct, s
 
     await page.click("#import-review-apply");
     await page.waitForFunction(() => !window.__kg.importReview.isApplyPending());
+    assert.ok(await page.evaluate(() => window.__kg.importReview.getAgentPreview()), "removals land as a preview to confirm first");
+    await page.click("#import-review-agent-preview-confirm");
+    await page.waitForFunction(() => window.__kg.importReview.getAgentPreview() === null);
     const result = await page.evaluate(() => window.__kg.importReview.getLastResult());
     assert.equal(result.ok, true);
     const removedKinds = result.touched.filter((t) => t.action === "removed").map((t) => t.kind).sort();
