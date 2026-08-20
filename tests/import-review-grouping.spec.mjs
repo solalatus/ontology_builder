@@ -307,6 +307,16 @@ test("the execution agent's closing commentary is surfaced in the result panel a
     await page.click("#import-review-apply");
     await page.waitForFunction(() => !window.__kg.importReview.isApplyPending());
 
+    // The commentary is already visible on the dry-run preview, before
+    // anything is committed (issue #126).
+    const preview = await page.evaluate(() => window.__kg.importReview.getAgentPreview());
+    assert.match(preview.agentCommentary, /left everything else alone/);
+    assert.equal(await page.locator("#import-review-agent-preview-commentary").isVisible(), true);
+    assert.match(await page.locator("#import-review-agent-preview-commentary").textContent(), /left everything else alone/);
+
+    await page.click("#import-review-agent-preview-confirm");
+    await page.waitForFunction(() => window.__kg.importReview.getAgentPreview() === null);
+
     const result = await page.evaluate(() => window.__kg.importReview.getLastResult());
     assert.match(result.commentary, /left everything else alone/);
     assert.equal(await page.locator("#import-review-result-commentary").isVisible(), true);
@@ -334,6 +344,10 @@ test("no commentary from the model leaves the commentary line hidden, not an emp
 
     await page.click("#import-review-apply");
     await page.waitForFunction(() => !window.__kg.importReview.isApplyPending());
+    assert.equal(await page.locator("#import-review-agent-preview-commentary").isVisible(), false);
+
+    await page.click("#import-review-agent-preview-confirm");
+    await page.waitForFunction(() => window.__kg.importReview.getAgentPreview() === null);
 
     const result = await page.evaluate(() => window.__kg.importReview.getLastResult());
     assert.equal(result.commentary, "");

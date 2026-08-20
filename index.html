@@ -1095,6 +1095,42 @@
     line-height: 1.5;
   }
 
+  /* Execution-agent dry-run preview (issue #126): the same .import-review-result
+     card, tinted toward --agent-accent so it visually reads as "the agent's
+     proposal, not yet real" rather than the post-hoc result panel it
+     precedes. */
+  .import-review-agent-preview {
+    border-color: var(--agent-accent);
+  }
+
+  .import-review-agent-preview-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .import-review-agent-preview-actions button {
+    font-size: 13px;
+    padding: 7px 14px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--toolbar-border);
+    background: var(--btn-bg);
+    color: var(--toolbar-fg);
+    cursor: pointer;
+    transition: background-color var(--transition-fast);
+  }
+
+  .import-review-agent-preview-actions button:hover {
+    background: var(--btn-bg-hover);
+  }
+
+  .import-review-agent-preview-actions .primary {
+    border-color: var(--agent-accent);
+    color: var(--agent-accent);
+    font-weight: 600;
+  }
+
   /* Agent Ontology — Rules/Actions manager cards. Same bordered-card
      treatment as .details-property-row above, plus a subtle background
      tint and shadow on top of it -- with a dozen-plus cards stacked in a
@@ -2016,7 +2052,16 @@
       <p id="import-review-matched-empty" class="import-review-empty-note" hidden>Nothing here matches by exact name on both sides.</p>
       <div id="import-review-matched-list" class="import-review-list"></div>
 
-      <label id="import-review-current-only-label" class="details-field-label"></label>
+      <div class="import-review-section-head">
+        <label id="import-review-current-only-label" class="details-field-label"></label>
+        <!-- Bulk-default action (issue #126): "keep current" is a no-op on
+             every current-only item by definition, so defaulting the
+             undecided remainder to it can never silently drop anything --
+             it only saves clicking through items where nothing needs to
+             happen. Never touches an item that already has a choice or a
+             written note (see bulkKeepCurrentImportReviewCurrentOnly()). -->
+        <button id="import-review-bulk-keep-current" type="button" class="details-add-btn">Keep current for the rest</button>
+      </div>
       <p id="import-review-current-only-empty" class="import-review-empty-note" hidden>Nothing is only in the current graph.</p>
       <div id="import-review-current-only-list" class="import-review-list"></div>
 
@@ -2027,11 +2072,38 @@
       <label id="import-review-shared-note-label" class="details-field-label">General notes about this review</label>
       <textarea id="import-review-shared-note" class="details-textarea" rows="3" placeholder="Reasoning that applies to the review as a whole, not tied to one item…"></textarea>
 
+      <!-- Execution-agent dry-run preview (issue #126): shown instead of a
+           result the moment the agent has proposed changes, so a human can
+           read what it would do -- including field content like a
+           relationship's own meaning text or a property's enum -- before
+           any of it becomes a real, undoable edit. See
+           renderImportReviewAgentPreview()/runImportReviewApply(). -->
+      <div id="import-review-agent-preview" class="import-review-result import-review-agent-preview" hidden>
+        <label class="details-field-label" id="import-review-agent-preview-label"></label>
+        <p id="import-review-agent-preview-intro"></p>
+        <p id="import-review-agent-preview-commentary" class="import-review-result-commentary" hidden></p>
+        <ul id="import-review-agent-preview-list"></ul>
+        <div class="import-review-agent-preview-actions">
+          <button id="import-review-agent-preview-discard" type="button"></button>
+          <button id="import-review-agent-preview-confirm" type="button" class="primary"></button>
+        </div>
+      </div>
+
       <div id="import-review-result" class="import-review-result" hidden>
         <label class="details-field-label" id="import-review-result-label"></label>
         <p id="import-review-result-status"></p>
         <p id="import-review-result-commentary" class="import-review-result-commentary" hidden></p>
         <ul id="import-review-result-list"></ul>
+        <!-- Post-Apply consistency re-check (issue #126): computeOntologyFindings()
+             run again against the just-mutated model and diffed against the
+             same pass taken before Apply, so a finding this merge introduced
+             (an orphaned rule, a dangling reference) is called out by name
+             instead of only being discoverable by opening the Consistency
+             dialog separately afterwards. -->
+        <div id="import-review-new-findings" hidden>
+          <label class="details-field-label" id="import-review-new-findings-label"></label>
+          <div id="import-review-new-findings-list"></div>
+        </div>
       </div>
     </div>
     <div class="modal-actions details-dialog-footer import-review-footer">
@@ -2537,6 +2609,7 @@ const STRINGS = {
     importReviewMatchedEmpty: "Nothing here matches by exact name on both sides.",
     importReviewCurrentOnlyLabel: (decided, total) => `Only in the current graph (${decided}/${total} decided)`,
     importReviewCurrentOnlyEmpty: "Nothing is only in the current graph.",
+    importReviewBulkKeepCurrent: "Keep current for the rest",
     importReviewIncomingOnlyLabel: (decided, total) => `Only in the incoming file (${decided}/${total} decided)`,
     importReviewIncomingOnlyEmpty: "Nothing is only in the incoming file.",
     importReviewSharedNoteLabel: "General notes about this review",
@@ -2552,8 +2625,20 @@ const STRINGS = {
     importReviewResultOk: "Applied.",
     importReviewResultFailed: (msg) => `The execution agent couldn't finish (${msg}). Every plain keep/take decision above was still applied — retry, or finish the rest by hand.`,
     importReviewResultNoAgentItems: "Applied. Nothing needed the execution agent.",
+    importReviewResultAgentDiscarded: "Applied the plain keep/take decisions. The execution agent's proposed changes were reviewed and discarded — nothing from that bucket was applied.",
     importReviewConnectFirst: "Connect the agent (top-right) before applying a decision with written reasoning.",
     importReviewCancelConfirm: "Discard every decision made in this review?",
+    // Execution-agent dry-run preview (issue #126) -- shown between the agent
+    // proposing its changes and them becoming a real, undoable edit.
+    importReviewAgentPreviewLabel: "The execution agent proposes these changes",
+    importReviewAgentPreviewIntro: "Nothing below is applied yet. Review it, then confirm or discard.",
+    importReviewAgentPreviewConfirm: "Confirm merge",
+    importReviewAgentPreviewDiscard: "Discard agent changes",
+    // Post-Apply consistency re-check (issue #126) -- deterministic-only,
+    // diffed against the same check run before Apply started.
+    importReviewNewFindingsLabel: (count) => count === 1
+      ? "1 consistency finding introduced by this merge"
+      : `${count} consistency findings introduced by this merge`,
     // Competency Questions (issue #94).
     competencyQuestionsLabel: "Competency questions",
     competencyQuestionsFilterPlaceholder: "Filter competency questions…",
@@ -2875,6 +2960,7 @@ const STRINGS = {
     importReviewMatchedEmpty: "Itt semmi nem egyezik pontos névvel mindkét oldalon.",
     importReviewCurrentOnlyLabel: (decided, total) => `Csak a jelenlegi gráfban (${decided}/${total} eldöntve)`,
     importReviewCurrentOnlyEmpty: "Semmi nincs csak a jelenlegi gráfban.",
+    importReviewBulkKeepCurrent: "Jelenlegi megtartása a többire",
     importReviewIncomingOnlyLabel: (decided, total) => `Csak a beérkező fájlban (${decided}/${total} eldöntve)`,
     importReviewIncomingOnlyEmpty: "Semmi nincs csak a beérkező fájlban.",
     importReviewSharedNoteLabel: "Általános megjegyzések az áttekintéshez",
@@ -2890,8 +2976,21 @@ const STRINGS = {
     importReviewResultOk: "Alkalmazva.",
     importReviewResultFailed: (msg) => `A végrehajtó ágens nem tudta befejezni (${msg}). A fenti egyszerű döntések alkalmazva lettek — próbáld újra, vagy fejezd be kézzel.`,
     importReviewResultNoAgentItems: "Alkalmazva. Semmihez nem kellett a végrehajtó ágens.",
+    importReviewResultAgentDiscarded: "Az egyszerű döntések alkalmazva lettek. A végrehajtó ágens javasolt változtatásait áttekintettük és elvetettük — abból semmi nem lett alkalmazva.",
     importReviewConnectFirst: "Csatlakoztasd az ágenst (jobb felül), mielőtt indoklással ellátott döntést alkalmazol.",
     importReviewCancelConfirm: "Eldobod az áttekintés összes döntését?",
+    // Végrehajtó ágens előzetes megtekintése (issue #126) -- azelőtt jelenik
+    // meg, hogy az ágens javasolt változtatásai valódi, visszavonható
+    // szerkesztéssé válnának.
+    importReviewAgentPreviewLabel: "A végrehajtó ágens ezeket a változtatásokat javasolja",
+    importReviewAgentPreviewIntro: "Lent még semmi nincs alkalmazva. Nézd át, majd erősítsd meg vagy vesd el.",
+    importReviewAgentPreviewConfirm: "Összevonás megerősítése",
+    importReviewAgentPreviewDiscard: "Ágens változtatásainak elvetése",
+    // Alkalmazás utáni konzisztencia-ellenőrzés (issue #126) -- csak
+    // determinisztikus, az Alkalmazás előtt lefuttatott ellenőrzéshez képest.
+    importReviewNewFindingsLabel: (count) => count === 1
+      ? "1 konzisztencia-észrevétel, amit ez az összevonás okozott"
+      : `${count} konzisztencia-észrevétel, amit ez az összevonás okozott`,
     // Kompetenciakérdések (issue #94).
     competencyQuestionsLabel: "Kompetenciakérdések",
     competencyQuestionsFilterPlaceholder: "Kompetenciakérdések szűrése…",
@@ -3189,8 +3288,12 @@ function applyLanguage() {
   byId("import-review-intro").textContent = t("importReviewIntro");
   byId("import-review-suggest").textContent = t("importReviewSuggestMatches");
   byId("import-review-matched-empty").textContent = t("importReviewMatchedEmpty");
+  byId("import-review-bulk-keep-current").textContent = t("importReviewBulkKeepCurrent");
   byId("import-review-current-only-empty").textContent = t("importReviewCurrentOnlyEmpty");
   byId("import-review-incoming-only-empty").textContent = t("importReviewIncomingOnlyEmpty");
+  byId("import-review-agent-preview-intro").textContent = t("importReviewAgentPreviewIntro");
+  byId("import-review-agent-preview-discard").textContent = t("importReviewAgentPreviewDiscard");
+  byId("import-review-agent-preview-confirm").textContent = t("importReviewAgentPreviewConfirm");
   byId("import-review-shared-note-label").textContent = t("importReviewSharedNoteLabel");
   byId("import-review-shared-note").placeholder = t("importReviewSharedNotePlaceholder");
   byId("import-review-download").textContent = t("importReviewDownload");
@@ -8922,17 +9025,34 @@ function closeConsistency() {
 // cannot block, delay or roll back anything: the deterministic findings are
 // already on screen before this runs, and every failure path leaves them
 // exactly as they were.
+// The two named categories below (issue #126) were added after a real merge
+// slipped a backwards relationship direction and a self-contradictory
+// property enum past every deterministic check -- both are semantic
+// judgments (does this text agree with that shape?), which is exactly what
+// the deterministic Tier A/B checks structurally cannot do and this tier
+// exists for. Kept as two more things this one general pass also looks for,
+// not two new prompts/buttons: issue #94's "one click, one API call" rule
+// for this tier applies to the whole set, not per-category.
 const CONSISTENCY_LLM_PROMPT = `You are reviewing a domain model for internal contradictions.
 
 You will be given a domain model in YAML: classes with properties, directed relationships, named rules, and actions with an input class, preconditions, an effect and a verification.
 
 Report only CONTRADICTIONS AND INCONSISTENCIES INSIDE THIS MODEL — a rule that requires something the model cannot provide, an action whose verification cannot follow from its effect, two statements that cannot both hold, a relationship direction that makes a stated rule unusable.
 
+Also specifically check these two things, and tag each finding you report for them with the matching "check" value:
+
+- "relation-direction": for a relationship, does its own "meaning" text actually describe the connection in the direction it is stored (from -[relation]-> to)? Flag it when the meaning text clearly asserts the reverse of the stored direction, e.g. a relationship stored as A -[requires]-> B whose meaning reads "B requires A".
+- "property-enum-coherence": for a property with an "allowed" value list, is every value actually a kind/state of the class carrying that property, not the class's own opposite or negation, and not a value that really belongs on some other, related class instead?
+
+Everything else you report (the general contradiction case above) gets "check":"model-review".
+
 Do NOT report missing content, do NOT suggest new classes or properties the model "should" have, and do NOT comment on style, naming or completeness. An unfinished model is not a broken one. If you find nothing, return an empty array.
 
 Return exactly one \`\`\`json block containing an array, and nothing else:
 
-[{"severity":"warning","subject":"the rule or action involved","message":"one sentence naming both halves of the contradiction"}]`;
+[{"check":"model-review","severity":"warning","subject":"the rule, action or relationship involved","message":"one sentence naming both halves of the contradiction"}]`;
+
+const CONSISTENCY_LLM_CHECK_KINDS = new Set(["model-review", "relation-direction", "property-enum-coherence"]);
 
 async function runConsistencyLlmCheck() {
   if (consistencyLlmPending || !agentState.connected) return;
@@ -8960,16 +9080,19 @@ async function runConsistencyLlmCheck() {
       } catch (err) { /* try the next candidate */ }
     }
     if (!parsed) throw new Error("no parseable findings array");
-    consistencyLlmFindings = parsed.slice(0, 25).map((raw, i) => ({
-      id: `llm:${i}:${String((raw && raw.subject) || "")}`,
-      check: "model-review",
-      tier: "llm",
-      // Never `error`. A probabilistic observation does not get to outrank a
-      // deterministic contradiction in the same list.
-      severity: "warning",
-      subject: { kind: "model", key: `llm-${i}`, name: String((raw && raw.subject) || "") },
-      message: String((raw && raw.message) || "").slice(0, 400),
-    })).filter((f) => f.message);
+    consistencyLlmFindings = parsed.slice(0, 25).map((raw, i) => {
+      const check = CONSISTENCY_LLM_CHECK_KINDS.has(raw && raw.check) ? raw.check : "model-review";
+      return {
+        id: `llm:${check}:${i}:${String((raw && raw.subject) || "")}`,
+        check,
+        tier: "llm",
+        // Never `error`. A probabilistic observation does not get to outrank a
+        // deterministic contradiction in the same list.
+        severity: "warning",
+        subject: { kind: "model", key: `llm-${i}`, name: String((raw && raw.subject) || "") },
+        message: String((raw && raw.message) || "").slice(0, 400),
+      };
+    }).filter((f) => f.message);
     consistencyLlmStatusKey = "consistencyLlmDone";
   } catch (err) {
     consistencyLlmFindings = [];
@@ -11100,6 +11223,7 @@ const importReviewMatchedEmptyEl = document.getElementById("import-review-matche
 const importReviewCurrentOnlyLabelEl = document.getElementById("import-review-current-only-label");
 const importReviewCurrentOnlyListEl = document.getElementById("import-review-current-only-list");
 const importReviewCurrentOnlyEmptyEl = document.getElementById("import-review-current-only-empty");
+const importReviewBulkKeepCurrentBtn = document.getElementById("import-review-bulk-keep-current");
 const importReviewIncomingOnlyLabelEl = document.getElementById("import-review-incoming-only-label");
 const importReviewIncomingOnlyListEl = document.getElementById("import-review-incoming-only-list");
 const importReviewIncomingOnlyEmptyEl = document.getElementById("import-review-incoming-only-empty");
@@ -11109,6 +11233,16 @@ const importReviewResultEl = document.getElementById("import-review-result");
 const importReviewResultStatusEl = document.getElementById("import-review-result-status");
 const importReviewResultCommentaryEl = document.getElementById("import-review-result-commentary");
 const importReviewResultListEl = document.getElementById("import-review-result-list");
+const importReviewNewFindingsEl = document.getElementById("import-review-new-findings");
+const importReviewNewFindingsLabelEl = document.getElementById("import-review-new-findings-label");
+const importReviewNewFindingsListEl = document.getElementById("import-review-new-findings-list");
+const importReviewAgentPreviewEl = document.getElementById("import-review-agent-preview");
+const importReviewAgentPreviewLabelEl = document.getElementById("import-review-agent-preview-label");
+const importReviewAgentPreviewIntroEl = document.getElementById("import-review-agent-preview-intro");
+const importReviewAgentPreviewCommentaryEl = document.getElementById("import-review-agent-preview-commentary");
+const importReviewAgentPreviewListEl = document.getElementById("import-review-agent-preview-list");
+const importReviewAgentPreviewConfirmBtn = document.getElementById("import-review-agent-preview-confirm");
+const importReviewAgentPreviewDiscardBtn = document.getElementById("import-review-agent-preview-discard");
 const importReviewProgressEl = document.getElementById("import-review-progress");
 const importReviewDownloadBtn = document.getElementById("import-review-download");
 const importReviewCancelBtn = document.getElementById("import-review-cancel");
@@ -11125,7 +11259,14 @@ let importReviewSuggestPending = false;
 let importReviewSuggestFailed = false;
 let importReviewSuggestRun = false; // becomes true once "Suggest matches" has been clicked at least once this review
 let importReviewApplyPending = false;
-let importReviewLastResult = null; // {ok, message, touched: [{kind,name,action}]} | null, cleared on (re)open
+let importReviewLastResult = null; // {ok, message, commentary, touched: [{kind,name,action}], newConsistencyFindings} | null, cleared on (re)open
+// Dry-run gate for the execution-agent bucket (issue #126): non-null between
+// the agent finishing its tool calls and the human clicking Confirm/Discard.
+// { overallBefore, preApplyFindings, deterministicTouched, preAgentSnapshot,
+//   afterAgentSnapshot, agentTouched, agentCommentary, diff } | null.
+// `state` itself sits at preAgentSnapshot (the agent's own mutations already
+// reverted) for the whole time this is non-null -- see runImportReviewApply().
+let importReviewAgentPreview = null;
 
 function importReviewItemId(kind, ...parts) { return `${kind}:${parts.map(String).join("::")}`; }
 
@@ -11520,6 +11661,8 @@ You will be given the current model, the incoming model, and a list of decisions
 
 Your job: make the live ontology reflect what the human actually decided, INCLUDING THE LOGICAL CONSEQUENCES of their reasoning -- not just the literal item a note was written on. If a note genuinely implies something elsewhere in the model also needs to change (a rename that leaves an existing rule's wording stale, say), make that change too. Prefer minimal, targeted edits over broad rewrites. Never invent a change no decision or its reasoning actually implies.
 
+REUSE THE GRAPH'S OWN VOCABULARY BEFORE INVENTING NEW WORDS. The user message includes an EXISTING RELATION NAMES section listing every relation name the current graph already uses, with real examples of its direction. Before writing any relationship name or direction in apply_ontology_changes, check that section first: if the current graph already has a name for the same shape you're about to write (containment, specialization/generalization, possession, comparison, or anything else it already covers), reuse that exact name and match its established from→to direction instead of coining a near-duplicate or writing the direction backwards. A real merge once invented "egyikFajtája" next to five existing uses of a graph's own "altípusa" for the identical specific→general shape, and separately stored a relationship whose own meaning text read backwards from how it was stored -- both are exactly what this paragraph exists to prevent.
+
 Use apply_ontology_changes to create or update anything (it never clears a field you don't mention on an existing match). Use remove_ontology_elements to delete something -- only when a human's own reasoning genuinely calls for it.
 
 BE CONSERVATIVE ABOUT REMOVAL. A removal is permanent within this run -- only call remove_ontology_elements on something when the reasoning specifically and clearly calls for removing that exact thing. A vague or general instruction ("this might be redundant," "consider dropping X") is not, by itself, enough justification for removing a concept that is still referenced elsewhere in the model, especially one with many existing relationships -- when you are genuinely unsure whether something should be removed or kept, keep it and say why in your final reply instead of removing it. Never merge or conflate two concepts into one just because a note mentioned trimming redundancy: confirm they are actually the same real-world concept first. Two things an ontology keeps as distinct sides of a comparison (a "demand" and the "resistance" it is checked against, say) are not the same concept just because a note called one of them redundant.
@@ -11628,6 +11771,41 @@ function importReviewIncomingYaml() {
   return toYaml(buildDomainModel(importReviewIncomingSnapshot()));
 }
 
+// Groups the current graph's own relation names so the merger prompt can
+// point at them explicitly (issue #126). The full CURRENT MODEL YAML the
+// agent already receives contains this same information, but nothing about
+// it draws attention to "this graph already has a name for this shape" over
+// a possibly-long relationship list -- a real merge invented four
+// near-duplicate relation names (and two backwards directions) for shapes
+// the graph already named, undetected until a manual re-read afterwards.
+// Deduplicated and capped so a large graph doesn't blow up the prompt with
+// a name repeated once per edge.
+function buildImportReviewRelationVocabulary() {
+  const byName = new Map(); // camelCase relation name -> { count, examples: ["A → B", ...] }
+  for (const e of state.edges) {
+    const src = state.nodes.find((n) => n.id === e.source);
+    const tgt = state.nodes.find((n) => n.id === e.target);
+    if (!src || !tgt) continue;
+    const name = toCamelCaseId(e.relation);
+    if (!name) continue;
+    if (!byName.has(name)) byName.set(name, { count: 0, examples: [] });
+    const entry = byName.get(name);
+    entry.count++;
+    const example = `${src.label} → ${tgt.label}`;
+    if (entry.examples.length < 3 && !entry.examples.includes(example)) entry.examples.push(example);
+  }
+  return [...byName.entries()]
+    .sort((a, b) => b[1].count - a[1].count)
+    .slice(0, 40)
+    .map(([name, { count, examples }]) => `- ${name} (used ${count}×: ${examples.join("; ")})`);
+}
+
+function importReviewRelationVocabularyText() {
+  const lines = buildImportReviewRelationVocabulary();
+  if (!lines.length) return "EXISTING RELATION NAMES IN THE CURRENT GRAPH: (none yet -- the current graph has no relationships)";
+  return `EXISTING RELATION NAMES IN THE CURRENT GRAPH (reuse one of these, and its listed direction, for a shape it already covers -- containment, specialization, possession, comparison, or anything else already named below -- rather than inventing a near-duplicate; only write a new relation name for a shape genuinely not covered by any of these):\n${lines.join("\n")}`;
+}
+
 function importReviewAgentItemsAsText(items, sharedNote) {
   const lines = items.map((item) => {
     const d = importReviewDecisionFor(item.id);
@@ -11655,7 +11833,7 @@ async function runImportReviewExecutionAgent(agentItems, sharedNote) {
     { role: "system", content: IMPORT_REVIEW_MERGER_SYSTEM_PROMPT },
     {
       role: "user",
-      content: `CURRENT MODEL:\n${buildDomainYamlExport()}\n\nINCOMING MODEL:\n${importReviewIncomingYaml()}\n\nDECISIONS:\n${importReviewAgentItemsAsText(agentItems, sharedNote)}`,
+      content: `CURRENT MODEL:\n${buildDomainYamlExport()}\n\n${importReviewRelationVocabularyText()}\n\nINCOMING MODEL:\n${importReviewIncomingYaml()}\n\nDECISIONS:\n${importReviewAgentItemsAsText(agentItems, sharedNote)}`,
     },
   ];
   const tools = [APPLY_ONTOLOGY_CHANGES_TOOL, REMOVE_ONTOLOGY_ELEMENTS_TOOL];
@@ -11951,6 +12129,49 @@ function createImportReviewItemRow(item) {
   return row;
 }
 
+// Flattens a diffDomainModels()-shaped diff into flat, human-readable lines
+// for the agent-bucket dry-run preview (issue #126) -- deliberately surfaces
+// the actual field content (a relationship's meaning text, a property's
+// allowed values) rather than just naming what changed, since a bare "class
+// X (upserted)" line is exactly what already didn't catch a backwards
+// relationship direction or a self-contradictory enum before Apply.
+function importReviewAgentPreviewLines(diff) {
+  const lines = [];
+  const push = (kind, label, detail) => lines.push({ kind, label, detail });
+  const em = (v) => (v == null || v === "" ? "—" : v);
+
+  for (const c of diff.classes.added) push("class", c.name, `meaning: ${em(c.value.meaning)}`);
+  for (const c of diff.classes.changed) push("class", c.name, `meaning: ${em(c.after.meaning)}`);
+  for (const c of diff.classes.removed) push("class", c.name, "(removed)");
+
+  const relLabel = (r) => `${r.name} (${r.from} → ${r.to})`;
+  for (const r of diff.relationships.added) push("relationship", relLabel(r), `meaning: ${em(r.meaning)}`);
+  for (const r of diff.relationships.changed) push("relationship", relLabel(r.after), `meaning: ${em(r.after.meaning)}`);
+  for (const r of diff.relationships.directionChanged) {
+    push("relationship", r.after.name, `direction: ${r.before.from} → ${r.before.to}, now ${r.after.from} → ${r.after.to} — meaning: ${em(r.after.meaning)}`);
+  }
+  for (const r of diff.relationships.removed) push("relationship", relLabel(r), "(removed)");
+
+  const propDetail = (v) => (v.allowed && v.allowed.length ? `allowed: ${v.allowed.join(", ")}` : `type: ${em(v.type)}`);
+  for (const p of diff.properties.added) push("property", `${p.name} (${p.className})`, propDetail(p.value));
+  for (const p of diff.properties.changed) push("property", `${p.name} (${p.className})`, propDetail(p.after));
+  for (const p of diff.properties.removed) push("property", `${p.name} (${p.className})`, "(removed)");
+
+  for (const r of diff.rules.added) push("rule", r.name, `conditions: ${em((r.value.conditions || []).join("; "))}`);
+  for (const r of diff.rules.changed) push("rule", r.name, `conditions: ${em((r.after.conditions || []).join("; "))}`);
+  for (const r of diff.rules.removed) push("rule", r.name, "(removed)");
+
+  for (const a of diff.actions.added) push("action", a.name, `effect: ${em(a.value.effect)}`);
+  for (const a of diff.actions.changed) push("action", a.name, `effect: ${em(a.after.effect)}`);
+  for (const a of diff.actions.removed) push("action", a.name, "(removed)");
+
+  for (const cq of diff.competencyQuestions.added) push("cq", cq.text, "(added)");
+  for (const cq of diff.competencyQuestions.changed) push("cq", cq.after, `was: ${em(cq.before)}`);
+  for (const cq of diff.competencyQuestions.removed) push("cq", cq.text, "(removed)");
+
+  return lines;
+}
+
 function renderImportReviewSection(listEl, emptyEl, items) {
   listEl.textContent = "";
   for (const item of items) listEl.appendChild(createImportReviewItemRow(item));
@@ -11993,11 +12214,55 @@ function renderImportReview() {
       li.textContent = `${importReviewKindLabel(touched.kind === "cq" ? "cq" : touched.kind)}: ${touched.name} (${touched.action})`;
       importReviewResultListEl.appendChild(li);
     }
+    // New consistency findings (issue #126): computeOntologyFindings() re-run
+    // against the post-Apply model and diffed by id against the same pass
+    // taken before anything in this Apply moved -- deliberately deterministic
+    // only (Tier A/B), so this costs no extra API call and runs on every
+    // Apply automatically, unlike the optional LLM tier the Consistency
+    // dialog still gates behind its own explicit Run button. Kept visually
+    // and structurally separate from pre-existing findings: this list is
+    // never "here's everything wrong with the model," only "here's what this
+    // specific merge just introduced."
+    const newFindings = importReviewLastResult.newConsistencyFindings || [];
+    importReviewNewFindingsEl.hidden = newFindings.length === 0;
+    if (newFindings.length) {
+      importReviewNewFindingsLabelEl.textContent = t("importReviewNewFindingsLabel", newFindings.length);
+      importReviewNewFindingsListEl.textContent = "";
+      for (const finding of newFindings) importReviewNewFindingsListEl.appendChild(consistencyFindingRow(finding));
+    }
   } else {
     importReviewResultEl.hidden = true;
+    importReviewNewFindingsEl.hidden = true;
   }
 
+  renderImportReviewAgentPreview();
   refreshImportReviewProgress();
+}
+
+// The dry-run gate's own panel (issue #126): shown instead of finalizing the
+// moment the execution agent's own mutations exist to review, distinct from
+// the post-hoc result panel above (which only ever shows AFTER something is
+// already committed to history). `state` sits reverted to right before the
+// agent ran for as long as this is visible -- see runImportReviewApply().
+function renderImportReviewAgentPreview() {
+  const preview = importReviewAgentPreview;
+  importReviewAgentPreviewEl.hidden = !preview;
+  importReviewApplyBtn.disabled = importReviewApplyPending || Boolean(preview) || !importReviewAllDecided();
+  if (!preview) return;
+
+  importReviewAgentPreviewLabelEl.textContent = t("importReviewAgentPreviewLabel");
+  importReviewAgentPreviewIntroEl.textContent = t("importReviewAgentPreviewIntro");
+  const commentary = preview.agentCommentary || "";
+  importReviewAgentPreviewCommentaryEl.hidden = !commentary;
+  importReviewAgentPreviewCommentaryEl.textContent = commentary;
+  importReviewAgentPreviewListEl.textContent = "";
+  for (const line of importReviewAgentPreviewLines(preview.diff)) {
+    const li = document.createElement("li");
+    li.textContent = `${importReviewKindLabel(line.kind)}: ${line.label} — ${line.detail}`;
+    importReviewAgentPreviewListEl.appendChild(li);
+  }
+  importReviewAgentPreviewConfirmBtn.textContent = t("importReviewAgentPreviewConfirm");
+  importReviewAgentPreviewDiscardBtn.textContent = t("importReviewAgentPreviewDiscard");
 }
 
 // ---------------------------------------------------------------------------
@@ -12022,12 +12287,23 @@ function openImportReview() {
   importReviewSuggestRun = false;
   importReviewApplyPending = false;
   importReviewLastResult = null;
+  importReviewAgentPreview = null;
   importReviewOpen = true;
   renderImportReview();
   importReviewOverlay.style.display = "flex";
 }
 
 function closeImportReview() {
+  if (importReviewAgentPreview) {
+    // Closing without deciding Confirm/Discard has to discard the whole
+    // in-flight Apply, including the deterministic bucket's changes -- at
+    // this point nothing from this Apply has been pushed to history yet
+    // (see runImportReviewApply()), so reverting `state` all the way back to
+    // what it was before Apply was clicked is the only way to leave no
+    // orphaned, un-undoable mutation sitting around after the dialog closes.
+    restoreSnapshot(importReviewAgentPreview.overallBefore);
+    importReviewAgentPreview = null;
+  }
   importReviewOverlay.style.display = "none";
   importReviewOpen = false;
 }
@@ -12036,53 +12312,166 @@ function importReviewAgentErrorMessage(err) {
   return agentChatErrorText(err);
 }
 
+// Marks every still-undecided current-only item "keep current" (issue #126).
+// Always safe: "keep current" on a current-only item is a no-op by
+// definition (see importReviewItemNeedsAgent()'s own comment), so this can
+// never silently discard anything -- it only skips clicking through items
+// where nothing was ever going to change. Never touches an item that
+// already has a choice or a written note.
+function bulkKeepCurrentImportReviewCurrentOnly() {
+  for (const item of importReviewItems) {
+    if (item.section !== "currentOnly") continue;
+    if (importReviewIsDecided(item.id)) continue;
+    importReviewDecisions[item.id] = { choice: "a", note: "" };
+  }
+  renderImportReview();
+}
+
+// Finishes one Apply: commits `touched` as a single history entry (if
+// anything actually changed), re-runs the deterministic consistency checks
+// against the result and diffs them by id against the pass taken before
+// Apply started (issue #126 -- deliberately Tier A/B only, so this never
+// costs an extra API call and runs on every Apply unconditionally), then
+// publishes the result panel. Shared by every path out of
+// runImportReviewApply() -- straight through with no agent items, an agent
+// error, an agent that touched nothing, and both ends of the dry-run gate
+// below (confirmImportReviewAgentPreview()/discardImportReviewAgentPreview()).
+function finalizeImportReviewApply({ overallBefore, preApplyFindings, touched, commentary, message, ok = true }) {
+  if (touched.length) {
+    pushHistory(overallBefore, snapshotState(), undefined);
+    markDirty();
+    fitViewToContent();
+  }
+  const postApplyFindings = touched.length ? computeOntologyFindings(buildDomainModel()) : preApplyFindings;
+  const preIds = new Set(preApplyFindings.map((f) => f.id));
+  const newConsistencyFindings = touched.length ? postApplyFindings.filter((f) => !preIds.has(f.id)) : [];
+
+  importReviewLastResult = {
+    ok,
+    message,
+    // The execution agent's own closing remark (its system prompt invites
+    // one for anything deliberately left undone or uncertain, see the "be
+    // conservative about removal" guidance) -- shown to the human, not
+    // discarded, whenever it wrote one.
+    commentary,
+    touched,
+    newConsistencyFindings,
+  };
+  importReviewApplyPending = false;
+  importReviewApplyBtn.textContent = t("importReviewApply");
+  renderImportReview();
+}
+
+// Confirms the dry-run preview (issue #126): re-applies the agent's own
+// mutations (captured as afterAgentSnapshot, reverted while the preview was
+// up) and finalizes with the deterministic bucket's touches plus the
+// agent's.
+function confirmImportReviewAgentPreview() {
+  const preview = importReviewAgentPreview;
+  if (!preview) return;
+  importReviewAgentPreview = null;
+  restoreSnapshot(preview.afterAgentSnapshot);
+  finalizeImportReviewApply({
+    overallBefore: preview.overallBefore,
+    preApplyFindings: preview.preApplyFindings,
+    touched: [...preview.deterministicTouched, ...preview.agentTouched],
+    commentary: preview.agentCommentary,
+    message: t("importReviewResultOk"),
+  });
+}
+
+// Discards the dry-run preview: `state` is already sitting at
+// preAgentSnapshot (right after the deterministic bucket, before the agent
+// ran) for the whole time a preview is up, so this only has to finalize
+// with the deterministic bucket's touches -- nothing from the agent lands.
+function discardImportReviewAgentPreview() {
+  const preview = importReviewAgentPreview;
+  if (!preview) return;
+  importReviewAgentPreview = null;
+  restoreSnapshot(preview.preAgentSnapshot);
+  finalizeImportReviewApply({
+    overallBefore: preview.overallBefore,
+    preApplyFindings: preview.preApplyFindings,
+    touched: preview.deterministicTouched,
+    commentary: "",
+    message: t("importReviewResultAgentDiscarded"),
+  });
+}
+
 async function runImportReviewApply() {
-  if (importReviewApplyPending || !importReviewAllDecided()) return;
+  if (importReviewApplyPending || importReviewAgentPreview || !importReviewAllDecided()) return;
   importReviewApplyPending = true;
   importReviewApplyBtn.disabled = true;
   importReviewApplyBtn.textContent = t("importReviewApplyRunning");
 
-  const before = snapshotState();
+  const overallBefore = snapshotState();
+  const preApplyFindings = computeOntologyFindings(buildDomainModel());
   const deterministicItems = importReviewItems.filter((item) => !importReviewItemNeedsAgent(item));
   const agentItems = importReviewItems.filter((item) => importReviewItemNeedsAgent(item));
 
   const deterministicTouched = applyDeterministicImportReviewBucket(deterministicItems);
 
-  let agentTouched = [];
-  let agentCommentary = "";
-  let agentError = null;
-  if (agentItems.length) {
-    if (!agentState.connected) {
-      agentError = t("importReviewConnectFirst");
-    } else {
-      try {
-        const agentResult = await runImportReviewExecutionAgent(agentItems, importReviewSharedNoteText);
-        agentTouched = agentResult.touched;
-        agentCommentary = agentResult.commentary;
-      } catch (err) {
-        agentError = importReviewAgentErrorMessage(err);
-      }
-    }
+  if (!agentItems.length) {
+    finalizeImportReviewApply({
+      overallBefore, preApplyFindings, touched: deterministicTouched,
+      commentary: "", message: t("importReviewResultNoAgentItems"),
+    });
+    return;
   }
 
-  const touched = [...deterministicTouched, ...agentTouched];
-  if (touched.length) {
-    pushHistory(before, snapshotState(), undefined);
-    markDirty();
-    fitViewToContent();
+  if (!agentState.connected) {
+    finalizeImportReviewApply({
+      overallBefore, preApplyFindings, touched: deterministicTouched,
+      commentary: "", message: t("importReviewResultFailed", t("importReviewConnectFirst")), ok: false,
+    });
+    return;
   }
 
-  importReviewLastResult = {
-    ok: !agentError,
-    message: agentError ? t("importReviewResultFailed", agentError)
-      : agentItems.length ? t("importReviewResultOk")
-      : t("importReviewResultNoAgentItems"),
-    // The execution agent's own closing remark (its system prompt invites
-    // one for anything deliberately left undone or uncertain, see the "be
-    // conservative about removal" guidance) -- shown to the human, not
-    // discarded, whenever it wrote one.
-    commentary: agentCommentary,
-    touched,
+  // Right after the deterministic bucket, before the agent runs -- what a
+  // Discard reverts to, and the "before" side of the dry-run diff below.
+  const preAgentSnapshot = snapshotState();
+  let agentTouched = [], agentCommentary = "", agentError = null;
+  try {
+    const agentResult = await runImportReviewExecutionAgent(agentItems, importReviewSharedNoteText);
+    agentTouched = agentResult.touched;
+    agentCommentary = agentResult.commentary;
+  } catch (err) {
+    agentError = importReviewAgentErrorMessage(err);
+  }
+
+  if (agentError) {
+    // Defensively revert: a failure partway through a multi-round tool-call
+    // loop may have already mutated `state` before the round that threw.
+    restoreSnapshot(preAgentSnapshot);
+    finalizeImportReviewApply({
+      overallBefore, preApplyFindings, touched: deterministicTouched,
+      commentary: "", message: t("importReviewResultFailed", agentError), ok: false,
+    });
+    return;
+  }
+
+  if (!agentTouched.length) {
+    // The agent ran and made zero tool calls (e.g. a commentary-only "I
+    // deliberately left this alone" reply) -- nothing to preview or revert.
+    finalizeImportReviewApply({
+      overallBefore, preApplyFindings, touched: deterministicTouched,
+      commentary: agentCommentary, message: t("importReviewResultOk"),
+    });
+    return;
+  }
+
+  // Dry-run gate (issue #126): the agent's own mutations are already applied
+  // to `state` at this point (the tool-execution loop mutates directly, same
+  // as before this issue) but not yet committed to history. Capture what it
+  // produced, revert to right before it ran, and show the human a reviewable
+  // diff of exactly what it would do -- including field content, not just a
+  // touched-list of names -- before it becomes a real, undoable edit.
+  const afterAgentSnapshot = snapshotState();
+  restoreSnapshot(preAgentSnapshot);
+  importReviewAgentPreview = {
+    overallBefore, preApplyFindings, deterministicTouched,
+    preAgentSnapshot, afterAgentSnapshot, agentTouched, agentCommentary,
+    diff: computeSemanticDiff(preAgentSnapshot, afterAgentSnapshot),
   };
   importReviewApplyPending = false;
   importReviewApplyBtn.textContent = t("importReviewApply");
@@ -12124,6 +12513,9 @@ importReviewCancelBtn.addEventListener("click", () => closeImportReview());
 importReviewOverlay.addEventListener("click", (e) => { if (e.target === importReviewOverlay) closeImportReview(); });
 importReviewApplyBtn.addEventListener("click", () => runImportReviewApply());
 importReviewSuggestBtn.addEventListener("click", () => runImportReviewSuggestMatches());
+importReviewBulkKeepCurrentBtn.addEventListener("click", () => bulkKeepCurrentImportReviewCurrentOnly());
+importReviewAgentPreviewConfirmBtn.addEventListener("click", () => confirmImportReviewAgentPreview());
+importReviewAgentPreviewDiscardBtn.addEventListener("click", () => discardImportReviewAgentPreview());
 importReviewDownloadBtn.addEventListener("click", () => downloadImportReviewDecisions());
 importReviewSharedNoteEl.addEventListener("input", () => { importReviewSharedNoteText = importReviewSharedNoteEl.value; });
 
@@ -14746,8 +15138,30 @@ window.__kg = {
     didSuggestFail: () => importReviewSuggestFailed,
     apply: runImportReviewApply,
     isApplyPending: () => importReviewApplyPending,
-    getLastResult: () => importReviewLastResult && { ...importReviewLastResult, touched: [...importReviewLastResult.touched] },
+    getLastResult: () => importReviewLastResult && {
+      ...importReviewLastResult,
+      touched: [...importReviewLastResult.touched],
+      newConsistencyFindings: [...(importReviewLastResult.newConsistencyFindings || [])],
+    },
     decisionsMarkdown: importReviewDecisionsMarkdown,
+    // Bulk-default action (issue #126): marks every still-undecided
+    // current-only item "keep current" without touching anything already
+    // decided.
+    bulkKeepCurrent: bulkKeepCurrentImportReviewCurrentOnly,
+    // Execution-agent dry-run gate (issue #126): non-null between the agent
+    // proposing tool calls and the human confirming/discarding them. `diff`
+    // is the exact diffDomainModels() shape computeSemanticDiff() produces
+    // elsewhere, so a test can assert on real before/after field content
+    // (a relationship's meaning text, a property's allowed values), not just
+    // which names were touched.
+    getAgentPreview: () => importReviewAgentPreview && {
+      diff: importReviewAgentPreview.diff,
+      lines: importReviewAgentPreviewLines(importReviewAgentPreview.diff),
+      agentTouched: [...importReviewAgentPreview.agentTouched],
+      agentCommentary: importReviewAgentPreview.agentCommentary,
+    },
+    confirmAgentPreview: confirmImportReviewAgentPreview,
+    discardAgentPreview: discardImportReviewAgentPreview,
     // Removal/upsert primitives + the merger's own tool set, exposed the
     // same way GET_GRAPH_STATE_TOOL/APPLY_ONTOLOGY_YAML_TOOL are elsewhere,
     // so a test can exercise the merger's tool contract directly.
@@ -14758,6 +15172,10 @@ window.__kg = {
     // that could drift out of sync -- same reasoning as CONSISTENCY_LLM_PROMPT/
     // APPLY_ONTOLOGY_YAML_TOOL's own exposure above.
     prompts: { proposer: IMPORT_REVIEW_PROPOSER_SYSTEM_PROMPT, merger: IMPORT_REVIEW_MERGER_SYSTEM_PROMPT },
+    // The relation-naming-convention summary (issue #126) injected into the
+    // merger's own user message, exposed directly so a test doesn't have to
+    // regex it out of a mocked request body.
+    relationVocabulary: buildImportReviewRelationVocabulary,
   },
   // Consistency checker (issue #83). The engine is exposed as the pure
   // function it is, so tests can run it over an arbitrary domain-model
@@ -14799,6 +15217,11 @@ window.__kg = {
       prompt: CONSISTENCY_LLM_PROMPT,
       results: () => [...consistencyLlmFindings],
       storageKey: CONSISTENCY_LLM_STORAGE_KEY,
+      // The two named categories added by issue #126 (plus the general
+      // "model-review" case) -- exposed so a test can assert a finding's
+      // `check` was actually tagged with one of these rather than silently
+      // falling back to "model-review".
+      checkKinds: () => [...CONSISTENCY_LLM_CHECK_KINDS],
     },
   },
   // Graph finder (issue #121) test surface, mirroring the reviewChanges/
