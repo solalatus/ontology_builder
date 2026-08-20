@@ -47,3 +47,7 @@ ontology_translation/domains/*/run-manifest.json
 ontology_translation/domains/*/run.log.jsonl
 ontology_translation/domains/*/source_ir.json
 ontology_translation/domains/*/eval-*/
+ontology_translation/domains/*/repair-*.json
+ontology_translation/domains/*/repair-out/
+ontology_translation/domains/*/reinstate-*.json
+ontology_translation/domains/*/reinstate-out/
