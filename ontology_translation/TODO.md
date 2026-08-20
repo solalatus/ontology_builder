@@ -147,9 +147,16 @@ succeeds end to end. Until then, this file is the only record.
   cost **~$8.61** total — see the Log for the full breakdown. Still well
   inside the ~$21.57 "Large tier, 3 correction rounds" ceiling from the
   original cost estimate.
-- **#104–#105, #107–#111: not started.**
-- One domain translated and merged: `ontology_translation/domains/brick-hvac/`.
-  No other domain started yet.
+- **#104–#105, #107, #110–#111: not started.**
+- **#109 (IOF Supply Chain): done, merged.** See
+  `ontology_translation/domains/iof-supply-chain/` — two spot-check
+  rounds, both with a real reject-fixed-generalized cycle (an invented
+  `allowed` list; a domain/range-mismatched relationship).
+- **#108 (IOF Maintenance): done, spot-checked clean, not yet merged —
+  see 2026-08-20 Log entry.** `ontology_translation/domains/iof-maintenance/`,
+  PR pending on `ontology-translation/108-iof-maintenance`.
+- Three domains translated: `brick-hvac` and `iof-supply-chain` merged to
+  `main`; `iof-maintenance` awaiting PR merge.
 
 ## Log / Decisions
 
@@ -1824,3 +1831,109 @@ reference and record deltas/decisions here instead.)*
   text); verified live with a targeted re-judge (3/3 unanimous
   "supported"), then a full official `evaluate.py` run: `hard_gates_ok:
   True`, 0 unsupported, 0 unjustified.
+
+- 2026-08-20 -- **#108 (IOF Maintenance) translated, on
+  `ontology-translation/108-iof-maintenance`.** Source:
+  `iofoundry/ontology` `maintenance/Maintenance.rdf`,
+  `Release_202602`, checksum-pinned in `source-manifest.yaml`
+  (`scope.roots: []` -- the module is small enough, 20 classes, to take
+  whole). This round's standing policy, stated explicitly and reinforced
+  twice mid-session after a real violation: fix the pipeline at the most
+  generalizable, domain-independent level, never encode this-or-any
+  specific ontology's own vocabulary or structure into pipeline code or
+  LLM-facing prompts -- "tomorrow ANY ontology can come, in ANY form."
+
+  **Five general pipeline fixes came out of this domain, none IOF- or
+  maintenance-specific:**
+  1. `evaluate.py`'s `endpoint_citation_gate` now also accepts a
+     relationship's citation of a real `someValuesFrom`/`allValuesFrom`
+     restriction (matched by IRI local-name, not label text) as valid
+     endpoint evidence, even when the endpoint class has no dedicated
+     `classes.<Name>` mapping of its own. Root cause: IOF's
+     `MaintainableMaterialItem` is real and load-bearing -- referenced by
+     name in several restrictions the compiler correctly cited -- but is
+     an IOF Core concept only ever *referenced from*, never declared
+     inside, the Maintenance module in scope, so it never got its own
+     class record. Any source ontology where a class is real but only
+     reachable via restrictions can hit this same false-positive shape;
+     the fix is general, verified against Brick/IOF-Supply-Chain for zero
+     regressions.
+  2. `extract.py` gained `discover_annotation_predicates()`: finds any
+     source ontology's own custom annotation vocabulary by naming
+     convention (predicate local names matched against
+     `definition|description|comment|explanatorynote|usagenote|gloss`
+     and `synonym|altlabel|alternate(?:name|label)|acronym|alias|
+     abbreviation` patterns) instead of only ever recognizing
+     `rdfs`/`skos`/`dcterms`. Motivated by IOF's own `iof-av:` annotation
+     namespace (`iof-av:usageNote`, `iof-av:adaptedFrom`, etc., used
+     throughout the real source data) -- **an earlier attempt hardcoded a
+     literal `IOF_AV` namespace constant into `extract.py`, and was
+     caught and reverted mid-session by direct reviewer correction**
+     ("do not assume this specific type of ontology or relationship...
+     this is a general pipeline for whatever ontology possible") before
+     being replaced with the general mechanism above.
+  3. `run_pipeline.py` now derives the fetched source file's on-disk
+     extension from the manifest's `source_url`
+     (`_guess_source_suffix()`) instead of always writing `source.ttl`.
+     Reproduced for real: `rdflib.Graph().parse()` throws `BadSyntax` on
+     RDF/XML content saved with a `.ttl` extension, which is exactly what
+     this domain's own `Maintenance.rdf` source is. Fixed with a real
+     offline `file://`-URL integration test, not just unit-mocked.
+  4. `reinstate.py`'s dynamically-built prompt no longer names Brick
+     HVAC's own relationship vocabulary (`hasPart`, `feeds`, `serves`,
+     `hasPoint`, `hasLocation`) as illustrative examples of "what a
+     relationship might mean" -- found via direct manual reading of the
+     prompt-construction function during a full domain-agnosticism audit
+     (an AST string-literal scan with a length filter had missed it,
+     since the offending text was one long instructional sentence, not a
+     short literal -- redone without the filter afterward, no further
+     issues found). Replaced with generic "shape" language that points at
+     the domain's own real `domain_relationships` data instead of a fixed
+     example set.
+  5. `validate_domain.py` gained a new `self_loop_relationship` warning
+     (a relationship whose `from` and `to` are the same class) --
+     structural, endpoint-citation, and semantic-judging gates had all
+     independently passed a genuine `hasMaintenanceState: MaintenanceState
+     -> MaintenanceState` self-loop in a compile candidate; found only by
+     direct manual reading of the candidate `reference.domain.yaml`.
+     `compiler-prompt.md` and `repair-prompt.md` both hardened with a
+     matching rule against using a same-class self-loop as a fallback for
+     a missing/out-of-scope endpoint -- the honest move is to omit the
+     relationship, not fabricate a self-reference.
+
+  All five fixes are covered by new regression tests; full offline suite
+  271/271 passing at merge readiness.
+
+  **Domain conversion itself**: 3 independent compiler runs (per
+  `source-manifest.yaml`'s `compiler.runs: 3`); adjudicated using the
+  established "richest + all gates clean" criterion -- run-2 chosen over
+  the immediately-clean run-1 for being richer, then brought to a clean
+  state via two real `repair.py` rounds (not hand-edits). Round 1 dropped
+  `relationships[1]` (`stateOf: MaintenanceState -> MaintenanceProcess`),
+  a real semantic conflation caught by existing semantic judging
+  (unanimous 3/3 unsupported). Round 2 dropped `relationships[0]`
+  (`hasMaintenanceState`, the self-loop described in fix 5 above),
+  found only by manual reading and repaired via a hand-built `repair.py`
+  batch (it wasn't in any gate's own flagged set). Both repairs correctly
+  chose `drop`, citing the same root cause each time. Final accepted
+  candidate: 20 classes / 13 relationships / 7 rules / 5 actions / 12 CQs,
+  `hard_gates_ok: True`, 0 unsupported (1 contested), 0 unjustified
+  dispositions, 100% provenance, 100% reverse coverage, 100% CQ support
+  (10/10), round-trip 0.92 -- richer *and* cleaner than the immediately-
+  clean run-1 alternative (which had 4 contested items).
+
+  **Manual spot-check, round 1: 5/5 accept, 0 reject.** 10%-stratified
+  sample (5 of 50, largest-remainder allocation, seed 108), reviewed live
+  against a freshly regenerated `source_ir.json`. All 5 items
+  (`classes.DegradedState`, `classes.FailureEvent`,
+  `classes.MaintenanceWorkOrderRecord.properties.taskCode`,
+  `relationships[11]`, `rules.canClassifyFailedState`) grounded directly
+  and literally in real source definition text, no fabrication, no
+  borrowed-domain-practice hand-waving needed for any of them. Full
+  detail: `domains/iof-maintenance/manual-spot-check.md`. Reviewer's
+  verdict on the sample: "this looks good" -- PR opened per issue #108,
+  reviewer merging directly (not merged by the agent).
+
+  Cost: ~$0.02 (two targeted `repair.py` calls) + ~$1.50 (two full
+  official `evaluate.py` re-runs to confirm convergence after each
+  repair round) + $0 sample review.

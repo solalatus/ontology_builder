@@ -1,0 +1,240 @@
+{
+  "rounds": [
+    {
+      "round": 1,
+      "date": "2026-08-20",
+      "reviewer": "repo owner (szablevi@gmail.com), in-session with the coding agent",
+      "artefact_definition": "every individually source-mapped element in translation.json mappings list -- classes, class properties, relationships, rules, actions. Competency questions excluded.",
+      "sampling": {
+        "method": "stratified by artefact type, proportional allocation, seed=108 (matching issue number)",
+        "population": 50,
+        "sample_size": 5,
+        "allocation": {
+          "classes": 2,
+          "properties": 1,
+          "relationships": 1,
+          "rules": 1,
+          "actions": 0
+        }
+      },
+      "items": [
+        {
+          "target_path": "classes.DegradedState",
+          "target_content": {
+            "meaning": "A state of reduced ability to perform as required but with acceptable reduced performance."
+          },
+          "mapping": {
+            "source_iris": [
+              "https://spec.industrialontologies.org/ontology/construct/DegradedState"
+            ],
+            "source_evidence": "\"state of reduced ability to perform as required but with acceptable reduced performance\"",
+            "confidence": "high",
+            "rationale": "Direct class mapping from the source degraded state concept."
+          },
+          "real_source_defs": [
+            {
+              "iri": "https://spec.industrialontologies.org/ontology/construct/DegradedState",
+              "kind": "class",
+              "labels": ["degraded state"],
+              "altLabels": [],
+              "definitions": [
+                "state of reduced ability to perform as required but with acceptable reduced performance"
+              ],
+              "sourceOntology": "iof-maintenance",
+              "parents": [
+                "https://spec.industrialontologies.org/ontology/construct/MaintenanceState"
+              ]
+            }
+          ]
+        },
+        {
+          "target_path": "classes.FailureEvent",
+          "target_content": {
+            "meaning": "An event that causes an item to lose its ability to perform a required function.",
+            "aliases": ["failure"]
+          },
+          "mapping": {
+            "source_iris": [
+              "https://spec.industrialontologies.org/ontology/construct/FailureEvent"
+            ],
+            "source_evidence": "\"event that causes an item to lose its ability to perform a required function\"",
+            "confidence": "high",
+            "rationale": "Direct class mapping from the source failure event concept."
+          },
+          "real_source_defs": [
+            {
+              "iri": "https://spec.industrialontologies.org/ontology/construct/FailureEvent",
+              "kind": "class",
+              "labels": ["failure event"],
+              "altLabels": ["failure"],
+              "definitions": [
+                "the event can be the loss of the primary function or a combination of functions",
+                "FailureEvent(e) ↔ Event(e) ∧ ∃o(FailedState(o) ∧ initiates(e, o)) ∧ ∃i,f,p1(MaintainableMaterialItem(i) ∧ hasParticipantAtAllTimes(e, i) ∧ PrimaryFunction(f) ∧ hasFunction(i, f) ∧ FunctioningProcess(p1) ∧ realizes(p1, f) ∧ precedes(p1, e) ∧ ¬∃p2(FunctioningProcess(p2) ∧ realizes(p2,f) ∧ precedes(p1, p2) ∧ precedes(p2, e)))",
+                "every instance of 'failure event' is defined as exactly an instance of 'event' e that 'initiates' some 'failed state' and that 'has participant at all times' some 'maintainable material item' that 'has function' some 'primary function ' f that 'has realization' some 'functioning process' p1 that 'precedes' e and there is no 'functioning process' p2 such that p2 'realizes' f and p1 'precedes' p2 and p2 'precedes' e",
+                "event that causes an item to lose its ability to perform a required function"
+              ],
+              "sourceOntology": "iof-maintenance",
+              "parents": [
+                "https://spec.industrialontologies.org/ontology/construct/Event"
+              ]
+            }
+          ]
+        },
+        {
+          "target_path": "classes.MaintenanceWorkOrderRecord.properties.taskCode",
+          "target_content": {
+            "type": "text"
+          },
+          "mapping": {
+            "source_iris": [
+              "https://spec.industrialontologies.org/ontology/construct/MaintenanceWorkOrderRecord"
+            ],
+            "source_evidence": "The definition says \"the record has a number of commonly used fields including dates, task description, task codes, costs\".",
+            "confidence": "high",
+            "rationale": "The source explicitly lists task codes as a commonly used field of the work order record."
+          },
+          "real_source_defs": [
+            {
+              "iri": "https://spec.industrialontologies.org/ontology/construct/MaintenanceWorkOrderRecord",
+              "kind": "class",
+              "labels": ["maintenance work order record"],
+              "altLabels": ["maintenance work order", "MWO"],
+              "definitions": [
+                "the record has a number of commonly used fields including dates, task description, task codes, costs",
+                "this definition remains provisional because it assumes that a work order must involve a 'maintenance process'. In the current definition, a work order cannot be made up of purely 'supporting maintenance activity' tasks.",
+                "MaintenanceWorkOrderRecord(x) ↔ InformationContentEntity(x) ∧ ∃y(MaintenanceProcess(y) ∧ describes(x, y) ∧ isInputOf(x, y))",
+                "every instance of 'maintenance work order' is defined as exactly an instance of 'information content entity' that 'describes' some 'maintenance process' p and that 'is input of' p",
+                "information content entity that describes a maintenance process"
+              ],
+              "sourceOntology": "iof-maintenance",
+              "parents": [
+                "https://spec.industrialontologies.org/ontology/construct/InformationContentEntity"
+              ]
+            }
+          ]
+        },
+        {
+          "target_path": "relationships[11]",
+          "target_content": {
+            "name": "resultsIn",
+            "from": "FailureProcess",
+            "to": "FailedState",
+            "meaning": "The failure process can result in a failed state.",
+            "aliases": []
+          },
+          "mapping": {
+            "source_iris": [
+              "https://spec.industrialontologies.org/ontology/construct/FailureProcess",
+              "https://spec.industrialontologies.org/ontology/construct/FailedState",
+              "https://spec.industrialontologies.org/ontology/construct/FailureProcess"
+            ],
+            "source_evidence": "FailureProcess is defined as a process that changes some quality of an item causing the item to become degraded or failed.",
+            "confidence": "high",
+            "rationale": "The source definition directly supports failure processes resulting in failed states."
+          },
+          "real_source_defs": [
+            {
+              "iri": "https://spec.industrialontologies.org/ontology/construct/FailureProcess",
+              "kind": "class",
+              "labels": ["failure process"],
+              "altLabels": ["functional failure"],
+              "definitions": [
+                "FailureProcess(x) ↔ Process(x) ∧ ∃y(DispositionToFail(y) ∧ realizes(x,y))",
+                "every instance of 'failure process' is defined as exactly an instance of 'process' that 'realizes' some 'disposition to fail'",
+                "process that changes some quality of an item causing the item to become degraded or failed"
+              ],
+              "sourceOntology": "iof-maintenance",
+              "parents": [
+                "http://purl.obolibrary.org/obo/BFO_0000015"
+              ]
+            },
+            {
+              "iri": "https://spec.industrialontologies.org/ontology/construct/FailedState",
+              "kind": "class",
+              "labels": ["failed state"],
+              "altLabels": [],
+              "definitions": [
+                "FailedState(o1) ↔ MaintenanceState(o1) ∧ ∃i(MaintainableMaterialItem(i) ∧ hasParticipantAtAllTimes(o1, i) ∧ ∃e(FailureEvent(e) ∧ initiates(e, o1)) ∧ ∃o2((DegradedState(o2) ∨ OperatingState(o2) ∧ hasParticipantAtAllTimes(o2,i)) ∧ precedes(o2, o1)) ∧ ¬∃o3((DegradedState(o3) ∨ OperatingState(o3)) ∧ hasParticipantAtAllTimes(o3,i) ∧ precedes(o2, o3) ∧ precedes(o3, o1)))",
+                "\"failed state': every instance of 'failed state' is defined as exactly an instance of 'maintenance state' o1 that 'has participant at all times' some 'maintainable material item' i and that is 'initiated by' some 'failure event' and is 'preceded by' some ('degraded state' or 'operating state') o2 that 'has participant at all times' i and there is no ('degraded state' or 'operating state' ) o3 such that o3 'has participant at all times' i and o2 'precedes' o3 and o3 'precedes' o1\"",
+                "state of an item being unable to perform a required function due to a failure event"
+              ],
+              "sourceOntology": "iof-maintenance",
+              "parents": [
+                "https://spec.industrialontologies.org/ontology/construct/MaintenanceState"
+              ]
+            }
+          ]
+        },
+        {
+          "target_path": "rules.canClassifyFailedState",
+          "target_content": {
+            "conditions": [
+              "a failure event has occurred",
+              "the item cannot perform its required function"
+            ]
+          },
+          "mapping": {
+            "source_iris": [
+              "https://spec.industrialontologies.org/ontology/construct/FailedState",
+              "https://spec.industrialontologies.org/ontology/construct/FailureEvent",
+              "https://spec.industrialontologies.org/ontology/construct/RequiredFunction"
+            ],
+            "source_evidence": "FailedState is defined as a \"state of an item being unable to perform a required function due to a failure event\".",
+            "confidence": "high",
+            "rationale": "The rule restates the source criterion for recognizing a failed state."
+          },
+          "real_source_defs": [
+            {
+              "iri": "https://spec.industrialontologies.org/ontology/construct/FailedState",
+              "kind": "class",
+              "labels": ["failed state"],
+              "altLabels": [],
+              "definitions": [
+                "state of an item being unable to perform a required function due to a failure event"
+              ],
+              "sourceOntology": "iof-maintenance",
+              "parents": [
+                "https://spec.industrialontologies.org/ontology/construct/MaintenanceState"
+              ]
+            },
+            {
+              "iri": "https://spec.industrialontologies.org/ontology/construct/FailureEvent",
+              "kind": "class",
+              "labels": ["failure event"],
+              "altLabels": ["failure"],
+              "definitions": [
+                "event that causes an item to lose its ability to perform a required function"
+              ],
+              "sourceOntology": "iof-maintenance",
+              "parents": [
+                "https://spec.industrialontologies.org/ontology/construct/Event"
+              ]
+            },
+            {
+              "iri": "https://spec.industrialontologies.org/ontology/construct/RequiredFunction",
+              "kind": "class",
+              "labels": ["required function"],
+              "altLabels": ["primary function"],
+              "definitions": [
+                "the function can be a combination of functions",
+                "function of a maintainable material item which is considered necessary to fulfil a process requirement"
+              ],
+              "sourceOntology": "iof-maintenance",
+              "parents": [
+                "http://purl.obolibrary.org/obo/BFO_0000034"
+              ]
+            }
+          ]
+        }
+      ],
+      "verdicts": {
+        "classes.DegradedState": "accept",
+        "classes.FailureEvent": "accept",
+        "classes.MaintenanceWorkOrderRecord.properties.taskCode": "accept",
+        "relationships[11]": "accept",
+        "rules.canClassifyFailedState": "accept"
+      },
+      "result": "5/5 accept, 0/5 reject"
+    }
+  ]
+}
