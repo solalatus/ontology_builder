@@ -200,6 +200,23 @@ Rules for this shape:
   any of those specific words — independent judging later found most of
   them had no honest grounding for the chosen values, only for the
   property's general existence.
+- **A property whose only justification is that its owning class "needs a
+  label/name/description" is not independently grounded by the class's own
+  bare label.** A class already carries its own identity via its `meaning`
+  field — a *separate* `<X>Label`/`<X>Name`/`<X>Description`-shaped data
+  property needs source material describing a real, distinct attribute (an
+  actual identifier/serial-number scheme, a documented descriptive text
+  field, a naming convention the source discusses), not just "this class
+  exists and has a name." Citing the class's own label as evidence for
+  adding such a property is circular: the label already justifies the
+  class's existence, it cannot separately justify a property whose entire
+  content is "restate that label." Found for real: several classes across
+  one domain each got an invented `<name>Label`/`<name>Name`/
+  `<name>Description` property justified only by the class's own bare
+  label with no distinct source material — independent judging rejected
+  every one on exactly this circularity. When you cannot point to source
+  material *about the attribute itself*, distinct from the material that
+  already justifies the class, omit the property.
 - **`rdfs:subClassOf` edges MUST NOT become `relationships` entries.**
   Taxonomy is for scope selection and interpretation only — it never
   appears as a relationship in the output.

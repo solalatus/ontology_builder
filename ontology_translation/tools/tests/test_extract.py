@@ -140,6 +140,52 @@ class ExtractAllTests(unittest.TestCase):
         self.assertEqual(total, 6 + 2 + 1 + 1 + 1 + 1)  # classes, object+datatype props, enum, restriction, import
 
 
+IOF_AV_TTL = """
+@prefix : <http://example.org/onto#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix iof-av: <https://spec.industrialontologies.org/ontology/annotation/> .
+
+:WidgetAssembly a owl:Class ;
+    rdfs:label "Widget Assembly" ;
+    iof-av:naturalLanguageDefinition "a component that is joined from parts to form one working unit" ;
+    iof-av:explanatoryNote "used across the whole widget product line" ;
+    iof-av:synonym "assembled widget" ;
+    iof-av:acronym "WA" .
+"""
+
+
+class IofAnnotationVocabularyTests(unittest.TestCase):
+    # Issue #108 (IOF Maintenance): IOF's own annotation vocabulary
+    # (iof-av:, used throughout the whole IOF suite -- Core, Supply Chain,
+    # Maintenance, ...) mints its own predicates for definition/synonym/
+    # acronym roles instead of reusing rdfs:comment/skos:definition/
+    # skos:altLabel. Found for real: every one of IOF Maintenance's 20
+    # classes came out of extraction with `definitions: []` despite 46
+    # real iof-av:naturalLanguageDefinition elements in the source file --
+    # confirmed present in IOF Supply Chain's source file too (133
+    # occurrences), so this is a standing IOF-suite convention, not a
+    # one-file quirk.
+    def setUp(self):
+        self.ir = extract_all(_parse(IOF_AV_TTL), "test-onto")
+        self.widget = self.ir["classes"][0]
+
+    def test_natural_language_definition_captured(self):
+        self.assertIn(
+            "a component that is joined from parts to form one working unit",
+            self.widget["definitions"],
+        )
+
+    def test_explanatory_note_captured(self):
+        self.assertIn("used across the whole widget product line", self.widget["definitions"])
+
+    def test_synonym_captured_as_alt_label(self):
+        self.assertIn("assembled widget", self.widget["altLabels"])
+
+    def test_acronym_captured_as_alt_label(self):
+        self.assertIn("WA", self.widget["altLabels"])
+
+
 class SelectScopeTests(unittest.TestCase):
     def setUp(self):
         self.ir = extract_all(_parse(SAMPLE_TTL), "test-onto")

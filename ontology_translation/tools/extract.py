@@ -24,14 +24,36 @@ import sys
 from pathlib import Path
 
 import rdflib
-from rdflib import OWL, RDF, RDFS
+from rdflib import OWL, RDF, RDFS, Namespace
 from rdflib.namespace import DCTERMS, SKOS
 
 from source_manifest import load_manifest
 
+# IOF's own annotation vocabulary (https://spec.industrialontologies.org/
+# ontology/annotation/, prefixed iof-av: throughout the IOF suite -- Core,
+# Supply Chain, Maintenance, and every other IOF module). Not IOF-specific
+# special-casing: this is the exact same "recognize another real,
+# widely-used annotation vocabulary" extension that already brought SKOS/
+# DCTERMS support in alongside bare rdfs:comment/rdfs:label -- IOF mints its
+# own predicates for the same annotation *roles* (definition, synonym,
+# acronym) rather than reusing SKOS/DCTERMS, so without this an entire
+# module's real definitional content is invisible to extraction. Found for
+# real on IOF Maintenance (issue #108): every one of its 20 classes came out
+# of extraction with `definitions: []` despite 46 real
+# iof-av:naturalLanguageDefinition elements sitting in the source file --
+# the compiler and this pipeline's own semantic judges were both reasoning
+# from bare class labels alone the whole time, a root cause behind several
+# "no definition supports this claim" rejections. Confirmed present in
+# IOF Supply Chain's source file too (133 occurrences) -- this predicate is
+# a standing IOF-suite convention, not a one-file quirk.
+IOF_AV = Namespace("https://spec.industrialontologies.org/ontology/annotation/")
+
 LABEL_PREDICATES = (RDFS.label, SKOS.prefLabel)
-ALT_LABEL_PREDICATES = (SKOS.altLabel,)
-DEFINITION_PREDICATES = (RDFS.comment, SKOS.definition, DCTERMS.description)
+ALT_LABEL_PREDICATES = (SKOS.altLabel, IOF_AV.synonym, IOF_AV.acronym)
+DEFINITION_PREDICATES = (
+    RDFS.comment, SKOS.definition, DCTERMS.description,
+    IOF_AV.naturalLanguageDefinition, IOF_AV.explanatoryNote,
+)
 
 
 def local_name(iri: str) -> str:
