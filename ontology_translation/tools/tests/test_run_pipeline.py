@@ -57,6 +57,79 @@ SOURCE_IR = {
 }
 
 
+RDF_XML_FIXTURE = """<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+         xmlns:owl="http://www.w3.org/2002/07/owl#"
+         xmlns:ex="http://example.org/onto#">
+  <owl:Class rdf:about="http://example.org/onto#Widget">
+    <rdfs:label>Widget</rdfs:label>
+    <rdfs:comment>A generic manufactured item.</rdfs:comment>
+  </owl:Class>
+</rdf:RDF>
+"""
+
+
+class GuessSourceSuffixTests(unittest.TestCase):
+    # Issue #108: run_pipeline.py used to hardcode every auto-fetched source
+    # to `source.ttl` regardless of the real serialization -- harmless for a
+    # genuinely-Turtle source (Brick), but silently WRONG for RDF/XML (a
+    # very common ontology serialization, including some real IOF modules):
+    # rdflib's own format auto-detection trusts a recognized extension over
+    # the actual bytes, so RDF/XML content saved as `.ttl` gets parsed as
+    # Turtle and crashes with a syntax error nowhere near the real problem.
+    def test_rdf_extension_preserved(self):
+        self.assertEqual(pipeline_mod._guess_source_suffix("https://example.org/onto/Thing.rdf"), ".rdf")
+
+    def test_turtle_extension_preserved(self):
+        self.assertEqual(pipeline_mod._guess_source_suffix("https://example.org/onto/Thing.ttl"), ".ttl")
+
+    def test_owl_extension_preserved(self):
+        self.assertEqual(pipeline_mod._guess_source_suffix("https://example.org/onto/Thing.owl"), ".owl")
+
+    def test_query_string_does_not_leak_into_the_suffix(self):
+        self.assertEqual(pipeline_mod._guess_source_suffix("https://example.org/onto/Thing.rdf?raw=true"), ".rdf")
+
+    def test_no_extension_falls_back_to_no_forced_suffix(self):
+        # No extension to trust -- forcing one anyway would be just as
+        # misleading as the original `.ttl` bug this fix replaces. Empty is
+        # honest: rdflib's own last-resort behavior (try Turtle, fail with an
+        # actionable message) is no worse than before, and never silently
+        # wrong the way a forced-but-incorrect extension is.
+        self.assertEqual(pipeline_mod._guess_source_suffix("https://example.org/ontology-download"), "")
+
+
+class AutoFetchSuffixIntegrationTests(unittest.TestCase):
+    # End-to-end regression for the same bug via the real fetch -> extract
+    # chain (a file:// URL, so this stays offline/free/no-credentials like
+    # every other test here) -- proves an RDF/XML source downloaded through
+    # run_pipeline.py's own auto-fetch path (not --source-file, which always
+    # bypassed this bug) lands on disk with the right extension and actually
+    # parses, rather than being silently mis-named and crashing at extract.
+    def test_rdf_xml_source_survives_the_real_auto_fetch_path(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            source_path = tmp_path / "upstream.rdf"
+            source_path.write_text(RDF_XML_FIXTURE, encoding="utf-8")
+            manifest_path = tmp_path / "source-manifest.yaml"
+            manifest_path.write_text(
+                f"id: test-domain\nsource_url: {source_path.as_uri()}\nscope:\n  roots: []\ncompiler:\n  prompt_version: compiler-prompt\n  runs: 1\n",
+                encoding="utf-8",
+            )
+            out_dir = tmp_path / "out"
+
+            rc = pipeline_mod.main(
+                ["--manifest", str(manifest_path), "--out-dir", str(out_dir), "--dry-run"]
+            )
+
+            self.assertEqual(rc, 0)
+            fetched = list(out_dir.glob("source.*"))
+            self.assertEqual(len(fetched), 1, f"expected exactly one fetched source file, got {fetched}")
+            self.assertEqual(fetched[0].suffix, ".rdf")
+            source_ir = json.loads((out_dir / "source_ir.json").read_text(encoding="utf-8"))
+            self.assertEqual([c["iri"] for c in source_ir["classes"]], ["http://example.org/onto#Widget"])
+
+
 class BuildRepairBatchTests(unittest.TestCase):
     def test_no_unsupported_items_returns_empty(self):
         semantic_judging = {"unsupported_count": 0, "unsupported_paths": [], "results": []}

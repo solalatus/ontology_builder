@@ -156,12 +156,66 @@ def provenance_gate(domain_data: dict, translation: dict, source_ir: dict) -> di
 # and it generalizes to any domain, not just Brick HVAC.
 
 
-def endpoint_citation_gate(domain_data: dict, translation: dict) -> dict:
+def _iri_local_name(iri: str) -> str:
+    """Last path/fragment segment of an IRI -- mirrors extract.py's own
+    `local_name()` (not imported directly: evaluate.py has stayed
+    dependency-free of extract.py's module-level RDFLib parsing so it can
+    run against just the already-extracted source_ir.json)."""
+    for sep in ("#", "/"):
+        if sep in iri:
+            tail = iri.rsplit(sep, 1)[-1]
+            if tail:
+                return tail
+    return iri
+
+
+def _restriction_class_names_by_iri(source_ir: dict) -> dict[str, str]:
+    """restriction record iri -> normalized class name of its constraint's
+    someValuesFrom/allValuesFrom target (skipped for cardinality/hasValue
+    restrictions, which don't constrain to a class at all). Lets
+    endpoint_citation_gate recognize a relationship citing a *restriction*
+    record as valid evidence for its endpoint class, found for real on IOF
+    Maintenance (issue #108): `MaintainableMaterialItem` is never declared
+    with its own `owl:Class` in that source file (it's an IOF Core concept
+    only ever referenced, via 18 separate restrictions/domain-range
+    declarations, from the local module) -- so it has no source_ir class
+    record and no single `classes.MaintainableMaterialItem` mapping citation
+    every relationship touching it could realistically share. Each
+    relationship correctly grounded its OWN edge in whichever specific
+    restriction actually supports it (`hasInput`'s own someValuesFrom, say)
+    rather than redundantly re-citing the class's own arbitrary "primary"
+    evidence -- genuinely *better* per-edge grounding, not a defect, and the
+    same pattern can occur for any class (declared locally or not) that is
+    the target of more than one real restriction in the source."""
+    out: dict[str, str] = {}
+    for r in source_ir.get("restrictions", []) if source_ir else []:
+        constraint = r.get("constraint") or {}
+        if constraint.get("type") in ("someValuesFrom", "allValuesFrom") and constraint.get("value"):
+            out[r["iri"]] = _normalize_class_name(_iri_local_name(constraint["value"]))
+    return out
+
+
+def endpoint_citation_gate(domain_data: dict, translation: dict, source_ir: dict | None = None) -> dict:
     mapping_by_path = {m.get("target_path"): m for m in translation.get("mappings", [])}
     class_iris = {
         name: set(mapping_by_path.get(f"classes.{name}", {}).get("source_iris") or [])
         for name in (domain_data.get("classes") or {})
     }
+    restriction_class_names = _restriction_class_names_by_iri(source_ir) if source_ir else {}
+
+    def _endpoint_satisfied(cited: set[str], cls: str | None, known: set[str]) -> bool:
+        if not known:
+            return True  # nothing on record for this class name at all -- not this gate's job to flag
+        if cited & known:
+            return True
+        # Fallback: a citation naming a restriction that structurally
+        # constrains to a class matching this endpoint's own name (by exact
+        # IRI local-name match, not label/prose matching) is real,
+        # independent evidence about that class -- see
+        # _restriction_class_names_by_iri's own comment for the case that
+        # motivated this.
+        target_name = _normalize_class_name(cls) if cls else None
+        return bool(target_name) and any(restriction_class_names.get(iri) == target_name for iri in cited)
 
     gaps = []
     for idx, rel in enumerate(domain_data.get("relationships") or []):
@@ -174,8 +228,8 @@ def endpoint_citation_gate(domain_data: dict, translation: dict) -> dict:
         cited = set(mapping.get("source_iris") or [])
         for end in ("from", "to"):
             cls = rel.get(end)
-            known = class_iris.get(cls)
-            if known and not (cited & known):
+            known = class_iris.get(cls) or set()
+            if cls in class_iris and not _endpoint_satisfied(cited, cls, known):
                 gaps.append({"target_path": target_path, "endpoint": end, "class": cls, "known_class_iris": sorted(known)})
 
     for action_name, action_def in (domain_data.get("actions") or {}).items():
@@ -187,8 +241,8 @@ def endpoint_citation_gate(domain_data: dict, translation: dict) -> dict:
             continue
         cited = set(mapping.get("source_iris") or [])
         inp = action_def.get("input")
-        known = class_iris.get(inp)
-        if known and not (cited & known):
+        known = class_iris.get(inp) or set()
+        if inp in class_iris and not _endpoint_satisfied(cited, inp, known):
             gaps.append({"target_path": target_path, "endpoint": "input", "class": inp, "known_class_iris": sorted(known)})
 
     return {"ok": not gaps, "gaps": gaps}
@@ -1179,7 +1233,7 @@ def run_evaluation(
 
     structural = structural_gate(domain_data)
     provenance = provenance_gate(domain_data, translation, source_ir)
-    endpoint_citations = endpoint_citation_gate(domain_data, translation)
+    endpoint_citations = endpoint_citation_gate(domain_data, translation, source_ir)
     referential_consistency = referential_consistency_gate(domain_data)
     reverse = reverse_coverage(source_ir, translation)
 

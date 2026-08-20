@@ -124,6 +124,23 @@ class BuildReinstateUserPromptTests(unittest.TestCase):
         prompt = reinstate_mod.build_reinstate_user_prompt(FLAGGED, ["Chiller", "CondensingUnit"])
         self.assertNotIn("Existing relationships", prompt)
 
+    def test_instructional_text_names_no_specific_relationship_vocabulary(self):
+        # Found during a full-pipeline domain-agnosticism audit: an earlier
+        # version of this instructional text hardcoded a worked example list
+        # ("hasPart for physical composition, feeds for a flow/supply path,
+        # serves for service provision, hasPoint for a sensor/setpoint
+        # association, hasLocation for spatial placement") -- Brick HVAC's
+        # own specific relationship vocabulary, silently anchoring every
+        # other domain's reinstatement toward names that mean nothing for a
+        # non-equipment domain. A domain whose own real relationships use
+        # totally different names must never see those HVAC-specific names
+        # suggested to it -- only its own actual relationship list (already
+        # covered by test_includes_existing_relationships_when_given).
+        relationships = [{"name": "ownedBy", "from": "Portfolio", "to": "Account", "meaning": "x", "aliases": []}]
+        prompt = reinstate_mod.build_reinstate_user_prompt(FLAGGED, ["Chiller", "CondensingUnit"], relationships)
+        for hvac_specific_name in ("hasPart", "hasPoint", "hasLocation", "feeds", "serves"):
+            self.assertNotIn(hvac_specific_name, prompt, f"{hvac_specific_name!r} should not appear -- this domain never used it")
+
 
 EVIDENCE = {"source_evidence": "e", "confidence": "high", "rationale": "r"}
 

@@ -233,6 +233,55 @@ class EndpointCitationGateTests(unittest.TestCase):
         result = evaluate_mod.endpoint_citation_gate(DOMAIN_DATA, translation)
         self.assertTrue(result["ok"])
 
+    def test_citing_a_restriction_constraining_to_the_endpoint_class_satisfies_the_gate(self):
+        # Issue #108 (IOF Maintenance): a class can be referenced by many
+        # independent restrictions without ever getting its own
+        # classes.<Name> mapping citation every relationship touching it
+        # could realistically share -- most starkly when the class has no
+        # source_ir class record at all (an externally-imported concept the
+        # compiler correctly recognized was needed anyway). A relationship
+        # that cites a *different*, but genuinely real, restriction
+        # constraining to that same class is legitimately grounded, not a
+        # citation gap.
+        domain = json.loads(json.dumps(DOMAIN_DATA))
+        translation = json.loads(json.dumps(TRANSLATION_FULL))
+        rel = next(m for m in translation["mappings"] if m["target_path"] == "relationships[0]")
+        rel["source_iris"] = ["http://ex.org#serves", "http://ex.org#Fan", "_:restrictionZone1"]  # Zone's own IRI dropped, a restriction cited instead
+        source_ir = json.loads(json.dumps(SOURCE_IR))
+        source_ir["restrictions"] = [
+            {"iri": "_:restrictionZone1", "kind": "restriction", "onProperty": "http://ex.org#serves",
+             "constraint": {"type": "someValuesFrom", "value": "http://ex.org#Zone"}, "sourceOntology": "test"},
+        ]
+        result = evaluate_mod.endpoint_citation_gate(domain, translation, source_ir)
+        self.assertTrue(result["ok"], result["gaps"])
+
+    def test_citing_a_restriction_constraining_to_a_different_class_is_still_a_gap(self):
+        # The fallback above must stay strict: a restriction citation only
+        # satisfies the gate when it structurally constrains to *this*
+        # endpoint's own class, not just any restriction.
+        domain = json.loads(json.dumps(DOMAIN_DATA))
+        translation = json.loads(json.dumps(TRANSLATION_FULL))
+        rel = next(m for m in translation["mappings"] if m["target_path"] == "relationships[0]")
+        rel["source_iris"] = ["http://ex.org#serves", "http://ex.org#Fan", "_:restrictionSomethingElse"]
+        source_ir = json.loads(json.dumps(SOURCE_IR))
+        source_ir["restrictions"] = [
+            {"iri": "_:restrictionSomethingElse", "kind": "restriction", "onProperty": "http://ex.org#serves",
+             "constraint": {"type": "someValuesFrom", "value": "http://ex.org#Irrelevant"}, "sourceOntology": "test"},
+        ]
+        result = evaluate_mod.endpoint_citation_gate(domain, translation, source_ir)
+        self.assertFalse(result["ok"])
+        self.assertEqual(result["gaps"][0]["class"], "Zone")
+
+    def test_without_source_ir_the_restriction_fallback_is_simply_unavailable_not_a_crash(self):
+        # source_ir is optional -- every existing call site/test omits it,
+        # and this gate must behave exactly as it always has when it's not
+        # supplied (no fallback attempted, same as before this issue).
+        translation = json.loads(json.dumps(TRANSLATION_FULL))
+        rel = next(m for m in translation["mappings"] if m["target_path"] == "relationships[0]")
+        rel["source_iris"] = ["http://ex.org#serves", "http://ex.org#Fan"]
+        result = evaluate_mod.endpoint_citation_gate(DOMAIN_DATA, translation)
+        self.assertFalse(result["ok"])
+
 
 class CamelToWordsTests(unittest.TestCase):
     def test_single_lowercase_word(self):

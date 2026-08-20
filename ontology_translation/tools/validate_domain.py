@@ -186,6 +186,29 @@ def validate_domain(data: dict) -> ValidationReport:
                     f"relationship '{rel.get('name', idx)}'.{endpoint_key} references unknown class '{endpoint}'",
                     path,
                 )
+        # Found for real on IOF Maintenance (issue #108): a relationship
+        # whose real other endpoint class wasn't extracted (an externally-
+        # referenced concept with no source_ir record of its own -- the same
+        # `MaintainableMaterialItem` gap endpoint_citation_gate's own
+        # restriction-fallback exists for) got compiled as a same-class
+        # self-loop instead, with the compiler's own low-confidence
+        # rationale admitting "the source domain class is not present ...
+        # retained only as a minimal linkage" -- a self-admitted fallback,
+        # not a real claim. Passed structural validation (both endpoints are
+        # real classes) and semantic judging (individually plausible-
+        # sounding) alike, caught only by direct manual reading. A warning,
+        # not a hard error: a genuinely self-referential relationship (e.g.
+        # a "precedes" ordering among instances of the same class) is not
+        # impossible in principle, just rare enough to deserve a human's
+        # attention every time it appears, same severity philosophy as
+        # index.html's own consistency checker's "self-loop" check.
+        if rel.get("from") and rel.get("from") == rel.get("to"):
+            report.warning(
+                "self_loop_relationship",
+                f"relationship '{rel.get('name', idx)}' has the same class ('{rel['from']}') on both ends -- "
+                "confirm this is a genuine self-reference, not a fallback for an endpoint class that wasn't available",
+                path,
+            )
     _check_duplicates(report, rel_signatures, "relationship (name+from+to)")
 
     rules = _get_typed(report, data, "rules", dict, {}, "rules_not_mapping", "'rules' must be a mapping of name -> rule")

@@ -73,6 +73,15 @@ definitions for the classes involved. For each one, decide exactly one of:
   the full corrected target_path (e.g.
   `classes.SomeClass.properties.newPropertyName` to rename a property); omit it
   when only the content changes, not the name.
+- **A property whose only cited evidence is its owning class's own bare
+  label (e.g. a `<name>Label`/`<name>Name`/`<name>Description` property
+  justified by nothing but "the class is called X") is circular, not
+  regroundable** — the label already justifies the class's existence, it
+  cannot separately justify a property whose entire content is "restate
+  that label" (same elevated bar as `compiler-prompt.md`'s own rule for
+  this). Check `source_context` for real, *distinct* material about the
+  attribute itself first; if it genuinely has none, this is a `drop`, not a
+  `reground` — regrounding cannot manufacture evidence that doesn't exist.
 - **`drop`** — after checking, the claim genuinely has no honest grounding
   anywhere in what you were given, including no defensible standard-practice
   reading, and no corrected replacement is possible either. This should be

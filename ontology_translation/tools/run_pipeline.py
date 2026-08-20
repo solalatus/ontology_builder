@@ -34,6 +34,7 @@ import argparse
 import json
 import sys
 from pathlib import Path
+from urllib.parse import urlsplit
 
 import yaml
 
@@ -44,6 +45,27 @@ import fetch as fetch_mod
 import reinstate as reinstate_mod
 import repair as repair_mod
 from source_manifest import load_manifest
+
+
+def _guess_source_suffix(source_url: str) -> str:
+    """The downloaded source file's on-disk extension, taken from the real
+    URL rather than hardcoded -- extract.py's `parse_graph()` calls
+    rdflib with `format=None`, and rdflib's own auto-detection trusts a
+    recognized file extension over sniffing the actual content. Found for
+    real: this used to hardcode every fetch to `source.ttl` regardless of
+    the source's real serialization -- harmless for Brick (genuinely
+    Turtle) but silently WRONG for any RDF/XML source (IOF's own modules,
+    among many others): rdflib would parse the RDF/XML bytes as Turtle and
+    crash with a syntax error nowhere near the real problem. `Path(...).suffix`
+    from the URL's own path preserves whatever the source really is
+    (`.rdf`/`.owl`/`.ttl`/`.nt`/`.jsonld`/...); a URL with no extension at
+    all falls through to no forced suffix, which is no worse than rdflib's
+    own last-resort behavior (try Turtle, fail with a clear, actionable
+    message asking for an explicit format) -- better to fail loudly on a
+    genuinely ambiguous source than to actively mislead the parser with an
+    extension known to be wrong."""
+    suffix = Path(urlsplit(source_url).path).suffix
+    return suffix if suffix else ""
 
 
 def _run_stage(label: str, main_fn, argv: list[str]) -> int:
@@ -286,7 +308,7 @@ def run_pipeline(
     out_dir.mkdir(parents=True, exist_ok=True)
 
     if source_file is None:
-        source_file = out_dir / "source.ttl"
+        source_file = out_dir / f"source{_guess_source_suffix(manifest.source_url)}"
         rc = _run_stage("fetch", fetch_mod.main, ["--manifest", str(manifest_path), "--out", str(source_file)])
         if rc != 0:
             return rc

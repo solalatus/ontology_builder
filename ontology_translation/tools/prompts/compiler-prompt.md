@@ -135,9 +135,26 @@ Rules for this shape:
   rationale, the same as any other mapping.
 - Object properties may become relationships **only** when the source
   semantics clearly support a direction and both endpoints resolve to
-  classes you are including. Many source ontologies declare an object
-  property's *existence and general meaning* (what the relationship type
-  itself represents) without declaring which specific pairs of classes it
+  classes you are including. **When a property's real other endpoint is a
+  concept you are not including as its own class (out of scope, or
+  genuinely absent from what you were given), do not fall back to using
+  the *same* class on both `from` and `to` just to "retain" the property in
+  some form — omit the relationship entirely and disposition the source
+  property honestly instead** (`out_of_scope` if the missing endpoint is
+  the reason, `unsupported_by_target_model` if there is no honest reading
+  without it). A same-class self-loop invented as a placeholder for a
+  missing endpoint is a fabricated claim, not a weaker version of a real
+  one, even at low confidence — found for real: a property whose only
+  honest reading needed an endpoint class that was not extracted got
+  compiled as a same-class relationship instead, with the rationale itself
+  admitting "the source domain class is not present ... retained only as a
+  minimal linkage." A hedge in the rationale does not make a structurally
+  nonsensical claim acceptable; the honest move when a needed endpoint
+  isn't available is to leave the relationship out, not to invent one that
+  reads as if the class relates to itself. Many source ontologies declare
+  an object property's *existence and general meaning* (what the
+  relationship type itself represents) without declaring which specific
+  pairs of classes it
   actually connects — so a *specific* endpoint pair is frequently standard,
   well-established practice for the domain at hand rather than something
   the source states as a per-pair axiom. That is fine to include, but
@@ -200,6 +217,23 @@ Rules for this shape:
   any of those specific words — independent judging later found most of
   them had no honest grounding for the chosen values, only for the
   property's general existence.
+- **A property whose only justification is that its owning class "needs a
+  label/name/description" is not independently grounded by the class's own
+  bare label.** A class already carries its own identity via its `meaning`
+  field — a *separate* `<X>Label`/`<X>Name`/`<X>Description`-shaped data
+  property needs source material describing a real, distinct attribute (an
+  actual identifier/serial-number scheme, a documented descriptive text
+  field, a naming convention the source discusses), not just "this class
+  exists and has a name." Citing the class's own label as evidence for
+  adding such a property is circular: the label already justifies the
+  class's existence, it cannot separately justify a property whose entire
+  content is "restate that label." Found for real: several classes across
+  one domain each got an invented `<name>Label`/`<name>Name`/
+  `<name>Description` property justified only by the class's own bare
+  label with no distinct source material — independent judging rejected
+  every one on exactly this circularity. When you cannot point to source
+  material *about the attribute itself*, distinct from the material that
+  already justifies the class, omit the property.
 - **`rdfs:subClassOf` edges MUST NOT become `relationships` entries.**
   Taxonomy is for scope selection and interpretation only — it never
   appears as a relationship in the output.

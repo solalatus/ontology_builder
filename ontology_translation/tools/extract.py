@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -32,6 +33,46 @@ from source_manifest import load_manifest
 LABEL_PREDICATES = (RDFS.label, SKOS.prefLabel)
 ALT_LABEL_PREDICATES = (SKOS.altLabel,)
 DEFINITION_PREDICATES = (RDFS.comment, SKOS.definition, DCTERMS.description)
+
+# Many real ontologies mint their OWN annotation properties for definition/
+# synonym/acronym roles instead of reusing rdfs:comment/skos:definition/
+# skos:altLabel -- found for real on IOF Maintenance (issue #108): every one
+# of its 20 classes came out of extraction with `definitions: []` despite 46
+# real `iof-av:naturalLanguageDefinition` elements (a custom predicate from
+# IOF's own annotation vocabulary) sitting right there in the source file.
+# A fixed allowlist of one more vocabulary would only ever fix the *next*
+# ontology this pipeline happens to be pointed at, not "whatever ontology
+# possible" (this pipeline's own explicit goal, not just IOF's) -- so
+# instead of hardcoding IOF's specific IRIs, this discovers ANY ontology's
+# own custom annotation predicates by NAMING CONVENTION: authors overwhelmingly
+# name a custom annotation property after the role it plays (something with
+# "definition"/"comment"/"description"/"note"/"gloss" in it for definitional
+# text; "synonym"/"altlabel"/"acronym"/"alias"/"abbreviation" for alternate
+# names) even when they don't reuse rdfs/skos/dcterms. Deliberately scoped to
+# predicates actually used with a LITERAL object somewhere in the graph (a
+# genuine textual annotation, never an object-valued relationship) and never
+# overrides the small set of well-known standard predicates above.
+_DEFINITION_NAME_RE = re.compile(r"definition|description|comment|explanatorynote|usagenote|gloss", re.IGNORECASE)
+_ALT_LABEL_NAME_RE = re.compile(r"synonym|altlabel|alternate(?:name|label)|acronym|alias|abbreviation", re.IGNORECASE)
+
+
+def discover_annotation_predicates(graph: rdflib.Graph) -> tuple[set, set]:
+    """(definition-like predicates, alt-label-like predicates) discovered in
+    `graph` by naming convention, excluding the well-known predicates
+    already handled explicitly. See the module comment above for why this
+    is a naming-convention heuristic rather than a per-ontology allowlist."""
+    known = set(LABEL_PREDICATES) | set(ALT_LABEL_PREDICATES) | set(DEFINITION_PREDICATES)
+    literal_predicates = {p for _, p, o in graph if isinstance(o, rdflib.Literal)}
+    definition_preds, alt_label_preds = set(), set()
+    for pred in literal_predicates:
+        if pred in known:
+            continue
+        name = local_name(str(pred))
+        if _DEFINITION_NAME_RE.search(name):
+            definition_preds.add(pred)
+        elif _ALT_LABEL_NAME_RE.search(name):
+            alt_label_preds.add(pred)
+    return definition_preds, alt_label_preds
 
 
 def local_name(iri: str) -> str:
@@ -61,26 +102,32 @@ def _literals(graph: rdflib.Graph, subject, predicates) -> list[str]:
     return out
 
 
-def _term_record(graph: rdflib.Graph, subject, kind: str, source_ontology: str) -> dict:
+def _term_record(
+    graph: rdflib.Graph, subject, kind: str, source_ontology: str,
+    extra_definition_preds: set = frozenset(), extra_alt_label_preds: set = frozenset(),
+) -> dict:
     iri = str(subject)
     labels = _literals(graph, subject, LABEL_PREDICATES) or [local_name(iri)]
     return {
         "iri": iri,
         "kind": kind,
         "labels": labels,
-        "altLabels": _literals(graph, subject, ALT_LABEL_PREDICATES),
-        "definitions": _literals(graph, subject, DEFINITION_PREDICATES),
+        "altLabels": _literals(graph, subject, (*ALT_LABEL_PREDICATES, *extra_alt_label_preds)),
+        "definitions": _literals(graph, subject, (*DEFINITION_PREDICATES, *extra_definition_preds)),
         "sourceOntology": source_ontology,
     }
 
 
-def extract_classes(graph: rdflib.Graph, source_ontology: str) -> list[dict]:
+def extract_classes(
+    graph: rdflib.Graph, source_ontology: str,
+    extra_definition_preds: set = frozenset(), extra_alt_label_preds: set = frozenset(),
+) -> list[dict]:
     subjects = set(graph.subjects(RDF.type, OWL.Class)) | set(graph.subjects(RDF.type, RDFS.Class))
     records = []
     for subject in sorted(subjects):
         if isinstance(subject, rdflib.BNode):
             continue  # anonymous class expressions are captured via restrictions, not as classes
-        record = _term_record(graph, subject, "class", source_ontology)
+        record = _term_record(graph, subject, "class", source_ontology, extra_definition_preds, extra_alt_label_preds)
         record["parents"] = sorted(
             str(p) for p in graph.objects(subject, RDFS.subClassOf) if not isinstance(p, rdflib.BNode)
         )
@@ -100,10 +147,13 @@ def extract_classes(graph: rdflib.Graph, source_ontology: str) -> list[dict]:
     return records
 
 
-def _property_records(graph: rdflib.Graph, rdf_type, kind: str, source_ontology: str) -> list[dict]:
+def _property_records(
+    graph: rdflib.Graph, rdf_type, kind: str, source_ontology: str,
+    extra_definition_preds: set = frozenset(), extra_alt_label_preds: set = frozenset(),
+) -> list[dict]:
     records = []
     for subject in sorted(graph.subjects(RDF.type, rdf_type)):
-        record = _term_record(graph, subject, kind, source_ontology)
+        record = _term_record(graph, subject, kind, source_ontology, extra_definition_preds, extra_alt_label_preds)
         record["domain"] = sorted(str(d) for d in graph.objects(subject, RDFS.domain))
         record["range"] = sorted(str(r) for r in graph.objects(subject, RDFS.range))
         record["inverseOf"] = sorted(str(i) for i in graph.objects(subject, OWL.inverseOf))
@@ -172,11 +222,14 @@ def extract_imports(graph: rdflib.Graph, source_ontology: str) -> list[dict]:
 
 
 def extract_all(graph: rdflib.Graph, source_ontology: str) -> dict:
+    extra_definitions, extra_alt_labels = discover_annotation_predicates(graph)
     return {
-        "classes": extract_classes(graph, source_ontology),
-        "object_properties": _property_records(graph, OWL.ObjectProperty, "object_property", source_ontology),
+        "classes": extract_classes(graph, source_ontology, extra_definitions, extra_alt_labels),
+        "object_properties": _property_records(
+            graph, OWL.ObjectProperty, "object_property", source_ontology, extra_definitions, extra_alt_labels
+        ),
         "datatype_properties": _property_records(
-            graph, OWL.DatatypeProperty, "datatype_property", source_ontology
+            graph, OWL.DatatypeProperty, "datatype_property", source_ontology, extra_definitions, extra_alt_labels
         ),
         "enumerations": extract_enumerations(graph, source_ontology),
         "restrictions": extract_restrictions(graph, source_ontology),

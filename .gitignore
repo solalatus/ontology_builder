@@ -28,3 +28,26 @@ node_modules/
 # and not the machinery that produced them.
 tests/evals/results/baselines/*/*/*/progress.json
 tests/evals/results/baselines/*/*/*/checkpoint/
+
+# ontology_translation domain pipeline (issue #101-#111): compile.py's/
+# evaluate.py's own working output -- candidate run-N.domain.yaml/
+# translation.json siblings, run-manifest.json, run.log.jsonl, and every
+# eval-*/ report directory a manual pipeline run produces along the way.
+# Same "repo tracks the results, not the machinery" convention as the evals
+# baselines above: only the final, human-adjudicated
+# reference.domain.yaml/translation.json/translation-evaluation.json/
+# translation-report.md/persona.md/manual-spot-check.* land in a domain's
+# folder (see brick-hvac/iof-supply-chain for the established file set) --
+# the numbered candidates and intermediate eval reports that got there are
+# fully reproducible from source-manifest.yaml via run_pipeline.py and would
+# otherwise churn on every re-run for no reason.
+ontology_translation/domains/*/run-*.domain.yaml
+ontology_translation/domains/*/run-*.translation.json
+ontology_translation/domains/*/run-manifest.json
+ontology_translation/domains/*/run.log.jsonl
+ontology_translation/domains/*/source_ir.json
+ontology_translation/domains/*/eval-*/
+ontology_translation/domains/*/repair-*.json
+ontology_translation/domains/*/repair-out*/
+ontology_translation/domains/*/reinstate-*.json
+ontology_translation/domains/*/reinstate-out*/
