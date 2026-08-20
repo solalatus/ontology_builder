@@ -122,6 +122,32 @@ class StructuralErrorTests(unittest.TestCase):
         report = validate_domain(bad)
         self.assertIn("dangling_relationship_endpoint", [i.code for i in report.errors])
 
+    def test_self_loop_relationship_is_flagged_as_a_warning_not_an_error(self):
+        # Found for real on IOF Maintenance (issue #108): a relationship
+        # whose real other endpoint class wasn't extracted got compiled as a
+        # same-class self-loop instead of being honestly omitted -- passed
+        # structural validation before this check existed, caught only by
+        # direct manual reading. Warning, not error: a genuinely
+        # self-referential relationship isn't impossible in principle.
+        data = {
+            "classes": {"MaintenanceState": {"meaning": "x"}},
+            "relationships": [{"name": "hasMaintenanceState", "from": "MaintenanceState", "to": "MaintenanceState", "meaning": "x", "aliases": []}],
+            "rules": {}, "actions": {}, "competency_questions": [],
+        }
+        report = validate_domain(data)
+        self.assertNotIn("self_loop_relationship", [i.code for i in report.errors])
+        self.assertIn("self_loop_relationship", [i.code for i in report.issues if i.severity == "warning"])
+        self.assertTrue(report.ok, "a warning must not fail the structural hard gate")
+
+    def test_distinct_endpoints_are_not_flagged_as_a_self_loop(self):
+        data = {
+            "classes": {"Fan": {"meaning": "x"}, "Zone": {"meaning": "x"}},
+            "relationships": [{"name": "serves", "from": "Fan", "to": "Zone", "meaning": "x", "aliases": []}],
+            "rules": {}, "actions": {}, "competency_questions": [],
+        }
+        report = validate_domain(data)
+        self.assertNotIn("self_loop_relationship", [i.code for i in report.issues])
+
     def test_same_relationship_name_across_different_endpoints_is_not_a_duplicate(self):
         # agent_ontology_spec.md Section 5 chose a list over a name-keyed
         # map specifically so "hasPoint" (etc.) can repeat between many
