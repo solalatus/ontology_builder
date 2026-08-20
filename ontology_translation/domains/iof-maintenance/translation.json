@@ -1,0 +1,739 @@
+{
+  "mappings": [
+    {
+      "target_path": "classes.MaintenanceState",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/MaintenanceState"
+      ],
+      "source_evidence": "\"stasis that holds during a temporal interval when the realizable functions and capabilities of the participating item, or the grade of realization of those functions and capabilities, remain unchanged\"",
+      "confidence": "high",
+      "rationale": "Direct class mapping from the source maintenance state concept."
+    },
+    {
+      "target_path": "classes.MaintenanceState.properties.stateCategory",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/MaintenanceState",
+        "https://spec.industrialontologies.org/ontology/construct/OperatingState",
+        "https://spec.industrialontologies.org/ontology/construct/DegradedState",
+        "https://spec.industrialontologies.org/ontology/construct/FailedState"
+      ],
+      "source_evidence": "MaintenanceState is defined as \"exactly an instance of 'operating state' or exactly an instance of 'degraded state' or exactly an instance of 'failed state'\".",
+      "confidence": "high",
+      "rationale": "The class definition explicitly names the three maintenance-state categories, supporting a text property with those allowed values."
+    },
+    {
+      "target_path": "classes.OperatingState",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/OperatingState"
+      ],
+      "source_evidence": "\"state of an item being able to perform a required function\"",
+      "confidence": "high",
+      "rationale": "Direct class mapping from the source operating state concept."
+    },
+    {
+      "target_path": "classes.DegradedState",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/DegradedState"
+      ],
+      "source_evidence": "\"state of reduced ability to perform as required but with acceptable reduced performance\"",
+      "confidence": "high",
+      "rationale": "Direct class mapping from the source degraded state concept."
+    },
+    {
+      "target_path": "classes.FailedState",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/FailedState"
+      ],
+      "source_evidence": "\"state of an item being unable to perform a required function due to a failure event\"",
+      "confidence": "high",
+      "rationale": "Direct class mapping from the source failed state concept."
+    },
+    {
+      "target_path": "classes.FailureEvent",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/FailureEvent"
+      ],
+      "source_evidence": "\"event that causes an item to lose its ability to perform a required function\"",
+      "confidence": "high",
+      "rationale": "Direct class mapping from the source failure event concept."
+    },
+    {
+      "target_path": "classes.FailureProcess",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/FailureProcess"
+      ],
+      "source_evidence": "\"process that changes some quality of an item causing the item to become degraded or failed\"",
+      "confidence": "high",
+      "rationale": "Direct class mapping from the source failure process concept."
+    },
+    {
+      "target_path": "classes.FailureEffect",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/FailureEffect"
+      ],
+      "source_evidence": "\"process that is the consequence of failure, within or beyond the boundary of the failed item\"",
+      "confidence": "high",
+      "rationale": "Direct class mapping from the source failure effect concept."
+    },
+    {
+      "target_path": "classes.UndesirableDisposition",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/UndesireableDisposition"
+      ],
+      "source_evidence": "\"disposition of an item to undergo a process that leads to undesirable outcomes\"",
+      "confidence": "high",
+      "rationale": "Direct class mapping using the source class despite its spelling variant in the IRI."
+    },
+    {
+      "target_path": "classes.DispositionToFail",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/DispositionToFail"
+      ],
+      "source_evidence": "\"disposition of an item to undergo a failure process\"",
+      "confidence": "high",
+      "rationale": "Direct class mapping from the source disposition-to-fail concept."
+    },
+    {
+      "target_path": "classes.DispositionToExhibitUndesirableBehavior",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/DispositionToExhibitUndesirableBehavior"
+      ],
+      "source_evidence": "\"disposition of an item that would not be expected under normal operating conditions\"",
+      "confidence": "high",
+      "rationale": "Direct class mapping from the source undesirable-behavior disposition concept."
+    },
+    {
+      "target_path": "classes.FailureModeCode",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/FailureModeCode"
+      ],
+      "source_evidence": "\"information content entity that describes an undesireable disposition\"",
+      "confidence": "high",
+      "rationale": "Direct class mapping from the source failure mode code concept."
+    },
+    {
+      "target_path": "classes.RequiredFunction",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/RequiredFunction"
+      ],
+      "source_evidence": "\"function of a maintainable material item which is considered necessary to fulfil a process requirement\"",
+      "confidence": "high",
+      "rationale": "Direct class mapping from the source required function concept."
+    },
+    {
+      "target_path": "classes.FunctioningProcess",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/FunctioningProcess"
+      ],
+      "source_evidence": "\"process in which an item performs its function\"",
+      "confidence": "high",
+      "rationale": "Direct class mapping from the source functioning process concept."
+    },
+    {
+      "target_path": "classes.MaintenanceStrategy",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/MaintenanceStrategy"
+      ],
+      "source_evidence": "\"maintenance (method/ approach/ actions) to enable (the/an) asset to achieve (management's/ desired) objectives\"",
+      "confidence": "high",
+      "rationale": "Direct class mapping from the source maintenance strategy concept."
+    },
+    {
+      "target_path": "classes.MaintenanceProcess",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/MaintenanceProcess"
+      ],
+      "source_evidence": "\"process to do with retaining or restoring the function of a maintainable material item under a maintenance strategy\"",
+      "confidence": "high",
+      "rationale": "Direct class mapping from the source maintenance process concept."
+    },
+    {
+      "target_path": "classes.MaintenanceActivity",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/MaintenanceActivity"
+      ],
+      "source_evidence": "\"maintenance process that is a single task to retain or restore the function of a maintainable material item\"",
+      "confidence": "high",
+      "rationale": "Direct class mapping from the source maintenance activity concept."
+    },
+    {
+      "target_path": "classes.SupportingMaintenanceActivity",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/SupportingMaintenanceActivity"
+      ],
+      "source_evidence": "\"single action in support of the execution of a maintenance process\"",
+      "confidence": "high",
+      "rationale": "Direct class mapping from the source supporting maintenance activity concept."
+    },
+    {
+      "target_path": "classes.MaintenanceWorkOrderRecord",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/MaintenanceWorkOrderRecord"
+      ],
+      "source_evidence": "\"information content entity that describes a maintenance process\"",
+      "confidence": "high",
+      "rationale": "Direct class mapping from the source maintenance work order record concept."
+    },
+    {
+      "target_path": "classes.MaintenanceWorkOrderRecord.properties.workOrderDate",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/MaintenanceWorkOrderRecord"
+      ],
+      "source_evidence": "The definition says \"the record has a number of commonly used fields including dates, task description, task codes, costs\".",
+      "confidence": "high",
+      "rationale": "The source explicitly lists dates as a commonly used field of the work order record."
+    },
+    {
+      "target_path": "classes.MaintenanceWorkOrderRecord.properties.taskDescription",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/MaintenanceWorkOrderRecord"
+      ],
+      "source_evidence": "The definition says \"the record has a number of commonly used fields including dates, task description, task codes, costs\".",
+      "confidence": "high",
+      "rationale": "The source explicitly lists task description as a commonly used field of the work order record."
+    },
+    {
+      "target_path": "classes.MaintenanceWorkOrderRecord.properties.taskCode",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/MaintenanceWorkOrderRecord"
+      ],
+      "source_evidence": "The definition says \"the record has a number of commonly used fields including dates, task description, task codes, costs\".",
+      "confidence": "high",
+      "rationale": "The source explicitly lists task codes as a commonly used field of the work order record."
+    },
+    {
+      "target_path": "classes.MaintenanceWorkOrderRecord.properties.cost",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/MaintenanceWorkOrderRecord"
+      ],
+      "source_evidence": "The definition says \"the record has a number of commonly used fields including dates, task description, task codes, costs\".",
+      "confidence": "high",
+      "rationale": "The source explicitly lists costs as a commonly used field of the work order record."
+    },
+    {
+      "target_path": "classes.QualificationSpecification",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/QualificationSpecification"
+      ],
+      "source_evidence": "\"requirement specification that identifies the need for a person to have an assessed skill for a specific task\"",
+      "confidence": "high",
+      "rationale": "Direct class mapping from the source qualification specification concept."
+    },
+    {
+      "target_path": "classes.QualifiedMaintenancePerson",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/QualifiedMaintenancePerson"
+      ],
+      "source_evidence": "\"person who is qualified to perform a specified specified maintenance activity\"",
+      "confidence": "high",
+      "rationale": "Direct class mapping from the source qualified maintenance person concept."
+    },
+    {
+      "target_path": "relationships[0]",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/FailureEvent",
+        "https://spec.industrialontologies.org/ontology/construct/FailedState",
+        "https://spec.industrialontologies.org/ontology/construct/initiates"
+      ],
+      "source_evidence": "FailureEvent is defined as an event that \"initiates\" some FailedState, and there is a restriction on initiates some FailedState.",
+      "confidence": "high",
+      "rationale": "The source directly supports a FailureEvent to FailedState initiation relation."
+    },
+    {
+      "target_path": "relationships[1]",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/MaintenanceWorkOrderRecord",
+        "https://spec.industrialontologies.org/ontology/construct/MaintenanceProcess",
+        "https://spec.industrialontologies.org/ontology/construct/MaintenanceWorkOrderRecord",
+        "https://spec.industrialontologies.org/ontology/construct/describes"
+      ],
+      "source_evidence": "MaintenanceWorkOrderRecord is defined as an information content entity that \"describes\" some MaintenanceProcess.",
+      "confidence": "high",
+      "rationale": "The work order record definition directly supports this describes relationship."
+    },
+    {
+      "target_path": "relationships[2]",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/MaintenanceProcess",
+        "https://spec.industrialontologies.org/ontology/construct/MaintenanceStrategy",
+        "https://spec.industrialontologies.org/ontology/construct/MaintenanceProcess",
+        "https://spec.industrialontologies.org/ontology/construct/MaintenanceStrategy",
+        "https://spec.industrialontologies.org/ontology/construct/prescribedBy"
+      ],
+      "source_evidence": "MaintenanceProcess is defined as a process performed \"under a maintenance strategy\", and restrictions cite prescribedBy some MaintenanceStrategy.",
+      "confidence": "high",
+      "rationale": "The source definition and restriction together support a process-to-strategy relationship."
+    },
+    {
+      "target_path": "relationships[3]",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/MaintenanceProcess",
+        "https://spec.industrialontologies.org/ontology/construct/MaintenanceActivity"
+      ],
+      "source_evidence": "Standard maintenance practice for the specific concepts MaintenanceProcess and MaintenanceActivity is that a maintenance process is made up of one or more maintenance activities or tasks.",
+      "confidence": "medium",
+      "rationale": "The source defines maintenance activity as a single-task maintenance process, supporting a standard-practice inclusion relationship from process to activity."
+    },
+    {
+      "target_path": "relationships[4]",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/MaintenanceProcess",
+        "https://spec.industrialontologies.org/ontology/construct/SupportingMaintenanceActivity",
+        "https://spec.industrialontologies.org/ontology/construct/SupportingMaintenanceActivity"
+      ],
+      "source_evidence": "SupportingMaintenanceActivity is defined as a \"single action in support of the execution of a maintenance process\".",
+      "confidence": "high",
+      "rationale": "The definition directly supports linking a maintenance process to supporting maintenance activities used in its execution."
+    },
+    {
+      "target_path": "relationships[5]",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/MaintenanceActivity",
+        "https://spec.industrialontologies.org/ontology/construct/QualificationSpecification",
+        "https://spec.industrialontologies.org/ontology/construct/QualifiedMaintenancePerson",
+        "https://spec.industrialontologies.org/ontology/construct/QualificationSpecification",
+        "https://spec.industrialontologies.org/ontology/construct/prescribedBy"
+      ],
+      "source_evidence": "QualifiedMaintenancePerson is defined using a MaintenanceActivity that is prescribed by some QualificationSpecification.",
+      "confidence": "high",
+      "rationale": "The qualified-person definition directly supports a qualification requirement relation from maintenance activity to qualification specification."
+    },
+    {
+      "target_path": "relationships[6]",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/QualifiedMaintenancePerson",
+        "https://spec.industrialontologies.org/ontology/construct/MaintenanceActivity",
+        "https://spec.industrialontologies.org/ontology/construct/QualifiedMaintenancePerson"
+      ],
+      "source_evidence": "QualifiedMaintenancePerson is a \"person who is qualified to perform a specified specified maintenance activity\".",
+      "confidence": "high",
+      "rationale": "The source definition directly supports a relation between qualified maintenance persons and the maintenance activities they are qualified to perform."
+    },
+    {
+      "target_path": "relationships[7]",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/FailureModeCode",
+        "https://spec.industrialontologies.org/ontology/construct/UndesireableDisposition",
+        "https://spec.industrialontologies.org/ontology/construct/FailureModeCode",
+        "https://spec.industrialontologies.org/ontology/construct/describes"
+      ],
+      "source_evidence": "FailureModeCode is defined as an information content entity that \"describes an undesireable disposition\", and there is a restriction on describes some UndesireableDisposition.",
+      "confidence": "high",
+      "rationale": "The source directly supports a descriptive relation from failure mode code to undesirable disposition."
+    },
+    {
+      "target_path": "relationships[8]",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/FailureProcess",
+        "https://spec.industrialontologies.org/ontology/construct/DispositionToFail",
+        "https://spec.industrialontologies.org/ontology/construct/FailureProcess"
+      ],
+      "source_evidence": "FailureProcess is defined as a process that \"realizes some disposition to fail\".",
+      "confidence": "high",
+      "rationale": "The source definition directly supports this realizes relationship."
+    },
+    {
+      "target_path": "relationships[9]",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/FunctioningProcess",
+        "https://spec.industrialontologies.org/ontology/construct/RequiredFunction",
+        "https://spec.industrialontologies.org/ontology/construct/FunctioningProcess",
+        "https://spec.industrialontologies.org/ontology/construct/RequiredFunction"
+      ],
+      "source_evidence": "FunctioningProcess is defined as a process that realizes a function, and FailureEvent refers to a primary function realized by a functioning process.",
+      "confidence": "high",
+      "rationale": "The source supports a functioning process realizing the required or primary function in scope."
+    },
+    {
+      "target_path": "relationships[10]",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/FailureProcess",
+        "https://spec.industrialontologies.org/ontology/construct/DegradedState",
+        "https://spec.industrialontologies.org/ontology/construct/FailureProcess"
+      ],
+      "source_evidence": "FailureProcess is defined as a process that changes some quality of an item causing the item to become degraded or failed.",
+      "confidence": "high",
+      "rationale": "The source definition directly supports failure processes resulting in degraded states."
+    },
+    {
+      "target_path": "relationships[11]",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/FailureProcess",
+        "https://spec.industrialontologies.org/ontology/construct/FailedState",
+        "https://spec.industrialontologies.org/ontology/construct/FailureProcess"
+      ],
+      "source_evidence": "FailureProcess is defined as a process that changes some quality of an item causing the item to become degraded or failed.",
+      "confidence": "high",
+      "rationale": "The source definition directly supports failure processes resulting in failed states."
+    },
+    {
+      "target_path": "relationships[12]",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/FailureEvent",
+        "https://spec.industrialontologies.org/ontology/construct/FailureEffect",
+        "https://spec.industrialontologies.org/ontology/construct/FailureEffect",
+        "https://spec.industrialontologies.org/ontology/construct/FailureEvent"
+      ],
+      "source_evidence": "FailureEffect is defined as a process that is the consequence of failure; standard maintenance practice for the specific concepts FailureEvent and FailureEffect treats a failure event as having downstream failure effects.",
+      "confidence": "medium",
+      "rationale": "The source clearly defines failure effect as a consequence of failure, supporting an event-to-effect relation at standard-practice level."
+    },
+    {
+      "target_path": "rules.canClassifyOperatingState",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/OperatingState",
+        "https://spec.industrialontologies.org/ontology/construct/RequiredFunction"
+      ],
+      "source_evidence": "OperatingState is defined as a \"state of an item being able to perform a required function\".",
+      "confidence": "high",
+      "rationale": "The rule restates the source criterion for recognizing an operating state."
+    },
+    {
+      "target_path": "rules.canClassifyDegradedState",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/DegradedState"
+      ],
+      "source_evidence": "DegradedState is defined as a \"state of reduced ability to perform as required but with acceptable reduced performance\".",
+      "confidence": "high",
+      "rationale": "The rule restates the source criterion for recognizing a degraded state."
+    },
+    {
+      "target_path": "rules.canClassifyFailedState",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/FailedState",
+        "https://spec.industrialontologies.org/ontology/construct/FailureEvent",
+        "https://spec.industrialontologies.org/ontology/construct/RequiredFunction"
+      ],
+      "source_evidence": "FailedState is defined as a \"state of an item being unable to perform a required function due to a failure event\".",
+      "confidence": "high",
+      "rationale": "The rule restates the source criterion for recognizing a failed state."
+    },
+    {
+      "target_path": "rules.canIssueMaintenanceWorkOrder",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/MaintenanceWorkOrderRecord",
+        "https://spec.industrialontologies.org/ontology/construct/MaintenanceProcess"
+      ],
+      "source_evidence": "MaintenanceWorkOrderRecord is an information content entity that describes a MaintenanceProcess; standard maintenance practice for these specific concepts is to issue a work order when maintenance work is needed.",
+      "confidence": "medium",
+      "rationale": "The source and standard practice together support issuing a work order when a maintenance process is required."
+    },
+    {
+      "target_path": "rules.canAssignQualifiedPerson",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/MaintenanceActivity",
+        "https://spec.industrialontologies.org/ontology/construct/QualificationSpecification",
+        "https://spec.industrialontologies.org/ontology/construct/QualifiedMaintenancePerson"
+      ],
+      "source_evidence": "QualifiedMaintenancePerson is defined via participation in a MaintenanceActivity and satisfying a QualificationSpecification prescribed for that activity.",
+      "confidence": "high",
+      "rationale": "The source directly supports assigning a person only when the activity's qualification is satisfied."
+    },
+    {
+      "target_path": "rules.canStartMaintenanceProcess",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/MaintenanceProcess",
+        "https://spec.industrialontologies.org/ontology/construct/MaintenanceStrategy",
+        "https://spec.industrialontologies.org/ontology/construct/MaintenanceWorkOrderRecord"
+      ],
+      "source_evidence": "MaintenanceProcess occurs under a MaintenanceStrategy, and MaintenanceWorkOrderRecord describes a MaintenanceProcess; standard maintenance practice ties execution to both strategy and work order.",
+      "confidence": "medium",
+      "rationale": "The source plus standard maintenance practice support requiring both governing strategy and work-order description before starting the process."
+    },
+    {
+      "target_path": "rules.canCloseMaintenanceWorkOrder",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/MaintenanceWorkOrderRecord",
+        "https://spec.industrialontologies.org/ontology/construct/MaintenanceProcess",
+        "https://spec.industrialontologies.org/ontology/construct/MaintenanceActivity"
+      ],
+      "source_evidence": "MaintenanceWorkOrderRecord includes fields such as dates, task description, task codes, costs; standard maintenance practice for these specific concepts closes a work order after activities are completed and recorded.",
+      "confidence": "medium",
+      "rationale": "The source record fields and standard practice support a closure rule based on completed and recorded maintenance work."
+    },
+    {
+      "target_path": "actions.classifyItemAsFailed",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/FailureEvent",
+        "https://spec.industrialontologies.org/ontology/construct/FailedState"
+      ],
+      "source_evidence": "FailedState is due to a FailureEvent, and FailureEvent initiates FailedState.",
+      "confidence": "high",
+      "rationale": "The action operationalizes the direct source linkage from failure event to failed state."
+    },
+    {
+      "target_path": "actions.createMaintenanceWorkOrder",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/MaintenanceProcess",
+        "https://spec.industrialontologies.org/ontology/construct/MaintenanceWorkOrderRecord"
+      ],
+      "source_evidence": "MaintenanceWorkOrderRecord is an information content entity that describes a MaintenanceProcess.",
+      "confidence": "high",
+      "rationale": "The action operationalizes creating the source-defined record for a maintenance process."
+    },
+    {
+      "target_path": "actions.assignQualifiedMaintenancePerson",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/MaintenanceActivity",
+        "https://spec.industrialontologies.org/ontology/construct/QualifiedMaintenancePerson",
+        "https://spec.industrialontologies.org/ontology/construct/QualificationSpecification"
+      ],
+      "source_evidence": "QualifiedMaintenancePerson is defined as a person qualified to perform a specified MaintenanceActivity through satisfying the relevant QualificationSpecification.",
+      "confidence": "high",
+      "rationale": "The action operationalizes assigning a person whose qualification matches the activity requirement."
+    },
+    {
+      "target_path": "actions.startMaintenanceProcess",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/MaintenanceProcess",
+        "https://spec.industrialontologies.org/ontology/construct/MaintenanceStrategy",
+        "https://spec.industrialontologies.org/ontology/construct/MaintenanceWorkOrderRecord"
+      ],
+      "source_evidence": "MaintenanceProcess is carried out under a MaintenanceStrategy and is described by a MaintenanceWorkOrderRecord.",
+      "confidence": "medium",
+      "rationale": "The action operationalizes beginning a maintenance process once its governing strategy and work order are in place."
+    },
+    {
+      "target_path": "actions.closeMaintenanceWorkOrder",
+      "source_iris": [
+        "https://spec.industrialontologies.org/ontology/construct/MaintenanceWorkOrderRecord",
+        "https://spec.industrialontologies.org/ontology/construct/MaintenanceProcess"
+      ],
+      "source_evidence": "The work order record includes dates, task description, task codes, and costs; standard maintenance practice uses those fields to finalize the record after work completion.",
+      "confidence": "medium",
+      "rationale": "The action operationalizes closing out the maintenance work order once the maintenance process has been completed and documented."
+    }
+  ],
+  "dispositions": [
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/DegradedState",
+      "disposition": "mapped",
+      "note": "mapped to classes.DegradedState"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/DispositionToExhibitUndesirableBehavior",
+      "disposition": "mapped",
+      "note": "mapped to classes.DispositionToExhibitUndesirableBehavior"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/DispositionToFail",
+      "disposition": "mapped",
+      "note": "mapped to classes.DispositionToFail"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/FailedState",
+      "disposition": "mapped",
+      "note": "mapped to classes.FailedState"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/FailureEffect",
+      "disposition": "mapped",
+      "note": "mapped to classes.FailureEffect"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/FailureEvent",
+      "disposition": "mapped",
+      "note": "mapped to classes.FailureEvent"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/FailureModeCode",
+      "disposition": "mapped",
+      "note": "mapped to classes.FailureModeCode"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/FailureProcess",
+      "disposition": "mapped",
+      "note": "mapped to classes.FailureProcess"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/FunctioningProcess",
+      "disposition": "mapped",
+      "note": "mapped to classes.FunctioningProcess"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/MaintenanceActivity",
+      "disposition": "mapped",
+      "note": "mapped to classes.MaintenanceActivity"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/MaintenanceProcess",
+      "disposition": "mapped",
+      "note": "mapped to classes.MaintenanceProcess"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/MaintenanceState",
+      "disposition": "mapped",
+      "note": "mapped to classes.MaintenanceState"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/MaintenanceStrategy",
+      "disposition": "mapped",
+      "note": "mapped to classes.MaintenanceStrategy"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/MaintenanceWorkOrderRecord",
+      "disposition": "mapped",
+      "note": "mapped to classes.MaintenanceWorkOrderRecord"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/OperatingState",
+      "disposition": "mapped",
+      "note": "mapped to classes.OperatingState"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/QualificationSpecification",
+      "disposition": "mapped",
+      "note": "mapped to classes.QualificationSpecification"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/QualifiedMaintenancePerson",
+      "disposition": "mapped",
+      "note": "mapped to classes.QualifiedMaintenancePerson"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/RequiredFunction",
+      "disposition": "mapped",
+      "note": "mapped to classes.RequiredFunction"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/SupportingMaintenanceActivity",
+      "disposition": "mapped",
+      "note": "mapped to classes.SupportingMaintenanceActivity"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/UndesireableDisposition",
+      "disposition": "mapped",
+      "note": "mapped to classes.UndesirableDisposition"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/hasMaintenanceState",
+      "disposition": "mapped",
+      "note": "mapped to relationships[0]"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/initiates",
+      "disposition": "mapped",
+      "note": "mapped to relationships[2]"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/construct/maintenanceStateOf",
+      "disposition": "mapped",
+      "note": "mapped to relationships[1]"
+    },
+    {
+      "source_iri": "N0abf2cec8d704b379105a3864a782e5a",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL restriction on prescribedBy some MaintenanceStrategy used as evidence only"
+    },
+    {
+      "source_iri": "N0dc9ee6a53cb4320a1a9ae509228588d",
+      "disposition": "unsupported_by_target_model",
+      "note": "anonymous allValuesFrom restriction without honest standalone agent-ontology element"
+    },
+    {
+      "source_iri": "N0fc5a58c57444f958e33289813da75c8",
+      "disposition": "unsupported_by_target_model",
+      "note": "anonymous someValuesFrom restriction without resolvable standalone target meaning"
+    },
+    {
+      "source_iri": "N1d0e89aa931e46028bcf7fe5b5cb78b1",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL restriction used only as background evidence"
+    },
+    {
+      "source_iri": "N2d1be89fc9124db8ab85b4702c3740e6",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL restriction on hasInput has no standalone target shape here"
+    },
+    {
+      "source_iri": "N3e976a97bce84aca82081657b5dcd083",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL restriction on describes some UndesireableDisposition used as evidence only"
+    },
+    {
+      "source_iri": "N405bfc7157364cb3ae4a7482e09965c7",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL restriction used only as background evidence"
+    },
+    {
+      "source_iri": "N445fd67027c14f8e95146e38f4ef96d6",
+      "disposition": "unsupported_by_target_model",
+      "note": "anonymous someValuesFrom restriction without resolvable standalone target meaning"
+    },
+    {
+      "source_iri": "N5d844f169b3d455abab448bbaa1353b6",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL restriction on participation in FunctioningProcess used as evidence only"
+    },
+    {
+      "source_iri": "N602825e230df4aecbf114555501414db",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL restriction on initiates some FailedState used as evidence only"
+    },
+    {
+      "source_iri": "N6e9114e82bf74d489f2d3d0b692656dd",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL restriction on prescribes some MaintenanceProcess used as evidence only"
+    },
+    {
+      "source_iri": "N838a963adabc49ce969b51bae42c9690",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL restriction on realization of a function used as evidence only"
+    },
+    {
+      "source_iri": "N864db26bbd7341a2ae34588bc6ecdc65",
+      "disposition": "unsupported_by_target_model",
+      "note": "anonymous restriction with unresolved property identifier"
+    },
+    {
+      "source_iri": "N92c33a7d411b4769b4d6f9180af88d68",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL restriction on prescribes some MaintenanceActivity used as evidence only"
+    },
+    {
+      "source_iri": "N9cef85c9eb7d43ef932132688a15ec12",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL restriction on realizes some DispositionToFail used as evidence only"
+    },
+    {
+      "source_iri": "N9ff0a4de1e924487bf0b51f88a89193f",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL restriction on functionOf some MaintainableMaterialItem has no standalone target shape here"
+    },
+    {
+      "source_iri": "Nc1e218c0b19943ee9d85f01345abac52",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL restriction duplicating prescribedBy some MaintenanceStrategy evidence"
+    },
+    {
+      "source_iri": "Ncc437ffbfb3b490593ae758d6659ed28",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL restriction on satisfiesRequirement used as evidence only"
+    },
+    {
+      "source_iri": "Nce3df515b3b5493285c2703dc1dcafa1",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL restriction on has participant in FailureProcess used as evidence only"
+    },
+    {
+      "source_iri": "Nd0e0b25155ff4175bf4e6ba0a6ce4e5e",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL restriction on participation in MaintenanceActivity used as evidence only"
+    },
+    {
+      "source_iri": "Nda3ca1620de14779999f2b33890cf781",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL restriction on describes some MaintenanceProcess used as evidence only"
+    },
+    {
+      "source_iri": "Ne7734699800543ccad699fafdd55430a",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL restriction on isInputOf some MaintenanceProcess used as evidence only"
+    },
+    {
+      "source_iri": "https://spec.industrialontologies.org/ontology/maintenance/Maintenance/",
+      "disposition": "not_agent_relevant",
+      "note": "ontology import bookkeeping, not a domain element to surface"
+    }
+  ]
+}

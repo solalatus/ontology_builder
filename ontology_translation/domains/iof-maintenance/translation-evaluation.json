@@ -1,0 +1,1237 @@
+{
+  "domain": "iof-maintenance",
+  "structural_validity": {
+    "ok": true,
+    "error_count": 0,
+    "warning_count": 0,
+    "issues": []
+  },
+  "provenance_completeness": {
+    "ok": true,
+    "element_provenance_coverage": 1.0,
+    "source_disposition_coverage": 1.0,
+    "missing_evidence": [],
+    "orphaned_mappings": [],
+    "missing_dispositions": [],
+    "unknown_dispositions": [
+      "https://spec.industrialontologies.org/ontology/maintenance/Maintenance/"
+    ]
+  },
+  "endpoint_citation_completeness": {
+    "ok": true,
+    "gaps": []
+  },
+  "referential_consistency": {
+    "ok": true,
+    "issue_count": 0,
+    "issues": []
+  },
+  "reverse_coverage": {
+    "coverage": 1.0,
+    "silently_dropped": []
+  },
+  "translation_stability": {
+    "pairs": [
+      {
+        "run_a": 1,
+        "run_b": 2,
+        "classes": {
+          "precision": 0.9,
+          "recall": 0.9473684210526315,
+          "f1": 0.9230769230769231
+        },
+        "relationships": {
+          "precision": 0.3,
+          "recall": 0.375,
+          "f1": 0.33333333333333326
+        },
+        "properties": {
+          "precision": 0.8,
+          "recall": 0.8,
+          "f1": 0.8000000000000002
+        },
+        "allowed_values": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        }
+      },
+      {
+        "run_a": 1,
+        "run_b": 3,
+        "classes": {
+          "precision": 0.9,
+          "recall": 0.9473684210526315,
+          "f1": 0.9230769230769231
+        },
+        "relationships": {
+          "precision": 0.3,
+          "recall": 0.3,
+          "f1": 0.3
+        },
+        "properties": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        },
+        "allowed_values": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        }
+      },
+      {
+        "run_a": 2,
+        "run_b": 3,
+        "classes": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        },
+        "relationships": {
+          "precision": 0.75,
+          "recall": 0.6,
+          "f1": 0.6666666666666665
+        },
+        "properties": {
+          "precision": 0.8,
+          "recall": 0.8,
+          "f1": 0.8000000000000002
+        },
+        "allowed_values": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        }
+      }
+    ],
+    "average_f1": {
+      "classes": 0.9487179487179488,
+      "relationships": 0.4333333333333333,
+      "properties": 0.8666666666666668,
+      "allowed_values": 0.3333333333333333
+    }
+  },
+  "semantic_judging": {
+    "results": [
+      {
+        "target_path": "classes.MaintenanceState",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited text is the source ontology\u2019s own definition of MaintenanceState and directly matches the target class without adding unsupported detail."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited text is the source ontology\u2019s own definition of MaintenanceState and directly matches the target class without adding unsupported detail."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited text is the source ontology\u2019s own definition of maintenance state and directly matches the target class, consistent with the ground-truth definitions provided."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.MaintenanceState.properties.stateCategory",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The source definition explicitly states that every MaintenanceState is exactly an OperatingState, DegradedState, or FailedState, which directly supports a categorization property with those three allowed values."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The source definition explicitly states that every MaintenanceState instance is exactly an OperatingState, DegradedState, or FailedState, which directly supports a stateCategory property constrained to those categories."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The source definition explicitly partitions MaintenanceState into operating, degraded, or failed state, which specifically supports a stateCategory property constrained to those categories."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.OperatingState",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition exactly matches the source class definition for OperatingState and directly grounds the target class mapping."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition exactly matches the source ontology's definition of OperatingState and directly grounds the target class mapping."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited text exactly matches the source ontology definition of OperatingState and directly grounds the target class mapping without adding unsupported detail."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.DegradedState",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The target class exactly matches the source class label and definition, and the cited evidence is identical to the ground-truth source definition."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited evidence exactly matches the source ontology definition of DegradedState and directly grounds the target class mapping without adding unsupported detail."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The target class exactly matches the source class label and definition, and the cited evidence is identical to the ground truth definition for DegradedState."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.FailedState",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition exactly matches the source ontology's definition for FailedState and directly grounds the class mapping without adding unsupported detail."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition exactly matches the source ontology's definition for FailedState and fully grounds the direct class mapping."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition exactly matches the source ontology's definition of FailedState and directly grounds the class mapping without adding unsupported detail."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.FailureEvent",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition exactly matches the source ontology's definition of FailureEvent and directly grounds the class mapping without adding unsupported detail."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition exactly matches the source ontology's definition of FailureEvent and directly grounds the class mapping without adding unsupported detail."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition exactly matches the source ontology\u2019s definition for FailureEvent and directly grounds the class mapping without adding unsupported detail."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.FailureProcess",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited text exactly matches the source ontology\u2019s definition of FailureProcess and directly supports the class mapping."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited evidence exactly matches the source ontology definition for FailureProcess and directly justifies the class mapping without adding unsupported detail."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited text exactly matches the source ontology definition of FailureProcess and fully supports the direct class mapping."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.FailureEffect",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited text exactly matches the source ontology definition of FailureEffect and directly grounds the class mapping without adding unsupported detail."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited evidence exactly matches the source ontology definition of FailureEffect and directly justifies the target class mapping without adding unsupported detail."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited evidence exactly matches the source definition of FailureEffect and fully supports the direct class mapping."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.UndesirableDisposition",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition exactly matches and directly grounds the target class UndesirableDisposition, and the source ground truth confirms it despite the source IRI's spelling variant."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition exactly matches the source class definition for UndesireableDisposition, and the rationale's note about the spelling variant is consistent with the ground-truth IRI/label."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition exactly matches and the ground-truth source class definition explicitly defines the concept as a disposition leading to undesirable outcomes, so the class mapping is directly justified despite the spelling variant."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.DispositionToFail",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited evidence exactly matches the source class definition for DispositionToFail and directly grounds the mapping with no added claims."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The target class exactly matches the source class label and definition, and the provided ground truth confirms the same wording."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited evidence exactly matches the source class definition for DispositionToFail and fully grounds the direct class mapping."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.DispositionToExhibitUndesirableBehavior",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition exactly matches the source class definition for DispositionToExhibitUndesirableBehavior and directly grounds the mapping."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition exactly matches the source class definition for DispositionToExhibitUndesirableBehavior and directly grounds the mapping."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited evidence exactly matches the source ontology definition for DispositionToExhibitUndesirableBehavior and fully supports the direct class mapping."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.FailureModeCode",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited evidence exactly matches the source ontology definition for FailureModeCode and directly grounds the target class mapping."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited evidence exactly matches the ground-truth definition of the source class FailureModeCode and directly supports the mapped class."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited evidence exactly matches the source ontology definition for FailureModeCode and directly supports the class mapping."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.RequiredFunction",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The target class exactly matches the cited and ground-truth source definition for RequiredFunction with no added detail beyond what the ontology states."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited evidence exactly matches the source ontology definition of RequiredFunction, directly grounding the class mapping without adding unsupported detail."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited evidence exactly matches the source ontology definition of RequiredFunction and fully justifies the direct class mapping."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.FunctioningProcess",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited evidence exactly matches the source definition of FunctioningProcess and directly grounds the mapped class with no added specificity."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited evidence exactly matches the source ontology definition of FunctioningProcess and directly supports the class mapping without adding unsupported detail."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source text exactly matches the source ontology\u2019s definition of FunctioningProcess and directly grounds the target class mapping without adding unsupported detail."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.MaintenanceStrategy",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited evidence exactly matches the source ontology definition of MaintenanceStrategy and directly grounds the class mapping."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited evidence exactly matches the source ontology definition for MaintenanceStrategy and directly supports the class mapping."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited evidence exactly matches the source ontology definition for the MaintenanceStrategy class, directly grounding the target element."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.MaintenanceProcess",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited evidence exactly matches the ground-truth source definition for MaintenanceProcess and directly supports the class mapping."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The target element exactly matches the source class and its provided definition, with the ground truth confirming the same maintenance process concept."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited evidence exactly matches the source ontology definition of MaintenanceProcess and fully supports the direct class mapping."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.MaintenanceActivity",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The target class exactly matches the source class label and definition provided, and the ground truth definition is identical to the cited evidence."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited evidence exactly matches the source ontology definition for MaintenanceActivity and directly grounds the target class mapping."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited evidence exactly matches the ground-truth definition of the source class MaintenanceActivity and fully justifies the direct class mapping."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.SupportingMaintenanceActivity",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The target class exactly matches the source class name and its provided definition, and the ground-truth source definition confirms this mapping directly."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The target class exactly matches the source class and its provided definition, and the ground-truth source definition confirms the mapping directly."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited evidence exactly matches the source class definition for SupportingMaintenanceActivity and directly grounds the target class mapping."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.MaintenanceWorkOrderRecord",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition exactly matches the source class's ground truth definition for MaintenanceWorkOrderRecord, so the direct mapping is specifically justified."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source text exactly matches the source ontology\u2019s definition of MaintenanceWorkOrderRecord and directly grounds the class mapping without adding unsupported detail."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source text exactly matches the ontology\u2019s definition of MaintenanceWorkOrderRecord and directly grounds the class mapping without adding unsupported detail."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.MaintenanceWorkOrderRecord.properties.workOrderDate",
+        "raw_judgments": [
+          {
+            "verdict": "partially_supported",
+            "rationale": "The source supports that a maintenance work order record commonly includes date fields, but it does not specifically justify a distinct property named workOrderDate rather than dates more generally."
+          },
+          {
+            "verdict": "partially_supported",
+            "rationale": "The source supports that a maintenance work order record commonly includes dates, but it does not specifically justify a distinct property named workOrderDate rather than dates more generally."
+          },
+          {
+            "verdict": "partially_supported",
+            "rationale": "The cited definition supports that a maintenance work order record commonly includes date fields, but it does not specifically ground a distinct property named workOrderDate rather than dates more generally."
+          }
+        ],
+        "majority_verdict": "partially_supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.MaintenanceWorkOrderRecord.properties.taskDescription",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited source definition explicitly names 'task description' as a commonly used field of a MaintenanceWorkOrderRecord, directly grounding the property."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source definition explicitly names 'task description' as a commonly used field of a MaintenanceWorkOrderRecord, directly grounding the taskDescription property."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The source definition explicitly states that a maintenance work order record commonly includes a task description field, directly grounding the property taskDescription."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.MaintenanceWorkOrderRecord.properties.taskCode",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The source definition explicitly says a maintenance work order record commonly includes 'task codes,' which directly grounds a taskCode property on that class and is consistent with the provided class definitions."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The ground-truth definition for MaintenanceWorkOrderRecord explicitly includes task codes among its commonly used fields, directly supporting a taskCode property on that class."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The source definition explicitly states that a MaintenanceWorkOrderRecord commonly includes 'task codes' as a field, which directly grounds the property taskCode."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.MaintenanceWorkOrderRecord.properties.cost",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited source text explicitly states that a maintenance work order record commonly includes costs, which directly grounds a cost property on that class and is consistent with the class definition."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source definition explicitly states that a maintenance work order record commonly includes costs as one of its fields, directly grounding a cost property on that class."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The source definition explicitly states that a maintenance work order record commonly includes 'costs' as one of its fields, directly grounding a cost property on that class."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.QualificationSpecification",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited evidence exactly matches the source ontology definition of QualificationSpecification and directly supports the target class mapping."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited evidence exactly matches the source ontology definition for QualificationSpecification and fully grounds the direct class mapping."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited evidence exactly matches the source class definition for QualificationSpecification, directly grounding the target element."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "classes.QualifiedMaintenancePerson",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition directly matches the source class label and is consistent with the ground-truth definition that a qualified maintenance person is a person qualified for a specified maintenance activity."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition exactly matches the source class label/definition and is consistent with the ground-truth formal and textual definitions of QualifiedMaintenancePerson."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition exactly matches the source class label/definition and is consistent with the ground truth, which defines a qualified maintenance person as a person satisfying qualification requirements for a maintenance activity."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "relationships[0]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited evidence is directly confirmed by the ground-truth definitions, which explicitly state that every FailureEvent initiates some FailedState and every FailedState is initiated by some FailureEvent."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited evidence is directly grounded by the source definitions, which explicitly state that every FailureEvent initiates some FailedState and that every FailedState is initiated by some FailureEvent."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited evidence is directly confirmed by the ground-truth definitions, which explicitly state that every FailureEvent initiates some FailedState and every FailedState is initiated by some FailureEvent."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "relationships[1]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The source definition explicitly states that every MaintenanceWorkOrderRecord describes some MaintenanceProcess, directly grounding this relationship and matching the provided class definitions."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The ground-truth definition explicitly states that every MaintenanceWorkOrderRecord describes some MaintenanceProcess, directly justifying this relationship."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The source definition explicitly states that every MaintenanceWorkOrderRecord describes some MaintenanceProcess, which directly grounds this relationship and is consistent with the provided class definitions."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "relationships[2]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The ground-truth definition explicitly says a maintenance process occurs 'under a maintenance strategy,' which directly supports a relationship from MaintenanceProcess to MaintenanceStrategy."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The ground-truth definition explicitly says a maintenance process occurs under a maintenance strategy, which directly supports a relationship between MaintenanceProcess and MaintenanceStrategy."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The ground-truth definition of MaintenanceProcess explicitly says it occurs 'under a maintenance strategy,' which directly supports a relationship linking a maintenance process to a maintenance strategy."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "relationships[3]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The evidence is specifically tied to MaintenanceProcess and MaintenanceActivity and is consistent with the source definitions, which state that a maintenance activity is itself a kind of maintenance process and plausibly functions as a constituent task within a maintenance process."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited standard practice that a maintenance process comprises maintenance activities is specifically tied to the named concepts and is consistent with the source definitions, especially that a maintenance activity is itself a single-task maintenance process."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The evidence is specifically tied to MaintenanceProcess and MaintenanceActivity, and the ground-truth definition that a maintenance activity is itself a maintenance process consisting of a single task is consistent with an inclusion/part-whole relationship from process to activity."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "relationships[4]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The source definition explicitly says a SupportingMaintenanceActivity is an action in support of executing a MaintenanceProcess, which directly grounds a relationship linking the maintenance process to such supporting activities."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The source definition explicitly states that a supporting maintenance activity is an action in support of executing a maintenance process, which directly grounds a relationship between MaintenanceProcess and SupportingMaintenanceActivity and is consistent with the provided class definitions."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The source definition explicitly states that a supporting maintenance activity is a single action in support of executing a maintenance process, which directly grounds a relationship between MaintenanceProcess and SupportingMaintenanceActivity and is consistent with the provided class definitions."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "relationships[5]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The ground-truth definition of QualifiedMaintenancePerson explicitly includes a maintenance activity that is prescribed by a qualification specification, which directly supports a relation between MaintenanceActivity and QualificationSpecification of that prescribed-by/qualification-requirement kind."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited and ground-truth definition of QualifiedMaintenancePerson explicitly includes a maintenance activity that is prescribed by a qualification specification, which directly grounds the stated relation between those two classes."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited and ground-truth definition of QualifiedMaintenancePerson explicitly includes a MaintenanceActivity that is prescribedBy some QualificationSpecification, which directly supports this relationship."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "relationships[6]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited and ground-truth definitions explicitly tie a qualified maintenance person to some maintenance activity they participate in and are qualified for, which specifically supports a relationship between these two classes."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited and ground-truth definitions explicitly tie a qualified maintenance person to some maintenance activity they participate in and are qualified for, so a relationship linking those concepts is justified."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition and ground-truth axioms explicitly tie a qualified maintenance person to some maintenance activity they participate in and are qualified for, supporting a relationship between these two classes."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "relationships[7]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The source definition explicitly says a failure mode code is an information content entity that describes an undesireable disposition, which directly grounds the stated relationship to undesirable disposition and is consistent with the provided class definitions."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The ground-truth definition explicitly says a failure mode code is an information content entity that describes an undesireable disposition, directly grounding the stated relationship between those specific classes."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The ground-truth definition explicitly says a failure mode code is an information content entity that describes an undesireable disposition, directly supporting this relationship."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "relationships[8]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The ground-truth definition explicitly states that every failure process realizes some disposition to fail, directly supporting the realizes relationship between FailureProcess and DispositionToFail."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The ground-truth definition explicitly states that every failure process realizes some disposition to fail, directly supporting this realizes relationship between FailureProcess and DispositionToFail."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The ground-truth definition explicitly states that every failure process realizes some disposition to fail, directly grounding the realizes relationship between FailureProcess and DispositionToFail."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "relationships[9]",
+        "raw_judgments": [
+          {
+            "verdict": "partially_supported",
+            "rationale": "The definitions support that a functioning process realizes some function and that required function is an alt-labeled primary function, but they do not specifically justify that the functioning process realizes the required/primary function in this relationship rather than merely some function."
+          },
+          {
+            "verdict": "partially_supported",
+            "rationale": "The definitions support that a functioning process realizes some function and that required function is an alt-labeled primary function, but they do not specifically establish that the functioning process realizes the required/primary function in this relationship."
+          },
+          {
+            "verdict": "partially_supported",
+            "rationale": "The definitions support that a functioning process realizes some function and that required function is an alt-labeled primary function, but they do not specifically establish that a functioning process realizes the required/primary function in this relationship rather than just any function."
+          }
+        ],
+        "majority_verdict": "partially_supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "relationships[10]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition explicitly says a failure process causes an item to become degraded or failed, which directly grounds a relationship from FailureProcess to DegradedState and is consistent with the source definitions provided."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition explicitly says a failure process causes an item to become degraded or failed, which directly supports a relationship from FailureProcess to DegradedState and is consistent with the source definitions provided."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited and ground-truth definitions explicitly connect a failure process to causing an item to become degraded or failed, which directly supports a relationship to degraded state without adding unsupported detail."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "relationships[11]",
+        "raw_judgments": [
+          {
+            "verdict": "partially_supported",
+            "rationale": "The cited definition supports that a failure process can cause an item to become failed, but it does not specifically justify a direct relationship to the ontology class FailedState, which the ground truth defines more narrowly as a maintenance state initiated by a failure event."
+          },
+          {
+            "verdict": "partially_supported",
+            "rationale": "The evidence and definitions support that a failure process can cause an item to become failed, but they do not directly justify a specific formal relationship to FailedState, whose ground-truth definition is instead tied to initiation by a FailureEvent."
+          },
+          {
+            "verdict": "partially_supported",
+            "rationale": "The cited definition supports that a failure process can cause an item to become failed, but it does not specifically justify a direct relationship to the ontology class FailedState, which ground truth defines more narrowly as a maintenance state initiated by a failure event."
+          }
+        ],
+        "majority_verdict": "partially_supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "relationships[12]",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The ground-truth definitions and cited maintenance practice specifically support linking a FailureEvent (the failure) to a FailureEffect as a downstream consequence/result of that failure, without adding unsupported extra detail."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The ground-truth definitions state that a FailureEvent is a failure and a FailureEffect is a process that is the consequence of failure, so relating the failure event to downstream failure effects is a specific and consistent interpretation."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The ground-truth definitions say a FailureEffect is a process that is the consequence of failure and a FailureEvent is the failure-causing event, so relating a failure event to downstream failure effects is a specific and standard-supported interpretation consistent with the source."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "rules.canClassifyOperatingState",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition directly states that an operating state is the state of an item being able to perform a required function, which specifically grounds a rule for classifying operating state and matches the source definitions."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition directly states that an operating state is the state of an item being able to perform a required function, which specifically grounds a rule for classifying operating state and is consistent with the source definitions provided."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition directly states the criterion for operating state as being able to perform a required function, which matches a rule for classifying operating state and is consistent with the ground-truth definitions."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "rules.canClassifyDegradedState",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited source definition exactly states the criterion for a degraded state, so a rule allowing classification of degraded state on that basis is directly grounded and consistent with the ground truth definition."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source definition directly states the criterion for a degraded state, so a rule that can classify degraded state on that basis is specifically grounded and consistent with the ground truth definition."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source definition directly states the criterion for a degraded state, so a rule that can classify degraded state by restating that criterion is adequately grounded and consistent with the ground truth definition."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "rules.canClassifyFailedState",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition directly says a failed state is a state where an item is unable to perform a required function due to a failure event, which matches the rule's stated classification criterion and is consistent with the ground-truth definitions for failed state, failure event, and required function."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition matches the ground-truth source text for failed state and directly supports a rule that classifies a state as failed when an item is unable to perform a required function due to a failure event."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition matches the source class definition for failed state, which explicitly says it is a state where an item is unable to perform a required function due to a failure event."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "rules.canIssueMaintenanceWorkOrder",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The ground-truth definition says a maintenance work order record describes and is input to a maintenance process, and standard practice specifically for maintenance work orders supports the rule that one can be issued when such maintenance work is needed."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The source definition establishes that a maintenance work order record describes and serves as input to a maintenance process, and the cited standard maintenance practice specifically supports the rule that one can issue such a work order when maintenance work is needed."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The source definition establishes a maintenance work order record as the record describing and serving as input to a maintenance process, and the cited standard practice specifically for maintenance work orders plausibly supports the rule that one can be issued when maintenance work is needed."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "rules.canAssignQualifiedPerson",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The ground-truth definition of QualifiedMaintenancePerson explicitly requires a person to participate in a maintenance activity and satisfy a qualification specification prescribed for that activity, which supports a rule that only such qualified persons can be assigned."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The ground-truth definition of QualifiedMaintenancePerson explicitly requires a person to satisfy a QualificationSpecification prescribed by the relevant MaintenanceActivity, which directly supports a rule allowing assignment only when that activity\u2019s qualification requirement is met."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The ground-truth definition of QualifiedMaintenancePerson explicitly requires a person to participate in some MaintenanceActivity and satisfy a QualificationSpecification prescribed for that activity, which supports a rule allowing assignment only when the activity-specific qualification is met."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "rules.canStartMaintenanceProcess",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The ground-truth definitions show a maintenance process is under a maintenance strategy and that a maintenance work order record both describes and is input to a maintenance process, so requiring both before starting the process is a reasonable, specifically grounded rule."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The ground-truth definitions explicitly place a maintenance process under a maintenance strategy and define a maintenance work order record as describing and being input to a maintenance process, so requiring both before starting the process is a justified rule."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The source definitions explicitly ground that a maintenance process is under a maintenance strategy and that a maintenance work order record describes and is input to a maintenance process, so requiring both before starting the process is a reasonable and specifically tied rule."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "rules.canCloseMaintenanceWorkOrder",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition explicitly identifies a maintenance work order record as describing a maintenance process and listing record fields, and the added standard maintenance practice specifically tied to work orders reasonably supports a rule that such a work order can be closed once the maintenance activities are completed and recorded."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition confirms a maintenance work order record describes a maintenance process and includes operational fields like dates, task description, task codes, and costs, and the cited standard practice specifically for maintenance work orders plausibly supports a rule that such an order can be closed once the maintenance activities are completed and recorded."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source explicitly grounds maintenance work orders as records describing maintenance processes with common fields for documenting the work, and the added rule that such a work order can be closed once maintenance activities are completed and recorded is a specific, standard-practice inference for these named concepts that is not contradicted by the source definitions."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "actions.classifyItemAsFailed",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited evidence is directly grounded by the source definitions, which explicitly state that a FailureEvent initiates a FailedState and that a FailedState is due to a FailureEvent, adequately supporting an action that classifies an item as failed on that basis."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited evidence matches the ground-truth definitions that a FailureEvent initiates a FailedState and that a FailedState is due to a FailureEvent, which is sufficient to justify an action that classifies an item as failed."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited and ground-truth definitions explicitly state that a FailureEvent initiates a FailedState and that a FailedState is due to a FailureEvent, which directly supports an action that classifies an item as failed on that basis."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "actions.createMaintenanceWorkOrder",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited source definition explicitly establishes a maintenance work order record as the information artifact for a maintenance process, which adequately grounds an action to create that record and is consistent with the supplied class definitions."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited evidence directly defines a maintenance work order record as an information content entity describing a maintenance process, which adequately grounds an action to create such a record and is consistent with the provided source definitions."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source definition directly establishes a maintenance work order record as the information artifact for a maintenance process, so an action to create that record is a justified operationalization and does not add unsupported specifics."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "actions.assignQualifiedMaintenancePerson",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition of QualifiedMaintenancePerson directly ties a person\u2019s qualification to a specified MaintenanceActivity via a QualificationSpecification, which adequately grounds an action to assign such a qualified person to the activity and is consistent with the source definitions."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition of QualifiedMaintenancePerson directly supports an action assigning a person whose satisfied QualificationSpecification matches a specified MaintenanceActivity, and this is consistent with the source class definitions."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited definition of QualifiedMaintenancePerson directly supports an action assigning a person whose qualifications satisfy the QualificationSpecification prescribed by a MaintenanceActivity, and this is consistent with the provided source class definitions."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      },
+      {
+        "target_path": "actions.startMaintenanceProcess",
+        "raw_judgments": [
+          {
+            "verdict": "partially_supported",
+            "rationale": "The evidence supports that a maintenance process is governed by a maintenance strategy and associated with a maintenance work order record, but it does not specifically justify an action of starting the process or the condition that both are already in place."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited evidence and source definitions specifically ground a maintenance process as being under a maintenance strategy and described/input by a maintenance work order record, which adequately supports an action to start that process when those governing inputs are in place."
+          },
+          {
+            "verdict": "partially_supported",
+            "rationale": "The evidence supports that a maintenance process is under a maintenance strategy and described by a maintenance work order record, but it does not specifically ground the action semantics of 'start' or the condition that both must already be 'in place' before beginning."
+          },
+          {
+            "verdict": "partially_supported",
+            "rationale": "The evidence supports that a maintenance process is governed by a maintenance strategy and described by a maintenance work order record, but it does not specifically justify an action of starting or beginning that process."
+          },
+          {
+            "verdict": "partially_supported",
+            "rationale": "The evidence supports that a maintenance process is governed by a maintenance strategy and described by a maintenance work order record, but it does not specifically justify an action of starting or beginning that process."
+          }
+        ],
+        "majority_verdict": "partially_supported",
+        "contested": true,
+        "confirmation_round": true
+      },
+      {
+        "target_path": "actions.closeMaintenanceWorkOrder",
+        "raw_judgments": [
+          {
+            "verdict": "supported",
+            "rationale": "The cited source text explicitly says a maintenance work order record has commonly used fields like dates, task description, task codes, and costs, and standard maintenance practice plausibly and specifically supports using that record to finalize/close the documented maintenance process without contradicting the ground-truth definitions."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source text explicitly says a maintenance work order record includes the listed fields and describes/is input to a maintenance process, and standard maintenance practice specifically tied to work orders reasonably supports an action to close/finalize that record after completion."
+          },
+          {
+            "verdict": "supported",
+            "rationale": "The cited source text explicitly grounds maintenance work order records as records describing a maintenance process with fields such as dates, task description, task codes, and costs, and standard maintenance practice plausibly and specifically supports an action to close/finalize that record once the documented work is completed."
+          }
+        ],
+        "majority_verdict": "supported",
+        "contested": false,
+        "confirmation_round": false
+      }
+    ],
+    "unsupported_count": 0,
+    "unsupported_paths": [],
+    "contested_count": 1,
+    "contested_paths": [
+      "actions.startMaintenanceProcess"
+    ],
+    "total_cost_usd": 0.4582
+  },
+  "disposition_judging": {
+    "results": [],
+    "unjustified_count": 0,
+    "unjustified_iris": [],
+    "contested_count": 0,
+    "contested_iris": [],
+    "total_cost_usd": 0.0
+  },
+  "round_trip": {
+    "sampled": 5,
+    "results": [
+      {
+        "target_path": "classes.MaintenanceState",
+        "reconstruction": "Most likely this represents an equipment or asset condition status during maintenance or operation, indicating that the item's functional capability is stable rather than changing over time. The stateCategory property suggests it classifies that stable condition as operating, degraded, or failed.",
+        "score": 0.78,
+        "rationale": "The reconstruction captures the core idea of a stable condition over time with unchanged functional capability, but it adds unsupported maintenance/operation context and stateCategory examples while omitting the broader notion of unchanged grade of realization."
+      },
+      {
+        "target_path": "classes.MaintenanceState.properties.stateCategory",
+        "reconstruction": "A categorical status field indicating the current maintenance or health state of an asset, system, or component. The allowed values suggest it distinguishes normal operation, reduced performance, and complete failure.",
+        "score": 0.9,
+        "rationale": "The reconstruction closely matches the source by describing a status field with the same three states\u2014operating, degraded, and failed\u2014though it adds broader context about maintenance/health and assets that is not explicit in the definition."
+      },
+      {
+        "target_path": "classes.OperatingState",
+        "reconstruction": "OperatingState most likely represents the condition or status of a device, system, or component when it is operational and capable of performing its intended function. It denotes an 'in service' or 'working' state as opposed to failed, inactive, or out-of-order states.",
+        "score": 0.97,
+        "rationale": "The reconstruction closely matches the source by describing the state of an item/system being operational and able to perform its intended function, with only minor added wording."
+      },
+      {
+        "target_path": "classes.DegradedState",
+        "reconstruction": "DegradedState most likely represents an operational condition in which a system, component, or agent remains functional but performs below its normal or required capability. It indicates partial impairment or reduced effectiveness while still maintaining an acceptable minimum level of service.",
+        "score": 0.98,
+        "rationale": "The reconstruction closely matches the source by describing a state of reduced capability that still maintains acceptable reduced performance, with only minor added elaboration."
+      },
+      {
+        "target_path": "classes.FailedState",
+        "reconstruction": "FailedState most likely represents the condition or lifecycle state of an asset, component, or system after a failure has occurred, indicating it can no longer perform its intended or required function. It is likely used in reliability, maintenance, or operational status modeling to distinguish failed items from normal or degraded states.",
+        "score": 0.97,
+        "rationale": "The reconstruction closely matches the source definition by describing a state after failure in which an item cannot perform its required function, adding only minor contextual speculation."
+      }
+    ],
+    "average_score": 0.9200000000000002,
+    "total_cost_usd": 0.0118
+  },
+  "cq_support": {
+    "results": [
+      {
+        "question": "When a failure event occurs, can the agent determine that it initiates a failed state and identify any failure effect associated with that event?",
+        "supported": true,
+        "rationale": "The ontology explicitly includes FailureEvent, FailedState, and FailureEffect with relationships 'initiates' and 'hasEffect', plus a failed-state classification rule and action, which together provide enough structure to reason that a failure event initiates a failed state and to identify associated failure effects."
+      },
+      {
+        "question": "Can the agent distinguish whether an item should be classified as operating, degraded, or failed based on the available state-classification rules?",
+        "supported": true,
+        "rationale": "The ontology explicitly defines operating, degraded, and failed states along with state-classification rules and related failure/function concepts sufficient to reason about how an item should be classified."
+      },
+      {
+        "question": "If a failure process is observed, can the agent determine whether it results in a degraded state or a failed state?",
+        "supported": true,
+        "rationale": "The ontology explicitly models FailureProcess with resultsIn links to both DegradedState and FailedState, plus state-classification rules, so it provides enough structure to reason whether an observed failure process leads to degraded or failed state."
+      },
+      {
+        "question": "Can the agent trace a failure process back to a disposition to fail that the process realizes?",
+        "supported": true,
+        "rationale": "The ontology explicitly includes the classes FailureProcess and DispositionToFail and a realizes relationship from FailureProcess to DispositionToFail, which is sufficient to reason from a failure process to the disposition to fail that it realizes."
+      },
+      {
+        "question": "Given a failure mode code, can the agent identify the undesirable disposition that the code describes?",
+        "supported": true,
+        "rationale": "The ontology explicitly includes the classes FailureModeCode and UndesirableDisposition and a direct describes relationship from FailureModeCode to UndesirableDisposition, which is sufficient to reason from a code to the disposition it describes."
+      },
+      {
+        "question": "For an item's required function, can the agent identify a functioning process that realizes that function?",
+        "supported": true,
+        "rationale": "The ontology explicitly includes the classes RequiredFunction and FunctioningProcess and the relationship FunctioningProcess realizes RequiredFunction, which is sufficient orientation to reason about identifying a functioning process for a required function."
+      },
+      {
+        "question": "When issuing a maintenance work order, can the agent create a maintenance work order record that describes the intended maintenance process?",
+        "supported": true,
+        "rationale": "The ontology explicitly includes the MaintenanceWorkOrderRecord class, a describes relationship to MaintenanceProcess, and a createMaintenanceWorkOrder action with preconditions and verification sufficient to reason that the agent can create such a record when issuing a work order."
+      },
+      {
+        "question": "For a given maintenance process, can the agent determine which maintenance strategy governs it and which maintenance activities and supporting maintenance activities it includes?",
+        "supported": true,
+        "rationale": "The ontology explicitly includes MaintenanceProcess with relationships to MaintenanceStrategy (governedByStrategy), MaintenanceActivity (hasActivity), and SupportingMaintenanceActivity (hasSupportingActivity), which is sufficient to reason about the governing strategy and included activities for a given maintenance process."
+      },
+      {
+        "question": "For a maintenance activity, can the agent determine what qualification specification is required and whether a qualified maintenance person can be assigned to perform it?",
+        "supported": true,
+        "rationale": "The ontology explicitly includes MaintenanceActivity, QualificationSpecification, QualifiedMaintenancePerson, the requiresQualification and qualifiedFor relationships, and assignment rules/actions sufficient to reason about required qualifications and whether a qualified person can be assigned."
+      },
+      {
+        "question": "Can the agent support the maintenance workflow by creating a maintenance work order, assigning a qualified maintenance person, starting the maintenance process, and closing the maintenance work order when appropriate?",
+        "supported": true,
+        "rationale": "The ontology explicitly includes the needed maintenance work order, maintenance process/activity, qualified person, rules, and actions for creating a work order, assigning qualified personnel, starting the process, and closing the work order."
+      }
+    ],
+    "support_score": 1.0,
+    "total_cost_usd": 0.061,
+    "generation_cost_usd": 0.0072
+  },
+  "hard_gates_ok": true
+}
