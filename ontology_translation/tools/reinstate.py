@@ -76,19 +76,23 @@ def build_reinstate_user_prompt(
         # reinstated class tends to come back as an unconnected orphan --
         # found for real: a first pass with only class names in this prompt
         # (no relationship examples) added 10 well-grounded classes with
-        # zero relationships each, even for equipment (CondensingUnit,
-        # Pump, CoolingTower) whose real physical connections to classes
-        # already in the domain are exactly the kind of thing this
-        # domain's existing hasPart/feeds relationships already model for
-        # comparable equipment. Showing the real relationship list lets the
-        # model reuse the same names/patterns instead of guessing whether
-        # inventing one is allowed.
+        # zero relationships each, even for classes whose real connections
+        # to classes already in the domain are exactly the kind of thing
+        # this domain's own existing relationships already model for
+        # comparable classes. Showing the real relationship list below lets
+        # the model reuse THIS domain's own actual names/patterns instead of
+        # guessing or inventing new ones -- deliberately no named example
+        # relationships here (an earlier version of this prompt hardcoded a
+        # worked list from one specific domain, which silently anchored
+        # every other domain's reinstatement toward that domain's own
+        # vocabulary instead of its own).
         parts.append(
-            "Existing relationships in this domain, for naming/pattern precedent -- reuse "
-            "these same relationship names and conventions (e.g. hasPart for physical "
-            "composition, feeds for a flow/supply path, serves for service provision, "
-            "hasPoint for a sensor/setpoint association, hasLocation for spatial placement) "
-            "rather than inventing new ones where an existing pattern already fits:"
+            "Existing relationships already in this domain, for naming/pattern precedent -- "
+            "reuse this domain's own existing relationship names and conventions (matching "
+            "shape: composition, flow/supply, service provision, spatial placement, or "
+            "whatever kinds of connections this specific domain already uses) rather than "
+            "inventing a new name where an existing pattern in the list below already fits "
+            "the same shape:"
         )
         parts.append(json.dumps(domain_relationships, indent=2))
     parts += [
