@@ -1,0 +1,23 @@
+id: iof-maintenance
+source_url: https://raw.githubusercontent.com/iofoundry/ontology/Release_202602/maintenance/Maintenance.rdf
+source_version: Release_202602
+source_sha256: 1ac077a3f5fccc7510967aab2f8427c2151d00673fd3cbe9f8b45da8b2ed2f97
+scope:
+  # No roots: like SupplyChain.rdf, Maintenance.rdf is already a small,
+  # single-purpose module (20 locally-defined classes, all under IOF's
+  # shared construct namespace, one owl:imports of IOF Core, 3 object
+  # properties, 0 datatype properties, 44 restrictions) -- it doesn't need
+  # further sub-scoping within itself, and its class hierarchy is flat
+  # relative to this file alone (classes here subclass from IOF
+  # Core/BFO terms this file only references, never defines). Empty
+  # roots = extract.py's select_scope is skipped entirely; the full local
+  # extraction goes to the compiler, which does the actual relevance
+  # curation via disposition-judging (same approach as iof-supply-chain,
+  # and per issue #108's own instruction not to translate BFO/IOF
+  # upper-ontology structure wholesale -- every omitted core/imported
+  # construct still gets an explicit source disposition from the
+  # compiler, not a pre-filter here).
+  roots: []
+compiler:
+  prompt_version: compiler-prompt
+  runs: 3
