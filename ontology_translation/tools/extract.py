@@ -92,6 +92,19 @@ def parse_graph(path: str | Path, fmt: str | None = None) -> rdflib.Graph:
     return graph
 
 
+def parse_graphs(paths: list[str | Path], fmt: str | None = None) -> rdflib.Graph:
+    """Parses one or more source files into a single merged graph -- some
+    real ontologies (FIBO Loans, issue #110) are deliberately split across
+    several `owl:imports`-linked files rather than published as one
+    self-contained document. `rdflib.Graph.parse()` called repeatedly on
+    the same Graph object merges triples by construction, so extraction/
+    scope-selection below need no change at all to work over the union."""
+    graph = rdflib.Graph()
+    for path in paths:
+        graph.parse(str(path), format=fmt)
+    return graph
+
+
 def _literals(graph: rdflib.Graph, subject, predicates) -> list[str]:
     out = []
     for pred in predicates:
@@ -312,7 +325,11 @@ def select_scope(ir: dict, roots: list[str], max_depth: int | None = None) -> di
 
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--input", type=Path, required=True, help="RDF/XML, Turtle or JSON-LD source file")
+    parser.add_argument(
+        "--input", type=Path, required=True, nargs="+",
+        help="RDF/XML, Turtle or JSON-LD source file(s) -- more than one merges into a single graph "
+        "before extraction, for ontologies split across owl:imports-linked files",
+    )
     parser.add_argument("--format", type=str, default=None, help="rdflib format hint (turtle, xml, json-ld, ...)")
     parser.add_argument("--manifest", type=Path, required=True, help="source-manifest.yaml (for id + scope.roots)")
     parser.add_argument("--out", type=Path, required=True, help="path to write the extracted source_ir.json")
@@ -326,7 +343,7 @@ def main(argv=None) -> int:
 
     manifest = load_manifest(args.manifest)
     print(f"[extract] {manifest.id}: parsing {args.input}")
-    graph = parse_graph(args.input, args.format)
+    graph = parse_graphs(args.input, args.format)
     print(f"[extract] {manifest.id}: {len(graph)} triples parsed")
 
     ir = extract_all(graph, manifest.id)
