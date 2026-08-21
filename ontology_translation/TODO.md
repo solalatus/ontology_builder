@@ -2295,3 +2295,99 @@ reference and record deltas/decisions here instead.)*
 
   Full offline suite: 1042/1042 passing before this round (from #104's
   own re-verification); re-verified again after this round's changes.
+
+- 2026-08-21 (continued) -- **#111 (multi-domain elicitation benchmark)
+  infrastructure built, on `ontology-translation/111-multi-domain-
+  benchmark`, stacked on #104/#105.** No `OPENAI_API_KEY` is configured in
+  this environment; user explicitly chose to wire the live eval harness to
+  the existing Azure credentials rather than add an OpenAI key or defer.
+  All 4 currently-translated non-itops domains approved to run
+  (brick-hvac, iof-maintenance, iof-supply-chain, fibo-loans), at the
+  issue's own stated minimum of 3 independent replicates/domain (12 real
+  live interviews total), explicitly chosen over cheaper 1x/2x options
+  after flagging the cost/time tradeoff.
+
+  **Azure routing threaded through every real call the eval makes.**
+  `llmMatcher.mjs`'s `callJudge` (and every `judge*`/`computeSemantic*`
+  function that calls it) and `reportGenerator.mjs`'s `generateLlmReview`
+  both gained an optional `chat` override param -- when given, routes
+  through it instead of the raw OpenAI fetch; every existing call site
+  (no `chat` passed) is unaffected. Verified with two new tests in
+  `tests/ontology-recovery-llm-matching.spec.mjs`: one confirming
+  `judgeClasses` calls the override exactly once instead of touching the
+  real fetch, one confirming `computeSemanticRecoveryMetrics` reaches the
+  override through its own *internal* `judgeClasses` call (not just when
+  called directly) and actually credits the fake verdict in its result --
+  first draft of that second test asserted a trivially-true `calls >= 0`,
+  caught on review and rewritten to prove the override fires exactly once
+  with a meaningful result assertion.
+
+  **`tests/evals/run-multi-domain-benchmark.mjs` (new)**: one process per
+  `--domain=<id> --run=<replicate-id>`, reusing `self-correction-eval.mjs`'s
+  own Azure connect/checkpoint/idempotence/error-classification pattern
+  wholesale rather than reinventing it. Runs the full live interview
+  (persona + real app agent, both real Azure calls) against a domain's
+  `reference.domain.yaml` + `persona.md`, scores heuristic + semantic
+  classes/relationships/properties/rules/actions (full-domain and
+  practical-scope), and writes report/transcript/tool-log/recovered-model
+  plus a new consolidated `metrics.json` and `provenance.json` (completion
+  marker; re-running a completed domain/replicate is a no-op unless
+  `--force`). Also accumulates real token usage across every `chat()` call
+  (persona/classifier/review/judge) plus the app agent's own relayed
+  responses (`chatResponses[].body.usage`) via `chatClient.mjs`'s existing
+  `sumUsage`, satisfying #111's "tokens/cost where available" -- surfaced
+  in `metrics.json`'s `operationalStats` and, when present, a new line in
+  `reportGenerator.mjs`'s `writeReport` (guarded on the field existing, so
+  every caller that doesn't set it renders exactly as before).
+
+  **Real smoke test** (`ONTOLOGY_EVAL_MAX_TURNS=3
+  ONTOLOGY_EVAL_WALLCLOCK_MINUTES=5`, brick-hvac): completed end-to-end in
+  63s real wall-clock, real Azure calls confirmed
+  (`semanticJudgingSucceeded: true`, model `gpt-5.4`). Surfaced one real
+  generalization bug this way, not caught by any prior test since none had
+  ever rendered a full report against a non-itops domain:
+  `reportGenerator.mjs`'s `scopeBlurb` hardcoded itops's own "68-class"
+  fixture size as a literal string in shared report text -- wrong for
+  every other domain (brick-hvac's real ground truth is 39 classes). Fixed
+  to read the real `${m.classes.groundTruthTotal}` instead; doc comment
+  updated to match. Grepped the rest of `tests/evals/` afterward for
+  similar itops-specific hardcoding (`68|itops|Eszter|MTSR|bank|Hungarian`)
+  -- everything else that matched is either a legitimate itops-as-default
+  value/comment or the `bipartiteMatching.mjs` Hungarian-*algorithm* (not
+  domain) reference, not a live behavioral bug.
+
+  **`tests/evals/summarize-multi-domain-benchmark.mjs` (new)**: pure
+  aggregation, no new API calls -- reads every completed domain x
+  replicate's `metrics.json`/`provenance.json` plus each domain's own
+  `ontology_translation/domains/<domain>/translation-evaluation.json`
+  (issue #103's translation-quality report, so elicitation error is never
+  read in isolation from translation error, per #111's own explicit
+  "Translation-quality context" section), and writes exactly #111's four
+  named outputs directly under `ontology_translation/results/
+  multi-domain/`: `summary.json`, `summary.md`, `runs.csv` (one row per
+  domain x replicate -- #111's own "do not aggregate away individual
+  runs"), `domain-comparison.csv` (per-domain mean +/- stdev). Macro
+  statistics average per-domain means with every domain weighted equally
+  regardless of size, matching #111's explicit rejection of a
+  micro-average. Answers all 7 of #111's own cross-domain-analysis
+  questions from real computed numbers (Pearson correlation for the two
+  numeric ones, size vs. recovery and translation-stability vs. recovery,
+  each requiring >=3 domains to mean anything); the "do interviewer
+  changes improve all domains or only IT Ops" question is explicitly
+  marked not-applicable this run (single interviewer model throughout),
+  and "does abstraction level affect recovery" is left to the reader with
+  an honest note that abstraction level has no numeric proxy in this
+  benchmark's own metrics. Dry-run verified against the smoke-test output
+  before the real runs -- `summary.md`/`runs.csv`/`domain-comparison.csv`
+  all render correctly, including the "not enough domains for a
+  meaningful correlation" and missing-token-data blank-cell paths; smoke-
+  test artifacts and the dry-run summary files deleted afterward (both
+  gitignored, `ontology_translation/results/` is not committed).
+
+  Full offline suite re-verified after all of the above: 1064/1075 pass
+  (11 skipped -- unrelated live-only tests gated on env vars this
+  environment doesn't set), 0 failures.
+
+  **Not yet done as of this entry**: the real 12-run (4 domains x 3
+  replicates) live benchmark itself has not been launched yet -- next
+  step. This entry covers the infrastructure only.

@@ -109,10 +109,32 @@ export function computeOperationalStats(orchestratorResult) {
 // connected with (already a real, live-picked standard-tier model per the
 // app's own default-model heuristic), overridable via
 // ONTOLOGY_EVAL_REVIEW_MODEL for a deliberately different reviewer model.
-export async function generateLlmReview({ apiKey, model, orchestratorResult }) {
+// `chat`, if given, replaces the OpenAI fetch below -- same injection
+// shape as personaAgent.mjs's own override (issue #111's Azure-backed
+// multi-domain benchmark runner). Every existing caller (undefined chat)
+// is unaffected.
+export async function generateLlmReview({ apiKey, model, orchestratorResult, chat = null }) {
   const transcriptText = orchestratorResult.log
     .map((e) => `[turn ${e.turn} | ${e.speaker}]\n${e.text}`)
     .join("\n\n");
+  const systemPrompt =
+    "You are reviewing a transcript of a simulated ontology-elicitation interview between an " +
+    "AI interviewer (speaker labels starting with \"app-\") and a simulated domain-expert persona " +
+    "(speaker label \"persona\"). Write a concise, skimmable review in markdown with two sections: " +
+    "'## Errors' (tool failures, contradictions, the interviewer losing track of state, misapplied " +
+    "edits, or anything that looks like a real bug) and '## Noteworthy observations' (good or bad " +
+    "interview technique, missed obvious follow-ups, especially efficient or inefficient moments, " +
+    "anything a reviewer optimizing this agent's prompt would want to know). Use bullet points with " +
+    "the turn number. If a section has nothing to report, write 'None observed.' under it. Do not " +
+    "restate the whole transcript.";
+  if (chat) {
+    try {
+      const { text } = await chat([{ role: "system", content: systemPrompt }, { role: "user", content: transcriptText }], model);
+      return text || "_LLM review returned no content._";
+    } catch (err) {
+      return `_LLM review call failed: ${String((err && err.message) || err)}_`;
+    }
+  }
   let res, data;
   // Retries a transient 429 with backoff, same as every other real API call
   // site in the app/test suite -- this one still degrades to a soft-fail
@@ -125,18 +147,7 @@ export async function generateLlmReview({ apiKey, model, orchestratorResult }) {
       body: JSON.stringify({
         model,
         messages: [
-          {
-            role: "system",
-            content: "You are reviewing a transcript of a simulated ontology-elicitation interview between an " +
-              "AI interviewer (speaker labels starting with \"app-\") and a simulated domain-expert persona " +
-              "(speaker label \"persona\"). Write a concise, skimmable review in markdown with two sections: " +
-              "'## Errors' (tool failures, contradictions, the interviewer losing track of state, misapplied " +
-              "edits, or anything that looks like a real bug) and '## Noteworthy observations' (good or bad " +
-              "interview technique, missed obvious follow-ups, especially efficient or inefficient moments, " +
-              "anything a reviewer optimizing this agent's prompt would want to know). Use bullet points with " +
-              "the turn number. If a section has nothing to report, write 'None observed.' under it. Do not " +
-              "restate the whole transcript.",
-          },
+          { role: "system", content: systemPrompt },
           { role: "user", content: transcriptText },
         ],
       }),
@@ -158,12 +169,14 @@ export async function generateLlmReview({ apiKey, model, orchestratorResult }) {
 // review, then a pointer to the full log. Overwritten every run.
 //
 // Two metrics objects are reported side by side, not one replacing the
-// other: `metrics` is scored against the fixture's full 68-class reference
-// domain (comprehensive, for context/comparability across fixture
-// revisions); `scopedMetrics` is scored against practicalScopeClassIds --
-// the classes the fixture's own canonical competency-questions/actions
-// material actually talks about (see groundTruthModel.mjs). A single-
-// session, competency-driven interview can only ever reach the second one;
+// other: `metrics` is scored against the ground truth's full comprehensive
+// reference domain (context/comparability across runs and domains alike --
+// issue #104 made this apply to any ontology_translation/domains/*, not
+// just the original 68-class itops fixture); `scopedMetrics` is scored
+// against practicalScopeClassIds -- the classes the ground truth's own
+// canonical competency-questions/actions material actually talks about
+// (see groundTruthModel.mjs). A single-session, competency-driven
+// interview can only ever reach the second one;
 // showing both, rather than quietly swapping the denominator, is what makes
 // this an addition to transparency rather than a way to make the number
 // look better.
@@ -236,10 +249,10 @@ export function writeReport({
   const m = metrics;
   const s = scopedMetrics;
   const scopeBlurb =
-    "Two denominators, side by side: **full domain** is every class/relationship/property in the fixture's " +
-    "68-class comprehensive reference model; **practical scope** is the subset the fixture's own canonical " +
-    "competency questions and actions actually talk about (see tests/evals/README.md) -- the ceiling a real, " +
-    "single-session, competency-driven interview could reach even with perfect elicitation. Full-domain numbers " +
+    `Two denominators, side by side: **full domain** is every class/relationship/property in the ground truth's ` +
+    `${m.classes.groundTruthTotal}-class comprehensive reference model; **practical scope** is the subset the ` +
+    "ground truth's own canonical competency questions and actions actually talk about (see tests/evals/README.md) " +
+    "-- the ceiling a real, single-session, competency-driven interview could reach even with perfect elicitation. Full-domain numbers " +
     "give context and cross-run comparability; practical-scope numbers are the more meaningful read of interview " +
     "quality on their own.";
   const lines = [
@@ -313,6 +326,9 @@ export function writeReport({
     `- Stopped: **${orchestratorResult.stoppedReason}**, after ${orchestratorResult.turnsUsed} turns, ${(orchestratorResult.durationMs / 1000).toFixed(0)}s wall-clock`,
     `- Real app-agent API calls: ${operationalStats.appAgentApiCalls} (apply_ontology_yaml called ${operationalStats.applyToolCalls}× · get_graph_state called ${operationalStats.getGraphStateCalls}×)`,
     `- Tool outcomes seen in transcript: ${operationalStats.toolApplied} applied · ${operationalStats.toolSkipped} skipped · ${operationalStats.toolNothing} no-op · ${operationalStats.toolError} error`,
+    ...(operationalStats.totalTokens
+      ? [`- Tokens: ${operationalStats.totalTokens} total (${operationalStats.promptTokens} prompt · ${operationalStats.completionTokens} completion) across ${operationalStats.tokenCallCount} API calls`]
+      : []),
     "",
     "## LLM review of the conversation",
     "",
