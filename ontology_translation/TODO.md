@@ -159,8 +159,13 @@ succeeds end to end. Until then, this file is the only record.
   an equivalent `.domain.yaml` now too (`ontology_translation/domains/
   itops/`), produced by a re-runnable conversion script, confirmed to
   reproduce the original MTSR fixture's scores.
-- **#105 (rules/actions in ontology-recovery scoring): not started yet —
-  next up in the same session.**
+- **#105 (rules/actions in ontology-recovery scoring): done, not yet
+  merged — see the dated Log entry below.** `recoveryMetrics.mjs` gained
+  `computeRuleMetrics`/`computeActionMetrics` (heuristic) and
+  `llmMatcher.mjs` gained `computeSemanticRuleActionMetrics` (semantic
+  supplement), reported as their own new report sections, not folded
+  into the existing `recoveryEffectiveness` composite. Stacked on top of
+  #104's branch (depends on its `rules` field and multi-domain loader).
 - **#107, #111: not started.**
 - **#109 (IOF Supply Chain): done, merged.** See
   `ontology_translation/domains/iof-supply-chain/` — two spot-check
@@ -2180,3 +2185,113 @@ reference and record deltas/decisions here instead.)*
   existing `tests/ontology-recovery-metrics.spec.mjs` coverage via
   `recoveryMetrics.mjs`'s own refactor). No live API calls anywhere in
   this round -- every check here is offline/deterministic.
+
+- 2026-08-21 (continued) -- **#105 implemented, on
+  `ontology-translation/105-rule-action-metrics`, stacked on top of
+  #104's own branch** (depends on its `rules` field and multi-domain
+  loader -- neither existed until #104 landed). Extends the
+  ontology-recovery eval to actually score rules and actions, which had
+  no recall metric at all before this (MTSR-sourced ground truth had no
+  rules concept whatsoever; actions were parsed but explicitly marked
+  "not currently scored" in `groundTruthModel.mjs`'s own comment).
+
+  **Ground truth's action shape extended, uniformly across both source
+  formats.** `preconditions`/`effect`/`verification` are now real,
+  resolved content on every normalized action -- `preconditions` is
+  always condition *text* (`string[]`), never a rule-name reference,
+  regardless of source: `.domain.yaml`'s own actions reference rule
+  names, resolved to that rule's real `conditions:` at ground-truth load
+  time (`buildActionsFromDomainYaml`); MTSR's actions already carry raw
+  condition text directly, no indirection to resolve. The RECOVERED
+  side's own preconditions (real rule-id references, matching
+  `index.html`'s actual `state.actions[].preconditions` schema) can only
+  be resolved once a live recovered state exists, so that resolution
+  happens at scoring time instead (`resolveRecoveredActionPreconditionText`
+  in `recoveryMetrics.mjs`), against `recoveredState.rules`.
+
+  **Rule matching** (`matchRules`/`computeRuleMetrics`): one-to-one
+  bipartite match (reusing `maxWeightBipartiteMatching`, same as
+  classes/properties) weighted 30% name similarity / 70% condition-text
+  similarity, PLUS an independent condition-overlap floor on top of the
+  combined threshold -- the issue's own literal words, "matching the
+  name alone is insufficient," enforced as a hard requirement rather
+  than just a weighting preference. Verified with a real synthetic case:
+  a rule named `totallyUnrelatedRuleName` with gold's *exact* condition
+  text still matches (condition equivalence recognized despite a
+  completely different name); a rule with gold's *exact* name but
+  unrelated condition text does not (name similarity alone cannot carry
+  a match past the floor).
+
+  **Action matching** (`matchActions`/`computeActionMetrics`):
+  one-to-one, weighted on name/meaning similarity ONLY -- deliberately
+  not gated on input-class agreement, since the issue's own required
+  test scenario ("correct effect but wrong input class") only makes
+  sense if a wrong input class doesn't prevent the action from being
+  identified at all. Reports the issue's own explicit component list
+  separately: identification recall/precision/F1, input-class accuracy,
+  precondition/effect/verification recovery (`labelSimilarity` reused
+  directly for the text-overlap components -- it was already exactly
+  "tokenize two free-text strings and Jaccard the token sets," the right
+  operation for condition/effect/verification prose, not just short
+  labels). Every component is `null`, not `0`, when the matched gold
+  action never had that field populated -- "do not penalize fields
+  absent from the reference domain," a real distinguishable outcome
+  rather than a fabricated zero.
+
+  **Composite left alone, per the issue's own explicit instruction.**
+  New standalone functions (`computeRuleMetrics`/`computeActionMetrics`
+  in `recoveryMetrics.mjs`, `computeSemanticRuleActionMetrics`/
+  `aggregateSemanticRuleActionMetrics` in `llmMatcher.mjs`), never folded
+  into `computeRecoveryMetrics`'s or `aggregateSemanticMetrics`'s own
+  return shapes -- the safest way to guarantee zero risk to
+  `recoveryEffectiveness` and to `rescore-saved-run.mjs`/
+  `reportGenerator.mjs`'s existing dependents was to never touch those
+  functions' contracts at all, not to add fields and trust nothing
+  downstream picks them up. `writeReport` gained two new, fully optional
+  report sections ("Rules and actions (heuristic)" / "(semantic)"),
+  rendered only when a caller actually passes the new data -- absent for
+  every existing caller.
+
+  **Semantic supplement**: `judgeRules`/`judgeActions`
+  (`llmMatcher.mjs`) follow the exact same pairing-judge pattern as
+  classes/relationships, scoped to identification only (the issue's own
+  "LLM-semantic supplement" section only lists matching, not a
+  component-level re-score) -- the same scoping `controlledValueFidelity`
+  already uses for its own component metric (never re-scored via the
+  semantic class/property judge's own matches, only ever the heuristic
+  `matchProperties` assignment). Verified with two real synthetic cases
+  the heuristic pass genuinely cannot resolve on its own (zero shared
+  tokens by construction): a paraphrased rule condition, and a
+  differently-named action sharing only its effect text -- both recall
+  correctly go from 0 (heuristic alone) to 1 once a fake MATCH verdict is
+  aggregated in, and a stale replayed verdict about a pair the heuristic
+  pass now matches on its own is correctly dropped, not double-counted
+  (mirrors the exact "never lowers recall, never double-counts" tests
+  `aggregateSemanticMetrics` already has for classes/relationships).
+
+  **The live app's own recovered state never captured rules/actions at
+  all before this** -- `ontology-recovery.eval.spec.mjs`'s
+  `recoveredState` only ever read `window.__kg.state.nodes/edges`. Now
+  also reads `.rules`/`.actions`, matching `index.html`'s own real data
+  model (`{id, name, conditions}` for rules; `{id, name, inputClassId,
+  preconditions, effect, verification}` for actions, confirmed directly
+  against `index.html`'s own `createAction`/`normalizeLoadedRule`/
+  `normalizeLoadedAction`).
+
+  **Test scenarios, matching the issue's own required list exactly**:
+  paraphrased equivalent rule (semantic-layer test), differently-named
+  equivalent action (semantic-layer test), same action name but wrong
+  effect (heuristic: identified via name, effect recovery scores low),
+  correct effect but wrong input class (heuristic: input-class accuracy
+  0, effect recovery still high -- components genuinely independent),
+  partial precondition recovery (heuristic: a real fraction, not rounded
+  to 0 or 1), duplicate recovered action matching two gold actions
+  (heuristic: one-to-one bipartite assignment holds, mirrors
+  `matchClasses`'s own existing precedent test). All 6 map onto real,
+  separately-verified test cases, not folded into one loose assertion.
+  No new domain fixture files needed -- every test uses synthetic
+  in-memory ground truth/recovered objects, the same convention every
+  existing test in these two files already follows.
+
+  Full offline suite: 1042/1042 passing before this round (from #104's
+  own re-verification); re-verified again after this round's changes.

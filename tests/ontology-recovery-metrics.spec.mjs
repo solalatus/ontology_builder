@@ -6,7 +6,10 @@ import {
   isRecoverableProperty, isRecoverableRelationship, buildReducedActions,
   mergeReciprocalRelationshipPairs,
 } from "./evals/lib/groundTruthModel.mjs";
-import { computeRecoveryMetrics, computeMatchDetail, matchClasses, matchProperties, computeHeuristicMatchPairs, MATCH_THRESHOLDS } from "./evals/lib/recoveryMetrics.mjs";
+import {
+  computeRecoveryMetrics, computeMatchDetail, matchClasses, matchProperties, computeHeuristicMatchPairs, MATCH_THRESHOLDS,
+  matchRules, computeRuleMetrics, computeRuleMatchDetail, matchActions, computeActionMetrics, computeActionMatchDetail,
+} from "./evals/lib/recoveryMetrics.mjs";
 
 // This file covers recoveryMetrics.mjs's own regex/token-overlap matcher
 // only -- deterministic, no API key, no network. The LLM-judge supplement
@@ -777,4 +780,172 @@ test("computeRecoveryMetrics accepts explicit thresholds and defaults to MATCH_T
   assert.equal(computeRecoveryMetrics(groundTruth, recovered).classes.matched, 0);
   assert.equal(computeRecoveryMetrics(groundTruth, recovered, MATCH_THRESHOLDS).classes.matched, 0);
   assert.equal(computeRecoveryMetrics(groundTruth, recovered, { class: 0.4, relationshipOrProperty: 0.3 }).classes.matched, 1);
+});
+
+// RULES AND ACTIONS (issue #105) ------------------------------------------
+// Same convention as everything above: synthetic ground truth/recovered
+// objects built inline, no new domain fixture files needed (the issue's
+// own instruction to keep any new fixtures under ontology_translation/
+// domains/ is honored vacuously -- none of these tests need one, matching
+// how every existing test in this file already works).
+
+test("matchRules finds a rule via real condition-text overlap even when its name is completely different -- name alone is insufficient, but is not required either", () => {
+  const groundTruth = {
+    rules: [{ id: "g1", label: "needsCoolingFromSetpoint", conditions: ["measured air temperature is above the applicable cooling temperature setpoint"] }],
+  };
+  const recoveredRules = [{ id: "r1", name: "totallyUnrelatedRuleName", conditions: ["measured air temperature is above the applicable cooling temperature setpoint"] }];
+  const { gtToRecovered } = matchRules(groundTruth, recoveredRules);
+  assert.equal(gtToRecovered.get("g1"), "r1");
+});
+
+test("matchRules does NOT match on a similar name alone when the condition text has essentially no real overlap", () => {
+  const groundTruth = {
+    rules: [{ id: "g1", label: "needsCoolingFromSetpoint", conditions: ["measured air temperature is above the applicable cooling temperature setpoint"] }],
+  };
+  const recoveredRules = [{ id: "r1", name: "needsCoolingFromSetpoint", conditions: ["the system requires a scheduled maintenance inspection"] }];
+  const { gtToRecovered } = matchRules(groundTruth, recoveredRules);
+  assert.equal(gtToRecovered.size, 0, "a matching name with a genuinely unrelated condition must not count as recovered");
+});
+
+test("computeRuleMetrics reports recall/precision/F1 and degrades to 0, not NaN, with no gold rules or no recovered rules", () => {
+  const groundTruth = { rules: [{ id: "g1", label: "x", conditions: ["a"] }] };
+  assert.deepEqual(computeRuleMetrics(groundTruth, []).recall, 0);
+  assert.deepEqual(computeRuleMetrics({ rules: [] }, [{ id: "r1", name: "x", conditions: ["a"] }]).precision, 0);
+  const perfect = computeRuleMetrics(groundTruth, [{ id: "r1", name: "x", conditions: ["a"] }]);
+  assert.equal(perfect.recall, 1);
+  assert.equal(perfect.precision, 1);
+  assert.equal(perfect.f1, 1);
+});
+
+test("matchRules maintains one-to-one assignment: two recovered rules both plausible for one gold rule are not both credited", () => {
+  const groundTruth = {
+    rules: [{ id: "g1", label: "needsCoolingFromSetpoint", conditions: ["measured air temperature is above the cooling temperature setpoint"] }],
+  };
+  const recoveredRules = [
+    { id: "r1", name: "needsCoolingFromSetpoint", conditions: ["measured air temperature is above the cooling temperature setpoint"] },
+    { id: "r2", name: "coolingSetpointExceeded", conditions: ["measured air temperature is above the cooling temperature setpoint"] },
+  ];
+  const { gtToRecovered, recoveredToGt } = matchRules(groundTruth, recoveredRules);
+  assert.equal(gtToRecovered.size, 1);
+  assert.equal(recoveredToGt.size, 1, "only one of the two candidates should be consumed by the single gold rule");
+});
+
+test("computeRuleMatchDetail lists a gold rule as unmatched only when nothing recovered matched it", () => {
+  const groundTruth = { rules: [{ id: "g1", label: "x", conditions: ["a real condition"] }, { id: "g2", label: "y", conditions: ["another real condition"] }] };
+  const recoveredRules = [{ id: "r1", name: "x", conditions: ["a real condition"] }];
+  const detail = computeRuleMatchDetail(groundTruth, recoveredRules);
+  assert.equal(detail.unmatchedGold.length, 1);
+  assert.equal(detail.unmatchedGold[0].id, "g2");
+  assert.equal(detail.unmatchedRecovered.length, 0);
+});
+
+function actionGroundTruth(actions) {
+  return {
+    classes: {
+      AirHandlingUnit: { id: "AirHandlingUnit", label: "Air Handling Unit", aliases: ["air handling unit"] },
+      Zone: { id: "Zone", label: "Zone", aliases: ["zone"] },
+    },
+    relationships: [], properties: [], rules: [], actions,
+  };
+}
+
+test("matchActions identifies an action by name even when its effect is wrong -- identification and effect recovery are separate questions", () => {
+  const groundTruth = actionGroundTruth([{
+    id: "increaseCooling", label: "increaseCooling", primaryInputClassId: "AirHandlingUnit",
+    preconditions: [], effect: "the cooling path is commanded to reduce air temperature toward the cooling setpoint", verification: "",
+  }]);
+  const recoveredState = {
+    nodes: [{ id: "n1", label: "Air Handling Unit", meaning: "", aliases: [], properties: [] }], edges: [],
+    rules: [],
+    actions: [{ id: "a1", name: "increaseCooling", inputClassId: "n1", preconditions: [], effect: "the unit is powered off entirely", verification: "" }],
+  };
+  const metrics = computeActionMetrics(groundTruth, recoveredState);
+  assert.equal(metrics.identification.matched, 1, "same-name action must still be identified");
+  assert.ok(metrics.effectRecovery < 0.2, `wrong effect should score low, got ${metrics.effectRecovery}`);
+});
+
+test("computeActionMetrics: correct effect but wrong input class scores each component independently", () => {
+  const groundTruth = actionGroundTruth([{
+    id: "increaseCooling", label: "increaseCooling", primaryInputClassId: "AirHandlingUnit",
+    preconditions: [], effect: "the cooling path is commanded to reduce air temperature toward the cooling setpoint", verification: "",
+  }]);
+  const recoveredState = {
+    nodes: [
+      { id: "n1", label: "Air Handling Unit", meaning: "", aliases: [], properties: [] },
+      { id: "n2", label: "Zone", meaning: "", aliases: [], properties: [] },
+    ],
+    edges: [],
+    rules: [],
+    actions: [{
+      id: "a1", name: "increaseCooling", inputClassId: "n2" /* wrong -- should be n1, the AHU */,
+      preconditions: [], effect: "the cooling path is commanded to reduce air temperature toward the cooling setpoint", verification: "",
+    }],
+  };
+  const metrics = computeActionMetrics(groundTruth, recoveredState);
+  assert.equal(metrics.identification.matched, 1);
+  assert.equal(metrics.inputClassAccuracy, 0, "wrong input class must score 0, not be silently ignored");
+  assert.ok(metrics.effectRecovery > 0.8, `correct effect should still score high, got ${metrics.effectRecovery}`);
+});
+
+test("computeActionMetrics: partial precondition recovery is a real fraction, not rounded to 0 or 1", () => {
+  const groundTruth = actionGroundTruth([{
+    id: "declareMajor", label: "declareMajor", primaryInputClassId: "AirHandlingUnit",
+    preconditions: ["incident severity is sev1 critical or sev2 high", "at least one impacted service is identified", "a commander has been assigned"],
+    effect: "", verification: "",
+  }]);
+  const recoveredState = {
+    nodes: [{ id: "n1", label: "Air Handling Unit", meaning: "", aliases: [], properties: [] }], edges: [],
+    rules: [{ id: "r1", name: "sevCheck", conditions: ["incident severity is sev1 critical or sev2 high"] }],
+    actions: [{ id: "a1", name: "declareMajor", inputClassId: "n1", preconditions: ["r1"], effect: "", verification: "" }],
+  };
+  const metrics = computeActionMetrics(groundTruth, recoveredState);
+  assert.ok(metrics.preconditionRecovery > 0 && metrics.preconditionRecovery < 1, `expected a real partial score, got ${metrics.preconditionRecovery}`);
+});
+
+test("computeActionMetrics does not penalize a component field that is genuinely absent from the reference domain -- null, not 0", () => {
+  const groundTruth = actionGroundTruth([{
+    id: "noop", label: "noop", primaryInputClassId: "AirHandlingUnit",
+    preconditions: [], effect: "", verification: "",
+  }]);
+  const recoveredState = {
+    nodes: [{ id: "n1", label: "Air Handling Unit", meaning: "", aliases: [], properties: [] }], edges: [],
+    rules: [],
+    actions: [{ id: "a1", name: "noop", inputClassId: "n1", preconditions: [], effect: "did something unexpected", verification: "checked something" }],
+  };
+  const metrics = computeActionMetrics(groundTruth, recoveredState);
+  assert.equal(metrics.preconditionRecovery, null, "gold had no preconditions -- must be n/a, not a penalized 0");
+  assert.equal(metrics.effectRecovery, null, "gold had no effect -- must be n/a, not a penalized 0");
+  assert.equal(metrics.verificationRecovery, null, "gold had no verification -- must be n/a, not a penalized 0");
+});
+
+test("matchActions maintains one-to-one assignment: a duplicated recovered action cannot satisfy two different gold actions at once", () => {
+  const groundTruth = actionGroundTruth([
+    { id: "increaseCooling", label: "increaseCooling", primaryInputClassId: "AirHandlingUnit", preconditions: [], effect: "", verification: "" },
+    { id: "increaseCoolingSlightly", label: "increaseCoolingSlightly", primaryInputClassId: "AirHandlingUnit", preconditions: [], effect: "", verification: "" },
+  ]);
+  const recoveredActions = [{ id: "a1", name: "increaseCooling", inputClassId: "n1", preconditions: [], effect: "", verification: "" }];
+  const { gtToRecovered, recoveredToGt } = matchActions(groundTruth, recoveredActions);
+  assert.ok(gtToRecovered.size <= 1, "one recovered action cannot be credited to two different gold actions");
+  assert.equal(recoveredToGt.size, gtToRecovered.size);
+});
+
+test("computeActionMatchDetail lists a gold action as unmatched only when nothing recovered matched it", () => {
+  const groundTruth = actionGroundTruth([
+    { id: "increaseCooling", label: "increaseCooling", primaryInputClassId: "AirHandlingUnit", preconditions: [], effect: "", verification: "" },
+    { id: "enableEconomizer", label: "enableEconomizer", primaryInputClassId: "AirHandlingUnit", preconditions: [], effect: "", verification: "" },
+  ]);
+  const recoveredState = { nodes: [], edges: [], rules: [], actions: [{ id: "a1", name: "increaseCooling", inputClassId: "n1", preconditions: [], effect: "", verification: "" }] };
+  const detail = computeActionMatchDetail(groundTruth, recoveredState);
+  assert.equal(detail.unmatchedGold.length, 1);
+  assert.equal(detail.unmatchedGold[0].id, "enableEconomizer");
+});
+
+test("computeRuleMetrics and computeActionMetrics handle a domain with no rules/actions at all without crashing or producing NaN (MTSR-sourced ground truth's own real shape)", () => {
+  const groundTruth = { classes: {}, relationships: [], properties: [], rules: [], actions: [] };
+  const recoveredState = { nodes: [], edges: [], rules: [], actions: [] };
+  const ruleMetrics = computeRuleMetrics(groundTruth, []);
+  const actionMetrics = computeActionMetrics(groundTruth, recoveredState);
+  assert.ok(Number.isFinite(ruleMetrics.recall) && Number.isFinite(ruleMetrics.precision) && Number.isFinite(ruleMetrics.f1));
+  assert.ok(Number.isFinite(actionMetrics.identification.recall) && Number.isFinite(actionMetrics.identification.f1));
+  assert.equal(actionMetrics.inputClassAccuracy, null);
 });

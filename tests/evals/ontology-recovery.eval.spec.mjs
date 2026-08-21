@@ -10,8 +10,8 @@ import {
   loadGroundTruthModel, scopeGroundTruth, resolveDomainYamlPath, resolveDomainPersonaPath, listAvailableDomains,
 } from "./lib/groundTruthModel.mjs";
 import { deriveOpeningLine } from "./lib/personaAgent.mjs";
-import { computeRecoveryMetrics, computeHeuristicMatchPairs } from "./lib/recoveryMetrics.mjs";
-import { computeSemanticRecoveryMetrics } from "./lib/llmMatcher.mjs";
+import { computeRecoveryMetrics, computeHeuristicMatchPairs, computeRuleMetrics, computeActionMetrics } from "./lib/recoveryMetrics.mjs";
+import { computeSemanticRecoveryMetrics, computeSemanticRuleActionMetrics } from "./lib/llmMatcher.mjs";
 import {
   writeConversationLog, computeOperationalStats, generateLlmReview, writeReport, writeToolCallLog,
   writeRecoveredModelYaml, writeHeuristicMatches, writeSemanticJudgments, writeSemanticMatches, RESULTS_DIR,
@@ -156,6 +156,10 @@ test(
       const recoveredState = await page.evaluate(() => ({
         nodes: window.__kg.state.nodes,
         edges: window.__kg.state.edges,
+        // Issue #105: rules/actions weren't captured at all before this --
+        // no rule/action recall metric could exist without them.
+        rules: window.__kg.state.rules,
+        actions: window.__kg.state.actions,
       }));
       // The exact YAML get_graph_state itself would return, captured
       // directly rather than reconstructed by hand from tool-calls.md's
@@ -182,6 +186,15 @@ test(
       // denominator).
       writeHeuristicMatches(computeHeuristicMatchPairs(groundTruth, recoveredState), { dir: resultsDir });
 
+      // Rules/actions (issue #105) -- full domain only, same reasoning as
+      // the heuristic-matches write above: there is no separate "practical
+      // scope" denominator for rules/actions yet (scopeGroundTruth already
+      // carries groundTruth.rules through unfiltered -- see its own
+      // comment -- so a scoped pass here would currently just repeat the
+      // same numbers, not a genuinely different measurement).
+      const ruleMetrics = computeRuleMetrics(groundTruth, recoveredState.rules || []);
+      const actionMetrics = computeActionMetrics(groundTruth, recoveredState);
+
       const operationalStats = computeOperationalStats(orchestratorResult);
       writeConversationLog(orchestratorResult, { dir: resultsDir });
       writeToolCallLog(orchestratorResult.rawApiLog, { dir: resultsDir });
@@ -196,13 +209,15 @@ test(
       // best-effort scoring supplement. writeReport's own "not computed"
       // fallback note (reportGenerator.mjs) makes that degradation visible
       // in the report itself, not a silently missing section.
-      let semanticMetrics = null, semanticScopedMetrics = null;
+      let semanticMetrics = null, semanticScopedMetrics = null, semanticRuleActionMetrics = null;
       try {
         semanticMetrics = await computeSemanticRecoveryMetrics({ groundTruth, recoveredState, apiKey: OPENAI_API_KEY, model: classifierModel });
         semanticScopedMetrics = await computeSemanticRecoveryMetrics({ groundTruth: scopedGroundTruth, recoveredState, apiKey: OPENAI_API_KEY, model: classifierModel });
+        semanticRuleActionMetrics = await computeSemanticRuleActionMetrics({ groundTruth, recoveredState, apiKey: OPENAI_API_KEY, model: classifierModel });
       } catch (err) {
         semanticMetrics = null;
         semanticScopedMetrics = null;
+        semanticRuleActionMetrics = null;
       }
       writeSemanticJudgments({ fullDomain: semanticMetrics, scoped: semanticScopedMetrics }, { dir: resultsDir });
       writeSemanticMatches({ fullDomain: semanticMetrics, scoped: semanticScopedMetrics }, { dir: resultsDir });
@@ -210,6 +225,7 @@ test(
       writeReport({
         metrics, scopedMetrics, semanticMetrics, semanticScopedMetrics, operationalStats, orchestratorResult,
         llmReviewText, interviewerModel, personaModel: PERSONA_MODEL, classifierModel, dir: resultsDir,
+        ruleMetrics, actionMetrics, semanticRuleActionMetrics,
       });
       console.log(`[ontology-recovery] EVAL_DOMAIN=${EVAL_DOMAIN} results written to ${resultsDir}`);
     });

@@ -392,6 +392,54 @@ rest of the confirmed class list. Fixed by adding explicit
 don't-stop-after-one-batch, cover-everything-confirmed guidance to Phase 3,
 pinned by `tests/helper-agent-phase4.spec.mjs`.
 
+## Rules and actions (issue #105)
+
+Classes/relationships/properties above have always been scored; rules and
+actions were part of the representation from the start but had no recall
+metric at all until this issue — reported as their own dimensions,
+deliberately **not** folded into `recoveryEffectiveness`'s composite (the
+issue's own instruction: "a later issue can define a new composite once
+enough domains have been run" with this data).
+
+**Rules** (`computeRuleMetrics`/`matchRules`) are matched one-to-one on a
+weighted combination of name similarity (30%) and condition-text
+similarity (70%), gated by an independent condition-overlap floor on top
+of the combined threshold — "a rule is recovered only if the core decision
+condition is semantically equivalent; matching the name alone is
+insufficient" is a hard requirement, not just a weighting preference. Only
+`.domain.yaml`-sourced ground truth has rules at all (issue #104's own
+addition to the normalized model) — always empty, and every metric here
+degrades to 0/no-crash, for MTSR-sourced ground truth.
+
+**Actions** (`computeActionMetrics`/`matchActions`) are matched one-to-one
+on name/meaning similarity alone — deliberately *not* gated on input-class
+agreement, so a same-named action with the wrong input class still counts
+as identified, with that mismatch showing up in its own component metric
+instead. Reported separately per the issue's own list: identification
+recall/precision/F1, input-class accuracy, precondition recovery, effect
+recovery, verification recovery. Gold's own `preconditions` field is
+always resolved condition *text* by the time it reaches this layer, never
+a rule-name reference, regardless of source format — `.domain.yaml`
+resolves its own rule-name references to that rule's real conditions at
+ground-truth load time (`groundTruthModel.mjs`); the RECOVERED side's
+preconditions (real rule-id references from `window.__kg.state.actions`)
+are resolved the same way at scoring time, once a live recovered state
+exists to resolve them against. A component metric is `null`, not `0`,
+whenever the matched gold action never had that field populated in the
+first place — "do not penalize fields absent from the reference domain"
+needs a real, distinguishable "not applicable" outcome.
+
+**Semantic supplement**: `judgeRules`/`judgeActions`
+(`llmMatcher.mjs`) follow the same pairing-judge pattern as classes/
+relationships, scoped to identification only — the component metrics
+above are always computed from the heuristic pass's own matched pairs,
+never re-judged or extended by which pass did the identifying (the same
+scoping `controlledValueFidelity` already uses for its own component:
+never re-scored via the semantic *class*/*property* judge's own matches,
+only ever the heuristic `matchProperties` assignment). `report.md` renders
+this as two new sections ("Rules and actions (heuristic)" / "(semantic)"),
+present only when a run actually captured rule/action data.
+
 ## Expectation to set going in
 
 The full-domain ground truth is large, and by design a bounded, focused

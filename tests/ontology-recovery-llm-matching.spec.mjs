@@ -6,8 +6,9 @@ import {
   buildRelationshipJudgePrompt, parseRelationshipJudgeResponse,
   buildPropertyJudgePrompt, parsePropertyJudgeResponse,
   buildValueFidelityJudgePrompt, parseValueFidelityJudgeResponse,
-  judgeClasses, judgeRelationships, judgeProperties, judgeValueFidelity,
-  computeSemanticRecoveryMetrics, oneToOneMatchedIds,
+  buildRuleJudgePrompt, parseRuleJudgeResponse, buildActionJudgePrompt, parseActionJudgeResponse,
+  judgeClasses, judgeRelationships, judgeProperties, judgeValueFidelity, judgeRules, judgeActions,
+  computeSemanticRecoveryMetrics, oneToOneMatchedIds, aggregateSemanticRuleActionMetrics,
 } from "./evals/lib/llmMatcher.mjs";
 
 // This file is the LLM-judge supplement's own test file -- deliberately
@@ -181,6 +182,121 @@ test("judgeProperties skips the API call for properties with no candidate proper
 test("judgeValueFidelity skips the API call entirely when nothing was heuristically matched", async () => {
   const result = await judgeValueFidelity({ apiKey: "unused", model: "unused", matchedControlledValue: [] });
   assert.deepEqual(result, []);
+});
+
+// RULES AND ACTIONS (issue #105) -- same prompt-building/parsing +
+// pure-aggregation-function coverage as classes/relationships above; no
+// new domain fixture files needed, same as recoveryMetrics.mjs's own
+// rule/action tests.
+
+test("buildRuleJudgePrompt shows each rule's real condition text, not just its name, and instructs that name alone is insufficient", () => {
+  const gold = [{ id: "g1", label: "needsCoolingFromSetpoint", conditions: ["measured air temperature is above the applicable cooling temperature setpoint"] }];
+  const recovered = [{ id: "r1", name: "coolingCheck", conditions: ["measured air temperature is above the applicable cooling temperature setpoint"] }];
+  const { system, user } = buildRuleJudgePrompt(gold, recovered);
+  assert.match(system, /core decision condition is semantically equivalent/);
+  assert.match(system, /name\/topic.*NOT a match/);
+  assert.match(user, /needsCoolingFromSetpoint -- conditions: measured air temperature is above/);
+  assert.match(user, /coolingCheck -- conditions: measured air temperature is above/);
+});
+
+test("parseRuleJudgeResponse maps a MATCH line back to the correct gold/recovered id pair by position", () => {
+  const gold = [{ id: "g1", label: "A" }, { id: "g2", label: "B" }];
+  const recovered = [{ id: "r1", name: "X" }, { id: "r2", name: "Y" }];
+  const text = "1: MATCH 2 -- same real condition, different name\n2: NO MATCH -- no equivalent condition found";
+  const results = parseRuleJudgeResponse(text, gold, recovered);
+  assert.deepEqual(results, [
+    { goldId: "g1", recoveredId: "r2", verdict: "MATCH" },
+    { goldId: "g2", recoveredId: null, verdict: "NO MATCH" },
+  ]);
+});
+
+test("buildActionJudgePrompt includes each action's effect text, not just its name -- the signal a differently-named equivalent action can still be judged by", () => {
+  const gold = [{ id: "g1", label: "increaseCooling", effect: "the cooling path is commanded to reduce air temperature toward the cooling setpoint" }];
+  const recovered = [{ id: "r1", name: "coolMore", effect: "the cooling path is commanded to reduce air temperature toward the cooling setpoint" }];
+  const { user } = buildActionJudgePrompt(gold, recovered);
+  assert.match(user, /increaseCooling -- effect: the cooling path is commanded/);
+  assert.match(user, /coolMore -- effect: the cooling path is commanded/);
+});
+
+test("parseActionJudgeResponse maps a MATCH line back to the correct gold/recovered id pair by position", () => {
+  const gold = [{ id: "g1", label: "A" }];
+  const recovered = [{ id: "r1", name: "X" }];
+  const results = parseActionJudgeResponse("1: MATCH 1 -- same real effect, different name", gold, recovered);
+  assert.deepEqual(results, [{ goldId: "g1", recoveredId: "r1", verdict: "MATCH" }]);
+});
+
+test("judgeRules/judgeActions skip the API call entirely when either side is empty", async () => {
+  const ruleResult = await judgeRules({ apiKey: "unused", model: "unused", unmatchedGold: [{ id: "g1" }], unmatchedRecovered: [] });
+  assert.deepEqual(ruleResult, [{ goldId: "g1", recoveredId: null, verdict: "NO MATCH" }]);
+  const actionResult = await judgeActions({ apiKey: "unused", model: "unused", unmatchedGold: [{ id: "g1" }], unmatchedRecovered: [] });
+  assert.deepEqual(actionResult, [{ goldId: "g1", recoveredId: null, verdict: "NO MATCH" }]);
+});
+
+test("aggregateSemanticRuleActionMetrics: a paraphrased rule the heuristic pass genuinely cannot match is rescued by a confirmed judge verdict", () => {
+  // Zero shared tokens between gold's and the recovered rule's condition
+  // text -- a real paraphrase, not just a reworded synonym -- so the
+  // heuristic pass (token-overlap only) has no way to find this on its own.
+  // That's exactly the case the semantic supplement exists for.
+  const groundTruth = {
+    classes: {}, relationships: [], properties: [], actions: [],
+    rules: [{ id: "g1", label: "needsCoolingFromSetpoint", conditions: ["measured air temperature is above the applicable cooling temperature setpoint"] }],
+  };
+  const recoveredRules = [{ id: "r1", name: "hotterThanTarget", conditions: ["the zone feels warmer than what the occupants configured as comfortable"] }];
+  const recoveredState = { nodes: [], edges: [], rules: recoveredRules, actions: [] };
+
+  const heuristicOnly = aggregateSemanticRuleActionMetrics({ groundTruth, recoveredState, judgments: { rules: [], actions: [] } });
+  assert.equal(heuristicOnly.rules.matched, 0, "sanity: the heuristic pass alone really does miss this paraphrase");
+
+  const judged = aggregateSemanticRuleActionMetrics({
+    groundTruth, recoveredState,
+    judgments: { rules: [{ goldId: "g1", recoveredId: "r1", verdict: "MATCH" }], actions: [] },
+  });
+  assert.equal(judged.rules.matched, 1);
+  assert.equal(judged.rules.recall, 1);
+});
+
+test("aggregateSemanticRuleActionMetrics: a differently-named equivalent action the heuristic pass misses on name alone is rescued the same way", () => {
+  const groundTruth = {
+    classes: {}, relationships: [], properties: [], rules: [],
+    actions: [{ id: "g1", label: "increaseCooling", primaryInputClassId: "AirHandlingUnit", preconditions: [], effect: "the cooling path is commanded to reduce air temperature toward the cooling setpoint", verification: "" }],
+  };
+  const recoveredActions = [{ id: "r1", name: "coolMore", inputClassId: "n1", preconditions: [], effect: "the cooling path is commanded to reduce air temperature toward the cooling setpoint", verification: "" }];
+  const recoveredState = { nodes: [], edges: [], rules: [], actions: recoveredActions };
+
+  const heuristicOnly = aggregateSemanticRuleActionMetrics({ groundTruth, recoveredState, judgments: { rules: [], actions: [] } });
+  assert.equal(heuristicOnly.actions.matched, 0, "sanity: 'increaseCooling' vs 'coolMore' shares no tokens at all");
+
+  const judged = aggregateSemanticRuleActionMetrics({
+    groundTruth, recoveredState,
+    judgments: { rules: [], actions: [{ goldId: "g1", recoveredId: "r1", verdict: "MATCH" }] },
+  });
+  assert.equal(judged.actions.matched, 1);
+  assert.equal(judged.actions.recall, 1);
+  // Component metrics (input-class accuracy, precondition/effect/
+  // verification recovery) are always computed from the HEURISTIC pass's
+  // own matched pairs only, never extended by a semantic-judge-confirmed
+  // identification -- the same scoping controlledValueFidelity already
+  // uses (aggregateSemanticMetrics never re-scores a property's fidelity
+  // via the semantic property judge's own matches either, only ever the
+  // heuristic matchProperties assignment). Since the heuristic pass never
+  // matched this pair at all, there is nothing to average -- n/a, not a
+  // fabricated 0 *or* a value that only exists because a different layer
+  // found the pairing.
+  assert.equal(judged.actions.components.effectRecovery, null);
+});
+
+test("aggregateSemanticRuleActionMetrics never lowers recall below the heuristic pass -- a stored verdict about an item the heuristic pass now matches on its own is dropped, not double-counted", () => {
+  const groundTruth = {
+    classes: {}, relationships: [], properties: [], actions: [],
+    rules: [{ id: "g1", label: "needsCoolingFromSetpoint", conditions: ["measured air temperature is above the applicable cooling temperature setpoint"] }],
+  };
+  const recoveredRules = [{ id: "r1", name: "needsCoolingFromSetpoint", conditions: ["measured air temperature is above the applicable cooling temperature setpoint"] }];
+  const recoveredState = { nodes: [], edges: [], rules: recoveredRules, actions: [] };
+  // A stale verdict about the same gold rule the heuristic pass now
+  // matches on its own (e.g. from a replay after a scoring change).
+  const stale = { rules: [{ goldId: "g1", recoveredId: "r1", verdict: "MATCH" }], actions: [] };
+  const result = aggregateSemanticRuleActionMetrics({ groundTruth, recoveredState, judgments: stale });
+  assert.equal(result.rules.matched, 1, "must not double-count -- still exactly 1, not 2");
 });
 
 // LIVE ROUND-TRIP (opt-in, real OpenAI call) ------------------------------
