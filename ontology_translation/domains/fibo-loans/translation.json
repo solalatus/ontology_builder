@@ -1,0 +1,2746 @@
+{
+  "mappings": [
+    {
+      "target_path": "classes.Loan",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/Loan"
+      ],
+      "source_evidence": "\"debt instrument whereby one party extends money or credit to another party ... repaid according to the terms of the contract\"",
+      "confidence": "high",
+      "rationale": "Direct mapping of the core loan concept in scope."
+    },
+    {
+      "target_path": "classes.Loan.properties.maturityDate",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/Loan",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasMaturityDate"
+      ],
+      "source_evidence": "\"has maturity date\" and loan is a debt instrument repaid according to contract terms",
+      "confidence": "high",
+      "rationale": "Maturity date is an explicit loan-relevant attribute supported by the property and loan definition."
+    },
+    {
+      "target_path": "classes.Loan.properties.initialExchangeDate",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/Loan",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasInitialExchangeDate"
+      ],
+      "source_evidence": "\"indicates the specific date when the initial exchange of assets or funds takes place\"",
+      "confidence": "medium",
+      "rationale": "Initial funding date is an operational loan attribute grounded by the explicit property definition."
+    },
+    {
+      "target_path": "classes.Loan.properties.interestRateCap",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/Loan",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasInterestRateCap"
+      ],
+      "source_evidence": "\"upper bound (ceiling) rate ... on variable-rate debt\"",
+      "confidence": "medium",
+      "rationale": "A cap is a direct loan attribute for variable-rate arrangements."
+    },
+    {
+      "target_path": "classes.Loan.properties.firstRateChangeTermMonths",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/Loan",
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/hasFirstRateChangeTerm"
+      ],
+      "source_evidence": "\"specifies a period of time in months after origination during which the interest rate cannot change\"",
+      "confidence": "high",
+      "rationale": "The property directly describes a numeric loan attribute in months."
+    },
+    {
+      "target_path": "classes.Loan.properties.assumable",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/Loan",
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/isAssumable"
+      ],
+      "source_evidence": "\"indicates whether or not another borrower may assume the payments on this loan\"",
+      "confidence": "high",
+      "rationale": "Direct datatype property on Loan."
+    },
+    {
+      "target_path": "classes.Loan.properties.initiallyPayable",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/Loan",
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/isInitiallyPayable"
+      ],
+      "source_evidence": "\"indicates whether the obligation arising from the covered loan was ... initially payable to the financial institution\"",
+      "confidence": "medium",
+      "rationale": "Included as an explicit boolean operational attribute for loans."
+    },
+    {
+      "target_path": "classes.Loan.properties.interestOnly",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/Loan",
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/isInterestOnly"
+      ],
+      "source_evidence": "\"indicates whether the contractual terms include ... interest only payments\"",
+      "confidence": "high",
+      "rationale": "Direct boolean feature of a loan."
+    },
+    {
+      "target_path": "classes.Loan.properties.balloonPayment",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/Loan",
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/hasBalloonPayment"
+      ],
+      "source_evidence": "\"indicates whether the contractual terms include ... repayment of the outstanding principal sum at the end of a loan period\"",
+      "confidence": "high",
+      "rationale": "Direct boolean feature relevant to repayment structure."
+    },
+    {
+      "target_path": "classes.Loan.properties.negativeAmortization",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/Loan",
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/hasNegativeAmortization"
+      ],
+      "source_evidence": "\"indicates whether the contractual terms include ... unpaid interest to be added to the balance of unpaid principal\"",
+      "confidence": "high",
+      "rationale": "Direct boolean feature relevant to loan servicing and risk."
+    },
+    {
+      "target_path": "classes.Loan.properties.totalClosingCosts",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/Loan",
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/hasTotalClosingCosts"
+      ],
+      "source_evidence": "\"indicates the total amount paid at the closing of a real estate transaction\"",
+      "confidence": "medium",
+      "rationale": "Modeled as a numeric loan attribute because the source provides an explicit cost property."
+    },
+    {
+      "target_path": "classes.Loan.properties.totalPointsAndFees",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/Loan",
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/hasTotalPointsAndFees"
+      ],
+      "source_evidence": "\"indicates a form of pre-paid interest, charged by the lender\"",
+      "confidence": "medium",
+      "rationale": "Modeled as a numeric loan attribute because the source describes a measurable amount."
+    },
+    {
+      "target_path": "classes.Loan.properties.principalAmount",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/Loan",
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/hasPrincipalAmount"
+      ],
+      "source_evidence": "\"indicates the nominal amount of the loan that must be paid at or before maturity\"",
+      "confidence": "high",
+      "rationale": "Direct monetary attribute of a loan."
+    },
+    {
+      "target_path": "classes.Loan.properties.loanBalance",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/Loan",
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/hasLoanBalance"
+      ],
+      "source_evidence": "\"indicates the balance with respect to the principal on the loan as of some date\"",
+      "confidence": "medium",
+      "rationale": "Modeled as a numeric operational balance attribute for loan monitoring."
+    },
+    {
+      "target_path": "classes.CreditAgreement",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/CreditAgreement"
+      ],
+      "source_evidence": "\"contractual agreement in which a debtor receives something of value and typically agrees to repay the creditor ... generally with interest\"",
+      "confidence": "high",
+      "rationale": "Direct mapping of the broader agreement concept supporting the loan slice."
+    },
+    {
+      "target_path": "classes.CreditAgreement.properties.debtAmount",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/CreditAgreement",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasDebtAmount"
+      ],
+      "source_evidence": "\"indicates the monetary amount of the debt\" with domain CreditAgreement",
+      "confidence": "high",
+      "rationale": "Direct attribute on credit agreements from an explicitly scoped property."
+    },
+    {
+      "target_path": "classes.CreditAgreement.properties.maturityDate",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/CreditAgreement",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasMaturityDate"
+      ],
+      "source_evidence": "\"indicates the date on which the principal amount ... is due to be repaid\"",
+      "confidence": "medium",
+      "rationale": "Maturity date is a standard and explicitly modeled contract attribute for debt instruments including credit agreements."
+    },
+    {
+      "target_path": "classes.CreditAgreement.properties.initialExchangeDate",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/CreditAgreement",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasInitialExchangeDate"
+      ],
+      "source_evidence": "\"For a credit agreement, this is the initial funding date\"",
+      "confidence": "high",
+      "rationale": "The property definition explicitly names credit agreements."
+    },
+    {
+      "target_path": "classes.CreditFacility",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/CreditFacility"
+      ],
+      "source_evidence": "\"credit agreement that allows the borrower to periodically take out money over an extended period of time\"",
+      "confidence": "high",
+      "rationale": "Direct mapping of a core operational facility concept."
+    },
+    {
+      "target_path": "classes.CreditFacility.properties.availableAmount",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/CreditFacility",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasAvailableAmount"
+      ],
+      "source_evidence": "\"indicates an amount of money available ... to borrow\"",
+      "confidence": "high",
+      "rationale": "Explicitly relevant monetary attribute for facilities."
+    },
+    {
+      "target_path": "classes.CreditFacility.properties.creditLimit",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/CreditFacility",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasCreditLimit"
+      ],
+      "source_evidence": "\"specifies the maximum amount of credit that may be borrowed\"",
+      "confidence": "high",
+      "rationale": "Direct operational attribute of revolving or facility-style credit."
+    },
+    {
+      "target_path": "classes.CreditFacility.properties.amountOfCreditExtended",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/CreditFacility",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasAmountOfCreditExtended"
+      ],
+      "source_evidence": "\"specifies the gross amount of credit that has been provided to the borrower\"",
+      "confidence": "high",
+      "rationale": "Explicit facility monitoring attribute."
+    },
+    {
+      "target_path": "classes.CreditFacility.properties.maximumAdvanceAmount",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/CreditFacility",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasMaximumAdvanceAmount"
+      ],
+      "source_evidence": "\"specifies the ceiling on the amount of credit that can be drawn ... in a single request\"",
+      "confidence": "high",
+      "rationale": "Directly modeled as a numeric facility control attribute."
+    },
+    {
+      "target_path": "classes.OpenEndCredit",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/OpenEndCredit"
+      ],
+      "source_evidence": "\"credit agreement that may be extended up to an agreed credit limit ... interest is charged only on the outstanding balance\"",
+      "confidence": "high",
+      "rationale": "Direct mapping of an important operational loan subtype."
+    },
+    {
+      "target_path": "classes.OpenEndCredit.properties.creditLimit",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/OpenEndCredit",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasCreditLimit"
+      ],
+      "source_evidence": "\"There is a credit limit most of the time\"",
+      "confidence": "high",
+      "rationale": "The class definition explicitly mentions the attribute, reinforced by the credit-limit property."
+    },
+    {
+      "target_path": "classes.ClosedEndCredit",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/ClosedEndCredit"
+      ],
+      "source_evidence": "\"credit agreement in which the loan principal cannot be increased after funds are dispersed in full\"",
+      "confidence": "high",
+      "rationale": "Direct mapping of a common loan-contract subtype."
+    },
+    {
+      "target_path": "classes.Borrower",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/Borrower"
+      ],
+      "source_evidence": "\"party to a credit agreement that is obligated to repay the amount borrowed\"",
+      "confidence": "high",
+      "rationale": "Direct mapping of a central party role."
+    },
+    {
+      "target_path": "classes.Lender",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/Lender"
+      ],
+      "source_evidence": "\"party that extends credit or money to a borrower with the expectation of being repaid\"",
+      "confidence": "high",
+      "rationale": "Direct mapping of a central party role."
+    },
+    {
+      "target_path": "classes.Servicer",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/Servicer"
+      ],
+      "source_evidence": "\"party that collects principal and interest payments on behalf of the lender\"",
+      "confidence": "high",
+      "rationale": "Direct operational party role relevant to payment processing."
+    },
+    {
+      "target_path": "classes.Principal",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/Principal"
+      ],
+      "source_evidence": "\"the value of an obligation ... that must be repaid at maturity\"",
+      "confidence": "high",
+      "rationale": "Direct mapping of a core loan amount concept."
+    },
+    {
+      "target_path": "classes.Principal.properties.outstandingAmount",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/Principal",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasOutstandingAmount"
+      ],
+      "source_evidence": "\"indicates an amount of money representing the principal ... owed at a specific point in time\"",
+      "confidence": "medium",
+      "rationale": "Outstanding principal is directly supported by the generic outstanding-amount property."
+    },
+    {
+      "target_path": "classes.Interest",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/Interest"
+      ],
+      "source_evidence": "\"the cost of using credit ... payable by a debtor to a creditor\"",
+      "confidence": "high",
+      "rationale": "Direct mapping of a core loan cost concept."
+    },
+    {
+      "target_path": "classes.Interest.properties.outstandingAmount",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/Interest",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasOutstandingAmount"
+      ],
+      "source_evidence": "\"indicates an amount of money representing the principal, interest, or other amount owed\"",
+      "confidence": "medium",
+      "rationale": "Outstanding interest is explicitly within the scope of the property definition."
+    },
+    {
+      "target_path": "classes.AccruedInterest",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/AccruedInterest"
+      ],
+      "source_evidence": "\"amount of interest that has been incurred, as of a specific date ... but has not yet been paid out\"",
+      "confidence": "high",
+      "rationale": "Direct mapping of an operationally important interest state."
+    },
+    {
+      "target_path": "classes.AccruedInterest.properties.asOfDate",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/AccruedInterest"
+      ],
+      "source_evidence": "\"amount of interest ... incurred, as of a specific date\"",
+      "confidence": "medium",
+      "rationale": "The class definition itself implies an as-of date attribute."
+    },
+    {
+      "target_path": "classes.AccruedInterest.properties.amount",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/AccruedInterest"
+      ],
+      "source_evidence": "\"amount of interest that has been incurred\"",
+      "confidence": "medium",
+      "rationale": "The class definition itself implies a numeric amount attribute."
+    },
+    {
+      "target_path": "classes.FixedInterestRate",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/FixedInterestRate"
+      ],
+      "source_evidence": "\"interest rate that does not fluctuate over the lifetime of a loan\"",
+      "confidence": "high",
+      "rationale": "Direct mapping of an interest-rate subtype in scope."
+    },
+    {
+      "target_path": "classes.FixedInterestRate.properties.rate",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/FixedInterestRate"
+      ],
+      "source_evidence": "\"interest rate that does not fluctuate\"",
+      "confidence": "medium",
+      "rationale": "The class definition clearly implies the numeric rate value itself."
+    },
+    {
+      "target_path": "classes.VariableInterestRate",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/VariableInterestRate"
+      ],
+      "source_evidence": "\"an interest rate that is allowed to vary over the maturity of a loan\"",
+      "confidence": "high",
+      "rationale": "Direct mapping of an interest-rate subtype in scope."
+    },
+    {
+      "target_path": "classes.VariableInterestRate.properties.rate",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/VariableInterestRate"
+      ],
+      "source_evidence": "\"an interest rate that is allowed to vary\"",
+      "confidence": "medium",
+      "rationale": "The class definition clearly implies the numeric rate value itself."
+    },
+    {
+      "target_path": "classes.FloatingInterestRate",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/FloatingInterestRate"
+      ],
+      "source_evidence": "\"variable interest rate that is based on a specific index or benchmark rate\"",
+      "confidence": "high",
+      "rationale": "Direct mapping of a specific variable-rate subtype."
+    },
+    {
+      "target_path": "classes.FloatingInterestRate.properties.rate",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/FloatingInterestRate"
+      ],
+      "source_evidence": "\"specific interest rate\" and example calculations in the class definition",
+      "confidence": "medium",
+      "rationale": "The class definition implies the actual rate value as an operational property."
+    },
+    {
+      "target_path": "classes.ManagedInterestRate",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/ManagedInterestRate"
+      ],
+      "source_evidence": "\"variable interest rate ... set from time to time by the institution\"",
+      "confidence": "high",
+      "rationale": "Direct mapping of another variable-rate subtype relevant to lending practice."
+    },
+    {
+      "target_path": "classes.ManagedInterestRate.properties.rate",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/ManagedInterestRate"
+      ],
+      "source_evidence": "\"variable interest rate charged by a financial institution\"",
+      "confidence": "medium",
+      "rationale": "The class definition implies the numeric rate value as the main operational attribute."
+    },
+    {
+      "target_path": "classes.DayCountConvention",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/DayCountConvention"
+      ],
+      "source_evidence": "\"used to calculate the number of days in an interest payment\"",
+      "confidence": "high",
+      "rationale": "Direct mapping of a key interest-calculation concept."
+    },
+    {
+      "target_path": "classes.DebtTerms",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/DebtTerms"
+      ],
+      "source_evidence": "\"contract terms that specify the formal rights and obligations of borrower and lender\"",
+      "confidence": "high",
+      "rationale": "Direct mapping of the main contractual terms concept."
+    },
+    {
+      "target_path": "classes.InterestPaymentTerms",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/InterestPaymentTerms"
+      ],
+      "source_evidence": "\"contract terms for payment of interest on a debt\"",
+      "confidence": "high",
+      "rationale": "Direct mapping of interest-related terms."
+    },
+    {
+      "target_path": "classes.InterestPaymentTerms.properties.initialInterestAccrualDate",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/InterestPaymentTerms",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasInitialInterestAccrualDate"
+      ],
+      "source_evidence": "\"the date from which interest begins to accrue\"",
+      "confidence": "high",
+      "rationale": "Direct interest-terms attribute from an explicit property."
+    },
+    {
+      "target_path": "classes.InterestPaymentTerms.properties.initialInterestPaymentDate",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/InterestPaymentTerms",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasInitialInterestPaymentDate"
+      ],
+      "source_evidence": "\"the date on which the first interest payment is due\"",
+      "confidence": "high",
+      "rationale": "Direct interest-terms attribute from an explicit property."
+    },
+    {
+      "target_path": "classes.InterestPaymentTerms.properties.finalInterestPaymentDate",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/InterestPaymentTerms",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasFinalInterestPaymentDate"
+      ],
+      "source_evidence": "\"the date on which the last interest payment is due\"",
+      "confidence": "high",
+      "rationale": "Direct interest-terms attribute from an explicit property."
+    },
+    {
+      "target_path": "classes.InterestPaymentTerms.properties.interestPaymentFrequency",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/InterestPaymentTerms",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasInterestPaymentFrequency"
+      ],
+      "source_evidence": "\"the frequency at which interest payments must be made on the debt\"",
+      "confidence": "high",
+      "rationale": "Operational payment-timing attribute explicitly modeled in the source."
+    },
+    {
+      "target_path": "classes.InterestPaymentTerms.properties.interestPaymentDay",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/InterestPaymentTerms",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasInterestPaymentDay"
+      ],
+      "source_evidence": "\"the day of the month on which interest payments must be made\"",
+      "confidence": "high",
+      "rationale": "Operational payment-timing attribute explicitly modeled in the source."
+    },
+    {
+      "target_path": "classes.InterestPaymentTerms.properties.compoundingFrequency",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/InterestPaymentTerms",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasCompoundingFrequency"
+      ],
+      "source_evidence": "\"the frequency at which interest is added to the principal\"",
+      "confidence": "high",
+      "rationale": "Compounding frequency is an explicit interest-terms attribute."
+    },
+    {
+      "target_path": "classes.PrincipalRepaymentTerms",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/PrincipalRepaymentTerms"
+      ],
+      "source_evidence": "\"contract terms that specify requirements for repayment of the principal\"",
+      "confidence": "high",
+      "rationale": "Direct mapping of principal-repayment terms."
+    },
+    {
+      "target_path": "classes.PrincipalRepaymentTerms.properties.initialPrincipalPaymentDate",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/PrincipalRepaymentTerms",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasInitialPrincipalPaymentDate"
+      ],
+      "source_evidence": "\"the date on which the first payment against the principal is due\"",
+      "confidence": "high",
+      "rationale": "Direct repayment-timing attribute from an explicit property."
+    },
+    {
+      "target_path": "classes.PrincipalRepaymentTerms.properties.principalRepaymentDate",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/PrincipalRepaymentTerms",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasPrincipalRepaymentDate"
+      ],
+      "source_evidence": "\"the date by which the principal must be repaid in full\" with domain PrincipalRepaymentTerms",
+      "confidence": "high",
+      "rationale": "Direct repayment completion date attribute."
+    },
+    {
+      "target_path": "classes.PrincipalRepaymentTerms.properties.principalPaymentFrequency",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/PrincipalRepaymentTerms",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasPrincipalPaymentFrequency"
+      ],
+      "source_evidence": "\"the frequency at which payments on the principal must be made\"",
+      "confidence": "high",
+      "rationale": "Direct repayment schedule attribute."
+    },
+    {
+      "target_path": "classes.PrincipalRepaymentTerms.properties.principalPaymentDay",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/PrincipalRepaymentTerms",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasPrincipalPaymentDay"
+      ],
+      "source_evidence": "\"the day of the month on which payments on the principal must be made\"",
+      "confidence": "high",
+      "rationale": "Direct repayment timing attribute."
+    },
+    {
+      "target_path": "classes.PrepaymentTerms",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/PrepaymentTerms"
+      ],
+      "source_evidence": "\"principal repayment terms related to payment of the loan prior to maturity\"",
+      "confidence": "high",
+      "rationale": "Direct mapping of prepayment-specific terms."
+    },
+    {
+      "target_path": "classes.PrepaymentTerms.properties.prePaymentPenaltyTermMonths",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/PrepaymentTerms",
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/hasPrePaymentPenaltyTerm"
+      ],
+      "source_evidence": "\"period of time in months after which there is no prepayment penalty\"",
+      "confidence": "high",
+      "rationale": "Direct numeric term from the explicit property definition."
+    },
+    {
+      "target_path": "classes.Amortization",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/Amortization"
+      ],
+      "source_evidence": "\"process of reduction of debt ... through principal payments\"",
+      "confidence": "high",
+      "rationale": "Direct mapping of the repayment process concept."
+    },
+    {
+      "target_path": "classes.FullAmortization",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/FullAmortization"
+      ],
+      "source_evidence": "\"last payment ... pays off all remaining principal and interest on the loan\"",
+      "confidence": "high",
+      "rationale": "Distinct repayment pattern useful for operational reasoning."
+    },
+    {
+      "target_path": "classes.PartialAmortization",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/PartialAmortization"
+      ],
+      "source_evidence": "\"the last payment due may be a large balloon payment\"",
+      "confidence": "high",
+      "rationale": "Distinct repayment pattern useful for operational reasoning."
+    },
+    {
+      "target_path": "classes.NegativeAmortization",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/NegativeAmortization"
+      ],
+      "source_evidence": "\"payments made do not cover the interest due\"",
+      "confidence": "high",
+      "rationale": "Distinct repayment pattern useful for operational reasoning."
+    },
+    {
+      "target_path": "classes.AmortizationSchedule",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/AmortizationSchedule"
+      ],
+      "source_evidence": "\"schedule of periodic payments ... that specify changes in the balance of the debt over time\"",
+      "confidence": "high",
+      "rationale": "Direct mapping of an operational repayment schedule."
+    },
+    {
+      "target_path": "classes.AmortizationSchedule.properties.anticipatedNumberOfPayments",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/AmortizationSchedule",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasAnticipatedNumberOfPayments"
+      ],
+      "source_evidence": "\"specifies the number of payments promised per the terms of the contract\"",
+      "confidence": "medium",
+      "rationale": "Standard schedule attribute supported by the explicit datatype property."
+    },
+    {
+      "target_path": "classes.LoanPaymentSchedule",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/LoanPaymentSchedule"
+      ],
+      "source_evidence": "\"regular or explicit (ad hoc) payment schedule associated with a given loan-specific account\"",
+      "confidence": "high",
+      "rationale": "Direct mapping of a loan-specific payment schedule."
+    },
+    {
+      "target_path": "classes.LoanPaymentSchedule.properties.anticipatedNumberOfPayments",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/LoanPaymentSchedule",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasAnticipatedNumberOfPayments"
+      ],
+      "source_evidence": "\"number of payments promised per the terms of the contract\"",
+      "confidence": "medium",
+      "rationale": "A loan payment schedule naturally carries the anticipated count of payments."
+    },
+    {
+      "target_path": "classes.InterestPaymentSchedule",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/InterestPaymentSchedule"
+      ],
+      "source_evidence": "\"schedule including the dates on which interest is due to be paid\"",
+      "confidence": "high",
+      "rationale": "Direct mapping of an operational schedule concept."
+    },
+    {
+      "target_path": "classes.InterestPaymentSchedule.properties.anticipatedNumberOfPayments",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/InterestPaymentSchedule",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasAnticipatedNumberOfPayments"
+      ],
+      "source_evidence": "\"number of payments promised per the terms of the contract\"",
+      "confidence": "medium",
+      "rationale": "An anticipated payment count is an operational attribute for a payment schedule."
+    },
+    {
+      "target_path": "classes.PrincipalPaymentSchedule",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/PrincipalPaymentSchedule"
+      ],
+      "source_evidence": "\"schedule including the dates on which some percentage or all of the principal is due to be paid\"",
+      "confidence": "high",
+      "rationale": "Direct mapping of an operational schedule concept."
+    },
+    {
+      "target_path": "classes.PrincipalPaymentSchedule.properties.anticipatedNumberOfPayments",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/PrincipalPaymentSchedule",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasAnticipatedNumberOfPayments"
+      ],
+      "source_evidence": "\"number of payments promised per the terms of the contract\"",
+      "confidence": "medium",
+      "rationale": "An anticipated payment count is an operational attribute for a payment schedule."
+    },
+    {
+      "target_path": "classes.InterestCalculationSchedule",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/InterestCalculationSchedule"
+      ],
+      "source_evidence": "\"schedule including the dates on which interest is calculated\"",
+      "confidence": "high",
+      "rationale": "Direct mapping of a contract schedule relevant to interest accrual."
+    },
+    {
+      "target_path": "classes.InterestRateResetSchedule",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/InterestRateResetSchedule"
+      ],
+      "source_evidence": "\"schedule including the dates on which a rate reset ... is recalculated\"",
+      "confidence": "high",
+      "rationale": "Direct mapping of a reset schedule relevant to variable-rate loans."
+    },
+    {
+      "target_path": "classes.ExplicitContractEventSchedule",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/ExplicitContractEventSchedule"
+      ],
+      "source_evidence": "\"schedule of actual dates and events ... that are terms of the contract\"",
+      "confidence": "high",
+      "rationale": "Direct mapping of an explicit event schedule concept."
+    },
+    {
+      "target_path": "classes.Collateral",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/Collateral"
+      ],
+      "source_evidence": "\"something pledged as security to ensure fulfillment of an obligation\"",
+      "confidence": "high",
+      "rationale": "Direct mapping of a core secured-lending concept."
+    },
+    {
+      "target_path": "classes.SecurityAgreement",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/SecurityAgreement"
+      ],
+      "source_evidence": "\"collateral agreement that grants a financial interest in some collateral\"",
+      "confidence": "high",
+      "rationale": "Direct mapping of the agreement used to secure collateralized loans."
+    },
+    {
+      "target_path": "classes.CreditEnhancementAgreement",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/CreditEnhancementAgreement"
+      ],
+      "source_evidence": "\"collateral agreement that governs the exchange of collateral between parties to mitigate counterparty credit risk\"",
+      "confidence": "high",
+      "rationale": "Direct mapping of an in-scope supporting agreement concept."
+    },
+    {
+      "target_path": "classes.CreditEnhancementBeneficiary",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/CreditEnhancementBeneficiary"
+      ],
+      "source_evidence": "\"party that benefits from the collateral or guarantee established under the agreement\"",
+      "confidence": "high",
+      "rationale": "Direct mapping of the beneficiary party role in credit enhancement."
+    },
+    {
+      "target_path": "classes.PaymentHistory",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/PaymentHistory"
+      ],
+      "source_evidence": "\"record of actual payments ... made by a borrower to a lender or servicer\"",
+      "confidence": "high",
+      "rationale": "Direct mapping of payment-performance history."
+    },
+    {
+      "target_path": "classes.IndividualPaymentTransaction",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/IndividualPaymentTransaction"
+      ],
+      "source_evidence": "\"actual payment of principal, interest, fees, or other related amounts\"",
+      "confidence": "high",
+      "rationale": "Direct mapping of an individual payment record."
+    },
+    {
+      "target_path": "classes.PrincipalPayment",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/PrincipalPayment"
+      ],
+      "source_evidence": "\"event reflecting the actual payment of some amount of the principal\"",
+      "confidence": "high",
+      "rationale": "Direct mapping of a principal-payment event."
+    },
+    {
+      "target_path": "classes.InterestPayment",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/InterestPayment"
+      ],
+      "source_evidence": "\"event reflecting the actual payment of interest\"",
+      "confidence": "high",
+      "rationale": "Direct mapping of an interest-payment event."
+    },
+    {
+      "target_path": "classes.InterestCalculation",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/InterestCalculation"
+      ],
+      "source_evidence": "\"event reflecting the calculation of interest\"",
+      "confidence": "high",
+      "rationale": "Direct mapping of an interest-calculation event."
+    },
+    {
+      "target_path": "classes.InterestRateReset",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/InterestRateReset"
+      ],
+      "source_evidence": "\"event reflecting a potential adjustment to an interest rate\"",
+      "confidence": "high",
+      "rationale": "Direct mapping of a variable-rate lifecycle event."
+    },
+    {
+      "target_path": "classes.BorrowingCapacity",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/BorrowingCapacity"
+      ],
+      "source_evidence": "\"upper bound on the total amount of money that a lender believes a party has the ability to repay\"",
+      "confidence": "high",
+      "rationale": "Direct mapping of a lending assessment concept."
+    },
+    {
+      "target_path": "classes.BorrowingCapacity.properties.amount",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/BorrowingCapacity"
+      ],
+      "source_evidence": "\"upper bound on the total amount of money\"",
+      "confidence": "medium",
+      "rationale": "The class definition itself implies the numeric amount as the core attribute."
+    },
+    {
+      "target_path": "classes.LoanToValueRatio",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/LoanToValueRatio"
+      ],
+      "source_evidence": "\"ratio, expressed as a percentage, between the principal amount of the loan and the appraised value of the asset securing the financing\"",
+      "confidence": "high",
+      "rationale": "Direct mapping of a key secured-loan risk measure."
+    },
+    {
+      "target_path": "classes.LoanToValueRatio.properties.ratio",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/LoanToValueRatio"
+      ],
+      "source_evidence": "\"ratio, expressed as a percentage\"",
+      "confidence": "medium",
+      "rationale": "The class definition itself implies the numeric percentage value."
+    },
+    {
+      "target_path": "classes.CombinedLoanToValueRatio",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/CombinedLoanToValueRatio"
+      ],
+      "source_evidence": "\"ratio of the total amount of debt ... and the appraised value of the asset(s)\"",
+      "confidence": "high",
+      "rationale": "Direct mapping of a key multi-loan collateral risk measure."
+    },
+    {
+      "target_path": "classes.CombinedLoanToValueRatio.properties.ratio",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/CombinedLoanToValueRatio"
+      ],
+      "source_evidence": "\"ratio of the total amount of debt\"",
+      "confidence": "medium",
+      "rationale": "The class definition itself implies the numeric ratio value."
+    },
+    {
+      "target_path": "classes.CollateralValueAsOfDate",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/CollateralValueAsOfDate"
+      ],
+      "source_evidence": "\"appraised value of the collateral for an obligation as of a given date\"",
+      "confidence": "high",
+      "rationale": "Direct mapping of collateral valuation as-of data."
+    },
+    {
+      "target_path": "classes.CollateralValueAsOfDate.properties.asOfDate",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/CollateralValueAsOfDate"
+      ],
+      "source_evidence": "\"as of a given date\"",
+      "confidence": "medium",
+      "rationale": "The class definition itself implies the valuation date."
+    },
+    {
+      "target_path": "classes.CollateralValueAsOfDate.properties.value",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/CollateralValueAsOfDate"
+      ],
+      "source_evidence": "\"appraised value of the collateral\"",
+      "confidence": "medium",
+      "rationale": "The class definition itself implies the numeric appraised value."
+    },
+    {
+      "target_path": "classes.SecuredLoan",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/SecuredLoan"
+      ],
+      "source_evidence": "\"loan in which the borrower pledges some asset via a security agreement as collateral for the loan, or that is secured via third-party guarantee\"",
+      "confidence": "high",
+      "rationale": "Direct mapping of the secured-loan concept."
+    },
+    {
+      "target_path": "classes.CollateralizedLoan",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/CollateralizedLoan"
+      ],
+      "source_evidence": "\"secured loan that is secured with cash or other acceptable collateral\"",
+      "confidence": "high",
+      "rationale": "Direct mapping of a collateral-backed loan subtype."
+    },
+    {
+      "target_path": "classes.GuaranteedLoan",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/GuaranteedLoan"
+      ],
+      "source_evidence": "\"loan that is secured with respect to repayment of principal and interest by guaranty\"",
+      "confidence": "high",
+      "rationale": "Direct mapping of a guaranteed-loan subtype."
+    },
+    {
+      "target_path": "classes.UnsecuredLoan",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/UnsecuredLoan"
+      ],
+      "source_evidence": "\"loan granted based on the strength of the borrower's credit history or reputation\"",
+      "confidence": "high",
+      "rationale": "Direct mapping of an unsecured-loan subtype."
+    },
+    {
+      "target_path": "classes.RevolvingLineOfCredit",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/RevolvingLineOfCredit"
+      ],
+      "source_evidence": "\"enables the borrower to withdraw funds, repay, and withdraw again\"",
+      "confidence": "high",
+      "rationale": "Direct mapping of a common credit-facility subtype."
+    },
+    {
+      "target_path": "classes.CommittedCreditFacility",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/CommittedCreditFacility"
+      ],
+      "source_evidence": "\"confirmed source of financing for the borrower, as long as the borrower meets the conditions\"",
+      "confidence": "high",
+      "rationale": "Direct mapping of a facility commitment status subtype."
+    },
+    {
+      "target_path": "classes.UncommittedCreditFacility",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/UncommittedCreditFacility"
+      ],
+      "source_evidence": "\"has yet to be confirmed as a source of financing for the borrower\"",
+      "confidence": "high",
+      "rationale": "Direct mapping of a facility commitment status subtype."
+    },
+    {
+      "target_path": "classes.SubFacility",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/SubFacility"
+      ],
+      "source_evidence": "\"portion of a credit facility extended to the borrower for some purpose\"",
+      "confidence": "high",
+      "rationale": "Direct mapping of a facility subdivision concept."
+    },
+    {
+      "target_path": "classes.CommittedSubFacility",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/CommittedSubFacility"
+      ],
+      "source_evidence": "\"contractually committed portion of a credit facility\"",
+      "confidence": "high",
+      "rationale": "Direct mapping of a committed sub-facility subtype."
+    },
+    {
+      "target_path": "classes.UncommittedSubFacility",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/UncommittedSubFacility"
+      ],
+      "source_evidence": "\"sub-facility that has yet to be confirmed as a source of financing\"",
+      "confidence": "high",
+      "rationale": "Direct mapping of an uncommitted sub-facility subtype."
+    },
+    {
+      "target_path": "relationships[0]",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/Loan",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/Borrower",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasBorrower"
+      ],
+      "source_evidence": "\"relates a contract, such as a debt instrument or credit agreement, to one or more parties that are incurring the debt\"",
+      "confidence": "high",
+      "rationale": "Loan is a debt instrument, so the property supports Loan to Borrower directly."
+    },
+    {
+      "target_path": "relationships[1]",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/Loan",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/Lender",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasLender"
+      ],
+      "source_evidence": "\"relates a contract, such as a debt instrument or credit agreement, to one or more parties that are financing the debt\"",
+      "confidence": "high",
+      "rationale": "Loan is a debt instrument, so the property supports Loan to Lender directly."
+    },
+    {
+      "target_path": "relationships[2]",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/CreditAgreement",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/Borrower",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasBorrower"
+      ],
+      "source_evidence": "\"relates a contract, such as a debt instrument or credit agreement, to ... borrower\"",
+      "confidence": "high",
+      "rationale": "The property definition explicitly names credit agreements."
+    },
+    {
+      "target_path": "relationships[3]",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/CreditAgreement",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/Lender",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasLender"
+      ],
+      "source_evidence": "\"relates a contract, such as a debt instrument or credit agreement, to ... parties that are financing the debt\"",
+      "confidence": "high",
+      "rationale": "The property definition explicitly names credit agreements."
+    },
+    {
+      "target_path": "relationships[4]",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/CreditFacility",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/Borrower",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasBorrower"
+      ],
+      "source_evidence": "Standard lending practice for the specific concepts CreditFacility and Borrower, consistent with the facility definition and hasBorrower meaning.",
+      "confidence": "medium",
+      "rationale": "A credit facility is a kind of credit agreement extended to a borrower, so this pairing is standard practice grounded in the in-scope concepts."
+    },
+    {
+      "target_path": "relationships[5]",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/CreditFacility",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/Lender",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasLender"
+      ],
+      "source_evidence": "Standard lending practice for the specific concepts CreditFacility and Lender, consistent with the facility definition and hasLender meaning.",
+      "confidence": "medium",
+      "rationale": "A credit facility is financing provided by a lender, so this pairing is standard practice grounded in the in-scope concepts."
+    },
+    {
+      "target_path": "relationships[6]",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/Loan",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/Principal",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasPrincipal"
+      ],
+      "source_evidence": "\"indicates the face value of an obligation, such as a bond or loan\"",
+      "confidence": "high",
+      "rationale": "The property definition explicitly names loans as carrying principal."
+    },
+    {
+      "target_path": "relationships[7]",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/Loan",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/Interest",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasInterestRate"
+      ],
+      "source_evidence": "Standard lending practice for the specific concepts Loan and Interest, grounded by the loan definition and Interest definition as the cost payable on credit.",
+      "confidence": "medium",
+      "rationale": "Loans operationally carry an interest obligation even though the explicit source property provided is for interest rate rather than the amount concept."
+    },
+    {
+      "target_path": "relationships[8]",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/Loan",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/FixedInterestRate",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasInterestRate"
+      ],
+      "source_evidence": "\"relates something, such as an agreement, or debt instrument, to the rate ... of interest\"",
+      "confidence": "high",
+      "rationale": "Loan is a debt instrument and FixedInterestRate is a valid interest-rate subtype."
+    },
+    {
+      "target_path": "relationships[9]",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/Loan",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/VariableInterestRate",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasInterestRate"
+      ],
+      "source_evidence": "\"relates something, such as an agreement, or debt instrument, to the rate ... of interest\"",
+      "confidence": "high",
+      "rationale": "Loan is a debt instrument and VariableInterestRate is a valid interest-rate subtype."
+    },
+    {
+      "target_path": "relationships[10]",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/InterestPaymentTerms",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/DayCountConvention",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasAccrualBasis"
+      ],
+      "source_evidence": "\"identifies the convention that defines how interest accrues\" with range DayCountConvention",
+      "confidence": "high",
+      "rationale": "Interest payment terms are the in-scope contractual location where accrual basis is operationally applied."
+    },
+    {
+      "target_path": "relationships[11]",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/InterestPaymentTerms",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/Interest",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/governsPaymentOf"
+      ],
+      "source_evidence": "\"links contractual terms ... such as interest ... terms to the element those terms apply to\" plus restriction someValuesFrom Interest",
+      "confidence": "high",
+      "rationale": "The property and restriction directly support InterestPaymentTerms governing Interest."
+    },
+    {
+      "target_path": "relationships[12]",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/PrincipalRepaymentTerms",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/Principal",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/governsPaymentOf"
+      ],
+      "source_evidence": "\"links contractual terms ... such as ... repayment terms to the element those terms apply to\" plus restriction someValuesFrom Principal",
+      "confidence": "high",
+      "rationale": "The property and restriction directly support PrincipalRepaymentTerms governing Principal."
+    },
+    {
+      "target_path": "relationships[13]",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/Loan",
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/PaymentHistory",
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/hasPaymentHistory"
+      ],
+      "source_evidence": "\"relates a credit agreement, loan, or commitment to any history of payments\"",
+      "confidence": "high",
+      "rationale": "The property definition explicitly includes loans and payment history."
+    },
+    {
+      "target_path": "relationships[14]",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/PaymentHistory",
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/IndividualPaymentTransaction",
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/hasIndividualPayment"
+      ],
+      "source_evidence": "\"links an actual payment ... to the overall payment history for an account\" with domain PaymentHistory and range IndividualPaymentTransaction",
+      "confidence": "high",
+      "rationale": "Direct mapping from the explicit object property."
+    },
+    {
+      "target_path": "relationships[15]",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/Loan",
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/Servicer",
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/isServicedBy"
+      ],
+      "source_evidence": "\"relates a loan to the financial service provider that services it\"",
+      "confidence": "high",
+      "rationale": "Direct mapping from the explicit object property."
+    },
+    {
+      "target_path": "relationships[16]",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/SecuredLoan",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/Collateral",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/isCollateralizedBy"
+      ],
+      "source_evidence": "\"relates an agreement to an asset pledged as security\" with range Collateral; secured loan definition states borrower pledges some asset as collateral",
+      "confidence": "high",
+      "rationale": "SecuredLoan is the specific in-scope agreement type naturally matched to the collateralization property."
+    },
+    {
+      "target_path": "relationships[17]",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/SecurityAgreement",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/Collateral",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/isCollateralizationOf"
+      ],
+      "source_evidence": "Security agreement definition says it grants a financial interest in some collateral; collateralization property means an agreement pledging the asset as security.",
+      "confidence": "medium",
+      "rationale": "The relationship captures the security agreement's linkage to collateral using the source agreement and collateral semantics."
+    },
+    {
+      "target_path": "relationships[18]",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/CreditEnhancementAgreement",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/CreditEnhancementBeneficiary"
+      ],
+      "source_evidence": "Credit enhancement agreement restriction on hasBeneficiary some CreditEnhancementBeneficiary.",
+      "confidence": "high",
+      "rationale": "The restriction directly identifies the beneficiary role for this agreement class."
+    },
+    {
+      "target_path": "relationships[19]",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/Loan",
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/LoanPaymentSchedule"
+      ],
+      "source_evidence": "Standard lending practice for the specific concepts Loan and LoanPaymentSchedule, grounded by the schedule definition as associated with a given loan-specific account.",
+      "confidence": "medium",
+      "rationale": "A loan payment schedule is operationally associated with a loan in standard servicing practice."
+    },
+    {
+      "target_path": "relationships[20]",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/Loan",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/AmortizationSchedule"
+      ],
+      "source_evidence": "Standard lending practice for the specific concepts Loan and AmortizationSchedule, grounded by the schedule definition describing debt balance changes over time.",
+      "confidence": "medium",
+      "rationale": "Loans with amortizing repayment commonly carry an amortization schedule."
+    },
+    {
+      "target_path": "relationships[21]",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/Loan",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/InterestPaymentSchedule"
+      ],
+      "source_evidence": "Standard lending practice for the specific concepts Loan and InterestPaymentSchedule, grounded by the schedule definition for contract-specific interest payment dates.",
+      "confidence": "medium",
+      "rationale": "Interest-bearing loans commonly carry an interest payment schedule."
+    },
+    {
+      "target_path": "relationships[22]",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/Loan",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/PrincipalPaymentSchedule"
+      ],
+      "source_evidence": "Standard lending practice for the specific concepts Loan and PrincipalPaymentSchedule, grounded by the schedule definition for dates on which principal is due.",
+      "confidence": "medium",
+      "rationale": "Loans with principal repayment commonly carry a principal payment schedule."
+    },
+    {
+      "target_path": "relationships[23]",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/Loan",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/InterestCalculationSchedule"
+      ],
+      "source_evidence": "Standard lending practice for the specific concepts Loan and InterestCalculationSchedule, grounded by the schedule definition for dates on which interest is calculated.",
+      "confidence": "medium",
+      "rationale": "Interest-bearing loans commonly carry an interest calculation schedule."
+    },
+    {
+      "target_path": "relationships[24]",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/Loan",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/InterestRateResetSchedule"
+      ],
+      "source_evidence": "Standard lending practice for the specific concepts Loan and InterestRateResetSchedule, grounded by the reset schedule definition.",
+      "confidence": "medium",
+      "rationale": "Variable-rate loans commonly carry an interest rate reset schedule."
+    },
+    {
+      "target_path": "relationships[25]",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/CreditFacility",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/SubFacility",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/SubFacility"
+      ],
+      "source_evidence": "Credit facility definition says it may define sub-facilities; sub-facility definition says it is a portion of a credit facility.",
+      "confidence": "high",
+      "rationale": "Both class definitions directly support the facility-to-sub-facility relationship."
+    },
+    {
+      "target_path": "relationships[26]",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/Collateral",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/CollateralValueAsOfDate"
+      ],
+      "source_evidence": "Collateral value class definition: \"appraised value of the collateral ... as of a given date\"",
+      "confidence": "high",
+      "rationale": "The valuation class is explicitly defined as being of collateral."
+    },
+    {
+      "target_path": "relationships[27]",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/Borrower",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/BorrowingCapacity"
+      ],
+      "source_evidence": "Borrowing capacity definition says it is the amount a lender believes a party can repay; borrower is the party incurring the debt.",
+      "confidence": "medium",
+      "rationale": "Borrowing capacity is standardly assessed for borrowers in origination and underwriting."
+    },
+    {
+      "target_path": "relationships[28]",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/CollateralizedLoan",
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/LoanToValueRatio"
+      ],
+      "source_evidence": "Loan-to-value ratio is between the principal amount of the loan and the appraised value of the asset securing the financing.",
+      "confidence": "high",
+      "rationale": "The ratio directly applies to collateralized loans by definition."
+    },
+    {
+      "target_path": "relationships[29]",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/CollateralizedLoan",
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/CombinedLoanToValueRatio"
+      ],
+      "source_evidence": "Combined loan-to-value ratio is important for secondary loans or refinancing involving multiple loans against a given asset.",
+      "confidence": "high",
+      "rationale": "The ratio directly applies to collateralized-loan scenarios involving secured assets."
+    },
+    {
+      "target_path": "rules.loanRequiresBorrowerAndLender",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/Loan",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/Borrower",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/Lender",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasBorrower",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasLender"
+      ],
+      "source_evidence": "Standard lending practice for the specific concepts Loan, Borrower, and Lender: a usable loan record must identify both parties.",
+      "confidence": "high",
+      "rationale": "Operationally, a loan cannot be administered without identifying borrower and lender."
+    },
+    {
+      "target_path": "rules.interestBearingLoanNeedsInterestTerms",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/Loan",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/InterestPaymentTerms",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/Interest",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/FixedInterestRate",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/VariableInterestRate",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/governsPaymentOf",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasInterestRate"
+      ],
+      "source_evidence": "Standard lending practice for the specific concepts Loan, interest rate, and interest payment terms: if interest is charged, the governing interest terms must be identified.",
+      "confidence": "high",
+      "rationale": "Operational servicing of an interest-bearing loan requires both a rate and the terms governing interest payment."
+    },
+    {
+      "target_path": "rules.securedLoanNeedsCollateral",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/SecuredLoan",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/Collateral",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/isCollateralizedBy"
+      ],
+      "source_evidence": "Secured loan definition says the borrower pledges some asset as collateral; isCollateralizedBy relates an agreement to an asset pledged as security.",
+      "confidence": "high",
+      "rationale": "A secured-loan record is incomplete without the collateral that secures it."
+    },
+    {
+      "target_path": "rules.paymentHistoryContainsPayments",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/Loan",
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/PaymentHistory",
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/IndividualPaymentTransaction",
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/hasPaymentHistory",
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/hasIndividualPayment"
+      ],
+      "source_evidence": "Payment history is a record of actual payments, and hasIndividualPayment links those actual payments to the history.",
+      "confidence": "high",
+      "rationale": "Operationally, a payment history should contain individual payment records."
+    },
+    {
+      "target_path": "rules.variableRateLoanNeedsResetTerms",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/Loan",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/VariableInterestRate",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/InterestRateResetSchedule",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/FloatingInterestRate"
+      ],
+      "source_evidence": "Floating interest rate definition says resets typically involve periodic reset dates; interest rate reset schedule defines the dates on which a rate reset is recalculated.",
+      "confidence": "high",
+      "rationale": "Variable-rate loans operationally need reset scheduling information."
+    },
+    {
+      "target_path": "rules.prepaymentPenaltyRequiresPrepaymentTerms",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/Loan",
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/PrepaymentTerms",
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/hasPrePaymentPenaltyTerm"
+      ],
+      "source_evidence": "Prepayment terms include any prepayment penalty period, and hasPrePaymentPenaltyTerm gives the period in months.",
+      "confidence": "high",
+      "rationale": "A recorded prepayment penalty requires corresponding prepayment terms to interpret it."
+    },
+    {
+      "target_path": "rules.amortizingLoanNeedsRepaymentSchedule",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/Loan",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/AmortizationSchedule",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/PrincipalRepaymentTerms",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/Principal",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/governsPaymentOf"
+      ],
+      "source_evidence": "Amortization schedule specifies changes in debt balance over time, and principal repayment terms govern payment of principal.",
+      "confidence": "high",
+      "rationale": "Amortizing loans need both schedule and governing repayment terms for operational administration."
+    },
+    {
+      "target_path": "actions.assessLoanReadiness",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/Loan",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/Borrower",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/Lender",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/InterestPaymentTerms"
+      ],
+      "source_evidence": "Standard lending practice for the specific concepts Loan, Borrower, Lender, and InterestPaymentTerms: core setup review confirms parties and essential terms before downstream processing.",
+      "confidence": "medium",
+      "rationale": "This action operationalizes standard completeness checks using the included concepts."
+    },
+    {
+      "target_path": "actions.verifySecuredLoanSupport",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/SecuredLoan",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/Collateral",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/isCollateralizedBy"
+      ],
+      "source_evidence": "Standard lending practice for the specific concepts SecuredLoan and Collateral: secured-loan review verifies the pledged collateral is recorded.",
+      "confidence": "high",
+      "rationale": "This action operationalizes validation of secured-loan support already modeled in the ontology."
+    },
+    {
+      "target_path": "actions.reviewVariableRateSetup",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/Loan",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/VariableInterestRate",
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/InterestRateResetSchedule"
+      ],
+      "source_evidence": "Standard lending practice for the specific concepts Loan, VariableInterestRate, and InterestRateResetSchedule: variable-rate setup review checks reset scheduling.",
+      "confidence": "high",
+      "rationale": "This action reflects routine review of variable-rate loan terms."
+    },
+    {
+      "target_path": "actions.reviewPaymentRecordCompleteness",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/Loan",
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/PaymentHistory",
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/IndividualPaymentTransaction"
+      ],
+      "source_evidence": "Standard lending practice for the specific concepts Loan, PaymentHistory, and IndividualPaymentTransaction: payment record review confirms history entries exist.",
+      "confidence": "high",
+      "rationale": "This action operationalizes completeness checking for payment servicing records."
+    },
+    {
+      "target_path": "actions.reviewPrepaymentTerms",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/Loan",
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/PrepaymentTerms",
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/hasPrePaymentPenaltyTerm"
+      ],
+      "source_evidence": "Standard lending practice for the specific concepts Loan and PrepaymentTerms: prepayment review confirms penalty timing is recorded when applicable.",
+      "confidence": "high",
+      "rationale": "This action operationalizes review of prepayment penalty information for loan administration."
+    },
+    {
+      "target_path": "classes.Accrual",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/Accrual"
+      ],
+      "source_evidence": "\"the process of accumulating interest or other income that has been earned but not paid\"; \"There are legal contractual terms for the accrual of interest, as distinct from the payment of interest.\"",
+      "confidence": "high",
+      "rationale": "The source definition directly identifies accrual as a distinct debt-contract process with contractual relevance."
+    },
+    {
+      "target_path": "classes.InterestRateSettingEvent",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/InterestRateSettingEvent"
+      ],
+      "source_evidence": "\"event on which an initial rate for a given contract is set, which may be relative the the occurrence of some other contract lifecycle event, such as the execution date\"",
+      "confidence": "high",
+      "rationale": "The source definition directly identifies a distinct operational lifecycle event for establishing the initial contract rate."
+    },
+    {
+      "target_path": "relationships[30]",
+      "source_iris": [
+        "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/InterestRateSettingEvent",
+        "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/Loan"
+      ],
+      "source_evidence": "\"event on which an initial rate for a given contract is set\"",
+      "confidence": "medium",
+      "rationale": "Because the event is defined as occurring for a given contract, linking it to a loan follows the same loan-to-rate-timing pattern already used for rate-reset scheduling in the domain."
+    }
+  ],
+  "dispositions": [
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/Accrual",
+      "disposition": "mapped",
+      "note": "mapped to classes.Accrual"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/AccruedInterest",
+      "disposition": "mapped",
+      "note": "classes.AccruedInterest"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/Amortization",
+      "disposition": "mapped",
+      "note": "classes.Amortization"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/AmortizationSchedule",
+      "disposition": "mapped",
+      "note": "classes.AmortizationSchedule"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/Borrower",
+      "disposition": "mapped",
+      "note": "classes.Borrower"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/BorrowerIdentificationScheme",
+      "disposition": "out_of_scope",
+      "note": "identifier scheme omitted from coherent loan-contract operational slice"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/BorrowerIdentifier",
+      "disposition": "out_of_scope",
+      "note": "identifier artifact omitted from coherent loan-contract operational slice"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/BorrowingCapacity",
+      "disposition": "mapped",
+      "note": "classes.BorrowingCapacity"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/CapitalLease",
+      "disposition": "out_of_scope",
+      "note": "lease-specific subtype outside selected loan slice"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/Collateral",
+      "disposition": "mapped",
+      "note": "classes.Collateral"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/CollateralValueAsOfDate",
+      "disposition": "mapped",
+      "note": "classes.CollateralValueAsOfDate"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/CommittedCreditFacility",
+      "disposition": "mapped",
+      "note": "classes.CommittedCreditFacility"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/CommittedSubFacility",
+      "disposition": "mapped",
+      "note": "classes.CommittedSubFacility"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/CreditAgreement",
+      "disposition": "mapped",
+      "note": "classes.CreditAgreement"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/CreditAgreementRepaidAtMaturity",
+      "disposition": "taxonomy_only",
+      "note": "used to interpret repayment patterns, not surfaced separately"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/CreditAgreementRepaidPeriodically",
+      "disposition": "taxonomy_only",
+      "note": "This class describes a repayment-pattern subtype of credit agreement, but in this domain that operational content is already represented through repayment and payment-structure classes such as PrincipalRepaymentTerms, InterestPaymentTerms, LoanPaymentSchedule, PrincipalPaymentSchedule, and AmortizationSchedule, together with product-form classes like ClosedEndCredit and OpenEndCredit. Surfacing an additional class for agreements \"repaid periodically\" would mainly restate that those schedules/terms exist, without adding a distinct participant, asset, calculation, or event role beyond the structures already modeled."
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/CreditEnhancementAgreement",
+      "disposition": "mapped",
+      "note": "classes.CreditEnhancementAgreement"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/CreditEnhancementBeneficiary",
+      "disposition": "mapped",
+      "note": "classes.CreditEnhancementBeneficiary"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/CreditFacility",
+      "disposition": "mapped",
+      "note": "classes.CreditFacility"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/Creditor",
+      "disposition": "taxonomy_only",
+      "note": "broader role interpreted through Lender in this slice"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/DayCountConvention",
+      "disposition": "mapped",
+      "note": "classes.DayCountConvention"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/Debt",
+      "disposition": "out_of_scope",
+      "note": "broader obligation concept omitted in favor of loan-specific concepts"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/DebtTerms",
+      "disposition": "mapped",
+      "note": "classes.DebtTerms"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/Debtor",
+      "disposition": "taxonomy_only",
+      "note": "broader role interpreted through Borrower in this slice"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/ExplicitContractEventSchedule",
+      "disposition": "mapped",
+      "note": "classes.ExplicitContractEventSchedule"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/FixedInterestRate",
+      "disposition": "mapped",
+      "note": "classes.FixedInterestRate"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/FloatingInterestRate",
+      "disposition": "mapped",
+      "note": "classes.FloatingInterestRate"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/FullAmortization",
+      "disposition": "mapped",
+      "note": "classes.FullAmortization"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/Interest",
+      "disposition": "mapped",
+      "note": "classes.Interest"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/InterestCalculation",
+      "disposition": "mapped",
+      "note": "classes.InterestCalculation"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/InterestCalculationSchedule",
+      "disposition": "mapped",
+      "note": "classes.InterestCalculationSchedule"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/InterestPayment",
+      "disposition": "mapped",
+      "note": "classes.InterestPayment"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/InterestPaymentSchedule",
+      "disposition": "mapped",
+      "note": "classes.InterestPaymentSchedule"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/InterestPaymentTerms",
+      "disposition": "mapped",
+      "note": "classes.InterestPaymentTerms"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/InterestRateReset",
+      "disposition": "mapped",
+      "note": "classes.InterestRateReset"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/InterestRateResetSchedule",
+      "disposition": "mapped",
+      "note": "classes.InterestRateResetSchedule"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/InterestRateSettingEvent",
+      "disposition": "mapped",
+      "note": "mapped to classes.InterestRateSettingEvent"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/Lease",
+      "disposition": "out_of_scope",
+      "note": "lease agreement branch excluded from requested loan-contract slice"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/Lender",
+      "disposition": "mapped",
+      "note": "classes.Lender"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/ManagedInterestRate",
+      "disposition": "mapped",
+      "note": "classes.ManagedInterestRate"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/MotorVehicleLease",
+      "disposition": "out_of_scope",
+      "note": "lease-specific subtype outside selected loan slice"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/NegativeAmortization",
+      "disposition": "mapped",
+      "note": "classes.NegativeAmortization"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/NonPhysicalCollateral",
+      "disposition": "taxonomy_only",
+      "note": "collateral subtype not needed as separate class in the simplified target"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/PartialAmortization",
+      "disposition": "mapped",
+      "note": "classes.PartialAmortization"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/PhysicalCollateral",
+      "disposition": "taxonomy_only",
+      "note": "collateral subtype not needed as separate class in the simplified target"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/Principal",
+      "disposition": "mapped",
+      "note": "classes.Principal"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/PrincipalPayment",
+      "disposition": "mapped",
+      "note": "classes.PrincipalPayment"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/PrincipalPaymentSchedule",
+      "disposition": "mapped",
+      "note": "classes.PrincipalPaymentSchedule"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/PrincipalRepaymentTerms",
+      "disposition": "mapped",
+      "note": "classes.PrincipalRepaymentTerms"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/ProjectedContractEventSchedule",
+      "disposition": "taxonomy_only",
+      "note": "generic parent schedule used for interpretation only"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/RateResetTimeOfDay",
+      "disposition": "out_of_scope",
+      "note": "time-of-day detail omitted from simplified operational slice"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/RetailCreditFacility",
+      "disposition": "out_of_scope",
+      "note": "industry-specific subtype omitted for concise slice"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/RevolvingLineOfCredit",
+      "disposition": "mapped",
+      "note": "classes.RevolvingLineOfCredit"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/SecurityAgreement",
+      "disposition": "mapped",
+      "note": "classes.SecurityAgreement"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/SubFacility",
+      "disposition": "mapped",
+      "note": "classes.SubFacility"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/UncommittedCreditFacility",
+      "disposition": "mapped",
+      "note": "classes.UncommittedCreditFacility"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/UncommittedSubFacility",
+      "disposition": "mapped",
+      "note": "classes.UncommittedSubFacility"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/VariableInterestRate",
+      "disposition": "mapped",
+      "note": "classes.VariableInterestRate"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FND/Agreements/Contracts/CollateralAgreement",
+      "disposition": "taxonomy_only",
+      "note": "generic imported agreement class used only to interpret security and enhancement agreements"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/ClosedEndCredit",
+      "disposition": "mapped",
+      "note": "classes.ClosedEndCredit"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/CollateralizedLoan",
+      "disposition": "mapped",
+      "note": "classes.CollateralizedLoan"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/Comaker",
+      "disposition": "out_of_scope",
+      "note": "third-party signer role omitted to keep party model focused on borrower/lender/servicer"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/CombinedLoanToValueRatio",
+      "disposition": "mapped",
+      "note": "classes.CombinedLoanToValueRatio"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/GuaranteedLoan",
+      "disposition": "mapped",
+      "note": "classes.GuaranteedLoan"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/IndividualPaymentTransaction",
+      "disposition": "mapped",
+      "note": "classes.IndividualPaymentTransaction"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/LenderLienPosition",
+      "disposition": "out_of_scope",
+      "note": "classifier detail omitted from simplified operational slice"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/Loan",
+      "disposition": "mapped",
+      "note": "classes.Loan"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/LoanPaymentSchedule",
+      "disposition": "mapped",
+      "note": "classes.LoanPaymentSchedule"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/LoanSpecificCustomerAccount",
+      "disposition": "out_of_scope",
+      "note": "accounting/account linkage omitted from contract-focused slice"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/LoanToValueRatio",
+      "disposition": "mapped",
+      "note": "classes.LoanToValueRatio"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/OpenEndCredit",
+      "disposition": "mapped",
+      "note": "classes.OpenEndCredit"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/OwnershipInterest",
+      "disposition": "out_of_scope",
+      "note": "classifier detail omitted from simplified operational slice"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/PaymentHistory",
+      "disposition": "mapped",
+      "note": "classes.PaymentHistory"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/PrepaymentTerms",
+      "disposition": "mapped",
+      "note": "classes.PrepaymentTerms"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/SecuredLoan",
+      "disposition": "mapped",
+      "note": "classes.SecuredLoan"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/Servicer",
+      "disposition": "mapped",
+      "note": "classes.Servicer"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/TotalOutstandingPrincipal",
+      "disposition": "out_of_scope",
+      "note": "specialized aggregate principal measure omitted in favor of simpler principal attributes"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/UnsecuredLoan",
+      "disposition": "mapped",
+      "note": "classes.UnsecuredLoan"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/governsPaymentOf",
+      "disposition": "mapped",
+      "note": "relationships[11], relationships[12]"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasAccrualBasis",
+      "disposition": "mapped",
+      "note": "relationships[10]"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasAmountOfCreditExtended",
+      "disposition": "mapped",
+      "note": "classes.CreditFacility.properties.amountOfCreditExtended"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasAvailableAmount",
+      "disposition": "mapped",
+      "note": "classes.CreditFacility.properties.availableAmount"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasBorrower",
+      "disposition": "mapped",
+      "note": "relationships[0], relationships[2], relationships[4]"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasCompoundingFrequency",
+      "disposition": "mapped",
+      "note": "classes.InterestPaymentTerms.properties.compoundingFrequency"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasCreditLimit",
+      "disposition": "mapped",
+      "note": "classes.CreditFacility.properties.creditLimit, classes.OpenEndCredit.properties.creditLimit"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasDebtAmount",
+      "disposition": "mapped",
+      "note": "classes.CreditAgreement.properties.debtAmount"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasDenomination",
+      "disposition": "out_of_scope",
+      "note": "currency denomination bookkeeping omitted from simplified target"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasFinalInterestPaymentDate",
+      "disposition": "mapped",
+      "note": "classes.InterestPaymentTerms.properties.finalInterestPaymentDate"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasInitialExchangeDate",
+      "disposition": "mapped",
+      "note": "classes.Loan.properties.initialExchangeDate, classes.CreditAgreement.properties.initialExchangeDate"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasInitialInterestAccrualDate",
+      "disposition": "mapped",
+      "note": "classes.InterestPaymentTerms.properties.initialInterestAccrualDate"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasInitialInterestPaymentDate",
+      "disposition": "mapped",
+      "note": "classes.InterestPaymentTerms.properties.initialInterestPaymentDate"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasInitialPrincipalPaymentDate",
+      "disposition": "mapped",
+      "note": "classes.PrincipalRepaymentTerms.properties.initialPrincipalPaymentDate"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasInterestPaymentDay",
+      "disposition": "mapped",
+      "note": "classes.InterestPaymentTerms.properties.interestPaymentDay"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasInterestPaymentFrequency",
+      "disposition": "mapped",
+      "note": "classes.InterestPaymentTerms.properties.interestPaymentFrequency"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasInterestRate",
+      "disposition": "mapped",
+      "note": "relationships[8], relationships[9]"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasInterestRateCap",
+      "disposition": "mapped",
+      "note": "classes.Loan.properties.interestRateCap"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasLender",
+      "disposition": "mapped",
+      "note": "relationships[1], relationships[3], relationships[5]"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasMaturityDate",
+      "disposition": "mapped",
+      "note": "classes.Loan.properties.maturityDate, classes.CreditAgreement.properties.maturityDate"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasMaximumAdvanceAmount",
+      "disposition": "mapped",
+      "note": "classes.CreditFacility.properties.maximumAdvanceAmount"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasOriginalTimeToMaturity",
+      "disposition": "out_of_scope",
+      "note": "duration-to-maturity omitted to keep date model simple"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasOutstandingAmount",
+      "disposition": "mapped",
+      "note": "classes.Principal.properties.outstandingAmount, classes.Interest.properties.outstandingAmount"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasPrincipal",
+      "disposition": "mapped",
+      "note": "relationships[6]"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasPrincipalPaymentDay",
+      "disposition": "mapped",
+      "note": "classes.PrincipalRepaymentTerms.properties.principalPaymentDay"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasPrincipalPaymentFrequency",
+      "disposition": "mapped",
+      "note": "classes.PrincipalRepaymentTerms.properties.principalPaymentFrequency"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasPrincipalRepaymentDate",
+      "disposition": "mapped",
+      "note": "classes.PrincipalRepaymentTerms.properties.principalRepaymentDate"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/isAmortizationOf",
+      "disposition": "unsupported_by_target_model",
+      "note": "source property lacks an in-scope honest endpoint pair in the simplified model"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/isBasedOn",
+      "disposition": "unsupported_by_target_model",
+      "note": "too generic to translate honestly into a specific simplified relationship"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/isCollateralizationOf",
+      "disposition": "mapped",
+      "note": "relationships[17]"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/isCollateralizedBy",
+      "disposition": "mapped",
+      "note": "relationships[16]"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/isInterestOn",
+      "disposition": "out_of_scope",
+      "note": "would require broader Debt class endpoint omitted from this slice"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/isOwed",
+      "disposition": "out_of_scope",
+      "note": "requires broader Debt/Creditor modeling omitted in favor of loan-specific roles"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/isOwedBy",
+      "disposition": "out_of_scope",
+      "note": "requires broader Debt/Debtor modeling omitted in favor of loan-specific roles"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/isOwedTo",
+      "disposition": "out_of_scope",
+      "note": "requires broader Debt/Creditor modeling omitted in favor of loan-specific roles"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/isPrincipalOf",
+      "disposition": "out_of_scope",
+      "note": "would require broader Debt class endpoint omitted from this slice"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/owes",
+      "disposition": "out_of_scope",
+      "note": "requires broader Debt/Debtor modeling omitted in favor of loan-specific roles"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/hasCost",
+      "disposition": "out_of_scope",
+      "note": "generic cost relation omitted because more specific loan cost properties were included instead"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/hasFirstRateChangeTerm",
+      "disposition": "mapped",
+      "note": "classes.Loan.properties.firstRateChangeTermMonths"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/hasIndividualPayment",
+      "disposition": "mapped",
+      "note": "relationships[14]"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/hasLoanBalance",
+      "disposition": "mapped",
+      "note": "classes.Loan.properties.loanBalance"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/hasPaymentHistory",
+      "disposition": "mapped",
+      "note": "relationships[13]"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/hasPrePaymentPenaltyTerm",
+      "disposition": "mapped",
+      "note": "classes.PrepaymentTerms.properties.prePaymentPenaltyTermMonths"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/hasPrincipalAmount",
+      "disposition": "mapped",
+      "note": "classes.Loan.properties.principalAmount"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/hasScheduledUnpaidBalance",
+      "disposition": "out_of_scope",
+      "note": "balance-object endpoint absent from extracted in-scope classes"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/hasTotalClosingCosts",
+      "disposition": "mapped",
+      "note": "classes.Loan.properties.totalClosingCosts"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/hasTotalPointsAndFees",
+      "disposition": "mapped",
+      "note": "classes.Loan.properties.totalPointsAndFees"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/isServicedBy",
+      "disposition": "mapped",
+      "note": "relationships[15]"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasAnticipatedNumberOfPayments",
+      "disposition": "mapped",
+      "note": "classes.AmortizationSchedule.properties.anticipatedNumberOfPayments, classes.LoanPaymentSchedule.properties.anticipatedNumberOfPayments, classes.InterestPaymentSchedule.properties.anticipatedNumberOfPayments, classes.PrincipalPaymentSchedule.properties.anticipatedNumberOfPayments"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/hasBalloonPayment",
+      "disposition": "mapped",
+      "note": "classes.Loan.properties.balloonPayment"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/hasNegativeAmortization",
+      "disposition": "mapped",
+      "note": "classes.Loan.properties.negativeAmortization"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/isAssumable",
+      "disposition": "mapped",
+      "note": "classes.Loan.properties.assumable"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/isInitiallyPayable",
+      "disposition": "mapped",
+      "note": "classes.Loan.properties.initiallyPayable"
+    },
+    {
+      "source_iri": "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/isInterestOnly",
+      "disposition": "mapped",
+      "note": "classes.Loan.properties.interestOnly"
+    },
+    {
+      "source_iri": "N00f43495483d45458bd6e9af783a9ca3",
+      "disposition": "unsupported_by_target_model",
+      "note": "generic OWL restriction not translated directly"
+    },
+    {
+      "source_iri": "N0504ca4c250b4a2eb6c2d5b7a3aca50c",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction used only as background evidence for collateral valuation meaning"
+    },
+    {
+      "source_iri": "N05656129d842463b9de586ec998b48a2",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL restriction not translated directly"
+    },
+    {
+      "source_iri": "N059bbb50bfdc4a849d291a6bcb223894",
+      "disposition": "not_agent_relevant",
+      "note": "business center restriction from imported infrastructure not relevant to loan-contract slice"
+    },
+    {
+      "source_iri": "N087bd47fa9fe4604873a6e59bbea18d4",
+      "disposition": "unsupported_by_target_model",
+      "note": "cardinality axiom not translated directly"
+    },
+    {
+      "source_iri": "N0a0a8babdb6c452b84c1a42e969e8187",
+      "disposition": "unsupported_by_target_model",
+      "note": "generic contractual element restriction not translated directly"
+    },
+    {
+      "source_iri": "N0c820f957d814b568bdafc062c5ebf6e",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction on omitted broader Debt model"
+    },
+    {
+      "source_iri": "N111fed4e547346a1821ef3f266e40715",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction merely tags a mapped source property"
+    },
+    {
+      "source_iri": "N118acc4c7c714dd4a0c107c330afb1d7",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction used as evidence for mapped beneficiary relationship but not translated itself"
+    },
+    {
+      "source_iri": "N152077f8d0da4ddc8328e6f687adeace",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL restriction not translated directly"
+    },
+    {
+      "source_iri": "N18ea7adebd874042b603268909cc4dc5",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction on omitted broader Debt/Debtor model"
+    },
+    {
+      "source_iri": "N1b6b95f3d30642e2ab028754c03049b0",
+      "disposition": "unsupported_by_target_model",
+      "note": "occurrence restriction not translated directly into target relationships"
+    },
+    {
+      "source_iri": "N1dd69061e51348f2a2bb7e62310aec02",
+      "disposition": "not_agent_relevant",
+      "note": "generic legal-person applicability restriction outside selected slice"
+    },
+    {
+      "source_iri": "N20ce17c23a104383b92a4e4db1678bf6",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL restriction not translated directly"
+    },
+    {
+      "source_iri": "N23e21b40aac34121b907586db29df77d",
+      "disposition": "not_agent_relevant",
+      "note": "currency infrastructure restriction omitted"
+    },
+    {
+      "source_iri": "N28a6ceaee1184840bc2fdee3e9c903d1",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL restriction not translated directly"
+    },
+    {
+      "source_iri": "N29064b484b3b43e0bd533f6cf31bd7f4",
+      "disposition": "unsupported_by_target_model",
+      "note": "embedded restriction node used only for role interpretation"
+    },
+    {
+      "source_iri": "N2a48107858f44268a1b391dde31d2386",
+      "disposition": "unsupported_by_target_model",
+      "note": "OWL restriction not translated directly"
+    },
+    {
+      "source_iri": "N2c89aec97385425fba652797b62eaeaa",
+      "disposition": "not_agent_relevant",
+      "note": "identifier cardinality bookkeeping"
+    },
+    {
+      "source_iri": "N2cb904881c0144adb8a8977de2e9577e",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction merely tags a mapped source property"
+    },
+    {
+      "source_iri": "N2dd1351018274d54ac744a26ee3f6fec",
+      "disposition": "not_agent_relevant",
+      "note": "legal-person role-playing axiom omitted"
+    },
+    {
+      "source_iri": "N33720bbf411a49289307ca7fa7b4c39e",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction merely tags a mapped source property"
+    },
+    {
+      "source_iri": "N3400557ecfdb4f94a1212f363a5f5f37",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction used only as background support for mapped prepayment term property"
+    },
+    {
+      "source_iri": "N363ac82cff174748aa017abfa56267ae",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction merely tags a mapped source property"
+    },
+    {
+      "source_iri": "N381e94d0368243c0bf30e205678c4922",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction merely tags a mapped source property"
+    },
+    {
+      "source_iri": "N39b20797366049e585d162f1fda6876e",
+      "disposition": "unsupported_by_target_model",
+      "note": "generic contractual element restriction used only as background evidence"
+    },
+    {
+      "source_iri": "N3a6d68d1698d41cd8f6268c11c3cfa60",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction on omitted broader Debt model"
+    },
+    {
+      "source_iri": "N3d418a0aa8bd45a9a76f64676084a960",
+      "disposition": "out_of_scope",
+      "note": "lien position classifier restriction omitted with classifier"
+    },
+    {
+      "source_iri": "N3dbd6e72dd424227a422f0ffee785fda",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction on omitted broader Debt model"
+    },
+    {
+      "source_iri": "N3f9fa6cddac9468b94ad1863271b78ee",
+      "disposition": "unsupported_by_target_model",
+      "note": "embedded role restriction not translated directly"
+    },
+    {
+      "source_iri": "N3fff2138e07c466c90229994020c97ae",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction merely tags a mapped source property"
+    },
+    {
+      "source_iri": "N46d40100a8194ccea67c47cc54cee54b",
+      "disposition": "out_of_scope",
+      "note": "primary-contract linkage to generic collateral agreement omitted from simplified model"
+    },
+    {
+      "source_iri": "N475dc8863ae94eaabce2e9a2dd86d49a",
+      "disposition": "not_agent_relevant",
+      "note": "generic collection restriction not translated"
+    },
+    {
+      "source_iri": "N48dd1aff79e444be8464754149abd294",
+      "disposition": "out_of_scope",
+      "note": "organization management restriction outside slice"
+    },
+    {
+      "source_iri": "N49ab723445e74ce2acab70677e9a31e4",
+      "disposition": "out_of_scope",
+      "note": "guarantor relation omitted because guarantor class not present in extracted in-scope classes"
+    },
+    {
+      "source_iri": "N4e64e9852763452f93be0f61800858c9",
+      "disposition": "not_agent_relevant",
+      "note": "definition bookkeeping cardinality"
+    },
+    {
+      "source_iri": "N4e785b60787a4fcdb5a89bb546b01a70",
+      "disposition": "not_agent_relevant",
+      "note": "generic collection restriction not translated"
+    },
+    {
+      "source_iri": "N517a31378e5645c7b7d75a49296fc81f",
+      "disposition": "out_of_scope",
+      "note": "provider restriction references unnamed blank-node support concept outside slice"
+    },
+    {
+      "source_iri": "N52f2690c2d0d4acf9dadd35db3c6a86c",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction merely tags a mapped source property"
+    },
+    {
+      "source_iri": "N55f2bac0c33e40efa0cc8d97e0cc7ad5",
+      "disposition": "not_agent_relevant",
+      "note": "currency amount infrastructure restriction"
+    },
+    {
+      "source_iri": "N5830c2ac7e9240ee99bb602703331ef2",
+      "disposition": "unsupported_by_target_model",
+      "note": "used only as background evidence for as-of date meaning"
+    },
+    {
+      "source_iri": "N58e06916c1d44cdc86d27a16e3557ddb",
+      "disposition": "out_of_scope",
+      "note": "assessment report evidence relation omitted from simplified target"
+    },
+    {
+      "source_iri": "N5d003eda43854b0ca144994cd416ff6e",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction merely reinforces mapped maturity-date property"
+    },
+    {
+      "source_iri": "N5ea63b21695644ebb61b29440132978a",
+      "disposition": "unsupported_by_target_model",
+      "note": "used only as background evidence for collateral value meaning"
+    },
+    {
+      "source_iri": "N619ac50cf8c44d18b42fd37f0b9ee16b",
+      "disposition": "out_of_scope",
+      "note": "ownership-interest classifier restriction omitted with classifier"
+    },
+    {
+      "source_iri": "N64dc05f954d04d448fa6ca1c9008c574",
+      "disposition": "out_of_scope",
+      "note": "customer-account applicability restriction omitted with account class"
+    },
+    {
+      "source_iri": "N66235b4552a740a8b8c8435bed670dd8",
+      "disposition": "unsupported_by_target_model",
+      "note": "generic appliesTo restriction not translated"
+    },
+    {
+      "source_iri": "N6dc612151a1d4d46a649a1e11818f98d",
+      "disposition": "out_of_scope",
+      "note": "third-party linkage omitted with Comaker and generic third-party modeling"
+    },
+    {
+      "source_iri": "N6ef4a2785f09441fa390cfa54ce088d8",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction merely tags a mapped source property"
+    },
+    {
+      "source_iri": "N7038ee25f6664bf8ac202243c3446987",
+      "disposition": "unsupported_by_target_model",
+      "note": "quantities-and-units argument axiom not translated"
+    },
+    {
+      "source_iri": "N784fe9cd788342b2a87b35232bb54f32",
+      "disposition": "out_of_scope",
+      "note": "composition axiom about security agreement in broader imported model not translated directly"
+    },
+    {
+      "source_iri": "N78f5202778574803bd2d52a30cba804c",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction on omitted broader Creditor/Debt model"
+    },
+    {
+      "source_iri": "N7c0759fcf510418bbcb3d14ec1f0fe8e",
+      "disposition": "unsupported_by_target_model",
+      "note": "occurrence restriction not translated directly"
+    },
+    {
+      "source_iri": "N7c6cddb700634c98928bb42448dd5232",
+      "disposition": "unsupported_by_target_model",
+      "note": "used only as direct evidence for mapped governsPaymentOf relationship"
+    },
+    {
+      "source_iri": "N7d735882dc9d467ca45dd9cf693f0108",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction merely reinforces mapped principalAmount property"
+    },
+    {
+      "source_iri": "N7d7d5ef03bc54567a90f515861e6cd6c",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction merely reinforces mapped collateral relationship"
+    },
+    {
+      "source_iri": "N7d849a8d4b9545628b5f91ffe739447a",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction merely tags a mapped source property"
+    },
+    {
+      "source_iri": "N7ff07bca842c48e3a57eec873509a6b6",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction merely tags a mapped source property"
+    },
+    {
+      "source_iri": "N81981c5006f24590886dea1667aa7252",
+      "disposition": "unsupported_by_target_model",
+      "note": "cardinality axiom not translated directly"
+    },
+    {
+      "source_iri": "N85404a1fcabc4c7b806ade8ef3ef2d89",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction merely tags a mapped source property"
+    },
+    {
+      "source_iri": "N86a8e548431e4d069caac0468f9eef86",
+      "disposition": "unsupported_by_target_model",
+      "note": "range axiom not translated directly"
+    },
+    {
+      "source_iri": "N8722769d234440cf8566fbd5bd6676a0",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction not translated directly due to missing honest endpoint pair"
+    },
+    {
+      "source_iri": "N8a8b449952f94891b850d4688372f511",
+      "disposition": "unsupported_by_target_model",
+      "note": "generic payment schedule restriction used only as background for standard-practice schedule links"
+    },
+    {
+      "source_iri": "N8c5c328f6c5c409dab8ceebf63ab67b9",
+      "disposition": "out_of_scope",
+      "note": "appraisal-document linkage omitted from simplified target"
+    },
+    {
+      "source_iri": "N8d4b800b59f248519503b6f6c6b96244",
+      "disposition": "out_of_scope",
+      "note": "ownership classifier infrastructure omitted"
+    },
+    {
+      "source_iri": "N915ed63d4c6b427495d06454a5bb4e45",
+      "disposition": "out_of_scope",
+      "note": "account applicability restriction omitted with customer account model"
+    },
+    {
+      "source_iri": "N9320baeba4844f4caa41133355185c9d",
+      "disposition": "unsupported_by_target_model",
+      "note": "generic relatesTo restriction not translated directly"
+    },
+    {
+      "source_iri": "N99f9d769318e4a5dbe2101d8e7982ad1",
+      "disposition": "unsupported_by_target_model",
+      "note": "used only as support for mapped hasIndividualPayment relationship"
+    },
+    {
+      "source_iri": "N9dbb258daa7e4a97a6e4d37c048e96cd",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction merely reinforces mapped collateral relationship"
+    },
+    {
+      "source_iri": "N9f437cab675c4dcb912e06182c89b2a8",
+      "disposition": "unsupported_by_target_model",
+      "note": "occurrence restriction not translated directly"
+    },
+    {
+      "source_iri": "Na06361072d3e4cd0a88d2f34ce7513d7",
+      "disposition": "taxonomy_only",
+      "note": "generic creditor-party restriction used only to interpret roles"
+    },
+    {
+      "source_iri": "Na297558427a14bf185b10d5b36d7cb0d",
+      "disposition": "unsupported_by_target_model",
+      "note": "used only as direct evidence for mapped governsPaymentOf relationship"
+    },
+    {
+      "source_iri": "Na5f84e4ce76e45a5b8f956f93e3f8e74",
+      "disposition": "unsupported_by_target_model",
+      "note": "datatype restriction not translated directly"
+    },
+    {
+      "source_iri": "Na863f28452c84583a2f5f252c5a6fa5e",
+      "disposition": "out_of_scope",
+      "note": "provider/principal imported infrastructure omitted"
+    },
+    {
+      "source_iri": "Na88cb7397cf34e48af1067a20934d7b2",
+      "disposition": "unsupported_by_target_model",
+      "note": "quantities-and-units argument axiom not translated"
+    },
+    {
+      "source_iri": "Na8b7d66660a0422f955546441cb23bb2",
+      "disposition": "out_of_scope",
+      "note": "generic classifier machinery omitted"
+    },
+    {
+      "source_iri": "Naa57007b191943da8577da9be8f96e78",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction merely tags a mapped source property"
+    },
+    {
+      "source_iri": "Nabce1f157d814242887a35ea96e85dd0",
+      "disposition": "out_of_scope",
+      "note": "corresponding account linkage omitted with account model"
+    },
+    {
+      "source_iri": "Nb0538b7659ac4f4592dc05e73e4a47eb",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction merely tags a mapped source property"
+    },
+    {
+      "source_iri": "Nb406cb4d26054b7eb1335ffcd2d2fe4b",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction merely tags a mapped source property"
+    },
+    {
+      "source_iri": "Nb55720b70fa34e93b632f724857ee2f7",
+      "disposition": "unsupported_by_target_model",
+      "note": "embedded restriction node used only for role interpretation"
+    },
+    {
+      "source_iri": "Nb7851fe48b5b4cf8892c80a08e4c8ad9",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction on omitted broader Debt model"
+    },
+    {
+      "source_iri": "Nb8b8642afa61426a8834f0e6420985f4",
+      "disposition": "not_agent_relevant",
+      "note": "generic collection restriction not translated"
+    },
+    {
+      "source_iri": "Nb982bfdbe640453f8c97ef8ac0acdd39",
+      "disposition": "out_of_scope",
+      "note": "borrower-held asset restriction omitted with ownership/asset model"
+    },
+    {
+      "source_iri": "Nbccfd5fbc08b445797fbbe2b9fd7968a",
+      "disposition": "unsupported_by_target_model",
+      "note": "embedded role restriction not translated directly"
+    },
+    {
+      "source_iri": "Nc008281adfb74d1782af4b2d82fbafbf",
+      "disposition": "unsupported_by_target_model",
+      "note": "collection constituent axiom used only as weak background for facility/sub-facility structure"
+    },
+    {
+      "source_iri": "Nc2110ba0c0864f4e9967175aa794f204",
+      "disposition": "taxonomy_only",
+      "note": "generic debtor-party restriction used only to interpret borrower role"
+    },
+    {
+      "source_iri": "Nc76d13fe68a2465cbfb1189313e99c07",
+      "disposition": "not_agent_relevant",
+      "note": "currency amount infrastructure restriction"
+    },
+    {
+      "source_iri": "Nc7c4d9c18dc04fa28f7af92298182f82",
+      "disposition": "not_agent_relevant",
+      "note": "generic collection restriction not translated"
+    },
+    {
+      "source_iri": "Nc9826840fc49425b930459e23464708f",
+      "disposition": "unsupported_by_target_model",
+      "note": "embodies-amortization axiom not translated directly"
+    },
+    {
+      "source_iri": "Ncf2f1f74ea0f4bd6b40fe68fd0d56138",
+      "disposition": "out_of_scope",
+      "note": "appraisal-document linkage omitted from simplified target"
+    },
+    {
+      "source_iri": "Nd02409bb0562442dab1654414246caef",
+      "disposition": "out_of_scope",
+      "note": "aggregate principal argument axiom omitted with TotalOutstandingPrincipal"
+    },
+    {
+      "source_iri": "Nd3020ec898ef4ed7a742a0edc8c87f3e",
+      "disposition": "unsupported_by_target_model",
+      "note": "embedded restriction node used only for role interpretation"
+    },
+    {
+      "source_iri": "Nd44728edcb9e40e5838c4277382e8e09",
+      "disposition": "out_of_scope",
+      "note": "guaranty composition axiom omitted because guaranty class not included"
+    },
+    {
+      "source_iri": "Nd46867e8ecd74575b61c790c33c4fcf7",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction merely tags collateralization property"
+    },
+    {
+      "source_iri": "Nd4900ce6c86546d1b8e48e8ae45f46f7",
+      "disposition": "out_of_scope",
+      "note": "asset applicability restriction omitted with broader asset model"
+    },
+    {
+      "source_iri": "Nd6323b279c684a819188aa80a75ba2dc",
+      "disposition": "unsupported_by_target_model",
+      "note": "generic contractual element restriction not translated directly"
+    },
+    {
+      "source_iri": "Nd6788aa916ea4144b23b62b91fceee9a",
+      "disposition": "unsupported_by_target_model",
+      "note": "quantities-and-units argument axiom not translated"
+    },
+    {
+      "source_iri": "Nd711f5aae7b54e25b7e5340e1aa23b0f",
+      "disposition": "out_of_scope",
+      "note": "extension provision omitted from simplified loan slice"
+    },
+    {
+      "source_iri": "Ndaa146e6499b4bcf82ea0b5a528d6a61",
+      "disposition": "out_of_scope",
+      "note": "guarantor restriction omitted because guarantor class not included in extracted slice"
+    },
+    {
+      "source_iri": "Ndad51414ea104484a42c5f3b52b5fea5",
+      "disposition": "unsupported_by_target_model",
+      "note": "occurrence restriction not translated directly"
+    },
+    {
+      "source_iri": "Ndced13d08ab24061925ca1f62a5d3c0a",
+      "disposition": "not_agent_relevant",
+      "note": "collection cardinality bookkeeping"
+    },
+    {
+      "source_iri": "Ndd3db25137c849c6bf85035a09e4f86c",
+      "disposition": "unsupported_by_target_model",
+      "note": "used only as support for mapped collateral relationship"
+    },
+    {
+      "source_iri": "Nde33935dec3d489cbd4a04f5ba466c2b",
+      "disposition": "unsupported_by_target_model",
+      "note": "datatype restriction not translated directly"
+    },
+    {
+      "source_iri": "Ne07979db33a54b029378cc91aed0e9fe",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction merely tags a mapped source property"
+    },
+    {
+      "source_iri": "Ne11579c71bca4316902befe4a788aca9",
+      "disposition": "out_of_scope",
+      "note": "asset applicability restriction omitted with broader asset model"
+    },
+    {
+      "source_iri": "Ne1a32048f7a04b3da379590e92b5cffa",
+      "disposition": "not_agent_relevant",
+      "note": "legal-person role-playing axiom omitted"
+    },
+    {
+      "source_iri": "Ne24e89eb9cf14456a284c8b94daeb0f0",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction merely tags a mapped source property"
+    },
+    {
+      "source_iri": "Ne49a36e38a384c62a604d90ed682a3f4",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction merely tags a mapped source property"
+    },
+    {
+      "source_iri": "Ne7c235eaade247a9ae69fe3b90c5ac9b",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction on omitted broader Debt model"
+    },
+    {
+      "source_iri": "Ne8b50cea0c9a42da9ba02112884d77eb",
+      "disposition": "unsupported_by_target_model",
+      "note": "used only as background evidence for collateral valuation date meaning"
+    },
+    {
+      "source_iri": "Ne9bbba64938840eb8f76b819d1b96020",
+      "disposition": "unsupported_by_target_model",
+      "note": "generic appliesTo restriction not translated directly"
+    },
+    {
+      "source_iri": "Neb27c3e1e1684437a0825151c9a071d9",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction merely tags a mapped source property"
+    },
+    {
+      "source_iri": "Nedcee43c071e4846ad8906499f560113",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction merely tags a mapped source property"
+    },
+    {
+      "source_iri": "Nf10fe58d8fa54f29b2845c61ff0fe178",
+      "disposition": "unsupported_by_target_model",
+      "note": "embedded role restriction not translated directly"
+    },
+    {
+      "source_iri": "Nf26242348c924fb59685118373f28e49",
+      "disposition": "unsupported_by_target_model",
+      "note": "used only as background evidence for collateral valuation date meaning"
+    },
+    {
+      "source_iri": "Nf6b4a448ba7241dab5401228306901f8",
+      "disposition": "not_agent_relevant",
+      "note": "generic date-period restriction omitted"
+    },
+    {
+      "source_iri": "Nf745f71c74354f7a9adb7ceabd0a0293",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction merely tags collateralization property"
+    },
+    {
+      "source_iri": "Nf874f4161de747dcb7dce5e063f98aff",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction merely tags a mapped source property"
+    },
+    {
+      "source_iri": "Nfb3981024be74d4b812d8a272dfef75d",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction merely tags a mapped source property"
+    },
+    {
+      "source_iri": "Nfbf5ae24ca994d6194d988793146e140",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction merely tags a mapped source property"
+    },
+    {
+      "source_iri": "Nfc70a4e143b04f619e9edd9871a966e7",
+      "disposition": "unsupported_by_target_model",
+      "note": "restriction merely tags a mapped source property"
+    },
+    {
+      "source_iri": "Nfd833b90681b48d19e4deb49003502c5",
+      "disposition": "out_of_scope",
+      "note": "guaranty composition axiom omitted because guaranty class not included"
+    }
+  ]
+}
