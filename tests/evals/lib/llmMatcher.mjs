@@ -1,5 +1,8 @@
 import { CHAT_URL, RATE_LIMIT_MAX_ATTEMPTS, rateLimitBackoffMs, sleepMs, isInsufficientQuotaError } from "../../lib/liveOpenAi.mjs";
-import { computeRecoveryMetrics, computeMatchDetail } from "./recoveryMetrics.mjs";
+import {
+  computeRecoveryMetrics, computeMatchDetail, computeRuleMetrics, computeActionMetrics,
+  computeRuleMatchDetail, computeActionMatchDetail,
+} from "./recoveryMetrics.mjs";
 import { maxWeightBipartiteMatching } from "./bipartiteMatching.mjs";
 
 // LLM-JUDGE SUPPLEMENT to recoveryMetrics.mjs's heuristic token-overlap
@@ -155,6 +158,62 @@ export function parsePropertyJudgeResponse(text, unmatchedGold) {
   return results;
 }
 
+// Rules and actions (issue #105) -- same shared pairing-judge shape as
+// classes/relationships above (buildPairingJudgePrompt), since matching
+// them is the same underlying question: does any CANDIDATE refer to the
+// same real-world rule/action a domain expert would treat as
+// interchangeable. Scoped to identification only, matching classes/
+// relationships' own precedent -- see recoveryMetrics.mjs's
+// computeRuleMatchDetail/computeActionMatchDetail module comment for why
+// the component metrics (precondition/effect/verification recovery,
+// input-class accuracy) stay heuristic-only rather than also getting a
+// semantic re-score the way controlledValueFidelity does.
+export function parseRuleJudgeResponse(text, unmatchedGold, unmatchedRecovered) {
+  const verdicts = parsePairingResponse(text, unmatchedGold.length);
+  return unmatchedGold.map((gold, i) => {
+    const ci = verdicts[i];
+    const matched = ci !== null && ci >= 0 && ci < unmatchedRecovered.length;
+    return { goldId: gold.id, recoveredId: matched ? unmatchedRecovered[ci].id : null, verdict: matched ? "MATCH" : "NO MATCH" };
+  });
+}
+
+export function buildRuleJudgePrompt(unmatchedGold, unmatchedRecovered) {
+  return buildPairingJudgePrompt({
+    kind: "rules",
+    instructions:
+      "A rule is the same real-world rule only if its core decision condition is semantically equivalent -- " +
+      "matching only the rule's own name/topic, with a genuinely different triggering condition, is NOT a match.",
+    goldItems: unmatchedGold,
+    goldText: (r) => `${r.label} -- conditions: ${(r.conditions || []).join("; ") || "(none stated)"}`,
+    candidateItems: unmatchedRecovered,
+    candidateText: (r) => `${r.name} -- conditions: ${(r.conditions || []).join("; ") || "(none stated)"}`,
+  });
+}
+
+export function parseActionJudgeResponse(text, unmatchedGold, unmatchedRecovered) {
+  const verdicts = parsePairingResponse(text, unmatchedGold.length);
+  return unmatchedGold.map((gold, i) => {
+    const ci = verdicts[i];
+    const matched = ci !== null && ci >= 0 && ci < unmatchedRecovered.length;
+    return { goldId: gold.id, recoveredId: matched ? unmatchedRecovered[ci].id : null, verdict: matched ? "MATCH" : "NO MATCH" };
+  });
+}
+
+export function buildActionJudgePrompt(unmatchedGold, unmatchedRecovered) {
+  return buildPairingJudgePrompt({
+    kind: "actions",
+    instructions:
+      "Two actions are the same real-world action only if they represent the same operation with the same " +
+      "intended effect -- an action with a similar name but a genuinely different effect is NOT a match. Input " +
+      "class and precondition/verification detail are scored separately elsewhere; judge identity here, not " +
+      "whether every field matches too.",
+    goldItems: unmatchedGold,
+    goldText: (a) => `${a.label}${a.effect ? ` -- effect: ${a.effect}` : ""}`,
+    candidateItems: unmatchedRecovered,
+    candidateText: (a) => `${a.name}${a.effect ? ` -- effect: ${a.effect}` : ""}`,
+  });
+}
+
 // Controlled-value fidelity: not a binary match/no-match (the property is
 // already heuristically matched) but a continuous 0-100 semantic-overlap
 // re-score, the direct fix for the exact failure this module exists for
@@ -245,6 +304,20 @@ export async function judgeRelationships({ apiKey, model, unmatchedGold, unmatch
   const { system, user } = buildRelationshipJudgePrompt(unmatchedGold, unmatchedRecovered);
   const text = await callJudge({ apiKey, model, system, user, onRawResponse });
   return parseRelationshipJudgeResponse(text, unmatchedGold, unmatchedRecovered);
+}
+
+export async function judgeRules({ apiKey, model, unmatchedGold, unmatchedRecovered, onRawResponse }) {
+  if (!unmatchedGold.length || !unmatchedRecovered.length) return unmatchedGold.map((g) => ({ goldId: g.id, recoveredId: null, verdict: "NO MATCH" }));
+  const { system, user } = buildRuleJudgePrompt(unmatchedGold, unmatchedRecovered);
+  const text = await callJudge({ apiKey, model, system, user, onRawResponse });
+  return parseRuleJudgeResponse(text, unmatchedGold, unmatchedRecovered);
+}
+
+export async function judgeActions({ apiKey, model, unmatchedGold, unmatchedRecovered, onRawResponse }) {
+  if (!unmatchedGold.length || !unmatchedRecovered.length) return unmatchedGold.map((g) => ({ goldId: g.id, recoveredId: null, verdict: "NO MATCH" }));
+  const { system, user } = buildActionJudgePrompt(unmatchedGold, unmatchedRecovered);
+  const text = await callJudge({ apiKey, model, system, user, onRawResponse });
+  return parseActionJudgeResponse(text, unmatchedGold, unmatchedRecovered);
 }
 
 export async function judgeProperties({ apiKey, model, unmatchedGold, onRawResponse }) {
@@ -468,5 +541,85 @@ export function aggregateSemanticMetrics({ groundTruth, recoveredState, judgment
       valueFidelity: fidelityJudgments.filter((j) => j.semanticFidelity !== null),
     },
     heuristic,
+  };
+}
+
+// Rule/action counterpart to computeSemanticRecoveryMetrics above (issue
+// #105) -- deliberately a separate, standalone function rather than folded
+// into computeSemanticRecoveryMetrics/aggregateSemanticMetrics, whose
+// existing return shape reportGenerator.mjs and rescore-saved-run.mjs
+// already depend on; adding fields there risked a regression in exactly
+// the code this change isn't supposed to touch. Same two-layer pattern
+// (heuristic first, then judge the residual, then recompute recall/
+// precision/F1 with the extra matches added), scoped to identification
+// only for both rules and actions -- see recoveryMetrics.mjs's
+// computeRuleMatchDetail/computeActionMatchDetail for why the action
+// component metrics (input-class accuracy, precondition/effect/
+// verification recovery) are not semantically re-judged here, only
+// recomputed from the now-larger matched set.
+export async function computeSemanticRuleActionMetrics({ groundTruth, recoveredState, apiKey, model }) {
+  const ruleDetail = computeRuleMatchDetail(groundTruth, recoveredState.rules || []);
+  const actionDetail = computeActionMatchDetail(groundTruth, recoveredState);
+
+  const rawResponses = {};
+  const ruleJudgments = await judgeRules({
+    apiKey, model, unmatchedGold: ruleDetail.unmatchedGold, unmatchedRecovered: ruleDetail.unmatchedRecovered,
+    onRawResponse: (t) => { rawResponses.rules = t; },
+  });
+  const actionJudgments = await judgeActions({
+    apiKey, model, unmatchedGold: actionDetail.unmatchedGold, unmatchedRecovered: actionDetail.unmatchedRecovered,
+    onRawResponse: (t) => { rawResponses.actions = t; },
+  });
+
+  return { ...aggregateSemanticRuleActionMetrics({ groundTruth, recoveredState, judgments: { rules: ruleJudgments, actions: actionJudgments } }), rawResponses };
+}
+
+// The pure, model-call-free half, split out for the same replay/rescore
+// reason aggregateSemanticMetrics is above.
+export function aggregateSemanticRuleActionMetrics({ groundTruth, recoveredState, judgments }) {
+  const ruleDetail = computeRuleMatchDetail(groundTruth, recoveredState.rules || []);
+  const actionDetail = computeActionMatchDetail(groundTruth, recoveredState);
+
+  const stillUnmatched = (list) => new Set(list.map((g) => g.id));
+  const unmatchedRuleIds = stillUnmatched(ruleDetail.unmatchedGold);
+  const unmatchedActionIds = stillUnmatched(actionDetail.unmatchedGold);
+  const ruleJudgments = (judgments.rules || []).filter((j) => unmatchedRuleIds.has(j.goldId));
+  const actionJudgments = (judgments.actions || []).filter((j) => unmatchedActionIds.has(j.goldId));
+
+  const { goldIds: extraRuleGoldIds, recoveredIds: extraRuleRecoveredIds, matches: resolvedRuleMatches } = oneToOneMatchedIds(ruleJudgments);
+  const { goldIds: extraActionGoldIds, recoveredIds: extraActionRecoveredIds, matches: resolvedActionMatches } = oneToOneMatchedIds(actionJudgments);
+
+  const ruleMatched = ruleDetail.matchedGoldCount + extraRuleGoldIds.size;
+  const ruleRecall = ruleDetail.goldTotal ? ruleMatched / ruleDetail.goldTotal : 0;
+  const rulePrecisionMatched = ruleDetail.matchedRecoveredCount + extraRuleRecoveredIds.size;
+  const rulePrecision = ruleDetail.recoveredTotal ? rulePrecisionMatched / ruleDetail.recoveredTotal : 0;
+
+  const actionMatched = actionDetail.matchedGoldCount + extraActionGoldIds.size;
+  const actionRecall = actionDetail.goldTotal ? actionMatched / actionDetail.goldTotal : 0;
+  const actionPrecisionMatched = actionDetail.matchedRecoveredCount + extraActionRecoveredIds.size;
+  const actionPrecision = actionDetail.recoveredTotal ? actionPrecisionMatched / actionDetail.recoveredTotal : 0;
+
+  return {
+    rules: {
+      recall: ruleRecall, precision: rulePrecision, f1: f1(ruleRecall, rulePrecision),
+      matched: ruleMatched, groundTruthTotal: ruleDetail.goldTotal, recoveredTotal: ruleDetail.recoveredTotal,
+    },
+    // Component metrics (input-class accuracy, precondition/effect/
+    // verification recovery) are heuristic-only by design (see this
+    // function's own module comment) -- recomputed here from the full
+    // recovered state so a caller reading this one function's output still
+    // sees them, not because the semantic judge itself re-scored them.
+    actions: {
+      recall: actionRecall, precision: actionPrecision, f1: f1(actionRecall, actionPrecision),
+      matched: actionMatched, groundTruthTotal: actionDetail.goldTotal, recoveredTotal: actionDetail.recoveredTotal,
+      components: computeActionMetrics(groundTruth, recoveredState),
+    },
+    judgeCallCount: [
+      ruleDetail.unmatchedGold.length && ruleDetail.unmatchedRecovered.length,
+      actionDetail.unmatchedGold.length && actionDetail.unmatchedRecovered.length,
+    ].filter(Boolean).length,
+    judgments: { rules: ruleJudgments, actions: actionJudgments },
+    resolvedMatches: { rules: resolvedRuleMatches, actions: resolvedActionMatches },
+    heuristic: { rules: computeRuleMetrics(groundTruth, recoveredState.rules || []), actions: computeActionMetrics(groundTruth, recoveredState) },
   };
 }

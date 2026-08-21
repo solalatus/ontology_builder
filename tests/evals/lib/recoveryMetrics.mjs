@@ -547,3 +547,222 @@ export function computeHeuristicMatchPairs(groundTruth, recoveredState, threshol
 
   return { classes: classMatches, relationships: relationshipMatches, properties: propertyMatches };
 }
+
+// ---------------------------------------------------------------------------
+// Rules and actions (issue #105) -- deliberately standalone functions, not
+// folded into computeRecoveryMetrics above. Two reasons: (1) the issue's own
+// explicit instruction not to change the existing recoveryEffectiveness
+// composite is easiest to honor with certainty by never touching that
+// function's return shape at all, rather than adding fields to it and
+// trusting nothing downstream accidentally picks them up; (2) action
+// component scoring needs its own class-match pass (for input-class
+// accuracy) -- computeMatchDetail/computeHeuristicMatchPairs above already
+// established the precedent of independently re-deriving matchClasses's
+// assignment rather than threading a shared result through, so this follows
+// the same "zero risk of behavior drift in the untouched functions" logic.
+//
+// Ground truth has no rules concept at all for MTSR-sourced domains
+// (groundTruth.rules is always []) -- every metric here degrades gracefully
+// to 0/null in that case, the same "nothing to recover, nothing recovered"
+// convention every other empty-denominator case in this file already uses.
+
+const RULE_MATCH_THRESHOLD = 0.35;
+// "A rule is recovered only if the core decision condition is semantically
+// equivalent; matching the name alone is insufficient" (issue #105's own
+// words) -- the combined threshold above is dominated by condition
+// similarity (weighted 0.7 vs name's 0.3 below), but a rule with a
+// coincidentally similar name and near-zero real condition overlap could
+// still clear it on name alone if condition similarity were simply low
+// rather than genuinely zero. This second, independent floor makes that
+// literal instruction a hard requirement, not just a weighting preference.
+const RULE_CONDITION_MIN_OVERLAP = 0.12;
+
+function ruleConditionText(rule) {
+  return (rule.conditions || []).join(" ");
+}
+
+// One-to-one bipartite match, same shape as matchClasses/matchProperties
+// above. Candidate weight combines name similarity and condition-text
+// similarity (labelSimilarity reused directly -- it is already exactly
+// "tokenize two free-text strings and Jaccard the token sets," which is
+// the right operation for condition prose too, not just short labels).
+export function matchRules(groundTruth, recoveredRules, thresholds = MATCH_THRESHOLDS) {
+  const gtRules = groundTruth.rules || [];
+  const candidateEdges = [];
+  for (const gtRule of gtRules) {
+    for (const rec of recoveredRules) {
+      const nameSim = labelSimilarity(gtRule.label, rec.name);
+      const conditionSim = labelSimilarity(ruleConditionText(gtRule), ruleConditionText(rec));
+      const combined = 0.3 * nameSim + 0.7 * conditionSim;
+      if (combined >= RULE_MATCH_THRESHOLD && conditionSim >= RULE_CONDITION_MIN_OVERLAP) {
+        candidateEdges.push({ left: gtRule.id, right: rec.id, weight: combined });
+      }
+    }
+  }
+  const assignment = maxWeightBipartiteMatching(candidateEdges);
+  const gtToRecovered = new Map();
+  const recoveredToGt = new Map();
+  for (const { left, right } of assignment) {
+    gtToRecovered.set(left, right);
+    recoveredToGt.set(right, left);
+  }
+  return { gtToRecovered, recoveredToGt, matches: assignment.map(({ left, right, weight }) => ({ goldId: left, recoveredId: right, weight })) };
+}
+
+// Rule precision/recall/F1 -- issue #105's own explicit requirement.
+// Deliberately just identification (is this rule recovered at all, under
+// the "real condition equivalence" bar above), not a blend with anything
+// else -- matches classes/relationships/properties, which are all pure
+// identification F1 too; component-level detail lives in
+// computeActionMetrics below for actions, and rules have no further
+// components of their own to report separately.
+export function computeRuleMetrics(groundTruth, recoveredRules, thresholds = MATCH_THRESHOLDS) {
+  const gtRules = groundTruth.rules || [];
+  const { gtToRecovered, recoveredToGt } = matchRules(groundTruth, recoveredRules, thresholds);
+  const matched = gtToRecovered.size;
+  const recall = gtRules.length ? matched / gtRules.length : 0;
+  const precision = recoveredRules.length ? recoveredToGt.size / recoveredRules.length : 0;
+  return { recall, precision, f1: f1(recall, precision), matched, groundTruthTotal: gtRules.length, recoveredTotal: recoveredRules.length };
+}
+
+// Action identification -- same one-to-one bipartite shape as matchRules,
+// weighted purely on name/meaning similarity. Input-class agreement is
+// deliberately NOT part of the matching weight here: issue #105 lists
+// "correct effect but wrong input class" as a required test scenario,
+// which only makes sense if a wrong input class does not prevent the
+// action itself from being identified -- it is scored as its own separate
+// component metric below instead (computeActionMetrics), never a gate on
+// whether the action counts as found at all.
+export function matchActions(groundTruth, recoveredActions, thresholds = MATCH_THRESHOLDS) {
+  const gtActions = groundTruth.actions || [];
+  const candidateEdges = [];
+  for (const gtAction of gtActions) {
+    for (const rec of recoveredActions) {
+      const score = labelSimilarity(gtAction.label, rec.name);
+      if (score >= thresholds.relationshipOrProperty) {
+        candidateEdges.push({ left: gtAction.id, right: rec.id, weight: score });
+      }
+    }
+  }
+  const assignment = maxWeightBipartiteMatching(candidateEdges);
+  const gtToRecovered = new Map();
+  const recoveredToGt = new Map();
+  for (const { left, right } of assignment) {
+    gtToRecovered.set(left, right);
+    recoveredToGt.set(right, left);
+  }
+  return { gtToRecovered, recoveredToGt, matches: assignment.map(({ left, right, weight }) => ({ goldId: left, recoveredId: right, weight })) };
+}
+
+// Resolves a recovered action's own `preconditions` (a list of RULE ids --
+// index.html's real data model, mirroring the gold side's pre-resolution
+// in groundTruthModel.mjs, see that module's own comment) into the real
+// condition text those rules actually carry, by looking them up in the
+// recovered state's own rules list. Cannot be done at ground-truth-load
+// time the way the gold side is, since it depends on what a live run
+// actually recovered.
+function resolveRecoveredActionPreconditionText(action, recoveredRules) {
+  const rulesById = new Map(recoveredRules.map((r) => [r.id, r]));
+  return (action.preconditions || [])
+    .flatMap((ruleId) => (rulesById.get(ruleId) || {}).conditions || [])
+    .join(" ");
+}
+
+function average(scores) {
+  return scores.length ? scores.reduce((a, b) => a + b, 0) / scores.length : null;
+}
+
+// Action identification recall/precision/F1, plus the four component
+// metrics issue #105 asks for reported separately (not blended into one
+// number): input-class accuracy, precondition/effect/verification
+// recovery. Each component is `null`, not 0, when no MATCHED pair had that
+// field populated on the gold side at all -- "do not penalize fields that
+// are absent from the reference domain" (the issue's own words) requires a
+// real, distinguishable "not applicable" outcome, not a score that looks
+// like a genuine 0% recovery of something that was never there to recover.
+export function computeActionMetrics(groundTruth, recoveredState, thresholds = MATCH_THRESHOLDS) {
+  const gtActions = groundTruth.actions || [];
+  const recoveredActions = recoveredState.actions || [];
+  const recoveredRules = recoveredState.rules || [];
+  const { gtToRecovered: gtToRecoveredClasses } = matchClasses(groundTruth, recoveredState.nodes || [], thresholds);
+  const { gtToRecovered, recoveredToGt } = matchActions(groundTruth, recoveredActions, thresholds);
+
+  const matched = gtToRecovered.size;
+  const identificationRecall = gtActions.length ? matched / gtActions.length : 0;
+  const identificationPrecision = recoveredActions.length ? recoveredToGt.size / recoveredActions.length : 0;
+  const identificationF1 = f1(identificationRecall, identificationPrecision);
+
+  const recoveredById = new Map(recoveredActions.map((a) => [a.id, a]));
+  let inputClassChecked = 0, inputClassCorrect = 0;
+  const preconditionScores = [], effectScores = [], verificationScores = [];
+
+  for (const gtAction of gtActions) {
+    const recId = gtToRecovered.get(gtAction.id);
+    if (!recId) continue;
+    const rec = recoveredById.get(recId);
+    if (!rec) continue;
+
+    // Input-class accuracy is only meaningful once the gold input class
+    // itself matched *something* recovered (gtToRecoveredClasses, from
+    // matchClasses) -- an input class that was never recovered at all is a
+    // class-level miss, not an action-input mismatch, same "don't conflate
+    // levels" discipline computeMatchDetail applies to relationships above.
+    const matchedRecoveredClassIds = gtToRecoveredClasses.get(gtAction.primaryInputClassId) || [];
+    if (matchedRecoveredClassIds.length) {
+      inputClassChecked++;
+      if (rec.inputClassId && matchedRecoveredClassIds.includes(rec.inputClassId)) inputClassCorrect++;
+    }
+
+    if (gtAction.preconditions && gtAction.preconditions.length) {
+      preconditionScores.push(labelSimilarity(gtAction.preconditions.join(" "), resolveRecoveredActionPreconditionText(rec, recoveredRules)));
+    }
+    if (gtAction.effect) effectScores.push(labelSimilarity(gtAction.effect, rec.effect || ""));
+    if (gtAction.verification) verificationScores.push(labelSimilarity(gtAction.verification, rec.verification || ""));
+  }
+
+  return {
+    identification: {
+      recall: identificationRecall, precision: identificationPrecision, f1: identificationF1,
+      matched, groundTruthTotal: gtActions.length, recoveredTotal: recoveredActions.length,
+    },
+    inputClassAccuracy: inputClassChecked ? inputClassCorrect / inputClassChecked : null,
+    inputClassChecked,
+    preconditionRecovery: average(preconditionScores),
+    effectRecovery: average(effectScores),
+    verificationRecovery: average(verificationScores),
+  };
+}
+
+// The llmMatcher.mjs equivalent of computeMatchDetail above, for rules and
+// actions -- the residual unmatched items the semantic-judge supplement
+// gets to look at. Deliberately scoped to IDENTIFICATION only: the
+// component metrics above (input-class accuracy, precondition/effect/
+// verification recovery) stay heuristic-only, the same scope issue #105's
+// own "LLM-semantic supplement" section lists (rule/action MATCHING, not a
+// semantic re-score of every component the way controlledValueFidelity
+// gets one) -- matching classes/relationships' own existing pattern
+// exactly, not a new one invented for this issue.
+export function computeRuleMatchDetail(groundTruth, recoveredRules, thresholds = MATCH_THRESHOLDS) {
+  const gtRules = groundTruth.rules || [];
+  const { gtToRecovered, recoveredToGt } = matchRules(groundTruth, recoveredRules, thresholds);
+  const unmatchedGold = gtRules.filter((r) => !gtToRecovered.has(r.id));
+  const unmatchedRecovered = recoveredRules.filter((r) => !recoveredToGt.has(r.id));
+  return {
+    unmatchedGold, unmatchedRecovered,
+    matchedGoldCount: gtToRecovered.size, matchedRecoveredCount: recoveredToGt.size,
+    goldTotal: gtRules.length, recoveredTotal: recoveredRules.length,
+  };
+}
+
+export function computeActionMatchDetail(groundTruth, recoveredState, thresholds = MATCH_THRESHOLDS) {
+  const gtActions = groundTruth.actions || [];
+  const recoveredActions = recoveredState.actions || [];
+  const { gtToRecovered, recoveredToGt } = matchActions(groundTruth, recoveredActions, thresholds);
+  const unmatchedGold = gtActions.filter((a) => !gtToRecovered.has(a.id));
+  const unmatchedRecovered = recoveredActions.filter((a) => !recoveredToGt.has(a.id));
+  return {
+    unmatchedGold, unmatchedRecovered,
+    matchedGoldCount: gtToRecovered.size, matchedRecoveredCount: recoveredToGt.size,
+    goldTotal: gtActions.length, recoveredTotal: recoveredActions.length,
+  };
+}

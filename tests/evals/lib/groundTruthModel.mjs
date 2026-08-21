@@ -235,6 +235,20 @@ export function mergeReciprocalRelationshipPairs(relationships) {
 // id, so there is no reduction to do there at all; see
 // buildActionsFromDomainYaml below for that format's own, much simpler,
 // equivalent.
+// `preconditions`/`effect`/`verification` (issue #105): every format
+// resolves to the SAME uniform shape -- `preconditions: string[]` (real
+// condition text, never a rule-name reference) and `effect`/
+// `verification: string` (a single string, joined if the source format
+// keeps them as an array) -- so recoveryMetrics.mjs's action-component
+// scoring never needs to know which format produced a given gold action.
+// MTSR's own actions already carry raw condition/effect/verification text
+// directly (no rules concept to resolve through at all); `.domain.yaml`'s
+// actions reference rule NAMES in `preconditions:`, resolved here at load
+// time into that rule's own `conditions:` text -- see
+// buildActionsFromDomainYaml below for exactly where that resolution
+// happens. Absent fields stay `[]`/`""`, never fabricated, so
+// recoveryMetrics.mjs's "do not penalize fields absent from the reference
+// domain" requirement has a real, distinguishable "absent" to check for.
 export function buildReducedActions(doc, classes) {
   const actions = [];
   for (const [id, a] of Object.entries(doc.actions || {})) {
@@ -247,16 +261,34 @@ export function buildReducedActions(doc, classes) {
       label: a.label || id,
       primaryInputClassId,
       droppedInputCount: inputEntries.length - 1,
+      preconditions: a.preconditions || [],
+      effect: (a.effects || []).join("; "),
+      verification: (a.verification || []).join("; "),
     });
   }
   return actions;
 }
 
 function buildActionsFromDomainYaml(doc, classes) {
+  const rules = doc.rules || {};
   const actions = [];
   for (const [id, a] of Object.entries(doc.actions || {})) {
     if (!a || !classes[a.input]) continue; // references a non-class (shouldn't happen, defensive)
-    actions.push({ id, label: buildDomainYamlLabel(id), primaryInputClassId: a.input, droppedInputCount: 0 });
+    // Each precondition names a rule; resolve to that rule's own real
+    // condition text -- see the module comment above for why this
+    // resolution happens once, here, rather than being deferred to
+    // scoring time (unlike the RECOVERED side, whose own rule references
+    // can only be resolved once a live recovered state exists).
+    const preconditions = (a.preconditions || []).flatMap((ruleName) => (rules[ruleName] && rules[ruleName].conditions) || []);
+    actions.push({
+      id,
+      label: buildDomainYamlLabel(id),
+      primaryInputClassId: a.input,
+      droppedInputCount: 0,
+      preconditions,
+      effect: a.effect || "",
+      verification: a.verification || "",
+    });
   }
   return actions;
 }

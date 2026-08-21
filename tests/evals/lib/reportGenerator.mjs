@@ -183,6 +183,39 @@ function metricsTableLines(m, s) {
   ];
 }
 
+// Rules/actions (issue #105) -- deliberately its OWN section and its own
+// table, never folded into recoveryEffectiveness above or into
+// metricsTableLines's own table: the issue's own explicit instruction was
+// not to change that composite yet ("a later issue can define a new
+// composite once enough domains have been run"). Only rendered when the
+// caller actually has this data (a domain with real rules/actions in its
+// ground truth, and a recovered state that captured window.__kg.state.
+// rules/actions) -- absent for every existing caller, so writeReport's
+// default behavior is completely unchanged unless a caller opts in.
+//
+// `identification` is {recall, precision, f1, matched, groundTruthTotal,
+// recoveredTotal} -- from either recoveryMetrics.mjs's own
+// computeRuleMetrics/computeActionMetrics().identification (heuristic) or
+// llmMatcher.mjs's aggregateSemanticRuleActionMetrics().rules/.actions
+// (semantic). `actionComponents` is always the heuristic
+// computeActionMetrics()'s own return value -- input-class accuracy and
+// precondition/effect/verification recovery are never semantically
+// re-judged (see recoveryMetrics.mjs's own module comment on why), so
+// there is only ever one version of these regardless of which
+// identification numbers are being shown alongside them.
+function ruleActionTableLines(ruleIdentification, actionIdentification, actionComponents) {
+  return [
+    "| Metric | Value | Detail |",
+    "|---|---|---|",
+    `| Rule recall / precision / F1 | ${pct(ruleIdentification.recall)} / ${pct(ruleIdentification.precision)} / ${pct(ruleIdentification.f1)} | ${ruleIdentification.matched}/${ruleIdentification.groundTruthTotal} ground-truth rules matched (core condition equivalence, not name alone); ${ruleIdentification.recoveredTotal} recovered |`,
+    `| Action identification recall / precision / F1 | ${pct(actionIdentification.recall)} / ${pct(actionIdentification.precision)} / ${pct(actionIdentification.f1)} | ${actionIdentification.matched}/${actionIdentification.groundTruthTotal} ground-truth actions matched by name/meaning; ${actionIdentification.recoveredTotal} recovered |`,
+    `| Action input-class accuracy | ${actionComponents.inputClassAccuracy === null ? "n/a" : pct(actionComponents.inputClassAccuracy)} | of ${actionComponents.inputClassChecked} matched action(s) whose input class itself was recoverable at all |`,
+    `| Action precondition recovery | ${actionComponents.preconditionRecovery === null ? "n/a (no matched gold action had preconditions)" : pct(actionComponents.preconditionRecovery)} | token-overlap similarity between gold rule conditions and the recovered action's own linked rules, averaged over matched actions that had any |`,
+    `| Action effect recovery | ${actionComponents.effectRecovery === null ? "n/a" : pct(actionComponents.effectRecovery)} | token-overlap similarity between gold and recovered effect text |`,
+    `| Action verification recovery | ${actionComponents.verificationRecovery === null ? "n/a" : pct(actionComponents.verificationRecovery)} | token-overlap similarity between gold and recovered verification text |`,
+  ];
+}
+
 // semanticMetrics/semanticScopedMetrics (llmMatcher.mjs's
 // computeSemanticRecoveryMetrics) are always rendered as their own section
 // right after the heuristic one, never merged into one table and never
@@ -191,7 +224,14 @@ function metricsTableLines(m, s) {
 // side, so it's visible how much of any difference is wording variance the
 // judge caught vs. a real difference in what was actually modeled (see
 // llmMatcher.mjs's own module doc for why this module exists at all).
-export function writeReport({ metrics, scopedMetrics, semanticMetrics, semanticScopedMetrics, operationalStats, orchestratorResult, llmReviewText, interviewerModel, personaModel, classifierModel, dir = RESULTS_DIR }) {
+export function writeReport({
+  metrics, scopedMetrics, semanticMetrics, semanticScopedMetrics, operationalStats, orchestratorResult, llmReviewText,
+  interviewerModel, personaModel, classifierModel, dir = RESULTS_DIR,
+  // Issue #105, additive and optional -- see ruleActionTableLines's own
+  // module comment for the exact shapes expected. Every existing caller
+  // omits these and gets exactly the report this function already wrote.
+  ruleMetrics, actionMetrics, semanticRuleActionMetrics,
+}) {
   fs.mkdirSync(dir, { recursive: true });
   const m = metrics;
   const s = scopedMetrics;
@@ -238,6 +278,33 @@ export function writeReport({ metrics, scopedMetrics, semanticMetrics, semanticS
       "judge calls). The heuristic metrics above are unaffected either way._",
       "",
     );
+  }
+  if (ruleMetrics && actionMetrics) {
+    lines.push(
+      "## Rules and actions (heuristic)",
+      "",
+      "Reported as their own dimensions, not folded into the recovery-effectiveness composite above (issue #105 -- " +
+      "a later issue can define a new composite once enough domains have been run with this data). A rule counts " +
+      "as recovered only when its core decision condition is semantically close to gold's, not merely its name " +
+      "(recoveryMetrics.mjs's `computeRuleMetrics`); an action's identification is separate from whether its " +
+      "input class, preconditions, effect, and verification text were also individually recovered.",
+      "",
+      ...ruleActionTableLines(ruleMetrics, actionMetrics.identification, actionMetrics),
+      "",
+    );
+    if (semanticRuleActionMetrics) {
+      lines.push(
+        "## Rules and actions (semantic)",
+        "",
+        "Same shape as above, plus a strict LLM judge given a second look at every residual rule/action the " +
+        "heuristic pass didn't match (`llmMatcher.mjs`'s `computeSemanticRuleActionMetrics`). Input-class accuracy " +
+        "and precondition/effect/verification recovery are not themselves semantically re-judged -- only whether " +
+        "the rule/action itself counts as recovered at all is.",
+        "",
+        ...ruleActionTableLines(semanticRuleActionMetrics.rules, semanticRuleActionMetrics.actions, actionMetrics),
+        "",
+      );
+    }
   }
   lines.push(
     "## Run stats",
