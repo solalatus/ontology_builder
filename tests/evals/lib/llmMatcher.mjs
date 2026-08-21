@@ -265,7 +265,20 @@ export function parseValueFidelityJudgeResponse(text, matchedControlledValue) {
 // call to call -- this file's own live determinism test checks for a
 // stable discrete verdict on a clear-cut case, not an identical continuous
 // score on an inherently ambiguous one.
-async function callJudge({ apiKey, model, system, user, onRawResponse }) {
+// `chat`, if given, replaces the OpenAI fetch below entirely -- same
+// injection point/shape as personaAgent.mjs's own `chat` override
+// (`async (messages) => ({ text, usage })`), so a caller running the
+// whole eval against a non-OpenAI provider (e.g. issue #111's Azure-backed
+// multi-domain benchmark runner) can point every real API call this eval
+// makes -- app agent, persona, classifier, AND the judge -- at the same
+// provider with one consistent override shape, not three different ones.
+// Every existing caller (undefined chat) is completely unaffected.
+async function callJudge({ apiKey, model, system, user, onRawResponse, chat = null }) {
+  if (chat) {
+    const { text } = await chat([{ role: "system", content: system }, { role: "user", content: user }], model);
+    if (onRawResponse) onRawResponse(text);
+    return text;
+  }
   let res, data;
   for (let attempt = 1; attempt <= RATE_LIMIT_MAX_ATTEMPTS; attempt++) {
     res = await fetch(CHAT_URL, {
@@ -292,48 +305,48 @@ async function callJudge({ apiKey, model, system, user, onRawResponse }) {
 // without needing a breaking change to these four functions' established
 // return-an-array contract, which several existing tests already assert on
 // directly.
-export async function judgeClasses({ apiKey, model, unmatchedGold, unmatchedRecovered, onRawResponse }) {
+export async function judgeClasses({ apiKey, model, unmatchedGold, unmatchedRecovered, onRawResponse, chat = null }) {
   if (!unmatchedGold.length || !unmatchedRecovered.length) return unmatchedGold.map((g) => ({ goldId: g.id, recoveredId: null, verdict: "NO MATCH" }));
   const { system, user } = buildClassJudgePrompt(unmatchedGold, unmatchedRecovered);
-  const text = await callJudge({ apiKey, model, system, user, onRawResponse });
+  const text = await callJudge({ apiKey, model, system, user, onRawResponse, chat });
   return parseClassJudgeResponse(text, unmatchedGold, unmatchedRecovered);
 }
 
-export async function judgeRelationships({ apiKey, model, unmatchedGold, unmatchedRecovered, onRawResponse }) {
+export async function judgeRelationships({ apiKey, model, unmatchedGold, unmatchedRecovered, onRawResponse, chat = null }) {
   if (!unmatchedGold.length || !unmatchedRecovered.length) return unmatchedGold.map((g) => ({ goldId: g.id, recoveredId: null, verdict: "NO MATCH" }));
   const { system, user } = buildRelationshipJudgePrompt(unmatchedGold, unmatchedRecovered);
-  const text = await callJudge({ apiKey, model, system, user, onRawResponse });
+  const text = await callJudge({ apiKey, model, system, user, onRawResponse, chat });
   return parseRelationshipJudgeResponse(text, unmatchedGold, unmatchedRecovered);
 }
 
-export async function judgeRules({ apiKey, model, unmatchedGold, unmatchedRecovered, onRawResponse }) {
+export async function judgeRules({ apiKey, model, unmatchedGold, unmatchedRecovered, onRawResponse, chat = null }) {
   if (!unmatchedGold.length || !unmatchedRecovered.length) return unmatchedGold.map((g) => ({ goldId: g.id, recoveredId: null, verdict: "NO MATCH" }));
   const { system, user } = buildRuleJudgePrompt(unmatchedGold, unmatchedRecovered);
-  const text = await callJudge({ apiKey, model, system, user, onRawResponse });
+  const text = await callJudge({ apiKey, model, system, user, onRawResponse, chat });
   return parseRuleJudgeResponse(text, unmatchedGold, unmatchedRecovered);
 }
 
-export async function judgeActions({ apiKey, model, unmatchedGold, unmatchedRecovered, onRawResponse }) {
+export async function judgeActions({ apiKey, model, unmatchedGold, unmatchedRecovered, onRawResponse, chat = null }) {
   if (!unmatchedGold.length || !unmatchedRecovered.length) return unmatchedGold.map((g) => ({ goldId: g.id, recoveredId: null, verdict: "NO MATCH" }));
   const { system, user } = buildActionJudgePrompt(unmatchedGold, unmatchedRecovered);
-  const text = await callJudge({ apiKey, model, system, user, onRawResponse });
+  const text = await callJudge({ apiKey, model, system, user, onRawResponse, chat });
   return parseActionJudgeResponse(text, unmatchedGold, unmatchedRecovered);
 }
 
-export async function judgeProperties({ apiKey, model, unmatchedGold, onRawResponse }) {
+export async function judgeProperties({ apiKey, model, unmatchedGold, onRawResponse, chat = null }) {
   const withCandidates = unmatchedGold.filter((p) => p.recoveredHostProperties.length);
   if (!withCandidates.length) return unmatchedGold.map((p) => ({ goldId: p.id, matchedPropertyName: null, verdict: "NO MATCH" }));
   const { system, user } = buildPropertyJudgePrompt(withCandidates);
-  const text = await callJudge({ apiKey, model, system, user, onRawResponse });
+  const text = await callJudge({ apiKey, model, system, user, onRawResponse, chat });
   const judged = parsePropertyJudgeResponse(text, withCandidates);
   const byId = new Map(judged.map((j) => [j.goldId, j]));
   return unmatchedGold.map((p) => byId.get(p.id) || { goldId: p.id, matchedPropertyName: null, verdict: "NO MATCH" });
 }
 
-export async function judgeValueFidelity({ apiKey, model, matchedControlledValue, onRawResponse }) {
+export async function judgeValueFidelity({ apiKey, model, matchedControlledValue, onRawResponse, chat = null }) {
   if (!matchedControlledValue.length) return [];
   const { system, user } = buildValueFidelityJudgePrompt(matchedControlledValue);
-  const text = await callJudge({ apiKey, model, system, user, onRawResponse });
+  const text = await callJudge({ apiKey, model, system, user, onRawResponse, chat });
   return parseValueFidelityJudgeResponse(text, matchedControlledValue);
 }
 
@@ -423,7 +436,10 @@ export function resolvePropertyJudgments(judgments, propertyDetail) {
 // plus whatever the judge additionally confirmed. Returns the exact same
 // shape as computeRecoveryMetrics so reportGenerator.mjs can render both
 // side by side with one shared table-building function.
-export async function computeSemanticRecoveryMetrics({ groundTruth, recoveredState, apiKey, model }) {
+// `chat`, if given, threads through to every judge call below -- see
+// callJudge's own comment for why (issue #111's Azure-backed multi-domain
+// benchmark runner is the first caller that actually needs this).
+export async function computeSemanticRecoveryMetrics({ groundTruth, recoveredState, apiKey, model, chat = null }) {
   const detail = computeMatchDetail(groundTruth, recoveredState);
 
   // Raw judge response text, captured via the onRawResponse callback rather
@@ -433,10 +449,10 @@ export async function computeSemanticRecoveryMetrics({ groundTruth, recoveredSta
   // flagged: today only aggregate percentages ever reach disk.
   const rawResponses = {};
 
-  const classes = await judgeClasses({ apiKey, model, unmatchedGold: detail.classes.unmatchedGold, unmatchedRecovered: detail.classes.unmatchedRecovered, onRawResponse: (t) => { rawResponses.classes = t; } });
-  const relationships = await judgeRelationships({ apiKey, model, unmatchedGold: detail.relationships.unmatchedGold, unmatchedRecovered: detail.relationships.unmatchedRecovered, onRawResponse: (t) => { rawResponses.relationships = t; } });
-  const properties = await judgeProperties({ apiKey, model, unmatchedGold: detail.properties.unmatchedGold, onRawResponse: (t) => { rawResponses.properties = t; } });
-  const valueFidelity = await judgeValueFidelity({ apiKey, model, matchedControlledValue: detail.properties.matchedControlledValue, onRawResponse: (t) => { rawResponses.valueFidelity = t; } });
+  const classes = await judgeClasses({ apiKey, model, chat, unmatchedGold: detail.classes.unmatchedGold, unmatchedRecovered: detail.classes.unmatchedRecovered, onRawResponse: (t) => { rawResponses.classes = t; } });
+  const relationships = await judgeRelationships({ apiKey, model, chat, unmatchedGold: detail.relationships.unmatchedGold, unmatchedRecovered: detail.relationships.unmatchedRecovered, onRawResponse: (t) => { rawResponses.relationships = t; } });
+  const properties = await judgeProperties({ apiKey, model, chat, unmatchedGold: detail.properties.unmatchedGold, onRawResponse: (t) => { rawResponses.properties = t; } });
+  const valueFidelity = await judgeValueFidelity({ apiKey, model, chat, matchedControlledValue: detail.properties.matchedControlledValue, onRawResponse: (t) => { rawResponses.valueFidelity = t; } });
 
   return { ...aggregateSemanticMetrics({ groundTruth, recoveredState, judgments: { classes, relationships, properties, valueFidelity } }), rawResponses };
 }
@@ -557,17 +573,17 @@ export function aggregateSemanticMetrics({ groundTruth, recoveredState, judgment
 // component metrics (input-class accuracy, precondition/effect/
 // verification recovery) are not semantically re-judged here, only
 // recomputed from the now-larger matched set.
-export async function computeSemanticRuleActionMetrics({ groundTruth, recoveredState, apiKey, model }) {
+export async function computeSemanticRuleActionMetrics({ groundTruth, recoveredState, apiKey, model, chat = null }) {
   const ruleDetail = computeRuleMatchDetail(groundTruth, recoveredState.rules || []);
   const actionDetail = computeActionMatchDetail(groundTruth, recoveredState);
 
   const rawResponses = {};
   const ruleJudgments = await judgeRules({
-    apiKey, model, unmatchedGold: ruleDetail.unmatchedGold, unmatchedRecovered: ruleDetail.unmatchedRecovered,
+    apiKey, model, chat, unmatchedGold: ruleDetail.unmatchedGold, unmatchedRecovered: ruleDetail.unmatchedRecovered,
     onRawResponse: (t) => { rawResponses.rules = t; },
   });
   const actionJudgments = await judgeActions({
-    apiKey, model, unmatchedGold: actionDetail.unmatchedGold, unmatchedRecovered: actionDetail.unmatchedRecovered,
+    apiKey, model, chat, unmatchedGold: actionDetail.unmatchedGold, unmatchedRecovered: actionDetail.unmatchedRecovered,
     onRawResponse: (t) => { rawResponses.actions = t; },
   });
 

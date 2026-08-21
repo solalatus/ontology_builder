@@ -232,6 +232,46 @@ test("judgeRules/judgeActions skip the API call entirely when either side is emp
   assert.deepEqual(actionResult, [{ goldId: "g1", recoveredId: null, verdict: "NO MATCH" }]);
 });
 
+// `chat` OVERRIDE (issue #111) -- a caller running the whole eval against a
+// non-OpenAI provider (Azure) needs every judge call routed through its own
+// provider config too, not just the app agent/persona/classifier. No live
+// call, no network: a fake `chat` in place of the real OpenAI fetch proves
+// the override is actually used (and receives the right system/user
+// prompt), never that fetch("https://api.openai.com/...") gets called.
+test("judgeClasses routes through a `chat` override instead of the OpenAI fetch when one is given", async () => {
+  const calls = [];
+  const chat = async (messages, model) => {
+    calls.push({ messages, model });
+    return { text: "1: MATCH 1 -- exact match", usage: null };
+  };
+  const gold = [{ id: "g1", label: "Service Desk", aliases: ["service desk"] }];
+  const recovered = [{ id: "r1", label: "Help Desk", meaning: "", aliases: [] }];
+  const result = await judgeClasses({ apiKey: "unused-with-chat-override", model: "my-azure-deployment", unmatchedGold: gold, unmatchedRecovered: recovered, chat });
+  assert.equal(calls.length, 1, "expected exactly one call through the override, not the real fetch");
+  assert.equal(calls[0].model, "my-azure-deployment");
+  assert.equal(calls[0].messages[0].role, "system");
+  assert.equal(calls[0].messages[1].role, "user");
+  assert.match(calls[0].messages[1].content, /Service Desk/);
+  assert.deepEqual(result, [{ goldId: "g1", recoveredId: "r1", verdict: "MATCH" }]);
+});
+
+test("computeSemanticRecoveryMetrics threads a `chat` override through its internal judgeClasses call, not just when judgeClasses is called directly", async () => {
+  // A real unmatched-gold-vs-unmatched-recovered pair (a class heuristic
+  // matching can't reach: zero label/alias overlap) so judgeClasses actually
+  // makes a call rather than short-circuiting on an empty list.
+  const groundTruth = {
+    classes: { c1: { id: "c1", label: "Widget", aliases: ["widget"] } },
+    relationships: [], properties: [], rules: [], actions: [],
+    practicalScopeClassIds: new Set(), practicalScopePropertyIds: new Set(),
+  };
+  const recoveredState = { nodes: [{ id: "n1", label: "Gadget", meaning: "", aliases: [] }], edges: [] };
+  let calls = 0;
+  const chat = async () => { calls++; return { text: "1: MATCH 1 -- same concept", usage: null }; };
+  const result = await computeSemanticRecoveryMetrics({ groundTruth, recoveredState, apiKey: "unused", model: "unused", chat });
+  assert.equal(calls, 1, "expected the override to be reached through computeSemanticRecoveryMetrics's own internal judgeClasses call");
+  assert.equal(result.classes.matched, 1, "the fake MATCH verdict should have been credited");
+});
+
 test("aggregateSemanticRuleActionMetrics: a paraphrased rule the heuristic pass genuinely cannot match is rescued by a confirmed judge verdict", () => {
   // Zero shared tokens between gold's and the recovered rule's condition
   // text -- a real paraphrase, not just a reworded synonym -- so the
