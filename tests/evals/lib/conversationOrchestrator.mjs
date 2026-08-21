@@ -242,14 +242,27 @@ export async function runOntologyRecoveryConversation({
   // Injected together so an eval cannot end up with the persona on one
   // provider and the classifier on another.
   chat = null,
+  // Issue #104: any domain's own persona.md + reference.domain.yaml can be
+  // substituted for itops's persona-eszter.md + MTSR fixture (personaAgent.
+  // mjs's own defaults), and its own derived opening line used instead of
+  // the hand-authored OPENING_LINE constant. All four default to itops's
+  // existing values, so every existing caller (which never passes these) is
+  // completely unaffected.
+  personaPath,
+  groundTruthText,
+  groundTruthFilename,
+  openingLine = OPENING_LINE,
 }) {
-  const persona = createPersonaAgent({ apiKey, model: personaModel, chat: chat ? (m) => chat(m, personaModel) : null });
+  const persona = createPersonaAgent({
+    apiKey, model: personaModel, chat: chat ? (m) => chat(m, personaModel) : null,
+    personaPath, groundTruthText, groundTruthFilename,
+  });
   const chatResponses = installRelay(page);
-  const log = [{ turn: 0, speaker: "persona", text: OPENING_LINE }];
+  const log = [{ turn: 0, speaker: "persona", text: openingLine }];
   const rawApiLog = [];
 
   const startedAt = Date.now();
-  let incomingForApp = OPENING_LINE;
+  let incomingForApp = openingLine;
   let stoppedReason = "max_turns_reached";
   let consecutiveEmptyAppTurns = 0;
   let consecutivePureAcknowledgmentTurns = 0;

@@ -114,6 +114,24 @@ function labelsMatch(a, b, threshold = CLASS_LABEL_MATCH_THRESHOLD) {
   return labelSimilarity(a, b) >= threshold;
 }
 
+// Checks a gold relationship's label against a recovered edge's label --
+// each side widened by its own aliases when it has any. Previously only
+// the recovered side could carry aliases (the app's edges gained an
+// aliases field after a real eval run found synonyms with nowhere to go --
+// see the module comment on relationshipRecovered's old inline version);
+// gold's own predicate label had nowhere to put one, since the MTSR
+// fixture's predicates never declared any. `.domain.yaml`-sourced ground
+// truth (issue #104) genuinely can: its own relationships carry a real
+// `aliases:` field the compiler pipeline populates from source synonyms,
+// so this is no longer a one-sided widening by construction -- MTSR-
+// sourced relationships simply have an empty `rel.aliases` and this
+// degrades to exactly the old one-sided behavior for them, zero change.
+export function relationshipLabelMatchesEdge(rel, edge, thresholds = MATCH_THRESHOLDS) {
+  const goldLabels = [rel.label, ...(rel.aliases || [])];
+  const edgeLabels = [edge.relation, ...(edge.aliases || [])];
+  return goldLabels.some((g) => edgeLabels.some((c) => labelsMatch(g, c, thresholds.relationshipOrProperty)));
+}
+
 function jaccard(a, b) {
   const sa = new Set(a.map(normalize));
   const sb = new Set(b.map(normalize));
@@ -250,28 +268,25 @@ export function computeRecoveryMetrics(groundTruth, recoveredState, thresholds =
 
   // Relationships: a ground-truth relationship is recovered if some edge
   // connects a recovered-node-matched-to-fromClass to a recovered-node-
-  // matched-to-toClass with a semantically close relation label. Checks the
-  // edge's own aliases too, not just its primary label -- the app's
-  // relationships gained an aliases field (mirroring classes) after a real
-  // eval run found the interviewer eliciting real relationship synonyms
-  // from the persona with nowhere to store them (see helper_agent_todo.md's
-  // dated addendum). Gold's own relationship label still has no alias list
-  // (the fixture's predicates never had one, unlike classes) -- this is a
-  // one-sided widening on the recovered side only.
-  function edgeLabelMatchesGt(gtLabel, edge) {
-    const candidates = [edge.relation, ...(edge.aliases || [])];
-    return candidates.some((c) => labelsMatch(gtLabel, c, thresholds.relationshipOrProperty));
-  }
+  // matched-to-toClass with a semantically close relation label. Checks
+  // both sides' aliases (relationshipLabelMatchesEdge, above) -- gold's own
+  // relationship can carry real aliases now (.domain.yaml-sourced ground
+  // truth; MTSR-sourced relationships simply have none, unaffected).
+  //
   // A gt relationship carrying `reciprocalLabel` (groundTruthModel.mjs's
   // mergeReciprocalRelationshipPairs) represents one real-world connection
   // gold happened to phrase from both ends -- recovered as satisfied by
   // either direction, not both, since a correctly-modeled recovered graph
   // only ever has one edge for it.
+  function reciprocalOf(rel) {
+    return rel.reciprocalLabel ? { label: rel.reciprocalLabel, aliases: rel.reciprocalAliases || [] } : null;
+  }
   function relationshipRecovered(rel, fromNodeIds, toNodeIds) {
-    const forward = edges.some((e) => fromNodeIds.has(e.source) && toNodeIds.has(e.target) && edgeLabelMatchesGt(rel.label, e));
+    const forward = edges.some((e) => fromNodeIds.has(e.source) && toNodeIds.has(e.target) && relationshipLabelMatchesEdge(rel, e, thresholds));
     if (forward) return true;
-    if (!rel.reciprocalLabel) return false;
-    return edges.some((e) => toNodeIds.has(e.source) && fromNodeIds.has(e.target) && edgeLabelMatchesGt(rel.reciprocalLabel, e));
+    const reciprocal = reciprocalOf(rel);
+    if (!reciprocal) return false;
+    return edges.some((e) => toNodeIds.has(e.source) && fromNodeIds.has(e.target) && relationshipLabelMatchesEdge(reciprocal, e, thresholds));
   }
   let relMatched = 0;
   for (const rel of groundTruth.relationships) {
@@ -287,10 +302,11 @@ export function computeRecoveryMetrics(groundTruth, recoveredState, thresholds =
     const tgtGtClass = recoveredToGt.get(e.target);
     if (!srcGtClass || !tgtGtClass) continue;
     const matchesSomeGtRel = groundTruth.relationships.some((rel) => {
-      const forward = rel.fromClassId === srcGtClass && rel.toClassId === tgtGtClass && edgeLabelMatchesGt(rel.label, e);
+      const forward = rel.fromClassId === srcGtClass && rel.toClassId === tgtGtClass && relationshipLabelMatchesEdge(rel, e, thresholds);
       if (forward) return true;
-      if (!rel.reciprocalLabel) return false;
-      return rel.toClassId === srcGtClass && rel.fromClassId === tgtGtClass && edgeLabelMatchesGt(rel.reciprocalLabel, e);
+      const reciprocal = reciprocalOf(rel);
+      if (!reciprocal) return false;
+      return rel.toClassId === srcGtClass && rel.fromClassId === tgtGtClass && relationshipLabelMatchesEdge(reciprocal, e, thresholds);
     });
     if (matchesSomeGtRel) recoveredRelMatchedToGt++;
   }
@@ -374,15 +390,15 @@ export function computeMatchDetail(groundTruth, recoveredState, thresholds = MAT
     .filter((n) => !matchedRecoveredNodeIds.has(n.id))
     .map((n) => ({ id: n.id, label: n.label, meaning: n.meaning, aliases: n.aliases || [] }));
 
-  function edgeLabelMatchesGt(gtLabel, edge) {
-    const candidates = [edge.relation, ...(edge.aliases || [])];
-    return candidates.some((c) => labelsMatch(gtLabel, c, thresholds.relationshipOrProperty));
+  function reciprocalOf(rel) {
+    return rel.reciprocalLabel ? { label: rel.reciprocalLabel, aliases: rel.reciprocalAliases || [] } : null;
   }
   function relationshipHeuristicMatch(rel, fromNodeIds, toNodeIds) {
-    const forward = edges.some((e) => fromNodeIds.has(e.source) && toNodeIds.has(e.target) && edgeLabelMatchesGt(rel.label, e));
+    const forward = edges.some((e) => fromNodeIds.has(e.source) && toNodeIds.has(e.target) && relationshipLabelMatchesEdge(rel, e, thresholds));
     if (forward) return true;
-    if (!rel.reciprocalLabel) return false;
-    return edges.some((e) => toNodeIds.has(e.source) && fromNodeIds.has(e.target) && edgeLabelMatchesGt(rel.reciprocalLabel, e));
+    const reciprocal = reciprocalOf(rel);
+    if (!reciprocal) return false;
+    return edges.some((e) => toNodeIds.has(e.source) && fromNodeIds.has(e.target) && relationshipLabelMatchesEdge(reciprocal, e, thresholds));
   }
   const labelOf = (id) => (groundTruth.classes[id] || {}).label || id;
   const unmatchedGoldRelationships = [];
@@ -409,10 +425,11 @@ export function computeMatchDetail(groundTruth, recoveredState, thresholds = MAT
     if (!srcGtClass || !tgtGtClass) continue; // endpoints never matched a gt class at all -- not a wording question either
     relEligibleRecoveredCount++;
     const matchesSomeGtRel = groundTruth.relationships.some((rel) => {
-      const forward = rel.fromClassId === srcGtClass && rel.toClassId === tgtGtClass && edgeLabelMatchesGt(rel.label, e);
+      const forward = rel.fromClassId === srcGtClass && rel.toClassId === tgtGtClass && relationshipLabelMatchesEdge(rel, e, thresholds);
       if (forward) return true;
-      if (!rel.reciprocalLabel) return false;
-      return rel.toClassId === srcGtClass && rel.fromClassId === tgtGtClass && edgeLabelMatchesGt(rel.reciprocalLabel, e);
+      const reciprocal = reciprocalOf(rel);
+      if (!reciprocal) return false;
+      return rel.toClassId === srcGtClass && rel.fromClassId === tgtGtClass && relationshipLabelMatchesEdge(reciprocal, e, thresholds);
     });
     if (matchesSomeGtRel) {
       relMatchedRecoveredCount++;
@@ -507,20 +524,16 @@ export function computeHeuristicMatchPairs(groundTruth, recoveredState, threshol
   const edges = recoveredState.edges || [];
   const { gtToRecovered, matches: classMatches } = matchClasses(groundTruth, nodes, thresholds);
 
-  function edgeLabelMatchesGt(gtLabel, edge) {
-    const candidates = [edge.relation, ...(edge.aliases || [])];
-    return candidates.some((c) => labelsMatch(gtLabel, c, thresholds.relationshipOrProperty));
-  }
-
   const relationshipMatches = [];
   for (const rel of groundTruth.relationships) {
     const fromNodeIds = new Set(gtToRecovered.get(rel.fromClassId) || []);
     const toNodeIds = new Set(gtToRecovered.get(rel.toClassId) || []);
     if (!fromNodeIds.size || !toNodeIds.size) continue;
-    const forwardEdge = edges.find((e) => fromNodeIds.has(e.source) && toNodeIds.has(e.target) && edgeLabelMatchesGt(rel.label, e));
+    const forwardEdge = edges.find((e) => fromNodeIds.has(e.source) && toNodeIds.has(e.target) && relationshipLabelMatchesEdge(rel, e, thresholds));
     if (forwardEdge) { relationshipMatches.push({ goldId: rel.id, edgeId: forwardEdge.id, direction: "forward" }); continue; }
     if (rel.reciprocalLabel) {
-      const reciprocalEdge = edges.find((e) => toNodeIds.has(e.source) && fromNodeIds.has(e.target) && edgeLabelMatchesGt(rel.reciprocalLabel, e));
+      const reciprocal = { label: rel.reciprocalLabel, aliases: rel.reciprocalAliases || [] };
+      const reciprocalEdge = edges.find((e) => toNodeIds.has(e.source) && fromNodeIds.has(e.target) && relationshipLabelMatchesEdge(reciprocal, e, thresholds));
       if (reciprocalEdge) relationshipMatches.push({ goldId: rel.id, edgeId: reciprocalEdge.id, direction: "reciprocal" });
     }
   }
