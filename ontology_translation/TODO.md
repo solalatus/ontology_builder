@@ -147,16 +147,21 @@ succeeds end to end. Until then, this file is the only record.
   cost **~$8.61** total — see the Log for the full breakdown. Still well
   inside the ~$21.57 "Large tier, 3 correction rounds" ceiling from the
   original cost estimate.
-- **#104–#105, #107, #110–#111: not started.**
+- **#104–#105, #107, #111: not started.**
 - **#109 (IOF Supply Chain): done, merged.** See
   `ontology_translation/domains/iof-supply-chain/` — two spot-check
   rounds, both with a real reject-fixed-generalized cycle (an invented
   `allowed` list; a domain/range-mismatched relationship).
-- **#108 (IOF Maintenance): done, spot-checked clean, not yet merged —
-  see 2026-08-20 Log entry.** `ontology_translation/domains/iof-maintenance/`,
-  PR pending on `ontology-translation/108-iof-maintenance`.
-- Three domains translated: `brick-hvac` and `iof-supply-chain` merged to
-  `main`; `iof-maintenance` awaiting PR merge.
+- **#108 (IOF Maintenance): done, merged (PR #128).** See
+  `ontology_translation/domains/iof-maintenance/` and the 2026-08-20 Log
+  entry.
+- **#110 (FIBO Loans): done, spot-checked clean, not yet merged — see
+  2026-08-21 Log entry.** `ontology_translation/domains/fibo-loans/`, PR
+  pending on `ontology-translation/110-fibo-loans`. First domain built
+  from more than one source file (`source-manifest.yaml`'s new
+  `extra_source_urls`).
+- Four domains translated: `brick-hvac`, `iof-supply-chain`, and
+  `iof-maintenance` merged to `main`; `fibo-loans` awaiting PR merge.
 
 ## Log / Decisions
 
@@ -1937,3 +1942,93 @@ reference and record deltas/decisions here instead.)*
   Cost: ~$0.02 (two targeted `repair.py` calls) + ~$1.50 (two full
   official `evaluate.py` re-runs to confirm convergence after each
   repair round) + $0 sample review.
+
+- 2026-08-21 -- **#110 (FIBO Loans) translated, on
+  `ontology-translation/110-fibo-loans`.** Same standing policy as #108,
+  reaffirmed by the reviewer again at the start of this round: fix the
+  pipeline at the most generalizable level, never encode this-or-any
+  specific ontology's own vocabulary or structure into pipeline code or
+  prompts.
+
+  **One real, general pipeline gap found and fixed before touching
+  FIBO's own content**: FIBO's LOAN module (`LOAN/LoansGeneral/
+  Loans.rdf`) declares `Loan`/`CreditFacility`/etc. but leaves
+  `Borrower`/`Lender`/`Principal`/`Interest`/`Collateral` declared only
+  in a separate file it `owl:imports`
+  (`FBC/DebtAndEquities/Debt.rdf`) -- a real architectural gap, since
+  every tool in this pipeline only ever supported exactly one source
+  file per domain (`fetch.py --out` a single path, `extract.py --input`
+  a single file). Generalized rather than special-cased for FIBO:
+  `source-manifest.yaml` gained optional `extra_source_urls`/
+  `extra_source_sha256` (any number of additional files, symmetric with
+  the existing `source_url`/`source_sha256`, every existing single-file
+  manifest unaffected); `fetch.py` downloads and independently
+  checksum-verifies every file (`--out` becomes a directory once
+  there's more than one); `extract.py --input` now takes one or more
+  paths and merges them into a single `rdflib.Graph` before extraction/
+  scope-selection -- no change needed to extraction or `select_scope()`
+  itself, since RDFLib merges triples across repeated `parse()` calls by
+  construction. `run_pipeline.py`'s auto-fetch path threads a multi-file
+  manifest through the same way end to end. This is not a FIBO-specific
+  shape -- any ontology split across `owl:imports`-linked files (Brick/
+  CCO-style splits, among many) benefits the same way. 20 new regression
+  tests (multi-file merge + cross-file scope-selection in `extract.py`;
+  a new `tests/test_fetch.py`, since `fetch.py` had no dedicated test
+  file before this; `extra_source_urls` manifest parsing/round-trip; a
+  real offline end-to-end `run_pipeline.py` integration test). Full
+  suite: 291/291. Committed separately, before the FIBO domain folder
+  existed at all.
+
+  **Free validation of an earlier generalization**: `extract.py`'s
+  naming-convention annotation-predicate discovery (added for IOF
+  Maintenance's `iof-av:` vocabulary, issue #108) picked up FIBO's own
+  `cmns-av:explanatoryNote` predicate with zero FIBO-specific code --
+  direct evidence the earlier fix actually generalizes rather than just
+  happening to also match one more ontology's naming choice.
+
+  **Domain conversion**: source = `LOAN/LoansGeneral/Loans.rdf` +
+  `FBC/DebtAndEquities/Debt.rdf` (`master_2026Q1`, both checksum-pinned,
+  `scope.roots: []` -- no filter, same "let the compiler narrow a
+  candidate set with real dispositions" pattern as Brick's 81→29). 3
+  independent compiler runs (55/31/30 classes); run-1 chosen (richest,
+  0 structural errors/warnings, squarely in the issue's 30-60 class
+  target -- its dispositions correctly excluded `Lease`/
+  `MotorVehicleLease`/`CapitalLease` as out of scope for a loan-contract
+  slice). Two real fix passes: `reinstate.py` reinstated 2 of 3
+  judge-flagged unjustified exclusions (`Accrual`,
+  `InterestRateSettingEvent`) and correctly reground-and-kept-excluded
+  the third (`CreditAgreementRepaidPeriodically` -- already represented
+  via existing repayment/schedule classes, not a principled omission
+  gap); a fresh judging round then caught `reinstate.py`'s own new
+  relationship (`InterestPaymentTerms governsPaymentOf Accrual`) as
+  majority-unsupported, and `repair.py` correctly dropped it rather than
+  force a reground the source definitions didn't support. Final: 57
+  classes / 31 relationships / 7 rules / 5 actions / 12 CQs,
+  `hard_gates_ok: True`, 0 unsupported (4 contested), 0 unjustified
+  exclusions, 100% provenance, 100% reverse coverage, 100% CQ support,
+  round-trip 0.906.
+
+  **Manual spot-check, round 1: 15/15 accept, 0 reject.**
+  10%-stratified sample (15 of 149, largest-remainder allocation, seed
+  110), reviewed live against a freshly regenerated `source_ir.json`.
+  Reviewer then asked what the report's non-hard-gate findings actually
+  were before approving -- all three investigated and confirmed
+  non-actionable: `referential_consistency`'s 5 flagged issues are all
+  the same known false-positive shape (documented in `evaluate.py`'s own
+  module comment: "rate" as ordinary English inside
+  `actions.reviewVariableRateSetup`'s text, not a dangling reference to
+  any specific class's `.rate` property) -- confirmed this gate has now
+  gone 0-for-3 real domains on catching anything the compiler/repair
+  prompts' own dropping-check doesn't already prevent, so left as a
+  report-only diagnostic rather than invested in an LLM-judged
+  replacement; `translation_stability`'s lower F1 (relationships=0.64,
+  properties=0.67) reflects the 3 independent runs genuinely picking
+  different class-set sizes on a larger source, not a correctness
+  signal; every contested semantic/disposition-judging item's raw votes
+  were pulled and confirmed majority-affirmed. Full detail:
+  `domains/fibo-loans/manual-spot-check.md`. PR opened per issue #110,
+  reviewer merging directly (not merged by the agent).
+
+  Cost: ~$1.49 (3 compiler runs) + ~$0.02 (reinstate) + ~$0.01 (repair)
+  + ~$1.50 (two full official `evaluate.py` re-runs to confirm
+  convergence after each fix round) + $0 sample review.

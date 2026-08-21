@@ -1,0 +1,408 @@
+{
+  "rounds": [
+    {
+      "round": 1,
+      "date": "2026-08-21",
+      "reviewer": "repo owner (szablevi@gmail.com), in-session with the coding agent",
+      "artefact_definition": "every individually source-mapped element in translation.json mappings list -- classes, class properties, relationships, rules, actions. Competency questions excluded.",
+      "sampling": {
+        "method": "stratified by artefact type, proportional allocation (largest remainder), seed=110 (matching issue number)",
+        "population": 149,
+        "sample_size": 15,
+        "allocation": {
+          "classes": 6,
+          "properties": 5,
+          "relationships": 3,
+          "rules": 1,
+          "actions": 0
+        }
+      },
+      "items": [
+        {
+          "target_path": "classes.AmortizationSchedule",
+          "target_content": {
+            "meaning": "A schedule of periodic payments that specifies changes in the balance of the debt over time.",
+            "properties": {"anticipatedNumberOfPayments": {"type": "number"}}
+          },
+          "mapping": {
+            "source_iris": ["https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/AmortizationSchedule"],
+            "source_evidence": "\"schedule of periodic payments ... that specify changes in the balance of the debt over time\"",
+            "confidence": "high",
+            "rationale": "Direct mapping of an operational repayment schedule."
+          },
+          "real_source_defs": [
+            {
+              "iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/AmortizationSchedule",
+              "kind": "class",
+              "labels": ["amortization schedule"],
+              "definitions": [
+                "schedule of periodic payments (repayment installments) that specify changes in the balance of the debt over time"
+              ],
+              "parents": [
+                "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/ProjectedContractEventSchedule",
+                "https://spec.edmcouncil.org/fibo/ontology/FND/ProductsAndServices/PaymentsAndSchedules/PaymentSchedule"
+              ]
+            }
+          ]
+        },
+        {
+          "target_path": "classes.CommittedCreditFacility",
+          "target_content": {
+            "meaning": "A credit facility that is a confirmed source of financing for the borrower, as long as the borrower meets the conditions of the agreement."
+          },
+          "mapping": {
+            "source_iris": ["https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/CommittedCreditFacility"],
+            "source_evidence": "\"confirmed source of financing for the borrower, as long as the borrower meets the conditions\"",
+            "confidence": "high",
+            "rationale": "Direct mapping of a facility commitment status subtype."
+          },
+          "real_source_defs": [
+            {
+              "iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/CommittedCreditFacility",
+              "kind": "class",
+              "labels": ["committed credit facility"],
+              "definitions": ["credit facility that is a confirmed source of financing for the borrower, as long as the borrower meets the conditions of the agreement"]
+            }
+          ]
+        },
+        {
+          "target_path": "classes.DayCountConvention",
+          "target_content": {
+            "meaning": "A business recurrence interval convention used to calculate the number of days in an interest payment for accrued interest or present value calculations on debt instruments."
+          },
+          "mapping": {
+            "source_iris": ["https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/DayCountConvention"],
+            "source_evidence": "\"used to calculate the number of days in an interest payment\"",
+            "confidence": "high",
+            "rationale": "Direct mapping of a key interest-calculation concept."
+          },
+          "real_source_defs": [
+            {
+              "iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/DayCountConvention",
+              "kind": "class",
+              "labels": ["day-count convention"],
+              "definitions": [
+                "a business recurrence interval convention that is used to calculate the number of days in an interest payment, which applies to the amount of accrued interest or the present value for debt instruments"
+              ]
+            }
+          ]
+        },
+        {
+          "target_path": "classes.InterestPayment",
+          "target_content": {"meaning": "An event reflecting the actual payment of interest."},
+          "mapping": {
+            "source_iris": ["https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/InterestPayment"],
+            "source_evidence": "\"event reflecting the actual payment of interest\"",
+            "confidence": "high",
+            "rationale": "Direct mapping of an interest-payment event."
+          },
+          "real_source_defs": [
+            {
+              "iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/InterestPayment",
+              "kind": "class",
+              "labels": ["interest payment"],
+              "definitions": ["event reflecting the actual payment of interest"]
+            }
+          ]
+        },
+        {
+          "target_path": "classes.InterestPaymentSchedule",
+          "target_content": {
+            "meaning": "A regular, contract-specific schedule including the dates on which interest is due to be paid.",
+            "properties": {"anticipatedNumberOfPayments": {"type": "number"}}
+          },
+          "mapping": {
+            "source_iris": ["https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/InterestPaymentSchedule"],
+            "source_evidence": "\"schedule including the dates on which interest is due to be paid\"",
+            "confidence": "high",
+            "rationale": "Direct mapping of an operational schedule concept."
+          },
+          "real_source_defs": [
+            {
+              "iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/InterestPaymentSchedule",
+              "kind": "class",
+              "labels": ["interest payment schedule"],
+              "definitions": ["regular, contract-specific schedule including the dates on which interest is due to be paid"]
+            }
+          ]
+        },
+        {
+          "target_path": "classes.SubFacility",
+          "target_content": {
+            "meaning": "A portion of a credit facility extended to the borrower for some purpose, possibly per some schedule specified in the facility."
+          },
+          "mapping": {
+            "source_iris": ["https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/SubFacility"],
+            "source_evidence": "\"portion of a credit facility extended to the borrower for some purpose\"",
+            "confidence": "high",
+            "rationale": "Direct mapping of a facility subdivision concept."
+          },
+          "real_source_defs": [
+            {
+              "iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/SubFacility",
+              "kind": "class",
+              "labels": ["sub-facility"],
+              "definitions": ["portion of a credit facility extended to the borrower for some purpose, possibly per some schedule specified in the facility"]
+            }
+          ]
+        },
+        {
+          "target_path": "classes.AmortizationSchedule.properties.anticipatedNumberOfPayments",
+          "target_content": {"type": "number"},
+          "mapping": {
+            "source_iris": [
+              "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/AmortizationSchedule",
+              "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasAnticipatedNumberOfPayments"
+            ],
+            "source_evidence": "\"specifies the number of payments promised per the terms of the contract\"",
+            "confidence": "medium",
+            "rationale": "Standard schedule attribute supported by the explicit datatype property."
+          },
+          "real_source_defs": [
+            {
+              "iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasAnticipatedNumberOfPayments",
+              "kind": "datatype_property",
+              "labels": ["has anticipated number of payments"],
+              "definitions": ["specifies the number of payments promised per the terms of the contract over the lifetime of the contract assuming all payments are made"],
+              "domain": [],
+              "range": ["http://www.w3.org/2001/XMLSchema#positiveInteger"]
+            }
+          ],
+          "reviewer_note": "No owl:Restriction directly ties this property to AmortizationSchedule (rdfs:domain is unset, common in FIBO) -- confidence is honestly labeled 'medium' and the property's own real definition/existence is genuinely grounded. Same accepted standard-practice-pairing pattern as Brick/IOF."
+        },
+        {
+          "target_path": "classes.CreditFacility.properties.creditLimit",
+          "target_content": {"type": "number"},
+          "mapping": {
+            "source_iris": [
+              "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/CreditFacility",
+              "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasCreditLimit"
+            ],
+            "source_evidence": "\"specifies the maximum amount of credit that may be borrowed\"",
+            "confidence": "high",
+            "rationale": "Direct operational attribute of revolving or facility-style credit."
+          },
+          "real_source_defs": [
+            {
+              "iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasCreditLimit",
+              "kind": "datatype_property",
+              "labels": ["has credit limit"],
+              "definitions": ["specifies the maximum amount of credit that may be borrowed with respect to a specific agreement (e.g. for line of credit)"]
+            }
+          ]
+        },
+        {
+          "target_path": "classes.InterestPaymentTerms.properties.compoundingFrequency",
+          "target_content": {"type": "text"},
+          "mapping": {
+            "source_iris": [
+              "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/InterestPaymentTerms",
+              "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasCompoundingFrequency"
+            ],
+            "source_evidence": "\"the frequency at which interest is added to the principal\"",
+            "confidence": "high",
+            "rationale": "Compounding frequency is an explicit interest-terms attribute."
+          },
+          "real_source_defs": [
+            {
+              "iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasCompoundingFrequency",
+              "kind": "datatype_property",
+              "labels": ["has compounding frequency"],
+              "definitions": ["the frequency at which interest is added to the principal of the debt over the course of the agreement"],
+              "range": ["https://spec.edmcouncil.org/fibo/ontology/FND/DatesAndTimes/FinancialDates/RecurrenceInterval"]
+            }
+          ]
+        },
+        {
+          "target_path": "classes.InterestPaymentTerms.properties.initialInterestPaymentDate",
+          "target_content": {"type": "date"},
+          "mapping": {
+            "source_iris": [
+              "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/InterestPaymentTerms",
+              "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasInitialInterestPaymentDate"
+            ],
+            "source_evidence": "\"the date on which the first interest payment is due\"",
+            "confidence": "high",
+            "rationale": "Direct interest-terms attribute from an explicit property."
+          },
+          "real_source_defs": [
+            {
+              "iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasInitialInterestPaymentDate",
+              "kind": "datatype_property",
+              "labels": ["has initial interest payment date"],
+              "definitions": ["the date on which the first interest payment is due"],
+              "range": ["https://www.omg.org/spec/Commons/DatesAndTimes/Date"]
+            }
+          ]
+        },
+        {
+          "target_path": "classes.LoanToValueRatio.properties.ratio",
+          "target_content": {"type": "number"},
+          "mapping": {
+            "source_iris": ["https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/LoanToValueRatio"],
+            "source_evidence": "\"ratio, expressed as a percentage\"",
+            "confidence": "medium",
+            "rationale": "The class definition itself implies the numeric percentage value."
+          },
+          "real_source_defs": [
+            {
+              "iri": "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/LoanToValueRatio",
+              "kind": "class",
+              "labels": ["loan-to-value ratio"],
+              "definitions": ["ratio, expressed as a percentage, between the principal amount of the loan and the appraised value of the asset securing the financing"]
+            }
+          ]
+        },
+        {
+          "target_path": "relationships[17]",
+          "target_content": {
+            "name": "secures",
+            "from": "SecurityAgreement",
+            "to": "Collateral",
+            "meaning": "The collateral over which the security agreement grants a financial interest.",
+            "aliases": []
+          },
+          "mapping": {
+            "source_iris": [
+              "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/SecurityAgreement",
+              "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/Collateral",
+              "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/isCollateralizationOf"
+            ],
+            "source_evidence": "Security agreement definition says it grants a financial interest in some collateral; collateralization property means an agreement pledging the asset as security.",
+            "confidence": "medium",
+            "rationale": "The relationship captures the security agreement's linkage to collateral using the source agreement and collateral semantics."
+          },
+          "real_source_defs": [
+            {
+              "iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/SecurityAgreement",
+              "kind": "class",
+              "labels": ["security agreement"],
+              "definitions": ["collateral agreement that grants a financial interest in some collateral to a party that is not an owner of that collateral, specifying terms including relative duties and rights, over and above those specified in the primary contract, regarding the disposition of the asset used as collateral"]
+            },
+            {
+              "iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/isCollateralizationOf",
+              "kind": "object_property",
+              "labels": ["is collateralization of"],
+              "definitions": ["relates some collateral to an agreement pledging the asset as security"],
+              "domain": ["https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/Collateral"]
+            }
+          ],
+          "reviewer_note": "The real source property (isCollateralizationOf) runs Collateral -> SecurityAgreement; the domain relationship is the inverse direction under a more natural name (secures: SecurityAgreement -> Collateral), disclosed honestly in the rationale rather than hidden -- same accepted direction-flip-for-readability pattern seen in IOF Supply Chain."
+        },
+        {
+          "target_path": "relationships[22]",
+          "target_content": {
+            "name": "hasSchedule",
+            "from": "Loan",
+            "to": "PrincipalPaymentSchedule",
+            "meaning": "The principal payment schedule associated with the loan.",
+            "aliases": []
+          },
+          "mapping": {
+            "source_iris": [
+              "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/Loan",
+              "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/PrincipalPaymentSchedule"
+            ],
+            "source_evidence": "Standard lending practice for the specific concepts Loan and PrincipalPaymentSchedule, grounded by the schedule definition for dates on which principal is due.",
+            "confidence": "medium",
+            "rationale": "Loans with principal repayment commonly carry a principal payment schedule."
+          },
+          "real_source_defs": [
+            {
+              "iri": "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/Loan",
+              "kind": "class",
+              "labels": ["loan"]
+            },
+            {
+              "iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/PrincipalPaymentSchedule",
+              "kind": "class",
+              "labels": ["principal payment schedule"]
+            }
+          ]
+        },
+        {
+          "target_path": "relationships[2]",
+          "target_content": {
+            "name": "hasBorrower",
+            "from": "CreditAgreement",
+            "to": "Borrower",
+            "meaning": "The borrower that incurs the debt under the credit agreement.",
+            "aliases": []
+          },
+          "mapping": {
+            "source_iris": [
+              "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/CreditAgreement",
+              "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/Borrower",
+              "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasBorrower"
+            ],
+            "source_evidence": "\"relates a contract, such as a debt instrument or credit agreement, to ... borrower\"",
+            "confidence": "high",
+            "rationale": "The property definition explicitly names credit agreements."
+          },
+          "real_source_defs": [
+            {
+              "iri": "https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/hasBorrower",
+              "kind": "object_property",
+              "labels": ["has borrower"],
+              "definitions": ["relates a contract, such as a debt instrument or credit agreement, to one or more parties that are incurring the debt"],
+              "range": ["https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/Borrower"]
+            }
+          ]
+        },
+        {
+          "target_path": "rules.paymentHistoryContainsPayments",
+          "target_content": {
+            "conditions": [
+              "loan hasPaymentHistory PaymentHistory",
+              "payment history hasIndividualPayment IndividualPaymentTransaction"
+            ]
+          },
+          "mapping": {
+            "source_iris": [
+              "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/Loan",
+              "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/PaymentHistory",
+              "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/IndividualPaymentTransaction",
+              "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/hasPaymentHistory",
+              "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/hasIndividualPayment"
+            ],
+            "source_evidence": "Payment history is a record of actual payments, and hasIndividualPayment links those actual payments to the history.",
+            "confidence": "high",
+            "rationale": "Operationally, a payment history should contain individual payment records."
+          },
+          "real_source_defs": [
+            {
+              "iri": "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/hasPaymentHistory",
+              "kind": "object_property",
+              "labels": ["has payment history"],
+              "definitions": ["relates a credit agreement, loan, or commitment to any history of payments that have been made by the borrower up to the point that payment history is requested"]
+            },
+            {
+              "iri": "https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/hasIndividualPayment",
+              "kind": "object_property",
+              "labels": ["has individual payment"],
+              "definitions": ["links an actual payment of principal, interest, and other related amounts to the overall payment history for an account"]
+            }
+          ]
+        }
+      ],
+      "verdicts": {
+        "classes.AmortizationSchedule": "accept",
+        "classes.CommittedCreditFacility": "accept",
+        "classes.DayCountConvention": "accept",
+        "classes.InterestPayment": "accept",
+        "classes.InterestPaymentSchedule": "accept",
+        "classes.SubFacility": "accept",
+        "classes.AmortizationSchedule.properties.anticipatedNumberOfPayments": "accept",
+        "classes.CreditFacility.properties.creditLimit": "accept",
+        "classes.InterestPaymentTerms.properties.compoundingFrequency": "accept",
+        "classes.InterestPaymentTerms.properties.initialInterestPaymentDate": "accept",
+        "classes.LoanToValueRatio.properties.ratio": "accept",
+        "relationships[17]": "accept",
+        "relationships[22]": "accept",
+        "relationships[2]": "accept",
+        "rules.paymentHistoryContainsPayments": "accept"
+      },
+      "result": "15/15 accept, 0/15 reject"
+    }
+  ]
+}
