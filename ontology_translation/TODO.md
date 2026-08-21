@@ -147,7 +147,21 @@ succeeds end to end. Until then, this file is the only record.
   cost **~$8.61** total — see the Log for the full breakdown. Still well
   inside the ~$21.57 "Large tier, 3 correction rounds" ceiling from the
   original cost estimate.
-- **#104–#105, #107, #111: not started.**
+- **#104 (`.domain.yaml` as canonical ground truth): done, not yet
+  merged — see the dated Log entry below.** `tests/evals/lib/
+  groundTruthModel.mjs` now loads any `ontology_translation/domains/*/
+  reference.domain.yaml` as hidden ground truth, auto-discovered (no
+  manifest.yaml), alongside the pre-existing MTSR path (kept, unchanged,
+  as itops's own default). `EVAL_DOMAIN=<id>` picks which domain
+  `tests/evals/ontology-recovery.eval.spec.mjs` runs a live interview
+  against, including the persona side (issue #104's own scope was
+  widened to cover this — see the Log entry for why). itops itself has
+  an equivalent `.domain.yaml` now too (`ontology_translation/domains/
+  itops/`), produced by a re-runnable conversion script, confirmed to
+  reproduce the original MTSR fixture's scores.
+- **#105 (rules/actions in ontology-recovery scoring): not started yet —
+  next up in the same session.**
+- **#107, #111: not started.**
 - **#109 (IOF Supply Chain): done, merged.** See
   `ontology_translation/domains/iof-supply-chain/` — two spot-check
   rounds, both with a real reject-fixed-generalized cycle (an invented
@@ -2032,3 +2046,137 @@ reference and record deltas/decisions here instead.)*
   Cost: ~$1.49 (3 compiler runs) + ~$0.02 (reinstate) + ~$0.01 (repair)
   + ~$1.50 (two full official `evaluate.py` re-runs to confirm
   convergence after each fix round) + $0 sample review.
+
+- 2026-08-21 -- **#104 implemented, on
+  `ontology-translation/104-domain-yaml-ground-truth`.** Reviewed against
+  the current state of the repo first, per the reviewer's own explicit
+  instruction ("review them to make sense in the current context") --
+  the issue was written 5 days before any real `.domain.yaml` existed,
+  and two real decisions came out of that review that were put to the
+  reviewer rather than assumed:
+
+  1. **No `manifest.yaml`.** The issue's own text specifies a
+     hand-maintained `ontology_translation/domains/manifest.yaml`
+     enumerating each domain's paths. All 4 domains built since (Brick,
+     both IOF domains, FIBO) never needed one -- each folder already
+     self-describes via a fixed filename convention plus its own
+     `source-manifest.yaml`'s `id:` field, which already matches the
+     directory name exactly in all 4 cases. Reviewer chose
+     auto-discovery over the issue's literal spec:
+     `groundTruthModel.mjs`'s `listAvailableDomains()`/
+     `resolveDomainYamlPath()` scan `ontology_translation/domains/*/`
+     for a `reference.domain.yaml`, nothing to keep in sync by hand.
+  2. **Live interview scope, not just scoring.** The issue's own
+     "relevant current code" list only named the ground-truth loader/
+     scoring files, but its own "Runner" section
+     (`EVAL_DOMAIN=brick-hvac node --test ...`) only makes sense if the
+     *live simulated interview* -- not just the scoring layer -- runs
+     against that domain. That meant `personaAgent.mjs` (hardcoded to
+     itops's own `persona-eszter.md` + a scripted opening line) needed
+     to generalize too, which the issue's own file list didn't
+     anticipate. Reviewer chose to do this now rather than defer it:
+     the domain-agnostic scaffolding `persona-eszter.md` used to carry
+     inline (the "don't leak the hidden file" rule, ending-the-interview
+     cue, consistency checklist, question-type-answering guidance) was
+     extracted into a new shared `fixtures/persona-experiment-wrapper.md`
+     any domain's `persona.md` can now reuse; `persona-eszter.md` itself
+     was trimmed to keep only its itops-specific remainder (regression-
+     tested for content-completeness in `tests/persona-agent.spec.mjs` --
+     every substantive rule from the original file is still present
+     somewhere in the reassembled prompt, reordered but not lost). Each
+     domain's own opening line is derived mechanically from its
+     `persona.md`'s "Who they are" section (second-person -> first-
+     person, plus a fixed generic invitation) rather than requiring a
+     hand-authored scripted paragraph every future domain's `persona.md`
+     would otherwise need to remember -- itops's own hand-authored
+     `OPENING_LINE` stays exactly as it was, untouched, per the
+     reviewer's own explicit choice not to homogenize an
+     already-validated opener away.
+
+  **The loader itself** (`groundTruthModel.mjs`): `loadGroundTruthModel({
+  format, path })` now dispatches to either the pre-existing MTSR parser
+  (`itops_mtsr.yaml`'s own schema, completely unchanged behavior) or a
+  new `.domain.yaml` parser, converging on the same normalized shape
+  both feed to `recoveryMetrics.mjs`. Every one of the 10 existing
+  zero-arg `loadGroundTruthModel()` call sites across `tests/evals/*.mjs`
+  is untouched -- the zero-arg form still means exactly "MTSR, the
+  bundled fixture," unchanged. Field mapping (now grounded in 4 real
+  accepted `.domain.yaml` files instead of the issue's own approximate
+  sketch): `classes.*` -> gold classes, nested `properties` -> gold
+  properties (`allowed` -> controlled values, inlined -- no separate
+  valueSets indirection needed the way MTSR's schema requires),
+  `relationships[]` -> gold relationships (`aliases` -> matching aliases,
+  credited on the **gold side now too**, not just the recovered side --
+  MTSR's own predicates never had anywhere to put one, so this was a
+  genuine one-sided gap `recoveryMetrics.mjs`'s own comment used to
+  document as a known limitation; `.domain.yaml` relationships really do
+  carry real aliases the compiler pipeline populates from source
+  synonyms), `rules`/`competency_questions`/action fields -> the
+  practical-scope corpus (the issue's own explicit list). `rules` is a
+  genuinely new normalized field (MTSR has no rules concept at all,
+  always empty there) -- exposed now because the scope corpus needs
+  rule-condition text, but not yet scored (#105's job, same
+  "exposed, not yet consumed" status `actions` already had before this
+  issue).
+
+  **One real correctness bug caught by tracing the matching code before
+  writing the loader, not after**: `.domain.yaml` classes are keyed by
+  PascalCase identifiers (`AirHandlingUnit`), not a separate natural-
+  language `label` field. `recoveryMetrics.mjs`'s own `normalize()`
+  splits camelCase *before* lowercasing (a real fix from Brick's own
+  session, for exactly this "the app's tool schema uses camelCase"
+  reason) -- so `groundTruthModel.mjs`'s own class-alias construction
+  had to split camelCase first too, before ever calling
+  `normalizeLabel()`. Lowercasing first (the naive order) would turn
+  `"AirHandlingUnit"` into the single opaque token `"airhandlingunit"`,
+  which can then never Jaccard-match a recovered node's real, space-
+  separated `"Air Handling Unit"` label -- caught by tracing the call
+  chain, not by a failing test, though a regression test for it exists
+  now (`tests/ground-truth-domain-yaml.spec.mjs`).
+
+  **itops migration**: `tests/evals/convert-itops-to-domain-yaml.mjs`,
+  a re-runnable script (not a one-off hand transcription, per the
+  reviewer's own explicit choice) converts `itops_mtsr.yaml` into
+  `ontology_translation/domains/itops/reference.domain.yaml` +
+  `persona.md`. One real bug in the script itself, caught before commit
+  by actually running `validate_domain.py` and inspecting the output
+  rather than trusting the mapping logic on paper: action ids (already
+  valid camelCase, e.g. `acknowledgeAlert`) were being run through the
+  *label*-camelCasing helper meant for space-separated text like `"is
+  supported by"`, which treats an already-camelCase string as one
+  unsplittable word and lowercases the whole thing (`acknowledgeAlert`
+  -> `acknowledgealert`) -- fixed by using the id directly, no
+  conversion needed. `tests/itops-domain-yaml-parity.spec.mjs` (offline,
+  deterministic, no live LLM run needed) confirms the converted
+  `.domain.yaml` carries the *exact* same class/relationship/property
+  counts as the original MTSR fixture (68/108/111, both ways) and that
+  `computeRecoveryMetrics` produces identical match counts against a
+  fixed synthetic recovered state through either loader -- the practical-
+  scope denominator differs slightly and is documented as expected
+  (MTSR's own action schema carries a `label`+`authorization` array
+  `.domain.yaml`'s action schema has no field for at all -- a real
+  format difference, not a bug). The live itops eval's own default
+  behavior is completely unchanged -- still `persona-eszter.md` +
+  `itops_mtsr.yaml`, since every other tool under `tests/evals/`
+  (`rescore-saved-run.mjs`, `score-baseline.mjs`,
+  `cross-run-analyses.mjs`, `threshold-sensitivity.mjs`) reads from
+  exactly that path and none of them were in scope to touch here.
+
+  **Results isolation**: `EVAL_DOMAIN=itops` (or unset) keeps writing to
+  the original shared `tests/evals/results/` (overwritten every run, as
+  documented); any other domain writes to its own
+  `ontology_translation/results/runs/<domain>/<run-id>/` instead, so
+  repeated runs of the same or different domains never clobber each
+  other -- gitignored (unlike `tests/evals/results/*.md`'s own
+  "committed, latest run only" convention), since a run-id-per-invocation
+  archive is meant to accumulate, not be committed wholesale.
+
+  Full offline suite: 1029/1029 passing before this round; every file
+  touched here re-verified against the full suite again after (same
+  count, zero regressions) plus 4 new test files covering the new
+  surface specifically (`tests/persona-agent.spec.mjs`,
+  `tests/ground-truth-domain-yaml.spec.mjs`,
+  `tests/itops-domain-yaml-parity.spec.mjs`, plus additions to the
+  existing `tests/ontology-recovery-metrics.spec.mjs` coverage via
+  `recoveryMetrics.mjs`'s own refactor). No live API calls anywhere in
+  this round -- every check here is offline/deterministic.

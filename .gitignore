@@ -51,3 +51,14 @@ ontology_translation/domains/*/repair-*.json
 ontology_translation/domains/*/repair-out*/
 ontology_translation/domains/*/reinstate-*.json
 ontology_translation/domains/*/reinstate-out*/
+
+# tests/evals' own ontology-recovery eval, run against any domain (issue
+# #104's EVAL_DOMAIN): every non-itops run's report/log/matches land under
+# an isolated ontology_translation/results/runs/<domain>/<run-id>/ instead
+# of overwriting one shared directory -- unlike tests/evals/results/*.md's
+# own "only the latest run is ever committed" convention (see that
+# directory's own note above), a run-id-per-invocation archive isn't
+# meant to accumulate in the repo; ignored entirely, same as every other
+# regenerable working-output directory in ontology_translation/domains/
+# above.
+ontology_translation/results/

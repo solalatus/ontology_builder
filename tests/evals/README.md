@@ -151,6 +151,53 @@ if this file is ever replaced by a fresh, uncorrected upload). Every other
 section (`classes:`, `valueSets:`, `constraints:`, `mappings:`,
 `competencyQuestions:`) is untouched from the original upload.
 
+## Running against a domain other than itops (issue #104)
+
+`EVAL_DOMAIN` picks which domain the eval runs against:
+
+```sh
+EVAL_DOMAIN=brick-hvac node --test tests/evals/ontology-recovery.eval.spec.mjs
+```
+
+Defaults to `itops` -- the original, hand-authored `persona-eszter.md` +
+`itops_mtsr.yaml`, completely unchanged, still writing to this directory
+(`results/`, overwritten every run, as described above). Every other value
+resolves to `ontology_translation/domains/<id>/reference.domain.yaml` +
+`persona.md` (auto-discovered by directory scan -- run with no
+`EVAL_DOMAIN` set, or list `ontology_translation/domains/` yourself, to see
+what's available) and writes to its own isolated
+`ontology_translation/results/runs/<domain>/<run-id>/` instead, so repeated
+runs never overwrite each other's results the way this shared directory's
+single-run convention does.
+
+A non-itops domain's persona uses the same domain-agnostic experiment
+scaffolding `persona-eszter.md` itself now shares
+(`fixtures/persona-experiment-wrapper.md` -- the "don't leak the hidden
+file," ending-the-interview, and consistency-checklist rules that apply to
+any persona) combined with that domain's own `persona.md`. Its opening
+line is derived mechanically from that file's own "Who they are" section
+(`lib/personaAgent.mjs`'s `deriveOpeningLine`) rather than requiring a
+hand-authored scripted paragraph the way itops's own `OPENING_LINE` is.
+
+`lib/groundTruthModel.mjs`'s `loadGroundTruthModel({ format, path })` is
+the loader both paths go through -- `format: "mtsr"` (the default, for
+`itops_mtsr.yaml`-shaped fixtures) or `format: "domain-yaml"` (for any
+`ontology_translation/domains/*/reference.domain.yaml`). Every existing
+call site across `tests/evals/*.mjs` uses the old zero-arg
+`loadGroundTruthModel()` form and is unaffected either way.
+
+itops itself has an equivalent `.domain.yaml` too
+(`ontology_translation/domains/itops/`), produced by a re-runnable
+conversion script (`tests/evals/convert-itops-to-domain-yaml.mjs`) rather
+than a hand transcription -- confirmed to carry the exact same class/
+relationship/property counts as the original MTSR fixture
+(`tests/itops-domain-yaml-parity.spec.mjs`, offline and deterministic, no
+live run needed). The live itops eval keeps using the original
+`persona-eszter.md`/`itops_mtsr.yaml` pair by default regardless, since
+every other tool under `tests/evals/` (`rescore-saved-run.mjs`,
+`score-baseline.mjs`, `cross-run-analyses.mjs`,
+`threshold-sensitivity.mjs`) reads from exactly that path.
+
 ## Deliberate, documented edits to the ground truth
 
 The user's own instruction was to trim the ground truth "based on the

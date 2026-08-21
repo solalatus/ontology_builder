@@ -1,15 +1,20 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import fs from "node:fs";
+import path from "node:path";
 import { withPage } from "../lib/page.mjs";
 import { loadEnvKey } from "../lib/env.mjs";
 import { connectAgentLive } from "../lib/liveOpenAi.mjs";
 import { runOntologyRecoveryConversation } from "./lib/conversationOrchestrator.mjs";
-import { loadGroundTruthModel, scopeGroundTruth } from "./lib/groundTruthModel.mjs";
+import {
+  loadGroundTruthModel, scopeGroundTruth, resolveDomainYamlPath, resolveDomainPersonaPath, listAvailableDomains,
+} from "./lib/groundTruthModel.mjs";
+import { deriveOpeningLine } from "./lib/personaAgent.mjs";
 import { computeRecoveryMetrics, computeHeuristicMatchPairs } from "./lib/recoveryMetrics.mjs";
 import { computeSemanticRecoveryMetrics } from "./lib/llmMatcher.mjs";
 import {
   writeConversationLog, computeOperationalStats, generateLlmReview, writeReport, writeToolCallLog,
-  writeRecoveredModelYaml, writeHeuristicMatches, writeSemanticJudgments, writeSemanticMatches,
+  writeRecoveredModelYaml, writeHeuristicMatches, writeSemanticJudgments, writeSemanticMatches, RESULTS_DIR,
 } from "./lib/reportGenerator.mjs";
 
 // Ontology-recovery eval — see tests/evals/README.md for the full design
@@ -20,10 +25,10 @@ import {
 // Simulates a full ontology-elicitation interview: the app's real helper
 // agent (interviewer, driven through the real browser+API exactly like
 // tests/helper-agent-live-openai.spec.mjs) against a second, independent
-// LLM playing Eszter Farkas (tests/evals/lib/personaAgent.mjs), whose
-// answers are grounded in the hidden ground-truth ontology
-// (tests/evals/fixtures/itops_mtsr.yaml). At the end, the agent's recovered
-// canvas model is diffed against the ground truth and a report is written.
+// LLM playing a persona (tests/evals/lib/personaAgent.mjs) whose answers
+// are grounded in a hidden ground-truth ontology. At the end, the agent's
+// recovered canvas model is diffed against the ground truth and a report
+// is written.
 //
 // This is an eval, not a strict pass/fail test: two real, non-deterministic
 // LLMs are talking to each other, so run-to-run variance is expected and
@@ -31,11 +36,55 @@ import {
 // outright breakage (a crash, a NaN metric, zero API calls happening at
 // all) -- the actual value of this file is the report it writes, not a
 // binary verdict.
+//
+// EVAL_DOMAIN (issue #104) picks which domain to run against. Defaults to
+// "itops" -- the original, hand-authored persona-eszter.md + MTSR fixture,
+// completely unchanged from before this option existed, still writing to
+// the original shared tests/evals/results/ (every other tool under
+// tests/evals/ -- rescore-saved-run.mjs, score-baseline.mjs,
+// cross-run-analyses.mjs, threshold-sensitivity.mjs, README.md -- reads
+// from exactly that path, so itops's default behavior stays load-bearing
+// for all of them). Any other value resolves to that domain's own
+// ontology_translation/domains/<id>/reference.domain.yaml + persona.md
+// (auto-discovered -- see groundTruthModel.mjs's own module comment for
+// why there's no separate manifest.yaml to keep in sync) and writes to its
+// own isolated ontology_translation/results/runs/<domain>/<run-id>/,
+// so repeated runs -- of the same or different domains -- never overwrite
+// each other's results the way the single shared directory used to.
+const EVAL_DOMAIN = process.env.EVAL_DOMAIN || "itops";
+const IS_ITOPS = EVAL_DOMAIN === "itops";
+
+function resolveDomainInputs(domainId) {
+  if (domainId === "itops") {
+    // Unchanged defaults -- personaAgent.mjs/groundTruthModel.mjs already
+    // default to exactly these when nothing is passed.
+    return { groundTruthArgs: {}, personaArgs: {}, resultsDir: RESULTS_DIR };
+  }
+  const domainYamlPath = resolveDomainYamlPath(domainId); // throws with a clear "available domains" list if unknown
+  const personaPath = resolveDomainPersonaPath(domainId);
+  assert.ok(personaPath, `EVAL_DOMAIN="${domainId}" has no persona.md -- cannot run a live interview without one`);
+  const groundTruthText = fs.readFileSync(domainYamlPath, "utf8");
+  const runId = new Date().toISOString().replace(/[:.]/g, "-");
+  const resultsDir = path.resolve(
+    path.dirname(domainYamlPath), "..", "..", "results", "runs", domainId, runId
+  );
+  return {
+    groundTruthArgs: { format: "domain-yaml", path: domainYamlPath },
+    personaArgs: {
+      personaPath, groundTruthText, groundTruthFilename: "reference.domain.yaml",
+      openingLine: deriveOpeningLine(fs.readFileSync(personaPath, "utf8")),
+    },
+    resultsDir,
+  };
+}
 
 const OPENAI_API_KEY = loadEnvKey("OPENAI_API_KEY");
 const skip = OPENAI_API_KEY
   ? false
   : "Set OPENAI_API_KEY in a .env file at the repo root (see tests/README.md) to run the ontology-recovery eval.";
+if (!IS_ITOPS && !skip && !listAvailableDomains().includes(EVAL_DOMAIN)) {
+  throw new Error(`EVAL_DOMAIN="${EVAL_DOMAIN}" not found. Available: itops, ${listAvailableDomains().join(", ")}`);
+}
 
 // Raised from 100 to 500 once the interviewer's own pacing was fixed to
 // batch similar low-ambiguity items instead of one-per-turn (index.html's
@@ -60,8 +109,11 @@ const PERSONA_MODEL = process.env.ONTOLOGY_EVAL_PERSONA_MODEL || "gpt-4o-mini";
 const CLASSIFIER_MODEL_OVERRIDE = process.env.ONTOLOGY_EVAL_CLASSIFIER_MODEL || null;
 const REVIEW_MODEL_OVERRIDE = process.env.ONTOLOGY_EVAL_REVIEW_MODEL || null;
 
+const { groundTruthArgs, personaArgs, resultsDir } = skip ? {} : resolveDomainInputs(EVAL_DOMAIN);
+if (!skip) fs.mkdirSync(resultsDir, { recursive: true });
+
 test(
-  "ontology-recovery eval: simulated interview against the Hungarian bank IT-ops ontology",
+  `ontology-recovery eval: simulated interview against the ${EVAL_DOMAIN} ontology`,
   { skip, timeout: WALLCLOCK_MS + 10 * 60 * 1000 },
   async () => {
     await withPage(async (page) => {
@@ -72,8 +124,8 @@ test(
       const classifierModel = CLASSIFIER_MODEL_OVERRIDE || interviewerModel;
 
       // Live progress: re-uses the exact same writers the final, successful
-      // path calls once at the end, so results/conversation-log.md and
-      // results/tool-calls.md are real and current at any point during a
+      // path calls once at the end, so <resultsDir>/conversation-log.md and
+      // <resultsDir>/tool-calls.md are real and current at any point during a
       // run -- checking them mid-run (every couple of minutes, say) shows
       // real turn-by-turn progress instead of a stale or empty file, and a
       // hang or crash mid-run still leaves everything up through the last
@@ -83,8 +135,8 @@ test(
       // timeout while validating this same fix, see helper_agent_todo.md's
       // dated Log entry).
       const onProgress = (snapshot) => {
-        writeConversationLog({ ...snapshot, stoppedReason: `in progress (${snapshot.phase}, turn ${snapshot.turn})` });
-        writeToolCallLog(snapshot.rawApiLog);
+        writeConversationLog({ ...snapshot, stoppedReason: `in progress (${snapshot.phase}, turn ${snapshot.turn})` }, { dir: resultsDir });
+        writeToolCallLog(snapshot.rawApiLog, { dir: resultsDir });
       };
 
       const orchestratorResult = await runOntologyRecoveryConversation({
@@ -95,6 +147,7 @@ test(
         maxTurns: MAX_TURNS,
         wallClockMs: WALLCLOCK_MS,
         onProgress,
+        ...personaArgs,
       });
 
       assert.ok(orchestratorResult.turnsUsed >= 1, "expected at least one real turn to happen");
@@ -110,9 +163,9 @@ test(
       // editing afterward without re-calling the tool) -- an external
       // review flagged this as a real reproducibility gap.
       const recoveredModelYaml = await page.evaluate(() => window.buildDomainYamlExport());
-      writeRecoveredModelYaml(recoveredModelYaml);
+      writeRecoveredModelYaml(recoveredModelYaml, { dir: resultsDir });
 
-      const groundTruth = loadGroundTruthModel();
+      const groundTruth = loadGroundTruthModel(groundTruthArgs);
       const metrics = computeRecoveryMetrics(groundTruth, recoveredState);
       const scopedGroundTruth = scopeGroundTruth(groundTruth, groundTruth.practicalScopeClassIds, groundTruth.practicalScopePropertyIds);
       const scopedMetrics = computeRecoveryMetrics(scopedGroundTruth, recoveredState);
@@ -127,11 +180,11 @@ test(
       // scoped pass would be redundant here, unlike the semantic judge
       // passes below, which make genuinely separate API calls per
       // denominator).
-      writeHeuristicMatches(computeHeuristicMatchPairs(groundTruth, recoveredState));
+      writeHeuristicMatches(computeHeuristicMatchPairs(groundTruth, recoveredState), { dir: resultsDir });
 
       const operationalStats = computeOperationalStats(orchestratorResult);
-      writeConversationLog(orchestratorResult);
-      writeToolCallLog(orchestratorResult.rawApiLog);
+      writeConversationLog(orchestratorResult, { dir: resultsDir });
+      writeToolCallLog(orchestratorResult.rawApiLog, { dir: resultsDir });
       const reviewModel = REVIEW_MODEL_OVERRIDE || interviewerModel;
       const llmReviewText = await generateLlmReview({ apiKey: OPENAI_API_KEY, model: reviewModel, orchestratorResult });
 
@@ -151,10 +204,14 @@ test(
         semanticMetrics = null;
         semanticScopedMetrics = null;
       }
-      writeSemanticJudgments({ fullDomain: semanticMetrics, scoped: semanticScopedMetrics });
-      writeSemanticMatches({ fullDomain: semanticMetrics, scoped: semanticScopedMetrics });
+      writeSemanticJudgments({ fullDomain: semanticMetrics, scoped: semanticScopedMetrics }, { dir: resultsDir });
+      writeSemanticMatches({ fullDomain: semanticMetrics, scoped: semanticScopedMetrics }, { dir: resultsDir });
 
-      writeReport({ metrics, scopedMetrics, semanticMetrics, semanticScopedMetrics, operationalStats, orchestratorResult, llmReviewText, interviewerModel, personaModel: PERSONA_MODEL, classifierModel });
+      writeReport({
+        metrics, scopedMetrics, semanticMetrics, semanticScopedMetrics, operationalStats, orchestratorResult,
+        llmReviewText, interviewerModel, personaModel: PERSONA_MODEL, classifierModel, dir: resultsDir,
+      });
+      console.log(`[ontology-recovery] EVAL_DOMAIN=${EVAL_DOMAIN} results written to ${resultsDir}`);
     });
   }
 );
