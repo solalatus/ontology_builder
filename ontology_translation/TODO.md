@@ -2391,3 +2391,54 @@ reference and record deltas/decisions here instead.)*
   **Not yet done as of this entry**: the real 12-run (4 domains x 3
   replicates) live benchmark itself has not been launched yet -- next
   step. This entry covers the infrastructure only.
+
+- 2026-08-21 (continued) -- **Real 12-run benchmark executed** (3
+  replicates x brick-hvac/iof-maintenance/iof-supply-chain/fibo-loans,
+  real Azure `gpt-5.4` calls throughout, ~50-minute total wall-clock
+  running 4 domains in parallel per replicate batch, 3 batches). All 12
+  completed clean (exit 0, `semanticJudgingSucceeded: true`), no rate-
+  limiting or auth failures observed at any point -- spot-checked
+  progress.json/checkpoint transcripts mid-run to confirm real, coherent,
+  domain-specific dialogue, not stalled or erroring. 10/12 runs ended
+  naturally (`app_agent_appears_finished`, 32-75 turns); 2/12
+  (brick-hvac/run-02, iof-maintenance/run-03) hit the 200-turn cap
+  (`max_turns_reached`) without the classifier ever deciding the
+  interview was done -- a real, legitimate dispersion data point, not a
+  bug (both still scored and reported normally).
+
+  `summarize-multi-domain-benchmark.mjs` run against all 12,
+  `ontology_translation/results/multi-domain/{summary.json,summary.md,
+  runs.csv,domain-comparison.csv}` written (all four gitignored, per
+  `ontology_translation/results/`'s existing convention -- publication-
+  ready artifacts to hand to the user directly, not committed).
+
+  **Headline macro results** (equal-weight across the 4 domains, full
+  domain scope): classes F1 0.736 ± 0.053, relationships F1 0.735 ±
+  0.050, properties F1 0.536 ± 0.127, composite recovery effectiveness
+  0.695 ± 0.051. Properties and rules (F1 0.413 ± 0.147) are the weakest-
+  and least-consistently-recovered elements; actions have the highest
+  dispersion of anything (F1 0.688 ± 0.296 -- iof-maintenance recovered
+  all 5 actions across every replicate, brick-hvac struggled). Cross-
+  domain analyses, computed from the real numbers (not asserted):
+  relationships are NOT systematically harder than classes (mixed, 2/4
+  domains); properties ARE under-elicited relative to classes in 3/4
+  domains; ontology size correlates negatively with recovery
+  effectiveness (Pearson r = -0.890, brick-hvac/fibo-loans are the two
+  largest and two of the three lowest-scoring domains) though only 4
+  domains is a thin base for that claim; translation stability shows no
+  clear correlation with elicitation score (r = -0.080); the interviewer-
+  generalization question is explicitly out of scope for this run (one
+  interviewer model throughout).
+
+  Total spend: ~80M tokens across all 12 runs (`operationalStats.
+  totalTokens`, now tracked end to end via `chatClient.mjs`'s existing
+  `sumUsage` -- every `chat()` call plus the app agent's own relayed
+  responses). Full reproducibility record (model, turn count, stop
+  reason, wall-clock, tokens) for every one of the 12 runs is in
+  `summary.md`'s own Reproducibility section and `runs.csv`.
+
+  This is the last piece of epic #101's own work -- #111 is otherwise
+  complete (infrastructure + real run + report). #107 (SOSA/SSN) was
+  separately closed won't-fix (see #107's own issue thread) as
+  optional/budget-dependent per #101, so #101's full sub-issue set is now
+  resolved.
