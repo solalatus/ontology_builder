@@ -20,8 +20,29 @@ filename selector -- compile.py always loads the single current
 content hash (see compile.py's `prompt_sha256()`); past wording is
 recovered from git history, not from multiple prompt files.
 
+Some real ontologies (found for real translating FIBO Loans, issue #110)
+are deliberately split across several `owl:imports`-linked files rather
+than published as one self-contained document -- FIBO's own LOAN module
+declares `Loan`, `SecuredLoan`, etc. in one file but leaves `Borrower`/
+`Lender` declared only in a separate FBC file it imports. This is not a
+FIBO-specific shape (Brick/SSN/CCO-style ontologies split the same way);
+`extra_source_urls`/`extra_source_sha256` generalize the single-file
+model to any number of files, pinned and checksummed exactly like the
+primary one:
+
+    source_url: https://.../LOAN/LoansGeneral/Loans.rdf
+    source_sha256: <hex digest of that one file>
+    extra_source_urls:
+      - https://.../FBC/DebtAndEquities/Debt.rdf
+    extra_source_sha256:
+      - <hex digest of that one file>
+
+Every existing single-file manifest is unaffected: with no
+`extra_source_urls` key, `source_urls`/`source_sha256s` below are just
+`[source_url]`/`[source_sha256]`, byte-identical to the pre-#110 shape.
+
 This module only reads/writes/validates the manifest structure; fetch.py
-owns actually downloading and checksumming the source file.
+owns actually downloading and checksumming the source file(s).
 """
 
 from __future__ import annotations
@@ -59,7 +80,25 @@ class SourceManifest:
     # --max-depth 1. This field existing without being wired up was itself
     # the bug -- a reproducibility record that doesn't actually reproduce.
     scope_max_depth: int | None = None
+    extra_source_urls: list[str] = field(default_factory=list)
+    extra_source_sha256: list[str | None] = field(default_factory=list)
     raw: dict = field(default_factory=dict, repr=False)
+
+    @property
+    def source_urls(self) -> list[str]:
+        """All source files in fetch order -- the primary `source_url`
+        first, then any `extra_source_urls`. Every caller that needs to
+        walk "every source file" (fetch.py, run_pipeline.py) should use
+        this, not `source_url` alone, so a single-file domain and a
+        multi-file one are handled by the same code path."""
+        return [self.source_url, *self.extra_source_urls]
+
+    @property
+    def source_sha256s(self) -> list[str | None]:
+        """Pinned checksums aligned 1:1 with `source_urls` -- `None` at a
+        position means that file isn't pinned yet (same "print it for
+        review" convention as the single-file `source_sha256`)."""
+        return [self.source_sha256, *self.extra_source_sha256]
 
     @classmethod
     def from_dict(cls, data: dict) -> "SourceManifest":
@@ -79,6 +118,17 @@ class SourceManifest:
         max_depth = scope.get("max_depth")
         if max_depth is not None and not isinstance(max_depth, int):
             raise ManifestError("source-manifest.scope.max_depth must be an integer when present")
+        extra_urls = data.get("extra_source_urls") or []
+        if not isinstance(extra_urls, list):
+            raise ManifestError("source-manifest.extra_source_urls must be a list when present")
+        extra_sha256 = data.get("extra_source_sha256") or []
+        if not isinstance(extra_sha256, list):
+            raise ManifestError("source-manifest.extra_source_sha256 must be a list when present")
+        if extra_sha256 and len(extra_sha256) != len(extra_urls):
+            raise ManifestError(
+                "source-manifest.extra_source_sha256 must have exactly one entry per "
+                "extra_source_urls entry (use null for one not pinned yet), or be omitted entirely"
+            )
         return cls(
             id=data["id"],
             source_url=data["source_url"],
@@ -88,6 +138,8 @@ class SourceManifest:
             source_version=data.get("source_version"),
             source_sha256=data.get("source_sha256"),
             scope_max_depth=max_depth,
+            extra_source_urls=list(extra_urls),
+            extra_source_sha256=list(extra_sha256) if extra_sha256 else [None] * len(extra_urls),
             raw=data,
         )
 
@@ -114,6 +166,12 @@ class SourceManifest:
                 },
             }
         )
+        if self.extra_source_urls:
+            out["extra_source_urls"] = list(self.extra_source_urls)
+            out["extra_source_sha256"] = list(self.extra_source_sha256)
+        else:
+            out.pop("extra_source_urls", None)
+            out.pop("extra_source_sha256", None)
         return out
 
 

@@ -115,5 +115,94 @@ class LoadManifestTests(unittest.TestCase):
         self.assertEqual(reloaded.scope_max_depth, 1)
 
 
+class MultiFileManifestTests(unittest.TestCase):
+    """extra_source_urls/extra_source_sha256 (issue #110): some real
+    ontologies are split across several owl:imports-linked files rather
+    than published as one self-contained document. Every existing
+    single-file manifest (no extra_source_urls key at all) must behave
+    exactly as before -- covered by LoadManifestTests above, unchanged."""
+
+    def test_single_file_manifest_has_one_element_source_urls(self):
+        manifest = load_manifest(self._write_helper(VALID_MANIFEST_YAML))
+        self.assertEqual(manifest.source_urls, ["https://example.org/Maintenance.rdf"])
+        self.assertEqual(manifest.source_sha256s, ["abc123"])
+
+    def test_extra_source_urls_are_appended_to_source_urls(self):
+        text = VALID_MANIFEST_YAML + (
+            "extra_source_urls:\n"
+            "  - https://example.org/Upstream.rdf\n"
+        )
+        manifest = load_manifest(self._write_helper(text))
+        self.assertEqual(
+            manifest.source_urls,
+            ["https://example.org/Maintenance.rdf", "https://example.org/Upstream.rdf"],
+        )
+
+    def test_extra_source_sha256_aligns_with_extra_source_urls(self):
+        text = VALID_MANIFEST_YAML + (
+            "extra_source_urls:\n"
+            "  - https://example.org/Upstream.rdf\n"
+            "extra_source_sha256:\n"
+            "  - deadbeef\n"
+        )
+        manifest = load_manifest(self._write_helper(text))
+        self.assertEqual(manifest.source_sha256s, ["abc123", "deadbeef"])
+
+    def test_extra_source_urls_without_sha256_defaults_to_none_per_entry(self):
+        text = VALID_MANIFEST_YAML + (
+            "extra_source_urls:\n"
+            "  - https://example.org/Upstream.rdf\n"
+            "  - https://example.org/Upstream2.rdf\n"
+        )
+        manifest = load_manifest(self._write_helper(text))
+        self.assertEqual(manifest.source_sha256s, ["abc123", None, None])
+
+    def test_mismatched_extra_sha256_length_raises(self):
+        text = VALID_MANIFEST_YAML + (
+            "extra_source_urls:\n"
+            "  - https://example.org/Upstream.rdf\n"
+            "  - https://example.org/Upstream2.rdf\n"
+            "extra_source_sha256:\n"
+            "  - deadbeef\n"
+        )
+        with self.assertRaises(ManifestError):
+            load_manifest(self._write_helper(text))
+
+    def test_round_trip_preserves_extra_source_urls(self):
+        text = VALID_MANIFEST_YAML + (
+            "extra_source_urls:\n"
+            "  - https://example.org/Upstream.rdf\n"
+            "extra_source_sha256:\n"
+            "  - deadbeef\n"
+        )
+        manifest = load_manifest(self._write_helper(text))
+
+        with tempfile.TemporaryDirectory() as tmp:
+            out_path = Path(tmp) / "source-manifest.yaml"
+            write_manifest(out_path, manifest)
+            reloaded = load_manifest(out_path)
+
+        self.assertEqual(reloaded.extra_source_urls, ["https://example.org/Upstream.rdf"])
+        self.assertEqual(reloaded.extra_source_sha256, ["deadbeef"])
+
+    def test_round_trip_of_single_file_manifest_omits_extra_keys(self):
+        # A domain that never had extra_source_urls must not gain empty
+        # extra_source_urls:/extra_source_sha256: keys on a write -- byte-
+        # shape stability for every already-committed single-file manifest.
+        manifest = load_manifest(self._write_helper(VALID_MANIFEST_YAML))
+        with tempfile.TemporaryDirectory() as tmp:
+            out_path = Path(tmp) / "source-manifest.yaml"
+            write_manifest(out_path, manifest)
+            written_text = out_path.read_text(encoding="utf-8")
+        self.assertNotIn("extra_source_urls", written_text)
+        self.assertNotIn("extra_source_sha256", written_text)
+
+    def _write_helper(self, text: str) -> Path:
+        tmp = tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False, encoding="utf-8")
+        tmp.write(text)
+        tmp.close()
+        return Path(tmp.name)
+
+
 if __name__ == "__main__":
     unittest.main()

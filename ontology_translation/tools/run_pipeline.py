@@ -295,7 +295,7 @@ def _fix_round(
 def run_pipeline(
     manifest_path: Path,
     out_dir: Path,
-    source_file: Path | None,
+    source_files: list[Path] | None,
     runs: int | None,
     max_fix_rounds: int,
     judges: int,
@@ -307,18 +307,28 @@ def run_pipeline(
     manifest = load_manifest(manifest_path)
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    if source_file is None:
-        source_file = out_dir / f"source{_guess_source_suffix(manifest.source_url)}"
-        rc = _run_stage("fetch", fetch_mod.main, ["--manifest", str(manifest_path), "--out", str(source_file)])
+    if source_files is None:
+        urls = manifest.source_urls
+        if len(urls) == 1:
+            fetch_target = out_dir / f"source{_guess_source_suffix(urls[0])}"
+            source_files = [fetch_target]
+        else:
+            # Multi-file manifest (issue #110): fetch.py treats a
+            # multi-source manifest's --out as a directory, one file per
+            # source_urls entry, named after each URL's own path -- see
+            # fetch.py's source_filename().
+            fetch_target = out_dir / "sources"
+            source_files = [fetch_target / fetch_mod.source_filename(u, i) for i, u in enumerate(urls)]
+        rc = _run_stage("fetch", fetch_mod.main, ["--manifest", str(manifest_path), "--out", str(fetch_target)])
         if rc != 0:
             return rc
     else:
-        print(f"[pipeline] === fetch === skipped, using existing {source_file}")
+        print(f"[pipeline] === fetch === skipped, using existing {source_files}")
 
     source_ir_path = out_dir / "source_ir.json"
     rc = _run_stage(
         "extract", extract_mod.main,
-        ["--input", str(source_file), "--manifest", str(manifest_path), "--out", str(source_ir_path)],
+        ["--input", *(str(f) for f in source_files), "--manifest", str(manifest_path), "--out", str(source_ir_path)],
     )
     if rc != 0:
         return rc
@@ -384,7 +394,10 @@ def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--manifest", type=Path, required=True)
     parser.add_argument("--out-dir", type=Path, required=True)
-    parser.add_argument("--source-file", type=Path, default=None, help="already-downloaded source file; skips fetch.py")
+    parser.add_argument(
+        "--source-file", type=Path, default=None, nargs="+",
+        help="already-downloaded source file(s); skips fetch.py. Pass more than one for a multi-file manifest.",
+    )
     parser.add_argument("--runs", type=int, default=None, help="override manifest.compiler.runs")
     parser.add_argument("--max-fix-rounds", type=int, default=2, help="max evaluate+repair/reinstate loop iterations")
     parser.add_argument("--judges", type=int, default=3)

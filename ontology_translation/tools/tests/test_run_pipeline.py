@@ -130,6 +130,57 @@ class AutoFetchSuffixIntegrationTests(unittest.TestCase):
             self.assertEqual([c["iri"] for c in source_ir["classes"]], ["http://example.org/onto#Widget"])
 
 
+RDF_XML_FIXTURE_2 = """<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+         xmlns:owl="http://www.w3.org/2002/07/owl#"
+         xmlns:ex="http://example.org/onto#">
+  <owl:Class rdf:about="http://example.org/onto#Manufacturer">
+    <rdfs:label>Manufacturer</rdfs:label>
+    <rdfs:comment>An agent that manufactures widgets.</rdfs:comment>
+  </owl:Class>
+</rdf:RDF>
+"""
+
+
+class MultiFileAutoFetchIntegrationTests(unittest.TestCase):
+    """End-to-end regression for issue #110's general fix: a manifest with
+    extra_source_urls must fetch every file (into a directory, via
+    fetch.py's own multi-file support) and feed all of them into extract.py
+    as a single merged graph, through run_pipeline.py's real auto-fetch
+    path -- not just the library functions in isolation. Offline (file://
+    URLs), same convention as AutoFetchSuffixIntegrationTests above."""
+
+    def test_both_files_are_fetched_and_merged(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            a_path = tmp_path / "widget.rdf"
+            b_path = tmp_path / "manufacturer.rdf"
+            a_path.write_text(RDF_XML_FIXTURE, encoding="utf-8")
+            b_path.write_text(RDF_XML_FIXTURE_2, encoding="utf-8")
+            manifest_path = tmp_path / "source-manifest.yaml"
+            manifest_path.write_text(
+                f"id: test-domain\nsource_url: {a_path.as_uri()}\n"
+                f"extra_source_urls:\n  - {b_path.as_uri()}\n"
+                "scope:\n  roots: []\ncompiler:\n  prompt_version: compiler-prompt\n  runs: 1\n",
+                encoding="utf-8",
+            )
+            out_dir = tmp_path / "out"
+
+            rc = pipeline_mod.main(
+                ["--manifest", str(manifest_path), "--out-dir", str(out_dir), "--dry-run"]
+            )
+
+            self.assertEqual(rc, 0)
+            fetched = sorted((out_dir / "sources").glob("*"))
+            self.assertEqual([p.name for p in fetched], ["manufacturer.rdf", "widget.rdf"])
+            source_ir = json.loads((out_dir / "source_ir.json").read_text(encoding="utf-8"))
+            iris = {c["iri"] for c in source_ir["classes"]}
+            self.assertEqual(
+                iris, {"http://example.org/onto#Widget", "http://example.org/onto#Manufacturer"}
+            )
+
+
 class BuildRepairBatchTests(unittest.TestCase):
     def test_no_unsupported_items_returns_empty(self):
         semantic_judging = {"unsupported_count": 0, "unsupported_paths": [], "results": []}

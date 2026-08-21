@@ -1,0 +1,13 @@
+id: fibo-loans
+source_url: https://raw.githubusercontent.com/edmcouncil/fibo/master_2026Q1/LOAN/LoansGeneral/Loans.rdf
+source_version: master_2026Q1
+source_sha256: 87024035dac38303e21738879202d87f0f37c1347a16119f9ec2b4e37e124f05
+extra_source_urls:
+  - https://raw.githubusercontent.com/edmcouncil/fibo/master_2026Q1/FBC/DebtAndEquities/Debt.rdf
+extra_source_sha256:
+  - 4fadbe7ef48c0caf57b499063149a92e3e4f9380527b6c071ac9382f561eb8c2
+scope:
+  roots: []
+compiler:
+  prompt_version: compiler-prompt
+  runs: 3

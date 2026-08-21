@@ -40,6 +40,16 @@ bugs that were found and fixed in `index.html` itself.
 carries — the reproducibility record (source URL, pinned SHA-256, scope
 roots, compiler prompt version and run count) required by issue #101.
 
+Most domains are one self-contained source file, but some real ontologies
+(FIBO Loans, issue #110) are deliberately split across several
+`owl:imports`-linked files. `source-manifest.yaml`'s `extra_source_urls`/
+`extra_source_sha256` (alongside the primary `source_url`/`source_sha256`)
+name any additional files; `fetch.py` downloads all of them (`--out`
+becomes a directory rather than a single file path once there's more than
+one), and `extract.py`'s `--input` accepts multiple paths, merging them
+into one graph before extraction/scope-selection run — see
+`source_manifest.py`'s own module docstring for the exact shape.
+
 ## Setup
 
 ```sh

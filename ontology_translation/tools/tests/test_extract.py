@@ -11,7 +11,7 @@ from pathlib import Path as _Path
 
 _sys.path.insert(0, str(_Path(__file__).resolve().parents[1]))
 
-from extract import discover_annotation_predicates, extract_all, local_name, main, parse_graph, select_scope
+from extract import discover_annotation_predicates, extract_all, local_name, main, parse_graph, parse_graphs, select_scope
 
 SAMPLE_TTL = """
 @prefix : <http://example.org/onto#> .
@@ -286,6 +286,70 @@ class ParseGraphFromFileTests(unittest.TestCase):
         self.assertGreater(len(graph), 0)
 
 
+# A second file, disjoint from SAMPLE_TTL, whose one class's parent
+# (:Equipment) is only declared in SAMPLE_TTL -- the same real shape found
+# translating FIBO Loans (issue #110): FIBO's LOAN module declares "Loan"
+# etc. in one file but leaves "Lender" declared only in a separate,
+# owl:imports-linked FBC file.
+SPLIT_TTL = """
+@prefix : <http://example.org/onto#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+:Servicer a owl:Class ;
+    rdfs:label "Servicer" ;
+    rdfs:comment "An agent that services equipment." ;
+    rdfs:subClassOf :Equipment .
+"""
+
+
+class ParseGraphsMultiFileTests(unittest.TestCase):
+    """extract.py's own multi-file support (issue #110's general fix, not
+    FIBO-specific -- any ontology split across owl:imports-linked files
+    hits this same shape)."""
+
+    def _write(self, tmp_path: Path, name: str, text: str) -> Path:
+        path = tmp_path / name
+        path.write_text(text, encoding="utf-8")
+        return path
+
+    def test_two_files_merge_into_one_graph(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            a = self._write(tmp_path, "a.ttl", SAMPLE_TTL)
+            b = self._write(tmp_path, "b.ttl", SPLIT_TTL)
+            graph = parse_graphs([a, b], fmt="turtle")
+
+        ir = extract_all(graph, "test-onto")
+        labels = {c["labels"][0] for c in ir["classes"]}
+        self.assertIn("Fan", labels)  # from a.ttl
+        self.assertIn("Servicer", labels)  # from b.ttl
+
+    def test_cross_file_parent_edge_is_resolved_by_select_scope(self):
+        # Servicer's rdfs:subClassOf :Equipment only makes sense once both
+        # files are in the same graph -- proves select_scope's BFS walks
+        # across the merged files, not just within either one alone.
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            a = self._write(tmp_path, "a.ttl", SAMPLE_TTL)
+            b = self._write(tmp_path, "b.ttl", SPLIT_TTL)
+            graph = parse_graphs([a, b], fmt="turtle")
+
+        ir = extract_all(graph, "test-onto")
+        scoped = select_scope(ir, ["Servicer"])
+        labels = {c["labels"][0] for c in scoped["classes"]}
+        self.assertIn("Servicer", labels)
+        self.assertIn("Equipment", labels)
+
+    def test_single_file_list_behaves_like_parse_graph(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            a = self._write(tmp_path, "a.ttl", SAMPLE_TTL)
+            merged = parse_graphs([a], fmt="turtle")
+            single = parse_graph(a, fmt="turtle")
+        self.assertEqual(len(merged), len(single))
+
+
 class MainCliMaxDepthTests(unittest.TestCase):
     """Regression coverage for a real bug: SourceManifest never parsed
     scope.max_depth at all, and extract.py's CLI only ever respected a
@@ -371,6 +435,48 @@ class MainCliMaxDepthTests(unittest.TestCase):
             ir = json.loads(out_path.read_text(encoding="utf-8"))
             labels = {c["labels"][0] for c in ir["classes"]}
             self.assertEqual(labels, {"Fan", "Equipment", "Damper"})
+
+
+class MainCliMultiInputTests(unittest.TestCase):
+    """End-to-end CLI coverage for --input accepting more than one file
+    (issue #110's general fix)."""
+
+    def test_two_input_files_are_merged_before_extraction(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            a = tmp_path / "a.ttl"
+            b = tmp_path / "b.ttl"
+            a.write_text(SAMPLE_TTL, encoding="utf-8")
+            b.write_text(SPLIT_TTL, encoding="utf-8")
+            manifest_path = tmp_path / "source-manifest.yaml"
+            manifest_path.write_text(
+                "id: test-onto\n"
+                "source_url: https://example.org/a.ttl\n"
+                "extra_source_urls:\n"
+                "  - https://example.org/b.ttl\n"
+                "scope:\n"
+                "  roots:\n"
+                "    - Servicer\n"
+                "compiler:\n"
+                "  prompt_version: compiler-prompt\n"
+                "  runs: 1\n",
+                encoding="utf-8",
+            )
+            out_path = tmp_path / "out.json"
+
+            rc = main(["--input", str(a), str(b), "--manifest", str(manifest_path), "--out", str(out_path)])
+
+            self.assertEqual(rc, 0)
+            import json
+
+            ir = json.loads(out_path.read_text(encoding="utf-8"))
+            labels = {c["labels"][0] for c in ir["classes"]}
+            # Servicer only exists in b.ttl; its parent Equipment only in
+            # a.ttl -- both present (plus Equipment's other real children,
+            # Fan/Damper, per select_scope's own sibling-inclusion rule)
+            # proves the two files were genuinely merged into one graph
+            # before scope selection ran, not extracted independently.
+            self.assertEqual(labels, {"Servicer", "Equipment", "Fan", "Damper"})
 
 
 def _parse(ttl_text: str):
