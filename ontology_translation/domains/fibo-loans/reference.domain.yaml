@@ -511,7 +511,7 @@ rules:
   interestBearingLoanNeedsInterestTerms:
     conditions:
     - loan hasInterestRate FixedInterestRate or VariableInterestRate
-    - interest payment terms governPaymentOf Interest
+    - interest payment terms govern payment of interest
   securedLoanNeedsCollateral:
     conditions:
     - secured loan isCollateralizedBy Collateral
@@ -529,7 +529,7 @@ rules:
   amortizingLoanNeedsRepaymentSchedule:
     conditions:
     - loan hasSchedule AmortizationSchedule
-    - principal repayment terms governPaymentOf Principal
+    - principal repayment terms govern payment of principal
 actions:
   assessLoanReadiness:
     input: Loan

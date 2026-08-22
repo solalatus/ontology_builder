@@ -143,6 +143,20 @@ test("rescoreRun refuses to run against a results/multi-domain/ path without an 
   fs.rmSync(tmpDir, { recursive: true, force: true });
 });
 
+// Issue #133/N4 (independent audit of this same fix): the original guard's
+// regex required a trailing separator right after "multi-domain", so a
+// sibling directory like results/multi-domain-superseded-2026-08/ (E9's own
+// committed archive of the pre-fix 12-run data) never matched -- verified
+// live to silently score a real brick-hvac recovered model against itops's
+// own fixture, exactly the failure E3 exists to prevent. Uses the real
+// committed archive directly, not a synthetic path, so this can't drift
+// out of sync with whatever the archive directory is actually named.
+test("rescoreRun also refuses to run against the committed multi-domain-superseded-* archive without an explicit domain", () => {
+  const supersededDir = path.resolve(__dirname, "..", "ontology_translation", "results", "multi-domain-superseded-2026-08", "run-01", "brick-hvac");
+  assert.ok(fs.existsSync(path.join(supersededDir, "recovered-model.yaml")), "expected the committed superseded archive to still exist at this path");
+  assert.throws(() => rescoreRun(supersededDir), /--domain=/, "must refuse rather than silently scoring against itops's fixture");
+});
+
 // The itops anchor runs (results/runs/) predate #104's domain concept and
 // have no domain of their own to name -- the zero-arg default must keep
 // working for them exactly as before, backward compatibility this fix must

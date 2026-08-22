@@ -60,6 +60,15 @@ function stdev(values) {
   return Math.sqrt(variance);
 }
 
+// Issue #133/N7c: same shape as every other per-dimension aggregate here
+// ({mean, stdev}), plus how many of the `attemptedCount` rows actually
+// contributed a real value -- a mean computed from fewer real observations
+// than were attempted (e.g. a semantic judging failure on some replicates)
+// must never look the same as one computed from all of them.
+function withN(values, attemptedCount) {
+  return { mean: mean(values), stdev: stdev(values), n: values.filter((v) => Number.isFinite(v)).length, attemptedCount };
+}
+
 function pearsonR(pairs) {
   const xv = pairs.map((p) => p[0]), yv = pairs.map((p) => p[1]);
   const mx = mean(xv), my = mean(yv);
@@ -149,6 +158,12 @@ function extractRunRow(domain, runId, m, prov) {
     // context-compaction event) is visible in runs.csv, not silently
     // averaged into the macro statistics at the same weight as a clean run.
     degraded: prov.degraded ?? false, totalErrorTurns: g(m.operationalStats, "totalErrorTurns") ?? 0, compactionEvents: prov.compactionEvents ?? 0,
+    // Issue #133/N7c: a semantic judging failure does NOT mark the whole
+    // run degraded (the heuristic scoring is still perfectly valid) but
+    // must be visible somewhere -- surfaced here, and factored into the
+    // semantic-dimension aggregates' own n via withN() below, rather than
+    // silently averaging over fewer runs than the heuristic figures.
+    semanticJudgingSucceeded: prov.semanticJudgingSucceeded ?? null,
     appAgentApiCalls: g(m.operationalStats, "appAgentApiCalls"),
     applyToolCalls: g(m.operationalStats, "applyToolCalls"),
     totalTokens: g(m.operationalStats, "totalTokens"),
@@ -279,7 +294,16 @@ async function main() {
       controlledValuePropertyGoldTotal: domainRows[0].controlledValuePropertyGoldTotal ?? null,
       classesScopedF1: { mean: mean(col("classesScopedF1")), stdev: stdev(col("classesScopedF1")) },
       recoveryEffectivenessScoped: { mean: mean(col("recoveryEffectivenessScoped")), stdev: stdev(col("recoveryEffectivenessScoped")) },
-      semanticClassesFullF1: { mean: mean(col("semanticClassesFullF1")), stdev: stdev(col("semanticClassesFullF1")) },
+      // Issue #133/N7c (independent audit of this same fix): a semantic
+      // judging failure (e.g. E1's new truncation throw) drops
+      // semanticMetrics to null for that run, which mean()/stdev() already
+      // correctly exclude from the average -- but with no visible n, a
+      // reader has no way to tell a mean computed from all 3 replicates
+      // apart from one computed from just 1, after 2 silently failed.
+      // Exposed here for every semantic dimension, not only classes.
+      semanticClassesFullF1: withN(col("semanticClassesFullF1"), domainRows.length),
+      semanticRelationshipsFullF1: withN(col("semanticRelationshipsFullF1"), domainRows.length),
+      semanticPropertiesFullF1: withN(col("semanticPropertiesFullF1"), domainRows.length),
       rulesF1: { mean: mean(col("rulesF1")), stdev: stdev(col("rulesF1")) },
       actionsIdentificationF1: { mean: mean(col("actionsIdentificationF1")), stdev: stdev(col("actionsIdentificationF1")) },
       turnsUsed: { mean: mean(col("turnsUsed")), stdev: stdev(col("turnsUsed")) },
@@ -392,7 +416,7 @@ async function main() {
   fs.writeFileSync(path.join(RESULTS_ROOT, "summary.json"), `${JSON.stringify(summaryJson, null, 2)}\n`);
 
   const runsCsvColumns = [
-    "domain", "replicate", "degraded", "totalErrorTurns", "compactionEvents",
+    "domain", "replicate", "degraded", "totalErrorTurns", "compactionEvents", "semanticJudgingSucceeded",
     "model", "turnsUsed", "stoppedReason", "wallClockSec", "appAgentApiCalls", "applyToolCalls", "totalTokens",
     "classesFullF1", "classesFullRecall", "classesFullPrecision", "relationshipsFullF1", "propertiesFullF1", "propertiesFullRecall",
     "controlledValueFidelityFull", "controlledValuePropertyGoldTotal", "controlledValuePropertyMatchedCount",
@@ -486,6 +510,23 @@ async function main() {
     md.push(`| ${d} | ${a.replicates} | ${fmt(a.classesFullF1.mean)} ± ${fmt(a.classesFullF1.stdev)} (${goldN(g.classes)}) | ${fmt(a.relationshipsFullF1.mean)} ± ${fmt(a.relationshipsFullF1.stdev)} (${goldN(g.relationships)}) `
       + `| ${fmt(a.propertiesFullF1.mean)} ± ${fmt(a.propertiesFullF1.stdev)} (${goldN(g.properties)}) | ${fmt(a.recoveryEffectivenessFull.mean)} ± ${fmt(a.recoveryEffectivenessFull.stdev)} `
       + `| ${fmt(a.rulesF1.mean)} (${goldN(g.rules)}) | ${fmt(a.actionsIdentificationF1.mean)} (${goldN(g.actions)}) |`);
+  }
+
+  // Issue #133/N7c (independent audit of this same fix): a semantic
+  // judging failure (E1's new truncation throw, among other causes) drops
+  // a run's semanticMetrics to null without marking the whole run
+  // degraded -- the heuristic scoring stays perfectly valid. That means a
+  // semantic mean here can legitimately be computed from fewer replicates
+  // than the heuristic figures above; "n" makes that explicit instead of
+  // presenting every semantic figure at the same apparent confidence.
+  md.push("", "## Semantic (LLM-judged) scoring (n = replicates whose semantic judging actually succeeded, out of replicates attempted)", "");
+  md.push("| Domain | Classes F1 | Relationships F1 | Properties F1 |", "|---|---|---|---|");
+  for (const d of domainList) {
+    const a = domainAgg[d];
+    const semN = (s) => `n=${s.n}/${s.attemptedCount}`;
+    md.push(`| ${d} | ${fmt(a.semanticClassesFullF1.mean)} ± ${fmt(a.semanticClassesFullF1.stdev)} (${semN(a.semanticClassesFullF1)}) `
+      + `| ${fmt(a.semanticRelationshipsFullF1.mean)} ± ${fmt(a.semanticRelationshipsFullF1.stdev)} (${semN(a.semanticRelationshipsFullF1)}) `
+      + `| ${fmt(a.semanticPropertiesFullF1.mean)} ± ${fmt(a.semanticPropertiesFullF1.stdev)} (${semN(a.semanticPropertiesFullF1)}) |`);
   }
 
   md.push("", "## Translation-quality context (issue #103's own evaluation, alongside elicitation)", "");

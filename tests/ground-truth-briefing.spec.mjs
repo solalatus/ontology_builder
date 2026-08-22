@@ -48,9 +48,14 @@ test("renderNaturalLanguageBriefing round-trips back to a parseable YAML documen
   assert.equal(reparsed.relationships[0].from, "Air Handling Unit");
 });
 
-test("renderNaturalLanguageBriefing degrades to returning the input unchanged on unparseable text, never throws", () => {
+// Issue #133/N7a (independent audit of this same fix): this used to assert
+// the opposite (degrades to returning the raw text unchanged, never
+// throws) -- that was itself the bug: a fail-open path that silently
+// handed the persona's context the raw, un-rendered, leak-exposing text on
+// any parse failure. A briefing that can't be rendered must fail loudly.
+test("renderNaturalLanguageBriefing throws on unparseable YAML, rather than silently falling back to the raw (leak-exposing) text", () => {
   const input = "not: valid: yaml: [unterminated";
-  assert.doesNotThrow(() => renderNaturalLanguageBriefing(input));
+  assert.throws(() => renderNaturalLanguageBriefing(input), /failed to parse/);
 });
 
 test("renderNaturalLanguageBriefing relabels a raw identifier embedded inline inside an otherwise-prose sentence, not just an isolated key/value", () => {
@@ -62,6 +67,26 @@ test("renderNaturalLanguageBriefing relabels a raw identifier embedded inline in
   const rendered = renderNaturalLanguageBriefing(yaml.dump(docWithInlineIdentifier));
   assert.equal(rendered.includes("hasBorrower"), false, "the raw token must not survive even when embedded mid-sentence");
   assert.match(rendered, /loan has Borrower Borrower/);
+});
+
+// Issue #133/N3 (independent audit of this same fix): a relationship's own
+// `aliases:` were never walked by collectRawIdentifiers, so the "every real
+// domain renders with zero surviving raw identifiers" test below couldn't
+// have caught a leaked alias -- it derives its own expected-identifier list
+// from the very same (buggy) function the renderer itself was built on, so
+// the blind spot was shared between the code and the test that was
+// supposed to catch it. Pinned directly here as its own real-incident
+// regression, independent of collectRawIdentifiers's own output: the real
+// "prescribedBy" alias (iof-maintenance) actually leaked into the rendered
+// briefing before this fix.
+test("a relationship's own alias (not just its primary name) is relabeled -- real incident: iof-maintenance's \"prescribedBy\" leaked before this fix", () => {
+  const domainYamlPath = resolveDomainYamlPath("iof-maintenance");
+  const rawText = fs.readFileSync(domainYamlPath, "utf8");
+  const doc = yaml.load(rawText);
+  const relWithAlias = doc.relationships.find((r) => (r.aliases || []).includes("prescribedBy"));
+  assert.ok(relWithAlias, "expected iof-maintenance's reference.domain.yaml to still declare this alias -- test fixture assumption");
+  const rendered = renderNaturalLanguageBriefing(rawText);
+  assert.equal(rendered.includes("prescribedBy"), false, "the aliased raw identifier must not survive rendering");
 });
 
 test("every real domain's reference.domain.yaml renders with zero surviving multi-segment raw identifiers", () => {

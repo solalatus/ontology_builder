@@ -12,7 +12,11 @@ const PERSONA_PATH = path.resolve(__dirname, "..", "fixtures", "persona-eszter.m
 // changes -- E11/E12/item-2 fixes among them -- should show up as a
 // different wrapperSha256 in a run's own provenance.json).
 export const WRAPPER_PATH = path.resolve(__dirname, "..", "fixtures", "persona-experiment-wrapper.md");
-const DEFAULT_GROUND_TRUTH_FILENAME = "hungarian_bank_itops_incident_response_mtsr.yaml";
+// Exported for issue #133/N7b: conversationOrchestrator.mjs uses this to
+// detect the "caller passed a real groundTruthFilename but forgot
+// groundTruthFormat: 'domain-yaml'" mistake -- see that check's own
+// comment.
+export const DEFAULT_GROUND_TRUTH_FILENAME = "hungarian_bank_itops_incident_response_mtsr.yaml";
 const CHAT_URL = "https://api.openai.com/v1/chat/completions";
 
 // The itops persona's own scripted opening line (persona-eszter.md's

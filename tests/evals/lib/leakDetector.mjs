@@ -50,8 +50,17 @@ export function collectRawIdentifiers(domainYamlDoc) {
     ids.add(className);
     for (const propName of Object.keys((c && c.properties) || {})) ids.add(propName);
   }
+  // Issue #133/N3 (independent audit of this same fix): a relationship's
+  // own `aliases:` entries are real raw identifiers too (real example:
+  // iof-maintenance's "prescribedBy") -- they were skipped here, so a
+  // leaked alias could never be flagged by the runtime guard even though
+  // relationship aliases ARE scored (relationshipLabelMatchesEdge checks
+  // [rel.label, ...rel.aliases]), making this a live, undetectable
+  // inflation channel in exactly the dimension Finding A recorded as having
+  // "no leaked-and-matched instances."
   for (const r of (domainYamlDoc && domainYamlDoc.relationships) || []) {
     if (r && r.name) ids.add(r.name);
+    for (const alias of (r && r.aliases) || []) ids.add(alias);
   }
   for (const name of Object.keys((domainYamlDoc && domainYamlDoc.rules) || {})) ids.add(name);
   for (const name of Object.keys((domainYamlDoc && domainYamlDoc.actions) || {})) ids.add(name);

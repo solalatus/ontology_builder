@@ -43,7 +43,15 @@ function buildIdentifierLabelMap(doc) {
     add(className);
     for (const propName of Object.keys((c && c.properties) || {})) add(propName);
   }
-  for (const r of (doc && doc.relationships) || []) { if (r && r.name) add(r.name); }
+  // Issue #133/N3: a relationship's own `aliases:` entries are real raw
+  // identifiers too -- skipped here previously, so an aliased identifier
+  // (real example: iof-maintenance's "prescribedBy") never got relabeled
+  // and could reach the persona's context verbatim, defeating this
+  // renderer's whole purpose for exactly that identifier.
+  for (const r of (doc && doc.relationships) || []) {
+    if (r && r.name) add(r.name);
+    for (const alias of (r && r.aliases) || []) add(alias);
+  }
   for (const name of Object.keys((doc && doc.rules) || {})) add(name);
   for (const name of Object.keys((doc && doc.actions) || {})) add(name);
   return map;
@@ -96,18 +104,26 @@ function relabel(node, map, regex) {
 // Takes the raw `.domain.yaml` file text and returns a natural-language
 // version of the same document, still YAML-shaped (same nesting, same
 // prose, same aliases/allowed values/conditions), with every raw internal
-// identifier replaced by its natural-language label. A document that fails
-// to parse as the expected object shape is returned unchanged rather than
-// thrown on -- callers embed this directly into a live experiment's system
-// prompt, and a rendering bug must never be able to abort a real run.
+// identifier replaced by its natural-language label.
+//
+// Issue #133/N7a (independent audit of this same fix): a document that
+// failed to parse used to be returned UNCHANGED -- fail-open, meaning a
+// parse failure silently handed the raw, un-rendered text (every raw
+// identifier still in it) straight to the persona's context, restoring the
+// exact leak this function exists to close. Throws instead: a briefing
+// that can't be rendered is not a run worth spending on, and the caller
+// (personaAgent.mjs's buildSystemPrompt) should fail the run loudly rather
+// than silently run it undefended.
 export function renderNaturalLanguageBriefing(rawYamlText) {
   let doc;
   try {
     doc = yaml.load(rawYamlText);
-  } catch {
-    return rawYamlText;
+  } catch (err) {
+    throw new Error(`renderNaturalLanguageBriefing: ground truth YAML failed to parse -- refusing to fall back to the raw (un-rendered, leak-exposing) text: ${err.message}`);
   }
-  if (!doc || typeof doc !== "object") return rawYamlText;
+  if (!doc || typeof doc !== "object") {
+    throw new Error("renderNaturalLanguageBriefing: parsed ground truth is not a document object -- refusing to fall back to the raw (un-rendered, leak-exposing) text");
+  }
   const map = buildIdentifierLabelMap(doc);
   const regex = buildReplacementRegex(map);
   const relabeled = relabel(doc, map, regex);

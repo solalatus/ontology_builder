@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { withLeakGuard, trackToolActivityStreak, WASTED_TURN_THRESHOLD } from "./evals/lib/conversationOrchestrator.mjs";
+import { withLeakGuard, trackToolActivityStreak, WASTED_TURN_THRESHOLD, excludeAlreadySaidByInterviewer, runOntologyRecoveryConversation } from "./evals/lib/conversationOrchestrator.mjs";
 
 // Issue #133 (external audit self-review): withLeakGuard was extracted out
 // of runOntologyRecoveryConversation's own inline closure specifically so
@@ -65,6 +65,27 @@ test("withLeakGuard retries once on a leaking first reply and returns the clean 
   assert.equal(poppedCount, 1, "popLastExchange must be called exactly once, before the retry");
   assert.equal(events.length, 1, "exactly one leak attempt was recorded");
   assert.equal(events[0].resolved, true, "the recorded event must be mutated to resolved once the retry came back clean");
+});
+
+// Issue #133/N5 (independent audit of this same fix): a retry must not
+// just resend the identical text -- it should carry a corrective note
+// naming exactly what leaked, per item 4's own original spec.
+test("withLeakGuard's retry appends a corrective note naming exactly what leaked, not a resend of the identical prompt", async () => {
+  const { fn, calls } = fakeReply([
+    "I'd call it AirHandlingUnit",
+    "I'd call it an air handling unit",
+  ]);
+  await withLeakGuard({
+    reply: fn,
+    incomingText: "what do you call it",
+    leakCandidates: new Set(["AirHandlingUnit"]),
+    maxRetries: 2,
+  });
+  assert.equal(calls[0], "what do you call it", "the first call is the real, unmodified interviewer message");
+  assert.notEqual(calls[1], calls[0], "the retry must not be an identical resend");
+  assert.match(calls[1], /^what do you call it/, "the retry still carries the original interviewer message");
+  assert.match(calls[1], /AirHandlingUnit/, "the retry names exactly which identifier leaked");
+  assert.match(calls[1], /not part of the interviewer/i, "the corrective note must be framed as internal, never attributable to the real interviewer");
 });
 
 test("withLeakGuard exhausts after maxRetries and returns exhausted:true with the leak still present, never silently patching the text", async () => {
@@ -149,8 +170,13 @@ test("trackToolActivityStreak crosses the threshold at exactly WASTED_TURN_THRES
   assert.equal(state.crossedThreshold, true);
 });
 
-test("trackToolActivityStreak reproduces the shape of both real Finding B incidents (68 and 159 consecutive no-activity turns) -- both cross the threshold well before the end", () => {
-  for (const realIncidentLength of [68, 159]) {
+// Issue #133/N2 (independent audit of this same fix): the real pathological
+// streak lengths, as measured by replaying the detector over the two real
+// Finding B incidents' actual committed transcripts (brick-hvac/run-02,
+// iof-maintenance/run-03) -- not the earlier prose estimate (~68/~159) this
+// test originally used, which undercounted slightly.
+test("trackToolActivityStreak reproduces the shape of both real Finding B incidents (160 and 171 consecutive no-activity turns) -- both cross the threshold well before the end", () => {
+  for (const realIncidentLength of [160, 171]) {
     let state = { current: 0, max: 0 };
     let crossedAt = null;
     for (let turn = 1; turn <= realIncidentLength; turn++) {
@@ -159,4 +185,103 @@ test("trackToolActivityStreak reproduces the shape of both real Finding B incide
     }
     assert.equal(crossedAt, WASTED_TURN_THRESHOLD, `a ${realIncidentLength}-turn dead loop must have been caught at turn ${WASTED_TURN_THRESHOLD}, not run to completion`);
   }
+});
+
+// Issue #133/N2: the real measured high-water mark across every
+// legitimately-finished run in the real committed archive (20 turns, in
+// iof-supply-chain/run-01) must NOT trip the detector -- the whole point of
+// raising the threshold was to put real margin between this number and the
+// pathological streaks above.
+test("trackToolActivityStreak does not cross the threshold for the real measured healthy-run high-water mark (20 consecutive no-activity turns)", () => {
+  let state = { current: 0, max: 0 };
+  for (let turn = 1; turn <= 20; turn++) state = trackToolActivityStreak(state, false);
+  assert.equal(state.crossedThreshold, false, "a genuinely healthy run's own real worst streak must not trip the detector");
+  assert.ok(WASTED_TURN_THRESHOLD - 20 >= 40, "the margin between the real healthy high-water mark and the threshold should be generous, not tight");
+});
+
+// Issue #133/N1 (independent audit of this same fix): excludeAlreadySaidByInterviewer
+// is the fix for the guard's own false-positive class -- an ordinary
+// "interviewer proposes X, persona confirms X" exchange.
+test("excludeAlreadySaidByInterviewer removes only identifiers already said, leaving genuinely novel ones", () => {
+  const candidates = new Set(["AirHandlingUnit", "hasBorrower", "needsCoolingFromSetpoint"]);
+  const alreadySaid = new Set(["AirHandlingUnit"]);
+  const effective = excludeAlreadySaidByInterviewer(candidates, alreadySaid);
+  assert.deepEqual(effective, new Set(["hasBorrower", "needsCoolingFromSetpoint"]));
+});
+
+test("excludeAlreadySaidByInterviewer passes null through unchanged (no .domain.yaml ground truth to guard)", () => {
+  assert.equal(excludeAlreadySaidByInterviewer(null, new Set(["x"])), null);
+});
+
+test("excludeAlreadySaidByInterviewer returns the full set unchanged when the interviewer has said nothing yet", () => {
+  const candidates = new Set(["AirHandlingUnit", "hasBorrower"]);
+  const effective = excludeAlreadySaidByInterviewer(candidates, new Set());
+  assert.deepEqual(effective, candidates);
+});
+
+// Issue #133/N1: the exact real failure mode, reproduced end to end with
+// withLeakGuard + excludeAlreadySaidByInterviewer wired together the same
+// way the orchestrator wires them -- the interviewer proposes a name, the
+// persona simply confirms it verbatim, and that alone must never trigger a
+// retry or an abort.
+test("withLeakGuard + excludeAlreadySaidByInterviewer together: a persona reply that only echoes an interviewer-proposed identifier is not a leak", async () => {
+  const leakCandidates = new Set(["QualificationSpecification"]);
+  const interviewerText = "Should I record this class as QualificationSpecification?";
+  const identifiersSaidByInterviewer = new Set(findLeakedIdentifiersLike(interviewerText, leakCandidates));
+  const effective = excludeAlreadySaidByInterviewer(leakCandidates, identifiersSaidByInterviewer);
+
+  const { fn, calls } = fakeReply(["Yes, QualificationSpecification is exactly right."]);
+  const result = await withLeakGuard({ reply: fn, incomingText: interviewerText, leakCandidates: effective, maxRetries: 2 });
+
+  assert.deepEqual(result.leaked, []);
+  assert.equal(result.exhausted, undefined);
+  assert.equal(calls.length, 1, "a pure echo-back of an interviewer-proposed identifier must never trigger a retry");
+});
+
+test("withLeakGuard + excludeAlreadySaidByInterviewer together: a persona reply introducing a DIFFERENT, genuinely novel identifier is still caught", async () => {
+  const leakCandidates = new Set(["needsCoolingFromSetpoint"]);
+  const interviewerText = "Do you want this recorded as needsCooling?"; // a different, non-matching string -- the interviewer never said the real identifier
+  const identifiersSaidByInterviewer = new Set(findLeakedIdentifiersLike(interviewerText, leakCandidates));
+  const effective = excludeAlreadySaidByInterviewer(leakCandidates, identifiersSaidByInterviewer);
+  assert.deepEqual(effective, leakCandidates, "the interviewer's near-miss guess must not exclude the real identifier");
+
+  const { fn } = fakeReply(["I'd use needsCoolingFromSetpoint instead."]);
+  const result = await withLeakGuard({ reply: fn, incomingText: interviewerText, leakCandidates: effective, maxRetries: 0 });
+  assert.deepEqual(result.leaked, ["needsCoolingFromSetpoint"]);
+  assert.equal(result.exhausted, true, "a genuinely novel leaked identifier must still be caught");
+});
+
+// Minimal stand-in for findLeakedIdentifiers (leakDetector.mjs) -- exact
+// same word-boundary semantics, kept local so this file doesn't need to
+// import leakDetector.mjs just for two tests.
+function findLeakedIdentifiersLike(text, candidateSet) {
+  const found = [];
+  for (const id of candidateSet) {
+    if (new RegExp(`\\b${id.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`).test(text)) found.push(id);
+  }
+  return found;
+}
+
+// Issue #133/N7b (independent audit of this same fix): a caller passing a
+// real, non-default groundTruthFilename but forgetting
+// groundTruthFormat: "domain-yaml" used to silently run with both defenses
+// disabled. Checked before any live page/API interaction, so this can be
+// tested with no real page or apiKey at all.
+test("runOntologyRecoveryConversation throws before doing any real work when groundTruthFilename is set but groundTruthFormat isn't \"domain-yaml\"", async () => {
+  await assert.rejects(
+    () => runOntologyRecoveryConversation({
+      page: null, apiKey: "unused", personaPath: "/dev/null", groundTruthText: "classes: {}",
+      groundTruthFilename: "reference.domain.yaml", // real domain filename, format forgotten
+    }),
+    /groundTruthFormat/,
+  );
+});
+
+test("runOntologyRecoveryConversation does not throw the N7b check when groundTruthFilename is left at its itops default", async () => {
+  // Reaches real work past the check (page: null), so it must fail for a
+  // DIFFERENT reason (a null page has no .evaluate) -- not the N7b guard.
+  await assert.rejects(
+    () => runOntologyRecoveryConversation({ page: null, apiKey: "unused" }),
+    (err) => !/groundTruthFormat/.test(err.message),
+  );
 });

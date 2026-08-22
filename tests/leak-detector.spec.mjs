@@ -37,6 +37,22 @@ test("collectRawIdentifiers walks classes, properties, relationships, rules, and
   assert.equal(ids.has("status"), true, "single-segment identifiers are still collected -- filtering happens later");
 });
 
+// Issue #133/N3 (independent audit of this same fix): relationship aliases
+// were never walked here -- a real leaked alias (iof-maintenance's
+// "prescribedBy") could reach the persona's context and never be flagged by
+// this exact function, since it was never in the candidate set at all.
+test("collectRawIdentifiers walks a relationship's own aliases, not just its primary name", () => {
+  const docWithAliasedRelationship = {
+    classes: { MaintenanceProcess: {}, MaintenanceStrategy: {} },
+    relationships: [
+      { name: "isCarriedOutUnder", from: "MaintenanceProcess", to: "MaintenanceStrategy", aliases: ["prescribedBy"] },
+    ],
+  };
+  const ids = collectRawIdentifiers(docWithAliasedRelationship);
+  assert.equal(ids.has("isCarriedOutUnder"), true);
+  assert.equal(ids.has("prescribedBy"), true, "the alias must be collected too, not just the relationship's own name");
+});
+
 test("buildLeakCandidateSet excludes every single-segment identifier from the audit's own measured false-positive list", () => {
   const candidates = buildLeakCandidateSet(domainDoc, "");
   for (const word of ["status", "cost", "Supplier", "Shipment", "uses"]) {

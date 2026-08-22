@@ -52,12 +52,21 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // looks like it's under `results/multi-domain/` (this repo's own multi-domain
 // benchmark output, issue #111) refuses to run without an explicit `domain`
 // -- exactly the run tree this mistake would otherwise silently corrupt.
+//
+// Issue #133/N4 (independent audit of this same fix): the original pattern
+// required a trailing path separator right after "multi-domain" --
+// `results/multi-domain-superseded-2026-08/...` (E9's own committed
+// snapshot directory) never matched, verified live: `rescoreRun` on that
+// directory with no `--domain` silently scored a real brick-hvac recovered
+// model against itops's own 68-class fixture and printed a plausible-
+// looking 0.000. No trailing separator required now, so any directory
+// whose name merely STARTS WITH "multi-domain" under `results/` is caught.
 export function rescoreRun(runDir, domain = null) {
   const modelPath = path.join(runDir, "recovered-model.yaml");
   if (!fs.existsSync(modelPath)) throw new Error(`no recovered-model.yaml in ${runDir}`);
-  if (!domain && /results[\\/]multi-domain[\\/]/.test(runDir)) {
+  if (!domain && /results[\\/]multi-domain/.test(runDir)) {
     throw new Error(
-      `${runDir} looks like a multi-domain benchmark run (results/multi-domain/) but no --domain= was given -- `
+      `${runDir} looks like a multi-domain benchmark run (results/multi-domain*/) but no --domain= was given -- `
       + `refusing to silently score it against itops's own fixture. Pass --domain=<id>. `
       + `Available domains: ${listAvailableDomains().join(", ")}`
     );
