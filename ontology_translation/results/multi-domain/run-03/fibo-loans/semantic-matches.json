@@ -1,0 +1,57 @@
+{
+  "fullDomain": {
+    "classes": [
+      {
+        "goldId": "CreditEnhancementBeneficiary",
+        "recoveredId": "n23"
+      }
+    ],
+    "relationships": [
+      {
+        "goldId": "rel_11",
+        "recoveredId": "e10"
+      },
+      {
+        "goldId": "rel_12",
+        "recoveredId": "e9"
+      },
+      {
+        "goldId": "rel_14",
+        "recoveredId": "e6"
+      },
+      {
+        "goldId": "rel_16",
+        "recoveredId": "e29"
+      },
+      {
+        "goldId": "rel_24",
+        "recoveredId": "e15"
+      }
+    ],
+    "properties": [],
+    "valueFidelity": []
+  },
+  "scoped": {
+    "classes": [],
+    "relationships": [
+      {
+        "goldId": "rel_11",
+        "recoveredId": "e10"
+      },
+      {
+        "goldId": "rel_12",
+        "recoveredId": "e9"
+      },
+      {
+        "goldId": "rel_16",
+        "recoveredId": "e29"
+      },
+      {
+        "goldId": "rel_24",
+        "recoveredId": "e15"
+      }
+    ],
+    "properties": [],
+    "valueFidelity": []
+  }
+}

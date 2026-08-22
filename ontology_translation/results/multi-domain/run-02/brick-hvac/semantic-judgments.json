@@ -1,0 +1,471 @@
+{
+  "fullDomain": {
+    "judgments": {
+      "classes": [
+        {
+          "goldId": "AirPlenum",
+          "recoveredId": "n3",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "AirQualitySensor",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "CO2DifferentialSensor",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "CondensingUnit",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "CoolingTower",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "HeatExchanger",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Humidifier",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "IsolationValve",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Pump",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "SpaceHeater",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "WaterTemperatureSensor",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "DryCooler",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "relationships": [
+        {
+          "goldId": "rel_0",
+          "recoveredId": "e16",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_1",
+          "recoveredId": "e17",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_2",
+          "recoveredId": "e18",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_3",
+          "recoveredId": "e19",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_4",
+          "recoveredId": "e20",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_5",
+          "recoveredId": "e21",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_6",
+          "recoveredId": "e6",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_7",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_8",
+          "recoveredId": "e7",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_9",
+          "recoveredId": "e8",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_10",
+          "recoveredId": "e9",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_11",
+          "recoveredId": "e10",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_12",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_13",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_14",
+          "recoveredId": "e13",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_15",
+          "recoveredId": "e14",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_16",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_17",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_18",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_19",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_21",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_22",
+          "recoveredId": "e4",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_23",
+          "recoveredId": "e5",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_24",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_34",
+          "recoveredId": "e11",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_35",
+          "recoveredId": "e12",
+          "verdict": "MATCH"
+        }
+      ],
+      "properties": [
+        {
+          "goldId": "TemperatureSensor.value",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "TemperatureSensor.status",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "CO2Sensor.value",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "TemperatureSetpoint.value",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "AirTemperatureSetpoint.value",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "OccupancySensor.occupied",
+          "matchedPropertyName": "occupancyState",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "Thermostat.mode",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Boiler.status",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Chiller.status",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Chiller.coolingCapacity",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "PackagedHeatPump.mode",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Building.yearBuilt",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Floor.levelNumber",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Space.maxOccupancy",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "valueFidelity": [
+        {
+          "id": "AirHandlingUnit.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Thermostat.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "TerminalUnit.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Filter.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Fan.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Economizer.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Zone.occupancyStatus",
+          "semanticFidelity": 1
+        }
+      ]
+    },
+    "rawResponses": {
+      "classes": "1: MATCH 1 -- plenum is the same air chamber concept\n2: NO MATCH -- no specific air quality sensor candidate\n3: NO MATCH -- no CO2 differential sensor candidate\n4: NO MATCH -- condensing unit not represented\n5: NO MATCH -- cooling tower not represented\n6: NO MATCH -- heat exchanger not represented\n7: NO MATCH -- humidifier not represented\n8: NO MATCH -- isolation valve not represented\n9: NO MATCH -- pump not represented\n10: NO MATCH -- space heater not represented\n11: NO MATCH -- no water temperature sensor candidate\n12: NO MATCH -- dry cooler not represented",
+      "relationships": "1: MATCH 12 -- hasComponent is equivalent to has Part for Fan\n2: MATCH 13 -- hasComponent is equivalent to has Part for Filter\n3: MATCH 14 -- hasComponent is equivalent to has Part for Damper\n4: MATCH 15 -- hasComponent is equivalent to has Part for Cooling Valve\n5: MATCH 16 -- hasComponent is equivalent to has Part for Heating Valve\n6: MATCH 17 -- hasComponent is equivalent to has Part for Economizer\n7: MATCH 3 -- generic has used for AHU point Air Temperature Sensor\n8: NO MATCH -- no candidate for generic AHU point to CO2 Sensor\n9: MATCH 4 -- generic has used for AHU point Air Temperature Setpoint\n10: MATCH 5 -- exact AHU point Cooling Temperature Setpoint\n11: MATCH 6 -- exact AHU point Heating Temperature Setpoint\n12: MATCH 7 -- exact AHU point Temperature Deadband Setpoint\n13: NO MATCH -- no candidate for Thermostat to Temperature Sensor\n14: NO MATCH -- no candidate for Thermostat to Temperature Setpoint\n15: MATCH 10 -- Space has Occupancy Sensor matches has Point/has Location reciprocal\n16: MATCH 11 -- Zone has Occupancy Sensor\n17: NO MATCH -- no candidate for AHU located in Building\n18: NO MATCH -- no candidate for AHU located on Floor\n19: NO MATCH -- no candidate for Terminal Unit located in Space\n20: NO MATCH -- no candidate for Thermostat located in Space\n21: NO MATCH -- candidate 8 is AHU has sensor, not sensor located in Building\n22: MATCH 1 -- contains is equivalent to has Part for Building-Floor\n23: MATCH 2 -- contains is equivalent to has Part for Floor-Space\n24: NO MATCH -- no candidate for Building has Part Zone\n25: MATCH 8 -- generic has used for AHU point Outside Air CO2 Sensor\n26: MATCH 9 -- generic has used for AHU point Return Air CO2 Sensor",
+      "properties": "1: MATCH \"occupancyState\" -- both denote whether the occupancy sensor reports occupied status",
+      "valueFidelity": "1: 100 -- identical value set\n2: 100 -- identical value set\n3: 100 -- identical value set\n4: 100 -- same three distinctions; formatting difference only\n5: 100 -- identical value set\n6: 100 -- identical value set\n7: 100 -- identical value set"
+    }
+  },
+  "scoped": {
+    "judgments": {
+      "classes": [
+        {
+          "goldId": "AirPlenum",
+          "recoveredId": "n3",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "Pump",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "relationships": [
+        {
+          "goldId": "rel_5",
+          "recoveredId": "e21",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_7",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_9",
+          "recoveredId": "e8",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_10",
+          "recoveredId": "e9",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_12",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_13",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_14",
+          "recoveredId": "e13",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_15",
+          "recoveredId": "e14",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_16",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_17",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_18",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_19",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_22",
+          "recoveredId": "e4",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_23",
+          "recoveredId": "e5",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_24",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "properties": [
+        {
+          "goldId": "TemperatureSensor.value",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "TemperatureSensor.status",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "CO2Sensor.value",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "TemperatureSetpoint.value",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "OccupancySensor.occupied",
+          "matchedPropertyName": "occupancyState",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "Thermostat.mode",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Boiler.status",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Chiller.status",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "valueFidelity": [
+        {
+          "id": "AirHandlingUnit.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Thermostat.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "TerminalUnit.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Economizer.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Zone.occupancyStatus",
+          "semanticFidelity": 1
+        }
+      ]
+    },
+    "rawResponses": {
+      "classes": "1: MATCH 1 -- plenum is the same air distribution chamber concept\n2: NO MATCH -- no candidate is the generic pump class",
+      "relationships": "1: MATCH 7 -- hasComponent Economizer is the same part relationship\n2: NO MATCH -- no candidate mentions AHU to CO2 sensor\n3: MATCH 3 -- AHU has cooling temperature setpoint\n4: MATCH 4 -- AHU has heating temperature setpoint\n5: NO MATCH -- no candidate for thermostat to temperature sensor\n6: NO MATCH -- no candidate for thermostat to temperature setpoint\n7: MATCH 5 -- Space has occupancy sensor matches\n8: MATCH 6 -- Zone has occupancy sensor matches\n9: NO MATCH -- no candidate for AHU located in building\n10: NO MATCH -- no candidate for AHU located on floor\n11: NO MATCH -- no candidate for terminal unit located in space\n12: NO MATCH -- no candidate for thermostat located in space\n13: MATCH 1 -- Building contains Floor is the same part relation\n14: MATCH 2 -- Floor contains Space is the same part relation\n15: NO MATCH -- Zone includes Space is not Building has Part Zone",
+      "properties": "1: MATCH \"occupancyState\" -- both denote whether occupancy is currently detected",
+      "valueFidelity": "1: 100 -- identical values and distinctions\n2: 100 -- identical values and distinctions\n3: 100 -- identical values and distinctions\n4: 100 -- identical values and distinctions\n5: 100 -- identical values and distinctions"
+    }
+  }
+}

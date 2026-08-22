@@ -2652,3 +2652,107 @@ reference and record deltas/decisions here instead.)*
   independent real Azure calls confirming the leak-isolation suite, and
   every new synthetic regression test added in this entry). The actual
   12-run live benchmark re-run remains deliberately deferred.
+
+- **Issue #133, third pass: fixed a second independent audit's 2 blockers
+  (N1, N2) + 4 gaps (N3-N6) + 3 minor items (N7a-c), then executed items 9
+  and 10 -- the actual 12-run live Azure re-run and its comparison against
+  Finding A.** N1: the leak guard had no first-speaker exclusion, so it
+  would have flagged ordinary interviewer-proposed-then-persona-confirmed
+  identifiers as leaks in the first ~16 turns of every run -- fixed by
+  tracking `identifiersSaidByInterviewer` and excluding them
+  (`excludeAlreadySaidByInterviewer`). N2:
+  `WASTED_TURN_THRESHOLD` (20) sat inside the real healthy-run distribution
+  (max observed 20) with zero margin from the two real pathological
+  incidents (160/171) -- raised to 80. Both were validated against real
+  data via a new `tests/leak-guard-replay-real-transcripts.spec.mjs`
+  harness that replays the fixed guards over all 12 committed transcripts
+  in `results/multi-domain-superseded-2026-08/`, no API key required. N3:
+  relationship `aliases` were missing from both identifier walks
+  (`leakDetector.mjs`, `groundTruthBriefing.mjs`) -- fixed, plus the
+  fibo-loans source data's own `governPaymentOf` informal-identifier bug.
+  N4: `rescore-saved-run.mjs`'s domain-inference regex didn't match the
+  `multi-domain-superseded-2026-08/` directory it needs to score against --
+  loosened. N5: the leak guard's retry now sends a corrective instruction
+  naming exactly what leaked, instead of resending the identical prompt.
+  N6: re-scored all 12 real committed runs and isolated the genuine
+  scorer-correctness delta (E2's bipartite relationship matching) from E6's
+  intentional `recoveryEffectiveness` redefinition -- corrected max delta
+  is 2.45pt (scoped)/1.38pt (full) on brick-hvac/run-03 relationships only,
+  all other 70/72 measurements exactly 0.00pt (supersedes the previous
+  entry's "~0.01-0.4pt" claim, which the audit correctly flagged as
+  understated). N7a-c: fail-loud instead of fail-open on an unparseable
+  ground-truth briefing; a setup-time assertion when `groundTruthFilename`
+  and `groundTruthFormat` disagree about whether a run is domain-yaml; and
+  the summarizer's semantic macro stats now report effective n
+  (succeeded/attempted) instead of silently averaging over fewer runs than
+  the heuristic ones.
+
+  **Then, per the audit's own suggested gate:** ran a single-domain
+  (iof-maintenance) smoke run against real Azure first -- completed clean,
+  `degraded: false`, 55 turns, `stoppedReason: "app_agent_appears_finished"`
+  -- before spending on the full 12-run re-run.
+
+  **Item 9: executed the full 4-domain x 3-replicate live benchmark
+  against real Azure** (`ontology_translation/results/multi-domain/`,
+  gitignore already permitted this per E9). 4 of the first 12 launched
+  runs hit Azure rate-limit-driven timeouts from running all 12
+  concurrently -- not a defect in the fixes -- and were resumed cleanly
+  from their own checkpoints at lower concurrency. All 12 runs finished
+  with `status: "complete"`, `degraded: false`,
+  `semanticJudgingSucceeded: true`, `errorCounts: {}`, zero leak events,
+  and a maximum no-tool-activity streak of 12 turns (well under the new
+  80-turn threshold, and under the old, too-tight 20-turn one). One run
+  (iof-supply-chain/run-02) legitimately stopped via
+  `pleasantry_loop_detected` at turn 63 -- verified by reading its own
+  transcript: turns 61-63 are pure "That's a fair stopping point" /
+  "Agreed" / "Take care" / "You too" with a real, usable partial model
+  already captured beforehand -- confirming the item-8 loop detector
+  correctly caught a genuine stall on live data, not a false positive.
+  Zero runs hit an undetected pleasantry/stall loop; zero runs hit
+  `max_turns_reached` from anything other than the one correctly-detected
+  case above.
+
+  **Item 10: comparison against Finding A's leak-adjusted retroactive
+  numbers** (macro F1, as-reported contaminated -> Finding A leak-adjusted
+  -> this clean re-run):
+
+  | Dimension | As-reported | Finding A leak-adjusted | New clean re-run |
+  |---|---|---|---|
+  | Classes | 73.6% | 61.6% | 68.3% |
+  | Relationships | 73.4% | 73.4% (no leak impact found) | 57.3% |
+  | Properties | 53.6% | 53.6% (no leak impact found) | 64.6% |
+  | Rules | 41.3% | 36.7% | 66.0% |
+  | Actions | 68.8% | 68.8% (no leak impact found) | 87.6% |
+  | Composite recovery effectiveness | 69.5% (4-component) | ~66.5% (4-component) | 63.4% (3-component, per E6's redefinition) |
+
+  Classes and the composite land close to Finding A's leak-adjusted
+  numbers, as item 10 asked to sanity-check. Rules and actions jumped up
+  substantially past even the as-reported (contaminated) numbers -- most
+  plausibly explained by E1's judge-parser fix (the old parser silently
+  scored an unparseable judge response as all-NO-MATCH with no error;
+  rules/actions have the smallest gold denominators, so a few
+  misparsed-as-zero verdicts move their F1 a lot), not by anything this
+  pass changed about rules/actions elicitation itself -- noted here rather
+  than asserted as a clean win, since it wasn't independently isolated
+  the way N6 isolated the relationship-scorer delta.
+
+  Relationships dropped further than Finding A's own leak-adjusted number
+  (which found *zero* leak impact on relationships), and this is the one
+  number in this table that does **not** simply confirm the fix. N6
+  already established the E2 bipartite-relationship-scorer correction
+  moves at most 1.38pt on the *old* 12 runs -- nowhere near a 16pt macro
+  swing -- so the scorer fix does not explain this drop. Per-run relFullF1
+  spans 0.200-0.784 across the 12 new runs (brick-hvac's own stdev alone
+  is 0.212 on n=3), and the low outlier (brick-hvac/run-02, 6/35 gold
+  relationships matched, 25 recovered) shows no error, no degradation, and
+  a normal 46-turn completion -- i.e. this looks like real interview-to-
+  interview variance in a live LLM benchmark at n=3 replicates/domain,
+  not a defect, but it is reported here rather than smoothed over. A
+  larger-n re-run would be needed to say more.
+
+  Full artifacts committed at `ontology_translation/results/multi-domain/`
+  (report.md, conversation-log.md, tool-calls.md, metrics.json,
+  provenance.json, match/judgment JSON, recovered-model.yaml per run, plus
+  summary.json/summary.md/runs.csv/domain-comparison.csv) -- the original
+  contaminated run remains committed and marked superseded at
+  `results/multi-domain-superseded-2026-08/`, per this ticket's own DoD.

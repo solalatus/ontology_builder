@@ -1,0 +1,429 @@
+competency_questions:
+  - id: cq1
+    text: Who is the borrower on a loan?
+  - id: cq2
+    text: Who is the lender on a loan?
+  - id: cq3
+    text: "What are a loan's principal amount, current balance, interest rate, and maturity date?"
+  - id: cq4
+    text: Is this case a loan or a credit facility?
+  - id: cq5
+    text: "For a revolving credit facility, what is the credit limit and how much remains available?"
+  - id: cq6
+    text: "Is a loan's rate fixed or variable?"
+  - id: cq7
+    text: "For a variable-rate loan, do we have the reset schedule on file?"
+  - id: cq8
+    text: "For a variable-rate loan, do we have any rate cap on file?"
+  - id: cq9
+    text: What repayment terms apply to a loan?
+  - id: cq10
+    text: What payment schedules are tied to a loan?
+  - id: cq11
+    text: Is a loan interest-only?
+  - id: cq12
+    text: Is a loan negatively amortizing?
+  - id: cq13
+    text: Does a loan have a balloon payment feature?
+  - id: cq14
+    text: Is a loan secured or unsecured?
+  - id: cq15
+    text: "For a secured loan, what collateral or security support is linked to it?"
+  - id: cq16
+    text: "What collateral value is on file, as of what date?"
+  - id: cq17
+    text: What is the loan-to-value or combined loan-to-value?
+  - id: cq18
+    text: Who is servicing a loan?
+  - id: cq19
+    text: What payment history do we have for a loan?
+  - id: cq20
+    text: "Which individual payments make up a loan's payment history?"
+  - id: cq21
+    text: "If this case is a credit facility, is it revolving?"
+classes:
+  Loan:
+    meaning: A loan is money or credit extended by a lender to a borrower that has to be repaid under agreed terms.
+    aliases: []
+    properties:
+      principalAmount:
+        type: number
+      currentBalance:
+        type: number
+      maturityDate:
+        type: date
+      isInterestOnly:
+        type: boolean
+      hasNegativeAmortization:
+        type: boolean
+      hasBalloonPayment:
+        type: boolean
+      rateCap:
+        type: number
+      firstRateChangeTerm:
+        type: number
+        unit: months
+  Borrower:
+    meaning: A borrower is the party that takes the loan or credit and is obligated to repay it.
+    aliases: []
+    properties: {}
+  Lender:
+    meaning: A lender is the party that provides the money or credit and expects repayment.
+    aliases: []
+    properties: {}
+  Servicer:
+    meaning: A servicer is the party responsible for collecting principal and interest payments on behalf of the lender.
+    aliases: []
+    properties: {}
+  Collateral:
+    meaning: Collateral is the asset or other pledged support used to secure repayment of an obligation.
+    aliases: []
+    properties: {}
+  PaymentHistory:
+    meaning: A payment history is the record of actual payments made against a loan.
+    aliases: []
+    properties: {}
+  Payment:
+    meaning: "A payment is an individual payment transaction applied toward principal, interest, fees, or other amounts owed."
+    aliases:
+      - individual payment transaction
+    properties: {}
+  LoanPaymentSchedule:
+    meaning: A loan payment schedule is the schedule of payments associated with a specific loan account.
+    aliases: []
+    properties: {}
+  AmortizationSchedule:
+    meaning: An amortization schedule shows how periodic payments reduce the balance of the loan over time.
+    aliases: []
+    properties: {}
+  PrincipalPaymentSchedule:
+    meaning: A principal payment schedule shows when principal amounts are due to be repaid.
+    aliases: []
+    properties: {}
+  InterestPaymentSchedule:
+    meaning: An interest payment schedule shows when interest payments are due.
+    aliases: []
+    properties: {}
+  RateResetSchedule:
+    meaning: null
+    aliases: []
+    properties: {}
+  InterestCalculationSchedule:
+    meaning: An interest calculation schedule shows when interest is calculated for the loan.
+    aliases: []
+    properties: {}
+  InterestTerms:
+    meaning: null
+    aliases: []
+    properties: {}
+  CollateralValue:
+    meaning: Collateral value is the appraised value recorded for collateral as of a particular date.
+    aliases: []
+    properties:
+      valueAmount:
+        type: number
+      asOfDate:
+        type: date
+  SecurityAgreement:
+    meaning: null
+    aliases: []
+    properties: {}
+  PrincipalRepaymentTerms:
+    meaning: Principal repayment terms set out when and how the principal on a loan has to be repaid.
+    aliases: []
+    properties:
+      paymentFrequency:
+        type: text
+  InterestPaymentTerms:
+    meaning: Interest payment terms set out when and how interest on a loan is calculated and paid.
+    aliases: []
+    properties:
+      paymentFrequency:
+        type: text
+      paymentDay:
+        type: text
+      compounding:
+        type: text
+  PrepaymentTerms:
+    meaning: "Prepayment terms cover what applies if the borrower pays down principal before maturity, including any penalty timing."
+    aliases: []
+    properties:
+      prepaymentPenaltyTiming:
+        type: text
+  DebtTerms:
+    meaning: null
+    aliases: []
+    properties: {}
+  CreditFacility:
+    meaning: A credit facility is a credit arrangement that lets the borrower draw funds up to an agreed limit over time rather than taking one fully funded amount at closing.
+    aliases:
+      - master commitment
+    properties:
+      creditLimit:
+        type: number
+      availableAmount:
+        type: number
+      facilityType:
+        type: text
+        allowed:
+          - revolving line of credit
+          - committed credit facility
+          - uncommitted credit facility
+  SubFacility:
+    meaning: A sub-facility is a defined portion of a larger credit facility made available for a particular purpose or availability structure.
+    aliases: []
+    properties: {}
+  SecuredLoan:
+    meaning: A secured loan is a loan backed by collateral or other credit support for repayment.
+    aliases: []
+    properties: {}
+  Interest:
+    meaning: Interest is the cost charged for using borrowed money.
+    aliases: []
+    properties: {}
+  Principal:
+    meaning: "Principal is the amount of the debt that has to be repaid, separate from interest."
+    aliases: []
+    properties: {}
+  DayCountConvention:
+    meaning: A day count convention is the rule used to calculate how interest accrues over time.
+    aliases: []
+    properties: {}
+  InterestRateResetSchedule:
+    meaning: An interest rate reset schedule shows when a variable rate is scheduled to be recalculated or reset.
+    aliases: []
+    properties: {}
+  FixedInterestRate:
+    meaning: A fixed interest rate is a rate that stays the same over the life of the loan unless the agreement says otherwise.
+    aliases: []
+    properties:
+      rate:
+        type: number
+  VariableInterestRate:
+    meaning: A variable interest rate is a rate that can change over time under the loan terms.
+    aliases: []
+    properties:
+      rate:
+        type: number
+  LoanToValueRatio:
+    meaning: A loan-to-value ratio is the ratio of the loan amount to the appraised value of the collateral securing it.
+    aliases: []
+    properties:
+      ratio:
+        type: number
+  CombinedLoanToValueRatio:
+    meaning: A combined loan-to-value ratio is the ratio of the total debt secured by the collateral to the appraised value of that collateral.
+    aliases: []
+    properties:
+      ratio:
+        type: number
+  CollateralizedLoan:
+    meaning: A collateralized loan is a secured loan backed specifically by pledged collateral whose value is tracked against the debt.
+    aliases: []
+    properties: {}
+relationships:
+  - name: hasBorrower
+    from: Loan
+    to: Borrower
+    meaning: Identifies the party that is obligated to repay under the loan or credit arrangement.
+    aliases: []
+  - name: hasLender
+    from: Loan
+    to: Lender
+    meaning: Identifies the party that is providing the loan or credit.
+    aliases: []
+  - name: isServicedBy
+    from: Loan
+    to: Servicer
+    meaning: Identifies the party responsible for collecting payments for the loan.
+    aliases: []
+  - name: hasPaymentHistory
+    from: Loan
+    to: PaymentHistory
+    meaning: Links a loan to the record of actual payments made against it.
+    aliases: []
+  - name: hasIndividualPayment
+    from: PaymentHistory
+    to: Payment
+    meaning: Links a payment history to one actual payment transaction that forms part of that history.
+    aliases: []
+  - name: isCollateralizedBy
+    from: SecuredLoan
+    to: Collateral
+    meaning: Links a secured loan to the collateral pledged to support repayment.
+    aliases: []
+  - name: secures
+    from: SecurityAgreement
+    to: Collateral
+    meaning: null
+    aliases: []
+  - name: hasCollateralValue
+    from: Collateral
+    to: CollateralValue
+    meaning: Links collateral to an appraised value recorded for it as of a date.
+    aliases: []
+  - name: hasSchedule
+    from: Loan
+    to: LoanPaymentSchedule
+    meaning: "Links a loan to a schedule that sets out payment, calculation, amortization, or rate-reset timing."
+    aliases: []
+  - name: hasSchedule
+    from: Loan
+    to: AmortizationSchedule
+    meaning: "Links a loan to a schedule that sets out payment, calculation, amortization, or rate-reset timing."
+    aliases: []
+  - name: hasSchedule
+    from: Loan
+    to: PrincipalPaymentSchedule
+    meaning: "Links a loan to a schedule that sets out payment, calculation, amortization, or rate-reset timing."
+    aliases: []
+  - name: hasSchedule
+    from: Loan
+    to: InterestPaymentSchedule
+    meaning: "Links a loan to a schedule that sets out payment, calculation, amortization, or rate-reset timing."
+    aliases: []
+  - name: hasSchedule
+    from: Loan
+    to: InterestRateResetSchedule
+    meaning: "Links a loan to a schedule that sets out payment, calculation, amortization, or rate-reset timing."
+    aliases: []
+  - name: hasSchedule
+    from: Loan
+    to: InterestCalculationSchedule
+    meaning: "Links a loan to a schedule that sets out payment, calculation, amortization, or rate-reset timing."
+    aliases: []
+  - name: governsPaymentOf
+    from: InterestPaymentTerms
+    to: Interest
+    meaning: Links the interest payment terms to the interest obligation those terms control.
+    aliases: []
+  - name: governsPaymentOf
+    from: PrincipalRepaymentTerms
+    to: Principal
+    meaning: Links the principal repayment terms to the principal obligation those terms control.
+    aliases: []
+  - name: hasAccrualBasis
+    from: InterestPaymentTerms
+    to: DayCountConvention
+    meaning: Links interest payment terms to the day count convention used to calculate accrued interest.
+    aliases: []
+  - name: hasPrincipalRepaymentTerms
+    from: Loan
+    to: PrincipalRepaymentTerms
+    meaning: Links a loan to the terms that govern repayment of principal.
+    aliases: []
+  - name: hasInterestPaymentTerms
+    from: Loan
+    to: InterestPaymentTerms
+    meaning: Links a loan to the terms that govern payment of interest.
+    aliases: []
+  - name: hasSubFacility
+    from: CreditFacility
+    to: SubFacility
+    meaning: Links a credit facility to a component portion of that facility.
+    aliases: []
+  - name: governsPaymentOf
+    from: PrepaymentTerms
+    to: Principal
+    meaning: Links the prepayment terms to the principal that may be repaid early under those terms.
+    aliases: []
+  - name: hasPrepaymentTerms
+    from: Loan
+    to: PrepaymentTerms
+    meaning: Links a loan to the terms that apply if principal is repaid before maturity.
+    aliases: []
+  - name: hasBorrower
+    from: CreditFacility
+    to: Borrower
+    meaning: null
+    aliases: []
+  - name: hasLender
+    from: CreditFacility
+    to: Lender
+    meaning: null
+    aliases: []
+  - name: hasFixedInterestRate
+    from: Loan
+    to: FixedInterestRate
+    meaning: Links a loan to the fixed rate that applies to it.
+    aliases: []
+  - name: hasVariableInterestRate
+    from: Loan
+    to: VariableInterestRate
+    meaning: Links a loan to the variable rate that applies to it.
+    aliases: []
+  - name: hasLoanToValueRatio
+    from: CollateralizedLoan
+    to: LoanToValueRatio
+    meaning: Links a collateralized loan to the loan-to-value measure used for that loan.
+    aliases: []
+  - name: hasCombinedLoanToValueRatio
+    from: CollateralizedLoan
+    to: CombinedLoanToValueRatio
+    meaning: Links a collateralized loan to the combined loan-to-value measure used for that loan.
+    aliases: []
+rules:
+  variableRateLoanSetupComplete:
+    conditions:
+      - loan has a variable interest rate
+      - loan has an interest rate reset schedule
+  amortizingLoanTrackingSetupComplete:
+    conditions:
+      - loan has an amortization schedule
+      - loan has principal repayment terms
+  paymentRecordComplete:
+    conditions:
+      - loan has payment history
+      - payment history has at least one individual payment
+  prepaymentPenaltyTimingRecorded:
+    conditions:
+      - prepayment penalty timing is recorded
+  collateralSupportRecorded:
+    conditions:
+      - secured loan is collateralized by collateral
+actions:
+  assessServicingReadiness:
+    input: Loan
+    preconditions: []
+    effect: Assess whether a loan is ready to be boarded or treated as complete for servicing.
+    verification: "Confirm the result identifies what was checked, what passed, and what is missing."
+  verifyCollateralSupportRecorded:
+    input: Loan
+    preconditions:
+      - collateralSupportRecorded
+    effect: Verify that a secured loan has collateral support recorded.
+    verification: Confirm collateral is actually linked to the loan rather than only marked as secured.
+  reviewVariableRateLoanSetup:
+    input: Loan
+    preconditions:
+      - variableRateLoanSetupComplete
+    effect: Review whether a variable-rate loan has the required variable-rate setup on file.
+    verification: Confirm the loan is variable-rate and the reset schedule is present.
+  reviewPaymentRecordCompleteness:
+    input: Loan
+    preconditions:
+      - paymentRecordComplete
+    effect: Review whether the loan has payment history and individual payment entries.
+    verification: Confirm a payment history exists and contains payment entries.
+  reviewPrepaymentTerms:
+    input: Loan
+    preconditions:
+      - prepaymentPenaltyTimingRecorded
+    effect: Review whether prepayment penalty timing is present where applicable.
+    verification: Confirm prepayment penalty timing is present when expected.
+  confirmAmortizingLoanTrackingSetup:
+    input: Loan
+    preconditions:
+      - amortizingLoanTrackingSetupComplete
+    effect: Confirm that an amortizing loan has the repayment structure needed for tracking.
+    verification: Confirm an amortization schedule and principal repayment terms are present.
+  identifyMissingSetupItems:
+    input: Loan
+    preconditions: []
+    effect: Identify missing setup items that block servicing readiness.
+    verification: Confirm the result names the missing items found for the loan.
+  produceSetupCompletenessResult:
+    input: Loan
+    preconditions: []
+    effect: Produce a setup or completeness check result with evidence.
+    verification: "Confirm the result states what was checked, what passed, what is missing, and what links or fields support it."
