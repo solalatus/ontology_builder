@@ -2756,3 +2756,62 @@ reference and record deltas/decisions here instead.)*
   summary.json/summary.md/runs.csv/domain-comparison.csv) -- the original
   contaminated run remains committed and marked superseded at
   `results/multi-domain-superseded-2026-08/`, per this ticket's own DoD.
+
+- **Issue #133, post-merge verification (PR #134 merged): dug into the two
+  loose ends flagged at merge time -- the relationships drop and the N1
+  echo-flag discrepancy. One turned out to be a false alarm on this
+  project's own part; the other remains a genuine, unresolved open item.**
+
+  **Relationships drop: verified NOT a scoring bug.** A first look at
+  `heuristic-matches.json` for brick-hvac/run-02 (the low outlier, relFullF1
+  0.200) appeared to show every one of its 6 matched relationship pairs
+  pointing at the wrong recovered edge -- e.g. gold "feeds
+  AirHandlingUnit->AirPlenum" seemingly matched to a recovered "feeds
+  AirHandlingUnit->TerminalUnit" edge, a different target class entirely.
+  That would have been a real defect in E2's bipartite relationship
+  matcher. It wasn't: the mismatch was an off-by-one in the *investigation
+  script*, not the scorer -- gold relationship ids are `rel_${index}` from
+  a zero-indexed `Array.map` (`groundTruthModel.mjs`), and the ad-hoc
+  cross-reference used 1-indexed labels. Corrected, every one of that
+  run's 6 matched pairs is exactly right (verified by hand, then made
+  permanent as a new regression test --
+  `tests/ontology-recovery-metrics.spec.mjs`, "matchRelationships on a
+  real committed low-recall run (brick-hvac/run-02)...", which asserts
+  every matched pair's recovered edge genuinely connects the same two
+  classes as its gold relationship, run against the real committed
+  `recovered-model.yaml`, not a synthetic fixture). **Conclusion stands
+  as originally reported**: the relationships macro drop is genuine
+  interview-to-interview variance at n=3 replicates/domain, not a defect,
+  now with an actual verification behind it instead of just the absence
+  of an error flag.
+
+  **N1 echo-flag discrepancy (this pass's own "4" vs. the second audit's
+  reported "227"): investigated, not resolved.** Tested three concrete
+  hypotheses for the gap, all against the real committed transcripts in
+  `results/multi-domain-superseded-2026-08/`:
+  1. Same-turn crediting (the interviewer's proposal and the persona's
+     reply share one turn number in the real transcript format,
+     confirmed) -- correcting for it only moves the count 4 -> 5.
+  2. Retry multiplication (the old guard's `maxRetries=2` could re-flag
+     one turn up to 3 times) -- doesn't fit either; this pass's own
+     turn-level echo/genuine split (4 echo / 63 genuine) has the *opposite*
+     ratio from the audit's (227 echo / 49 genuine), which retry counting
+     alone can't produce.
+  3. Non-causal "said anywhere in the whole transcript" instead of "said
+     before this turn" -- the mechanism most likely to inflate an echo
+     count, and it does move it up, but only to 8, not 227.
+
+  None of the three closes the gap. The total flaggable candidate hits
+  across all 12 real transcripts, under the current (merged)
+  `buildLeakCandidateSet`/`findLeakedIdentifiers` -- the same functions the
+  audit's own text says it used -- is only ~67-76, roughly 3.6x smaller
+  than the audit's claimed 227+49=276. This is left as a genuinely open,
+  unreconciled discrepancy rather than resolved one way or the other;
+  N1's actual fix (the interviewer-said exclusion) is unaffected either
+  way, since both this pass's own measurement and the audit agree the old
+  logic had real echo-only false positives to eliminate and the new logic
+  eliminates all of them in the replay harness (`totalEchoFlagsRemainingUnderNewLogic === 0`, unaffected by which raw total is correct).
+
+  Full offline suite re-verified clean including the new real-data
+  relationship-matcher regression test. No code behavior changed in this
+  entry -- verification and documentation only.

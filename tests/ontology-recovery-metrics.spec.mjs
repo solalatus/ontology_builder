@@ -1,15 +1,21 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import yaml from "js-yaml";
 import {
-  loadGroundTruthModel, scopeGroundTruth, loadRawFixtureText,
+  loadGroundTruthModel, scopeGroundTruth, loadRawFixtureText, resolveDomainYamlPath,
   isRecoverableProperty, isRecoverableRelationship, buildReducedActions,
   mergeReciprocalRelationshipPairs,
 } from "./evals/lib/groundTruthModel.mjs";
 import {
-  computeRecoveryMetrics, computeMatchDetail, matchClasses, matchProperties, computeHeuristicMatchPairs, MATCH_THRESHOLDS,
+  computeRecoveryMetrics, computeMatchDetail, matchClasses, matchProperties, matchRelationships, computeHeuristicMatchPairs, MATCH_THRESHOLDS,
   matchRules, computeRuleMetrics, computeRuleMatchDetail, matchActions, computeActionMetrics, computeActionMatchDetail,
 } from "./evals/lib/recoveryMetrics.mjs";
+import { recoveredStateFromYaml } from "./evals/score-baseline.mjs";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // This file covers recoveryMetrics.mjs's own regex/token-overlap matcher
 // only -- deterministic, no API key, no network. The LLM-judge supplement
@@ -224,6 +230,66 @@ test("computeRecoveryMetrics: relationship precision is one-to-one -- N parallel
   assert.equal(metrics.relationships.matched, 1, "still exactly 1 gold relationship recovered, not double-counted");
   assert.equal(metrics.relationships.recall, 1);
   assert.equal(metrics.relationships.precision, 0.2, "only 1 of the 5 recovered edges can be credited -- the other 4 are surplus, same discipline as duplicate classes/properties");
+});
+
+// Real-data regression, added after a post-merge dig into #133's own
+// numbers: brick-hvac/run-02 (one of the 12 committed live re-run results)
+// scored an unusually low relationship F1 (0.20), and a first look at
+// heuristic-matches.json appeared to show every matched pair pointing at
+// the WRONG recovered edge (e.g. gold "feeds AirHandlingUnit->AirPlenum"
+// seemingly matched to a recovered "feeds AirHandlingUnit->TerminalUnit"
+// edge) -- which would have been a real bipartite-matching bug. It wasn't:
+// the apparent mismatch was an off-by-one in the *investigation* itself
+// (gold relationship ids are `rel_${index}` from a 0-indexed Array.map;
+// the ad-hoc check that first spotted this used 1-indexed labels). Once
+// corrected, every one of that run's 6 matched pairs is exactly right.
+// This test makes that verification permanent and automatic instead of
+// something only discoverable by hand-reading JSON with the right ids:
+// for a real committed run with genuinely low recall, every pair
+// matchRelationships reports must have a recovered edge whose actual
+// source/target node labels correspond to the matched gold relationship's
+// actual fromClassId/toClassId labels -- not merely "some edge with the
+// right relation name landed on some gold relationship of the same name",
+// which is exactly the shape a real class-pair-gating bug would produce.
+test("matchRelationships on a real committed low-recall run (brick-hvac/run-02): every matched pair's recovered edge genuinely connects the same two classes as its gold relationship", () => {
+  const domain = "brick-hvac";
+  const runDir = path.resolve(__dirname, "..", "ontology_translation", "results", "multi-domain", "run-02", domain);
+  const groundTruth = loadGroundTruthModel({ path: resolveDomainYamlPath(domain), format: "domain-yaml" });
+  const recoveredYamlText = fs.readFileSync(path.join(runDir, "recovered-model.yaml"), "utf8");
+  const { state: recovered } = recoveredStateFromYaml(recoveredYamlText);
+
+  const { gtToRecovered } = matchClasses(groundTruth, recovered.nodes);
+  const relMatch = matchRelationships(groundTruth, recovered.edges, gtToRecovered);
+
+  assert.ok(relMatch.matches.length >= 4, "expected this real low-recall run to still have several matched relationships to check -- test fixture assumption");
+
+  const relById = new Map(groundTruth.relationships.map((r) => [r.id, r]));
+  const nodeById = new Map(recovered.nodes.map((n) => [n.id, n]));
+  const edgeById = new Map(recovered.edges.map((e) => [e.id, e]));
+
+  for (const { goldId, recoveredId } of relMatch.matches) {
+    const rel = relById.get(goldId);
+    const edge = edgeById.get(recoveredId);
+    assert.ok(rel, `matched goldId ${goldId} must be a real gold relationship`);
+    assert.ok(edge, `matched recoveredId ${recoveredId} must be a real recovered edge`);
+
+    const expectedFromLabel = groundTruth.classes[rel.fromClassId].label;
+    const expectedToLabel = groundTruth.classes[rel.toClassId].label;
+    const edgeFromLabel = nodeById.get(edge.source)?.label;
+    const edgeToLabel = nodeById.get(edge.target)?.label;
+
+    // Either the forward pairing or (for a reciprocal relationship) the
+    // swapped one is legitimate -- matchRelationships itself allows both --
+    // but it must be one of exactly those two, never some other class pair
+    // entirely.
+    const forwardMatch = edgeFromLabel === expectedFromLabel && edgeToLabel === expectedToLabel;
+    const reciprocalMatch = edgeFromLabel === expectedToLabel && edgeToLabel === expectedFromLabel;
+    assert.ok(
+      forwardMatch || reciprocalMatch,
+      `${goldId} (${rel.label}: ${expectedFromLabel} -> ${expectedToLabel}) matched to ${recoveredId} `
+      + `(${edge.relation}: ${edgeFromLabel} -> ${edgeToLabel}) -- recovered edge does not connect the same two classes as the gold relationship`,
+    );
+  }
 });
 
 // A real confirmatory eval run recorded these exact two relationships
