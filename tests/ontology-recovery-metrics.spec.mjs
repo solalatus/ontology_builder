@@ -85,18 +85,38 @@ test("mergeReciprocalRelationshipPairs leaves two same-direction predicates betw
   assert.ok(merged.every((r) => r.reciprocalLabel === undefined));
 });
 
-test("mergeReciprocalRelationshipPairs only pairs each relationship once, even with 3+ entries sharing a class-pair key", () => {
+// Issue #133/E18 (external audit): the function's own comment promises
+// "three-or-more-way ... groups are left untouched," but the code never
+// actually enforced a group-size check -- it would merge the first
+// opposite-direction pair it happened to find and silently guess which
+// member was the "real" partner, arbitrarily collapsing fwd1+rev1 while
+// leaving fwd2 alone. This test used to assert exactly that buggy behavior
+// as if it were correct; now asserts the policy the comment always
+// described: a 3-member group is left entirely untouched, no merging at all.
+test("mergeReciprocalRelationshipPairs leaves a 3+-member class-pair group entirely untouched, per its own documented policy -- does not arbitrarily merge the first opposite-direction pair it finds", () => {
   const relationships = [
     { id: "fwd1", label: "is supported by", fromClassId: "incident", toClassId: "evidence" },
     { id: "rev1", label: "documents", fromClassId: "evidence", toClassId: "incident" },
     { id: "fwd2", label: "is otherwise linked to", fromClassId: "incident", toClassId: "evidence" },
   ];
   const merged = mergeReciprocalRelationshipPairs(relationships);
-  assert.equal(merged.length, 2, "fwd1+rev1 merge into one unit; fwd2 has no partner left and stays separate");
-  const mergedPair = merged.find((r) => r.id === "fwd1");
-  assert.equal(mergedPair.reciprocalLabel, "documents");
-  const lone = merged.find((r) => r.id === "fwd2");
-  assert.equal(lone.reciprocalLabel, undefined);
+  assert.equal(merged.length, 3, "no merging at all -- a real, three-or-more-way group, not a reciprocal pair plus an unrelated extra fact");
+  for (const rel of merged) assert.equal(rel.reciprocalLabel, undefined, `${rel.id} must not have been merged`);
+});
+
+// A self-loop's "opposite direction" is itself (fromClassId === toClassId),
+// so the ordinary partner test is vacuously true for any *other* self-loop
+// on the same class -- without an explicit exclusion, two unrelated
+// self-loop facts on the same class would be incorrectly merged into one
+// reciprocal pair (issue #133/E18).
+test("mergeReciprocalRelationshipPairs never merges two self-loop relationships on the same class into a reciprocal pair", () => {
+  const relationships = [
+    { id: "loop1", label: "depends on a peer instance of", fromClassId: "service", toClassId: "service" },
+    { id: "loop2", label: "replicates to a peer instance of", fromClassId: "service", toClassId: "service" },
+  ];
+  const merged = mergeReciprocalRelationshipPairs(relationships);
+  assert.equal(merged.length, 2, "both self-loops stay separate, real facts -- not merged into one reciprocal pair");
+  for (const rel of merged) assert.equal(rel.reciprocalLabel, undefined);
 });
 
 test("groundTruthModel's bundled fixture has 7 reciprocal relationship pairs in the practical scope, a real and audited fraction of scored relationships", () => {
@@ -174,6 +194,36 @@ test("computeRecoveryMetrics matches a camelCase recovered relation name against
   const metrics = computeRecoveryMetrics(groundTruth, recovered);
   assert.equal(metrics.relationships.matched, 1, "camelCase \"isImplementedBy\" must match ground truth's \"is implemented by\"");
   assert.equal(metrics.relationships.recall, 1);
+});
+
+// Issue #133/E2 (external audit): relationship precision previously came
+// from two independent existential `.some()` scans instead of a one-to-one
+// bipartite assignment, so N recovered edges all matching the same one gold
+// relationship all counted toward precision's numerator. Demonstrated by
+// the audit: 5 identical parallel edges for 1 gold relationship scored
+// precision=1.00 instead of the true 1/5=0.20. matchRelationships (reused
+// by computeRecoveryMetrics) fixes this the same way matchClasses/
+// matchProperties/matchRules/matchActions already work.
+test("computeRecoveryMetrics: relationship precision is one-to-one -- N parallel duplicate edges for 1 gold relationship do not each count toward precision", () => {
+  const groundTruth = {
+    classes: {
+      a: { id: "a", label: "A", aliases: ["a"] },
+      b: { id: "b", label: "B", aliases: ["b"] },
+    },
+    relationships: [{ id: "a_serves_b", label: "serves", fromClassId: "a", toClassId: "b" }],
+    properties: [],
+  };
+  const recovered = {
+    nodes: [
+      { id: "n1", label: "A", meaning: "x", aliases: [], properties: [] },
+      { id: "n2", label: "B", meaning: "y", aliases: [], properties: [] },
+    ],
+    edges: Array.from({ length: 5 }, (_, i) => ({ id: `e${i}`, source: "n1", target: "n2", relation: "serves" })),
+  };
+  const metrics = computeRecoveryMetrics(groundTruth, recovered);
+  assert.equal(metrics.relationships.matched, 1, "still exactly 1 gold relationship recovered, not double-counted");
+  assert.equal(metrics.relationships.recall, 1);
+  assert.equal(metrics.relationships.precision, 0.2, "only 1 of the 5 recovered edges can be credited -- the other 4 are surplus, same discipline as duplicate classes/properties");
 });
 
 // A real confirmatory eval run recorded these exact two relationships
@@ -473,6 +523,39 @@ test("computeRecoveryMetrics handles an entirely empty recovered state without c
   assert.equal(metrics.controlledValueFidelity, null);
   assert.ok(Number.isFinite(metrics.recoveryEffectiveness));
   assert.equal(metrics.recoveryEffectiveness, 0);
+});
+
+// Issue #133/E6 (external audit): recoveryEffectiveness used to silently
+// average 3 components when no controlled-value property was ever matched
+// and 4 when one was -- the same field name meaning two different,
+// incomparable computations depending on what a run happened to touch. Now
+// fixed at exactly 3 components always; the 4-component variant is a
+// separate, distinctly-named field.
+test("computeRecoveryMetrics: recoveryEffectiveness is always the fixed 3-component average, never silently 4, even when a controlled-value property matches", () => {
+  const groundTruth = twoClassGroundTruth({
+    properties: [{ id: "prop1", label: "has severity", classId: "incident", kind: "controlled-value", targetId: "severitySet", allowedValues: ["sev1", "sev2"] }],
+  });
+  const recoveredState = {
+    nodes: [
+      { id: "n1", label: "Incident", meaning: "", aliases: [], properties: [{ name: "severity", allowed: ["sev1", "sev2"] }] },
+      { id: "n2", label: "Evidence Item", meaning: "", aliases: [] },
+    ],
+    edges: [],
+  };
+  const metrics = computeRecoveryMetrics(groundTruth, recoveredState);
+  assert.ok(metrics.controlledValueFidelity !== null, "a controlled-value property was matched -- fidelity must be computed");
+  const expectedCore = (metrics.classes.f1 + metrics.relationships.f1 + metrics.properties.f1) / 3;
+  assert.ok(Math.abs(metrics.recoveryEffectiveness - expectedCore) < 1e-9, "recoveryEffectiveness must be the fixed 3-component average, not folding in fidelity");
+  const expectedWithFidelity = (metrics.classes.f1 + metrics.relationships.f1 + metrics.properties.f1 + metrics.controlledValueFidelity) / 4;
+  assert.ok(Math.abs(metrics.recoveryEffectivenessWithFidelity - expectedWithFidelity) < 1e-9);
+  assert.equal(metrics.controlledValuePropertyGoldTotal, 1);
+  assert.equal(metrics.controlledValuePropertyMatchedCount, 1);
+});
+
+test("computeRecoveryMetrics: recoveryEffectivenessWithFidelity is null (not silently equal to recoveryEffectiveness) when no controlled-value property was ever matched", () => {
+  const groundTruth = loadGroundTruthModel();
+  const metrics = computeRecoveryMetrics(groundTruth, { nodes: [], edges: [] });
+  assert.equal(metrics.recoveryEffectivenessWithFidelity, null);
 });
 
 // computeMatchDetail: the residual "what the heuristic matcher couldn't

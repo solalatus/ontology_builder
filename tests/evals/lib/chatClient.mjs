@@ -84,19 +84,24 @@ function requestFor(config, model) {
   };
 }
 
-// One chat completion. Returns the reply text, the usage block, the model id
-// the provider says answered, and the exact request parameters, so a caller can
-// write all of it into provenance without reconstructing anything.
-export async function chatOnce({ config, model, systemPrompt, userPrompt, label = "call" }) {
-  const { url, headers, includeModelInBody } = requestFor(config, model);
-  const body = {
-    ...(includeModelInBody ? { model } : {}),
-    messages: [
-      { role: "system", content: systemPrompt },
-      { role: "user", content: userPrompt },
-    ],
-  };
-
+// Shared retry/request core for both call shapes below. Issue #133/Finding C
+// (external audit): `chatOnce` only ever accepted a single system+user pair,
+// so a caller with a real multi-turn conversation (personaAgent.mjs's own
+// growing `messages` array) had no role-preserving option here and had to
+// flatten every prior turn into one undifferentiated blob -- the exact
+// pattern `cq-non-regression.mjs`'s own `azureChatMessages` was written to
+// replace after it caused a persona to re-emit its scripted opening line on
+// all 19 turns of a real run ("with no role boundaries, the strongest
+// pattern left in the prompt is the persona document's own 'Opening
+// response' section"). `chatMessagesOnce` below is that same fix, applied
+// here instead of forking a second, weaker retry implementation: it gets
+// this function's own TPM-aware backoff (`tpmBackoffMs`/`TPM_MAX_ATTEMPTS`,
+// azureChatMessages only has the weaker `rateLimitBackoffMs`), which matters
+// for a real multi-turn conversation -- by turn 200 the full transcript
+// resent on every call is tens of thousands of tokens, exactly what this
+// file's own header says can exhaust a minute's TPM budget outright.
+async function requestOnce({ config, model, messages, label, url, headers, includeModelInBody }) {
+  const body = { ...(includeModelInBody ? { model } : {}), messages };
   const maxAttempts = Math.max(RATE_LIMIT_MAX_ATTEMPTS, TPM_MAX_ATTEMPTS);
   let res, data;
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
@@ -117,11 +122,30 @@ export async function chatOnce({ config, model, systemPrompt, userPrompt, label 
     if (res.status >= 500 && attempt < RATE_LIMIT_MAX_ATTEMPTS) { await sleepMs(rateLimitBackoffMs(attempt)); continue; }
     throw new Error(`${label}: chat call failed: HTTP ${res.status} ${data && data.error && data.error.message}`);
   }
-
   const choice = data.choices && data.choices[0];
   const reply = (choice && choice.message && choice.message.content) || "";
+  return { data, choice, reply };
+}
+
+// Issue #133/E16 (external audit): a 200-OK-but-empty reply used to throw
+// immediately with no retry at all -- distinct from the 429/5xx retry loop
+// above, which only covers a failed HTTP response, not a "succeeded but
+// said nothing" one. Reasoning-tier models genuinely do return empty
+// content sometimes when the turn's token budget goes entirely to
+// reasoning; a single retry of the exact same request absorbs that
+// transient case for every caller uniformly, cheaper than pushing
+// call-site-specific retry logic into each one. Still throws if the retry
+// is ALSO empty -- an empty reply twice in a row from the same prompt is a
+// real signal, not noise to paper over indefinitely.
+async function chatRequest({ config, model, messages, label = "call" }) {
+  const { url, headers, includeModelInBody } = requestFor(config, model);
+  let { data, choice, reply } = await requestOnce({ config, model, messages, label, url, headers, includeModelInBody });
   if (!reply.trim()) {
-    throw new Error(`${label}: provider returned an empty reply (finish_reason=${choice && choice.finish_reason})`);
+    console.log(`  ${label}: provider returned an empty reply (finish_reason=${choice && choice.finish_reason}), retrying once`);
+    ({ data, choice, reply } = await requestOnce({ config, model, messages, label, url, headers, includeModelInBody }));
+  }
+  if (!reply.trim()) {
+    throw new Error(`${label}: provider returned an empty reply twice in a row (finish_reason=${choice && choice.finish_reason})`);
   }
   return {
     reply,
@@ -137,6 +161,22 @@ export async function chatOnce({ config, model, systemPrompt, userPrompt, label 
       maxTokens: null,   // not sent -- reasoning-tier models reject max_tokens
     },
   };
+}
+
+// One chat completion from a system+user pair. Returns the reply text, the
+// usage block, the model id the provider says answered, and the exact
+// request parameters, so a caller can write all of it into provenance
+// without reconstructing anything.
+export async function chatOnce({ config, model, systemPrompt, userPrompt, label = "call" }) {
+  return chatRequest({ config, model, messages: [{ role: "system", content: systemPrompt }, { role: "user", content: userPrompt }], label });
+}
+
+// The same call, but for a real multi-turn conversation: `messages` is sent
+// exactly as given, roles intact, no flattening. For a caller like
+// personaAgent.mjs whose own `messages` array already accumulates the full
+// system + user/assistant/user/... history turn by turn.
+export async function chatMessagesOnce({ config, model, messages, label = "call" }) {
+  return chatRequest({ config, model, messages, label });
 }
 
 export function sumUsage(usages) {

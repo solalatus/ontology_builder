@@ -61,4 +61,19 @@ ontology_translation/domains/*/reinstate-out*/
 # meant to accumulate in the repo; ignored entirely, same as every other
 # regenerable working-output directory in ontology_translation/domains/
 # above.
-ontology_translation/results/
+ontology_translation/results/runs/
+
+# ontology_translation/results/multi-domain/ -- issue #111's own
+# multi-domain benchmark output. Was previously blanket-ignored along with
+# results/runs/ above, which meant no real completed benchmark run was ever
+# actually committed and auditable in the repo -- part of what issue
+# #133/E9 flagged. Same "repo tracks the results, not the machinery"
+# convention as tests/evals/results/baselines/ above: the real artifacts
+# (report.md, conversation-log.md, tool-calls.md, metrics.json,
+# provenance.json, the match/judgment JSON files, and the top-level
+# summary.md/summary.json/runs.csv/domain-comparison.csv) are committed so a
+# reviewer can audit a run's actual transcript and scoring without
+# re-running it. Only the transient per-run scratch stays ignored, exactly
+# like the baselines' own progress.json/checkpoint/ rule.
+ontology_translation/results/multi-domain/*/*/progress.json
+ontology_translation/results/multi-domain/*/*/checkpoint/

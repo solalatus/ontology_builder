@@ -80,6 +80,17 @@ export function writeConversationLog(orchestratorResult, { dir = RESULTS_DIR } =
 // outcome classification: applied/skipped/nothing/error) -- mirrors the
 // same note-text convention tests/helper-agent-live-openai.spec.mjs already
 // asserts against.
+// Issue #133/E4 (external audit): a run that hit real API errors or lost
+// history to compaction previously looked identical, in every operational
+// stat, to a completely clean one -- errorCounts/compactionEvents
+// (conversationOrchestrator.mjs's own classifyAppSystemNote tally, computed
+// live during the run rather than re-derived from the transcript here) are
+// surfaced directly, plus a `degraded` flag any consumer (metrics.json,
+// provenance.json, summarize-multi-domain-benchmark.mjs's macro stats) can
+// use to exclude or flag a run rather than silently averaging it in at
+// full weight. Any compaction at all, or more than 2 total error-note
+// occurrences across the whole run, marks a run degraded -- matching the
+// audit's own suggested policy.
 export function computeOperationalStats(orchestratorResult) {
   let applyToolCalls = 0, getGraphStateCalls = 0;
   for (const r of orchestratorResult.chatResponses) {
@@ -91,6 +102,14 @@ export function computeOperationalStats(orchestratorResult) {
   }
   const toolNotes = orchestratorResult.log.filter((e) => e.speaker === "app-tool");
   const count = (re) => toolNotes.filter((e) => re.test(e.text)).length;
+  const errorCounts = orchestratorResult.errorCounts || {};
+  const compactionEvents = orchestratorResult.compactionEvents || 0;
+  const totalErrorTurns = Object.values(errorCounts).reduce((a, b) => a + b, 0);
+  // Issue #133/E13 item 4: every raw-identifier leak the runtime guard
+  // caught, whether a retry cleaned it up (resolved: true) or the run
+  // aborted with it still unresolved (leak_detected_after_retries).
+  const leakEvents = orchestratorResult.leakEvents || [];
+  const unresolvedLeakEvents = leakEvents.filter((e) => !e.resolved).length;
   return {
     appAgentApiCalls: orchestratorResult.chatResponses.length,
     applyToolCalls,
@@ -99,6 +118,12 @@ export function computeOperationalStats(orchestratorResult) {
     toolSkipped: count(/skipped/i),
     toolNothing: count(/nothing new or changed/i),
     toolError: count(/could not be applied/i),
+    errorCounts,
+    totalErrorTurns,
+    compactionEvents,
+    leakEventsCount: leakEvents.length,
+    unresolvedLeakEvents,
+    degraded: compactionEvents > 0 || totalErrorTurns > 2 || unresolvedLeakEvents > 0,
   };
 }
 
@@ -328,6 +353,13 @@ export function writeReport({
     `- Tool outcomes seen in transcript: ${operationalStats.toolApplied} applied · ${operationalStats.toolSkipped} skipped · ${operationalStats.toolNothing} no-op · ${operationalStats.toolError} error`,
     ...(operationalStats.totalTokens
       ? [`- Tokens: ${operationalStats.totalTokens} total (${operationalStats.promptTokens} prompt · ${operationalStats.completionTokens} completion) across ${operationalStats.tokenCallCount} API calls`]
+      : []),
+    ...(operationalStats.totalErrorTurns || operationalStats.compactionEvents || operationalStats.unresolvedLeakEvents
+      ? [`- **Degraded run** (issue #133/E4, E13): ${operationalStats.totalErrorTurns} app-agent error turn(s) `
+        + `(${Object.entries(operationalStats.errorCounts).map(([k, v]) => `${k}=${v}`).join(", ") || "none"}), `
+        + `${operationalStats.compactionEvents} context-compaction event(s), `
+        + `${operationalStats.unresolvedLeakEvents || 0} unresolved ground-truth leak event(s) out of ${operationalStats.leakEventsCount || 0} caught -- `
+        + `exclude from macro statistics unless explicitly overridden.`]
       : []),
     "",
     "## LLM review of the conversation",

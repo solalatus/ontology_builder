@@ -46,9 +46,10 @@ import { fileURLToPath } from "node:url";
 import { launchChromium } from "../lib/browser.mjs";
 import { APP_URL } from "../lib/page.mjs";
 import { forwardToRealAzure, configureAzureEndpoint, openPanel } from "../lib/liveAzureOpenAi.mjs";
+import { execFileSync } from "node:child_process";
 import { runOntologyRecoveryConversation } from "./lib/conversationOrchestrator.mjs";
-import { deriveOpeningLine } from "./lib/personaAgent.mjs";
-import { chatOnce, sumUsage, DEFAULT_AZURE_API_VERSION } from "./lib/chatClient.mjs";
+import { deriveOpeningLine, WRAPPER_PATH } from "./lib/personaAgent.mjs";
+import { chatMessagesOnce, sumUsage, DEFAULT_AZURE_API_VERSION } from "./lib/chatClient.mjs";
 import {
   loadGroundTruthModel, scopeGroundTruth, resolveDomainYamlPath, resolveDomainPersonaPath, listAvailableDomains,
 } from "./lib/groundTruthModel.mjs";
@@ -61,6 +62,32 @@ import {
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const RESULTS_ROOT = path.resolve(__dirname, "..", "..", "ontology_translation", "results", "multi-domain");
+
+function readJsonSafe(p) {
+  try { return JSON.parse(fs.readFileSync(p, "utf8")); } catch (err) { return null; }
+}
+
+// Issue #133/E8 (external audit): provenance.json previously recorded which
+// files a run used (domainYamlPath, personaPath) but not what state they
+// were actually IN at the time -- a domain.yaml, persona.md, or wrapper
+// prompt edited after a run completed left the old run's provenance
+// pointing at a path whose current content no longer matches what was
+// really sent. Hashing the exact text makes a run's provenance verifiable
+// against the repo at any later commit, not just trusted by path.
+function sha256(text) {
+  return crypto.createHash("sha256").update(text, "utf8").digest("hex");
+}
+
+// Best-effort -- a shallow clone or a source tree with no .git at all must
+// never abort a real benchmark run just because its own provenance can't be
+// fully stamped.
+function currentCommitSha() {
+  try {
+    return execFileSync("git", ["rev-parse", "HEAD"], { cwd: __dirname, encoding: "utf8" }).trim();
+  } catch {
+    return null;
+  }
+}
 
 const arg = (name, fallback = null) => {
   const hit = process.argv.slice(2).find((a) => a.startsWith(`--${name}=`));
@@ -122,11 +149,34 @@ async function main() {
   if (!personaPath) { console.error(`Domain "${domain}" has no persona.md -- cannot run a live interview.`); process.exit(1); }
 
   const outDir = path.join(RESULTS_ROOT, runId, domain);
-  if (fs.existsSync(path.join(outDir, "provenance.json")) && !flag("force")) {
+  // Issue #133/E10 (external audit): the completeness check used to be
+  // plain existsSync(provenance.json) -- true for a provenance.json left
+  // behind by a run that later failed partway through a --force redo just
+  // as easily as a genuinely finished one, and provenance.json was written
+  // *last*, after every other artifact, so a failed redo could leave a NEW
+  // transcript/recovered-model sitting beside the OLD provenance/metrics,
+  // silently mismatched. Now checks `status === "complete"` specifically,
+  // and --force wipes the whole run directory before starting rather than
+  // writing over it -- no partial overlap between an old run and a new one
+  // is possible.
+  const provenancePath = path.join(outDir, "provenance.json");
+  const existingProvenance = fs.existsSync(provenancePath) ? readJsonSafe(provenancePath) : null;
+  if (existingProvenance && existingProvenance.status === "complete" && !flag("force")) {
     console.log(`${domain}/${runId}: already complete -- skipping (pass --force to redo it)`);
     return;
   }
+  if (flag("force") && fs.existsSync(outDir)) {
+    fs.rmSync(outDir, { recursive: true, force: true });
+  }
+  const runUuid = crypto.randomUUID();
   fs.mkdirSync(path.join(outDir, "checkpoint"), { recursive: true });
+  // Written immediately, before any real work starts, and overwritten with
+  // the full version (same runUuid) only once every other artifact this
+  // run produces has already landed -- so a run that dies partway through
+  // leaves an unambiguous `status: "in-progress"` marker behind instead of
+  // no marker (silently re-run-able, fine) or a stale "complete" one
+  // (silently trusted as done, not fine).
+  fs.writeFileSync(provenancePath, `${JSON.stringify({ schemaVersion: 1, domain, runId, runUuid, status: "in-progress", startedAt: new Date().toISOString() }, null, 2)}\n`);
   const progressPath = path.join(outDir, "progress.json");
   const startedAt = Date.now();
   const writeProgress = (extra) => {
@@ -148,16 +198,29 @@ async function main() {
   // below, after the orchestrator finishes -- this array only covers the
   // persona/classifier/review/judge side, not the app agent's own calls,
   // which are relayed straight to Azure and never pass through here).
+  //
+  // chatMessagesOnce, not chatOnce (issue #133/Finding C): chatOnce only
+  // ever accepted a single system+user pair, so routing personaAgent.mjs's
+  // own growing multi-turn `messages` array through it meant flattening
+  // every prior turn into one undifferentiated blob with the roles
+  // stripped -- the exact pattern cq-non-regression.mjs's own header
+  // documents as having caused a persona to re-emit its scripted opening
+  // line on all 19 turns of a real run. `messages` is sent to
+  // chatMessagesOnce exactly as given, roles intact -- a no-op difference
+  // for the classifier/review/judge's own always-2-message calls, and the
+  // real fix for the persona's real conversation.
   const usages = [];
   const chat = async (messages, model) => {
-    const call = await chatOnce({
+    const call = await chatMessagesOnce({
       config: { provider: "azure", endpoint, apiKey, apiVersion: process.env.AZURE_OPENAI_API_VERSION || DEFAULT_AZURE_API_VERSION },
-      model, systemPrompt: messages[0].content,
-      userPrompt: messages.slice(1).map((m) => m.content).join("\n\n"),
+      model, messages,
       label: `${domain}/${runId}`,
     });
     if (call.usage) usages.push(call.usage);
-    return { text: call.reply, usage: call.usage };
+    // finishReason threaded through (issue #133/E1): llmMatcher.mjs's
+    // callJudge hard-fails on "length" rather than silently scoring a
+    // truncated judge response as if it were a complete all-NO-MATCH one.
+    return { text: call.reply, usage: call.usage, finishReason: call.finishReason };
   };
 
   const browser = await launchChromium();
@@ -179,6 +242,14 @@ async function main() {
     writeProgress({ phase: "connecting", turnsUsed: 0 });
     await connectAzure(page, apiKey, endpoint, MODEL);
 
+    // Issue #133/E8: the app's own real system prompt, fetched from the live
+    // page rather than re-derived statically -- buildAgentSystemPrompt() is
+    // the exact function index.html itself calls to build each request
+    // (see its own call site), so hashing its actual return value can never
+    // drift out of sync with what index.html's prompt-building code changes
+    // to later.
+    const interviewerPromptText = await page.evaluate(() => window.buildAgentSystemPrompt());
+
     const openingLine = deriveOpeningLine(fs.readFileSync(personaPath, "utf8"));
     const groundTruthText = fs.readFileSync(domainYamlPath, "utf8");
     writeProgress({ phase: "interviewing", turnsUsed: 0 });
@@ -188,7 +259,7 @@ async function main() {
       maxTurns: MAX_TURNS, wallClockMs: WALLCLOCK_MINUTES * 60 * 1000,
       installRelay: (p) => forwardToRealAzure(p, `${endpoint}/openai/deployments/**`),
       chat,
-      personaPath, groundTruthText, groundTruthFilename: "reference.domain.yaml", openingLine,
+      personaPath, groundTruthText, groundTruthFilename: "reference.domain.yaml", groundTruthFormat: "domain-yaml", openingLine,
       onProgress: ({ phase, turn, turnsUsed, durationMs, log, rawApiLog }) => {
         writeProgress({ phase, turn, turnsUsed, durationSec: Math.round(durationMs / 1000), logEntries: log.length });
         if (phase !== "app_turn_complete") return;
@@ -253,12 +324,18 @@ async function main() {
     // benchmark.mjs's own cross-domain comparison pass -- reading this one
     // file instead of re-deriving anything from report.md's prose.
     fs.writeFileSync(path.join(outDir, "metrics.json"), `${JSON.stringify({
-      domain, runId, metrics, scopedMetrics, semanticMetrics, semanticScopedMetrics,
+      domain, runId, runUuid, metrics, scopedMetrics, semanticMetrics, semanticScopedMetrics,
       ruleMetrics, actionMetrics, semanticRuleActionMetrics, operationalStats,
     }, null, 2)}\n`);
 
-    fs.writeFileSync(path.join(outDir, "provenance.json"), `${JSON.stringify({
-      schemaVersion: 1, domain, runId, generatedAt: new Date().toISOString(),
+    // Overwrites the "in-progress" marker written at the top of main()
+    // (issue #133/E10) -- same runUuid, now status: "complete", and only
+    // reached once every other artifact this run produces has already
+    // landed on disk. A run that dies before here leaves the in-progress
+    // marker behind, which the completeness check above correctly does not
+    // treat as done.
+    fs.writeFileSync(provenancePath, `${JSON.stringify({
+      schemaVersion: 1, domain, runId, runUuid, status: "complete", generatedAt: new Date().toISOString(),
       model: MODEL, personaModel: PERSONA_MODEL, classifierModel: CLASSIFIER_MODEL,
       provider: "azure", endpoint,
       domainYamlPath: path.relative(path.resolve(__dirname, "..", ".."), domainYamlPath),
@@ -267,6 +344,22 @@ async function main() {
       turnsUsed: orchestratorResult.turnsUsed,
       wallClockSec: Math.round((Date.now() - startedAt) / 1000),
       semanticJudgingSucceeded: semanticMetrics !== null,
+      // Issue #133/E4: a run that hit real API errors or lost history to
+      // compaction previously looked identical to a clean one everywhere
+      // provenance is read from -- surfaced here so a consumer can exclude
+      // or flag it rather than silently averaging it in at full weight.
+      degraded: operationalStats.degraded,
+      errorCounts: operationalStats.errorCounts,
+      compactionEvents: operationalStats.compactionEvents,
+      // Issue #133/E8: what exact prompts/ground-truth text and what exact
+      // repo state actually produced this run -- verifiable against the
+      // repo at any later commit, not just trusted from a path string that
+      // may have since been edited.
+      repoCommitSha: currentCommitSha(),
+      interviewerPromptSha256: sha256(interviewerPromptText),
+      personaPromptSha256: sha256(fs.readFileSync(personaPath, "utf8")),
+      groundTruthSha256: sha256(groundTruthText),
+      wrapperSha256: sha256(fs.readFileSync(WRAPPER_PATH, "utf8")),
     }, null, 2)}\n`);
 
     writeProgress({ phase: "done", turnsUsed: orchestratorResult.turnsUsed, stoppedReason: orchestratorResult.stoppedReason });
