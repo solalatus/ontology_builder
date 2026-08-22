@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "domain": "iof-maintenance",
+  "runId": "run-03",
+  "generatedAt": "2026-08-21T15:00:50.549Z",
+  "model": "gpt-5.4",
+  "personaModel": "gpt-5.4",
+  "classifierModel": "gpt-5.4",
+  "provider": "azure",
+  "endpoint": "[redacted -- Azure resource hostname, not committed]",
+  "domainYamlPath": "ontology_translation/domains/iof-maintenance/reference.domain.yaml",
+  "personaPath": "ontology_translation/domains/iof-maintenance/persona.md",
+  "stoppedReason": "max_turns_reached",
+  "turnsUsed": 200,
+  "wallClockSec": 1606,
+  "semanticJudgingSucceeded": true
+}

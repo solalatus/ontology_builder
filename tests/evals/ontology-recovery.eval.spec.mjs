@@ -71,7 +71,7 @@ function resolveDomainInputs(domainId) {
   return {
     groundTruthArgs: { format: "domain-yaml", path: domainYamlPath },
     personaArgs: {
-      personaPath, groundTruthText, groundTruthFilename: "reference.domain.yaml",
+      personaPath, groundTruthText, groundTruthFilename: "reference.domain.yaml", groundTruthFormat: "domain-yaml",
       openingLine: deriveOpeningLine(fs.readFileSync(personaPath, "utf8")),
     },
     resultsDir,

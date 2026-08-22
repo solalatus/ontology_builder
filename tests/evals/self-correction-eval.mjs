@@ -57,7 +57,7 @@ import { launchChromium } from "../lib/browser.mjs";
 import { APP_URL } from "../lib/page.mjs";
 import { forwardToRealAzure, configureAzureEndpoint, openPanel } from "../lib/liveAzureOpenAi.mjs";
 import { runOntologyRecoveryConversation } from "./lib/conversationOrchestrator.mjs";
-import { chatOnce, DEFAULT_AZURE_API_VERSION } from "./lib/chatClient.mjs";
+import { chatMessagesOnce, DEFAULT_AZURE_API_VERSION } from "./lib/chatClient.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const OUT_ROOT = path.join(__dirname, "results", "baselines", "self-correcting-interviewer");
@@ -183,11 +183,20 @@ async function main() {
       // The persona and the completion classifier are Node-side calls, not the
       // app's — the relay above does not touch them. Without this they go to
       // api.openai.com with an Azure key and 401 immediately.
+      //
+      // chatMessagesOnce, not chatOnce (issue #133/Finding C): this file was
+      // the origin of the flattening pattern cq-non-regression.mjs's own
+      // header documents as broken -- routing personaAgent.mjs's real
+      // multi-turn `messages` array through chatOnce's single system+user
+      // pair meant flattening every prior turn into one undifferentiated
+      // blob, roles stripped, which caused a persona to re-emit its scripted
+      // opening line on all 19 turns of that run. Fixed here at the source
+      // rather than leaving it live in the one file every later runner
+      // (including this one) had been copying it from.
       chat: async (messages, model) => {
-        const call = await chatOnce({
+        const call = await chatMessagesOnce({
           config: { provider: "azure", endpoint, apiKey, apiVersion: process.env.AZURE_OPENAI_API_VERSION || DEFAULT_AZURE_API_VERSION },
-          model, systemPrompt: messages[0].content,
-          userPrompt: messages.slice(1).map((m) => m.content).join("\n\n"),
+          model, messages,
           label: `${armName}/${runId} harness`,
         });
         return { text: call.reply, usage: call.usage };

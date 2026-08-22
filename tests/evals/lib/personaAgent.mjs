@@ -2,12 +2,21 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { loadRawFixtureText } from "./groundTruthModel.mjs";
+import { renderNaturalLanguageBriefing } from "./groundTruthBriefing.mjs";
 import { RATE_LIMIT_MAX_ATTEMPTS, rateLimitBackoffMs, sleepMs, isInsufficientQuotaError } from "../../lib/liveOpenAi.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PERSONA_PATH = path.resolve(__dirname, "..", "fixtures", "persona-eszter.md");
-const WRAPPER_PATH = path.resolve(__dirname, "..", "fixtures", "persona-experiment-wrapper.md");
-const DEFAULT_GROUND_TRUTH_FILENAME = "hungarian_bank_itops_incident_response_mtsr.yaml";
+// Exported for issue #133/E8: provenance needs to hash the exact wrapper
+// file text a run actually used (persona-experiment-wrapper.md content
+// changes -- E11/E12/item-2 fixes among them -- should show up as a
+// different wrapperSha256 in a run's own provenance.json).
+export const WRAPPER_PATH = path.resolve(__dirname, "..", "fixtures", "persona-experiment-wrapper.md");
+// Exported for issue #133/N7b: conversationOrchestrator.mjs uses this to
+// detect the "caller passed a real groundTruthFilename but forgot
+// groundTruthFormat: 'domain-yaml'" mistake -- see that check's own
+// comment.
+export const DEFAULT_GROUND_TRUTH_FILENAME = "hungarian_bank_itops_incident_response_mtsr.yaml";
 const CHAT_URL = "https://api.openai.com/v1/chat/completions";
 
 // The itops persona's own scripted opening line (persona-eszter.md's
@@ -46,6 +55,13 @@ export function deriveOpeningLine(personaMarkdownText) {
     .replace(/\byou've\b/gi, "I've")
     .replace(/\byou'll\b/gi, "I'll")
     .replace(/\byou'd\b/gi, "I'd")
+    // Issue #133/E21 (external audit): the bare "\bYou\b" -> "I" swap below
+    // only replaces the pronoun, not the verb that agrees with it -- "You
+    // are" became the ungrammatical "I are", "You were" became "I were".
+    // Handled as their own two-word replacements, before the bare-pronoun
+    // swap, since that swap alone can't also conjugate the following verb.
+    .replace(/\byou are\b/gi, "I am")
+    .replace(/\byou were\b/gi, "I was")
     .replace(/\bYou\b/g, "I")
     .replace(/\byou\b/g, "I")
     .replace(/\byours\b/gi, "mine")
@@ -53,12 +69,25 @@ export function deriveOpeningLine(personaMarkdownText) {
   return `${firstPerson} Where would you like to start?`;
 }
 
-function buildSystemPrompt({ personaPath, groundTruthText, groundTruthFilename } = {}) {
+// Issue #133/E12 item 1 (external audit, root-cause fix): the raw
+// `.domain.yaml` file text used to be embedded here verbatim -- every raw
+// internal identifier (AirHandlingUnit, hasBorrower, ...) sitting directly
+// in the persona's own context, available to be regurgitated regardless of
+// what the wrapper prompt asked it not to do (Finding A's real leaks).
+// `groundTruthFormat: "domain-yaml"` renders a natural-language-only
+// version of the same document first (see groundTruthBriefing.mjs) so there
+// is no raw identifier left anywhere in what reaches the model at all.
+// Defaults to "mtsr" (embed as-is), matching every existing caller
+// (itops's own fixture, and every caller that never passes this) exactly.
+function buildSystemPrompt({ personaPath, groundTruthText, groundTruthFilename, groundTruthFormat = "mtsr" } = {}) {
   const resolvedPersonaPath = personaPath || PERSONA_PATH;
   const personaText = fs.readFileSync(resolvedPersonaPath, "utf8");
   const resolvedFilename = groundTruthFilename || DEFAULT_GROUND_TRUTH_FILENAME;
   const wrapperText = fs.readFileSync(WRAPPER_PATH, "utf8").replaceAll("{{GROUND_TRUTH_FILENAME}}", resolvedFilename);
-  const resolvedGroundTruthText = groundTruthText !== undefined ? groundTruthText : loadRawFixtureText();
+  const rawGroundTruthText = groundTruthText !== undefined ? groundTruthText : loadRawFixtureText();
+  const resolvedGroundTruthText = groundTruthFormat === "domain-yaml"
+    ? renderNaturalLanguageBriefing(rawGroundTruthText)
+    : rawGroundTruthText;
 
   const [wrapperPurpose, wrapperRest] = wrapperText.split(/\n## Hidden-ground-truth rule\n/);
   const rest = `## Hidden-ground-truth rule\n${wrapperRest}`;
@@ -84,10 +113,13 @@ function buildSystemPrompt({ personaPath, groundTruthText, groundTruthFilename }
 // plus its own reference.domain.yaml's raw text can be substituted, wrapped
 // in the same domain-agnostic experiment scaffolding
 // (persona-experiment-wrapper.md) itops now shares rather than duplicates.
-// All three default to itops's own values, so every existing call site
+// `groundTruthFormat` (issue #133/E12 item 1): pass "domain-yaml" alongside
+// them so the ground truth actually embedded is the natural-language
+// rendering (see buildSystemPrompt above), not the raw file text.
+// All three original params default to itops's own values, so every existing call site
 // (createPersonaAgent({ apiKey, model })) is completely unaffected.
-export function createPersonaAgent({ apiKey, model, chat = null, personaPath, groundTruthText, groundTruthFilename }) {
-  const messages = [{ role: "system", content: buildSystemPrompt({ personaPath, groundTruthText, groundTruthFilename }) }];
+export function createPersonaAgent({ apiKey, model, chat = null, personaPath, groundTruthText, groundTruthFilename, groundTruthFormat }) {
+  const messages = [{ role: "system", content: buildSystemPrompt({ personaPath, groundTruthText, groundTruthFilename, groundTruthFormat }) }];
 
   // Retries a transient 429 with backoff, same as every other real API call
   // site in the app/test suite (index.html's callAgentChatRaw,

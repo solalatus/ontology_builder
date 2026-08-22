@@ -1,0 +1,253 @@
+{
+  "classes": [
+    {
+      "goldId": "AirHandlingUnit",
+      "recoveredId": "n1",
+      "weight": 1
+    },
+    {
+      "goldId": "TemperatureSensor",
+      "recoveredId": "n10",
+      "weight": 1
+    },
+    {
+      "goldId": "AirTemperatureSensor",
+      "recoveredId": "n23",
+      "weight": 1
+    },
+    {
+      "goldId": "CO2Sensor",
+      "recoveredId": "n12",
+      "weight": 1
+    },
+    {
+      "goldId": "OutsideAirCO2Sensor",
+      "recoveredId": "n28",
+      "weight": 1
+    },
+    {
+      "goldId": "ReturnAirCO2Sensor",
+      "recoveredId": "n29",
+      "weight": 1
+    },
+    {
+      "goldId": "TemperatureSetpoint",
+      "recoveredId": "n11",
+      "weight": 1
+    },
+    {
+      "goldId": "AirTemperatureSetpoint",
+      "recoveredId": "n24",
+      "weight": 1
+    },
+    {
+      "goldId": "CoolingTemperatureSetpoint",
+      "recoveredId": "n25",
+      "weight": 1
+    },
+    {
+      "goldId": "HeatingTemperatureSetpoint",
+      "recoveredId": "n26",
+      "weight": 1
+    },
+    {
+      "goldId": "TemperatureDeadbandSetpoint",
+      "recoveredId": "n27",
+      "weight": 1
+    },
+    {
+      "goldId": "OccupancySensor",
+      "recoveredId": "n13",
+      "weight": 1
+    },
+    {
+      "goldId": "Thermostat",
+      "recoveredId": "n4",
+      "weight": 1
+    },
+    {
+      "goldId": "TerminalUnit",
+      "recoveredId": "n2",
+      "weight": 1
+    },
+    {
+      "goldId": "Damper",
+      "recoveredId": "n17",
+      "weight": 1
+    },
+    {
+      "goldId": "Filter",
+      "recoveredId": "n19",
+      "weight": 1
+    },
+    {
+      "goldId": "Fan",
+      "recoveredId": "n18",
+      "weight": 1
+    },
+    {
+      "goldId": "Economizer",
+      "recoveredId": "n22",
+      "weight": 1
+    },
+    {
+      "goldId": "CoolingValve",
+      "recoveredId": "n20",
+      "weight": 1
+    },
+    {
+      "goldId": "HeatingValve",
+      "recoveredId": "n21",
+      "weight": 1
+    },
+    {
+      "goldId": "Boiler",
+      "recoveredId": "n15",
+      "weight": 1
+    },
+    {
+      "goldId": "Chiller",
+      "recoveredId": "n14",
+      "weight": 1
+    },
+    {
+      "goldId": "PackagedHeatPump",
+      "recoveredId": "n16",
+      "weight": 1
+    },
+    {
+      "goldId": "Building",
+      "recoveredId": "n7",
+      "weight": 1
+    },
+    {
+      "goldId": "Floor",
+      "recoveredId": "n8",
+      "weight": 1
+    },
+    {
+      "goldId": "Space",
+      "recoveredId": "n6",
+      "weight": 1
+    },
+    {
+      "goldId": "Zone",
+      "recoveredId": "n5",
+      "weight": 1
+    }
+  ],
+  "relationships": [
+    {
+      "goldId": "rel_26",
+      "edgeId": "e1",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_27",
+      "edgeId": "e23",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_28",
+      "edgeId": "e22",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_29",
+      "edgeId": "e24",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_30",
+      "edgeId": "e15",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_31",
+      "edgeId": "e3",
+      "direction": "forward"
+    }
+  ],
+  "properties": [
+    {
+      "goldId": "AirHandlingUnit.status",
+      "hostNodeId": "n1",
+      "matchedPropertyName": "status"
+    },
+    {
+      "goldId": "AirTemperatureSensor.value",
+      "hostNodeId": "n23",
+      "matchedPropertyName": "value"
+    },
+    {
+      "goldId": "OutsideAirCO2Sensor.value",
+      "hostNodeId": "n28",
+      "matchedPropertyName": "value"
+    },
+    {
+      "goldId": "ReturnAirCO2Sensor.value",
+      "hostNodeId": "n29",
+      "matchedPropertyName": "value"
+    },
+    {
+      "goldId": "CoolingTemperatureSetpoint.value",
+      "hostNodeId": "n25",
+      "matchedPropertyName": "value"
+    },
+    {
+      "goldId": "HeatingTemperatureSetpoint.value",
+      "hostNodeId": "n26",
+      "matchedPropertyName": "value"
+    },
+    {
+      "goldId": "TemperatureDeadbandSetpoint.value",
+      "hostNodeId": "n27",
+      "matchedPropertyName": "value"
+    },
+    {
+      "goldId": "Thermostat.status",
+      "hostNodeId": "n4",
+      "matchedPropertyName": "status"
+    },
+    {
+      "goldId": "TerminalUnit.status",
+      "hostNodeId": "n2",
+      "matchedPropertyName": "status"
+    },
+    {
+      "goldId": "Damper.position",
+      "hostNodeId": "n17",
+      "matchedPropertyName": "position"
+    },
+    {
+      "goldId": "Filter.status",
+      "hostNodeId": "n19",
+      "matchedPropertyName": "status"
+    },
+    {
+      "goldId": "Fan.status",
+      "hostNodeId": "n18",
+      "matchedPropertyName": "status"
+    },
+    {
+      "goldId": "Economizer.status",
+      "hostNodeId": "n22",
+      "matchedPropertyName": "status"
+    },
+    {
+      "goldId": "CoolingValve.position",
+      "hostNodeId": "n20",
+      "matchedPropertyName": "position"
+    },
+    {
+      "goldId": "HeatingValve.position",
+      "hostNodeId": "n21",
+      "matchedPropertyName": "position"
+    },
+    {
+      "goldId": "Zone.occupancyStatus",
+      "hostNodeId": "n5",
+      "matchedPropertyName": "occupancyState"
+    }
+  ]
+}

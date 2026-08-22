@@ -85,17 +85,27 @@ test("appearsFinished retries a transient rate limit and succeeds once it recove
   );
 });
 
-test("appearsFinished does not retry a permanent insufficient_quota error", async () => {
+// Issue #133/E16 (external audit): this used to assert appearsFinished
+// *threw* on a permanent classifier failure, taking the entire run down
+// with it over one failed "is this finished?" check. Now degrades to
+// "not finished" instead -- the conservative direction, since the run
+// keeps going rather than ending prematurely, and the failure itself is
+// still not silently retried indefinitely (still exactly 1 call).
+test("appearsFinished does not retry a permanent insufficient_quota error, and degrades to \"not finished\" rather than crashing the run", async () => {
   await withMockedFetch(
     [{ status: 429, body: { error: { message: "You exceeded your current quota.", code: "insufficient_quota" } } }],
     async (calls) => {
-      await assert.rejects(
-        () => appearsFinished("some interviewer message", { apiKey: "sk-test", model: "gpt-test" }),
-        /appearsFinished classifier call failed \(HTTP 429/
-      );
+      const result = await appearsFinished("some interviewer message", { apiKey: "sk-test", model: "gpt-test" });
+      assert.equal(result, false, "a failed classifier call must default to \"not finished\", not crash the run");
       assert.equal(calls.length, 1, "a permanent quota error must not be retried");
     }
   );
+});
+
+test("appearsFinished degrades to \"not finished\" when a `chat` override throws, instead of crashing the run", async () => {
+  const chat = async () => { throw new Error("provider returned an empty reply twice in a row"); };
+  const result = await appearsFinished("some interviewer message", { apiKey: "unused", model: "gpt-test", chat });
+  assert.equal(result, false);
 });
 
 test("generateLlmReview retries a transient rate limit and succeeds once it recovers", async () => {

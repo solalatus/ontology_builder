@@ -49,8 +49,15 @@ test("buildSystemPrompt() (itops default) still contains every substantive rule 
   // Consistency checklist -- genericized item 1, same intent.
   assert.match(prompt, /Am I speaking in character as the persona described above/);
 
-  // Ending the interview.
-  assert.match(prompt, /That covers it well, thank you/);
+  // Ending the interview. Issue #133/E12 (external audit): the original
+  // fixed worked example ("That covers it well, thank you.") was itself the
+  // literal string that repeated 159 times in a real dead-loop incident
+  // (iof-maintenance/run-03) -- the wrapper now deliberately avoids handing
+  // the persona one fixed template to echo verbatim, so this checks for the
+  // preserved BEHAVIOR (a single short closing line, own words, then stop)
+  // rather than that specific retired phrase.
+  assert.match(prompt, /give a single short closing line in your own words/);
+  assert.match(prompt, /do not repeat a farewell or thank-you back and forth turn after turn/);
 
   // itops-specific content (never touched by the wrapper extraction) is
   // still present too -- the trimmed persona-eszter.md's own remainder.
@@ -78,6 +85,29 @@ test("buildSystemPrompt() with an explicit domain persona/ground truth embeds th
   assert.match(prompt, /reference\.domain\.yaml/);
 });
 
+test("buildSystemPrompt() with groundTruthFormat: \"domain-yaml\" embeds the natural-language rendering, not the raw identifier text (issue #133/E12 item 1)", () => {
+  const personaPath = resolveDomainPersonaPath("brick-hvac");
+  const groundTruthText = fs.readFileSync(resolveDomainYamlPath("brick-hvac"), "utf8");
+
+  const prompt = buildSystemPrompt({
+    personaPath, groundTruthText, groundTruthFilename: "reference.domain.yaml", groundTruthFormat: "domain-yaml",
+  });
+
+  assert.equal(prompt.includes("AirHandlingUnit"), false, "the raw internal identifier must never reach the persona's own context");
+  assert.match(prompt, /Air Handling Unit/, "the natural-language label is present instead");
+  // The domain's real descriptive content (aliases, prose) still survives.
+  assert.match(prompt, /AHU/);
+});
+
+test("buildSystemPrompt() without groundTruthFormat (default) still embeds the raw domain-yaml identifiers unchanged -- backward compatible for every existing caller", () => {
+  const personaPath = resolveDomainPersonaPath("brick-hvac");
+  const groundTruthText = fs.readFileSync(resolveDomainYamlPath("brick-hvac"), "utf8");
+
+  const prompt = buildSystemPrompt({ personaPath, groundTruthText, groundTruthFilename: "reference.domain.yaml" });
+
+  assert.match(prompt, /AirHandlingUnit/, "raw identifier text embedded as before when groundTruthFormat is not passed");
+});
+
 test("deriveOpeningLine turns a persona.md's own \"Who they are\" section into a first-person opener", () => {
   const personaPath = resolveDomainPersonaPath("brick-hvac");
   const text = fs.readFileSync(personaPath, "utf8");
@@ -92,6 +122,23 @@ test("deriveOpeningLine turns a persona.md's own \"Who they are\" section into a
   assert.doesNotMatch(selfDescription, /\byou\b|\byour\b/i, "should not still address the model in second person");
 });
 
+// Issue #133/E21 (external audit): the bare pronoun swap alone turned "You
+// are" into the ungrammatical "I are", and "You were" into "I were" --
+// harmless against the four real personas that exist today (none of them
+// happen to phrase their "Who they are" section this way), but a future
+// persona could trigger it and open the interview with a visibly broken
+// sentence.
+test("deriveOpeningLine conjugates \"You are\"/\"You were\" correctly instead of leaving the ungrammatical \"I are\"/\"I were\"", () => {
+  const text = "## Who they are\nYou are a senior logistics coordinator. You were previously a warehouse manager.\n";
+  const opening = deriveOpeningLine(text);
+  assert.match(opening, /^I am a senior logistics coordinator\.\s+I was previously a warehouse manager\./);
+  assert.doesNotMatch(opening, /\bI are\b|\bI were\b/i);
+});
+
+// E21's own suggested mitigation: pin the four current domains' real derived
+// openers so any future change to deriveOpeningLine (or to a persona.md's
+// "Who they are" wording) that breaks the grammar is caught immediately,
+// not just "parses without throwing".
 test("deriveOpeningLine produces a real, non-empty, first-person opener for every domain that exists today", () => {
   const domains = listAvailableDomains();
   assert.ok(domains.length >= 4, "expected at least the 4 domains translated so far");

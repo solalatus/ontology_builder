@@ -1,0 +1,301 @@
+competency_questions:
+  - id: cq1
+    text: Which air handler serves this terminal unit?
+  - id: cq2
+    text: Which air handler serves this plenum?
+  - id: cq3
+    text: Which temperature sensors are associated with this air handler?
+  - id: cq4
+    text: Which setpoints are associated with this air handler?
+  - id: cq5
+    text: What HVAC equipment is located in this building?
+  - id: cq6
+    text: What HVAC equipment is located on this floor?
+  - id: cq7
+    text: What HVAC equipment is located in this space?
+  - id: cq8
+    text: Which spaces are on this floor?
+  - id: cq9
+    text: Which floors belong to this building?
+  - id: cq10
+    text: "For this air handler, which CO2 sensor measures outside air?"
+  - id: cq11
+    text: "For this air handler, which CO2 sensor measures return air?"
+  - id: cq12
+    text: What equipment is upstream of this terminal unit?
+  - id: cq13
+    text: What equipment is upstream of this plenum?
+  - id: cq14
+    text: "If the measured air temperature is not at the desired value, which setpoint should be checked?"
+  - id: cq15
+    text: Which occupancy sensor is associated with this space?
+  - id: cq16
+    text: Which occupancy sensor is associated with this zone?
+  - id: cq17
+    text: Which zones or spaces are served by this thermostat?
+  - id: cq18
+    text: Which zones or spaces are served by this terminal unit?
+  - id: cq19
+    text: "Which valves, dampers, fans, and filters are part of this air handler?"
+  - id: cq20
+    text: "Which cooling or heating devices are connected to this chiller, boiler, or heat-pump path?"
+  - id: cq21
+    text: When can the economizer be used instead of mechanical cooling for this air-handling process?
+classes:
+  Air Handling Unit:
+    meaning: null
+    aliases:
+      - AHU
+    properties: {}
+  Terminal Unit:
+    meaning: null
+    aliases: []
+    properties: {}
+  Air Plenum:
+    meaning: null
+    aliases: []
+    properties: {}
+  Building:
+    meaning: null
+    aliases: []
+    properties: {}
+  Floor:
+    meaning: null
+    aliases:
+      - Storey
+    properties: {}
+  Space:
+    meaning: null
+    aliases: []
+    properties: {}
+  Zone:
+    meaning: null
+    aliases: []
+    properties: {}
+  Thermostat:
+    meaning: null
+    aliases: []
+    properties: {}
+  Air Temperature Sensor:
+    meaning: null
+    aliases: []
+    properties: {}
+  Outside-Air CO2 Sensor:
+    meaning: null
+    aliases: []
+    properties: {}
+  Return-Air CO2 Sensor:
+    meaning: null
+    aliases: []
+    properties: {}
+  Occupancy Sensor:
+    meaning: null
+    aliases: []
+    properties: {}
+  Economizer:
+    meaning: null
+    aliases: []
+    properties: {}
+  Air Temperature Setpoint:
+    meaning: null
+    aliases: []
+    properties: {}
+  Cooling Temperature Setpoint:
+    meaning: null
+    aliases: []
+    properties: {}
+  Heating Temperature Setpoint:
+    meaning: null
+    aliases: []
+    properties: {}
+  Temperature Deadband Setpoint:
+    meaning: null
+    aliases: []
+    properties: {}
+  Cooling Valve:
+    meaning: null
+    aliases: []
+    properties: {}
+  Heating Valve:
+    meaning: null
+    aliases: []
+    properties: {}
+  Damper:
+    meaning: null
+    aliases: []
+    properties: {}
+  Fan:
+    meaning: null
+    aliases: []
+    properties: {}
+  Filter:
+    meaning: null
+    aliases: []
+    properties: {}
+  Chiller:
+    meaning: null
+    aliases: []
+    properties: {}
+  Boiler:
+    meaning: null
+    aliases: []
+    properties: {}
+  Packaged Heat Pump:
+    meaning: null
+    aliases: []
+    properties: {}
+  Pump:
+    meaning: null
+    aliases: []
+    properties: {}
+  Heat Exchanger:
+    meaning: null
+    aliases: []
+    properties: {}
+  Cooling Tower:
+    meaning: null
+    aliases: []
+    properties: {}
+relationships:
+  - name: hasFloor
+    from: Building
+    to: Floor
+    meaning: null
+    aliases: []
+  - name: hasSpace
+    from: Floor
+    to: Space
+    meaning: null
+    aliases: []
+  - name: locatedInBuilding
+    from: Air Handling Unit
+    to: Building
+    meaning: null
+    aliases: []
+  - name: locatedOnFloor
+    from: Air Handling Unit
+    to: Floor
+    meaning: null
+    aliases: []
+  - name: locatedInSpace
+    from: Terminal Unit
+    to: Space
+    meaning: null
+    aliases: []
+  - name: locatedInSpace
+    from: Thermostat
+    to: Space
+    meaning: null
+    aliases: []
+  - name: feeds
+    from: Air Handling Unit
+    to: Terminal Unit
+    meaning: null
+    aliases: []
+  - name: feeds
+    from: Air Handling Unit
+    to: Air Plenum
+    meaning: null
+    aliases: []
+  - name: serves
+    from: Thermostat
+    to: Zone
+    meaning: null
+    aliases: []
+  - name: serves
+    from: Terminal Unit
+    to: Space
+    meaning: null
+    aliases: []
+  - name: hasPoint
+    from: Air Handling Unit
+    to: Air Temperature Sensor
+    meaning: null
+    aliases: []
+  - name: hasPoint
+    from: Air Handling Unit
+    to: Outside-Air CO2 Sensor
+    meaning: null
+    aliases: []
+  - name: hasPoint
+    from: Air Handling Unit
+    to: Return-Air CO2 Sensor
+    meaning: null
+    aliases: []
+  - name: hasPoint
+    from: Air Handling Unit
+    to: Air Temperature Setpoint
+    meaning: null
+    aliases: []
+  - name: hasPoint
+    from: Air Handling Unit
+    to: Cooling Temperature Setpoint
+    meaning: null
+    aliases: []
+  - name: hasPoint
+    from: Air Handling Unit
+    to: Heating Temperature Setpoint
+    meaning: null
+    aliases: []
+  - name: hasPoint
+    from: Air Handling Unit
+    to: Temperature Deadband Setpoint
+    meaning: null
+    aliases: []
+  - name: hasPart
+    from: Air Handling Unit
+    to: Economizer
+    meaning: null
+    aliases: []
+  - name: hasPart
+    from: Air Handling Unit
+    to: Cooling Valve
+    meaning: null
+    aliases: []
+  - name: hasPart
+    from: Air Handling Unit
+    to: Heating Valve
+    meaning: null
+    aliases: []
+  - name: hasPart
+    from: Air Handling Unit
+    to: Damper
+    meaning: null
+    aliases: []
+  - name: hasPart
+    from: Air Handling Unit
+    to: Fan
+    meaning: null
+    aliases: []
+  - name: hasPart
+    from: Air Handling Unit
+    to: Filter
+    meaning: null
+    aliases: []
+  - name: hasPoint
+    from: Space
+    to: Occupancy Sensor
+    meaning: null
+    aliases: []
+  - name: hasPoint
+    from: Zone
+    to: Occupancy Sensor
+    meaning: null
+    aliases: []
+  - name: feeds
+    from: Chiller
+    to: Cooling Valve
+    meaning: null
+    aliases: []
+  - name: feeds
+    from: Boiler
+    to: Heating Valve
+    meaning: null
+    aliases: []
+  - name: feeds
+    from: Packaged Heat Pump
+    to: Terminal Unit
+    meaning: null
+    aliases: []
+rules: {}
+actions: {}

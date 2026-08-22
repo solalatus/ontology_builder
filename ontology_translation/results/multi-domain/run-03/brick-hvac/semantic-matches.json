@@ -1,0 +1,146 @@
+{
+  "fullDomain": {
+    "classes": [],
+    "relationships": [
+      {
+        "goldId": "rel_16",
+        "recoveredId": "e8"
+      },
+      {
+        "goldId": "rel_17",
+        "recoveredId": "e7"
+      },
+      {
+        "goldId": "rel_18",
+        "recoveredId": "e9"
+      },
+      {
+        "goldId": "rel_19",
+        "recoveredId": "e10"
+      },
+      {
+        "goldId": "rel_22",
+        "recoveredId": "e5"
+      },
+      {
+        "goldId": "rel_23",
+        "recoveredId": "e6"
+      },
+      {
+        "goldId": "rel_24",
+        "recoveredId": "e25"
+      }
+    ],
+    "properties": [],
+    "valueFidelity": [
+      {
+        "id": "AirHandlingUnit.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "AirPlenum.airflowState",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Thermostat.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "TerminalUnit.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Filter.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Fan.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Economizer.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Boiler.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Chiller.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "PackagedHeatPump.mode",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Zone.occupancyStatus",
+        "semanticFidelity": 1
+      }
+    ]
+  },
+  "scoped": {
+    "classes": [],
+    "relationships": [
+      {
+        "goldId": "rel_16",
+        "recoveredId": "e8"
+      },
+      {
+        "goldId": "rel_17",
+        "recoveredId": "e7"
+      },
+      {
+        "goldId": "rel_18",
+        "recoveredId": "e9"
+      },
+      {
+        "goldId": "rel_19",
+        "recoveredId": "e10"
+      },
+      {
+        "goldId": "rel_22",
+        "recoveredId": "e5"
+      },
+      {
+        "goldId": "rel_23",
+        "recoveredId": "e6"
+      },
+      {
+        "goldId": "rel_24",
+        "recoveredId": "e25"
+      }
+    ],
+    "properties": [],
+    "valueFidelity": [
+      {
+        "id": "AirHandlingUnit.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Thermostat.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "TerminalUnit.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Economizer.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Boiler.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Chiller.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Zone.occupancyStatus",
+        "semanticFidelity": 1
+      }
+    ]
+  }
+}

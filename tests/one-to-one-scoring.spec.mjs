@@ -1,12 +1,14 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { loadGroundTruthModel, scopeGroundTruth } from "./evals/lib/groundTruthModel.mjs";
 import { computeRecoveryMetrics } from "./evals/lib/recoveryMetrics.mjs";
 import { recoveredStateFromYaml } from "./evals/score-baseline.mjs";
 import { extractYaml } from "./evals/baseline-one-shot.mjs";
+import { rescoreRun } from "./evals/rescore-saved-run.mjs";
 
 // EXPERIMENT_BRIEF.md §8's acceptance checks for the new comparison-condition
 // baselines (B1/B2/B3) -- offline, zero API calls (§8.6), run before any
@@ -80,6 +82,100 @@ test("degenerate input: a model with an edge pointing at an undeclared class sco
   assert.equal(state.nodes.length, 1);
   const full = loadGroundTruthModel();
   assert.doesNotThrow(() => computeRecoveryMetrics(full, state));
+});
+
+// Issue #133/E17 (external audit): recoveredStateFromYaml used to return
+// only { nodes, edges }, silently dropping rules/actions even though
+// buildDomainModel's own export includes both -- so a saved run's rules/
+// actions could never be re-scored offline from its own recovered-model.yaml,
+// exactly the gap rescore-saved-run.mjs and this ticket's own retroactive
+// leak quantification hit. Keyed by name (doubling as id), matching how
+// gold's own .domain.yaml rules/actions are keyed.
+test("recoveredStateFromYaml parses rules and actions, not just classes/relationships", () => {
+  const text = [
+    "classes:",
+    "  Thing:",
+    "    meaning: x",
+    "relationships: []",
+    "rules:",
+    "  needsAttention:",
+    "    conditions:",
+    "      - the value exceeds the threshold",
+    "actions:",
+    "  flagForReview:",
+    "    input: Thing",
+    "    preconditions:",
+    "      - needsAttention",
+    "    effect: mark the thing for review",
+    "    verification: confirm the review flag is set",
+    "",
+  ].join("\n");
+  const { state } = recoveredStateFromYaml(text);
+  assert.equal(state.rules.length, 1);
+  assert.deepEqual(state.rules[0], { id: "needsAttention", name: "needsAttention", conditions: ["the value exceeds the threshold"] });
+  assert.equal(state.actions.length, 1);
+  assert.deepEqual(state.actions[0], {
+    id: "flagForReview", name: "flagForReview", inputClassId: "Thing",
+    preconditions: ["needsAttention"], effect: "mark the thing for review", verification: "confirm the review flag is set",
+  });
+});
+
+test("recoveredStateFromYaml defaults rules/actions to empty arrays when the YAML has neither block", () => {
+  const text = "classes:\n  Thing:\n    meaning: x\nrelationships: []\n";
+  const { state } = recoveredStateFromYaml(text);
+  assert.deepEqual(state.rules, []);
+  assert.deepEqual(state.actions, []);
+});
+
+// Issue #133/E3 (external audit): rescoreRun used to always score against
+// itops's own fixture regardless of which run it was pointed at -- a
+// brick-hvac run would silently get scored against IT-operations gold and
+// print plausible near-zero numbers with no error. Now refuses outright
+// when the run directory looks like a results/multi-domain/ path (this
+// repo's own multi-domain benchmark tree, issue #111) and no domain was
+// named, rather than silently mis-scoring it.
+test("rescoreRun refuses to run against a results/multi-domain/ path without an explicit domain", () => {
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "rescore-test-"));
+  const runDir = path.join(tmpDir, "results", "multi-domain", "run-01", "brick-hvac");
+  fs.mkdirSync(runDir, { recursive: true });
+  fs.writeFileSync(path.join(runDir, "recovered-model.yaml"), "classes:\n  Thing:\n    meaning: x\nrelationships: []\n");
+  assert.throws(() => rescoreRun(runDir), /--domain=/, "must refuse rather than silently scoring against itops's fixture");
+  fs.rmSync(tmpDir, { recursive: true, force: true });
+});
+
+// Issue #133/N4 (independent audit of this same fix): the original guard's
+// regex required a trailing separator right after "multi-domain", so a
+// sibling directory like results/multi-domain-superseded-2026-08/ (E9's own
+// committed archive of the pre-fix 12-run data) never matched -- verified
+// live to silently score a real brick-hvac recovered model against itops's
+// own fixture, exactly the failure E3 exists to prevent. Uses the real
+// committed archive directly, not a synthetic path, so this can't drift
+// out of sync with whatever the archive directory is actually named.
+test("rescoreRun also refuses to run against the committed multi-domain-superseded-* archive without an explicit domain", () => {
+  const supersededDir = path.resolve(__dirname, "..", "ontology_translation", "results", "multi-domain-superseded-2026-08", "run-01", "brick-hvac");
+  assert.ok(fs.existsSync(path.join(supersededDir, "recovered-model.yaml")), "expected the committed superseded archive to still exist at this path");
+  assert.throws(() => rescoreRun(supersededDir), /--domain=/, "must refuse rather than silently scoring against itops's fixture");
+});
+
+// The itops anchor runs (results/runs/) predate #104's domain concept and
+// have no domain of their own to name -- the zero-arg default must keep
+// working for them exactly as before, backward compatibility this fix must
+// not break.
+test("rescoreRun still defaults to itops's own fixture with no domain given, for the pre-#104 anchor runs", () => {
+  const RUN_01_DIR = path.dirname(RUN_01_YAML_PATH);
+  const r = rescoreRun(RUN_01_DIR);
+  assert.ok(r.heuristic.full.classes.groundTruthTotal > 0, "must have scored against a real ground truth, not crashed or silently produced zeros");
+});
+
+// A real domain, explicitly named, must score against that domain's own
+// ground truth -- not itops's -- confirmed by a groundTruthTotal that
+// matches the named domain's own real class count, not itops's 68.
+test("rescoreRun scores against the named domain's own ground truth when --domain is given", () => {
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "rescore-test-"));
+  fs.writeFileSync(path.join(tmpDir, "recovered-model.yaml"), "classes:\n  Thing:\n    meaning: x\nrelationships: []\n");
+  const r = rescoreRun(tmpDir, "brick-hvac");
+  assert.equal(r.heuristic.full.classes.groundTruthTotal, 39, "brick-hvac's own real full-domain class count, not itops's 68");
+  fs.rmSync(tmpDir, { recursive: true, force: true });
 });
 
 // §8.3 Extraction check -- bare YAML, ```yaml-fenced, plain-fenced, and

@@ -3,10 +3,11 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { tagApiMessagesWithTurn, looksLikeEarlyPhaseCheckpoint, looksLikePureAcknowledgment, looksLikeContinuationOffer } from "./evals/lib/conversationOrchestrator.mjs";
+import { tagApiMessagesWithTurn, looksLikeEarlyPhaseCheckpoint, looksLikePureAcknowledgment, looksLikeContinuationOffer, classifyAppSystemNote, WASTED_TURN_THRESHOLD } from "./evals/lib/conversationOrchestrator.mjs";
 import {
   writeConversationLog, writeToolCallLog, writeReport, pathsFor, RESULTS_DIR,
   writeRecoveredModelYaml, writeHeuristicMatches, writeSemanticJudgments, writeSemanticMatches,
+  computeOperationalStats,
 } from "./evals/lib/reportGenerator.mjs";
 
 // Own throwaway directory, not the real tests/evals/results/ -- these are
@@ -104,6 +105,118 @@ test("looksLikePureAcknowledgment recognizes short stock closing lines with no q
   assert.equal(looksLikePureAcknowledgment("Great, thanks so much for your time today."), true);
   assert.equal(looksLikePureAcknowledgment("No problem at all."), true);
   assert.equal(looksLikePureAcknowledgment("Goodbye!"), true);
+});
+
+// Issue #133/Finding B (external audit): the test above uses a straight
+// ASCII apostrophe ("You're welcome!"), which is exactly the fixture shape
+// that let this ship broken -- gpt-5.4 consistently outputs the curly
+// typographic apostrophe (’) in real prose, never the straight one, so the
+// unnormalized pattern silently never matched real output. Root-caused via
+// a real incident: iof-maintenance/run-03 spent 159 of 200 turns (79.5% of
+// the run) in a dead "That covers it well, thank you." / "You're welcome."
+// loop because this exact check never recognized the app agent's real,
+// curly-quoted "You're welcome." as a stock closing phrase.
+test("looksLikePureAcknowledgment recognizes the real curly-quote apostrophe gpt-5.4 actually outputs, not just the straight ASCII one", () => {
+  assert.equal(looksLikePureAcknowledgment("You’re welcome."), true, "curly apostrophe (’) -- the character real model output actually uses");
+  assert.equal(looksLikePureAcknowledgment("You're welcome."), true, "straight apostrophe must still work too");
+});
+
+// Issue #133/E4 (external audit): index.html appends a "system"-role
+// transcript note on a rate limit, an unrecoverable context-length overflow,
+// a tool-round-limit stop, or a generic API error -- classifyAppSystemNote
+// recognizes exactly the English strings index.html's own translation table
+// (agentChatErrorText/t("agentToolTooManyRounds")) produces for each, so a
+// real error is distinguishable from the app agent simply having nothing to
+// say, instead of both surfacing identically as an empty turn.
+test("classifyAppSystemNote recognizes each of index.html's own real error strings", () => {
+  assert.equal(classifyAppSystemNote("Rate limit reached. Wait a moment and try again."), "rateLimit");
+  assert.equal(classifyAppSystemNote("This OpenAI account is out of quota. Check your plan and billing on platform.openai.com — waiting will not help."), "insufficientQuota");
+  assert.equal(classifyAppSystemNote("The conversation is too long and couldn't be shortened further. Try starting a new topic."), "contextLength");
+  assert.equal(classifyAppSystemNote("Could not reach the OpenAI API (network or CORS error)."), "network");
+  assert.equal(classifyAppSystemNote("OpenAI rejected the API key. Disconnect and reconnect with a valid one."), "authFailed");
+  assert.equal(classifyAppSystemNote("The agent tried to use its tools too many times in one message and was stopped."), "toolRoundLimit");
+  assert.equal(classifyAppSystemNote("Something went wrong contacting the agent. Try again."), "generic");
+});
+
+test("classifyAppSystemNote returns null for ordinary transcript notes that are not errors at all", () => {
+  assert.equal(classifyAppSystemNote("The agent left 2 consistency problem(s) unresolved — see Check."), null);
+  assert.equal(classifyAppSystemNote(""), null);
+});
+
+// Issue #133/E4: a run that hit real API errors or lost history to
+// compaction previously looked identical, in every operational stat, to a
+// completely clean one -- computeOperationalStats now surfaces both plus a
+// `degraded` gate any consumer can use to exclude or flag the run.
+test("computeOperationalStats surfaces errorCounts/compactionEvents and sets degraded when either crosses the gate", () => {
+  const clean = computeOperationalStats({ log: [], chatResponses: [], errorCounts: {}, compactionEvents: 0 });
+  assert.equal(clean.degraded, false);
+  assert.equal(clean.totalErrorTurns, 0);
+
+  const oneCompaction = computeOperationalStats({ log: [], chatResponses: [], errorCounts: {}, compactionEvents: 1 });
+  assert.equal(oneCompaction.degraded, true, "any compaction at all marks a run degraded");
+
+  const manyErrors = computeOperationalStats({ log: [], chatResponses: [], errorCounts: { rateLimit: 3 }, compactionEvents: 0 });
+  assert.equal(manyErrors.degraded, true);
+  assert.equal(manyErrors.totalErrorTurns, 3);
+
+  const fewErrors = computeOperationalStats({ log: [], chatResponses: [], errorCounts: { rateLimit: 1 }, compactionEvents: 0 });
+  assert.equal(fewErrors.degraded, false, "a couple of transient rate-limit retries alone should not condemn an otherwise-clean run");
+});
+
+// computeOperationalStats predates orchestratorResult carrying
+// errorCounts/compactionEvents at all (every real saved run's own
+// operationalStats before this fix) -- must default gracefully, not throw.
+test("computeOperationalStats defaults gracefully when orchestratorResult has no errorCounts/compactionEvents at all", () => {
+  const stats = computeOperationalStats({ log: [], chatResponses: [] });
+  assert.equal(stats.degraded, false);
+  assert.deepEqual(stats.errorCounts, {});
+  assert.equal(stats.compactionEvents, 0);
+  assert.equal(stats.leakEventsCount, 0);
+  assert.equal(stats.unresolvedLeakEvents, 0);
+  assert.equal(stats.maxConsecutiveTurnsWithNoToolActivity, 0);
+});
+
+// Issue #133/E13 item 4: a run the leak guard had to abort (still leaking
+// after every retry) must be flagged degraded even with zero API errors and
+// zero compactions -- the whole point of the guard is that this kind of run
+// is not trustworthy for scoring, regardless of how smoothly everything else
+// went.
+test("computeOperationalStats marks a run degraded when the leak guard never resolved a leak, but not when every leak event was eventually resolved by a retry", () => {
+  const resolved = computeOperationalStats({
+    log: [], chatResponses: [], errorCounts: {}, compactionEvents: 0,
+    leakEvents: [{ turn: 5, attempt: 1, identifiers: ["AirHandlingUnit"], resolved: true }],
+  });
+  assert.equal(resolved.degraded, false, "a leak that a retry successfully cleaned up should not condemn the run");
+  assert.equal(resolved.leakEventsCount, 1);
+  assert.equal(resolved.unresolvedLeakEvents, 0);
+
+  const unresolved = computeOperationalStats({
+    log: [], chatResponses: [], errorCounts: {}, compactionEvents: 0,
+    leakEvents: [
+      { turn: 5, attempt: 1, identifiers: ["AirHandlingUnit"], resolved: false },
+      { turn: 5, attempt: 2, identifiers: ["AirHandlingUnit"], resolved: false },
+    ],
+  });
+  assert.equal(unresolved.degraded, true, "still-leaking after every retry must mark the run degraded");
+  assert.equal(unresolved.unresolvedLeakEvents, 2);
+});
+
+// Issue #133/item 8: a run that crossed the general stall threshold (or came
+// close to it) is exactly the shape of run Finding B measured twice in real
+// data -- must be flagged degraded even with nothing else wrong.
+test("computeOperationalStats marks a run degraded once maxConsecutiveTurnsWithNoToolActivity reaches WASTED_TURN_THRESHOLD, not before", () => {
+  const belowThreshold = computeOperationalStats({
+    log: [], chatResponses: [], errorCounts: {}, compactionEvents: 0,
+    maxConsecutiveTurnsWithNoToolActivity: WASTED_TURN_THRESHOLD - 1,
+  });
+  assert.equal(belowThreshold.degraded, false, "a near-miss stretch alone should not condemn an otherwise-clean run");
+  assert.equal(belowThreshold.maxConsecutiveTurnsWithNoToolActivity, WASTED_TURN_THRESHOLD - 1);
+
+  const atThreshold = computeOperationalStats({
+    log: [], chatResponses: [], errorCounts: {}, compactionEvents: 0,
+    maxConsecutiveTurnsWithNoToolActivity: WASTED_TURN_THRESHOLD,
+  });
+  assert.equal(atThreshold.degraded, true, "reaching the declared threshold must mark the run degraded");
 });
 
 test("looksLikePureAcknowledgment rejects real content even when it starts with a closing-sounding word", () => {
@@ -472,4 +585,13 @@ test("looksLikeContinuationOffer needs both a question and an offer — a final 
   assert.equal(looksLikeContinuationOffer("The model is complete. Does that match your understanding?"), false);
   assert.equal(looksLikeContinuationOffer(""), false);
   assert.equal(looksLikeContinuationOffer(null), false);
+});
+
+// Issue #133/Finding B (external audit): the "if you'd like" branch of
+// CONTINUATION_OFFER_PATTERNS shares the same straight-apostrophe-only
+// defect as looksLikePureAcknowledgment above -- fixed by the same
+// central normalizeQuotes() pass, verified here against the curly
+// apostrophe real model output actually uses.
+test("looksLikeContinuationOffer recognizes \"if you'd like\" with the real curly-quote apostrophe, not just the straight ASCII one", () => {
+  assert.equal(looksLikeContinuationOffer("I can continue into the remaining scope if you’d like to proceed?"), true);
 });

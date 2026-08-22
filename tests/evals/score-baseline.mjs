@@ -70,7 +70,24 @@ export function recoveredStateFromYaml(text) {
     // visible (EXPERIMENT_BRIEF.md §7.2).
     .filter((e) => e.source && e.target);
   const declaredEdges = (doc.relationships || []).length;
-  return { state: { nodes, edges }, droppedEdges: declaredEdges - edges.length };
+
+  // Rules/actions (issue #133/E17): previously omitted entirely, so a saved
+  // run's rules/actions could never be re-scored offline from its own
+  // recovered-model.yaml even though buildDomainModel exports both --
+  // exactly the tool rescore-saved-run.mjs and this ticket's own retroactive
+  // quantification need. Keyed by name in the export the same way gold's
+  // own `.domain.yaml` rules/actions are (see groundTruthModel.mjs), so the
+  // name doubles as a stable id -- matchRules/matchActions only need `id`
+  // to build their assignment map, not a separately-generated one.
+  const rules = Object.entries(doc.rules || {}).map(([name, r]) => ({
+    id: name, name, conditions: (r && r.conditions) || [],
+  }));
+  const actions = Object.entries(doc.actions || {}).map(([name, a]) => ({
+    id: name, name, inputClassId: a && a.input,
+    preconditions: (a && a.preconditions) || [], effect: (a && a.effect) || "", verification: (a && a.verification) || "",
+  }));
+
+  return { state: { nodes, edges, rules, actions }, droppedEdges: declaredEdges - edges.length };
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

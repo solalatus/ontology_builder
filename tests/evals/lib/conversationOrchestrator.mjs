@@ -1,7 +1,91 @@
+import fs from "node:fs";
+import yaml from "js-yaml";
 import { CHAT_URL, forwardToRealOpenAi, sendChatMessage, RATE_LIMIT_MAX_ATTEMPTS, rateLimitBackoffMs, sleepMs, isInsufficientQuotaError } from "../../lib/liveOpenAi.mjs";
-import { createPersonaAgent, OPENING_LINE } from "./personaAgent.mjs";
+import { createPersonaAgent, OPENING_LINE, DEFAULT_GROUND_TRUTH_FILENAME } from "./personaAgent.mjs";
+import { buildLeakCandidateSet, findLeakedIdentifiers } from "./leakDetector.mjs";
 
 const CLASSIFIER_URL = "https://api.openai.com/v1/chat/completions";
+
+// Issue #133/Finding B (external audit): gpt-5.4 consistently outputs the
+// curly typographic apostrophe (’, "'") in real prose, never the
+// straight ASCII one ("'") -- confirmed empirically, "You're welcome."
+// (straight) never appears in any real transcript this eval has produced,
+// "You're welcome." (curly) appears constantly. Every regex below that
+// matches an apostrophe'd word ("you're", "if you'd") was written with only
+// the straight form, so it silently never matched real output. Root-caused
+// via one specific incident: iof-maintenance/run-03 finished cleanly at
+// turn 40, then spent turns 41-200 (159 turns, 79.5% of the run) in a dead
+// "That covers it well, thank you." / "You're welcome." loop because
+// looksLikePureAcknowledgment never recognized the app agent's own
+// "You're welcome." as a stock closing phrase. Normalizing both curly-quote
+// characters to straight before every pattern test here (once, centrally)
+// is more robust than hand-editing each pattern's own character class.
+function normalizeQuotes(text) {
+  return text.replace(/[‘’]/g, "'").replace(/[“”]/g, '"');
+}
+
+// Issue #133/E4 (external audit): index.html appends a "system"-role
+// transcript note on a rate limit, an unrecoverable context-length overflow
+// (after compaction was attempted and still failed), a tool-round-limit
+// stop, or a generic API error (agentChatErrorText/t("agentToolTooManyRounds")
+// in index.html) -- but this orchestrator only ever looked for
+// role === "assistant" on each turn, so a real API error surfaced
+// identically to the app agent simply having nothing to say: silently, with
+// no count anywhere. Classifies exactly the English strings index.html's own
+// translation table produces for each kind, so a real error is
+// distinguishable from a genuinely quiet turn instead of being folded into
+// the same "app_agent_produced_no_text_repeatedly" stop reason.
+const APP_ERROR_PATTERNS = {
+  rateLimit: /rate limit reached/i,
+  insufficientQuota: /out of quota/i,
+  contextLength: /conversation is too long/i,
+  network: /could not reach the .* api/i,
+  authFailed: /rejected the api key/i,
+  toolRoundLimit: /tried to use its tools too many times/i,
+  generic: /something went wrong contacting the agent/i,
+};
+export function classifyAppSystemNote(text) {
+  for (const [kind, re] of Object.entries(APP_ERROR_PATTERNS)) {
+    if (re.test(text)) return kind;
+  }
+  return null;
+}
+
+// Issue #133/item 8 (external audit): a general stall/wasted-turn detector,
+// distinct from the pure-acknowledgment pleasantry-loop detectors below
+// (which only catch that one specific closing-phrase shape). Both real
+// incidents Finding B measured (iof-maintenance/run-03; brick-hvac/run-02)
+// share one underlying signature: an extended stretch of turns with
+// literally zero tool activity (no apply_ontology_yaml, no
+// get_graph_state) -- the app kept talking, but nothing was actually
+// happening.
+//
+// Issue #133/N2 (independent audit of this same fix): the original value
+// here (20) was picked from Finding A's own prose estimate of the two real
+// incidents' length without actually measuring the real population of
+// HEALTHY runs' own no-tool streaks. Replaying the detector over all 12
+// real committed transcripts found the two pathological streaks are
+// actually 160 and 171 turns (not ~159/~68 -- Finding B's own count was of
+// a slightly different span), but ALSO found a legitimately-finished run
+// (iof-supply-chain/run-01) reaches a streak of exactly 20 turns on its
+// own, with zero margin under the old threshold, and another reaches 18.
+// The real population is two clean, far-apart clusters (healthy: 1-20,
+// pathological: 160-171) with a wide 25-150 gap between them -- this value
+// sits in the middle of that gap rather than right at the edge of the
+// healthy cluster.
+export const WASTED_TURN_THRESHOLD = 80;
+
+// Pure state-transition step for the stall detector above, extracted for
+// the same reason withLeakGuard was (see that function's own comment) --
+// so the increment/reset/threshold logic is directly unit-testable without
+// a live Playwright page. Takes the current {current, max} streak state and
+// whether THIS turn had any tool activity, returns the updated state plus
+// whether this update just crossed WASTED_TURN_THRESHOLD.
+export function trackToolActivityStreak({ current, max }, turnHadToolActivity) {
+  if (turnHadToolActivity) return { current: 0, max, crossedThreshold: false };
+  const next = current + 1;
+  return { current: next, max: Math.max(max, next), crossedThreshold: next >= WASTED_TURN_THRESHOLD };
+}
 
 // Deterministic pre-filter, checked before ever calling the LLM classifier
 // below. First live run of this eval (see helper_agent_todo.md's Log) found
@@ -63,7 +147,8 @@ const CONTINUATION_OFFER_PATTERNS = [
 export function looksLikeContinuationOffer(text) {
   if (!text) return false;
   if (!text.includes("?")) return false; // a final summary states; it does not ask
-  return CONTINUATION_OFFER_PATTERNS.some((re) => re.test(text));
+  const normalized = normalizeQuotes(text);
+  return CONTINUATION_OFFER_PATTERNS.some((re) => re.test(normalized));
 }
 
 // Second, independent safety net -- catches the actual failure mode a real
@@ -84,7 +169,7 @@ export function looksLikeContinuationOffer(text) {
 const PURE_ACKNOWLEDGMENT_PATTERN = /^\s*(thanks|thank you|you'?re welcome|take care|sounds (good|great)|great(,| -)? thanks|glad (to|i could) help|my pleasure|no problem|appreciate it|have a (great|good|nice) (day|one)|goodbye|bye( for now)?)\b/i;
 export function looksLikePureAcknowledgment(text) {
   if (!text) return false;
-  const trimmed = text.trim();
+  const trimmed = normalizeQuotes(text.trim());
   if (!trimmed) return false;
   if (trimmed.split(/\s+/).length > 25) return false; // real content runs longer than a closing line
   if (trimmed.includes("?")) return false; // a question means the conversation is still active
@@ -154,32 +239,51 @@ export async function appearsFinished(text, { apiKey, model, chat = null }) {
   // Same injection point as personaAgent's: issue #85 runs against Azure,
   // where the fixed api.openai.com URL and Bearer header below are wrong.
   // The deterministic pre-filter above still runs either way.
+  //
+  // Issue #133/E16 (external audit): a classifier call that ultimately fails
+  // (an empty reply twice in a row, an exhausted-retries HTTP error) used to
+  // throw and take the *entire* run down with it -- hours of a real,
+  // otherwise-healthy interview lost to one failed "is this finished?"
+  // check. Degraded to "not finished" instead: the conservative direction
+  // (the run keeps going rather than ending prematurely), consistent with
+  // this function's own deterministic pre-filters above, which likewise
+  // only ever force NO, never YES.
   if (chat) {
-    const { text: verdict } = await chat(classifierMessages(text));
-    return classifierVerdict(verdict);
+    try {
+      const { text: verdict } = await chat(classifierMessages(text));
+      return classifierVerdict(verdict);
+    } catch (err) {
+      console.log(`  appearsFinished: classifier call failed (${String((err && err.message) || err)}), defaulting to "not finished"`);
+      return false;
+    }
   }
   let res, data;
   // Retries a transient 429 with backoff, same as every other real API call
   // site (index.html, the relay, personaAgent.mjs) -- this classifier call
   // had no retry at all until a real run hit a rate limit here mid-eval.
   // insufficient_quota is still never retried.
-  for (let attempt = 1; attempt <= RATE_LIMIT_MAX_ATTEMPTS; attempt++) {
-    res = await fetch(CLASSIFIER_URL, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model,
-        messages: classifierMessages(text),
-      }),
-    });
-    data = await res.json();
-    if (res.ok && !data.error) break;
-    const isRetryableRateLimit = res.status === 429 && !isInsufficientQuotaError(data) && attempt < RATE_LIMIT_MAX_ATTEMPTS;
-    if (isRetryableRateLimit) {
-      await sleepMs(rateLimitBackoffMs(attempt));
-      continue;
+  try {
+    for (let attempt = 1; attempt <= RATE_LIMIT_MAX_ATTEMPTS; attempt++) {
+      res = await fetch(CLASSIFIER_URL, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model,
+          messages: classifierMessages(text),
+        }),
+      });
+      data = await res.json();
+      if (res.ok && !data.error) break;
+      const isRetryableRateLimit = res.status === 429 && !isInsufficientQuotaError(data) && attempt < RATE_LIMIT_MAX_ATTEMPTS;
+      if (isRetryableRateLimit) {
+        await sleepMs(rateLimitBackoffMs(attempt));
+        continue;
+      }
+      throw new Error(`appearsFinished classifier call failed (HTTP ${res.status}, model "${model}"): ${(data.error && data.error.message) || "unknown error"}`);
     }
-    throw new Error(`appearsFinished classifier call failed (HTTP ${res.status}, model "${model}"): ${(data.error && data.error.message) || "unknown error"}`);
+  } catch (err) {
+    console.log(`  appearsFinished: classifier call failed (${String((err && err.message) || err)}), defaulting to "not finished"`);
+    return false;
   }
   return classifierVerdict((data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || "");
 }
@@ -193,6 +297,80 @@ export async function appearsFinished(text, { apiKey, model, chat = null }) {
 // mapping is testable without a live browser.
 export function tagApiMessagesWithTurn(apiMessages, turn) {
   return apiMessages.map((m) => ({ turn, ...m }));
+}
+
+// Issue #133/N1 (independent audit of the E13 item 4 guard): the effective
+// leak-candidate set for one turn is every candidate EXCEPT the ones the
+// interviewer has already said earlier in the conversation -- a persona
+// reply merely confirming or repeating back an identifier the interviewer
+// itself introduced is not a leak. Extracted as its own pure function, same
+// rationale as withLeakGuard below: directly unit-testable without needing
+// to drive the full turn loop.
+export function excludeAlreadySaidByInterviewer(leakCandidates, identifiersSaidByInterviewer) {
+  if (!leakCandidates) return null;
+  return new Set([...leakCandidates].filter((id) => !identifiersSaidByInterviewer.has(id)));
+}
+
+// Issue #133/E13 item 4 (external audit): a runtime hard-reject +
+// bounded-retry guard for a single reply -- regenerates up to `maxRetries`
+// times when it verbatim-leaks a raw ground-truth identifier, popping the
+// leaking exchange before each retry (via `popLastExchange`) so a retry is
+// a genuinely fresh attempt rather than the model seeing its own rejected
+// answer sitting uncorrected in its history. On exhaustion, returns the
+// last (still-leaking) reply with `exhausted: true` -- the caller aborts
+// rather than silently forwarding it or patching the text.
+//
+// Extracted out of runOntologyRecoveryConversation (where it started as an
+// inline closure over `persona`/`turn`/`emitProgress`/`leakEvents`) into a
+// standalone, parameterized function specifically so this retry/pop/exhaust
+// logic can be unit-tested directly with a fake `reply()` -- the inline
+// version could only be exercised indirectly through the full turn loop,
+// which needs a live Playwright `page` and a real or mocked API call to
+// reach at all. `reply` and `popLastExchange` are the only two integration
+// points with the real persona: `reply(text)` must resolve to `{text, ...}`
+// the same shape persona.reply() returns, and `popLastExchange()` is
+// whatever removes the just-appended (leaking) turn from the caller's own
+// running conversation state.
+//
+// Issue #133/N5 (independent audit of this same fix): item 4's own spec
+// asked for regeneration "with an explicit corrective instruction naming
+// exactly what leaked" -- the first version of this guard just resent the
+// identical `incomingText` on retry, relying purely on sampling variance to
+// produce a different answer. A retry now appends a corrective note built
+// by `buildCorrectiveRetryText` below. This note is only ever seen by the
+// persona's own private conversation history (the interviewer-facing
+// transcript is built and logged by the caller BEFORE this function is
+// ever invoked, from the real interviewer's own message, and is never
+// touched here) -- so it can never be misattributed as something the real
+// interviewer said.
+export async function withLeakGuard({ reply, popLastExchange, incomingText, leakCandidates, maxRetries = 2, onLeakAttempt }) {
+  let result = await reply(incomingText);
+  if (!leakCandidates) return { reply: result, leaked: [] };
+  const eventsThisCall = [];
+  for (let attempt = 1; attempt <= maxRetries + 1; attempt++) {
+    const leaked = findLeakedIdentifiers(result.text, leakCandidates);
+    if (!leaked.length) {
+      for (const ev of eventsThisCall) ev.resolved = true; // a later attempt on this same call came back clean
+      return { reply: result, leaked: [] };
+    }
+    const event = { attempt, identifiers: leaked, resolved: false };
+    eventsThisCall.push(event);
+    if (onLeakAttempt) onLeakAttempt(event); // same object reference -- the resolved:true mutation above is visible to whatever the caller collected it into
+    if (attempt > maxRetries) return { reply: result, leaked, exhausted: true };
+    if (popLastExchange) popLastExchange();
+    result = await reply(buildCorrectiveRetryText(incomingText, leaked));
+  }
+  return { reply: result, leaked: findLeakedIdentifiers(result.text, leakCandidates) };
+}
+
+// Issue #133/N5: the corrective note appended on a leak retry, naming
+// exactly which raw identifier(s) leaked so the regeneration has a real
+// chance of succeeding rather than just re-rolling the dice on the
+// identical prompt. Framed explicitly as an internal note, not something
+// the interviewer said, so the persona doesn't mistake it for a real
+// follow-up question.
+function buildCorrectiveRetryText(incomingText, leakedIdentifiers) {
+  return `${incomingText}\n\n[Internal note, not part of the interviewer's message: your previous answer used the exact internal reference-model term(s) ${leakedIdentifiers.map((id) => `"${id}"`).join(", ")} verbatim. Rephrase your answer using only ordinary natural-language description, exactly as your own instructions already require -- never the raw internal identifier itself.]`;
 }
 
 // Runs the full simulated interview: alternates the real app agent (driven
@@ -251,22 +429,82 @@ export async function runOntologyRecoveryConversation({
   personaPath,
   groundTruthText,
   groundTruthFilename,
+  groundTruthFormat,
   openingLine = OPENING_LINE,
 }) {
+  // Issue #133/N7b (independent audit of this same fix): groundTruthFormat
+  // defaults to "mtsr" (raw embed) and silently gates BOTH defenses at
+  // once -- the root-cause rendering fix (item 1, personaAgent.mjs's
+  // buildSystemPrompt) and the runtime leak guard (E13 item 4) below. A
+  // caller that passes a real, non-default groundTruthFilename (every real
+  // domain-yaml call site does, always "reference.domain.yaml") but forgets
+  // groundTruthFormat: "domain-yaml" would silently run completely
+  // undefended, with no signal anywhere that either defense was ever
+  // active. Checked before createPersonaAgent below (not after), so this is
+  // the actual, first thing that fails -- not something that happens to
+  // also come out true after the persona's own (undefended) system prompt
+  // has already been built.
+  if (groundTruthFilename && groundTruthFilename !== DEFAULT_GROUND_TRUTH_FILENAME && groundTruthFormat !== "domain-yaml") {
+    throw new Error(
+      `runOntologyRecoveryConversation: groundTruthFilename "${groundTruthFilename}" looks like a real non-itops domain, `
+      + `but groundTruthFormat is "${groundTruthFormat || "(not given, defaults to \"mtsr\")"}", not "domain-yaml" -- `
+      + `both the root-cause identifier-rendering fix and the runtime leak guard would silently run disabled. `
+      + `Pass groundTruthFormat: "domain-yaml" explicitly.`
+    );
+  }
+
   const persona = createPersonaAgent({
     apiKey, model: personaModel, chat: chat ? (m) => chat(m, personaModel) : null,
-    personaPath, groundTruthText, groundTruthFilename,
+    personaPath, groundTruthText, groundTruthFilename, groundTruthFormat,
   });
   const chatResponses = installRelay(page);
   const log = [{ turn: 0, speaker: "persona", text: openingLine }];
   const rawApiLog = [];
 
+  // Issue #133/E13 item 4 (external audit): a runtime hard-reject +
+  // bounded-retry guard, on top of the root-cause fix above (item 1,
+  // groundTruthFormat: "domain-yaml") and the wrapper-prompt fix (E11) --
+  // defense in depth, not a replacement for either. Built only when there is
+  // a `.domain.yaml`-shaped ground truth to build a candidate set from
+  // (leakDetector.mjs's collectRawIdentifiers assumes that schema); itops's
+  // own MTSR-format default has no equivalent guard yet and is unaffected.
+  const leakCandidates = (() => {
+    if (groundTruthFormat !== "domain-yaml" || !groundTruthText) return null;
+    let doc;
+    try { doc = yaml.load(groundTruthText); } catch { return null; }
+    if (!doc || typeof doc !== "object") return null;
+    const briefText = personaPath ? (() => { try { return fs.readFileSync(personaPath, "utf8"); } catch { return ""; } })() : "";
+    return buildLeakCandidateSet(doc, briefText);
+  })();
+  const MAX_LEAK_RETRY_ATTEMPTS = 2; // total attempts = 1 original + this many regenerations
+  const leakEvents = []; // { turn, attempt, identifiers, resolved } -- for provenance/transparency, mirrors errorCounts
+
+  // Issue #133/N1 (independent audit of this same fix): item 4's own spec
+  // was "an identifier not yet said by the interviewer anywhere earlier in
+  // the conversation" -- the first version of this guard checked only
+  // "not already in the persona's brief", which flags the ordinary case of
+  // the interviewer proposing an identifier and the persona simply
+  // confirming or repeating it back. Replayed against the 12 real committed
+  // transcripts this produced 227 false-positive flags across all 12 runs,
+  // the first one landing at turn 4-16 in every single run -- with
+  // MAX_LEAK_RETRY_ATTEMPTS retries, that aborts essentially every run
+  // almost immediately. Tracking what the interviewer has actually said so
+  // far and excluding it turns this back into a genuine "the persona
+  // introduced this identifier first" check.
+  const identifiersSaidByInterviewer = new Set();
+
   const startedAt = Date.now();
   let incomingForApp = openingLine;
   let stoppedReason = "max_turns_reached";
   let consecutiveEmptyAppTurns = 0;
+  let consecutiveErrorTurns = 0;
   let consecutivePureAcknowledgmentTurns = 0;
+  let consecutivePersonaAcknowledgmentTurns = 0; // issue #133/E12
+  let consecutiveTurnsWithNoToolActivity = 0; // issue #133/item 8
+  let maxConsecutiveTurnsWithNoToolActivity = 0; // issue #133/item 8 -- worth surfacing even for a run that never crossed WASTED_TURN_THRESHOLD
   let turnsUsed = 0;
+  const errorCounts = {}; // issue #133/E4: kind -> occurrence count, across the whole run
+  let compactionEvents = 0;
 
   // Never let a progress-reporting failure (a bad file write, a full disk)
   // take down the real conversation it's only reporting on.
@@ -303,20 +541,62 @@ export async function runOntologyRecoveryConversation({
     // since compaction only replaces already-logged history, it doesn't
     // change what this turn itself sent/received.
     const apiMessagesAfter = await page.evaluate(() => window.__kg.agent.state.apiMessages);
+    // A compaction (compactAgentHistory) shrinks apiMessages instead of only
+    // appending to it -- the one place that's directly observable from here,
+    // since a successful compaction leaves no transcript note of its own
+    // (issue #133/E4: previously invisible to every operational stat).
+    if (apiMessagesAfter.length < apiMessagesBefore) compactionEvents++;
     const newApiMessages = apiMessagesAfter.length >= apiMessagesBefore ? apiMessagesAfter.slice(apiMessagesBefore) : apiMessagesAfter;
     rawApiLog.push(...tagApiMessagesWithTurn(newApiMessages, turn));
     emitProgress("app_turn_complete", turn); // sendChatMessage returned -- this turn's real content just landed in log/rawApiLog
 
+    // Issue #133/item 8: general stall detector -- see WASTED_TURN_THRESHOLD's
+    // own comment for why "any tool call at all" (not "any new content") is
+    // the right signal. Checked unconditionally, ahead of the empty/error
+    // branches below, since the real incidents this targets are turns where
+    // the app DID produce real text every time -- it just never touched a
+    // tool -- not turns that were empty or erroring (those already have
+    // their own, stricter 3-turn thresholds).
+    {
+      const streak = trackToolActivityStreak(
+        { current: consecutiveTurnsWithNoToolActivity, max: maxConsecutiveTurnsWithNoToolActivity },
+        newEntries.some((e) => e.role === "tool"),
+      );
+      consecutiveTurnsWithNoToolActivity = streak.current;
+      maxConsecutiveTurnsWithNoToolActivity = streak.max;
+      if (streak.crossedThreshold) { stoppedReason = "wasted_turns_no_tool_activity"; break; }
+    }
+
     const lastAssistant = [...newEntries].reverse().find((m) => m.role === "assistant");
     const appText = lastAssistant && lastAssistant.text ? lastAssistant.text.trim() : "";
+    const errorNote = newEntries.find((e) => e.role === "system" && classifyAppSystemNote(e.text));
+    if (errorNote) errorCounts[classifyAppSystemNote(errorNote.text)] = (errorCounts[classifyAppSystemNote(errorNote.text)] || 0) + 1;
+
+    // Issue #133/N1: record what the interviewer just said BEFORE the
+    // persona ever replies to it, so a persona reply that merely echoes an
+    // identifier the interviewer already introduced is never flagged.
+    if (leakCandidates && appText) {
+      for (const id of findLeakedIdentifiers(appText, leakCandidates)) identifiersSaidByInterviewer.add(id);
+    }
 
     if (!appText) {
-      consecutiveEmptyAppTurns++;
-      if (consecutiveEmptyAppTurns >= 3) { stoppedReason = "app_agent_produced_no_text_repeatedly"; break; }
+      if (errorNote) {
+        // A real API error, not the app agent simply having nothing to say
+        // (issue #133/E4) -- counted and stopped on separately so the run's
+        // own stoppedReason names what actually happened.
+        consecutiveErrorTurns++;
+        consecutiveEmptyAppTurns = 0;
+        if (consecutiveErrorTurns >= 3) { stoppedReason = "app_agent_errored_repeatedly"; break; }
+      } else {
+        consecutiveErrorTurns = 0;
+        consecutiveEmptyAppTurns++;
+        if (consecutiveEmptyAppTurns >= 3) { stoppedReason = "app_agent_produced_no_text_repeatedly"; break; }
+      }
       incomingForApp = "(continuing) Please go ahead and ask your next question.";
       continue;
     }
     consecutiveEmptyAppTurns = 0;
+    consecutiveErrorTurns = 0;
 
     if (looksLikePureAcknowledgment(appText)) {
       consecutivePureAcknowledgmentTurns++;
@@ -334,10 +614,56 @@ export async function runOntologyRecoveryConversation({
       break;
     }
 
-    const personaReply = await persona.reply(appText);
+    // Issue #133/N1: exclude identifiers the interviewer has already said,
+    // anywhere earlier in the conversation, from this turn's candidate set
+    // -- see identifiersSaidByInterviewer's own comment above.
+    const effectiveLeakCandidates = excludeAlreadySaidByInterviewer(leakCandidates, identifiersSaidByInterviewer);
+
+    const { reply: personaReply, leaked, exhausted } = await withLeakGuard({
+      reply: (text) => persona.reply(text),
+      popLastExchange: () => { persona.messages.pop(); persona.messages.pop(); }, // the leaking assistant reply, then its paired user turn
+      incomingText: appText,
+      leakCandidates: effectiveLeakCandidates,
+      maxRetries: MAX_LEAK_RETRY_ATTEMPTS,
+      onLeakAttempt: (event) => {
+        event.turn = turn;
+        leakEvents.push(event);
+        emitProgress(`leak_detected_attempt_${event.attempt}`, turn);
+      },
+    });
+    if (exhausted) {
+      // Abort-and-flag, never silent patching: the last reply still leaks a
+      // raw ground-truth identifier after every retry was exhausted. Do NOT
+      // forward it to the app -- a leaked identifier reaching the
+      // interviewer would inflate recovery accuracy on a question the
+      // interview never actually earned the answer to (this issue's whole
+      // reason for existing). The leak is recorded in the log for
+      // transparency instead of the reply text itself.
+      log.push({ turn, speaker: "persona", text: `[leak guard: reply withheld after ${MAX_LEAK_RETRY_ATTEMPTS + 1} attempts, still contained: ${leaked.join(", ")}]` });
+      stoppedReason = "leak_detected_after_retries";
+      break;
+    }
     log.push({ turn, speaker: "persona", text: personaReply.text });
     incomingForApp = personaReply.text;
     emitProgress("persona_turn_complete", turn);
+
+    // Issue #133/E12 (external audit): looksLikePureAcknowledgment was only
+    // ever checked against the *interviewer's* text -- a real 159-turn dead
+    // loop (iof-maintenance/run-03) was two-sided ("That covers it well,
+    // thank you." / "You're welcome.", back and forth), and the persona's
+    // own wrapper-scripted closing line was never checked at all. The
+    // app-side check above remains the primary tripwire (it fires first,
+    // before the persona is even asked to reply); this is the same
+    // detector applied to the other half of the loop, as a second,
+    // independent one -- a scenario where the app's own phrasing varies
+    // enough to dodge the pattern each turn, but the persona is still just
+    // repeating its scripted sign-off, is now caught too.
+    if (looksLikePureAcknowledgment(personaReply.text)) {
+      consecutivePersonaAcknowledgmentTurns++;
+      if (consecutivePersonaAcknowledgmentTurns >= 2) { stoppedReason = "pleasantry_loop_detected"; break; }
+    } else {
+      consecutivePersonaAcknowledgmentTurns = 0;
+    }
   }
 
   emitProgress(stoppedReason, turnsUsed);
@@ -349,5 +675,9 @@ export async function runOntologyRecoveryConversation({
     durationMs: Date.now() - startedAt,
     chatResponses, // raw real API responses for the app agent's side, for operational metrics
     rawApiLog, // exact tool_calls arguments + tool result content per turn, for reportGenerator.mjs's transparency log
+    errorCounts, // issue #133/E4: {rateLimit, insufficientQuota, contextLength, network, authFailed, toolRoundLimit, generic} -> occurrence count
+    compactionEvents, // issue #133/E4: how many turns compacted the app agent's own conversation history
+    leakEvents, // issue #133/E13 item 4: [{turn, attempt, identifiers, resolved}] -- every raw-identifier leak the runtime guard caught, retried, or (if resolved stays false) exhausted retries on
+    maxConsecutiveTurnsWithNoToolActivity, // issue #133/item 8: worth surfacing even for a run that never crossed WASTED_TURN_THRESHOLD (a near-miss is still informative)
   };
 }

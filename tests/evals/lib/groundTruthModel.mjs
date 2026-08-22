@@ -187,9 +187,23 @@ export function mergeReciprocalRelationshipPairs(relationships) {
   const merged = [];
   for (const rel of relationships) {
     if (consumedIds.has(rel.id)) continue;
+    // A self-loop (fromClassId === toClassId) can never have a real
+    // opposite-direction partner in the sense this function means -- the
+    // partner test below (`other.fromClassId === rel.toClassId && ...`) is
+    // vacuously true for any *other* self-loop on the same class, which
+    // would incorrectly treat two unrelated self-loop facts as one
+    // reciprocal pair (issue #133/E18). Excluded up front, not merged.
+    if (rel.fromClassId === rel.toClassId) { consumedIds.add(rel.id); merged.push(rel); continue; }
     const group = byPairKey.get([rel.fromClassId, rel.toClassId].sort().join("|"));
+    // This function's own comment above promises "only pairs of exactly
+    // two ... are merged; three-or-more-way ... groups ... are left
+    // untouched" -- the code never actually enforced that (issue #133/E18):
+    // with 3+ members sharing a class pair, it would still merge the first
+    // opposite-direction pair it found and silently guess which member was
+    // the "real" partner. Enforced explicitly here instead of only in prose.
+    if (group.length !== 2) { consumedIds.add(rel.id); merged.push(rel); continue; }
     const partner = group.find(
-      (other) => !consumedIds.has(other.id) && other.id !== rel.id &&
+      (other) => other.id !== rel.id &&
         other.fromClassId === rel.toClassId && other.toClassId === rel.fromClassId
     );
     consumedIds.add(rel.id);
@@ -544,7 +558,15 @@ export function loadDomainYamlGroundTruthModel(domainYamlPath) {
 
   const corpusParts = [...(doc.competency_questions || []).map((cq) => cq.text || "")];
   for (const r of rules) corpusParts.push(...r.conditions);
-  for (const a of Object.values(doc.actions || {})) {
+  // Issue #133/E19 (external audit): the MTSR loader below pushes each
+  // action's own label into the corpus (`corpusParts.push(a.label)`); this
+  // loader previously didn't, so the practical-scope corpus wasn't built
+  // the same way for the four `.domain.yaml` benchmark domains as for the
+  // itops MTSR anchors -- an action's own name could never, by itself, pull
+  // it into scope here, only its preconditions/effect/verification text
+  // could. Pushing buildDomainYamlLabel(name) restores parity.
+  for (const [name, a] of Object.entries(doc.actions || {})) {
+    corpusParts.push(buildDomainYamlLabel(name));
     corpusParts.push(...((a && a.preconditions) || []));
     if (a && a.effect) corpusParts.push(a.effect);
     if (a && a.verification) corpusParts.push(a.verification);

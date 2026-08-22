@@ -1,0 +1,324 @@
+competency_questions:
+  - id: cq1
+    text: Which supplier supplies a given customer for a given item?
+  - id: cq2
+    text: Which shipment is being prepared between a specific ship-from location and ship-to location?
+  - id: cq3
+    text: Which carrier is involved in a transportation service?
+  - id: cq4
+    text: Which carrier is involved in a given shipment-preparation activity?
+  - id: cq5
+    text: Which lot is tracked for a given shipment through recorded tracking events?
+  - id: cq6
+    text: "DEFERRED: Which sublot is the traceable unit tied to a given shipment?"
+  - id: cq7
+    text: Which logistic unit is tracked for a given shipment through recorded tracking events?
+  - id: cq8
+    text: Which load is tracked for a given shipment through recorded tracking events?
+  - id: cq9
+    text: Where does a given transport process start in the supply chain?
+  - id: cq10
+    text: Where does a given transport process end in the supply chain?
+  - id: cq11
+    text: Which facility is the site of the receiving process?
+  - id: cq12
+    text: Which storage facility is the site of the storage process?
+  - id: cq13
+    text: Which facility is the site of the shipment preparation process?
+  - id: cq14
+    text: Which freight forwarder is involved in a freight-forwarding service?
+  - id: cq15
+    text: Which material trade item is associated with a given purchase order?
+  - id: cq16
+    text: Which material trade item is associated with a given shipment?
+  - id: cq17
+    text: Which container is being used for a given shipment?
+  - id: cq18
+    text: Which freight container is being used for a given shipment?
+  - id: cq19
+    text: Which tracking events need to be recorded to preserve traceability for a given shipment?
+  - id: cq20
+    text: Which tracking events need to be recorded to preserve traceability for a given lot?
+  - id: cq21
+    text: "Which supply relationship depends on a given supplier, customer, and product?"
+  - id: cq22
+    text: Which logistics service applies to the current supply-chain process?
+  - id: cq23
+    text: Which transportation service applies to the current supply-chain process?
+  - id: cq24
+    text: Which packaging service applies to the current supply-chain process?
+  - id: cq25
+    text: Which storage service applies to the current supply-chain process?
+classes:
+  Shipment:
+    meaning: null
+    aliases: []
+    properties: {}
+  Supplier:
+    meaning: null
+    aliases: []
+    properties: {}
+  Customer:
+    meaning: null
+    aliases: []
+    properties: {}
+  MaterialTradeItem:
+    meaning: null
+    aliases: []
+    properties: {}
+  SupplyRelationship:
+    meaning: null
+    aliases: []
+    properties: {}
+  PurchaseOrder:
+    meaning: null
+    aliases: []
+    properties: {}
+  Carrier:
+    meaning: null
+    aliases: []
+    properties: {}
+  FreightForwarder:
+    meaning: null
+    aliases: []
+    properties: {}
+  TransportProcess:
+    meaning: null
+    aliases: []
+    properties: {}
+  ShipmentPreparationProcess:
+    meaning: null
+    aliases: []
+    properties: {}
+  Lot:
+    meaning: null
+    aliases: []
+    properties: {}
+  Sublot:
+    meaning: null
+    aliases: []
+    properties: {}
+  LogisticUnit:
+    meaning: null
+    aliases: []
+    properties: {}
+  Load:
+    meaning: null
+    aliases: []
+    properties: {}
+  TrackingEvent:
+    meaning: null
+    aliases: []
+    properties: {}
+  Facility:
+    meaning: null
+    aliases: []
+    properties: {}
+  StorageFacility:
+    meaning: null
+    aliases: []
+    properties: {}
+  Container:
+    meaning: null
+    aliases: []
+    properties: {}
+  FreightContainer:
+    meaning: null
+    aliases: []
+    properties: {}
+  FreightForwardingService:
+    meaning: null
+    aliases: []
+    properties: {}
+  ShipFromLocation:
+    meaning: null
+    aliases: []
+    properties: {}
+  ShipToLocation:
+    meaning: null
+    aliases: []
+    properties: {}
+  LogisticsService:
+    meaning: null
+    aliases: []
+    properties: {}
+  TransportationService:
+    meaning: null
+    aliases: []
+    properties: {}
+  PackagingService:
+    meaning: null
+    aliases: []
+    properties: {}
+  StorageService:
+    meaning: null
+    aliases: []
+    properties: {}
+  ReceivingProcess:
+    meaning: null
+    aliases: []
+    properties: {}
+  SupplyChainProcess:
+    meaning: null
+    aliases: []
+    properties: {}
+  SupplyChainNode:
+    meaning: null
+    aliases: []
+    properties: {}
+  StorageProcess:
+    meaning: null
+    aliases: []
+    properties: {}
+  TraceableResourceUnit:
+    meaning: null
+    aliases: []
+    properties: {}
+relationships:
+  - name: dependsOnSupplier
+    from: SupplyRelationship
+    to: Supplier
+    meaning: null
+    aliases: []
+  - name: dependsOnCustomer
+    from: SupplyRelationship
+    to: Customer
+    meaning: null
+    aliases: []
+  - name: dependsOnMaterialTradeItem
+    from: SupplyRelationship
+    to: MaterialTradeItem
+    meaning: null
+    aliases: []
+  - name: concernsMaterialTradeItem
+    from: PurchaseOrder
+    to: MaterialTradeItem
+    meaning: null
+    aliases: []
+  - name: concernsMaterialTradeItem
+    from: Shipment
+    to: MaterialTradeItem
+    meaning: null
+    aliases: []
+  - name: shipsFrom
+    from: Shipment
+    to: ShipFromLocation
+    meaning: null
+    aliases: []
+  - name: shipsTo
+    from: Shipment
+    to: ShipToLocation
+    meaning: null
+    aliases: []
+  - name: startsAt
+    from: TransportProcess
+    to: SupplyChainNode
+    meaning: null
+    aliases: []
+  - name: endsAt
+    from: TransportProcess
+    to: SupplyChainNode
+    meaning: null
+    aliases: []
+  - name: involvesCarrier
+    from: ShipmentPreparationProcess
+    to: Carrier
+    meaning: null
+    aliases: []
+  - name: involvesFreightForwarder
+    from: FreightForwardingService
+    to: FreightForwarder
+    meaning: null
+    aliases: []
+  - name: involvesCarrier
+    from: TransportationService
+    to: Carrier
+    meaning: null
+    aliases: []
+  - name: occursAt
+    from: ReceivingProcess
+    to: Facility
+    meaning: null
+    aliases: []
+  - name: occursAt
+    from: StorageProcess
+    to: StorageFacility
+    meaning: null
+    aliases: []
+  - name: occursAt
+    from: ShipmentPreparationProcess
+    to: Facility
+    meaning: null
+    aliases: []
+  - name: hasIdentifiedShipmentPreparationProcess
+    from: Shipment
+    to: ShipmentPreparationProcess
+    meaning: null
+    aliases: []
+  - name: usesContainer
+    from: Shipment
+    to: Container
+    meaning: null
+    aliases: []
+  - name: usesFreightContainer
+    from: Shipment
+    to: FreightContainer
+    meaning: null
+    aliases: []
+  - name: tracksShipment
+    from: TrackingEvent
+    to: Shipment
+    meaning: null
+    aliases: []
+  - name: tracksLot
+    from: TrackingEvent
+    to: Lot
+    meaning: null
+    aliases: []
+  - name: tracksLogisticUnit
+    from: TrackingEvent
+    to: LogisticUnit
+    meaning: null
+    aliases: []
+  - name: tracksLoad
+    from: TrackingEvent
+    to: Load
+    meaning: null
+    aliases: []
+  - name: suppliesToCustomer
+    from: Supplier
+    to: Customer
+    meaning: null
+    aliases: []
+  - name: fulfills
+    from: Shipment
+    to: PurchaseOrder
+    meaning: null
+    aliases: []
+rules: {}
+actions:
+  prepareShipmentForDispatch:
+    input: Shipment
+    preconditions: []
+    effect: Shipment is prepared for dispatch.
+    verification: Confirm the shipment is recorded as prepared for dispatch.
+  dispatchShipmentForMovement:
+    input: Shipment
+    preconditions: []
+    effect: Shipment is dispatched for movement.
+    verification: Confirm the shipment is recorded as dispatched for movement.
+  receiveShipmentAtDestinationFacility:
+    input: Shipment
+    preconditions: []
+    effect: Shipment is recorded as received at the destination facility.
+    verification: Confirm the shipment is recorded as received at the destination facility.
+  recordTrackingEvent:
+    input: TrackingEvent
+    preconditions: []
+    effect: A tracking event is recorded and linked to the relevant traced unit.
+    verification: Confirm the tracking event exists and is linked to the relevant traced unit.
+  evaluateSupplyRelationship:
+    input: SupplyRelationship
+    preconditions: []
+    effect: "The supply relationship is evaluated against the supplier, customer, and item involved."
+    verification: Confirm the evaluation result is recorded for the supply relationship.

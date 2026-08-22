@@ -197,6 +197,63 @@ export function matchClasses(groundTruth, recoveredNodes, thresholds = MATCH_THR
   return { gtToRecovered, recoveredToGt, matches: assignment.map(({ left, right, weight }) => ({ goldId: left, recoveredId: right, weight })) };
 }
 
+// Relationships, one-to-one, the same shape as matchClasses/matchProperties
+// (issue #133/E2): previously a gold relationship's "recovered?" check and a
+// recovered edge's "matches some gold relationship?" check were two
+// independent existential scans, so N parallel/duplicate recovered edges
+// all satisfying the same one gold relationship counted N times toward
+// precision's numerator -- demonstrated with 5 identical parallel edges for
+// 1 gold relationship scoring precision=1.00 instead of the true 1/5.
+// Candidate edges are gated exactly as relationshipRecovered/the old inline
+// scan were (fromClassId/toClassId matched via gtToRecovered, either
+// direction for a reciprocal pair), weighted by the best label similarity
+// across both sides' aliases, and resolved by the same
+// maxWeightBipartiteMatching every other dimension already uses.
+function reciprocalOf(rel) {
+  return rel.reciprocalLabel ? { label: rel.reciprocalLabel, aliases: rel.reciprocalAliases || [] } : null;
+}
+function bestLabelSimilarity(labelsA, labelsB) {
+  let best = 0;
+  for (const a of labelsA) {
+    for (const b of labelsB) {
+      const score = labelSimilarity(a, b);
+      if (score > best) best = score;
+    }
+  }
+  return best;
+}
+export function matchRelationships(groundTruth, edges, gtToRecoveredClasses, thresholds = MATCH_THRESHOLDS) {
+  const candidateEdges = [];
+  for (const rel of groundTruth.relationships) {
+    const fromNodeIds = new Set(gtToRecoveredClasses.get(rel.fromClassId) || []);
+    const toNodeIds = new Set(gtToRecoveredClasses.get(rel.toClassId) || []);
+    if (!fromNodeIds.size || !toNodeIds.size) continue;
+    const relLabels = [rel.label, ...(rel.aliases || [])];
+    const reciprocal = reciprocalOf(rel);
+    const reciprocalLabels = reciprocal ? [reciprocal.label, ...(reciprocal.aliases || [])] : null;
+    for (const e of edges) {
+      const edgeLabels = [e.relation, ...(e.aliases || [])];
+      let weight = 0;
+      if (fromNodeIds.has(e.source) && toNodeIds.has(e.target)) {
+        weight = bestLabelSimilarity(relLabels, edgeLabels);
+      } else if (reciprocalLabels && toNodeIds.has(e.source) && fromNodeIds.has(e.target)) {
+        weight = bestLabelSimilarity(reciprocalLabels, edgeLabels);
+      }
+      if (weight >= thresholds.relationshipOrProperty) {
+        candidateEdges.push({ left: rel.id, right: e.id, weight });
+      }
+    }
+  }
+  const assignment = maxWeightBipartiteMatching(candidateEdges);
+  const gtToRecovered = new Map();
+  const recoveredToGt = new Map();
+  for (const { left, right } of assignment) {
+    gtToRecovered.set(left, right);
+    recoveredToGt.set(right, left);
+  }
+  return { gtToRecovered, recoveredToGt, matches: assignment.map(({ left, right, weight }) => ({ goldId: left, recoveredId: right, weight })) };
+}
+
 // Builds { goldPropertyId -> recovered property } the same way matchClasses
 // builds its class assignment: every gold property whose host class matched
 // contributes a weighted candidate edge to each property of that matched
@@ -266,51 +323,17 @@ export function computeRecoveryMetrics(groundTruth, recoveredState, thresholds =
     ? classMatchedCount / Object.keys(groundTruth.classes).length : 0;
   const classPrecision = nodes.length ? recoveredToGt.size / nodes.length : 0;
 
-  // Relationships: a ground-truth relationship is recovered if some edge
-  // connects a recovered-node-matched-to-fromClass to a recovered-node-
-  // matched-to-toClass with a semantically close relation label. Checks
-  // both sides' aliases (relationshipLabelMatchesEdge, above) -- gold's own
-  // relationship can carry real aliases now (.domain.yaml-sourced ground
-  // truth; MTSR-sourced relationships simply have none, unaffected).
-  //
-  // A gt relationship carrying `reciprocalLabel` (groundTruthModel.mjs's
-  // mergeReciprocalRelationshipPairs) represents one real-world connection
-  // gold happened to phrase from both ends -- recovered as satisfied by
-  // either direction, not both, since a correctly-modeled recovered graph
-  // only ever has one edge for it.
-  function reciprocalOf(rel) {
-    return rel.reciprocalLabel ? { label: rel.reciprocalLabel, aliases: rel.reciprocalAliases || [] } : null;
-  }
-  function relationshipRecovered(rel, fromNodeIds, toNodeIds) {
-    const forward = edges.some((e) => fromNodeIds.has(e.source) && toNodeIds.has(e.target) && relationshipLabelMatchesEdge(rel, e, thresholds));
-    if (forward) return true;
-    const reciprocal = reciprocalOf(rel);
-    if (!reciprocal) return false;
-    return edges.some((e) => toNodeIds.has(e.source) && fromNodeIds.has(e.target) && relationshipLabelMatchesEdge(reciprocal, e, thresholds));
-  }
-  let relMatched = 0;
-  for (const rel of groundTruth.relationships) {
-    const fromNodeIds = new Set(gtToRecovered.get(rel.fromClassId) || []);
-    const toNodeIds = new Set(gtToRecovered.get(rel.toClassId) || []);
-    if (!fromNodeIds.size || !toNodeIds.size) continue;
-    if (relationshipRecovered(rel, fromNodeIds, toNodeIds)) relMatched++;
-  }
+  // Relationships: one-to-one bipartite assignment (matchRelationships,
+  // issue #133/E2 -- see that function's own comment for why the previous
+  // two-independent-existential-scans approach let N parallel/duplicate
+  // recovered edges all count toward one gold relationship's precision
+  // credit). gtToRecovered here is one-to-one (matchClasses, issue #133-era)
+  // so `.get(classId)` is a single id, not an array; matchRelationships
+  // wraps it in a Set itself.
+  const relMatch = matchRelationships(groundTruth, edges, gtToRecovered, thresholds);
+  const relMatched = relMatch.gtToRecovered.size;
   const relRecall = groundTruth.relationships.length ? relMatched / groundTruth.relationships.length : 0;
-  let recoveredRelMatchedToGt = 0;
-  for (const e of edges) {
-    const srcGtClass = recoveredToGt.get(e.source);
-    const tgtGtClass = recoveredToGt.get(e.target);
-    if (!srcGtClass || !tgtGtClass) continue;
-    const matchesSomeGtRel = groundTruth.relationships.some((rel) => {
-      const forward = rel.fromClassId === srcGtClass && rel.toClassId === tgtGtClass && relationshipLabelMatchesEdge(rel, e, thresholds);
-      if (forward) return true;
-      const reciprocal = reciprocalOf(rel);
-      if (!reciprocal) return false;
-      return rel.toClassId === srcGtClass && rel.fromClassId === tgtGtClass && relationshipLabelMatchesEdge(reciprocal, e, thresholds);
-    });
-    if (matchesSomeGtRel) recoveredRelMatchedToGt++;
-  }
-  const relPrecision = edges.length ? recoveredRelMatchedToGt / edges.length : 0;
+  const relPrecision = edges.length ? relMatch.recoveredToGt.size / edges.length : 0;
 
   // Properties (+ controlled-value fidelity for matched controlled-value properties)
   const propMatch = matchProperties(groundTruth, nodes, gtToRecovered, thresholds);
@@ -331,27 +354,46 @@ export function computeRecoveryMetrics(groundTruth, recoveredState, thresholds =
   const relationshipF1 = f1(relRecall, relPrecision);
   const propertyF1 = f1(propertyRecall, propertyPrecision);
 
-  // Composite "recovery effectiveness": equal-weighted average of the four
-  // headline dimensions (class F1, relationship F1, property F1, value
-  // fidelity) -- a documented default, not a derived/statistically-fit
-  // weighting. Value fidelity is excluded from the average (treated as 0
-  // contribution weight) when no controlled-value property was ever
-  // matched, rather than penalizing a short interview that just never
-  // reached that territory. The property term was property *recall* until
-  // that dimension gained a precision figure (matchProperties above); it is
-  // F1 now, so all three dimensions enter the composite like for like and a
+  // Composite "recovery effectiveness". Issue #133/E6 (external audit): this
+  // used to silently average either 3 or 4 components depending on whether
+  // any controlled-value property happened to be matched in THIS particular
+  // run -- so the same field name meant a different, incomparable
+  // computation from one run to the next, with no flag anywhere that the
+  // divisor had changed (a domain/replicate that never touched a
+  // controlled-value property was not "penalized", but it also was not
+  // computing the same statistic as one that was). Now fixed and declared:
+  // `recoveryEffectiveness` is always the equal-weighted average of exactly
+  // the three headline dimensions (class F1, relationship F1, property F1),
+  // so every run's figure means the same thing and is directly comparable.
+  // Value fidelity is reported as its own separate figure
+  // (`controlledValueFidelity`, already returned below) plus a distinctly
+  // named 4-component variant (`recoveryEffectivenessWithFidelity`, null
+  // when no controlled-value property was ever matched) for a caller that
+  // specifically wants it folded in -- never silently substituted for the
+  // 3-component figure. The property term was property *recall* until that
+  // dimension gained a precision figure (matchProperties above); it is F1
+  // now, so all three dimensions enter the composite like for like and a
   // model that lists many unmatched properties no longer scores as well here
   // as one that lists only the ones gold actually has.
-  const components = [classF1, relationshipF1, propertyF1];
-  if (controlledValueFidelity !== null) components.push(controlledValueFidelity);
-  const recoveryEffectiveness = components.reduce((a, b) => a + b, 0) / components.length;
+  const recoveryEffectiveness = (classF1 + relationshipF1 + propertyF1) / 3;
+  const recoveryEffectivenessWithFidelity = controlledValueFidelity !== null
+    ? (classF1 + relationshipF1 + propertyF1 + controlledValueFidelity) / 4
+    : null;
 
   return {
     classes: { recall: classRecall, precision: classPrecision, f1: classF1, matched: classMatchedCount, groundTruthTotal: Object.keys(groundTruth.classes).length, recoveredTotal: nodes.length },
     relationships: { recall: relRecall, precision: relPrecision, f1: relationshipF1, matched: relMatched, groundTruthTotal: groundTruth.relationships.length, recoveredTotal: edges.length },
     properties: { recall: propertyRecall, precision: propertyPrecision, f1: propertyF1, matched: propMatched, groundTruthTotal: groundTruth.properties.length, recoveredTotal: propMatch.recoveredTotal },
     controlledValueFidelity,
+    // Issue #133/E6: the gold controlled-value-property count (how many
+    // exist in the reference model), not just how many were matched -- a
+    // fidelity figure computed from 1/1 matched properties out of a gold
+    // total of 12 means something very different from 1/1 out of a gold
+    // total of 1, and neither was visible before.
+    controlledValuePropertyGoldTotal: groundTruth.properties.filter((p) => p.allowedValues && p.allowedValues.length).length,
+    controlledValuePropertyMatchedCount: fidelityScores.length,
     recoveryEffectiveness,
+    recoveryEffectivenessWithFidelity,
   };
 }
 
@@ -390,17 +432,16 @@ export function computeMatchDetail(groundTruth, recoveredState, thresholds = MAT
     .filter((n) => !matchedRecoveredNodeIds.has(n.id))
     .map((n) => ({ id: n.id, label: n.label, meaning: n.meaning, aliases: n.aliases || [] }));
 
-  function reciprocalOf(rel) {
-    return rel.reciprocalLabel ? { label: rel.reciprocalLabel, aliases: rel.reciprocalAliases || [] } : null;
-  }
-  function relationshipHeuristicMatch(rel, fromNodeIds, toNodeIds) {
-    const forward = edges.some((e) => fromNodeIds.has(e.source) && toNodeIds.has(e.target) && relationshipLabelMatchesEdge(rel, e, thresholds));
-    if (forward) return true;
-    const reciprocal = reciprocalOf(rel);
-    if (!reciprocal) return false;
-    return edges.some((e) => toNodeIds.has(e.source) && fromNodeIds.has(e.target) && relationshipLabelMatchesEdge(reciprocal, e, thresholds));
-  }
+  // Reuses matchRelationships's own one-to-one assignment (issue #133/E2)
+  // instead of independently re-deriving "did this match?" with existential
+  // scans, the same reasoning properties below already follow via
+  // matchProperties: an item the one-to-one assignment left unmatched (its
+  // best-scoring edge/relationship went to a *better* candidate elsewhere)
+  // must be offered to the judge as unmatched, even though an existential
+  // `.some()` scan would have called it matched -- the two could disagree,
+  // and only the assignment the real score comes from is correct here.
   const labelOf = (id) => (groundTruth.classes[id] || {}).label || id;
+  const relMatch = matchRelationships(groundTruth, edges, gtToRecovered, thresholds);
   const unmatchedGoldRelationships = [];
   let relEligibleGoldCount = 0, relMatchedGoldCount = 0; // "eligible" = endpoints matched, a real wording question
   for (const rel of groundTruth.relationships) {
@@ -408,7 +449,7 @@ export function computeMatchDetail(groundTruth, recoveredState, thresholds = MAT
     const toNodeIds = new Set(gtToRecovered.get(rel.toClassId) || []);
     if (!fromNodeIds.size || !toNodeIds.size) continue; // class-level miss, not a wording question
     relEligibleGoldCount++;
-    if (relationshipHeuristicMatch(rel, fromNodeIds, toNodeIds)) {
+    if (relMatch.gtToRecovered.has(rel.id)) {
       relMatchedGoldCount++;
     } else {
       unmatchedGoldRelationships.push({
@@ -424,14 +465,7 @@ export function computeMatchDetail(groundTruth, recoveredState, thresholds = MAT
     const tgtGtClass = recoveredToGt.get(e.target);
     if (!srcGtClass || !tgtGtClass) continue; // endpoints never matched a gt class at all -- not a wording question either
     relEligibleRecoveredCount++;
-    const matchesSomeGtRel = groundTruth.relationships.some((rel) => {
-      const forward = rel.fromClassId === srcGtClass && rel.toClassId === tgtGtClass && relationshipLabelMatchesEdge(rel, e, thresholds);
-      if (forward) return true;
-      const reciprocal = reciprocalOf(rel);
-      if (!reciprocal) return false;
-      return rel.toClassId === srcGtClass && rel.fromClassId === tgtGtClass && relationshipLabelMatchesEdge(reciprocal, e, thresholds);
-    });
-    if (matchesSomeGtRel) {
+    if (relMatch.recoveredToGt.has(e.id)) {
       relMatchedRecoveredCount++;
     } else {
       unmatchedRecoveredEdges.push({
@@ -496,6 +530,11 @@ export function computeMatchDetail(groundTruth, recoveredState, thresholds = MAT
     },
     properties: {
       unmatchedGold: unmatchedGoldProperties, matchedControlledValue: matchedControlledValueProperties,
+      // Issue #133/E6: the full gold controlled-value-property count (not
+      // just the ones matched here), so a consumer of matchedControlledValue
+      // can tell a fidelity score computed from 1/1 matched apart from one
+      // computed from 1/12 matched.
+      controlledValuePropertyGoldTotal: groundTruth.properties.filter((p) => p.allowedValues && p.allowedValues.length).length,
       matchedGoldCount: propMatchedCount, eligibleGoldCount: propEligibleCount, goldTotal: groundTruth.properties.length,
       // Precision-side counts, mirroring the class/relationship blocks above,
       // so the semantic pass can compute a property precision on the same
@@ -524,19 +563,21 @@ export function computeHeuristicMatchPairs(groundTruth, recoveredState, threshol
   const edges = recoveredState.edges || [];
   const { gtToRecovered, matches: classMatches } = matchClasses(groundTruth, nodes, thresholds);
 
-  const relationshipMatches = [];
-  for (const rel of groundTruth.relationships) {
+  // Reuses matchRelationships's own one-to-one assignment (issue #133/E2)
+  // rather than re-deriving it with the old first-match `.find()` scan, for
+  // the same reason properties below reuse matchProperties: this is exactly
+  // the pairing the reported numbers were computed from. `direction` is
+  // reconstructed from the matched edge's actual endpoints against the
+  // gold relationship's own from/to, not re-decided independently.
+  const relMatchResult = matchRelationships(groundTruth, edges, gtToRecovered, thresholds);
+  const edgesById = new Map(edges.map((e) => [e.id, e]));
+  const relationshipMatches = relMatchResult.matches.map(({ goldId, recoveredId }) => {
+    const rel = groundTruth.relationships.find((r) => r.id === goldId);
+    const edge = edgesById.get(recoveredId);
     const fromNodeIds = new Set(gtToRecovered.get(rel.fromClassId) || []);
-    const toNodeIds = new Set(gtToRecovered.get(rel.toClassId) || []);
-    if (!fromNodeIds.size || !toNodeIds.size) continue;
-    const forwardEdge = edges.find((e) => fromNodeIds.has(e.source) && toNodeIds.has(e.target) && relationshipLabelMatchesEdge(rel, e, thresholds));
-    if (forwardEdge) { relationshipMatches.push({ goldId: rel.id, edgeId: forwardEdge.id, direction: "forward" }); continue; }
-    if (rel.reciprocalLabel) {
-      const reciprocal = { label: rel.reciprocalLabel, aliases: rel.reciprocalAliases || [] };
-      const reciprocalEdge = edges.find((e) => toNodeIds.has(e.source) && fromNodeIds.has(e.target) && relationshipLabelMatchesEdge(reciprocal, e, thresholds));
-      if (reciprocalEdge) relationshipMatches.push({ goldId: rel.id, edgeId: reciprocalEdge.id, direction: "reciprocal" });
-    }
-  }
+    const direction = fromNodeIds.has(edge.source) ? "forward" : "reciprocal";
+    return { goldId, edgeId: recoveredId, direction };
+  });
 
   // Properties reuse matchProperties's one-to-one assignment for the same
   // reason classes reuse matchClasses's: it is exactly the pairing the

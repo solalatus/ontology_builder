@@ -1,4 +1,5 @@
 import { openPanel, sendChatMessage, RATE_LIMIT_MAX_ATTEMPTS, rateLimitBackoffMs, sleepMs, isInsufficientQuotaError } from "./liveOpenAi.mjs";
+import { tpmBackoffMs, TPM_MAX_ATTEMPTS } from "../evals/lib/chatClient.mjs";
 
 // Azure OpenAI counterpart to tests/lib/liveOpenAi.mjs -- reuses everything
 // provider-agnostic from there (openPanel, sendChatMessage, the shared
@@ -17,12 +18,29 @@ export { RATE_LIMIT_MAX_ATTEMPTS, rateLimitBackoffMs, sleepMs, isInsufficientQuo
 // glob/regex, not a fixed string, since the resource endpoint (and
 // therefore the exact URL) is only known at test-run time from the
 // environment, unlike OpenAI's single fixed api.openai.com URL.
+//
+// Issue #133/E5 (external audit): this used RATE_LIMIT_MAX_ATTEMPTS/
+// rateLimitBackoffMs (1s/2s/4s, 4 attempts, ~7s total) -- the weakest retry
+// of any real call site in this repo. chatClient.mjs's own header explains
+// why that is not enough: Azure meters a *tokens-per-minute* budget, not
+// just requests-per-second, and its own tpmBackoffMs/TPM_MAX_ATTEMPTS (30-
+// 180s, 6 attempts, honouring Retry-After) is what every Node-side call
+// already uses for exactly this reason. The app agent carries the largest
+// prompts of any call site (the growing transcript plus tool schemas), so
+// it is the *most* likely to hit a TPM window, and until now it was the one
+// path with no way to wait one out -- it would simply fulfil the 429 into
+// the app, which conversationOrchestrator.mjs's own classifyAppSystemNote
+// (issue #133/E4) now at least counts rather than silently misreading as
+// the app agent going quiet, but "count the failure" is a worse outcome
+// than "survive the transient window," which this fix makes possible.
 export function forwardToRealAzure(page, urlPattern) {
   const responses = [];
   page.route(urlPattern, async (route) => {
     const req = route.request();
     let res, text;
-    for (let attempt = 1; attempt <= RATE_LIMIT_MAX_ATTEMPTS; attempt++) {
+    const maxAttempts = Math.max(RATE_LIMIT_MAX_ATTEMPTS, TPM_MAX_ATTEMPTS);
+    let retries = 0;
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
       try {
         res = await fetch(req.url(), {
           method: req.method(),
@@ -38,15 +56,21 @@ export function forwardToRealAzure(page, urlPattern) {
         await route.fulfill({ status: 599, contentType: "application/json", body: JSON.stringify({ error: { message: String(err) } }) });
         return;
       }
-      if (res.status !== 429 || attempt >= RATE_LIMIT_MAX_ATTEMPTS) break;
+      if (res.status !== 429 || attempt >= maxAttempts) break;
       let parsedErr = null;
       try { parsedErr = JSON.parse(text); } catch (err) { /* non-JSON error body */ }
       if (isInsufficientQuotaError(parsedErr)) break;
-      await sleepMs(rateLimitBackoffMs(attempt));
+      retries++;
+      const retryAfter = Number(res.headers.get("retry-after"));
+      await sleepMs(tpmBackoffMs(attempt, retryAfter));
     }
     let parsed = null;
     try { parsed = JSON.parse(text); } catch (err) { /* non-JSON body, leave parsed null */ }
-    responses.push({ status: res.status, body: parsed });
+    // `retries` travels with each completed response so a caller building
+    // operational stats (reportGenerator.mjs's computeOperationalStats) can
+    // surface how many 429s the app agent's own calls actually absorbed,
+    // the same visibility issue #133/E4 gave the Node-side calls.
+    responses.push({ status: res.status, body: parsed, retries });
     await route.fulfill({ status: res.status, contentType: "application/json", body: text });
   });
   return responses;

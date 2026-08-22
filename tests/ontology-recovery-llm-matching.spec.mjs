@@ -8,7 +8,7 @@ import {
   buildValueFidelityJudgePrompt, parseValueFidelityJudgeResponse,
   buildRuleJudgePrompt, parseRuleJudgeResponse, buildActionJudgePrompt, parseActionJudgeResponse,
   judgeClasses, judgeRelationships, judgeProperties, judgeValueFidelity, judgeRules, judgeActions,
-  computeSemanticRecoveryMetrics, oneToOneMatchedIds, aggregateSemanticRuleActionMetrics,
+  computeSemanticRecoveryMetrics, oneToOneMatchedIds, aggregateSemanticRuleActionMetrics, aggregateSemanticMetrics,
 } from "./evals/lib/llmMatcher.mjs";
 
 // This file is the LLM-judge supplement's own test file -- deliberately
@@ -47,14 +47,40 @@ test("parseClassJudgeResponse maps a MATCH line back to the correct gold/recover
   ]);
 });
 
-test("parseClassJudgeResponse treats a missing or malformed line as NO MATCH rather than crashing", () => {
+// Issue #133/E1 (external audit): this used to assert the exact bug the
+// audit flagged -- "a wholly unparsed response is indistinguishable from a
+// genuine all-no-match." A response missing a REFERENCE item's verdict
+// line entirely (the prompt's own contract is "exactly one line per item")
+// is now treated as a truncated/malformed response and fails loudly,
+// instead of silently scoring the missing item as NO MATCH.
+test("parseClassJudgeResponse fails loudly when the judge response is missing a REFERENCE item's verdict line entirely, rather than silently scoring it NO MATCH", () => {
   const gold = [{ id: "g1", label: "A" }, { id: "g2", label: "B" }];
   const recovered = [{ id: "r1", label: "X" }];
-  const result = parseClassJudgeResponse("1: MATCH 1 -- ok\n(the model forgot line 2 entirely)", gold, recovered);
-  assert.deepEqual(result, [
-    { goldId: "g1", recoveredId: "r1", verdict: "MATCH" },
-    { goldId: "g2", recoveredId: null, verdict: "NO MATCH" },
-  ]);
+  assert.throws(
+    () => parseClassJudgeResponse("1: MATCH 1 -- ok\n(the model forgot line 2 entirely)", gold, recovered),
+    /recognized only 1\/2/,
+  );
+});
+
+// Issue #133/E1: the audit measured curly quotes and markdown bullet/bold/
+// numbering both dropping a real verdict from 2/2 recognized to 0/2 --
+// reproduced here directly against parseClassJudgeResponse (through
+// parsePairingResponse's shared normalizeJudgeLine), not just the raw regex.
+test("parseClassJudgeResponse recognizes verdict lines wrapped in markdown (bullet, bold, \"N.\" numbering) and curly quotes, not just the prompt's own plain \"N: \" shape", () => {
+  const gold = [{ id: "g1", label: "A" }, { id: "g2", label: "B" }];
+  const recovered = [{ id: "r1", label: "X" }, { id: "r2", label: "Y" }];
+  const variants = [
+    "- **1:** MATCH **2** -- same concept\n- **2:** NO MATCH -- different",
+    "**1.** MATCH 2 -- same concept\n**2.** NO MATCH -- different",
+    "1) MATCH 2 -- same concept\n2) NO MATCH -- different",
+  ];
+  for (const text of variants) {
+    const result = parseClassJudgeResponse(text, gold, recovered);
+    assert.deepEqual(result, [
+      { goldId: "g1", recoveredId: "r2", verdict: "MATCH" },
+      { goldId: "g2", recoveredId: null, verdict: "NO MATCH" },
+    ], `should have parsed: ${text}`);
+  }
 });
 
 test("parseClassJudgeResponse ignores a MATCH referencing a candidate index that doesn't exist, defaulting to NO MATCH", () => {
@@ -105,6 +131,37 @@ test("oneToOneMatchedIds on an all-NO-MATCH list returns empty sets, not a crash
   assert.equal(recoveredIds.size, 0);
 });
 
+// Issue #133/E15 (external audit): aggregateSemanticMetrics filtered stale
+// judgments by "is the gold side still unmatched?" but never by "is the
+// *recovered* side still unmatched?" -- so a replayed judgment naming a
+// recoveredId the current heuristic pass already consumed (for a different
+// gold item) got double-credited on top of that heuristic match. The audit
+// demonstrated this producing precision=2.00; reproduced exactly here with
+// one recovered node that already heuristically matched gold class X, plus
+// a stale judgment claiming that same node also matches unmatched gold
+// class Y.
+test("aggregateSemanticMetrics drops a stale judgment whose recoveredId the current heuristic pass already consumed, instead of double-crediting it", () => {
+  const groundTruth = {
+    classes: {
+      x: { id: "x", label: "X", aliases: ["x"] },
+      y: { id: "y", label: "Y", aliases: ["y"] },
+    },
+    relationships: [], properties: [],
+  };
+  const recoveredState = {
+    nodes: [{ id: "n1", label: "X", meaning: "", aliases: [] }], // heuristically matches X, one-to-one
+    edges: [],
+  };
+  const judgments = {
+    classes: [{ goldId: "y", recoveredId: "n1", verdict: "MATCH" }], // stale: n1 already spoken for by X
+    relationships: [], properties: [], valueFidelity: [],
+  };
+  const result = aggregateSemanticMetrics({ groundTruth, recoveredState, judgments });
+  assert.equal(result.classes.matched, 1, "the stale judgment must not add a second match on top of X's real heuristic one");
+  assert.equal(result.classes.precision, 1, "precision must stay a real fraction (<=1), not 2.00 from double-crediting n1");
+  assert.equal(result.classes.recoveredTotal, 1);
+});
+
 test("buildRelationshipJudgePrompt shows the reciprocal phrasing alongside the primary label and includes both endpoint class labels", () => {
   const gold = [{ id: "rel1", label: "is supported by", reciprocalLabel: "documents", fromClassLabel: "Incident", toClassLabel: "Evidence Item" }];
   const recovered = [{ id: "e1", relation: "hasEvidence", aliases: ["evidence collected for"], fromClassLabel: "Incident", toClassLabel: "Evidence Item" }];
@@ -138,6 +195,20 @@ test("parsePropertyJudgeResponse only accepts a MATCH naming a candidate that wa
   assert.deepEqual(hallucinated, [{ goldId: "p1", matchedPropertyName: null, verdict: "NO MATCH" }]);
 });
 
+// Issue #133/E1: the audit measured curly quotes dropping a real property
+// verdict from 2/2 recognized to 0/2 (the parser hard-required an ASCII
+// `"`), and separately flagged that a candidate name should match
+// case-insensitively after trimming rather than being rejected as a
+// hallucination just because the model echoed it back with different
+// casing or incidental whitespace.
+test("parsePropertyJudgeResponse recognizes curly-quoted candidate names and matches case-insensitively after trimming", () => {
+  const unmatchedGold = [{ id: "p1", label: "has severity", hostClassLabel: "Incident", recoveredHostProperties: ["priority"] }];
+  const curlyQuoted = parsePropertyJudgeResponse("1: MATCH “priority” -- same field, different name", unmatchedGold);
+  assert.deepEqual(curlyQuoted, [{ goldId: "p1", matchedPropertyName: "priority", verdict: "MATCH" }]);
+  const differentCase = parsePropertyJudgeResponse('1: MATCH "Priority" -- same field', unmatchedGold);
+  assert.deepEqual(differentCase, [{ goldId: "p1", matchedPropertyName: "priority", verdict: "MATCH" }], "must resolve back to the real offered candidate's own casing, not the judge's echo");
+});
+
 test("buildValueFidelityJudgePrompt presents both raw value lists verbatim without any pre-normalization, leaving the semantic judgment entirely to the model", () => {
   const matched = [{ id: "prop1", label: "has severity", goldAllowedValues: ["sev1-critical", "sev2-high"], recoveredAllowedValues: ["Critical", "High"] }];
   const { user, system } = buildValueFidelityJudgePrompt(matched);
@@ -159,6 +230,14 @@ test("parseValueFidelityJudgeResponse leaves semanticFidelity null for a propert
   const result = parseValueFidelityJudgeResponse("1: 80 -- ok", matched);
   assert.equal(result[0].semanticFidelity, 0.8);
   assert.equal(result[1].semanticFidelity, null);
+});
+
+// Issue #133/E1: the audit measured bold "**1:**" numbering dropping a real
+// value-fidelity score from 2/2 recognized to 0/2.
+test("parseValueFidelityJudgeResponse recognizes a bold-numbered verdict line", () => {
+  const matched = [{ id: "p1" }];
+  const result = parseValueFidelityJudgeResponse("**1:** 75 -- close but not identical", matched);
+  assert.equal(result[0].semanticFidelity, 0.75);
 });
 
 // ORCHESTRATION SHORT-CIRCUITS -- no API call needed when there's nothing
@@ -253,6 +332,21 @@ test("judgeClasses routes through a `chat` override instead of the OpenAI fetch 
   assert.equal(calls[0].messages[1].role, "user");
   assert.match(calls[0].messages[1].content, /Service Desk/);
   assert.deepEqual(result, [{ goldId: "g1", recoveredId: "r1", verdict: "MATCH" }]);
+});
+
+// Issue #133/E1: chatOnce/chatMessagesOnce always returned `finishReason`,
+// but nothing here ever looked at it -- a truncated judge response
+// (finish_reason "length", e.g. a token-budget cutoff mid-list) was
+// indistinguishable from a real, complete all-NO-MATCH verdict. judgeClasses
+// (via callJudge) now hard-fails on it instead.
+test("judgeClasses fails loudly when the chat override reports the response was truncated (finish_reason=length), instead of scoring it as a real verdict", async () => {
+  const chat = async () => ({ text: "1: MATCH 1", usage: null, finishReason: "length" });
+  const gold = [{ id: "g1", label: "Service Desk", aliases: ["service desk"] }];
+  const recovered = [{ id: "r1", label: "Help Desk", meaning: "", aliases: [] }];
+  await assert.rejects(
+    () => judgeClasses({ apiKey: "unused", model: "my-azure-deployment", unmatchedGold: gold, unmatchedRecovered: recovered, chat }),
+    /truncated/,
+  );
 });
 
 test("computeSemanticRecoveryMetrics threads a `chat` override through its internal judgeClasses call, not just when judgeClasses is called directly", async () => {

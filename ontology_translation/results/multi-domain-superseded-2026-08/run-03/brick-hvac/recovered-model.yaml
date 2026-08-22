@@ -1,0 +1,472 @@
+competency_questions:
+  - id: cq1
+    text: Which air handling unit serves this terminal unit?
+  - id: cq2
+    text: Which air handling unit serves this air plenum?
+  - id: cq3
+    text: What equipment is upstream of this terminal unit?
+  - id: cq4
+    text: What should I check next for this terminal unit?
+  - id: cq5
+    text: Which temperature sensors belong to this air handling unit?
+  - id: cq6
+    text: Which setpoints belong to this air handling unit?
+  - id: cq7
+    text: "If the air temperature is off, which setpoint should I compare it to?"
+  - id: cq8
+    text: Which outside-air CO2 sensor is on this air handling unit?
+  - id: cq9
+    text: Which return-air CO2 sensor is on this air handling unit?
+  - id: cq10
+    text: What spaces are on this floor?
+  - id: cq11
+    text: Which floor is this space in?
+  - id: cq12
+    text: What HVAC equipment is located in this building?
+  - id: cq13
+    text: What HVAC equipment is located on this floor?
+  - id: cq14
+    text: What HVAC equipment is located in this space?
+  - id: cq15
+    text: Which thermostat serves this zone?
+  - id: cq16
+    text: Which thermostat serves this space?
+  - id: cq17
+    text: Which terminal unit serves this zone?
+  - id: cq18
+    text: Which terminal unit serves this space?
+classes:
+  TerminalUnit:
+    meaning: A terminal unit is the downstream device that controls delivery of air or conditioning to a served space.
+    aliases: []
+    properties:
+      status:
+        type: text
+        allowed:
+          - "off"
+          - "on"
+          - alarm
+  AirHandler:
+    meaning: null
+    aliases: []
+    properties: {}
+  Zone:
+    meaning: "A zone is the control area kept to one temperature target, which can be one room or a group of spaces on the same control."
+    aliases: []
+    properties:
+      occupancyStatus:
+        type: text
+        allowed:
+          - occupied
+          - unoccupied
+          - unknown
+  Building:
+    meaning: "A building is the overall site container that holds the floors, spaces, zones, and HVAC equipment."
+    aliases: []
+    properties: {}
+  AirHandlingUnit:
+    meaning: The air handler is the main piece of air-side equipment that moves and conditions air for the areas it serves.
+    aliases:
+      - AHU
+      - air handler
+    properties:
+      status:
+        type: text
+        allowed:
+          - "off"
+          - "on"
+          - alarm
+  Space:
+    meaning: A space is the physical room or area in the building where people work and where some devices may be located.
+    aliases: []
+    properties: {}
+  Floor:
+    meaning: A floor is one building level that contains a group of spaces.
+    aliases:
+      - storey
+    properties: {}
+  Thermostat:
+    meaning: "A thermostat is the control device that reads temperature and applies the zone's temperature target."
+    aliases: []
+    properties:
+      mode:
+        type: text
+        allowed:
+          - heating
+          - cooling
+          - auto
+          - "off"
+      status:
+        type: text
+        allowed:
+          - normal
+          - fault
+          - offline
+  AirPlenum:
+    meaning: "An air plenum is the air-distribution section that receives air from the upstream system for supply, return, or exhaust."
+    aliases:
+      - plenum
+    properties: {}
+  TemperatureSensor:
+    meaning: A temperature sensor is the point that measures temperature for control or troubleshooting.
+    aliases: []
+    properties:
+      value:
+        type: number
+  OutsideAirCO2Sensor:
+    meaning: An outside-air CO2 sensor measures the CO2 level in outdoor air coming into the air-handling process.
+    aliases: []
+    properties:
+      value:
+        type: number
+  ReturnAirCO2Sensor:
+    meaning: A return-air CO2 sensor measures the CO2 level in the air returning from the building back to the air handler.
+    aliases: []
+    properties:
+      value:
+        type: number
+  AirTemperatureSetpoint:
+    meaning: An air temperature setpoint is the target air temperature the unit is trying to maintain.
+    aliases: []
+    properties:
+      value:
+        type: number
+  CoolingTemperatureSetpoint:
+    meaning: A cooling temperature setpoint is the temperature threshold used to decide when cooling should be brought on.
+    aliases: []
+    properties:
+      value:
+        type: number
+  HeatingTemperatureSetpoint:
+    meaning: A heating temperature setpoint is the temperature threshold used to decide when heating should be brought on.
+    aliases: []
+    properties:
+      value:
+        type: number
+  TemperatureDeadbandSetpoint:
+    meaning: A temperature deadband setpoint is the allowed temperature range where the system should hold steady without switching into heating or cooling.
+    aliases: []
+    properties:
+      value:
+        type: number
+  Chiller:
+    meaning: A chiller is the plant equipment that makes chilled water for the cooling side of the HVAC system.
+    aliases: []
+    properties:
+      status:
+        type: text
+        allowed:
+          - "off"
+          - "on"
+          - alarm
+  Boiler:
+    meaning: A boiler is the plant equipment that makes hot water for the heating side of the HVAC system.
+    aliases: []
+    properties:
+      status:
+        type: text
+        allowed:
+          - "off"
+          - "on"
+          - alarm
+  Pump:
+    meaning: A pump is the device that moves water through the heating or cooling path.
+    aliases: []
+    properties: {}
+  CoolingTower:
+    meaning: A cooling tower is the heat-rejection equipment that helps the chiller side get rid of unwanted heat.
+    aliases: []
+    properties: {}
+  CoolingValve:
+    meaning: A cooling valve is the valve on an AHU that modulates chilled-water flow for cooling control.
+    aliases: []
+    properties:
+      position:
+        type: text
+  HeatingValve:
+    meaning: A heating valve is the valve on an AHU that modulates hot-water flow for heating control.
+    aliases: []
+    properties:
+      position:
+        type: text
+  WaterTemperatureSensor:
+    meaning: A water temperature sensor measures hot- or chilled-water temperature on the plant side so we can tell whether upstream equipment is doing its job.
+    aliases: []
+    properties:
+      value:
+        type: number
+  OccupancySensor:
+    meaning: A sensor that indicates whether a space or zone is occupied for HVAC control use.
+    aliases: []
+    properties:
+      occupied:
+        type: text
+        allowed:
+          - occupied
+          - unoccupied
+          - unknown
+  Economizer:
+    meaning: An AHU function or section that uses suitable air-side conditions to reduce mechanical cooling.
+    aliases: []
+    properties:
+      status:
+        type: text
+        allowed:
+          - disabled
+          - enabled
+          - active
+relationships:
+  - name: feeds
+    from: AirHandlingUnit
+    to: TerminalUnit
+    meaning: One piece of equipment is upstream and supplies the air or water path to the next thing.
+    aliases: []
+  - name: feeds
+    from: AirHandlingUnit
+    to: AirPlenum
+    meaning: One piece of equipment is upstream and supplies the air or water path to the next thing.
+    aliases: []
+  - name: hasPart
+    from: Building
+    to: Floor
+    meaning: The equipment or place includes that component as part of what it is made up of.
+    aliases: []
+  - name: hasPart
+    from: Floor
+    to: Space
+    meaning: The equipment or place includes that component as part of what it is made up of.
+    aliases: []
+  - name: includes
+    from: Zone
+    to: Space
+    meaning: The larger control grouping contains that space within it.
+    aliases: []
+  - name: serves
+    from: Thermostat
+    to: Zone
+    meaning: That device provides control or conditioning for the zone or space.
+    aliases: []
+  - name: serves
+    from: TerminalUnit
+    to: Space
+    meaning: That device provides control or conditioning for the zone or space.
+    aliases: []
+  - name: hasPoint
+    from: AirHandlingUnit
+    to: TemperatureSensor
+    meaning: "That piece of equipment, space, or zone has that sensor or setpoint associated with it for monitoring or control."
+    aliases: []
+  - name: hasPoint
+    from: AirHandlingUnit
+    to: OutsideAirCO2Sensor
+    meaning: "That piece of equipment, space, or zone has that sensor or setpoint associated with it for monitoring or control."
+    aliases: []
+  - name: hasPoint
+    from: AirHandlingUnit
+    to: ReturnAirCO2Sensor
+    meaning: "That piece of equipment, space, or zone has that sensor or setpoint associated with it for monitoring or control."
+    aliases: []
+  - name: hasPoint
+    from: AirHandlingUnit
+    to: AirTemperatureSetpoint
+    meaning: "That piece of equipment, space, or zone has that sensor or setpoint associated with it for monitoring or control."
+    aliases: []
+  - name: hasPoint
+    from: AirHandlingUnit
+    to: CoolingTemperatureSetpoint
+    meaning: "That piece of equipment, space, or zone has that sensor or setpoint associated with it for monitoring or control."
+    aliases: []
+  - name: hasPoint
+    from: AirHandlingUnit
+    to: HeatingTemperatureSetpoint
+    meaning: "That piece of equipment, space, or zone has that sensor or setpoint associated with it for monitoring or control."
+    aliases: []
+  - name: hasPoint
+    from: AirHandlingUnit
+    to: TemperatureDeadbandSetpoint
+    meaning: "That piece of equipment, space, or zone has that sensor or setpoint associated with it for monitoring or control."
+    aliases: []
+  - name: hasPart
+    from: AirHandlingUnit
+    to: CoolingValve
+    meaning: The equipment or place includes that component as part of what it is made up of.
+    aliases: []
+  - name: hasPart
+    from: AirHandlingUnit
+    to: HeatingValve
+    meaning: The equipment or place includes that component as part of what it is made up of.
+    aliases: []
+  - name: feeds
+    from: Chiller
+    to: CoolingValve
+    meaning: One piece of equipment is upstream and supplies the air or water path to the next thing.
+    aliases: []
+  - name: feeds
+    from: Boiler
+    to: HeatingValve
+    meaning: One piece of equipment is upstream and supplies the air or water path to the next thing.
+    aliases: []
+  - name: hasLocation
+    from: TerminalUnit
+    to: Space
+    meaning: "That equipment or device is physically located in that building, floor, or space."
+    aliases: []
+  - name: hasLocation
+    from: Thermostat
+    to: Space
+    meaning: "That equipment or device is physically located in that building, floor, or space."
+    aliases: []
+  - name: hasLocation
+    from: AirHandlingUnit
+    to: Floor
+    meaning: "That equipment or device is physically located in that building, floor, or space."
+    aliases: []
+  - name: hasLocation
+    from: AirHandlingUnit
+    to: Building
+    meaning: "That equipment or device is physically located in that building, floor, or space."
+    aliases: []
+  - name: hasLocation
+    from: OutsideAirCO2Sensor
+    to: Building
+    meaning: "That equipment or device is physically located in that building, floor, or space."
+    aliases: []
+  - name: hasPoint
+    from: Chiller
+    to: WaterTemperatureSensor
+    meaning: "That piece of equipment, space, or zone has that sensor or setpoint associated with it for monitoring or control."
+    aliases: []
+  - name: hasPoint
+    from: Boiler
+    to: WaterTemperatureSensor
+    meaning: "That piece of equipment, space, or zone has that sensor or setpoint associated with it for monitoring or control."
+    aliases: []
+  - name: hasPart
+    from: AirHandlingUnit
+    to: Economizer
+    meaning: The equipment or place includes that component as part of what it is made up of.
+    aliases: []
+  - name: hasPoint
+    from: Space
+    to: OccupancySensor
+    meaning: "That piece of equipment, space, or zone has that sensor or setpoint associated with it for monitoring or control."
+    aliases: []
+  - name: hasPoint
+    from: Zone
+    to: OccupancySensor
+    meaning: "That piece of equipment, space, or zone has that sensor or setpoint associated with it for monitoring or control."
+    aliases: []
+  - name: hasLocation
+    from: OccupancySensor
+    to: Space
+    meaning: "That equipment or device is physically located in that building, floor, or space."
+    aliases: []
+rules:
+  occupiedZoneRequiresControl:
+    conditions:
+      - zone occupancyStatus is occupied
+      - either a thermostat serves the zone or a terminal unit serves a space included in the zone
+  needsCoolingFromSetpoint:
+    conditions:
+      - the air handling unit temperature sensor value is above the applicable cooling temperature setpoint value
+  needsHeatingFromSetpoint:
+    conditions:
+      - the air handling unit temperature sensor value is below the applicable heating temperature setpoint value
+  temperatureWithinDeadband:
+    conditions:
+      - the air handling unit temperature sensor value is within the temperature deadband around the air temperature setpoint value
+actions:
+  traceUpstreamToServingAirHandler:
+    input: TerminalUnit
+    preconditions: []
+    effect: Identify the upstream air handling unit feeding the starting equipment.
+    verification: Confirm the traced serving air handling unit for the starting equipment.
+  pullAirHandlerPoints:
+    input: AirHandlingUnit
+    preconditions: []
+    effect: "Retrieve the relevant temperature sensors, CO2 sensors, and setpoints for the air handling unit together."
+    verification: Confirm the expected points and setpoints are shown together for the air handling unit.
+  compareAirTemperatureToRelevantSetpoint:
+    input: AirHandlingUnit
+    preconditions: []
+    effect: Compare the air handling unit measured temperature to the applicable cooling or heating setpoint.
+    verification: Confirm the comparison used the air handling unit temperature sensor value and the correct setpoint value for the question being asked.
+  decideCoolingHeatingOrDeadband:
+    input: AirHandlingUnit
+    preconditions: []
+    effect: "Determine whether the unit needs more cooling, more heating, or should stay in deadband."
+    verification: "Confirm the decision states cooling, heating, or deadband for the unit."
+  checkEconomizerValidity:
+    input: AirHandlingUnit
+    preconditions: []
+    effect: Determine whether economizer operation is a valid option instead of mechanical cooling.
+    verification: Confirm whether economizer use is valid for the air handling unit.
+  verifyOccupiedZoneHasActiveControl:
+    input: Zone
+    preconditions: []
+    effect: Determine whether the occupied zone has active control serving it.
+    verification: Confirm whether a working thermostat or terminal unit serves the occupied zone.
+  findEquipmentByPhysicalLocation:
+    input: Building
+    preconditions: []
+    effect: "Retrieve HVAC equipment physically located in the specified building, floor, or space context."
+    verification: Confirm the returned equipment matches the requested physical location context.
+  identifyServingEquipmentForZoneOrSpace:
+    input: Zone
+    preconditions: []
+    effect: "Identify which thermostat, terminal unit, or other served equipment goes with the specified zone or space."
+    verification: Confirm the identified serving equipment matches the requested zone or space.
+  traceUpstreamFromTerminalUnitToAHU:
+    input: TerminalUnit
+    preconditions: []
+    effect: Identify the air handling unit feeding that terminal unit.
+    verification: Confirm there is a feeds relationship from the air handling unit to that terminal unit.
+  traceUpstreamFromPlenumToAHU:
+    input: AirPlenum
+    preconditions: []
+    effect: Identify the air handling unit feeding that air plenum.
+    verification: Confirm there is a feeds relationship from the air handling unit to that air plenum.
+  pullPointsOnAHU:
+    input: AirHandlingUnit
+    preconditions: []
+    effect: "Return the air handling unit's relevant points together, including the temperature sensor, outside-air CO2 sensor, return-air CO2 sensor, and temperature setpoints."
+    verification: Confirm those points are associated to that air handling unit through hasPoint relationships.
+  decideCoolingHeatingOrDeadbandOnAHU:
+    input: AirHandlingUnit
+    preconditions:
+      - needsCoolingFromSetpoint
+      - needsHeatingFromSetpoint
+      - temperatureWithinDeadband
+    effect: "Determine whether the unit needs more cooling, more heating, or should stay within deadband."
+    verification: "Confirm the outcome matches the temperature comparison against the cooling setpoint, heating setpoint, or deadband check."
+  verifyOccupiedZoneConditioning:
+    input: Zone
+    preconditions:
+      - occupiedZoneRequiresControl
+    effect: Check that the occupied zone has active control available through a serving thermostat or terminal unit.
+    verification: Confirm a serving thermostat or terminal unit is assigned and operating for that zone.
+  findEquipmentInBuilding:
+    input: Building
+    preconditions: []
+    effect: Return the HVAC equipment in that building context.
+    verification: "Confirm the returned equipment is tied to that building directly, or is on floors that are part of that building."
+  findEquipmentOnFloor:
+    input: Floor
+    preconditions: []
+    effect: Return the HVAC equipment on that floor.
+    verification: "Confirm the returned equipment is located on that floor directly, or in spaces that are part of that floor."
+  findEquipmentInSpace:
+    input: Space
+    preconditions: []
+    effect: Return the HVAC equipment in that space.
+    verification: Confirm the returned equipment has location in that space.
+  identifyServingEquipmentForZone:
+    input: Zone
+    preconditions: []
+    effect: "Return the thermostat serving that zone, and any terminal unit serving a space included in that zone."
+    verification: "Confirm the thermostat serves the zone directly, or the terminal unit serves a space the zone includes."
+  identifyServingEquipmentForSpace:
+    input: Space
+    preconditions: []
+    effect: "Return the terminal unit serving that space, and any thermostat serving a zone that includes that space."
+    verification: "Confirm the terminal unit serves the space directly, or the thermostat serves a zone that includes that space."

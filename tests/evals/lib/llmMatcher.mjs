@@ -38,15 +38,50 @@ import { maxWeightBipartiteMatching } from "./bipartiteMatching.mjs";
 
 const JUDGE_LINE_RE = /^\s*(\d+)\s*:\s*(MATCH\s+(\d+)|NO MATCH)/i;
 
+// Issue #133/E1 (external audit): the judge prompt asks for a plain
+// "N: MATCH M -- reason" line, but a real model does not always answer in
+// exactly that shape -- curly quotes, a markdown bullet/heading/bold
+// wrapper, or "N." instead of "N:" all previously made a well-formed
+// verdict invisible to JUDGE_LINE_RE and the property/value-fidelity
+// regexes below (measured: curly quotes and markdown numbering both
+// dropped a real verdict from 2/2 recognized to 0/2). Normalizing once,
+// centrally, before every line-level regex test in this file is more
+// robust than hand-relaxing each pattern's own anchor.
+function normalizeJudgeLine(line) {
+  return line
+    .replace(/[‘’]/g, "'").replace(/[“”]/g, '"') // curly -> straight quotes
+    .replace(/^\s*[-*•#]+\s*/, "") // leading bullet/heading marker ("- ", "* ", "# ")
+    .replace(/\*\*/g, "") // bold markers anywhere -- purely decorative for parsing
+    .replace(/^(\s*\d+)\s*[.)]\s*/, "$1: "); // "1." or "1)" -> "1: "
+}
+
+// Issue #133/E1: previously any REFERENCE item the judge didn't produce a
+// recognizable line for was silently left `null` (treated as NO MATCH),
+// making a genuinely truncated or malformed response indistinguishable
+// from the judge legitimately saying "no match" to everything -- worst on
+// exactly the domains with the most unmatched gold, where a shortfall is
+// easiest to miss. The prompt's own contract is "exactly one line per
+// REFERENCE item, in order"; any run producing fewer recognized lines than
+// that now fails loudly instead of silently scoring the shortfall as 0.
 function parsePairingResponse(text, goldCount) {
   const lines = String(text || "").split("\n");
   const verdicts = new Array(goldCount).fill(null); // null = no verdict line seen (treated as no match)
-  for (const line of lines) {
-    const m = JUDGE_LINE_RE.exec(line);
+  let recognizedCount = 0;
+  for (const rawLine of lines) {
+    const m = JUDGE_LINE_RE.exec(normalizeJudgeLine(rawLine));
     if (!m) continue;
     const goldIndex = Number(m[1]) - 1;
     if (goldIndex < 0 || goldIndex >= goldCount) continue;
+    if (verdicts[goldIndex] === null) recognizedCount++;
     verdicts[goldIndex] = m[3] ? Number(m[3]) - 1 : -1; // -1 = explicit NO MATCH
+  }
+  if (goldCount > 0 && recognizedCount < goldCount) {
+    throw new Error(
+      `parsePairingResponse: judge response recognized only ${recognizedCount}/${goldCount} REFERENCE-item verdict `
+      + `lines (the prompt asks for exactly one line per item) -- treating this as a truncated or malformed `
+      + `response rather than silently scoring the missing ${goldCount - recognizedCount} as NO MATCH. Raw response: `
+      + `${JSON.stringify(String(text || "").slice(0, 2000))}`
+    );
   }
   return verdicts;
 }
@@ -85,7 +120,13 @@ export function parseClassJudgeResponse(text, unmatchedGold, unmatchedRecovered)
 export function buildClassJudgePrompt(unmatchedGold, unmatchedRecovered) {
   return buildPairingJudgePrompt({
     kind: "classes",
-    instructions: "Two classes named for different roles, teams, or departments are NOT the same class just because they both do incident-response work.",
+    // Issue #133/E14 (external audit): this instruction was itops-specific
+    // ("incident-response work") but sent verbatim to every domain's own
+    // class judge -- HVAC equipment, loan contracts, supply-chain events
+    // alike. Generalized to the same underlying discipline (two things
+    // sharing a role in one process are not automatically the same class)
+    // without naming any one domain.
+    instructions: "Two classes named for different roles, parties, or artifacts are NOT the same class just because they participate in the same real-world process.",
     goldItems: unmatchedGold,
     goldText: (c) => `${c.label}${c.aliases && c.aliases.length ? ` (aka: ${c.aliases.filter((a) => a !== c.label.toLowerCase()).join(", ")})` : ""}`,
     candidateItems: unmatchedRecovered,
@@ -147,13 +188,19 @@ export function parsePropertyJudgeResponse(text, unmatchedGold) {
   const lines = String(text || "").split("\n");
   const results = unmatchedGold.map((p) => ({ goldId: p.id, matchedPropertyName: null, verdict: "NO MATCH" }));
   const lineRe = /^\s*(\d+)\s*:\s*MATCH\s+"([^"]*)"/i;
-  for (const line of lines) {
-    const m = lineRe.exec(line);
+  for (const rawLine of lines) {
+    const m = lineRe.exec(normalizeJudgeLine(rawLine));
     if (!m) continue;
     const i = Number(m[1]) - 1;
     if (i < 0 || i >= unmatchedGold.length) continue;
-    if (!unmatchedGold[i].recoveredHostProperties.includes(m[2])) continue; // judge must pick a real candidate, not invent one
-    results[i] = { goldId: unmatchedGold[i].id, matchedPropertyName: m[2], verdict: "MATCH" };
+    // Issue #133/E1: matched case-insensitively after trimming -- the judge
+    // must still pick a real offered candidate, not invent one, but "status"
+    // must not be silently rejected as a non-match just because the model
+    // echoed it back as "Status" or with incidental surrounding whitespace.
+    const candidateName = m[2].trim();
+    const realCandidate = unmatchedGold[i].recoveredHostProperties.find((c) => c.trim().toLowerCase() === candidateName.toLowerCase());
+    if (!realCandidate) continue;
+    results[i] = { goldId: unmatchedGold[i].id, matchedPropertyName: realCandidate, verdict: "MATCH" };
   }
   return results;
 }
@@ -241,8 +288,8 @@ export function parseValueFidelityJudgeResponse(text, matchedControlledValue) {
   const lines = String(text || "").split("\n");
   const results = matchedControlledValue.map((p) => ({ id: p.id, semanticFidelity: null }));
   const lineRe = /^\s*(\d+)\s*:\s*(\d+(?:\.\d+)?)/;
-  for (const line of lines) {
-    const m = lineRe.exec(line);
+  for (const rawLine of lines) {
+    const m = lineRe.exec(normalizeJudgeLine(rawLine));
     if (!m) continue;
     const i = Number(m[1]) - 1;
     if (i < 0 || i >= matchedControlledValue.length) continue;
@@ -273,10 +320,23 @@ export function parseValueFidelityJudgeResponse(text, matchedControlledValue) {
 // makes -- app agent, persona, classifier, AND the judge -- at the same
 // provider with one consistent override shape, not three different ones.
 // Every existing caller (undefined chat) is completely unaffected.
+// Issue #133/E1 (external audit): a truncated judge response (finish_reason
+// "length", e.g. a token-budget cutoff mid-list) was previously
+// indistinguishable from a real, complete response that simply had fewer
+// recognized lines -- run-multi-domain-benchmark.mjs's own `chat` wrapper
+// returns `finishReason` (chatClient.mjs's chatOnce/chatMessagesOnce always
+// did), but nothing here ever looked at it. Checked and hard-failed on in
+// both the `chat`-override and raw-fetch paths, so a truncation surfaces as
+// a loud, specific error rather than a silently short verdict list (which
+// parsePairingResponse's own new count check would likely also catch, but
+// this names the actual cause instead of leaving it to be inferred).
 async function callJudge({ apiKey, model, system, user, onRawResponse, chat = null }) {
   if (chat) {
-    const { text } = await chat([{ role: "system", content: system }, { role: "user", content: user }], model);
+    const { text, finishReason } = await chat([{ role: "system", content: system }, { role: "user", content: user }], model);
     if (onRawResponse) onRawResponse(text);
+    if (finishReason === "length") {
+      throw new Error(`llmMatcher judge call (model "${model}") was truncated (finish_reason=length) -- the judge's response is incomplete, not a real all-NO-MATCH verdict.`);
+    }
     return text;
   }
   let res, data;
@@ -292,8 +352,12 @@ async function callJudge({ apiKey, model, system, user, onRawResponse, chat = nu
     if (retryable) { await sleepMs(rateLimitBackoffMs(attempt)); continue; }
     throw new Error(`llmMatcher judge call failed (HTTP ${res.status}, model "${model}"): ${(data.error && data.error.message) || "unknown error"}`);
   }
-  const text = (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || "";
+  const choice = data.choices && data.choices[0];
+  const text = (choice && choice.message && choice.message.content) || "";
   if (onRawResponse) onRawResponse(text);
+  if (choice && choice.finish_reason === "length") {
+    throw new Error(`llmMatcher judge call (model "${model}") was truncated (finish_reason=length) -- the judge's response is incomplete, not a real all-NO-MATCH verdict.`);
+  }
   return text;
 }
 
@@ -478,12 +542,24 @@ export function aggregateSemanticMetrics({ groundTruth, recoveredState, judgment
   // same gold item twice (recall) while precision saw it once. Verdicts about
   // items the current heuristic pass already matched are therefore dropped,
   // not added -- they cost nothing, since that item is already counted.
+  // Issue #133/E15 (external audit): the gold side was filtered to "still
+  // unmatched" but the *recovered* side never was, so a replayed judgment
+  // naming a recoveredId the current heuristic pass already consumed (for a
+  // *different* gold item) got credited a second time on top of that
+  // heuristic match -- demonstrated by the audit producing precision=2.00.
+  // Both sides now get the same "still unmatched by the current heuristic
+  // pass" filter, symmetric with how resolvePropertyJudgments already seeds
+  // `taken` from `detail.properties.matchedKeys` for the same reason.
   const stillUnmatched = (list) => new Set(list.map((g) => g.id));
   const unmatchedClassIds = stillUnmatched(detail.classes.unmatchedGold);
   const unmatchedRelIds = stillUnmatched(detail.relationships.unmatchedGold);
   const unmatchedPropIds = stillUnmatched(detail.properties.unmatchedGold);
-  const classJudgments = (judgments.classes || []).filter((j) => unmatchedClassIds.has(j.goldId));
-  const relJudgments = (judgments.relationships || []).filter((j) => unmatchedRelIds.has(j.goldId));
+  const unmatchedRecoveredNodeIds = stillUnmatched(detail.classes.unmatchedRecovered);
+  const unmatchedRecoveredEdgeIds = stillUnmatched(detail.relationships.unmatchedRecovered);
+  const classJudgments = (judgments.classes || [])
+    .filter((j) => unmatchedClassIds.has(j.goldId) && (!j.recoveredId || unmatchedRecoveredNodeIds.has(j.recoveredId)));
+  const relJudgments = (judgments.relationships || [])
+    .filter((j) => unmatchedRelIds.has(j.goldId) && (!j.recoveredId || unmatchedRecoveredEdgeIds.has(j.recoveredId)));
   const propJudgments = (judgments.properties || []).filter((j) => unmatchedPropIds.has(j.goldId));
   const fidelityJudgments = judgments.valueFidelity || [];
 
@@ -519,18 +595,39 @@ export function aggregateSemanticMetrics({ groundTruth, recoveredState, judgment
   );
   const controlledValueFidelity = fidelityScores.length ? fidelityScores.reduce((a, b) => a + b, 0) / fidelityScores.length : null;
 
-  // Same equal-weighted composite as computeRecoveryMetrics, and the property
-  // term is F1 there now too -- see its own comment on why that changed.
-  const components = [classF1, relF1, propertyF1];
-  if (controlledValueFidelity !== null) components.push(controlledValueFidelity);
-  const recoveryEffectiveness = components.reduce((a, b) => a + b, 0) / components.length;
+  // Same fixed, always-3-component composite as computeRecoveryMetrics --
+  // issue #133/E6, see that function's own comment for why the divisor must
+  // never silently vary with whether a controlled-value property happened
+  // to be matched. recoveryEffectivenessWithFidelity is the separate,
+  // distinctly-named 4-component variant.
+  const recoveryEffectiveness = (classF1 + relF1 + propertyF1) / 3;
+  const recoveryEffectivenessWithFidelity = controlledValueFidelity !== null
+    ? (classF1 + relF1 + propertyF1 + controlledValueFidelity) / 4
+    : null;
+
+  // Invariant, issue #133/E15: every recall/precision/F1 above must be a
+  // real fraction. A failure here means a judgment slipped past both the
+  // gold-side and recovered-side "still unmatched" filters above and is
+  // double-crediting something the heuristic pass already counted --
+  // exactly the class of bug this ticket exists to catch, not something to
+  // silently clamp and paper over.
+  for (const [name, value] of [
+    ["classRecall", classRecall], ["classPrecision", classPrecision],
+    ["relRecall", relRecall], ["relPrecision", relPrecision],
+    ["propertyRecall", propertyRecall], ["propertyPrecision", propertyPrecision],
+  ]) {
+    if (!(value >= 0 && value <= 1)) throw new Error(`aggregateSemanticMetrics: ${name}=${value} is outside [0,1] -- a judgment double-credited an already heuristically-matched item`);
+  }
 
   return {
     classes: { recall: classRecall, precision: classPrecision, f1: classF1, matched: classMatched, groundTruthTotal: detail.classes.goldTotal, recoveredTotal: detail.classes.recoveredTotal },
     relationships: { recall: relRecall, precision: relPrecision, f1: relF1, matched: relMatched, groundTruthTotal: detail.relationships.goldTotal, recoveredTotal: detail.relationships.recoveredTotal },
     properties: { recall: propertyRecall, precision: propertyPrecision, f1: propertyF1, matched: propMatched, groundTruthTotal: detail.properties.goldTotal, recoveredTotal: detail.properties.recoveredTotal },
     controlledValueFidelity,
+    controlledValuePropertyGoldTotal: detail.properties.controlledValuePropertyGoldTotal,
+    controlledValuePropertyMatchedCount: fidelityScores.length,
     recoveryEffectiveness,
+    recoveryEffectivenessWithFidelity,
     judgeCallCount: [detail.classes.unmatchedGold.length && detail.classes.unmatchedRecovered.length,
       detail.relationships.unmatchedGold.length && detail.relationships.unmatchedRecovered.length,
       detail.properties.unmatchedGold.some((p) => p.recoveredHostProperties.length),
