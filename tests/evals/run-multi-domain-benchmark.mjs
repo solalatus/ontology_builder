@@ -337,7 +337,13 @@ async function main() {
     fs.writeFileSync(provenancePath, `${JSON.stringify({
       schemaVersion: 1, domain, runId, runUuid, status: "complete", generatedAt: new Date().toISOString(),
       model: MODEL, personaModel: PERSONA_MODEL, classifierModel: CLASSIFIER_MODEL,
-      provider: "azure", endpoint,
+      // The endpoint hostname identifies a specific Azure resource (and, in
+      // practice, the account/organization behind it) -- not a credential,
+      // but not something that belongs in committed, potentially-public
+      // provenance either now that issue #133/E9 un-ignores this file.
+      // Hashed instead of stored raw: still lets two runs be verified as
+      // having used the same resource without disclosing which one.
+      provider: "azure", endpointSha256: sha256(endpoint),
       domainYamlPath: path.relative(path.resolve(__dirname, "..", ".."), domainYamlPath),
       personaPath: path.relative(path.resolve(__dirname, "..", ".."), personaPath),
       stoppedReason: orchestratorResult.stoppedReason,

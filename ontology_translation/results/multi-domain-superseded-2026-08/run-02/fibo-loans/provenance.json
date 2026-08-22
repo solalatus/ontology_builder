@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "domain": "fibo-loans",
+  "runId": "run-02",
+  "generatedAt": "2026-08-21T14:24:44.383Z",
+  "model": "gpt-5.4",
+  "personaModel": "gpt-5.4",
+  "classifierModel": "gpt-5.4",
+  "provider": "azure",
+  "endpoint": "[redacted -- Azure resource hostname, not committed]",
+  "domainYamlPath": "ontology_translation/domains/fibo-loans/reference.domain.yaml",
+  "personaPath": "ontology_translation/domains/fibo-loans/persona.md",
+  "stoppedReason": "app_agent_appears_finished",
+  "turnsUsed": 62,
+  "wallClockSec": 849,
+  "semanticJudgingSucceeded": true
+}

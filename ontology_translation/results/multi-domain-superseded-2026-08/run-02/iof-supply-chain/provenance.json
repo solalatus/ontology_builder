@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "domain": "iof-supply-chain",
+  "runId": "run-02",
+  "generatedAt": "2026-08-21T14:28:00.531Z",
+  "model": "gpt-5.4",
+  "personaModel": "gpt-5.4",
+  "classifierModel": "gpt-5.4",
+  "provider": "azure",
+  "endpoint": "[redacted -- Azure resource hostname, not committed]",
+  "domainYamlPath": "ontology_translation/domains/iof-supply-chain/reference.domain.yaml",
+  "personaPath": "ontology_translation/domains/iof-supply-chain/persona.md",
+  "stoppedReason": "app_agent_appears_finished",
+  "turnsUsed": 75,
+  "wallClockSec": 1047,
+  "semanticJudgingSucceeded": true
+}

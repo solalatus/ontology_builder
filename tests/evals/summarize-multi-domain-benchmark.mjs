@@ -454,6 +454,29 @@ async function main() {
     md.push(`| ${label} | ${fmt(s.mean)} | ${fmt(s.stdev)} | ${s.domains} | ${supportCell} |`);
   }
 
+  // Issue #133/E19 (external audit): "practical scope" is calibrated
+  // differently for classes than for properties (whole-phrase substring
+  // with any alias vs. all-content-tokens overlap -- see
+  // tests/evals/README.md's own "Full domain vs. practical scope" section
+  // for the full reasoning), which the audit found undocumented anywhere a
+  // reader of just this published report would see it. Stated explicitly
+  // here rather than only in source comments.
+  md.push(
+    "",
+    "## Methodology notes",
+    "",
+    "**Practical-scope calibration is not the same rule for every dimension.** " +
+      "A class enters practical scope when its label or an alias appears as a " +
+      "whole phrase in the domain's own competency-question/action corpus; a " +
+      "property enters practical scope only when *every* content word of its " +
+      "own label appears *somewhere* in that same corpus (a more forgiving " +
+      "test, since natural competency questions never contain a \"has X\"-style " +
+      "predicate label verbatim). The two are not directly comparable measures " +
+      "of the same thing -- see `tests/evals/README.md`'s \"Full domain vs. " +
+      "practical scope\" section for the full reasoning and the fixture-level " +
+      "numbers that motivated the difference.",
+  );
+
   md.push("", "## Per-domain results (mean +/- stdev across replicates; gold n = ground-truth element count that dimension's recall/precision was computed against)", "");
   md.push("| Domain | Replicates | Classes F1 (gold n) | Relationships F1 (gold n) | Properties F1 (gold n) | Recovery effectiveness | Rules F1 (gold n) | Actions F1 (gold n) |", "|---|---|---|---|---|---|---|---|");
   const goldN = (n) => n < MIN_GOLD_SUPPORT_N ? `**n=${n}**` : `n=${n}`;

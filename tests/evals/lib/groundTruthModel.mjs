@@ -558,7 +558,15 @@ export function loadDomainYamlGroundTruthModel(domainYamlPath) {
 
   const corpusParts = [...(doc.competency_questions || []).map((cq) => cq.text || "")];
   for (const r of rules) corpusParts.push(...r.conditions);
-  for (const a of Object.values(doc.actions || {})) {
+  // Issue #133/E19 (external audit): the MTSR loader below pushes each
+  // action's own label into the corpus (`corpusParts.push(a.label)`); this
+  // loader previously didn't, so the practical-scope corpus wasn't built
+  // the same way for the four `.domain.yaml` benchmark domains as for the
+  // itops MTSR anchors -- an action's own name could never, by itself, pull
+  // it into scope here, only its preconditions/effect/verification text
+  // could. Pushing buildDomainYamlLabel(name) restores parity.
+  for (const [name, a] of Object.entries(doc.actions || {})) {
+    corpusParts.push(buildDomainYamlLabel(name));
     corpusParts.push(...((a && a.preconditions) || []));
     if (a && a.effect) corpusParts.push(a.effect);
     if (a && a.verification) corpusParts.push(a.verification);

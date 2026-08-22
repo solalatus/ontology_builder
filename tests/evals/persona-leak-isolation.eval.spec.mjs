@@ -4,25 +4,33 @@ import fs from "node:fs";
 import { createPersonaAgent } from "./lib/personaAgent.mjs";
 import { resolveDomainPersonaPath, resolveDomainYamlPath } from "./lib/groundTruthModel.mjs";
 import { buildLeakCandidateSet, findLeakedIdentifiers } from "./lib/leakDetector.mjs";
+import { chatMessagesOnce, DEFAULT_AZURE_API_VERSION } from "./lib/chatClient.mjs";
 import { loadEnvKey } from "../lib/env.mjs";
 import yaml from "js-yaml";
 
 // Issue #133/E13 item 3 (external audit): "build an isolated persona-only
-// regression suite seeded from the real failure transcripts... but do NOT
-// invoke it with real Azure calls in this pass." This is that suite -- a
-// live, OpenAI-key-gated harness (skipped without OPENAI_API_KEY, same
-// pattern every other *.eval.spec.mjs file in this directory uses), built
-// and committed now, deliberately not run against a real key in this pass.
-// It exercises the persona IN ISOLATION -- no browser, no app agent, no full
-// multi-turn conversation -- replaying the exact real interviewer message
-// that triggered a real, measured leak in the actual 12-run multi-domain
+// regression suite seeded from the real failure transcripts". It exercises
+// the persona IN ISOLATION -- no browser, no app agent, no full multi-turn
+// conversation -- replaying the exact real interviewer message that
+// triggered a real, measured leak in the actual 12-run multi-domain
 // benchmark, and asserting the fixed persona (root-cause rendering + wrapper
 // prompt fix, both from this same issue) no longer reproduces it.
 //
+// Gated on AZURE_OPENAI_* (this repo's real live benchmark path -- see
+// run-multi-domain-benchmark.mjs's own header), not OPENAI_API_KEY: this
+// suite originally targeted OpenAI, matching every other *.eval.spec.mjs
+// file's convention, but that leaves it permanently unrunnable in an
+// environment (like this one) that only has Azure credentials configured --
+// and Azure/gpt-5.4 is the actual model family that produced the real leaks
+// this suite exists to catch, so testing against it directly is also more
+// faithful than substituting a different OpenAI model.
+//
 // Each scenario below is transcribed verbatim from a real completed run
-// still on disk under ontology_translation/results/multi-domain/ at the time
-// this suite was written (run directories are gitignored, not committed --
-// see issue #133/E9 -- so the scenario text here IS the permanent record):
+// that was on disk under ontology_translation/results/multi-domain/ at the
+// time this suite was written (run directories were, at that time,
+// gitignored and never committed -- see issue #133/E9 -- so the scenario
+// text here IS the permanent record of what those specific transcripts
+// said):
 //   - brick-hvac run-03, turn 49: the interviewer proposed three rule names
 //     (needsCooling/needsHeating/withinTemperatureDeadband); the persona's
 //     real reply substituted its own raw internal rule identifiers verbatim
@@ -41,10 +49,13 @@ import yaml from "js-yaml";
 // its exact internal reference-model term the moment the interviewer's
 // guess was merely close.
 
-const OPENAI_API_KEY = loadEnvKey("OPENAI_API_KEY");
-const skip = OPENAI_API_KEY
+const AZURE_ENDPOINT = (loadEnvKey("AZURE_OPENAI_ENDPOINT") || "").replace(/\/+$/, "");
+const AZURE_API_KEY = loadEnvKey("AZURE_OPENAI_API_KEY");
+const AZURE_DEPLOYMENT = loadEnvKey("AZURE_OPENAI_DEPLOYMENT");
+const AZURE_API_VERSION = loadEnvKey("AZURE_OPENAI_API_VERSION") || DEFAULT_AZURE_API_VERSION;
+const skip = (AZURE_ENDPOINT && AZURE_API_KEY && AZURE_DEPLOYMENT)
   ? false
-  : "Set OPENAI_API_KEY in a .env file at the repo root (see tests/README.md) to run the persona leak-isolation suite.";
+  : "Set AZURE_OPENAI_ENDPOINT, AZURE_OPENAI_API_KEY, and AZURE_OPENAI_DEPLOYMENT in a .env file at the repo root (see tests/README.md) to run the persona leak-isolation suite.";
 
 const SCENARIOS = [
   {
@@ -95,8 +106,16 @@ for (const scenario of SCENARIOS) {
       const groundTruthText = fs.readFileSync(domainYamlPath, "utf8");
 
       const persona = createPersonaAgent({
-        apiKey: OPENAI_API_KEY,
-        model: "gpt-4o-mini",
+        model: AZURE_DEPLOYMENT,
+        chat: async (messages) => {
+          const call = await chatMessagesOnce({
+            config: { provider: "azure", endpoint: AZURE_ENDPOINT, apiKey: AZURE_API_KEY, apiVersion: AZURE_API_VERSION },
+            model: AZURE_DEPLOYMENT,
+            messages,
+            label: `persona-leak-isolation/${scenario.domainId}`,
+          });
+          return { text: call.reply, usage: call.usage };
+        },
         personaPath,
         groundTruthText,
         groundTruthFilename: "reference.domain.yaml",

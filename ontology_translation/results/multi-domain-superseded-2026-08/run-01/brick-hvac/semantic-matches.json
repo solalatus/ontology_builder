@@ -1,0 +1,114 @@
+{
+  "fullDomain": {
+    "classes": [
+      {
+        "goldId": "AirPlenum",
+        "recoveredId": "n4"
+      },
+      {
+        "goldId": "TemperatureSetpoint",
+        "recoveredId": "n10"
+      }
+    ],
+    "relationships": [
+      {
+        "goldId": "rel_16",
+        "recoveredId": "e7"
+      },
+      {
+        "goldId": "rel_17",
+        "recoveredId": "e8"
+      },
+      {
+        "goldId": "rel_18",
+        "recoveredId": "e9"
+      },
+      {
+        "goldId": "rel_19",
+        "recoveredId": "e10"
+      },
+      {
+        "goldId": "rel_22",
+        "recoveredId": "e1"
+      },
+      {
+        "goldId": "rel_23",
+        "recoveredId": "e2"
+      }
+    ],
+    "properties": [
+      {
+        "goldId": "OccupancySensor.occupied",
+        "matchedPropertyName": "occupancyStatus"
+      }
+    ],
+    "valueFidelity": [
+      {
+        "id": "Filter.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Fan.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Economizer.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Zone.occupancyStatus",
+        "semanticFidelity": 1
+      }
+    ]
+  },
+  "scoped": {
+    "classes": [
+      {
+        "goldId": "AirPlenum",
+        "recoveredId": "n4"
+      }
+    ],
+    "relationships": [
+      {
+        "goldId": "rel_16",
+        "recoveredId": "e7"
+      },
+      {
+        "goldId": "rel_17",
+        "recoveredId": "e8"
+      },
+      {
+        "goldId": "rel_18",
+        "recoveredId": "e9"
+      },
+      {
+        "goldId": "rel_19",
+        "recoveredId": "e10"
+      },
+      {
+        "goldId": "rel_22",
+        "recoveredId": "e1"
+      },
+      {
+        "goldId": "rel_23",
+        "recoveredId": "e2"
+      }
+    ],
+    "properties": [
+      {
+        "goldId": "OccupancySensor.occupied",
+        "matchedPropertyName": "occupancyStatus"
+      }
+    ],
+    "valueFidelity": [
+      {
+        "id": "Economizer.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Zone.occupancyStatus",
+        "semanticFidelity": 1
+      }
+    ]
+  }
+}

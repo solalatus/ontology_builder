@@ -1,5 +1,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
 import {
   loadGroundTruthModel, scopeGroundTruth, listAvailableDomains, resolveDomainYamlPath, resolveDomainPersonaPath,
 } from "./evals/lib/groundTruthModel.mjs";
@@ -44,6 +47,40 @@ test("a .domain.yaml-sourced ground truth exposes real rules, unlike MTSR (which
   const rule = domainYaml.rules.find((r) => r.id === "needsCoolingFromSetpoint");
   assert.ok(rule, "expected the needsCoolingFromSetpoint rule to survive the load");
   assert.ok(rule.conditions.length > 0);
+});
+
+// Issue #133/E19 (external audit): the MTSR loader has always pushed each
+// action's own label into the practical-scope corpus (`corpusParts.push(a.label)`);
+// this loader didn't, so an action's own name could never, by itself, pull a
+// property into scope here -- only its preconditions/effect/verification
+// text could. Synthetic doc, since this needs an action whose OWN name
+// textually overlaps with an unrelated property's words while carrying no
+// competency question, rule, precondition, effect, or verification text at
+// all -- isolating the corpus-parity fix from every other scope-widening
+// path (rule conditions, competency questions, the action's own primary
+// input class, which is separately and unconditionally in scope regardless
+// of corpus text).
+test("an action's own name feeds the practical-scope corpus, achieving parity with the MTSR loader (E19)", () => {
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "domain-yaml-corpus-test-"));
+  const yamlPath = path.join(tmpDir, "reference.domain.yaml");
+  fs.writeFileSync(yamlPath, `
+classes:
+  Claim:
+    properties:
+      insuranceCoverage:
+        type: text
+actions:
+  reviewInsuranceCoverage:
+    input: Claim
+`);
+  const gt = loadGroundTruthModel({ format: "domain-yaml", path: yamlPath });
+  const prop = gt.properties.find((p) => p.id === "Claim.insuranceCoverage");
+  assert.ok(prop, "expected the synthetic property to load");
+  assert.ok(
+    gt.practicalScopePropertyIds.has(prop.id),
+    "the action's own name (\"reviewInsuranceCoverage\" -> \"review Insurance Coverage\") should pull \"insurance coverage\" into the corpus, " +
+      "putting the property in scope even with no competency question, rule, precondition, effect, or verification text anywhere",
+  );
 });
 
 test("rule condition text feeds the practical-scope corpus (the issue's own explicit requirement)", () => {

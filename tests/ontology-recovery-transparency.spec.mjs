@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { tagApiMessagesWithTurn, looksLikeEarlyPhaseCheckpoint, looksLikePureAcknowledgment, looksLikeContinuationOffer, classifyAppSystemNote } from "./evals/lib/conversationOrchestrator.mjs";
+import { tagApiMessagesWithTurn, looksLikeEarlyPhaseCheckpoint, looksLikePureAcknowledgment, looksLikeContinuationOffer, classifyAppSystemNote, WASTED_TURN_THRESHOLD } from "./evals/lib/conversationOrchestrator.mjs";
 import {
   writeConversationLog, writeToolCallLog, writeReport, pathsFor, RESULTS_DIR,
   writeRecoveredModelYaml, writeHeuristicMatches, writeSemanticJudgments, writeSemanticMatches,
@@ -173,6 +173,7 @@ test("computeOperationalStats defaults gracefully when orchestratorResult has no
   assert.equal(stats.compactionEvents, 0);
   assert.equal(stats.leakEventsCount, 0);
   assert.equal(stats.unresolvedLeakEvents, 0);
+  assert.equal(stats.maxConsecutiveTurnsWithNoToolActivity, 0);
 });
 
 // Issue #133/E13 item 4: a run the leak guard had to abort (still leaking
@@ -198,6 +199,24 @@ test("computeOperationalStats marks a run degraded when the leak guard never res
   });
   assert.equal(unresolved.degraded, true, "still-leaking after every retry must mark the run degraded");
   assert.equal(unresolved.unresolvedLeakEvents, 2);
+});
+
+// Issue #133/item 8: a run that crossed the general stall threshold (or came
+// close to it) is exactly the shape of run Finding B measured twice in real
+// data -- must be flagged degraded even with nothing else wrong.
+test("computeOperationalStats marks a run degraded once maxConsecutiveTurnsWithNoToolActivity reaches WASTED_TURN_THRESHOLD, not before", () => {
+  const belowThreshold = computeOperationalStats({
+    log: [], chatResponses: [], errorCounts: {}, compactionEvents: 0,
+    maxConsecutiveTurnsWithNoToolActivity: WASTED_TURN_THRESHOLD - 1,
+  });
+  assert.equal(belowThreshold.degraded, false, "a near-miss stretch alone should not condemn an otherwise-clean run");
+  assert.equal(belowThreshold.maxConsecutiveTurnsWithNoToolActivity, WASTED_TURN_THRESHOLD - 1);
+
+  const atThreshold = computeOperationalStats({
+    log: [], chatResponses: [], errorCounts: {}, compactionEvents: 0,
+    maxConsecutiveTurnsWithNoToolActivity: WASTED_TURN_THRESHOLD,
+  });
+  assert.equal(atThreshold.degraded, true, "reaching the declared threshold must mark the run degraded");
 });
 
 test("looksLikePureAcknowledgment rejects real content even when it starts with a closing-sounding word", () => {

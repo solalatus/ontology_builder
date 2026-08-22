@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { RATE_LIMIT_MAX_ATTEMPTS, rateLimitBackoffMs, sleepMs, isInsufficientQuotaError } from "../../lib/liveOpenAi.mjs";
+import { WASTED_TURN_THRESHOLD } from "./conversationOrchestrator.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export const RESULTS_DIR = path.resolve(__dirname, "..", "results");
@@ -110,6 +111,12 @@ export function computeOperationalStats(orchestratorResult) {
   // aborted with it still unresolved (leak_detected_after_retries).
   const leakEvents = orchestratorResult.leakEvents || [];
   const unresolvedLeakEvents = leakEvents.filter((e) => !e.resolved).length;
+  // Issue #133/item 8: the general stall detector's own high-water mark for
+  // this run -- a run that actually crossed WASTED_TURN_THRESHOLD stopped
+  // early with stoppedReason "wasted_turns_no_tool_activity" (visible in
+  // provenance separately), but the raw streak is worth surfacing here too
+  // so a near-miss that didn't quite cross the line still shows up.
+  const maxConsecutiveTurnsWithNoToolActivity = orchestratorResult.maxConsecutiveTurnsWithNoToolActivity || 0;
   return {
     appAgentApiCalls: orchestratorResult.chatResponses.length,
     applyToolCalls,
@@ -123,7 +130,9 @@ export function computeOperationalStats(orchestratorResult) {
     compactionEvents,
     leakEventsCount: leakEvents.length,
     unresolvedLeakEvents,
-    degraded: compactionEvents > 0 || totalErrorTurns > 2 || unresolvedLeakEvents > 0,
+    maxConsecutiveTurnsWithNoToolActivity,
+    degraded: compactionEvents > 0 || totalErrorTurns > 2 || unresolvedLeakEvents > 0
+      || maxConsecutiveTurnsWithNoToolActivity >= WASTED_TURN_THRESHOLD,
   };
 }
 
@@ -354,11 +363,12 @@ export function writeReport({
     ...(operationalStats.totalTokens
       ? [`- Tokens: ${operationalStats.totalTokens} total (${operationalStats.promptTokens} prompt · ${operationalStats.completionTokens} completion) across ${operationalStats.tokenCallCount} API calls`]
       : []),
-    ...(operationalStats.totalErrorTurns || operationalStats.compactionEvents || operationalStats.unresolvedLeakEvents
-      ? [`- **Degraded run** (issue #133/E4, E13): ${operationalStats.totalErrorTurns} app-agent error turn(s) `
+    ...(operationalStats.totalErrorTurns || operationalStats.compactionEvents || operationalStats.unresolvedLeakEvents || operationalStats.maxConsecutiveTurnsWithNoToolActivity
+      ? [`- **Degraded run** (issue #133/E4, E13, item 8): ${operationalStats.totalErrorTurns} app-agent error turn(s) `
         + `(${Object.entries(operationalStats.errorCounts).map(([k, v]) => `${k}=${v}`).join(", ") || "none"}), `
         + `${operationalStats.compactionEvents} context-compaction event(s), `
-        + `${operationalStats.unresolvedLeakEvents || 0} unresolved ground-truth leak event(s) out of ${operationalStats.leakEventsCount || 0} caught -- `
+        + `${operationalStats.unresolvedLeakEvents || 0} unresolved ground-truth leak event(s) out of ${operationalStats.leakEventsCount || 0} caught, `
+        + `${operationalStats.maxConsecutiveTurnsWithNoToolActivity || 0} consecutive turn(s) with no tool activity at the run's worst stretch -- `
         + `exclude from macro statistics unless explicitly overridden.`]
       : []),
     "",

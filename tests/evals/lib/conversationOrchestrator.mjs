@@ -51,6 +51,31 @@ export function classifyAppSystemNote(text) {
   return null;
 }
 
+// Issue #133/item 8 (external audit): a general stall/wasted-turn detector,
+// distinct from the pure-acknowledgment pleasantry-loop detectors below
+// (which only catch that one specific closing-phrase shape). Both real
+// incidents Finding B measured (iof-maintenance/run-03: 159 wasted turns;
+// brick-hvac/run-02: 68 wasted turns) share one underlying signature: an
+// extended stretch of turns with literally zero tool activity (no
+// apply_ontology_yaml, no get_graph_state) -- the app kept talking, but
+// nothing was actually happening. Sized comfortably below both real
+// incidents but well above any plausible legitimate no-apply discussion
+// stretch (a thoughtful multi-part clarifying exchange might reasonably run
+// 5-10 turns between applies while covering a complex topic).
+export const WASTED_TURN_THRESHOLD = 20;
+
+// Pure state-transition step for the stall detector above, extracted for
+// the same reason withLeakGuard was (see that function's own comment) --
+// so the increment/reset/threshold logic is directly unit-testable without
+// a live Playwright page. Takes the current {current, max} streak state and
+// whether THIS turn had any tool activity, returns the updated state plus
+// whether this update just crossed WASTED_TURN_THRESHOLD.
+export function trackToolActivityStreak({ current, max }, turnHadToolActivity) {
+  if (turnHadToolActivity) return { current: 0, max, crossedThreshold: false };
+  const next = current + 1;
+  return { current: next, max: Math.max(max, next), crossedThreshold: next >= WASTED_TURN_THRESHOLD };
+}
+
 // Deterministic pre-filter, checked before ever calling the LLM classifier
 // below. First live run of this eval (see helper_agent_todo.md's Log) found
 // a real false positive: the interviewer's own system prompt has it recap
@@ -263,6 +288,46 @@ export function tagApiMessagesWithTurn(apiMessages, turn) {
   return apiMessages.map((m) => ({ turn, ...m }));
 }
 
+// Issue #133/E13 item 4 (external audit): a runtime hard-reject +
+// bounded-retry guard for a single reply -- regenerates up to `maxRetries`
+// times when it verbatim-leaks a raw ground-truth identifier, popping the
+// leaking exchange before each retry (via `popLastExchange`) so a retry is
+// a genuinely fresh attempt rather than the model seeing its own rejected
+// answer sitting uncorrected in its history. On exhaustion, returns the
+// last (still-leaking) reply with `exhausted: true` -- the caller aborts
+// rather than silently forwarding it or patching the text.
+//
+// Extracted out of runOntologyRecoveryConversation (where it started as an
+// inline closure over `persona`/`turn`/`emitProgress`/`leakEvents`) into a
+// standalone, parameterized function specifically so this retry/pop/exhaust
+// logic can be unit-tested directly with a fake `reply()` -- the inline
+// version could only be exercised indirectly through the full turn loop,
+// which needs a live Playwright `page` and a real or mocked API call to
+// reach at all. `reply` and `popLastExchange` are the only two integration
+// points with the real persona: `reply(text)` must resolve to `{text, ...}`
+// the same shape persona.reply() returns, and `popLastExchange()` is
+// whatever removes the just-appended (leaking) turn from the caller's own
+// running conversation state.
+export async function withLeakGuard({ reply, popLastExchange, incomingText, leakCandidates, maxRetries = 2, onLeakAttempt }) {
+  let result = await reply(incomingText);
+  if (!leakCandidates) return { reply: result, leaked: [] };
+  const eventsThisCall = [];
+  for (let attempt = 1; attempt <= maxRetries + 1; attempt++) {
+    const leaked = findLeakedIdentifiers(result.text, leakCandidates);
+    if (!leaked.length) {
+      for (const ev of eventsThisCall) ev.resolved = true; // a later attempt on this same call came back clean
+      return { reply: result, leaked: [] };
+    }
+    const event = { attempt, identifiers: leaked, resolved: false };
+    eventsThisCall.push(event);
+    if (onLeakAttempt) onLeakAttempt(event); // same object reference -- the resolved:true mutation above is visible to whatever the caller collected it into
+    if (attempt > maxRetries) return { reply: result, leaked, exhausted: true };
+    if (popLastExchange) popLastExchange();
+    result = await reply(incomingText);
+  }
+  return { reply: result, leaked: findLeakedIdentifiers(result.text, leakCandidates) };
+}
+
 // Runs the full simulated interview: alternates the real app agent (driven
 // through `page`, already connected via connectAgentLive) and the persona
 // agent (personaAgent.mjs), starting from the persona's own scripted
@@ -348,37 +413,6 @@ export async function runOntologyRecoveryConversation({
   const MAX_LEAK_RETRY_ATTEMPTS = 2; // total attempts = 1 original + this many regenerations
   const leakEvents = []; // { turn, attempt, identifiers, resolved } -- for provenance/transparency, mirrors errorCounts
 
-  // Regenerates the persona's last reply up to MAX_LEAK_RETRY_ATTEMPTS times
-  // when it verbatim-leaks a raw ground-truth identifier. Pops the leaking
-  // exchange from the persona's own running context before each retry, so a
-  // retry is a genuinely fresh attempt at the same question rather than the
-  // model seeing its own rejected answer sitting uncorrected in its history.
-  // On exhaustion, returns the last (still-leaking) reply with `exhausted:
-  // true` -- the caller aborts the run rather than silently forwarding it,
-  // per the strategy this issue was opened to implement ("a hard reject, and
-  // a special re-generation loop", not silent patching of the leaked text).
-  async function personaReplyWithLeakGuard(incomingText, turn) {
-    let reply = await persona.reply(incomingText);
-    if (!leakCandidates) return { reply, leaked: [] };
-    const eventsThisTurn = [];
-    for (let attempt = 1; attempt <= MAX_LEAK_RETRY_ATTEMPTS + 1; attempt++) {
-      const leaked = findLeakedIdentifiers(reply.text, leakCandidates);
-      if (!leaked.length) {
-        for (const ev of eventsThisTurn) ev.resolved = true; // a later attempt on this same turn came back clean
-        return { reply, leaked: [] };
-      }
-      const event = { turn, attempt, identifiers: leaked, resolved: false };
-      eventsThisTurn.push(event);
-      leakEvents.push(event);
-      emitProgress(`leak_detected_attempt_${attempt}`, turn);
-      if (attempt > MAX_LEAK_RETRY_ATTEMPTS) return { reply, leaked, exhausted: true };
-      persona.messages.pop(); // the leaking assistant reply
-      persona.messages.pop(); // its paired user turn
-      reply = await persona.reply(incomingText);
-    }
-    return { reply, leaked: findLeakedIdentifiers(reply.text, leakCandidates) };
-  }
-
   const startedAt = Date.now();
   let incomingForApp = openingLine;
   let stoppedReason = "max_turns_reached";
@@ -386,6 +420,8 @@ export async function runOntologyRecoveryConversation({
   let consecutiveErrorTurns = 0;
   let consecutivePureAcknowledgmentTurns = 0;
   let consecutivePersonaAcknowledgmentTurns = 0; // issue #133/E12
+  let consecutiveTurnsWithNoToolActivity = 0; // issue #133/item 8
+  let maxConsecutiveTurnsWithNoToolActivity = 0; // issue #133/item 8 -- worth surfacing even for a run that never crossed WASTED_TURN_THRESHOLD
   let turnsUsed = 0;
   const errorCounts = {}; // issue #133/E4: kind -> occurrence count, across the whole run
   let compactionEvents = 0;
@@ -434,6 +470,23 @@ export async function runOntologyRecoveryConversation({
     rawApiLog.push(...tagApiMessagesWithTurn(newApiMessages, turn));
     emitProgress("app_turn_complete", turn); // sendChatMessage returned -- this turn's real content just landed in log/rawApiLog
 
+    // Issue #133/item 8: general stall detector -- see WASTED_TURN_THRESHOLD's
+    // own comment for why "any tool call at all" (not "any new content") is
+    // the right signal. Checked unconditionally, ahead of the empty/error
+    // branches below, since the real incidents this targets are turns where
+    // the app DID produce real text every time -- it just never touched a
+    // tool -- not turns that were empty or erroring (those already have
+    // their own, stricter 3-turn thresholds).
+    {
+      const streak = trackToolActivityStreak(
+        { current: consecutiveTurnsWithNoToolActivity, max: maxConsecutiveTurnsWithNoToolActivity },
+        newEntries.some((e) => e.role === "tool"),
+      );
+      consecutiveTurnsWithNoToolActivity = streak.current;
+      maxConsecutiveTurnsWithNoToolActivity = streak.max;
+      if (streak.crossedThreshold) { stoppedReason = "wasted_turns_no_tool_activity"; break; }
+    }
+
     const lastAssistant = [...newEntries].reverse().find((m) => m.role === "assistant");
     const appText = lastAssistant && lastAssistant.text ? lastAssistant.text.trim() : "";
     const errorNote = newEntries.find((e) => e.role === "system" && classifyAppSystemNote(e.text));
@@ -474,7 +527,18 @@ export async function runOntologyRecoveryConversation({
       break;
     }
 
-    const { reply: personaReply, leaked, exhausted } = await personaReplyWithLeakGuard(appText, turn);
+    const { reply: personaReply, leaked, exhausted } = await withLeakGuard({
+      reply: (text) => persona.reply(text),
+      popLastExchange: () => { persona.messages.pop(); persona.messages.pop(); }, // the leaking assistant reply, then its paired user turn
+      incomingText: appText,
+      leakCandidates,
+      maxRetries: MAX_LEAK_RETRY_ATTEMPTS,
+      onLeakAttempt: (event) => {
+        event.turn = turn;
+        leakEvents.push(event);
+        emitProgress(`leak_detected_attempt_${event.attempt}`, turn);
+      },
+    });
     if (exhausted) {
       // Abort-and-flag, never silent patching: the last reply still leaks a
       // raw ground-truth identifier after every retry was exhausted. Do NOT
@@ -522,5 +586,6 @@ export async function runOntologyRecoveryConversation({
     errorCounts, // issue #133/E4: {rateLimit, insufficientQuota, contextLength, network, authFailed, toolRoundLimit, generic} -> occurrence count
     compactionEvents, // issue #133/E4: how many turns compacted the app agent's own conversation history
     leakEvents, // issue #133/E13 item 4: [{turn, attempt, identifiers, resolved}] -- every raw-identifier leak the runtime guard caught, retried, or (if resolved stays false) exhausted retries on
+    maxConsecutiveTurnsWithNoToolActivity, // issue #133/item 8: worth surfacing even for a run that never crossed WASTED_TURN_THRESHOLD (a near-miss is still informative)
   };
 }

@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "domain": "brick-hvac",
+  "runId": "run-03",
+  "generatedAt": "2026-08-21T14:46:59.163Z",
+  "model": "gpt-5.4",
+  "personaModel": "gpt-5.4",
+  "classifierModel": "gpt-5.4",
+  "provider": "azure",
+  "endpoint": "[redacted -- Azure resource hostname, not committed]",
+  "domainYamlPath": "ontology_translation/domains/brick-hvac/reference.domain.yaml",
+  "personaPath": "ontology_translation/domains/brick-hvac/persona.md",
+  "stoppedReason": "app_agent_appears_finished",
+  "turnsUsed": 69,
+  "wallClockSec": 779,
+  "semanticJudgingSucceeded": true
+}

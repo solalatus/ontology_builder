@@ -1,0 +1,13 @@
+domain,replicate,degraded,totalErrorTurns,compactionEvents,model,turnsUsed,stoppedReason,wallClockSec,appAgentApiCalls,applyToolCalls,totalTokens,classesFullF1,classesFullRecall,classesFullPrecision,relationshipsFullF1,propertiesFullF1,propertiesFullRecall,controlledValueFidelityFull,recoveryEffectivenessFull,classesScopedF1,relationshipsScopedF1,propertiesScopedF1,recoveryEffectivenessScoped,semanticClassesFullF1,semanticRelationshipsFullF1,semanticPropertiesFullF1,rulesF1,actionsIdentificationF1,semanticRulesF1,semanticActionsF1
+brick-hvac,run-01,false,0,0,gpt-5.4,32,app_agent_appears_finished,621,73,20,3411359,0.738,0.615,0.923,0.600,0.517,0.357,1,0.714,0.682,0.333,0.375,0.598,0.800,0.771,0.552,0.500,0.800,0.833,1
+brick-hvac,run-02,false,0,0,gpt-5.4,200,max_turns_reached,1397,215,11,9697566,0.836,0.718,1,0.698,0,0,,0.511,0.739,0.383,0,0.374,0.836,0.889,0,0,0,0,0
+brick-hvac,run-03,false,0,0,gpt-5.4,69,app_agent_appears_finished,779,82,6,3752966,0.750,0.615,0.960,0.764,0.623,0.452,1,0.784,0.791,0.650,0.743,0.796,0.750,0.764,0.623,0.727,0.087,0.727,0.087
+iof-maintenance,run-01,false,0,0,gpt-5.4,62,app_agent_appears_finished,749,115,37,4434355,0.765,0.650,0.929,0.667,0.500,0.400,1,0.733,0.828,0.737,0.400,0.655,0.765,0.667,0.500,0.667,1,0.667,1
+iof-maintenance,run-02,false,0,0,gpt-5.4,46,app_agent_appears_finished,645,102,25,4360930,0.765,0.650,0.929,0.615,0.909,1,1,0.822,0.828,0.667,0.500,0.665,0.765,0.615,0.909,0.444,1,0.444,1
+iof-maintenance,run-03,false,0,0,gpt-5.4,200,max_turns_reached,1606,248,23,15760386,0.800,0.700,0.933,0.818,0.667,0.800,,0.762,0.867,0.941,0.444,0.751,0.800,0.818,0.667,0.444,1,0.444,1
+iof-supply-chain,run-01,false,0,0,gpt-5.4,56,app_agent_appears_finished,605,84,20,2618090,0.738,0.585,1,0.741,0,0,,0.493,0.881,0.809,0,0.563,0.738,0.852,0,0,1,0,1
+iof-supply-chain,run-02,false,0,0,gpt-5.4,75,app_agent_appears_finished,1047,155,40,11150604,0.738,0.585,1,0.667,0.800,0.667,,0.735,0.847,0.723,1,0.857,0.738,0.778,0.800,0.286,0.667,0.286,0.667
+iof-supply-chain,run-03,false,0,0,gpt-5.4,47,app_agent_appears_finished,695,107,29,4734610,0.707,0.547,1,0.868,0.800,0.667,,0.792,0.877,0.913,1,0.930,0.707,0.868,0.800,0.333,0.333,0.333,0.333
+fibo-loans,run-01,false,0,0,gpt-5.4,57,app_agent_appears_finished,900,127,34,9648985,0.674,0.526,0.938,0.806,0.500,0.347,,0.660,0.750,0.625,0.667,0.681,0.674,0.839,0.500,0.222,0.571,0.222,0.714
+fibo-loans,run-02,false,0,0,gpt-5.4,62,app_agent_appears_finished,849,116,28,6146376,0.659,0.491,1,0.897,0.529,0.367,,0.695,0.808,0.773,0.667,0.749,0.659,0.897,0.529,0.600,0.800,0.600,1
+fibo-loans,run-03,false,0,0,gpt-5.4,55,app_agent_appears_finished,782,108,38,4719725,0.659,0.491,1,0.678,0.592,0.429,,0.643,0.692,0.533,0.545,0.590,0.659,0.678,0.592,0.727,1,0.727,1

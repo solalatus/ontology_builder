@@ -2583,3 +2583,72 @@ reference and record deltas/decisions here instead.)*
   **The actual live benchmark re-run is deliberately NOT done in this
   pass** -- per the user's own explicit instruction, that step waits for
   the next independent audit round on this fix itself.
+
+- 2026-08-22 (continued) -- **Self-audit follow-up**: asked to honestly
+  assess whether the previous entry's fix pass was "the absolute best one
+  can do." It wasn't -- six concrete gaps identified and fixed, all
+  without the actual 12-run live re-run (still deliberately deferred):
+
+  1. **The pre-fix 12-run data was left uncommitted entirely**, diverging
+     from audit E9's own suggested mitigation ("commit the superseded run
+     under `results/multi-domain-superseded-2026-08/`"). Fixed: the real
+     artifacts (minus `progress.json`/`checkpoint/`) are now committed
+     there, with a `SUPERSEDED.md` explaining exactly what it is, why it's
+     committed despite being known-bad, and what changed since. Caught and
+     redacted one real disclosure issue in the process: every
+     `provenance.json`'s `endpoint` field contained the real Azure resource
+     hostname (not a credential, but identifying) -- now hashed
+     (`endpointSha256`) instead of stored raw, both in this committed
+     snapshot and in the runner's own code going forward.
+  2. **The Tier 3 prompt fixes (E11, E12, item 1, E13) were never actually
+     verified against real model behavior.** `persona-leak-isolation.eval.spec.mjs`
+     was built in the previous pass but deliberately not run. Rewired from
+     its original OpenAI-key gating (no OpenAI key configured in this
+     environment) to Azure/gpt-5.4 -- the same real model family that
+     produced the original leaks -- and actually run: **all 3 real
+     scenarios pass**, replaying the exact real interviewer messages from
+     brick-hvac/run-03 turn 49, iof-maintenance/run-02 turn 5, and
+     fibo-loans/run-02 turn 6 against the fixed persona. First real
+     empirical evidence the fix works, not just that its mechanical pieces
+     are individually unit-tested.
+  3. **The runtime leak guard had no direct test of its own retry/pop/
+     exhaust logic** -- only reachable through the full turn loop, which
+     needs a live Playwright page. Extracted into a standalone, exported
+     `withLeakGuard()` (parameterized on a `reply` function and a
+     `popLastExchange` callback) and unit-tested directly: clean-first-try,
+     leak-then-clean-retry (with the leak event correctly marked resolved),
+     exhaustion after `maxRetries` (with the leak event still recorded,
+     never silently patched), and the message-array pop behavior itself.
+  4. **E19** (external audit, previously deferred): the `.domain.yaml`
+     corpus loader omitted action names/labels from the practical-scope
+     corpus while the MTSR loader always included them
+     (`corpusParts.push(a.label)`) -- fixed for parity, with a synthetic
+     regression test proving an action's own name (not its preconditions/
+     effect/verification text) now pulls a textually-related property into
+     scope. The class-vs-property scoping calibration asymmetry (whole-
+     phrase substring vs. all-content-tokens overlap) was already
+     documented in `tests/evals/README.md`; added an explicit "Methodology
+     notes" section to `summarize-multi-domain-benchmark.mjs`'s own
+     generated `summary.md` too, so a reader of just the published report
+     sees it without digging into source comments.
+  5. **A general wasted-turn/loop detector** (issue #133 item 8, previously
+     deferred): the existing pleasantry-loop detectors only catch that one
+     specific closing-phrase shape. Added a general stall detector --
+     `WASTED_TURN_THRESHOLD` (20) consecutive turns with zero tool activity
+     (no `apply_ontology_yaml`, no `get_graph_state`) stops the run with a
+     distinct `stoppedReason`, surfaced in `operationalStats`/`provenance`/
+     the `degraded` gate. The transition logic (`trackToolActivityStreak`)
+     is a pure, directly-unit-tested function; one test replays the exact
+     68- and 159-turn lengths of both real Finding B incidents and confirms
+     both would have been caught at turn 20, not run to completion.
+  6. Confirmed (not a new fix, a verification): E6's redefinition of
+     `recoveryEffectiveness` to always be the fixed 3-component average was
+     flagged to the user directly as a headline-metric change worth their
+     own attention, rather than left buried in a 21-item list -- the user's
+     own call on whether that redefinition is the right one stands as of
+     this entry.
+
+  Full offline regression suite re-verified clean (including two
+  independent real Azure calls confirming the leak-isolation suite, and
+  every new synthetic regression test added in this entry). The actual
+  12-run live benchmark re-run remains deliberately deferred.
