@@ -1,0 +1,5776 @@
+# Ontology-recovery eval — conversation log
+
+Status: **app_agent_appears_finished** — 111 turn(s) so far, 1713s elapsed.
+Last updated: 2026-08-23T17:35:56.392Z
+
+### Turn 0 — persona
+
+I lead IT operations and major-incident management for a regulated financial institution (IT Operations and Incident Response Ontology for a Medium-sized Hungarian Bank).  Day-to-day scope: IT service operations, observability, incident response, problem/change/recovery management, stakeholder communication, evidence, and regulatory reporting workflow. Where would you like to start?
+
+### Turn 1 — app-user
+
+I lead IT operations and major-incident management for a regulated financial institution (IT Operations and Incident Response Ontology for a Medium-sized Hungarian Bank).  Day-to-day scope: IT service operations, observability, incident response, problem/change/recovery management, stakeholder communication, evidence, and regulatory reporting workflow. Where would you like to start?
+
+### Turn 1 — app-tool
+
+🔍 Checked the current ontology state.
+
+### Turn 1 — app-assistant
+
+Great — we’re starting from an empty model.
+
+You’ve already given the domain and scope clearly: an ontology for an agent supporting IT operations and major-incident management in a regulated financial institution, covering day-to-day operations, observability, incident response, problem/change/recovery management, stakeholder communication, evidence, and regulatory reporting workflow.
+
+We’ll build it in short phases:
+1. competency questions and actions,
+2. classes,
+3. relationships,
+4. decision-relevant properties,
+5. meanings and aliases,
+6. fixed choices/constraints,
+7. rules,
+8. actions in operational detail,
+9. validation.
+
+We should start with Phase 1: the real questions the future agent must be able to answer, plus the actions it must perform.
+
+First focused question:
+Please give me 5–10 real questions that this agent must be able to answer in your domain, phrased as the kind of question a user would actually ask.
+
+### Turn 1 — persona
+
+Yes — here are the core kinds of questions I’d expect an operations or incident agent to answer in this domain:
+
+1. Which business services and customer channels are impacted by this incident?
+2. Which configuration items and external dependencies sit on the dependency path for the affected IT service?
+3. Which active alerts and events are correlated with this incident?
+4. Who owns the affected service, and which resolver group and on-call engineer should handle it?
+5. Does this incident meet the criteria to be treated as a major incident?
+6. Which runbook, workaround, backup set, and recovery plan are appropriate and safe to use here?
+7. Was this incident likely caused by a recent change or deployment?
+8. Has a materiality assessment been completed, and do we need to prepare or send a regulatory notification?
+9. Are the required evidence, stakeholder communications, and closure conditions complete?
+10. Which corrective actions from earlier post-incident reviews are still open for this affected service?
+
+Those are the practical questions people actually ask in the middle of response, escalation, recovery, and review. If you want, I can next give the actions in the same operational style.
+
+### Turn 2 — app-user
+
+Yes — here are the core kinds of questions I’d expect an operations or incident agent to answer in this domain:
+
+1. Which business services and customer channels are impacted by this incident?
+2. Which configuration items and external dependencies sit on the dependency path for the affected IT service?
+3. Which active alerts and events are correlated with this incident?
+4. Who owns the affected service, and which resolver group and on-call engineer should handle it?
+5. Does this incident meet the criteria to be treated as a major incident?
+6. Which runbook, workaround, backup set, and recovery plan are appropriate and safe to use here?
+7. Was this incident likely caused by a recent change or deployment?
+8. Has a materiality assessment been completed, and do we need to prepare or send a regulatory notification?
+9. Are the required evidence, stakeholder communications, and closure conditions complete?
+10. Which corrective actions from earlier post-incident reviews are still open for this affected service?
+
+Those are the practical questions people actually ask in the middle of response, escalation, recovery, and review. If you want, I can next give the actions in the same operational style.
+
+### Turn 2 — app-tool
+
+✓ Applied: 23 added, 0 updated.
+
+### Turn 2 — app-assistant
+
+Good — I’ve recorded those as atomic competency questions.
+
+Recap of what we just captured:
+- impact on business services and customer channels,
+- dependency-path analysis for configuration items and external dependencies,
+- alert/event correlation,
+- service ownership and routing to resolver group / on-call engineer,
+- major-incident qualification,
+- selection of runbook / workaround / backup set / recovery plan,
+- likely linkage to recent change or deployment,
+- materiality assessment and regulatory notification needs,
+- completeness of evidence / stakeholder communications / closure conditions,
+- open corrective actions from prior post-incident reviews.
+
+Next, still in Phase 1:
+Please give me 5–10 real actions the agent must perform in this domain, in the same operational style.
+
+### Turn 2 — persona
+
+In operational terms, these are the main actions I’d expect the agent to support:
+
+1. Acknowledge an alert.
+2. Assign an incident to the right resolver group.
+3. Declare a major incident when the situation meets the bank’s criteria.
+4. Contain an incident by coordinating approved containment steps.
+5. Isolate an affected configuration item when isolation is the right containment measure.
+6. Fail over a service to its recovery environment.
+7. Restore data or a system from a backup set.
+8. Execute an emergency change to resolve or stabilize an active incident.
+9. Send an approved stakeholder communication about the incident.
+10. Submit a regulatory notification once the reporting decision and approvals are in place.
+11. Close an incident when restoration, evidence, and communications are complete.
+
+That set covers the main operational flow from detection through response, recovery, communication, reporting, and closure.
+
+### Turn 3 — app-user
+
+In operational terms, these are the main actions I’d expect the agent to support:
+
+1. Acknowledge an alert.
+2. Assign an incident to the right resolver group.
+3. Declare a major incident when the situation meets the bank’s criteria.
+4. Contain an incident by coordinating approved containment steps.
+5. Isolate an affected configuration item when isolation is the right containment measure.
+6. Fail over a service to its recovery environment.
+7. Restore data or a system from a backup set.
+8. Execute an emergency change to resolve or stabilize an active incident.
+9. Send an approved stakeholder communication about the incident.
+10. Submit a regulatory notification once the reporting decision and approvals are in place.
+11. Close an incident when restoration, evidence, and communications are complete.
+
+That set covers the main operational flow from detection through response, recovery, communication, reporting, and closure.
+
+### Turn 3 — app-tool
+
+🔍 Checked the current ontology state.
+
+### Turn 3 — app-tool
+
+✓ Applied: 11 added, 0 updated.
+
+### Turn 3 — app-assistant
+
+I’ve captured the action list conceptually, but the tool can’t fully validate actions yet because the input classes they refer to don’t exist in the model yet. That’s fine for now: we’ve got the accepted action requirements, and we’ll properly complete the action definitions after we introduce the classes and relationships they depend on.
+
+Recap of confirmed actions:
+- acknowledge an alert,
+- assign an incident to a resolver group,
+- declare a major incident,
+- contain an incident,
+- isolate a configuration item,
+- fail over a service,
+- restore from backup,
+- execute an emergency change,
+- send a stakeholder communication,
+- submit a regulatory notification,
+- close an incident.
+
+Before moving to classes, I need the required narrow follow-up for Phase 1:
+
+For each role you already named — service owner, resolver group, and on-call engineer — is there a closely related role that actually does the day-to-day work under it, and does any of this depend on a specific operating context that changes how it’s handled?
+
+### Turn 3 — app-system
+
+The agent left 11 consistency problem(s) unresolved — see Check.
+
+### Turn 3 — persona
+
+Yes, there are a few important adjacent roles, and the handling does depend on context.
+
+- **Service owner**: that role is accountable for the IT service across its lifecycle, but the day-to-day operational work is usually not done by the service owner personally. In practice, operational handling is carried by operations teams, resolver groups, and often the relevant application or technical owner depending on what is actually failing. So I’d separate accountability from hands-on restoration.
+
+- **Resolver group**: this is already the day-to-day delivery team for diagnosis and restoration in a given technology or service area. The closely related role under immediate time pressure is the **on-call engineer**, who is the named technical specialist available for urgent response. I’d treat the resolver group as the team capability and the on-call engineer as the time-bound individual handler.
+
+- **On-call engineer**: that is the person doing the urgent operational work when paged, but they normally operate as a member of a resolver group rather than as a standalone structure.
+
+And yes, context matters quite a lot. The same incident can be handled differently depending on things like:
+
+- whether it is a normal incident or a **major incident**,
+- whether it is a **cybersecurity incident**,
+- which **service** or **configuration item** is affected,
+- whether a **vendor** or third-party dependency is involved,
+- whether recovery requires **backup**, **failover**, or an **emergency change**,
+- and whether the case has become **material** enough to drive regulatory handling.
+
+For major incidents especially, you need an additional coordination role: the **incident commander**. That is not just another engineer; it is the person accountable for command, coordination, and decision cadence during the major incident.
+
+### Turn 4 — app-user
+
+Yes, there are a few important adjacent roles, and the handling does depend on context.
+
+- **Service owner**: that role is accountable for the IT service across its lifecycle, but the day-to-day operational work is usually not done by the service owner personally. In practice, operational handling is carried by operations teams, resolver groups, and often the relevant application or technical owner depending on what is actually failing. So I’d separate accountability from hands-on restoration.
+
+- **Resolver group**: this is already the day-to-day delivery team for diagnosis and restoration in a given technology or service area. The closely related role under immediate time pressure is the **on-call engineer**, who is the named technical specialist available for urgent response. I’d treat the resolver group as the team capability and the on-call engineer as the time-bound individual handler.
+
+- **On-call engineer**: that is the person doing the urgent operational work when paged, but they normally operate as a member of a resolver group rather than as a standalone structure.
+
+And yes, context matters quite a lot. The same incident can be handled differently depending on things like:
+
+- whether it is a normal incident or a **major incident**,
+- whether it is a **cybersecurity incident**,
+- which **service** or **configuration item** is affected,
+- whether a **vendor** or third-party dependency is involved,
+- whether recovery requires **backup**, **failover**, or an **emergency change**,
+- and whether the case has become **material** enough to drive regulatory handling.
+
+For major incidents especially, you need an additional coordination role: the **incident commander**. That is not just another engineer; it is the person accountable for command, coordination, and decision cadence during the major incident.
+
+### Turn 4 — app-assistant
+
+Good — that gives us two confirmed additions that matter operationally, plus several handling contexts.
+
+Recap of what I captured:
+- **Service owner** is accountable, but not usually the hands-on restoration role.
+- **Resolver group** is the day-to-day team responsible for diagnosis/restoration.
+- **On-call engineer** is the urgent individual responder, typically operating as part of a resolver group.
+- **Incident commander** is an additional role specifically for major-incident coordination.
+- Handling can vary by context such as:
+  - major vs non-major incident,
+  - cybersecurity incident,
+  - affected service or configuration item,
+  - vendor / third-party involvement,
+  - recovery approach needed,
+  - materiality/regulatory significance.
+
+One clarification before we move to classes:
+You used **vendor** here, but earlier the competency questions used **external dependency**. In your organization, does **vendor** mean the same thing as external dependency, or is a vendor one specific kind of external dependency?
+
+### Turn 4 — persona
+
+A vendor is one specific kind of external dependency, not the whole category.
+
+Operationally, when we say **external dependency**, we usually mean anything outside the bank’s direct technical control that the affected service relies on. A **vendor** is the external organization. What we actually depend on day to day is often a **third-party service** they provide, and sometimes a **cloud service** or support arrangement tied to an application.
+
+So I’d keep those distinct:
+
+- **Vendor** = the supplier organization.
+- **Third-party service** = the externally provided service the bank depends on.
+- **Cloud service** = a specific externally provided technology capability.
+- **External dependency** = broader operational language that can cover those service dependencies.
+
+That distinction matters during incident handling, because we may escalate to the vendor, but the dependency analysis usually traces through the external service the affected IT service depends on.
+
+### Turn 5 — app-user
+
+A vendor is one specific kind of external dependency, not the whole category.
+
+Operationally, when we say **external dependency**, we usually mean anything outside the bank’s direct technical control that the affected service relies on. A **vendor** is the external organization. What we actually depend on day to day is often a **third-party service** they provide, and sometimes a **cloud service** or support arrangement tied to an application.
+
+So I’d keep those distinct:
+
+- **Vendor** = the supplier organization.
+- **Third-party service** = the externally provided service the bank depends on.
+- **Cloud service** = a specific externally provided technology capability.
+- **External dependency** = broader operational language that can cover those service dependencies.
+
+That distinction matters during incident handling, because we may escalate to the vendor, but the dependency analysis usually traces through the external service the affected IT service depends on.
+
+### Turn 5 — app-assistant
+
+Understood. I’ll keep those distinct rather than merging them.
+
+Recap:
+- **Vendor** = supplier organization.
+- **Third-party service** = externally provided service depended on operationally.
+- **Cloud service** = a specific externally provided technology capability.
+- **External dependency** = the broader category term, not identical to vendor.
+- In incident handling, escalation may go to the vendor, while dependency-path analysis usually traces through the external service.
+
+Now we can start Phase 2: classes, in small justified batches.
+
+First class batch, directly justified by your core questions and actions:
+- **Incident** — needed for most of the questions and for actions like assign, declare, contain, and close.
+- **IT service** — needed for affected-service analysis, dependency path, ownership, failover, and open corrective actions by affected service.
+- **Business service** — needed because you asked which business services are impacted.
+- **Customer channel** — needed because you asked which customer channels are impacted.
+
+For each of these, does the agent need to identify, retrieve, connect, or pass this to a tool as a distinct thing: **Incident, IT service, Business service, Customer channel**?
+
+### Turn 5 — persona
+
+Yes — all four need to exist as distinct things.
+
+- **Incident**: definitely distinct. It is the central operational record for interruption, degradation, or a security condition requiring managed response. The agent has to retrieve it, update handling around it, and use it as the anchor for correlation, assignment, communication, recovery, reporting, and closure.
+
+- **IT service**: also distinct. This is the managed technology capability supporting business services. We use it for impact assessment, ownership, dependency analysis, monitoring, recovery, and change linkage. It is not interchangeable with a business service.
+
+- **Business service**: distinct as well. This is the customer- or business-facing capability. When an incident happens, the business wants to know what customer-facing or business-facing capability is affected, not just which internal technical service is degraded.
+
+- **Customer channel**: yes, distinct. That matters because the same business service may be delivered through one or more channels, and impact communication is often framed in channel terms — for example mobile banking, internet banking, or another access route used by customers.
+
+So yes, the agent should treat all four as separate objects it can identify and connect.
+
+### Turn 6 — app-user
+
+Yes — all four need to exist as distinct things.
+
+- **Incident**: definitely distinct. It is the central operational record for interruption, degradation, or a security condition requiring managed response. The agent has to retrieve it, update handling around it, and use it as the anchor for correlation, assignment, communication, recovery, reporting, and closure.
+
+- **IT service**: also distinct. This is the managed technology capability supporting business services. We use it for impact assessment, ownership, dependency analysis, monitoring, recovery, and change linkage. It is not interchangeable with a business service.
+
+- **Business service**: distinct as well. This is the customer- or business-facing capability. When an incident happens, the business wants to know what customer-facing or business-facing capability is affected, not just which internal technical service is degraded.
+
+- **Customer channel**: yes, distinct. That matters because the same business service may be delivered through one or more channels, and impact communication is often framed in channel terms — for example mobile banking, internet banking, or another access route used by customers.
+
+So yes, the agent should treat all four as separate objects it can identify and connect.
+
+### Turn 6 — app-tool
+
+🔍 Checked the current ontology state.
+
+### Turn 6 — app-tool
+
+✓ Applied: 4 added, 0 updated.
+
+### Turn 6 — app-assistant
+
+Confirmed and recorded:
+- **Incident**
+- **ITService**
+- **BusinessService**
+- **CustomerChannel**
+
+Recap of what you established:
+- Incident is the central operational record.
+- IT service is a distinct managed technology capability.
+- Business service is the business- or customer-facing capability impacted.
+- Customer channel is distinct because impact and communication are often channel-specific.
+
+Next class batch, justified by your dependency and observability questions plus the response actions:
+- **Configuration item** — needed for dependency path analysis and isolation.
+- **Alert** — needed for active-alert correlation and alert acknowledgement.
+- **Event** — needed for active-event correlation.
+- **External dependency** — needed because you explicitly ask which external dependencies are on the dependency path.
+
+For each of these, does the agent need to identify, retrieve, connect, or pass this to a tool as a distinct thing: **Configuration item, Alert, Event, External dependency**?
+
+### Turn 6 — persona
+
+Three of those, yes as distinct things; one I’d phrase differently.
+
+- **Configuration item**: yes, definitely distinct. That is the managed component in scope for operations and configuration management, and it matters for dependency mapping, monitoring, impact analysis, assignment, and isolation.
+
+- **Alert**: yes, distinct. It is the signal that needs triage or acknowledgement and may open or contribute to an incident.
+
+- **Event**: yes, distinct. It is the observed occurrence or state change we correlate into the incident picture. An alert is not the same thing as an event.
+
+- **External dependency**: the underlying idea is right, but I would not make that the formal thing in the model at this level. In our operational language that is a broad umbrella term. What we actually need as distinct retrievable things are the concrete external service dependencies, especially **third-party services**, and in some cases **cloud services** and the **vendor** behind them.
+
+So I would not keep a single generic class called external dependency if you want the agent to reason cleanly. I’d model the specific external dependency types instead.
+
+### Turn 7 — app-user
+
+Three of those, yes as distinct things; one I’d phrase differently.
+
+- **Configuration item**: yes, definitely distinct. That is the managed component in scope for operations and configuration management, and it matters for dependency mapping, monitoring, impact analysis, assignment, and isolation.
+
+- **Alert**: yes, distinct. It is the signal that needs triage or acknowledgement and may open or contribute to an incident.
+
+- **Event**: yes, distinct. It is the observed occurrence or state change we correlate into the incident picture. An alert is not the same thing as an event.
+
+- **External dependency**: the underlying idea is right, but I would not make that the formal thing in the model at this level. In our operational language that is a broad umbrella term. What we actually need as distinct retrievable things are the concrete external service dependencies, especially **third-party services**, and in some cases **cloud services** and the **vendor** behind them.
+
+So I would not keep a single generic class called external dependency if you want the agent to reason cleanly. I’d model the specific external dependency types instead.
+
+### Turn 7 — app-assistant
+
+That’s a useful correction.
+
+Recap:
+- Keep as distinct classes:
+  - **ConfigurationItem**
+  - **Alert**
+  - **Event**
+- Do **not** keep a generic formal class **ExternalDependency** at this level.
+- Instead, use specific retrievable dependency classes such as:
+  - **ThirdPartyService**
+  - **CloudService**
+  - **Vendor**
+
+Next class batch, still Phase 2:
+Does the agent need to identify, retrieve, connect, or pass these as distinct things: **Third-party service, Cloud service, Vendor**?
+
+### Turn 7 — persona
+
+Yes — all three should be distinct.
+
+- **Third-party service**: yes. This is the external service the bank depends on operationally, and it belongs in dependency-path analysis and impact assessment.
+
+- **Cloud service**: yes. It is a specific externally provided technology capability and should not just be folded into a generic third-party label if you want operational clarity.
+
+- **Vendor**: yes. This is the supplier organization, and we need it separately because escalation, support accountability, and provider criticality sit at that level.
+
+In practice, the service dependency and the supplier relationship are related but not the same thing, so the agent should be able to work with both.
+
+### Turn 8 — app-user
+
+Yes — all three should be distinct.
+
+- **Third-party service**: yes. This is the external service the bank depends on operationally, and it belongs in dependency-path analysis and impact assessment.
+
+- **Cloud service**: yes. It is a specific externally provided technology capability and should not just be folded into a generic third-party label if you want operational clarity.
+
+- **Vendor**: yes. This is the supplier organization, and we need it separately because escalation, support accountability, and provider criticality sit at that level.
+
+In practice, the service dependency and the supplier relationship are related but not the same thing, so the agent should be able to work with both.
+
+### Turn 8 — app-tool
+
+🔍 Checked the current ontology state.
+
+### Turn 8 — app-tool
+
+✓ Applied: 6 added, 0 updated.
+
+### Turn 8 — app-assistant
+
+Confirmed and recorded:
+- **ConfigurationItem**
+- **Alert**
+- **Event**
+- **ThirdPartyService**
+- **CloudService**
+- **Vendor**
+
+Recap of what you established:
+- Configuration item is a managed component for dependency mapping, impact, monitoring, assignment, and isolation.
+- Alert and event are distinct.
+- Third-party service and cloud service are concrete external service dependencies.
+- Vendor is distinct from those because escalation and provider accountability sit at the organization level.
+
+Next class batch, justified by your routing and coordination questions:
+- **ServiceOwner** — needed because you ask who owns the affected service.
+- **ResolverGroup** — needed because you ask which resolver group should handle the incident.
+- **OnCallEngineer** — needed because you ask which on-call engineer should handle the incident.
+- **IncidentCommander** — surfaced in the Phase 1 follow-up as a distinct role for major-incident coordination.
+
+For each of these, does the agent need to identify, retrieve, connect, or pass this to a tool as a distinct thing: **Service owner, Resolver group, On-call engineer, Incident commander**?
+
+### Turn 8 — persona
+
+Yes — all four are distinct and operationally important.
+
+- **Service owner**: yes. That is the accountable role for the IT service across its lifecycle.
+- **Resolver group**: yes. That is the team assigned to diagnose and restore within a defined technology or service area.
+- **On-call engineer**: yes. That is the individual responder available for urgent operational action.
+- **Incident commander**: yes. Distinct, because for a major incident you need someone accountable for command, coordination, and decision cadence, not just technical execution.
+
+So the agent should be able to identify and connect each of those separately.
+
+### Turn 9 — app-user
+
+Yes — all four are distinct and operationally important.
+
+- **Service owner**: yes. That is the accountable role for the IT service across its lifecycle.
+- **Resolver group**: yes. That is the team assigned to diagnose and restore within a defined technology or service area.
+- **On-call engineer**: yes. That is the individual responder available for urgent operational action.
+- **Incident commander**: yes. Distinct, because for a major incident you need someone accountable for command, coordination, and decision cadence, not just technical execution.
+
+So the agent should be able to identify and connect each of those separately.
+
+### Turn 9 — app-tool
+
+🔍 Checked the current ontology state.
+
+### Turn 9 — app-tool
+
+✓ Applied: 4 added, 0 updated.
+
+### Turn 9 — app-assistant
+
+Confirmed and recorded:
+- **ServiceOwner**
+- **ResolverGroup**
+- **OnCallEngineer**
+- **IncidentCommander**
+
+Recap:
+- Service owner = accountable role for the IT service.
+- Resolver group = operational team for diagnosis and restoration.
+- On-call engineer = urgent individual responder.
+- Incident commander = major-incident coordination role.
+
+Next class batch, justified by your “appropriate and safe to use” questions and recovery actions:
+- **Runbook**
+- **Workaround**
+- **BackupSet**
+- **RecoveryPlan**
+- **RecoveryEnvironment** — I’m proposing this because “fail over a service to its recovery environment” may require the target environment to be a distinct thing the agent identifies or connects to, not just a phrase inside the action.
+
+For each of these, does the agent need to identify, retrieve, connect, or pass this to a tool as a distinct thing: **Runbook, Workaround, Backup set, Recovery plan, Recovery environment**?
+
+### Turn 9 — persona
+
+Four of those, yes as distinct things. One I’d handle a bit differently.
+
+- **Runbook**: yes, distinct.
+- **Workaround**: yes, distinct.
+- **Backup set**: yes, distinct.
+- **Recovery plan**: yes, distinct.
+
+On **recovery environment**: the operational idea is valid, but I would not usually model that as a separate special-purpose class just for recovery. I’d treat it as an **environment**, with a type such as disaster recovery when relevant. That gives you a cleaner model because the same service or component may exist across production, test, development, pre-production, management, and disaster recovery contexts.
+
+So I would keep **environment** as the distinct thing, rather than inventing a dedicated recovery-environment class.
+
+### Turn 10 — app-user
+
+Four of those, yes as distinct things. One I’d handle a bit differently.
+
+- **Runbook**: yes, distinct.
+- **Workaround**: yes, distinct.
+- **Backup set**: yes, distinct.
+- **Recovery plan**: yes, distinct.
+
+On **recovery environment**: the operational idea is valid, but I would not usually model that as a separate special-purpose class just for recovery. I’d treat it as an **environment**, with a type such as disaster recovery when relevant. That gives you a cleaner model because the same service or component may exist across production, test, development, pre-production, management, and disaster recovery contexts.
+
+So I would keep **environment** as the distinct thing, rather than inventing a dedicated recovery-environment class.
+
+### Turn 10 — app-assistant
+
+That makes sense. I’ll use **Environment** rather than a special-purpose recovery-environment class.
+
+Recap:
+- Keep as distinct classes:
+  - **Runbook**
+  - **Workaround**
+  - **BackupSet**
+  - **RecoveryPlan**
+  - **Environment**
+- Do not create a separate dedicated **RecoveryEnvironment** class.
+
+Next class batch, justified by change linkage, reporting, closure, and review:
+- **Change** — needed because you ask whether a recent change likely caused the incident, and for the emergency change action.
+- **Deployment** — needed because you separately ask whether a recent deployment likely caused the incident.
+- **MaterialityAssessment** — needed because you ask whether one has been completed.
+- **RegulatoryNotification** — needed because you ask whether to prepare or send one, and you have a submit action.
+- **EvidenceItem** — needed because you ask whether required evidence is complete.
+- **StakeholderCommunication** — needed because you ask whether required communications are complete and have an action to send one.
+- **ClosureCondition** — needed because you ask whether required closure conditions are complete.
+- **CorrectiveAction** — needed because you ask which post-incident corrective actions remain open.
+
+For each of these, does the agent need to identify, retrieve, connect, or pass this to a tool as a distinct thing: **Change, Deployment, Materiality assessment, Regulatory notification, Evidence item, Stakeholder communication, Closure condition, Corrective action**?
+
+### Turn 10 — persona
+
+Most of those, yes. One I would not model as a standalone thing.
+
+- **Change**: yes, distinct.
+- **Deployment**: yes, distinct.
+- **Materiality assessment**: yes, distinct.
+- **Regulatory notification**: yes, distinct.
+- **Evidence item**: yes, distinct.
+- **Stakeholder communication**: the concept is right; I’d usually just call that **communication**, because the same controlled message can be aimed at technical, management, business, customer, vendor, regulator, or all-staff audiences.
+- **Corrective action**: yes, distinct.
+
+On **closure condition**: I would not make that a separate object. In operations, closure conditions are the required checks or criteria you verify before closing the incident — things like service health, evidence, communications, and review obligations where applicable. That is better treated as rules or preconditions around the close incident action, not as a standalone business object.
+
+### Turn 11 — app-user
+
+Most of those, yes. One I would not model as a standalone thing.
+
+- **Change**: yes, distinct.
+- **Deployment**: yes, distinct.
+- **Materiality assessment**: yes, distinct.
+- **Regulatory notification**: yes, distinct.
+- **Evidence item**: yes, distinct.
+- **Stakeholder communication**: the concept is right; I’d usually just call that **communication**, because the same controlled message can be aimed at technical, management, business, customer, vendor, regulator, or all-staff audiences.
+- **Corrective action**: yes, distinct.
+
+On **closure condition**: I would not make that a separate object. In operations, closure conditions are the required checks or criteria you verify before closing the incident — things like service health, evidence, communications, and review obligations where applicable. That is better treated as rules or preconditions around the close incident action, not as a standalone business object.
+
+### Turn 11 — app-tool
+
+🔍 Checked the current ontology state.
+
+### Turn 11 — app-tool
+
+✓ Applied: 12 added, 0 updated.
+
+### Turn 11 — app-assistant
+
+Confirmed and recorded:
+- **Runbook**
+- **Workaround**
+- **BackupSet**
+- **RecoveryPlan**
+- **Environment**
+- **Change**
+- **Deployment**
+- **MaterialityAssessment**
+- **RegulatoryNotification**
+- **EvidenceItem**
+- **Communication**
+- **CorrectiveAction**
+
+And explicitly **not** modeled as standalone classes:
+- **ClosureCondition** — better represented later as rules/preconditions.
+- **StakeholderCommunication** as a separate term — we’ll use **Communication** as the broader operational class.
+
+Phase 2 recap so far: we now have confirmed classes for the core operational record, service layers, channels, technical components, observability objects, external service/provider objects, roles, procedural artifacts, recovery context, change/deployment, regulatory/reporting objects, evidence/communication, and post-incident corrective actions.
+
+Before I move to relationships, one last class check:
+You mentioned **cybersecurity incident** as a context that changes handling. Should that be represented as its own distinct class, or should it later be handled as a type/category/status on **Incident** rather than a separate class?
+
+### Turn 11 — persona
+
+It should be a distinct class, not just a generic category value on incident.
+
+The reason is operational: a cybersecurity incident carries handling implications beyond ordinary classification. It is tied to security-relevant activity, it has a specific relationship to security events, it drives evidence-preservation expectations, and it can trigger materiality and regulatory handling differently from a standard availability or performance issue.
+
+So I would keep **cybersecurity incident** separate from the base incident, while still recognizing that ordinary incident properties like status, severity, impact, and so on still matter.
+
+### Turn 12 — app-user
+
+It should be a distinct class, not just a generic category value on incident.
+
+The reason is operational: a cybersecurity incident carries handling implications beyond ordinary classification. It is tied to security-relevant activity, it has a specific relationship to security events, it drives evidence-preservation expectations, and it can trigger materiality and regulatory handling differently from a standard availability or performance issue.
+
+So I would keep **cybersecurity incident** separate from the base incident, while still recognizing that ordinary incident properties like status, severity, impact, and so on still matter.
+
+### Turn 12 — app-tool
+
+🔍 Checked the current ontology state.
+
+### Turn 12 — app-tool
+
+✓ Applied: 1 added, 0 updated.
+
+### Turn 12 — app-assistant
+
+Confirmed and recorded:
+- **CybersecurityIncident** as a distinct class.
+
+Recap of the class phase outcome:
+We now have a confirmed first-pass class set covering incidents, cybersecurity incidents, services, channels, configuration items, alerts/events, external services/providers, operational roles, response artifacts, environments, change/deployment, reporting/evidence/communication, and corrective actions.
+
+Now we move to Phase 3: relationships.
+
+First relationship batch, grounded directly in your impact questions:
+- **Incident --impacts--> BusinessService**
+- **Incident --impacts--> CustomerChannel**
+- **Incident --affects--> ITService**
+
+These are three separate direct relationships because your competency questions ask specifically which business services and customer channels are impacted by the incident, and the rest of the model also needs the incident tied directly to the affected IT service.
+
+Do these three directions match how you want the model to work:
+1. Incident **impacts** BusinessService
+2. Incident **impacts** CustomerChannel
+3. Incident **affects** ITService
+
+### Turn 12 — persona
+
+Two are right in substance, one I would not model directly that way.
+
+1. **Incident impacts business service** — yes, that matches how I’d work.
+2. **Incident impacts customer channel** — I would not usually make that a direct incident-to-channel link.
+3. **Incident affects IT service** — the underlying idea is right, but I’d usually phrase that as the incident **impacts** the IT service as well.
+
+The reason for the customer channel point is that channel impact is usually derived through the business service: a business service is delivered through one or more customer channels, and the incident impacts the business service. That lets you answer the user question about impacted channels without forcing a separate direct relationship every time.
+
+So operationally:
+- incident to business service: direct, yes;
+- incident to IT service: direct, yes;
+- customer channel: usually reached through the impacted business service rather than directly from the incident.
+
+### Turn 13 — app-user
+
+Two are right in substance, one I would not model directly that way.
+
+1. **Incident impacts business service** — yes, that matches how I’d work.
+2. **Incident impacts customer channel** — I would not usually make that a direct incident-to-channel link.
+3. **Incident affects IT service** — the underlying idea is right, but I’d usually phrase that as the incident **impacts** the IT service as well.
+
+The reason for the customer channel point is that channel impact is usually derived through the business service: a business service is delivered through one or more customer channels, and the incident impacts the business service. That lets you answer the user question about impacted channels without forcing a separate direct relationship every time.
+
+So operationally:
+- incident to business service: direct, yes;
+- incident to IT service: direct, yes;
+- customer channel: usually reached through the impacted business service rather than directly from the incident.
+
+### Turn 13 — app-assistant
+
+Good distinction.
+
+Recap:
+- Keep direct:
+  - **Incident --impacts--> BusinessService**
+  - **Incident --impacts--> ITService**
+- Do **not** add a direct **Incident --impacts--> CustomerChannel** relationship at this stage.
+- Instead, channel impact is usually derived through business service.
+
+That means we also need the business-service/channel link to answer the channel question cleanly.
+
+Please confirm this small relationship batch:
+1. **BusinessService --deliveredThrough--> CustomerChannel**
+2. **ITService --supports--> BusinessService**
+3. **Incident --impacts--> ITService**
+4. **Incident --impacts--> BusinessService**
+
+### Turn 13 — persona
+
+Three of those are right in substance. One I’d reverse.
+
+1. **Business service delivered through customer channel** — yes.
+2. **IT service supports business service** — I would reverse that. In practice I’d say the **business service depends on the IT service**.
+3. **Incident impacts IT service** — yes.
+4. **Incident impacts business service** — yes.
+
+That second one matters because from an operational point of view we trace downward from business impact into the supporting technology stack. Saying the business service depends on the IT service makes that dependency direction clearer.
+
+### Turn 14 — app-user
+
+Three of those are right in substance. One I’d reverse.
+
+1. **Business service delivered through customer channel** — yes.
+2. **IT service supports business service** — I would reverse that. In practice I’d say the **business service depends on the IT service**.
+3. **Incident impacts IT service** — yes.
+4. **Incident impacts business service** — yes.
+
+That second one matters because from an operational point of view we trace downward from business impact into the supporting technology stack. Saying the business service depends on the IT service makes that dependency direction clearer.
+
+### Turn 14 — app-tool
+
+🔍 Checked the current ontology state.
+
+### Turn 14 — app-tool
+
+✓ Applied: 4 added, 0 updated.
+
+### Turn 14 — app-assistant
+
+Confirmed and recorded:
+- **Incident --impacts--> BusinessService**
+- **Incident --impacts--> ITService**
+- **BusinessService --deliveredThrough--> CustomerChannel**
+- **BusinessService --dependsOn--> ITService**
+
+Recap:
+- Channel impact is derived through the impacted business service.
+- The business-to-technology dependency direction is from business service down to IT service.
+
+Next relationship batch, grounded in your dependency-path questions:
+- **ITService --dependsOn--> ConfigurationItem**
+- **ITService --dependsOn--> ThirdPartyService**
+- **ITService --dependsOn--> CloudService**
+
+These would let the agent trace the dependency path for the affected IT service into internal components and external service dependencies.
+
+Do these three directions match how you want the model to work?
+
+### Turn 14 — persona
+
+Two of those I’d keep, one I’d handle differently.
+
+- **IT service depends on third-party service** — yes.
+- **IT service depends on cloud service** — I would be careful there. A cloud service is a distinct thing, but I would not automatically state that same direct dependency pattern here unless you specifically need it modeled that way in your implementation.
+- **IT service depends on configuration item** — I would not usually phrase it as “depends on” for internal technical components.
+
+For internal components, I’d be more precise:
+- an **IT service is implemented by an application**,
+- an **IT service runs on infrastructure components**,
+- and those concrete components then carry further technical relationships.
+
+That gives you a better dependency path than collapsing all internal structure into a generic depends-on link to configuration items. So for tracing, yes, configuration items matter — but I would connect them through more specific implementation and hosting relationships rather than a broad direct dependency statement.
+
+### Turn 15 — app-user
+
+Two of those I’d keep, one I’d handle differently.
+
+- **IT service depends on third-party service** — yes.
+- **IT service depends on cloud service** — I would be careful there. A cloud service is a distinct thing, but I would not automatically state that same direct dependency pattern here unless you specifically need it modeled that way in your implementation.
+- **IT service depends on configuration item** — I would not usually phrase it as “depends on” for internal technical components.
+
+For internal components, I’d be more precise:
+- an **IT service is implemented by an application**,
+- an **IT service runs on infrastructure components**,
+- and those concrete components then carry further technical relationships.
+
+That gives you a better dependency path than collapsing all internal structure into a generic depends-on link to configuration items. So for tracing, yes, configuration items matter — but I would connect them through more specific implementation and hosting relationships rather than a broad direct dependency statement.
+
+### Turn 15 — app-assistant
+
+That’s an important modeling boundary.
+
+Recap:
+- Keep direct:
+  - **ITService --dependsOn--> ThirdPartyService**
+- Do **not** yet record:
+  - **ITService --dependsOn--> ConfigurationItem**
+  - **ITService --dependsOn--> CloudService**
+- For internal technical structure, you want more specific relationships rather than one broad direct dependency.
+
+That means we need one clarification before I can continue cleanly:
+Should **Application** and **InfrastructureComponent** be added as distinct classes, so we can represent “IT service is implemented by application” and “IT service runs on infrastructure component” explicitly?
+
+### Turn 15 — persona
+
+Yes — both should be distinct classes.
+
+- **Application** needs to be separate because an IT service is often implemented by one or more applications, and that distinction matters for ownership, support, deployment, change linkage, vendor support, and recovery.
+- **Infrastructure component** also needs to be separate because services and applications run on technical infrastructure, and that is where a lot of operational impact, monitoring, isolation, and restoration work actually lands.
+
+So yes, add **application** and **infrastructure component** as distinct things before you continue that part of the relationship model.
+
+### Turn 16 — app-user
+
+Yes — both should be distinct classes.
+
+- **Application** needs to be separate because an IT service is often implemented by one or more applications, and that distinction matters for ownership, support, deployment, change linkage, vendor support, and recovery.
+- **Infrastructure component** also needs to be separate because services and applications run on technical infrastructure, and that is where a lot of operational impact, monitoring, isolation, and restoration work actually lands.
+
+So yes, add **application** and **infrastructure component** as distinct things before you continue that part of the relationship model.
+
+### Turn 16 — app-tool
+
+🔍 Checked the current ontology state.
+
+### Turn 16 — app-tool
+
+✓ Applied: 2 added, 0 updated.
+
+### Turn 16 — app-assistant
+
+Confirmed and recorded:
+- **Application**
+- **InfrastructureComponent**
+
+Recap:
+- Application is distinct for implementation, ownership, support, deployment/change linkage, vendor support, and recovery.
+- Infrastructure component is distinct for operational impact, monitoring, isolation, and restoration.
+
+Now back to the relationship question, in the more specific form you asked for.
+
+Please confirm this relationship batch:
+1. **ITService --implementedBy--> Application**
+2. **Application --runsOn--> InfrastructureComponent**
+3. **ITService --dependsOn--> ThirdPartyService**
+
+And one separate check in the same pattern:
+4. Does the model also need a direct **ITService --dependsOn--> CloudService** relationship, or is cloud dependency expected to be captured some other way?
+
+### Turn 16 — persona
+
+Yes to the first three.
+
+1. **IT service is implemented by application** — yes.
+2. **Application runs on infrastructure component** — yes.
+3. **IT service depends on third-party service** — yes.
+
+On the cloud point: yes, the model does need **vendor provides cloud service** as its own relationship. For a direct **IT service depends on cloud service** link, I would only add it if you want to represent that dependency explicitly rather than infer it through broader external service structure. In our operational thinking, cloud service is a real distinct dependency type, but I would be careful not to duplicate dependency paths unnecessarily.
+
+So the safer answer is: cloud service should definitely exist and be linked to vendor, but whether you also make IT service depend directly on cloud service is a modeling choice I would keep separate from the three relationships above.
+
+### Turn 17 — app-user
+
+Yes to the first three.
+
+1. **IT service is implemented by application** — yes.
+2. **Application runs on infrastructure component** — yes.
+3. **IT service depends on third-party service** — yes.
+
+On the cloud point: yes, the model does need **vendor provides cloud service** as its own relationship. For a direct **IT service depends on cloud service** link, I would only add it if you want to represent that dependency explicitly rather than infer it through broader external service structure. In our operational thinking, cloud service is a real distinct dependency type, but I would be careful not to duplicate dependency paths unnecessarily.
+
+So the safer answer is: cloud service should definitely exist and be linked to vendor, but whether you also make IT service depend directly on cloud service is a modeling choice I would keep separate from the three relationships above.
+
+### Turn 17 — app-assistant
+
+Good — I’ll record the three confirmed ones, and I’ll treat the direct IT-service-to-cloud-service dependency as still open rather than assuming it.
+
+Recap:
+- Confirmed:
+  - **ITService --implementedBy--> Application**
+  - **Application --runsOn--> InfrastructureComponent**
+  - **ITService --dependsOn--> ThirdPartyService**
+- Open question:
+  - whether to add **ITService --dependsOn--> CloudService**
+- Newly surfaced for the next batch:
+  - **Vendor --provides--> CloudService**
+
+Please confirm this small external/provider relationship batch:
+1. **Vendor --provides--> ThirdPartyService**
+2. **Vendor --provides--> CloudService**
+3. **ThirdPartyService --dependsOn--> CloudService** only if that is a real dependency pattern you want the agent to trace, otherwise we leave it out.
+
+### Turn 17 — persona
+
+The first two, yes.
+
+1. **Vendor provides third-party service** — yes.
+2. **Vendor provides cloud service** — yes.
+
+On the third:
+- **Third-party service depends on cloud service** — I would leave that out unless you have a very specific need for it. That is not a general relationship I would rely on in the core operating model.
+
+Operationally, what we need consistently is:
+- who the supplier is,
+- what external service we depend on,
+- and, where relevant, what cloud capability is being provided.
+
+But I would not introduce a default dependency chain from third-party service to cloud service unless you truly need that granularity.
+
+### Turn 18 — app-user
+
+The first two, yes.
+
+1. **Vendor provides third-party service** — yes.
+2. **Vendor provides cloud service** — yes.
+
+On the third:
+- **Third-party service depends on cloud service** — I would leave that out unless you have a very specific need for it. That is not a general relationship I would rely on in the core operating model.
+
+Operationally, what we need consistently is:
+- who the supplier is,
+- what external service we depend on,
+- and, where relevant, what cloud capability is being provided.
+
+But I would not introduce a default dependency chain from third-party service to cloud service unless you truly need that granularity.
+
+### Turn 18 — app-tool
+
+🔍 Checked the current ontology state.
+
+### Turn 18 — app-tool
+
+✓ Applied: 5 added, 0 updated.
+
+### Turn 18 — app-assistant
+
+Confirmed and recorded:
+- **ITService --implementedBy--> Application**
+- **Application --runsOn--> InfrastructureComponent**
+- **ITService --dependsOn--> ThirdPartyService**
+- **Vendor --provides--> ThirdPartyService**
+- **Vendor --provides--> CloudService**
+
+Left out for now:
+- **ThirdPartyService --dependsOn--> CloudService**
+- direct **ITService --dependsOn--> CloudService** remains open, not assumed
+
+Next relationship batch, grounded in your observability and incident-correlation questions:
+1. **Alert --correlatesWith--> Incident**
+2. **Event --correlatesWith--> Incident**
+3. **Alert --relatesTo--> ConfigurationItem** if alerts are tied to specific monitored components
+4. **Event --relatesTo--> ConfigurationItem** if events are tied to specific monitored components
+
+Please confirm which of these are real operational relationships, and if you want a more specific verb than **relatesTo** for the configuration-item links.
+
+### Turn 18 — persona
+
+All four ideas are real, but I’d tighten the wording and direction on some of them.
+
+1. **Alert correlates with incident** — the substance is right, but I’d usually put it from the incident side: an **incident is triggered by an alert**. There is also a looser operational idea that an alert may open an incident, but if you want a stable incident relationship, “incident is triggered by alert” is the cleaner one.
+
+2. **Event correlates with incident** — yes in substance, and again I’d normally put it from the incident side: an **incident is correlated from events**.
+
+3. **Alert relates to configuration item** — yes, but I’d be more specific than “relates to.” I’d say the alert **concerns** a configuration item when it points to that affected or monitored component.
+
+4. **Event relates to configuration item** — yes, and again I’d use a more precise phrase: the event is **observed on** the configuration item.
+
+So I would keep the operational links, but with those more specific directions and verbs.
+
+### Turn 19 — app-user
+
+All four ideas are real, but I’d tighten the wording and direction on some of them.
+
+1. **Alert correlates with incident** — the substance is right, but I’d usually put it from the incident side: an **incident is triggered by an alert**. There is also a looser operational idea that an alert may open an incident, but if you want a stable incident relationship, “incident is triggered by alert” is the cleaner one.
+
+2. **Event correlates with incident** — yes in substance, and again I’d normally put it from the incident side: an **incident is correlated from events**.
+
+3. **Alert relates to configuration item** — yes, but I’d be more specific than “relates to.” I’d say the alert **concerns** a configuration item when it points to that affected or monitored component.
+
+4. **Event relates to configuration item** — yes, and again I’d use a more precise phrase: the event is **observed on** the configuration item.
+
+So I would keep the operational links, but with those more specific directions and verbs.
+
+### Turn 19 — app-assistant
+
+Good — that gives us clearer operational verbs.
+
+Recap:
+- Use incident-side relationships for incident correlation:
+  - **Incident --triggeredBy--> Alert**
+  - **Incident --correlatedFrom--> Event**
+- Use more specific component links:
+  - **Alert --concerns--> ConfigurationItem**
+  - **Event --observedOn--> ConfigurationItem**
+
+One focused follow-up before I record them:
+For the question “which active alerts and events are correlated with this incident?”, do you also need a direct looser relationship from **Incident** to **Alert** and from **Incident** to **Event** beyond “triggered by” and “correlated from” — for example because not every correlated alert is the triggering one, and not every relevant event is part of the same derivation pattern — or do these two verbs already cover what you need?
+
+### Turn 19 — persona
+
+These two already cover what I need in the core model.
+
+- **Incident is triggered by alert** covers the alert side well enough for the operational picture.
+- **Incident is correlated from event** covers the event side.
+
+In practice, there can be multiple related signals around an incident, but I would not add extra vague direct links just to capture “loosely relevant” unless you have a specific use case that demands it. For the core operating model, the more precise links are better than a second generic layer of correlation.
+
+### Turn 20 — app-user
+
+These two already cover what I need in the core model.
+
+- **Incident is triggered by alert** covers the alert side well enough for the operational picture.
+- **Incident is correlated from event** covers the event side.
+
+In practice, there can be multiple related signals around an incident, but I would not add extra vague direct links just to capture “loosely relevant” unless you have a specific use case that demands it. For the core operating model, the more precise links are better than a second generic layer of correlation.
+
+### Turn 20 — app-tool
+
+🔍 Checked the current ontology state.
+
+### Turn 20 — app-tool
+
+✓ Applied: 4 added, 0 updated.
+
+### Turn 20 — app-assistant
+
+Confirmed and recorded:
+- **Incident --triggeredBy--> Alert**
+- **Incident --correlatedFrom--> Event**
+- **Alert --concerns--> ConfigurationItem**
+- **Event --observedOn--> ConfigurationItem**
+
+Recap:
+- You prefer precise signal relationships rather than a second vague “related to” layer.
+- These cover the core correlation need for the model.
+
+Next relationship batch, grounded in the ownership/routing questions and the “should handle” requirement:
+
+To answer:
+- who owns the affected service,
+- which resolver group should handle the incident,
+- which on-call engineer should handle the incident,
+
+we likely need both current assignment links and the structural routing links that let the agent derive the right target.
+
+Please confirm or correct this batch:
+1. **ITService --ownedBy--> ServiceOwner**
+2. **ITService --supportedBy--> ResolverGroup**
+3. **ResolverGroup --hasOnCallEngineer--> OnCallEngineer**
+4. **Incident --assignedTo--> ResolverGroup**
+5. **Incident --assignedTo--> OnCallEngineer** only if incidents are explicitly assigned directly to an individual as well as to a group.
+
+### Turn 20 — persona
+
+The underlying needs are right, but I’d phrase several of those differently.
+
+1. **IT service owned by service owner** — yes in substance. I normally state it from the role side: the **service owner owns the IT service**.
+
+2. **IT service supported by resolver group** — I would not assume that as the core relationship from what we’ve covered so far. The routing question can be answered through the incident assignment and through whether the resolver group supports an affected service or configuration item at the time of assignment, but I would be careful about hard-coding a broad permanent support relationship unless you need it explicitly.
+
+3. **Resolver group has on-call engineer** — again, the idea is right, but I’d phrase it from the person side: the **on-call engineer is a member of a resolver group**.
+
+4. **Incident assigned to resolver group** — yes.
+
+5. **Incident assigned to on-call engineer** — the concept is right, but I’d put it a little differently: the incident is **handled by** the on-call engineer rather than assigned to them in exactly the same sense as a resolver group assignment.
+
+So I’d keep:
+- service owner owns IT service,
+- on-call engineer is member of resolver group,
+- incident is assigned to resolver group,
+- incident is handled by on-call engineer.
+
+And I’d leave the broader resolver-group-to-service support link open unless you want to get into assignment rules and support coverage explicitly.
+
+### Turn 21 — app-user
+
+The underlying needs are right, but I’d phrase several of those differently.
+
+1. **IT service owned by service owner** — yes in substance. I normally state it from the role side: the **service owner owns the IT service**.
+
+2. **IT service supported by resolver group** — I would not assume that as the core relationship from what we’ve covered so far. The routing question can be answered through the incident assignment and through whether the resolver group supports an affected service or configuration item at the time of assignment, but I would be careful about hard-coding a broad permanent support relationship unless you need it explicitly.
+
+3. **Resolver group has on-call engineer** — again, the idea is right, but I’d phrase it from the person side: the **on-call engineer is a member of a resolver group**.
+
+4. **Incident assigned to resolver group** — yes.
+
+5. **Incident assigned to on-call engineer** — the concept is right, but I’d put it a little differently: the incident is **handled by** the on-call engineer rather than assigned to them in exactly the same sense as a resolver group assignment.
+
+So I’d keep:
+- service owner owns IT service,
+- on-call engineer is member of resolver group,
+- incident is assigned to resolver group,
+- incident is handled by on-call engineer.
+
+And I’d leave the broader resolver-group-to-service support link open unless you want to get into assignment rules and support coverage explicitly.
+
+### Turn 21 — app-assistant
+
+That’s clear, and it also flags an important gap.
+
+Recap:
+- Confirmed:
+  - **ServiceOwner --owns--> ITService**
+  - **OnCallEngineer --memberOf--> ResolverGroup**
+  - **Incident --assignedTo--> ResolverGroup**
+  - **Incident --handledBy--> OnCallEngineer**
+- Not yet confirmed:
+  - a broader structural service-support relationship for resolver groups.
+
+But because one of your competency questions is **“Which resolver group should handle the incident?”**, the model needs some relationship that lets the agent derive the right resolver group, not just record one after assignment.
+
+So one focused follow-up:
+What is the stable operational connector the agent should use to derive the right resolver group in the first place — for example, does a **resolver group support an IT service**, **support a configuration item**, **support an application**, or some combination of those?
+
+### Turn 21 — persona
+
+For deriving the right group, I would use the idea that the resolver group supports the affected service area or technical component involved in the incident.
+
+If you want that stated in model terms, the safest operational rule is not “every resolver group permanently owns every affected object,” but that the resolver group chosen for assignment must support an affected **IT service** or **configuration item**.
+
+So yes, as stable connectors for routing, I would use support coverage to:
+- **IT service**, and
+- **configuration item**.
+
+That matches how assignment is validated operationally: the group should actually cover the affected service or component.
+
+### Turn 22 — app-user
+
+For deriving the right group, I would use the idea that the resolver group supports the affected service area or technical component involved in the incident.
+
+If you want that stated in model terms, the safest operational rule is not “every resolver group permanently owns every affected object,” but that the resolver group chosen for assignment must support an affected **IT service** or **configuration item**.
+
+So yes, as stable connectors for routing, I would use support coverage to:
+- **IT service**, and
+- **configuration item**.
+
+That matches how assignment is validated operationally: the group should actually cover the affected service or component.
+
+### Turn 22 — app-tool
+
+🔍 Checked the current ontology state.
+
+### Turn 22 — app-tool
+
+✓ Applied: 6 added, 0 updated.
+
+### Turn 22 — app-assistant
+
+Confirmed and recorded:
+- **ServiceOwner --owns--> ITService**
+- **OnCallEngineer --memberOf--> ResolverGroup**
+- **Incident --assignedTo--> ResolverGroup**
+- **Incident --handledBy--> OnCallEngineer**
+- **ResolverGroup --supports--> ITService**
+- **ResolverGroup --supports--> ConfigurationItem**
+
+Recap:
+- We now have both:
+  - the recorded handling links on the incident, and
+  - the structural support-coverage links needed to derive the right resolver group.
+
+Next relationship batch, grounded in your “major incident” handling context:
+1. **Incident --coordinatedBy--> IncidentCommander** for major incidents
+2. **CybersecurityIncident --impacts--> ITService**
+3. **CybersecurityIncident --impacts--> BusinessService** only if you want the same impact structure available directly on cybersecurity incidents rather than always routing through the base incident
+4. **CybersecurityIncident --correlatedFrom--> Event** if security incidents use the same event-correlation pattern
+
+Please confirm which of these should be in the core model.
+
+### Turn 22 — persona
+
+The first one, yes. The others I’d refine.
+
+1. **Incident coordinated by incident commander** — yes. That is the right operational link for cases where command has been assigned, especially major incidents.
+
+2. **Cybersecurity incident impacts IT service** — I would not introduce that as a separate core relationship if the base incident already carries impact to IT service. A cybersecurity incident is still an incident in operational handling terms, so I would avoid duplicating the same impact structure unless you have a very specific reason.
+
+3. **Cybersecurity incident impacts business service** — same answer. I would not add a separate duplicate impact path just because it is the security-specialized form.
+
+4. **Cybersecurity incident correlated from event** — I would be more specific than generic event. What matters here is the link to a **security event**.
+
+So in the core model I would keep:
+- **incident is coordinated by incident commander**,
+- and for the cybersecurity-specialized side, use relationships specific to security handling rather than repeating the ordinary impact links.
+
+### Turn 23 — app-user
+
+The first one, yes. The others I’d refine.
+
+1. **Incident coordinated by incident commander** — yes. That is the right operational link for cases where command has been assigned, especially major incidents.
+
+2. **Cybersecurity incident impacts IT service** — I would not introduce that as a separate core relationship if the base incident already carries impact to IT service. A cybersecurity incident is still an incident in operational handling terms, so I would avoid duplicating the same impact structure unless you have a very specific reason.
+
+3. **Cybersecurity incident impacts business service** — same answer. I would not add a separate duplicate impact path just because it is the security-specialized form.
+
+4. **Cybersecurity incident correlated from event** — I would be more specific than generic event. What matters here is the link to a **security event**.
+
+So in the core model I would keep:
+- **incident is coordinated by incident commander**,
+- and for the cybersecurity-specialized side, use relationships specific to security handling rather than repeating the ordinary impact links.
+
+### Turn 23 — app-assistant
+
+Good — that avoids duplicating the ordinary incident structure.
+
+Recap:
+- Confirmed:
+  - **Incident --coordinatedBy--> IncidentCommander**
+- Not adding duplicate cybersecurity-specific impact links to IT service or business service.
+- Cybersecurity-specific handling should use security-specific relationships instead.
+
+One focused follow-up before I continue:
+Do you want **SecurityEvent** added as a distinct class, with a relationship such as **CybersecurityIncident --correlatedFrom--> SecurityEvent**, or does your existing **Event** class already cover security events well enough for this model?
+
+### Turn 23 — persona
+
+Yes — **security event** should be a distinct class.
+
+A generic event is too broad for security handling. A cybersecurity incident should be tied specifically to security-relevant events, because that affects monitoring ownership, investigation context, evidence expectations, and downstream reporting.
+
+I would not phrase it exactly as “correlated from” if you are asking for my natural wording here. I’d say the cybersecurity incident is **derived from** the security event. That better reflects that the security incident emerges from security-relevant observed activity rather than ordinary operational event correlation.
+
+### Turn 24 — app-user
+
+Yes — **security event** should be a distinct class.
+
+A generic event is too broad for security handling. A cybersecurity incident should be tied specifically to security-relevant events, because that affects monitoring ownership, investigation context, evidence expectations, and downstream reporting.
+
+I would not phrase it exactly as “correlated from” if you are asking for my natural wording here. I’d say the cybersecurity incident is **derived from** the security event. That better reflects that the security incident emerges from security-relevant observed activity rather than ordinary operational event correlation.
+
+### Turn 24 — app-tool
+
+🔍 Checked the current ontology state.
+
+### Turn 24 — app-tool
+
+✓ Applied: 3 added, 0 updated.
+
+### Turn 24 — app-assistant
+
+Confirmed and recorded:
+- **SecurityEvent**
+- **Incident --coordinatedBy--> IncidentCommander**
+- **CybersecurityIncident --derivedFrom--> SecurityEvent**
+
+Recap:
+- Cybersecurity handling now has its own security-specific event path without duplicating the ordinary incident impact structure.
+
+Next relationship batch, grounded in your “appropriate and safe to use” questions and recovery actions:
+1. **Runbook --appliesTo--> ITService**
+2. **Workaround --appliesTo--> ITService**
+3. **RecoveryPlan --appliesTo--> ITService**
+4. **BackupSet --covers--> ITService** only if backup sets are tracked at service level rather than only at application/system/data level
+5. **RecoveryPlan --uses--> BackupSet** only if the plan explicitly refers to a backup set as part of execution
+6. **ITService --runsIn--> Environment** if environment is needed as the operational context for failover and recovery
+
+Please confirm which of these belong in the core model, and correct any verb/direction you’d prefer.
+
+### Turn 24 — persona
+
+A few of those belong, but I’d tighten them.
+
+1. **Runbook applies to IT service** — I would not put it that way in the core model from what we’ve covered so far. What matters operationally is that an **incident is handled with a runbook**. That is the direct response link.
+
+2. **Workaround applies to IT service** — again, I would not start there. A workaround is more naturally tied through the problem or known error context rather than as a broad direct service relationship.
+
+3. **Recovery plan applies to IT service** — yes in substance, but I’d phrase it more actively: the **recovery plan recovers the IT service**.
+
+4. **Backup set covers IT service** — I would not use that. Backup sets protect recoverable technical targets, not services in the abstract.
+
+5. **Recovery plan uses backup set** — yes, that belongs.
+
+6. **IT service runs in environment** — the idea is right, but I’d say the **IT service is deployed in an environment**.
+
+So for the core model here, I’d keep:
+- incident is handled with runbook,
+- recovery plan recovers IT service,
+- recovery plan uses backup set,
+- IT service is deployed in environment.
+
+And I’d leave workaround and backup-set-to-service out of this part.
+
+### Turn 25 — app-user
+
+A few of those belong, but I’d tighten them.
+
+1. **Runbook applies to IT service** — I would not put it that way in the core model from what we’ve covered so far. What matters operationally is that an **incident is handled with a runbook**. That is the direct response link.
+
+2. **Workaround applies to IT service** — again, I would not start there. A workaround is more naturally tied through the problem or known error context rather than as a broad direct service relationship.
+
+3. **Recovery plan applies to IT service** — yes in substance, but I’d phrase it more actively: the **recovery plan recovers the IT service**.
+
+4. **Backup set covers IT service** — I would not use that. Backup sets protect recoverable technical targets, not services in the abstract.
+
+5. **Recovery plan uses backup set** — yes, that belongs.
+
+6. **IT service runs in environment** — the idea is right, but I’d say the **IT service is deployed in an environment**.
+
+So for the core model here, I’d keep:
+- incident is handled with runbook,
+- recovery plan recovers IT service,
+- recovery plan uses backup set,
+- IT service is deployed in environment.
+
+And I’d leave workaround and backup-set-to-service out of this part.
+
+### Turn 25 — app-assistant
+
+Good refinement.
+
+Recap:
+- Confirmed for the core model:
+  - **Incident --handledWith--> Runbook**
+  - **RecoveryPlan --recovers--> ITService**
+  - **RecoveryPlan --uses--> BackupSet**
+  - **ITService --deployedIn--> Environment**
+- Not adding here:
+  - **Runbook --appliesTo--> ITService**
+  - **Workaround --appliesTo--> ITService**
+  - **BackupSet --covers--> ITService**
+
+One focused follow-up, because your competency questions explicitly ask **which workaround is appropriate and safe to use for this incident**:
+What is the stable connector the agent should use to derive a workaround — for example, is a **workaround used for an incident**, **used for an application**, **used for a configuration item**, or tied to some other object such as a known problem context?
+
+### Turn 25 — persona
+
+The stable connector is the problem or known-error side, not a broad direct link from workaround to incident or service.
+
+Operationally, a **known error** is the diagnosed problem with a documented cause or workaround, and the **workaround** hangs off that. Then the incident can be linked to the problem, and from there you can derive the workaround that is appropriate to use.
+
+So I would model that chain through:
+- incident linked to problem,
+- problem documented by known error,
+- known error has workaround.
+
+That is much safer than saying every workaround simply belongs straight to an incident or service.
+
+### Turn 26 — app-user
+
+The stable connector is the problem or known-error side, not a broad direct link from workaround to incident or service.
+
+Operationally, a **known error** is the diagnosed problem with a documented cause or workaround, and the **workaround** hangs off that. Then the incident can be linked to the problem, and from there you can derive the workaround that is appropriate to use.
+
+So I would model that chain through:
+- incident linked to problem,
+- problem documented by known error,
+- known error has workaround.
+
+That is much safer than saying every workaround simply belongs straight to an incident or service.
+
+### Turn 26 — app-assistant
+
+Understood. That means we need those classes before we can finish this relationship area cleanly.
+
+Recap:
+- Do **not** use a broad direct workaround-to-incident or workaround-to-service link.
+- Use the chain:
+  - **Incident -> Problem**
+  - **Problem -> KnownError**
+  - **KnownError -> Workaround**
+
+Next class check, still necessary for Phase 2 completion because these are now justified by your confirmed workaround requirement:
+Does the agent need to identify, retrieve, connect, or pass these as distinct things: **Problem** and **KnownError**?
+
+### Turn 26 — persona
+
+Yes — both should be distinct.
+
+- **Problem** is the underlying cause, or potential underlying cause, behind one or more incidents.
+- **Known error** is not just another name for problem; it is the diagnosed problem with documented cause or workaround.
+
+That distinction matters operationally because not every problem has reached the point where you have a known error and usable workaround.
+
+### Turn 27 — app-user
+
+Yes — both should be distinct.
+
+- **Problem** is the underlying cause, or potential underlying cause, behind one or more incidents.
+- **Known error** is not just another name for problem; it is the diagnosed problem with documented cause or workaround.
+
+That distinction matters operationally because not every problem has reached the point where you have a known error and usable workaround.
+
+### Turn 27 — app-tool
+
+🔍 Checked the current ontology state.
+
+### Turn 27 — app-tool
+
+✓ Applied: 2 added, 0 updated.
+
+### Turn 27 — app-assistant
+
+Confirmed and recorded:
+- **Problem**
+- **KnownError**
+
+Recap:
+- Problem and known error are distinct.
+- Known error is the diagnosed problem with documented cause or workaround.
+
+Now please confirm this relationship batch:
+1. **Incident --linkedTo--> Problem** if that is the right operational verb for associating an incident with its underlying problem record
+2. **KnownError --documents--> Problem**
+3. **KnownError --has--> Workaround**
+4. **Incident --handledWith--> Runbook**
+5. **RecoveryPlan --recovers--> ITService**
+6. **RecoveryPlan --uses--> BackupSet**
+7. **ITService --deployedIn--> Environment**
+
+### Turn 27 — persona
+
+Most of that is right, but I’d reverse one of them.
+
+1. **Incident linked to problem** — yes.
+2. **Known error documents problem** — I would reverse that. I’d say the **problem is documented by the known error**.
+3. **Known error has workaround** — yes.
+4. **Incident handled with runbook** — yes.
+5. **Recovery plan recovers IT service** — yes.
+6. **Recovery plan uses backup set** — yes.
+7. **IT service deployed in environment** — yes.
+
+### Turn 28 — app-user
+
+Most of that is right, but I’d reverse one of them.
+
+1. **Incident linked to problem** — yes.
+2. **Known error documents problem** — I would reverse that. I’d say the **problem is documented by the known error**.
+3. **Known error has workaround** — yes.
+4. **Incident handled with runbook** — yes.
+5. **Recovery plan recovers IT service** — yes.
+6. **Recovery plan uses backup set** — yes.
+7. **IT service deployed in environment** — yes.
+
+### Turn 28 — app-tool
+
+🔍 Checked the current ontology state.
+
+### Turn 28 — app-tool
+
+✓ Applied: 7 added, 0 updated.
+
+### Turn 28 — app-assistant
+
+Confirmed and recorded:
+- **Incident --linkedTo--> Problem**
+- **Problem --documentedBy--> KnownError**
+- **KnownError --has--> Workaround**
+- **Incident --handledWith--> Runbook**
+- **RecoveryPlan --recovers--> ITService**
+- **RecoveryPlan --uses--> BackupSet**
+- **ITService --deployedIn--> Environment**
+
+Recap:
+- We now have the safer workaround derivation path via problem and known error.
+- Recovery and environment links are in place at the service level.
+
+Next relationship batch, grounded in change/deployment causality and reporting/completeness:
+1. **Incident --causedBy--> Change** if a recent change can be identified as the likely cause
+2. **Incident --causedBy--> Deployment** if a recent deployment can be identified as the likely cause
+3. **Incident --hasAssessment--> MaterialityAssessment**
+4. **RegulatoryNotification --preparedFor--> Incident**
+5. **RegulatoryNotification --submittedFor--> Incident** only if you want separate prepare/send links rather than a single incident-to-notification link plus status later
+6. **Incident --hasEvidence--> EvidenceItem**
+7. **Incident --hasCommunication--> Communication**
+8. **CorrectiveAction --for--> ITService**
+
+Please confirm which of these belong in the core model, and correct any direction/verb you prefer.
+
+### Turn 28 — persona
+
+Several belong, but I’d tighten the wording and avoid a couple of duplicates.
+
+1. **Incident caused by change** — I would not state that as a general core relationship. What we do need is that an incident may be **resolved by a change**, and for emergency handling an emergency change can be justified by an incident. Causality to change is operationally important, but I would be cautious about asserting a fixed “caused by” relationship unless you explicitly want causal analysis modeled.
+
+2. **Incident caused by deployment** — same caution. Useful analytically, but not one I’d put into the core model from the current scope.
+
+3. **Incident has assessment** — yes in substance, but I’d say the **incident is evaluated by a materiality assessment**.
+
+4. **Regulatory notification prepared for incident** / 5. **submitted for incident** — I would not split those into separate relationships. The cleaner core link is that the **regulatory notification reports the incident**. Preparation and submission state belong on the notification itself.
+
+6. **Incident has evidence** — yes in substance, but I’d say the **incident is supported by evidence items**.
+
+7. **Incident has communication** — yes in substance, but I’d say the **incident is communicated through communication records**.
+
+8. **Corrective action for IT service** — I would not make that the primary relationship. The cleaner path is through the post-incident review context and then you can analyze which service the reviewed incident affected.
+
+So for this batch I’d keep:
+- incident is evaluated by materiality assessment,
+- regulatory notification reports incident,
+- incident is supported by evidence item,
+- incident is communicated through communication.
+
+And I’d leave direct caused-by and direct corrective-action-to-service out of the core model.
+
+### Turn 29 — app-user
+
+Several belong, but I’d tighten the wording and avoid a couple of duplicates.
+
+1. **Incident caused by change** — I would not state that as a general core relationship. What we do need is that an incident may be **resolved by a change**, and for emergency handling an emergency change can be justified by an incident. Causality to change is operationally important, but I would be cautious about asserting a fixed “caused by” relationship unless you explicitly want causal analysis modeled.
+
+2. **Incident caused by deployment** — same caution. Useful analytically, but not one I’d put into the core model from the current scope.
+
+3. **Incident has assessment** — yes in substance, but I’d say the **incident is evaluated by a materiality assessment**.
+
+4. **Regulatory notification prepared for incident** / 5. **submitted for incident** — I would not split those into separate relationships. The cleaner core link is that the **regulatory notification reports the incident**. Preparation and submission state belong on the notification itself.
+
+6. **Incident has evidence** — yes in substance, but I’d say the **incident is supported by evidence items**.
+
+7. **Incident has communication** — yes in substance, but I’d say the **incident is communicated through communication records**.
+
+8. **Corrective action for IT service** — I would not make that the primary relationship. The cleaner path is through the post-incident review context and then you can analyze which service the reviewed incident affected.
+
+So for this batch I’d keep:
+- incident is evaluated by materiality assessment,
+- regulatory notification reports incident,
+- incident is supported by evidence item,
+- incident is communicated through communication.
+
+And I’d leave direct caused-by and direct corrective-action-to-service out of the core model.
+
+### Turn 29 — app-assistant
+
+Good — that narrows the core model to the stable links you actually use.
+
+Recap:
+- Keep:
+  - **Incident --evaluatedBy--> MaterialityAssessment**
+  - **RegulatoryNotification --reports--> Incident**
+  - **Incident --supportedBy--> EvidenceItem**
+  - **Incident --communicatedThrough--> Communication**
+- Leave out for now:
+  - direct **Incident --causedBy--> Change**
+  - direct **Incident --causedBy--> Deployment**
+  - direct **CorrectiveAction --for--> ITService**
+- You also introduced an additional structure we don’t yet have: the **post-incident review** context.
+
+One focused follow-up before I record the next part:
+Does **PostIncidentReview** need to be a distinct class, so that corrective actions can be linked through **Incident -> PostIncidentReview -> CorrectiveAction** rather than directly to IT service?
+
+### Turn 29 — persona
+
+Yes — **post-incident review** should be a distinct class.
+
+That review is the structured place where we look at causes, response effectiveness, lessons learned, and follow-up work. It is also the right place to hang resulting **corrective actions** rather than forcing a direct corrective-action-to-service link.
+
+Operationally, that gives you the cleaner chain:
+- incident is reviewed in a post-incident review,
+- post-incident review produces corrective actions.
+
+### Turn 30 — app-user
+
+Yes — **post-incident review** should be a distinct class.
+
+That review is the structured place where we look at causes, response effectiveness, lessons learned, and follow-up work. It is also the right place to hang resulting **corrective actions** rather than forcing a direct corrective-action-to-service link.
+
+Operationally, that gives you the cleaner chain:
+- incident is reviewed in a post-incident review,
+- post-incident review produces corrective actions.
+
+### Turn 30 — app-tool
+
+🔍 Checked the current ontology state.
+
+### Turn 30 — app-tool
+
+✓ Applied: 7 added, 0 updated.
+
+### Turn 30 — app-assistant
+
+Confirmed and recorded:
+- **PostIncidentReview**
+- **Incident --evaluatedBy--> MaterialityAssessment**
+- **RegulatoryNotification --reports--> Incident**
+- **Incident --supportedBy--> EvidenceItem**
+- **Incident --communicatedThrough--> Communication**
+- **Incident --reviewedIn--> PostIncidentReview**
+- **PostIncidentReview --produces--> CorrectiveAction**
+
+Short recap of the relationship phase so far:
+- We now have direct links for impact, service/channel structure, technical implementation, external services/providers, observability correlation, ownership/routing, major-incident coordination, cybersecurity derivation, problem/known-error/workaround, recovery/runbook/environment, materiality/reporting/evidence/communication, and post-incident review with corrective actions.
+
+One more relationship batch is still needed because some confirmed classes still have no relationships or likely missing ones:
+- **Change**
+- **Deployment**
+- **CybersecurityIncident**
+- **CloudService**
+- **InfrastructureComponent**
+- **BackupSet**
+- **Communication** may also need a direct link to regulatory notification or audience depending on use.
+
+So one focused question:
+For this remaining set, which of the following are real core relationships in your operating model?
+
+1. **Incident --resolvedBy--> Change**
+2. **Change --deploys--> Deployment** or **Deployment --implements--> Change** if those are directly connected in your process
+3. **Deployment --targets--> Application**
+4. **BackupSet --protects--> Application** or **BackupSet --protects--> InfrastructureComponent** — which recoverable target is right in your model?
+5. **CloudService --providedBy--> Vendor** is already covered indirectly by **Vendor --provides--> CloudService**; do you also need any direct link from **ITService** or **Application** to **CloudService**?
+6. **InfrastructureComponent --deployedIn--> Environment**
+7. **CybersecurityIncident --supportedBy--> EvidenceItem** if security incidents have distinct evidence-preservation handling beyond the base incident path.
+
+### Turn 30 — persona
+
+Here’s how I’d treat that batch.
+
+1. **Incident resolved by change** — yes, that is a real core relationship.
+
+2. On change and deployment, I would not use “change deploys deployment.” The cleaner structure is:
+- a **change is implemented by a release**,
+- and a **release is delivered by a deployment**.
+So if you want to stay faithful to how we manage it, there is not a direct core change-to-deployment link in that phrasing.
+
+3. **Deployment targets application** — I would reverse the wording a bit. I’d say the **deployment deploys the application**. Separately, deployment also has a target environment.
+
+4. **Backup set protects application or infrastructure component** — neither of those would be my first choice as the generic answer. The stable core relationship is that the **backup set protects a configuration item**.
+
+5. On **cloud service**, yes, vendor-to-cloud-service is the solid relationship. I would still be cautious about adding a direct IT-service-to-cloud-service or application-to-cloud-service link unless you specifically need that dependency captured explicitly.
+
+6. **Infrastructure component deployed in environment** — I would not phrase it that way in the core model from what we have so far. The broader pattern for technical estate is that **configuration items belong to an environment**.
+
+7. **Cybersecurity incident supported by evidence item** — I would make that more specific. The key security-specialized relationship is that a **cybersecurity incident requires preservation of evidence items**. That is stronger and more accurate than the generic supported-by phrasing.
+
+So from your list, I’d positively keep:
+- incident is resolved by change,
+- deployment deploys application,
+- backup set protects configuration item,
+- cybersecurity incident requires preservation of evidence item.
+
+And I’d handle change/deployment through release if you want that part complete.
+
+### Turn 31 — app-user
+
+Here’s how I’d treat that batch.
+
+1. **Incident resolved by change** — yes, that is a real core relationship.
+
+2. On change and deployment, I would not use “change deploys deployment.” The cleaner structure is:
+- a **change is implemented by a release**,
+- and a **release is delivered by a deployment**.
+So if you want to stay faithful to how we manage it, there is not a direct core change-to-deployment link in that phrasing.
+
+3. **Deployment targets application** — I would reverse the wording a bit. I’d say the **deployment deploys the application**. Separately, deployment also has a target environment.
+
+4. **Backup set protects application or infrastructure component** — neither of those would be my first choice as the generic answer. The stable core relationship is that the **backup set protects a configuration item**.
+
+5. On **cloud service**, yes, vendor-to-cloud-service is the solid relationship. I would still be cautious about adding a direct IT-service-to-cloud-service or application-to-cloud-service link unless you specifically need that dependency captured explicitly.
+
+6. **Infrastructure component deployed in environment** — I would not phrase it that way in the core model from what we have so far. The broader pattern for technical estate is that **configuration items belong to an environment**.
+
+7. **Cybersecurity incident supported by evidence item** — I would make that more specific. The key security-specialized relationship is that a **cybersecurity incident requires preservation of evidence items**. That is stronger and more accurate than the generic supported-by phrasing.
+
+So from your list, I’d positively keep:
+- incident is resolved by change,
+- deployment deploys application,
+- backup set protects configuration item,
+- cybersecurity incident requires preservation of evidence item.
+
+And I’d handle change/deployment through release if you want that part complete.
+
+### Turn 31 — app-assistant
+
+Good — that identifies another missing class and clarifies the remaining relationships.
+
+Recap:
+- Keep:
+  - **Incident --resolvedBy--> Change**
+  - **Deployment --deploys--> Application**
+  - **BackupSet --protects--> ConfigurationItem**
+  - **CybersecurityIncident --requiresPreservationOf--> EvidenceItem**
+- Use a broader environmental pattern:
+  - **ConfigurationItem** belongs to **Environment**
+- Do **not** force a direct ITService/Application-to-CloudService dependency unless specifically needed.
+- For change/deployment flow, you want:
+  - **Change -> Release -> Deployment**
+  rather than a direct change-to-deployment shortcut.
+
+One necessary follow-up before I record that part:
+Does **Release** need to be a distinct class, so we can represent:
+- **Change --implementedBy--> Release**
+- **Release --deliveredBy--> Deployment**?
+
+### Turn 31 — persona
+
+Yes — **release** should be a distinct class.
+
+A release is the governed package of approved changes introduced together, and that is different from the deployment, which is the technical execution. So if you want the change and deployment side modeled properly, you should keep **release** as its own object between them.
+
+### Turn 32 — app-user
+
+Yes — **release** should be a distinct class.
+
+A release is the governed package of approved changes introduced together, and that is different from the deployment, which is the technical execution. So if you want the change and deployment side modeled properly, you should keep **release** as its own object between them.
+
+### Turn 32 — app-tool
+
+🔍 Checked the current ontology state.
+
+### Turn 32 — app-tool
+
+✓ Applied: 8 added, 0 updated.
+
+### Turn 32 — app-assistant
+
+Confirmed and recorded:
+- **Release**
+- **Incident --resolvedBy--> Change**
+- **Change --implementedBy--> Release**
+- **Release --deliveredBy--> Deployment**
+- **Deployment --deploys--> Application**
+- **BackupSet --protects--> ConfigurationItem**
+- **ConfigurationItem --belongsTo--> Environment**
+- **CybersecurityIncident --requiresPreservationOf--> EvidenceItem**
+
+Relationship-phase recap in plain language:
+- Impact flows from incidents to business services and IT services, and from business services to customer channels.
+- Business services depend on IT services; IT services are implemented by applications; applications run on infrastructure.
+- IT services can depend on third-party services; vendors provide third-party and cloud services.
+- Incidents are tied to alerts/events, assigned and handled through groups/engineers, and coordinated by an incident commander when needed.
+- Workarounds come through problem and known-error structure.
+- Recovery uses plans, backup sets, environments, and runbooks.
+- Regulatory/reporting/evidence/communication and post-incident review are all linked.
+- Change/release/deployment and cybersecurity-evidence preservation are now connected.
+
+Before moving to properties, I need one focused clean-up question from the relationship phase:
+Should **InfrastructureComponent** have its own direct relationship to **ConfigurationItem** — for example **InfrastructureComponent --isTrackedAs--> ConfigurationItem** or some other operational connector — or in your model is an infrastructure component itself simply one kind of configuration item in practice, so keeping both as separate classes may be unnecessary?
+
+### Turn 32 — persona
+
+In practice, an infrastructure component is one kind of configuration item.
+
+So I would not add a separate relationship like “is tracked as” between them. The cleaner approach is to treat **infrastructure component** as a specialized kind of configuration item rather than as two unrelated objects needing a connector. The same logic applies to things like servers, virtual machines, network devices, storage systems, and similar technical estate.
+
+### Turn 33 — app-user
+
+In practice, an infrastructure component is one kind of configuration item.
+
+So I would not add a separate relationship like “is tracked as” between them. The cleaner approach is to treat **infrastructure component** as a specialized kind of configuration item rather than as two unrelated objects needing a connector. The same logic applies to things like servers, virtual machines, network devices, storage systems, and similar technical estate.
+
+### Turn 33 — app-assistant
+
+That’s a useful boundary, but this tool can’t represent subclassing or “is a kind of” taxonomy directly.
+
+So I should not record a fake relationship like “isTrackedAs,” and I should also not leave both classes in place as if they were separate operational objects unless there’s a real non-taxonomic link between them.
+
+Recap of the issue:
+- You’ve said **InfrastructureComponent** is really a specialized kind of **ConfigurationItem**, not a separately connected business object.
+- In this tool, that usually means the safer option is to **remove InfrastructureComponent as a separate class** and let configuration-item properties or values carry that distinction later.
+
+One focused question to settle it:
+Do you want me to treat **InfrastructureComponent** as **not a separate class** in this ontology, and instead capture “infrastructure component” later as a type/category on **ConfigurationItem**?
+
+### Turn 33 — persona
+
+Yes — in this ontology, that is the safer choice.
+
+Treat **infrastructure component** as not a separate standalone class here, and capture that distinction under **configuration item** instead. That avoids creating an artificial relationship just to compensate for the tool not supporting specialization.
+
+### Turn 34 — app-user
+
+Yes — in this ontology, that is the safer choice.
+
+Treat **infrastructure component** as not a separate standalone class here, and capture that distinction under **configuration item** instead. That avoids creating an artificial relationship just to compensate for the tool not supporting specialization.
+
+### Turn 34 — app-assistant
+
+Understood.
+
+Recap:
+- **InfrastructureComponent** should **not** remain a separate standalone class in this ontology.
+- We’ll represent that distinction later as a type/category on **ConfigurationItem** instead.
+- Because this tool only merges additions/updates and does not provide a clean delete operation here, I’ll treat **InfrastructureComponent** as a known clean-up item in the live model unless you remove it directly on the canvas.
+
+That settles the relationship phase enough to move on.
+
+Now we start Phase 4: decision-bearing properties.
+I’ll begin with the classes that clearly need current operational state to answer your questions and perform actions.
+
+Please confirm which of these properties are actually needed on **Incident** for the agent to identify, filter, decide, explain, or act:
+1. **incident identifier**
+2. **status**
+3. **severity**
+4. **priority**
+5. **start time**
+6. **major-incident flag**
+7. **closure time**
+8. **summary**
+
+### Turn 34 — persona
+
+Yes, those are all operationally useful, with one naming adjustment.
+
+For **incident**, I would want:
+
+1. **Incident identifier** — yes, needed for retrieval and traceability.
+2. **Status** — yes.
+3. **Severity** — yes.
+4. **Priority** — yes.
+5. **Start time** — the underlying need is right, but I would distinguish operational timestamps more carefully rather than use one generic start time.
+6. **Major-incident flag** — yes, if your tool needs an explicit indicator for that classification.
+7. **Closure time** — yes.
+8. **Summary** — yes.
+
+On the timestamp point, in practice we usually care about at least detection/opening separately, and later resolution/closure separately, because they drive different reporting and handling questions. So I would not collapse that into one generic start time if you want the model to support real operations.
+
+### Turn 35 — app-user
+
+Yes, those are all operationally useful, with one naming adjustment.
+
+For **incident**, I would want:
+
+1. **Incident identifier** — yes, needed for retrieval and traceability.
+2. **Status** — yes.
+3. **Severity** — yes.
+4. **Priority** — yes.
+5. **Start time** — the underlying need is right, but I would distinguish operational timestamps more carefully rather than use one generic start time.
+6. **Major-incident flag** — yes, if your tool needs an explicit indicator for that classification.
+7. **Closure time** — yes.
+8. **Summary** — yes.
+
+On the timestamp point, in practice we usually care about at least detection/opening separately, and later resolution/closure separately, because they drive different reporting and handling questions. So I would not collapse that into one generic start time if you want the model to support real operations.
+
+### Turn 35 — app-tool
+
+🔍 Checked the current ontology state.
+
+### Turn 35 — app-tool
+
+✓ Applied: 0 added, 1 updated.
+
+### Turn 35 — app-assistant
+
+Confirmed and recorded on **Incident**:
+- **incidentIdentifier**
+- **status**
+- **severity**
+- **priority**
+- **detectedAt**
+- **openedAt**
+- **majorIncidentFlag**
+- **closedAt**
+- **summary**
+
+Recap:
+- We avoided a vague single “start time.”
+- You want distinct operational timestamps for detection/opening and later closure.
+
+Next property batch, for classes the agent tracks over time and uses in routing/response decisions:
+Please confirm which of these are needed.
+
+For **Alert**:
+1. **status**
+2. **severity**
+3. **triggeredAt**
+4. **summary**
+
+For **ITService**:
+5. **service name**
+6. **criticality**
+7. **service status**
+
+For **ConfigurationItem**:
+8. **configuration item identifier**
+9. **configuration item type**
+10. **operational status**
+
+### Turn 35 — persona
+
+Most of those are needed, with a few wording adjustments.
+
+For **alert**:
+1. **Status** — yes.
+2. **Severity** — yes.
+3. **Triggered at** — the idea is right, but I’d usually call that **raised at** for an alert.
+4. **Summary** — yes.
+
+For **IT service**:
+5. **Service name** — yes.
+6. **Criticality** — yes.
+7. **Service status** — I’d phrase that as **health state**, because we use that to express healthy, degraded, unavailable, recovering, and similar operational conditions.
+
+For **configuration item**:
+8. **Configuration item identifier** — the need is real, but the core property we’ve discussed explicitly is **name**. If your implementation also needs an identifier, that can be practical, but I would not overstate it unless you’ve decided to add one.
+9. **Configuration item type** — yes, especially since you’re folding infrastructure distinctions into the configuration item.
+10. **Operational status** — I would be careful here. We have not established a specific operational-status property for configuration items in the core model so far. I would not force it in unless you have a concrete decision use for it backed by the model you want.
+
+### Turn 36 — app-user
+
+Most of those are needed, with a few wording adjustments.
+
+For **alert**:
+1. **Status** — yes.
+2. **Severity** — yes.
+3. **Triggered at** — the idea is right, but I’d usually call that **raised at** for an alert.
+4. **Summary** — yes.
+
+For **IT service**:
+5. **Service name** — yes.
+6. **Criticality** — yes.
+7. **Service status** — I’d phrase that as **health state**, because we use that to express healthy, degraded, unavailable, recovering, and similar operational conditions.
+
+For **configuration item**:
+8. **Configuration item identifier** — the need is real, but the core property we’ve discussed explicitly is **name**. If your implementation also needs an identifier, that can be practical, but I would not overstate it unless you’ve decided to add one.
+9. **Configuration item type** — yes, especially since you’re folding infrastructure distinctions into the configuration item.
+10. **Operational status** — I would be careful here. We have not established a specific operational-status property for configuration items in the core model so far. I would not force it in unless you have a concrete decision use for it backed by the model you want.
+
+### Turn 36 — app-assistant
+
+Good corrections.
+
+Recap:
+- **Alert** needs:
+  - **status**
+  - **severity**
+  - **raisedAt**
+  - **summary**
+- **ITService** needs:
+  - **serviceName**
+  - **criticality**
+  - **healthState**
+- **ConfigurationItem**:
+  - keep **name**
+  - keep **configurationItemType**
+  - do **not** add a status field yet without a concrete decision need
+  - identifier is possible, but not yet clearly justified from what we’ve confirmed
+
+One focused follow-up before I record the configuration-item properties:
+You earlier said the agent must support dependency mapping, monitoring, impact analysis, assignment, and isolation for configuration items. Without some current-state field on **ConfigurationItem**, what would let the agent distinguish a normal component from one that is isolated, unavailable, or otherwise in a changed operational state? Do you want a **state/status** property after all, or is that state represented somewhere else in your operating model?
+
+### Turn 36 — persona
+
+I would still be careful not to invent a configuration-item status just because it sounds useful.
+
+In this operating model, the active operational picture is carried mainly through:
+- **incidents**,
+- **alerts**,
+- **events**,
+- and the **health state** of services.
+
+For a configuration item, we do need identification and classification, ownership, environment, location, monitoring links, and affected-by-incident context. Isolation is primarily an **action outcome** in the incident context, not necessarily a standing lifecycle property on the configuration item record itself.
+
+So my answer is: no, I would not add a generic configuration-item state field to the core model unless you have a specific governed status vocabulary for configuration items. As things stand, the changed operational state is represented through incident and event context rather than a permanent configuration-item status property.
+
+### Turn 37 — app-user
+
+I would still be careful not to invent a configuration-item status just because it sounds useful.
+
+In this operating model, the active operational picture is carried mainly through:
+- **incidents**,
+- **alerts**,
+- **events**,
+- and the **health state** of services.
+
+For a configuration item, we do need identification and classification, ownership, environment, location, monitoring links, and affected-by-incident context. Isolation is primarily an **action outcome** in the incident context, not necessarily a standing lifecycle property on the configuration item record itself.
+
+So my answer is: no, I would not add a generic configuration-item state field to the core model unless you have a specific governed status vocabulary for configuration items. As things stand, the changed operational state is represented through incident and event context rather than a permanent configuration-item status property.
+
+### Turn 37 — app-tool
+
+🔍 Checked the current ontology state.
+
+### Turn 37 — app-tool
+
+✓ Applied: 0 added, 3 updated.
+
+### Turn 37 — app-assistant
+
+Confirmed and recorded:
+- **Alert**: `status`, `severity`, `raisedAt`, `summary`
+- **ITService**: `serviceName`, `criticality`, `healthState`
+- **ConfigurationItem**: `name`, `configurationItemType`
+
+And explicitly not added:
+- a generic **ConfigurationItem** status/state property, because in your model the active operational state is mainly carried through incidents, alerts, events, and service health.
+
+Next property batch, focused on reporting/completeness decisions and operational traceability:
+Please confirm which of these are needed.
+
+For **MaterialityAssessment**:
+1. **assessment status**
+2. **assessment outcome**
+3. **assessed at**
+
+For **RegulatoryNotification**:
+4. **notification status**
+5. **prepared at**
+6. **submitted at**
+
+For **EvidenceItem**:
+7. **evidence type**
+8. **collected at**
+9. **completeness status**
+
+For **Communication**:
+10. **communication type**
+11. **approval status**
+12. **sent at**
+
+### Turn 37 — persona
+
+Several of these are needed, but I’d correct a few names.
+
+For **materiality assessment**:
+1. **Assessment status** — I would not use that as a core property from what we’ve established.
+2. **Assessment outcome** — yes, but I’d call it **result**.
+3. **Assessed at** — yes.
+
+For **regulatory notification**:
+4. **Notification status** — yes.
+5. **Prepared at** — I would not add that as a core property here.
+6. **Submitted at** — yes.
+
+For **evidence item**:
+7. **Evidence type** — we have not established that as a core property.
+8. **Collected at** — yes.
+9. **Completeness status** — I would not use that. The key property here is **integrity status**, because preservation and verifiability matter more than a vague completeness label.
+
+For **communication**:
+10. **Communication type** — I would not use that wording as the core property.
+11. **Approval status** — the idea is right, but the core property is just **status**, with the lifecycle including approval-related states.
+12. **Sent at** — yes.
+
+So the safer core set is:
+- materiality assessment: **result**, **assessed at**;
+- regulatory notification: **status**, **submitted at**;
+- evidence item: **collected at**, **integrity status**;
+- communication: **status**, **sent at**.
+
+### Turn 38 — app-user
+
+Several of these are needed, but I’d correct a few names.
+
+For **materiality assessment**:
+1. **Assessment status** — I would not use that as a core property from what we’ve established.
+2. **Assessment outcome** — yes, but I’d call it **result**.
+3. **Assessed at** — yes.
+
+For **regulatory notification**:
+4. **Notification status** — yes.
+5. **Prepared at** — I would not add that as a core property here.
+6. **Submitted at** — yes.
+
+For **evidence item**:
+7. **Evidence type** — we have not established that as a core property.
+8. **Collected at** — yes.
+9. **Completeness status** — I would not use that. The key property here is **integrity status**, because preservation and verifiability matter more than a vague completeness label.
+
+For **communication**:
+10. **Communication type** — I would not use that wording as the core property.
+11. **Approval status** — the idea is right, but the core property is just **status**, with the lifecycle including approval-related states.
+12. **Sent at** — yes.
+
+So the safer core set is:
+- materiality assessment: **result**, **assessed at**;
+- regulatory notification: **status**, **submitted at**;
+- evidence item: **collected at**, **integrity status**;
+- communication: **status**, **sent at**.
+
+### Turn 38 — app-tool
+
+🔍 Checked the current ontology state.
+
+### Turn 38 — app-tool
+
+✓ Applied: 0 added, 4 updated.
+
+### Turn 38 — app-assistant
+
+Confirmed and recorded:
+- **MaterialityAssessment**: `result`, `assessedAt`
+- **RegulatoryNotification**: `status`, `submittedAt`
+- **EvidenceItem**: `collectedAt`, `integrityStatus`
+- **Communication**: `status`, `sentAt`
+
+Recap:
+- We kept only the properties that directly support the reporting/completeness decisions you described.
+- We avoided broader fields like “evidence type” or “prepared at” because you hadn’t justified them yet.
+
+Next property batch, focused on recovery, change/release/deployment, and post-incident follow-up:
+Please confirm which of these are needed.
+
+For **RecoveryPlan**:
+1. **plan status**
+
+For **BackupSet**:
+2. **backup time**
+
+For **Change**:
+3. **change type**
+4. **change status**
+
+For **Deployment**:
+5. **deployment status**
+6. **deployed at**
+
+For **CorrectiveAction**:
+7. **status**
+8. **due date**
+
+For **PostIncidentReview**:
+9. **review status**
+10. **review date**
+
+### Turn 38 — persona
+
+A few of those are needed, but several need different wording.
+
+For **recovery plan**:
+1. **Plan status** — I would not use that as a core property here. The operationally important fields are the recovery objectives and review date rather than a generic status.
+
+For **backup set**:
+2. **Backup time** — the underlying need is right, but I’d be more specific: the key field is **last successful backup**. In practice there is also backup **status**.
+
+For **change**:
+3. **Change type** — we have not established that as a core property.
+4. **Change status** — yes.
+
+For **deployment**:
+5. **Deployment status** — yes.
+6. **Deployed at** — I would not use that exact wording as the single field. The deployment timing is better represented with **started at** and **completed at**.
+
+For **corrective action**:
+7. **Status** — yes.
+8. **Due date** — yes.
+
+For **post-incident review**:
+9. **Review status** — I would not add that as a core property.
+10. **Review date** — yes, but I’d phrase it as **held on**.
+
+So I’d keep:
+- backup set: **status**, **last successful backup**;
+- change: **status**;
+- deployment: **status**, **started at**, **completed at**;
+- corrective action: **status**, **due date**;
+- post-incident review: **held on**.
+
+And I’d leave recovery-plan status, change type, and review status out.
+
+### Turn 39 — app-user
+
+A few of those are needed, but several need different wording.
+
+For **recovery plan**:
+1. **Plan status** — I would not use that as a core property here. The operationally important fields are the recovery objectives and review date rather than a generic status.
+
+For **backup set**:
+2. **Backup time** — the underlying need is right, but I’d be more specific: the key field is **last successful backup**. In practice there is also backup **status**.
+
+For **change**:
+3. **Change type** — we have not established that as a core property.
+4. **Change status** — yes.
+
+For **deployment**:
+5. **Deployment status** — yes.
+6. **Deployed at** — I would not use that exact wording as the single field. The deployment timing is better represented with **started at** and **completed at**.
+
+For **corrective action**:
+7. **Status** — yes.
+8. **Due date** — yes.
+
+For **post-incident review**:
+9. **Review status** — I would not add that as a core property.
+10. **Review date** — yes, but I’d phrase it as **held on**.
+
+So I’d keep:
+- backup set: **status**, **last successful backup**;
+- change: **status**;
+- deployment: **status**, **started at**, **completed at**;
+- corrective action: **status**, **due date**;
+- post-incident review: **held on**.
+
+And I’d leave recovery-plan status, change type, and review status out.
+
+### Turn 39 — app-assistant
+
+Good — that sharpens the operational fields.
+
+Recap:
+- **RecoveryPlan**: no generic status field
+- **BackupSet**: `status`, `lastSuccessfulBackup`
+- **Change**: `status`
+- **Deployment**: `status`, `startedAt`, `completedAt`
+- **CorrectiveAction**: `status`, `dueDate`
+- **PostIncidentReview**: `heldOn`
+
+One focused follow-up before I record the recovery-plan part:
+You said the operationally important fields on **RecoveryPlan** are the recovery objectives and review date. Do you want these core properties on **RecoveryPlan**:
+1. **recovery time objective**
+2. **recovery point objective**
+3. **reviewedOn** ?
+
+### Turn 39 — persona
+
+Yes, those belong on the recovery plan, with one wording adjustment.
+
+I’d want:
+1. **Recovery time objective** — yes.
+2. **Recovery point objective** — yes.
+3. **Last review date** — yes; I’d use that wording rather than a generic “reviewed on.”
+
+### Turn 40 — app-user
+
+Yes, those belong on the recovery plan, with one wording adjustment.
+
+I’d want:
+1. **Recovery time objective** — yes.
+2. **Recovery point objective** — yes.
+3. **Last review date** — yes; I’d use that wording rather than a generic “reviewed on.”
+
+### Turn 40 — app-tool
+
+🔍 Checked the current ontology state.
+
+### Turn 40 — app-tool
+
+✓ Applied: 0 added, 6 updated.
+
+### Turn 40 — app-assistant
+
+Confirmed and recorded:
+- **RecoveryPlan**: `recoveryTimeObjective`, `recoveryPointObjective`, `lastReviewDate`
+- **BackupSet**: `status`, `lastSuccessfulBackup`
+- **Change**: `status`
+- **Deployment**: `status`, `startedAt`, `completedAt`
+- **CorrectiveAction**: `status`, `dueDate`
+- **PostIncidentReview**: `heldOn`
+
+Recap:
+- We now have the core decision-bearing properties for incident handling, service health, reporting, evidence, communication, recovery, change/deployment, and follow-up actions.
+
+Before moving on, there’s one more property clean-up batch for classes likely to need identification or decision fields:
+Please confirm which of these are needed.
+
+1. **Application**: `name`
+2. **Environment**: `name`, `environmentType`
+3. **Vendor**: `name`, `criticality`
+4. **ThirdPartyService**: `name`, `status`
+5. **CloudService**: `name`, `status`
+6. **Runbook**: `name`
+7. **Workaround**: `name`
+8. **Release**: `status`
+9. **KnownError**: `summary`
+10. **Problem**: `status`
+
+### Turn 40 — persona
+
+Some of those are needed as stated, some need different fields, and some I would not add.
+
+1. **Application: name** — I would not add just that from what we’ve already established. Application does have operational properties, but “name” has not been one of the core fields we’ve explicitly settled yet in this pass.
+
+2. **Environment: name, environment type** — not both in that form. The key property here is **environment type**.
+
+3. **Vendor: name, criticality** — yes in substance, but I’d use **legal name** and **criticality tier**.
+
+4. **Third-party service: name, status** — I would not confirm those from what we’ve explicitly established so far. The core property we have clearly for third-party service is **criticality tier**.
+
+5. **Cloud service: name, status** — I would not confirm those from the current model we’ve built so far.
+
+6. **Runbook: name** — we have not established a core property set for runbook here yet, so I would not force it.
+
+7. **Workaround: name** — no, not as the core property. What matters more is the documented workaround content through the known-error side.
+
+8. **Release: status** — no, the release property we need is **version**, and there is also a release date if you want the timing.
+
+9. **Known error: summary** — I would not use summary. The key fields are **diagnosed cause** and **workaround summary**.
+
+10. **Problem: status** — yes.
+
+So the cleaner set I’d confirm is:
+- environment: **environment type**;
+- vendor: **legal name**, **criticality tier**;
+- third-party service: **criticality tier**;
+- release: **version**;
+- known error: **diagnosed cause**, **workaround summary**;
+- problem: **status**.
+
+### Turn 41 — app-user
+
+Some of those are needed as stated, some need different fields, and some I would not add.
+
+1. **Application: name** — I would not add just that from what we’ve already established. Application does have operational properties, but “name” has not been one of the core fields we’ve explicitly settled yet in this pass.
+
+2. **Environment: name, environment type** — not both in that form. The key property here is **environment type**.
+
+3. **Vendor: name, criticality** — yes in substance, but I’d use **legal name** and **criticality tier**.
+
+4. **Third-party service: name, status** — I would not confirm those from what we’ve explicitly established so far. The core property we have clearly for third-party service is **criticality tier**.
+
+5. **Cloud service: name, status** — I would not confirm those from the current model we’ve built so far.
+
+6. **Runbook: name** — we have not established a core property set for runbook here yet, so I would not force it.
+
+7. **Workaround: name** — no, not as the core property. What matters more is the documented workaround content through the known-error side.
+
+8. **Release: status** — no, the release property we need is **version**, and there is also a release date if you want the timing.
+
+9. **Known error: summary** — I would not use summary. The key fields are **diagnosed cause** and **workaround summary**.
+
+10. **Problem: status** — yes.
+
+So the cleaner set I’d confirm is:
+- environment: **environment type**;
+- vendor: **legal name**, **criticality tier**;
+- third-party service: **criticality tier**;
+- release: **version**;
+- known error: **diagnosed cause**, **workaround summary**;
+- problem: **status**.
+
+### Turn 41 — app-assistant
+
+Good — that keeps the property layer tied to real decisions.
+
+Recap:
+- Confirmed:
+  - **Environment**: `environmentType`
+  - **Vendor**: `legalName`, `criticalityTier`
+  - **ThirdPartyService**: `criticalityTier`
+  - **Release**: `version`
+  - **KnownError**: `diagnosedCause`, `workaroundSummary`
+  - **Problem**: `status`
+- Not yet confirmed:
+  - application name
+  - cloud-service properties
+  - runbook properties
+  - workaround properties
+  - third-party-service name/status
+  - vendor name as a generic field rather than legal name
+
+One focused follow-up before I record the last few likely-needed properties:
+For the competency question **“Which runbook is appropriate and safe to use for this incident?”**, without at least one identifying field on **Runbook**, what would let the agent retrieve or present a specific runbook distinctly? Do you want a minimal identifier such as **title** or **runbook identifier**, or is there another existing property you’d rather use?
+
+### Turn 41 — persona
+
+Yes — a **runbook** does need at least a minimal identifying field so the agent can retrieve and present a specific procedure.
+
+I’d use a simple **name** for that. That is enough for the operational purpose here without overcomplicating the property set.
+
+### Turn 42 — app-user
+
+Yes — a **runbook** does need at least a minimal identifying field so the agent can retrieve and present a specific procedure.
+
+I’d use a simple **name** for that. That is enough for the operational purpose here without overcomplicating the property set.
+
+### Turn 42 — app-tool
+
+🔍 Checked the current ontology state.
+
+### Turn 42 — app-tool
+
+✓ Applied: 0 added, 7 updated.
+
+### Turn 42 — app-assistant
+
+Confirmed and recorded:
+- **Environment**: `environmentType`
+- **Vendor**: `legalName`, `criticalityTier`
+- **ThirdPartyService**: `criticalityTier`
+- **Runbook**: `name`
+- **Release**: `version`
+- **KnownError**: `diagnosedCause`, `workaroundSummary`
+- **Problem**: `status`
+
+Phase 4 recap:
+We now have a substantial set of decision-bearing properties, but still only where you justified them. We deliberately left out several “nice to know” fields that weren’t needed by your questions/actions.
+
+Next is Phase 5: language layer.
+I’ll start with class meanings in a single coherent batch.
+
+Please give me a one-sentence plain meaning for these classes, in your own terms:
+1. **Incident**
+2. **ITService**
+3. **BusinessService**
+4. **CustomerChannel**
+5. **ConfigurationItem**
+
+### Turn 42 — persona
+
+1. **Incident**: an unplanned interruption, degradation, or security condition that requires managed response.
+
+2. **IT service**: a managed technology capability that supports one or more business services.
+
+3. **Business service**: a customer-facing or business-facing capability delivered by the bank.
+
+4. **Customer channel**: a channel through which customers access banking services.
+
+5. **Configuration item**: a managed component that sits within configuration-management scope and matters for operation, support, or recovery.
+
+### Turn 43 — app-user
+
+1. **Incident**: an unplanned interruption, degradation, or security condition that requires managed response.
+
+2. **IT service**: a managed technology capability that supports one or more business services.
+
+3. **Business service**: a customer-facing or business-facing capability delivered by the bank.
+
+4. **Customer channel**: a channel through which customers access banking services.
+
+5. **Configuration item**: a managed component that sits within configuration-management scope and matters for operation, support, or recovery.
+
+### Turn 43 — app-tool
+
+🔍 Checked the current ontology state.
+
+### Turn 43 — app-tool
+
+✓ Applied: 0 added, 5 updated.
+
+### Turn 43 — app-assistant
+
+Recorded.  
+
+Recap of meanings captured:
+- **Incident**: an unplanned interruption, degradation, or security condition that requires managed response.
+- **ITService**: a managed technology capability that supports one or more business services.
+- **BusinessService**: a customer-facing or business-facing capability delivered by the bank.
+- **CustomerChannel**: a channel through which customers access banking services.
+- **ConfigurationItem**: a managed component that sits within configuration-management scope and matters for operation, support, or recovery.
+
+Next meaning batch:
+Please give me a one-sentence plain meaning for these classes:
+1. **Alert**
+2. **Event**
+3. **ThirdPartyService**
+4. **CloudService**
+5. **Vendor**
+
+### Turn 43 — persona
+
+1. **Alert**: a monitoring or security signal that requires triage or acknowledgement.
+
+2. **Event**: a time-stamped observation of a state change or other notable occurrence.
+
+3. **Third-party service**: an externally provided service that the bank depends on.
+
+4. **Cloud service**: a technology capability consumed from an external or group cloud provider.
+
+5. **Vendor**: an external organization that supplies or supports technology or services.
+
+### Turn 44 — app-user
+
+1. **Alert**: a monitoring or security signal that requires triage or acknowledgement.
+
+2. **Event**: a time-stamped observation of a state change or other notable occurrence.
+
+3. **Third-party service**: an externally provided service that the bank depends on.
+
+4. **Cloud service**: a technology capability consumed from an external or group cloud provider.
+
+5. **Vendor**: an external organization that supplies or supports technology or services.
+
+### Turn 44 — app-tool
+
+🔍 Checked the current ontology state.
+
+### Turn 44 — app-tool
+
+✓ Applied: 0 added, 5 updated.
+
+### Turn 44 — app-assistant
+
+Recorded.
+
+Recap of meanings captured:
+- **Alert**: a monitoring or security signal that requires triage or acknowledgement.
+- **Event**: a time-stamped observation of a state change or other notable occurrence.
+- **ThirdPartyService**: an externally provided service that the bank depends on.
+- **CloudService**: a technology capability consumed from an external or group cloud provider.
+- **Vendor**: an external organization that supplies or supports technology or services.
+
+Next meaning batch:
+Please give me a one-sentence plain meaning for these classes:
+1. **ServiceOwner**
+2. **ResolverGroup**
+3. **OnCallEngineer**
+4. **IncidentCommander**
+5. **Runbook**
+
+### Turn 44 — persona
+
+1. **Service owner**: the role accountable for an IT service across its lifecycle.
+
+2. **Resolver group**: the team assigned to diagnose and restore issues in a specific technology or service area.
+
+3. **On-call engineer**: a technical specialist available for time-critical operational response.
+
+4. **Incident commander**: the person accountable for command, coordination, and decision cadence during a major incident.
+
+5. **Runbook**: a maintained operational procedure used for diagnosis, response, recovery, or verification.
+
+### Turn 45 — app-user
+
+1. **Service owner**: the role accountable for an IT service across its lifecycle.
+
+2. **Resolver group**: the team assigned to diagnose and restore issues in a specific technology or service area.
+
+3. **On-call engineer**: a technical specialist available for time-critical operational response.
+
+4. **Incident commander**: the person accountable for command, coordination, and decision cadence during a major incident.
+
+5. **Runbook**: a maintained operational procedure used for diagnosis, response, recovery, or verification.
+
+### Turn 45 — app-tool
+
+🔍 Checked the current ontology state.
+
+### Turn 45 — app-tool
+
+✓ Applied: 0 added, 5 updated.
+
+### Turn 45 — app-assistant
+
+Recorded.
+
+Recap of meanings captured:
+- **ServiceOwner**: the role accountable for an IT service across its lifecycle.
+- **ResolverGroup**: the team assigned to diagnose and restore issues in a specific technology or service area.
+- **OnCallEngineer**: a technical specialist available for time-critical operational response.
+- **IncidentCommander**: the person accountable for command, coordination, and decision cadence during a major incident.
+- **Runbook**: a maintained operational procedure used for diagnosis, response, recovery, or verification.
+
+Next meaning batch:
+Please give me a one-sentence plain meaning for these classes:
+1. **Workaround**
+2. **BackupSet**
+3. **RecoveryPlan**
+4. **Environment**
+5. **Change**
+
+### Turn 45 — persona
+
+1. **Workaround**: a temporary method that reduces or bypasses the impact of an incident or problem.
+
+2. **Backup set**: a defined collection of recoverable backup data for protected components.
+
+3. **Recovery plan**: a documented plan for restoring an IT service and its dependencies.
+
+4. **Environment**: a deployment context such as production, test, development, or disaster recovery.
+
+5. **Change**: a controlled addition, modification, or removal that may affect an IT service.
+
+### Turn 46 — app-user
+
+1. **Workaround**: a temporary method that reduces or bypasses the impact of an incident or problem.
+
+2. **Backup set**: a defined collection of recoverable backup data for protected components.
+
+3. **Recovery plan**: a documented plan for restoring an IT service and its dependencies.
+
+4. **Environment**: a deployment context such as production, test, development, or disaster recovery.
+
+5. **Change**: a controlled addition, modification, or removal that may affect an IT service.
+
+### Turn 46 — app-tool
+
+🔍 Checked the current ontology state.
+
+### Turn 46 — app-tool
+
+✓ Applied: 0 added, 5 updated.
+
+### Turn 46 — app-assistant
+
+Recorded.
+
+Recap of meanings captured:
+- **Workaround**: a temporary method that reduces or bypasses the impact of an incident or problem.
+- **BackupSet**: a defined collection of recoverable backup data for protected components.
+- **RecoveryPlan**: a documented plan for restoring an IT service and its dependencies.
+- **Environment**: a deployment context such as production, test, development, or disaster recovery.
+- **Change**: a controlled addition, modification, or removal that may affect an IT service.
+
+Next meaning batch:
+Please give me a one-sentence plain meaning for these classes:
+1. **Deployment**
+2. **MaterialityAssessment**
+3. **RegulatoryNotification**
+4. **EvidenceItem**
+5. **Communication**
+
+### Turn 46 — persona
+
+1. **Deployment**: the technical execution that installs or activates a release or change.
+
+2. **Materiality assessment**: a documented determination of incident significance and reporting implications.
+
+3. **Regulatory notification**: a formal incident-related submission to a competent authority.
+
+4. **Evidence item**: a preserved record, artifact, or observation that supports incident analysis and accountability.
+
+5. **Communication**: a controlled message sent to operational, business, customer, vendor, or regulatory audiences.
+
+### Turn 47 — app-user
+
+1. **Deployment**: the technical execution that installs or activates a release or change.
+
+2. **Materiality assessment**: a documented determination of incident significance and reporting implications.
+
+3. **Regulatory notification**: a formal incident-related submission to a competent authority.
+
+4. **Evidence item**: a preserved record, artifact, or observation that supports incident analysis and accountability.
+
+5. **Communication**: a controlled message sent to operational, business, customer, vendor, or regulatory audiences.
+
+### Turn 47 — app-tool
+
+🔍 Checked the current ontology state.
+
+### Turn 47 — app-tool
+
+✓ Applied: 0 added, 5 updated.
+
+### Turn 47 — app-assistant
+
+Recorded.
+
+Recap of meanings captured:
+- **Deployment**: the technical execution that installs or activates a release or change.
+- **MaterialityAssessment**: a documented determination of incident significance and reporting implications.
+- **RegulatoryNotification**: a formal incident-related submission to a competent authority.
+- **EvidenceItem**: a preserved record, artifact, or observation that supports incident analysis and accountability.
+- **Communication**: a controlled message sent to operational, business, customer, vendor, or regulatory audiences.
+
+Next meaning batch:
+Please give me a one-sentence plain meaning for these classes:
+1. **CorrectiveAction**
+2. **CybersecurityIncident**
+3. **Application**
+4. **SecurityEvent**
+5. **Problem**
+
+### Turn 47 — persona
+
+1. **Corrective action**: a tracked action intended to remove a cause, reduce risk, or improve response capability.
+
+2. **Cybersecurity incident**: an incident caused by or involving malicious, unauthorized, or otherwise security-relevant activity.
+
+3. **Application**: a software system that implements business or operational functionality.
+
+4. **Security event**: an event relevant to confidentiality, integrity, availability, authenticity, or cyber-threat activity.
+
+5. **Problem**: the underlying cause, or potential underlying cause, of one or more incidents.
+
+### Turn 48 — app-user
+
+1. **Corrective action**: a tracked action intended to remove a cause, reduce risk, or improve response capability.
+
+2. **Cybersecurity incident**: an incident caused by or involving malicious, unauthorized, or otherwise security-relevant activity.
+
+3. **Application**: a software system that implements business or operational functionality.
+
+4. **Security event**: an event relevant to confidentiality, integrity, availability, authenticity, or cyber-threat activity.
+
+5. **Problem**: the underlying cause, or potential underlying cause, of one or more incidents.
+
+### Turn 48 — app-tool
+
+🔍 Checked the current ontology state.
+
+### Turn 48 — app-tool
+
+✓ Applied: 0 added, 5 updated.
+
+### Turn 48 — app-assistant
+
+Recorded.
+
+Recap of meanings captured:
+- **CorrectiveAction**: a tracked action intended to remove a cause, reduce risk, or improve response capability.
+- **CybersecurityIncident**: an incident caused by or involving malicious, unauthorized, or otherwise security-relevant activity.
+- **Application**: a software system that implements business or operational functionality.
+- **SecurityEvent**: an event relevant to confidentiality, integrity, availability, authenticity, or cyber-threat activity.
+- **Problem**: the underlying cause, or potential underlying cause, of one or more incidents.
+
+Next meaning batch:
+Please give me a one-sentence plain meaning for these classes:
+1. **KnownError**
+2. **PostIncidentReview**
+3. **Release**
+
+And one clarification in the same pattern:
+4. **InfrastructureComponent** is still present in the live model from earlier, but you later decided it should not remain a separate class. Do you want to give it a temporary meaning for now just so the graph is internally documented, or should I leave it as an explicit clean-up item to remove on the canvas?
+
+### Turn 48 — persona
+
+1. **Known error**: a diagnosed problem with a documented cause or workaround.
+
+2. **Post-incident review**: a structured review of causes, response effectiveness, lessons learned, and follow-up work after an incident.
+
+3. **Release**: a governed package of approved changes introduced together.
+
+4. On **infrastructure component**, I would leave it as an explicit clean-up item to remove on the canvas rather than giving it a fresh standalone meaning here, since we already agreed it should not remain a separate class in this ontology.
+
+### Turn 49 — app-user
+
+1. **Known error**: a diagnosed problem with a documented cause or workaround.
+
+2. **Post-incident review**: a structured review of causes, response effectiveness, lessons learned, and follow-up work after an incident.
+
+3. **Release**: a governed package of approved changes introduced together.
+
+4. On **infrastructure component**, I would leave it as an explicit clean-up item to remove on the canvas rather than giving it a fresh standalone meaning here, since we already agreed it should not remain a separate class in this ontology.
+
+### Turn 49 — app-tool
+
+🔍 Checked the current ontology state.
+
+### Turn 49 — app-tool
+
+✓ Applied: 0 added, 3 updated.
+
+### Turn 49 — app-assistant
+
+Recorded.
+
+Recap:
+- **KnownError**: a diagnosed problem with a documented cause or workaround.
+- **PostIncidentReview**: a structured review of causes, response effectiveness, lessons learned, and follow-up work after an incident.
+- **Release**: a governed package of approved changes introduced together.
+- **InfrastructureComponent** remains an explicit clean-up item to remove on the canvas, not something we are documenting further.
+
+Now we should capture relationship meanings in batches.
+
+Please give me a one-sentence plain meaning for these relationships:
+1. **impacts** (`Incident -> BusinessService` and `Incident -> ITService`)
+2. **deliveredThrough** (`BusinessService -> CustomerChannel`)
+3. **dependsOn** (`BusinessService -> ITService` and `ITService -> ThirdPartyService`)
+4. **implementedBy** (`ITService -> Application`, `Change -> Release`)
+5. **provides** (`Vendor -> ThirdPartyService`, `Vendor -> CloudService`)
+
+### Turn 49 — persona
+
+1. **Impacts**: identifies the business or technology service whose operation is adversely affected by the incident.
+
+2. **Delivered through**: identifies the customer access channel through which a business service is provided.
+
+3. **Depends on**: identifies a service that must be available or functioning for the depending service to operate as intended.
+
+4. **Implemented by**: identifies the concrete application or release through which the higher-level service or change is realized.
+
+5. **Provides**: identifies the externally supplied service or cloud capability delivered by the vendor.
+
+### Turn 50 — app-user
+
+1. **Impacts**: identifies the business or technology service whose operation is adversely affected by the incident.
+
+2. **Delivered through**: identifies the customer access channel through which a business service is provided.
+
+3. **Depends on**: identifies a service that must be available or functioning for the depending service to operate as intended.
+
+4. **Implemented by**: identifies the concrete application or release through which the higher-level service or change is realized.
+
+5. **Provides**: identifies the externally supplied service or cloud capability delivered by the vendor.
+
+### Turn 50 — app-tool
+
+🔍 Checked the current ontology state.
+
+### Turn 50 — app-tool
+
+✓ Applied: 0 added, 9 updated.
+
+### Turn 50 — app-assistant
+
+Recorded.
+
+Recap of relationship meanings captured:
+- **impacts**: identifies the business or technology service whose operation is adversely affected by the incident.
+- **deliveredThrough**: identifies the customer access channel through which a business service is provided.
+- **dependsOn**: identifies a service that must be available or functioning for the depending service to operate as intended.
+- **implementedBy**: identifies the concrete application or release through which the higher-level service or change is realized.
+- **provides**: identifies the externally supplied service or cloud capability delivered by the vendor.
+
+Next relationship meaning batch:
+Please give me a one-sentence plain meaning for these relationships:
+1. **triggeredBy**
+2. **correlatedFrom**
+3. **concerns**
+4. **observedOn**
+5. **owns**
+
+### Turn 50 — persona
+
+1. **Triggered by**: identifies the alert whose signal led to opening or recognizing the incident.
+
+2. **Correlated from**: identifies the event data brought together to form the incident picture.
+
+3. **Concerns**: identifies the configuration item that an alert is about.
+
+4. **Observed on**: identifies the configuration item on which the event was seen.
+
+5. **Owns**: identifies the accountable owner for the service in question.
+
+### Turn 51 — app-user
+
+1. **Triggered by**: identifies the alert whose signal led to opening or recognizing the incident.
+
+2. **Correlated from**: identifies the event data brought together to form the incident picture.
+
+3. **Concerns**: identifies the configuration item that an alert is about.
+
+4. **Observed on**: identifies the configuration item on which the event was seen.
+
+5. **Owns**: identifies the accountable owner for the service in question.
+
+### Turn 51 — app-tool
+
+🔍 Checked the current ontology state.
+
+### Turn 51 — app-tool
+
+✓ Applied: 0 added, 5 updated.
+
+### Turn 51 — app-assistant
+
+Recorded.
+
+Recap of relationship meanings captured:
+- **triggeredBy**: identifies the alert whose signal led to opening or recognizing the incident.
+- **correlatedFrom**: identifies the event data brought together to form the incident picture.
+- **concerns**: identifies the configuration item that an alert is about.
+- **observedOn**: identifies the configuration item on which the event was seen.
+- **owns**: identifies the accountable owner for the service in question.
+
+Next relationship meaning batch:
+Please give me a one-sentence plain meaning for these relationships:
+1. **memberOf**
+2. **assignedTo**
+3. **handledBy**
+4. **supports**
+5. **coordinatedBy**
+
+### Turn 51 — persona
+
+1. **Member of**: identifies the resolver group that the on-call engineer belongs to.
+
+2. **Assigned to**: identifies the resolver group currently responsible for diagnosing and restoring the incident.
+
+3. **Handled by**: identifies the individual responder currently working the incident.
+
+4. **Supports**: identifies the service or configuration item that a resolver group is responsible for covering operationally.
+
+5. **Coordinated by**: identifies the incident commander responsible for command and coordination of the incident.
+
+### Turn 52 — app-user
+
+1. **Member of**: identifies the resolver group that the on-call engineer belongs to.
+
+2. **Assigned to**: identifies the resolver group currently responsible for diagnosing and restoring the incident.
+
+3. **Handled by**: identifies the individual responder currently working the incident.
+
+4. **Supports**: identifies the service or configuration item that a resolver group is responsible for covering operationally.
+
+5. **Coordinated by**: identifies the incident commander responsible for command and coordination of the incident.
+
+### Turn 52 — app-tool
+
+🔍 Checked the current ontology state.
+
+### Turn 52 — app-tool
+
+✓ Applied: 0 added, 6 updated.
+
+### Turn 52 — app-assistant
+
+Recorded.
+
+Recap of relationship meanings captured:
+- **memberOf**: identifies the resolver group that the on-call engineer belongs to.
+- **assignedTo**: identifies the resolver group currently responsible for diagnosing and restoring the incident.
+- **handledBy**: identifies the individual responder currently working the incident.
+- **supports**: identifies the service or configuration item that a resolver group is responsible for covering operationally.
+- **coordinatedBy**: identifies the incident commander responsible for command and coordination of the incident.
+
+Next relationship meaning batch:
+Please give me a one-sentence plain meaning for these relationships:
+1. **derivedFrom**
+2. **linkedTo**
+3. **documentedBy**
+4. **has** (`KnownError -> Workaround`)
+5. **handledWith**
+
+### Turn 52 — persona
+
+1. **Derived from**: identifies the security event from which the cybersecurity incident is determined.
+
+2. **Linked to**: identifies the problem record associated with the incident.
+
+3. **Documented by**: identifies the known-error record that captures the diagnosed problem.
+
+4. **Has**: identifies the workaround attached to the known error.
+
+5. **Handled with**: identifies the runbook used to manage diagnosis, response, recovery, or verification for the incident.
+
+### Turn 53 — app-user
+
+1. **Derived from**: identifies the security event from which the cybersecurity incident is determined.
+
+2. **Linked to**: identifies the problem record associated with the incident.
+
+3. **Documented by**: identifies the known-error record that captures the diagnosed problem.
+
+4. **Has**: identifies the workaround attached to the known error.
+
+5. **Handled with**: identifies the runbook used to manage diagnosis, response, recovery, or verification for the incident.
+
+### Turn 53 — app-tool
+
+🔍 Checked the current ontology state.
+
+### Turn 53 — app-tool
+
+✓ Applied: 0 added, 5 updated.
+
+### Turn 53 — app-assistant
+
+Recorded.
+
+Recap of relationship meanings captured:
+- **derivedFrom**: identifies the security event from which the cybersecurity incident is determined.
+- **linkedTo**: identifies the problem record associated with the incident.
+- **documentedBy**: identifies the known-error record that captures the diagnosed problem.
+- **has**: identifies the workaround attached to the known error.
+- **handledWith**: identifies the runbook used to manage diagnosis, response, recovery, or verification for the incident.
+
+Next relationship meaning batch:
+Please give me a one-sentence plain meaning for these relationships:
+1. **recovers**
+2. **uses**
+3. **deployedIn**
+4. **evaluatedBy**
+5. **reports**
+
+### Turn 53 — persona
+
+1. **Recovers**: identifies the IT service that the recovery plan is intended to restore.
+
+2. **Uses**: identifies the backup set required by the recovery plan.
+
+3. **Deployed in**: identifies the environment in which the IT service is deployed.
+
+4. **Evaluated by**: identifies the materiality assessment used to determine the incident’s significance and reporting implications.
+
+5. **Reports**: identifies the incident that the regulatory notification formally reports.
+
+### Turn 54 — app-user
+
+1. **Recovers**: identifies the IT service that the recovery plan is intended to restore.
+
+2. **Uses**: identifies the backup set required by the recovery plan.
+
+3. **Deployed in**: identifies the environment in which the IT service is deployed.
+
+4. **Evaluated by**: identifies the materiality assessment used to determine the incident’s significance and reporting implications.
+
+5. **Reports**: identifies the incident that the regulatory notification formally reports.
+
+### Turn 54 — app-tool
+
+🔍 Checked the current ontology state.
+
+### Turn 54 — app-tool
+
+✓ Applied: 0 added, 5 updated.
+
+### Turn 54 — app-assistant
+
+Recorded.
+
+Recap of relationship meanings captured:
+- **recovers**: identifies the IT service that the recovery plan is intended to restore.
+- **uses**: identifies the backup set required by the recovery plan.
+- **deployedIn**: identifies the environment in which the IT service is deployed.
+- **evaluatedBy**: identifies the materiality assessment used to determine the incident's significance and reporting implications.
+- **reports**: identifies the incident that the regulatory notification formally reports.
+
+Next relationship meaning batch:
+Please give me a one-sentence plain meaning for these relationships:
+1. **supportedBy**
+2. **communicatedThrough**
+3. **reviewedIn**
+4. **produces**
+5. **resolvedBy**
+
+### Turn 54 — persona
+
+1. **Supported by**: identifies the evidence items that substantiate the incident record, analysis, or resolution.
+
+2. **Communicated through**: identifies the communication records used to inform stakeholders about the incident.
+
+3. **Reviewed in**: identifies the post-incident review where the incident is examined after response.
+
+4. **Produces**: identifies the corrective actions that come out of the post-incident review.
+
+5. **Resolved by**: identifies the change used to restore or permanently fix the incident.
+
+### Turn 55 — app-user
+
+1. **Supported by**: identifies the evidence items that substantiate the incident record, analysis, or resolution.
+
+2. **Communicated through**: identifies the communication records used to inform stakeholders about the incident.
+
+3. **Reviewed in**: identifies the post-incident review where the incident is examined after response.
+
+4. **Produces**: identifies the corrective actions that come out of the post-incident review.
+
+5. **Resolved by**: identifies the change used to restore or permanently fix the incident.
+
+### Turn 55 — app-tool
+
+🔍 Checked the current ontology state.
+
+### Turn 55 — app-tool
+
+✓ Applied: 0 added, 5 updated.
+
+### Turn 55 — app-assistant
+
+Recorded.
+
+Recap of relationship meanings captured:
+- **supportedBy**: identifies the evidence items that substantiate the incident record, analysis, or resolution.
+- **communicatedThrough**: identifies the communication records used to inform stakeholders about the incident.
+- **reviewedIn**: identifies the post-incident review where the incident is examined after response.
+- **produces**: identifies the corrective actions that come out of the post-incident review.
+- **resolvedBy**: identifies the change used to restore or permanently fix the incident.
+
+Next relationship meaning batch:
+Please give me a one-sentence plain meaning for these relationships:
+1. **deliveredBy**
+2. **deploys**
+3. **protects**
+4. **belongsTo**
+5. **requiresPreservationOf**
+
+### Turn 55 — persona
+
+1. **Delivered by**: identifies the deployment through which the release is technically introduced.
+
+2. **Deploys**: identifies the application that the deployment installs or activates.
+
+3. **Protects**: identifies the configuration item whose recoverable data is covered by the backup set.
+
+4. **Belongs to**: identifies the environment that the configuration item is part of.
+
+5. **Requires preservation of**: identifies the evidence items that must be preserved for the cybersecurity incident.
+
+### Turn 56 — app-user
+
+1. **Delivered by**: identifies the deployment through which the release is technically introduced.
+
+2. **Deploys**: identifies the application that the deployment installs or activates.
+
+3. **Protects**: identifies the configuration item whose recoverable data is covered by the backup set.
+
+4. **Belongs to**: identifies the environment that the configuration item is part of.
+
+5. **Requires preservation of**: identifies the evidence items that must be preserved for the cybersecurity incident.
+
+### Turn 56 — app-tool
+
+🔍 Checked the current ontology state.
+
+### Turn 56 — app-tool
+
+✓ Applied: 0 added, 5 updated.
+
+### Turn 56 — app-assistant
+
+Recorded.
+
+Recap:
+- **deliveredBy**: identifies the deployment through which the release is technically introduced.
+- **deploys**: identifies the application that the deployment installs or activates.
+- **protects**: identifies the configuration item whose recoverable data is covered by the backup set.
+- **belongsTo**: identifies the environment that the configuration item is part of.
+- **requiresPreservationOf**: identifies the evidence items that must be preserved for the cybersecurity incident.
+
+We’ve now captured meanings for almost all active classes and relationships. Two items are still clearly unfinished in the live model:
+- **InfrastructureComponent** still exists as a leftover class and has no meaning, but you have already confirmed it should be removed on the canvas rather than documented further.
+- **runsOn** still has no meaning, but it points to that same leftover class and should probably disappear together with it.
+
+Short recap of Phase 5:
+- Class meanings are now filled in for the substantive model.
+- Relationship meanings are now filled in for the substantive model.
+- The remaining language-layer gap is tied to the leftover **InfrastructureComponent / runsOn** pair, which you already marked as cleanup rather than part of the intended ontology.
+
+Before moving to fixed choices and constraints, one focused alias question:
+Are there any true aliases you want explicitly captured for these classes — and only where they genuinely mean the same thing in your setting:
+1. **ConfigurationItem**
+2. **Vendor**
+3. **Communication**
+4. **ResolverGroup**
+5. **KnownError**
+
+### Turn 56 — persona
+
+Yes, a few are worth capturing because people really do use them interchangeably in operations:
+
+1. **Configuration item** — **CI** is the standard short form.
+2. **Vendor** — **supplier** is a real interchangeable term in practice.
+3. **Communication** — **notification** is used in everyday incident handling, though you do need to keep it distinct from the formal regulatory notification object.
+4. **Resolver group** — **support group** is a common equivalent term.
+5. **Known error** — I would keep that as-is; I would not force an extra alias unless you have a local support-tool term you want to preserve.
+
+### Turn 57 — app-user
+
+Yes, a few are worth capturing because people really do use them interchangeably in operations:
+
+1. **Configuration item** — **CI** is the standard short form.
+2. **Vendor** — **supplier** is a real interchangeable term in practice.
+3. **Communication** — **notification** is used in everyday incident handling, though you do need to keep it distinct from the formal regulatory notification object.
+4. **Resolver group** — **support group** is a common equivalent term.
+5. **Known error** — I would keep that as-is; I would not force an extra alias unless you have a local support-tool term you want to preserve.
+
+### Turn 57 — app-tool
+
+🔍 Checked the current ontology state.
+
+### Turn 57 — app-tool
+
+✓ Applied: 0 added, 4 updated.
+
+### Turn 57 — app-assistant
+
+Recorded aliases:
+- **ConfigurationItem** → `CI`
+- **Vendor** → `supplier`
+- **Communication** → `notification`
+- **ResolverGroup** → `support group`
+
+And explicitly not adding an alias for **KnownError** at this point.
+
+Recap:
+- These are operationally real interchangeable terms in your setting.
+- We are still keeping **Communication** distinct from the formal **RegulatoryNotification** object even though “notification” is common everyday wording.
+
+Next alias batch, this time for relationships:
+Are any of these true alternate phrasings you want captured as aliases?
+
+1. **assignedTo** → for example “routed to”
+2. **handledBy** → for example “worked by”
+3. **supports** → for example “covers”
+4. **resolvedBy** → for example “fixed by”
+5. **communicatedThrough** → for example “notified through” or “communicated via”
+
+Please confirm only the ones that are genuinely used in your organization.
+
+### Turn 57 — persona
+
+A few of those are realistic enough to keep, but I’d be selective.
+
+1. **Assigned to** → **routed to** is a believable operational phrasing.
+2. **Handled by** → **worked by** is also realistic in day-to-day ops language.
+3. **Supports** → **covers** is commonly used when talking about resolver-group scope.
+4. **Resolved by** → **fixed by** is understandable, but I’d be a bit careful because “fixed” can sound narrower than restoration or workaround-based resolution through change.
+5. **Communicated through** → **communicated via** is fine; I would prefer that over “notified through,” which can blur with the formal notification concept.
+
+### Turn 58 — app-user
+
+A few of those are realistic enough to keep, but I’d be selective.
+
+1. **Assigned to** → **routed to** is a believable operational phrasing.
+2. **Handled by** → **worked by** is also realistic in day-to-day ops language.
+3. **Supports** → **covers** is commonly used when talking about resolver-group scope.
+4. **Resolved by** → **fixed by** is understandable, but I’d be a bit careful because “fixed” can sound narrower than restoration or workaround-based resolution through change.
+5. **Communicated through** → **communicated via** is fine; I would prefer that over “notified through,” which can blur with the formal notification concept.
+
+### Turn 58 — app-tool
+
+🔍 Checked the current ontology state.
+
+### Turn 58 — app-tool
+
+✓ Applied: 0 added, 5 updated.
+
+### Turn 58 — app-assistant
+
+Recorded relationship aliases:
+- **assignedTo** → `routed to`
+- **handledBy** → `worked by`
+- **supports** → `covers`
+- **communicatedThrough** → `communicated via`
+
+And intentionally **not** adding `fixed by` as an alias for **resolvedBy**.
+
+Recap of Phase 5:
+- Meanings are now captured for the intended classes and relationships.
+- Aliases are captured where you said they are truly used.
+- Remaining cleanup item: remove **InfrastructureComponent** and its **runsOn** relationship on the canvas, since both are leftovers from before we decided not to model specialization that way.
+
+Now we move to Phase 6: constraints and fixed choices.
+
+First allowed-value batch:
+What are the allowed value lists for these properties?
+1. **Incident.status**
+2. **Incident.severity**
+3. **Incident.priority**
+4. **ITService.healthState**
+5. **Alert.status**
+6. **Alert.severity**
+
+### Turn 58 — persona
+
+Yes — for those properties, the allowed values are:
+
+1. **Incident status**
+- new
+- acknowledged
+- investigating
+- contained
+- recovering
+- monitoring
+- resolved
+- closed
+- cancelled
+
+2. **Incident severity**
+- sev1-critical
+- sev2-high
+- sev3-medium
+- sev4-low
+
+3. **Incident priority**
+- p1-critical
+- p2-high
+- p3-medium
+- p4-low
+
+4. **IT service health state**
+- healthy
+- degraded
+- partially-unavailable
+- unavailable
+- recovering
+- unknown
+
+5. **Alert status**
+- new
+- acknowledged
+- suppressed
+- escalated
+- closed
+
+6. **Alert severity**
+- sev1-critical
+- sev2-high
+- sev3-medium
+- sev4-low
+
+### Turn 59 — app-user
+
+Yes — for those properties, the allowed values are:
+
+1. **Incident status**
+- new
+- acknowledged
+- investigating
+- contained
+- recovering
+- monitoring
+- resolved
+- closed
+- cancelled
+
+2. **Incident severity**
+- sev1-critical
+- sev2-high
+- sev3-medium
+- sev4-low
+
+3. **Incident priority**
+- p1-critical
+- p2-high
+- p3-medium
+- p4-low
+
+4. **IT service health state**
+- healthy
+- degraded
+- partially-unavailable
+- unavailable
+- recovering
+- unknown
+
+5. **Alert status**
+- new
+- acknowledged
+- suppressed
+- escalated
+- closed
+
+6. **Alert severity**
+- sev1-critical
+- sev2-high
+- sev3-medium
+- sev4-low
+
+### Turn 59 — app-tool
+
+🔍 Checked the current ontology state.
+
+### Turn 59 — app-tool
+
+✓ Applied: 0 added, 3 updated.
+
+### Turn 59 — app-assistant
+
+Recorded allowed values for:
+- **Incident.status**
+- **Incident.severity**
+- **Incident.priority**
+- **ITService.healthState**
+- **Alert.status**
+- **Alert.severity**
+
+Recap:
+- The core incident and alert state vocabularies are now constrained.
+- The service health-state vocabulary is also captured.
+
+For the Phase 6 requirement, I now need the “what breaks if this value is missing or wrong?” check, one property at a time.
+
+First property only:
+If **Incident.status** is missing or wrong, what breaks operationally?
+
+### Turn 59 — persona
+
+If **incident status** is missing or invalid, several operational decisions become unsafe or blocked.
+
+Most importantly, you cannot reliably determine:
+- whether the incident is still active,
+- whether assignment or containment is still appropriate,
+- whether major-incident declaration is still allowed,
+- whether closure is allowed,
+- and what communication or escalation cadence should apply.
+
+Some actions explicitly depend on status boundaries. For example:
+- you should not assign an incident that is already closed or cancelled,
+- you should not declare a major incident for something already resolved, closed, or cancelled,
+- containment only makes sense from the right active investigation states,
+- and closure depends on the incident already being in a valid late-stage state.
+
+So operationally, missing or invalid status breaks lifecycle control and can block action execution.
+
+### Turn 60 — app-user
+
+If **incident status** is missing or invalid, several operational decisions become unsafe or blocked.
+
+Most importantly, you cannot reliably determine:
+- whether the incident is still active,
+- whether assignment or containment is still appropriate,
+- whether major-incident declaration is still allowed,
+- whether closure is allowed,
+- and what communication or escalation cadence should apply.
+
+Some actions explicitly depend on status boundaries. For example:
+- you should not assign an incident that is already closed or cancelled,
+- you should not declare a major incident for something already resolved, closed, or cancelled,
+- containment only makes sense from the right active investigation states,
+- and closure depends on the incident already being in a valid late-stage state.
+
+So operationally, missing or invalid status breaks lifecycle control and can block action execution.
+
+### Turn 60 — app-assistant
+
+Good — that establishes **Incident.status** as operationally required for lifecycle control and action gating.
+
+Recap:
+- If incident status is missing/wrong, the agent cannot safely determine whether the incident is active, assignable, containable, declarable as major, or closable.
+- It also breaks communication/escalation cadence decisions.
+
+Next property only:
+If **Incident.severity** is missing or wrong, what breaks operationally?
+
+### Turn 60 — persona
+
+If **incident severity** is missing or invalid, you lose an important basis for triage, escalation, and major-incident handling.
+
+Operationally, that affects:
+- how urgently the incident is treated,
+- how response effort is mobilized,
+- whether the incident is even eligible for major-incident declaration under the defined decision boundary,
+- and how stakeholders interpret the seriousness of the event.
+
+A key point is that major-incident declaration depends in part on severity. So if severity is missing or wrong, you may fail to escalate a serious incident properly, or escalate one that does not meet the threshold. That makes it decision-critical even if not every action in the lifecycle depends on it directly.
+
+### Turn 61 — app-user
+
+If **incident severity** is missing or invalid, you lose an important basis for triage, escalation, and major-incident handling.
+
+Operationally, that affects:
+- how urgently the incident is treated,
+- how response effort is mobilized,
+- whether the incident is even eligible for major-incident declaration under the defined decision boundary,
+- and how stakeholders interpret the seriousness of the event.
+
+A key point is that major-incident declaration depends in part on severity. So if severity is missing or wrong, you may fail to escalate a serious incident properly, or escalate one that does not meet the threshold. That makes it decision-critical even if not every action in the lifecycle depends on it directly.
+
+### Turn 61 — app-assistant
+
+Understood.
+
+Recap:
+- **Incident.severity** is decision-critical for triage, escalation, mobilization, and major-incident qualification.
+- If it is missing or wrong, the agent can under-escalate or over-escalate.
+
+Next property only:
+If **Incident.priority** is missing or wrong, what breaks operationally?
+
+### Turn 61 — persona
+
+If **incident priority** is missing or invalid, work can still continue, but routing and response urgency become harder to manage consistently.
+
+Operationally, priority helps with:
+- queue ordering,
+- response focus when multiple incidents compete for attention,
+- and communicating how quickly the organization expects active handling.
+
+So it is important for coordination and workload management, but it is not the same thing as severity. A wrong priority can skew operational attention and delay the right work, even when the incident is otherwise valid.
+
+### Turn 62 — app-user
+
+If **incident priority** is missing or invalid, work can still continue, but routing and response urgency become harder to manage consistently.
+
+Operationally, priority helps with:
+- queue ordering,
+- response focus when multiple incidents compete for attention,
+- and communicating how quickly the organization expects active handling.
+
+So it is important for coordination and workload management, but it is not the same thing as severity. A wrong priority can skew operational attention and delay the right work, even when the incident is otherwise valid.
+
+### Turn 62 — app-assistant
+
+Recap:
+- **Incident.priority** matters for queue ordering, response focus, and expected handling urgency.
+- It is operationally important, but not the same gating field as severity or status.
+
+Next property only:
+If **ITService.healthState** is missing or wrong, what breaks operationally?
+
+### Turn 62 — persona
+
+If **IT service health state** is missing or invalid, you lose a reliable view of current service condition, which affects impact assessment, recovery decisions, and closure.
+
+Operationally, that breaks or weakens:
+- deciding whether the service is healthy, degraded, partially unavailable, unavailable, recovering, or simply unknown,
+- verifying whether containment or recovery improved the situation,
+- determining whether failover or restore actions have actually succeeded,
+- and confirming whether incident closure conditions are met.
+
+It matters especially at closure, because you need impacted services to be back to a healthy state or to an accepted residual condition before closing the incident. Without a valid health state, that check is not reliable.
+
+### Turn 63 — app-user
+
+If **IT service health state** is missing or invalid, you lose a reliable view of current service condition, which affects impact assessment, recovery decisions, and closure.
+
+Operationally, that breaks or weakens:
+- deciding whether the service is healthy, degraded, partially unavailable, unavailable, recovering, or simply unknown,
+- verifying whether containment or recovery improved the situation,
+- determining whether failover or restore actions have actually succeeded,
+- and confirming whether incident closure conditions are met.
+
+It matters especially at closure, because you need impacted services to be back to a healthy state or to an accepted residual condition before closing the incident. Without a valid health state, that check is not reliable.
+
+### Turn 63 — app-assistant
+
+Recap:
+- **ITService.healthState** is needed for current-condition awareness, verifying recovery/failover success, and checking closure readiness.
+- Without it, impact assessment and closure validation become unreliable.
+
+Next property only:
+If **Alert.status** is missing or wrong, what breaks operationally?
+
+### Turn 63 — persona
+
+If **alert status** is missing or invalid, alert handling becomes unreliable and acknowledgement control breaks down.
+
+Operationally, that affects:
+- whether the alert is still new and needs acknowledgement,
+- whether it has already been acknowledged, suppressed, escalated, or closed,
+- whether duplicate work or missed work is likely,
+- and whether the acknowledge action is even valid to perform.
+
+That matters because acknowledging an alert depends on it being in the right starting state. If status is missing or wrong, the agent can neither enforce that boundary nor explain the current handling state clearly.
+
+### Turn 64 — app-user
+
+If **alert status** is missing or invalid, alert handling becomes unreliable and acknowledgement control breaks down.
+
+Operationally, that affects:
+- whether the alert is still new and needs acknowledgement,
+- whether it has already been acknowledged, suppressed, escalated, or closed,
+- whether duplicate work or missed work is likely,
+- and whether the acknowledge action is even valid to perform.
+
+That matters because acknowledging an alert depends on it being in the right starting state. If status is missing or wrong, the agent can neither enforce that boundary nor explain the current handling state clearly.
+
+### Turn 64 — app-assistant
+
+Recap:
+- **Alert.status** is required to control acknowledgement and avoid duplicate or missed work.
+- Without it, the agent cannot tell whether acknowledgement is valid or already done.
+
+Next property only:
+If **Alert.severity** is missing or wrong, what breaks operationally?
+
+### Turn 64 — persona
+
+If **alert severity** is missing or invalid, triage quality drops and the signal can be misread.
+
+Operationally, that affects:
+- how urgently the alert is investigated,
+- how noisy signals are separated from potentially critical ones,
+- and how likely the alert is to drive prompt incident recognition or escalation.
+
+It may not block acknowledgement by itself, but it does weaken prioritization and early response quality.
+
+### Turn 65 — app-user
+
+If **alert severity** is missing or invalid, triage quality drops and the signal can be misread.
+
+Operationally, that affects:
+- how urgently the alert is investigated,
+- how noisy signals are separated from potentially critical ones,
+- and how likely the alert is to drive prompt incident recognition or escalation.
+
+It may not block acknowledgement by itself, but it does weaken prioritization and early response quality.
+
+### Turn 65 — app-assistant
+
+Recap of Phase 6 so far:
+- We’ve captured allowed values for the main incident, alert, and service-state properties.
+- We’ve also established their operational importance:
+  - **Incident.status** and **Alert.status** are action-gating.
+  - **Incident.severity** and **Alert.severity** are triage/escalation critical.
+  - **Incident.priority** is coordination-critical.
+  - **ITService.healthState** is closure/recovery critical.
+
+Next allowed-value batch:
+What are the allowed value lists for these properties?
+1. **Change.status**
+2. **Deployment.status**
+3. **RegulatoryNotification.status**
+4. **Communication.status**
+5. **CorrectiveAction.status**
+6. **EvidenceItem.integrityStatus**
+7. **Environment.environmentType**
+8. **MaterialityAssessment.result**
+
+### Turn 65 — persona
+
+The allowed values for those are:
+
+1. **Change status**
+- draft
+- assessed
+- approved
+- scheduled
+- implementing
+- implemented
+- failed
+- rolled-back
+- closed
+- cancelled
+
+2. **Deployment status**
+- planned
+- running
+- succeeded
+- failed
+- rolled-back
+- cancelled
+
+3. **Regulatory notification status**
+- draft
+- pending-approval
+- approved
+- submitted
+- accepted
+- rejected
+- withdrawn
+
+4. **Communication status**
+- draft
+- pending-approval
+- approved
+- submitted
+- accepted
+- rejected
+- withdrawn
+
+5. **Corrective action status**
+- open
+- in-progress
+- blocked
+- implemented
+- verified
+- closed
+- cancelled
+
+6. **Evidence item integrity status**
+- collected
+- hashed
+- verified
+- sealed
+- compromised
+
+7. **Environment type**
+- production
+- disaster-recovery
+- pre-production
+- test
+- development
+- management
+
+8. **Materiality assessment result**
+- not-reportable
+- potentially-reportable
+- reportable
+- undetermined
+
+### Turn 66 — app-user
+
+The allowed values for those are:
+
+1. **Change status**
+- draft
+- assessed
+- approved
+- scheduled
+- implementing
+- implemented
+- failed
+- rolled-back
+- closed
+- cancelled
+
+2. **Deployment status**
+- planned
+- running
+- succeeded
+- failed
+- rolled-back
+- cancelled
+
+3. **Regulatory notification status**
+- draft
+- pending-approval
+- approved
+- submitted
+- accepted
+- rejected
+- withdrawn
+
+4. **Communication status**
+- draft
+- pending-approval
+- approved
+- submitted
+- accepted
+- rejected
+- withdrawn
+
+5. **Corrective action status**
+- open
+- in-progress
+- blocked
+- implemented
+- verified
+- closed
+- cancelled
+
+6. **Evidence item integrity status**
+- collected
+- hashed
+- verified
+- sealed
+- compromised
+
+7. **Environment type**
+- production
+- disaster-recovery
+- pre-production
+- test
+- development
+- management
+
+8. **Materiality assessment result**
+- not-reportable
+- potentially-reportable
+- reportable
+- undetermined
+
+### Turn 66 — app-tool
+
+🔍 Checked the current ontology state.
+
+### Turn 66 — app-tool
+
+✓ Applied: 0 added, 8 updated.
+
+### Turn 66 — app-assistant
+
+Recorded allowed values for:
+- **Change.status**
+- **Deployment.status**
+- **RegulatoryNotification.status**
+- **Communication.status**
+- **CorrectiveAction.status**
+- **EvidenceItem.integrityStatus**
+- **Environment.environmentType**
+- **MaterialityAssessment.result**
+
+Recap:
+- We now have fixed vocabularies for change/deployment lifecycles, communication/reporting lifecycles, corrective-action tracking, evidence integrity, environment type, and materiality result.
+
+Now I need the required “what breaks if missing or wrong?” check, one property at a time.
+
+First property only:
+If **Change.status** is missing or wrong, what breaks operationally?
+
+### Turn 66 — persona
+
+If **change status** is missing or invalid, you cannot safely tell where the change is in its control lifecycle.
+
+Operationally, that affects:
+- whether it is only proposed, already assessed, approved, scheduled, being implemented, completed, failed, rolled back, or closed,
+- whether it is safe to proceed with implementation-related decisions,
+- whether the change can credibly be cited as the thing that resolved an incident,
+- and whether follow-up or rollback handling is still needed.
+
+For emergency handling in particular, status matters because you need to know that the change is moving through a controlled path, even if accelerated. Without a valid status, decision-making and auditability both weaken.
+
+### Turn 67 — app-user
+
+If **change status** is missing or invalid, you cannot safely tell where the change is in its control lifecycle.
+
+Operationally, that affects:
+- whether it is only proposed, already assessed, approved, scheduled, being implemented, completed, failed, rolled back, or closed,
+- whether it is safe to proceed with implementation-related decisions,
+- whether the change can credibly be cited as the thing that resolved an incident,
+- and whether follow-up or rollback handling is still needed.
+
+For emergency handling in particular, status matters because you need to know that the change is moving through a controlled path, even if accelerated. Without a valid status, decision-making and auditability both weaken.
+
+### Turn 67 — app-assistant
+
+Recap:
+- **Change.status** is required to understand the control lifecycle, implementation readiness, rollback needs, and whether a change can credibly be treated as incident-resolving.
+- Without it, emergency handling and auditability both weaken.
+
+Next property only:
+If **Deployment.status** is missing or wrong, what breaks operationally?
+
+### Turn 67 — persona
+
+If **deployment status** is missing or invalid, you lose a reliable view of whether the technical execution is still planned, running, completed successfully, failed, rolled back, or cancelled.
+
+Operationally, that affects:
+- whether implementation is actually in progress,
+- whether an application change has really been introduced,
+- whether a failure or rollback has occurred,
+- and whether a recent deployment remains a plausible explanation when investigating an incident.
+
+So it matters for execution tracking, incident analysis, and recovery of failed rollout activity.
+
+### Turn 68 — app-user
+
+If **deployment status** is missing or invalid, you lose a reliable view of whether the technical execution is still planned, running, completed successfully, failed, rolled back, or cancelled.
+
+Operationally, that affects:
+- whether implementation is actually in progress,
+- whether an application change has really been introduced,
+- whether a failure or rollback has occurred,
+- and whether a recent deployment remains a plausible explanation when investigating an incident.
+
+So it matters for execution tracking, incident analysis, and recovery of failed rollout activity.
+
+### Turn 68 — app-assistant
+
+Recap:
+- **Deployment.status** is needed for execution tracking, incident analysis, and detecting failure or rollback states.
+- Without it, the agent cannot reliably judge whether a deployment is in progress, succeeded, failed, or still relevant to incident investigation.
+
+Next property only:
+If **RegulatoryNotification.status** is missing or wrong, what breaks operationally?
+
+### Turn 68 — persona
+
+If **regulatory notification status** is missing or invalid, the reporting workflow becomes unsafe.
+
+Operationally, that affects:
+- whether the notification is still being drafted,
+- awaiting approval,
+- approved for submission,
+- already submitted,
+- accepted,
+- rejected,
+- or withdrawn.
+
+That matters because submission is only valid once the notification is approved and still within the due window. Without a valid status, the agent cannot safely decide whether submission may proceed, whether follow-up is needed after rejection, or whether the reporting obligation has actually been met.
+
+### Turn 69 — app-user
+
+If **regulatory notification status** is missing or invalid, the reporting workflow becomes unsafe.
+
+Operationally, that affects:
+- whether the notification is still being drafted,
+- awaiting approval,
+- approved for submission,
+- already submitted,
+- accepted,
+- rejected,
+- or withdrawn.
+
+That matters because submission is only valid once the notification is approved and still within the due window. Without a valid status, the agent cannot safely decide whether submission may proceed, whether follow-up is needed after rejection, or whether the reporting obligation has actually been met.
+
+### Turn 69 — app-assistant
+
+Recap:
+- **RegulatoryNotification.status** is action-gating for submission and follow-up.
+- Without it, the agent cannot safely decide whether submission may proceed, whether rejection handling is needed, or whether the obligation is satisfied.
+
+Next property only:
+If **Communication.status** is missing or wrong, what breaks operationally?
+
+### Turn 69 — persona
+
+If **communication status** is missing or invalid, controlled messaging breaks down.
+
+Operationally, that affects:
+- whether the message is still a draft,
+- awaiting approval,
+- approved,
+- already submitted or sent onward,
+- accepted,
+- rejected,
+- or withdrawn.
+
+That matters because stakeholder communication should only go out in a controlled state and with the right approval position. It also affects closure readiness, because required communications must be complete before an incident can be closed. Without valid status, the agent cannot safely tell whether a communication is ready to send, already sent, or still incomplete.
+
+### Turn 70 — app-user
+
+If **communication status** is missing or invalid, controlled messaging breaks down.
+
+Operationally, that affects:
+- whether the message is still a draft,
+- awaiting approval,
+- approved,
+- already submitted or sent onward,
+- accepted,
+- rejected,
+- or withdrawn.
+
+That matters because stakeholder communication should only go out in a controlled state and with the right approval position. It also affects closure readiness, because required communications must be complete before an incident can be closed. Without valid status, the agent cannot safely tell whether a communication is ready to send, already sent, or still incomplete.
+
+### Turn 70 — app-assistant
+
+Recap:
+- **Communication.status** is needed to control approval/sending and to check closure readiness.
+- Without it, the agent cannot safely tell whether a communication is ready, sent, incomplete, rejected, or withdrawn.
+
+Next property only:
+If **CorrectiveAction.status** is missing or wrong, what breaks operationally?
+
+### Turn 70 — persona
+
+If **corrective action status** is missing or invalid, follow-up tracking becomes unreliable.
+
+Operationally, that affects:
+- whether the action is still open,
+- in progress,
+- blocked,
+- implemented,
+- verified,
+- closed,
+- or cancelled.
+
+Without that, you cannot reliably answer whether important remediation from a post-incident review is still outstanding, stalled, or complete. That weakens lessons-learned follow-through and risk reduction.
+
+### Turn 71 — app-user
+
+If **corrective action status** is missing or invalid, follow-up tracking becomes unreliable.
+
+Operationally, that affects:
+- whether the action is still open,
+- in progress,
+- blocked,
+- implemented,
+- verified,
+- closed,
+- or cancelled.
+
+Without that, you cannot reliably answer whether important remediation from a post-incident review is still outstanding, stalled, or complete. That weakens lessons-learned follow-through and risk reduction.
+
+### Turn 71 — app-assistant
+
+Recap:
+- **CorrectiveAction.status** is required to tell whether remediation is outstanding, stalled, complete, or cancelled.
+- Without it, the agent cannot reliably answer your post-incident follow-up question.
+
+Next property only:
+If **EvidenceItem.integrityStatus** is missing or wrong, what breaks operationally?
+
+### Turn 71 — persona
+
+If **evidence item integrity status** is missing or invalid, you cannot judge whether the evidence is trustworthy enough for investigation, accountability, or reporting.
+
+Operationally, that affects:
+- whether the evidence has merely been collected,
+- cryptographically protected,
+- verified,
+- sealed,
+- or compromised.
+
+That matters especially for cybersecurity incidents and regulatory reporting, where preserved evidence may need to support serious conclusions or submissions. Without integrity status, the agent cannot safely assess evidential reliability or preservation quality.
+
+### Turn 72 — app-user
+
+If **evidence item integrity status** is missing or invalid, you cannot judge whether the evidence is trustworthy enough for investigation, accountability, or reporting.
+
+Operationally, that affects:
+- whether the evidence has merely been collected,
+- cryptographically protected,
+- verified,
+- sealed,
+- or compromised.
+
+That matters especially for cybersecurity incidents and regulatory reporting, where preserved evidence may need to support serious conclusions or submissions. Without integrity status, the agent cannot safely assess evidential reliability or preservation quality.
+
+### Turn 72 — app-assistant
+
+Recap:
+- **EvidenceItem.integrityStatus** is required to judge evidential trustworthiness and preservation quality.
+- Without it, the agent cannot safely assess whether evidence is reliable enough for investigation, accountability, or reporting.
+
+Next property only:
+If **Environment.environmentType** is missing or wrong, what breaks operationally?
+
+### Turn 72 — persona
+
+If **environment type** is missing or invalid, recovery and change decisions can easily be applied in the wrong context.
+
+Operationally, that affects:
+- whether you are dealing with production, disaster recovery, test, development, pre-production, or management scope,
+- whether a failover target is actually the intended recovery environment,
+- whether a restore target is appropriate,
+- and whether a deployment or change is being executed against the correct environment.
+
+So it is important for safe execution and for avoiding actions in the wrong operational context.
+
+### Turn 73 — app-user
+
+If **environment type** is missing or invalid, recovery and change decisions can easily be applied in the wrong context.
+
+Operationally, that affects:
+- whether you are dealing with production, disaster recovery, test, development, pre-production, or management scope,
+- whether a failover target is actually the intended recovery environment,
+- whether a restore target is appropriate,
+- and whether a deployment or change is being executed against the correct environment.
+
+So it is important for safe execution and for avoiding actions in the wrong operational context.
+
+### Turn 73 — app-assistant
+
+Recap:
+- **Environment.environmentType** is needed to distinguish execution context and to prevent failover, restore, deployment, or change actions from targeting the wrong environment.
+- Without it, safe execution is at risk.
+
+Next property only:
+If **MaterialityAssessment.result** is missing or wrong, what breaks operationally?
+
+### Turn 73 — persona
+
+If **materiality assessment result** is missing or invalid, the reporting decision path becomes unclear or unsafe.
+
+Operationally, that affects:
+- whether the incident is considered not reportable,
+- potentially reportable,
+- reportable,
+- or still undetermined.
+
+That matters because regulatory notification depends on the assessment concluding that the incident is reportable. Without a valid result, the agent cannot safely decide whether reporting is required, whether a notification should move forward, or whether the case is still awaiting determination.
+
+### Turn 74 — app-user
+
+If **materiality assessment result** is missing or invalid, the reporting decision path becomes unclear or unsafe.
+
+Operationally, that affects:
+- whether the incident is considered not reportable,
+- potentially reportable,
+- reportable,
+- or still undetermined.
+
+That matters because regulatory notification depends on the assessment concluding that the incident is reportable. Without a valid result, the agent cannot safely decide whether reporting is required, whether a notification should move forward, or whether the case is still awaiting determination.
+
+### Turn 74 — app-assistant
+
+Recap of Phase 6:
+- We now have fixed choice lists for the core lifecycle, health, reporting, evidence, and environment properties.
+- We also established, property by property, what operationally breaks if those values are missing or wrong.
+
+Status at this point:
+- **Phase 1** competency questions/actions: captured
+- **Phase 2** classes: captured, with one known cleanup item (**InfrastructureComponent**)
+- **Phase 3** relationships: captured, with the same cleanup dependency (**runsOn**)
+- **Phase 4** decision-bearing properties: captured
+- **Phase 5** meanings and aliases: largely captured
+- **Phase 6** fixed choices/constraints: partially captured and now well advanced
+
+We are ready to start Phase 7: rules.
+
+First rule only:
+For **“Does this incident meet the criteria to be treated as a major incident?”**, what are the plain-language conditions the bank uses to decide that?
+
+### Turn 74 — persona
+
+Operationally, we treat major-incident declaration as allowed when all of these are true:
+
+- the incident is still active, so it is not already resolved, closed, or cancelled;
+- the incident severity is in the high end, specifically critical or high;
+- at least one impacted IT service has been identified;
+- and an incident commander is assigned.
+
+That is the decision boundary I’d use for whether the incident can be declared as a major incident.
+
+### Turn 75 — app-user
+
+Operationally, we treat major-incident declaration as allowed when all of these are true:
+
+- the incident is still active, so it is not already resolved, closed, or cancelled;
+- the incident severity is in the high end, specifically critical or high;
+- at least one impacted IT service has been identified;
+- and an incident commander is assigned.
+
+That is the decision boundary I’d use for whether the incident can be declared as a major incident.
+
+### Turn 75 — app-tool
+
+🔍 Checked the current ontology state.
+
+### Turn 75 — app-tool
+
+✓ Applied: 1 added, 0 updated.
+
+### Turn 75 — app-assistant
+
+Recorded rule:
+- **canDeclareMajorIncident**
+  - incident status is not resolved, closed, or cancelled
+  - incident severity is `sev1-critical` or `sev2-high`
+  - incident impacts at least one IT service
+  - incident is coordinated by an incident commander
+
+Recap:
+- This now gives the model an explicit major-incident decision boundary based on lifecycle state, severity, impact, and command assignment.
+
+Next rule only:
+For **“Do we need to send a regulatory notification for this incident?”**, what are the plain-language conditions that must be true?
+
+### Turn 75 — persona
+
+For actually **submitting** a regulatory notification, these conditions must all be true:
+
+- the materiality assessment result is **reportable**;
+- the notification is linked to the incident and the regulator;
+- the required fields and supporting evidence are complete;
+- the notification has already reached **approved** status;
+- and submission happens before the notification due time.
+
+I’d be careful with the wording, though: that is the decision boundary for **submitting** the notification, not the entire judgment of whether one may eventually be needed. The earlier reporting need comes from the materiality assessment path.
+
+### Turn 76 — app-user
+
+For actually **submitting** a regulatory notification, these conditions must all be true:
+
+- the materiality assessment result is **reportable**;
+- the notification is linked to the incident and the regulator;
+- the required fields and supporting evidence are complete;
+- the notification has already reached **approved** status;
+- and submission happens before the notification due time.
+
+I’d be careful with the wording, though: that is the decision boundary for **submitting** the notification, not the entire judgment of whether one may eventually be needed. The earlier reporting need comes from the materiality assessment path.
+
+### Turn 76 — app-assistant
+
+Good distinction.
+
+Recap:
+- You’ve defined conditions for **submitting** a regulatory notification, not for the earlier “might we need one?” judgment.
+- The earlier need is driven primarily by the materiality-assessment path.
+
+One focused follow-up before I record this rule:
+You said the notification must be “linked to the incident and the regulator,” but the current model has **RegulatoryNotification --reports--> Incident** and no **Regulator** class or due-time property yet.
+
+Which of these do you want in the ontology so this rule can be represented cleanly?
+1. add a **Regulator** class and a relationship like **RegulatoryNotification --addressedTo--> Regulator**
+2. add a **dueTime** property on **RegulatoryNotification**
+3. both of the above
+4. neither — if you want to restate the rule only in terms of what is already in the model
+
+### Turn 76 — persona
+
+Both of the above.
+
+To represent that rule cleanly, you do need:
+- a **regulator** as a distinct thing the notification is sent to,
+- and a **due time** on the regulatory notification.
+
+I’d phrase the relationship more as the notification **is sent to** the regulator, rather than “addressed to,” because the operational boundary here is actual submission destination.
+
+### Turn 77 — app-user
+
+Both of the above.
+
+To represent that rule cleanly, you do need:
+- a **regulator** as a distinct thing the notification is sent to,
+- and a **due time** on the regulatory notification.
+
+I’d phrase the relationship more as the notification **is sent to** the regulator, rather than “addressed to,” because the operational boundary here is actual submission destination.
+
+### Turn 77 — app-tool
+
+🔍 Checked the current ontology state.
+
+### Turn 77 — app-assistant
+
+Understood.
+
+Recap:
+- We need to add:
+  - **Regulator** as a distinct class
+  - **RegulatoryNotification --sentTo--> Regulator**
+  - **RegulatoryNotification.dueTime**
+
+One focused class confirmation before I add them:
+Does the agent need to identify, retrieve, connect, or pass **Regulator** as a distinct thing in this ontology?
+
+### Turn 77 — persona
+
+Yes — **regulator** should be a distinct thing.
+
+We need it separately because the bank is supervised by regulators, regulatory notifications are sent to a specific regulator, and reporting obligations are not just abstract workflow states.
+
+### Turn 78 — app-user
+
+Yes — **regulator** should be a distinct thing.
+
+We need it separately because the bank is supervised by regulators, regulatory notifications are sent to a specific regulator, and reporting obligations are not just abstract workflow states.
+
+### Turn 78 — app-tool
+
+🔍 Checked the current ontology state.
+
+### Turn 78 — app-tool
+
+✓ Applied: 2 added, 1 updated.
+
+### Turn 78 — app-assistant
+
+Confirmed and recorded:
+- **Regulator**
+- **RegulatoryNotification.dueTime**
+- **RegulatoryNotification --sentTo--> Regulator**
+
+Recap:
+- The model can now represent the notification destination and due-time boundary needed for submission logic.
+
+Now I can capture the rule cleanly.
+
+Please confirm this rule wording:
+**canSubmitRegulatoryNotification**
+- materiality assessment result is `reportable`
+- regulatory notification reports the incident
+- regulatory notification is sent to a regulator
+- required fields and supporting evidence are complete
+- regulatory notification status is `approved`
+- submission happens before regulatory notification due time
+
+### Turn 78 — persona
+
+Yes — that matches the operational rule.
+
+### Turn 79 — app-user
+
+Yes — that matches the operational rule.
+
+### Turn 79 — app-tool
+
+🔍 Checked the current ontology state.
+
+### Turn 79 — app-tool
+
+✓ Applied: 1 added, 0 updated.
+
+### Turn 79 — app-assistant
+
+Recorded rule:
+- **canSubmitRegulatoryNotification**
+  - materiality assessment result is `reportable`
+  - regulatory notification reports the incident
+  - regulatory notification is sent to a regulator
+  - required fields and supporting evidence are complete
+  - regulatory notification status is `approved`
+  - submission happens before regulatory notification due time
+
+Recap:
+- The model now has explicit rule support both for **major-incident declaration** and for **regulatory-notification submission**.
+- We also added the missing supporting concepts needed to express the notification rule cleanly.
+
+Next rule only:
+For **“Are the required evidence, stakeholder communications, and closure conditions complete?”** — specifically for allowing **incident closure** — what are the plain-language conditions that must be true?
+
+### Turn 79 — persona
+
+For **closing an incident**, these conditions must all be true:
+
+- the incident is already in **resolved** or **monitoring** status;
+- impacted services are back to **healthy** state, or there is an accepted residual condition;
+- resolution and restoration evidence are recorded;
+- required stakeholder communications are complete;
+- and if it is a major incident or a cybersecurity incident, a post-incident review is already scheduled or completed.
+
+That is the operational closure boundary I’d enforce.
+
+### Turn 80 — app-user
+
+For **closing an incident**, these conditions must all be true:
+
+- the incident is already in **resolved** or **monitoring** status;
+- impacted services are back to **healthy** state, or there is an accepted residual condition;
+- resolution and restoration evidence are recorded;
+- required stakeholder communications are complete;
+- and if it is a major incident or a cybersecurity incident, a post-incident review is already scheduled or completed.
+
+That is the operational closure boundary I’d enforce.
+
+### Turn 80 — app-tool
+
+🔍 Checked the current ontology state.
+
+### Turn 80 — app-assistant
+
+Good closure rule, but one part needs a modeling choice before I record it exactly:
+
+You said:
+- impacted services are back to **healthy**, **or there is an accepted residual condition**
+
+The current model has **ITService.healthState**, but it does **not** yet have any property or relationship representing an accepted residual condition.
+
+One focused follow-up:
+Do you want to add a property on **Incident** such as **residualConditionAccepted** (boolean), so this closure rule can be represented cleanly?
+
+### Turn 80 — persona
+
+Yes — that is the cleanest way to represent that closure exception in this ontology.
+
+A simple boolean on the **incident** for **accepted residual condition** is enough for this purpose.
+
+### Turn 81 — app-user
+
+Yes — that is the cleanest way to represent that closure exception in this ontology.
+
+A simple boolean on the **incident** for **accepted residual condition** is enough for this purpose.
+
+### Turn 81 — app-tool
+
+🔍 Checked the current ontology state.
+
+### Turn 81 — app-tool
+
+✓ Applied: 1 added, 1 updated.
+
+### Turn 81 — app-assistant
+
+Recorded:
+- **Incident.acceptedResidualCondition** as a boolean
+- **canCloseIncident**
+  - incident status is `resolved` or `monitoring`
+  - impacted IT services are healthy or incident accepted residual condition is true
+  - resolution and restoration evidence are recorded
+  - required stakeholder communications are complete
+  - if the incident is a major incident or a cybersecurity incident, a post-incident review is scheduled or completed
+
+Recap:
+- The model now has three explicit operational rules:
+  - major-incident declaration,
+  - regulatory-notification submission,
+  - incident closure.
+
+We are ready for Phase 8: actions in operational detail.
+We already have the action names, but they still need proper input classes, preconditions, and model-grounded effect/verification.
+
+First action only:
+For **acknowledge alert**, please confirm or correct this structure:
+
+- **input**: `Alert`
+- **preconditions**: alert status is `new`
+- **effect**: alert status becomes `acknowledged`
+- **verification**: confirm the alert status is now `acknowledged`
+
+### Turn 81 — persona
+
+That is broadly right, but one important precondition is missing.
+
+For **acknowledge alert**:
+
+- **Input**: alert
+- **Preconditions**:
+  - alert status is **new**
+  - the operator is authorized for the responsible resolver group
+- **Effect**:
+  - alert status becomes **acknowledged**
+  - the acknowledgement timestamp is recorded
+- **Verification**:
+  - read the alert and confirm its status is **acknowledged**
+
+So your structure is correct, but I would include the authorization boundary and the recorded acknowledgement time.
+
+### Turn 82 — app-user
+
+That is broadly right, but one important precondition is missing.
+
+For **acknowledge alert**:
+
+- **Input**: alert
+- **Preconditions**:
+  - alert status is **new**
+  - the operator is authorized for the responsible resolver group
+- **Effect**:
+  - alert status becomes **acknowledged**
+  - the acknowledgement timestamp is recorded
+- **Verification**:
+  - read the alert and confirm its status is **acknowledged**
+
+So your structure is correct, but I would include the authorization boundary and the recorded acknowledgement time.
+
+### Turn 82 — app-assistant
+
+The status part is clear, but I can only record action details that reference things already in the model.
+
+Right now:
+- **Alert.status** exists
+- but we do **not** yet have:
+  - an **acknowledgement timestamp** property on `Alert`
+  - any authorization structure such as operator identity/role/group authorization
+
+So I should not record those parts yet as if the model already supports them.
+
+Recap:
+- Confirmed and recordable now:
+  - input: `Alert`
+  - precondition: alert status is `new`
+  - effect: alert status becomes `acknowledged`
+  - verification: confirm alert status is `acknowledged`
+- Not yet model-supported:
+  - authorization boundary
+  - acknowledgement timestamp
+
+One focused follow-up:
+Do you want to add an **acknowledgedAt** property on **Alert** now, since you explicitly need it for this action’s effect?
+
+### Turn 82 — persona
+
+Yes — add **acknowledged at** on the alert. That is worth capturing because it is part of the operational result of acknowledgement.
+
+### Turn 83 — app-user
+
+Yes — add **acknowledged at** on the alert. That is worth capturing because it is part of the operational result of acknowledgement.
+
+### Turn 83 — app-tool
+
+🔍 Checked the current ontology state.
+
+### Turn 83 — app-tool
+
+✓ Applied: 0 added, 2 updated.
+
+### Turn 83 — app-assistant
+
+Recorded:
+- **Alert.acknowledgedAt**
+- **acknowledgeAlert**
+  - input: `Alert`
+  - effect: alert status becomes acknowledged and `acknowledgedAt` is recorded
+  - verification: confirm alert status is acknowledged
+
+One correction: I have **not** yet recorded the `status is new` precondition as a named rule, so the action currently has no formal precondition attached in the model. I should add that once we define it as a rule rather than leaving it only in conversation.
+
+Recap:
+- We resolved the timestamp dependency for alert acknowledgement.
+- Authorization is still out of scope for this ontology as currently modeled.
+
+Next action only:
+For **assign incident to resolver group**, please confirm or correct this structure:
+
+- **input**: `Incident`
+- **preconditions**:
+  - incident status is not `resolved`, `closed`, or `cancelled`
+  - chosen resolver group supports an impacted IT service or affected configuration item
+- **effect**: incident is assigned to the resolver group
+- **verification**: confirm the incident shows the intended resolver-group assignment
+
+### Turn 83 — persona
+
+Yes — that structure matches the operational rule.
+
+### Turn 84 — app-user
+
+Yes — that structure matches the operational rule.
+
+### Turn 84 — app-tool
+
+🔍 Checked the current ontology state.
+
+### Turn 84 — app-tool
+
+✓ Applied: 0 added, 1 updated.
+
+### Turn 84 — app-assistant
+
+Recorded:
+- **assignIncidentToResolverGroup**
+  - input: `Incident`
+  - effect: the incident is assigned to the intended resolver group
+  - verification: confirm the incident shows the intended resolver-group assignment
+
+Same note as before: the preconditions are confirmed conceptually, but I have not yet attached them as named rules in the model, so they are not formally referenced by the action yet.
+
+Recap:
+- We now have two action inputs resolved:
+  - `acknowledgeAlert` → `Alert`
+  - `assignIncidentToResolverGroup` → `Incident`
+
+Next action only:
+For **declare major incident**, please confirm or correct this structure:
+
+- **input**: `Incident`
+- **preconditions**: `canDeclareMajorIncident`
+- **effect**: incident majorIncidentFlag becomes `true`
+- **verification**: confirm the incident is recorded as a major incident
+
+### Turn 84 — persona
+
+That is right in substance, but I’d make the effect and verification a bit stronger.
+
+For **declare major incident**:
+
+- **Input**: incident
+- **Preconditions**: the major-incident declaration conditions are met
+- **Effect**:
+  - the incident is classified as a major incident,
+  - major-incident coordination starts,
+  - and the communication cadence for the major incident starts
+- **Verification**:
+  - confirm the incident is marked as major,
+  - an incident commander is present,
+  - the declaration time is recorded,
+  - and there is a communication record supporting that declaration state.
+
+So yes, setting the major-incident indicator is part of it, but operationally the declaration also starts the coordination and communication pattern.
+
+### Turn 85 — app-user
+
+That is right in substance, but I’d make the effect and verification a bit stronger.
+
+For **declare major incident**:
+
+- **Input**: incident
+- **Preconditions**: the major-incident declaration conditions are met
+- **Effect**:
+  - the incident is classified as a major incident,
+  - major-incident coordination starts,
+  - and the communication cadence for the major incident starts
+- **Verification**:
+  - confirm the incident is marked as major,
+  - an incident commander is present,
+  - the declaration time is recorded,
+  - and there is a communication record supporting that declaration state.
+
+So yes, setting the major-incident indicator is part of it, but operationally the declaration also starts the coordination and communication pattern.
+
+### Turn 85 — app-assistant
+
+That makes sense operationally, but I can only record the parts the current model can actually support.
+
+Right now the model supports:
+- **Incident.majorIncidentFlag**
+- **Incident --coordinatedBy--> IncidentCommander**
+- **Incident --communicatedThrough--> Communication**
+
+But it does **not** yet support:
+- a **declaration time** property on `Incident`
+- a specific property for “communication cadence”
+
+So I should not pretend those parts are modeled yet.
+
+Recap:
+- Recordable now:
+  - input: `Incident`
+  - precondition: `canDeclareMajorIncident`
+  - effect: incident majorIncidentFlag becomes `true`; major-incident coordination and communication are initiated
+  - verification: confirm the incident is marked major, an incident commander is present, and there is a communication record supporting the declaration state
+- Not yet model-supported:
+  - declaration timestamp as a property
+  - explicit communication-cadence property
+
+One focused follow-up:
+Do you want to add **majorIncidentDeclaredAt** as a property on **Incident** now, since you explicitly need declaration time for verification?
+
+### Turn 85 — persona
+
+The concept is right, but I’d put it a little differently: I would add a **declared at** timestamp on the **major incident**, not just a specially named incident property. If you are keeping major incident as a distinct thing in the ontology, that is the cleaner place for it.
+
+### Turn 86 — app-user
+
+The concept is right, but I’d put it a little differently: I would add a **declared at** timestamp on the **major incident**, not just a specially named incident property. If you are keeping major incident as a distinct thing in the ontology, that is the cleaner place for it.
+
+### Turn 86 — app-assistant
+
+Understood — but right now the ontology does **not** have a separate **MajorIncident** class. It has:
+- `Incident`
+- a boolean `majorIncidentFlag`
+- and the rule `canDeclareMajorIncident`
+
+So with the current model shape, I have two clean options:
+1. keep using **Incident** and add a property like `declaredAt` or `majorIncidentDeclaredAt` there, or
+2. introduce **MajorIncident** as a distinct class and then connect it operationally.
+
+Because this tool cannot represent subclassing, option 2 would need careful extra modeling and could change several earlier decisions.
+
+One focused question:
+For this ontology, do you want to keep major incident as **an Incident with major-incident properties**, and add **majorIncidentDeclaredAt** on `Incident`?
+
+### Turn 86 — persona
+
+Yes — for this ontology, keep it as an **incident with major-incident properties** and add **major-incident declared at** on the incident.
+
+### Turn 87 — app-user
+
+Yes — for this ontology, keep it as an **incident with major-incident properties** and add **major-incident declared at** on the incident.
+
+### Turn 87 — app-tool
+
+🔍 Checked the current ontology state.
+
+### Turn 87 — app-tool
+
+✓ Applied: 0 added, 2 updated.
+
+### Turn 87 — app-assistant
+
+Recorded:
+- **Incident.majorIncidentDeclaredAt**
+- **declareMajorIncident**
+  - input: `Incident`
+  - preconditions: `canDeclareMajorIncident`
+  - effect: incident `majorIncidentFlag` becomes true, `majorIncidentDeclaredAt` is recorded, coordination is initiated, and communication for the declaration state is initiated
+  - verification: confirm the incident is marked major, an incident commander is present, `majorIncidentDeclaredAt` is recorded, and a communication record supports the declaration state
+
+Recap:
+- We now have proper model support for declaration time on major incidents.
+- The declaration action is now grounded in the existing rule and relationships.
+
+Next action only:
+For **submit regulatory notification**, please confirm or correct this structure:
+
+- **input**: `RegulatoryNotification`
+- **preconditions**: `canSubmitRegulatoryNotification`
+- **effect**: regulatory notification status becomes `submitted` and `submittedAt` is recorded
+- **verification**: confirm the regulatory notification status is `submitted` and `submittedAt` is recorded
+
+### Turn 87 — persona
+
+That is mostly right, but I’d make the verification slightly stronger.
+
+For **submit regulatory notification**:
+
+- **Input**: regulatory notification
+- **Preconditions**: the regulatory-notification submission conditions are met
+- **Effect**:
+  - notification status becomes **submitted**
+  - **submitted at** is recorded
+  - the submission receipt is stored
+- **Verification**:
+  - confirm the notification is in **submitted** state
+  - and confirm either accepted submission or, if it was rejected, that the rejection and remediation are recorded
+
+So your version is fine as a minimal modelable core, but operationally we also retain the submission receipt and deal explicitly with rejection outcomes.
+
+### Turn 88 — app-user
+
+That is mostly right, but I’d make the verification slightly stronger.
+
+For **submit regulatory notification**:
+
+- **Input**: regulatory notification
+- **Preconditions**: the regulatory-notification submission conditions are met
+- **Effect**:
+  - notification status becomes **submitted**
+  - **submitted at** is recorded
+  - the submission receipt is stored
+- **Verification**:
+  - confirm the notification is in **submitted** state
+  - and confirm either accepted submission or, if it was rejected, that the rejection and remediation are recorded
+
+So your version is fine as a minimal modelable core, but operationally we also retain the submission receipt and deal explicitly with rejection outcomes.
+
+### Turn 88 — app-assistant
+
+That’s helpful, and again I need to separate what is operationally true from what the current model can actually represent.
+
+Right now the model supports:
+- `RegulatoryNotification.status`
+- `RegulatoryNotification.submittedAt`
+
+But it does **not** yet support:
+- a stored **submission receipt**
+- a recorded **remediation** object or property for rejection handling
+
+So the clean recordable core is still the minimal version, while noting the extra operational expectations as open extensions.
+
+Recap:
+- Recordable now:
+  - input: `RegulatoryNotification`
+  - preconditions: `canSubmitRegulatoryNotification`
+  - effect: status becomes `submitted`; `submittedAt` is recorded
+  - verification: confirm status is `submitted` and `submittedAt` is recorded
+- Not yet model-supported:
+  - submission receipt
+  - rejection remediation tracking
+
+One focused follow-up:
+Do you want to add a **submissionReceiptStored** boolean property on **RegulatoryNotification** now, since you explicitly need receipt retention as part of the operational result?
+
+### Turn 88 — persona
+
+No — I would leave that out of the core ontology for now rather than add a boolean just for that. The retention of submission proof is operationally important, but with the current model shape I’d treat it as evidence or implementation detail rather than force a thin flag onto the notification itself.
+
+### Turn 89 — app-user
+
+No — I would leave that out of the core ontology for now rather than add a boolean just for that. The retention of submission proof is operationally important, but with the current model shape I’d treat it as evidence or implementation detail rather than force a thin flag onto the notification itself.
+
+### Turn 89 — app-tool
+
+🔍 Checked the current ontology state.
+
+### Turn 89 — app-tool
+
+✓ Applied: 0 added, 1 updated.
+
+### Turn 89 — app-assistant
+
+Recorded:
+- **submitRegulatoryNotification**
+  - input: `RegulatoryNotification`
+  - preconditions: `canSubmitRegulatoryNotification`
+  - effect: status becomes `submitted` and `submittedAt` is recorded
+  - verification: confirm status is `submitted` and `submittedAt` is recorded
+
+Recap:
+- We kept the action aligned to what the current ontology can actually verify.
+- Submission proof and rejection-remediation handling remain operational extensions outside the current modeled core.
+
+Next action only:
+For **close incident**, please confirm or correct this structure:
+
+- **input**: `Incident`
+- **preconditions**: `canCloseIncident`
+- **effect**: incident status becomes `closed` and `closedAt` is recorded
+- **verification**: confirm incident status is `closed` and `closedAt` is recorded
+
+### Turn 89 — persona
+
+That is the right core structure. Operationally, I’d also verify the linked service condition and retained evidence, but as the modeled action definition you’ve written it is correct.
+
+### Turn 90 — app-user
+
+That is the right core structure. Operationally, I’d also verify the linked service condition and retained evidence, but as the modeled action definition you’ve written it is correct.
+
+### Turn 90 — app-tool
+
+🔍 Checked the current ontology state.
+
+### Turn 90 — app-tool
+
+✓ Applied: 0 added, 1 updated.
+
+### Turn 90 — app-assistant
+
+I recorded **closeIncident**, but the tool surfaced one real modeling gap:
+
+- **Warning**: `canCloseIncident` refers to **CybersecurityIncident**, but from the action input **Incident** there is currently no navigable relationship from `Incident` to `CybersecurityIncident`.
+
+In plain language: the rule says “if the incident is a major incident or a cybersecurity incident…”, but the current graph does not yet let the agent determine from an `Incident` whether that incident is also in the cybersecurity-incident path.
+
+Recap:
+- Recorded:
+  - **closeIncident**
+    - input: `Incident`
+    - preconditions: `canCloseIncident`
+    - effect: incident status becomes `closed` and `closedAt` is recorded
+    - verification: confirm incident status is `closed` and `closedAt` is recorded
+- New gap found:
+  - we need a real relationship between **Incident** and **CybersecurityIncident**
+
+One focused question to fix that gap:
+What is the right operational relationship between **Incident** and **CybersecurityIncident** in your model — for example, should it be **Incident --hasSecurityAspect--> CybersecurityIncident**, **Incident --classifiedAs--> CybersecurityIncident** is *not* suitable here because that would just be disguised subclassing, so what is the real connector you use?
+
+### Turn 90 — persona
+
+I would not invent a separate connector just to bridge that gap.
+
+Operationally, a **cybersecurity incident** is the security-specialized form of incident, not a second peer object that an ordinary incident points to. So with a tool that cannot represent specialization, the cleaner approach is to carry the cybersecurity handling condition on the **incident** itself rather than create an artificial relationship between two records that are really the same operational case.
+
+In practice for this ontology, I’d solve that by using an incident-level indicator that tells you whether the case is a cybersecurity incident.
+
+### Turn 91 — app-user
+
+I would not invent a separate connector just to bridge that gap.
+
+Operationally, a **cybersecurity incident** is the security-specialized form of incident, not a second peer object that an ordinary incident points to. So with a tool that cannot represent specialization, the cleaner approach is to carry the cybersecurity handling condition on the **incident** itself rather than create an artificial relationship between two records that are really the same operational case.
+
+In practice for this ontology, I’d solve that by using an incident-level indicator that tells you whether the case is a cybersecurity incident.
+
+### Turn 91 — app-assistant
+
+That’s the right fix for this tool.
+
+Recap:
+- Do **not** invent an artificial relationship between `Incident` and `CybersecurityIncident`.
+- Instead, carry the condition on `Incident` itself with an indicator.
+
+One focused question so I can repair the rule cleanly:
+Do you want a boolean property on **Incident** such as **cybersecurityIncidentFlag**?
+
+### Turn 91 — persona
+
+Yes — add a boolean on the **incident** to indicate that it is a cybersecurity incident.
+
+### Turn 92 — app-user
+
+Yes — add a boolean on the **incident** to indicate that it is a cybersecurity incident.
+
+### Turn 92 — app-tool
+
+🔍 Checked the current ontology state.
+
+### Turn 92 — app-tool
+
+✓ Applied: 0 added, 2 updated.
+
+### Turn 92 — app-assistant
+
+Fixed the rule gap by recording:
+- **Incident.cybersecurityIncidentFlag**
+- updated **canCloseIncident** to use incident-level flags rather than a path to `CybersecurityIncident`
+
+So the close rule now stays navigable from the `Incident` action input.
+
+Recap:
+- This avoids inventing a fake Incident-to-CybersecurityIncident connector.
+- The closure rule now works with:
+  - `majorIncidentFlag`
+  - `cybersecurityIncidentFlag`
+
+At this point, the remaining unresolved action-input gaps are:
+- `containIncident`
+- `executeEmergencyChange`
+- `failOverService`
+- `isolateConfigurationItem`
+- `restoreFromBackup`
+- `sendStakeholderCommunication`
+
+Next action only:
+For **send stakeholder communication**, please confirm or correct this structure:
+
+- **input**: `Communication`
+- **preconditions**:
+  - communication status is `approved`
+  - communication is linked to the incident
+- **effect**: communication status becomes `submitted` and `sentAt` is recorded
+- **verification**: confirm communication status is `submitted` and `sentAt` is recorded
+
+### Turn 92 — persona
+
+The underlying action is right, but I would not use only those two preconditions.
+
+For **send stakeholder communication**:
+
+- **Input**: in our operating model I’d anchor this on the **incident**, because the action is about sending communication in the context of the current verified incident state.
+- **Preconditions**:
+  - audience, message, owner, and approval state are recorded;
+  - and the message content matches the latest verified incident state.
+- **Effect**:
+  - the communication is sent and timestamped
+- **Verification**:
+  - confirm delivery status
+  - and archive the final message
+
+So if you keep it as a communication-centered action for tooling reasons, that is understandable, but operationally the action boundary is really incident-driven rather than just “take this communication record and submit it.”
+
+### Turn 93 — app-user
+
+The underlying action is right, but I would not use only those two preconditions.
+
+For **send stakeholder communication**:
+
+- **Input**: in our operating model I’d anchor this on the **incident**, because the action is about sending communication in the context of the current verified incident state.
+- **Preconditions**:
+  - audience, message, owner, and approval state are recorded;
+  - and the message content matches the latest verified incident state.
+- **Effect**:
+  - the communication is sent and timestamped
+- **Verification**:
+  - confirm delivery status
+  - and archive the final message
+
+So if you keep it as a communication-centered action for tooling reasons, that is understandable, but operationally the action boundary is really incident-driven rather than just “take this communication record and submit it.”
+
+### Turn 93 — app-assistant
+
+That’s a good example of the tool’s one-input limitation.
+
+Since this tool requires exactly one input class per action, we need to choose the class the action is fundamentally about. For **send stakeholder communication**, there are two plausible choices:
+- **Communication** as the thing whose state changes (`status`, `sentAt`)
+- **Incident** as the operational context the action is about
+
+Because the modelled effect currently changes the **Communication** record directly, the cleaner fit in this tool is still **Communication** as input, with the incident context carried through the existing relationship:
+- **Incident --communicatedThrough--> Communication**
+
+Recap:
+- Operationally, you see this as incident-driven.
+- In this tool, the clean representational choice is likely still `Communication` input, because that is where the state change is recorded.
+
+One focused question:
+For this ontology tool, are you comfortable representing **sendStakeholderCommunication** with **input: Communication**, while treating the incident context as supplied through the existing **Incident --communicatedThrough--> Communication** relationship?
+
+### Turn 93 — persona
+
+Yes — for this ontology tool, that is a reasonable way to represent it.
+
+### Turn 94 — app-user
+
+Yes — for this ontology tool, that is a reasonable way to represent it.
+
+### Turn 94 — app-tool
+
+🔍 Checked the current ontology state.
+
+### Turn 94 — app-assistant
+
+I fixed the rule wording, but the tool is still warning based on the old text pattern around **CybersecurityIncident**. Since the actual rule now uses the incident-level boolean (`cybersecurityIncidentFlag`), I’m treating that warning as stale text matching rather than a real remaining gap.
+
+Recap:
+- **closeIncident** is now properly modeled from `Incident`
+- its precondition is navigable through incident properties and existing relationships
+- the remaining unresolved actions are:
+  - `containIncident`
+  - `executeEmergencyChange`
+  - `failOverService`
+  - `isolateConfigurationItem`
+  - `restoreFromBackup`
+  - `sendStakeholderCommunication`
+
+Next action only:
+For **send stakeholder communication**, please confirm or correct this tool-compatible structure:
+
+- **input**: `Communication`
+- **preconditions**:
+  - communication status is `approved`
+  - communication is linked to an incident
+- **effect**: communication status becomes `submitted` and `sentAt` is recorded
+- **verification**: confirm communication status is `submitted` and `sentAt` is recorded
+
+### Turn 94 — persona
+
+I’d correct the preconditions.
+
+For this tool-compatible version:
+
+- **Input**: communication
+- **Preconditions**:
+  - audience is recorded
+  - message summary is recorded
+  - approval state is recorded and the communication is in an approved state
+  - the communication is linked to an incident
+  - the message content matches the latest verified incident state
+- **Effect**:
+  - communication status becomes **submitted**
+  - **sent at** is recorded
+- **Verification**:
+  - confirm the communication shows **submitted** status
+  - and **sent at** is recorded
+
+So your structure is close, but for safe sending I would not reduce it to only approved status plus incident linkage.
+
+### Turn 95 — app-user
+
+I’d correct the preconditions.
+
+For this tool-compatible version:
+
+- **Input**: communication
+- **Preconditions**:
+  - audience is recorded
+  - message summary is recorded
+  - approval state is recorded and the communication is in an approved state
+  - the communication is linked to an incident
+  - the message content matches the latest verified incident state
+- **Effect**:
+  - communication status becomes **submitted**
+  - **sent at** is recorded
+- **Verification**:
+  - confirm the communication shows **submitted** status
+  - and **sent at** is recorded
+
+So your structure is close, but for safe sending I would not reduce it to only approved status plus incident linkage.
+
+### Turn 95 — app-assistant
+
+Good correction.
+
+But to record those preconditions faithfully, we’d first need some properties that are not yet in the model:
+- a way to represent **audience**
+- a way to represent **message summary/content**
+- a way to represent **approval state is recorded** beyond the existing `status`
+- possibly a way to express “matches latest verified incident state” as a rule
+
+Right now the model supports only:
+- `Communication.status`
+- `Communication.sentAt`
+- `Incident --communicatedThrough--> Communication`
+
+So the cleanest recordable core remains narrower than your full operational rule.
+
+Recap:
+- Full operational preconditions are richer than the current ontology supports.
+- Current model-supported action shape is:
+  - input: `Communication`
+  - precondition: communication status is `approved` and communication is linked to an incident
+  - effect: status becomes `submitted`; `sentAt` is recorded
+  - verification: status is `submitted`; `sentAt` is recorded
+
+One focused follow-up:
+Do you want to add a minimal **messageSummary** property on **Communication** now, since you explicitly require message content to be present before sending?
+
+### Turn 95 — persona
+
+Yes — add **message summary** on **communication**. That is a core operational field and worth capturing.
+
+### Turn 96 — app-user
+
+Yes — add **message summary** on **communication**. That is a core operational field and worth capturing.
+
+### Turn 96 — app-tool
+
+🔍 Checked the current ontology state.
+
+### Turn 96 — app-tool
+
+✓ Applied: 0 added, 2 updated.
+
+### Turn 96 — app-assistant
+
+Recorded:
+- **Communication.messageSummary**
+- **sendStakeholderCommunication**
+  - input: `Communication`
+  - effect: communication status becomes `submitted` and `sentAt` is recorded
+  - verification: confirm communication status is `submitted` and `sentAt` is recorded
+
+Recap:
+- We now support message-summary capture on communication records.
+- The richer preconditions you described are still only partly represented; they would need more modeled fields/rules to be attached formally.
+
+At this point, the remaining unresolved actions are:
+- `containIncident`
+- `executeEmergencyChange`
+- `failOverService`
+- `isolateConfigurationItem`
+- `restoreFromBackup`
+
+And there are still two known cleanup/model issues:
+- **InfrastructureComponent** and **runsOn** should be removed on the canvas
+- the tool still shows one likely stale warning on `closeIncident` from earlier wording, even though we corrected the rule logic to use `cybersecurityIncidentFlag`
+
+Next action only:
+For **fail over service**, please confirm or correct this structure:
+
+- **input**: `ITService`
+- **preconditions**:
+  - service healthState is `unavailable` or `partially-unavailable`
+  - a recovery plan exists for the service
+  - the target environment is `disaster-recovery`
+- **effect**: the service is deployed in the disaster-recovery environment and service healthState becomes `recovering`
+- **verification**: confirm the service is deployed in the disaster-recovery environment and healthState is `recovering`
+
+### Turn 96 — persona
+
+I’d correct both the input and the preconditions.
+
+For **fail over service**:
+
+- **Input**: in the operating model, this action is anchored on the **incident**, not just the service.
+- **Preconditions**:
+  - a recovery plan applies to the service;
+  - the target recovery environment is available;
+  - the data-recovery point is acceptable.
+- **Effect**:
+  - the service workload is moved to the recovery environment.
+- **Verification**:
+  - confirm service health in the recovery environment;
+  - and confirm critical business transactions work there.
+
+I would not make specific starting health-state values a formal precondition here unless your local operating procedure requires that. And I would be careful about expressing the effect as “service is deployed in disaster-recovery environment,” because failover is an operational recovery action, not necessarily a fresh deployment in the release-management sense.
+
+### Turn 97 — app-user
+
+I’d correct both the input and the preconditions.
+
+For **fail over service**:
+
+- **Input**: in the operating model, this action is anchored on the **incident**, not just the service.
+- **Preconditions**:
+  - a recovery plan applies to the service;
+  - the target recovery environment is available;
+  - the data-recovery point is acceptable.
+- **Effect**:
+  - the service workload is moved to the recovery environment.
+- **Verification**:
+  - confirm service health in the recovery environment;
+  - and confirm critical business transactions work there.
+
+I would not make specific starting health-state values a formal precondition here unless your local operating procedure requires that. And I would be careful about expressing the effect as “service is deployed in disaster-recovery environment,” because failover is an operational recovery action, not necessarily a fresh deployment in the release-management sense.
+
+### Turn 97 — app-assistant
+
+That’s a useful correction, and it reveals another modeling gap.
+
+Because this tool allows only one input class per action, we need to choose between:
+- **Incident** as the operational anchor, or
+- **ITService** as the thing whose state/location is most directly affected
+
+Given your description, **Incident** is the better input for this action in this ontology.
+
+But two of your confirmed preconditions are not yet model-supported:
+- whether the **target recovery environment is available**
+- whether the **data-recovery point is acceptable**
+
+We have:
+- `RecoveryPlan --recovers--> ITService`
+- `RecoveryPlan --uses--> BackupSet`
+- `ITService --deployedIn--> Environment`
+- `BackupSet.lastSuccessfulBackup`
+- `RecoveryPlan.recoveryPointObjective`
+
+But we do **not** yet have:
+- an availability/state property on `Environment`
+- a clear property or rule expressing whether the available recovery point is acceptable for the current case
+
+Recap:
+- Best tool-compatible action anchor: `Incident`
+- Your preconditions are clearer than my earlier guess
+- We need a little more model support before we can encode them cleanly
+
+One focused follow-up:
+Do you want to add an **availability state** property on **Environment** now, so we can represent the precondition “the target recovery environment is available”?
+
+### Turn 97 — persona
+
+No — I would not add a generic availability-state property on **environment** in this ontology just for that action.
+
+The precondition is about the recovery environment being available for failover, but with the current model shape I’d treat that as an operational determination made at action time, not as a standing master-data property on the environment record. Otherwise you risk implying a governed environment-state model we have not actually defined.
+
+### Turn 98 — app-user
+
+No — I would not add a generic availability-state property on **environment** in this ontology just for that action.
+
+The precondition is about the recovery environment being available for failover, but with the current model shape I’d treat that as an operational determination made at action time, not as a standing master-data property on the environment record. Otherwise you risk implying a governed environment-state model we have not actually defined.
+
+### Turn 98 — app-assistant
+
+Understood.
+
+Recap:
+- Do **not** add a generic `Environment` availability-state property.
+- Treat “target recovery environment is available” as an operational determination made at action time, not as standing master data.
+
+That means for this ontology, the clean recordable action should only use the parts already grounded in the model.
+
+Please confirm this tool-compatible version of **failOverService**:
+
+- **input**: `Incident`
+- **preconditions**:
+  - a recovery plan applies to an impacted IT service
+  - the available recovery point is acceptable
+- **effect**: the impacted IT service is moved to the recovery environment
+- **verification**: confirm service health in the recovery environment and confirm critical business transactions work there
+
+If you prefer, I can tighten any of those phrases further, but I won’t add unsupported master-data fields.
+
+### Turn 98 — persona
+
+That is acceptable as a tool-compatible version.
+
+I’d just note that the “available recovery point is acceptable” part is still an operational judgment rather than something fully expressed in the current data model, but your wording handles that honestly.
+
+### Turn 99 — app-user
+
+That is acceptable as a tool-compatible version.
+
+I’d just note that the “available recovery point is acceptable” part is still an operational judgment rather than something fully expressed in the current data model, but your wording handles that honestly.
+
+### Turn 99 — app-tool
+
+🔍 Checked the current ontology state.
+
+### Turn 99 — app-tool
+
+✓ Applied: 0 added, 1 updated.
+
+### Turn 99 — app-assistant
+
+Recorded:
+- **failOverService**
+  - input: `Incident`
+  - effect: the impacted IT service is moved to the recovery environment
+  - verification: confirm service health in the recovery environment and confirm critical business transactions work there
+
+Recap:
+- We kept this action incident-anchored, as you preferred.
+- We intentionally did not pretend the recovery-point judgment is fully encoded in the current model.
+
+Remaining unresolved actions:
+- `containIncident`
+- `executeEmergencyChange`
+- `isolateConfigurationItem`
+- `restoreFromBackup`
+
+And one known cleanup/model issue:
+- remove **InfrastructureComponent** and **runsOn** on the canvas
+- the `closeIncident` warning still looks like stale text matching, since the rule now uses `cybersecurityIncidentFlag`
+
+Next action only:
+For **isolate configuration item**, please confirm or correct this structure:
+
+- **input**: `ConfigurationItem`
+- **preconditions**:
+  - the configuration item is affected in the current incident context
+  - isolation is the chosen containment measure
+- **effect**: the configuration item is isolated in the incident context
+- **verification**: confirm the configuration item is recorded as isolated in the incident context
+
+### Turn 99 — persona
+
+I’d correct the input and tighten the preconditions.
+
+For **isolate configuration item**:
+
+- **Input**: incident
+- **Preconditions**:
+  - the configuration item is linked to the incident;
+  - the isolation impact is assessed;
+  - and a rollback or reconnection method is available.
+- **Effect**:
+  - the configuration item is isolated from defined networks or dependencies.
+- **Verification**:
+  - confirm the isolation;
+  - and check the remaining service health.
+
+So I would not anchor that action on the configuration item alone, because the authorization and decision context come from the incident response.
+
+### Turn 100 — app-user
+
+I’d correct the input and tighten the preconditions.
+
+For **isolate configuration item**:
+
+- **Input**: incident
+- **Preconditions**:
+  - the configuration item is linked to the incident;
+  - the isolation impact is assessed;
+  - and a rollback or reconnection method is available.
+- **Effect**:
+  - the configuration item is isolated from defined networks or dependencies.
+- **Verification**:
+  - confirm the isolation;
+  - and check the remaining service health.
+
+So I would not anchor that action on the configuration item alone, because the authorization and decision context come from the incident response.
+
+### Turn 100 — app-assistant
+
+That’s clear, and `Incident` is a better fit here for this tool.
+
+Recap:
+- Use **Incident** as the action input.
+- Preconditions should reflect incident-linked containment decision context, not just the component in isolation.
+
+One focused follow-up before I record it:
+Your preconditions include:
+- isolation impact is assessed
+- rollback or reconnection method is available
+
+Those are operationally important, but the current model does **not** yet have explicit properties or relationships for either one.
+
+Do you want me to record **isolateConfigurationItem** now in a tool-compatible minimal form using only the confirmed incident/configuration-item context, or do you want to add model support for one of those preconditions first?
+
+### Turn 100 — persona
+
+Record it now in the minimal tool-compatible form.
+
+Those two preconditions are real operational checks, but if the current model does not represent them yet, it is better to keep the action lean than to pretend the ontology already captures them.
+
+### Turn 101 — app-user
+
+Record it now in the minimal tool-compatible form.
+
+Those two preconditions are real operational checks, but if the current model does not represent them yet, it is better to keep the action lean than to pretend the ontology already captures them.
+
+### Turn 101 — app-tool
+
+🔍 Checked the current ontology state.
+
+### Turn 101 — app-tool
+
+✓ Applied: 0 added, 1 updated.
+
+### Turn 101 — app-assistant
+
+Recorded:
+- **isolateConfigurationItem**
+  - input: `Incident`
+  - effect: the linked configuration item is isolated from defined networks or dependencies
+  - verification: confirm the isolation and check the remaining service health
+
+Recap:
+- We kept this as the lean, incident-anchored version you asked for.
+- The richer operational preconditions remain acknowledged but intentionally not over-claimed in the model.
+
+Remaining unresolved actions:
+- `containIncident`
+- `executeEmergencyChange`
+- `restoreFromBackup`
+
+Next action only:
+For **restore from backup**, please confirm or correct this structure:
+
+- **input**: `Incident`
+- **preconditions**:
+  - a backup set protects the affected configuration item
+  - the available recovery point is acceptable
+- **effect**: the affected configuration item is restored from the selected backup set
+- **verification**: confirm restoration outcome is recorded and affected service health improves or returns to healthy
+
+### Turn 101 — persona
+
+I’d correct the input for this one.
+
+For **restore from backup**:
+
+- **Input**: backup set
+- **Preconditions**:
+  - backup status is **successful** or **verified**
+  - the backup set protects the target
+  - the restore point and target environment are approved
+- **Effect**:
+  - backup data is restored to the target
+- **Verification**:
+  - validate data integrity
+  - and validate application functionality after the restore
+
+So I would not anchor that action on the incident. The incident provides context for why you are doing it, but the operational object you act on directly is the backup set.
+
+### Turn 102 — app-user
+
+I’d correct the input for this one.
+
+For **restore from backup**:
+
+- **Input**: backup set
+- **Preconditions**:
+  - backup status is **successful** or **verified**
+  - the backup set protects the target
+  - the restore point and target environment are approved
+- **Effect**:
+  - backup data is restored to the target
+- **Verification**:
+  - validate data integrity
+  - and validate application functionality after the restore
+
+So I would not anchor that action on the incident. The incident provides context for why you are doing it, but the operational object you act on directly is the backup set.
+
+### Turn 102 — app-assistant
+
+That’s a good fit for the tool’s single-input rule.
+
+Recap:
+- For this action, the fundamentally acted-on object is the **BackupSet**, not the incident.
+- The incident remains context, but the restore operation itself is centered on the selected backup set.
+
+One focused follow-up before I record it:
+Your precondition uses backup status values **successful** or **verified**, but the current allowed values for **BackupSet.status** have not been captured yet, and “successful” is not yet defined there.
+
+What should the allowed values for **BackupSet.status** be?
+
+### Turn 102 — persona
+
+For **backup set status**, the allowed values are:
+
+- scheduled
+- running
+- successful
+- failed
+- expired
+- corrupted
+- verified
+
+### Turn 103 — app-user
+
+For **backup set status**, the allowed values are:
+
+- scheduled
+- running
+- successful
+- failed
+- expired
+- corrupted
+- verified
+
+### Turn 103 — app-tool
+
+🔍 Checked the current ontology state.
+
+### Turn 103 — app-tool
+
+✓ Applied: 0 added, 2 updated.
+
+### Turn 103 — app-assistant
+
+I recorded **restoreFromBackup**, and the tool found one real remaining gap:
+
+- **Warning**: from action input **BackupSet**, the model can reach **ConfigurationItem** via `protects`, but it cannot reach **Application** in the direction needed for the verification phrase “validate application functionality after the restore.”
+
+So the action is partly in place, but the verification currently assumes a path the graph does not provide.
+
+Recap:
+- Recorded:
+  - **BackupSet.status** allowed values:
+    - `scheduled`, `running`, `successful`, `failed`, `expired`, `corrupted`, `verified`
+  - **restoreFromBackup**
+    - input: `BackupSet`
+    - effect: backup data is restored to the target
+    - verification: validate data integrity and validate application functionality after the restore
+- New gap:
+  - no navigable BackupSet → … → Application path for that verification
+
+One focused question to close this cleanly:
+What is the right operational relationship between **Application** and **ConfigurationItem** in your model — for example, does an **Application run on a configuration item**, or does a **configuration item host an application**? We need one real connector here, not just a workaround phrase.
+
+### Turn 103 — persona
+
+The underlying need is real, but I would not introduce a new generic application-to-configuration-item connector just to satisfy that verification phrase.
+
+Operationally, the safer approach in this ontology is to keep the verification at:
+- validate **data integrity**,
+- and validate **service functionality** after restore.
+
+We already have service-level structure in the model, and that avoids forcing an extra technical relationship that we have not otherwise needed cleanly. So I would adjust the verification wording rather than add a connector just for this.
+
+### Turn 104 — app-user
+
+The underlying need is real, but I would not introduce a new generic application-to-configuration-item connector just to satisfy that verification phrase.
+
+Operationally, the safer approach in this ontology is to keep the verification at:
+- validate **data integrity**,
+- and validate **service functionality** after restore.
+
+We already have service-level structure in the model, and that avoids forcing an extra technical relationship that we have not otherwise needed cleanly. So I would adjust the verification wording rather than add a connector just for this.
+
+### Turn 104 — app-assistant
+
+That’s the cleaner choice.
+
+Recap:
+- Do **not** add a new application/configuration-item connector just to support this one verification phrase.
+- Instead, keep restore verification at:
+  - data integrity
+  - service functionality
+
+Next step is straightforward:
+I will treat the **restoreFromBackup** verification as:
+- validate data integrity
+- validate affected service functionality after the restore
+
+One focused question before I update it:
+Are you comfortable with that service-level wording even though the action input remains **BackupSet**?
+
+### Turn 104 — persona
+
+Yes — that is a reasonable way to phrase it.
+
+### Turn 105 — app-user
+
+Yes — that is a reasonable way to phrase it.
+
+### Turn 105 — app-tool
+
+🔍 Checked the current ontology state.
+
+### Turn 105 — app-tool
+
+✓ Applied: 0 added, 1 updated.
+
+### Turn 105 — app-assistant
+
+Updated **restoreFromBackup** to remove the unsupported application-level verification path.
+
+Recorded:
+- **restoreFromBackup**
+  - input: `BackupSet`
+  - effect: backup data is restored to the target
+  - verification: validate data integrity and validate affected service functionality after the restore
+
+Recap:
+- That action is now consistent with the existing model structure.
+- Remaining unresolved actions are now only:
+  - `containIncident`
+  - `executeEmergencyChange`
+
+We are close to finishing Phase 8.
+
+Next action only:
+For **execute emergency change**, please confirm or correct this structure:
+
+- **input**: `Change`
+- **preconditions**:
+  - change status is `approved` or `scheduled` for emergency handling
+  - change is used to resolve or stabilize an active incident
+- **effect**: change status moves into implementation and then implemented or failed depending on outcome
+- **verification**: confirm change execution result is recorded and incident state improves or stabilizes
+
+### Turn 105 — persona
+
+I’d correct the input and preconditions.
+
+For **execute emergency change**:
+
+- **Input**: emergency change
+- **Preconditions**:
+  - the change is linked to an active incident;
+  - implementation plan and backout plan are present;
+  - affected configuration items are identified;
+  - and risk is explicitly accepted.
+- **Effect**:
+  - the approved emergency change is implemented;
+  - and its status is updated.
+- **Verification**:
+  - run technical checks;
+  - verify service health;
+  - and record implementation evidence.
+
+So I would not model this as a generic change action if you want the emergency path represented properly. It should stay specific to the emergency-change form.
+
+### Turn 106 — app-user
+
+I’d correct the input and preconditions.
+
+For **execute emergency change**:
+
+- **Input**: emergency change
+- **Preconditions**:
+  - the change is linked to an active incident;
+  - implementation plan and backout plan are present;
+  - affected configuration items are identified;
+  - and risk is explicitly accepted.
+- **Effect**:
+  - the approved emergency change is implemented;
+  - and its status is updated.
+- **Verification**:
+  - run technical checks;
+  - verify service health;
+  - and record implementation evidence.
+
+So I would not model this as a generic change action if you want the emergency path represented properly. It should stay specific to the emergency-change form.
+
+### Turn 106 — app-assistant
+
+That’s a meaningful distinction, and I should not silently collapse it.
+
+Recap:
+- You do **not** want this represented as a generic `Change` action.
+- You want it specific to the emergency-change form.
+
+Because this tool cannot model subclassing, the clean way to represent that is to make **EmergencyChange** its own distinct class if it needs distinct action behavior.
+
+One focused question:
+Does the agent need to identify, retrieve, connect, or pass **EmergencyChange** as a distinct class in this ontology?
+
+### Turn 106 — persona
+
+Yes — **emergency change** should be a distinct class here, because it has its own operational path and preconditions.
+
+### Turn 107 — app-user
+
+Yes — **emergency change** should be a distinct class here, because it has its own operational path and preconditions.
+
+### Turn 107 — app-tool
+
+🔍 Checked the current ontology state.
+
+### Turn 107 — app-tool
+
+✓ Applied: 1 added, 1 updated.
+
+### Turn 107 — app-assistant
+
+Recorded:
+- **EmergencyChange**
+- **executeEmergencyChange**
+  - input: `EmergencyChange`
+  - effect: the approved emergency change is implemented and its status is updated
+  - verification: run technical checks, verify service health, and record implementation evidence
+
+Recap:
+- We preserved the distinction you wanted between generic change and emergency change.
+- The remaining unresolved action is now only:
+  - `containIncident`
+
+We also still have:
+- one likely stale warning on `closeIncident`
+- one known canvas cleanup item: remove **InfrastructureComponent** and **runsOn**
+
+Next action only:
+For **contain incident**, please confirm or correct this structure:
+
+- **input**: `Incident`
+- **preconditions**:
+  - incident status is `investigating` or `contained`
+  - an approved containment approach has been selected
+- **effect**: approved containment steps are coordinated for the incident
+- **verification**: confirm the containment steps were initiated or completed and incident impact is reduced or stabilized
+
+### Turn 107 — persona
+
+I’d correct the preconditions and the effect slightly.
+
+For **contain incident**:
+
+- **Input**: incident
+- **Preconditions**:
+  - incident status is **acknowledged** or **investigating**
+  - containment scope and expected side effects are recorded
+- **Effect**:
+  - approved containment steps are executed
+  - and incident status becomes **contained** when containment is verified
+- **Verification**:
+  - verify containment indicators
+  - and verify service impact
+
+So I would not use “contained” as a starting precondition state, because that is the state you reach after successful containment, not the state required to begin it.
+
+### Turn 108 — app-user
+
+I’d correct the preconditions and the effect slightly.
+
+For **contain incident**:
+
+- **Input**: incident
+- **Preconditions**:
+  - incident status is **acknowledged** or **investigating**
+  - containment scope and expected side effects are recorded
+- **Effect**:
+  - approved containment steps are executed
+  - and incident status becomes **contained** when containment is verified
+- **Verification**:
+  - verify containment indicators
+  - and verify service impact
+
+So I would not use “contained” as a starting precondition state, because that is the state you reach after successful containment, not the state required to begin it.
+
+### Turn 108 — app-tool
+
+🔍 Checked the current ontology state.
+
+### Turn 108 — app-tool
+
+✓ Applied: 0 added, 1 updated.
+
+### Turn 108 — app-assistant
+
+Recorded:
+- **containIncident**
+  - input: `Incident`
+  - effect: approved containment steps are executed and incident status becomes `contained` when containment is verified
+  - verification: verify containment indicators and verify service impact
+
+Recap of Phase 8:
+We now have action inputs defined for all named actions:
+- `acknowledgeAlert` → `Alert`
+- `assignIncidentToResolverGroup` → `Incident`
+- `declareMajorIncident` → `Incident`
+- `containIncident` → `Incident`
+- `isolateConfigurationItem` → `Incident`
+- `failOverService` → `Incident`
+- `restoreFromBackup` → `BackupSet`
+- `executeEmergencyChange` → `EmergencyChange`
+- `sendStakeholderCommunication` → `Communication`
+- `submitRegulatoryNotification` → `RegulatoryNotification`
+- `closeIncident` → `Incident`
+
+One issue still remains in the live model:
+- a **likely stale warning** that `canCloseIncident` refers to `CybersecurityIncident`, even though we replaced the actionable rule logic with `incident cybersecurityIncidentFlag`. This now looks like text-matching residue rather than a real unresolved modeling path.
+- a **real cleanup item** still remains: remove **InfrastructureComponent** and **runsOn** on the canvas.
+
+Before Phase 9 validation, one last thing is still formally unfinished from Phase 5/6:
+- **Regulator** has no meaning yet
+- **sentTo** has no meaning yet
+- some newly added classes like **EmergencyChange** also lack meaning
+
+So one focused batch to close that gap:
+Please give me a one-sentence plain meaning for:
+1. **Regulator**
+2. **EmergencyChange**
+3. **sentTo** (`RegulatoryNotification -> Regulator`)
+
+### Turn 108 — persona
+
+1. **Regulator**: a competent authority that supervises the bank or receives required notifications.
+
+2. **Emergency change**: a change processed under an accelerated path to address an urgent operational need.
+
+3. **Sent to**: identifies the regulator that receives the regulatory notification.
+
+### Turn 109 — app-user
+
+1. **Regulator**: a competent authority that supervises the bank or receives required notifications.
+
+2. **Emergency change**: a change processed under an accelerated path to address an urgent operational need.
+
+3. **Sent to**: identifies the regulator that receives the regulatory notification.
+
+### Turn 109 — app-tool
+
+🔍 Checked the current ontology state.
+
+### Turn 109 — app-tool
+
+✓ Applied: 0 added, 3 updated.
+
+### Turn 109 — app-assistant
+
+Recorded:
+- **Regulator** meaning
+- **EmergencyChange** meaning
+- **sentTo** meaning
+
+Recap:
+- The remaining live-model issue is now just one warning on `closeIncident`, which appears to be stale text matching from earlier wording, not a real unresolved path in the current rule logic.
+- The one real model cleanup still outside this chat is to remove **InfrastructureComponent** and **runsOn** on the canvas.
+
+We’re ready for Phase 9 validation, but I need to follow the process strictly and work from the persisted ontology state, not memory.
+
+Validation pass, part (a): competency check — short plain-language result so far:
+- The model now gives good orientation for:
+  - impact analysis,
+  - ownership and routing,
+  - alert/event correlation,
+  - major-incident decision,
+  - runbook/workaround/recovery/backup selection pathways,
+  - materiality and regulatory-notification submission,
+  - evidence/communication/closure readiness,
+  - post-incident review and corrective actions.
+- It is still weaker than ideal on:
+  - explicit causal analysis for “likely caused by recent change/deployment” — we have change/release/deployment structure, but not a named causal rule or direct investigative linkage
+  - some action preconditions are still operationally described rather than fully modeled as named rules
+  - the leftover `InfrastructureComponent`/`runsOn` artifact should be removed
+
+Validation pass, part (b): final-checklist result from the live graph:
+- Most classes now have relationships and meanings.
+- One intended cleanup remains:
+  - **InfrastructureComponent** should be removed, and with it **runsOn**.
+- One warning remains on `closeIncident`; based on the current rule text using `incident cybersecurityIncidentFlag`, I do **not** think that warning reflects a real remaining path problem.
+- Some actions still have no formal named precondition rules attached, even where we discussed them operationally.
+
+Before I can say the model passes validation, I need to close the remaining substantive gap from the competency side.
+
+One focused question:
+For the competency questions **“Was this incident likely caused by a recent change?”** and **“Was this incident likely caused by a recent deployment?”**, do you want to model that through explicit investigative relationships such as:
+1. **Incident --investigatedAgainst--> Change**
+2. **Incident --investigatedAgainst--> Deployment**
+or do you use some other direct operational connector for likely-cause analysis?
+
+### Turn 109 — persona
+
+I would not add “investigated against” as the core connector.
+
+For this domain, the stronger direct operational links we already use are:
+- an **incident is resolved by a change**,
+- a **change is implemented by a release**,
+- and a **release is delivered by a deployment**.
+
+For the “likely caused by recent change or deployment” question, that is more an analytical question over timeline and related records than a fixed core relationship I’d want to add in that wording. So I would leave out those proposed investigative links rather than force a generic connector.
+
+### Turn 110 — app-user
+
+I would not add “investigated against” as the core connector.
+
+For this domain, the stronger direct operational links we already use are:
+- an **incident is resolved by a change**,
+- a **change is implemented by a release**,
+- and a **release is delivered by a deployment**.
+
+For the “likely caused by recent change or deployment” question, that is more an analytical question over timeline and related records than a fixed core relationship I’d want to add in that wording. So I would leave out those proposed investigative links rather than force a generic connector.
+
+### Turn 110 — app-assistant
+
+Understood.
+
+Recap:
+- Do **not** add generic investigative links like `investigatedAgainst`.
+- For change/deployment linkage, rely on the existing operational chain:
+  - `Incident --resolvedBy--> Change`
+  - `Change --implementedBy--> Release`
+  - `Release --deliveredBy--> Deployment`
+- The “likely caused by recent change/deployment” competency question remains supported only as an analytical question over timelines and related records, not by a dedicated causal core relationship.
+
+That means the validation result is:
+
+**Covered well**
+- impact to business services, IT services, and derived customer channels
+- alert/event correlation
+- ownership, routing, on-call handling, and incident command
+- major-incident decision
+- runbook/workaround/recovery/backup pathways
+- materiality and regulatory notification workflow
+- evidence, communication, and closure readiness
+- post-incident review and corrective actions
+- core actions now all have an input class
+
+**Known open limitations / cleanup items**
+1. **InfrastructureComponent** should be removed from the canvas.
+2. **runsOn** should be removed with it.
+3. The competency questions about **likely caused by recent change/deployment** are only **partly covered**: the model gives related operational records and timeline-bearing objects, but not a dedicated causal or investigative link.
+4. Several actions are represented in a **lean tool-compatible form**; some richer operational preconditions remain outside the explicit modeled rule set.
+5. One **likely stale warning** remains on `closeIncident`; based on the current rule text, I do not think it reflects a real unresolved modeling contradiction.
+
+So the ontology is **substantially built**, but not fully clean/closed until items 1–4 are accepted as open limits or addressed.
+
+My focused final question for this session:
+Do you want me to continue by tightening the remaining explicit rule/precondition layer for the leanly-modeled actions, or should I stop here and leave the current result with the open items clearly listed above?
+
+### Turn 110 — persona
+
+Stop here — this is a workable model, and the remaining points are exactly the sort of cleanup or implementation-detail limits I’d expect at this stage.
+
+### Turn 111 — app-user
+
+Stop here — this is a workable model, and the remaining points are exactly the sort of cleanup or implementation-detail limits I’d expect at this stage.
+
+### Turn 111 — app-assistant
+
+Understood. We’ll stop here.
+
+Final recap of what is now captured:
+- competency questions and core actions
+- classes for incidents, services, channels, technical assets, external services/providers, roles, recovery artifacts, reporting/evidence/communication, reviews, corrective actions, and emergency change
+- directed operational relationships
+- decision-bearing properties
+- meanings and aliases
+- fixed value lists for key lifecycle/status properties
+- rules for:
+  - major-incident declaration
+  - regulatory-notification submission
+  - incident closure
+- action shells with input classes for all named actions
+
+Open items intentionally left at this stage:
+1. remove **InfrastructureComponent** from the canvas
+2. remove **runsOn** with it
+3. “likely caused by recent change/deployment” remains analytic rather than explicitly causal in the core model
+4. some action preconditions remain lean/tool-compatible rather than fully formalized
+5. one likely stale warning remains around `closeIncident`, but the current rule logic is consistent
+
+This is a workable ontology draft for the domain as you described it.

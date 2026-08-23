@@ -27,7 +27,7 @@ import { fileURLToPath } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, "..", "..");
-const RESULTS_ROOT = path.join(REPO_ROOT, "ontology_translation", "results", "multi-domain");
+const DEFAULT_RESULTS_ROOT = path.join(REPO_ROOT, "ontology_translation", "results", "multi-domain");
 const DOMAINS_DIR = path.join(REPO_ROOT, "ontology_translation", "domains");
 
 const arg = (name, fallback = null) => {
@@ -221,9 +221,15 @@ async function main() {
   const domains = csvList("domains");
   const runs = csvList("runs");
   if (domains.length === 0 || runs.length === 0) {
-    console.error("Usage: node tests/evals/summarize-multi-domain-benchmark.mjs --domains=<d1,d2,...> --runs=<r1,r2,...>");
+    console.error("Usage: node tests/evals/summarize-multi-domain-benchmark.mjs --domains=<d1,d2,...> --runs=<r1,r2,...> [--resultsDir=<path>]");
     process.exit(1);
   }
+  // Issue #137: mirrors run-multi-domain-benchmark.mjs's own --resultsDir=
+  // override, for the same reason -- a sibling results directory (e.g. a
+  // contamination-free control-domain arm) needs its own summary without
+  // mixing into ontology_translation/results/multi-domain/'s 4-domain
+  // macro statistics. Defaults to the original hardcoded path.
+  const RESULTS_ROOT = path.resolve(process.cwd(), arg("resultsDir", DEFAULT_RESULTS_ROOT));
 
   const rows = [];
   const missing = [];

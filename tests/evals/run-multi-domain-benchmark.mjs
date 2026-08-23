@@ -61,7 +61,7 @@ import {
 } from "./lib/reportGenerator.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const RESULTS_ROOT = path.resolve(__dirname, "..", "..", "ontology_translation", "results", "multi-domain");
+const DEFAULT_RESULTS_ROOT = path.resolve(__dirname, "..", "..", "ontology_translation", "results", "multi-domain");
 
 function readJsonSafe(p) {
   try { return JSON.parse(fs.readFileSync(p, "utf8")); } catch (err) { return null; }
@@ -134,10 +134,19 @@ async function main() {
   const domain = arg("domain");
   const runId = arg("run");
   if (!domain || !runId) {
-    console.error("Usage: node tests/evals/run-multi-domain-benchmark.mjs --domain=<id> --run=<run-id> [--force]");
+    console.error("Usage: node tests/evals/run-multi-domain-benchmark.mjs --domain=<id> --run=<run-id> [--force] [--resultsDir=<path>]");
     console.error(`Available domains: ${listAvailableDomains().join(", ")}`);
     process.exit(1);
   }
+  // Issue #137: a clearly-named sibling results directory (e.g. a
+  // contamination-free control-domain arm) needs to write somewhere other
+  // than ontology_translation/results/multi-domain/ without mixing into
+  // the 4-domain macro statistics that directory's own summarizer pass
+  // computes. Defaults to the original hardcoded path -- every existing
+  // call site is completely unaffected. Relative paths resolve against the
+  // current working directory, matching how a shell would interpret any
+  // other CLI path argument.
+  const RESULTS_ROOT = path.resolve(process.cwd(), arg("resultsDir", DEFAULT_RESULTS_ROOT));
   const endpoint = (process.env.AZURE_OPENAI_ENDPOINT || "").replace(/\/+$/, "");
   const apiKey = process.env.AZURE_OPENAI_API_KEY;
   if (!endpoint || !apiKey || !MODEL) {

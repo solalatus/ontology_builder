@@ -76,6 +76,30 @@ export function writeConversationLog(orchestratorResult, { dir = RESULTS_DIR } =
   fs.writeFileSync(pathsFor(dir).logPath, lines.join("\n"));
 }
 
+// The exact inverse of writeConversationLog above -- parses a committed
+// conversation-log.md back into {turn, speaker, text} entries. Issue #137:
+// pulled out of tests/leak-guard-replay-real-transcripts.spec.mjs (which had
+// its own private copy of this regex) so a second real-transcript-replay
+// tool (the interviewer-prior-knowledge report) doesn't grow a third one --
+// paired here with the writer it must stay in sync with, rather than a
+// separate parsing-only module that could silently drift from what
+// writeConversationLog actually produces. Turn numbers are not unique keys:
+// a real transcript has one "### Turn N — app-user", one "app-tool" (zero or
+// more), one "app-assistant", and one "persona" entry all sharing the same N
+// (interviewer and persona share a turn number -- confirmed against real
+// committed transcripts during #133's post-merge verification), so callers
+// that need a specific speaker's text for a turn should filter by both
+// fields, not assume one entry per turn number.
+export function parseConversationLog(text) {
+  const entries = [];
+  const re = /^### Turn (\d+) — ([a-z-]+)\n\n([\s\S]*?)(?=\n### Turn |\n*$)/gm;
+  let m;
+  while ((m = re.exec(text))) {
+    entries.push({ turn: Number(m[1]), speaker: m[2], text: m[3].trim() });
+  }
+  return entries;
+}
+
 // Tool-call activity, read from both the raw real API responses (for exact
 // tool_calls counts) and the app's own visible transcript tool notes (for
 // outcome classification: applied/skipped/nothing/error) -- mirrors the

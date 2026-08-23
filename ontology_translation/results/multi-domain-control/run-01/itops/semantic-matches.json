@@ -1,0 +1,138 @@
+{
+  "fullDomain": {
+    "classes": [
+      {
+        "goldId": "ItService",
+        "recoveredId": "n2"
+      }
+    ],
+    "relationships": [],
+    "properties": [],
+    "valueFidelity": [
+      {
+        "id": "Vendor.criticalityTier",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "BackupSet.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Environment.environmentType",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "ThirdPartyService.criticalityTier",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "Alert.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Alert.severity",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Incident.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Incident.severity",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Incident.priority",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Problem.status",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "Change.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Deployment.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "EvidenceItem.integrityStatus",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Communication.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "MaterialityAssessment.result",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "RegulatoryNotification.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "CorrectiveAction.status",
+        "semanticFidelity": 1
+      }
+    ]
+  },
+  "scoped": {
+    "classes": [
+      {
+        "goldId": "ItService",
+        "recoveredId": "n2"
+      }
+    ],
+    "relationships": [],
+    "properties": [],
+    "valueFidelity": [
+      {
+        "id": "BackupSet.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Alert.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Alert.severity",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Incident.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Incident.severity",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Change.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Deployment.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "EvidenceItem.integrityStatus",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Communication.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "MaterialityAssessment.result",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "RegulatoryNotification.status",
+        "semanticFidelity": 1
+      }
+    ]
+  }
+}

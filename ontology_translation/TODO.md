@@ -2891,3 +2891,143 @@ reference and record deltas/decisions here instead.)*
 
   Documentation-only entry: no code or committed benchmark artifact
   changed. Cross-referenced in `tests/evals/results/runs/README.md`.
+
+- **Issue #137: contamination-free control arm run under the exact
+  multi-domain configuration, plus a reusable interviewer-prior-knowledge
+  tool that corrects PR #136's own unreproducible figures for the
+  published-ontology domains too.** Full narrative and all figures also at
+  `ontology_translation/results/multi-domain-control/README.md`.
+
+  **Generalized both benchmark scripts first**, since the control arm needs
+  its own results directory without disturbing `multi-domain/`'s 4-domain
+  macro statistics: `run-multi-domain-benchmark.mjs` and
+  `summarize-multi-domain-benchmark.mjs` both gained a `--resultsDir=`
+  override, defaulting to the original hardcoded path (every existing call
+  site is unaffected -- verified: re-running the summarizer with no
+  override against the real `multi-domain/` data changes only its own
+  `generatedAt` timestamp, nothing else).
+
+  **Built a reusable interviewer-prior-knowledge tool**
+  (`tests/evals/lib/interviewerPriorKnowledge.mjs` +
+  `tests/evals/interviewer-prior-knowledge-report.mjs`, 11 tests), the
+  interviewer-side mirror of #133's own persona-side leak audit: for every
+  raw multi-segment gold identifier appearing anywhere in a transcript,
+  which side said it first, and did that identifier end up as a scored
+  match. Along the way, extracted `parseConversationLog` out of its private
+  copy in `tests/leak-guard-replay-real-transcripts.spec.mjs` into
+  `reportGenerator.mjs` (paired with the writer it parses), and split
+  `leakDetector.mjs`'s multi-segment filter out of `buildLeakCandidateSet`
+  into its own `collectMultiSegmentIdentifiers` export, since the
+  interviewer-first tool needs the multi-segment restriction WITHOUT the
+  persona-brief exclusion (that exclusion is about whether the *persona*
+  had legitimate reason to know a word already -- meaningless on the
+  interviewer side, which is never shown the persona's brief at all).
+
+  **This tool corrects PR #136's own figures.** Re-run against the same 12
+  published-domain transcripts PR #136 audited ad hoc, it measures **31**
+  total interviewer-first identifiers (range 0-8/run), not PR #136's
+  claimed 330 (range 4-46/run) -- roughly 10x smaller. No script for PR
+  #136's methodology was ever committed anywhere in this repo's history
+  (`git log --all --grep="interviewer-first"` finds only the documentation
+  commit itself), so it was unreproducible; spot-checking this tool's own
+  output (e.g. iof-maintenance/run-01's 8 interviewer-first hits include
+  real, sensible raw-identifier guesses like `MaintenanceProcess`,
+  `classifyItemAsFailed`) gives confidence it is measuring the real thing,
+  just arriving at a materially smaller number than the prior ad hoc pass
+  claimed. Reported as a correction, not silently adopted or silently
+  ignored -- the same posture as #133's own still-open N1 echo-count
+  discrepancy. Persona-first stayed at 0 across all 12 transcripts either
+  way (re-verified, unaffected by this correction).
+
+  **Ran itops (the hand-authored, unpublished, structurally
+  memorization-proof domain) 3 times under the exact `multi-domain/`
+  configuration** -- same `gpt-5.4` deployment, same interviewer/wrapper
+  prompts (verified identical `interviewerPromptSha256`/`wrapperSha256` in
+  `provenance.json` across both directories), same runner, same scorer.
+  Persona choice: the converted `persona.md` (not the richer
+  `persona-eszter.md` the frozen replication runs use), for configuration
+  parity with the other four domains -- a deliberate, documented deviation
+  from those frozen runs, which remain a separate, non-comparable control
+  (see `tests/evals/results/runs/README.md`). Results committed to a
+  clearly-named **sibling** directory,
+  `ontology_translation/results/multi-domain-control/`, not mixed into
+  `multi-domain/`'s own macro statistics -- itops is structurally
+  different enough (see the domain-size point below) that averaging it in
+  would corrupt the existing 4-domain comparison.
+
+  A single-replicate smoke run gated the spend as usual (clean,
+  `degraded: false`, deleted afterward). Of the 3 live replicates,
+  `run-01` initially hit the default 45-minute wall-clock cap at 127 turns
+  while **genuinely still doing real, specific modeling work** (verified by
+  reading its own transcript, not just trusting the stop reason) --
+  re-run once with a 90-minute budget (`ONTOLOGY_EVAL_WALLCLOCK_MINUTES=90
+  ONTOLOGY_EVAL_MAX_TURNS=280 --force`) and reached a natural
+  `app_agent_appears_finished` stop at 111 turns. `run-02` stopped via
+  `pleasantry_loop_detected` at 91 turns -- verified against its own
+  transcript as a genuine correct catch (turns 89-91 are pure "Take care" /
+  "You too" / "Thank you" after an explicit, substantive stopping point at
+  turn 88), the same shape as `iof-supply-chain/run-02`'s real catch in the
+  #133 re-run. `run-03` finished cleanly. All three: `degraded: false`,
+  zero leak events, zero errors, `maxConsecutiveTurnsWithNoToolActivity`
+  well under the 80-turn threshold.
+
+  **Comparison against the 4 published-ontology domains** (macro F1, itops
+  vs. `multi-domain/`'s own macro figures, after the `run-01` re-run):
+
+  | Dimension | itops | 4 published domains | Delta |
+  |---|---|---|---|
+  | Classes (full) | 67.3% | 68.3% | -1.0 pt |
+  | Relationships (full) | 48.2% | 57.3% | -9.1 pt |
+  | Properties (full) | 58.7% | 64.6% | -5.9 pt |
+  | Composite recovery effectiveness (full) | 58.1% | 63.4% | -5.3 pt |
+  | Rules | 61.3% | 66.0% | -4.7 pt |
+  | Actions (identification) | 81.0% | 87.6% | -6.6 pt |
+
+  Every dimension is now modestly negative -- before the `run-01` re-run
+  (i.e. with the truncated first attempt), rules was anomalously +8.2 pt
+  *above* the published domains, an artifact of budget starvation rather
+  than a real effect. Re-running `run-01` to a natural stop alone closed
+  the composite gap from -9.6 pt to -5.3 pt -- direct, measured
+  confirmation that itops's own domain size was part of the original
+  story, not just a hypothesis: itops has **321** total ground-truth
+  elements (68 classes, 111 properties, 120 relationships, 11 rules, 11
+  actions), more than double the largest published domain (fibo-loans,
+  149) and up to 6x the smallest (iof-maintenance, 50); mean turns-used
+  (92.7) is 1.4-2.1x every published domain's own mean, mean total tokens
+  (22.2M) roughly 3.3-5.6x theirs.
+
+  **Explicit statement of what this does and does not establish about
+  pretraining contamination (issue #137's own requested "Analysis to
+  report" item, replacing the prior "upper bound" caveat with a measured
+  figure).** Interviewer-first identifier counts for the itops runs: 10
+  total (range 0-7/run), 9 of which (90%) ended up as a scored match --
+  measured with the exact same tool re-run against both directories, so
+  this is a like-for-like comparison against the corrected 31-total/
+  0-8-per-run figure for the published domains above. **The counts do NOT
+  show a stark separation**: itops's range sits inside the published
+  domains' own range, not an order of magnitude below it. This argues
+  mildly against pretraining contamination being the dominant driver of the
+  remaining -5.3 pt composite gap. But domain size and pretraining-
+  familiarity are still confounded in this single-arm design -- itops is
+  simultaneously the only contamination-free domain here AND by far the
+  largest one, and even a 90-minute budget may not be fully sufficient for
+  a 321-element domain (`run-01` still listed real open items at its own
+  natural stopping point, not "nothing left to do"). **The honest
+  conclusion**: the remaining gap most plausibly reflects domain size/
+  density rather than pretraining contamination, based on the
+  interviewer-first evidence, but this single-arm design cannot fully rule
+  out a modest contamination contribution either. issue #137's own
+  suggested "optional second arm" (a mechanically obfuscated, same-size
+  renamed copy of a translated domain) is the design that would actually
+  isolate the variable, by holding domain size/structure constant while
+  removing pretraining familiarity -- **deliberately not taken in this
+  pass**: a rushed mechanical renaming that produced incoherent or
+  unnatural prose would compromise the interview itself (and this
+  benchmark's own label/meaning-sensitive scorer) in ways that could
+  produce a misleading result of its own, which would be worse than
+  leaving the comparison honestly confounded and naming the confound
+  plainly, as this entry does. Left as a well-scoped, real follow-up, not
+  silently dropped.
+
+  Full offline regression suite re-verified clean after all of the above:
+  1167 tests, 1153 pass, 0 fail, 14 skipped (pre-existing, unrelated).

@@ -1,0 +1,35 @@
+{
+  "generatedAt": "2026-08-23T17:38:57.476Z",
+  "resultsRoot": "/home/user/ontology_builder/ontology_translation/results/multi-domain-control",
+  "rows": [
+    {
+      "domain": "itops",
+      "runId": "run-01",
+      "interviewerFirstCount": 3,
+      "interviewerFirstMatchedCount": 2,
+      "personaFirstCount": 0,
+      "personaFirstIdentifiers": []
+    },
+    {
+      "domain": "itops",
+      "runId": "run-02",
+      "interviewerFirstCount": 0,
+      "interviewerFirstMatchedCount": 0,
+      "personaFirstCount": 0,
+      "personaFirstIdentifiers": []
+    },
+    {
+      "domain": "itops",
+      "runId": "run-03",
+      "interviewerFirstCount": 7,
+      "interviewerFirstMatchedCount": 7,
+      "personaFirstCount": 0,
+      "personaFirstIdentifiers": []
+    }
+  ],
+  "totals": {
+    "totalInterviewerFirst": 10,
+    "totalInterviewerFirstMatched": 9,
+    "totalPersonaFirst": 0
+  }
+}

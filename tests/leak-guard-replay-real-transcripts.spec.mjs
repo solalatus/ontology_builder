@@ -7,6 +7,7 @@ import yaml from "js-yaml";
 import { trackToolActivityStreak, WASTED_TURN_THRESHOLD, excludeAlreadySaidByInterviewer } from "./evals/lib/conversationOrchestrator.mjs";
 import { buildLeakCandidateSet, findLeakedIdentifiers } from "./evals/lib/leakDetector.mjs";
 import { resolveDomainYamlPath, resolveDomainPersonaPath } from "./evals/lib/groundTruthModel.mjs";
+import { parseConversationLog } from "./evals/lib/reportGenerator.mjs";
 
 // Issue #133 N1/N2 (independent audit of the fix pass): both blockers were
 // invisible to the synthetic unit tests and only became obvious once the
@@ -22,19 +23,6 @@ import { resolveDomainYamlPath, resolveDomainPersonaPath } from "./evals/lib/gro
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ARCHIVE_ROOT = path.resolve(__dirname, "..", "ontology_translation", "results", "multi-domain-superseded-2026-08");
-
-// Parses a conversation-log.md the exact way writeConversationLog wrote it
-// (`### Turn ${turn} — ${speaker}`, see reportGenerator.mjs) back into
-// {turn, speaker, text} entries.
-function parseConversationLog(text) {
-  const entries = [];
-  const re = /^### Turn (\d+) — ([a-z-]+)\n\n([\s\S]*?)(?=\n### Turn |\n*$)/gm;
-  let m;
-  while ((m = re.exec(text))) {
-    entries.push({ turn: Number(m[1]), speaker: m[2], text: m[3].trim() });
-  }
-  return entries;
-}
 
 function discoverRuns() {
   const runs = [];

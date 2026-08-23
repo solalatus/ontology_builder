@@ -75,5 +75,14 @@ ontology_translation/results/runs/
 # reviewer can audit a run's actual transcript and scoring without
 # re-running it. Only the transient per-run scratch stays ignored, exactly
 # like the baselines' own progress.json/checkpoint/ rule.
-ontology_translation/results/multi-domain/*/*/progress.json
-ontology_translation/results/multi-domain/*/*/checkpoint/
+#
+# The glob is `multi-domain*`, not the literal `multi-domain`, so this rule
+# also covers every sibling results directory run-multi-domain-benchmark.mjs's
+# own --resultsDir= override can point at (issue #137: multi-domain-control/,
+# the contamination-free control arm, is the first of these) -- caught live
+# when #137's own control-arm runs staged their checkpoint/ and progress.json
+# into git, because the old literal-only glob didn't reach the new sibling
+# directory. A results directory this repo ever writes real per-run scratch
+# into should never need a matching gitignore entry added by hand.
+ontology_translation/results/multi-domain*/*/*/progress.json
+ontology_translation/results/multi-domain*/*/*/checkpoint/
