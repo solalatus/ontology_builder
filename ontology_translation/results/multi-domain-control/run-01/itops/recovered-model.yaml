@@ -1,0 +1,705 @@
+competency_questions:
+  - id: cq1
+    text: Which business services are impacted by this incident?
+  - id: cq2
+    text: Which customer channels are impacted by this incident?
+  - id: cq3
+    text: Which configuration items sit on the dependency path for the affected IT service?
+  - id: cq4
+    text: Which external dependencies sit on the dependency path for the affected IT service?
+  - id: cq5
+    text: Which active alerts are correlated with this incident?
+  - id: cq6
+    text: Which active events are correlated with this incident?
+  - id: cq7
+    text: Who owns the affected service?
+  - id: cq8
+    text: Which resolver group should handle the incident?
+  - id: cq9
+    text: Which on-call engineer should handle the incident?
+  - id: cq10
+    text: Does this incident meet the criteria to be treated as a major incident?
+  - id: cq11
+    text: Which runbook is appropriate and safe to use for this incident?
+  - id: cq12
+    text: Which workaround is appropriate and safe to use for this incident?
+  - id: cq13
+    text: Which backup set is appropriate and safe to use for this incident?
+  - id: cq14
+    text: Which recovery plan is appropriate and safe to use for this incident?
+  - id: cq15
+    text: Was this incident likely caused by a recent change?
+  - id: cq16
+    text: Was this incident likely caused by a recent deployment?
+  - id: cq17
+    text: Has a materiality assessment been completed?
+  - id: cq18
+    text: Do we need to prepare a regulatory notification for this incident?
+  - id: cq19
+    text: Do we need to send a regulatory notification for this incident?
+  - id: cq20
+    text: Are the required evidence items complete for this incident?
+  - id: cq21
+    text: Are the required stakeholder communications complete for this incident?
+  - id: cq22
+    text: Are the required closure conditions complete for this incident?
+  - id: cq23
+    text: Which corrective actions from earlier post-incident reviews are still open for the affected service?
+classes:
+  Incident:
+    meaning: "An unplanned interruption, degradation, or security condition that requires managed response."
+    aliases: []
+    properties:
+      incidentIdentifier:
+        type: text
+      status:
+        type: text
+        allowed:
+          - new
+          - acknowledged
+          - investigating
+          - contained
+          - recovering
+          - monitoring
+          - resolved
+          - closed
+          - cancelled
+      severity:
+        type: text
+        allowed:
+          - sev1-critical
+          - sev2-high
+          - sev3-medium
+          - sev4-low
+      priority:
+        type: text
+        allowed:
+          - p1-critical
+          - p2-high
+          - p3-medium
+          - p4-low
+      detectedAt:
+        type: date
+      openedAt:
+        type: date
+      majorIncidentFlag:
+        type: boolean
+      closedAt:
+        type: date
+      summary:
+        type: text
+      acceptedResidualCondition:
+        type: boolean
+      majorIncidentDeclaredAt:
+        type: date
+      cybersecurityIncidentFlag:
+        type: boolean
+  ITService:
+    meaning: A managed technology capability that supports one or more business services.
+    aliases: []
+    properties:
+      serviceName:
+        type: text
+      criticality:
+        type: text
+      healthState:
+        type: text
+        allowed:
+          - healthy
+          - degraded
+          - partially-unavailable
+          - unavailable
+          - recovering
+          - unknown
+  BusinessService:
+    meaning: A customer-facing or business-facing capability delivered by the bank.
+    aliases: []
+    properties: {}
+  CustomerChannel:
+    meaning: A channel through which customers access banking services.
+    aliases: []
+    properties: {}
+  ConfigurationItem:
+    meaning: "A managed component that sits within configuration-management scope and matters for operation, support, or recovery."
+    aliases:
+      - CI
+    properties:
+      name:
+        type: text
+      configurationItemType:
+        type: text
+  Alert:
+    meaning: A monitoring or security signal that requires triage or acknowledgement.
+    aliases: []
+    properties:
+      status:
+        type: text
+        allowed:
+          - new
+          - acknowledged
+          - suppressed
+          - escalated
+          - closed
+      severity:
+        type: text
+        allowed:
+          - sev1-critical
+          - sev2-high
+          - sev3-medium
+          - sev4-low
+      raisedAt:
+        type: date
+      summary:
+        type: text
+      acknowledgedAt:
+        type: date
+  Event:
+    meaning: A time-stamped observation of a state change or other notable occurrence.
+    aliases: []
+    properties: {}
+  ThirdPartyService:
+    meaning: An externally provided service that the bank depends on.
+    aliases: []
+    properties:
+      criticalityTier:
+        type: text
+  CloudService:
+    meaning: A technology capability consumed from an external or group cloud provider.
+    aliases: []
+    properties: {}
+  Vendor:
+    meaning: An external organization that supplies or supports technology or services.
+    aliases:
+      - supplier
+    properties:
+      legalName:
+        type: text
+      criticalityTier:
+        type: text
+  ServiceOwner:
+    meaning: The role accountable for an IT service across its lifecycle.
+    aliases: []
+    properties: {}
+  ResolverGroup:
+    meaning: The team assigned to diagnose and restore issues in a specific technology or service area.
+    aliases:
+      - support group
+    properties: {}
+  OnCallEngineer:
+    meaning: A technical specialist available for time-critical operational response.
+    aliases: []
+    properties: {}
+  IncidentCommander:
+    meaning: "The person accountable for command, coordination, and decision cadence during a major incident."
+    aliases: []
+    properties: {}
+  Runbook:
+    meaning: "A maintained operational procedure used for diagnosis, response, recovery, or verification."
+    aliases: []
+    properties:
+      name:
+        type: text
+  Workaround:
+    meaning: A temporary method that reduces or bypasses the impact of an incident or problem.
+    aliases: []
+    properties: {}
+  BackupSet:
+    meaning: A defined collection of recoverable backup data for protected components.
+    aliases: []
+    properties:
+      status:
+        type: text
+        allowed:
+          - scheduled
+          - running
+          - successful
+          - failed
+          - expired
+          - corrupted
+          - verified
+      lastSuccessfulBackup:
+        type: date
+  RecoveryPlan:
+    meaning: A documented plan for restoring an IT service and its dependencies.
+    aliases: []
+    properties:
+      recoveryTimeObjective:
+        type: text
+      recoveryPointObjective:
+        type: text
+      lastReviewDate:
+        type: date
+  Environment:
+    meaning: "A deployment context such as production, test, development, or disaster recovery."
+    aliases: []
+    properties:
+      environmentType:
+        type: text
+        allowed:
+          - production
+          - disaster-recovery
+          - pre-production
+          - test
+          - development
+          - management
+  Change:
+    meaning: "A controlled addition, modification, or removal that may affect an IT service."
+    aliases: []
+    properties:
+      status:
+        type: text
+        allowed:
+          - draft
+          - assessed
+          - approved
+          - scheduled
+          - implementing
+          - implemented
+          - failed
+          - rolled-back
+          - closed
+          - cancelled
+  Deployment:
+    meaning: The technical execution that installs or activates a release or change.
+    aliases: []
+    properties:
+      status:
+        type: text
+        allowed:
+          - planned
+          - running
+          - succeeded
+          - failed
+          - rolled-back
+          - cancelled
+      startedAt:
+        type: date
+      completedAt:
+        type: date
+  MaterialityAssessment:
+    meaning: A documented determination of incident significance and reporting implications.
+    aliases: []
+    properties:
+      result:
+        type: text
+        allowed:
+          - not-reportable
+          - potentially-reportable
+          - reportable
+          - undetermined
+      assessedAt:
+        type: date
+  RegulatoryNotification:
+    meaning: A formal incident-related submission to a competent authority.
+    aliases: []
+    properties:
+      status:
+        type: text
+        allowed:
+          - draft
+          - pending-approval
+          - approved
+          - submitted
+          - accepted
+          - rejected
+          - withdrawn
+      submittedAt:
+        type: date
+      dueTime:
+        type: date
+  EvidenceItem:
+    meaning: "A preserved record, artifact, or observation that supports incident analysis and accountability."
+    aliases: []
+    properties:
+      collectedAt:
+        type: date
+      integrityStatus:
+        type: text
+        allowed:
+          - collected
+          - hashed
+          - verified
+          - sealed
+          - compromised
+  Communication:
+    meaning: "A controlled message sent to operational, business, customer, vendor, or regulatory audiences."
+    aliases:
+      - notification
+    properties:
+      status:
+        type: text
+        allowed:
+          - draft
+          - pending-approval
+          - approved
+          - submitted
+          - accepted
+          - rejected
+          - withdrawn
+      sentAt:
+        type: date
+      messageSummary:
+        type: text
+  CorrectiveAction:
+    meaning: "A tracked action intended to remove a cause, reduce risk, or improve response capability."
+    aliases: []
+    properties:
+      status:
+        type: text
+        allowed:
+          - open
+          - in-progress
+          - blocked
+          - implemented
+          - verified
+          - closed
+          - cancelled
+      dueDate:
+        type: date
+  CybersecurityIncident:
+    meaning: "An incident caused by or involving malicious, unauthorized, or otherwise security-relevant activity."
+    aliases: []
+    properties: {}
+  Application:
+    meaning: A software system that implements business or operational functionality.
+    aliases: []
+    properties: {}
+  InfrastructureComponent:
+    meaning: null
+    aliases: []
+    properties: {}
+  SecurityEvent:
+    meaning: "An event relevant to confidentiality, integrity, availability, authenticity, or cyber-threat activity."
+    aliases: []
+    properties: {}
+  Problem:
+    meaning: "The underlying cause, or potential underlying cause, of one or more incidents."
+    aliases: []
+    properties:
+      status:
+        type: text
+  KnownError:
+    meaning: A diagnosed problem with a documented cause or workaround.
+    aliases: []
+    properties:
+      diagnosedCause:
+        type: text
+      workaroundSummary:
+        type: text
+  PostIncidentReview:
+    meaning: "A structured review of causes, response effectiveness, lessons learned, and follow-up work after an incident."
+    aliases: []
+    properties:
+      heldOn:
+        type: date
+  Release:
+    meaning: A governed package of approved changes introduced together.
+    aliases: []
+    properties:
+      version:
+        type: text
+  Regulator:
+    meaning: A competent authority that supervises the bank or receives required notifications.
+    aliases: []
+    properties: {}
+  EmergencyChange:
+    meaning: A change processed under an accelerated path to address an urgent operational need.
+    aliases: []
+    properties: {}
+relationships:
+  - name: impacts
+    from: Incident
+    to: BusinessService
+    meaning: Identifies the business or technology service whose operation is adversely affected by the incident.
+    aliases: []
+  - name: impacts
+    from: Incident
+    to: ITService
+    meaning: Identifies the business or technology service whose operation is adversely affected by the incident.
+    aliases: []
+  - name: deliveredThrough
+    from: BusinessService
+    to: CustomerChannel
+    meaning: Identifies the customer access channel through which a business service is provided.
+    aliases: []
+  - name: dependsOn
+    from: BusinessService
+    to: ITService
+    meaning: Identifies a service that must be available or functioning for the depending service to operate as intended.
+    aliases: []
+  - name: implementedBy
+    from: ITService
+    to: Application
+    meaning: Identifies the concrete application or release through which the higher-level service or change is realized.
+    aliases: []
+  - name: runsOn
+    from: Application
+    to: InfrastructureComponent
+    meaning: null
+    aliases: []
+  - name: dependsOn
+    from: ITService
+    to: ThirdPartyService
+    meaning: Identifies a service that must be available or functioning for the depending service to operate as intended.
+    aliases: []
+  - name: provides
+    from: Vendor
+    to: ThirdPartyService
+    meaning: Identifies the externally supplied service or cloud capability delivered by the vendor.
+    aliases: []
+  - name: provides
+    from: Vendor
+    to: CloudService
+    meaning: Identifies the externally supplied service or cloud capability delivered by the vendor.
+    aliases: []
+  - name: triggeredBy
+    from: Incident
+    to: Alert
+    meaning: Identifies the alert whose signal led to opening or recognizing the incident.
+    aliases: []
+  - name: correlatedFrom
+    from: Incident
+    to: Event
+    meaning: Identifies the event data brought together to form the incident picture.
+    aliases: []
+  - name: concerns
+    from: Alert
+    to: ConfigurationItem
+    meaning: Identifies the configuration item that an alert is about.
+    aliases: []
+  - name: observedOn
+    from: Event
+    to: ConfigurationItem
+    meaning: Identifies the configuration item on which the event was seen.
+    aliases: []
+  - name: owns
+    from: ServiceOwner
+    to: ITService
+    meaning: Identifies the accountable owner for the service in question.
+    aliases: []
+  - name: memberOf
+    from: OnCallEngineer
+    to: ResolverGroup
+    meaning: Identifies the resolver group that the on-call engineer belongs to.
+    aliases: []
+  - name: assignedTo
+    from: Incident
+    to: ResolverGroup
+    meaning: Identifies the resolver group currently responsible for diagnosing and restoring the incident.
+    aliases:
+      - routed to
+  - name: handledBy
+    from: Incident
+    to: OnCallEngineer
+    meaning: Identifies the individual responder currently working the incident.
+    aliases:
+      - worked by
+  - name: supports
+    from: ResolverGroup
+    to: ITService
+    meaning: Identifies the service or configuration item that a resolver group is responsible for covering operationally.
+    aliases:
+      - covers
+  - name: supports
+    from: ResolverGroup
+    to: ConfigurationItem
+    meaning: Identifies the service or configuration item that a resolver group is responsible for covering operationally.
+    aliases:
+      - covers
+  - name: coordinatedBy
+    from: Incident
+    to: IncidentCommander
+    meaning: Identifies the incident commander responsible for command and coordination of the incident.
+    aliases: []
+  - name: derivedFrom
+    from: CybersecurityIncident
+    to: SecurityEvent
+    meaning: Identifies the security event from which the cybersecurity incident is determined.
+    aliases: []
+  - name: linkedTo
+    from: Incident
+    to: Problem
+    meaning: Identifies the problem record associated with the incident.
+    aliases: []
+  - name: documentedBy
+    from: Problem
+    to: KnownError
+    meaning: Identifies the known-error record that captures the diagnosed problem.
+    aliases: []
+  - name: has
+    from: KnownError
+    to: Workaround
+    meaning: Identifies the workaround attached to the known error.
+    aliases: []
+  - name: handledWith
+    from: Incident
+    to: Runbook
+    meaning: "Identifies the runbook used to manage diagnosis, response, recovery, or verification for the incident."
+    aliases: []
+  - name: recovers
+    from: RecoveryPlan
+    to: ITService
+    meaning: Identifies the IT service that the recovery plan is intended to restore.
+    aliases: []
+  - name: uses
+    from: RecoveryPlan
+    to: BackupSet
+    meaning: Identifies the backup set required by the recovery plan.
+    aliases: []
+  - name: deployedIn
+    from: ITService
+    to: Environment
+    meaning: Identifies the environment in which the IT service is deployed.
+    aliases: []
+  - name: evaluatedBy
+    from: Incident
+    to: MaterialityAssessment
+    meaning: "Identifies the materiality assessment used to determine the incident's significance and reporting implications."
+    aliases: []
+  - name: reports
+    from: RegulatoryNotification
+    to: Incident
+    meaning: Identifies the incident that the regulatory notification formally reports.
+    aliases: []
+  - name: supportedBy
+    from: Incident
+    to: EvidenceItem
+    meaning: "Identifies the evidence items that substantiate the incident record, analysis, or resolution."
+    aliases: []
+  - name: communicatedThrough
+    from: Incident
+    to: Communication
+    meaning: Identifies the communication records used to inform stakeholders about the incident.
+    aliases:
+      - communicated via
+  - name: reviewedIn
+    from: Incident
+    to: PostIncidentReview
+    meaning: Identifies the post-incident review where the incident is examined after response.
+    aliases: []
+  - name: produces
+    from: PostIncidentReview
+    to: CorrectiveAction
+    meaning: Identifies the corrective actions that come out of the post-incident review.
+    aliases: []
+  - name: resolvedBy
+    from: Incident
+    to: Change
+    meaning: Identifies the change used to restore or permanently fix the incident.
+    aliases: []
+  - name: implementedBy
+    from: Change
+    to: Release
+    meaning: Identifies the concrete application or release through which the higher-level service or change is realized.
+    aliases: []
+  - name: deliveredBy
+    from: Release
+    to: Deployment
+    meaning: Identifies the deployment through which the release is technically introduced.
+    aliases: []
+  - name: deploys
+    from: Deployment
+    to: Application
+    meaning: Identifies the application that the deployment installs or activates.
+    aliases: []
+  - name: protects
+    from: BackupSet
+    to: ConfigurationItem
+    meaning: Identifies the configuration item whose recoverable data is covered by the backup set.
+    aliases: []
+  - name: belongsTo
+    from: ConfigurationItem
+    to: Environment
+    meaning: Identifies the environment that the configuration item is part of.
+    aliases: []
+  - name: requiresPreservationOf
+    from: CybersecurityIncident
+    to: EvidenceItem
+    meaning: Identifies the evidence items that must be preserved for the cybersecurity incident.
+    aliases: []
+  - name: sentTo
+    from: RegulatoryNotification
+    to: Regulator
+    meaning: Identifies the regulator that receives the regulatory notification.
+    aliases: []
+rules:
+  canDeclareMajorIncident:
+    conditions:
+      - "incident status is not resolved, closed, or cancelled"
+      - incident severity is sev1-critical or sev2-high
+      - incident impacts at least one IT service
+      - incident is coordinated by an incident commander
+  canSubmitRegulatoryNotification:
+    conditions:
+      - materiality assessment result is reportable
+      - regulatory notification reports the incident
+      - regulatory notification is sent to a regulator
+      - required fields and supporting evidence are complete
+      - regulatory notification status is approved
+      - submission happens before regulatory notification due time
+  canCloseIncident:
+    conditions:
+      - incident status is resolved or monitoring
+      - impacted IT services are healthy or incident accepted residual condition is true
+      - resolution and restoration evidence are recorded
+      - required stakeholder communications are complete
+      - "if incident majorIncidentFlag is true or incident cybersecurityIncidentFlag is true, a post-incident review is scheduled or completed"
+actions:
+  acknowledgeAlert:
+    input: Alert
+    preconditions: []
+    effect: Alert status becomes acknowledged and alert acknowledgedAt is recorded.
+    verification: Confirm the alert status is acknowledged.
+  assignIncidentToResolverGroup:
+    input: Incident
+    preconditions: []
+    effect: The incident is assigned to the intended resolver group.
+    verification: Confirm the incident shows the intended resolver group assignment.
+  declareMajorIncident:
+    input: Incident
+    preconditions:
+      - canDeclareMajorIncident
+    effect: "Incident majorIncidentFlag becomes true, incident majorIncidentDeclaredAt is recorded, major-incident coordination is initiated, and communication for the declaration state is initiated."
+    verification: "Confirm the incident is marked as a major incident, an incident commander is present, incident majorIncidentDeclaredAt is recorded, and a communication record supports the declaration state."
+  containIncident:
+    input: Incident
+    preconditions: []
+    effect: Approved containment steps are executed and incident status becomes contained when containment is verified.
+    verification: Verify containment indicators and verify service impact.
+  isolateConfigurationItem:
+    input: Incident
+    preconditions: []
+    effect: The linked configuration item is isolated from defined networks or dependencies.
+    verification: Confirm the isolation and check the remaining service health.
+  failOverService:
+    input: Incident
+    preconditions: []
+    effect: The impacted IT service is moved to the recovery environment.
+    verification: Confirm service health in the recovery environment and confirm critical business transactions work there.
+  restoreFromBackup:
+    input: BackupSet
+    preconditions: []
+    effect: Backup data is restored to the target.
+    verification: Validate data integrity and validate affected service functionality after the restore.
+  executeEmergencyChange:
+    input: EmergencyChange
+    preconditions: []
+    effect: The approved emergency change is implemented and its status is updated.
+    verification: "Run technical checks, verify service health, and record implementation evidence."
+  sendStakeholderCommunication:
+    input: Communication
+    preconditions: []
+    effect: Communication status becomes submitted and communication sentAt is recorded.
+    verification: Confirm the communication status is submitted and communication sentAt is recorded.
+  submitRegulatoryNotification:
+    input: RegulatoryNotification
+    preconditions:
+      - canSubmitRegulatoryNotification
+    effect: Regulatory notification status becomes submitted and regulatory notification submittedAt is recorded.
+    verification: Confirm the regulatory notification status is submitted and regulatory notification submittedAt is recorded.
+  closeIncident:
+    input: Incident
+    preconditions:
+      - canCloseIncident
+    effect: Incident status becomes closed and incident closedAt is recorded.
+    verification: Confirm the incident status is closed and incident closedAt is recorded.

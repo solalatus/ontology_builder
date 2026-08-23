@@ -1,0 +1,107 @@
+{
+  "generatedAt": "2026-08-23T17:38:57.191Z",
+  "resultsRoot": "/home/user/ontology_builder/ontology_translation/results/multi-domain",
+  "rows": [
+    {
+      "domain": "brick-hvac",
+      "runId": "run-01",
+      "interviewerFirstCount": 0,
+      "interviewerFirstMatchedCount": 0,
+      "personaFirstCount": 0,
+      "personaFirstIdentifiers": []
+    },
+    {
+      "domain": "brick-hvac",
+      "runId": "run-02",
+      "interviewerFirstCount": 0,
+      "interviewerFirstMatchedCount": 0,
+      "personaFirstCount": 0,
+      "personaFirstIdentifiers": []
+    },
+    {
+      "domain": "brick-hvac",
+      "runId": "run-03",
+      "interviewerFirstCount": 2,
+      "interviewerFirstMatchedCount": 2,
+      "personaFirstCount": 0,
+      "personaFirstIdentifiers": []
+    },
+    {
+      "domain": "iof-maintenance",
+      "runId": "run-01",
+      "interviewerFirstCount": 8,
+      "interviewerFirstMatchedCount": 8,
+      "personaFirstCount": 0,
+      "personaFirstIdentifiers": []
+    },
+    {
+      "domain": "iof-maintenance",
+      "runId": "run-02",
+      "interviewerFirstCount": 3,
+      "interviewerFirstMatchedCount": 3,
+      "personaFirstCount": 0,
+      "personaFirstIdentifiers": []
+    },
+    {
+      "domain": "iof-maintenance",
+      "runId": "run-03",
+      "interviewerFirstCount": 3,
+      "interviewerFirstMatchedCount": 3,
+      "personaFirstCount": 0,
+      "personaFirstIdentifiers": []
+    },
+    {
+      "domain": "iof-supply-chain",
+      "runId": "run-01",
+      "interviewerFirstCount": 4,
+      "interviewerFirstMatchedCount": 4,
+      "personaFirstCount": 0,
+      "personaFirstIdentifiers": []
+    },
+    {
+      "domain": "iof-supply-chain",
+      "runId": "run-02",
+      "interviewerFirstCount": 3,
+      "interviewerFirstMatchedCount": 3,
+      "personaFirstCount": 0,
+      "personaFirstIdentifiers": []
+    },
+    {
+      "domain": "iof-supply-chain",
+      "runId": "run-03",
+      "interviewerFirstCount": 7,
+      "interviewerFirstMatchedCount": 7,
+      "personaFirstCount": 0,
+      "personaFirstIdentifiers": []
+    },
+    {
+      "domain": "fibo-loans",
+      "runId": "run-01",
+      "interviewerFirstCount": 1,
+      "interviewerFirstMatchedCount": 1,
+      "personaFirstCount": 0,
+      "personaFirstIdentifiers": []
+    },
+    {
+      "domain": "fibo-loans",
+      "runId": "run-02",
+      "interviewerFirstCount": 0,
+      "interviewerFirstMatchedCount": 0,
+      "personaFirstCount": 0,
+      "personaFirstIdentifiers": []
+    },
+    {
+      "domain": "fibo-loans",
+      "runId": "run-03",
+      "interviewerFirstCount": 0,
+      "interviewerFirstMatchedCount": 0,
+      "personaFirstCount": 0,
+      "personaFirstIdentifiers": []
+    }
+  ],
+  "totals": {
+    "totalInterviewerFirst": 31,
+    "totalInterviewerFirstMatched": 31,
+    "totalPersonaFirst": 0
+  }
+}

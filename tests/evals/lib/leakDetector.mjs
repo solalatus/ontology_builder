@@ -67,6 +67,27 @@ export function collectRawIdentifiers(domainYamlDoc) {
   return ids;
 }
 
+// Every raw identifier in the document that clears the multi-segment bar
+// (module header: a single-segment identifier is indistinguishable from
+// ordinary English vocabulary), with NO brief exclusion applied. Issue #137:
+// pulled out of buildLeakCandidateSet below so the interviewer-prior-
+// knowledge tool (tests/evals/lib/interviewerPriorKnowledge.mjs) can reuse
+// the identical "what counts as a checkable raw identifier" definition this
+// module already establishes, without also picking up the brief exclusion --
+// that exclusion is specifically about whether the PERSONA had legitimate
+// reason to already know a word (it was handed the word in its own
+// character sketch), which has no equivalent meaning on the interviewer
+// side: the interviewer is never shown the persona's brief, so whether a
+// word happens to appear there is irrelevant to whether the interviewer's
+// use of it reflects pretrained knowledge of the source ontology.
+export function collectMultiSegmentIdentifiers(domainYamlDoc) {
+  const candidates = new Set();
+  for (const id of collectRawIdentifiers(domainYamlDoc)) {
+    if (isMultiSegmentIdentifier(id)) candidates.add(id);
+  }
+  return candidates;
+}
+
 // Given the raw document plus the persona's OWN brief text (persona.md --
 // legitimately handed to the persona as its character sketch, free to
 // mention domain vocabulary), returns the identifiers that would actually be
@@ -77,8 +98,7 @@ export function collectRawIdentifiers(domainYamlDoc) {
 export function buildLeakCandidateSet(domainYamlDoc, personaBriefText = "") {
   const brief = String(personaBriefText || "");
   const candidates = new Set();
-  for (const id of collectRawIdentifiers(domainYamlDoc)) {
-    if (!isMultiSegmentIdentifier(id)) continue;
+  for (const id of collectMultiSegmentIdentifiers(domainYamlDoc)) {
     if (brief.includes(id)) continue;
     candidates.add(id);
   }
