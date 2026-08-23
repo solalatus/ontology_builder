@@ -26,6 +26,25 @@ directory is a static, self-contained page rendering the same tables and finding
 side-by-side read — open it directly in a browser, no server or build step needed (same "single portable
 file" convention as `index.html` itself, spec.md §2).
 
+## Synthetic-control role (issue #133 follow-up audit, 2026-08-23)
+
+Beyond replication, these three runs double as the benchmark's **synthetic control**: unlike the four
+translated domains in `ontology_translation/results/multi-domain/` (Brick, IOF Maintenance, IOF Supply
+Chain, FIBO Loans — all derived from published industry ontologies the interviewer model was plausibly
+pretrained on), `itops_mtsr.yaml` is hand-authored for this project and published nowhere, so the
+interviewer cannot be reciting memorized vocabulary here. A post-#133 audit put all three runs through
+the same checks as the multi-domain re-run: the current scorer reproduces every published per-dimension
+figure exactly (the composite differs only by #133/E6's documented 3-component redefinition — the
+4-component 37.0/37.2/39.6% full-domain figures below map to 24.3/28.7/20.8% under the current
+definition); a first-speaker leak audit against all 302 leakable raw fixture identifiers found **zero
+persona-first introductions in any run** (notable, since these runs predate every #133 leak defense);
+interviewer-first raw-identifier hits are only 9/4/5 per run vs. 25–46 on the published-ontology domains,
+consistent with convergent naming rather than memorization; and all three ended cleanly
+(`app_agent_appears_finished`) with no pleasantry-loop waste. Caveat: these runs used a different
+interviewer model and an earlier interviewer-prompt generation than the multi-domain benchmark, so their
+absolute scores are not head-to-head comparable with it — the control claim is about contamination, not
+about the score level. Full audit narrative: `ontology_translation/TODO.md`'s 2026-08-23 entry.
+
 ## Run stats
 
 | Run | Turns | Wall-clock | App-agent calls | `apply_ontology_yaml` | `get_graph_state` | Applied / Skipped |
