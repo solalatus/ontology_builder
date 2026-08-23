@@ -2815,3 +2815,79 @@ reference and record deltas/decisions here instead.)*
   Full offline suite re-verified clean including the new real-data
   relationship-matcher regression test. No code behavior changed in this
   entry -- verification and documentation only.
+
+- **Issue #133, follow-up audit (2026-08-23): quantified the interviewer
+  prior-knowledge channel on the clean 12-run set, then verified the
+  purely synthetic itops control runs with the same method -- the
+  elicitation results do not rest only on ontologies the interviewer
+  model could have memorized.**
+
+  **Interviewer-first identifiers on the 12-run re-run, quantified.**
+  Finding A's own out-of-scope caveat (the interviewer "guessing" exact
+  internal identifiers of published ontologies could reflect pretrained
+  knowledge of Brick/IOF/FIBO rather than elicitation skill) was never
+  put to a number for the clean re-run. Measured now, with the same
+  first-speaker method Finding A used on the persona side: across the 12
+  runs in `results/multi-domain/`, **330 distinct raw multi-segment gold
+  identifiers were introduced first by the interviewer** (per-run range
+  4-46; fibo-loans worst at 36-46), and **162 of them ended up as scored
+  heuristic matches -- ~30% of the 548 matched gold elements across all
+  12 runs**. This is an upper bound on distortion, not proven inflation:
+  matching is label/alias-based after camelCase splitting, so many of
+  those elements could have matched under natural phrasing too. The
+  persona side stays clean: zero persona-first introductions in all 12
+  transcripts (re-verified during this audit). Not a code bug and not a
+  leak in Finding A's sense -- but it means the multi-domain scores
+  should be read as an upper bound on pure elicitation skill for these
+  publicly-published source ontologies.
+
+  **Synthetic control: the itops replication runs check out under the
+  identical audit.** `tests/evals/fixtures/itops_mtsr.yaml` (68 classes,
+  108 relationships, 111 properties, 11 actions) is hand-authored for
+  this project -- a fictional medium-sized Hungarian bank's IT-operations
+  domain, never published anywhere a pretrained model could have seen --
+  so the interviewer-memorization channel is structurally closed there.
+  The three frozen replication runs (`tests/evals/results/runs/`,
+  interviewer `gpt-5.5-2026-04-23`, persona `gpt-4o-mini`) were put
+  through the same checks as the multi-domain re-run:
+
+  1. Offline re-score with the current scorer reproduces every published
+     per-dimension figure exactly (class/relationship/property F1, value
+     fidelity, rules, actions, both denominators, heuristic and
+     semantic). The only difference from the archived README tables is
+     E6's own intentional composite redefinition: the archived 4-component
+     recovery effectiveness (37.0% / 37.2% / 39.6% full-domain) maps to
+     24.3% / 28.7% / 20.8% under the current 3-component definition --
+     same underlying numbers, different (documented) average.
+  2. First-speaker leak audit over all three transcripts, against all 302
+     leakable raw identifiers (class/relationship/property/action ids
+     plus camelCase value-set members; none appear in persona-eszter.md):
+     **zero persona-first introductions in any run** -- notable because
+     these runs predate every #133 defense (raw MTSR YAML embedded
+     verbatim in the persona's context, no natural-language briefing, no
+     runtime leak guard), so the wrapper prompt alone held on this
+     fixture.
+  3. Interviewer-first raw-identifier hits are 9 / 4 / 5 per run --
+     versus 25-46 per run on the published-ontology domains -- and the
+     few hits are convergent naming (natural labels like "Service Desk"
+     camelCased the same way by coincidence of convention), since there
+     is no published source to memorize.
+  4. All three runs ended cleanly (`app_agent_appears_finished`, 52/51/57
+     turns); no pleasantry-loop or wasted-turn contamination of their
+     operational stats.
+
+  **What this does and does not establish.** It establishes that the
+  interview pipeline's recovery results are not an artifact of the
+  interviewer reciting memorized public ontologies: on a domain where
+  memorization is impossible, the same pipeline still recovers a usable
+  model, with a fully clean leak audit on both sides. It does NOT make
+  the itops scores comparable head-to-head with the multi-domain run:
+  the itops replications used a different interviewer model and an
+  earlier interviewer-prompt generation, and their own README already
+  documents that configuration as frozen-for-replication rather than
+  current. A same-configuration synthetic-domain arm (or an obfuscated/
+  renamed variant of one of the translated domains) remains the right
+  follow-up if a directly comparable contamination-free number is wanted.
+
+  Documentation-only entry: no code or committed benchmark artifact
+  changed. Cross-referenced in `tests/evals/results/runs/README.md`.
