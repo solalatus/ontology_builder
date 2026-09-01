@@ -2774,6 +2774,7 @@ const STRINGS = {
     agentChatErrorGeneric: "Something went wrong contacting the agent. Try again.",
     // Helper Agent — Phase 3 (tool-calling).
     agentToolApplied: (added, changed) => `✓ Applied: ${added} added, ${changed} updated.`,
+    agentToolRemoved: (count) => `✓ Removed: ${count} element(s).`,
     agentToolSkippedNote: "An additional ontology edit in this message was skipped — only one edit is applied per message.",
     agentToolNothingNote: "The agent tried to edit the ontology, but nothing new or changed was found in it.",
     agentToolErrorNote: "The agent's ontology edit could not be applied (invalid data).",
@@ -3122,6 +3123,7 @@ const STRINGS = {
     agentChatErrorGeneric: "Hiba történt az ügynök elérésekor. Próbáld újra.",
     // Helper Agent — Phase 3 (eszközhívások).
     agentToolApplied: (added, changed) => `✓ Alkalmazva: ${added} hozzáadva, ${changed} frissítve.`,
+    agentToolRemoved: (count) => `✓ Eltávolítva: ${count} elem.`,
     agentToolSkippedNote: "Egy további ontológia-szerkesztést kihagytunk ebben az üzenetben — üzenetenként csak egy szerkesztés kerül alkalmazásra.",
     agentToolNothingNote: "Az ügynök megpróbálta szerkeszteni az ontológiát, de nem talált benne új vagy módosított elemet.",
     agentToolErrorNote: "Az ügynök szerkesztését nem sikerült alkalmazni (érvénytelen adat).",
@@ -11607,11 +11609,21 @@ function applyDeterministicImportReviewBucket(items) {
 // never clears a field it doesn't mention on an existing match) --
 // literally applyYamlModelToState() with fieldLevelMerge:true, the exact
 // same core the interview agent's own apply_ontology_yaml tool already
-// trusts. remove_ontology_elements is new: named, deliberate removal, the
-// one capability apply_ontology_yaml/agent-merge was deliberately never
-// given (see applyYamlModelToState's own comment) -- necessary because a
-// human's longform reasoning can genuinely call for deleting something, not
-// just creating or patching it.
+// trusts. remove_ontology_elements is named, deliberate removal --
+// necessary because a human's longform reasoning can genuinely call for
+// deleting something, not just creating or patching it.
+//
+// remove_ontology_elements (the tool definition just below, and
+// removeNamedOntologyElements()) is no longer execution-agent-only: issue
+// #140's follow-up wires this exact same tool into the persistent
+// interview agent's own tool loop too (see its own "tools:" array and
+// handleAgentRemoveToolCall further down) -- apply_ontology_yaml/
+// agent-merge being upsert-only with no removal path at all turned out to
+// be a real defect, not a safe omission: the interview system prompt's own
+// CONSISTENCY CHECK section already told the agent to "remove" a
+// duplicate reverse-direction relationship when it found one, with no
+// tool that could actually do it. apply_ontology_changes stays execution-
+// agent-only; only the removal tool is shared.
 // ---------------------------------------------------------------------------
 
 const APPLY_ONTOLOGY_CHANGES_TOOL = {
@@ -14440,8 +14452,11 @@ ontology the expert is looking at. Call it as soon as something is concrete enou
 don't wait until the end of the interview to batch everything into one
 call. Only include entries that are new or have changed; the tool merges
 against the live model, so it never needs a full restated model. Make at
-most one apply_ontology_yaml call per message — if you have several things
-to record, put them all in that one call's yaml.
+most one committing call — apply_ontology_yaml or remove_ontology_elements,
+whichever applies — per message; if you have several things to record, put
+them all in that one apply_ontology_yaml call's yaml (removals are always
+their own separate call — see REMOVING SOMETHING FROM THE LIVE ONTOLOGY
+below).
 
 Use this YAML shape:
 
@@ -14478,24 +14493,50 @@ actions:
     effect: <plain text>
     verification: <plain text>
 
+REMOVING SOMETHING FROM THE LIVE ONTOLOGY
+You also have a remove_ontology_elements tool that permanently deletes named
+classes, relationships, properties, rules, actions, or competency questions
+from the live ontology — for when something genuinely needs to go, not just
+be added or changed. Name only exactly what should go; it never does a
+blanket wipe.
+
+BE CONSERVATIVE ABOUT REMOVAL. Only call it when the expert's own words, or
+an unambiguous consistency-check finding (like the reverse-direction
+duplicate below), clearly call for deleting that specific thing. A vague or
+general remark ("that might not matter," "we probably don't need that") is
+not enough on its own — if you are genuinely unsure whether something should
+be removed, leave it and ask the expert directly instead of removing it.
+
+Never use apply_ontology_yaml's meaning or aliases field to leave yourself a
+note that something should be deleted (e.g. writing "REMOVE" as a meaning,
+or rewriting it to say the item is "leftover" or "superseded") instead of
+actually deleting it — that ships a broken, half-retracted item in the
+exported ontology rather than resolving anything. If something should go,
+call remove_ontology_elements on it directly, in the same turn you decide
+that; if you are not sure, leave its real content exactly as it is and ask.
+
 CONSISTENCY CHECK
 After each apply_ontology_yaml call the tool result may list consistency
 problems the app found in the live ontology. Problems marked [error] are exact
 contradictions; [warning] are likely contradictions found by text matching and
 can occasionally be wrong. Fix what you can before replying to the expert — you
-may make up to two further apply_ontology_yaml calls in this same turn purely to
-resolve them. Only fix a problem when the correction is unambiguous from what
-the expert has already told you, and never by weakening or deleting the rule,
-property or relationship that surfaced it. If resolving it needs information the
-expert has not given you, leave it and ask them about it in your reply. If you
-are certain a reported problem is not real, you may leave it and carry on — but
-say so briefly rather than passing over it silently. One [warning] pattern
-is almost always real, not a false positive: the same two classes connected
-by both a relationship and its reverse (e.g. [Class A] --relatesTo-->
-[Class B] alongside [Class B] --relatesTo--> [Class A], worded differently)
-— this tool models one connection per pair, not both directions as separate
-facts, so resolve which direction the expert actually uses and remove the
-other rather than leaving both on the chance the warning might be wrong.
+may make up to two further apply_ontology_yaml and/or remove_ontology_elements
+calls in this same turn purely to resolve them. Only fix a problem when the
+correction is unambiguous from what the expert has already told you, and never
+by weakening the rule, property or relationship that surfaced it (removing the
+one specific duplicate/contradictory item the finding names is not
+"weakening" — see the reverse-direction case just below). If resolving it
+needs information the expert has not given you, leave it and ask them about it
+in your reply. If you are certain a reported problem is not real, you may
+leave it and carry on — but say so briefly rather than passing over it
+silently. One [warning] pattern is almost always real, not a false positive:
+the same two classes connected by both a relationship and its reverse (e.g.
+[Class A] --relatesTo--> [Class B] alongside [Class B] --relatesTo-->
+[Class A], worded differently) — this tool models one connection per pair,
+not both directions as separate facts, so resolve which direction the expert
+actually uses and call remove_ontology_elements on the other, rather than
+leaving both on the chance the warning might be wrong, and rather than only
+rewriting its meaning to say it should go.
 
 TONE
 Precise, patient, and collaborative — like a knowledge engineer who respects
@@ -14656,15 +14697,23 @@ async function callAgentChat(messages) {
   return typeof message.content === "string" ? message.content : "";
 }
 
-// Executes one tool call and returns {applied, resultText} — resultText is
-// what gets sent back to the API as that tool_call_id's result; applied
-// tells the caller whether this call actually changed the ontology (used
-// to enforce "at most one real commit per turn," see sendAgentChatMessage).
-// Every branch also appends a small, localized transcript note so the
-// outcome is visible to the user, not just to the model (plan §4.5's
-// transparency requirement, extended here to cover the skip/error/no-op
-// cases the plan didn't spell out line-by-line).
-async function handleAgentToolCall(call, alreadyCommittedThisTurn) {
+// Executes one apply_ontology_yaml tool call and returns {applied,
+// resultText} — resultText is what gets sent back to the API as that
+// tool_call_id's result; applied tells the caller whether this call
+// actually changed the ontology (used to enforce "at most one real commit
+// per turn," see the tool-call loop below). Every branch also appends a
+// small, localized transcript note so the outcome is visible to the user,
+// not just to the model (plan §4.5's transparency requirement, extended
+// here to cover the skip/error/no-op cases the plan didn't spell out
+// line-by-line). Renamed from handleAgentToolCall (issue #140 follow-up)
+// once a second, sibling handler (handleAgentRemoveToolCall, just below)
+// existed to be confused with — this one only ever handles
+// apply_ontology_yaml, hence the name-checking guard immediately below,
+// which the single-tool original had no need for.
+async function handleAgentApplyToolCall(call, alreadyCommittedThisTurn) {
+  if (call.function && call.function.name !== "apply_ontology_yaml") {
+    return { applied: false, resultText: `Error: unknown tool "${call.function && call.function.name}".` };
+  }
   let args;
   try {
     args = JSON.parse((call.function && call.function.arguments) || "{}");
@@ -14674,7 +14723,7 @@ async function handleAgentToolCall(call, alreadyCommittedThisTurn) {
   }
   if (alreadyCommittedThisTurn) {
     appendTranscriptMessage("tool", t("agentToolSkippedNote"));
-    return { applied: false, resultText: "Skipped: no further apply_ontology_yaml call is available this turn. "
+    return { applied: false, resultText: "Skipped: no further apply_ontology_yaml or remove_ontology_elements call is available this turn. "
       + "The extra calls in a turn are for resolving consistency problems your own edit introduced, not for further edits. "
       + "Reply to the expert instead." };
   }
@@ -14713,6 +14762,73 @@ async function handleAgentToolCall(call, alreadyCommittedThisTurn) {
   await commitYamlImport(yamlText, "agent-merge"); // never "replace"; not "merge" either — see commitYamlImport's own comment
   appendTranscriptMessage("tool", t("agentToolApplied", plan.addedCount, plan.changedCount));
   return { applied: true, resultText: `Applied. Added ${plan.addedCount}, updated ${plan.changedCount} existing item(s).${dropped}` };
+}
+
+// Sibling of handleAgentApplyToolCall above, for remove_ontology_elements
+// (issue #140 follow-up). Until this existed, the live interview agent had
+// no way to retract anything it had said earlier -- apply_ontology_yaml is
+// upsert-only by design (see its own tool description and
+// applyYamlModelToState's comment) -- even though this very system prompt
+// already told it, in the CONSISTENCY CHECK section, to "remove" a
+// duplicate reverse-direction relationship when it found one. A manual
+// audit of 15 real completed interviews found the predictable result: with
+// an instruction to remove something and no tool that could, the agent
+// resorted to overwriting a `meaning` field with a self-directed note
+// ("REMOVE") that then shipped, untouched, in the final export (issue
+// #140). Reuses removeNamedOntologyElements() directly -- the exact same
+// named-only removal core the Import Review execution agent's own
+// remove_ontology_elements tool already uses (executeImportReviewMergerTool)
+// -- not a second implementation of "find this named thing and delete it."
+//
+// Shares handleAgentApplyToolCall's per-turn commit budget and skip/error
+// message (both are checked by the same `alreadyCommittedThisTurn` the
+// tool-call loop threads through) -- a removal is exactly as much a real
+// mutating commit as an apply, and must count against the same "one real
+// edit per turn, plus up to two more purely for self-correction" limit for
+// the same reason (see AGENT_MAX_APPLIES_PER_TURN's own comment).
+async function handleAgentRemoveToolCall(call, alreadyCommittedThisTurn) {
+  if (call.function && call.function.name !== "remove_ontology_elements") {
+    return { applied: false, resultText: `Error: unknown tool "${call.function && call.function.name}".` };
+  }
+  let args;
+  try {
+    args = JSON.parse((call.function && call.function.arguments) || "{}");
+  } catch (err) {
+    appendTranscriptMessage("tool", t("agentToolErrorNote"));
+    return { applied: false, resultText: "Error: could not parse tool arguments as JSON." };
+  }
+  if (alreadyCommittedThisTurn) {
+    appendTranscriptMessage("tool", t("agentToolSkippedNote"));
+    return { applied: false, resultText: "Skipped: no further apply_ontology_yaml or remove_ontology_elements call is available this turn. "
+      + "The extra calls in a turn are for resolving consistency problems your own edit introduced, not for further edits. "
+      + "Reply to the expert instead." };
+  }
+  const before = snapshotState();
+  const removed = removeNamedOntologyElements({
+    classes: Array.isArray(args.classes) ? args.classes : [],
+    relationships: Array.isArray(args.relationships) ? args.relationships : [],
+    properties: Array.isArray(args.properties) ? args.properties : [],
+    rules: Array.isArray(args.rules) ? args.rules : [],
+    actions: Array.isArray(args.actions) ? args.actions : [],
+    competencyQuestions: Array.isArray(args.competencyQuestions) ? args.competencyQuestions : [],
+  });
+  const total = Object.values(removed).reduce((s, arr) => s + arr.length, 0);
+  if (total === 0) {
+    appendTranscriptMessage("tool", t("agentToolNothingNote"));
+    return { applied: false, resultText: "Nothing was removed — none of the named items matched anything currently in the ontology by that exact name. Call get_graph_state if you are not sure of the current exact name." };
+  }
+  // Same "one combined undo step per turn" fold as commitYamlImport's own
+  // "agent-merge" path (see that function's own comment) -- a remove call
+  // and a same-turn self-correction apply call must undo together, not as
+  // two separate history entries.
+  pushOrFoldAgentHistory(before, snapshotState(), { source: "agent-auto-edit", evidenceIndex: agentState.transcript.length });
+  markDirty();
+  const summary = Object.entries(removed)
+    .filter(([, names]) => names.length)
+    .map(([kind, names]) => `${kind}: ${names.join(", ")}`)
+    .join("; ");
+  appendTranscriptMessage("tool", t("agentToolRemoved", total));
+  return { applied: true, resultText: `Removed ${total} element(s) — ${summary}.` };
 }
 
 // Read-only — reuses the exact same, already-tested exporter the manual
@@ -14882,7 +14998,15 @@ async function sendAgentChatMessage(userText) {
       // (EXPERIMENT_BRIEF.md's B3 "structured interview without tool calls"
       // condition). Never set by any real UI.
       const message = await callAgentChatRaw(messages, {
-        tools: agentState.toolsDisabled ? undefined : [APPLY_ONTOLOGY_YAML_TOOL, GET_GRAPH_STATE_TOOL],
+        // REMOVE_ONTOLOGY_ELEMENTS_TOOL added here (issue #140 follow-up):
+        // previously only the Import Review execution agent had it (see
+        // that tool's own comment for the original "deliberately never
+        // given" framing) -- the live interview agent had no way to
+        // retract anything it had said earlier, which a manual audit of 15
+        // real completed interviews traced directly to leftover deletion-
+        // sentinel text ("REMOVE") shipping in final exports. See
+        // handleAgentRemoveToolCall's own comment for the full story.
+        tools: agentState.toolsDisabled ? undefined : [APPLY_ONTOLOGY_YAML_TOOL, GET_GRAPH_STATE_TOOL, REMOVE_ONTOLOGY_ELEMENTS_TOOL],
         promptCacheKey: agentState.promptCacheKey,
         signal: controller.signal,
       });
@@ -14914,7 +15038,13 @@ async function sendAgentChatMessage(userText) {
           const budget = appliesThisTurn === 0 ? true
             : (!agentState.selfCorrectionDisabled
                && appliesThisTurn < AGENT_MAX_APPLIES_PER_TURN && remediationOpen);
-          const { applied, resultText } = await handleAgentToolCall(call, !budget);
+          // Shared budget across both mutating tools (issue #140 follow-up)
+          // -- an apply and a remove in the same turn draw from the same
+          // "one real edit, plus up to two more purely for self-correction"
+          // pool, not two independent ones; see handleAgentRemoveToolCall's
+          // own comment.
+          const toolHandler = name === "remove_ontology_elements" ? handleAgentRemoveToolCall : handleAgentApplyToolCall;
+          const { applied, resultText } = await toolHandler(call, !budget);
           if (applied) {
             appliesThisTurn++;
             const findings = computeOntologyFindings(buildDomainModel(), { droppedReferences: lastDroppedReferences });

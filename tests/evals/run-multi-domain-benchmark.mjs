@@ -58,7 +58,10 @@ import { computeSemanticRecoveryMetrics, computeSemanticRuleActionMetrics } from
 import {
   writeConversationLog, computeOperationalStats, generateLlmReview, writeReport, writeToolCallLog,
   writeRecoveredModelYaml, writeHeuristicMatches, writeSemanticJudgments, writeSemanticMatches,
+  writeModelSanitizerFindings,
 } from "./lib/reportGenerator.mjs";
+import yaml from "js-yaml";
+import { findModelIssues } from "./lib/modelSanitizer.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DEFAULT_RESULTS_ROOT = path.resolve(__dirname, "..", "..", "ontology_translation", "results", "multi-domain");
@@ -285,6 +288,17 @@ async function main() {
     }));
     const recoveredModelYaml = await page.evaluate(() => window.buildDomainYamlExport());
     writeRecoveredModelYaml(recoveredModelYaml, { dir: outDir });
+    // Issue #140: report-only, offline (no model call) content-quality scan
+    // of the export the run itself just produced -- never strips anything
+    // from this run's own recovered-model.yaml, only records what a human
+    // reviewer would flag (leftover deletion-sentinel text, duplicate/
+    // self-loop relationships). Best-effort: a parse failure here must never
+    // fail an otherwise-successful run over a report-only side artifact.
+    try {
+      writeModelSanitizerFindings(findModelIssues(yaml.load(recoveredModelYaml) || {}), { dir: outDir });
+    } catch (err) {
+      console.error(`model-sanitizer scan failed (non-fatal): ${err.message}`);
+    }
 
     const groundTruth = loadGroundTruthModel({ format: "domain-yaml", path: domainYamlPath });
     const metrics = computeRecoveryMetrics(groundTruth, recoveredState);
