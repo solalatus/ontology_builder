@@ -61,7 +61,7 @@ changes directly to the live ontology on canvas, visible immediately.
 | Question | Decision |
 |---|---|
 | Edit application model | Fully autonomous — no per-edit confirmation gate. Trust is maintained through undo, not through a confirm dialog. |
-| Tool granularity | One coarse tool, `apply_ontology_yaml`, not a fine-grained per-entity tool set. It reuses the existing YAML import pipeline verbatim. |
+| Tool granularity | One coarse tool, `apply_ontology_yaml`, not a fine-grained per-entity tool set. It reuses the existing YAML import pipeline verbatim. **Grew to two mutating tools (issue #140 follow-up, `ontology_translation/TODO.md`'s dated entry):** `apply_ontology_yaml` remained upsert-only by design (it still cannot clear/delete anything), but a manual audit of 15 real completed interviews found the interviewer's own prompt already instructing it to "remove" a duplicate reverse-direction relationship with no tool that could — the predictable result was a self-directed `"REMOVE"` note written into `meaning` instead of an actual deletion. `remove_ontology_elements` (already built for the Import Review execution agent, issue #122) is now also wired into this tool loop for named, deliberate removal, sharing the same one-real-commit-per-turn budget `apply_ontology_yaml` established. Still not a fine-grained per-entity tool set in the sense this row originally meant (no separate `create_class`/`update_property`/etc.) — just no longer missing a delete capability entirely. |
 | Localization | Bilingual (en/hu) from day one, matching the base app's existing `STRINGS` convention — not English-only for this first pass. |
 
 ## 3. CORS — empirical finding (updated; provisional go)

@@ -151,11 +151,24 @@ is dev-only test tooling, same as Playwright.
   shipped interviewer (issue #75 §1): a golden SHA-256 of the real system
   prompt in both languages, and a runtime assertion, captured off a real
   outgoing request, that an ordinary interview exposes exactly
-  `apply_ontology_yaml` and `get_graph_state` and no normalization tool.
+  `apply_ontology_yaml`, `get_graph_state`, and `remove_ontology_elements`
+  (issue #140 follow-up added the third) and no normalization tool.
   Offline — no key, no network. **Read that file's header before touching
   either constant:** an intentional prompt change makes a new treatment and
   needs its own non-regression evaluation, and an unintentional one must be
   reverted rather than blessed.
+- `agent-remove-tool.spec.mjs` — the interview agent's `remove_ontology_elements`
+  tool (issue #140 follow-up: the interviewer had no way to actually delete
+  anything until this, which is why leftover `"REMOVE"`-sentinel text was
+  shipping in real exports — see `ontology_translation/TODO.md`'s dated
+  entry): tool dispatch, exactly-one-undo-step, cascade deletion (removing a
+  class also removes relationships that reference it), property-only removal,
+  undo restoring exactly what was removed, a no-match call reported as a
+  no-op rather than silently swallowed, malformed-argument handling, and the
+  per-turn commit budget correctly shared with `apply_ontology_yaml` (a
+  same-turn remove after a clean apply with nothing to remediate is refused;
+  a remove used to resolve a same-turn `inverse-pair` warning is allowed and
+  folds into one undo step). Mocked API throughout — no key, no network.
 - `post-normalization.spec.mjs` — the offline half of the
   `post-normalization-v1`/`-v2` experiment (issue #75): the deterministic ontology
   diff engine, reply extraction and candidate validation, the blinding and
@@ -225,6 +238,24 @@ Either live suite is independent of the other — set only `OPENAI_API_KEY`
 to exercise the OpenAI live path, only the two Azure variables to exercise
 the Azure live path, or both to exercise both; the mocked suites for both
 providers always run regardless of what's configured.
+
+`agent-remove-tool-live.spec.mjs` is a different kind of live test from the
+two above: those catch a mismatch between an *assumed* and an *actual* API
+response shape; this one checks a real model's *behavior* — given the new
+`remove_ontology_elements` tool (issue #140 follow-up) and a prompt that
+describes it, does the model actually reach for it when a deletion is
+clearly called for, rather than repeating the exact failure mode that
+motivated adding the tool (writing a `meaning: "REMOVE"` note instead of
+deleting anything)? `agent-remove-tool.spec.mjs` already covers the
+mechanics with a scripted/mocked model; only a real one can answer whether
+it chooses correctly. Two short scenarios, a handful of real calls total —
+not a substitute for a full non-regression evaluation against the anchor
+distribution, which `agent-production-invariants.spec.mjs`'s own header
+still calls for before this prompt's composite/relationship numbers are
+trusted against anything, just real evidence the specific fix works rather
+than proof by prompt-text inspection alone. Same opt-in gating as
+`helper-agent-live-azure.spec.mjs` (both `AZURE_OPENAI_API_KEY` and
+`AZURE_OPENAI_ENDPOINT`); never runs in CI.
 
 ## Ontology-recovery eval (opt-in, separate from the main suite)
 

@@ -2350,3 +2350,39 @@ eval's own tested prompt text is what actually caught and resolved the discrepan
 - [x] Full regression (`node --test tests/*.spec.mjs`): 958/958 pass after both fixes.
 - [x] Docs: this entry; issue #96 closed (see the updated entry above); two follow-up issues filed for the
       two ambiguous ideas and the three weak-but-shipped ones.
+
+## Interview agent gains a real delete tool (issue #140 follow-up) — the "one coarse tool" decision in `helper_agent_plan.md` §2 no longer fully holds
+
+Full story lives in `ontology_translation/TODO.md`'s dated entry (the manual audit that found it, the fix,
+the live behavioral tests, the ontology cleanup) — this entry is the pointer from the Helper Agent's own
+implementation log, not a duplicate of that narrative.
+
+Short version: the interview agent's tool set was `apply_ontology_yaml` (upsert-only) plus `get_graph_state`
+(read-only) from Phase 3 onward — §2's "one coarse tool" row was accurate for the feature's whole life until
+now. A manual audit of 15 real completed interviews found `AGENT_SYSTEM_PROMPT_BASE`'s own CONSISTENCY CHECK
+section instructing the agent to "remove" one direction of a duplicate reverse-relationship warning, with no
+tool that could actually do that — the agent's only recourse was overwriting a `meaning` field with a
+self-directed `"REMOVE"` note, which then shipped untouched in real exports.
+
+Fix: `remove_ontology_elements` (built for the Import Review execution agent, issue #122, `helper_agent_plan.
+md` §10) is now also wired into this same interview tool loop, sharing `apply_ontology_yaml`'s own per-turn
+commit budget and undo-folding. `helper_agent_plan.md` §2's table row is corrected in place (struck through
+where superseded, same convention as its own §0 historical corrections) rather than rewritten, so the
+original decision and why it changed both stay visible.
+
+Golden hashes and the tool-name list in `tests/agent-production-invariants.spec.mjs` updated to match (a new
+treatment, per that file's own documented discipline) — a full live non-regression evaluation against the
+anchor distribution was not run in this pass (no budget), but two small, real live behavioral tests against
+the actual Azure deployment were, both passing on the first run; ten offline mocked tests cover the mechanics.
+See `ontology_translation/TODO.md` for the exact transcripts and score deltas from the ontology cleanup this
+same change enabled.
+
+- [x] `remove_ontology_elements` wired into the interview tool loop, sharing `apply_ontology_yaml`'s budget
+      and undo-folding.
+- [x] `AGENT_SYSTEM_PROMPT_BASE` updated: conservative-removal guidance, explicit ban on the meaning-field-
+      as-deletion-note workaround, CONSISTENCY CHECK's inverse-pair paragraph now names the real tool.
+- [x] Golden prompt hash + tool-name list in `tests/agent-production-invariants.spec.mjs` updated.
+- [x] Ten offline mocked tests (`tests/agent-remove-tool.spec.mjs`) + two live behavioral tests
+      (`tests/agent-remove-tool-live.spec.mjs`, run for real against Azure, both passing).
+- [x] `helper_agent_plan.md` §2 corrected in place.
+- [x] Full regression suite green.
