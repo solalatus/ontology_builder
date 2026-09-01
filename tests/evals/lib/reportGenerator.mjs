@@ -35,6 +35,7 @@ export function pathsFor(dir = RESULTS_DIR) {
     heuristicMatchesPath: path.join(dir, "heuristic-matches.json"),
     semanticJudgmentsPath: path.join(dir, "semantic-judgments.json"),
     semanticMatchesPath: path.join(dir, "semantic-matches.json"),
+    modelSanitizerFindingsPath: path.join(dir, "model-sanitizer-findings.json"),
   };
 }
 
@@ -437,6 +438,20 @@ export function writeRecoveredModelYaml(recoveredModelYaml, { dir = RESULTS_DIR 
 export function writeHeuristicMatches(matchPairs, { dir = RESULTS_DIR } = {}) {
   fs.mkdirSync(dir, { recursive: true });
   fs.writeFileSync(pathsFor(dir).heuristicMatchesPath, JSON.stringify(matchPairs, null, 2));
+}
+
+// modelSanitizer.mjs's findModelIssues(doc) output, verbatim, run against
+// this run's own just-written recovered-model.yaml (issue #140). Report-
+// only -- this never strips anything from the live run's actual export, it
+// just makes visible, permanently, whether the run it just did left behind
+// any leftover-deletion-sentinel text or duplicate/self-loop relationships,
+// the same defect class the manual audit behind #140/#141 found by hand
+// across 15 already-committed runs. See modelSanitizer.mjs's own module doc
+// for what "strip" vs "advisory" severity means; nothing here acts on
+// either one, it only records them next to the run's other artifacts.
+export function writeModelSanitizerFindings(findings, { dir = RESULTS_DIR } = {}) {
+  fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(pathsFor(dir).modelSanitizerFindingsPath, JSON.stringify(findings, null, 2));
 }
 
 // llmMatcher.mjs's computeSemanticRecoveryMetrics(...).judgments and

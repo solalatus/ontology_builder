@@ -3158,3 +3158,125 @@ reference and record deltas/decisions here instead.)*
   resolution case including its undeclared-class null-fallback, and a
   real-data regression against fibo-loans/run-01 confirming
   `inputClassAccuracy` is no longer forced to 0).
+
+- **Manual, page-by-page audit of all 15 real committed runs** (issue
+  request, deliberately not automated): read every domain's gold
+  `reference.domain.yaml` and every one of the 15 real runs'
+  `recovered-model.yaml` + `heuristic-matches.json` by hand -- cross-
+  referencing gold's 0-indexed `rel_<i>` ids and each run's own 1-indexed
+  `e<i+1>` edge ids directly against the actual YAML content, not trusting
+  the scorer's own self-report -- to independently verify the relationship-
+  scorer stopword fix (above) actually produces trustworthy matches, and to
+  separately catch anything a human reader would call wrong that the
+  scorer either credits it shouldn't or never sees at all. Found two
+  distinct categories of genuine, previously-undocumented defect, filed as
+  three follow-up issues (#140, #141, #142) rather than fixed inline, since
+  each needed its own scoped investigation:
+
+  - **Content-quality defects in the recovered ontologies themselves**
+    (issue #140): leftover deletion-sentinel text (`meaning: "REMOVE"`,
+    an alias literally `__REMOVE__`) surviving into a shipped export, and
+    duplicate/reciprocal-pair or self-loop relationships stating the same
+    fact more than once. Confirmed the scorer itself handles every one of
+    these correctly (never double-counts a duplicate, never credits a
+    sentinel-tagged item) -- purely a defect in what the live interview
+    exports, not in how it's scored.
+  - **Real scorer defects, not wording/stemming gaps** (issue #141): the
+    Hungarian bipartite matcher (`bipartiteMatching.mjs`) maximizes total
+    matched-weight *sum* across the whole assignment, which is provably not
+    the same objective as "each gold element gets its best available
+    match" -- demonstrated concretely in fibo-loans/run-01 and run-03,
+    where a near-perfect class match got sacrificed so two mediocre
+    matches elsewhere could both be satisfied instead, producing real
+    false-positive credited matches plus collateral false negatives.
+  - **A stemming gap in `labelSimilarity`** (issue #142): confirmed,
+    reproducible inflection mismatches (`hasLocation`/`locatedIn`,
+    `secures`/`secured`, `governs`/`govern`) that a Porter2/Snowball
+    stemmer would close, carefully distinguished during the audit from the
+    genuine synonym gaps (`hasPart`/`hasFloor`, `hasAgent`/`involvesX`,
+    `owns`/`accountableFor`) that stemming can never close and that this
+    project already deliberately chose not to paper over with a hand-
+    curated synonym dictionary.
+
+  One methodology correction made mid-audit, worth recording since it
+  almost became a fourth, wrongly-filed ticket: itops's `resolves`/
+  `isAssignedTo` and `mayOpen`/`isTriggeredBy` relationship pairs initially
+  looked like the same "matcher steals the wrong pairing" bug as #141.
+  Tracing it into `groundTruthModel.mjs`'s own
+  `mergeReciprocalRelationshipPairs` showed this is deliberate, working-
+  as-designed behavior (issue #133/E2's own reciprocal-pair credit
+  mechanism) -- gold's own 0-indexed `rel_<i>` numbering is assigned
+  *before* that merge consumes one member of each genuine reciprocal pair,
+  so a naive re-derivation of "which `rel_<i>` exists" from the raw YAML's
+  position alone (exactly what both this audit and issue #141's own write-
+  up initially did) silently disagrees with what the scorer is actually
+  scoring against. Corrected before filing; not a bug, not filed.
+
+- **Issue #140 implemented: `tests/evals/lib/modelSanitizer.mjs`.** Root-
+  caused directly in `index.html`: the live interview's app-agent tool set
+  is exactly `apply_ontology_yaml` (upsert-only -- its own tool description
+  says a field you don't mention is never cleared) plus the read-only
+  `get_graph_state`. Unlike the separate Import Review merger flow (issue
+  #122/#126, which has a real `remove_ontology_elements` tool, deliberately
+  built cautious -- see its own system prompt's "BE CONSERVATIVE ABOUT
+  REMOVAL"), the live interview flow that produced every one of the 15
+  real committed runs has **no deletion capability at all**. When the
+  app-agent decides mid-interview that something it said earlier should be
+  retracted, rewriting `meaning`/`aliases` to a self-directed note is the
+  only lever available to it -- there is no tool call that could actually
+  remove the item. This fully explains every `"REMOVE"`/`__REMOVE__`
+  instance the audit found.
+
+  Two severities, matched to how confidently each defect can be auto-
+  applied without silently deleting real recovered content: **strip**
+  (an explicit removal sentinel, exact-match only on `meaning`/`aliases`;
+  or a self-loop relationship proven redundant by a same-named, properly-
+  targeted sibling elsewhere in the same model) and **advisory, never
+  auto-removed** (reciprocal-pair duplicates, "leftover"/"superseded"/
+  "deprecated"/"TODO"/"placeholder" language, or a bare null/empty
+  `meaning`). The advisory tier exists because the audit itself found a
+  counter-example that rules out a blunter "delete anything that looks
+  like a leftover" approach: brick-hvac/run-03's `TemperatureSetpoint`
+  class self-describes as "a leftover generic class now superseded by"
+  more specific types, yet is still wired into a real, otherwise-correct
+  edge in the same model -- auto-deleting it would have destroyed
+  genuinely-recovered content, not cleaned anything up.
+
+  `tests/evals/validate-recovered-model.mjs` (CLI, report-only by default,
+  `--write` to strip in place) and a report-only integration into
+  `run-multi-domain-benchmark.mjs` (every future run now writes
+  `model-sanitizer-findings.json` next to its `recovered-model.yaml`,
+  best-effort/non-fatal) are the two call sites.
+
+  **Two deliberate non-actions, both explained rather than silently
+  skipped:**
+  - Not wiring an actual deletion tool into the live interview app-agent's
+    own toolset. Letting an autonomous agent delete ontology content
+    mid-interview, live, against a real user's model is a materially
+    higher-risk product/prompt behavior change than a report-only
+    validator -- it deserves the same kind of careful, live-tested prompt
+    engineering the Import Review merger's own delete tool got (#126),
+    not a fold-in-unreviewed addition to a defense-in-depth pass. Left as
+    explicit follow-up work, not attempted here.
+  - Not rewriting the 15 already-committed real run artifacts.
+    `recovered-model.yaml` files under `ontology_translation/results/` are
+    the historical record of what a live interview actually produced,
+    including its defects -- the same defects that are this issue's own
+    evidence (and #141's). Mutating them destructively would erase that
+    evidence. The validator was instead run in report-only mode against
+    all 15 and its findings hand-verified against the manual audit's own
+    citations: an exact match on every cited instance, plus several
+    additional genuine true-positive findings (mostly null-meaning
+    classes/relationships) the manual audit didn't exhaustively enumerate --
+    each spot-checked by hand, not assumed correct. One correction to
+    issue #140's own first-draft evidence list surfaced this way: the
+    `hasSubFacility CreditFacility→CreditFacility` self-loop is
+    fibo-loans/run-02's, not iof-supply-chain/run-03's as originally
+    (mis-)written -- fixed on the issue directly once found.
+
+  Full offline regression suite re-verified clean: 1180 tests, 1169 pass,
+  0 fail, 11 skipped (pre-existing, unrelated) -- includes 14 new
+  `tests/model-sanitizer.spec.mjs` unit tests covering every real-evidence
+  fixture above, both strip- and advisory-severity mechanics, cascade
+  removal, and the "load-bearing leftover class must survive strip mode"
+  case.
