@@ -1,15 +1,15 @@
 # Multi-domain elicitation benchmark -- cross-domain report
 
-Generated 2026-08-23T17:36:55.937Z. Domains: itops. Replicates: run-01, run-02, run-03 (3/domain).
+Generated 2026-09-01T06:35:15.027Z. Domains: itops. Replicates: run-01, run-02, run-03 (3/domain).
 
 ## Macro statistics (equal weight per domain, per #111's own methodology)
 
 | Metric | Macro mean F1 | Macro stdev (dispersion) | Domains | Gold support (Σ ground-truth elements, floor n≥10) |
 |---|---|---|---|---|
 | Classes (full domain) | 0.673 |  | 1 | 68 |
-| Relationships (full domain) | 0.482 |  | 1 | 108 |
+| Relationships (full domain) | 0.486 |  | 1 | 108 |
 | Properties (full domain) | 0.587 |  | 1 | 111 |
-| Composite recovery effectiveness (full) | 0.581 |  | 1 | n/a (composite) |
+| Composite recovery effectiveness (full) | 0.582 |  | 1 | n/a (composite) |
 | Classes (practical scope) | 0.690 |  | 1 | 68 |
 | Composite recovery effectiveness (scoped) | 0.554 |  | 1 | n/a (composite) |
 | Rules | 0.613 |  | 1 | 11 |
@@ -23,7 +23,7 @@ Generated 2026-08-23T17:36:55.937Z. Domains: itops. Replicates: run-01, run-02, 
 
 | Domain | Replicates | Classes F1 (gold n) | Relationships F1 (gold n) | Properties F1 (gold n) | Recovery effectiveness | Rules F1 (gold n) | Actions F1 (gold n) |
 |---|---|---|---|---|---|---|---|
-| itops | 3 | 0.673 ± 0.019 (n=68) | 0.482 ± 0.037 (n=108) | 0.587 ± 0.098 (n=111) | 0.581 ± 0.039 | 0.613 (n=11) | 0.810 (n=11) |
+| itops | 3 | 0.673 ± 0.019 (n=68) | 0.486 ± 0.040 (n=108) | 0.587 ± 0.098 (n=111) | 0.582 ± 0.039 | 0.613 (n=11) | 0.810 (n=11) |
 
 ## Semantic (LLM-judged) scoring (n = replicates whose semantic judging actually succeeded, out of replicates attempted)
 
@@ -47,10 +47,10 @@ recover perfectly no matter how good the interview is. See each domain's own `tr
 - classesFullF1: mean 0.673, stdev 
 - rulesF1: mean 0.613, stdev 
 - propertiesFullF1: mean 0.587, stdev 
-- relationshipsFullF1: mean 0.482, stdev 
+- relationshipsFullF1: mean 0.486, stdev 
 
 **Are relationships systematically harder than classes?** yes, in every domain.
-- itops: relationships F1 − classes F1 = -0.191
+- itops: relationships F1 − classes F1 = -0.186
 
 **Are properties systematically under-elicited?** yes, in every domain (comparing property recall to class recall).
 - itops: property recall 0.459 vs class recall 0.510
@@ -58,7 +58,7 @@ recover perfectly no matter how good the interview is. See each domain's own `tr
 **Does domain abstraction level affect recovery?** Abstraction level has no numeric proxy in this benchmark's own metrics -- reading the per-domain F1s in domain-comparison.csv against each domain's known character (brick-hvac: concrete physical equipment graph; iof-maintenance/iof-supply-chain: process- and event-centric industrial ontologies; fibo-loans: abstract financial/regulatory concepts) is left to the reader rather than asserted here.
 
 **Does ontology size affect recovery?** Pearson r =  (n=1, 95% CI n/a) -- not enough domains for a meaningful correlation (n=1).
-- itops: 309 total ground-truth elements, recovery effectiveness 0.581
+- itops: 309 total ground-truth elements, recovery effectiveness 0.582
 
 **Does translation stability correlate with elicitation score?** Pearson r =  (n=0, 95% CI n/a) -- not enough domains for a meaningful correlation (n=0).
 

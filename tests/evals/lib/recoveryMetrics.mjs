@@ -41,6 +41,9 @@ const STOPWORDS = new Set(["a", "an", "the", "is", "of", "its", "to", "for", "ha
 function tokenize(s) {
   return normalize(s).split(" ").filter((w) => w && !STOPWORDS.has(w));
 }
+function tokenizeRaw(s) {
+  return normalize(s).split(" ").filter(Boolean);
+}
 
 // Two labels "match" if they're identical after normalization, or their
 // stopword-stripped token sets overlap heavily enough (Jaccard >= threshold).
@@ -97,11 +100,40 @@ export const MATCH_THRESHOLDS = {
 // The raw Jaccard score behind labelsMatch's threshold check, exposed
 // separately so matchClasses (below) can use it as an edge weight for
 // one-to-one bipartite matching instead of just a boolean pass/fail.
+//
+// Found via a deep transcript dig prompted by a request to look for a real
+// F1 lever, not a synthetic fixture: STOPWORDS above includes "has"/"have",
+// so a relationship named literally "has" -- one of the most natural verbs
+// an LLM defaults to for possession/composition/attachment, and the single
+// most common relation name brick-hvac/run-02's own recovered model used --
+// tokenizes to an EMPTY set once stopword-stripped. The unconditional
+// `if (!ta.length || !tb.length) return 0` below then makes it impossible
+// for "has" to match ANY gold relationship, no matter how correct the
+// content is: confirmed against that real run, whose recovered model
+// correctly captures and applies (via a real apply_ontology_yaml call)
+// "AirHandlingUnit has AirTemperatureSensor" etc. against gold's own
+// "AirHandlingUnit hasPoint AirTemperatureSensor" -- correct content,
+// correct class pair, scored as a recall miss purely because "has" strips
+// to nothing. The fallback below is symmetric across BOTH sides being
+// compared (not decided per-string independently) -- a bare "has" that
+// falls back to its unstripped ["has"] must not then be compared against
+// an already-stripped ["point"], which would still score 0; verified this
+// exact asymmetric-fallback mistake once during development before fixing
+// it into the symmetric form here. Measured impact re-scoring all 15 real
+// completed live interviews with this fix: relationship macro F1 55.4% ->
+// 57.8% (+2.4pt), zero domains regress, brick-hvac alone +11.8pt (see
+// TODO.md's dated entry for the full before/after table). Does NOT rescue a
+// genuine different-word choice with zero token overlap even after this
+// fallback (e.g. gold's "hasPart" vs a recovered "hasComponent" -- still 0,
+// a real vocabulary gap, not a stopword artifact) -- that residual class of
+// gap remains a deliberate, accepted limitation, per this module's own
+// header.
 function labelSimilarity(a, b) {
   const na = normalize(a), nb = normalize(b);
   if (!na || !nb) return 0;
   if (na === nb) return 1;
-  const ta = tokenize(a), tb = tokenize(b);
+  let ta = tokenize(a), tb = tokenize(b);
+  if (!ta.length || !tb.length) { ta = tokenizeRaw(a); tb = tokenizeRaw(b); }
   if (!ta.length || !tb.length) return 0;
   const sa = new Set(ta), sb = new Set(tb);
   let intersection = 0;

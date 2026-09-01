@@ -36,7 +36,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { recoveredStateFromYaml } from "./score-baseline.mjs";
 import { loadGroundTruthModel, scopeGroundTruth, resolveDomainYamlPath, listAvailableDomains } from "./lib/groundTruthModel.mjs";
-import { computeRecoveryMetrics, computeRuleMetrics, computeActionMetrics } from "./lib/recoveryMetrics.mjs";
+import { computeRecoveryMetrics, computeRuleMetrics, computeActionMetrics, computeHeuristicMatchPairs } from "./lib/recoveryMetrics.mjs";
 import { aggregateSemanticMetrics } from "./lib/llmMatcher.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -96,16 +96,105 @@ export function rescoreRun(runDir, domain = null) {
   return out;
 }
 
+// Regenerates a run's own metrics.json and heuristic-matches.json IN PLACE
+// from its already-saved recovered-model.yaml (and, for the semantic
+// figures, its already-saved semantic-judgments.json) -- no new API calls,
+// same "recompute the numbers, not the interview" principle as rescoreRun
+// above, just applied as a permanent correction instead of a printed
+// comparison. Built for the relationship-scorer stopword fix (TODO.md's
+// dated entry), generalized because this is already the second time this
+// project has needed to retroactively correct already-published run
+// artifacts after a scorer bug fix (the first was issue #133/E2's
+// relationship-matching correction, done by hand at the time) -- worth a
+// reusable flag rather than a one-off script the next time it happens.
+//
+// WHAT GETS OVERWRITTEN vs. LEFT ALONE, deliberately:
+//   metrics.json             -- fully regenerated (heuristic + rules/actions
+//                                recomputed; semantic figures replayed from
+//                                stored judgments, same as rescoreRun;
+//                                operationalStats/domain/runId/runUuid
+//                                carried over unchanged from the old file,
+//                                since those describe the LIVE RUN itself,
+//                                not anything the scorer computes)
+//   heuristic-matches.json   -- fully regenerated (computeHeuristicMatchPairs
+//                                against the full, unscoped ground truth,
+//                                the same call run-multi-domain-benchmark.mjs
+//                                itself makes)
+//   conversation-log.md, tool-calls.md, recovered-model.yaml,
+//   provenance.json, report.md, semantic-judgments.json,
+//   semantic-matches.json    -- NEVER touched. These are facts about what
+//                                actually happened in the live run (or, for
+//                                report.md, embed LLM review text that would
+//                                need a new API call to regenerate) -- only
+//                                the numbers *derived* from the saved
+//                                recovered-model.yaml are a function of the
+//                                scorer and thus safe to recompute in place.
+function writeRescoredRun(runDir, domain) {
+  const metricsPath = path.join(runDir, "metrics.json");
+  const matchesPath = path.join(runDir, "heuristic-matches.json");
+  const judgmentsPath = path.join(runDir, "semantic-judgments.json");
+  if (!fs.existsSync(metricsPath)) throw new Error(`no metrics.json in ${runDir} -- nothing to preserve domain/runId/runUuid/operationalStats from`);
+  const oldMetrics = JSON.parse(fs.readFileSync(metricsPath, "utf8"));
+  // rawResponses (the judge's own raw reply text) is captured only at LIVE
+  // judging time (onRawResponse callbacks in computeSemanticRecoveryMetrics)
+  // -- aggregateSemanticMetrics's replay path has no way to reconstruct it
+  // from the structured judgments alone. It IS persisted to disk, though
+  // (writeSemanticJudgments saves {judgments, rawResponses} per scope), so
+  // it's carried forward from there rather than silently dropped -- this
+  // function's own rule is "recompute only what's actually a function of
+  // the scorer"; rawResponses isn't one, same as report.md's LLM review text.
+  const savedJudgments = fs.existsSync(judgmentsPath) ? JSON.parse(fs.readFileSync(judgmentsPath, "utf8")) : null;
+
+  const r = rescoreRun(runDir, domain);
+  const modelPath = path.join(runDir, "recovered-model.yaml");
+  const { state: recoveredState } = recoveredStateFromYaml(fs.readFileSync(modelPath, "utf8"));
+  const full = domain ? loadGroundTruthModel({ format: "domain-yaml", path: resolveDomainYamlPath(domain) }) : loadGroundTruthModel();
+
+  const withRawResponses = (semanticMetrics, savedKey) => {
+    if (!semanticMetrics) return semanticMetrics;
+    const rawResponses = savedJudgments && savedJudgments[savedKey] && savedJudgments[savedKey].rawResponses;
+    return rawResponses ? { ...semanticMetrics, rawResponses } : semanticMetrics;
+  };
+
+  const newMetrics = {
+    domain: oldMetrics.domain, runId: oldMetrics.runId, runUuid: oldMetrics.runUuid,
+    metrics: r.heuristic.full, scopedMetrics: r.heuristic.practical,
+    semanticMetrics: withRawResponses(r.semantic.full, "fullDomain"),
+    semanticScopedMetrics: withRawResponses(r.semantic.practical, "scoped"),
+    // Rule/action semantic judging has no stored per-run judgment file to
+    // replay against (unlike classes/relationships/properties), so it isn't
+    // recomputed -- carried over unchanged, same as every other artifact
+    // this function doesn't touch.
+    ruleMetrics: r.rules.full, actionMetrics: r.actions.full,
+    semanticRuleActionMetrics: oldMetrics.semanticRuleActionMetrics,
+    operationalStats: oldMetrics.operationalStats,
+  };
+  fs.writeFileSync(metricsPath, `${JSON.stringify(newMetrics, null, 2)}\n`);
+  fs.writeFileSync(matchesPath, `${JSON.stringify(computeHeuristicMatchPairs(full, recoveredState), null, 2)}\n`);
+  return newMetrics;
+}
+
 if (import.meta.url === `file://${process.argv[1]}`) {
   const rawArgs = process.argv.slice(2);
   const domainArg = rawArgs.find((a) => a.startsWith("--domain="));
   const domain = domainArg ? domainArg.split("=").slice(1).join("=") : null;
-  const runDirs = rawArgs.filter((a) => !a.startsWith("--domain="));
+  const write = rawArgs.includes("--write");
+  const runDirs = rawArgs.filter((a) => !a.startsWith("--domain=") && a !== "--write");
   if (!runDirs.length) {
-    console.error("Usage: node tests/evals/rescore-saved-run.mjs [--domain=<id>] <run-dir> [...]");
+    console.error("Usage: node tests/evals/rescore-saved-run.mjs [--domain=<id>] [--write] <run-dir> [...]");
     console.error("Example: node tests/evals/rescore-saved-run.mjs tests/evals/results/runs/run-01");
     console.error("Example: node tests/evals/rescore-saved-run.mjs --domain=brick-hvac ontology_translation/results/multi-domain/run-01/brick-hvac");
+    console.error("Example (writes metrics.json + heuristic-matches.json in place): node tests/evals/rescore-saved-run.mjs --write --domain=brick-hvac ontology_translation/results/multi-domain/run-01/brick-hvac");
     process.exit(1);
+  }
+  if (write) {
+    for (const dir of runDirs) {
+      const abs = path.isAbsolute(dir) ? dir : path.resolve(process.cwd(), dir);
+      const runDir = fs.existsSync(abs) ? abs : path.join(__dirname, dir);
+      writeRescoredRun(runDir, domain);
+      console.log(`${path.relative(process.cwd(), runDir)}: metrics.json + heuristic-matches.json regenerated`);
+    }
+    process.exit(0);
   }
   const pct = (x) => (x === null || x === undefined ? "  -- " : `${(x * 100).toFixed(1)}%`);
   console.log("Offline re-score with the current scorer. No model calls; stored judge verdicts replayed as-is.\n");

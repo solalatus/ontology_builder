@@ -3031,3 +3031,130 @@ reference and record deltas/decisions here instead.)*
 
   Full offline regression suite re-verified clean after all of the above:
   1167 tests, 1153 pass, 0 fail, 14 skipped (pre-existing, unrelated).
+
+- **Relationship-scorer stopword bug: found via a deep transcript dig (not
+  a hypothesis), fixed, and retroactively applied to all 15 real committed
+  runs.** Prompted by a direct request to look for a real way to improve
+  F-score, backed by evidence, not opinion. Neither open ticket at the time
+  (#99, #100) was about F-score at all -- both are narrow qualitative
+  prompt-wording follow-ups with no F1 lever. The real lever came from
+  mining the 15 real completed live interviews directly (12 multi-domain +
+  3 itops): 370 of 651 gold relationships (57%) went unmatched, and tracing
+  *why*, not just counting, found a real, previously-unknown scorer defect.
+
+  **The bug.** `recoveryMetrics.mjs`'s `labelSimilarity` (shared by
+  matchClasses/matchProperties/matchRelationships/matchRules/matchActions)
+  strips stopwords -- including "has"/"have" -- before comparing labels. A
+  relationship named literally `"has"` -- one of the most natural verbs an
+  LLM defaults to for possession/composition, and the single most common
+  relation name brick-hvac/run-02's own recovered model used -- tokenizes
+  to an EMPTY set once stripped, and the unconditional
+  `if (!ta.length || !tb.length) return 0` made it impossible for "has" to
+  match ANY gold relationship, no matter how correct the content. Confirmed
+  against that real run by hand: it correctly captures and applies (via a
+  real `apply_ontology_yaml` call) "AirHandlingUnit has AirTemperatureSensor"
+  against gold's own "AirHandlingUnit hasPoint AirTemperatureSensor" --
+  correct content, correct class pair, scored as a pure recall miss.
+
+  **The fix**: a fallback to unstripped tokens, applied SYMMETRICALLY to
+  both sides of a comparison (not decided per-string independently -- a
+  first, broken draft let a bare "has" fall back to its own unstripped
+  `["has"]` while the OTHER side, "has Point", stayed stripped to
+  `["point"]`, leaving disjoint sets that still scored 0; caught before
+  shipping by re-testing the exact real case by hand). Verified: zero
+  effect on properties (classes/rules/actions were also confirmed
+  unaffected on this real data, despite `labelSimilarity` being shared by
+  all of them) -- properties/class/rule/action names are typically nouns,
+  not "has X" verb phrases, so the bug's real-world footprint is
+  relationships-only.
+
+  **Deliberately not pursued**: a curated synonym dictionary for the
+  residual gap this fix does NOT close (e.g. gold's "hasPart" vs a
+  recovered "hasComponent" -- still zero token overlap, a genuine
+  vocabulary gap, not a stopword artifact). This module's own header
+  already documents that class of gap as a deliberate, accepted
+  limitation; the user's own call, made explicitly this time rather than
+  revisited unilaterally.
+
+  **A second, unrelated bug found and fixed while building the retroactive
+  rescore tooling** (not part of the original F1 investigation, but
+  blocking a reliable rescore): `score-baseline.mjs`'s
+  `recoveredStateFromYaml` left an action's `inputClassId` as the raw class
+  NAME string straight from the YAML's `input:` field, never resolved
+  through the same `labelToId` map its own `edges[].source`/`.target`
+  parsing two lines above already uses. `computeActionMetrics`'s
+  `inputClassAccuracy` compares `rec.inputClassId` against
+  `gtToRecoveredClasses`'s node-id-valued results (e.g. `"n1"`) -- a raw
+  label like `"Loan"` can never appear in a set of node ids, so
+  `inputClassAccuracy` silently scored as if 0 were the only possible value
+  every time it was recomputed through this path, regardless of whether the
+  action's input class was actually correct. Confirmed with the
+  UNMODIFIED (pre-stopword-fix) scorer too -- fully unrelated to the
+  relationship fix, just discovered as a side effect of being the first
+  caller to ever recompute `actionMetrics` through the YAML-round-trip path
+  against real data. Fixed by resolving `a.input` through `labelToId`,
+  same as edges. Verified against fibo-loans/run-01: the corrected
+  recomputed value (0.8) exactly matches the original value that run's
+  OWN live-computed metrics.json already had (which used the live app's
+  own internal state object, not the YAML round-trip, and so never hit
+  this bug) -- confirming the fix, not a new number invented from nothing.
+
+  **Built `rescore-saved-run.mjs --write`**, generalized rather than a
+  one-off script, since this is already the second time this project has
+  needed to retroactively correct already-published run artifacts after a
+  scorer bug (the first was issue #133/E2's relationship-matching fix, done
+  by hand at the time). Regenerates a run's `metrics.json` and
+  `heuristic-matches.json` in place from its already-saved
+  `recovered-model.yaml` (and, for semantic figures, its already-saved
+  `semantic-judgments.json`, including carrying forward `rawResponses` --
+  captured only at live-judging time, not a function of the scorer, so
+  replayed from disk rather than dropped) -- no new API calls. Deliberately
+  leaves untouched: `conversation-log.md`, `tool-calls.md`,
+  `recovered-model.yaml`, `provenance.json`, `report.md` (embeds LLM review
+  text that would need a new API call), `semantic-judgments.json`,
+  `semantic-matches.json` -- facts about the live run, not the scorer's
+  output.
+
+  **Applied to all 15 real committed runs** (12 in `multi-domain/`, 3 in
+  `multi-domain-control/`). Published summaries regenerated too
+  (`summary.md`/`summary.json`/`runs.csv`/`domain-comparison.csv` for both
+  directories, plus both `interviewer-prior-knowledge.json` reports, which
+  depend on `heuristic-matches.json`'s matched-pairs cross-reference --
+  confirmed unaffected in their own right, since interviewer-first
+  detection uses a completely different mechanism than `labelSimilarity`).
+
+  **Corrected published numbers** (macro F1, per the report's own
+  established per-run-mean methodology, `multi-domain/`'s 4 published
+  domains):
+
+  | Dimension | Before | After | Delta |
+  |---|---|---|---|
+  | Relationships (full) | 57.3% | 60.3% | +3.0 pt |
+  | Composite recovery effectiveness (full) | 63.4% | 64.4% | +1.0 pt |
+  | Composite recovery effectiveness (scoped) | 62.7% | 63.5% | +0.8 pt |
+  | Classes, properties, rules, actions | unchanged | unchanged | 0.0 pt |
+
+  brick-hvac alone gained +12.2 pt relationship F1 (44.5% -> 56.7%) --
+  the domain whose interview style most often used bare "has" for its many
+  point/part/location decomposition relationships. Two of four domains
+  (iof-maintenance, iof-supply-chain) showed zero relationship-figure
+  change at all -- not because the fix doesn't apply there, but because
+  those runs' recovered edges simply never happened to use an all-stopword
+  relation name. `multi-domain-control/`'s itops figures moved the same
+  way (see that directory's own README.md for the corrected control-arm
+  comparison table, which itself needed updating since it was published
+  before this fix landed).
+
+  This is a real, verified, low-risk fix with a measured effect -- not
+  transformative on its own (macro relationship F1 +3.0 pt is meaningful,
+  not radical), but it is very likely been silently deflating every
+  relationship F1 number this project has published since #111, and it is
+  now fixed at the root rather than worked around.
+
+  Full offline regression suite re-verified clean: 1172 tests, 1158 pass,
+  0 fail, 14 skipped (pre-existing, unrelated) -- includes new regression
+  tests for both fixes (the exact "has" case, a real-data regression
+  against brick-hvac/run-02's recovered model, the `inputClassId`
+  resolution case including its undeclared-class null-fallback, and a
+  real-data regression against fibo-loans/run-01 confirming
+  `inputClassAccuracy` is no longer forced to 0).

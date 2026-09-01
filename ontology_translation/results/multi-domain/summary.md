@@ -1,17 +1,17 @@
 # Multi-domain elicitation benchmark -- cross-domain report
 
-Generated 2026-08-22T17:19:38.338Z. Domains: brick-hvac, iof-maintenance, iof-supply-chain, fibo-loans. Replicates: run-01, run-02, run-03 (3/domain).
+Generated 2026-09-01T06:35:14.973Z. Domains: brick-hvac, iof-maintenance, iof-supply-chain, fibo-loans. Replicates: run-01, run-02, run-03 (3/domain).
 
 ## Macro statistics (equal weight per domain, per #111's own methodology)
 
 | Metric | Macro mean F1 | Macro stdev (dispersion) | Domains | Gold support (Σ ground-truth elements, floor n≥10) |
 |---|---|---|---|---|
 | Classes (full domain) | 0.683 | 0.056 | 4 | 169 |
-| Relationships (full domain) | 0.573 | 0.092 | 4 | 109 |
+| Relationships (full domain) | 0.603 | 0.042 | 4 | 109 |
 | Properties (full domain) | 0.646 | 0.186 | 4 | 99 |
-| Composite recovery effectiveness (full) | 0.634 | 0.064 | 4 | n/a (composite) |
+| Composite recovery effectiveness (full) | 0.644 | 0.055 | 4 | n/a (composite) |
 | Classes (practical scope) | 0.749 | 0.042 | 4 | 169 |
-| Composite recovery effectiveness (scoped) | 0.627 | 0.129 | 4 | n/a (composite) |
+| Composite recovery effectiveness (scoped) | 0.635 | 0.118 | 4 | n/a (composite) |
 | Rules | 0.660 | 0.111 | 4 | 26 |
 | Actions (identification) | 0.876 | 0.114 | 4 | 20 |
 
@@ -23,7 +23,7 @@ Generated 2026-08-22T17:19:38.338Z. Domains: brick-hvac, iof-maintenance, iof-su
 
 | Domain | Replicates | Classes F1 (gold n) | Relationships F1 (gold n) | Properties F1 (gold n) | Recovery effectiveness | Rules F1 (gold n) | Actions F1 (gold n) |
 |---|---|---|---|---|---|---|---|
-| brick-hvac | 3 | 0.766 ± 0.039 (n=39) | 0.445 ± 0.212 (n=35) | 0.521 ± 0.198 (n=42) | 0.577 ± 0.094 | 0.574 (**n=7**) | 0.724 (**n=5**) |
+| brick-hvac | 3 | 0.766 ± 0.039 (n=39) | 0.567 ± 0.067 (n=35) | 0.521 ± 0.198 (n=42) | 0.618 ± 0.065 | 0.574 (**n=7**) | 0.724 (**n=5**) |
 | iof-maintenance | 3 | 0.670 ± 0.085 (n=20) | 0.569 ± 0.094 (n=13) | 0.731 ± 0.278 (**n=5**) | 0.657 ± 0.151 | 0.668 (**n=7**) | 1 (**n=5**) |
 | iof-supply-chain | 3 | 0.650 ± 0.022 (n=53) | 0.627 ± 0.151 (n=30) | 0.867 ± 0.115 (**n=3**) | 0.715 ± 0.066 | 0.813 (**n=5**) | 0.889 (**n=5**) |
 | fibo-loans | 3 | 0.645 ± 0.077 (n=57) | 0.649 ± 0.060 (n=31) | 0.466 ± 0.046 (n=49) | 0.587 ± 0.012 | 0.583 (**n=7**) | 0.893 (**n=5**) |
@@ -54,12 +54,12 @@ recover perfectly no matter how good the interview is. See each domain's own `tr
 **Which ontology elements are consistently recovered?** Ranked by macro mean F1 minus dispersion (rewards both high and stable recovery):
 - actionsIdentificationF1: mean 0.876, stdev 0.114
 - classesFullF1: mean 0.683, stdev 0.056
+- relationshipsFullF1: mean 0.603, stdev 0.042
 - rulesF1: mean 0.660, stdev 0.111
-- relationshipsFullF1: mean 0.573, stdev 0.092
 - propertiesFullF1: mean 0.646, stdev 0.186
 
 **Are relationships systematically harder than classes?** mixed -- harder in 3/4 domains.
-- brick-hvac: relationships F1 − classes F1 = -0.321
+- brick-hvac: relationships F1 − classes F1 = -0.199
 - iof-maintenance: relationships F1 − classes F1 = -0.101
 - iof-supply-chain: relationships F1 − classes F1 = -0.022
 - fibo-loans: relationships F1 − classes F1 = 0.004
@@ -72,13 +72,13 @@ recover perfectly no matter how good the interview is. See each domain's own `tr
 
 **Does domain abstraction level affect recovery?** Abstraction level has no numeric proxy in this benchmark's own metrics -- reading the per-domain F1s in domain-comparison.csv against each domain's known character (brick-hvac: concrete physical equipment graph; iof-maintenance/iof-supply-chain: process- and event-centric industrial ontologies; fibo-loans: abstract financial/regulatory concepts) is left to the reader rather than asserted here.
 
-**Does ontology size affect recovery?** Pearson r = -0.64 (n=4, 95% CI [-1, 1]) -- r=-0.64, but n=4 is below this report's own floor of 5 for a directional conclusion -- not stated as a verdict.
-- brick-hvac: 128 total ground-truth elements, recovery effectiveness 0.577
+**Does ontology size affect recovery?** Pearson r = -0.63 (n=4, 95% CI [-1, 1.00]) -- r=-0.63, but n=4 is below this report's own floor of 5 for a directional conclusion -- not stated as a verdict.
+- brick-hvac: 128 total ground-truth elements, recovery effectiveness 0.618
 - iof-maintenance: 50 total ground-truth elements, recovery effectiveness 0.657
 - iof-supply-chain: 96 total ground-truth elements, recovery effectiveness 0.715
 - fibo-loans: 149 total ground-truth elements, recovery effectiveness 0.587
 
-**Does translation stability correlate with elicitation score?** Pearson r = -0.98 (n=4, 95% CI [-1, -0.96]) -- r=-0.98, but n=4 is below this report's own floor of 5 for a directional conclusion -- not stated as a verdict.
+**Does translation stability correlate with elicitation score?** Pearson r = -0.96 (n=4, 95% CI [-1.00, 1]) -- r=-0.96, but n=4 is below this report's own floor of 5 for a directional conclusion -- not stated as a verdict.
 
 **Do interviewer changes improve all domains or only IT Ops?** Not applicable to this run -- every domain and replicate used the same single interviewer model/deployment. Answering this question requires a follow-up run holding domains fixed and varying the interviewer model, which is out of scope for this pass.
 

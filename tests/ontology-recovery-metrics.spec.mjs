@@ -202,6 +202,85 @@ test("computeRecoveryMetrics matches a camelCase recovered relation name against
   assert.equal(metrics.relationships.recall, 1);
 });
 
+// Found via a deep transcript dig, not a synthetic hypothesis: labelSimilarity's
+// STOPWORDS set includes "has"/"have" (module comment above it), so a
+// relationship named literally "has" -- one of the most natural relation
+// names an LLM defaults to for possession/composition -- tokenizes to an
+// EMPTY set once stopwords are stripped, and the unconditional
+// `if (!ta.length || !tb.length) return 0` used to make it unmatchable
+// against ANY gold relationship regardless of content. Confirmed against a
+// real committed run (brick-hvac/run-02): its recovered model correctly
+// captures and applies "AirHandlingUnit has AirTemperatureSensor" against
+// gold's own "AirHandlingUnit hasPoint AirTemperatureSensor" -- correct
+// content, correct class pair, previously scored as a pure recall miss.
+// Fixed with a fallback to unstripped tokens, applied SYMMETRICALLY to both
+// sides being compared (not decided per-string independently -- an earlier,
+// broken draft of this fix let a bare "has" fall back to its own unstripped
+// ["has"] while the OTHER side ("has Point") still got stripped down to
+// ["point"], leaving disjoint token sets and still scoring 0; the tests
+// below pin the symmetric, correct behavior). Measured impact re-scoring
+// all 15 real completed live interviews: relationship macro F1 55.4% ->
+// 57.8%, zero domains regress (TODO.md's dated entry has the full table).
+test("computeRecoveryMetrics: a relationship named literally \"has\" matches gold's \"has Point\" -- previously unconditionally unmatchable, since \"has\" alone tokenizes to an empty stopword-stripped set", () => {
+  const groundTruth = {
+    classes: {
+      ahu: { id: "ahu", label: "Air Handling Unit", aliases: ["air handling unit"] },
+      sensor: { id: "sensor", label: "Air Temperature Sensor", aliases: ["air temperature sensor"] },
+    },
+    relationships: [{ id: "rel_0", label: "has Point", fromClassId: "ahu", toClassId: "sensor" }],
+    properties: [],
+  };
+  const recovered = {
+    nodes: [
+      { id: "n1", label: "Air Handling Unit", meaning: "x", aliases: [], properties: [] },
+      { id: "n2", label: "Air Temperature Sensor", meaning: "y", aliases: [], properties: [] },
+    ],
+    edges: [{ id: "e1", source: "n1", target: "n2", relation: "has" }],
+  };
+  const metrics = computeRecoveryMetrics(groundTruth, recovered);
+  assert.equal(metrics.relationships.matched, 1, "a bare \"has\" edge must be able to match a \"has Point\" gold relationship on the right class pair");
+  assert.equal(metrics.relationships.recall, 1);
+});
+
+test("computeRecoveryMetrics: the \"has\" fallback does not rescue a genuine different-word choice with zero token overlap (still a real, accepted vocabulary gap, not fixed by this)", () => {
+  const groundTruth = {
+    classes: {
+      incident: { id: "incident", label: "Incident", aliases: ["incident"] },
+      service: { id: "service", label: "IT Service", aliases: ["it service"] },
+    },
+    relationships: [{ id: "rel_0", label: "impacts", fromClassId: "incident", toClassId: "service" }],
+    properties: [],
+  };
+  const recovered = {
+    nodes: [
+      { id: "n1", label: "Incident", meaning: "x", aliases: [], properties: [] },
+      { id: "n2", label: "IT Service", meaning: "y", aliases: [], properties: [] },
+    ],
+    edges: [{ id: "e1", source: "n1", target: "n2", relation: "affects" }],
+  };
+  const metrics = computeRecoveryMetrics(groundTruth, recovered);
+  assert.equal(metrics.relationships.matched, 0, "\"impacts\" vs \"affects\" share zero tokens -- a real synonym gap the stopword fix does not and should not paper over");
+});
+
+test("real-data regression (brick-hvac/run-02): the recovered model's real bare-\"has\" edges now match their corresponding gold hasPoint/hasPart relationships", () => {
+  const domain = "brick-hvac";
+  const runDir = path.resolve(__dirname, "..", "ontology_translation", "results", "multi-domain", "run-02", domain);
+  const groundTruth = loadGroundTruthModel({ path: resolveDomainYamlPath(domain), format: "domain-yaml" });
+  const { state: recovered } = recoveredStateFromYaml(fs.readFileSync(path.join(runDir, "recovered-model.yaml"), "utf8"));
+  const { gtToRecovered } = matchClasses(groundTruth, recovered.nodes);
+  const relMatch = matchRelationships(groundTruth, recovered.edges, gtToRecovered);
+
+  const hasEdges = recovered.edges.filter((e) => e.relation === "has");
+  assert.ok(hasEdges.length > 0, "expected this real run's recovered model to contain bare-\"has\" edges -- test fixture assumption");
+  const matchedRecoveredIds = new Set(relMatch.matches.map((m) => m.recoveredId));
+  const matchedHasEdges = hasEdges.filter((e) => matchedRecoveredIds.has(e.id));
+  assert.ok(
+    matchedHasEdges.length >= hasEdges.length - 1,
+    `expected nearly all of this run's ${hasEdges.length} bare-"has" edges to now match a gold relationship (matched: ${matchedHasEdges.length}) -- `
+    + "before the stopword-symmetric-fallback fix, none of them ever could, regardless of content",
+  );
+});
+
 // Issue #133/E2 (external audit): relationship precision previously came
 // from two independent existential `.some()` scans instead of a one-to-one
 // bipartite assignment, so N recovered edges all matching the same one gold
@@ -278,12 +357,19 @@ test("matchRelationships on a real committed low-recall run (brick-hvac/run-02):
     const edgeFromLabel = nodeById.get(edge.source)?.label;
     const edgeToLabel = nodeById.get(edge.target)?.label;
 
+    // Alphanumeric-only, case-insensitive comparison -- matchClasses itself
+    // treats "Outside-Air CO2 Sensor" (recovered) and "Outside Air CO2
+    // Sensor" (gold) as the same class (its own label-matching normalizes
+    // punctuation the same way), and this test should agree with the real
+    // matcher's own notion of "the same class", not a stricter one of its
+    // own that happens to reject a real, correct match on formatting alone.
+    const canon = (s) => String(s || "").toLowerCase().replace(/[^a-z0-9]/g, "");
     // Either the forward pairing or (for a reciprocal relationship) the
     // swapped one is legitimate -- matchRelationships itself allows both --
     // but it must be one of exactly those two, never some other class pair
     // entirely.
-    const forwardMatch = edgeFromLabel === expectedFromLabel && edgeToLabel === expectedToLabel;
-    const reciprocalMatch = edgeFromLabel === expectedToLabel && edgeToLabel === expectedFromLabel;
+    const forwardMatch = canon(edgeFromLabel) === canon(expectedFromLabel) && canon(edgeToLabel) === canon(expectedToLabel);
+    const reciprocalMatch = canon(edgeFromLabel) === canon(expectedToLabel) && canon(edgeToLabel) === canon(expectedFromLabel);
     assert.ok(
       forwardMatch || reciprocalMatch,
       `${goldId} (${rel.label}: ${expectedFromLabel} -> ${expectedToLabel}) matched to ${recoveredId} `

@@ -4,8 +4,8 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { loadGroundTruthModel, scopeGroundTruth } from "./evals/lib/groundTruthModel.mjs";
-import { computeRecoveryMetrics } from "./evals/lib/recoveryMetrics.mjs";
+import { loadGroundTruthModel, scopeGroundTruth, resolveDomainYamlPath } from "./evals/lib/groundTruthModel.mjs";
+import { computeRecoveryMetrics, computeActionMetrics } from "./evals/lib/recoveryMetrics.mjs";
 import { recoveredStateFromYaml } from "./evals/score-baseline.mjs";
 import { extractYaml } from "./evals/baseline-one-shot.mjs";
 import { rescoreRun } from "./evals/rescore-saved-run.mjs";
@@ -114,10 +114,55 @@ test("recoveredStateFromYaml parses rules and actions, not just classes/relation
   assert.equal(state.rules.length, 1);
   assert.deepEqual(state.rules[0], { id: "needsAttention", name: "needsAttention", conditions: ["the value exceeds the threshold"] });
   assert.equal(state.actions.length, 1);
+  // inputClassId is the recovered NODE id ("n1"), not the raw class-name
+  // string from the YAML's own input: field -- resolved through the same
+  // labelToId map edges[].source/.target already use two lines above this
+  // function's own action-parsing, matching what computeActionMetrics's
+  // inputClassAccuracy actually compares against (gtToRecoveredClasses's
+  // results are node ids too). A real bug once left this as the raw label
+  // "Thing" -- silently making inputClassAccuracy unrecoverable via this
+  // function for every real run, since a label can never appear in a set of
+  // node ids (found and fixed alongside the relationship-scorer stopword
+  // fix, see TODO.md's dated entry).
   assert.deepEqual(state.actions[0], {
-    id: "flagForReview", name: "flagForReview", inputClassId: "Thing",
+    id: "flagForReview", name: "flagForReview", inputClassId: "n1",
     preconditions: ["needsAttention"], effect: "mark the thing for review", verification: "confirm the review flag is set",
   });
+});
+
+test("recoveredStateFromYaml resolves an action's input class to null, not the raw label, when it names a class not actually declared", () => {
+  const text = [
+    "classes:",
+    "  Thing:",
+    "    meaning: x",
+    "relationships: []",
+    "actions:",
+    "  doSomething:",
+    "    input: Ghost",
+    "    preconditions: []",
+    "    effect: e",
+    "    verification: v",
+    "",
+  ].join("\n");
+  const { state } = recoveredStateFromYaml(text);
+  assert.equal(state.actions[0].inputClassId, null, "an action naming an undeclared input class must resolve to null, not leak the raw unresolvable label through");
+});
+
+// Real-data regression: with the bug (raw label, never resolved through
+// labelToId), computeActionMetrics's inputClassAccuracy could never be
+// anything but 0 when computed from a real recovered-model.yaml, no matter
+// how correct the action's input class actually was -- confirmed against
+// fibo-loans/run-01's own committed model, whose true inputClassAccuracy
+// (re-derived from the live app's own internal state at the time this run
+// completed) is 0.8, not 0.
+test("real-data regression (fibo-loans/run-01): computeActionMetrics's inputClassAccuracy is no longer forced to 0 by an unresolved label", () => {
+  const domain = "fibo-loans";
+  const runDir = path.resolve(__dirname, "..", "ontology_translation", "results", "multi-domain", "run-01", domain);
+  const groundTruth = loadGroundTruthModel({ path: resolveDomainYamlPath(domain), format: "domain-yaml" });
+  const { state } = recoveredStateFromYaml(fs.readFileSync(path.join(runDir, "recovered-model.yaml"), "utf8"));
+  const actionMetrics = computeActionMetrics(groundTruth, state);
+  assert.ok(actionMetrics.inputClassChecked > 0, "expected this real run to have at least one action whose input class was itself recovered -- test fixture assumption");
+  assert.ok(actionMetrics.inputClassAccuracy > 0, `expected a real, non-zero inputClassAccuracy (got ${actionMetrics.inputClassAccuracy}) -- 0 is exactly what the unresolved-label bug always produced, regardless of correctness`);
 });
 
 test("recoveredStateFromYaml defaults rules/actions to empty arrays when the YAML has neither block", () => {

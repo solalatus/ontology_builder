@@ -54,9 +54,9 @@ story, not just a hypothesis.
 | Dimension | itops (this control arm) | 4 published-ontology domains (`multi-domain/`) | Delta |
 |---|---|---|---|
 | Classes (full) | 67.3% | 68.3% | -1.0 pt |
-| Relationships (full) | 48.2% | 57.3% | -9.1 pt |
+| Relationships (full) | 48.6% | 60.3% | -11.7 pt |
 | Properties (full) | 58.7% | 64.6% | -5.9 pt |
-| Composite recovery effectiveness (full) | 58.1% | 63.4% | -5.3 pt |
+| Composite recovery effectiveness (full) | 58.2% | 64.4% | -6.2 pt |
 | Rules | 61.3% | 66.0% | -4.7 pt |
 | Actions (identification) | 81.0% | 87.6% | -6.6 pt |
 
@@ -64,6 +64,15 @@ Every dimension is now modestly negative (before the `run-01` re-run, rules
 was anomalously +8.2 pt above the published domains -- an artifact of the
 truncated run, not a real effect) -- a materially more coherent signal:
 consistently somewhat harder across the board, not a mixed picture.
+
+*Relationships/composite figures above reflect a relationship-scorer fix
+landed after this control arm's own original numbers were first published
+(a bare "has" relation name could never match anything -- see
+`ontology_translation/TODO.md`'s later dated entry for the full story); both
+arms were re-scored with the same corrected scorer, so this table stays a
+like-for-like comparison. Classes/properties/rules/actions were unaffected
+by that fix on this real data (verified directly, not assumed) and are
+unchanged from the original figures.*
 
 Interviewer-first raw identifier introductions (the channel this control
 arm exists to measure -- see `tests/evals/lib/interviewerPriorKnowledge.mjs`),
@@ -103,7 +112,7 @@ turns-used for itops (92.7) is 1.4-2.1x every published domain's own mean
 (4.0-6.7M) -- itops is not just larger on paper, it measurably costs more
 interview budget to cover at the same thoroughness.
 
-**What this means for the remaining composite-score gap (-5.3 pt)**: even
+**What this means for the remaining composite-score gap (-6.2 pt)**: even
 after removing the clearest budget artifact, it cannot be confidently
 attributed mainly to pretraining contamination inflating the
 published-ontology domains' scores, because domain size and pretraining-

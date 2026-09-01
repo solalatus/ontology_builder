@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-08-23T17:36:55.937Z",
+  "generatedAt": "2026-09-01T06:35:15.027Z",
   "domains": [
     "itops"
   ],
@@ -71,12 +71,12 @@
       "classesFullF1": 0.6923076923076924,
       "classesFullRecall": 0.5294117647058824,
       "classesFullPrecision": 1,
-      "relationshipsFullF1": 0.5,
+      "relationshipsFullF1": 0.5128205128205128,
       "propertiesFullF1": 0.5513513513513514,
       "propertiesFullRecall": 0.4594594594594595,
       "controlledValueFidelityFull": 0.7619047619047619,
-      "recoveryEffectivenessFull": 0.5812196812196814,
-      "recoveryEffectivenessWithFidelityFull": 0.6263909513909515,
+      "recoveryEffectivenessFull": 0.5854931854931856,
+      "recoveryEffectivenessWithFidelityFull": 0.6295960795960797,
       "controlledValuePropertyGoldTotal": 35,
       "controlledValuePropertyMatchedCount": 21,
       "classesScopedF1": 0.6666666666666667,
@@ -146,16 +146,16 @@
         "stdev": 0.019421484001112085
       },
       "relationshipsFullF1": {
-        "mean": 0.48222222222222216,
-        "stdev": 0.03671713698190736
+        "mean": 0.4864957264957264,
+        "stdev": 0.04038386921030913
       },
       "propertiesFullF1": {
         "mean": 0.5870736306357407,
         "stdev": 0.09776350699374921
       },
       "recoveryEffectivenessFull": {
-        "mean": 0.5807486133881287,
-        "stdev": 0.03875787821939227
+        "mean": 0.58217311481263,
+        "stdev": 0.03886224192433721
       },
       "controlledValueFidelityFull": {
         "mean": 0.8163568457686105,
@@ -214,7 +214,7 @@
       "domains": 1
     },
     "relationshipsFullF1": {
-      "mean": 0.48222222222222216,
+      "mean": 0.4864957264957264,
       "stdev": null,
       "domains": 1
     },
@@ -224,7 +224,7 @@
       "domains": 1
     },
     "recoveryEffectivenessFull": {
-      "mean": 0.5807486133881287,
+      "mean": 0.58217311481263,
       "stdev": null,
       "domains": 1
     },
@@ -290,7 +290,7 @@
       },
       {
         "element": "relationshipsFullF1",
-        "macroMeanF1": 0.48222222222222216,
+        "macroMeanF1": 0.4864957264957264,
         "macroStdevF1": null
       }
     ],
@@ -298,7 +298,7 @@
       "perDomain": [
         {
           "domain": "itops",
-          "delta": -0.1907277650842008
+          "delta": -0.18645426081069655
         }
       ],
       "domainsWhereHarder": 1,
@@ -328,7 +328,7 @@
         {
           "domain": "itops",
           "size": 309,
-          "recoveryEffectivenessFull": 0.5807486133881287
+          "recoveryEffectivenessFull": 0.58217311481263
         }
       ],
       "conclusion": "not enough domains for a meaningful correlation (n=1)"
