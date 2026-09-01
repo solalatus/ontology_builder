@@ -1,6 +1,6 @@
 # Multi-domain elicitation benchmark -- cross-domain report
 
-Generated 2026-09-01T06:35:15.027Z. Domains: itops. Replicates: run-01, run-02, run-03 (3/domain).
+Generated 2026-09-01T18:34:13.423Z. Domains: itops. Replicates: run-01, run-02, run-03 (3/domain).
 
 ## Macro statistics (equal weight per domain, per #111's own methodology)
 

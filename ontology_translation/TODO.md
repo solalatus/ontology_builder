@@ -3418,3 +3418,109 @@ reference and record deltas/decisions here instead.)*
   width CSS-transition-timing test) seen once in a full-suite run and
   confirmed non-reproducing in 3/3 isolated re-runs before being treated as
   a pre-existing flake rather than a regression.
+
+- **Issue #141 implemented: `bipartiteMatching.mjs`'s sum-maximizing
+  assignment can sacrifice a near-exact match to enable two mediocre ones
+  -- fixed with a two-phase solve, not a threshold tweak.** `maxWeightBipartite
+  Matching()` finds the assignment maximizing *total* matched weight, which
+  is provably not the same objective as "each gold element gets its single
+  best available match." Confirmed on real fibo-loans data (issue #141's
+  own audit): gold class `InterestPaymentTerms` has a near-perfect (~1.0)
+  candidate match to a recovered node also literally named
+  `InterestPaymentTerms`, but the plain sum-maximizing assignment instead
+  gave that node to an unrelated gold class `InterestPayment` (weight
+  ~0.667, a coincidental partial-token overlap -- `InterestPayment` is
+  really an event class the run never recovered at all) and sent
+  `InterestPaymentTerms` down to an empty decoy stub node also named
+  `InterestTerms` (also ~0.667) -- because 0.667+0.667 beats 1.0+0 under
+  pure sum maximization, even though 1.0+0 (the real match, plus the
+  unrecoverable event class correctly left unmatched) is the objectively
+  right pairing. The identical shape recurred independently for
+  `InterestRateResetSchedule`/`InterestRateReset` in the same run, and for
+  `CreditEnhancementAgreement`/`CreditAgreement`/`SupportAgreement` in
+  run-03.
+
+  **Fix**: a two-phase solve, both phases routed through the exact same,
+  already-tested Hungarian core (`solveExactAssignment`, extracted
+  unchanged from the previous single-phase body) -- phase 1 solves only the
+  edges at or above `HIGH_CONFIDENCE_LOCK_THRESHOLD` (0.9, "essentially an
+  exact name/alias match") in isolation, locking those pairs in; phase 2
+  solves everything else, with the phase-1 endpoints removed from
+  consideration. This makes an unambiguous near-exact match un-stealable by
+  a coincidental partial overlap elsewhere, while leaving the existing sum-
+  maximizing behavior completely intact for genuinely ambiguous cases (no
+  candidate anywhere near the lock threshold) -- exactly the case the
+  original algorithm was built correctly for. 0.9 was picked, not tuned:
+  every real coincidental-overlap false positive the audit found scored
+  0.667 or lower, every genuine match it needed to protect scored ~1.0 --
+  no evidence yet of a real case needing a value in between. Applies
+  uniformly to `matchClasses`/`matchRelationships`/`matchProperties`
+  (all three already routed through the shared `maxWeightBipartiteMatching`)
+  and to `llmMatcher.mjs`'s semantic-judge aggregation (uniform weight-1
+  edges: every edge clears the lock threshold, so phase 1 alone already
+  finds the correct maximum matching and phase 2 correctly has nothing left
+  to do -- verified, not just assumed, since that call site's binary
+  MATCH/NO-MATCH weights make it the case most likely to interact oddly
+  with a hard threshold).
+
+  **One existing test needed correcting, not the fix**: `tests/bipartite-
+  matching.spec.mjs`'s "denser graph...global maximum...not greedy" test
+  used a top edge weight of exactly 0.9 -- coincidentally landing right on
+  the new lock threshold, which is a *different* feature than the one that
+  test was written to exercise (plain Hungarian correctness on genuinely
+  comparable candidates, no confidence-tier interaction intended). Rescaled
+  proportionally to stay below 0.9 so it continues testing what it always
+  meant to, unrelated to issue #141's own new behavior.
+
+  **Test plan, all four parts done**: (1) four new synthetic unit tests in
+  `tests/bipartite-matching.spec.mjs`, two of which were verified to fail
+  against the pre-fix algorithm and pass against the fix (confirmed by
+  literally `git stash`-ing the fix and re-running), plus a "still correct
+  below the lock threshold" case and a "multiple independent locked pairs"
+  case; (2) a real-fixture regression test in `tests/ontology-recovery-
+  metrics.spec.mjs` against the actual fibo-loans/run-01 gold + recovered
+  model, asserting `matchClasses` now assigns `InterestPaymentTerms`/
+  `InterestRateResetSchedule` to their real, identically-named nodes and
+  correctly leaves `InterestPayment`/`InterestRateReset` unmatched --
+  confirmed failing pre-fix (`n14`/decoy) and passing post-fix (`n18`/real)
+  against the identical assertion; (3) full regression suite green: 1196
+  tests, 1185 pass, 0 fail, 11 skipped, no reintroduced many-to-one
+  regression; (4) all 15 real runs rescored (`rescore-saved-run.mjs
+  --write`) and hand-diffed.
+
+  **Rescore results**: only fibo-loans/run-01 and run-03 changed score-wise
+  (`metrics.json` diff), exactly as expected -- every other run's
+  `heuristic-matches.json` reordered internally (a byproduct of splitting
+  the solve into two phases, which changes Map/Set iteration order) with
+  zero change to `metrics.json`, confirmed file-by-file, not assumed from
+  the reordering looking harmless. fibo-loans/run-01: `InterestPaymentTerms`
+  now correctly matches its real node (weight 1.0, was 0.667 on the wrong
+  node), `InterestPayment`/`InterestRateReset` are now correctly unmatched
+  (were false positives), and three previously-unreachable property matches
+  on the correct node (`interestPaymentFrequency`, `interestPaymentDay`,
+  `compoundingFrequency`) are now credited, since their host node was
+  freed up. fibo-loans/run-03: `CreditAgreement` (pure coincidental false
+  positive) is now correctly unmatched; `CreditEnhancementAgreement` now
+  matches its real node. Domain-level composite deltas for fibo-loans:
+  class-F1 mean 0.645 -> 0.623 (down -- the false-positive class credits
+  are honestly gone), relationship-F1 mean 0.653 -> 0.687 (up -- the
+  newly-freed property/relationship matches). No other domain's composite
+  numbers moved at all.
+
+  **What this fix does NOT resolve, checked directly rather than assumed**:
+  fibo-loans/run-03's `FloatingInterestRate` still matches a generic, empty
+  `InterestRate` placeholder node at the same 0.667 weight as before --
+  unaffected, correctly, since nothing else wants that placeholder node
+  more, so there is no "sacrifice" for this fix's two-phase solve to
+  prevent; this is the separate, different-root-cause "word-overlap ignores
+  semantics" issue the original audit also documented, not something a
+  matching-objective fix can address. Also checked and NOT resolved:
+  `iof-supply-chain/run-02`'s `rel_6` remains unmatched after this fix --
+  confirmed by direct inspection of the rescored `heuristic-matches.json`,
+  not assumed fixed. That anomaly's root cause remains unexplained and is
+  left as a separately-documented, still-open item rather than silently
+  closed by this fix's own success elsewhere.
+
+  Full offline regression suite green throughout (see above); rescoring and
+  resummarizing did not change any test code, so no re-run of the suite was
+  needed after that step, only after the algorithm change itself.

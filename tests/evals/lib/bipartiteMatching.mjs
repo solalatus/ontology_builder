@@ -73,8 +73,12 @@ function hungarianMinCost(cost) {
 // the semantic-judge call site does, since a judge verdict is binary MATCH/
 // NO MATCH, not a graded score) reduces this to plain maximum-cardinality
 // bipartite matching.
-export function maxWeightBipartiteMatching(edges) {
-  const positiveEdges = edges.filter((e) => e.weight > 0);
+//
+// Exact solve for one bipartite subproblem -- the whole original body of
+// this module before issue #141's two-phase fix (see maxWeightBipartiteMatching
+// below), extracted unchanged so both phases run through the identical,
+// already-tested Hungarian core rather than a second implementation.
+function solveExactAssignment(positiveEdges) {
   if (!positiveEdges.length) return [];
 
   const lefts = [...new Set(positiveEdges.map((e) => e.left))];
@@ -114,4 +118,56 @@ export function maxWeightBipartiteMatching(edges) {
     }
   }
   return result;
+}
+
+// Issue #141: plain maximum-*total*-weight assignment is provably not the
+// same objective as "each gold element gets its single best available
+// match," and the two diverge with real, demonstrated consequences when the
+// recovered side contains a duplicate/near-duplicate pair for one concept.
+// Confirmed on real fibo-loans data: gold class `InterestPaymentTerms` has a
+// near-perfect (~1.0) candidate match to a recovered node also literally
+// named `InterestPaymentTerms`, but the plain sum-maximizing assignment gave
+// that node to a different, unrelated gold class instead (weight ~0.667),
+// and sent `InterestPaymentTerms` to an empty decoy stub (also ~0.667) --
+// because 0.667 + 0.667 (two mediocre matches) beats 1.0 + 0 (one excellent
+// match, with the other gold class correctly left unmatched) under pure sum
+// maximization, even though the sum-maximizing choice is the objectively
+// wrong pairing. This is a real algorithmic defect, not a wording/threshold
+// tuning issue: the Hungarian solver is working correctly for the objective
+// it was given, but that objective is wrong for a benchmark whose job is
+// "does each gold element have a genuinely correct match."
+//
+// Fix: a high-confidence pair (weight >= HIGH_CONFIDENCE_LOCK_THRESHOLD,
+// meaning "essentially an exact name/alias match") is locked in during a
+// first solve restricted to only the high-confidence edges, before the
+// remaining, genuinely ambiguous edges are handed to a second, independent
+// solve over what's left. This makes an unambiguous near-exact match
+// un-stealable by a coincidental partial overlap elsewhere, while leaving
+// the existing sum-maximizing behavior completely intact for the ambiguous
+// cases it was always meant for (two candidates each partially, genuinely
+// plausible, with no clearly-best option). Both phases route through the
+// exact same, already-tested Hungarian core (solveExactAssignment above) --
+// this is a change to which edges compete against which, not a new or
+// approximate algorithm, and it never weakens the existing one-to-one
+// guarantee (see this module's own top-of-file comment for why that
+// guarantee itself was added).
+//
+// 0.9 was picked, not tuned: every real "coincidental partial overlap" false
+// positive found in the issue #141 audit scored 0.667 or lower (2-of-3 or
+// fewer shared tokens), while every genuine match it needed to protect was a
+// same-or-near-identical name at ~1.0 -- there is no evidence yet of a real
+// case needing a value between the two, so the round, clearly-labeled
+// threshold was kept rather than fitted to a specific decimal.
+const HIGH_CONFIDENCE_LOCK_THRESHOLD = 0.9;
+
+export function maxWeightBipartiteMatching(edges) {
+  const positiveEdges = edges.filter((e) => e.weight > 0);
+  if (!positiveEdges.length) return [];
+
+  const highConfidence = positiveEdges.filter((e) => e.weight >= HIGH_CONFIDENCE_LOCK_THRESHOLD);
+  const locked = solveExactAssignment(highConfidence);
+  const lockedLefts = new Set(locked.map((e) => e.left));
+  const lockedRights = new Set(locked.map((e) => e.right));
+  const remaining = positiveEdges.filter((e) => !lockedLefts.has(e.left) && !lockedRights.has(e.right));
+  return [...locked, ...solveExactAssignment(remaining)];
 }

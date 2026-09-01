@@ -173,11 +173,6 @@
       "direction": "forward"
     },
     {
-      "goldId": "rel_14",
-      "edgeId": "e6",
-      "direction": "forward"
-    },
-    {
       "goldId": "rel_15",
       "edgeId": "e3",
       "direction": "forward"
@@ -210,6 +205,11 @@
     {
       "goldId": "rel_25",
       "edgeId": "e23",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_14",
+      "edgeId": "e6",
       "direction": "forward"
     }
   ],

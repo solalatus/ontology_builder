@@ -378,6 +378,42 @@ test("matchRelationships on a real committed low-recall run (brick-hvac/run-02):
   }
 });
 
+// Real-data regression for issue #141's bipartite-matching fix. Before the
+// fix, fibo-loans/run-01's own heuristic-matches.json assigned gold
+// `InterestPaymentTerms` to the recovered model's orphaned `InterestTerms`
+// stub node (weight ~0.667) and let a different, unrelated gold class
+// (`InterestPayment`, an event class the run never actually recovered) claim
+// the real, identically-named `InterestPaymentTerms` recovered node instead
+// (also ~0.667) -- because 0.667+0.667 beat the objectively correct 1.0+0
+// under plain sum-maximization. Same shape for `InterestRateResetSchedule`
+// vs. the orphaned `RateResetSchedule` stub and `InterestRateReset`. See
+// ontology_translation/TODO.md's dated entry for the full audit.
+test("real-data regression (fibo-loans/run-01): matchClasses assigns InterestPaymentTerms/InterestRateResetSchedule to their real, identically-named recovered nodes, not decoy stubs (issue #141)", () => {
+  const domain = "fibo-loans";
+  const runDir = path.resolve(__dirname, "..", "ontology_translation", "results", "multi-domain", "run-01", domain);
+  const groundTruth = loadGroundTruthModel({ path: resolveDomainYamlPath(domain), format: "domain-yaml" });
+  const { state: recovered } = recoveredStateFromYaml(fs.readFileSync(path.join(runDir, "recovered-model.yaml"), "utf8"));
+  const { gtToRecovered } = matchClasses(groundTruth, recovered.nodes);
+
+  const nodeIdByLabel = new Map(recovered.nodes.map((n) => [n.label, n.id]));
+
+  const iptNodeId = nodeIdByLabel.get("InterestPaymentTerms");
+  assert.ok(iptNodeId, "expected this real run to contain a recovered node literally named InterestPaymentTerms -- test fixture assumption");
+  assert.deepEqual(
+    gtToRecovered.get("InterestPaymentTerms"), [iptNodeId],
+    "gold InterestPaymentTerms must match the real, identically-named recovered node, not be traded down to the InterestTerms decoy stub"
+  );
+  // The event class genuinely has no recovered counterpart in this run
+  // (confirmed by the original manual audit) and must now be correctly
+  // unmatched, not credited via a node stolen from InterestPaymentTerms.
+  assert.equal(gtToRecovered.has("InterestPayment"), false);
+
+  const irrsNodeId = nodeIdByLabel.get("InterestRateResetSchedule");
+  assert.ok(irrsNodeId, "expected this real run to contain a recovered node literally named InterestRateResetSchedule -- test fixture assumption");
+  assert.deepEqual(gtToRecovered.get("InterestRateResetSchedule"), [irrsNodeId]);
+  assert.equal(gtToRecovered.has("InterestRateReset"), false);
+});
+
 // A real confirmatory eval run recorded these exact two relationships
 // (class pair, direction, and meaning all correct) but they scored as
 // unmatched at the class-level 0.6 Jaccard threshold -- "using" vs "with"

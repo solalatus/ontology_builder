@@ -148,26 +148,6 @@
       "direction": "forward"
     },
     {
-      "goldId": "rel_3",
-      "edgeId": "e21",
-      "direction": "forward"
-    },
-    {
-      "goldId": "rel_4",
-      "edgeId": "e5",
-      "direction": "forward"
-    },
-    {
-      "goldId": "rel_5",
-      "edgeId": "e18",
-      "direction": "forward"
-    },
-    {
-      "goldId": "rel_7",
-      "edgeId": "e4",
-      "direction": "forward"
-    },
-    {
       "goldId": "rel_8",
       "edgeId": "e16",
       "direction": "forward"
@@ -193,11 +173,6 @@
       "direction": "forward"
     },
     {
-      "goldId": "rel_15",
-      "edgeId": "e1",
-      "direction": "forward"
-    },
-    {
       "goldId": "rel_17",
       "edgeId": "e2",
       "direction": "forward"
@@ -218,6 +193,36 @@
       "direction": "forward"
     },
     {
+      "goldId": "rel_27",
+      "edgeId": "e17",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_3",
+      "edgeId": "e21",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_4",
+      "edgeId": "e5",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_5",
+      "edgeId": "e18",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_7",
+      "edgeId": "e4",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_15",
+      "edgeId": "e1",
+      "direction": "forward"
+    },
+    {
       "goldId": "rel_25",
       "edgeId": "e9",
       "direction": "forward"
@@ -225,11 +230,6 @@
     {
       "goldId": "rel_26",
       "edgeId": "e10",
-      "direction": "forward"
-    },
-    {
-      "goldId": "rel_27",
-      "edgeId": "e17",
       "direction": "forward"
     }
   ],
