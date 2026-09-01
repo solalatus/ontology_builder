@@ -12,10 +12,10 @@
       "recoveredTotal": 29
     },
     "relationships": {
-      "recall": 0.17142857142857143,
-      "precision": 0.24,
-      "f1": 0.19999999999999998,
-      "matched": 6,
+      "recall": 0.42857142857142855,
+      "precision": 0.6,
+      "f1": 0.5,
+      "matched": 15,
       "groundTruthTotal": 35,
       "recoveredTotal": 25
     },
@@ -30,8 +30,8 @@
     "controlledValueFidelity": 1,
     "controlledValuePropertyGoldTotal": 20,
     "controlledValuePropertyMatchedCount": 7,
-    "recoveryEffectiveness": 0.5121635094715852,
-    "recoveryEffectivenessWithFidelity": 0.6341226321036889
+    "recoveryEffectiveness": 0.6121635094715852,
+    "recoveryEffectivenessWithFidelity": 0.7091226321036889
   },
   "scopedMetrics": {
     "classes": {
@@ -43,10 +43,10 @@
       "recoveredTotal": 29
     },
     "relationships": {
-      "recall": 0.15789473684210525,
-      "precision": 0.12,
-      "f1": 0.13636363636363635,
-      "matched": 3,
+      "recall": 0.3684210526315789,
+      "precision": 0.28,
+      "f1": 0.3181818181818182,
+      "matched": 7,
       "groundTruthTotal": 19,
       "recoveredTotal": 25
     },
@@ -61,8 +61,8 @@
     "controlledValueFidelity": 1,
     "controlledValuePropertyGoldTotal": 10,
     "controlledValuePropertyMatchedCount": 5,
-    "recoveryEffectiveness": 0.413819041478616,
-    "recoveryEffectivenessWithFidelity": 0.560364281108962
+    "recoveryEffectiveness": 0.4744251020846766,
+    "recoveryEffectivenessWithFidelity": 0.6058188265635074
   },
   "semanticMetrics": {
     "classes": {
@@ -190,34 +190,9 @@
           "verdict": "MATCH"
         },
         {
-          "goldId": "rel_6",
-          "recoveredId": "e6",
-          "verdict": "MATCH"
-        },
-        {
           "goldId": "rel_7",
           "recoveredId": null,
           "verdict": "NO MATCH"
-        },
-        {
-          "goldId": "rel_8",
-          "recoveredId": "e7",
-          "verdict": "MATCH"
-        },
-        {
-          "goldId": "rel_9",
-          "recoveredId": "e8",
-          "verdict": "MATCH"
-        },
-        {
-          "goldId": "rel_10",
-          "recoveredId": "e9",
-          "verdict": "MATCH"
-        },
-        {
-          "goldId": "rel_11",
-          "recoveredId": "e10",
-          "verdict": "MATCH"
         },
         {
           "goldId": "rel_12",
@@ -228,16 +203,6 @@
           "goldId": "rel_13",
           "recoveredId": null,
           "verdict": "NO MATCH"
-        },
-        {
-          "goldId": "rel_14",
-          "recoveredId": "e13",
-          "verdict": "MATCH"
-        },
-        {
-          "goldId": "rel_15",
-          "recoveredId": "e14",
-          "verdict": "MATCH"
         },
         {
           "goldId": "rel_16",
@@ -278,16 +243,6 @@
           "goldId": "rel_24",
           "recoveredId": null,
           "verdict": "NO MATCH"
-        },
-        {
-          "goldId": "rel_34",
-          "recoveredId": "e11",
-          "verdict": "MATCH"
-        },
-        {
-          "goldId": "rel_35",
-          "recoveredId": "e12",
-          "verdict": "MATCH"
         }
       ],
       "properties": [
@@ -426,48 +381,12 @@
           "recoveredId": "e21"
         },
         {
-          "goldId": "rel_6",
-          "recoveredId": "e6"
-        },
-        {
-          "goldId": "rel_8",
-          "recoveredId": "e7"
-        },
-        {
-          "goldId": "rel_9",
-          "recoveredId": "e8"
-        },
-        {
-          "goldId": "rel_10",
-          "recoveredId": "e9"
-        },
-        {
-          "goldId": "rel_11",
-          "recoveredId": "e10"
-        },
-        {
-          "goldId": "rel_14",
-          "recoveredId": "e13"
-        },
-        {
-          "goldId": "rel_15",
-          "recoveredId": "e14"
-        },
-        {
           "goldId": "rel_22",
           "recoveredId": "e4"
         },
         {
           "goldId": "rel_23",
           "recoveredId": "e5"
-        },
-        {
-          "goldId": "rel_34",
-          "recoveredId": "e11"
-        },
-        {
-          "goldId": "rel_35",
-          "recoveredId": "e12"
         }
       ],
       "properties": [
@@ -517,10 +436,10 @@
         "recoveredTotal": 29
       },
       "relationships": {
-        "recall": 0.17142857142857143,
-        "precision": 0.24,
-        "f1": 0.19999999999999998,
-        "matched": 6,
+        "recall": 0.42857142857142855,
+        "precision": 0.6,
+        "f1": 0.5,
+        "matched": 15,
         "groundTruthTotal": 35,
         "recoveredTotal": 25
       },
@@ -535,8 +454,8 @@
       "controlledValueFidelity": 1,
       "controlledValuePropertyGoldTotal": 20,
       "controlledValuePropertyMatchedCount": 7,
-      "recoveryEffectiveness": 0.5121635094715852,
-      "recoveryEffectivenessWithFidelity": 0.6341226321036889
+      "recoveryEffectiveness": 0.6121635094715852,
+      "recoveryEffectivenessWithFidelity": 0.7091226321036889
     },
     "rawResponses": {
       "classes": "1: MATCH 1 -- plenum is the same air chamber concept\n2: NO MATCH -- no specific air quality sensor candidate\n3: NO MATCH -- no CO2 differential sensor candidate\n4: NO MATCH -- condensing unit not represented\n5: NO MATCH -- cooling tower not represented\n6: NO MATCH -- heat exchanger not represented\n7: NO MATCH -- humidifier not represented\n8: NO MATCH -- isolation valve not represented\n9: NO MATCH -- pump not represented\n10: NO MATCH -- space heater not represented\n11: NO MATCH -- no water temperature sensor candidate\n12: NO MATCH -- dry cooler not represented",
@@ -601,16 +520,6 @@
           "verdict": "NO MATCH"
         },
         {
-          "goldId": "rel_9",
-          "recoveredId": "e8",
-          "verdict": "MATCH"
-        },
-        {
-          "goldId": "rel_10",
-          "recoveredId": "e9",
-          "verdict": "MATCH"
-        },
-        {
           "goldId": "rel_12",
           "recoveredId": null,
           "verdict": "NO MATCH"
@@ -619,16 +528,6 @@
           "goldId": "rel_13",
           "recoveredId": null,
           "verdict": "NO MATCH"
-        },
-        {
-          "goldId": "rel_14",
-          "recoveredId": "e13",
-          "verdict": "MATCH"
-        },
-        {
-          "goldId": "rel_15",
-          "recoveredId": "e14",
-          "verdict": "MATCH"
         },
         {
           "goldId": "rel_16",
@@ -744,22 +643,6 @@
           "recoveredId": "e21"
         },
         {
-          "goldId": "rel_9",
-          "recoveredId": "e8"
-        },
-        {
-          "goldId": "rel_10",
-          "recoveredId": "e9"
-        },
-        {
-          "goldId": "rel_14",
-          "recoveredId": "e13"
-        },
-        {
-          "goldId": "rel_15",
-          "recoveredId": "e14"
-        },
-        {
           "goldId": "rel_22",
           "recoveredId": "e4"
         },
@@ -807,10 +690,10 @@
         "recoveredTotal": 29
       },
       "relationships": {
-        "recall": 0.15789473684210525,
-        "precision": 0.12,
-        "f1": 0.13636363636363635,
-        "matched": 3,
+        "recall": 0.3684210526315789,
+        "precision": 0.28,
+        "f1": 0.3181818181818182,
+        "matched": 7,
         "groundTruthTotal": 19,
         "recoveredTotal": 25
       },
@@ -825,8 +708,8 @@
       "controlledValueFidelity": 1,
       "controlledValuePropertyGoldTotal": 10,
       "controlledValuePropertyMatchedCount": 5,
-      "recoveryEffectiveness": 0.413819041478616,
-      "recoveryEffectivenessWithFidelity": 0.560364281108962
+      "recoveryEffectiveness": 0.4744251020846766,
+      "recoveryEffectivenessWithFidelity": 0.6058188265635074
     },
     "rawResponses": {
       "classes": "1: MATCH 1 -- plenum is the same air distribution chamber concept\n2: NO MATCH -- no candidate is the generic pump class",

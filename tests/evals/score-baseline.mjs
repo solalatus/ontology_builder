@@ -82,8 +82,22 @@ export function recoveredStateFromYaml(text) {
   const rules = Object.entries(doc.rules || {}).map(([name, r]) => ({
     id: name, name, conditions: (r && r.conditions) || [],
   }));
+  // Bug found and fixed alongside the relationship-scorer stopword fix
+  // (TODO.md's dated entry): inputClassId was left as the raw class NAME
+  // string straight from the YAML's `input:` field, never resolved through
+  // labelToId the way edges[].source/.target already are two lines above --
+  // so computeActionMetrics's inputClassAccuracy (which compares
+  // rec.inputClassId against gtToRecoveredClasses's *node-id*-valued
+  // results, e.g. "n1") could never match a raw label like "Loan" against
+  // an id like "n1", regardless of whether the action was genuinely
+  // correct. Reproduces on every real committed run checked (all silently
+  // scored inputClassAccuracy as if 0 were possible when recomputed via
+  // this function, before this fix) -- confirmed with the unmodified
+  // scorer, unrelated to the stopword fix itself; caught while building the
+  // --write mode for rescore-saved-run.mjs, since that's the first caller
+  // that ever recomputed actionMetrics through this path against real data.
   const actions = Object.entries(doc.actions || {}).map(([name, a]) => ({
-    id: name, name, inputClassId: a && a.input,
+    id: name, name, inputClassId: labelToId.get(a && a.input) || null,
     preconditions: (a && a.preconditions) || [], effect: (a && a.effect) || "", verification: (a && a.verification) || "",
   }));
 

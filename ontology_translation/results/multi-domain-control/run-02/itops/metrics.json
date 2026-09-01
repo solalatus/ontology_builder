@@ -12,10 +12,10 @@
       "recoveredTotal": 36
     },
     "relationships": {
-      "recall": 0.3611111111111111,
-      "precision": 0.8125,
-      "f1": 0.5,
-      "matched": 39,
+      "recall": 0.37037037037037035,
+      "precision": 0.8333333333333334,
+      "f1": 0.5128205128205128,
+      "matched": 40,
       "groundTruthTotal": 108,
       "recoveredTotal": 48
     },
@@ -30,8 +30,8 @@
     "controlledValueFidelity": 0.7619047619047619,
     "controlledValuePropertyGoldTotal": 35,
     "controlledValuePropertyMatchedCount": 21,
-    "recoveryEffectiveness": 0.5812196812196814,
-    "recoveryEffectivenessWithFidelity": 0.6263909513909515
+    "recoveryEffectiveness": 0.5854931854931856,
+    "recoveryEffectivenessWithFidelity": 0.6295960795960797
   },
   "scopedMetrics": {
     "classes": {
@@ -308,11 +308,6 @@
           "goldId": "rel_85",
           "recoveredId": null,
           "verdict": "NO MATCH"
-        },
-        {
-          "goldId": "rel_97",
-          "recoveredId": "e23",
-          "verdict": "MATCH"
         },
         {
           "goldId": "rel_98",
@@ -611,12 +606,7 @@
     },
     "resolvedMatches": {
       "classes": [],
-      "relationships": [
-        {
-          "goldId": "rel_97",
-          "recoveredId": "e23"
-        }
-      ],
+      "relationships": [],
       "properties": [],
       "valueFidelity": [
         {
@@ -715,10 +705,10 @@
         "recoveredTotal": 36
       },
       "relationships": {
-        "recall": 0.3611111111111111,
-        "precision": 0.8125,
-        "f1": 0.5,
-        "matched": 39,
+        "recall": 0.37037037037037035,
+        "precision": 0.8333333333333334,
+        "f1": 0.5128205128205128,
+        "matched": 40,
         "groundTruthTotal": 108,
         "recoveredTotal": 48
       },
@@ -733,8 +723,8 @@
       "controlledValueFidelity": 0.7619047619047619,
       "controlledValuePropertyGoldTotal": 35,
       "controlledValuePropertyMatchedCount": 21,
-      "recoveryEffectiveness": 0.5812196812196814,
-      "recoveryEffectivenessWithFidelity": 0.6263909513909515
+      "recoveryEffectiveness": 0.5854931854931856,
+      "recoveryEffectivenessWithFidelity": 0.6295960795960797
     },
     "rawResponses": {
       "relationships": "1: NO MATCH -- accountableFor is not the same as owns\n2: NO MATCH -- no Vendor provides Third Party Service candidate\n3: NO MATCH -- no Vendor supports Application candidate\n4: NO MATCH -- no Stakeholder has Interest In Business Service candidate\n5: NO MATCH -- no Configuration Item belongs To Environment candidate\n6: NO MATCH -- no Event observed on Configuration Item candidate\n7: NO MATCH -- no Event relates To It Service candidate\n8: NO MATCH -- no Alert indicates Event candidate\n9: NO MATCH -- no Incident notifies Stakeholder candidate\n10: NO MATCH -- justifiedBy is different from is Resolved By\n11: MATCH 4 -- hasWorkaround matches has Workaround\n12: NO MATCH -- no Known Error affects Configuration Item candidate\n13: NO MATCH -- no Workaround documented in Runbook candidate\n14: NO MATCH -- no Change modifies Configuration Item candidate\n15: NO MATCH -- no Change affects It Service candidate\n16: NO MATCH -- no Deployment targets Environment candidate\n17: NO MATCH -- no Deployment deploys Application candidate",

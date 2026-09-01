@@ -138,6 +138,41 @@
   ],
   "relationships": [
     {
+      "goldId": "rel_6",
+      "edgeId": "e6",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_8",
+      "edgeId": "e7",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_9",
+      "edgeId": "e8",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_10",
+      "edgeId": "e9",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_11",
+      "edgeId": "e10",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_14",
+      "edgeId": "e13",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_15",
+      "edgeId": "e14",
+      "direction": "forward"
+    },
+    {
       "goldId": "rel_26",
       "edgeId": "e1",
       "direction": "forward"
@@ -165,6 +200,16 @@
     {
       "goldId": "rel_31",
       "edgeId": "e3",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_34",
+      "edgeId": "e11",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_35",
+      "edgeId": "e12",
       "direction": "forward"
     }
   ],
