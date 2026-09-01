@@ -69,12 +69,12 @@
     },
     {
       "goldId": "rel_5",
-      "edgeId": "e10",
+      "edgeId": "e9",
       "direction": "forward"
     },
     {
       "goldId": "rel_6",
-      "edgeId": "e11",
+      "edgeId": "e10",
       "direction": "forward"
     }
   ],

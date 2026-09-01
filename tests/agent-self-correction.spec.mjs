@@ -132,7 +132,10 @@ test("the agent may commit up to three times in a turn, and the fourth is refuse
     ]);
     const results = toolResults(bodies);
     assert.equal(results.filter((r) => r.startsWith("Applied.")).length, 3, "exactly three commits should land");
-    assert.match(results[results.length - 1], /no further apply_ontology_yaml call is available this turn/i);
+    // Wording grew to cover remove_ontology_elements too (issue #140 follow-up:
+    // it now shares this same per-turn commit budget) -- still asserted as a
+    // substring match, not equality, so this stays robust to further wording.
+    assert.match(results[results.length - 1], /no further apply_ontology_yaml or remove_ontology_elements call is available this turn/i);
     assert.equal(await page.evaluate(() => window.__kg.state.nodes.some((n) => n.label === "Extra3")), false);
   });
 });

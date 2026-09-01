@@ -4,12 +4,12 @@
   "runUuid": "aeea55a1-a0f1-4d70-bf87-9f00adcb2b33",
   "metrics": {
     "classes": {
-      "recall": 0.5094339622641509,
+      "recall": 0.49056603773584906,
       "precision": 1,
-      "f1": 0.6749999999999999,
-      "matched": 27,
+      "f1": 0.6582278481012659,
+      "matched": 26,
       "groundTruthTotal": 53,
-      "recoveredTotal": 27
+      "recoveredTotal": 26
     },
     "relationships": {
       "recall": 0.6666666666666666,
@@ -30,17 +30,17 @@
     "controlledValueFidelity": null,
     "controlledValuePropertyGoldTotal": 0,
     "controlledValuePropertyMatchedCount": 0,
-    "recoveryEffectiveness": 0.7531045751633987,
+    "recoveryEffectiveness": 0.7475138578638206,
     "recoveryEffectivenessWithFidelity": null
   },
   "scopedMetrics": {
     "classes": {
       "recall": 0.75,
-      "precision": 0.7777777777777778,
-      "f1": 0.7636363636363638,
+      "precision": 0.8076923076923077,
+      "f1": 0.7777777777777779,
       "matched": 21,
       "groundTruthTotal": 28,
-      "recoveredTotal": 27
+      "recoveredTotal": 26
     },
     "relationships": {
       "recall": 0.6956521739130435,
@@ -61,17 +61,17 @@
     "controlledValueFidelity": null,
     "controlledValuePropertyGoldTotal": 0,
     "controlledValuePropertyMatchedCount": 0,
-    "recoveryEffectiveness": 0.8303030303030304,
+    "recoveryEffectiveness": 0.8350168350168351,
     "recoveryEffectivenessWithFidelity": null
   },
   "semanticMetrics": {
     "classes": {
-      "recall": 0.5094339622641509,
+      "recall": 0.49056603773584906,
       "precision": 1,
-      "f1": 0.6749999999999999,
-      "matched": 27,
+      "f1": 0.6582278481012659,
+      "matched": 26,
       "groundTruthTotal": 53,
-      "recoveredTotal": 27
+      "recoveredTotal": 26
     },
     "relationships": {
       "recall": 0.7,
@@ -92,7 +92,7 @@
     "controlledValueFidelity": null,
     "controlledValuePropertyGoldTotal": 0,
     "controlledValuePropertyMatchedCount": 0,
-    "recoveryEffectiveness": 0.7661764705882353,
+    "recoveryEffectiveness": 0.7605857532886574,
     "recoveryEffectivenessWithFidelity": null,
     "judgeCallCount": 1,
     "judgments": {
@@ -267,12 +267,12 @@
     },
     "heuristic": {
       "classes": {
-        "recall": 0.5094339622641509,
+        "recall": 0.49056603773584906,
         "precision": 1,
-        "f1": 0.6749999999999999,
-        "matched": 27,
+        "f1": 0.6582278481012659,
+        "matched": 26,
         "groundTruthTotal": 53,
-        "recoveredTotal": 27
+        "recoveredTotal": 26
       },
       "relationships": {
         "recall": 0.6666666666666666,
@@ -293,7 +293,7 @@
       "controlledValueFidelity": null,
       "controlledValuePropertyGoldTotal": 0,
       "controlledValuePropertyMatchedCount": 0,
-      "recoveryEffectiveness": 0.7531045751633987,
+      "recoveryEffectiveness": 0.7475138578638206,
       "recoveryEffectivenessWithFidelity": null
     },
     "rawResponses": {
@@ -303,11 +303,11 @@
   "semanticScopedMetrics": {
     "classes": {
       "recall": 0.75,
-      "precision": 0.7777777777777778,
-      "f1": 0.7636363636363638,
+      "precision": 0.8076923076923077,
+      "f1": 0.7777777777777779,
       "matched": 21,
       "groundTruthTotal": 28,
-      "recoveredTotal": 27
+      "recoveredTotal": 26
     },
     "relationships": {
       "recall": 0.7391304347826086,
@@ -328,7 +328,7 @@
     "controlledValueFidelity": null,
     "controlledValuePropertyGoldTotal": 0,
     "controlledValuePropertyMatchedCount": 0,
-    "recoveryEffectiveness": 0.8454545454545456,
+    "recoveryEffectiveness": 0.8501683501683502,
     "recoveryEffectivenessWithFidelity": null,
     "judgeCallCount": 2,
     "judgments": {
@@ -398,11 +398,11 @@
     "heuristic": {
       "classes": {
         "recall": 0.75,
-        "precision": 0.7777777777777778,
-        "f1": 0.7636363636363638,
+        "precision": 0.8076923076923077,
+        "f1": 0.7777777777777779,
         "matched": 21,
         "groundTruthTotal": 28,
-        "recoveredTotal": 27
+        "recoveredTotal": 26
       },
       "relationships": {
         "recall": 0.6956521739130435,
@@ -423,7 +423,7 @@
       "controlledValueFidelity": null,
       "controlledValuePropertyGoldTotal": 0,
       "controlledValuePropertyMatchedCount": 0,
-      "recoveryEffectiveness": 0.8303030303030304,
+      "recoveryEffectiveness": 0.8350168350168351,
       "recoveryEffectivenessWithFidelity": null
     },
     "rawResponses": {

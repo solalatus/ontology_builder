@@ -89,11 +89,6 @@ classes:
     meaning: A shipper is the consignor that sends or consigns a shipment.
     aliases: []
     properties: {}
-  Consignee:
-    meaning: null
-    aliases:
-      - __REMOVE__
-    properties: {}
   StorageFacility:
     meaning: A storage facility is a facility used to store goods or traceable units.
     aliases: []

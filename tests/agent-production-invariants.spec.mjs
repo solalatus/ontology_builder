@@ -39,44 +39,56 @@ import { withPage } from "./lib/page.mjs";
 // + AGENT_KNOWLEDGE + the output-language directive, exactly as sent to the
 // model on a real request. Recorded per language because the directive names
 // the language (agentLanguageDirective()), so the two differ by design.
-// Updated deliberately in the commit that shipped a ground-up prompt/behavior-
-// tuning bundle (6 of 8 ideas from a research review, 2 left ambiguous for a
-// future targeted eval): rule/action authoring-time consistency checks
-// (Phase 7/8), no false "skip this phase?" framing on incomplete required work
-// (GROUND RULES), a Phase 5 closing check for meaning-sentence coverage plus a
-// reconciled Phase 9(b) checklist and AGENT_KNOWLEDGE "Final check" item,
-// Phase 6's batch cap + per-item justification, adaptive alias-elicitation
-// stopping, naming inverse-relationship-pair duplicates explicitly in
-// CONSISTENCY CHECK, and never ending the interview on a dangling open
-// question. The previous hashes were 0173b3f3…/3a147149…, recorded when issue
-// #94 made competency questions first-class. That makes a new treatment, so
-// this bundle got the same non-regression discipline before merging -- see
-// tests/evals/PROMPT_TUNING_BUNDLE.md for the design and n=5 results (all six
-// F1 dimensions within spread, zero regressions, 6 of 8 ideas showing their
-// intended behavior change in a majority of treatment runs). This is the
-// intentional case the header above describes -- not a hash updated to make a
-// failing test go away.
 //
-// One word-level fix landed after the eval, not before: the shipped example
-// lists ("status, type, category, priority, and similar") originally also
-// named "severity", which collided with the fixture-vocabulary blocklist
-// competency-questions-agent.spec.mjs pins (severity is a real property in
-// this repo's own eval fixture). Removed rather than re-run -- it's one
-// illustrative word among several already followed by "and similar", not a
-// structural change, and the eval's qualitative findings (checklist
-// engagement, meaning-sentence coverage) don't depend on which example word
-// appears in that one list.
+// Updated deliberately (issue #140 follow-up): a manual, page-by-page audit
+// of 15 real completed interviews found the interviewer's system prompt
+// itself already instructed, in its own CONSISTENCY CHECK section, to
+// "resolve which direction the expert actually uses and remove the other"
+// when a reverse-direction relationship-pair warning fired -- an instruction
+// the interviewer had no tool to actually carry out, since apply_ontology_yaml
+// is upsert-only by design. The audit found the predictable result: the
+// interviewer instead overwrote a `meaning` field with a self-directed
+// deletion note ("REMOVE") that then shipped, untouched, in the final
+// exported ontology. Fixed by giving the interviewer a real
+// remove_ontology_elements tool (reusing the exact tool/removal core the
+// Import Review execution agent already had) and rewriting the prompt to
+// describe it, with the same "BE CONSERVATIVE ABOUT REMOVAL" caution that
+// tool's own execution-agent prompt already uses, plus an explicit
+// prohibition on the meaning-field-as-deletion-note workaround the audit
+// found in practice. This is the intentional case the header above
+// describes, and a new treatment by that header's own definition -- a live
+// non-regression evaluation against the anchor distribution
+// (tests/evals/results/runs/run-01..03) is the right next step before this
+// prompt's own composite/relationship numbers are compared to anything, but
+// was not run in this same pass (explicit cost/scope decision, no full live
+// benchmark budget available at the time -- see ontology_translation/
+// TODO.md's dated entry for this exact tradeoff spelled out). The two live,
+// opt-in behavioral tests added alongside this change
+// (tests/agent-remove-tool-live.spec.mjs) are a smaller, targeted substitute
+// that were run for real against Azure before this hash was pinned -- not a
+// full anchor-comparable non-regression pass, but real evidence the model
+// actually uses the new tool correctly, not just that the prompt text reads
+// as if it should.
+//
+// Previous hashes (3684db5c…/a92324e5…) were the ground-up prompt/behavior-
+// tuning bundle recorded just before this change -- see this constant's own
+// prior revision (git blame) for that bundle's own full changelog, itself
+// following the same discipline from a previous intentional change.
 export const PRODUCTION_SYSTEM_PROMPT_SHA256 = {
-  en: "3684db5c4eb426406005a44a99f8ff9588206da0c061a42aef7e80c3a18b96a7",
-  hu: "a92324e50de806c1ec20ba27d82c0cbe82b570e6c2a4eb668ab9c6d2be5c8db0",
+  en: "e733938a97fff2b48349886928f49bc697a2d1a6331efbaebae5fbbd6077ab28",
+  hu: "f802c23c4a52d586d5052769a67e68484551aa6c1cbb1cbf8661b836110cec73",
 };
 
 // The complete ontology tool surface an ordinary interview request exposes.
-// Issue #75 §1: an interview must expose exactly these two and no
-// normalization tool. Order matters here on purpose -- it is the order the app
-// sends, and pinning it means the assertion fails on a reordering too, which
-// is the cheapest way to notice that this array was edited at all.
-export const PRODUCTION_TOOL_NAMES = ["apply_ontology_yaml", "get_graph_state"];
+// Issue #75 §1: an interview must expose exactly these and no normalization
+// tool. Order matters here on purpose -- it is the order the app sends, and
+// pinning it means the assertion fails on a reordering too, which is the
+// cheapest way to notice that this array was edited at all. Grew to three
+// (issue #140 follow-up, see PRODUCTION_SYSTEM_PROMPT_SHA256's own comment
+// just above for the full story): remove_ontology_elements, appended last
+// to match the literal order the "tools:" array is constructed in the live
+// interview's own tool-calling loop.
+export const PRODUCTION_TOOL_NAMES = ["apply_ontology_yaml", "get_graph_state", "remove_ontology_elements"];
 
 const MODELS_URL = "https://api.openai.com/v1/models";
 const CHAT_URL = "https://api.openai.com/v1/chat/completions";

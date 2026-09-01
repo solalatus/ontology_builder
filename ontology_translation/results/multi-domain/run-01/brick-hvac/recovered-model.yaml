@@ -354,11 +354,6 @@ relationships:
     meaning: The thing is physically installed within that building or space.
     aliases:
       - installed in
-  - name: isServedBy
-    from: Zone
-    to: Thermostat
-    meaning: REMOVE
-    aliases: []
 rules:
   canIncreaseCooling:
     conditions:

@@ -21,18 +21,13 @@
       "weight": 1
     },
     {
-      "goldId": "Consignee",
-      "recoveredId": "n15",
-      "weight": 1
-    },
-    {
       "goldId": "Shipper",
       "recoveredId": "n14",
       "weight": 1
     },
     {
       "goldId": "SupplyRelationship",
-      "recoveredId": "n27",
+      "recoveredId": "n26",
       "weight": 1
     },
     {
@@ -77,22 +72,22 @@
     },
     {
       "goldId": "StorageFacility",
-      "recoveredId": "n16",
+      "recoveredId": "n15",
       "weight": 1
     },
     {
       "goldId": "ShipFromLocation",
-      "recoveredId": "n17",
+      "recoveredId": "n16",
       "weight": 1
     },
     {
       "goldId": "ShipToLocation",
-      "recoveredId": "n18",
+      "recoveredId": "n17",
       "weight": 1
     },
     {
       "goldId": "SupplyChainNode",
-      "recoveredId": "n19",
+      "recoveredId": "n18",
       "weight": 1
     },
     {
@@ -102,37 +97,37 @@
     },
     {
       "goldId": "ShipmentPreparationProcess",
-      "recoveredId": "n21",
-      "weight": 1
-    },
-    {
-      "goldId": "ReceivingProcess",
-      "recoveredId": "n24",
-      "weight": 1
-    },
-    {
-      "goldId": "StorageProcess",
-      "recoveredId": "n23",
-      "weight": 1
-    },
-    {
-      "goldId": "ConsigningProcess",
-      "recoveredId": "n26",
-      "weight": 1
-    },
-    {
-      "goldId": "InventoryManagementProcess",
-      "recoveredId": "n25",
-      "weight": 1
-    },
-    {
-      "goldId": "TransportationService",
       "recoveredId": "n20",
       "weight": 1
     },
     {
-      "goldId": "FreightForwardingService",
+      "goldId": "ReceivingProcess",
+      "recoveredId": "n23",
+      "weight": 1
+    },
+    {
+      "goldId": "StorageProcess",
       "recoveredId": "n22",
+      "weight": 1
+    },
+    {
+      "goldId": "ConsigningProcess",
+      "recoveredId": "n25",
+      "weight": 1
+    },
+    {
+      "goldId": "InventoryManagementProcess",
+      "recoveredId": "n24",
+      "weight": 1
+    },
+    {
+      "goldId": "TransportationService",
+      "recoveredId": "n19",
+      "weight": 1
+    },
+    {
+      "goldId": "FreightForwardingService",
+      "recoveredId": "n21",
       "weight": 1
     }
   ],

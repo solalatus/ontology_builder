@@ -252,11 +252,6 @@ relationships:
     to: Lender
     meaning: null
     aliases: []
-  - name: hasSubFacility
-    from: CreditFacility
-    to: CreditFacility
-    meaning: null
-    aliases: []
   - name: isSecuredByAgreement
     from: Collateral
     to: SecurityAgreement

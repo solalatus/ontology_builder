@@ -115,11 +115,6 @@ relationships:
     to: MaintenanceActivity
     meaning: The maintenance process includes that maintenance activity as one of its tasks.
     aliases: []
-  - name: qualifiedPersonFor
-    from: MaintenanceActivity
-    to: QualifiedMaintenancePerson
-    meaning: REMOVE
-    aliases: []
   - name: assignedTo
     from: MaintenanceActivity
     to: QualifiedMaintenancePerson
@@ -134,11 +129,6 @@ relationships:
     from: QualifiedMaintenancePerson
     to: MaintenanceActivity
     meaning: The qualified maintenance person is cleared to perform that maintenance activity.
-    aliases: []
-  - name: isDescribedBy
-    from: MaintenanceProcess
-    to: MaintenanceWorkOrder
-    meaning: REMOVE
     aliases: []
 rules:
   canClassifyItemAsFailed:
