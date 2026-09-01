@@ -525,11 +525,6 @@
       "matchedPropertyName": "result"
     },
     {
-      "goldId": "RegulatoryNotification.dueAt",
-      "hostNodeId": "n23",
-      "matchedPropertyName": "dueTime"
-    },
-    {
       "goldId": "RegulatoryNotification.submittedAt",
       "hostNodeId": "n23",
       "matchedPropertyName": "submittedAt"
@@ -553,6 +548,11 @@
       "goldId": "CorrectiveAction.dueDate",
       "hostNodeId": "n26",
       "matchedPropertyName": "dueDate"
+    },
+    {
+      "goldId": "RegulatoryNotification.dueAt",
+      "hostNodeId": "n23",
+      "matchedPropertyName": "dueTime"
     }
   ]
 }

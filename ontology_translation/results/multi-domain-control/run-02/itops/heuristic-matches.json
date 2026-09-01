@@ -348,11 +348,6 @@
       "direction": "forward"
     },
     {
-      "goldId": "rel_97",
-      "edgeId": "e23",
-      "direction": "forward"
-    },
-    {
       "goldId": "rel_102",
       "edgeId": "e15",
       "direction": "forward"
@@ -381,6 +376,11 @@
       "goldId": "rel_119",
       "edgeId": "e26",
       "direction": "forward"
+    },
+    {
+      "goldId": "rel_97",
+      "edgeId": "e23",
+      "direction": "forward"
     }
   ],
   "properties": [
@@ -400,19 +400,9 @@
       "matchedPropertyName": "criticalProvider"
     },
     {
-      "goldId": "Regulator.name",
-      "hostNodeId": "n33",
-      "matchedPropertyName": "regulatorName"
-    },
-    {
       "goldId": "Stakeholder.name",
       "hostNodeId": "n16",
       "matchedPropertyName": "name"
-    },
-    {
-      "goldId": "BusinessService.name",
-      "hostNodeId": "n2",
-      "matchedPropertyName": "serviceName"
     },
     {
       "goldId": "BusinessService.criticalityTier",
@@ -423,11 +413,6 @@
       "goldId": "BusinessService.healthState",
       "hostNodeId": "n2",
       "matchedPropertyName": "healthState"
-    },
-    {
-      "goldId": "ItService.name",
-      "hostNodeId": "n3",
-      "matchedPropertyName": "serviceName"
     },
     {
       "goldId": "ItService.criticalityTier",
@@ -443,11 +428,6 @@
       "goldId": "ConfigurationItem.name",
       "hostNodeId": "n5",
       "matchedPropertyName": "name"
-    },
-    {
-      "goldId": "BackupSet.status",
-      "hostNodeId": "n20",
-      "matchedPropertyName": "backupStatus"
     },
     {
       "goldId": "BackupSet.lastSuccessfulBackup",
@@ -485,21 +465,6 @@
       "matchedPropertyName": "summary"
     },
     {
-      "goldId": "Incident.detectedAt",
-      "hostNodeId": "n1",
-      "matchedPropertyName": "detectedTime"
-    },
-    {
-      "goldId": "Incident.resolvedAt",
-      "hostNodeId": "n1",
-      "matchedPropertyName": "resolvedTime"
-    },
-    {
-      "goldId": "Incident.closedAt",
-      "hostNodeId": "n1",
-      "matchedPropertyName": "closedTime"
-    },
-    {
       "goldId": "Incident.status",
       "hostNodeId": "n1",
       "matchedPropertyName": "status"
@@ -518,11 +483,6 @@
       "goldId": "Incident.detectionSource",
       "hostNodeId": "n1",
       "matchedPropertyName": "detectionSource"
-    },
-    {
-      "goldId": "Incident.timeToAcknowledge",
-      "hostNodeId": "n1",
-      "matchedPropertyName": "acknowledgementTime"
     },
     {
       "goldId": "Problem.summary",
@@ -565,16 +525,6 @@
       "matchedPropertyName": "status"
     },
     {
-      "goldId": "Deployment.startedAt",
-      "hostNodeId": "n10",
-      "matchedPropertyName": "startedTime"
-    },
-    {
-      "goldId": "Deployment.completedAt",
-      "hostNodeId": "n10",
-      "matchedPropertyName": "completedTime"
-    },
-    {
       "goldId": "RecoveryPlan.recoveryTimeObjective",
       "hostNodeId": "n19",
       "matchedPropertyName": "recoveryTimeObjective"
@@ -585,19 +535,9 @@
       "matchedPropertyName": "recoveryPointObjective"
     },
     {
-      "goldId": "EvidenceItem.collectedAt",
-      "hostNodeId": "n23",
-      "matchedPropertyName": "collectedTime"
-    },
-    {
       "goldId": "EvidenceItem.integrityStatus",
       "hostNodeId": "n23",
       "matchedPropertyName": "integrityStatus"
-    },
-    {
-      "goldId": "Communication.sentAt",
-      "hostNodeId": "n24",
-      "matchedPropertyName": "sentTime"
     },
     {
       "goldId": "Communication.audience",
@@ -613,6 +553,71 @@
       "goldId": "Communication.messageSummary",
       "hostNodeId": "n24",
       "matchedPropertyName": "messageSummary"
+    },
+    {
+      "goldId": "RegulatoryNotification.status",
+      "hostNodeId": "n22",
+      "matchedPropertyName": "status"
+    },
+    {
+      "goldId": "Regulator.name",
+      "hostNodeId": "n33",
+      "matchedPropertyName": "regulatorName"
+    },
+    {
+      "goldId": "BusinessService.name",
+      "hostNodeId": "n2",
+      "matchedPropertyName": "serviceName"
+    },
+    {
+      "goldId": "ItService.name",
+      "hostNodeId": "n3",
+      "matchedPropertyName": "serviceName"
+    },
+    {
+      "goldId": "BackupSet.status",
+      "hostNodeId": "n20",
+      "matchedPropertyName": "backupStatus"
+    },
+    {
+      "goldId": "Incident.detectedAt",
+      "hostNodeId": "n1",
+      "matchedPropertyName": "detectedTime"
+    },
+    {
+      "goldId": "Incident.resolvedAt",
+      "hostNodeId": "n1",
+      "matchedPropertyName": "resolvedTime"
+    },
+    {
+      "goldId": "Incident.closedAt",
+      "hostNodeId": "n1",
+      "matchedPropertyName": "closedTime"
+    },
+    {
+      "goldId": "Incident.timeToAcknowledge",
+      "hostNodeId": "n1",
+      "matchedPropertyName": "acknowledgementTime"
+    },
+    {
+      "goldId": "Deployment.startedAt",
+      "hostNodeId": "n10",
+      "matchedPropertyName": "startedTime"
+    },
+    {
+      "goldId": "Deployment.completedAt",
+      "hostNodeId": "n10",
+      "matchedPropertyName": "completedTime"
+    },
+    {
+      "goldId": "EvidenceItem.collectedAt",
+      "hostNodeId": "n23",
+      "matchedPropertyName": "collectedTime"
+    },
+    {
+      "goldId": "Communication.sentAt",
+      "hostNodeId": "n24",
+      "matchedPropertyName": "sentTime"
     },
     {
       "goldId": "MaterialityAssessment.assessedAt",
@@ -633,11 +638,6 @@
       "goldId": "RegulatoryNotification.submittedAt",
       "hostNodeId": "n22",
       "matchedPropertyName": "submittedTime"
-    },
-    {
-      "goldId": "RegulatoryNotification.status",
-      "hostNodeId": "n22",
-      "matchedPropertyName": "status"
     }
   ]
 }

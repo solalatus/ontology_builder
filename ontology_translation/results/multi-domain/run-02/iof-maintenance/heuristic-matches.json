@@ -48,18 +48,8 @@
   ],
   "relationships": [
     {
-      "goldId": "rel_0",
-      "edgeId": "e4",
-      "direction": "forward"
-    },
-    {
       "goldId": "rel_1",
       "edgeId": "e5",
-      "direction": "forward"
-    },
-    {
-      "goldId": "rel_2",
-      "edgeId": "e6",
       "direction": "forward"
     },
     {
@@ -75,6 +65,16 @@
     {
       "goldId": "rel_6",
       "edgeId": "e10",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_0",
+      "edgeId": "e4",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_2",
+      "edgeId": "e6",
       "direction": "forward"
     }
   ],

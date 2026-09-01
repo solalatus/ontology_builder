@@ -138,6 +138,36 @@
   ],
   "relationships": [
     {
+      "goldId": "rel_26",
+      "edgeId": "e1",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_27",
+      "edgeId": "e23",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_28",
+      "edgeId": "e22",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_29",
+      "edgeId": "e24",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_30",
+      "edgeId": "e15",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_31",
+      "edgeId": "e3",
+      "direction": "forward"
+    },
+    {
       "goldId": "rel_6",
       "edgeId": "e6",
       "direction": "forward"
@@ -170,36 +200,6 @@
     {
       "goldId": "rel_15",
       "edgeId": "e14",
-      "direction": "forward"
-    },
-    {
-      "goldId": "rel_26",
-      "edgeId": "e1",
-      "direction": "forward"
-    },
-    {
-      "goldId": "rel_27",
-      "edgeId": "e23",
-      "direction": "forward"
-    },
-    {
-      "goldId": "rel_28",
-      "edgeId": "e22",
-      "direction": "forward"
-    },
-    {
-      "goldId": "rel_29",
-      "edgeId": "e24",
-      "direction": "forward"
-    },
-    {
-      "goldId": "rel_30",
-      "edgeId": "e15",
-      "direction": "forward"
-    },
-    {
-      "goldId": "rel_31",
-      "edgeId": "e3",
       "direction": "forward"
     },
     {
