@@ -1,0 +1,1292 @@
+[
+  {
+    "severity": "advisory",
+    "kind": "class",
+    "identity": "Incident",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty"
+  },
+  {
+    "severity": "advisory",
+    "kind": "class",
+    "identity": "BusinessService",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty"
+  },
+  {
+    "severity": "advisory",
+    "kind": "class",
+    "identity": "ITService",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty"
+  },
+  {
+    "severity": "advisory",
+    "kind": "class",
+    "identity": "CustomerChannel",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty"
+  },
+  {
+    "severity": "advisory",
+    "kind": "class",
+    "identity": "ConfigurationItem",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty"
+  },
+  {
+    "severity": "advisory",
+    "kind": "class",
+    "identity": "ThirdPartyService",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty"
+  },
+  {
+    "severity": "advisory",
+    "kind": "class",
+    "identity": "Alert",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty"
+  },
+  {
+    "severity": "advisory",
+    "kind": "class",
+    "identity": "Event",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty"
+  },
+  {
+    "severity": "advisory",
+    "kind": "class",
+    "identity": "ServiceOwner",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty"
+  },
+  {
+    "severity": "advisory",
+    "kind": "class",
+    "identity": "BusinessOwner",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty"
+  },
+  {
+    "severity": "advisory",
+    "kind": "class",
+    "identity": "ResolverGroup",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty"
+  },
+  {
+    "severity": "advisory",
+    "kind": "class",
+    "identity": "OnCallEngineer",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty"
+  },
+  {
+    "severity": "advisory",
+    "kind": "class",
+    "identity": "Runbook",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty"
+  },
+  {
+    "severity": "advisory",
+    "kind": "class",
+    "identity": "Workaround",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty"
+  },
+  {
+    "severity": "advisory",
+    "kind": "class",
+    "identity": "BackupSet",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty"
+  },
+  {
+    "severity": "advisory",
+    "kind": "class",
+    "identity": "RecoveryPlan",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty"
+  },
+  {
+    "severity": "advisory",
+    "kind": "class",
+    "identity": "Change",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty"
+  },
+  {
+    "severity": "advisory",
+    "kind": "class",
+    "identity": "MaterialityAssessment",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty"
+  },
+  {
+    "severity": "advisory",
+    "kind": "class",
+    "identity": "RegulatoryNotification",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty"
+  },
+  {
+    "severity": "advisory",
+    "kind": "class",
+    "identity": "EvidenceItem",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty"
+  },
+  {
+    "severity": "advisory",
+    "kind": "class",
+    "identity": "Communication",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty"
+  },
+  {
+    "severity": "advisory",
+    "kind": "class",
+    "identity": "Deployment",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty"
+  },
+  {
+    "severity": "advisory",
+    "kind": "class",
+    "identity": "CorrectiveAction",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty"
+  },
+  {
+    "severity": "advisory",
+    "kind": "class",
+    "identity": "KnownError",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty"
+  },
+  {
+    "severity": "advisory",
+    "kind": "class",
+    "identity": "ApplicationOwner",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty"
+  },
+  {
+    "severity": "advisory",
+    "kind": "class",
+    "identity": "TechnicalOwner",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty"
+  },
+  {
+    "severity": "advisory",
+    "kind": "class",
+    "identity": "IncidentCommander",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty"
+  },
+  {
+    "severity": "advisory",
+    "kind": "class",
+    "identity": "ServiceDesk",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty"
+  },
+  {
+    "severity": "advisory",
+    "kind": "class",
+    "identity": "SecurityOperationsCentre",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty"
+  },
+  {
+    "severity": "advisory",
+    "kind": "class",
+    "identity": "NetworkOperationsCentre",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty"
+  },
+  {
+    "severity": "advisory",
+    "kind": "class",
+    "identity": "IncidentResponseTeam",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty"
+  },
+  {
+    "severity": "advisory",
+    "kind": "class",
+    "identity": "Environment",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty"
+  },
+  {
+    "severity": "advisory",
+    "kind": "class",
+    "identity": "CybersecurityIncident",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty"
+  },
+  {
+    "severity": "advisory",
+    "kind": "class",
+    "identity": "MajorIncident",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty"
+  },
+  {
+    "severity": "advisory",
+    "kind": "class",
+    "identity": "Application",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty"
+  },
+  {
+    "severity": "advisory",
+    "kind": "class",
+    "identity": "SecurityEvent",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty"
+  },
+  {
+    "severity": "advisory",
+    "kind": "class",
+    "identity": "MonitoringTool",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty"
+  },
+  {
+    "severity": "advisory",
+    "kind": "class",
+    "identity": "Problem",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty"
+  },
+  {
+    "severity": "advisory",
+    "kind": "class",
+    "identity": "PostIncidentReview",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty"
+  },
+  {
+    "severity": "advisory",
+    "kind": "class",
+    "identity": "OrganizationalUnit",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty"
+  },
+  {
+    "severity": "advisory",
+    "kind": "class",
+    "identity": "Release",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty"
+  },
+  {
+    "severity": "advisory",
+    "kind": "class",
+    "identity": "Stakeholder",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty"
+  },
+  {
+    "severity": "advisory",
+    "kind": "class",
+    "identity": "EmergencyChange",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty"
+  },
+  {
+    "severity": "advisory",
+    "kind": "class",
+    "identity": "IntegrationInterface",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty"
+  },
+  {
+    "severity": "advisory",
+    "kind": "class",
+    "identity": "BusinessProcess",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty"
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "impacts (Incident → BusinessService)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "impacts",
+      "from": "Incident",
+      "to": "BusinessService",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "impacts (Incident → ITService)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "impacts",
+      "from": "Incident",
+      "to": "ITService",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "deliveredThrough (BusinessService → CustomerChannel)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "deliveredThrough",
+      "from": "BusinessService",
+      "to": "CustomerChannel",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "runsOn (ITService → ConfigurationItem)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "runsOn",
+      "from": "ITService",
+      "to": "ConfigurationItem",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "dependsOn (ITService → ThirdPartyService)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "dependsOn",
+      "from": "ITService",
+      "to": "ThirdPartyService",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "deployedIn (ITService → Environment)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "deployedIn",
+      "from": "ITService",
+      "to": "Environment",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "belongsTo (ConfigurationItem → Environment)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "belongsTo",
+      "from": "ConfigurationItem",
+      "to": "Environment",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "triggeredBy (Incident → Alert)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "triggeredBy",
+      "from": "Incident",
+      "to": "Alert",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "correlatedFrom (Incident → Event)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "correlatedFrom",
+      "from": "Incident",
+      "to": "Event",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "indicates (Alert → Event)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "indicates",
+      "from": "Alert",
+      "to": "Event",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "owns (ServiceOwner → ITService)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "owns",
+      "from": "ServiceOwner",
+      "to": "ITService",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "isAccountableFor (BusinessOwner → BusinessService)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "isAccountableFor",
+      "from": "BusinessOwner",
+      "to": "BusinessService",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "assignedTo (Incident → ResolverGroup)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "assignedTo",
+      "from": "Incident",
+      "to": "ResolverGroup",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "handledBy (Incident → OnCallEngineer)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "handledBy",
+      "from": "Incident",
+      "to": "OnCallEngineer",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "memberOf (OnCallEngineer → ResolverGroup)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "memberOf",
+      "from": "OnCallEngineer",
+      "to": "ResolverGroup",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "supports (ResolverGroup → ITService)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "supports",
+      "from": "ResolverGroup",
+      "to": "ITService",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "supports (ResolverGroup → ConfigurationItem)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "supports",
+      "from": "ResolverGroup",
+      "to": "ConfigurationItem",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "owns (ApplicationOwner → Application)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "owns",
+      "from": "ApplicationOwner",
+      "to": "Application",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "owns (TechnicalOwner → ConfigurationItem)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "owns",
+      "from": "TechnicalOwner",
+      "to": "ConfigurationItem",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "records (ServiceDesk → Incident)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "records",
+      "from": "ServiceDesk",
+      "to": "Incident",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "commands (IncidentCommander → MajorIncident)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "commands",
+      "from": "IncidentCommander",
+      "to": "MajorIncident",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "isCoordinatedBy (Incident → IncidentCommander)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "isCoordinatedBy",
+      "from": "Incident",
+      "to": "IncidentCommander",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "memberOf (IncidentCommander → IncidentResponseTeam)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "memberOf",
+      "from": "IncidentCommander",
+      "to": "IncidentResponseTeam",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "coordinates (IncidentResponseTeam → MajorIncident)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "coordinates",
+      "from": "IncidentResponseTeam",
+      "to": "MajorIncident",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "monitors (SecurityOperationsCentre → SecurityEvent)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "monitors",
+      "from": "SecurityOperationsCentre",
+      "to": "SecurityEvent",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "operates (NetworkOperationsCentre → MonitoringTool)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "operates",
+      "from": "NetworkOperationsCentre",
+      "to": "MonitoringTool",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "isHandledWith (Incident → Runbook)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "isHandledWith",
+      "from": "Incident",
+      "to": "Runbook",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "has (KnownError → Workaround)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "has",
+      "from": "KnownError",
+      "to": "Workaround",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "isDocumentedIn (Workaround → Runbook)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "isDocumentedIn",
+      "from": "Workaround",
+      "to": "Runbook",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "recovers (RecoveryPlan → ITService)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "recovers",
+      "from": "RecoveryPlan",
+      "to": "ITService",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "isRecoveredWith (Incident → RecoveryPlan)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "isRecoveredWith",
+      "from": "Incident",
+      "to": "RecoveryPlan",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "protects (BackupSet → ConfigurationItem)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "protects",
+      "from": "BackupSet",
+      "to": "ConfigurationItem",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "isResolvedBy (Incident → Change)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "isResolvedBy",
+      "from": "Incident",
+      "to": "Change",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "isEvaluatedBy (Incident → MaterialityAssessment)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "isEvaluatedBy",
+      "from": "Incident",
+      "to": "MaterialityAssessment",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "reports (RegulatoryNotification → Incident)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "reports",
+      "from": "RegulatoryNotification",
+      "to": "Incident",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "isSupportedBy (Incident → EvidenceItem)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "isSupportedBy",
+      "from": "Incident",
+      "to": "EvidenceItem",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "isAbout (Communication → Incident)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "isAbout",
+      "from": "Communication",
+      "to": "Incident",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "produces (PostIncidentReview → CorrectiveAction)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "produces",
+      "from": "PostIncidentReview",
+      "to": "CorrectiveAction",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "isOwnedBy (CorrectiveAction → OrganizationalUnit)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "isOwnedBy",
+      "from": "CorrectiveAction",
+      "to": "OrganizationalUnit",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "isImplementedBy (CorrectiveAction → Change)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "isImplementedBy",
+      "from": "CorrectiveAction",
+      "to": "Change",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "isDocumentedBy (Problem → KnownError)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "isDocumentedBy",
+      "from": "Problem",
+      "to": "KnownError",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "affects (KnownError → ConfigurationItem)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "affects",
+      "from": "KnownError",
+      "to": "ConfigurationItem",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "isLinkedTo (Incident → Problem)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "isLinkedTo",
+      "from": "Incident",
+      "to": "Problem",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "isReviewedIn (Incident → PostIncidentReview)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "isReviewedIn",
+      "from": "Incident",
+      "to": "PostIncidentReview",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "isDeliveredBy (Release → Deployment)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "isDeliveredBy",
+      "from": "Release",
+      "to": "Deployment",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "deploys (Deployment → Application)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "deploys",
+      "from": "Deployment",
+      "to": "Application",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "targets (Deployment → Environment)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "targets",
+      "from": "Deployment",
+      "to": "Environment",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "isImplementedBy (ITService → Application)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "isImplementedBy",
+      "from": "ITService",
+      "to": "Application",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "isDerivedFrom (CybersecurityIncident → SecurityEvent)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "isDerivedFrom",
+      "from": "CybersecurityIncident",
+      "to": "SecurityEvent",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "refersToIncident (MajorIncident → Incident)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "refersToIncident",
+      "from": "MajorIncident",
+      "to": "Incident",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "refersToIncident (CybersecurityIncident → Incident)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "refersToIncident",
+      "from": "CybersecurityIncident",
+      "to": "Incident",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "isAddressedTo (Communication → Stakeholder)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "isAddressedTo",
+      "from": "Communication",
+      "to": "Stakeholder",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "notifies (Incident → Stakeholder)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "notifies",
+      "from": "Incident",
+      "to": "Stakeholder",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "dependsOn (BusinessService → ITService)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "dependsOn",
+      "from": "BusinessService",
+      "to": "ITService",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "triggers (MaterialityAssessment → RegulatoryNotification)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "triggers",
+      "from": "MaterialityAssessment",
+      "to": "RegulatoryNotification",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "isImplementedBy (Change → Release)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "isImplementedBy",
+      "from": "Change",
+      "to": "Release",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "usedBy (BackupSet → RecoveryPlan)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "usedBy",
+      "from": "BackupSet",
+      "to": "RecoveryPlan",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "exposes (ITService → IntegrationInterface)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "exposes",
+      "from": "ITService",
+      "to": "IntegrationInterface",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "consumes (Application → IntegrationInterface)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "consumes",
+      "from": "Application",
+      "to": "IntegrationInterface",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "supports (BusinessService → BusinessProcess)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "supports",
+      "from": "BusinessService",
+      "to": "BusinessProcess",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "affects (Incident → ConfigurationItem)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "affects",
+      "from": "Incident",
+      "to": "ConfigurationItem",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "respondsTo (EmergencyChange → Incident)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "respondsTo",
+      "from": "EmergencyChange",
+      "to": "Incident",
+      "meaning": null,
+      "aliases": []
+    }
+  }
+]

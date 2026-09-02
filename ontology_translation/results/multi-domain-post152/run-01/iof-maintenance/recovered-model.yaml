@@ -1,0 +1,261 @@
+competency_questions:
+  - id: cq1
+    text: What maintenance state is an asset in right now?
+  - id: cq2
+    text: Which assets are currently in each maintenance state?
+  - id: cq3
+    text: What failure event put an asset into a failed state?
+  - id: cq4
+    text: "For a given failure event, which failed states did it cause?"
+  - id: cq5
+    text: What maintenance process is a work order describing?
+  - id: cq6
+    text: What maintenance strategy is a maintenance process carried out under?
+  - id: cq7
+    text: What maintenance activities make up a maintenance process?
+  - id: cq8
+    text: Does a maintenance process include supporting activities?
+  - id: cq9
+    text: What qualification is required for a maintenance activity?
+  - id: cq10
+    text: Which qualified maintenance person is qualified to perform a maintenance activity?
+  - id: cq11
+    text: What required function is tied to a failure event?
+  - id: cq12
+    text: What required function is tied to the process an asset carries out when functioning?
+  - id: cq13
+    text: What failure effects came out of a failure event?
+  - id: cq14
+    text: What failure mode code describes a known undesirable disposition?
+classes:
+  WorkOrder:
+    meaning: An information record that describes a maintenance process.
+    aliases:
+      - maintenance work order
+      - MWO
+    properties:
+      finalCost:
+        type: number
+      performedTaskInformation:
+        type: text
+  MaintenanceActivity:
+    meaning: A single maintenance task carried out to retain or restore the function of a maintainable asset.
+    aliases: []
+    properties: {}
+  MaintenanceProcess:
+    meaning: The work carried out to retain or restore the function of a maintainable asset under a maintenance strategy.
+    aliases: []
+    properties: {}
+  Asset:
+    meaning: "A maintainable physical thing whose function, condition, failure, and maintenance are tracked."
+    aliases: []
+    properties: {}
+  FailureEvent:
+    meaning: An event that causes an asset to lose its ability to perform a required function.
+    aliases:
+      - failure
+    properties: {}
+  QualificationSpecification:
+    meaning: A requirement specification that says a person must have an assessed skill for a specific maintenance task.
+    aliases: []
+    properties: {}
+  QualifiedMaintenancePerson:
+    meaning: A person who is qualified to perform a specified maintenance activity.
+    aliases: []
+    properties: {}
+  MaintenanceStrategy:
+    meaning: The maintenance approach used to help an asset achieve the intended maintenance objectives.
+    aliases: []
+    properties: {}
+  SupportingMaintenanceActivity:
+    meaning: A single action that supports execution of a maintenance process without being the main maintenance task itself.
+    aliases: []
+    properties: {}
+  MaintenanceState:
+    meaning: "The condition an asset is in while its functions and capabilities, or the level at which they are being delivered, remain unchanged."
+    aliases: []
+    properties:
+      stateCategory:
+        type: text
+        allowed:
+          - operating
+          - degraded
+          - failed
+  FailedState:
+    meaning: A state in which an asset cannot perform a required function because of a failure event.
+    aliases: []
+    properties: {}
+  RequiredFunction:
+    meaning: The function a maintainable asset is expected to perform because it is necessary for the job the asset is there to do.
+    aliases:
+      - primary function
+    properties: {}
+  FailureEffect:
+    meaning: "The consequence of a failure event, whether inside the failed asset or beyond it."
+    aliases: []
+    properties: {}
+  FailureModeCode:
+    meaning: A coded information item that describes an undesirable disposition.
+    aliases: []
+    properties:
+      codeValue:
+        type: text
+  FunctioningProcess:
+    meaning: The actual process in which an asset performs its required function.
+    aliases: []
+    properties: {}
+  UndesirableDisposition:
+    meaning: A disposition of an asset to undergo a process that leads to an unwanted outcome.
+    aliases:
+      - failure mode
+    properties: {}
+relationships:
+  - name: hasMaintenanceState
+    from: Asset
+    to: MaintenanceState
+    meaning: The asset is currently in that maintenance state.
+    aliases: []
+  - name: initiates
+    from: FailureEvent
+    to: FailedState
+    meaning: The failure event begins the failed state.
+    aliases: []
+  - name: describes
+    from: WorkOrder
+    to: MaintenanceProcess
+    meaning: The work order record describes the maintenance process being carried out.
+    aliases: []
+  - name: governedByStrategy
+    from: MaintenanceProcess
+    to: MaintenanceStrategy
+    meaning: The maintenance process is carried out under that maintenance strategy.
+    aliases:
+      - prescribed by
+  - name: hasActivity
+    from: MaintenanceProcess
+    to: MaintenanceActivity
+    meaning: The maintenance process includes that maintenance activity as one of its tasks.
+    aliases: []
+  - name: hasSupportingActivity
+    from: MaintenanceProcess
+    to: SupportingMaintenanceActivity
+    meaning: The maintenance process includes that supporting maintenance activity in carrying out the work.
+    aliases: []
+  - name: requiresQualificationSpecification
+    from: MaintenanceActivity
+    to: QualificationSpecification
+    meaning: The maintenance activity requires that qualification specification to be satisfied before the work is assigned.
+    aliases:
+      - prescribed by
+  - name: qualifiedFor
+    from: QualifiedMaintenancePerson
+    to: MaintenanceActivity
+    meaning: The person is qualified to perform that maintenance activity.
+    aliases: []
+  - name: isAssociatedWith
+    from: FailureEvent
+    to: RequiredFunction
+    meaning: The failure event is tied to the required function that was lost or affected.
+    aliases: []
+  - name: realizes
+    from: FunctioningProcess
+    to: RequiredFunction
+    meaning: The functioning process is the actual doing that carries out the required function.
+    aliases: []
+  - name: hasFailureEffect
+    from: FailureEvent
+    to: FailureEffect
+    meaning: The failure event leads to that failure effect as a consequence.
+    aliases: []
+  - name: describes
+    from: FailureModeCode
+    to: UndesirableDisposition
+    meaning: The failure mode code is the shorthand used to describe that undesirable disposition.
+    aliases: []
+  - name: hasFailedState
+    from: Asset
+    to: FailedState
+    meaning: The asset is in that failed state.
+    aliases: []
+  - name: affects
+    from: FailureEvent
+    to: Asset
+    meaning: The failure event happens to and impacts that asset.
+    aliases: []
+  - name: hasRequiredFunction
+    from: Asset
+    to: RequiredFunction
+    meaning: The asset is expected to perform that required function as part of the job it is there to do.
+    aliases: []
+  - name: assignedTo
+    from: MaintenanceActivity
+    to: QualifiedMaintenancePerson
+    meaning: The maintenance activity is assigned to that qualified maintenance person.
+    aliases: []
+rules:
+  canClassifyFailedState:
+    conditions:
+      - a failure event has occurred
+      - the asset cannot perform its required function
+  canStartMaintenanceProcess:
+    conditions:
+      - a maintenance strategy is defined for the maintenance process
+      - a work order describes the maintenance process
+  canAssignQualifiedPerson:
+    conditions:
+      - the maintenance activity requires a qualification specification
+      - the person satisfies the required qualification
+  canCloseMaintenanceWorkOrder:
+    conditions:
+      - the maintenance activities in the maintenance process are completed
+      - performed task information is recorded on the work order
+      - final cost is recorded on the work order
+actions:
+  createMaintenanceWorkOrder:
+    input: WorkOrder
+    preconditions: []
+    effect: Create a maintenance work order for a needed maintenance process.
+    verification: Confirm a work order exists and describes the intended maintenance process.
+  assignQualifiedMaintenancePerson:
+    input: MaintenanceActivity
+    preconditions: []
+    effect: Assign a qualified maintenance person to a maintenance activity.
+    verification: Confirm the assigned person is recorded for the activity and is qualified for it.
+  startMaintenanceProcess:
+    input: MaintenanceProcess
+    preconditions:
+      - canStartMaintenanceProcess
+    effect: Start a maintenance process once it has a defined strategy and a work order describing it.
+    verification: Confirm the maintenance process has active work backing it and assigned activities before treating it as started.
+  closeMaintenanceWorkOrder:
+    input: WorkOrder
+    preconditions:
+      - canCloseMaintenanceWorkOrder
+    effect: "Close the maintenance work order after the work order record is updated to reflect completion of the maintenance process, including the performed task information and final cost."
+    verification: Confirm completed task information and final cost are recorded before the work order is closed.
+  verifyWorkOrderDescribesMaintenanceProcess:
+    input: WorkOrder
+    preconditions: []
+    effect: Verify that a work order describes the maintenance process it is supposed to cover.
+    verification: Confirm the work order maps to the intended maintenance process.
+  verifyAssignedPersonIsQualified:
+    input: MaintenanceActivity
+    preconditions: []
+    effect: Verify that the assigned person is qualified for the maintenance activity.
+    verification: "Confirm the person's qualification satisfies the activity's required qualification."
+  verifyMaintenanceProcessHasActiveWork:
+    input: MaintenanceProcess
+    preconditions: []
+    effect: Verify that a maintenance process has active work backing it and assigned activities before treating it as started.
+    verification: Confirm there is active work backing the process and that activities are assigned.
+  confirmWorkOrderReadyToClose:
+    input: WorkOrder
+    preconditions: []
+    effect: Confirm that completed task information and final cost are recorded before closing the work order.
+    verification: Confirm the completion details and final cost are present on the work order.
+  classifyAssetAsFailed:
+    input: Asset
+    preconditions:
+      - canClassifyFailedState
+    effect: Classify the asset as failed when a failure event has occurred and the asset can no longer do its required job.
+    verification: Confirm the asset is recorded as failed and linked to the failure event.
