@@ -12,6 +12,11 @@ instruction, those only get updated once one full domain passthrough
 (fetch → extract → compile → evaluate → accepted `reference.domain.yaml`)
 succeeds end to end. Until then, this file is the only record.
 
+**`PAPER_NOTES.md`** (same directory) holds short, dated scientific remarks
+— design rationale and open questions meant for the companion paper's own
+Methods/Discussion/Future-Work sections — kept separate from this file's own
+engineering log below.
+
 ---
 
 ## Current State
