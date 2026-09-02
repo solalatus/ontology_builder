@@ -1,0 +1,29 @@
+{
+  "fullDomain": {
+    "classes": [
+      {
+        "goldId": "GeospatialLocation",
+        "recoveredId": "n10"
+      }
+    ],
+    "relationships": [
+      {
+        "goldId": "rel_6",
+        "recoveredId": "e15"
+      }
+    ],
+    "properties": [],
+    "valueFidelity": []
+  },
+  "scoped": {
+    "classes": [],
+    "relationships": [
+      {
+        "goldId": "rel_6",
+        "recoveredId": "e15"
+      }
+    ],
+    "properties": [],
+    "valueFidelity": []
+  }
+}

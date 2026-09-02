@@ -1,0 +1,32 @@
+[
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "groupsIncident (Problem → Incident)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "groupsIncident",
+      "from": "Problem",
+      "to": "Incident",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "documentedBy (Problem → KnownError)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "documentedBy",
+      "from": "Problem",
+      "to": "KnownError",
+      "meaning": null,
+      "aliases": []
+    }
+  }
+]

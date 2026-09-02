@@ -1,0 +1,47 @@
+[
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "hasPart (AirHandler → Humidifier)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "hasPart",
+      "from": "AirHandler",
+      "to": "Humidifier",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "hasPoint (Boiler → WaterTemperatureSensor)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "hasPoint",
+      "from": "Boiler",
+      "to": "WaterTemperatureSensor",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "hasPoint (Chiller → WaterTemperatureSensor)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "hasPoint",
+      "from": "Chiller",
+      "to": "WaterTemperatureSensor",
+      "meaning": null,
+      "aliases": []
+    }
+  }
+]
