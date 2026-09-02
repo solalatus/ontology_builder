@@ -100,8 +100,8 @@ function requestFor(config, model) {
 // for a real multi-turn conversation -- by turn 200 the full transcript
 // resent on every call is tens of thousands of tokens, exactly what this
 // file's own header says can exhaust a minute's TPM budget outright.
-async function requestOnce({ config, model, messages, label, url, headers, includeModelInBody }) {
-  const body = { ...(includeModelInBody ? { model } : {}), messages };
+async function requestOnce({ config, model, messages, label, url, headers, includeModelInBody, extraBody = {} }) {
+  const body = { ...(includeModelInBody ? { model } : {}), messages, ...extraBody };
   const maxAttempts = Math.max(RATE_LIMIT_MAX_ATTEMPTS, TPM_MAX_ATTEMPTS);
   let res, data;
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
@@ -137,12 +137,12 @@ async function requestOnce({ config, model, messages, label, url, headers, inclu
 // call-site-specific retry logic into each one. Still throws if the retry
 // is ALSO empty -- an empty reply twice in a row from the same prompt is a
 // real signal, not noise to paper over indefinitely.
-async function chatRequest({ config, model, messages, label = "call" }) {
+async function chatRequest({ config, model, messages, label = "call", extraBody = {} }) {
   const { url, headers, includeModelInBody } = requestFor(config, model);
-  let { data, choice, reply } = await requestOnce({ config, model, messages, label, url, headers, includeModelInBody });
+  let { data, choice, reply } = await requestOnce({ config, model, messages, label, url, headers, includeModelInBody, extraBody });
   if (!reply.trim()) {
     console.log(`  ${label}: provider returned an empty reply (finish_reason=${choice && choice.finish_reason}), retrying once`);
-    ({ data, choice, reply } = await requestOnce({ config, model, messages, label, url, headers, includeModelInBody }));
+    ({ data, choice, reply } = await requestOnce({ config, model, messages, label, url, headers, includeModelInBody, extraBody }));
   }
   if (!reply.trim()) {
     throw new Error(`${label}: provider returned an empty reply twice in a row (finish_reason=${choice && choice.finish_reason})`);
@@ -157,8 +157,17 @@ async function chatRequest({ config, model, messages, label = "call" }) {
       endpoint: config.provider === "azure" ? config.endpoint : "https://api.openai.com",
       apiVersion: config.apiVersion,
       model,
-      temperature: null, // not sent -- see this file's header
-      maxTokens: null,   // not sent -- reasoning-tier models reject max_tokens
+      // Reported from extraBody, not hardcoded to null, since a caller can
+      // opt in per call (conversationOrchestrator.mjs's classifier does,
+      // having verified live that this specific deployment accepts both --
+      // see that file's own header). Still null/not-sent by default for
+      // every other caller (persona, review, judge): reasoning-tier models
+      // in general can reject a non-default temperature or max_tokens
+      // outright (HTTP 400, confirmed live -- see baseline-one-shot.mjs's
+      // own request-body comment), so nothing here opts in without a
+      // caller-specific, verified reason to.
+      temperature: extraBody.temperature ?? null,
+      maxTokens: null, // not sent -- reasoning-tier models reject max_tokens
     },
   };
 }
@@ -167,16 +176,19 @@ async function chatRequest({ config, model, messages, label = "call" }) {
 // usage block, the model id the provider says answered, and the exact
 // request parameters, so a caller can write all of it into provenance
 // without reconstructing anything.
-export async function chatOnce({ config, model, systemPrompt, userPrompt, label = "call" }) {
-  return chatRequest({ config, model, messages: [{ role: "system", content: systemPrompt }, { role: "user", content: userPrompt }], label });
+export async function chatOnce({ config, model, systemPrompt, userPrompt, label = "call", extraBody = {} }) {
+  return chatRequest({ config, model, messages: [{ role: "system", content: systemPrompt }, { role: "user", content: userPrompt }], label, extraBody });
 }
 
 // The same call, but for a real multi-turn conversation: `messages` is sent
 // exactly as given, roles intact, no flattening. For a caller like
 // personaAgent.mjs whose own `messages` array already accumulates the full
-// system + user/assistant/user/... history turn by turn.
-export async function chatMessagesOnce({ config, model, messages, label = "call" }) {
-  return chatRequest({ config, model, messages, label });
+// system + user/assistant/user/... history turn by turn. `extraBody` is an
+// opt-in escape hatch (e.g. { temperature: 0, response_format: { type:
+// "json_object" } }) for a caller that has verified its own specific model
+// accepts the extra fields -- never sent unless a caller asks for it.
+export async function chatMessagesOnce({ config, model, messages, label = "call", extraBody = {} }) {
+  return chatRequest({ config, model, messages, label, extraBody });
 }
 
 export function sumUsage(usages) {

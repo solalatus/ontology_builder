@@ -153,6 +153,39 @@ export function looksLikeEarlyPhaseCheckpoint(text) {
   return EARLY_PHASE_CHECKPOINT_PATTERNS.some((re) => re.test(text)) || looksLikeNumberedPhaseWithOpenQuestion(text);
 }
 
+// Strongest and cheapest of these filters, added after temperature:0 +
+// forced JSON output (see appearsFinished's own header) proved the
+// classifier's error on this failure class is not sampling noise at all:
+// a live final-gate run had the classifier deterministically agree with
+// itself twice -- {"phase":"10","finished":true} on both the first call
+// AND the independent confirmation call -- on an utterly ordinary Phase-1
+// "here are the reworded competency questions, please confirm, say
+// 'confirmed' to persist them" checkpoint. Averaging two samples of a
+// deterministic (temperature:0) call cannot decorrelate a systematic
+// misjudgment; only a check that never asks the classifier's opinion on
+// this shape of message at all can.
+//
+// The generalization: this project's own three published anchor endings
+// (looksLikeContinuationOffer's own comment below) are flat declarative
+// statements with NO question mark at all, and the production
+// interviewer's own final-checklist instruction (index.html's INTERVIEW
+// PROCESS, Phase 10(b)) explicitly tells it to close by reporting results
+// plainly rather than "leaving the conversation on an unanswered
+// question" -- a genuine final wrap-up, by this project's own design, is
+// never phrased as an open question awaiting a reply. So: ANY message
+// that contains a question mark is never treated as finished, full stop,
+// with no LLM call at all for this specific judgment. This can only
+// delay detecting a genuine completion (the run falls back to the
+// wallclock/turn cap, or a later, truly question-free closing message),
+// never wrongly end one early -- the same "only ever forces NO" trade
+// every filter in this file already makes, just applied unconditionally
+// here because the alternative (trusting the classifier's opinion on a
+// message that is visibly still asking something) has now demonstrably
+// failed twice in the same afternoon, deterministically, not by chance.
+export function looksLikeOpenQuestion(text) {
+  return Boolean(text) && text.includes("?");
+}
+
 // Third deterministic pre-filter, and the same failure class as the first:
 // the LLM classifier being fooled by rhetorical shape. Issue #94's first
 // gpt-5.4 batch found ALL SIX interviews stopped on a message that recapped
@@ -245,6 +278,15 @@ export function looksLikePureAcknowledgment(text) {
 // same question and read the answer exactly the same way. Two copies of this
 // would drift, and a classifier that drifts between arms would put a
 // difference into the comparison that has nothing to do with the treatment.
+// Forced JSON output (see classifyOnce below for where temperature:0 and
+// response_format:{type:"json_object"} actually get sent) -- a structured
+// {"phase":..., "finished":...} object, parsed with JSON.parse, replaces
+// the old "read the last line, check if it starts with yes" free-text
+// convention. That old format was itself a small extra source of
+// unreliability on top of the classifier's own judgment (stray
+// punctuation, an extra reasoning line, "Yes." vs "YES" vs "yes,") --
+// forcing a real JSON object removes that whole layer of parsing
+// ambiguity, independent of the temperature/confirmation fixes below.
 export function classifierMessages(text) {
   return [
     { role: "system", content: "You judge a single message from an AI conducting a domain-modeling interview, which " +
@@ -256,21 +298,29 @@ export function classifierMessages(text) {
               "checklist). It recaps and asks for confirmation at the end of EVERY phase, not just the last " +
               "one -- a recap of phase 1, 2, 3, etc. asking to proceed to the next phase is completely normal " +
               "mid-interview behavior, not completion, and a message that explicitly announces or begins phase " +
-              "9 is not itself the finished interview -- it is one phase away from it. First, on one line, name " +
-              "which phase (0-10) this message's content most resembles, or say 'final wrap-up' if it's phase " +
-              "10 or equivalent. Then, on the next line by itself, answer with exactly one word, YES or NO: " +
-              "does this specific message indicate the *entire* 11-phase interview is finished (this is the " +
+              "9 is not itself the finished interview -- it is one phase away from it. Respond with ONLY a JSON " +
+              "object of exactly this shape: {\"phase\": <string -- which phase, 0-10, this message's content " +
+              "most resembles, or \"final wrap-up\" if it's phase 10 or equivalent>, \"finished\": <boolean -- " +
+              "true only if this specific message indicates the *entire* 11-phase interview is finished (the " +
               "phase-10-equivalent final wrap-up, referencing a completed model as a whole, not just one " +
-              "earlier phase's recap)? Default to NO whenever the message reads like an earlier phase's " +
-              "checkpoint -- including phase 9's own narrow questions -- rather than a true final summary." },
+              "earlier phase's recap), false whenever the message reads like an earlier phase's checkpoint -- " +
+              "including phase 9's own narrow questions -- rather than a true final summary>}. No text outside " +
+              "the JSON object." },
     { role: "user", content: text },
   ];
 }
 
-// The model answers on two lines: a phase name, then YES or NO alone.
+// Strict JSON parse of classifierMessages' own required shape -- a
+// malformed or unparseable reply defaults to "not finished" (false), the
+// same "only ever forces NO" rule as every other fallback in this file,
+// never a thrown error that could take the run down with it.
 export function classifierVerdict(answer) {
-  const lines = String(answer || "").trim().split("\n").map((l) => l.trim()).filter(Boolean);
-  return /^\s*yes/i.test(lines[lines.length - 1] || "");
+  try {
+    const parsed = JSON.parse(String(answer || "").trim());
+    return parsed && parsed.finished === true;
+  } catch (err) {
+    return false;
+  }
 }
 
 // One real classifier call, either through the injected chat() (the Azure
@@ -278,6 +328,19 @@ export function classifierVerdict(answer) {
 // verdict, or null if the call itself failed (network/HTTP/parse error) --
 // null is distinct from false so the caller can log/handle a failure
 // differently from a clean "no".
+//
+// temperature:0 + response_format:{type:"json_object"} verified live
+// against this project's own current Azure deployment (gpt-5.4, a
+// reasoning-tier model) before being sent here: both a bare 200 with a
+// real JSON body, not the HTTP 400 this file's history documents other
+// reasoning-tier parameters (max_tokens) getting rejected with elsewhere.
+// Reduces, but does not by itself eliminate, the sampling variance
+// appearsFinished's own header describes -- kept alongside the
+// independent-confirmation check there, not instead of it, since a
+// different/future model backing this same call is not guaranteed to
+// treat temperature:0 as fully deterministic either.
+const CLASSIFIER_EXTRA_BODY = { temperature: 0, response_format: { type: "json_object" } };
+
 async function classifyOnce(text, { apiKey, model, chat }) {
   if (chat) {
     try {
@@ -301,6 +364,7 @@ async function classifyOnce(text, { apiKey, model, chat }) {
         body: JSON.stringify({
           model,
           messages: classifierMessages(text),
+          ...CLASSIFIER_EXTRA_BODY,
         }),
       });
       data = await res.json();
@@ -320,6 +384,7 @@ async function classifyOnce(text, { apiKey, model, chat }) {
 }
 
 export async function appearsFinished(text, { apiKey, model, chat = null }) {
+  if (looksLikeOpenQuestion(text)) return false;
   if (looksLikeEarlyPhaseCheckpoint(text)) return false;
   if (looksLikeContinuationOffer(text)) return false;
   // Same injection point as personaAgent's: issue #85 runs against Azure,
@@ -683,7 +748,16 @@ export async function runOntologyRecoveryConversation({
     }
 
     if (Date.now() - startedAt > wallClockMs) { stoppedReason = "wallclock_timeout"; break; }
-    if (await appearsFinished(appText, { apiKey, model: classifierModel, chat: chat ? (m) => chat(m, classifierModel) : null })) {
+    if (await appearsFinished(appText, {
+      apiKey, model: classifierModel,
+      // temperature:0 + forced JSON output (CLASSIFIER_EXTRA_BODY, see
+      // classifyOnce's own header): verified live against this project's
+      // own current Azure deployment before being enabled here -- a caller
+      // wiring in a different/reasoning-tier model that rejects these must
+      // verify its own model accepts them first, the same way this one was
+      // verified, rather than assuming it from this comment.
+      chat: chat ? (m) => chat(m, classifierModel, CLASSIFIER_EXTRA_BODY) : null,
+    })) {
       stoppedReason = "app_agent_appears_finished";
       break;
     }

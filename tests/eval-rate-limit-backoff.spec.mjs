@@ -75,7 +75,7 @@ test("appearsFinished retries a transient rate limit and succeeds once it recove
   await withMockedFetch(
     [
       { status: 429, body: { error: { message: "Rate limit reached", code: "rate_limit_exceeded" } } },
-      { status: 200, body: { choices: [{ message: { role: "assistant", content: "phase 10 / final wrap-up\nYES" } }] } },
+      { status: 200, body: { choices: [{ message: { role: "assistant", content: "{\"phase\":\"final wrap-up\",\"finished\":true}" } }] } },
     ],
     async (calls) => {
       const result = await appearsFinished("The ontology interview is now complete.", { apiKey: "sk-test", model: "gpt-test" });
@@ -97,8 +97,8 @@ test("appearsFinished retries a transient rate limit and succeeds once it recove
 test("appearsFinished does not trust a single YES -- a disagreeing confirmation call keeps the run going", async () => {
   await withMockedFetch(
     [
-      { status: 200, body: { choices: [{ message: { role: "assistant", content: "phase 1\nYES" } }] } },
-      { status: 200, body: { choices: [{ message: { role: "assistant", content: "phase 1\nNO" } }] } },
+      { status: 200, body: { choices: [{ message: { role: "assistant", content: "{\"phase\":\"1\",\"finished\":true}" } }] } },
+      { status: 200, body: { choices: [{ message: { role: "assistant", content: "{\"phase\":\"1\",\"finished\":false}" } }] } },
     ],
     async (calls) => {
       const result = await appearsFinished("Good start. Please confirm this wording keeps your intent.", { apiKey: "sk-test", model: "gpt-test" });
