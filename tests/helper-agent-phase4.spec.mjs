@@ -1,6 +1,9 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import fs from "node:fs";
+import yaml from "js-yaml";
 import { withPage } from "./lib/page.mjs";
+import { listAvailableDomains, resolveDomainYamlPath } from "./evals/lib/groundTruthModel.mjs";
 
 // Helper Agent — Phase 4: baked-in knowledge (AGENT_KNOWLEDGE) + the
 // INTERVIEW PROCESS system-prompt section. buildAgentSystemPrompt() has no
@@ -467,4 +470,84 @@ test("the connected panel's static note reflects that tool-calling has shipped, 
     assert.doesNotMatch(noteHu, /egyelőre csak beszélget/);
     assert.match(noteHu, /alkalmazhat/);
   }, { lang: "en" });
+});
+
+// Issue #144's own standing mechanical overlap-check test: AGENT_KNOWLEDGE's
+// baked howto's illustrative example used to be a near-mirror of real
+// vocabulary in 2 of the 5 benchmark domains (Supplier/Vendor, then --
+// found only while fixing that -- an exact PurchaseOrder class-name match
+// too). The existing blocklist test above only scans AGENT_SYSTEM_PROMPT_
+// BASE's own GROUND RULES->SCOPE slice; it never looked at AGENT_KNOWLEDGE
+// at all, which is why this went unnoticed. This closes that gap.
+//
+// Checks entity-identifying vocabulary only -- class/relationship names and
+// their aliases, not property names. Property vocabulary ("status",
+// "amount", "date", "unit") is generic and legitimately recurs across
+// almost every real domain *and* AGENT_KNOWLEDGE's own prose about what a
+// property is in general -- a first attempt that checked every word
+// (including property names, split into camelCase component words) flagged
+// dozens of ordinary shared English modeling words as false positives
+// (ontology_translation/TODO.md's #144 dated entry has the details) and was
+// unusable as a standing guard. Class/relationship names are exactly the
+// "cast of characters" a running example could accidentally mirror; they
+// are not what the howto's generic property-type examples are about.
+//
+// Checks AGENT_KNOWLEDGE's own code surface only -- fenced ```yaml/```text
+// blocks plus inline `single-backtick` spans -- not its surrounding prose.
+// The running example's own identifier vocabulary lives there (a
+// `ClassName:` YAML key, a `Thing --relationship--> Other thing` line, an
+// inline `issuedBy: Invoice -> X` aside); ordinary explanatory sentences
+// legitimately reuse common English words that also happen to be real
+// class names somewhere across 5 domains (brick-hvac's own `Filter`/
+// `Building` classes, itops's own `Database`/`Change`/`Deployment` classes)
+// with zero connection to any illustrative example -- confirmed directly:
+// checking whole-document prose flagged all of those as noise; checking
+// only the code surface does not.
+function splitCamelCaseForOverlapCheck(s) {
+  return String(s).replace(/([a-z0-9])([A-Z])/g, "$1 $2");
+}
+function normalizeForOverlapCheck(s) {
+  return splitCamelCaseForOverlapCheck(s).toLowerCase().replace(/[^a-z0-9\s]/g, " ").replace(/\s+/g, " ").trim();
+}
+
+test("AGENT_KNOWLEDGE's illustrative example carries no real domain's class/relationship vocabulary (issue #144's standing overlap check)", async () => {
+  const domains = listAvailableDomains();
+  assert.ok(domains.length >= 5, `expected at least the 5 benchmark domains, found: ${domains.join(", ")}`);
+
+  const entityPhrases = new Set();
+  for (const domain of domains) {
+    const doc = yaml.load(fs.readFileSync(resolveDomainYamlPath(domain), "utf8"));
+    for (const [name, cls] of Object.entries(doc.classes || {})) {
+      entityPhrases.add(normalizeForOverlapCheck(name));
+      for (const alias of cls.aliases || []) entityPhrases.add(normalizeForOverlapCheck(alias));
+    }
+    for (const rel of doc.relationships || []) {
+      entityPhrases.add(normalizeForOverlapCheck(rel.name));
+      for (const alias of rel.aliases || []) entityPhrases.add(normalizeForOverlapCheck(alias));
+    }
+  }
+  // Below 4 characters is almost entirely real domain abbreviations (AHU,
+  // NOC, API, VM, ...) that would make this an "any 2-3 letter substring"
+  // check and swamp it with noise; excluded the same deliberate way
+  // properties are, not an oversight.
+  const checkPhrases = [...entityPhrases].filter((p) => p.length >= 4);
+
+  await withPage(async (page) => {
+    const prompt = await systemPrompt(page);
+    const knowledgeStart = prompt.indexOf("How to Describe a Domain for an AI Agent");
+    assert.ok(knowledgeStart >= 0, "expected to find AGENT_KNOWLEDGE's own howto heading in the system prompt");
+    const knowledge = prompt.slice(knowledgeStart);
+
+    const fenced = [...knowledge.matchAll(/```(?:yaml|text)\n([\s\S]*?)```/g)].map((m) => m[1]);
+    const withoutFenced = knowledge.replace(/```[\s\S]*?```/g, " ");
+    const inline = [...withoutFenced.matchAll(/`([^`]+)`/g)].map((m) => m[1]);
+    const codeSurface = ` ${normalizeForOverlapCheck([...fenced, ...inline].join("\n"))} `;
+
+    const overlaps = checkPhrases.filter((phrase) => codeSurface.includes(` ${phrase} `));
+    assert.deepEqual(
+      overlaps, [],
+      `AGENT_KNOWLEDGE's illustrative example uses real domain vocabulary (${overlaps.join(", ")}) -- `
+      + "pick different placeholder words for the running example (see issue #144)"
+    );
+  });
 });
