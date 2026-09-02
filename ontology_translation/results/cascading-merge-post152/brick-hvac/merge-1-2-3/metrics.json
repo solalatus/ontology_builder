@@ -1,0 +1,713 @@
+{
+  "domain": "brick-hvac",
+  "runId": "merge-1-2-3",
+  "runUuid": "6414c3a1-9b46-40dc-95fc-f9abe09b7861",
+  "metrics": {
+    "classes": {
+      "recall": 0.8461538461538461,
+      "precision": 1,
+      "f1": 0.9166666666666666,
+      "matched": 33,
+      "groundTruthTotal": 39,
+      "recoveredTotal": 33
+    },
+    "relationships": {
+      "recall": 0.8285714285714286,
+      "precision": 0.8055555555555556,
+      "f1": 0.8169014084507044,
+      "matched": 29,
+      "groundTruthTotal": 35,
+      "recoveredTotal": 36
+    },
+    "properties": {
+      "recall": 0.5714285714285714,
+      "precision": 0.75,
+      "f1": 0.6486486486486486,
+      "matched": 24,
+      "groundTruthTotal": 42,
+      "recoveredTotal": 32
+    },
+    "controlledValueFidelity": 1,
+    "controlledValuePropertyGoldTotal": 20,
+    "controlledValuePropertyMatchedCount": 10,
+    "recoveryEffectiveness": 0.7940722412553399,
+    "recoveryEffectivenessWithFidelity": 0.8455541809415049
+  },
+  "scopedMetrics": {
+    "classes": {
+      "recall": 1,
+      "precision": 0.5454545454545454,
+      "f1": 0.7058823529411764,
+      "matched": 18,
+      "groundTruthTotal": 18,
+      "recoveredTotal": 33
+    },
+    "relationships": {
+      "recall": 0.7894736842105263,
+      "precision": 0.4166666666666667,
+      "f1": 0.5454545454545454,
+      "matched": 15,
+      "groundTruthTotal": 19,
+      "recoveredTotal": 36
+    },
+    "properties": {
+      "recall": 0.8125,
+      "precision": 0.40625,
+      "f1": 0.5416666666666666,
+      "matched": 13,
+      "groundTruthTotal": 16,
+      "recoveredTotal": 32
+    },
+    "controlledValueFidelity": 1,
+    "controlledValuePropertyGoldTotal": 10,
+    "controlledValuePropertyMatchedCount": 9,
+    "recoveryEffectiveness": 0.5976678550207962,
+    "recoveryEffectivenessWithFidelity": 0.6982508912655971
+  },
+  "semanticMetrics": null,
+  "semanticScopedMetrics": null,
+  "ruleMetrics": {
+    "recall": 0.7142857142857143,
+    "precision": 0.7142857142857143,
+    "f1": 0.7142857142857143,
+    "matched": 5,
+    "groundTruthTotal": 7,
+    "recoveredTotal": 7
+  },
+  "actionMetrics": {
+    "identification": {
+      "recall": 1,
+      "precision": 1,
+      "f1": 1,
+      "matched": 5,
+      "groundTruthTotal": 5,
+      "recoveredTotal": 5
+    },
+    "inputClassAccuracy": 1,
+    "inputClassChecked": 5,
+    "preconditionRecovery": 0.42577422577422575,
+    "effectRecovery": 0.6177033492822966,
+    "verificationRecovery": 0.5783475783475783
+  },
+  "semanticRuleActionMetrics": null,
+  "operationalStats": {
+    "kind": "cascading-intelligent-merge",
+    "sourceDescription": "(run-01 + run-02) + run-03",
+    "decisionCounts": {
+      "matchedNoted": 54,
+      "pairedAccepted": 25,
+      "currentKept": 39,
+      "incomingTaken": 12
+    },
+    "suggestFailures": [
+      false
+    ],
+    "agentPreviewSummaries": [
+      {
+        "agentTouchedCount": 103,
+        "agentCommentary": "Applied the accepted renames/reframings, added the incoming-specific relationship forms the human chose, reconciled the overlapping class/relationship/action/rule/question wording by combining complementary details, and removed only the superseded old relationship forms plus the incoming duplicate question phrasings after merging their content into retained/reworded questions.\n\nOne deliberate choice: although the developer guidance says to prefer existing relation names, the human explicitly accepted several cross-label predicate renames (for example `hasPoint` → `hasAsPoint`, `hasPart` → `hasAsPart`, `locatedIn` → `locatedOn`, `hasPoint` → `hasOccupancySensor`), so I enacted those exact accepted predicate changes rather than normalizing them back to the old graph vocabulary.",
+        "lineCount": 99
+      }
+    ],
+    "lastResults": [
+      {
+        "ok": true,
+        "message": "Applied.",
+        "commentary": "Applied the accepted renames/reframings, added the incoming-specific relationship forms the human chose, reconciled the overlapping class/relationship/action/rule/question wording by combining complementary details, and removed only the superseded old relationship forms plus the incoming duplicate question phrasings after merging their content into retained/reworded questions.\n\nOne deliberate choice: although the developer guidance says to prefer existing relation names, the human explicitly accepted several cross-label predicate renames (for example `hasPoint` → `hasAsPoint`, `hasPart` → `hasAsPart`, `locatedIn` → `locatedOn`, `hasPoint` → `hasOccupancySensor`), so I enacted those exact accepted predicate changes rather than normalizing them back to the old graph vocabulary.",
+        "touched": [
+          {
+            "kind": "property",
+            "name": "AirHandler.name",
+            "action": "added"
+          },
+          {
+            "kind": "property",
+            "name": "Zone.name",
+            "action": "added"
+          },
+          {
+            "kind": "property",
+            "name": "TerminalUnit.name",
+            "action": "added"
+          },
+          {
+            "kind": "property",
+            "name": "Space.name",
+            "action": "added"
+          },
+          {
+            "kind": "property",
+            "name": "Space.maximumOccupancy",
+            "action": "added"
+          },
+          {
+            "kind": "property",
+            "name": "Floor.name",
+            "action": "added"
+          },
+          {
+            "kind": "property",
+            "name": "Thermostat.name",
+            "action": "added"
+          },
+          {
+            "kind": "property",
+            "name": "Building.name",
+            "action": "added"
+          },
+          {
+            "kind": "relationship",
+            "name": "contains (Floor → Space)",
+            "action": "added"
+          },
+          {
+            "kind": "relationship",
+            "name": "contains (Building → Floor)",
+            "action": "added"
+          },
+          {
+            "kind": "relationship",
+            "name": "contains (Zone → Space)",
+            "action": "added"
+          },
+          {
+            "kind": "relationship",
+            "name": "locatedIn (OutsideAirCO2Sensor → Building)",
+            "action": "added"
+          },
+          {
+            "kind": "class",
+            "name": "TemperatureDeadbandSetpoint → DeadbandSetpoint",
+            "action": "renamed"
+          },
+          {
+            "kind": "rule",
+            "name": "needsCoolingFromSetpoint → canIncreaseCooling",
+            "action": "renamed"
+          },
+          {
+            "kind": "rule",
+            "name": "needsHeatingFromSetpoint → canIncreaseHeating",
+            "action": "renamed"
+          },
+          {
+            "kind": "rule",
+            "name": "temperatureWithinDeadband → canMaintainWithinDeadband",
+            "action": "renamed"
+          },
+          {
+            "kind": "rule",
+            "name": "verifyThermostatControlContext → canVerifyOccupiedZoneConditioning",
+            "action": "renamed"
+          },
+          {
+            "kind": "rule",
+            "name": "economizerReducesMechanicalConditioning → economizerContextAvailable",
+            "action": "renamed"
+          },
+          {
+            "kind": "action",
+            "name": "holdSteadyInDeadband → maintainWithinDeadband",
+            "action": "renamed"
+          },
+          {
+            "kind": "class",
+            "name": "AirHandler",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "Zone",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "TerminalUnit",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "Space",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "Floor",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "Thermostat",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "OccupancySensor",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "TemperatureSensor",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "OutsideAirCO2Sensor",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "ReturnAirCO2Sensor",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "Damper",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "Fan",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "Filter",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "CoolingValve",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "HeatingValve",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "Building",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "Boiler",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "Chiller",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "PackagedHeatPump",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "AirTemperatureSensor",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "AirTemperatureSetpoint",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "CoolingTemperatureSetpoint",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "HeatingTemperatureSetpoint",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "DeadbandSetpoint",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "Economizer",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "AirPlenum",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "Humidifier",
+            "action": "upserted"
+          },
+          {
+            "kind": "rule",
+            "name": "canIncreaseCooling",
+            "action": "upserted"
+          },
+          {
+            "kind": "rule",
+            "name": "canIncreaseHeating",
+            "action": "upserted"
+          },
+          {
+            "kind": "rule",
+            "name": "canMaintainWithinDeadband",
+            "action": "upserted"
+          },
+          {
+            "kind": "rule",
+            "name": "canVerifyOccupiedZoneConditioning",
+            "action": "upserted"
+          },
+          {
+            "kind": "rule",
+            "name": "economizerContextAvailable",
+            "action": "upserted"
+          },
+          {
+            "kind": "action",
+            "name": "enableEconomizer",
+            "action": "upserted"
+          },
+          {
+            "kind": "action",
+            "name": "increaseCooling",
+            "action": "upserted"
+          },
+          {
+            "kind": "action",
+            "name": "increaseHeating",
+            "action": "upserted"
+          },
+          {
+            "kind": "action",
+            "name": "verifyOccupiedZoneConditioning",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "feeds (AirHandler → TerminalUnit)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "serves (TerminalUnit → Space)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "serves (Thermostat → Zone)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "locatedIn (AirHandler → Building)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "locatedIn (TerminalUnit → Space)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "locatedIn (Thermostat → Space)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "feeds (Boiler → HeatingValve)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "feeds (Chiller → CoolingValve)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "feeds (PackagedHeatPump → TerminalUnit)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "feeds (AirHandler → AirPlenum)",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Which air handler feeds a given terminal unit?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "What is upstream of a given terminal unit or plenum on the air side?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Which temperature sensors belong to a given air handler?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Which setpoints belong to a given air handler?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "If air temperature is off target, which setpoint should be checked?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Which outside-air and return-air CO2 sensors go with a given air handler?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "What fans, filters, dampers, and control valves are part of a given air handler?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Which thermostat or terminal unit serves a given zone or space?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Which spaces are on a given floor, and which floors are in a given building?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "What HVAC equipment is physically located in a given building, on a given floor, or in a given space?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Which occupancy sensor is associated with a given space or zone for control?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "What heating or cooling equipment is upstream on the plant side for a given served device or path?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "When can a given air handler use economizer instead of mechanical cooling?",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasAsPart (AirHandler → Damper)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasAsPart (AirHandler → Fan)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasAsPart (AirHandler → Filter)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasAsPart (AirHandler → HeatingValve)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasAsPart (AirHandler → CoolingValve)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasAsPoint (AirHandler → AirTemperatureSensor)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasAsPoint (AirHandler → AirTemperatureSetpoint)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasAsPoint (AirHandler → CoolingTemperatureSetpoint)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasAsPoint (AirHandler → HeatingTemperatureSetpoint)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasAsPoint (AirHandler → DeadbandSetpoint)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasAsPoint (AirHandler → OutsideAirCO2Sensor)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasAsPoint (AirHandler → ReturnAirCO2Sensor)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasAsPoint (Thermostat → TemperatureSensor)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasAsPart (AirHandler → Economizer)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasAsPart (AirHandler → Humidifier)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasOccupancySensor (Space → OccupancySensor)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasOccupancySensor (Zone → OccupancySensor)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "locatedOn (AirHandler → Floor)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasPart (AirHandler → Damper)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasPart (AirHandler → Fan)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasPart (AirHandler → Filter)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasPart (AirHandler → HeatingValve)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasPart (AirHandler → CoolingValve)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasPoint (AirHandler → AirTemperatureSensor)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasPoint (AirHandler → AirTemperatureSetpoint)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasPoint (AirHandler → CoolingTemperatureSetpoint)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasPoint (AirHandler → HeatingTemperatureSetpoint)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasPoint (AirHandler → DeadbandSetpoint)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasPoint (AirHandler → OutsideAirCO2Sensor)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasPoint (AirHandler → ReturnAirCO2Sensor)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasPoint (Thermostat → TemperatureSensor)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasPart (AirHandler → Economizer)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasPart (AirHandler → Humidifier)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasPoint (Space → OccupancySensor)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasPoint (Zone → OccupancySensor)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "locatedIn (AirHandler → Floor)",
+            "action": "removed"
+          },
+          {
+            "kind": "cq",
+            "name": "If air temperature is off target, which setpoint should be checked?",
+            "action": "removed"
+          }
+        ],
+        "newConsistencyFindings": [
+          {
+            "id": "unreachable-from-action-input:verifyOccupiedZoneConditioning|TerminalUnit",
+            "check": "unreachable-from-action-input",
+            "tier": "text",
+            "severity": "warning",
+            "subject": {
+              "kind": "action",
+              "key": "verifyOccupiedZoneConditioning|TerminalUnit",
+              "name": "verifyOccupiedZoneConditioning",
+              "className": "TerminalUnit"
+            },
+            "message": "Action \"verifyOccupiedZoneConditioning\" has input class Zone, and its precondition canVerifyOccupiedZoneConditioning refers to TerminalUnit, which is only reachable against the direction of the relationships between them.",
+            "suggestion": "Add or redirect a relationship so the agent can navigate from Zone to TerminalUnit. Rewording the text does not create the path it assumes."
+          }
+        ]
+      }
+    ]
+  }
+}

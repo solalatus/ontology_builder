@@ -1,0 +1,975 @@
+{
+  "domain": "itops",
+  "runId": "merge-1-2",
+  "runUuid": "82ca5ea6-49cb-4016-880e-4f36dc54e041",
+  "metrics": {
+    "classes": {
+      "recall": 0.6617647058823529,
+      "precision": 1,
+      "f1": 0.7964601769911505,
+      "matched": 45,
+      "groundTruthTotal": 68,
+      "recoveredTotal": 45
+    },
+    "relationships": {
+      "recall": 0.6111111111111112,
+      "precision": 0.9166666666666666,
+      "f1": 0.7333333333333334,
+      "matched": 66,
+      "groundTruthTotal": 108,
+      "recoveredTotal": 72
+    },
+    "properties": {
+      "recall": 0.7747747747747747,
+      "precision": 0.86,
+      "f1": 0.8151658767772512,
+      "matched": 86,
+      "groundTruthTotal": 111,
+      "recoveredTotal": 100
+    },
+    "controlledValueFidelity": 0.9354838709677419,
+    "controlledValuePropertyGoldTotal": 35,
+    "controlledValuePropertyMatchedCount": 31,
+    "recoveryEffectiveness": 0.7816531290339116,
+    "recoveryEffectivenessWithFidelity": 0.8201108145173692
+  },
+  "scopedMetrics": {
+    "classes": {
+      "recall": 0.9583333333333334,
+      "precision": 0.5111111111111111,
+      "f1": 0.6666666666666666,
+      "matched": 23,
+      "groundTruthTotal": 24,
+      "recoveredTotal": 45
+    },
+    "relationships": {
+      "recall": 0.8611111111111112,
+      "precision": 0.4305555555555556,
+      "f1": 0.5740740740740742,
+      "matched": 31,
+      "groundTruthTotal": 36,
+      "recoveredTotal": 72
+    },
+    "properties": {
+      "recall": 0.96,
+      "precision": 0.24,
+      "f1": 0.384,
+      "matched": 24,
+      "groundTruthTotal": 25,
+      "recoveredTotal": 100
+    },
+    "controlledValueFidelity": 1,
+    "controlledValuePropertyGoldTotal": 14,
+    "controlledValuePropertyMatchedCount": 14,
+    "recoveryEffectiveness": 0.5415802469135803,
+    "recoveryEffectivenessWithFidelity": 0.6561851851851852
+  },
+  "semanticMetrics": null,
+  "semanticScopedMetrics": null,
+  "ruleMetrics": {
+    "recall": 0.2727272727272727,
+    "precision": 0.375,
+    "f1": 0.3157894736842105,
+    "matched": 3,
+    "groundTruthTotal": 11,
+    "recoveredTotal": 8
+  },
+  "actionMetrics": {
+    "identification": {
+      "recall": 1,
+      "precision": 1,
+      "f1": 1,
+      "matched": 11,
+      "groundTruthTotal": 11,
+      "recoveredTotal": 11
+    },
+    "inputClassAccuracy": 1,
+    "inputClassChecked": 11,
+    "preconditionRecovery": 0.1878579485031098,
+    "effectRecovery": 0.6285615899252263,
+    "verificationRecovery": 0.7874620329165783
+  },
+  "semanticRuleActionMetrics": null,
+  "operationalStats": {
+    "kind": "cascading-intelligent-merge",
+    "sourceDescription": "run-01 + run-02",
+    "decisionCounts": {
+      "matchedNoted": 52,
+      "pairedAccepted": 38,
+      "currentKept": 104,
+      "incomingTaken": 24
+    },
+    "suggestFailures": [
+      false
+    ],
+    "agentPreviewSummaries": [
+      {
+        "agentTouchedCount": 130,
+        "agentCommentary": "Done. I kept duplicate current-side properties like `Incident.status` / `BusinessService.healthState` etc. where no explicit human decision said to remove or rename them, even if incoming wording preferred other fields. I only removed the old names that the decisions explicitly treated as renames.",
+        "lineCount": 139
+      }
+    ],
+    "lastResults": [
+      {
+        "ok": true,
+        "message": "Applied.",
+        "commentary": "Done. I kept duplicate current-side properties like `Incident.status` / `BusinessService.healthState` etc. where no explicit human decision said to remove or rename them, even if incoming wording preferred other fields. I only removed the old names that the decisions explicitly treated as renames.",
+        "touched": [
+          {
+            "kind": "class",
+            "name": "IncidentResponseTeam",
+            "action": "added"
+          },
+          {
+            "kind": "property",
+            "name": "Incident.incidentId",
+            "action": "added"
+          },
+          {
+            "kind": "property",
+            "name": "Incident.currentStatus",
+            "action": "added"
+          },
+          {
+            "kind": "property",
+            "name": "Incident.isMajorIncident",
+            "action": "added"
+          },
+          {
+            "kind": "property",
+            "name": "Incident.isCybersecurityIncident",
+            "action": "added"
+          },
+          {
+            "kind": "property",
+            "name": "BusinessService.serviceName",
+            "action": "added"
+          },
+          {
+            "kind": "property",
+            "name": "BusinessService.currentStatus",
+            "action": "added"
+          },
+          {
+            "kind": "property",
+            "name": "BusinessService.criticality",
+            "action": "added"
+          },
+          {
+            "kind": "property",
+            "name": "ITService.criticality",
+            "action": "added"
+          },
+          {
+            "kind": "property",
+            "name": "ConfigurationItem.criticality",
+            "action": "added"
+          },
+          {
+            "kind": "property",
+            "name": "Alert.acknowledgedAt",
+            "action": "added"
+          },
+          {
+            "kind": "property",
+            "name": "Deployment.deploymentStatus",
+            "action": "added"
+          },
+          {
+            "kind": "rule",
+            "name": "cybersecurityEvidenceSufficient",
+            "action": "added"
+          },
+          {
+            "kind": "relationship",
+            "name": "indicates (Alert → Event)",
+            "action": "added"
+          },
+          {
+            "kind": "relationship",
+            "name": "memberOf (IncidentCommander → IncidentResponseTeam)",
+            "action": "added"
+          },
+          {
+            "kind": "relationship",
+            "name": "groupsIncident (Problem → Incident)",
+            "action": "added"
+          },
+          {
+            "kind": "cq",
+            "name": "Which runbook can be used for this incident?",
+            "action": "added"
+          },
+          {
+            "kind": "cq",
+            "name": "Which workaround can be used for this incident?",
+            "action": "added"
+          },
+          {
+            "kind": "cq",
+            "name": "Which backup set and recovery plan can be used safely for this incident?",
+            "action": "added"
+          },
+          {
+            "kind": "cq",
+            "name": "Was the incident caused by a recent change or deployment?",
+            "action": "added"
+          },
+          {
+            "kind": "cq",
+            "name": "Is a materiality assessment complete, and is a regulatory notification required and due?",
+            "action": "added"
+          },
+          {
+            "kind": "cq",
+            "name": "Is the incident supported by the necessary evidence, and is that evidence retained with integrity?",
+            "action": "added"
+          },
+          {
+            "kind": "cq",
+            "name": "If the incident is security-related, has the required evidence been preserved?",
+            "action": "added"
+          },
+          {
+            "kind": "cq",
+            "name": "Are evidence integrity, stakeholder communications, and closure conditions complete for this incident?",
+            "action": "added"
+          },
+          {
+            "kind": "class",
+            "name": "ITServiceOwner → ServiceOwner",
+            "action": "renamed"
+          },
+          {
+            "kind": "class",
+            "name": "StakeholderCommunication → Communication",
+            "action": "renamed"
+          },
+          {
+            "kind": "rule",
+            "name": "majorIncidentDeclarationPreconditions → canDeclareMajorIncident",
+            "action": "renamed"
+          },
+          {
+            "kind": "rule",
+            "name": "regulatoryNotificationSubmissionPreconditions → canSubmitRegulatoryNotification",
+            "action": "renamed"
+          },
+          {
+            "kind": "rule",
+            "name": "incidentClosurePreconditions → canCloseIncident",
+            "action": "renamed"
+          },
+          {
+            "kind": "rule",
+            "name": "safeBackupSetUse → backupSetSafeForRecovery",
+            "action": "renamed"
+          },
+          {
+            "kind": "action",
+            "name": "assignIncidentToResolverGroup → assignIncident",
+            "action": "renamed"
+          },
+          {
+            "kind": "class",
+            "name": "Incident",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "BusinessService",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "CustomerChannel",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "ITService",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "ConfigurationItem",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "ThirdPartyService",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "Alert",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "Event",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "ResolverGroup",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "OnCallEngineer",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "IncidentCommander",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "Runbook",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "Workaround",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "BackupSet",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "RecoveryPlan",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "Change",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "Deployment",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "MaterialityAssessment",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "RegulatoryNotification",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "EvidenceItem",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "ServiceOwner",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "Communication",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "InfrastructureComponent",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "Environment",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "Problem",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "KnownError",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "Release",
+            "action": "upserted"
+          },
+          {
+            "kind": "rule",
+            "name": "canDeclareMajorIncident",
+            "action": "upserted"
+          },
+          {
+            "kind": "rule",
+            "name": "canSubmitRegulatoryNotification",
+            "action": "upserted"
+          },
+          {
+            "kind": "rule",
+            "name": "canCloseIncident",
+            "action": "upserted"
+          },
+          {
+            "kind": "rule",
+            "name": "backupSetSafeForRecovery",
+            "action": "upserted"
+          },
+          {
+            "kind": "action",
+            "name": "acknowledgeAlert",
+            "action": "upserted"
+          },
+          {
+            "kind": "action",
+            "name": "declareMajorIncident",
+            "action": "upserted"
+          },
+          {
+            "kind": "action",
+            "name": "sendStakeholderCommunication",
+            "action": "upserted"
+          },
+          {
+            "kind": "action",
+            "name": "submitRegulatoryNotification",
+            "action": "upserted"
+          },
+          {
+            "kind": "action",
+            "name": "closeIncident",
+            "action": "upserted"
+          },
+          {
+            "kind": "action",
+            "name": "containIncident",
+            "action": "upserted"
+          },
+          {
+            "kind": "action",
+            "name": "isolateConfigurationItem",
+            "action": "upserted"
+          },
+          {
+            "kind": "action",
+            "name": "failOverService",
+            "action": "upserted"
+          },
+          {
+            "kind": "action",
+            "name": "restoreBackup",
+            "action": "upserted"
+          },
+          {
+            "kind": "action",
+            "name": "executeEmergencyChange",
+            "action": "upserted"
+          },
+          {
+            "kind": "action",
+            "name": "assignIncident",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "impactsBusinessService (Incident → BusinessService)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "deliveredThrough (BusinessService → CustomerChannel)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "dependsOnThirdPartyService (ITService → ThirdPartyService)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "affectsConfigurationItem (Incident → ConfigurationItem)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasWorkaround (KnownError → Workaround)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "usesBackupSet (RecoveryPlan → BackupSet)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "impactsItservice (Incident → ITService)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "runsOn (ITService → InfrastructureComponent)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "triggeredBy (Incident → Alert)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "correlatedFrom (Incident → Event)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "owns (ServiceOwner → ITService)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "assignedTo (Incident → ResolverGroup)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "handledBy (Incident → OnCallEngineer)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "coordinatedBy (Incident → IncidentCommander)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "memberOf (OnCallEngineer → ResolverGroup)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "handledWith (Incident → Runbook)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "recoveredWith (Incident → RecoveryPlan)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "resolvedBy (Incident → Change)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "supportedBy (Incident → EvidenceItem)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "communicatedThrough (Incident → Communication)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "evaluatedBy (Incident → MaterialityAssessment)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "triggers (MaterialityAssessment → RegulatoryNotification)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "protects (BackupSet → ConfigurationItem)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "deployedIn (ITService → Environment)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "reports (RegulatoryNotification → Incident)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "implementedBy (Change → Release)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "deliveredBy (Release → Deployment)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "dependsOnService (BusinessService → ITService)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "sentTo (RegulatoryNotification → Regulator)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "documentedBy (Problem → KnownError)",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Which business services are impacted by this incident?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Through which customer channels are those impacted business services delivered?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Which IT services are impacted by this incident?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Which configuration items and third-party services are on the dependency path of the affected IT service?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Which active alerts and correlated events are tied to this incident?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Who owns the affected service?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Which resolver group should handle the incident?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Which on-call engineer should handle the incident?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Does the incident meet the criteria for a major incident?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "If the incident is a major incident, who is commanding it?",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "runsOnInfrastructureComponent (ITService → InfrastructureComponent)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "isTriggeredByAlert (Incident → Alert)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "isCorrelatedFromEvent (Incident → Event)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "ownsItservice (ServiceOwner → ITService)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "assignedToResolverGroup (Incident → ResolverGroup)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "handledByOnCallEngineer (Incident → OnCallEngineer)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "coordinatedByIncidentCommander (Incident → IncidentCommander)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "memberOfResolverGroup (OnCallEngineer → ResolverGroup)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "handledWithRunbook (Incident → Runbook)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "recoveredWithRecoveryPlan (Incident → RecoveryPlan)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "resolvedByChange (Incident → Change)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "supportedByEvidenceItem (Incident → EvidenceItem)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "evaluatedByMaterialityAssessment (Incident → MaterialityAssessment)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "triggersRegulatoryNotification (MaterialityAssessment → RegulatoryNotification)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "protectsConfigurationItem (BackupSet → ConfigurationItem)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "deployedInEnvironment (ITService → Environment)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "reportsIncident (RegulatoryNotification → Incident)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "implementedByRelease (Change → Release)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "deliveredByDeployment (Release → Deployment)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "dependsOnItservice (BusinessService → ITService)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "sentToRegulator (RegulatoryNotification → Regulator)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "documentedByKnownError (Problem → KnownError)",
+            "action": "removed"
+          },
+          {
+            "kind": "property",
+            "name": "Incident.majorIncidentDeclaredAt",
+            "action": "removed"
+          },
+          {
+            "kind": "property",
+            "name": "BusinessService.name",
+            "action": "removed"
+          },
+          {
+            "kind": "property",
+            "name": "ITService.name",
+            "action": "removed"
+          },
+          {
+            "kind": "property",
+            "name": "BusinessService.criticalityTier",
+            "action": "removed"
+          },
+          {
+            "kind": "property",
+            "name": "ITService.criticalityTier",
+            "action": "removed"
+          },
+          {
+            "kind": "property",
+            "name": "ConfigurationItem.criticalityTier",
+            "action": "removed"
+          },
+          {
+            "kind": "property",
+            "name": "ThirdPartyService.criticalityTier",
+            "action": "removed"
+          },
+          {
+            "kind": "property",
+            "name": "Alert.status",
+            "action": "removed"
+          },
+          {
+            "kind": "property",
+            "name": "Change.status",
+            "action": "removed"
+          },
+          {
+            "kind": "property",
+            "name": "RegulatoryNotification.status",
+            "action": "removed"
+          },
+          {
+            "kind": "property",
+            "name": "Alert.severity",
+            "action": "removed"
+          },
+          {
+            "kind": "property",
+            "name": "Alert.detectionSource",
+            "action": "removed"
+          },
+          {
+            "kind": "property",
+            "name": "Event.detectionSource",
+            "action": "removed"
+          },
+          {
+            "kind": "property",
+            "name": "Event.observedAt",
+            "action": "removed"
+          },
+          {
+            "kind": "property",
+            "name": "Release.version",
+            "action": "removed"
+          },
+          {
+            "kind": "cq",
+            "name": "Which business services and customer channels are impacted by this incident?",
+            "action": "removed"
+          },
+          {
+            "kind": "cq",
+            "name": "Which active alerts and events are correlated with the incident?",
+            "action": "removed"
+          },
+          {
+            "kind": "cq",
+            "name": "Who owns the affected service, and which resolver group and on-call engineer should be assigned?",
+            "action": "removed"
+          },
+          {
+            "kind": "cq",
+            "name": "Does the incident meet the bank's criteria for major-incident declaration?",
+            "action": "removed"
+          }
+        ],
+        "newConsistencyFindings": [
+          {
+            "id": "effect-verification-mismatch:containIncident|impact",
+            "check": "effect-verification-mismatch",
+            "tier": "text",
+            "severity": "warning",
+            "subject": {
+              "kind": "action",
+              "key": "containIncident|impact",
+              "name": "containIncident",
+              "className": "Incident"
+            },
+            "message": "Action \"containIncident\" verifies Incident.impact, but its effect never says that property changes.",
+            "suggestion": "Either say in the effect what sets it, or verify something the effect actually does."
+          },
+          {
+            "id": "effect-verification-mismatch:sendStakeholderCommunication|status",
+            "check": "effect-verification-mismatch",
+            "tier": "text",
+            "severity": "warning",
+            "subject": {
+              "kind": "action",
+              "key": "sendStakeholderCommunication|status",
+              "name": "sendStakeholderCommunication",
+              "className": "Incident"
+            },
+            "message": "Action \"sendStakeholderCommunication\" verifies Incident.status, but its effect never says that property changes.",
+            "suggestion": "Either say in the effect what sets it, or verify something the effect actually does."
+          },
+          {
+            "id": "inverse-pair:Incident --linkedToProblem--> Problem||Problem --groupsIncident--> Incident",
+            "check": "inverse-pair",
+            "tier": "exact",
+            "severity": "warning",
+            "subject": {
+              "kind": "relationship",
+              "key": "Incident --linkedToProblem--> Problem||Problem --groupsIncident--> Incident",
+              "name": "groupsIncident"
+            },
+            "message": "Problem --groupsIncident--> Incident looks like the inverse of Incident --linkedToProblem--> Problem. The profile is one directed relationship per real-world connection, never also its inverse.",
+            "suggestion": "Keep whichever direction the questions and actions actually navigate."
+          },
+          {
+            "id": "unreachable-from-action-input:closeIncident|CybersecurityIncident",
+            "check": "unreachable-from-action-input",
+            "tier": "text",
+            "severity": "warning",
+            "subject": {
+              "kind": "action",
+              "key": "closeIncident|CybersecurityIncident",
+              "name": "closeIncident",
+              "className": "CybersecurityIncident"
+            },
+            "message": "Action \"closeIncident\" has input class Incident, and its precondition canCloseIncident refers to CybersecurityIncident, which is only reachable against the direction of the relationships between them.",
+            "suggestion": "Add or redirect a relationship so the agent can navigate from Incident to CybersecurityIncident. Rewording the text does not create the path it assumes."
+          },
+          {
+            "id": "unreachable-from-action-input:restoreBackup|Application",
+            "check": "unreachable-from-action-input",
+            "tier": "text",
+            "severity": "warning",
+            "subject": {
+              "kind": "action",
+              "key": "restoreBackup|Application",
+              "name": "restoreBackup",
+              "className": "Application"
+            },
+            "message": "Action \"restoreBackup\" has input class BackupSet, and its verification refers to Application, which is only reachable against the direction of the relationships between them.",
+            "suggestion": "Add or redirect a relationship so the agent can navigate from BackupSet to Application. Rewording the text does not create the path it assumes."
+          },
+          {
+            "id": "orphan-rule:cybersecurityEvidenceSufficient",
+            "check": "orphan-rule",
+            "tier": "exact",
+            "severity": "note",
+            "subject": {
+              "kind": "rule",
+              "key": "cybersecurityEvidenceSufficient",
+              "name": "cybersecurityEvidenceSufficient"
+            },
+            "message": "Rule \"cybersecurityEvidenceSufficient\" is not used as a precondition by any action."
+          }
+        ]
+      }
+    ]
+  }
+}

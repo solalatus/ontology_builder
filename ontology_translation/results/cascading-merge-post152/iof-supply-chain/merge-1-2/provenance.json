@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "domain": "iof-supply-chain",
+  "kind": "cascading-intelligent-merge",
+  "model": "gpt-5.4",
+  "provider": "azure",
+  "endpointSha256": "1eb621d5fda661ff03ff3b3fd4ad234f28d8923e66ea63448a87e430e97fcace",
+  "sourceRuns": [
+    "run-01",
+    "run-02",
+    "run-03"
+  ],
+  "sourceResultsDir": "ontology_translation/results/multi-domain-post152",
+  "sourceYamlSha256": [
+    {
+      "run": "run-01",
+      "sha256": "7814344ec8dd55d79a638a17482b6a338f4848e51aa030935286e5161bc8e0a0"
+    },
+    {
+      "run": "run-02",
+      "sha256": "6ea2b4ba1bba132e99ae18cdbab1db4096836fd63223a8b958dfafa94de9009c"
+    },
+    {
+      "run": "run-03",
+      "sha256": "5562816679023c3b908094866e04006e8e176de5ce65f37c1d70ab9bd6fc5d4a"
+    }
+  ],
+  "domainYamlPath": "ontology_translation/domains/iof-supply-chain/reference.domain.yaml",
+  "groundTruthSha256": "10d1322053aef557f17d8377e0504cc838392991a1f7740d6c62360d789f639e",
+  "matchedItemNoteSha256": "e94c915fe6df91178cdc50bdc9bd728ebfcc33825131e5e9a5c36631e9d08941",
+  "sharedNoteSha256": "17624fa12ea64af9ecd0d5dc1d879147e33fec9d32a07a28855bcb85f9b725d7",
+  "interviewerPromptSha256": "64a18c817a849bb1a38e153813a9d4c8a81701695b09616897a8395060d0350d",
+  "stage": "merge-1-2",
+  "generatedAt": "2026-09-02T19:39:20.024Z",
+  "mergedFrom": [
+    "run-01",
+    "run-02"
+  ]
+}
