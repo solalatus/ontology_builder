@@ -2386,3 +2386,114 @@ same change enabled.
       (`tests/agent-remove-tool-live.spec.mjs`, run for real against Azure, both passing).
 - [x] `helper_agent_plan.md` §2 corrected in place.
 - [x] Full regression suite green.
+
+## Elicitation-improvement bundle (epic #152) — seven tickets implemented, gated on one full 5×3 benchmark rerun
+
+Full epic tracked on GitHub as #152, following from a deep review of live elicitation transcripts across all
+five benchmark domains looking for behavioral patterns worth fixing to raise recovery-effectiveness F1. Eight
+tickets were filed under one epic with a fixed merge gate agreed with the maintainer up front: the epic only
+merges to `main` if a full 5-domain×3-replicate live benchmark rerun **and** a recomputed cascading-merge(1,2)
+both show improvement over the current committed baselines; if either fails, the work stays on a branch for
+further analysis, never merged. Seven of the eight tickets are implemented as of this entry; the eighth
+(#155, specialization/subclassing) was scoped, discussed for side effects, and deliberately parked rather than
+implemented — see its own note below. **The gate itself (the live 5×3 rerun + cascading-merge recompute) has
+not run yet as of this entry** — everything below is the pre-gate implementation state, to be updated once
+the gate's result is in.
+
+Standing policy enforced throughout, not just for new edits: no ontology/domain-specific vocabulary in any
+prompt or procedure, verified by a full historical audit (not just this pass's own new text) using the
+entity-vocabulary overlap methodology issue #144 established (auto-discovered class/relationship names +
+aliases from all 5 domains' `reference.domain.yaml` files, entity-only, >=4 chars, to avoid the documented
+generic-English-word false-positive storm) — now a permanent test
+(`tests/helper-agent-phase4.spec.mjs`: "no LLM-facing prompt in the app... carries real domain vocabulary
+outside the allowlisted generic words"). The audit found one genuine pre-existing leak this pass didn't
+introduce (a "supplier/vendor/counterparty" illustrative example in the Import Review merger's GROUND RULES,
+overlapping itops's own `Vendor` class) and, during #160's own implementation, two words in a first draft of
+new prompt text ("documents", "processes") that turned out to be exact relationship names in itops's own
+reference ontology — all replaced with vocabulary verified to have zero overlap.
+
+**#153 — cascading-merge wholesale-replace bug.** The Import Review execution agent's `rename_ontology_element`
+tool didn't exist; a rename was enacted as delete-then-recreate, which loses the internal node id and any
+edges/properties recorded against it — the root cause of 3-way cascading merge regressing where 2-way merge
+helped. Fixed with a real in-place rekey tool, wired into both the merger's tool surface and the Import Review
+system prompt (including the migration/formatting-preference guidance a rename now needs). Five offline tests
+(`tests/import-review-rename.spec.mjs`); a live 2-domain re-run of the cascading-merge script confirmed the
+fix directly (brick-hvac's regression essentially eliminated; iof-supply-chain's narrowed but not eliminated —
+an honest, not-fully-solved case, since it's a genuine N:1 collapse dependent on the model's own migration
+diligence rather than a pure rename bug).
+
+**#154 + #159 — Phase 3 path-based relationship elicitation.** Shipped together (same Phase 3 logic, would
+have fought each other as independent diffs). Replaces "two classes mentioned together in the same CQ/action
+almost always need a direct relationship" with: ask how two jointly-mentioned classes actually connect first,
+and only commit a direct edge once the expert explicitly confirms that exact fact independently of whatever
+path was already recorded. Layered as a standing obligation repeated after every later phase that introduces
+a new class, not a one-time Phase 3 pass. Two pre-existing tests updated for the new wording (with rationale
+comments), two new behavioral tests added.
+
+**#156 — mandatory end-of-interview second opinion.** Phase 9(b) (now 9(c), see #160 below) tells the
+interviewer to call `get_graph_state` with a new optional `finalValidation:true` argument, which — at most
+once per conversation — also runs one automatic Tier C (LLM second-opinion) review of the whole ontology, fed
+back through the same tool result the deterministic sweep already uses, same fix-forward discipline as issue
+#84's self-correction loop. `fetchConsistencyLlmFindings()` was extracted as the shared pure core between this
+new path and the pre-existing human-triggered Tier C UI feature (issue #89), so the new code's actual live-API
+surface is small — confirmed by a dedicated live smoke test
+(`tests/agent-final-validation-tierc-live.spec.mjs`, run for real against Azure, both cases passing: a real
+nested Tier C call round-trips and surfaces its result without hanging, and the once-per-conversation bound
+holds across two real turns) on top of six offline mocked tests
+(`tests/agent-final-validation-tierc.spec.mjs`).
+
+**#157 — narration count overclaim check.** A pure function (`findNarrationCountOverclaim`) catches the
+interviewer's own reply text overclaiming how many items it just added/changed relative to what was actually
+applied ("added all 12..." when only 9 were), injecting a system-note correction. Seven offline tests.
+
+**#158 — alias-symmetry scorer audit.** `tests/evals/README.md` had a stale claim that relationship and
+property aliases get no cross-checking in the recovery scorer; verified against the actual scorer code and
+corrected, with two new tests proving the real (correct) behavior directly rather than just fixing the prose.
+
+**#160 — bounded domain-expansion pass.** New Phase 9(b), inserted into the Validation pass between the
+pre-existing competency check (still 9(a)) and the pre-existing final checklist (renumbered 9(b)->9(c), one
+new checklist item added confirming 9(b) actually ran). Runs once, only after 9(a) confirms every competency
+question and action is covered — recall beyond what the CQs happened to ask about, not closing a gap 9(a)
+already found. For each major class, silently checks a fixed, generic, domain-neutral checklist (parts/
+components, lifecycle states, actors, inputs/outputs, related paperwork/agreements, measurements, earlier/
+later workflow stages), offers only the categories that plausibly apply, once per major concept, batched, and
+requires the expert's explicit confirmation before adding anything — whatever it surfaces still has to earn
+its place through the ordinary per-item phases (Phase 3's path check, Phase 4's competency-question trace),
+never bypassing them. Two decisions were explicitly raised with and made by the maintainer before
+implementing, per the ticket's own "raise with the maintainer" note: **default-on** (not opt-in — otherwise
+the epic's own end-of-epic gate wouldn't exercise it at all), and its evaluation **folded into that same gate**
+rather than a separate pre-registered n>=5 itops run, to stay inside the epic's one-full-rerun budget. "Subtypes
+or variants" — one of the ticket's own listed probing categories — is deliberately excluded: it has nowhere
+clean to be recorded until #155's parked design question (below) is resolved; a permanent test guards against
+it quietly creeping back in before then. One new offline test added asserting the bound, the confirmation
+requirement, and the subtypes/variants exclusion.
+
+**#155 — specialization/subclassing construct — parked, not implemented.** Discussed for concrete side effects
+(grounded in the actual YAML shape and scorer code, not abstract speculation) before any implementation
+decision. Scoped to a label-only variant (no inheritance semantics) should it ever proceed, with an explicit
+requirement that a full, honest audit of all 5 domains' own taxonomy structure happen before any re-translation
+work, should this be picked up later. Deliberately **removed from epic #152** (the epic can and must be able to
+close without it) but **kept tagged** `elicitation-improvement` and left open for a future pass — a values/
+design decision, not a technical blocker.
+
+Golden hashes in `tests/agent-production-invariants.spec.mjs` updated three times across this batch (once per
+prompt-changing ticket: the domain-neutrality fix, #154+#159, #156, #160), each with a dated changelog comment
+per that file's own established discipline. Full offline regression suite (`node --test tests/*.spec.mjs`)
+green after every single change in this batch, not just at the end — 1223 passing as of this entry (11 skipped,
+opt-in live suites requiring real Azure credentials).
+
+- [x] #153 fixed (`rename_ontology_element` tool), tested offline (5 tests) and live (2-domain cascading-merge
+      re-run).
+- [x] #154 + #159 shipped together (Phase 3 path-based elicitation).
+- [x] #156 shipped (bounded end-of-interview Tier C second opinion), tested offline (6 tests) and live (2 tests
+      against real Azure).
+- [x] #157 shipped (narration count overclaim check), 7 offline tests.
+- [x] #158 shipped (alias-symmetry scorer audit + doc fix), 2 offline tests.
+- [x] #160 shipped (bounded domain-expansion pass, default-on), 1 new offline test; default-on and eval-scope
+      decisions made with the maintainer before implementing.
+- [x] #155 discussed, scoped (label-only), parked — removed from the epic, tag kept, left open.
+- [x] Full historical domain-neutrality audit performed (not just this pass's own edits); one pre-existing leak
+      found and fixed; permanent regression test added.
+- [ ] **Epic gate: full live 5-domain×3-replicate benchmark rerun + cascading-merge(1,2) recompute — not yet
+      run.** The epic does not merge to `main` until both show improvement over the committed baselines; if
+      either fails, this work stays on its branch for further analysis. To be updated once run.

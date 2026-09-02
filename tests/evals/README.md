@@ -338,20 +338,36 @@ added (helper_agent_todo.md's dated Log entry).
 Two different Jaccard thresholds, not one: classes (0.6) get every one of
 the ground truth's own declared aliases cross-checked against the recovered
 node's own label/meaning/aliases — real, built-in tolerance for rephrasing.
-Relationships and properties (0.3) get none of that: the fixture's
-`predicates:` section has no `aliases:` field at all, and the app's own
-edge/property data model has no alias concept either — always exactly one
-recorded label against exactly one gold label, with nowhere else to look.
-Auditing a real confirmatory run's actual recovered relationships against
-gold found this asymmetry silently costing correct recoveries at the class
-threshold (e.g. `Incident handledUsing Runbook` for gold's `Incident is
-handled with Runbook` — same class pair, same direction, same meaning, one
-preposition the interviewer could never have known to avoid since gold's
-exact wording is hidden from it — Jaccard 0.33). The lower threshold is
-still gated by the relationship/property's class pair (or host class)
-already matching, which does most of the disambiguating work a class match
-relies on alone, so it's safe to be more forgiving here without the same
-false-positive risk classes would have. It does *not* rescue a genuine
+Relationships (0.3) get a narrower version of the same tolerance, not none
+at all (issue #158 audit corrected this section, previously stale since the
+2026-07-30 fix it predates): `matchRelationships`/`relationshipLabelMatchesEdge`
+(`recoveryMetrics.mjs`) cross-check every one of a gold relationship's own
+declared `aliases` against every one of the recovered edge's own `relation` +
+`aliases` — genuinely symmetric, both sides, same as classes. What is *not*
+symmetric is how much gold-side alias data actually exists to check against,
+and it depends on the ground-truth format: `.domain.yaml`-sourced relationships
+(the 4 published-ontology domains, compiled from real source-ontology synonyms)
+carry real `aliases:` values, while `itops_mtsr.yaml`'s own `predicates:`
+section — this fixture's format — never declared any, so itops-scored
+relationships degrade to the old one-sided (recovered-edge-only) behavior, not
+because the scorer treats itops differently but because that fixture has
+nothing on the gold side to offer it. Properties (also 0.3) genuinely get none
+of this: `matchProperties` compares `prop.label` against the recovered
+property's own `name` only, and neither source format nor the product's own
+property schema (`createPropertyRow` in `index.html`) has an `aliases` field
+for properties at all — "always exactly one recorded label against exactly
+one gold label, with nowhere else to look" is still accurate for this
+dimension specifically. Auditing a real confirmatory itops run's actual
+recovered relationships against gold found this itops-specific asymmetry
+(before relationship aliases existed on either side) silently costing correct
+recoveries at the class threshold (e.g. `Incident handledUsing Runbook` for
+gold's `Incident is handled with Runbook` — same class pair, same direction,
+same meaning, one preposition the interviewer could never have known to avoid
+since gold's exact wording is hidden from it — Jaccard 0.33). The lower
+threshold is still gated by the relationship/property's class pair (or host
+class) already matching, which does most of the disambiguating work a class
+match relies on alone, so it's safe to be more forgiving here without the
+same false-positive risk classes would have. It does *not* rescue a genuine
 different word choice with zero token overlap at all (gold's "impacts" vs a
 recorded "affects" — Jaccard 0) — that residual gap is accepted, not
 silently hidden behind a synonym dictionary this eval deliberately doesn't

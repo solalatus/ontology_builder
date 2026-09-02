@@ -244,7 +244,11 @@ test("every chat request's tools array includes get_graph_state with no required
 
     const tool = bodies[0].tools.find((tl) => tl.function.name === "get_graph_state");
     assert.ok(tool, "get_graph_state must be attached to every request");
-    assert.deepEqual(tool.function.parameters.properties, {});
+    // Issue #156 added the optional finalValidation flag (bounded end-of-
+    // interview Tier C second opinion) to this tool's schema, so the
+    // properties object is no longer empty -- but it must still carry no
+    // *required* arguments, which is the actual invariant this test guards.
+    assert.deepEqual(Object.keys(tool.function.parameters.properties), ["finalValidation"]);
     assert.deepEqual(tool.function.parameters.required, []);
   });
 });
