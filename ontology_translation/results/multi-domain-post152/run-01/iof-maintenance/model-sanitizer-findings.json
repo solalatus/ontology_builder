@@ -1,0 +1,10 @@
+[
+  {
+    "severity": "advisory",
+    "kind": "relationship-pair",
+    "identity": "qualifiedForMaintenanceActivity (QualifiedMaintenancePerson → MaintenanceActivity) / assignedToQualifiedMaintenancePerson (MaintenanceActivity → QualifiedMaintenancePerson)",
+    "field": "pair",
+    "pattern": "RECIPROCAL_PAIR",
+    "detail": "qualifiedForMaintenanceActivity (QualifiedMaintenancePerson → MaintenanceActivity) and assignedToQualifiedMaintenancePerson (MaintenanceActivity → QualifiedMaintenancePerson) connect the same two classes in opposite directions -- confirm these are two genuinely distinct facts, not the same fact stated twice"
+  }
+]
