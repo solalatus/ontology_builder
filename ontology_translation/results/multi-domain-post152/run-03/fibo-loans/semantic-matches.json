@@ -1,0 +1,34 @@
+{
+  "fullDomain": {
+    "classes": [
+      {
+        "goldId": "IndividualPaymentTransaction",
+        "recoveredId": "n9"
+      }
+    ],
+    "relationships": [
+      {
+        "goldId": "rel_24",
+        "recoveredId": "e15"
+      }
+    ],
+    "properties": [],
+    "valueFidelity": []
+  },
+  "scoped": {
+    "classes": [
+      {
+        "goldId": "Amortization",
+        "recoveredId": "n10"
+      }
+    ],
+    "relationships": [
+      {
+        "goldId": "rel_24",
+        "recoveredId": "e15"
+      }
+    ],
+    "properties": [],
+    "valueFidelity": []
+  }
+}

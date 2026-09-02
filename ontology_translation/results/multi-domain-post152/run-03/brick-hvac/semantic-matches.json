@@ -1,0 +1,90 @@
+{
+  "fullDomain": {
+    "classes": [],
+    "relationships": [
+      {
+        "goldId": "rel_14",
+        "recoveredId": "e20"
+      },
+      {
+        "goldId": "rel_15",
+        "recoveredId": "e21"
+      }
+    ],
+    "properties": [],
+    "valueFidelity": [
+      {
+        "id": "AirHandlingUnit.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "OccupancySensor.occupied",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Thermostat.mode",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Thermostat.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "TerminalUnit.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Economizer.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Zone.occupancyStatus",
+        "semanticFidelity": 0
+      }
+    ]
+  },
+  "scoped": {
+    "classes": [],
+    "relationships": [
+      {
+        "goldId": "rel_14",
+        "recoveredId": "e20"
+      },
+      {
+        "goldId": "rel_15",
+        "recoveredId": "e21"
+      }
+    ],
+    "properties": [],
+    "valueFidelity": [
+      {
+        "id": "AirHandlingUnit.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "OccupancySensor.occupied",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Thermostat.mode",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Thermostat.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "TerminalUnit.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Economizer.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Zone.occupancyStatus",
+        "semanticFidelity": 0
+      }
+    ]
+  }
+}
