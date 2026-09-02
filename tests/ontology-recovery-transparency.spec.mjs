@@ -62,8 +62,8 @@ test("looksLikeEarlyPhaseCheckpoint catches the exact real message that fooled t
   assert.equal(looksLikeEarlyPhaseCheckpoint(REAL_FALSE_POSITIVE_MESSAGE), true);
 });
 
-test("looksLikeEarlyPhaseCheckpoint catches \"Phase N recap\" for every early phase (0-8), and the reverse \"recap ... phase N\" order", () => {
-  for (let n = 0; n <= 8; n++) {
+test("looksLikeEarlyPhaseCheckpoint catches \"Phase N recap\" for every early phase (0-9), and the reverse \"recap ... phase N\" order", () => {
+  for (let n = 0; n <= 9; n++) {
     assert.equal(looksLikeEarlyPhaseCheckpoint(`**Phase ${n} recap — some heading:**\n\nDetails here.`), true, `phase ${n} recap should match`);
   }
   assert.equal(looksLikeEarlyPhaseCheckpoint("Here's a quick recap of phase 5 before we continue."), true);
@@ -73,9 +73,47 @@ test("looksLikeEarlyPhaseCheckpoint catches \"Phase N is confirmed complete\" fo
   assert.equal(looksLikeEarlyPhaseCheckpoint("Great — Phase 5 is confirmed complete. Moving on to constraints."), true);
 });
 
-test("looksLikeEarlyPhaseCheckpoint does not match phase 9 (the real final pass) so it still reaches the LLM classifier", () => {
-  assert.equal(looksLikeEarlyPhaseCheckpoint("**Phase 9 recap — final validation:**\n\nEverything checks out."), false);
-  assert.equal(looksLikeEarlyPhaseCheckpoint("Phase 9 is confirmed complete. The ontology is ready to use."), false);
+// Issue #160: the old final phase (9) was split into a new Phase 9 (bounded
+// domain-expansion pass) plus Phase 10 (validation pass) -- the excluded
+// number below moved with it. This exclusion (letting a "Phase 10 recap"
+// message still reach the real LLM classifier, rather than being forced to
+// "not finished" by this deterministic filter alone) is exactly what
+// needs re-checking by hand every time the interviewer's phase count
+// changes -- see the next test for the number-agnostic safety net added
+// specifically so a future phase change can't silently break this again
+// without a human deliberately re-deriving which number is "final".
+test("looksLikeEarlyPhaseCheckpoint does not match phase 10 (the real final pass) on its own, so a genuine final recap still reaches the LLM classifier", () => {
+  assert.equal(looksLikeEarlyPhaseCheckpoint("**Phase 10 recap — final validation:**\n\nEverything checks out."), false);
+  assert.equal(looksLikeEarlyPhaseCheckpoint("Phase 10 is confirmed complete. The ontology is ready to use."), false);
+});
+
+// The number-agnostic safety net (looksLikeNumberedPhaseWithOpenQuestion,
+// internal to conversationOrchestrator.mjs) that exists specifically so
+// this exact incident class doesn't need another manual fix the next time
+// a phase is added, split, or renumbered: a live pilot run for issue #160
+// found the real interviewer saying "Now Phase 9, the bounded domain-
+// expansion pass... Are we missing any of these nearby structures...?" --
+// naming a phase number while asking a real, unanswered, narrowly-scoped
+// question -- and the LLM classifier, primed by its own stale phase-count
+// description, misread it as the final wrap-up. This test uses phase
+// numbers that are deliberately NOT any phase this interview prompt
+// currently has (47, 999) specifically to prove the fix does not depend on
+// knowing the real phase count at all -- it would catch this failure mode
+// even after a future restructuring nobody remembered to sync here.
+test("looksLikeEarlyPhaseCheckpoint catches ANY numbered-phase mention paired with a real open question, independent of the interviewer's actual phase count", () => {
+  assert.equal(
+    looksLikeEarlyPhaseCheckpoint("Now Phase 9, the bounded domain-expansion pass. For the major concept Incident, are we missing any lifecycle events or related paperwork?"),
+    true,
+    "the exact real message that fooled the classifier in the #160 pilot run must be caught deterministically"
+  );
+  assert.equal(looksLikeEarlyPhaseCheckpoint("Moving into Phase 47 now: is there anything else about this concept worth capturing?"), true,
+    "a hypothetical future phase number (not one this prompt currently has) must still be caught");
+  assert.equal(looksLikeEarlyPhaseCheckpoint("Phase 999 check: does this property need an allowed-value list?"), true);
+  // The same phase-number mention WITHOUT a real open question (a flat
+  // declarative statement) is not caught by this specific check -- it may
+  // still be a genuine final wrap-up, so it must be allowed to reach the
+  // classifier rather than being forced to "not finished" here.
+  assert.equal(looksLikeEarlyPhaseCheckpoint("Phase 47 is now complete."), false);
 });
 
 test("looksLikeEarlyPhaseCheckpoint does not match a genuine final wrap-up with no phase-recap phrasing at all", () => {

@@ -103,18 +103,54 @@ export function trackToolActivityStreak({ current, max }, turnHadToolActivity) {
 // real final wrap-up's, no matter how the instructions are worded.
 //
 // This catches the interviewer's own consistent "Phase N recap" / "Phase N
-// is confirmed complete" phrasing (N 0-8, never 9 -- phase 9 is the real
+// is confirmed complete" phrasing (N 0-9, never 10 -- phase 10 is the real
 // final pass and must still reach the LLM call) with plain regex, and
 // short-circuits straight to "not finished" without spending an API call at
 // all. It only ever forces NO, never YES, so it can only make the
 // classifier less trigger-happy than before, never more.
+//
+// The specific excluded number here (currently 10) has already drifted out
+// of sync with the real interviewer prompt once: issue #160 split the old
+// final Phase 9 into a new Phase 9 (bounded domain-expansion pass) plus
+// Phase 10 (validation pass), and a live pilot run reproduced this exact
+// failure mode a third time on the newly-introduced Phase 9 -- the
+// interviewer said "Now Phase 9, the bounded domain-expansion pass..." and
+// asked a real, unanswered, narrowly-scoped question, and the LLM
+// classifier (told by its own system prompt, below, that phase 9 was the
+// final wrap-up) said YES. See looksLikeNumberedPhaseWithOpenQuestion just
+// below for the number-agnostic safety net added specifically so the next
+// phase-count change can't silently reintroduce this a fourth time; this
+// array is still kept in sync by hand as a belt-and-suspenders early exit,
+// but is no longer the only thing standing between a phase renumbering and
+// this bug.
 const EARLY_PHASE_CHECKPOINT_PATTERNS = [
-  /\bphase\s*[0-8]\b[^\n]{0,40}\brecap\b/i,
-  /\brecap\b[^\n]{0,40}\bphase\s*[0-8]\b/i,
-  /\bphase\s*[0-8]\b[^\n]{0,60}\bconfirmed\s+complete\b/i,
+  /\bphase\s*[0-9]\b[^\n]{0,40}\brecap\b/i,
+  /\brecap\b[^\n]{0,40}\bphase\s*[0-9]\b/i,
+  /\bphase\s*[0-9]\b[^\n]{0,60}\bconfirmed\s+complete\b/i,
 ];
+
+// Number-agnostic safety net, added after the incident described just
+// above. Rather than re-deriving and hand-syncing "which phase number is
+// currently final" (which has now broken this file twice), this check
+// needs no phase count at all: ANY message that names a specific numbered
+// phase ("Phase N" for any N) while still asking a real, unanswered
+// question is a mid-interview checkpoint, never a genuine final wrap-up --
+// this project's own three published anchor endings (quoted in
+// looksLikeContinuationOffer's own comment below) are flat declarative
+// statements with no phase number and no open question at all, and that
+// shape difference, not the specific phase count, is the real signal. Safe
+// under the same "only ever forces NO" rule as every filter in this file:
+// at worst, a genuine final message that happens to both name a phase
+// number and end on a real question falls through to the LLM classifier
+// exactly as it would without this check -- never worse than before it
+// existed, and this one needs no update the next time a phase is added,
+// removed, split, or renumbered.
+function looksLikeNumberedPhaseWithOpenQuestion(text) {
+  if (!text || !text.includes("?")) return false;
+  return /\bphase\s*\d+\b/i.test(text);
+}
 export function looksLikeEarlyPhaseCheckpoint(text) {
-  return EARLY_PHASE_CHECKPOINT_PATTERNS.some((re) => re.test(text));
+  return EARLY_PHASE_CHECKPOINT_PATTERNS.some((re) => re.test(text)) || looksLikeNumberedPhaseWithOpenQuestion(text);
 }
 
 // Third deterministic pre-filter, and the same failure class as the first:
@@ -212,17 +248,21 @@ export function looksLikePureAcknowledgment(text) {
 export function classifierMessages(text) {
   return [
     { role: "system", content: "You judge a single message from an AI conducting a domain-modeling interview, which " +
-              "runs through 10 numbered phases: 0 orientation, 1 real questions/actions, 2 classes, " +
+              "runs through 11 numbered phases: 0 orientation, 1 real questions/actions, 2 classes, " +
               "3 relationships, 4 decision properties, 5 language/aliases, 6 constraints, 7 rules, 8 actions, " +
-              "9 final validation pass (competency-question check, final checklist). It recaps and asks for " +
-              "confirmation at the end of EVERY phase, not just the last one -- a recap of phase 1, 2, 3, etc. " +
-              "asking to proceed to the next phase is completely normal mid-interview behavior, not completion. " +
-              "First, on one line, name which phase (0-9) this message's content most resembles, or say " +
-              "'final wrap-up' if it's phase 9 or equivalent. Then, on the next line by itself, answer with " +
-              "exactly one word, YES or NO: does this specific message indicate the *entire* 10-phase " +
-              "interview is finished (this is the phase-9-equivalent final wrap-up, referencing a completed " +
-              "model as a whole, not just one earlier phase's recap)? Default to NO whenever the message reads " +
-              "like an earlier phase's checkpoint rather than a true final summary." },
+              "9 a bounded domain-expansion pass (a handful of narrow, scoped questions about specific already-" +
+              "modeled concepts -- this is still real elicitation, not a summary, and normally gets a real " +
+              "answer back before moving on), 10 final validation pass (competency-question check, final " +
+              "checklist). It recaps and asks for confirmation at the end of EVERY phase, not just the last " +
+              "one -- a recap of phase 1, 2, 3, etc. asking to proceed to the next phase is completely normal " +
+              "mid-interview behavior, not completion, and a message that explicitly announces or begins phase " +
+              "9 is not itself the finished interview -- it is one phase away from it. First, on one line, name " +
+              "which phase (0-10) this message's content most resembles, or say 'final wrap-up' if it's phase " +
+              "10 or equivalent. Then, on the next line by itself, answer with exactly one word, YES or NO: " +
+              "does this specific message indicate the *entire* 11-phase interview is finished (this is the " +
+              "phase-10-equivalent final wrap-up, referencing a completed model as a whole, not just one " +
+              "earlier phase's recap)? Default to NO whenever the message reads like an earlier phase's " +
+              "checkpoint -- including phase 9's own narrow questions -- rather than a true final summary." },
     { role: "user", content: text },
   ];
 }
