@@ -3524,3 +3524,134 @@ reference and record deltas/decisions here instead.)*
   Full offline regression suite green throughout (see above); rescoring and
   resummarizing did not change any test code, so no re-run of the suite was
   needed after that step, only after the algorithm change itself.
+
+- **Issue #142 implemented: Porter2 ("Snowball English") stemming, closing
+  pure grammatical-inflection gaps the #140/#141 audit found and separated
+  out explicitly from genuine vocabulary/synonym gaps** -- gold's
+  `hasLocation` (token `location`) never matched a recovered `locatedIn`/
+  `locatedOnFloor` (token `located`), even though a human reader recognizes
+  them as the same word, because `labelSimilarity()`'s Jaccard comparison
+  was exact-token-only. `snowball-stemmers` (0.6.0, `newStemmer("english")`)
+  is now applied to every token before the Jaccard comparison, in both
+  `labelSimilarity()` (short class/relationship/property labels) and, since
+  `computeActionMetrics()` calls the same function directly on full free-
+  text rule/action precondition/effect/verification sentences, there too.
+
+  **Package verified empirically, not trusted from its name**, because the
+  ticket's own text warned several similarly-named npm packages actually
+  implement the original 1980 Porter algorithm under a modern-sounding
+  name -- confirmed live: `stemmer` (wooorm) documents itself as literally
+  "[Porter stemming algorithm]", the old one. `snowball-stemmers` exposes
+  both `"porter"` (old) and `"english"` (Porter2) as distinct named
+  algorithms from one package; tested both against known-divergent words
+  before trusting either: `"generalizations"` -> `"gener"` (porter) vs
+  `"general"` (english); `"successfully"` -> `"successfulli"` vs
+  `"success"`; `"commune"`/`"communal"` collapse to one stem under porter
+  but stay distinct under english. `"english"` is Snowball's own name for
+  what is commonly called Porter2, confirmed genuinely different from the
+  ticket's warned-against trap, not just differently named.
+
+  **Two deliberate design decisions beyond the ticket's literal text**:
+  (1) stopwords are filtered on the *original* word, before stemming, not
+  stemmed-then-filtered as the ticket itself suggested -- Porter2 stems
+  `"its"` to `"it"`, so the reverse order would require adding `"it"` to
+  `STOPWORDS` purely as a stemming artifact; filtering first avoids that.
+  (2) stemming is gated to plain ASCII lowercase-alphanumeric tokens
+  (`/^[a-z0-9]+$/`) -- this app is bilingual (en/hu) and itops's own ground
+  truth carries genuine Hungarian aliases, and an English suffix-stripping
+  stemmer is not a safe no-op on Hungarian text: confirmed directly that it
+  mangles real Hungarian words this benchmark's own gold data uses
+  (`"incidens"` -> `"inciden"`, `"forrás"` -> `"forrá"`, `"szolgáltatás"` ->
+  `"szolgáltatá"`), because Hungarian's own "-ás/-és" noun-forming suffix
+  coincidentally resembles the English plural "-s" Porter2 strips. None of
+  the 15 real committed runs are in Hungarian (confirmed: no accented
+  character appears in any of them), so this guard has no effect on any
+  existing result -- it exists to not silently corrupt a future Hungarian
+  run, not to fix an observed problem.
+
+  **Test plan**: 13 new unit tests in `tests/ontology-recovery-metrics.
+  spec.mjs` -- 4 confirming the audit's own now-fixable gaps (`hasLocation`/
+  `locatedIn`, `hasLocation`/`locatedOnFloor`, `secures`/
+  `isSecuredByAgreement`, `governsPaymentOf`/`governPaymentOfInterest`), 3
+  confirming genuine vocabulary gaps stay correctly unmatched (`hasPart`/
+  `hasFloor`, `hasAgent`/`involvesCarrier`, `owns`/`accountableFor` -- a
+  stemmer that accidentally widened these would be masking a real gap, not
+  fixing one), a stopword-interaction case, a stopword-fix-survival case
+  (the earlier symmetric-stopword-fallback fix must still hold with
+  stemming layered on top), a Hungarian-alias exact-match case (bilingual
+  guard), plus 2 real-fixture regression tests against brick-hvac/run-01's
+  and fibo-loans/run-03's actual recovered models (below) -- and 3 more for
+  the `STEM_EXCEPTIONS` fix described below. One pre-existing test's
+  fixture broke, correctly: `tests/ontology-recovery-llm-matching.spec.mjs`'s
+  `aggregateSemanticRuleActionMetrics` test used gold `"increaseCooling"` vs
+  recovered `"coolMore"`, sanity-asserting zero heuristic token overlap --
+  under stemming `"cooling"`/`"cool"` genuinely do share a root, correctly
+  clearing the action threshold on their own, which broke that assumption,
+  not the fix; the recovered name was swapped to `"chillFurther"` (verified
+  to share zero stemmed tokens with `"increaseCooling"`). Full offline
+  regression suite green: 1207 tests, 1196 pass, 0 fail, 11 skipped
+  (unchanged pass/fail split from before the feature, +3 tests net from the
+  fixture swap and the `STEM_EXCEPTIONS` addition below).
+
+  **Rescore results** (`rescore-saved-run.mjs --write`, all 15 real runs):
+  brick-hvac/run-01 and run-03 each gained 4 relationship matches (gold's
+  `hasLocation` against the run's own real `locatedIn`/`locatedOnFloor`/
+  `locatedInSpace` edges -- hand-verified against each run's actual
+  `recovered-model.yaml` edge content, same class pairs and directions as
+  gold, not just a score-count change taken on faith); fibo-loans/run-03
+  gained 2 (`governsPaymentOf` against `governPaymentOfInterest`, same
+  verification). itops/run-02 gained 1 rule match (`ruleMetrics` 10/11 ->
+  11/11: gold's `declareMajorIncidentPreconditions` now matches the run's
+  own verbose `qualifiesAsMajorIncident` rule, whose 7 conditions restate
+  gold's 4 in different words -- e.g. "incident status is not resolved" for
+  gold's "not in [resolved, closed, cancelled]" -- a combined weight of
+  0.38, just above `RULE_MATCH_THRESHOLD` (0.35), that stemming's extra
+  token overlap on words like "resolved"/"assigned"/"impacted" pushed over).
+  Several runs' `preconditionRecovery`/`effectRecovery`/`verificationRecovery`
+  scores also moved (traced to `computeActionMetrics` calling
+  `labelSimilarity()` directly on full free-text action sentences, sharing
+  the same tokenize pipeline -- spot-checked fibo-loans/run-01's own
+  `reviewPaymentRecordCompleteness` gold/recovered effect-text pair by hand
+  to confirm the mechanism, not just trust the score delta). Macro deltas
+  (`summarize-multi-domain-benchmark.mjs`, `results/multi-domain/summary.md`
+  + `results/multi-domain-control/summary.md`): relationships-full macro
+  mean F1 0.617 -> 0.644; composite recovery effectiveness (full) 0.649 ->
+  0.658, (scoped) 0.638 -> 0.650; brick-hvac composite 0.619 -> 0.647;
+  fibo-loans composite 0.602 -> 0.609; itops rules F1 0.613 -> 0.643 (the
+  only itops macro metric that moved).
+
+  **Hand-check found and fixed a real false positive, not a synthetic
+  concern** -- per explicit instruction to read through the rescoring by
+  hand, not just trust green tests: a corpus-wide scan of every match at
+  weight < 0.4 across all 15 runs, both full and practical scope, surfaced
+  itops/run-02's practical-scope property matcher assigning gold's
+  `Change.implementationPlan` -> recovered `plannedStart` and
+  `Change.backoutPlan` -> recovered `plannedEnd`, both at weight 0.333 (one
+  shared token in a 3-token union). Root cause: Porter2 stems `"planned"`
+  (the "scheduled" sense, an adjective on Start/End) to `"plan"` (the
+  "document" sense), and itops's own ground truth carries both senses side
+  by side on the same `Change` class -- `implementationPlan`/`backoutPlan`
+  vs. `plannedStart`/`plannedEnd` -- so the two words collided purely on
+  Porter2's stem, not on any real shared meaning. It surfaced only in
+  practical scope because the two real `Change.planned*` gold properties
+  that would otherwise out-compete for those exact recovered slots (and
+  correctly win, at weight 1.0, in full-domain scope) are themselves out of
+  practical scope, leaving the slots open to the coincidental match.
+  A global threshold raise was considered and rejected: the same corpus
+  scan found many *other*, entirely correct matches sitting at the
+  identical 0.333 weight with no relation to stemming at all (e.g.
+  `Incident.resolvedAt` -> `resolvedTime`, `RegulatoryNotification.dueAt`
+  -> `dueTime`) -- raising the bar to exclude the one false positive would
+  have broken those too. Fixed narrowly instead: `STEM_EXCEPTIONS`
+  (`recoveryMetrics.mjs`) keeps `"planned"` unstemmed, closing exactly this
+  collision while leaving `"planning"`/`"plans"` (not the word found
+  colliding) stemming normally. After the fix and a second full rescore of
+  all 15 runs, itops/run-02's practical-scope properties are back to the
+  correct 22/25 (was briefly 24/25 with the bug); no other run or scope was
+  affected (heuristic-matches.json, which is always scored against full
+  domain, never showed this false positive at all). 3 more unit tests cover
+  it: the false-positive pair now correctly fails to match, the exception's
+  narrowness (`"planning"`/`"plans"` still stem and still match a gold
+  `Plan` property), and a real-fixture regression against itops/run-02
+  itself. Full regression suite re-confirmed green after this second fix:
+  1207 tests, 1196 pass, 0 fail, 11 skipped.

@@ -535,8 +535,8 @@
     "inputClassAccuracy": 0.8,
     "inputClassChecked": 5,
     "preconditionRecovery": 0.5444444444444445,
-    "effectRecovery": 0.2649996202627781,
-    "verificationRecovery": 0.38281457104986516
+    "effectRecovery": 0.3011107313738893,
+    "verificationRecovery": 0.38887517711047126
   },
   "semanticRuleActionMetrics": {
     "rules": {

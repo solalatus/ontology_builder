@@ -12,10 +12,10 @@
       "recoveredTotal": 31
     },
     "relationships": {
-      "recall": 0.5806451612903226,
-      "precision": 0.5806451612903226,
-      "f1": 0.5806451612903226,
-      "matched": 18,
+      "recall": 0.6451612903225806,
+      "precision": 0.6451612903225806,
+      "f1": 0.6451612903225806,
+      "matched": 20,
       "groundTruthTotal": 31,
       "recoveredTotal": 31
     },
@@ -30,7 +30,7 @@
     "controlledValueFidelity": null,
     "controlledValuePropertyGoldTotal": 0,
     "controlledValuePropertyMatchedCount": 0,
-    "recoveryEffectiveness": 0.5670915106398978,
+    "recoveryEffectiveness": 0.5885968869839838,
     "recoveryEffectivenessWithFidelity": null
   },
   "scopedMetrics": {
@@ -43,10 +43,10 @@
       "recoveredTotal": 31
     },
     "relationships": {
-      "recall": 0.5882352941176471,
-      "precision": 0.3225806451612903,
-      "f1": 0.41666666666666663,
-      "matched": 10,
+      "recall": 0.7058823529411765,
+      "precision": 0.3870967741935484,
+      "f1": 0.5,
+      "matched": 12,
       "groundTruthTotal": 17,
       "recoveredTotal": 31
     },
@@ -61,7 +61,7 @@
     "controlledValueFidelity": null,
     "controlledValuePropertyGoldTotal": 0,
     "controlledValuePropertyMatchedCount": 0,
-    "recoveryEffectiveness": 0.6277777777777778,
+    "recoveryEffectiveness": 0.6555555555555554,
     "recoveryEffectivenessWithFidelity": null
   },
   "semanticMetrics": {
@@ -240,16 +240,6 @@
           "verdict": "NO MATCH"
         },
         {
-          "goldId": "rel_11",
-          "recoveredId": "e10",
-          "verdict": "MATCH"
-        },
-        {
-          "goldId": "rel_12",
-          "recoveredId": "e9",
-          "verdict": "MATCH"
-        },
-        {
           "goldId": "rel_14",
           "recoveredId": "e6",
           "verdict": "MATCH"
@@ -413,14 +403,6 @@
       ],
       "relationships": [
         {
-          "goldId": "rel_11",
-          "recoveredId": "e10"
-        },
-        {
-          "goldId": "rel_12",
-          "recoveredId": "e9"
-        },
-        {
           "goldId": "rel_14",
           "recoveredId": "e6"
         },
@@ -446,10 +428,10 @@
         "recoveredTotal": 31
       },
       "relationships": {
-        "recall": 0.5806451612903226,
-        "precision": 0.5806451612903226,
-        "f1": 0.5806451612903226,
-        "matched": 18,
+        "recall": 0.6451612903225806,
+        "precision": 0.6451612903225806,
+        "f1": 0.6451612903225806,
+        "matched": 20,
         "groundTruthTotal": 31,
         "recoveredTotal": 31
       },
@@ -464,7 +446,7 @@
       "controlledValueFidelity": null,
       "controlledValuePropertyGoldTotal": 0,
       "controlledValuePropertyMatchedCount": 0,
-      "recoveryEffectiveness": 0.5670915106398978,
+      "recoveryEffectiveness": 0.5885968869839838,
       "recoveryEffectivenessWithFidelity": null
     },
     "rawResponses": {
@@ -534,16 +516,6 @@
           "verdict": "NO MATCH"
         },
         {
-          "goldId": "rel_11",
-          "recoveredId": "e10",
-          "verdict": "MATCH"
-        },
-        {
-          "goldId": "rel_12",
-          "recoveredId": "e9",
-          "verdict": "MATCH"
-        },
-        {
           "goldId": "rel_16",
           "recoveredId": "e29",
           "verdict": "MATCH"
@@ -572,14 +544,6 @@
       "classes": [],
       "relationships": [
         {
-          "goldId": "rel_11",
-          "recoveredId": "e10"
-        },
-        {
-          "goldId": "rel_12",
-          "recoveredId": "e9"
-        },
-        {
           "goldId": "rel_16",
           "recoveredId": "e29"
         },
@@ -601,10 +565,10 @@
         "recoveredTotal": 31
       },
       "relationships": {
-        "recall": 0.5882352941176471,
-        "precision": 0.3225806451612903,
-        "f1": 0.41666666666666663,
-        "matched": 10,
+        "recall": 0.7058823529411765,
+        "precision": 0.3870967741935484,
+        "f1": 0.5,
+        "matched": 12,
         "groundTruthTotal": 17,
         "recoveredTotal": 31
       },
@@ -619,7 +583,7 @@
       "controlledValueFidelity": null,
       "controlledValuePropertyGoldTotal": 0,
       "controlledValuePropertyMatchedCount": 0,
-      "recoveryEffectiveness": 0.6277777777777778,
+      "recoveryEffectiveness": 0.6555555555555554,
       "recoveryEffectivenessWithFidelity": null
     },
     "rawResponses": {
@@ -647,8 +611,8 @@
     "inputClassAccuracy": 0.8,
     "inputClassChecked": 5,
     "preconditionRecovery": 0.15714285714285714,
-    "effectRecovery": 0.27941587823940767,
-    "verificationRecovery": 0.43597069597069593
+    "effectRecovery": 0.41666666666666663,
+    "verificationRecovery": 0.46706800445930874
   },
   "semanticRuleActionMetrics": {
     "rules": {

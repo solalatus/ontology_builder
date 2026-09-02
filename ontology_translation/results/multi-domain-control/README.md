@@ -53,11 +53,11 @@ story, not just a hypothesis.
 
 | Dimension | itops (this control arm) | 4 published-ontology domains (`multi-domain/`) | Delta |
 |---|---|---|---|
-| Classes (full) | 67.3% | 68.3% | -1.0 pt |
-| Relationships (full) | 48.6% | 60.3% | -11.7 pt |
-| Properties (full) | 58.7% | 64.6% | -5.9 pt |
-| Composite recovery effectiveness (full) | 58.2% | 64.4% | -6.2 pt |
-| Rules | 61.3% | 66.0% | -4.7 pt |
+| Classes (full) | 67.3% | 67.6% | -0.3 pt |
+| Relationships (full) | 48.6% | 64.4% | -15.8 pt |
+| Properties (full) | 58.7% | 65.3% | -6.6 pt |
+| Composite recovery effectiveness (full) | 58.2% | 65.8% | -7.6 pt |
+| Rules | 64.3% | 66.0% | -1.7 pt |
 | Actions (identification) | 81.0% | 87.6% | -6.6 pt |
 
 Every dimension is now modestly negative (before the `run-01` re-run, rules
@@ -65,13 +65,18 @@ was anomalously +8.2 pt above the published domains -- an artifact of the
 truncated run, not a real effect) -- a materially more coherent signal:
 consistently somewhat harder across the board, not a mixed picture.
 
-*Relationships/composite figures above reflect a relationship-scorer fix
-landed after this control arm's own original numbers were first published
-(a bare "has" relation name could never match anything -- see
-`ontology_translation/TODO.md`'s later dated entry for the full story); both
-arms were re-scored with the same corrected scorer, so this table stays a
-like-for-like comparison. Classes/properties/rules/actions were unaffected
-by that fix on this real data (verified directly, not assumed) and are
+*Figures above reflect three scorer fixes landed after this control arm's
+own original numbers were first published -- a relationship-scorer fix (a
+bare "has" relation name could never match anything), issue #141's
+two-phase bipartite-matching fix (a coincidental partial-token overlap
+could steal a recovered node/edge away from its real, near-exact match),
+and issue #142's Porter2 stemming (pure grammatical-inflection mismatches,
+e.g. "hasLocation" vs. "locatedIn", now match) -- see
+`ontology_translation/TODO.md`'s later dated entries for the full story on
+each. Both arms were re-scored with the same corrected scorer after every
+fix, so this table stays a like-for-like comparison throughout. Actions
+were unaffected by any of the three fixes on this real data (verified
+directly, not assumed) and are
 unchanged from the original figures.*
 
 Interviewer-first raw identifier introductions (the channel this control

@@ -12,10 +12,10 @@
       "recoveredTotal": 22
     },
     "relationships": {
-      "recall": 0.5428571428571428,
-      "precision": 0.7916666666666666,
-      "f1": 0.6440677966101694,
-      "matched": 19,
+      "recall": 0.6571428571428571,
+      "precision": 0.9583333333333334,
+      "f1": 0.7796610169491525,
+      "matched": 23,
       "groundTruthTotal": 35,
       "recoveredTotal": 24
     },
@@ -30,8 +30,8 @@
     "controlledValueFidelity": 0.75,
     "controlledValuePropertyGoldTotal": 20,
     "controlledValuePropertyMatchedCount": 4,
-    "recoveryEffectiveness": 0.5597015874053614,
-    "recoveryEffectivenessWithFidelity": 0.6072761905540209
+    "recoveryEffectiveness": 0.6048993275183557,
+    "recoveryEffectivenessWithFidelity": 0.6411744956387668
   },
   "scopedMetrics": {
     "classes": {
@@ -43,10 +43,10 @@
       "recoveredTotal": 22
     },
     "relationships": {
-      "recall": 0.42105263157894735,
-      "precision": 0.3333333333333333,
-      "f1": 0.372093023255814,
-      "matched": 8,
+      "recall": 0.631578947368421,
+      "precision": 0.5,
+      "f1": 0.5581395348837209,
+      "matched": 12,
       "groundTruthTotal": 19,
       "recoveredTotal": 24
     },
@@ -61,8 +61,8 @@
     "controlledValueFidelity": 0.75,
     "controlledValuePropertyGoldTotal": 10,
     "controlledValuePropertyMatchedCount": 4,
-    "recoveryEffectiveness": 0.5173643410852714,
-    "recoveryEffectivenessWithFidelity": 0.5755232558139536
+    "recoveryEffectiveness": 0.5793798449612404,
+    "recoveryEffectivenessWithFidelity": 0.6220348837209303
   },
   "semanticMetrics": {
     "classes": {
@@ -195,26 +195,6 @@
           "verdict": "NO MATCH"
         },
         {
-          "goldId": "rel_16",
-          "recoveredId": "e21",
-          "verdict": "MATCH"
-        },
-        {
-          "goldId": "rel_17",
-          "recoveredId": "e22",
-          "verdict": "MATCH"
-        },
-        {
-          "goldId": "rel_18",
-          "recoveredId": "e23",
-          "verdict": "MATCH"
-        },
-        {
-          "goldId": "rel_19",
-          "recoveredId": "e24",
-          "verdict": "MATCH"
-        },
-        {
           "goldId": "rel_21",
           "recoveredId": null,
           "verdict": "NO MATCH"
@@ -328,24 +308,7 @@
     },
     "resolvedMatches": {
       "classes": [],
-      "relationships": [
-        {
-          "goldId": "rel_16",
-          "recoveredId": "e21"
-        },
-        {
-          "goldId": "rel_17",
-          "recoveredId": "e22"
-        },
-        {
-          "goldId": "rel_18",
-          "recoveredId": "e23"
-        },
-        {
-          "goldId": "rel_19",
-          "recoveredId": "e24"
-        }
-      ],
+      "relationships": [],
       "properties": [],
       "valueFidelity": [
         {
@@ -376,10 +339,10 @@
         "recoveredTotal": 22
       },
       "relationships": {
-        "recall": 0.5428571428571428,
-        "precision": 0.7916666666666666,
-        "f1": 0.6440677966101694,
-        "matched": 19,
+        "recall": 0.6571428571428571,
+        "precision": 0.9583333333333334,
+        "f1": 0.7796610169491525,
+        "matched": 23,
         "groundTruthTotal": 35,
         "recoveredTotal": 24
       },
@@ -394,8 +357,8 @@
       "controlledValueFidelity": 0.75,
       "controlledValuePropertyGoldTotal": 20,
       "controlledValuePropertyMatchedCount": 4,
-      "recoveryEffectiveness": 0.5597015874053614,
-      "recoveryEffectivenessWithFidelity": 0.6072761905540209
+      "recoveryEffectiveness": 0.6048993275183557,
+      "recoveryEffectivenessWithFidelity": 0.6411744956387668
     },
     "rawResponses": {
       "relationships": "1: NO MATCH -- no candidate links AHU to CO2 Sensor point\n2: NO MATCH -- candidate setpoint point is on Air Handling Unit, not Thermostat\n3: MATCH 4 -- AHU located in Building matches has Location\n4: MATCH 5 -- AHU located on Floor matches has Location\n5: MATCH 6 -- Terminal Unit located in Space matches has Location\n6: MATCH 7 -- Thermostat located in Space matches has Location\n7: NO MATCH -- no candidate links Outside Air CO2 Sensor to Building\n8: MATCH 2 -- Building contains Floor matches has Part\n9: MATCH 1 -- Floor contains Space matches has Part\n10: NO MATCH -- no candidate says Building has Part Zone",
@@ -473,26 +436,6 @@
           "verdict": "NO MATCH"
         },
         {
-          "goldId": "rel_16",
-          "recoveredId": "e21",
-          "verdict": "MATCH"
-        },
-        {
-          "goldId": "rel_17",
-          "recoveredId": "e22",
-          "verdict": "MATCH"
-        },
-        {
-          "goldId": "rel_18",
-          "recoveredId": "e23",
-          "verdict": "MATCH"
-        },
-        {
-          "goldId": "rel_19",
-          "recoveredId": "e24",
-          "verdict": "MATCH"
-        },
-        {
           "goldId": "rel_24",
           "recoveredId": null,
           "verdict": "NO MATCH"
@@ -551,24 +494,7 @@
     },
     "resolvedMatches": {
       "classes": [],
-      "relationships": [
-        {
-          "goldId": "rel_16",
-          "recoveredId": "e21"
-        },
-        {
-          "goldId": "rel_17",
-          "recoveredId": "e22"
-        },
-        {
-          "goldId": "rel_18",
-          "recoveredId": "e23"
-        },
-        {
-          "goldId": "rel_19",
-          "recoveredId": "e24"
-        }
-      ],
+      "relationships": [],
       "properties": [],
       "valueFidelity": [
         {
@@ -599,10 +525,10 @@
         "recoveredTotal": 22
       },
       "relationships": {
-        "recall": 0.42105263157894735,
-        "precision": 0.3333333333333333,
-        "f1": 0.372093023255814,
-        "matched": 8,
+        "recall": 0.631578947368421,
+        "precision": 0.5,
+        "f1": 0.5581395348837209,
+        "matched": 12,
         "groundTruthTotal": 19,
         "recoveredTotal": 24
       },
@@ -617,8 +543,8 @@
       "controlledValueFidelity": 0.75,
       "controlledValuePropertyGoldTotal": 10,
       "controlledValuePropertyMatchedCount": 4,
-      "recoveryEffectiveness": 0.5173643410852714,
-      "recoveryEffectivenessWithFidelity": 0.5755232558139536
+      "recoveryEffectiveness": 0.5793798449612404,
+      "recoveryEffectivenessWithFidelity": 0.6220348837209303
     },
     "rawResponses": {
       "classes": "1: NO MATCH -- no candidate is a cooling temperature setpoint\n2: NO MATCH -- no candidate is a heating temperature setpoint\n3: NO MATCH -- economizer is a control mode/assembly, not any listed candidate\n4: NO MATCH -- no candidate is a pump",
@@ -645,8 +571,8 @@
     },
     "inputClassAccuracy": 1,
     "inputClassChecked": 3,
-    "preconditionRecovery": 0.8823529411764706,
-    "effectRecovery": 0.2545454545454546,
+    "preconditionRecovery": 0.9166666666666666,
+    "effectRecovery": 0.3263403263403264,
     "verificationRecovery": 0.4166666666666667
   },
   "semanticRuleActionMetrics": {

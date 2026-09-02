@@ -1,6 +1,6 @@
 # Multi-domain elicitation benchmark -- cross-domain report
 
-Generated 2026-09-01T18:34:13.423Z. Domains: itops. Replicates: run-01, run-02, run-03 (3/domain).
+Generated 2026-09-02T07:17:29.570Z. Domains: itops. Replicates: run-01, run-02, run-03 (3/domain).
 
 ## Macro statistics (equal weight per domain, per #111's own methodology)
 
@@ -12,7 +12,7 @@ Generated 2026-09-01T18:34:13.423Z. Domains: itops. Replicates: run-01, run-02, 
 | Composite recovery effectiveness (full) | 0.582 |  | 1 | n/a (composite) |
 | Classes (practical scope) | 0.690 |  | 1 | 68 |
 | Composite recovery effectiveness (scoped) | 0.554 |  | 1 | n/a (composite) |
-| Rules | 0.613 |  | 1 | 11 |
+| Rules | 0.643 |  | 1 | 11 |
 | Actions (identification) | 0.810 |  | 1 | 11 |
 
 ## Methodology notes
@@ -23,7 +23,7 @@ Generated 2026-09-01T18:34:13.423Z. Domains: itops. Replicates: run-01, run-02, 
 
 | Domain | Replicates | Classes F1 (gold n) | Relationships F1 (gold n) | Properties F1 (gold n) | Recovery effectiveness | Rules F1 (gold n) | Actions F1 (gold n) |
 |---|---|---|---|---|---|---|---|
-| itops | 3 | 0.673 ± 0.019 (n=68) | 0.486 ± 0.040 (n=108) | 0.587 ± 0.098 (n=111) | 0.582 ± 0.039 | 0.613 (n=11) | 0.810 (n=11) |
+| itops | 3 | 0.673 ± 0.019 (n=68) | 0.486 ± 0.040 (n=108) | 0.587 ± 0.098 (n=111) | 0.582 ± 0.039 | 0.643 (n=11) | 0.810 (n=11) |
 
 ## Semantic (LLM-judged) scoring (n = replicates whose semantic judging actually succeeded, out of replicates attempted)
 
@@ -45,7 +45,7 @@ recover perfectly no matter how good the interview is. See each domain's own `tr
 **Which ontology elements are consistently recovered?** Ranked by macro mean F1 minus dispersion (rewards both high and stable recovery):
 - actionsIdentificationF1: mean 0.810, stdev 
 - classesFullF1: mean 0.673, stdev 
-- rulesF1: mean 0.613, stdev 
+- rulesF1: mean 0.643, stdev 
 - propertiesFullF1: mean 0.587, stdev 
 - relationshipsFullF1: mean 0.486, stdev 
 

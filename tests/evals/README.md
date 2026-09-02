@@ -312,7 +312,23 @@ Matching is heuristic token-set-overlap string comparison (normalized,
 stopword-stripped, Jaccard-based), not an LLM judge — deterministic and
 cheap, at the cost of missing recoveries phrased very differently from the
 ground truth's own labels/aliases. A known limitation, not solved here to
-keep this eval's own moving parts small. Normalization does split camelCase
+keep this eval's own moving parts small. Tokens are also Porter2 ("Snowball
+English") stemmed (issue #142) before the Jaccard comparison, so pure
+grammatical inflections match too — gold's `hasLocation` (→ token
+`locat`) now matches a recovered `locatedIn`/`locatedOnFloor` (→ tokens
+`locat`, `in`/`on floor`), which zero-stemmed exact-token matching never
+could. Stemming is English-only and ASCII-gated (a bilingual guard —
+`recoveryMetrics.mjs`'s own comment has the real Hungarian words it would
+otherwise corrupt) and does not touch the synonym gap above — `hasAgent`
+vs. `involvesCarrier` still shares no root and is still unmatched, exactly
+as the two words being genuinely different, not inflected forms of the
+same word, would predict. A narrow stem exception (`STEM_EXCEPTIONS`)
+keeps "planned" from stemming to "plan", found necessary by hand-checking
+the #142 rescore itself: itops's own ground truth carries a "planned"
+(scheduled) property alongside an unrelated "Plan" (document) one, and
+Porter2 collapsing them together produced a real false-positive match in
+one real run (see `ontology_translation/TODO.md`'s dated entry).
+Normalization does split camelCase
 into words first (`isImplementedBy` → `is implemented by`) — the app's own
 relationship-name dialect is camelCase while the ground truth's predicate
 labels are natural-language phrases, and a first real run found this

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-09-01T18:34:13.359Z",
+  "generatedAt": "2026-09-02T07:17:29.498Z",
   "domains": [
     "brick-hvac",
     "iof-maintenance",
@@ -35,18 +35,18 @@
       "classesFullF1": 0.7213114754098361,
       "classesFullRecall": 0.5641025641025641,
       "classesFullPrecision": 1,
-      "relationshipsFullF1": 0.6440677966101694,
+      "relationshipsFullF1": 0.7796610169491525,
       "propertiesFullF1": 0.3137254901960784,
       "propertiesFullRecall": 0.19047619047619047,
       "controlledValueFidelityFull": 0.75,
-      "recoveryEffectivenessFull": 0.5597015874053614,
-      "recoveryEffectivenessWithFidelityFull": 0.6072761905540209,
+      "recoveryEffectivenessFull": 0.6048993275183557,
+      "recoveryEffectivenessWithFidelityFull": 0.6411744956387668,
       "controlledValuePropertyGoldTotal": 20,
       "controlledValuePropertyMatchedCount": 4,
       "classesScopedF1": 0.7000000000000001,
-      "relationshipsScopedF1": 0.372093023255814,
+      "relationshipsScopedF1": 0.5581395348837209,
       "propertiesScopedF1": 0.4800000000000001,
-      "recoveryEffectivenessScoped": 0.5173643410852714,
+      "recoveryEffectivenessScoped": 0.5793798449612404,
       "semanticClassesFullF1": 0.7213114754098361,
       "semanticRelationshipsFullF1": 0.7796610169491525,
       "semanticPropertiesFullF1": 0.3137254901960784,
@@ -113,18 +113,18 @@
       "classesFullF1": 0.7812500000000001,
       "classesFullRecall": 0.6410256410256411,
       "classesFullPrecision": 1,
-      "relationshipsFullF1": 0.5671641791044776,
+      "relationshipsFullF1": 0.6865671641791045,
       "propertiesFullF1": 0.7076923076923077,
       "propertiesFullRecall": 0.5476190476190477,
       "controlledValueFidelityFull": 1,
-      "recoveryEffectivenessFull": 0.6853688289322618,
-      "recoveryEffectivenessWithFidelityFull": 0.7640266216991963,
+      "recoveryEffectivenessFull": 0.7251698239571375,
+      "recoveryEffectivenessWithFidelityFull": 0.7938773679678531,
       "controlledValuePropertyGoldTotal": 20,
       "controlledValuePropertyMatchedCount": 11,
       "classesScopedF1": 0.6976744186046512,
-      "relationshipsScopedF1": 0.2745098039215686,
+      "relationshipsScopedF1": 0.4313725490196078,
       "propertiesScopedF1": 0.6153846153846153,
-      "recoveryEffectivenessScoped": 0.529189612636945,
+      "recoveryEffectivenessScoped": 0.5814771943362914,
       "semanticClassesFullF1": 0.7812500000000001,
       "semanticRelationshipsFullF1": 0.7761194029850748,
       "semanticPropertiesFullF1": 0.7076923076923077,
@@ -464,18 +464,18 @@
       "classesFullF1": 0.6590909090909092,
       "classesFullRecall": 0.5087719298245614,
       "classesFullPrecision": 0.9354838709677419,
-      "relationshipsFullF1": 0.5806451612903226,
+      "relationshipsFullF1": 0.6451612903225806,
       "propertiesFullF1": 0.46153846153846156,
       "propertiesFullRecall": 0.30612244897959184,
       "controlledValueFidelityFull": null,
-      "recoveryEffectivenessFull": 0.5670915106398978,
+      "recoveryEffectivenessFull": 0.5885968869839838,
       "recoveryEffectivenessWithFidelityFull": null,
       "controlledValuePropertyGoldTotal": 0,
       "controlledValuePropertyMatchedCount": 0,
       "classesScopedF1": 0.7999999999999999,
-      "relationshipsScopedF1": 0.41666666666666663,
+      "relationshipsScopedF1": 0.5,
       "propertiesScopedF1": 0.6666666666666666,
-      "recoveryEffectivenessScoped": 0.6277777777777778,
+      "recoveryEffectivenessScoped": 0.6555555555555554,
       "semanticClassesFullF1": 0.6818181818181819,
       "semanticRelationshipsFullF1": 0.7419354838709677,
       "semanticPropertiesFullF1": 0.46153846153846156,
@@ -500,16 +500,16 @@
         "stdev": 0.038856448844985736
       },
       "relationshipsFullF1": {
-        "mean": 0.570410658571549,
-        "stdev": 0.07208874549279433
+        "mean": 0.655409393709419,
+        "stdev": 0.14241023873212114
       },
       "propertiesFullF1": {
         "mean": 0.521263559748106,
         "stdev": 0.19782989136145168
       },
       "recoveryEffectivenessFull": {
-        "mean": 0.6190779752697361,
-        "stdev": 0.06311831173439633
+        "mean": 0.6474108869823594,
+        "stdev": 0.06743909322083172
       },
       "controlledValueFidelityFull": {
         "mean": 0.9166666666666666,
@@ -521,8 +521,8 @@
         "stdev": 0.010449205321922946
       },
       "recoveryEffectivenessScoped": {
-        "mean": 0.5069930186022976,
-        "stdev": 0.02881772287224923
+        "mean": 0.5450940471274027,
+        "stdev": 0.061210085473630486
       },
       "semanticClassesFullF1": {
         "mean": 0.7753636290581807,
@@ -743,16 +743,16 @@
         "stdev": 0.056946856805316096
       },
       "relationshipsFullF1": {
-        "mean": 0.6873535214014624,
-        "stdev": 0.10028642169324407
+        "mean": 0.7088588977455484,
+        "stdev": 0.06753073138495204
       },
       "propertiesFullF1": {
         "mean": 0.49457741007036776,
         "stdev": 0.02889842765823056
       },
       "recoveryEffectivenessFull": {
-        "mean": 0.6015034580090314,
-        "stdev": 0.04049691013152659
+        "mean": 0.6086719167903935,
+        "stdev": 0.032467187361936684
       },
       "controlledValueFidelityFull": {
         "mean": null,
@@ -764,8 +764,8 @@
         "stdev": 0.06566468910017098
       },
       "recoveryEffectivenessScoped": {
-        "mean": 0.5967778803976983,
-        "stdev": 0.031097132930417867
+        "mean": 0.6060371396569576,
+        "stdev": 0.045665540434121334
       },
       "semanticClassesFullF1": {
         "mean": 0.6376458368351413,
@@ -818,8 +818,8 @@
       "domains": 4
     },
     "relationshipsFullF1": {
-      "mean": 0.6170129415487459,
-      "stdev": 0.052913894851202126,
+      "mean": 0.6436389694192348,
+      "stdev": 0.05277075143126387,
       "domains": 4
     },
     "propertiesFullF1": {
@@ -828,8 +828,8 @@
       "domains": 4
     },
     "recoveryEffectivenessFull": {
-      "mean": 0.6486825599118544,
-      "stdev": 0.049555278395151794,
+      "mean": 0.6575579025353508,
+      "stdev": 0.043020381412257766,
       "domains": 4
     },
     "controlledValueFidelityFull": {
@@ -843,8 +843,8 @@
       "domains": 4
     },
     "recoveryEffectivenessScoped": {
-      "mean": 0.6381191397006767,
-      "stdev": 0.11807675502651556,
+      "mean": 0.6499592116467678,
+      "stdev": 0.10335275232269554,
       "domains": 4
     },
     "rulesF1": {
@@ -884,8 +884,8 @@
       },
       {
         "element": "relationshipsFullF1",
-        "macroMeanF1": 0.6170129415487459,
-        "macroStdevF1": 0.052913894851202126
+        "macroMeanF1": 0.6436389694192348,
+        "macroStdevF1": 0.05277075143126387
       },
       {
         "element": "rulesF1",
@@ -902,7 +902,7 @@
       "perDomain": [
         {
           "domain": "brick-hvac",
-          "delta": -0.19514904891800422
+          "delta": -0.11015031378013429
         },
         {
           "domain": "iof-maintenance",
@@ -914,7 +914,7 @@
         },
         {
           "domain": "fibo-loans",
-          "delta": 0.06477407884619846
+          "delta": 0.08627945519028446
         }
       ],
       "domainsWhereHarder": 3,
@@ -952,17 +952,17 @@
       "note": "Abstraction level has no numeric proxy in this benchmark's own metrics -- reading the per-domain F1s in domain-comparison.csv against each domain's known character (brick-hvac: concrete physical equipment graph; iof-maintenance/iof-supply-chain: process- and event-centric industrial ontologies; fibo-loans: abstract financial/regulatory concepts) is left to the reader rather than asserted here."
     },
     "ontologySizeVsRecovery": {
-      "pearsonR": -0.6297183530278664,
+      "pearsonR": -0.5562447727685947,
       "n": 4,
       "ci95": [
-        -1.0000000000000002,
-        0.9999999999999999
+        -1,
+        0.9999999999999998
       ],
       "perDomain": [
         {
           "domain": "brick-hvac",
           "size": 128,
-          "recoveryEffectivenessFull": 0.6190779752697361
+          "recoveryEffectivenessFull": 0.6474108869823594
         },
         {
           "domain": "iof-maintenance",
@@ -977,19 +977,19 @@
         {
           "domain": "fibo-loans",
           "size": 149,
-          "recoveryEffectivenessFull": 0.6015034580090314
+          "recoveryEffectivenessFull": 0.6086719167903935
         }
       ],
-      "conclusion": "r=-0.63, but n=4 is below this report's own floor of 5 for a directional conclusion -- not stated as a verdict"
+      "conclusion": "r=-0.56, but n=4 is below this report's own floor of 5 for a directional conclusion -- not stated as a verdict"
     },
     "translationStabilityVsElicitation": {
-      "pearsonR": -0.9745715648393775,
+      "pearsonR": -0.9175898912763447,
       "n": 4,
       "ci95": [
         -1,
         1
       ],
-      "conclusion": "r=-0.97, but n=4 is below this report's own floor of 5 for a directional conclusion -- not stated as a verdict"
+      "conclusion": "r=-0.92, but n=4 is below this report's own floor of 5 for a directional conclusion -- not stated as a verdict"
     },
     "interviewerChangeGeneralization": {
       "note": "Not applicable to this run -- every domain and replicate used the same single interviewer model/deployment. Answering this question requires a follow-up run holding domains fixed and varying the interviewer model, which is out of scope for this pass."

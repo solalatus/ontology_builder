@@ -221,6 +221,26 @@
       "goldId": "rel_35",
       "edgeId": "e14",
       "direction": "forward"
+    },
+    {
+      "goldId": "rel_16",
+      "edgeId": "e8",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_17",
+      "edgeId": "e7",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_18",
+      "edgeId": "e9",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_19",
+      "edgeId": "e10",
+      "direction": "forward"
     }
   ],
   "properties": [
