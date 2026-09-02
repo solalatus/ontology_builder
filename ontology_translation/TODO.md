@@ -3722,6 +3722,53 @@ reference and record deltas/decisions here instead.)*
   ship half-tuned (a test that fails on "date" from day one teaches nobody
   anything and gets ignored or deleted, not fixed). Left for a follow-up.
 
+- **Issue #144 follow-up: the standing mechanical overlap-check test
+  deferred above is now implemented**, closing the one remaining Definition-
+  of-Done item that didn't need a live rerun (the live non-regression
+  evaluation above stays deferred; not attempted here, per instruction).
+  `tests/helper-agent-phase4.spec.mjs`'s new test resolves the two design
+  problems the earlier attempt hit:
+
+  1. **Entity vocabulary only, not property vocabulary.** Built from every
+     domain's class/relationship names and aliases (via the already-existing
+     `listAvailableDomains()`/`resolveDomainYamlPath()`, so a future domain
+     addition is picked up automatically, not silently missed), explicitly
+     excluding property names. Properties are generic modeling vocabulary
+     (`status`, `amount`, `date`) that legitimately recurs across almost
+     every real domain and in `AGENT_KNOWLEDGE`'s own prose about what a
+     property is in general -- checking them was the earlier attempt's own
+     source of false positives, confirmed by re-running that same naive
+     check with properties included but scoped only to code blocks (below):
+     it still flagged `status`/`amount`/`unit`/`due date` as noise.
+  2. **`AGENT_KNOWLEDGE`'s own code surface only, not its prose.** Checks
+     fenced ` ```yaml`/` ```text` blocks plus inline `` `single-backtick` ``
+     spans -- where a running example's own identifier vocabulary actually
+     lives (a `ClassName:` YAML key, a `Thing --relationship--> Other thing`
+     line, an inline `` `issuedBy: Invoice -> X` `` aside) -- not the
+     surrounding explanatory sentences. Confirmed necessary, not assumed:
+     checking whole-document prose against entity-only vocabulary still
+     flagged 7 real class names (brick-hvac's own `Filter`/`Building`,
+     iof-supply-chain's own `Load` and `PurchaseOrder`'s alias `order`,
+     itops's own `Database`/`Change`/`Deployment`) as false positives, every
+     one of them an ordinary English word used in ordinary prose sentences
+     with zero connection to any illustrative example (`"Avoid database
+     table names"`, `"in increasing order"`, `"Deployment-time, not
+     authoring"`) -- confirmed by hand-checking where each actually
+     appears, not just trusting the flag count.
+
+  **Verified to actually catch the original bug, not just assumed correct**:
+  ran the new test against the pre-#144-fix `index.html` (via `git show
+  282bc70~1:index.html`, run, then restored) -- it correctly failed, listing
+  all four real overlaps (`supplier`, `purchase order`, `order`, `vendor`),
+  then passed again against the current fixed vocabulary. Below-4-character
+  entity phrases are excluded the same deliberate way properties are (almost
+  entirely real domain abbreviations -- `AHU`, `NOC`, `API`, `VM` -- that
+  would make this an any-2-3-letter-substring check and swamp it with its
+  own kind of noise).
+
+  Full offline regression suite green: 1211 tests, 1200 pass, 0 fail, 11
+  skipped (+1 from this test).
+
   Full offline regression suite green (`tests/agent-production-invariants.
   spec.mjs` re-confirms the new golden hash on both languages;
   `tests/helper-agent-phase4.spec.mjs`'s own `AGENT_KNOWLEDGE`-content
