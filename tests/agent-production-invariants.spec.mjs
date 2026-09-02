@@ -40,43 +40,47 @@ import { withPage } from "./lib/page.mjs";
 // model on a real request. Recorded per language because the directive names
 // the language (agentLanguageDirective()), so the two differ by design.
 //
-// Updated deliberately (issue #140 follow-up): a manual, page-by-page audit
-// of 15 real completed interviews found the interviewer's system prompt
-// itself already instructed, in its own CONSISTENCY CHECK section, to
-// "resolve which direction the expert actually uses and remove the other"
-// when a reverse-direction relationship-pair warning fired -- an instruction
-// the interviewer had no tool to actually carry out, since apply_ontology_yaml
-// is upsert-only by design. The audit found the predictable result: the
-// interviewer instead overwrote a `meaning` field with a self-directed
-// deletion note ("REMOVE") that then shipped, untouched, in the final
-// exported ontology. Fixed by giving the interviewer a real
-// remove_ontology_elements tool (reusing the exact tool/removal core the
-// Import Review execution agent already had) and rewriting the prompt to
-// describe it, with the same "BE CONSERVATIVE ABOUT REMOVAL" caution that
-// tool's own execution-agent prompt already uses, plus an explicit
-// prohibition on the meaning-field-as-deletion-note workaround the audit
-// found in practice. This is the intentional case the header above
-// describes, and a new treatment by that header's own definition -- a live
-// non-regression evaluation against the anchor distribution
-// (tests/evals/results/runs/run-01..03) is the right next step before this
-// prompt's own composite/relationship numbers are compared to anything, but
-// was not run in this same pass (explicit cost/scope decision, no full live
-// benchmark budget available at the time -- see ontology_translation/
-// TODO.md's dated entry for this exact tradeoff spelled out). The two live,
-// opt-in behavioral tests added alongside this change
-// (tests/agent-remove-tool-live.spec.mjs) are a smaller, targeted substitute
-// that were run for real against Azure before this hash was pinned -- not a
-// full anchor-comparable non-regression pass, but real evidence the model
-// actually uses the new tool correctly, not just that the prompt text reads
-// as if it should.
+// Updated deliberately (issue #144): AGENT_KNOWLEDGE's own baked "how to
+// describe a domain" howto used a running procurement example --
+// Invoice/Supplier/Employee/Purchase order -- that turned out to overlap
+// real vocabulary in 2 of the 5 benchmark domains: iof-supply-chain's own
+// `Supplier` class and `PurchaseOrder` class (an exact match, not just a
+// shared root), and itops's own `Vendor` class, whose alias is literally
+// "supplier". Sent to the interviewer verbatim on every single run
+// regardless of domain, this is a more direct leak channel than the
+// pretraining-contamination question issue #133 characterized -- not "the
+// model may have seen this during training" but "the model is handed this
+// content directly, in its own system prompt, on this exact run."
+// `Supplier`/`vendor` -> `Manufacturer`/`producer`, `Purchase order` ->
+// `Requisition`, mechanically verified to share no class/relationship/
+// property name (or camelCase-split component word) with any of the 5
+// domains' own `reference.domain.yaml` files. Same shape throughout (a
+// class with a meaning and alias, a relationship, decision-relevant
+// properties) -- only the vocabulary changed, not the howto's own content
+// or structure. A live non-regression evaluation against the anchor
+// distribution (tests/evals/results/runs/run-01..03) is the right next step
+// before this prompt's own numbers are compared to anything, but was not
+// run in this same pass -- explicitly deferred in issue #144's own filing
+// (no full live benchmark budget available at the time; see
+// ontology_translation/TODO.md's dated entry). Issue #144's own proposed
+// standing mechanical overlap-check test was also not added here: a first
+// attempt at one (naive whole-word overlap between AGENT_KNOWLEDGE and the
+// 5 domains' vocabularies) flagged dozens of ordinary shared English
+// modeling words -- "date", "amount", "status", "type", "for" -- that any
+// howto discussing properties in general will inevitably share with real
+// domains that also have dated/amount/status-shaped properties; building a
+// version that distinguishes the illustrative example's own proper nouns
+// from that generic scaffolding is real design work, deliberately left for
+// a follow-up rather than shipped half-tuned here.
 //
-// Previous hashes (3684db5c…/a92324e5…) were the ground-up prompt/behavior-
-// tuning bundle recorded just before this change -- see this constant's own
-// prior revision (git blame) for that bundle's own full changelog, itself
-// following the same discipline from a previous intentional change.
+// Previous hashes (e733938a…/f802c23c…) were the remove_ontology_elements-
+// tool prompt bundle recorded just before this change -- see this
+// constant's own prior revision (git blame) for that bundle's own full
+// changelog, itself following the same discipline from a previous
+// intentional change.
 export const PRODUCTION_SYSTEM_PROMPT_SHA256 = {
-  en: "e733938a97fff2b48349886928f49bc697a2d1a6331efbaebae5fbbd6077ab28",
-  hu: "f802c23c4a52d586d5052769a67e68484551aa6c1cbb1cbf8661b836110cec73",
+  en: "d65f23817244ea0889114099fef5ecfdfcc1215e746f2681e910387f3e136529",
+  hu: "86890c0762c26616326be7830cb71a399b9879610006dc2c9a0b5ef6d20b22e4",
 };
 
 // The complete ontology tool surface an ordinary interview request exposes.

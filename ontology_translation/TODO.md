@@ -3660,3 +3660,70 @@ reference and record deltas/decisions here instead.)*
   `Plan` property), and a real-fixture regression against itops/run-02
   itself. Full regression suite re-confirmed green after this second fix:
   1207 tests, 1196 pass, 0 fail, 11 skipped.
+
+- **Issue #144 implemented: `AGENT_KNOWLEDGE`'s baked "how to describe a
+  domain" howto used a running procurement example --
+  Invoice/Supplier/Employee/Purchase order -- that overlapped real
+  vocabulary in 2 of the 5 benchmark domains**, sent to the interviewer
+  verbatim on every single run regardless of domain. Confirmed mechanically,
+  not just eyeballed: `iof-supply-chain`'s real `Supplier` class, `iof-
+  supply-chain`'s real `PurchaseOrder` class (an *exact* two-word match, not
+  merely a shared root -- found only now, while checking this ticket's own
+  fix mechanically; the original issue filing had only flagged `Supplier`/
+  `Vendor`), and `itops`'s real `Vendor` class, whose own alias is literally
+  "supplier". This is a more direct leak channel than the pretraining-
+  contamination question issue #133 characterized -- not "the model may
+  have seen this during training" but "the model is handed this content
+  directly, in its own system prompt, on this exact run."
+
+  **Explicitly the slightest change that fixes the exposure, not the
+  ticket's full Definition of Done** (per direct instruction): renamed
+  `Supplier`/`vendor` -> `Manufacturer`/`producer` and `Purchase order` ->
+  `Requisition` throughout `AGENT_KNOWLEDGE` (every occurrence -- the
+  running example itself, its "Complete compact example" YAML restatement,
+  and two grammar-explanation asides elsewhere in the same howto that also
+  happened to name `Supplier`/`vendor`), same shape throughout (a class
+  with a meaning and alias, a relationship, decision-relevant properties)
+  -- only the vocabulary changed. Verified clear via a one-off mechanical
+  scan against all 5 domains' own `reference.domain.yaml` files (every
+  class/relationship/property name and alias, camelCase-split into
+  component words) before picking the replacement words, not just assumed
+  plausible-sounding substitutes: `distributor`/`wholesaler`/`retailer`/
+  `carrier` were tried and rejected first, all four for genuinely
+  overlapping with real `iof-supply-chain` vocabulary the same way
+  `Supplier` did. The app's own in-app Help glossary (`helpUsageSections`/
+  `helpConceptTerms` in `index.html`) also uses an Invoice/Supplier example
+  but was deliberately left untouched -- that text is shown to the human
+  user only and is never sent to any model, so it carries none of this
+  issue's exposure; touching it would have been scope creep with zero
+  safety benefit.
+
+  **`PRODUCTION_SYSTEM_PROMPT_SHA256` updated** (both `en`/`hu`,
+  `tests/agent-production-invariants.spec.mjs`) in the same commit, per
+  that file's own non-negotiable discipline for any change to the
+  production interviewer prompt -- this is a new treatment, and a live
+  non-regression evaluation against the anchor distribution
+  (`tests/evals/results/runs/run-01..03`) is the right next step before
+  this prompt's own numbers are compared to anything. **Not run in this
+  pass** -- explicitly deferred in issue #144's own filing (no full live
+  benchmark budget available; the ticket names this itself as the reason
+  it was filed for later rather than actioned immediately).
+
+  **The ticket's own proposed standing mechanical overlap-check test was
+  also not added here**, and this is a real, deliberate scope decision, not
+  an oversight: a first attempt at one (a naive whole-word overlap between
+  `AGENT_KNOWLEDGE` and the 5 domains' full vocabularies) flagged dozens of
+  ordinary shared English modeling words -- `date`, `amount`, `status`,
+  `type`, `for` -- that any howto explaining properties in general will
+  inevitably share with real domains that also have dated/amount/status-
+  shaped properties. A useful version needs to distinguish the illustrative
+  example's own proper nouns from that generic scaffolding vocabulary,
+  which is real design work belonging in its own pass, not something to
+  ship half-tuned (a test that fails on "date" from day one teaches nobody
+  anything and gets ignored or deleted, not fixed). Left for a follow-up.
+
+  Full offline regression suite green (`tests/agent-production-invariants.
+  spec.mjs` re-confirms the new golden hash on both languages;
+  `tests/helper-agent-phase4.spec.mjs`'s own `AGENT_KNOWLEDGE`-content
+  assertions, none of which named the old vocabulary directly, are
+  unaffected).
