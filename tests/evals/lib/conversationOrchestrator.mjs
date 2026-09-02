@@ -273,28 +273,19 @@ export function classifierVerdict(answer) {
   return /^\s*yes/i.test(lines[lines.length - 1] || "");
 }
 
-export async function appearsFinished(text, { apiKey, model, chat = null }) {
-  if (looksLikeEarlyPhaseCheckpoint(text)) return false;
-  if (looksLikeContinuationOffer(text)) return false;
-  // Same injection point as personaAgent's: issue #85 runs against Azure,
-  // where the fixed api.openai.com URL and Bearer header below are wrong.
-  // The deterministic pre-filter above still runs either way.
-  //
-  // Issue #133/E16 (external audit): a classifier call that ultimately fails
-  // (an empty reply twice in a row, an exhausted-retries HTTP error) used to
-  // throw and take the *entire* run down with it -- hours of a real,
-  // otherwise-healthy interview lost to one failed "is this finished?"
-  // check. Degraded to "not finished" instead: the conservative direction
-  // (the run keeps going rather than ending prematurely), consistent with
-  // this function's own deterministic pre-filters above, which likewise
-  // only ever force NO, never YES.
+// One real classifier call, either through the injected chat() (the Azure
+// browser-relay path) or a direct OpenAI-shaped fetch. Returns the boolean
+// verdict, or null if the call itself failed (network/HTTP/parse error) --
+// null is distinct from false so the caller can log/handle a failure
+// differently from a clean "no".
+async function classifyOnce(text, { apiKey, model, chat }) {
   if (chat) {
     try {
       const { text: verdict } = await chat(classifierMessages(text));
       return classifierVerdict(verdict);
     } catch (err) {
       console.log(`  appearsFinished: classifier call failed (${String((err && err.message) || err)}), defaulting to "not finished"`);
-      return false;
+      return null;
     }
   }
   let res, data;
@@ -323,9 +314,52 @@ export async function appearsFinished(text, { apiKey, model, chat = null }) {
     }
   } catch (err) {
     console.log(`  appearsFinished: classifier call failed (${String((err && err.message) || err)}), defaulting to "not finished"`);
-    return false;
+    return null;
   }
   return classifierVerdict((data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || "");
+}
+
+export async function appearsFinished(text, { apiKey, model, chat = null }) {
+  if (looksLikeEarlyPhaseCheckpoint(text)) return false;
+  if (looksLikeContinuationOffer(text)) return false;
+  // Same injection point as personaAgent's: issue #85 runs against Azure,
+  // where the fixed api.openai.com URL and Bearer header below are wrong.
+  // The deterministic pre-filters above still run either way, and only
+  // ever force NO, never YES.
+  //
+  // A single classifier call is not trustworthy enough to stop a run on by
+  // itself. Neither temperature nor a seed is set on this call (see
+  // classifyOnce's own header on why not -- a reasoning-tier model can
+  // reject or silently ignore those parameters), so the SAME exact input
+  // text can legitimately get a different verdict on different calls --
+  // demonstrated directly during the epic-#152 final-gate rerun: a plain
+  // Phase-1 "here's the reworded wording, please confirm" checkpoint
+  // message (no phase-recap phrasing, no continuation offer, nothing any
+  // deterministic pre-filter above catches) got a real YES from the live
+  // classifier and ended a brick-hvac interview after 2 turns; replaying
+  // the *exact* same text against the *exact* same classifier moments
+  // later got a correct NO. This is not a prompt-wording problem the
+  // system prompt in classifierMessages can fix -- it's sampling variance
+  // in a non-deterministic model call, so no amount of rephrasing that
+  // prompt closes it for good; only requiring independent agreement does.
+  //
+  // So: a first YES is not trusted on its own. It triggers one immediate,
+  // fully independent second call on the same text, and the run is only
+  // actually treated as finished if BOTH calls say YES. A first NO still
+  // resolves immediately with no second call -- the classifier says NO on
+  // the overwhelming majority of turns in a real interview, so this adds
+  // at most one extra call per run in the ordinary case, and exactly the
+  // one extra call that catches a false alarm before it costs the run.
+  // Either call failing (classifyOnce returning null) is treated as NO,
+  // same "only ever forces NO" rule as everywhere else in this file --
+  // never confirms a finish it isn't sure about.
+  const first = await classifyOnce(text, { apiKey, model, chat });
+  if (first !== true) return false;
+  const confirmed = await classifyOnce(text, { apiKey, model, chat });
+  if (confirmed !== true) {
+    console.log("  appearsFinished: first call said YES but the independent confirmation call did not agree -- treating as \"not finished\"");
+  }
+  return confirmed === true;
 }
 
 // Pure, unit-testable tagging step: given a slice of raw apiMessages
