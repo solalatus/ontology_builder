@@ -101,7 +101,11 @@ test("appearsFinished does not trust a single YES -- a disagreeing confirmation 
       { status: 200, body: { choices: [{ message: { role: "assistant", content: "{\"phase\":\"1\",\"finished\":false}" } }] } },
     ],
     async (calls) => {
-      const result = await appearsFinished("Good start. Please confirm this wording keeps your intent.", { apiKey: "sk-test", model: "gpt-test" });
+      // Deliberately no "?", "please confirm/tell me/let me know", or phase
+      // number -- must reach the classifier rather than being pre-filtered
+      // deterministically, so this actually exercises the disagreeing-
+      // confirmation-call path being tested here.
+      const result = await appearsFinished("Good start. Recorded those and moving into the next batch of properties.", { apiKey: "sk-test", model: "gpt-test" });
       assert.equal(result, false, "a disagreeing confirmation call must override the first call's YES");
       assert.equal(calls.length, 2, "exactly one first call plus one confirmation call, no further retries");
     }

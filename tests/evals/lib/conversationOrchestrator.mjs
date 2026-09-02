@@ -182,8 +182,31 @@ export function looksLikeEarlyPhaseCheckpoint(text) {
 // here because the alternative (trusting the classifier's opinion on a
 // message that is visibly still asking something) has now demonstrably
 // failed twice in the same afternoon, deterministically, not by chance.
+// A live final-gate run (fibo-loans run-02) found the narrower gap this
+// filter's "?" check alone leaves: the interviewer's own closing sentence
+// -- "Please confirm just this set, and whether BorrowingCapacity should
+// stay out for now unless we explicitly add a competency question for it
+// later." -- is grammatically an imperative request, not a punctuated
+// question, so it contains no "?" at all and slipped past the check
+// above. The LLM classifier then misjudged it as finished, ending the
+// interview mid-work; the resulting model scored 0.48 (vs. a 0.59-0.65
+// baseline range) with high precision but very low recall -- exactly the
+// signature of "cut off before it finished adding things", not a
+// genuinely narrower but complete model. "Please confirm ..." is one of
+// this interviewer's own most common closing idioms across every domain
+// (seen dozens of times today alone, always at a mid-interview
+// checkpoint, never once in a genuine final wrap-up) -- safe to match
+// unconditionally for the same reason the question-mark check is: only
+// ever forces NO, so at worst a genuine final that happens to phrase its
+// close this way falls through to the classifier exactly as before.
+const REQUEST_FOR_REPLY_PATTERNS = [
+  /\bplease\s+(confirm|tell me|let me know|clarify|advise|choose|select|answer|give|provide|correct|edit|specify|state)\b/i,
+  /\bconfirm(ed)?\s+or\s+correct\b/i,
+  /\blet me know\b/i,
+];
 export function looksLikeOpenQuestion(text) {
-  return Boolean(text) && text.includes("?");
+  if (!text) return false;
+  return text.includes("?") || REQUEST_FOR_REPLY_PATTERNS.some((re) => re.test(text));
 }
 
 // Third deterministic pre-filter, and the same failure class as the first:
@@ -287,7 +310,24 @@ export function looksLikePureAcknowledgment(text) {
 // punctuation, an extra reasoning line, "Yes." vs "YES" vs "yes,") --
 // forcing a real JSON object removes that whole layer of parsing
 // ambiguity, independent of the temperature/confirmation fixes below.
-export function classifierMessages(text) {
+// `recentContext` (optional): a short window of the conversation
+// immediately before `text` -- added after a live final-gate run
+// (fibo-loans run-02) got misjudged on a message that, read in isolation,
+// is genuinely ambiguous ("I need to correct the record... here is what I
+// can justify now... please confirm this set") but is unambiguous read in
+// its actual place in the conversation (a mid-Phase-4 property-scoping
+// back-and-forth, nowhere near a real close). The deterministic filters
+// (looksLikeOpenQuestion etc.) catch the mechanical shape of a request for
+// reply; this is the complementary fix on the classifier's own side --
+// give it the same situational information a person skimming the
+// transcript would have, rather than asking it to divine "is this the
+// end?" from one message stripped of everything around it. Purely
+// additive: recentContext defaults to "" and every existing call/test that
+// doesn't pass it behaves exactly as before.
+export function classifierMessages(text, recentContext = "") {
+  const contextBlock = recentContext
+    ? `RECENT CONVERSATION, for situational context only -- judge ONLY the final message below, not this history:\n${recentContext}\n\n---\n\nMESSAGE TO JUDGE:\n${text}`
+    : text;
   return [
     { role: "system", content: "You judge a single message from an AI conducting a domain-modeling interview, which " +
               "runs through 11 numbered phases: 0 orientation, 1 real questions/actions, 2 classes, " +
@@ -298,7 +338,11 @@ export function classifierMessages(text) {
               "checklist). It recaps and asks for confirmation at the end of EVERY phase, not just the last " +
               "one -- a recap of phase 1, 2, 3, etc. asking to proceed to the next phase is completely normal " +
               "mid-interview behavior, not completion, and a message that explicitly announces or begins phase " +
-              "9 is not itself the finished interview -- it is one phase away from it. Respond with ONLY a JSON " +
+              "9 is not itself the finished interview -- it is one phase away from it. You may be given some " +
+              "recent conversation immediately before the message, purely so you can judge it in its real " +
+              "situational context (e.g. is it mid-way through scoping one class's properties, or genuinely " +
+              "wrapping up the whole model?) -- your verdict is always about the final message only, never " +
+              "about whether the earlier history looks finished. Respond with ONLY a JSON " +
               "object of exactly this shape: {\"phase\": <string -- which phase, 0-10, this message's content " +
               "most resembles, or \"final wrap-up\" if it's phase 10 or equivalent>, \"finished\": <boolean -- " +
               "true only if this specific message indicates the *entire* 11-phase interview is finished (the " +
@@ -306,7 +350,7 @@ export function classifierMessages(text) {
               "earlier phase's recap), false whenever the message reads like an earlier phase's checkpoint -- " +
               "including phase 9's own narrow questions -- rather than a true final summary>}. No text outside " +
               "the JSON object." },
-    { role: "user", content: text },
+    { role: "user", content: contextBlock },
   ];
 }
 
@@ -341,10 +385,10 @@ export function classifierVerdict(answer) {
 // treat temperature:0 as fully deterministic either.
 const CLASSIFIER_EXTRA_BODY = { temperature: 0, response_format: { type: "json_object" } };
 
-async function classifyOnce(text, { apiKey, model, chat }) {
+async function classifyOnce(text, { apiKey, model, chat, recentContext }) {
   if (chat) {
     try {
-      const { text: verdict } = await chat(classifierMessages(text));
+      const { text: verdict } = await chat(classifierMessages(text, recentContext));
       return classifierVerdict(verdict);
     } catch (err) {
       console.log(`  appearsFinished: classifier call failed (${String((err && err.message) || err)}), defaulting to "not finished"`);
@@ -363,7 +407,7 @@ async function classifyOnce(text, { apiKey, model, chat }) {
         headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
         body: JSON.stringify({
           model,
-          messages: classifierMessages(text),
+          messages: classifierMessages(text, recentContext),
           ...CLASSIFIER_EXTRA_BODY,
         }),
       });
@@ -383,7 +427,7 @@ async function classifyOnce(text, { apiKey, model, chat }) {
   return classifierVerdict((data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || "");
 }
 
-export async function appearsFinished(text, { apiKey, model, chat = null }) {
+export async function appearsFinished(text, { apiKey, model, chat = null, recentContext = "" }) {
   if (looksLikeOpenQuestion(text)) return false;
   if (looksLikeEarlyPhaseCheckpoint(text)) return false;
   if (looksLikeContinuationOffer(text)) return false;
@@ -418,9 +462,9 @@ export async function appearsFinished(text, { apiKey, model, chat = null }) {
   // Either call failing (classifyOnce returning null) is treated as NO,
   // same "only ever forces NO" rule as everywhere else in this file --
   // never confirms a finish it isn't sure about.
-  const first = await classifyOnce(text, { apiKey, model, chat });
+  const first = await classifyOnce(text, { apiKey, model, chat, recentContext });
   if (first !== true) return false;
-  const confirmed = await classifyOnce(text, { apiKey, model, chat });
+  const confirmed = await classifyOnce(text, { apiKey, model, chat, recentContext });
   if (confirmed !== true) {
     console.log("  appearsFinished: first call said YES but the independent confirmation call did not agree -- treating as \"not finished\"");
   }
@@ -748,8 +792,18 @@ export async function runOntologyRecoveryConversation({
     }
 
     if (Date.now() - startedAt > wallClockMs) { stoppedReason = "wallclock_timeout"; break; }
+    // The last few log entries before this turn's own final message,
+    // trimmed for cost -- see classifierMessages' own header on why the
+    // classifier gets this at all (it used to judge one message in total
+    // isolation, and a live run showed that is a harder, more error-prone
+    // task than judging it in its actual place in the conversation).
+    // log's own last entry at this point IS appText itself, so this slices
+    // it off with -1 to avoid handing the classifier the same text twice.
+    const recentContext = log.slice(-7, -1)
+      .map((e) => `[${e.speaker}]: ${e.text.length > 300 ? `${e.text.slice(0, 300)}…` : e.text}`)
+      .join("\n\n");
     if (await appearsFinished(appText, {
-      apiKey, model: classifierModel,
+      apiKey, model: classifierModel, recentContext,
       // temperature:0 + forced JSON output (CLASSIFIER_EXTRA_BODY, see
       // classifyOnce's own header): verified live against this project's
       // own current Azure deployment before being enabled here -- a caller
