@@ -3774,3 +3774,86 @@ reference and record deltas/decisions here instead.)*
   `tests/helper-agent-phase4.spec.mjs`'s own `AGENT_KNOWLEDGE`-content
   assertions, none of which named the old vocabulary directly, are
   unaffected).
+
+- **Issue #147 implemented and run for real: does cascading intelligent
+  merge of the 3 existing live-interview replicates recover more than any
+  single replicate does alone?** Full write-up, methodology, per-domain
+  tables, and root-cause spot-checks:
+  `ontology_translation/results/cascading-merge/REPORT.md`. Short version
+  here.
+
+  **Built `tests/evals/run-cascading-merge.mjs`**, a new driver that seeds
+  a live browser's canvas with `run-01`'s saved model
+  (`window.__kg.formats.commitYamlImport(..., "replace")`, the same
+  mechanism a Replace-import uses) and then drives the app's own real
+  Import Review dialog (`window.__kg.importReview.*`) live against real
+  Azure OpenAI -- the exact per-item LLM-assisted match/merge review and
+  execution agent (real delete tool included) a human running the app by
+  hand would use, per direct instruction to use the real feature rather
+  than a bespoke merge algorithm. `merge(run-01, run-02)` first, then
+  `merge(that result, run-03)` on the same live canvas, per issue #147's
+  own cascade design. Fixed, reproducible, not-tuned-per-domain decision
+  policy: current-only items always kept, incoming-only items always
+  taken (no second version to weigh against, and the whole premise being
+  tested is composing what different sessions each caught, not filtering
+  by consensus), suggested cross-label pairings always accepted, and a
+  matched-but-differing item gets a fixed reasoning note (no plain pick)
+  so it routes to the real execution agent for genuine reconciliation
+  rather than a scripted keep/take. Scored the same way every other run in
+  this repo is scored (`computeRecoveryMetrics`/`computeRuleMetrics`/
+  `computeActionMetrics` via `rescoreRun()`, reused not reimplemented) --
+  heuristic only, deliberately: semantic judging would mean fresh judge
+  calls with their own cost for a metric this repo's own summaries already
+  treat as secondary.
+
+  **Smoke-tested on itops first** (per this repo's own established
+  discipline, e.g. issue #137's own itops-first smoke run) before spending
+  on the other four -- completed in ~70s real wall-clock for both cascade
+  stages combined, sanity-checked (high precision throughout, coherent
+  agent commentary, no `suggestMatches()` failures) before running the
+  full 5-domain batch. All 5 domains completed cleanly in one pass, no
+  retries needed.
+
+  **Result: mixed, not a uniform win.** `merge(run-01, run-02)` beat the
+  3-replicate mean composite recovery effectiveness in 5/5 domains and the
+  single best individual replicate in 3/5 (iof-supply-chain, fibo-loans,
+  itops) -- supports the human-elicitation-workshop analogy this
+  measurement set out to test. Cascading a third replicate through the
+  same mechanism did **not** extend that pattern: it regressed composite
+  recovery relative to the two-way merge in 3/5 domains (brick-hvac
+  sharply, 0.718 -> 0.611), and the full three-way result underperformed
+  the single best individual replicate in 3/5 domains overall (4-domain
+  published macro: mean 0.658, best 0.733, merge(1,2) 0.743, merge(1,2,3)
+  0.694 -- below best by -0.039). Rule recovery is the one dimension that
+  improved cleanly and consistently in every single domain at both stages
+  (4-domain macro rules F1: 0.660 mean -> 0.771 at merge(1,2,3)).
+
+  **The regression is a real content effect, confirmed by hand in two
+  domains, not a scoring artifact**: brick-hvac's relationships recall
+  dropped 22/35 -> 19/35 and properties recall 18/42 -> 10/42 from
+  merge(1,2) to merge(1,2,3) with precision staying high throughout
+  (0.76-0.97) -- content was lost, not diluted by noise. iof-supply-chain's
+  relationships recall AND precision both dropped simultaneously (21/30 ->
+  15/30 matched, precision 0.84 -> 0.52, with recoveredTotal even rising
+  25->29) -- the third-source reconciliation pass both introduced
+  incorrect/duplicate edges and lost previously-correct ones in the same
+  stage. Neither case shows the execution agent failing outright
+  (`suggestFailures` false and a coherent, non-empty commentary at every
+  stage, every domain) -- reads as a real limit of three-source
+  reconciliation quality under the current merger prompt and decision
+  policy, not a pipeline malfunction.
+
+  **Scope, honestly** (matches issue #147's own "not scoped/blocking for
+  this issue" note): n=1 per domain -- one cascading-merge run, not a
+  replicated condition the way the 3 individual runs are, so no variance
+  bound on the merge process itself; one fixed ordering (1->2->3); one
+  fixed decision policy. `PAPER_NOTES.md`'s own open-question note updated
+  with this result and its caveats.
+
+  Artifacts: `ontology_translation/results/cascading-merge/<domain>/
+  {merge-1-2,merge-1-2-3}/` -- `recovered-model.yaml`, `metrics.json`,
+  `heuristic-matches.json`, `decisions.md` (the same export a human
+  clicking "Download decisions" would get), `provenance.json`. No offline
+  regression suite changes needed (new script only, no existing code
+  touched), but the full suite was re-confirmed green before this entry
+  (1211 tests, 1200 pass, 0 fail, 11 skipped -- unchanged from before).

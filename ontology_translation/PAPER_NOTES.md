@@ -77,20 +77,30 @@ per-replicate spread in `ontology_translation/results/multi-domain/summary.md`
 and `multi-domain-control/summary.md`), which is exactly the kind of
 independent-sampling variance a merge step could exploit.
 
-**Status: untested.** No condition in this repository currently runs
-repeated auto-elicitation and merges the outputs — every existing
-comparison condition (`tests/evals/EXPERIMENT_BRIEF.md` §3, B1–B5) varies a
-single-run factor. This is a natural candidate for a future condition
-(informally, "B6 — repeated elicitation + intelligent merge") were resources
-available: run N replicates, merge them via the Import Review execution
-agent (or an equivalent offline merge pass), and rescore the merged model
-against the same ground truth to see whether it beats the best individual
-replicate. Flagging this now so it is not lost before someone has the budget
-to run it.
+**Status: tested (issue #147) — mixed result, not a uniform win.** Ran the
+concrete first design: the 3 existing replicates and their individual
+scoring kept exactly as the baseline; additionally cascade-merged
+(`merge(run-01, run-02)`, then `merge(that, run-03)`) through the app's own
+real Import Review / intelligent-merge feature, driven live against real
+Azure OpenAI, and scored the same way. Full methodology, per-domain tables,
+and root-cause spot-checks: `ontology_translation/results/cascading-merge/
+REPORT.md`.
 
-**Tracked as issue #147**, with a concrete first design: keep the 3
-existing replicates and their individual scoring as the baseline, unchanged;
-additionally cascade-merge them (`merge(run-01, run-02)`, then
-`merge(that, run-03)`) via the same Import Review machinery, score the
-final merged model the same way, and report whether it lifts recovery
-effectiveness over the best individual replicate.
+**The two-way merge result supports the analogy**: `merge(run-01, run-02)`
+beat the 3-replicate mean's composite recovery effectiveness in 5/5 domains
+and the single best individual replicate in 3/5 (iof-supply-chain,
+fibo-loans, itops) — consistent with the human-elicitation-workshop
+premise this note started from. **The three-way cascade did not extend
+that pattern**: adding a third source through the same mechanism regressed
+composite recovery relative to the two-way merge in 3/5 domains (brick-hvac
+sharply, -0.107), and the full three-way result underperformed the single
+best individual replicate in 3/5 domains overall — confirmed as a real
+content effect in two domains by hand (relationships/properties recall
+genuinely dropped between stages, precision unaffected or also dropping,
+not merely a scoring artifact). Rule recovery was the one dimension that
+improved cleanly and consistently in every domain at every stage. Given
+n=1 per domain (one cascading-merge run, not a replicated condition the
+way the 3 individual runs are), none of this should be read as more than
+a single, real data point per domain — a proper follow-up would replicate
+the merge condition itself, and try orderings beyond the fixed 1→2→3
+cascade used here.
