@@ -55,14 +55,20 @@ test("the baked-in knowledge includes a condensed, operational excerpt of the pa
   });
 });
 
-test("the system prompt includes the INTERVIEW PROCESS section with all 10 phases (0 through 9)", async () => {
+test("the system prompt includes the INTERVIEW PROCESS section with all 11 phases (0 through 10)", async () => {
   await withPage(async (page) => {
     const prompt = await systemPrompt(page);
     assert.match(prompt, /INTERVIEW PROCESS/);
     assert.match(prompt, /0\. Orientation: call get_graph_state first/);
     // Renamed by issue #94: the phase now names the artefact it produces.
     assert.match(prompt, /1\. Competency questions and actions/);
-    assert.match(prompt, /9\. Validation pass/);
+    // Issue #160: split into its own top-level phase (not a validation-pass
+    // sub-step) after a live pilot run showed the model silently folding a
+    // sub-step version into the validation pass's self-check framing and
+    // never actually asking the expert anything -- see this file's own
+    // Phase 9 test below for the full story.
+    assert.match(prompt, /9\. Bounded domain-expansion pass/);
+    assert.match(prompt, /10\. Validation pass/);
     assert.match(prompt, /Competency check/);
     assert.match(prompt, /Final checklist/);
   });
@@ -147,25 +153,44 @@ test("the system prompt's Phase 1 probe is narrow and closed (two named categori
   });
 });
 
-// Issue #160: a bounded pass, inserted into the Validation pass as the new
-// Phase 9(b), for recall beyond what the competency questions happened to
-// ask about. Assertions here guard the specific failure modes the ticket
-// itself calls out: running before coverage is actually complete, adding
-// content without the expert's confirmation, forcing every category onto
-// every class, and turning into the kind of open-ended re-probing loop
-// idea #2 (PROMPT_TUNING_BUNDLE.md) already found and rejected once for
-// Phase 1's own "anything else?" probe.
-test("the system prompt's Phase 9(b) domain-expansion pass runs only after competency/action coverage, requires confirmation, and stays bounded", async () => {
+// Issue #160: a bounded pass for recall beyond what the competency
+// questions happened to ask about. First shipped as sub-step (b) inside
+// the Validation pass, but a live pilot run (itops run-01,
+// ontology_translation/results/multi-domain-control-post152/) caught the
+// real model silently folding it into the validation pass's own
+// self-check framing -- it announced "we've reached the validation
+// phase" and jumped straight to the competency/final checklist without
+// ever actually asking the expert the expansion question out loud.
+// Restructured as its own top-level Phase 9 (Validation becomes Phase
+// 10) specifically because every other real elicitation step in this
+// prompt (phases 1-8) reliably gets asked as a genuine question when it
+// is a numbered top-level phase in its own right -- only this one, once
+// nested as a validation-pass sub-item next to two silent self-checks,
+// got treated as another self-check instead of a real question. The
+// phase text now also says explicitly it is not satisfied by the
+// transition into validation. Assertions here guard the specific failure
+// modes the ticket and this live run called out: running before coverage
+// is actually complete, adding content without the expert's
+// confirmation, forcing every category onto every class, treating
+// entering validation as covering it, and turning into the kind of
+// open-ended re-probing loop idea #2 (PROMPT_TUNING_BUNDLE.md) already
+// found and rejected once for Phase 1's own "anything else?" probe.
+test("the system prompt's Phase 9 domain-expansion pass is a real conversational step, runs only after competency/action coverage, requires confirmation, and stays bounded", async () => {
   await withPage(async (page) => {
     const prompt = await systemPrompt(page);
-    assert.match(prompt, /\(b\) Bounded domain-expansion pass: run this once, only after \(a\) finds\s*every competency question and action covered/);
+    assert.match(prompt, /9\. Bounded domain-expansion pass: a real conversational step, not a\s*self-check/);
+    assert.match(prompt, /Do not fold it into\s*the validation pass below or treat "we've reached the validation\s*phase" as covering it/);
+    assert.match(prompt, /a session that skips\s*straight from Phase 8 into competency\/final checks has skipped this\s*phase entirely, not completed it implicitly/);
     assert.match(prompt, /Add nothing from this pass without the expert's\s*explicit confirmation/);
-    assert.match(prompt, /Skip any category that plainly doesn't fit that concept — never\s*force all of them onto every class/);
-    assert.match(prompt, /Ask this once per major concept, not\s*repeatedly/);
-    assert.match(prompt, /never\s*reach for a specific\s*domain's vocabulary while doing this/);
+    assert.match(prompt, /Skip any category that plainly doesn't fit\s*that concept — never force all of them onto every class/);
+    assert.match(prompt, /Ask this once per major\s*concept, not repeatedly/);
+    assert.match(prompt, /never\s*reach for a specific domain's vocabulary while doing this/);
     // Anything the pass surfaces still has to earn its place through the
     // ordinary per-item phases, not bypass them.
-    assert.match(prompt, /route anything confirmed through the\s*same phases as everything else \(a new relationship still needs\s*Phase 3's path check, a new property still needs Phase 4's\s*competency-question trace\)/);
+    assert.match(prompt, /route anything confirmed through the same\s*phases as everything else \(a new relationship still needs Phase 3's\s*path check, a new property still needs Phase 4's competency-question\s*trace\)/);
+    // The final checklist (now Phase 10(b)) must check this phase actually
+    // happened, not just that the transition text mentioned it.
+    assert.match(prompt, /Phase 9's domain-expansion offer was\s*actually made, out loud, for every major class — not silently\s*skipped by treating the transition into this validation pass as\s*covering it/);
     // "subtypes or variants" is one of ticket #160's own listed probing
     // categories, but deliberately excluded here: it has nowhere clean to
     // be recorded until #155's parked specialization-construct design

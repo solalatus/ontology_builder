@@ -13828,7 +13828,7 @@ const GET_GRAPH_STATE_TOOL = {
       "Call this whenever you're not certain your own memory of " +
       "what's already defined is still accurate — the expert can edit the " +
       "canvas directly at any time, independent of this conversation. " +
-      "Pass finalValidation:true on the one call you make for Phase 9(c)'s " +
+      "Pass finalValidation:true on the one call you make for Phase 10(b)'s " +
       "final checklist -- it additionally runs one automated second-opinion " +
       "model review of the whole ontology (at most once per conversation, " +
       "regardless of how many times you pass it afterward).",
@@ -13837,7 +13837,7 @@ const GET_GRAPH_STATE_TOOL = {
       properties: {
         finalValidation: {
           type: "boolean",
-          description: "Set true only for the get_graph_state call made as part of Phase 9(c)'s final checklist.",
+          description: "Set true only for the get_graph_state call made as part of Phase 10(b)'s final checklist.",
         },
       },
       required: [],
@@ -14525,7 +14525,45 @@ already has instead of following it rigidly)
    that are actually in the model — if describing what changes or how to
    check it needs something not yet captured, capture that first rather
    than describing a check the model doesn't actually support.
-9. Validation pass — run ALL THREE steps below, in order, before
+9. Bounded domain-expansion pass: a real conversational step, not a
+   self-check — you must actually ask the expert this, in words, and get
+   a real answer, the same as any other phase above. Do not fold it into
+   the validation pass below or treat "we've reached the validation
+   phase" as covering it; announcing the interview is heading into
+   validation does not satisfy this step, and a session that skips
+   straight from Phase 8 into competency/final checks has skipped this
+   phase entirely, not completed it implicitly. Run it once, right here,
+   after every competency question and action is structurally covered —
+   its purpose is recall beyond what the competency questions happened to
+   ask about, not closing a gap Phase 10's competency check would find.
+   For each major class already in the model — the ones central to
+   what's been discussed, not every class — silently check which of
+   these general neighboring structures could plausibly apply to it:
+   subordinate parts or components; states or lifecycle events it passes
+   through; actors or responsible parties connected to it; its inputs and
+   outputs; related paperwork or agreements; measurements or
+   characteristic values it carries; earlier or later stages of a larger
+   workflow it takes part in. Skip any category that plainly doesn't fit
+   that concept — never force all of them onto every class, and never
+   reach for a specific domain's vocabulary while doing this (these are
+   generic shapes, not named examples to mention to the expert). Batch
+   what's left into one offer per major concept, or across a small group
+   of them (same batching discipline as GROUND RULES), naming only the
+   categories you think might actually be missing — e.g. "we have the
+   operational core for [concept] — are there any [the specific
+   applicable categories] we're missing?" Ask this once per major
+   concept, not repeatedly: a "no, that's covered" answer, or silence
+   beyond a first reasonable follow-up, ends the pass for that concept —
+   move on rather than re-probing or broadening into open-ended
+   brainstorming. Add nothing from this pass without the expert's
+   explicit confirmation, and route anything confirmed through the same
+   phases as everything else (a new relationship still needs Phase 3's
+   path check, a new property still needs Phase 4's competency-question
+   trace) rather than writing it straight in. This pass proposes
+   candidates; it never substitutes for Phase 10's checklist below, and
+   finding nothing worth adding for a concept is a legitimate, common
+   outcome, not a sign to keep pushing for more.
+10. Validation pass — run BOTH checks below, in order, before
    considering a class, relationship, rule, or action finished:
    (a) Competency check: call get_graph_state and read the persisted
        competency_questions from that result — do NOT work from your own
@@ -14540,38 +14578,7 @@ already has instead of following it rigidly)
        plainly — an ontology with no recorded competency questions has no
        acceptance test, and the fix is to capture them, not to invent a
        list now and grade against it.
-   (b) Bounded domain-expansion pass: run this once, only after (a) finds
-       every competency question and action covered — its purpose is
-       recall beyond what the competency questions happened to ask about,
-       not closing a gap (a) already found. For each major class already
-       in the model — the ones central to what's been discussed, not
-       every class — silently check which of these general neighboring
-       structures could plausibly apply to it: subordinate parts or
-       components; states or lifecycle events it passes through; actors or
-       responsible parties connected to it; its inputs and outputs;
-       related paperwork or agreements; measurements or characteristic
-       values it carries; earlier or later stages of a larger workflow it
-       takes part in. Skip any category that plainly doesn't fit that concept — never
-       force all of them onto every class, and never reach for a specific
-       domain's vocabulary while doing this (these are generic shapes, not
-       named examples to mention to the expert). Batch what's left into one
-       offer per major concept, or across a small group of them (same
-       batching discipline as GROUND RULES), naming only the categories
-       you think might actually be missing — e.g. "we have the operational
-       core for [concept] — are there any [the specific applicable
-       categories] we're missing?" Ask this once per major concept, not
-       repeatedly: a "no, that's covered" answer, or silence beyond a
-       first reasonable follow-up, ends the pass for that concept — move
-       on rather than re-probing or broadening into open-ended
-       brainstorming. Add nothing from this pass without the expert's
-       explicit confirmation, and route anything confirmed through the
-       same phases as everything else (a new relationship still needs
-       Phase 3's path check, a new property still needs Phase 4's
-       competency-question trace) rather than writing it straight in. This
-       pass proposes candidates; it never substitutes for the rest of the
-       checklist, and finding nothing worth adding for a concept is a
-       legitimate, common outcome, not a sign to keep pushing for more.
-   (c) Final checklist: call get_graph_state with finalValidation:true and
+   (b) Final checklist: call get_graph_state with finalValidation:true and
        confirm directly from that
        result, not from memory, that every class has at least one
        relationship recorded; that the jointly-mentioned-pair/path check
@@ -14590,8 +14597,10 @@ already has instead of following it rigidly)
        verb; every property helps identify/filter/decide/explain/act,
        and every class the agent tracks over time (not just looks up) has
        its own current-state property; common synonyms are captured; every class and relationship has a meaning sentence; every property whose value is naturally a small fixed set (status, type, category, priority, and similar) has a captured allowed-value list; every rule and action only references properties, relationships, and values actually captured in the model; important actions have
-       explicit conditions; and step (b)'s domain-expansion offer was
-       actually made for every major class, not skipped.
+       explicit conditions; and Phase 9's domain-expansion offer was
+       actually made, out loud, for every major class — not silently
+       skipped by treating the transition into this validation pass as
+       covering it.
        That same call also returns a second-opinion model review of the
        whole ontology (once per conversation). Treat what it reports the
        same way you already treat the deterministic findings above: report
@@ -15084,7 +15093,7 @@ async function handleAgentRemoveToolCall(call, alreadyCommittedThisTurn) {
 // "the reliable signal is the tool call, not the narration" reasoning as
 // the deterministic sweep below, extended to Tier C: rather than guessing
 // from the model's own prose that it has reached Phase 9, the interviewer
-// is told explicitly (Phase 9(c), see the prompt) to pass
+// is told explicitly (Phase 10(b), see the prompt) to pass
 // finalValidation:true on the one get_graph_state call it makes for its
 // final checklist. Bounded to at most one real Tier C call per
 // conversation (agentState.tierCFindingsRanThisSession) regardless of how
@@ -15122,7 +15131,7 @@ async function handleGetGraphStateCall(call) {
   // the validation pass). Phase detection would mean parsing the model's own
   // description of what it is doing, which is exactly the kind of claim this
   // repository has already caught being wrong. get_graph_state is the
-  // read-the-whole-model tool, the interview prompt's own Phase 9(c) tells the
+  // read-the-whole-model tool, the interview prompt's own Phase 10(b) tells the
   // agent to call it and confirm "directly from that result, not from
   // memory", and the whole model is what a full findings list is about. So
   // the reliable signal is the tool call, not the narration.

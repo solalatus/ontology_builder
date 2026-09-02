@@ -163,11 +163,32 @@ import { withPage } from "./lib/page.mjs";
 // (this pass very likely raises full-domain recall while being closer to
 // neutral, or slightly negative on precision, for practical-scope F1).
 //
-// Previous hashes (7bf30dd2…/22f89f79…) were the #156 Tier C
-// final-validation wiring recorded just before this change.
+// Corrected same-day, before any full benchmark rerun spent against it: a
+// live pilot interview (itops run-01, ontology_translation/results/
+// multi-domain-control-post152/, run specifically to smoke-test this
+// ticket before committing the epic's one full 5x3 rerun budget) showed
+// the domain-expansion pass, as first shipped (validation-pass sub-step
+// (b) above), never actually firing -- the real model announced "we've
+// reached the validation phase" and went straight to the competency/
+// final checklist without ever asking the expert the expansion question.
+// Restructured as its own top-level Phase 9 (Validation pass becomes
+// Phase 10, both its sub-steps unchanged in content) specifically because
+// phases 1-8 -- each a real, numbered top-level phase -- reliably get
+// asked as genuine questions throughout this same transcript; only once
+// nested next to two silent self-checks under one "Validation pass"
+// heading did the model treat it as another self-check. The phase text
+// now says explicitly that reaching validation does not satisfy it, and
+// Phase 10(b)'s own final-checklist item was reworded to match. No
+// change to what the pass asks or checks, only where it sits and how
+// forcefully it says it is not optional -- re-verified with a second live
+// pilot run before the full rerun proceeded.
+//
+// Previous hashes (cf492ad0…/acff5f52…) were this same ticket's first,
+// not-yet-reliable wording, live-tested and rejected before any full
+// benchmark spend.
 export const PRODUCTION_SYSTEM_PROMPT_SHA256 = {
-  en: "cf492ad0b6bb60983ff8342b000c12085f8e84d35859048aa33cdf1271d82313",
-  hu: "acff5f52d79567e9928595bd905abd7310ad5229322f1ea7da29067716e6bb55",
+  en: "64a18c817a849bb1a38e153813a9d4c8a81701695b09616897a8395060d0350d",
+  hu: "c66479c0f853df1425e79cde00fb59af0da0e4a160e14420394434741d61a5c6",
 };
 
 // The complete ontology tool surface an ordinary interview request exposes.
