@@ -87,3 +87,10 @@ agent (or an equivalent offline merge pass), and rescore the merged model
 against the same ground truth to see whether it beats the best individual
 replicate. Flagging this now so it is not lost before someone has the budget
 to run it.
+
+**Tracked as issue #147**, with a concrete first design: keep the 3
+existing replicates and their individual scoring as the baseline, unchanged;
+additionally cascade-merge them (`merge(run-01, run-02)`, then
+`merge(that, run-03)`) via the same Import Review machinery, score the
+final merged model the same way, and report whether it lifts recovery
+effectiveness over the best individual replicate.
