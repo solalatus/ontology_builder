@@ -1,0 +1,986 @@
+{
+  "domain": "itops",
+  "runId": "merge-1-2-3",
+  "runUuid": "014e457d-85c8-4a3c-b361-1276860c96e2",
+  "metrics": {
+    "classes": {
+      "recall": 0.6176470588235294,
+      "precision": 1,
+      "f1": 0.7636363636363637,
+      "matched": 42,
+      "groundTruthTotal": 68,
+      "recoveredTotal": 42
+    },
+    "relationships": {
+      "recall": 0.5,
+      "precision": 0.9,
+      "f1": 0.6428571428571429,
+      "matched": 54,
+      "groundTruthTotal": 108,
+      "recoveredTotal": 60
+    },
+    "properties": {
+      "recall": 0.7117117117117117,
+      "precision": 0.7452830188679245,
+      "f1": 0.7281105990783409,
+      "matched": 79,
+      "groundTruthTotal": 111,
+      "recoveredTotal": 106
+    },
+    "controlledValueFidelity": 0.8518518518518519,
+    "controlledValuePropertyGoldTotal": 35,
+    "controlledValuePropertyMatchedCount": 27,
+    "recoveryEffectiveness": 0.7115347018572824,
+    "recoveryEffectivenessWithFidelity": 0.7466139893559247
+  },
+  "scopedMetrics": {
+    "classes": {
+      "recall": 0.9166666666666666,
+      "precision": 0.5238095238095238,
+      "f1": 0.6666666666666667,
+      "matched": 22,
+      "groundTruthTotal": 24,
+      "recoveredTotal": 42
+    },
+    "relationships": {
+      "recall": 0.75,
+      "precision": 0.45,
+      "f1": 0.5625000000000001,
+      "matched": 27,
+      "groundTruthTotal": 36,
+      "recoveredTotal": 60
+    },
+    "properties": {
+      "recall": 0.92,
+      "precision": 0.2169811320754717,
+      "f1": 0.35114503816793896,
+      "matched": 23,
+      "groundTruthTotal": 25,
+      "recoveredTotal": 106
+    },
+    "controlledValueFidelity": 1,
+    "controlledValuePropertyGoldTotal": 14,
+    "controlledValuePropertyMatchedCount": 14,
+    "recoveryEffectiveness": 0.5267705682782019,
+    "recoveryEffectivenessWithFidelity": 0.6450779262086515
+  },
+  "semanticMetrics": null,
+  "semanticScopedMetrics": null,
+  "ruleMetrics": {
+    "recall": 1,
+    "precision": 0.9166666666666666,
+    "f1": 0.9565217391304348,
+    "matched": 11,
+    "groundTruthTotal": 11,
+    "recoveredTotal": 12
+  },
+  "actionMetrics": {
+    "identification": {
+      "recall": 1,
+      "precision": 1,
+      "f1": 1,
+      "matched": 11,
+      "groundTruthTotal": 11,
+      "recoveredTotal": 11
+    },
+    "inputClassAccuracy": 0.9,
+    "inputClassChecked": 10,
+    "preconditionRecovery": 0.7654191337118165,
+    "effectRecovery": 0.37129728325900574,
+    "verificationRecovery": 0.3555707364530894
+  },
+  "semanticRuleActionMetrics": null,
+  "operationalStats": {
+    "kind": "cascading-intelligent-merge",
+    "sourceDescription": "(run-01 + run-02) + run-03",
+    "decisionCounts": {
+      "matchedNoted": 88,
+      "pairedAccepted": 24,
+      "currentKept": 82,
+      "incomingTaken": 26
+    },
+    "suggestFailures": [
+      false
+    ],
+    "agentPreviewSummaries": [
+      {
+        "agentTouchedCount": 132,
+        "agentCommentary": "Applied the merge decisions conservatively.\n\nI did not remove older competency questions or older rules/actions beyond the explicit cross-label replacements, because the human guidance emphasized preserving unique content from separate elicitation sessions unless a specific removal was clearly implied.",
+        "lineCount": 93
+      }
+    ],
+    "lastResults": [
+      {
+        "ok": true,
+        "message": "Applied.",
+        "commentary": "Applied the merge decisions conservatively.\n\nI did not remove older competency questions or older rules/actions beyond the explicit cross-label replacements, because the human guidance emphasized preserving unique content from separate elicitation sessions unless a specific removal was clearly implied.",
+        "touched": [
+          {
+            "kind": "property",
+            "name": "Incident.description",
+            "action": "added"
+          },
+          {
+            "kind": "property",
+            "name": "Incident.impact",
+            "action": "added"
+          },
+          {
+            "kind": "property",
+            "name": "Incident.urgency",
+            "action": "added"
+          },
+          {
+            "kind": "property",
+            "name": "Incident.category",
+            "action": "added"
+          },
+          {
+            "kind": "property",
+            "name": "Incident.recurring",
+            "action": "added"
+          },
+          {
+            "kind": "property",
+            "name": "Incident.timeToRestore",
+            "action": "added"
+          },
+          {
+            "kind": "property",
+            "name": "ITService.description",
+            "action": "added"
+          },
+          {
+            "kind": "property",
+            "name": "ITService.availabilityTarget",
+            "action": "added"
+          },
+          {
+            "kind": "property",
+            "name": "ConfigurationItem.version",
+            "action": "added"
+          },
+          {
+            "kind": "property",
+            "name": "Alert.detectionSource",
+            "action": "added"
+          },
+          {
+            "kind": "property",
+            "name": "Alert.occurrenceCount",
+            "action": "added"
+          },
+          {
+            "kind": "property",
+            "name": "Event.observedAt",
+            "action": "added"
+          },
+          {
+            "kind": "property",
+            "name": "Event.eventType",
+            "action": "added"
+          },
+          {
+            "kind": "property",
+            "name": "BackupSet.lastVerification",
+            "action": "added"
+          },
+          {
+            "kind": "property",
+            "name": "MaterialityAssessment.rationale",
+            "action": "added"
+          },
+          {
+            "kind": "property",
+            "name": "MaterialityAssessment.reportingDueTime",
+            "action": "added"
+          },
+          {
+            "kind": "property",
+            "name": "EvidenceItem.cryptographicHash",
+            "action": "added"
+          },
+          {
+            "kind": "property",
+            "name": "CorrectiveAction.actionDescription",
+            "action": "added"
+          },
+          {
+            "kind": "property",
+            "name": "PostIncidentReview.findings",
+            "action": "added"
+          },
+          {
+            "kind": "property",
+            "name": "PostIncidentReview.scheduledOn",
+            "action": "added"
+          },
+          {
+            "kind": "rule",
+            "name": "requiresRegulatoryNotification",
+            "action": "added"
+          },
+          {
+            "kind": "relationship",
+            "name": "indicates (Alert → Event)",
+            "action": "added"
+          },
+          {
+            "kind": "relationship",
+            "name": "affects (Change → ITService)",
+            "action": "added"
+          },
+          {
+            "kind": "relationship",
+            "name": "requires (CybersecurityIncident → MaterialityAssessment)",
+            "action": "added"
+          },
+          {
+            "kind": "relationship",
+            "name": "reviews (PostIncidentReview → Incident)",
+            "action": "added"
+          },
+          {
+            "kind": "class",
+            "name": "Incident",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "ITService",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "BusinessService",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "CustomerChannel",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "ConfigurationItem",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "Alert",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "Event",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "ThirdPartyService",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "ResolverGroup",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "OnCallEngineer",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "IncidentCommander",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "Runbook",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "Workaround",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "BackupSet",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "Environment",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "Change",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "Deployment",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "MaterialityAssessment",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "RegulatoryNotification",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "EvidenceItem",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "Communication",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "CorrectiveAction",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "CybersecurityIncident",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "Application",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "SecurityEvent",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "PostIncidentReview",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "Regulator",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "InfrastructureComponent",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "MajorIncident",
+            "action": "upserted"
+          },
+          {
+            "kind": "rule",
+            "name": "canSubmitRegulatoryNotification",
+            "action": "upserted"
+          },
+          {
+            "kind": "rule",
+            "name": "canCloseIncident",
+            "action": "upserted"
+          },
+          {
+            "kind": "rule",
+            "name": "meetsMajorIncidentCriteria",
+            "action": "upserted"
+          },
+          {
+            "kind": "rule",
+            "name": "canAssignResolverGroup",
+            "action": "upserted"
+          },
+          {
+            "kind": "action",
+            "name": "declareMajorIncident",
+            "action": "upserted"
+          },
+          {
+            "kind": "action",
+            "name": "submitRegulatoryNotification",
+            "action": "upserted"
+          },
+          {
+            "kind": "action",
+            "name": "assignIncidentToResolverGroup",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "impacts (Incident → BusinessService)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "impacts (Incident → ITService)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "deliveredThrough (BusinessService → CustomerChannel)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "implementedBy (ITService → Application)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "dependsOn (ITService → ThirdPartyService)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "triggeredBy (Incident → Alert)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "correlatedFrom (Incident → Event)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "memberOf (OnCallEngineer → ResolverGroup)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "assignedTo (Incident → ResolverGroup)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "handledBy (Incident → OnCallEngineer)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "supports (ResolverGroup → ITService)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "supports (ResolverGroup → ConfigurationItem)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "coordinatedBy (Incident → IncidentCommander)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "derivedFrom (CybersecurityIncident → SecurityEvent)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "linkedTo (Incident → Problem)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "documentedBy (Problem → KnownError)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "handledWith (Incident → Runbook)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "uses (RecoveryPlan → BackupSet)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "reports (RegulatoryNotification → Incident)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "supportedBy (Incident → EvidenceItem)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "communicatedThrough (Incident → Communication)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "reviewedIn (Incident → PostIncidentReview)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "produces (PostIncidentReview → CorrectiveAction)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "deploys (Deployment → Application)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "protects (BackupSet → ConfigurationItem)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "requiresPreservationOf (CybersecurityIncident → EvidenceItem)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "sentTo (RegulatoryNotification → Regulator)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "recoveredWith (Incident → RecoveryPlan)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "affects (Incident → ConfigurationItem)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "triggers (MaterialityAssessment → RegulatoryNotification)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "includes (RegulatoryNotification → EvidenceItem)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "runsOn (ITService → InfrastructureComponent)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "runsOn (Application → InfrastructureComponent)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "owns (ServiceOwner → ITService)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "targets (Deployment → Environment)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "has (KnownError → Workaround)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "evaluatedBy (Incident → MaterialityAssessment)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "entersHandlingPath (Incident → MajorIncident)",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Which business services are impacted by this incident, and through which customer channels are customers seeing it?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Which alerts and events are actually correlated to this incident, and which ones are just noise?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "What IT services, configuration items, and third-party dependencies sit on the dependency path for the affected service?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Who owns the affected service, and which resolver group or on-call engineer should take this now?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "What runbook, workaround, backup set, or recovery plan can we safely use for this case?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Was this incident likely caused by a recent change or deployment?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Has the materiality assessment been completed, and do we need to prepare or submit a regulatory notification?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Do we need to prepare a regulatory notification for this incident?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Do we need to send a regulatory notification for this incident?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Are the required evidence items complete for this incident?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Are the required stakeholder communications complete for this incident?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Are the required closure conditions complete for this incident?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Which corrective actions from earlier post-incident reviews are still open for the affected service?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Which business services are impacted by this incident?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Which configuration items sit on the dependency path of the affected IT service?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Which third-party services sit on the dependency path of the affected IT service?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Which active alerts are correlated with this incident?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Which underlying events are correlated with this incident?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Who owns the affected service?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Which resolver group should take this incident now?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Which on-call engineer should take this incident now?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Does this incident meet our criteria for major-incident handling?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Which runbook can we use safely for this case?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Which workaround can we use safely for this case?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Which backup set can we use safely for this case?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Which recovery plan can we use safely for this case?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Was this incident caused by a recent change?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Was this incident caused by a recent deployment?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Has the materiality assessment been completed?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Is a regulatory notification required, and when is it due?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Do we have the required evidence in place before closing the incident?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Do we have the required stakeholder communications in place before closing the incident?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Before closing the incident, are impacted services healthy or operating under an accepted residual condition, and for major or cyber cases is the post-incident review scheduled or completed?",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "Server",
+            "action": "removed"
+          },
+          {
+            "kind": "class",
+            "name": "EmergencyChange",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "runsOnInfrastructureComponent (ITService → ConfigurationItem)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "runsOnInfrastructureComponent (Application → ConfigurationItem)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "accountableFor (ServiceOwner → ITService)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "deployedIn (ITService → Environment)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasWorkaround (KnownError → Workaround)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "documentedBy (KnownError → Workaround)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "assessedBy (Incident → MaterialityAssessment)",
+            "action": "removed"
+          },
+          {
+            "kind": "property",
+            "name": "Incident.detectedTime",
+            "action": "removed"
+          },
+          {
+            "kind": "property",
+            "name": "Incident.resolvedTime",
+            "action": "removed"
+          },
+          {
+            "kind": "property",
+            "name": "Incident.closedTime",
+            "action": "removed"
+          },
+          {
+            "kind": "property",
+            "name": "Incident.acknowledgementTime",
+            "action": "removed"
+          },
+          {
+            "kind": "property",
+            "name": "ITService.serviceName",
+            "action": "removed"
+          },
+          {
+            "kind": "property",
+            "name": "ConfigurationItem.configurationItemType",
+            "action": "removed"
+          },
+          {
+            "kind": "property",
+            "name": "BackupSet.backupStatus",
+            "action": "removed"
+          },
+          {
+            "kind": "property",
+            "name": "MaterialityAssessment.assessedTime",
+            "action": "removed"
+          },
+          {
+            "kind": "property",
+            "name": "MaterialityAssessment.assessmentResult",
+            "action": "removed"
+          },
+          {
+            "kind": "property",
+            "name": "RegulatoryNotification.dueTime",
+            "action": "removed"
+          },
+          {
+            "kind": "property",
+            "name": "RegulatoryNotification.submittedTime",
+            "action": "removed"
+          },
+          {
+            "kind": "property",
+            "name": "EvidenceItem.collectedTime",
+            "action": "removed"
+          },
+          {
+            "kind": "property",
+            "name": "Communication.sentTime",
+            "action": "removed"
+          },
+          {
+            "kind": "rule",
+            "name": "qualifiesAsMajorIncident",
+            "action": "removed"
+          },
+          {
+            "kind": "rule",
+            "name": "canAssignIncidentToResolverGroup",
+            "action": "removed"
+          },
+          {
+            "kind": "action",
+            "name": "assignIncident",
+            "action": "removed"
+          }
+        ],
+        "newConsistencyFindings": [
+          {
+            "id": "inverse-pair:Incident --reviewedIn--> PostIncidentReview||PostIncidentReview --reviews--> Incident",
+            "check": "inverse-pair",
+            "tier": "exact",
+            "severity": "warning",
+            "subject": {
+              "kind": "relationship",
+              "key": "Incident --reviewedIn--> PostIncidentReview||PostIncidentReview --reviews--> Incident",
+              "name": "reviews"
+            },
+            "message": "PostIncidentReview --reviews--> Incident looks like the inverse of Incident --reviewedIn--> PostIncidentReview. The profile is one directed relationship per real-world connection, never also its inverse.",
+            "suggestion": "Keep whichever direction the questions and actions actually navigate."
+          },
+          {
+            "id": "unknown-property-reference:closeIncident#effect|closed time",
+            "check": "unknown-property-reference",
+            "tier": "text",
+            "severity": "warning",
+            "subject": {
+              "kind": "action",
+              "key": "closeIncident#effect|closed time",
+              "name": "closeIncident"
+            },
+            "message": "Action \"closeIncident\" (effect) refers to \"closedTime\", which is not a property, relationship, class, rule or action in this model.",
+            "suggestion": "Add it as a property of the class it belongs to, or reword the text to use something the model actually has."
+          },
+          {
+            "id": "unknown-property-reference:closeIncident#verification|closed time",
+            "check": "unknown-property-reference",
+            "tier": "text",
+            "severity": "warning",
+            "subject": {
+              "kind": "action",
+              "key": "closeIncident#verification|closed time",
+              "name": "closeIncident"
+            },
+            "message": "Action \"closeIncident\" (verification) refers to \"closedTime\", which is not a property, relationship, class, rule or action in this model.",
+            "suggestion": "Add it as a property of the class it belongs to, or reword the text to use something the model actually has."
+          },
+          {
+            "id": "unknown-property-reference:sendStakeholderCommunication#effect|sent time",
+            "check": "unknown-property-reference",
+            "tier": "text",
+            "severity": "warning",
+            "subject": {
+              "kind": "action",
+              "key": "sendStakeholderCommunication#effect|sent time",
+              "name": "sendStakeholderCommunication"
+            },
+            "message": "Action \"sendStakeholderCommunication\" (effect) refers to \"sentTime\", which is not a property, relationship, class, rule or action in this model.",
+            "suggestion": "Add it as a property of the class it belongs to, or reword the text to use something the model actually has."
+          },
+          {
+            "id": "unknown-property-reference:sendStakeholderCommunication#verification|sent time",
+            "check": "unknown-property-reference",
+            "tier": "text",
+            "severity": "warning",
+            "subject": {
+              "kind": "action",
+              "key": "sendStakeholderCommunication#verification|sent time",
+              "name": "sendStakeholderCommunication"
+            },
+            "message": "Action \"sendStakeholderCommunication\" (verification) refers to \"sentTime\", which is not a property, relationship, class, rule or action in this model.",
+            "suggestion": "Add it as a property of the class it belongs to, or reword the text to use something the model actually has."
+          },
+          {
+            "id": "orphan-rule:requiresRegulatoryNotification",
+            "check": "orphan-rule",
+            "tier": "exact",
+            "severity": "note",
+            "subject": {
+              "kind": "rule",
+              "key": "requiresRegulatoryNotification",
+              "name": "requiresRegulatoryNotification"
+            },
+            "message": "Rule \"requiresRegulatoryNotification\" is not used as a precondition by any action."
+          }
+        ]
+      }
+    ]
+  }
+}

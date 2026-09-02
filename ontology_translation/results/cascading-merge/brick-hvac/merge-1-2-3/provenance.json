@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "domain": "brick-hvac",
+  "kind": "cascading-intelligent-merge",
+  "model": "gpt-5.4",
+  "provider": "azure",
+  "endpointSha256": "1eb621d5fda661ff03ff3b3fd4ad234f28d8923e66ea63448a87e430e97fcace",
+  "sourceRuns": [
+    "run-01",
+    "run-02",
+    "run-03"
+  ],
+  "sourceResultsDir": "ontology_translation/results/multi-domain",
+  "sourceYamlSha256": [
+    {
+      "run": "run-01",
+      "sha256": "40c85378e0638e8c7969e72de6d179988c09b1f8ed6c2fbc2c18d583da6bbbaf"
+    },
+    {
+      "run": "run-02",
+      "sha256": "3e9e87b2af9ee1d3648095ad973da3e860f20fef718778d3c7efd64e18641496"
+    },
+    {
+      "run": "run-03",
+      "sha256": "b37cd7e3364b665f85062800e5289caea511c51ef02f77d87f6471c6669986ce"
+    }
+  ],
+  "domainYamlPath": "ontology_translation/domains/brick-hvac/reference.domain.yaml",
+  "groundTruthSha256": "b4d9eb718ec560f112a46c1fb998b8869b0e96d3739f1a84e8b797f5fb71d4d3",
+  "matchedItemNoteSha256": "e94c915fe6df91178cdc50bdc9bd728ebfcc33825131e5e9a5c36631e9d08941",
+  "sharedNoteSha256": "17624fa12ea64af9ecd0d5dc1d879147e33fec9d32a07a28855bcb85f9b725d7",
+  "interviewerPromptSha256": "d65f23817244ea0889114099fef5ecfdfcc1215e746f2681e910387f3e136529",
+  "stage": "merge-1-2-3",
+  "generatedAt": "2026-09-02T10:30:14.081Z",
+  "mergedFrom": [
+    "run-01",
+    "run-02",
+    "run-03"
+  ]
+}

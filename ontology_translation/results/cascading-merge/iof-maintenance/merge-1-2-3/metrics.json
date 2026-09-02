@@ -1,0 +1,354 @@
+{
+  "domain": "iof-maintenance",
+  "runId": "merge-1-2-3",
+  "runUuid": "a4b8a525-03fa-4e01-b31e-f6000aba926b",
+  "metrics": {
+    "classes": {
+      "recall": 0.7,
+      "precision": 0.9333333333333333,
+      "f1": 0.8,
+      "matched": 14,
+      "groundTruthTotal": 20,
+      "recoveredTotal": 15
+    },
+    "relationships": {
+      "recall": 0.6923076923076923,
+      "precision": 0.6428571428571429,
+      "f1": 0.6666666666666666,
+      "matched": 9,
+      "groundTruthTotal": 13,
+      "recoveredTotal": 14
+    },
+    "properties": {
+      "recall": 1,
+      "precision": 0.5555555555555556,
+      "f1": 0.7142857142857143,
+      "matched": 5,
+      "groundTruthTotal": 5,
+      "recoveredTotal": 9
+    },
+    "controlledValueFidelity": 1,
+    "controlledValuePropertyGoldTotal": 1,
+    "controlledValuePropertyMatchedCount": 1,
+    "recoveryEffectiveness": 0.7269841269841271,
+    "recoveryEffectivenessWithFidelity": 0.7952380952380953
+  },
+  "scopedMetrics": {
+    "classes": {
+      "recall": 0.8666666666666667,
+      "precision": 0.8666666666666667,
+      "f1": 0.8666666666666667,
+      "matched": 13,
+      "groundTruthTotal": 15,
+      "recoveredTotal": 15
+    },
+    "relationships": {
+      "recall": 1,
+      "precision": 0.5714285714285714,
+      "f1": 0.7272727272727273,
+      "matched": 8,
+      "groundTruthTotal": 8,
+      "recoveredTotal": 14
+    },
+    "properties": {
+      "recall": 1,
+      "precision": 0.2222222222222222,
+      "f1": 0.3636363636363636,
+      "matched": 2,
+      "groundTruthTotal": 2,
+      "recoveredTotal": 9
+    },
+    "controlledValueFidelity": null,
+    "controlledValuePropertyGoldTotal": 0,
+    "controlledValuePropertyMatchedCount": 0,
+    "recoveryEffectiveness": 0.6525252525252525,
+    "recoveryEffectivenessWithFidelity": null
+  },
+  "semanticMetrics": null,
+  "semanticScopedMetrics": null,
+  "ruleMetrics": {
+    "recall": 0.7142857142857143,
+    "precision": 1,
+    "f1": 0.8333333333333333,
+    "matched": 5,
+    "groundTruthTotal": 7,
+    "recoveredTotal": 5
+  },
+  "actionMetrics": {
+    "identification": {
+      "recall": 1,
+      "precision": 1,
+      "f1": 1,
+      "matched": 5,
+      "groundTruthTotal": 5,
+      "recoveredTotal": 5
+    },
+    "inputClassAccuracy": 1,
+    "inputClassChecked": 5,
+    "preconditionRecovery": 0.7314356232003291,
+    "effectRecovery": 0.5666157372039725,
+    "verificationRecovery": 0.622483660130719
+  },
+  "semanticRuleActionMetrics": null,
+  "operationalStats": {
+    "kind": "cascading-intelligent-merge",
+    "sourceDescription": "(run-01 + run-02) + run-03",
+    "decisionCounts": {
+      "matchedNoted": 28,
+      "pairedAccepted": 5,
+      "currentKept": 28,
+      "incomingTaken": 3
+    },
+    "suggestFailures": [
+      false
+    ],
+    "agentPreviewSummaries": [
+      {
+        "agentTouchedCount": 37,
+        "agentCommentary": "Applied the reconciliations and the accepted renames/specialization mappings. I removed only the exact superseded class/relationships explicitly covered by decisions, and left other nearby elements in place conservatively — for example, I did not remove `initiatesFailedState (FailureEvent → MaintenanceState)` because no decision clearly said that broader relation should go.",
+        "lineCount": 33
+      }
+    ],
+    "lastResults": [
+      {
+        "ok": true,
+        "message": "Applied.",
+        "commentary": "Applied the reconciliations and the accepted renames/specialization mappings. I removed only the exact superseded class/relationships explicitly covered by decisions, and left other nearby elements in place conservatively — for example, I did not remove `initiatesFailedState (FailureEvent → MaintenanceState)` because no decision clearly said that broader relation should go.",
+        "touched": [
+          {
+            "kind": "relationship",
+            "name": "describedBy (MaintenanceProcess → MaintenanceWorkOrder)",
+            "action": "added"
+          },
+          {
+            "kind": "class",
+            "name": "FailureEvent",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "MaintenanceProcess",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "MaintenanceActivity",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "MaintenanceState",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "QualificationSpecification",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "MaintenanceStrategy",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "FailedState",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "MaintenanceWorkOrder",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "MaintainableItem",
+            "action": "upserted"
+          },
+          {
+            "kind": "rule",
+            "name": "canStartMaintenanceProcess",
+            "action": "upserted"
+          },
+          {
+            "kind": "rule",
+            "name": "canAssignQualifiedMaintenancePerson",
+            "action": "upserted"
+          },
+          {
+            "kind": "action",
+            "name": "classifyItemAsFailed",
+            "action": "upserted"
+          },
+          {
+            "kind": "action",
+            "name": "createMaintenanceWorkOrder",
+            "action": "upserted"
+          },
+          {
+            "kind": "action",
+            "name": "startMaintenanceProcess",
+            "action": "upserted"
+          },
+          {
+            "kind": "action",
+            "name": "closeMaintenanceWorkOrder",
+            "action": "upserted"
+          },
+          {
+            "kind": "action",
+            "name": "assignQualifiedMaintenancePerson",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasEffect (FailureEvent → FailureEffect)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "assignedTo (MaintenanceActivity → QualifiedMaintenancePerson)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "describes (MaintenanceWorkOrder → MaintenanceProcess)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasMaintenanceState (MaintainableItem → MaintenanceState)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "initiates (FailureEvent → FailedState)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "governedByStrategy (MaintenanceProcess → MaintenanceStrategy)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "qualifiedFor (QualifiedMaintenancePerson → MaintenanceActivity)",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "What maintenance state is this item in right now?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Which items are currently in operating, degraded, or failed state?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Which failure event caused an item to enter a failed state?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Which failed states were caused by the same failure event?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "What maintenance process is this work order for?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Which maintenance strategy governs a maintenance process?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Which maintenance activities are included in a maintenance process?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "What qualification is required for a maintenance activity?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Which maintenance person is qualified to perform a maintenance activity?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "What failure effects resulted from a failure event?",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "Item",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "initiatesFailedState (FailureEvent → FailedState)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "governedBy (MaintenanceProcess → MaintenanceStrategy)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "isQualifiedFor (QualifiedMaintenancePerson → MaintenanceActivity)",
+            "action": "removed"
+          }
+        ],
+        "newConsistencyFindings": [
+          {
+            "id": "inverse-pair:MaintenanceActivity --assignedTo--> QualifiedMaintenancePerson||QualifiedMaintenancePerson --qualifiedFor--> MaintenanceActivity",
+            "check": "inverse-pair",
+            "tier": "exact",
+            "severity": "warning",
+            "subject": {
+              "kind": "relationship",
+              "key": "MaintenanceActivity --assignedTo--> QualifiedMaintenancePerson||QualifiedMaintenancePerson --qualifiedFor--> MaintenanceActivity",
+              "name": "qualifiedFor"
+            },
+            "message": "QualifiedMaintenancePerson --qualifiedFor--> MaintenanceActivity looks like the inverse of MaintenanceActivity --assignedTo--> QualifiedMaintenancePerson. The profile is one directed relationship per real-world connection, never also its inverse.",
+            "suggestion": "Keep whichever direction the questions and actions actually navigate."
+          },
+          {
+            "id": "inverse-pair:MaintenanceWorkOrder --describes--> MaintenanceProcess||MaintenanceProcess --describedBy--> MaintenanceWorkOrder",
+            "check": "inverse-pair",
+            "tier": "exact",
+            "severity": "warning",
+            "subject": {
+              "kind": "relationship",
+              "key": "MaintenanceWorkOrder --describes--> MaintenanceProcess||MaintenanceProcess --describedBy--> MaintenanceWorkOrder",
+              "name": "describedBy"
+            },
+            "message": "MaintenanceProcess --describedBy--> MaintenanceWorkOrder looks like the inverse of MaintenanceWorkOrder --describes--> MaintenanceProcess. The profile is one directed relationship per real-world connection, never also its inverse.",
+            "suggestion": "Keep whichever direction the questions and actions actually navigate."
+          },
+          {
+            "id": "unreachable-from-action-input:classifyItemAsFailed|MaintainableItem",
+            "check": "unreachable-from-action-input",
+            "tier": "text",
+            "severity": "warning",
+            "subject": {
+              "kind": "action",
+              "key": "classifyItemAsFailed|MaintainableItem",
+              "name": "classifyItemAsFailed",
+              "className": "MaintainableItem"
+            },
+            "message": "Action \"classifyItemAsFailed\" has input class FailureEvent, and its effect refers to MaintainableItem, which is only reachable against the direction of the relationships between them.",
+            "suggestion": "Add or redirect a relationship so the agent can navigate from FailureEvent to MaintainableItem. Rewording the text does not create the path it assumes."
+          }
+        ]
+      }
+    ]
+  }
+}
