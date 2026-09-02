@@ -1,0 +1,312 @@
+{
+  "fullDomain": {
+    "judgments": {
+      "classes": [
+        {
+          "goldId": "Distributor",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Retailer",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Wholesaler",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Cargo",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "FreightContainer",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Trailer",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Wagon",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Traceability",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "DistributionCenter",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Factory",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "GeospatialLocation",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "ShippingRoute",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "SupplyChainTransportProcess",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "ReceivingProcess",
+          "recoveredId": "n23",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "StorageProcess",
+          "recoveredId": "n24",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "WarehousingProcess",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "PackagingProcess",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "FreightForwardingProcess",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "SupplyChainProcess",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "LogisticsProcess",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "ManufacturingService",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "BillOfLading",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "relationships": [
+        {
+          "goldId": "rel_0",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_3",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_4",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_5",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_6",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_7",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_19",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_20",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_21",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_22",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_24",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_25",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_26",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_27",
+          "recoveredId": "e20",
+          "verdict": "MATCH"
+        }
+      ],
+      "properties": [
+        {
+          "goldId": "FreightForwarder.status",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "TrackingEvent.eventTime",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "TrackingEvent.eventType",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "valueFidelity": []
+    },
+    "rawResponses": {
+      "classes": "1: NO MATCH -- no candidate for distributor role\n2: NO MATCH -- no candidate for retailer role\n3: NO MATCH -- no candidate for wholesaler role\n4: NO MATCH -- no candidate for cargo\n5: NO MATCH -- no candidate for freight container\n6: NO MATCH -- no candidate for trailer\n7: NO MATCH -- no candidate for wagon\n8: NO MATCH -- no candidate for traceability\n9: NO MATCH -- no candidate for distribution center\n10: NO MATCH -- no candidate for factory\n11: NO MATCH -- no candidate for geospatial location\n12: NO MATCH -- no candidate for shipping route\n13: NO MATCH -- receiving/storage are narrower than transport process\n14: MATCH 1 -- Receiving and Receiving Process are interchangeable\n15: MATCH 2 -- Storage and Storage Process are interchangeable\n16: NO MATCH -- storage is narrower than warehousing\n17: NO MATCH -- no candidate for packaging process\n18: NO MATCH -- no candidate for freight forwarding process\n19: NO MATCH -- candidates are narrower specific processes\n20: NO MATCH -- candidates are narrower specific processes\n21: NO MATCH -- no candidate for manufacturing service\n22: NO MATCH -- no candidate for bill of lading",
+      "relationships": "1: NO MATCH -- no candidate expresses supplier supplies to customer\n2: NO MATCH -- hasMaterialTradeItem is not clearly depends on product\n3: NO MATCH -- identifiesCarrier is not the same as has agent\n4: NO MATCH -- involvesShipper is not the same as has agent\n5: NO MATCH -- involvesFreightForwarder is not the same as has agent\n6: NO MATCH 13 -- involvesCarrier is not the same as has agent\n7: NO MATCH -- recordsShipment is not clearly the same as tracks\n8: NO MATCH -- recordsLot is not clearly the same as tracks\n9: NO MATCH -- recordsLogisticUnit is not clearly the same as tracks\n10: NO MATCH -- recordsLoad is not clearly the same as tracks\n11: NO MATCH -- no candidate expresses fulfills order\n12: NO MATCH 4 -- includesMaterialTradeItem is not the same as concerns item\n13: NO MATCH 5 -- includesMaterialTradeItem is not the same as concerns item\n14: MATCH 11 -- exact same manages Traceable Resource Unit"
+    }
+  },
+  "scoped": {
+    "judgments": {
+      "classes": [
+        {
+          "goldId": "Cargo",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "FreightContainer",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Traceability",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "ReceivingProcess",
+          "recoveredId": "n23",
+          "verdict": "MATCH"
+        }
+      ],
+      "relationships": [
+        {
+          "goldId": "rel_0",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_3",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_4",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_6",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_19",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_20",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_21",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_22",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_24",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_25",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_26",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "properties": [
+        {
+          "goldId": "TrackingEvent.eventTime",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "TrackingEvent.eventType",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "valueFidelity": []
+    },
+    "rawResponses": {
+      "classes": "1: NO MATCH -- no candidate denotes the goods being transported\n2: NO MATCH -- no candidate denotes a freight container artifact\n3: NO MATCH -- no candidate denotes traceability capability/concept\n4: MATCH 3 -- Receiving is the same process concept",
+      "relationships": "1: NO MATCH -- no candidate means supplier supplies to customer\n2: NO MATCH -- hasMaterialTradeItem is not the same as depends on product\n3: NO MATCH -- identifiesCarrier is not the same as has agent\n4: NO MATCH -- involvesFreightForwarder is not the same as has agent\n5: NO MATCH -- recordsShipment is not clearly the same as tracks\n6: NO MATCH -- recordsLot is not clearly the same as tracks\n7: NO MATCH -- recordsLogisticUnit is not clearly the same as tracks\n8: NO MATCH -- recordsLoad is not clearly the same as tracks\n9: NO MATCH -- no candidate means shipment fulfills purchase order\n10: NO MATCH -- includesMaterialTradeItem is not clearly the same as concerns item\n11: NO MATCH -- includesMaterialTradeItem is not clearly the same as concerns item"
+    }
+  }
+}

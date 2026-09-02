@@ -1,0 +1,33 @@
+{
+  "fullDomain": {
+    "classes": [
+      {
+        "goldId": "ReceivingProcess",
+        "recoveredId": "n23"
+      },
+      {
+        "goldId": "StorageProcess",
+        "recoveredId": "n24"
+      }
+    ],
+    "relationships": [
+      {
+        "goldId": "rel_27",
+        "recoveredId": "e20"
+      }
+    ],
+    "properties": [],
+    "valueFidelity": []
+  },
+  "scoped": {
+    "classes": [
+      {
+        "goldId": "ReceivingProcess",
+        "recoveredId": "n23"
+      }
+    ],
+    "relationships": [],
+    "properties": [],
+    "valueFidelity": []
+  }
+}

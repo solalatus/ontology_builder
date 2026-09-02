@@ -1,0 +1,311 @@
+competency_questions:
+  - id: cq1
+    text: Which supplier is supplying a given customer in this supply situation?
+  - id: cq2
+    text: Which shipment is being prepared for a given ship-from location and ship-to location?
+  - id: cq3
+    text: Which carrier is responsible for a given transport move or shipment preparation activity?
+  - id: cq4
+    text: Which traceable unit is tied to this shipment?
+  - id: cq5
+    text: "Where does a transport process start, and where does it end in the supply chain?"
+  - id: cq6
+    text: "Which facility is the site of the receiving, storage, or shipment preparation activity?"
+  - id: cq7
+    text: Which freight forwarder is involved in this freight forwarding service or process?
+  - id: cq8
+    text: Which material trade item is tied to this purchase order or shipment?
+  - id: cq9
+    text: Which container is being used to hold cargo for this shipment?
+  - id: cq10
+    text: Which supplier-customer-product combination defines the supply relationship we’re dealing with?
+  - id: cq11
+    text: Which tracking events need to be on record to preserve traceability for a shipment or traceable unit?
+  - id: cq12
+    text: "Which logistics, transportation, packaging, or storage service applies to the activity happening right now?"
+classes:
+  Shipment:
+    meaning: null
+    aliases: []
+    properties: {}
+  PurchaseOrder:
+    meaning: null
+    aliases: []
+    properties: {}
+  Supplier:
+    meaning: null
+    aliases: []
+    properties: {}
+  Customer:
+    meaning: null
+    aliases: []
+    properties: {}
+  Carrier:
+    meaning: null
+    aliases: []
+    properties: {}
+  FreightForwarder:
+    meaning: null
+    aliases: []
+    properties: {}
+  Facility:
+    meaning: null
+    aliases: []
+    properties: {}
+  TransportProcess:
+    meaning: null
+    aliases: []
+    properties: {}
+  TrackingEvent:
+    meaning: null
+    aliases: []
+    properties: {}
+  MaterialTradeItem:
+    meaning: null
+    aliases: []
+    properties: {}
+  SupplyRelationship:
+    meaning: null
+    aliases: []
+    properties: {}
+  ShipFromLocation:
+    meaning: null
+    aliases: []
+    properties: {}
+  ShipToLocation:
+    meaning: null
+    aliases: []
+    properties: {}
+  Lot:
+    meaning: null
+    aliases: []
+    properties: {}
+  Sublot:
+    meaning: null
+    aliases: []
+    properties: {}
+  LogisticUnit:
+    meaning: null
+    aliases: []
+    properties: {}
+  Load:
+    meaning: null
+    aliases: []
+    properties: {}
+  Shipper:
+    meaning: null
+    aliases: []
+    properties: {}
+  Consignee:
+    meaning: null
+    aliases: []
+    properties: {}
+  ShipmentPreparation:
+    meaning: null
+    aliases: []
+    properties: {}
+  FreightForwardingService:
+    meaning: null
+    aliases: []
+    properties: {}
+  SupplyChainNode:
+    meaning: null
+    aliases: []
+    properties: {}
+  Receiving:
+    meaning: null
+    aliases: []
+    properties: {}
+  Storage:
+    meaning: null
+    aliases: []
+    properties: {}
+  StorageFacility:
+    meaning: null
+    aliases: []
+    properties: {}
+  TraceableResourceUnit:
+    meaning: null
+    aliases: []
+    properties: {}
+  InventoryManagement:
+    meaning: null
+    aliases: []
+    properties: {}
+  ConsigningProcess:
+    meaning: null
+    aliases: []
+    properties: {}
+  Container:
+    meaning: null
+    aliases: []
+    properties: {}
+  LogisticsService:
+    meaning: null
+    aliases: []
+    properties: {}
+  TransportationService:
+    meaning: null
+    aliases: []
+    properties: {}
+  PackagingService:
+    meaning: null
+    aliases: []
+    properties: {}
+  StorageService:
+    meaning: null
+    aliases: []
+    properties: {}
+relationships:
+  - name: hasShipFromLocation
+    from: Shipment
+    to: ShipFromLocation
+    meaning: null
+    aliases: []
+  - name: hasShipToLocation
+    from: Shipment
+    to: ShipToLocation
+    meaning: null
+    aliases: []
+  - name: preparesShipment
+    from: ShipmentPreparation
+    to: Shipment
+    meaning: null
+    aliases: []
+  - name: identifiesCarrier
+    from: ShipmentPreparation
+    to: Carrier
+    meaning: null
+    aliases: []
+  - name: involvesFreightForwarder
+    from: FreightForwardingService
+    to: FreightForwarder
+    meaning: null
+    aliases: []
+  - name: startsAtNode
+    from: TransportProcess
+    to: SupplyChainNode
+    meaning: null
+    aliases: []
+  - name: endsAtNode
+    from: TransportProcess
+    to: SupplyChainNode
+    meaning: null
+    aliases: []
+  - name: occursAtFacility
+    from: Receiving
+    to: Facility
+    meaning: null
+    aliases: []
+  - name: occursAtFacility
+    from: ShipmentPreparation
+    to: Facility
+    meaning: null
+    aliases: []
+  - name: occursAtStorageFacility
+    from: Storage
+    to: StorageFacility
+    meaning: null
+    aliases: []
+  - name: includesMaterialTradeItem
+    from: PurchaseOrder
+    to: MaterialTradeItem
+    meaning: null
+    aliases: []
+  - name: includesMaterialTradeItem
+    from: Shipment
+    to: MaterialTradeItem
+    meaning: null
+    aliases: []
+  - name: hasSupplier
+    from: SupplyRelationship
+    to: Supplier
+    meaning: null
+    aliases: []
+  - name: hasCustomer
+    from: SupplyRelationship
+    to: Customer
+    meaning: null
+    aliases: []
+  - name: hasMaterialTradeItem
+    from: SupplyRelationship
+    to: MaterialTradeItem
+    meaning: null
+    aliases: []
+  - name: recordsShipment
+    from: TrackingEvent
+    to: Shipment
+    meaning: null
+    aliases: []
+  - name: recordsLot
+    from: TrackingEvent
+    to: Lot
+    meaning: null
+    aliases: []
+  - name: recordsLogisticUnit
+    from: TrackingEvent
+    to: LogisticUnit
+    meaning: null
+    aliases: []
+  - name: recordsLoad
+    from: TrackingEvent
+    to: Load
+    meaning: null
+    aliases: []
+  - name: managesTraceableResourceUnit
+    from: InventoryManagement
+    to: TraceableResourceUnit
+    meaning: null
+    aliases: []
+  - name: managesLot
+    from: InventoryManagement
+    to: Lot
+    meaning: null
+    aliases: []
+  - name: managesLogisticUnit
+    from: InventoryManagement
+    to: LogisticUnit
+    meaning: null
+    aliases: []
+  - name: involvesShipper
+    from: ConsigningProcess
+    to: Shipper
+    meaning: null
+    aliases: []
+  - name: usesContainer
+    from: Shipment
+    to: Container
+    meaning: null
+    aliases: []
+  - name: involvesCarrier
+    from: TransportationService
+    to: Carrier
+    meaning: null
+    aliases: []
+rules: {}
+actions:
+  prepareShipment:
+    input: null
+    preconditions: []
+    effect: Prepare a shipment for movement.
+    verification: Confirm the shipment is recorded as prepared.
+  dispatchShipment:
+    input: null
+    preconditions: []
+    effect: Dispatch a shipment into movement.
+    verification: Confirm the shipment is recorded as dispatched.
+  receiveShipment:
+    input: null
+    preconditions: []
+    effect: Receive a shipment at its destination or receiving site.
+    verification: Confirm the shipment is recorded as received.
+  recordTrackingEvent:
+    input: null
+    preconditions: []
+    effect: Add a tracking event to the traceability record.
+    verification: Confirm the tracking event is on record and linked to the relevant shipment or traceable unit.
+  evaluateSupplyRelationship:
+    input: null
+    preconditions: []
+    effect: Evaluate the supply relationship in the current supply situation.
+    verification: Confirm the supply relationship evaluation is recorded or its result is available.
