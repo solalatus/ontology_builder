@@ -198,6 +198,16 @@
       "direction": "forward"
     },
     {
+      "goldId": "rel_11",
+      "edgeId": "e10",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_12",
+      "edgeId": "e9",
+      "direction": "forward"
+    },
+    {
       "goldId": "rel_17",
       "edgeId": "e19",
       "direction": "forward"

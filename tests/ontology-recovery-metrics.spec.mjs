@@ -262,6 +262,114 @@ test("computeRecoveryMetrics: the \"has\" fallback does not rescue a genuine dif
   assert.equal(metrics.relationships.matched, 0, "\"impacts\" vs \"affects\" share zero tokens -- a real synonym gap the stopword fix does not and should not paper over");
 });
 
+// --- issue #142: Porter2 stemming ------------------------------------------
+//
+// Builds the minimal groundTruth/recovered pair the "has" tests above
+// construct by hand, for a gold relationship label vs. a recovered relation
+// name, and returns whether computeRecoveryMetrics actually credits it as
+// matched -- factored out here since this block needs many such pairs.
+function relLabelMatched(goldLabel, recoveredRelation) {
+  const groundTruth = {
+    classes: {
+      a: { id: "a", label: "A", aliases: ["a"] },
+      b: { id: "b", label: "B", aliases: ["b"] },
+    },
+    relationships: [{ id: "rel_0", label: goldLabel, fromClassId: "a", toClassId: "b" }],
+    properties: [],
+  };
+  const recovered = {
+    nodes: [
+      { id: "n1", label: "A", meaning: "x", aliases: [], properties: [] },
+      { id: "n2", label: "B", meaning: "y", aliases: [], properties: [] },
+    ],
+    edges: [{ id: "e1", source: "n1", target: "n2", relation: recoveredRelation }],
+  };
+  return computeRecoveryMetrics(groundTruth, recovered).relationships.matched === 1;
+}
+
+// The four confirmed-fixable gaps the manual audit behind issues #140-#142
+// found -- pure grammatical-inflection mismatches Porter2 stemming closes
+// (see ontology_translation/TODO.md's dated entry for the real committed
+// runs each of these was found in).
+test("Porter2 stemming: gold \"hasLocation\" now matches a recovered \"locatedIn\" (brick-hvac/run-01's real gap)", () => {
+  assert.ok(relLabelMatched("hasLocation", "locatedIn"));
+});
+
+test("Porter2 stemming: gold \"hasLocation\" now matches a recovered \"locatedOnFloor\" (brick-hvac/run-03's real gap)", () => {
+  assert.ok(relLabelMatched("hasLocation", "locatedOnFloor"));
+});
+
+test("Porter2 stemming: gold \"secures\" now matches a recovered \"isSecuredByAgreement\" (fibo-loans/run-02's real gap)", () => {
+  assert.ok(relLabelMatched("secures", "isSecuredByAgreement"));
+});
+
+test("Porter2 stemming: gold \"governsPaymentOf\" now matches a recovered \"governPaymentOfInterest\" (fibo-loans/run-03's real gap)", () => {
+  assert.ok(relLabelMatched("governsPaymentOf", "governPaymentOfInterest"));
+});
+
+// Explicitly-out-of-scope cases: true vocabulary/synonym gaps, not
+// grammatical inflections -- stemming must not paper over these. Confirming
+// they STILL fail is as much the point of this feature as confirming the
+// four cases above now pass; a stemmer that accidentally widened these
+// would be masking a real recovery gap, not fixing one.
+test("Porter2 stemming does not rescue \"hasPart\" vs a recovered \"hasFloor\" -- different words, not an inflection (brick-hvac/run-03's real, accepted gap)", () => {
+  assert.equal(relLabelMatched("hasPart", "hasFloor"), false);
+});
+
+test("Porter2 stemming does not rescue \"hasAgent\" vs a recovered \"involvesCarrier\" -- different words (iof-supply-chain's real, accepted gap)", () => {
+  assert.equal(relLabelMatched("hasAgent", "involvesCarrier"), false);
+});
+
+test("Porter2 stemming does not rescue \"owns\" vs a recovered \"accountableFor\" -- a true synonym, not an inflection (itops/run-02's real, accepted gap)", () => {
+  assert.equal(relLabelMatched("owns", "accountableFor"), false);
+});
+
+// Stopword-interaction regression: STOPWORDS is checked against the
+// ORIGINAL word, not the stemmed one (see recoveryMetrics.mjs's own
+// comment on why -- Porter2 stems "its" to "it", which would otherwise
+// need STOPWORDS to carry "it" purely as a stemming artifact). Pins that a
+// gold label built entirely from stopwords plus one real word still
+// tokenizes to just that one real word, not extra noise from a
+// stopword's own stem leaking through.
+test("Porter2 stemming does not break stopword filtering: \"its own location\" still tokenizes down to just \"location\"-rooted content", () => {
+  assert.ok(relLabelMatched("its own location", "locatedIn"));
+});
+
+// The original stopword-symmetric-fallback fix (issue found via the F1
+// investigation, already covered above) must survive stemming being added
+// on top of it -- a bare "has" still tokenizes to an empty stopword-
+// stripped set (STOPWORDS still contains it, unstemmed match), still falls
+// back to its own unstripped, now-stemmed token, and that must still equal
+// the other side's own stemmed "point" token family.
+test("Porter2 stemming does not reintroduce the bare-\"has\" stopword bug: \"has\" still matches gold's \"has Point\"", () => {
+  assert.ok(relLabelMatched("has Point", "has"));
+});
+
+// Bilingual safety guard (see recoveryMetrics.mjs's own comment on why an
+// English stemmer is not applied to non-ASCII tokens): a Hungarian alias
+// containing the accented characters this app's own normalize() regex
+// explicitly allows must still compare by exact string equality, unaffected
+// by the English-only stemmer sitting downstream of that check.
+test("Porter2 stemming leaves a Hungarian-alias exact match untouched (bilingual safety guard)", () => {
+  const groundTruth = {
+    classes: {
+      a: { id: "a", label: "A", aliases: ["a"] },
+      b: { id: "b", label: "B", aliases: ["b"] },
+    },
+    relationships: [{ id: "rel_0", label: "szállító kapcsolat", fromClassId: "a", toClassId: "b" }],
+    properties: [],
+  };
+  const recovered = {
+    nodes: [
+      { id: "n1", label: "A", meaning: "x", aliases: [], properties: [] },
+      { id: "n2", label: "B", meaning: "y", aliases: [], properties: [] },
+    ],
+    edges: [{ id: "e1", source: "n1", target: "n2", relation: "szállító kapcsolat" }],
+  };
+  const metrics = computeRecoveryMetrics(groundTruth, recovered);
+  assert.equal(metrics.relationships.matched, 1, "an exact Hungarian-string match must still match after adding an English-only stemmer");
+});
+
 test("real-data regression (brick-hvac/run-02): the recovered model's real bare-\"has\" edges now match their corresponding gold hasPoint/hasPart relationships", () => {
   const domain = "brick-hvac";
   const runDir = path.resolve(__dirname, "..", "ontology_translation", "results", "multi-domain", "run-02", domain);
@@ -279,6 +387,98 @@ test("real-data regression (brick-hvac/run-02): the recovered model's real bare-
     `expected nearly all of this run's ${hasEdges.length} bare-"has" edges to now match a gold relationship (matched: ${matchedHasEdges.length}) -- `
     + "before the stopword-symmetric-fallback fix, none of them ever could, regardless of content",
   );
+});
+
+// Real-data regression for issue #142's stemming fix. The manual audit that
+// found issues #140-#142 confirmed by hand that brick-hvac/run-01's own
+// recovered model correctly captures 4 real "located in/on" facts
+// (locatedIn AirHandlingUnit->Building, locatedOn AirHandlingUnit->Floor,
+// locatedIn TerminalUnit->Space, locatedIn Thermostat->Space) that gold
+// records as hasLocation -- all 4 were unmatchable before Porter2 stemming,
+// purely because "located" and "location" are different tokens with zero
+// Jaccard overlap, not because the content was wrong.
+test("real-data regression (brick-hvac/run-01): the recovered model's real \"locatedIn\"/\"locatedOn\" edges now match gold's hasLocation relationships", () => {
+  const domain = "brick-hvac";
+  const runDir = path.resolve(__dirname, "..", "ontology_translation", "results", "multi-domain", "run-01", domain);
+  const groundTruth = loadGroundTruthModel({ path: resolveDomainYamlPath(domain), format: "domain-yaml" });
+  const { state: recovered } = recoveredStateFromYaml(fs.readFileSync(path.join(runDir, "recovered-model.yaml"), "utf8"));
+  const { gtToRecovered } = matchClasses(groundTruth, recovered.nodes);
+  const relMatch = matchRelationships(groundTruth, recovered.edges, gtToRecovered);
+
+  const locatedEdges = recovered.edges.filter((e) => e.relation === "locatedIn" || e.relation === "locatedOn");
+  assert.equal(locatedEdges.length, 4, "expected this real run's recovered model to contain exactly 4 locatedIn/locatedOn edges -- test fixture assumption");
+  const matchedRecoveredIds = new Set(relMatch.matches.map((m) => m.recoveredId));
+  const matchedLocatedEdges = locatedEdges.filter((e) => matchedRecoveredIds.has(e.id));
+  assert.equal(
+    matchedLocatedEdges.length, 4,
+    `expected all 4 of this run's locatedIn/locatedOn edges to now match a gold hasLocation relationship (matched: ${matchedLocatedEdges.length}) -- `
+    + "before Porter2 stemming, none of them ever could, since \"located\" and \"location\" shared zero tokens",
+  );
+
+  // Every one of the 4 edges must be matched against gold's own
+  // hasLocation relationship specifically, not some unrelated gold
+  // relationship that happens to also clear the threshold now that
+  // stemming is in play.
+  const relById = new Map(groundTruth.relationships.map((r) => [r.id, r]));
+  for (const e of locatedEdges) {
+    const match = relMatch.matches.find((m) => m.recoveredId === e.id);
+    assert.ok(match, `expected ${e.relation} (${e.id}) to be matched`);
+    const rel = relById.get(match.goldId);
+    // loadDomainYamlGroundTruthModel() derives .label from the raw YAML key
+    // via buildDomainYamlLabel (camelCase -> space-separated), so gold's
+    // own "hasLocation" key reads as the label "has Location" here.
+    assert.equal(rel.label, "has Location", `${e.relation} (${e.id}) matched ${match.goldId} ("${rel.label}"), expected gold's hasLocation`);
+  }
+});
+
+// Overstemming regression, found by hand-checking the #142 rescore's actual
+// output rather than by a synthetic case: Porter2 stems "planned" (the
+// "scheduled" sense, an adjective on Start/End) down to "plan" (the
+// "document" sense), so before this exception a property named
+// "implementation Plan" spuriously shared a token with "plannedStart" on
+// nothing but that collision -- confirmed live against itops/run-02's own
+// recovered model, where the practical-scope property matcher (the two
+// real "Change.planned*" gold properties that would otherwise win those
+// recovered slots are out of scope there) matched Change.implementationPlan
+// -> "plannedStart" and Change.backoutPlan -> "plannedEnd" at weight 0.333,
+// clearing REL_PROP_LABEL_MATCH_THRESHOLD (0.3) on a single coincidental
+// shared token. STEM_EXCEPTIONS (recoveryMetrics.mjs) keeps "planned"
+// unstemmed to close this; a global threshold change was rejected instead
+// (see that exception's own comment for the corpus-wide scan that ruled it
+// out -- many other correct matches sit at that identical weight).
+function propLabelMatched(goldPropLabel, recoveredPropName) {
+  const groundTruth = {
+    classes: { a: { id: "a", label: "A", aliases: ["a"] } },
+    relationships: [],
+    properties: [{ id: "a.prop", label: goldPropLabel, classId: "a" }],
+  };
+  const recovered = {
+    nodes: [{ id: "n1", label: "A", meaning: "x", aliases: [], properties: [{ name: recoveredPropName }] }],
+    edges: [],
+  };
+  return computeRecoveryMetrics(groundTruth, recovered).properties.matched === 1;
+}
+
+test("Porter2 stemming does not conflate \"implementation Plan\" with \"plannedStart\" -- \"planned\" (scheduled) and \"Plan\" (document) are different words that happen to share a Porter2 stem (itops/run-02's real false positive, now closed)", () => {
+  assert.equal(propLabelMatched("implementation Plan", "plannedStart"), false);
+  assert.equal(propLabelMatched("backout Plan", "plannedEnd"), false);
+});
+
+test("the \"planned\" stem exception is narrow: \"planning\" and \"plans\" still stem normally and still match a gold \"Plan\" property", () => {
+  assert.ok(propLabelMatched("recovery Plan", "recoveryPlanning"));
+  assert.ok(propLabelMatched("recovery Plan", "recoveryPlans"));
+});
+
+test("real-data regression (itops/run-02): Change.implementationPlan and Change.backoutPlan stay correctly unmatched in practical scope, where the two real Change.planned* gold properties that would otherwise claim those recovered slots are out of scope", () => {
+  const domain = "itops";
+  const runDir = path.resolve(__dirname, "..", "ontology_translation", "results", "multi-domain-control", "run-02", domain);
+  const full = loadGroundTruthModel({ path: resolveDomainYamlPath(domain), format: "domain-yaml" });
+  const scoped = scopeGroundTruth(full, full.practicalScopeClassIds, full.practicalScopePropertyIds);
+  const { state: recovered } = recoveredStateFromYaml(fs.readFileSync(path.join(runDir, "recovered-model.yaml"), "utf8"));
+  const { gtToRecovered } = matchClasses(scoped, recovered.nodes);
+  const propMatch = matchProperties(scoped, recovered.nodes, gtToRecovered);
+  assert.ok(!propMatch.goldToRecovered.has("Change.implementationPlan"), "Change.implementationPlan must not match anything in practical scope");
+  assert.ok(!propMatch.goldToRecovered.has("Change.backoutPlan"), "Change.backoutPlan must not match anything in practical scope");
 });
 
 // Issue #133/E2 (external audit): relationship precision previously came

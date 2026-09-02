@@ -10,6 +10,64 @@
 // second LLM-matching pass, to keep this eval's own moving parts small.
 
 import { maxWeightBipartiteMatching } from "./bipartiteMatching.mjs";
+import snowballFactory from "snowball-stemmers";
+
+// Issue #142: Porter2 ("Snowball English") stemming, closing the class of
+// gap the audit behind issues #140/#141 found and separated out explicitly
+// from genuine vocabulary/synonym gaps -- pure grammatical-inflection
+// mismatches like gold's "hasLocation" (-> token "location") never matching
+// a recovered "locatedIn"/"locatedOnFloor" (-> token "located"), even though
+// a human reader recognizes them as the same word. Requested as Porter2
+// specifically, not the original 1980 Porter algorithm: several similarly-
+// named npm packages actually implement the old algorithm under a modern-
+// sounding name, so this was verified directly rather than trusted from the
+// package name -- snowball-stemmers' own "porter" and "english" algorithms
+// produce genuinely different output on real words (e.g. "generalizations"
+// -> "gener" for "porter", "general" for "english"; "successfully" ->
+// "successfulli" vs "success"; "commune"/"communal" collapse to one stem
+// under "porter" but stay distinct under "english") -- "english" is
+// Snowball's own name for what is commonly called Porter2, and is the one
+// used below.
+const porter2 = snowballFactory.newStemmer("english");
+
+// Only stems plain ASCII lowercase-alphanumeric tokens. This app is
+// bilingual (en/hu) and at least one real domain's own ground truth
+// (itops) carries genuine Hungarian aliases (e.g. Vendor's own aliases:
+// [supplier, szállító, beszállító]) -- an English suffix-stripping stemmer
+// is not a safe no-op on Hungarian text, confirmed directly: it mangles
+// real Hungarian words this benchmark's own gold data uses ("incidens" ->
+// "inciden", "forrás" -> "forrá", "szolgáltatás" -> "szolgáltatá") because
+// Hungarian's own "-ás/-és" noun-forming suffix coincidentally resembles
+// the English plural "-s" Porter2 strips. None of this benchmark's 15 real
+// committed runs are in Hungarian (confirmed: no accented character
+// appears in any of them), so this guard has no effect on any existing
+// result -- it exists to not silently corrupt a future Hungarian-language
+// run, not to fix an observed problem.
+// "planned" is deliberately exempted from stemming (kept as its own stem
+// rather than collapsing to "plan"). Found via manual hand-check of the
+// #142 rescore, not a synthetic case: itops's own ground truth carries
+// BOTH senses side by side -- "Change.implementationPlan"/"backoutPlan"
+// (the artifact/document sense of "plan") and "Change.plannedStart"/
+// "plannedEnd" (the "scheduled" sense, an adjective on Start/End) -- and
+// Porter2 stems "planned" to "plan", so "implementation Plan" and
+// "plannedStart" spuriously shared a token on nothing but that collision,
+// clearing REL_PROP_LABEL_MATCH_THRESHOLD (weight 0.333, from a lone
+// shared token in a 3-token union) in itops/run-02's practical-scope
+// property matching, where the two real "Change.planned*" gold properties
+// that would otherwise out-compete for the same recovered slots happen to
+// be out of scope. A global threshold change was considered and rejected:
+// a corpus-wide scan (all 15 real runs, both scopes) found many other
+// *correct* matches sitting at that identical weight (e.g.
+// "Incident.resolvedAt"->"resolvedTime", "RegulatoryNotification.dueAt"->
+// "dueTime") that a higher bar would have broken too. This exception is
+// narrow by design -- "planning"/"plans" still stem to "plan" as normal,
+// since they were not the word found colliding.
+const STEM_EXCEPTIONS = new Set(["planned"]);
+
+function stem(word) {
+  if (STEM_EXCEPTIONS.has(word)) return word;
+  return /^[a-z0-9]+$/.test(word) ? porter2.stem(word) : word;
+}
 
 // Recovered relationship names come out of the app in its own camelCase
 // dialect ("isImplementedBy", "dependsOn" -- the YAML shape the agent's
@@ -38,11 +96,22 @@ function normalize(s) {
 }
 
 const STOPWORDS = new Set(["a", "an", "the", "is", "of", "its", "to", "for", "has", "have"]);
+// Stopwords are filtered on the ORIGINAL word, before stemming -- not
+// stemmed-then-filtered, even though issue #142 itself suggested the
+// reverse order. Verified directly why that reverse order is the wrong
+// call, not just a style preference: Porter2 stems "its" to "it", so a
+// stem-then-filter pipeline would need "it" added to STOPWORDS too (and
+// "it" is a real, if unlikely, standalone content word this list should
+// not blanket-suppress) purely as an artifact of stemming order, not
+// because "it" itself needed adding. Filtering first sidesteps that
+// entirely: STOPWORDS keeps meaning exactly what it already says ("skip
+// these exact words"), and only genuine content words ever reach the
+// stemmer.
 function tokenize(s) {
-  return normalize(s).split(" ").filter((w) => w && !STOPWORDS.has(w));
+  return normalize(s).split(" ").filter((w) => w && !STOPWORDS.has(w)).map(stem);
 }
 function tokenizeRaw(s) {
-  return normalize(s).split(" ").filter(Boolean);
+  return normalize(s).split(" ").filter(Boolean).map(stem);
 }
 
 // Two labels "match" if they're identical after normalization, or their

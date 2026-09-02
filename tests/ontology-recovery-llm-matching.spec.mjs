@@ -394,11 +394,19 @@ test("aggregateSemanticRuleActionMetrics: a differently-named equivalent action 
     classes: {}, relationships: [], properties: [], rules: [],
     actions: [{ id: "g1", label: "increaseCooling", primaryInputClassId: "AirHandlingUnit", preconditions: [], effect: "the cooling path is commanded to reduce air temperature toward the cooling setpoint", verification: "" }],
   };
-  const recoveredActions = [{ id: "r1", name: "coolMore", inputClassId: "n1", preconditions: [], effect: "the cooling path is commanded to reduce air temperature toward the cooling setpoint", verification: "" }];
+  // "coolMore" (this test's original recovered name) picked up a real
+  // heuristic-level token overlap with "increaseCooling" once issue #142's
+  // Porter2 stemming shipped -- "cooling" and "cool" now stem to the same
+  // root, which is correct behavior, not a bug, but it stopped being a
+  // genuinely zero-heuristic-overlap example. "chillFurther" still shares
+  // no stemmed tokens at all with "increaseCooling" (verified directly),
+  // so it keeps testing what this test is actually about: the semantic
+  // judge rescuing a pair the heuristic pass truly cannot reach on its own.
+  const recoveredActions = [{ id: "r1", name: "chillFurther", inputClassId: "n1", preconditions: [], effect: "the cooling path is commanded to reduce air temperature toward the cooling setpoint", verification: "" }];
   const recoveredState = { nodes: [], edges: [], rules: [], actions: recoveredActions };
 
   const heuristicOnly = aggregateSemanticRuleActionMetrics({ groundTruth, recoveredState, judgments: { rules: [], actions: [] } });
-  assert.equal(heuristicOnly.actions.matched, 0, "sanity: 'increaseCooling' vs 'coolMore' shares no tokens at all");
+  assert.equal(heuristicOnly.actions.matched, 0, "sanity: 'increaseCooling' vs 'chillFurther' shares no tokens at all, even after stemming");
 
   const judged = aggregateSemanticRuleActionMetrics({
     groundTruth, recoveredState,

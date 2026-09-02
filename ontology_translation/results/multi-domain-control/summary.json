@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-09-01T18:34:13.423Z",
+  "generatedAt": "2026-09-02T07:17:29.570Z",
   "domains": [
     "itops"
   ],
@@ -86,7 +86,7 @@
       "semanticClassesFullF1": 0.6923076923076924,
       "semanticRelationshipsFullF1": 0.5128205128205128,
       "semanticPropertiesFullF1": 0.5513513513513514,
-      "rulesF1": 0.9090909090909091,
+      "rulesF1": 1,
       "actionsIdentificationF1": 1,
       "semanticRulesF1": 0.9090909090909091,
       "semanticActionsF1": 1
@@ -189,8 +189,8 @@
         "attemptedCount": 3
       },
       "rulesF1": {
-        "mean": 0.6125541125541125,
-        "stdev": 0.25927989505418797
+        "mean": 0.6428571428571429,
+        "stdev": 0.31134992453861954
       },
       "actionsIdentificationF1": {
         "mean": 0.8095238095238094,
@@ -244,7 +244,7 @@
       "domains": 1
     },
     "rulesF1": {
-      "mean": 0.6125541125541125,
+      "mean": 0.6428571428571429,
       "stdev": null,
       "domains": 1
     },
@@ -280,7 +280,7 @@
       },
       {
         "element": "rulesF1",
-        "macroMeanF1": 0.6125541125541125,
+        "macroMeanF1": 0.6428571428571429,
         "macroStdevF1": null
       },
       {

@@ -998,10 +998,10 @@
     }
   },
   "ruleMetrics": {
-    "recall": 0.9090909090909091,
-    "precision": 0.9090909090909091,
-    "f1": 0.9090909090909091,
-    "matched": 10,
+    "recall": 1,
+    "precision": 1,
+    "f1": 1,
+    "matched": 11,
     "groundTruthTotal": 11,
     "recoveredTotal": 11
   },
@@ -1016,9 +1016,9 @@
     },
     "inputClassAccuracy": 1,
     "inputClassChecked": 10,
-    "preconditionRecovery": 0.7298803460055171,
-    "effectRecovery": 0.23198786507610036,
-    "verificationRecovery": 0.19827533577533574
+    "preconditionRecovery": 0.7530719280719279,
+    "effectRecovery": 0.29582160263978446,
+    "verificationRecovery": 0.2410187035187035
   },
   "semanticRuleActionMetrics": {
     "rules": {

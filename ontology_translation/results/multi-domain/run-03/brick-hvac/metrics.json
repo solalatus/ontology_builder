@@ -12,10 +12,10 @@
       "recoveredTotal": 25
     },
     "relationships": {
-      "recall": 0.5428571428571428,
-      "precision": 0.59375,
-      "f1": 0.5671641791044776,
-      "matched": 19,
+      "recall": 0.6571428571428571,
+      "precision": 0.71875,
+      "f1": 0.6865671641791045,
+      "matched": 23,
       "groundTruthTotal": 35,
       "recoveredTotal": 32
     },
@@ -30,8 +30,8 @@
     "controlledValueFidelity": 1,
     "controlledValuePropertyGoldTotal": 20,
     "controlledValuePropertyMatchedCount": 11,
-    "recoveryEffectiveness": 0.6853688289322618,
-    "recoveryEffectivenessWithFidelity": 0.7640266216991963
+    "recoveryEffectiveness": 0.7251698239571375,
+    "recoveryEffectivenessWithFidelity": 0.7938773679678531
   },
   "scopedMetrics": {
     "classes": {
@@ -43,10 +43,10 @@
       "recoveredTotal": 25
     },
     "relationships": {
-      "recall": 0.3684210526315789,
-      "precision": 0.21875,
-      "f1": 0.2745098039215686,
-      "matched": 7,
+      "recall": 0.5789473684210527,
+      "precision": 0.34375,
+      "f1": 0.4313725490196078,
+      "matched": 11,
       "groundTruthTotal": 19,
       "recoveredTotal": 32
     },
@@ -61,8 +61,8 @@
     "controlledValueFidelity": 1,
     "controlledValuePropertyGoldTotal": 10,
     "controlledValuePropertyMatchedCount": 7,
-    "recoveryEffectiveness": 0.529189612636945,
-    "recoveryEffectivenessWithFidelity": 0.6468922094777088
+    "recoveryEffectiveness": 0.5814771943362914,
+    "recoveryEffectivenessWithFidelity": 0.6861078957522185
   },
   "semanticMetrics": {
     "classes": {
@@ -180,26 +180,6 @@
           "verdict": "NO MATCH"
         },
         {
-          "goldId": "rel_16",
-          "recoveredId": "e8",
-          "verdict": "MATCH"
-        },
-        {
-          "goldId": "rel_17",
-          "recoveredId": "e7",
-          "verdict": "MATCH"
-        },
-        {
-          "goldId": "rel_18",
-          "recoveredId": "e9",
-          "verdict": "MATCH"
-        },
-        {
-          "goldId": "rel_19",
-          "recoveredId": "e10",
-          "verdict": "MATCH"
-        },
-        {
           "goldId": "rel_21",
           "recoveredId": null,
           "verdict": "NO MATCH"
@@ -298,22 +278,6 @@
       "classes": [],
       "relationships": [
         {
-          "goldId": "rel_16",
-          "recoveredId": "e8"
-        },
-        {
-          "goldId": "rel_17",
-          "recoveredId": "e7"
-        },
-        {
-          "goldId": "rel_18",
-          "recoveredId": "e9"
-        },
-        {
-          "goldId": "rel_19",
-          "recoveredId": "e10"
-        },
-        {
           "goldId": "rel_22",
           "recoveredId": "e5"
         },
@@ -384,10 +348,10 @@
         "recoveredTotal": 25
       },
       "relationships": {
-        "recall": 0.5428571428571428,
-        "precision": 0.59375,
-        "f1": 0.5671641791044776,
-        "matched": 19,
+        "recall": 0.6571428571428571,
+        "precision": 0.71875,
+        "f1": 0.6865671641791045,
+        "matched": 23,
         "groundTruthTotal": 35,
         "recoveredTotal": 32
       },
@@ -402,8 +366,8 @@
       "controlledValueFidelity": 1,
       "controlledValuePropertyGoldTotal": 20,
       "controlledValuePropertyMatchedCount": 11,
-      "recoveryEffectiveness": 0.6853688289322618,
-      "recoveryEffectivenessWithFidelity": 0.7640266216991963
+      "recoveryEffectiveness": 0.7251698239571375,
+      "recoveryEffectivenessWithFidelity": 0.7938773679678531
     },
     "rawResponses": {
       "relationships": "1: NO MATCH -- no thermostat-to-temperature-sensor point relation in candidates\n2: NO MATCH -- no thermostat-to-temperature-setpoint point relation in candidates\n3: MATCH 4 -- same AHU located in building relation\n4: MATCH 3 -- same AHU located on floor relation\n5: MATCH 5 -- same terminal unit located in space relation\n6: MATCH 6 -- same thermostat located in space relation\n7: NO MATCH -- no outside air CO2 sensor located in building relation in candidates\n8: MATCH 1 -- hasFloor is the same building-has-part-floor relation\n9: MATCH 2 -- hasSpace is the same floor-has-part-space relation\n10: MATCH 10 -- hasZone is the same building-has-part-zone relation",
@@ -471,26 +435,6 @@
           "verdict": "NO MATCH"
         },
         {
-          "goldId": "rel_16",
-          "recoveredId": "e8",
-          "verdict": "MATCH"
-        },
-        {
-          "goldId": "rel_17",
-          "recoveredId": "e7",
-          "verdict": "MATCH"
-        },
-        {
-          "goldId": "rel_18",
-          "recoveredId": "e9",
-          "verdict": "MATCH"
-        },
-        {
-          "goldId": "rel_19",
-          "recoveredId": "e10",
-          "verdict": "MATCH"
-        },
-        {
           "goldId": "rel_22",
           "recoveredId": "e5",
           "verdict": "MATCH"
@@ -548,22 +492,6 @@
       "classes": [],
       "relationships": [
         {
-          "goldId": "rel_16",
-          "recoveredId": "e8"
-        },
-        {
-          "goldId": "rel_17",
-          "recoveredId": "e7"
-        },
-        {
-          "goldId": "rel_18",
-          "recoveredId": "e9"
-        },
-        {
-          "goldId": "rel_19",
-          "recoveredId": "e10"
-        },
-        {
           "goldId": "rel_22",
           "recoveredId": "e5"
         },
@@ -618,10 +546,10 @@
         "recoveredTotal": 25
       },
       "relationships": {
-        "recall": 0.3684210526315789,
-        "precision": 0.21875,
-        "f1": 0.2745098039215686,
-        "matched": 7,
+        "recall": 0.5789473684210527,
+        "precision": 0.34375,
+        "f1": 0.4313725490196078,
+        "matched": 11,
         "groundTruthTotal": 19,
         "recoveredTotal": 32
       },
@@ -636,8 +564,8 @@
       "controlledValueFidelity": 1,
       "controlledValuePropertyGoldTotal": 10,
       "controlledValuePropertyMatchedCount": 7,
-      "recoveryEffectiveness": 0.529189612636945,
-      "recoveryEffectivenessWithFidelity": 0.6468922094777088
+      "recoveryEffectiveness": 0.5814771943362914,
+      "recoveryEffectivenessWithFidelity": 0.6861078957522185
     },
     "rawResponses": {
       "classes": "1: NO MATCH -- only specific CO2 sensor subtypes are present, not the general class\n2: NO MATCH -- no occupancy sensor candidate\n3: NO MATCH -- packaged heat pump is not the same as a pump",
@@ -665,8 +593,8 @@
     "inputClassAccuracy": 1,
     "inputClassChecked": 4,
     "preconditionRecovery": 0.008620689655172414,
-    "effectRecovery": 0.21041666666666664,
-    "verificationRecovery": 0.27649440342938797
+    "effectRecovery": 0.2884085213032581,
+    "verificationRecovery": 0.3132591093117409
   },
   "semanticRuleActionMetrics": {
     "rules": {

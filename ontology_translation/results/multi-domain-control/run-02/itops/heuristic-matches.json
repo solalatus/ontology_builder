@@ -485,6 +485,11 @@
       "matchedPropertyName": "detectionSource"
     },
     {
+      "goldId": "Incident.timeToAcknowledge",
+      "hostNodeId": "n1",
+      "matchedPropertyName": "acknowledgementTime"
+    },
+    {
       "goldId": "Problem.summary",
       "hostNodeId": "n35",
       "matchedPropertyName": "summary"
@@ -593,11 +598,6 @@
       "goldId": "Incident.closedAt",
       "hostNodeId": "n1",
       "matchedPropertyName": "closedTime"
-    },
-    {
-      "goldId": "Incident.timeToAcknowledge",
-      "hostNodeId": "n1",
-      "matchedPropertyName": "acknowledgementTime"
     },
     {
       "goldId": "Deployment.startedAt",
