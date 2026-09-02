@@ -1,0 +1,184 @@
+{
+  "fullDomain": {
+    "classes": [
+      {
+        "goldId": "ItService",
+        "recoveredId": "n4"
+      }
+    ],
+    "relationships": [
+      {
+        "goldId": "rel_11",
+        "recoveredId": "e27"
+      },
+      {
+        "goldId": "rel_17",
+        "recoveredId": "e23"
+      },
+      {
+        "goldId": "rel_72",
+        "recoveredId": "e9"
+      },
+      {
+        "goldId": "rel_87",
+        "recoveredId": "e40"
+      },
+      {
+        "goldId": "rel_90",
+        "recoveredId": "e48"
+      },
+      {
+        "goldId": "rel_97",
+        "recoveredId": "e31"
+      }
+    ],
+    "properties": [],
+    "valueFidelity": [
+      {
+        "id": "ConfigurationItem.criticalityTier",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "BackupSet.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "ThirdPartyService.criticalityTier",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Alert.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Incident.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Incident.severity",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Incident.priority",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Incident.impact",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Incident.urgency",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Incident.category",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Incident.detectionSource",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Change.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Change.riskLevel",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Deployment.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "EvidenceItem.integrityStatus",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Communication.audience",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Communication.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "MaterialityAssessment.result",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "RegulatoryNotification.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "CorrectiveAction.status",
+        "semanticFidelity": 1
+      }
+    ]
+  },
+  "scoped": {
+    "classes": [
+      {
+        "goldId": "ItService",
+        "recoveredId": "n4"
+      }
+    ],
+    "relationships": [
+      {
+        "goldId": "rel_87",
+        "recoveredId": "e40"
+      }
+    ],
+    "properties": [],
+    "valueFidelity": [
+      {
+        "id": "BackupSet.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Alert.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Incident.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Incident.severity",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Incident.impact",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Change.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Deployment.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "EvidenceItem.integrityStatus",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Communication.audience",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Communication.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "MaterialityAssessment.result",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "RegulatoryNotification.status",
+        "semanticFidelity": 1
+      }
+    ]
+  }
+}
