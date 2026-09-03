@@ -1,0 +1,258 @@
+{
+  "classes": [
+    {
+      "goldId": "Supplier",
+      "recoveredId": "n1",
+      "weight": 1
+    },
+    {
+      "goldId": "Customer",
+      "recoveredId": "n2",
+      "weight": 1
+    },
+    {
+      "goldId": "Carrier",
+      "recoveredId": "n7",
+      "weight": 1
+    },
+    {
+      "goldId": "FreightForwarder",
+      "recoveredId": "n8",
+      "weight": 1
+    },
+    {
+      "goldId": "SupplyRelationship",
+      "recoveredId": "n6",
+      "weight": 1
+    },
+    {
+      "goldId": "MaterialTradeItem",
+      "recoveredId": "n3",
+      "weight": 1
+    },
+    {
+      "goldId": "PurchaseOrder",
+      "recoveredId": "n4",
+      "weight": 1
+    },
+    {
+      "goldId": "Shipment",
+      "recoveredId": "n5",
+      "weight": 1
+    },
+    {
+      "goldId": "Container",
+      "recoveredId": "n19",
+      "weight": 1
+    },
+    {
+      "goldId": "FreightContainer",
+      "recoveredId": "n20",
+      "weight": 1
+    },
+    {
+      "goldId": "LogisticUnit",
+      "recoveredId": "n22",
+      "weight": 1
+    },
+    {
+      "goldId": "Load",
+      "recoveredId": "n23",
+      "weight": 1
+    },
+    {
+      "goldId": "Lot",
+      "recoveredId": "n21",
+      "weight": 1
+    },
+    {
+      "goldId": "TrackingEvent",
+      "recoveredId": "n24",
+      "weight": 1
+    },
+    {
+      "goldId": "Facility",
+      "recoveredId": "n16",
+      "weight": 1
+    },
+    {
+      "goldId": "StorageFacility",
+      "recoveredId": "n17",
+      "weight": 1
+    },
+    {
+      "goldId": "ShipFromLocation",
+      "recoveredId": "n28",
+      "weight": 1
+    },
+    {
+      "goldId": "ShipToLocation",
+      "recoveredId": "n29",
+      "weight": 1
+    },
+    {
+      "goldId": "SupplyChainNode",
+      "recoveredId": "n30",
+      "weight": 1
+    },
+    {
+      "goldId": "TransportProcess",
+      "recoveredId": "n12",
+      "weight": 1
+    },
+    {
+      "goldId": "ShipmentPreparationProcess",
+      "recoveredId": "n11",
+      "weight": 1
+    },
+    {
+      "goldId": "ReceivingProcess",
+      "recoveredId": "n13",
+      "weight": 1
+    },
+    {
+      "goldId": "StorageProcess",
+      "recoveredId": "n14",
+      "weight": 1
+    },
+    {
+      "goldId": "TransportationService",
+      "recoveredId": "n9",
+      "weight": 1
+    },
+    {
+      "goldId": "FreightForwardingService",
+      "recoveredId": "n10",
+      "weight": 1
+    },
+    {
+      "goldId": "BillOfLading",
+      "recoveredId": "n31",
+      "weight": 1
+    }
+  ],
+  "relationships": [
+    {
+      "goldId": "rel_1",
+      "edgeId": "e1",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_2",
+      "edgeId": "e2",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_3",
+      "edgeId": "e3",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_4",
+      "edgeId": "e11",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_6",
+      "edgeId": "e12",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_7",
+      "edgeId": "e10",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_8",
+      "edgeId": "e13",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_9",
+      "edgeId": "e14",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_10",
+      "edgeId": "e9",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_11",
+      "edgeId": "e20",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_12",
+      "edgeId": "e21",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_15",
+      "edgeId": "e15",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_16",
+      "edgeId": "e22",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_17",
+      "edgeId": "e7",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_18",
+      "edgeId": "e8",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_19",
+      "edgeId": "e16",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_20",
+      "edgeId": "e17",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_21",
+      "edgeId": "e18",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_22",
+      "edgeId": "e19",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_24",
+      "edgeId": "e5",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_25",
+      "edgeId": "e4",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_26",
+      "edgeId": "e6",
+      "direction": "forward"
+    }
+  ],
+  "properties": [
+    {
+      "goldId": "TrackingEvent.eventTime",
+      "hostNodeId": "n24",
+      "matchedPropertyName": "eventTime"
+    },
+    {
+      "goldId": "TrackingEvent.eventType",
+      "hostNodeId": "n24",
+      "matchedPropertyName": "eventType"
+    }
+  ]
+}
