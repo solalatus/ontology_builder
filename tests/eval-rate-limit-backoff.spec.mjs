@@ -75,12 +75,39 @@ test("appearsFinished retries a transient rate limit and succeeds once it recove
   await withMockedFetch(
     [
       { status: 429, body: { error: { message: "Rate limit reached", code: "rate_limit_exceeded" } } },
-      { status: 200, body: { choices: [{ message: { role: "assistant", content: "phase 9 / final wrap-up\nYES" } }] } },
+      { status: 200, body: { choices: [{ message: { role: "assistant", content: "{\"phase\":\"final wrap-up\",\"finished\":true}" } }] } },
     ],
     async (calls) => {
       const result = await appearsFinished("The ontology interview is now complete.", { apiKey: "sk-test", model: "gpt-test" });
       assert.equal(result, true);
-      assert.equal(calls.length, 2, "expected the one failed attempt plus the eventual success");
+      // A first YES is never trusted alone (see appearsFinished's own
+      // comment on why -- classifier sampling variance, demonstrated live
+      // during the epic-#152 rerun): it triggers one independent
+      // confirmation call before the run is actually treated as finished.
+      // scriptedFetch repeats the last scripted response for any call past
+      // the array's end, so the confirmation call also gets YES here --
+      // 3 total: the one failed 429 attempt, the first YES, the confirming YES.
+      assert.equal(calls.length, 3, "expected the one failed attempt, the first YES, and the confirming second call");
+    }
+  );
+});
+
+// The specific bug this confirmation step exists to catch: a first YES that
+// does NOT hold up on an independent re-ask must never end the run.
+test("appearsFinished does not trust a single YES -- a disagreeing confirmation call keeps the run going", async () => {
+  await withMockedFetch(
+    [
+      { status: 200, body: { choices: [{ message: { role: "assistant", content: "{\"phase\":\"1\",\"finished\":true}" } }] } },
+      { status: 200, body: { choices: [{ message: { role: "assistant", content: "{\"phase\":\"1\",\"finished\":false}" } }] } },
+    ],
+    async (calls) => {
+      // Deliberately no "?", "please confirm/tell me/let me know", or phase
+      // number -- must reach the classifier rather than being pre-filtered
+      // deterministically, so this actually exercises the disagreeing-
+      // confirmation-call path being tested here.
+      const result = await appearsFinished("Good start. Recorded those and moving into the next batch of properties.", { apiKey: "sk-test", model: "gpt-test" });
+      assert.equal(result, false, "a disagreeing confirmation call must override the first call's YES");
+      assert.equal(calls.length, 2, "exactly one first call plus one confirmation call, no further retries");
     }
   );
 });

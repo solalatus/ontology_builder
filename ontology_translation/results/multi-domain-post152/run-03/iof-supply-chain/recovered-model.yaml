@@ -1,0 +1,396 @@
+competency_questions:
+  - id: cq1
+    text: Which supplier supplies a given customer for a given item?
+  - id: cq2
+    text: What shipment is being prepared from a given ship-from location to a given ship-to location?
+  - id: cq3
+    text: Which carrier is responsible for a given transport or shipment preparation process?
+  - id: cq4
+    text: Which lot is tied to a given shipment?
+  - id: cq6
+    text: Which logistic unit is tied to a given shipment?
+  - id: cq7
+    text: Which load is tied to a given shipment?
+  - id: cq8
+    text: Where does a given transport start?
+  - id: cq9
+    text: Where is a given transport supposed to end?
+  - id: cq10
+    text: At which facility is a given receiving activity happening?
+  - id: cq11
+    text: At which facility is a given storage activity happening?
+  - id: cq12
+    text: At which facility is a given shipment preparation activity happening?
+  - id: cq13
+    text: Which freight forwarder is involved in a given freight forwarding service or process?
+  - id: cq14
+    text: What material trade item is a given purchase order for?
+  - id: cq15
+    text: What material trade item is a given shipment for?
+  - id: cq16
+    text: What container is being used for a given shipment?
+  - id: cq17
+    text: What freight container is being used for a given shipment?
+  - id: cq18
+    text: What tracking events do we have for a given shipment?
+  - id: cq19
+    text: What tracking events do we have for a given lot?
+  - id: cq20
+    text: What tracking events do we have for a given logistic unit?
+  - id: cq21
+    text: What tracking events do we have for a given load?
+  - id: cq23
+    text: "What supply relationship applies to a given supplier, customer, and product combination?"
+classes:
+  Supplier:
+    meaning: A trading partner that supplies goods or services in the supply chain.
+    aliases:
+      - supplier
+    properties:
+      supplierIdentifier:
+        type: text
+  Customer:
+    meaning: A trading partner that receives supplied goods or services in the supply chain.
+    aliases:
+      - customer
+    properties:
+      customerIdentifier:
+        type: text
+  MaterialTradeItem:
+    meaning: "A material item treated as something we buy, sell, ship, or otherwise trade in supply-chain operations."
+    aliases:
+      - material trade item
+    properties:
+      materialTradeItemIdentifier:
+        type: text
+  Shipment:
+    meaning: "A traceable unit of goods being prepared, moved, or received through the supply chain."
+    aliases:
+      - shipment
+    properties:
+      shipmentIdentifier:
+        type: text
+  PurchaseOrder:
+    meaning: An agreement that requests or authorizes supply of goods or services.
+    aliases:
+      - purchase order
+      - order
+    properties:
+      purchaseOrderIdentifier:
+        type: text
+  TransportProcess:
+    meaning: A movement process that transports goods from one point in the supply chain to another.
+    aliases:
+      - transport process
+      - transport move
+    properties:
+      transportIdentifier:
+        type: text
+  Facility:
+    meaning: A physical facility used in supply-chain operations.
+    aliases:
+      - facility
+    properties:
+      facilityIdentifier:
+        type: text
+  Carrier:
+    meaning: A supplier that carries or transports shipments.
+    aliases:
+      - carrier
+    properties:
+      carrierIdentifier:
+        type: text
+  FreightForwarder:
+    meaning: An agent that arranges freight forwarding activities and services.
+    aliases:
+      - freight forwarder
+    properties:
+      freightForwarderIdentifier:
+        type: text
+  SupplyRelationship:
+    meaning: "A supply dependency defined by a supplier, a customer, and a product context."
+    aliases:
+      - supply relationship
+    properties: {}
+  Lot:
+    meaning: A traceable production or supply lot used for batch-level control.
+    aliases:
+      - lot
+    properties:
+      lotIdentifier:
+        type: text
+  LogisticUnit:
+    meaning: A traceable logistics handling unit used in storage and transport.
+    aliases:
+      - logistic unit
+    properties:
+      logisticUnitIdentifier:
+        type: text
+  Load:
+    meaning: A traceable load unit prepared for handling or transport.
+    aliases:
+      - load
+    properties:
+      loadIdentifier:
+        type: text
+  TrackingEvent:
+    meaning: "An event recorded to track movement, handling, or state changes of a traceable unit."
+    aliases:
+      - tracking event
+    properties:
+      eventTime:
+        type: date
+      eventType:
+        type: text
+        allowed:
+          - packed
+          - shipped
+          - arrived
+          - received
+          - stored
+  ReceivingProcess:
+    meaning: A business process that receives incoming goods or shipments.
+    aliases:
+      - receiving process
+    properties: {}
+  StorageProcess:
+    meaning: A planned process that stores goods or traceable units.
+    aliases:
+      - storage process
+    properties: {}
+  ShipmentPreparationProcess:
+    meaning: A process that prepares a shipment for dispatch.
+    aliases:
+      - shipment preparation process
+    properties: {}
+  TransportationService:
+    meaning: A service that provides transportation capability for supply-chain movement.
+    aliases:
+      - transportation service
+    properties: {}
+  FreightForwardingService:
+    meaning: A service that provides freight forwarding capability.
+    aliases:
+      - freight forwarding service
+    properties: {}
+  Container:
+    meaning: A material artifact used to hold or transport goods.
+    aliases:
+      - container
+    properties:
+      containerIdentifier:
+        type: text
+  FreightContainer:
+    meaning: A container specifically used for freight transport.
+    aliases:
+      - freight container
+    properties:
+      freightContainerIdentifier:
+        type: text
+  ShipFromLocation:
+    meaning: The location from which a shipment is sent.
+    aliases:
+      - ship-from location
+    properties:
+      shipFromLocationIdentifier:
+        type: text
+  ShipToLocation:
+    meaning: The location to which a shipment is sent.
+    aliases:
+      - ship-to location
+    properties:
+      shipToLocationIdentifier:
+        type: text
+  SupplyChainNode:
+    meaning: "A point in the supply chain used as an origin, destination, or operating point."
+    aliases:
+      - supply chain node
+    properties:
+      supplyChainNodeIdentifier:
+        type: text
+  StorageFacility:
+    meaning: A facility used to store goods or other traceable units.
+    aliases:
+      - storage facility
+    properties:
+      storageFacilityIdentifier:
+        type: text
+relationships:
+  - name: dependsOnSupplier
+    from: SupplyRelationship
+    to: Supplier
+    meaning: The supply relationship depends on the supplier involved.
+    aliases: []
+  - name: dependsOnCustomer
+    from: SupplyRelationship
+    to: Customer
+    meaning: The supply relationship depends on the customer involved.
+    aliases: []
+  - name: dependsOnProduct
+    from: SupplyRelationship
+    to: MaterialTradeItem
+    meaning: The supply relationship depends on the material trade item involved.
+    aliases: []
+  - name: concernsItem
+    from: PurchaseOrder
+    to: MaterialTradeItem
+    meaning: The purchase order concerns the material trade item being ordered.
+    aliases: []
+  - name: concernsItem
+    from: Shipment
+    to: MaterialTradeItem
+    meaning: The shipment concerns the material trade item being moved.
+    aliases: []
+  - name: shipsFrom
+    from: Shipment
+    to: ShipFromLocation
+    meaning: The shipment is sent from the ship-from location.
+    aliases: []
+  - name: shipsTo
+    from: Shipment
+    to: ShipToLocation
+    meaning: The shipment is sent to the ship-to location.
+    aliases: []
+  - name: occursAt
+    from: ReceivingProcess
+    to: Facility
+    meaning: The receiving process takes place at the facility.
+    aliases: []
+  - name: occursAt
+    from: ShipmentPreparationProcess
+    to: Facility
+    meaning: The shipment preparation process takes place at the facility.
+    aliases: []
+  - name: occursAt
+    from: StorageProcess
+    to: StorageFacility
+    meaning: The storage process takes place at the storage facility.
+    aliases: []
+  - name: startsAt
+    from: TransportProcess
+    to: SupplyChainNode
+    meaning: The transport process starts at the supply chain node.
+    aliases: []
+  - name: endsAt
+    from: TransportProcess
+    to: SupplyChainNode
+    meaning: The transport process ends at the supply chain node.
+    aliases: []
+  - name: hasAgent
+    from: ShipmentPreparationProcess
+    to: Carrier
+    meaning: The shipment preparation process involves the carrier.
+    aliases: []
+  - name: hasAgent
+    from: FreightForwardingService
+    to: FreightForwarder
+    meaning: The freight forwarding service involves the freight forwarder.
+    aliases: []
+  - name: hasAgent
+    from: TransportationService
+    to: Carrier
+    meaning: The transportation service involves the carrier.
+    aliases: []
+  - name: tracks
+    from: TrackingEvent
+    to: Shipment
+    meaning: The tracking event records information about the shipment.
+    aliases: []
+  - name: tracks
+    from: TrackingEvent
+    to: Lot
+    meaning: The tracking event records information about the lot.
+    aliases: []
+  - name: tracks
+    from: TrackingEvent
+    to: LogisticUnit
+    meaning: The tracking event records information about the logistic unit.
+    aliases: []
+  - name: tracks
+    from: TrackingEvent
+    to: Load
+    meaning: The tracking event records information about the load.
+    aliases: []
+  - name: usesContainer
+    from: Shipment
+    to: Container
+    meaning: The shipment uses the container for handling or transport.
+    aliases: []
+  - name: usesContainer
+    from: Shipment
+    to: FreightContainer
+    meaning: The shipment uses the freight container for freight transport.
+    aliases: []
+  - name: fulfillsOrder
+    from: Shipment
+    to: PurchaseOrder
+    meaning: The shipment fulfills the purchase order.
+    aliases: []
+  - name: isIdentifiedFor
+    from: Shipment
+    to: ShipmentPreparationProcess
+    meaning: The shipment is identified for the shipment preparation process that gets it ready for dispatch.
+    aliases: []
+  - name: isIdentifiedFor
+    from: Shipment
+    to: ReceivingProcess
+    meaning: The shipment is identified for the receiving process that handles it on arrival.
+    aliases: []
+  - name: isIdentifiedFor
+    from: Shipment
+    to: TransportProcess
+    meaning: The shipment is identified for the transport process that moves it through the supply chain.
+    aliases: []
+  - name: hasLot
+    from: Shipment
+    to: Lot
+    meaning: The shipment is associated with the lot being moved or fulfilled through that shipment.
+    aliases: []
+  - name: hasLogisticUnit
+    from: Shipment
+    to: LogisticUnit
+    meaning: The shipment is associated with the logistic unit used for handling or transport.
+    aliases: []
+  - name: hasLoad
+    from: Shipment
+    to: Load
+    meaning: The shipment is associated with the load prepared for handling or movement.
+    aliases: []
+  - name: usesTransportationService
+    from: TransportProcess
+    to: TransportationService
+    meaning: The transport process uses the transportation service that provides the movement capability.
+    aliases: []
+rules:
+  validTrackingEvent:
+    conditions:
+      - "a shipment, lot, logistic unit, or load is identified"
+      - an event time is available
+      - an event type is known
+actions:
+  prepareShipment:
+    input: Shipment
+    preconditions: []
+    effect: The shipment is documented with its ship-from and ship-to locations and associated with a shipment preparation process.
+    verification: Confirm the shipment has assigned shipping locations and an identified shipment preparation process.
+  dispatchShipment:
+    input: Shipment
+    preconditions: []
+    effect: The shipment is dispatched for movement.
+    verification: Confirm the shipment to be dispatched is identified.
+  receiveShipment:
+    input: Shipment
+    preconditions: []
+    effect: The shipment is recorded as having arrived through a receiving process.
+    verification: Confirm the shipment has a ship-to location and an identified receiving process.
+  recordTrackingEvent:
+    input: TrackingEvent
+    preconditions:
+      - validTrackingEvent
+    effect: A new tracking event is recorded with its event time and event type and linked to the relevant traceable unit.
+    verification: "Confirm the event time, event type, and the tracked shipment, lot, logistic unit, or load were recorded."
+  evaluateSupplyRelationship:
+    input: SupplyRelationship
+    preconditions: []
+    effect: "The supply relationship is reviewed against the supplier, customer, and product it depends on."
+    verification: "Confirm the supplier, customer, and material trade item links are all present."

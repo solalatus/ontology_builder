@@ -1,0 +1,700 @@
+{
+  "fullDomain": {
+    "judgments": {
+      "classes": [
+        {
+          "goldId": "Bank",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "OrganizationalUnit",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "ItOperationsTeam",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Vendor",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "BusinessProcess",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "ServiceLevelObjective",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Server",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "VirtualMachine",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "ContainerPlatform",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "CloudService",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "NetworkDevice",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "NetworkSegment",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Endpoint",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "StorageSystem",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "DataCentre",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Site",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "DataAsset",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "IntegrationInterface",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "MonitoringRule",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Metric",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "LogSource",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "BusinessContinuityPlan",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "DisasterRecoveryTest",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "relationships": [
+        {
+          "goldId": "rel_21",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_35",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_44",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_54",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_55",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_62",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_63",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_67",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_68",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_69",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_75",
+          "recoveredId": "e44",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_77",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_86",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_90",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_93",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_94",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_98",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_100",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_101",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_104",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_105",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_108",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_111",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_119",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "properties": [
+        {
+          "goldId": "Regulator.name",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "BusinessService.name",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "BusinessService.description",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "BusinessService.availabilityTarget",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "ItService.name",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "ItService.description",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "ItService.criticalityTier",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "ItService.availabilityTarget",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "ConfigurationItem.name",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "ConfigurationItem.version",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "ConfigurationItem.criticalityTier",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Application.externallyAccessible",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Application.releaseVersion",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Database.engineType",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Database.engineVersion",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "BackupSet.lastSuccessfulBackup",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "BackupSet.lastVerification",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Environment.environmentType",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "ThirdPartyService.criticalityTier",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Event.observedAt",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Event.eventType",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Event.detectionSource",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Alert.summary",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Alert.occurrenceCount",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "MajorIncident.declaredAt",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Problem.summary",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Problem.status",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Problem.rootCauseCategory",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "KnownError.diagnosedCause",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "KnownError.workaroundSummary",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Change.summary",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Change.status",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Change.riskLevel",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Change.plannedStart",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Change.plannedEnd",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Change.implementationPlan",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Change.backoutPlan",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Release.version",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "RecoveryPlan.lastReviewDate",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "EvidenceItem.cryptographicHash",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Communication.messageSummary",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "MaterialityAssessment.rationale",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "valueFidelity": [
+        {
+          "id": "Stakeholder.audienceType",
+          "semanticFidelity": 0
+        },
+        {
+          "id": "BusinessService.criticalityTier",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "BusinessService.healthState",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "ItService.healthState",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "BackupSet.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Alert.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Alert.severity",
+          "semanticFidelity": 0
+        },
+        {
+          "id": "Alert.detectionSource",
+          "semanticFidelity": 0
+        },
+        {
+          "id": "Incident.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Incident.severity",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Incident.priority",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Incident.impact",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Incident.urgency",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Incident.category",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Incident.detectionSource",
+          "semanticFidelity": 0
+        },
+        {
+          "id": "Deployment.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "EvidenceItem.integrityStatus",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Communication.audience",
+          "semanticFidelity": 0
+        },
+        {
+          "id": "Communication.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "MaterialityAssessment.result",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "RegulatoryNotification.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "CorrectiveAction.status",
+          "semanticFidelity": 0
+        }
+      ]
+    },
+    "rawResponses": {
+      "relationships": "1: NO MATCH -- no stakeholder/business-service interest relation present\n2: NO MATCH -- no application/infrastructure runs-on relation present\n3: NO MATCH -- no backup-set protects CI relation present\n4: NO MATCH -- no monitoring-tool monitors CI relation present\n5: NO MATCH -- no monitoring-tool monitors IT service relation present\n6: NO MATCH -- no event observed-on CI relation present\n7: NO MATCH -- no event relates-to IT service relation present\n8: NO MATCH -- no alert indicates event relation present\n9: NO MATCH -- no alert concerns IT service relation present\n10: NO MATCH -- no alert concerns configuration-item relation present\n11: MATCH 1 -- impacts a configuration item is the same as affects it\n12: NO MATCH -- no incident handled-by on-call-engineer relation present\n13: NO MATCH -- no incident recovered-with recovery-plan relation present\n14: NO MATCH -- declaration as major incident is not requires post incident review\n15: NO MATCH -- no cybersecurity-incident requires materiality-assessment relation present\n16: NO MATCH -- no cybersecurity-incident may-require regulatory-notification relation present\n17: NO MATCH -- no known-error affects configuration-item relation present\n18: NO MATCH -- caused-by change is not change modifies configuration item\n19: NO MATCH -- caused-by change is not change affects IT service\n20: NO MATCH -- no deployment targets environment relation present\n21: NO MATCH -- no deployment deploys application relation present\n22: NO MATCH -- no post-incident-review identifies problem relation present\n23: NO MATCH -- no corrective-action implemented-by change relation present\n24: NO MATCH -- no regulatory-notification includes evidence-item relation present",
+      "valueFidelity": "1: 0 -- no recovered values, so no overlap\n2: 100 -- identical set of distinctions\n3: 100 -- identical meanings; formatting only differs\n4: 100 -- identical meanings; formatting only differs\n5: 100 -- identical set of distinctions\n6: 100 -- identical set of distinctions\n7: 0 -- no recovered values, so no overlap\n8: 0 -- no recovered values, so no overlap\n9: 100 -- identical set of distinctions\n10: 100 -- identical set of distinctions\n11: 100 -- identical set of distinctions\n12: 100 -- identical meanings; formatting only differs\n13: 100 -- identical set of distinctions\n14: 100 -- identical meanings; formatting only differs\n15: 0 -- no recovered values, so no overlap\n16: 100 -- identical set of distinctions\n17: 100 -- identical set of distinctions\n18: 0 -- no recovered values, so no overlap\n19: 100 -- identical set of distinctions\n20: 100 -- identical set of distinctions\n21: 100 -- identical set of distinctions\n22: 0 -- no recovered values, so no overlap"
+    }
+  },
+  "scoped": {
+    "judgments": {
+      "classes": [
+        {
+          "goldId": "Bank",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "relationships": [
+        {
+          "goldId": "rel_44",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_68",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_69",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_75",
+          "recoveredId": "e44",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_77",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_86",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_90",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_100",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_101",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_104",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_105",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_119",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "properties": [
+        {
+          "goldId": "Change.status",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Change.implementationPlan",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Change.backoutPlan",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "valueFidelity": [
+        {
+          "id": "ItService.healthState",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "BackupSet.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Alert.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Alert.severity",
+          "semanticFidelity": 0
+        },
+        {
+          "id": "Incident.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Incident.severity",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Incident.impact",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Deployment.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "EvidenceItem.integrityStatus",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Communication.audience",
+          "semanticFidelity": 0
+        },
+        {
+          "id": "Communication.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "MaterialityAssessment.result",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "RegulatoryNotification.status",
+          "semanticFidelity": 1
+        }
+      ]
+    },
+    "rawResponses": {
+      "classes": "1: NO MATCH -- no candidate is the bank institution itself",
+      "relationships": "1: NO MATCH -- no candidate about Backup Set protecting Configuration Item\n2: NO MATCH -- no candidate about Alert concerning IT Service\n3: NO MATCH -- no candidate about Alert concerning Configuration Item\n4: MATCH 1 -- affects/impacts Configuration Item are the same relation\n5: NO MATCH -- no candidate about Incident handled by On Call Engineer\n6: NO MATCH -- no candidate about Incident recovered with Recovery Plan\n7: NO MATCH -- no candidate about Major Incident requiring Post Incident Review\n8: NO MATCH -- no candidate about Change modifying Configuration Item\n9: NO MATCH -- no candidate about Change affecting IT Service\n10: NO MATCH -- no candidate about Deployment targeting Environment\n11: NO MATCH -- no candidate about Deployment deploying Application\n12: NO MATCH -- no candidate about Regulatory Notification including Evidence Item",
+      "valueFidelity": "1: 100 -- identical distinctions; formatting only differs\n2: 100 -- identical distinctions\n3: 100 -- identical distinctions\n4: 0 -- no recovered values; all distinctions missing\n5: 100 -- identical distinctions\n6: 100 -- identical distinctions\n7: 100 -- identical distinctions; formatting only differs\n8: 100 -- identical distinctions\n9: 100 -- identical distinctions\n10: 0 -- no recovered values; all distinctions missing\n11: 100 -- identical distinctions\n12: 100 -- identical distinctions\n13: 100 -- identical distinctions"
+    }
+  }
+}

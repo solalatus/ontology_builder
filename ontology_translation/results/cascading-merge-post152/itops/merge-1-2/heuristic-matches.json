@@ -1,0 +1,778 @@
+{
+  "classes": [
+    {
+      "goldId": "OrganizationalUnit",
+      "recoveredId": "n41",
+      "weight": 1
+    },
+    {
+      "goldId": "ServiceDesk",
+      "recoveredId": "n43",
+      "weight": 1
+    },
+    {
+      "goldId": "NetworkOperationsCentre",
+      "recoveredId": "n44",
+      "weight": 1
+    },
+    {
+      "goldId": "SecurityOperationsCentre",
+      "recoveredId": "n45",
+      "weight": 1
+    },
+    {
+      "goldId": "IncidentResponseTeam",
+      "recoveredId": "n42",
+      "weight": 1
+    },
+    {
+      "goldId": "ResolverGroup",
+      "recoveredId": "n9",
+      "weight": 1
+    },
+    {
+      "goldId": "OnCallEngineer",
+      "recoveredId": "n10",
+      "weight": 1
+    },
+    {
+      "goldId": "IncidentCommander",
+      "recoveredId": "n40",
+      "weight": 1
+    },
+    {
+      "goldId": "ServiceOwner",
+      "recoveredId": "n12",
+      "weight": 1
+    },
+    {
+      "goldId": "ApplicationOwner",
+      "recoveredId": "n34",
+      "weight": 1
+    },
+    {
+      "goldId": "TechnicalOwner",
+      "recoveredId": "n46",
+      "weight": 1
+    },
+    {
+      "goldId": "BusinessOwner",
+      "recoveredId": "n11",
+      "weight": 1
+    },
+    {
+      "goldId": "Vendor",
+      "recoveredId": "n24",
+      "weight": 1
+    },
+    {
+      "goldId": "Regulator",
+      "recoveredId": "n20",
+      "weight": 1
+    },
+    {
+      "goldId": "Stakeholder",
+      "recoveredId": "n22",
+      "weight": 1
+    },
+    {
+      "goldId": "BusinessService",
+      "recoveredId": "n4",
+      "weight": 1
+    },
+    {
+      "goldId": "CustomerChannel",
+      "recoveredId": "n5",
+      "weight": 1
+    },
+    {
+      "goldId": "ItService",
+      "recoveredId": "n3",
+      "weight": 1
+    },
+    {
+      "goldId": "ConfigurationItem",
+      "recoveredId": "n6",
+      "weight": 1
+    },
+    {
+      "goldId": "Application",
+      "recoveredId": "n35",
+      "weight": 1
+    },
+    {
+      "goldId": "Database",
+      "recoveredId": "n37",
+      "weight": 1
+    },
+    {
+      "goldId": "InfrastructureComponent",
+      "recoveredId": "n36",
+      "weight": 1
+    },
+    {
+      "goldId": "StorageSystem",
+      "recoveredId": "n38",
+      "weight": 1
+    },
+    {
+      "goldId": "BackupSet",
+      "recoveredId": "n16",
+      "weight": 1
+    },
+    {
+      "goldId": "Environment",
+      "recoveredId": "n31",
+      "weight": 1
+    },
+    {
+      "goldId": "ThirdPartyService",
+      "recoveredId": "n7",
+      "weight": 1
+    },
+    {
+      "goldId": "MonitoringTool",
+      "recoveredId": "n47",
+      "weight": 1
+    },
+    {
+      "goldId": "Event",
+      "recoveredId": "n8",
+      "weight": 1
+    },
+    {
+      "goldId": "SecurityEvent",
+      "recoveredId": "n48",
+      "weight": 1
+    },
+    {
+      "goldId": "Alert",
+      "recoveredId": "n2",
+      "weight": 1
+    },
+    {
+      "goldId": "Incident",
+      "recoveredId": "n1",
+      "weight": 1
+    },
+    {
+      "goldId": "MajorIncident",
+      "recoveredId": "n32",
+      "weight": 1
+    },
+    {
+      "goldId": "CybersecurityIncident",
+      "recoveredId": "n33",
+      "weight": 1
+    },
+    {
+      "goldId": "Problem",
+      "recoveredId": "n25",
+      "weight": 1
+    },
+    {
+      "goldId": "KnownError",
+      "recoveredId": "n15",
+      "weight": 1
+    },
+    {
+      "goldId": "Change",
+      "recoveredId": "n28",
+      "weight": 1
+    },
+    {
+      "goldId": "EmergencyChange",
+      "recoveredId": "n39",
+      "weight": 1
+    },
+    {
+      "goldId": "Release",
+      "recoveredId": "n29",
+      "weight": 1
+    },
+    {
+      "goldId": "Deployment",
+      "recoveredId": "n30",
+      "weight": 1
+    },
+    {
+      "goldId": "Workaround",
+      "recoveredId": "n14",
+      "weight": 1
+    },
+    {
+      "goldId": "Runbook",
+      "recoveredId": "n13",
+      "weight": 1
+    },
+    {
+      "goldId": "RecoveryPlan",
+      "recoveredId": "n17",
+      "weight": 1
+    },
+    {
+      "goldId": "EvidenceItem",
+      "recoveredId": "n21",
+      "weight": 1
+    },
+    {
+      "goldId": "Communication",
+      "recoveredId": "n23",
+      "weight": 1
+    },
+    {
+      "goldId": "MaterialityAssessment",
+      "recoveredId": "n18",
+      "weight": 1
+    },
+    {
+      "goldId": "RegulatoryNotification",
+      "recoveredId": "n19",
+      "weight": 1
+    },
+    {
+      "goldId": "PostIncidentReview",
+      "recoveredId": "n26",
+      "weight": 1
+    },
+    {
+      "goldId": "CorrectiveAction",
+      "recoveredId": "n27",
+      "weight": 1
+    }
+  ],
+  "relationships": [
+    {
+      "goldId": "rel_5",
+      "edgeId": "e20",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_6",
+      "edgeId": "e21",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_7",
+      "edgeId": "e22",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_9",
+      "edgeId": "e47",
+      "direction": "reciprocal"
+    },
+    {
+      "goldId": "rel_10",
+      "edgeId": "e32",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_12",
+      "edgeId": "e49",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_13",
+      "edgeId": "e30",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_14",
+      "edgeId": "e29",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_16",
+      "edgeId": "e31",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_20",
+      "edgeId": "e38",
+      "direction": "reciprocal"
+    },
+    {
+      "goldId": "rel_23",
+      "edgeId": "e1",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_27",
+      "edgeId": "e7",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_28",
+      "edgeId": "e8",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_29",
+      "edgeId": "e33",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_32",
+      "edgeId": "e53",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_33",
+      "edgeId": "e34",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_36",
+      "edgeId": "e9",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_46",
+      "edgeId": "e52",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_47",
+      "edgeId": "e51",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_70",
+      "edgeId": "e27",
+      "direction": "reciprocal"
+    },
+    {
+      "goldId": "rel_72",
+      "edgeId": "e28",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_73",
+      "edgeId": "e25",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_74",
+      "edgeId": "e26",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_79",
+      "edgeId": "e35",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_80",
+      "edgeId": "e39",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_81",
+      "edgeId": "e50",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_82",
+      "edgeId": "e23",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_84",
+      "edgeId": "e43",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_85",
+      "edgeId": "e45",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_87",
+      "edgeId": "e36",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_88",
+      "edgeId": "e57",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_92",
+      "edgeId": "e40",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_96",
+      "edgeId": "e54",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_97",
+      "edgeId": "e55",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_99",
+      "edgeId": "e19",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_102",
+      "edgeId": "e56",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_103",
+      "edgeId": "e46",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_106",
+      "edgeId": "e44",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_109",
+      "edgeId": "e42",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_113",
+      "edgeId": "e41",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_116",
+      "edgeId": "e37",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_118",
+      "edgeId": "e48",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_17",
+      "edgeId": "e12",
+      "direction": "reciprocal"
+    },
+    {
+      "goldId": "rel_62",
+      "edgeId": "e2",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_63",
+      "edgeId": "e3",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_67",
+      "edgeId": "e4",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_68",
+      "edgeId": "e6",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_69",
+      "edgeId": "e5",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_75",
+      "edgeId": "e10",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_77",
+      "edgeId": "e17",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_83",
+      "edgeId": "e11",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_86",
+      "edgeId": "e13",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_110",
+      "edgeId": "e18",
+      "direction": "forward"
+    }
+  ],
+  "properties": [
+    {
+      "goldId": "Stakeholder.name",
+      "hostNodeId": "n22",
+      "matchedPropertyName": "name"
+    },
+    {
+      "goldId": "Stakeholder.audienceType",
+      "hostNodeId": "n22",
+      "matchedPropertyName": "audience type"
+    },
+    {
+      "goldId": "BusinessService.criticalityTier",
+      "hostNodeId": "n4",
+      "matchedPropertyName": "criticality tier"
+    },
+    {
+      "goldId": "BusinessService.healthState",
+      "hostNodeId": "n4",
+      "matchedPropertyName": "health state"
+    },
+    {
+      "goldId": "ItService.healthState",
+      "hostNodeId": "n3",
+      "matchedPropertyName": "healthState"
+    },
+    {
+      "goldId": "BackupSet.status",
+      "hostNodeId": "n16",
+      "matchedPropertyName": "status"
+    },
+    {
+      "goldId": "Environment.environmentType",
+      "hostNodeId": "n31",
+      "matchedPropertyName": "environmentType"
+    },
+    {
+      "goldId": "Alert.status",
+      "hostNodeId": "n2",
+      "matchedPropertyName": "status"
+    },
+    {
+      "goldId": "Alert.severity",
+      "hostNodeId": "n2",
+      "matchedPropertyName": "severity"
+    },
+    {
+      "goldId": "Alert.detectionSource",
+      "hostNodeId": "n2",
+      "matchedPropertyName": "detection source"
+    },
+    {
+      "goldId": "Incident.summary",
+      "hostNodeId": "n1",
+      "matchedPropertyName": "summary"
+    },
+    {
+      "goldId": "Incident.description",
+      "hostNodeId": "n1",
+      "matchedPropertyName": "description"
+    },
+    {
+      "goldId": "Incident.detectedAt",
+      "hostNodeId": "n1",
+      "matchedPropertyName": "detected at"
+    },
+    {
+      "goldId": "Incident.openedAt",
+      "hostNodeId": "n1",
+      "matchedPropertyName": "opened at"
+    },
+    {
+      "goldId": "Incident.resolvedAt",
+      "hostNodeId": "n1",
+      "matchedPropertyName": "resolved at"
+    },
+    {
+      "goldId": "Incident.closedAt",
+      "hostNodeId": "n1",
+      "matchedPropertyName": "closed at"
+    },
+    {
+      "goldId": "Incident.status",
+      "hostNodeId": "n1",
+      "matchedPropertyName": "status"
+    },
+    {
+      "goldId": "Incident.severity",
+      "hostNodeId": "n1",
+      "matchedPropertyName": "severity"
+    },
+    {
+      "goldId": "Incident.priority",
+      "hostNodeId": "n1",
+      "matchedPropertyName": "priority"
+    },
+    {
+      "goldId": "Incident.impact",
+      "hostNodeId": "n1",
+      "matchedPropertyName": "impact"
+    },
+    {
+      "goldId": "Incident.urgency",
+      "hostNodeId": "n1",
+      "matchedPropertyName": "urgency"
+    },
+    {
+      "goldId": "Incident.category",
+      "hostNodeId": "n1",
+      "matchedPropertyName": "category"
+    },
+    {
+      "goldId": "Incident.detectionSource",
+      "hostNodeId": "n1",
+      "matchedPropertyName": "detection source"
+    },
+    {
+      "goldId": "Incident.recurring",
+      "hostNodeId": "n1",
+      "matchedPropertyName": "recurring"
+    },
+    {
+      "goldId": "Incident.timeToAcknowledge",
+      "hostNodeId": "n1",
+      "matchedPropertyName": "time to acknowledge"
+    },
+    {
+      "goldId": "Incident.timeToRestore",
+      "hostNodeId": "n1",
+      "matchedPropertyName": "time to restore"
+    },
+    {
+      "goldId": "Release.releaseDate",
+      "hostNodeId": "n29",
+      "matchedPropertyName": "release date"
+    },
+    {
+      "goldId": "Deployment.status",
+      "hostNodeId": "n30",
+      "matchedPropertyName": "status"
+    },
+    {
+      "goldId": "Deployment.startedAt",
+      "hostNodeId": "n30",
+      "matchedPropertyName": "started at"
+    },
+    {
+      "goldId": "Deployment.completedAt",
+      "hostNodeId": "n30",
+      "matchedPropertyName": "completed at"
+    },
+    {
+      "goldId": "RecoveryPlan.recoveryTimeObjective",
+      "hostNodeId": "n17",
+      "matchedPropertyName": "recoveryObjectiveTime"
+    },
+    {
+      "goldId": "RecoveryPlan.recoveryPointObjective",
+      "hostNodeId": "n17",
+      "matchedPropertyName": "recoveryObjectivePoint"
+    },
+    {
+      "goldId": "EvidenceItem.collectedAt",
+      "hostNodeId": "n21",
+      "matchedPropertyName": "collected at"
+    },
+    {
+      "goldId": "EvidenceItem.integrityStatus",
+      "hostNodeId": "n21",
+      "matchedPropertyName": "integrity status"
+    },
+    {
+      "goldId": "Communication.sentAt",
+      "hostNodeId": "n23",
+      "matchedPropertyName": "sent at"
+    },
+    {
+      "goldId": "Communication.audience",
+      "hostNodeId": "n23",
+      "matchedPropertyName": "audience"
+    },
+    {
+      "goldId": "Communication.status",
+      "hostNodeId": "n23",
+      "matchedPropertyName": "status"
+    },
+    {
+      "goldId": "MaterialityAssessment.assessedAt",
+      "hostNodeId": "n18",
+      "matchedPropertyName": "assessed at"
+    },
+    {
+      "goldId": "MaterialityAssessment.result",
+      "hostNodeId": "n18",
+      "matchedPropertyName": "result"
+    },
+    {
+      "goldId": "MaterialityAssessment.reportingDueTime",
+      "hostNodeId": "n18",
+      "matchedPropertyName": "reporting due time"
+    },
+    {
+      "goldId": "RegulatoryNotification.dueAt",
+      "hostNodeId": "n19",
+      "matchedPropertyName": "due at"
+    },
+    {
+      "goldId": "RegulatoryNotification.submittedAt",
+      "hostNodeId": "n19",
+      "matchedPropertyName": "submitted at"
+    },
+    {
+      "goldId": "RegulatoryNotification.status",
+      "hostNodeId": "n19",
+      "matchedPropertyName": "status"
+    },
+    {
+      "goldId": "PostIncidentReview.heldOn",
+      "hostNodeId": "n26",
+      "matchedPropertyName": "held on"
+    },
+    {
+      "goldId": "PostIncidentReview.findings",
+      "hostNodeId": "n26",
+      "matchedPropertyName": "findings"
+    },
+    {
+      "goldId": "CorrectiveAction.actionDescription",
+      "hostNodeId": "n27",
+      "matchedPropertyName": "action description"
+    },
+    {
+      "goldId": "CorrectiveAction.status",
+      "hostNodeId": "n27",
+      "matchedPropertyName": "status"
+    },
+    {
+      "goldId": "CorrectiveAction.dueDate",
+      "hostNodeId": "n27",
+      "matchedPropertyName": "due date"
+    },
+    {
+      "goldId": "BackupSet.lastSuccessfulBackup",
+      "hostNodeId": "n16",
+      "matchedPropertyName": "lastSuccessfulBackupTime"
+    },
+    {
+      "goldId": "Event.observedAt",
+      "hostNodeId": "n8",
+      "matchedPropertyName": "observedTime"
+    },
+    {
+      "goldId": "Alert.raisedAt",
+      "hostNodeId": "n2",
+      "matchedPropertyName": "raisedTime"
+    },
+    {
+      "goldId": "MajorIncident.declaredAt",
+      "hostNodeId": "n32",
+      "matchedPropertyName": "declarationTime"
+    },
+    {
+      "goldId": "RecoveryPlan.lastReviewDate",
+      "hostNodeId": "n17",
+      "matchedPropertyName": "lastReviewTime"
+    }
+  ]
+}

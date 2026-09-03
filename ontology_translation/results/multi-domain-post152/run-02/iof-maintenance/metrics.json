@@ -1,0 +1,445 @@
+{
+  "domain": "iof-maintenance",
+  "runId": "run-02",
+  "runUuid": "f196e784-092e-4dbd-aa43-2a1c7a2992e0",
+  "metrics": {
+    "classes": {
+      "recall": 0.85,
+      "precision": 0.9444444444444444,
+      "f1": 0.8947368421052632,
+      "matched": 17,
+      "groundTruthTotal": 20,
+      "recoveredTotal": 18
+    },
+    "relationships": {
+      "recall": 0.6923076923076923,
+      "precision": 0.5294117647058824,
+      "f1": 0.5999999999999999,
+      "matched": 9,
+      "groundTruthTotal": 13,
+      "recoveredTotal": 17
+    },
+    "properties": {
+      "recall": 0.2,
+      "precision": 0.3333333333333333,
+      "f1": 0.25,
+      "matched": 1,
+      "groundTruthTotal": 5,
+      "recoveredTotal": 3
+    },
+    "controlledValueFidelity": null,
+    "controlledValuePropertyGoldTotal": 1,
+    "controlledValuePropertyMatchedCount": 0,
+    "recoveryEffectiveness": 0.581578947368421,
+    "recoveryEffectivenessWithFidelity": null
+  },
+  "scopedMetrics": {
+    "classes": {
+      "recall": 0.9333333333333333,
+      "precision": 0.7777777777777778,
+      "f1": 0.8484848484848485,
+      "matched": 14,
+      "groundTruthTotal": 15,
+      "recoveredTotal": 18
+    },
+    "relationships": {
+      "recall": 0.875,
+      "precision": 0.4117647058823529,
+      "f1": 0.56,
+      "matched": 7,
+      "groundTruthTotal": 8,
+      "recoveredTotal": 17
+    },
+    "properties": {
+      "recall": 0.5,
+      "precision": 0.3333333333333333,
+      "f1": 0.4,
+      "matched": 1,
+      "groundTruthTotal": 2,
+      "recoveredTotal": 3
+    },
+    "controlledValueFidelity": null,
+    "controlledValuePropertyGoldTotal": 0,
+    "controlledValuePropertyMatchedCount": 0,
+    "recoveryEffectiveness": 0.6028282828282828,
+    "recoveryEffectivenessWithFidelity": null
+  },
+  "semanticMetrics": {
+    "classes": {
+      "recall": 0.85,
+      "precision": 0.9444444444444444,
+      "f1": 0.8947368421052632,
+      "matched": 17,
+      "groundTruthTotal": 20,
+      "recoveredTotal": 18
+    },
+    "relationships": {
+      "recall": 0.9230769230769231,
+      "precision": 0.7058823529411765,
+      "f1": 0.8000000000000002,
+      "matched": 12,
+      "groundTruthTotal": 13,
+      "recoveredTotal": 17
+    },
+    "properties": {
+      "recall": 0.2,
+      "precision": 0.3333333333333333,
+      "f1": 0.25,
+      "matched": 1,
+      "groundTruthTotal": 5,
+      "recoveredTotal": 3
+    },
+    "controlledValueFidelity": null,
+    "controlledValuePropertyGoldTotal": 1,
+    "controlledValuePropertyMatchedCount": 0,
+    "recoveryEffectiveness": 0.6482456140350877,
+    "recoveryEffectivenessWithFidelity": null,
+    "judgeCallCount": 3,
+    "judgments": {
+      "classes": [
+        {
+          "goldId": "MaintenanceState",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "DispositionToFail",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "DispositionToExhibitUndesirableBehavior",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "relationships": [
+        {
+          "goldId": "rel_0",
+          "recoveredId": "e4",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_10",
+          "recoveredId": "e5",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_11",
+          "recoveredId": "e6",
+          "verdict": "MATCH"
+        }
+      ],
+      "properties": [
+        {
+          "goldId": "MaintenanceWorkOrderRecord.workOrderDate",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "MaintenanceWorkOrderRecord.taskDescription",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "MaintenanceWorkOrderRecord.taskCode",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "valueFidelity": []
+    },
+    "resolvedMatches": {
+      "classes": [],
+      "relationships": [
+        {
+          "goldId": "rel_0",
+          "recoveredId": "e4"
+        },
+        {
+          "goldId": "rel_10",
+          "recoveredId": "e5"
+        },
+        {
+          "goldId": "rel_11",
+          "recoveredId": "e6"
+        }
+      ],
+      "properties": [],
+      "valueFidelity": []
+    },
+    "heuristic": {
+      "classes": {
+        "recall": 0.85,
+        "precision": 0.9444444444444444,
+        "f1": 0.8947368421052632,
+        "matched": 17,
+        "groundTruthTotal": 20,
+        "recoveredTotal": 18
+      },
+      "relationships": {
+        "recall": 0.6923076923076923,
+        "precision": 0.5294117647058824,
+        "f1": 0.5999999999999999,
+        "matched": 9,
+        "groundTruthTotal": 13,
+        "recoveredTotal": 17
+      },
+      "properties": {
+        "recall": 0.2,
+        "precision": 0.3333333333333333,
+        "f1": 0.25,
+        "matched": 1,
+        "groundTruthTotal": 5,
+        "recoveredTotal": 3
+      },
+      "controlledValueFidelity": null,
+      "controlledValuePropertyGoldTotal": 1,
+      "controlledValuePropertyMatchedCount": 0,
+      "recoveryEffectiveness": 0.581578947368421,
+      "recoveryEffectivenessWithFidelity": null
+    },
+    "rawResponses": {
+      "classes": "1: NO MATCH -- state is not a material item\n2: NO MATCH -- disposition to fail is not a maintainable material item\n3: NO MATCH -- undesirable-behavior disposition is not a maintainable material item",
+      "relationships": "1: MATCH 1 -- initiates and begins are interchangeable here\n2: MATCH 2 -- same relation phrased explicitly toward degraded state\n3: MATCH 3 -- same relation phrased explicitly toward failed state",
+      "properties": "1: NO MATCH -- task information is not specifically the work order date\n2: NO MATCH -- task information is broader than a specific task description field\n3: NO MATCH -- task information is not a specific task code field"
+    }
+  },
+  "semanticScopedMetrics": {
+    "classes": {
+      "recall": 0.9333333333333333,
+      "precision": 0.7777777777777778,
+      "f1": 0.8484848484848485,
+      "matched": 14,
+      "groundTruthTotal": 15,
+      "recoveredTotal": 18
+    },
+    "relationships": {
+      "recall": 1,
+      "precision": 0.47058823529411764,
+      "f1": 0.6399999999999999,
+      "matched": 8,
+      "groundTruthTotal": 8,
+      "recoveredTotal": 17
+    },
+    "properties": {
+      "recall": 0.5,
+      "precision": 0.3333333333333333,
+      "f1": 0.4,
+      "matched": 1,
+      "groundTruthTotal": 2,
+      "recoveredTotal": 3
+    },
+    "controlledValueFidelity": null,
+    "controlledValuePropertyGoldTotal": 0,
+    "controlledValuePropertyMatchedCount": 0,
+    "recoveryEffectiveness": 0.6294949494949494,
+    "recoveryEffectivenessWithFidelity": null,
+    "judgeCallCount": 3,
+    "judgments": {
+      "classes": [
+        {
+          "goldId": "MaintenanceState",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "relationships": [
+        {
+          "goldId": "rel_0",
+          "recoveredId": "e4",
+          "verdict": "MATCH"
+        }
+      ],
+      "properties": [
+        {
+          "goldId": "MaintenanceWorkOrderRecord.taskCode",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "valueFidelity": []
+    },
+    "resolvedMatches": {
+      "classes": [],
+      "relationships": [
+        {
+          "goldId": "rel_0",
+          "recoveredId": "e4"
+        }
+      ],
+      "properties": [],
+      "valueFidelity": []
+    },
+    "heuristic": {
+      "classes": {
+        "recall": 0.9333333333333333,
+        "precision": 0.7777777777777778,
+        "f1": 0.8484848484848485,
+        "matched": 14,
+        "groundTruthTotal": 15,
+        "recoveredTotal": 18
+      },
+      "relationships": {
+        "recall": 0.875,
+        "precision": 0.4117647058823529,
+        "f1": 0.56,
+        "matched": 7,
+        "groundTruthTotal": 8,
+        "recoveredTotal": 17
+      },
+      "properties": {
+        "recall": 0.5,
+        "precision": 0.3333333333333333,
+        "f1": 0.4,
+        "matched": 1,
+        "groundTruthTotal": 2,
+        "recoveredTotal": 3
+      },
+      "controlledValueFidelity": null,
+      "controlledValuePropertyGoldTotal": 0,
+      "controlledValuePropertyMatchedCount": 0,
+      "recoveryEffectiveness": 0.6028282828282828,
+      "recoveryEffectivenessWithFidelity": null
+    },
+    "rawResponses": {
+      "classes": "1: NO MATCH -- no candidate is a state/condition class matching maintenance state",
+      "relationships": "1: MATCH 1 -- initiates and begins are equivalent here",
+      "properties": "1: NO MATCH -- candidate is a generic task info field, not a specific task code"
+    }
+  },
+  "ruleMetrics": {
+    "recall": 0.42857142857142855,
+    "precision": 0.42857142857142855,
+    "f1": 0.42857142857142855,
+    "matched": 3,
+    "groundTruthTotal": 7,
+    "recoveredTotal": 7
+  },
+  "actionMetrics": {
+    "identification": {
+      "recall": 1,
+      "precision": 0.625,
+      "f1": 0.7692307692307693,
+      "matched": 5,
+      "groundTruthTotal": 5,
+      "recoveredTotal": 8
+    },
+    "inputClassAccuracy": 0.8,
+    "inputClassChecked": 5,
+    "preconditionRecovery": 0.42333333333333334,
+    "effectRecovery": 0.7142857142857142,
+    "verificationRecovery": 0.6982767232767233
+  },
+  "semanticRuleActionMetrics": {
+    "rules": {
+      "recall": 0.42857142857142855,
+      "precision": 0.42857142857142855,
+      "f1": 0.42857142857142855,
+      "matched": 3,
+      "groundTruthTotal": 7,
+      "recoveredTotal": 7
+    },
+    "actions": {
+      "recall": 1,
+      "precision": 0.625,
+      "f1": 0.7692307692307693,
+      "matched": 5,
+      "groundTruthTotal": 5,
+      "recoveredTotal": 8,
+      "components": {
+        "identification": {
+          "recall": 1,
+          "precision": 0.625,
+          "f1": 0.7692307692307693,
+          "matched": 5,
+          "groundTruthTotal": 5,
+          "recoveredTotal": 8
+        },
+        "inputClassAccuracy": 0.8,
+        "inputClassChecked": 5,
+        "preconditionRecovery": 0.42333333333333334,
+        "effectRecovery": 0.7142857142857142,
+        "verificationRecovery": 0.6982767232767233
+      }
+    },
+    "judgeCallCount": 1,
+    "judgments": {
+      "rules": [
+        {
+          "goldId": "canClassifyOperatingState",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "canClassifyDegradedState",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "canClassifyFailedState",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "canIssueMaintenanceWorkOrder",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "actions": []
+    },
+    "resolvedMatches": {
+      "rules": [],
+      "actions": []
+    },
+    "heuristic": {
+      "rules": {
+        "recall": 0.42857142857142855,
+        "precision": 0.42857142857142855,
+        "f1": 0.42857142857142855,
+        "matched": 3,
+        "groundTruthTotal": 7,
+        "recoveredTotal": 7
+      },
+      "actions": {
+        "identification": {
+          "recall": 1,
+          "precision": 0.625,
+          "f1": 0.7692307692307693,
+          "matched": 5,
+          "groundTruthTotal": 5,
+          "recoveredTotal": 8
+        },
+        "inputClassAccuracy": 0.8,
+        "inputClassChecked": 5,
+        "preconditionRecovery": 0.42333333333333334,
+        "effectRecovery": 0.7142857142857142,
+        "verificationRecovery": 0.6982767232767233
+      }
+    },
+    "rawResponses": {
+      "rules": "1: NO MATCH -- candidate only asserts already in operating state, not the function-based classification condition\n2: NO MATCH -- candidate only asserts already in degraded state, not reduced-but-acceptable performance criterion\n3: NO MATCH -- candidate only asserts already in failed state, not failure event plus inability to function\n4: NO MATCH -- candidate is about describing a maintenance process, not issuing a work order when maintenance is needed"
+    }
+  },
+  "operationalStats": {
+    "appAgentApiCalls": 103,
+    "applyToolCalls": 30,
+    "getGraphStateCalls": 6,
+    "toolApplied": 30,
+    "toolSkipped": 1,
+    "toolNothing": 0,
+    "toolError": 0,
+    "errorCounts": {},
+    "totalErrorTurns": 0,
+    "compactionEvents": 0,
+    "leakEventsCount": 0,
+    "unresolvedLeakEvents": 0,
+    "maxConsecutiveTurnsWithNoToolActivity": 7,
+    "degraded": false,
+    "totalTokens": 3828041,
+    "promptTokens": 3804173,
+    "completionTokens": 23868,
+    "tokenCallCount": 175
+  }
+}

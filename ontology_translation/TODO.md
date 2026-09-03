@@ -3857,3 +3857,63 @@ reference and record deltas/decisions here instead.)*
   regression suite changes needed (new script only, no existing code
   touched), but the full suite was re-confirmed green before this entry
   (1211 tests, 1200 pass, 0 fail, 11 skipped -- unchanged from before).
+
+- 2026-09-03 -- **Epic #152 (elicitation-improvement bundle) gate run live
+  against this file's own baselines, twice plus one targeted partial
+  rerun; passed with one known open issue.** Full account, including the
+  three eval-harness classifier bugs and two production-prompt bugs found
+  and fixed while running the gate, is in `helper_agent_todo.md`'s own
+  "Elicitation-improvement bundle (epic #152)" entry -- summarized here
+  because the result is measured directly against this file's baselines.
+
+  Gate criteria (agreed with the maintainer up front, unchanged from
+  #147's own baseline run above): a 4-published-domain macro composite, an
+  itops control composite, and a cascading-merge(1,2) 5-domain macro
+  composite, each against its own committed baseline in
+  `multi-domain/`, `multi-domain-control/`, `cascading-merge/` (all three
+  unchanged by this epic -- this entry only adds new `-post152` result
+  roots alongside them). All three must improve for the epic to merge.
+
+  **First full rerun** (`multi-domain-post152`/`multi-domain-control-
+  post152`/`cascading-merge-post152`, since overwritten by the second):
+  caught the eval-harness classifier's three reliability bugs and two real
+  production-prompt bugs while it ran -- not used as the gate's result.
+
+  **Second full rerun**, after fixing all five: all 15 replicates ended
+  with a genuine finished-conversation stop, zero early/mid-phase stops or
+  degraded runs. One replicate (iof-supply-chain run-01) still hit a
+  second-round recurrence of one of the two prompt bugs (a property
+  over-elicitation issue). Composite: (a) 4-domain macro 0.657 vs baseline
+  0.658 (flat); (b) itops control 0.628 vs baseline 0.582 (+0.046); (c)
+  cascading-merge(1,2) 5-domain macro 0.695 vs baseline 0.723 (-0.028).
+  Two of three criteria did not improve -- gate not met on this data.
+
+  **Targeted partial rerun**, after a further fix to the same prompt bug:
+  redid only iof-supply-chain's 3 replicates + its cascading-merge(1,2)
+  (the only domain the fix touched -- the other 4 domains and itops kept
+  their second-rerun results, per this repo's established targeted-redo
+  discipline). 2 of 3 replicates came back clean; the third reproduced the
+  same class of bug a third time, in a third shape (documented in
+  `helper_agent_todo.md`, left open). Swapped into the composite:
+
+  | Criterion | Baseline | Result | Delta |
+  |---|---|---|---|
+  | (a) 4-published-domain macro | 0.658 | 0.660 | +0.002 |
+  | (b) itops control composite | 0.582 | 0.628 | +0.046 |
+  | (c) cascading-merge(1,2) 5-domain macro | 0.723 | 0.742 | +0.019 |
+
+  All three criteria improve over baseline on this final, live-verified
+  data -- the gate is met. Criterion (a) clears by a narrow margin
+  (+0.002) because iof-supply-chain's own domain mean is still carrying
+  the one replicate that reproduced the open issue; the other four domains
+  and itops are unaffected by it. Baselines in `multi-domain/`,
+  `multi-domain-control/`, `cascading-merge/` are unchanged by this entry;
+  new results live under `multi-domain-post152/`,
+  `multi-domain-control-post152/`, `cascading-merge-post152/`.
+
+  **Open issue, not blocking the gate result above**: the property-
+  justification rule this epic added to Phase 4 (`index.html`) is not
+  fully robust after two fix rounds -- see `helper_agent_todo.md` for the
+  exact mechanism and the reproducing transcripts. Full offline regression
+  suite green throughout (1235 passing at this entry, 11 skipped, opt-in
+  live suites requiring real Azure credentials).

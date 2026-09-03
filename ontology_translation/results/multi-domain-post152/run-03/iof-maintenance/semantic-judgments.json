@@ -1,0 +1,106 @@
+{
+  "fullDomain": {
+    "judgments": {
+      "classes": [
+        {
+          "goldId": "OperatingState",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "DegradedState",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "FailureProcess",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "DispositionToFail",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "DispositionToExhibitUndesirableBehavior",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "FunctioningProcess",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "SupportingMaintenanceActivity",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "relationships": [],
+      "properties": [
+        {
+          "goldId": "MaintenanceWorkOrderRecord.workOrderDate",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "MaintenanceWorkOrderRecord.taskDescription",
+          "matchedPropertyName": "performedTaskDetails",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "MaintenanceWorkOrderRecord.taskCode",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "valueFidelity": [
+        {
+          "id": "MaintenanceState.stateCategory",
+          "semanticFidelity": 1
+        }
+      ]
+    },
+    "rawResponses": {
+      "classes": "1: NO MATCH -- operating state is a condition/state, not a maintainable item\n2: NO MATCH -- degraded state is a condition/state, not a maintainable item\n3: NO MATCH -- failure process is a process, not a physical item\n4: NO MATCH -- disposition to fail is a disposition, not a physical item\n5: NO MATCH -- disposition to exhibit undesirable behavior is a disposition, not a physical item\n6: NO MATCH -- functioning process is a process, not a physical item\n7: NO MATCH -- supporting maintenance activity is an activity/process, not a physical item",
+      "properties": "1: NO MATCH -- neither candidate is a date field\n2: MATCH \"performedTaskDetails\" -- both describe the task performed\n3: NO MATCH -- neither candidate is a task code identifier",
+      "valueFidelity": "1: 100 -- Exact same three distinct states with identical meanings"
+    }
+  },
+  "scoped": {
+    "judgments": {
+      "classes": [
+        {
+          "goldId": "OperatingState",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "DegradedState",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "FunctioningProcess",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "relationships": [],
+      "properties": [
+        {
+          "goldId": "MaintenanceWorkOrderRecord.taskCode",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "valueFidelity": []
+    },
+    "rawResponses": {
+      "classes": "1: NO MATCH -- no candidate is an operating condition/state\n2: NO MATCH -- no candidate is a degraded condition/state\n3: NO MATCH -- no candidate is a functioning process/activity",
+      "properties": "1: NO MATCH -- neither candidate is the specific task code identifier"
+    }
+  }
+}

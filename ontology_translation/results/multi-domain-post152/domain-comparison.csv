@@ -1,0 +1,5 @@
+domain,replicates,groundTruthClasses,groundTruthRelationships,groundTruthProperties,classesFullF1Mean,classesFullF1Stdev,relationshipsFullF1Mean,relationshipsFullF1Stdev,propertiesFullF1Mean,propertiesFullF1Stdev,recoveryEffectivenessFullMean,recoveryEffectivenessFullStdev,classesScopedF1Mean,recoveryEffectivenessScopedMean,rulesF1Mean,actionsIdentificationF1Mean,turnsUsedMean,totalTokensMean,translationHardGatesOk,translationStructuralValidityOk,translationProvenanceCoverage,translationReverseCoverage,translationStabilityMeanF1,translationCqSupportRate
+brick-hvac,3,39,35,42,0.847,0.098,0.691,0.221,0.468,0.281,0.669,0.123,0.728,0.586,0.730,0.544,68.333,8397874,true,true,1,1,0.776,0.900
+fibo-loans,3,57,31,49,0.687,0.011,0.792,0.022,0.542,0.092,0.674,0.034,0.687,0.629,0.644,1,66.667,8283430,true,true,1,1,0.763,1
+iof-maintenance,3,20,13,5,0.808,0.075,0.606,0.058,0.528,0.411,0.647,0.142,0.835,0.620,0.602,0.856,56,4173844,true,true,1,1,0.646,1
+iof-supply-chain,3,53,30,3,0.719,0.070,0.643,0.139,0.591,0.361,0.651,0.117,0.838,0.736,0.657,1,72.333,12175769.333,true,true,1,1,0.429,0.900

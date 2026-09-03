@@ -1,0 +1,138 @@
+{
+  "classes": [
+    {
+      "goldId": "MaintenanceState",
+      "recoveredId": "n2",
+      "weight": 1
+    },
+    {
+      "goldId": "FailureEvent",
+      "recoveredId": "n3",
+      "weight": 1
+    },
+    {
+      "goldId": "FailureEffect",
+      "recoveredId": "n13",
+      "weight": 1
+    },
+    {
+      "goldId": "UndesirableDisposition",
+      "recoveredId": "n12",
+      "weight": 1
+    },
+    {
+      "goldId": "FailureModeCode",
+      "recoveredId": "n11",
+      "weight": 1
+    },
+    {
+      "goldId": "RequiredFunction",
+      "recoveredId": "n10",
+      "weight": 1
+    },
+    {
+      "goldId": "FunctioningProcess",
+      "recoveredId": "n14",
+      "weight": 1
+    },
+    {
+      "goldId": "MaintenanceStrategy",
+      "recoveredId": "n6",
+      "weight": 1
+    },
+    {
+      "goldId": "MaintenanceProcess",
+      "recoveredId": "n5",
+      "weight": 1
+    },
+    {
+      "goldId": "MaintenanceActivity",
+      "recoveredId": "n7",
+      "weight": 1
+    },
+    {
+      "goldId": "MaintenanceWorkOrderRecord",
+      "recoveredId": "n4",
+      "weight": 1
+    },
+    {
+      "goldId": "QualificationSpecification",
+      "recoveredId": "n8",
+      "weight": 1
+    },
+    {
+      "goldId": "QualifiedMaintenancePerson",
+      "recoveredId": "n9",
+      "weight": 1
+    }
+  ],
+  "relationships": [
+    {
+      "goldId": "rel_2",
+      "edgeId": "e4",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_3",
+      "edgeId": "e5",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_1",
+      "edgeId": "e3",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_5",
+      "edgeId": "e6",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_6",
+      "edgeId": "e7",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_7",
+      "edgeId": "e9",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_9",
+      "edgeId": "e8",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_12",
+      "edgeId": "e10",
+      "direction": "forward"
+    }
+  ],
+  "properties": [
+    {
+      "goldId": "MaintenanceState.stateCategory",
+      "hostNodeId": "n2",
+      "matchedPropertyName": "stateCategory"
+    },
+    {
+      "goldId": "MaintenanceWorkOrderRecord.workOrderDate",
+      "hostNodeId": "n4",
+      "matchedPropertyName": "workOrderDate"
+    },
+    {
+      "goldId": "MaintenanceWorkOrderRecord.taskDescription",
+      "hostNodeId": "n4",
+      "matchedPropertyName": "taskDescription"
+    },
+    {
+      "goldId": "MaintenanceWorkOrderRecord.taskCode",
+      "hostNodeId": "n4",
+      "matchedPropertyName": "taskCode"
+    },
+    {
+      "goldId": "MaintenanceWorkOrderRecord.cost",
+      "hostNodeId": "n4",
+      "matchedPropertyName": "cost"
+    }
+  ]
+}

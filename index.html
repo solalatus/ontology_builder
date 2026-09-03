@@ -2616,6 +2616,7 @@ const STRINGS = {
     importReviewSharedNotePlaceholder: "Reasoning that applies to the review as a whole, not tied to one item…",
     importReviewChoiceKeepCurrent: "Keep current",
     importReviewChoiceTakeIncoming: "Take incoming",
+    importReviewContentLossWarningLabel: "Warning",
     importReviewNotePlaceholder: "Or write reasoning instead…",
     importReviewDownload: "Download decisions",
     importReviewApply: "Apply",
@@ -2780,6 +2781,7 @@ const STRINGS = {
     agentToolErrorNote: "The agent's ontology edit could not be applied (invalid data).",
     agentToolTooManyRounds: "The agent tried to use its tools too many times in one message and was stopped.",
     agentToolCheckedState: "🔍 Checked the current ontology state.",
+    agentNarrationCountMismatchNote: (claimed, added, changed) => `⚠️ The agent said "all ${claimed}" were recorded, but this turn actually added ${added} and updated ${changed} item(s). The agent has been told to restate the true numbers.`,
     // Helper Agent — Post-plan extension (helper_agent_plan.md §9): conversation persistence & restart.
     agentRestartConversation: "Restart conversation",
     agentRestartConfirmMessage: "This will permanently delete the current conversation history with the agent. The ontology on the canvas will NOT be affected. This cannot be undone.",
@@ -2968,6 +2970,7 @@ const STRINGS = {
     importReviewSharedNotePlaceholder: "Az egész áttekintésre vonatkozó indoklás, nem egy adott tételhez kötve…",
     importReviewChoiceKeepCurrent: "Jelenlegi megtartása",
     importReviewChoiceTakeIncoming: "Beérkező átvétele",
+    importReviewContentLossWarningLabel: "Figyelmeztetés",
     importReviewNotePlaceholder: "Vagy írd le, mi történjen…",
     importReviewDownload: "Döntések letöltése",
     importReviewApply: "Alkalmaz",
@@ -3129,6 +3132,7 @@ const STRINGS = {
     agentToolErrorNote: "Az ügynök szerkesztését nem sikerült alkalmazni (érvénytelen adat).",
     agentToolTooManyRounds: "Az ügynök túl sokszor próbálta használni az eszközeit egy üzenetben, ezért megállítottuk.",
     agentToolCheckedState: "🔍 Ellenőriztük az ontológia jelenlegi állapotát.",
+    agentNarrationCountMismatchNote: (claimed, added, changed) => `⚠️ Az ügynök azt mondta, hogy „mind a ${claimed}” elem rögzítve lett, de ebben a körben valójában ${added} elem került hozzáadásra és ${changed} frissítésre. Az ügynök utasítást kapott a valós számok megismétlésére.`,
     // Helper Agent — utólagos bővítés (helper_agent_plan.md §9): beszélgetés mentése és újraindítása.
     agentRestartConversation: "Beszélgetés újraindítása",
     agentRestartConfirmMessage: "Ez véglegesen törli az ügynökkel folytatott jelenlegi beszélgetés előzményeit. A vásznon lévő ontológiát ez NEM érinti. Ez nem vonható vissza.",
@@ -9056,45 +9060,58 @@ Return exactly one \`\`\`json block containing an array, and nothing else:
 
 const CONSISTENCY_LLM_CHECK_KINDS = new Set(["model-review", "relation-direction", "property-enum-coherence"]);
 
+// The real API call + parsing core, extracted (issue #156) so it has
+// exactly one implementation shared by the human-triggered Consistency
+// dialog button below and the automatic end-of-interview Phase 9 hook
+// (handleGetGraphStateCall's finalValidation path) -- neither duplicates
+// the other's request/parse logic, and a future fix to one applies to both.
+// Pure with respect to UI state: throws on any failure (unparseable
+// reply, network error) rather than swallowing it, so each caller decides
+// how to surface that failure in its own context (a dialog status string
+// here, a tool-result message there) instead of this function guessing.
+async function fetchConsistencyLlmFindings() {
+  const message = await callAgentChatRaw([
+    { role: "system", content: CONSISTENCY_LLM_PROMPT },
+    // Ontology-only on purpose: this pass was evaluated (issue #89) on a
+    // model with no competency_questions section, and its task is
+    // contradiction detection, not coverage. Handing it the new section
+    // would silently change the input of an already-evaluated subsystem
+    // (issue #94 §21). Coverage has its own prompt and its own result state.
+    { role: "user", content: buildDomainYamlExport({ includeCompetencyQuestions: false }) },
+  ]);
+  const reply = (message && typeof message.content === "string") ? message.content : "";
+  const blocks = [...reply.matchAll(/```(?:json)?\s*\n([\s\S]*?)```/g)].map((m) => m[1].trim());
+  const braced = reply.slice(reply.indexOf("["), reply.lastIndexOf("]") + 1);
+  let parsed = null;
+  for (const block of [...blocks, braced].filter(Boolean)) {
+    try {
+      const value = JSON.parse(block);
+      if (Array.isArray(value)) { parsed = value; break; }
+    } catch (err) { /* try the next candidate */ }
+  }
+  if (!parsed) throw new Error("no parseable findings array");
+  return parsed.slice(0, 25).map((raw, i) => {
+    const check = CONSISTENCY_LLM_CHECK_KINDS.has(raw && raw.check) ? raw.check : "model-review";
+    return {
+      id: `llm:${check}:${i}:${String((raw && raw.subject) || "")}`,
+      check,
+      tier: "llm",
+      // Never `error`. A probabilistic observation does not get to outrank a
+      // deterministic contradiction in the same list.
+      severity: "warning",
+      subject: { kind: "model", key: `llm-${i}`, name: String((raw && raw.subject) || "") },
+      message: String((raw && raw.message) || "").slice(0, 400),
+    };
+  }).filter((f) => f.message);
+}
+
 async function runConsistencyLlmCheck() {
   if (consistencyLlmPending || !agentState.connected) return;
   consistencyLlmPending = true;
   consistencyLlmStatusKey = "consistencyLlmRunning";
   renderConsistencyDialog();
   try {
-    const message = await callAgentChatRaw([
-      { role: "system", content: CONSISTENCY_LLM_PROMPT },
-      // Ontology-only on purpose: this pass was evaluated (issue #89) on a
-      // model with no competency_questions section, and its task is
-      // contradiction detection, not coverage. Handing it the new section
-      // would silently change the input of an already-evaluated subsystem
-      // (issue #94 §21). Coverage has its own prompt and its own result state.
-      { role: "user", content: buildDomainYamlExport({ includeCompetencyQuestions: false }) },
-    ]);
-    const reply = (message && typeof message.content === "string") ? message.content : "";
-    const blocks = [...reply.matchAll(/```(?:json)?\s*\n([\s\S]*?)```/g)].map((m) => m[1].trim());
-    const braced = reply.slice(reply.indexOf("["), reply.lastIndexOf("]") + 1);
-    let parsed = null;
-    for (const block of [...blocks, braced].filter(Boolean)) {
-      try {
-        const value = JSON.parse(block);
-        if (Array.isArray(value)) { parsed = value; break; }
-      } catch (err) { /* try the next candidate */ }
-    }
-    if (!parsed) throw new Error("no parseable findings array");
-    consistencyLlmFindings = parsed.slice(0, 25).map((raw, i) => {
-      const check = CONSISTENCY_LLM_CHECK_KINDS.has(raw && raw.check) ? raw.check : "model-review";
-      return {
-        id: `llm:${check}:${i}:${String((raw && raw.subject) || "")}`,
-        check,
-        tier: "llm",
-        // Never `error`. A probabilistic observation does not get to outrank a
-        // deterministic contradiction in the same list.
-        severity: "warning",
-        subject: { kind: "model", key: `llm-${i}`, name: String((raw && raw.subject) || "") },
-        message: String((raw && raw.message) || "").slice(0, 400),
-      };
-    }).filter((f) => f.message);
+    consistencyLlmFindings = await fetchConsistencyLlmFindings();
     consistencyLlmStatusKey = "consistencyLlmDone";
   } catch (err) {
     consistencyLlmFindings = [];
@@ -11280,6 +11297,7 @@ function importReviewKindLabel(kind) {
     case "rule": return t("finderKindRule");
     case "action": return t("finderKindAction");
     case "cq": return t("finderKindCq");
+    case "warning": return t("importReviewContentLossWarningLabel");
     default: return "";
   }
 }
@@ -11666,6 +11684,51 @@ const REMOVE_ONTOLOGY_ELEMENTS_TOOL = {
   },
 };
 
+// Issue #153 -- the root cause of the cascading-merge regression this tool
+// exists to fix. apply_ontology_changes matches an EXISTING class/rule/
+// action by its CURRENT name (applyYamlModelToState's own label/name find),
+// so calling it with a NEW name for a "renamed"/"reframed" decision never
+// updates the original -- it silently creates a second, brand-new entity
+// under the new name, with none of the original's properties (a class
+// keeps only whatever that one call happens to declare), while the
+// original is left behind as an apparent duplicate. If the merger agent
+// then "cleans up" by removing the original via remove_ontology_elements,
+// deleteNode()'s own cascade (state.edges = state.edges.filter(...)) wipes
+// every relationship that ever pointed at it too -- confirmed, by directly
+// diffing real committed merge output, as the exact mechanism behind
+// brick-hvac's Air Handling Unit->AirHandlingUnit rename losing its
+// economizerStatus/status properties and its locatedIn/locatedOn
+// relationships, and iof-supply-chain's Container/TraceableResourceUnit->
+// LogisticUnit collapse losing its manages/uses relationships the same way
+// (both in ontology_translation/results/cascading-merge/).
+//
+// This tool re-keys the EXISTING object's own label/name IN PLACE (mutates
+// the same node/rule/action object rather than deleting one and creating
+// another) -- every property, relationship, alias, meaning, precondition
+// and effect the original already had survives completely untouched, and
+// every edge that references the class by internal id (never by label)
+// keeps pointing at the exact same node it always did, automatically, with
+// nothing left to migrate. This is the correct primitive for "renamed"/
+// "reframed" merge decisions; apply_ontology_changes remains correct for
+// everything else (an existing entity's meaning/aliases/properties
+// changing while its own name stays the same).
+const RENAME_ONTOLOGY_ELEMENT_TOOL = {
+  type: "function",
+  function: {
+    name: "rename_ontology_element",
+    description: "Renames an EXISTING class, rule, or action IN PLACE, preserving every one of its properties, relationships, aliases, meaning, preconditions and effects untouched -- the correct way to enact a 'renamed'/'reframed'/'specialized'/'generalized' merge decision where a current-side item and an incoming-side item are the same real-world concept under a different name. Do NOT use apply_ontology_changes for a rename: it matches by the CURRENT name, so giving it a new name creates a second, empty-of-history duplicate instead of renaming the original, which silently loses that original's properties and relationships. Call this first for a rename; call apply_ontology_changes afterward, against the NEW name, only if the decision also calls for changing the meaning, aliases, or properties beyond the name itself. When several current-side items are being collapsed into one incoming name (a generalization), rename the one that should survive, then use apply_ontology_changes to add onto it any property or relationship unique to the other current-side item(s) before removing those other, now-redundant duplicates with remove_ontology_elements -- never remove a duplicate before its own unique content, if any, has been migrated onto the survivor.",
+    parameters: {
+      type: "object",
+      properties: {
+        kind: { type: "string", enum: ["class", "rule", "action"], description: "Relationships are never renamed directly -- rename their endpoint classes instead (an edge is identified by its endpoints' internal ids, not by label, so renaming an endpoint class already carries every relationship attached to it along for free)." },
+        from: { type: "string", description: "The element's exact current name." },
+        to: { type: "string", description: "Its new name." },
+      },
+      required: ["kind", "from", "to"],
+    },
+  },
+};
+
 const IMPORT_REVIEW_MERGER_SYSTEM_PROMPT = `ROLE
 You are executing a batch of merge decisions a human already made between two versions of an ontology: the current live graph, and an incoming file being merged into it.
 
@@ -11675,7 +11738,13 @@ Your job: make the live ontology reflect what the human actually decided, INCLUD
 
 REUSE THE GRAPH'S OWN VOCABULARY BEFORE INVENTING NEW WORDS. The user message includes an EXISTING RELATION NAMES section listing every relation name the current graph already uses, with real examples of its direction. Before writing any relationship name or direction in apply_ontology_changes, check that section first: if the current graph already has a name for the same shape you're about to write (containment, specialization/generalization, possession, comparison, or anything else it already covers), reuse that exact name and match its established from→to direction instead of coining a near-duplicate or writing the direction backwards. A real merge once invented "egyikFajtája" next to five existing uses of a graph's own "altípusa" for the identical specific→general shape, and separately stored a relationship whose own meaning text read backwards from how it was stored -- both are exactly what this paragraph exists to prevent.
 
-Use apply_ontology_changes to create or update anything (it never clears a field you don't mention on an existing match). Use remove_ontology_elements to delete something -- only when a human's own reasoning genuinely calls for it.
+Use apply_ontology_changes to create or update anything (it never clears a field you don't mention on an existing match). Use remove_ontology_elements to delete something -- only when a human's own reasoning genuinely calls for it. Use rename_ontology_element for a "renamed"/"reframed"/"specialized"/"generalized" pairing between one current-side class/rule/action and one incoming-side item that the human accepted as the same real-world thing under a different name.
+
+NEVER RENAME BY CALLING apply_ontology_changes WITH THE NEW NAME. apply_ontology_changes finds an EXISTING entity by its CURRENT name -- giving it a name that doesn't exist yet creates a brand-new, empty-of-history entity instead of renaming the original, and the original's properties and relationships are then either left behind as an apparent duplicate or, if you remove the original afterward, destroyed outright (removing a class deletes every relationship attached to it too). This exact mistake has already cost real, confirmed data in past merges. rename_ontology_element re-keys the original in place -- every property, relationship, alias and meaning it already had survives automatically, with nothing left for you to manually re-add. The sequence for a rename is: (1) rename_ontology_element to give the survivor its final name; (2) apply_ontology_changes afterward, against that new name, only if the decision also calls for a meaning/alias/property change beyond the name itself.
+
+WHEN A DIFFERENCE IS ONLY FORMATTING, NOT A REAL RENAME, KEEP THE CURRENT GRAPH'S OWN SPELLING. Two names that differ only in spacing, casing, or punctuation (words run together versus separated, an underscore versus a space, and so on) are the same name in two conventions, not two different names -- when a paired current-side and incoming-side item differ only that way and mean the exact same thing, rename to whichever spelling the CURRENT graph already uses (or leave the current one as-is if the pairing note doesn't require any change at all), never to the incoming file's spelling by default. Picking a side arbitrarily here just to "normalize" produces spurious churn with zero informational value.
+
+WHEN SEVERAL CURRENT-SIDE ITEMS COLLAPSE INTO ONE INCOMING NAME (a generalization), migrate before you remove. Pick the current-side item that should survive and rename_ontology_element it to the final name. For every OTHER current-side item being folded into it, first check whether it has any property, relationship, alias, or meaning content not already present on the survivor -- if so, add that content onto the survivor with apply_ontology_changes -- and only remove the now-redundant duplicate with remove_ontology_elements once nothing of its own is left unmigrated. Removing a duplicate that still has unique content is exactly the same silent-data-loss mistake as renaming by re-creation, just reached by a different path.
 
 BE CONSERVATIVE ABOUT REMOVAL. A removal is permanent within this run -- only call remove_ontology_elements on something when the reasoning specifically and clearly calls for removing that exact thing. A vague or general instruction ("this might be redundant," "consider dropping X") is not, by itself, enough justification for removing a concept that is still referenced elsewhere in the model, especially one with many existing relationships -- when you are genuinely unsure whether something should be removed or kept, keep it and say why in your final reply instead of removing it. Never merge or conflate two concepts into one just because a note mentioned trimming redundancy: confirm they are actually the same real-world concept first. Two things an ontology keeps as distinct sides of a comparison (a "demand" and the "resistance" it is checked against, say) are not the same concept just because a note called one of them redundant.
 
@@ -11752,7 +11821,48 @@ function executeImportReviewMergerTool(call, touched) {
     return "Applied.";
   }
 
+  if (name === "rename_ontology_element") {
+    const kind = args.kind;
+    const from = typeof args.from === "string" ? args.from.trim() : "";
+    const to = typeof args.to === "string" ? args.to.trim() : "";
+    if (!from || !to) return "Error: both from and to are required.";
+    if (from === to) return "Error: from and to are the same name -- nothing to rename.";
+    const collections = { class: state.nodes, rule: state.rules, action: state.actions };
+    const nameField = kind === "class" ? "label" : "name";
+    const collection = collections[kind];
+    if (!collection) return `Error: unknown kind "${kind}" -- rename_ontology_element only handles class, rule, or action (relationships are renamed by renaming their endpoint classes instead).`;
+    const existing = collection.find((el) => el[nameField] === from);
+    if (!existing) return `Error: no ${kind} named "${from}" exists.`;
+    if (collection.some((el) => el[nameField] === to)) {
+      return `Error: a ${kind} named "${to}" already exists -- use apply_ontology_changes to merge unique content onto it instead, then remove_ontology_elements on "${from}" once nothing of its own is left unmigrated.`;
+    }
+    existing[nameField] = to; // in-place re-key -- same object, same internal id, every other field and every edge/property attached to it untouched
+    markDirty();
+    touched.push({ kind, name: `${from} → ${to}`, action: "renamed" });
+    return `Renamed ${kind} "${from}" to "${to}", preserving its properties and relationships untouched.`;
+  }
+
   if (name === "remove_ontology_elements") {
+    // Issue #153 -- a content-loss transparency net, not a block: removing a
+    // class that still has properties or relationships attached is exactly
+    // the shape of the wholesale-replace defect this ticket fixes (a
+    // mis-enacted rename via delete-and-recreate instead of
+    // rename_ontology_element), but the tool still has to honour a removal
+    // a human's own reasoning genuinely calls for -- this only makes sure
+    // that if content is about to be destroyed, it is named in the result
+    // text and in `touched`, so the post-Apply summary and decisions.md
+    // export can never silently omit it the way the original bug did.
+    const requestedClassNames = Array.isArray(args.classes) ? args.classes : [];
+    const classLossWarnings = [];
+    for (const className of requestedClassNames) {
+      const node = state.nodes.find((n) => n.label === className);
+      if (!node) continue;
+      const propCount = (node.properties || []).length;
+      const edgeCount = state.edges.filter((e) => e.source === node.id || e.target === node.id).length;
+      if (propCount || edgeCount) {
+        classLossWarnings.push(`"${className}" (${propCount} propert${propCount === 1 ? "y" : "ies"}, ${edgeCount} relationship(s))`);
+      }
+    }
     const removed = removeNamedOntologyElements({
       classes: Array.isArray(args.classes) ? args.classes : [],
       relationships: Array.isArray(args.relationships) ? args.relationships : [],
@@ -11761,6 +11871,9 @@ function executeImportReviewMergerTool(call, touched) {
       actions: Array.isArray(args.actions) ? args.actions : [],
       competencyQuestions: Array.isArray(args.competencyQuestions) ? args.competencyQuestions : [],
     });
+    if (classLossWarnings.length) {
+      touched.push({ kind: "warning", name: `removed while it still had unmigrated content: ${classLossWarnings.join("; ")}`, action: "warning" });
+    }
     // Explicit map, not a naive /s$/ strip -- "classes" -> "classe" and
     // "properties" -> "propertie" both fail to match any known kind in
     // importReviewKindLabel()'s switch, which silently renders as a blank
@@ -11773,7 +11886,11 @@ function executeImportReviewMergerTool(call, touched) {
       for (const n of names) touched.push({ kind: REMOVED_KIND_SINGULAR[kind] || kind, name: n, action: "removed" });
     }
     const total = Object.values(removed).reduce((s, arr) => s + arr.length, 0);
-    return `Removed ${total} element(s).`;
+    return classLossWarnings.length
+      ? `Removed ${total} element(s). Warning: removed ${classLossWarnings.join("; ")} while it still had properties/relationships attached -- `
+        + `if any of that content was unique (not already present elsewhere), it is now lost. rename_ontology_element preserves content; `
+        + `remove_ontology_elements does not.`
+      : `Removed ${total} element(s).`;
   }
 
   return `Error: unknown tool "${name}".`;
@@ -11848,7 +11965,7 @@ async function runImportReviewExecutionAgent(agentItems, sharedNote) {
       content: `CURRENT MODEL:\n${buildDomainYamlExport()}\n\n${importReviewRelationVocabularyText()}\n\nINCOMING MODEL:\n${importReviewIncomingYaml()}\n\nDECISIONS:\n${importReviewAgentItemsAsText(agentItems, sharedNote)}`,
     },
   ];
-  const tools = [APPLY_ONTOLOGY_CHANGES_TOOL, REMOVE_ONTOLOGY_ELEMENTS_TOOL];
+  const tools = [APPLY_ONTOLOGY_CHANGES_TOOL, REMOVE_ONTOLOGY_ELEMENTS_TOOL, RENAME_ONTOLOGY_ELEMENT_TOOL];
   const touched = [];
   // The system prompt explicitly invites a short closing reply for anything
   // deliberately left undone or uncertain (its own "be conservative about
@@ -12973,6 +13090,14 @@ const agentState = {
   // the treatment alone and nothing else (not a Chromium version, not a
   // harness revision). Never set by any real UI.
   selfCorrectionDisabled: false,
+  // Issue #156 -- bounds the automatic end-of-interview Tier C call to at
+  // most once per conversation, however many times get_graph_state is
+  // called with finalValidation:true afterward (e.g. the interviewer
+  // re-validating after fixing something Phase 9 turned up). Set the
+  // moment the call is attempted, not only on success -- a failed attempt
+  // must not be silently retried indefinitely either, same "one bounded
+  // pass" framing as the rest of this ticket.
+  tierCFindingsRanThisSession: false,
 };
 
 try {
@@ -13520,6 +13645,7 @@ function disconnectAgent() {
   agentState.apiMessages = [];
   agentState.sending = false;
   agentState.promptCacheKey = null;
+  agentState.tierCFindingsRanThisSession = false;
   renderAgentTranscript();
   setAgentTypingIndicator(false);
   setAgentConnectedUi(false);
@@ -13542,6 +13668,7 @@ function restartAgentConversation() {
   agentState.transcript = [];
   agentState.apiMessages = [];
   agentState.promptCacheKey = `kg-agent-${crypto.randomUUID()}`;
+  agentState.tierCFindingsRanThisSession = false;
   renderAgentTranscript();
   // If a turn was still in flight, aborting it above means its own
   // sendAgentChatMessage() call now discards itself on the generation
@@ -13697,11 +13824,24 @@ const GET_GRAPH_STATE_TOOL = {
     description: "Returns the ontology's current live state (competency " +
       "questions, classes, relationships, rules, actions) exactly as it is " +
       "on the canvas right now, in the same YAML shape apply_ontology_yaml " +
-      "accepts. Takes no " +
-      "arguments. Call this whenever you're not certain your own memory of " +
+      "accepts, plus a deterministic consistency-check summary. " +
+      "Call this whenever you're not certain your own memory of " +
       "what's already defined is still accurate — the expert can edit the " +
-      "canvas directly at any time, independent of this conversation.",
-    parameters: { type: "object", properties: {}, required: [] },
+      "canvas directly at any time, independent of this conversation. " +
+      "Pass finalValidation:true on the one call you make for Phase 10(b)'s " +
+      "final checklist -- it additionally runs one automated second-opinion " +
+      "model review of the whole ontology (at most once per conversation, " +
+      "regardless of how many times you pass it afterward).",
+    parameters: {
+      type: "object",
+      properties: {
+        finalValidation: {
+          type: "boolean",
+          description: "Set true only for the get_graph_state call made as part of Phase 10(b)'s final checklist.",
+        },
+      },
+      required: [],
+    },
   },
 };
 
@@ -14120,9 +14260,9 @@ GROUND RULES
 - Only add a property, rule, or constraint if it is justified by an actual
   question or action the expert gave you. Push back gently on fields
   proposed "just in case."
-- Watch for near-synonyms silently referring to different things (e.g.
-  "supplier" vs "vendor" vs "counterparty" may not be equivalent) — ask
-  before merging two terms into one class.
+- Watch for near-synonyms silently referring to different things (e.g. two
+  terms the expert has used that sound interchangeable may not actually be
+  equivalent) — ask before merging two terms into one class.
 - Never fabricate domain content. If the expert is unsure, record it as an
   open question rather than guessing.
 - This is a general-purpose ontology-building tool for ANY domain -- not
@@ -14136,9 +14276,15 @@ GROUND RULES
   different, unrelated domain.
 - A phase that still has required work left is not optional — never offer
   the expert a choice between finishing it and skipping ahead to a later
-  phase (e.g. validation). State plainly what's confirmed and what's still
-  open; let them decide whether to continue in a follow-up session, but
-  don't frame remaining required work itself as something to skip.
+  phase (e.g. validation), and never offer them a choice between finishing
+  it and stopping here. State plainly what's confirmed and what's still
+  open, then immediately ask the next concrete question needed to close
+  that gap — don't present "stop or continue" as a fair choice, and don't
+  soften an unfinished phase into a "good stopping point." If the expert
+  stops responding or explicitly refuses to continue, say plainly, in your
+  own next turn, exactly what remains missing and that the model is being
+  left in a known-incomplete state — never let a recap read as if the open
+  item were resolved.
 - Don't mistake your own or the expert's earlier wording being repeated
   back to you (a recap, an echoed reply) for a fresh confirmation of new
   content, and don't treat something as recorded because it reads like it
@@ -14149,8 +14295,8 @@ explains the reasoning for — adapt the pacing to how much the expert
 already has instead of following it rigidly)
 0. Orientation: call get_graph_state first. If it's empty, ask what
    business domain/agent this is for, in one or two sentences, and briefly
-   explain the process (about 9 short phases; the expert can stop early
-   with whatever is captured so far). If it's not empty, recap what's
+   explain the process (about 10 short phases building up a complete
+   model). If it's not empty, recap what's
    already there instead of assuming a blank slate. If it already contains
    competency_questions (they can be imported from an external process, not
    only elicited here), do NOT discard them and do NOT immediately generate
@@ -14298,12 +14444,25 @@ already has instead of following it rigidly)
    this phase, call get_graph_state and check every class's relationship
    count directly — don't rely on memory of what you've already asked;
    anything still at zero is unfinished, not naturally standalone. Having at
-   least one relationship isn't the real bar, though: two classes that
-   appear together in the same competency question or action almost
-   always need a direct relationship between them specifically, not just
-   each one separately connected to something else. Re-read the confirmed
-   competency questions once more before moving on, and confirm every pair of classes it
-   jointly mentions has an explicit relationship between that exact pair.
+   least one relationship isn't the real bar, though: re-read the confirmed
+   competency questions and actions once more before moving on, and for
+   every pair of classes one of them jointly mentions, work out how you
+   actually get from one to the other. Ask for the path, not the edge —
+   "how do you get from [Class A] to the [Role X] responsible for it? what
+   concepts and relationships are involved along the way?" — rather than
+   asking "what relationship connects [Class A] and [Role X]" as if a
+   direct link is already assumed. Record whatever real concepts and
+   relationships the expert actually describes along that path. Only add a
+   direct relationship between the two specifically once the expert
+   explicitly confirms that exact fact holds on its own, separately from
+   any path through other classes — two classes being jointly mentioned is
+   a reason to ask how they connect, never by itself a reason to assume the
+   connection is direct.
+   Repeat this same jointly-mentioned-pair/path check again after every
+   later phase that introduces a class which did not exist the last time you
+   ran it — a class named for the first time while capturing properties,
+   rules, or actions still needs a relationship pass of its own, not just
+   whatever happened to come up while it was being defined.
 4. Decision-bearing properties: for each class, propose ONLY properties
    that trace back to a competency question or action (filter, compare,
    decide, explain, or act). Reject "nice to know" fields. Once you're
@@ -14319,6 +14478,23 @@ already has instead of following it rigidly)
    them either confirm a real alternative already in the model or change
    their answer. A property genuinely unneeded by anything on the list
    stays excluded as normal.
+   The same scrutiny applies in the other direction: don't accept a
+   property just because the expert says a value will exist "per policy"
+   or "per the organization's system," with the exact scheme left open —
+   that names that a value exists, not what the agent does with it. Before
+   recording it, ask the expert to name the specific competency question or
+   action that needs it, and how (which filter, comparison, decision,
+   explanation, or tool-call input it drives). If they can only repeat that
+   some identifier or value will exist without naming that function, leave
+   it as an open item rather than a confirmed property.
+   This applies to your own batched proposals just as much as to the
+   expert's answers: when batching a repeated property across several
+   classes (see GROUND RULES), propose it only for the classes where you
+   can already name which confirmed competency question or action needs
+   it -- not under one shared generic rationale like "for lookup,
+   reporting, or tool input" applied to the whole group. A class
+   without its own specific tie-back drops out of the batch and stays an
+   open item, even if the rest of the batch is justified.
    Separately, when a class is something the agent monitors, tracks, or
    reports on over time — not just a static lookup/reference record — ask
    explicitly whether it needs its own current-state or status property,
@@ -14372,8 +14548,46 @@ already has instead of following it rigidly)
    that are actually in the model — if describing what changes or how to
    check it needs something not yet captured, capture that first rather
    than describing a check the model doesn't actually support.
-9. Validation pass — run BOTH checks before considering a class,
-   relationship, rule, or action finished:
+9. Bounded domain-expansion pass: a real conversational step, not a
+   self-check — you must actually ask the expert this, in words, and get
+   a real answer, the same as any other phase above. Do not fold it into
+   the validation pass below or treat "we've reached the validation
+   phase" as covering it; announcing the interview is heading into
+   validation does not satisfy this step, and a session that skips
+   straight from Phase 8 into competency/final checks has skipped this
+   phase entirely, not completed it implicitly. Run it once, right here,
+   after every competency question and action is structurally covered —
+   its purpose is recall beyond what the competency questions happened to
+   ask about, not closing a gap Phase 10's competency check would find.
+   For each major class already in the model — the ones central to
+   what's been discussed, not every class — silently check which of
+   these general neighboring structures could plausibly apply to it:
+   subordinate parts or components; states or lifecycle events it passes
+   through; actors or responsible parties connected to it; its inputs and
+   outputs; related paperwork or agreements; measurements or
+   characteristic values it carries; earlier or later stages of a larger
+   workflow it takes part in. Skip any category that plainly doesn't fit
+   that concept — never force all of them onto every class, and never
+   reach for a specific domain's vocabulary while doing this (these are
+   generic shapes, not named examples to mention to the expert). Batch
+   what's left into one offer per major concept, or across a small group
+   of them (same batching discipline as GROUND RULES), naming only the
+   categories you think might actually be missing — e.g. "we have the
+   operational core for [concept] — are there any [the specific
+   applicable categories] we're missing?" Ask this once per major
+   concept, not repeatedly: a "no, that's covered" answer, or silence
+   beyond a first reasonable follow-up, ends the pass for that concept —
+   move on rather than re-probing or broadening into open-ended
+   brainstorming. Add nothing from this pass without the expert's
+   explicit confirmation, and route anything confirmed through the same
+   phases as everything else (a new relationship still needs Phase 3's
+   path check, a new property still needs Phase 4's competency-question
+   trace) rather than writing it straight in. This pass proposes
+   candidates; it never substitutes for Phase 10's checklist below, and
+   finding nothing worth adding for a concept is a legitimate, common
+   outcome, not a sign to keep pushing for more.
+10. Validation pass — run BOTH checks below, in order, before
+   considering a class, relationship, rule, or action finished:
    (a) Competency check: call get_graph_state and read the persisted
        competency_questions from that result — do NOT work from your own
        memory of what was asked in Phase 1, which may have been compacted,
@@ -14387,12 +14601,17 @@ already has instead of following it rigidly)
        plainly — an ontology with no recorded competency questions has no
        acceptance test, and the fix is to capture them, not to invent a
        list now and grade against it.
-   (b) Final checklist: call get_graph_state and confirm directly from that
+   (b) Final checklist: call get_graph_state with finalValidation:true and
+       confirm directly from that
        result, not from memory, that every class has at least one
-       relationship recorded, AND that every pair of classes jointly
-       mentioned in a competency question or action has a direct relationship
-       between that specific pair (not just each side connected to
-       something else); every actor reached only through a group or
+       relationship recorded; that the jointly-mentioned-pair/path check
+       (Phase 3) has actually been run again for every class that was first
+       introduced after Phase 3 — a class named while capturing properties,
+       rules, or actions is not exempt from it just because it arrived
+       late; that no relationship was added between a jointly-mentioned
+       pair without the expert explicitly confirming the direct fact,
+       separately from whatever path was already recorded between them;
+       every actor reached only through a group or
        parent-record chain also has a direct relationship where the
        original material implies one, not just the two-hop path; every
        distinctly-named actor or role from Phase 1 became its own class,
@@ -14401,10 +14620,23 @@ already has instead of following it rigidly)
        verb; every property helps identify/filter/decide/explain/act,
        and every class the agent tracks over time (not just looks up) has
        its own current-state property; common synonyms are captured; every class and relationship has a meaning sentence; every property whose value is naturally a small fixed set (status, type, category, priority, and similar) has a captured allowed-value list; every rule and action only references properties, relationships, and values actually captured in the model; important actions have
-       explicit conditions.
-   If either check finds a real gap, go back and close it before continuing
+       explicit conditions; and Phase 9's domain-expansion offer was
+       actually made, out loud, for every major class — not silently
+       skipped by treating the transition into this validation pass as
+       covering it.
+       That same call also returns a second-opinion model review of the
+       whole ontology (once per conversation). Treat what it reports the
+       same way you already treat the deterministic findings above: report
+       it to the expert as coming from an automated second opinion, not as
+       your own judgment or the expert's own words, and never resolve it by
+       weakening or deleting the item it is about — add whatever fact is
+       actually missing, the same fix-forward rule that already applies to
+       every other finding in this interview. A second opinion that turns
+       out to be wrong is still reported, not silently discarded — say so
+       plainly if, after checking, you conclude it does not hold.
+   If any check finds a real gap, go back and close it before continuing
    — don't just note the gap and report the interview complete anyway.
-   Report the result of both checks to the expert plainly. If real gaps remain
+   Report the result of all checks to the expert plainly. If real gaps remain
    that can't be resolved in this session, say so as a named, itemized list
    of open items rather than leaving the conversation on an unanswered
    question — ending on an unresolved question is not the same as ending
@@ -14697,6 +14929,39 @@ async function callAgentChat(messages) {
   return typeof message.content === "string" ? message.content : "";
 }
 
+// Issue #157 -- a deterministic guard against a documented failure pattern:
+// the tool result handleAgentApplyToolCall returns below is already
+// truthful (see its own comment on the issue #83 fix), but a manual read of
+// ~185,000 lines of real interview transcripts across this project's own
+// itops/brick-hvac/iof-maintenance/iof-supply-chain/fibo-loans runs found
+// the interviewer's own SUBSEQUENT natural-language reply to the expert
+// repeatedly overclaiming a bigger "recorded all N" total than what that
+// turn's apply(es) actually added/updated (e.g. narrating "recorded all 12"
+// after a tool result that actually said "Added 3, updated 0") -- and
+// nothing ever cross-checked the claim against the true numbers.
+//
+// Deliberately narrow, to keep the false-positive rate low: only an
+// explicit "all <number>" phrase is treated as a totalizing claim, compared
+// against this turn's own real added+changed total. A partial or itemized
+// claim ("recorded 3 of the 5 we discussed", "added the two you confirmed")
+// is not a totalizing claim and is not flagged -- this is not a general
+// arithmetic-in-prose checker, just the one specific shape the transcripts
+// actually showed causing harm. Exported on window.__kg.agent (see the
+// debug hook below) so it is directly unit-testable without needing a live
+// turn to exercise it.
+function findNarrationCountOverclaim(replyText, trueAddedCount, trueChangedCount) {
+  if (typeof replyText !== "string" || !replyText) return null;
+  const trueTotal = (trueAddedCount || 0) + (trueChangedCount || 0);
+  const re = /\ball\s+(\d+)\b/gi;
+  let match;
+  let worst = null;
+  while ((match = re.exec(replyText))) {
+    const claimed = Number(match[1]);
+    if (claimed > trueTotal && (!worst || claimed > worst.claimed)) worst = { claimed, trueTotal };
+  }
+  return worst;
+}
+
 // Executes one apply_ontology_yaml tool call and returns {applied,
 // resultText} — resultText is what gets sent back to the API as that
 // tool_call_id's result; applied tells the caller whether this call
@@ -14761,7 +15026,16 @@ async function handleAgentApplyToolCall(call, alreadyCommittedThisTurn) {
   }
   await commitYamlImport(yamlText, "agent-merge"); // never "replace"; not "merge" either — see commitYamlImport's own comment
   appendTranscriptMessage("tool", t("agentToolApplied", plan.addedCount, plan.changedCount));
-  return { applied: true, resultText: `Applied. Added ${plan.addedCount}, updated ${plan.changedCount} existing item(s).${dropped}` };
+  // addedCount/changedCount surfaced on the return value (issue #157), not
+  // just embedded in resultText's prose -- the turn loop below needs the
+  // real numbers as data, not as something it would have to re-parse back
+  // out of a sentence it just generated.
+  return {
+    applied: true,
+    resultText: `Applied. Added ${plan.addedCount}, updated ${plan.changedCount} existing item(s).${dropped}`,
+    addedCount: plan.addedCount,
+    changedCount: plan.changedCount,
+  };
 }
 
 // Sibling of handleAgentApplyToolCall above, for remove_ontology_elements
@@ -14838,14 +15112,49 @@ async function handleAgentRemoveToolCall(call, alreadyCommittedThisTurn) {
 // one-real-commit-per-turn guardrail) and can be called any number of
 // times in a turn, bounded only by the shared AGENT_MAX_TOOL_ROUNDS safety
 // limit every tool-calling round already respects.
-function handleGetGraphStateCall() {
+// Issue #156 -- the automatic end-of-interview whole-graph pass. Same
+// "the reliable signal is the tool call, not the narration" reasoning as
+// the deterministic sweep below, extended to Tier C: rather than guessing
+// from the model's own prose that it has reached Phase 9, the interviewer
+// is told explicitly (Phase 10(b), see the prompt) to pass
+// finalValidation:true on the one get_graph_state call it makes for its
+// final checklist. Bounded to at most one real Tier C call per
+// conversation (agentState.tierCFindingsRanThisSession) regardless of how
+// many times finalValidation:true is passed afterward -- re-validating
+// after a fix should re-run the free deterministic sweep, not spend a
+// second model call every time. A Tier C failure (network, unparseable
+// reply) is reported plainly and still counts as "ran" -- silently
+// retrying it on every subsequent call would be the unbounded loop this
+// ticket is scoped to avoid.
+async function fetchFinalValidationTierCAppendix() {
+  if (agentState.tierCFindingsRanThisSession) {
+    // Explicit, not a silent omission -- a reader of the tool-call log (or
+    // the agent itself) should be able to tell "already checked once" apart
+    // from "finalValidation was never passed at all" without having to
+    // infer it from an absent section.
+    return "\n\n# SECOND-OPINION MODEL CHECK — already attempted once this conversation, not repeated.";
+  }
+  if (!agentState.connected) return "";
+  agentState.tierCFindingsRanThisSession = true;
+  try {
+    const findings = await fetchConsistencyLlmFindings();
+    return findings.length
+      ? `\n\n# SECOND-OPINION MODEL CHECK — ${findings.length} observation(s) from a separate automated review (report these to the expert, marked as model-derived, the same as the deterministic findings above; not authoritative on their own, but not to be dismissed without checking):\n`
+        + findings.map((f) => `#   [${f.check}] ${f.message}`).join("\n")
+      : "\n\n# SECOND-OPINION MODEL CHECK — no additional observations.";
+  } catch (err) {
+    return "\n\n# SECOND-OPINION MODEL CHECK — could not be completed (this does not affect the deterministic findings above).";
+  }
+}
+
+async function handleGetGraphStateCall(call) {
   appendTranscriptMessage("tool", t("agentToolCheckedState"));
   // The full sweep rides along here rather than being triggered by detecting
   // "Phase 9" in the agent's prose (issue #84 §2 asks for one full sweep at
   // the validation pass). Phase detection would mean parsing the model's own
   // description of what it is doing, which is exactly the kind of claim this
   // repository has already caught being wrong. get_graph_state is the
-  // read-the-whole-model tool, the interview prompt's own Phase 9(b) tells the
+  // read-the-whole-model tool, the interview prompt's own Phase 10(b) tells the
   // agent to call it and confirm "directly from that result, not from
   // memory", and the whole model is what a full findings list is about. So
   // the reliable signal is the tool call, not the narration.
@@ -14857,7 +15166,10 @@ function handleGetGraphStateCall() {
       + findings.slice(0, 25).map((f) => `#   [${f.severity}] ${f.check} — ${f.message}`).join("\n")
       + (findings.length > 25 ? `\n#   …and ${findings.length - 25} more.` : "")
     : "\n\n# CONSISTENCY CHECK — no outstanding problems in the model.";
-  return { applied: false, resultText: buildDomainYamlExport() + appendix };
+  let args = {};
+  try { args = JSON.parse((call && call.function && call.function.arguments) || "{}"); } catch (err) { /* treat as no args */ }
+  const tierCAppendix = args && args.finalValidation === true ? await fetchFinalValidationTierCAppendix() : "";
+  return { applied: false, resultText: buildDomainYamlExport() + appendix + tierCAppendix };
 }
 
 function agentChatErrorText(err) {
@@ -14981,6 +15293,11 @@ async function sendAgentChatMessage(userText) {
   // replies to the expert — and are refused for anything else, so a turn
   // cannot quietly become three turns of elicitation.
   let appliesThisTurn = 0;
+  // Issue #157 -- this turn's real, deterministic added/updated total from
+  // apply_ontology_yaml calls only (remove_ontology_elements is a different
+  // claim shape and is not in scope for the overclaim check below).
+  let totalAppliedAdded = 0;
+  let totalAppliedChanged = 0;
   agentTurnFoldIndex = -1;
   // Findings outstanding at the top of the turn. Anything not on this list
   // afterwards is something this turn introduced, which is what the agent is
@@ -15025,7 +15342,7 @@ async function sendAgentChatMessage(userText) {
         for (const call of message.tool_calls) {
           const name = call.function && call.function.name;
           if (name === "get_graph_state") {
-            const { resultText } = handleGetGraphStateCall();
+            const { resultText } = await handleGetGraphStateCall(call);
             agentState.apiMessages.push({ role: "tool", tool_call_id: call.id, content: resultText });
             continue;
           }
@@ -15044,9 +15361,13 @@ async function sendAgentChatMessage(userText) {
           // pool, not two independent ones; see handleAgentRemoveToolCall's
           // own comment.
           const toolHandler = name === "remove_ontology_elements" ? handleAgentRemoveToolCall : handleAgentApplyToolCall;
-          const { applied, resultText } = await toolHandler(call, !budget);
+          const { applied, resultText, addedCount, changedCount } = await toolHandler(call, !budget);
           if (applied) {
             appliesThisTurn++;
+            if (name === "apply_ontology_yaml") {
+              totalAppliedAdded += addedCount || 0;
+              totalAppliedChanged += changedCount || 0;
+            }
             const findings = computeOntologyFindings(buildDomainModel(), { droppedReferences: lastDroppedReferences });
             lastDroppedReferences = [];
             unresolvedFromThisTurn = findings.filter((f) => f.severity !== "note" && !turnFindingIdsAtStart.has(f.id));
@@ -15067,6 +15388,29 @@ async function sendAgentChatMessage(userText) {
       const reply = typeof message.content === "string" ? message.content : "";
       agentState.apiMessages.push({ role: "assistant", content: reply });
       appendTranscriptMessage("assistant", reply);
+      // Issue #157 -- checked against this turn's own real total, only when
+      // this turn actually applied something (an overclaim check with a
+      // true total of 0 would flag "all 1" in an unrelated sentence for no
+      // reason). The model's own words are shown as-is, not rewritten —
+      // silently editing what it said would be its own kind of dishonesty —
+      // but the mismatch is surfaced immediately (visible to whoever is
+      // running the app) and fed back so the model can correct itself on
+      // its very next reply, the same "injected harness note" shape
+      // compactAgentHistory's own summary uses above.
+      if (totalAppliedAdded + totalAppliedChanged > 0) {
+        const overclaim = findNarrationCountOverclaim(reply, totalAppliedAdded, totalAppliedChanged);
+        if (overclaim) {
+          appendTranscriptMessage("system", t("agentNarrationCountMismatchNote", overclaim.claimed, totalAppliedAdded, totalAppliedChanged));
+          agentState.apiMessages.push({
+            role: "user",
+            content: `[System note] Your last reply said "all ${overclaim.claimed}", but this turn's `
+              + `apply_ontology_yaml call(s) actually recorded ${totalAppliedAdded} added and `
+              + `${totalAppliedChanged} updated item(s) — not ${overclaim.claimed}. State the true numbers `
+              + `the next time you summarize what was recorded, and call get_graph_state first if you are `
+              + `not sure what actually persisted.`,
+          });
+        }
+      }
       break;
     } catch (err) {
       if (myGeneration !== agentState.requestGeneration) return;
@@ -15297,7 +15641,7 @@ window.__kg = {
     // so a test can exercise the merger's tool contract directly.
     applyYamlModelToState,
     removeNamedOntologyElements,
-    tools: { applyOntologyChanges: APPLY_ONTOLOGY_CHANGES_TOOL, removeOntologyElements: REMOVE_ONTOLOGY_ELEMENTS_TOOL },
+    tools: { applyOntologyChanges: APPLY_ONTOLOGY_CHANGES_TOOL, removeOntologyElements: REMOVE_ONTOLOGY_ELEMENTS_TOOL, renameOntologyElement: RENAME_ONTOLOGY_ELEMENT_TOOL },
     // Exposed so a test/eval measures the shipped prompt, not a copy of it
     // that could drift out of sync -- same reasoning as CONSISTENCY_LLM_PROMPT/
     // APPLY_ONTOLOGY_YAML_TOOL's own exposure above.
@@ -15452,6 +15796,10 @@ window.__kg = {
     setSelfCorrectionDisabled: (off) => { agentState.selfCorrectionDisabled = Boolean(off); },
     buildSystemPrompt: buildAgentSystemPrompt,
     isSending: () => agentState.sending,
+    // Issue #157 -- pure function, exposed directly so the narration-count-
+    // overclaim detection logic is unit-testable without needing a live
+    // turn to exercise it.
+    findNarrationCountOverclaim,
     // Post-plan extension (helper_agent_plan.md §9) — conversation
     // persistence/restart test surface.
     restartConversation: restartAgentConversation,

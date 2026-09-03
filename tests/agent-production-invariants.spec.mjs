@@ -73,14 +73,158 @@ import { withPage } from "./lib/page.mjs";
 // from that generic scaffolding is real design work, deliberately left for
 // a follow-up rather than shipped half-tuned here.
 //
-// Previous hashes (e733938a…/f802c23c…) were the remove_ontology_elements-
-// tool prompt bundle recorded just before this change -- see this
-// constant's own prior revision (git blame) for that bundle's own full
-// changelog, itself following the same discipline from a previous
-// intentional change.
+// Updated again (elicitation-improvement epic, #152): a full domain-
+// neutrality review (prompted by explicit standing policy: no ontology/
+// domain-specific language may appear in any prompt or procedure) scanned
+// every LLM-facing prompt's entity vocabulary against all 5 benchmark
+// domains' real class/relationship names+aliases, using the same
+// methodology issue #144's own standing overlap-check test already
+// established (entity-only, >=4 chars, to avoid the documented generic-
+// English-word false-positive storm). Found one genuine, pre-existing leak
+// this narrower, GROUND-RULES-only-scoped test never covered: the
+// "near-synonyms" guidance bullet used a concrete illustrative example --
+// "supplier" vs "vendor" vs "counterparty" -- that is real vocabulary in
+// itops (Vendor, alias "supplier") and plausibly finance-domain phrasing
+// (counterparty), sitting one bullet above the very "never reach for a
+// specific domain's vocabulary... use an abstract placeholder" rule it
+// violated. Replaced with a fully abstract description ("two terms the
+// expert has used that sound interchangeable"), no illustrative words at
+// all -- no live non-regression evaluation run for this specific wording
+// change alone (folded into the epic's own end-of-epic full benchmark
+// gate instead, per that epic's own budget discipline).
+//
+// Updated again (elicitation-improvement epic, #152, tickets #154+#159):
+// Phase 3's "two classes that appear together in the same competency
+// question or action almost always need a direct relationship between
+// them specifically" assumption is replaced with path-first elicitation --
+// ask how two jointly-mentioned classes actually connect before assuming
+// the connection is direct, and only commit a direct edge once the expert
+// explicitly confirms that exact fact independently of whatever path was
+// already recorded (#159: precision fix, guards against inventing direct
+// edges between concepts that are really only indirectly connected).
+// Layered with #154: the same jointly-mentioned-pair/path check is now a
+// standing obligation repeated after every later phase that introduces a
+// class which did not exist the last time it ran, not a one-time Phase 3
+// pass -- Phase 9(b)'s final checklist was updated to match both changes.
+// Designed and shipped together per the epic's own note that these two
+// tickets touch the same Phase 3 logic and would fight each other as
+// independent diffs. No live non-regression evaluation run for this
+// specific wording change alone -- folded into the epic's own end-of-epic
+// full benchmark gate instead, per that epic's own budget discipline.
+//
+// Updated again (elicitation-improvement epic, #152, ticket #156): Phase
+// 9(b)'s final checklist now tells the interviewer to call get_graph_state
+// with finalValidation:true, which additionally runs one automatic Tier C
+// (LLM second-opinion) review of the whole ontology, at most once per
+// conversation. Findings are surfaced through the same tool result the
+// deterministic consistency sweep already uses, with the same fix-forward
+// discipline as issue #84's self-correction loop (never resolve a finding
+// by weakening/deleting the item it is about). get_graph_state's own tool
+// schema gained the optional finalValidation boolean parameter to carry
+// this signal -- PRODUCTION_TOOL_NAMES (below) is unaffected, since tool
+// *names* didn't change, only one tool's parameters. No live non-regression
+// evaluation run for this specific wording change alone -- folded into the
+// epic's own end-of-epic full benchmark gate instead, per that epic's own
+// budget discipline; a live mocked-model test suite
+// (tests/agent-final-validation-tierc.spec.mjs) does directly confirm the
+// mechanism (one bounded Tier C call, findings surfaced, no retry loop).
+//
+// Updated again (elicitation-improvement epic, #152, ticket #160): a new
+// Phase 9(b) -- bounded domain-expansion pass -- was inserted into the
+// Validation pass, between the pre-existing competency check (now still
+// 9(a)) and the pre-existing final checklist (renumbered 9(b)->9(c), no
+// content change beyond one new checklist item confirming 9(b) actually
+// ran). Runs once, only after 9(a) finds every competency question and
+// action covered: for each major class, silently checks a fixed, generic
+// checklist of neighboring structures (parts/components, lifecycle
+// states, actors, inputs/outputs, related paperwork/agreements,
+// measurements, earlier/later workflow stages -- explicitly NOT
+// "subtypes or variants", ticket #160's own listed category, which is
+// deliberately skipped: it has nowhere to be recorded until #155's
+// parked specialization-construct design question is resolved, per that
+// ticket's own stated fallback), offers only the categories that plausibly
+// apply, once per major concept, and requires the expert's explicit
+// confirmation before adding anything -- never bypasses the ordinary
+// per-item phases (Phase 3's path check, Phase 4's competency-question
+// trace) for whatever it surfaces. Default-on (not opt-in) and its
+// evaluation folded into the epic's own end-of-epic full benchmark gate
+// rather than a separate pre-registered n>=5 run -- both explicit,
+// deliberate scope decisions made with the maintainer before implementing,
+// not silently assumed. Two illustrative words in an early draft of this
+// phase's own wording ("documents", "processes") turned out to be exact
+// relationship names in itops's own reference ontology (`documents`,
+// `processes`) rather than safely generic English -- caught by the same
+// standing full-prompt vocabulary scan #152's earlier hash update
+// established, replaced with "paperwork"/"workflow stages" instead, no
+// exact-match overlap with any of the 5 domains. Report **both**
+// full-domain and practical-scope F1 deltas separately for this ticket at
+// gate time, per its own explicit acceptance criterion -- a full-domain-
+// only report would misrepresent the tradeoff the ticket itself expects
+// (this pass very likely raises full-domain recall while being closer to
+// neutral, or slightly negative on precision, for practical-scope F1).
+//
+// Corrected same-day, before any full benchmark rerun spent against it: a
+// live pilot interview (itops run-01, ontology_translation/results/
+// multi-domain-control-post152/, run specifically to smoke-test this
+// ticket before committing the epic's one full 5x3 rerun budget) showed
+// the domain-expansion pass, as first shipped (validation-pass sub-step
+// (b) above), never actually firing -- the real model announced "we've
+// reached the validation phase" and went straight to the competency/
+// final checklist without ever asking the expert the expansion question.
+// Restructured as its own top-level Phase 9 (Validation pass becomes
+// Phase 10, both its sub-steps unchanged in content) specifically because
+// phases 1-8 -- each a real, numbered top-level phase -- reliably get
+// asked as genuine questions throughout this same transcript; only once
+// nested next to two silent self-checks under one "Validation pass"
+// heading did the model treat it as another self-check. The phase text
+// now says explicitly that reaching validation does not satisfy it, and
+// Phase 10(b)'s own final-checklist item was reworded to match. No
+// change to what the pass asks or checks, only where it sits and how
+// forcefully it says it is not optional -- re-verified with a second live
+// pilot run before the full rerun proceeded.
+//
+// Previous hashes (cf492ad0…/acff5f52…) were this same ticket's first,
+// not-yet-reliable wording, live-tested and rejected before any full
+// benchmark spend.
+//
+// Root-cause fix from a full honest read of the epic #152 gate rerun's own
+// transcripts (not just its scores): iof-supply-chain/run-03 (this branch)
+// stopped mid-Phase-3 with confirmed classes still lacking relationships,
+// because the GROUND RULES bullet on unfinished phases explicitly said to
+// "let them decide whether to continue in a follow-up session" -- the
+// interviewer offered a stop/continue choice verbatim, and the persona took
+// it. Reworded to forbid offering a stop the same way it already forbade
+// offering to skip ahead: state the gap, then ask the next concrete
+// question, never soften an unfinished phase into a "good stopping point."
+// Phase 0's own orientation line telling the expert up front that they
+// "can stop early" was the seed of the same problem -- removed (also fixed
+// a stale "about 9 short phases" left over from the Phase 9/10 split
+// above, now "about 10").
+// Separately, iof-supply-chain/run-02 (this branch) tanked its own
+// properties precision (18 recovered vs. 3 gold, mostly generic
+// `.identifier` fields) because the expert justified them with "the exact
+// format coming from the organization's system and policy" and Phase 4
+// accepted that at face value. Added the same push-back discipline Phase 4
+// already applies to a proposed *exclusion*: a property justified only by
+// "some value/identifier will exist, per policy" -- naming that it exists,
+// not what the agent does with it -- is not accepted; the expert must name
+// the specific competency question/action it serves.
+//
+// That fix only policed the *expert's* answer; the clean rerun it enabled
+// found it didn't police the *interviewer's own* batch proposal. Live in
+// iof-supply-chain/run-01 (post-fix rerun, this branch): the interviewer
+// proposed a batch of 10 `.identifier` properties across unrelated classes
+// under one shared, generic rationale ("for lookup, traceability, or tool
+// input") and never named a competency question for any single one --
+// technically satisfying the per-answer rule (the expert just said yes)
+// while reproducing the same failure (26 recovered vs. 3 gold, precision
+// 0.077). Closed at the actual break point: a batched property proposal
+// must name the tie-back per class, not once for the whole batch: a class
+// without its own specific justification drops out of the batch and stays
+// open, even if the rest of the batch is fine.
 export const PRODUCTION_SYSTEM_PROMPT_SHA256 = {
-  en: "d65f23817244ea0889114099fef5ecfdfcc1215e746f2681e910387f3e136529",
-  hu: "86890c0762c26616326be7830cb71a399b9879610006dc2c9a0b5ef6d20b22e4",
+  en: "9c9a4583a266795d69c7f7993866b4261d6f9d3cfcb882117260d1abb7489f0d",
+  hu: "57142d09a2bcf63b135639c46676dbfde95272e6ded42d59710fe1975762597f",
 };
 
 // The complete ontology tool surface an ordinary interview request exposes.

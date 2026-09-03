@@ -1,0 +1,99 @@
+{
+  "fullDomain": {
+    "classes": [],
+    "relationships": [],
+    "properties": [
+      {
+        "goldId": "TemperatureSensor.value",
+        "matchedPropertyName": "currentTemperature"
+      },
+      {
+        "goldId": "CO2Sensor.value",
+        "matchedPropertyName": "currentCO2"
+      },
+      {
+        "goldId": "OutsideAirCO2Sensor.value",
+        "matchedPropertyName": "currentCO2"
+      },
+      {
+        "goldId": "ReturnAirCO2Sensor.value",
+        "matchedPropertyName": "currentCO2"
+      },
+      {
+        "goldId": "TemperatureSetpoint.value",
+        "matchedPropertyName": "targetTemperature"
+      },
+      {
+        "goldId": "CoolingTemperatureSetpoint.value",
+        "matchedPropertyName": "targetTemperature"
+      },
+      {
+        "goldId": "HeatingTemperatureSetpoint.value",
+        "matchedPropertyName": "targetTemperature"
+      }
+    ],
+    "valueFidelity": [
+      {
+        "id": "AirHandlingUnit.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Economizer.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Zone.occupancyStatus",
+        "semanticFidelity": 1
+      }
+    ]
+  },
+  "scoped": {
+    "classes": [],
+    "relationships": [
+      {
+        "goldId": "rel_12",
+        "recoveredId": "e4"
+      },
+      {
+        "goldId": "rel_13",
+        "recoveredId": "e5"
+      }
+    ],
+    "properties": [
+      {
+        "goldId": "TemperatureSensor.value",
+        "matchedPropertyName": "currentTemperature"
+      },
+      {
+        "goldId": "CO2Sensor.value",
+        "matchedPropertyName": "currentCO2"
+      },
+      {
+        "goldId": "TemperatureSetpoint.value",
+        "matchedPropertyName": "targetTemperature"
+      },
+      {
+        "goldId": "CoolingTemperatureSetpoint.value",
+        "matchedPropertyName": "targetTemperature"
+      },
+      {
+        "goldId": "HeatingTemperatureSetpoint.value",
+        "matchedPropertyName": "targetTemperature"
+      }
+    ],
+    "valueFidelity": [
+      {
+        "id": "AirHandlingUnit.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Economizer.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Zone.occupancyStatus",
+        "semanticFidelity": 1
+      }
+    ]
+  }
+}

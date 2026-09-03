@@ -1,0 +1,82 @@
+{
+  "fullDomain": {
+    "judgments": {
+      "classes": [
+        {
+          "goldId": "OperatingState",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "DegradedState",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "FailedState",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "FailureProcess",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "DispositionToFail",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "DispositionToExhibitUndesirableBehavior",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "SupportingMaintenanceActivity",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "relationships": [],
+      "properties": [],
+      "valueFidelity": [
+        {
+          "id": "MaintenanceState.stateCategory",
+          "semanticFidelity": 1
+        }
+      ]
+    },
+    "rawResponses": {
+      "classes": "1: NO MATCH -- operating state is a state, candidate is an item\n2: NO MATCH -- degraded state is a state, candidate is an item\n3: NO MATCH -- failed state is a state, candidate is an item\n4: NO MATCH -- failure process is a process, candidate is an item\n5: NO MATCH -- disposition to fail is a disposition, candidate is an item\n6: NO MATCH -- disposition to exhibit undesirable behavior is a disposition, candidate is an item\n7: NO MATCH -- supporting maintenance activity is an activity, candidate is an item",
+      "valueFidelity": "1: 100 -- Exact same three operational states with identical distinctions"
+    }
+  },
+  "scoped": {
+    "judgments": {
+      "classes": [
+        {
+          "goldId": "OperatingState",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "DegradedState",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "FailedState",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "relationships": [],
+      "properties": [],
+      "valueFidelity": []
+    },
+    "rawResponses": {
+      "classes": "1: NO MATCH -- no candidate denotes an operating state\n2: NO MATCH -- no candidate denotes a degraded state\n3: NO MATCH -- no candidate denotes a failed state"
+    }
+  }
+}

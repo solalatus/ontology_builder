@@ -1,0 +1,348 @@
+{
+  "domain": "fibo-loans",
+  "runId": "merge-1-2",
+  "runUuid": "76ae3f1f-df8e-46ed-b4a6-cbd6f9004fa5",
+  "metrics": {
+    "classes": {
+      "recall": 0.5964912280701754,
+      "precision": 1,
+      "f1": 0.7472527472527472,
+      "matched": 34,
+      "groundTruthTotal": 57,
+      "recoveredTotal": 34
+    },
+    "relationships": {
+      "recall": 0.8709677419354839,
+      "precision": 0.7941176470588235,
+      "f1": 0.8307692307692308,
+      "matched": 27,
+      "groundTruthTotal": 31,
+      "recoveredTotal": 34
+    },
+    "properties": {
+      "recall": 0.4897959183673469,
+      "precision": 0.96,
+      "f1": 0.6486486486486486,
+      "matched": 24,
+      "groundTruthTotal": 49,
+      "recoveredTotal": 25
+    },
+    "controlledValueFidelity": null,
+    "controlledValuePropertyGoldTotal": 0,
+    "controlledValuePropertyMatchedCount": 0,
+    "recoveryEffectiveness": 0.7422235422235421,
+    "recoveryEffectivenessWithFidelity": null
+  },
+  "scopedMetrics": {
+    "classes": {
+      "recall": 0.7916666666666666,
+      "precision": 0.5588235294117647,
+      "f1": 0.6551724137931034,
+      "matched": 19,
+      "groundTruthTotal": 24,
+      "recoveredTotal": 34
+    },
+    "relationships": {
+      "recall": 0.9411764705882353,
+      "precision": 0.47058823529411764,
+      "f1": 0.627450980392157,
+      "matched": 16,
+      "groundTruthTotal": 17,
+      "recoveredTotal": 34
+    },
+    "properties": {
+      "recall": 0.9090909090909091,
+      "precision": 0.4,
+      "f1": 0.5555555555555556,
+      "matched": 10,
+      "groundTruthTotal": 11,
+      "recoveredTotal": 25
+    },
+    "controlledValueFidelity": null,
+    "controlledValuePropertyGoldTotal": 0,
+    "controlledValuePropertyMatchedCount": 0,
+    "recoveryEffectiveness": 0.612726316580272,
+    "recoveryEffectivenessWithFidelity": null
+  },
+  "semanticMetrics": null,
+  "semanticScopedMetrics": null,
+  "ruleMetrics": {
+    "recall": 0.5714285714285714,
+    "precision": 0.8,
+    "f1": 0.6666666666666666,
+    "matched": 4,
+    "groundTruthTotal": 7,
+    "recoveredTotal": 5
+  },
+  "actionMetrics": {
+    "identification": {
+      "recall": 1,
+      "precision": 1,
+      "f1": 1,
+      "matched": 5,
+      "groundTruthTotal": 5,
+      "recoveredTotal": 5
+    },
+    "inputClassAccuracy": 1,
+    "inputClassChecked": 4,
+    "preconditionRecovery": 0.3892857142857143,
+    "effectRecovery": 0.3510225885225885,
+    "verificationRecovery": 0.4256922162804516
+  },
+  "semanticRuleActionMetrics": null,
+  "operationalStats": {
+    "kind": "cascading-intelligent-merge",
+    "sourceDescription": "run-01 + run-02",
+    "decisionCounts": {
+      "matchedNoted": 60,
+      "pairedAccepted": 16,
+      "currentKept": 6,
+      "incomingTaken": 36
+    },
+    "suggestFailures": [
+      false
+    ],
+    "agentPreviewSummaries": [
+      {
+        "agentTouchedCount": 6,
+        "agentCommentary": "",
+        "lineCount": 23
+      }
+    ],
+    "lastResults": [
+      {
+        "ok": true,
+        "message": "Applied.",
+        "commentary": "",
+        "touched": [
+          {
+            "kind": "class",
+            "name": "EnhancementBeneficiary",
+            "action": "added"
+          },
+          {
+            "kind": "class",
+            "name": "CreditEnhancementAgreement",
+            "action": "added"
+          },
+          {
+            "kind": "class",
+            "name": "OpenEndCredit",
+            "action": "added"
+          },
+          {
+            "kind": "class",
+            "name": "ClosedEndCredit",
+            "action": "added"
+          },
+          {
+            "kind": "class",
+            "name": "PrepaymentTerms",
+            "action": "added"
+          },
+          {
+            "kind": "rule",
+            "name": "securedLoanSupportCheck",
+            "action": "added"
+          },
+          {
+            "kind": "rule",
+            "name": "prepaymentTermTimingCheck",
+            "action": "added"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasBorrower (CreditFacility → Borrower)",
+            "action": "added"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasLender (CreditFacility → Lender)",
+            "action": "added"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasBeneficiary (CreditEnhancementAgreement → EnhancementBeneficiary)",
+            "action": "added"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasCreditType (CreditAgreement → OpenEndCredit)",
+            "action": "added"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasCreditType (CreditAgreement → ClosedEndCredit)",
+            "action": "added"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasPrepaymentTerms (Loan → PrepaymentTerms)",
+            "action": "added"
+          },
+          {
+            "kind": "cq",
+            "name": "For a credit facility, how much credit has been extended?",
+            "action": "added"
+          },
+          {
+            "kind": "cq",
+            "name": "Does this credit facility have sub-facilities, and if so what are they?",
+            "action": "added"
+          },
+          {
+            "kind": "cq",
+            "name": "Is this loan fixed rate or variable rate?",
+            "action": "added"
+          },
+          {
+            "kind": "cq",
+            "name": "If it is variable rate, what reset schedule, cap, or first rate change term applies?",
+            "action": "added"
+          },
+          {
+            "kind": "cq",
+            "name": "Is this loan interest-only?",
+            "action": "added"
+          },
+          {
+            "kind": "cq",
+            "name": "Does this loan permit negative amortization?",
+            "action": "added"
+          },
+          {
+            "kind": "cq",
+            "name": "Does this loan include a balloon payment?",
+            "action": "added"
+          },
+          {
+            "kind": "cq",
+            "name": "What prepayment terms apply to this loan, including any prepayment penalty period?",
+            "action": "added"
+          },
+          {
+            "kind": "cq",
+            "name": "Is this loan secured, and if so what collateral or security support applies?",
+            "action": "added"
+          },
+          {
+            "kind": "cq",
+            "name": "If there is a credit enhancement arrangement, who is the beneficiary of that protection?",
+            "action": "added"
+          },
+          {
+            "kind": "cq",
+            "name": "Which servicer is responsible for collecting payments on this loan?",
+            "action": "added"
+          },
+          {
+            "kind": "cq",
+            "name": "What payment history exists for this loan?",
+            "action": "added"
+          },
+          {
+            "kind": "cq",
+            "name": "Which individual payment transactions make up that payment history?",
+            "action": "added"
+          },
+          {
+            "kind": "cq",
+            "name": "What borrowing capacity has been assessed for this borrower?",
+            "action": "added"
+          },
+          {
+            "kind": "cq",
+            "name": "For a collateralized loan, what collateral value is relevant as of a given date?",
+            "action": "added"
+          },
+          {
+            "kind": "cq",
+            "name": "For a collateralized loan, what loan-to-value ratio is relevant?",
+            "action": "added"
+          },
+          {
+            "kind": "cq",
+            "name": "For a collateralized loan, what combined loan-to-value ratio is relevant?",
+            "action": "added"
+          },
+          {
+            "kind": "cq",
+            "name": "Is the loan missing anything needed to confirm core setup of borrower, lender, and interest terms?",
+            "action": "added"
+          },
+          {
+            "kind": "cq",
+            "name": "Is a variable-rate loan missing anything needed to track resets correctly?",
+            "action": "added"
+          },
+          {
+            "kind": "cq",
+            "name": "Is a secured loan missing anything needed to support its secured status?",
+            "action": "added"
+          },
+          {
+            "kind": "cq",
+            "name": "Does the loan have enough payment history detail to be trackable in servicing?",
+            "action": "added"
+          },
+          {
+            "kind": "class",
+            "name": "PrincipalRepaymentTerm → PrincipalRepaymentTerms",
+            "action": "renamed"
+          },
+          {
+            "kind": "class",
+            "name": "InterestPaymentTerm → InterestPaymentTerms",
+            "action": "renamed"
+          },
+          {
+            "kind": "class",
+            "name": "CollateralValuation → CollateralValue",
+            "action": "renamed"
+          },
+          {
+            "kind": "rule",
+            "name": "variableRateLoanNeedsResetSchedule → variableRateSetupCheck",
+            "action": "renamed"
+          },
+          {
+            "kind": "rule",
+            "name": "paymentRecordMustIncludeHistoryAndTransactions → paymentRecordCompletenessCheck",
+            "action": "renamed"
+          },
+          {
+            "kind": "rule",
+            "name": "loanReadinessNeedsCorePartiesAndInterestRate → loanReadinessCheck",
+            "action": "renamed"
+          }
+        ],
+        "newConsistencyFindings": [
+          {
+            "id": "orphan-rule:prepaymentTermTimingCheck",
+            "check": "orphan-rule",
+            "tier": "exact",
+            "severity": "note",
+            "subject": {
+              "kind": "rule",
+              "key": "prepaymentTermTimingCheck",
+              "name": "prepaymentTermTimingCheck"
+            },
+            "message": "Rule \"prepaymentTermTimingCheck\" is not used as a precondition by any action."
+          },
+          {
+            "id": "orphan-rule:securedLoanSupportCheck",
+            "check": "orphan-rule",
+            "tier": "exact",
+            "severity": "note",
+            "subject": {
+              "kind": "rule",
+              "key": "securedLoanSupportCheck",
+              "name": "securedLoanSupportCheck"
+            },
+            "message": "Rule \"securedLoanSupportCheck\" is not used as a precondition by any action."
+          }
+        ]
+      }
+    ]
+  }
+}

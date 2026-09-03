@@ -1,0 +1,111 @@
+{
+  "fullDomain": {
+    "classes": [],
+    "relationships": [
+      {
+        "goldId": "rel_12",
+        "recoveredId": "e50"
+      },
+      {
+        "goldId": "rel_14",
+        "recoveredId": "e13"
+      }
+    ],
+    "properties": [
+      {
+        "goldId": "MaterialityAssessment.result",
+        "matchedPropertyName": "outcome"
+      },
+      {
+        "goldId": "RegulatoryNotification.submittedAt",
+        "matchedPropertyName": "submissionTime"
+      }
+    ],
+    "valueFidelity": [
+      {
+        "id": "ItService.healthState",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "BackupSet.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Environment.environmentType",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Alert.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Alert.severity",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "Incident.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Incident.severity",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "RegulatoryNotification.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "CorrectiveAction.status",
+        "semanticFidelity": 1
+      }
+    ]
+  },
+  "scoped": {
+    "classes": [],
+    "relationships": [],
+    "properties": [
+      {
+        "goldId": "Incident.closedAt",
+        "matchedPropertyName": "closureTime"
+      },
+      {
+        "goldId": "MaterialityAssessment.result",
+        "matchedPropertyName": "outcome"
+      },
+      {
+        "goldId": "RegulatoryNotification.submittedAt",
+        "matchedPropertyName": "submissionTime"
+      }
+    ],
+    "valueFidelity": [
+      {
+        "id": "ItService.healthState",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "BackupSet.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Alert.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Alert.severity",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "Incident.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Incident.severity",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "RegulatoryNotification.status",
+        "semanticFidelity": 1
+      }
+    ]
+  }
+}

@@ -1,0 +1,216 @@
+{
+  "fullDomain": {
+    "judgments": {
+      "classes": [
+        {
+          "goldId": "Distributor",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Retailer",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Wholesaler",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Cargo",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Trailer",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Wagon",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "DistributionCenter",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Factory",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "GeospatialLocation",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "ShippingRoute",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "SupplyChainTransportProcess",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "ReceivingProcess",
+          "recoveredId": "n17",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "StorageProcess",
+          "recoveredId": "n18",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "WarehousingProcess",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "PackagingProcess",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "SupplyChainProcess",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "LogisticsProcess",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "ManufacturingService",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "relationships": [
+        {
+          "goldId": "rel_3",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_4",
+          "recoveredId": "e8",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_5",
+          "recoveredId": "e28",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_6",
+          "recoveredId": "e11",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_7",
+          "recoveredId": "e10",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_23",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_24",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_25",
+          "recoveredId": "e17",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_26",
+          "recoveredId": "e18",
+          "verdict": "MATCH"
+        }
+      ],
+      "properties": [
+        {
+          "goldId": "FreightForwarder.status",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "valueFidelity": []
+    },
+    "rawResponses": {
+      "classes": "1: NO MATCH -- no candidate is the distributor role\n2: NO MATCH -- no candidate is the retailer role\n3: NO MATCH -- no candidate is the wholesaler role\n4: NO MATCH -- no candidate is cargo/goods as an entity\n5: NO MATCH -- no candidate is a trailer vehicle\n6: NO MATCH -- no candidate is a wagon vehicle\n7: NO MATCH -- no candidate is a distribution center facility\n8: NO MATCH -- no candidate is a factory facility\n9: NO MATCH -- no candidate is a geospatial location\n10: NO MATCH -- no candidate is a shipping route\n11: NO MATCH -- candidates are specific activities, not transport process\n12: MATCH 1 -- receiving activity is the receiving process\n13: MATCH 2 -- storage activity is the storage process\n14: NO MATCH -- warehousing is broader than storage/receiving alone\n15: NO MATCH -- no candidate is a packaging process\n16: NO MATCH -- candidates are narrower than general supply chain process\n17: NO MATCH -- candidates are narrower than general logistics process\n18: NO MATCH -- no candidate is a manufacturing service",
+      "relationships": "1: NO MATCH -- depends on product is not just has material trade item\n2: MATCH 3 -- hasCarrier expresses the agent carrier of shipment preparation\n3: MATCH 12 -- hasShipper expresses the agent shipper of consigning\n4: MATCH 6 -- involvesFreightForwarder matches agent freight forwarder\n5: MATCH 5 -- involvesCarrier matches agent carrier\n6: NO MATCH -- contributes to traceability is not part of traceability\n7: NO MATCH -- no candidate states shipment fulfills purchase order\n8: MATCH 7 -- hasMaterialTradeItem matches concerns item\n9: MATCH 8 -- hasMaterialTradeItem matches concerns item"
+    }
+  },
+  "scoped": {
+    "judgments": {
+      "classes": [
+        {
+          "goldId": "Cargo",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "ReceivingProcess",
+          "recoveredId": "n17",
+          "verdict": "MATCH"
+        }
+      ],
+      "relationships": [
+        {
+          "goldId": "rel_3",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_4",
+          "recoveredId": "e8",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_6",
+          "recoveredId": "e11",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_23",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_24",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_25",
+          "recoveredId": "e17",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_26",
+          "recoveredId": "e18",
+          "verdict": "MATCH"
+        }
+      ],
+      "properties": [],
+      "valueFidelity": []
+    },
+    "rawResponses": {
+      "classes": "1: NO MATCH -- no candidate is the goods/cargo itself\n2: MATCH 3 -- same receiving business process concept",
+      "relationships": "1: NO MATCH -- hasMaterialTradeItem is not specifically depends on product\n2: MATCH 3 -- hasCarrier matches has Agent to Carrier\n3: MATCH 4 -- involvesFreightForwarder matches has Agent to Freight Forwarder\n4: NO MATCH -- contributesTo is not clearly part of traceability\n5: NO MATCH -- no candidate states shipment fulfills purchase order\n6: MATCH 5 -- hasMaterialTradeItem matches concerns item\n7: MATCH 6 -- hasMaterialTradeItem matches concerns item"
+    }
+  }
+}

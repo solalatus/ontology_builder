@@ -55,14 +55,20 @@ test("the baked-in knowledge includes a condensed, operational excerpt of the pa
   });
 });
 
-test("the system prompt includes the INTERVIEW PROCESS section with all 10 phases (0 through 9)", async () => {
+test("the system prompt includes the INTERVIEW PROCESS section with all 11 phases (0 through 10)", async () => {
   await withPage(async (page) => {
     const prompt = await systemPrompt(page);
     assert.match(prompt, /INTERVIEW PROCESS/);
     assert.match(prompt, /0\. Orientation: call get_graph_state first/);
     // Renamed by issue #94: the phase now names the artefact it produces.
     assert.match(prompt, /1\. Competency questions and actions/);
-    assert.match(prompt, /9\. Validation pass/);
+    // Issue #160: split into its own top-level phase (not a validation-pass
+    // sub-step) after a live pilot run showed the model silently folding a
+    // sub-step version into the validation pass's self-check framing and
+    // never actually asking the expert anything -- see this file's own
+    // Phase 9 test below for the full story.
+    assert.match(prompt, /9\. Bounded domain-expansion pass/);
+    assert.match(prompt, /10\. Validation pass/);
     assert.match(prompt, /Competency check/);
     assert.match(prompt, /Final checklist/);
   });
@@ -82,7 +88,7 @@ test("the system prompt includes the INTERVIEW PROCESS section with all 10 phase
 test("the system prompt's final checklist requires a get_graph_state check, not memory, and forbids reporting completion over an unresolved gap", async () => {
   await withPage(async (page) => {
     const prompt = await systemPrompt(page);
-    assert.match(prompt, /call get_graph_state and confirm directly from that\s*result, not from memory, that every class has at least one\s*relationship recorded/);
+    assert.match(prompt, /call get_graph_state with finalValidation:true and\s*confirm directly from that\s*result, not from memory, that every class has at least one/);
     assert.match(prompt, /go back and close it before continuing\s*—\s*don't just note the gap and report the interview complete anyway/);
   });
 });
@@ -95,7 +101,14 @@ test("the system prompt's final checklist requires a get_graph_state check, not 
 test("the system prompt's final checklist also covers jointly-named relationship pairs and distinctly-named roles, matching the upgraded Phase 2/3 bars", async () => {
   await withPage(async (page) => {
     const prompt = await systemPrompt(page);
-    assert.match(prompt, /every pair of classes jointly\s*mentioned in a competency question or action has a direct relationship\s*between that specific pair/);
+    // Updated for the path-based-elicitation redesign (#159/#154): the
+    // checklist no longer asserts co-mentioned classes "almost always"
+    // need a direct relationship -- it confirms the path-first check was
+    // actually re-run for classes introduced after Phase 3, and that no
+    // direct relationship was added without the expert's explicit
+    // confirmation.
+    assert.match(prompt, /jointly-mentioned-pair\/path check\s*\(Phase 3\) has actually been run again for every class that was first\s*introduced after Phase 3/);
+    assert.match(prompt, /no relationship was added between a jointly-mentioned\s*pair without the expert explicitly confirming the direct fact/);
     assert.match(prompt, /distinctly-named actor or role from Phase 1 became its own class,\s*not folded into one generic bucket type/);
   });
 });
@@ -137,6 +150,56 @@ test("the system prompt's Phase 1 probe is narrow and closed (two named categori
     assert.match(prompt, /is there a closely related role that\s*actually does the day-to-day work under it, and does any of this\s*depend on a specific operating context that changes how it's\s*handled/);
     assert.match(prompt, /do not invite open-ended extra scope \("is\s*there anything else at all\?" tends to produce elaboration well past\s*what's needed, more classes than the acceptance test calls for, not\s*fewer\)/);
     assert.match(prompt, /Add only what the expert ties to answering one of the already-/);
+  });
+});
+
+// Issue #160: a bounded pass for recall beyond what the competency
+// questions happened to ask about. First shipped as sub-step (b) inside
+// the Validation pass, but a live pilot run (itops run-01,
+// ontology_translation/results/multi-domain-control-post152/) caught the
+// real model silently folding it into the validation pass's own
+// self-check framing -- it announced "we've reached the validation
+// phase" and jumped straight to the competency/final checklist without
+// ever actually asking the expert the expansion question out loud.
+// Restructured as its own top-level Phase 9 (Validation becomes Phase
+// 10) specifically because every other real elicitation step in this
+// prompt (phases 1-8) reliably gets asked as a genuine question when it
+// is a numbered top-level phase in its own right -- only this one, once
+// nested as a validation-pass sub-item next to two silent self-checks,
+// got treated as another self-check instead of a real question. The
+// phase text now also says explicitly it is not satisfied by the
+// transition into validation. Assertions here guard the specific failure
+// modes the ticket and this live run called out: running before coverage
+// is actually complete, adding content without the expert's
+// confirmation, forcing every category onto every class, treating
+// entering validation as covering it, and turning into the kind of
+// open-ended re-probing loop idea #2 (PROMPT_TUNING_BUNDLE.md) already
+// found and rejected once for Phase 1's own "anything else?" probe.
+test("the system prompt's Phase 9 domain-expansion pass is a real conversational step, runs only after competency/action coverage, requires confirmation, and stays bounded", async () => {
+  await withPage(async (page) => {
+    const prompt = await systemPrompt(page);
+    assert.match(prompt, /9\. Bounded domain-expansion pass: a real conversational step, not a\s*self-check/);
+    assert.match(prompt, /Do not fold it into\s*the validation pass below or treat "we've reached the validation\s*phase" as covering it/);
+    assert.match(prompt, /a session that skips\s*straight from Phase 8 into competency\/final checks has skipped this\s*phase entirely, not completed it implicitly/);
+    assert.match(prompt, /Add nothing from this pass without the expert's\s*explicit confirmation/);
+    assert.match(prompt, /Skip any category that plainly doesn't fit\s*that concept — never force all of them onto every class/);
+    assert.match(prompt, /Ask this once per major\s*concept, not repeatedly/);
+    assert.match(prompt, /never\s*reach for a specific domain's vocabulary while doing this/);
+    // Anything the pass surfaces still has to earn its place through the
+    // ordinary per-item phases, not bypass them.
+    assert.match(prompt, /route anything confirmed through the same\s*phases as everything else \(a new relationship still needs Phase 3's\s*path check, a new property still needs Phase 4's competency-question\s*trace\)/);
+    // The final checklist (now Phase 10(b)) must check this phase actually
+    // happened, not just that the transition text mentioned it.
+    assert.match(prompt, /Phase 9's domain-expansion offer was\s*actually made, out loud, for every major class — not silently\s*skipped by treating the transition into this validation pass as\s*covering it/);
+    // "subtypes or variants" is one of ticket #160's own listed probing
+    // categories, but deliberately excluded here: it has nowhere clean to
+    // be recorded until #155's parked specialization-construct design
+    // question is resolved (see that ticket's own stated fallback, and
+    // this file's own agent-production-invariants.spec.mjs hash-update
+    // comment). This guards against it quietly creeping back in before
+    // #155 actually ships.
+    assert.equal(/subtypes?\s+or\s+variants?/i.test(prompt), false,
+      "the domain-expansion pass must not probe for subtypes/variants until issue #155's parked specialization-construct design is resolved");
   });
 });
 
@@ -245,15 +308,27 @@ test("the system prompt grounds relationship candidates in Phase 1 material and 
 // scoped relationships whose *both* endpoint classes were actually
 // recovered were still missing -- the class itself had a relationship to
 // *something*, just not to the specific other class a Phase 1 item jointly
-// named. Pins the upgraded bar: co-occurrence in the same original
-// question/action is a strong signal two classes need a direct
-// relationship between that exact pair, not just each side connected
-// elsewhere.
-test("the system prompt requires checking that classes jointly named in the same Phase 1 item have a direct relationship between them, not just individually connected", async () => {
+// named. The original fix for this (pinned here until the redesign below)
+// asserted co-occurrence in the same original question/action as a strong
+// signal two classes need a *direct* relationship between that exact pair.
+//
+// Superseded (elicitation-improvement epic, #159): that assumption is
+// exactly what caused the opposite failure -- inventing a direct edge
+// between two classes that are really connected only through an
+// intermediate concept, a precision cost this program's own transcript
+// review found real evidence for. The upgraded bar keeps the same
+// completeness goal (a co-mentioned pair must never be left unexamined)
+// but replaces the assumption with a path-first question: ask how the two
+// classes actually connect before assuming the connection is direct, and
+// only commit a direct edge once the expert explicitly confirms that exact
+// fact independently of any path already recorded.
+test("the system prompt requires asking how two jointly-named classes connect (path-first), not assuming a direct relationship, before moving on from Phase 3", async () => {
   await withPage(async (page) => {
     const prompt = await systemPrompt(page);
-    assert.match(prompt, /two classes that\s*appear together in the same competency question or action almost\s*always need a direct relationship between them specifically/);
-    assert.match(prompt, /confirm every pair of classes it\s*jointly mentions has an explicit relationship between that exact pair/);
+    assert.match(prompt, /for\s*every pair of classes one of them jointly mentions, work out how you\s*actually get from one to the other/);
+    assert.match(prompt, /rather than\s*asking "what relationship connects .*?" as if a\s*direct link is already assumed/);
+    assert.match(prompt, /Only add a\s*direct relationship between the two specifically once the expert\s*explicitly confirms that exact fact holds on its own/);
+    assert.match(prompt, /Repeat this same jointly-mentioned-pair\/path check again after every\s*later phase that introduces a class/);
   });
 });
 
@@ -455,6 +530,67 @@ test("Phase 4 checks an excluded property against the still-open Phase 1 list be
   });
 });
 
+test("Phase 4 rejects a property justified only by \"per policy\"/\"per the organization's system\" with no named function", async () => {
+  // iof-supply-chain/run-02 (epic #152 gate rerun, this branch): the
+  // interviewer went class-by-class asking "do you need an identifier
+  // property?" and the expert answered "I'd record it generically as an
+  // identifier... with the exact format coming from the organization's
+  // system and policy rather than me inventing one" -- accepted at face
+  // value for 16 of 18 recovered properties, none in gold, precision
+  // 0.11. The property *definition* is unchanged; this adds the same
+  // push-back discipline already applied to a proposed exclusion, in the
+  // other direction, to a proposed inclusion with no named function.
+  await withPage(async (page) => {
+    const prompt = await systemPrompt(page);
+    assert.match(prompt, /don't accept a\s*property just because the expert says a value will exist "per policy"\s*or "per the organization's system,"/);
+    assert.match(prompt, /that names that a value exists, not what the agent does with it/);
+    assert.match(prompt, /ask the expert to name the\s*specific competency question or\s*action that needs it, and how/);
+    assert.match(prompt, /leave\s*it as an open item rather than a confirmed property/);
+  });
+});
+
+test("Phase 4's push-back on unjustified properties applies to the interviewer's own batched proposals, not just the expert's answers", async () => {
+  // The fix above policed the *expert's* answer ("per policy"). The clean
+  // rerun it enabled found the interviewer itself could still batch a
+  // property across many classes under one shared, generic rationale and
+  // never name a competency question for any single one -- iof-supply-chain
+  // run-01 (epic #152 gate rerun, this branch) proposed 10 `.identifier`
+  // properties in one turn as "classes that seem likely to need identifiers
+  // for lookup, traceability, or tool input," the expert just said yes, and
+  // it reproduced the same failure (26 recovered vs. 3 gold, precision
+  // 0.077) the first fix was meant to close.
+  await withPage(async (page) => {
+    const prompt = await systemPrompt(page);
+    assert.match(prompt, /This applies to your own batched proposals just as much as to the\s*expert's answers/);
+    assert.match(prompt, /propose it only for the classes where you\s*can already name which confirmed competency question or action needs\s*it/);
+    assert.match(prompt, /not under one shared generic rationale like "for lookup,\s*reporting, or tool input" applied to the whole group/);
+    assert.match(prompt, /A class\s*without its own specific tie-back drops out of the batch and stays an\s*open item, even if the rest of the batch is justified/);
+  });
+});
+
+test("an unfinished phase is never offered as a stopping point, and Phase 0 doesn't pre-announce that the expert can stop early", async () => {
+  // iof-supply-chain/run-03 (epic #152 gate rerun, this branch) stopped
+  // mid-Phase-3 with confirmed classes still lacking relationships: the
+  // interviewer explicitly asked "do you want me to stop the relationship
+  // phase here and summarize... or do you have one more concrete
+  // relationship gap", the expert took the offer, and the run ended with
+  // 0 properties recovered because Phase 4 was never reached. The GROUND
+  // RULES bullet already forbade offering to skip *ahead*; it explicitly
+  // permitted offering to stop *here* ("let them decide whether to
+  // continue in a follow-up session"). This is the same failure mode as
+  // the excluded-property check above -- the fix must be root-cause, not
+  // reworded around this one transcript, so it targets the instruction
+  // that let it happen, not iof-supply-chain specifically.
+  await withPage(async (page) => {
+    const prompt = await systemPrompt(page);
+    assert.match(prompt, /never offer them a choice between finishing\s*it and stopping here/);
+    assert.match(prompt, /then immediately ask the next concrete question needed to close\s*that gap/);
+    assert.match(prompt, /don't present "stop or continue" as a fair choice, and don't\s*soften an unfinished phase into a "good stopping point\."/);
+    assert.match(prompt, /say plainly, in your\s*own next turn, exactly what remains missing and that the model is being\s*left in a known-incomplete state/);
+    assert.doesNotMatch(prompt, /the expert can stop early\s*with whatever is captured so far/);
+  });
+});
+
 test("the connected panel's static note reflects that tool-calling has shipped, not stale pre-Phase-3 copy", async () => {
   // Phase 3 shipped apply_ontology_yaml; this note used to say the agent
   // "can only talk for now" and that editing "arrives in a later phase" --
@@ -549,5 +685,84 @@ test("AGENT_KNOWLEDGE's illustrative example carries no real domain's class/rela
       `AGENT_KNOWLEDGE's illustrative example uses real domain vocabulary (${overlaps.join(", ")}) -- `
       + "pick different placeholder words for the running example (see issue #144)"
     );
+  });
+});
+
+// Generalizes the two checks above (elicitation-improvement epic, #152):
+// the GROUND-RULES-only check uses a hand-picked term list and never looked
+// at the rest of the interviewer prompt; the AGENT_KNOWLEDGE check only
+// looked at that one section's own code-fenced/backtick spans. Neither
+// would have caught a concrete illustrative example living in ordinary
+// prose *outside* GROUND RULES and outside AGENT_KNOWLEDGE -- which is
+// exactly where a real, pre-existing leak was found by a full-prompt scan
+// during that epic's own work: a "near-synonyms" guidance bullet used
+// "supplier" vs "vendor" vs "counterparty" as its illustrative example --
+// real vocabulary in itops (Vendor, alias "supplier") -- one bullet above
+// the very "never reach for a specific domain's vocabulary... use an
+// abstract placeholder" rule it violated. Fixed by replacing it with a
+// fully abstract description (no illustrative words at all); this test
+// pins that fix and stands as a general net for anywhere else in the whole
+// prompt, not just the two previously-checked sections.
+//
+// Scans the WHOLE prompt's prose (not just code-fenced spans -- most of
+// the interviewer prompt IS prose, with no code-fence boundary to lean on
+// the way AGENT_KNOWLEDGE's own check does), which surfaces real generic
+// English words no reasonable ontology-authoring guidance can avoid
+// ("filter", "order", "location", "database" as in "avoid database table
+// names", ...) -- each hand-verified by reading its actual sentence in the
+// prompt (not assumed) before being added to this explicit allowlist, same
+// "confirmed by hand, not just trusted" discipline as issue #144's own
+// investigation. A hit NOT on this allowlist is new and must be checked by
+// hand the same way before being added -- never bulk-added to make a
+// failing run pass.
+const GENERIC_ALLOWLIST_FOR_FULL_PROMPT_SCAN = new Set([
+  "building", "carries", "change", "connects", "connects to", "contains",
+  "database", "depends on", "deployment", "describes", "event", "filter",
+  "is justified by", "load", "location", "monitors", "order", "problem",
+  "records", "relates to", "reports", "reviews", "tracks", "triggers",
+  "uses", "covers", "includes", "produces", "space", "evidence",
+  // "that exact fact holds on its own" (#159's path-based-elicitation
+  // wording) -- the ordinary English verb, hand-verified against its real
+  // sentence, not a reference to any domain's "holds" relationship.
+  "holds",
+  // "weakening or deleting the item it is about" (#156's Tier C guidance)
+  // -- ordinary English, hand-verified.
+  "is about",
+]);
+
+test("no LLM-facing prompt in the app (interviewer, Import Review merger, Import Review proposer) carries real domain vocabulary outside the allowlisted generic words (issue #152 full review)", async () => {
+  const domains = listAvailableDomains();
+  assert.ok(domains.length >= 5, `expected at least the 5 benchmark domains, found: ${domains.join(", ")}`);
+
+  const entityPhrases = new Set();
+  for (const domain of domains) {
+    const doc = yaml.load(fs.readFileSync(resolveDomainYamlPath(domain), "utf8"));
+    for (const [name, cls] of Object.entries(doc.classes || {})) {
+      entityPhrases.add(normalizeForOverlapCheck(name));
+      for (const alias of cls.aliases || []) entityPhrases.add(normalizeForOverlapCheck(alias));
+    }
+    for (const rel of doc.relationships || []) {
+      entityPhrases.add(normalizeForOverlapCheck(rel.name));
+      for (const alias of rel.aliases || []) entityPhrases.add(normalizeForOverlapCheck(alias));
+    }
+  }
+  const checkPhrases = [...entityPhrases].filter((p) => p.length >= 4 && !GENERIC_ALLOWLIST_FOR_FULL_PROMPT_SCAN.has(p));
+
+  await withPage(async (page) => {
+    const prompts = {
+      "interviewer system prompt": await page.evaluate(() => window.__kg.agent.buildSystemPrompt()),
+      "Import Review merger prompt": await page.evaluate(() => window.__kg.importReview.prompts.merger),
+      "Import Review proposer prompt": await page.evaluate(() => window.__kg.importReview.prompts.proposer),
+    };
+    for (const [label, text] of Object.entries(prompts)) {
+      const padded = ` ${normalizeForOverlapCheck(text)} `;
+      const overlaps = checkPhrases.filter((phrase) => padded.includes(` ${phrase} `));
+      assert.deepEqual(
+        overlaps, [],
+        `${label} uses real domain vocabulary (${overlaps.join(", ")}) not on the generic allowlist -- `
+        + "either this is a genuine leak (replace with an abstract description, see issue #144/#152) "
+        + "or it is a new generic word that needs hand-verifying and adding to GENERIC_ALLOWLIST_FOR_FULL_PROMPT_SCAN"
+      );
+    }
   });
 });

@@ -38,8 +38,8 @@ check, or run it for real via `node --test`.
    - the app agent's latest reply looks like it believes the interview is
      essentially wrapped up (a real classification call after each
      app-agent turn — `appearsFinished()` in `lib/conversationOrchestrator.mjs`,
-     itself backed by a deterministic pre-filter that never needs the API
-     call at all — see the config table below);
+     itself backed by several deterministic pre-filters that never need the
+     API call at all — see the config table below);
    - the app agent has sent two consecutive short, content-free
      pleasantries in a row with no question in them (`looksLikePureAcknowledgment()`
      in `lib/conversationOrchestrator.mjs`) — a second, independent safety
@@ -338,20 +338,36 @@ added (helper_agent_todo.md's dated Log entry).
 Two different Jaccard thresholds, not one: classes (0.6) get every one of
 the ground truth's own declared aliases cross-checked against the recovered
 node's own label/meaning/aliases — real, built-in tolerance for rephrasing.
-Relationships and properties (0.3) get none of that: the fixture's
-`predicates:` section has no `aliases:` field at all, and the app's own
-edge/property data model has no alias concept either — always exactly one
-recorded label against exactly one gold label, with nowhere else to look.
-Auditing a real confirmatory run's actual recovered relationships against
-gold found this asymmetry silently costing correct recoveries at the class
-threshold (e.g. `Incident handledUsing Runbook` for gold's `Incident is
-handled with Runbook` — same class pair, same direction, same meaning, one
-preposition the interviewer could never have known to avoid since gold's
-exact wording is hidden from it — Jaccard 0.33). The lower threshold is
-still gated by the relationship/property's class pair (or host class)
-already matching, which does most of the disambiguating work a class match
-relies on alone, so it's safe to be more forgiving here without the same
-false-positive risk classes would have. It does *not* rescue a genuine
+Relationships (0.3) get a narrower version of the same tolerance, not none
+at all (issue #158 audit corrected this section, previously stale since the
+2026-07-30 fix it predates): `matchRelationships`/`relationshipLabelMatchesEdge`
+(`recoveryMetrics.mjs`) cross-check every one of a gold relationship's own
+declared `aliases` against every one of the recovered edge's own `relation` +
+`aliases` — genuinely symmetric, both sides, same as classes. What is *not*
+symmetric is how much gold-side alias data actually exists to check against,
+and it depends on the ground-truth format: `.domain.yaml`-sourced relationships
+(the 4 published-ontology domains, compiled from real source-ontology synonyms)
+carry real `aliases:` values, while `itops_mtsr.yaml`'s own `predicates:`
+section — this fixture's format — never declared any, so itops-scored
+relationships degrade to the old one-sided (recovered-edge-only) behavior, not
+because the scorer treats itops differently but because that fixture has
+nothing on the gold side to offer it. Properties (also 0.3) genuinely get none
+of this: `matchProperties` compares `prop.label` against the recovered
+property's own `name` only, and neither source format nor the product's own
+property schema (`createPropertyRow` in `index.html`) has an `aliases` field
+for properties at all — "always exactly one recorded label against exactly
+one gold label, with nowhere else to look" is still accurate for this
+dimension specifically. Auditing a real confirmatory itops run's actual
+recovered relationships against gold found this itops-specific asymmetry
+(before relationship aliases existed on either side) silently costing correct
+recoveries at the class threshold (e.g. `Incident handledUsing Runbook` for
+gold's `Incident is handled with Runbook` — same class pair, same direction,
+same meaning, one preposition the interviewer could never have known to avoid
+since gold's exact wording is hidden from it — Jaccard 0.33). The lower
+threshold is still gated by the relationship/property's class pair (or host
+class) already matching, which does most of the disambiguating work a class
+match relies on alone, so it's safe to be more forgiving here without the
+same false-positive risk classes would have. It does *not* rescue a genuine
 different word choice with zero token overlap at all (gold's "impacts" vs a
 recorded "affects" — Jaccard 0) — that residual gap is accepted, not
 silently hidden behind a synonym dictionary this eval deliberately doesn't
@@ -561,7 +577,7 @@ All environment-configurable, none hardcoded:
 | `ONTOLOGY_EVAL_MAX_TURNS` | 500 | Hard turn cap — raised from 100 once the interviewer's own pacing was fixed to batch similar items instead of one-per-turn (helper_agent_todo.md's dated Log entry) |
 | `ONTOLOGY_EVAL_WALLCLOCK_MINUTES` | 45 | Hard wall-clock cap |
 | `ONTOLOGY_EVAL_PERSONA_MODEL` | `gpt-4o-mini` | Simulating Eszter is a lighter task than open-ended elicitation, so this defaults cheap |
-| `ONTOLOGY_EVAL_CLASSIFIER_MODEL` | (interviewer's own connected model) | The "does this look finished?" check — was a fixed cheap default (`gpt-4o-mini`) until a real run found it hard to instruction-away from a false positive on an early-phase recap; now defaults to whatever real, live-picked "standard tier" model the interviewer connects with, same pattern as `ONTOLOGY_EVAL_REVIEW_MODEL`. Also backed by a deterministic pre-filter (`looksLikeEarlyPhaseCheckpoint` in `lib/conversationOrchestrator.mjs`) that catches the interviewer's own "Phase N recap" phrasing before ever calling this model at all. Defaulting to the interviewer's own model can pick a reasoning-tier model, which rejects the `temperature`/`max_tokens` params this call used to send (HTTP 400, `"Unsupported parameter: 'max_tokens'..."`); the old code silently treated that failure as "not finished" instead of surfacing it, which is what let the 160+-turn pleasantry loop above happen in the first place. `appearsFinished()` no longer sends either param (matching `index.html`'s own `callAgentChatRaw()`, which never did) and now throws instead of silently defaulting on any classifier API error. |
+| `ONTOLOGY_EVAL_CLASSIFIER_MODEL` | (interviewer's own connected model) | The "does this look finished?" check — was a fixed cheap default (`gpt-4o-mini`) until a real run found it hard to instruction-away from a false positive on an early-phase recap; now defaults to whatever real, live-picked "standard tier" model the interviewer connects with, same pattern as `ONTOLOGY_EVAL_REVIEW_MODEL`. Backed by several deterministic pre-filters in `lib/conversationOrchestrator.mjs` that catch a message as never-finished (an early-phase recap, an open "?", a request-for-reply idiom, a continuation offer) before ever calling this model at all — added across multiple real runs that each found a different way a genuinely-unfinished message got misjudged; see `appearsFinished()`'s own header comment and `helper_agent_todo.md`'s epic #152 entry for the full account. Defaulting to the interviewer's own model can pick a reasoning-tier model, which rejects the `max_tokens` param this call used to send (HTTP 400, `"Unsupported parameter: 'max_tokens'..."`) — that param was dropped entirely (matching `index.html`'s own `callAgentChatRaw()`, which never sent it). `temperature: 0` and forced JSON output (`response_format`) were added later and verified live against a real reasoning-tier deployment first, since `max_tokens`'s own rejection was exactly this risk (see `CLASSIFIER_EXTRA_BODY`'s own comment) — reduces but does not eliminate the classifier's sampling variance, so an independent second confirmation call is still required before trusting a first "finished" verdict. A failed classifier call degrades to "not finished" (never silently retried indefinitely, never crashes the run) rather than throwing — the conservative direction, since the interview keeps going rather than ending prematurely. |
 | `ONTOLOGY_EVAL_REVIEW_MODEL` | (interviewer's own connected model) | The report's LLM-review call |
 
 The interviewer side always uses whatever model the app's own real

@@ -1,0 +1,10 @@
+[
+  {
+    "severity": "advisory",
+    "kind": "class",
+    "identity": "IsolationValve",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty"
+  }
+]

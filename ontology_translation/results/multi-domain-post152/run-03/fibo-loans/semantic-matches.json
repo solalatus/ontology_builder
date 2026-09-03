@@ -1,0 +1,24 @@
+{
+  "fullDomain": {
+    "classes": [],
+    "relationships": [],
+    "properties": [
+      {
+        "goldId": "PrepaymentTerms.prePaymentPenaltyTermMonths",
+        "matchedPropertyName": "prepaymentPenaltyTimingMonths"
+      }
+    ],
+    "valueFidelity": []
+  },
+  "scoped": {
+    "classes": [
+      {
+        "goldId": "Amortization",
+        "recoveredId": "n11"
+      }
+    ],
+    "relationships": [],
+    "properties": [],
+    "valueFidelity": []
+  }
+}

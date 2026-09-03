@@ -1,0 +1,70 @@
+[
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "hasLocation (Boiler → Building)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "hasLocation",
+      "from": "Boiler",
+      "to": "Building",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "hasLocation (Chiller → Building)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "hasLocation",
+      "from": "Chiller",
+      "to": "Building",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "hasLocation (OutsideAirCO2Sensor → Building)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "hasLocation",
+      "from": "OutsideAirCO2Sensor",
+      "to": "Building",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "hasLocation (OccupancySensor → Space)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "hasLocation",
+      "from": "OccupancySensor",
+      "to": "Space",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship-pair",
+    "identity": "hasPoint (Space → OccupancySensor) / hasLocation (OccupancySensor → Space)",
+    "field": "pair",
+    "pattern": "RECIPROCAL_PAIR",
+    "detail": "hasPoint (Space → OccupancySensor) and hasLocation (OccupancySensor → Space) connect the same two classes in opposite directions -- confirm these are two genuinely distinct facts, not the same fact stated twice"
+  }
+]

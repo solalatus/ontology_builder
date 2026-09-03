@@ -222,10 +222,10 @@ async function main() {
   // for the classifier/review/judge's own always-2-message calls, and the
   // real fix for the persona's real conversation.
   const usages = [];
-  const chat = async (messages, model) => {
+  const chat = async (messages, model, extraBody = {}) => {
     const call = await chatMessagesOnce({
       config: { provider: "azure", endpoint, apiKey, apiVersion: process.env.AZURE_OPENAI_API_VERSION || DEFAULT_AZURE_API_VERSION },
-      model, messages,
+      model, messages, extraBody,
       label: `${domain}/${runId}`,
     });
     if (call.usage) usages.push(call.usage);

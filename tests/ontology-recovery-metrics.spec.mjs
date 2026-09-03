@@ -370,6 +370,77 @@ test("Porter2 stemming leaves a Hungarian-alias exact match untouched (bilingual
   assert.equal(metrics.relationships.matched, 1, "an exact Hungarian-string match must still match after adding an English-only stemmer");
 });
 
+// Issue #158 audit: confirmed by tracing matchRelationships/
+// relationshipLabelMatchesEdge that gold-side relationship aliases ARE
+// cross-checked, symmetric with the recovered edge's own aliases -- the
+// same tolerance classes get, just gated by REL_PROP_LABEL_MATCH_THRESHOLD
+// (0.3) instead of CLASS_LABEL_MATCH_THRESHOLD (0.6). tests/evals/README.md
+// previously (incorrectly) said relationships got "none of that" alias
+// cross-checking at all -- stale since the 2026-07-30 fix that gave edges a
+// real `aliases` field, predating `.domain.yaml`-sourced ground truth
+// (issue #104) actually carrying gold-side relationship aliases to check
+// against. This test pins the current, correct behavior directly rather
+// than leaving it to be re-discovered from a prose claim: neither side's
+// bare label matches the other's at all, and the match only exists because
+// both sides' aliases are consulted.
+test("matchRelationships credits a gold relationship's own alias against a recovered edge's own alias (issue #158)", () => {
+  const groundTruth = {
+    classes: {
+      incident: { id: "incident", label: "Incident", aliases: ["incident"] },
+      resolverGroup: { id: "resolverGroup", label: "Resolver Group", aliases: ["resolver group"] },
+    },
+    // Gold's own recorded label/aliases share zero tokens with the recovered
+    // edge's label/aliases below -- the only way this can match at all is via
+    // gold's alias against the recovered edge's alias, both sides at once.
+    relationships: [{
+      id: "rel_0", label: "escalatedTo", aliases: ["routed to"], fromClassId: "incident", toClassId: "resolverGroup",
+    }],
+    properties: [],
+  };
+  const recovered = {
+    nodes: [
+      { id: "n1", label: "Incident", meaning: "", aliases: [], properties: [] },
+      { id: "n2", label: "Resolver Group", meaning: "", aliases: [], properties: [] },
+    ],
+    edges: [{ id: "e1", source: "n1", target: "n2", relation: "handedOffTo", aliases: ["routed to"] }],
+  };
+  const { gtToRecovered } = matchClasses(groundTruth, recovered.nodes);
+  const relMatch = matchRelationships(groundTruth, recovered.edges, gtToRecovered);
+  assert.equal(relMatch.matches.length, 1, "gold's alias and the recovered edge's alias share real token overlap and must match");
+  assert.equal(relMatch.matches[0].goldId, "rel_0");
+  assert.equal(relMatch.matches[0].recoveredId, "e1");
+
+  // Negative control: strip both aliases and the same pair must NOT match --
+  // proves the match above genuinely came from alias credit, not from some
+  // other path (e.g. the class-pair gate alone being enough).
+  const groundTruthNoAlias = {
+    ...groundTruth,
+    relationships: [{ id: "rel_0", label: "escalatedTo", fromClassId: "incident", toClassId: "resolverGroup" }],
+  };
+  const recoveredNoAlias = { nodes: recovered.nodes, edges: [{ id: "e1", source: "n1", target: "n2", relation: "handedOffTo" }] };
+  const relMatchNoAlias = matchRelationships(groundTruthNoAlias, recoveredNoAlias.edges, gtToRecovered);
+  assert.equal(relMatchNoAlias.matches.length, 0, "without either side's alias, \"escalatedTo\" and \"handedOffTo\" share no tokens and must not match");
+});
+
+// Companion negative case: properties genuinely have no alias concept on
+// either side (neither source ground-truth format nor the product's own
+// property schema declares one) -- tests/evals/README.md's claim is
+// accurate for this dimension specifically, unlike relationships above.
+test("matchProperties has no alias concept on either side (issue #158) -- a same-meaning, zero-token-overlap pair does not match", () => {
+  const groundTruth = {
+    classes: { incident: { id: "incident", label: "Incident", aliases: ["incident"] } },
+    relationships: [],
+    properties: [{ id: "prop_0", label: "severity", classId: "incident" }],
+  };
+  const recovered = {
+    nodes: [{ id: "n1", label: "Incident", meaning: "", aliases: [], properties: [{ name: "criticality" }] }],
+    edges: [],
+  };
+  const { gtToRecovered } = matchClasses(groundTruth, recovered.nodes);
+  const propMatch = matchProperties(groundTruth, recovered.nodes, gtToRecovered);
+  assert.equal(propMatch.goldToRecovered.size, 0, "no alias/synonym path exists for properties, so a genuine synonym with zero token overlap cannot match");
+});
+
 test("real-data regression (brick-hvac/run-02): the recovered model's real bare-\"has\" edges now match their corresponding gold hasPoint/hasPart relationships", () => {
   const domain = "brick-hvac";
   const runDir = path.resolve(__dirname, "..", "ontology_translation", "results", "multi-domain", "run-02", domain);

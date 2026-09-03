@@ -1,0 +1,573 @@
+{
+  "domain": "iof-supply-chain",
+  "runId": "merge-1-2",
+  "runUuid": "00b1d28b-53b5-4940-a350-a03e6e6cb523",
+  "metrics": {
+    "classes": {
+      "recall": 0.7358490566037735,
+      "precision": 1,
+      "f1": 0.8478260869565216,
+      "matched": 39,
+      "groundTruthTotal": 53,
+      "recoveredTotal": 39
+    },
+    "relationships": {
+      "recall": 0.8666666666666667,
+      "precision": 0.5909090909090909,
+      "f1": 0.7027027027027029,
+      "matched": 26,
+      "groundTruthTotal": 30,
+      "recoveredTotal": 44
+    },
+    "properties": {
+      "recall": 0.6666666666666666,
+      "precision": 1,
+      "f1": 0.8,
+      "matched": 2,
+      "groundTruthTotal": 3,
+      "recoveredTotal": 2
+    },
+    "controlledValueFidelity": null,
+    "controlledValuePropertyGoldTotal": 0,
+    "controlledValuePropertyMatchedCount": 0,
+    "recoveryEffectiveness": 0.783509596553075,
+    "recoveryEffectivenessWithFidelity": null
+  },
+  "scopedMetrics": {
+    "classes": {
+      "recall": 0.9642857142857143,
+      "precision": 0.6923076923076923,
+      "f1": 0.8059701492537313,
+      "matched": 27,
+      "groundTruthTotal": 28,
+      "recoveredTotal": 39
+    },
+    "relationships": {
+      "recall": 0.9130434782608695,
+      "precision": 0.4772727272727273,
+      "f1": 0.6268656716417911,
+      "matched": 21,
+      "groundTruthTotal": 23,
+      "recoveredTotal": 44
+    },
+    "properties": {
+      "recall": 1,
+      "precision": 1,
+      "f1": 1,
+      "matched": 2,
+      "groundTruthTotal": 2,
+      "recoveredTotal": 2
+    },
+    "controlledValueFidelity": null,
+    "controlledValuePropertyGoldTotal": 0,
+    "controlledValuePropertyMatchedCount": 0,
+    "recoveryEffectiveness": 0.8109452736318409,
+    "recoveryEffectivenessWithFidelity": null
+  },
+  "semanticMetrics": null,
+  "semanticScopedMetrics": null,
+  "ruleMetrics": {
+    "recall": 0.8,
+    "precision": 1,
+    "f1": 0.888888888888889,
+    "matched": 4,
+    "groundTruthTotal": 5,
+    "recoveredTotal": 4
+  },
+  "actionMetrics": {
+    "identification": {
+      "recall": 1,
+      "precision": 1,
+      "f1": 1,
+      "matched": 5,
+      "groundTruthTotal": 5,
+      "recoveredTotal": 5
+    },
+    "inputClassAccuracy": 1,
+    "inputClassChecked": 5,
+    "preconditionRecovery": 0.6458333333333334,
+    "effectRecovery": 0.4536231884057971,
+    "verificationRecovery": 0.5231253713606654
+  },
+  "semanticRuleActionMetrics": null,
+  "operationalStats": {
+    "kind": "cascading-intelligent-merge",
+    "sourceDescription": "run-01 + run-02",
+    "decisionCounts": {
+      "matchedNoted": 30,
+      "pairedAccepted": 25,
+      "currentKept": 21,
+      "incomingTaken": 21
+    },
+    "suggestFailures": [
+      false
+    ],
+    "agentPreviewSummaries": [
+      {
+        "agentTouchedCount": 70,
+        "agentCommentary": "",
+        "lineCount": 74
+      }
+    ],
+    "lastResults": [
+      {
+        "ok": true,
+        "message": "Applied.",
+        "commentary": "",
+        "touched": [
+          {
+            "kind": "class",
+            "name": "PackagingProcess",
+            "action": "added"
+          },
+          {
+            "kind": "class",
+            "name": "LogisticsProcess",
+            "action": "added"
+          },
+          {
+            "kind": "relationship",
+            "name": "fulfillsOrder (Shipment → PurchaseOrder)",
+            "action": "added"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasFreightForwardingService (Shipment → FreightForwardingService)",
+            "action": "added"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasTransportationService (Shipment → TransportationService)",
+            "action": "added"
+          },
+          {
+            "kind": "relationship",
+            "name": "isDestinationNode (ShipToLocation → SupplyChainNode)",
+            "action": "added"
+          },
+          {
+            "kind": "cq",
+            "name": "Which storage facility is this storage activity happening at?",
+            "action": "added"
+          },
+          {
+            "kind": "cq",
+            "name": "Which facility is this shipment preparation activity happening at?",
+            "action": "added"
+          },
+          {
+            "kind": "cq",
+            "name": "Which freight forwarder is involved in this forwarding service?",
+            "action": "added"
+          },
+          {
+            "kind": "cq",
+            "name": "What item is this purchase order for?",
+            "action": "added"
+          },
+          {
+            "kind": "cq",
+            "name": "What item is this shipment moving?",
+            "action": "added"
+          },
+          {
+            "kind": "cq",
+            "name": "What container is used for this shipment?",
+            "action": "added"
+          },
+          {
+            "kind": "cq",
+            "name": "What freight container is used for this shipment?",
+            "action": "added"
+          },
+          {
+            "kind": "cq",
+            "name": "What tracking events do we have for this shipment?",
+            "action": "added"
+          },
+          {
+            "kind": "cq",
+            "name": "What tracking events do we have for this lot?",
+            "action": "added"
+          },
+          {
+            "kind": "cq",
+            "name": "Which logistics service applies to what is happening right now?",
+            "action": "added"
+          },
+          {
+            "kind": "cq",
+            "name": "Which transportation service applies to what is happening right now?",
+            "action": "added"
+          },
+          {
+            "kind": "cq",
+            "name": "Which packaging service applies to what is happening right now?",
+            "action": "added"
+          },
+          {
+            "kind": "cq",
+            "name": "Which storage service applies to what is happening right now?",
+            "action": "added"
+          },
+          {
+            "kind": "cq",
+            "name": "What traceable resource unit is relevant for this shipment?",
+            "action": "added"
+          },
+          {
+            "kind": "class",
+            "name": "ShipmentPreparation → ShipmentPreparationProcess",
+            "action": "renamed"
+          },
+          {
+            "kind": "class",
+            "name": "ReceivingActivity → ReceivingProcess",
+            "action": "renamed"
+          },
+          {
+            "kind": "class",
+            "name": "StorageActivity → StorageProcess",
+            "action": "renamed"
+          },
+          {
+            "kind": "class",
+            "name": "TraceableUnit → TraceableResourceUnit",
+            "action": "renamed"
+          },
+          {
+            "kind": "class",
+            "name": "Carrier",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "FreightForwarder",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "MaterialTradeItem",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "TransportProcess",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "Container",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "SupplyRelationship",
+            "action": "upserted"
+          },
+          {
+            "kind": "rule",
+            "name": "canRecordTrackingEvent",
+            "action": "upserted"
+          },
+          {
+            "kind": "rule",
+            "name": "canReceiveShipment",
+            "action": "upserted"
+          },
+          {
+            "kind": "rule",
+            "name": "canPrepareShipment",
+            "action": "upserted"
+          },
+          {
+            "kind": "action",
+            "name": "prepareShipment",
+            "action": "upserted"
+          },
+          {
+            "kind": "action",
+            "name": "dispatchShipment",
+            "action": "upserted"
+          },
+          {
+            "kind": "action",
+            "name": "receiveShipment",
+            "action": "upserted"
+          },
+          {
+            "kind": "action",
+            "name": "recordTrackingEvent",
+            "action": "upserted"
+          },
+          {
+            "kind": "action",
+            "name": "evaluateSupplyRelationship",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "dependsOnSupplier (SupplyRelationship → Supplier)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "dependsOnCustomer (SupplyRelationship → Customer)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "dependsOnProduct (SupplyRelationship → MaterialTradeItem)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "concernsItem (PurchaseOrder → MaterialTradeItem)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "concernsItem (Shipment → MaterialTradeItem)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasAgent (ShipmentPreparationProcess → Carrier)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasShipmentPreparationProcess (Shipment → ShipmentPreparationProcess)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasAgent (FreightForwardingService → FreightForwarder)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasAgent (TransportationService → Carrier)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "tracks (TrackingEvent → Shipment)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "tracks (TrackingEvent → Lot)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "tracks (TrackingEvent → LogisticUnit)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "tracks (TrackingEvent → Load)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "usesContainer (Shipment → FreightContainer)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasReceivingProcess (Shipment → ReceivingProcess)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "usesService (StorageProcess → StorageService)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "usesService (PackagingProcess → PackagingService)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "usesService (LogisticsProcess → LogisticsService)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasTransportationService (TransportProcess → TransportationService)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "startsAt (TransportProcess → SupplyChainNode)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "endsAt (TransportProcess → SupplyChainNode)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasTransportProcess (Shipment → TransportProcess)",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Which supplier is associated with this supplier-customer-product supply relationship?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Which customer is associated with this supplier-customer-product supply relationship?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Which product/item is associated with this supplier-customer-product supply relationship?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Which shipment is being prepared for this ship-from location and this ship-to location?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Which carrier handles this transport?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Which carrier handles this shipment preparation?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Which lot is tied to this shipment?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Which logistic unit is tied to this shipment?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Which load is tied to this shipment?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Where does this transport start?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Where is this transport supposed to end?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Which facility is this receiving activity happening at?",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasSupplier (SupplyRelationship → Supplier)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasCustomer (SupplyRelationship → Customer)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasMaterialTradeItem (SupplyRelationship → MaterialTradeItem)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasMaterialTradeItem (PurchaseOrder → MaterialTradeItem)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasMaterialTradeItem (Shipment → MaterialTradeItem)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasCarrier (ShipmentPreparationProcess → Carrier)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasShipmentPreparation (Shipment → ShipmentPreparationProcess)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "involvesFreightForwarder (FreightForwardingService → FreightForwarder)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "involvesCarrier (TransportationService → Carrier)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "tracksShipment (TrackingEvent → Shipment)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "tracksLot (TrackingEvent → Lot)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "tracksLogisticUnit (TrackingEvent → LogisticUnit)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "tracksLoad (TrackingEvent → Load)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "usesFreightContainer (Shipment → FreightContainer)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasReceivingActivity (Shipment → ReceivingProcess)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasStorageService (StorageProcess → StorageService)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasPackagingService (ShipmentPreparationProcess → PackagingService)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasLogisticsService (ShipmentPreparationProcess → LogisticsService)",
+            "action": "removed"
+          }
+        ],
+        "newConsistencyFindings": []
+      }
+    ]
+  }
+}
