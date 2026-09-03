@@ -1,0 +1,24 @@
+{
+  "fullDomain": {
+    "classes": [
+      {
+        "goldId": "CollateralValueAsOfDate",
+        "recoveredId": "n23"
+      }
+    ],
+    "relationships": [],
+    "properties": [],
+    "valueFidelity": []
+  },
+  "scoped": {
+    "classes": [
+      {
+        "goldId": "Amortization",
+        "recoveredId": "n15"
+      }
+    ],
+    "relationships": [],
+    "properties": [],
+    "valueFidelity": []
+  }
+}
