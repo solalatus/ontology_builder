@@ -1,0 +1,208 @@
+competency_questions:
+  - id: cq1
+    text: What maintenance state is this item in right now?
+  - id: cq2
+    text: "Which items are currently operating, which are degraded, and which have failed?"
+  - id: cq3
+    text: What failure event put this item into a failed state?
+  - id: cq4
+    text: Which failed items came from this particular failure event?
+  - id: cq5
+    text: What maintenance process does this work order actually refer to?
+  - id: cq6
+    text: What maintenance strategy is this maintenance job being carried out under?
+  - id: cq7
+    text: What maintenance activities make up this maintenance process?
+  - id: cq8
+    text: What qualification is required for this maintenance activity?
+  - id: cq9
+    text: Which qualified maintenance person can perform this maintenance activity?
+  - id: cq10
+    text: "What required function was involved in this failure event or in the item's normal functioning?"
+  - id: cq11
+    text: What failure mode code is being used to describe this known undesirable disposition?
+  - id: cq12
+    text: What failure effects followed from this failure event?
+classes:
+  MaintainableItem:
+    meaning: An asset or material item whose function we are trying to retain or restore through maintenance.
+    aliases: []
+    properties: {}
+  MaintenanceState:
+    meaning: "The condition an item is in for a period where its functional capability stays the same, such as operating, degraded, or failed."
+    aliases: []
+    properties:
+      stateCategory:
+        type: text
+        allowed:
+          - operating
+          - degraded
+          - failed
+  FailureEvent:
+    meaning: The event where an item loses its ability to perform a required function.
+    aliases:
+      - failure
+    properties: {}
+  MaintenanceWorkOrderRecord:
+    meaning: The record that describes a maintenance process.
+    aliases:
+      - maintenance work order
+      - MWO
+    properties:
+      workOrderDate:
+        type: date
+      taskDescription:
+        type: text
+      taskCode:
+        type: text
+      cost:
+        type: number
+  MaintenanceProcess:
+    meaning: The work carried out to retain or restore the function of a maintainable item under a maintenance strategy.
+    aliases: []
+    properties: {}
+  MaintenanceStrategy:
+    meaning: The maintenance approach used to help an asset achieve the desired maintenance objectives.
+    aliases: []
+    properties: {}
+  MaintenanceActivity:
+    meaning: A single maintenance task carried out to retain or restore the function of a maintainable item.
+    aliases: []
+    properties: {}
+  QualificationSpecification:
+    meaning: A requirement that says a person must have an assessed skill for a specific task.
+    aliases: []
+    properties: {}
+  QualifiedMaintenancePerson:
+    meaning: A person who is qualified to perform a specified maintenance activity.
+    aliases: []
+    properties: {}
+  RequiredFunction:
+    meaning: A function of a maintainable item that is necessary to meet a process requirement.
+    aliases:
+      - primary function
+    properties: {}
+  FailureModeCode:
+    meaning: A code record that describes an undesirable disposition.
+    aliases: []
+    properties: {}
+  UndesirableDisposition:
+    meaning: A tendency of an item to undergo a process that leads to an undesirable outcome.
+    aliases: []
+    properties: {}
+  FailureEffect:
+    meaning: "A consequence process that follows from a failure event, either within the failed item or beyond it."
+    aliases: []
+    properties: {}
+  FunctioningProcess:
+    meaning: The process in which an item performs its function.
+    aliases: []
+    properties: {}
+relationships:
+  - name: hasMaintenanceState
+    from: MaintainableItem
+    to: MaintenanceState
+    meaning: The maintainable item is in that maintenance state.
+    aliases: []
+  - name: initiatesFailedState
+    from: FailureEvent
+    to: MaintenanceState
+    meaning: The failure event begins the failed state.
+    aliases: []
+  - name: describesProcess
+    from: MaintenanceWorkOrderRecord
+    to: MaintenanceProcess
+    meaning: The maintenance work order record describes the maintenance process.
+    aliases: []
+  - name: isGovernedByStrategy
+    from: MaintenanceProcess
+    to: MaintenanceStrategy
+    meaning: The maintenance process is carried out under that maintenance strategy.
+    aliases: []
+  - name: hasActivity
+    from: MaintenanceProcess
+    to: MaintenanceActivity
+    meaning: The maintenance process includes that maintenance activity as one of its tasks.
+    aliases: []
+  - name: requiresQualificationSpecification
+    from: MaintenanceActivity
+    to: QualificationSpecification
+    meaning: The maintenance activity requires that qualification specification to be satisfied.
+    aliases: []
+  - name: isQualifiedForActivity
+    from: QualifiedMaintenancePerson
+    to: MaintenanceActivity
+    meaning: The qualified maintenance person is qualified to perform that maintenance activity.
+    aliases: []
+  - name: realizesRequiredFunction
+    from: FunctioningProcess
+    to: RequiredFunction
+    meaning: The functioning process is the process in which the required function is carried out.
+    aliases: []
+  - name: describesUndesirableDisposition
+    from: FailureModeCode
+    to: UndesirableDisposition
+    meaning: The failure mode code describes that undesirable disposition.
+    aliases: []
+  - name: hasFailureEffect
+    from: FailureEvent
+    to: FailureEffect
+    meaning: The failure event has that failure effect as a consequence.
+    aliases: []
+  - name: isAssignedToActivity
+    from: QualifiedMaintenancePerson
+    to: MaintenanceActivity
+    meaning: The qualified maintenance person is assigned to that maintenance activity.
+    aliases: []
+rules:
+  canClassifyItemAsFailed:
+    conditions:
+      - a failure event has occurred
+      - the item cannot perform its required function
+  canAssignQualifiedMaintenancePerson:
+    conditions:
+      - the maintenance activity requires a qualification specification
+      - the person is qualified for the maintenance activity
+  canCreateMaintenanceWorkOrder:
+    conditions:
+      - a maintenance process is needed to retain or restore function
+  canStartMaintenanceProcess:
+    conditions:
+      - a maintenance strategy is defined for the maintenance process
+      - a maintenance work order record describes the maintenance process
+  canCloseMaintenanceWorkOrder:
+    conditions:
+      - the maintenance activities in the maintenance process are completed
+      - the maintenance work order record has been updated with the performed task information
+      - the maintenance work order record has a final cost recorded
+actions:
+  classifyItemAsFailed:
+    input: MaintainableItem
+    preconditions:
+      - canClassifyItemAsFailed
+    effect: A failed maintenance state is recorded for the affected maintainable item.
+    verification: Confirm that the maintainable item is now tracked in a failed maintenance state.
+  createMaintenanceWorkOrder:
+    input: MaintenanceProcess
+    preconditions:
+      - canCreateMaintenanceWorkOrder
+    effect: A maintenance work order record is created for the maintenance process.
+    verification: Confirm that a maintenance work order record describes the maintenance process.
+  assignQualifiedMaintenancePerson:
+    input: MaintenanceActivity
+    preconditions:
+      - canAssignQualifiedMaintenancePerson
+    effect: A qualified maintenance person is assigned to the maintenance activity.
+    verification: Confirm that the person is assigned to the maintenance activity and is qualified for that activity.
+  startMaintenanceProcess:
+    input: MaintenanceProcess
+    preconditions:
+      - canStartMaintenanceProcess
+    effect: The maintenance process begins under its maintenance strategy.
+    verification: Confirm that a maintenance work order record describes the maintenance process and that maintenance activities exist for the maintenance process.
+  closeMaintenanceWorkOrder:
+    input: MaintenanceWorkOrderRecord
+    preconditions:
+      - canCloseMaintenanceWorkOrder
+    effect: The maintenance work order record is updated with completed task information and final cost to reflect completion of the maintenance process.
+    verification: Confirm that the maintenance work order record contains the completed task information and final cost; note that activity completion is still only partially modeled in this ontology.
