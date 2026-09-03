@@ -1,0 +1,32 @@
+[
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "commandedBy (MajorIncident → IncidentCommander)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "commandedBy",
+      "from": "MajorIncident",
+      "to": "IncidentCommander",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "communicatedThrough (Incident → Communication)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "communicatedThrough",
+      "from": "Incident",
+      "to": "Communication",
+      "meaning": null,
+      "aliases": []
+    }
+  }
+]
