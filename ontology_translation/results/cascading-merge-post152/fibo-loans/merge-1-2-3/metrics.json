@@ -1,0 +1,1008 @@
+{
+  "domain": "fibo-loans",
+  "runId": "merge-1-2-3",
+  "runUuid": "b662ddad-219b-439f-a248-8e648b8b470a",
+  "metrics": {
+    "classes": {
+      "recall": 0.5614035087719298,
+      "precision": 0.9696969696969697,
+      "f1": 0.711111111111111,
+      "matched": 32,
+      "groundTruthTotal": 57,
+      "recoveredTotal": 33
+    },
+    "relationships": {
+      "recall": 0.8064516129032258,
+      "precision": 0.7142857142857143,
+      "f1": 0.7575757575757576,
+      "matched": 25,
+      "groundTruthTotal": 31,
+      "recoveredTotal": 35
+    },
+    "properties": {
+      "recall": 0.42857142857142855,
+      "precision": 0.8076923076923077,
+      "f1": 0.5599999999999999,
+      "matched": 21,
+      "groundTruthTotal": 49,
+      "recoveredTotal": 26
+    },
+    "controlledValueFidelity": null,
+    "controlledValuePropertyGoldTotal": 0,
+    "controlledValuePropertyMatchedCount": 0,
+    "recoveryEffectiveness": 0.6762289562289562,
+    "recoveryEffectivenessWithFidelity": null
+  },
+  "scopedMetrics": {
+    "classes": {
+      "recall": 0.7916666666666666,
+      "precision": 0.5757575757575758,
+      "f1": 0.6666666666666667,
+      "matched": 19,
+      "groundTruthTotal": 24,
+      "recoveredTotal": 33
+    },
+    "relationships": {
+      "recall": 0.9411764705882353,
+      "precision": 0.45714285714285713,
+      "f1": 0.6153846153846154,
+      "matched": 16,
+      "groundTruthTotal": 17,
+      "recoveredTotal": 35
+    },
+    "properties": {
+      "recall": 0.9090909090909091,
+      "precision": 0.38461538461538464,
+      "f1": 0.5405405405405405,
+      "matched": 10,
+      "groundTruthTotal": 11,
+      "recoveredTotal": 26
+    },
+    "controlledValueFidelity": null,
+    "controlledValuePropertyGoldTotal": 0,
+    "controlledValuePropertyMatchedCount": 0,
+    "recoveryEffectiveness": 0.6075306075306076,
+    "recoveryEffectivenessWithFidelity": null
+  },
+  "semanticMetrics": null,
+  "semanticScopedMetrics": null,
+  "ruleMetrics": {
+    "recall": 0.5714285714285714,
+    "precision": 0.8,
+    "f1": 0.6666666666666666,
+    "matched": 4,
+    "groundTruthTotal": 7,
+    "recoveredTotal": 5
+  },
+  "actionMetrics": {
+    "identification": {
+      "recall": 1,
+      "precision": 1,
+      "f1": 1,
+      "matched": 5,
+      "groundTruthTotal": 5,
+      "recoveredTotal": 5
+    },
+    "inputClassAccuracy": 1,
+    "inputClassChecked": 4,
+    "preconditionRecovery": 0.4402131202131202,
+    "effectRecovery": 0.2776806526806527,
+    "verificationRecovery": 0.3141456582633053
+  },
+  "semanticRuleActionMetrics": null,
+  "operationalStats": {
+    "kind": "cascading-intelligent-merge",
+    "sourceDescription": "(run-01 + run-02) + run-03",
+    "decisionCounts": {
+      "matchedNoted": 76,
+      "pairedAccepted": 35,
+      "currentKept": 12,
+      "incomingTaken": 6
+    },
+    "suggestFailures": [
+      false
+    ],
+    "agentPreviewSummaries": [
+      {
+        "agentTouchedCount": 171,
+        "agentCommentary": "Done. I applied the accepted renames/reframings, updated meanings/rules/actions/questions conservatively, and removed only items clearly displaced by the decisions.\n\nOne caution: the accepted merge generalized `FixedInterestRate` and `VariableInterestRate` into `InterestRate`, but there was no separate decision authorizing migration of their old `rate` property into the new class under a second property name alongside incoming `currentRateValue`. To avoid inventing semantics, I kept the incoming-style `InterestRate` shape and removed the old subtype classes.",
+        "lineCount": 138
+      }
+    ],
+    "lastResults": [
+      {
+        "ok": true,
+        "message": "Applied.",
+        "commentary": "Done. I applied the accepted renames/reframings, updated meanings/rules/actions/questions conservatively, and removed only items clearly displaced by the decisions.\n\nOne caution: the accepted merge generalized `FixedInterestRate` and `VariableInterestRate` into `InterestRate`, but there was no separate decision authorizing migration of their old `rate` property into the new class under a second property name alongside incoming `currentRateValue`. To avoid inventing semantics, I kept the incoming-style `InterestRate` shape and removed the old subtype classes.",
+        "touched": [
+          {
+            "kind": "property",
+            "name": "Loan.isSecured",
+            "action": "added"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasPrincipalRepaymentTerms (Loan → PrincipalRepaymentTerms)",
+            "action": "added"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasInterestPaymentTerms (Loan → InterestPaymentTerms)",
+            "action": "added"
+          },
+          {
+            "kind": "cq",
+            "name": "What loan-to-value ratio applies to this collateralized loan?",
+            "action": "added"
+          },
+          {
+            "kind": "cq",
+            "name": "What combined loan-to-value ratio applies to this collateralized loan?",
+            "action": "added"
+          },
+          {
+            "kind": "cq",
+            "name": "Does the credit facility have any sub-facilities, and if so which ones?",
+            "action": "added"
+          },
+          {
+            "kind": "class",
+            "name": "PaymentTransaction → IndividualPaymentTransaction",
+            "action": "renamed"
+          },
+          {
+            "kind": "class",
+            "name": "CollateralValue → CollateralValueRecord",
+            "action": "renamed"
+          },
+          {
+            "kind": "class",
+            "name": "LoanToValueRatio → LoanToValueMeasure",
+            "action": "renamed"
+          },
+          {
+            "kind": "class",
+            "name": "CombinedLoanToValueRatio → CombinedLoanToValueMeasure",
+            "action": "renamed"
+          },
+          {
+            "kind": "class",
+            "name": "EnhancementBeneficiary → CreditEnhancementBeneficiary",
+            "action": "renamed"
+          },
+          {
+            "kind": "rule",
+            "name": "variableRateSetupCheck → variableRateLoanHasResetSchedule",
+            "action": "renamed"
+          },
+          {
+            "kind": "rule",
+            "name": "paymentRecordCompletenessCheck → paymentTrackingIsComplete",
+            "action": "renamed"
+          },
+          {
+            "kind": "rule",
+            "name": "loanReadinessCheck → loanReadyForServicingSetup",
+            "action": "renamed"
+          },
+          {
+            "kind": "rule",
+            "name": "securedLoanSupportCheck → securedLoanHasCollateralSupport",
+            "action": "renamed"
+          },
+          {
+            "kind": "rule",
+            "name": "prepaymentTermTimingCheck → prepaymentPenaltyTimingIsRecorded",
+            "action": "renamed"
+          },
+          {
+            "kind": "action",
+            "name": "assessLoanReadiness → assessLoanReadinessForServicingSetup",
+            "action": "renamed"
+          },
+          {
+            "kind": "action",
+            "name": "verifySecuredLoanSupport → verifySecuredLoanHasCollateral",
+            "action": "renamed"
+          },
+          {
+            "kind": "action",
+            "name": "reviewPaymentRecordCompleteness → reviewPaymentTrackingCompleteness",
+            "action": "renamed"
+          },
+          {
+            "kind": "action",
+            "name": "reviewPrepaymentTerms → reviewPrepaymentPenaltyTiming",
+            "action": "renamed"
+          },
+          {
+            "kind": "class",
+            "name": "Loan",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "Borrower",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "Lender",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "Servicer",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "CreditFacility",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "CreditAgreement",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "PrincipalRepaymentTerms",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "InterestPaymentTerms",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "LoanPaymentSchedule",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "AmortizationSchedule",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "PrincipalPaymentSchedule",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "InterestPaymentSchedule",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "Collateral",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "SecurityAgreement",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "InterestRateResetSchedule",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "BorrowingCapacity",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "SubFacility",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "Principal",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "Interest",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "PaymentHistory",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "AccruedInterest",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "DayCountConvention",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "CreditEnhancementAgreement",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "PrepaymentTerms",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "CollateralValueRecord",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "IndividualPaymentTransaction",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "LoanToValueMeasure",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "CombinedLoanToValueMeasure",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "CreditEnhancementBeneficiary",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "InterestRate",
+            "action": "upserted"
+          },
+          {
+            "kind": "rule",
+            "name": "variableRateLoanHasResetSchedule",
+            "action": "upserted"
+          },
+          {
+            "kind": "rule",
+            "name": "paymentTrackingIsComplete",
+            "action": "upserted"
+          },
+          {
+            "kind": "rule",
+            "name": "loanReadyForServicingSetup",
+            "action": "upserted"
+          },
+          {
+            "kind": "rule",
+            "name": "securedLoanHasCollateralSupport",
+            "action": "upserted"
+          },
+          {
+            "kind": "rule",
+            "name": "prepaymentPenaltyTimingIsRecorded",
+            "action": "upserted"
+          },
+          {
+            "kind": "action",
+            "name": "assessLoanReadinessForServicingSetup",
+            "action": "upserted"
+          },
+          {
+            "kind": "action",
+            "name": "verifySecuredLoanHasCollateral",
+            "action": "upserted"
+          },
+          {
+            "kind": "action",
+            "name": "reviewVariableRateSetup",
+            "action": "upserted"
+          },
+          {
+            "kind": "action",
+            "name": "reviewPaymentTrackingCompleteness",
+            "action": "upserted"
+          },
+          {
+            "kind": "action",
+            "name": "reviewPrepaymentPenaltyTiming",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasBorrower (Loan → Borrower)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasLender (Loan → Lender)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "isServicedBy (Loan → Servicer)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasPrincipal (Loan → Principal)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasInterest (Loan → Interest)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "governsPaymentOf (PrincipalRepaymentTerms → Principal)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "governsPaymentOf (InterestPaymentTerms → Interest)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasCollateral (Loan → Collateral)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "secures (SecurityAgreement → Collateral)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasPaymentHistory (Loan → PaymentHistory)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasIndividualPayment (PaymentHistory → IndividualPaymentTransaction)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasSchedule (Loan → LoanPaymentSchedule)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasSchedule (Loan → AmortizationSchedule)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasSchedule (Loan → PrincipalPaymentSchedule)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasSchedule (Loan → InterestPaymentSchedule)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasSchedule (Loan → InterestRateResetSchedule)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasBorrowingCapacity (Borrower → BorrowingCapacity)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasSubFacility (CreditFacility → SubFacility)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasCollateralValue (Collateral → CollateralValueRecord)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasBorrower (CreditAgreement → Borrower)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasLender (CreditAgreement → Lender)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasAccrualBasis (InterestPaymentTerms → DayCountConvention)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasBorrower (CreditFacility → Borrower)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasLender (CreditFacility → Lender)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasBeneficiary (CreditEnhancementAgreement → CreditEnhancementBeneficiary)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasInterestRate (Loan → InterestRate)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasAccruedInterest (Loan → AccruedInterest)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasLoanToValueMeasure (Loan → LoanToValueMeasure)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasCombinedLoanToValueMeasure (Loan → CombinedLoanToValueMeasure)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "includesPrepaymentTerms (PrincipalRepaymentTerms → PrepaymentTerms)",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Who is the borrower and who is the lender for a given loan?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "What principal amount, interest rate, and maturity date apply to a given loan or credit agreement?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Which repayment terms govern principal repayment and which terms govern interest payment for a given agreement?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "What payment schedules are associated with a loan, including amortization, principal payment, and interest payment schedules?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Is a given loan secured, and if so, what collateral or security agreement supports it?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Which servicer is responsible for collecting payments on a given loan?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Does a loan have variable-rate features such as a reset schedule, a cap, or a first rate change term?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "What prepayment terms apply to a loan, including any prepayment penalty period?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "What payment history exists for a given loan, and which individual payments make it up?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Is a loan interest-only, does it permit negative amortization, or does it include a balloon payment?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "What borrowing capacity or available amount has been assessed for a borrower or credit facility?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "What collateral value and loan-to-value measures are relevant for a collateralized loan?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "For a credit facility, how much credit has been extended?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Does this credit facility have any sub-facilities, and if so which ones?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Is this loan fixed rate or variable rate?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "If it is variable rate, what reset schedule, cap, or first rate change term applies?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Is this loan interest-only?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Does this loan permit negative amortization?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Does this loan include a balloon payment?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "What prepayment terms apply to this loan, including any prepayment penalty period?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Is this loan secured, and if so what collateral or security support applies?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "If there is a credit enhancement arrangement, who is the beneficiary of that protection?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Which servicer is responsible for collecting payments on this loan?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "What payment history exists for this loan?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Which individual payment transactions make up that payment history?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "What borrowing capacity has been assessed for this borrower?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "For a collateralized loan, what collateral value is relevant as of a given date?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "For a collateralized loan, what loan-to-value ratio is relevant?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "For a collateralized loan, what combined loan-to-value ratio is relevant?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Is the loan missing anything needed to confirm core setup of borrower, lender, and interest terms?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Is a variable-rate loan missing anything needed to track resets correctly?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Is a secured loan missing anything needed to support its secured status?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Does the loan have enough payment history detail to be trackable in servicing?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "What loan-to-value ratio applies to this collateralized loan?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "What combined loan-to-value ratio applies to this collateralized loan?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Who is the borrower on this loan?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Who is the lender on this loan?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "What is the principal amount on this loan?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "What interest rate applies to this loan right now?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "What is the maturity date of this loan?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "When was this loan first funded or initially exchanged?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "What terms govern principal repayment on this loan?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "What terms govern interest payment on this loan?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "What payment schedules are on file for this loan?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Is an amortization schedule on file for this loan?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Is there a separate principal payment schedule on file for this loan?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Is there a separate interest payment schedule on file for this loan?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "What secured form applies to this loan, if any?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "What collateral is linked to this loan?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Is there a security agreement over the collateral linked to this loan?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Does this loan have variable-rate features?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Is there a reset schedule on file for this loan?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Is there an interest-rate cap on this loan?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "What first rate change term applies to this loan?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "What prepayment terms apply to this loan?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "What prepayment penalty timing applies to this loan?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "What payment history is on file for this loan?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Which individual payments make up the payment history for this loan?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Does this loan allow negative amortization?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "What amount remains available on this credit facility?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "What accrued interest is outstanding as of a given date?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "What day-count basis is being used for interest accrual?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "What collateral value is on file as of a given date?",
+            "action": "upserted"
+          },
+          {
+            "kind": "warning",
+            "name": "removed while it still had unmigrated content: \"FixedInterestRate\" (1 property, 1 relationship(s)); \"VariableInterestRate\" (1 property, 1 relationship(s))",
+            "action": "warning"
+          },
+          {
+            "kind": "class",
+            "name": "FixedInterestRate",
+            "action": "removed"
+          },
+          {
+            "kind": "class",
+            "name": "VariableInterestRate",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "servicedBy (Loan → Servicer)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "governsPaymentOfPrincipal (PrincipalRepaymentTerms → Principal)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "governsPaymentOfInterest (InterestPaymentTerms → Interest)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "collateralizedBy (Loan → Collateral)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "securesCollateral (SecurityAgreement → Collateral)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasCollateralValuation (Collateral → CollateralValueRecord)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasLoanToValueRatio (Loan → LoanToValueMeasure)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasCombinedLoanToValueRatio (Loan → CombinedLoanToValueMeasure)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasPrepaymentTerms (Loan → PrepaymentTerms)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasAccruedInterest (Interest → AccruedInterest)",
+            "action": "removed"
+          },
+          {
+            "kind": "property",
+            "name": "Loan.initialExchangeDate",
+            "action": "removed"
+          },
+          {
+            "kind": "property",
+            "name": "Loan.interestOnly",
+            "action": "removed"
+          },
+          {
+            "kind": "property",
+            "name": "Loan.negativeAmortization",
+            "action": "removed"
+          },
+          {
+            "kind": "property",
+            "name": "Loan.balloonPayment",
+            "action": "removed"
+          },
+          {
+            "kind": "property",
+            "name": "Loan.prepaymentPenaltyTermMonths",
+            "action": "removed"
+          },
+          {
+            "kind": "property",
+            "name": "CreditFacility.availableAmount",
+            "action": "removed"
+          },
+          {
+            "kind": "property",
+            "name": "BorrowingCapacity.amount",
+            "action": "removed"
+          },
+          {
+            "kind": "property",
+            "name": "CollateralValueRecord.value",
+            "action": "removed"
+          },
+          {
+            "kind": "property",
+            "name": "LoanToValueMeasure.ratio",
+            "action": "removed"
+          },
+          {
+            "kind": "property",
+            "name": "CombinedLoanToValueMeasure.ratio",
+            "action": "removed"
+          },
+          {
+            "kind": "cq",
+            "name": "For a credit facility, how much credit has been extended?",
+            "action": "removed"
+          }
+        ],
+        "newConsistencyFindings": []
+      }
+    ]
+  }
+}
