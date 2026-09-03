@@ -1,0 +1,24 @@
+{
+  "fullDomain": {
+    "classes": [],
+    "relationships": [],
+    "properties": [
+      {
+        "goldId": "MaintenanceWorkOrderRecord.taskDescription",
+        "matchedPropertyName": "performedTaskDetails"
+      }
+    ],
+    "valueFidelity": [
+      {
+        "id": "MaintenanceState.stateCategory",
+        "semanticFidelity": 1
+      }
+    ]
+  },
+  "scoped": {
+    "classes": [],
+    "relationships": [],
+    "properties": [],
+    "valueFidelity": []
+  }
+}
