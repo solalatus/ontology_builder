@@ -549,6 +549,25 @@ test("Phase 4 rejects a property justified only by \"per policy\"/\"per the orga
   });
 });
 
+test("Phase 4's push-back on unjustified properties applies to the interviewer's own batched proposals, not just the expert's answers", async () => {
+  // The fix above policed the *expert's* answer ("per policy"). The clean
+  // rerun it enabled found the interviewer itself could still batch a
+  // property across many classes under one shared, generic rationale and
+  // never name a competency question for any single one -- iof-supply-chain
+  // run-01 (epic #152 gate rerun, this branch) proposed 10 `.identifier`
+  // properties in one turn as "classes that seem likely to need identifiers
+  // for lookup, traceability, or tool input," the expert just said yes, and
+  // it reproduced the same failure (26 recovered vs. 3 gold, precision
+  // 0.077) the first fix was meant to close.
+  await withPage(async (page) => {
+    const prompt = await systemPrompt(page);
+    assert.match(prompt, /This applies to your own batched proposals just as much as to the\s*expert's answers/);
+    assert.match(prompt, /propose it only for the classes where you\s*can already name which confirmed competency question or action needs\s*it/);
+    assert.match(prompt, /not under one shared generic rationale like "for lookup,\s*reporting, or tool input" applied to the whole group/);
+    assert.match(prompt, /A class\s*without its own specific tie-back drops out of the batch and stays an\s*open item, even if the rest of the batch is justified/);
+  });
+});
+
 test("an unfinished phase is never offered as a stopping point, and Phase 0 doesn't pre-announce that the expert can stop early", async () => {
   // iof-supply-chain/run-03 (epic #152 gate rerun, this branch) stopped
   // mid-Phase-3 with confirmed classes still lacking relationships: the

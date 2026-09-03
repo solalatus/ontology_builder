@@ -209,9 +209,22 @@ import { withPage } from "./lib/page.mjs";
 // "some value/identifier will exist, per policy" -- naming that it exists,
 // not what the agent does with it -- is not accepted; the expert must name
 // the specific competency question/action it serves.
+//
+// That fix only policed the *expert's* answer; the clean rerun it enabled
+// found it didn't police the *interviewer's own* batch proposal. Live in
+// iof-supply-chain/run-01 (post-fix rerun, this branch): the interviewer
+// proposed a batch of 10 `.identifier` properties across unrelated classes
+// under one shared, generic rationale ("for lookup, traceability, or tool
+// input") and never named a competency question for any single one --
+// technically satisfying the per-answer rule (the expert just said yes)
+// while reproducing the same failure (26 recovered vs. 3 gold, precision
+// 0.077). Closed at the actual break point: a batched property proposal
+// must name the tie-back per class, not once for the whole batch: a class
+// without its own specific justification drops out of the batch and stays
+// open, even if the rest of the batch is fine.
 export const PRODUCTION_SYSTEM_PROMPT_SHA256 = {
-  en: "606a1f5ade9610bba35e6073cdca581f94074518baee43b1a29709eae848989f",
-  hu: "8a84bf9d85f3ceaba43c0a93215b751275509e998d47375a9223383f7453d802",
+  en: "9c9a4583a266795d69c7f7993866b4261d6f9d3cfcb882117260d1abb7489f0d",
+  hu: "57142d09a2bcf63b135639c46676dbfde95272e6ded42d59710fe1975762597f",
 };
 
 // The complete ontology tool surface an ordinary interview request exposes.
