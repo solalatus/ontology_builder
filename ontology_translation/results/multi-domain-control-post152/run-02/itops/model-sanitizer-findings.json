@@ -1,0 +1,17 @@
+[
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "wasCausedBy (Incident → Change)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "wasCausedBy",
+      "from": "Incident",
+      "to": "Change",
+      "meaning": null,
+      "aliases": []
+    }
+  }
+]
