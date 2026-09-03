@@ -1,0 +1,645 @@
+{
+  "domain": "iof-maintenance",
+  "runId": "merge-1-2",
+  "runUuid": "12635c92-3ebf-433e-bd67-f68c9bc6c80f",
+  "metrics": {
+    "classes": {
+      "recall": 0.85,
+      "precision": 0.9444444444444444,
+      "f1": 0.8947368421052632,
+      "matched": 17,
+      "groundTruthTotal": 20,
+      "recoveredTotal": 18
+    },
+    "relationships": {
+      "recall": 0.6923076923076923,
+      "precision": 0.5294117647058824,
+      "f1": 0.5999999999999999,
+      "matched": 9,
+      "groundTruthTotal": 13,
+      "recoveredTotal": 17
+    },
+    "properties": {
+      "recall": 0.6,
+      "precision": 0.6,
+      "f1": 0.6,
+      "matched": 3,
+      "groundTruthTotal": 5,
+      "recoveredTotal": 5
+    },
+    "controlledValueFidelity": null,
+    "controlledValuePropertyGoldTotal": 1,
+    "controlledValuePropertyMatchedCount": 0,
+    "recoveryEffectiveness": 0.6982456140350877,
+    "recoveryEffectivenessWithFidelity": null
+  },
+  "scopedMetrics": {
+    "classes": {
+      "recall": 0.9333333333333333,
+      "precision": 0.7777777777777778,
+      "f1": 0.8484848484848485,
+      "matched": 14,
+      "groundTruthTotal": 15,
+      "recoveredTotal": 18
+    },
+    "relationships": {
+      "recall": 0.875,
+      "precision": 0.4117647058823529,
+      "f1": 0.56,
+      "matched": 7,
+      "groundTruthTotal": 8,
+      "recoveredTotal": 17
+    },
+    "properties": {
+      "recall": 1,
+      "precision": 0.4,
+      "f1": 0.5714285714285715,
+      "matched": 2,
+      "groundTruthTotal": 2,
+      "recoveredTotal": 5
+    },
+    "controlledValueFidelity": null,
+    "controlledValuePropertyGoldTotal": 0,
+    "controlledValuePropertyMatchedCount": 0,
+    "recoveryEffectiveness": 0.6599711399711401,
+    "recoveryEffectivenessWithFidelity": null
+  },
+  "semanticMetrics": null,
+  "semanticScopedMetrics": null,
+  "ruleMetrics": {
+    "recall": 0.42857142857142855,
+    "precision": 0.375,
+    "f1": 0.39999999999999997,
+    "matched": 3,
+    "groundTruthTotal": 7,
+    "recoveredTotal": 8
+  },
+  "actionMetrics": {
+    "identification": {
+      "recall": 1,
+      "precision": 0.625,
+      "f1": 0.7692307692307693,
+      "matched": 5,
+      "groundTruthTotal": 5,
+      "recoveredTotal": 8
+    },
+    "inputClassAccuracy": 0.8,
+    "inputClassChecked": 5,
+    "preconditionRecovery": 0.42333333333333334,
+    "effectRecovery": 0.7142857142857142,
+    "verificationRecovery": 0.6982767232767233
+  },
+  "semanticRuleActionMetrics": null,
+  "operationalStats": {
+    "kind": "cascading-intelligent-merge",
+    "sourceDescription": "run-01 + run-02",
+    "decisionCounts": {
+      "matchedNoted": 27,
+      "pairedAccepted": 19,
+      "currentKept": 2,
+      "incomingTaken": 18
+    },
+    "suggestFailures": [
+      false
+    ],
+    "agentPreviewSummaries": [
+      {
+        "agentTouchedCount": 71,
+        "agentCommentary": "Applied the merge decisions.\n\nI was conservative about deletions except where the human explicitly accepted incoming specializations/renames. One thing I did not change: I did not remove older competency questions that were still complementary rather than clearly redundant.",
+        "lineCount": 65
+      }
+    ],
+    "lastResults": [
+      {
+        "ok": true,
+        "message": "Applied.",
+        "commentary": "Applied the merge decisions.\n\nI was conservative about deletions except where the human explicitly accepted incoming specializations/renames. One thing I did not change: I did not remove older competency questions that were still complementary rather than clearly redundant.",
+        "touched": [
+          {
+            "kind": "class",
+            "name": "SupportingMaintenanceActivity",
+            "action": "added"
+          },
+          {
+            "kind": "class",
+            "name": "FailureProcess",
+            "action": "added"
+          },
+          {
+            "kind": "property",
+            "name": "MaintenanceActivity.completionStatus",
+            "action": "added"
+          },
+          {
+            "kind": "rule",
+            "name": "treatItemAsOperating",
+            "action": "added"
+          },
+          {
+            "kind": "rule",
+            "name": "treatItemAsDegraded",
+            "action": "added"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasSupportingMaintenanceActivity (MaintenanceProcess → SupportingMaintenanceActivity)",
+            "action": "added"
+          },
+          {
+            "kind": "relationship",
+            "name": "isAssociatedWith (FailureEvent → RequiredFunction)",
+            "action": "added"
+          },
+          {
+            "kind": "action",
+            "name": "checkWhetherItemShouldBeOperatingDegradedOrFailed",
+            "action": "added"
+          },
+          {
+            "kind": "action",
+            "name": "verifyWorkOrderDescribesMaintenanceProcess",
+            "action": "added"
+          },
+          {
+            "kind": "action",
+            "name": "verifyAssignedPersonQualifiedBeforeAssignment",
+            "action": "added"
+          },
+          {
+            "kind": "cq",
+            "name": "Is this person qualified for that maintenance activity?",
+            "action": "added"
+          },
+          {
+            "kind": "cq",
+            "name": "What required function is tied to this failure event?",
+            "action": "added"
+          },
+          {
+            "kind": "cq",
+            "name": "What required function is tied to this functioning process?",
+            "action": "added"
+          },
+          {
+            "kind": "cq",
+            "name": "Which failure mode code describes this known undesirable disposition?",
+            "action": "added"
+          },
+          {
+            "kind": "cq",
+            "name": "What failure effects resulted from this failure event?",
+            "action": "added"
+          },
+          {
+            "kind": "cq",
+            "name": "Did this failure process lead to a degraded state or a failed state?",
+            "action": "added"
+          },
+          {
+            "kind": "class",
+            "name": "MaintainableItem → MaintainableMaterialItem",
+            "action": "renamed"
+          },
+          {
+            "kind": "rule",
+            "name": "canClassifyItemAsFailed → treatItemAsFailed",
+            "action": "renamed"
+          },
+          {
+            "kind": "rule",
+            "name": "canCreateMaintenanceWorkOrder → workOrderDescribesMaintenanceProcess",
+            "action": "renamed"
+          },
+          {
+            "kind": "rule",
+            "name": "canCloseMaintenanceWorkOrder → canCloseMaintenanceWorkOrderRecord",
+            "action": "renamed"
+          },
+          {
+            "kind": "action",
+            "name": "classifyItemAsFailed → classifyItemAsFailedAfterFailureEvent",
+            "action": "renamed"
+          },
+          {
+            "kind": "action",
+            "name": "createMaintenanceWorkOrder → createMaintenanceWorkOrderForNeededProcess",
+            "action": "renamed"
+          },
+          {
+            "kind": "action",
+            "name": "assignQualifiedMaintenancePerson → assignQualifiedMaintenancePersonToActivity",
+            "action": "renamed"
+          },
+          {
+            "kind": "class",
+            "name": "MaintenanceWorkOrderRecord",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "MaintenanceProcess",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "MaintenanceStrategy",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "MaintenanceActivity",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "QualificationSpecification",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "RequiredFunction",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "FailureModeCode",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "UndesirableDisposition",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "FailureEffect",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "FunctioningProcess",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "MaintainableMaterialItem",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "OperatingState",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "DegradedState",
+            "action": "upserted"
+          },
+          {
+            "kind": "class",
+            "name": "FailedState",
+            "action": "upserted"
+          },
+          {
+            "kind": "rule",
+            "name": "canAssignQualifiedMaintenancePerson",
+            "action": "upserted"
+          },
+          {
+            "kind": "rule",
+            "name": "canStartMaintenanceProcess",
+            "action": "upserted"
+          },
+          {
+            "kind": "rule",
+            "name": "startMaintenanceProcess",
+            "action": "upserted"
+          },
+          {
+            "kind": "action",
+            "name": "closeMaintenanceWorkOrder",
+            "action": "upserted"
+          },
+          {
+            "kind": "action",
+            "name": "startMaintenanceProcess",
+            "action": "upserted"
+          },
+          {
+            "kind": "action",
+            "name": "classifyItemAsFailedAfterFailureEvent",
+            "action": "upserted"
+          },
+          {
+            "kind": "action",
+            "name": "createMaintenanceWorkOrderForNeededProcess",
+            "action": "upserted"
+          },
+          {
+            "kind": "action",
+            "name": "assignQualifiedMaintenancePersonToActivity",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasFailureEffect (FailureEvent → FailureEffect)",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "What maintenance state is this item in right now?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Which items are currently operating, which are degraded, and which have failed?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "What failure event put this item into a failed state?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "What maintenance process does this work order actually refer to?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "What maintenance strategy is this maintenance job being carried out under?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "What maintenance activities make up this maintenance process?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "What qualification is required for this maintenance activity?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Which qualified maintenance person can perform this maintenance activity?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "What supporting activities are involved in carrying out this maintenance process?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Which items are currently operating normally?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Which items are currently degraded?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Which items are currently failed?",
+            "action": "upserted"
+          },
+          {
+            "kind": "cq",
+            "name": "Which failed states came from this particular failure event?",
+            "action": "upserted"
+          },
+          {
+            "kind": "rule",
+            "name": "treatItemAsFailed",
+            "action": "upserted"
+          },
+          {
+            "kind": "rule",
+            "name": "workOrderDescribesMaintenanceProcess",
+            "action": "upserted"
+          },
+          {
+            "kind": "rule",
+            "name": "canCloseMaintenanceWorkOrderRecord",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "isInOperatingState (MaintainableMaterialItem → OperatingState)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "isInDegradedState (MaintainableMaterialItem → DegradedState)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "isInFailedState (MaintainableMaterialItem → FailedState)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "begins (FailureEvent → FailedState)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "describes (MaintenanceWorkOrderRecord → MaintenanceProcess)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "isGovernedBy (MaintenanceProcess → MaintenanceStrategy)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasMaintenanceActivity (MaintenanceProcess → MaintenanceActivity)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "requires (MaintenanceActivity → QualificationSpecification)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "isQualifiedFor (QualifiedMaintenancePerson → MaintenanceActivity)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "realizes (FunctioningProcess → RequiredFunction)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "describes (FailureModeCode → UndesirableDisposition)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "isAssignedTo (MaintenanceActivity → QualifiedMaintenancePerson)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "leadsToDegradedState (FailureProcess → DegradedState)",
+            "action": "upserted"
+          },
+          {
+            "kind": "relationship",
+            "name": "leadsToFailedState (FailureProcess → FailedState)",
+            "action": "upserted"
+          },
+          {
+            "kind": "warning",
+            "name": "removed while it still had unmigrated content: \"MaintenanceState\" (1 property, 2 relationship(s))",
+            "action": "warning"
+          },
+          {
+            "kind": "class",
+            "name": "MaintenanceState",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "describesProcess (MaintenanceWorkOrderRecord → MaintenanceProcess)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "isGovernedByStrategy (MaintenanceProcess → MaintenanceStrategy)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "hasActivity (MaintenanceProcess → MaintenanceActivity)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "requiresQualificationSpecification (MaintenanceActivity → QualificationSpecification)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "isQualifiedForActivity (QualifiedMaintenancePerson → MaintenanceActivity)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "realizesRequiredFunction (FunctioningProcess → RequiredFunction)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "describesUndesirableDisposition (FailureModeCode → UndesirableDisposition)",
+            "action": "removed"
+          },
+          {
+            "kind": "relationship",
+            "name": "isAssignedToActivity (QualifiedMaintenancePerson → MaintenanceActivity)",
+            "action": "removed"
+          },
+          {
+            "kind": "property",
+            "name": "MaintenanceWorkOrderRecord.taskDescription",
+            "action": "removed"
+          }
+        ],
+        "newConsistencyFindings": [
+          {
+            "id": "action-input-missing:checkWhetherItemShouldBeOperatingDegradedOrFailed",
+            "check": "action-input-missing",
+            "tier": "exact",
+            "severity": "error",
+            "subject": {
+              "kind": "action",
+              "key": "checkWhetherItemShouldBeOperatingDegradedOrFailed",
+              "name": "checkWhetherItemShouldBeOperatingDegradedOrFailed"
+            },
+            "message": "Action \"checkWhetherItemShouldBeOperatingDegradedOrFailed\" has no input class.",
+            "suggestion": "Give it the one class the action is fundamentally about."
+          },
+          {
+            "id": "inverse-pair:QualifiedMaintenancePerson --isQualifiedFor--> MaintenanceActivity||MaintenanceActivity --isAssignedTo--> QualifiedMaintenancePerson",
+            "check": "inverse-pair",
+            "tier": "exact",
+            "severity": "warning",
+            "subject": {
+              "kind": "relationship",
+              "key": "QualifiedMaintenancePerson --isQualifiedFor--> MaintenanceActivity||MaintenanceActivity --isAssignedTo--> QualifiedMaintenancePerson",
+              "name": "isAssignedTo"
+            },
+            "message": "MaintenanceActivity --isAssignedTo--> QualifiedMaintenancePerson looks like the inverse of QualifiedMaintenancePerson --isQualifiedFor--> MaintenanceActivity. The profile is one directed relationship per real-world connection, never also its inverse.",
+            "suggestion": "Keep whichever direction the questions and actions actually navigate."
+          },
+          {
+            "id": "orphan-rule:startMaintenanceProcess",
+            "check": "orphan-rule",
+            "tier": "exact",
+            "severity": "note",
+            "subject": {
+              "kind": "rule",
+              "key": "startMaintenanceProcess",
+              "name": "startMaintenanceProcess"
+            },
+            "message": "Rule \"startMaintenanceProcess\" is not used as a precondition by any action."
+          },
+          {
+            "id": "orphan-rule:treatItemAsDegraded",
+            "check": "orphan-rule",
+            "tier": "exact",
+            "severity": "note",
+            "subject": {
+              "kind": "rule",
+              "key": "treatItemAsDegraded",
+              "name": "treatItemAsDegraded"
+            },
+            "message": "Rule \"treatItemAsDegraded\" is not used as a precondition by any action."
+          },
+          {
+            "id": "orphan-rule:treatItemAsFailed",
+            "check": "orphan-rule",
+            "tier": "exact",
+            "severity": "note",
+            "subject": {
+              "kind": "rule",
+              "key": "treatItemAsFailed",
+              "name": "treatItemAsFailed"
+            },
+            "message": "Rule \"treatItemAsFailed\" is not used as a precondition by any action."
+          },
+          {
+            "id": "orphan-rule:treatItemAsOperating",
+            "check": "orphan-rule",
+            "tier": "exact",
+            "severity": "note",
+            "subject": {
+              "kind": "rule",
+              "key": "treatItemAsOperating",
+              "name": "treatItemAsOperating"
+            },
+            "message": "Rule \"treatItemAsOperating\" is not used as a precondition by any action."
+          },
+          {
+            "id": "orphan-rule:workOrderDescribesMaintenanceProcess",
+            "check": "orphan-rule",
+            "tier": "exact",
+            "severity": "note",
+            "subject": {
+              "kind": "rule",
+              "key": "workOrderDescribesMaintenanceProcess",
+              "name": "workOrderDescribesMaintenanceProcess"
+            },
+            "message": "Rule \"workOrderDescribesMaintenanceProcess\" is not used as a precondition by any action."
+          }
+        ]
+      }
+    ]
+  }
+}
