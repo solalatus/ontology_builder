@@ -104,3 +104,35 @@ way the 3 individual runs are), none of this should be read as more than
 a single, real data point per domain — a proper follow-up would replicate
 the merge condition itself, and try orderings beyond the fixed 1→2→3
 cascade used here.
+
+**A second real data point (epic #152, 2026-09-03): merge(1,2) result did
+not replicate cleanly, and the reason traces to interviewer-behavior
+variance, not the merge mechanism.** After a set of interviewer prompt
+changes (`helper_agent_todo.md`'s epic #152 entry), the 5-domain
+merge(1,2) macro moved from baseline 0.723 to 0.695 on the first rerun (a
+regression) and 0.742 on a corrected rerun (an improvement) — the same
+merge script, same domains, two different results a few hours apart,
+entirely explained by one domain's (iof-supply-chain) source replicates
+swinging between a clean run (properties precision 1.0) and a run
+contaminated by a since-fixed prompt bug (properties precision as low as
+0.08) depending on how a simulated persona happened to phrase one answer.
+This is itself evidence for the n=1 caution above: a single cascading-merge
+data point is exactly as sensitive to its two source replicates' own
+variance as this note already expected, and that variance can be large
+enough to flip the merge's own improvement/regression verdict.
+
+**Related methodological note: the properties-recall dimension is
+extremely fragile on a domain with few gold properties.** iof-supply-chain's
+own `reference.domain.yaml` defines exactly 3 properties total across ~20
+classes (the sparsest of the 5 benchmark domains by a wide margin — the
+next-sparsest, iof-maintenance, has 8). With a denominator of 3, a single
+extra recovered-but-ungolded property swings precision by a third; the
+prompt bug above, at its worst, recovered 26 properties against those 3
+gold ones (precision 0.077) versus a clean run's 2 (precision 1.0) — a
+0.66-point swing in `recoveryEffectiveness` from one axis alone, on a
+domain that is also structurally saturated with "traceable X" vocabulary
+that plausibly invites exactly this kind of over-elicitation. Worth
+considering for any future benchmark redesign: either weight the macro
+composite by each domain's own gold-element counts, or treat
+`recoveryEffectivenessScoped` (the practical-scope variant) as the primary
+comparator on domains below some minimum gold-property count.
