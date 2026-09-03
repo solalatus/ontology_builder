@@ -1,0 +1,70 @@
+{
+  "fullDomain": {
+    "classes": [
+      {
+        "goldId": "ReceivingProcess",
+        "recoveredId": "n17"
+      },
+      {
+        "goldId": "StorageProcess",
+        "recoveredId": "n18"
+      }
+    ],
+    "relationships": [
+      {
+        "goldId": "rel_4",
+        "recoveredId": "e8"
+      },
+      {
+        "goldId": "rel_5",
+        "recoveredId": "e28"
+      },
+      {
+        "goldId": "rel_6",
+        "recoveredId": "e11"
+      },
+      {
+        "goldId": "rel_7",
+        "recoveredId": "e10"
+      },
+      {
+        "goldId": "rel_25",
+        "recoveredId": "e17"
+      },
+      {
+        "goldId": "rel_26",
+        "recoveredId": "e18"
+      }
+    ],
+    "properties": [],
+    "valueFidelity": []
+  },
+  "scoped": {
+    "classes": [
+      {
+        "goldId": "ReceivingProcess",
+        "recoveredId": "n17"
+      }
+    ],
+    "relationships": [
+      {
+        "goldId": "rel_4",
+        "recoveredId": "e8"
+      },
+      {
+        "goldId": "rel_6",
+        "recoveredId": "e11"
+      },
+      {
+        "goldId": "rel_25",
+        "recoveredId": "e17"
+      },
+      {
+        "goldId": "rel_26",
+        "recoveredId": "e18"
+      }
+    ],
+    "properties": [],
+    "valueFidelity": []
+  }
+}
