@@ -530,6 +530,48 @@ test("Phase 4 checks an excluded property against the still-open Phase 1 list be
   });
 });
 
+test("Phase 4 rejects a property justified only by \"per policy\"/\"per the organization's system\" with no named function", async () => {
+  // iof-supply-chain/run-02 (epic #152 gate rerun, this branch): the
+  // interviewer went class-by-class asking "do you need an identifier
+  // property?" and the expert answered "I'd record it generically as an
+  // identifier... with the exact format coming from the organization's
+  // system and policy rather than me inventing one" -- accepted at face
+  // value for 16 of 18 recovered properties, none in gold, precision
+  // 0.11. The property *definition* is unchanged; this adds the same
+  // push-back discipline already applied to a proposed exclusion, in the
+  // other direction, to a proposed inclusion with no named function.
+  await withPage(async (page) => {
+    const prompt = await systemPrompt(page);
+    assert.match(prompt, /don't accept a\s*property just because the expert says a value will exist "per policy"\s*or "per the organization's system,"/);
+    assert.match(prompt, /that names that a value exists, not what the agent does with it/);
+    assert.match(prompt, /ask the expert to name the\s*specific competency question or\s*action that needs it, and how/);
+    assert.match(prompt, /leave\s*it as an open item rather than a confirmed property/);
+  });
+});
+
+test("an unfinished phase is never offered as a stopping point, and Phase 0 doesn't pre-announce that the expert can stop early", async () => {
+  // iof-supply-chain/run-03 (epic #152 gate rerun, this branch) stopped
+  // mid-Phase-3 with confirmed classes still lacking relationships: the
+  // interviewer explicitly asked "do you want me to stop the relationship
+  // phase here and summarize... or do you have one more concrete
+  // relationship gap", the expert took the offer, and the run ended with
+  // 0 properties recovered because Phase 4 was never reached. The GROUND
+  // RULES bullet already forbade offering to skip *ahead*; it explicitly
+  // permitted offering to stop *here* ("let them decide whether to
+  // continue in a follow-up session"). This is the same failure mode as
+  // the excluded-property check above -- the fix must be root-cause, not
+  // reworded around this one transcript, so it targets the instruction
+  // that let it happen, not iof-supply-chain specifically.
+  await withPage(async (page) => {
+    const prompt = await systemPrompt(page);
+    assert.match(prompt, /never offer them a choice between finishing\s*it and stopping here/);
+    assert.match(prompt, /then immediately ask the next concrete question needed to close\s*that gap/);
+    assert.match(prompt, /don't present "stop or continue" as a fair choice, and don't\s*soften an unfinished phase into a "good stopping point\."/);
+    assert.match(prompt, /say plainly, in your\s*own next turn, exactly what remains missing and that the model is being\s*left in a known-incomplete state/);
+    assert.doesNotMatch(prompt, /the expert can stop early\s*with whatever is captured so far/);
+  });
+});
+
 test("the connected panel's static note reflects that tool-calling has shipped, not stale pre-Phase-3 copy", async () => {
   // Phase 3 shipped apply_ontology_yaml; this note used to say the agent
   // "can only talk for now" and that editing "arrives in a later phase" --

@@ -186,9 +186,32 @@ import { withPage } from "./lib/page.mjs";
 // Previous hashes (cf492ad0…/acff5f52…) were this same ticket's first,
 // not-yet-reliable wording, live-tested and rejected before any full
 // benchmark spend.
+//
+// Root-cause fix from a full honest read of the epic #152 gate rerun's own
+// transcripts (not just its scores): iof-supply-chain/run-03 (this branch)
+// stopped mid-Phase-3 with confirmed classes still lacking relationships,
+// because the GROUND RULES bullet on unfinished phases explicitly said to
+// "let them decide whether to continue in a follow-up session" -- the
+// interviewer offered a stop/continue choice verbatim, and the persona took
+// it. Reworded to forbid offering a stop the same way it already forbade
+// offering to skip ahead: state the gap, then ask the next concrete
+// question, never soften an unfinished phase into a "good stopping point."
+// Phase 0's own orientation line telling the expert up front that they
+// "can stop early" was the seed of the same problem -- removed (also fixed
+// a stale "about 9 short phases" left over from the Phase 9/10 split
+// above, now "about 10").
+// Separately, iof-supply-chain/run-02 (this branch) tanked its own
+// properties precision (18 recovered vs. 3 gold, mostly generic
+// `.identifier` fields) because the expert justified them with "the exact
+// format coming from the organization's system and policy" and Phase 4
+// accepted that at face value. Added the same push-back discipline Phase 4
+// already applies to a proposed *exclusion*: a property justified only by
+// "some value/identifier will exist, per policy" -- naming that it exists,
+// not what the agent does with it -- is not accepted; the expert must name
+// the specific competency question/action it serves.
 export const PRODUCTION_SYSTEM_PROMPT_SHA256 = {
-  en: "64a18c817a849bb1a38e153813a9d4c8a81701695b09616897a8395060d0350d",
-  hu: "c66479c0f853df1425e79cde00fb59af0da0e4a160e14420394434741d61a5c6",
+  en: "606a1f5ade9610bba35e6073cdca581f94074518baee43b1a29709eae848989f",
+  hu: "8a84bf9d85f3ceaba43c0a93215b751275509e998d47375a9223383f7453d802",
 };
 
 // The complete ontology tool surface an ordinary interview request exposes.

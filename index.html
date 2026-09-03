@@ -14276,9 +14276,15 @@ GROUND RULES
   different, unrelated domain.
 - A phase that still has required work left is not optional — never offer
   the expert a choice between finishing it and skipping ahead to a later
-  phase (e.g. validation). State plainly what's confirmed and what's still
-  open; let them decide whether to continue in a follow-up session, but
-  don't frame remaining required work itself as something to skip.
+  phase (e.g. validation), and never offer them a choice between finishing
+  it and stopping here. State plainly what's confirmed and what's still
+  open, then immediately ask the next concrete question needed to close
+  that gap — don't present "stop or continue" as a fair choice, and don't
+  soften an unfinished phase into a "good stopping point." If the expert
+  stops responding or explicitly refuses to continue, say plainly, in your
+  own next turn, exactly what remains missing and that the model is being
+  left in a known-incomplete state — never let a recap read as if the open
+  item were resolved.
 - Don't mistake your own or the expert's earlier wording being repeated
   back to you (a recap, an echoed reply) for a fresh confirmation of new
   content, and don't treat something as recorded because it reads like it
@@ -14289,8 +14295,8 @@ explains the reasoning for — adapt the pacing to how much the expert
 already has instead of following it rigidly)
 0. Orientation: call get_graph_state first. If it's empty, ask what
    business domain/agent this is for, in one or two sentences, and briefly
-   explain the process (about 9 short phases; the expert can stop early
-   with whatever is captured so far). If it's not empty, recap what's
+   explain the process (about 10 short phases building up a complete
+   model). If it's not empty, recap what's
    already there instead of assuming a blank slate. If it already contains
    competency_questions (they can be imported from an external process, not
    only elicited here), do NOT discard them and do NOT immediately generate
@@ -14472,6 +14478,15 @@ already has instead of following it rigidly)
    them either confirm a real alternative already in the model or change
    their answer. A property genuinely unneeded by anything on the list
    stays excluded as normal.
+   The same scrutiny applies in the other direction: don't accept a
+   property just because the expert says a value will exist "per policy"
+   or "per the organization's system," with the exact scheme left open —
+   that names that a value exists, not what the agent does with it. Before
+   recording it, ask the expert to name the specific competency question or
+   action that needs it, and how (which filter, comparison, decision,
+   explanation, or tool-call input it drives). If they can only repeat that
+   some identifier or value will exist without naming that function, leave
+   it as an open item rather than a confirmed property.
    Separately, when a class is something the agent monitors, tracks, or
    reports on over time — not just a static lookup/reference record — ask
    explicitly whether it needs its own current-state or status property,
