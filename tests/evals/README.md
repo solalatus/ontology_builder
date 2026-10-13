@@ -222,6 +222,14 @@ justified:
   relationship"), modeling `Major Incident —declared from→ Incident`
   instead of forcing `"is a"` onto a generic edge. Scoring that choice as a
   miss would penalize correct behavior, not bad interview technique.
+  Since issue #167 it excludes every label the app's own consistency
+  check flags as a disguised subclass edge, not only the literal `"is a"`:
+  the same `SUBCLASSING_PREDICATE` pattern and normalization as
+  `index.html` (`a`/`an`/`kind of`/`type of`/`sort of`/`classified as`/
+  `subclass of`/`instance of`/`subtype of`, optionally after `is`/`are`),
+  with a unit test that fails if the two copies drift apart. No current
+  ground truth contains any such label, so every loaded model, and every
+  reported number, is unchanged.
 - **`buildReducedActions`** — the fixture's own actions each declare
   potentially several named inputs (e.g. `declareMajorIncident: inputs:
   {incident: ..., commander: ...}`), but this app's Action node has exactly
