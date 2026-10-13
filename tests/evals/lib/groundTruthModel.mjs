@@ -138,8 +138,28 @@ export function isRecoverableProperty(predicate) {
 // subclass hierarchies into relationships in the first place, so this is
 // expected to be a no-op there too, same "safety net, not a load-bearing
 // requirement" reasoning as isRecoverableProperty.
+//
+// Issue #167: the check used to be the literal label "is a" only, narrower
+// than what the app itself treats as a disguised subclass edge. It now uses
+// the same pattern and normalization as index.html's SUBCLASSING_PREDICATE /
+// consistencyNormalizeText (a, an, kind of, type of, sort of, classified as,
+// subclass of, instance of, subtype of, optionally prefixed by is/are), so a
+// ground-truth "subclass of" or "type of" predicate is excluded too. Both
+// copies are pinned equal by tests/ontology-recovery-metrics.spec.mjs.
+export const SUBCLASSING_PREDICATE = /^(is|are)?\s*(a|an|kind of|type of|sort of|classified as|subclass of|instance of|subtype of)$/;
+
+export function normalizeRelationshipLabel(s) {
+  return String(s == null ? "" : s)
+    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+    .toLowerCase()
+    .replace(/[_\-]+/g, " ")
+    .replace(/[^a-z0-9\s]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 export function isRecoverableRelationship(predicate) {
-  return predicate.label !== "is a";
+  return !SUBCLASSING_PREDICATE.test(normalizeRelationshipLabel(predicate.label));
 }
 
 // RECIPROCAL RELATIONSHIP PAIRS ------------------------------------------

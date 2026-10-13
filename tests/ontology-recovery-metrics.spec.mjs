@@ -7,7 +7,7 @@ import yaml from "js-yaml";
 import {
   loadGroundTruthModel, scopeGroundTruth, loadRawFixtureText, resolveDomainYamlPath,
   isRecoverableProperty, isRecoverableRelationship, buildReducedActions,
-  mergeReciprocalRelationshipPairs,
+  mergeReciprocalRelationshipPairs, SUBCLASSING_PREDICATE, normalizeRelationshipLabel,
 } from "./evals/lib/groundTruthModel.mjs";
 import {
   computeRecoveryMetrics, computeMatchDetail, matchClasses, matchProperties, matchRelationships, computeHeuristicMatchPairs, MATCH_THRESHOLDS,
@@ -51,10 +51,30 @@ test("isRecoverableProperty rejects only identifier/uri-target datatype predicat
   assert.equal(isRecoverableProperty({ kind: "object", to: "identifier" }), true);
 });
 
-test("isRecoverableRelationship rejects only \"is a\" (subclass) predicates", () => {
+test("isRecoverableRelationship rejects subclass-shaped predicates (\"is a\" and the app's other SUBCLASSING_PREDICATE forms)", () => {
   assert.equal(isRecoverableRelationship({ label: "is a" }), false);
-  assert.equal(isRecoverableRelationship({ label: "impacts" }), true);
-  assert.equal(isRecoverableRelationship({ label: "declared from" }), true);
+  // Issue #167: every form the app's own consistency check flags as a
+  // disguised subclass edge, in the label spellings ground truth arrives in.
+  for (const label of ["is an", "a", "kind of", "is kind of", "type of", "is type of", "sort of",
+    "classified as", "is classified as", "subclass of", "is_subclass_of", "SubclassOf",
+    "instance of", "subtype of", "are a", "Is A", "is-a"]) {
+    assert.equal(isRecoverableRelationship({ label }), false, `"${label}" should be excluded`);
+  }
+  for (const label of ["impacts", "declared from", "is assigned to", "is part of", "has type",
+    "classifies", "type", "is about", "an instance"]) {
+    assert.equal(isRecoverableRelationship({ label }), true, `"${label}" is an ordinary relationship`);
+  }
+});
+
+test("isRecoverableRelationship stays in step with index.html's SUBCLASSING_PREDICATE and consistencyNormalizeText (issue #167)", () => {
+  const html = fs.readFileSync(new URL("../index.html", import.meta.url), "utf8");
+  const regexLine = html.match(/^const SUBCLASSING_PREDICATE = (\/.*\/);$/m);
+  assert.ok(regexLine, "index.html still declares SUBCLASSING_PREDICATE");
+  assert.equal(regexLine[1], SUBCLASSING_PREDICATE.toString(), "same pattern as the app");
+  const normFn = html.match(/function consistencyNormalizeText\(s\) \{\n([\s\S]*?)\n\}/);
+  assert.ok(normFn, "index.html still declares consistencyNormalizeText");
+  const ours = normalizeRelationshipLabel.toString().match(/\{\n([\s\S]*?)\n\}/)[1];
+  assert.equal(ours.trim(), normFn[1].trim(), "same normalization steps as the app");
 });
 
 test("mergeReciprocalRelationshipPairs merges two opposite-direction predicates between the same class pair into one entry with a reciprocalLabel", () => {
