@@ -6,7 +6,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { startStaticServer } from "./lib/server.mjs";
 import { launchChromium } from "./lib/browser.mjs";
-import { APP_URL, addNodeViaDblClick, createEdgeViaConnectMode, waitForDownloads } from "./lib/page.mjs";
+import { APP_URL, withPage, addNodeViaDblClick, createEdgeViaConnectMode, waitForDownloads } from "./lib/page.mjs";
 
 // Issue #165: the toolbar's Export button (formerly "Save Version") opens a
 // modal with two choices -- "Results only" (exactly the three files it always
@@ -80,22 +80,55 @@ test("the toolbar button is labelled Export / Exportálás and opens the export 
     assert.equal(await overlayDisplay(page), "none");
     await page.click("#btn-save-version");
     assert.equal(await overlayDisplay(page), "flex");
-    assert.equal(await page.locator("#export-results-only").textContent(), "Results only");
-    assert.equal(await page.locator("#export-whole-session").textContent(), "Whole conversation and session results");
+    assert.equal(await page.locator("#export-results-only-title").textContent(), "Results only");
+    assert.equal(await page.locator("#export-whole-session-title").textContent(), "Whole conversation and session results");
     assert.equal(await page.locator("#export-cancel").textContent(), "Cancel");
-    assert.match(await page.locator("#export-intro").textContent(), /API key and connection settings are never included/);
+    assert.match(await page.locator("#export-privacy").textContent(), /API key and connection settings are never included/);
     await page.click("#export-cancel");
 
     await page.click("#btn-lang-toggle"); // -> hu
     assert.equal(await page.locator("#btn-save-version").textContent(), "Exportálás");
     await page.click("#btn-save-version");
     assert.equal(await page.locator("#export-title").textContent(), "Exportálás");
-    assert.equal(await page.locator("#export-results-only").textContent(), "Csak az eredmények");
-    assert.equal(await page.locator("#export-whole-session").textContent(), "A teljes beszélgetés és a munkamenet eredményei");
+    assert.equal(await page.locator("#export-results-only-title").textContent(), "Csak az eredmények");
+    assert.equal(await page.locator("#export-whole-session-title").textContent(), "A teljes beszélgetés és a munkamenet eredményei");
     assert.equal(await page.locator("#export-cancel").textContent(), "Mégse");
-    assert.match(await page.locator("#export-intro").textContent(), /API kulcs/);
+    assert.match(await page.locator("#export-privacy").textContent(), /API kulcs/);
     await page.click("#export-cancel");
   });
+});
+
+// Layout: the two choices are stacked, full-width option cards above a
+// lone Cancel, each with its own description, in both languages and at
+// phone width -- not three buttons wrapping unevenly in one action row.
+test("the export modal lays out as two stacked option cards above Cancel, without overflow, in EN and HU at desktop and phone width", async () => {
+  for (const lang of ["en", "hu"]) for (const viewport of [{ width: 1200, height: 800 }, { width: 360, height: 740 }]) {
+    await withPage(async (page) => {
+      await page.click("#btn-save-version");
+      await page.waitForSelector("#export-overlay", { state: "visible" });
+      const g = await page.evaluate(() => {
+        const box = (id) => document.getElementById(id).getBoundingClientRect();
+        const dlg = box("export-dialog"), a = box("export-results-only"), b = box("export-whole-session"), cancel = box("export-cancel");
+        const overflowing = [...document.querySelectorAll("#export-dialog button, #export-dialog button span")]
+          .filter((el) => el.scrollWidth > el.clientWidth + 1).map((el) => el.id || el.className);
+        return {
+          dlg: { left: dlg.left, right: dlg.right, top: dlg.top, bottom: dlg.bottom }, a, b, cancel, overflowing,
+          vw: window.innerWidth, vh: window.innerHeight,
+          descs: [document.getElementById("export-results-only-desc").textContent, document.getElementById("export-whole-session-desc").textContent],
+          focused: document.activeElement && document.activeElement.id,
+        };
+      });
+      const tag = `${lang} @${viewport.width}px`;
+      assert.ok(g.dlg.left >= 0 && g.dlg.right <= g.vw && g.dlg.top >= 0 && g.dlg.bottom <= g.vh, `${tag}: dialog fits the viewport`);
+      assert.ok(Math.abs(g.a.width - g.b.width) < 1 && Math.abs(g.a.left - g.b.left) < 1, `${tag}: options share one full-width column`);
+      assert.ok(g.b.top >= g.a.bottom, `${tag}: whole-session option sits below results-only`);
+      assert.ok(g.cancel.top >= g.b.bottom, `${tag}: Cancel sits below both options`);
+      assert.ok(g.cancel.right > g.a.right - 1, `${tag}: Cancel is right-aligned`);
+      assert.deepEqual(g.overflowing, [], `${tag}: no button text overflows`);
+      assert.ok(g.descs.every((d) => d.length > 20), `${tag}: each option carries its description`);
+      assert.equal(g.focused, "export-results-only", `${tag}: the safe choice has focus`);
+    }, { lang, viewport });
+  }
 });
 
 test("Cancel, Escape and a backdrop click all close the modal without writing anything or bumping the version", async () => {

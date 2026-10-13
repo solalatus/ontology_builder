@@ -603,6 +603,67 @@
     background: var(--btn-bg-hover);
   }
 
+  /* Export dialog (issue #165): the two export choices are full-width
+     option cards (title + one-line description) rather than buttons in the
+     action row, so neither wraps awkwardly beside Cancel and each choice
+     explains itself where it is clicked. */
+  #export-dialog {
+    max-width: 440px;
+  }
+
+  .export-options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 0 0 14px;
+  }
+
+  .export-option {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    width: 100%;
+    padding: 12px 14px;
+    text-align: left;
+    font: inherit;
+    color: var(--toolbar-fg);
+    background: var(--btn-bg);
+    border: 1px solid var(--toolbar-border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: background-color var(--transition-fast), border-color var(--transition-fast);
+  }
+
+  .export-option:hover {
+    background: var(--btn-bg-hover);
+    border-color: var(--accent);
+  }
+
+  .export-option:focus-visible,
+  .modal-actions button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+  }
+
+  .export-option-title {
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  .export-option-desc {
+    font-size: 12.5px;
+    line-height: 1.45;
+    opacity: 0.75;
+  }
+
+  .export-note {
+    margin: 0 0 16px;
+    font-size: 12.5px;
+    line-height: 1.45;
+    opacity: 0.75;
+  }
+
   #confirm-ok,
   #import-replace {
     border-color: var(--danger) !important;
@@ -2023,10 +2084,19 @@
   <div id="export-dialog" class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="export-title">
     <h2 id="export-title" class="modal-title">Exportálás</h2>
     <p id="export-intro" class="modal-message"></p>
+    <div class="export-options">
+      <button id="export-results-only" class="export-option" type="button" aria-describedby="export-results-only-desc">
+        <span id="export-results-only-title" class="export-option-title">Csak az eredmények</span>
+        <span id="export-results-only-desc" class="export-option-desc"></span>
+      </button>
+      <button id="export-whole-session" class="export-option" type="button" aria-describedby="export-whole-session-desc">
+        <span id="export-whole-session-title" class="export-option-title">A teljes beszélgetés és a munkamenet eredményei</span>
+        <span id="export-whole-session-desc" class="export-option-desc"></span>
+      </button>
+    </div>
+    <p id="export-privacy" class="export-note"></p>
     <div id="export-actions" class="modal-actions">
       <button id="export-cancel" type="button">Mégse</button>
-      <button id="export-results-only" type="button">Csak az eredmények</button>
-      <button id="export-whole-session" type="button">A teljes beszélgetés és a munkamenet eredményei</button>
     </div>
   </div>
 </div>
@@ -2539,7 +2609,10 @@ const STRINGS = {
     redo: "Redo",
     saveVersion: "Export",
     exportTitle: "Export",
-    exportIntro: "Choose what to export.\n\nResults only: the three model files (full-fidelity JSON, TXT edge list, Domain Model YAML).\n\nWhole conversation and session results: the same three files plus one .session.json bundle with the Helper Agent conversation (including every tool call) and the latest check results.\n\nYour API key and connection settings are never included.",
+    exportIntro: "Choose what to export.",
+    exportResultsOnlyDesc: "The three model files: full-fidelity JSON, TXT edge list and Domain Model YAML.",
+    exportWholeSessionDesc: "The same three files plus a .session.json bundle with the Helper Agent conversation (every tool call included) and the latest check results.",
+    exportPrivacyNote: "Your API key and connection settings are never included.",
     exportResultsOnly: "Results only",
     exportWholeSession: "Whole conversation and session results",
     folderSync: "Folder Sync",
@@ -2919,7 +2992,10 @@ const STRINGS = {
     redo: "Újra",
     saveVersion: "Exportálás",
     exportTitle: "Exportálás",
-    exportIntro: "Válaszd ki, mit szeretnél exportálni.\n\nCsak az eredmények: a három modellfájl (teljes JSON, TXT éllista, Doménmodell YAML).\n\nA teljes beszélgetés és a munkamenet eredményei: ugyanez a három fájl, plusz egy .session.json csomag a Segéd ügynökkel folytatott beszélgetéssel (minden eszközhívással együtt) és a legutóbbi ellenőrzések eredményeivel.\n\nAz API kulcs és a kapcsolódási beállítások soha nem kerülnek bele.",
+    exportIntro: "Válaszd ki, mit szeretnél exportálni.",
+    exportResultsOnlyDesc: "A három modellfájl: teljes JSON, TXT éllista és Doménmodell YAML.",
+    exportWholeSessionDesc: "Ugyanez a három fájl, plusz egy .session.json csomag a Segéd ügynökkel folytatott beszélgetéssel (minden eszközhívással együtt) és a legutóbbi ellenőrzések eredményeivel.",
+    exportPrivacyNote: "Az API kulcs és a kapcsolódási beállítások soha nem kerülnek bele.",
     exportResultsOnly: "Csak az eredmények",
     exportWholeSession: "A teljes beszélgetés és a munkamenet eredményei",
     folderSync: "Mappa szinkronizálás",
@@ -3338,8 +3414,11 @@ function applyLanguage() {
   byId("export-title").textContent = t("exportTitle");
   byId("export-intro").textContent = t("exportIntro");
   byId("export-cancel").textContent = t("cancel");
-  byId("export-results-only").textContent = t("exportResultsOnly");
-  byId("export-whole-session").textContent = t("exportWholeSession");
+  byId("export-results-only-title").textContent = t("exportResultsOnly");
+  byId("export-results-only-desc").textContent = t("exportResultsOnlyDesc");
+  byId("export-whole-session-title").textContent = t("exportWholeSession");
+  byId("export-whole-session-desc").textContent = t("exportWholeSessionDesc");
+  byId("export-privacy").textContent = t("exportPrivacyNote");
   byId("import-cancel").textContent = t("cancel");
   byId("import-replace").textContent = t("replace");
   byId("import-merge").textContent = t("merge");
