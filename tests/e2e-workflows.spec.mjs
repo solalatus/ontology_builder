@@ -80,6 +80,7 @@ test("E2E: building a small ontology end to end survives Save Version -> reopen 
     await page.waitForSelector("#domain-model-overlay", { state: "hidden" });
 
     await page.click("#btn-save-version");
+    await page.click("#export-results-only");
     await waitForDownloads(downloads, 3);
     const jsonDl = downloads.find((d) => d.suggestedFilename().endsWith(".json"));
     const jsonText = await readDownload(jsonDl);
@@ -291,6 +292,7 @@ test("E2E: bare-node dashing and property badges render correctly again after a 
     await page.evaluate(() => { window.__kg.state.edges[0].labelT = 0.8; window.__kg.markDirty(); });
 
     await page.click("#btn-save-version");
+    await page.click("#export-results-only");
     await waitForDownloads(downloads, 3);
     const jsonDl = downloads.find((d) => d.suggestedFilename().endsWith(".json"));
     const jsonText = await readDownload(jsonDl);

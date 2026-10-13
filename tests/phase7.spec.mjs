@@ -176,6 +176,7 @@ test("granting a second folder while already connected switches the write target
     await addNodeViaDblClick(page, 300, 300, "Alpha");
     await page.evaluate(() => window.__kg.actions.setMode("idle"));
     await page.click("#btn-save-version");
+    await page.click("#export-results-only");
     await page.evaluate(() => window.__kg.tier2.waitForSaveVersion());
 
     const aWritesAfterFirstSave = await page.evaluate(() => Object.keys(window.__mockFolderWritesByName.FolderA || {}).length);
@@ -187,6 +188,7 @@ test("granting a second folder while already connected switches the write target
     assert.equal(await page.locator("#btn-folder-sync").textContent(), "Synced: FolderB");
 
     await page.click("#btn-save-version");
+    await page.click("#export-results-only");
     await page.evaluate(() => window.__kg.tier2.waitForSaveVersion());
 
     const bWritesAfterSecondSave = await page.evaluate(() => Object.keys(window.__mockFolderWritesByName.FolderB || {}).length);
@@ -219,6 +221,7 @@ test("once connected, Save Version writes silently into the folder and triggers 
     await page.waitForFunction(() => window.__kg.tier2.getDirHandle() !== null);
 
     await page.click("#btn-save-version");
+    await page.click("#export-results-only");
     await page.evaluate(() => window.__kg.tier2.waitForSaveVersion());
 
     assert.equal(downloads.length, 0, "Tier 2 write should replace, not supplement, the Tier 3 download");
@@ -244,6 +247,7 @@ test("if a Tier 2 write fails after grant, Save Version falls back to a Tier 3 d
     await page.waitForFunction(() => window.__kg.tier2.getDirHandle() !== null);
 
     await page.click("#btn-save-version");
+    await page.click("#export-results-only");
     await page.evaluate(() => window.__kg.tier2.waitForSaveVersion());
     await waitForDownloads(downloads, 3);
 
@@ -259,6 +263,7 @@ test("without ever connecting Folder Sync, Save Version behaves exactly like Tie
   await withFolderPage(async (page, downloads) => {
     await addNodeViaDblClick(page, 300, 300, "Alpha");
     await page.click("#btn-save-version");
+    await page.click("#export-results-only");
     await waitForDownloads(downloads, 3);
 
     assert.equal(downloads.length, 3);
@@ -296,6 +301,7 @@ test("a Tier 2 write failure AND a simultaneous Tier 1 (localStorage) write fail
     });
 
     await page.click("#btn-save-version");
+    await page.click("#export-results-only");
     await page.evaluate(() => window.__kg.tier2.waitForSaveVersion()); // Tier 2/3 side must still resolve
     await page.evaluate(() => window.__kg.storage.whenIdle()); // Tier 1 side must still resolve too, not hang
     await waitForDownloads(downloads, 3);

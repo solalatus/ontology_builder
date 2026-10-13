@@ -9,7 +9,8 @@ hand, export it in a form immediately usable by scripts or an LLM, or edit
 the exported text directly and bring it back in. Full design rationale:
 `spec.md`.
 
-Every "Save Version" writes three files side by side, and all three can be
+The toolbar's **Export** button (formerly "Save Version") asks what to write.
+**Results only** writes three files side by side, and all three can be
 imported back through the same button:
 
 | File | What it is | Re-import restores |
@@ -21,6 +22,34 @@ imported back through the same button:
 The `.txt` and `.domain.yaml` are the hand-editable, pipeline-friendly ones;
 the `.json` is the one to reopen when you want the canvas back exactly as you
 left it.
+
+**Whole conversation and session results** writes the same three files plus
+one session bundle, `<name>_vNNNN_<timestamp>.session.json` (issue #165) — a
+single file a study participant can hand back. It holds:
+
+| Field | Contents |
+|---|---|
+| `format`, `format_version` | `"kg-session-bundle"`, `1` |
+| `app` | page name/file, `document.lastModified`, UI language, and `index_html_sha256` (the exact page bytes; only when the page is served over http(s) — a `file://` page cannot read itself, so it is `null` there) |
+| `saved_at`, `graph_name`, `graph_meta` | when, which graph, its version metadata |
+| `exports` | the `.json`, `.txt` and `.domain.yaml` texts, byte-identical to the three files written alongside |
+| `conversation.transcript` | the Helper Agent chat as shown in the panel |
+| `conversation.api_messages` | the API-level history, every tool call and tool result included |
+| `interviewer` | model name, provider (`openai`/`azure`), and the system prompt exactly as the page builds it, with its SHA-256 |
+| `checks` | current consistency-checker findings, plus the latest model-based contradiction and competency-question coverage results if they were run |
+
+It never contains the API key, the Azure endpoint/api-version, or any other
+connection setting beyond the model name; as a second safeguard the file is
+scrubbed of the live key, the endpoint, and anything shaped like an `sk-`
+secret key (e.g. one pasted into the chat). Exporting never changes the
+interviewer prompt or the agent's behaviour. With Folder Sync granted, the
+bundle is written to the folder like the other three files.
+
+**Clear** removes the whole domain model — classes, relationships,
+competency questions, rules and actions — as one undoable step; the confirm
+dialog lists what it will remove, with counts, and (when a Helper Agent
+conversation exists) offers to restart that conversation too, which is not
+undoable and therefore off by default.
 
 Built on top of that base editor, an **Agent Ontology** layer
 (`agent_ontology_spec.md`) adds domain-model authoring — competency

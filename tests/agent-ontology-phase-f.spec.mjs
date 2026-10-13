@@ -354,6 +354,7 @@ test("Save Version bundles the domain YAML as a third file, named per the versio
   await withDownloadPage(async (page, downloads) => {
     await addNodeViaDblClick(page, 300, 300, "Invoice");
     await page.click("#btn-save-version");
+    await page.click("#export-results-only");
     await waitForDownloads(downloads, 3);
 
     assert.equal(downloads.length, 3);
@@ -373,6 +374,7 @@ test("Save Version does not change JSON/TXT content or shape — the YAML export
     await createEdgeViaConnectMode(page, 250, 250, 650, 250, "relates to");
     await page.evaluate(() => window.__kg.actions.setMode("idle"));
     await page.click("#btn-save-version");
+    await page.click("#export-results-only");
     await waitForDownloads(downloads, 3);
 
     const jsonDl = downloads.find((d) => d.suggestedFilename().endsWith(".json"));

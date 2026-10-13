@@ -223,6 +223,7 @@ test("a custom label position survives Save Version -> reopen (JSON round trip)"
     });
 
     await page.click("#btn-save-version");
+    await page.click("#export-results-only");
     await waitForDownloads(downloads, 3);
     const jsonDl = downloads.find((d) => d.suggestedFilename().endsWith(".json"));
     const jsonText = await readDownload(jsonDl);

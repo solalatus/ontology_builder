@@ -114,6 +114,7 @@ test("a realistic end-to-end session across many features stays internally consi
     // --- Phase 7: Save Version — increments the version counter ---------
     const versionBefore = await page.evaluate(() => (window.__kg.state.meta ? window.__kg.state.meta.version : 0));
     await page.click("#btn-save-version");
+    await page.click("#export-results-only");
     await page.waitForFunction((v) => window.__kg.state.meta.version === v + 1, versionBefore);
     const versionAfter = await page.evaluate(() => window.__kg.state.meta.version);
     assert.equal(versionAfter, versionBefore + 1);

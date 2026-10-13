@@ -180,6 +180,17 @@ is dev-only test tooling, same as Playwright.
   v2 prompt is v1's plus exactly its two added constraints, which is what makes
   the two conditions comparable. The artifact-dependent tests skip cleanly for
   any condition not generated in this checkout.
+- `session-export.spec.mjs` — the Export dialog and the session bundle (issue
+  #165): Results only vs. Whole conversation and session results, the
+  bundle's shape and its byte-identical copies of the three exports, the
+  API-level history round trip, the interviewer prompt and its hash, Folder
+  Sync, and that no API key, Azure endpoint or `sk-`-shaped secret ever
+  reaches the file. Mocked API throughout.
+- `agent-panel-canvas-layout.spec.mjs` — the canvas while the Helper Agent
+  panel is open (issues #163/#164): the backing store tracks the shrunk
+  canvas box without a window resize, drags move nodes rather than panning,
+  and the selection toolbar and inline rename inputs land over the item they
+  belong to rather than one panel-width to its left.
 
 ## Live OpenAI integration tests (opt-in)
 

@@ -573,6 +573,14 @@
     white-space: pre-line;
   }
 
+  .confirm-option-row {
+    align-items: center;
+    gap: 8px;
+    margin: -4px 0 16px;
+    font-size: 13px;
+    cursor: pointer;
+  }
+
   .modal-actions {
     display: flex;
     justify-content: flex-end;
@@ -1947,7 +1955,7 @@
   </div>
 
   <div class="toolbar-group">
-    <button id="btn-save-version" type="button">Verzió mentése</button>
+    <button id="btn-save-version" type="button">Exportálás</button>
     <button id="btn-folder-sync" type="button" class="state-toggle" aria-pressed="false" style="display:none;">Mappa szinkronizálás</button>
     <button id="btn-import-txt" type="button">Importálás</button>
     <input id="import-file-input" type="file" accept=".txt,.json,.yaml,.yml">
@@ -1996,9 +2004,29 @@
 <div id="confirm-overlay" class="modal-overlay">
   <div id="confirm-dialog" class="modal-dialog" role="alertdialog" aria-modal="true">
     <p id="confirm-message" class="modal-message"></p>
+    <label id="confirm-option-row" class="confirm-option-row" style="display:none">
+      <input id="confirm-option" type="checkbox">
+      <span id="confirm-option-label"></span>
+    </label>
     <div id="confirm-actions" class="modal-actions">
       <button id="confirm-cancel" type="button">Mégse</button>
       <button id="confirm-ok" type="button">OK</button>
+    </div>
+  </div>
+</div>
+
+<!-- Export (issue #165): the toolbar's Export button opens this instead of
+     writing files straight away, so the user picks between today's three
+     result files and those three plus a session bundle (the Helper Agent
+     conversation and the latest check results). -->
+<div id="export-overlay" class="modal-overlay">
+  <div id="export-dialog" class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="export-title">
+    <h2 id="export-title" class="modal-title">Exportálás</h2>
+    <p id="export-intro" class="modal-message"></p>
+    <div id="export-actions" class="modal-actions">
+      <button id="export-cancel" type="button">Mégse</button>
+      <button id="export-results-only" type="button">Csak az eredmények</button>
+      <button id="export-whole-session" type="button">A teljes beszélgetés és a munkamenet eredményei</button>
     </div>
   </div>
 </div>
@@ -2509,7 +2537,11 @@ const STRINGS = {
     autoLayout: "Auto-layout",
     undo: "Undo",
     redo: "Redo",
-    saveVersion: "Save Version",
+    saveVersion: "Export",
+    exportTitle: "Export",
+    exportIntro: "Choose what to export.\n\nResults only: the three model files (full-fidelity JSON, TXT edge list, Domain Model YAML).\n\nWhole conversation and session results: the same three files plus one .session.json bundle with the Helper Agent conversation (including every tool call) and the latest check results.\n\nYour API key and connection settings are never included.",
+    exportResultsOnly: "Results only",
+    exportWholeSession: "Whole conversation and session results",
     folderSync: "Folder Sync",
     folderSynced: (name) => `Synced: ${name}`,
     importButton: "Import", // handles both .txt (spec.md §5.3) and .domain.yaml (agent_ontology_spec.md §11, Phase G)
@@ -2527,8 +2559,17 @@ const STRINGS = {
     ok: "OK",
     replace: "Replace",
     merge: "Merge",
-    clearConfirmMessage: "Clear the entire graph? This removes all nodes and edges. This can be undone with the Undo button.",
+    clearConfirmMessage: (c) => {
+      const n = (count, one, many) => `${count} ${count === 1 ? one : many}`;
+      const parts = [
+        n(c.classes, "class", "classes"), n(c.relationships, "relationship", "relationships"),
+        n(c.competencyQuestions, "competency question", "competency questions"),
+        n(c.rules, "rule", "rules"), n(c.actions, "action", "actions"),
+      ];
+      return `Clear the entire model? This removes ${parts.slice(0, -1).join(", ")} and ${parts[parts.length - 1]}. This can be undone with the Undo button.`;
+    },
     clearConfirmLabel: "Clear",
+    clearAlsoRestartConversation: "Also restart the Helper Agent conversation (cannot be undone)",
     nodeLabelPlaceholder: "Node label",
     relationLabelPlaceholder: "relation label",
     graphNamePlaceholder: "Graph name",
@@ -2847,7 +2888,7 @@ const STRINGS = {
       {
         heading: "Saving, exporting, and importing",
         paragraphs: [
-          "“Save Version” writes three files side by side: a full-fidelity JSON (reopen this to get the canvas back exactly as you left it), a plain-text edge list, and a Domain Model YAML file — the one meant for a script or an LLM to read. All three re-import through the same button, or by dragging a file onto the canvas.",
+          "“Export” asks what to write. “Results only” writes three files side by side: a full-fidelity JSON (reopen this to get the canvas back exactly as you left it), a plain-text edge list, and a Domain Model YAML file — the one meant for a script or an LLM to read. All three re-import through the same button, or by dragging a file onto the canvas. “Whole conversation and session results” writes the same three plus one .session.json bundle: the Helper Agent conversation (every message and tool call) and the latest check results, never your API key.",
           "“Folder Sync,” where your browser supports it, keeps a chosen folder automatically up to date instead of downloading a file every time.",
         ],
       },
@@ -2876,7 +2917,11 @@ const STRINGS = {
     autoLayout: "Automatikus elrendezés",
     undo: "Visszavonás",
     redo: "Újra",
-    saveVersion: "Verzió mentése",
+    saveVersion: "Exportálás",
+    exportTitle: "Exportálás",
+    exportIntro: "Válaszd ki, mit szeretnél exportálni.\n\nCsak az eredmények: a három modellfájl (teljes JSON, TXT éllista, Doménmodell YAML).\n\nA teljes beszélgetés és a munkamenet eredményei: ugyanez a három fájl, plusz egy .session.json csomag a Segéd ügynökkel folytatott beszélgetéssel (minden eszközhívással együtt) és a legutóbbi ellenőrzések eredményeivel.\n\nAz API kulcs és a kapcsolódási beállítások soha nem kerülnek bele.",
+    exportResultsOnly: "Csak az eredmények",
+    exportWholeSession: "A teljes beszélgetés és a munkamenet eredményei",
     folderSync: "Mappa szinkronizálás",
     folderSynced: (name) => `Szinkronizálva: ${name}`,
     importButton: "Importálás",
@@ -2894,8 +2939,12 @@ const STRINGS = {
     ok: "OK",
     replace: "Csere",
     merge: "Egyesítés",
-    clearConfirmMessage: "Törlöd az egész gráfot? Ez eltávolítja az összes csomópontot és élt. Ez visszavonható a Visszavonás gombbal.",
+    clearConfirmMessage: (c) =>
+      `Törlöd a teljes modellt? Ez eltávolít ${c.classes} osztályt, ${c.relationships} kapcsolatot, ` +
+      `${c.competencyQuestions} kompetenciakérdést, ${c.rules} szabályt és ${c.actions} műveletet. ` +
+      "Ez visszavonható a Visszavonás gombbal.",
     clearConfirmLabel: "Törlés",
+    clearAlsoRestartConversation: "A Segéd ügynökkel folytatott beszélgetés újraindítása is (nem vonható vissza)",
     nodeLabelPlaceholder: "Csomópont neve",
     relationLabelPlaceholder: "kapcsolat neve",
     graphNamePlaceholder: "Gráf neve",
@@ -3194,7 +3243,7 @@ const STRINGS = {
       {
         heading: "Mentés, exportálás, importálás",
         paragraphs: [
-          "A „Verzió mentése” három fájlt ír ki egymás mellé: egy teljes hűségű JSON-t (ezt nyisd meg újra, ha pontosan úgy szeretnéd visszakapni a vásznat, ahogy hagytad), egy egyszerű szöveges éllistát, és egy Doménmodell YAML fájlt — ez utóbbi egy szkriptnek vagy LLM-nek szól. Mindhárom ugyanazon a gombon keresztül importálható vissza, vagy fájl vászonra húzásával.",
+          "Az „Exportálás” megkérdezi, mit írjon ki. A „Csak az eredmények” három fájlt ír ki egymás mellé: egy teljes hűségű JSON-t (ezt nyisd meg újra, ha pontosan úgy szeretnéd visszakapni a vásznat, ahogy hagytad), egy egyszerű szöveges éllistát, és egy Doménmodell YAML fájlt — ez utóbbi egy szkriptnek vagy LLM-nek szól. Mindhárom ugyanazon a gombon keresztül importálható vissza, vagy fájl vászonra húzásával. „A teljes beszélgetés és a munkamenet eredményei” ugyanezt a hármat írja ki, plusz egy .session.json csomagot: a Segéd ügynökkel folytatott beszélgetést (minden üzenettel és eszközhívással) és a legutóbbi ellenőrzések eredményeit, az API kulcsot soha.",
           "A „Mappa szinkronizálás”, ahol a böngésződ támogatja, automatikusan naprakészen tart egy kiválasztott mappát ahelyett, hogy minden alkalommal fájlt kellene letölteni.",
         ],
       },
@@ -3286,6 +3335,11 @@ function applyLanguage() {
   byId("sel-trash").title = t("deleteTitle");
   byId("confirm-cancel").textContent = t("cancel");
   byId("confirm-ok").textContent = t("ok");
+  byId("export-title").textContent = t("exportTitle");
+  byId("export-intro").textContent = t("exportIntro");
+  byId("export-cancel").textContent = t("cancel");
+  byId("export-results-only").textContent = t("exportResultsOnly");
+  byId("export-whole-session").textContent = t("exportWholeSession");
   byId("import-cancel").textContent = t("cancel");
   byId("import-replace").textContent = t("replace");
   byId("import-merge").textContent = t("merge");
@@ -3439,6 +3493,17 @@ function screenToWorld(sx, sy) {
 
 function worldToScreen(wx, wy) {
   return { x: wx * camera.scale + camera.panX, y: wy * camera.scale + camera.panY };
+}
+
+// Page (viewport) coordinates for a world point -- what a position:fixed
+// HTML overlay needs. worldToScreen() is canvas-local, which only equals
+// page coordinates while the canvas starts at x = 0; the Helper Agent panel
+// shifts it right (issue #55), so overlays must add the canvas's own offset
+// (issue #164).
+function worldToPage(wx, wy) {
+  const local = worldToScreen(wx, wy);
+  const rect = canvas.getBoundingClientRect();
+  return { x: local.x + rect.left, y: local.y + rect.top };
 }
 
 function zoomAt(screenX, screenY, factor) {
@@ -4921,6 +4986,15 @@ function resizeCanvas() {
 }
 
 window.addEventListener("resize", resizeCanvas);
+// Issue #163: #canvas-wrap animates `left` when the Helper Agent panel opens
+// or closes, so the synchronous resizeCanvas() in updateAgentPanelOffset()
+// measures the box before the transition has moved it and keeps a stale
+// backing-store width (stretched drawing, hit-tests beside the boxes). An
+// observer on the wrapper re-measures on every real size change, including
+// the end of that transition and any future layout change.
+if (typeof ResizeObserver === "function") {
+  new ResizeObserver(() => resizeCanvas()).observe(canvas.parentElement);
+}
 
 // ---------------------------------------------------------------------------
 // Viewport culling (Section 6, Section 9): draw/hit-test only what
@@ -5296,14 +5370,30 @@ function updateSelectionToolbar() {
     anchorWorld = geo.mid; // the curve's actual midpoint when the edge is bent, not the straight-line one
     selToggleDirBtn.style.display = "";
   }
-  const screen = worldToScreen(anchorWorld.x, anchorWorld.y);
+  const screen = worldToPage(anchorWorld.x, anchorWorld.y);
   selToolbar.style.display = "flex";
   selToolbar.style.left = `${screen.x}px`;
   selToolbar.style.top = `${screen.y}px`;
 }
 
+// Issue #162: Clear means the whole domain model, not just the graph --
+// competency questions, rules and actions left behind made "start over"
+// silently non-empty, and the Helper Agent's orientation step then picked
+// them up as if they belonged to the next interview.
+function modelContentCounts() {
+  return {
+    classes: state.nodes.length, relationships: state.edges.length,
+    competencyQuestions: state.competencyQuestions.length,
+    rules: state.rules.length, actions: state.actions.length,
+  };
+}
+
+function modelHasAnyContent() {
+  return Object.values(modelContentCounts()).some((n) => n > 0);
+}
+
 function updateClearButton() {
-  document.getElementById("btn-clear").disabled = state.nodes.length === 0 && state.edges.length === 0;
+  document.getElementById("btn-clear").disabled = !modelHasAnyContent();
 }
 
 function render() {
@@ -5353,7 +5443,10 @@ let activeInlineEditor = null;
 function clampCenterToViewport(x, y, halfW, halfH) {
   const margin = 8;
   const toolbarBottom = document.getElementById("toolbar").getBoundingClientRect().bottom;
-  const minX = halfW + margin;
+  // The canvas's own left edge, not the window's: with the Helper Agent
+  // panel open the canvas starts to its right (issue #164), and an input
+  // clamped against x = 0 could land underneath the panel.
+  const minX = canvas.getBoundingClientRect().left + halfW + margin;
   const maxX = window.innerWidth - halfW - margin;
   const minY = toolbarBottom + halfH + margin;
   const maxY = window.innerHeight - halfH - margin;
@@ -5416,6 +5509,9 @@ const confirmOverlay = document.getElementById("confirm-overlay");
 const confirmMessageEl = document.getElementById("confirm-message");
 const confirmOkBtn = document.getElementById("confirm-ok");
 const confirmCancelBtn = document.getElementById("confirm-cancel");
+const confirmOptionRow = document.getElementById("confirm-option-row");
+const confirmOptionInput = document.getElementById("confirm-option");
+const confirmOptionLabelEl = document.getElementById("confirm-option-label");
 let activeConfirm = null;
 
 // Guards against stacking a second modal on top of one that's already open
@@ -5430,25 +5526,33 @@ let activeConfirm = null;
 function isAnyModalOpen() {
   return ["confirm-overlay", "details-overlay", "domain-model-overlay", "import-overlay", "welcome-overlay", "help-overlay",
       "consistency-overlay", "review-changes-overlay", "agent-connect-overlay", "agent-azure-config-overlay", "graph-finder-overlay",
-      "import-review-overlay"]
+      "import-review-overlay", "export-overlay"]
     .some((id) => document.getElementById(id).style.display === "flex");
 }
 
-function showConfirmDialog({ message, confirmLabel = t("ok"), onConfirm, onCancel }) {
+// `option` ({label, checked}) adds one checkbox under the message; its value
+// is passed to onConfirm. Omitted, the row stays hidden and onConfirm gets
+// `false` -- every caller that predates the option is unaffected.
+function showConfirmDialog({ message, confirmLabel = t("ok"), option = null, onConfirm, onCancel }) {
   if (isAnyModalOpen()) return;
   cancelInlineInput();
   confirmMessageEl.textContent = message;
   confirmOkBtn.textContent = confirmLabel;
+  confirmOptionRow.style.display = option ? "flex" : "none";
+  confirmOptionInput.checked = Boolean(option && option.checked);
+  confirmOptionLabelEl.textContent = option ? option.label : "";
   confirmOverlay.style.display = "flex";
-  activeConfirm = { onConfirm, onCancel };
+  activeConfirm = { onConfirm, onCancel, hasOption: Boolean(option) };
 }
 
 function closeConfirmDialog(confirmed) {
   if (!activeConfirm) return;
-  const { onConfirm, onCancel } = activeConfirm;
+  const { onConfirm, onCancel, hasOption } = activeConfirm;
   activeConfirm = null;
+  const optionChecked = hasOption && confirmOptionInput.checked;
   confirmOverlay.style.display = "none";
-  if (confirmed) { if (onConfirm) onConfirm(); }
+  confirmOptionRow.style.display = "none";
+  if (confirmed) { if (onConfirm) onConfirm(optionChecked); }
   else if (onCancel) onCancel();
 }
 
@@ -6273,6 +6377,7 @@ function closeAnyOpenModal() {
   closeAzureConfigPopup();
   closeAgentConnectModal();
   closeImportReview();
+  closeExportDialog();
 }
 
 function openGraphFinder() {
@@ -6649,7 +6754,7 @@ function placeNewNodeAt(world, screenPos) {
 function beginRenameNodePrompt(nodeId) {
   const node = state.nodes.find((n) => n.id === nodeId);
   if (!node) return;
-  const screenPos = worldToScreen(node.x + node.w / 2, node.y + node.h / 2);
+  const screenPos = worldToPage(node.x + node.w / 2, node.y + node.h / 2);
   showInlineInput({
     x: screenPos.x, y: screenPos.y, value: node.label,
     placeholder: t("nodeLabelPlaceholder"),
@@ -6669,7 +6774,7 @@ function beginRenameEdgePrompt(edgeId) {
   if (!edge) return;
   const geo = edgeGeometry(edge, computeEdgeBendInfo());
   if (!geo) return;
-  const screenPos = worldToScreen(geo.mid.x, geo.mid.y);
+  const screenPos = worldToPage(geo.mid.x, geo.mid.y);
   showInlineInput({
     x: screenPos.x, y: screenPos.y, value: edge.relation, placeholder: t("relationLabelPlaceholder"),
     onCommit: (text) => {
@@ -6812,6 +6917,10 @@ window.addEventListener("keydown", (e) => {
   }
   if (document.getElementById("import-overlay").style.display === "flex") {
     if (e.key === "Escape") { e.preventDefault(); closeImportDialog(); }
+    return;
+  }
+  if (document.getElementById("export-overlay").style.display === "flex") {
+    if (e.key === "Escape") { e.preventDefault(); closeExportDialog(); }
     return;
   }
   if (document.getElementById("agent-azure-config-overlay").style.display === "flex") {
@@ -9546,7 +9655,7 @@ async function writeFileToFolder(dirHandle, filename, content) {
 let pendingSaveVersion = Promise.resolve();
 function waitForSaveVersion() { return pendingSaveVersion; }
 
-function performSaveVersion() {
+function performSaveVersion({ includeSession = false } = {}) {
   if (!state.meta) {
     state.meta = {
       format_version: 1,
@@ -9562,26 +9671,163 @@ function performSaveVersion() {
   const jsonContent = JSON.stringify(buildJsonExport(savedAt), null, 2);
   const txtContent = buildTxtExport(savedAt);
   const yamlContent = buildDomainYamlExport(); // agent_ontology_spec.md §5
+  const resultFiles = [
+    [`${base}.json`, jsonContent, "application/json"],
+    [`${base}.txt`, txtContent, "text/plain"],
+    [`${base}.domain.yaml`, yamlContent, "application/x-yaml"],
+  ];
 
-  if (tier2DirHandle) {
-    pendingSaveVersion = Promise.all([
-      writeFileToFolder(tier2DirHandle, `${base}.json`, jsonContent),
-      writeFileToFolder(tier2DirHandle, `${base}.txt`, txtContent),
-      writeFileToFolder(tier2DirHandle, `${base}.domain.yaml`, yamlContent),
-    ]).catch((err) => {
-      console.warn("[KG Canvas] Folder Sync write failed, falling back to download:", err);
-      triggerDownload(`${base}.json`, jsonContent, "application/json");
-      triggerDownload(`${base}.txt`, txtContent, "text/plain");
-      triggerDownload(`${base}.domain.yaml`, yamlContent, "application/x-yaml");
-    });
+  // The three result files are written exactly as before, synchronously, in
+  // both modes -- the session bundle (issue #165) is purely additive.
+  const resultsWritten = writeExportFiles(resultFiles);
+  if (!includeSession) {
+    pendingSaveVersion = resultsWritten;
   } else {
-    triggerDownload(`${base}.json`, jsonContent, "application/json");
-    triggerDownload(`${base}.txt`, txtContent, "text/plain");
-    triggerDownload(`${base}.domain.yaml`, yamlContent, "application/x-yaml");
-    pendingSaveVersion = Promise.resolve();
+    // Captured now, synchronously, so the bundle describes exactly the
+    // state these three files were written from, even though finishing it
+    // (the hashes) is async.
+    const bundle = buildSessionBundle({ savedAt, base, jsonContent, txtContent, yamlContent });
+    const bundleWritten = finishSessionBundle(bundle)
+      .then((text) => writeExportFiles([[`${base}.session.json`, text, "application/json"]]));
+    pendingSaveVersion = Promise.all([resultsWritten, bundleWritten]).then(() => undefined);
   }
   scheduleSave(); // persist the incremented version so it survives a reload (Section 9)
 }
+
+// Folder Sync when a folder is granted, a download otherwise; a failed
+// folder write falls back to downloading the same files.
+function writeExportFiles(files) {
+  if (tier2DirHandle) {
+    return Promise.all(files.map(([name, content]) => writeFileToFolder(tier2DirHandle, name, content)))
+      .catch((err) => {
+        console.warn("[KG Canvas] Folder Sync write failed, falling back to download:", err);
+        for (const [name, content, mime] of files) triggerDownload(name, content, mime);
+      });
+  }
+  for (const [name, content, mime] of files) triggerDownload(name, content, mime);
+  return Promise.resolve();
+}
+
+// ---------------------------------------------------------------------------
+// Session bundle (issue #165): one JSON file a study participant can hand
+// back -- the three exports, the Helper Agent conversation (UI transcript and
+// the API-level history with every tool call and result), which interviewer
+// produced it, and the latest check results. Built only on explicit request
+// ("Whole conversation and session results"); never touches the interviewer
+// prompt or agent behaviour.
+//
+// NEVER includes the API key, the Azure endpoint/api-version, or any other
+// connection setting beyond the model name. As a second line of defence the
+// serialized text is scrubbed of the live key and of anything shaped like an
+// OpenAI secret key, in case one was pasted into the chat itself.
+// ---------------------------------------------------------------------------
+const SESSION_BUNDLE_FORMAT = "kg-session-bundle";
+const SESSION_BUNDLE_FORMAT_VERSION = 1;
+const SESSION_SECRET_PATTERN = /sk-[A-Za-z0-9_-]{16,}/g;
+
+function buildSessionBundle({ savedAt, base, jsonContent, txtContent, yamlContent }) {
+  const clone = (v) => JSON.parse(JSON.stringify(v));
+  let deterministicFindings = [];
+  try { deterministicFindings = computeOntologyFindings(buildDomainModel()); } catch (err) { /* best effort */ }
+  return {
+    format: SESSION_BUNDLE_FORMAT,
+    format_version: SESSION_BUNDLE_FORMAT_VERSION,
+    app: {
+      name: "Knowledge Graph Canvas",
+      file: (() => { try { return decodeURIComponent(location.pathname.split("/").pop() || "") || null; } catch (err) { return null; } })(),
+      document_last_modified: document.lastModified || null,
+      index_html_sha256: null, // filled in by finishSessionBundle() when the page can read its own source
+      language: lang,
+    },
+    saved_at: savedAt,
+    graph_name: state.graphName,
+    graph_meta: clone(state.meta),
+    exports: {
+      json: { filename: `${base}.json`, content: jsonContent },
+      txt: { filename: `${base}.txt`, content: txtContent },
+      domain_yaml: { filename: `${base}.domain.yaml`, content: yamlContent },
+    },
+    conversation: {
+      transcript: clone(agentState.transcript),
+      api_messages: clone(agentState.apiMessages),
+    },
+    interviewer: {
+      model: agentState.model || null,
+      provider: agentState.connected || agentState.model ? (isAzureProvider(agentState.azureEndpoint) ? "azure" : "openai") : null,
+      // The system prompt is prepended to api_messages at request time rather
+      // than stored with them, so it is recorded here as the page builds it now.
+      system_prompt: buildAgentSystemPrompt(),
+      system_prompt_sha256: null, // filled in by finishSessionBundle()
+    },
+    checks: {
+      consistency: deterministicFindings,
+      consistency_llm: clone(consistencyLlmFindings),
+      cq_coverage: clone(cqCoverageFindings),
+    },
+  };
+}
+
+async function sha256Hex(text) {
+  try {
+    const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
+    return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, "0")).join("");
+  } catch (err) {
+    return null; // e.g. no SubtleCrypto in this context -- the bundle just omits the hash
+  }
+}
+
+async function readOwnSource() {
+  // A file:// page can't fetch itself (Chromium logs a console error just
+  // for trying), so only a served copy gets a source hash.
+  if (!/^https?:$/.test(location.protocol)) return null;
+  try {
+    const res = await fetch(location.href, { cache: "no-store" });
+    return res.ok ? await res.text() : null;
+  } catch (err) {
+    return null;
+  }
+}
+
+function scrubSessionSecrets(text) {
+  let out = text.replace(SESSION_SECRET_PATTERN, "[redacted]");
+  for (const secret of [agentState.apiKey, agentState.azureEndpoint]) {
+    if (secret && secret.length >= 8) out = out.split(secret).join("[redacted]");
+  }
+  return out;
+}
+
+async function finishSessionBundle(bundle) {
+  bundle.interviewer.system_prompt_sha256 = await sha256Hex(bundle.interviewer.system_prompt);
+  const source = await readOwnSource();
+  if (source) bundle.app.index_html_sha256 = await sha256Hex(source);
+  return scrubSessionSecrets(JSON.stringify(bundle, null, 2));
+}
+
+const exportOverlay = document.getElementById("export-overlay");
+
+function openExportDialog() {
+  if (isAnyModalOpen()) return;
+  cancelInlineInput();
+  exportOverlay.style.display = "flex";
+  document.getElementById("export-results-only").focus();
+}
+
+function closeExportDialog() {
+  exportOverlay.style.display = "none";
+}
+
+document.getElementById("export-cancel").addEventListener("click", closeExportDialog);
+document.getElementById("export-results-only").addEventListener("click", () => {
+  closeExportDialog();
+  performSaveVersion();
+});
+document.getElementById("export-whole-session").addEventListener("click", () => {
+  closeExportDialog();
+  performSaveVersion({ includeSession: true });
+});
+exportOverlay.addEventListener("click", (e) => {
+  if (e.target === exportOverlay) closeExportDialog(); // click outside the dialog = cancel
+});
 
 // ---------------------------------------------------------------------------
 // File formats — import (Section 5.3). Parser is a direct port of the
@@ -12669,7 +12915,7 @@ document.getElementById("btn-connect").addEventListener("click", () => {
 document.getElementById("btn-autolayout").addEventListener("click", () => autoLayout());
 document.getElementById("btn-undo").addEventListener("click", () => undo());
 document.getElementById("btn-redo").addEventListener("click", () => redo());
-document.getElementById("btn-save-version").addEventListener("click", () => performSaveVersion());
+document.getElementById("btn-save-version").addEventListener("click", () => openExportDialog());
 document.getElementById("btn-folder-sync").addEventListener("click", () => connectFolderSync());
 document.getElementById("btn-theme-toggle").addEventListener("click", () => toggleTheme());
 document.getElementById("btn-lang-toggle").addEventListener("click", () => toggleLanguage());
@@ -12800,19 +13046,32 @@ canvas.addEventListener("drop", async (e) => {
   openImportDialog(text, detectImportKind(file.name, text), file.name);
 });
 
+function clearWholeModel() {
+  const before = snapshotState();
+  state.nodes = [];
+  state.edges = [];
+  state.competencyQuestions = [];
+  state.rules = [];
+  state.actions = [];
+  state.connectSource = null;
+  clearSelection();
+  pushHistory(before, snapshotState());
+  markDirty();
+}
+
 document.getElementById("btn-clear").addEventListener("click", () => {
-  if (state.nodes.length === 0 && state.edges.length === 0) return; // nothing to clear
+  if (!modelHasAnyContent()) return; // nothing to clear
+  // Restarting the conversation is offered only when there is one, and is
+  // not undoable (conversation history lives outside `state`/history), so it
+  // is opt-in rather than the default.
+  const hasConversation = agentState.transcript.length > 0 || agentState.apiMessages.length > 0;
   showConfirmDialog({
-    message: t("clearConfirmMessage"),
+    message: t("clearConfirmMessage", modelContentCounts()),
     confirmLabel: t("clearConfirmLabel"),
-    onConfirm: () => {
-      const before = snapshotState();
-      state.nodes = [];
-      state.edges = [];
-      state.connectSource = null;
-      clearSelection();
-      pushHistory(before, snapshotState());
-      markDirty();
+    option: hasConversation ? { label: t("clearAlsoRestartConversation"), checked: false } : null,
+    onConfirm: (restartConversation) => {
+      clearWholeModel();
+      if (restartConversation) restartAgentConversation();
     },
   });
 });

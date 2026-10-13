@@ -143,6 +143,7 @@ test("a realistic Agent Ontology authoring session — classes, a relationship, 
 
     // --- Phase 4: Save Version — all three files, YAML content matches ---
     await page.click("#btn-save-version");
+    await page.click("#export-results-only");
     await waitForDownloads(downloads, 3);
     assert.equal(downloads.length, 3);
 
@@ -300,6 +301,7 @@ test("a longer, realistic chain of rules and actions (a 4-stage invoice workflow
     // Save Version — the exported YAML should read as one coherent chain,
     // not four disconnected fragments.
     await page.click("#btn-save-version");
+    await page.click("#export-results-only");
     await waitForDownloads(downloads, 3);
     const yamlDl = downloads.find((d) => d.suggestedFilename().endsWith(".domain.yaml"));
     const yaml = await readDownload(yamlDl);
