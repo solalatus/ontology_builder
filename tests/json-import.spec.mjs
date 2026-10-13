@@ -97,6 +97,7 @@ test("Save Version's own JSON output re-imports into an identical graph", async 
     });
 
     await page.click("#btn-save-version");
+    await page.click("#export-results-only");
     await waitForDownloads(downloads, 3);
     const jsonDl = downloads.find((d) => d.suggestedFilename().endsWith(".json"));
     assert.ok(jsonDl, "Save Version must have written a .json");
@@ -196,6 +197,7 @@ test("A restore continues the file's version series instead of starting a new gr
 
     // The next Save Version must continue at v0008, not restart at v0001.
     await page.click("#btn-save-version");
+    await page.click("#export-results-only");
     await waitForDownloads(downloads, 3);
     assert.equal(downloads.length, 3);
     const names = await page.evaluate(() => window.__kg.getRecordedDownloadFilenames());

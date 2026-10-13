@@ -963,6 +963,20 @@ phase above — tracked here instead of invented as a fake phase number.
   underneath it; Clear is exactly one undo step and Undo/Redo round-trip
   it correctly; a genuinely disabled Clear button can't be clicked at all;
   the post-clear (empty) state is what survives a reload, not the old one.
+- [x] **Issue #162 (2026-10-13): Clear now clears the whole domain model**,
+      not just the graph. Competency questions, rules and actions used to
+      survive a Clear, so "start over" left a non-empty model that the
+      Helper Agent's orientation step then picked up as the next
+      interview's starting point. Now: one undo step empties nodes, edges,
+      competency questions, rules and actions; the button is enabled
+      whenever any of those exist (it used to stay disabled with only
+      questions/rules/actions left, leaving no toolbar way to remove them);
+      the confirm text lists each kind with its count (EN/HU); and when a
+      Helper Agent conversation exists, the dialog offers an opt-in,
+      unchecked-by-default "also restart the conversation" checkbox (not
+      undoable, since the conversation lives outside history). 9 more
+      tests in `tests/clear-graph.spec.mjs` (21 total), all confirmed
+      failing against the pre-fix page.
 
 ### Dark/light theme toggle
 
@@ -3457,6 +3471,49 @@ and record deltas here instead of editing the spec.)*
   `OPENAI_API_KEY` set, so the live-gated tests executed rather than being
   skipped, unlike the 2026-08-12 entry's 897+16-skipped count above — not a
   regression, a different environment). Python: unchanged.
+- 2026-10-13 — **Issues #162–#165, recorded here as deltas from the frozen
+  spec.md (per this log's own convention).**
+  - **#165 — "Save Version" is now "Export" and opens a dialog** (spec.md
+    §2 and §7's "Save Version" button). "Results only" writes exactly the
+    three files Section 5.4 defines, unchanged; "Whole conversation and
+    session results" writes those three plus one
+    `<name>_vNNNN_<timestamp>.session.json` bundle: the three export texts
+    (byte-identical), the Helper Agent's UI transcript and API-level
+    messages (every tool call/result), the interviewer's model, provider and
+    system prompt with its SHA-256, the current consistency findings and
+    the latest model-based checks, and the page's own SHA-256 when served
+    over http(s). Never the API key, Azure endpoint/api-version or other
+    connection settings; the serialized file is also scrubbed of the live
+    key, the endpoint and any `sk-`-shaped secret. Folder Sync writes it
+    like the other three. The element id stays `btn-save-version` so the
+    existing tests and harnesses that click it keep working (they now also
+    pick "Results only"). The interviewer prompt is byte-identical — the
+    golden hash in `tests/agent-production-invariants.spec.mjs` is
+    unchanged. 16 tests in `tests/session-export.spec.mjs`. The one-page
+    PDF field guide is a manual interview method sheet with no app UI in
+    it (and no source in the repo to regenerate from), so the session
+    export is documented in README instead.
+  - **#162 — Clear clears the whole model** (see the Clear graph section
+    above for the full entry).
+  - **#163 — the canvas backing store no longer goes stale when the Helper
+    Agent panel opens/closes.** `updateAgentPanelOffset()` called
+    `resizeCanvas()` synchronously, but `#canvas-wrap` animates `left`, so
+    it measured the pre-transition box and kept a too-wide buffer
+    (stretched drawing; drags panned instead of moving nodes) until a
+    window resize. A `ResizeObserver` on `#canvas-wrap` now re-measures on
+    every real size change.
+  - **#164 — overlays anchored to world coordinates are placed in page
+    coordinates.** `worldToScreen()` is canvas-local; the selection
+    toolbar and the node/edge rename inputs used it as page coordinates,
+    which is only right while the canvas starts at x = 0. New
+    `worldToPage()` adds the canvas's own offset; inline-input clamping now
+    clamps to the canvas's left edge instead of the window's, so an input
+    can't land under the open panel.
+  - Tests: `tests/agent-panel-canvas-layout.spec.mjs` (8, for #163/#164),
+    9 new in `tests/clear-graph.spec.mjs`, 16 in
+    `tests/session-export.spec.mjs` — every new test except the
+    collapsed-panel controls was confirmed failing against the pre-fix
+    `index.html` before being trusted.
 
 ---
 

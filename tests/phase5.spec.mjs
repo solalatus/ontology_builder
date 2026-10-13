@@ -54,6 +54,7 @@ async function setGraphTitle(page, name) {
 async function saveVersion(page, downloads) {
   const before = downloads ? downloads.length : 0;
   await page.click("#btn-save-version");
+  await page.click("#export-results-only");
   if (downloads) await waitForDownloads(downloads, before + 3);
 }
 

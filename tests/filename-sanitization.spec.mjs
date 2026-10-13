@@ -157,6 +157,7 @@ test("An accented graph name reaches the saved filenames intact", async () => {
       window.__kg.actions.createNode(0, 0, "A");
     });
     await page.click("#btn-save-version");
+    await page.click("#export-results-only");
     await waitForDownloads(downloads, 3);
 
     // A real download still has to actually fire for each of the three

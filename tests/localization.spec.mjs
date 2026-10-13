@@ -46,7 +46,7 @@ test("toggling the language switches all static toolbar/dialog text, the <html> 
     assert.equal(await page.locator("#btn-autolayout").textContent(), "Auto-layout");
     assert.equal(await page.locator("#btn-undo").textContent(), "Undo");
     assert.equal(await page.locator("#btn-redo").textContent(), "Redo");
-    assert.equal(await page.locator("#btn-save-version").textContent(), "Save Version");
+    assert.equal(await page.locator("#btn-save-version").textContent(), "Export");
     assert.equal(await page.locator("#btn-import-txt").textContent(), "Import");
     assert.equal(await page.locator("#btn-clear").textContent(), "Clear");
     assert.equal(await page.getAttribute("#btn-zoom-out", "aria-label"), "Zoom out");
@@ -189,7 +189,7 @@ test("the Clear confirm dialog message and button label translate", async () => 
     await page.click("#btn-clear");
     assert.equal(
       await page.locator("#confirm-message").textContent(),
-      "Törlöd az egész gráfot? Ez eltávolítja az összes csomópontot és élt. Ez visszavonható a Visszavonás gombbal.",
+      "Törlöd a teljes modellt? Ez eltávolít 1 osztályt, 0 kapcsolatot, 0 kompetenciakérdést, 0 szabályt és 0 műveletet. Ez visszavonható a Visszavonás gombbal.",
     );
     assert.equal(await page.locator("#confirm-ok").textContent(), "Törlés");
     assert.equal(await page.locator("#confirm-cancel").textContent(), "Mégse");
@@ -199,7 +199,7 @@ test("the Clear confirm dialog message and button label translate", async () => 
     await page.click("#btn-clear");
     assert.equal(
       await page.locator("#confirm-message").textContent(),
-      "Clear the entire graph? This removes all nodes and edges. This can be undone with the Undo button.",
+      "Clear the entire model? This removes 1 class, 0 relationships, 0 competency questions, 0 rules and 0 actions. This can be undone with the Undo button.",
     );
     assert.equal(await page.locator("#confirm-ok").textContent(), "Clear");
     assert.equal(await page.locator("#confirm-cancel").textContent(), "Cancel");
