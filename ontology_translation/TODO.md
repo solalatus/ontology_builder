@@ -3991,4 +3991,13 @@ reference and record deltas/decisions here instead.)*
   (current), −0.003 (pre-#152). Deviation recorded: the design text said 11
   sets, its table listed 10; the verdict does not depend on it. Net: a plain
   union of all interviews is the robust simple choice in this data.
+- 2026-10-14 — #174 closed as a dead end (owner's call: gains under ~0.01
+  are not worth it). Summary in `results/majority-vote/README.md`: majority
+  vote and hybrid not convincing (pre-registered); collapsing same-pair
+  relationships estimated at about +0.01 (structural count, not run); phase 2
+  (LLM re-scoring) not run because it is a measurement and cannot raise F1.
+  What held up: any union beats a single interview; a deterministic union
+  equals the LLM merge on the same pair; the published two-way gain depends
+  on the pair (addendum added to `cascading-merge-post152/REPORT.md`). Final
+  F1 is limited by recall at interview time.
 
