@@ -278,4 +278,5 @@ class CommittedReportIsCurrentTests(unittest.TestCase):
     def test_committed_report_is_exactly_what_the_generator_renders(self):
         audit_data = json.loads(AUDIT_JSON.read_text(encoding="utf-8"))
         classification = yaml.safe_load(CLASSIFICATION.read_text(encoding="utf-8"))
-        self.assertEqual(REPORT_MD.read_text(encoding="utf-8"), report.render(audit_data, classification))
+        recovered = json.loads((AUDIT_JSON.parent / "recovered-connectivity.json").read_text(encoding="utf-8"))
+        self.assertEqual(REPORT_MD.read_text(encoding="utf-8"), report.render(audit_data, classification, recovered))

@@ -107,7 +107,109 @@ def _components_cell(sizes: list[int], n_classes: int) -> str:
     return f"{len(sizes)} (largest {sizes[0]}/{n_classes})"
 
 
-def render(audit: dict, classification: dict) -> str:
+STEP1_STATUSES = ["linked", "connected", "not connected", "parent not recovered", "subtype not recovered", "neither recovered"]
+
+
+def render_step1(recovered: dict) -> list[str]:
+    """The interview-output section, from recovered-connectivity.json
+    (tests/evals/subtype-connectivity.mjs)."""
+    cur, pre = recovered["current_prompt"], recovered["pre_152_prompt"]
+    out = []
+    w = out.append
+
+    def unlinked(era):
+        rows = []
+        for run in era["runs"]:
+            for p in run["pairs"]:
+                if p["status"] == "not connected":
+                    caught = any(h["subtype"] == p.get("recovered_subtype") and h["parent"] == p.get("recovered_parent")
+                                 and not h["linked"] for h in run["name_hint_hits"])
+                    rows.append((run, p, caught))
+        return rows
+
+    cur_unlinked, pre_unlinked = unlinked(cur), unlinked(pre)
+    count_by = lambda rows: Counter(p["category"] for _, p, _ in rows)
+    w("## Step 1: interview outputs")
+    w("")
+    w(f"The reference audit says what *could* be a subclass. #155's gate asks whether interviews actually leave")
+    w(f"subtypes unlinked from their parent. `tests/evals/subtype-connectivity.mjs` re-runs the project's own")
+    w(f"heuristic class matcher on every recovered model. It reproduces each run's committed")
+    w(f"`heuristic-matches.json` exactly ({sum(r['matcher_reproduces_committed_matches'] for r in cur['runs'])} of "
+      f"{len(cur['runs'])} current-prompt runs, {sum(r['matcher_reproduces_committed_matches'] for r in pre['runs'])} of "
+      f"{len(pre['runs'])} pre-#152 runs). For each audit pair it then records whether the interview recovered")
+    w("the subtype and its parent, and whether a chain of relationships links them.")
+    w("")
+    w(f"Corpus: {', '.join('`' + c + '`' for c in cur['corpus'])} (current prompt, {len(cur['runs'])} runs). "
+      f"For comparison, {', '.join('`' + c + '`' for c in pre['corpus'])} (pre-#152 prompt, {len(pre['runs'])} runs).")
+    w("")
+    w("### What happens to each pair (current prompt, summed over runs)")
+    w("")
+    w("| Category | " + " | ".join(STEP1_STATUSES) + " | of which folded into a parent property |")
+    w("|---|" + "---:|" * (len(STEP1_STATUSES) + 1))
+    for cat in CATEGORIES:
+        c = cur["summary"]["by_category"].get(cat)
+        if not c:
+            continue
+        w(f"| {cat} | " + " | ".join(str(c[s]) for s in STEP1_STATUSES) + f" | {c['folded into a parent value']} |")
+    w("")
+    w("*linked*: a relationship joins the two; *connected*: a chain of relationships through other classes does;")
+    w("*folded*: the subtype was not recovered as a class, but a property of the recovered parent carries it")
+    w("(`stateCategory = degraded`, `isSecured`).")
+    w("")
+    w("### Unlinked subtypes")
+    w("")
+    w("| Prompt | Unlinked pairs (all runs) | kind | value | state | Caught by the name hint |")
+    w("|---|---:|---:|---:|---:|---:|")
+    for name, rows_ in [("current", cur_unlinked), ("pre-#152", pre_unlinked)]:
+        cb = count_by(rows_)
+        w(f"| {name} | {len(rows_)} | {cb['kind']} | {cb['value']} | {cb['state']} | {sum(1 for *_, c in rows_ if c)} of {len(rows_)} |")
+    w("")
+    w("Current prompt, every instance:")
+    w("")
+    for run, p, caught in cur_unlinked:
+        w(f"- {run['domain']} {run['run']}: `{p['subclass']}` → `{p['superclass']}` ({p['category']})"
+          + ("" if caught else " — not caught by the name hint"))
+    w("")
+    w("### Gate")
+    w("")
+    by_domain = cur["summary"]["by_domain"]
+    w("| Domain | Runs | Runs with an unlinked kind | Name hint: fires (unlinked) | Name hint: already linked |")
+    w("|---|---:|---:|---:|---:|")
+    for dom, d in sorted(by_domain.items()):
+        w(f"| {dom} | {d['runs']} | {d['runs_with_unlinked_kind']} | {d['name_hint_unlinked']} | {d['name_hint_linked']} |")
+    w("")
+    met = cur["summary"]["gate_met"]
+    gate_domains = cur["summary"]["domains_with_an_unlinked_kind"]
+    distinct_kinds = sorted({(p["subclass"], p["superclass"]) for _, p, _ in cur_unlinked if p["category"] == "kind"})
+    w(f"The gate recorded on #155 (an unlinked kind in at least one run, in two or more domains) is "
+      f"**{'met' if met else 'not met'}**: {', '.join(gate_domains) or 'no domain'}. It is met by "
+      f"{len(distinct_kinds)} distinct pair{'s' if len(distinct_kinds) != 1 else ''}: "
+      + ", ".join(f"`{a}` → `{b}`" for a, b in distinct_kinds) + ".")
+    w("")
+    hint_fp = [(run, h) for run in cur["runs"] for h in run["name_hint_hits"]
+               if not h["linked"] and not any(p.get("recovered_subtype") == h["subtype"] and p.get("recovered_parent") == h["parent"] for p in run["pairs"])]
+    w("### Observations")
+    w("")
+    w(f"1. **The prompt change in epic #152 already reduced the problem.** Unlinked pairs fell from {len(pre_unlinked)} to "
+      f"{len(cur_unlinked)} across the same 15 interviews per prompt, and kinds from {count_by(pre_unlinked)['kind']} to "
+      f"{count_by(cur_unlinked)['kind']}. The FIBO islands that motivated #155 (`SecuredLoan`, `CollateralizedLoan`) "
+      "no longer occur: the current interviews model security as a `Loan → Collateral` relationship or an `isSecured` "
+      "property, never as a separate class.")
+    states = cur["summary"]["by_category"].get("state", {})
+    w("2. **Most subtypes are simply not elicited as classes**, whatever their category. That is the flat model working "
+      f"as intended for values and states. Of the {states.get('subtype not recovered', 0)} state subtypes not recovered "
+      f"as classes, {states.get('folded into a parent value', 0)} were folded into a property of the parent "
+      "(iof-maintenance's `stateCategory`).")
+    w(f"3. **The cheap name hint is accurate and targeted.** It would have fired {sum(d['name_hint_unlinked'] for d in by_domain.values())} times "
+      f"in the current runs, catching {sum(1 for *_, c in cur_unlinked if c)} of the {len(cur_unlinked)} unlinked pairs, "
+      f"with {len(hint_fp)} false positive{'s' if len(hint_fp) != 1 else ''} ("
+      + ", ".join(f"`{h['subtype']}` → `{h['parent']}`" for _, h in hint_fp) + "). It stays silent where a "
+      f"subtype is already linked ({sum(d['name_hint_linked'] for d in by_domain.values())} such name pairs).")
+    w("")
+    return out
+
+
+def render(audit: dict, classification: dict, recovered: dict | None = None) -> str:
     rows = domain_rows(audit, classification)
     total = Counter()
     for r in rows:
@@ -126,8 +228,9 @@ def render(audit: dict, classification: dict) -> str:
     w("# Subclass audit across the five domains (issue #155)")
     w("")
     w("Generated by `tools/subclass_audit_report.py` from `audit.json` (computed by")
-    w("`tools/subclass_audit.py`) and `classification.yaml` (a reviewer's judgment, one line per")
-    w("pair). Do not edit by hand; rerun both scripts instead.")
+    w("`tools/subclass_audit.py`), `classification.yaml` (a reviewer's judgment, one line per pair)")
+    w("and `recovered-connectivity.json` (computed by `tests/evals/subtype-connectivity.mjs`).")
+    w("Do not edit by hand; rerun the scripts instead.")
     w("")
     w("## Question")
     w("")
@@ -254,10 +357,9 @@ def render(audit: dict, classification: dict) -> str:
     w("   - Class mappings that cite a parent class as evidence (iof-supply-chain's `Trailer` cites "
       "`[Trailer, Container]`) are handled by the first-listed rule and no longer affect the result.")
     w("")
-    w("## What this means for #155")
+    w("## What the reference audit supports")
     w("")
-    w("This audit covers the *reference* models, not the interview outputs that motivated #155.")
-    w("It does not record a decision (that is #155's next step). What the data supports:")
+    w("This part covers the *reference* models; the next section covers the interview outputs.")
     w("")
     w(f"- **An unguarded `specializes` rule is not justified.** {total['value'] + total['state']} of {n_pairs}")
     w("  candidates are values or states that a flat model already expresses, and every domain")
@@ -268,14 +370,17 @@ def render(audit: dict, classification: dict) -> str:
     w("  those pairs without a new construct, and that is what the existing interviewer guidance")
     w("  (thing versus property) already asks for.")
     w("")
+    if recovered:
+        out.extend(render_step1(recovered))
     w("## Reproduce")
     w("")
     w("```sh")
     w("python3 ontology_translation/tools/subclass_audit.py --out ontology_translation/results/subclass-audit/audit.json")
+    w("node tests/evals/subtype-connectivity.mjs --write")
     w("python3 ontology_translation/tools/subclass_audit_report.py")
     w("```")
     w("")
-    w("Both are offline and deterministic. `fetch.py --manifest <domain>/source-manifest.yaml")
+    w("All three are offline and deterministic. `fetch.py --manifest <domain>/source-manifest.yaml")
     w("--redownload` re-fetches a source from its pinned URL and fails if its checksum changed.")
     w("")
     w("## Candidate pairs")
@@ -306,7 +411,8 @@ def render(audit: dict, classification: dict) -> str:
 def main() -> int:
     audit = json.loads((AUDIT_DIR / "audit.json").read_text(encoding="utf-8"))
     classification = yaml.safe_load((AUDIT_DIR / "classification.yaml").read_text(encoding="utf-8"))
-    (AUDIT_DIR / "REPORT.md").write_text(render(audit, classification), encoding="utf-8")
+    recovered = json.loads((AUDIT_DIR / "recovered-connectivity.json").read_text(encoding="utf-8"))
+    (AUDIT_DIR / "REPORT.md").write_text(render(audit, classification, recovered), encoding="utf-8")
     print(f"wrote {AUDIT_DIR / 'REPORT.md'}")
     return 0
 

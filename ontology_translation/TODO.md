@@ -3943,3 +3943,19 @@ reference and record deltas/decisions here instead.)*
   reported but not counted because they hold only under the translation's
   merge of `brick:Space` and `rec:Space`. #155's decision itself is still
   open.
+- 2026-10-14 — #155 decision recorded on the issue: **deferred, with an
+  evidence gate** (not declined). Full inherited-property reasoning is
+  ruled out (spec.md §10); a guarded, label-only `specializes` for genuine
+  kinds is built only if interview outputs leave kinds unlinked from their
+  parent in at least one run per domain in two or more domains.
+- 2026-10-14 — #155 step 1 done (`tests/evals/subtype-connectivity.mjs`,
+  `results/subclass-audit/recovered-connectivity.json`, REPORT.md "Step 1"):
+  the project's matcher reproduces all 30 runs' committed matches. Current
+  prompt: 7 unlinked subtype pairs in 15 runs (4 kind, 3 value), down from
+  17 (7 kind, 10 value) under the pre-#152 prompt; FIBO's motivating
+  `SecuredLoan`/`CollateralizedLoan` islands no longer occur (modelled as
+  `Loan → Collateral` or `isSecured`). **Gate met** by 2 distinct kinds:
+  `StorageFacility → Facility` (iof-supply-chain, 3 of 3 runs; the expert
+  says "a storage facility is still a kind of facility") and `CreditFacility
+  → CreditAgreement` (fibo-loans, 1 of 3). The name-suffix hint would have
+  caught 6 of the 7 with 1 false positive (`PackagedHeatPump → Pump`).
