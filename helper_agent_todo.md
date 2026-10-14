@@ -2636,3 +2636,20 @@ whoever picks it up.
 - [x] **Epic gate: full live 5-domain×3-replicate benchmark rerun + cascading-merge(1,2) recompute — run twice
       plus one targeted partial rerun; all three criteria improve over baseline on the final, live-verified
       numbers above. Gate met.**
+
+## Prompt caching on Azure and per-call usage (issues #176, #177) — 2026-10-14
+
+- **#176:** `prompt_cache_key` is now sent on Azure connections too. The
+  earlier entry above ("an OpenAI-specific ... hint with no verified Azure
+  equivalent") is superseded: Azure documents the same parameter for
+  GPT-5.6 and later families, with no specific API version required. Every
+  connection gets one `kg-agent-<uuid>` key, rotated on Restart Conversation
+  and cleared on Disconnect, for both providers.
+- **#177:** every successful model call's `usage` is recorded verbatim with
+  its kind, model, served model and provider (`agentState.usage`), saved
+  with the conversation, cleared with it on Restart/Disconnect, and exported
+  in the session bundle as `usage` (calls plus totals per kind; fields no
+  call reported are `null`, not 0). A call that finishes after the
+  conversation was restarted is not recorded. Nothing changes in what is
+  sent to the model, and nothing is priced.
+

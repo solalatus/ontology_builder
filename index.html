@@ -9320,7 +9320,7 @@ async function fetchConsistencyLlmFindings() {
     // would silently change the input of an already-evaluated subsystem
     // (issue #94 §21). Coverage has its own prompt and its own result state.
     { role: "user", content: buildDomainYamlExport({ includeCompetencyQuestions: false }) },
-  ]);
+  ], { usageKind: "consistency_llm" });
   const reply = (message && typeof message.content === "string") ? message.content : "";
   const blocks = [...reply.matchAll(/```(?:json)?\s*\n([\s\S]*?)```/g)].map((m) => m[1].trim());
   const braced = reply.slice(reply.indexOf("["), reply.lastIndexOf("]") + 1);
@@ -9507,7 +9507,7 @@ async function runCqCoverageCheck() {
     const message = await callAgentChatRaw([
       { role: "system", content: CQ_COVERAGE_LLM_PROMPT },
       { role: "user", content: buildDomainYamlExport() },
-    ]);
+    ], { usageKind: "cq_coverage" });
     const reply = (message && typeof message.content === "string") ? message.content : "";
     const blocks = [...reply.matchAll(/```(?:json)?\s*\n([\s\S]*?)```/g)].map((m) => m[1].trim());
     const braced = reply.slice(reply.indexOf("["), reply.lastIndexOf("]") + 1);
@@ -9897,6 +9897,9 @@ function buildSessionBundle({ savedAt, base, jsonContent, txtContent, yamlConten
       consistency_llm: clone(consistencyLlmFindings),
       cq_coverage: clone(cqCoverageFindings),
     },
+    // Issue #177: every model call's usage, verbatim, plus totals per call
+    // kind. Additive, so format_version stays 1.
+    usage: summarizeAgentUsage(agentState.usage),
   };
 }
 
@@ -12355,7 +12358,7 @@ async function runImportReviewExecutionAgent(agentItems, sharedNote) {
   // possibly empty).
   let commentary = "";
   for (let round = 0; round < IMPORT_REVIEW_MERGER_MAX_ROUNDS; round++) {
-    const message = await callAgentChatRaw(messages, { tools });
+    const message = await callAgentChatRaw(messages, { tools, usageKind: "import_merge" });
     if (!Array.isArray(message.tool_calls) || !message.tool_calls.length) {
       commentary = typeof message.content === "string" ? message.content.trim() : "";
       break;
@@ -12508,7 +12511,7 @@ async function runImportReviewSuggestMatches() {
     const message = await callAgentChatRaw([
       { role: "system", content: IMPORT_REVIEW_PROPOSER_SYSTEM_PROMPT },
       { role: "user", content: JSON.stringify(leftover) },
-    ]);
+    ], { usageKind: "import_suggest" });
     const reply = (message && typeof message.content === "string") ? message.content : "";
     const blocks = [...reply.matchAll(/```(?:json)?\s*\n([\s\S]*?)```/g)].map((m) => m[1].trim());
     const braced = reply.slice(reply.indexOf("["), reply.lastIndexOf("]") + 1);
@@ -13448,12 +13451,19 @@ const agentState = {
   transcript: [],
   apiMessages: [],
   sending: false,
-  // A stable per-connection routing hint for OpenAI's prompt-prefix caching
-  // (see callAgentChatRaw's own comment) — generated fresh on connect, not
-  // per-request, since reusing one key across a whole connection is what
-  // makes it useful; cleared on disconnect so a later connection gets its
-  // own fresh key rather than inheriting a stale one.
+  // A stable per-connection routing hint for prompt-prefix caching, on
+  // OpenAI and Azure OpenAI alike (see callAgentChatRaw's own comment) —
+  // generated fresh on connect, not per-request, since reusing one key
+  // across a whole connection is what makes it useful; cleared on
+  // disconnect so a later connection gets its own fresh key rather than
+  // inheriting a stale one.
   promptCacheKey: null,
+  // Issue #177: one entry per successful model call of this conversation --
+  // {kind, model, served_model, provider, at, usage} with the provider's
+  // `usage` object verbatim (null when the response carried none). Saved
+  // and cleared with the transcript; summarized into the session bundle.
+  // Counts only, never priced here.
+  usage: [],
   // The in-flight chat turn's AbortController, if any -- disconnectAgent()
   // and restartAgentConversation() abort it so a reply that was already on
   // the wire doesn't land after the conversation it belongs to is gone.
@@ -13593,6 +13603,7 @@ async function writeAgentConversationToStorage() {
   await writeAgentConversationPayload({
     transcript: agentState.transcript,
     apiMessages: agentState.apiMessages,
+    usage: agentState.usage,
     savedAt: Date.now(),
   });
 }
@@ -13663,6 +13674,11 @@ async function loadAgentConversationFromStorage() {
   if (!data || !Array.isArray(data.transcript) || !Array.isArray(data.apiMessages)) {
     return { restored: false, gapMs: 0 };
   }
+  // Issue #177: restored even without a conversation (a coverage check run
+  // before any interview is still a call that was made and paid for).
+  agentState.usage = Array.isArray(data.usage)
+    ? data.usage.filter((u) => u && typeof u === "object" && typeof u.kind === "string")
+    : [];
   if (!data.transcript.length && !data.apiMessages.length) {
     return { restored: false, gapMs: 0 }; // nothing to restore
   }
@@ -13991,14 +14007,10 @@ async function submitAgentConnect() {
   agentState.azureApiVersion = isAzureProvider(agentPendingAzureEndpoint) ? agentConnectAzureApiVersion : null;
   agentState.models = agentPendingModels;
   agentState.model = chosenModel;
-  // prompt_cache_key is an OpenAI-specific routing hint (see
-  // callAgentChatRaw's own comment) with no documented equivalent on Azure
-  // OpenAI's classic chat-completions surface -- left null for Azure so it's
-  // simply never included in the request body (the same `promptCacheKey ?
-  // {...} : {}` spread that already handles a fresh connection's first,
-  // pre-cache-key call handles this too), rather than sending a field whose
-  // Azure-side behavior isn't verified.
-  agentState.promptCacheKey = isAzureProvider(agentPendingAzureEndpoint) ? null : `kg-agent-${crypto.randomUUID()}`;
+  // One prompt_cache_key per connection, for both providers (issue #176):
+  // Azure OpenAI documents the same parameter for GPT-5.6 and later model
+  // families, with no specific API version required. See callAgentChatRaw.
+  agentState.promptCacheKey = `kg-agent-${crypto.randomUUID()}`;
   agentState.connected = true;
   try {
     if (remember) {
@@ -14035,6 +14047,7 @@ function disconnectAgent() {
   agentState.model = null;
   agentState.transcript = [];
   agentState.apiMessages = [];
+  agentState.usage = [];
   agentState.sending = false;
   agentState.promptCacheKey = null;
   agentState.tierCFindingsRanThisSession = false;
@@ -14059,6 +14072,7 @@ function restartAgentConversation() {
   agentState.requestGeneration++;
   agentState.transcript = [];
   agentState.apiMessages = [];
+  agentState.usage = [];
   agentState.promptCacheKey = `kg-agent-${crypto.randomUUID()}`;
   agentState.tierCFindingsRanThisSession = false;
   renderAgentTranscript();
@@ -15244,16 +15258,22 @@ function setAgentSending(sending) {
 // object on any failure so callers can branch without re-deriving the
 // failure type from a raw Response — see helper_agent_plan.md §4.6.
 //
-// OpenAI's prompt-prefix caching is automatic (no request flag turns it
-// on/off) once a shared prefix crosses their length threshold — nothing to
-// "enable" here. `prompt_cache_key` is the one lever actually exposed to
-// callers: a routing hint that improves cache-hit *consistency* for
-// requests sharing a long common prefix (our system prompt/knowledge block,
-// unchanged for the life of a connection — see get_graph_state's own
+// Prompt-prefix caching is automatic on both providers (no request flag
+// turns it on/off) once a shared prefix crosses the length threshold —
+// nothing to "enable" here. `prompt_cache_key` is the one lever actually
+// exposed to callers: a routing hint that improves cache-hit *consistency*
+// for requests sharing a long common prefix (our system prompt/knowledge
+// block, unchanged for the life of a connection — see get_graph_state's own
 // comment for why that content is a pull tool rather than injected into the
 // prefix). Reusing one key for a whole connection, not generating a fresh
-// one per call, is what makes that hint meaningful.
-async function callAgentChatRaw(messages, { tools, promptCacheKey, signal } = {}) {
+// one per call, is what makes that hint meaningful. Sent to OpenAI and, since
+// issue #176, to Azure OpenAI too: Azure documents the same parameter for
+// GPT-5.6 and later model families, with no specific API version required.
+//
+// `usageKind` (issue #177) names the call for the usage log: every
+// successful response's `usage` is recorded with it (recordAgentUsage).
+async function callAgentChatRaw(messages, { tools, promptCacheKey, signal, usageKind = "other" } = {}) {
+  const generation = agentState.requestGeneration;
   const azure = isAzureProvider(agentState.azureEndpoint);
   const url = agentChatUrl(agentState.azureEndpoint, agentState.model, agentState.azureApiVersion);
   const authHeaders = agentAuthHeaders(agentState.azureEndpoint, agentState.apiKey);
@@ -15310,14 +15330,82 @@ async function callAgentChatRaw(messages, { tools, promptCacheKey, signal } = {}
       throw { kind: "generic", status: res.status };
     }
     const choice = json && Array.isArray(json.choices) ? json.choices[0] : null;
+    // Only while the conversation this call belongs to still exists: a
+    // restart or disconnect during the call starts a new usage log, the
+    // same way it starts a new transcript.
+    if (generation === agentState.requestGeneration) recordAgentUsage(usageKind, json, azure);
     return (choice && choice.message) || { content: "" };
   }
 }
 
+// Issue #177: the provider's per-call usage, kept verbatim next to what the
+// call was for. Counts only; pricing belongs to whoever reads the bundle.
+function recordAgentUsage(kind, json, azure) {
+  const usage = json && json.usage && typeof json.usage === "object" ? JSON.parse(JSON.stringify(json.usage)) : null;
+  agentState.usage.push({
+    kind,
+    model: agentState.model || null,
+    served_model: (json && typeof json.model === "string") ? json.model : null,
+    provider: azure ? "azure" : "openai",
+    at: new Date().toISOString(),
+    usage,
+  });
+  scheduleAgentConversationSave();
+}
+
+const AGENT_USAGE_FIELDS = {
+  prompt_tokens: (u) => u.prompt_tokens,
+  cached_tokens: (u) => u.prompt_tokens_details && u.prompt_tokens_details.cached_tokens,
+  cache_write_tokens: (u) => u.prompt_tokens_details && u.prompt_tokens_details.cache_write_tokens,
+  completion_tokens: (u) => u.completion_tokens,
+  reasoning_tokens: (u) => u.completion_tokens_details && u.completion_tokens_details.reasoning_tokens,
+};
+
+// Totals over a list of usage entries. A field no call reported is null,
+// not 0: "not reported" and "zero" are different facts. cache_hit_share is
+// cached / prompt over the calls that reported both.
+function totalAgentUsage(entries) {
+  const totals = { calls: entries.length, calls_with_usage: 0 };
+  for (const field of Object.keys(AGENT_USAGE_FIELDS)) totals[field] = null;
+  let sharePrompt = 0;
+  let shareCached = 0;
+  for (const entry of entries) {
+    const u = entry && entry.usage;
+    if (!u || typeof u !== "object") continue;
+    totals.calls_with_usage += 1;
+    const values = {};
+    for (const [field, get] of Object.entries(AGENT_USAGE_FIELDS)) {
+      const v = get(u);
+      if (typeof v === "number" && Number.isFinite(v)) {
+        totals[field] = (totals[field] || 0) + v;
+        values[field] = v;
+      }
+    }
+    if (values.prompt_tokens != null && values.cached_tokens != null) {
+      sharePrompt += values.prompt_tokens;
+      shareCached += values.cached_tokens;
+    }
+  }
+  totals.cache_hit_share = sharePrompt > 0 ? shareCached / sharePrompt : null;
+  return totals;
+}
+
+function summarizeAgentUsage(entries) {
+  const byKind = {};
+  for (const entry of entries) (byKind[entry.kind] ||= []).push(entry);
+  return {
+    calls: JSON.parse(JSON.stringify(entries)),
+    totals: {
+      all: totalAgentUsage(entries),
+      by_kind: Object.fromEntries(Object.keys(byKind).sort().map((k) => [k, totalAgentUsage(byKind[k])])),
+    },
+  };
+}
+
 // Plain-text convenience wrapper over callAgentChatRaw(), for call sites
 // (summarization) that never attach tools and only care about the reply text.
-async function callAgentChat(messages) {
-  const message = await callAgentChatRaw(messages, { promptCacheKey: agentState.promptCacheKey });
+async function callAgentChat(messages, usageKind = "compaction") {
+  const message = await callAgentChatRaw(messages, { promptCacheKey: agentState.promptCacheKey, usageKind });
   return typeof message.content === "string" ? message.content : "";
 }
 
@@ -15707,6 +15795,7 @@ async function sendAgentChatMessage(userText) {
       // (EXPERIMENT_BRIEF.md's B3 "structured interview without tool calls"
       // condition). Never set by any real UI.
       const message = await callAgentChatRaw(messages, {
+        usageKind: "interview",
         // REMOVE_ONTOLOGY_ELEMENTS_TOOL added here (issue #140 follow-up):
         // previously only the Import Review execution agent had it (see
         // that tool's own comment for the original "deliberately never

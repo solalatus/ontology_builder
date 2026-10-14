@@ -32,6 +32,9 @@ import { openPanel, sendChatMessage, forwardToRealAzure, connectAgentLiveAzure, 
 
 const AZURE_OPENAI_API_KEY = loadEnvKey("AZURE_OPENAI_API_KEY");
 const AZURE_OPENAI_ENDPOINT = loadEnvKey("AZURE_OPENAI_ENDPOINT");
+// Optional: the deployment the prompt-caching test should use (issue #176
+// asks for a GPT-5.6+ / 6.x one). Without it, the app's default choice.
+const AZURE_OPENAI_DEPLOYMENT = loadEnvKey("AZURE_OPENAI_DEPLOYMENT");
 const skip = (AZURE_OPENAI_API_KEY && AZURE_OPENAI_ENDPOINT)
   ? false
   : "Set both AZURE_OPENAI_API_KEY and AZURE_OPENAI_ENDPOINT in a .env file at the repo root (see tests/README.md) to run live Azure OpenAI integration tests.";
@@ -103,7 +106,8 @@ test("live: connecting with the real endpoint finalizes with provider state corr
     assert.equal(state.azureEndpoint, AZURE_OPENAI_ENDPOINT.replace(/\/+$/, ""));
     assert.equal(state.isAzure, true);
     assert.ok(state.model, "a real deployment should have been selected");
-    assert.equal(state.promptCacheKey, null, "prompt_cache_key has no verified Azure equivalent and must not be set for an Azure connection");
+    // Issue #176: Azure connections get a per-connection cache key too.
+    assert.match(state.promptCacheKey || "", /^kg-agent-[0-9a-f-]{36}$/);
   });
 });
 
@@ -160,3 +164,49 @@ test("live: a real tool-calling response against Azure actually applies to the c
     for (const r of chatResponses) assert.equal(r.status, 200);
   });
 });
+
+// Issues #176 and #177 against a real Azure resource: the app's own
+// api-version accepts prompt_cache_key on a chat request, the same key is
+// sent on every call of a connection, a repeated long prefix is served from
+// the cache, and every call's usage is recorded with provider "azure".
+test("live (#176/#177): Azure accepts prompt_cache_key, a repeated prefix reports cached tokens, and usage is recorded per call", { skip }, async () => {
+  await withPageAllowingResourceErrors(async (page) => {
+    await connectAgentLiveAzure(page, AZURE_OPENAI_API_KEY, AZURE_OPENAI_ENDPOINT, { deployment: AZURE_OPENAI_DEPLOYMENT || null });
+    const requestBodies = [];
+    page.on("request", (req) => {
+      if (req.method() === "POST" && /\/chat\/completions/.test(req.url())) requestBodies.push(req.postDataJSON());
+    });
+    const chatResponses = forwardToRealAzure(page, chatUrlPattern(AZURE_OPENAI_ENDPOINT));
+
+    // Two turns of one conversation: the second resends the same long prefix
+    // (system prompt plus the first turn), which is what the cache serves.
+    await sendChatMessage(page, "Reply with one short sentence confirming you are ready to model a domain.");
+    await sendChatMessage(page, "Thanks. Reply with one more short sentence, no tool calls needed.");
+
+    assert.ok(chatResponses.length >= 2, `expected at least two chat calls, got ${chatResponses.length}`);
+    for (const r of chatResponses) {
+      assert.equal(r.status, 200, `Azure rejected a chat call (prompt_cache_key under the app's api-version?): ${JSON.stringify(r.body)}`);
+    }
+    const keys = new Set(requestBodies.map((b) => b.prompt_cache_key));
+    assert.equal(keys.size, 1, `one cache key per connection, got ${[...keys].join(", ")}`);
+    assert.match([...keys][0] || "", /^kg-agent-/);
+
+    const usage = await page.evaluate(() => window.__kg.agent.state.usage);
+    const model = await page.evaluate(() => window.__kg.agent.state.model);
+    assert.equal(usage.length, chatResponses.length, "one usage entry per call");
+    for (const entry of usage) {
+      assert.equal(entry.provider, "azure");
+      assert.equal(entry.kind, "interview");
+      assert.equal(entry.model, model);
+      assert.ok(entry.usage && typeof entry.usage.prompt_tokens === "number", "Azure returned a usage object");
+    }
+    const cached = usage.slice(1).map((e) => (e.usage.prompt_tokens_details || {}).cached_tokens || 0);
+    // Printed for the record: what this real deployment did.
+    console.log(`[live #176] deployment=${model} calls=${usage.length} prompt=${usage.map((e) => e.usage.prompt_tokens).join(",")} `
+      + `cached=${usage.map((e) => (e.usage.prompt_tokens_details || {}).cached_tokens ?? "n/a").join(",")} `
+      + `cache_write=${usage.map((e) => (e.usage.prompt_tokens_details || {}).cache_write_tokens ?? "n/a").join(",")} `
+      + `reasoning=${usage.map((e) => (e.usage.completion_tokens_details || {}).reasoning_tokens ?? "n/a").join(",")}`);
+    assert.ok(cached.some((c) => c > 0), `a later call with the same prefix should report cached_tokens > 0, got ${cached.join(", ")}`);
+  });
+});
+

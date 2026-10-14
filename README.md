@@ -37,6 +37,7 @@ single file a study participant can hand back. It holds:
 | `conversation.api_messages` | the API-level history, every tool call and tool result included |
 | `interviewer` | model name, provider (`openai`/`azure`), and the system prompt exactly as the page builds it, with its SHA-256 |
 | `checks` | current consistency-checker findings, plus the latest model-based contradiction and competency-question coverage results if they were run |
+| `usage` | every model call of the conversation with its kind (`interview`, `compaction`, `consistency_llm`, `cq_coverage`, `import_merge`, `import_suggest`), model, served model, provider and the provider's `usage` object verbatim (prompt, cached, cache-write, completion and reasoning tokens); plus totals per kind and overall, with the cache-hit share. Counts only, never priced. Kept with the conversation: it survives a reload, and Restart Conversation starts a new log (issue #177) |
 
 It never contains the API key, the Azure endpoint/api-version, or any other
 connection setting beyond the model name; as a second safeguard the file is

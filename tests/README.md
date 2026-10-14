@@ -194,6 +194,12 @@ is dev-only test tooling, same as Playwright.
   Also the hybrid on the hold-out (`evals/hybrid-holdout.mjs`): per-type
   thresholds, the hold-out helpers and criterion, and that its committed
   results, models and report match a fresh run. Offline: no key, no network.
+- `session-usage.spec.mjs` — the per-call usage log (issue #177): every
+  model call recorded with its kind, model, served model and provider; the
+  session bundle's totals per kind (with `null` for fields no call
+  reported); persistence across a reload; Restart Conversation and
+  Disconnect starting a new log; a call that finishes after a restart not
+  leaking into the new log. Mocked OpenAI; no key, no network.
 - `subtype-connectivity.spec.mjs` — issue #155's step-1 analysis
   (`evals/subtype-connectivity.mjs`): how the committed recovered interview
   models treat the subclass pairs found by the reference audit (linked,
@@ -267,6 +273,12 @@ A key alone can't be used to run these: unlike OpenAI's single global API
 host, an Azure OpenAI key is only meaningful against the specific resource
 it belongs to. Costs a small amount of real money per run; never runs in
 CI, only when both are deliberately provided.
+Its prompt-caching test (issues #176/#177) checks that the app's own
+api-version accepts `prompt_cache_key`, that one key is sent per
+connection, that a second turn reports `cached_tokens > 0`, and that every
+call's usage is recorded; it prints the real token counts. Set the optional
+`AZURE_OPENAI_DEPLOYMENT` to run it against a specific deployment (the issue
+asks for a GPT-5.6+ one); without it the app's default choice is used.
 
 Either live suite is independent of the other — set only `OPENAI_API_KEY`
 to exercise the OpenAI live path, only the two Azure variables to exercise

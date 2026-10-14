@@ -93,8 +93,18 @@ test("agent panel is collapsed by default and expands via its toggle", async () 
 // loaded one, which is how this file's push-layout assertions flaked in a full
 // suite run while passing every time in isolation: the value sampled was a
 // mid-transition `84.3px` instead of the settled width.
-async function settledLeft(page, id) {
-  return waitForStyleSettled(page, `#${id}`, "left");
+async function settledLeft(page, id, opts = {}) {
+  return waitForStyleSettled(page, `#${id}`, "left", opts);
+}
+
+// Waits (up to 5s) for the computed `left` to reach `expected`, then returns
+// whatever it is, so the caller's assertion still reports the real value on
+// a failure. A plain "settled" wait could return the pre-transition 0px: the
+// value holds still for a few frames before the CSS transition starts.
+async function leftReaches(page, id, expected) {
+  await page.waitForFunction(({ id, expected }) => getComputedStyle(document.getElementById(id)).left === expected,
+    { id, expected }, { timeout: 5000, polling: "raf" }).catch(() => {});
+  return page.evaluate((id) => getComputedStyle(document.getElementById(id)).left, id);
 }
 
 test("toolbar and canvas sit flush left (0px) while the agent panel is collapsed -- the default, unchanged from before issue #55", async () => {
@@ -111,15 +121,15 @@ test("expanding the agent panel pushes the toolbar and canvas right by the panel
     const toggleWidth = await page.evaluate(() => document.getElementById("agent-panel-toggle").getBoundingClientRect().width);
     const expectedOffset = `${Math.round(panelWidth + toggleWidth)}px`;
 
-    assert.equal(await settledLeft(page, "toolbar"), expectedOffset);
-    assert.equal(await settledLeft(page, "canvas-wrap"), expectedOffset);
+    assert.equal(await leftReaches(page, "toolbar", expectedOffset), expectedOffset);
+    assert.equal(await leftReaches(page, "canvas-wrap", expectedOffset), expectedOffset);
   });
 });
 
 test("collapsing the agent panel again snaps the toolbar and canvas back to 0", async () => {
   await withPage(async (page) => {
     await openPanel(page);
-    await settledLeft(page, "toolbar"); // let it push out first
+    await settledLeft(page, "toolbar", { differentFrom: "0px" }); // let it push out first
     await page.click("#agent-panel-toggle"); // collapse
     assert.equal(await settledLeft(page, "toolbar"), "0px");
     assert.equal(await settledLeft(page, "canvas-wrap"), "0px");
@@ -143,7 +153,8 @@ test("dragging the resize handle widens the panel and pushes the toolbar/canvas 
 
     const bodyWidth = await page.evaluate(() => document.getElementById("agent-panel-body").getBoundingClientRect().width);
     const toggleWidth = await page.evaluate(() => document.getElementById("agent-panel-toggle").getBoundingClientRect().width);
-    assert.equal(await settledLeft(page, "toolbar"), `${Math.round(bodyWidth + toggleWidth)}px`);
+    const expected = `${Math.round(bodyWidth + toggleWidth)}px`;
+    assert.equal(await leftReaches(page, "toolbar", expected), expected);
   });
 });
 

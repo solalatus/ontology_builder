@@ -506,7 +506,7 @@ test("a 403 on the deployments endpoint is also treated as an invalid-key error"
 // Chat completions: URL, headers, and body shape
 // --------------------------------------------------------------------------
 
-test("a chat turn against Azure posts to the deployment-scoped URL with an api-key header and no model/prompt_cache_key field", async () => {
+test("a chat turn against Azure posts to the deployment-scoped URL with an api-key header, no model field, and a prompt_cache_key (issue #176)", async () => {
   await withPage(async (page) => {
     mockAzureDeploymentsRoute(page, {
       deployments: [{ id: "my-deployment", model: "gpt-4o-mini", created_at: 1, status: "succeeded" }],
@@ -526,7 +526,9 @@ test("a chat turn against Azure posts to the deployment-scoped URL with an api-k
     assert.equal(capturedRequest.headers["api-key"], "azure-secret");
     assert.equal(capturedRequest.headers["authorization"], undefined);
     assert.equal(capturedRequest.body.model, undefined, "Azure addresses the model via the URL, not a body field");
-    assert.equal(capturedRequest.body.prompt_cache_key, undefined, "prompt_cache_key is an OpenAI-only hint with no verified Azure equivalent");
+    // Issue #176: Azure documents prompt_cache_key for GPT-5.6+ families, so
+    // an Azure connection sends one too, the same kg-agent-<uuid> scheme.
+    assert.match(capturedRequest.body.prompt_cache_key || "", /^kg-agent-[0-9a-f-]{36}$/);
     assert.ok(Array.isArray(capturedRequest.body.messages) && capturedRequest.body.messages.length > 0);
     // Tools are always attached on a real chat turn (apply_ontology_yaml +
     // get_graph_state) -- this is the exact request shape a real tool-calling
@@ -802,5 +804,61 @@ test("remembering an Azure connection with a custom API version persists and res
     assert.equal(await page.evaluate(() => window.__kg.agent.getPendingAzureApiVersion()), customVersion);
     await page.click("#agent-azure-config-open");
     assert.equal(await page.locator("#agent-azure-api-version-input").inputValue(), customVersion);
+  });
+});
+
+test("issue #176: an Azure connection reuses one prompt_cache_key across turns, restart rotates it, and a new connection gets its own", async () => {
+  await withPage(async (page) => {
+    mockAzureDeploymentsRoute(page, {
+      deployments: [{ id: "my-deployment", model: "gpt-4o-mini", created_at: 1, status: "succeeded" }],
+    });
+    await connectAgent(page, { key: "azure-secret", azureEndpoint: AZURE_ENDPOINT });
+    const bodies = [];
+    await page.route(azureChatUrl("my-deployment"), (route) => {
+      bodies.push(route.request().postDataJSON());
+      route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(chatCompletionBody("ok")) });
+    });
+    for (const text of ["first", "second"]) {
+      await sendChatMessage(page, text);
+      await page.waitForFunction(() => !window.__kg.agent.isSending());
+    }
+    assert.equal(bodies.length, 2);
+    assert.ok(bodies[0].prompt_cache_key);
+    assert.equal(bodies[0].prompt_cache_key, bodies[1].prompt_cache_key, "one key for the whole connection");
+
+    await page.evaluate(() => window.__kg.agent.restartConversation());
+    await sendChatMessage(page, "after restart");
+    await page.waitForFunction(() => !window.__kg.agent.isSending());
+    assert.notEqual(bodies[2].prompt_cache_key, bodies[0].prompt_cache_key, "restart rotates the key");
+
+    await page.evaluate(() => window.__kg.agent.disconnect());
+    await connectAgent(page, { key: "azure-secret", azureEndpoint: AZURE_ENDPOINT });
+    await sendChatMessage(page, "new connection");
+    await page.waitForFunction(() => !window.__kg.agent.isSending());
+    assert.ok(bodies[3].prompt_cache_key);
+    assert.notEqual(bodies[3].prompt_cache_key, bodies[2].prompt_cache_key, "a new connection gets its own key");
+  });
+});
+
+
+test("issue #177: an Azure call's usage is recorded with provider azure and the deployment as its model", async () => {
+  await withPage(async (page) => {
+    mockAzureDeploymentsRoute(page, {
+      deployments: [{ id: "my-deployment", model: "gpt-4o-mini", created_at: 1, status: "succeeded" }],
+    });
+    await connectAgent(page, { key: "azure-secret", azureEndpoint: AZURE_ENDPOINT });
+    const usage = { prompt_tokens: 1500, completion_tokens: 40, prompt_tokens_details: { cached_tokens: 1280 } };
+    await page.route(azureChatUrl("my-deployment"), (route) => route.fulfill({
+      status: 200, contentType: "application/json",
+      body: JSON.stringify({ ...chatCompletionBody("ok"), model: "gpt-4o-mini-2024-07-18", usage }),
+    }));
+    await sendChatMessage(page, "hello");
+    await page.waitForFunction(() => !window.__kg.agent.isSending());
+    const [entry] = await page.evaluate(() => window.__kg.agent.state.usage);
+    assert.equal(entry.kind, "interview");
+    assert.equal(entry.provider, "azure");
+    assert.equal(entry.model, "my-deployment");
+    assert.equal(entry.served_model, "gpt-4o-mini-2024-07-18");
+    assert.deepEqual(entry.usage, usage);
   });
 });

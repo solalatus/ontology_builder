@@ -90,7 +90,9 @@ export async function configureAzureEndpoint(page, endpoint) {
 // .../openai/deployments (relayed, see forwardToRealAzure above), real
 // default-deployment selection against the real returned list, then
 // finalizes. Returns the real deployment-list responses.
-export async function connectAgentLiveAzure(page, apiKey, endpoint) {
+// `deployment` (optional) picks that deployment instead of the app's default
+// choice, e.g. a GPT-5.6+ one for the prompt-caching test (issue #176).
+export async function connectAgentLiveAzure(page, apiKey, endpoint, { deployment = null } = {}) {
   const deploymentsUrl = `${endpoint.replace(/\/+$/, "")}/openai/deployments**`;
   const modelResponses = forwardToRealAzure(page, deploymentsUrl);
   await openPanel(page);
@@ -99,6 +101,11 @@ export async function connectAgentLiveAzure(page, apiKey, endpoint) {
   await configureAzureEndpoint(page, endpoint);
   await page.click("#agent-connect-submit");
   await page.waitForFunction(() => !document.getElementById("agent-model-select-modal").disabled, null, { timeout: 30000 });
+  if (deployment) {
+    const ids = await page.$$eval("#agent-model-select-modal option", (os) => os.map((o) => o.value));
+    if (!ids.includes(deployment)) throw new Error(`deployment "${deployment}" is not in this key's deployment list: ${ids.join(", ")}`);
+    await page.selectOption("#agent-model-select-modal", deployment);
+  }
   await page.click("#agent-connect-submit");
   await page.waitForFunction(() => window.__kg.agent.state.connected === true, null, { timeout: 30000 });
   return modelResponses;
