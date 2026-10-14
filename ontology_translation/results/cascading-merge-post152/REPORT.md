@@ -1,5 +1,13 @@
 # Cascading intelligent-merge recompute — epic #152 gate, criterion (c)
 
+> **Addendum (2026-10-14, issue #174):** this cascade only ever merged runs 1
+> and 2, which in this era is the best of the three possible pairs. A
+> deterministic union of each pair scores 0.742, 0.669 and 0.665 (5-domain
+> macro composite): an average pair gains +0.038 over a single interview, not
+> the +0.088 the merge(1,2) figure suggests. A plain union of all three
+> (0.691) beats this cascade's three-way stage (0.665). See
+> `ontology_translation/results/majority-vote/README.md`.
+
 Recomputes the same measurement as `ontology_translation/results/cascading-merge/REPORT.md`
 (issue #147's baseline), after the elicitation-improvement bundle
 (epic #152, see `helper_agent_todo.md`'s own entry for the full account)

@@ -1,0 +1,467 @@
+{
+  "design": "ontology_translation/results/majority-vote/HYBRID-DESIGN.md",
+  "holdout": {
+    "sets": [
+      {
+        "set": "tests/evals/results/runs",
+        "interviews": 3,
+        "triples": 1,
+        "singles": 0.25421406188138757,
+        "union": {
+          "composite": 0.33141770464144066,
+          "relationships": {
+            "precision": 0.1568627450980392,
+            "recall": 0.14814814814814814
+          }
+        },
+        "hybrid": {
+          "composite": 0.30794645821937455,
+          "relationships": {
+            "precision": 0.35714285714285715,
+            "recall": 0.046296296296296294
+          }
+        },
+        "majority": {
+          "composite": 0.24852762598664238,
+          "relationships": {
+            "precision": 0.42857142857142855,
+            "recall": 0.05555555555555555
+          }
+        },
+        "intersection": {
+          "composite": 0.123287866686217,
+          "relationships": {
+            "precision": 0.4,
+            "recall": 0.018518518518518517
+          }
+        },
+        "hybrid_review_relationships": 84
+      },
+      {
+        "set": "tests/evals/results/baselines/competency-questions/control",
+        "interviews": 3,
+        "triples": 1,
+        "singles": 0.2382907431042218,
+        "union": {
+          "composite": 0.32187000034589036,
+          "relationships": {
+            "precision": 0.10666666666666667,
+            "recall": 0.07407407407407407
+          }
+        },
+        "hybrid": {
+          "composite": 0.30847413384559635,
+          "relationships": {
+            "precision": 0.15789473684210525,
+            "recall": 0.027777777777777776
+          }
+        },
+        "majority": {
+          "composite": 0.23968742543545693,
+          "relationships": {
+            "precision": 0.15789473684210525,
+            "recall": 0.027777777777777776
+          }
+        },
+        "intersection": {
+          "composite": 0.10525577618660958,
+          "relationships": {
+            "precision": 0.2857142857142857,
+            "recall": 0.018518518518518517
+          }
+        },
+        "hybrid_review_relationships": 51
+      },
+      {
+        "set": "tests/evals/results/baselines/competency-questions/treatment",
+        "interviews": 3,
+        "triples": 1,
+        "singles": 0.2752224918696387,
+        "union": {
+          "composite": 0.3535217950884674,
+          "relationships": {
+            "precision": 0.1511627906976744,
+            "recall": 0.12037037037037036
+          }
+        },
+        "hybrid": {
+          "composite": 0.3346880488512208,
+          "relationships": {
+            "precision": 0.23809523809523808,
+            "recall": 0.046296296296296294
+          }
+        },
+        "majority": {
+          "composite": 0.25599852344038393,
+          "relationships": {
+            "precision": 0.23809523809523808,
+            "recall": 0.046296296296296294
+          }
+        },
+        "intersection": {
+          "composite": 0.12675983436853003,
+          "relationships": {
+            "precision": 0.5,
+            "recall": 0.018518518518518517
+          }
+        },
+        "hybrid_review_relationships": 58
+      },
+      {
+        "set": "tests/evals/results/baselines/competency-questions-gpt-5-mini/control",
+        "interviews": 3,
+        "triples": 1,
+        "singles": 0.15898224664142482,
+        "union": {
+          "composite": 0.2280318690783807,
+          "relationships": {
+            "precision": 0.140625,
+            "recall": 0.08333333333333333
+          }
+        },
+        "hybrid": {
+          "composite": 0.2102421652421652,
+          "relationships": {
+            "precision": 0.3333333333333333,
+            "recall": 0.027777777777777776
+          }
+        },
+        "majority": {
+          "composite": 0.17498048710940992,
+          "relationships": {
+            "precision": 0.3333333333333333,
+            "recall": 0.027777777777777776
+          }
+        },
+        "intersection": {
+          "composite": 0.08900521400521401,
+          "relationships": {
+            "precision": 0.75,
+            "recall": 0.027777777777777776
+          }
+        },
+        "hybrid_review_relationships": 55
+      },
+      {
+        "set": "tests/evals/results/baselines/competency-questions-gpt-5-mini/treatment",
+        "interviews": 3,
+        "triples": 1,
+        "singles": 0.21439897996376844,
+        "union": {
+          "composite": 0.28769675595626065,
+          "relationships": {
+            "precision": 0.1125,
+            "recall": 0.08333333333333333
+          }
+        },
+        "hybrid": {
+          "composite": 0.2721753049621902,
+          "relationships": {
+            "precision": 0.21428571428571427,
+            "recall": 0.027777777777777776
+          }
+        },
+        "majority": {
+          "composite": 0.19841383187225572,
+          "relationships": {
+            "precision": 0.21428571428571427,
+            "recall": 0.027777777777777776
+          }
+        },
+        "intersection": {
+          "composite": 0.08187134502923976,
+          "relationships": {
+            "precision": 0,
+            "recall": 0
+          }
+        },
+        "hybrid_review_relationships": 61
+      },
+      {
+        "set": "tests/evals/results/baselines/prompt-tuning-bundle/control",
+        "interviews": 5,
+        "triples": 10,
+        "singles": 0.20463052642531201,
+        "union": {
+          "composite": 0.2804996718920323,
+          "relationships": {
+            "precision": 0.07895061317346655,
+            "recall": 0.04074074074074074
+          }
+        },
+        "hybrid": {
+          "composite": 0.2695403704006894,
+          "relationships": {
+            "precision": 0.07522134298450087,
+            "recall": 0.012037037037037037
+          }
+        },
+        "majority": {
+          "composite": 0.1770166324809555,
+          "relationships": {
+            "precision": 0.07522134298450087,
+            "recall": 0.012037037037037037
+          }
+        },
+        "intersection": {
+          "composite": 0.0924354790282558,
+          "relationships": {
+            "precision": 0.19718253968253968,
+            "recall": 0.010185185185185184
+          }
+        },
+        "hybrid_review_relationships": 38.3
+      },
+      {
+        "set": "tests/evals/results/baselines/prompt-tuning-bundle/treatment",
+        "interviews": 5,
+        "triples": 10,
+        "singles": 0.20264429506848103,
+        "union": {
+          "composite": 0.2820328094663167,
+          "relationships": {
+            "precision": 0.12519215811411818,
+            "recall": 0.06944444444444445
+          }
+        },
+        "hybrid": {
+          "composite": 0.2657139408162985,
+          "relationships": {
+            "precision": 0.3421536796536796,
+            "recall": 0.021296296296296296
+          }
+        },
+        "majority": {
+          "composite": 0.18181606282993318,
+          "relationships": {
+            "precision": 0.3421536796536796,
+            "recall": 0.021296296296296296
+          }
+        },
+        "intersection": {
+          "composite": 0.07801279803368091,
+          "relationships": {
+            "precision": 0.6416666666666666,
+            "recall": 0.010185185185185184
+          }
+        },
+        "hybrid_review_relationships": 50.8
+      },
+      {
+        "set": "tests/evals/results/baselines/self-correcting-interviewer/control",
+        "interviews": 3,
+        "triples": 1,
+        "singles": 0.2452560271012644,
+        "union": {
+          "composite": 0.34762040924847365,
+          "relationships": {
+            "precision": 0.15789473684210525,
+            "recall": 0.1111111111111111
+          }
+        },
+        "hybrid": {
+          "composite": 0.30974438927526704,
+          "relationships": {
+            "precision": 0.09090909090909091,
+            "recall": 0.009259259259259259
+          }
+        },
+        "majority": {
+          "composite": 0.22017760875639794,
+          "relationships": {
+            "precision": 0.09090909090909091,
+            "recall": 0.009259259259259259
+          }
+        },
+        "intersection": {
+          "composite": 0.1193640711989336,
+          "relationships": {
+            "precision": 1,
+            "recall": 0.009259259259259259
+          }
+        },
+        "hybrid_review_relationships": 61
+      },
+      {
+        "set": "tests/evals/results/baselines/self-correcting-interviewer/treatment",
+        "interviews": 3,
+        "triples": 1,
+        "singles": 0.23163069450111343,
+        "union": {
+          "composite": 0.28810879190385835,
+          "relationships": {
+            "precision": 0.15384615384615385,
+            "recall": 0.1111111111111111
+          }
+        },
+        "hybrid": {
+          "composite": 0.26677825601785427,
+          "relationships": {
+            "precision": 0.26666666666666666,
+            "recall": 0.037037037037037035
+          }
+        },
+        "majority": {
+          "composite": 0.20069839341587917,
+          "relationships": {
+            "precision": 0.26666666666666666,
+            "recall": 0.037037037037037035
+          }
+        },
+        "intersection": {
+          "composite": 0.12702007717445718,
+          "relationships": {
+            "precision": 0.2857142857142857,
+            "recall": 0.018518518518518517
+          }
+        },
+        "hybrid_review_relationships": 60
+      },
+      {
+        "set": "tests/evals/results/baselines/b2-generic-interviewer",
+        "interviews": 3,
+        "triples": 1,
+        "singles": 0.17031886305930144,
+        "union": {
+          "composite": 0.1784207896051974,
+          "relationships": {
+            "precision": 0.0410958904109589,
+            "recall": 0.1111111111111111
+          }
+        },
+        "hybrid": {
+          "composite": 0.1703255515099593,
+          "relationships": {
+            "precision": 0.5,
+            "recall": 0.018518518518518517
+          }
+        },
+        "majority": {
+          "composite": 0.16501831501831501,
+          "relationships": {
+            "precision": 0.5,
+            "recall": 0.018518518518518517
+          }
+        },
+        "intersection": {
+          "composite": 0.11523596780484345,
+          "relationships": {
+            "precision": 0,
+            "recall": 0
+          }
+        },
+        "hybrid_review_relationships": 284
+      }
+    ],
+    "criterion": {
+      "sets": 10,
+      "mean": {
+        "singles": 0.21955889296159134,
+        "union": 0.28992205972263185,
+        "hybrid": 0.2715628619140616,
+        "majority": 0.206233490634563,
+        "intersection": 0.10582484295159811
+      },
+      "hybrid_wins_vs_union": 0,
+      "hybrid_wins_vs_majority": 10,
+      "beats_union_on_mean": false,
+      "beats_majority_on_mean": true,
+      "wins_at_least_9_of_11": false,
+      "convincing": false
+    }
+  },
+  "phase1": {
+    "current": {
+      "domains": {
+        "brick-hvac": {
+          "hybrid": 0.7923582428500461,
+          "union": 0.7513439369619146,
+          "majority": 0.6863021936361021,
+          "merge(1,2)": 0.793875511131304,
+          "merge(1,2,3)": 0.7006032542285677
+        },
+        "fibo-loans": {
+          "hybrid": 0.7254114682283199,
+          "union": 0.6878338052295926,
+          "majority": 0.7015479284773815,
+          "merge(1,2)": 0.7422235422235421,
+          "merge(1,2,3)": 0.6762289562289562
+        },
+        "iof-maintenance": {
+          "hybrid": 0.7521367521367521,
+          "union": 0.71009471009471,
+          "majority": 0.6370370370370371,
+          "merge(1,2)": 0.6982456140350877,
+          "merge(1,2,3)": 0.6825396825396824
+        },
+        "iof-supply-chain": {
+          "hybrid": 0.6012334258402714,
+          "union": 0.5209466874890168,
+          "majority": 0.7691056910569106,
+          "merge(1,2)": 0.783509596553075,
+          "merge(1,2,3)": 0.5656879352531526
+        },
+        "itops": {
+          "hybrid": 0.7479677609547739,
+          "union": 0.7863475098608387,
+          "majority": 0.6639533758121366,
+          "merge(1,2)": 0.6896268352726564,
+          "merge(1,2,3)": 0.6997661213245628
+        }
+      },
+      "macro": {
+        "hybrid": 0.7238215300020328,
+        "union": 0.6913133299272145,
+        "majority": 0.6915892452039136,
+        "merge(1,2)": 0.741496219843133,
+        "merge(1,2,3)": 0.6649651899149844
+      }
+    },
+    "pre-152": {
+      "domains": {
+        "brick-hvac": {
+          "hybrid": 0.7990300597851081,
+          "union": 0.7690235366279,
+          "majority": 0.7643212508884151,
+          "merge(1,2)": 0.7178595576161498,
+          "merge(1,2,3)": 0.6114070785546922
+        },
+        "fibo-loans": {
+          "hybrid": 0.7235487091713023,
+          "union": 0.7206247325631151,
+          "majority": 0.6332118174223438,
+          "merge(1,2)": 0.6990891053391053,
+          "merge(1,2,3)": 0.7101064627380418
+        },
+        "iof-maintenance": {
+          "hybrid": 0.7491582491582491,
+          "union": 0.7439335887611748,
+          "majority": 0.6771749755620723,
+          "merge(1,2)": 0.7355311355311356,
+          "merge(1,2,3)": 0.7269841269841271
+        },
+        "iof-supply-chain": {
+          "hybrid": 0.7765567765567766,
+          "union": 0.7903340440653874,
+          "majority": 0.6967948717948719,
+          "merge(1,2)": 0.8183314627759072,
+          "merge(1,2,3)": 0.7278248587570623
+        },
+        "itops": {
+          "hybrid": 0.6274396170162465,
+          "union": 0.6653804169541758,
+          "majority": 0.5429120880451658,
+          "merge(1,2)": 0.6459449015348483,
+          "merge(1,2,3)": 0.7115347018572824
+        }
+      },
+      "macro": {
+        "hybrid": 0.7351466823375364,
+        "union": 0.7378592637943506,
+        "majority": 0.6628830007425738,
+        "merge(1,2)": 0.7233512325594292,
+        "merge(1,2,3)": 0.6975714457782412
+      }
+    }
+  }
+}

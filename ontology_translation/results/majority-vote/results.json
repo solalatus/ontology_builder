@@ -1,0 +1,3949 @@
+{
+  "design": "ontology_translation/results/majority-vote/DESIGN.md",
+  "eras": {
+    "current": {
+      "label": "current prompt (post #152)",
+      "domains": {
+        "brick-hvac": {
+          "arms": {
+            "run-01": {
+              "composite": 0.5594873509809443,
+              "classes": {
+                "precision": 1,
+                "recall": 0.6410256410256411,
+                "f1": 0.7812500000000001,
+                "matched": 25,
+                "recoveredTotal": 25,
+                "groundTruthTotal": 39
+              },
+              "relationships": {
+                "precision": 0.78125,
+                "recall": 0.7142857142857143,
+                "f1": 0.7462686567164178,
+                "matched": 25,
+                "recoveredTotal": 32,
+                "groundTruthTotal": 35
+              },
+              "properties": {
+                "precision": 0.36363636363636365,
+                "recall": 0.09523809523809523,
+                "f1": 0.1509433962264151,
+                "matched": 4,
+                "recoveredTotal": 11,
+                "groundTruthTotal": 42
+              },
+              "rules_f1": 0.6,
+              "actions_f1": 0
+            },
+            "run-02": {
+              "composite": 0.8018181818181818,
+              "classes": {
+                "precision": 1,
+                "recall": 0.9230769230769231,
+                "f1": 0.9600000000000001,
+                "matched": 36,
+                "recoveredTotal": 36,
+                "groundTruthTotal": 39
+              },
+              "relationships": {
+                "precision": 0.9354838709677419,
+                "recall": 0.8285714285714286,
+                "f1": 0.8787878787878788,
+                "matched": 29,
+                "recoveredTotal": 31,
+                "groundTruthTotal": 35
+              },
+              "properties": {
+                "precision": 0.9444444444444444,
+                "recall": 0.40476190476190477,
+                "f1": 0.5666666666666667,
+                "matched": 17,
+                "recoveredTotal": 18,
+                "groundTruthTotal": 42
+              },
+              "rules_f1": 0.923076923076923,
+              "actions_f1": 0.8333333333333333
+            },
+            "run-03": {
+              "composite": 0.6447761194029851,
+              "classes": {
+                "precision": 1,
+                "recall": 0.6666666666666666,
+                "f1": 0.8,
+                "matched": 26,
+                "recoveredTotal": 26,
+                "groundTruthTotal": 39
+              },
+              "relationships": {
+                "precision": 0.46875,
+                "recall": 0.42857142857142855,
+                "f1": 0.4477611940298507,
+                "matched": 15,
+                "recoveredTotal": 32,
+                "groundTruthTotal": 35
+              },
+              "properties": {
+                "precision": 0.92,
+                "recall": 0.5476190476190477,
+                "f1": 0.6865671641791046,
+                "matched": 23,
+                "recoveredTotal": 25,
+                "groundTruthTotal": 42
+              },
+              "rules_f1": 0.6666666666666666,
+              "actions_f1": 0.8000000000000002
+            },
+            "merge(1,2)": {
+              "composite": 0.793875511131304,
+              "classes": {
+                "precision": 1,
+                "recall": 0.9230769230769231,
+                "f1": 0.9600000000000001,
+                "matched": 36,
+                "recoveredTotal": 36,
+                "groundTruthTotal": 39
+              },
+              "relationships": {
+                "precision": 0.8611111111111112,
+                "recall": 0.8857142857142857,
+                "f1": 0.8732394366197184,
+                "matched": 31,
+                "recoveredTotal": 36,
+                "groundTruthTotal": 35
+              },
+              "properties": {
+                "precision": 0.85,
+                "recall": 0.40476190476190477,
+                "f1": 0.5483870967741935,
+                "matched": 17,
+                "recoveredTotal": 20,
+                "groundTruthTotal": 42
+              },
+              "rules_f1": 0.923076923076923,
+              "actions_f1": 0.8333333333333333
+            },
+            "merge(1,2,3)": {
+              "composite": 0.7006032542285677,
+              "classes": {
+                "precision": 1,
+                "recall": 0.9230769230769231,
+                "f1": 0.9600000000000001,
+                "matched": 36,
+                "recoveredTotal": 36,
+                "groundTruthTotal": 39
+              },
+              "relationships": {
+                "precision": 0.4473684210526316,
+                "recall": 0.4857142857142857,
+                "f1": 0.4657534246575342,
+                "matched": 17,
+                "recoveredTotal": 38,
+                "groundTruthTotal": 35
+              },
+              "properties": {
+                "precision": 0.8275862068965517,
+                "recall": 0.5714285714285714,
+                "f1": 0.676056338028169,
+                "matched": 24,
+                "recoveredTotal": 29,
+                "groundTruthTotal": 42
+              },
+              "rules_f1": 0.7692307692307692,
+              "actions_f1": 0.6666666666666666
+            },
+            "union": {
+              "composite": 0.7513439369619146,
+              "classes": {
+                "precision": 1,
+                "recall": 0.9230769230769231,
+                "f1": 0.9600000000000001,
+                "matched": 36,
+                "recoveredTotal": 36,
+                "groundTruthTotal": 39
+              },
+              "relationships": {
+                "precision": 0.5740740740740741,
+                "recall": 0.8857142857142857,
+                "f1": 0.6966292134831461,
+                "matched": 31,
+                "recoveredTotal": 54,
+                "groundTruthTotal": 35
+              },
+              "properties": {
+                "precision": 0.6571428571428571,
+                "recall": 0.5476190476190477,
+                "f1": 0.5974025974025974,
+                "matched": 23,
+                "recoveredTotal": 35,
+                "groundTruthTotal": 42
+              },
+              "rules_f1": 0.8571428571428571,
+              "actions_f1": 0.8333333333333333,
+              "name_collisions": 0
+            },
+            "majority": {
+              "composite": 0.6863021936361021,
+              "classes": {
+                "precision": 1,
+                "recall": 0.6923076923076923,
+                "f1": 0.8181818181818181,
+                "matched": 27,
+                "recoveredTotal": 27,
+                "groundTruthTotal": 39
+              },
+              "relationships": {
+                "precision": 0.9615384615384616,
+                "recall": 0.7142857142857143,
+                "f1": 0.819672131147541,
+                "matched": 25,
+                "recoveredTotal": 26,
+                "groundTruthTotal": 35
+              },
+              "properties": {
+                "precision": 0.8,
+                "recall": 0.2857142857142857,
+                "f1": 0.4210526315789473,
+                "matched": 12,
+                "recoveredTotal": 15,
+                "groundTruthTotal": 42
+              },
+              "rules_f1": 0.7272727272727273,
+              "actions_f1": 1,
+              "name_collisions": 0
+            },
+            "intersection": {
+              "composite": 0.5080176998335566,
+              "classes": {
+                "precision": 1,
+                "recall": 0.6153846153846154,
+                "f1": 0.761904761904762,
+                "matched": 24,
+                "recoveredTotal": 24,
+                "groundTruthTotal": 39
+              },
+              "relationships": {
+                "precision": 0.9375,
+                "recall": 0.42857142857142855,
+                "f1": 0.588235294117647,
+                "matched": 15,
+                "recoveredTotal": 16,
+                "groundTruthTotal": 35
+              },
+              "properties": {
+                "precision": 1,
+                "recall": 0.09523809523809523,
+                "f1": 0.17391304347826084,
+                "matched": 4,
+                "recoveredTotal": 4,
+                "groundTruthTotal": 42
+              },
+              "rules_f1": 0.6,
+              "actions_f1": 0,
+              "name_collisions": 0
+            },
+            "union(1,2)": {
+              "composite": 0.764709784411277,
+              "classes": {
+                "precision": 1,
+                "recall": 0.9230769230769231,
+                "f1": 0.9600000000000001,
+                "matched": 36,
+                "recoveredTotal": 36,
+                "groundTruthTotal": 39
+              },
+              "relationships": {
+                "precision": 0.775,
+                "recall": 0.8857142857142857,
+                "f1": 0.8266666666666667,
+                "matched": 31,
+                "recoveredTotal": 40,
+                "groundTruthTotal": 35
+              },
+              "properties": {
+                "precision": 0.68,
+                "recall": 0.40476190476190477,
+                "f1": 0.5074626865671642,
+                "matched": 17,
+                "recoveredTotal": 25,
+                "groundTruthTotal": 42
+              },
+              "rules_f1": 0.923076923076923,
+              "actions_f1": 0.8333333333333333,
+              "name_collisions": 0
+            },
+            "best pair": {
+              "composite": 0.6679749300231227,
+              "classes": {
+                "precision": 1,
+                "recall": 0.6923076923076923,
+                "f1": 0.8181818181818181,
+                "matched": 27,
+                "recoveredTotal": 27,
+                "groundTruthTotal": 39
+              },
+              "relationships": {
+                "precision": 0.5208333333333334,
+                "recall": 0.7142857142857143,
+                "f1": 0.6024096385542168,
+                "matched": 25,
+                "recoveredTotal": 48,
+                "groundTruthTotal": 35
+              },
+              "properties": {
+                "precision": 0.7,
+                "recall": 0.5,
+                "f1": 0.5833333333333334,
+                "matched": 21,
+                "recoveredTotal": 30,
+                "groundTruthTotal": 42
+              },
+              "rules_f1": 0.6666666666666666,
+              "actions_f1": 0.8000000000000002,
+              "name_collisions": 0
+            }
+          },
+          "best_pair": {
+            "chosen": "(1,3)",
+            "candidates": [
+              {
+                "pair": "(1,2)",
+                "errors_and_warnings": 4,
+                "components": 8,
+                "composite": 0.764709784411277
+              },
+              {
+                "pair": "(1,3)",
+                "errors_and_warnings": 2,
+                "components": 1,
+                "composite": 0.6679749300231227
+              },
+              {
+                "pair": "(2,3)",
+                "errors_and_warnings": 3,
+                "components": 9,
+                "composite": 0.7746296296296297
+              }
+            ]
+          },
+          "support": {
+            "classes": {
+              "support_1": 9,
+              "support_2": 3,
+              "support_3": 24,
+              "conflicts": 0
+            },
+            "properties": {
+              "support_1": 20,
+              "support_2": 11,
+              "support_3": 4,
+              "conflicts": 0
+            },
+            "relationships": {
+              "support_1": 28,
+              "support_2": 10,
+              "support_3": 15,
+              "conflicts": 0
+            },
+            "rules": {
+              "support_1": 3,
+              "support_2": 1,
+              "support_3": 3,
+              "conflicts": 0
+            },
+            "actions": {
+              "support_1": 2,
+              "support_2": 5,
+              "support_3": 0,
+              "conflicts": 0
+            }
+          },
+          "review_queue_majority": {
+            "classes": {
+              "below_threshold": 9,
+              "conflicts": 0
+            },
+            "properties": {
+              "below_threshold": 20,
+              "conflicts": 0
+            },
+            "relationships": {
+              "below_threshold": 28,
+              "conflicts": 0
+            },
+            "rules": {
+              "below_threshold": 3,
+              "conflicts": 0
+            },
+            "actions": {
+              "below_threshold": 2,
+              "conflicts": 0
+            },
+            "total": 62
+          }
+        },
+        "fibo-loans": {
+          "arms": {
+            "run-01": {
+              "composite": 0.7122088584445699,
+              "classes": {
+                "precision": 1,
+                "recall": 0.5087719298245614,
+                "f1": 0.6744186046511628,
+                "matched": 29,
+                "recoveredTotal": 29,
+                "groundTruthTotal": 57
+              },
+              "relationships": {
+                "precision": 0.8571428571428571,
+                "recall": 0.7741935483870968,
+                "f1": 0.8135593220338982,
+                "matched": 24,
+                "recoveredTotal": 28,
+                "groundTruthTotal": 31
+              },
+              "properties": {
+                "precision": 0.96,
+                "recall": 0.4897959183673469,
+                "f1": 0.6486486486486486,
+                "matched": 24,
+                "recoveredTotal": 25,
+                "groundTruthTotal": 49
+              },
+              "rules_f1": 0.6,
+              "actions_f1": 1
+            },
+            "run-02": {
+              "composite": 0.6505247561427338,
+              "classes": {
+                "precision": 0.96875,
+                "recall": 0.543859649122807,
+                "f1": 0.6966292134831461,
+                "matched": 31,
+                "recoveredTotal": 32,
+                "groundTruthTotal": 57
+              },
+              "relationships": {
+                "precision": 0.7352941176470589,
+                "recall": 0.8064516129032258,
+                "f1": 0.7692307692307693,
+                "matched": 25,
+                "recoveredTotal": 34,
+                "groundTruthTotal": 31
+              },
+              "properties": {
+                "precision": 0.8095238095238095,
+                "recall": 0.3469387755102041,
+                "f1": 0.4857142857142857,
+                "matched": 17,
+                "recoveredTotal": 21,
+                "groundTruthTotal": 49
+              },
+              "rules_f1": 0.6666666666666666,
+              "actions_f1": 1
+            },
+            "run-03": {
+              "composite": 0.6586865297509975,
+              "classes": {
+                "precision": 1,
+                "recall": 0.5263157894736842,
+                "f1": 0.6896551724137931,
+                "matched": 30,
+                "recoveredTotal": 30,
+                "groundTruthTotal": 57
+              },
+              "relationships": {
+                "precision": 0.78125,
+                "recall": 0.8064516129032258,
+                "f1": 0.7936507936507936,
+                "matched": 25,
+                "recoveredTotal": 32,
+                "groundTruthTotal": 31
+              },
+              "properties": {
+                "precision": 0.85,
+                "recall": 0.3469387755102041,
+                "f1": 0.49275362318840576,
+                "matched": 17,
+                "recoveredTotal": 20,
+                "groundTruthTotal": 49
+              },
+              "rules_f1": 0.6666666666666666,
+              "actions_f1": 1
+            },
+            "merge(1,2)": {
+              "composite": 0.7422235422235421,
+              "classes": {
+                "precision": 1,
+                "recall": 0.5964912280701754,
+                "f1": 0.7472527472527472,
+                "matched": 34,
+                "recoveredTotal": 34,
+                "groundTruthTotal": 57
+              },
+              "relationships": {
+                "precision": 0.7941176470588235,
+                "recall": 0.8709677419354839,
+                "f1": 0.8307692307692308,
+                "matched": 27,
+                "recoveredTotal": 34,
+                "groundTruthTotal": 31
+              },
+              "properties": {
+                "precision": 0.96,
+                "recall": 0.4897959183673469,
+                "f1": 0.6486486486486486,
+                "matched": 24,
+                "recoveredTotal": 25,
+                "groundTruthTotal": 49
+              },
+              "rules_f1": 0.6666666666666666,
+              "actions_f1": 1
+            },
+            "merge(1,2,3)": {
+              "composite": 0.6762289562289562,
+              "classes": {
+                "precision": 0.9696969696969697,
+                "recall": 0.5614035087719298,
+                "f1": 0.711111111111111,
+                "matched": 32,
+                "recoveredTotal": 33,
+                "groundTruthTotal": 57
+              },
+              "relationships": {
+                "precision": 0.7142857142857143,
+                "recall": 0.8064516129032258,
+                "f1": 0.7575757575757576,
+                "matched": 25,
+                "recoveredTotal": 35,
+                "groundTruthTotal": 31
+              },
+              "properties": {
+                "precision": 0.8076923076923077,
+                "recall": 0.42857142857142855,
+                "f1": 0.5599999999999999,
+                "matched": 21,
+                "recoveredTotal": 26,
+                "groundTruthTotal": 49
+              },
+              "rules_f1": 0.6666666666666666,
+              "actions_f1": 1
+            },
+            "union": {
+              "composite": 0.6878338052295926,
+              "classes": {
+                "precision": 0.9444444444444444,
+                "recall": 0.5964912280701754,
+                "f1": 0.7311827956989247,
+                "matched": 34,
+                "recoveredTotal": 36,
+                "groundTruthTotal": 57
+              },
+              "relationships": {
+                "precision": 0.6428571428571429,
+                "recall": 0.8709677419354839,
+                "f1": 0.7397260273972603,
+                "matched": 27,
+                "recoveredTotal": 42,
+                "groundTruthTotal": 31
+              },
+              "properties": {
+                "precision": 0.75,
+                "recall": 0.4897959183673469,
+                "f1": 0.5925925925925924,
+                "matched": 24,
+                "recoveredTotal": 32,
+                "groundTruthTotal": 49
+              },
+              "rules_f1": 0.8333333333333333,
+              "actions_f1": 1,
+              "name_collisions": 0
+            },
+            "majority": {
+              "composite": 0.7015479284773815,
+              "classes": {
+                "precision": 0.96875,
+                "recall": 0.543859649122807,
+                "f1": 0.6966292134831461,
+                "matched": 31,
+                "recoveredTotal": 32,
+                "groundTruthTotal": 57
+              },
+              "relationships": {
+                "precision": 0.8666666666666667,
+                "recall": 0.8387096774193549,
+                "f1": 0.8524590163934426,
+                "matched": 26,
+                "recoveredTotal": 30,
+                "groundTruthTotal": 31
+              },
+              "properties": {
+                "precision": 0.8695652173913043,
+                "recall": 0.40816326530612246,
+                "f1": 0.5555555555555556,
+                "matched": 20,
+                "recoveredTotal": 23,
+                "groundTruthTotal": 49
+              },
+              "rules_f1": 0.8333333333333333,
+              "actions_f1": 1,
+              "name_collisions": 0
+            },
+            "intersection": {
+              "composite": 0.5654612159329141,
+              "classes": {
+                "precision": 1,
+                "recall": 0.40350877192982454,
+                "f1": 0.575,
+                "matched": 23,
+                "recoveredTotal": 23,
+                "groundTruthTotal": 57
+              },
+              "relationships": {
+                "precision": 0.9090909090909091,
+                "recall": 0.6451612903225806,
+                "f1": 0.7547169811320754,
+                "matched": 20,
+                "recoveredTotal": 22,
+                "groundTruthTotal": 31
+              },
+              "properties": {
+                "precision": 1,
+                "recall": 0.22448979591836735,
+                "f1": 0.36666666666666664,
+                "matched": 11,
+                "recoveredTotal": 11,
+                "groundTruthTotal": 49
+              },
+              "rules_f1": 0.6,
+              "actions_f1": 1,
+              "name_collisions": 0
+            },
+            "union(1,2)": {
+              "composite": 0.7188749017393518,
+              "classes": {
+                "precision": 0.9714285714285714,
+                "recall": 0.5964912280701754,
+                "f1": 0.7391304347826086,
+                "matched": 34,
+                "recoveredTotal": 35,
+                "groundTruthTotal": 57
+              },
+              "relationships": {
+                "precision": 0.7297297297297297,
+                "recall": 0.8709677419354839,
+                "f1": 0.7941176470588235,
+                "matched": 27,
+                "recoveredTotal": 37,
+                "groundTruthTotal": 31
+              },
+              "properties": {
+                "precision": 0.8571428571428571,
+                "recall": 0.4897959183673469,
+                "f1": 0.6233766233766234,
+                "matched": 24,
+                "recoveredTotal": 28,
+                "groundTruthTotal": 49
+              },
+              "rules_f1": 0.8333333333333333,
+              "actions_f1": 1,
+              "name_collisions": 0
+            },
+            "best pair": {
+              "composite": 0.7188749017393518,
+              "classes": {
+                "precision": 0.9714285714285714,
+                "recall": 0.5964912280701754,
+                "f1": 0.7391304347826086,
+                "matched": 34,
+                "recoveredTotal": 35,
+                "groundTruthTotal": 57
+              },
+              "relationships": {
+                "precision": 0.7297297297297297,
+                "recall": 0.8709677419354839,
+                "f1": 0.7941176470588235,
+                "matched": 27,
+                "recoveredTotal": 37,
+                "groundTruthTotal": 31
+              },
+              "properties": {
+                "precision": 0.8571428571428571,
+                "recall": 0.4897959183673469,
+                "f1": 0.6233766233766234,
+                "matched": 24,
+                "recoveredTotal": 28,
+                "groundTruthTotal": 49
+              },
+              "rules_f1": 0.8333333333333333,
+              "actions_f1": 1,
+              "name_collisions": 0
+            }
+          },
+          "best_pair": {
+            "chosen": "(1,2)",
+            "candidates": [
+              {
+                "pair": "(1,2)",
+                "errors_and_warnings": 0,
+                "components": 2,
+                "composite": 0.7188749017393518
+              },
+              {
+                "pair": "(1,3)",
+                "errors_and_warnings": 0,
+                "components": 2,
+                "composite": 0.6991381167851757
+              },
+              {
+                "pair": "(2,3)",
+                "errors_and_warnings": 3,
+                "components": 2,
+                "composite": 0.6564220633418428
+              }
+            ]
+          },
+          "support": {
+            "classes": {
+              "support_1": 4,
+              "support_2": 9,
+              "support_3": 23,
+              "conflicts": 0
+            },
+            "properties": {
+              "support_1": 9,
+              "support_2": 12,
+              "support_3": 11,
+              "conflicts": 0
+            },
+            "relationships": {
+              "support_1": 12,
+              "support_2": 8,
+              "support_3": 22,
+              "conflicts": 0
+            },
+            "rules": {
+              "support_1": 0,
+              "support_2": 2,
+              "support_3": 3,
+              "conflicts": 0
+            },
+            "actions": {
+              "support_1": 0,
+              "support_2": 0,
+              "support_3": 5,
+              "conflicts": 0
+            }
+          },
+          "review_queue_majority": {
+            "classes": {
+              "below_threshold": 4,
+              "conflicts": 0
+            },
+            "properties": {
+              "below_threshold": 9,
+              "conflicts": 0
+            },
+            "relationships": {
+              "below_threshold": 12,
+              "conflicts": 0
+            },
+            "rules": {
+              "below_threshold": 0,
+              "conflicts": 0
+            },
+            "actions": {
+              "below_threshold": 0,
+              "conflicts": 0
+            },
+            "total": 25
+          }
+        },
+        "iof-maintenance": {
+          "arms": {
+            "run-01": {
+              "composite": 0.8104575163398694,
+              "classes": {
+                "precision": 0.9285714285714286,
+                "recall": 0.65,
+                "f1": 0.7647058823529412,
+                "matched": 13,
+                "recoveredTotal": 14,
+                "groundTruthTotal": 20
+              },
+              "relationships": {
+                "precision": 0.7272727272727273,
+                "recall": 0.6153846153846154,
+                "f1": 0.6666666666666667,
+                "matched": 8,
+                "recoveredTotal": 11,
+                "groundTruthTotal": 13
+              },
+              "properties": {
+                "precision": 1,
+                "recall": 1,
+                "f1": 1,
+                "matched": 5,
+                "recoveredTotal": 5,
+                "groundTruthTotal": 5
+              },
+              "rules_f1": 0.8333333333333333,
+              "actions_f1": 1
+            },
+            "run-02": {
+              "composite": 0.581578947368421,
+              "classes": {
+                "precision": 0.9444444444444444,
+                "recall": 0.85,
+                "f1": 0.8947368421052632,
+                "matched": 17,
+                "recoveredTotal": 18,
+                "groundTruthTotal": 20
+              },
+              "relationships": {
+                "precision": 0.5294117647058824,
+                "recall": 0.6923076923076923,
+                "f1": 0.5999999999999999,
+                "matched": 9,
+                "recoveredTotal": 17,
+                "groundTruthTotal": 13
+              },
+              "properties": {
+                "precision": 0.3333333333333333,
+                "recall": 0.2,
+                "f1": 0.25,
+                "matched": 1,
+                "recoveredTotal": 3,
+                "groundTruthTotal": 5
+              },
+              "rules_f1": 0.42857142857142855,
+              "actions_f1": 0.7692307692307693
+            },
+            "run-03": {
+              "composite": 0.5499211178724364,
+              "classes": {
+                "precision": 0.9285714285714286,
+                "recall": 0.65,
+                "f1": 0.7647058823529412,
+                "matched": 13,
+                "recoveredTotal": 14,
+                "groundTruthTotal": 20
+              },
+              "relationships": {
+                "precision": 0.5,
+                "recall": 0.6153846153846154,
+                "f1": 0.5517241379310345,
+                "matched": 8,
+                "recoveredTotal": 16,
+                "groundTruthTotal": 13
+              },
+              "properties": {
+                "precision": 0.2857142857142857,
+                "recall": 0.4,
+                "f1": 0.3333333333333333,
+                "matched": 2,
+                "recoveredTotal": 7,
+                "groundTruthTotal": 5
+              },
+              "rules_f1": 0.5454545454545454,
+              "actions_f1": 0.8000000000000002
+            },
+            "merge(1,2)": {
+              "composite": 0.6982456140350877,
+              "classes": {
+                "precision": 0.9444444444444444,
+                "recall": 0.85,
+                "f1": 0.8947368421052632,
+                "matched": 17,
+                "recoveredTotal": 18,
+                "groundTruthTotal": 20
+              },
+              "relationships": {
+                "precision": 0.5294117647058824,
+                "recall": 0.6923076923076923,
+                "f1": 0.5999999999999999,
+                "matched": 9,
+                "recoveredTotal": 17,
+                "groundTruthTotal": 13
+              },
+              "properties": {
+                "precision": 0.6,
+                "recall": 0.6,
+                "f1": 0.6,
+                "matched": 3,
+                "recoveredTotal": 5,
+                "groundTruthTotal": 5
+              },
+              "rules_f1": 0.39999999999999997,
+              "actions_f1": 0.7692307692307693
+            },
+            "merge(1,2,3)": {
+              "composite": 0.6825396825396824,
+              "classes": {
+                "precision": 0.9375,
+                "recall": 0.75,
+                "f1": 0.8333333333333334,
+                "matched": 15,
+                "recoveredTotal": 16,
+                "groundTruthTotal": 20
+              },
+              "relationships": {
+                "precision": 0.6,
+                "recall": 0.6923076923076923,
+                "f1": 0.6428571428571429,
+                "matched": 9,
+                "recoveredTotal": 15,
+                "groundTruthTotal": 13
+              },
+              "properties": {
+                "precision": 0.4444444444444444,
+                "recall": 0.8,
+                "f1": 0.5714285714285714,
+                "matched": 4,
+                "recoveredTotal": 9,
+                "groundTruthTotal": 5
+              },
+              "rules_f1": 0.4615384615384615,
+              "actions_f1": 0.8000000000000002
+            },
+            "union": {
+              "composite": 0.71009471009471,
+              "classes": {
+                "precision": 0.9473684210526315,
+                "recall": 0.9,
+                "f1": 0.9230769230769231,
+                "matched": 18,
+                "recoveredTotal": 19,
+                "groundTruthTotal": 20
+              },
+              "relationships": {
+                "precision": 0.4166666666666667,
+                "recall": 0.7692307692307693,
+                "f1": 0.5405405405405406,
+                "matched": 10,
+                "recoveredTotal": 24,
+                "groundTruthTotal": 13
+              },
+              "properties": {
+                "precision": 0.5,
+                "recall": 1,
+                "f1": 0.6666666666666666,
+                "matched": 5,
+                "recoveredTotal": 10,
+                "groundTruthTotal": 5
+              },
+              "rules_f1": 0.6250000000000001,
+              "actions_f1": 0.7692307692307693,
+              "name_collisions": 0
+            },
+            "majority": {
+              "composite": 0.6370370370370371,
+              "classes": {
+                "precision": 0.9333333333333333,
+                "recall": 0.7,
+                "f1": 0.8,
+                "matched": 14,
+                "recoveredTotal": 15,
+                "groundTruthTotal": 20
+              },
+              "relationships": {
+                "precision": 0.7272727272727273,
+                "recall": 0.6153846153846154,
+                "f1": 0.6666666666666667,
+                "matched": 8,
+                "recoveredTotal": 11,
+                "groundTruthTotal": 13
+              },
+              "properties": {
+                "precision": 0.5,
+                "recall": 0.4,
+                "f1": 0.4444444444444445,
+                "matched": 2,
+                "recoveredTotal": 4,
+                "groundTruthTotal": 5
+              },
+              "rules_f1": 0.5454545454545454,
+              "actions_f1": 1,
+              "name_collisions": 0
+            },
+            "intersection": {
+              "composite": 0.5736111111111111,
+              "classes": {
+                "precision": 0.9166666666666666,
+                "recall": 0.55,
+                "f1": 0.6874999999999999,
+                "matched": 11,
+                "recoveredTotal": 12,
+                "groundTruthTotal": 20
+              },
+              "relationships": {
+                "precision": 1,
+                "recall": 0.5384615384615384,
+                "f1": 0.7000000000000001,
+                "matched": 7,
+                "recoveredTotal": 7,
+                "groundTruthTotal": 13
+              },
+              "properties": {
+                "precision": 1,
+                "recall": 0.2,
+                "f1": 0.33333333333333337,
+                "matched": 1,
+                "recoveredTotal": 1,
+                "groundTruthTotal": 5
+              },
+              "rules_f1": 0.6,
+              "actions_f1": 1,
+              "name_collisions": 0
+            },
+            "union(1,2)": {
+              "composite": 0.7729700854700855,
+              "classes": {
+                "precision": 0.9473684210526315,
+                "recall": 0.9,
+                "f1": 0.9230769230769231,
+                "matched": 18,
+                "recoveredTotal": 19,
+                "groundTruthTotal": 20
+              },
+              "relationships": {
+                "precision": 0.47368421052631576,
+                "recall": 0.6923076923076923,
+                "f1": 0.5625,
+                "matched": 9,
+                "recoveredTotal": 19,
+                "groundTruthTotal": 13
+              },
+              "properties": {
+                "precision": 0.7142857142857143,
+                "recall": 1,
+                "f1": 0.8333333333333333,
+                "matched": 5,
+                "recoveredTotal": 7,
+                "groundTruthTotal": 5
+              },
+              "rules_f1": 0.6250000000000001,
+              "actions_f1": 0.7692307692307693,
+              "name_collisions": 0
+            },
+            "best pair": {
+              "composite": 0.603988603988604,
+              "classes": {
+                "precision": 0.9473684210526315,
+                "recall": 0.9,
+                "f1": 0.9230769230769231,
+                "matched": 18,
+                "recoveredTotal": 19,
+                "groundTruthTotal": 20
+              },
+              "relationships": {
+                "precision": 0.43478260869565216,
+                "recall": 0.7692307692307693,
+                "f1": 0.5555555555555555,
+                "matched": 10,
+                "recoveredTotal": 23,
+                "groundTruthTotal": 13
+              },
+              "properties": {
+                "precision": 0.2857142857142857,
+                "recall": 0.4,
+                "f1": 0.3333333333333333,
+                "matched": 2,
+                "recoveredTotal": 7,
+                "groundTruthTotal": 5
+              },
+              "rules_f1": 0.42857142857142855,
+              "actions_f1": 0.7692307692307693,
+              "name_collisions": 0
+            }
+          },
+          "best_pair": {
+            "chosen": "(2,3)",
+            "candidates": [
+              {
+                "pair": "(1,2)",
+                "errors_and_warnings": 6,
+                "components": 3,
+                "composite": 0.7729700854700855
+              },
+              {
+                "pair": "(1,3)",
+                "errors_and_warnings": 4,
+                "components": 1,
+                "composite": 0.6824372759856631
+              },
+              {
+                "pair": "(2,3)",
+                "errors_and_warnings": 2,
+                "components": 1,
+                "composite": 0.603988603988604
+              }
+            ]
+          },
+          "support": {
+            "classes": {
+              "support_1": 4,
+              "support_2": 3,
+              "support_3": 12,
+              "conflicts": 0
+            },
+            "properties": {
+              "support_1": 6,
+              "support_2": 3,
+              "support_3": 1,
+              "conflicts": 0
+            },
+            "relationships": {
+              "support_1": 13,
+              "support_2": 4,
+              "support_3": 7,
+              "conflicts": 0
+            },
+            "rules": {
+              "support_1": 5,
+              "support_2": 1,
+              "support_3": 3,
+              "conflicts": 0
+            },
+            "actions": {
+              "support_1": 3,
+              "support_2": 0,
+              "support_3": 5,
+              "conflicts": 0
+            }
+          },
+          "review_queue_majority": {
+            "classes": {
+              "below_threshold": 4,
+              "conflicts": 0
+            },
+            "properties": {
+              "below_threshold": 6,
+              "conflicts": 0
+            },
+            "relationships": {
+              "below_threshold": 13,
+              "conflicts": 0
+            },
+            "rules": {
+              "below_threshold": 5,
+              "conflicts": 0
+            },
+            "actions": {
+              "below_threshold": 3,
+              "conflicts": 0
+            },
+            "total": 31
+          }
+        },
+        "iof-supply-chain": {
+          "arms": {
+            "run-01": {
+              "composite": 0.6878306878306878,
+              "classes": {
+                "precision": 0.9459459459459459,
+                "recall": 0.660377358490566,
+                "f1": 0.7777777777777778,
+                "matched": 35,
+                "recoveredTotal": 37,
+                "groundTruthTotal": 53
+              },
+              "relationships": {
+                "precision": 0.425,
+                "recall": 0.5666666666666667,
+                "f1": 0.48571428571428565,
+                "matched": 17,
+                "recoveredTotal": 40,
+                "groundTruthTotal": 30
+              },
+              "properties": {
+                "precision": 1,
+                "recall": 0.6666666666666666,
+                "f1": 0.8,
+                "matched": 2,
+                "recoveredTotal": 2,
+                "groundTruthTotal": 3
+              },
+              "rules_f1": 0.888888888888889,
+              "actions_f1": 1
+            },
+            "run-02": {
+              "composite": 0.7455026455026456,
+              "classes": {
+                "precision": 1,
+                "recall": 0.5849056603773585,
+                "f1": 0.738095238095238,
+                "matched": 31,
+                "recoveredTotal": 31,
+                "groundTruthTotal": 53
+              },
+              "relationships": {
+                "precision": 0.6666666666666666,
+                "recall": 0.7333333333333333,
+                "f1": 0.6984126984126984,
+                "matched": 22,
+                "recoveredTotal": 33,
+                "groundTruthTotal": 30
+              },
+              "properties": {
+                "precision": 1,
+                "recall": 0.6666666666666666,
+                "f1": 0.8,
+                "matched": 2,
+                "recoveredTotal": 2,
+                "groundTruthTotal": 3
+              },
+              "rules_f1": 0.7499999999999999,
+              "actions_f1": 1
+            },
+            "run-03": {
+              "composite": 0.5202337987894362,
+              "classes": {
+                "precision": 1,
+                "recall": 0.4716981132075472,
+                "f1": 0.641025641025641,
+                "matched": 25,
+                "recoveredTotal": 25,
+                "groundTruthTotal": 53
+              },
+              "relationships": {
+                "precision": 0.7586206896551724,
+                "recall": 0.7333333333333333,
+                "f1": 0.7457627118644068,
+                "matched": 22,
+                "recoveredTotal": 29,
+                "groundTruthTotal": 30
+              },
+              "properties": {
+                "precision": 0.1,
+                "recall": 0.6666666666666666,
+                "f1": 0.1739130434782609,
+                "matched": 2,
+                "recoveredTotal": 20,
+                "groundTruthTotal": 3
+              },
+              "rules_f1": 0.33333333333333337,
+              "actions_f1": 1
+            },
+            "merge(1,2)": {
+              "composite": 0.783509596553075,
+              "classes": {
+                "precision": 1,
+                "recall": 0.7358490566037735,
+                "f1": 0.8478260869565216,
+                "matched": 39,
+                "recoveredTotal": 39,
+                "groundTruthTotal": 53
+              },
+              "relationships": {
+                "precision": 0.5909090909090909,
+                "recall": 0.8666666666666667,
+                "f1": 0.7027027027027029,
+                "matched": 26,
+                "recoveredTotal": 44,
+                "groundTruthTotal": 30
+              },
+              "properties": {
+                "precision": 1,
+                "recall": 0.6666666666666666,
+                "f1": 0.8,
+                "matched": 2,
+                "recoveredTotal": 2,
+                "groundTruthTotal": 3
+              },
+              "rules_f1": 0.888888888888889,
+              "actions_f1": 1
+            },
+            "merge(1,2,3)": {
+              "composite": 0.5656879352531526,
+              "classes": {
+                "precision": 1,
+                "recall": 0.7358490566037735,
+                "f1": 0.8478260869565216,
+                "matched": 39,
+                "recoveredTotal": 39,
+                "groundTruthTotal": 53
+              },
+              "relationships": {
+                "precision": 0.5531914893617021,
+                "recall": 0.8666666666666667,
+                "f1": 0.6753246753246753,
+                "matched": 26,
+                "recoveredTotal": 47,
+                "groundTruthTotal": 30
+              },
+              "properties": {
+                "precision": 0.1,
+                "recall": 0.6666666666666666,
+                "f1": 0.1739130434782609,
+                "matched": 2,
+                "recoveredTotal": 20,
+                "groundTruthTotal": 3
+              },
+              "rules_f1": 0.888888888888889,
+              "actions_f1": 1
+            },
+            "union": {
+              "composite": 0.5209466874890168,
+              "classes": {
+                "precision": 0.9512195121951219,
+                "recall": 0.7358490566037735,
+                "f1": 0.8297872340425531,
+                "matched": 39,
+                "recoveredTotal": 41,
+                "groundTruthTotal": 53
+              },
+              "relationships": {
+                "precision": 0.4126984126984127,
+                "recall": 0.8666666666666667,
+                "f1": 0.5591397849462365,
+                "matched": 26,
+                "recoveredTotal": 63,
+                "groundTruthTotal": 30
+              },
+              "properties": {
+                "precision": 0.1,
+                "recall": 0.6666666666666666,
+                "f1": 0.1739130434782609,
+                "matched": 2,
+                "recoveredTotal": 20,
+                "groundTruthTotal": 3
+              },
+              "rules_f1": 0.888888888888889,
+              "actions_f1": 1,
+              "name_collisions": 0
+            },
+            "majority": {
+              "composite": 0.7691056910569106,
+              "classes": {
+                "precision": 1,
+                "recall": 0.5471698113207547,
+                "f1": 0.7073170731707317,
+                "matched": 29,
+                "recoveredTotal": 29,
+                "groundTruthTotal": 53
+              },
+              "relationships": {
+                "precision": 0.88,
+                "recall": 0.7333333333333333,
+                "f1": 0.8,
+                "matched": 22,
+                "recoveredTotal": 25,
+                "groundTruthTotal": 30
+              },
+              "properties": {
+                "precision": 1,
+                "recall": 0.6666666666666666,
+                "f1": 0.8,
+                "matched": 2,
+                "recoveredTotal": 2,
+                "groundTruthTotal": 3
+              },
+              "rules_f1": 0.7499999999999999,
+              "actions_f1": 1,
+              "name_collisions": 0
+            },
+            "intersection": {
+              "composite": 0.665390749601276,
+              "classes": {
+                "precision": 1,
+                "recall": 0.4339622641509434,
+                "f1": 0.6052631578947368,
+                "matched": 23,
+                "recoveredTotal": 23,
+                "groundTruthTotal": 53
+              },
+              "relationships": {
+                "precision": 0.9285714285714286,
+                "recall": 0.43333333333333335,
+                "f1": 0.5909090909090909,
+                "matched": 13,
+                "recoveredTotal": 14,
+                "groundTruthTotal": 30
+              },
+              "properties": {
+                "precision": 1,
+                "recall": 0.6666666666666666,
+                "f1": 0.8,
+                "matched": 2,
+                "recoveredTotal": 2,
+                "groundTruthTotal": 3
+              },
+              "rules_f1": 0.33333333333333337,
+              "actions_f1": 1,
+              "name_collisions": 0
+            },
+            "union(1,2)": {
+              "composite": 0.7424961278226135,
+              "classes": {
+                "precision": 0.9512195121951219,
+                "recall": 0.7358490566037735,
+                "f1": 0.8297872340425531,
+                "matched": 39,
+                "recoveredTotal": 41,
+                "groundTruthTotal": 53
+              },
+              "relationships": {
+                "precision": 0.45614035087719296,
+                "recall": 0.8666666666666667,
+                "f1": 0.5977011494252873,
+                "matched": 26,
+                "recoveredTotal": 57,
+                "groundTruthTotal": 30
+              },
+              "properties": {
+                "precision": 1,
+                "recall": 0.6666666666666666,
+                "f1": 0.8,
+                "matched": 2,
+                "recoveredTotal": 2,
+                "groundTruthTotal": 3
+              },
+              "rules_f1": 0.888888888888889,
+              "actions_f1": 1,
+              "name_collisions": 0
+            },
+            "best pair": {
+              "composite": 0.7424961278226135,
+              "classes": {
+                "precision": 0.9512195121951219,
+                "recall": 0.7358490566037735,
+                "f1": 0.8297872340425531,
+                "matched": 39,
+                "recoveredTotal": 41,
+                "groundTruthTotal": 53
+              },
+              "relationships": {
+                "precision": 0.45614035087719296,
+                "recall": 0.8666666666666667,
+                "f1": 0.5977011494252873,
+                "matched": 26,
+                "recoveredTotal": 57,
+                "groundTruthTotal": 30
+              },
+              "properties": {
+                "precision": 1,
+                "recall": 0.6666666666666666,
+                "f1": 0.8,
+                "matched": 2,
+                "recoveredTotal": 2,
+                "groundTruthTotal": 3
+              },
+              "rules_f1": 0.888888888888889,
+              "actions_f1": 1,
+              "name_collisions": 0
+            }
+          },
+          "best_pair": {
+            "chosen": "(1,2)",
+            "candidates": [
+              {
+                "pair": "(1,2)",
+                "errors_and_warnings": 0,
+                "components": 2,
+                "composite": 0.7424961278226135
+              },
+              {
+                "pair": "(1,3)",
+                "errors_and_warnings": 0,
+                "components": 3,
+                "composite": 0.5300085251491902
+              },
+              {
+                "pair": "(2,3)",
+                "errors_and_warnings": 0,
+                "components": 4,
+                "composite": 0.5165631469979296
+              }
+            ]
+          },
+          "support": {
+            "classes": {
+              "support_1": 12,
+              "support_2": 6,
+              "support_3": 23,
+              "conflicts": 0
+            },
+            "properties": {
+              "support_1": 18,
+              "support_2": 0,
+              "support_3": 2,
+              "conflicts": 0
+            },
+            "relationships": {
+              "support_1": 38,
+              "support_2": 11,
+              "support_3": 14,
+              "conflicts": 0
+            },
+            "rules": {
+              "support_1": 1,
+              "support_2": 2,
+              "support_3": 1,
+              "conflicts": 0
+            },
+            "actions": {
+              "support_1": 0,
+              "support_2": 0,
+              "support_3": 5,
+              "conflicts": 0
+            }
+          },
+          "review_queue_majority": {
+            "classes": {
+              "below_threshold": 12,
+              "conflicts": 0
+            },
+            "properties": {
+              "below_threshold": 18,
+              "conflicts": 0
+            },
+            "relationships": {
+              "below_threshold": 38,
+              "conflicts": 0
+            },
+            "rules": {
+              "below_threshold": 1,
+              "conflicts": 0
+            },
+            "actions": {
+              "below_threshold": 0,
+              "conflicts": 0
+            },
+            "total": 69
+          }
+        },
+        "itops": {
+          "arms": {
+            "run-01": {
+              "composite": 0.5674461672038268,
+              "classes": {
+                "precision": 1,
+                "recall": 0.6029411764705882,
+                "f1": 0.7522935779816513,
+                "matched": 41,
+                "recoveredTotal": 41,
+                "groundTruthTotal": 68
+              },
+              "relationships": {
+                "precision": 0.9019607843137255,
+                "recall": 0.42592592592592593,
+                "f1": 0.5786163522012578,
+                "matched": 46,
+                "recoveredTotal": 51,
+                "groundTruthTotal": 108
+              },
+              "properties": {
+                "precision": 0.896551724137931,
+                "recall": 0.23423423423423423,
+                "f1": 0.37142857142857144,
+                "matched": 26,
+                "recoveredTotal": 29,
+                "groundTruthTotal": 111
+              },
+              "rules_f1": 0.3076923076923077,
+              "actions_f1": 1
+            },
+            "run-02": {
+              "composite": 0.6684111563055387,
+              "classes": {
+                "precision": 1,
+                "recall": 0.6617647058823529,
+                "f1": 0.7964601769911505,
+                "matched": 45,
+                "recoveredTotal": 45,
+                "groundTruthTotal": 68
+              },
+              "relationships": {
+                "precision": 0.9423076923076923,
+                "recall": 0.4537037037037037,
+                "f1": 0.6125,
+                "matched": 49,
+                "recoveredTotal": 52,
+                "groundTruthTotal": 108
+              },
+              "properties": {
+                "precision": 0.96,
+                "recall": 0.43243243243243246,
+                "f1": 0.5962732919254659,
+                "matched": 48,
+                "recoveredTotal": 50,
+                "groundTruthTotal": 111
+              },
+              "rules_f1": 0.3076923076923077,
+              "actions_f1": 1
+            },
+            "run-03": {
+              "composite": 0.6491720800000428,
+              "classes": {
+                "precision": 0.9782608695652174,
+                "recall": 0.6617647058823529,
+                "f1": 0.7894736842105263,
+                "matched": 45,
+                "recoveredTotal": 46,
+                "groundTruthTotal": 68
+              },
+              "relationships": {
+                "precision": 0.6056338028169014,
+                "recall": 0.39814814814814814,
+                "f1": 0.4804469273743017,
+                "matched": 43,
+                "recoveredTotal": 71,
+                "groundTruthTotal": 108
+              },
+              "properties": {
+                "precision": 0.8611111111111112,
+                "recall": 0.5585585585585585,
+                "f1": 0.6775956284153005,
+                "matched": 62,
+                "recoveredTotal": 72,
+                "groundTruthTotal": 111
+              },
+              "rules_f1": 0.7857142857142858,
+              "actions_f1": 1
+            },
+            "merge(1,2)": {
+              "composite": 0.6896268352726564,
+              "classes": {
+                "precision": 1,
+                "recall": 0.7058823529411765,
+                "f1": 0.8275862068965517,
+                "matched": 48,
+                "recoveredTotal": 48,
+                "groundTruthTotal": 68
+              },
+              "relationships": {
+                "precision": 0.9298245614035088,
+                "recall": 0.49074074074074076,
+                "f1": 0.6424242424242425,
+                "matched": 53,
+                "recoveredTotal": 57,
+                "groundTruthTotal": 108
+              },
+              "properties": {
+                "precision": 0.803030303030303,
+                "recall": 0.4774774774774775,
+                "f1": 0.5988700564971752,
+                "matched": 53,
+                "recoveredTotal": 66,
+                "groundTruthTotal": 111
+              },
+              "rules_f1": 0.42857142857142855,
+              "actions_f1": 1
+            },
+            "merge(1,2,3)": {
+              "composite": 0.6997661213245628,
+              "classes": {
+                "precision": 1,
+                "recall": 0.7794117647058824,
+                "f1": 0.8760330578512397,
+                "matched": 53,
+                "recoveredTotal": 53,
+                "groundTruthTotal": 68
+              },
+              "relationships": {
+                "precision": 0.6086956521739131,
+                "recall": 0.5185185185185185,
+                "f1": 0.5599999999999999,
+                "matched": 56,
+                "recoveredTotal": 92,
+                "groundTruthTotal": 108
+              },
+              "properties": {
+                "precision": 0.7647058823529411,
+                "recall": 0.5855855855855856,
+                "f1": 0.663265306122449,
+                "matched": 65,
+                "recoveredTotal": 85,
+                "groundTruthTotal": 111
+              },
+              "rules_f1": 0.7857142857142858,
+              "actions_f1": 1
+            },
+            "union": {
+              "composite": 0.7863475098608387,
+              "classes": {
+                "precision": 1,
+                "recall": 0.7794117647058824,
+                "f1": 0.8760330578512397,
+                "matched": 53,
+                "recoveredTotal": 53,
+                "groundTruthTotal": 68
+              },
+              "relationships": {
+                "precision": 0.7425742574257426,
+                "recall": 0.6944444444444444,
+                "f1": 0.7177033492822966,
+                "matched": 75,
+                "recoveredTotal": 101,
+                "groundTruthTotal": 108
+              },
+              "properties": {
+                "precision": 0.8823529411764706,
+                "recall": 0.6756756756756757,
+                "f1": 0.7653061224489796,
+                "matched": 75,
+                "recoveredTotal": 85,
+                "groundTruthTotal": 111
+              },
+              "rules_f1": 0.7857142857142858,
+              "actions_f1": 1,
+              "name_collisions": 0
+            },
+            "majority": {
+              "composite": 0.6639533758121366,
+              "classes": {
+                "precision": 1,
+                "recall": 0.6764705882352942,
+                "f1": 0.8070175438596492,
+                "matched": 46,
+                "recoveredTotal": 46,
+                "groundTruthTotal": 68
+              },
+              "relationships": {
+                "precision": 0.9791666666666666,
+                "recall": 0.4351851851851852,
+                "f1": 0.6025641025641025,
+                "matched": 47,
+                "recoveredTotal": 48,
+                "groundTruthTotal": 108
+              },
+              "properties": {
+                "precision": 0.9787234042553191,
+                "recall": 0.4144144144144144,
+                "f1": 0.5822784810126581,
+                "matched": 46,
+                "recoveredTotal": 47,
+                "groundTruthTotal": 111
+              },
+              "rules_f1": 0.42857142857142855,
+              "actions_f1": 1,
+              "name_collisions": 0
+            },
+            "intersection": {
+              "composite": 0.4405709628221353,
+              "classes": {
+                "precision": 1,
+                "recall": 0.4852941176470588,
+                "f1": 0.6534653465346535,
+                "matched": 33,
+                "recoveredTotal": 33,
+                "groundTruthTotal": 68
+              },
+              "relationships": {
+                "precision": 1,
+                "recall": 0.23148148148148148,
+                "f1": 0.3759398496240602,
+                "matched": 25,
+                "recoveredTotal": 25,
+                "groundTruthTotal": 108
+              },
+              "properties": {
+                "precision": 1,
+                "recall": 0.17117117117117117,
+                "f1": 0.2923076923076923,
+                "matched": 19,
+                "recoveredTotal": 19,
+                "groundTruthTotal": 111
+              },
+              "rules_f1": 0.16666666666666669,
+              "actions_f1": 0.9523809523809523,
+              "name_collisions": 0
+            },
+            "union(1,2)": {
+              "composite": 0.7133994667449203,
+              "classes": {
+                "precision": 1,
+                "recall": 0.7058823529411765,
+                "f1": 0.8275862068965517,
+                "matched": 48,
+                "recoveredTotal": 48,
+                "groundTruthTotal": 68
+              },
+              "relationships": {
+                "precision": 0.8714285714285714,
+                "recall": 0.5648148148148148,
+                "f1": 0.6853932584269662,
+                "matched": 61,
+                "recoveredTotal": 70,
+                "groundTruthTotal": 108
+              },
+              "properties": {
+                "precision": 0.9137931034482759,
+                "recall": 0.4774774774774775,
+                "f1": 0.6272189349112427,
+                "matched": 53,
+                "recoveredTotal": 58,
+                "groundTruthTotal": 111
+              },
+              "rules_f1": 0.42857142857142855,
+              "actions_f1": 1,
+              "name_collisions": 0
+            },
+            "best pair": {
+              "composite": 0.7133994667449203,
+              "classes": {
+                "precision": 1,
+                "recall": 0.7058823529411765,
+                "f1": 0.8275862068965517,
+                "matched": 48,
+                "recoveredTotal": 48,
+                "groundTruthTotal": 68
+              },
+              "relationships": {
+                "precision": 0.8714285714285714,
+                "recall": 0.5648148148148148,
+                "f1": 0.6853932584269662,
+                "matched": 61,
+                "recoveredTotal": 70,
+                "groundTruthTotal": 108
+              },
+              "properties": {
+                "precision": 0.9137931034482759,
+                "recall": 0.4774774774774775,
+                "f1": 0.6272189349112427,
+                "matched": 53,
+                "recoveredTotal": 58,
+                "groundTruthTotal": 111
+              },
+              "rules_f1": 0.42857142857142855,
+              "actions_f1": 1,
+              "name_collisions": 0
+            }
+          },
+          "best_pair": {
+            "chosen": "(1,2)",
+            "candidates": [
+              {
+                "pair": "(1,2)",
+                "errors_and_warnings": 4,
+                "components": 2,
+                "composite": 0.7133994667449203
+              },
+              {
+                "pair": "(1,3)",
+                "errors_and_warnings": 5,
+                "components": 1,
+                "composite": 0.7644840801083971
+              },
+              {
+                "pair": "(2,3)",
+                "errors_and_warnings": 7,
+                "components": 1,
+                "composite": 0.7715290488844121
+              }
+            ]
+          },
+          "support": {
+            "classes": {
+              "support_1": 7,
+              "support_2": 13,
+              "support_3": 33,
+              "conflicts": 0
+            },
+            "properties": {
+              "support_1": 38,
+              "support_2": 28,
+              "support_3": 19,
+              "conflicts": 2
+            },
+            "relationships": {
+              "support_1": 53,
+              "support_2": 23,
+              "support_3": 25,
+              "conflicts": 0
+            },
+            "rules": {
+              "support_1": 14,
+              "support_2": 2,
+              "support_3": 1,
+              "conflicts": 0
+            },
+            "actions": {
+              "support_1": 0,
+              "support_2": 0,
+              "support_3": 11,
+              "conflicts": 0
+            }
+          },
+          "review_queue_majority": {
+            "classes": {
+              "below_threshold": 7,
+              "conflicts": 0
+            },
+            "properties": {
+              "below_threshold": 38,
+              "conflicts": 2
+            },
+            "relationships": {
+              "below_threshold": 53,
+              "conflicts": 0
+            },
+            "rules": {
+              "below_threshold": 14,
+              "conflicts": 0
+            },
+            "actions": {
+              "below_threshold": 0,
+              "conflicts": 0
+            },
+            "total": 114
+          }
+        }
+      },
+      "macro": {
+        "run-01": {
+          "composite": 0.6674861161599797,
+          "classes_f1": 0.7500891685527067,
+          "relationships_f1": 0.6581650566665053,
+          "properties_f1": 0.5942041232607271,
+          "rules_f1": 0.645982905982906,
+          "actions_f1": 0.8
+        },
+        "run-02": {
+          "composite": 0.6895671374275041,
+          "classes_f1": 0.8171842941349595,
+          "relationships_f1": 0.7117862692862692,
+          "properties_f1": 0.5397308488612836,
+          "rules_f1": 0.6152014652014651,
+          "actions_f1": 0.9205128205128205
+        },
+        "run-03": {
+          "composite": 0.6045579291631796,
+          "classes_f1": 0.7369720760005803,
+          "relationships_f1": 0.6038691529700774,
+          "properties_f1": 0.472832558518881,
+          "rules_f1": 0.5995670995670995,
+          "actions_f1": 0.9200000000000002
+        },
+        "merge(1,2)": {
+          "composite": 0.741496219843133,
+          "classes_f1": 0.8554803766422168,
+          "relationships_f1": 0.7298271225031788,
+          "properties_f1": 0.6391811603840035,
+          "rules_f1": 0.6614407814407814,
+          "actions_f1": 0.9205128205128205
+        },
+        "merge(1,2,3)": {
+          "composite": 0.6649651899149844,
+          "classes_f1": 0.8456607178504412,
+          "relationships_f1": 0.620302200083022,
+          "properties_f1": 0.5289326518114901,
+          "rules_f1": 0.7144078144078143,
+          "actions_f1": 0.8933333333333333
+        },
+        "union": {
+          "composite": 0.6913133299272145,
+          "classes_f1": 0.8640160021339283,
+          "relationships_f1": 0.650747783129896,
+          "properties_f1": 0.5591762045178194,
+          "rules_f1": 0.798015873015873,
+          "actions_f1": 0.9205128205128205
+        },
+        "majority": {
+          "composite": 0.6915892452039136,
+          "classes_f1": 0.765829129739069,
+          "relationships_f1": 0.7482723833543505,
+          "properties_f1": 0.5606662225183212,
+          "rules_f1": 0.6569264069264069,
+          "actions_f1": 1
+        },
+        "intersection": {
+          "composite": 0.5506103478601987,
+          "classes_f1": 0.6566266532668305,
+          "relationships_f1": 0.6019602431565747,
+          "properties_f1": 0.39324414715719064,
+          "rules_f1": 0.45999999999999996,
+          "actions_f1": 0.7904761904761906
+        },
+        "union(1,2)": {
+          "composite": 0.7424900732376496,
+          "classes_f1": 0.8559161597597272,
+          "relationships_f1": 0.6932757443155488,
+          "properties_f1": 0.6782783156376727,
+          "rules_f1": 0.7397741147741147,
+          "actions_f1": 0.9205128205128205
+        },
+        "best pair": {
+          "composite": 0.6893468060637225,
+          "classes_f1": 0.827552523396091,
+          "relationships_f1": 0.6470354498041699,
+          "properties_f1": 0.5934524449909065,
+          "rules_f1": 0.6492063492063492,
+          "actions_f1": 0.9138461538461538
+        }
+      }
+    },
+    "pre-152": {
+      "label": "pre-#152 prompt (replication)",
+      "domains": {
+        "brick-hvac": {
+          "arms": {
+            "run-01": {
+              "composite": 0.6048993275183557,
+              "classes": {
+                "precision": 1,
+                "recall": 0.5641025641025641,
+                "f1": 0.7213114754098361,
+                "matched": 22,
+                "recoveredTotal": 22,
+                "groundTruthTotal": 39
+              },
+              "relationships": {
+                "precision": 0.9583333333333334,
+                "recall": 0.6571428571428571,
+                "f1": 0.7796610169491525,
+                "matched": 23,
+                "recoveredTotal": 24,
+                "groundTruthTotal": 35
+              },
+              "properties": {
+                "precision": 0.8888888888888888,
+                "recall": 0.19047619047619047,
+                "f1": 0.3137254901960784,
+                "matched": 8,
+                "recoveredTotal": 9,
+                "groundTruthTotal": 42
+              },
+              "rules_f1": 0.8333333333333333,
+              "actions_f1": 0.6
+            },
+            "run-02": {
+              "composite": 0.6121635094715852,
+              "classes": {
+                "precision": 0.9310344827586207,
+                "recall": 0.6923076923076923,
+                "f1": 0.7941176470588235,
+                "matched": 27,
+                "recoveredTotal": 29,
+                "groundTruthTotal": 39
+              },
+              "relationships": {
+                "precision": 0.6,
+                "recall": 0.42857142857142855,
+                "f1": 0.5,
+                "matched": 15,
+                "recoveredTotal": 25,
+                "groundTruthTotal": 35
+              },
+              "properties": {
+                "precision": 0.9411764705882353,
+                "recall": 0.38095238095238093,
+                "f1": 0.5423728813559321,
+                "matched": 16,
+                "recoveredTotal": 17,
+                "groundTruthTotal": 42
+              },
+              "rules_f1": 0.6666666666666666,
+              "actions_f1": 1
+            },
+            "run-03": {
+              "composite": 0.7251698239571375,
+              "classes": {
+                "precision": 1,
+                "recall": 0.6410256410256411,
+                "f1": 0.7812500000000001,
+                "matched": 25,
+                "recoveredTotal": 25,
+                "groundTruthTotal": 39
+              },
+              "relationships": {
+                "precision": 0.71875,
+                "recall": 0.6571428571428571,
+                "f1": 0.6865671641791045,
+                "matched": 23,
+                "recoveredTotal": 32,
+                "groundTruthTotal": 35
+              },
+              "properties": {
+                "precision": 1,
+                "recall": 0.5476190476190477,
+                "f1": 0.7076923076923077,
+                "matched": 23,
+                "recoveredTotal": 23,
+                "groundTruthTotal": 42
+              },
+              "rules_f1": 0.22222222222222224,
+              "actions_f1": 0.5714285714285714
+            },
+            "merge(1,2)": {
+              "composite": 0.7178595576161498,
+              "classes": {
+                "precision": 0.9655172413793104,
+                "recall": 0.717948717948718,
+                "f1": 0.8235294117647058,
+                "matched": 28,
+                "recoveredTotal": 29,
+                "groundTruthTotal": 39
+              },
+              "relationships": {
+                "precision": 0.9565217391304348,
+                "recall": 0.6285714285714286,
+                "f1": 0.7586206896551724,
+                "matched": 22,
+                "recoveredTotal": 23,
+                "groundTruthTotal": 35
+              },
+              "properties": {
+                "precision": 0.8571428571428571,
+                "recall": 0.42857142857142855,
+                "f1": 0.5714285714285714,
+                "matched": 18,
+                "recoveredTotal": 21,
+                "groundTruthTotal": 42
+              },
+              "rules_f1": 0.7692307692307692,
+              "actions_f1": 0.9090909090909091
+            },
+            "merge(1,2,3)": {
+              "composite": 0.6114070785546922,
+              "classes": {
+                "precision": 0.9655172413793104,
+                "recall": 0.717948717948718,
+                "f1": 0.8235294117647058,
+                "matched": 28,
+                "recoveredTotal": 29,
+                "groundTruthTotal": 39
+              },
+              "relationships": {
+                "precision": 0.76,
+                "recall": 0.5428571428571428,
+                "f1": 0.6333333333333332,
+                "matched": 19,
+                "recoveredTotal": 25,
+                "groundTruthTotal": 35
+              },
+              "properties": {
+                "precision": 0.9090909090909091,
+                "recall": 0.23809523809523808,
+                "f1": 0.3773584905660377,
+                "matched": 10,
+                "recoveredTotal": 11,
+                "groundTruthTotal": 42
+              },
+              "rules_f1": 0.6153846153846153,
+              "actions_f1": 0.625
+            },
+            "union": {
+              "composite": 0.7690235366279,
+              "classes": {
+                "precision": 0.9655172413793104,
+                "recall": 0.717948717948718,
+                "f1": 0.8235294117647058,
+                "matched": 28,
+                "recoveredTotal": 29,
+                "groundTruthTotal": 39
+              },
+              "relationships": {
+                "precision": 0.7368421052631579,
+                "recall": 0.8,
+                "f1": 0.7671232876712328,
+                "matched": 28,
+                "recoveredTotal": 38,
+                "groundTruthTotal": 35
+              },
+              "properties": {
+                "precision": 0.96,
+                "recall": 0.5714285714285714,
+                "f1": 0.7164179104477612,
+                "matched": 24,
+                "recoveredTotal": 25,
+                "groundTruthTotal": 42
+              },
+              "rules_f1": 0.7692307692307692,
+              "actions_f1": 0.625,
+              "name_collisions": 0
+            },
+            "majority": {
+              "composite": 0.7643212508884151,
+              "classes": {
+                "precision": 1,
+                "recall": 0.717948717948718,
+                "f1": 0.835820895522388,
+                "matched": 28,
+                "recoveredTotal": 28,
+                "groundTruthTotal": 39
+              },
+              "relationships": {
+                "precision": 0.9642857142857143,
+                "recall": 0.7714285714285715,
+                "f1": 0.8571428571428572,
+                "matched": 27,
+                "recoveredTotal": 28,
+                "groundTruthTotal": 35
+              },
+              "properties": {
+                "precision": 1,
+                "recall": 0.42857142857142855,
+                "f1": 0.6,
+                "matched": 18,
+                "recoveredTotal": 18,
+                "groundTruthTotal": 42
+              },
+              "rules_f1": 0.8333333333333333,
+              "actions_f1": 0.8000000000000002,
+              "name_collisions": 0
+            },
+            "intersection": {
+              "composite": 0.4487330802683765,
+              "classes": {
+                "precision": 1,
+                "recall": 0.48717948717948717,
+                "f1": 0.6551724137931034,
+                "matched": 19,
+                "recoveredTotal": 19,
+                "groundTruthTotal": 39
+              },
+              "relationships": {
+                "precision": 1,
+                "recall": 0.3142857142857143,
+                "f1": 0.4782608695652174,
+                "matched": 11,
+                "recoveredTotal": 11,
+                "groundTruthTotal": 35
+              },
+              "properties": {
+                "precision": 1,
+                "recall": 0.11904761904761904,
+                "f1": 0.21276595744680848,
+                "matched": 5,
+                "recoveredTotal": 5,
+                "groundTruthTotal": 42
+              },
+              "rules_f1": 0.25,
+              "actions_f1": 0.7499999999999999,
+              "name_collisions": 0
+            },
+            "union(1,2)": {
+              "composite": 0.7283739725398357,
+              "classes": {
+                "precision": 0.9655172413793104,
+                "recall": 0.717948717948718,
+                "f1": 0.8235294117647058,
+                "matched": 28,
+                "recoveredTotal": 29,
+                "groundTruthTotal": 39
+              },
+              "relationships": {
+                "precision": 0.7714285714285715,
+                "recall": 0.7714285714285715,
+                "f1": 0.7714285714285715,
+                "matched": 27,
+                "recoveredTotal": 35,
+                "groundTruthTotal": 35
+              },
+              "properties": {
+                "precision": 0.9473684210526315,
+                "recall": 0.42857142857142855,
+                "f1": 0.5901639344262295,
+                "matched": 18,
+                "recoveredTotal": 19,
+                "groundTruthTotal": 42
+              },
+              "rules_f1": 0.8333333333333333,
+              "actions_f1": 0.8333333333333333,
+              "name_collisions": 0
+            },
+            "best pair": {
+              "composite": 0.7283739725398357,
+              "classes": {
+                "precision": 0.9655172413793104,
+                "recall": 0.717948717948718,
+                "f1": 0.8235294117647058,
+                "matched": 28,
+                "recoveredTotal": 29,
+                "groundTruthTotal": 39
+              },
+              "relationships": {
+                "precision": 0.7714285714285715,
+                "recall": 0.7714285714285715,
+                "f1": 0.7714285714285715,
+                "matched": 27,
+                "recoveredTotal": 35,
+                "groundTruthTotal": 35
+              },
+              "properties": {
+                "precision": 0.9473684210526315,
+                "recall": 0.42857142857142855,
+                "f1": 0.5901639344262295,
+                "matched": 18,
+                "recoveredTotal": 19,
+                "groundTruthTotal": 42
+              },
+              "rules_f1": 0.8333333333333333,
+              "actions_f1": 0.8333333333333333,
+              "name_collisions": 0
+            }
+          },
+          "best_pair": {
+            "chosen": "(1,2)",
+            "candidates": [
+              {
+                "pair": "(1,2)",
+                "errors_and_warnings": 3,
+                "components": 4,
+                "composite": 0.7283739725398357
+              },
+              {
+                "pair": "(1,3)",
+                "errors_and_warnings": 7,
+                "components": 3,
+                "composite": 0.8002412181516659
+              },
+              {
+                "pair": "(2,3)",
+                "errors_and_warnings": 7,
+                "components": 4,
+                "composite": 0.7152386068582685
+              }
+            ]
+          },
+          "support": {
+            "classes": {
+              "support_1": 1,
+              "support_2": 9,
+              "support_3": 19,
+              "conflicts": 1
+            },
+            "properties": {
+              "support_1": 7,
+              "support_2": 12,
+              "support_3": 6,
+              "conflicts": 0
+            },
+            "relationships": {
+              "support_1": 10,
+              "support_2": 16,
+              "support_3": 12,
+              "conflicts": 0
+            },
+            "rules": {
+              "support_1": 1,
+              "support_2": 4,
+              "support_3": 1,
+              "conflicts": 0
+            },
+            "actions": {
+              "support_1": 6,
+              "support_2": 2,
+              "support_3": 3,
+              "conflicts": 0
+            }
+          },
+          "review_queue_majority": {
+            "classes": {
+              "below_threshold": 1,
+              "conflicts": 1
+            },
+            "properties": {
+              "below_threshold": 7,
+              "conflicts": 0
+            },
+            "relationships": {
+              "below_threshold": 10,
+              "conflicts": 0
+            },
+            "rules": {
+              "below_threshold": 1,
+              "conflicts": 0
+            },
+            "actions": {
+              "below_threshold": 6,
+              "conflicts": 0
+            },
+            "total": 26
+          }
+        },
+        "fibo-loans": {
+          "arms": {
+            "run-01": {
+              "composite": 0.6461295545762354,
+              "classes": {
+                "precision": 0.90625,
+                "recall": 0.5087719298245614,
+                "f1": 0.651685393258427,
+                "matched": 29,
+                "recoveredTotal": 32,
+                "groundTruthTotal": 57
+              },
+              "relationships": {
+                "precision": 0.8214285714285714,
+                "recall": 0.7419354838709677,
+                "f1": 0.7796610169491526,
+                "matched": 23,
+                "recoveredTotal": 28,
+                "groundTruthTotal": 31
+              },
+              "properties": {
+                "precision": 0.8181818181818182,
+                "recall": 0.3673469387755102,
+                "f1": 0.5070422535211268,
+                "matched": 18,
+                "recoveredTotal": 22,
+                "groundTruthTotal": 49
+              },
+              "rules_f1": 0.6666666666666666,
+              "actions_f1": 0.7692307692307693
+            },
+            "run-02": {
+              "composite": 0.591289308810961,
+              "classes": {
+                "precision": 1,
+                "recall": 0.38596491228070173,
+                "f1": 0.5569620253164557,
+                "matched": 22,
+                "recoveredTotal": 22,
+                "groundTruthTotal": 57
+              },
+              "relationships": {
+                "precision": 0.7692307692307693,
+                "recall": 0.6451612903225806,
+                "f1": 0.7017543859649122,
+                "matched": 20,
+                "recoveredTotal": 26,
+                "groundTruthTotal": 31
+              },
+              "properties": {
+                "precision": 1,
+                "recall": 0.3469387755102041,
+                "f1": 0.5151515151515151,
+                "matched": 17,
+                "recoveredTotal": 17,
+                "groundTruthTotal": 49
+              },
+              "rules_f1": 0.8333333333333333,
+              "actions_f1": 1
+            },
+            "run-03": {
+              "composite": 0.5885968869839838,
+              "classes": {
+                "precision": 0.9354838709677419,
+                "recall": 0.5087719298245614,
+                "f1": 0.6590909090909092,
+                "matched": 29,
+                "recoveredTotal": 31,
+                "groundTruthTotal": 57
+              },
+              "relationships": {
+                "precision": 0.6451612903225806,
+                "recall": 0.6451612903225806,
+                "f1": 0.6451612903225806,
+                "matched": 20,
+                "recoveredTotal": 31,
+                "groundTruthTotal": 31
+              },
+              "properties": {
+                "precision": 0.9375,
+                "recall": 0.30612244897959184,
+                "f1": 0.46153846153846156,
+                "matched": 15,
+                "recoveredTotal": 16,
+                "groundTruthTotal": 49
+              },
+              "rules_f1": 0.25,
+              "actions_f1": 0.9090909090909091
+            },
+            "merge(1,2)": {
+              "composite": 0.6990891053391053,
+              "classes": {
+                "precision": 0.9090909090909091,
+                "recall": 0.5263157894736842,
+                "f1": 0.6666666666666666,
+                "matched": 30,
+                "recoveredTotal": 33,
+                "groundTruthTotal": 57
+              },
+              "relationships": {
+                "precision": 0.7575757575757576,
+                "recall": 0.8064516129032258,
+                "f1": 0.7812499999999999,
+                "matched": 25,
+                "recoveredTotal": 33,
+                "groundTruthTotal": 31
+              },
+              "properties": {
+                "precision": 0.8928571428571429,
+                "recall": 0.5102040816326531,
+                "f1": 0.6493506493506493,
+                "matched": 25,
+                "recoveredTotal": 28,
+                "groundTruthTotal": 49
+              },
+              "rules_f1": 0.8333333333333333,
+              "actions_f1": 0.7692307692307693
+            },
+            "merge(1,2,3)": {
+              "composite": 0.7101064627380418,
+              "classes": {
+                "precision": 0.8947368421052632,
+                "recall": 0.5964912280701754,
+                "f1": 0.7157894736842105,
+                "matched": 34,
+                "recoveredTotal": 38,
+                "groundTruthTotal": 57
+              },
+              "relationships": {
+                "precision": 0.6341463414634146,
+                "recall": 0.8387096774193549,
+                "f1": 0.7222222222222222,
+                "matched": 26,
+                "recoveredTotal": 41,
+                "groundTruthTotal": 31
+              },
+              "properties": {
+                "precision": 0.9310344827586207,
+                "recall": 0.5510204081632653,
+                "f1": 0.6923076923076924,
+                "matched": 27,
+                "recoveredTotal": 29,
+                "groundTruthTotal": 49
+              },
+              "rules_f1": 0.8333333333333333,
+              "actions_f1": 0.7142857142857143
+            },
+            "union": {
+              "composite": 0.7206247325631151,
+              "classes": {
+                "precision": 0.8947368421052632,
+                "recall": 0.5964912280701754,
+                "f1": 0.7157894736842105,
+                "matched": 34,
+                "recoveredTotal": 38,
+                "groundTruthTotal": 57
+              },
+              "relationships": {
+                "precision": 0.6444444444444445,
+                "recall": 0.9354838709677419,
+                "f1": 0.763157894736842,
+                "matched": 29,
+                "recoveredTotal": 45,
+                "groundTruthTotal": 31
+              },
+              "properties": {
+                "precision": 0.8484848484848485,
+                "recall": 0.5714285714285714,
+                "f1": 0.6829268292682927,
+                "matched": 28,
+                "recoveredTotal": 33,
+                "groundTruthTotal": 49
+              },
+              "rules_f1": 0.7692307692307692,
+              "actions_f1": 0.7142857142857143,
+              "name_collisions": 0
+            },
+            "majority": {
+              "composite": 0.6332118174223438,
+              "classes": {
+                "precision": 1,
+                "recall": 0.47368421052631576,
+                "f1": 0.6428571428571429,
+                "matched": 27,
+                "recoveredTotal": 27,
+                "groundTruthTotal": 57
+              },
+              "relationships": {
+                "precision": 0.8461538461538461,
+                "recall": 0.7096774193548387,
+                "f1": 0.7719298245614036,
+                "matched": 22,
+                "recoveredTotal": 26,
+                "groundTruthTotal": 31
+              },
+              "properties": {
+                "precision": 0.9411764705882353,
+                "recall": 0.32653061224489793,
+                "f1": 0.48484848484848486,
+                "matched": 16,
+                "recoveredTotal": 17,
+                "groundTruthTotal": 49
+              },
+              "rules_f1": 0.6666666666666666,
+              "actions_f1": 1,
+              "name_collisions": 0
+            },
+            "intersection": {
+              "composite": 0.4274811608144941,
+              "classes": {
+                "precision": 1,
+                "recall": 0.3508771929824561,
+                "f1": 0.5194805194805194,
+                "matched": 20,
+                "recoveredTotal": 20,
+                "groundTruthTotal": 57
+              },
+              "relationships": {
+                "precision": 0.9285714285714286,
+                "recall": 0.41935483870967744,
+                "f1": 0.5777777777777778,
+                "matched": 13,
+                "recoveredTotal": 14,
+                "groundTruthTotal": 31
+              },
+              "properties": {
+                "precision": 1,
+                "recall": 0.10204081632653061,
+                "f1": 0.1851851851851852,
+                "matched": 5,
+                "recoveredTotal": 5,
+                "groundTruthTotal": 49
+              },
+              "rules_f1": 0,
+              "actions_f1": 1,
+              "name_collisions": 0
+            },
+            "union(1,2)": {
+              "composite": 0.7086247086247086,
+              "classes": {
+                "precision": 0.9090909090909091,
+                "recall": 0.5263157894736842,
+                "f1": 0.6666666666666666,
+                "matched": 30,
+                "recoveredTotal": 33,
+                "groundTruthTotal": 57
+              },
+              "relationships": {
+                "precision": 0.7714285714285715,
+                "recall": 0.8709677419354839,
+                "f1": 0.8181818181818182,
+                "matched": 27,
+                "recoveredTotal": 35,
+                "groundTruthTotal": 31
+              },
+              "properties": {
+                "precision": 0.8620689655172413,
+                "recall": 0.5102040816326531,
+                "f1": 0.641025641025641,
+                "matched": 25,
+                "recoveredTotal": 29,
+                "groundTruthTotal": 49
+              },
+              "rules_f1": 0.7692307692307692,
+              "actions_f1": 0.7692307692307693,
+              "name_collisions": 0
+            },
+            "best pair": {
+              "composite": 0.7101074269930101,
+              "classes": {
+                "precision": 0.96875,
+                "recall": 0.543859649122807,
+                "f1": 0.6966292134831461,
+                "matched": 31,
+                "recoveredTotal": 32,
+                "groundTruthTotal": 57
+              },
+              "relationships": {
+                "precision": 0.65,
+                "recall": 0.8387096774193549,
+                "f1": 0.7323943661971831,
+                "matched": 26,
+                "recoveredTotal": 40,
+                "groundTruthTotal": 31
+              },
+              "properties": {
+                "precision": 0.9642857142857143,
+                "recall": 0.5510204081632653,
+                "f1": 0.7012987012987012,
+                "matched": 27,
+                "recoveredTotal": 28,
+                "groundTruthTotal": 49
+              },
+              "rules_f1": 0.8333333333333333,
+              "actions_f1": 0.9090909090909091,
+              "name_collisions": 0
+            }
+          },
+          "best_pair": {
+            "chosen": "(2,3)",
+            "candidates": [
+              {
+                "pair": "(1,2)",
+                "errors_and_warnings": 2,
+                "components": 5,
+                "composite": 0.7086247086247086
+              },
+              {
+                "pair": "(1,3)",
+                "errors_and_warnings": 1,
+                "components": 5,
+                "composite": 0.6682456140350878
+              },
+              {
+                "pair": "(2,3)",
+                "errors_and_warnings": 1,
+                "components": 2,
+                "composite": 0.7101074269930101
+              }
+            ]
+          },
+          "support": {
+            "classes": {
+              "support_1": 11,
+              "support_2": 7,
+              "support_3": 20,
+              "conflicts": 0
+            },
+            "properties": {
+              "support_1": 16,
+              "support_2": 12,
+              "support_3": 5,
+              "conflicts": 0
+            },
+            "relationships": {
+              "support_1": 19,
+              "support_2": 12,
+              "support_3": 14,
+              "conflicts": 0
+            },
+            "rules": {
+              "support_1": 1,
+              "support_2": 5,
+              "support_3": 0,
+              "conflicts": 0
+            },
+            "actions": {
+              "support_1": 4,
+              "support_2": 0,
+              "support_3": 5,
+              "conflicts": 0
+            }
+          },
+          "review_queue_majority": {
+            "classes": {
+              "below_threshold": 11,
+              "conflicts": 0
+            },
+            "properties": {
+              "below_threshold": 16,
+              "conflicts": 0
+            },
+            "relationships": {
+              "below_threshold": 19,
+              "conflicts": 0
+            },
+            "rules": {
+              "below_threshold": 1,
+              "conflicts": 0
+            },
+            "actions": {
+              "below_threshold": 4,
+              "conflicts": 0
+            },
+            "total": 51
+          }
+        },
+        "iof-maintenance": {
+          "arms": {
+            "run-01": {
+              "composite": 0.8104575163398694,
+              "classes": {
+                "precision": 0.9285714285714286,
+                "recall": 0.65,
+                "f1": 0.7647058823529412,
+                "matched": 13,
+                "recoveredTotal": 14,
+                "groundTruthTotal": 20
+              },
+              "relationships": {
+                "precision": 0.7272727272727273,
+                "recall": 0.6153846153846154,
+                "f1": 0.6666666666666667,
+                "matched": 8,
+                "recoveredTotal": 11,
+                "groundTruthTotal": 13
+              },
+              "properties": {
+                "precision": 1,
+                "recall": 1,
+                "f1": 1,
+                "matched": 5,
+                "recoveredTotal": 5,
+                "groundTruthTotal": 5
+              },
+              "rules_f1": 0.8333333333333333,
+              "actions_f1": 1
+            },
+            "run-02": {
+              "composite": 0.522061191626409,
+              "classes": {
+                "precision": 0.9,
+                "recall": 0.45,
+                "f1": 0.6,
+                "matched": 9,
+                "recoveredTotal": 10,
+                "groundTruthTotal": 20
+              },
+              "relationships": {
+                "precision": 0.6,
+                "recall": 0.46153846153846156,
+                "f1": 0.5217391304347826,
+                "matched": 6,
+                "recoveredTotal": 10,
+                "groundTruthTotal": 13
+              },
+              "properties": {
+                "precision": 0.5,
+                "recall": 0.4,
+                "f1": 0.4444444444444445,
+                "matched": 2,
+                "recoveredTotal": 4,
+                "groundTruthTotal": 5
+              },
+              "rules_f1": 0.7272727272727273,
+              "actions_f1": 1
+            },
+            "run-03": {
+              "composite": 0.6517204301075269,
+              "classes": {
+                "precision": 0.9090909090909091,
+                "recall": 0.5,
+                "f1": 0.6451612903225806,
+                "matched": 10,
+                "recoveredTotal": 11,
+                "groundTruthTotal": 20
+              },
+              "relationships": {
+                "precision": 0.5833333333333334,
+                "recall": 0.5384615384615384,
+                "f1": 0.5599999999999999,
+                "matched": 7,
+                "recoveredTotal": 12,
+                "groundTruthTotal": 13
+              },
+              "properties": {
+                "precision": 1,
+                "recall": 0.6,
+                "f1": 0.7499999999999999,
+                "matched": 3,
+                "recoveredTotal": 3,
+                "groundTruthTotal": 5
+              },
+              "rules_f1": 0.4444444444444445,
+              "actions_f1": 1
+            },
+            "merge(1,2)": {
+              "composite": 0.7355311355311356,
+              "classes": {
+                "precision": 0.9333333333333333,
+                "recall": 0.7,
+                "f1": 0.8,
+                "matched": 14,
+                "recoveredTotal": 15,
+                "groundTruthTotal": 20
+              },
+              "relationships": {
+                "precision": 0.6923076923076923,
+                "recall": 0.6923076923076923,
+                "f1": 0.6923076923076923,
+                "matched": 9,
+                "recoveredTotal": 13,
+                "groundTruthTotal": 13
+              },
+              "properties": {
+                "precision": 0.5555555555555556,
+                "recall": 1,
+                "f1": 0.7142857142857143,
+                "matched": 5,
+                "recoveredTotal": 9,
+                "groundTruthTotal": 5
+              },
+              "rules_f1": 0.8333333333333333,
+              "actions_f1": 1
+            },
+            "merge(1,2,3)": {
+              "composite": 0.7269841269841271,
+              "classes": {
+                "precision": 0.9333333333333333,
+                "recall": 0.7,
+                "f1": 0.8,
+                "matched": 14,
+                "recoveredTotal": 15,
+                "groundTruthTotal": 20
+              },
+              "relationships": {
+                "precision": 0.6428571428571429,
+                "recall": 0.6923076923076923,
+                "f1": 0.6666666666666666,
+                "matched": 9,
+                "recoveredTotal": 14,
+                "groundTruthTotal": 13
+              },
+              "properties": {
+                "precision": 0.5555555555555556,
+                "recall": 1,
+                "f1": 0.7142857142857143,
+                "matched": 5,
+                "recoveredTotal": 9,
+                "groundTruthTotal": 5
+              },
+              "rules_f1": 0.8333333333333333,
+              "actions_f1": 1
+            },
+            "union": {
+              "composite": 0.7439335887611748,
+              "classes": {
+                "precision": 0.875,
+                "recall": 0.7,
+                "f1": 0.7777777777777777,
+                "matched": 14,
+                "recoveredTotal": 16,
+                "groundTruthTotal": 20
+              },
+              "relationships": {
+                "precision": 0.5625,
+                "recall": 0.6923076923076923,
+                "f1": 0.6206896551724138,
+                "matched": 9,
+                "recoveredTotal": 16,
+                "groundTruthTotal": 13
+              },
+              "properties": {
+                "precision": 0.7142857142857143,
+                "recall": 1,
+                "f1": 0.8333333333333333,
+                "matched": 5,
+                "recoveredTotal": 7,
+                "groundTruthTotal": 5
+              },
+              "rules_f1": 0.8333333333333333,
+              "actions_f1": 1,
+              "name_collisions": 0
+            },
+            "majority": {
+              "composite": 0.6771749755620723,
+              "classes": {
+                "precision": 0.9090909090909091,
+                "recall": 0.5,
+                "f1": 0.6451612903225806,
+                "matched": 10,
+                "recoveredTotal": 11,
+                "groundTruthTotal": 20
+              },
+              "relationships": {
+                "precision": 0.7777777777777778,
+                "recall": 0.5384615384615384,
+                "f1": 0.6363636363636364,
+                "matched": 7,
+                "recoveredTotal": 9,
+                "groundTruthTotal": 13
+              },
+              "properties": {
+                "precision": 1,
+                "recall": 0.6,
+                "f1": 0.7499999999999999,
+                "matched": 3,
+                "recoveredTotal": 3,
+                "groundTruthTotal": 5
+              },
+              "rules_f1": 0.7272727272727273,
+              "actions_f1": 1,
+              "name_collisions": 0
+            },
+            "intersection": {
+              "composite": 0.5661375661375662,
+              "classes": {
+                "precision": 1,
+                "recall": 0.4,
+                "f1": 0.5714285714285715,
+                "matched": 8,
+                "recoveredTotal": 8,
+                "groundTruthTotal": 20
+              },
+              "relationships": {
+                "precision": 1,
+                "recall": 0.38461538461538464,
+                "f1": 0.5555555555555556,
+                "matched": 5,
+                "recoveredTotal": 5,
+                "groundTruthTotal": 13
+              },
+              "properties": {
+                "precision": 1,
+                "recall": 0.4,
+                "f1": 0.5714285714285715,
+                "matched": 2,
+                "recoveredTotal": 2,
+                "groundTruthTotal": 5
+              },
+              "rules_f1": 0.4444444444444445,
+              "actions_f1": 1,
+              "name_collisions": 0
+            },
+            "union(1,2)": {
+              "composite": 0.7592592592592592,
+              "classes": {
+                "precision": 0.875,
+                "recall": 0.7,
+                "f1": 0.7777777777777777,
+                "matched": 14,
+                "recoveredTotal": 16,
+                "groundTruthTotal": 20
+              },
+              "relationships": {
+                "precision": 0.6428571428571429,
+                "recall": 0.6923076923076923,
+                "f1": 0.6666666666666666,
+                "matched": 9,
+                "recoveredTotal": 14,
+                "groundTruthTotal": 13
+              },
+              "properties": {
+                "precision": 0.7142857142857143,
+                "recall": 1,
+                "f1": 0.8333333333333333,
+                "matched": 5,
+                "recoveredTotal": 7,
+                "groundTruthTotal": 5
+              },
+              "rules_f1": 0.8333333333333333,
+              "actions_f1": 1,
+              "name_collisions": 0
+            },
+            "best pair": {
+              "composite": 0.5811728395061729,
+              "classes": {
+                "precision": 0.8333333333333334,
+                "recall": 0.5,
+                "f1": 0.625,
+                "matched": 10,
+                "recoveredTotal": 12,
+                "groundTruthTotal": 20
+              },
+              "relationships": {
+                "precision": 0.5,
+                "recall": 0.5384615384615384,
+                "f1": 0.5185185185185186,
+                "matched": 7,
+                "recoveredTotal": 14,
+                "groundTruthTotal": 13
+              },
+              "properties": {
+                "precision": 0.6,
+                "recall": 0.6,
+                "f1": 0.6,
+                "matched": 3,
+                "recoveredTotal": 5,
+                "groundTruthTotal": 5
+              },
+              "rules_f1": 0.7272727272727273,
+              "actions_f1": 1,
+              "name_collisions": 0
+            }
+          },
+          "best_pair": {
+            "chosen": "(2,3)",
+            "candidates": [
+              {
+                "pair": "(1,2)",
+                "errors_and_warnings": 4,
+                "components": 3,
+                "composite": 0.7592592592592592
+              },
+              {
+                "pair": "(1,3)",
+                "errors_and_warnings": 3,
+                "components": 3,
+                "composite": 0.8222222222222223
+              },
+              {
+                "pair": "(2,3)",
+                "errors_and_warnings": 3,
+                "components": 2,
+                "composite": 0.5811728395061729
+              }
+            ]
+          },
+          "support": {
+            "classes": {
+              "support_1": 5,
+              "support_2": 3,
+              "support_3": 8,
+              "conflicts": 0
+            },
+            "properties": {
+              "support_1": 4,
+              "support_2": 1,
+              "support_3": 2,
+              "conflicts": 0
+            },
+            "relationships": {
+              "support_1": 7,
+              "support_2": 4,
+              "support_3": 5,
+              "conflicts": 0
+            },
+            "rules": {
+              "support_1": 1,
+              "support_2": 2,
+              "support_3": 2,
+              "conflicts": 0
+            },
+            "actions": {
+              "support_1": 0,
+              "support_2": 0,
+              "support_3": 5,
+              "conflicts": 0
+            }
+          },
+          "review_queue_majority": {
+            "classes": {
+              "below_threshold": 5,
+              "conflicts": 0
+            },
+            "properties": {
+              "below_threshold": 4,
+              "conflicts": 0
+            },
+            "relationships": {
+              "below_threshold": 7,
+              "conflicts": 0
+            },
+            "rules": {
+              "below_threshold": 1,
+              "conflicts": 0
+            },
+            "actions": {
+              "below_threshold": 0,
+              "conflicts": 0
+            },
+            "total": 17
+          }
+        },
+        "iof-supply-chain": {
+          "arms": {
+            "run-01": {
+              "composite": 0.7521367521367521,
+              "classes": {
+                "precision": 1,
+                "recall": 0.4716981132075472,
+                "f1": 0.641025641025641,
+                "matched": 25,
+                "recoveredTotal": 25,
+                "groundTruthTotal": 53
+              },
+              "relationships": {
+                "precision": 0.7272727272727273,
+                "recall": 0.5333333333333333,
+                "f1": 0.6153846153846153,
+                "matched": 16,
+                "recoveredTotal": 22,
+                "groundTruthTotal": 30
+              },
+              "properties": {
+                "precision": 1,
+                "recall": 1,
+                "f1": 1,
+                "matched": 3,
+                "recoveredTotal": 3,
+                "groundTruthTotal": 3
+              },
+              "rules_f1": 0.7499999999999999,
+              "actions_f1": 0.6666666666666666
+            },
+            "run-02": {
+              "composite": 0.7475138578638206,
+              "classes": {
+                "precision": 1,
+                "recall": 0.49056603773584906,
+                "f1": 0.6582278481012659,
+                "matched": 26,
+                "recoveredTotal": 26,
+                "groundTruthTotal": 53
+              },
+              "relationships": {
+                "precision": 0.9523809523809523,
+                "recall": 0.6666666666666666,
+                "f1": 0.7843137254901961,
+                "matched": 20,
+                "recoveredTotal": 21,
+                "groundTruthTotal": 30
+              },
+              "properties": {
+                "precision": 1,
+                "recall": 0.6666666666666666,
+                "f1": 0.8,
+                "matched": 2,
+                "recoveredTotal": 2,
+                "groundTruthTotal": 3
+              },
+              "rules_f1": 0.888888888888889,
+              "actions_f1": 1
+            },
+            "run-03": {
+              "composite": 0.6385566710315728,
+              "classes": {
+                "precision": 0.9615384615384616,
+                "recall": 0.4716981132075472,
+                "f1": 0.6329113924050632,
+                "matched": 25,
+                "recoveredTotal": 26,
+                "groundTruthTotal": 53
+              },
+              "relationships": {
+                "precision": 0.5,
+                "recall": 0.4666666666666667,
+                "f1": 0.4827586206896552,
+                "matched": 14,
+                "recoveredTotal": 28,
+                "groundTruthTotal": 30
+              },
+              "properties": {
+                "precision": 1,
+                "recall": 0.6666666666666666,
+                "f1": 0.8,
+                "matched": 2,
+                "recoveredTotal": 2,
+                "groundTruthTotal": 3
+              },
+              "rules_f1": 0.8000000000000002,
+              "actions_f1": 1
+            },
+            "merge(1,2)": {
+              "composite": 0.8183314627759072,
+              "classes": {
+                "precision": 1,
+                "recall": 0.5283018867924528,
+                "f1": 0.6913580246913581,
+                "matched": 28,
+                "recoveredTotal": 28,
+                "groundTruthTotal": 53
+              },
+              "relationships": {
+                "precision": 0.84,
+                "recall": 0.7,
+                "f1": 0.7636363636363636,
+                "matched": 21,
+                "recoveredTotal": 25,
+                "groundTruthTotal": 30
+              },
+              "properties": {
+                "precision": 1,
+                "recall": 1,
+                "f1": 1,
+                "matched": 3,
+                "recoveredTotal": 3,
+                "groundTruthTotal": 3
+              },
+              "rules_f1": 0.888888888888889,
+              "actions_f1": 0.6666666666666666
+            },
+            "merge(1,2,3)": {
+              "composite": 0.7278248587570623,
+              "classes": {
+                "precision": 1,
+                "recall": 0.5094339622641509,
+                "f1": 0.6749999999999999,
+                "matched": 27,
+                "recoveredTotal": 27,
+                "groundTruthTotal": 53
+              },
+              "relationships": {
+                "precision": 0.5172413793103449,
+                "recall": 0.5,
+                "f1": 0.5084745762711865,
+                "matched": 15,
+                "recoveredTotal": 29,
+                "groundTruthTotal": 30
+              },
+              "properties": {
+                "precision": 1,
+                "recall": 1,
+                "f1": 1,
+                "matched": 3,
+                "recoveredTotal": 3,
+                "groundTruthTotal": 3
+              },
+              "rules_f1": 0.8000000000000002,
+              "actions_f1": 0.6666666666666666
+            },
+            "union": {
+              "composite": 0.7903340440653874,
+              "classes": {
+                "precision": 0.967741935483871,
+                "recall": 0.5660377358490566,
+                "f1": 0.7142857142857144,
+                "matched": 30,
+                "recoveredTotal": 31,
+                "groundTruthTotal": 53
+              },
+              "relationships": {
+                "precision": 0.5945945945945946,
+                "recall": 0.7333333333333333,
+                "f1": 0.6567164179104478,
+                "matched": 22,
+                "recoveredTotal": 37,
+                "groundTruthTotal": 30
+              },
+              "properties": {
+                "precision": 1,
+                "recall": 1,
+                "f1": 1,
+                "matched": 3,
+                "recoveredTotal": 3,
+                "groundTruthTotal": 3
+              },
+              "rules_f1": 0.8000000000000002,
+              "actions_f1": 0.6666666666666666,
+              "name_collisions": 0
+            },
+            "majority": {
+              "composite": 0.6967948717948719,
+              "classes": {
+                "precision": 1,
+                "recall": 0.5094339622641509,
+                "f1": 0.6749999999999999,
+                "matched": 27,
+                "recoveredTotal": 27,
+                "groundTruthTotal": 53
+              },
+              "relationships": {
+                "precision": 0.7272727272727273,
+                "recall": 0.5333333333333333,
+                "f1": 0.6153846153846153,
+                "matched": 16,
+                "recoveredTotal": 22,
+                "groundTruthTotal": 30
+              },
+              "properties": {
+                "precision": 1,
+                "recall": 0.6666666666666666,
+                "f1": 0.8,
+                "matched": 2,
+                "recoveredTotal": 2,
+                "groundTruthTotal": 3
+              },
+              "rules_f1": 0.888888888888889,
+              "actions_f1": 1,
+              "name_collisions": 0
+            },
+            "intersection": {
+              "composite": 0.6051942186088527,
+              "classes": {
+                "precision": 1,
+                "recall": 0.3584905660377358,
+                "f1": 0.5277777777777778,
+                "matched": 19,
+                "recoveredTotal": 19,
+                "groundTruthTotal": 53
+              },
+              "relationships": {
+                "precision": 0.9090909090909091,
+                "recall": 0.3333333333333333,
+                "f1": 0.4878048780487804,
+                "matched": 10,
+                "recoveredTotal": 11,
+                "groundTruthTotal": 30
+              },
+              "properties": {
+                "precision": 1,
+                "recall": 0.6666666666666666,
+                "f1": 0.8,
+                "matched": 2,
+                "recoveredTotal": 2,
+                "groundTruthTotal": 3
+              },
+              "rules_f1": 0.7499999999999999,
+              "actions_f1": 1,
+              "name_collisions": 0
+            },
+            "union(1,2)": {
+              "composite": 0.8135501355013549,
+              "classes": {
+                "precision": 1,
+                "recall": 0.5471698113207547,
+                "f1": 0.7073170731707317,
+                "matched": 29,
+                "recoveredTotal": 29,
+                "groundTruthTotal": 53
+              },
+              "relationships": {
+                "precision": 0.7333333333333333,
+                "recall": 0.7333333333333333,
+                "f1": 0.7333333333333333,
+                "matched": 22,
+                "recoveredTotal": 30,
+                "groundTruthTotal": 30
+              },
+              "properties": {
+                "precision": 1,
+                "recall": 1,
+                "f1": 1,
+                "matched": 3,
+                "recoveredTotal": 3,
+                "groundTruthTotal": 3
+              },
+              "rules_f1": 0.888888888888889,
+              "actions_f1": 0.6666666666666666,
+              "name_collisions": 0
+            },
+            "best pair": {
+              "composite": 0.7204481792717088,
+              "classes": {
+                "precision": 0.967741935483871,
+                "recall": 0.5660377358490566,
+                "f1": 0.7142857142857144,
+                "matched": 30,
+                "recoveredTotal": 31,
+                "groundTruthTotal": 53
+              },
+              "relationships": {
+                "precision": 0.5789473684210527,
+                "recall": 0.7333333333333333,
+                "f1": 0.6470588235294117,
+                "matched": 22,
+                "recoveredTotal": 38,
+                "groundTruthTotal": 30
+              },
+              "properties": {
+                "precision": 1,
+                "recall": 0.6666666666666666,
+                "f1": 0.8,
+                "matched": 2,
+                "recoveredTotal": 2,
+                "groundTruthTotal": 3
+              },
+              "rules_f1": 0.8000000000000002,
+              "actions_f1": 1,
+              "name_collisions": 0
+            }
+          },
+          "best_pair": {
+            "chosen": "(2,3)",
+            "candidates": [
+              {
+                "pair": "(1,2)",
+                "errors_and_warnings": 2,
+                "components": 6,
+                "composite": 0.8135501355013549
+              },
+              {
+                "pair": "(1,3)",
+                "errors_and_warnings": 2,
+                "components": 4,
+                "composite": 0.741766570208075
+              },
+              {
+                "pair": "(2,3)",
+                "errors_and_warnings": 1,
+                "components": 4,
+                "composite": 0.7204481792717088
+              }
+            ]
+          },
+          "support": {
+            "classes": {
+              "support_1": 4,
+              "support_2": 8,
+              "support_3": 19,
+              "conflicts": 0
+            },
+            "properties": {
+              "support_1": 1,
+              "support_2": 0,
+              "support_3": 2,
+              "conflicts": 0
+            },
+            "relationships": {
+              "support_1": 15,
+              "support_2": 11,
+              "support_3": 11,
+              "conflicts": 0
+            },
+            "rules": {
+              "support_1": 1,
+              "support_2": 1,
+              "support_3": 3,
+              "conflicts": 0
+            },
+            "actions": {
+              "support_1": 5,
+              "support_2": 0,
+              "support_3": 5,
+              "conflicts": 0
+            }
+          },
+          "review_queue_majority": {
+            "classes": {
+              "below_threshold": 4,
+              "conflicts": 0
+            },
+            "properties": {
+              "below_threshold": 1,
+              "conflicts": 0
+            },
+            "relationships": {
+              "below_threshold": 15,
+              "conflicts": 0
+            },
+            "rules": {
+              "below_threshold": 1,
+              "conflicts": 0
+            },
+            "actions": {
+              "below_threshold": 5,
+              "conflicts": 0
+            },
+            "total": 26
+          }
+        },
+        "itops": {
+          "arms": {
+            "run-01": {
+              "composite": 0.5417573483427142,
+              "classes": {
+                "precision": 0.9722222222222222,
+                "recall": 0.5147058823529411,
+                "f1": 0.6730769230769229,
+                "matched": 35,
+                "recoveredTotal": 36,
+                "groundTruthTotal": 68
+              },
+              "relationships": {
+                "precision": 0.7857142857142857,
+                "recall": 0.3055555555555556,
+                "f1": 0.43999999999999995,
+                "matched": 33,
+                "recoveredTotal": 42,
+                "groundTruthTotal": 108
+              },
+              "properties": {
+                "precision": 0.7924528301886793,
+                "recall": 0.3783783783783784,
+                "f1": 0.5121951219512196,
+                "matched": 42,
+                "recoveredTotal": 53,
+                "groundTruthTotal": 111
+              },
+              "rules_f1": 0.42857142857142855,
+              "actions_f1": 1
+            },
+            "run-02": {
+              "composite": 0.5854931854931856,
+              "classes": {
+                "precision": 1,
+                "recall": 0.5294117647058824,
+                "f1": 0.6923076923076924,
+                "matched": 36,
+                "recoveredTotal": 36,
+                "groundTruthTotal": 68
+              },
+              "relationships": {
+                "precision": 0.8333333333333334,
+                "recall": 0.37037037037037035,
+                "f1": 0.5128205128205128,
+                "matched": 40,
+                "recoveredTotal": 48,
+                "groundTruthTotal": 108
+              },
+              "properties": {
+                "precision": 0.6891891891891891,
+                "recall": 0.4594594594594595,
+                "f1": 0.5513513513513514,
+                "matched": 51,
+                "recoveredTotal": 74,
+                "groundTruthTotal": 111
+              },
+              "rules_f1": 1,
+              "actions_f1": 1
+            },
+            "run-03": {
+              "composite": 0.6192688106019903,
+              "classes": {
+                "precision": 1,
+                "recall": 0.4852941176470588,
+                "f1": 0.6534653465346535,
+                "matched": 33,
+                "recoveredTotal": 33,
+                "groundTruthTotal": 68
+              },
+              "relationships": {
+                "precision": 0.9047619047619048,
+                "recall": 0.35185185185185186,
+                "f1": 0.5066666666666666,
+                "matched": 38,
+                "recoveredTotal": 42,
+                "groundTruthTotal": 108
+              },
+              "properties": {
+                "precision": 0.9836065573770492,
+                "recall": 0.5405405405405406,
+                "f1": 0.6976744186046512,
+                "matched": 60,
+                "recoveredTotal": 61,
+                "groundTruthTotal": 111
+              },
+              "rules_f1": 0.5000000000000001,
+              "actions_f1": 0.42857142857142855
+            },
+            "merge(1,2)": {
+              "composite": 0.6459449015348483,
+              "classes": {
+                "precision": 1,
+                "recall": 0.6176470588235294,
+                "f1": 0.7636363636363637,
+                "matched": 42,
+                "recoveredTotal": 42,
+                "groundTruthTotal": 68
+              },
+              "relationships": {
+                "precision": 0.8571428571428571,
+                "recall": 0.4444444444444444,
+                "f1": 0.5853658536585367,
+                "matched": 48,
+                "recoveredTotal": 56,
+                "groundTruthTotal": 108
+              },
+              "properties": {
+                "precision": 0.6744186046511628,
+                "recall": 0.5225225225225225,
+                "f1": 0.5888324873096448,
+                "matched": 58,
+                "recoveredTotal": 86,
+                "groundTruthTotal": 111
+              },
+              "rules_f1": 1,
+              "actions_f1": 1
+            },
+            "merge(1,2,3)": {
+              "composite": 0.7115347018572824,
+              "classes": {
+                "precision": 1,
+                "recall": 0.6176470588235294,
+                "f1": 0.7636363636363637,
+                "matched": 42,
+                "recoveredTotal": 42,
+                "groundTruthTotal": 68
+              },
+              "relationships": {
+                "precision": 0.9,
+                "recall": 0.5,
+                "f1": 0.6428571428571429,
+                "matched": 54,
+                "recoveredTotal": 60,
+                "groundTruthTotal": 108
+              },
+              "properties": {
+                "precision": 0.7452830188679245,
+                "recall": 0.7117117117117117,
+                "f1": 0.7281105990783409,
+                "matched": 79,
+                "recoveredTotal": 106,
+                "groundTruthTotal": 111
+              },
+              "rules_f1": 0.9565217391304348,
+              "actions_f1": 1
+            },
+            "union": {
+              "composite": 0.6653804169541758,
+              "classes": {
+                "precision": 0.9772727272727273,
+                "recall": 0.6323529411764706,
+                "f1": 0.7678571428571428,
+                "matched": 43,
+                "recoveredTotal": 44,
+                "groundTruthTotal": 68
+              },
+              "relationships": {
+                "precision": 0.7230769230769231,
+                "recall": 0.4351851851851852,
+                "f1": 0.5433526011560693,
+                "matched": 47,
+                "recoveredTotal": 65,
+                "groundTruthTotal": 108
+              },
+              "properties": {
+                "precision": 0.6944444444444444,
+                "recall": 0.6756756756756757,
+                "f1": 0.684931506849315,
+                "matched": 75,
+                "recoveredTotal": 108,
+                "groundTruthTotal": 111
+              },
+              "rules_f1": 0.9565217391304348,
+              "actions_f1": 1,
+              "name_collisions": 0
+            },
+            "majority": {
+              "composite": 0.5429120880451658,
+              "classes": {
+                "precision": 0.9705882352941176,
+                "recall": 0.4852941176470588,
+                "f1": 0.6470588235294118,
+                "matched": 33,
+                "recoveredTotal": 34,
+                "groundTruthTotal": 68
+              },
+              "relationships": {
+                "precision": 0.7804878048780488,
+                "recall": 0.2962962962962963,
+                "f1": 0.42953020134228187,
+                "matched": 32,
+                "recoveredTotal": 41,
+                "groundTruthTotal": 108
+              },
+              "properties": {
+                "precision": 0.8653846153846154,
+                "recall": 0.40540540540540543,
+                "f1": 0.5521472392638037,
+                "matched": 45,
+                "recoveredTotal": 52,
+                "groundTruthTotal": 111
+              },
+              "rules_f1": 0.5333333333333333,
+              "actions_f1": 0.9523809523809523,
+              "name_collisions": 0
+            },
+            "intersection": {
+              "composite": 0.3983198130490823,
+              "classes": {
+                "precision": 0.9629629629629629,
+                "recall": 0.38235294117647056,
+                "f1": 0.5473684210526316,
+                "matched": 26,
+                "recoveredTotal": 27,
+                "groundTruthTotal": 68
+              },
+              "relationships": {
+                "precision": 0.7916666666666666,
+                "recall": 0.17592592592592593,
+                "f1": 0.2878787878787879,
+                "matched": 19,
+                "recoveredTotal": 24,
+                "groundTruthTotal": 108
+              },
+              "properties": {
+                "precision": 0.8928571428571429,
+                "recall": 0.22522522522522523,
+                "f1": 0.3597122302158274,
+                "matched": 25,
+                "recoveredTotal": 28,
+                "groundTruthTotal": 111
+              },
+              "rules_f1": 0.42857142857142855,
+              "actions_f1": 0.42857142857142855,
+              "name_collisions": 0
+            },
+            "union(1,2)": {
+              "composite": 0.6174102611076379,
+              "classes": {
+                "precision": 0.9767441860465116,
+                "recall": 0.6176470588235294,
+                "f1": 0.7567567567567568,
+                "matched": 42,
+                "recoveredTotal": 43,
+                "groundTruthTotal": 68
+              },
+              "relationships": {
+                "precision": 0.7457627118644068,
+                "recall": 0.4074074074074074,
+                "f1": 0.5269461077844312,
+                "matched": 44,
+                "recoveredTotal": 59,
+                "groundTruthTotal": 108
+              },
+              "properties": {
+                "precision": 0.6511627906976745,
+                "recall": 0.5045045045045045,
+                "f1": 0.5685279187817259,
+                "matched": 56,
+                "recoveredTotal": 86,
+                "groundTruthTotal": 111
+              },
+              "rules_f1": 1,
+              "actions_f1": 1,
+              "name_collisions": 0
+            },
+            "best pair": {
+              "composite": 0.6256045873846922,
+              "classes": {
+                "precision": 0.972972972972973,
+                "recall": 0.5294117647058824,
+                "f1": 0.6857142857142857,
+                "matched": 36,
+                "recoveredTotal": 37,
+                "groundTruthTotal": 68
+              },
+              "relationships": {
+                "precision": 0.7692307692307693,
+                "recall": 0.37037037037037035,
+                "f1": 0.5,
+                "matched": 40,
+                "recoveredTotal": 52,
+                "groundTruthTotal": 108
+              },
+              "properties": {
+                "precision": 0.825,
+                "recall": 0.5945945945945946,
+                "f1": 0.6910994764397906,
+                "matched": 66,
+                "recoveredTotal": 80,
+                "groundTruthTotal": 111
+              },
+              "rules_f1": 0.5000000000000001,
+              "actions_f1": 1,
+              "name_collisions": 0
+            }
+          },
+          "best_pair": {
+            "chosen": "(1,3)",
+            "candidates": [
+              {
+                "pair": "(1,2)",
+                "errors_and_warnings": 2,
+                "components": 3,
+                "composite": 0.6174102611076379
+              },
+              {
+                "pair": "(1,3)",
+                "errors_and_warnings": 2,
+                "components": 2,
+                "composite": 0.6256045873846922
+              },
+              {
+                "pair": "(2,3)",
+                "errors_and_warnings": 5,
+                "components": 2,
+                "composite": 0.7025984785719667
+              }
+            ]
+          },
+          "support": {
+            "classes": {
+              "support_1": 10,
+              "support_2": 7,
+              "support_3": 27,
+              "conflicts": 0
+            },
+            "properties": {
+              "support_1": 56,
+              "support_2": 24,
+              "support_3": 28,
+              "conflicts": 0
+            },
+            "relationships": {
+              "support_1": 24,
+              "support_2": 17,
+              "support_3": 24,
+              "conflicts": 0
+            },
+            "rules": {
+              "support_1": 8,
+              "support_2": 1,
+              "support_3": 3,
+              "conflicts": 0
+            },
+            "actions": {
+              "support_1": 0,
+              "support_2": 8,
+              "support_3": 3,
+              "conflicts": 0
+            }
+          },
+          "review_queue_majority": {
+            "classes": {
+              "below_threshold": 10,
+              "conflicts": 0
+            },
+            "properties": {
+              "below_threshold": 56,
+              "conflicts": 0
+            },
+            "relationships": {
+              "below_threshold": 24,
+              "conflicts": 0
+            },
+            "rules": {
+              "below_threshold": 8,
+              "conflicts": 0
+            },
+            "actions": {
+              "below_threshold": 0,
+              "conflicts": 0
+            },
+            "total": 98
+          }
+        }
+      },
+      "macro": {
+        "run-01": {
+          "composite": 0.6710760997827854,
+          "classes_f1": 0.6903610630247536,
+          "relationships_f1": 0.6562746631899173,
+          "properties_f1": 0.6665925731336849,
+          "rules_f1": 0.7023809523809523,
+          "actions_f1": 0.8071794871794872
+        },
+        "run-02": {
+          "composite": 0.6117042106531922,
+          "classes_f1": 0.6603230425568475,
+          "relationships_f1": 0.6041255509420808,
+          "properties_f1": 0.5706640384606486,
+          "rules_f1": 0.8232323232323232,
+          "actions_f1": 1
+        },
+        "run-03": {
+          "composite": 0.6446625245364423,
+          "classes_f1": 0.6743757876706413,
+          "relationships_f1": 0.5762307483716015,
+          "properties_f1": 0.6833810375670841,
+          "rules_f1": 0.44333333333333336,
+          "actions_f1": 0.7818181818181817
+        },
+        "merge(1,2)": {
+          "composite": 0.7233512325594292,
+          "classes_f1": 0.7490380933518188,
+          "relationships_f1": 0.7162361198515529,
+          "properties_f1": 0.7047794844749159,
+          "rules_f1": 0.8649572649572649,
+          "actions_f1": 0.8689976689976688
+        },
+        "merge(1,2,3)": {
+          "composite": 0.6975714457782412,
+          "classes_f1": 0.7555910498170559,
+          "relationships_f1": 0.6347107882701103,
+          "properties_f1": 0.7024124992475571,
+          "rules_f1": 0.8077146042363434,
+          "actions_f1": 0.8011904761904762
+        },
+        "union": {
+          "composite": 0.7378592637943506,
+          "classes_f1": 0.7598479040739103,
+          "relationships_f1": 0.6702079713294011,
+          "properties_f1": 0.7835219159797404,
+          "rules_f1": 0.8256633221850613,
+          "actions_f1": 0.8011904761904762
+        },
+        "majority": {
+          "composite": 0.6628830007425738,
+          "classes_f1": 0.6891796304463046,
+          "relationships_f1": 0.6620702269589589,
+          "properties_f1": 0.6373991448224576,
+          "rules_f1": 0.7298989898989899,
+          "actions_f1": 0.9504761904761905
+        },
+        "intersection": {
+          "composite": 0.4891731677756743,
+          "classes_f1": 0.5642455407065208,
+          "relationships_f1": 0.47745557376522385,
+          "properties_f1": 0.4258183888552785,
+          "rules_f1": 0.37460317460317455,
+          "actions_f1": 0.8357142857142857
+        },
+        "union(1,2)": {
+          "composite": 0.7254436674065592,
+          "classes_f1": 0.7464095372273277,
+          "relationships_f1": 0.7033112994789642,
+          "properties_f1": 0.7266101655133859,
+          "rules_f1": 0.8649572649572649,
+          "actions_f1": 0.8538461538461538
+        },
+        "best pair": {
+          "composite": 0.6731414011390839,
+          "classes_f1": 0.7090317250495705,
+          "relationships_f1": 0.6338800559347371,
+          "properties_f1": 0.6765124224329443,
+          "rules_f1": 0.7387878787878788,
+          "actions_f1": 0.9484848484848485
+        }
+      }
+    }
+  }
+}

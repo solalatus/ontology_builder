@@ -538,7 +538,14 @@ function loadMtsrGroundTruthModel(fixturePath, { includeAllProperties = false } 
 // (no rule-recall metric exists yet, same "exposed, not yet scored" status
 // `actions` already had before this issue, tracked separately: issue #105).
 export function loadDomainYamlGroundTruthModel(domainYamlPath) {
-  const doc = yaml.load(fs.readFileSync(domainYamlPath, "utf8"));
+  return normalizeDomainYamlDoc(yaml.load(fs.readFileSync(domainYamlPath, "utf8")), path.basename(path.dirname(domainYamlPath)));
+}
+
+// The same normalization on an in-memory .domain.yaml document (issue #174:
+// the majority-vote merge matches interview models against each other
+// without writing them to disk first).
+export function normalizeDomainYamlDoc(doc, id = null) {
+  doc = doc || {};
 
   const classes = {};
   for (const [name, c] of Object.entries(doc.classes || {})) {
@@ -594,7 +601,7 @@ export function loadDomainYamlGroundTruthModel(domainYamlPath) {
 
   return buildNormalizedModel({
     classes, relationships, properties, valueSets: {}, rules, actions, corpusParts,
-    metadata: { id: path.basename(path.dirname(domainYamlPath)) },
+    metadata: { id },
   });
 }
 
