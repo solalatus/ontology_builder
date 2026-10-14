@@ -665,3 +665,17 @@ as the reference and record deltas/clarifications here instead of rewriting the 
   Full suite green twice consecutively: `node --test tests/*.spec.mjs` (287 tests — 282 + 5) and
   `python3 -m unittest discover -s tools -p "test_*.py"` (11 tests, untouched — everything here is
   JS-only), all green.
+- 2026-10-14 — Consistency checker: new note-level check
+  `unlinked-subtype-name` (issue #155). A class whose name ends with another
+  class's whole name, with no chain of relationships between them, gets a
+  note suggesting a property on the general class or a real relationship.
+  Note severity on purpose: it reads names, so it can be wrong, and notes
+  never reach the agent (issue #84), so interview behaviour and the eval
+  numbers are unchanged. Gated like `class-no-relationships` (silent until
+  the graph has a relationship) and individually switchable. Measured
+  before shipping on the 15 current-prompt interview runs
+  (`ontology_translation/results/subclass-audit/REPORT.md`, "Step 1"): 6 of
+  7 unlinked subtype pairs caught, 1 false positive (`PackagedHeatPump` /
+  `Pump`); a test checks the shipped check fires exactly where the measured
+  prototype did on all 15 runs.
+

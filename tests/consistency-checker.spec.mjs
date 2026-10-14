@@ -524,3 +524,96 @@ test("the agent is told when a relationship in its own call was not stored", asy
     assert.equal(dropped.length, 1);
   });
 });
+
+// ---------------------------------------------------------------------------
+// unlinked-subtype-name (issue #155): a class whose name ends with another
+// class's whole name, with nothing connecting the two. Measured on the
+// committed interview runs before shipping; a note only.
+
+const SUBTYPE_MODEL = () => ({
+  classes: {
+    Facility: { properties: {} }, StorageFacility: { properties: {} },
+    ReceivingActivity: { properties: {} }, StorageActivity: { properties: {} },
+  },
+  relationships: [
+    { name: "occursAt", from: "ReceivingActivity", to: "Facility" },
+    { name: "occursAt", from: "StorageActivity", to: "StorageFacility" },
+  ],
+  rules: {}, actions: {},
+});
+const nameHints = (findings) => findings.filter((f) => f.check === "unlinked-subtype-name");
+
+test("unlinked-subtype-name notes a class named like a kind of another when nothing connects them", async () => {
+  // The real iof-supply-chain case: three of three interviews left
+  // StorageFacility in a separate part of the model from Facility.
+  await withPage(async (page) => {
+    const [hit, ...rest] = nameHints(await check(page, SUBTYPE_MODEL()));
+    assert.equal(rest.length, 0);
+    assert.equal(hit.severity, "note");
+    assert.equal(hit.tier, "text");
+    assert.equal(hit.id, "unlinked-subtype-name:StorageFacility|Facility");
+    assert.deepEqual(hit.subject, { kind: "class", key: "StorageFacility|Facility", name: "StorageFacility" });
+    assert.match(hit.message, /"StorageFacility" looks like a kind of "Facility"/);
+    assert.match(hit.suggestion, /property of "Facility"/);
+    assert.match(hit.suggestion, /real relationship/);
+  });
+});
+
+test("unlinked-subtype-name stays silent once the two are connected, directly or through other classes", async () => {
+  await withPage(async (page) => {
+    const direct = SUBTYPE_MODEL();
+    direct.relationships.push({ name: "partOf", from: "StorageFacility", to: "Facility" });
+    assert.deepEqual(nameHints(await check(page, direct)), []);
+    const viaOthers = SUBTYPE_MODEL();
+    viaOthers.relationships.push({ name: "precedes", from: "ReceivingActivity", to: "StorageActivity" });
+    assert.deepEqual(nameHints(await check(page, viaOthers)), []);
+  });
+});
+
+test("unlinked-subtype-name is gated on the graph having started, like class-no-relationships", async () => {
+  await withPage(async (page) => {
+    const young = { classes: { Loan: { properties: {} }, SecuredLoan: { properties: {} } }, relationships: [], rules: {}, actions: {} };
+    assert.deepEqual(nameHints(await check(page, young)), []);
+  });
+});
+
+test("unlinked-subtype-name matches whole trailing words only", async () => {
+  await withPage(async (page) => {
+    const classes = Object.fromEntries(
+      ["Loan", "Loans", "LoanOfficer", "SecuredLoan", "Sensor", "CO2Sensor", "Zone", "HVACZone", "Balloon", "Anchor", "X"]
+        .map((n) => [n, { properties: {} }]));
+    const model = { classes, relationships: [{ name: "links", from: "Anchor", to: "X" }], rules: {}, actions: {} };
+    const pairs = nameHints(await check(page, model)).map((f) => f.subject.key).sort();
+    // Not "Loans"/"Loan" (a different word), not "LoanOfficer"/"Loan" (a
+    // prefix), not "Balloon"/"Loan" (inside a word).
+    assert.deepEqual(pairs, ["CO2Sensor|Sensor", "HVACZone|Zone", "SecuredLoan|Loan"]);
+  });
+});
+
+test("unlinked-subtype-name can be switched off on its own", async () => {
+  await withPage(async (page) => {
+    const findings = await page.evaluate((m) => {
+      window.__kg.consistency.checks["unlinked-subtype-name"] = false;
+      try { return window.__kg.consistency.compute(m, {}); } finally { window.__kg.consistency.checks["unlinked-subtype-name"] = true; }
+    }, SUBTYPE_MODEL());
+    assert.deepEqual(nameHints(findings), []);
+  });
+});
+
+test("on the committed interview runs, the shipped check fires exactly where the measured prototype did (issue #155 step 1)", async () => {
+  // recovered-connectivity.json records the name hint as prototyped and
+  // measured in tests/evals/subtype-connectivity.mjs; the app's own check must
+  // flag the same unlinked pairs on the same recovered models.
+  const results = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "ontology_translation", "results", "subclass-audit", "recovered-connectivity.json"), "utf8"));
+  const runs = results.current_prompt.runs;
+  assert.equal(runs.length, 15);
+  await withPage(async (page) => {
+    for (const run of runs) {
+      const dir = path.join(__dirname, "..", "ontology_translation", "results", run.corpus, run.run, run.domain);
+      const model = yaml.load(fs.readFileSync(path.join(dir, "recovered-model.yaml"), "utf8"));
+      const shipped = nameHints(await check(page, model)).map((f) => f.subject.key).sort();
+      const measured = run.name_hint_hits.filter((h) => !h.linked).map((h) => `${h.subtype}|${h.parent}`).sort();
+      assert.deepEqual(shipped, measured, `${run.corpus}/${run.run}/${run.domain}`);
+    }
+  });
+});

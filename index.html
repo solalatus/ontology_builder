@@ -7840,6 +7840,8 @@ const CONSISTENCY_CHECKS = {
   "unknown-property-reference": true,
   "unreachable-from-action-input": true,
   "effect-verification-mismatch": true,
+  // Name-based, a note only (issue #155): see consistencyNameChecks.
+  "unlinked-subtype-name": true,
   // Off by default: the highest false-positive risk in the set by a wide
   // margin (any capitalised noun phrase in ordinary prose looks like a class
   // name). Kept implemented and tested so the decision is reversible with a
@@ -8245,6 +8247,58 @@ function consistencyExactChecks(index, options) {
   return out;
 }
 
+// --- Name hint: a subtype left unlinked from its parent (issue #155) -------
+// A class whose name ends with another class's whole name ("StorageFacility",
+// "Facility") is usually a kind of it, and this tool has no subclass link, so
+// the two end up in separate parts of the model unless something real
+// connects them. Measured on the committed interview runs before shipping
+// (ontology_translation/results/subclass-audit/REPORT.md, "Step 1"): it caught
+// 6 of the 7 unlinked subtype pairs with one false positive
+// ("PackagedHeatPump" / "Pump"). It reads names, so it can be wrong: a note,
+// never a warning, which also keeps it away from the agent loop (issue #84
+// hands the agent errors and warnings only). Gated like
+// class-no-relationships: before any relationship exists, everything is
+// unlinked and saying so is noise.
+function consistencyClassNameWords(name) {
+  return String(name || "")
+    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+    .replace(/([A-Z]+)([A-Z][a-z])/g, "$1 $2")
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .filter(Boolean);
+}
+
+function consistencyNameChecks(index) {
+  const out = [];
+  if (!CONSISTENCY_CHECKS["unlinked-subtype-name"] || index.relationships.length === 0) return out;
+  const component = new Map();
+  for (const name of index.classNames) {
+    if (component.has(name)) continue;
+    const queue = [name];
+    component.set(name, name);
+    for (let head = 0; head < queue.length; head++) {
+      for (const next of index.undirected.get(queue[head]) || []) {
+        if (!component.has(next)) { component.set(next, name); queue.push(next); }
+      }
+    }
+  }
+  const words = new Map(index.classNames.map((n) => [n, consistencyClassNameWords(n)]));
+  for (const sub of index.classNames) {
+    const sw = words.get(sub);
+    for (const parent of index.classNames) {
+      const pw = words.get(parent);
+      if (sub === parent || pw.length === 0 || pw.length >= sw.length) continue;
+      if (sw.slice(sw.length - pw.length).join(" ") !== pw.join(" ")) continue;
+      if (component.get(sub) === component.get(parent)) continue;
+      out.push(makeFinding("unlinked-subtype-name", "note", "text",
+        { kind: "class", key: `${sub}|${parent}`, name: sub },
+        `"${sub}" looks like a kind of "${parent}", but no relationship connects them, directly or through other classes.`,
+        `If it differs from "${parent}" only in one attribute, make that a property of "${parent}" (a type or status value). Otherwise connect it to the model with a real relationship; this tool has no subclass link.`));
+    }
+  }
+  return out;
+}
+
 // --- Tier B: text checks ---------------------------------------------------
 // Rules store their conditions as prose, and actions store their effect and
 // verification the same way -- that is the model's own grammar, not an
@@ -8525,7 +8579,7 @@ function consistencyTextChecks(index, options) {
 //                      exempt from class-no-relationships for one sweep
 function computeOntologyFindings(model, options = {}) {
   const index = buildConsistencyIndex(model);
-  const findings = [...consistencyExactChecks(index, options), ...consistencyTextChecks(index, options)];
+  const findings = [...consistencyExactChecks(index, options), ...consistencyTextChecks(index, options), ...consistencyNameChecks(index)];
   // Stable order: severity, then check, then id. The list is compared between
   // sweeps to decide what is new (issue #84's delta scoping), so a stable
   // order is not cosmetic -- it is what makes those comparisons meaningful.

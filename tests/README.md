@@ -134,7 +134,10 @@ is dev-only test tooling, same as Playwright.
   asserts the labelled-corpus claims in
   `fixtures/consistency-corpus/labels.json` — every documented defect marked
   detectable is found, and exactly one error is reported across all three,
-  which is the documented one. Offline: no key, no network.
+  which is the documented one. The `unlinked-subtype-name` note (issue
+  #155) is also checked against the committed interview runs: it must fire
+  exactly where the prototype measured in `subtype-connectivity.spec.mjs`
+  did. Offline: no key, no network.
 - `agent-self-correction.spec.mjs` — the agent half of the checker (issue
   #84): findings reaching the tool result delta-scoped, notes never reaching
   it, the three-apply budget and its refusal of a fourth, the extra applies

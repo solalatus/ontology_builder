@@ -82,7 +82,12 @@ property does not allow, an action whose preconditions reason about a class
 unreachable from its own input, a relationship silently dropped because an
 endpoint class does not exist. It is deterministic and needs no API key; a
 `Check` button in the toolbar opens the findings, and stays quiet while a model
-is merely unfinished. An optional pass that also asks the connected model to
+is merely unfinished. It also notes, without calling it a contradiction, a class
+whose name says it is a kind of another (`StorageFacility`, `Facility`) when
+nothing connects the two: the tool has no subclass link, so such a subtype
+needs either a property on the general class or a real relationship (issue
+#155). Notes like this stay in the panel and are never handed to the Helper
+Agent. An optional pass that also asks the connected model to
 look for contradictions runs from the same panel; it is on by default (issue
 #89) but can be switched off there, and only ever runs on an explicit click —
 nothing is sent anywhere on its own. Importing a domain-model file reports

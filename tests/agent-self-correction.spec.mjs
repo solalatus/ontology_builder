@@ -121,6 +121,19 @@ test("notes never reach the agent — an unfinished model must not look broken",
   });
 });
 
+test("the unlinked-subtype-name note stays with the human, never in the agent's tool result (issue #155)", async () => {
+  // Shipped as an app-only hint: changing what the agent is told would change
+  // interview behaviour, which needs its own eval round.
+  await withPage(async (page) => {
+    const yaml = "classes:\n  Facility:\n    properties: {}\n  StorageFacility:\n    properties: {}\n  ReceivingActivity:\n    properties: {}\n  StorageActivity:\n    properties: {}\nrelationships:\n  - name: occursAt\n    from: ReceivingActivity\n    to: Facility\n  - name: occursAt\n    from: StorageActivity\n    to: StorageFacility\n";
+    const bodies = await runAgentTurn(page, [toolTurn([applyCall("t1", yaml)]), textTurn("Done.")]);
+    const result = toolResults(bodies)[0];
+    assert.match(result, /no new problems from this edit/);
+    assert.equal(/unlinked-subtype-name|looks like a kind of/.test(result), false);
+    assert.ok((await page.evaluate(() => window.__kg.consistency.current())).some((f) => f.check === "unlinked-subtype-name"));
+  });
+});
+
 test("the agent may commit up to three times in a turn, and the fourth is refused", async () => {
   await withPage(async (page) => {
     const bodies = await runAgentTurn(page, [

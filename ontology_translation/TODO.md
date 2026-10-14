@@ -3959,3 +3959,11 @@ reference and record deltas/decisions here instead.)*
   says "a storage facility is still a kind of facility") and `CreditFacility
   → CreditAgreement` (fibo-loans, 1 of 3). The name-suffix hint would have
   caught 6 of the 7 with 1 false positive (`PackagedHeatPump → Pump`).
+- 2026-10-14 — #155 closed. Outcome: the name hint shipped as the
+  consistency checker's note-level `unlinked-subtype-name` (#170, app-only,
+  never shown to the agent); the remaining suggestions are recorded as
+  future work, not scheduled: #171 (interviewer guidance: values and states
+  become controlled properties on the parent) and #172 (guarded, label-only
+  `specializes` for genuine kinds, scored as a separate taxonomy dimension
+  against the audit's kind pairs, so no re-translation is needed).
+
