@@ -1,6 +1,7 @@
 id: iof-supply-chain
 source_url: https://raw.githubusercontent.com/iofoundry/ontology/Release_202602/supplychain/SupplyChain.rdf
 source_version: Release_202602
+source_license: MIT, Industrial Ontologies Foundry (dcterms:license in the file)
 source_sha256: 209d13903ac6b91cc0137b50f0deb283dc9c9c766b005571ed1c8671180bf9ce
 scope:
   # No roots: unlike Brick (a huge multi-domain ontology genuinely needing

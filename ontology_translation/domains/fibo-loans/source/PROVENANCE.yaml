@@ -1,0 +1,20 @@
+# Provenance of the committed original source files in this folder.
+# Written by fetch.py --redownload; do not edit by hand.
+domain: fibo-loans
+written_by: ontology_translation/tools/fetch.py --redownload
+source_version: master_2026Q1
+license: MIT, Copyright (c) 2016-2025 EDM Council, Inc. (notice embedded in each file's
+  dct:license)
+files:
+- file: Loans.rdf
+  url: https://raw.githubusercontent.com/edmcouncil/fibo/master_2026Q1/LOAN/LoansGeneral/Loans.rdf
+  sha256: 87024035dac38303e21738879202d87f0f37c1347a16119f9ec2b4e37e124f05
+  bytes: 45350
+  downloaded_at: '2026-10-14T06:48:16Z'
+  matches_manifest_pin: true
+- file: Debt.rdf
+  url: https://raw.githubusercontent.com/edmcouncil/fibo/master_2026Q1/FBC/DebtAndEquities/Debt.rdf
+  sha256: 4fadbe7ef48c0caf57b499063149a92e3e4f9380527b6c071ac9382f561eb8c2
+  bytes: 103650
+  downloaded_at: '2026-10-14T06:48:17Z'
+  matches_manifest_pin: true

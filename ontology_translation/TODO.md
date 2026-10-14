@@ -3917,3 +3917,29 @@ reference and record deltas/decisions here instead.)*
   exact mechanism and the reproducing transcripts. Full offline regression
   suite green throughout (1235 passing at this entry, 11 skipped, opt-in
   live suites requiring real Azure credentials).
+- 2026-10-14 — Original source ontologies committed (user request):
+  `domains/<id>/source/` holds every manifest domain's source files,
+  byte-identical to the pinned SHA-256s, with a `PROVENANCE.yaml` (URL,
+  SHA-256, size, licence, download time) written by `fetch.py`, and
+  `source_license` added to each manifest. `fetch.py --manifest` now loads
+  the committed copy by default and only downloads with `--redownload`
+  (which refreshes the copies and provenance only if every checksum
+  matches); `run_pipeline.py --redownload` passes it through. The existing
+  download tests now say `redownload=True`, and new tests cover the load
+  path, missing/modified copies, all-or-nothing refresh and the committed
+  data itself (`test_committed_sources.py`). itops has no upstream: its
+  original MTSR fixture (before the 23 `"is a"` predicates were removed in
+  d197883) is committed as `domains/itops/source/itops_mtsr.original.yaml`
+  with a hand-written provenance record.
+- 2026-10-14 — #155 five-domain subclass audit done:
+  `tools/subclass_audit.py` → `results/subclass-audit/audit.json`, a
+  reviewer classification in `classification.yaml`, and the generated
+  `REPORT.md`. 68 candidate pairs; 25 kinds, 31 values, 6 states, 1 role,
+  5 individuals. Every domain has candidates (Brick none under a kinds-only
+  rule). Two methodological decisions recorded in the report: an IRI's
+  identity comes only from mappings that list it first (the compiler cites
+  parents as evidence, which otherwise produced pairs like `Trailer
+  specializes Wagon`), and Brick's `Building`/`Floor`/`Zone` → `Space` are
+  reported but not counted because they hold only under the translation's
+  merge of `brick:Space` and `rec:Space`. #155's decision itself is still
+  open.

@@ -1,0 +1,95 @@
+# Issue #155 subclass audit: a judgment on each candidate pair found by
+# tools/subclass_audit.py (audit.json). This file is NOT computed: it is a
+# reviewer's reading of each pair, recorded so it can be checked and argued
+# with. tools/tests/test_subclass_audit.py fails if it stops covering exactly
+# the audit's candidate pairs.
+#
+# Categories (OntoClean-style rigidity, adapted for a flat-classes model):
+#   kind      rigid, and the subtype has relationships, properties or rules
+#             of its own in the domain. The only category where a
+#             specializes edge carries information a property cannot.
+#   value     rigid, but differs from its siblings by one attribute value
+#             (medium, mode, type flag). A controlled-value property on the
+#             parent says the same thing and keeps the model flat.
+#   state     anti-rigid: an instance can enter or leave it during its life
+#             (declared, accrued, degraded). Must not be a subclass.
+#   role      held because of a relationship to something else.
+#   individual
+#             names one real-world thing (there is one Service Desk), not a
+#             type: the instance-versus-class confusion.
+categories: [kind, value, state, role, individual]
+
+pairs:
+  brick-hvac:
+    - {sub: CO2Sensor, super: AirQualitySensor, category: value, why: measured substance}
+    - {sub: CO2DifferentialSensor, super: CO2Sensor, category: value, why: measurement type (differential)}
+    - {sub: OutsideAirCO2Sensor, super: CO2Sensor, category: value, why: which air stream it sits in}
+    - {sub: ReturnAirCO2Sensor, super: CO2Sensor, category: value, why: which air stream it sits in}
+    - {sub: AirTemperatureSensor, super: TemperatureSensor, category: value, why: medium measured}
+    - {sub: WaterTemperatureSensor, super: TemperatureSensor, category: value, why: medium measured}
+    - {sub: AirTemperatureSetpoint, super: TemperatureSetpoint, category: value, why: medium controlled}
+    - {sub: CoolingTemperatureSetpoint, super: TemperatureSetpoint, category: value, why: operating mode}
+    - {sub: HeatingTemperatureSetpoint, super: TemperatureSetpoint, category: value, why: operating mode}
+    - {sub: TemperatureDeadbandSetpoint, super: TemperatureSetpoint, category: value, why: setpoint type}
+  fibo-loans:
+    - {sub: FullAmortization, super: Amortization, category: value, why: amortization type}
+    - {sub: NegativeAmortization, super: Amortization, category: value, why: amortization type}
+    - {sub: PartialAmortization, super: Amortization, category: value, why: amortization type}
+    - {sub: RevolvingLineOfCredit, super: CommittedCreditFacility, category: kind, why: its own draw-and-repay mechanics}
+    - {sub: ClosedEndCredit, super: CreditAgreement, category: value, why: open-end versus closed-end flag}
+    - {sub: OpenEndCredit, super: CreditAgreement, category: value, why: open-end versus closed-end flag}
+    - {sub: CreditFacility, super: CreditAgreement, category: kind, why: own properties and 3 relationships}
+    - {sub: Loan, super: CreditAgreement, category: kind, why: "the domain's central class, with 15 relationships"}
+    - {sub: CommittedCreditFacility, super: CreditFacility, category: value, why: committed flag}
+    - {sub: UncommittedCreditFacility, super: CreditFacility, category: value, why: committed flag}
+    - {sub: InterestPaymentTerms, super: DebtTerms, category: kind, why: many properties of its own}
+    - {sub: PrincipalRepaymentTerms, super: DebtTerms, category: kind, why: many properties of its own}
+    - {sub: AccruedInterest, super: Interest, category: state, why: interest is accrued until it is paid}
+    - {sub: InterestRateReset, super: InterestCalculation, category: kind, why: a distinct event type}
+    - {sub: InterestRateSettingEvent, super: InterestCalculation, category: kind, why: a distinct event type}
+    - {sub: SecuredLoan, super: Loan, category: kind, why: own collateral relationship and rule}
+    - {sub: UnsecuredLoan, super: Loan, category: value, why: only the absence of security}
+    - {sub: PrepaymentTerms, super: PrincipalRepaymentTerms, category: kind, why: own penalty property and action}
+    - {sub: CollateralizedLoan, super: SecuredLoan, category: kind, why: own collateral relationships}
+    - {sub: GuaranteedLoan, super: SecuredLoan, category: value, why: security type (guarantee)}
+    - {sub: CommittedSubFacility, super: SubFacility, category: value, why: committed flag}
+    - {sub: UncommittedSubFacility, super: SubFacility, category: value, why: committed flag}
+    - {sub: FloatingInterestRate, super: VariableInterestRate, category: value, why: rate-setting mechanism}
+    - {sub: ManagedInterestRate, super: VariableInterestRate, category: value, why: rate-setting mechanism}
+  iof-maintenance:
+    - {sub: MaintenanceActivity, super: MaintenanceProcess, category: kind, why: own relationships}
+    - {sub: DegradedState, super: MaintenanceState, category: state, why: an asset moves in and out of it}
+    - {sub: FailedState, super: MaintenanceState, category: state, why: an asset moves in and out of it}
+    - {sub: OperatingState, super: MaintenanceState, category: state, why: an asset moves in and out of it}
+    - {sub: DispositionToExhibitUndesirableBehavior, super: UndesirableDisposition, category: value, why: failure-mode type}
+    - {sub: DispositionToFail, super: UndesirableDisposition, category: value, why: failure-mode type}
+  iof-supply-chain:
+    - {sub: FreightContainer, super: Container, category: value, why: equipment type}
+    - {sub: Trailer, super: Container, category: value, why: equipment type (road)}
+    - {sub: Wagon, super: Container, category: value, why: equipment type (rail)}
+    - {sub: StorageFacility, super: Facility, category: kind, why: own relationship}
+    - {sub: DistributionCenter, super: StorageFacility, category: value, why: facility type}
+  itops:
+    - {sub: EmergencyChange, super: Change, category: value, why: change path chosen at submission}
+    - {sub: Application, super: ConfigurationItem, category: kind, why: own relationships (8)}
+    - {sub: BackupSet, super: ConfigurationItem, category: kind, why: own relationships}
+    - {sub: CloudService, super: ConfigurationItem, category: kind, why: own relationship}
+    - {sub: Database, super: ConfigurationItem, category: kind, why: own relationships}
+    - {sub: InfrastructureComponent, super: ConfigurationItem, category: kind, why: own relationships and subtypes}
+    - {sub: NetworkSegment, super: ConfigurationItem, category: kind, why: own relationships}
+    - {sub: SecurityEvent, super: Event, category: kind, why: own relationships (4)}
+    - {sub: CybersecurityIncident, super: Incident, category: state, why: an incident can be reclassified as cyber after triage}
+    - {sub: MajorIncident, super: Incident, category: state, why: declared and de-escalated during the incident's life}
+    - {sub: ContainerPlatform, super: InfrastructureComponent, category: kind, why: own relationship}
+    - {sub: Endpoint, super: InfrastructureComponent, category: kind, why: own relationship}
+    - {sub: NetworkDevice, super: InfrastructureComponent, category: kind, why: own relationship}
+    - {sub: Server, super: InfrastructureComponent, category: kind, why: own relationships}
+    - {sub: StorageSystem, super: InfrastructureComponent, category: kind, why: own relationships}
+    - {sub: VirtualMachine, super: InfrastructureComponent, category: kind, why: own relationships}
+    - {sub: ThirdPartyService, super: ItService, category: value, why: provider type}
+    - {sub: IncidentResponseTeam, super: OrganizationalUnit, category: individual, why: one such team in the bank}
+    - {sub: ItOperationsTeam, super: OrganizationalUnit, category: individual, why: one such team in the bank}
+    - {sub: NetworkOperationsCentre, super: OrganizationalUnit, category: individual, why: one NOC in the bank}
+    - {sub: ResolverGroup, super: OrganizationalUnit, category: role, why: a unit acting as resolver for incidents}
+    - {sub: SecurityOperationsCentre, super: OrganizationalUnit, category: individual, why: one SOC in the bank}
+    - {sub: ServiceDesk, super: OrganizationalUnit, category: individual, why: one Service Desk in the bank}

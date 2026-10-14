@@ -1,0 +1,13 @@
+# Provenance of the committed original source files in this folder.
+# Written by fetch.py --redownload; do not edit by hand.
+domain: iof-supply-chain
+written_by: ontology_translation/tools/fetch.py --redownload
+source_version: Release_202602
+license: MIT, Industrial Ontologies Foundry (dcterms:license in the file)
+files:
+- file: SupplyChain.rdf
+  url: https://raw.githubusercontent.com/iofoundry/ontology/Release_202602/supplychain/SupplyChain.rdf
+  sha256: 209d13903ac6b91cc0137b50f0deb283dc9c9c766b005571ed1c8671180bf9ce
+  bytes: 283220
+  downloaded_at: '2026-10-14T06:48:17Z'
+  matches_manifest_pin: true
