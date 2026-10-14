@@ -1,0 +1,968 @@
+competency_questions:
+  - id: cq1
+    text: What services were impacted by an incident, and who are the affected stakeholders?
+  - id: cq2
+    text: Can the agent identify the configuration items and third-party services related to an affected service?
+  - id: cq3
+    text: Which alerts or events led to the creation of an incident, and what is their current status?
+  - id: cq4
+    text: Who is the service owner of an affected service?
+  - id: cq5
+    text: Which resolver group should address an incident?
+  - id: cq6
+    text: Does an incident qualify for major incident declaration?
+  - id: cq7
+    text: What criteria are used to decide whether an incident qualifies for major incident declaration?
+  - id: cq8
+    text: What runbook or workaround can be used to mitigate the impact of an incident while resolution is in progress?
+  - id: cq9
+    text: Has a materiality assessment been conducted for an incident?
+  - id: cq10
+    text: Does an incident require regulatory notification?
+  - id: cq11
+    text: What corrective actions from previous incidents are still outstanding for an impacted service?
+  - id: cq12
+    text: How do outstanding corrective actions relate to an incident?
+  - id: cq13
+    text: What timelines and conditions must be followed to close an incident properly once resolved?
+  - id: cq14
+    text: How is evidence integrity maintained during incident management?
+  - id: cq15
+    text: What documentation steps must be followed during incident management?
+classes:
+  ConfigurationItem:
+    meaning: A configuration item is a component of the bank’s IT infrastructure that is managed and recorded to ensure service quality and operational integrity.
+    aliases:
+      - konfigurációs elem
+    properties:
+      status:
+        type: text
+        allowed:
+          - operational
+          - under-maintenance
+          - retired
+      identifier:
+        type: text
+      name:
+        type: text
+      isolationImpactAssessed:
+        type: boolean
+      reconnectionMethodAvailable:
+        type: boolean
+      ciType:
+        type: text
+        allowed:
+          - application
+          - database
+          - server
+          - network-device
+  Incident:
+    meaning: An incident is an unplanned interruption or reduction in the quality of an IT service that requires managed response to restore normal operations.
+    aliases: []
+    properties:
+      severity:
+        type: text
+        allowed:
+          - sev1-critical
+          - sev2-high
+          - sev3-medium
+          - sev4-low
+      identifier:
+        type: text
+      priority:
+        type: text
+        allowed:
+          - p1-critical
+          - p2-high
+          - p3-medium
+          - p4-low
+      status:
+        type: text
+        allowed:
+          - new
+          - acknowledged
+          - investigating
+          - contained
+          - recovering
+          - monitoring
+          - resolved
+          - closed
+          - cancelled
+      summary:
+        type: text
+      startTime:
+        type: date
+      currentState:
+        type: text
+        allowed:
+          - new
+          - acknowledged
+          - investigating
+          - contained
+          - recovering
+          - monitoring
+          - resolved
+          - closed
+          - cancelled
+      incidentId:
+        type: text
+      majorIncidentDeclared:
+        type: boolean
+  RegulatoryNotification:
+    meaning: A regulatory notification is a formal communication submitted to a regulatory authority to inform them of incidents affecting compliance or operational integrity.
+    aliases:
+      - felügyeleti bejelentés
+    properties:
+      status:
+        type: text
+        allowed:
+          - draft
+          - pending-approval
+          - approved
+          - submitted
+          - accepted
+          - rejected
+          - withdrawn
+      dueDate:
+        type: date
+      submissionTimestamp:
+        type: date
+      identifier:
+        type: text
+      currentState:
+        type: text
+        allowed:
+          - draft
+          - pending-approval
+          - approved
+          - submitted
+          - accepted
+          - rejected
+          - withdrawn
+  ResolverGroup:
+    meaning: A resolver group is a team of technical experts assigned to diagnose and resolve incidents affecting specific technology or services.
+    aliases:
+      - megoldócsoport
+    properties:
+      name:
+        type: text
+      status:
+        type: text
+        allowed:
+          - available
+          - on-call
+          - busy
+      identifier:
+        type: text
+      supportScope:
+        type: text
+        allowed:
+          - application-support
+          - infrastructure-support
+          - network-support
+          - security-support
+          - database-support
+      currentState:
+        type: text
+        allowed:
+          - active
+          - inactive
+  Alert:
+    meaning: An alert is a notification raised by monitoring systems that indicates a potential issue within IT services or infrastructure that requires attention.
+    aliases:
+      - riasztás
+    properties:
+      status:
+        type: text
+        allowed:
+          - new
+          - acknowledged
+          - suppressed
+          - escalated
+          - closed
+      identifier:
+        type: text
+      severity:
+        type: text
+        allowed:
+          - sev1-critical
+          - sev2-high
+          - sev3-medium
+          - sev4-low
+      triggerTimestamp:
+        type: date
+      alertSource:
+        type: text
+      alertTime:
+        type: date
+      contextAvailable:
+        type: boolean
+  BackupSet:
+    meaning: A backup set is a defined collection of data that has been backed up and can be restored in case of data loss or system failure.
+    aliases:
+      - mentéskészlet
+    properties:
+      status:
+        type: text
+        allowed:
+          - scheduled
+          - running
+          - successful
+          - failed
+          - expired
+          - corrupted
+          - verified
+      backupType:
+        type: text
+        allowed:
+          - full
+          - incremental
+          - differential
+      identifier:
+        type: text
+      lastBackupDate:
+        type: date
+      verificationTime:
+        type: date
+  Event:
+    meaning: An event is an observable occurrence in the IT environment that may indicate a change in the state of a service or system and can be monitored for potential incidents.
+    aliases:
+      - esemény
+    properties:
+      eventType:
+        type: text
+        allowed:
+          - incident
+          - maintenance
+          - upgrade
+          - outage
+          - service change
+      identifier:
+        type: text
+      source:
+        type: text
+      timestamp:
+        type: date
+      status:
+        type: text
+        allowed:
+          - new
+          - acknowledged
+          - resolved
+          - closed
+  EvidenceItem:
+    meaning: An evidence item is a preserved record or artifact collected during incident management to support analysis and accountability.
+    aliases:
+      - bizonyíték
+    properties:
+      integrityStatus:
+        type: text
+        allowed:
+          - collected
+          - verified
+          - sealed
+          - compromised
+      captureDate:
+        type: date
+      identifier:
+        type: text
+      link:
+        type: text
+      collectionTime:
+        type: date
+      integrityState:
+        type: text
+        allowed:
+          - intact
+          - compromised
+  MaterialityAssessment:
+    meaning: A materiality assessment is an evaluation process that determines the significance of an incident and whether it triggers regulatory reporting obligations.
+    aliases:
+      - lényegességi értékelés
+    properties:
+      assessmentDate:
+        type: date
+      status:
+        type: text
+        allowed:
+          - not-reportable
+          - potentially-reportable
+          - reportable
+          - undetermined
+      identifier:
+        type: text
+      rationale:
+        type: text
+      assessmentTime:
+        type: date
+  ServiceOwner:
+    meaning: A service owner is the individual responsible for the overall management and performance of a specific IT service throughout its lifecycle.
+    aliases:
+      - szolgáltatásgazda
+    properties:
+      name:
+        type: text
+      identifier:
+        type: text
+      currentState:
+        type: text
+  Workaround:
+    meaning: A workaround is a temporary solution implemented to reduce or bypass the impact of an incident before a permanent fix is available.
+    aliases:
+      - kerülőmegoldás
+    properties:
+      status:
+        type: text
+        allowed:
+          - available
+          - under-evaluation
+          - deprecated
+      description:
+        type: text
+      identifier:
+        type: text
+      approvalFlag:
+        type: boolean
+  BusinessService:
+    meaning: A capability delivered by the bank that provides value to customers or internal operations.
+    aliases: []
+    properties:
+      currentStatus:
+        type: text
+        allowed:
+          - healthy
+          - degraded
+          - partially-unavailable
+          - unavailable
+          - recovering
+      criticalityTier:
+        type: text
+        allowed:
+          - tier-1-critical
+          - tier-2-important
+          - tier-3-standard
+          - tier-4-supporting
+      serviceName:
+        type: text
+  EmergencyChange:
+    meaning: A change made under expedited conditions to address urgent operational needs arising from an incident.
+    aliases: []
+    properties:
+      changeStatus:
+        type: text
+        allowed:
+          - draft
+          - assessed
+          - approved
+          - scheduled
+          - implementing
+          - implemented
+          - failed
+          - rolled-back
+          - closed
+          - cancelled
+      backoutPlanDocumented:
+        type: boolean
+      implementationPlanDocumented:
+        type: boolean
+      implementationTime:
+        type: date
+      riskAccepted:
+        type: boolean
+      currentState:
+        type: text
+        allowed:
+          - draft
+          - assessed
+          - approved
+          - scheduled
+          - implementing
+          - implemented
+          - failed
+          - rolled-back
+          - closed
+          - cancelled
+      validFrom:
+        type: date
+      validTo:
+        type: date
+  RecoveryPlan:
+    meaning: A documented strategy outlining the steps needed to restore an IT service after an incident.
+    aliases: []
+    properties:
+      status:
+        type: text
+        allowed:
+          - draft
+          - approved
+          - in-progress
+          - completed
+          - archived
+      currentState:
+        type: text
+        allowed:
+          - active
+          - outdated
+          - approved
+      lastTestedAt:
+        type: date
+      planId:
+        type: text
+  StakeholderCommunication:
+    meaning: A controlled message sent to inform affected parties about the status and details of an incident.
+    aliases: []
+    properties:
+      communicationStatus:
+        type: text
+        allowed:
+          - draft
+          - pending-approval
+          - approved
+          - sent
+          - archived
+      sentTime:
+        type: date
+      audience:
+        type: text
+        allowed:
+          - technical
+          - management
+          - business
+          - customer
+          - vendor
+          - regulator
+          - all-staff
+      plannedTime:
+        type: date
+      deliveryState:
+        type: text
+        allowed:
+          - pending
+          - delivered
+          - failed
+      required:
+        type: boolean
+  CorrectiveAction:
+    meaning: A corrective action is a tracked step aimed at addressing the root cause of an incident to prevent future occurrences.
+    aliases:
+      - helyesbítő intézkedés
+    properties:
+      description:
+        type: text
+      dueDate:
+        type: date
+      identifier:
+        type: text
+      status:
+        type: text
+        allowed:
+          - open
+          - in-progress
+          - blocked
+          - implemented
+          - verified
+          - closed
+          - cancelled
+  Regulator:
+    meaning: A regulator is a governmental or authoritative body responsible for overseeing and enforcing compliance within the banking sector.
+    aliases:
+      - felügyeleti hatóság
+    properties:
+      identifier:
+        type: text
+      name:
+        type: text
+  Runbook:
+    meaning: A runbook is a documented set of procedures and instructions for responding to specific operational scenarios, incidents, or maintenance tasks.
+    aliases:
+      - üzemeltetési eljárás
+    properties:
+      identifier:
+        type: text
+      name:
+        type: text
+      version:
+        type: text
+  SecondaryEnvironment:
+    meaning: A secondary environment is an alternate operating setting used for testing, recovery, or operational continuity, such as a disaster recovery site.
+    aliases: []
+    properties:
+      identifier:
+        type: text
+      name:
+        type: text
+      status:
+        type: text
+        allowed:
+          - operational
+          - in-maintenance
+          - out-of-service
+  Service:
+    meaning: A service is a capability provided by the bank to deliver value to customers, supported by IT and operational processes.
+    aliases:
+      - szolgáltatás
+    properties:
+      criticality:
+        type: text
+        allowed:
+          - tier-1-critical
+          - tier-2-important
+          - tier-3-standard
+          - tier-4-supporting
+      description:
+        type: text
+      identifier:
+        type: text
+      name:
+        type: text
+      status:
+        type: text
+        allowed:
+          - healthy
+          - degraded
+          - partially-unavailable
+          - unavailable
+          - recovering
+          - unknown
+  Stakeholder:
+    meaning: A stakeholder is any individual or group that has an interest in or is affected by the operations and services of the bank, including employees, customers, and regulators.
+    aliases:
+      - érintett
+    properties:
+      identifier:
+        type: text
+      name:
+        type: text
+      role:
+        type: text
+  ThirdPartyService:
+    meaning: A third-party service is an external capability or service provided by a vendor that the bank relies on to support its operation.
+    aliases:
+      - külső szolgáltatás
+    properties:
+      criticality:
+        type: text
+        allowed:
+          - tier-1-critical
+          - tier-2-important
+          - tier-3-standard
+          - tier-4-supporting
+      identifier:
+        type: text
+      name:
+        type: text
+      status:
+        type: text
+        allowed:
+          - active
+          - inactive
+  ApplicationOwner:
+    meaning: The individual responsible for the functionality and operational fitness of a specific application.
+    aliases: []
+    properties: {}
+  ChangeManager:
+    meaning: The individual responsible for overseeing the change management process, including approvals and implementation of changes.
+    aliases: []
+    properties: {}
+  CommunicationOwner:
+    meaning: The person responsible for managing and delivering communication messages related to incidents.
+    aliases: []
+    properties: {}
+  ComplianceOfficer:
+    meaning: The individual tasked with ensuring that regulatory obligations are met regarding incidents and operational practices.
+    aliases: []
+    properties: {}
+  ContainmentMeasure:
+    meaning: Actions taken to limit the impact of an incident and prevent further degradation of services.
+    aliases: []
+    properties:
+      containmentStatus:
+        type: text
+        allowed:
+          - active
+          - inactive
+          - under-review
+      expectedSideEffects:
+        type: text
+      scope:
+        type: text
+  IncidentCommander:
+    meaning: The individual responsible for managing and coordinating the response efforts during a major incident.
+    aliases: []
+    properties: {}
+  MajorIncidentDeclaration:
+    meaning: The formal recognition of an incident that has significant impact, requiring enhanced coordination and management efforts.
+    aliases: []
+    properties:
+      declarationStatus:
+        type: text
+        allowed:
+          - active
+          - resolved
+          - cancelled
+      declarationTime:
+        type: date
+  OnCallEngineer:
+    meaning: The technical specialist available for immediate response to incident-related issues during their on-call shift.
+    aliases: []
+    properties: {}
+  RecoveryEnvironment:
+    meaning: A designated setting where services can be restored or failover activities occur during recovery efforts.
+    aliases: []
+    properties:
+      currentStatus:
+        type: text
+        allowed:
+          - available
+          - unavailable
+          - in-use
+          - undergoing-maintenance
+      environmentType:
+        type: text
+        allowed:
+          - production
+          - test
+          - development
+          - disaster-recovery
+  RecoveryLead:
+    meaning: The person who oversees the execution of recovery plans and manages restoration efforts following incidents.
+    aliases: []
+    properties: {}
+  RecoveryObjective:
+    meaning: A specific target defined to guide the restoration of services following an incident.
+    aliases: []
+    properties:
+      objectiveDescription:
+        type: text
+      targetTime:
+        type: date
+  RootCause:
+    meaning: The underlying reason identified for one or more incidents that provides insight into what went wrong.
+    aliases: []
+    properties:
+      category:
+        type: text
+        allowed:
+          - software-defect
+          - configuration-error
+          - capacity-shortage
+          - hardware-failure
+          - network-failure
+          - human-error
+          - process-failure
+          - third-party-failure
+          - cyber-attack
+          - unknown
+      recurrencePreventionMeasures:
+        type: text
+      status:
+        type: text
+        allowed:
+          - under-investigation
+          - confirmed
+          - mitigated
+  TechnicalOwner:
+    meaning: The person accountable for the engineering and maintenance of a particular configuration item or service.
+    aliases: []
+    properties: {}
+  AlertOrEvent:
+    meaning: An alert or event is a time-stamped observation indicating a noteworthy occurrence related to IT services or security.
+    aliases: []
+    properties:
+      alertIdentifier:
+        type: text
+      alertType:
+        type: text
+        allowed:
+          - performance
+          - security
+          - availability
+          - operational
+      currentState:
+        type: text
+        allowed:
+          - new
+          - acknowledged
+          - suppressed
+          - escalated
+          - closed
+      detectedAt:
+        type: date
+  Evidence:
+    meaning: Evidence is a preserved record or artifact collected during incident management to support analysis and accountability.
+    aliases: []
+    properties:
+      collectedAt:
+        type: date
+      currentState:
+        type: text
+        allowed:
+          - collected
+          - hashed
+          - verified
+          - sealed
+          - compromised
+      evidenceId:
+        type: text
+      evidenceType:
+        type: text
+        allowed:
+          - document
+          - log
+          - screenshot
+          - analysis
+  ITService:
+    meaning: An IT service is a managed technology capability supporting one or more business services.
+    aliases:
+      - informatics service
+    properties:
+      criticalityTier:
+        type: text
+        allowed:
+          - tier-1-critical
+          - tier-2-important
+          - tier-3-standard
+          - tier-4-supporting
+      currentState:
+        type: text
+        allowed:
+          - healthy
+          - degraded
+          - partially-unavailable
+          - unavailable
+      serviceName:
+        type: text
+relationships:
+  - name: assignedTo
+    from: Incident
+    to: ResolverGroup
+    meaning: An incident is assigned to a resolver group when responsibility for managing and resolving the incident is delegated to that team.
+    aliases: []
+  - name: hasRegulatoryNotification
+    from: Incident
+    to: RegulatoryNotification
+    meaning: An incident has a regulatory notification when a formal communication related to the incident is prepared for submission to a regulatory authority.
+    aliases: []
+  - name: hasEvidenceItem
+    from: Incident
+    to: EvidenceItem
+    meaning: An incident has an evidence item when a record or artifact supporting the incident investigation is collected and documented.
+    aliases: []
+  - name: triggeredByAlert
+    from: Incident
+    to: Alert
+    meaning: An incident is triggered by an alert when the alert notification initiates the creation or acknowledgment of the incident.
+    aliases: []
+  - name: hasMaterialityAssessment
+    from: Incident
+    to: MaterialityAssessment
+    meaning: An incident has a materiality assessment when it is evaluated to determine its significance and potential regulatory reporting requirements.
+    aliases: []
+  - name: implementedByEmergencyChange
+    from: Incident
+    to: EmergencyChange
+    meaning: Denotes that an incident is resolved through the execution of an emergency change.
+    aliases: []
+  - name: linkedToIncident
+    from: EmergencyChange
+    to: Incident
+    meaning: null
+    aliases: []
+rules:
+  qualifiesForMajorIncident:
+    conditions:
+      - incident status is not resolved, closed, or cancelled
+      - incident severity is sev1-critical or sev2-high
+      - incident impacts at least one service
+  canAcknowledgeAlert:
+    conditions:
+      - alert status is new
+  canContainIncident:
+    conditions:
+      - incident status is acknowledged or investigating
+  canDocumentEvidenceItem:
+    conditions:
+      - incident status is not closed or cancelled
+  canRestoreBackup:
+    conditions:
+      - service has a backup set
+  requiresRegulatoryNotification:
+    conditions:
+      - incident has a materiality assessment
+      - materiality assessment status is potentially-reportable or reportable
+  canSubmitApprovedRegulatoryNotification:
+    conditions:
+      - RegulatoryNotification notificationStatus is approved.
+  canAssignIncident:
+    conditions:
+      - incident impacts at least one service
+  canCloseIncident:
+    conditions:
+      - incident status is resolved or monitoring
+      - all services impacted by the incident are healthy
+      - incident has evidence items recorded
+  canExecuteServiceFailover:
+    conditions:
+      - service has a secondary environment
+  canAssignIncident2:
+    conditions:
+      - Incident status is not closed or cancelled.
+      - Incident priority is defined.
+      - Incident affects a BusinessService supported by a ResolverGroup whose groupStatus is active or on-call.
+      - Or Incident implicates a ConfigurationItem whose TechnicalOwner can be used to route it.
+  canExecuteEmergencyChange:
+    conditions:
+      - Incident status is not resolved, closed, or cancelled.
+      - Incident is linked to an EmergencyChange.
+      - EmergencyChange implementationPlanDocumented is true.
+      - EmergencyChange backoutPlanDocumented is true.
+      - EmergencyChange riskAccepted is true.
+  canFailOverRecoveryEnvironment:
+    conditions:
+      - RecoveryEnvironment currentStatus is available.
+  canFailOverService:
+    conditions:
+      - Incident affects a BusinessService.
+      - BusinessService has a RecoveryEnvironment whose currentStatus is available.
+      - Incident has a RecoveryPlan.
+      - BusinessService has a RecoveryObjective.
+  canIsolateConfigurationItem:
+    conditions:
+      - Incident implicates the ConfigurationItem.
+      - ConfigurationItem isolationImpactAssessed is true.
+      - ConfigurationItem reconnectionMethodAvailable is true.
+  canIsolateConfigurationItemDirect:
+    conditions:
+      - ConfigurationItem isolationImpactAssessed is true.
+      - ConfigurationItem reconnectionMethodAvailable is true.
+  canRestoreBackup2:
+    conditions:
+      - Incident uses a BackupSet whose backupStatus is successful or verified.
+      - BackupSet restores a ConfigurationItem.
+      - Incident implicates the ConfigurationItem.
+      - Incident has a RecoveryPlan whose status is approved or in-progress.
+  canSendApprovedStakeholderCommunication:
+    conditions:
+      - StakeholderCommunication communicationStatus is approved.
+      - StakeholderCommunication audience is defined.
+      - StakeholderCommunication is ownedBy a CommunicationOwner.
+  canSendStakeholderCommunication:
+    conditions:
+      - Incident status is defined.
+      - Incident has a StakeholderCommunication.
+      - StakeholderCommunication communicationStatus is approved.
+      - StakeholderCommunication audience is defined.
+      - StakeholderCommunication is ownedBy a CommunicationOwner.
+  communicationSendable:
+    conditions:
+      - The incident includes at least one StakeholderCommunication.
+      - The stakeholder communication deliveryState is not delivered.
+  emergencyChangeExecutable:
+    conditions:
+      - The emergency change currentState is approved.
+      - The emergency change validFrom date is current.
+  regulatoryNotificationNeeded:
+    conditions:
+      - The incident requires a RegulatoryNotification.
+      - The regulatory notification currentState is pending-approval or approved.
+      - The regulatory notification dueDate has not passed.
+      - The related regulatory notification notificationRequired is true.
+  requiredCommunicationsSent:
+    conditions:
+      - The incident includes at least one StakeholderCommunication.
+      - The stakeholder communication required is true.
+      - The stakeholder communication deliveryState is delivered.
+      - The stakeholder communication sentAt is recorded.
+  validEmergencyChange:
+    conditions:
+      - The incident hasEmergencyChange at least one EmergencyChange.
+      - The emergency change currentState is approved or scheduled.
+      - The emergency change validFrom date is current.
+actions:
+  assignIncident:
+    input: Incident
+    preconditions:
+      - canAssignIncident
+    effect: Record the resolver group or on-call engineer responsible for handling the incident.
+    verification: Confirm the incident shows an assigned handling party.
+  declareMajorIncident:
+    input: Incident
+    preconditions:
+      - qualifiesForMajorIncident
+    effect: Record the incident as a major incident.
+    verification: Confirm the incident is marked as a major incident.
+  sendStakeholderCommunication:
+    input: Incident
+    preconditions: []
+    effect: Send incident information to relevant stakeholders.
+    verification: Confirm the communication was issued to the intended stakeholders.
+  submitRegulatoryNotification:
+    input: Incident
+    preconditions:
+      - requiresRegulatoryNotification
+    effect: Submit a formal notification about the incident to the regulator.
+    verification: Confirm the notification was submitted and recorded.
+  acknowledgeAlert:
+    input: Alert
+    preconditions:
+      - canAcknowledgeAlert
+    effect: Record that the alert has been received and is under investigation.
+    verification: Confirm the alert shows as acknowledged or under investigation.
+  containIncident:
+    input: Incident
+    preconditions:
+      - canContainIncident
+    effect: Record containment measures taken to reduce service impact.
+    verification: Confirm containment measures are documented and impact is reduced or stabilized.
+  restoreBackup:
+    input: Service
+    preconditions:
+      - canRestoreBackup
+    effect: Restore service data or components from a backup set.
+    verification: Confirm the service or data has been restored from backup and is usable.
+  executeEmergencyChange:
+    input: EmergencyChange
+    preconditions:
+      - canExecuteEmergencyChange
+    effect: An expedited change is implemented to address the incident.
+    verification: Confirm the emergency change is recorded as implemented and linked to the incident.
+  closeIncident:
+    input: Incident
+    preconditions:
+      - canCloseIncident
+    effect: Mark the incident as closed after resolution and verification are complete.
+    verification: Confirm the incident is marked closed.
+  documentEvidenceItem:
+    input: Incident
+    preconditions:
+      - canDocumentEvidenceItem
+    effect: Record and preserve evidence associated with an incident.
+    verification: Confirm evidence associated with the incident is recorded and preserved.
+  executeServiceFailover:
+    input: Service
+    preconditions:
+      - canExecuteServiceFailover
+    effect: Shift service operation to a secondary environment.
+    verification: Confirm the service is operating from the secondary environment.
+  failOverService:
+    input: RecoveryEnvironment
+    preconditions:
+      - canFailOverRecoveryEnvironment
+    effect: RecoveryEnvironment currentStatus becomes in-use.
+    verification: Confirm RecoveryEnvironment currentStatus is in-use.
+  isolateConfigurationItem:
+    input: ConfigurationItem
+    preconditions:
+      - canIsolateConfigurationItemDirect
+    effect: ConfigurationItem currentStatus becomes affected.
+    verification: Confirm ConfigurationItem currentStatus is affected.
+  initiateRecoveryPlan:
+    input: Incident
+    preconditions: []
+    effect: no direct model change is recorded; the action uses the ITService restoredBy RecoveryPlan relationship to identify the recovery plan to initiate
+    verification: confirm the incident impacts an ITService that is restoredBy a RecoveryPlan whose currentState is active
+  recordEvidence:
+    input: Incident
+    preconditions: []
+    effect: incident includes an Evidence item
+    verification: confirm the incident includes the recorded Evidence item

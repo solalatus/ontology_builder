@@ -191,7 +191,9 @@ is dev-only test tooling, same as Playwright.
   that the committed `ontology_translation/results/majority-vote/` results,
   every built arm's model and `REPORT.md` match a fresh run, and that the
   single-run and cascade baselines reproduce their own committed scores.
-  Offline: no key, no network.
+  Also the hybrid on the hold-out (`evals/hybrid-holdout.mjs`): per-type
+  thresholds, the hold-out helpers and criterion, and that its committed
+  results, models and report match a fresh run. Offline: no key, no network.
 - `subtype-connectivity.spec.mjs` — issue #155's step-1 analysis
   (`evals/subtype-connectivity.mjs`): how the committed recovered interview
   models treat the subclass pairs found by the reference audit (linked,

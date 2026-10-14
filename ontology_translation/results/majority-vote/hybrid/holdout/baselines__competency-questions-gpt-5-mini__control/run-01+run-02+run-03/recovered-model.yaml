@@ -1,0 +1,836 @@
+competency_questions: []
+classes:
+  BusinessService:
+    meaning: A customer- or business-facing capability delivered by the bank.
+    aliases:
+      - üzleti szolgáltatás
+    properties:
+      businessServiceId:
+        type: text
+      impactCriticality:
+        type: text
+        allowed:
+          - tier-1-critical
+          - tier-2-important
+          - tier-3-standard
+          - tier-4-supporting
+  Incident:
+    meaning: An unplanned interruption, degradation, or security condition requiring managed response.
+    aliases:
+      - outage
+      - hibajegy
+      - probléma
+    properties:
+      majorIncidentDeclared:
+        type: boolean
+      priority:
+        type: text
+      severity:
+        type: text
+        allowed:
+          - critical
+          - high
+          - medium
+          - low
+      status:
+        type: text
+        allowed:
+          - detected
+          - investigating
+          - mitigated
+          - restored
+          - closed
+      detectedAt:
+        type: date
+      materialityAssessment:
+        type: text
+        allowed:
+          - none
+          - non-material
+          - material
+          - undetermined
+      postIncidentReviewStatus:
+        type: text
+        allowed:
+          - not-scheduled
+          - scheduled
+          - completed
+      restoredAt:
+        type: date
+      rootCauseSummary:
+        type: text
+      containedAt:
+        type: date
+      majorIncidentDeclaredAt:
+        type: date
+      incidentNumber:
+        type: text
+      isCybersecurity:
+        type: boolean
+      readyForClosure:
+        type: boolean
+      regulatoryReviewFlag:
+        type: boolean
+      category:
+        type: text
+        allowed:
+          - availability
+          - performance
+          - security
+          - capacity
+          - configuration
+          - dependency
+          - data-loss
+      estimatedAffectedCustomers:
+        type: number
+        unit: count
+      estimatedCustomerImpact:
+        type: text
+      impactLevel:
+        type: text
+      regulatorReportedAt:
+        type: date
+      resolvedAt:
+        type: date
+      lastCommunicationTime:
+        type: date
+      materiality:
+        type: text
+        allowed:
+          - material
+          - non-material
+          - unknown
+      recoveryStatus:
+        type: text
+        allowed:
+          - notStarted
+          - inProgress
+          - recovered
+          - failed
+      regulatoryNotificationDueDate:
+        type: date
+      regulatoryNotificationRequired:
+        type: boolean
+        allowed:
+          - 'true'
+          - 'false'
+      rootCauseIdentified:
+        type: boolean
+        allowed:
+          - 'true'
+          - 'false'
+  IncidentCommander:
+    meaning: The person accountable for command, coordination, and decision cadence during a major incident.
+    aliases:
+      - IC
+      - incident lead
+      - incident manager
+      - incidensparancsnok
+      - MIM lead
+    properties:
+      contactDetails:
+        type: text
+  ITService:
+    meaning: A managed technology capability supporting one or more business services.
+    aliases:
+      - informatics service
+      - informatikai szolgáltatás
+    properties:
+      serviceId:
+        type: text
+      businessImpactLevel:
+        type: text
+        allowed:
+          - low
+          - medium
+          - high
+          - critical
+      recoveryPointObjective:
+        type: number
+        unit: hours
+      slaTier:
+        type: text
+      criticality:
+        type: text
+        allowed:
+          - tier-1-critical
+          - tier-2-important
+          - tier-3-standard
+          - tier-4-supporting
+      timeToAcknowledgeTarget:
+        type: number
+        unit: minutes
+      timeToRestoreTarget:
+        type: number
+        unit: minutes
+      backupAvailable:
+        type: boolean
+        allowed:
+          - 'true'
+          - 'false'
+      healthState:
+        type: text
+        allowed:
+          - operational
+          - degraded
+          - partial_outage
+          - major_outage
+  RecoveryPlan:
+    meaning: A documented plan for restoring an IT service and its dependencies.
+    aliases:
+      - runbook
+      - workaround
+      - helyreállítási terv
+      - DR plan
+    properties:
+      lastValidatedAt:
+        type: date
+      documentLink:
+        type: text
+      hasWorkaroundSteps:
+        type: boolean
+      reviewValidityDays:
+        type: number
+        unit: days
+      kbUrl:
+        type: text
+      title:
+        type: text
+      planStatus:
+        type: text
+        allowed:
+          - approved
+          - draft
+          - unavailable
+  ResolverGroup:
+    meaning: A team assigned to diagnose and restore a specific technology or service area.
+    aliases:
+      - resolver
+      - support group
+      - megoldócsoport
+    properties:
+      contactDetails:
+        type: text
+      escalationPolicy:
+        type: text
+      groupId:
+        type: text
+  Change:
+    meaning: A controlled addition, modification, or removal that may affect an IT service.
+    aliases:
+      - deployment
+      - patch
+      - változás
+      - módosítás
+    properties:
+      changeDate:
+        type: date
+      changeId:
+        type: text
+      changeType:
+        type: text
+        allowed:
+          - deployment
+          - patch
+          - configuration
+      emergencyChange:
+        type: boolean
+      approved:
+        type: boolean
+        allowed:
+          - 'true'
+          - 'false'
+  ConfigurationItem:
+    meaning: A managed component recorded in the configuration-management scope.
+    aliases:
+      - CI
+      - konfigurációs elem
+    properties:
+      ciId:
+        type: text
+      lastBackupAt:
+        type: date
+      backupAvailable:
+        type: boolean
+        allowed:
+          - 'true'
+          - 'false'
+      healthState:
+        type: text
+        allowed:
+          - operational
+          - degraded
+          - partial_outage
+          - major_outage
+      serviceTier:
+        type: text
+        allowed:
+          - Tier1
+          - Tier2
+          - Tier3
+  CorrectiveAction:
+    meaning: A tracked action intended to remove a cause, reduce risk, or improve response capability.
+    aliases:
+      - remediation
+      - post-incident action
+      - remediation action
+      - helyesbítő intézkedés
+    properties:
+      dueDate:
+        type: date
+      status:
+        type: text
+        allowed:
+          - open
+          - in-progress
+          - resolved
+          - closed
+      actionId:
+        type: text
+      assignedToContact:
+        type: text
+  EvidencePackage:
+    meaning: A preserved record or artifact supporting incident analysis and accountability.
+    aliases:
+      - evidence
+      - forensic package
+      - bizonyítéki csomag
+    properties:
+      preservedAt:
+        type: date
+      chainOfCustodyRecorded:
+        type: boolean
+      storageLocation:
+        type: text
+      description:
+        type: text
+      evidenceType:
+        type: text
+      storedAt:
+        type: text
+  OnCallEngineer:
+    meaning: A technical specialist available for time-critical operational response.
+    aliases:
+      - on-call
+      - duty engineer
+      - ügyeletes mérnök
+    properties:
+      contactDetails:
+        type: text
+  ServiceOwner:
+    meaning: The role accountable for an IT service across its lifecycle.
+    aliases:
+      - owner
+      - service manager
+      - szolgáltatásgazda
+    properties:
+      contactDetails:
+        type: text
+  Vendor:
+    meaning: An external organization supplying or supporting technology or services.
+    aliases:
+      - third-party
+      - supplier
+      - szállító
+      - beszállító
+    properties:
+      contactDetails:
+        type: text
+      contractJurisdiction:
+        type: text
+      vendorTier:
+        type: text
+        allowed:
+          - Tier1
+          - Tier2
+          - Tier3
+  Backup:
+    meaning: A defined collection of recoverable backup data for protected components.
+    aliases:
+      - restore point
+      - mentéskészlet
+      - mentés
+    properties:
+      createdAt:
+        type: date
+      recoverable:
+        type: boolean
+      storageLocation:
+        type: text
+      verified:
+        type: boolean
+      verifiedAt:
+        type: date
+  RegulatoryNotification:
+    meaning: A formal incident-related submission to a competent authority.
+    aliases:
+      - regulatory report
+      - regulator notification
+      - report
+      - supervisory notification
+      - felügyeleti bejelentés
+    properties:
+      deadline:
+        type: date
+      regulatorName:
+        type: text
+      submissionStatus:
+        type: text
+        allowed:
+          - not-required
+          - planned
+          - submitted
+          - overdue
+  Stakeholder:
+    meaning: A person, group, or organization affected by or responsible for an operational outcome.
+    aliases:
+      - audience
+      - interested party
+      - érintett
+    properties:
+      contactDetails:
+        type: text
+  TechnicalOwner:
+    meaning: The role responsible for technical decisions, architecture, and hands-on remediation for a service.
+    aliases:
+      - tech owner
+      - technical lead
+    properties:
+      contactDetails:
+        type: text
+  AlertEvent:
+    meaning: An alert or event generated by monitoring, SIEM, or external sources indicating a potential issue.
+    aliases: []
+    properties:
+      alertId:
+        type: text
+      alertSeverity:
+        type: text
+        allowed:
+          - sev1-critical
+          - sev2-high
+          - sev3-medium
+          - sev4-low
+      observedAt:
+        type: date
+      sourceTool:
+        type: text
+  ChangeRequest:
+    meaning: A tracked request to change systems, including emergency changes linked to incident recovery.
+    aliases: []
+    properties:
+      changeId:
+        type: text
+      changeType:
+        type: text
+        allowed:
+          - normal
+          - emergency
+      emergencyFlag:
+        type: boolean
+      status:
+        type: text
+        allowed:
+          - draft
+          - assessed
+          - approved
+          - scheduled
+          - implementing
+          - implemented
+          - failed
+          - rolled-back
+          - closed
+          - cancelled
+  DutyManager:
+    meaning: The manager on duty who authorizes escalations and communications for incidents.
+    aliases: []
+    properties: {}
+  Notification:
+    meaning: An outbound notification related to an incident, including target, type, timestamp, and delivery status.
+    aliases: []
+    properties:
+      deliveryStatus:
+        type: text
+        allowed:
+          - pending
+          - sent
+          - failed
+          - acknowledged
+      notificationId:
+        type: text
+      notificationType:
+        type: text
+        allowed:
+          - major-incident-declared
+          - incident-notify-assignee
+          - incident-update
+          - regulator-notification
+      sentAt:
+        type: date
+      targetUri:
+        type: text
+  Person:
+    meaning: An individual involved in reporting, investigating, or resolving incidents (internal staff or external contact).
+    aliases: []
+    properties:
+      contactUri:
+        type: text
+      personId:
+        type: text
+      roleLabel:
+        type: text
+  RegulatorContact:
+    meaning: A regulatory authority or contact record used for reporting incidents to regulators.
+    aliases: []
+    properties:
+      contactUri:
+        type: text
+      jurisdiction:
+        type: text
+      regulatorName:
+        type: text
+  VendorSupportEngineer:
+    meaning: A vendor-assigned support contact who can act on incidents affecting vendor-owned systems.
+    aliases: []
+    properties:
+      contactUri:
+        type: text
+      vendorName:
+        type: text
+      vendorSlaTier:
+        type: text
+        allowed:
+          - tier-1-critical
+          - tier-2-important
+          - tier-3-standard
+  Alert:
+    meaning: A monitoring or detection signal indicating potential problems that may be correlated into an incident.
+    aliases: []
+    properties:
+      severity:
+        type: text
+        allowed:
+          - critical
+          - high
+          - medium
+          - low
+      status:
+        type: text
+        allowed:
+          - active
+          - acknowledged
+          - resolved
+      timestamp:
+        type: date
+  DetectionSource:
+    meaning: The origin or mechanism by which an incident or alert was detected (for example monitoring system, user report, or external vendor notification).
+    aliases: []
+    properties:
+      sourceType:
+        type: text
+        allowed:
+          - monitoring
+          - userReport
+          - externalVendor
+          - automatedAlert
+          - manualTicket
+          - other
+  EvidenceItem:
+    meaning: A collected record, log, snapshot, or artifact preserved for audit, investigation, or regulatory reporting purposes.
+    aliases: []
+    properties:
+      collectedAt:
+        type: date
+      configExportFormat:
+        type: text
+      evidenceType:
+        type: text
+        allowed:
+          - log
+          - snapshot
+          - configExport
+          - communication
+          - file
+          - other
+      retainedForRegulatory:
+        type: boolean
+        allowed:
+          - 'true'
+          - 'false'
+  StakeholderGroup:
+    meaning: A named group of business or regulatory stakeholders who should receive communications and updates about an incident.
+    aliases: []
+    properties: {}
+relationships:
+  - name: incidentImpacts
+    from: Incident
+    to: ITService
+    meaning: Links an incident to the IT service it disrupts or degrades.
+    aliases:
+      - impacts
+      - affects
+  - name: incidentUsesRecoveryPlan
+    from: Incident
+    to: RecoveryPlan
+    meaning: The incident is being handled using this recovery plan or runbook.
+    aliases:
+      - usesRunbook
+  - name: incidentAssignedToResolverGroup
+    from: Incident
+    to: ResolverGroup
+    meaning: Assigns an incident to a team responsible for resolution.
+    aliases:
+      - assignedToResolverGroup
+  - name: incidentLedBy
+    from: Incident
+    to: IncidentCommander
+    meaning: The incident commander leading coordination and decisions for this incident.
+    aliases:
+      - ledBy
+      - incidentCommander
+  - name: changeAffectsCi
+    from: Change
+    to: ConfigurationItem
+    meaning: A deployment or change that affects this configuration item.
+    aliases:
+      - affects
+  - name: incidentHasEvidence
+    from: Incident
+    to: EvidencePackage
+    meaning: The incident has one or more preserved evidence packages used for investigation.
+    aliases:
+      - evidenceFor
+  - name: incidentRelatedTo
+    from: Incident
+    to: Incident
+    meaning: Relates one incident to another due to correlation, shared cause, or shared impact.
+    aliases:
+      - relatedTo
+  - name: incidentAssignedToEngineer
+    from: Incident
+    to: OnCallEngineer
+    meaning: The on-call engineer assigned to handle or escalate this incident.
+    aliases:
+      - assignedToOnCall
+  - name: serviceOwnedBy
+    from: ITService
+    to: ServiceOwner
+    meaning: The service owner accountable for business-level decisions about this IT service.
+    aliases:
+      - ownedBy
+rules:
+  majorIncidentCriteria:
+    conditions:
+      - incident.severity is critical
+      - incident.majorIncidentDeclared is true
+      - the incident affects multiple ITService records with businessImpactLevel high or critical
+      - incident.materialityAssessment is material
+  canCloseIncident:
+    conditions:
+      - incident.status is restored OR incident.status is closed
+      - incident.readyForClosure is true
+      - there are no incidentHasCorrectiveAction with status in [open, in-progress]
+      - if incident.isCybersecurity is true then evidenceForIncident exists AND EvidencePackage.chainOfCustodyRecorded is true
+      - if incident.majorIncidentDeclared is true then a post-incident review is scheduled or completed
+  regulatoryNotificationRequired:
+    conditions:
+      - incident.materialityAssessment is material
+      - incident.materialityAssessment is undetermined AND incident has regulatory-review flag
+      - incident.isCybersecurity is true AND data-exfiltration or personal data impacted
+      - any regulator-specific threshold (placeholder)
+  assignDefaultResolver:
+    conditions:
+      - if ITService has groupResponsibleForService then recommend that ResolverGroup
+      - if current time is outside business hours then recommend an OnCallEngineer who is engineerMemberOfGroup
+      - if incident.severity is critical then include escalation to IncidentCommander
+  backupUsableForRecovery:
+    conditions:
+      - Backup.verified is true
+      - Backup.recoverable is true
+      - Backup.createdAt is newer than ITService.recoveryPointObjective (hours)
+  changeCorrelation:
+    conditions:
+      - there exists a Change where changeDeployedTo matches the affected ITService AND changeDate is within the incident window
+      - OR incidentCausedByChange is already recorded
+  evidencePreservationRequired:
+    conditions:
+      - incident.isCybersecurity is true
+  shouldSchedulePostIncidentReview:
+    conditions:
+      - incident.majorIncidentDeclared is true
+      - incident.status is restored OR incident.status is closed
+  useRecoveryPlan:
+    conditions:
+      - ITService has serviceHasRecoveryPlan
+      - RecoveryPlan.hasWorkaroundSteps is true
+      - RecoveryPlan.lastValidatedAt is within RecoveryPlan.reviewValidityDays (per-plan)
+      - incident.status is investigating OR incident.status is mitigated
+  needsRegulatoryReporting:
+    conditions:
+      - incident severity is sev1-critical OR the incident affects a BusinessService in a jurisdiction that requires immediate reporting
+      - regulatorReportedAt is not set for the incident
+      - estimatedCustomerImpact indicates regulatory impact or customer data exposure
+  requiresEmergencyChange:
+    conditions:
+      - the incident is linked to a ChangeRequest with changeType emergency OR the ChangeRequest emergencyFlag is true
+      - the linked ChangeRequest status is one of [draft, assessed, approved, scheduled, implementing, failed, rolled-back]
+      - incident status is not resolved
+  allowEmergencyChange:
+    conditions:
+      - the emergency change is linked to an active incident
+      - change.changeType is emergency
+      - implementation and backout plans are documented in the change record
+      - change affects at least one ConfigurationItem and those ConfigurationItem(s) are assessed
+      - explicit risk acceptance approval is documented
+  assignIncidentCommander:
+    conditions:
+      - during business hours, the Major Incident Manager (MIM) is assigned if available
+      - during after-hours, the Duty Manager is assigned as default
+      - if the incident is P1-critical or sev1-critical, the Duty Manager may escalate to a senior-level manager or executive based on impact and availability
+      - if both the MIM and Duty Manager are unavailable, the role falls to an appropriate on-call escalation contact
+  communicationsUpToDate:
+    conditions:
+      - if incident.priority is P1 or incident.severity is critical, the most recent incident.lastCommunicationTime is within 15 minutes of now
+      - if incident.priority is P2 or incident.severity is high, the most recent incident.lastCommunicationTime is within 30 minutes of now
+      - otherwise, the most recent incident.lastCommunicationTime is within 4 hours of now
+  evidenceComplete_major_nonreg:
+    conditions:
+      - incident.isMajor is true and incident.regulatoryNotificationRequired is false
+      - exists collectedEvidence where (EvidenceItem.evidenceType equals 'log')
+      - exists collectedEvidence where (EvidenceItem.evidenceType equals 'communication')
+      - for every collectedEvidence where (EvidenceItem.evidenceType equals 'communication'), that EvidenceItem evidenceSentTo includes all StakeholderGroup nodes linked from the incident via notifiesStakeholders
+  evidenceComplete_regulatory:
+    conditions:
+      - evidenceCompletenessRequired
+      - exists collectedEvidence where (EvidenceItem.evidenceType equals 'log')
+      - exists collectedEvidence where (EvidenceItem.evidenceType equals 'configExport')
+      - exists collectedEvidence where (EvidenceItem.evidenceType equals 'communication')
+      - for every collectedEvidence where (EvidenceItem.evidenceType equals 'communication'), that EvidenceItem evidenceSentTo includes all StakeholderGroup nodes linked from the incident via notifiesStakeholders
+  evidenceCompletenessRequired:
+    conditions:
+      - incident.isMajor is true or incident.regulatoryNotificationRequired is true
+  similarIncidentByServiceAndRootCause:
+    conditions:
+      - the current incident.rootCauseIdentified is true
+      - another incident impacts at least one of the same ITService(s) as the current incident
+      - another incident.rootCause equals the current incident.rootCause
+actions:
+  assignResolver:
+    input: Incident
+    preconditions:
+      - assignDefaultResolver
+    effect: Assigns a ResolverGroup or OnCallEngineer to the incident (creates incidentAssignedToResolverGroup or incidentAssignedToEngineer relationship).
+    verification: Confirm the incident has incidentAssignedToResolverGroup or incidentAssignedToEngineer set.
+  declareMajorIncident:
+    input: Incident
+    preconditions:
+      - majorIncidentCriteria
+    effect: Sets incident.majorIncidentDeclared to true and recommends or assigns an IncidentCommander (creates incidentLedBy relationship).
+    verification: incident.majorIncidentDeclared is true and incidentLedBy is set if assigned.
+  linkIncidentToChange:
+    input: Incident
+    preconditions:
+      - changeCorrelation
+    effect: Creates incidentCausedByChange linking the incident to the identified Change.
+    verification: incidentCausedByChange relationship exists linking the incident and the Change.
+  openRegulatoryNotification:
+    input: Incident
+    preconditions:
+      - regulatoryNotificationRequired
+    effect: Creates or updates a RegulatoryNotification linked to the incident (notificationForIncident) and sets submissionStatus to planned.
+    verification: A RegulatoryNotification exists with notificationForIncident linking to the incident and submissionStatus set to planned.
+  validateBackupAndRestore:
+    input: Backup
+    preconditions: []
+    effect: Runs backup validation; sets Backup.verified true. If validation shows restore is required, initiates a restore job for the associated ConfigurationItem.
+    verification: Backup.verified is true and, if a restore was needed, a restore job record or log entry exists.
+  acknowledgeIncident:
+    input: Incident
+    preconditions: []
+    effect: set incident.status to acknowledged and set incident.acknowledgedAt to current time
+    verification: read the incident and confirm status is acknowledged and acknowledgedAt is recorded
+  categorizeIncident:
+    input: Incident
+    preconditions: []
+    effect: set incident.category to the chosen category (e.g., availability, performance, cybersecurity)
+    verification: read the incident and confirm incident.category matches the chosen value
+  applyRecoveryPlan:
+    input: Incident
+    preconditions:
+      - useRecoveryPlan
+    effect: Links the chosen RecoveryPlan to the incident (incidentUsesRecoveryPlan) and applies its steps; updates incident.status toward mitigated or restored as appropriate.
+    verification: incidentUsesRecoveryPlan relationship exists and incident.status is updated to mitigated or restored.
+  markReadyToClose:
+    input: Incident
+    preconditions:
+      - canCloseIncident
+    effect: Sets incident.readyForClosure to true and updates incident.status to closed.
+    verification: incident.readyForClosure is true and incident.status is closed.
+  notifyStakeholders:
+    input: Incident
+    preconditions: []
+    effect: Sends notifications to stakeholders listed by incidentShouldNotify (emails/messages) with the current incident summary and status.
+    verification: Notification log entries exist showing stakeholders and timestamps for the sent notifications.
+  preserveEvidence:
+    input: Incident
+    preconditions:
+      - evidencePreservationRequired
+    effect: Creates an EvidencePackage linked to the incident (evidenceForIncident) and records chain-of-custody.
+    verification: An EvidencePackage exists for the incident and EvidencePackage.chainOfCustodyRecorded is true.
+  schedulePostIncidentReview:
+    input: Incident
+    preconditions:
+      - shouldSchedulePostIncidentReview
+    effect: Sets Incident.postIncidentReviewStatus to scheduled and creates a calendar/task entry for the review.
+    verification: Incident.postIncidentReviewStatus is scheduled and a review calendar entry exists.
+  attachEvidenceToIncident:
+    input: Incident
+    preconditions: []
+    effect: create incidentHasEvidence relationship from the incident to the Evidence item and set Evidence.collectedAt to current time if not set
+    verification: confirm the incidentHasEvidence relationship exists and the Evidence.collectedAt is recorded
+  linkAlertToIncident:
+    input: Incident
+    preconditions: []
+    effect: create incidentLinkedToAlert relationship from the incident to the AlertEvent and set incident.firstDetectedAt to the alert observedAt if not already set
+    verification: confirm the incidentLinkedToAlert relationship exists and firstDetectedAt is populated
+  notifyAssignedResolverGroup:
+    input: Incident
+    preconditions: []
+    effect: If a Person is linked via incidentAssignedToPerson, create a Notification targeting that Person record with notificationType incident-notify-assignee and link it via incidentHasNotification; otherwise create a Notification targeting the ResolverGroup contactUri and link it via incidentHasNotification.
+    verification: confirm at least one Notification object exists linked by incidentHasNotification for the incident and that its deliveryStatus is not failed
+  recommendRunbookForIncident:
+    input: Incident
+    preconditions: []
+    effect: find Runbook instances related to linked ITService(s) and recommend the highest-relevance Runbook by creating an incidentUsesRunbook relationship
+    verification: confirm an incidentUsesRunbook relationship exists linking the incident to the recommended Runbook
+  recordContainmentAction:
+    input: Incident
+    preconditions: []
+    effect: set incident.status to contained and set incident.containedAt to current time; optionally create incidentHasEvidence links for containment evidence provided
+    verification: read the incident and confirm status is contained and containedAt is recorded, and any provided Evidence items are linked
+  recordResolutionAction:
+    input: Incident
+    preconditions: []
+    effect: set incident.status to resolved and set incident.resolvedAt to current time; optionally link any resolution Evidence via incidentHasEvidence
+    verification: read the incident and confirm status is resolved and resolvedAt is recorded, and any provided Evidence items are linked
+  executeEmergencyChange:
+    input: Change
+    preconditions:
+      - allowEmergencyChange
+    effect: change.approved becomes true and change.changedAt is set when the emergency change is executed
+    verification: confirm change.approved is true and change.changedAt is recorded
+  failOverService:
+    input: ITService
+    preconditions: []
+    effect: ITService.healthState becomes operational (service failed over to DR environment)
+    verification: confirm ITService.healthState is operational
+  isolateConfigurationItem:
+    input: ConfigurationItem
+    preconditions: []
+    effect: configurationItem.healthState becomes degraded (isolated)
+    verification: confirm ConfigurationItem.healthState is degraded
+  sendStakeholderCommunication:
+    input: Incident
+    preconditions: []
+    effect: create an EvidenceItem of evidenceType communication and link it from the Incident via collectedEvidence; update incident.lastCommunicationTime
+    verification: confirm an EvidenceItem of type communication exists linked via collectedEvidence and incident.lastCommunicationTime is set

@@ -3981,4 +3981,14 @@ reference and record deltas/decisions here instead.)*
   which pair is (1,2): an average pair gains +0.038 / +0.072 over a single
   interview, the union of all three +0.037 / +0.095. No UI work warranted
   from phase 1; phase 2 (LLM scoring) remains optional on #174.
+- 2026-10-14 — #174 hybrid (union, except relationships need 2 of 3),
+  pre-registered in `results/majority-vote/HYBRID-DESIGN.md` and tested on
+  10 untouched itops interview sets: **not convincing**. Hold-out mean:
+  single 0.220, union 0.290, hybrid 0.272, majority 0.206; the hybrid beat
+  union in 0 of 10 sets. Relationship precision/recall are near the floor on
+  the hold-out (old low-recall interviews), so voting cut the little recall
+  there was. On the phase-1 runs that suggested it: +0.033 over union
+  (current), −0.003 (pre-#152). Deviation recorded: the design text said 11
+  sets, its table listed 10; the verdict does not depend on it. Net: a plain
+  union of all interviews is the robust simple choice in this data.
 

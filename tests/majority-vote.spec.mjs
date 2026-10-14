@@ -173,3 +173,41 @@ test("the cascade baselines and single runs reproduce their own committed scores
     }
   }
 });
+
+test("per-type thresholds: the hybrid keeps every class but votes on relationships", () => {
+  const docs = RUNS();
+  const groups = buildGroups(docs);
+  const hybrid = buildModel(docs, groups, { runs: [0, 1, 2], threshold: 1, thresholds: { relationships: 2 } }).doc;
+  assert.deepEqual(Object.keys(hybrid.classes).sort(), ["Borrower", "Collateral", "Guarantor", "Loan"], "all classes, as union");
+  assert.deepEqual(hybrid.relationships.map((r) => r.name), ["hasBorrower"], "securedBy was found by one run only");
+  assert.deepEqual(Object.keys(hybrid.actions).sort(), ["approveLoan", "releaseCollateral"], "actions as union");
+  const q = reviewQueue(groups, { runs: [0, 1, 2], threshold: 1, thresholds: { relationships: 2 } });
+  assert.equal(q.relationships.below_threshold, 1);
+  assert.equal(q.classes.below_threshold, 0);
+});
+
+// --- Hybrid on the hold-out (HYBRID-DESIGN.md) ------------------------------
+
+import { triples, setRuns, holdoutCriterion, runAll, renderReport as renderHybridReport, OUT_DIR as HYBRID_DIR, HOLDOUT_SETS } from "./evals/hybrid-holdout.mjs";
+
+test("hold-out helpers: triples of a set, invalid runs excluded, the pre-registered criterion", () => {
+  assert.deepEqual(triples(["a", "b", "c"]), [["a", "b", "c"]]);
+  assert.equal(triples(["1", "2", "3", "4", "5"]).length, 10);
+  assert.ok(!setRuns("tests/evals/results/baselines/b2-generic-interviewer").some((r) => /INVALID/.test(r)));
+  assert.equal(HOLDOUT_SETS.length, 10, "the sets the design's table lists");
+  const set = (u, h, m) => ({ singles: 0, union: { composite: u }, hybrid: { composite: h }, majority: { composite: m }, intersection: { composite: 0 } });
+  const all = (h) => Array.from({ length: 10 }, () => set(0.3, h, 0.2));
+  assert.equal(holdoutCriterion(all(0.31)).convincing, true);
+  assert.equal(holdoutCriterion(all(0.29)).convincing, false);
+  const eightWins = [...Array.from({ length: 8 }, () => set(0.3, 0.4, 0.2)), set(0.3, 0.2, 0.2), set(0.3, 0.2, 0.2)];
+  assert.equal(holdoutCriterion(eightWins).wins_at_least_9_of_11, false, "8 wins is not enough");
+});
+
+test("the committed hybrid results, models and report are exactly what a fresh run produces", () => {
+  const files = new Map();
+  const fresh = JSON.parse(JSON.stringify(runAll({ collect: files })));
+  const committed = JSON.parse(fs.readFileSync(path.join(HYBRID_DIR, "results.json"), "utf8"));
+  assert.deepEqual(fresh, committed);
+  for (const [file, text] of files) assert.equal(fs.readFileSync(file, "utf8"), text, file);
+  assert.equal(fs.readFileSync(path.join(HYBRID_DIR, "REPORT.md"), "utf8"), renderHybridReport(committed));
+});

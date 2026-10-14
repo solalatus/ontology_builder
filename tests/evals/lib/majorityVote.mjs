@@ -162,13 +162,14 @@ const rest = (key, n) => key.split("|").slice(2, 2 + n);
 /**
  * Builds a .domain.yaml document from the groups that reach `threshold`
  * support among `runs`, per the design: representative = the member from
- * the lowest-numbered run, used unchanged.
+ * the lowest-numbered run, used unchanged. `thresholds` overrides the
+ * threshold per element type (the hybrid: { relationships: 2 }).
  */
-export function buildModel(docs, groups, { runs, threshold }) {
+export function buildModel(docs, groups, { runs, threshold, thresholds = {} }) {
   const stats = { collisions: 0 };
   const kept = (type) => groups[type].groups
     .map((g) => restrict(g, runs))
-    .filter((g) => g.support >= threshold)
+    .filter((g) => g.support >= (thresholds[type] ?? threshold))
     // Higher support first, so it keeps the plain name on a collision.
     .sort((x, y) => y.support - x.support || x.members[0].localeCompare(y.members[0]));
 
@@ -257,10 +258,11 @@ export function buildModel(docs, groups, { runs, threshold }) {
 
 /** What a person would have to review after a vote: elements below the
  * threshold (found by fewer runs) plus the recorded conflicts. */
-export function reviewQueue(groups, { runs, threshold }) {
+export function reviewQueue(groups, { runs, threshold, thresholds = {} }) {
   const out = {};
   for (const type of ELEMENT_TYPES) {
-    const below = groups[type].groups.map((g) => restrict(g, runs)).filter((g) => g.support > 0 && g.support < threshold);
+    const t = thresholds[type] ?? threshold;
+    const below = groups[type].groups.map((g) => restrict(g, runs)).filter((g) => g.support > 0 && g.support < t);
     out[type] = {
       below_threshold: below.length,
       conflicts: groups[type].conflicts.filter((e) => runs.includes(runOf(e.a)) && runs.includes(runOf(e.b))).length,
