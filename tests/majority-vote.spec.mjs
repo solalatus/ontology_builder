@@ -1,0 +1,138 @@
+import { test } from "node:test";
+import assert from "node:assert/strict";
+import { buildGroups, buildModel, groupElements, reviewQueue, restrict, runOf } from "./evals/lib/majorityVote.mjs";
+import { chooseBestPair, componentCount } from "./evals/majority-vote-merge.mjs";
+
+// Issue #174: the majority-vote merge's grouping and voting, on a small
+// three-run fixture where the right answer is known.
+
+const props = (...names) => Object.fromEntries(names.map((n) => [n, { type: "date" }]));
+const RUNS = () => [
+  {
+    competency_questions: [{ id: "cq1", text: "Which borrower owes a loan?" }],
+    classes: { Loan: { meaning: "A loan.", properties: props("maturityDate") }, Borrower: { properties: {} }, Collateral: { properties: {} } },
+    relationships: [
+      { name: "hasBorrower", from: "Loan", to: "Borrower" },
+      { name: "securedBy", from: "Loan", to: "Collateral" },
+    ],
+    rules: { loanNeedsBorrower: { conditions: ["A loan must have a borrower recorded before approval."] } },
+    actions: {
+      approveLoan: { input: "Loan", preconditions: ["loanNeedsBorrower"], effect: "The loan is approved.", verification: "Check status." },
+      releaseCollateral: { input: "Collateral", preconditions: [], effect: "Collateral released.", verification: "Check." },
+    },
+  },
+  {
+    classes: { Loan: { properties: props("maturityDate") }, Borrower: { properties: {} } },
+    relationships: [{ name: "hasBorrower", from: "Loan", to: "Borrower" }],
+    rules: { loanNeedsBorrower: { conditions: ["A loan must have a borrower recorded before approval."] } },
+    actions: {
+      approveLoan: { input: "Loan", preconditions: ["loanNeedsBorrower"], effect: "Approved.", verification: "Check." },
+      releaseCollateral: { input: "Loan", preconditions: [], effect: "Released.", verification: "Check." },
+    },
+  },
+  {
+    classes: { Loan: { properties: {} }, Borrower: { properties: {} }, Guarantor: { properties: {} } },
+    relationships: [
+      { name: "hasBorrower", from: "Loan", to: "Borrower" },
+      { name: "borrows", from: "Borrower", to: "Loan" }, // reciprocal of hasBorrower: one unit
+    ],
+    rules: {},
+    actions: { approveLoan: { input: "Loan", preconditions: [], effect: "Approved.", verification: "Check." } },
+  },
+];
+
+const supportOf = (groups, type, key) => restrict(groups[type].groups.find((g) => g.includes(key)), [0, 1, 2]).support;
+
+test("groups the same element across runs and counts its support", () => {
+  const groups = buildGroups(RUNS());
+  assert.equal(supportOf(groups, "classes", "c|0|Loan"), 3);
+  assert.equal(supportOf(groups, "classes", "c|0|Borrower"), 3);
+  assert.equal(supportOf(groups, "classes", "c|0|Collateral"), 1);
+  assert.equal(supportOf(groups, "classes", "c|2|Guarantor"), 1);
+  assert.equal(supportOf(groups, "properties", "p|0|Loan|maturityDate"), 2);
+  assert.equal(supportOf(groups, "rules", "u|0|loanNeedsBorrower"), 2);
+  assert.equal(supportOf(groups, "actions", "a|0|approveLoan"), 3);
+});
+
+test("a reciprocal pair within one run is one relationship element, and is emitted whole", () => {
+  const groups = buildGroups(RUNS());
+  const unitsOfRun2 = Object.values(groups.units[2]);
+  assert.deepEqual(unitsOfRun2, [[0, 1]], "hasBorrower and borrows form one unit");
+  assert.equal(supportOf(groups, "relationships", "r|0|rel_0"), 3);
+  const onlyRun2 = buildModel(RUNS(), groups, { runs: [2], threshold: 1 }).doc;
+  assert.deepEqual(onlyRun2.relationships.map((r) => r.name).sort(), ["borrows", "hasBorrower"]);
+});
+
+test("thresholds: union keeps everything, majority keeps support >= 2, intersection keeps support 3", () => {
+  const docs = RUNS();
+  const groups = buildGroups(docs);
+  const model = (threshold) => buildModel(docs, groups, { runs: [0, 1, 2], threshold }).doc;
+  assert.deepEqual(Object.keys(model(1).classes).sort(), ["Borrower", "Collateral", "Guarantor", "Loan"]);
+  assert.deepEqual(Object.keys(model(2).classes).sort(), ["Borrower", "Loan"]);
+  assert.deepEqual(Object.keys(model(3).classes).sort(), ["Borrower", "Loan"]);
+  assert.deepEqual(Object.keys(model(2).classes.Loan.properties), ["maturityDate"]);
+  assert.deepEqual(Object.keys(model(3).classes.Loan.properties), [], "maturityDate is in 2 runs only");
+  assert.deepEqual(Object.keys(model(2).rules), ["loanNeedsBorrower"]);
+  assert.deepEqual(Object.keys(model(3).rules), []);
+});
+
+test("a relationship needs both endpoint classes kept; the representative comes from the lowest run", () => {
+  const docs = RUNS();
+  const groups = buildGroups(docs);
+  const union = buildModel(docs, groups, { runs: [0, 1, 2], threshold: 1 }).doc;
+  assert.ok(union.relationships.some((r) => r.name === "securedBy"));
+  const majority = buildModel(docs, groups, { runs: [0, 1, 2], threshold: 2 }).doc;
+  assert.deepEqual(majority.relationships.map((r) => `${r.from} ${r.name} ${r.to}`), ["Loan hasBorrower Borrower"]);
+  assert.equal(majority.classes.Loan.meaning, "A loan.", "run 1's body, unchanged");
+  assert.deepEqual(majority.competency_questions, docs[0].competency_questions);
+});
+
+test("an action needs its (representative's) input class kept; preconditions are remapped to kept rules", () => {
+  const docs = RUNS();
+  const groups = buildGroups(docs);
+  const majority = buildModel(docs, groups, { runs: [0, 1, 2], threshold: 2 }).doc;
+  // releaseCollateral is in two runs, but its representative (run 1) takes
+  // Collateral, which only run 1 has: dropped.
+  assert.deepEqual(Object.keys(majority.actions), ["approveLoan"]);
+  assert.deepEqual(majority.actions.approveLoan.preconditions, ["loanNeedsBorrower"]);
+  const intersection = buildModel(docs, groups, { runs: [0, 1, 2], threshold: 3 }).doc;
+  assert.deepEqual(intersection.actions.approveLoan.preconditions, [], "the rule did not survive, so the reference goes");
+});
+
+test("restricting to a pair votes among those two runs only", () => {
+  const docs = RUNS();
+  const groups = buildGroups(docs);
+  const pair = buildModel(docs, groups, { runs: [0, 1], threshold: 1 }).doc;
+  assert.deepEqual(Object.keys(pair.classes).sort(), ["Borrower", "Collateral", "Loan"]);
+  assert.equal(pair.actions.releaseCollateral.input, "Collateral");
+});
+
+test("groupElements: strongest first, and never two elements of one run in a group (the conflict rule)", () => {
+  const elements = ["c|0|A", "c|0|A2", "c|1|B", "c|2|C"];
+  const edges = [
+    { a: "c|0|A", b: "c|1|B", weight: 0.9, pair: 0 },
+    { a: "c|0|A2", b: "c|1|B", weight: 0.8, pair: 0 }, // would join A and A2 (both run 0)
+    { a: "c|1|B", b: "c|2|C", weight: 0.7, pair: 2 },
+  ];
+  const { groups, conflicts } = groupElements(elements, edges);
+  assert.deepEqual(groups, [["c|0|A", "c|1|B", "c|2|C"], ["c|0|A2"]]);
+  assert.deepEqual(conflicts.map((e) => e.a), ["c|0|A2"]);
+  // Order of the input does not matter.
+  assert.deepEqual(groupElements(elements, [...edges].reverse()).groups, groups);
+  assert.equal(runOf("p|2|Loan|x"), 2);
+});
+
+test("reviewQueue counts what falls below the threshold, per type, plus conflicts", () => {
+  const groups = buildGroups(RUNS());
+  const q = reviewQueue(groups, { runs: [0, 1, 2], threshold: 2 });
+  assert.equal(q.classes.below_threshold, 2); // Collateral, Guarantor
+  assert.equal(q.relationships.below_threshold, 1); // securedBy
+  assert.equal(q.total, Object.values(q).filter((v) => typeof v === "object").reduce((n, t) => n + t.below_threshold + t.conflicts, 0));
+});
+
+test("best pair without gold: fewest errors and warnings, then fewest components, then lowest pair", () => {
+  const c = (index, errors_and_warnings, components) => ({ index, pair: `p${index}`, errors_and_warnings, components });
+  assert.equal(chooseBestPair([c(0, 3, 1), c(1, 1, 5), c(2, 2, 1)]).index, 1);
+  assert.equal(chooseBestPair([c(0, 1, 4), c(1, 1, 2), c(2, 1, 2)]).index, 1);
+  assert.equal(componentCount({ classes: { A: {}, B: {}, C: {} }, relationships: [{ from: "A", to: "B" }] }), 2);
+});

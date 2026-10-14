@@ -45,7 +45,12 @@ const RUNS_DIR = path.join(__dirname, "results", "runs");
 const BASELINES_ROOT = path.join(__dirname, "results", "baselines");
 
 export function recoveredStateFromYaml(text) {
-  const doc = yaml.load(text) || {};
+  return recoveredStateFromDoc(yaml.load(text) || {});
+}
+
+// The same conversion on an in-memory document (issue #174).
+export function recoveredStateFromDoc(doc) {
+  doc = doc || {};
   const labelToId = new Map();
   const nodes = Object.entries(doc.classes || {}).map(([label, c], index) => {
     const id = `n${index + 1}`;
