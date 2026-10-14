@@ -3966,4 +3966,19 @@ reference and record deltas/decisions here instead.)*
   become controlled properties on the parent) and #172 (guarded, label-only
   `specializes` for genuine kinds, scored as a separate taxonomy dimension
   against the audit's kind pairs, so no re-translation is needed).
+- 2026-10-14 — #174 phase 1 (majority-vote merge vs. the LLM cascade),
+  design pre-registered in `results/majority-vote/DESIGN.md` before any
+  result. **Not convincing** by the pre-registered criterion: the 2-of-3
+  vote beats merge(1,2,3) in the current era (0.692 vs 0.665) but not in
+  the pre-#152 replication (0.663 vs 0.698), and is below merge(1,2) in
+  both. Why: a class only one interview found is usually right (92% / 77%
+  of the classes the vote drops matched gold), so voting cuts recall;
+  single-interview relationships are mostly wrong (28% / 41%), where voting
+  helps. Secondary: the deterministic union(1,2) equals the LLM merge(1,2)
+  on the heuristic score (+0.001 / +0.002); a plain union of all three beats
+  the LLM three-way cascade in both eras; the gold-free best-pair choice is
+  no better than chance. Exploratory: the published two-way gain depends on
+  which pair is (1,2): an average pair gains +0.038 / +0.072 over a single
+  interview, the union of all three +0.037 / +0.095. No UI work warranted
+  from phase 1; phase 2 (LLM scoring) remains optional on #174.
 

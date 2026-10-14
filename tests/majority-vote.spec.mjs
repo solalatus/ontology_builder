@@ -136,3 +136,40 @@ test("best pair without gold: fewest errors and warnings, then fewest components
   assert.equal(chooseBestPair([c(0, 1, 4), c(1, 1, 2), c(2, 1, 2)]).index, 1);
   assert.equal(componentCount({ classes: { A: {}, B: {}, C: {} }, relationships: [{ from: "A", to: "B" }] }), 2);
 });
+
+// --- The committed experiment is current -----------------------------------
+
+import fs from "node:fs";
+import path from "node:path";
+import { runExperiment, renderReport, OUT_DIR } from "./evals/majority-vote-merge.mjs";
+
+test("the committed results, every built arm's model and REPORT.md are exactly what a fresh run produces", async () => {
+  const files = new Map();
+  const fresh = JSON.parse(JSON.stringify(await runExperiment({ collect: files })));
+  const committed = JSON.parse(fs.readFileSync(path.join(OUT_DIR, "results.json"), "utf8"));
+  assert.deepEqual(fresh, committed);
+  assert.equal(files.size, 2 * 5 * 5, "two eras, five domains, five built arms");
+  for (const [file, text] of files) assert.equal(fs.readFileSync(file, "utf8"), text, file);
+  assert.equal(fs.readFileSync(path.join(OUT_DIR, "REPORT.md"), "utf8"), renderReport(committed));
+});
+
+test("the cascade baselines and single runs reproduce their own committed scores", () => {
+  // The comparison is only fair if the arms are scored exactly as the
+  // committed runs and merges were.
+  const results = JSON.parse(fs.readFileSync(path.join(OUT_DIR, "results.json"), "utf8"));
+  const RES = path.join(OUT_DIR, "..");
+  const dirs = {
+    current: { runs: (d) => (d === "itops" ? "multi-domain-control-post152" : "multi-domain-post152"), cascade: "cascading-merge-post152" },
+    "pre-152": { runs: (d) => (d === "itops" ? "multi-domain-control" : "multi-domain"), cascade: "cascading-merge" },
+  };
+  for (const [era, e] of Object.entries(results.eras)) {
+    for (const [domain, d] of Object.entries(e.domains)) {
+      const metrics = (dir) => JSON.parse(fs.readFileSync(path.join(RES, dir, "metrics.json"), "utf8")).metrics.recoveryEffectiveness;
+      for (const run of ["run-01", "run-02", "run-03"]) {
+        assert.equal(d.arms[run].composite, metrics(path.join(dirs[era].runs(domain), run, domain)), `${era} ${domain} ${run}`);
+      }
+      assert.equal(d.arms["merge(1,2)"].composite, metrics(path.join(dirs[era].cascade, domain, "merge-1-2")), `${era} ${domain} merge(1,2)`);
+      assert.equal(d.arms["merge(1,2,3)"].composite, metrics(path.join(dirs[era].cascade, domain, "merge-1-2-3")), `${era} ${domain} merge(1,2,3)`);
+    }
+  }
+});

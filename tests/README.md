@@ -183,6 +183,15 @@ is dev-only test tooling, same as Playwright.
   v2 prompt is v1's plus exactly its two added constraints, which is what makes
   the two conditions comparable. The artifact-dependent tests skip cleanly for
   any condition not generated in this checkout.
+- `majority-vote.spec.mjs` — issue #174's majority-vote merge
+  (`evals/lib/majorityVote.mjs`, `evals/majority-vote-merge.mjs`): grouping
+  across interviews with the same-run conflict rule, voting thresholds, the
+  endpoint/input rules for relationships and actions, reciprocal units, the
+  review queue and the gold-free best-pair choice on a small fixture; then
+  that the committed `ontology_translation/results/majority-vote/` results,
+  every built arm's model and `REPORT.md` match a fresh run, and that the
+  single-run and cascade baselines reproduce their own committed scores.
+  Offline: no key, no network.
 - `subtype-connectivity.spec.mjs` — issue #155's step-1 analysis
   (`evals/subtype-connectivity.mjs`): how the committed recovered interview
   models treat the subclass pairs found by the reference audit (linked,
