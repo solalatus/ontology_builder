@@ -11,7 +11,7 @@ research tools only.
 ## Pipeline
 
 ```
-fetch.py        source_url (+ pinned SHA-256) -> local RDF/OWL file
+fetch.py        committed source copy (or, with --redownload, source_url) + pinned SHA-256 -> local RDF/OWL file
 extract.py      RDF/OWL file -> source_ir.json  (deterministic, RDFLib, no LLM)
 compile.py      source_ir.json -> N x {run-i.domain.yaml, run-i.translation.json}  (Azure OpenAI GPT-5.4)
 validate_domain.py   structural hard gate on a .domain.yaml (also called by compile.py after every run,
@@ -25,6 +25,9 @@ reinstate.py    the symmetric pass for the opposite direction: source elements e
                      disposition-judging found were EXCLUDED with an unjustified or boilerplate reason
                      (see prompts/reinstate-prompt.md)
 run_pipeline.py single-command orchestration of everything above -- see "Running a domain" below
+subclass_audit.py, subclass_audit_report.py
+                issue #155's five-domain rdfs:subClassOf audit and its generated report
+                (results/subclass-audit/) -- see "Subclass audit" below
 ```
 
 `index.html` also imports/exports this exact `.domain.yaml` format
@@ -49,6 +52,31 @@ becomes a directory rather than a single file path once there's more than
 one), and `extract.py`'s `--input` accepts multiple paths, merging them
 into one graph before extraction/scope-selection run — see
 `source_manifest.py`'s own module docstring for the exact shape.
+
+## Committed source ontologies
+
+Every domain's original source files are committed under
+`domains/<id>/source/`, under the filenames `source_filename()` gives them,
+next to a `PROVENANCE.yaml` that records each file's URL, SHA-256, size,
+licence and the UTC time it was downloaded (Brick's BSD licence text is in
+`source/LICENSE`; FIBO and IOF carry their MIT notice inside the files).
+itops has no upstream: `domains/itops/source/` holds the original MTSR
+fixture as first committed (before its `"is a"` predicates were removed),
+with a hand-written `PROVENANCE.yaml` pointing at the commits.
+
+`fetch.py --manifest` therefore **loads** by default: it verifies each
+committed copy against the manifest's pinned checksum and copies it to
+`--out`, with no network access. `--redownload` fetches from the pinned
+URLs instead; only when every file matches its pin does it replace the
+committed copies and rewrite `PROVENANCE.yaml`, so a changed upstream never
+overwrites what is committed. `--out` is optional in manifest mode: without
+it fetch.py only verifies (or, with `--redownload`, refreshes) the
+committed copies.
+
+```sh
+python3 ontology_translation/tools/fetch.py --manifest ontology_translation/domains/fibo-loans/source-manifest.yaml
+python3 ontology_translation/tools/fetch.py --manifest ontology_translation/domains/fibo-loans/source-manifest.yaml --redownload
+```
 
 ## Setup
 
@@ -90,7 +118,9 @@ stops at `compile.py`'s own `--dry-run` cost estimate, same as running
 `compile.py --dry-run` directly; drop it only once that estimate looks
 right. Exit code reflects the *final* evaluation's `hard_gates_ok`, not
 just whether every stage ran without crashing — a pipeline that completes
-but leaves hard gates failing is still a failure. `--source-file` skips
+but leaves hard gates failing is still a failure. The fetch stage loads the
+committed source copies; pass `--redownload` to fetch them from their pinned
+URLs instead (see "Committed source ontologies" above). `--source-file` skips
 `fetch.py` and uses an already-downloaded file instead (useful for
 re-running against a file you've already fetched and want to keep using,
 without re-downloading or re-pinning).
@@ -139,6 +169,26 @@ from `evaluate.py`'s report.
 assembles the exact prompts and prints an approximate cost estimate
 without calling the API or writing anything — drop `--dry-run` only once
 that number looks right.
+
+## Subclass audit (issue #155)
+
+```sh
+python3 ontology_translation/tools/subclass_audit.py --out ontology_translation/results/subclass-audit/audit.json
+python3 ontology_translation/tools/subclass_audit_report.py
+```
+
+Offline and deterministic. `subclass_audit.py` reads the committed sources,
+each domain's `translation.json` and `reference.domain.yaml`, and lists every
+pair of translated classes that the source taxonomy relates by
+`rdfs:subClassOf` (walking through untranslated intermediates), with
+connectivity measures from the reference model. A source IRI's identity is
+taken only from mappings that list it first in `source_iris`; later
+positions are evidence the compiler cited. `results/subclass-audit/classification.yaml`
+is a reviewer's per-pair judgment (kind / value / state / role /
+individual), and `subclass_audit_report.py` renders `REPORT.md` from the
+two. Tests check that the committed `audit.json` and `REPORT.md` are
+exactly what the scripts produce, and that the classification covers
+exactly the audit's pairs.
 
 ## Cost and monitoring
 

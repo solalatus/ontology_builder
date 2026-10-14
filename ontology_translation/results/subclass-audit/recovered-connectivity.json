@@ -1,0 +1,3826 @@
+{
+  "current_prompt": {
+    "corpus": [
+      "ontology_translation/results/multi-domain-post152",
+      "ontology_translation/results/multi-domain-control-post152"
+    ],
+    "statuses": [
+      "linked",
+      "connected",
+      "not connected",
+      "parent not recovered",
+      "subtype not recovered",
+      "neither recovered"
+    ],
+    "summary": {
+      "by_category": {
+        "value": {
+          "linked": 4,
+          "connected": 20,
+          "not connected": 3,
+          "parent not recovered": 5,
+          "subtype not recovered": 45,
+          "neither recovered": 16,
+          "folded into a parent value": 0
+        },
+        "kind": {
+          "linked": 6,
+          "connected": 17,
+          "not connected": 4,
+          "parent not recovered": 6,
+          "subtype not recovered": 24,
+          "neither recovered": 18,
+          "folded into a parent value": 1
+        },
+        "state": {
+          "linked": 4,
+          "connected": 4,
+          "not connected": 0,
+          "parent not recovered": 3,
+          "subtype not recovered": 7,
+          "neither recovered": 0,
+          "folded into a parent value": 5
+        },
+        "individual": {
+          "linked": 0,
+          "connected": 0,
+          "not connected": 0,
+          "parent not recovered": 9,
+          "subtype not recovered": 5,
+          "neither recovered": 1,
+          "folded into a parent value": 0
+        },
+        "role": {
+          "linked": 0,
+          "connected": 1,
+          "not connected": 0,
+          "parent not recovered": 2,
+          "subtype not recovered": 0,
+          "neither recovered": 0,
+          "folded into a parent value": 0
+        }
+      },
+      "by_domain": {
+        "brick-hvac": {
+          "runs": 3,
+          "runs_with_unlinked_kind": 0,
+          "unlinked_kind_pairs": 0,
+          "name_hint_unlinked": 4,
+          "name_hint_linked": 12
+        },
+        "fibo-loans": {
+          "runs": 3,
+          "runs_with_unlinked_kind": 1,
+          "unlinked_kind_pairs": 1,
+          "name_hint_unlinked": 0,
+          "name_hint_linked": 5
+        },
+        "iof-maintenance": {
+          "runs": 3,
+          "runs_with_unlinked_kind": 0,
+          "unlinked_kind_pairs": 0,
+          "name_hint_unlinked": 0,
+          "name_hint_linked": 1
+        },
+        "iof-supply-chain": {
+          "runs": 3,
+          "runs_with_unlinked_kind": 3,
+          "unlinked_kind_pairs": 3,
+          "name_hint_unlinked": 3,
+          "name_hint_linked": 3
+        },
+        "itops": {
+          "runs": 3,
+          "runs_with_unlinked_kind": 0,
+          "unlinked_kind_pairs": 0,
+          "name_hint_unlinked": 0,
+          "name_hint_linked": 9
+        }
+      },
+      "domains_with_an_unlinked_kind": [
+        "fibo-loans",
+        "iof-supply-chain"
+      ],
+      "gate_met": true
+    },
+    "runs": [
+      {
+        "domain": "brick-hvac",
+        "run": "run-01",
+        "corpus": "multi-domain-post152",
+        "recovered_classes": 25,
+        "recovered_relationships": 32,
+        "components": 1,
+        "matcher_reproduces_committed_matches": true,
+        "pairs": [
+          {
+            "subclass": "CO2Sensor",
+            "superclass": "AirQualitySensor",
+            "category": "value",
+            "status": "parent not recovered",
+            "recovered_subtype": "CO2Sensor"
+          },
+          {
+            "subclass": "CO2DifferentialSensor",
+            "superclass": "CO2Sensor",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "CO2Sensor"
+          },
+          {
+            "subclass": "OutsideAirCO2Sensor",
+            "superclass": "CO2Sensor",
+            "category": "value",
+            "status": "connected",
+            "recovered_subtype": "OutsideAirCO2Sensor",
+            "recovered_parent": "CO2Sensor"
+          },
+          {
+            "subclass": "ReturnAirCO2Sensor",
+            "superclass": "CO2Sensor",
+            "category": "value",
+            "status": "connected",
+            "recovered_subtype": "ReturnAirCO2Sensor",
+            "recovered_parent": "CO2Sensor"
+          },
+          {
+            "subclass": "AirTemperatureSensor",
+            "superclass": "TemperatureSensor",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "TemperatureSensor"
+          },
+          {
+            "subclass": "WaterTemperatureSensor",
+            "superclass": "TemperatureSensor",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "TemperatureSensor"
+          },
+          {
+            "subclass": "AirTemperatureSetpoint",
+            "superclass": "TemperatureSetpoint",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "TemperatureSetpoint"
+          },
+          {
+            "subclass": "CoolingTemperatureSetpoint",
+            "superclass": "TemperatureSetpoint",
+            "category": "value",
+            "status": "connected",
+            "recovered_subtype": "CoolingTemperatureSetpoint",
+            "recovered_parent": "TemperatureSetpoint"
+          },
+          {
+            "subclass": "HeatingTemperatureSetpoint",
+            "superclass": "TemperatureSetpoint",
+            "category": "value",
+            "status": "connected",
+            "recovered_subtype": "HeatingTemperatureSetpoint",
+            "recovered_parent": "TemperatureSetpoint"
+          },
+          {
+            "subclass": "TemperatureDeadbandSetpoint",
+            "superclass": "TemperatureSetpoint",
+            "category": "value",
+            "status": "connected",
+            "recovered_subtype": "DeadbandSetpoint",
+            "recovered_parent": "TemperatureSetpoint"
+          }
+        ],
+        "name_hint_hits": [
+          {
+            "subtype": "CoolingTemperatureSetpoint",
+            "parent": "TemperatureSetpoint",
+            "linked": true
+          },
+          {
+            "subtype": "HeatingTemperatureSetpoint",
+            "parent": "TemperatureSetpoint",
+            "linked": true
+          },
+          {
+            "subtype": "OutsideAirCO2Sensor",
+            "parent": "CO2Sensor",
+            "linked": true
+          },
+          {
+            "subtype": "ReturnAirCO2Sensor",
+            "parent": "CO2Sensor",
+            "linked": true
+          }
+        ]
+      },
+      {
+        "domain": "brick-hvac",
+        "run": "run-02",
+        "corpus": "multi-domain-post152",
+        "recovered_classes": 36,
+        "recovered_relationships": 31,
+        "components": 9,
+        "matcher_reproduces_committed_matches": true,
+        "pairs": [
+          {
+            "subclass": "CO2Sensor",
+            "superclass": "AirQualitySensor",
+            "category": "value",
+            "status": "parent not recovered",
+            "recovered_subtype": "CO2Sensor"
+          },
+          {
+            "subclass": "CO2DifferentialSensor",
+            "superclass": "CO2Sensor",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "CO2Sensor"
+          },
+          {
+            "subclass": "OutsideAirCO2Sensor",
+            "superclass": "CO2Sensor",
+            "category": "value",
+            "status": "not connected",
+            "recovered_subtype": "OutsideAirCO2Sensor",
+            "recovered_parent": "CO2Sensor"
+          },
+          {
+            "subclass": "ReturnAirCO2Sensor",
+            "superclass": "CO2Sensor",
+            "category": "value",
+            "status": "not connected",
+            "recovered_subtype": "ReturnAirCO2Sensor",
+            "recovered_parent": "CO2Sensor"
+          },
+          {
+            "subclass": "AirTemperatureSensor",
+            "superclass": "TemperatureSensor",
+            "category": "value",
+            "status": "connected",
+            "recovered_subtype": "AirTemperatureSensor",
+            "recovered_parent": "TemperatureSensor"
+          },
+          {
+            "subclass": "WaterTemperatureSensor",
+            "superclass": "TemperatureSensor",
+            "category": "value",
+            "status": "not connected",
+            "recovered_subtype": "WaterTemperatureSensor",
+            "recovered_parent": "TemperatureSensor"
+          },
+          {
+            "subclass": "AirTemperatureSetpoint",
+            "superclass": "TemperatureSetpoint",
+            "category": "value",
+            "status": "connected",
+            "recovered_subtype": "AirTemperatureSetpoint",
+            "recovered_parent": "TemperatureSetpoint"
+          },
+          {
+            "subclass": "CoolingTemperatureSetpoint",
+            "superclass": "TemperatureSetpoint",
+            "category": "value",
+            "status": "connected",
+            "recovered_subtype": "CoolingTemperatureSetpoint",
+            "recovered_parent": "TemperatureSetpoint"
+          },
+          {
+            "subclass": "HeatingTemperatureSetpoint",
+            "superclass": "TemperatureSetpoint",
+            "category": "value",
+            "status": "connected",
+            "recovered_subtype": "HeatingTemperatureSetpoint",
+            "recovered_parent": "TemperatureSetpoint"
+          },
+          {
+            "subclass": "TemperatureDeadbandSetpoint",
+            "superclass": "TemperatureSetpoint",
+            "category": "value",
+            "status": "connected",
+            "recovered_subtype": "TemperatureDeadbandSetpoint",
+            "recovered_parent": "TemperatureSetpoint"
+          }
+        ],
+        "name_hint_hits": [
+          {
+            "subtype": "AirTemperatureSensor",
+            "parent": "TemperatureSensor",
+            "linked": true
+          },
+          {
+            "subtype": "AirTemperatureSetpoint",
+            "parent": "TemperatureSetpoint",
+            "linked": true
+          },
+          {
+            "subtype": "CoolingTemperatureSetpoint",
+            "parent": "TemperatureSetpoint",
+            "linked": true
+          },
+          {
+            "subtype": "HeatingTemperatureSetpoint",
+            "parent": "TemperatureSetpoint",
+            "linked": true
+          },
+          {
+            "subtype": "OutsideAirCO2Sensor",
+            "parent": "CO2Sensor",
+            "linked": false
+          },
+          {
+            "subtype": "PackagedHeatPump",
+            "parent": "Pump",
+            "linked": false
+          },
+          {
+            "subtype": "ReturnAirCO2Sensor",
+            "parent": "CO2Sensor",
+            "linked": false
+          },
+          {
+            "subtype": "WaterTemperatureSensor",
+            "parent": "TemperatureSensor",
+            "linked": false
+          }
+        ]
+      },
+      {
+        "domain": "brick-hvac",
+        "run": "run-03",
+        "corpus": "multi-domain-post152",
+        "recovered_classes": 26,
+        "recovered_relationships": 32,
+        "components": 1,
+        "matcher_reproduces_committed_matches": true,
+        "pairs": [
+          {
+            "subclass": "CO2Sensor",
+            "superclass": "AirQualitySensor",
+            "category": "value",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "CO2DifferentialSensor",
+            "superclass": "CO2Sensor",
+            "category": "value",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "OutsideAirCO2Sensor",
+            "superclass": "CO2Sensor",
+            "category": "value",
+            "status": "parent not recovered",
+            "recovered_subtype": "OutsideAirCO2Sensor"
+          },
+          {
+            "subclass": "ReturnAirCO2Sensor",
+            "superclass": "CO2Sensor",
+            "category": "value",
+            "status": "parent not recovered",
+            "recovered_subtype": "ReturnAirCO2Sensor"
+          },
+          {
+            "subclass": "AirTemperatureSensor",
+            "superclass": "TemperatureSensor",
+            "category": "value",
+            "status": "connected",
+            "recovered_subtype": "AirTemperatureSensor",
+            "recovered_parent": "TemperatureSensor"
+          },
+          {
+            "subclass": "WaterTemperatureSensor",
+            "superclass": "TemperatureSensor",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "TemperatureSensor"
+          },
+          {
+            "subclass": "AirTemperatureSetpoint",
+            "superclass": "TemperatureSetpoint",
+            "category": "value",
+            "status": "connected",
+            "recovered_subtype": "AirTemperatureSetpoint",
+            "recovered_parent": "TemperatureSetpoint"
+          },
+          {
+            "subclass": "CoolingTemperatureSetpoint",
+            "superclass": "TemperatureSetpoint",
+            "category": "value",
+            "status": "connected",
+            "recovered_subtype": "CoolingTemperatureSetpoint",
+            "recovered_parent": "TemperatureSetpoint"
+          },
+          {
+            "subclass": "HeatingTemperatureSetpoint",
+            "superclass": "TemperatureSetpoint",
+            "category": "value",
+            "status": "connected",
+            "recovered_subtype": "HeatingTemperatureSetpoint",
+            "recovered_parent": "TemperatureSetpoint"
+          },
+          {
+            "subclass": "TemperatureDeadbandSetpoint",
+            "superclass": "TemperatureSetpoint",
+            "category": "value",
+            "status": "connected",
+            "recovered_subtype": "TemperatureDeadbandSetpoint",
+            "recovered_parent": "TemperatureSetpoint"
+          }
+        ],
+        "name_hint_hits": [
+          {
+            "subtype": "AirTemperatureSensor",
+            "parent": "TemperatureSensor",
+            "linked": true
+          },
+          {
+            "subtype": "AirTemperatureSetpoint",
+            "parent": "TemperatureSetpoint",
+            "linked": true
+          },
+          {
+            "subtype": "CoolingTemperatureSetpoint",
+            "parent": "TemperatureSetpoint",
+            "linked": true
+          },
+          {
+            "subtype": "HeatingTemperatureSetpoint",
+            "parent": "TemperatureSetpoint",
+            "linked": true
+          }
+        ]
+      },
+      {
+        "domain": "fibo-loans",
+        "run": "run-01",
+        "corpus": "multi-domain-post152",
+        "recovered_classes": 29,
+        "recovered_relationships": 28,
+        "components": 2,
+        "matcher_reproduces_committed_matches": true,
+        "pairs": [
+          {
+            "subclass": "FullAmortization",
+            "superclass": "Amortization",
+            "category": "value",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "NegativeAmortization",
+            "superclass": "Amortization",
+            "category": "value",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "PartialAmortization",
+            "superclass": "Amortization",
+            "category": "value",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "RevolvingLineOfCredit",
+            "superclass": "CommittedCreditFacility",
+            "category": "kind",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "ClosedEndCredit",
+            "superclass": "CreditAgreement",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "CreditAgreement"
+          },
+          {
+            "subclass": "CreditFacility",
+            "superclass": "CreditAgreement",
+            "category": "kind",
+            "status": "not connected",
+            "recovered_subtype": "CreditFacility",
+            "recovered_parent": "CreditAgreement"
+          },
+          {
+            "subclass": "Loan",
+            "superclass": "CreditAgreement",
+            "category": "kind",
+            "status": "connected",
+            "recovered_subtype": "Loan",
+            "recovered_parent": "CreditAgreement"
+          },
+          {
+            "subclass": "OpenEndCredit",
+            "superclass": "CreditAgreement",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "CreditAgreement"
+          },
+          {
+            "subclass": "CommittedCreditFacility",
+            "superclass": "CreditFacility",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "CreditFacility"
+          },
+          {
+            "subclass": "UncommittedCreditFacility",
+            "superclass": "CreditFacility",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "CreditFacility"
+          },
+          {
+            "subclass": "InterestPaymentTerms",
+            "superclass": "DebtTerms",
+            "category": "kind",
+            "status": "parent not recovered",
+            "recovered_subtype": "InterestPaymentTerm"
+          },
+          {
+            "subclass": "PrincipalRepaymentTerms",
+            "superclass": "DebtTerms",
+            "category": "kind",
+            "status": "parent not recovered",
+            "recovered_subtype": "PrincipalRepaymentTerm"
+          },
+          {
+            "subclass": "AccruedInterest",
+            "superclass": "Interest",
+            "category": "state",
+            "status": "linked",
+            "recovered_subtype": "AccruedInterest",
+            "recovered_parent": "Interest"
+          },
+          {
+            "subclass": "InterestRateReset",
+            "superclass": "InterestCalculation",
+            "category": "kind",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "InterestRateSettingEvent",
+            "superclass": "InterestCalculation",
+            "category": "kind",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "SecuredLoan",
+            "superclass": "Loan",
+            "category": "kind",
+            "status": "subtype not recovered",
+            "recovered_parent": "Loan"
+          },
+          {
+            "subclass": "UnsecuredLoan",
+            "superclass": "Loan",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "Loan"
+          },
+          {
+            "subclass": "PrepaymentTerms",
+            "superclass": "PrincipalRepaymentTerms",
+            "category": "kind",
+            "status": "subtype not recovered",
+            "recovered_parent": "PrincipalRepaymentTerm"
+          },
+          {
+            "subclass": "CollateralizedLoan",
+            "superclass": "SecuredLoan",
+            "category": "kind",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "GuaranteedLoan",
+            "superclass": "SecuredLoan",
+            "category": "value",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "CommittedSubFacility",
+            "superclass": "SubFacility",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "SubFacility"
+          },
+          {
+            "subclass": "UncommittedSubFacility",
+            "superclass": "SubFacility",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "SubFacility"
+          },
+          {
+            "subclass": "FloatingInterestRate",
+            "superclass": "VariableInterestRate",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "VariableInterestRate"
+          },
+          {
+            "subclass": "ManagedInterestRate",
+            "superclass": "VariableInterestRate",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "VariableInterestRate"
+          }
+        ],
+        "name_hint_hits": [
+          {
+            "subtype": "AccruedInterest",
+            "parent": "Interest",
+            "linked": true
+          },
+          {
+            "subtype": "CombinedLoanToValueRatio",
+            "parent": "LoanToValueRatio",
+            "linked": true
+          }
+        ]
+      },
+      {
+        "domain": "fibo-loans",
+        "run": "run-02",
+        "corpus": "multi-domain-post152",
+        "recovered_classes": 32,
+        "recovered_relationships": 34,
+        "components": 2,
+        "matcher_reproduces_committed_matches": true,
+        "pairs": [
+          {
+            "subclass": "FullAmortization",
+            "superclass": "Amortization",
+            "category": "value",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "NegativeAmortization",
+            "superclass": "Amortization",
+            "category": "value",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "PartialAmortization",
+            "superclass": "Amortization",
+            "category": "value",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "RevolvingLineOfCredit",
+            "superclass": "CommittedCreditFacility",
+            "category": "kind",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "ClosedEndCredit",
+            "superclass": "CreditAgreement",
+            "category": "value",
+            "status": "linked",
+            "recovered_subtype": "ClosedEndCredit",
+            "recovered_parent": "CreditAgreement"
+          },
+          {
+            "subclass": "CreditFacility",
+            "superclass": "CreditAgreement",
+            "category": "kind",
+            "status": "connected",
+            "recovered_subtype": "CreditFacility",
+            "recovered_parent": "CreditAgreement"
+          },
+          {
+            "subclass": "Loan",
+            "superclass": "CreditAgreement",
+            "category": "kind",
+            "status": "connected",
+            "recovered_subtype": "Loan",
+            "recovered_parent": "CreditAgreement"
+          },
+          {
+            "subclass": "OpenEndCredit",
+            "superclass": "CreditAgreement",
+            "category": "value",
+            "status": "linked",
+            "recovered_subtype": "OpenEndCredit",
+            "recovered_parent": "CreditAgreement"
+          },
+          {
+            "subclass": "CommittedCreditFacility",
+            "superclass": "CreditFacility",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "CreditFacility"
+          },
+          {
+            "subclass": "UncommittedCreditFacility",
+            "superclass": "CreditFacility",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "CreditFacility"
+          },
+          {
+            "subclass": "InterestPaymentTerms",
+            "superclass": "DebtTerms",
+            "category": "kind",
+            "status": "parent not recovered",
+            "recovered_subtype": "InterestPaymentTerms"
+          },
+          {
+            "subclass": "PrincipalRepaymentTerms",
+            "superclass": "DebtTerms",
+            "category": "kind",
+            "status": "parent not recovered",
+            "recovered_subtype": "PrincipalRepaymentTerms"
+          },
+          {
+            "subclass": "AccruedInterest",
+            "superclass": "Interest",
+            "category": "state",
+            "status": "subtype not recovered",
+            "recovered_parent": "Interest"
+          },
+          {
+            "subclass": "InterestRateReset",
+            "superclass": "InterestCalculation",
+            "category": "kind",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "InterestRateSettingEvent",
+            "superclass": "InterestCalculation",
+            "category": "kind",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "SecuredLoan",
+            "superclass": "Loan",
+            "category": "kind",
+            "status": "subtype not recovered",
+            "recovered_parent": "Loan"
+          },
+          {
+            "subclass": "UnsecuredLoan",
+            "superclass": "Loan",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "Loan"
+          },
+          {
+            "subclass": "PrepaymentTerms",
+            "superclass": "PrincipalRepaymentTerms",
+            "category": "kind",
+            "status": "connected",
+            "recovered_subtype": "PrepaymentTerms",
+            "recovered_parent": "PrincipalRepaymentTerms"
+          },
+          {
+            "subclass": "CollateralizedLoan",
+            "superclass": "SecuredLoan",
+            "category": "kind",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "GuaranteedLoan",
+            "superclass": "SecuredLoan",
+            "category": "value",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "CommittedSubFacility",
+            "superclass": "SubFacility",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "SubFacility"
+          },
+          {
+            "subclass": "UncommittedSubFacility",
+            "superclass": "SubFacility",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "SubFacility"
+          },
+          {
+            "subclass": "FloatingInterestRate",
+            "superclass": "VariableInterestRate",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "VariableInterestRate"
+          },
+          {
+            "subclass": "ManagedInterestRate",
+            "superclass": "VariableInterestRate",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "VariableInterestRate"
+          }
+        ],
+        "name_hint_hits": [
+          {
+            "subtype": "CombinedLoanToValueRatio",
+            "parent": "LoanToValueRatio",
+            "linked": true
+          }
+        ]
+      },
+      {
+        "domain": "fibo-loans",
+        "run": "run-03",
+        "corpus": "multi-domain-post152",
+        "recovered_classes": 30,
+        "recovered_relationships": 32,
+        "components": 2,
+        "matcher_reproduces_committed_matches": true,
+        "pairs": [
+          {
+            "subclass": "FullAmortization",
+            "superclass": "Amortization",
+            "category": "value",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "NegativeAmortization",
+            "superclass": "Amortization",
+            "category": "value",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "PartialAmortization",
+            "superclass": "Amortization",
+            "category": "value",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "RevolvingLineOfCredit",
+            "superclass": "CommittedCreditFacility",
+            "category": "kind",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "ClosedEndCredit",
+            "superclass": "CreditAgreement",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "CreditAgreement"
+          },
+          {
+            "subclass": "CreditFacility",
+            "superclass": "CreditAgreement",
+            "category": "kind",
+            "status": "connected",
+            "recovered_subtype": "CreditFacility",
+            "recovered_parent": "CreditAgreement"
+          },
+          {
+            "subclass": "Loan",
+            "superclass": "CreditAgreement",
+            "category": "kind",
+            "status": "connected",
+            "recovered_subtype": "Loan",
+            "recovered_parent": "CreditAgreement"
+          },
+          {
+            "subclass": "OpenEndCredit",
+            "superclass": "CreditAgreement",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "CreditAgreement"
+          },
+          {
+            "subclass": "CommittedCreditFacility",
+            "superclass": "CreditFacility",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "CreditFacility"
+          },
+          {
+            "subclass": "UncommittedCreditFacility",
+            "superclass": "CreditFacility",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "CreditFacility"
+          },
+          {
+            "subclass": "InterestPaymentTerms",
+            "superclass": "DebtTerms",
+            "category": "kind",
+            "status": "parent not recovered",
+            "recovered_subtype": "InterestPaymentTerms"
+          },
+          {
+            "subclass": "PrincipalRepaymentTerms",
+            "superclass": "DebtTerms",
+            "category": "kind",
+            "status": "parent not recovered",
+            "recovered_subtype": "PrincipalRepaymentTerms"
+          },
+          {
+            "subclass": "AccruedInterest",
+            "superclass": "Interest",
+            "category": "state",
+            "status": "connected",
+            "recovered_subtype": "AccruedInterest",
+            "recovered_parent": "Interest"
+          },
+          {
+            "subclass": "InterestRateReset",
+            "superclass": "InterestCalculation",
+            "category": "kind",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "InterestRateSettingEvent",
+            "superclass": "InterestCalculation",
+            "category": "kind",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "SecuredLoan",
+            "superclass": "Loan",
+            "category": "kind",
+            "status": "subtype not recovered",
+            "recovered_parent": "Loan",
+            "folded_as": "isSecured (boolean)"
+          },
+          {
+            "subclass": "UnsecuredLoan",
+            "superclass": "Loan",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "Loan"
+          },
+          {
+            "subclass": "PrepaymentTerms",
+            "superclass": "PrincipalRepaymentTerms",
+            "category": "kind",
+            "status": "linked",
+            "recovered_subtype": "PrepaymentTerms",
+            "recovered_parent": "PrincipalRepaymentTerms"
+          },
+          {
+            "subclass": "CollateralizedLoan",
+            "superclass": "SecuredLoan",
+            "category": "kind",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "GuaranteedLoan",
+            "superclass": "SecuredLoan",
+            "category": "value",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "CommittedSubFacility",
+            "superclass": "SubFacility",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "SubFacility"
+          },
+          {
+            "subclass": "UncommittedSubFacility",
+            "superclass": "SubFacility",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "SubFacility"
+          },
+          {
+            "subclass": "FloatingInterestRate",
+            "superclass": "VariableInterestRate",
+            "category": "value",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "ManagedInterestRate",
+            "superclass": "VariableInterestRate",
+            "category": "value",
+            "status": "neither recovered"
+          }
+        ],
+        "name_hint_hits": [
+          {
+            "subtype": "AccruedInterest",
+            "parent": "Interest",
+            "linked": true
+          },
+          {
+            "subtype": "CombinedLoanToValueMeasure",
+            "parent": "LoanToValueMeasure",
+            "linked": true
+          }
+        ]
+      },
+      {
+        "domain": "iof-maintenance",
+        "run": "run-01",
+        "corpus": "multi-domain-post152",
+        "recovered_classes": 14,
+        "recovered_relationships": 11,
+        "components": 4,
+        "matcher_reproduces_committed_matches": true,
+        "pairs": [
+          {
+            "subclass": "MaintenanceActivity",
+            "superclass": "MaintenanceProcess",
+            "category": "kind",
+            "status": "linked",
+            "recovered_subtype": "MaintenanceActivity",
+            "recovered_parent": "MaintenanceProcess"
+          },
+          {
+            "subclass": "DegradedState",
+            "superclass": "MaintenanceState",
+            "category": "state",
+            "status": "subtype not recovered",
+            "recovered_parent": "MaintenanceState",
+            "folded_as": "stateCategory = degraded"
+          },
+          {
+            "subclass": "FailedState",
+            "superclass": "MaintenanceState",
+            "category": "state",
+            "status": "subtype not recovered",
+            "recovered_parent": "MaintenanceState",
+            "folded_as": "stateCategory = failed"
+          },
+          {
+            "subclass": "OperatingState",
+            "superclass": "MaintenanceState",
+            "category": "state",
+            "status": "subtype not recovered",
+            "recovered_parent": "MaintenanceState",
+            "folded_as": "stateCategory = operating"
+          },
+          {
+            "subclass": "DispositionToExhibitUndesirableBehavior",
+            "superclass": "UndesirableDisposition",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "UndesirableDisposition"
+          },
+          {
+            "subclass": "DispositionToFail",
+            "superclass": "UndesirableDisposition",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "UndesirableDisposition"
+          }
+        ],
+        "name_hint_hits": []
+      },
+      {
+        "domain": "iof-maintenance",
+        "run": "run-02",
+        "corpus": "multi-domain-post152",
+        "recovered_classes": 18,
+        "recovered_relationships": 17,
+        "components": 3,
+        "matcher_reproduces_committed_matches": true,
+        "pairs": [
+          {
+            "subclass": "MaintenanceActivity",
+            "superclass": "MaintenanceProcess",
+            "category": "kind",
+            "status": "linked",
+            "recovered_subtype": "MaintenanceActivity",
+            "recovered_parent": "MaintenanceProcess"
+          },
+          {
+            "subclass": "DegradedState",
+            "superclass": "MaintenanceState",
+            "category": "state",
+            "status": "parent not recovered",
+            "recovered_subtype": "DegradedState"
+          },
+          {
+            "subclass": "FailedState",
+            "superclass": "MaintenanceState",
+            "category": "state",
+            "status": "parent not recovered",
+            "recovered_subtype": "FailedState"
+          },
+          {
+            "subclass": "OperatingState",
+            "superclass": "MaintenanceState",
+            "category": "state",
+            "status": "parent not recovered",
+            "recovered_subtype": "OperatingState"
+          },
+          {
+            "subclass": "DispositionToExhibitUndesirableBehavior",
+            "superclass": "UndesirableDisposition",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "UndesirableDisposition"
+          },
+          {
+            "subclass": "DispositionToFail",
+            "superclass": "UndesirableDisposition",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "UndesirableDisposition"
+          }
+        ],
+        "name_hint_hits": [
+          {
+            "subtype": "SupportingMaintenanceActivity",
+            "parent": "MaintenanceActivity",
+            "linked": true
+          }
+        ]
+      },
+      {
+        "domain": "iof-maintenance",
+        "run": "run-03",
+        "corpus": "multi-domain-post152",
+        "recovered_classes": 14,
+        "recovered_relationships": 16,
+        "components": 1,
+        "matcher_reproduces_committed_matches": true,
+        "pairs": [
+          {
+            "subclass": "MaintenanceActivity",
+            "superclass": "MaintenanceProcess",
+            "category": "kind",
+            "status": "linked",
+            "recovered_subtype": "MaintenanceActivity",
+            "recovered_parent": "MaintenanceProcess"
+          },
+          {
+            "subclass": "DegradedState",
+            "superclass": "MaintenanceState",
+            "category": "state",
+            "status": "subtype not recovered",
+            "recovered_parent": "MaintenanceState",
+            "folded_as": "stateCategory = degraded"
+          },
+          {
+            "subclass": "FailedState",
+            "superclass": "MaintenanceState",
+            "category": "state",
+            "status": "connected",
+            "recovered_subtype": "FailedState",
+            "recovered_parent": "MaintenanceState"
+          },
+          {
+            "subclass": "OperatingState",
+            "superclass": "MaintenanceState",
+            "category": "state",
+            "status": "subtype not recovered",
+            "recovered_parent": "MaintenanceState",
+            "folded_as": "stateCategory = operating"
+          },
+          {
+            "subclass": "DispositionToExhibitUndesirableBehavior",
+            "superclass": "UndesirableDisposition",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "UndesirableDisposition"
+          },
+          {
+            "subclass": "DispositionToFail",
+            "superclass": "UndesirableDisposition",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "UndesirableDisposition"
+          }
+        ],
+        "name_hint_hits": []
+      },
+      {
+        "domain": "iof-supply-chain",
+        "run": "run-01",
+        "corpus": "multi-domain-post152",
+        "recovered_classes": 37,
+        "recovered_relationships": 40,
+        "components": 3,
+        "matcher_reproduces_committed_matches": true,
+        "pairs": [
+          {
+            "subclass": "FreightContainer",
+            "superclass": "Container",
+            "category": "value",
+            "status": "connected",
+            "recovered_subtype": "FreightContainer",
+            "recovered_parent": "Container"
+          },
+          {
+            "subclass": "Trailer",
+            "superclass": "Container",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "Container"
+          },
+          {
+            "subclass": "Wagon",
+            "superclass": "Container",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "Container"
+          },
+          {
+            "subclass": "StorageFacility",
+            "superclass": "Facility",
+            "category": "kind",
+            "status": "not connected",
+            "recovered_subtype": "StorageFacility",
+            "recovered_parent": "Facility"
+          },
+          {
+            "subclass": "DistributionCenter",
+            "superclass": "StorageFacility",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "StorageFacility"
+          }
+        ],
+        "name_hint_hits": [
+          {
+            "subtype": "FreightContainer",
+            "parent": "Container",
+            "linked": true
+          },
+          {
+            "subtype": "StorageFacility",
+            "parent": "Facility",
+            "linked": false
+          }
+        ]
+      },
+      {
+        "domain": "iof-supply-chain",
+        "run": "run-02",
+        "corpus": "multi-domain-post152",
+        "recovered_classes": 31,
+        "recovered_relationships": 33,
+        "components": 4,
+        "matcher_reproduces_committed_matches": true,
+        "pairs": [
+          {
+            "subclass": "FreightContainer",
+            "superclass": "Container",
+            "category": "value",
+            "status": "connected",
+            "recovered_subtype": "FreightContainer",
+            "recovered_parent": "Container"
+          },
+          {
+            "subclass": "Trailer",
+            "superclass": "Container",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "Container"
+          },
+          {
+            "subclass": "Wagon",
+            "superclass": "Container",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "Container"
+          },
+          {
+            "subclass": "StorageFacility",
+            "superclass": "Facility",
+            "category": "kind",
+            "status": "not connected",
+            "recovered_subtype": "StorageFacility",
+            "recovered_parent": "Facility"
+          },
+          {
+            "subclass": "DistributionCenter",
+            "superclass": "StorageFacility",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "StorageFacility"
+          }
+        ],
+        "name_hint_hits": [
+          {
+            "subtype": "FreightContainer",
+            "parent": "Container",
+            "linked": true
+          },
+          {
+            "subtype": "StorageFacility",
+            "parent": "Facility",
+            "linked": false
+          }
+        ]
+      },
+      {
+        "domain": "iof-supply-chain",
+        "run": "run-03",
+        "corpus": "multi-domain-post152",
+        "recovered_classes": 25,
+        "recovered_relationships": 29,
+        "components": 3,
+        "matcher_reproduces_committed_matches": true,
+        "pairs": [
+          {
+            "subclass": "FreightContainer",
+            "superclass": "Container",
+            "category": "value",
+            "status": "connected",
+            "recovered_subtype": "FreightContainer",
+            "recovered_parent": "Container"
+          },
+          {
+            "subclass": "Trailer",
+            "superclass": "Container",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "Container"
+          },
+          {
+            "subclass": "Wagon",
+            "superclass": "Container",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "Container"
+          },
+          {
+            "subclass": "StorageFacility",
+            "superclass": "Facility",
+            "category": "kind",
+            "status": "not connected",
+            "recovered_subtype": "StorageFacility",
+            "recovered_parent": "Facility"
+          },
+          {
+            "subclass": "DistributionCenter",
+            "superclass": "StorageFacility",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "StorageFacility"
+          }
+        ],
+        "name_hint_hits": [
+          {
+            "subtype": "FreightContainer",
+            "parent": "Container",
+            "linked": true
+          },
+          {
+            "subtype": "StorageFacility",
+            "parent": "Facility",
+            "linked": false
+          }
+        ]
+      },
+      {
+        "domain": "itops",
+        "run": "run-01",
+        "corpus": "multi-domain-control-post152",
+        "recovered_classes": 41,
+        "recovered_relationships": 51,
+        "components": 1,
+        "matcher_reproduces_committed_matches": true,
+        "pairs": [
+          {
+            "subclass": "EmergencyChange",
+            "superclass": "Change",
+            "category": "value",
+            "status": "connected",
+            "recovered_subtype": "EmergencyChange",
+            "recovered_parent": "Change"
+          },
+          {
+            "subclass": "Application",
+            "superclass": "ConfigurationItem",
+            "category": "kind",
+            "status": "connected",
+            "recovered_subtype": "Application",
+            "recovered_parent": "ConfigurationItem"
+          },
+          {
+            "subclass": "BackupSet",
+            "superclass": "ConfigurationItem",
+            "category": "kind",
+            "status": "connected",
+            "recovered_subtype": "BackupSet",
+            "recovered_parent": "ConfigurationItem"
+          },
+          {
+            "subclass": "CloudService",
+            "superclass": "ConfigurationItem",
+            "category": "kind",
+            "status": "subtype not recovered",
+            "recovered_parent": "ConfigurationItem"
+          },
+          {
+            "subclass": "Database",
+            "superclass": "ConfigurationItem",
+            "category": "kind",
+            "status": "connected",
+            "recovered_subtype": "Database",
+            "recovered_parent": "ConfigurationItem"
+          },
+          {
+            "subclass": "InfrastructureComponent",
+            "superclass": "ConfigurationItem",
+            "category": "kind",
+            "status": "connected",
+            "recovered_subtype": "InfrastructureComponent",
+            "recovered_parent": "ConfigurationItem"
+          },
+          {
+            "subclass": "NetworkSegment",
+            "superclass": "ConfigurationItem",
+            "category": "kind",
+            "status": "subtype not recovered",
+            "recovered_parent": "ConfigurationItem"
+          },
+          {
+            "subclass": "SecurityEvent",
+            "superclass": "Event",
+            "category": "kind",
+            "status": "subtype not recovered",
+            "recovered_parent": "Event"
+          },
+          {
+            "subclass": "CybersecurityIncident",
+            "superclass": "Incident",
+            "category": "state",
+            "status": "linked",
+            "recovered_subtype": "CybersecurityIncident",
+            "recovered_parent": "Incident"
+          },
+          {
+            "subclass": "MajorIncident",
+            "superclass": "Incident",
+            "category": "state",
+            "status": "linked",
+            "recovered_subtype": "MajorIncident",
+            "recovered_parent": "Incident"
+          },
+          {
+            "subclass": "ContainerPlatform",
+            "superclass": "InfrastructureComponent",
+            "category": "kind",
+            "status": "subtype not recovered",
+            "recovered_parent": "InfrastructureComponent"
+          },
+          {
+            "subclass": "Endpoint",
+            "superclass": "InfrastructureComponent",
+            "category": "kind",
+            "status": "subtype not recovered",
+            "recovered_parent": "InfrastructureComponent"
+          },
+          {
+            "subclass": "NetworkDevice",
+            "superclass": "InfrastructureComponent",
+            "category": "kind",
+            "status": "subtype not recovered",
+            "recovered_parent": "InfrastructureComponent"
+          },
+          {
+            "subclass": "Server",
+            "superclass": "InfrastructureComponent",
+            "category": "kind",
+            "status": "subtype not recovered",
+            "recovered_parent": "InfrastructureComponent"
+          },
+          {
+            "subclass": "StorageSystem",
+            "superclass": "InfrastructureComponent",
+            "category": "kind",
+            "status": "connected",
+            "recovered_subtype": "StorageSystem",
+            "recovered_parent": "InfrastructureComponent"
+          },
+          {
+            "subclass": "VirtualMachine",
+            "superclass": "InfrastructureComponent",
+            "category": "kind",
+            "status": "subtype not recovered",
+            "recovered_parent": "InfrastructureComponent"
+          },
+          {
+            "subclass": "ThirdPartyService",
+            "superclass": "ItService",
+            "category": "value",
+            "status": "linked",
+            "recovered_subtype": "ThirdPartyService",
+            "recovered_parent": "ITService"
+          },
+          {
+            "subclass": "IncidentResponseTeam",
+            "superclass": "OrganizationalUnit",
+            "category": "individual",
+            "status": "subtype not recovered",
+            "recovered_parent": "OrganizationalUnit"
+          },
+          {
+            "subclass": "ItOperationsTeam",
+            "superclass": "OrganizationalUnit",
+            "category": "individual",
+            "status": "subtype not recovered",
+            "recovered_parent": "OrganizationalUnit"
+          },
+          {
+            "subclass": "NetworkOperationsCentre",
+            "superclass": "OrganizationalUnit",
+            "category": "individual",
+            "status": "subtype not recovered",
+            "recovered_parent": "OrganizationalUnit"
+          },
+          {
+            "subclass": "ResolverGroup",
+            "superclass": "OrganizationalUnit",
+            "category": "role",
+            "status": "connected",
+            "recovered_subtype": "ResolverGroup",
+            "recovered_parent": "OrganizationalUnit"
+          },
+          {
+            "subclass": "SecurityOperationsCentre",
+            "superclass": "OrganizationalUnit",
+            "category": "individual",
+            "status": "subtype not recovered",
+            "recovered_parent": "OrganizationalUnit"
+          },
+          {
+            "subclass": "ServiceDesk",
+            "superclass": "OrganizationalUnit",
+            "category": "individual",
+            "status": "subtype not recovered",
+            "recovered_parent": "OrganizationalUnit"
+          }
+        ],
+        "name_hint_hits": [
+          {
+            "subtype": "CybersecurityIncident",
+            "parent": "Incident",
+            "linked": true
+          },
+          {
+            "subtype": "EmergencyChange",
+            "parent": "Change",
+            "linked": true
+          },
+          {
+            "subtype": "MajorIncident",
+            "parent": "Incident",
+            "linked": true
+          }
+        ]
+      },
+      {
+        "domain": "itops",
+        "run": "run-02",
+        "corpus": "multi-domain-control-post152",
+        "recovered_classes": 45,
+        "recovered_relationships": 52,
+        "components": 2,
+        "matcher_reproduces_committed_matches": true,
+        "pairs": [
+          {
+            "subclass": "EmergencyChange",
+            "superclass": "Change",
+            "category": "value",
+            "status": "connected",
+            "recovered_subtype": "Emergency change",
+            "recovered_parent": "Change"
+          },
+          {
+            "subclass": "Application",
+            "superclass": "ConfigurationItem",
+            "category": "kind",
+            "status": "connected",
+            "recovered_subtype": "Application",
+            "recovered_parent": "Configuration item"
+          },
+          {
+            "subclass": "BackupSet",
+            "superclass": "ConfigurationItem",
+            "category": "kind",
+            "status": "connected",
+            "recovered_subtype": "Backup set",
+            "recovered_parent": "Configuration item"
+          },
+          {
+            "subclass": "CloudService",
+            "superclass": "ConfigurationItem",
+            "category": "kind",
+            "status": "subtype not recovered",
+            "recovered_parent": "Configuration item"
+          },
+          {
+            "subclass": "Database",
+            "superclass": "ConfigurationItem",
+            "category": "kind",
+            "status": "connected",
+            "recovered_subtype": "Database",
+            "recovered_parent": "Configuration item"
+          },
+          {
+            "subclass": "InfrastructureComponent",
+            "superclass": "ConfigurationItem",
+            "category": "kind",
+            "status": "connected",
+            "recovered_subtype": "Infrastructure component",
+            "recovered_parent": "Configuration item"
+          },
+          {
+            "subclass": "NetworkSegment",
+            "superclass": "ConfigurationItem",
+            "category": "kind",
+            "status": "subtype not recovered",
+            "recovered_parent": "Configuration item"
+          },
+          {
+            "subclass": "SecurityEvent",
+            "superclass": "Event",
+            "category": "kind",
+            "status": "connected",
+            "recovered_subtype": "Security event",
+            "recovered_parent": "Event"
+          },
+          {
+            "subclass": "CybersecurityIncident",
+            "superclass": "Incident",
+            "category": "state",
+            "status": "connected",
+            "recovered_subtype": "Cybersecurity incident",
+            "recovered_parent": "Incident"
+          },
+          {
+            "subclass": "MajorIncident",
+            "superclass": "Incident",
+            "category": "state",
+            "status": "linked",
+            "recovered_subtype": "Major incident",
+            "recovered_parent": "Incident"
+          },
+          {
+            "subclass": "ContainerPlatform",
+            "superclass": "InfrastructureComponent",
+            "category": "kind",
+            "status": "subtype not recovered",
+            "recovered_parent": "Infrastructure component"
+          },
+          {
+            "subclass": "Endpoint",
+            "superclass": "InfrastructureComponent",
+            "category": "kind",
+            "status": "subtype not recovered",
+            "recovered_parent": "Infrastructure component"
+          },
+          {
+            "subclass": "NetworkDevice",
+            "superclass": "InfrastructureComponent",
+            "category": "kind",
+            "status": "subtype not recovered",
+            "recovered_parent": "Infrastructure component"
+          },
+          {
+            "subclass": "Server",
+            "superclass": "InfrastructureComponent",
+            "category": "kind",
+            "status": "subtype not recovered",
+            "recovered_parent": "Infrastructure component"
+          },
+          {
+            "subclass": "StorageSystem",
+            "superclass": "InfrastructureComponent",
+            "category": "kind",
+            "status": "subtype not recovered",
+            "recovered_parent": "Infrastructure component"
+          },
+          {
+            "subclass": "VirtualMachine",
+            "superclass": "InfrastructureComponent",
+            "category": "kind",
+            "status": "subtype not recovered",
+            "recovered_parent": "Infrastructure component"
+          },
+          {
+            "subclass": "ThirdPartyService",
+            "superclass": "ItService",
+            "category": "value",
+            "status": "linked",
+            "recovered_subtype": "Third-party service",
+            "recovered_parent": "IT service"
+          },
+          {
+            "subclass": "IncidentResponseTeam",
+            "superclass": "OrganizationalUnit",
+            "category": "individual",
+            "status": "parent not recovered",
+            "recovered_subtype": "Incident response team"
+          },
+          {
+            "subclass": "ItOperationsTeam",
+            "superclass": "OrganizationalUnit",
+            "category": "individual",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "NetworkOperationsCentre",
+            "superclass": "OrganizationalUnit",
+            "category": "individual",
+            "status": "parent not recovered",
+            "recovered_subtype": "Network operations centre"
+          },
+          {
+            "subclass": "ResolverGroup",
+            "superclass": "OrganizationalUnit",
+            "category": "role",
+            "status": "parent not recovered",
+            "recovered_subtype": "Resolver group"
+          },
+          {
+            "subclass": "SecurityOperationsCentre",
+            "superclass": "OrganizationalUnit",
+            "category": "individual",
+            "status": "parent not recovered",
+            "recovered_subtype": "Security operations centre"
+          },
+          {
+            "subclass": "ServiceDesk",
+            "superclass": "OrganizationalUnit",
+            "category": "individual",
+            "status": "parent not recovered",
+            "recovered_subtype": "Service desk"
+          }
+        ],
+        "name_hint_hits": [
+          {
+            "subtype": "Cybersecurity incident",
+            "parent": "Incident",
+            "linked": true
+          },
+          {
+            "subtype": "Emergency change",
+            "parent": "Change",
+            "linked": true
+          },
+          {
+            "subtype": "Major incident",
+            "parent": "Incident",
+            "linked": true
+          },
+          {
+            "subtype": "Security event",
+            "parent": "Event",
+            "linked": true
+          }
+        ]
+      },
+      {
+        "domain": "itops",
+        "run": "run-03",
+        "corpus": "multi-domain-control-post152",
+        "recovered_classes": 46,
+        "recovered_relationships": 71,
+        "components": 1,
+        "matcher_reproduces_committed_matches": true,
+        "pairs": [
+          {
+            "subclass": "EmergencyChange",
+            "superclass": "Change",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "Change"
+          },
+          {
+            "subclass": "Application",
+            "superclass": "ConfigurationItem",
+            "category": "kind",
+            "status": "linked",
+            "recovered_subtype": "Application",
+            "recovered_parent": "ConfigurationItem"
+          },
+          {
+            "subclass": "BackupSet",
+            "superclass": "ConfigurationItem",
+            "category": "kind",
+            "status": "linked",
+            "recovered_subtype": "BackupSet",
+            "recovered_parent": "ConfigurationItem"
+          },
+          {
+            "subclass": "CloudService",
+            "superclass": "ConfigurationItem",
+            "category": "kind",
+            "status": "subtype not recovered",
+            "recovered_parent": "ConfigurationItem"
+          },
+          {
+            "subclass": "Database",
+            "superclass": "ConfigurationItem",
+            "category": "kind",
+            "status": "subtype not recovered",
+            "recovered_parent": "ConfigurationItem"
+          },
+          {
+            "subclass": "InfrastructureComponent",
+            "superclass": "ConfigurationItem",
+            "category": "kind",
+            "status": "subtype not recovered",
+            "recovered_parent": "ConfigurationItem"
+          },
+          {
+            "subclass": "NetworkSegment",
+            "superclass": "ConfigurationItem",
+            "category": "kind",
+            "status": "subtype not recovered",
+            "recovered_parent": "ConfigurationItem"
+          },
+          {
+            "subclass": "SecurityEvent",
+            "superclass": "Event",
+            "category": "kind",
+            "status": "connected",
+            "recovered_subtype": "SecurityEvent",
+            "recovered_parent": "Event"
+          },
+          {
+            "subclass": "CybersecurityIncident",
+            "superclass": "Incident",
+            "category": "state",
+            "status": "connected",
+            "recovered_subtype": "CybersecurityIncident",
+            "recovered_parent": "Incident"
+          },
+          {
+            "subclass": "MajorIncident",
+            "superclass": "Incident",
+            "category": "state",
+            "status": "subtype not recovered",
+            "recovered_parent": "Incident"
+          },
+          {
+            "subclass": "ContainerPlatform",
+            "superclass": "InfrastructureComponent",
+            "category": "kind",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "Endpoint",
+            "superclass": "InfrastructureComponent",
+            "category": "kind",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "NetworkDevice",
+            "superclass": "InfrastructureComponent",
+            "category": "kind",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "Server",
+            "superclass": "InfrastructureComponent",
+            "category": "kind",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "StorageSystem",
+            "superclass": "InfrastructureComponent",
+            "category": "kind",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "VirtualMachine",
+            "superclass": "InfrastructureComponent",
+            "category": "kind",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "ThirdPartyService",
+            "superclass": "ItService",
+            "category": "value",
+            "status": "parent not recovered",
+            "recovered_subtype": "ThirdPartyService"
+          },
+          {
+            "subclass": "IncidentResponseTeam",
+            "superclass": "OrganizationalUnit",
+            "category": "individual",
+            "status": "parent not recovered",
+            "recovered_subtype": "IncidentResponseTeam"
+          },
+          {
+            "subclass": "ItOperationsTeam",
+            "superclass": "OrganizationalUnit",
+            "category": "individual",
+            "status": "parent not recovered",
+            "recovered_subtype": "ITOperationsTeam"
+          },
+          {
+            "subclass": "NetworkOperationsCentre",
+            "superclass": "OrganizationalUnit",
+            "category": "individual",
+            "status": "parent not recovered",
+            "recovered_subtype": "NetworkOperationsCentre"
+          },
+          {
+            "subclass": "ResolverGroup",
+            "superclass": "OrganizationalUnit",
+            "category": "role",
+            "status": "parent not recovered",
+            "recovered_subtype": "ResolverGroup"
+          },
+          {
+            "subclass": "SecurityOperationsCentre",
+            "superclass": "OrganizationalUnit",
+            "category": "individual",
+            "status": "parent not recovered",
+            "recovered_subtype": "SecurityOperationsCentre"
+          },
+          {
+            "subclass": "ServiceDesk",
+            "superclass": "OrganizationalUnit",
+            "category": "individual",
+            "status": "parent not recovered",
+            "recovered_subtype": "ServiceDesk"
+          }
+        ],
+        "name_hint_hits": [
+          {
+            "subtype": "CybersecurityIncident",
+            "parent": "Incident",
+            "linked": true
+          },
+          {
+            "subtype": "SecurityEvent",
+            "parent": "Event",
+            "linked": true
+          }
+        ]
+      }
+    ]
+  },
+  "pre_152_prompt": {
+    "corpus": [
+      "ontology_translation/results/multi-domain",
+      "ontology_translation/results/multi-domain-control"
+    ],
+    "statuses": [
+      "linked",
+      "connected",
+      "not connected",
+      "parent not recovered",
+      "subtype not recovered",
+      "neither recovered"
+    ],
+    "summary": {
+      "by_category": {
+        "value": {
+          "linked": 2,
+          "connected": 5,
+          "not connected": 10,
+          "parent not recovered": 6,
+          "subtype not recovered": 41,
+          "neither recovered": 29,
+          "folded into a parent value": 7
+        },
+        "kind": {
+          "linked": 8,
+          "connected": 13,
+          "not connected": 7,
+          "parent not recovered": 9,
+          "subtype not recovered": 23,
+          "neither recovered": 15,
+          "folded into a parent value": 0
+        },
+        "state": {
+          "linked": 1,
+          "connected": 4,
+          "not connected": 0,
+          "parent not recovered": 0,
+          "subtype not recovered": 13,
+          "neither recovered": 0,
+          "folded into a parent value": 9
+        },
+        "individual": {
+          "linked": 0,
+          "connected": 0,
+          "not connected": 0,
+          "parent not recovered": 0,
+          "subtype not recovered": 0,
+          "neither recovered": 15,
+          "folded into a parent value": 0
+        },
+        "role": {
+          "linked": 0,
+          "connected": 0,
+          "not connected": 0,
+          "parent not recovered": 3,
+          "subtype not recovered": 0,
+          "neither recovered": 0,
+          "folded into a parent value": 0
+        }
+      },
+      "by_domain": {
+        "brick-hvac": {
+          "runs": 3,
+          "runs_with_unlinked_kind": 0,
+          "unlinked_kind_pairs": 0,
+          "name_hint_unlinked": 8,
+          "name_hint_linked": 3
+        },
+        "fibo-loans": {
+          "runs": 3,
+          "runs_with_unlinked_kind": 1,
+          "unlinked_kind_pairs": 4,
+          "name_hint_unlinked": 3,
+          "name_hint_linked": 6
+        },
+        "iof-maintenance": {
+          "runs": 3,
+          "runs_with_unlinked_kind": 0,
+          "unlinked_kind_pairs": 0,
+          "name_hint_unlinked": 0,
+          "name_hint_linked": 0
+        },
+        "iof-supply-chain": {
+          "runs": 3,
+          "runs_with_unlinked_kind": 3,
+          "unlinked_kind_pairs": 3,
+          "name_hint_unlinked": 3,
+          "name_hint_linked": 0
+        },
+        "itops": {
+          "runs": 3,
+          "runs_with_unlinked_kind": 0,
+          "unlinked_kind_pairs": 0,
+          "name_hint_unlinked": 1,
+          "name_hint_linked": 5
+        }
+      },
+      "domains_with_an_unlinked_kind": [
+        "fibo-loans",
+        "iof-supply-chain"
+      ],
+      "gate_met": true
+    },
+    "runs": [
+      {
+        "domain": "brick-hvac",
+        "run": "run-01",
+        "corpus": "multi-domain",
+        "recovered_classes": 22,
+        "recovered_relationships": 24,
+        "components": 2,
+        "matcher_reproduces_committed_matches": true,
+        "pairs": [
+          {
+            "subclass": "CO2Sensor",
+            "superclass": "AirQualitySensor",
+            "category": "value",
+            "status": "parent not recovered",
+            "recovered_subtype": "CO2Sensor"
+          },
+          {
+            "subclass": "CO2DifferentialSensor",
+            "superclass": "CO2Sensor",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "CO2Sensor"
+          },
+          {
+            "subclass": "OutsideAirCO2Sensor",
+            "superclass": "CO2Sensor",
+            "category": "value",
+            "status": "not connected",
+            "recovered_subtype": "OutsideAirCO2Sensor",
+            "recovered_parent": "CO2Sensor"
+          },
+          {
+            "subclass": "ReturnAirCO2Sensor",
+            "superclass": "CO2Sensor",
+            "category": "value",
+            "status": "not connected",
+            "recovered_subtype": "ReturnAirCO2Sensor",
+            "recovered_parent": "CO2Sensor"
+          },
+          {
+            "subclass": "AirTemperatureSensor",
+            "superclass": "TemperatureSensor",
+            "category": "value",
+            "status": "parent not recovered",
+            "recovered_subtype": "AirTemperatureSensor"
+          },
+          {
+            "subclass": "WaterTemperatureSensor",
+            "superclass": "TemperatureSensor",
+            "category": "value",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "AirTemperatureSetpoint",
+            "superclass": "TemperatureSetpoint",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "TemperatureSetpoint",
+            "folded_as": "setpointKind = air"
+          },
+          {
+            "subclass": "CoolingTemperatureSetpoint",
+            "superclass": "TemperatureSetpoint",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "TemperatureSetpoint",
+            "folded_as": "setpointKind = cooling"
+          },
+          {
+            "subclass": "HeatingTemperatureSetpoint",
+            "superclass": "TemperatureSetpoint",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "TemperatureSetpoint",
+            "folded_as": "setpointKind = heating"
+          },
+          {
+            "subclass": "TemperatureDeadbandSetpoint",
+            "superclass": "TemperatureSetpoint",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "TemperatureSetpoint",
+            "folded_as": "setpointKind = deadband"
+          }
+        ],
+        "name_hint_hits": [
+          {
+            "subtype": "OutsideAirCO2Sensor",
+            "parent": "CO2Sensor",
+            "linked": false
+          },
+          {
+            "subtype": "ReturnAirCO2Sensor",
+            "parent": "CO2Sensor",
+            "linked": false
+          }
+        ]
+      },
+      {
+        "domain": "brick-hvac",
+        "run": "run-02",
+        "corpus": "multi-domain",
+        "recovered_classes": 29,
+        "recovered_relationships": 25,
+        "components": 5,
+        "matcher_reproduces_committed_matches": true,
+        "pairs": [
+          {
+            "subclass": "CO2Sensor",
+            "superclass": "AirQualitySensor",
+            "category": "value",
+            "status": "parent not recovered",
+            "recovered_subtype": "CO2 Sensor"
+          },
+          {
+            "subclass": "CO2DifferentialSensor",
+            "superclass": "CO2Sensor",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "CO2 Sensor"
+          },
+          {
+            "subclass": "OutsideAirCO2Sensor",
+            "superclass": "CO2Sensor",
+            "category": "value",
+            "status": "not connected",
+            "recovered_subtype": "Outside-Air CO2 Sensor",
+            "recovered_parent": "CO2 Sensor"
+          },
+          {
+            "subclass": "ReturnAirCO2Sensor",
+            "superclass": "CO2Sensor",
+            "category": "value",
+            "status": "not connected",
+            "recovered_subtype": "Return-Air CO2 Sensor",
+            "recovered_parent": "CO2 Sensor"
+          },
+          {
+            "subclass": "AirTemperatureSensor",
+            "superclass": "TemperatureSensor",
+            "category": "value",
+            "status": "not connected",
+            "recovered_subtype": "Air Temperature Sensor",
+            "recovered_parent": "Temperature Sensor"
+          },
+          {
+            "subclass": "WaterTemperatureSensor",
+            "superclass": "TemperatureSensor",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "Temperature Sensor"
+          },
+          {
+            "subclass": "AirTemperatureSetpoint",
+            "superclass": "TemperatureSetpoint",
+            "category": "value",
+            "status": "not connected",
+            "recovered_subtype": "Air Temperature Setpoint",
+            "recovered_parent": "Temperature Setpoint"
+          },
+          {
+            "subclass": "CoolingTemperatureSetpoint",
+            "superclass": "TemperatureSetpoint",
+            "category": "value",
+            "status": "not connected",
+            "recovered_subtype": "Cooling Temperature Setpoint",
+            "recovered_parent": "Temperature Setpoint"
+          },
+          {
+            "subclass": "HeatingTemperatureSetpoint",
+            "superclass": "TemperatureSetpoint",
+            "category": "value",
+            "status": "not connected",
+            "recovered_subtype": "Heating Temperature Setpoint",
+            "recovered_parent": "Temperature Setpoint"
+          },
+          {
+            "subclass": "TemperatureDeadbandSetpoint",
+            "superclass": "TemperatureSetpoint",
+            "category": "value",
+            "status": "not connected",
+            "recovered_subtype": "Temperature Deadband Setpoint",
+            "recovered_parent": "Temperature Setpoint"
+          }
+        ],
+        "name_hint_hits": [
+          {
+            "subtype": "Air Temperature Sensor",
+            "parent": "Temperature Sensor",
+            "linked": false
+          },
+          {
+            "subtype": "Air Temperature Setpoint",
+            "parent": "Temperature Setpoint",
+            "linked": false
+          },
+          {
+            "subtype": "Cooling Temperature Setpoint",
+            "parent": "Temperature Setpoint",
+            "linked": false
+          },
+          {
+            "subtype": "Heating Temperature Setpoint",
+            "parent": "Temperature Setpoint",
+            "linked": false
+          },
+          {
+            "subtype": "Outside-Air CO2 Sensor",
+            "parent": "CO2 Sensor",
+            "linked": false
+          },
+          {
+            "subtype": "Return-Air CO2 Sensor",
+            "parent": "CO2 Sensor",
+            "linked": false
+          }
+        ]
+      },
+      {
+        "domain": "brick-hvac",
+        "run": "run-03",
+        "corpus": "multi-domain",
+        "recovered_classes": 25,
+        "recovered_relationships": 32,
+        "components": 1,
+        "matcher_reproduces_committed_matches": true,
+        "pairs": [
+          {
+            "subclass": "CO2Sensor",
+            "superclass": "AirQualitySensor",
+            "category": "value",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "CO2DifferentialSensor",
+            "superclass": "CO2Sensor",
+            "category": "value",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "OutsideAirCO2Sensor",
+            "superclass": "CO2Sensor",
+            "category": "value",
+            "status": "parent not recovered",
+            "recovered_subtype": "OutsideAirCO2Sensor"
+          },
+          {
+            "subclass": "ReturnAirCO2Sensor",
+            "superclass": "CO2Sensor",
+            "category": "value",
+            "status": "parent not recovered",
+            "recovered_subtype": "ReturnAirCO2Sensor"
+          },
+          {
+            "subclass": "AirTemperatureSensor",
+            "superclass": "TemperatureSensor",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "TemperatureSensor"
+          },
+          {
+            "subclass": "WaterTemperatureSensor",
+            "superclass": "TemperatureSensor",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "TemperatureSensor"
+          },
+          {
+            "subclass": "AirTemperatureSetpoint",
+            "superclass": "TemperatureSetpoint",
+            "category": "value",
+            "status": "connected",
+            "recovered_subtype": "AirTemperatureSetpoint",
+            "recovered_parent": "TemperatureSetpoint"
+          },
+          {
+            "subclass": "CoolingTemperatureSetpoint",
+            "superclass": "TemperatureSetpoint",
+            "category": "value",
+            "status": "connected",
+            "recovered_subtype": "CoolingTemperatureSetpoint",
+            "recovered_parent": "TemperatureSetpoint"
+          },
+          {
+            "subclass": "HeatingTemperatureSetpoint",
+            "superclass": "TemperatureSetpoint",
+            "category": "value",
+            "status": "connected",
+            "recovered_subtype": "HeatingTemperatureSetpoint",
+            "recovered_parent": "TemperatureSetpoint"
+          },
+          {
+            "subclass": "TemperatureDeadbandSetpoint",
+            "superclass": "TemperatureSetpoint",
+            "category": "value",
+            "status": "connected",
+            "recovered_subtype": "TemperatureDeadbandSetpoint",
+            "recovered_parent": "TemperatureSetpoint"
+          }
+        ],
+        "name_hint_hits": [
+          {
+            "subtype": "AirTemperatureSetpoint",
+            "parent": "TemperatureSetpoint",
+            "linked": true
+          },
+          {
+            "subtype": "CoolingTemperatureSetpoint",
+            "parent": "TemperatureSetpoint",
+            "linked": true
+          },
+          {
+            "subtype": "HeatingTemperatureSetpoint",
+            "parent": "TemperatureSetpoint",
+            "linked": true
+          }
+        ]
+      },
+      {
+        "domain": "fibo-loans",
+        "run": "run-01",
+        "corpus": "multi-domain",
+        "recovered_classes": 32,
+        "recovered_relationships": 28,
+        "components": 6,
+        "matcher_reproduces_committed_matches": true,
+        "pairs": [
+          {
+            "subclass": "FullAmortization",
+            "superclass": "Amortization",
+            "category": "value",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "NegativeAmortization",
+            "superclass": "Amortization",
+            "category": "value",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "PartialAmortization",
+            "superclass": "Amortization",
+            "category": "value",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "RevolvingLineOfCredit",
+            "superclass": "CommittedCreditFacility",
+            "category": "kind",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "ClosedEndCredit",
+            "superclass": "CreditAgreement",
+            "category": "value",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "CreditFacility",
+            "superclass": "CreditAgreement",
+            "category": "kind",
+            "status": "parent not recovered",
+            "recovered_subtype": "CreditFacility"
+          },
+          {
+            "subclass": "Loan",
+            "superclass": "CreditAgreement",
+            "category": "kind",
+            "status": "parent not recovered",
+            "recovered_subtype": "Loan"
+          },
+          {
+            "subclass": "OpenEndCredit",
+            "superclass": "CreditAgreement",
+            "category": "value",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "CommittedCreditFacility",
+            "superclass": "CreditFacility",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "CreditFacility",
+            "folded_as": "facilityType = committed credit facility"
+          },
+          {
+            "subclass": "UncommittedCreditFacility",
+            "superclass": "CreditFacility",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "CreditFacility",
+            "folded_as": "facilityType = uncommitted credit facility"
+          },
+          {
+            "subclass": "InterestPaymentTerms",
+            "superclass": "DebtTerms",
+            "category": "kind",
+            "status": "not connected",
+            "recovered_subtype": "InterestPaymentTerms",
+            "recovered_parent": "DebtTerms"
+          },
+          {
+            "subclass": "PrincipalRepaymentTerms",
+            "superclass": "DebtTerms",
+            "category": "kind",
+            "status": "not connected",
+            "recovered_subtype": "PrincipalRepaymentTerms",
+            "recovered_parent": "DebtTerms"
+          },
+          {
+            "subclass": "AccruedInterest",
+            "superclass": "Interest",
+            "category": "state",
+            "status": "subtype not recovered",
+            "recovered_parent": "Interest"
+          },
+          {
+            "subclass": "InterestRateReset",
+            "superclass": "InterestCalculation",
+            "category": "kind",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "InterestRateSettingEvent",
+            "superclass": "InterestCalculation",
+            "category": "kind",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "SecuredLoan",
+            "superclass": "Loan",
+            "category": "kind",
+            "status": "not connected",
+            "recovered_subtype": "SecuredLoan",
+            "recovered_parent": "Loan"
+          },
+          {
+            "subclass": "UnsecuredLoan",
+            "superclass": "Loan",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "Loan"
+          },
+          {
+            "subclass": "PrepaymentTerms",
+            "superclass": "PrincipalRepaymentTerms",
+            "category": "kind",
+            "status": "connected",
+            "recovered_subtype": "PrepaymentTerms",
+            "recovered_parent": "PrincipalRepaymentTerms"
+          },
+          {
+            "subclass": "CollateralizedLoan",
+            "superclass": "SecuredLoan",
+            "category": "kind",
+            "status": "not connected",
+            "recovered_subtype": "CollateralizedLoan",
+            "recovered_parent": "SecuredLoan"
+          },
+          {
+            "subclass": "GuaranteedLoan",
+            "superclass": "SecuredLoan",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "SecuredLoan"
+          },
+          {
+            "subclass": "CommittedSubFacility",
+            "superclass": "SubFacility",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "SubFacility"
+          },
+          {
+            "subclass": "UncommittedSubFacility",
+            "superclass": "SubFacility",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "SubFacility"
+          },
+          {
+            "subclass": "FloatingInterestRate",
+            "superclass": "VariableInterestRate",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "VariableInterestRate"
+          },
+          {
+            "subclass": "ManagedInterestRate",
+            "superclass": "VariableInterestRate",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "VariableInterestRate"
+          }
+        ],
+        "name_hint_hits": [
+          {
+            "subtype": "CollateralizedLoan",
+            "parent": "Loan",
+            "linked": false
+          },
+          {
+            "subtype": "CombinedLoanToValueRatio",
+            "parent": "LoanToValueRatio",
+            "linked": true
+          },
+          {
+            "subtype": "InterestRateResetSchedule",
+            "parent": "RateResetSchedule",
+            "linked": false
+          },
+          {
+            "subtype": "SecuredLoan",
+            "parent": "Loan",
+            "linked": false
+          }
+        ]
+      },
+      {
+        "domain": "fibo-loans",
+        "run": "run-02",
+        "corpus": "multi-domain",
+        "recovered_classes": 22,
+        "recovered_relationships": 26,
+        "components": 1,
+        "matcher_reproduces_committed_matches": true,
+        "pairs": [
+          {
+            "subclass": "FullAmortization",
+            "superclass": "Amortization",
+            "category": "value",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "NegativeAmortization",
+            "superclass": "Amortization",
+            "category": "value",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "PartialAmortization",
+            "superclass": "Amortization",
+            "category": "value",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "RevolvingLineOfCredit",
+            "superclass": "CommittedCreditFacility",
+            "category": "kind",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "ClosedEndCredit",
+            "superclass": "CreditAgreement",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "CreditAgreement"
+          },
+          {
+            "subclass": "CreditFacility",
+            "superclass": "CreditAgreement",
+            "category": "kind",
+            "status": "connected",
+            "recovered_subtype": "CreditFacility",
+            "recovered_parent": "CreditAgreement"
+          },
+          {
+            "subclass": "Loan",
+            "superclass": "CreditAgreement",
+            "category": "kind",
+            "status": "connected",
+            "recovered_subtype": "Loan",
+            "recovered_parent": "CreditAgreement"
+          },
+          {
+            "subclass": "OpenEndCredit",
+            "superclass": "CreditAgreement",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "CreditAgreement"
+          },
+          {
+            "subclass": "CommittedCreditFacility",
+            "superclass": "CreditFacility",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "CreditFacility"
+          },
+          {
+            "subclass": "UncommittedCreditFacility",
+            "superclass": "CreditFacility",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "CreditFacility"
+          },
+          {
+            "subclass": "InterestPaymentTerms",
+            "superclass": "DebtTerms",
+            "category": "kind",
+            "status": "parent not recovered",
+            "recovered_subtype": "InterestPaymentTerms"
+          },
+          {
+            "subclass": "PrincipalRepaymentTerms",
+            "superclass": "DebtTerms",
+            "category": "kind",
+            "status": "parent not recovered",
+            "recovered_subtype": "PrincipalRepaymentTerms"
+          },
+          {
+            "subclass": "AccruedInterest",
+            "superclass": "Interest",
+            "category": "state",
+            "status": "subtype not recovered",
+            "recovered_parent": "Interest"
+          },
+          {
+            "subclass": "InterestRateReset",
+            "superclass": "InterestCalculation",
+            "category": "kind",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "InterestRateSettingEvent",
+            "superclass": "InterestCalculation",
+            "category": "kind",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "SecuredLoan",
+            "superclass": "Loan",
+            "category": "kind",
+            "status": "subtype not recovered",
+            "recovered_parent": "Loan"
+          },
+          {
+            "subclass": "UnsecuredLoan",
+            "superclass": "Loan",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "Loan"
+          },
+          {
+            "subclass": "PrepaymentTerms",
+            "superclass": "PrincipalRepaymentTerms",
+            "category": "kind",
+            "status": "linked",
+            "recovered_subtype": "PrepaymentTerms",
+            "recovered_parent": "PrincipalRepaymentTerms"
+          },
+          {
+            "subclass": "CollateralizedLoan",
+            "superclass": "SecuredLoan",
+            "category": "kind",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "GuaranteedLoan",
+            "superclass": "SecuredLoan",
+            "category": "value",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "CommittedSubFacility",
+            "superclass": "SubFacility",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "SubFacility"
+          },
+          {
+            "subclass": "UncommittedSubFacility",
+            "superclass": "SubFacility",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "SubFacility"
+          },
+          {
+            "subclass": "FloatingInterestRate",
+            "superclass": "VariableInterestRate",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "VariableInterestRate"
+          },
+          {
+            "subclass": "ManagedInterestRate",
+            "superclass": "VariableInterestRate",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "VariableInterestRate"
+          }
+        ],
+        "name_hint_hits": []
+      },
+      {
+        "domain": "fibo-loans",
+        "run": "run-03",
+        "corpus": "multi-domain",
+        "recovered_classes": 31,
+        "recovered_relationships": 31,
+        "components": 2,
+        "matcher_reproduces_committed_matches": true,
+        "pairs": [
+          {
+            "subclass": "FullAmortization",
+            "superclass": "Amortization",
+            "category": "value",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "NegativeAmortization",
+            "superclass": "Amortization",
+            "category": "value",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "PartialAmortization",
+            "superclass": "Amortization",
+            "category": "value",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "RevolvingLineOfCredit",
+            "superclass": "CommittedCreditFacility",
+            "category": "kind",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "ClosedEndCredit",
+            "superclass": "CreditAgreement",
+            "category": "value",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "CreditFacility",
+            "superclass": "CreditAgreement",
+            "category": "kind",
+            "status": "parent not recovered",
+            "recovered_subtype": "CreditFacility"
+          },
+          {
+            "subclass": "Loan",
+            "superclass": "CreditAgreement",
+            "category": "kind",
+            "status": "parent not recovered",
+            "recovered_subtype": "Loan"
+          },
+          {
+            "subclass": "OpenEndCredit",
+            "superclass": "CreditAgreement",
+            "category": "value",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "CommittedCreditFacility",
+            "superclass": "CreditFacility",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "CreditFacility"
+          },
+          {
+            "subclass": "UncommittedCreditFacility",
+            "superclass": "CreditFacility",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "CreditFacility"
+          },
+          {
+            "subclass": "InterestPaymentTerms",
+            "superclass": "DebtTerms",
+            "category": "kind",
+            "status": "parent not recovered",
+            "recovered_subtype": "InterestPaymentTerms"
+          },
+          {
+            "subclass": "PrincipalRepaymentTerms",
+            "superclass": "DebtTerms",
+            "category": "kind",
+            "status": "parent not recovered",
+            "recovered_subtype": "PrincipalRepaymentTerms"
+          },
+          {
+            "subclass": "AccruedInterest",
+            "superclass": "Interest",
+            "category": "state",
+            "status": "subtype not recovered",
+            "recovered_parent": "Interest"
+          },
+          {
+            "subclass": "InterestRateReset",
+            "superclass": "InterestCalculation",
+            "category": "kind",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "InterestRateSettingEvent",
+            "superclass": "InterestCalculation",
+            "category": "kind",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "SecuredLoan",
+            "superclass": "Loan",
+            "category": "kind",
+            "status": "connected",
+            "recovered_subtype": "SecuredLoan",
+            "recovered_parent": "Loan"
+          },
+          {
+            "subclass": "UnsecuredLoan",
+            "superclass": "Loan",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "Loan"
+          },
+          {
+            "subclass": "PrepaymentTerms",
+            "superclass": "PrincipalRepaymentTerms",
+            "category": "kind",
+            "status": "connected",
+            "recovered_subtype": "PrepaymentTerms",
+            "recovered_parent": "PrincipalRepaymentTerms"
+          },
+          {
+            "subclass": "CollateralizedLoan",
+            "superclass": "SecuredLoan",
+            "category": "kind",
+            "status": "connected",
+            "recovered_subtype": "CollateralizedLoan",
+            "recovered_parent": "SecuredLoan"
+          },
+          {
+            "subclass": "GuaranteedLoan",
+            "superclass": "SecuredLoan",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "SecuredLoan"
+          },
+          {
+            "subclass": "CommittedSubFacility",
+            "superclass": "SubFacility",
+            "category": "value",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "UncommittedSubFacility",
+            "superclass": "SubFacility",
+            "category": "value",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "FloatingInterestRate",
+            "superclass": "VariableInterestRate",
+            "category": "value",
+            "status": "connected",
+            "recovered_subtype": "InterestRate",
+            "recovered_parent": "VariableInterestRate"
+          },
+          {
+            "subclass": "ManagedInterestRate",
+            "superclass": "VariableInterestRate",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "VariableInterestRate"
+          }
+        ],
+        "name_hint_hits": [
+          {
+            "subtype": "CollateralizedLoan",
+            "parent": "Loan",
+            "linked": true
+          },
+          {
+            "subtype": "CombinedLoanToValue",
+            "parent": "LoanToValue",
+            "linked": true
+          },
+          {
+            "subtype": "FixedInterestRate",
+            "parent": "InterestRate",
+            "linked": true
+          },
+          {
+            "subtype": "SecuredLoan",
+            "parent": "Loan",
+            "linked": true
+          },
+          {
+            "subtype": "VariableInterestRate",
+            "parent": "InterestRate",
+            "linked": true
+          }
+        ]
+      },
+      {
+        "domain": "iof-maintenance",
+        "run": "run-01",
+        "corpus": "multi-domain",
+        "recovered_classes": 14,
+        "recovered_relationships": 11,
+        "components": 3,
+        "matcher_reproduces_committed_matches": true,
+        "pairs": [
+          {
+            "subclass": "MaintenanceActivity",
+            "superclass": "MaintenanceProcess",
+            "category": "kind",
+            "status": "linked",
+            "recovered_subtype": "MaintenanceActivity",
+            "recovered_parent": "MaintenanceProcess"
+          },
+          {
+            "subclass": "DegradedState",
+            "superclass": "MaintenanceState",
+            "category": "state",
+            "status": "subtype not recovered",
+            "recovered_parent": "MaintenanceState",
+            "folded_as": "stateCategory = degraded"
+          },
+          {
+            "subclass": "FailedState",
+            "superclass": "MaintenanceState",
+            "category": "state",
+            "status": "subtype not recovered",
+            "recovered_parent": "MaintenanceState",
+            "folded_as": "stateCategory = failed"
+          },
+          {
+            "subclass": "OperatingState",
+            "superclass": "MaintenanceState",
+            "category": "state",
+            "status": "subtype not recovered",
+            "recovered_parent": "MaintenanceState",
+            "folded_as": "stateCategory = operating"
+          },
+          {
+            "subclass": "DispositionToExhibitUndesirableBehavior",
+            "superclass": "UndesirableDisposition",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "UndesirableDisposition"
+          },
+          {
+            "subclass": "DispositionToFail",
+            "superclass": "UndesirableDisposition",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "UndesirableDisposition"
+          }
+        ],
+        "name_hint_hits": []
+      },
+      {
+        "domain": "iof-maintenance",
+        "run": "run-02",
+        "corpus": "multi-domain",
+        "recovered_classes": 10,
+        "recovered_relationships": 10,
+        "components": 2,
+        "matcher_reproduces_committed_matches": true,
+        "pairs": [
+          {
+            "subclass": "MaintenanceActivity",
+            "superclass": "MaintenanceProcess",
+            "category": "kind",
+            "status": "linked",
+            "recovered_subtype": "MaintenanceActivity",
+            "recovered_parent": "MaintenanceProcess"
+          },
+          {
+            "subclass": "DegradedState",
+            "superclass": "MaintenanceState",
+            "category": "state",
+            "status": "subtype not recovered",
+            "recovered_parent": "MaintenanceState",
+            "folded_as": "stateName = degraded"
+          },
+          {
+            "subclass": "FailedState",
+            "superclass": "MaintenanceState",
+            "category": "state",
+            "status": "connected",
+            "recovered_subtype": "FailedState",
+            "recovered_parent": "MaintenanceState"
+          },
+          {
+            "subclass": "OperatingState",
+            "superclass": "MaintenanceState",
+            "category": "state",
+            "status": "subtype not recovered",
+            "recovered_parent": "MaintenanceState",
+            "folded_as": "stateName = operating"
+          },
+          {
+            "subclass": "DispositionToExhibitUndesirableBehavior",
+            "superclass": "UndesirableDisposition",
+            "category": "value",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "DispositionToFail",
+            "superclass": "UndesirableDisposition",
+            "category": "value",
+            "status": "neither recovered"
+          }
+        ],
+        "name_hint_hits": []
+      },
+      {
+        "domain": "iof-maintenance",
+        "run": "run-03",
+        "corpus": "multi-domain",
+        "recovered_classes": 11,
+        "recovered_relationships": 12,
+        "components": 2,
+        "matcher_reproduces_committed_matches": true,
+        "pairs": [
+          {
+            "subclass": "MaintenanceActivity",
+            "superclass": "MaintenanceProcess",
+            "category": "kind",
+            "status": "linked",
+            "recovered_subtype": "MaintenanceActivity",
+            "recovered_parent": "MaintenanceProcess"
+          },
+          {
+            "subclass": "DegradedState",
+            "superclass": "MaintenanceState",
+            "category": "state",
+            "status": "subtype not recovered",
+            "recovered_parent": "MaintenanceState",
+            "folded_as": "stateCategory = degraded"
+          },
+          {
+            "subclass": "FailedState",
+            "superclass": "MaintenanceState",
+            "category": "state",
+            "status": "connected",
+            "recovered_subtype": "FailedState",
+            "recovered_parent": "MaintenanceState"
+          },
+          {
+            "subclass": "OperatingState",
+            "superclass": "MaintenanceState",
+            "category": "state",
+            "status": "subtype not recovered",
+            "recovered_parent": "MaintenanceState",
+            "folded_as": "stateCategory = operating"
+          },
+          {
+            "subclass": "DispositionToExhibitUndesirableBehavior",
+            "superclass": "UndesirableDisposition",
+            "category": "value",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "DispositionToFail",
+            "superclass": "UndesirableDisposition",
+            "category": "value",
+            "status": "neither recovered"
+          }
+        ],
+        "name_hint_hits": []
+      },
+      {
+        "domain": "iof-supply-chain",
+        "run": "run-01",
+        "corpus": "multi-domain",
+        "recovered_classes": 25,
+        "recovered_relationships": 22,
+        "components": 5,
+        "matcher_reproduces_committed_matches": true,
+        "pairs": [
+          {
+            "subclass": "FreightContainer",
+            "superclass": "Container",
+            "category": "value",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "Trailer",
+            "superclass": "Container",
+            "category": "value",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "Wagon",
+            "superclass": "Container",
+            "category": "value",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "StorageFacility",
+            "superclass": "Facility",
+            "category": "kind",
+            "status": "not connected",
+            "recovered_subtype": "StorageFacility",
+            "recovered_parent": "Facility"
+          },
+          {
+            "subclass": "DistributionCenter",
+            "superclass": "StorageFacility",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "StorageFacility"
+          }
+        ],
+        "name_hint_hits": [
+          {
+            "subtype": "StorageFacility",
+            "parent": "Facility",
+            "linked": false
+          }
+        ]
+      },
+      {
+        "domain": "iof-supply-chain",
+        "run": "run-02",
+        "corpus": "multi-domain",
+        "recovered_classes": 26,
+        "recovered_relationships": 21,
+        "components": 7,
+        "matcher_reproduces_committed_matches": true,
+        "pairs": [
+          {
+            "subclass": "FreightContainer",
+            "superclass": "Container",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "Container"
+          },
+          {
+            "subclass": "Trailer",
+            "superclass": "Container",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "Container"
+          },
+          {
+            "subclass": "Wagon",
+            "superclass": "Container",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "Container"
+          },
+          {
+            "subclass": "StorageFacility",
+            "superclass": "Facility",
+            "category": "kind",
+            "status": "not connected",
+            "recovered_subtype": "StorageFacility",
+            "recovered_parent": "Facility"
+          },
+          {
+            "subclass": "DistributionCenter",
+            "superclass": "StorageFacility",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "StorageFacility"
+          }
+        ],
+        "name_hint_hits": [
+          {
+            "subtype": "StorageFacility",
+            "parent": "Facility",
+            "linked": false
+          }
+        ]
+      },
+      {
+        "domain": "iof-supply-chain",
+        "run": "run-03",
+        "corpus": "multi-domain",
+        "recovered_classes": 26,
+        "recovered_relationships": 28,
+        "components": 3,
+        "matcher_reproduces_committed_matches": true,
+        "pairs": [
+          {
+            "subclass": "FreightContainer",
+            "superclass": "Container",
+            "category": "value",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "Trailer",
+            "superclass": "Container",
+            "category": "value",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "Wagon",
+            "superclass": "Container",
+            "category": "value",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "StorageFacility",
+            "superclass": "Facility",
+            "category": "kind",
+            "status": "not connected",
+            "recovered_subtype": "StorageFacility",
+            "recovered_parent": "Facility"
+          },
+          {
+            "subclass": "DistributionCenter",
+            "superclass": "StorageFacility",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "StorageFacility"
+          }
+        ],
+        "name_hint_hits": [
+          {
+            "subtype": "StorageFacility",
+            "parent": "Facility",
+            "linked": false
+          }
+        ]
+      },
+      {
+        "domain": "itops",
+        "run": "run-01",
+        "corpus": "multi-domain-control",
+        "recovered_classes": 36,
+        "recovered_relationships": 42,
+        "components": 2,
+        "matcher_reproduces_committed_matches": true,
+        "pairs": [
+          {
+            "subclass": "EmergencyChange",
+            "superclass": "Change",
+            "category": "value",
+            "status": "not connected",
+            "recovered_subtype": "EmergencyChange",
+            "recovered_parent": "Change"
+          },
+          {
+            "subclass": "Application",
+            "superclass": "ConfigurationItem",
+            "category": "kind",
+            "status": "connected",
+            "recovered_subtype": "Application",
+            "recovered_parent": "ConfigurationItem"
+          },
+          {
+            "subclass": "BackupSet",
+            "superclass": "ConfigurationItem",
+            "category": "kind",
+            "status": "linked",
+            "recovered_subtype": "BackupSet",
+            "recovered_parent": "ConfigurationItem"
+          },
+          {
+            "subclass": "CloudService",
+            "superclass": "ConfigurationItem",
+            "category": "kind",
+            "status": "connected",
+            "recovered_subtype": "CloudService",
+            "recovered_parent": "ConfigurationItem"
+          },
+          {
+            "subclass": "Database",
+            "superclass": "ConfigurationItem",
+            "category": "kind",
+            "status": "subtype not recovered",
+            "recovered_parent": "ConfigurationItem"
+          },
+          {
+            "subclass": "InfrastructureComponent",
+            "superclass": "ConfigurationItem",
+            "category": "kind",
+            "status": "connected",
+            "recovered_subtype": "InfrastructureComponent",
+            "recovered_parent": "ConfigurationItem"
+          },
+          {
+            "subclass": "NetworkSegment",
+            "superclass": "ConfigurationItem",
+            "category": "kind",
+            "status": "subtype not recovered",
+            "recovered_parent": "ConfigurationItem"
+          },
+          {
+            "subclass": "SecurityEvent",
+            "superclass": "Event",
+            "category": "kind",
+            "status": "connected",
+            "recovered_subtype": "SecurityEvent",
+            "recovered_parent": "Event"
+          },
+          {
+            "subclass": "CybersecurityIncident",
+            "superclass": "Incident",
+            "category": "state",
+            "status": "connected",
+            "recovered_subtype": "CybersecurityIncident",
+            "recovered_parent": "Incident"
+          },
+          {
+            "subclass": "MajorIncident",
+            "superclass": "Incident",
+            "category": "state",
+            "status": "subtype not recovered",
+            "recovered_parent": "Incident",
+            "folded_as": "majorIncidentFlag (boolean)"
+          },
+          {
+            "subclass": "ContainerPlatform",
+            "superclass": "InfrastructureComponent",
+            "category": "kind",
+            "status": "subtype not recovered",
+            "recovered_parent": "InfrastructureComponent"
+          },
+          {
+            "subclass": "Endpoint",
+            "superclass": "InfrastructureComponent",
+            "category": "kind",
+            "status": "subtype not recovered",
+            "recovered_parent": "InfrastructureComponent"
+          },
+          {
+            "subclass": "NetworkDevice",
+            "superclass": "InfrastructureComponent",
+            "category": "kind",
+            "status": "subtype not recovered",
+            "recovered_parent": "InfrastructureComponent"
+          },
+          {
+            "subclass": "Server",
+            "superclass": "InfrastructureComponent",
+            "category": "kind",
+            "status": "subtype not recovered",
+            "recovered_parent": "InfrastructureComponent"
+          },
+          {
+            "subclass": "StorageSystem",
+            "superclass": "InfrastructureComponent",
+            "category": "kind",
+            "status": "subtype not recovered",
+            "recovered_parent": "InfrastructureComponent"
+          },
+          {
+            "subclass": "VirtualMachine",
+            "superclass": "InfrastructureComponent",
+            "category": "kind",
+            "status": "subtype not recovered",
+            "recovered_parent": "InfrastructureComponent"
+          },
+          {
+            "subclass": "ThirdPartyService",
+            "superclass": "ItService",
+            "category": "value",
+            "status": "parent not recovered",
+            "recovered_subtype": "ThirdPartyService"
+          },
+          {
+            "subclass": "IncidentResponseTeam",
+            "superclass": "OrganizationalUnit",
+            "category": "individual",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "ItOperationsTeam",
+            "superclass": "OrganizationalUnit",
+            "category": "individual",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "NetworkOperationsCentre",
+            "superclass": "OrganizationalUnit",
+            "category": "individual",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "ResolverGroup",
+            "superclass": "OrganizationalUnit",
+            "category": "role",
+            "status": "parent not recovered",
+            "recovered_subtype": "ResolverGroup"
+          },
+          {
+            "subclass": "SecurityOperationsCentre",
+            "superclass": "OrganizationalUnit",
+            "category": "individual",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "ServiceDesk",
+            "superclass": "OrganizationalUnit",
+            "category": "individual",
+            "status": "neither recovered"
+          }
+        ],
+        "name_hint_hits": [
+          {
+            "subtype": "CybersecurityIncident",
+            "parent": "Incident",
+            "linked": true
+          },
+          {
+            "subtype": "EmergencyChange",
+            "parent": "Change",
+            "linked": false
+          },
+          {
+            "subtype": "SecurityEvent",
+            "parent": "Event",
+            "linked": true
+          }
+        ]
+      },
+      {
+        "domain": "itops",
+        "run": "run-02",
+        "corpus": "multi-domain-control",
+        "recovered_classes": 36,
+        "recovered_relationships": 48,
+        "components": 2,
+        "matcher_reproduces_committed_matches": true,
+        "pairs": [
+          {
+            "subclass": "EmergencyChange",
+            "superclass": "Change",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "Change",
+            "folded_as": "emergencyClassification = emergency"
+          },
+          {
+            "subclass": "Application",
+            "superclass": "ConfigurationItem",
+            "category": "kind",
+            "status": "linked",
+            "recovered_subtype": "Application",
+            "recovered_parent": "ConfigurationItem"
+          },
+          {
+            "subclass": "BackupSet",
+            "superclass": "ConfigurationItem",
+            "category": "kind",
+            "status": "linked",
+            "recovered_subtype": "BackupSet",
+            "recovered_parent": "ConfigurationItem"
+          },
+          {
+            "subclass": "CloudService",
+            "superclass": "ConfigurationItem",
+            "category": "kind",
+            "status": "subtype not recovered",
+            "recovered_parent": "ConfigurationItem"
+          },
+          {
+            "subclass": "Database",
+            "superclass": "ConfigurationItem",
+            "category": "kind",
+            "status": "subtype not recovered",
+            "recovered_parent": "ConfigurationItem"
+          },
+          {
+            "subclass": "InfrastructureComponent",
+            "superclass": "ConfigurationItem",
+            "category": "kind",
+            "status": "subtype not recovered",
+            "recovered_parent": "ConfigurationItem"
+          },
+          {
+            "subclass": "NetworkSegment",
+            "superclass": "ConfigurationItem",
+            "category": "kind",
+            "status": "subtype not recovered",
+            "recovered_parent": "ConfigurationItem"
+          },
+          {
+            "subclass": "SecurityEvent",
+            "superclass": "Event",
+            "category": "kind",
+            "status": "subtype not recovered",
+            "recovered_parent": "Event"
+          },
+          {
+            "subclass": "CybersecurityIncident",
+            "superclass": "Incident",
+            "category": "state",
+            "status": "subtype not recovered",
+            "recovered_parent": "Incident"
+          },
+          {
+            "subclass": "MajorIncident",
+            "superclass": "Incident",
+            "category": "state",
+            "status": "subtype not recovered",
+            "recovered_parent": "Incident",
+            "folded_as": "majorIncidentClassification = major"
+          },
+          {
+            "subclass": "ContainerPlatform",
+            "superclass": "InfrastructureComponent",
+            "category": "kind",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "Endpoint",
+            "superclass": "InfrastructureComponent",
+            "category": "kind",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "NetworkDevice",
+            "superclass": "InfrastructureComponent",
+            "category": "kind",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "Server",
+            "superclass": "InfrastructureComponent",
+            "category": "kind",
+            "status": "parent not recovered",
+            "recovered_subtype": "Server"
+          },
+          {
+            "subclass": "StorageSystem",
+            "superclass": "InfrastructureComponent",
+            "category": "kind",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "VirtualMachine",
+            "superclass": "InfrastructureComponent",
+            "category": "kind",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "ThirdPartyService",
+            "superclass": "ItService",
+            "category": "value",
+            "status": "linked",
+            "recovered_subtype": "ThirdPartyService",
+            "recovered_parent": "ITService"
+          },
+          {
+            "subclass": "IncidentResponseTeam",
+            "superclass": "OrganizationalUnit",
+            "category": "individual",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "ItOperationsTeam",
+            "superclass": "OrganizationalUnit",
+            "category": "individual",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "NetworkOperationsCentre",
+            "superclass": "OrganizationalUnit",
+            "category": "individual",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "ResolverGroup",
+            "superclass": "OrganizationalUnit",
+            "category": "role",
+            "status": "parent not recovered",
+            "recovered_subtype": "ResolverGroup"
+          },
+          {
+            "subclass": "SecurityOperationsCentre",
+            "superclass": "OrganizationalUnit",
+            "category": "individual",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "ServiceDesk",
+            "superclass": "OrganizationalUnit",
+            "category": "individual",
+            "status": "neither recovered"
+          }
+        ],
+        "name_hint_hits": []
+      },
+      {
+        "domain": "itops",
+        "run": "run-03",
+        "corpus": "multi-domain-control",
+        "recovered_classes": 33,
+        "recovered_relationships": 42,
+        "components": 1,
+        "matcher_reproduces_committed_matches": true,
+        "pairs": [
+          {
+            "subclass": "EmergencyChange",
+            "superclass": "Change",
+            "category": "value",
+            "status": "subtype not recovered",
+            "recovered_parent": "Change"
+          },
+          {
+            "subclass": "Application",
+            "superclass": "ConfigurationItem",
+            "category": "kind",
+            "status": "connected",
+            "recovered_subtype": "Application",
+            "recovered_parent": "ConfigurationItem"
+          },
+          {
+            "subclass": "BackupSet",
+            "superclass": "ConfigurationItem",
+            "category": "kind",
+            "status": "linked",
+            "recovered_subtype": "BackupSet",
+            "recovered_parent": "ConfigurationItem"
+          },
+          {
+            "subclass": "CloudService",
+            "superclass": "ConfigurationItem",
+            "category": "kind",
+            "status": "subtype not recovered",
+            "recovered_parent": "ConfigurationItem"
+          },
+          {
+            "subclass": "Database",
+            "superclass": "ConfigurationItem",
+            "category": "kind",
+            "status": "subtype not recovered",
+            "recovered_parent": "ConfigurationItem"
+          },
+          {
+            "subclass": "InfrastructureComponent",
+            "superclass": "ConfigurationItem",
+            "category": "kind",
+            "status": "connected",
+            "recovered_subtype": "InfrastructureComponent",
+            "recovered_parent": "ConfigurationItem"
+          },
+          {
+            "subclass": "NetworkSegment",
+            "superclass": "ConfigurationItem",
+            "category": "kind",
+            "status": "subtype not recovered",
+            "recovered_parent": "ConfigurationItem"
+          },
+          {
+            "subclass": "SecurityEvent",
+            "superclass": "Event",
+            "category": "kind",
+            "status": "connected",
+            "recovered_subtype": "SecurityEvent",
+            "recovered_parent": "Event"
+          },
+          {
+            "subclass": "CybersecurityIncident",
+            "superclass": "Incident",
+            "category": "state",
+            "status": "connected",
+            "recovered_subtype": "CybersecurityIncident",
+            "recovered_parent": "Incident"
+          },
+          {
+            "subclass": "MajorIncident",
+            "superclass": "Incident",
+            "category": "state",
+            "status": "linked",
+            "recovered_subtype": "MajorIncident",
+            "recovered_parent": "Incident"
+          },
+          {
+            "subclass": "ContainerPlatform",
+            "superclass": "InfrastructureComponent",
+            "category": "kind",
+            "status": "subtype not recovered",
+            "recovered_parent": "InfrastructureComponent"
+          },
+          {
+            "subclass": "Endpoint",
+            "superclass": "InfrastructureComponent",
+            "category": "kind",
+            "status": "subtype not recovered",
+            "recovered_parent": "InfrastructureComponent"
+          },
+          {
+            "subclass": "NetworkDevice",
+            "superclass": "InfrastructureComponent",
+            "category": "kind",
+            "status": "subtype not recovered",
+            "recovered_parent": "InfrastructureComponent"
+          },
+          {
+            "subclass": "Server",
+            "superclass": "InfrastructureComponent",
+            "category": "kind",
+            "status": "subtype not recovered",
+            "recovered_parent": "InfrastructureComponent"
+          },
+          {
+            "subclass": "StorageSystem",
+            "superclass": "InfrastructureComponent",
+            "category": "kind",
+            "status": "subtype not recovered",
+            "recovered_parent": "InfrastructureComponent"
+          },
+          {
+            "subclass": "VirtualMachine",
+            "superclass": "InfrastructureComponent",
+            "category": "kind",
+            "status": "subtype not recovered",
+            "recovered_parent": "InfrastructureComponent"
+          },
+          {
+            "subclass": "ThirdPartyService",
+            "superclass": "ItService",
+            "category": "value",
+            "status": "linked",
+            "recovered_subtype": "ThirdPartyService",
+            "recovered_parent": "ITService"
+          },
+          {
+            "subclass": "IncidentResponseTeam",
+            "superclass": "OrganizationalUnit",
+            "category": "individual",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "ItOperationsTeam",
+            "superclass": "OrganizationalUnit",
+            "category": "individual",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "NetworkOperationsCentre",
+            "superclass": "OrganizationalUnit",
+            "category": "individual",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "ResolverGroup",
+            "superclass": "OrganizationalUnit",
+            "category": "role",
+            "status": "parent not recovered",
+            "recovered_subtype": "ResolverGroup"
+          },
+          {
+            "subclass": "SecurityOperationsCentre",
+            "superclass": "OrganizationalUnit",
+            "category": "individual",
+            "status": "neither recovered"
+          },
+          {
+            "subclass": "ServiceDesk",
+            "superclass": "OrganizationalUnit",
+            "category": "individual",
+            "status": "neither recovered"
+          }
+        ],
+        "name_hint_hits": [
+          {
+            "subtype": "CybersecurityIncident",
+            "parent": "Incident",
+            "linked": true
+          },
+          {
+            "subtype": "MajorIncident",
+            "parent": "Incident",
+            "linked": true
+          },
+          {
+            "subtype": "SecurityEvent",
+            "parent": "Event",
+            "linked": true
+          }
+        ]
+      }
+    ]
+  }
+}

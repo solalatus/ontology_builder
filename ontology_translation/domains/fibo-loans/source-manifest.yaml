@@ -1,6 +1,7 @@
 id: fibo-loans
 source_url: https://raw.githubusercontent.com/edmcouncil/fibo/master_2026Q1/LOAN/LoansGeneral/Loans.rdf
 source_version: master_2026Q1
+source_license: MIT, Copyright (c) 2016-2025 EDM Council, Inc. (notice embedded in each file's dct:license)
 source_sha256: 87024035dac38303e21738879202d87f0f37c1347a16119f9ec2b4e37e124f05
 extra_source_urls:
   - https://raw.githubusercontent.com/edmcouncil/fibo/master_2026Q1/FBC/DebtAndEquities/Debt.rdf

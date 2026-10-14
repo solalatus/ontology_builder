@@ -1,0 +1,14 @@
+# Provenance of the committed original source files in this folder.
+# Written by fetch.py --redownload; do not edit by hand.
+domain: brick-hvac
+written_by: ontology_translation/tools/fetch.py --redownload
+source_version: v1.4.4
+license: BSD-3-Clause, Copyright (c) 2016-2023 Brick Consortium, Inc. (full text in
+  source/LICENSE)
+files:
+- file: Brick.ttl
+  url: https://github.com/BrickSchema/Brick/releases/download/v1.4.4/Brick.ttl
+  sha256: b65720b7b9b64c646745c689777e6138c0d59ce0088df0aeb78fbd444d04d8e7
+  bytes: 1749633
+  downloaded_at: '2026-10-14T06:48:16Z'
+  matches_manifest_pin: true

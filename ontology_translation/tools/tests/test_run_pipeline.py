@@ -119,7 +119,7 @@ class AutoFetchSuffixIntegrationTests(unittest.TestCase):
             out_dir = tmp_path / "out"
 
             rc = pipeline_mod.main(
-                ["--manifest", str(manifest_path), "--out-dir", str(out_dir), "--dry-run"]
+                ["--manifest", str(manifest_path), "--out-dir", str(out_dir), "--dry-run", "--redownload"]
             )
 
             self.assertEqual(rc, 0)
@@ -168,7 +168,7 @@ class MultiFileAutoFetchIntegrationTests(unittest.TestCase):
             out_dir = tmp_path / "out"
 
             rc = pipeline_mod.main(
-                ["--manifest", str(manifest_path), "--out-dir", str(out_dir), "--dry-run"]
+                ["--manifest", str(manifest_path), "--out-dir", str(out_dir), "--dry-run", "--redownload"]
             )
 
             self.assertEqual(rc, 0)
@@ -179,6 +179,62 @@ class MultiFileAutoFetchIntegrationTests(unittest.TestCase):
             self.assertEqual(
                 iris, {"http://example.org/onto#Widget", "http://example.org/onto#Manufacturer"}
             )
+
+
+class CommittedSourceAutoFetchTests(unittest.TestCase):
+    """fetch.py loads a domain's committed source copy (domains/<id>/source/,
+    next to the manifest) by default and only downloads with --redownload.
+    The URL here points at a file that does not exist, so a passing default
+    run proves nothing was downloaded."""
+
+    def _manifest(self, tmp_path: Path) -> Path:
+        manifest_path = tmp_path / "source-manifest.yaml"
+        missing = (tmp_path / "upstream" / "widget.rdf").as_uri()
+        manifest_path.write_text(
+            f"id: test-domain\nsource_url: {missing}\nscope:\n  roots: []\ncompiler:\n  prompt_version: compiler-prompt\n  runs: 1\n",
+            encoding="utf-8",
+        )
+        return manifest_path
+
+    def test_default_run_loads_the_committed_copy_without_touching_the_url(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            manifest_path = self._manifest(tmp_path)
+            (tmp_path / "source").mkdir()
+            (tmp_path / "source" / "widget.rdf").write_text(RDF_XML_FIXTURE, encoding="utf-8")
+            out_dir = tmp_path / "out"
+
+            rc = pipeline_mod.main(["--manifest", str(manifest_path), "--out-dir", str(out_dir), "--dry-run"])
+
+            self.assertEqual(rc, 0)
+            self.assertEqual((out_dir / "source.rdf").read_text(encoding="utf-8"), RDF_XML_FIXTURE)
+            source_ir = json.loads((out_dir / "source_ir.json").read_text(encoding="utf-8"))
+            self.assertEqual([c["iri"] for c in source_ir["classes"]], ["http://example.org/onto#Widget"])
+
+    def test_default_run_without_a_committed_copy_fails_at_fetch(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            manifest_path = self._manifest(tmp_path)
+            out_dir = tmp_path / "out"
+
+            rc = pipeline_mod.main(["--manifest", str(manifest_path), "--out-dir", str(out_dir), "--dry-run"])
+
+            self.assertNotEqual(rc, 0)
+            self.assertFalse((out_dir / "source_ir.json").exists(), "extract must not run without a source")
+
+    def test_redownload_refreshes_the_committed_copy_and_provenance(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            manifest_path = self._manifest(tmp_path)
+            (tmp_path / "upstream").mkdir()
+            (tmp_path / "upstream" / "widget.rdf").write_text(RDF_XML_FIXTURE, encoding="utf-8")
+            out_dir = tmp_path / "out"
+
+            rc = pipeline_mod.main(["--manifest", str(manifest_path), "--out-dir", str(out_dir), "--dry-run", "--redownload"])
+
+            self.assertEqual(rc, 0)
+            self.assertEqual((tmp_path / "source" / "widget.rdf").read_text(encoding="utf-8"), RDF_XML_FIXTURE)
+            self.assertTrue((tmp_path / "source" / "PROVENANCE.yaml").is_file())
 
 
 class BuildRepairBatchTests(unittest.TestCase):

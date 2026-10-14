@@ -1,0 +1,1072 @@
+{
+  "domains": [
+    {
+      "domain": "brick-hvac",
+      "source_files": [
+        "ontology_translation/domains/brick-hvac/source/Brick.ttl"
+      ],
+      "named_subclassof_edges_in_source": 2014,
+      "mapped_source_iris": 49,
+      "secondary_only_citations": [
+        "Air Handler Unit (cited by classes.AirHandlingUnit, relationships[34], relationships[35])",
+        "Air Handling Unit (cited by classes.AirHandlingUnit, relationships[34], relationships[35])",
+        "Occupancy Sensor (cited by classes.OccupancySensor)",
+        "Space (cited by classes.Space, relationships[23])",
+        "Storey (cited by classes.Floor)",
+        "servicedBy (cited by relationships[31])"
+      ],
+      "target_classes": 39,
+      "taxonomy_only_dispositions": 8,
+      "upward_walk_outcomes": {
+        "no mapped ancestor (parent outside translated scope)": 29
+      },
+      "candidates": [
+        {
+          "subclass": "CO2Sensor",
+          "superclass": "AirQualitySensor",
+          "source_paths": [
+            "CO2 Sensor -> Air Quality Sensor"
+          ],
+          "min_skipped": 0,
+          "x_relationship_count": 1,
+          "x_is_island": false,
+          "already_related_to_parent": false,
+          "x_connected_to_parent": false,
+          "kind": "direct"
+        },
+        {
+          "subclass": "CO2DifferentialSensor",
+          "superclass": "CO2Sensor",
+          "source_paths": [
+            "CO2 Differential Sensor -> CO2 Sensor"
+          ],
+          "min_skipped": 0,
+          "x_relationship_count": 0,
+          "x_is_island": true,
+          "already_related_to_parent": false,
+          "x_connected_to_parent": false,
+          "kind": "direct"
+        },
+        {
+          "subclass": "OutsideAirCO2Sensor",
+          "superclass": "CO2Sensor",
+          "source_paths": [
+            "Outside Air CO2 Sensor -> CO2 Sensor"
+          ],
+          "min_skipped": 0,
+          "x_relationship_count": 2,
+          "x_is_island": false,
+          "already_related_to_parent": false,
+          "x_connected_to_parent": true,
+          "kind": "direct"
+        },
+        {
+          "subclass": "ReturnAirCO2Sensor",
+          "superclass": "CO2Sensor",
+          "source_paths": [
+            "Return Air CO2 Sensor -> CO2 Sensor"
+          ],
+          "min_skipped": 0,
+          "x_relationship_count": 1,
+          "x_is_island": false,
+          "already_related_to_parent": false,
+          "x_connected_to_parent": true,
+          "kind": "direct"
+        },
+        {
+          "subclass": "AirTemperatureSensor",
+          "superclass": "TemperatureSensor",
+          "source_paths": [
+            "Air Temperature Sensor -> Temperature Sensor"
+          ],
+          "min_skipped": 0,
+          "x_relationship_count": 1,
+          "x_is_island": false,
+          "already_related_to_parent": false,
+          "x_connected_to_parent": true,
+          "kind": "direct"
+        },
+        {
+          "subclass": "WaterTemperatureSensor",
+          "superclass": "TemperatureSensor",
+          "source_paths": [
+            "Water Temperature Sensor -> Temperature Sensor"
+          ],
+          "min_skipped": 0,
+          "x_relationship_count": 0,
+          "x_is_island": true,
+          "already_related_to_parent": false,
+          "x_connected_to_parent": false,
+          "kind": "direct"
+        },
+        {
+          "subclass": "AirTemperatureSetpoint",
+          "superclass": "TemperatureSetpoint",
+          "source_paths": [
+            "Air Temperature Setpoint -> Temperature Setpoint"
+          ],
+          "min_skipped": 0,
+          "x_relationship_count": 1,
+          "x_is_island": false,
+          "already_related_to_parent": false,
+          "x_connected_to_parent": true,
+          "kind": "direct"
+        },
+        {
+          "subclass": "CoolingTemperatureSetpoint",
+          "superclass": "TemperatureSetpoint",
+          "source_paths": [
+            "Cooling Temperature Setpoint -> Temperature Setpoint"
+          ],
+          "min_skipped": 0,
+          "x_relationship_count": 1,
+          "x_is_island": false,
+          "already_related_to_parent": false,
+          "x_connected_to_parent": true,
+          "kind": "direct"
+        },
+        {
+          "subclass": "HeatingTemperatureSetpoint",
+          "superclass": "TemperatureSetpoint",
+          "source_paths": [
+            "Heating Temperature Setpoint -> Temperature Setpoint"
+          ],
+          "min_skipped": 0,
+          "x_relationship_count": 1,
+          "x_is_island": false,
+          "already_related_to_parent": false,
+          "x_connected_to_parent": true,
+          "kind": "direct"
+        },
+        {
+          "subclass": "TemperatureDeadbandSetpoint",
+          "superclass": "TemperatureSetpoint",
+          "source_paths": [
+            "Temperature Deadband Setpoint -> Temperature Setpoint"
+          ],
+          "min_skipped": 0,
+          "x_relationship_count": 1,
+          "x_is_island": false,
+          "already_related_to_parent": false,
+          "x_connected_to_parent": true,
+          "kind": "direct"
+        }
+      ],
+      "folded_parents": [],
+      "secondary_ancestor_hits": [
+        {
+          "subclass": "Building",
+          "cited_by_class": "Space",
+          "source_path": "Building -> Location -> Space"
+        },
+        {
+          "subclass": "Floor",
+          "cited_by_class": "Space",
+          "source_path": "Floor -> Location -> Space"
+        },
+        {
+          "subclass": "Zone",
+          "cited_by_class": "Space",
+          "source_path": "Zone -> Location -> Space"
+        }
+      ],
+      "latent_subtypes_by_disposition": {
+        "not listed in translation.json": 154,
+        "out_of_scope": 10,
+        "taxonomy_only": 1
+      },
+      "latent_subtype_examples": {
+        "not listed in translation.json": [
+          "Return Air Plenum (subclass of Air Plenum)",
+          "Discharge Air Plenum (subclass of Air Plenum)",
+          "Supply Air Plenum (subclass of Air Plenum)",
+          "Exhaust Air Temperature Sensor (subclass of Air Temperature Sensor)",
+          "Mixed Air Temperature Sensor (subclass of Air Temperature Sensor)",
+          "Return Air Temperature Sensor (subclass of Air Temperature Sensor)"
+        ],
+        "out_of_scope": [
+          "Frost Sensor (subclass of Temperature Sensor)",
+          "Heat Sink Temperature Sensor (subclass of Temperature Sensor)",
+          "Natural Gas Temperature Sensor (subclass of Temperature Sensor)",
+          "Soil Temperature Sensor (subclass of Temperature Sensor)",
+          "Air Wet Bulb Temperature Sensor (subclass of Temperature Sensor)",
+          "Radiant Panel Temperature Sensor (subclass of Temperature Sensor)"
+        ],
+        "taxonomy_only": [
+          "CO2 Level Sensor (subclass of CO2 Sensor)"
+        ]
+      }
+    },
+    {
+      "domain": "fibo-loans",
+      "source_files": [
+        "ontology_translation/domains/fibo-loans/source/Loans.rdf",
+        "ontology_translation/domains/fibo-loans/source/Debt.rdf"
+      ],
+      "named_subclassof_edges_in_source": 90,
+      "mapped_source_iris": 57,
+      "secondary_only_citations": [
+        "governs payment of (cited by relationships[11], relationships[12], rules.interestBearingLoanNeedsInterestTerms, rules.amortizingLoanNeedsRepaymentSchedule)",
+        "has accrual basis (cited by relationships[10])",
+        "has amount of credit extended (cited by classes.CreditFacility.properties.amountOfCreditExtended)",
+        "has anticipated number of payments (cited by classes.AmortizationSchedule.properties.anticipatedNumberOfPayments, classes.LoanPaymentSchedule.properties.anticipatedNumberOfPayments, classes.InterestPaymentSchedule.properties.anticipatedNumberOfPayments, classes.PrincipalPaymentSchedule.properties.anticipatedNumberOfPayments)",
+        "has available amount (cited by classes.CreditFacility.properties.availableAmount)",
+        "has balloon payment (cited by classes.Loan.properties.balloonPayment)",
+        "has borrower (cited by relationships[0], relationships[2], relationships[4], rules.loanRequiresBorrowerAndLender)",
+        "has compounding frequency (cited by classes.InterestPaymentTerms.properties.compoundingFrequency)",
+        "has credit limit (cited by classes.CreditFacility.properties.creditLimit, classes.OpenEndCredit.properties.creditLimit)",
+        "has debt amount (cited by classes.CreditAgreement.properties.debtAmount)",
+        "has final interest payment date (cited by classes.InterestPaymentTerms.properties.finalInterestPaymentDate)",
+        "has first rate change term (cited by classes.Loan.properties.firstRateChangeTermMonths)",
+        "has individual payment (cited by relationships[14], rules.paymentHistoryContainsPayments)",
+        "has initial exchange date (cited by classes.Loan.properties.initialExchangeDate, classes.CreditAgreement.properties.initialExchangeDate)",
+        "has initial interest accrual date (cited by classes.InterestPaymentTerms.properties.initialInterestAccrualDate)",
+        "has initial interest payment date (cited by classes.InterestPaymentTerms.properties.initialInterestPaymentDate)",
+        "has initial principal payment date (cited by classes.PrincipalRepaymentTerms.properties.initialPrincipalPaymentDate)",
+        "has interest payment day (cited by classes.InterestPaymentTerms.properties.interestPaymentDay)",
+        "has interest payment frequency (cited by classes.InterestPaymentTerms.properties.interestPaymentFrequency)",
+        "has interest rate (cited by relationships[7], relationships[8], relationships[9], rules.interestBearingLoanNeedsInterestTerms)",
+        "has interest rate cap (cited by classes.Loan.properties.interestRateCap)",
+        "has lender (cited by relationships[1], relationships[3], relationships[5], rules.loanRequiresBorrowerAndLender)",
+        "has loan balance (cited by classes.Loan.properties.loanBalance)",
+        "has maturity date (cited by classes.Loan.properties.maturityDate, classes.CreditAgreement.properties.maturityDate)",
+        "has maximum advance amount (cited by classes.CreditFacility.properties.maximumAdvanceAmount)",
+        "has negative amortization (cited by classes.Loan.properties.negativeAmortization)",
+        "has outstanding amount (cited by classes.Principal.properties.outstandingAmount, classes.Interest.properties.outstandingAmount)",
+        "has payment history (cited by relationships[13], rules.paymentHistoryContainsPayments)",
+        "has pre-payment penalty term (cited by classes.PrepaymentTerms.properties.prePaymentPenaltyTermMonths, rules.prepaymentPenaltyRequiresPrepaymentTerms, actions.reviewPrepaymentTerms)",
+        "has principal (cited by relationships[6])",
+        "has principal amount (cited by classes.Loan.properties.principalAmount)",
+        "has principal payment day (cited by classes.PrincipalRepaymentTerms.properties.principalPaymentDay)",
+        "has principal payment frequency (cited by classes.PrincipalRepaymentTerms.properties.principalPaymentFrequency)",
+        "has principal repayment date (cited by classes.PrincipalRepaymentTerms.properties.principalRepaymentDate)",
+        "has total closing costs (cited by classes.Loan.properties.totalClosingCosts)",
+        "has total points and fees (cited by classes.Loan.properties.totalPointsAndFees)",
+        "is assumable (cited by classes.Loan.properties.assumable)",
+        "is collateralization of (cited by relationships[17])",
+        "is collateralized by (cited by relationships[16], rules.securedLoanNeedsCollateral, actions.verifySecuredLoanSupport)",
+        "is initially payable (cited by classes.Loan.properties.initiallyPayable)",
+        "is interest only (cited by classes.Loan.properties.interestOnly)",
+        "is performed by (cited by relationships[15])"
+      ],
+      "target_classes": 57,
+      "taxonomy_only_dispositions": 10,
+      "upward_walk_outcomes": {
+        "no mapped ancestor (parent outside translated scope)": 33
+      },
+      "candidates": [
+        {
+          "subclass": "FullAmortization",
+          "superclass": "Amortization",
+          "source_paths": [
+            "full amortization -> amortization"
+          ],
+          "min_skipped": 0,
+          "x_relationship_count": 0,
+          "x_is_island": true,
+          "already_related_to_parent": false,
+          "x_connected_to_parent": false,
+          "kind": "direct"
+        },
+        {
+          "subclass": "NegativeAmortization",
+          "superclass": "Amortization",
+          "source_paths": [
+            "negative amortization -> amortization"
+          ],
+          "min_skipped": 0,
+          "x_relationship_count": 0,
+          "x_is_island": true,
+          "already_related_to_parent": false,
+          "x_connected_to_parent": false,
+          "kind": "direct"
+        },
+        {
+          "subclass": "PartialAmortization",
+          "superclass": "Amortization",
+          "source_paths": [
+            "partial amortization -> amortization"
+          ],
+          "min_skipped": 0,
+          "x_relationship_count": 0,
+          "x_is_island": true,
+          "already_related_to_parent": false,
+          "x_connected_to_parent": false,
+          "kind": "direct"
+        },
+        {
+          "subclass": "RevolvingLineOfCredit",
+          "superclass": "CommittedCreditFacility",
+          "source_paths": [
+            "revolving line of credit -> committed credit facility"
+          ],
+          "min_skipped": 0,
+          "x_relationship_count": 0,
+          "x_is_island": true,
+          "already_related_to_parent": false,
+          "x_connected_to_parent": false,
+          "kind": "direct"
+        },
+        {
+          "subclass": "ClosedEndCredit",
+          "superclass": "CreditAgreement",
+          "source_paths": [
+            "closed-end credit -> credit agreement"
+          ],
+          "min_skipped": 0,
+          "x_relationship_count": 0,
+          "x_is_island": true,
+          "already_related_to_parent": false,
+          "x_connected_to_parent": false,
+          "kind": "direct"
+        },
+        {
+          "subclass": "CreditFacility",
+          "superclass": "CreditAgreement",
+          "source_paths": [
+            "credit facility -> credit agreement repaid periodically -> credit agreement"
+          ],
+          "min_skipped": 1,
+          "x_relationship_count": 3,
+          "x_is_island": false,
+          "already_related_to_parent": false,
+          "x_connected_to_parent": true,
+          "kind": "via 1 skipped"
+        },
+        {
+          "subclass": "Loan",
+          "superclass": "CreditAgreement",
+          "source_paths": [
+            "loan -> credit agreement repaid periodically -> credit agreement"
+          ],
+          "min_skipped": 1,
+          "x_relationship_count": 15,
+          "x_is_island": false,
+          "already_related_to_parent": false,
+          "x_connected_to_parent": true,
+          "kind": "via 1 skipped"
+        },
+        {
+          "subclass": "OpenEndCredit",
+          "superclass": "CreditAgreement",
+          "source_paths": [
+            "open-end credit -> credit agreement"
+          ],
+          "min_skipped": 0,
+          "x_relationship_count": 0,
+          "x_is_island": true,
+          "already_related_to_parent": false,
+          "x_connected_to_parent": false,
+          "kind": "direct"
+        },
+        {
+          "subclass": "CommittedCreditFacility",
+          "superclass": "CreditFacility",
+          "source_paths": [
+            "committed credit facility -> credit facility"
+          ],
+          "min_skipped": 0,
+          "x_relationship_count": 0,
+          "x_is_island": true,
+          "already_related_to_parent": false,
+          "x_connected_to_parent": false,
+          "kind": "direct"
+        },
+        {
+          "subclass": "UncommittedCreditFacility",
+          "superclass": "CreditFacility",
+          "source_paths": [
+            "uncommitted credit facility -> credit facility"
+          ],
+          "min_skipped": 0,
+          "x_relationship_count": 0,
+          "x_is_island": true,
+          "already_related_to_parent": false,
+          "x_connected_to_parent": false,
+          "kind": "direct"
+        },
+        {
+          "subclass": "InterestPaymentTerms",
+          "superclass": "DebtTerms",
+          "source_paths": [
+            "interest payment terms -> debt terms"
+          ],
+          "min_skipped": 0,
+          "x_relationship_count": 2,
+          "x_is_island": false,
+          "already_related_to_parent": false,
+          "x_connected_to_parent": false,
+          "kind": "direct"
+        },
+        {
+          "subclass": "PrincipalRepaymentTerms",
+          "superclass": "DebtTerms",
+          "source_paths": [
+            "principal repayment terms -> debt terms"
+          ],
+          "min_skipped": 0,
+          "x_relationship_count": 1,
+          "x_is_island": false,
+          "already_related_to_parent": false,
+          "x_connected_to_parent": false,
+          "kind": "direct"
+        },
+        {
+          "subclass": "AccruedInterest",
+          "superclass": "Interest",
+          "source_paths": [
+            "accrued interest -> interest"
+          ],
+          "min_skipped": 0,
+          "x_relationship_count": 0,
+          "x_is_island": true,
+          "already_related_to_parent": false,
+          "x_connected_to_parent": false,
+          "kind": "direct"
+        },
+        {
+          "subclass": "InterestRateReset",
+          "superclass": "InterestCalculation",
+          "source_paths": [
+            "interest rate reset -> interest calculation"
+          ],
+          "min_skipped": 0,
+          "x_relationship_count": 0,
+          "x_is_island": true,
+          "already_related_to_parent": false,
+          "x_connected_to_parent": false,
+          "kind": "direct"
+        },
+        {
+          "subclass": "InterestRateSettingEvent",
+          "superclass": "InterestCalculation",
+          "source_paths": [
+            "interest rate setting event -> interest calculation"
+          ],
+          "min_skipped": 0,
+          "x_relationship_count": 1,
+          "x_is_island": false,
+          "already_related_to_parent": false,
+          "x_connected_to_parent": false,
+          "kind": "direct"
+        },
+        {
+          "subclass": "SecuredLoan",
+          "superclass": "Loan",
+          "source_paths": [
+            "secured loan -> loan"
+          ],
+          "min_skipped": 0,
+          "x_relationship_count": 1,
+          "x_is_island": false,
+          "already_related_to_parent": false,
+          "x_connected_to_parent": false,
+          "kind": "direct"
+        },
+        {
+          "subclass": "UnsecuredLoan",
+          "superclass": "Loan",
+          "source_paths": [
+            "unsecured loan -> loan"
+          ],
+          "min_skipped": 0,
+          "x_relationship_count": 0,
+          "x_is_island": true,
+          "already_related_to_parent": false,
+          "x_connected_to_parent": false,
+          "kind": "direct"
+        },
+        {
+          "subclass": "PrepaymentTerms",
+          "superclass": "PrincipalRepaymentTerms",
+          "source_paths": [
+            "pre-payment terms -> principal repayment terms"
+          ],
+          "min_skipped": 0,
+          "x_relationship_count": 0,
+          "x_is_island": true,
+          "already_related_to_parent": false,
+          "x_connected_to_parent": false,
+          "kind": "direct"
+        },
+        {
+          "subclass": "CollateralizedLoan",
+          "superclass": "SecuredLoan",
+          "source_paths": [
+            "collateralized loan -> secured loan"
+          ],
+          "min_skipped": 0,
+          "x_relationship_count": 2,
+          "x_is_island": false,
+          "already_related_to_parent": false,
+          "x_connected_to_parent": false,
+          "kind": "direct"
+        },
+        {
+          "subclass": "GuaranteedLoan",
+          "superclass": "SecuredLoan",
+          "source_paths": [
+            "guaranteed loan -> secured loan"
+          ],
+          "min_skipped": 0,
+          "x_relationship_count": 0,
+          "x_is_island": true,
+          "already_related_to_parent": false,
+          "x_connected_to_parent": false,
+          "kind": "direct"
+        },
+        {
+          "subclass": "CommittedSubFacility",
+          "superclass": "SubFacility",
+          "source_paths": [
+            "committed sub-facility -> sub-facility"
+          ],
+          "min_skipped": 0,
+          "x_relationship_count": 0,
+          "x_is_island": true,
+          "already_related_to_parent": false,
+          "x_connected_to_parent": false,
+          "kind": "direct"
+        },
+        {
+          "subclass": "UncommittedSubFacility",
+          "superclass": "SubFacility",
+          "source_paths": [
+            "uncommitted sub-facility -> sub-facility"
+          ],
+          "min_skipped": 0,
+          "x_relationship_count": 0,
+          "x_is_island": true,
+          "already_related_to_parent": false,
+          "x_connected_to_parent": false,
+          "kind": "direct"
+        },
+        {
+          "subclass": "FloatingInterestRate",
+          "superclass": "VariableInterestRate",
+          "source_paths": [
+            "floating interest rate -> variable interest rate"
+          ],
+          "min_skipped": 0,
+          "x_relationship_count": 0,
+          "x_is_island": true,
+          "already_related_to_parent": false,
+          "x_connected_to_parent": false,
+          "kind": "direct"
+        },
+        {
+          "subclass": "ManagedInterestRate",
+          "superclass": "VariableInterestRate",
+          "source_paths": [
+            "managed interest rate -> variable interest rate"
+          ],
+          "min_skipped": 0,
+          "x_relationship_count": 0,
+          "x_is_island": true,
+          "already_related_to_parent": false,
+          "x_connected_to_parent": false,
+          "kind": "direct"
+        }
+      ],
+      "folded_parents": [],
+      "secondary_ancestor_hits": [],
+      "latent_subtypes_by_disposition": {
+        "taxonomy_only": 4,
+        "out_of_scope": 2
+      },
+      "latent_subtype_examples": {
+        "taxonomy_only": [
+          "credit agreement repaid at maturity (subclass of credit agreement)",
+          "credit agreement repaid periodically (subclass of credit agreement)",
+          "non-physical collateral (subclass of collateral)",
+          "physical collateral (subclass of collateral)"
+        ],
+        "out_of_scope": [
+          "total outstanding principal (subclass of principal)",
+          "retail credit facility (subclass of committed credit facility)"
+        ]
+      }
+    },
+    {
+      "domain": "iof-maintenance",
+      "source_files": [
+        "ontology_translation/domains/iof-maintenance/source/Maintenance.rdf"
+      ],
+      "named_subclassof_edges_in_source": 20,
+      "mapped_source_iris": 20,
+      "secondary_only_citations": [
+        "describes (cited by relationships[1], relationships[7])",
+        "initiates (cited by relationships[0])",
+        "prescribedBy (cited by relationships[2], relationships[5])"
+      ],
+      "target_classes": 20,
+      "taxonomy_only_dispositions": 0,
+      "upward_walk_outcomes": {
+        "no mapped ancestor (parent outside translated scope)": 14
+      },
+      "candidates": [
+        {
+          "subclass": "MaintenanceActivity",
+          "superclass": "MaintenanceProcess",
+          "source_paths": [
+            "MaintenanceActivity -> MaintenanceProcess"
+          ],
+          "min_skipped": 0,
+          "x_relationship_count": 3,
+          "x_is_island": false,
+          "already_related_to_parent": true,
+          "x_connected_to_parent": true,
+          "kind": "direct"
+        },
+        {
+          "subclass": "DegradedState",
+          "superclass": "MaintenanceState",
+          "source_paths": [
+            "DegradedState -> MaintenanceState"
+          ],
+          "min_skipped": 0,
+          "x_relationship_count": 1,
+          "x_is_island": false,
+          "already_related_to_parent": false,
+          "x_connected_to_parent": false,
+          "kind": "direct"
+        },
+        {
+          "subclass": "FailedState",
+          "superclass": "MaintenanceState",
+          "source_paths": [
+            "FailedState -> MaintenanceState"
+          ],
+          "min_skipped": 0,
+          "x_relationship_count": 2,
+          "x_is_island": false,
+          "already_related_to_parent": false,
+          "x_connected_to_parent": false,
+          "kind": "direct"
+        },
+        {
+          "subclass": "OperatingState",
+          "superclass": "MaintenanceState",
+          "source_paths": [
+            "OperatingState -> MaintenanceState"
+          ],
+          "min_skipped": 0,
+          "x_relationship_count": 0,
+          "x_is_island": true,
+          "already_related_to_parent": false,
+          "x_connected_to_parent": false,
+          "kind": "direct"
+        },
+        {
+          "subclass": "DispositionToExhibitUndesirableBehavior",
+          "superclass": "UndesirableDisposition",
+          "source_paths": [
+            "DispositionToExhibitUndesirableBehavior -> UndesireableDisposition"
+          ],
+          "min_skipped": 0,
+          "x_relationship_count": 0,
+          "x_is_island": true,
+          "already_related_to_parent": false,
+          "x_connected_to_parent": false,
+          "kind": "direct"
+        },
+        {
+          "subclass": "DispositionToFail",
+          "superclass": "UndesirableDisposition",
+          "source_paths": [
+            "DispositionToFail -> UndesireableDisposition"
+          ],
+          "min_skipped": 0,
+          "x_relationship_count": 1,
+          "x_is_island": false,
+          "already_related_to_parent": false,
+          "x_connected_to_parent": false,
+          "kind": "direct"
+        }
+      ],
+      "folded_parents": [],
+      "secondary_ancestor_hits": [],
+      "latent_subtypes_by_disposition": {},
+      "latent_subtype_examples": {}
+    },
+    {
+      "domain": "iof-supply-chain",
+      "source_files": [
+        "ontology_translation/domains/iof-supply-chain/source/SupplyChain.rdf"
+      ],
+      "named_subclassof_edges_in_source": 83,
+      "mapped_source_iris": 61,
+      "secondary_only_citations": [
+        "Customer (cited by relationships[0], relationships[2], rules.canEvaluateSupplyRelationship)",
+        "ShipFromLocationRole (cited by classes.ShipFromLocation)",
+        "ShipToLocationRole (cited by classes.ShipToLocation)",
+        "Supplier (cited by relationships[0], relationships[1], rules.canEvaluateSupplyRelationship)",
+        "SystemCapability (cited by classes.Traceability)",
+        "isSuppliedToAtSomeTime (cited by classes.Customer)"
+      ],
+      "target_classes": 53,
+      "taxonomy_only_dispositions": 76,
+      "upward_walk_outcomes": {
+        "no mapped ancestor (parent outside translated scope)": 48
+      },
+      "candidates": [
+        {
+          "subclass": "FreightContainer",
+          "superclass": "Container",
+          "source_paths": [
+            "FreightContainer -> Container"
+          ],
+          "min_skipped": 0,
+          "x_relationship_count": 1,
+          "x_is_island": false,
+          "already_related_to_parent": false,
+          "x_connected_to_parent": true,
+          "kind": "direct"
+        },
+        {
+          "subclass": "Trailer",
+          "superclass": "Container",
+          "source_paths": [
+            "Trailer -> Container"
+          ],
+          "min_skipped": 0,
+          "x_relationship_count": 0,
+          "x_is_island": true,
+          "already_related_to_parent": false,
+          "x_connected_to_parent": false,
+          "kind": "direct"
+        },
+        {
+          "subclass": "Wagon",
+          "superclass": "Container",
+          "source_paths": [
+            "Wagon -> Container"
+          ],
+          "min_skipped": 0,
+          "x_relationship_count": 0,
+          "x_is_island": true,
+          "already_related_to_parent": false,
+          "x_connected_to_parent": false,
+          "kind": "direct"
+        },
+        {
+          "subclass": "StorageFacility",
+          "superclass": "Facility",
+          "source_paths": [
+            "StorageFacility -> Facility"
+          ],
+          "min_skipped": 0,
+          "x_relationship_count": 1,
+          "x_is_island": false,
+          "already_related_to_parent": false,
+          "x_connected_to_parent": false,
+          "kind": "direct"
+        },
+        {
+          "subclass": "DistributionCenter",
+          "superclass": "StorageFacility",
+          "source_paths": [
+            "DistributionCenter -> StorageFacility"
+          ],
+          "min_skipped": 0,
+          "x_relationship_count": 0,
+          "x_is_island": true,
+          "already_related_to_parent": false,
+          "x_connected_to_parent": false,
+          "kind": "direct"
+        }
+      ],
+      "folded_parents": [],
+      "secondary_ancestor_hits": [],
+      "latent_subtypes_by_disposition": {},
+      "latent_subtype_examples": {}
+    },
+    {
+      "domain": "itops",
+      "source_files": [
+        "ontology_translation/domains/itops/source/itops_mtsr.original.yaml"
+      ],
+      "named_subclassof_edges_in_source": 23,
+      "target_classes": 68,
+      "candidates": [
+        {
+          "subclass": "EmergencyChange",
+          "superclass": "Change",
+          "kind": "direct",
+          "source_paths": [
+            "Emergency Change -> Change"
+          ],
+          "x_relationship_count": 1,
+          "x_is_island": false,
+          "already_related_to_parent": false,
+          "x_connected_to_parent": true
+        },
+        {
+          "subclass": "Application",
+          "superclass": "ConfigurationItem",
+          "kind": "direct",
+          "source_paths": [
+            "Application -> Configuration Item"
+          ],
+          "x_relationship_count": 8,
+          "x_is_island": false,
+          "already_related_to_parent": false,
+          "x_connected_to_parent": true
+        },
+        {
+          "subclass": "BackupSet",
+          "superclass": "ConfigurationItem",
+          "kind": "direct",
+          "source_paths": [
+            "Backup Set -> Configuration Item"
+          ],
+          "x_relationship_count": 3,
+          "x_is_island": false,
+          "already_related_to_parent": true,
+          "x_connected_to_parent": true
+        },
+        {
+          "subclass": "CloudService",
+          "superclass": "ConfigurationItem",
+          "kind": "direct",
+          "source_paths": [
+            "Cloud Service -> Configuration Item"
+          ],
+          "x_relationship_count": 1,
+          "x_is_island": false,
+          "already_related_to_parent": false,
+          "x_connected_to_parent": true
+        },
+        {
+          "subclass": "Database",
+          "superclass": "ConfigurationItem",
+          "kind": "direct",
+          "source_paths": [
+            "Database -> Configuration Item"
+          ],
+          "x_relationship_count": 3,
+          "x_is_island": false,
+          "already_related_to_parent": false,
+          "x_connected_to_parent": true
+        },
+        {
+          "subclass": "InfrastructureComponent",
+          "superclass": "ConfigurationItem",
+          "kind": "direct",
+          "source_paths": [
+            "Infrastructure Component -> Configuration Item"
+          ],
+          "x_relationship_count": 2,
+          "x_is_island": false,
+          "already_related_to_parent": false,
+          "x_connected_to_parent": true
+        },
+        {
+          "subclass": "NetworkSegment",
+          "superclass": "ConfigurationItem",
+          "kind": "direct",
+          "source_paths": [
+            "Network Segment -> Configuration Item"
+          ],
+          "x_relationship_count": 2,
+          "x_is_island": false,
+          "already_related_to_parent": false,
+          "x_connected_to_parent": false
+        },
+        {
+          "subclass": "SecurityEvent",
+          "superclass": "Event",
+          "kind": "direct",
+          "source_paths": [
+            "Security Event -> Event"
+          ],
+          "x_relationship_count": 4,
+          "x_is_island": false,
+          "already_related_to_parent": false,
+          "x_connected_to_parent": true
+        },
+        {
+          "subclass": "CybersecurityIncident",
+          "superclass": "Incident",
+          "kind": "direct",
+          "source_paths": [
+            "Cybersecurity Incident -> Incident"
+          ],
+          "x_relationship_count": 4,
+          "x_is_island": false,
+          "already_related_to_parent": false,
+          "x_connected_to_parent": true
+        },
+        {
+          "subclass": "MajorIncident",
+          "superclass": "Incident",
+          "kind": "direct",
+          "source_paths": [
+            "Major Incident -> Incident"
+          ],
+          "x_relationship_count": 4,
+          "x_is_island": false,
+          "already_related_to_parent": false,
+          "x_connected_to_parent": true
+        },
+        {
+          "subclass": "ContainerPlatform",
+          "superclass": "InfrastructureComponent",
+          "kind": "direct",
+          "source_paths": [
+            "Container Platform -> Infrastructure Component"
+          ],
+          "x_relationship_count": 1,
+          "x_is_island": false,
+          "already_related_to_parent": false,
+          "x_connected_to_parent": false
+        },
+        {
+          "subclass": "Endpoint",
+          "superclass": "InfrastructureComponent",
+          "kind": "direct",
+          "source_paths": [
+            "Endpoint -> Infrastructure Component"
+          ],
+          "x_relationship_count": 1,
+          "x_is_island": false,
+          "already_related_to_parent": false,
+          "x_connected_to_parent": false
+        },
+        {
+          "subclass": "NetworkDevice",
+          "superclass": "InfrastructureComponent",
+          "kind": "direct",
+          "source_paths": [
+            "Network Device -> Infrastructure Component"
+          ],
+          "x_relationship_count": 1,
+          "x_is_island": false,
+          "already_related_to_parent": false,
+          "x_connected_to_parent": false
+        },
+        {
+          "subclass": "Server",
+          "superclass": "InfrastructureComponent",
+          "kind": "direct",
+          "source_paths": [
+            "Server -> Infrastructure Component"
+          ],
+          "x_relationship_count": 2,
+          "x_is_island": false,
+          "already_related_to_parent": false,
+          "x_connected_to_parent": false
+        },
+        {
+          "subclass": "StorageSystem",
+          "superclass": "InfrastructureComponent",
+          "kind": "direct",
+          "source_paths": [
+            "Storage System -> Infrastructure Component"
+          ],
+          "x_relationship_count": 2,
+          "x_is_island": false,
+          "already_related_to_parent": false,
+          "x_connected_to_parent": true
+        },
+        {
+          "subclass": "VirtualMachine",
+          "superclass": "InfrastructureComponent",
+          "kind": "direct",
+          "source_paths": [
+            "Virtual Machine -> Infrastructure Component"
+          ],
+          "x_relationship_count": 2,
+          "x_is_island": false,
+          "already_related_to_parent": false,
+          "x_connected_to_parent": false
+        },
+        {
+          "subclass": "ThirdPartyService",
+          "superclass": "ItService",
+          "kind": "direct",
+          "source_paths": [
+            "Third-party Service -> IT Service"
+          ],
+          "x_relationship_count": 3,
+          "x_is_island": false,
+          "already_related_to_parent": true,
+          "x_connected_to_parent": true
+        },
+        {
+          "subclass": "IncidentResponseTeam",
+          "superclass": "OrganizationalUnit",
+          "kind": "direct",
+          "source_paths": [
+            "Incident Response Team -> Organizational Unit"
+          ],
+          "x_relationship_count": 2,
+          "x_is_island": false,
+          "already_related_to_parent": false,
+          "x_connected_to_parent": true
+        },
+        {
+          "subclass": "ItOperationsTeam",
+          "superclass": "OrganizationalUnit",
+          "kind": "direct",
+          "source_paths": [
+            "IT Operations Team -> Organizational Unit"
+          ],
+          "x_relationship_count": 1,
+          "x_is_island": false,
+          "already_related_to_parent": false,
+          "x_connected_to_parent": true
+        },
+        {
+          "subclass": "NetworkOperationsCentre",
+          "superclass": "OrganizationalUnit",
+          "kind": "direct",
+          "source_paths": [
+            "Network Operations Centre -> Organizational Unit"
+          ],
+          "x_relationship_count": 1,
+          "x_is_island": false,
+          "already_related_to_parent": false,
+          "x_connected_to_parent": true
+        },
+        {
+          "subclass": "ResolverGroup",
+          "superclass": "OrganizationalUnit",
+          "kind": "direct",
+          "source_paths": [
+            "Resolver Group -> Organizational Unit"
+          ],
+          "x_relationship_count": 3,
+          "x_is_island": false,
+          "already_related_to_parent": false,
+          "x_connected_to_parent": true
+        },
+        {
+          "subclass": "SecurityOperationsCentre",
+          "superclass": "OrganizationalUnit",
+          "kind": "direct",
+          "source_paths": [
+            "Security Operations Centre -> Organizational Unit"
+          ],
+          "x_relationship_count": 1,
+          "x_is_island": false,
+          "already_related_to_parent": false,
+          "x_connected_to_parent": true
+        },
+        {
+          "subclass": "ServiceDesk",
+          "superclass": "OrganizationalUnit",
+          "kind": "direct",
+          "source_paths": [
+            "Service Desk -> Organizational Unit"
+          ],
+          "x_relationship_count": 1,
+          "x_is_island": false,
+          "already_related_to_parent": false,
+          "x_connected_to_parent": true
+        }
+      ],
+      "is_a_with_missing_endpoint": []
+    }
+  ]
+}

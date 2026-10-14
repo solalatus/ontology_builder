@@ -1,0 +1,19 @@
+# Provenance of the committed original source file in this folder.
+# itops has no upstream URL and no source-manifest.yaml, so fetch.py does not
+# manage it; this record is written by hand from the git history.
+domain: itops
+source_kind: project-authored MTSR fixture (no external upstream)
+license: same as this repository (MIT)
+files:
+- file: itops_mtsr.original.yaml
+  origin: tests/evals/fixtures/itops_mtsr.yaml as first committed
+  first_committed_in: af54bac7fbce2d0a7f263884e895f6e84c9275b7
+  first_committed_at: '2026-07-29T13:10:40Z'
+  sha256: c09e3ff07e4d8908d0bbbe4d82a464c948a412e5e64927750c9a2f0d021a69f7
+  bytes: 88346
+  note: >-
+    The original, before d197883358839fcb3bab852f9cda93d02fefb3c9
+    (2026-07-29T17:09:08Z) physically removed its 23 "is a" predicates, 37
+    identifier/uri properties and every action's secondary inputs. The
+    cleaned file is still tests/evals/fixtures/itops_mtsr.yaml, and
+    ../reference.domain.yaml is converted from that cleaned file.

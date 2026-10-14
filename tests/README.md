@@ -134,7 +134,10 @@ is dev-only test tooling, same as Playwright.
   asserts the labelled-corpus claims in
   `fixtures/consistency-corpus/labels.json` — every documented defect marked
   detectable is found, and exactly one error is reported across all three,
-  which is the documented one. Offline: no key, no network.
+  which is the documented one. The `unlinked-subtype-name` note (issue
+  #155) is also checked against the committed interview runs: it must fire
+  exactly where the prototype measured in `subtype-connectivity.spec.mjs`
+  did. Offline: no key, no network.
 - `agent-self-correction.spec.mjs` — the agent half of the checker (issue
   #84): findings reaching the tool result delta-scoped, notes never reaching
   it, the three-apply budget and its refusal of a fourth, the extra applies
@@ -180,6 +183,15 @@ is dev-only test tooling, same as Playwright.
   v2 prompt is v1's plus exactly its two added constraints, which is what makes
   the two conditions comparable. The artifact-dependent tests skip cleanly for
   any condition not generated in this checkout.
+- `subtype-connectivity.spec.mjs` — issue #155's step-1 analysis
+  (`evals/subtype-connectivity.mjs`): how the committed recovered interview
+  models treat the subclass pairs found by the reference audit (linked,
+  connected, unlinked, folded into a parent property), the proposed
+  name-suffix consistency hint, and the decision gate. Offline: it re-runs
+  the project's own class matcher, checks it reproduces every run's
+  committed `heuristic-matches.json`, and checks the committed
+  `ontology_translation/results/subclass-audit/recovered-connectivity.json`
+  is current.
 - `session-export.spec.mjs` — the Export dialog and the session bundle (issue
   #165): Results only vs. Whole conversation and session results, the
   bundle's shape and its byte-identical copies of the three exports, the

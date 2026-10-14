@@ -1,0 +1,13 @@
+# Provenance of the committed original source files in this folder.
+# Written by fetch.py --redownload; do not edit by hand.
+domain: iof-maintenance
+written_by: ontology_translation/tools/fetch.py --redownload
+source_version: Release_202602
+license: MIT, Industrial Ontologies Foundry (dcterms:license in the file)
+files:
+- file: Maintenance.rdf
+  url: https://raw.githubusercontent.com/iofoundry/ontology/Release_202602/maintenance/Maintenance.rdf
+  sha256: 1ac077a3f5fccc7510967aab2f8427c2151d00673fd3cbe9f8b45da8b2ed2f97
+  bytes: 44329
+  downloaded_at: '2026-10-14T06:48:17Z'
+  matches_manifest_pin: true

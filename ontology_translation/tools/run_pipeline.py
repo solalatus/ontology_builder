@@ -303,6 +303,7 @@ def run_pipeline(
     cq_count: int,
     dry_run: bool,
     confirmation_judges: int | None = None,
+    redownload: bool = False,
 ) -> int:
     manifest = load_manifest(manifest_path)
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -319,7 +320,12 @@ def run_pipeline(
             # fetch.py's source_filename().
             fetch_target = out_dir / "sources"
             source_files = [fetch_target / fetch_mod.source_filename(u, i) for i, u in enumerate(urls)]
-        rc = _run_stage("fetch", fetch_mod.main, ["--manifest", str(manifest_path), "--out", str(fetch_target)])
+        # fetch.py loads the committed copies under domains/<id>/source/ by
+        # default; --redownload fetches the pinned URLs and refreshes them.
+        fetch_argv = ["--manifest", str(manifest_path), "--out", str(fetch_target)]
+        if redownload:
+            fetch_argv.append("--redownload")
+        rc = _run_stage("fetch", fetch_mod.main, fetch_argv)
         if rc != 0:
             return rc
     else:
@@ -404,13 +410,17 @@ def main(argv=None) -> int:
     parser.add_argument("--confirmation-judges", type=int, default=None, help="extra judges on contested items; omit to use evaluate.py's own default")
     parser.add_argument("--round-trip-sample", type=int, default=5)
     parser.add_argument("--cq-count", type=int, default=10)
+    parser.add_argument(
+        "--redownload", action="store_true",
+        help="fetch the sources from their pinned URLs instead of the committed copies (refreshes domains/<id>/source/)",
+    )
     parser.add_argument("--dry-run", action="store_true", help="fetch+extract+compile --dry-run only; no API calls, nothing written past the cost estimate")
     args = parser.parse_args(argv)
 
     return run_pipeline(
         args.manifest, args.out_dir, args.source_file, args.runs, args.max_fix_rounds,
         args.judges, args.round_trip_sample, args.cq_count, args.dry_run,
-        confirmation_judges=args.confirmation_judges,
+        confirmation_judges=args.confirmation_judges, redownload=args.redownload,
     )
 
 
