@@ -194,6 +194,12 @@ is dev-only test tooling, same as Playwright.
   Also the hybrid on the hold-out (`evals/hybrid-holdout.mjs`): per-type
   thresholds, the hold-out helpers and criterion, and that its committed
   results, models and report match a fresh run. Offline: no key, no network.
+- `agent-pinned-model.spec.mjs` — the pinned default model (issue #178):
+  which spellings count as GPT-6.1-sol and which do not, OpenAI and Azure
+  model lists (Azure matched on the deployment's model, never its name),
+  the fallback when it is absent, and end-to-end connects for both
+  providers. Both live suites also check, when the key reaches it, that it
+  is preselected and that a real tool call works on it.
 - `session-usage.spec.mjs` — the per-call usage log (issue #177): every
   model call recorded with its kind, model, served model and provider; the
   session bundle's totals per kind (with `null` for fields no call

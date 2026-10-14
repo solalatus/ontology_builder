@@ -210,3 +210,35 @@ test("live (#176/#177): Azure accepts prompt_cache_key, a repeated prefix report
   });
 });
 
+// Issue #178: if this Azure key can reach GPT-6.1-sol (under any name),
+// a fresh connection must land on it, and a tool-attached turn must work on
+// it: an earlier codename generation returned a 400 ("Function tools ...
+// are not supported") as soon as tools were attached.
+test("live (#178): the pinned GPT-6.1-sol is preselected when available, and a real tool call works on it", { skip }, async (t) => {
+  await withPageAllowingResourceErrors(async (page) => {
+    await connectAgentLiveAzure(page, AZURE_OPENAI_API_KEY, AZURE_OPENAI_ENDPOINT);
+    const pinnedName = await page.evaluate(() => window.__kg.agent.pinnedModel);
+    const available = await page.evaluate((pinned) => window.__kg.agent.state.models
+      .filter((m) => window.__kg.agent.canonicalModelName(m.baseModel || m.id) === window.__kg.agent.canonicalModelName(pinned))
+      .map((m) => m.id), pinnedName);
+    const selected = await page.evaluate(() => window.__kg.agent.state.model);
+    console.log(`[live #178] Azure: pinned=${pinnedName} available-as=${JSON.stringify(available)} selected=${selected}`);
+    if (!available.length) {
+      t.skip(`this Azure key cannot reach ${pinnedName} under any name; nothing to verify`);
+      return;
+    }
+    assert.ok(available.includes(selected), `expected ${selected} to be one of the pinned model's entries ${available.join(", ")}`);
+
+    const chatResponses = forwardToRealAzure(page, chatUrlPattern(AZURE_OPENAI_ENDPOINT));
+    const before = await page.evaluate(() => window.__kg.state.nodes.length);
+    await sendChatMessage(page, "Add a class called Invoice, meaning: a request from a supplier to receive payment. "
+      + "Use the apply_ontology_yaml tool right now to add it — don't just describe it in text.");
+    for (const r of chatResponses) assert.equal(r.status, 200, `a tool-attached call on ${selected} failed: ${JSON.stringify(r.body)}`);
+    const sawToolCall = chatResponses.some((r) => {
+      const msg = r.body && r.body.choices && r.body.choices[0] && r.body.choices[0].message;
+      return msg && Array.isArray(msg.tool_calls) && msg.tool_calls.some((c) => c.function && c.function.name === "apply_ontology_yaml");
+    });
+    assert.ok(sawToolCall, "the pinned model should call apply_ontology_yaml for a directive request");
+    assert.equal(await page.evaluate(() => window.__kg.state.nodes.length), before + 1);
+  });
+});

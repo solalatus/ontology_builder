@@ -59,7 +59,12 @@ structured YAML domain model — and a **Helper Agent**
 (`helper_agent_plan.md`) adds an embedded, bring-your-own-key chat panel
 that can interview a user and build/edit that same domain model live on the
 canvas through tool calls, with its own conversation persisted across
-reloads.
+reloads. A fresh connection lands on **GPT-6.1-sol** whenever the
+key can reach it, with an OpenAI key or an Azure key alike, recognised by the
+model itself rather than by the deployment's name (`gpt-61-sol`,
+`GPT 6.1 Sol`, dated snapshots and `-preview` all count; `-mini` or `6.10` do
+not). Without it, the newest standard reasoning model is chosen as before,
+and any model can still be picked by hand (issue #178).
 
 **Competency questions** (issue #94) are the requirements the rest of the
 model answers to: the real questions the future agent must be able to answer,

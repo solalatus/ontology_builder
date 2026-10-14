@@ -2652,4 +2652,13 @@ whoever picks it up.
   call reported are `null`, not 0). A call that finishes after the
   conversation was restarted is not recorded. Nothing changes in what is
   sent to the model, and nothing is priced.
+- **#178:** the default model is pinned to GPT-6.1-sol (owner's decision,
+  2026-10-14: no major re-runs planned, so comparability with older runs
+  is not at stake). `pickDefaultAgentModel` prefers it whenever the key
+  reaches it, matched on the model's identity (OpenAI id, Azure
+  deployment's `model`), never the deployment name, after
+  `canonicalModelName` strips case, separators, provider prefixes, dated
+  snapshots and `-preview`. This bypasses the codename exclusion for this
+  one model only, because the live suites verify tool-attached calls on it
+  (the failure recorded for an earlier codename generation).
 

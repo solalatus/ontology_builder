@@ -13410,7 +13410,37 @@ function isStandardTierModel(model) {
   return /^(gpt-[0-9]+(\.[0-9]+)?|o[0-9]+)(-\d{4}-\d{2}-\d{2})?$/i.test(id);
 }
 
+// Issue #178: the model a fresh connection lands on whenever the key can
+// reach it, OpenAI or Azure alike. Matched on the model's real identity
+// (OpenAI's id; the deployment's `model` field on Azure, never the free-form
+// deployment name), after canonicalModelName() has removed the usual
+// platform naming differences. This deliberately overrides the codename
+// exclusion in isStandardTierModel() for this one model, which was checked
+// live with tools attached before it was pinned.
+const AGENT_PINNED_MODEL = "gpt-6.1-sol";
+
+// Lowercase; drop a provider prefix ("azure/", "openai/"), trailing dated
+// snapshots ("-2026-09-30", "-20260930") and "-preview"; then every
+// non-alphanumeric character, so "gpt-6.1-sol", "gpt-61-sol" (Azure drops
+// dots), "gpt-6-1-sol" and "GPT 6.1 Sol" all compare equal while
+// "gpt-6.1-sol-mini" or "gpt-6.10-sol" stay different.
+function canonicalModelName(name) {
+  let n = String(name || "").toLowerCase().trim();
+  n = n.slice(n.lastIndexOf("/") + 1);
+  for (let prev = null; prev !== n;) {
+    prev = n;
+    n = n.replace(/[-_. ]?\d{4}[-_.]?\d{2}[-_.]?\d{2}$/, "").replace(/[-_. ]?preview$/, "");
+  }
+  return n.replace(/[^a-z0-9]/g, "");
+}
+
+function isPinnedAgentModel(model) {
+  return canonicalModelName(modelNameForHeuristics(model)) === canonicalModelName(AGENT_PINNED_MODEL);
+}
+
 function pickDefaultAgentModel(models) {
+  const pinned = models.filter((m) => isLikelyChatModel(m) && isPinnedAgentModel(m));
+  if (pinned.length) return [...pinned].sort((a, b) => (b.created || 0) - (a.created || 0))[0].id;
   const chatModels = models.filter((m) => isLikelyChatModel(m));
   const reasoningModels = chatModels.filter((m) => isLikelyReasoningModel(m));
   const standardReasoningModels = reasoningModels.filter((m) => isStandardTierModel(m));
@@ -16243,6 +16273,8 @@ window.__kg = {
     forgetStoredKey: forgetStoredAgentKey,
     hasStoredKey: hasStoredAgentKey,
     pickDefaultModel: pickDefaultAgentModel,
+    pinnedModel: AGENT_PINNED_MODEL,
+    canonicalModelName,
     isLikelyReasoningModel,
     isLikelyChatModel,
     isStandardTierModel,
