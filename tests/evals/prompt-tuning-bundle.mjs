@@ -1,8 +1,11 @@
 // PROMPT/BEHAVIOR TUNING BUNDLE EVALUATION (8 approved ideas from the ground-up review)
 //
-//   AZURE_OPENAI_ENDPOINT=... AZURE_OPENAI_API_KEY=... \
 //   node tests/evals/prompt-tuning-bundle.mjs --arm=control   --run=run-01
 //   node tests/evals/prompt-tuning-bundle.mjs --arm=treatment --run=run-01
+//
+// with the provider's credentials in the repo-root .env (see
+// tests/lib/llmProvider.mjs). The committed runs were made on Azure OpenAI;
+// a run on another provider is a new condition, not a replication of those.
 //
 // See PROMPT_TUNING_BUNDLE.md for the pre-registered design, measures and
 // pass criteria — nothing here should be read without that document. Same
@@ -26,9 +29,10 @@ import crypto from "node:crypto";
 import { fileURLToPath } from "node:url";
 import { launchChromium } from "../lib/browser.mjs";
 import { APP_URL } from "../lib/page.mjs";
-import { forwardToRealAzure, configureAzureEndpoint, openPanel } from "../lib/liveAzureOpenAi.mjs";
+import { configureAzureEndpoint, openPanel } from "../lib/liveAzureOpenAi.mjs";
+import { forwardChatToRealProvider, connectAgentLiveProvider } from "../lib/liveProvider.mjs";
+import { llmEnv, resolveLlmConfig, missingCredentials, modelIdFor, cheapPersonaModel, chatRequestFor } from "../lib/llmProvider.mjs";
 import { runOntologyRecoveryConversation } from "./lib/conversationOrchestrator.mjs";
-import { DEFAULT_AZURE_API_VERSION } from "./lib/chatClient.mjs";
 import { RATE_LIMIT_MAX_ATTEMPTS, rateLimitBackoffMs, sleepMs } from "../lib/liveOpenAi.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -211,21 +215,23 @@ const arg = (name, fallback = null) => {
   return hit ? hit.split("=").slice(1).join("=") : fallback;
 };
 
-const MODEL = process.env.EVAL_INTERVIEWER_MODEL || "gpt-5.4";
-const PERSONA_MODEL = process.env.ONTOLOGY_EVAL_PERSONA_MODEL || "gpt-4o-mini-internal";
-const CLASSIFIER_MODEL = process.env.ONTOLOGY_EVAL_CLASSIFIER_MODEL || MODEL;
-const REACHABLE_DEPLOYMENTS = (process.env.EVAL_AZURE_DEPLOYMENTS
+const ENV = llmEnv();
+const LLM = resolveLlmConfig(ENV);
+const MODEL = ENV.EVAL_INTERVIEWER_MODEL || modelIdFor(LLM, "gpt-5.4");
+const PERSONA_MODEL = ENV.ONTOLOGY_EVAL_PERSONA_MODEL || cheapPersonaModel(LLM, MODEL);
+const CLASSIFIER_MODEL = ENV.ONTOLOGY_EVAL_CLASSIFIER_MODEL || MODEL;
+const REACHABLE_DEPLOYMENTS = (ENV.EVAL_AZURE_DEPLOYMENTS
   || "gpt-5.4,gpt-4o-mini-internal,gpt-4o,gpt-5-mini,o4-mini").split(",");
-const MAX_TURNS = Number(process.env.ONTOLOGY_EVAL_MAX_TURNS) || 120;
-const WALLCLOCK_MINUTES = Number(process.env.ONTOLOGY_EVAL_WALLCLOCK_MINUTES) || 45;
+const MAX_TURNS = Number(ENV.ONTOLOGY_EVAL_MAX_TURNS) || 120;
+const WALLCLOCK_MINUTES = Number(ENV.ONTOLOGY_EVAL_WALLCLOCK_MINUTES) || 45;
 
-async function azureChatMessages({ endpoint, apiKey, apiVersion, model, messages, label }) {
-  const url = `${endpoint}/openai/deployments/${model}/chat/completions?api-version=${apiVersion}`;
+async function providerChatMessages({ config, model, messages, label }) {
+  const { url, headers, includeModelInBody } = chatRequestFor(config, model);
   for (let attempt = 1; attempt <= RATE_LIMIT_MAX_ATTEMPTS; attempt++) {
     const res = await fetch(url, {
       method: "POST",
-      headers: { "api-key": apiKey, "Content-Type": "application/json" },
-      body: JSON.stringify({ messages }),
+      headers,
+      body: JSON.stringify({ ...(includeModelInBody ? { model } : {}), messages }),
     });
     const text = await res.text();
     let data;
@@ -258,7 +264,14 @@ async function stubDeploymentListing(page, endpoint) {
   }));
 }
 
-async function connectAzure(page, apiKey, endpoint, model) {
+// On Azure, the stubbed listing above (this resource's real one is empty);
+// on OpenAI and Bedrock the real model list, which has no such gap.
+async function connectInterviewer(page, model) {
+  if (LLM.provider !== "azure") {
+    await connectAgentLiveProvider(page, LLM, { model });
+    return;
+  }
+  const { apiKey, endpoint } = LLM;
   await stubDeploymentListing(page, endpoint);
   await openPanel(page);
   await page.click("#agent-connect-open");
@@ -291,9 +304,9 @@ async function main() {
     console.error("Usage: node tests/evals/prompt-tuning-bundle.mjs --arm=control|treatment --run=run-01");
     process.exit(1);
   }
-  const endpoint = (process.env.AZURE_OPENAI_ENDPOINT || "").replace(/\/+$/, "");
-  const apiKey = process.env.AZURE_OPENAI_API_KEY;
-  if (!endpoint || !apiKey) { console.error("AZURE_OPENAI_ENDPOINT and AZURE_OPENAI_API_KEY are required."); process.exit(1); }
+  const missing = missingCredentials(LLM);
+  if (missing) { console.error(missing); process.exit(1); }
+  const { apiKey, endpoint } = LLM;
 
   const outDir = path.join(OUT_ROOT, armName, runId);
   if (fs.existsSync(path.join(outDir, "baseline-provenance.json")) && arg("force") === null) {
@@ -329,7 +342,7 @@ async function main() {
     await page.evaluate(() => { if (window.__kg.lang.get() !== "en") window.__kg.lang.toggle(); });
     await page.evaluate(() => window.__kg.welcome.close());
     writeProgress({ phase: "connecting", turnsUsed: 0 });
-    await connectAzure(page, apiKey, endpoint, MODEL);
+    await connectInterviewer(page, MODEL);
 
     const livePrompt = await page.evaluate(() => window.__kg.agent.buildSystemPrompt());
     if (armName === "control") {
@@ -368,11 +381,9 @@ async function main() {
       classifierModel: CLASSIFIER_MODEL,
       maxTurns: MAX_TURNS,
       wallClockMs: WALLCLOCK_MINUTES * 60 * 1000,
-      installRelay: (p) => forwardToRealAzure(p, `${endpoint}/openai/deployments/**`),
-      chat: async (messages, model) => azureChatMessages({
-        endpoint, apiKey,
-        apiVersion: process.env.AZURE_OPENAI_API_VERSION || DEFAULT_AZURE_API_VERSION,
-        model, messages, label: `${armName}/${runId} harness`,
+      installRelay: (p) => forwardChatToRealProvider(p, LLM),
+      chat: async (messages, model) => providerChatMessages({
+        config: LLM, model, messages, label: `${armName}/${runId} harness`,
       }),
       onProgress: ({ phase, turn, turnsUsed, durationMs, log, rawApiLog }) => {
         const lastApp = [...log].reverse().find((e) => String(e.speaker).startsWith("app-assistant"));
@@ -406,7 +417,7 @@ async function main() {
       arm: armName, runId,
       generatedAt: new Date().toISOString(),
       model: MODEL, personaModel: PERSONA_MODEL, classifierModel: CLASSIFIER_MODEL,
-      provider: "azure", endpoint,
+      provider: LLM.provider, endpoint,
       interviewerPromptSha256: promptSha,
       bundleApplied: armName === "treatment",
       stoppedReason: result.stoppedReason,

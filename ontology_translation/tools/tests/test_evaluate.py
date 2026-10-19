@@ -1455,8 +1455,8 @@ class RunEvaluationLiveMockedTests(unittest.TestCase):
 
             with mock.patch.object(
                 evaluate_mod,
-                "load_azure_config",
-                return_value={"endpoint": "https://fake/", "api_key": "fake", "api_version": "v1", "deployment": "gpt-5.4"},
+                "load_llm_config",
+                return_value={"provider": "azure", "endpoint": "https://fake/", "api_key": "fake", "api_version": "v1", "deployment": "gpt-5.4"},
             ), mock.patch("openai.AzureOpenAI", FakeClient):
                 rc = evaluate_mod.run_evaluation(
                     domain_yaml_path,
@@ -1528,8 +1528,8 @@ class RunEvaluationLiveMockedTests(unittest.TestCase):
 
             with mock.patch.object(
                 evaluate_mod,
-                "load_azure_config",
-                return_value={"endpoint": "https://fake/", "api_key": "fake", "api_version": "v1", "deployment": "gpt-5.4"},
+                "load_llm_config",
+                return_value={"provider": "azure", "endpoint": "https://fake/", "api_key": "fake", "api_version": "v1", "deployment": "gpt-5.4"},
             ), mock.patch("openai.AzureOpenAI", FakeClient):
                 rc = evaluate_mod.run_evaluation(
                     domain_yaml_path, translation_path, source_ir_path, manifest_path, out_dir,
@@ -1580,8 +1580,8 @@ class RunEvaluationLiveMockedTests(unittest.TestCase):
 
             with mock.patch.object(
                 evaluate_mod,
-                "load_azure_config",
-                return_value={"endpoint": "https://fake/", "api_key": "fake", "api_version": "v1", "deployment": "gpt-5.4"},
+                "load_llm_config",
+                return_value={"provider": "azure", "endpoint": "https://fake/", "api_key": "fake", "api_version": "v1", "deployment": "gpt-5.4"},
             ), mock.patch("openai.AzureOpenAI", FakeClient):
                 rc = evaluate_mod.run_evaluation(
                     domain_yaml_path, translation_path, source_ir_path, manifest_path, out_dir,
@@ -1645,8 +1645,8 @@ class RunEvaluationLiveMockedTests(unittest.TestCase):
 
             with mock.patch.object(
                 evaluate_mod,
-                "load_azure_config",
-                return_value={"endpoint": "https://fake/", "api_key": "fake", "api_version": "v1", "deployment": "gpt-5.4"},
+                "load_llm_config",
+                return_value={"provider": "azure", "endpoint": "https://fake/", "api_key": "fake", "api_version": "v1", "deployment": "gpt-5.4"},
             ), mock.patch("openai.AzureOpenAI", FakeClient):
                 evaluate_mod.run_evaluation(
                     domain_yaml_path, translation_path, source_ir_path, manifest_path, out_dir,

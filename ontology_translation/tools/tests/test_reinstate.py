@@ -505,8 +505,8 @@ class RunReinstateLiveMockedTests(unittest.TestCase):
             domain_yaml_path, translation_path, flagged_path = self._write_inputs(tmp_path)
             out_dir = tmp_path / "out"
             with mock.patch.object(
-                reinstate_mod, "load_azure_config",
-                return_value={"endpoint": None, "api_key": None, "api_version": "x", "deployment": "gpt-5.4"},
+                reinstate_mod, "load_llm_config",
+                return_value={"provider": "azure", "endpoint": None, "api_key": None, "api_version": "x", "deployment": "gpt-5.4"},
             ):
                 rc = reinstate_mod.run_reinstate(domain_yaml_path, translation_path, flagged_path, out_dir, dry_run=False)
         self.assertEqual(rc, 1)
@@ -534,8 +534,8 @@ class RunReinstateLiveMockedTests(unittest.TestCase):
             out_dir = tmp_path / "out"
 
             with mock.patch.object(
-                reinstate_mod, "load_azure_config",
-                return_value={"endpoint": "https://fake/", "api_key": "fake", "api_version": "v1", "deployment": "gpt-5.4"},
+                reinstate_mod, "load_llm_config",
+                return_value={"provider": "azure", "endpoint": "https://fake/", "api_key": "fake", "api_version": "v1", "deployment": "gpt-5.4"},
             ), mock.patch("openai.AzureOpenAI", FakeClient):
                 rc = reinstate_mod.run_reinstate(domain_yaml_path, translation_path, flagged_path, out_dir, dry_run=False)
 
@@ -563,8 +563,8 @@ class RunReinstateLiveMockedTests(unittest.TestCase):
             out_dir = tmp_path / "out"
 
             with mock.patch.object(
-                reinstate_mod, "load_azure_config",
-                return_value={"endpoint": "https://fake/", "api_key": "fake", "api_version": "v1", "deployment": "gpt-5.4"},
+                reinstate_mod, "load_llm_config",
+                return_value={"provider": "azure", "endpoint": "https://fake/", "api_key": "fake", "api_version": "v1", "deployment": "gpt-5.4"},
             ), mock.patch("openai.AzureOpenAI", FakeClient):
                 rc = reinstate_mod.run_reinstate(domain_yaml_path, translation_path, flagged_path, out_dir, dry_run=False)
 

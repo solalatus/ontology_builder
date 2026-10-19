@@ -1,8 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { withPage } from "./lib/page.mjs";
-import { loadEnvKey } from "./lib/env.mjs";
-import { sendChatMessage, forwardToRealAzure, connectAgentLiveAzure } from "./lib/liveAzureOpenAi.mjs";
+import { sendChatMessage, forwardChatToRealProvider, connectAgentLiveProvider, resolveLlmConfig, missingCredentials } from "./lib/liveProvider.mjs";
 
 // LIVE, opt-in smoke test for issue #156's new wiring: get_graph_state's
 // optional finalValidation:true argument, which triggers one bounded,
@@ -24,18 +23,12 @@ import { sendChatMessage, forwardToRealAzure, connectAgentLiveAzure } from "./li
 // out of scope here and already measured elsewhere.
 //
 // Same opt-in gating as every other live suite in this repo: skipped with a
-// clear reason unless both AZURE_OPENAI_API_KEY and AZURE_OPENAI_ENDPOINT
-// are set. Never runs in CI.
+// clear reason unless the configured provider's credentials are set. Never runs in CI.
 
-const AZURE_OPENAI_API_KEY = loadEnvKey("AZURE_OPENAI_API_KEY");
-const AZURE_OPENAI_ENDPOINT = loadEnvKey("AZURE_OPENAI_ENDPOINT");
-const skip = (AZURE_OPENAI_API_KEY && AZURE_OPENAI_ENDPOINT)
-  ? false
-  : "Set both AZURE_OPENAI_API_KEY and AZURE_OPENAI_ENDPOINT in a .env file at the repo root (see tests/README.md) to run this live smoke test.";
+// Whichever provider the repo-root .env selects (tests/lib/llmProvider.mjs).
+const LLM = resolveLlmConfig();
+const skip = missingCredentials(LLM) || false;
 
-function chatUrlPattern(endpoint) {
-  return `${endpoint.replace(/\/+$/, "")}/openai/deployments/**/chat/completions**`;
-}
 
 async function seed(page, yaml) {
   await page.evaluate((y) => {
@@ -46,10 +39,9 @@ async function seed(page, yaml) {
 
 test("live: get_graph_state finalValidation:true actually round-trips one real Tier C call and surfaces its result without hanging", { skip, timeout: 90000 }, async () => {
   await withPage(async (page) => {
-    const chatUrl = chatUrlPattern(AZURE_OPENAI_ENDPOINT);
-    forwardToRealAzure(page, chatUrl);
+    forwardChatToRealProvider(page, LLM);
     // page.on("request") rather than a second page.route() on the same
-    // pattern: forwardToRealAzure's own route already fulfils every
+    // pattern: the relay's own route already fulfils every
     // matching request, so a second route handler here would just race it
     // for which one finishes the request first. The request event fires
     // for every request regardless of how (or whether) it gets routed, so
@@ -62,7 +54,7 @@ test("live: get_graph_state finalValidation:true actually round-trips one real T
     });
 
     await seed(page, "classes:\n  Widget:\n    properties: {}\n  Station:\n    properties: {}\nrelationships:\n  - name: processedAt\n    from: Widget\n    to: Station\n");
-    await connectAgentLiveAzure(page, AZURE_OPENAI_API_KEY, AZURE_OPENAI_ENDPOINT);
+    await connectAgentLiveProvider(page, LLM);
 
     await sendChatMessage(
       page,
@@ -88,10 +80,9 @@ test("live: get_graph_state finalValidation:true actually round-trips one real T
 
 test("live: a second finalValidation:true call in the same conversation does not spend a second real Tier C request", { skip, timeout: 120000 }, async () => {
   await withPage(async (page) => {
-    const chatUrl = chatUrlPattern(AZURE_OPENAI_ENDPOINT);
-    forwardToRealAzure(page, chatUrl);
+    forwardChatToRealProvider(page, LLM);
     // page.on("request") rather than a second page.route() on the same
-    // pattern: forwardToRealAzure's own route already fulfils every
+    // pattern: the relay's own route already fulfils every
     // matching request, so a second route handler here would just race it
     // for which one finishes the request first. The request event fires
     // for every request regardless of how (or whether) it gets routed, so
@@ -104,7 +95,7 @@ test("live: a second finalValidation:true call in the same conversation does not
     });
 
     await seed(page, "classes:\n  Widget:\n    properties: {}\n  Station:\n    properties: {}\nrelationships:\n  - name: processedAt\n    from: Widget\n    to: Station\n");
-    await connectAgentLiveAzure(page, AZURE_OPENAI_API_KEY, AZURE_OPENAI_ENDPOINT);
+    await connectAgentLiveProvider(page, LLM);
 
     await sendChatMessage(page, "Please call get_graph_state right now with finalValidation set to true.");
     await sendChatMessage(page, "Please call get_graph_state again with finalValidation set to true, one more time.");

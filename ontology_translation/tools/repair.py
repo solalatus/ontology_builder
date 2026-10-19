@@ -32,7 +32,7 @@ from pathlib import Path
 import yaml
 
 from compile import RunLogger, _extract_json_object, approx_tokens, estimate_cost
-from env import load_azure_config
+from env import load_llm_config, make_llm_client, missing_llm_config
 from validate_domain import validate_domain
 
 TOOLS_DIR = Path(__file__).resolve().parent
@@ -432,26 +432,20 @@ def run_repair(
         print("[repair] DRY RUN -- no API call made, nothing written")
         return 0
 
-    azure_config = load_azure_config()
-    missing = [k for k in ("endpoint", "api_key") if not azure_config[k]]
+    llm_config = load_llm_config()
+    missing = missing_llm_config(llm_config)
     if missing:
-        print(f"[repair] ERROR: missing Azure config: {missing}. Set AZURE_OPENAI_ENDPOINT / AZURE_OPENAI_API_KEY.", file=sys.stderr)
+        print(f"[repair] ERROR: {missing}", file=sys.stderr)
         return 1
 
-    from openai import AzureOpenAI
-
-    client = AzureOpenAI(
-        api_version=azure_config["api_version"],
-        azure_endpoint=azure_config["endpoint"],
-        api_key=azure_config["api_key"],
-    )
+    client = make_llm_client(llm_config)
 
     out_dir.mkdir(parents=True, exist_ok=True)
     logger = RunLogger(out_dir / "repair.log.jsonl")
     logger.event("repair_start", items=len(rejected_items), prompt_sha256=prompt_sha256(system_prompt))
 
     try:
-        repairs, usage = call_repair(client, azure_config["deployment"], system_prompt, user_prompt, logger, "repair")
+        repairs, usage = call_repair(client, llm_config["deployment"], system_prompt, user_prompt, logger, "repair")
     finally:
         logger.event("repair_end")
         logger.close()

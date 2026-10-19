@@ -2662,3 +2662,38 @@ whoever picks it up.
   one model only, because the live suites verify tool-attached calls on it
   (the failure recorded for an earlier codename generation).
 
+
+## AWS Bedrock as a third provider (issue #183) — 2026-10-19
+
+- **Endpoint.** The app talks to Bedrock's bedrock-mantle endpoint only. Probed
+  live on 2026-10-19: an OPTIONS preflight to bedrock-runtime's
+  `/openai/v1/chat/completions` returns 400 with no CORS headers;
+  bedrock-mantle returns 200 with `access-control-allow-origin: *` (and
+  keeps CORS headers on its 401s). The Bedrock popup refuses a
+  bedrock-runtime endpoint with that explanation.
+- **Shape.** Bearer API key, model id in the body, models from `GET /v1/models`
+  (filtered to `openai.*`), chat under `/openai/v1` for closed-weight GPT
+  models and `/v1` otherwise, with one retry under the other prefix on
+  "isn't supported on this route" (remembered per connection).
+  `canonicalModelName` strips Bedrock's `openai.`/`us.openai.` prefixes and
+  `-1:0` version suffixes, so `openai.gpt-6.1-sol` is the pinned model.
+- **UX.** The connect modal keeps the plain key form; the quiet row under
+  the key now reads "Other provider: Azure OpenAI · AWS Bedrock", each
+  opening its own popup (Bedrock: region, default us-east-1, and an
+  optional endpoint). Configuring one hides the other, and the row shows
+  the configured provider's summary. A pasted Bedrock-shaped key attaches
+  Bedrock in the default region by itself. A different key shape detaches
+  it again, but only if it was attached that way.
+- **prompt_cache_key** is sent on every provider. A 400 naming it as
+  unknown or unsupported makes the call retry without it once, and it is
+  not sent again on that connection. This covers Bedrock, and also the
+  open #176 risk that the app's old Azure api-version rejects it.
+- **Tooling.** `tests/lib/llmProvider.mjs` (Node) and `env.load_llm_config`
+  (Python) resolve one provider for every live test, eval and experiment
+  script from `LLM_PROVIDER` or the credentials present; `.env.example`
+  lists the variables. The OpenAI-era eval specs behave exactly as before on
+  OpenAI.
+- **Open until verified live:**
+  - the Mantle model-list shape for a real key;
+  - tool calls and cached tokens on `openai.gpt-6.1-sol`;
+  - `prompt_cache_key` acceptance (`helper-agent-live-bedrock.spec.mjs`).

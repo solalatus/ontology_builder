@@ -7,8 +7,11 @@
 //   # v2 (v1 plus exactly two constraints -- see lib/normalizerPromptV2.mjs):
 //   node tests/evals/post-normalization.mjs --condition=post-normalization-v2 run-01 run-02 run-03
 //
-//   # or, against OpenAI directly:
-//   OPENAI_API_KEY=sk-... EVAL_PROVIDER=openai NORMALIZER_MODEL=gpt-5.5-2026-04-23 \
+//   # or any other provider (tests/lib/llmProvider.mjs), e.g. OpenAI directly:
+//   OPENAI_API_KEY=sk-... LLM_PROVIDER=openai NORMALIZER_MODEL=gpt-5.5-2026-04-23 \
+//   node tests/evals/post-normalization.mjs run-01 run-02 run-03
+//   # or AWS Bedrock:
+//   AWS_BEARER_TOKEN_BEDROCK=... LLM_PROVIDER=bedrock NORMALIZER_MODEL=openai.gpt-5.4 \
 //   node tests/evals/post-normalization.mjs run-01 run-02 run-03
 //
 // The prompt each condition runs comes from lib/conditions.mjs; everything else

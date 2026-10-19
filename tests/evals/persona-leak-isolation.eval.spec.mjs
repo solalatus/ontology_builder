@@ -4,8 +4,8 @@ import fs from "node:fs";
 import { createPersonaAgent } from "./lib/personaAgent.mjs";
 import { resolveDomainPersonaPath, resolveDomainYamlPath } from "./lib/groundTruthModel.mjs";
 import { buildLeakCandidateSet, findLeakedIdentifiers } from "./lib/leakDetector.mjs";
-import { chatMessagesOnce, DEFAULT_AZURE_API_VERSION } from "./lib/chatClient.mjs";
-import { loadEnvKey } from "../lib/env.mjs";
+import { chatMessagesOnce } from "./lib/chatClient.mjs";
+import { llmEnv, resolveLlmConfig, missingCredentials, defaultModel } from "../lib/llmProvider.mjs";
 import yaml from "js-yaml";
 
 // Issue #133/E13 item 3 (external audit): "build an isolated persona-only
@@ -16,7 +16,9 @@ import yaml from "js-yaml";
 // benchmark, and asserting the fixed persona (root-cause rendering + wrapper
 // prompt fix, both from this same issue) no longer reproduces it.
 //
-// Gated on AZURE_OPENAI_* (this repo's real live benchmark path -- see
+// Runs on whichever provider the repo-root .env selects (issue #183,
+// tests/lib/llmProvider.mjs). Originally gated on AZURE_OPENAI_* (this repo's
+// real live benchmark path -- see
 // run-multi-domain-benchmark.mjs's own header), not OPENAI_API_KEY: this
 // suite originally targeted OpenAI, matching every other *.eval.spec.mjs
 // file's convention, but that leaves it permanently unrunnable in an
@@ -49,13 +51,12 @@ import yaml from "js-yaml";
 // its exact internal reference-model term the moment the interviewer's
 // guess was merely close.
 
-const AZURE_ENDPOINT = (loadEnvKey("AZURE_OPENAI_ENDPOINT") || "").replace(/\/+$/, "");
-const AZURE_API_KEY = loadEnvKey("AZURE_OPENAI_API_KEY");
-const AZURE_DEPLOYMENT = loadEnvKey("AZURE_OPENAI_DEPLOYMENT");
-const AZURE_API_VERSION = loadEnvKey("AZURE_OPENAI_API_VERSION") || DEFAULT_AZURE_API_VERSION;
-const skip = (AZURE_ENDPOINT && AZURE_API_KEY && AZURE_DEPLOYMENT)
-  ? false
-  : "Set AZURE_OPENAI_ENDPOINT, AZURE_OPENAI_API_KEY, and AZURE_OPENAI_DEPLOYMENT in a .env file at the repo root (see tests/README.md) to run the persona leak-isolation suite.";
+const ENV = llmEnv();
+const LLM = resolveLlmConfig(ENV);
+// The model the leaks were measured on, in the provider's naming.
+const PERSONA_MODEL = defaultModel(LLM, null, ENV);
+const skip = missingCredentials(LLM) || (PERSONA_MODEL ? false
+  : "Set LLM_MODEL (or AZURE_OPENAI_DEPLOYMENT / BEDROCK_MODEL) in the repo-root .env (see tests/README.md) to run the persona leak-isolation suite.");
 
 const SCENARIOS = [
   {
@@ -106,11 +107,11 @@ for (const scenario of SCENARIOS) {
       const groundTruthText = fs.readFileSync(domainYamlPath, "utf8");
 
       const persona = createPersonaAgent({
-        model: AZURE_DEPLOYMENT,
+        model: PERSONA_MODEL,
         chat: async (messages) => {
           const call = await chatMessagesOnce({
-            config: { provider: "azure", endpoint: AZURE_ENDPOINT, apiKey: AZURE_API_KEY, apiVersion: AZURE_API_VERSION },
-            model: AZURE_DEPLOYMENT,
+            config: LLM,
+            model: PERSONA_MODEL,
             messages,
             label: `persona-leak-isolation/${scenario.domainId}`,
           });

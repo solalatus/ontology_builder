@@ -25,7 +25,7 @@ from pathlib import Path
 
 import yaml
 
-from env import load_azure_config
+from env import load_llm_config, make_llm_client, missing_llm_config
 from source_manifest import load_manifest
 from validate_domain import validate_domain
 
@@ -261,26 +261,20 @@ def run_compile(
         print("[compile] DRY RUN -- no API call made, nothing written")
         return 0
 
-    azure_config = load_azure_config()
-    missing = [k for k in ("endpoint", "api_key") if not azure_config[k]]
+    llm_config = load_llm_config()
+    missing = missing_llm_config(llm_config)
     if missing:
-        print(f"[compile] ERROR: missing Azure config: {missing}. Set AZURE_OPENAI_ENDPOINT / AZURE_OPENAI_API_KEY.", file=sys.stderr)
+        print(f"[compile] ERROR: {missing}", file=sys.stderr)
         return 1
 
-    from openai import AzureOpenAI  # imported here so --dry-run never requires the openai package to be importable-with-network
-
-    client = AzureOpenAI(
-        api_version=azure_config["api_version"],
-        azure_endpoint=azure_config["endpoint"],
-        api_key=azure_config["api_key"],
-    )
+    client = make_llm_client(llm_config)
 
     logger = RunLogger(out_dir / "run.log.jsonl")
     logger.event(
         "compile_start",
         domain=manifest.id,
         runs=run_count,
-        deployment=azure_config["deployment"],
+        deployment=llm_config["deployment"],
         prompt_version=manifest.compiler_prompt_version,
         prompt_sha256=prompt_sha256(system_prompt),
     )
@@ -290,7 +284,7 @@ def run_compile(
     try:
         for i in range(1, run_count + 1):
             run_label = f"run-{i}"
-            result = call_compiler(client, azure_config["deployment"], system_prompt, user_prompt, logger, run_label)
+            result = call_compiler(client, llm_config["deployment"], system_prompt, user_prompt, logger, run_label)
             total_cost += estimate_cost(result.prompt_tokens, result.completion_tokens, result.cached_tokens)
 
             domain_yaml_path = out_dir / f"{run_label}.domain.yaml"
@@ -337,8 +331,9 @@ def run_compile(
                 "domain": manifest.id,
                 "prompt_version": manifest.compiler_prompt_version,
                 "prompt_sha256": prompt_sha256(system_prompt),
-                "deployment": azure_config["deployment"],
-                "api_version": azure_config["api_version"],
+                "provider": llm_config["provider"],
+                "deployment": llm_config["deployment"],
+                "api_version": llm_config["api_version"],
                 "runs": run_manifest_entries,
                 "total_estimated_cost_usd": round(total_cost, 4),
             },

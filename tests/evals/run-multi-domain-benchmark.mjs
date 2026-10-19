@@ -1,7 +1,9 @@
 // MULTI-DOMAIN ELICITATION BENCHMARK RUNNER (issue #111)
 //
-//   AZURE_OPENAI_ENDPOINT=... AZURE_OPENAI_API_KEY=... \
 //   node tests/evals/run-multi-domain-benchmark.mjs --domain=brick-hvac --run=run-01
+//
+// with the provider's credentials in the repo-root .env (OpenAI, Azure OpenAI
+// or AWS Bedrock; see tests/lib/llmProvider.mjs).
 //
 // WHAT THIS ANSWERS
 // ------------------
@@ -19,17 +21,15 @@
 // parallel); summarize-multi-domain-benchmark.mjs then reads every domain's
 // saved metrics.json (no API calls) and writes the cross-domain comparison.
 //
-// WHY AZURE, NOT OPENAI
-// ----------------------
-// No OPENAI_API_KEY is configured in this environment; AZURE_OPENAI_* is
-// (the same resource ontology_translation/tools' compiler pipeline already
-// spends against). tests/evals/lib/chatClient.mjs's chatOnce() and
-// tests/lib/liveAzureOpenAi.mjs already carry full Azure support built for
-// self-correction-eval.mjs's own non-regression runs -- reused here
-// directly, not reimplemented. Every real call this eval makes -- the app
-// agent (relayed through the browser), the persona, the completion
-// classifier, the transcript review, and the LLM judge -- goes through the
-// same AZURE_OPENAI_DEPLOYMENT.
+// WHICH PROVIDER
+// --------------
+// Whichever tests/lib/llmProvider.mjs resolves from the environment (issue
+// #183): OpenAI, Azure OpenAI or AWS Bedrock. The runs committed so far were
+// made on Azure OpenAI, the only provider configured at the time. Every real
+// call this eval makes -- the app agent (relayed through the browser), the
+// persona, the completion classifier, the transcript review, and the LLM
+// judge -- goes to that one provider, with one model unless a per-role
+// variable below says otherwise.
 //
 // LIVE PROGRESS, CHECKPOINTING, IDEMPOTENCE
 // -------------------------------------------
@@ -45,11 +45,12 @@ import crypto from "node:crypto";
 import { fileURLToPath } from "node:url";
 import { launchChromium } from "../lib/browser.mjs";
 import { APP_URL } from "../lib/page.mjs";
-import { forwardToRealAzure, configureAzureEndpoint, openPanel } from "../lib/liveAzureOpenAi.mjs";
+import { forwardChatToRealProvider, connectAgentLiveProvider } from "../lib/liveProvider.mjs";
+import { llmEnv, resolveLlmConfig, missingCredentials, defaultModel } from "../lib/llmProvider.mjs";
 import { execFileSync } from "node:child_process";
 import { runOntologyRecoveryConversation } from "./lib/conversationOrchestrator.mjs";
 import { deriveOpeningLine, WRAPPER_PATH } from "./lib/personaAgent.mjs";
-import { chatMessagesOnce, sumUsage, DEFAULT_AZURE_API_VERSION } from "./lib/chatClient.mjs";
+import { chatMessagesOnce, sumUsage } from "./lib/chatClient.mjs";
 import {
   loadGroundTruthModel, scopeGroundTruth, resolveDomainYamlPath, resolveDomainPersonaPath, listAvailableDomains,
 } from "./lib/groundTruthModel.mjs";
@@ -98,40 +99,16 @@ const arg = (name, fallback = null) => {
 };
 const flag = (name) => process.argv.slice(2).includes(`--${name}`);
 
-const MODEL = process.env.EVAL_INTERVIEWER_MODEL || process.env.AZURE_OPENAI_DEPLOYMENT;
-const PERSONA_MODEL = process.env.ONTOLOGY_EVAL_PERSONA_MODEL || MODEL;
-const CLASSIFIER_MODEL = process.env.ONTOLOGY_EVAL_CLASSIFIER_MODEL || MODEL;
-const REVIEW_MODEL = process.env.ONTOLOGY_EVAL_REVIEW_MODEL || MODEL;
-const MAX_TURNS = Number(process.env.ONTOLOGY_EVAL_MAX_TURNS) || 200;
-const WALLCLOCK_MINUTES = Number(process.env.ONTOLOGY_EVAL_WALLCLOCK_MINUTES) || 45;
-
-// Same deployment-vs-model-id gotcha self-correction-eval.mjs's own header
-// documents: on Azure, "model" in the connect UI is a deployment NAME, and
-// the app only offers deployments the resource's real /openai/deployments
-// listing returns -- passing a model id that happens not to also be the
-// deployment's name produces a 404 that reads like a missing resource, not
-// a wrong model.
-async function connectAzure(page, apiKey, endpoint, model) {
-  const deploymentsUrl = `${endpoint.replace(/\/+$/, "")}/openai/deployments**`;
-  forwardToRealAzure(page, deploymentsUrl);
-  await openPanel(page);
-  await page.click("#agent-connect-open");
-  await page.fill("#agent-key-input", apiKey);
-  await configureAzureEndpoint(page, endpoint);
-  await page.click("#agent-connect-submit");
-  await page.waitForFunction(() => !document.getElementById("agent-model-select-modal").disabled, null, { timeout: 60000 });
-  const picked = await page.evaluate((wanted) => {
-    const select = document.getElementById("agent-model-select-modal");
-    const option = [...select.options].find((o) => o.value === wanted);
-    if (!option) return null;
-    select.value = wanted;
-    select.dispatchEvent(new Event("change", { bubbles: true }));
-    return select.value;
-  }, model);
-  if (picked !== model) throw new Error(`deployment "${model}" not offered by the endpoint; got: ${picked}`);
-  await page.click("#agent-connect-submit");
-  await page.waitForFunction(() => window.__kg.agent.state.connected === true, null, { timeout: 60000 });
-}
+const ENV = llmEnv();
+const LLM = resolveLlmConfig(ENV);
+// No built-in default: a benchmark run names its model (LLM_MODEL, or the
+// provider's own AZURE_OPENAI_DEPLOYMENT / BEDROCK_MODEL).
+const MODEL = ENV.EVAL_INTERVIEWER_MODEL || defaultModel(LLM, null, ENV);
+const PERSONA_MODEL = ENV.ONTOLOGY_EVAL_PERSONA_MODEL || MODEL;
+const CLASSIFIER_MODEL = ENV.ONTOLOGY_EVAL_CLASSIFIER_MODEL || MODEL;
+const REVIEW_MODEL = ENV.ONTOLOGY_EVAL_REVIEW_MODEL || MODEL;
+const MAX_TURNS = Number(ENV.ONTOLOGY_EVAL_MAX_TURNS) || 200;
+const WALLCLOCK_MINUTES = Number(ENV.ONTOLOGY_EVAL_WALLCLOCK_MINUTES) || 45;
 
 async function main() {
   const domain = arg("domain");
@@ -150,12 +127,12 @@ async function main() {
   // current working directory, matching how a shell would interpret any
   // other CLI path argument.
   const RESULTS_ROOT = path.resolve(process.cwd(), arg("resultsDir", DEFAULT_RESULTS_ROOT));
-  const endpoint = (process.env.AZURE_OPENAI_ENDPOINT || "").replace(/\/+$/, "");
-  const apiKey = process.env.AZURE_OPENAI_API_KEY;
-  if (!endpoint || !apiKey || !MODEL) {
-    console.error("AZURE_OPENAI_ENDPOINT, AZURE_OPENAI_API_KEY, and AZURE_OPENAI_DEPLOYMENT are required.");
+  const missing = missingCredentials(LLM);
+  if (missing || !MODEL) {
+    console.error(missing || "Set LLM_MODEL (or AZURE_OPENAI_DEPLOYMENT / BEDROCK_MODEL) to the interviewer model.");
     process.exit(1);
   }
+  const { apiKey } = LLM;
   const domainYamlPath = resolveDomainYamlPath(domain); // throws with a clear "available domains" list if unknown
   const personaPath = resolveDomainPersonaPath(domain);
   if (!personaPath) { console.error(`Domain "${domain}" has no persona.md -- cannot run a live interview.`); process.exit(1); }
@@ -224,7 +201,7 @@ async function main() {
   const usages = [];
   const chat = async (messages, model, extraBody = {}) => {
     const call = await chatMessagesOnce({
-      config: { provider: "azure", endpoint, apiKey, apiVersion: process.env.AZURE_OPENAI_API_VERSION || DEFAULT_AZURE_API_VERSION },
+      config: LLM,
       model, messages, extraBody,
       label: `${domain}/${runId}`,
     });
@@ -252,7 +229,10 @@ async function main() {
     await page.evaluate(() => { if (window.__kg.lang.get() !== "en") window.__kg.lang.toggle(); });
     await page.evaluate(() => window.__kg.welcome.close());
     writeProgress({ phase: "connecting", turnsUsed: 0 });
-    await connectAzure(page, apiKey, endpoint, MODEL);
+    // On Azure the model is a deployment name, offered only if the
+    // resource's own deployment listing returns it; a name that isn't
+    // fails here rather than as a 404 mid-interview.
+    await connectAgentLiveProvider(page, LLM, { model: MODEL });
 
     // Issue #133/E8: the app's own real system prompt, fetched from the live
     // page rather than re-derived statically -- buildAgentSystemPrompt() is
@@ -269,7 +249,7 @@ async function main() {
     const orchestratorResult = await runOntologyRecoveryConversation({
       page, apiKey, personaModel: PERSONA_MODEL, classifierModel: CLASSIFIER_MODEL,
       maxTurns: MAX_TURNS, wallClockMs: WALLCLOCK_MINUTES * 60 * 1000,
-      installRelay: (p) => forwardToRealAzure(p, `${endpoint}/openai/deployments/**`),
+      installRelay: (p) => forwardChatToRealProvider(p, LLM),
       chat,
       personaPath, groundTruthText, groundTruthFilename: "reference.domain.yaml", groundTruthFormat: "domain-yaml", openingLine,
       onProgress: ({ phase, turn, turnsUsed, durationMs, log, rawApiLog }) => {
@@ -360,13 +340,13 @@ async function main() {
     fs.writeFileSync(provenancePath, `${JSON.stringify({
       schemaVersion: 1, domain, runId, runUuid, status: "complete", generatedAt: new Date().toISOString(),
       model: MODEL, personaModel: PERSONA_MODEL, classifierModel: CLASSIFIER_MODEL,
-      // The endpoint hostname identifies a specific Azure resource (and, in
+      // The endpoint hostname can identify a specific Azure resource (and, in
       // practice, the account/organization behind it) -- not a credential,
       // but not something that belongs in committed, potentially-public
       // provenance either now that issue #133/E9 un-ignores this file.
       // Hashed instead of stored raw: still lets two runs be verified as
       // having used the same resource without disclosing which one.
-      provider: "azure", endpointSha256: sha256(endpoint),
+      provider: LLM.provider, endpointSha256: sha256(LLM.endpoint),
       domainYamlPath: path.relative(path.resolve(__dirname, "..", ".."), domainYamlPath),
       personaPath: path.relative(path.resolve(__dirname, "..", ".."), personaPath),
       stoppedReason: orchestratorResult.stoppedReason,

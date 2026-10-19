@@ -558,7 +558,7 @@ class RunRepairLiveMockedTests(unittest.TestCase):
             inputs = self._write_inputs(tmp_path)
             out_dir = tmp_path / "out"
             with mock.patch.object(
-                repair_mod, "load_azure_config", return_value={"endpoint": None, "api_key": None, "api_version": "x", "deployment": "gpt-5.4"}
+                repair_mod, "load_llm_config", return_value={"provider": "azure", "endpoint": None, "api_key": None, "api_version": "x", "deployment": "gpt-5.4"}
             ):
                 rc = repair_mod.run_repair(*inputs, out_dir, dry_run=False)
         self.assertEqual(rc, 1)
@@ -586,8 +586,9 @@ class RunRepairLiveMockedTests(unittest.TestCase):
 
             with mock.patch.object(
                 repair_mod,
-                "load_azure_config",
+                "load_llm_config",
                 return_value={
+                    "provider": "azure",
                     "endpoint": "https://fake.openai.azure.com/",
                     "api_key": "fake-key",
                     "api_version": "2024-12-01-preview",
@@ -622,8 +623,9 @@ class RunRepairLiveMockedTests(unittest.TestCase):
 
             with mock.patch.object(
                 repair_mod,
-                "load_azure_config",
+                "load_llm_config",
                 return_value={
+                    "provider": "azure",
                     "endpoint": "https://fake.openai.azure.com/",
                     "api_key": "fake-key",
                     "api_version": "2024-12-01-preview",

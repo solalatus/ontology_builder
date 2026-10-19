@@ -187,6 +187,10 @@ test("live (#176/#177): Azure accepts prompt_cache_key, a repeated prefix report
     for (const r of chatResponses) {
       assert.equal(r.status, 200, `Azure rejected a chat call (prompt_cache_key under the app's api-version?): ${JSON.stringify(r.body)}`);
     }
+    // The app retries a call without prompt_cache_key if a provider rejects
+    // it (issue #183); for #176 the point is that Azure accepts it.
+    assert.equal(await page.evaluate(() => window.__kg.agent.state.promptCacheKeyRejected), false,
+      "Azure rejected prompt_cache_key under the app's api-version");
     const keys = new Set(requestBodies.map((b) => b.prompt_cache_key));
     assert.equal(keys.size, 1, `one cache key per connection, got ${[...keys].join(", ")}`);
     assert.match([...keys][0] || "", /^kg-agent-/);

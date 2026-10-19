@@ -35,14 +35,15 @@ single file a study participant can hand back. It holds:
 | `exports` | the `.json`, `.txt` and `.domain.yaml` texts, byte-identical to the three files written alongside |
 | `conversation.transcript` | the Helper Agent chat as shown in the panel |
 | `conversation.api_messages` | the API-level history, every tool call and tool result included |
-| `interviewer` | model name, provider (`openai`/`azure`), and the system prompt exactly as the page builds it, with its SHA-256 |
+| `interviewer` | model name, provider (`openai`/`azure`/`bedrock`), and the system prompt exactly as the page builds it, with its SHA-256 |
 | `checks` | current consistency-checker findings, plus the latest model-based contradiction and competency-question coverage results if they were run |
 | `usage` | every model call of the conversation with its kind (`interview`, `compaction`, `consistency_llm`, `cq_coverage`, `import_merge`, `import_suggest`), model, served model, provider and the provider's `usage` object verbatim (prompt, cached, cache-write, completion and reasoning tokens); plus totals per kind and overall, with the cache-hit share. Counts only, never priced. Kept with the conversation: it survives a reload, and Restart Conversation starts a new log (issue #177) |
 
-It never contains the API key, the Azure endpoint/api-version, or any other
-connection setting beyond the model name; as a second safeguard the file is
-scrubbed of the live key, the endpoint, and anything shaped like an `sk-`
-secret key (e.g. one pasted into the chat). Exporting never changes the
+It never contains the API key, the Azure endpoint/api-version, the Bedrock
+region/endpoint, or any other connection setting beyond the model name. As a
+second safeguard, the file is scrubbed of the live key, the endpoint, and
+anything shaped like an OpenAI (`sk-`) or Bedrock (`ABSK`,
+`bedrock-api-key-`) key, such as one pasted into the chat. Exporting never changes the
 interviewer prompt or the agent's behaviour. With Folder Sync granted, the
 bundle is written to the folder like the other three files.
 
@@ -59,12 +60,19 @@ structured YAML domain model — and a **Helper Agent**
 (`helper_agent_plan.md`) adds an embedded, bring-your-own-key chat panel
 that can interview a user and build/edit that same domain model live on the
 canvas through tool calls, with its own conversation persisted across
-reloads. A fresh connection lands on **GPT-6.1-sol** whenever the
-key can reach it, with an OpenAI key or an Azure key alike, recognised by the
-model itself rather than by the deployment's name (`gpt-61-sol`,
-`GPT 6.1 Sol`, dated snapshots and `-preview` all count; `-mini` or `6.10` do
-not). Without it, the newest standard reasoning model is chosen as before,
-and any model can still be picked by hand (issue #178).
+reloads. The key can be an OpenAI key, an Azure OpenAI key with its resource
+endpoint, or an **AWS Bedrock** API key with its region (issue #183). Pick
+the provider from the small "Other provider" row under the key field; a
+pasted Bedrock key selects Bedrock by itself. Bedrock is reached through
+its bedrock-mantle endpoint, the one Bedrock endpoint a browser may call,
+and every model call (the interview, compaction, the model-based checks,
+import merge) goes to the same provider. A fresh connection lands on
+**GPT-6.1-sol** whenever the key can reach it, whatever the provider. The
+model is recognised by its actual identity, not its listed name:
+`gpt-61-sol`, `GPT 6.1 Sol`, Bedrock's `openai.gpt-6.1-sol`, dated snapshots
+and `-preview` all count; `-mini` or `6.10` do not. Without it, the newest
+standard reasoning model is chosen as before, and any model can still be
+picked by hand (issue #178).
 
 **Competency questions** (issue #94) are the requirements the rest of the
 model answers to: the real questions the future agent must be able to answer,

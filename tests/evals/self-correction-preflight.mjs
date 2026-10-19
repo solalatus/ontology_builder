@@ -1,7 +1,6 @@
 // PREFLIGHT FOR THE issue #85 BATCH — exercise everything, spend almost nothing
 //
-//   AZURE_OPENAI_ENDPOINT=... AZURE_OPENAI_API_KEY=... \
-//   node tests/evals/self-correction-preflight.mjs
+//   node tests/evals/self-correction-preflight.mjs   (provider from the repo-root .env)
 //
 // Six interviews cost real money and take hours, and the batch has already
 // aborted twice on setup bugs that a two-turn run would have caught in a
@@ -10,7 +9,7 @@
 // plumbing, and plumbing is exactly what a preflight is for.
 //
 // This drives the REAL runner, both arms, with the turn cap set to 2. Every
-// moving part is touched: the Azure connection and model pinning, the app
+// moving part is touched: the provider connection and model pinning, the app
 // relay, the persona, the completion classifier, the control arm's prompt
 // reconstruction, the treatment arm's findings feed, checkpointing, and the
 // artifact shape. It writes to a throwaway directory and deletes it, so it can
@@ -21,26 +20,29 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
-import { chatOnce, DEFAULT_AZURE_API_VERSION } from "./lib/chatClient.mjs";
+import { chatOnce } from "./lib/chatClient.mjs";
+import { llmEnv, resolveLlmConfig, missingCredentials, modelIdFor, cheapPersonaModel } from "../lib/llmProvider.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(__dirname, "..", "..");
 const OUT = path.join(__dirname, "results", "baselines", "self-correcting-interviewer");
 
-const endpoint = (process.env.AZURE_OPENAI_ENDPOINT || "").replace(/\/+$/, "");
-const apiKey = process.env.AZURE_OPENAI_API_KEY;
-const INTERVIEWER = process.env.EVAL_INTERVIEWER_MODEL || "gpt-5.4";
-const PERSONA = process.env.ONTOLOGY_EVAL_PERSONA_MODEL || "gpt-4o-mini-internal";
+const env = llmEnv();
+const config = resolveLlmConfig(env);
+// The same defaults self-correction-eval.mjs resolves, so the preflight
+// checks the models the batch will actually use.
+const INTERVIEWER = env.EVAL_INTERVIEWER_MODEL || modelIdFor(config, "gpt-5.4");
+const PERSONA = env.ONTOLOGY_EVAL_PERSONA_MODEL || cheapPersonaModel(config, INTERVIEWER);
 
 const results = [];
 const check = (name, ok, detail = "") => { results.push({ name, ok, detail }); console.log(`${ok ? "PASS" : "FAIL"}  ${name}${detail ? ` — ${detail}` : ""}`); return ok; };
 
-if (!endpoint || !apiKey) { console.error("AZURE_OPENAI_ENDPOINT and AZURE_OPENAI_API_KEY are required."); process.exit(1); }
+const missing = missingCredentials(config);
+if (missing) { console.error(missing); process.exit(1); }
 
 // 1. Both deployments exist and answer. A deployment name is not a model id on
 //    Azure -- `gpt-4o-mini` is deployed here as `gpt-4o-mini-internal`, which
 //    is what produced the last 404.
-const config = { provider: "azure", endpoint, apiKey, apiVersion: process.env.AZURE_OPENAI_API_VERSION || DEFAULT_AZURE_API_VERSION };
 for (const [role, model] of [["interviewer", INTERVIEWER], ["persona/classifier", PERSONA]]) {
   try {
     const call = await chatOnce({ config, model, systemPrompt: "Reply with the single word OK.", userPrompt: "go", label: `preflight ${role}` });

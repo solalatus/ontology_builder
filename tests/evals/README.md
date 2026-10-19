@@ -13,9 +13,11 @@ non-recursive and never sees this subdirectory. Run it explicitly:
 node --test tests/evals/*.eval.spec.mjs
 ```
 
-Requires `OPENAI_API_KEY` (same `.env`/`tests/lib/env.mjs` convention as
-`tests/helper-agent-live-openai.spec.mjs` — see `tests/README.md`). Skips
-with a clear reason if absent.
+Runs on the provider the repo-root `.env` selects: OpenAI (`OPENAI_API_KEY`),
+Azure OpenAI or AWS Bedrock (`tests/lib/llmProvider.mjs`; see "One provider
+switch" in `tests/README.md`, issue #183). On OpenAI it behaves exactly as it
+always has. Skips with a clear reason if the provider's credentials are
+absent.
 
 **Do not import this spec file directly with plain `node`** (e.g.
 `node -e 'import("...")'`) to "just check it loads" — `node:test`'s `test()`
