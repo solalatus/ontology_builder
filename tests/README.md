@@ -339,6 +339,26 @@ reads an answer from either API.
 
 It prints the real token counts.
 
+## Reasoning effort (issue #181)
+
+`agent-reasoning-effort.spec.mjs` covers the explicit effort fully mocked:
+- `reasoning_effort` on Chat Completions, `reasoning.effort` on the Responses
+  route; none for a non-reasoning model, including after switching to one;
+- the connect dialog's effort row and per-connection choice, persistence, and
+  the bundle and usage fields;
+- the clear error when a model rejects the effort, with no retry without it.
+
+`agent-production-invariants.spec.mjs` pins the default (`medium`).
+
+`agent-reasoning-effort-live.spec.mjs` is the live acceptance check #181
+requires before any #182 run. On the model the app's default lands on, with
+the provider the `.env` selects, it makes a tool-attached call and a call
+without tools at `medium` and at `high`. It checks that the effort is on the
+wire in each route's shape, and prints the reasoning tokens. Choose the
+effort for an eval run with `EVAL_REASONING_EFFORT`;
+`run-multi-domain-benchmark.mjs` records the effort actually sent in
+`provenance.json`.
+
 ## One provider switch for every live test, eval and experiment
 
 `tests/lib/llmProvider.mjs` resolves the provider for every Node-side caller

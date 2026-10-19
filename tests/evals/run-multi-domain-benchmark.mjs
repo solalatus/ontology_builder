@@ -107,6 +107,10 @@ const MODEL = ENV.EVAL_INTERVIEWER_MODEL || defaultModel(LLM, null, ENV);
 const PERSONA_MODEL = ENV.ONTOLOGY_EVAL_PERSONA_MODEL || MODEL;
 const CLASSIFIER_MODEL = ENV.ONTOLOGY_EVAL_CLASSIFIER_MODEL || MODEL;
 const REVIEW_MODEL = ENV.ONTOLOGY_EVAL_REVIEW_MODEL || MODEL;
+// Issue #181: the interviewer's reasoning effort, chosen in the connect
+// dialog like a user would; unset means the app's default (`medium`). The
+// effort actually sent is read back from the app and recorded below.
+const REASONING_EFFORT = ENV.EVAL_REASONING_EFFORT || null;
 const MAX_TURNS = Number(ENV.ONTOLOGY_EVAL_MAX_TURNS) || 200;
 const WALLCLOCK_MINUTES = Number(ENV.ONTOLOGY_EVAL_WALLCLOCK_MINUTES) || 45;
 
@@ -232,7 +236,8 @@ async function main() {
     // On Azure the model is a deployment name, offered only if the
     // resource's own deployment listing returns it; a name that isn't
     // fails here rather than as a 404 mid-interview.
-    await connectAgentLiveProvider(page, LLM, { model: MODEL });
+    await connectAgentLiveProvider(page, LLM, { model: MODEL, reasoningEffort: REASONING_EFFORT });
+    const reasoningEffort = await page.evaluate(() => window.__kg.agent.effectiveReasoningEffort());
 
     // Issue #133/E8: the app's own real system prompt, fetched from the live
     // page rather than re-derived statically -- buildAgentSystemPrompt() is
@@ -340,6 +345,9 @@ async function main() {
     fs.writeFileSync(provenancePath, `${JSON.stringify({
       schemaVersion: 1, domain, runId, runUuid, status: "complete", generatedAt: new Date().toISOString(),
       model: MODEL, personaModel: PERSONA_MODEL, classifierModel: CLASSIFIER_MODEL,
+      // The interviewer's effort as sent (issue #181); null for a
+      // non-reasoning model, which never gets the parameter.
+      reasoningEffort,
       // The endpoint hostname can identify a specific Azure resource (and, in
       // practice, the account/organization behind it) -- not a credential,
       // but not something that belongs in committed, potentially-public

@@ -42,6 +42,7 @@ const APP_ERROR_PATTERNS = {
   network: /could not reach the .* api/i,
   authFailed: /rejected the api key/i,
   toolRoundLimit: /tried to use its tools too many times/i,
+  reasoningEffortRejected: /rejected the reasoning effort/i,
   generic: /something went wrong contacting the agent/i,
 };
 export function classifyAppSystemNote(text) {

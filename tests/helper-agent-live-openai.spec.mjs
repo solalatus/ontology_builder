@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { withPage, addNodeViaDblClick } from "./lib/page.mjs";
 import { loadEnvKey } from "./lib/env.mjs";
-import { unexpectedFailures, replyMessage } from "./lib/liveProvider.mjs";
+import { unexpectedFailures, replyMessage, askUntilToolCall } from "./lib/liveProvider.mjs";
 import {
   MODELS_URL, CHAT_URL, RESPONSES_URL, forwardToRealOpenAi, openPanel,
   connectAgentLive, sendChatMessage, withPageAllowingResourceErrors,
@@ -136,13 +136,10 @@ test("live: a real tool-calling response actually applies to the canvas through 
     // competency questions before modelling, and a reasoning model holds
     // to that over a one-line directive on an empty canvas.
     await page.evaluate(() => window.__kg.formats.commitYamlImport(
-      "competency_questions:\n  - text: Which supplier issued a given payment request?\n", "merge"));
+      "competency_questions:\n  - text: Which supplier issued a given invoice?\n", "merge"));
     const before = await page.evaluate(() => window.__kg.state.nodes.length);
-    await sendChatMessage(
-      page,
-      "Add a class called Invoice, meaning: a request from a supplier to receive payment. " +
-      "Use the apply_ontology_yaml tool right now to add it — don't just describe it in text."
-    );
+    await askUntilToolCall(page, chatResponses, "apply_ontology_yaml", "Add a class called Invoice, meaning: a request from a supplier to receive payment. " +
+      "The competency question on the canvas is agreed. Use the apply_ontology_yaml tool right now to add it — don't just describe it in text.");
 
     // At least one real response in this exchange should be a tool_calls
     // response naming apply_ontology_yaml -- the model actually deciding to
@@ -288,10 +285,10 @@ test("live (#178): the pinned model (GPT-6.1 Sol, else GPT-6 Sol) is preselected
     // competency questions before modelling, and a reasoning model holds
     // to that over a one-line directive on an empty canvas.
     await page.evaluate(() => window.__kg.formats.commitYamlImport(
-      "competency_questions:\n  - text: Which supplier issued a given payment request?\n", "merge"));
+      "competency_questions:\n  - text: Which supplier issued a given invoice?\n", "merge"));
     const before = await page.evaluate(() => window.__kg.state.nodes.length);
-    await sendChatMessage(page, "Add a class called Invoice, meaning: a request from a supplier to receive payment. "
-      + "Use the apply_ontology_yaml tool right now to add it — don't just describe it in text.");
+    await askUntilToolCall(page, chatResponses, "apply_ontology_yaml", "Add a class called Invoice, meaning: a request from a supplier to receive payment. "
+      + "The competency question on the canvas is agreed. Use the apply_ontology_yaml tool right now to add it — don't just describe it in text.");
     assert.deepEqual(unexpectedFailures(chatResponses), [], `a tool-attached call on ${selected} failed`);
     const sawToolCall = chatResponses.some((r) => {
       const msg = replyMessage(r);

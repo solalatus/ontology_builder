@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { loadEnvKey } from "./lib/env.mjs";
 import { withPageAllowingResourceErrors } from "./lib/liveOpenAi.mjs";
-import { sendChatMessage, connectAgentLiveBedrock, forwardToRealBedrock, liveChatUrlPattern, unexpectedFailures, replyMessage } from "./lib/liveProvider.mjs";
+import { sendChatMessage, connectAgentLiveBedrock, forwardToRealBedrock, liveChatUrlPattern, unexpectedFailures, replyMessage, askUntilToolCall } from "./lib/liveProvider.mjs";
 import { resolveLlmConfig } from "./lib/llmProvider.mjs";
 import { chatOnce } from "./evals/lib/chatClient.mjs";
 
@@ -77,10 +77,10 @@ test("live: a real tool-attached interview turn works, prompt_cache_key is accep
     // competency questions before modelling, and a reasoning model holds
     // to that over a one-line directive on an empty canvas.
     await page.evaluate(() => window.__kg.formats.commitYamlImport(
-      "competency_questions:\n  - text: Which supplier issued a given payment request?\n", "merge"));
+      "competency_questions:\n  - text: Which supplier issued a given invoice?\n", "merge"));
     const before = await page.evaluate(() => window.__kg.state.nodes.length);
-    await sendChatMessage(page, "Add a class called Invoice, meaning: a request from a supplier to receive payment. "
-      + "Use the apply_ontology_yaml tool right now to add it — don't just describe it in text.", { timeout: 180000 });
+    await askUntilToolCall(page, chatResponses, "apply_ontology_yaml", "Add a class called Invoice, meaning: a request from a supplier to receive payment. "
+      + "The competency question on the canvas is agreed. Use the apply_ontology_yaml tool right now to add it — don't just describe it in text.");
     await sendChatMessage(page, "Thanks. Reply with one short sentence, no tool calls needed.", { timeout: 180000 });
 
     const state = await page.evaluate(() => ({

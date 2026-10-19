@@ -2741,3 +2741,41 @@ whoever picks it up.
   - `agent-remove-tool-live` "what looks wrong": 3 of 4 on GPT-6 Sol (3 of 5
     on GPT-6 Luna). The model sometimes describes the duplicate and asks
     first. Left as is: it measures that judgement.
+
+## Explicit reasoning effort (issue #181, Part 1) — 2026-10-19
+
+- **The rule.** Every request to a reasoning model (`isLikelyReasoningModel`
+  on the model's real identity) carries an explicit effort. On Chat
+  Completions it is `reasoning_effort`; on the Responses route (#183) it is
+  `reasoning: { effort }`. The rule holds on every provider and every call
+  kind, the background checks included. A non-reasoning model never gets the
+  parameter.
+- **Choosing it.** Default `medium` (`AGENT_REASONING_EFFORT_DEFAULT`, pinned
+  in `agent-production-invariants.spec.mjs`). `high` is selectable per
+  connection in the connect dialog's effort row, which shows only for a
+  reasoning model. A non-default choice is remembered with the key; `none`
+  is not offered.
+- **Rejection.** A model that rejects the effort gets a clear transcript
+  error naming the model and the level. The parameter is never dropped.
+  Point 3 of the ticket ("connect-time error"; "Responses API out of scope")
+  was replaced by this, with the owner's agreement (2026-10-19): GPT-6
+  models take tools with an effort only on the Responses route, which #183
+  already uses.
+- **Recorded.** The session bundle's `interviewer.reasoning_effort`, each
+  usage entry's `reasoning_effort`, and `reasoningEffort` in the benchmark's
+  and cascading merge's provenance. Eval runs choose it with
+  `EVAL_REASONING_EFFORT`.
+- **Live acceptance on Azure gpt-6-sol.** `medium` and `high` were both
+  accepted, with and without tools, on both routes. Reasoning tokens per
+  interview call: roughly 10–220 at `medium` and 30–620 at `high`, against
+  0–37 at the provider default. The provider default was evidently lower
+  than `medium`.
+- **Behaviour at explicit `medium`.** The model keeps more strictly to the
+  interviewer's method: it asks the expert to confirm before applying, and
+  describes a duplicate instead of removing it.
+  - The plumbing live tests now say the competency question is agreed, and
+    retry a declined request in a fresh conversation (`askUntilToolCall`;
+    up to five fresh tries for Tier C).
+  - The `agent-remove-tool-live` "what looks wrong" scenario dropped from 3
+    of 4 (provider default) to 0 of 3 (explicit `medium`). Left as is: it
+    measures that judgement, and it is the kind of effect #182 measures.
