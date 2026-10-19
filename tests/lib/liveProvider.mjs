@@ -89,7 +89,7 @@ async function selectModel(page, model) {
 // The real connect flow against bedrock-mantle: configure the region (or
 // endpoint override) in the Bedrock popup, list models, optionally pick one,
 // finalise. Returns the relayed model-list responses.
-export async function connectAgentLiveBedrock(page, config, { model = null } = {}) {
+export async function connectAgentLiveBedrock(page, config, { model = null, reasoningEffort = null } = {}) {
   const modelResponses = forwardToRealBedrock(page, liveModelsUrlPattern(config));
   await openPanel(page);
   await page.click("#agent-connect-open");
@@ -106,6 +106,7 @@ export async function connectAgentLiveBedrock(page, config, { model = null } = {
   await page.click("#agent-connect-submit");
   await page.waitForFunction(() => !document.getElementById("agent-model-select-modal").disabled, null, { timeout: 30000 });
   if (model) await selectModel(page, model);
+  if (reasoningEffort) await page.selectOption("#agent-reasoning-effort-select", reasoningEffort);
   await page.click("#agent-connect-submit");
   await page.waitForFunction(() => window.__kg.agent.state.connected === true, null, { timeout: 30000 });
   return modelResponses;
@@ -116,17 +117,18 @@ export async function connectAgentLiveBedrock(page, config, { model = null } = {
  * instead of the app's own default: a model id on OpenAI and Bedrock, a
  * deployment name on Azure.
  */
-export async function connectAgentLiveProvider(page, config, { model = null } = {}) {
-  if (config.provider === "azure") return connectAgentLiveAzure(page, config.apiKey, config.endpoint, { deployment: model });
-  if (config.provider === "bedrock") return connectAgentLiveBedrock(page, config, { model });
-  if (!model) return connectAgentLive(page, config.apiKey);
+export async function connectAgentLiveProvider(page, config, { model = null, reasoningEffort = null } = {}) {
+  if (config.provider === "azure") return connectAgentLiveAzure(page, config.apiKey, config.endpoint, { deployment: model, reasoningEffort });
+  if (config.provider === "bedrock") return connectAgentLiveBedrock(page, config, { model, reasoningEffort });
+  if (!model && !reasoningEffort) return connectAgentLive(page, config.apiKey);
   const modelResponses = forwardToRealOpenAi(page, MODELS_URL);
   await openPanel(page);
   await page.click("#agent-connect-open");
   await page.fill("#agent-key-input", config.apiKey);
   await page.click("#agent-connect-submit");
   await page.waitForFunction(() => !document.getElementById("agent-model-select-modal").disabled, null, { timeout: 30000 });
-  await selectModel(page, model);
+  if (model) await selectModel(page, model);
+  if (reasoningEffort) await page.selectOption("#agent-reasoning-effort-select", reasoningEffort);
   await page.click("#agent-connect-submit");
   await page.waitForFunction(() => window.__kg.agent.state.connected === true, null, { timeout: 30000 });
   return modelResponses;
@@ -163,4 +165,23 @@ export function replyMessage(response) {
   const toolCalls = body.output.filter((o) => o.type === "function_call")
     .map((o) => ({ id: o.call_id, type: "function", function: { name: o.name, arguments: o.arguments } }));
   return { role: "assistant", content: text || null, ...(toolCalls.length ? { tool_calls: toolCalls } : {}) };
+}
+
+/**
+ * Sends a directive request until the model makes `toolName` -- at most
+ * `tries` times, each retry in a new conversation. For live tests that
+ * check plumbing (does a real tool call land?), not the model's judgement:
+ * a reasoning model at an explicit effort sometimes asks the expert to
+ * confirm first, which the interviewer's method allows (live, 2026-10-19).
+ * `responses` is the relay's list. Returns the number of attempts used.
+ */
+export async function askUntilToolCall(page, responses, toolName, text, { tries = 3, timeout = 180000 } = {}) {
+  for (let attempt = 1; attempt <= tries; attempt++) {
+    if (attempt > 1) await page.evaluate(() => window.__kg.agent.restartConversation());
+    const before = responses.length;
+    await sendChatMessage(page, text, { timeout });
+    const made = responses.slice(before).some((r) => ((replyMessage(r) || {}).tool_calls || []).some((c) => c.function && c.function.name === toolName));
+    if (made) return attempt;
+  }
+  return tries + 1;
 }

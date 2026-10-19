@@ -92,7 +92,9 @@ export async function configureAzureEndpoint(page, endpoint) {
 // finalizes. Returns the real deployment-list responses.
 // `deployment` (optional) picks that deployment instead of the app's default
 // choice, e.g. a GPT-5.6+ one for the prompt-caching test (issue #176).
-export async function connectAgentLiveAzure(page, apiKey, endpoint, { deployment = null } = {}) {
+// `reasoningEffort` (optional, issue #181) is picked in the dialog's effort
+// row; it is only shown, and only sent, for a reasoning model.
+export async function connectAgentLiveAzure(page, apiKey, endpoint, { deployment = null, reasoningEffort = null } = {}) {
   const deploymentsUrl = `${endpoint.replace(/\/+$/, "")}/openai/deployments**`;
   const modelResponses = forwardToRealAzure(page, deploymentsUrl);
   await openPanel(page);
@@ -106,6 +108,7 @@ export async function connectAgentLiveAzure(page, apiKey, endpoint, { deployment
     if (!ids.includes(deployment)) throw new Error(`deployment "${deployment}" is not in this key's deployment list: ${ids.join(", ")}`);
     await page.selectOption("#agent-model-select-modal", deployment);
   }
+  if (reasoningEffort) await page.selectOption("#agent-reasoning-effort-select", reasoningEffort);
   await page.click("#agent-connect-submit");
   await page.waitForFunction(() => window.__kg.agent.state.connected === true, null, { timeout: 30000 });
   return modelResponses;

@@ -2286,6 +2286,16 @@
     </div>
     <label id="agent-model-label" class="details-field-label" for="agent-model-select-modal">Modell</label>
     <select id="agent-model-select-modal" disabled></select>
+    <!-- Issue #181: shown once a reasoning model is selected; the effort is
+         then sent explicitly with every request on this connection. -->
+    <div id="agent-effort-row" style="display:none">
+      <label id="agent-effort-label" class="details-field-label" for="agent-reasoning-effort-select">Gondolkodási szint</label>
+      <select id="agent-reasoning-effort-select">
+        <option value="medium">közepes</option>
+        <option value="high">magas</option>
+      </select>
+      <p id="agent-effort-hint" class="agent-field-hint"></p>
+    </div>
     <label id="agent-remember-row" class="agent-remember-row">
       <input id="agent-remember-key" type="checkbox">
       <span id="agent-remember-text">A kulcs megjegyzése ezen az eszközön</span>
@@ -2935,6 +2945,10 @@ const STRINGS = {
     agentAzureConfigRemove: "Remove Azure configuration",
     agentAzureConfigSave: "Save",
     agentModelLabel: "Model",
+    agentEffortLabel: "Reasoning effort",
+    agentEffortMedium: "medium (default)",
+    agentEffortHigh: "high",
+    agentEffortHint: "Sent explicitly with every request to a reasoning model, the same way on every provider.",
     agentRememberKey: "Remember this key on this device",
     agentDisconnect: "Disconnect",
     agentForgetKey: "Forget saved key",
@@ -2957,6 +2971,7 @@ const STRINGS = {
     agentChatErrorInsufficientQuota: "This OpenAI account is out of quota. Check your plan and billing on platform.openai.com — waiting will not help.",
     agentChatErrorNetwork: "Could not reach the model provider's API (network or CORS error).",
     agentChatErrorContextLength: "The conversation is too long and couldn't be shortened further. Try starting a new topic.",
+    agentChatErrorReasoningEffort: (model, effort) => `${model} rejected the reasoning effort "${effort}". Disconnect and connect again with another effort or model.`,
     agentChatErrorGeneric: "Something went wrong contacting the agent. Try again.",
     // Helper Agent — Phase 3 (tool-calling).
     agentToolApplied: (added, changed) => `✓ Applied: ${added} added, ${changed} updated.`,
@@ -3310,6 +3325,10 @@ const STRINGS = {
     agentAzureConfigRemove: "Azure eltávolítása",
     agentAzureConfigSave: "Mentés",
     agentModelLabel: "Modell",
+    agentEffortLabel: "Gondolkodási szint",
+    agentEffortMedium: "közepes (alapértelmezett)",
+    agentEffortHigh: "magas",
+    agentEffortHint: "Gondolkodó modellnek minden kérésben kifejezetten elküldjük, minden szolgáltatónál ugyanígy.",
     agentRememberKey: "A kulcs megjegyzése ezen az eszközön",
     agentDisconnect: "Leválasztás",
     agentForgetKey: "Elmentett kulcs törlése",
@@ -3332,6 +3351,7 @@ const STRINGS = {
     agentChatErrorInsufficientQuota: "Ennek az OpenAI fióknak elfogyott a kerete. Ellenőrizd az előfizetést és a számlázást a platform.openai.com oldalon — várakozás nem segít.",
     agentChatErrorNetwork: "Nem sikerült elérni a modellszolgáltató API-ját (hálózati vagy CORS hiba).",
     agentChatErrorContextLength: "A beszélgetés túl hosszú, és nem sikerült tovább rövidíteni. Próbálj új témát kezdeni.",
+    agentChatErrorReasoningEffort: (model, effort) => `A(z) ${model} modell elutasította a(z) „${effort}” gondolkodási szintet. Válaszd le, majd csatlakozz újra másik szinttel vagy modellel.`,
     agentChatErrorGeneric: "Hiba történt az ügynök elérésekor. Próbáld újra.",
     // Helper Agent — Phase 3 (eszközhívások).
     agentToolApplied: (added, changed) => `✓ Alkalmazva: ${added} hozzáadva, ${changed} frissítve.`,
@@ -3620,6 +3640,10 @@ function applyAgentLanguage() {
   renderAgentBedrockConfigError();
   updateAgentAzureConfigSummary(); // also re-renders the provider row's text
   byId("agent-model-label").textContent = t("agentModelLabel");
+  byId("agent-effort-label").textContent = t("agentEffortLabel");
+  byId("agent-effort-hint").textContent = t("agentEffortHint");
+  byId("agent-reasoning-effort-select").options[0].textContent = t("agentEffortMedium");
+  byId("agent-reasoning-effort-select").options[1].textContent = t("agentEffortHigh");
   byId("agent-remember-text").textContent = t("agentRememberKey");
   byId("agent-connect-cancel").textContent = t("cancel");
   updateAgentConnectSubmitLabel();
@@ -9984,6 +10008,9 @@ function buildSessionBundle({ savedAt, base, jsonContent, txtContent, yamlConten
     interviewer: {
       model: agentState.model || null,
       provider: agentState.connected || agentState.model ? agentProviderOf(agentState) : null,
+      // Issue #181: the effort sent with this model's requests, null when
+      // none is (a non-reasoning model, or no connection).
+      reasoning_effort: agentState.model ? agentReasoningEffortFor(agentState.model) : null,
       // The system prompt is prepended to api_messages at request time rather
       // than stored with them, so it is recorded here as the page builds it now.
       system_prompt: buildAgentSystemPrompt(),
@@ -13335,6 +13362,9 @@ const AGENT_AZURE_API_VERSION_STORAGE_KEY = "kg-agent-azure-api-version";
 // region's default bedrock-mantle host.
 const AGENT_BEDROCK_REGION_STORAGE_KEY = "kg-agent-bedrock-region";
 const AGENT_BEDROCK_ENDPOINT_STORAGE_KEY = "kg-agent-bedrock-endpoint";
+// The remembered connection's reasoning effort (issue #181); absent means
+// AGENT_REASONING_EFFORT_DEFAULT.
+const AGENT_REASONING_EFFORT_STORAGE_KEY = "kg-agent-reasoning-effort";
 // UI preference, not connection state -- deliberately its own key, same
 // reasoning as THEME_STORAGE_KEY/LANG_STORAGE_KEY (issue #55).
 const AGENT_PANEL_WIDTH_STORAGE_KEY = "kg-agent-panel-width";
@@ -13591,6 +13621,16 @@ function isStandardTierModel(model) {
 const AGENT_PINNED_MODELS = ["gpt-6.1-sol", "gpt-6-sol"];
 const AGENT_PINNED_MODEL = AGENT_PINNED_MODELS[0];
 
+// Issue #181: the reasoning effort is always sent explicitly to a reasoning
+// model, identically on every provider -- an unset parameter means "the
+// provider's default today", which is not a controlled configuration.
+// `medium` until the #182 measurement says `high`; the connect dialog can
+// raise it per connection. `none` is not offered (rejected by every model
+// but the codename generation), and a non-reasoning model never gets the
+// parameter (gpt-4o-mini, gpt-4.1 reject it outright).
+const AGENT_REASONING_EFFORTS = ["medium", "high"];
+const AGENT_REASONING_EFFORT_DEFAULT = "medium";
+
 // Lowercase; drop a provider prefix ("azure/", "openai/", Bedrock's
 // "openai." and "us.openai."), trailing dated snapshots ("-2026-09-30",
 // "-20260930"), "-preview" and Bedrock version suffixes ("-1:0"); then every
@@ -13605,6 +13645,13 @@ function canonicalModelName(name) {
     n = n.replace(/[-_. ]?\d{4}[-_.]?\d{2}[-_.]?\d{2}$/, "").replace(/[-_. ]?preview$/, "").replace(/-v?\d+:\d+$/, "");
   }
   return n.replace(/[^a-z0-9]/g, "");
+}
+
+// The effort a call to `modelId` carries: the connection's level for a
+// reasoning model, none for any other.
+function agentReasoningEffortFor(modelId) {
+  const model = agentState.models.find((m) => m.id === modelId) || { id: modelId };
+  return isLikelyReasoningModel(model) ? agentState.reasoningEffort : null;
 }
 
 // The rung of AGENT_PINNED_MODELS this model is (0 = most preferred), or -1.
@@ -13669,6 +13716,10 @@ const agentState = {
   // use /v1/responses"); later tool-carrying calls go to the Responses API,
   // where the model keeps its reasoning. See callAgentChatRaw.
   toolsViaResponses: false,
+  // Issue #181: this connection's reasoning effort (one of
+  // AGENT_REASONING_EFFORTS), sent only to reasoning models -- see
+  // agentReasoningEffortFor().
+  reasoningEffort: AGENT_REASONING_EFFORT_DEFAULT,
   model: null,
   models: [], // [{id, created, baseModel}], newest-first once sorted for display -- see fetchAgentModels()'s own comment on baseModel
   // Full UI transcript ({role, text}[]) vs. the API-facing working set
@@ -14028,6 +14079,16 @@ async function fetchAgentModels(apiKey, conn) {
   }
 }
 
+// Issue #181: the effort row appears in the model stage, and only while the
+// model picked in the dialog is a reasoning model -- the only kind the
+// effort is sent to.
+function updateAgentEffortRow() {
+  const select = document.getElementById("agent-model-select-modal");
+  const model = agentPendingModels.find((m) => m.id === select.value);
+  const show = agentConnectStage === "model" && Boolean(model) && isLikelyReasoningModel(model);
+  document.getElementById("agent-effort-row").style.display = show ? "" : "none";
+}
+
 function populateAgentModelSelects(models, selectedId) {
   const sorted = [...models].sort((a, b) => (b.created || 0) - (a.created || 0));
   for (const id of ["agent-model-select-modal", "agent-model-select"]) {
@@ -14262,14 +14323,16 @@ function readStoredAgentConnectSettings() {
   try {
     const azure = normalizeAzureEndpoint(localStorage.getItem(AGENT_AZURE_ENDPOINT_STORAGE_KEY) || "");
     const region = localStorage.getItem(AGENT_BEDROCK_REGION_STORAGE_KEY);
+    const effort = localStorage.getItem(AGENT_REASONING_EFFORT_STORAGE_KEY);
     return {
       key: localStorage.getItem(AGENT_KEY_STORAGE_KEY) || "",
+      reasoningEffort: AGENT_REASONING_EFFORTS.includes(effort) ? effort : AGENT_REASONING_EFFORT_DEFAULT,
       azureEndpoint: azure,
       azureApiVersion: azure ? (localStorage.getItem(AGENT_AZURE_API_VERSION_STORAGE_KEY) || null) : null,
       bedrock: !azure && region ? { region, endpoint: normalizeBedrockEndpoint(localStorage.getItem(AGENT_BEDROCK_ENDPOINT_STORAGE_KEY) || "") } : null,
     };
   } catch (err) {
-    return { key: "", azureEndpoint: null, azureApiVersion: null, bedrock: null };
+    return { key: "", reasoningEffort: AGENT_REASONING_EFFORT_DEFAULT, azureEndpoint: null, azureApiVersion: null, bedrock: null };
   }
 }
 
@@ -14277,6 +14340,7 @@ const AGENT_CONNECTION_STORAGE_KEYS = [
   AGENT_KEY_STORAGE_KEY, AGENT_MODEL_STORAGE_KEY,
   AGENT_AZURE_ENDPOINT_STORAGE_KEY, AGENT_AZURE_API_VERSION_STORAGE_KEY,
   AGENT_BEDROCK_REGION_STORAGE_KEY, AGENT_BEDROCK_ENDPOINT_STORAGE_KEY,
+  AGENT_REASONING_EFFORT_STORAGE_KEY,
 ];
 
 function openAgentConnectModal() {
@@ -14298,12 +14362,14 @@ function openAgentConnectModal() {
   agentConnectBedrockAutoDetected = false;
   document.getElementById("agent-key-input").value = stored.key;
   document.getElementById("agent-remember-key").checked = Boolean(stored.key);
+  document.getElementById("agent-reasoning-effort-select").value = stored.reasoningEffort;
   document.getElementById("agent-connect-submit").disabled = false;
   const modalSelect = document.getElementById("agent-model-select-modal");
   modalSelect.textContent = "";
   modalSelect.disabled = true;
   updateAgentConnectSubmitLabel();
   updateAgentAzureConfigSummary();
+  updateAgentEffortRow();
   document.getElementById("agent-connect-overlay").style.display = "flex";
 }
 
@@ -14359,6 +14425,7 @@ async function submitAgentConnect() {
       populateAgentModelSelects(models, defaultModel);
       document.getElementById("agent-model-select-modal").disabled = false;
       agentConnectStage = "model";
+      updateAgentEffortRow();
     } catch (err) {
       setAgentConnectError((err && err.kind) || "network");
     } finally {
@@ -14370,6 +14437,7 @@ async function submitAgentConnect() {
 
   // agentConnectStage === "model": finalize with whichever model is selected.
   const chosenModel = document.getElementById("agent-model-select-modal").value;
+  const chosenEffort = document.getElementById("agent-reasoning-effort-select").value;
   const remember = document.getElementById("agent-remember-key").checked;
   const conn = agentPendingConnection;
   agentState.apiKey = agentPendingKey;
@@ -14381,6 +14449,7 @@ async function submitAgentConnect() {
   agentState.bedrockRoutes = {};
   agentState.promptCacheKeyRejected = false;
   agentState.toolsViaResponses = false;
+  agentState.reasoningEffort = AGENT_REASONING_EFFORTS.includes(chosenEffort) ? chosenEffort : AGENT_REASONING_EFFORT_DEFAULT;
   agentState.models = agentPendingModels;
   agentState.model = chosenModel;
   // One prompt_cache_key per connection, for every provider (issues #176,
@@ -14394,6 +14463,7 @@ async function submitAgentConnect() {
     if (remember) {
       localStorage.setItem(AGENT_KEY_STORAGE_KEY, agentPendingKey);
       localStorage.setItem(AGENT_MODEL_STORAGE_KEY, chosenModel || "");
+      if (agentState.reasoningEffort !== AGENT_REASONING_EFFORT_DEFAULT) localStorage.setItem(AGENT_REASONING_EFFORT_STORAGE_KEY, agentState.reasoningEffort);
       const provider = agentProviderOf(conn);
       if (provider === "azure") {
         localStorage.setItem(AGENT_AZURE_ENDPOINT_STORAGE_KEY, conn.azureEndpoint);
@@ -14421,6 +14491,7 @@ function disconnectAgent() {
   agentState.bedrockRoutes = {};
   agentState.promptCacheKeyRejected = false;
   agentState.toolsViaResponses = false;
+  agentState.reasoningEffort = AGENT_REASONING_EFFORT_DEFAULT;
   agentState.models = [];
   agentState.model = null;
   agentState.transcript = [];
@@ -14532,6 +14603,7 @@ document.getElementById("agent-azure-api-version-input").addEventListener("keydo
   if (e.key === "Enter") saveAzureConfig();
 });
 document.getElementById("agent-key-input").addEventListener("input", () => onAgentKeyInput());
+document.getElementById("agent-model-select-modal").addEventListener("change", () => updateAgentEffortRow());
 document.getElementById("agent-bedrock-config-open").addEventListener("click", () => openBedrockConfigPopup());
 document.getElementById("agent-bedrock-config-cancel").addEventListener("click", () => closeBedrockConfigPopup());
 document.getElementById("agent-bedrock-config-overlay").addEventListener("click", (e) => {
@@ -15677,6 +15749,7 @@ async function callAgentChatRaw(messages, { tools, promptCacheKey, signal, usage
   for (let attempt = 1; attempt <= AGENT_RATE_LIMIT_MAX_ATTEMPTS; attempt++) {
     const sendCacheKey = Boolean(promptCacheKey) && !agentState.promptCacheKeyRejected;
     const viaResponses = Boolean(tools) && agentState.toolsViaResponses;
+    const effort = agentReasoningEffortFor(agentState.model);
     const body = viaResponses
       ? {
         // The Responses API names the model in the body on every provider,
@@ -15685,6 +15758,8 @@ async function callAgentChatRaw(messages, { tools, promptCacheKey, signal, usage
         input: chatMessagesToResponsesInput(messages),
         tools: chatToolsToResponsesTools(tools),
         tool_choice: "auto",
+        // The same effort as on Chat Completions, in this API's shape.
+        ...(effort ? { reasoning: { effort } } : {}),
         // The whole history is resent on every call, as on Chat
         // Completions; nothing needs to be kept on the provider's side.
         store: false,
@@ -15699,6 +15774,7 @@ async function callAgentChatRaw(messages, { tools, promptCacheKey, signal, usage
         ...(provider === "azure" ? {} : { model: agentState.model }),
         messages,
         ...(tools ? { tools, tool_choice: "auto" } : {}),
+        ...(effort ? { reasoning_effort: effort } : {}),
         ...(sendCacheKey ? { prompt_cache_key: promptCacheKey } : {}),
       };
     let res;
@@ -15745,6 +15821,14 @@ async function callAgentChatRaw(messages, { tools, promptCacheKey, signal, usage
         attempt--;
         continue;
       }
+      // The model refused the effort itself (an unsupported value, or the
+      // parameter at all): said plainly, never silently dropped -- dropping
+      // it would bring back the uncontrolled provider default (#181).
+      const param = (json && json.error && json.error.param) || "";
+      if (effort && res.status === 400 && !/function tools/i.test(message) &&
+          (/^reasoning(_effort|\.effort)?$/.test(param) || /reasoning[_.]effort/i.test(message))) {
+        throw { kind: "reasoningEffortRejected", model: agentState.model, effort };
+      }
       if (sendCacheKey && !triedWithoutCacheKey && res.status === 400 && /prompt_cache_key/i.test(message) &&
           /unknown|unrecogni[sz]ed|unsupported|not supported|not allowed|not permitted|extra|invalid/i.test(message)) {
         triedWithoutCacheKey = true;
@@ -15776,7 +15860,7 @@ async function callAgentChatRaw(messages, { tools, promptCacheKey, signal, usage
     // Only while the conversation this call belongs to still exists: a
     // restart or disconnect during the call starts a new usage log, the
     // same way it starts a new transcript.
-    if (generation === agentState.requestGeneration) recordAgentUsage(usageKind, reply, provider, { api: viaResponses ? "responses" : "chat_completions" });
+    if (generation === agentState.requestGeneration) recordAgentUsage(usageKind, reply, provider, { api: viaResponses ? "responses" : "chat_completions", effort });
     return (choice && choice.message) || { content: "" };
   }
 }
@@ -15857,13 +15941,16 @@ function responsesToChatCompletion(json) {
 
 // Issue #177: the provider's per-call usage, kept verbatim next to what the
 // call was for. Counts only; pricing belongs to whoever reads the bundle.
-function recordAgentUsage(kind, json, provider, { api = "chat_completions" } = {}) {
+function recordAgentUsage(kind, json, provider, { api = "chat_completions", effort = null } = {}) {
   const usage = json && json.usage && typeof json.usage === "object" ? JSON.parse(JSON.stringify(json.usage)) : null;
   agentState.usage.push({
     kind,
     model: agentState.model || null,
     served_model: (json && typeof json.model === "string") ? json.model : null,
     provider,
+    // The reasoning effort the call was sent with (issue #181), null when
+    // none was (a non-reasoning model).
+    reasoning_effort: effort,
     // Only present when the call went to the Responses API (its usage is
     // then given under Chat Completions' field names).
     ...(api === "responses" ? { api } : {}),
@@ -16179,6 +16266,7 @@ function agentChatErrorText(err) {
   if (kind === "rateLimit") return t("agentChatErrorRateLimit");
   if (kind === "network") return t("agentChatErrorNetwork");
   if (kind === "contextLength") return t("agentChatErrorContextLength");
+  if (kind === "reasoningEffortRejected") return t("agentChatErrorReasoningEffort", err.model, err.effort);
   return t("agentChatErrorGeneric");
 }
 
@@ -16803,6 +16891,10 @@ window.__kg = {
     looksLikeBedrockKey,
     bedrockDefaultRegion: BEDROCK_DEFAULT_REGION,
     getPendingBedrock: () => agentConnectBedrock && { ...agentConnectBedrock },
+    // Issue #181.
+    reasoningEfforts: AGENT_REASONING_EFFORTS,
+    reasoningEffortDefault: AGENT_REASONING_EFFORT_DEFAULT,
+    effectiveReasoningEffort: () => (agentState.model ? agentReasoningEffortFor(agentState.model) : null),
     getPendingConnection: pendingAgentConnection,
     getBedrockConfigErrorKind: () => agentBedrockConfigErrorKind,
     // The Responses API transport for tool calls (issue #183).

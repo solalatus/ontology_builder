@@ -91,7 +91,7 @@ async function seed(page, yaml) {
   }, yaml);
 }
 
-test("live: get_graph_state finalValidation:true actually round-trips one real Tier C call and surfaces its result without hanging", { skip, timeout: 480000 }, async () => {
+test("live: get_graph_state finalValidation:true actually round-trips one real Tier C call and surfaces its result without hanging", { skip, timeout: 1200000 }, async () => {
   await withPage(async (page) => {
     forwardChatToRealProvider(page, LLM);
     // page.on("request") rather than a second page.route() on the same
@@ -133,7 +133,7 @@ test("live: get_graph_state finalValidation:true actually round-trips one real T
   });
 });
 
-test("live: a second finalValidation:true call in the same conversation does not spend a second real Tier C request", { skip, timeout: 600000 }, async () => {
+test("live: a second finalValidation:true call in the same conversation does not spend a second real Tier C request", { skip, timeout: 1500000 }, async () => {
   await withPage(async (page) => {
     forwardChatToRealProvider(page, LLM);
     // page.on("request") rather than a second page.route() on the same

@@ -255,7 +255,9 @@ async function main() {
     await page.waitForFunction(() => Boolean(window.__kg));
     await page.evaluate(() => { if (window.__kg.lang.get() !== "en") window.__kg.lang.toggle(); });
     await page.evaluate(() => window.__kg.welcome.close());
-    await connectAgentLiveProvider(page, llm, { model });
+    await connectAgentLiveProvider(page, llm, { model, reasoningEffort: env.EVAL_REASONING_EFFORT || null });
+    // The merge agent's reasoning effort as sent (issue #181).
+    provenance.reasoningEffort = await page.evaluate(() => window.__kg.agent.effectiveReasoningEffort());
     // The merge agent's calls (import_merge / import_suggest) go to the
     // real provider through this relay.
     forwardChatToRealProvider(page, llm);
