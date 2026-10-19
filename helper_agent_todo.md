@@ -2721,7 +2721,7 @@ whoever picks it up.
   script from `LLM_PROVIDER` or the credentials present; `.env.example`
   lists the variables. The OpenAI-era eval specs behave exactly as before on
   OpenAI.
-- **Open until verified live:**
+- **Open until verified live (tracked in #184; Azure is verified live, see below):**
   - the Mantle model-list shape for a real key;
   - tool calls and cached tokens on `openai.gpt-6.1-sol`;
   - `prompt_cache_key` acceptance (`helper-agent-live-bedrock.spec.mjs`).
