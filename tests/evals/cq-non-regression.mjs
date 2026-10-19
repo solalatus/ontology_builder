@@ -1,8 +1,11 @@
 // NON-REGRESSION EVALUATION OF THE COMPETENCY-QUESTION INTERVIEWER (issue #94)
 //
-//   AZURE_OPENAI_ENDPOINT=... AZURE_OPENAI_API_KEY=... \
 //   node tests/evals/cq-non-regression.mjs --arm=control   --run=run-01
 //   node tests/evals/cq-non-regression.mjs --arm=treatment --run=run-01
+//
+// with the provider's credentials in the repo-root .env (see
+// tests/lib/llmProvider.mjs). The committed runs were made on Azure OpenAI;
+// a run on another provider is a new condition, not a replication of those.
 //
 // WHAT THIS ANSWERS
 // -----------------
@@ -68,9 +71,10 @@ import crypto from "node:crypto";
 import { fileURLToPath } from "node:url";
 import { launchChromium } from "../lib/browser.mjs";
 import { APP_URL } from "../lib/page.mjs";
-import { forwardToRealAzure, configureAzureEndpoint, openPanel } from "../lib/liveAzureOpenAi.mjs";
+import { configureAzureEndpoint, openPanel } from "../lib/liveAzureOpenAi.mjs";
+import { forwardChatToRealProvider, connectAgentLiveProvider } from "../lib/liveProvider.mjs";
+import { llmEnv, resolveLlmConfig, missingCredentials, modelIdFor, cheapPersonaModel, chatRequestFor } from "../lib/llmProvider.mjs";
 import { runOntologyRecoveryConversation } from "./lib/conversationOrchestrator.mjs";
-import { DEFAULT_AZURE_API_VERSION } from "./lib/chatClient.mjs";
 import { RATE_LIMIT_MAX_ATTEMPTS, rateLimitBackoffMs, sleepMs } from "../lib/liveOpenAi.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -117,17 +121,19 @@ const arg = (name, fallback = null) => {
 // competency-questions-gpt-5-mini condition (CQ_NON_REGRESSION.md §7), not
 // discarded — but the primary comparison runs on the established pair, which
 // is one minor version from the anchors' gpt-5.5 and identical to #85's arms.
-const MODEL = process.env.EVAL_INTERVIEWER_MODEL || "gpt-5.4";
+const ENV = llmEnv();
+const LLM = resolveLlmConfig(ENV);
+const MODEL = ENV.EVAL_INTERVIEWER_MODEL || modelIdFor(LLM, "gpt-5.4");
 // The persona answers from a fixture it was handed and has nothing to reason
 // about, so it stays on the cheap non-reasoning deployment #85 used.
-const PERSONA_MODEL = process.env.ONTOLOGY_EVAL_PERSONA_MODEL || "gpt-4o-mini-internal";
+const PERSONA_MODEL = ENV.ONTOLOGY_EVAL_PERSONA_MODEL || cheapPersonaModel(LLM, MODEL);
 // The completion classifier stays on the INTERVIEWER's model, matching
 // self-correction-eval.mjs and ontology-recovery.eval.spec.mjs. That default is
 // deliberate upstream, not an oversight: a cheap classifier was hard to
 // instruction away from false "the interview is finished" positives, and a run
 // once looped 160+ turns because of it.
-const CLASSIFIER_MODEL = process.env.ONTOLOGY_EVAL_CLASSIFIER_MODEL || MODEL;
-const REACHABLE_DEPLOYMENTS = (process.env.EVAL_AZURE_DEPLOYMENTS
+const CLASSIFIER_MODEL = ENV.ONTOLOGY_EVAL_CLASSIFIER_MODEL || MODEL;
+const REACHABLE_DEPLOYMENTS = (ENV.EVAL_AZURE_DEPLOYMENTS
   || "gpt-5.4,gpt-4o-mini-internal,gpt-4o,gpt-5-mini,o4-mini").split(",");
 // 45 minutes and 120 turns are the established values (self-correction-eval.mjs
 // and ontology-recovery.eval.spec.mjs both use them); they are not re-derived
@@ -142,8 +148,8 @@ const REACHABLE_DEPLOYMENTS = (process.env.EVAL_AZURE_DEPLOYMENTS
 // control's — the direction that manufactures a false regression. The analyzer
 // therefore refuses to report any run that stopped on wallclock_timeout; if
 // that happens, raise this and re-run rather than reading the numbers.
-const MAX_TURNS = Number(process.env.ONTOLOGY_EVAL_MAX_TURNS) || 120;
-const WALLCLOCK_MINUTES = Number(process.env.ONTOLOGY_EVAL_WALLCLOCK_MINUTES) || 45;
+const MAX_TURNS = Number(ENV.ONTOLOGY_EVAL_MAX_TURNS) || 120;
+const WALLCLOCK_MINUTES = Number(ENV.ONTOLOGY_EVAL_WALLCLOCK_MINUTES) || 45;
 
 // The harness's own two model calls (the simulated expert and the "is this
 // interview finished?" classifier), sent as a REAL multi-turn message array.
@@ -157,13 +163,13 @@ const WALLCLOCK_MINUTES = Number(process.env.ONTOLOGY_EVAL_WALLCLOCK_MINUTES) ||
 // pattern left in the prompt is the persona document's own "Opening response"
 // section. The interview never advanced past turn 1's content, and the run was
 // discarded. Preserving roles is what makes it a conversation.
-async function azureChatMessages({ endpoint, apiKey, apiVersion, model, messages, label }) {
-  const url = `${endpoint}/openai/deployments/${model}/chat/completions?api-version=${apiVersion}`;
+async function providerChatMessages({ config, model, messages, label }) {
+  const { url, headers, includeModelInBody } = chatRequestFor(config, model);
   for (let attempt = 1; attempt <= RATE_LIMIT_MAX_ATTEMPTS; attempt++) {
     const res = await fetch(url, {
       method: "POST",
-      headers: { "api-key": apiKey, "Content-Type": "application/json" },
-      body: JSON.stringify({ messages }),
+      headers,
+      body: JSON.stringify({ ...(includeModelInBody ? { model } : {}), messages }),
     });
     const text = await res.text();
     let data;
@@ -199,7 +205,14 @@ async function stubDeploymentListing(page, endpoint) {
   }));
 }
 
-async function connectAzure(page, apiKey, endpoint, model) {
+// On Azure, the stubbed listing above (this resource's real one is empty);
+// on OpenAI and Bedrock the real model list, which has no such gap.
+async function connectInterviewer(page, model) {
+  if (LLM.provider !== "azure") {
+    await connectAgentLiveProvider(page, LLM, { model });
+    return;
+  }
+  const { apiKey, endpoint } = LLM;
   await stubDeploymentListing(page, endpoint);
   await openPanel(page);
   await page.click("#agent-connect-open");
@@ -227,9 +240,9 @@ async function main() {
     console.error("Usage: node tests/evals/cq-non-regression.mjs --arm=control|treatment --run=run-01");
     process.exit(1);
   }
-  const endpoint = (process.env.AZURE_OPENAI_ENDPOINT || "").replace(/\/+$/, "");
-  const apiKey = process.env.AZURE_OPENAI_API_KEY;
-  if (!endpoint || !apiKey) { console.error("AZURE_OPENAI_ENDPOINT and AZURE_OPENAI_API_KEY are required."); process.exit(1); }
+  const missing = missingCredentials(LLM);
+  if (missing) { console.error(missing); process.exit(1); }
+  const { apiKey, endpoint } = LLM;
 
   const outDir = path.join(OUT_ROOT, armName, runId);
   if (fs.existsSync(path.join(outDir, "baseline-provenance.json")) && arg("force") === null) {
@@ -265,7 +278,7 @@ async function main() {
     await page.evaluate(() => { if (window.__kg.lang.get() !== "en") window.__kg.lang.toggle(); });
     await page.evaluate(() => window.__kg.welcome.close());
     writeProgress({ phase: "connecting", turnsUsed: 0 });
-    await connectAzure(page, apiKey, endpoint, MODEL);
+    await connectInterviewer(page, MODEL);
 
     if (armName === "control") {
       const base = fs.readFileSync(PRE_94_PROMPT, "utf8");
@@ -286,11 +299,9 @@ async function main() {
       classifierModel: CLASSIFIER_MODEL,
       maxTurns: MAX_TURNS,
       wallClockMs: WALLCLOCK_MINUTES * 60 * 1000,
-      installRelay: (p) => forwardToRealAzure(p, `${endpoint}/openai/deployments/**`),
-      chat: async (messages, model) => azureChatMessages({
-        endpoint, apiKey,
-        apiVersion: process.env.AZURE_OPENAI_API_VERSION || DEFAULT_AZURE_API_VERSION,
-        model, messages, label: `${armName}/${runId} harness`,
+      installRelay: (p) => forwardChatToRealProvider(p, LLM),
+      chat: async (messages, model) => providerChatMessages({
+        config: LLM, model, messages, label: `${armName}/${runId} harness`,
       }),
       onProgress: ({ phase, turn, turnsUsed, durationMs, log, rawApiLog }) => {
         const lastApp = [...log].reverse().find((e) => String(e.speaker).startsWith("app-assistant"));
@@ -327,7 +338,7 @@ async function main() {
       arm: armName, runId,
       generatedAt: new Date().toISOString(),
       model: MODEL, personaModel: PERSONA_MODEL, classifierModel: CLASSIFIER_MODEL,
-      provider: "azure", endpoint,
+      provider: LLM.provider, endpoint,
       interviewerPromptSha256: promptSha,
       competencyQuestionsEnabled: armName === "treatment",
       stoppedReason: result.stoppedReason,

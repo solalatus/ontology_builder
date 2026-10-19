@@ -84,9 +84,11 @@ python3 ontology_translation/tools/fetch.py --manifest ontology_translation/doma
 pip install -r ontology_translation/tools/requirements.txt
 ```
 
-Azure credentials go in a `.env` file at the repo root (gitignored, see
-`.gitignore` line 5 — **never commit it**), same convention as
-`tests/lib/env.mjs`/`AZURE_OPENAI_API_KEY` for the main app's live tests:
+Credentials go in a `.env` file at the repo root (gitignored, see
+`.gitignore` line 5 — **never commit it**). It is the same file the JS live
+tests and evals read, and the provider is resolved the same way
+(`env.load_llm_config`, mirroring `tests/lib/llmProvider.mjs`; issue #183).
+Azure OpenAI, which every committed run used:
 
 ```
 AZURE_OPENAI_ENDPOINT=https://your-resource.openai.azure.com/
@@ -95,10 +97,21 @@ AZURE_OPENAI_API_VERSION=2024-12-01-preview
 AZURE_OPENAI_DEPLOYMENT=gpt-5.4
 ```
 
-`AZURE_OPENAI_DEPLOYMENT` is the resource-owner-chosen deployment name, not
-necessarily the literal model id — confirm it against the actual Azure
-resource before a live run. Environment variables win over `.env` if both
-are set (`env.py`, mirrors `tests/lib/env.mjs` exactly).
+or AWS Bedrock (bedrock-mantle; the model defaults to `openai.gpt-5.4`):
+
+```
+AWS_BEARER_TOKEN_BEDROCK=...
+AWS_REGION=us-east-1
+BEDROCK_MODEL=openai.gpt-6.1-sol
+```
+
+or OpenAI (`OPENAI_API_KEY`). With several configured, `LLM_PROVIDER` picks
+one; without it Azure wins, then Bedrock. `LLM_MODEL` overrides the model on
+any provider. `AZURE_OPENAI_DEPLOYMENT` is the resource-owner-chosen
+deployment name, not necessarily the literal model id — confirm it against
+the actual Azure resource before a live run. Environment variables win over
+`.env` if both are set (`env.py`, mirrors `tests/lib/env.mjs` exactly). A
+compile's `run-manifest.json` records the provider.
 
 ## Running a domain
 

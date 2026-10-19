@@ -22,7 +22,7 @@ from pathlib import Path
 import yaml
 
 from compile import RunLogger, _extract_json_object, estimate_cost, approx_tokens
-from env import load_azure_config
+from env import load_llm_config, make_llm_client, missing_llm_config
 from source_manifest import load_manifest
 from validate_domain import validate_domain
 
@@ -1298,31 +1298,29 @@ def run_evaluation(
         _write_reports(out_dir, manifest.id, report)
         return 1
 
-    azure_config = load_azure_config()
-    missing = [k for k in ("endpoint", "api_key") if not azure_config[k]]
+    llm_config = load_llm_config()
+    missing = missing_llm_config(llm_config)
     if missing:
-        print(f"[evaluate] ERROR: missing Azure config: {missing}. Set AZURE_OPENAI_ENDPOINT / AZURE_OPENAI_API_KEY.", file=sys.stderr)
+        print(f"[evaluate] ERROR: {missing}", file=sys.stderr)
         _write_reports(out_dir, manifest.id, report)
         return 1
 
-    from openai import AzureOpenAI
-
-    client = AzureOpenAI(api_version=azure_config["api_version"], azure_endpoint=azure_config["endpoint"], api_key=azure_config["api_key"])
+    client = make_llm_client(llm_config)
     logger = RunLogger(out_dir / "evaluate.log.jsonl")
     logger.event("evaluate_start", domain=manifest.id)
     try:
         report["semantic_judging"] = judge_mappings(
-            client, azure_config["deployment"], translation, logger, judges=judges,
+            client, llm_config["deployment"], translation, logger, judges=judges,
             domain_data=domain_data, source_ir=source_ir, confirmation_judges=confirmation_judges,
         )
         report["disposition_judging"] = judge_dispositions(
-            client, azure_config["deployment"], translation, source_ir, logger, judges=judges, confirmation_judges=confirmation_judges,
+            client, llm_config["deployment"], translation, source_ir, logger, judges=judges, confirmation_judges=confirmation_judges,
         )
         report["round_trip"] = round_trip_sample(
-            client, azure_config["deployment"], domain_data, translation, logger, sample_size=round_trip_sample_size
+            client, llm_config["deployment"], domain_data, translation, logger, sample_size=round_trip_sample_size
         )
-        cqs, cq_gen_cost = generate_cqs(client, azure_config["deployment"], domain_data, logger, n=cq_count)
-        report["cq_support"] = judge_cq_support(client, azure_config["deployment"], domain_yaml_path.read_text(encoding="utf-8"), cqs, logger)
+        cqs, cq_gen_cost = generate_cqs(client, llm_config["deployment"], domain_data, logger, n=cq_count)
+        report["cq_support"] = judge_cq_support(client, llm_config["deployment"], domain_yaml_path.read_text(encoding="utf-8"), cqs, logger)
         report["cq_support"]["generation_cost_usd"] = round(cq_gen_cost, 4)
     finally:
         logger.event("evaluate_end", domain=manifest.id)

@@ -194,6 +194,18 @@ is dev-only test tooling, same as Playwright.
   Also the hybrid on the hold-out (`evals/hybrid-holdout.mjs`): per-type
   thresholds, the hold-out helpers and criterion, and that its committed
   results, models and report match a fresh run. Offline: no key, no network.
+- `agent-pinned-model.spec.mjs` — the pinned default model (issue #178):
+  which spellings count as GPT-6.1-sol and which do not, OpenAI and Azure
+  model lists (Azure matched on the deployment's model, never its name),
+  the fallback when it is absent, and end-to-end connects for both
+  providers. Both live suites also check, when the key reaches it, that it
+  is preselected and that a real tool call works on it.
+- `session-usage.spec.mjs` — the per-call usage log (issue #177): every
+  model call recorded with its kind, model, served model and provider; the
+  session bundle's totals per kind (with `null` for fields no call
+  reported); persistence across a reload; Restart Conversation and
+  Disconnect starting a new log; a call that finishes after a restart not
+  leaking into the new log. Mocked OpenAI; no key, no network.
 - `subtype-connectivity.spec.mjs` — issue #155's step-1 analysis
   (`evals/subtype-connectivity.mjs`): how the committed recovered interview
   models treat the subclass pairs found by the reference audit (linked,
@@ -267,11 +279,98 @@ A key alone can't be used to run these: unlike OpenAI's single global API
 host, an Azure OpenAI key is only meaningful against the specific resource
 it belongs to. Costs a small amount of real money per run; never runs in
 CI, only when both are deliberately provided.
+Its prompt-caching test (issues #176/#177) checks that the app's own
+api-version accepts `prompt_cache_key`, that one key is sent per
+connection, that a second turn reports `cached_tokens > 0`, and that every
+call's usage is recorded; it prints the real token counts. Set the optional
+`AZURE_OPENAI_DEPLOYMENT` to run it against a specific deployment (the issue
+asks for a GPT-5.6+ one); without it the app's default choice is used.
 
 Either live suite is independent of the other — set only `OPENAI_API_KEY`
 to exercise the OpenAI live path, only the two Azure variables to exercise
 the Azure live path, or both to exercise both; the mocked suites for both
 providers always run regardless of what's configured.
+
+## AWS Bedrock support (issue #183)
+
+AWS Bedrock is the third provider: a Bedrock API key (long-term `ABSK...` or
+short-term `bedrock-api-key-...`) sent as `Authorization: Bearer`, the model id
+in the body (`openai.gpt-6.1-sol`), like OpenAI. Bedrock has two
+OpenAI-compatible endpoints, and only **bedrock-mantle**
+(`https://bedrock-mantle.{region}.api.aws`) answers a browser's CORS
+preflight. `bedrock-runtime`'s `/openai/v1` route rejects it, so the app uses
+Mantle and refuses a bedrock-runtime endpoint in its settings popup. On
+Mantle, the model list is `GET /v1/models` (the app keeps OpenAI's models
+only), and chat is under `/openai/v1/chat/completions` for the closed-weight
+GPT models and `/v1/chat/completions` for others (gpt-oss among them). A
+model rejected with "isn't supported on this route" is retried once under
+the other prefix, and that prefix is remembered for the connection. GPT-6.1
+Sol is served in-region on Mantle in `us-east-1` only, hence the default
+region.
+
+One more correction applies to every provider. Some reasoning models (the
+GPT-6 codename deployments, checked live on Azure) refuse function tools on
+Chat Completions while reasoning is on. The error points to the Responses
+API. On that error the app moves the connection's tool-carrying calls to
+the provider's Responses route (`/openai/v1/responses` on Azure and Mantle,
+`/v1/responses` on OpenAI). Reasoning stays on; it is not switched off to
+make tools fit. The translation both ways is in `index.html`
+(`chatMessagesToResponsesInput`, `responsesToChatCompletion`). The live
+relays cover both routes, and `replyMessage` in `tests/lib/liveProvider.mjs`
+reads an answer from either API.
+
+`helper-agent-bedrock.spec.mjs` covers this fully mocked:
+- the provider row and popup, key auto-detection, mutual exclusion with Azure;
+- the model listing, the pinned model, every call kind and the route retry;
+- the `prompt_cache_key` fallback, persistence, and the session bundle's
+  provider and key scrubbing.
+
+`live-bedrock-relay.spec.mjs` covers the relay the live tests use.
+`llm-provider.spec.mjs` covers the shared resolver below.
+
+`helper-agent-live-bedrock.spec.mjs` is the live suite. It skips unless
+`AWS_BEARER_TOKEN_BEDROCK` is set (`AWS_REGION`, `BEDROCK_ENDPOINT` and
+`BEDROCK_MODEL` are optional). It checks:
+- the CORS assumption itself;
+- the real model listing and the preselected GPT-6.1 Sol;
+- a tool-attached interview turn with `prompt_cache_key` and cached tokens on
+  the second call;
+- a background check, and the Node-side client.
+
+It prints the real token counts.
+
+## One provider switch for every live test, eval and experiment
+
+`tests/lib/llmProvider.mjs` resolves the provider for every Node-side caller
+(the live behavioural specs, `tests/evals/*`, the experiment runners).
+`ontology_translation/tools/env.py` resolves it the same way for the Python
+tools. One change to the repo-root `.env` therefore moves all of them:
+
+```
+LLM_PROVIDER=bedrock            # openai | azure | bedrock; optional, see below
+LLM_MODEL=openai.gpt-6.1-sol    # optional: one model for every role
+AWS_BEARER_TOKEN_BEDROCK=...    # Bedrock
+AWS_REGION=us-east-1
+AZURE_OPENAI_ENDPOINT=...       # Azure OpenAI
+AZURE_OPENAI_API_KEY=...
+AZURE_OPENAI_DEPLOYMENT=...
+OPENAI_API_KEY=...              # OpenAI
+```
+
+Without `LLM_PROVIDER`, the provider follows the credentials present: Azure if
+`AZURE_OPENAI_ENDPOINT` is set, else Bedrock if `AWS_BEARER_TOKEN_BEDROCK` is,
+else OpenAI. A script's own per-role variables (`EVAL_INTERVIEWER_MODEL`,
+`ONTOLOGY_EVAL_PERSONA_MODEL`, ...) still win. A script's built-in default model
+is translated to the provider's naming (`gpt-5.4` becomes `openai.gpt-5.4` on
+Bedrock). The cheap persona model of the Azure-era experiments has no Bedrock
+equivalent, so there the persona runs on the interviewer's model. A run on a
+different provider than the committed one is a new condition, not a
+replication, and its provenance records the provider.
+
+The provider-specific live suites (`helper-agent-live-openai`, `-azure`,
+`-bedrock`) each read only their own provider's variables, so all three can
+run side by side. The behavioural ones (`agent-remove-tool-live`,
+`agent-final-validation-tierc-live`) and the evals use the resolved provider.
 
 `agent-remove-tool-live.spec.mjs` is a different kind of live test from the
 two above: those catch a mismatch between an *assumed* and an *actual* API
@@ -287,9 +386,9 @@ not a substitute for a full non-regression evaluation against the anchor
 distribution, which `agent-production-invariants.spec.mjs`'s own header
 still calls for before this prompt's composite/relationship numbers are
 trusted against anything, just real evidence the specific fix works rather
-than proof by prompt-text inspection alone. Same opt-in gating as
-`helper-agent-live-azure.spec.mjs` (both `AZURE_OPENAI_API_KEY` and
-`AZURE_OPENAI_ENDPOINT`); never runs in CI.
+than proof by prompt-text inspection alone. Runs on the provider the `.env`
+selects (see "One provider switch" above) and skips without its credentials;
+never runs in CI.
 
 ## Ontology-recovery eval (opt-in, separate from the main suite)
 
@@ -304,8 +403,9 @@ it in — run it explicitly:
 node --test tests/evals/*.eval.spec.mjs
 ```
 
-Same `OPENAI_API_KEY`/`.env` convention as the live suite above, plus its
-own env-configurable turn/wall-clock/model budget. See
+Runs on the provider the `.env` selects (see "One provider switch" above;
+on OpenAI it behaves exactly as before), plus its own env-configurable
+turn/wall-clock/model budget. See
 `tests/evals/README.md` for the full design writeup — it's a report-
 generating eval, not a strict pass/fail test, and costs meaningfully more
 time/money per run than anything else in this directory.

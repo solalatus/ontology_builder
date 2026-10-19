@@ -2,6 +2,10 @@
 //
 //   OPENAI_API_KEY=sk-... node tests/evals/baseline-one-shot.mjs run-01 run-02 run-03
 //
+// On another provider (tests/lib/llmProvider.mjs: LLM_PROVIDER=azure|bedrock
+// and its credentials), BASELINE_MODEL or LLM_MODEL must name the model: the
+// default below is an OpenAI snapshot no other provider serves.
+//
 // WHAT THIS IS FOR
 // ----------------
 // The eval measures what the *interactive* elicitation agent recovered: it
@@ -43,6 +47,7 @@ import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
 import { fileURLToPath } from "node:url";
+import { llmEnv, resolveLlmConfig, missingCredentials, chatRequestFor } from "../lib/llmProvider.mjs";
 import {
   RATE_LIMIT_MAX_ATTEMPTS, rateLimitBackoffMs, sleepMs, isInsufficientQuotaError,
 } from "../lib/liveOpenAi.mjs";
@@ -53,11 +58,12 @@ const RUNS_DIR = path.join(__dirname, "results", "runs");
 // keeps this condition's output from colliding with B2/B3's own subdirectories
 // under the same results/baselines/ root (EXPERIMENT_BRIEF.md §4.1).
 const OUT_DIR = path.join(__dirname, "results", "baselines", "b1-one-shot");
-const CHAT_URL = "https://api.openai.com/v1/chat/completions";
 
 // Same model the interactive interviewer used, so the comparison isolates the
 // procedure (one-shot vs. incremental) rather than model capability.
-const MODEL = process.env.BASELINE_MODEL || "gpt-5.5-2026-04-23";
+const ENV = llmEnv();
+const LLM = resolveLlmConfig(ENV);
+const MODEL = ENV.BASELINE_MODEL || ENV.LLM_MODEL || (LLM.provider === "openai" ? "gpt-5.5-2026-04-23" : null);
 
 // The output grammar, stated exactly as the app's own export writes it, so the
 // baseline model is scored on domain content rather than on guessing a format.
@@ -128,14 +134,15 @@ const sha256 = (s) => crypto.createHash("sha256").update(s).digest("hex");
 // imports extractYaml for the offline extraction acceptance check without
 // wanting to trigger this loop or require an API key).
 if (import.meta.url === `file://${process.argv[1]}`) {
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) {
-    console.error("OPENAI_API_KEY is not set. This script makes one real API call per run.");
+  const missing = missingCredentials(LLM);
+  if (missing || !MODEL) {
+    console.error(missing ? `${missing} This script makes one real API call per run.` : "Set BASELINE_MODEL (or LLM_MODEL) to the model to run.");
     process.exit(1);
   }
+  const request = chatRequestFor(LLM, MODEL);
   const runIds = process.argv.slice(2);
   if (!runIds.length) {
-    console.error("Usage: OPENAI_API_KEY=... node tests/evals/baseline-one-shot.mjs <run-id> [...]");
+    console.error("Usage: node tests/evals/baseline-one-shot.mjs <run-id> [...]");
     process.exit(1);
   }
 
@@ -150,9 +157,9 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 
     let res, data;
     for (let attempt = 1; attempt <= RATE_LIMIT_MAX_ATTEMPTS; attempt++) {
-      res = await fetch(CHAT_URL, {
+      res = await fetch(request.url, {
         method: "POST",
-        headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+        headers: request.headers,
         // Deliberately no `temperature` -- confirmed live (HTTP 400,
         // "Unsupported value: 'temperature' does not support 0 with this
         // model. Only the default (1) value is supported.") that the
@@ -163,7 +170,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
         // either, for the same reason). Omitting it is the one request shape
         // confirmed to work across standard and reasoning-tier models alike.
         body: JSON.stringify({
-          model: MODEL,
+          ...(request.includeModelInBody ? { model: MODEL } : {}),
           messages: [
             { role: "system", content: SYSTEM_PROMPT },
             { role: "user", content: userPrompt },
@@ -192,6 +199,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       runId,
       generatedAt: new Date().toISOString(),
       model: MODEL,
+      provider: LLM.provider,
       temperature: null, // not sent -- see the request-body comment above; this model only accepts its default
       systemPromptSha256: sha256(SYSTEM_PROMPT),
       transcriptSha256: sha256(transcript),

@@ -1,8 +1,10 @@
 // NON-REGRESSION EVALUATION OF THE SELF-CORRECTING INTERVIEWER (issue #85)
 //
-//   AZURE_OPENAI_ENDPOINT=... AZURE_OPENAI_API_KEY=... \
 //   node tests/evals/self-correction-eval.mjs --arm=control   --run=run-01
 //   node tests/evals/self-correction-eval.mjs --arm=treatment --run=run-01
+//
+// with the provider's credentials in the repo-root .env (see
+// tests/lib/llmProvider.mjs). The committed runs were made on Azure OpenAI.
 //
 // WHAT THIS ANSWERS
 // -----------------
@@ -55,9 +57,10 @@ import crypto from "node:crypto";
 import { fileURLToPath } from "node:url";
 import { launchChromium } from "../lib/browser.mjs";
 import { APP_URL } from "../lib/page.mjs";
-import { forwardToRealAzure, configureAzureEndpoint, openPanel } from "../lib/liveAzureOpenAi.mjs";
+import { forwardChatToRealProvider, connectAgentLiveProvider } from "../lib/liveProvider.mjs";
+import { llmEnv, resolveLlmConfig, missingCredentials, modelIdFor, cheapPersonaModel } from "../lib/llmProvider.mjs";
 import { runOntologyRecoveryConversation } from "./lib/conversationOrchestrator.mjs";
-import { chatMessagesOnce, DEFAULT_AZURE_API_VERSION } from "./lib/chatClient.mjs";
+import { chatMessagesOnce } from "./lib/chatClient.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const OUT_ROOT = path.join(__dirname, "results", "baselines", "self-correcting-interviewer");
@@ -75,38 +78,17 @@ const arg = (name, fallback = null) => {
   return hit ? hit.split("=").slice(1).join("=") : fallback;
 };
 
-const MODEL = process.env.EVAL_INTERVIEWER_MODEL || "gpt-5.4";
-// A deployment NAME, not a model id -- on Azure the two are independent, and
+const ENV = llmEnv();
+const LLM = resolveLlmConfig(ENV);
+// gpt-5.4 in the provider's naming ("openai.gpt-5.4" on Bedrock), pinned
+// rather than following LLM_MODEL: both arms of this experiment ran on it.
+const MODEL = ENV.EVAL_INTERVIEWER_MODEL || modelIdFor(LLM, "gpt-5.4");
+// On Azure a deployment NAME, not a model id -- the two are independent, and
 // this resource deploys gpt-4o-mini under "gpt-4o-mini-internal". Passing the
 // model id produced an HTTP 404 that reads like a missing resource.
-const PERSONA_MODEL = process.env.ONTOLOGY_EVAL_PERSONA_MODEL || "gpt-4o-mini-internal";
-const MAX_TURNS = Number(process.env.ONTOLOGY_EVAL_MAX_TURNS) || 120;
-const WALLCLOCK_MINUTES = Number(process.env.ONTOLOGY_EVAL_WALLCLOCK_MINUTES) || 45;
-
-async function connectAzure(page, apiKey, endpoint, model) {
-  const deploymentsUrl = `${endpoint.replace(/\/+$/, "")}/openai/deployments**`;
-  forwardToRealAzure(page, deploymentsUrl);
-  await openPanel(page);
-  await page.click("#agent-connect-open");
-  await page.fill("#agent-key-input", apiKey);
-  await configureAzureEndpoint(page, endpoint);
-  await page.click("#agent-connect-submit");
-  await page.waitForFunction(() => !document.getElementById("agent-model-select-modal").disabled, null, { timeout: 60000 });
-  // Pin the interviewer model rather than accepting the app's own default
-  // heuristic: both arms must run on the same one for the comparison to mean
-  // anything, and "whatever the heuristic picks today" is not a fixed value.
-  const picked = await page.evaluate((wanted) => {
-    const select = document.getElementById("agent-model-select-modal");
-    const option = [...select.options].find((o) => o.value === wanted);
-    if (!option) return null;
-    select.value = wanted;
-    select.dispatchEvent(new Event("change", { bubbles: true }));
-    return select.value;
-  }, model);
-  if (picked !== model) throw new Error(`deployment ${model} not offered by the endpoint; got: ${picked}`);
-  await page.click("#agent-connect-submit");
-  await page.waitForFunction(() => window.__kg.agent.state.connected === true, null, { timeout: 60000 });
-}
+const PERSONA_MODEL = ENV.ONTOLOGY_EVAL_PERSONA_MODEL || cheapPersonaModel(LLM, MODEL);
+const MAX_TURNS = Number(ENV.ONTOLOGY_EVAL_MAX_TURNS) || 120;
+const WALLCLOCK_MINUTES = Number(ENV.ONTOLOGY_EVAL_WALLCLOCK_MINUTES) || 45;
 
 async function main() {
   const armName = arg("arm");
@@ -115,9 +97,9 @@ async function main() {
     console.error("Usage: node tests/evals/self-correction-eval.mjs --arm=control|treatment --run=run-01");
     process.exit(1);
   }
-  const endpoint = (process.env.AZURE_OPENAI_ENDPOINT || "").replace(/\/+$/, "");
-  const apiKey = process.env.AZURE_OPENAI_API_KEY;
-  if (!endpoint || !apiKey) { console.error("AZURE_OPENAI_ENDPOINT and AZURE_OPENAI_API_KEY are required."); process.exit(1); }
+  const missing = missingCredentials(LLM);
+  if (missing) { console.error(missing); process.exit(1); }
+  const { apiKey, endpoint } = LLM;
 
   const outDir = path.join(OUT_ROOT, armName, runId);
   // Idempotence: a completed run is never re-run, never re-spent, never
@@ -155,7 +137,11 @@ async function main() {
     await page.evaluate(() => { if (window.__kg.lang.get() !== "en") window.__kg.lang.toggle(); });
     await page.evaluate(() => window.__kg.welcome.close());
     writeProgress({ phase: "connecting", turnsUsed: 0 });
-    await connectAzure(page, apiKey, endpoint, MODEL);
+    // Pin the interviewer model rather than accepting the app's own default
+    // heuristic: both arms must run on the same one for the comparison to
+    // mean anything, and "whatever the heuristic picks today" is not a
+    // fixed value.
+    await connectAgentLiveProvider(page, LLM, { model: MODEL });
 
     if (armName === "control") {
       const base = fs.readFileSync(PRE_84_PROMPT, "utf8");
@@ -179,10 +165,10 @@ async function main() {
       classifierModel: MODEL,
       maxTurns: MAX_TURNS,
       wallClockMs: WALLCLOCK_MINUTES * 60 * 1000,
-      installRelay: (p) => forwardToRealAzure(p, `${endpoint}/openai/deployments/**`),
+      installRelay: (p) => forwardChatToRealProvider(p, LLM),
       // The persona and the completion classifier are Node-side calls, not the
       // app's — the relay above does not touch them. Without this they go to
-      // api.openai.com with an Azure key and 401 immediately.
+      // api.openai.com with an Azure or Bedrock key and 401 immediately.
       //
       // chatMessagesOnce, not chatOnce (issue #133/Finding C): this file was
       // the origin of the flattening pattern cq-non-regression.mjs's own
@@ -195,7 +181,7 @@ async function main() {
       // (including this one) had been copying it from.
       chat: async (messages, model) => {
         const call = await chatMessagesOnce({
-          config: { provider: "azure", endpoint, apiKey, apiVersion: process.env.AZURE_OPENAI_API_VERSION || DEFAULT_AZURE_API_VERSION },
+          config: LLM,
           model, messages,
           label: `${armName}/${runId} harness`,
         });
@@ -243,7 +229,7 @@ async function main() {
       arm: armName, runId,
       generatedAt: new Date().toISOString(),
       model: MODEL, personaModel: PERSONA_MODEL,
-      provider: "azure", endpoint,
+      provider: LLM.provider, endpoint,
       interviewerPromptSha256: promptSha,
       selfCorrectionEnabled: armName === "treatment",
       stoppedReason: result.stoppedReason,

@@ -1,8 +1,10 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { withPage } from "./lib/page.mjs";
-import { loadEnvKey } from "./lib/env.mjs";
-import { sendChatMessage, forwardToRealAzure, connectAgentLiveAzure } from "./lib/liveAzureOpenAi.mjs";
+// Resource errors tolerated: a model may answer the first tool call with a
+// documented one-time 400 the app corrects (see isOneTimeCorrection in
+// tests/lib/liveProvider.mjs), and the browser logs that 400.
+import { withPageAllowingResourceErrors as withPage } from "./lib/liveOpenAi.mjs";
+import { sendChatMessage, forwardChatToRealProvider, connectAgentLiveProvider, resolveLlmConfig, missingCredentials } from "./lib/liveProvider.mjs";
 
 // LIVE, opt-in behavioral check for issue #140's fix: does a real model
 // actually reach for the new remove_ontology_elements tool when a genuine
@@ -27,18 +29,12 @@ import { sendChatMessage, forwardToRealAzure, connectAgentLiveAzure } from "./li
 // scores in general.
 //
 // Same opt-in gating as every other live suite in this repo: skipped with a
-// clear reason unless both AZURE_OPENAI_API_KEY and AZURE_OPENAI_ENDPOINT
-// are set. Never runs in CI.
+// clear reason unless the configured provider's credentials are set. Never runs in CI.
 
-const AZURE_OPENAI_API_KEY = loadEnvKey("AZURE_OPENAI_API_KEY");
-const AZURE_OPENAI_ENDPOINT = loadEnvKey("AZURE_OPENAI_ENDPOINT");
-const skip = (AZURE_OPENAI_API_KEY && AZURE_OPENAI_ENDPOINT)
-  ? false
-  : "Set both AZURE_OPENAI_API_KEY and AZURE_OPENAI_ENDPOINT in a .env file at the repo root (see tests/README.md) to run this live behavioral check.";
+// Whichever provider the repo-root .env selects (tests/lib/llmProvider.mjs).
+const LLM = resolveLlmConfig();
+const skip = missingCredentials(LLM) || false;
 
-function chatUrlPattern(endpoint) {
-  return `${endpoint.replace(/\/+$/, "")}/openai/deployments/**/chat/completions**`;
-}
 
 async function seed(page, yaml) {
   await page.evaluate((y) => {
@@ -69,10 +65,10 @@ async function anyMeaningContainsSentinel(page) {
 
 test("live: told a mistakenly-added relationship whose meaning literally says REMOVE should actually be deleted, the model calls remove_ontology_elements, not another meaning-sentinel edit", { skip, timeout: 90000 }, async () => {
   await withPage(async (page) => {
-    forwardToRealAzure(page, chatUrlPattern(AZURE_OPENAI_ENDPOINT));
+    forwardChatToRealProvider(page, LLM);
     await seed(page,
       "classes:\n  Zone:\n    properties: {}\n  Thermostat:\n    properties: {}\nrelationships:\n  - name: isServedBy\n    from: Zone\n    to: Thermostat\n    meaning: REMOVE\n");
-    await connectAgentLiveAzure(page, AZURE_OPENAI_API_KEY, AZURE_OPENAI_ENDPOINT);
+    await connectAgentLiveProvider(page, LLM);
 
     await sendChatMessage(page,
       "Before we continue, I want to clean something up: there's a relationship called "
@@ -97,10 +93,10 @@ test("live: told a mistakenly-added relationship whose meaning literally says RE
 
 test("live: shown a model with a reverse-direction duplicate relationship and asked what looks wrong, the model uses remove_ontology_elements to actually fix it, not just describe it", { skip, timeout: 120000 }, async () => {
   await withPage(async (page) => {
-    forwardToRealAzure(page, chatUrlPattern(AZURE_OPENAI_ENDPOINT));
+    forwardChatToRealProvider(page, LLM);
     await seed(page,
       "classes:\n  Incident:\n    properties: {}\n  Engineer:\n    properties: {}\nrelationships:\n  - name: relatesTo\n    from: Incident\n    to: Engineer\n  - name: relatesTo\n    from: Engineer\n    to: Incident\n");
-    await connectAgentLiveAzure(page, AZURE_OPENAI_API_KEY, AZURE_OPENAI_ENDPOINT);
+    await connectAgentLiveProvider(page, LLM);
 
     await sendChatMessage(page,
       "Can you check the current model with get_graph_state and tell me if anything "

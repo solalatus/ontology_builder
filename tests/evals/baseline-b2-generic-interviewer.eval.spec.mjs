@@ -5,8 +5,9 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { withPage } from "../lib/page.mjs";
-import { loadEnvKey } from "../lib/env.mjs";
-import { connectAgentLive } from "../lib/liveOpenAi.mjs";
+import { connectAgentLiveProvider, forwardChatToRealProvider } from "../lib/liveProvider.mjs";
+import { llmEnv, resolveLlmConfig, missingCredentials, cheapPersonaModel } from "../lib/llmProvider.mjs";
+import { providerChat } from "./lib/chatClient.mjs";
 import { runOntologyRecoveryConversation } from "./lib/conversationOrchestrator.mjs";
 import { loadGroundTruthModel, scopeGroundTruth } from "./lib/groundTruthModel.mjs";
 import { computeRecoveryMetrics, computeHeuristicMatchPairs } from "./lib/recoveryMetrics.mjs";
@@ -50,17 +51,23 @@ import {
 // writers, pointed at this condition's own {dir}. Nothing under
 // tests/evals/results/runs/ is ever touched (EXPERIMENT_BRIEF.md §4.1).
 
-const OPENAI_API_KEY = loadEnvKey("OPENAI_API_KEY");
-const skip = OPENAI_API_KEY
-  ? false
-  : "Set OPENAI_API_KEY in a .env file at the repo root (see tests/README.md) to run condition B2.";
+// Whichever provider the repo-root .env selects (tests/lib/llmProvider.mjs,
+// issue #183). On OpenAI every call takes the same path it always has; on
+// Azure OpenAI or AWS Bedrock the harness's own calls go through `chat` and
+// the app's through the provider relay.
+const ENV = llmEnv();
+const LLM = resolveLlmConfig(ENV);
+const skip = missingCredentials(LLM) ? `${missingCredentials(LLM)} Needed for condition B2.` : false;
+const CHAT = LLM.provider === "openai" ? null : providerChat(LLM, { label: "b2" });
+const providerRelay = LLM.provider === "openai" ? {} : { installRelay: (p) => forwardChatToRealProvider(p, LLM) };
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const MAX_TURNS = Number(process.env.ONTOLOGY_EVAL_MAX_TURNS) || 500;
 const WALLCLOCK_MINUTES = Number(process.env.ONTOLOGY_EVAL_WALLCLOCK_MINUTES) || 45;
 const WALLCLOCK_MS = WALLCLOCK_MINUTES * 60 * 1000;
-const PERSONA_MODEL = process.env.ONTOLOGY_EVAL_PERSONA_MODEL || "gpt-4o-mini";
+// gpt-4o-mini on OpenAI, as always; see cheapPersonaModel for the others.
+const PERSONA_MODEL_OVERRIDE = ENV.ONTOLOGY_EVAL_PERSONA_MODEL || null;
 const CLASSIFIER_MODEL_OVERRIDE = process.env.ONTOLOGY_EVAL_CLASSIFIER_MODEL || null;
 const REVIEW_MODEL_OVERRIDE = process.env.ONTOLOGY_EVAL_REVIEW_MODEL || null;
 // Distinct from the interactive anchors' run-01/02/03 labels on purpose --
@@ -118,10 +125,11 @@ test(
   { skip, timeout: WALLCLOCK_MS + 10 * 60 * 1000 },
   async () => {
     await withPage(async (page) => {
-      const modelResponses = await connectAgentLive(page, OPENAI_API_KEY);
+      const modelResponses = await connectAgentLiveProvider(page, LLM);
       const interviewerModel = await page.evaluate(() => window.__kg.agent.state.model);
       assert.ok(interviewerModel, "expected the real connect flow to pick a real model");
       void modelResponses;
+      const PERSONA_MODEL = PERSONA_MODEL_OVERRIDE || cheapPersonaModel(LLM, interviewerModel);
       const classifierModel = CLASSIFIER_MODEL_OVERRIDE || interviewerModel;
 
       await page.evaluate((prompt) => {
@@ -139,9 +147,11 @@ test(
 
       const orchestratorResult = await runOntologyRecoveryConversation({
         page,
-        apiKey: OPENAI_API_KEY,
+        apiKey: LLM.apiKey,
         personaModel: PERSONA_MODEL,
         classifierModel,
+        chat: CHAT,
+        ...providerRelay,
         maxTurns: MAX_TURNS,
         wallClockMs: WALLCLOCK_MS,
         onProgress,
@@ -171,12 +181,12 @@ test(
       writeConversationLog(orchestratorResult, { dir: OUT_DIR });
       writeToolCallLog(orchestratorResult.rawApiLog, { dir: OUT_DIR });
       const reviewModel = REVIEW_MODEL_OVERRIDE || interviewerModel;
-      const llmReviewText = await generateLlmReview({ apiKey: OPENAI_API_KEY, model: reviewModel, orchestratorResult });
+      const llmReviewText = await generateLlmReview({ apiKey: LLM.apiKey, model: reviewModel, orchestratorResult, chat: CHAT });
 
       let semanticMetrics = null, semanticScopedMetrics = null;
       try {
-        semanticMetrics = await computeSemanticRecoveryMetrics({ groundTruth, recoveredState, apiKey: OPENAI_API_KEY, model: classifierModel });
-        semanticScopedMetrics = await computeSemanticRecoveryMetrics({ groundTruth: scopedGroundTruth, recoveredState, apiKey: OPENAI_API_KEY, model: classifierModel });
+        semanticMetrics = await computeSemanticRecoveryMetrics({ groundTruth, recoveredState, apiKey: LLM.apiKey, model: classifierModel, chat: CHAT });
+        semanticScopedMetrics = await computeSemanticRecoveryMetrics({ groundTruth: scopedGroundTruth, recoveredState, apiKey: LLM.apiKey, model: classifierModel, chat: CHAT });
       } catch (err) {
         semanticMetrics = null;
         semanticScopedMetrics = null;

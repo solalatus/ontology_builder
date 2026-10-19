@@ -2636,3 +2636,108 @@ whoever picks it up.
 - [x] **Epic gate: full live 5-domain×3-replicate benchmark rerun + cascading-merge(1,2) recompute — run twice
       plus one targeted partial rerun; all three criteria improve over baseline on the final, live-verified
       numbers above. Gate met.**
+
+## Prompt caching on Azure and per-call usage (issues #176, #177) — 2026-10-14
+
+- **#176:** `prompt_cache_key` is now sent on Azure connections too. The
+  earlier entry above ("an OpenAI-specific ... hint with no verified Azure
+  equivalent") is superseded: Azure documents the same parameter for
+  GPT-5.6 and later families, with no specific API version required. Every
+  connection gets one `kg-agent-<uuid>` key, rotated on Restart Conversation
+  and cleared on Disconnect, for both providers.
+- **#177:** every successful model call's `usage` is recorded verbatim with
+  its kind, model, served model and provider (`agentState.usage`), saved
+  with the conversation, cleared with it on Restart/Disconnect, and exported
+  in the session bundle as `usage` (calls plus totals per kind; fields no
+  call reported are `null`, not 0). A call that finishes after the
+  conversation was restarted is not recorded. Nothing changes in what is
+  sent to the model, and nothing is priced.
+- **#178:** the default model is pinned to GPT-6.1-sol (owner's decision,
+  2026-10-14: no major re-runs planned, so comparability with older runs
+  is not at stake). `pickDefaultAgentModel` prefers it whenever the key
+  reaches it, matched on the model's identity (OpenAI id, Azure
+  deployment's `model`), never the deployment name, after
+  `canonicalModelName` strips case, separators, provider prefixes, dated
+  snapshots and `-preview`. This bypasses the codename exclusion for this
+  one model only, because the live suites verify tool-attached calls on it
+  (the failure recorded for an earlier codename generation).
+
+
+## AWS Bedrock as a third provider (issue #183) — 2026-10-19
+
+- **Endpoint.** The app talks to Bedrock's bedrock-mantle endpoint only. Probed
+  live on 2026-10-19: an OPTIONS preflight to bedrock-runtime's
+  `/openai/v1/chat/completions` returns 400 with no CORS headers;
+  bedrock-mantle returns 200 with `access-control-allow-origin: *` (and
+  keeps CORS headers on its 401s). The Bedrock popup refuses a
+  bedrock-runtime endpoint with that explanation.
+- **Shape.** Bearer API key, model id in the body, models from `GET /v1/models`
+  (filtered to `openai.*`), chat under `/openai/v1` for closed-weight GPT
+  models and `/v1` otherwise, with one retry under the other prefix on
+  "isn't supported on this route" (remembered per connection).
+  `canonicalModelName` strips Bedrock's `openai.`/`us.openai.` prefixes and
+  `-1:0` version suffixes, so `openai.gpt-6.1-sol` is the pinned model.
+- **UX.** The connect modal keeps the plain key form; the quiet row under
+  the key now reads "Other provider: Azure OpenAI · AWS Bedrock", each
+  opening its own popup (Bedrock: region, default us-east-1, and an
+  optional endpoint). Configuring one hides the other, and the row shows
+  the configured provider's summary. A pasted Bedrock-shaped key attaches
+  Bedrock in the default region by itself. A different key shape detaches
+  it again, but only if it was attached that way.
+- **prompt_cache_key** is sent on every provider. A 400 naming it as
+  unknown or unsupported makes the call retry without it once, and it is
+  not sent again on that connection. This covers Bedrock; on Azure it
+  turned out unnecessary: the old api-version accepts the key (live,
+  2026-10-19).
+- **Tools on reasoning models: the Responses API.**
+  - Live on Azure (2026-10-19), the GPT-6 codename deployments (`gpt-6-sol`,
+    `gpt-6-luna`) refuse function tools on Chat Completions while reasoning is
+    on: "Function tools with reasoning_effort are not supported ... use
+    /v1/responses or set reasoning_effort to 'none'". The error appears under
+    every api-version tried.
+  - Reasoning is not switched off (owner's instruction: no provider gets a
+    dumbed-down path). On that error, the connection's tool-carrying calls
+    move to the Responses API instead, where tools and reasoning work
+    together.
+  - The routes: Azure's `/openai/v1/responses` with the deployment as
+    `model`; OpenAI's `/v1/responses`; bedrock-mantle's
+    `/openai/v1/responses`. All three answer a browser's CORS preflight.
+  - The calls send `store: false` and the full history, translated to and
+    from Chat Completions' shape (`chatMessagesToResponsesInput`,
+    `responsesToChatCompletion`).
+  - Their usage is logged under Chat Completions' field names with
+    `api: "responses"`. Calls without tools stay on Chat Completions.
+  - Verified live on gpt-6-luna: tool calls land, `prompt_cache_key` caching
+    holds (10,730 of 10,796 prompt tokens cached on the second call), and
+    reasoning tokens are reported.
+- **Live tests on that model.**
+  - The directive tool-call test now seeds one competency question first:
+    with reasoning on, the interviewer otherwise keeps to its CQ-first method
+    on an empty canvas.
+  - `agent-remove-tool-live`'s "what looks wrong" scenario passed 3 of 5 runs:
+    the model sometimes describes the duplicate and asks before deleting.
+- **Tooling.** `tests/lib/llmProvider.mjs` (Node) and `env.load_llm_config`
+  (Python) resolve one provider for every live test, eval and experiment
+  script from `LLM_PROVIDER` or the credentials present; `.env.example`
+  lists the variables. The OpenAI-era eval specs behave exactly as before on
+  OpenAI.
+- **Open until verified live (tracked in #184; Azure is verified live, see below):**
+  - the Mantle model-list shape for a real key;
+  - tool calls and cached tokens on `openai.gpt-6.1-sol`;
+  - `prompt_cache_key` acceptance (`helper-agent-live-bedrock.spec.mjs`).
+- **Pinned-model ladder (#178).** `AGENT_PINNED_MODELS = ["gpt-6.1-sol",
+  "gpt-6-sol"]`: the first rung the key reaches wins, on any provider and
+  under any name. The live Azure resource used for verification has only
+  `gpt-6-sol` and `gpt-6-luna`; the app picks `gpt-6-sol`, and the live
+  #178 test (now ladder-aware) passes on it, tool call included.
+- **Live behavioural specs on GPT-6 Sol (reasoning on, Responses API for
+  tools), 2026-10-19:**
+  - Tier C: the schema reserves `finalValidation:true` for the Phase 10(b)
+    checklist, and the model holds to that. The requests now name Phase
+    10(b), and the canvas is seeded with a finished-looking model. A
+    declined request is retried, each time in a new conversation, at most
+    five times. Both tests then passed 3 of 3, with the once-per-conversation
+    bound exercised live every time.
+  - `agent-remove-tool-live` "what looks wrong": 3 of 4 on GPT-6 Sol (3 of 5
+    on GPT-6 Luna). The model sometimes describes the duplicate and asks
+    first. Left as is: it measures that judgement.

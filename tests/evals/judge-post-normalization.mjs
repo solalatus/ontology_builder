@@ -1,7 +1,9 @@
 // TRANSCRIPT-GROUNDED, BLIND STRUCTURAL A/B JUDGE (issue #75 §9)
 //
-//   AZURE_OPENAI_ENDPOINT=... AZURE_OPENAI_API_KEY=... \
 //   node tests/evals/judge-post-normalization.mjs run-01 run-02 run-03
+//   (provider from the repo-root .env, see tests/lib/llmProvider.mjs; the
+//   default judge models are Azure deployment names -- set JUDGE_MODELS on
+//   another provider)
 //   node tests/evals/judge-post-normalization.mjs --condition=post-normalization-v2 run-01 run-02 run-03
 //
 // WHY THIS EXISTS

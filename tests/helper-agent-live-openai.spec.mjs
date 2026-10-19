@@ -2,8 +2,9 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { withPage, addNodeViaDblClick } from "./lib/page.mjs";
 import { loadEnvKey } from "./lib/env.mjs";
+import { unexpectedFailures, replyMessage } from "./lib/liveProvider.mjs";
 import {
-  MODELS_URL, CHAT_URL, forwardToRealOpenAi, openPanel,
+  MODELS_URL, CHAT_URL, RESPONSES_URL, forwardToRealOpenAi, openPanel,
   connectAgentLive, sendChatMessage, withPageAllowingResourceErrors,
 } from "./lib/liveOpenAi.mjs";
 
@@ -99,7 +100,7 @@ test("live: an actually-invalid key gets a real 401 from OpenAI, correctly class
 test("live: a real chat completion round-trips through the actual UI and renders the model's real reply", { skip }, async () => {
   await withPage(async (page) => {
     await connectAgentLive(page, OPENAI_API_KEY);
-    const chatResponses = forwardToRealOpenAi(page, CHAT_URL);
+    const chatResponses = forwardToRealOpenAi(page, RESPONSES_URL, forwardToRealOpenAi(page, CHAT_URL));
 
     await sendChatMessage(page, "Reply with a single short sentence confirming you're ready to help model a domain.");
 
@@ -113,8 +114,8 @@ test("live: a real chat completion round-trips through the actual UI and renders
     // actual contract. What must hold regardless: at least one real call
     // happened, and the *last* one is a genuine plain-text reply.
     assert.ok(chatResponses.length >= 1);
-    for (const r of chatResponses) assert.equal(r.status, 200);
-    const lastResponseMessage = chatResponses[chatResponses.length - 1].body.choices[0].message;
+    assert.deepEqual(unexpectedFailures(chatResponses), []);
+    const lastResponseMessage = replyMessage(chatResponses[chatResponses.length - 1]);
     assert.ok(!lastResponseMessage.tool_calls, "the final response in the exchange should be a plain reply, not another tool call");
 
     const transcript = await page.evaluate(() => window.__kg.agent.state.transcript);
@@ -129,8 +130,13 @@ test("live: a real chat completion round-trips through the actual UI and renders
 test("live: a real tool-calling response actually applies to the canvas through the real import pipeline", { skip }, async () => {
   await withPage(async (page) => {
     await connectAgentLive(page, OPENAI_API_KEY);
-    const chatResponses = forwardToRealOpenAi(page, CHAT_URL);
+    const chatResponses = forwardToRealOpenAi(page, RESPONSES_URL, forwardToRealOpenAi(page, CHAT_URL));
 
+    // Mid-interview, as in real use: the app's interviewer settles
+    // competency questions before modelling, and a reasoning model holds
+    // to that over a one-line directive on an empty canvas.
+    await page.evaluate(() => window.__kg.formats.commitYamlImport(
+      "competency_questions:\n  - text: Which supplier issued a given payment request?\n", "merge"));
     const before = await page.evaluate(() => window.__kg.state.nodes.length);
     await sendChatMessage(
       page,
@@ -142,7 +148,7 @@ test("live: a real tool-calling response actually applies to the canvas through 
     // response naming apply_ontology_yaml -- the model actually deciding to
     // use the real tool schema the app sent it, not a scripted answer.
     const sawRealToolCall = chatResponses.some((r) => {
-      const msg = r.body && r.body.choices && r.body.choices[0] && r.body.choices[0].message;
+      const msg = replyMessage(r);
       return msg && Array.isArray(msg.tool_calls) && msg.tool_calls.some((c) => c.function && c.function.name === "apply_ontology_yaml");
     });
     assert.ok(sawRealToolCall, "expected the real model to call apply_ontology_yaml for a directive, unambiguous request");
@@ -167,7 +173,7 @@ test("live: get_graph_state, called for real, sees a node added manually on the 
     // conversation itself.
     await addNodeViaDblClick(page, 300, 200, "PreExistingLiveTestClass");
     await connectAgentLive(page, OPENAI_API_KEY);
-    const chatResponses = forwardToRealOpenAi(page, CHAT_URL);
+    const chatResponses = forwardToRealOpenAi(page, RESPONSES_URL, forwardToRealOpenAi(page, CHAT_URL));
 
     await sendChatMessage(
       page,
@@ -175,7 +181,7 @@ test("live: get_graph_state, called for real, sees a node added manually on the 
     );
 
     const sawRealGetGraphStateCall = chatResponses.some((r) => {
-      const msg = r.body && r.body.choices && r.body.choices[0] && r.body.choices[0].message;
+      const msg = replyMessage(r);
       return msg && Array.isArray(msg.tool_calls) && msg.tool_calls.some((c) => c.function && c.function.name === "get_graph_state");
     });
     assert.ok(sawRealGetGraphStateCall, "expected the real model to call get_graph_state for an explicit, unambiguous request to do so");
@@ -193,7 +199,7 @@ test("live: get_graph_state, called for real, sees a node added manually on the 
 test("live: the output-language lock holds for a real model against a real Hungarian directive", { skip }, async () => {
   await withPage(async (page) => {
     await connectAgentLive(page, OPENAI_API_KEY);
-    forwardToRealOpenAi(page, CHAT_URL);
+    forwardToRealOpenAi(page, RESPONSES_URL, forwardToRealOpenAi(page, CHAT_URL));
 
     await sendChatMessage(page, "In two short sentences, tell me what you can help me with. Do not call any tool for this message.");
 
@@ -224,7 +230,7 @@ test("live: the output-language lock holds for a real model against a real Hunga
 test("live: two real, separate tool calls against the same class compose — the second doesn't erase what the first added", { skip }, async () => {
   await withPage(async (page) => {
     await connectAgentLive(page, OPENAI_API_KEY);
-    forwardToRealOpenAi(page, CHAT_URL);
+    forwardToRealOpenAi(page, RESPONSES_URL, forwardToRealOpenAi(page, CHAT_URL));
 
     await sendChatMessage(
       page,
@@ -248,5 +254,50 @@ test("live: two real, separate tool calls against the same class compose — the
     const propNames = incident.properties.map((p) => p.name.toLowerCase());
     assert.ok(propNames.includes("status"), `expected the first call's "status" property to survive, got: ${JSON.stringify(propNames)}`);
     assert.ok(propNames.includes("severity"), `expected the second call's "severity" property to be added, got: ${JSON.stringify(propNames)}`);
+  });
+});
+
+// Issue #178: a fresh connection lands on the first rung of the preference
+// ladder (GPT-6.1 Sol, then GPT-6 Sol) this OpenAI key can reach, under any
+// name, and a tool-attached turn works on it. These codename models refuse
+// tools with reasoning on Chat Completions; the app takes them through the
+// Responses API.
+test("live (#178): the pinned model (GPT-6.1 Sol, else GPT-6 Sol) is preselected, and a real tool call works on it", { skip }, async (t) => {
+  await withPageAllowingResourceErrors(async (page) => {
+    await connectAgentLive(page, OPENAI_API_KEY);
+    // The first rung with any entry on this key, and that rung's entries.
+    const { ladder, rung, available } = await page.evaluate(() => {
+      const a = window.__kg.agent;
+      const canon = (m) => a.canonicalModelName(m.baseModel || m.id);
+      for (const name of a.pinnedModels) {
+        const ids = a.state.models.filter((m) => canon(m) === a.canonicalModelName(name)).map((m) => m.id);
+        if (ids.length) return { ladder: a.pinnedModels, rung: name, available: ids };
+      }
+      return { ladder: a.pinnedModels, rung: null, available: [] };
+    });
+    const selected = await page.evaluate(() => window.__kg.agent.state.model);
+    console.log(`[live #178] OpenAI: ladder=${ladder.join(" > ")} reachable-rung=${rung} as=${JSON.stringify(available)} selected=${selected}`);
+    if (!rung) {
+      t.skip(`this OpenAI key reaches no model on the ladder (${ladder.join(", ")}); nothing to verify`);
+      return;
+    }
+    assert.ok(available.includes(selected), `expected ${selected} to be one of ${rung}'s entries ${available.join(", ")}`);
+
+    const chatResponses = forwardToRealOpenAi(page, RESPONSES_URL, forwardToRealOpenAi(page, CHAT_URL));
+    // Mid-interview, as in real use: the app's interviewer settles
+    // competency questions before modelling, and a reasoning model holds
+    // to that over a one-line directive on an empty canvas.
+    await page.evaluate(() => window.__kg.formats.commitYamlImport(
+      "competency_questions:\n  - text: Which supplier issued a given payment request?\n", "merge"));
+    const before = await page.evaluate(() => window.__kg.state.nodes.length);
+    await sendChatMessage(page, "Add a class called Invoice, meaning: a request from a supplier to receive payment. "
+      + "Use the apply_ontology_yaml tool right now to add it — don't just describe it in text.");
+    assert.deepEqual(unexpectedFailures(chatResponses), [], `a tool-attached call on ${selected} failed`);
+    const sawToolCall = chatResponses.some((r) => {
+      const msg = replyMessage(r);
+      return msg && Array.isArray(msg.tool_calls) && msg.tool_calls.some((c) => c.function && c.function.name === "apply_ontology_yaml");
+    });
+    assert.ok(sawToolCall, "the pinned model should call apply_ontology_yaml for a directive request");
+    assert.equal(await page.evaluate(() => window.__kg.state.nodes.length), before + 1);
   });
 });

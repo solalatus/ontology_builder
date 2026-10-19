@@ -1,8 +1,10 @@
 // CASCADING INTELLIGENT-MERGE MEASUREMENT (issue #147)
 //
-//   AZURE_OPENAI_ENDPOINT=... AZURE_OPENAI_API_KEY=... \
 //   node tests/evals/run-cascading-merge.mjs --domain=<id> [--force] \
 //     [--sourceResultsDir=<path>] [--sourceRuns=run-01,run-02,run-03] [--outDir=<path>]
+//
+// with the provider's credentials and model in the repo-root .env (OpenAI,
+// Azure OpenAI or AWS Bedrock; see tests/lib/llmProvider.mjs).
 //
 // WHAT THIS ANSWERS
 // ------------------
@@ -57,7 +59,8 @@ import { fileURLToPath } from "node:url";
 import yaml from "js-yaml";
 import { launchChromium } from "../lib/browser.mjs";
 import { APP_URL } from "../lib/page.mjs";
-import { forwardToRealAzure, configureAzureEndpoint, openPanel } from "../lib/liveAzureOpenAi.mjs";
+import { forwardChatToRealProvider, connectAgentLiveProvider } from "../lib/liveProvider.mjs";
+import { llmEnv, resolveLlmConfig, missingCredentials, defaultModel } from "../lib/llmProvider.mjs";
 import { loadGroundTruthModel, resolveDomainYamlPath, listAvailableDomains } from "./lib/groundTruthModel.mjs";
 import { computeHeuristicMatchPairs } from "./lib/recoveryMetrics.mjs";
 import { recoveredStateFromYaml } from "./score-baseline.mjs";
@@ -79,31 +82,6 @@ function sha256(text) {
 
 function readJsonSafe(p) {
   try { return JSON.parse(fs.readFileSync(p, "utf8")); } catch { return null; }
-}
-
-// Same deployment-vs-model-id pattern as run-multi-domain-benchmark.mjs's
-// own connectAzure -- reused verbatim rather than imported, since it's a
-// small unexported local function there too.
-async function connectAzure(page, apiKey, endpoint, model) {
-  const deploymentsUrl = `${endpoint.replace(/\/+$/, "")}/openai/deployments**`;
-  forwardToRealAzure(page, deploymentsUrl);
-  await openPanel(page);
-  await page.click("#agent-connect-open");
-  await page.fill("#agent-key-input", apiKey);
-  await configureAzureEndpoint(page, endpoint);
-  await page.click("#agent-connect-submit");
-  await page.waitForFunction(() => !document.getElementById("agent-model-select-modal").disabled, null, { timeout: 60000 });
-  const picked = await page.evaluate((wanted) => {
-    const select = document.getElementById("agent-model-select-modal");
-    const option = [...select.options].find((o) => o.value === wanted);
-    if (!option) return null;
-    select.value = wanted;
-    select.dispatchEvent(new Event("change", { bubbles: true }));
-    return select.value;
-  }, model);
-  if (picked !== model) throw new Error(`deployment "${model}" not offered by the endpoint; got: ${picked}`);
-  await page.click("#agent-connect-submit");
-  await page.waitForFunction(() => window.__kg.agent.state.connected === true, null, { timeout: 60000 });
 }
 
 // Sent as the free-text reasoning on every matched-but-differing item, so
@@ -238,11 +216,12 @@ async function main() {
   if (sourceRuns.length !== 3) { console.error("Exactly 3 --sourceRuns= are required (run-01,run-02,run-03)."); process.exit(1); }
   const outRoot = path.resolve(process.cwd(), arg("outDir", DEFAULT_OUT_ROOT), domain);
 
-  const endpoint = (process.env.AZURE_OPENAI_ENDPOINT || "").replace(/\/+$/, "");
-  const apiKey = process.env.AZURE_OPENAI_API_KEY;
-  const model = process.env.EVAL_INTERVIEWER_MODEL || process.env.AZURE_OPENAI_DEPLOYMENT;
-  if (!endpoint || !apiKey || !model) {
-    console.error("AZURE_OPENAI_ENDPOINT, AZURE_OPENAI_API_KEY, and AZURE_OPENAI_DEPLOYMENT are required.");
+  const env = llmEnv();
+  const llm = resolveLlmConfig(env);
+  const model = env.EVAL_INTERVIEWER_MODEL || defaultModel(llm, null, env);
+  const missing = missingCredentials(llm);
+  if (missing || !model) {
+    console.error(missing || "Set LLM_MODEL (or AZURE_OPENAI_DEPLOYMENT / BEDROCK_MODEL) to the merge agent's model.");
     process.exit(1);
   }
 
@@ -261,7 +240,7 @@ async function main() {
 
   const provenance = {
     schemaVersion: 1, domain, kind: "cascading-intelligent-merge",
-    model, provider: "azure", endpointSha256: sha256(endpoint),
+    model, provider: llm.provider, endpointSha256: sha256(llm.endpoint),
     sourceRuns, sourceResultsDir: path.relative(path.resolve(__dirname, "..", ".."), sourceResultsDir),
     sourceYamlSha256: sourceYamlPaths.map((p, i) => ({ run: sourceRuns[i], sha256: sha256(fs.readFileSync(p, "utf8")) })),
     domainYamlPath: `ontology_translation/domains/${domain}/reference.domain.yaml`,
@@ -276,7 +255,10 @@ async function main() {
     await page.waitForFunction(() => Boolean(window.__kg));
     await page.evaluate(() => { if (window.__kg.lang.get() !== "en") window.__kg.lang.toggle(); });
     await page.evaluate(() => window.__kg.welcome.close());
-    await connectAzure(page, apiKey, endpoint, model);
+    await connectAgentLiveProvider(page, llm, { model });
+    // The merge agent's calls (import_merge / import_suggest) go to the
+    // real provider through this relay.
+    forwardChatToRealProvider(page, llm);
     provenance.interviewerPromptSha256 = sha256(await page.evaluate(() => window.buildAgentSystemPrompt()));
 
     // Seed the canvas with run-01's own saved model -- the exact mechanism

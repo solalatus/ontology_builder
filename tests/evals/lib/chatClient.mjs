@@ -25,7 +25,12 @@ import {
   RATE_LIMIT_MAX_ATTEMPTS, rateLimitBackoffMs, sleepMs, isInsufficientQuotaError,
 } from "../../lib/liveOpenAi.mjs";
 
-export const DEFAULT_AZURE_API_VERSION = "2024-12-01-preview";
+import {
+  DEFAULT_AZURE_API_VERSION, llmEnv, resolveLlmProvider, resolveLlmConfig, requireCredentials,
+  chatRequestFor, isWrongBedrockRoute, providerProvenance,
+} from "../../lib/llmProvider.mjs";
+
+export { DEFAULT_AZURE_API_VERSION };
 
 // Azure OpenAI meters a *tokens-per-minute* budget per deployment, not just a
 // requests-per-second one. A judge call in this condition carries ~80k prompt
@@ -42,46 +47,16 @@ export function tpmBackoffMs(attempt, retryAfterSeconds) {
   return Math.min(30000 * attempt, 180000); // 30s, 60s, 90s, 120s, 150s
 }
 
-// Resolves the provider from the environment. Azure wins when an endpoint is
-// configured, because supplying one is an explicit choice; otherwise OpenAI.
-export function resolveProvider(env = process.env) {
-  const explicit = (env.EVAL_PROVIDER || "").toLowerCase();
-  if (explicit === "azure" || explicit === "openai") return explicit;
-  return env.AZURE_OPENAI_ENDPOINT ? "azure" : "openai";
+// The provider, key and endpoint come from tests/lib/llmProvider.mjs, the one
+// place every Node-side caller resolves them (issue #183): OpenAI, Azure
+// OpenAI or AWS Bedrock, chosen by LLM_PROVIDER or by which credentials the
+// environment / repo-root .env holds. `env` defaults to that merged view.
+export function resolveProvider(env = llmEnv()) {
+  return resolveLlmProvider(env);
 }
 
-export function resolveClientConfig(env = process.env) {
-  const provider = resolveProvider(env);
-  if (provider === "azure") {
-    const endpoint = (env.AZURE_OPENAI_ENDPOINT || "").replace(/\/+$/, "");
-    const apiKey = env.AZURE_OPENAI_API_KEY || env.OPENAI_API_KEY;
-    const apiVersion = env.AZURE_OPENAI_API_VERSION || DEFAULT_AZURE_API_VERSION;
-    if (!endpoint) throw new Error("AZURE_OPENAI_ENDPOINT is not set");
-    if (!apiKey) throw new Error("AZURE_OPENAI_API_KEY (or OPENAI_API_KEY) is not set");
-    return { provider, endpoint, apiKey, apiVersion };
-  }
-  const apiKey = env.OPENAI_API_KEY;
-  if (!apiKey) throw new Error("OPENAI_API_KEY is not set");
-  return { provider, apiKey, endpoint: "https://api.openai.com", apiVersion: null };
-}
-
-function requestFor(config, model) {
-  if (config.provider === "azure") {
-    return {
-      // On Azure the "model" is a deployment name in the URL, and the resolved
-      // model id only comes back in the response body -- which is why every
-      // artifact records both `model` (what was asked for) and `modelReported`
-      // (what actually answered). They are not always the same string.
-      url: `${config.endpoint}/openai/deployments/${encodeURIComponent(model)}/chat/completions?api-version=${encodeURIComponent(config.apiVersion)}`,
-      headers: { "api-key": config.apiKey, "Content-Type": "application/json" },
-      includeModelInBody: false,
-    };
-  }
-  return {
-    url: `${config.endpoint}/v1/chat/completions`,
-    headers: { Authorization: `Bearer ${config.apiKey}`, "Content-Type": "application/json" },
-    includeModelInBody: true,
-  };
+export function resolveClientConfig(env = llmEnv()) {
+  return requireCredentials(resolveLlmConfig(env));
 }
 
 // Shared retry/request core for both call shapes below. Issue #133/Finding C
@@ -104,11 +79,20 @@ async function requestOnce({ config, model, messages, label, url, headers, inclu
   const body = { ...(includeModelInBody ? { model } : {}), messages, ...extraBody };
   const maxAttempts = Math.max(RATE_LIMIT_MAX_ATTEMPTS, TPM_MAX_ATTEMPTS);
   let res, data;
+  let triedOtherRoute = false;
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     res = await fetch(url, { method: "POST", headers, body: JSON.stringify(body) });
     const text = await res.text();
     try { data = JSON.parse(text); } catch (err) { data = { error: { message: text.slice(0, 500) } }; }
     if (res.ok) break;
+    // bedrock-mantle serves some models under the other path prefix; one
+    // retry there, the same correction the app makes (callAgentChatRaw).
+    if (config.provider === "bedrock" && !triedOtherRoute && isWrongBedrockRoute(res.status, data)) {
+      triedOtherRoute = true;
+      url = url.includes("/openai/v1/") ? url.replace("/openai/v1/", "/v1/") : url.replace("/v1/", "/openai/v1/");
+      attempt--;
+      continue;
+    }
     if (isInsufficientQuotaError(data) || attempt >= maxAttempts) {
       throw new Error(`${label}: chat call failed: HTTP ${res.status} ${data && data.error && data.error.message}`);
     }
@@ -138,7 +122,7 @@ async function requestOnce({ config, model, messages, label, url, headers, inclu
 // is ALSO empty -- an empty reply twice in a row from the same prompt is a
 // real signal, not noise to paper over indefinitely.
 async function chatRequest({ config, model, messages, label = "call", extraBody = {} }) {
-  const { url, headers, includeModelInBody } = requestFor(config, model);
+  const { url, headers, includeModelInBody } = chatRequestFor(config, model);
   let { data, choice, reply } = await requestOnce({ config, model, messages, label, url, headers, includeModelInBody, extraBody });
   if (!reply.trim()) {
     console.log(`  ${label}: provider returned an empty reply (finish_reason=${choice && choice.finish_reason}), retrying once`);
@@ -153,9 +137,7 @@ async function chatRequest({ config, model, messages, label = "call", extraBody 
     modelReported: data.model || null,
     finishReason: (choice && choice.finish_reason) || null,
     requestParams: {
-      provider: config.provider,
-      endpoint: config.provider === "azure" ? config.endpoint : "https://api.openai.com",
-      apiVersion: config.apiVersion,
+      ...providerProvenance(config),
       model,
       // Reported from extraBody, not hardcoded to null, since a caller can
       // opt in per call (conversationOrchestrator.mjs's classifier does,
@@ -201,4 +183,16 @@ export function sumUsage(usages) {
     total.calls += 1;
   }
   return total;
+}
+
+// The `chat` shape conversationOrchestrator.mjs, personaAgent.mjs,
+// reportGenerator.mjs and llmMatcher.mjs accept in place of their own
+// OpenAI-only fetch, bound to a resolved provider config (issue #183).
+// `usages`, if given, collects every call's usage block.
+export function providerChat(config, { label = "harness", usages = null } = {}) {
+  return async (messages, model, extraBody = {}) => {
+    const call = await chatMessagesOnce({ config, model, messages, extraBody, label });
+    if (usages && call.usage) usages.push(call.usage);
+    return { text: call.reply, usage: call.usage, finishReason: call.finishReason };
+  };
 }

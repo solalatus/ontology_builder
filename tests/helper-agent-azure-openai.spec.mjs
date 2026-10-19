@@ -186,16 +186,21 @@ test("isValidAzureEndpoint accepts absolute http(s) URLs and rejects everything 
 
 test("modelsUrl/chatUrl/authHeaders return the OpenAI shape for a null endpoint and the Azure shape for a real one", async () => {
   await withPage(async (page) => {
-    const result = await page.evaluate(({ endpoint, version }) => ({
-      openaiModelsUrl: window.__kg.agent.modelsUrl(null),
-      openaiChatUrl: window.__kg.agent.chatUrl(null, "gpt-4o"),
-      openaiHeaders: window.__kg.agent.authHeaders(null, "sk-abc"),
-      azureModelsUrl: window.__kg.agent.modelsUrl(endpoint),
-      azureChatUrl: window.__kg.agent.chatUrl(endpoint, "my-deployment"),
-      azureHeaders: window.__kg.agent.authHeaders(endpoint, "azure-key-abc"),
-      azureChatUrlEncodesDeploymentName: window.__kg.agent.chatUrl(endpoint, "my deployment/weird"),
-      version,
-    }), { endpoint: AZURE_ENDPOINT, version: AZURE_API_VERSION });
+    const result = await page.evaluate(({ endpoint, version }) => {
+      const openai = { azureEndpoint: null };
+      const azure = { azureEndpoint: endpoint };
+      return {
+        openaiModelsUrl: window.__kg.agent.modelsUrl(openai),
+        openaiChatUrl: window.__kg.agent.chatUrl(openai, "gpt-4o"),
+        openaiHeaders: window.__kg.agent.authHeaders(openai, "sk-abc"),
+        azureModelsUrl: window.__kg.agent.modelsUrl(azure),
+        azureChatUrl: window.__kg.agent.chatUrl(azure, "my-deployment"),
+        azureHeaders: window.__kg.agent.authHeaders(azure, "azure-key-abc"),
+        azureChatUrlEncodesDeploymentName: window.__kg.agent.chatUrl(azure, "my deployment/weird"),
+        overriddenVersionUrl: window.__kg.agent.chatUrl({ azureEndpoint: endpoint, azureApiVersion: "2099-01-01" }, "d"),
+        version,
+      };
+    }, { endpoint: AZURE_ENDPOINT, version: AZURE_API_VERSION });
 
     assert.equal(result.openaiModelsUrl, "https://api.openai.com/v1/models");
     assert.equal(result.openaiChatUrl, "https://api.openai.com/v1/chat/completions");
@@ -208,6 +213,7 @@ test("modelsUrl/chatUrl/authHeaders return the OpenAI shape for a null endpoint 
     // path must come back safely encoded, not spliced in raw.
     assert.ok(!result.azureChatUrlEncodesDeploymentName.includes(" "));
     assert.ok(result.azureChatUrlEncodesDeploymentName.includes(encodeURIComponent("my deployment/weird")));
+    assert.match(result.overriddenVersionUrl, /api-version=2099-01-01$/);
   });
 });
 
@@ -506,7 +512,7 @@ test("a 403 on the deployments endpoint is also treated as an invalid-key error"
 // Chat completions: URL, headers, and body shape
 // --------------------------------------------------------------------------
 
-test("a chat turn against Azure posts to the deployment-scoped URL with an api-key header and no model/prompt_cache_key field", async () => {
+test("a chat turn against Azure posts to the deployment-scoped URL with an api-key header, no model field, and a prompt_cache_key (issue #176)", async () => {
   await withPage(async (page) => {
     mockAzureDeploymentsRoute(page, {
       deployments: [{ id: "my-deployment", model: "gpt-4o-mini", created_at: 1, status: "succeeded" }],
@@ -526,7 +532,9 @@ test("a chat turn against Azure posts to the deployment-scoped URL with an api-k
     assert.equal(capturedRequest.headers["api-key"], "azure-secret");
     assert.equal(capturedRequest.headers["authorization"], undefined);
     assert.equal(capturedRequest.body.model, undefined, "Azure addresses the model via the URL, not a body field");
-    assert.equal(capturedRequest.body.prompt_cache_key, undefined, "prompt_cache_key is an OpenAI-only hint with no verified Azure equivalent");
+    // Issue #176: Azure documents prompt_cache_key for GPT-5.6+ families, so
+    // an Azure connection sends one too, the same kg-agent-<uuid> scheme.
+    assert.match(capturedRequest.body.prompt_cache_key || "", /^kg-agent-[0-9a-f-]{36}$/);
     assert.ok(Array.isArray(capturedRequest.body.messages) && capturedRequest.body.messages.length > 0);
     // Tools are always attached on a real chat turn (apply_ontology_yaml +
     // get_graph_state) -- this is the exact request shape a real tool-calling
@@ -802,5 +810,61 @@ test("remembering an Azure connection with a custom API version persists and res
     assert.equal(await page.evaluate(() => window.__kg.agent.getPendingAzureApiVersion()), customVersion);
     await page.click("#agent-azure-config-open");
     assert.equal(await page.locator("#agent-azure-api-version-input").inputValue(), customVersion);
+  });
+});
+
+test("issue #176: an Azure connection reuses one prompt_cache_key across turns, restart rotates it, and a new connection gets its own", async () => {
+  await withPage(async (page) => {
+    mockAzureDeploymentsRoute(page, {
+      deployments: [{ id: "my-deployment", model: "gpt-4o-mini", created_at: 1, status: "succeeded" }],
+    });
+    await connectAgent(page, { key: "azure-secret", azureEndpoint: AZURE_ENDPOINT });
+    const bodies = [];
+    await page.route(azureChatUrl("my-deployment"), (route) => {
+      bodies.push(route.request().postDataJSON());
+      route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(chatCompletionBody("ok")) });
+    });
+    for (const text of ["first", "second"]) {
+      await sendChatMessage(page, text);
+      await page.waitForFunction(() => !window.__kg.agent.isSending());
+    }
+    assert.equal(bodies.length, 2);
+    assert.ok(bodies[0].prompt_cache_key);
+    assert.equal(bodies[0].prompt_cache_key, bodies[1].prompt_cache_key, "one key for the whole connection");
+
+    await page.evaluate(() => window.__kg.agent.restartConversation());
+    await sendChatMessage(page, "after restart");
+    await page.waitForFunction(() => !window.__kg.agent.isSending());
+    assert.notEqual(bodies[2].prompt_cache_key, bodies[0].prompt_cache_key, "restart rotates the key");
+
+    await page.evaluate(() => window.__kg.agent.disconnect());
+    await connectAgent(page, { key: "azure-secret", azureEndpoint: AZURE_ENDPOINT });
+    await sendChatMessage(page, "new connection");
+    await page.waitForFunction(() => !window.__kg.agent.isSending());
+    assert.ok(bodies[3].prompt_cache_key);
+    assert.notEqual(bodies[3].prompt_cache_key, bodies[2].prompt_cache_key, "a new connection gets its own key");
+  });
+});
+
+
+test("issue #177: an Azure call's usage is recorded with provider azure and the deployment as its model", async () => {
+  await withPage(async (page) => {
+    mockAzureDeploymentsRoute(page, {
+      deployments: [{ id: "my-deployment", model: "gpt-4o-mini", created_at: 1, status: "succeeded" }],
+    });
+    await connectAgent(page, { key: "azure-secret", azureEndpoint: AZURE_ENDPOINT });
+    const usage = { prompt_tokens: 1500, completion_tokens: 40, prompt_tokens_details: { cached_tokens: 1280 } };
+    await page.route(azureChatUrl("my-deployment"), (route) => route.fulfill({
+      status: 200, contentType: "application/json",
+      body: JSON.stringify({ ...chatCompletionBody("ok"), model: "gpt-4o-mini-2024-07-18", usage }),
+    }));
+    await sendChatMessage(page, "hello");
+    await page.waitForFunction(() => !window.__kg.agent.isSending());
+    const [entry] = await page.evaluate(() => window.__kg.agent.state.usage);
+    assert.equal(entry.kind, "interview");
+    assert.equal(entry.provider, "azure");
+    assert.equal(entry.model, "my-deployment");
+    assert.equal(entry.served_model, "gpt-4o-mini-2024-07-18");
+    assert.deepEqual(entry.usage, usage);
   });
 });

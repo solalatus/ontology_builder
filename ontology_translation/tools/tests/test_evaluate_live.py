@@ -1,7 +1,8 @@
-"""Live smoke test against the real Azure OpenAI resource -- same opt-in
+"""Live smoke test against the configured model provider (Azure OpenAI,
+OpenAI or AWS Bedrock; env.load_llm_config) -- same opt-in
 convention as test_compile_live.py / helper-agent-live-azure.spec.mjs:
 included in normal discovery, skips with a clear reason unless
-AZURE_OPENAI_ENDPOINT/AZURE_OPENAI_API_KEY are set, never runs in CI.
+the configured provider's credentials are set, never runs in CI.
 
 Kept deliberately tiny (judges=1, round_trip_sample=1, cq_count=2, a
 single-class translation) to catch real integration issues -- especially
@@ -20,7 +21,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import evaluate as evaluate_mod
-from env import load_azure_config
+from env import load_llm_config, missing_llm_config
 
 SMOKE_DOMAIN_YAML = "classes:\n  Fan:\n    meaning: A device that moves air to ventilate a space.\n" \
     "relationships: []\nrules: {}\nactions: {}\ncompetency_questions: []\n"
@@ -55,14 +56,14 @@ SMOKE_SOURCE_IR = {
 }
 
 
-def _azure_creds_present() -> bool:
-    config = load_azure_config()
-    return bool(config["endpoint"]) and bool(config["api_key"])
+def _creds_present() -> bool:
+    # Whichever provider env.load_llm_config resolves (issue #183).
+    return missing_llm_config(load_llm_config()) is None
 
 
 @unittest.skipUnless(
-    _azure_creds_present(),
-    "AZURE_OPENAI_ENDPOINT/AZURE_OPENAI_API_KEY not set (env or .env) -- live Azure smoke test skipped",
+    _creds_present(),
+    "no model provider credentials (OPENAI_API_KEY, AZURE_OPENAI_ENDPOINT/AZURE_OPENAI_API_KEY or AWS_BEARER_TOKEN_BEDROCK; env or .env) -- live smoke test skipped",
 )
 class EvaluateLiveSmokeTest(unittest.TestCase):
     def test_one_real_pass_through_all_llm_layers_on_a_tiny_translation(self):

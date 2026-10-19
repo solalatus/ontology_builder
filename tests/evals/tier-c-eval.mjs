@@ -1,6 +1,6 @@
 // TIER C EVALUATION (issue #89) — does the optional LLM pass find anything new?
 //
-//   AZURE_OPENAI_ENDPOINT=... AZURE_OPENAI_API_KEY=... node tests/evals/tier-c-eval.mjs
+//   node tests/evals/tier-c-eval.mjs   (provider from the repo-root .env, see tests/lib/llmProvider.mjs)
 //
 // One call per model, over finished ontologies — no interviews. Runs the SAME
 // prompt the shipped Tier C uses, read out of index.html rather than copied,
@@ -17,10 +17,12 @@ import { fileURLToPath } from "node:url";
 import { launchChromium } from "../lib/browser.mjs";
 import { APP_URL } from "../lib/page.mjs";
 import { chatOnce, resolveClientConfig } from "./lib/chatClient.mjs";
+import { modelIdFor } from "../lib/llmProvider.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const OUT = path.join(__dirname, "results", "baselines", "tier-c");
-const MODEL = process.env.TIER_C_MODEL || "gpt-5.4";
+const config = resolveClientConfig();
+const MODEL = process.env.TIER_C_MODEL || modelIdFor(config, "gpt-5.4");
 const sha256 = (s) => crypto.createHash("sha256").update(s).digest("hex");
 
 // The nine finished ontologies available: three anchors, six #85 arm models.
@@ -30,7 +32,6 @@ const SOURCES = [
     ({ id: `${arm}-${r}`, file: path.join(__dirname, "results", "baselines", "self-correcting-interviewer", arm, r, "recovered-model.yaml") }))),
 ].filter((s) => fs.existsSync(s.file));
 
-const config = resolveClientConfig();
 fs.mkdirSync(OUT, { recursive: true });
 
 const browser = await launchChromium();

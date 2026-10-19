@@ -232,8 +232,8 @@ class RunCompileLiveTests(unittest.TestCase):
             out_dir = tmp_path / "out"
             with mock.patch.object(
                 compile_mod,
-                "load_azure_config",
-                return_value={"endpoint": None, "api_key": None, "api_version": "x", "deployment": "gpt-5.4"},
+                "load_llm_config",
+                return_value={"provider": "azure", "endpoint": None, "api_key": None, "api_version": "x", "deployment": "gpt-5.4"},
             ):
                 rc = compile_mod.run_compile(source_ir_path, manifest_path, out_dir, runs=None, scope_note=None, dry_run=False)
         self.assertEqual(rc, 1)
@@ -247,8 +247,9 @@ class RunCompileLiveTests(unittest.TestCase):
 
             with mock.patch.object(
                 compile_mod,
-                "load_azure_config",
+                "load_llm_config",
                 return_value={
+                    "provider": "azure",
                     "endpoint": "https://fake.openai.azure.com/",
                     "api_key": "fake-key",
                     "api_version": "2024-12-01-preview",
@@ -288,8 +289,9 @@ class RunCompileLiveTests(unittest.TestCase):
 
             with mock.patch.object(
                 compile_mod,
-                "load_azure_config",
+                "load_llm_config",
                 return_value={
+                    "provider": "azure",
                     "endpoint": "https://fake.openai.azure.com/",
                     "api_key": "fake-key",
                     "api_version": "2024-12-01-preview",
@@ -311,6 +313,43 @@ class RunCompileLiveTests(unittest.TestCase):
             events = [json.loads(line)["event"] for line in log_lines]
             self.assertIn("run_normalized", events)
 
+    def test_bedrock_config_builds_a_plain_openai_client_on_bedrock_mantle(self):
+        # Issue #183: the same pipeline on AWS Bedrock -- an OpenAI SDK client
+        # pointed at bedrock-mantle's /openai/v1 with the Bedrock key, and the
+        # Bedrock model id as the model.
+        FakeClient, calls = _fake_client_class([SAMPLE_RESPONSE_CONTENT])
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            manifest_path, source_ir_path = self._write_inputs(tmp_path, runs=1)
+            out_dir = tmp_path / "out"
+            constructed = []
+
+            def make(**kwargs):
+                client = FakeClient(**kwargs)
+                constructed.append(kwargs)
+                return client
+
+            with mock.patch.object(
+                compile_mod,
+                "load_llm_config",
+                return_value={
+                    "provider": "bedrock",
+                    "endpoint": "https://bedrock-mantle.us-east-1.api.aws",
+                    "api_key": "ABSKfake",
+                    "api_version": None,
+                    "region": "us-east-1",
+                    "deployment": "openai.gpt-6.1-sol",
+                },
+            ), mock.patch("openai.OpenAI", make), mock.patch("openai.AzureOpenAI", side_effect=AssertionError("not Azure")):
+                rc = compile_mod.run_compile(source_ir_path, manifest_path, out_dir, runs=None, scope_note=None, dry_run=False)
+
+            self.assertEqual(rc, 0)
+            self.assertEqual(constructed, [{"api_key": "ABSKfake", "base_url": "https://bedrock-mantle.us-east-1.api.aws/openai/v1"}])
+            self.assertEqual(calls[0]["model"], "openai.gpt-6.1-sol")
+            run_manifest = json.loads((out_dir / "run-manifest.json").read_text(encoding="utf-8"))
+            self.assertEqual(run_manifest["provider"], "bedrock")
+            self.assertEqual(run_manifest["deployment"], "openai.gpt-6.1-sol")
+
     def test_runs_override_beats_manifest_runs(self):
         FakeClient, calls = _fake_client_class([SAMPLE_RESPONSE_CONTENT])
         with tempfile.TemporaryDirectory() as tmp:
@@ -320,8 +359,9 @@ class RunCompileLiveTests(unittest.TestCase):
 
             with mock.patch.object(
                 compile_mod,
-                "load_azure_config",
+                "load_llm_config",
                 return_value={
+                    "provider": "azure",
                     "endpoint": "https://fake.openai.azure.com/",
                     "api_key": "fake-key",
                     "api_version": "2024-12-01-preview",
