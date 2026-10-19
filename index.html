@@ -1483,7 +1483,8 @@
     font-size: 13px;
   }
 
-  #agent-key-input, #agent-azure-endpoint-input, #agent-azure-api-version-input {
+  #agent-key-input, #agent-azure-endpoint-input, #agent-azure-api-version-input,
+  #agent-bedrock-region-input, #agent-bedrock-endpoint-input {
     width: 100%;
     box-sizing: border-box;
     font: inherit;
@@ -1503,20 +1504,31 @@
     opacity: 0.65;
   }
 
-  /* The small link/summary row that replaces the old always-visible Azure
-     endpoint field in the main connect modal (design critique, 2026-08) --
-     styled like #agent-forget-key's own dashed-border "secondary action"
-     look so it doesn't compete visually with the primary key field above
-     it. Its text doubles as the "is Azure configured" indicator: plain
-     link text when not configured, the endpoint itself once it is. */
-  #agent-azure-config-open {
-    display: block;
-    width: 100%;
-    box-sizing: border-box;
+  /* The quiet provider row under the key field (design critique, 2026-08;
+     issue #183): a muted caption and one small dashed-border button per
+     non-default provider, styled like #agent-forget-key's own "secondary
+     action" look so it doesn't compete visually with the primary key field
+     above it. Once a provider is configured the row shows only that
+     provider's summary, full width -- its text doubles as the "which
+     provider" indicator. */
+  #agent-provider-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
     margin: 8px 0 0;
     font-size: 12px;
+  }
+
+  #agent-provider-caption {
+    color: var(--toolbar-fg);
+    opacity: 0.65;
+  }
+
+  #agent-provider-row button {
+    font-size: 12px;
     text-align: left;
-    padding: 6px 9px;
+    padding: 4px 9px;
     color: var(--toolbar-fg);
     background: transparent;
     border: 1px dashed var(--toolbar-border);
@@ -1524,14 +1536,21 @@
     cursor: pointer;
   }
 
-  #agent-azure-config-open:hover {
+  #agent-provider-row.configured button {
+    flex: 1;
+    padding: 6px 9px;
+    overflow-wrap: anywhere;
+  }
+
+  #agent-provider-row button:hover {
     background: var(--btn-bg-hover);
   }
 
   /* Remove sits apart from Cancel/Save (a destructive action, not a peer of
      the other two) -- pushed to the opposite end of .modal-actions' flex
      row instead of grouped with them. */
-  #agent-azure-config-remove {
+  #agent-azure-config-remove,
+  #agent-bedrock-config-remove {
     margin-right: auto;
   }
 
@@ -2256,7 +2275,15 @@
     <h2 id="agent-connect-title" class="modal-title">Segéd ügynök csatlakoztatása</h2>
     <label id="agent-key-label" class="details-field-label" for="agent-key-input">OpenAI API kulcs</label>
     <input id="agent-key-input" type="password" autocomplete="off" spellcheck="false">
-    <button id="agent-azure-config-open" type="button">Azure OpenAI-t használsz?</button>
+    <!-- The quiet provider row (issue #183): OpenAI needs nothing but the key
+         above; Azure OpenAI and AWS Bedrock each open their own small
+         settings popup. Once one is configured, its summary is all this row
+         shows. -->
+    <div id="agent-provider-row">
+      <span id="agent-provider-caption">Másik szolgáltató:</span>
+      <button id="agent-azure-config-open" type="button">Azure OpenAI</button>
+      <button id="agent-bedrock-config-open" type="button">AWS Bedrock</button>
+    </div>
     <label id="agent-model-label" class="details-field-label" for="agent-model-select-modal">Modell</label>
     <select id="agent-model-select-modal" disabled></select>
     <label id="agent-remember-row" class="agent-remember-row">
@@ -2290,6 +2317,37 @@
       <button id="agent-azure-config-remove" type="button">Azure eltávolítása</button>
       <button id="agent-azure-config-cancel" type="button">Mégse</button>
       <button id="agent-azure-config-save" type="button">Mentés</button>
+    </div>
+  </div>
+</div>
+
+<!-- AWS Bedrock settings popup (issue #183) -- same swap pattern as the
+     Azure one above. Only the region is needed; the endpoint is derived
+     from it (bedrock-mantle, the Bedrock endpoint a browser can call). -->
+<div id="agent-bedrock-config-overlay" class="modal-overlay">
+  <div id="agent-bedrock-config-dialog" class="modal-dialog" role="dialog" aria-modal="true">
+    <h2 id="agent-bedrock-config-title" class="modal-title">AWS Bedrock beállítások</h2>
+    <label id="agent-bedrock-region-label" class="details-field-label" for="agent-bedrock-region-input">AWS régió</label>
+    <input id="agent-bedrock-region-input" type="text" autocomplete="off" spellcheck="false" list="agent-bedrock-regions" placeholder="us-east-1">
+    <datalist id="agent-bedrock-regions">
+      <option value="us-east-1"></option>
+      <option value="us-east-2"></option>
+      <option value="us-west-2"></option>
+      <option value="eu-central-1"></option>
+      <option value="eu-west-1"></option>
+      <option value="eu-north-1"></option>
+      <option value="ap-northeast-1"></option>
+      <option value="ap-southeast-2"></option>
+    </datalist>
+    <p id="agent-bedrock-region-hint" class="agent-field-hint"></p>
+    <label id="agent-bedrock-endpoint-label" class="details-field-label" for="agent-bedrock-endpoint-input">Végpont (nem kötelező)</label>
+    <input id="agent-bedrock-endpoint-input" type="text" autocomplete="off" spellcheck="false" placeholder="https://bedrock-mantle.us-east-1.api.aws">
+    <p id="agent-bedrock-endpoint-hint" class="agent-field-hint"></p>
+    <p id="agent-bedrock-config-error" class="agent-connect-error" role="alert"></p>
+    <div class="modal-actions">
+      <button id="agent-bedrock-config-remove" type="button">Bedrock eltávolítása</button>
+      <button id="agent-bedrock-config-cancel" type="button">Mégse</button>
+      <button id="agent-bedrock-config-save" type="button">Mentés</button>
     </div>
   </div>
 </div>
@@ -2849,13 +2907,26 @@ const STRINGS = {
     },
     // Helper Agent (helper_agent_plan.md) — BYOK chat panel, Phase 1.
     agentPanelToggle: "Helper agent",
-    agentPanelIntro: "Connect with your own OpenAI or Azure OpenAI API key to a helper agent that assists with building the domain model.",
+    agentPanelIntro: "Connect with your own OpenAI, Azure OpenAI or AWS Bedrock API key to a helper agent that assists with building the domain model.",
     agentConnect: "Connect",
     agentConnectTitle: "Connect helper agent",
     agentKeyLabel: "OpenAI API key",
     agentKeyLabelAzure: "Azure OpenAI API key",
-    agentAzureConfigLink: "Using Azure OpenAI?",
+    agentKeyLabelBedrock: "AWS Bedrock API key",
+    agentOtherProviderCaption: "Other provider:",
+    agentAzureConfigLink: "Azure OpenAI",
     agentAzureConfiguredSummary: (endpoint) => `Azure OpenAI: ${endpoint} (edit)`,
+    agentBedrockConfigLink: "AWS Bedrock",
+    agentBedrockConfiguredSummary: (where) => `AWS Bedrock: ${where} (edit)`,
+    agentBedrockConfigTitle: "AWS Bedrock settings",
+    agentBedrockRegionLabel: "AWS region",
+    agentBedrockRegionHint: "The region of your Bedrock API key. GPT-6.1 Sol is served in us-east-1.",
+    agentBedrockEndpointLabel: "Endpoint (optional)",
+    agentBedrockEndpointHint: "Leave blank to use the region's bedrock-mantle endpoint.",
+    agentBedrockConfigRemove: "Remove Bedrock",
+    agentErrorInvalidRegion: "That doesn't look like an AWS region (expected something like us-east-1).",
+    agentErrorInvalidBedrockEndpoint: "That doesn't look like a valid endpoint URL (expected something like https://bedrock-mantle.us-east-1.api.aws).",
+    agentErrorBedrockRuntimeEndpoint: "bedrock-runtime endpoints don't accept requests from a browser. Leave the endpoint blank to use bedrock-mantle.",
     agentAzureConfigTitle: "Azure OpenAI settings",
     agentAzureEndpointLabel: "Azure OpenAI endpoint",
     agentAzureEndpointHint: "Leave blank to use OpenAI directly. For Azure OpenAI, paste your resource endpoint here.",
@@ -2881,10 +2952,10 @@ const STRINGS = {
     agentErrorGeneric: (status) => `Connection failed (HTTP ${status}). Check your key and try again.`,
     // Helper Agent — Phase 2 (live chat).
     agentContextCompacted: "Earlier context was summarized to fit the model's limit.",
-    agentChatErrorInvalidKey: "OpenAI rejected the API key. Disconnect and reconnect with a valid one.",
+    agentChatErrorInvalidKey: "The provider rejected the API key. Disconnect and reconnect with a valid one.",
     agentChatErrorRateLimit: "Rate limit reached. Wait a moment and try again.",
     agentChatErrorInsufficientQuota: "This OpenAI account is out of quota. Check your plan and billing on platform.openai.com — waiting will not help.",
-    agentChatErrorNetwork: "Could not reach the OpenAI API (network or CORS error).",
+    agentChatErrorNetwork: "Could not reach the model provider's API (network or CORS error).",
     agentChatErrorContextLength: "The conversation is too long and couldn't be shortened further. Try starting a new topic.",
     agentChatErrorGeneric: "Something went wrong contacting the agent. Try again.",
     // Helper Agent — Phase 3 (tool-calling).
@@ -3211,13 +3282,26 @@ const STRINGS = {
     },
     // Helper Agent (helper_agent_plan.md) — BYOK chat panel, Phase 1.
     agentPanelToggle: "Segéd ügynök",
-    agentPanelIntro: "Csatlakozz a saját OpenAI vagy Azure OpenAI API kulcsoddal egy segéd ügynökhöz, ami a doménmodell felépítésében segít.",
+    agentPanelIntro: "Csatlakozz a saját OpenAI, Azure OpenAI vagy AWS Bedrock API kulcsoddal egy segéd ügynökhöz, ami a doménmodell felépítésében segít.",
     agentConnect: "Csatlakozás",
     agentConnectTitle: "Segéd ügynök csatlakoztatása",
     agentKeyLabel: "OpenAI API kulcs",
     agentKeyLabelAzure: "Azure OpenAI API kulcs",
-    agentAzureConfigLink: "Azure OpenAI-t használsz?",
+    agentKeyLabelBedrock: "AWS Bedrock API kulcs",
+    agentOtherProviderCaption: "Másik szolgáltató:",
+    agentAzureConfigLink: "Azure OpenAI",
     agentAzureConfiguredSummary: (endpoint) => `Azure OpenAI: ${endpoint} (szerkesztés)`,
+    agentBedrockConfigLink: "AWS Bedrock",
+    agentBedrockConfiguredSummary: (where) => `AWS Bedrock: ${where} (szerkesztés)`,
+    agentBedrockConfigTitle: "AWS Bedrock beállítások",
+    agentBedrockRegionLabel: "AWS régió",
+    agentBedrockRegionHint: "A Bedrock API kulcsod régiója. A GPT-6.1 Sol az us-east-1 régióban érhető el.",
+    agentBedrockEndpointLabel: "Végpont (nem kötelező)",
+    agentBedrockEndpointHint: "Hagyd üresen a régió bedrock-mantle végpontjához.",
+    agentBedrockConfigRemove: "Bedrock eltávolítása",
+    agentErrorInvalidRegion: "Ez nem tűnik AWS régiónak (valami ilyesmit várunk: us-east-1).",
+    agentErrorInvalidBedrockEndpoint: "Ez nem tűnik érvényes végpont URL-nek (valami ilyesmit várunk: https://bedrock-mantle.us-east-1.api.aws).",
+    agentErrorBedrockRuntimeEndpoint: "A bedrock-runtime végpontok nem fogadnak kérést böngészőből. Hagyd üresen a végpontot a bedrock-mantle használatához.",
     agentAzureConfigTitle: "Azure OpenAI beállítások",
     agentAzureEndpointLabel: "Azure OpenAI végpont",
     agentAzureEndpointHint: "Hagyd üresen az OpenAI közvetlen használatához. Azure OpenAI esetén add meg az erőforrásod végpontját.",
@@ -3243,10 +3327,10 @@ const STRINGS = {
     agentErrorGeneric: (status) => `Sikertelen csatlakozás (HTTP ${status}). Ellenőrizd a kulcsot és próbáld újra.`,
     // Helper Agent — Phase 2 (élő beszélgetés).
     agentContextCompacted: "A korábbi beszélgetést összefoglaltuk, hogy beleférjen a modell korlátjába.",
-    agentChatErrorInvalidKey: "Az OpenAI elutasította az API kulcsot. Válaszd le, majd csatlakozz újra érvényes kulccsal.",
+    agentChatErrorInvalidKey: "A szolgáltató elutasította az API kulcsot. Válaszd le, majd csatlakozz újra érvényes kulccsal.",
     agentChatErrorRateLimit: "Elérted a sebességkorlátot. Várj egy kicsit, majd próbáld újra.",
     agentChatErrorInsufficientQuota: "Ennek az OpenAI fióknak elfogyott a kerete. Ellenőrizd az előfizetést és a számlázást a platform.openai.com oldalon — várakozás nem segít.",
-    agentChatErrorNetwork: "Nem sikerült elérni az OpenAI API-t (hálózati vagy CORS hiba).",
+    agentChatErrorNetwork: "Nem sikerült elérni a modellszolgáltató API-ját (hálózati vagy CORS hiba).",
     agentChatErrorContextLength: "A beszélgetés túl hosszú, és nem sikerült tovább rövidíteni. Próbálj új témát kezdeni.",
     agentChatErrorGeneric: "Hiba történt az ügynök elérésekor. Próbáld újra.",
     // Helper Agent — Phase 3 (eszközhívások).
@@ -3525,7 +3609,16 @@ function applyAgentLanguage() {
   byId("agent-azure-config-remove").textContent = t("agentAzureConfigRemove");
   byId("agent-azure-config-cancel").textContent = t("cancel");
   byId("agent-azure-config-save").textContent = t("agentAzureConfigSave");
-  updateAgentAzureConfigSummary(); // also re-renders the link/summary button's text
+  byId("agent-bedrock-config-title").textContent = t("agentBedrockConfigTitle");
+  byId("agent-bedrock-region-label").textContent = t("agentBedrockRegionLabel");
+  byId("agent-bedrock-region-hint").textContent = t("agentBedrockRegionHint");
+  byId("agent-bedrock-endpoint-label").textContent = t("agentBedrockEndpointLabel");
+  byId("agent-bedrock-endpoint-hint").textContent = t("agentBedrockEndpointHint");
+  byId("agent-bedrock-config-remove").textContent = t("agentBedrockConfigRemove");
+  byId("agent-bedrock-config-cancel").textContent = t("cancel");
+  byId("agent-bedrock-config-save").textContent = t("agentAzureConfigSave");
+  renderAgentBedrockConfigError();
+  updateAgentAzureConfigSummary(); // also re-renders the provider row's text
   byId("agent-model-label").textContent = t("agentModelLabel");
   byId("agent-remember-text").textContent = t("agentRememberKey");
   byId("agent-connect-cancel").textContent = t("cancel");
@@ -5604,7 +5697,7 @@ let activeConfirm = null;
 // consts' own declaration order.
 function isAnyModalOpen() {
   return ["confirm-overlay", "details-overlay", "domain-model-overlay", "import-overlay", "welcome-overlay", "help-overlay",
-      "consistency-overlay", "review-changes-overlay", "agent-connect-overlay", "agent-azure-config-overlay", "graph-finder-overlay",
+      "consistency-overlay", "review-changes-overlay", "agent-connect-overlay", "agent-azure-config-overlay", "agent-bedrock-config-overlay", "graph-finder-overlay",
       "import-review-overlay", "export-overlay"]
     .some((id) => document.getElementById(id).style.display === "flex");
 }
@@ -7004,6 +7097,10 @@ window.addEventListener("keydown", (e) => {
   }
   if (document.getElementById("agent-azure-config-overlay").style.display === "flex") {
     if (e.key === "Escape") { e.preventDefault(); closeAzureConfigPopup(); }
+    return;
+  }
+  if (document.getElementById("agent-bedrock-config-overlay").style.display === "flex") {
+    if (e.key === "Escape") { e.preventDefault(); closeBedrockConfigPopup(); }
     return;
   }
   if (document.getElementById("agent-connect-overlay").style.display === "flex") {
@@ -9856,7 +9953,7 @@ function writeExportFiles(files) {
 // ---------------------------------------------------------------------------
 const SESSION_BUNDLE_FORMAT = "kg-session-bundle";
 const SESSION_BUNDLE_FORMAT_VERSION = 1;
-const SESSION_SECRET_PATTERN = /sk-[A-Za-z0-9_-]{16,}/g;
+const SESSION_SECRET_PATTERN = /sk-[A-Za-z0-9_-]{16,}|ABSK[A-Za-z0-9+/=]{16,}|bedrock-api-key-[A-Za-z0-9+/=_%.-]{16,}/g;
 
 function buildSessionBundle({ savedAt, base, jsonContent, txtContent, yamlContent }) {
   const clone = (v) => JSON.parse(JSON.stringify(v));
@@ -9886,7 +9983,7 @@ function buildSessionBundle({ savedAt, base, jsonContent, txtContent, yamlConten
     },
     interviewer: {
       model: agentState.model || null,
-      provider: agentState.connected || agentState.model ? (isAzureProvider(agentState.azureEndpoint) ? "azure" : "openai") : null,
+      provider: agentState.connected || agentState.model ? agentProviderOf(agentState) : null,
       // The system prompt is prepended to api_messages at request time rather
       // than stored with them, so it is recorded here as the page builds it now.
       system_prompt: buildAgentSystemPrompt(),
@@ -9926,7 +10023,10 @@ async function readOwnSource() {
 
 function scrubSessionSecrets(text) {
   let out = text.replace(SESSION_SECRET_PATTERN, "[redacted]");
-  for (const secret of [agentState.apiKey, agentState.azureEndpoint]) {
+  // A Bedrock endpoint is scrubbed only when it overrides the region default
+  // (a private proxy, say); the default host names nothing but the region.
+  const bedrockOverride = agentState.bedrockBaseUrl && agentState.bedrockBaseUrl !== bedrockMantleBaseUrl(agentState.bedrockRegion) ? agentState.bedrockBaseUrl : null;
+  for (const secret of [agentState.apiKey, agentState.azureEndpoint, bedrockOverride]) {
     if (secret && secret.length >= 8) out = out.split(secret).join("[redacted]");
   }
   return out;
@@ -13230,6 +13330,11 @@ const AGENT_AZURE_ENDPOINT_STORAGE_KEY = "kg-agent-azure-endpoint";
 // absent means "use AZURE_OPENAI_API_VERSION," same absent-means-default
 // convention as every other override in this popup.
 const AGENT_AZURE_API_VERSION_STORAGE_KEY = "kg-agent-azure-api-version";
+// Only ever hold values when the remembered connection is AWS Bedrock (issue
+// #183): its region, and an explicit endpoint only when one overrides the
+// region's default bedrock-mantle host.
+const AGENT_BEDROCK_REGION_STORAGE_KEY = "kg-agent-bedrock-region";
+const AGENT_BEDROCK_ENDPOINT_STORAGE_KEY = "kg-agent-bedrock-endpoint";
 // UI preference, not connection state -- deliberately its own key, same
 // reasoning as THEME_STORAGE_KEY/LANG_STORAGE_KEY (issue #55).
 const AGENT_PANEL_WIDTH_STORAGE_KEY = "kg-agent-panel-width";
@@ -13269,6 +13374,61 @@ function isAzureProvider(azureEndpoint) {
   return Boolean(azureEndpoint);
 }
 
+// AWS Bedrock (issue #183). Bedrock serves OpenAI models behind two
+// OpenAI-compatible endpoints; only bedrock-mantle can be called from a
+// browser. Checked live: bedrock-runtime's /openai/v1 route answers the CORS
+// preflight with a 400 and no Access-Control-Allow-Origin, bedrock-mantle
+// answers it with "*". So the app always talks to bedrock-mantle, derived
+// from the region unless an endpoint is given explicitly.
+const BEDROCK_DEFAULT_REGION = "us-east-1"; // the only in-region home of GPT-6.1 Sol on bedrock-mantle
+const BEDROCK_REGION_PATTERN = /^[a-z]{2}(-gov)?-[a-z]+-\d+$/;
+
+function bedrockMantleBaseUrl(region) {
+  return `https://bedrock-mantle.${region}.api.aws`;
+}
+
+// The endpoint override is a host root: a pasted ".../openai/v1" or ".../v1"
+// (the base URLs AWS's own docs show) is trimmed back to it, because the app
+// picks the path per call (bedrockChatPath).
+function normalizeBedrockEndpoint(raw) {
+  const trimmed = (raw || "").trim().replace(/\/+$/, "").replace(/\/(openai\/)?v1$/, "").replace(/\/+$/, "");
+  return trimmed || null;
+}
+
+// null when usable, else the error kind to show.
+function bedrockEndpointProblem(normalized) {
+  let u;
+  try { u = new URL(normalized); } catch (err) { return "invalidEndpoint"; }
+  if (!(u.protocol === "https:" || u.protocol === "http:") || !u.hostname) return "invalidEndpoint";
+  if (/^bedrock-runtime[.-]/i.test(u.hostname)) return "bedrockRuntimeEndpoint";
+  return null;
+}
+
+// The one provider signal, generalised: a connection-shaped object
+// ({ azureEndpoint, bedrockBaseUrl }, which agentState itself is) names its
+// provider by which of the two is set. The connect flow never lets both be
+// set at once (saving one provider's settings clears the other's).
+function agentProviderOf(conn) {
+  if (conn && isAzureProvider(conn.azureEndpoint)) return "azure";
+  if (conn && conn.bedrockBaseUrl) return "bedrock";
+  return "openai";
+}
+
+// Bedrock model ids carry a vendor prefix ("openai.gpt-6.1-sol"), on
+// bedrock-runtime also a cross-Region scope ("us.", "global."); the
+// underlying OpenAI name is what every model heuristic below matches on.
+function stripBedrockModelPrefix(id) {
+  return String(id || "").replace(/^(?:[a-z]{2,6}(?:-gov)?\.)?openai\./i, "");
+}
+
+// bedrock-mantle serves different models under different path prefixes: the
+// closed-weight GPT models under /openai/v1, most others (gpt-oss among them)
+// under /v1. A wrong guess is answered with "isn't supported on this route",
+// and callAgentChatRaw then retries once under the other prefix.
+function bedrockChatPath(model) {
+  return /^openai\.gpt-(?!oss)/i.test(model) ? "/openai/v1" : "/v1";
+}
+
 // Trims whitespace and a trailing slash (so URL-joining below never
 // produces a doubled "//") -- returns null for blank input, which is what
 // tells the rest of the connect flow "no endpoint was given, use OpenAI."
@@ -13298,28 +13458,33 @@ function isValidAzureEndpoint(normalized) {
 // OpenAI) an Azure OpenAI resource can only serve chat completions for a
 // base model the resource owner has explicitly deployed under a
 // deployment name, never an arbitrary model id.
-// apiVersion is optional (falsy -- including omitted, null, or "" -- falls
-// back to AZURE_OPENAI_API_VERSION) so every existing call site that never
-// deals with the per-connection override (e.g. this file's own pure-function
-// test coverage) keeps working unchanged; only the Azure config popup's
-// Save handler ever passes a real override through, threaded via
-// agentState.azureApiVersion below.
-function agentModelsUrl(azureEndpoint, apiVersion) {
-  return isAzureProvider(azureEndpoint)
-    ? `${azureEndpoint}/openai/deployments?api-version=${apiVersion || AZURE_OPENAI_API_VERSION}`
-    : OPENAI_MODELS_URL;
+// Every URL/header helper below takes a connection-shaped object
+// ({ azureEndpoint, azureApiVersion, bedrockBaseUrl }) -- agentState itself
+// for a live connection, the connect flow's pending settings before one
+// exists. azureApiVersion is optional (falsy falls back to
+// AZURE_OPENAI_API_VERSION); only the Azure config popup's Save handler
+// ever sets a real override.
+function agentModelsUrl(conn) {
+  const provider = agentProviderOf(conn);
+  if (provider === "azure") return `${conn.azureEndpoint}/openai/deployments?api-version=${conn.azureApiVersion || AZURE_OPENAI_API_VERSION}`;
+  // bedrock-mantle's Models API is at /v1/models only (/openai/v1/models
+  // is a 404), whatever path prefix the listed models are served under.
+  if (provider === "bedrock") return `${conn.bedrockBaseUrl}/v1/models`;
+  return OPENAI_MODELS_URL;
 }
 
 // Azure's chat completions endpoint addresses the deployment via the URL
 // path itself (.../deployments/{deploymentId}/chat/completions), not a
-// `model` field in the body the way OpenAI's does -- deploymentOrModel is
-// agentState.model either way (a deployment name for Azure, a model id for
-// OpenAI), since callAgentChatRaw never needs to know which. apiVersion is
-// optional, same fallback convention as agentModelsUrl above.
-function agentChatUrl(azureEndpoint, deploymentOrModel, apiVersion) {
-  return isAzureProvider(azureEndpoint)
-    ? `${azureEndpoint}/openai/deployments/${encodeURIComponent(deploymentOrModel)}/chat/completions?api-version=${apiVersion || AZURE_OPENAI_API_VERSION}`
-    : OPENAI_CHAT_URL;
+// `model` field in the body the way OpenAI's and Bedrock's do --
+// deploymentOrModel is agentState.model either way. bedrockPath overrides
+// bedrockChatPath()'s guess (callAgentChatRaw's one retry on a wrong route).
+function agentChatUrl(conn, deploymentOrModel, bedrockPath) {
+  const provider = agentProviderOf(conn);
+  if (provider === "azure") {
+    return `${conn.azureEndpoint}/openai/deployments/${encodeURIComponent(deploymentOrModel)}/chat/completions?api-version=${conn.azureApiVersion || AZURE_OPENAI_API_VERSION}`;
+  }
+  if (provider === "bedrock") return `${conn.bedrockBaseUrl}${bedrockPath || bedrockChatPath(deploymentOrModel)}/chat/completions`;
+  return OPENAI_CHAT_URL;
 }
 
 // The one genuinely easy-to-get-wrong difference between the two APIs:
@@ -13330,9 +13495,10 @@ function agentChatUrl(azureEndpoint, deploymentOrModel, apiVersion) {
 // key that's valid for one provider is never even shaped like a valid
 // credential for the other, so sending the wrong header form doesn't
 // silently degrade -- it fails auth outright, which is exactly why this
-// needs to be right rather than "close enough."
-function agentAuthHeaders(azureEndpoint, apiKey) {
-  return isAzureProvider(azureEndpoint) ? { "api-key": apiKey } : { Authorization: `Bearer ${apiKey}` };
+// needs to be right rather than "close enough." A Bedrock API key is a
+// Bearer token, the same header form as OpenAI's.
+function agentAuthHeaders(conn, apiKey) {
+  return agentProviderOf(conn) === "azure" ? { "api-key": apiKey } : { Authorization: `Bearer ${apiKey}` };
 }
 
 // Shared backoff for both real API entry points (model discovery below and
@@ -13419,17 +13585,18 @@ function isStandardTierModel(model) {
 // live with tools attached before it was pinned.
 const AGENT_PINNED_MODEL = "gpt-6.1-sol";
 
-// Lowercase; drop a provider prefix ("azure/", "openai/"), trailing dated
-// snapshots ("-2026-09-30", "-20260930") and "-preview"; then every
+// Lowercase; drop a provider prefix ("azure/", "openai/", Bedrock's
+// "openai." and "us.openai."), trailing dated snapshots ("-2026-09-30",
+// "-20260930"), "-preview" and Bedrock version suffixes ("-1:0"); then every
 // non-alphanumeric character, so "gpt-6.1-sol", "gpt-61-sol" (Azure drops
-// dots), "gpt-6-1-sol" and "GPT 6.1 Sol" all compare equal while
-// "gpt-6.1-sol-mini" or "gpt-6.10-sol" stay different.
+// dots), "openai.gpt-6.1-sol", "gpt-6-1-sol" and "GPT 6.1 Sol" all compare
+// equal while "gpt-6.1-sol-mini" or "gpt-6.10-sol" stay different.
 function canonicalModelName(name) {
   let n = String(name || "").toLowerCase().trim();
-  n = n.slice(n.lastIndexOf("/") + 1);
+  n = stripBedrockModelPrefix(n.slice(n.lastIndexOf("/") + 1));
   for (let prev = null; prev !== n;) {
     prev = n;
-    n = n.replace(/[-_. ]?\d{4}[-_.]?\d{2}[-_.]?\d{2}$/, "").replace(/[-_. ]?preview$/, "");
+    n = n.replace(/[-_. ]?\d{4}[-_.]?\d{2}[-_.]?\d{2}$/, "").replace(/[-_. ]?preview$/, "").replace(/-v?\d+:\d+$/, "");
   }
   return n.replace(/[^a-z0-9]/g, "");
 }
@@ -13471,6 +13638,17 @@ const agentState = {
   // azureEndpoint is null, same as azureEndpoint itself being the one
   // provider signal (see isAzureProvider's own comment).
   azureApiVersion: null,
+  // AWS Bedrock (issue #183): the bedrock-mantle host root this connection
+  // talks to (null = not Bedrock), and the region it was derived from, kept
+  // for display. Mutually exclusive with azureEndpoint (agentProviderOf).
+  bedrockBaseUrl: null,
+  bedrockRegion: null,
+  // Per connection: a model whose first-guess bedrock-mantle path prefix was
+  // rejected keeps using the one that worked ({ [model]: "/v1" }).
+  bedrockRoutes: {},
+  // Set when the provider rejected prompt_cache_key as an unknown parameter
+  // on this connection; later calls leave it out (callAgentChatRaw).
+  promptCacheKeyRejected: false,
   model: null,
   models: [], // [{id, created, baseModel}], newest-first once sorted for display -- see fetchAgentModels()'s own comment on baseModel
   // Full UI transcript ({role, text}[]) vs. the API-facing working set
@@ -13744,6 +13922,7 @@ function renderAgentConnectError() {
   if (agentConnectErrorKind === "emptyKey") el.textContent = t("agentErrorEmptyKey");
   else if (agentConnectErrorKind === "invalidKey") el.textContent = t("agentErrorInvalidKey");
   else if (agentConnectErrorKind === "invalidEndpoint") el.textContent = t("agentErrorInvalidEndpoint");
+  else if (agentConnectErrorKind === "invalidBedrockEndpoint") el.textContent = t("agentErrorInvalidBedrockEndpoint");
   else if (agentConnectErrorKind === "network") el.textContent = t("agentErrorNetwork");
   else if (agentConnectErrorKind === "noModels") el.textContent = t("agentErrorNoModels");
   else if (agentConnectErrorKind && typeof agentConnectErrorKind === "object") el.textContent = t("agentErrorGeneric", agentConnectErrorKind.status);
@@ -13776,10 +13955,15 @@ function setAgentConnectError(kind) {
 // an unfamiliar future status string should degrade to "assume usable"
 // rather than silently hide a deployment this app just doesn't recognize
 // the status label for.
-async function fetchAgentModels(apiKey, azureEndpoint, apiVersion) {
-  const azure = isAzureProvider(azureEndpoint);
-  const url = agentModelsUrl(azureEndpoint, apiVersion);
-  const headers = agentAuthHeaders(azureEndpoint, apiKey);
+//
+// Bedrock (issue #183): bedrock-mantle's list spans every vendor it hosts;
+// only OpenAI's models are kept, with the vendor prefix stripped into
+// baseModel ("openai.gpt-6.1-sol" -> "gpt-6.1-sol") for the same reason.
+async function fetchAgentModels(apiKey, conn) {
+  const provider = agentProviderOf(conn);
+  const azure = provider === "azure";
+  const url = agentModelsUrl(conn);
+  const headers = agentAuthHeaders(conn, apiKey);
   for (let attempt = 1; attempt <= AGENT_RATE_LIMIT_MAX_ATTEMPTS; attempt++) {
     let res;
     try {
@@ -13808,6 +13992,11 @@ async function fetchAgentModels(apiKey, azureEndpoint, apiVersion) {
     const data = Array.isArray(json && json.data) ? json.data : [];
     const usable = data.filter((m) => m && typeof m.id === "string" &&
       !(azure && typeof m.status === "string" && /^(failed|canceled|cancelled)$/i.test(m.status)));
+    if (provider === "bedrock") {
+      return usable.filter((m) => /^(?:[a-z]{2,6}(?:-gov)?\.)?openai\./i.test(m.id)).map((m) => ({
+        id: m.id, created: typeof m.created === "number" ? m.created : 0, baseModel: stripBedrockModelPrefix(m.id),
+      }));
+    }
     if (!azure) {
       return usable.map((m) => ({ id: m.id, created: typeof m.created === "number" ? m.created : 0, baseModel: m.id }));
     }
@@ -13852,38 +14041,79 @@ function setAgentPanelExpanded(expanded) {
 //             using whichever model is currently selected.
 let agentConnectStage = "key";
 let agentPendingKey = null;
-let agentPendingAzureEndpoint = null;
+// The connection settings the key stage's model list was fetched with --
+// the ones finalize uses, even if the popups were reopened in between.
+let agentPendingConnection = null;
 let agentPendingModels = [];
-// The Azure endpoint/api-version currently attached to the in-progress
-// connect flow -- set via the Azure config popup's Save/Remove (below),
-// never by a field inline in the main modal (design critique, 2026-08: "a
-// normal OpenAI key flow, and a small link that leads to an Azure-specific
-// popup"). null endpoint = plain OpenAI, same convention as
-// agentPendingAzureEndpoint/agentState.azureEndpoint. null apiVersion =
-// use AZURE_OPENAI_API_VERSION's own default.
+// The provider settings currently attached to the in-progress connect flow
+// -- set via the Azure / Bedrock config popups' Save/Remove (below), never
+// by a field inline in the main modal (design critique, 2026-08: "a normal
+// OpenAI key flow, and a small link that leads to an Azure-specific
+// popup"). At most one of the two providers is attached: saving one clears
+// the other. null endpoint = no Azure; null apiVersion = use
+// AZURE_OPENAI_API_VERSION's own default. agentConnectBedrock is null or
+// { region, endpoint } (endpoint = an explicit override, else null).
 let agentConnectAzureEndpoint = null;
 let agentConnectAzureApiVersion = null;
+let agentConnectBedrock = null;
+// True while Bedrock was attached by recognising a pasted key rather than by
+// the user's own Save -- only then may a different key detach it again.
+let agentConnectBedrockAutoDetected = false;
+
+// A Bedrock API key is recognisable from its shape: a long-term key is the
+// base64 of "BedrockAPIKey-...", so it starts with "ABSK"; a short-term one
+// starts with "bedrock-api-key-". Nothing comparable identifies an Azure key.
+function looksLikeBedrockKey(key) {
+  return /^(ABSK[A-Za-z0-9+/=]{20,}|bedrock-api-key-\S{20,})$/.test((key || "").trim());
+}
+
+function resolvedBedrockBaseUrl(bedrock) {
+  return bedrock ? (bedrock.endpoint || bedrockMantleBaseUrl(bedrock.region)) : null;
+}
+
+function pendingAgentConnection() {
+  return {
+    azureEndpoint: agentConnectAzureEndpoint,
+    azureApiVersion: agentConnectAzureEndpoint ? agentConnectAzureApiVersion : null,
+    bedrockBaseUrl: resolvedBedrockBaseUrl(agentConnectBedrock),
+    bedrockRegion: agentConnectBedrock ? agentConnectBedrock.region : null,
+  };
+}
 
 function updateAgentConnectSubmitLabel() {
   document.getElementById("agent-connect-submit").textContent =
     agentConnectStage === "model" ? t("agentConfirmModel") : t("agentConnect");
 }
 
-// Re-renders the key field's label (plain "OpenAI API key" vs. "Azure
-// OpenAI API key") and the Azure link/summary button from whatever's
+// Re-renders the key field's label ("OpenAI API key" / "Azure OpenAI API
+// key" / "AWS Bedrock API key") and the provider row from whatever's
 // currently attached to the connect flow -- called after every change to
-// agentConnectAzureEndpoint (modal open, popup Save/Remove, language
-// toggle) so the two always agree with each other and with the actual
-// pending state.
+// it (modal open, popup Save/Remove, key auto-detection, language toggle)
+// so the two always agree with each other and with the actual pending state.
 function updateAgentKeyLabel() {
+  const provider = agentProviderOf(pendingAgentConnection());
   document.getElementById("agent-key-label").textContent =
-    t(agentConnectAzureEndpoint ? "agentKeyLabelAzure" : "agentKeyLabel");
+    t(provider === "azure" ? "agentKeyLabelAzure" : provider === "bedrock" ? "agentKeyLabelBedrock" : "agentKeyLabel");
 }
 
+// The quiet row under the key field. Nothing attached: "Other provider:"
+// with one small button per provider. One attached: that provider's
+// summary alone (click to edit), the other button hidden.
 function updateAgentAzureConfigSummary() {
-  document.getElementById("agent-azure-config-open").textContent = agentConnectAzureEndpoint
-    ? t("agentAzureConfiguredSummary", agentConnectAzureEndpoint)
-    : t("agentAzureConfigLink");
+  const azureBtn = document.getElementById("agent-azure-config-open");
+  const bedrockBtn = document.getElementById("agent-bedrock-config-open");
+  const caption = document.getElementById("agent-provider-caption");
+  const row = document.getElementById("agent-provider-row");
+  const provider = agentProviderOf(pendingAgentConnection());
+  row.classList.toggle("configured", provider !== "openai");
+  caption.textContent = t("agentOtherProviderCaption");
+  caption.style.display = provider === "openai" ? "" : "none";
+  azureBtn.style.display = provider === "bedrock" ? "none" : "";
+  bedrockBtn.style.display = provider === "azure" ? "none" : "";
+  azureBtn.textContent = provider === "azure" ? t("agentAzureConfiguredSummary", agentConnectAzureEndpoint) : t("agentAzureConfigLink");
+  bedrockBtn.textContent = provider === "bedrock"
+    ? t("agentBedrockConfiguredSummary", agentConnectBedrock.endpoint || agentConnectBedrock.region)
+    : t("agentBedrockConfigLink");
   updateAgentKeyLabel();
 }
 
@@ -13926,6 +14156,7 @@ function saveAzureConfig() {
   if (endpoint && !isValidAzureEndpoint(endpoint)) { setAgentAzureConfigError("invalidEndpoint"); return; }
   agentConnectAzureEndpoint = endpoint;
   agentConnectAzureApiVersion = endpoint ? (apiVersionRaw || null) : null;
+  if (endpoint) { agentConnectBedrock = null; agentConnectBedrockAutoDetected = false; }
   updateAgentAzureConfigSummary();
   closeAzureConfigPopup();
 }
@@ -13940,29 +14171,113 @@ function removeAzureConfig() {
   closeAzureConfigPopup();
 }
 
+// AWS Bedrock settings popup (issue #183) -- the same swap pattern as the
+// Azure one above.
+let agentBedrockConfigErrorKind = null; // null | "invalidRegion" | "invalidEndpoint" | "bedrockRuntimeEndpoint"
+
+function renderAgentBedrockConfigError() {
+  const key = { invalidRegion: "agentErrorInvalidRegion", invalidEndpoint: "agentErrorInvalidBedrockEndpoint", bedrockRuntimeEndpoint: "agentErrorBedrockRuntimeEndpoint" }[agentBedrockConfigErrorKind];
+  document.getElementById("agent-bedrock-config-error").textContent = key ? t(key) : "";
+}
+
+function setAgentBedrockConfigError(kind) {
+  agentBedrockConfigErrorKind = kind;
+  renderAgentBedrockConfigError();
+}
+
+function openBedrockConfigPopup() {
+  document.getElementById("agent-bedrock-region-input").value = agentConnectBedrock ? agentConnectBedrock.region : BEDROCK_DEFAULT_REGION;
+  document.getElementById("agent-bedrock-endpoint-input").value = (agentConnectBedrock && agentConnectBedrock.endpoint) || "";
+  setAgentBedrockConfigError(null);
+  document.getElementById("agent-connect-overlay").style.display = "none";
+  document.getElementById("agent-bedrock-config-overlay").style.display = "flex";
+}
+
+function closeBedrockConfigPopup() {
+  document.getElementById("agent-bedrock-config-overlay").style.display = "none";
+  document.getElementById("agent-connect-overlay").style.display = "flex";
+}
+
+function saveBedrockConfig() {
+  const region = document.getElementById("agent-bedrock-region-input").value.trim().toLowerCase() || BEDROCK_DEFAULT_REGION;
+  const endpoint = normalizeBedrockEndpoint(document.getElementById("agent-bedrock-endpoint-input").value);
+  if (!BEDROCK_REGION_PATTERN.test(region)) { setAgentBedrockConfigError("invalidRegion"); return; }
+  const problem = endpoint ? bedrockEndpointProblem(endpoint) : null;
+  if (problem) { setAgentBedrockConfigError(problem); return; }
+  agentConnectBedrock = { region, endpoint };
+  agentConnectBedrockAutoDetected = false;
+  agentConnectAzureEndpoint = null;
+  agentConnectAzureApiVersion = null;
+  updateAgentAzureConfigSummary();
+  closeBedrockConfigPopup();
+}
+
+function removeBedrockConfig() {
+  agentConnectBedrock = null;
+  agentConnectBedrockAutoDetected = false;
+  setAgentBedrockConfigError(null);
+  updateAgentAzureConfigSummary();
+  closeBedrockConfigPopup();
+}
+
+// Typing or pasting a key: a Bedrock-shaped key with no provider chosen
+// attaches Bedrock in its default region (the summary row shows it, one
+// click away from changing); replacing it with a key of another shape
+// detaches it again, but only if it was attached this way.
+function onAgentKeyInput() {
+  const key = document.getElementById("agent-key-input").value;
+  const provider = agentProviderOf(pendingAgentConnection());
+  if (provider === "openai" && looksLikeBedrockKey(key)) {
+    agentConnectBedrock = { region: BEDROCK_DEFAULT_REGION, endpoint: null };
+    agentConnectBedrockAutoDetected = true;
+    updateAgentAzureConfigSummary();
+  } else if (provider === "bedrock" && agentConnectBedrockAutoDetected && key.trim() && !looksLikeBedrockKey(key)) {
+    agentConnectBedrock = null;
+    agentConnectBedrockAutoDetected = false;
+    updateAgentAzureConfigSummary();
+  }
+}
+
+function readStoredAgentConnectSettings() {
+  try {
+    const azure = normalizeAzureEndpoint(localStorage.getItem(AGENT_AZURE_ENDPOINT_STORAGE_KEY) || "");
+    const region = localStorage.getItem(AGENT_BEDROCK_REGION_STORAGE_KEY);
+    return {
+      key: localStorage.getItem(AGENT_KEY_STORAGE_KEY) || "",
+      azureEndpoint: azure,
+      azureApiVersion: azure ? (localStorage.getItem(AGENT_AZURE_API_VERSION_STORAGE_KEY) || null) : null,
+      bedrock: !azure && region ? { region, endpoint: normalizeBedrockEndpoint(localStorage.getItem(AGENT_BEDROCK_ENDPOINT_STORAGE_KEY) || "") } : null,
+    };
+  } catch (err) {
+    return { key: "", azureEndpoint: null, azureApiVersion: null, bedrock: null };
+  }
+}
+
+const AGENT_CONNECTION_STORAGE_KEYS = [
+  AGENT_KEY_STORAGE_KEY, AGENT_MODEL_STORAGE_KEY,
+  AGENT_AZURE_ENDPOINT_STORAGE_KEY, AGENT_AZURE_API_VERSION_STORAGE_KEY,
+  AGENT_BEDROCK_REGION_STORAGE_KEY, AGENT_BEDROCK_ENDPOINT_STORAGE_KEY,
+];
+
 function openAgentConnectModal() {
   if (isAnyModalOpen()) return;
   agentConnectStage = "key";
   agentPendingKey = null;
-  agentPendingAzureEndpoint = null;
+  agentPendingConnection = null;
   agentPendingModels = [];
   setAgentConnectError(null);
-  // Pre-fills a remembered key (and, for a remembered Azure connection, its
-  // endpoint + api-version too) so a returning user doesn't retype any of
+  // Pre-fills a remembered key (and, for a remembered Azure or Bedrock
+  // connection, its settings too) so a returning user doesn't retype any of
   // it, but Connect still requires an explicit click either way —
   // persistence is just a convenience, not a bypass of the "always via the
   // modal" vision.
-  let storedKey = "";
-  try {
-    storedKey = localStorage.getItem(AGENT_KEY_STORAGE_KEY) || "";
-    agentConnectAzureEndpoint = normalizeAzureEndpoint(localStorage.getItem(AGENT_AZURE_ENDPOINT_STORAGE_KEY) || "");
-    agentConnectAzureApiVersion = localStorage.getItem(AGENT_AZURE_API_VERSION_STORAGE_KEY) || null;
-  } catch (err) {
-    agentConnectAzureEndpoint = null;
-    agentConnectAzureApiVersion = null;
-  }
-  document.getElementById("agent-key-input").value = storedKey;
-  document.getElementById("agent-remember-key").checked = Boolean(storedKey);
+  const stored = readStoredAgentConnectSettings();
+  agentConnectAzureEndpoint = stored.azureEndpoint;
+  agentConnectAzureApiVersion = stored.azureApiVersion;
+  agentConnectBedrock = stored.bedrock;
+  agentConnectBedrockAutoDetected = false;
+  document.getElementById("agent-key-input").value = stored.key;
+  document.getElementById("agent-remember-key").checked = Boolean(stored.key);
   document.getElementById("agent-connect-submit").disabled = false;
   const modalSelect = document.getElementById("agent-model-select-modal");
   modalSelect.textContent = "";
@@ -13999,21 +14314,26 @@ async function submitAgentConnect() {
   if (agentConnectStage === "key") {
     const key = document.getElementById("agent-key-input").value.trim();
     if (!key) { setAgentConnectError("emptyKey"); return; }
-    // Already validated once by the Azure config popup's own Save handler --
-    // re-checked here defensively too, since agentConnectAzureEndpoint can
-    // also come straight from localStorage (openAgentConnectModal) without
-    // going through Save, e.g. a value hand-edited or left over from an
-    // older version of this app.
-    const azureEndpoint = agentConnectAzureEndpoint;
-    if (azureEndpoint && !isValidAzureEndpoint(azureEndpoint)) { setAgentConnectError("invalidEndpoint"); return; }
+    // Already validated once by the config popups' own Save handlers --
+    // re-checked here defensively too, since the pending settings can also
+    // come straight from localStorage (openAgentConnectModal) without going
+    // through Save, e.g. a value hand-edited or left over from an older
+    // version of this app.
+    const conn = pendingAgentConnection();
+    if (conn.azureEndpoint && !isValidAzureEndpoint(conn.azureEndpoint)) { setAgentConnectError("invalidEndpoint"); return; }
+    if (agentConnectBedrock && (!BEDROCK_REGION_PATTERN.test(agentConnectBedrock.region) ||
+        (agentConnectBedrock.endpoint && bedrockEndpointProblem(agentConnectBedrock.endpoint)))) {
+      setAgentConnectError("invalidBedrockEndpoint");
+      return;
+    }
     setAgentConnectError(null);
     submitBtn.disabled = true;
     submitBtn.textContent = t("agentConnecting");
     try {
-      const models = await fetchAgentModels(key, azureEndpoint, agentConnectAzureApiVersion);
+      const models = await fetchAgentModels(key, conn);
       if (!models.length) { setAgentConnectError("noModels"); return; }
       agentPendingKey = key;
-      agentPendingAzureEndpoint = azureEndpoint;
+      agentPendingConnection = conn;
       agentPendingModels = models;
       const defaultModel = pickDefaultAgentModel(models);
       populateAgentModelSelects(models, defaultModel);
@@ -14031,34 +14351,36 @@ async function submitAgentConnect() {
   // agentConnectStage === "model": finalize with whichever model is selected.
   const chosenModel = document.getElementById("agent-model-select-modal").value;
   const remember = document.getElementById("agent-remember-key").checked;
+  const conn = agentPendingConnection;
   agentState.apiKey = agentPendingKey;
   agentState.rememberKey = remember;
-  agentState.azureEndpoint = agentPendingAzureEndpoint;
-  agentState.azureApiVersion = isAzureProvider(agentPendingAzureEndpoint) ? agentConnectAzureApiVersion : null;
+  agentState.azureEndpoint = conn.azureEndpoint;
+  agentState.azureApiVersion = conn.azureApiVersion;
+  agentState.bedrockBaseUrl = conn.bedrockBaseUrl;
+  agentState.bedrockRegion = conn.bedrockRegion;
+  agentState.bedrockRoutes = {};
+  agentState.promptCacheKeyRejected = false;
   agentState.models = agentPendingModels;
   agentState.model = chosenModel;
-  // One prompt_cache_key per connection, for both providers (issue #176):
-  // Azure OpenAI documents the same parameter for GPT-5.6 and later model
-  // families, with no specific API version required. See callAgentChatRaw.
+  // One prompt_cache_key per connection, for every provider (issues #176,
+  // #183): Azure OpenAI documents the same parameter for GPT-5.6 and later
+  // model families, with no specific API version required, and so does
+  // Bedrock. See callAgentChatRaw.
   agentState.promptCacheKey = `kg-agent-${crypto.randomUUID()}`;
   agentState.connected = true;
   try {
+    for (const k of AGENT_CONNECTION_STORAGE_KEYS) localStorage.removeItem(k);
     if (remember) {
       localStorage.setItem(AGENT_KEY_STORAGE_KEY, agentPendingKey);
       localStorage.setItem(AGENT_MODEL_STORAGE_KEY, chosenModel || "");
-      if (agentPendingAzureEndpoint) {
-        localStorage.setItem(AGENT_AZURE_ENDPOINT_STORAGE_KEY, agentPendingAzureEndpoint);
-        if (agentConnectAzureApiVersion) localStorage.setItem(AGENT_AZURE_API_VERSION_STORAGE_KEY, agentConnectAzureApiVersion);
-        else localStorage.removeItem(AGENT_AZURE_API_VERSION_STORAGE_KEY);
-      } else {
-        localStorage.removeItem(AGENT_AZURE_ENDPOINT_STORAGE_KEY);
-        localStorage.removeItem(AGENT_AZURE_API_VERSION_STORAGE_KEY);
+      const provider = agentProviderOf(conn);
+      if (provider === "azure") {
+        localStorage.setItem(AGENT_AZURE_ENDPOINT_STORAGE_KEY, conn.azureEndpoint);
+        if (conn.azureApiVersion) localStorage.setItem(AGENT_AZURE_API_VERSION_STORAGE_KEY, conn.azureApiVersion);
+      } else if (provider === "bedrock") {
+        localStorage.setItem(AGENT_BEDROCK_REGION_STORAGE_KEY, conn.bedrockRegion);
+        if (conn.bedrockBaseUrl !== bedrockMantleBaseUrl(conn.bedrockRegion)) localStorage.setItem(AGENT_BEDROCK_ENDPOINT_STORAGE_KEY, conn.bedrockBaseUrl);
       }
-    } else {
-      localStorage.removeItem(AGENT_KEY_STORAGE_KEY);
-      localStorage.removeItem(AGENT_MODEL_STORAGE_KEY);
-      localStorage.removeItem(AGENT_AZURE_ENDPOINT_STORAGE_KEY);
-      localStorage.removeItem(AGENT_AZURE_API_VERSION_STORAGE_KEY);
     }
   } catch (err) { /* best-effort only, mirrors the language/theme persistence precedent */ }
   populateAgentModelSelects(agentPendingModels, chosenModel);
@@ -14073,6 +14395,10 @@ function disconnectAgent() {
   agentState.apiKey = null;
   agentState.azureEndpoint = null;
   agentState.azureApiVersion = null;
+  agentState.bedrockBaseUrl = null;
+  agentState.bedrockRegion = null;
+  agentState.bedrockRoutes = {};
+  agentState.promptCacheKeyRejected = false;
   agentState.models = [];
   agentState.model = null;
   agentState.transcript = [];
@@ -14117,10 +14443,7 @@ function restartAgentConversation() {
 
 function forgetStoredAgentKey() {
   try {
-    localStorage.removeItem(AGENT_KEY_STORAGE_KEY);
-    localStorage.removeItem(AGENT_MODEL_STORAGE_KEY);
-    localStorage.removeItem(AGENT_AZURE_ENDPOINT_STORAGE_KEY);
-    localStorage.removeItem(AGENT_AZURE_API_VERSION_STORAGE_KEY);
+    for (const k of AGENT_CONNECTION_STORAGE_KEYS) localStorage.removeItem(k);
   } catch (err) { /* best-effort only */ }
   document.getElementById("agent-forget-key-row").style.display = "none";
 }
@@ -14186,6 +14509,19 @@ document.getElementById("agent-azure-endpoint-input").addEventListener("keydown"
 document.getElementById("agent-azure-api-version-input").addEventListener("keydown", (e) => {
   if (e.key === "Enter") saveAzureConfig();
 });
+document.getElementById("agent-key-input").addEventListener("input", () => onAgentKeyInput());
+document.getElementById("agent-bedrock-config-open").addEventListener("click", () => openBedrockConfigPopup());
+document.getElementById("agent-bedrock-config-cancel").addEventListener("click", () => closeBedrockConfigPopup());
+document.getElementById("agent-bedrock-config-overlay").addEventListener("click", (e) => {
+  if (e.target === document.getElementById("agent-bedrock-config-overlay")) closeBedrockConfigPopup();
+});
+document.getElementById("agent-bedrock-config-save").addEventListener("click", () => saveBedrockConfig());
+document.getElementById("agent-bedrock-config-remove").addEventListener("click", () => removeBedrockConfig());
+for (const id of ["agent-bedrock-region-input", "agent-bedrock-endpoint-input"]) {
+  document.getElementById(id).addEventListener("keydown", (e) => {
+    if (e.key === "Enter") saveBedrockConfig();
+  });
+}
 document.getElementById("agent-disconnect").addEventListener("click", () => disconnectAgent());
 document.getElementById("agent-restart-conversation").addEventListener("click", () => {
   if (!agentState.transcript.length && !agentState.apiMessages.length) return; // nothing to restart
@@ -15288,7 +15624,7 @@ function setAgentSending(sending) {
 // object on any failure so callers can branch without re-deriving the
 // failure type from a raw Response — see helper_agent_plan.md §4.6.
 //
-// Prompt-prefix caching is automatic on both providers (no request flag
+// Prompt-prefix caching is automatic on every provider (no request flag
 // turns it on/off) once a shared prefix crosses the length threshold —
 // nothing to "enable" here. `prompt_cache_key` is the one lever actually
 // exposed to callers: a routing hint that improves cache-hit *consistency*
@@ -15299,18 +15635,26 @@ function setAgentSending(sending) {
 // one per call, is what makes that hint meaningful. Sent to OpenAI and, since
 // issue #176, to Azure OpenAI too: Azure documents the same parameter for
 // GPT-5.6 and later model families, with no specific API version required.
+// Bedrock (issue #183) documents it as well. A provider that rejects it as
+// an unknown parameter gets the call again without it, once per connection.
 //
 // `usageKind` (issue #177) names the call for the usage log: every
 // successful response's `usage` is recorded with it (recordAgentUsage).
 async function callAgentChatRaw(messages, { tools, promptCacheKey, signal, usageKind = "other" } = {}) {
   const generation = agentState.requestGeneration;
-  const azure = isAzureProvider(agentState.azureEndpoint);
-  const url = agentChatUrl(agentState.azureEndpoint, agentState.model, agentState.azureApiVersion);
-  const authHeaders = agentAuthHeaders(agentState.azureEndpoint, agentState.apiKey);
+  const provider = agentProviderOf(agentState);
+  const authHeaders = agentAuthHeaders(agentState, agentState.apiKey);
+  // Two one-time corrections, neither counted against the rate-limit
+  // attempts: a Bedrock model served under the other path prefix, and a
+  // provider that rejects prompt_cache_key as an unknown parameter.
+  let bedrockPath = provider === "bedrock" ? (agentState.bedrockRoutes[agentState.model] || bedrockChatPath(agentState.model)) : null;
+  let triedOtherRoute = false;
+  let triedWithoutCacheKey = false;
   for (let attempt = 1; attempt <= AGENT_RATE_LIMIT_MAX_ATTEMPTS; attempt++) {
+    const sendCacheKey = Boolean(promptCacheKey) && !agentState.promptCacheKeyRejected;
     let res;
     try {
-      res = await fetch(url, {
+      res = await fetch(agentChatUrl(agentState, agentState.model, bedrockPath), {
         method: "POST",
         headers: {
           ...authHeaders,
@@ -15320,11 +15664,12 @@ async function callAgentChatRaw(messages, { tools, promptCacheKey, signal, usage
           // Azure addresses the model via the URL's own deployment segment
           // (agentChatUrl above) -- a `model` field in the body is
           // meaningless there and, on some API versions, rejected outright
-          // as an unrecognized field, so it's only ever sent for OpenAI.
-          ...(azure ? {} : { model: agentState.model }),
+          // as an unrecognized field, so it's only ever sent for OpenAI and
+          // Bedrock.
+          ...(provider === "azure" ? {} : { model: agentState.model }),
           messages,
           ...(tools ? { tools, tool_choice: "auto" } : {}),
-          ...(promptCacheKey ? { prompt_cache_key: promptCacheKey } : {}),
+          ...(sendCacheKey ? { prompt_cache_key: promptCacheKey } : {}),
         }),
         ...(signal ? { signal } : {}),
       });
@@ -15339,6 +15684,20 @@ async function callAgentChatRaw(messages, { tools, promptCacheKey, signal, usage
       const message = (json && json.error && json.error.message) || "";
       if (res.status === 400 && (code === "context_length_exceeded" || /context length|maximum context/i.test(message))) {
         throw { kind: "contextLength" };
+      }
+      if (provider === "bedrock" && !triedOtherRoute && (res.status === 400 || res.status === 404) && /supported on this route/i.test(message)) {
+        triedOtherRoute = true;
+        bedrockPath = bedrockPath === "/openai/v1" ? "/v1" : "/openai/v1";
+        agentState.bedrockRoutes[agentState.model] = bedrockPath;
+        attempt--;
+        continue;
+      }
+      if (sendCacheKey && !triedWithoutCacheKey && res.status === 400 && /prompt_cache_key/i.test(message) &&
+          /unknown|unrecogni[sz]ed|unsupported|not supported|not allowed|not permitted|extra|invalid/i.test(message)) {
+        triedWithoutCacheKey = true;
+        agentState.promptCacheKeyRejected = true;
+        attempt--;
+        continue;
       }
       if (res.status === 401 || res.status === 403) throw { kind: "invalidKey" };
       // OpenAI uses the same 429 status for two very different situations,
@@ -15363,20 +15722,20 @@ async function callAgentChatRaw(messages, { tools, promptCacheKey, signal, usage
     // Only while the conversation this call belongs to still exists: a
     // restart or disconnect during the call starts a new usage log, the
     // same way it starts a new transcript.
-    if (generation === agentState.requestGeneration) recordAgentUsage(usageKind, json, azure);
+    if (generation === agentState.requestGeneration) recordAgentUsage(usageKind, json, provider);
     return (choice && choice.message) || { content: "" };
   }
 }
 
 // Issue #177: the provider's per-call usage, kept verbatim next to what the
 // call was for. Counts only; pricing belongs to whoever reads the bundle.
-function recordAgentUsage(kind, json, azure) {
+function recordAgentUsage(kind, json, provider) {
   const usage = json && json.usage && typeof json.usage === "object" ? JSON.parse(JSON.stringify(json.usage)) : null;
   agentState.usage.push({
     kind,
     model: agentState.model || null,
     served_model: (json && typeof json.model === "string") ? json.model : null,
-    provider: azure ? "azure" : "openai",
+    provider,
     at: new Date().toISOString(),
     usage,
   });
@@ -16302,6 +16661,18 @@ window.__kg = {
     removeAzureConfig,
     getPendingAzureEndpoint: () => agentConnectAzureEndpoint,
     getPendingAzureApiVersion: () => agentConnectAzureApiVersion,
+    // AWS Bedrock (issue #183) -- same shape as the Azure surface above.
+    providerOf: agentProviderOf,
+    bedrockMantleBaseUrl,
+    normalizeBedrockEndpoint,
+    bedrockEndpointProblem,
+    bedrockChatPath,
+    stripBedrockModelPrefix,
+    looksLikeBedrockKey,
+    bedrockDefaultRegion: BEDROCK_DEFAULT_REGION,
+    getPendingBedrock: () => agentConnectBedrock && { ...agentConnectBedrock },
+    getPendingConnection: pendingAgentConnection,
+    getBedrockConfigErrorKind: () => agentBedrockConfigErrorKind,
     getAzureConfigErrorKind: () => agentAzureConfigErrorKind,
     // Phase 2 — live chat test surface.
     sendMessage: submitAgentChatInput,

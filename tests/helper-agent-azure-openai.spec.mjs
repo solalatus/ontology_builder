@@ -186,16 +186,21 @@ test("isValidAzureEndpoint accepts absolute http(s) URLs and rejects everything 
 
 test("modelsUrl/chatUrl/authHeaders return the OpenAI shape for a null endpoint and the Azure shape for a real one", async () => {
   await withPage(async (page) => {
-    const result = await page.evaluate(({ endpoint, version }) => ({
-      openaiModelsUrl: window.__kg.agent.modelsUrl(null),
-      openaiChatUrl: window.__kg.agent.chatUrl(null, "gpt-4o"),
-      openaiHeaders: window.__kg.agent.authHeaders(null, "sk-abc"),
-      azureModelsUrl: window.__kg.agent.modelsUrl(endpoint),
-      azureChatUrl: window.__kg.agent.chatUrl(endpoint, "my-deployment"),
-      azureHeaders: window.__kg.agent.authHeaders(endpoint, "azure-key-abc"),
-      azureChatUrlEncodesDeploymentName: window.__kg.agent.chatUrl(endpoint, "my deployment/weird"),
-      version,
-    }), { endpoint: AZURE_ENDPOINT, version: AZURE_API_VERSION });
+    const result = await page.evaluate(({ endpoint, version }) => {
+      const openai = { azureEndpoint: null };
+      const azure = { azureEndpoint: endpoint };
+      return {
+        openaiModelsUrl: window.__kg.agent.modelsUrl(openai),
+        openaiChatUrl: window.__kg.agent.chatUrl(openai, "gpt-4o"),
+        openaiHeaders: window.__kg.agent.authHeaders(openai, "sk-abc"),
+        azureModelsUrl: window.__kg.agent.modelsUrl(azure),
+        azureChatUrl: window.__kg.agent.chatUrl(azure, "my-deployment"),
+        azureHeaders: window.__kg.agent.authHeaders(azure, "azure-key-abc"),
+        azureChatUrlEncodesDeploymentName: window.__kg.agent.chatUrl(azure, "my deployment/weird"),
+        overriddenVersionUrl: window.__kg.agent.chatUrl({ azureEndpoint: endpoint, azureApiVersion: "2099-01-01" }, "d"),
+        version,
+      };
+    }, { endpoint: AZURE_ENDPOINT, version: AZURE_API_VERSION });
 
     assert.equal(result.openaiModelsUrl, "https://api.openai.com/v1/models");
     assert.equal(result.openaiChatUrl, "https://api.openai.com/v1/chat/completions");
@@ -208,6 +213,7 @@ test("modelsUrl/chatUrl/authHeaders return the OpenAI shape for a null endpoint 
     // path must come back safely encoded, not spliced in raw.
     assert.ok(!result.azureChatUrlEncodesDeploymentName.includes(" "));
     assert.ok(result.azureChatUrlEncodesDeploymentName.includes(encodeURIComponent("my deployment/weird")));
+    assert.match(result.overriddenVersionUrl, /api-version=2099-01-01$/);
   });
 });
 
