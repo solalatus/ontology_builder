@@ -125,3 +125,30 @@ test("end to end, Azure key: the deployment running the pinned model is preselec
     assert.equal(await page.evaluate(() => window.__kg.agent.state.model), "interviews-eu");
   });
 });
+
+// The ladder: GPT-6.1 Sol first, GPT-6 Sol when 6.1 isn't reachable, then
+// the general rule. Checked live on an Azure resource that has only the GPT-6
+// generation (2026-10-19).
+test("the preference ladder: GPT-6.1 Sol, else GPT-6 Sol, else the general rule", async () => {
+  await withPage(async (page) => {
+    assert.deepEqual(await page.evaluate(() => window.__kg.agent.pinnedModels), ["gpt-6.1-sol", "gpt-6-sol"]);
+    // Only the GPT-6 generation deployed: GPT-6 Sol, not the newer Luna.
+    assert.equal(await pick(page, [
+      { id: "gpt-6-sol", created: 100, baseModel: "gpt-6-sol" },
+      { id: "gpt-6-luna", created: 200, baseModel: "gpt-6-luna" },
+    ]), "gpt-6-sol");
+    // Both rungs present: the first wins regardless of age.
+    assert.equal(await pick(page, [
+      { id: "old-sol", created: 900, baseModel: "gpt-6-sol-2026-09-22" },
+      { id: "new-sol", created: 100, baseModel: "gpt-6.1-sol" },
+    ]), "new-sol");
+    // Spelling variants of the second rung count; near misses don't.
+    assert.equal(await pick(page, [{ id: "eu-sol", created: 1, baseModel: "GPT 6 Sol" }, { id: "x", created: 9, baseModel: "gpt-6-sol-mini" }]), "eu-sol");
+    assert.equal(await pick(page, [{ id: "openai.gpt-6-sol", created: 1, baseModel: "gpt-6-sol" }]), "openai.gpt-6-sol");
+    // Neither rung: unchanged general rule.
+    assert.equal(await pick(page, [
+      { id: "gpt-6-luna", created: 200, baseModel: "gpt-6-luna" },
+      { id: "gpt-5.5", created: 100, baseModel: "gpt-5.5" },
+    ]), "gpt-5.5");
+  });
+});

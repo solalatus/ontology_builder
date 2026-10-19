@@ -13577,14 +13577,19 @@ function isStandardTierModel(model) {
   return /^(gpt-[0-9]+(\.[0-9]+)?|o[0-9]+)(-\d{4}-\d{2}-\d{2})?$/i.test(id);
 }
 
-// Issue #178: the model a fresh connection lands on whenever the key can
-// reach it, OpenAI or Azure alike. Matched on the model's real identity
-// (OpenAI's id; the deployment's `model` field on Azure, never the free-form
-// deployment name), after canonicalModelName() has removed the usual
-// platform naming differences. This deliberately overrides the codename
-// exclusion in isStandardTierModel() for this one model, which was checked
-// live with tools attached before it was pinned.
-const AGENT_PINNED_MODEL = "gpt-6.1-sol";
+// Issue #178: the models a fresh connection lands on, in order of
+// preference -- the first one the key can reach wins, on any provider.
+// GPT-6 Sol is the step down when GPT-6.1 Sol isn't deployed (an Azure
+// resource with only the GPT-6 generation, checked live 2026-10-19).
+// Matched on the model's real identity (OpenAI's id; the deployment's
+// `model` field on Azure, never the free-form deployment name; Bedrock's id
+// without its vendor prefix), after canonicalModelName() has removed the
+// usual platform naming differences. This deliberately overrides the
+// codename exclusion in isStandardTierModel() for these models; their tool
+// calls go through the Responses API where Chat Completions refuses tools
+// with reasoning (callAgentChatRaw).
+const AGENT_PINNED_MODELS = ["gpt-6.1-sol", "gpt-6-sol"];
+const AGENT_PINNED_MODEL = AGENT_PINNED_MODELS[0];
 
 // Lowercase; drop a provider prefix ("azure/", "openai/", Bedrock's
 // "openai." and "us.openai."), trailing dated snapshots ("-2026-09-30",
@@ -13602,13 +13607,21 @@ function canonicalModelName(name) {
   return n.replace(/[^a-z0-9]/g, "");
 }
 
+// The rung of AGENT_PINNED_MODELS this model is (0 = most preferred), or -1.
+function pinnedModelRank(model) {
+  const name = canonicalModelName(modelNameForHeuristics(model));
+  return AGENT_PINNED_MODELS.findIndex((p) => canonicalModelName(p) === name);
+}
+
 function isPinnedAgentModel(model) {
-  return canonicalModelName(modelNameForHeuristics(model)) === canonicalModelName(AGENT_PINNED_MODEL);
+  return pinnedModelRank(model) === 0;
 }
 
 function pickDefaultAgentModel(models) {
-  const pinned = models.filter((m) => isLikelyChatModel(m) && isPinnedAgentModel(m));
-  if (pinned.length) return [...pinned].sort((a, b) => (b.created || 0) - (a.created || 0))[0].id;
+  for (let rank = 0; rank < AGENT_PINNED_MODELS.length; rank++) {
+    const pinned = models.filter((m) => isLikelyChatModel(m) && pinnedModelRank(m) === rank);
+    if (pinned.length) return [...pinned].sort((a, b) => (b.created || 0) - (a.created || 0))[0].id;
+  }
   const chatModels = models.filter((m) => isLikelyChatModel(m));
   const reasoningModels = chatModels.filter((m) => isLikelyReasoningModel(m));
   const standardReasoningModels = reasoningModels.filter((m) => isStandardTierModel(m));
@@ -16751,6 +16764,7 @@ window.__kg = {
     hasStoredKey: hasStoredAgentKey,
     pickDefaultModel: pickDefaultAgentModel,
     pinnedModel: AGENT_PINNED_MODEL,
+    pinnedModels: AGENT_PINNED_MODELS,
     canonicalModelName,
     isLikelyReasoningModel,
     isLikelyChatModel,

@@ -69,12 +69,13 @@ and every model call (the interview, compaction, the model-based checks,
 import merge) goes to the same provider. Where a reasoning model takes tools
 only through the Responses API, the agent's tool calls go there, with
 reasoning kept on. A fresh connection lands on
-**GPT-6.1-sol** whenever the key can reach it, whatever the provider. The
+**GPT-6.1-sol** whenever the key can reach it, whatever the provider, and on
+**GPT-6-sol** when it can reach that but not 6.1. The
 model is recognised by its actual identity, not its listed name:
 `gpt-61-sol`, `GPT 6.1 Sol`, Bedrock's `openai.gpt-6.1-sol`, dated snapshots
-and `-preview` all count; `-mini` or `6.10` do not. Without it, the newest
-standard reasoning model is chosen as before, and any model can still be
-picked by hand (issue #178).
+and `-preview` all count; `-mini` or `6.10` do not. Without either, the
+newest standard reasoning model is chosen as before, and any model can still
+be picked by hand (issue #178).
 
 **Competency questions** (issue #94) are the requirements the rest of the
 model answers to: the real questions the future agent must be able to answer,

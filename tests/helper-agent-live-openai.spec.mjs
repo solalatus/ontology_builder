@@ -257,24 +257,31 @@ test("live: two real, separate tool calls against the same class compose — the
   });
 });
 
-// Issue #178: if this OpenAI key can reach GPT-6.1-sol (under any name),
-// a fresh connection must land on it, and a tool-attached turn must work on
-// it: an earlier codename generation returned a 400 ("Function tools ...
-// are not supported") as soon as tools were attached.
-test("live (#178): the pinned GPT-6.1-sol is preselected when available, and a real tool call works on it", { skip }, async (t) => {
+// Issue #178: a fresh connection lands on the first rung of the preference
+// ladder (GPT-6.1 Sol, then GPT-6 Sol) this OpenAI key can reach, under any
+// name, and a tool-attached turn works on it. These codename models refuse
+// tools with reasoning on Chat Completions; the app takes them through the
+// Responses API.
+test("live (#178): the pinned model (GPT-6.1 Sol, else GPT-6 Sol) is preselected, and a real tool call works on it", { skip }, async (t) => {
   await withPageAllowingResourceErrors(async (page) => {
     await connectAgentLive(page, OPENAI_API_KEY);
-    const pinnedName = await page.evaluate(() => window.__kg.agent.pinnedModel);
-    const available = await page.evaluate((pinned) => window.__kg.agent.state.models
-      .filter((m) => window.__kg.agent.canonicalModelName(m.baseModel || m.id) === window.__kg.agent.canonicalModelName(pinned))
-      .map((m) => m.id), pinnedName);
+    // The first rung with any entry on this key, and that rung's entries.
+    const { ladder, rung, available } = await page.evaluate(() => {
+      const a = window.__kg.agent;
+      const canon = (m) => a.canonicalModelName(m.baseModel || m.id);
+      for (const name of a.pinnedModels) {
+        const ids = a.state.models.filter((m) => canon(m) === a.canonicalModelName(name)).map((m) => m.id);
+        if (ids.length) return { ladder: a.pinnedModels, rung: name, available: ids };
+      }
+      return { ladder: a.pinnedModels, rung: null, available: [] };
+    });
     const selected = await page.evaluate(() => window.__kg.agent.state.model);
-    console.log(`[live #178] OpenAI: pinned=${pinnedName} available-as=${JSON.stringify(available)} selected=${selected}`);
-    if (!available.length) {
-      t.skip(`this OpenAI key cannot reach ${pinnedName} under any name; nothing to verify`);
+    console.log(`[live #178] OpenAI: ladder=${ladder.join(" > ")} reachable-rung=${rung} as=${JSON.stringify(available)} selected=${selected}`);
+    if (!rung) {
+      t.skip(`this OpenAI key reaches no model on the ladder (${ladder.join(", ")}); nothing to verify`);
       return;
     }
-    assert.ok(available.includes(selected), `expected ${selected} to be one of the pinned model's entries ${available.join(", ")}`);
+    assert.ok(available.includes(selected), `expected ${selected} to be one of ${rung}'s entries ${available.join(", ")}`);
 
     const chatResponses = forwardToRealOpenAi(page, RESPONSES_URL, forwardToRealOpenAi(page, CHAT_URL));
     // Mid-interview, as in real use: the app's interviewer settles

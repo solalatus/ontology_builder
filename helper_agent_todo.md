@@ -2725,3 +2725,19 @@ whoever picks it up.
   - the Mantle model-list shape for a real key;
   - tool calls and cached tokens on `openai.gpt-6.1-sol`;
   - `prompt_cache_key` acceptance (`helper-agent-live-bedrock.spec.mjs`).
+- **Pinned-model ladder (#178).** `AGENT_PINNED_MODELS = ["gpt-6.1-sol",
+  "gpt-6-sol"]`: the first rung the key reaches wins, on any provider and
+  under any name. The live Azure resource used for verification has only
+  `gpt-6-sol` and `gpt-6-luna`; the app picks `gpt-6-sol`, and the live
+  #178 test (now ladder-aware) passes on it, tool call included.
+- **Live behavioural specs on GPT-6 Sol (reasoning on, Responses API for
+  tools), 2026-10-19:**
+  - Tier C: the schema reserves `finalValidation:true` for the Phase 10(b)
+    checklist, and the model holds to that. The requests now name Phase
+    10(b), and the canvas is seeded with a finished-looking model. A
+    declined request is retried, each time in a new conversation, at most
+    five times. Both tests then passed 3 of 3, with the once-per-conversation
+    bound exercised live every time.
+  - `agent-remove-tool-live` "what looks wrong": 3 of 4 on GPT-6 Sol (3 of 5
+    on GPT-6 Luna). The model sometimes describes the duplicate and asks
+    first. Left as is: it measures that judgement.

@@ -43,7 +43,7 @@ test("live: bedrock-mantle answers a browser's CORS preflight; bedrock-runtime's
   assert.equal(runtime.headers.get("access-control-allow-origin"), null, "if this starts passing, bedrock-runtime became browser-callable and the app could offer it");
 });
 
-test("live: the key lists OpenAI models on bedrock-mantle, and the app preselects GPT-6.1 Sol when the region serves it", { skip }, async () => {
+test("live: the key lists OpenAI models on bedrock-mantle, and the app preselects GPT-6.1 Sol, else GPT-6 Sol, when the region serves it", { skip }, async () => {
   await withPageAllowingResourceErrors(async (page) => {
     const modelResponses = await connectAgentLiveBedrock(page, CONFIG);
     assert.equal(modelResponses.length, 1);
@@ -54,7 +54,9 @@ test("live: the key lists OpenAI models on bedrock-mantle, and the app preselect
     console.log(`[live #183] region=${CONFIG.region} listed=${listed.length} openai=${JSON.stringify(offered)} selected=${selected}`);
     assert.ok(offered.length > 0, `no OpenAI model listed for this key; listed: ${listed.join(", ")}`);
     assert.ok(offered.every((id) => /(^|\.)openai\./.test(id)));
-    if (offered.includes("openai.gpt-6.1-sol")) assert.equal(selected, "openai.gpt-6.1-sol", "the pinned model (#178) is the default");
+    // The preference ladder (#178): the first rung this region serves.
+    const rung = ["openai.gpt-6.1-sol", "openai.gpt-6-sol"].find((id) => offered.includes(id));
+    if (rung) assert.equal(selected, rung, "the first reachable rung of the pinned ladder is the default");
   });
 });
 
