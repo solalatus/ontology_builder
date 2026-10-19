@@ -238,6 +238,11 @@ export const PRODUCTION_SYSTEM_PROMPT_SHA256 = {
 // interview's own tool-calling loop.
 export const PRODUCTION_TOOL_NAMES = ["apply_ontology_yaml", "get_graph_state", "remove_ontology_elements"];
 
+// Issue #181: the effort every interview request to a reasoning model carries
+// by default. Changing it changes the configuration every #182 run is
+// measured at -- see that ticket before touching the constant.
+export const PRODUCTION_REASONING_EFFORT = "medium";
+
 const MODELS_URL = "https://api.openai.com/v1/models";
 const CHAT_URL = "https://api.openai.com/v1/chat/completions";
 const sha256 = (s) => crypto.createHash("sha256").update(s).digest("hex");
@@ -305,5 +310,39 @@ test("an ordinary interview request exposes exactly the two ontology tools, and 
     // different prompt went out on the wire.
     const systemMessage = requestBodies[0].messages.find((m) => m.role === "system");
     assert.equal(sha256(systemMessage.content), PRODUCTION_SYSTEM_PROMPT_SHA256.en);
+
+    // A non-reasoning model never gets a reasoning effort (issue #181).
+    assert.equal("reasoning_effort" in requestBodies[0], false);
+  });
+});
+
+test("an interview request to a reasoning model carries the pinned default reasoning effort (issue #181)", async () => {
+  await withPage(async (page) => {
+    await page.route(MODELS_URL, (route) => route.fulfill({
+      status: 200, contentType: "application/json",
+      body: JSON.stringify({ object: "list", data: [{ id: "gpt-5.5", created: 1715000000, object: "model", owned_by: "openai" }] }),
+    }));
+    const requestBodies = [];
+    await page.route(CHAT_URL, (route) => {
+      requestBodies.push(route.request().postDataJSON());
+      route.fulfill({
+        status: 200, contentType: "application/json",
+        body: JSON.stringify({ id: "chatcmpl-test", object: "chat.completion", choices: [{ index: 0, message: { role: "assistant", content: "Understood." }, finish_reason: "stop" }] }),
+      });
+    });
+    if (!(await page.evaluate(() => window.__kg.agent.isExpanded()))) await page.click("#agent-panel-toggle");
+    await page.click("#agent-connect-open");
+    await page.fill("#agent-key-input", "sk-test-key");
+    await page.click("#agent-connect-submit");
+    await page.waitForFunction(() => !document.getElementById("agent-model-select-modal").disabled);
+    await page.click("#agent-connect-submit");
+    await page.waitForFunction(() => window.__kg.agent.state.connected === true);
+    await page.fill("#agent-chat-input", "Let's start the interview.");
+    await page.click("#agent-chat-send");
+    await page.waitForFunction(() => window.__kg.agent.isSending() === false);
+
+    assert.equal(requestBodies[0].reasoning_effort, PRODUCTION_REASONING_EFFORT,
+      "the default reasoning effort changed -- see this constant's comment before touching it");
+    assert.equal(await page.evaluate(() => window.__kg.agent.reasoningEffortDefault), PRODUCTION_REASONING_EFFORT);
   });
 });
