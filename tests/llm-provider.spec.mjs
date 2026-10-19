@@ -9,7 +9,7 @@ import {
   isWrongBedrockRoute, providerProvenance, cheapPersonaModel,
 } from "./lib/llmProvider.mjs";
 import { chatOnce, resolveClientConfig, providerChat } from "./evals/lib/chatClient.mjs";
-import { liveChatUrlPattern, liveModelsUrlPattern } from "./lib/liveProvider.mjs";
+import { liveChatUrlPattern, liveModelsUrlPattern, replyMessage } from "./lib/liveProvider.mjs";
 
 // Issue #183: every Node-side caller resolves its provider here, so one
 // .env change moves the live tests, evals and experiment scripts together.
@@ -103,13 +103,26 @@ test("request shape per provider, matching the app's", () => {
   assert.equal(JSON.stringify(providerProvenance(bedrock)).includes("ABSKkey"), false, "provenance never carries the key");
 });
 
-test("the live relay patterns cover the app's chat and model calls per provider", () => {
+test("the live relay patterns cover the app's model calls per provider, Responses API included", () => {
   const bedrock = resolveLlmConfig({ AWS_BEARER_TOKEN_BEDROCK: "k" });
-  assert.equal(liveChatUrlPattern(bedrock), "https://bedrock-mantle.us-east-1.api.aws/**/chat/completions");
-  assert.equal(liveModelsUrlPattern(bedrock), "https://bedrock-mantle.us-east-1.api.aws/v1/models");
+  const b = liveChatUrlPattern(bedrock);
+  const mantle = "https://bedrock-mantle.us-east-1.api.aws";
+  assert.deepEqual([`${mantle}/openai/v1/chat/completions`, `${mantle}/v1/chat/completions`, `${mantle}/openai/v1/responses`, `${mantle}/v1/models`].map((u) => b.test(u)), [true, true, true, false]);
+  assert.equal(liveModelsUrlPattern(bedrock), `${mantle}/v1/models`);
   const azure = resolveLlmConfig({ AZURE_OPENAI_ENDPOINT: "https://r", AZURE_OPENAI_API_KEY: "k" });
-  assert.equal(liveChatUrlPattern(azure), "https://r/openai/deployments/**");
+  const a = liveChatUrlPattern(azure);
+  assert.deepEqual(["https://r/openai/deployments/sol/chat/completions?api-version=x", "https://r/openai/v1/responses", "https://r/openai/deployments?api-version=x"].map((u) => a.test(u)), [true, true, false]);
   assert.equal(liveChatUrlPattern(resolveLlmConfig({})), "https://api.openai.com/v1/chat/completions");
+});
+
+test("replyMessage reads a relayed answer from either API", () => {
+  assert.deepEqual(replyMessage({ body: { choices: [{ message: { role: "assistant", content: "Hi" } }] } }), { role: "assistant", content: "Hi" });
+  assert.deepEqual(replyMessage({ body: { output: [
+    { type: "reasoning" },
+    { type: "message", content: [{ type: "output_text", text: "Hi" }] },
+    { type: "function_call", call_id: "c", name: "f", arguments: "{}" },
+  ] } }), { role: "assistant", content: "Hi", tool_calls: [{ id: "c", type: "function", function: { name: "f", arguments: "{}" } }] });
+  assert.equal(replyMessage({ body: { error: { message: "x" } } }), null);
 });
 
 // --- chatClient on Bedrock -----------------------------------------------------

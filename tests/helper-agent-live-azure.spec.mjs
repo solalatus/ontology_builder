@@ -2,6 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { withPage } from "./lib/page.mjs";
 import { loadEnvKey } from "./lib/env.mjs";
+import { unexpectedFailures, replyMessage, liveChatUrlPattern } from "./lib/liveProvider.mjs";
 import { withPageAllowingResourceErrors } from "./lib/liveOpenAi.mjs";
 import { openPanel, sendChatMessage, forwardToRealAzure, connectAgentLiveAzure, configureAzureEndpoint } from "./lib/liveAzureOpenAi.mjs";
 
@@ -43,8 +44,10 @@ function deploymentsUrlPattern(endpoint) {
   return `${endpoint.replace(/\/+$/, "")}/openai/deployments**`;
 }
 
+// Chat Completions and the Responses API (where tool calls go on models
+// that need it, issue #183).
 function chatUrlPattern(endpoint) {
-  return `${endpoint.replace(/\/+$/, "")}/openai/deployments/**/chat/completions**`;
+  return liveChatUrlPattern({ provider: "azure", endpoint: endpoint.replace(/\/+$/, "") });
 }
 
 test("live: GET .../openai/deployments returns a real, non-empty, correctly-shaped deployment list for a valid key+endpoint", { skip }, async () => {
@@ -112,7 +115,7 @@ test("live: connecting with the real endpoint finalizes with provider state corr
 });
 
 test("live: a real chat completion round-trips through the actual UI against the real Azure deployment", { skip }, async () => {
-  await withPage(async (page) => {
+  await withPageAllowingResourceErrors(async (page) => { // the first tool call may be a documented one-time correction (a 400 the browser logs)
     await connectAgentLiveAzure(page, AZURE_OPENAI_API_KEY, AZURE_OPENAI_ENDPOINT);
     const chatResponses = forwardToRealAzure(page, chatUrlPattern(AZURE_OPENAI_ENDPOINT));
 
@@ -123,8 +126,8 @@ test("live: a real chat completion round-trips through the actual UI against the
     // legitimate, real model behavior, not a bug -- assert at least one
     // real call happened and the last one is a genuine plain-text reply.
     assert.ok(chatResponses.length >= 1);
-    for (const r of chatResponses) assert.equal(r.status, 200, `real Azure chat completion call failed: ${JSON.stringify(r.body)}`);
-    const lastResponseMessage = chatResponses[chatResponses.length - 1].body.choices[0].message;
+    assert.deepEqual(unexpectedFailures(chatResponses), [], "real Azure chat completion call failed");
+    const lastResponseMessage = replyMessage(chatResponses[chatResponses.length - 1]);
     assert.ok(!lastResponseMessage.tool_calls, "the final response in the exchange should be a plain reply, not another tool call");
 
     const transcript = await page.evaluate(() => window.__kg.agent.state.transcript);
@@ -135,10 +138,15 @@ test("live: a real chat completion round-trips through the actual UI against the
 });
 
 test("live: a real tool-calling response against Azure actually applies to the canvas through the real import pipeline", { skip }, async () => {
-  await withPage(async (page) => {
+  await withPageAllowingResourceErrors(async (page) => { // see above
     await connectAgentLiveAzure(page, AZURE_OPENAI_API_KEY, AZURE_OPENAI_ENDPOINT);
     const chatResponses = forwardToRealAzure(page, chatUrlPattern(AZURE_OPENAI_ENDPOINT));
 
+    // Mid-interview, as in real use: the app's interviewer settles
+    // competency questions before modelling, and a reasoning model holds
+    // to that over a one-line directive on an empty canvas.
+    await page.evaluate(() => window.__kg.formats.commitYamlImport(
+      "competency_questions:\n  - text: Which supplier issued a given payment request?\n", "merge"));
     const before = await page.evaluate(() => window.__kg.state.nodes.length);
     await sendChatMessage(
       page,
@@ -147,7 +155,7 @@ test("live: a real tool-calling response against Azure actually applies to the c
     );
 
     const sawRealToolCall = chatResponses.some((r) => {
-      const msg = r.body && r.body.choices && r.body.choices[0] && r.body.choices[0].message;
+      const msg = replyMessage(r);
       return msg && Array.isArray(msg.tool_calls) && msg.tool_calls.some((c) => c.function && c.function.name === "apply_ontology_yaml");
     });
     assert.ok(sawRealToolCall, "expected the real Azure-hosted model to call apply_ontology_yaml for a directive, unambiguous request");
@@ -161,7 +169,7 @@ test("live: a real tool-calling response against Azure actually applies to the c
     // body field -- the exact request-shape contract
     // helper-agent-azure-openai.spec.mjs pins with a mock, now confirmed
     // against what a real Azure resource actually accepted.
-    for (const r of chatResponses) assert.equal(r.status, 200);
+    assert.deepEqual(unexpectedFailures(chatResponses), []);
   });
 });
 
@@ -174,7 +182,7 @@ test("live (#176/#177): Azure accepts prompt_cache_key, a repeated prefix report
     await connectAgentLiveAzure(page, AZURE_OPENAI_API_KEY, AZURE_OPENAI_ENDPOINT, { deployment: AZURE_OPENAI_DEPLOYMENT || null });
     const requestBodies = [];
     page.on("request", (req) => {
-      if (req.method() === "POST" && /\/chat\/completions/.test(req.url())) requestBodies.push(req.postDataJSON());
+      if (req.method() === "POST" && /\/(chat\/completions|responses)(\?|$)/.test(req.url())) requestBodies.push(req.postDataJSON());
     });
     const chatResponses = forwardToRealAzure(page, chatUrlPattern(AZURE_OPENAI_ENDPOINT));
 
@@ -184,9 +192,7 @@ test("live (#176/#177): Azure accepts prompt_cache_key, a repeated prefix report
     await sendChatMessage(page, "Thanks. Reply with one more short sentence, no tool calls needed.");
 
     assert.ok(chatResponses.length >= 2, `expected at least two chat calls, got ${chatResponses.length}`);
-    for (const r of chatResponses) {
-      assert.equal(r.status, 200, `Azure rejected a chat call (prompt_cache_key under the app's api-version?): ${JSON.stringify(r.body)}`);
-    }
+    assert.deepEqual(unexpectedFailures(chatResponses), [], "Azure rejected a chat call");
     // The app retries a call without prompt_cache_key if a provider rejects
     // it (issue #183); for #176 the point is that Azure accepts it.
     assert.equal(await page.evaluate(() => window.__kg.agent.state.promptCacheKeyRejected), false,
@@ -197,7 +203,7 @@ test("live (#176/#177): Azure accepts prompt_cache_key, a repeated prefix report
 
     const usage = await page.evaluate(() => window.__kg.agent.state.usage);
     const model = await page.evaluate(() => window.__kg.agent.state.model);
-    assert.equal(usage.length, chatResponses.length, "one usage entry per call");
+    assert.equal(usage.length, chatResponses.filter((r) => r.status === 200).length, "one usage entry per successful call");
     for (const entry of usage) {
       assert.equal(entry.provider, "azure");
       assert.equal(entry.kind, "interview");
@@ -234,12 +240,17 @@ test("live (#178): the pinned GPT-6.1-sol is preselected when available, and a r
     assert.ok(available.includes(selected), `expected ${selected} to be one of the pinned model's entries ${available.join(", ")}`);
 
     const chatResponses = forwardToRealAzure(page, chatUrlPattern(AZURE_OPENAI_ENDPOINT));
+    // Mid-interview, as in real use: the app's interviewer settles
+    // competency questions before modelling, and a reasoning model holds
+    // to that over a one-line directive on an empty canvas.
+    await page.evaluate(() => window.__kg.formats.commitYamlImport(
+      "competency_questions:\n  - text: Which supplier issued a given payment request?\n", "merge"));
     const before = await page.evaluate(() => window.__kg.state.nodes.length);
     await sendChatMessage(page, "Add a class called Invoice, meaning: a request from a supplier to receive payment. "
       + "Use the apply_ontology_yaml tool right now to add it — don't just describe it in text.");
-    for (const r of chatResponses) assert.equal(r.status, 200, `a tool-attached call on ${selected} failed: ${JSON.stringify(r.body)}`);
+    assert.deepEqual(unexpectedFailures(chatResponses), [], `a tool-attached call on ${selected} failed`);
     const sawToolCall = chatResponses.some((r) => {
-      const msg = r.body && r.body.choices && r.body.choices[0] && r.body.choices[0].message;
+      const msg = replyMessage(r);
       return msg && Array.isArray(msg.tool_calls) && msg.tool_calls.some((c) => c.function && c.function.name === "apply_ontology_yaml");
     });
     assert.ok(sawToolCall, "the pinned model should call apply_ontology_yaml for a directive request");

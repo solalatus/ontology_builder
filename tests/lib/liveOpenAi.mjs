@@ -11,6 +11,7 @@ import { launchChromium } from "./browser.mjs";
 
 export const MODELS_URL = "https://api.openai.com/v1/models";
 export const CHAT_URL = "https://api.openai.com/v1/chat/completions";
+export const RESPONSES_URL = "https://api.openai.com/v1/responses";
 
 // Same backoff shape as index.html's own AGENT_RATE_LIMIT_MAX_ATTEMPTS --
 // a real, shared account/org rate limit under real API load (this sandbox's
@@ -53,8 +54,9 @@ export function isInsufficientQuotaError(parsedBody) {
 // means the page only ever sees one response per request -- the eventual
 // success, or the final failure -- exactly like a real (non-relayed) client
 // experiencing a single slow call rather than several distinct failed ones.
-export function forwardToRealOpenAi(page, url) {
-  const responses = [];
+// `responses` lets two relays (Chat Completions and Responses, issue #183)
+// report into one list.
+export function forwardToRealOpenAi(page, url, responses = []) {
   page.route(url, async (route) => {
     const req = route.request();
     let res, text;

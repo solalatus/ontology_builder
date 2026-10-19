@@ -13342,6 +13342,7 @@ const AGENT_PANEL_WIDTH_DEFAULT = 320; // matches #agent-panel-body's own CSS fa
 const AGENT_PANEL_WIDTH_MIN = 240;
 const AGENT_PANEL_WIDTH_MAX = 720;
 const OPENAI_MODELS_URL = "https://api.openai.com/v1/models";
+const OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses";
 // Azure OpenAI requires an explicit api-version query param on every
 // request (unlike OpenAI, which versions implicitly via the /v1/ path) --
 // there is no "latest"/omit-it option.
@@ -13649,6 +13650,12 @@ const agentState = {
   // Set when the provider rejected prompt_cache_key as an unknown parameter
   // on this connection; later calls leave it out (callAgentChatRaw).
   promptCacheKeyRejected: false,
+  // Set when the model refused function tools with reasoning on Chat
+  // Completions (the GPT-6 codename generation, checked live on Azure
+  // 2026-10-19: "Function tools with reasoning_effort are not supported ...
+  // use /v1/responses"); later tool-carrying calls go to the Responses API,
+  // where the model keeps its reasoning. See callAgentChatRaw.
+  toolsViaResponses: false,
   model: null,
   models: [], // [{id, created, baseModel}], newest-first once sorted for display -- see fetchAgentModels()'s own comment on baseModel
   // Full UI transcript ({role, text}[]) vs. the API-facing working set
@@ -14360,6 +14367,7 @@ async function submitAgentConnect() {
   agentState.bedrockRegion = conn.bedrockRegion;
   agentState.bedrockRoutes = {};
   agentState.promptCacheKeyRejected = false;
+  agentState.toolsViaResponses = false;
   agentState.models = agentPendingModels;
   agentState.model = chosenModel;
   // One prompt_cache_key per connection, for every provider (issues #176,
@@ -14399,6 +14407,7 @@ function disconnectAgent() {
   agentState.bedrockRegion = null;
   agentState.bedrockRoutes = {};
   agentState.promptCacheKeyRejected = false;
+  agentState.toolsViaResponses = false;
   agentState.models = [];
   agentState.model = null;
   agentState.transcript = [];
@@ -15644,33 +15653,50 @@ async function callAgentChatRaw(messages, { tools, promptCacheKey, signal, usage
   const generation = agentState.requestGeneration;
   const provider = agentProviderOf(agentState);
   const authHeaders = agentAuthHeaders(agentState, agentState.apiKey);
-  // Two one-time corrections, neither counted against the rate-limit
-  // attempts: a Bedrock model served under the other path prefix, and a
-  // provider that rejects prompt_cache_key as an unknown parameter.
+  // Three one-time corrections, none counted against the rate-limit
+  // attempts: a Bedrock model served under the other path prefix, a
+  // provider that rejects prompt_cache_key as an unknown parameter, and a
+  // model that takes function tools with reasoning only on the Responses API.
   let bedrockPath = provider === "bedrock" ? (agentState.bedrockRoutes[agentState.model] || bedrockChatPath(agentState.model)) : null;
   let triedOtherRoute = false;
   let triedWithoutCacheKey = false;
+  let triedResponses = false;
   for (let attempt = 1; attempt <= AGENT_RATE_LIMIT_MAX_ATTEMPTS; attempt++) {
     const sendCacheKey = Boolean(promptCacheKey) && !agentState.promptCacheKeyRejected;
+    const viaResponses = Boolean(tools) && agentState.toolsViaResponses;
+    const body = viaResponses
+      ? {
+        // The Responses API names the model in the body on every provider,
+        // Azure's v1 route included (the deployment name).
+        model: agentState.model,
+        input: chatMessagesToResponsesInput(messages),
+        tools: chatToolsToResponsesTools(tools),
+        tool_choice: "auto",
+        // The whole history is resent on every call, as on Chat
+        // Completions; nothing needs to be kept on the provider's side.
+        store: false,
+        ...(sendCacheKey ? { prompt_cache_key: promptCacheKey } : {}),
+      }
+      : {
+        // Azure addresses the model via the URL's own deployment segment
+        // (agentChatUrl above) -- a `model` field in the body is
+        // meaningless there and, on some API versions, rejected outright
+        // as an unrecognized field, so it's only ever sent for OpenAI and
+        // Bedrock.
+        ...(provider === "azure" ? {} : { model: agentState.model }),
+        messages,
+        ...(tools ? { tools, tool_choice: "auto" } : {}),
+        ...(sendCacheKey ? { prompt_cache_key: promptCacheKey } : {}),
+      };
     let res;
     try {
-      res = await fetch(agentChatUrl(agentState, agentState.model, bedrockPath), {
+      res = await fetch(viaResponses ? agentResponsesUrl(agentState, agentState.model, bedrockPath) : agentChatUrl(agentState, agentState.model, bedrockPath), {
         method: "POST",
         headers: {
           ...authHeaders,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          // Azure addresses the model via the URL's own deployment segment
-          // (agentChatUrl above) -- a `model` field in the body is
-          // meaningless there and, on some API versions, rejected outright
-          // as an unrecognized field, so it's only ever sent for OpenAI and
-          // Bedrock.
-          ...(provider === "azure" ? {} : { model: agentState.model }),
-          messages,
-          ...(tools ? { tools, tool_choice: "auto" } : {}),
-          ...(sendCacheKey ? { prompt_cache_key: promptCacheKey } : {}),
-        }),
+        body: JSON.stringify(body),
         ...(signal ? { signal } : {}),
       });
     } catch (err) {
@@ -15689,6 +15715,20 @@ async function callAgentChatRaw(messages, { tools, promptCacheKey, signal, usage
         triedOtherRoute = true;
         bedrockPath = bedrockPath === "/openai/v1" ? "/v1" : "/openai/v1";
         agentState.bedrockRoutes[agentState.model] = bedrockPath;
+        attempt--;
+        continue;
+      }
+      // "Function tools with reasoning_effort are not supported for this
+      // model in /v1/chat/completions. To use function tools, use
+      // /v1/responses or set reasoning_effort to 'none'." Turning reasoning
+      // off would trade the model's quality for convenience; the Responses
+      // API keeps it, so tool-carrying calls on this connection move there.
+      // Calls without tools (the model-based checks) stay on Chat
+      // Completions, where this model reasons normally.
+      if (tools && !viaResponses && !triedResponses && res.status === 400 &&
+          /function tools/i.test(message) && /reasoning/i.test(message)) {
+        triedResponses = true;
+        agentState.toolsViaResponses = true;
         attempt--;
         continue;
       }
@@ -15718,24 +15758,102 @@ async function callAgentChatRaw(messages, { tools, promptCacheKey, signal, usage
       }
       throw { kind: "generic", status: res.status };
     }
-    const choice = json && Array.isArray(json.choices) ? json.choices[0] : null;
+    const reply = viaResponses ? responsesToChatCompletion(json) : json;
+    const choice = reply && Array.isArray(reply.choices) ? reply.choices[0] : null;
     // Only while the conversation this call belongs to still exists: a
     // restart or disconnect during the call starts a new usage log, the
     // same way it starts a new transcript.
-    if (generation === agentState.requestGeneration) recordAgentUsage(usageKind, json, provider);
+    if (generation === agentState.requestGeneration) recordAgentUsage(usageKind, reply, provider, { api: viaResponses ? "responses" : "chat_completions" });
     return (choice && choice.message) || { content: "" };
   }
 }
 
+// --- The Responses API, for tool calls on models that need it --------------
+//
+// The conversation is kept in Chat Completions' shape everywhere in this
+// app (apiMessages, the transcript, compaction); these four functions
+// translate one call to the Responses API and its answer back, so nothing
+// else needs to know which API answered.
+
+function agentResponsesUrl(conn, model, bedrockPath) {
+  const provider = agentProviderOf(conn);
+  // Azure's v1 route, which needs no api-version (the app's pinned one
+  // predates the Responses API) and takes the deployment name as `model`.
+  if (provider === "azure") return `${conn.azureEndpoint}/openai/v1/responses`;
+  if (provider === "bedrock") return `${conn.bedrockBaseUrl}${bedrockPath || bedrockChatPath(model)}/responses`;
+  return OPENAI_RESPONSES_URL;
+}
+
+function chatContentText(content) {
+  if (typeof content === "string") return content;
+  if (Array.isArray(content)) return content.map((p) => (p && typeof p.text === "string" ? p.text : "")).join("");
+  return "";
+}
+
+function chatMessagesToResponsesInput(messages) {
+  const input = [];
+  for (const m of messages) {
+    if (m.role === "tool") {
+      input.push({ type: "function_call_output", call_id: m.tool_call_id, output: chatContentText(m.content) });
+      continue;
+    }
+    const text = chatContentText(m.content);
+    if (text || m.role !== "assistant") input.push({ role: m.role, content: text });
+    if (m.role === "assistant" && Array.isArray(m.tool_calls)) {
+      for (const call of m.tool_calls) {
+        input.push({ type: "function_call", call_id: call.id, name: call.function.name, arguments: call.function.arguments || "{}" });
+      }
+    }
+  }
+  return input;
+}
+
+function chatToolsToResponsesTools(tools) {
+  return tools.map((t) => (t.type === "function" && t.function ? { type: "function", ...t.function } : t));
+}
+
+// The answer in Chat Completions' shape: the text and function calls of the
+// output as one assistant message, and the usage under Chat Completions'
+// field names (input_tokens -> prompt_tokens and so on), so the usage log
+// (issue #177) totals both APIs alike.
+function responsesToChatCompletion(json) {
+  const output = (json && Array.isArray(json.output)) ? json.output : [];
+  let content = "";
+  const toolCalls = [];
+  for (const item of output) {
+    if (item.type === "message" && Array.isArray(item.content)) {
+      content += item.content.filter((p) => p.type === "output_text").map((p) => p.text).join("");
+    } else if (item.type === "function_call") {
+      toolCalls.push({ id: item.call_id, type: "function", function: { name: item.name, arguments: item.arguments || "{}" } });
+    }
+  }
+  const u = json && json.usage;
+  const usage = u ? {
+    prompt_tokens: u.input_tokens,
+    completion_tokens: u.output_tokens,
+    total_tokens: u.total_tokens,
+    ...(u.input_tokens_details ? { prompt_tokens_details: { ...u.input_tokens_details } } : {}),
+    ...(u.output_tokens_details ? { completion_tokens_details: { ...u.output_tokens_details } } : {}),
+  } : undefined;
+  return {
+    model: json && json.model,
+    choices: [{ index: 0, message: { role: "assistant", content: content || null, ...(toolCalls.length ? { tool_calls: toolCalls } : {}) }, finish_reason: toolCalls.length ? "tool_calls" : "stop" }],
+    ...(usage ? { usage } : {}),
+  };
+}
+
 // Issue #177: the provider's per-call usage, kept verbatim next to what the
 // call was for. Counts only; pricing belongs to whoever reads the bundle.
-function recordAgentUsage(kind, json, provider) {
+function recordAgentUsage(kind, json, provider, { api = "chat_completions" } = {}) {
   const usage = json && json.usage && typeof json.usage === "object" ? JSON.parse(JSON.stringify(json.usage)) : null;
   agentState.usage.push({
     kind,
     model: agentState.model || null,
     served_model: (json && typeof json.model === "string") ? json.model : null,
     provider,
+    // Only present when the call went to the Responses API (its usage is
+    // then given under Chat Completions' field names).
+    ...(api === "responses" ? { api } : {}),
     at: new Date().toISOString(),
     usage,
   });
@@ -16673,6 +16791,11 @@ window.__kg = {
     getPendingBedrock: () => agentConnectBedrock && { ...agentConnectBedrock },
     getPendingConnection: pendingAgentConnection,
     getBedrockConfigErrorKind: () => agentBedrockConfigErrorKind,
+    // The Responses API transport for tool calls (issue #183).
+    responsesUrl: agentResponsesUrl,
+    chatMessagesToResponsesInput,
+    chatToolsToResponsesTools,
+    responsesToChatCompletion,
     getAzureConfigErrorKind: () => agentAzureConfigErrorKind,
     // Phase 2 — live chat test surface.
     sendMessage: submitAgentChatInput,

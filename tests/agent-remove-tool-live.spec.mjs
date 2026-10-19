@@ -1,6 +1,9 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { withPage } from "./lib/page.mjs";
+// Resource errors tolerated: a model may answer the first tool call with a
+// documented one-time 400 the app corrects (see isOneTimeCorrection in
+// tests/lib/liveProvider.mjs), and the browser logs that 400.
+import { withPageAllowingResourceErrors as withPage } from "./lib/liveOpenAi.mjs";
 import { sendChatMessage, forwardChatToRealProvider, connectAgentLiveProvider, resolveLlmConfig, missingCredentials } from "./lib/liveProvider.mjs";
 
 // LIVE, opt-in behavioral check for issue #140's fix: does a real model

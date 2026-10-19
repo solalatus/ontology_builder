@@ -66,7 +66,9 @@ the provider from the small "Other provider" row under the key field; a
 pasted Bedrock key selects Bedrock by itself. Bedrock is reached through
 its bedrock-mantle endpoint, the one Bedrock endpoint a browser may call,
 and every model call (the interview, compaction, the model-based checks,
-import merge) goes to the same provider. A fresh connection lands on
+import merge) goes to the same provider. Where a reasoning model takes tools
+only through the Responses API, the agent's tool calls go there, with
+reasoning kept on. A fresh connection lands on
 **GPT-6.1-sol** whenever the key can reach it, whatever the provider. The
 model is recognised by its actual identity, not its listed name:
 `gpt-61-sol`, `GPT 6.1 Sol`, Bedrock's `openai.gpt-6.1-sol`, dated snapshots

@@ -628,3 +628,148 @@ test("the prompt_cache_key fallback is provider-agnostic: an Azure API version t
     assert.equal(await lastSystemNote(page), null);
   });
 });
+
+// Checked live on Azure (2026-10-19): the GPT-6 codename models answer a
+// tool-carrying Chat Completions call with this 400 and point to the
+// Responses API, where tools and reasoning work together. The app moves
+// that connection's tool calls there rather than switching reasoning off.
+const TOOLS_NEED_RESPONSES = {
+  status: 400,
+  body: { error: { message: "Function tools with reasoning_effort are not supported for this model in /v1/chat/completions. To use function tools, use /v1/responses or set reasoning_effort to 'none'.", type: "invalid_request_error", param: "reasoning_effort" } },
+};
+const responsesUsage = { input_tokens: 1300, input_tokens_details: { cached_tokens: 1267, cache_write_tokens: 31 }, output_tokens: 20, output_tokens_details: { reasoning_tokens: 12 }, total_tokens: 1320 };
+const responsesToolCall = { id: "resp_1", model: "gpt-6-sol-2026-09-22", output: [
+  { type: "reasoning", id: "rs_1", summary: [] },
+  { type: "function_call", id: "fc_1", call_id: "call_abc", name: "get_graph_state", arguments: "{}" },
+], usage: responsesUsage };
+const responsesText = (text) => ({ id: "resp_2", model: "gpt-6-sol-2026-09-22", output: [
+  { type: "message", role: "assistant", content: [{ type: "output_text", text }] },
+], usage: responsesUsage });
+
+test("pure translation: chat history to Responses input, tools, and the answer back", async () => {
+  await withPage(async (page) => {
+    const r = await page.evaluate(() => {
+      const a = window.__kg.agent;
+      return {
+        input: a.chatMessagesToResponsesInput([
+          { role: "system", content: "S" },
+          { role: "user", content: [{ type: "text", text: "U" }] },
+          { role: "assistant", content: null, tool_calls: [{ id: "c1", type: "function", function: { name: "f", arguments: "{\"x\":1}" } }] },
+          { role: "tool", tool_call_id: "c1", content: "Applied." },
+          { role: "assistant", content: "Done." },
+        ]),
+        tools: a.chatToolsToResponsesTools([{ type: "function", function: { name: "f", description: "d", parameters: { type: "object" } } }]),
+        back: a.responsesToChatCompletion({
+          model: "m", output: [{ type: "reasoning" }, { type: "message", content: [{ type: "output_text", text: "Hi" }] }, { type: "function_call", call_id: "c2", name: "g", arguments: "{}" }],
+          usage: { input_tokens: 10, input_tokens_details: { cached_tokens: 4 }, output_tokens: 3, output_tokens_details: { reasoning_tokens: 2 }, total_tokens: 13 },
+        }),
+        urls: [
+          a.responsesUrl({ azureEndpoint: null }, "gpt-6-sol"),
+          a.responsesUrl({ azureEndpoint: "https://r.openai.azure.com" }, "dep"),
+          a.responsesUrl({ bedrockBaseUrl: "https://bedrock-mantle.us-east-1.api.aws" }, "openai.gpt-6.1-sol"),
+        ],
+      };
+    });
+    assert.deepEqual(r.input, [
+      { role: "system", content: "S" },
+      { role: "user", content: "U" },
+      { type: "function_call", call_id: "c1", name: "f", arguments: "{\"x\":1}" },
+      { type: "function_call_output", call_id: "c1", output: "Applied." },
+      { role: "assistant", content: "Done." },
+    ]);
+    assert.deepEqual(r.tools, [{ type: "function", name: "f", description: "d", parameters: { type: "object" } }]);
+    assert.deepEqual(r.back, {
+      model: "m",
+      choices: [{ index: 0, message: { role: "assistant", content: "Hi", tool_calls: [{ id: "c2", type: "function", function: { name: "g", arguments: "{}" } }] }, finish_reason: "tool_calls" }],
+      usage: { prompt_tokens: 10, completion_tokens: 3, total_tokens: 13, prompt_tokens_details: { cached_tokens: 4 }, completion_tokens_details: { reasoning_tokens: 2 } },
+    });
+    assert.deepEqual(r.urls, [
+      "https://api.openai.com/v1/responses",
+      "https://r.openai.azure.com/openai/v1/responses",
+      "https://bedrock-mantle.us-east-1.api.aws/openai/v1/responses",
+    ]);
+  });
+});
+
+test("Azure: a model that refuses tools with reasoning on Chat Completions gets its tool calls through the Responses API, reasoning kept", async () => {
+  await withPageAllowingResourceErrors(async (page) => {
+    const endpoint = "https://my-resource.openai.azure.com";
+    page.route(`${endpoint}/openai/deployments?**`, (route) => route.fulfill({
+      status: 200, contentType: "application/json",
+      body: JSON.stringify({ data: [{ id: "sol", model: "gpt-6-sol", created_at: 1, status: "succeeded" }] }),
+    }));
+    const chats = mockChat(page, `${endpoint}/openai/deployments/sol/chat/completions?**`, (body) => body.tools
+      ? TOOLS_NEED_RESPONSES
+      : { status: 200, body: reply("```json\n[]\n```") });
+    const responses = mockChat(page, `${endpoint}/openai/v1/responses`, (body, n) => ({ status: 200, body: n === 1 ? responsesToolCall : responsesText("Done.") }));
+    await openConnectModal(page);
+    await page.fill("#agent-key-input", "azure-secret");
+    await page.click("#agent-azure-config-open");
+    await page.fill("#agent-azure-endpoint-input", endpoint);
+    await page.click("#agent-azure-config-save");
+    await page.click("#agent-connect-submit");
+    await page.waitForFunction(() => !document.getElementById("agent-model-select-modal").disabled);
+    await page.click("#agent-connect-submit");
+    await page.waitForFunction(() => window.__kg.agent.state.connected === true);
+
+    await sendChat(page, "Hello");
+    assert.equal(await lastSystemNote(page), null, "no error reached the transcript");
+    assert.equal(chats.length, 1, "one refused Chat Completions call");
+    assert.equal(responses.length, 2, "the tool round and the reply, both on Responses");
+    const [first, second] = responses;
+    assert.equal(first.headers["api-key"], "azure-secret");
+    assert.equal(first.body.model, "sol", "the deployment name as model");
+    assert.equal(first.body.store, false);
+    assert.equal("reasoning_effort" in first.body || "reasoning" in first.body, false, "reasoning is left at the model's default, not switched off");
+    assert.match(first.body.prompt_cache_key, /^kg-agent-/);
+    assert.ok(first.body.tools.every((t) => t.type === "function" && t.name && !t.function), "tools in the Responses shape");
+    assert.equal(first.body.input[0].role, "system");
+    assert.deepEqual(second.body.input.slice(-2), [
+      { type: "function_call", call_id: "call_abc", name: "get_graph_state", arguments: "{}" },
+      { type: "function_call_output", call_id: "call_abc", output: second.body.input.at(-1).output },
+    ]);
+    const transcript = await page.evaluate(() => window.__kg.agent.state.transcript.map((m) => m.text));
+    assert.ok(transcript.includes("Done."));
+
+    // Calls without tools stay on Chat Completions, reasoning untouched.
+    await page.evaluate((y) => window.__kg.formats.commitYamlImport(y, "merge"), "classes:\n  A: {}\n  B: {}\nrelationships:\n  - name: r\n    from: A\n    to: B\n");
+    await page.evaluate(() => window.__kg.consistency.llm.run());
+    assert.equal(chats.length, 2);
+    assert.equal(chats[1].body.tools, undefined);
+    assert.equal(responses.length, 2);
+
+    const usageLog = await page.evaluate(() => window.__kg.agent.state.usage);
+    assert.deepEqual(usageLog.map((e) => [e.kind, e.api ?? "chat_completions"]), [["interview", "responses"], ["interview", "responses"], ["consistency_llm", "chat_completions"]]);
+    assert.equal(usageLog[0].usage.prompt_tokens, 1300);
+    assert.equal(usageLog[0].usage.prompt_tokens_details.cached_tokens, 1267);
+    assert.equal(usageLog[0].usage.completion_tokens_details.reasoning_tokens, 12);
+
+    await page.evaluate(() => window.__kg.agent.disconnect());
+    assert.equal(await page.evaluate(() => window.__kg.agent.state.toolsViaResponses), false, "a new connection starts on Chat Completions");
+  });
+});
+
+test("Bedrock: the same switch uses bedrock-mantle's Responses route", async () => {
+  await withPageAllowingResourceErrors(async (page) => {
+    mockModels(page);
+    mockChat(page, GPT_CHAT_URL, (body) => (body.tools ? TOOLS_NEED_RESPONSES : { status: 200, body: reply("ok") }));
+    const responses = mockChat(page, `${MANTLE}/openai/v1/responses`, () => ({ status: 200, body: responsesText("Hi.") }));
+    await connectBedrock(page);
+    await sendChat(page, "Hello");
+    assert.equal(responses.length, 1);
+    assert.equal(responses[0].body.model, "openai.gpt-6.1-sol");
+    assert.equal(responses[0].headers.authorization, `Bearer ${BEDROCK_KEY}`);
+    assert.equal(await lastSystemNote(page), null);
+  });
+});
+
+test("an unrelated reasoning_effort error is not mistaken for the tools restriction", async () => {
+  await withPageAllowingResourceErrors(async (page) => {
+    mockModels(page);
+    const chats = mockChat(page, GPT_CHAT_URL, () => ({ status: 400, body: { error: { message: "Unsupported value: 'reasoning_effort' does not support 'minimal' with this model.", param: "reasoning_effort" } } }));
+    await connectBedrock(page);
+    await sendChat(page, "Hello");
+    assert.equal(chats.length, 1);
+    assert.equal(await page.evaluate(() => window.__kg.agent.state.toolsViaResponses), false);
+  });
+});

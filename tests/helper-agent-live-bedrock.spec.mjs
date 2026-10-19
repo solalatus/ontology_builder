@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { loadEnvKey } from "./lib/env.mjs";
 import { withPageAllowingResourceErrors } from "./lib/liveOpenAi.mjs";
-import { sendChatMessage, connectAgentLiveBedrock, forwardToRealBedrock, liveChatUrlPattern } from "./lib/liveProvider.mjs";
+import { sendChatMessage, connectAgentLiveBedrock, forwardToRealBedrock, liveChatUrlPattern, unexpectedFailures, replyMessage } from "./lib/liveProvider.mjs";
 import { resolveLlmConfig } from "./lib/llmProvider.mjs";
 import { chatOnce } from "./evals/lib/chatClient.mjs";
 
@@ -67,10 +67,15 @@ test("live: a real tool-attached interview turn works, prompt_cache_key is accep
     const model = await page.evaluate(() => window.__kg.agent.state.model);
     const requests = [];
     page.on("request", (req) => {
-      if (req.method() === "POST" && /\/chat\/completions$/.test(req.url())) requests.push({ url: req.url(), body: req.postDataJSON() });
+      if (req.method() === "POST" && /\/(chat\/completions|responses)$/.test(req.url())) requests.push({ url: req.url(), body: req.postDataJSON() });
     });
     const chatResponses = forwardToRealBedrock(page, liveChatUrlPattern(CONFIG));
 
+    // Mid-interview, as in real use: the app's interviewer settles
+    // competency questions before modelling, and a reasoning model holds
+    // to that over a one-line directive on an empty canvas.
+    await page.evaluate(() => window.__kg.formats.commitYamlImport(
+      "competency_questions:\n  - text: Which supplier issued a given payment request?\n", "merge"));
     const before = await page.evaluate(() => window.__kg.state.nodes.length);
     await sendChatMessage(page, "Add a class called Invoice, meaning: a request from a supplier to receive payment. "
       + "Use the apply_ontology_yaml tool right now to add it — don't just describe it in text.", { timeout: 180000 });
@@ -91,13 +96,14 @@ test("live: a real tool-attached interview turn works, prompt_cache_key is accep
 
     assert.deepEqual(state.transcript, [], `the app reported an error: ${state.transcript.join(" | ")}`);
     assert.equal(state.rejected, false, "Bedrock rejected prompt_cache_key");
+    assert.deepEqual(unexpectedFailures(chatResponses), []);
     assert.equal(chatResponses[chatResponses.length - 1].status, 200);
     assert.ok(requests.every((r) => r.body.model === model && Array.isArray(r.body.tools) && /^kg-agent-/.test(r.body.prompt_cache_key || "")),
       "every interview call carries the model, the tools and the connection's cache key");
     assert.equal(new Set(requests.map((r) => r.body.prompt_cache_key)).size, 1, "one cache key per connection");
 
     const sawToolCall = chatResponses.some((r) => {
-      const msg = r.body && r.body.choices && r.body.choices[0] && r.body.choices[0].message;
+      const msg = replyMessage(r);
       return msg && Array.isArray(msg.tool_calls) && msg.tool_calls.some((c) => c.function && c.function.name === "apply_ontology_yaml");
     });
     assert.ok(sawToolCall, "the model should call apply_ontology_yaml for a directive request");

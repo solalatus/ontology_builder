@@ -2686,8 +2686,36 @@ whoever picks it up.
   it again, but only if it was attached that way.
 - **prompt_cache_key** is sent on every provider. A 400 naming it as
   unknown or unsupported makes the call retry without it once, and it is
-  not sent again on that connection. This covers Bedrock, and also the
-  open #176 risk that the app's old Azure api-version rejects it.
+  not sent again on that connection. This covers Bedrock; on Azure it
+  turned out unnecessary: the old api-version accepts the key (live,
+  2026-10-19).
+- **Tools on reasoning models: the Responses API.**
+  - Live on Azure (2026-10-19), the GPT-6 codename deployments (`gpt-6-sol`,
+    `gpt-6-luna`) refuse function tools on Chat Completions while reasoning is
+    on: "Function tools with reasoning_effort are not supported ... use
+    /v1/responses or set reasoning_effort to 'none'". The error appears under
+    every api-version tried.
+  - Reasoning is not switched off (owner's instruction: no provider gets a
+    dumbed-down path). On that error, the connection's tool-carrying calls
+    move to the Responses API instead, where tools and reasoning work
+    together.
+  - The routes: Azure's `/openai/v1/responses` with the deployment as
+    `model`; OpenAI's `/v1/responses`; bedrock-mantle's
+    `/openai/v1/responses`. All three answer a browser's CORS preflight.
+  - The calls send `store: false` and the full history, translated to and
+    from Chat Completions' shape (`chatMessagesToResponsesInput`,
+    `responsesToChatCompletion`).
+  - Their usage is logged under Chat Completions' field names with
+    `api: "responses"`. Calls without tools stay on Chat Completions.
+  - Verified live on gpt-6-luna: tool calls land, `prompt_cache_key` caching
+    holds (10,730 of 10,796 prompt tokens cached on the second call), and
+    reasoning tokens are reported.
+- **Live tests on that model.**
+  - The directive tool-call test now seeds one competency question first:
+    with reasoning on, the interviewer otherwise keeps to its CQ-first method
+    on an empty canvas.
+  - `agent-remove-tool-live`'s "what looks wrong" scenario passed 3 of 5 runs:
+    the model sometimes describes the duplicate and asks before deleting.
 - **Tooling.** `tests/lib/llmProvider.mjs` (Node) and `env.load_llm_config`
   (Python) resolve one provider for every live test, eval and experiment
   script from `LLM_PROVIDER` or the credentials present; `.env.example`

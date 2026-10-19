@@ -308,6 +308,17 @@ the other prefix, and that prefix is remembered for the connection. GPT-6.1
 Sol is served in-region on Mantle in `us-east-1` only, hence the default
 region.
 
+One more correction applies to every provider. Some reasoning models (the
+GPT-6 codename deployments, checked live on Azure) refuse function tools on
+Chat Completions while reasoning is on. The error points to the Responses
+API. On that error the app moves the connection's tool-carrying calls to
+the provider's Responses route (`/openai/v1/responses` on Azure and Mantle,
+`/v1/responses` on OpenAI). Reasoning stays on; it is not switched off to
+make tools fit. The translation both ways is in `index.html`
+(`chatMessagesToResponsesInput`, `responsesToChatCompletion`). The live
+relays cover both routes, and `replyMessage` in `tests/lib/liveProvider.mjs`
+reads an answer from either API.
+
 `helper-agent-bedrock.spec.mjs` covers this fully mocked:
 - the provider row and popup, key auto-detection, mutual exclusion with Azure;
 - the model listing, the pinned model, every call kind and the route retry;
