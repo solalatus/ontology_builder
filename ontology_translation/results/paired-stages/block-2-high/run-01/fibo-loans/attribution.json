@@ -1,0 +1,2204 @@
+{
+  "runDir": "/home/user/ontology_builder/ontology_translation/results/paired-stages/block-2-high/run-01/fibo-loans",
+  "domain": "fibo-loans",
+  "snapshots": {
+    "A": {
+      "turn": 84,
+      "semanticAvailable": true,
+      "counts": {
+        "classes": {
+          "recovered": 30,
+          "endpoint_class_missing": 0,
+          "other_name": 0,
+          "removed": 1,
+          "mentioned_not_committed": 15,
+          "never_mentioned": 11,
+          "goldTotal": 57,
+          "scorerMatched": 30
+        },
+        "relationships": {
+          "recovered": 20,
+          "endpoint_class_missing": 6,
+          "other_name": 3,
+          "removed": 0,
+          "mentioned_not_committed": 1,
+          "never_mentioned": 1,
+          "goldTotal": 31
+        },
+        "properties": {
+          "recovered": 22,
+          "endpoint_class_missing": 8,
+          "other_name": 0,
+          "removed": 0,
+          "mentioned_not_committed": 3,
+          "never_mentioned": 16,
+          "goldTotal": 49
+        }
+      },
+      "items": {
+        "classes": [
+          {
+            "id": "Loan",
+            "label": "Loan",
+            "category": "recovered"
+          },
+          {
+            "id": "CreditAgreement",
+            "label": "Credit Agreement",
+            "category": "recovered"
+          },
+          {
+            "id": "CreditFacility",
+            "label": "Credit Facility",
+            "category": "recovered"
+          },
+          {
+            "id": "OpenEndCredit",
+            "label": "Open End Credit",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "ClosedEndCredit",
+            "label": "Closed End Credit",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "Borrower",
+            "label": "Borrower",
+            "category": "recovered"
+          },
+          {
+            "id": "Lender",
+            "label": "Lender",
+            "category": "recovered"
+          },
+          {
+            "id": "Servicer",
+            "label": "Servicer",
+            "category": "recovered"
+          },
+          {
+            "id": "Principal",
+            "label": "Principal",
+            "category": "recovered"
+          },
+          {
+            "id": "Interest",
+            "label": "Interest",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "AccruedInterest",
+            "label": "Accrued Interest",
+            "category": "removed"
+          },
+          {
+            "id": "FixedInterestRate",
+            "label": "Fixed Interest Rate",
+            "category": "recovered"
+          },
+          {
+            "id": "VariableInterestRate",
+            "label": "Variable Interest Rate",
+            "category": "recovered"
+          },
+          {
+            "id": "FloatingInterestRate",
+            "label": "Floating Interest Rate",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "ManagedInterestRate",
+            "label": "Managed Interest Rate",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "DayCountConvention",
+            "label": "Day Count Convention",
+            "category": "recovered"
+          },
+          {
+            "id": "DebtTerms",
+            "label": "Debt Terms",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "InterestPaymentTerms",
+            "label": "Interest Payment Terms",
+            "category": "recovered"
+          },
+          {
+            "id": "PrincipalRepaymentTerms",
+            "label": "Principal Repayment Terms",
+            "category": "recovered"
+          },
+          {
+            "id": "PrepaymentTerms",
+            "label": "Prepayment Terms",
+            "category": "recovered"
+          },
+          {
+            "id": "Amortization",
+            "label": "Amortization",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "FullAmortization",
+            "label": "Full Amortization",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "PartialAmortization",
+            "label": "Partial Amortization",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "NegativeAmortization",
+            "label": "Negative Amortization",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "AmortizationSchedule",
+            "label": "Amortization Schedule",
+            "category": "recovered"
+          },
+          {
+            "id": "LoanPaymentSchedule",
+            "label": "Loan Payment Schedule",
+            "category": "recovered"
+          },
+          {
+            "id": "InterestPaymentSchedule",
+            "label": "Interest Payment Schedule",
+            "category": "recovered"
+          },
+          {
+            "id": "PrincipalPaymentSchedule",
+            "label": "Principal Payment Schedule",
+            "category": "recovered"
+          },
+          {
+            "id": "InterestCalculationSchedule",
+            "label": "Interest Calculation Schedule",
+            "category": "recovered"
+          },
+          {
+            "id": "InterestRateResetSchedule",
+            "label": "Interest Rate Reset Schedule",
+            "category": "recovered"
+          },
+          {
+            "id": "ExplicitContractEventSchedule",
+            "label": "Explicit Contract Event Schedule",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "Collateral",
+            "label": "Collateral",
+            "category": "recovered"
+          },
+          {
+            "id": "SecurityAgreement",
+            "label": "Security Agreement",
+            "category": "recovered"
+          },
+          {
+            "id": "CreditEnhancementAgreement",
+            "label": "Credit Enhancement Agreement",
+            "category": "recovered"
+          },
+          {
+            "id": "CreditEnhancementBeneficiary",
+            "label": "Credit Enhancement Beneficiary",
+            "category": "recovered"
+          },
+          {
+            "id": "PaymentHistory",
+            "label": "Payment History",
+            "category": "recovered"
+          },
+          {
+            "id": "IndividualPaymentTransaction",
+            "label": "Individual Payment Transaction",
+            "category": "recovered"
+          },
+          {
+            "id": "PrincipalPayment",
+            "label": "Principal Payment",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "InterestPayment",
+            "label": "Interest Payment",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "InterestCalculation",
+            "label": "Interest Calculation",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "InterestRateReset",
+            "label": "Interest Rate Reset",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "BorrowingCapacity",
+            "label": "Borrowing Capacity",
+            "category": "recovered"
+          },
+          {
+            "id": "LoanToValueRatio",
+            "label": "Loan To Value Ratio",
+            "category": "recovered"
+          },
+          {
+            "id": "CombinedLoanToValueRatio",
+            "label": "Combined Loan To Value Ratio",
+            "category": "recovered"
+          },
+          {
+            "id": "CollateralValueAsOfDate",
+            "label": "Collateral Value As Of Date",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "SecuredLoan",
+            "label": "Secured Loan",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "CollateralizedLoan",
+            "label": "Collateralized Loan",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "GuaranteedLoan",
+            "label": "Guaranteed Loan",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "UnsecuredLoan",
+            "label": "Unsecured Loan",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "RevolvingLineOfCredit",
+            "label": "Revolving Line Of Credit",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "CommittedCreditFacility",
+            "label": "Committed Credit Facility",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "UncommittedCreditFacility",
+            "label": "Uncommitted Credit Facility",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "SubFacility",
+            "label": "Sub Facility",
+            "category": "recovered"
+          },
+          {
+            "id": "CommittedSubFacility",
+            "label": "Committed Sub Facility",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "UncommittedSubFacility",
+            "label": "Uncommitted Sub Facility",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "Accrual",
+            "label": "Accrual",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "InterestRateSettingEvent",
+            "label": "Interest Rate Setting Event",
+            "category": "recovered"
+          }
+        ],
+        "relationships": [
+          {
+            "id": "rel_0",
+            "label": "Loan has Borrower Borrower",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_1",
+            "label": "Loan has Lender Lender",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_2",
+            "label": "CreditAgreement has Borrower Borrower",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_3",
+            "label": "CreditAgreement has Lender Lender",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_4",
+            "label": "CreditFacility has Borrower Borrower",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_5",
+            "label": "CreditFacility has Lender Lender",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_6",
+            "label": "Loan has Principal Principal",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_7",
+            "label": "Loan has Interest Interest",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "rel_8",
+            "label": "Loan has Interest Rate FixedInterestRate",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_9",
+            "label": "Loan has Interest Rate VariableInterestRate",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_10",
+            "label": "InterestPaymentTerms has Accrual Basis DayCountConvention",
+            "category": "other_name"
+          },
+          {
+            "id": "rel_11",
+            "label": "InterestPaymentTerms governs Payment Of Interest",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "rel_12",
+            "label": "PrincipalRepaymentTerms governs Payment Of Principal",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "rel_13",
+            "label": "Loan has Payment History PaymentHistory",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_14",
+            "label": "PaymentHistory has Individual Payment IndividualPaymentTransaction",
+            "category": "other_name"
+          },
+          {
+            "id": "rel_15",
+            "label": "Loan is Serviced By Servicer",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_16",
+            "label": "SecuredLoan is Collateralized By Collateral",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "rel_17",
+            "label": "SecurityAgreement secures Collateral",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_18",
+            "label": "CreditEnhancementAgreement has Beneficiary CreditEnhancementBeneficiary",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_19",
+            "label": "Loan has Schedule LoanPaymentSchedule",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_20",
+            "label": "Loan has Schedule AmortizationSchedule",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_21",
+            "label": "Loan has Schedule InterestPaymentSchedule",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_22",
+            "label": "Loan has Schedule PrincipalPaymentSchedule",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_23",
+            "label": "Loan has Schedule InterestCalculationSchedule",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_24",
+            "label": "Loan has Schedule InterestRateResetSchedule",
+            "category": "other_name"
+          },
+          {
+            "id": "rel_25",
+            "label": "CreditFacility has Sub Facility SubFacility",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_26",
+            "label": "Collateral has Collateral Value CollateralValueAsOfDate",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "rel_27",
+            "label": "Borrower has Borrowing Capacity BorrowingCapacity",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_28",
+            "label": "CollateralizedLoan has Loan To Value Ratio LoanToValueRatio",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "rel_29",
+            "label": "CollateralizedLoan has Combined Loan To Value Ratio CombinedLoanToValueRatio",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "rel_30",
+            "label": "Loan has Schedule InterestRateSettingEvent",
+            "category": "never_mentioned"
+          }
+        ],
+        "properties": [
+          {
+            "id": "Loan.maturityDate",
+            "label": "Loan.maturityDate",
+            "category": "recovered"
+          },
+          {
+            "id": "Loan.initialExchangeDate",
+            "label": "Loan.initialExchangeDate",
+            "category": "recovered"
+          },
+          {
+            "id": "Loan.interestRateCap",
+            "label": "Loan.interestRateCap",
+            "category": "recovered"
+          },
+          {
+            "id": "Loan.firstRateChangeTermMonths",
+            "label": "Loan.firstRateChangeTermMonths",
+            "category": "recovered"
+          },
+          {
+            "id": "Loan.assumable",
+            "label": "Loan.assumable",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "Loan.initiallyPayable",
+            "label": "Loan.initiallyPayable",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "Loan.interestOnly",
+            "label": "Loan.interestOnly",
+            "category": "recovered"
+          },
+          {
+            "id": "Loan.balloonPayment",
+            "label": "Loan.balloonPayment",
+            "category": "recovered"
+          },
+          {
+            "id": "Loan.negativeAmortization",
+            "label": "Loan.negativeAmortization",
+            "category": "recovered"
+          },
+          {
+            "id": "Loan.totalClosingCosts",
+            "label": "Loan.totalClosingCosts",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "Loan.totalPointsAndFees",
+            "label": "Loan.totalPointsAndFees",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "Loan.principalAmount",
+            "label": "Loan.principalAmount",
+            "category": "recovered"
+          },
+          {
+            "id": "Loan.loanBalance",
+            "label": "Loan.loanBalance",
+            "category": "recovered"
+          },
+          {
+            "id": "CreditAgreement.debtAmount",
+            "label": "CreditAgreement.debtAmount",
+            "category": "recovered"
+          },
+          {
+            "id": "CreditAgreement.maturityDate",
+            "label": "CreditAgreement.maturityDate",
+            "category": "recovered"
+          },
+          {
+            "id": "CreditAgreement.initialExchangeDate",
+            "label": "CreditAgreement.initialExchangeDate",
+            "category": "recovered"
+          },
+          {
+            "id": "CreditFacility.availableAmount",
+            "label": "CreditFacility.availableAmount",
+            "category": "recovered"
+          },
+          {
+            "id": "CreditFacility.creditLimit",
+            "label": "CreditFacility.creditLimit",
+            "category": "recovered"
+          },
+          {
+            "id": "CreditFacility.amountOfCreditExtended",
+            "label": "CreditFacility.amountOfCreditExtended",
+            "category": "recovered"
+          },
+          {
+            "id": "CreditFacility.maximumAdvanceAmount",
+            "label": "CreditFacility.maximumAdvanceAmount",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "OpenEndCredit.creditLimit",
+            "label": "OpenEndCredit.creditLimit",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "Principal.outstandingAmount",
+            "label": "Principal.outstandingAmount",
+            "category": "recovered"
+          },
+          {
+            "id": "Interest.outstandingAmount",
+            "label": "Interest.outstandingAmount",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "AccruedInterest.asOfDate",
+            "label": "AccruedInterest.asOfDate",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "AccruedInterest.amount",
+            "label": "AccruedInterest.amount",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "FixedInterestRate.rate",
+            "label": "FixedInterestRate.rate",
+            "category": "recovered"
+          },
+          {
+            "id": "VariableInterestRate.rate",
+            "label": "VariableInterestRate.rate",
+            "category": "recovered"
+          },
+          {
+            "id": "FloatingInterestRate.rate",
+            "label": "FloatingInterestRate.rate",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "ManagedInterestRate.rate",
+            "label": "ManagedInterestRate.rate",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "InterestPaymentTerms.initialInterestAccrualDate",
+            "label": "InterestPaymentTerms.initialInterestAccrualDate",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "InterestPaymentTerms.initialInterestPaymentDate",
+            "label": "InterestPaymentTerms.initialInterestPaymentDate",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "InterestPaymentTerms.finalInterestPaymentDate",
+            "label": "InterestPaymentTerms.finalInterestPaymentDate",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "InterestPaymentTerms.interestPaymentFrequency",
+            "label": "InterestPaymentTerms.interestPaymentFrequency",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "InterestPaymentTerms.interestPaymentDay",
+            "label": "InterestPaymentTerms.interestPaymentDay",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "InterestPaymentTerms.compoundingFrequency",
+            "label": "InterestPaymentTerms.compoundingFrequency",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "PrincipalRepaymentTerms.initialPrincipalPaymentDate",
+            "label": "PrincipalRepaymentTerms.initialPrincipalPaymentDate",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "PrincipalRepaymentTerms.principalRepaymentDate",
+            "label": "PrincipalRepaymentTerms.principalRepaymentDate",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "PrincipalRepaymentTerms.principalPaymentFrequency",
+            "label": "PrincipalRepaymentTerms.principalPaymentFrequency",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "PrincipalRepaymentTerms.principalPaymentDay",
+            "label": "PrincipalRepaymentTerms.principalPaymentDay",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "PrepaymentTerms.prePaymentPenaltyTermMonths",
+            "label": "PrepaymentTerms.prePaymentPenaltyTermMonths",
+            "category": "recovered"
+          },
+          {
+            "id": "AmortizationSchedule.anticipatedNumberOfPayments",
+            "label": "AmortizationSchedule.anticipatedNumberOfPayments",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "LoanPaymentSchedule.anticipatedNumberOfPayments",
+            "label": "LoanPaymentSchedule.anticipatedNumberOfPayments",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "InterestPaymentSchedule.anticipatedNumberOfPayments",
+            "label": "InterestPaymentSchedule.anticipatedNumberOfPayments",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "PrincipalPaymentSchedule.anticipatedNumberOfPayments",
+            "label": "PrincipalPaymentSchedule.anticipatedNumberOfPayments",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "BorrowingCapacity.amount",
+            "label": "BorrowingCapacity.amount",
+            "category": "recovered"
+          },
+          {
+            "id": "LoanToValueRatio.ratio",
+            "label": "LoanToValueRatio.ratio",
+            "category": "recovered"
+          },
+          {
+            "id": "CombinedLoanToValueRatio.ratio",
+            "label": "CombinedLoanToValueRatio.ratio",
+            "category": "recovered"
+          },
+          {
+            "id": "CollateralValueAsOfDate.asOfDate",
+            "label": "CollateralValueAsOfDate.asOfDate",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "CollateralValueAsOfDate.value",
+            "label": "CollateralValueAsOfDate.value",
+            "category": "endpoint_class_missing"
+          }
+        ]
+      }
+    },
+    "B": {
+      "turn": 93,
+      "semanticAvailable": true,
+      "counts": {
+        "classes": {
+          "recovered": 30,
+          "endpoint_class_missing": 0,
+          "other_name": 0,
+          "removed": 1,
+          "mentioned_not_committed": 18,
+          "never_mentioned": 8,
+          "goldTotal": 57,
+          "scorerMatched": 30
+        },
+        "relationships": {
+          "recovered": 20,
+          "endpoint_class_missing": 6,
+          "other_name": 3,
+          "removed": 0,
+          "mentioned_not_committed": 1,
+          "never_mentioned": 1,
+          "goldTotal": 31
+        },
+        "properties": {
+          "recovered": 22,
+          "endpoint_class_missing": 8,
+          "other_name": 0,
+          "removed": 0,
+          "mentioned_not_committed": 12,
+          "never_mentioned": 7,
+          "goldTotal": 49
+        }
+      },
+      "items": {
+        "classes": [
+          {
+            "id": "Loan",
+            "label": "Loan",
+            "category": "recovered"
+          },
+          {
+            "id": "CreditAgreement",
+            "label": "Credit Agreement",
+            "category": "recovered"
+          },
+          {
+            "id": "CreditFacility",
+            "label": "Credit Facility",
+            "category": "recovered"
+          },
+          {
+            "id": "OpenEndCredit",
+            "label": "Open End Credit",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "ClosedEndCredit",
+            "label": "Closed End Credit",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "Borrower",
+            "label": "Borrower",
+            "category": "recovered"
+          },
+          {
+            "id": "Lender",
+            "label": "Lender",
+            "category": "recovered"
+          },
+          {
+            "id": "Servicer",
+            "label": "Servicer",
+            "category": "recovered"
+          },
+          {
+            "id": "Principal",
+            "label": "Principal",
+            "category": "recovered"
+          },
+          {
+            "id": "Interest",
+            "label": "Interest",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "AccruedInterest",
+            "label": "Accrued Interest",
+            "category": "removed"
+          },
+          {
+            "id": "FixedInterestRate",
+            "label": "Fixed Interest Rate",
+            "category": "recovered"
+          },
+          {
+            "id": "VariableInterestRate",
+            "label": "Variable Interest Rate",
+            "category": "recovered"
+          },
+          {
+            "id": "FloatingInterestRate",
+            "label": "Floating Interest Rate",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "ManagedInterestRate",
+            "label": "Managed Interest Rate",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "DayCountConvention",
+            "label": "Day Count Convention",
+            "category": "recovered"
+          },
+          {
+            "id": "DebtTerms",
+            "label": "Debt Terms",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "InterestPaymentTerms",
+            "label": "Interest Payment Terms",
+            "category": "recovered"
+          },
+          {
+            "id": "PrincipalRepaymentTerms",
+            "label": "Principal Repayment Terms",
+            "category": "recovered"
+          },
+          {
+            "id": "PrepaymentTerms",
+            "label": "Prepayment Terms",
+            "category": "recovered"
+          },
+          {
+            "id": "Amortization",
+            "label": "Amortization",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "FullAmortization",
+            "label": "Full Amortization",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "PartialAmortization",
+            "label": "Partial Amortization",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "NegativeAmortization",
+            "label": "Negative Amortization",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "AmortizationSchedule",
+            "label": "Amortization Schedule",
+            "category": "recovered"
+          },
+          {
+            "id": "LoanPaymentSchedule",
+            "label": "Loan Payment Schedule",
+            "category": "recovered"
+          },
+          {
+            "id": "InterestPaymentSchedule",
+            "label": "Interest Payment Schedule",
+            "category": "recovered"
+          },
+          {
+            "id": "PrincipalPaymentSchedule",
+            "label": "Principal Payment Schedule",
+            "category": "recovered"
+          },
+          {
+            "id": "InterestCalculationSchedule",
+            "label": "Interest Calculation Schedule",
+            "category": "recovered"
+          },
+          {
+            "id": "InterestRateResetSchedule",
+            "label": "Interest Rate Reset Schedule",
+            "category": "recovered"
+          },
+          {
+            "id": "ExplicitContractEventSchedule",
+            "label": "Explicit Contract Event Schedule",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "Collateral",
+            "label": "Collateral",
+            "category": "recovered"
+          },
+          {
+            "id": "SecurityAgreement",
+            "label": "Security Agreement",
+            "category": "recovered"
+          },
+          {
+            "id": "CreditEnhancementAgreement",
+            "label": "Credit Enhancement Agreement",
+            "category": "recovered"
+          },
+          {
+            "id": "CreditEnhancementBeneficiary",
+            "label": "Credit Enhancement Beneficiary",
+            "category": "recovered"
+          },
+          {
+            "id": "PaymentHistory",
+            "label": "Payment History",
+            "category": "recovered"
+          },
+          {
+            "id": "IndividualPaymentTransaction",
+            "label": "Individual Payment Transaction",
+            "category": "recovered"
+          },
+          {
+            "id": "PrincipalPayment",
+            "label": "Principal Payment",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "InterestPayment",
+            "label": "Interest Payment",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "InterestCalculation",
+            "label": "Interest Calculation",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "InterestRateReset",
+            "label": "Interest Rate Reset",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "BorrowingCapacity",
+            "label": "Borrowing Capacity",
+            "category": "recovered"
+          },
+          {
+            "id": "LoanToValueRatio",
+            "label": "Loan To Value Ratio",
+            "category": "recovered"
+          },
+          {
+            "id": "CombinedLoanToValueRatio",
+            "label": "Combined Loan To Value Ratio",
+            "category": "recovered"
+          },
+          {
+            "id": "CollateralValueAsOfDate",
+            "label": "Collateral Value As Of Date",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "SecuredLoan",
+            "label": "Secured Loan",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "CollateralizedLoan",
+            "label": "Collateralized Loan",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "GuaranteedLoan",
+            "label": "Guaranteed Loan",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "UnsecuredLoan",
+            "label": "Unsecured Loan",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "RevolvingLineOfCredit",
+            "label": "Revolving Line Of Credit",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "CommittedCreditFacility",
+            "label": "Committed Credit Facility",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "UncommittedCreditFacility",
+            "label": "Uncommitted Credit Facility",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "SubFacility",
+            "label": "Sub Facility",
+            "category": "recovered"
+          },
+          {
+            "id": "CommittedSubFacility",
+            "label": "Committed Sub Facility",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "UncommittedSubFacility",
+            "label": "Uncommitted Sub Facility",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "Accrual",
+            "label": "Accrual",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "InterestRateSettingEvent",
+            "label": "Interest Rate Setting Event",
+            "category": "recovered"
+          }
+        ],
+        "relationships": [
+          {
+            "id": "rel_0",
+            "label": "Loan has Borrower Borrower",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_1",
+            "label": "Loan has Lender Lender",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_2",
+            "label": "CreditAgreement has Borrower Borrower",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_3",
+            "label": "CreditAgreement has Lender Lender",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_4",
+            "label": "CreditFacility has Borrower Borrower",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_5",
+            "label": "CreditFacility has Lender Lender",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_6",
+            "label": "Loan has Principal Principal",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_7",
+            "label": "Loan has Interest Interest",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "rel_8",
+            "label": "Loan has Interest Rate FixedInterestRate",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_9",
+            "label": "Loan has Interest Rate VariableInterestRate",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_10",
+            "label": "InterestPaymentTerms has Accrual Basis DayCountConvention",
+            "category": "other_name"
+          },
+          {
+            "id": "rel_11",
+            "label": "InterestPaymentTerms governs Payment Of Interest",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "rel_12",
+            "label": "PrincipalRepaymentTerms governs Payment Of Principal",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "rel_13",
+            "label": "Loan has Payment History PaymentHistory",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_14",
+            "label": "PaymentHistory has Individual Payment IndividualPaymentTransaction",
+            "category": "other_name"
+          },
+          {
+            "id": "rel_15",
+            "label": "Loan is Serviced By Servicer",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_16",
+            "label": "SecuredLoan is Collateralized By Collateral",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "rel_17",
+            "label": "SecurityAgreement secures Collateral",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_18",
+            "label": "CreditEnhancementAgreement has Beneficiary CreditEnhancementBeneficiary",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_19",
+            "label": "Loan has Schedule LoanPaymentSchedule",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_20",
+            "label": "Loan has Schedule AmortizationSchedule",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_21",
+            "label": "Loan has Schedule InterestPaymentSchedule",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_22",
+            "label": "Loan has Schedule PrincipalPaymentSchedule",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_23",
+            "label": "Loan has Schedule InterestCalculationSchedule",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_24",
+            "label": "Loan has Schedule InterestRateResetSchedule",
+            "category": "other_name"
+          },
+          {
+            "id": "rel_25",
+            "label": "CreditFacility has Sub Facility SubFacility",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_26",
+            "label": "Collateral has Collateral Value CollateralValueAsOfDate",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "rel_27",
+            "label": "Borrower has Borrowing Capacity BorrowingCapacity",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_28",
+            "label": "CollateralizedLoan has Loan To Value Ratio LoanToValueRatio",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "rel_29",
+            "label": "CollateralizedLoan has Combined Loan To Value Ratio CombinedLoanToValueRatio",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "rel_30",
+            "label": "Loan has Schedule InterestRateSettingEvent",
+            "category": "never_mentioned"
+          }
+        ],
+        "properties": [
+          {
+            "id": "Loan.maturityDate",
+            "label": "Loan.maturityDate",
+            "category": "recovered"
+          },
+          {
+            "id": "Loan.initialExchangeDate",
+            "label": "Loan.initialExchangeDate",
+            "category": "recovered"
+          },
+          {
+            "id": "Loan.interestRateCap",
+            "label": "Loan.interestRateCap",
+            "category": "recovered"
+          },
+          {
+            "id": "Loan.firstRateChangeTermMonths",
+            "label": "Loan.firstRateChangeTermMonths",
+            "category": "recovered"
+          },
+          {
+            "id": "Loan.assumable",
+            "label": "Loan.assumable",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "Loan.initiallyPayable",
+            "label": "Loan.initiallyPayable",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "Loan.interestOnly",
+            "label": "Loan.interestOnly",
+            "category": "recovered"
+          },
+          {
+            "id": "Loan.balloonPayment",
+            "label": "Loan.balloonPayment",
+            "category": "recovered"
+          },
+          {
+            "id": "Loan.negativeAmortization",
+            "label": "Loan.negativeAmortization",
+            "category": "recovered"
+          },
+          {
+            "id": "Loan.totalClosingCosts",
+            "label": "Loan.totalClosingCosts",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "Loan.totalPointsAndFees",
+            "label": "Loan.totalPointsAndFees",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "Loan.principalAmount",
+            "label": "Loan.principalAmount",
+            "category": "recovered"
+          },
+          {
+            "id": "Loan.loanBalance",
+            "label": "Loan.loanBalance",
+            "category": "recovered"
+          },
+          {
+            "id": "CreditAgreement.debtAmount",
+            "label": "CreditAgreement.debtAmount",
+            "category": "recovered"
+          },
+          {
+            "id": "CreditAgreement.maturityDate",
+            "label": "CreditAgreement.maturityDate",
+            "category": "recovered"
+          },
+          {
+            "id": "CreditAgreement.initialExchangeDate",
+            "label": "CreditAgreement.initialExchangeDate",
+            "category": "recovered"
+          },
+          {
+            "id": "CreditFacility.availableAmount",
+            "label": "CreditFacility.availableAmount",
+            "category": "recovered"
+          },
+          {
+            "id": "CreditFacility.creditLimit",
+            "label": "CreditFacility.creditLimit",
+            "category": "recovered"
+          },
+          {
+            "id": "CreditFacility.amountOfCreditExtended",
+            "label": "CreditFacility.amountOfCreditExtended",
+            "category": "recovered"
+          },
+          {
+            "id": "CreditFacility.maximumAdvanceAmount",
+            "label": "CreditFacility.maximumAdvanceAmount",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "OpenEndCredit.creditLimit",
+            "label": "OpenEndCredit.creditLimit",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "Principal.outstandingAmount",
+            "label": "Principal.outstandingAmount",
+            "category": "recovered"
+          },
+          {
+            "id": "Interest.outstandingAmount",
+            "label": "Interest.outstandingAmount",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "AccruedInterest.asOfDate",
+            "label": "AccruedInterest.asOfDate",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "AccruedInterest.amount",
+            "label": "AccruedInterest.amount",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "FixedInterestRate.rate",
+            "label": "FixedInterestRate.rate",
+            "category": "recovered"
+          },
+          {
+            "id": "VariableInterestRate.rate",
+            "label": "VariableInterestRate.rate",
+            "category": "recovered"
+          },
+          {
+            "id": "FloatingInterestRate.rate",
+            "label": "FloatingInterestRate.rate",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "ManagedInterestRate.rate",
+            "label": "ManagedInterestRate.rate",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "InterestPaymentTerms.initialInterestAccrualDate",
+            "label": "InterestPaymentTerms.initialInterestAccrualDate",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "InterestPaymentTerms.initialInterestPaymentDate",
+            "label": "InterestPaymentTerms.initialInterestPaymentDate",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "InterestPaymentTerms.finalInterestPaymentDate",
+            "label": "InterestPaymentTerms.finalInterestPaymentDate",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "InterestPaymentTerms.interestPaymentFrequency",
+            "label": "InterestPaymentTerms.interestPaymentFrequency",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "InterestPaymentTerms.interestPaymentDay",
+            "label": "InterestPaymentTerms.interestPaymentDay",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "InterestPaymentTerms.compoundingFrequency",
+            "label": "InterestPaymentTerms.compoundingFrequency",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "PrincipalRepaymentTerms.initialPrincipalPaymentDate",
+            "label": "PrincipalRepaymentTerms.initialPrincipalPaymentDate",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "PrincipalRepaymentTerms.principalRepaymentDate",
+            "label": "PrincipalRepaymentTerms.principalRepaymentDate",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "PrincipalRepaymentTerms.principalPaymentFrequency",
+            "label": "PrincipalRepaymentTerms.principalPaymentFrequency",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "PrincipalRepaymentTerms.principalPaymentDay",
+            "label": "PrincipalRepaymentTerms.principalPaymentDay",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "PrepaymentTerms.prePaymentPenaltyTermMonths",
+            "label": "PrepaymentTerms.prePaymentPenaltyTermMonths",
+            "category": "recovered"
+          },
+          {
+            "id": "AmortizationSchedule.anticipatedNumberOfPayments",
+            "label": "AmortizationSchedule.anticipatedNumberOfPayments",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "LoanPaymentSchedule.anticipatedNumberOfPayments",
+            "label": "LoanPaymentSchedule.anticipatedNumberOfPayments",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "InterestPaymentSchedule.anticipatedNumberOfPayments",
+            "label": "InterestPaymentSchedule.anticipatedNumberOfPayments",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "PrincipalPaymentSchedule.anticipatedNumberOfPayments",
+            "label": "PrincipalPaymentSchedule.anticipatedNumberOfPayments",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "BorrowingCapacity.amount",
+            "label": "BorrowingCapacity.amount",
+            "category": "recovered"
+          },
+          {
+            "id": "LoanToValueRatio.ratio",
+            "label": "LoanToValueRatio.ratio",
+            "category": "recovered"
+          },
+          {
+            "id": "CombinedLoanToValueRatio.ratio",
+            "label": "CombinedLoanToValueRatio.ratio",
+            "category": "recovered"
+          },
+          {
+            "id": "CollateralValueAsOfDate.asOfDate",
+            "label": "CollateralValueAsOfDate.asOfDate",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "CollateralValueAsOfDate.value",
+            "label": "CollateralValueAsOfDate.value",
+            "category": "endpoint_class_missing"
+          }
+        ]
+      }
+    },
+    "C": {
+      "turn": 114,
+      "semanticAvailable": true,
+      "counts": {
+        "classes": {
+          "recovered": 32,
+          "endpoint_class_missing": 0,
+          "other_name": 0,
+          "removed": 1,
+          "mentioned_not_committed": 17,
+          "never_mentioned": 7,
+          "goldTotal": 57,
+          "scorerMatched": 32
+        },
+        "relationships": {
+          "recovered": 28,
+          "endpoint_class_missing": 3,
+          "other_name": 0,
+          "removed": 0,
+          "mentioned_not_committed": 0,
+          "never_mentioned": 0,
+          "goldTotal": 31
+        },
+        "properties": {
+          "recovered": 25,
+          "endpoint_class_missing": 5,
+          "other_name": 0,
+          "removed": 0,
+          "mentioned_not_committed": 12,
+          "never_mentioned": 7,
+          "goldTotal": 49
+        }
+      },
+      "items": {
+        "classes": [
+          {
+            "id": "Loan",
+            "label": "Loan",
+            "category": "recovered"
+          },
+          {
+            "id": "CreditAgreement",
+            "label": "Credit Agreement",
+            "category": "recovered"
+          },
+          {
+            "id": "CreditFacility",
+            "label": "Credit Facility",
+            "category": "recovered"
+          },
+          {
+            "id": "OpenEndCredit",
+            "label": "Open End Credit",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "ClosedEndCredit",
+            "label": "Closed End Credit",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "Borrower",
+            "label": "Borrower",
+            "category": "recovered"
+          },
+          {
+            "id": "Lender",
+            "label": "Lender",
+            "category": "recovered"
+          },
+          {
+            "id": "Servicer",
+            "label": "Servicer",
+            "category": "recovered"
+          },
+          {
+            "id": "Principal",
+            "label": "Principal",
+            "category": "recovered"
+          },
+          {
+            "id": "Interest",
+            "label": "Interest",
+            "category": "recovered"
+          },
+          {
+            "id": "AccruedInterest",
+            "label": "Accrued Interest",
+            "category": "removed"
+          },
+          {
+            "id": "FixedInterestRate",
+            "label": "Fixed Interest Rate",
+            "category": "recovered"
+          },
+          {
+            "id": "VariableInterestRate",
+            "label": "Variable Interest Rate",
+            "category": "recovered"
+          },
+          {
+            "id": "FloatingInterestRate",
+            "label": "Floating Interest Rate",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "ManagedInterestRate",
+            "label": "Managed Interest Rate",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "DayCountConvention",
+            "label": "Day Count Convention",
+            "category": "recovered"
+          },
+          {
+            "id": "DebtTerms",
+            "label": "Debt Terms",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "InterestPaymentTerms",
+            "label": "Interest Payment Terms",
+            "category": "recovered"
+          },
+          {
+            "id": "PrincipalRepaymentTerms",
+            "label": "Principal Repayment Terms",
+            "category": "recovered"
+          },
+          {
+            "id": "PrepaymentTerms",
+            "label": "Prepayment Terms",
+            "category": "recovered"
+          },
+          {
+            "id": "Amortization",
+            "label": "Amortization",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "FullAmortization",
+            "label": "Full Amortization",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "PartialAmortization",
+            "label": "Partial Amortization",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "NegativeAmortization",
+            "label": "Negative Amortization",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "AmortizationSchedule",
+            "label": "Amortization Schedule",
+            "category": "recovered"
+          },
+          {
+            "id": "LoanPaymentSchedule",
+            "label": "Loan Payment Schedule",
+            "category": "recovered"
+          },
+          {
+            "id": "InterestPaymentSchedule",
+            "label": "Interest Payment Schedule",
+            "category": "recovered"
+          },
+          {
+            "id": "PrincipalPaymentSchedule",
+            "label": "Principal Payment Schedule",
+            "category": "recovered"
+          },
+          {
+            "id": "InterestCalculationSchedule",
+            "label": "Interest Calculation Schedule",
+            "category": "recovered"
+          },
+          {
+            "id": "InterestRateResetSchedule",
+            "label": "Interest Rate Reset Schedule",
+            "category": "recovered"
+          },
+          {
+            "id": "ExplicitContractEventSchedule",
+            "label": "Explicit Contract Event Schedule",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "Collateral",
+            "label": "Collateral",
+            "category": "recovered"
+          },
+          {
+            "id": "SecurityAgreement",
+            "label": "Security Agreement",
+            "category": "recovered"
+          },
+          {
+            "id": "CreditEnhancementAgreement",
+            "label": "Credit Enhancement Agreement",
+            "category": "recovered"
+          },
+          {
+            "id": "CreditEnhancementBeneficiary",
+            "label": "Credit Enhancement Beneficiary",
+            "category": "recovered"
+          },
+          {
+            "id": "PaymentHistory",
+            "label": "Payment History",
+            "category": "recovered"
+          },
+          {
+            "id": "IndividualPaymentTransaction",
+            "label": "Individual Payment Transaction",
+            "category": "recovered"
+          },
+          {
+            "id": "PrincipalPayment",
+            "label": "Principal Payment",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "InterestPayment",
+            "label": "Interest Payment",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "InterestCalculation",
+            "label": "Interest Calculation",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "InterestRateReset",
+            "label": "Interest Rate Reset",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "BorrowingCapacity",
+            "label": "Borrowing Capacity",
+            "category": "recovered"
+          },
+          {
+            "id": "LoanToValueRatio",
+            "label": "Loan To Value Ratio",
+            "category": "recovered"
+          },
+          {
+            "id": "CombinedLoanToValueRatio",
+            "label": "Combined Loan To Value Ratio",
+            "category": "recovered"
+          },
+          {
+            "id": "CollateralValueAsOfDate",
+            "label": "Collateral Value As Of Date",
+            "category": "recovered"
+          },
+          {
+            "id": "SecuredLoan",
+            "label": "Secured Loan",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "CollateralizedLoan",
+            "label": "Collateralized Loan",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "GuaranteedLoan",
+            "label": "Guaranteed Loan",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "UnsecuredLoan",
+            "label": "Unsecured Loan",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "RevolvingLineOfCredit",
+            "label": "Revolving Line Of Credit",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "CommittedCreditFacility",
+            "label": "Committed Credit Facility",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "UncommittedCreditFacility",
+            "label": "Uncommitted Credit Facility",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "SubFacility",
+            "label": "Sub Facility",
+            "category": "recovered"
+          },
+          {
+            "id": "CommittedSubFacility",
+            "label": "Committed Sub Facility",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "UncommittedSubFacility",
+            "label": "Uncommitted Sub Facility",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "Accrual",
+            "label": "Accrual",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "InterestRateSettingEvent",
+            "label": "Interest Rate Setting Event",
+            "category": "recovered"
+          }
+        ],
+        "relationships": [
+          {
+            "id": "rel_0",
+            "label": "Loan has Borrower Borrower",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_1",
+            "label": "Loan has Lender Lender",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_2",
+            "label": "CreditAgreement has Borrower Borrower",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_3",
+            "label": "CreditAgreement has Lender Lender",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_4",
+            "label": "CreditFacility has Borrower Borrower",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_5",
+            "label": "CreditFacility has Lender Lender",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_6",
+            "label": "Loan has Principal Principal",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_7",
+            "label": "Loan has Interest Interest",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_8",
+            "label": "Loan has Interest Rate FixedInterestRate",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_9",
+            "label": "Loan has Interest Rate VariableInterestRate",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_10",
+            "label": "InterestPaymentTerms has Accrual Basis DayCountConvention",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_11",
+            "label": "InterestPaymentTerms governs Payment Of Interest",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_12",
+            "label": "PrincipalRepaymentTerms governs Payment Of Principal",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_13",
+            "label": "Loan has Payment History PaymentHistory",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_14",
+            "label": "PaymentHistory has Individual Payment IndividualPaymentTransaction",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_15",
+            "label": "Loan is Serviced By Servicer",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_16",
+            "label": "SecuredLoan is Collateralized By Collateral",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "rel_17",
+            "label": "SecurityAgreement secures Collateral",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_18",
+            "label": "CreditEnhancementAgreement has Beneficiary CreditEnhancementBeneficiary",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_19",
+            "label": "Loan has Schedule LoanPaymentSchedule",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_20",
+            "label": "Loan has Schedule AmortizationSchedule",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_21",
+            "label": "Loan has Schedule InterestPaymentSchedule",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_22",
+            "label": "Loan has Schedule PrincipalPaymentSchedule",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_23",
+            "label": "Loan has Schedule InterestCalculationSchedule",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_24",
+            "label": "Loan has Schedule InterestRateResetSchedule",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_25",
+            "label": "CreditFacility has Sub Facility SubFacility",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_26",
+            "label": "Collateral has Collateral Value CollateralValueAsOfDate",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_27",
+            "label": "Borrower has Borrowing Capacity BorrowingCapacity",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_28",
+            "label": "CollateralizedLoan has Loan To Value Ratio LoanToValueRatio",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "rel_29",
+            "label": "CollateralizedLoan has Combined Loan To Value Ratio CombinedLoanToValueRatio",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "rel_30",
+            "label": "Loan has Schedule InterestRateSettingEvent",
+            "category": "recovered"
+          }
+        ],
+        "properties": [
+          {
+            "id": "Loan.maturityDate",
+            "label": "Loan.maturityDate",
+            "category": "recovered"
+          },
+          {
+            "id": "Loan.initialExchangeDate",
+            "label": "Loan.initialExchangeDate",
+            "category": "recovered"
+          },
+          {
+            "id": "Loan.interestRateCap",
+            "label": "Loan.interestRateCap",
+            "category": "recovered"
+          },
+          {
+            "id": "Loan.firstRateChangeTermMonths",
+            "label": "Loan.firstRateChangeTermMonths",
+            "category": "recovered"
+          },
+          {
+            "id": "Loan.assumable",
+            "label": "Loan.assumable",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "Loan.initiallyPayable",
+            "label": "Loan.initiallyPayable",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "Loan.interestOnly",
+            "label": "Loan.interestOnly",
+            "category": "recovered"
+          },
+          {
+            "id": "Loan.balloonPayment",
+            "label": "Loan.balloonPayment",
+            "category": "recovered"
+          },
+          {
+            "id": "Loan.negativeAmortization",
+            "label": "Loan.negativeAmortization",
+            "category": "recovered"
+          },
+          {
+            "id": "Loan.totalClosingCosts",
+            "label": "Loan.totalClosingCosts",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "Loan.totalPointsAndFees",
+            "label": "Loan.totalPointsAndFees",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "Loan.principalAmount",
+            "label": "Loan.principalAmount",
+            "category": "recovered"
+          },
+          {
+            "id": "Loan.loanBalance",
+            "label": "Loan.loanBalance",
+            "category": "recovered"
+          },
+          {
+            "id": "CreditAgreement.debtAmount",
+            "label": "CreditAgreement.debtAmount",
+            "category": "recovered"
+          },
+          {
+            "id": "CreditAgreement.maturityDate",
+            "label": "CreditAgreement.maturityDate",
+            "category": "recovered"
+          },
+          {
+            "id": "CreditAgreement.initialExchangeDate",
+            "label": "CreditAgreement.initialExchangeDate",
+            "category": "recovered"
+          },
+          {
+            "id": "CreditFacility.availableAmount",
+            "label": "CreditFacility.availableAmount",
+            "category": "recovered"
+          },
+          {
+            "id": "CreditFacility.creditLimit",
+            "label": "CreditFacility.creditLimit",
+            "category": "recovered"
+          },
+          {
+            "id": "CreditFacility.amountOfCreditExtended",
+            "label": "CreditFacility.amountOfCreditExtended",
+            "category": "recovered"
+          },
+          {
+            "id": "CreditFacility.maximumAdvanceAmount",
+            "label": "CreditFacility.maximumAdvanceAmount",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "OpenEndCredit.creditLimit",
+            "label": "OpenEndCredit.creditLimit",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "Principal.outstandingAmount",
+            "label": "Principal.outstandingAmount",
+            "category": "recovered"
+          },
+          {
+            "id": "Interest.outstandingAmount",
+            "label": "Interest.outstandingAmount",
+            "category": "recovered"
+          },
+          {
+            "id": "AccruedInterest.asOfDate",
+            "label": "AccruedInterest.asOfDate",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "AccruedInterest.amount",
+            "label": "AccruedInterest.amount",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "FixedInterestRate.rate",
+            "label": "FixedInterestRate.rate",
+            "category": "recovered"
+          },
+          {
+            "id": "VariableInterestRate.rate",
+            "label": "VariableInterestRate.rate",
+            "category": "recovered"
+          },
+          {
+            "id": "FloatingInterestRate.rate",
+            "label": "FloatingInterestRate.rate",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "ManagedInterestRate.rate",
+            "label": "ManagedInterestRate.rate",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "InterestPaymentTerms.initialInterestAccrualDate",
+            "label": "InterestPaymentTerms.initialInterestAccrualDate",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "InterestPaymentTerms.initialInterestPaymentDate",
+            "label": "InterestPaymentTerms.initialInterestPaymentDate",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "InterestPaymentTerms.finalInterestPaymentDate",
+            "label": "InterestPaymentTerms.finalInterestPaymentDate",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "InterestPaymentTerms.interestPaymentFrequency",
+            "label": "InterestPaymentTerms.interestPaymentFrequency",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "InterestPaymentTerms.interestPaymentDay",
+            "label": "InterestPaymentTerms.interestPaymentDay",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "InterestPaymentTerms.compoundingFrequency",
+            "label": "InterestPaymentTerms.compoundingFrequency",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "PrincipalRepaymentTerms.initialPrincipalPaymentDate",
+            "label": "PrincipalRepaymentTerms.initialPrincipalPaymentDate",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "PrincipalRepaymentTerms.principalRepaymentDate",
+            "label": "PrincipalRepaymentTerms.principalRepaymentDate",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "PrincipalRepaymentTerms.principalPaymentFrequency",
+            "label": "PrincipalRepaymentTerms.principalPaymentFrequency",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "PrincipalRepaymentTerms.principalPaymentDay",
+            "label": "PrincipalRepaymentTerms.principalPaymentDay",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "PrepaymentTerms.prePaymentPenaltyTermMonths",
+            "label": "PrepaymentTerms.prePaymentPenaltyTermMonths",
+            "category": "recovered"
+          },
+          {
+            "id": "AmortizationSchedule.anticipatedNumberOfPayments",
+            "label": "AmortizationSchedule.anticipatedNumberOfPayments",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "LoanPaymentSchedule.anticipatedNumberOfPayments",
+            "label": "LoanPaymentSchedule.anticipatedNumberOfPayments",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "InterestPaymentSchedule.anticipatedNumberOfPayments",
+            "label": "InterestPaymentSchedule.anticipatedNumberOfPayments",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "PrincipalPaymentSchedule.anticipatedNumberOfPayments",
+            "label": "PrincipalPaymentSchedule.anticipatedNumberOfPayments",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "BorrowingCapacity.amount",
+            "label": "BorrowingCapacity.amount",
+            "category": "recovered"
+          },
+          {
+            "id": "LoanToValueRatio.ratio",
+            "label": "LoanToValueRatio.ratio",
+            "category": "recovered"
+          },
+          {
+            "id": "CombinedLoanToValueRatio.ratio",
+            "label": "CombinedLoanToValueRatio.ratio",
+            "category": "recovered"
+          },
+          {
+            "id": "CollateralValueAsOfDate.asOfDate",
+            "label": "CollateralValueAsOfDate.asOfDate",
+            "category": "recovered"
+          },
+          {
+            "id": "CollateralValueAsOfDate.value",
+            "label": "CollateralValueAsOfDate.value",
+            "category": "recovered"
+          }
+        ]
+      }
+    }
+  },
+  "transitionsAtoC": {
+    "classes": {
+      "never_mentioned->mentioned_not_committed": 3,
+      "mentioned_not_committed->recovered": 1,
+      "never_mentioned->recovered": 1
+    },
+    "relationships": {
+      "endpoint_class_missing->recovered": 3,
+      "other_name->recovered": 3,
+      "mentioned_not_committed->recovered": 1,
+      "never_mentioned->recovered": 1
+    },
+    "properties": {
+      "endpoint_class_missing->recovered": 3,
+      "never_mentioned->mentioned_not_committed": 9
+    }
+  }
+}

@@ -1,0 +1,391 @@
+competency_questions:
+  - id: cq1
+    text: "Which air handler serves a space, traced through the terminal unit serving that space?"
+  - id: cq2
+    text: Which terminal unit serves a space?
+  - id: cq3
+    text: What is the reading of the air-temperature sensor associated with an air handler?
+  - id: cq4
+    text: What cooling setpoint applies to an air handler?
+  - id: cq5
+    text: Can the economizer reduce mechanical cooling under the currently sensed conditions relevant to its operation?
+  - id: cq6
+    text: "Which fans, filters, dampers, and valves belong to an alarming air handler?"
+  - id: cq7
+    text: "If a cooling valve is calling but the air is not getting colder, which chiller feeds it upstream?"
+  - id: cq8
+    text: "For an occupied zone, is its serving thermostat assigned and operating?"
+  - id: cq9
+    text: Is the terminal unit serving the relevant space assigned and operating?
+  - id: cq10
+    text: Which boiler feeds the heating valve on an air handler being troubleshot?
+  - id: cq11
+    text: "Is the chiller feeding an air handler's cooling valve showing on, off, or alarm?"
+  - id: cq12
+    text: Which air handler feeds an air plenum?
+  - id: cq13
+    text: Do the outside-air and return-air CO₂ readings associated with an air handler indicate a need for a ventilation check?
+  - id: cq14
+    text: "Is the measured air temperature within the active setpoint's configured deadband, so no heating or cooling change is needed on that basis?"
+  - id: cq15
+    text: "For an alarming air handler, what are the fan status, filter condition, damper position, cooling-valve position, and heating-valve position of its identified parts?"
+classes:
+  Space:
+    meaning: "A bounded area used for a function, such as an office or meeting room."
+    aliases: []
+    properties: {}
+  TerminalUnit:
+    meaning: Equipment that regulates airflow or temperature for the space it serves.
+    aliases: []
+    properties:
+      status:
+        type: text
+        allowed:
+          - "off"
+          - "on"
+          - alarm
+  AirHandlingUnit:
+    meaning: "An assembly that moves and conditions air for distribution, using components such as fans, filters, dampers, and coils."
+    aliases:
+      - AHU
+      - air handling unit
+      - AirHandler
+    properties:
+      status:
+        type: text
+        allowed:
+          - "off"
+          - "on"
+          - alarm
+  AirTemperatureSensor:
+    meaning: Measures the temperature of air; its reading is compared with a target.
+    aliases: []
+    properties:
+      value:
+        type: number
+        unit: degrees Celsius
+  CoolingTemperatureSetpoint:
+    meaning: The temperature target used when calling for cooling.
+    aliases: []
+    properties:
+      value:
+        type: number
+        unit: degrees Celsius
+  HeatingTemperatureSetpoint:
+    meaning: The temperature target used when calling for heating.
+    aliases: []
+    properties:
+      value:
+        type: number
+        unit: degrees Celsius
+  TemperatureDeadbandSetpoint:
+    meaning: Defines the allowed temperature band around the active setpoint where no heating or cooling change is called for.
+    aliases: []
+    properties:
+      value:
+        type: number
+        unit: degrees Celsius
+  AirTemperatureSetpoint:
+    meaning: "A general target for air temperature, distinct from the specific cooling and heating targets."
+    aliases: []
+    properties:
+      value:
+        type: number
+        unit: degrees Celsius
+  Economizer:
+    meaning: Equipment or control that uses suitable sensed conditions to reduce the need for mechanical heating or cooling.
+    aliases: []
+    properties:
+      status:
+        type: text
+        allowed:
+          - disabled
+          - enabled
+          - active
+  OutsideAirCO2Sensor:
+    meaning: "Reports the CO₂ concentration in the outside-air stream, in ppm."
+    aliases: []
+    properties:
+      value:
+        type: number
+        unit: ppm
+  ReturnAirCO2Sensor:
+    meaning: "Reports the CO₂ concentration in the return-air stream, in ppm."
+    aliases: []
+    properties:
+      value:
+        type: number
+        unit: ppm
+  Fan:
+    meaning: Moves air through the ventilation or conditioning system.
+    aliases: []
+    properties:
+      status:
+        type: text
+        allowed:
+          - "off"
+          - "on"
+          - alarm
+  Filter:
+    meaning: Removes material from the air stream.
+    aliases: []
+    properties:
+      status:
+        type: text
+        allowed:
+          - clean
+          - dirty
+          - replacement due
+  Damper:
+    meaning: "Changes resistance to airflow, regulates its rate, or shuts it off."
+    aliases: []
+    properties:
+      position:
+        type: number
+        unit: percent
+  CoolingValve:
+    meaning: Regulates cold-water flow through a cooling coil to control air temperature.
+    aliases: []
+    properties:
+      position:
+        type: number
+        unit: percent
+  HeatingValve:
+    meaning: Regulates hot-water flow through a heating coil to control air temperature.
+    aliases: []
+    properties:
+      position:
+        type: number
+        unit: percent
+  Chiller:
+    meaning: Plant equipment that transfers heat between fluids to provide chilled water for the cooling path.
+    aliases: []
+    properties:
+      status:
+        type: text
+        allowed:
+          - "off"
+          - "on"
+          - alarm
+  Boiler:
+    meaning: A closed vessel that heats water or another fluid to supply hot water or steam for heating and related uses.
+    aliases: []
+    properties: {}
+  AirPlenum:
+    meaning: A chamber that receives air from an air handler or room for distribution or exhaust; it is not a terminal unit serving a space.
+    aliases: []
+    properties: {}
+  Zone:
+    meaning: An area or group of spaces controlled together because they have similar heating or cooling needs; it is not necessarily one room.
+    aliases: []
+    properties:
+      occupancyStatus:
+        type: text
+        allowed:
+          - occupied
+          - unoccupied
+          - unknown
+  Thermostat:
+    meaning: A device that uses a temperature reading and setpoint to control the temperature of the zone it serves.
+    aliases: []
+    properties:
+      status:
+        type: text
+        allowed:
+          - normal
+          - fault
+          - offline
+      mode:
+        type: text
+        allowed:
+          - heating
+          - cooling
+          - auto
+          - "off"
+  OccupancySensor:
+    meaning: "Reports whether a space or zone is occupied, unoccupied, or unknown for control purposes."
+    aliases: []
+    properties:
+      occupied:
+        type: text
+        allowed:
+          - occupied
+          - unoccupied
+          - unknown
+relationships:
+  - name: serves
+    from: TerminalUnit
+    to: Space
+    meaning: The terminal unit regulates airflow or temperature for that space.
+    aliases: []
+  - name: feeds
+    from: AirHandlingUnit
+    to: TerminalUnit
+    meaning: The air handler is upstream of the terminal unit in the air path.
+    aliases: []
+  - name: feeds
+    from: AirHandlingUnit
+    to: AirPlenum
+    meaning: The air handler supplies air to a downstream plenum without implying that every terminal-unit path passes through it.
+    aliases: []
+  - name: serves
+    from: Thermostat
+    to: Zone
+    meaning: The thermostat is a controlling device for that zone.
+    aliases: []
+  - name: hasOccupancySensorPoint
+    from: Space
+    to: OccupancySensor
+    meaning: "The space uses the sensor's occupancy reading for control, without specifying where the sensor is mounted."
+    aliases: []
+  - name: hasPoint
+    from: Zone
+    to: OccupancySensor
+    meaning: "The zone uses the sensor's occupancy reading for control, without specifying where the sensor is mounted."
+    aliases:
+      - hasOccupancySensorPoint
+  - name: hasPoint
+    from: AirHandlingUnit
+    to: AirTemperatureSensor
+    meaning: "The reading belongs to the air handler's monitoring or control context, without specifying the sensor's mounting location."
+    aliases:
+      - hasAirTemperaturePoint
+  - name: hasPoint
+    from: AirHandlingUnit
+    to: CoolingTemperatureSetpoint
+    meaning: "The control point supplies the air handler's cooling target."
+    aliases:
+      - hasCoolingTemperatureSetpoint
+  - name: hasPoint
+    from: AirHandlingUnit
+    to: HeatingTemperatureSetpoint
+    meaning: "The control point supplies the air handler's heating target."
+    aliases:
+      - hasHeatingTemperatureSetpoint
+  - name: hasPoint
+    from: AirHandlingUnit
+    to: AirTemperatureSetpoint
+    meaning: "The control point supplies a general air-temperature target, distinct from the heating and cooling targets."
+    aliases:
+      - hasAirTemperatureSetpoint
+  - name: hasPoint
+    from: AirHandlingUnit
+    to: TemperatureDeadbandSetpoint
+    meaning: The control point defines the allowed band around the active setpoint.
+    aliases:
+      - hasTemperatureDeadband
+  - name: hasPart
+    from: AirHandlingUnit
+    to: Economizer
+    meaning: An economizer can be part of the air handler to reduce mechanical conditioning when conditions support its use.
+    aliases:
+      - includes
+  - name: hasPoint
+    from: AirHandlingUnit
+    to: OutsideAirCO2Sensor
+    meaning: The associated sensor reports CO₂ in the outside-air stream without specifying its mounting location.
+    aliases:
+      - hasOutsideAirCo2Point
+  - name: hasPoint
+    from: AirHandlingUnit
+    to: ReturnAirCO2Sensor
+    meaning: The associated sensor reports CO₂ in the return-air stream without specifying its mounting location.
+    aliases:
+      - hasReturnAirCo2Point
+  - name: hasPart
+    from: AirHandlingUnit
+    to: Fan
+    meaning: "The fan is a physical component of the air handler that moves air, not a sensor or setpoint point."
+    aliases: []
+  - name: hasPart
+    from: AirHandlingUnit
+    to: Filter
+    meaning: The filter is a physical component of the air handler that removes material from the air stream.
+    aliases: []
+  - name: hasPart
+    from: AirHandlingUnit
+    to: Damper
+    meaning: The damper is a physical component of the air handler that regulates or shuts off airflow.
+    aliases: []
+  - name: hasPart
+    from: AirHandlingUnit
+    to: CoolingValve
+    meaning: "The cooling valve controls cold-water flow through the air handler's cooling coil."
+    aliases: []
+  - name: hasPart
+    from: AirHandlingUnit
+    to: HeatingValve
+    meaning: "The heating valve controls hot-water flow through the air handler's heating coil."
+    aliases: []
+  - name: feeds
+    from: Chiller
+    to: CoolingValve
+    meaning: The chiller is upstream of that valve in the chilled-water cooling path.
+    aliases: []
+  - name: feeds
+    from: Boiler
+    to: HeatingValve
+    meaning: "The boiler is upstream of the heating valve in the hot-water heating path, supplying the heated water the valve regulates for the coil."
+    aliases: []
+rules:
+  canIncreaseCooling:
+    conditions:
+      - The air-temperature reading associated with the air handler and the value of its applicable cooling-temperature setpoint are available and reliable.
+      - The air-temperature reading is above that cooling-temperature setpoint value.
+  canIncreaseHeating:
+    conditions:
+      - The air-temperature reading associated with the air handler and the value of its applicable heating-temperature setpoint are available and reliable.
+      - The air-temperature reading is below that heating-temperature setpoint value.
+  withinActiveSetpointDeadband:
+    conditions:
+      - "Establish from current control context which of the air handler's recorded temperature setpoints is active; do not infer this from the presence of a setpoint point."
+      - "The associated air-temperature sensor reading, active setpoint value, and temperature deadband setpoint value are available and reliable."
+      - The air-temperature reading is within the configured deadband around the active setpoint value.
+  canEnableEconomizer:
+    conditions:
+      - "Establish from the available economizer sensing and control context that sensed conditions support economizer operation to reduce mechanical conditioning; if suitability cannot be established, do not enable it."
+  canCheckOccupiedZoneEquipment:
+    conditions:
+      - Zone occupancy status equals occupied.
+      - Confirm the occupancy information is trustworthy before using it for the occupied-zone check.
+  canCheckOccupiedSpaceEquipment:
+    conditions:
+      - The reading of the occupancy sensor point used by the space equals occupied.
+      - Confirm the occupancy information is trustworthy before using it for the occupied-space check.
+      - A terminal unit serving the space is assigned and its status can be checked.
+  warrantsVentilationCheck:
+    conditions:
+      - Both the outside-air CO₂ sensor reading and return-air CO₂ sensor reading associated with the air handler are available and reliable; report both readings and their difference.
+      - "Establish the expected CO₂ condition for the air stream being assessed from available context; if it cannot be established, leave the ventilation-check conclusion unresolved."
+      - A reading is elevated relative to the established expected condition for that air stream; recommend a ventilation check without concluding that a ventilation fault is proven.
+actions:
+  enableEconomizer:
+    input: AirHandlingUnit
+    preconditions:
+      - canEnableEconomizer
+    effect: "Issue an enable command for the air handler's included economizer; its status may become enabled, but enabling alone does not establish active operation."
+    verification: "Retain the command and read the included economizer's status; active verifies operation, whereas enabled means operation is not yet verified."
+  increaseCooling:
+    input: AirHandlingUnit
+    preconditions:
+      - canIncreaseCooling
+    effect: "Issue the air handler's implementation-specific cooling-path command when its reliable measured air temperature is above its reliable applicable cooling-temperature setpoint; retain the command."
+    verification: "Retain successive readings from the associated air-temperature sensor and compare their trend with the cooling-temperature setpoint value; a trend down toward the setpoint verifies the intended effect, while no such trend means the effect has not been verified, not necessarily that the command failed."
+  increaseHeating:
+    input: AirHandlingUnit
+    preconditions:
+      - canIncreaseHeating
+    effect: "Issue the air handler's implementation-specific heating-path command when its reliable measured air temperature is below its reliable applicable heating-temperature setpoint; retain the command."
+    verification: "Retain successive readings from the associated air-temperature sensor and compare their trend with the heating-temperature setpoint value; a trend up toward the setpoint verifies the intended effect, while no such trend means the effect has not been verified, not necessarily that the command failed."
+  checkOccupiedZoneEquipment:
+    input: Zone
+    preconditions:
+      - canCheckOccupiedZoneEquipment
+    effect: Check whether a thermostat serving the occupied zone is assigned and read its status if one is assigned; report an assignment gap if none is assigned.
+    verification: "Confirm the zone occupancy status and the serving thermostat connection and status; normal reports a healthy thermostat, fault or offline reports a problem, and no serving thermostat reports an assignment gap; do not infer that zone temperature meets its target."
+  leaveHeatingCoolingUnchangedWithinDeadband:
+    input: AirHandlingUnit
+    preconditions:
+      - withinActiveSetpointDeadband
+    effect: "Leave the air handler's heating and cooling unchanged on the basis of a confirmed comparison within the active setpoint's configured deadband at the time of the decision."
+    verification: "Retain the associated air-temperature sensor reading and the established active setpoint and temperature deadband values used for the decision; confirm that their comparison justified no change at that time. On a later reading, recheck against the applicable established setpoint and configured deadband; if it is outside the band, report that the earlier no-change decision no longer applies and reassess, not that the earlier decision failed. If the active setpoint cannot be established, do not claim the decision was verified."

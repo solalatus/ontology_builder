@@ -50,7 +50,7 @@ import { llmEnv, resolveLlmConfig, missingCredentials, defaultModel } from "../l
 import { execFileSync } from "node:child_process";
 import { runOntologyRecoveryConversation } from "./lib/conversationOrchestrator.mjs";
 import { deriveOpeningLine, WRAPPER_PATH } from "./lib/personaAgent.mjs";
-import { chatMessagesOnce, sumUsage } from "./lib/chatClient.mjs";
+import { chatMessagesOnce } from "./lib/chatClient.mjs";
 import {
   loadGroundTruthModel, scopeGroundTruth, resolveDomainYamlPath, resolveDomainPersonaPath, listAvailableDomains,
 } from "./lib/groundTruthModel.mjs";
@@ -63,6 +63,10 @@ import {
 } from "./lib/reportGenerator.mjs";
 import yaml from "js-yaml";
 import { findModelIssues } from "./lib/modelSanitizer.mjs";
+import { createStageController, DEFAULT_STAGE_TURN_CAPS } from "./lib/pairedStages.mjs";
+import { runCost, pricesFromEnv } from "./lib/runCost.mjs";
+import { recoveredStateFromYaml } from "./score-baseline.mjs";
+import { rescoreRun } from "./rescore-saved-run.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DEFAULT_RESULTS_ROOT = path.resolve(__dirname, "..", "..", "ontology_translation", "results", "multi-domain");
@@ -113,6 +117,26 @@ const REVIEW_MODEL = ENV.ONTOLOGY_EVAL_REVIEW_MODEL || MODEL;
 const REASONING_EFFORT = ENV.EVAL_REASONING_EFFORT || null;
 const MAX_TURNS = Number(ENV.ONTOLOGY_EVAL_MAX_TURNS) || 200;
 const WALLCLOCK_MINUTES = Number(ENV.ONTOLOGY_EVAL_WALLCLOCK_MINUTES) || 45;
+// Issue #182: the paired stages after the interviewer's own wrap-up --
+// snapshot A, the coverage sweep (#179), snapshot B, the naming pass (#180),
+// snapshot C. Off unless asked for; with both off a run is exactly what it
+// always was.
+const COVERAGE_SWEEP = ENV.ONTOLOGY_EVAL_COVERAGE_SWEEP === "1";
+const NAMING_PASS = ENV.ONTOLOGY_EVAL_NAMING_PASS === "1";
+const STAGES = COVERAGE_SWEEP || NAMING_PASS;
+const SWEEP_MAX_ROUNDS = Number(ENV.ONTOLOGY_EVAL_SWEEP_MAX_ROUNDS) || 3;
+const STAGE_TURN_CAPS = {
+  sweepRound: Number(ENV.ONTOLOGY_EVAL_SWEEP_ROUND_TURN_CAP) || DEFAULT_STAGE_TURN_CAPS.sweepRound,
+  sweepCloseout: Number(ENV.ONTOLOGY_EVAL_SWEEP_CLOSEOUT_TURN_CAP) || DEFAULT_STAGE_TURN_CAPS.sweepCloseout,
+  naming: Number(ENV.ONTOLOGY_EVAL_NAMING_TURN_CAP) || DEFAULT_STAGE_TURN_CAPS.naming,
+};
+// One app turn may take this long before the run counts as hung. An explicit
+// effort on a long transcript is slower per call than the old default (#181).
+const APP_TURN_TIMEOUT_MS = (Number(ENV.ONTOLOGY_EVAL_APP_TURN_TIMEOUT_SEC) || 90) * 1000;
+// A per-run spending ceiling, checked before every turn against the running
+// cost of both the app's and the harness's calls. Unset: no ceiling.
+const RUN_COST_CAP_USD = Number(ENV.EVAL_RUN_COST_CAP_USD) || null;
+const PRICES = pricesFromEnv(ENV);
 
 async function main() {
   const domain = arg("domain");
@@ -219,6 +243,25 @@ async function main() {
   const browser = await launchChromium();
   const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
   const checkpointDir = path.join(outDir, "checkpoint");
+  // The running cost (issue #182), refreshed before every turn and shown in
+  // progress.json so a run can be followed, and stopped, while it is going.
+  let latestCost = null;
+  const refreshCost = async () => {
+    try {
+      const appUsageLog = await page.evaluate(() => window.__kg.agent.state.usage);
+      latestCost = runCost({ appUsageLog, harnessUsages: usages, prices: PRICES });
+    } catch (err) { /* the page may be mid-navigation; keep the last figure */ }
+    return latestCost;
+  };
+  const costLine = () => (latestCost ? {
+    costUsd: Number(latestCost.all.costUsd.toFixed(3)),
+    appCalls: latestCost.app.calls,
+    promptTokens: latestCost.all.promptTokens,
+    cachedShare: latestCost.all.cachedShare === null ? null : Number(latestCost.all.cachedShare.toFixed(3)),
+    reasoningTokens: latestCost.all.reasoningTokens,
+  } : {});
+  const stageSnapshots = [];
+  let stageController = null;
   const checkpoint = async (log, rawApiLog) => {
     fs.writeFileSync(path.join(checkpointDir, "conversation-log.md"),
       log.map((e) => `### turn ${e.turn} — ${e.speaker}\n\n${e.text}\n`).join("\n"));
@@ -251,14 +294,55 @@ async function main() {
     const groundTruthText = fs.readFileSync(domainYamlPath, "utf8");
     writeProgress({ phase: "interviewing", turnsUsed: 0 });
 
+    if (STAGES) {
+      const exportDoc = async () => yaml.load(await page.evaluate(() => window.buildDomainYamlExport())) || {};
+      stageController = createStageController({
+        sweep: COVERAGE_SWEEP, naming: NAMING_PASS, sweepMaxRounds: SWEEP_MAX_ROUNDS, turnCaps: STAGE_TURN_CAPS, lang: "en",
+        // Each snapshot is written the moment it is taken, so a run that
+        // dies later still keeps it, together with the running cost at that
+        // moment (the per-stage cost is the difference between two).
+        captureSnapshot: async (label, { turn, stage }) => {
+          const text = await page.evaluate(() => window.buildDomainYamlExport());
+          const dir = path.join(outDir, "snapshots", label);
+          fs.mkdirSync(dir, { recursive: true });
+          fs.writeFileSync(path.join(dir, "recovered-model.yaml"), text);
+          const cost = await refreshCost();
+          const entry = { label, turn, stage, takenAt: new Date().toISOString(), elapsedSec: Math.round((Date.now() - startedAt) / 1000),
+            cost: cost && { all: cost.all, app: cost.app, harness: cost.harness } };
+          fs.writeFileSync(path.join(dir, "snapshot.json"), `${JSON.stringify(entry, null, 2)}\n`);
+          stageSnapshots.push({ ...entry, yamlText: text });
+          console.log(`${domain}/${runId}: snapshot ${label} at turn ${turn} ($${cost ? cost.all.costUsd.toFixed(2) : "?"} so far)`);
+          return yaml.load(text) || {};
+        },
+        readModel: exportDoc,
+        setRenameTool: (on) => page.evaluate((v) => window.__kg.agent.setRenameToolEnabled(v), on),
+        renameLog: () => page.evaluate(() => window.__kg.agent.state.renameLog),
+        log: (line) => console.log(`${domain}/${runId}: ${line}`),
+      });
+    }
+
     const orchestratorResult = await runOntologyRecoveryConversation({
       page, apiKey, personaModel: PERSONA_MODEL, classifierModel: CLASSIFIER_MODEL,
       maxTurns: MAX_TURNS, wallClockMs: WALLCLOCK_MINUTES * 60 * 1000,
       installRelay: (p) => forwardChatToRealProvider(p, LLM),
       chat,
       personaPath, groundTruthText, groundTruthFilename: "reference.domain.yaml", groundTruthFormat: "domain-yaml", openingLine,
+      appTurnTimeoutMs: APP_TURN_TIMEOUT_MS,
+      stageController,
+      shouldStop: async () => {
+        const cost = await refreshCost();
+        if (RUN_COST_CAP_USD && cost && cost.all.costUsd >= RUN_COST_CAP_USD) {
+          console.error(`${domain}/${runId}: cost cap reached ($${cost.all.costUsd.toFixed(2)} >= $${RUN_COST_CAP_USD}), stopping`);
+          return "cost_cap_reached";
+        }
+        return null;
+      },
       onProgress: ({ phase, turn, turnsUsed, durationMs, log, rawApiLog }) => {
-        writeProgress({ phase, turn, turnsUsed, durationSec: Math.round(durationMs / 1000), logEntries: log.length });
+        writeProgress({
+          phase, turn, turnsUsed, durationSec: Math.round(durationMs / 1000), logEntries: log.length,
+          ...(stageController ? { stage: stageController.stage, sweepRound: stageController.round, snapshots: stageSnapshots.map((x) => `${x.label}@${x.turn}`) } : {}),
+          ...costLine(),
+        });
         if (phase !== "app_turn_complete") return;
         checkpoint(log, rawApiLog).catch(() => { /* best effort, never fatal */ });
       },
@@ -297,14 +381,22 @@ async function main() {
     const actionMetrics = computeActionMetrics(groundTruth, recoveredState);
 
     const operationalStats = computeOperationalStats(orchestratorResult);
-    const appAgentUsages = orchestratorResult.chatResponses
-      .map((r) => r.body && r.body.usage)
-      .filter(Boolean);
-    const totalUsage = sumUsage([...usages, ...appAgentUsages]);
-    operationalStats.totalTokens = totalUsage.total_tokens;
-    operationalStats.promptTokens = totalUsage.prompt_tokens;
-    operationalStats.completionTokens = totalUsage.completion_tokens;
-    operationalStats.tokenCallCount = totalUsage.calls;
+    // The app's own usage log, not the relayed bodies: a Responses API body
+    // reports input_tokens/output_tokens, which summing body.usage.prompt_tokens
+    // counted as zero (issue #182). The log is normalized and has cached
+    // tokens; the conversation's cost as of its last turn, before scoring.
+    const conversationCost = runCost({ appUsageLog: await page.evaluate(() => window.__kg.agent.state.usage), harnessUsages: usages, prices: PRICES });
+    operationalStats.totalTokens = conversationCost.all.promptTokens + conversationCost.all.completionTokens;
+    operationalStats.promptTokens = conversationCost.all.promptTokens;
+    operationalStats.completionTokens = conversationCost.all.completionTokens;
+    operationalStats.cachedTokens = conversationCost.all.cachedTokens;
+    operationalStats.cachedShare = conversationCost.all.cachedShare;
+    operationalStats.reasoningTokens = conversationCost.all.reasoningTokens;
+    operationalStats.tokenCallCount = conversationCost.all.calls;
+    operationalStats.conversationCostUsd = conversationCost.all.costUsd;
+    operationalStats.appCost = conversationCost.app;
+    operationalStats.appCostByKind = conversationCost.appByKind;
+    operationalStats.harnessCost = conversationCost.harness;
     writeConversationLog(orchestratorResult, { dir: outDir });
     writeToolCallLog(orchestratorResult.rawApiLog, { dir: outDir });
     writeProgress({ phase: "scoring", turnsUsed: orchestratorResult.turnsUsed });
@@ -322,6 +414,58 @@ async function main() {
     writeSemanticJudgments({ fullDomain: semanticMetrics, scoped: semanticScopedMetrics }, { dir: outDir });
     writeSemanticMatches({ fullDomain: semanticMetrics, scoped: semanticScopedMetrics }, { dir: outDir });
 
+    // Issue #182: every snapshot scored the same way, from its own
+    // recovered-model.yaml (the path rescore-saved-run.mjs takes), with its
+    // own judge verdicts stored beside it, so B - A and C - B are computed on
+    // one scoring path and can be replayed offline. The offline replay is run
+    // here once as a check that it reproduces the live numbers.
+    const snapshotScores = [];
+    for (const snap of stageSnapshots) {
+      writeProgress({ phase: `scoring_snapshot_${snap.label}`, turnsUsed: orchestratorResult.turnsUsed, ...costLine() });
+      const dir = path.join(outDir, "snapshots", snap.label);
+      const { state, droppedEdges } = recoveredStateFromYaml(snap.yamlText);
+      const sm = computeRecoveryMetrics(groundTruth, state);
+      const ssm = computeRecoveryMetrics(scopedGroundTruth, state);
+      writeHeuristicMatches(computeHeuristicMatchPairs(groundTruth, state), { dir });
+      let sem = null, semScoped = null, semRuleAction = null;
+      try {
+        sem = await computeSemanticRecoveryMetrics({ groundTruth, recoveredState: state, apiKey, model: CLASSIFIER_MODEL, chat });
+        semScoped = await computeSemanticRecoveryMetrics({ groundTruth: scopedGroundTruth, recoveredState: state, apiKey, model: CLASSIFIER_MODEL, chat });
+        semRuleAction = await computeSemanticRuleActionMetrics({ groundTruth, recoveredState: state, apiKey, model: CLASSIFIER_MODEL, chat });
+      } catch (err) {
+        console.error(`${domain}/${runId}: semantic judge pass failed on snapshot ${snap.label}, heuristic only: ${String((err && err.message) || err)}`);
+        sem = null; semScoped = null; semRuleAction = null;
+      }
+      writeSemanticJudgments({ fullDomain: sem, scoped: semScoped }, { dir });
+      writeSemanticMatches({ fullDomain: sem, scoped: semScoped }, { dir });
+      const counts = {
+        classes: state.nodes.length,
+        relationships: state.edges.length,
+        properties: state.nodes.reduce((n, x) => n + x.properties.length, 0),
+        allowedValueLists: state.nodes.reduce((n, x) => n + x.properties.filter((pr) => (pr.allowed || []).length > 0).length, 0),
+        rules: state.rules.length,
+        actions: state.actions.length,
+        droppedEdges,
+      };
+      const replay = rescoreRun(dir, domain);
+      const same = (a, b) => (a === null || a === undefined || b === null || b === undefined ? a == b : Math.abs(a - b) < 1e-9);
+      const offlineRescoreAgrees = same(replay.heuristic.full.recoveryEffectiveness, sm.recoveryEffectiveness)
+        && same(replay.heuristic.practical.recoveryEffectiveness, ssm.recoveryEffectiveness)
+        && same(replay.semantic.full && replay.semantic.full.recoveryEffectiveness, sem && sem.recoveryEffectiveness);
+      if (!offlineRescoreAgrees) console.error(`${domain}/${runId}: WARNING snapshot ${snap.label}: the offline rescore does not reproduce the live score`);
+      const entry = {
+        label: snap.label, turn: snap.turn, stage: snap.stage, elapsedSec: snap.elapsedSec, counts,
+        metrics: sm, scopedMetrics: ssm, semanticMetrics: sem, semanticScopedMetrics: semScoped,
+        ruleMetrics: computeRuleMetrics(groundTruth, state.rules || []), actionMetrics: computeActionMetrics(groundTruth, state),
+        semanticRuleActionMetrics: semRuleAction, offlineRescoreAgrees,
+      };
+      fs.writeFileSync(path.join(dir, "metrics.json"), `${JSON.stringify(entry, null, 2)}\n`);
+      snapshotScores.push(entry);
+      console.log(`${domain}/${runId}: snapshot ${snap.label} composite(full)=${sm.recoveryEffectiveness.toFixed(3)} (scoped)=${ssm.recoveryEffectiveness.toFixed(3)}`
+        + (sem ? ` semantic=${sem.recoveryEffectiveness.toFixed(3)}` : ""));
+    }
+    const finalCost = await refreshCost();
+
     writeReport({
       metrics, scopedMetrics, semanticMetrics, semanticScopedMetrics, operationalStats, orchestratorResult,
       llmReviewText, interviewerModel: MODEL, personaModel: PERSONA_MODEL, classifierModel: CLASSIFIER_MODEL, dir: outDir,
@@ -334,6 +478,12 @@ async function main() {
     fs.writeFileSync(path.join(outDir, "metrics.json"), `${JSON.stringify({
       domain, runId, runUuid, metrics, scopedMetrics, semanticMetrics, semanticScopedMetrics,
       ruleMetrics, actionMetrics, semanticRuleActionMetrics, operationalStats,
+      // Issue #182: the per-snapshot scores, compact (the full entries are in snapshots/<label>/metrics.json).
+      snapshots: snapshotScores.map((x) => ({
+        label: x.label, turn: x.turn, counts: x.counts, offlineRescoreAgrees: x.offlineRescoreAgrees,
+        composite: x.metrics.recoveryEffectiveness, scopedComposite: x.scopedMetrics.recoveryEffectiveness,
+        semanticComposite: x.semanticMetrics ? x.semanticMetrics.recoveryEffectiveness : null,
+      })),
     }, null, 2)}\n`);
 
     // Overwrites the "in-progress" marker written at the top of main()
@@ -377,9 +527,24 @@ async function main() {
       personaPromptSha256: sha256(fs.readFileSync(personaPath, "utf8")),
       groundTruthSha256: sha256(groundTruthText),
       wrapperSha256: sha256(fs.readFileSync(WRAPPER_PATH, "utf8")),
+      // Issue #182: the run's budget and stage settings, what the stages
+      // did, and what the run cost.
+      maxTurns: MAX_TURNS, wallClockMinutes: WALLCLOCK_MINUTES, appTurnTimeoutSec: APP_TURN_TIMEOUT_MS / 1000,
+      runCostCapUsd: RUN_COST_CAP_USD, prices: PRICES,
+      coverageSweep: COVERAGE_SWEEP, namingPass: NAMING_PASS,
+      ...(STAGES ? { sweepMaxRounds: SWEEP_MAX_ROUNDS, stageTurnCaps: STAGE_TURN_CAPS } : {}),
+      stages: orchestratorResult.stages,
+      snapshots: stageSnapshots.map((x) => ({ label: x.label, turn: x.turn, stage: x.stage, elapsedSec: x.elapsedSec, cost: x.cost })),
+      harnessMessages: orchestratorResult.harnessMessages,
+      classifierParamsDropped: orchestratorResult.classifierParamsDropped,
+      cachedShare: operationalStats.cachedShare,
+      reasoningTokens: operationalStats.reasoningTokens,
+      conversationCostUsd: operationalStats.conversationCostUsd,
+      totalCostUsd: finalCost ? finalCost.all.costUsd : null,
+      totalCost: finalCost,
     }, null, 2)}\n`);
 
-    writeProgress({ phase: "done", turnsUsed: orchestratorResult.turnsUsed, stoppedReason: orchestratorResult.stoppedReason });
+    writeProgress({ phase: "done", turnsUsed: orchestratorResult.turnsUsed, stoppedReason: orchestratorResult.stoppedReason, ...costLine() });
     console.log(`${domain}/${runId}: done. ${orchestratorResult.turnsUsed} turns, stopped=${orchestratorResult.stoppedReason}, `
       + `recoveryEffectiveness(full)=${metrics.recoveryEffectiveness.toFixed(3)} (scoped)=${scopedMetrics.recoveryEffectiveness.toFixed(3)}`);
   } catch (err) {
@@ -388,7 +553,7 @@ async function main() {
       : /401|invalid[_ ]api[_ ]key|Access denied|Unauthorized/i.test(message) ? "auth_failed"
       : /429/.test(message) ? "rate_limited"
       : "error";
-    writeProgress({ phase: "failed", failureKind: kind, error: message.slice(0, 600) });
+    writeProgress({ phase: "failed", failureKind: kind, error: message.slice(0, 600), ...costLine() });
     console.error(`${domain}/${runId}: FAILED (${kind}) — ${message.slice(0, 300)}`);
     console.error(`Partial transcript/model are in ${path.relative(process.cwd(), checkpointDir)}; re-running resumes.`);
     process.exitCode = kind === "out_of_funds" ? 3 : 1;

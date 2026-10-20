@@ -615,6 +615,20 @@ export async function runOntologyRecoveryConversation({
   groundTruthFilename,
   groundTruthFormat,
   openingLine = OPENING_LINE,
+  // How long one app turn (a real, possibly multi-round tool-calling
+  // exchange) may take before the run is treated as hung. 90 s was enough
+  // at the provider default effort; an explicit effort on a long transcript
+  // takes longer per call (#181, #182).
+  appTurnTimeoutMs = 90000,
+  // Issue #182: the paired-stage controller (pairedStages.mjs's
+  // createStageController). When the interviewer first appears finished it
+  // decides whether to end the run or inject the next stage; it also caps
+  // each stage's turns. null keeps the old behaviour exactly: the first
+  // "finished" ends the run.
+  stageController = null,
+  // Checked at the top of every turn; a non-null return (a reason string)
+  // stops the run with that reason -- the runner's per-run cost ceiling.
+  shouldStop = null,
 }) {
   // Issue #133/N7b (independent audit of this same fix): groundTruthFormat
   // defaults to "mtsr" (raw embed) and silently gates BOTH defenses at
@@ -677,6 +691,46 @@ export async function runOntologyRecoveryConversation({
   // introduced this identifier first" check.
   const identifiersSaidByInterviewer = new Set();
 
+  // The classifier's request parameters, adapted once if the model rejects
+  // one: gpt-6-sol answers temperature:0 with "Only the default (1) value is
+  // supported" (live, 2026-10-20), and a failed classifier call counts as
+  // "not finished" -- left alone, every run would have gone on to the
+  // wallclock cap. The JSON response format is kept.
+  let classifierExtraBody = { ...CLASSIFIER_EXTRA_BODY };
+  const classifierParamsDropped = [];
+  let consecutiveClassifierFailures = 0;
+  const classifierChat = chat ? async (m) => {
+    try {
+      const out = await chat(m, classifierModel, classifierExtraBody);
+      consecutiveClassifierFailures = 0;
+      return out;
+    } catch (err) {
+      const message = String((err && err.message) || err);
+      if ("temperature" in classifierExtraBody && /temperature/i.test(message)) {
+        const { temperature, ...rest } = classifierExtraBody;
+        void temperature;
+        classifierExtraBody = rest;
+        classifierParamsDropped.push("temperature");
+        console.log(`  appearsFinished: the classifier model rejected temperature; continuing without it (${message.slice(0, 160)})`);
+        try {
+          const out = await chat(m, classifierModel, classifierExtraBody);
+          consecutiveClassifierFailures = 0;
+          return out;
+        } catch (retryErr) {
+          consecutiveClassifierFailures++;
+          throw retryErr;
+        }
+      }
+      consecutiveClassifierFailures++;
+      throw err;
+    }
+  } : null;
+  // Three classifier failures in a row means the run can no longer notice
+  // its own end; stopping beats running blind to the cap.
+  const MAX_CONSECUTIVE_CLASSIFIER_FAILURES = 3;
+
+  const harnessMessages = [];
+
   const startedAt = Date.now();
   let incomingForApp = openingLine;
   let stoppedReason = "max_turns_reached";
@@ -701,6 +755,10 @@ export async function runOntologyRecoveryConversation({
 
   for (let turn = 1; turn <= maxTurns; turn++) {
     if (Date.now() - startedAt > wallClockMs) { stoppedReason = "wallclock_timeout"; break; }
+    if (shouldStop) {
+      const reason = await shouldStop({ turn, durationMs: Date.now() - startedAt });
+      if (reason) { stoppedReason = reason; break; }
+    }
     turnsUsed = turn;
 
     // Fires before the one call in this loop with no progress feedback of
@@ -710,7 +768,7 @@ export async function runOntologyRecoveryConversation({
 
     const transcriptBefore = await page.evaluate(() => window.__kg.agent.state.transcript.length);
     const apiMessagesBefore = await page.evaluate(() => window.__kg.agent.state.apiMessages.length);
-    await sendChatMessage(page, incomingForApp, { timeout: 90000 });
+    await sendChatMessage(page, incomingForApp, { timeout: appTurnTimeoutMs });
     const transcriptAfter = await page.evaluate(() => window.__kg.agent.state.transcript);
     const newEntries = transcriptAfter.slice(transcriptBefore);
     for (const entry of newEntries) log.push({ turn, speaker: `app-${entry.role}`, text: entry.text });
@@ -782,11 +840,15 @@ export async function runOntologyRecoveryConversation({
     consecutiveEmptyAppTurns = 0;
     consecutiveErrorTurns = 0;
 
+    // With stages (issue #182), a pleasantry loop is the interviewer having
+    // wrapped up the current stage, not the end of the run: the controller
+    // decides, exactly as for a classifier "finished".
+    let pleasantryLoop = false;
     if (looksLikePureAcknowledgment(appText)) {
       consecutivePureAcknowledgmentTurns++;
       if (consecutivePureAcknowledgmentTurns >= 2) {
-        stoppedReason = "pleasantry_loop_detected";
-        break;
+        if (!stageController) { stoppedReason = "pleasantry_loop_detected"; break; }
+        pleasantryLoop = true;
       }
     } else {
       consecutivePureAcknowledgmentTurns = 0;
@@ -803,18 +865,36 @@ export async function runOntologyRecoveryConversation({
     const recentContext = log.slice(-7, -1)
       .map((e) => `[${e.speaker}]: ${e.text.length > 300 ? `${e.text.slice(0, 300)}…` : e.text}`)
       .join("\n\n");
-    if (await appearsFinished(appText, {
+    const finished = pleasantryLoop || await appearsFinished(appText, {
       apiKey, model: classifierModel, recentContext,
       // temperature:0 + forced JSON output (CLASSIFIER_EXTRA_BODY, see
-      // classifyOnce's own header): verified live against this project's
-      // own current Azure deployment before being enabled here -- a caller
-      // wiring in a different/reasoning-tier model that rejects these must
-      // verify its own model accepts them first, the same way this one was
-      // verified, rather than assuming it from this comment.
-      chat: chat ? (m) => chat(m, classifierModel, CLASSIFIER_EXTRA_BODY) : null,
-    })) {
-      stoppedReason = "app_agent_appears_finished";
+      // classifyOnce's own header), with temperature dropped once if the
+      // model rejects it (classifierChat above).
+      chat: classifierChat,
+    });
+    if (consecutiveClassifierFailures >= MAX_CONSECUTIVE_CLASSIFIER_FAILURES) {
+      stoppedReason = "classifier_failing";
       break;
+    }
+    // Issue #182: a stage may also end on its own turn cap, as if the
+    // interviewer had wrapped it up.
+    const stageDecision = stageController
+      ? (finished ? await stageController.onInterviewerFinished({ turn, appText }) : await stageController.onTurnWithoutFinish({ turn, appText }))
+      : (finished ? { stop: true, stoppedReason: "app_agent_appears_finished" } : null);
+    if (stageDecision && stageDecision.stop) {
+      stoppedReason = stageDecision.stoppedReason;
+      break;
+    }
+    if (stageDecision && stageDecision.message) {
+      // The next message to the interviewer is the harness's stage
+      // instruction, not the persona's reply to this turn.
+      log.push({ turn, speaker: "harness", text: stageDecision.message });
+      harnessMessages.push({ turn, text: stageDecision.message });
+      incomingForApp = stageDecision.message;
+      consecutivePureAcknowledgmentTurns = 0;
+      consecutivePersonaAcknowledgmentTurns = 0;
+      emitProgress("stage_injected", turn);
+      continue;
     }
 
     // Issue #133/N1: exclude identifiers the interviewer has already said,
@@ -863,7 +943,21 @@ export async function runOntologyRecoveryConversation({
     // repeating its scripted sign-off, is now caught too.
     if (looksLikePureAcknowledgment(personaReply.text)) {
       consecutivePersonaAcknowledgmentTurns++;
-      if (consecutivePersonaAcknowledgmentTurns >= 2) { stoppedReason = "pleasantry_loop_detected"; break; }
+      if (consecutivePersonaAcknowledgmentTurns >= 2) {
+        if (!stageController) { stoppedReason = "pleasantry_loop_detected"; break; }
+        // Issue #182: the same two-sided sign-off, inside a stage, ends
+        // that stage rather than the run.
+        const decision = await stageController.onInterviewerFinished({ turn, appText });
+        if (decision && decision.stop) { stoppedReason = decision.stoppedReason; break; }
+        if (decision && decision.message) {
+          log.push({ turn, speaker: "harness", text: decision.message });
+          harnessMessages.push({ turn, text: decision.message });
+          incomingForApp = decision.message;
+          consecutivePureAcknowledgmentTurns = 0;
+          consecutivePersonaAcknowledgmentTurns = 0;
+          emitProgress("stage_injected", turn);
+        }
+      }
     } else {
       consecutivePersonaAcknowledgmentTurns = 0;
     }
@@ -882,5 +976,8 @@ export async function runOntologyRecoveryConversation({
     compactionEvents, // issue #133/E4: how many turns compacted the app agent's own conversation history
     leakEvents, // issue #133/E13 item 4: [{turn, attempt, identifiers, resolved}] -- every raw-identifier leak the runtime guard caught, retried, or (if resolved stays false) exhausted retries on
     maxConsecutiveTurnsWithNoToolActivity, // issue #133/item 8: worth surfacing even for a run that never crossed WASTED_TURN_THRESHOLD (a near-miss is still informative)
+    classifierParamsDropped, // parameters the classifier model rejected and the run continued without
+    stages: stageController ? stageController.summary() : null, // issue #182: stage events and snapshot labels
+    harnessMessages, // issue #182: the exact stage instructions injected, with their turns
   };
 }

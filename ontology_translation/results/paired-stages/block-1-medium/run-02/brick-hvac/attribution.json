@@ -1,0 +1,1885 @@
+{
+  "runDir": "/home/user/ontology_builder/ontology_translation/results/paired-stages/block-1-medium/run-02/brick-hvac",
+  "domain": "brick-hvac",
+  "snapshots": {
+    "A": {
+      "turn": 75,
+      "semanticAvailable": true,
+      "counts": {
+        "classes": {
+          "recovered": 22,
+          "endpoint_class_missing": 0,
+          "other_name": 0,
+          "removed": 0,
+          "mentioned_not_committed": 5,
+          "never_mentioned": 12,
+          "goldTotal": 39,
+          "scorerMatched": 22
+        },
+        "relationships": {
+          "recovered": 14,
+          "endpoint_class_missing": 12,
+          "other_name": 7,
+          "removed": 0,
+          "mentioned_not_committed": 0,
+          "never_mentioned": 2,
+          "goldTotal": 35
+        },
+        "properties": {
+          "recovered": 15,
+          "endpoint_class_missing": 18,
+          "other_name": 3,
+          "removed": 0,
+          "mentioned_not_committed": 3,
+          "never_mentioned": 3,
+          "goldTotal": 42
+        }
+      },
+      "items": {
+        "classes": [
+          {
+            "id": "AirHandlingUnit",
+            "label": "Air Handling Unit",
+            "category": "recovered"
+          },
+          {
+            "id": "AirPlenum",
+            "label": "Air Plenum",
+            "category": "recovered"
+          },
+          {
+            "id": "TemperatureSensor",
+            "label": "Temperature Sensor",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "AirTemperatureSensor",
+            "label": "Air Temperature Sensor",
+            "category": "recovered"
+          },
+          {
+            "id": "CO2Sensor",
+            "label": "CO2 Sensor",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "OutsideAirCO2Sensor",
+            "label": "Outside Air CO2 Sensor",
+            "category": "recovered"
+          },
+          {
+            "id": "ReturnAirCO2Sensor",
+            "label": "Return Air CO2 Sensor",
+            "category": "recovered"
+          },
+          {
+            "id": "AirQualitySensor",
+            "label": "Air Quality Sensor",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "TemperatureSetpoint",
+            "label": "Temperature Setpoint",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "AirTemperatureSetpoint",
+            "label": "Air Temperature Setpoint",
+            "category": "recovered"
+          },
+          {
+            "id": "CoolingTemperatureSetpoint",
+            "label": "Cooling Temperature Setpoint",
+            "category": "recovered"
+          },
+          {
+            "id": "HeatingTemperatureSetpoint",
+            "label": "Heating Temperature Setpoint",
+            "category": "recovered"
+          },
+          {
+            "id": "TemperatureDeadbandSetpoint",
+            "label": "Temperature Deadband Setpoint",
+            "category": "recovered"
+          },
+          {
+            "id": "OccupancySensor",
+            "label": "Occupancy Sensor",
+            "category": "recovered"
+          },
+          {
+            "id": "Thermostat",
+            "label": "Thermostat",
+            "category": "recovered"
+          },
+          {
+            "id": "TerminalUnit",
+            "label": "Terminal Unit",
+            "category": "recovered"
+          },
+          {
+            "id": "Damper",
+            "label": "Damper",
+            "category": "recovered"
+          },
+          {
+            "id": "Filter",
+            "label": "Filter",
+            "category": "recovered"
+          },
+          {
+            "id": "Fan",
+            "label": "Fan",
+            "category": "recovered"
+          },
+          {
+            "id": "Economizer",
+            "label": "Economizer",
+            "category": "recovered"
+          },
+          {
+            "id": "CoolingValve",
+            "label": "Cooling Valve",
+            "category": "recovered"
+          },
+          {
+            "id": "HeatingValve",
+            "label": "Heating Valve",
+            "category": "recovered"
+          },
+          {
+            "id": "Boiler",
+            "label": "Boiler",
+            "category": "recovered"
+          },
+          {
+            "id": "Chiller",
+            "label": "Chiller",
+            "category": "recovered"
+          },
+          {
+            "id": "PackagedHeatPump",
+            "label": "Packaged Heat Pump",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "Building",
+            "label": "Building",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "Floor",
+            "label": "Floor",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "Space",
+            "label": "Space",
+            "category": "recovered"
+          },
+          {
+            "id": "Zone",
+            "label": "Zone",
+            "category": "recovered"
+          },
+          {
+            "id": "CO2DifferentialSensor",
+            "label": "CO2 Differential Sensor",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "CondensingUnit",
+            "label": "Condensing Unit",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "CoolingTower",
+            "label": "Cooling Tower",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "HeatExchanger",
+            "label": "Heat Exchanger",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "Humidifier",
+            "label": "Humidifier",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "IsolationValve",
+            "label": "Isolation Valve",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "Pump",
+            "label": "Pump",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "SpaceHeater",
+            "label": "Space Heater",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "WaterTemperatureSensor",
+            "label": "Water Temperature Sensor",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "DryCooler",
+            "label": "Dry Cooler",
+            "category": "never_mentioned"
+          }
+        ],
+        "relationships": [
+          {
+            "id": "rel_0",
+            "label": "AirHandlingUnit has Part Fan",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_1",
+            "label": "AirHandlingUnit has Part Filter",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_2",
+            "label": "AirHandlingUnit has Part Damper",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_3",
+            "label": "AirHandlingUnit has Part CoolingValve",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_4",
+            "label": "AirHandlingUnit has Part HeatingValve",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_5",
+            "label": "AirHandlingUnit has Part Economizer",
+            "category": "other_name"
+          },
+          {
+            "id": "rel_6",
+            "label": "AirHandlingUnit has Point AirTemperatureSensor",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_7",
+            "label": "AirHandlingUnit has Point CO2Sensor",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "rel_8",
+            "label": "AirHandlingUnit has Point AirTemperatureSetpoint",
+            "category": "other_name"
+          },
+          {
+            "id": "rel_9",
+            "label": "AirHandlingUnit has Point CoolingTemperatureSetpoint",
+            "category": "other_name"
+          },
+          {
+            "id": "rel_10",
+            "label": "AirHandlingUnit has Point HeatingTemperatureSetpoint",
+            "category": "other_name"
+          },
+          {
+            "id": "rel_11",
+            "label": "AirHandlingUnit has Point TemperatureDeadbandSetpoint",
+            "category": "other_name"
+          },
+          {
+            "id": "rel_12",
+            "label": "Thermostat has Point TemperatureSensor",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "rel_13",
+            "label": "Thermostat has Point TemperatureSetpoint",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "rel_14",
+            "label": "Space has Point OccupancySensor",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_15",
+            "label": "Zone has Point OccupancySensor",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_16",
+            "label": "AirHandlingUnit has Location Building",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "rel_17",
+            "label": "AirHandlingUnit has Location Floor",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "rel_18",
+            "label": "TerminalUnit has Location Space",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "rel_19",
+            "label": "Thermostat has Location Space",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "rel_21",
+            "label": "OutsideAirCO2Sensor has Location Building",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "rel_22",
+            "label": "Building has Part Floor",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "rel_23",
+            "label": "Floor has Part Space",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "rel_24",
+            "label": "Building has Part Zone",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "rel_25",
+            "label": "AirHandlingUnit feeds AirPlenum",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_26",
+            "label": "AirHandlingUnit feeds TerminalUnit",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_27",
+            "label": "Boiler feeds HeatingValve",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_28",
+            "label": "Chiller feeds CoolingValve",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_29",
+            "label": "PackagedHeatPump feeds TerminalUnit",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "rel_30",
+            "label": "TerminalUnit serves Space",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_31",
+            "label": "Thermostat serves Zone",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_32",
+            "label": "CondensingUnit has Part Fan",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "rel_33",
+            "label": "SpaceHeater serves Space",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "rel_34",
+            "label": "AirHandlingUnit has Point OutsideAirCO2Sensor",
+            "category": "other_name"
+          },
+          {
+            "id": "rel_35",
+            "label": "AirHandlingUnit has Point ReturnAirCO2Sensor",
+            "category": "other_name"
+          }
+        ],
+        "properties": [
+          {
+            "id": "AirHandlingUnit.status",
+            "label": "AirHandlingUnit.status",
+            "category": "recovered"
+          },
+          {
+            "id": "AirPlenum.airflowState",
+            "label": "AirPlenum.airflowState",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "TemperatureSensor.value",
+            "label": "TemperatureSensor.value",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "TemperatureSensor.status",
+            "label": "TemperatureSensor.status",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "AirTemperatureSensor.value",
+            "label": "AirTemperatureSensor.value",
+            "category": "other_name"
+          },
+          {
+            "id": "CO2Sensor.value",
+            "label": "CO2Sensor.value",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "OutsideAirCO2Sensor.value",
+            "label": "OutsideAirCO2Sensor.value",
+            "category": "other_name"
+          },
+          {
+            "id": "ReturnAirCO2Sensor.value",
+            "label": "ReturnAirCO2Sensor.value",
+            "category": "other_name"
+          },
+          {
+            "id": "AirQualitySensor.value",
+            "label": "AirQualitySensor.value",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "TemperatureSetpoint.value",
+            "label": "TemperatureSetpoint.value",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "AirTemperatureSetpoint.value",
+            "label": "AirTemperatureSetpoint.value",
+            "category": "recovered"
+          },
+          {
+            "id": "CoolingTemperatureSetpoint.value",
+            "label": "CoolingTemperatureSetpoint.value",
+            "category": "recovered"
+          },
+          {
+            "id": "HeatingTemperatureSetpoint.value",
+            "label": "HeatingTemperatureSetpoint.value",
+            "category": "recovered"
+          },
+          {
+            "id": "TemperatureDeadbandSetpoint.value",
+            "label": "TemperatureDeadbandSetpoint.value",
+            "category": "recovered"
+          },
+          {
+            "id": "OccupancySensor.occupied",
+            "label": "OccupancySensor.occupied",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "Thermostat.mode",
+            "label": "Thermostat.mode",
+            "category": "recovered"
+          },
+          {
+            "id": "Thermostat.status",
+            "label": "Thermostat.status",
+            "category": "recovered"
+          },
+          {
+            "id": "TerminalUnit.status",
+            "label": "TerminalUnit.status",
+            "category": "recovered"
+          },
+          {
+            "id": "Damper.position",
+            "label": "Damper.position",
+            "category": "recovered"
+          },
+          {
+            "id": "Filter.status",
+            "label": "Filter.status",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "Fan.status",
+            "label": "Fan.status",
+            "category": "recovered"
+          },
+          {
+            "id": "Economizer.status",
+            "label": "Economizer.status",
+            "category": "recovered"
+          },
+          {
+            "id": "CoolingValve.position",
+            "label": "CoolingValve.position",
+            "category": "recovered"
+          },
+          {
+            "id": "HeatingValve.position",
+            "label": "HeatingValve.position",
+            "category": "recovered"
+          },
+          {
+            "id": "Boiler.status",
+            "label": "Boiler.status",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "Chiller.status",
+            "label": "Chiller.status",
+            "category": "recovered"
+          },
+          {
+            "id": "Chiller.coolingCapacity",
+            "label": "Chiller.coolingCapacity",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "PackagedHeatPump.mode",
+            "label": "PackagedHeatPump.mode",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "Building.yearBuilt",
+            "label": "Building.yearBuilt",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "Floor.levelNumber",
+            "label": "Floor.levelNumber",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "Space.maxOccupancy",
+            "label": "Space.maxOccupancy",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "Zone.occupancyStatus",
+            "label": "Zone.occupancyStatus",
+            "category": "recovered"
+          },
+          {
+            "id": "CO2DifferentialSensor.value",
+            "label": "CO2DifferentialSensor.value",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "CondensingUnit.status",
+            "label": "CondensingUnit.status",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "CoolingTower.status",
+            "label": "CoolingTower.status",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "HeatExchanger.status",
+            "label": "HeatExchanger.status",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "Humidifier.status",
+            "label": "Humidifier.status",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "IsolationValve.position",
+            "label": "IsolationValve.position",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "Pump.status",
+            "label": "Pump.status",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "SpaceHeater.status",
+            "label": "SpaceHeater.status",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "WaterTemperatureSensor.value",
+            "label": "WaterTemperatureSensor.value",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "DryCooler.status",
+            "label": "DryCooler.status",
+            "category": "endpoint_class_missing"
+          }
+        ]
+      }
+    },
+    "B": {
+      "turn": 82,
+      "semanticAvailable": true,
+      "counts": {
+        "classes": {
+          "recovered": 22,
+          "endpoint_class_missing": 0,
+          "other_name": 0,
+          "removed": 0,
+          "mentioned_not_committed": 6,
+          "never_mentioned": 11,
+          "goldTotal": 39,
+          "scorerMatched": 22
+        },
+        "relationships": {
+          "recovered": 14,
+          "endpoint_class_missing": 12,
+          "other_name": 7,
+          "removed": 0,
+          "mentioned_not_committed": 0,
+          "never_mentioned": 2,
+          "goldTotal": 35
+        },
+        "properties": {
+          "recovered": 15,
+          "endpoint_class_missing": 18,
+          "other_name": 4,
+          "removed": 0,
+          "mentioned_not_committed": 3,
+          "never_mentioned": 2,
+          "goldTotal": 42
+        }
+      },
+      "items": {
+        "classes": [
+          {
+            "id": "AirHandlingUnit",
+            "label": "Air Handling Unit",
+            "category": "recovered"
+          },
+          {
+            "id": "AirPlenum",
+            "label": "Air Plenum",
+            "category": "recovered"
+          },
+          {
+            "id": "TemperatureSensor",
+            "label": "Temperature Sensor",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "AirTemperatureSensor",
+            "label": "Air Temperature Sensor",
+            "category": "recovered"
+          },
+          {
+            "id": "CO2Sensor",
+            "label": "CO2 Sensor",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "OutsideAirCO2Sensor",
+            "label": "Outside Air CO2 Sensor",
+            "category": "recovered"
+          },
+          {
+            "id": "ReturnAirCO2Sensor",
+            "label": "Return Air CO2 Sensor",
+            "category": "recovered"
+          },
+          {
+            "id": "AirQualitySensor",
+            "label": "Air Quality Sensor",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "TemperatureSetpoint",
+            "label": "Temperature Setpoint",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "AirTemperatureSetpoint",
+            "label": "Air Temperature Setpoint",
+            "category": "recovered"
+          },
+          {
+            "id": "CoolingTemperatureSetpoint",
+            "label": "Cooling Temperature Setpoint",
+            "category": "recovered"
+          },
+          {
+            "id": "HeatingTemperatureSetpoint",
+            "label": "Heating Temperature Setpoint",
+            "category": "recovered"
+          },
+          {
+            "id": "TemperatureDeadbandSetpoint",
+            "label": "Temperature Deadband Setpoint",
+            "category": "recovered"
+          },
+          {
+            "id": "OccupancySensor",
+            "label": "Occupancy Sensor",
+            "category": "recovered"
+          },
+          {
+            "id": "Thermostat",
+            "label": "Thermostat",
+            "category": "recovered"
+          },
+          {
+            "id": "TerminalUnit",
+            "label": "Terminal Unit",
+            "category": "recovered"
+          },
+          {
+            "id": "Damper",
+            "label": "Damper",
+            "category": "recovered"
+          },
+          {
+            "id": "Filter",
+            "label": "Filter",
+            "category": "recovered"
+          },
+          {
+            "id": "Fan",
+            "label": "Fan",
+            "category": "recovered"
+          },
+          {
+            "id": "Economizer",
+            "label": "Economizer",
+            "category": "recovered"
+          },
+          {
+            "id": "CoolingValve",
+            "label": "Cooling Valve",
+            "category": "recovered"
+          },
+          {
+            "id": "HeatingValve",
+            "label": "Heating Valve",
+            "category": "recovered"
+          },
+          {
+            "id": "Boiler",
+            "label": "Boiler",
+            "category": "recovered"
+          },
+          {
+            "id": "Chiller",
+            "label": "Chiller",
+            "category": "recovered"
+          },
+          {
+            "id": "PackagedHeatPump",
+            "label": "Packaged Heat Pump",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "Building",
+            "label": "Building",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "Floor",
+            "label": "Floor",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "Space",
+            "label": "Space",
+            "category": "recovered"
+          },
+          {
+            "id": "Zone",
+            "label": "Zone",
+            "category": "recovered"
+          },
+          {
+            "id": "CO2DifferentialSensor",
+            "label": "CO2 Differential Sensor",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "CondensingUnit",
+            "label": "Condensing Unit",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "CoolingTower",
+            "label": "Cooling Tower",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "HeatExchanger",
+            "label": "Heat Exchanger",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "Humidifier",
+            "label": "Humidifier",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "IsolationValve",
+            "label": "Isolation Valve",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "Pump",
+            "label": "Pump",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "SpaceHeater",
+            "label": "Space Heater",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "WaterTemperatureSensor",
+            "label": "Water Temperature Sensor",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "DryCooler",
+            "label": "Dry Cooler",
+            "category": "never_mentioned"
+          }
+        ],
+        "relationships": [
+          {
+            "id": "rel_0",
+            "label": "AirHandlingUnit has Part Fan",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_1",
+            "label": "AirHandlingUnit has Part Filter",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_2",
+            "label": "AirHandlingUnit has Part Damper",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_3",
+            "label": "AirHandlingUnit has Part CoolingValve",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_4",
+            "label": "AirHandlingUnit has Part HeatingValve",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_5",
+            "label": "AirHandlingUnit has Part Economizer",
+            "category": "other_name"
+          },
+          {
+            "id": "rel_6",
+            "label": "AirHandlingUnit has Point AirTemperatureSensor",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_7",
+            "label": "AirHandlingUnit has Point CO2Sensor",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "rel_8",
+            "label": "AirHandlingUnit has Point AirTemperatureSetpoint",
+            "category": "other_name"
+          },
+          {
+            "id": "rel_9",
+            "label": "AirHandlingUnit has Point CoolingTemperatureSetpoint",
+            "category": "other_name"
+          },
+          {
+            "id": "rel_10",
+            "label": "AirHandlingUnit has Point HeatingTemperatureSetpoint",
+            "category": "other_name"
+          },
+          {
+            "id": "rel_11",
+            "label": "AirHandlingUnit has Point TemperatureDeadbandSetpoint",
+            "category": "other_name"
+          },
+          {
+            "id": "rel_12",
+            "label": "Thermostat has Point TemperatureSensor",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "rel_13",
+            "label": "Thermostat has Point TemperatureSetpoint",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "rel_14",
+            "label": "Space has Point OccupancySensor",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_15",
+            "label": "Zone has Point OccupancySensor",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_16",
+            "label": "AirHandlingUnit has Location Building",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "rel_17",
+            "label": "AirHandlingUnit has Location Floor",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "rel_18",
+            "label": "TerminalUnit has Location Space",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "rel_19",
+            "label": "Thermostat has Location Space",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "rel_21",
+            "label": "OutsideAirCO2Sensor has Location Building",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "rel_22",
+            "label": "Building has Part Floor",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "rel_23",
+            "label": "Floor has Part Space",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "rel_24",
+            "label": "Building has Part Zone",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "rel_25",
+            "label": "AirHandlingUnit feeds AirPlenum",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_26",
+            "label": "AirHandlingUnit feeds TerminalUnit",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_27",
+            "label": "Boiler feeds HeatingValve",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_28",
+            "label": "Chiller feeds CoolingValve",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_29",
+            "label": "PackagedHeatPump feeds TerminalUnit",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "rel_30",
+            "label": "TerminalUnit serves Space",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_31",
+            "label": "Thermostat serves Zone",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_32",
+            "label": "CondensingUnit has Part Fan",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "rel_33",
+            "label": "SpaceHeater serves Space",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "rel_34",
+            "label": "AirHandlingUnit has Point OutsideAirCO2Sensor",
+            "category": "other_name"
+          },
+          {
+            "id": "rel_35",
+            "label": "AirHandlingUnit has Point ReturnAirCO2Sensor",
+            "category": "other_name"
+          }
+        ],
+        "properties": [
+          {
+            "id": "AirHandlingUnit.status",
+            "label": "AirHandlingUnit.status",
+            "category": "recovered"
+          },
+          {
+            "id": "AirPlenum.airflowState",
+            "label": "AirPlenum.airflowState",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "TemperatureSensor.value",
+            "label": "TemperatureSensor.value",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "TemperatureSensor.status",
+            "label": "TemperatureSensor.status",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "AirTemperatureSensor.value",
+            "label": "AirTemperatureSensor.value",
+            "category": "other_name"
+          },
+          {
+            "id": "CO2Sensor.value",
+            "label": "CO2Sensor.value",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "OutsideAirCO2Sensor.value",
+            "label": "OutsideAirCO2Sensor.value",
+            "category": "other_name"
+          },
+          {
+            "id": "ReturnAirCO2Sensor.value",
+            "label": "ReturnAirCO2Sensor.value",
+            "category": "other_name"
+          },
+          {
+            "id": "AirQualitySensor.value",
+            "label": "AirQualitySensor.value",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "TemperatureSetpoint.value",
+            "label": "TemperatureSetpoint.value",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "AirTemperatureSetpoint.value",
+            "label": "AirTemperatureSetpoint.value",
+            "category": "recovered"
+          },
+          {
+            "id": "CoolingTemperatureSetpoint.value",
+            "label": "CoolingTemperatureSetpoint.value",
+            "category": "recovered"
+          },
+          {
+            "id": "HeatingTemperatureSetpoint.value",
+            "label": "HeatingTemperatureSetpoint.value",
+            "category": "recovered"
+          },
+          {
+            "id": "TemperatureDeadbandSetpoint.value",
+            "label": "TemperatureDeadbandSetpoint.value",
+            "category": "recovered"
+          },
+          {
+            "id": "OccupancySensor.occupied",
+            "label": "OccupancySensor.occupied",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "Thermostat.mode",
+            "label": "Thermostat.mode",
+            "category": "recovered"
+          },
+          {
+            "id": "Thermostat.status",
+            "label": "Thermostat.status",
+            "category": "recovered"
+          },
+          {
+            "id": "TerminalUnit.status",
+            "label": "TerminalUnit.status",
+            "category": "recovered"
+          },
+          {
+            "id": "Damper.position",
+            "label": "Damper.position",
+            "category": "recovered"
+          },
+          {
+            "id": "Filter.status",
+            "label": "Filter.status",
+            "category": "other_name"
+          },
+          {
+            "id": "Fan.status",
+            "label": "Fan.status",
+            "category": "recovered"
+          },
+          {
+            "id": "Economizer.status",
+            "label": "Economizer.status",
+            "category": "recovered"
+          },
+          {
+            "id": "CoolingValve.position",
+            "label": "CoolingValve.position",
+            "category": "recovered"
+          },
+          {
+            "id": "HeatingValve.position",
+            "label": "HeatingValve.position",
+            "category": "recovered"
+          },
+          {
+            "id": "Boiler.status",
+            "label": "Boiler.status",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "Chiller.status",
+            "label": "Chiller.status",
+            "category": "recovered"
+          },
+          {
+            "id": "Chiller.coolingCapacity",
+            "label": "Chiller.coolingCapacity",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "PackagedHeatPump.mode",
+            "label": "PackagedHeatPump.mode",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "Building.yearBuilt",
+            "label": "Building.yearBuilt",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "Floor.levelNumber",
+            "label": "Floor.levelNumber",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "Space.maxOccupancy",
+            "label": "Space.maxOccupancy",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "Zone.occupancyStatus",
+            "label": "Zone.occupancyStatus",
+            "category": "recovered"
+          },
+          {
+            "id": "CO2DifferentialSensor.value",
+            "label": "CO2DifferentialSensor.value",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "CondensingUnit.status",
+            "label": "CondensingUnit.status",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "CoolingTower.status",
+            "label": "CoolingTower.status",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "HeatExchanger.status",
+            "label": "HeatExchanger.status",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "Humidifier.status",
+            "label": "Humidifier.status",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "IsolationValve.position",
+            "label": "IsolationValve.position",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "Pump.status",
+            "label": "Pump.status",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "SpaceHeater.status",
+            "label": "SpaceHeater.status",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "WaterTemperatureSensor.value",
+            "label": "WaterTemperatureSensor.value",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "DryCooler.status",
+            "label": "DryCooler.status",
+            "category": "endpoint_class_missing"
+          }
+        ]
+      }
+    },
+    "C": {
+      "turn": 97,
+      "semanticAvailable": true,
+      "counts": {
+        "classes": {
+          "recovered": 22,
+          "endpoint_class_missing": 0,
+          "other_name": 0,
+          "removed": 0,
+          "mentioned_not_committed": 6,
+          "never_mentioned": 11,
+          "goldTotal": 39,
+          "scorerMatched": 22
+        },
+        "relationships": {
+          "recovered": 21,
+          "endpoint_class_missing": 12,
+          "other_name": 0,
+          "removed": 0,
+          "mentioned_not_committed": 0,
+          "never_mentioned": 2,
+          "goldTotal": 35
+        },
+        "properties": {
+          "recovered": 20,
+          "endpoint_class_missing": 18,
+          "other_name": 0,
+          "removed": 0,
+          "mentioned_not_committed": 2,
+          "never_mentioned": 2,
+          "goldTotal": 42
+        }
+      },
+      "items": {
+        "classes": [
+          {
+            "id": "AirHandlingUnit",
+            "label": "Air Handling Unit",
+            "category": "recovered"
+          },
+          {
+            "id": "AirPlenum",
+            "label": "Air Plenum",
+            "category": "recovered"
+          },
+          {
+            "id": "TemperatureSensor",
+            "label": "Temperature Sensor",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "AirTemperatureSensor",
+            "label": "Air Temperature Sensor",
+            "category": "recovered"
+          },
+          {
+            "id": "CO2Sensor",
+            "label": "CO2 Sensor",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "OutsideAirCO2Sensor",
+            "label": "Outside Air CO2 Sensor",
+            "category": "recovered"
+          },
+          {
+            "id": "ReturnAirCO2Sensor",
+            "label": "Return Air CO2 Sensor",
+            "category": "recovered"
+          },
+          {
+            "id": "AirQualitySensor",
+            "label": "Air Quality Sensor",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "TemperatureSetpoint",
+            "label": "Temperature Setpoint",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "AirTemperatureSetpoint",
+            "label": "Air Temperature Setpoint",
+            "category": "recovered"
+          },
+          {
+            "id": "CoolingTemperatureSetpoint",
+            "label": "Cooling Temperature Setpoint",
+            "category": "recovered"
+          },
+          {
+            "id": "HeatingTemperatureSetpoint",
+            "label": "Heating Temperature Setpoint",
+            "category": "recovered"
+          },
+          {
+            "id": "TemperatureDeadbandSetpoint",
+            "label": "Temperature Deadband Setpoint",
+            "category": "recovered"
+          },
+          {
+            "id": "OccupancySensor",
+            "label": "Occupancy Sensor",
+            "category": "recovered"
+          },
+          {
+            "id": "Thermostat",
+            "label": "Thermostat",
+            "category": "recovered"
+          },
+          {
+            "id": "TerminalUnit",
+            "label": "Terminal Unit",
+            "category": "recovered"
+          },
+          {
+            "id": "Damper",
+            "label": "Damper",
+            "category": "recovered"
+          },
+          {
+            "id": "Filter",
+            "label": "Filter",
+            "category": "recovered"
+          },
+          {
+            "id": "Fan",
+            "label": "Fan",
+            "category": "recovered"
+          },
+          {
+            "id": "Economizer",
+            "label": "Economizer",
+            "category": "recovered"
+          },
+          {
+            "id": "CoolingValve",
+            "label": "Cooling Valve",
+            "category": "recovered"
+          },
+          {
+            "id": "HeatingValve",
+            "label": "Heating Valve",
+            "category": "recovered"
+          },
+          {
+            "id": "Boiler",
+            "label": "Boiler",
+            "category": "recovered"
+          },
+          {
+            "id": "Chiller",
+            "label": "Chiller",
+            "category": "recovered"
+          },
+          {
+            "id": "PackagedHeatPump",
+            "label": "Packaged Heat Pump",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "Building",
+            "label": "Building",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "Floor",
+            "label": "Floor",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "Space",
+            "label": "Space",
+            "category": "recovered"
+          },
+          {
+            "id": "Zone",
+            "label": "Zone",
+            "category": "recovered"
+          },
+          {
+            "id": "CO2DifferentialSensor",
+            "label": "CO2 Differential Sensor",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "CondensingUnit",
+            "label": "Condensing Unit",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "CoolingTower",
+            "label": "Cooling Tower",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "HeatExchanger",
+            "label": "Heat Exchanger",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "Humidifier",
+            "label": "Humidifier",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "IsolationValve",
+            "label": "Isolation Valve",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "Pump",
+            "label": "Pump",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "SpaceHeater",
+            "label": "Space Heater",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "WaterTemperatureSensor",
+            "label": "Water Temperature Sensor",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "DryCooler",
+            "label": "Dry Cooler",
+            "category": "never_mentioned"
+          }
+        ],
+        "relationships": [
+          {
+            "id": "rel_0",
+            "label": "AirHandlingUnit has Part Fan",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_1",
+            "label": "AirHandlingUnit has Part Filter",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_2",
+            "label": "AirHandlingUnit has Part Damper",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_3",
+            "label": "AirHandlingUnit has Part CoolingValve",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_4",
+            "label": "AirHandlingUnit has Part HeatingValve",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_5",
+            "label": "AirHandlingUnit has Part Economizer",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_6",
+            "label": "AirHandlingUnit has Point AirTemperatureSensor",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_7",
+            "label": "AirHandlingUnit has Point CO2Sensor",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "rel_8",
+            "label": "AirHandlingUnit has Point AirTemperatureSetpoint",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_9",
+            "label": "AirHandlingUnit has Point CoolingTemperatureSetpoint",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_10",
+            "label": "AirHandlingUnit has Point HeatingTemperatureSetpoint",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_11",
+            "label": "AirHandlingUnit has Point TemperatureDeadbandSetpoint",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_12",
+            "label": "Thermostat has Point TemperatureSensor",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "rel_13",
+            "label": "Thermostat has Point TemperatureSetpoint",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "rel_14",
+            "label": "Space has Point OccupancySensor",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_15",
+            "label": "Zone has Point OccupancySensor",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_16",
+            "label": "AirHandlingUnit has Location Building",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "rel_17",
+            "label": "AirHandlingUnit has Location Floor",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "rel_18",
+            "label": "TerminalUnit has Location Space",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "rel_19",
+            "label": "Thermostat has Location Space",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "rel_21",
+            "label": "OutsideAirCO2Sensor has Location Building",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "rel_22",
+            "label": "Building has Part Floor",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "rel_23",
+            "label": "Floor has Part Space",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "rel_24",
+            "label": "Building has Part Zone",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "rel_25",
+            "label": "AirHandlingUnit feeds AirPlenum",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_26",
+            "label": "AirHandlingUnit feeds TerminalUnit",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_27",
+            "label": "Boiler feeds HeatingValve",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_28",
+            "label": "Chiller feeds CoolingValve",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_29",
+            "label": "PackagedHeatPump feeds TerminalUnit",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "rel_30",
+            "label": "TerminalUnit serves Space",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_31",
+            "label": "Thermostat serves Zone",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_32",
+            "label": "CondensingUnit has Part Fan",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "rel_33",
+            "label": "SpaceHeater serves Space",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "rel_34",
+            "label": "AirHandlingUnit has Point OutsideAirCO2Sensor",
+            "category": "recovered"
+          },
+          {
+            "id": "rel_35",
+            "label": "AirHandlingUnit has Point ReturnAirCO2Sensor",
+            "category": "recovered"
+          }
+        ],
+        "properties": [
+          {
+            "id": "AirHandlingUnit.status",
+            "label": "AirHandlingUnit.status",
+            "category": "recovered"
+          },
+          {
+            "id": "AirPlenum.airflowState",
+            "label": "AirPlenum.airflowState",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "TemperatureSensor.value",
+            "label": "TemperatureSensor.value",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "TemperatureSensor.status",
+            "label": "TemperatureSensor.status",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "AirTemperatureSensor.value",
+            "label": "AirTemperatureSensor.value",
+            "category": "recovered"
+          },
+          {
+            "id": "CO2Sensor.value",
+            "label": "CO2Sensor.value",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "OutsideAirCO2Sensor.value",
+            "label": "OutsideAirCO2Sensor.value",
+            "category": "recovered"
+          },
+          {
+            "id": "ReturnAirCO2Sensor.value",
+            "label": "ReturnAirCO2Sensor.value",
+            "category": "recovered"
+          },
+          {
+            "id": "AirQualitySensor.value",
+            "label": "AirQualitySensor.value",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "TemperatureSetpoint.value",
+            "label": "TemperatureSetpoint.value",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "AirTemperatureSetpoint.value",
+            "label": "AirTemperatureSetpoint.value",
+            "category": "recovered"
+          },
+          {
+            "id": "CoolingTemperatureSetpoint.value",
+            "label": "CoolingTemperatureSetpoint.value",
+            "category": "recovered"
+          },
+          {
+            "id": "HeatingTemperatureSetpoint.value",
+            "label": "HeatingTemperatureSetpoint.value",
+            "category": "recovered"
+          },
+          {
+            "id": "TemperatureDeadbandSetpoint.value",
+            "label": "TemperatureDeadbandSetpoint.value",
+            "category": "recovered"
+          },
+          {
+            "id": "OccupancySensor.occupied",
+            "label": "OccupancySensor.occupied",
+            "category": "recovered"
+          },
+          {
+            "id": "Thermostat.mode",
+            "label": "Thermostat.mode",
+            "category": "recovered"
+          },
+          {
+            "id": "Thermostat.status",
+            "label": "Thermostat.status",
+            "category": "recovered"
+          },
+          {
+            "id": "TerminalUnit.status",
+            "label": "TerminalUnit.status",
+            "category": "recovered"
+          },
+          {
+            "id": "Damper.position",
+            "label": "Damper.position",
+            "category": "recovered"
+          },
+          {
+            "id": "Filter.status",
+            "label": "Filter.status",
+            "category": "recovered"
+          },
+          {
+            "id": "Fan.status",
+            "label": "Fan.status",
+            "category": "recovered"
+          },
+          {
+            "id": "Economizer.status",
+            "label": "Economizer.status",
+            "category": "recovered"
+          },
+          {
+            "id": "CoolingValve.position",
+            "label": "CoolingValve.position",
+            "category": "recovered"
+          },
+          {
+            "id": "HeatingValve.position",
+            "label": "HeatingValve.position",
+            "category": "recovered"
+          },
+          {
+            "id": "Boiler.status",
+            "label": "Boiler.status",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "Chiller.status",
+            "label": "Chiller.status",
+            "category": "recovered"
+          },
+          {
+            "id": "Chiller.coolingCapacity",
+            "label": "Chiller.coolingCapacity",
+            "category": "mentioned_not_committed"
+          },
+          {
+            "id": "PackagedHeatPump.mode",
+            "label": "PackagedHeatPump.mode",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "Building.yearBuilt",
+            "label": "Building.yearBuilt",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "Floor.levelNumber",
+            "label": "Floor.levelNumber",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "Space.maxOccupancy",
+            "label": "Space.maxOccupancy",
+            "category": "never_mentioned"
+          },
+          {
+            "id": "Zone.occupancyStatus",
+            "label": "Zone.occupancyStatus",
+            "category": "recovered"
+          },
+          {
+            "id": "CO2DifferentialSensor.value",
+            "label": "CO2DifferentialSensor.value",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "CondensingUnit.status",
+            "label": "CondensingUnit.status",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "CoolingTower.status",
+            "label": "CoolingTower.status",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "HeatExchanger.status",
+            "label": "HeatExchanger.status",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "Humidifier.status",
+            "label": "Humidifier.status",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "IsolationValve.position",
+            "label": "IsolationValve.position",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "Pump.status",
+            "label": "Pump.status",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "SpaceHeater.status",
+            "label": "SpaceHeater.status",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "WaterTemperatureSensor.value",
+            "label": "WaterTemperatureSensor.value",
+            "category": "endpoint_class_missing"
+          },
+          {
+            "id": "DryCooler.status",
+            "label": "DryCooler.status",
+            "category": "endpoint_class_missing"
+          }
+        ]
+      }
+    }
+  },
+  "transitionsAtoC": {
+    "classes": {
+      "never_mentioned->mentioned_not_committed": 1
+    },
+    "relationships": {
+      "other_name->recovered": 7
+    },
+    "properties": {
+      "other_name->recovered": 3,
+      "mentioned_not_committed->recovered": 2,
+      "never_mentioned->mentioned_not_committed": 1
+    }
+  }
+}

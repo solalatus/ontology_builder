@@ -2976,6 +2976,7 @@ const STRINGS = {
     // Helper Agent — Phase 3 (tool-calling).
     agentToolApplied: (added, changed) => `✓ Applied: ${added} added, ${changed} updated.`,
     agentToolRemoved: (count) => `✓ Removed: ${count} element(s).`,
+    agentToolRenamed: (count) => `✓ Renamed: ${count} element(s).`,
     agentToolSkippedNote: "An additional ontology edit in this message was skipped — only one edit is applied per message.",
     agentToolNothingNote: "The agent tried to edit the ontology, but nothing new or changed was found in it.",
     agentToolErrorNote: "The agent's ontology edit could not be applied (invalid data).",
@@ -3356,6 +3357,7 @@ const STRINGS = {
     // Helper Agent — Phase 3 (eszközhívások).
     agentToolApplied: (added, changed) => `✓ Alkalmazva: ${added} hozzáadva, ${changed} frissítve.`,
     agentToolRemoved: (count) => `✓ Eltávolítva: ${count} elem.`,
+    agentToolRenamed: (count) => `✓ Átnevezve: ${count} elem.`,
     agentToolSkippedNote: "Egy további ontológia-szerkesztést kihagytunk ebben az üzenetben — üzenetenként csak egy szerkesztés kerül alkalmazásra.",
     agentToolNothingNote: "Az ügynök megpróbálta szerkeszteni az ontológiát, de nem talált benne új vagy módosított elemet.",
     agentToolErrorNote: "Az ügynök szerkesztését nem sikerült alkalmazni (érvénytelen adat).",
@@ -13771,6 +13773,11 @@ const agentState = {
   // the treatment alone and nothing else (not a Chromium version, not a
   // harness revision). Never set by any real UI.
   selfCorrectionDisabled: false,
+  // Eval-only, same family: when true the interviewer is also offered
+  // rename_ontology_elements (see RENAME_ONTOLOGY_ELEMENTS_TOOL's comment), and
+  // every rename it makes is logged here for the harness. Never set by any UI.
+  renameToolEnabled: false,
+  renameLog: [],
   // Issue #156 -- bounds the automatic end-of-interview Tier C call to at
   // most once per conversation, however many times get_graph_state is
   // called with finalValidation:true afterward (e.g. the interviewer
@@ -14707,6 +14714,51 @@ const GET_GRAPH_STATE_TOOL = {
         },
       },
       required: [],
+    },
+  },
+};
+
+// Eval-only (issue #180's naming pass, run by tests/evals/lib/pairedStages.mjs):
+// offered to the interviewer only while agentState.renameToolEnabled is set,
+// which no UI does, so the shipped tool list and prompt are unchanged. The
+// import-merge agent's rename_ontology_element (#153) re-keys a class in
+// place but cannot reach a relationship or a property, and renaming those
+// by apply-new-then-remove-old costs two edits per batch against a budget of
+// one. This does all three kinds in place, in batches: a class keeps its old
+// label as an alias, a relationship keeps its old name as an alias and can
+// be turned round, a property just takes the new name (there is no property
+// alias field). Renames add no content, so they do not draw on the per-turn
+// edit budget, but they fold into the turn's one undo step.
+const RENAME_ONTOLOGY_ELEMENTS_TOOL = {
+  type: "function",
+  function: {
+    name: "rename_ontology_elements",
+    description: "Renames existing classes, relationships or properties IN PLACE to the name the expert says " +
+      "they use, keeping everything attached to them. A renamed class keeps its previous name as an alias; a " +
+      "renamed relationship keeps its previous name as an alias and, with reverse:true, is turned round to the " +
+      "direction the expert states; a renamed property takes the new name. Use this instead of adding a new " +
+      "element and removing the old one. Several renames can go in one call.",
+    parameters: {
+      type: "object",
+      properties: {
+        renames: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              kind: { type: "string", enum: ["class", "relationship", "property"] },
+              from: { type: "string", description: "The element's exact current name (a relationship's current name, a property's current name)." },
+              to: { type: "string", description: "The new name. For a relationship turned round, its name in the new direction." },
+              className: { type: "string", description: "property only: the class that has the property." },
+              source: { type: "string", description: "relationship only: its current from-class." },
+              target: { type: "string", description: "relationship only: its current to-class." },
+              reverse: { type: "boolean", description: "relationship only: true to swap from and to." },
+            },
+            required: ["kind", "from", "to"],
+          },
+        },
+      },
+      required: ["renames"],
     },
   },
 };
@@ -16192,6 +16244,86 @@ async function handleAgentRemoveToolCall(call, alreadyCommittedThisTurn) {
   return { applied: true, resultText: `Removed ${total} element(s) — ${summary}.` };
 }
 
+// One rename, applied to `state` directly; returns a result line and whether
+// anything changed. See RENAME_ONTOLOGY_ELEMENTS_TOOL's own comment.
+// `idByLabelAtStart` lets a later rename in the same batch name a class by
+// the label it had when the batch began (a class and its relationships are
+// typically renamed together, and the model names them as it saw them).
+function renameOneOntologyElement(r, idByLabelAtStart = new Map()) {
+  const from = r && typeof r.from === "string" ? r.from.trim() : "";
+  const to = r && typeof r.to === "string" ? r.to.trim() : "";
+  const kind = r && r.kind;
+  if (!from || !to) return { ok: false, line: "Error: from and to are both required." };
+  const currentNode = (label) => state.nodes.find((n) => n.label === label);
+  const nodeByLabel = (label) => currentNode(label) || state.nodes.find((n) => n.id === idByLabelAtStart.get(label));
+  if (kind === "class") {
+    if (from === to) return { ok: false, line: `Error: class "${from}": from and to are the same.` };
+    const node = currentNode(from);
+    if (!node) return { ok: false, line: `Error: no class named "${from}".` };
+    if (currentNode(to)) return { ok: false, line: `Error: a class named "${to}" already exists.` };
+    node.label = to;
+    node.aliases = (node.aliases || []).filter((a) => a !== to);
+    if (!node.aliases.includes(from)) node.aliases.push(from);
+    return { ok: true, line: `class "${from}" → "${to}" (previous name kept as an alias)` };
+  }
+  if (kind === "property") {
+    const node = nodeByLabel(r.className);
+    if (!node) return { ok: false, line: `Error: no class named "${r.className}" for property "${from}".` };
+    if (from === to) return { ok: false, line: `Error: property "${r.className}.${from}": from and to are the same.` };
+    const prop = (node.properties || []).find((p) => p.name === from);
+    if (!prop) return { ok: false, line: `Error: class "${r.className}" has no property named "${from}".` };
+    if (node.properties.some((p) => p.name === to)) return { ok: false, line: `Error: class "${r.className}" already has a property named "${to}".` };
+    prop.name = to;
+    return { ok: true, line: `property "${r.className}.${from}" → "${to}"` };
+  }
+  if (kind === "relationship") {
+    const s = nodeByLabel(r.source);
+    const t = nodeByLabel(r.target);
+    if (!s || !t) return { ok: false, line: `Error: relationship "${from}": no class named "${!s ? r.source : r.target}".` };
+    const edge = state.edges.find((e) => e.source === s.id && e.target === t.id && toCamelCaseId(e.relation) === toCamelCaseId(from));
+    if (!edge) return { ok: false, line: `Error: no relationship "${from}" from "${r.source}" to "${r.target}".` };
+    const reverse = r.reverse === true;
+    if (!reverse && toCamelCaseId(from) === toCamelCaseId(to)) return { ok: false, line: `Error: relationship "${from}": from and to are the same.` };
+    const [newSource, newTarget] = reverse ? [t.id, s.id] : [s.id, t.id];
+    if (state.edges.some((e) => e !== edge && e.source === newSource && e.target === newTarget && toCamelCaseId(e.relation) === toCamelCaseId(to))) {
+      return { ok: false, line: `Error: a relationship "${to}" already exists in that direction.` };
+    }
+    const previous = edge.relation;
+    edge.relation = to;
+    edge.source = newSource;
+    edge.target = newTarget;
+    edge.aliases = (edge.aliases || []).filter((a) => toCamelCaseId(a) !== toCamelCaseId(to));
+    if (toCamelCaseId(previous) !== toCamelCaseId(to) && !edge.aliases.some((a) => toCamelCaseId(a) === toCamelCaseId(previous))) edge.aliases.push(previous);
+    const [fromLabel, toLabel] = reverse ? [r.target, r.source] : [r.source, r.target];
+    return { ok: true, line: `relationship "${previous}" (${r.source} → ${r.target}) → "${to}" (${fromLabel} → ${toLabel})` };
+  }
+  return { ok: false, line: `Error: unknown kind "${kind}" (class, relationship or property).` };
+}
+
+async function handleAgentRenameToolCall(call) {
+  let args;
+  try {
+    args = JSON.parse((call.function && call.function.arguments) || "{}");
+  } catch (err) {
+    appendTranscriptMessage("tool", t("agentToolErrorNote"));
+    return { applied: false, resultText: "Error: could not parse tool arguments as JSON." };
+  }
+  const renames = Array.isArray(args.renames) ? args.renames : [];
+  if (!renames.length) return { applied: false, resultText: "Error: renames was empty." };
+  const before = snapshotState();
+  const idByLabelAtStart = new Map(state.nodes.map((n) => [n.label, n.id]));
+  const results = renames.map((r) => renameOneOntologyElement(r, idByLabelAtStart));
+  const done = results.filter((x) => x.ok).length;
+  if (done) {
+    pushOrFoldAgentHistory(before, snapshotState(), { source: "agent-auto-edit", evidenceIndex: agentState.transcript.length });
+    markDirty();
+    render();
+  }
+  agentState.renameLog.push(...renames.map((r, i) => ({ ...r, ok: results[i].ok, result: results[i].line })));
+  appendTranscriptMessage("tool", done ? t("agentToolRenamed", done) : t("agentToolNothingNote"));
+  return { applied: done > 0, resultText: `Renamed ${done} of ${renames.length}:\n` + results.map((x) => `- ${x.line}`).join("\n") };
+}
+
 // Read-only — reuses the exact same, already-tested exporter the manual
 // Save Version/Domain Model export path uses, so there's no second
 // serialization of the domain model to keep in sync. Never touches
@@ -16412,7 +16544,8 @@ async function sendAgentChatMessage(userText) {
         // real completed interviews traced directly to leftover deletion-
         // sentinel text ("REMOVE") shipping in final exports. See
         // handleAgentRemoveToolCall's own comment for the full story.
-        tools: agentState.toolsDisabled ? undefined : [APPLY_ONTOLOGY_YAML_TOOL, GET_GRAPH_STATE_TOOL, REMOVE_ONTOLOGY_ELEMENTS_TOOL],
+        tools: agentState.toolsDisabled ? undefined : [APPLY_ONTOLOGY_YAML_TOOL, GET_GRAPH_STATE_TOOL, REMOVE_ONTOLOGY_ELEMENTS_TOOL,
+          ...(agentState.renameToolEnabled ? [RENAME_ONTOLOGY_ELEMENTS_TOOL] : [])],
         promptCacheKey: agentState.promptCacheKey,
         signal: controller.signal,
       });
@@ -16432,6 +16565,11 @@ async function sendAgentChatMessage(userText) {
           const name = call.function && call.function.name;
           if (name === "get_graph_state") {
             const { resultText } = await handleGetGraphStateCall(call);
+            agentState.apiMessages.push({ role: "tool", tool_call_id: call.id, content: resultText });
+            continue;
+          }
+          if (name === "rename_ontology_elements" && agentState.renameToolEnabled) {
+            const { resultText } = await handleAgentRenameToolCall(call);
             agentState.apiMessages.push({ role: "tool", tool_call_id: call.id, content: resultText });
             continue;
           }
@@ -16907,6 +17045,9 @@ window.__kg = {
     sendMessage: submitAgentChatInput,
     // Eval-only (issue #85's control arm) -- see agentState.selfCorrectionDisabled.
     setSelfCorrectionDisabled: (off) => { agentState.selfCorrectionDisabled = Boolean(off); },
+    // Eval-only (issue #180's naming pass) -- see agentState.renameToolEnabled.
+    setRenameToolEnabled: (on) => { agentState.renameToolEnabled = Boolean(on); },
+    renameTool: RENAME_ONTOLOGY_ELEMENTS_TOOL,
     buildSystemPrompt: buildAgentSystemPrompt,
     isSending: () => agentState.sending,
     // Issue #157 -- pure function, exposed directly so the narration-count-

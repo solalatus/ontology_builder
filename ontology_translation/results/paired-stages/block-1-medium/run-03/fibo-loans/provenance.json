@@ -1,0 +1,332 @@
+{
+  "schemaVersion": 1,
+  "domain": "fibo-loans",
+  "runId": "run-03",
+  "runUuid": "a7de4530-cecc-4835-b662-d5bf013c92d5",
+  "status": "complete",
+  "generatedAt": "2026-10-20T10:58:49.681Z",
+  "model": "gpt-6-sol",
+  "personaModel": "gpt-6-sol",
+  "classifierModel": "gpt-6-sol",
+  "reasoningEffort": "medium",
+  "provider": "azure",
+  "endpointSha256": "e3e57f18180d7eb5a21f2693f60ce94f67ca899f783a0f790212e25a4f648197",
+  "domainYamlPath": "ontology_translation/domains/fibo-loans/reference.domain.yaml",
+  "personaPath": "ontology_translation/domains/fibo-loans/persona.md",
+  "stoppedReason": "stages_complete",
+  "turnsUsed": 137,
+  "wallClockSec": 1998,
+  "semanticJudgingSucceeded": true,
+  "degraded": false,
+  "errorCounts": {},
+  "compactionEvents": 0,
+  "repoCommitSha": "13a026f6dcc5e5d3720831117a877cd44c006f67",
+  "interviewerPromptSha256": "9c9a4583a266795d69c7f7993866b4261d6f9d3cfcb882117260d1abb7489f0d",
+  "personaPromptSha256": "ba8aba0b3dfd47f5fe9f4d8181fcccd9247180ecab0513cd239ae119389969d0",
+  "groundTruthSha256": "d57a0925240e0ad0abd6c8d537ed31fc69ad7b153725e5a6e78577f55b0356d4",
+  "wrapperSha256": "0316104269a6a163807c71e40c36929889e7dcba61fe59e8c7ddd0ca771c70f1",
+  "maxTurns": 300,
+  "wallClockMinutes": 120,
+  "appTurnTimeoutSec": 600,
+  "runCostCapUsd": 30,
+  "prices": {
+    "input": 2,
+    "cachedInput": 0.2,
+    "output": 10
+  },
+  "coverageSweep": true,
+  "namingPass": true,
+  "sweepMaxRounds": 3,
+  "stageTurnCaps": {
+    "sweepRound": 45,
+    "sweepCloseout": 15,
+    "naming": 45
+  },
+  "stages": {
+    "enabled": {
+      "sweep": true,
+      "naming": true
+    },
+    "sweepMaxRounds": 3,
+    "turnCaps": {
+      "sweepRound": 45,
+      "sweepCloseout": 15,
+      "naming": 45
+    },
+    "lang": "en",
+    "finalStage": "done",
+    "snapshots": [
+      {
+        "label": "A",
+        "turn": 108,
+        "stage": "interview",
+        "classCount": 29
+      },
+      {
+        "label": "B",
+        "turn": 115,
+        "stage": "sweep",
+        "classCount": 29
+      },
+      {
+        "label": "C",
+        "turn": 137,
+        "stage": "naming",
+        "classCount": 29
+      }
+    ],
+    "events": [
+      {
+        "type": "snapshot",
+        "label": "A",
+        "turn": 108
+      },
+      {
+        "type": "stage_started",
+        "stage": "sweep",
+        "turn": 108,
+        "round": 1
+      },
+      {
+        "type": "sweep_round_ended",
+        "round": 1,
+        "turn": 115,
+        "endedBy": "ledger",
+        "classesAdded": 0
+      },
+      {
+        "type": "snapshot",
+        "label": "B",
+        "turn": 115
+      },
+      {
+        "type": "stage_started",
+        "stage": "naming",
+        "turn": 115
+      },
+      {
+        "type": "naming_ended",
+        "turn": 137,
+        "endedBy": "ledger"
+      },
+      {
+        "type": "snapshot",
+        "label": "C",
+        "turn": 137
+      }
+    ],
+    "sweepRounds": [
+      {
+        "round": 1,
+        "startTurn": 108,
+        "endTurn": 115,
+        "endedBy": "ledger",
+        "classesAdded": [],
+        "ledger": {
+          "surfaced": 32,
+          "added": 0,
+          "declined": 32,
+          "open": 0
+        }
+      }
+    ],
+    "sweepLedgerTotals": {
+      "surfaced": 32,
+      "added": 0,
+      "declined": 32,
+      "open": 0
+    },
+    "stagesCapped": [],
+    "namingLedger": {
+      "relationships_renamed": 2,
+      "relationships_redirected": 0,
+      "properties_renamed": 11,
+      "classes_renamed": 4
+    },
+    "namingRenames": {
+      "relationshipsRenamed": 2,
+      "relationshipsRedirected": 0,
+      "propertiesRenamed": 11,
+      "classesRenamed": 4,
+      "failed": 0
+    }
+  },
+  "snapshots": [
+    {
+      "label": "A",
+      "turn": 108,
+      "stage": "interview",
+      "elapsedSec": 1357,
+      "cost": {
+        "all": {
+          "calls": 282,
+          "promptTokens": 7410520,
+          "cachedTokens": 7256736,
+          "completionTokens": 44299,
+          "reasoningTokens": 12133,
+          "cachedShare": 0.9792478800408069,
+          "costUsd": 2.2019052
+        },
+        "app": {
+          "calls": 172,
+          "promptTokens": 5280728,
+          "cachedTokens": 5154938,
+          "completionTokens": 26758,
+          "reasoningTokens": 7690,
+          "cachedShare": 0.9761794207162345,
+          "costUsd": 1.5501476
+        },
+        "harness": {
+          "calls": 110,
+          "promptTokens": 2129792,
+          "cachedTokens": 2101798,
+          "completionTokens": 17541,
+          "reasoningTokens": 4443,
+          "cachedShare": 0.9868559934491256,
+          "costUsd": 0.6517576
+        }
+      }
+    },
+    {
+      "label": "B",
+      "turn": 115,
+      "stage": "sweep",
+      "elapsedSec": 1457,
+      "cost": {
+        "all": {
+          "calls": 297,
+          "promptTokens": 8143835,
+          "cachedTokens": 7978603,
+          "completionTokens": 49030,
+          "reasoningTokens": 13845,
+          "cachedShare": 0.979710787362465,
+          "costUsd": 2.4164846
+        },
+        "app": {
+          "calls": 180,
+          "promptTokens": 5812845,
+          "cachedTokens": 5679310,
+          "completionTokens": 29287,
+          "reasoningTokens": 8705,
+          "cachedShare": 0.9770276000822317,
+          "costUsd": 1.695802
+        },
+        "harness": {
+          "calls": 117,
+          "promptTokens": 2330990,
+          "cachedTokens": 2299293,
+          "completionTokens": 19743,
+          "reasoningTokens": 5140,
+          "cachedShare": 0.9864019150661307,
+          "costUsd": 0.7206826000000001
+        }
+      }
+    },
+    {
+      "label": "C",
+      "turn": 137,
+      "stage": "naming",
+      "elapsedSec": 1880,
+      "cost": {
+        "all": {
+          "calls": 354,
+          "promptTokens": 11598668,
+          "cachedTokens": 11275407,
+          "completionTokens": 56109,
+          "reasoningTokens": 15875,
+          "cachedShare": 0.972129472108349,
+          "costUsd": 3.4626934
+        },
+        "app": {
+          "calls": 215,
+          "promptTokens": 8495463,
+          "cachedTokens": 8208560,
+          "completionTokens": 33948,
+          "reasoningTokens": 9892,
+          "cachedShare": 0.9662286799436358,
+          "costUsd": 2.554998
+        },
+        "harness": {
+          "calls": 139,
+          "promptTokens": 3103205,
+          "cachedTokens": 3066847,
+          "completionTokens": 22161,
+          "reasoningTokens": 5983,
+          "cachedShare": 0.9882837260187451,
+          "costUsd": 0.9076954
+        }
+      }
+    }
+  ],
+  "harnessMessages": [
+    {
+      "turn": 108,
+      "text": "Before we close, one more systematic pass, to catch what we have not talked about yet.\n\nCall get_graph_state first and treat it as the source of truth for what is already on the canvas. Then go through every class on the canvas, three to five classes per question, and ask me, for each one, what exists around it in our work: its subordinate parts or components; its states or lifecycle events; the actors or parties responsible for it; its inputs and outputs; related documents or agreements; measurements or characteristic values it carries; earlier or later stages of a workflow it belongs to; more specific or sibling kinds of the same thing; and which of the properties already confirmed on a sibling class also apply to it. Skip the categories that plainly do not fit a class.\n\nAsk these as open questions about what exists, not about what the agent needs: do not limit a question to what the recorded competency questions or actions require, and do not ask me to mention only what is needed. Only once I have answered, check each thing I named against the competency questions and actions, exactly as you would any other candidate, and add only what passes; nothing is added only because it was mentioned. Keep a running list of the candidates and close each one as added, declined (with the reason) or left open; none may silently disappear.\n\nWhen every class in this pass has been asked about and every candidate is closed, end that message with one line in exactly this form, and ask nothing further in it:\nCOVERAGE LEDGER: surfaced=<number>; added=<number>; declined=<number>; open=<number>"
+    },
+    {
+      "turn": 115,
+      "text": "One last pass, on wording: I would like the model to use our own words.\n\nCall get_graph_state first. Then go through what is on the canvas, three to five items per question, relationships first, then properties, then classes:\n- for each relationship, ask me what we call this connection ourselves, in one verb phrase, and which way round we would say it;\n- for each property and each class, ask me whether that is what we would call it, or whether we have our own term for it.\n\nRecord each answer with the rename_ontology_elements tool: a relationship takes my verb phrase, and if I state it the other way round it is turned round (reverse: true); a property or a class takes my term. Previous names of classes and relationships are kept as aliases automatically. Where I say the current name is already right, leave it as it is. Do not add or remove anything in this pass.\n\nWhen every relationship, property and class has been asked about, end that message with one line in exactly this form, and ask nothing further in it:\nNAMING LEDGER: relationships_renamed=<number>; relationships_redirected=<number>; properties_renamed=<number>; classes_renamed=<number>"
+    }
+  ],
+  "classifierParamsDropped": [
+    "temperature"
+  ],
+  "cachedShare": 0.972129472108349,
+  "reasoningTokens": 15875,
+  "conversationCostUsd": 3.4626934,
+  "totalCostUsd": 3.6456374,
+  "totalCost": {
+    "prices": {
+      "input": 2,
+      "cachedInput": 0.2,
+      "output": 10
+    },
+    "app": {
+      "calls": 215,
+      "promptTokens": 8495463,
+      "cachedTokens": 8208560,
+      "completionTokens": 33948,
+      "reasoningTokens": 9892,
+      "cachedShare": 0.9662286799436358,
+      "costUsd": 2.554998
+    },
+    "appByKind": {
+      "interview": {
+        "calls": 214,
+        "promptTokens": 8491380,
+        "cachedTokens": 8208560,
+        "completionTokens": 32924,
+        "reasoningTokens": 8888,
+        "cachedShare": 0.9666932818929315,
+        "costUsd": 2.536592
+      },
+      "consistency_llm": {
+        "calls": 1,
+        "promptTokens": 4083,
+        "cachedTokens": 0,
+        "completionTokens": 1024,
+        "reasoningTokens": 1004,
+        "cachedShare": 0,
+        "costUsd": 0.018406
+      }
+    },
+    "harness": {
+      "calls": 160,
+      "promptTokens": 3164857,
+      "cachedTokens": 3066847,
+      "completionTokens": 28125,
+      "reasoningTokens": 9942,
+      "cachedShare": 0.9690317761592387,
+      "costUsd": 1.0906394
+    },
+    "all": {
+      "calls": 375,
+      "promptTokens": 11660320,
+      "cachedTokens": 11275407,
+      "completionTokens": 62073,
+      "reasoningTokens": 19834,
+      "cachedShare": 0.9669894994305474,
+      "costUsd": 3.6456374
+    }
+  }
+}
