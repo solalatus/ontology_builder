@@ -93,7 +93,10 @@ export function writeConversationLog(orchestratorResult, { dir = RESULTS_DIR } =
 // fields, not assume one entry per turn number.
 export function parseConversationLog(text) {
   const entries = [];
-  const re = /^### Turn (\d+) — ([a-z-]+)\n\n([\s\S]*?)(?=\n### Turn |\n*$)/gm;
+  // The end-of-text lookahead is (?![\s\S]), not $: under the m flag $ is
+  // any line end, which used to cut every multi-line entry down to its first
+  // line (issue #189).
+  const re = /^### Turn (\d+) — ([a-z-]+)\n\n([\s\S]*?)(?=\n### Turn |\s*(?![\s\S]))/gm;
   let m;
   while ((m = re.exec(text))) {
     entries.push({ turn: Number(m[1]), speaker: m[2], text: m[3].trim() });

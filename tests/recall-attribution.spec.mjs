@@ -6,9 +6,10 @@ import path from "node:path";
 import yaml from "js-yaml";
 import { normalizeDomainYamlDoc } from "./evals/lib/groundTruthModel.mjs";
 import {
-  attributeSnapshot, parseAppliedYaml, unionOfCommitted, parseConversationLogFull, attributionTransitions, normalizeTokens,
+  attributeSnapshot, parseAppliedYaml, unionOfCommitted, attributionTransitions, normalizeTokens,
 } from "./evals/lib/recallAttribution.mjs";
 import { attributeRun } from "./evals/attribute-recall.mjs";
+import { parseConversationLog } from "./evals/lib/reportGenerator.mjs";
 
 // Issue #182's per-item recall attribution: every gold item a snapshot
 // missed gets exactly one reason, decided in a fixed order from what the run
@@ -36,7 +37,7 @@ const toolCallsMd = (entries) => entries.map(({ turn, yaml: y }) => [
 
 const conversationMd = (entries) => ["# log", "", ...entries.flatMap(({ turn, speaker, text }) => [`### Turn ${turn} — ${speaker}`, "", text, ""])].join("\n");
 
-const LOG = parseConversationLogFull(conversationMd([
+const LOG = parseConversationLog(conversationMd([
   { turn: 1, speaker: "persona", text: "We run boilers.\nEach boiler feeds a heating valve, and we track the flow rate of a boiler." },
   { turn: 2, speaker: "app-assistant", text: "Noted. Is there a pump?" },
   { turn: 3, speaker: "persona", text: "Yes, pumps. And an expansion tank sits on the loop." },
@@ -62,7 +63,7 @@ relationships:
   - { name: connectsTo, from: Boiler, to: HeatingValve }
 `;
 
-test("the full log parser keeps every line of an entry", () => {
+test("the shared log parser keeps every line of an entry (#189)", () => {
   assert.equal(LOG[0].text, "We run boilers.\nEach boiler feeds a heating valve, and we track the flow rate of a boiler.");
   assert.equal(LOG.length, 5);
 });

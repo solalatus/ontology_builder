@@ -10,14 +10,15 @@
 import fs from "node:fs";
 import path from "node:path";
 import { loadGroundTruthModel, resolveDomainYamlPath } from "./lib/groundTruthModel.mjs";
-import { attributeSnapshot, parseAppliedYaml, attributionTransitions, parseConversationLogFull } from "./lib/recallAttribution.mjs";
+import { parseConversationLog } from "./lib/reportGenerator.mjs";
+import { attributeSnapshot, parseAppliedYaml, attributionTransitions } from "./lib/recallAttribution.mjs";
 
 const readIf = (p) => (fs.existsSync(p) ? fs.readFileSync(p, "utf8") : null);
 const readJsonIf = (p) => { const t = readIf(p); return t ? JSON.parse(t) : null; };
 
 export function attributeRun(runDir, domain) {
   const groundTruth = loadGroundTruthModel({ format: "domain-yaml", path: resolveDomainYamlPath(domain) });
-  const log = parseConversationLogFull(readIf(path.join(runDir, "conversation-log.md")) || "");
+  const log = parseConversationLog(readIf(path.join(runDir, "conversation-log.md")) || "");
   const applied = parseAppliedYaml(readIf(path.join(runDir, "tool-calls.md")) || "");
   const snapshotsDir = path.join(runDir, "snapshots");
   const labels = fs.existsSync(snapshotsDir) ? fs.readdirSync(snapshotsDir).filter((l) => fs.existsSync(path.join(snapshotsDir, l, "recovered-model.yaml"))).sort() : [];

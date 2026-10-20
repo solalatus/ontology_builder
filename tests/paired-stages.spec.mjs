@@ -73,7 +73,6 @@ function pageStageController(page, snapshots, options = {}) {
   return createStageController({
     captureSnapshot: async (label, { turn }) => { const doc = await exportDoc(); snapshots.push({ label, turn, doc }); return doc; },
     readModel: exportDoc,
-    setRenameTool: (on) => page.evaluate((v) => window.__kg.agent.setRenameToolEnabled(v), on),
     renameLog: () => page.evaluate(() => window.__kg.agent.state.renameLog),
     ...options,
   });
@@ -116,14 +115,6 @@ test("one run yields snapshots A, B and C at the stage boundaries, the sweep rea
     assert.equal(result.harnessMessages[2].text, STAGE_TEXTS.en.sweepCloseout);
     assert.equal(result.harnessMessages[3].text, STAGE_TEXTS.en.naming);
     assert.ok(result.log.some((e) => e.speaker === "harness"));
-
-    // The rename tool is offered in the naming pass only.
-    const offered = interviewer.requests.map((b) => (b.tools || []).some((t) => t.function.name === "rename_ontology_elements"));
-    const firstNaming = interviewer.requests.findIndex((b) => b.messages[b.messages.length - 1].content === STAGE_TEXTS.en.naming);
-    assert.ok(firstNaming > 0);
-    assert.ok(offered.slice(0, firstNaming).every((x) => !x), "not before the naming pass");
-    assert.ok(offered.slice(firstNaming).every((x) => x), "throughout the naming pass");
-    assert.equal(await page.evaluate(() => window.__kg.agent.state.renameToolEnabled), false, "withdrawn again at the end");
 
     const s = result.stages;
     assert.equal(s.sweepRounds.length, 2);
@@ -327,4 +318,52 @@ test("the block driver's settings are the design note's, and it adds up money sp
   } finally {
     fs.rmSync(root, { recursive: true, force: true });
   }
+});
+
+// --- Issue #188: a sign-off that names unfinished phases is not a finished interview ---
+
+test("an incomplete sign-off is never 'finished': the classifier is not even asked", async () => {
+  const { appearsFinished, looksLikeIncompleteSignOff } = await import("./evals/lib/conversationOrchestrator.mjs");
+  // The real message that ended #182's block-2 brick-hvac run-03 in Phase 3.
+  const cutShort = "Take care. The model remains **known-incomplete**: four accepted classes have no documented relationships, and properties, constraints, rules, the five actions, the domain-expansion pass, and final validation remain unfinished.";
+  const earlier = "The decision-bearing properties, rules, and five actions have not yet been modeled, and final validation has not been run.";
+  // Genuine wrap-ups list content gaps, never unfinished phases.
+  const genuine = "Validation summary: every class has a meaning sentence; the expansion pass was made. Still thin: one trigger is structurally adjacent but not yet modeled as a true causation rule. The model is being left known-incomplete on these items: no verified assignment source.";
+  assert.equal(looksLikeIncompleteSignOff(cutShort), true);
+  assert.equal(looksLikeIncompleteSignOff(earlier), true);
+  assert.equal(looksLikeIncompleteSignOff(genuine), false);
+  let asked = 0;
+  const chat = async () => { asked++; return { text: JSON.stringify({ phase: "final wrap-up", finished: true }) }; };
+  assert.equal(await appearsFinished(cutShort, { chat }), false);
+  assert.equal(asked, 0);
+  assert.equal(await appearsFinished(genuine, { chat }), true, "a genuine wrap-up still goes to the classifier");
+});
+
+test("a run whose interviewer signs off with phases unfinished ends as interview_ended_incomplete, with no snapshot A", async () => {
+  await withPage(async (page) => {
+    await connect(page);
+    let n = 0;
+    const responses = [];
+    page.route(CHAT_URL, (route) => {
+      n++;
+      const text = n === 1 ? "What does the agent need to answer first?"
+        : n === 2 ? "Understood. We'll leave this as a known-incomplete first pass: properties, rules and actions have not yet been modeled, and final validation has not been run."
+        : "Take care.";
+      const body = asChatCompletion({ text });
+      responses.push({ status: 200, body });
+      route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(body) });
+    });
+    const harness = stubHarnessChat();
+    const snapshots = [];
+    const chat = async (messages, model, extraBody) => (/You judge a single message/.test(messages[0].content)
+      ? harness.chat(messages, model, extraBody)
+      : { text: "Take care.", usage: { prompt_tokens: 10, completion_tokens: 2 } });
+    const result = await runOntologyRecoveryConversation({
+      page, apiKey: "unused", chat, installRelay: () => responses,
+      maxTurns: 20, wallClockMs: 5 * 60 * 1000, appTurnTimeoutMs: 20000,
+      stageController: pageStageController(page, snapshots),
+    });
+    assert.equal(result.stoppedReason, "interview_ended_incomplete");
+    assert.deepEqual(snapshots, [], "a cut-short interview is never taken as snapshot A");
+  });
 });

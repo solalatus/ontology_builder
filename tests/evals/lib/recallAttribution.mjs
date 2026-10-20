@@ -46,21 +46,6 @@ export function normalizeTokens(text) {
 
 const phrase = (text) => ` ${normalizeTokens(text).join(" ")} `;
 
-/**
- * conversation-log.md back into { turn, speaker, text } entries, every line of
- * each entry. reportGenerator.mjs's parseConversationLog keeps only the first
- * line of a multi-line entry (its end-of-text lookahead is `\n*$` under the m
- * flag, which matches at any line end); two committed reports pin numbers
- * computed with it, so it is left as it is and this reads the whole text.
- */
-export function parseConversationLogFull(text) {
-  const entries = [];
-  const re = /^### Turn (\d+) — ([a-z-]+)\n\n([\s\S]*?)(?=\n### Turn |\s*(?![\s\S]))/gm;
-  let m;
-  while ((m = re.exec(String(text || "")))) entries.push({ turn: Number(m[1]), speaker: m[2], text: m[3].trim() });
-  return entries;
-}
-
 /** Every apply_ontology_yaml argument in a tool-calls.md, with its turn. */
 export function parseAppliedYaml(toolCallsMd) {
   const out = [];
@@ -132,7 +117,7 @@ export function semanticMatchedGoldIds(semanticMatches) {
  *   groundTruth     the scorer's normalized gold model
  *   snapshotYaml    the snapshot's recovered-model.yaml text
  *   turn            the snapshot's turn (conversation and commits after it are ignored)
- *   log             [{ turn, speaker, text }] (parseConversationLogFull's output)
+ *   log             [{ turn, speaker, text }] (reportGenerator.mjs's parseConversationLog)
  *   applied         parseAppliedYaml's output
  *   semanticMatches the snapshot's semantic-matches.json body, or null
  */

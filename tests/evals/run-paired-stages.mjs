@@ -26,17 +26,26 @@ export const RESULTS_ROOT = path.join(ROOT, "ontology_translation", "results", "
 export const BLOCKS = {
   1: { dir: "block-1-medium", effort: "medium" },
   2: { dir: "block-2-high", effort: "high" },
+  // Issue #187's measurement: the shipped app after #187/#188 (naming
+  // question in the prompt, rename tool, default effort `high`), interview
+  // only, snapshot A at the wrap-up; no effort is passed, so the app's own
+  // default is what runs. Compared against block 1's snapshot A.
+  187: {
+    root: path.join(ROOT, "ontology_translation", "results", "default-change-187"), dir: "treatment", effort: null,
+    env: { ONTOLOGY_EVAL_COVERAGE_SWEEP: "", ONTOLOGY_EVAL_NAMING_PASS: "", ONTOLOGY_EVAL_SNAPSHOT_AT_WRAPUP: "1" },
+  },
 };
 
 // Interleaved, so a block stopped early still has both domains.
 export const DEFAULT_RUNS = ["run-01", "run-02", "run-03"].flatMap((r) => [`fibo-loans:${r}`, `brick-hvac:${r}`]);
 
 // The protocol's fixed settings (DESIGN.md, "Fixed for every run").
-export function protocolEnv(effort) {
+export function protocolEnv(effort, overrides = {}) {
   return {
     LLM_PROVIDER: "azure",
     LLM_MODEL: "gpt-6-sol",
-    EVAL_REASONING_EFFORT: effort,
+    // Empty means "not passed": the app's own default effort runs.
+    EVAL_REASONING_EFFORT: effort || "",
     ONTOLOGY_EVAL_COVERAGE_SWEEP: "1",
     ONTOLOGY_EVAL_NAMING_PASS: "1",
     ONTOLOGY_EVAL_SWEEP_MAX_ROUNDS: "3",
@@ -44,6 +53,7 @@ export function protocolEnv(effort) {
     ONTOLOGY_EVAL_MAX_TURNS: "300",
     ONTOLOGY_EVAL_APP_TURN_TIMEOUT_SEC: "600",
     EVAL_RUN_COST_CAP_USD: "30",
+    ...overrides,
   };
 }
 
@@ -96,10 +106,11 @@ async function main() {
     return hit ? hit.split("=").slice(1).join("=") : fallback;
   };
   const block = BLOCKS[arg("block", "")];
-  if (!block) { console.error("Usage: node tests/evals/run-paired-stages.mjs --block=1|2 [--runs=domain:run-id,...] [--budget=USD]"); process.exit(1); }
+  if (!block) { console.error("Usage: node tests/evals/run-paired-stages.mjs --block=1|2|187 [--runs=domain:run-id,...] [--budget=USD]"); process.exit(1); }
   const runs = arg("runs", DEFAULT_RUNS.join(",")).split(",").map((s) => s.split(":"));
   const budget = Number(arg("budget", "200"));
-  const blockDir = path.join(RESULTS_ROOT, block.dir);
+  const resultsRoot = block.root || RESULTS_ROOT;
+  const blockDir = path.join(resultsRoot, block.dir);
   fs.mkdirSync(blockDir, { recursive: true });
   const logPath = path.join(blockDir, "block.log");
   const log = (line) => {
@@ -107,11 +118,11 @@ async function main() {
     console.log(stamped);
     fs.appendFileSync(logPath, `${stamped}\n`);
   };
-  const env = protocolEnv(block.effort);
+  const env = protocolEnv(block.effort, block.env);
 
   for (const [domain, runId] of runs) {
-    const spent = spentUsd();
-    if (spent >= budget) { log(`STOP: $${spent.toFixed(2)} spent across paired-stages/, budget $${budget} reached`); process.exitCode = 4; return; }
+    const spent = spentUsd(resultsRoot);
+    if (spent >= budget) { log(`STOP: $${spent.toFixed(2)} spent under ${path.relative(ROOT, resultsRoot)}/, budget $${budget} reached`); process.exitCode = 4; return; }
     log(`START ${block.dir} ${domain}/${runId} (spent so far $${spent.toFixed(2)} of $${budget})`);
     const code = await runOne({ domain, runId, blockDir, env, log });
     const prov = (() => { try { return JSON.parse(fs.readFileSync(path.join(blockDir, runId, domain, "provenance.json"), "utf8")); } catch { return null; } })();
@@ -120,7 +131,7 @@ async function main() {
       + `cost=$${prov && typeof prov.totalCostUsd === "number" ? prov.totalCostUsd.toFixed(2) : "?"} turns=${prov && prov.turnsUsed}`);
     if (!clean) { log(`STOP: ${domain}/${runId} did not end cleanly; not starting another run`); process.exitCode = 5; return; }
   }
-  log(`BLOCK DONE ${block.dir}: $${spentUsd().toFixed(2)} spent across paired-stages/`);
+  log(`BLOCK DONE ${block.dir}: $${spentUsd(resultsRoot).toFixed(2)} spent under ${path.relative(ROOT, resultsRoot)}/`);
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) await main();

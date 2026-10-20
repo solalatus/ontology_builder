@@ -85,21 +85,30 @@ computed with the same tool re-run against both directories:
 
 | Arm | Total interviewer-first | Per-run range | Matched (scored) | Persona-first (leak audit) |
 |---|---|---|---|---|
-| itops (3 runs, this control arm) | 10 | 0-7 | 9 (90%) | 0 |
-| 4 published domains (12 runs) | 31 | 0-8 | 31 (100%) | 0 |
+| itops (3 runs, this control arm) | 167 | 48-61 | 159 (95%) | 0 |
+| 4 published domains (12 runs) | 330 | 4-46 | 314 (95%) | 0 |
 
-**The interviewer-first counts do NOT show a stark separation.** itops's
-per-run range (0-7) sits inside the published domains' own range (0-8), not
-an order of magnitude below it. This directly revises PR #136's own ad hoc
-figures for the published-domain side (330 total, range 4-46/run) -- no
-script for that computation was ever committed anywhere in this repo's
-history (confirmed via `git log --all --grep="interviewer-first"`), so it
-was unreproducible; `tests/evals/interviewer-prior-knowledge-report.mjs` is
-now the first actually-runnable, tested implementation of this measurement,
-and re-running it against the same 12 published-domain transcripts produces
-31, not 330. See `ontology_translation/TODO.md`'s dated entry for the full
-correction and the reasoning that ruled out several benign explanations for
-the gap without fully resolving it.
+**Correction (2026-10-20, issue #189).** This table first reported 10 (itops) and
+31 (published domains), and the text below it called those figures a
+correction of PR #136's 330. Both small numbers were artifacts of a parser
+bug: `parseConversationLog` kept only the first line of every transcript
+entry, so almost every identifier said later in a message was never seen.
+Read in full, the tool reproduces PR #136's published-domain total exactly
+(330, range 4-46/run). #136's matched count (162, ~30%) is still not
+reproduced: this tool finds 314 (95%).
+
+**The interviewer-first counts do not separate the arms in the direction
+pretraining contamination predicts.** itops is the hand-authored domain the
+interviewer cannot have memorized, and it has *more* interviewer-first raw
+identifiers per run (48-61) than any published domain (4-46). itops is also
+2 to 6 times larger (see below), so raw counts are not a like-for-like
+comparison, but nothing here suggests the published domains get extra
+interviewer-first vocabulary from memory. Interviewer-first introductions
+look like convergent naming: the interviewer coins the obvious camelCase
+name for something the expert described, and it coincides with gold. The
+earlier version of this paragraph reached the same reading from the wrong
+numbers ("no stark separation"). See `ontology_translation/TODO.md`'s dated
+entries for the history.
 
 ## The domain-size confound
 
@@ -129,8 +138,8 @@ at its own natural stopping point, not "nothing left to do"). A residual
 domain-size effect and a pretraining-contamination effect would produce the
 same directional result here (itops scoring lower), and this arm alone
 cannot fully separate them. The interviewer-first counts above argue
-mildly against pretraining being the dominant remaining effect (no stark
-separation from the published domains), which leaves domain size/density as
+against pretraining being the dominant remaining effect (the memorization-proof
+domain has as many interviewer-first identifiers as the published ones, or more), which leaves domain size/density as
 the more likely primary driver of what's left, but this is a read of the
 evidence, not a proof -- a same-size-and-structure comparison is needed to
 actually isolate the variable.

@@ -2,10 +2,9 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { withPage } from "./lib/page.mjs";
 
-// Issue #180's naming pass: the eval-only rename_ontology_elements tool the
-// interviewer is offered while agentState.renameToolEnabled is set (by
-// tests/evals/lib/pairedStages.mjs only). Off by default, so the shipped tool
-// list is unchanged; renames classes, relationships and properties in place,
+// rename_ontology_elements (issue #180's naming pass; on every interview since
+// #187, whose prompt asks for the expert's own term at confirmation time):
+// renames classes, relationships and properties in place,
 // keeps previous class and relationship names as aliases, can turn a
 // relationship round, does not draw on the per-turn edit budget, and folds
 // into the turn's one undo step. Mocked: no key, no network.
@@ -71,28 +70,12 @@ const graph = (page) => page.evaluate(() => {
   };
 });
 
-test("the rename tool is not offered unless the eval switch is on", async () => {
+test("every interview request offers the rename tool, after the other three", async () => {
   await withPage(async (page) => {
     await connect(page);
-    const requests = mockChatSequence(page, [textBody("ok"), textBody("ok")]);
+    const requests = mockChatSequence(page, [textBody("ok")]);
     await send(page, "hello");
-    assert.deepEqual(toolNames(requests[0]), ["apply_ontology_yaml", "get_graph_state", "remove_ontology_elements"]);
-    await page.evaluate(() => window.__kg.agent.setRenameToolEnabled(true));
-    await send(page, "hello again");
-    assert.deepEqual(toolNames(requests[1]), ["apply_ontology_yaml", "get_graph_state", "remove_ontology_elements", "rename_ontology_elements"]);
-  });
-});
-
-test("a rename call is ignored while the switch is off", async () => {
-  await withPage(async (page) => {
-    await connect(page);
-    await page.evaluate((y) => window.__kg.formats.commitYamlImport(y, "merge"), SEED);
-    mockChatSequence(page, [
-      toolBody([toolCall("r1", "rename_ontology_elements", { renames: [{ kind: "class", from: "Sink", to: "Drain" }] })]),
-      textBody("done"),
-    ]);
-    await send(page, "rename");
-    assert.ok((await graph(page)).nodes.some((n) => n.label === "Sink"));
+    assert.deepEqual(toolNames(requests[0]), ["apply_ontology_yaml", "get_graph_state", "remove_ontology_elements", "rename_ontology_elements"]);
   });
 });
 
@@ -100,7 +83,6 @@ test("classes, relationships and properties are renamed in place in one batch; p
   await withPage(async (page) => {
     await connect(page);
     await page.evaluate((y) => window.__kg.formats.commitYamlImport(y, "merge"), SEED);
-    await page.evaluate(() => window.__kg.agent.setRenameToolEnabled(true));
     const historyBefore = await page.evaluate(() => window.__kg.history.past.length);
     const requests = mockChatSequence(page, [
       toolBody([
@@ -144,7 +126,6 @@ test("a relationship stated the other way round is re-recorded in the expert's d
   await withPage(async (page) => {
     await connect(page);
     await page.evaluate((y) => window.__kg.formats.commitYamlImport(y, "merge"), SEED);
-    await page.evaluate(() => window.__kg.agent.setRenameToolEnabled(true));
     mockChatSequence(page, [
       toolBody([toolCall("r1", "rename_ontology_elements", { renames: [
         { kind: "relationship", from: "connectsTo", to: "receivesFrom", source: "Source", target: "Sink", reverse: true },
@@ -160,7 +141,6 @@ test("a rename onto an existing name is refused and changes nothing", async () =
   await withPage(async (page) => {
     await connect(page);
     await page.evaluate((y) => window.__kg.formats.commitYamlImport(y, "merge"), SEED);
-    await page.evaluate(() => window.__kg.agent.setRenameToolEnabled(true));
     const historyBefore = await page.evaluate(() => window.__kg.history.past.length);
     const requests = mockChatSequence(page, [
       toolBody([toolCall("r1", "rename_ontology_elements", { renames: [{ kind: "class", from: "Sink", to: "Source" }] })]),

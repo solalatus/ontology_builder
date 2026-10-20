@@ -720,7 +720,7 @@ test("Azure: a model that refuses tools with reasoning on Chat Completions gets 
     assert.equal(first.headers["api-key"], "azure-secret");
     assert.equal(first.body.model, "sol", "the deployment name as model");
     assert.equal(first.body.store, false);
-    assert.deepEqual(first.body.reasoning, { effort: "medium" }, "reasoning kept on, at the explicit default effort (#181), never switched off");
+    assert.deepEqual(first.body.reasoning, { effort: "high" }, "reasoning kept on, at the explicit default effort (#181, `high` since #187), never switched off");
     assert.match(first.body.prompt_cache_key, /^kg-agent-/);
     assert.ok(first.body.tools.every((t) => t.type === "function" && t.name && !t.function), "tools in the Responses shape");
     assert.equal(first.body.input[0].role, "system");
@@ -736,7 +736,7 @@ test("Azure: a model that refuses tools with reasoning on Chat Completions gets 
     await page.evaluate(() => window.__kg.consistency.llm.run());
     assert.equal(chats.length, 2);
     assert.equal(chats[1].body.tools, undefined);
-    assert.equal(chats[1].body.reasoning_effort, "medium", "the same explicit effort on Chat Completions");
+    assert.equal(chats[1].body.reasoning_effort, "high", "the same explicit effort on Chat Completions");
     assert.equal(responses.length, 2);
 
     const usageLog = await page.evaluate(() => window.__kg.agent.state.usage);

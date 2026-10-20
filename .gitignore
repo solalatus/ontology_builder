@@ -93,3 +93,6 @@ ontology_translation/results/multi-domain*/*/*/checkpoint/
 ontology_translation/results/paired-stages/*/*/*/progress.json
 ontology_translation/results/paired-stages/*/*/*/checkpoint/
 ontology_translation/results/paired-stages/*/block.log
+ontology_translation/results/default-change-187/*/*/*/progress.json
+ontology_translation/results/default-change-187/*/*/*/checkpoint/
+ontology_translation/results/default-change-187/*/block.log

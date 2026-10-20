@@ -8,9 +8,10 @@
 //   interview --A--> coverage sweep (#179), to a fixpoint --B--> naming pass (#180) --C--> end
 //
 // so each run yields the sweep effect (B - A), the naming effect (C - B) and
-// both (C - A) as paired differences. The production prompt is untouched;
-// the only app-side difference is the eval-only rename tool, offered during
-// the naming pass alone (index.html, RENAME_ONTOLOGY_ELEMENTS_TOOL).
+// both (C - A) as paired differences. The naming pass records renames with
+// rename_ontology_elements (index.html, RENAME_ONTOLOGY_ELEMENTS_TOOL),
+// which #182 offered during the naming pass only and #187 made part of every
+// interview.
 //
 // A stage ends when the interviewer closes it with its ledger line (asked
 // for in the stage text, and detected here without a model call), when the
@@ -123,7 +124,6 @@ export const DEFAULT_STAGE_TURN_CAPS = { sweepRound: 45, sweepCloseout: 15, nami
  *
  *   captureSnapshot(label, { turn, stage }) -> parsed YAML doc of the model at that moment
  *   readModel()                            -> parsed YAML doc of the model now
- *   setRenameTool(on)                      -> offers / withdraws the eval-only rename tool
  *   renameLog()                            -> the app's log of renames made (agentState.renameLog)
  */
 export function createStageController({
@@ -134,7 +134,6 @@ export function createStageController({
   lang = "en",
   captureSnapshot,
   readModel,
-  setRenameTool = async () => {},
   renameLog = async () => [],
   log = () => {},
 }) {
@@ -168,7 +167,6 @@ export function createStageController({
   }
 
   async function startNaming(turn) {
-    await setRenameTool(true);
     return enter("naming", turn, texts.naming);
   }
 
@@ -218,7 +216,6 @@ export function createStageController({
       namingLedger = parseLedger("naming", appText);
       namingRenames = await renameLog();
       record({ type: "naming_ended", turn, endedBy: how });
-      await setRenameTool(false);
       await snapshot("C", turn);
       stage = "done";
       return { stop: true, stoppedReason: "stages_complete" };

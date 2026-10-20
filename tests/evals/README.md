@@ -652,8 +652,16 @@ none is run by `node --test tests/evals/*.eval.spec.mjs`:
   - Testing: `tests/lib/mockAzureFetch.mjs` stands in for the Azure resource,
     so the runner can be dry-run end to end with no key
     (`tests/paired-stages-runner-dry-run.spec.mjs`).
-  - App side: the only change is an eval-only rename tool, offered during the
-    naming pass alone.
+  - App side: the naming pass renames through `rename_ontology_elements`,
+    which #182 offered during the naming pass alone and #187 made part of
+    every interview.
+- **`ontology_translation/results/default-change-187/DESIGN.md`**: the single
+  measurement of #187/#188's shipped change: the naming question at
+  confirmation time, the rule against stopping mid-interview, and default
+  effort `high`. Treatment runs come from `run-paired-stages.mjs --block=187`
+  (interview only; `ONTOLOGY_EVAL_SNAPSHOT_AT_WRAPUP=1` takes snapshot A
+  with no stages). They are compared against #182's block 1 snapshot A by
+  `analyze-default-change.mjs`.
 
 All of these are evaluation-only with respect to the shipped app. The production
 interviewer's system prompt and tool surface are pinned by
