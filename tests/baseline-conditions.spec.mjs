@@ -118,3 +118,15 @@ test("an unknown condition, or a condition with stages on, is refused before any
   await assert.rejects(runner(["tests/evals/run-multi-domain-benchmark.mjs", "--domain=brick-hvac", "--run=x", "--resultsDir=/nonexistent"], { ONTOLOGY_EVAL_CONDITION: "b9" }), /Unknown ONTOLOGY_EVAL_CONDITION/);
   await assert.rejects(runner(["tests/evals/run-multi-domain-benchmark.mjs", "--domain=brick-hvac", "--run=x", "--resultsDir=/nonexistent"], { ONTOLOGY_EVAL_CONDITION: "b3-no-commit", ONTOLOGY_EVAL_NAMING_PASS: "1" }), /runs to the wrap-up only/);
 });
+
+test("the pre-registered reading: beats beyond the larger stdev, level within it, ahead below it; the report renders with conditions missing", async () => {
+  const { reading, summarize, renderReport, CONDITIONS } = await import("./evals/analyze-baselines.mjs");
+  assert.equal(reading({ mean: 0.8, sd: 0.05 }, { mean: 0.6, sd: 0.1 }), "beats");
+  assert.equal(reading({ mean: 0.8, sd: 0.05 }, { mean: 0.75, sd: 0.1 }), "level");
+  assert.equal(reading({ mean: 0.6, sd: 0.02 }, { mean: 0.7, sd: 0.05 }), "ahead");
+  assert.equal(reading({ mean: 0.6, sd: 0.02 }, { mean: null, sd: null }), null);
+  const report = renderReport(summarize(fs.mkdtempSync(path.join(os.tmpdir(), "baselines-empty-"))));
+  assert.deepEqual(CONDITIONS.map((c) => c.id), ["interactive", "b1-one-shot", "b2-generic-interviewer", "b3-no-commit"]);
+  assert.match(report, /\| fibo-loans \| 0\.680 ± 0\.016 \| — \| — \| — \|/);
+  assert.match(report, /## Pre-registered reading/);
+});
