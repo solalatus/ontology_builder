@@ -34,6 +34,14 @@ export const BLOCKS = {
     root: path.join(ROOT, "ontology_translation", "results", "default-change-187"), dir: "treatment", effort: null,
     env: { ONTOLOGY_EVAL_COVERAGE_SWEEP: "", ONTOLOGY_EVAL_NAMING_PASS: "", ONTOLOGY_EVAL_SNAPSHOT_AT_WRAPUP: "1" },
   },
+  // The final scores: the same shipped configuration as block 187, on the
+  // three domains #182 and #187 did not run. fibo-loans and brick-hvac come
+  // from block 187's treatment, which is this exact app state.
+  final: {
+    root: path.join(ROOT, "ontology_translation", "results", "final-scores"), dir: "runs", effort: null,
+    env: { ONTOLOGY_EVAL_COVERAGE_SWEEP: "", ONTOLOGY_EVAL_NAMING_PASS: "", ONTOLOGY_EVAL_SNAPSHOT_AT_WRAPUP: "1" },
+    runs: ["run-01", "run-02", "run-03"].flatMap((r) => [`iof-maintenance:${r}`, `iof-supply-chain:${r}`, `itops:${r}`]),
+  },
 };
 
 // Interleaved, so a block stopped early still has both domains.
@@ -106,8 +114,8 @@ async function main() {
     return hit ? hit.split("=").slice(1).join("=") : fallback;
   };
   const block = BLOCKS[arg("block", "")];
-  if (!block) { console.error("Usage: node tests/evals/run-paired-stages.mjs --block=1|2|187 [--runs=domain:run-id,...] [--budget=USD]"); process.exit(1); }
-  const runs = arg("runs", DEFAULT_RUNS.join(",")).split(",").map((s) => s.split(":"));
+  if (!block) { console.error("Usage: node tests/evals/run-paired-stages.mjs --block=1|2|187|final [--runs=domain:run-id,...] [--budget=USD]"); process.exit(1); }
+  const runs = arg("runs", (block.runs || DEFAULT_RUNS).join(",")).split(",").map((s) => s.split(":"));
   const budget = Number(arg("budget", "200"));
   const resultsRoot = block.root || RESULTS_ROOT;
   const blockDir = path.join(resultsRoot, block.dir);
