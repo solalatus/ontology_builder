@@ -136,3 +136,18 @@ considering for any future benchmark redesign: either weight the macro
 composite by each domain's own gold-element counts, or treat
 `recoveryEffectivenessScoped` (the practical-scope variant) as the primary
 comparator on domains below some minimum gold-property count.
+
+---
+
+## 2026-10-20 — Final scores at the shipped configuration, and a refinement of the interviewer-first count
+
+**The result** (`ontology_translation/results/final-scores/`, 3 interviews per domain, all 15 clean, `gpt-6-sol` at default effort `high`, the #187/#188 prompt): composite 0.781 macro over the four published domains (iof-maintenance 0.911, brick-hvac 0.811, iof-supply-chain 0.721, fibo-loans 0.680) and 0.577 on the unpublished itops control; 0.740 over all five. Precision is 0.89–1.00 almost everywhere; what is missing is class recall on the large domains (0.45–0.49), which #182 traced to the competency-question inclusion test rather than to nobody asking. The score falls with gold size (38 to 287 elements), and itops is both the largest and the only unpublished domain, so one control cannot separate the two.
+
+**Methods note: the expert's own words count.** The interviewer-first measure (`tests/evals/lib/interviewerPriorKnowledge.mjs`) asks whether the interviewer wrote a gold identifier before the expert said it. Until 2026-10-20 it matched raw identifiers only. That credited the interviewer whenever it was first to *write* a term in camelCase, including the expert's own phrase written back: "failure mode code" became `FailureModeCode`. The measure then partly reflected the interviewer's formatting habit rather than its prior knowledge.
+
+It now credits the expert's plain-words mentions made before the interviewer's first raw use. The leak guard (persona-first) is unchanged. Recounted offline:
+- the 12 published-domain runs of `multi-domain/`: 80, previously 330;
+- the earlier itops control: 32, previously 167;
+- the final-scores runs: 0–4 per run on the published domains and 1–10 on itops.
+
+A hand check of a sample of the moved terms found each to be the expert's own phrase, most of them from the opening competency questions. For the paper, report the corrected measure. The unpublished domain shows the most interviewer-first terms, which is the opposite of what memorization would predict.

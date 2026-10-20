@@ -1,0 +1,39 @@
+{
+  "fullDomain": {
+    "judgments": {
+      "classes": [
+        {
+          "goldId": "DispositionToFail",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "DispositionToExhibitUndesirableBehavior",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "relationships": [],
+      "properties": [],
+      "valueFidelity": [
+        {
+          "id": "MaintenanceState.stateCategory",
+          "semanticFidelity": 1
+        }
+      ]
+    },
+    "rawResponses": {
+      "classes": "1: NO MATCH -- An asset is an item, not a disposition to fail.\n2: NO MATCH -- An asset is an item, not a disposition to exhibit undesirable behavior.",
+      "valueFidelity": "1: 100 -- Identical states and distinctions."
+    }
+  },
+  "scoped": {
+    "judgments": {
+      "classes": [],
+      "relationships": [],
+      "properties": [],
+      "valueFidelity": []
+    },
+    "rawResponses": {}
+  }
+}

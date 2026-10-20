@@ -127,3 +127,12 @@ test("#187's default-change criteria: non-regression, naming carried into the pr
     assert.equal(c2["4. the default effort that ran is high, every run inside the caps"].met, false);
   } finally { fs.rmSync(root, { recursive: true, force: true }); }
 });
+
+test("final scores: every domain listed, published four before the contamination control, and the report renders with missing domains", async () => {
+  const { DOMAINS, summarize, renderReport } = await import("./evals/analyze-final-scores.mjs");
+  assert.deepEqual(DOMAINS.map((d) => d.id), ["fibo-loans", "brick-hvac", "iof-maintenance", "iof-supply-chain", "itops"]);
+  const report = renderReport(summarize());
+  for (const d of DOMAINS) assert.match(report, new RegExp(`\\| ${d.id} \\|`));
+  assert.match(report, /macro mean, all five/);
+  assert.match(report, /## Contamination check/);
+});

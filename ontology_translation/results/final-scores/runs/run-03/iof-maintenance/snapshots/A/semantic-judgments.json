@@ -1,0 +1,76 @@
+{
+  "fullDomain": {
+    "judgments": {
+      "classes": [
+        {
+          "goldId": "OperatingState",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "DegradedState",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "DispositionToExhibitUndesirableBehavior",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "SupportingMaintenanceActivity",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "relationships": [
+        {
+          "goldId": "rel_3",
+          "recoveredId": "e2",
+          "verdict": "MATCH"
+        }
+      ],
+      "properties": [],
+      "valueFidelity": [
+        {
+          "id": "MaintenanceState.stateCategory",
+          "semanticFidelity": 1
+        }
+      ]
+    },
+    "rawResponses": {
+      "classes": "1: NO MATCH -- An asset is a physical item, not an operating state.\n2: NO MATCH -- An asset is not a degraded state.\n3: NO MATCH -- An asset is not a disposition to exhibit undesirable behavior.\n4: NO MATCH -- An asset is not a maintenance activity.",
+      "relationships": "1: MATCH 1 -- “Includes” expresses the same process-to-activity relationship as “has Activity.”",
+      "valueFidelity": "1: 100 -- Identical values and distinctions."
+    }
+  },
+  "scoped": {
+    "judgments": {
+      "classes": [
+        {
+          "goldId": "OperatingState",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "DegradedState",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "relationships": [
+        {
+          "goldId": "rel_3",
+          "recoveredId": "e2",
+          "verdict": "MATCH"
+        }
+      ],
+      "properties": [],
+      "valueFidelity": []
+    },
+    "rawResponses": {
+      "classes": "1: NO MATCH -- An asset is a physical item, not its operating state.\n2: NO MATCH -- A failure process may cause degradation but is not the degraded state.",
+      "relationships": "1: MATCH 1 -- “Includes” expresses that a maintenance process has maintenance activities."
+    }
+  }
+}

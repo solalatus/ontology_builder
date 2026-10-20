@@ -79,14 +79,26 @@ were unaffected by any of the three fixes on this real data (verified
 directly, not assumed) and are
 unchanged from the original figures.*
 
-Interviewer-first raw identifier introductions (the channel this control
-arm exists to measure -- see `tests/evals/lib/interviewerPriorKnowledge.mjs`),
-computed with the same tool re-run against both directories:
+Interviewer-first identifier introductions (the channel this control
+arm exists to measure -- see `tests/evals/lib/interviewerPriorKnowledge.mjs`):
+gold identifiers the interviewer wrote before the expert had said them,
+either as the identifier or in plain words. Computed with the same tool
+re-run against both directories:
 
 | Arm | Total interviewer-first | Per-run range | Matched (scored) | Persona-first (leak audit) |
 |---|---|---|---|---|
-| itops (3 runs, this control arm) | 167 | 48-61 | 159 (95%) | 0 |
-| 4 published domains (12 runs) | 330 | 4-46 | 314 (95%) | 0 |
+| itops (3 runs, this control arm) | 32 | 9-12 | 30 (94%) | 0 |
+| 4 published domains (12 runs) | 80 | 0-17 | 77 (96%) | 0 |
+
+**Correction (2026-10-20, the expert's own words).** Until this date the
+tool counted only raw identifiers, so it credited the interviewer whenever
+it was the first to *write* a term in camelCase -- including the expert's
+own "failure mode code" written back as `FailureModeCode`. That gave 167
+(itops, 48-61/run) and 330 (published, 4-46/run). An identifier whose words
+the expert said in plain language before the interviewer's first raw use
+now counts as the expert's. A hand check of a sample of the 250 terms this
+moved found each to be the expert's own phrase, most of them in the opening
+competency questions. The leak audit (persona-first) is unchanged.
 
 **Correction (2026-10-20, issue #189).** This table first reported 10 (itops) and
 31 (published domains), and the text below it called those figures a
@@ -99,16 +111,16 @@ reproduced: this tool finds 314 (95%).
 
 **The interviewer-first counts do not separate the arms in the direction
 pretraining contamination predicts.** itops is the hand-authored domain the
-interviewer cannot have memorized, and it has *more* interviewer-first raw
-identifiers per run (48-61) than any published domain (4-46). itops is also
-2 to 6 times larger (see below), so raw counts are not a like-for-like
-comparison, but nothing here suggests the published domains get extra
-interviewer-first vocabulary from memory. Interviewer-first introductions
-look like convergent naming: the interviewer coins the obvious camelCase
-name for something the expert described, and it coincides with gold. The
-earlier version of this paragraph reached the same reading from the wrong
-numbers ("no stark separation"). See `ontology_translation/TODO.md`'s dated
-entries for the history.
+interviewer cannot have memorized, and it has *more* interviewer-first
+identifiers per run (9-12, mean 10.7) than the published domains (0-17,
+mean 6.7). itops is also 2 to 6 times larger (see below), so raw counts are
+not a like-for-like comparison, but nothing here suggests the published
+domains get extra interviewer-first vocabulary from memory. What remains
+looks like convergent naming: the interviewer coins the obvious name for
+something the expert described, and it coincides with gold. Earlier
+versions of this paragraph reached the same reading from wrong numbers
+(issue #189, and the correction above). See `ontology_translation/TODO.md`'s
+dated entries for the history.
 
 ## The domain-size confound
 

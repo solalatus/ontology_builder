@@ -15,7 +15,8 @@
 // gold identifiers were introduced first by the INTERVIEWER rather than the
 // persona -- the channel #133's Finding A explicitly scoped out of its own
 // leak audit and PR #136's post-close audit first quantified ad hoc on the
-// 12-run re-run (330 total, 162 matched) -- plus how many of those ended up
+// 12-run re-run (330 total, 162 matched; 80 since the expert's plain-words
+// mentions count, see lib/interviewerPriorKnowledge.mjs) -- plus how many of those ended up
 // as a scored heuristic match. See tests/evals/lib/interviewerPriorKnowledge.mjs
 // for exactly what "first" and "matched" mean and their documented
 // approximations (property/relationship cross-referencing is existential,

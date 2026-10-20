@@ -1,0 +1,620 @@
+{
+  "generatedAt": "2026-10-20T20:54:48.774Z",
+  "domains": [
+    {
+      "id": "fibo-loans",
+      "source": "FIBO (published)",
+      "gold": {
+        "classes": 57,
+        "relationships": 31,
+        "properties": 49
+      },
+      "runs": [
+        {
+          "runId": "run-01",
+          "clean": true,
+          "turn": 96,
+          "row": {
+            "composite": 0.6618106779065683,
+            "scopedComposite": 0.5961712792619848,
+            "semanticComposite": 0.6618106779065683,
+            "classRecall": 0.40350877192982454,
+            "classPrecision": 1,
+            "classF1": 0.575,
+            "relRecall": 0.6774193548387096,
+            "relPrecision": 1,
+            "relF1": 0.8076923076923077,
+            "propRecall": 0.4489795918367347,
+            "propPrecision": 0.9166666666666666,
+            "propF1": 0.6027397260273972,
+            "semClassF1": 0.575,
+            "semRelF1": 0.8076923076923077,
+            "semPropF1": 0.6027397260273972,
+            "rulesF1": 0.7272727272727273,
+            "actionsF1": 1,
+            "valueFidelity": null,
+            "allowedValueLists": 0,
+            "classes": 23,
+            "relationships": 21,
+            "properties": 24
+          },
+          "contamination": {
+            "interviewerFirst": 0,
+            "personaFirst": 0,
+            "interviewerFirstIds": []
+          },
+          "cost": 1.959426
+        },
+        {
+          "runId": "run-02",
+          "clean": true,
+          "turn": 99,
+          "row": {
+            "composite": 0.6857300451941212,
+            "scopedComposite": 0.5552692921113974,
+            "semanticComposite": 0.6857300451941212,
+            "classRecall": 0.49122807017543857,
+            "classPrecision": 1,
+            "classF1": 0.6588235294117647,
+            "relRecall": 0.7419354838709677,
+            "relPrecision": 0.8518518518518519,
+            "relF1": 0.7931034482758621,
+            "propRecall": 0.46938775510204084,
+            "propPrecision": 0.8518518518518519,
+            "propF1": 0.6052631578947368,
+            "semClassF1": 0.6588235294117647,
+            "semRelF1": 0.7931034482758621,
+            "semPropF1": 0.6052631578947368,
+            "rulesF1": 0.16666666666666666,
+            "actionsF1": 1,
+            "valueFidelity": null,
+            "allowedValueLists": 1,
+            "classes": 28,
+            "relationships": 27,
+            "properties": 27
+          },
+          "contamination": {
+            "interviewerFirst": 0,
+            "personaFirst": 0,
+            "interviewerFirstIds": []
+          },
+          "cost": 2.2512868
+        },
+        {
+          "runId": "run-03",
+          "clean": true,
+          "turn": 96,
+          "row": {
+            "composite": 0.6910108604845447,
+            "scopedComposite": 0.5990066674061202,
+            "semanticComposite": 0.7144026733500418,
+            "classRecall": 0.47368421052631576,
+            "classPrecision": 1,
+            "classF1": 0.6428571428571429,
+            "relRecall": 0.6774193548387096,
+            "relPrecision": 0.8076923076923077,
+            "relF1": 0.7368421052631579,
+            "propRecall": 0.5306122448979592,
+            "propPrecision": 1,
+            "propF1": 0.6933333333333334,
+            "semClassF1": 0.6428571428571429,
+            "semRelF1": 0.8070175438596492,
+            "semPropF1": 0.6933333333333334,
+            "rulesF1": 0,
+            "actionsF1": 1,
+            "valueFidelity": null,
+            "allowedValueLists": 0,
+            "classes": 27,
+            "relationships": 26,
+            "properties": 26
+          },
+          "contamination": {
+            "interviewerFirst": 0,
+            "personaFirst": 0,
+            "interviewerFirstIds": []
+          },
+          "cost": 2.0222542000000003
+        }
+      ]
+    },
+    {
+      "id": "brick-hvac",
+      "source": "Brick (published)",
+      "gold": {
+        "classes": 39,
+        "relationships": 35,
+        "properties": 42
+      },
+      "runs": [
+        {
+          "runId": "run-01",
+          "clean": true,
+          "turn": 84,
+          "row": {
+            "composite": 0.7080368906455862,
+            "scopedComposite": 0.6106060606060605,
+            "semanticComposite": 0.8595520421607379,
+            "classRecall": 0.7692307692307693,
+            "classPrecision": 1,
+            "classF1": 0.8695652173913044,
+            "relRecall": 0.42857142857142855,
+            "relPrecision": 0.4838709677419355,
+            "relF1": 0.4545454545454545,
+            "propRecall": 0.6666666666666666,
+            "propPrecision": 1,
+            "propF1": 0.8,
+            "semClassF1": 0.8695652173913044,
+            "semRelF1": 0.909090909090909,
+            "semPropF1": 0.8,
+            "rulesF1": 0.15384615384615383,
+            "actionsF1": 1,
+            "valueFidelity": 1,
+            "allowedValueLists": 13,
+            "classes": 30,
+            "relationships": 31,
+            "properties": 28
+          },
+          "contamination": {
+            "interviewerFirst": 0,
+            "personaFirst": 0,
+            "interviewerFirstIds": []
+          },
+          "cost": 2.0225474
+        },
+        {
+          "runId": "run-02",
+          "clean": true,
+          "turn": 115,
+          "row": {
+            "composite": 0.8252499558381912,
+            "scopedComposite": 0.5835579514824797,
+            "semanticComposite": 0.9232891715244658,
+            "classRecall": 0.8974358974358975,
+            "classPrecision": 1,
+            "classF1": 0.945945945945946,
+            "relRecall": 0.6571428571428571,
+            "relPrecision": 0.696969696969697,
+            "relF1": 0.676470588235294,
+            "propRecall": 0.7619047619047619,
+            "propPrecision": 0.9696969696969697,
+            "propF1": 0.8533333333333334,
+            "semClassF1": 0.945945945945946,
+            "semRelF1": 0.9705882352941176,
+            "semPropF1": 0.8533333333333334,
+            "rulesF1": 0,
+            "actionsF1": 1,
+            "valueFidelity": 1,
+            "allowedValueLists": 18,
+            "classes": 35,
+            "relationships": 33,
+            "properties": 33
+          },
+          "contamination": {
+            "interviewerFirst": 0,
+            "personaFirst": 0,
+            "interviewerFirstIds": []
+          },
+          "cost": 3.0131416
+        },
+        {
+          "runId": "run-03",
+          "clean": true,
+          "turn": 101,
+          "row": {
+            "composite": 0.8983074796058715,
+            "scopedComposite": 0.6529390420899855,
+            "semanticComposite": 0.9272929868522484,
+            "classRecall": 0.8717948717948718,
+            "classPrecision": 1,
+            "classF1": 0.9315068493150686,
+            "relRecall": 0.8857142857142857,
+            "relPrecision": 0.9117647058823529,
+            "relF1": 0.8985507246376812,
+            "propRecall": 0.7619047619047619,
+            "propPrecision": 1,
+            "propF1": 0.8648648648648648,
+            "semClassF1": 0.9315068493150686,
+            "semRelF1": 0.9855072463768115,
+            "semPropF1": 0.8648648648648648,
+            "rulesF1": 0,
+            "actionsF1": 1,
+            "valueFidelity": 1,
+            "allowedValueLists": 17,
+            "classes": 34,
+            "relationships": 34,
+            "properties": 32
+          },
+          "contamination": {
+            "interviewerFirst": 0,
+            "personaFirst": 0,
+            "interviewerFirstIds": []
+          },
+          "cost": 2.5723968
+        }
+      ]
+    },
+    {
+      "id": "iof-maintenance",
+      "source": "IOF (published)",
+      "gold": {
+        "classes": 20,
+        "relationships": 13,
+        "properties": 5
+      },
+      "runs": [
+        {
+          "runId": "run-01",
+          "clean": true,
+          "turn": 99,
+          "row": {
+            "composite": 0.9487179487179488,
+            "scopedComposite": 0.738562091503268,
+            "semanticComposite": 0.9487179487179488,
+            "classRecall": 0.9,
+            "classPrecision": 0.9473684210526315,
+            "classF1": 0.9230769230769231,
+            "relRecall": 0.9230769230769231,
+            "relPrecision": 0.9230769230769231,
+            "relF1": 0.9230769230769231,
+            "propRecall": 1,
+            "propPrecision": 1,
+            "propF1": 1,
+            "semClassF1": 0.9230769230769231,
+            "semRelF1": 0.9230769230769231,
+            "semPropF1": 1,
+            "rulesF1": 0.8333333333333333,
+            "actionsF1": 1,
+            "valueFidelity": 1,
+            "allowedValueLists": 1,
+            "classes": 19,
+            "relationships": 13,
+            "properties": 5
+          },
+          "contamination": {
+            "interviewerFirst": 4,
+            "personaFirst": 0,
+            "interviewerFirstIds": [
+              "canCloseMaintenanceWorkOrder",
+              "canStartMaintenanceProcess",
+              "closeMaintenanceWorkOrder",
+              "startMaintenanceProcess"
+            ]
+          },
+          "cost": 1.7913242
+        },
+        {
+          "runId": "run-02",
+          "clean": true,
+          "turn": 80,
+          "row": {
+            "composite": 0.896190906353508,
+            "scopedComposite": 0.7868686868686868,
+            "semanticComposite": 0.896190906353508,
+            "classRecall": 1,
+            "classPrecision": 0.9523809523809523,
+            "classF1": 0.975609756097561,
+            "relRecall": 1,
+            "relPrecision": 0.9285714285714286,
+            "relF1": 0.962962962962963,
+            "propRecall": 0.6,
+            "propPrecision": 1,
+            "propF1": 0.7499999999999999,
+            "semClassF1": 0.975609756097561,
+            "semRelF1": 0.962962962962963,
+            "semPropF1": 0.7499999999999999,
+            "rulesF1": 0.6666666666666666,
+            "actionsF1": 1,
+            "valueFidelity": 1,
+            "allowedValueLists": 1,
+            "classes": 21,
+            "relationships": 14,
+            "properties": 3
+          },
+          "contamination": {
+            "interviewerFirst": 0,
+            "personaFirst": 0,
+            "interviewerFirstIds": []
+          },
+          "cost": 1.5220513999999998
+        },
+        {
+          "runId": "run-03",
+          "clean": true,
+          "turn": 92,
+          "row": {
+            "composite": 0.8882882882882882,
+            "scopedComposite": 0.6946428571428572,
+            "semanticComposite": 0.9149549549549549,
+            "classRecall": 0.8,
+            "classPrecision": 0.9411764705882353,
+            "classF1": 0.8648648648648648,
+            "relRecall": 0.7692307692307693,
+            "relPrecision": 0.8333333333333334,
+            "relF1": 0.8,
+            "propRecall": 1,
+            "propPrecision": 1,
+            "propF1": 1,
+            "semClassF1": 0.8648648648648648,
+            "semRelF1": 0.8799999999999999,
+            "semPropF1": 1,
+            "rulesF1": 0.6153846153846153,
+            "actionsF1": 0.33333333333333337,
+            "valueFidelity": 1,
+            "allowedValueLists": 1,
+            "classes": 17,
+            "relationships": 12,
+            "properties": 5
+          },
+          "contamination": {
+            "interviewerFirst": 4,
+            "personaFirst": 0,
+            "interviewerFirstIds": [
+              "DegradedState",
+              "OperatingState",
+              "createMaintenanceWorkOrder",
+              "hasEffect"
+            ]
+          },
+          "cost": 1.543634
+        }
+      ]
+    },
+    {
+      "id": "iof-supply-chain",
+      "source": "IOF (published)",
+      "gold": {
+        "classes": 53,
+        "relationships": 30,
+        "properties": 3
+      },
+      "runs": [
+        {
+          "runId": "run-01",
+          "clean": true,
+          "turn": 79,
+          "row": {
+            "composite": 0.754851684263449,
+            "scopedComposite": 0.9105202973127501,
+            "semanticComposite": 0.754851684263449,
+            "classRecall": 0.4716981132075472,
+            "classPrecision": 1,
+            "classF1": 0.641025641025641,
+            "relRecall": 0.7,
+            "relPrecision": 1,
+            "relF1": 0.8235294117647058,
+            "propRecall": 0.6666666666666666,
+            "propPrecision": 1,
+            "propF1": 0.8,
+            "semClassF1": 0.641025641025641,
+            "semRelF1": 0.8235294117647058,
+            "semPropF1": 0.8,
+            "rulesF1": 0.888888888888889,
+            "actionsF1": 1,
+            "valueFidelity": null,
+            "allowedValueLists": 0,
+            "classes": 25,
+            "relationships": 21,
+            "properties": 2
+          },
+          "contamination": {
+            "interviewerFirst": 5,
+            "personaFirst": 0,
+            "interviewerFirstIds": [
+              "canRecordTrackingEvent",
+              "hasAgent",
+              "prepareShipment",
+              "receiveShipment",
+              "recordTrackingEvent"
+            ]
+          },
+          "cost": 1.5550532000000001
+        },
+        {
+          "runId": "run-02",
+          "clean": true,
+          "turn": 76,
+          "row": {
+            "composite": 0.7623931623931623,
+            "scopedComposite": 0.9463312368972745,
+            "semanticComposite": 0.7623931623931623,
+            "classRecall": 0.4716981132075472,
+            "classPrecision": 1,
+            "classF1": 0.641025641025641,
+            "relRecall": 0.7333333333333333,
+            "relPrecision": 1,
+            "relF1": 0.846153846153846,
+            "propRecall": 0.6666666666666666,
+            "propPrecision": 1,
+            "propF1": 0.8,
+            "semClassF1": 0.641025641025641,
+            "semRelF1": 0.846153846153846,
+            "semPropF1": 0.8,
+            "rulesF1": 0.888888888888889,
+            "actionsF1": 0.5714285714285715,
+            "valueFidelity": null,
+            "allowedValueLists": 0,
+            "classes": 25,
+            "relationships": 22,
+            "properties": 2
+          },
+          "contamination": {
+            "interviewerFirst": 3,
+            "personaFirst": 0,
+            "interviewerFirstIds": [
+              "evaluateSupplyRelationship",
+              "prepareShipment",
+              "recordTrackingEvent"
+            ]
+          },
+          "cost": 1.531036
+        },
+        {
+          "runId": "run-03",
+          "clean": true,
+          "turn": 77,
+          "row": {
+            "composite": 0.6459739091318039,
+            "scopedComposite": 0.8078431372549021,
+            "semanticComposite": 0.6459739091318039,
+            "classRecall": 0.41509433962264153,
+            "classPrecision": 0.9565217391304348,
+            "classF1": 0.5789473684210527,
+            "relRecall": 0.6,
+            "relPrecision": 0.8181818181818182,
+            "relF1": 0.6923076923076923,
+            "propRecall": 0.6666666666666666,
+            "propPrecision": 0.6666666666666666,
+            "propF1": 0.6666666666666666,
+            "semClassF1": 0.5789473684210527,
+            "semRelF1": 0.6923076923076923,
+            "semPropF1": 0.6666666666666666,
+            "rulesF1": 0.8000000000000002,
+            "actionsF1": 1,
+            "valueFidelity": null,
+            "allowedValueLists": 0,
+            "classes": 23,
+            "relationships": 22,
+            "properties": 3
+          },
+          "contamination": {
+            "interviewerFirst": 0,
+            "personaFirst": 0,
+            "interviewerFirstIds": []
+          },
+          "cost": 1.6213306
+        }
+      ]
+    },
+    {
+      "id": "itops",
+      "source": "hand-authored, unpublished (contamination control)",
+      "gold": {
+        "classes": 68,
+        "relationships": 108,
+        "properties": 111
+      },
+      "runs": [
+        {
+          "runId": "run-01",
+          "clean": true,
+          "turn": 101,
+          "row": {
+            "composite": 0.46619299286160265,
+            "scopedComposite": 0.6492957746478873,
+            "semanticComposite": 0.46619299286160265,
+            "classRecall": 0.38235294117647056,
+            "classPrecision": 1,
+            "classF1": 0.5531914893617021,
+            "relRecall": 0.3148148148148148,
+            "relPrecision": 0.9714285714285714,
+            "relF1": 0.4755244755244756,
+            "propRecall": 0.24324324324324326,
+            "propPrecision": 0.7714285714285715,
+            "propF1": 0.36986301369863017,
+            "semClassF1": 0.5531914893617021,
+            "semRelF1": 0.4755244755244756,
+            "semPropF1": 0.36986301369863017,
+            "rulesF1": 0.8571428571428572,
+            "actionsF1": 0.9523809523809523,
+            "valueFidelity": 0.9166666666666666,
+            "allowedValueLists": 13,
+            "classes": 26,
+            "relationships": 35,
+            "properties": 35
+          },
+          "contamination": {
+            "interviewerFirst": 1,
+            "personaFirst": 0,
+            "interviewerFirstIds": [
+              "acknowledgeAlert"
+            ]
+          },
+          "cost": 2.7784958
+        },
+        {
+          "runId": "run-02",
+          "clean": true,
+          "turn": 137,
+          "row": {
+            "composite": 0.6574671870793064,
+            "scopedComposite": 0.6401447990543736,
+            "semanticComposite": 0.6616865963620069,
+            "classRecall": 0.5882352941176471,
+            "classPrecision": 1,
+            "classF1": 0.7407407407407407,
+            "relRecall": 0.5185185185185185,
+            "relPrecision": 0.9655172413793104,
+            "relF1": 0.6746987951807228,
+            "propRecall": 0.3963963963963964,
+            "propPrecision": 0.9361702127659575,
+            "propF1": 0.5569620253164558,
+            "semClassF1": 0.7407407407407407,
+            "semRelF1": 0.6746987951807228,
+            "semPropF1": 0.569620253164557,
+            "rulesF1": 0.8181818181818182,
+            "actionsF1": 1,
+            "valueFidelity": 0.95,
+            "allowedValueLists": 19,
+            "classes": 40,
+            "relationships": 58,
+            "properties": 47
+          },
+          "contamination": {
+            "interviewerFirst": 1,
+            "personaFirst": 0,
+            "interviewerFirstIds": [
+              "executeEmergencyChange"
+            ]
+          },
+          "cost": 4.0383356
+        },
+        {
+          "runId": "run-03",
+          "clean": true,
+          "turn": 114,
+          "row": {
+            "composite": 0.6063910188487204,
+            "scopedComposite": 0.701610387116903,
+            "semanticComposite": 0.6063910188487204,
+            "classRecall": 0.4852941176470588,
+            "classPrecision": 1,
+            "classF1": 0.6534653465346535,
+            "relRecall": 0.4537037037037037,
+            "relPrecision": 0.98,
+            "relF1": 0.6202531645569621,
+            "propRecall": 0.3783783783783784,
+            "propPrecision": 0.9767441860465116,
+            "propF1": 0.5454545454545454,
+            "semClassF1": 0.6534653465346535,
+            "semRelF1": 0.6202531645569621,
+            "semPropF1": 0.5454545454545454,
+            "rulesF1": 0.761904761904762,
+            "actionsF1": 0.9523809523809523,
+            "valueFidelity": 0.875,
+            "allowedValueLists": 15,
+            "classes": 33,
+            "relationships": 50,
+            "properties": 43
+          },
+          "contamination": {
+            "interviewerFirst": 10,
+            "personaFirst": 0,
+            "interviewerFirstIds": [
+              "acknowledgeAlert",
+              "assignIncident",
+              "closeIncident",
+              "containIncident",
+              "declareMajorIncident",
+              "executeEmergencyChange",
+              "failOverService",
+              "restoreBackup",
+              "sendStakeholderCommunication",
+              "submitRegulatoryNotification"
+            ]
+          },
+          "cost": 3.4217946
+        }
+      ]
+    }
+  ]
+}

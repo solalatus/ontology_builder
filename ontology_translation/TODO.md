@@ -2933,7 +2933,11 @@ reference and record deltas/decisions here instead.)*
   full, the same 12 transcripts give 330 interviewer-first identifiers (range
   4-46/run), PR #136's figure, of which 314 (95%) matched; the itops control
   arm gives 167 (48-61/run), not 10. See
-  `ontology_translation/results/multi-domain-control/README.md`.]**
+  `ontology_translation/results/multi-domain-control/README.md`.
+  Superseded again 2026-10-20: those counts credited the interviewer for
+  writing the expert's own words as an identifier; with the expert's
+  plain-words mentions counted, they are 80 (0-17/run, 77 matched) and 32
+  (9-12/run, 30 matched).]**
 
   **This tool corrects PR #136's own figures.** Re-run against the same 12
   published-domain transcripts PR #136 audited ad hoc, it measures **31**
@@ -3015,7 +3019,9 @@ reference and record deltas/decisions here instead.)*
   167 interviewer-first identifiers (48-61/run, 159 matched) and the
   published domains 330 (4-46/run, 314 matched). The memorization-proof
   domain has more per run, not fewer, so the reading below ("not driven by
-  pretraining") holds, now on correct numbers.] Interviewer-first identifier counts for the itops runs: 10
+  pretraining") holds, now on correct numbers. Superseded again 2026-10-20,
+  the expert's plain-words mentions now count: itops 32 (9-12/run), the
+  published domains 80 (0-17/run); the reading still holds.] Interviewer-first identifier counts for the itops runs: 10
   total (range 0-7/run), 9 of which (90%) ended up as a scored match --
   measured with the exact same tool re-run against both directories, so
   this is a like-for-like comparison against the corrected 31-total/
@@ -4011,4 +4017,14 @@ reference and record deltas/decisions here instead.)*
   equals the LLM merge on the same pair; the published two-way gain depends
   on the pair (addendum added to `cascading-merge-post152/REPORT.md`). Final
   F1 is limited by recall at interview time.
-
+- 2026-10-20 — Final scores (`results/final-scores/`, design committed
+  before the runs): all five domains at the shipped configuration after
+  #191, 3 interviews each, 15/15 clean, 33.64 USD for the 15 runs (19.80 new).
+  Composite 0.781 macro over the four published domains, 0.577 on itops,
+  0.740 over all five. Precision near 1; class recall on the large domains
+  is the gap. The interviewer-first detector now credits the expert's
+  plain-words mentions (it used to count the expert's own phrase, written
+  back in camelCase, against the interviewer); every earlier figure was
+  recounted offline: 330 -> 80 (published, `multi-domain/`), 167 -> 32
+  (itops control). See `PAPER_NOTES.md`, 2026-10-20. Open tickets after
+  this: #172 (future) and #184 (Bedrock key) only.
