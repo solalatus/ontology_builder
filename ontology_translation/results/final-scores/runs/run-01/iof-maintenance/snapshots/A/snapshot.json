@@ -1,0 +1,36 @@
+{
+  "label": "A",
+  "turn": 99,
+  "stage": "interview",
+  "takenAt": "2026-10-20T17:42:01.877Z",
+  "elapsedSec": 1080,
+  "cost": {
+    "all": {
+      "calls": 254,
+      "promptTokens": 5732147,
+      "cachedTokens": 5648191,
+      "completionTokens": 41397,
+      "reasoningTokens": 15000,
+      "cachedShare": 0.9853534809906306,
+      "costUsd": 1.7115202
+    },
+    "app": {
+      "calls": 154,
+      "promptTokens": 4230108,
+      "cachedTokens": 4174176,
+      "completionTokens": 28620,
+      "reasoningTokens": 12286,
+      "cachedShare": 0.9867776425566439,
+      "costUsd": 1.2328992
+    },
+    "harness": {
+      "calls": 100,
+      "promptTokens": 1502039,
+      "cachedTokens": 1474015,
+      "completionTokens": 12777,
+      "reasoningTokens": 2714,
+      "cachedShare": 0.9813426948301609,
+      "costUsd": 0.478621
+    }
+  }
+}

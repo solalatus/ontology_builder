@@ -41,3 +41,10 @@ A run that hits a cap, or ends other than `stages_complete`, is reported and not
 ## Not comparable, and not compared
 
 The earlier multi-domain runs (`multi-domain-post152/`, `multi-domain-control-post152/`) used `gpt-5.4`, an earlier prompt and the provider-default effort. They are history, not a baseline. A comparison of this configuration against one-shot or no-commit baselines on the same model is not part of this result.
+
+## Amendment, 2026-10-20 (after the runs, before the write-up)
+
+The contamination check's measure was corrected. It used to count a gold identifier against the interviewer whenever the interviewer was the first to write it in raw form, even when the expert had already said the same words in plain language. It now credits the expert's plain-words mentions (`tests/evals/lib/interviewerPriorKnowledge.mjs`).
+
+This changes no score and no run. Only that column is affected. The earlier published figures that used the same tool were recounted the same way (`ANALYSIS.md`, reading 3).
+

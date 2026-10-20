@@ -4,7 +4,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import yaml from "js-yaml";
-import { computeFirstSpeakerIdentifiers, crossReferenceMatchedIdentifiers } from "./evals/lib/interviewerPriorKnowledge.mjs";
+import { computeFirstSpeakerIdentifiers, crossReferenceMatchedIdentifiers, identifierWords } from "./evals/lib/interviewerPriorKnowledge.mjs";
 import { collectMultiSegmentIdentifiers } from "./evals/lib/leakDetector.mjs";
 import { resolveDomainYamlPath, loadGroundTruthModel } from "./evals/lib/groundTruthModel.mjs";
 import { parseConversationLog } from "./evals/lib/reportGenerator.mjs";
@@ -58,6 +58,42 @@ test("computeFirstSpeakerIdentifiers: within one turn, the interviewer's own sta
   const { interviewerFirst, personaFirst } = computeFirstSpeakerIdentifiers(entries, candidates);
   assert.deepEqual([...interviewerFirst], ["QualificationSpecification"]);
   assert.deepEqual([...personaFirst], []);
+});
+
+test("computeFirstSpeakerIdentifiers: the interviewer writing the expert's own words as the raw identifier is not interviewer-first", () => {
+  // The expert says the term in plain words; the interviewer records it and
+  // writes it back as the identifier; the expert then repeats that raw form.
+  // The term is the expert's, and the echo is not a leak either.
+  const candidates = new Set(["MaintenanceWorkOrderRecord"]);
+  const entries = [
+    { turn: 1, speaker: "app-assistant", text: "What does the record describe?" },
+    { turn: 1, speaker: "persona", text: "The **maintenance work-order record** describes the job." },
+    { turn: 2, speaker: "app-assistant", text: "Recorded MaintenanceWorkOrderRecord." },
+    { turn: 2, speaker: "persona", text: "Yes, MaintenanceWorkOrderRecord is fine." },
+  ];
+  const { interviewerFirst, personaFirst, expertWordsFirst } = computeFirstSpeakerIdentifiers(entries, candidates);
+  assert.deepEqual([...interviewerFirst], []);
+  assert.deepEqual([...personaFirst], []);
+  assert.deepEqual([...expertWordsFirst], ["MaintenanceWorkOrderRecord"]);
+});
+
+test("computeFirstSpeakerIdentifiers: the expert's words count only before the interviewer's first raw use, and only as whole words", () => {
+  const candidates = new Set(["closeIncident", "FailureEvent"]);
+  const entries = [
+    { turn: 1, speaker: "persona", text: "We foreclose incidents rarely." },
+    { turn: 2, speaker: "app-assistant", text: "Shall I add closeIncident and FailureEvent?" },
+    { turn: 2, speaker: "persona", text: "Yes, close incident is the action, and a failure event is what we log." },
+  ];
+  const { interviewerFirst, expertWordsFirst } = computeFirstSpeakerIdentifiers(entries, candidates);
+  assert.deepEqual([...interviewerFirst].sort(), ["FailureEvent", "closeIncident"]);
+  assert.equal(expertWordsFirst.size, 0);
+});
+
+test("identifierWords splits camelCase, acronyms and underscores", () => {
+  assert.equal(identifierWords("MaintenanceWorkOrderRecord"), "maintenance work order record");
+  assert.equal(identifierWords("isCollateralizedBy"), "is collateralized by");
+  assert.equal(identifierWords("CO2Sensor"), "co2 sensor");
+  assert.equal(identifierWords("HVACZone"), "hvac zone");
 });
 
 test("computeFirstSpeakerIdentifiers: an identifier appearing in neither speaker's text is in neither set", () => {
@@ -142,8 +178,9 @@ test("crossReferenceMatchedIdentifiers: an identifier with no corresponding matc
 //
 // This is the reproducible version of PR #136's ad hoc figures for this
 // exact same 12-run set (330 interviewer-first total, range 4-46/run, 162
-// matched ~30%). Its total reproduces #136's exactly once the log is read in
-// full (issue #189); its matched count does not (314, 95%). Spot-checking this tool's own output
+// matched ~30%). Its raw-form total reproduced #136's once the log was read
+// in full (issue #189); since 2026-10-20 the expert's plain-words mentions
+// count too, which brings it to 80 (see the test below). Spot-checking this tool's own output
 // (interviewer-first identifiers on iof-maintenance/run-01, fibo-loans/
 // run-01, brick-hvac/run-03 include real, sensible raw-identifier guesses
 // like "MaintenanceProcess", "classifyItemAsFailed", "SecuredLoan",
@@ -178,7 +215,7 @@ test("real-data regression: persona-first stays empty on every one of the 12 com
   }
 });
 
-test("real-data regression: total interviewer-first count across the 12 committed runs is reproducible, and matches PR #136's 330 once logs are read in full (#189)", () => {
+test("real-data regression: total interviewer-first count across the 12 committed runs is reproducible (80, of which 77 matched)", () => {
   const domains = ["brick-hvac", "iof-maintenance", "iof-supply-chain", "fibo-loans"];
   const runs = ["run-01", "run-02", "run-03"];
   let totalInterviewerFirst = 0;
@@ -199,6 +236,14 @@ test("real-data regression: total interviewer-first count across the 12 committe
   // only the first line of every entry. Read in full, the same 12
   // transcripts give 330 -- PR #136's original figure, which the "31" had
   // been presented as correcting -- of which 314 (95%) became scored matches.
-  assert.equal(totalInterviewerFirst, 330);
-  assert.equal(totalMatched, 314);
+  //
+  // 2026-10-20: 330 counted every term the interviewer was first to write in
+  // raw form, including the expert's own words written back as an
+  // identifier ("failure mode code" -> FailureModeCode). Crediting the
+  // expert's plain-words mentions leaves 80, of which 77 (96%) became scored
+  // matches. A sample of the 250 terms this moved was checked by hand: each
+  // was the expert's own phrase, most of them in the opening competency
+  // questions.
+  assert.equal(totalInterviewerFirst, 80);
+  assert.equal(totalMatched, 77);
 });

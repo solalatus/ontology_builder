@@ -1,0 +1,128 @@
+{
+  "fullDomain": {
+    "classes": [],
+    "relationships": [],
+    "properties": [],
+    "valueFidelity": [
+      {
+        "id": "BusinessService.healthState",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "ItService.healthState",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "BackupSet.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Environment.environmentType",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Alert.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Incident.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Incident.severity",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Change.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Change.riskLevel",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Deployment.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "EvidenceItem.integrityStatus",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Communication.audience",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "Communication.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "MaterialityAssessment.result",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "RegulatoryNotification.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "CorrectiveAction.status",
+        "semanticFidelity": 1
+      }
+    ]
+  },
+  "scoped": {
+    "classes": [],
+    "relationships": [],
+    "properties": [],
+    "valueFidelity": [
+      {
+        "id": "ItService.healthState",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "BackupSet.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Alert.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Incident.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Incident.severity",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Change.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Deployment.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "EvidenceItem.integrityStatus",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Communication.audience",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "Communication.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "MaterialityAssessment.result",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "RegulatoryNotification.status",
+        "semanticFidelity": 1
+      }
+    ]
+  }
+}

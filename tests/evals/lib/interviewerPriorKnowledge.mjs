@@ -54,9 +54,44 @@ import { matchRules, matchActions } from "./recoveryMetrics.mjs";
 // interviewer is never shown the persona's brief, so whether a word happens
 // to appear there has no bearing on the interviewer side -- see that
 // function's own header comment).
+//
+// THE EXPERT'S OWN WORDS COUNT (2026-10-20)
+// -----------------------------------------
+// A raw identifier is a formatting of words: MaintenanceWorkOrderRecord is
+// "maintenance work order record". When the persona says those words in
+// plain language and the interviewer then writes them back as the raw
+// identifier, the term came from the expert, not from the interviewer's
+// memory. Counting only raw forms credited the interviewer with it, so an
+// interviewer that happened to echo labels in camelCase scored as heavily
+// "contaminated" without knowing anything. So the persona's plain-words
+// mentions are tracked too (expertWordsFirst), and an identifier whose
+// words the persona said before the interviewer's first raw use is never
+// interviewer-first. personaFirst stays raw-only: it is #133's leak guard,
+// which is about the persona reciting hidden raw identifiers, and saying a
+// term in ordinary words is exactly what the persona is meant to do.
+
+/** "MaintenanceWorkOrderRecord" -> "maintenance work order record". */
+export function identifierWords(id) {
+  return String(id).replace(/([a-z0-9])([A-Z])/g, "$1 $2").replace(/([A-Z])([A-Z][a-z])/g, "$1 $2").replace(/_/g, " ").toLowerCase();
+}
+
+const plainText = (t) => String(t || "").toLowerCase().replace(/[*_`]/g, " ").replace(/[-\s]+/g, " ");
+const escapeRegExp = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+// Whole words at the start, so "close incident" is not found inside
+// "foreclose incident"; open at the end, so a plural still counts.
+function saysInWords(text, id) {
+  return new RegExp(`(^|[^a-z0-9])${escapeRegExp(identifierWords(id))}`).test(text);
+}
+
 export function computeFirstSpeakerIdentifiers(entries, candidateSet) {
   const interviewerFirst = new Set();
   const personaFirst = new Set();
+  const expertWordsFirst = new Set();
+  // Every raw identifier the interviewer has written so far, whoever gets
+  // the credit: the leak guard asks only whether the persona wrote a raw
+  // form before the interviewer did, as it always has.
+  const interviewerWroteRaw = new Set();
   const maxTurn = entries.reduce((m, e) => Math.max(m, e.turn), 0);
   for (let turn = 1; turn <= maxTurn; turn++) {
     const appText = (entries.find((e) => e.turn === turn && e.speaker === "app-assistant") || {}).text || "";
@@ -66,16 +101,21 @@ export function computeFirstSpeakerIdentifiers(entries, candidateSet) {
     // (the persona is replying TO this turn's interviewer message).
     if (appText) {
       for (const id of findLeakedIdentifiers(appText, candidateSet)) {
-        if (!personaFirst.has(id)) interviewerFirst.add(id);
+        if (!personaFirst.has(id) && !expertWordsFirst.has(id) && !interviewerWroteRaw.has(id)) interviewerFirst.add(id);
+        interviewerWroteRaw.add(id);
       }
     }
     if (personaText) {
       for (const id of findLeakedIdentifiers(personaText, candidateSet)) {
-        if (!interviewerFirst.has(id)) personaFirst.add(id);
+        if (!interviewerWroteRaw.has(id)) personaFirst.add(id);
+      }
+      const plain = plainText(personaText);
+      for (const id of candidateSet) {
+        if (!interviewerWroteRaw.has(id) && !personaFirst.has(id) && saysInWords(plain, id)) expertWordsFirst.add(id);
       }
     }
   }
-  return { interviewerFirst, personaFirst };
+  return { interviewerFirst, personaFirst, expertWordsFirst };
 }
 
 // Given a set of raw identifiers and everything one completed run produced,

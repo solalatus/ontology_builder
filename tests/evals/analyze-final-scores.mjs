@@ -47,7 +47,7 @@ export function interviewerFirstCount(runDir, domainId) {
   if (!fs.existsSync(logPath)) return null;
   const doc = yaml.load(fs.readFileSync(resolveDomainYamlPath(domainId), "utf8"));
   const { interviewerFirst, personaFirst } = computeFirstSpeakerIdentifiers(parseConversationLog(fs.readFileSync(logPath, "utf8")), collectMultiSegmentIdentifiers(doc));
-  return { interviewerFirst: interviewerFirst.size, personaFirst: personaFirst.size };
+  return { interviewerFirst: interviewerFirst.size, personaFirst: personaFirst.size, interviewerFirstIds: [...interviewerFirst].sort() };
 }
 
 export function loadDomainRuns(domain) {
@@ -89,8 +89,10 @@ export function renderReport(domains) {
   const macro = (k, set) => mean(set.map((d) => agg(d.runs, (r) => r.row[k]).mean).filter((x) => typeof x === "number"));
   const published = domains.filter((d) => d.id !== "itops");
   const fmt = (x) => (typeof x === "number" ? x.toFixed(3) : "—");
-  L.push(`| **macro mean, all five** | | **${fmt(macro("composite", domains))}** | ${fmt(macro("scopedComposite", domains))} | ${fmt(macro("semanticComposite", domains))} | ${fmt(macro("classF1", domains))} | ${fmt(macro("relF1", domains))} | ${fmt(macro("propF1", domains))} | ${fmt(macro("rulesF1", domains))} | ${fmt(macro("actionsF1", domains))} |`);
-  L.push(`| macro mean, four published | | ${fmt(macro("composite", published))} | ${fmt(macro("scopedComposite", published))} | ${fmt(macro("semanticComposite", published))} | ${fmt(macro("classF1", published))} | ${fmt(macro("relF1", published))} | ${fmt(macro("propF1", published))} | ${fmt(macro("rulesF1", published))} | ${fmt(macro("actionsF1", published))} |`, "");
+  // PAPER_NOTES.md (2026-09-02): the four published domains are the primary
+  // result and itops the leakage control, so the published mean comes first.
+  L.push(`| **macro mean, four published (primary)** | | **${fmt(macro("composite", published))}** | ${fmt(macro("scopedComposite", published))} | ${fmt(macro("semanticComposite", published))} | ${fmt(macro("classF1", published))} | ${fmt(macro("relF1", published))} | ${fmt(macro("propF1", published))} | ${fmt(macro("rulesF1", published))} | ${fmt(macro("actionsF1", published))} |`);
+  L.push(`| macro mean, all five (itops included) | | ${fmt(macro("composite", domains))} | ${fmt(macro("scopedComposite", domains))} | ${fmt(macro("semanticComposite", domains))} | ${fmt(macro("classF1", domains))} | ${fmt(macro("relF1", domains))} | ${fmt(macro("propF1", domains))} | ${fmt(macro("rulesF1", domains))} | ${fmt(macro("actionsF1", domains))} |`, "");
 
   L.push("## Recall and precision", "", "| Domain | Gold classes / relationships / properties | Class R / P | Relationship R / P | Property R / P | Allowed-value lists |", "|---|---|---|---|---|---|");
   for (const d of domains) {
@@ -99,14 +101,15 @@ export function renderReport(domains) {
   }
   L.push("");
 
-  L.push("## Contamination check", "", "Interviewer-first raw gold identifiers per run: a multi-segment gold identifier the interviewer said before the expert ever did (`lib/interviewerPriorKnowledge.mjs`). If the interviewer were reciting published ontologies from memory, the published domains would show many more of these than itops, which cannot have been memorized. Persona-first must be 0 (the leak guard).", "",
-    "| Domain | Interviewer-first per run | per 100 gold elements | Persona-first (total) |", "|---|---|---|---|");
+  L.push("## Contamination check", "", "Interviewer-first gold identifiers: a multi-segment gold identifier the interviewer wrote before the expert had said it, either as the identifier or in plain words (`lib/interviewerPriorKnowledge.mjs`). If the interviewer were reciting published ontologies from memory, the published domains would show many more of these than itops, which cannot have been memorized. Persona-first must be 0 (the leak guard).", "",
+    "| Domain | Interviewer-first per run | Range over runs | per 100 gold elements | Persona-first (total) |", "|---|---|---|---|---|");
   for (const d of domains) {
-    const s = agg(d.runs, (r) => r.contamination && r.contamination.interviewerFirst);
     const size = d.gold.classes + d.gold.relationships + d.gold.properties;
-    const per100 = s.mean === null ? "—" : (100 * s.mean / size).toFixed(1);
+    const s = agg(d.runs, (r) => r.contamination && r.contamination.interviewerFirst);
+    const xs = d.runs.filter((r) => r.clean && r.contamination).map((r) => r.contamination.interviewerFirst);
+    const range = xs.length ? `${Math.min(...xs)} to ${Math.max(...xs)}` : "—";
     const pf = d.runs.reduce((n, r) => n + ((r.contamination && r.contamination.personaFirst) || 0), 0);
-    L.push(`| ${d.id} | ${pm(s, 1)} | ${per100} | ${pf} |`);
+    L.push(`| ${d.id} | ${pm(s, 1)} | ${range} | ${s.mean === null ? "—" : (100 * s.mean / size).toFixed(1)} | ${pf} |`);
   }
   L.push("");
 
