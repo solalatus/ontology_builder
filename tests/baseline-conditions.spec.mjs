@@ -130,3 +130,15 @@ test("the pre-registered reading: beats beyond the larger stdev, level within it
   assert.match(report, /\| fibo-loans \| 0\.680 ± 0\.016 \| — \| — \| — \|/);
   assert.match(report, /## Pre-registered reading/);
 });
+
+test("B3 is not stopped by the no-tool-activity stall detector: a tool-less interview past its threshold still reaches the wrap-up", { timeout: 600000 }, async () => {
+  const { WASTED_TURN_THRESHOLD } = await import("./evals/lib/conversationOrchestrator.mjs");
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "baselines-b3-long-"));
+  try {
+    await runner(["tests/evals/run-multi-domain-benchmark.mjs", "--domain=brick-hvac", "--run=dry-01", `--resultsDir=${root}`],
+      { ONTOLOGY_EVAL_CONDITION: "b3-no-commit", MOCK_TOOLLESS_QUESTIONS: String(WASTED_TURN_THRESHOLD + 5), ONTOLOGY_EVAL_MAX_TURNS: "300" });
+    const prov = readJson(path.join(root, "dry-01", "brick-hvac", "provenance.json"));
+    assert.equal(prov.stoppedReason, "stages_complete");
+    assert.ok(prov.turnsUsed > WASTED_TURN_THRESHOLD, `ran ${prov.turnsUsed} turns`);
+  } finally { fs.rmSync(root, { recursive: true, force: true }); }
+});

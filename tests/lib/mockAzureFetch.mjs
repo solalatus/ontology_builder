@@ -31,9 +31,12 @@ if (ENDPOINT) {
   const json = (status, body) => new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json" } });
   const harnessUsage = { prompt_tokens: 400, completion_tokens: 20, total_tokens: 420, prompt_tokens_details: { cached_tokens: 0 } };
   const harnessReply = (text) => json(200, { id: "h", object: "chat.completion", choices: [{ index: 0, message: { role: "assistant", content: text }, finish_reason: "stop" }], usage: harnessUsage });
+  // MOCK_TOOLLESS_QUESTIONS (default 1) questions before the wrap-up, so a
+  // test can run a tool-less interview past the orchestrator's stall threshold.
   let toollessTurns = 0;
-  const toollessMove = () => (++toollessTurns === 1
-    ? { text: "What does the agent need to know about invoices and suppliers?" }
+  const toollessQuestions = Number(process.env.MOCK_TOOLLESS_QUESTIONS) || 1;
+  const toollessMove = () => (++toollessTurns <= toollessQuestions
+    ? { text: toollessTurns === 1 ? "What does the agent need to know about invoices and suppliers?" : `Question ${toollessTurns}: what else should the agent know about invoice ${toollessTurns}?` }
     : { text: "Thank you. The ontology is complete: every class, relationship and property is confirmed." });
   const APP_PROMPT = /professional knowledge engineer specializing in Minimal Typed/;
 

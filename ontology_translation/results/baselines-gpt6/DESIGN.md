@@ -67,3 +67,19 @@ No other comparison is a pass criterion. Three replicates detect differences of 
 - B4 (private scratch model) and B5 (a held-out domain). itops already serves as the domain the prompt was not tuned on for memorization; it is not held out from prompt tuning.
 - Any change to a baseline prompt.
 - Comparing these runs with the original itops baselines, which used `gpt-5.5`, an earlier persona and an earlier app.
+
+## Amendment 1, 2026-10-20 21:55 UTC (after B1, before any B3 result)
+
+**What happened.** The first B3 run (fibo-loans run-01) was stopped at turn 80 by the harness's no-tool-activity stall detector (`wasted_turns_no_tool_activity`; issue #133, item 8). It cost 1.24 USD.
+
+The detector ends a run in which the app goes 80 turns without a tool call. It was added in September to catch dead loops, after the original B3 runs of August. Under B3 the app is offered no tools at all, so the detector is certain to fire on every B3 run. It measures nothing about the condition. The transcript shows a productive interview, still confirming meanings at turn 80.
+
+**The change.** The detector does not stop a run that is offered no tools (`toolActivityExpected` in `conversationOrchestrator.mjs`, set by the runner for B3 only). The rest is unchanged for every condition:
+- the detector still applies to every run that is offered tools;
+- the streak is still counted;
+- the turn, wall-clock and cost caps still apply;
+- every other loop guard still applies.
+
+A dry run past the threshold covers it (`tests/baseline-conditions.spec.mjs`), and it fails without the change.
+
+**The stopped run.** It produced no snapshot and no extraction, so it has no result that could be kept or discarded. Its files are kept in `excluded/`, and its cost stays in the budget. Its slot is re-run. This departs from "a run is never re-run without the owner", which exists to stop an unlucky outcome being re-drawn. There is no outcome here. The deviation is stated here and in the write-up.

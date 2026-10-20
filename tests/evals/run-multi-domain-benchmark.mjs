@@ -362,6 +362,8 @@ async function main() {
       personaPath, groundTruthText, groundTruthFilename: "reference.domain.yaml", groundTruthFormat: "domain-yaml", openingLine,
       appTurnTimeoutMs: APP_TURN_TIMEOUT_MS,
       stageController,
+      // B3 is offered no tools, so a turn without a tool call is not a stall.
+      toolActivityExpected: CONDITION !== "b3-no-commit",
       shouldStop: async () => {
         const cost = await refreshCost();
         if (RUN_COST_CAP_USD && cost && cost.all.costUsd >= RUN_COST_CAP_USD) {
