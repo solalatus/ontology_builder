@@ -20,23 +20,26 @@
 //
 // The stage texts are pre-registered: ontology_translation/results/
 // paired-stages/DESIGN.md quotes them verbatim, and pairedStages.spec.mjs
-// fails if the two drift apart.
+// fails if the two drift apart. The sweep texts are version 2 (amendment 1
+// in DESIGN.md, 2026-10-20): version 1 let the interviewer narrow each
+// question to what the recorded questions need, and the sweep surfaced
+// nothing.
 
 export const STAGE_TEXTS = {
   en: {
     sweepFirst: [
       "Before we close, one more systematic pass, to catch what we have not talked about yet.",
       "",
-      "Call get_graph_state first and treat it as the source of truth for what is already on the canvas. Then go through every class on the canvas, three to five classes per question, and ask me, for each one: whether it has subordinate parts or components; states or lifecycle events; actors or responsible parties; inputs and outputs; related documents or agreements; measurements or characteristic values it carries; earlier or later stages of a workflow; more specific or sibling kinds of the same thing; and which of the properties already confirmed on a sibling class also apply to it. Skip the categories that plainly do not fit a class.",
+      "Call get_graph_state first and treat it as the source of truth for what is already on the canvas. Then go through every class on the canvas, three to five classes per question, and ask me, for each one, what exists around it in our work: its subordinate parts or components; its states or lifecycle events; the actors or parties responsible for it; its inputs and outputs; related documents or agreements; measurements or characteristic values it carries; earlier or later stages of a workflow it belongs to; more specific or sibling kinds of the same thing; and which of the properties already confirmed on a sibling class also apply to it. Skip the categories that plainly do not fit a class.",
       "",
-      "Every candidate this turns up goes through the same competency-question justification as before; nothing is added only because it was mentioned. Keep a running list of the candidates and close each one as added, declined (with my reason) or left open; none may silently disappear.",
+      "Ask these as open questions about what exists, not about what the agent needs: do not limit a question to what the recorded competency questions or actions require, and do not ask me to mention only what is needed. Only once I have answered, check each thing I named against the competency questions and actions, exactly as you would any other candidate, and add only what passes; nothing is added only because it was mentioned. Keep a running list of the candidates and close each one as added, declined (with the reason) or left open; none may silently disappear.",
       "",
       "When every class in this pass has been asked about and every candidate is closed, end that message with one line in exactly this form, and ask nothing further in it:",
       "COVERAGE LEDGER: surfaced=<number>; added=<number>; declined=<number>; open=<number>",
     ].join("\n"),
     sweepNext: (classes) => [
       `Thank you. These classes were added in that pass: ${classes.join(", ")}.`,
-      "Please ask the same questions about each of them, under the same rules, and close this pass with the same COVERAGE LEDGER line.",
+      "Please ask the same open questions about each of them, under the same rules, and close this pass with the same COVERAGE LEDGER line.",
     ].join("\n"),
     sweepCloseout: "The model has grown during this pass. Please run the Phase 3 check of jointly mentioned pairs and paths, and the Phase 10 checklist, once more over the whole model, then wrap up as you normally would.",
     naming: [
@@ -56,16 +59,16 @@ export const STAGE_TEXTS = {
     sweepFirst: [
       "Mielőtt lezárnánk, még egy módszeres kört szeretnék, hogy előkerüljön, amiről eddig nem beszéltünk.",
       "",
-      "Először hívd meg a get_graph_state eszközt, és azt tekintsd mérvadónak abban, hogy mi van már a vásznon. Utána menj végig a vásznon lévő összes osztályon, kérdésenként három-öt osztállyal, és kérdezd meg tőlem mindegyikről: vannak-e alárendelt részei vagy összetevői; állapotai vagy életciklus-eseményei; szereplői vagy felelősei; bemenetei és kimenetei; kapcsolódó dokumentumai vagy megállapodásai; mért vagy jellemző értékei, amelyeket hordoz; egy munkafolyamat korábbi vagy későbbi szakaszai; ugyanannak a dolognak szűkebb vagy testvér fajtái; és hogy egy testvérosztályon már jóváhagyott tulajdonságok közül melyek érvényesek erre is. Hagyd ki azokat a szempontokat, amelyek egy osztályra nyilvánvalóan nem illenek.",
+      "Először hívd meg a get_graph_state eszközt, és azt tekintsd mérvadónak abban, hogy mi van már a vásznon. Utána menj végig a vásznon lévő összes osztályon, kérdésenként három-öt osztállyal, és kérdezd meg tőlem mindegyikről, mi minden létezik körülötte a munkánkban: alárendelt részei vagy összetevői; állapotai vagy életciklus-eseményei; szereplői vagy felelősei; bemenetei és kimenetei; kapcsolódó dokumentumai vagy megállapodásai; mért vagy jellemző értékei, amelyeket hordoz; annak a munkafolyamatnak korábbi vagy későbbi szakaszai, amelyhez tartozik; ugyanannak a dolognak szűkebb vagy testvér fajtái; és hogy egy testvérosztályon már jóváhagyott tulajdonságok közül melyek érvényesek erre is. Hagyd ki azokat a szempontokat, amelyek egy osztályra nyilvánvalóan nem illenek.",
       "",
-      "Minden így előkerülő jelölt ugyanazon a kompetenciakérdés-alapú indokláson megy át, mint eddig; semmi sem kerül be csak azért, mert szóba került. Vezess folyamatos listát a jelöltekről, és mindegyiket zárd le: felvéve, elutasítva (az én indokommal) vagy nyitva hagyva; egyik sem tűnhet el szó nélkül.",
+      "Ezeket nyitott kérdésként tedd fel arról, mi létezik, nem arról, mire van szüksége az ügynöknek: ne szűkítsd a kérdést arra, amit a rögzített kompetenciakérdések vagy műveletek megkövetelnek, és ne kérd, hogy csak a szükségeseket említsem. Csak miután válaszoltam, vesd össze mindazt, amit megneveztem, a kompetenciakérdésekkel és a műveletekkel, pontosan úgy, mint bármely más jelöltet, és csak azt vedd fel, ami ezen átmegy; semmi sem kerül be csak azért, mert szóba került. Vezess folyamatos listát a jelöltekről, és mindegyiket zárd le: felvéve, elutasítva (az indokkal) vagy nyitva hagyva; egyik sem tűnhet el szó nélkül.",
       "",
       "Amikor ebben a körben minden osztályról kérdeztél, és minden jelölt le van zárva, azt az üzenetet pontosan ilyen alakú sorral zárd, és abban már ne kérdezz semmit:",
       "COVERAGE LEDGER: surfaced=<szám>; added=<szám>; declined=<szám>; open=<szám>",
     ].join("\n"),
     sweepNext: (classes) => [
       `Köszönöm. Ebben a körben ezek az osztályok kerültek be: ${classes.join(", ")}.`,
-      "Kérlek, ugyanezeket a kérdéseket tedd fel mindegyikről, ugyanazokkal a szabályokkal, és ezt a kört is ugyanazzal a COVERAGE LEDGER sorral zárd.",
+      "Kérlek, ugyanezeket a nyitott kérdéseket tedd fel mindegyikről, ugyanazokkal a szabályokkal, és ezt a kört is ugyanazzal a COVERAGE LEDGER sorral zárd.",
     ].join("\n"),
     sweepCloseout: "A modell ebben a körben bővült. Kérlek, futtasd le még egyszer a teljes modellre a 3. fázis együtt említett párokra és utakra vonatkozó ellenőrzését és a 10. fázis ellenőrzőlistáját, majd zárd le úgy, ahogy szoktad.",
     naming: [

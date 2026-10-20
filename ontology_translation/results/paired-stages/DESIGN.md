@@ -135,9 +135,29 @@ How these are computed (`tests/evals/analyze-paired-stages.mjs`, written before 
 7. **All three snapshots are scored from their YAML export** (see Snapshots and scoring), so the paired differences share one scoring path.
 8. **No Bedrock, no other domains.** As #182: fibo-loans and brick-hvac only, on Azure only.
 
+## Amendment 1 (2026-10-20, before block 1 continued): the sweep asks open questions
+
+**What happened.** The first two runs used sweep text version 1, kept verbatim at the end of this file: block 1's brick-hvac run-01 (the smoke run) and fibo-loans run-01. In both, the sweep surfaced nothing.
+
+- **brick-hvac** had all 39 gold-sized classes on the canvas at A, so an empty sweep is plausible there.
+- **fibo-loans** had 25 classes against the gold model's 57. The interviewer put every sweep question as "please mention only what the recorded questions or checks need", and the persona, which by design does not volunteer, answered "no additions" for every group.
+
+Version 1 says that candidates go through the competency-question justification. The interviewer applied that filter inside the question itself. That changes *what gets asked*, which #179 says the sweep must not do ("The sweep changes what gets asked, not what gets accepted").
+
+**The change.**
+- Version 2 asks the neighbourhood questions as open questions about what exists.
+- It says explicitly not to narrow a question to what the recorded questions need, and to apply the justification only after the expert has answered, when deciding whether to add each candidate.
+- The inclusion test itself is unchanged.
+- Nothing else changes: the close-out and naming texts, settings, models, caps, scoring and pass criteria stay as above.
+
+**What it means for the runs.**
+- The two version-1 runs are kept for the record under `superseded-sweep-v1/` and are not part of either block.
+- Block 1 is re-run in full with version 2. That includes brick-hvac run-01, so the earlier rule that the smoke run counts as a replicate no longer applies.
+- The owner chose this on 2026-10-20 after seeing those two runs.
+
 ## The stage texts, verbatim
 
-The harness sends the English texts (the domains and the persona are English). `{classes}` is replaced by the comma-separated names of the classes the previous round added.
+The harness sends the English texts (the domains and the persona are English). `{classes}` is replaced by the comma-separated names of the classes the previous round added. These are the texts in force (sweep version 2).
 
 ### English
 
@@ -146,9 +166,9 @@ The harness sends the English texts (the domains and the persona are English). `
 ```text
 Before we close, one more systematic pass, to catch what we have not talked about yet.
 
-Call get_graph_state first and treat it as the source of truth for what is already on the canvas. Then go through every class on the canvas, three to five classes per question, and ask me, for each one: whether it has subordinate parts or components; states or lifecycle events; actors or responsible parties; inputs and outputs; related documents or agreements; measurements or characteristic values it carries; earlier or later stages of a workflow; more specific or sibling kinds of the same thing; and which of the properties already confirmed on a sibling class also apply to it. Skip the categories that plainly do not fit a class.
+Call get_graph_state first and treat it as the source of truth for what is already on the canvas. Then go through every class on the canvas, three to five classes per question, and ask me, for each one, what exists around it in our work: its subordinate parts or components; its states or lifecycle events; the actors or parties responsible for it; its inputs and outputs; related documents or agreements; measurements or characteristic values it carries; earlier or later stages of a workflow it belongs to; more specific or sibling kinds of the same thing; and which of the properties already confirmed on a sibling class also apply to it. Skip the categories that plainly do not fit a class.
 
-Every candidate this turns up goes through the same competency-question justification as before; nothing is added only because it was mentioned. Keep a running list of the candidates and close each one as added, declined (with my reason) or left open; none may silently disappear.
+Ask these as open questions about what exists, not about what the agent needs: do not limit a question to what the recorded competency questions or actions require, and do not ask me to mention only what is needed. Only once I have answered, check each thing I named against the competency questions and actions, exactly as you would any other candidate, and add only what passes; nothing is added only because it was mentioned. Keep a running list of the candidates and close each one as added, declined (with the reason) or left open; none may silently disappear.
 
 When every class in this pass has been asked about and every candidate is closed, end that message with one line in exactly this form, and ask nothing further in it:
 COVERAGE LEDGER: surfaced=<number>; added=<number>; declined=<number>; open=<number>
@@ -158,7 +178,7 @@ COVERAGE LEDGER: surfaced=<number>; added=<number>; declined=<number>; open=<num
 
 ```text
 Thank you. These classes were added in that pass: {classes}.
-Please ask the same questions about each of them, under the same rules, and close this pass with the same COVERAGE LEDGER line.
+Please ask the same open questions about each of them, under the same rules, and close this pass with the same COVERAGE LEDGER line.
 ```
 
 #### Coverage sweep, close-out (only if the sweep changed the model)
@@ -189,9 +209,9 @@ NAMING LEDGER: relationships_renamed=<number>; relationships_redirected=<number>
 ```text
 Mielőtt lezárnánk, még egy módszeres kört szeretnék, hogy előkerüljön, amiről eddig nem beszéltünk.
 
-Először hívd meg a get_graph_state eszközt, és azt tekintsd mérvadónak abban, hogy mi van már a vásznon. Utána menj végig a vásznon lévő összes osztályon, kérdésenként három-öt osztállyal, és kérdezd meg tőlem mindegyikről: vannak-e alárendelt részei vagy összetevői; állapotai vagy életciklus-eseményei; szereplői vagy felelősei; bemenetei és kimenetei; kapcsolódó dokumentumai vagy megállapodásai; mért vagy jellemző értékei, amelyeket hordoz; egy munkafolyamat korábbi vagy későbbi szakaszai; ugyanannak a dolognak szűkebb vagy testvér fajtái; és hogy egy testvérosztályon már jóváhagyott tulajdonságok közül melyek érvényesek erre is. Hagyd ki azokat a szempontokat, amelyek egy osztályra nyilvánvalóan nem illenek.
+Először hívd meg a get_graph_state eszközt, és azt tekintsd mérvadónak abban, hogy mi van már a vásznon. Utána menj végig a vásznon lévő összes osztályon, kérdésenként három-öt osztállyal, és kérdezd meg tőlem mindegyikről, mi minden létezik körülötte a munkánkban: alárendelt részei vagy összetevői; állapotai vagy életciklus-eseményei; szereplői vagy felelősei; bemenetei és kimenetei; kapcsolódó dokumentumai vagy megállapodásai; mért vagy jellemző értékei, amelyeket hordoz; annak a munkafolyamatnak korábbi vagy későbbi szakaszai, amelyhez tartozik; ugyanannak a dolognak szűkebb vagy testvér fajtái; és hogy egy testvérosztályon már jóváhagyott tulajdonságok közül melyek érvényesek erre is. Hagyd ki azokat a szempontokat, amelyek egy osztályra nyilvánvalóan nem illenek.
 
-Minden így előkerülő jelölt ugyanazon a kompetenciakérdés-alapú indokláson megy át, mint eddig; semmi sem kerül be csak azért, mert szóba került. Vezess folyamatos listát a jelöltekről, és mindegyiket zárd le: felvéve, elutasítva (az én indokommal) vagy nyitva hagyva; egyik sem tűnhet el szó nélkül.
+Ezeket nyitott kérdésként tedd fel arról, mi létezik, nem arról, mire van szüksége az ügynöknek: ne szűkítsd a kérdést arra, amit a rögzített kompetenciakérdések vagy műveletek megkövetelnek, és ne kérd, hogy csak a szükségeseket említsem. Csak miután válaszoltam, vesd össze mindazt, amit megneveztem, a kompetenciakérdésekkel és a műveletekkel, pontosan úgy, mint bármely más jelöltet, és csak azt vedd fel, ami ezen átmegy; semmi sem kerül be csak azért, mert szóba került. Vezess folyamatos listát a jelöltekről, és mindegyiket zárd le: felvéve, elutasítva (az indokkal) vagy nyitva hagyva; egyik sem tűnhet el szó nélkül.
 
 Amikor ebben a körben minden osztályról kérdeztél, és minden jelölt le van zárva, azt az üzenetet pontosan ilyen alakú sorral zárd, és abban már ne kérdezz semmit:
 COVERAGE LEDGER: surfaced=<szám>; added=<szám>; declined=<szám>; open=<szám>
@@ -201,7 +221,7 @@ COVERAGE LEDGER: surfaced=<szám>; added=<szám>; declined=<szám>; open=<szám>
 
 ```text
 Köszönöm. Ebben a körben ezek az osztályok kerültek be: {classes}.
-Kérlek, ugyanezeket a kérdéseket tedd fel mindegyikről, ugyanazokkal a szabályokkal, és ezt a kört is ugyanazzal a COVERAGE LEDGER sorral zárd.
+Kérlek, ugyanezeket a nyitott kérdéseket tedd fel mindegyikről, ugyanazokkal a szabályokkal, és ezt a kört is ugyanazzal a COVERAGE LEDGER sorral zárd.
 ```
 
 #### Coverage sweep, close-out (only if the sweep changed the model)
@@ -223,4 +243,50 @@ Minden választ a rename_ontology_elements eszközzel rögzíts: a kapcsolat az 
 
 Amikor minden kapcsolatról, tulajdonságról és osztályról kérdeztél, azt az üzenetet pontosan ilyen alakú sorral zárd, és abban már ne kérdezz semmit:
 NAMING LEDGER: relationships_renamed=<szám>; relationships_redirected=<szám>; properties_renamed=<szám>; classes_renamed=<szám>
+```
+
+## Superseded: sweep text version 1 (used only in the two runs under `superseded-sweep-v1/`)
+
+### English
+
+#### Coverage sweep, first round
+
+```text
+Before we close, one more systematic pass, to catch what we have not talked about yet.
+
+Call get_graph_state first and treat it as the source of truth for what is already on the canvas. Then go through every class on the canvas, three to five classes per question, and ask me, for each one: whether it has subordinate parts or components; states or lifecycle events; actors or responsible parties; inputs and outputs; related documents or agreements; measurements or characteristic values it carries; earlier or later stages of a workflow; more specific or sibling kinds of the same thing; and which of the properties already confirmed on a sibling class also apply to it. Skip the categories that plainly do not fit a class.
+
+Every candidate this turns up goes through the same competency-question justification as before; nothing is added only because it was mentioned. Keep a running list of the candidates and close each one as added, declined (with my reason) or left open; none may silently disappear.
+
+When every class in this pass has been asked about and every candidate is closed, end that message with one line in exactly this form, and ask nothing further in it:
+COVERAGE LEDGER: surfaced=<number>; added=<number>; declined=<number>; open=<number>
+```
+
+#### Coverage sweep, each further round
+
+```text
+Thank you. These classes were added in that pass: {classes}.
+Please ask the same questions about each of them, under the same rules, and close this pass with the same COVERAGE LEDGER line.
+```
+
+### Hungarian
+
+#### Coverage sweep, first round
+
+```text
+Mielőtt lezárnánk, még egy módszeres kört szeretnék, hogy előkerüljön, amiről eddig nem beszéltünk.
+
+Először hívd meg a get_graph_state eszközt, és azt tekintsd mérvadónak abban, hogy mi van már a vásznon. Utána menj végig a vásznon lévő összes osztályon, kérdésenként három-öt osztállyal, és kérdezd meg tőlem mindegyikről: vannak-e alárendelt részei vagy összetevői; állapotai vagy életciklus-eseményei; szereplői vagy felelősei; bemenetei és kimenetei; kapcsolódó dokumentumai vagy megállapodásai; mért vagy jellemző értékei, amelyeket hordoz; egy munkafolyamat korábbi vagy későbbi szakaszai; ugyanannak a dolognak szűkebb vagy testvér fajtái; és hogy egy testvérosztályon már jóváhagyott tulajdonságok közül melyek érvényesek erre is. Hagyd ki azokat a szempontokat, amelyek egy osztályra nyilvánvalóan nem illenek.
+
+Minden így előkerülő jelölt ugyanazon a kompetenciakérdés-alapú indokláson megy át, mint eddig; semmi sem kerül be csak azért, mert szóba került. Vezess folyamatos listát a jelöltekről, és mindegyiket zárd le: felvéve, elutasítva (az én indokommal) vagy nyitva hagyva; egyik sem tűnhet el szó nélkül.
+
+Amikor ebben a körben minden osztályról kérdeztél, és minden jelölt le van zárva, azt az üzenetet pontosan ilyen alakú sorral zárd, és abban már ne kérdezz semmit:
+COVERAGE LEDGER: surfaced=<szám>; added=<szám>; declined=<szám>; open=<szám>
+```
+
+#### Coverage sweep, each further round
+
+```text
+Köszönöm. Ebben a körben ezek az osztályok kerültek be: {classes}.
+Kérlek, ugyanezeket a kérdéseket tedd fel mindegyikről, ugyanazokkal a szabályokkal, és ezt a kört is ugyanazzal a COVERAGE LEDGER sorral zárd.
 ```
