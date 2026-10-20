@@ -123,7 +123,10 @@ const WALLCLOCK_MINUTES = Number(ENV.ONTOLOGY_EVAL_WALLCLOCK_MINUTES) || 45;
 // always was.
 const COVERAGE_SWEEP = ENV.ONTOLOGY_EVAL_COVERAGE_SWEEP === "1";
 const NAMING_PASS = ENV.ONTOLOGY_EVAL_NAMING_PASS === "1";
-const STAGES = COVERAGE_SWEEP || NAMING_PASS;
+// Snapshot A alone (issue #187's measurement): the interview to its own
+// wrap-up, scored exactly like a paired-stage snapshot, no stages injected.
+const SNAPSHOT_AT_WRAPUP = ENV.ONTOLOGY_EVAL_SNAPSHOT_AT_WRAPUP === "1";
+const STAGES = COVERAGE_SWEEP || NAMING_PASS || SNAPSHOT_AT_WRAPUP;
 const SWEEP_MAX_ROUNDS = Number(ENV.ONTOLOGY_EVAL_SWEEP_MAX_ROUNDS) || 3;
 const STAGE_TURN_CAPS = {
   sweepRound: Number(ENV.ONTOLOGY_EVAL_SWEEP_ROUND_TURN_CAP) || DEFAULT_STAGE_TURN_CAPS.sweepRound,
@@ -315,7 +318,6 @@ async function main() {
           return yaml.load(text) || {};
         },
         readModel: exportDoc,
-        setRenameTool: (on) => page.evaluate((v) => window.__kg.agent.setRenameToolEnabled(v), on),
         renameLog: () => page.evaluate(() => window.__kg.agent.state.renameLog),
         log: (line) => console.log(`${domain}/${runId}: ${line}`),
       });

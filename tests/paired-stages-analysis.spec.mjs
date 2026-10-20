@@ -104,3 +104,26 @@ test("a run that did not end stages_complete is listed, excluded from the means,
     assert.equal(evaluateCriteria(runs)["#179 block 1 (medium)"].met, false, "a run over a cap fails every criterion");
   } finally { fs.rmSync(root, { recursive: true, force: true }); }
 });
+
+test("#187's default-change criteria: non-regression, naming carried into the prompt, no cut-short interview, high effort", async () => {
+  const { loadArm, evaluate } = await import("./evals/analyze-default-change.mjs");
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "default-change-"));
+  try {
+    const put = (arm, domain, i, opts, prov = {}) => {
+      writeRun(root, arm, `run-0${i + 1}`, domain, [["A", 60, opts]]);
+      const p = path.join(root, arm, `run-0${i + 1}`, domain, "provenance.json");
+      fs.writeFileSync(p, JSON.stringify({ ...JSON.parse(fs.readFileSync(p, "utf8")), reasoningEffort: "high", ...prov }));
+    };
+    for (const d of ["fibo-loans", "brick-hvac"]) {
+      [0.30, 0.34, 0.32].forEach((rel, i) => put("control", d, i, { composite: 0.60 + i * 0.01, relF1: rel }));
+      [0.50, 0.55, 0.52].forEach((rel, i) => put("treatment", d, i, { composite: 0.63, relF1: rel, relPrecision: 0.8 }));
+    }
+    const c = evaluate(loadArm(path.join(root, "treatment"), "A"), loadArm(path.join(root, "control"), "A"));
+    assert.deepEqual(Object.values(c).map((x) => x.met), [true, true, true, true]);
+
+    put("treatment", "brick-hvac", 2, { composite: 0.4, relF1: 0.5 }, { stoppedReason: "interview_ended_incomplete" });
+    const c2 = evaluate(loadArm(path.join(root, "treatment"), "A"), loadArm(path.join(root, "control"), "A"));
+    assert.equal(c2["3. no interview cut short (#188)"].met, false);
+    assert.equal(c2["4. the default effort that ran is high, every run inside the caps"].met, false);
+  } finally { fs.rmSync(root, { recursive: true, force: true }); }
+});

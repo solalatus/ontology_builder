@@ -75,4 +75,4 @@ Block 2's brick-hvac run-03 ended its interview in Phase 3. At turn 43 the perso
 
 - **Judge noise.** Re-judging an identical model (B = A) moved the semantic composite by up to 0.011. Semantic differences smaller than that are noise.
 - **Replicate spread.** Snapshot-A composite ranges 0.53 to 0.74 within fibo-loans `medium`. Three replicates per cell detect effects of about +0.1, as #182 planned, and nothing smaller.
-- **Parser bug.** `reportGenerator.mjs`'s `parseConversationLog` keeps only the first line of each multi-line entry (`\n*$` under the `m` flag). The attribution script uses its own full-text parser. Two committed reports pin numbers computed with the buggy parser, so the fix is left for #189.
+- **Parser bug (fixed in #189).** `reportGenerator.mjs`'s `parseConversationLog` kept only the first line of each multi-line entry. The attribution here always used full text, first through its own parser and since #189 through the fixed shared one, so these numbers are unaffected. The fix reversed two earlier figures: the interviewer-first identifier counts, 330 and 167, not 31 and 10; see `multi-domain-control/README.md`.

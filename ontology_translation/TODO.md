@@ -2928,6 +2928,13 @@ reference and record deltas/decisions here instead.)*
   had legitimate reason to know a word already -- meaningless on the
   interviewer side, which is never shown the persona's brief at all).
 
+  **[Superseded 2026-10-20, issue #189: the "31" below came from a parser bug
+  (`parseConversationLog` kept only the first line of each entry). Read in
+  full, the same 12 transcripts give 330 interviewer-first identifiers (range
+  4-46/run), PR #136's figure, of which 314 (95%) matched; the itops control
+  arm gives 167 (48-61/run), not 10. See
+  `ontology_translation/results/multi-domain-control/README.md`.]**
+
   **This tool corrects PR #136's own figures.** Re-run against the same 12
   published-domain transcripts PR #136 audited ad hoc, it measures **31**
   total interviewer-first identifiers (range 0-8/run), not PR #136's
@@ -3004,7 +3011,11 @@ reference and record deltas/decisions here instead.)*
   **Explicit statement of what this does and does not establish about
   pretraining contamination (issue #137's own requested "Analysis to
   report" item, replacing the prior "upper bound" caveat with a measured
-  figure).** Interviewer-first identifier counts for the itops runs: 10
+  figure).** [Superseded 2026-10-20, issue #189: read in full, itops gives
+  167 interviewer-first identifiers (48-61/run, 159 matched) and the
+  published domains 330 (4-46/run, 314 matched). The memorization-proof
+  domain has more per run, not fewer, so the reading below ("not driven by
+  pretraining") holds, now on correct numbers.] Interviewer-first identifier counts for the itops runs: 10
   total (range 0-7/run), 9 of which (90%) ended up as a scored match --
   measured with the exact same tool re-run against both directories, so
   this is a like-for-like comparison against the corrected 31-total/

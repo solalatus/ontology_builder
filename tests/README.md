@@ -348,7 +348,7 @@ It prints the real token counts.
   the bundle and usage fields;
 - the clear error when a model rejects the effort, with no retry without it.
 
-`agent-production-invariants.spec.mjs` pins the default (`medium`).
+`agent-production-invariants.spec.mjs` pins the default (`high` since #187).
 
 `agent-reasoning-effort-live.spec.mjs` is the live acceptance check #181
 requires before any #182 run. On the model the app's default lands on, with

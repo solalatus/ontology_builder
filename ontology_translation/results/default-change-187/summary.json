@@ -1,0 +1,21 @@
+{
+  "generatedAt": "2026-10-20T17:20:17.698Z",
+  "criteria": {
+    "1. non-regression (composite and practical scope not below control mean − sd, both domains)": {
+      "met": true,
+      "detail": "fibo-loans: composite 0.680 vs control 0.655 ± 0.108; practical 0.583 vs 0.561 ± 0.056; brick-hvac: composite 0.811 vs control 0.509 ± 0.051; practical 0.616 vs 0.469 ± 0.049"
+    },
+    "2. naming carried into the prompt (#180's criterion, against control A, both domains)": {
+      "met": false,
+      "detail": "fibo-loans: rel F1 +0.054 vs control sd 0.081, prop F1 -0.001 vs sd 0.171, rel precision +0.061; brick-hvac: rel F1 +0.381 vs control sd 0.185, prop F1 +0.360 vs sd 0.113, rel precision +0.326"
+    },
+    "3. no interview cut short (#188)": {
+      "met": true,
+      "detail": "6/6 runs ended stages_complete at a genuine wrap-up; 0 ended interview_ended_incomplete"
+    },
+    "4. the default effort that ran is high, every run inside the caps": {
+      "met": true,
+      "detail": "effort recorded: high; stopped: stages_complete"
+    }
+  }
+}

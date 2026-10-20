@@ -237,6 +237,25 @@ const CONTINUATION_OFFER_PATTERNS = [
   /\b(the )?next step (can|could|would) be\b/i,
   /\bnext i can do\b/i,
 ];
+// Issue #188: a sign-off that itself says later phases were never done
+// (properties, rules or actions "have not yet been modeled", final validation
+// "has not been run", work that "remains unfinished") is an interview cut
+// short, not a finished one -- a real run (block 2 of #182, brick-hvac run-03)
+// ended in Phase 3 this way and the classifier confirmed it twice. Checked on
+// every wrap-up the paired-stage and multi-domain runs have produced: it
+// flags that one message and none of the 43 genuine final wrap-ups, which
+// list content gaps ("not yet modeled as a rule") but never unfinished phases.
+const INCOMPLETE_SIGN_OFF_PATTERNS = [
+  /\b(remain|remains|are still|is still)\s+(unfinished|undone)\b/i,
+  /\b(properties|rules|actions|constraints)\b[^.]{0,80}\b(have|has)\s+not\s+(yet\s+)?been\s+(modeled|modelled|captured|recorded)\b/i,
+  /\bfinal validation\b[^.]{0,80}\b(has not|hasn't|have not|not yet)\b/i,
+];
+export function looksLikeIncompleteSignOff(text) {
+  if (!text) return false;
+  const normalized = normalizeQuotes(text);
+  return INCOMPLETE_SIGN_OFF_PATTERNS.some((re) => re.test(normalized));
+}
+
 export function looksLikeContinuationOffer(text) {
   if (!text) return false;
   if (!text.includes("?")) return false; // a final summary states; it does not ask
@@ -432,6 +451,7 @@ export async function appearsFinished(text, { apiKey, model, chat = null, recent
   if (looksLikeOpenQuestion(text)) return false;
   if (looksLikeEarlyPhaseCheckpoint(text)) return false;
   if (looksLikeContinuationOffer(text)) return false;
+  if (looksLikeIncompleteSignOff(text)) return false;
   // Same injection point as personaAgent's: issue #85 runs against Azure,
   // where the fixed api.openai.com URL and Bearer header below are wrong.
   // The deterministic pre-filters above still run either way, and only
@@ -738,6 +758,7 @@ export async function runOntologyRecoveryConversation({
   let consecutiveErrorTurns = 0;
   let consecutivePureAcknowledgmentTurns = 0;
   let consecutivePersonaAcknowledgmentTurns = 0; // issue #133/E12
+  let lastSubstantiveAppText = ""; // issue #188: the interviewer's last non-pleasantry message
   let consecutiveTurnsWithNoToolActivity = 0; // issue #133/item 8
   let maxConsecutiveTurnsWithNoToolActivity = 0; // issue #133/item 8 -- worth surfacing even for a run that never crossed WASTED_TURN_THRESHOLD
   let turnsUsed = 0;
@@ -839,6 +860,7 @@ export async function runOntologyRecoveryConversation({
     }
     consecutiveEmptyAppTurns = 0;
     consecutiveErrorTurns = 0;
+    if (!looksLikePureAcknowledgment(appText)) lastSubstantiveAppText = appText;
 
     // With stages (issue #182), a pleasantry loop is the interviewer having
     // wrapped up the current stage, not the end of the run: the controller
@@ -847,6 +869,10 @@ export async function runOntologyRecoveryConversation({
     if (looksLikePureAcknowledgment(appText)) {
       consecutivePureAcknowledgmentTurns++;
       if (consecutivePureAcknowledgmentTurns >= 2) {
+        // Issue #188: a sign-off loop after a message that says later phases
+        // were never done ends the run as cut short -- never as a finished
+        // interview, and never as snapshot A.
+        if (looksLikeIncompleteSignOff(lastSubstantiveAppText)) { stoppedReason = "interview_ended_incomplete"; break; }
         if (!stageController) { stoppedReason = "pleasantry_loop_detected"; break; }
         pleasantryLoop = true;
       }
@@ -944,6 +970,7 @@ export async function runOntologyRecoveryConversation({
     if (looksLikePureAcknowledgment(personaReply.text)) {
       consecutivePersonaAcknowledgmentTurns++;
       if (consecutivePersonaAcknowledgmentTurns >= 2) {
+        if (looksLikeIncompleteSignOff(lastSubstantiveAppText)) { stoppedReason = "interview_ended_incomplete"; break; }
         if (!stageController) { stoppedReason = "pleasantry_loop_detected"; break; }
         // Issue #182: the same two-sided sign-off, inside a stage, ends
         // that stage rather than the run.

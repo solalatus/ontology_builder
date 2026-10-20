@@ -1,0 +1,10 @@
+[
+  {
+    "severity": "advisory",
+    "kind": "relationship-pair",
+    "identity": "hasPoint (Space → Occupancy Sensor) / hasLocationIn (Occupancy Sensor → Space)",
+    "field": "pair",
+    "pattern": "RECIPROCAL_PAIR",
+    "detail": "hasPoint (Space → Occupancy Sensor) and hasLocationIn (Occupancy Sensor → Space) connect the same two classes in opposite directions -- confirm these are two genuinely distinct facts, not the same fact stated twice"
+  }
+]

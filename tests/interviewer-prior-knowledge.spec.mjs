@@ -140,9 +140,10 @@ test("crossReferenceMatchedIdentifiers: an identifier with no corresponding matc
 
 // --- Real-data regression: the committed 4-domain x 3-replicate re-run ---
 //
-// This is the reproducible correction to PR #136's own unreproducible ad
-// hoc figures for this exact same 12-run set (330 interviewer-first total,
-// range 4-46/run, 162 matched ~30%). Spot-checking this tool's own output
+// This is the reproducible version of PR #136's ad hoc figures for this
+// exact same 12-run set (330 interviewer-first total, range 4-46/run, 162
+// matched ~30%). Its total reproduces #136's exactly once the log is read in
+// full (issue #189); its matched count does not (314, 95%). Spot-checking this tool's own output
 // (interviewer-first identifiers on iof-maintenance/run-01, fibo-loans/
 // run-01, brick-hvac/run-03 include real, sensible raw-identifier guesses
 // like "MaintenanceProcess", "classifyItemAsFailed", "SecuredLoan",
@@ -177,7 +178,7 @@ test("real-data regression: persona-first stays empty on every one of the 12 com
   }
 });
 
-test("real-data regression: total interviewer-first count across the 12 committed runs is a genuinely small, reproducible number -- corrects PR #136's unreproducible 330 figure", () => {
+test("real-data regression: total interviewer-first count across the 12 committed runs is reproducible, and matches PR #136's 330 once logs are read in full (#189)", () => {
   const domains = ["brick-hvac", "iof-maintenance", "iof-supply-chain", "fibo-loans"];
   const runs = ["run-01", "run-02", "run-03"];
   let totalInterviewerFirst = 0;
@@ -189,11 +190,15 @@ test("real-data regression: total interviewer-first count across the 12 committe
       totalMatched += matched.size;
     }
   }
-  // Pinned to this tool's own actual, reproducible output -- not to PR
-  // #136's figure, which no committed script can reproduce. A future
-  // change to leakDetector.mjs's candidate-set definition or the matching
-  // logic that moves this number is expected to update this assertion
+  // Pinned to this tool's own actual, reproducible output. A future change
+  // to leakDetector.mjs's candidate-set definition or the matching logic
+  // that moves this number is expected to update this assertion
   // deliberately, with a note explaining why -- not silently.
-  assert.equal(totalInterviewerFirst, 31);
-  assert.equal(totalMatched, 31);
+  //
+  // Issue #189: this was pinned at 31 / 31 while parseConversationLog kept
+  // only the first line of every entry. Read in full, the same 12
+  // transcripts give 330 -- PR #136's original figure, which the "31" had
+  // been presented as correcting -- of which 314 (95%) became scored matches.
+  assert.equal(totalInterviewerFirst, 330);
+  assert.equal(totalMatched, 314);
 });

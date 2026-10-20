@@ -222,9 +222,20 @@ import { withPage } from "./lib/page.mjs";
 // must name the tie-back per class, not once for the whole batch: a class
 // without its own specific justification drops out of the batch and stays
 // open, even if the rest of the batch is fine.
+//
+// Updated deliberately (issues #187 and #188, 2026-10-20). Phases 2, 3 and 4
+// ask, in the same batch as each confirmation, for the expert's own term (and
+// for a relationship, their verb and direction), and use it as the name,
+// renaming an already-recorded item in place with rename_ontology_elements --
+// the naming pass #182 measured as a separate stage, folded into the
+// interview. GROUND RULES: a farewell-sounding remark while later phases are
+// unfinished is not a refusal to continue; the interviewer names the
+// remaining phases and asks the next question (a #182 run ended in Phase 3
+// that way). Measured, together with the default effort moving to `high`,
+// in ontology_translation/results/default-change-187/.
 export const PRODUCTION_SYSTEM_PROMPT_SHA256 = {
-  en: "9c9a4583a266795d69c7f7993866b4261d6f9d3cfcb882117260d1abb7489f0d",
-  hu: "57142d09a2bcf63b135639c46676dbfde95272e6ded42d59710fe1975762597f",
+  en: "603766dfec317f168ab5bebb8b901f681903a114139b8f469af1bbbbf98cf354",
+  hu: "9ab5a49274478731571cf183b618b64e0f851beedd523e10007cfb849312adcc",
 };
 
 // The complete ontology tool surface an ordinary interview request exposes.
@@ -235,13 +246,16 @@ export const PRODUCTION_SYSTEM_PROMPT_SHA256 = {
 // (issue #140 follow-up, see PRODUCTION_SYSTEM_PROMPT_SHA256's own comment
 // just above for the full story): remove_ontology_elements, appended last
 // to match the literal order the "tools:" array is constructed in the live
-// interview's own tool-calling loop.
-export const PRODUCTION_TOOL_NAMES = ["apply_ontology_yaml", "get_graph_state", "remove_ontology_elements"];
+// interview's own tool-calling loop. Grew to four (issue #187):
+// rename_ontology_elements, so a name the expert gives for an item already on
+// the canvas is applied in place.
+export const PRODUCTION_TOOL_NAMES = ["apply_ontology_yaml", "get_graph_state", "remove_ontology_elements", "rename_ontology_elements"];
 
 // Issue #181: the effort every interview request to a reasoning model carries
-// by default. Changing it changes the configuration every #182 run is
-// measured at -- see that ticket before touching the constant.
-export const PRODUCTION_REASONING_EFFORT = "medium";
+// by default. `high` since #187 (owner's decision, 2026-10-20), measured with
+// that change in ontology_translation/results/default-change-187/; #182's runs
+// were at explicit `medium` and `high`.
+export const PRODUCTION_REASONING_EFFORT = "high";
 
 const MODELS_URL = "https://api.openai.com/v1/models";
 const CHAT_URL = "https://api.openai.com/v1/chat/completions";
@@ -259,7 +273,7 @@ for (const lang of ["en", "hu"]) {
   });
 }
 
-test("an ordinary interview request exposes exactly the two ontology tools, and no normalization tool", async () => {
+test("an ordinary interview request exposes exactly the production ontology tools, and no normalization tool", async () => {
   await withPage(async (page) => {
     await page.route(MODELS_URL, (route) => route.fulfill({
       status: 200, contentType: "application/json",

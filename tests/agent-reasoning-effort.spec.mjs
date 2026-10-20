@@ -7,7 +7,7 @@ import { withPageAllowingResourceErrors } from "./lib/liveOpenAi.mjs";
 // Issue #181, Part 1: the reasoning effort is sent explicitly to every
 // reasoning model, identically on every provider and on both routes (Chat
 // Completions `reasoning_effort`, Responses API `reasoning.effort`); never to
-// a non-reasoning model; `medium` by default, `high` selectable per
+// a non-reasoning model; `high` by default since #187, `medium` selectable per
 // connection; a rejection is reported, never silently dropped. Mocked: no key,
 // no network. The live acceptance check is agent-reasoning-effort-live.spec.mjs.
 
@@ -68,10 +68,10 @@ const lastSystemNote = (page) => page.evaluate(() => {
   return t.length ? t[t.length - 1].text : null;
 });
 
-test("the default effort is medium and only medium and high are offered", async () => {
+test("the default effort is high (#187) and only medium and high are offered", async () => {
   await withPage(async (page) => {
     const r = await page.evaluate(() => ({ efforts: window.__kg.agent.reasoningEfforts, def: window.__kg.agent.reasoningEffortDefault }));
-    assert.deepEqual(r, { efforts: ["medium", "high"], def: "medium" });
+    assert.deepEqual(r, { efforts: ["medium", "high"], def: "high" });
     const options = await page.$$eval("#agent-reasoning-effort-select option", (os) => os.map((o) => o.value));
     assert.deepEqual(options, ["medium", "high"], "no `none`, no lower level");
   });
@@ -88,7 +88,7 @@ test("the effort row appears in the model stage for a reasoning model only, and 
     await page.waitForFunction(() => !document.getElementById("agent-model-select-modal").disabled);
     assert.equal(await page.inputValue("#agent-model-select-modal"), "gpt-5.5");
     assert.ok(await page.locator("#agent-effort-row").isVisible());
-    assert.equal(await page.inputValue("#agent-reasoning-effort-select"), "medium");
+    assert.equal(await page.inputValue("#agent-reasoning-effort-select"), "high");
     await page.selectOption("#agent-model-select-modal", "gpt-4o-mini");
     assert.equal(await page.locator("#agent-effort-row").isVisible(), false);
     await page.selectOption("#agent-model-select-modal", "gpt-5.5");
@@ -104,17 +104,17 @@ test("OpenAI: a reasoning model gets reasoning_effort on every call kind; the ch
     await send(page);
     await page.evaluate((y) => window.__kg.formats.commitYamlImport(y, "merge"), "classes:\n  A: {}\n  B: {}\nrelationships:\n  - name: r\n    from: A\n    to: B\n");
     await page.evaluate(() => window.__kg.consistency.llm.run());
-    assert.deepEqual(chats.map((b) => [Boolean(b.tools), b.reasoning_effort]), [[true, "medium"], [false, "medium"]], "interview and background check alike");
+    assert.deepEqual(chats.map((b) => [Boolean(b.tools), b.reasoning_effort]), [[true, "high"], [false, "high"]], "interview and background check alike");
     const usage = await page.evaluate(() => window.__kg.agent.state.usage.map((e) => e.reasoning_effort));
-    assert.deepEqual(usage, ["medium", "medium"], "the usage log records the effort each call was sent with");
+    assert.deepEqual(usage, ["high", "high"], "the usage log records the effort each call was sent with");
   });
   await withPage(async (page) => {
     mockModels(page, ["gpt-5.5"]);
     const chats = mockRoute(page, OPENAI_CHAT);
-    await connect(page, { effort: "high" });
+    await connect(page, { effort: "medium" });
     await send(page);
-    assert.equal(chats[0].reasoning_effort, "high");
-    assert.equal(await page.evaluate(() => window.__kg.agent.effectiveReasoningEffort()), "high");
+    assert.equal(chats[0].reasoning_effort, "medium");
+    assert.equal(await page.evaluate(() => window.__kg.agent.effectiveReasoningEffort()), "medium");
   });
 });
 
@@ -203,12 +203,12 @@ test("a remembered connection keeps a non-default effort; the default is not sto
   await withPage(async (page) => {
     mockModels(page, ["gpt-5.5"]);
     mockRoute(page, OPENAI_CHAT);
-    await connect(page, { effort: "high", remember: true });
-    assert.equal(await page.evaluate(() => localStorage.getItem("kg-agent-reasoning-effort")), "high");
+    await connect(page, { effort: "medium", remember: true });
+    assert.equal(await page.evaluate(() => localStorage.getItem("kg-agent-reasoning-effort")), "medium");
     await page.evaluate(() => window.__kg.agent.disconnect());
-    assert.equal(await page.evaluate(() => window.__kg.agent.state.reasoningEffort), "medium", "a disconnect resets the live state");
+    assert.equal(await page.evaluate(() => window.__kg.agent.state.reasoningEffort), "high", "a disconnect resets the live state");
     await page.click("#agent-connect-open");
-    assert.equal(await page.inputValue("#agent-reasoning-effort-select"), "high", "pre-filled from the remembered connection");
+    assert.equal(await page.inputValue("#agent-reasoning-effort-select"), "medium", "pre-filled from the remembered connection");
     await page.click("#agent-connect-cancel");
     await page.click("#agent-forget-key");
     assert.equal(await page.evaluate(() => localStorage.getItem("kg-agent-reasoning-effort")), null);

@@ -2946,8 +2946,8 @@ const STRINGS = {
     agentAzureConfigSave: "Save",
     agentModelLabel: "Model",
     agentEffortLabel: "Reasoning effort",
-    agentEffortMedium: "medium (default)",
-    agentEffortHigh: "high",
+    agentEffortMedium: "medium",
+    agentEffortHigh: "high (default)",
     agentEffortHint: "Sent explicitly with every request to a reasoning model, the same way on every provider.",
     agentRememberKey: "Remember this key on this device",
     agentDisconnect: "Disconnect",
@@ -3327,8 +3327,8 @@ const STRINGS = {
     agentAzureConfigSave: "Mentés",
     agentModelLabel: "Modell",
     agentEffortLabel: "Gondolkodási szint",
-    agentEffortMedium: "közepes (alapértelmezett)",
-    agentEffortHigh: "magas",
+    agentEffortMedium: "közepes",
+    agentEffortHigh: "magas (alapértelmezett)",
     agentEffortHint: "Gondolkodó modellnek minden kérésben kifejezetten elküldjük, minden szolgáltatónál ugyanígy.",
     agentRememberKey: "A kulcs megjegyzése ezen az eszközön",
     agentDisconnect: "Leválasztás",
@@ -13626,12 +13626,14 @@ const AGENT_PINNED_MODEL = AGENT_PINNED_MODELS[0];
 // Issue #181: the reasoning effort is always sent explicitly to a reasoning
 // model, identically on every provider -- an unset parameter means "the
 // provider's default today", which is not a controlled configuration.
-// `medium` until the #182 measurement says `high`; the connect dialog can
-// raise it per connection. `none` is not offered (rejected by every model
+// `high` by the owner's decision of 2026-10-20 (issue #187), measured together
+// with #187's prompt change against the old prompt at `medium`; #182 on its
+// own found no gain from `high` at the interview stage. The connect dialog
+// can lower it per connection. `none` is not offered (rejected by every model
 // but the codename generation), and a non-reasoning model never gets the
 // parameter (gpt-4o-mini, gpt-4.1 reject it outright).
 const AGENT_REASONING_EFFORTS = ["medium", "high"];
-const AGENT_REASONING_EFFORT_DEFAULT = "medium";
+const AGENT_REASONING_EFFORT_DEFAULT = "high";
 
 // Lowercase; drop a provider prefix ("azure/", "openai/", Bedrock's
 // "openai." and "us.openai."), trailing dated snapshots ("-2026-09-30",
@@ -13773,10 +13775,8 @@ const agentState = {
   // the treatment alone and nothing else (not a Chromium version, not a
   // harness revision). Never set by any real UI.
   selfCorrectionDisabled: false,
-  // Eval-only, same family: when true the interviewer is also offered
-  // rename_ontology_elements (see RENAME_ONTOLOGY_ELEMENTS_TOOL's comment), and
-  // every rename it makes is logged here for the harness. Never set by any UI.
-  renameToolEnabled: false,
+  // Every rename_ontology_elements call's renames and their outcome, for
+  // the eval harness (issue #182) and the session's own record.
   renameLog: [],
   // Issue #156 -- bounds the automatic end-of-interview Tier C call to at
   // most once per conversation, however many times get_graph_state is
@@ -14718,17 +14718,17 @@ const GET_GRAPH_STATE_TOOL = {
   },
 };
 
-// Eval-only (issue #180's naming pass, run by tests/evals/lib/pairedStages.mjs):
-// offered to the interviewer only while agentState.renameToolEnabled is set,
-// which no UI does, so the shipped tool list and prompt are unchanged. The
-// import-merge agent's rename_ontology_element (#153) re-keys a class in
-// place but cannot reach a relationship or a property, and renaming those
-// by apply-new-then-remove-old costs two edits per batch against a budget of
-// one. This does all three kinds in place, in batches: a class keeps its old
-// label as an alias, a relationship keeps its old name as an alias and can
-// be turned round, a property just takes the new name (there is no property
-// alias field). Renames add no content, so they do not draw on the per-turn
-// edit budget, but they fold into the turn's one undo step.
+// Renames classes, relationships and properties in place, in batches (issue
+// #180's naming pass, offered to every interview since #187, whose prompt
+// asks for the expert's own term at confirmation time). The import-merge
+// agent's rename_ontology_element (#153) re-keys a class in place but cannot
+// reach a relationship or a property, and renaming those by apply-new-then-
+// remove-old costs two edits against a per-turn budget of one. Here a class
+// keeps its old label as an alias, a relationship keeps its old name as an
+// alias and can be turned round, and a property just takes the new name
+// (there is no property alias field). Renames add no content, so they do
+// not draw on the per-turn edit budget, but they fold into the turn's one
+// undo step.
 const RENAME_ONTOLOGY_ELEMENTS_TOOL = {
   type: "function",
   function: {
@@ -15198,8 +15198,13 @@ GROUND RULES
   it and stopping here. State plainly what's confirmed and what's still
   open, then immediately ask the next concrete question needed to close
   that gap — don't present "stop or continue" as a fair choice, and don't
-  soften an unfinished phase into a "good stopping point." If the expert
-  stops responding or explicitly refuses to continue, say plainly, in your
+  soften an unfinished phase into a "good stopping point." An expert remark
+  that sounds like a farewell or a natural stopping point ("that's a fair
+  place to leave it", a goodbye) while later phases are still unfinished is
+  not, by itself, a refusal to continue: it usually only means the current
+  item may stay open. Reply by naming the phases that remain and asking the
+  first concrete question of the next one. Only if the expert then
+  explicitly declines to continue, or stops responding, say plainly, in your
   own next turn, exactly what remains missing and that the model is being
   left in a known-incomplete state — never let a recap read as if the open
   item were resolved.
@@ -15304,6 +15309,11 @@ already has instead of following it rigidly)
    doesn't settle it without a specific operational reason attached (e.g.
    "yes, because X and Y are staffed and handled independently" is a real
    answer; agreement alone is not).
+   When the expert confirms a class, ask in the same batch whether that is
+   what they would call it themselves or whether they have their own term,
+   and use their term as the class name, keeping your proposed name as an
+   alias. Agreement with what a class means is not agreement with your
+   wording for it.
    A role that only surfaced from the Phase 1 follow-up probe (not from
    the expert's own original free-form list) is a candidate, not a
    pre-approved inclusion — the probe's job is to surface it, not to
@@ -15317,7 +15327,15 @@ already has instead of following it rigidly)
    any other unjustified class.
 3. Relationships: propose relationships as verb phrases between two
    classes, each with an explicit direction. Reject vague or directionless
-   relationships. Never phrase a relationship as disguised subclassing —
+   relationships. Once the expert confirms a relationship in substance, ask
+   in the same batch what they call that connection themselves, in one verb
+   phrase, and which way round they would say it, and record their verb in
+   their direction, keeping your proposed wording as an alias. Don't keep
+   your own verb just because the expert agreed with what it means, and
+   don't keep a passive "...By" form when the expert states it the other way
+   round. An item that is already recorded under your wording is renamed in
+   place with rename_ontology_elements (which keeps everything attached to
+   it), never re-added under the new name and the old one removed. Never phrase a relationship as disguised subclassing —
    "is type of," "is a kind of," "is a," "classified as," and similar
    wording all mean "these are really the same taxonomy, one more specific
    than the other," which this tool cannot represent (it has classes and
@@ -15396,6 +15414,9 @@ already has instead of following it rigidly)
    them either confirm a real alternative already in the model or change
    their answer. A property genuinely unneeded by anything on the list
    stays excluded as normal.
+   As with classes and relationships, when the expert confirms a property,
+   ask in the same batch whether that is their own name for it, and use
+   their term as the property name.
    The same scrutiny applies in the other direction: don't accept a
    property just because the expert says a value will exist "per policy"
    or "per the organization's system," with the exact scheme left open —
@@ -16544,8 +16565,11 @@ async function sendAgentChatMessage(userText) {
         // real completed interviews traced directly to leftover deletion-
         // sentinel text ("REMOVE") shipping in final exports. See
         // handleAgentRemoveToolCall's own comment for the full story.
-        tools: agentState.toolsDisabled ? undefined : [APPLY_ONTOLOGY_YAML_TOOL, GET_GRAPH_STATE_TOOL, REMOVE_ONTOLOGY_ELEMENTS_TOOL,
-          ...(agentState.renameToolEnabled ? [RENAME_ONTOLOGY_ELEMENTS_TOOL] : [])],
+        // RENAME_ONTOLOGY_ELEMENTS_TOOL added here (issue #187): the prompt
+        // asks for the expert's own term at confirmation time, and an item
+        // already recorded under the interviewer's wording is renamed in
+        // place rather than re-added and removed.
+        tools: agentState.toolsDisabled ? undefined : [APPLY_ONTOLOGY_YAML_TOOL, GET_GRAPH_STATE_TOOL, REMOVE_ONTOLOGY_ELEMENTS_TOOL, RENAME_ONTOLOGY_ELEMENTS_TOOL],
         promptCacheKey: agentState.promptCacheKey,
         signal: controller.signal,
       });
@@ -16568,7 +16592,7 @@ async function sendAgentChatMessage(userText) {
             agentState.apiMessages.push({ role: "tool", tool_call_id: call.id, content: resultText });
             continue;
           }
-          if (name === "rename_ontology_elements" && agentState.renameToolEnabled) {
+          if (name === "rename_ontology_elements") {
             const { resultText } = await handleAgentRenameToolCall(call);
             agentState.apiMessages.push({ role: "tool", tool_call_id: call.id, content: resultText });
             continue;
@@ -17045,8 +17069,6 @@ window.__kg = {
     sendMessage: submitAgentChatInput,
     // Eval-only (issue #85's control arm) -- see agentState.selfCorrectionDisabled.
     setSelfCorrectionDisabled: (off) => { agentState.selfCorrectionDisabled = Boolean(off); },
-    // Eval-only (issue #180's naming pass) -- see agentState.renameToolEnabled.
-    setRenameToolEnabled: (on) => { agentState.renameToolEnabled = Boolean(on); },
     renameTool: RENAME_ONTOLOGY_ELEMENTS_TOOL,
     buildSystemPrompt: buildAgentSystemPrompt,
     isSending: () => agentState.sending,

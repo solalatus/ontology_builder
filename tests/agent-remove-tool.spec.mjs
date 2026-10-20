@@ -74,11 +74,11 @@ async function seed(page, yaml = SEED_YAML) {
   }, yaml);
 }
 
-test("the tools array on a live interview request includes remove_ontology_elements, third after apply and get_graph_state", async () => {
+test("the tools array on a live interview request includes remove_ontology_elements, third after apply and get_graph_state (rename follows since #187)", async () => {
   await withPage(async (page) => {
     const bodies = await runAgentTurn(page, [textTurn("Understood.")], "Let's start.");
     const names = bodies[0].tools.map((t) => t.function.name);
-    assert.deepEqual(names, ["apply_ontology_yaml", "get_graph_state", "remove_ontology_elements"]);
+    assert.deepEqual(names, ["apply_ontology_yaml", "get_graph_state", "remove_ontology_elements", "rename_ontology_elements"]);
   });
 });
 

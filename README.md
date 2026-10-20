@@ -76,8 +76,8 @@ model is recognised by its actual identity, not its listed name:
 and `-preview` all count; `-mini` or `6.10` do not. Without either, the
 newest standard reasoning model is chosen as before, and any model can still
 be picked by hand (issue #178). A reasoning model is always sent an explicit
-**reasoning effort**: `medium` by default, `high` selectable in the connect
-dialog. It is sent the same way on every provider and on both API routes,
+**reasoning effort**: `high` by default (since issue #187), `medium` selectable in
+the connect dialog. It is sent the same way on every provider and on both API routes,
 and never to a non-reasoning model. A model that rejects it gets a clear
 error rather than a silently dropped setting. The session bundle and each
 usage entry record the effort sent (issue #181).
