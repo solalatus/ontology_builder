@@ -32,6 +32,8 @@ B − A composite, mean of both domains: +0.005 at `medium` and +0.001 at `high`
 
 ## #180, naming pass: not met at `medium`, met at `high`; the floors hold in both
 
+Promotion into the shipped prompt, with a non-regression run, is #187 (owner's decision, 2026-10-20).
+
 | | fibo-loans | brick-hvac |
 |---|---|---|
 | C − B composite, `medium` | +0.031 | +0.163 |
@@ -67,10 +69,10 @@ Block 2's brick-hvac run-03 ended its interview in Phase 3. At turn 43 the perso
 
 - **How it is counted.** No cap was hit, so under the pre-registered rules the run counts, and it is averaged in above.
 - **Effect.** Excluding it changes no pass/fail verdict.
-- **Worth a ticket.** The `high` interviewer accepted the persona's mid-interview stop instead of offering to continue the remaining phases. Neither the persona wrapper nor the interviewer prompt is meant to allow that.
+- **Ticket: #188.** The `high` interviewer accepted the persona's mid-interview stop instead of offering to continue the remaining phases. Neither the persona wrapper nor the interviewer prompt is meant to allow that.
 
 ## Other notes
 
 - **Judge noise.** Re-judging an identical model (B = A) moved the semantic composite by up to 0.011. Semantic differences smaller than that are noise.
 - **Replicate spread.** Snapshot-A composite ranges 0.53 to 0.74 within fibo-loans `medium`. Three replicates per cell detect effects of about +0.1, as #182 planned, and nothing smaller.
-- **Parser bug.** `reportGenerator.mjs`'s `parseConversationLog` keeps only the first line of each multi-line entry (`\n*$` under the `m` flag). The attribution script uses its own full-text parser. Two committed reports pin numbers computed with the buggy parser, so the fix is left for a separate ticket.
+- **Parser bug.** `reportGenerator.mjs`'s `parseConversationLog` keeps only the first line of each multi-line entry (`\n*$` under the `m` flag). The attribution script uses its own full-text parser. Two committed reports pin numbers computed with the buggy parser, so the fix is left for #189.
