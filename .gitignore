@@ -99,3 +99,6 @@ ontology_translation/results/default-change-187/*/block.log
 ontology_translation/results/final-scores/*/*/*/progress.json
 ontology_translation/results/final-scores/*/*/*/checkpoint/
 ontology_translation/results/final-scores/*/block.log
+ontology_translation/results/baselines-gpt6/*/*/*/progress.json
+ontology_translation/results/baselines-gpt6/*/*/*/checkpoint/
+ontology_translation/results/baselines-gpt6/block.log

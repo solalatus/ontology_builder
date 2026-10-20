@@ -44,6 +44,39 @@ export const BLOCKS = {
   },
 };
 
+// The baselines (EXPERIMENT_BRIEF.md §3) at the shipped configuration, on all
+// five domains: B1 (one-shot extraction) over each final-score interview's
+// own transcript, then B3 (no commits) and B2 (generic interviewer) as fresh
+// interviews, each run like a final-score run in everything but its one
+// factor (results/baselines-gpt6/DESIGN.md). Cheapest first, and B3 before
+// B2 because it is the condition closest to the paper's claim.
+const FINAL_SOURCE = {
+  "fibo-loans": "ontology_translation/results/default-change-187/treatment",
+  "brick-hvac": "ontology_translation/results/default-change-187/treatment",
+  "iof-maintenance": "ontology_translation/results/final-scores/runs",
+  "iof-supply-chain": "ontology_translation/results/final-scores/runs",
+  itops: "ontology_translation/results/final-scores/runs",
+};
+const ALL_FIVE = ["fibo-loans", "brick-hvac", "iof-maintenance", "iof-supply-chain", "itops"];
+export function baselineItems() {
+  const each = (condition) => ["run-01", "run-02", "run-03"].flatMap((runId) => ALL_FIVE.map((domain) => ({ condition, domain, runId })));
+  return [...each("b1-one-shot"), ...each("b3-no-commit"), ...each("b2-generic-interviewer")];
+}
+BLOCKS.baselines = {
+  root: path.join(ROOT, "ontology_translation", "results", "baselines-gpt6"), effort: null,
+  env: { ONTOLOGY_EVAL_COVERAGE_SWEEP: "", ONTOLOGY_EVAL_NAMING_PASS: "", ONTOLOGY_EVAL_SNAPSHOT_AT_WRAPUP: "1", EVAL_RUN_COST_CAP_USD: "10" },
+  items: baselineItems,
+};
+
+/** The command, directory and clean end of one baseline item. */
+export function baselineCommand({ condition, domain, runId }, root) {
+  const dir = path.join(root, condition);
+  if (condition === "b1-one-shot") {
+    return { dir, cleanStop: "extracted", args: ["tests/evals/run-baseline-b1.mjs", `--domain=${domain}`, `--run=${runId}`, `--source=${FINAL_SOURCE[domain]}`, `--resultsDir=${dir}`], env: {} };
+  }
+  return { dir, cleanStop: "stages_complete", args: ["tests/evals/run-multi-domain-benchmark.mjs", `--domain=${domain}`, `--run=${runId}`, `--resultsDir=${dir}`], env: { ONTOLOGY_EVAL_CONDITION: condition } };
+}
+
 // Interleaved, so a block stopped early still has both domains.
 export const DEFAULT_RUNS = ["run-01", "run-02", "run-03"].flatMap((r) => [`fibo-loans:${r}`, `brick-hvac:${r}`]);
 
@@ -88,9 +121,9 @@ export function spentUsd(root = RESULTS_ROOT) {
   return total;
 }
 
-function runOne({ domain, runId, blockDir, env, log }) {
+function runOne({ domain, runId, blockDir, env, log, args = null }) {
   return new Promise((resolve) => {
-    const child = spawn(process.execPath, ["tests/evals/run-multi-domain-benchmark.mjs", `--domain=${domain}`, `--run=${runId}`, `--resultsDir=${blockDir}`], {
+    const child = spawn(process.execPath, args || ["tests/evals/run-multi-domain-benchmark.mjs", `--domain=${domain}`, `--run=${runId}`, `--resultsDir=${blockDir}`], {
       cwd: ROOT, env: { ...process.env, ...env }, stdio: ["ignore", "pipe", "pipe"],
     });
     const forward = (stream) => {
@@ -114,11 +147,11 @@ async function main() {
     return hit ? hit.split("=").slice(1).join("=") : fallback;
   };
   const block = BLOCKS[arg("block", "")];
-  if (!block) { console.error("Usage: node tests/evals/run-paired-stages.mjs --block=1|2|187|final [--runs=domain:run-id,...] [--budget=USD]"); process.exit(1); }
+  if (!block) { console.error("Usage: node tests/evals/run-paired-stages.mjs --block=1|2|187|final|baselines [--runs=domain:run-id,...] [--only=condition:domain:run-id,...] [--skip=...] [--budget=USD]"); process.exit(1); }
   const runs = arg("runs", (block.runs || DEFAULT_RUNS).join(",")).split(",").map((s) => s.split(":"));
   const budget = Number(arg("budget", "200"));
   const resultsRoot = block.root || RESULTS_ROOT;
-  const blockDir = path.join(resultsRoot, block.dir);
+  const blockDir = block.items ? resultsRoot : path.join(resultsRoot, block.dir);
   fs.mkdirSync(blockDir, { recursive: true });
   const logPath = path.join(blockDir, "block.log");
   const log = (line) => {
@@ -127,6 +160,30 @@ async function main() {
     fs.appendFileSync(logPath, `${stamped}\n`);
   };
   const env = protocolEnv(block.effort, block.env);
+
+  if (block.items) {
+    // --only runs just those items; --skip leaves out a run that ended
+    // uncleanly for a reason of its own, so the rest can go on (DESIGN.md,
+    // "Exclusion").
+    const only = arg("only", null), skip = arg("skip", "").split(",").filter(Boolean);
+    const key = (it) => `${it.condition}:${it.domain}:${it.runId}`;
+    const items = block.items().filter((it) => (!only || only.split(",").includes(key(it))) && !skip.includes(key(it)));
+    for (const item of items) {
+      const spent = spentUsd(resultsRoot);
+      if (spent >= budget) { log(`STOP: $${spent.toFixed(2)} spent under ${path.relative(ROOT, resultsRoot)}/, budget $${budget} reached`); process.exitCode = 4; return; }
+      const cmd = baselineCommand(item, resultsRoot);
+      const name = `${item.condition} ${item.domain}/${item.runId}`;
+      log(`START ${name} (spent so far $${spent.toFixed(2)} of $${budget})`);
+      const code = await runOne({ ...item, blockDir: cmd.dir, env: { ...env, ...cmd.env }, log, args: cmd.args });
+      const prov = (() => { try { return JSON.parse(fs.readFileSync(path.join(cmd.dir, item.runId, item.domain, "provenance.json"), "utf8")); } catch { return null; } })();
+      const clean = code === 0 && prov && prov.status === "complete" && prov.stoppedReason === cmd.cleanStop;
+      log(`END ${name}: exit=${code} status=${prov && prov.status} stopped=${prov && prov.stoppedReason} `
+        + `cost=$${prov && typeof prov.totalCostUsd === "number" ? prov.totalCostUsd.toFixed(2) : "?"} turns=${prov && prov.turnsUsed}`);
+      if (!clean) { log(`STOP: ${name} did not end cleanly; not starting another run`); process.exitCode = 5; return; }
+    }
+    log(`BLOCK DONE baselines: $${spentUsd(resultsRoot).toFixed(2)} spent under ${path.relative(ROOT, resultsRoot)}/`);
+    return;
+  }
 
   for (const [domain, runId] of runs) {
     const spent = spentUsd(resultsRoot);
