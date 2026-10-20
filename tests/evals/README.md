@@ -608,8 +608,8 @@ ONTOLOGY_EVAL_MAX_TURNS=6 node --test tests/evals/*.eval.spec.mjs
 
 ## Conditions built on top of this eval
 
-Two separate specifications extend the eval rather than being part of it, and
-neither is run by `node --test tests/evals/*.eval.spec.mjs`:
+Several specifications extend the eval rather than being part of it, and
+none is run by `node --test tests/evals/*.eval.spec.mjs`:
 
 - **`EXPERIMENT_BRIEF.md`** — the B1/B2/B3 comparison conditions, each varying
   one factor of the pipeline that *produces* a model (how a transcript becomes
@@ -629,7 +629,33 @@ neither is run by `node --test tests/evals/*.eval.spec.mjs`:
   `results/baselines/post-normalization-v2/REPORT.md`, the latter carrying the
   experiment's final **REJECT** recommendation.
 
-Both are evaluation-only with respect to the shipped app. The production
+- **`ontology_translation/results/paired-stages/DESIGN.md`**: the paired-stage
+  protocol (issue #182). It measures #179's coverage sweep, #180's naming pass
+  and #181's `medium` versus `high` effort inside one run per replicate. The
+  interviewer runs to its own wrap-up (snapshot A), then the harness injects the
+  sweep (snapshot B) and the naming pass (snapshot C). Each snapshot is scored
+  the same way.
+  - Pieces: `lib/pairedStages.mjs` (stage texts and the stage state machine),
+    the `stageController` and `shouldStop` options of
+    `runOntologyRecoveryConversation`, and these settings of
+    `run-multi-domain-benchmark.mjs`:
+    - `ONTOLOGY_EVAL_COVERAGE_SWEEP=1` and `ONTOLOGY_EVAL_NAMING_PASS=1` turn
+      the stages on;
+    - `ONTOLOGY_EVAL_SWEEP_MAX_ROUNDS` and the `ONTOLOGY_EVAL_*_TURN_CAP`
+      variables bound them;
+    - `ONTOLOGY_EVAL_APP_TURN_TIMEOUT_SEC` and `EVAL_RUN_COST_CAP_USD` bound
+      each turn and each run;
+    - `EVAL_PRICE_*_PER_M` set the prices used for cost.
+  - Running it: `run-paired-stages.mjs --block=1|2` runs a block one run at a
+    time, with the protocol's fixed settings and a total budget.
+  - Analysis: `attribute-recall.mjs` attributes every missed gold item.
+  - Testing: `tests/lib/mockAzureFetch.mjs` stands in for the Azure resource,
+    so the runner can be dry-run end to end with no key
+    (`tests/paired-stages-runner-dry-run.spec.mjs`).
+  - App side: the only change is an eval-only rename tool, offered during the
+    naming pass alone.
+
+All of these are evaluation-only with respect to the shipped app. The production
 interviewer's system prompt and tool surface are pinned by
 `tests/agent-production-invariants.spec.mjs` in the default suite, so a
 condition cannot quietly change the thing it is supposed to be measuring

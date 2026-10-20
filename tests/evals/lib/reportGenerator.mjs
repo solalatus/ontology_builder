@@ -117,13 +117,29 @@ export function parseConversationLog(text) {
 // full weight. Any compaction at all, or more than 2 total error-note
 // occurrences across the whole run, marks a run degraded -- matching the
 // audit's own suggested policy.
+// The tool calls in one relayed response, whichever API answered: Chat
+// Completions (choices[0].message.tool_calls) or the Responses API that tool
+// calls move to on some reasoning models (output items of type
+// function_call; issue #183). Counting only the first shape reported zero
+// tool calls for every Responses-routed run.
+export function toolCallNamesOf(body) {
+  if (!body) return [];
+  if (Array.isArray(body.choices)) {
+    const msg = body.choices[0] && body.choices[0].message;
+    return ((msg && msg.tool_calls) || []).map((c) => c.function && c.function.name).filter(Boolean);
+  }
+  if (Array.isArray(body.output)) return body.output.filter((o) => o.type === "function_call").map((o) => o.name);
+  return [];
+}
+
 export function computeOperationalStats(orchestratorResult) {
-  let applyToolCalls = 0, getGraphStateCalls = 0;
+  let applyToolCalls = 0, getGraphStateCalls = 0, removeToolCalls = 0, renameToolCalls = 0;
   for (const r of orchestratorResult.chatResponses) {
-    const msg = r.body && r.body.choices && r.body.choices[0] && r.body.choices[0].message;
-    for (const c of (msg && msg.tool_calls) || []) {
-      if (c.function && c.function.name === "apply_ontology_yaml") applyToolCalls++;
-      if (c.function && c.function.name === "get_graph_state") getGraphStateCalls++;
+    for (const name of toolCallNamesOf(r.body)) {
+      if (name === "apply_ontology_yaml") applyToolCalls++;
+      if (name === "get_graph_state") getGraphStateCalls++;
+      if (name === "remove_ontology_elements") removeToolCalls++;
+      if (name === "rename_ontology_elements") renameToolCalls++;
     }
   }
   const toolNotes = orchestratorResult.log.filter((e) => e.speaker === "app-tool");
@@ -146,6 +162,8 @@ export function computeOperationalStats(orchestratorResult) {
     appAgentApiCalls: orchestratorResult.chatResponses.length,
     applyToolCalls,
     getGraphStateCalls,
+    removeToolCalls,
+    renameToolCalls,
     toolApplied: count(/applied/i),
     toolSkipped: count(/skipped/i),
     toolNothing: count(/nothing new or changed/i),

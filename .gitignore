@@ -86,3 +86,10 @@ ontology_translation/results/runs/
 # into should never need a matching gitignore entry added by hand.
 ontology_translation/results/multi-domain*/*/*/progress.json
 ontology_translation/results/multi-domain*/*/*/checkpoint/
+
+# ontology_translation/results/paired-stages/ (issue #182): the same rule for
+# the paired-stage runs, plus the block driver's own log, which carries raw
+# runner output (error messages can name the endpoint) and is not a result.
+ontology_translation/results/paired-stages/*/*/*/progress.json
+ontology_translation/results/paired-stages/*/*/*/checkpoint/
+ontology_translation/results/paired-stages/*/block.log
