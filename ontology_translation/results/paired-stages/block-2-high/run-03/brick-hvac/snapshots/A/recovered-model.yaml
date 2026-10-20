@@ -1,0 +1,356 @@
+competency_questions:
+  - id: cq1
+    text: Which thermostat serves a given zone?
+  - id: cq2
+    text: Which terminal unit serves a given space?
+  - id: cq3
+    text: Which air handler feeds a given terminal unit?
+  - id: cq4
+    text: What is downstream of a given air handler in the air path?
+  - id: cq5
+    text: Where is a given air handler physically located?
+  - id: cq6
+    text: Which terminal units does a given air handler feed?
+  - id: cq7
+    text: Which spaces does a given air handler feed?
+  - id: cq8
+    text: Which floor contains a given space?
+  - id: cq9
+    text: "Which air-temperature sensor supplies a given air handler's reading?"
+  - id: cq10
+    text: What air temperature is that sensor reporting?
+  - id: cq11
+    text: "What cooling, heating, and air-temperature setpoints are configured for a given air handler?"
+  - id: cq12
+    text: "What deadband is configured for a given air handler, and which setpoint is active or needs verification?"
+  - id: cq13
+    text: "Does the available reading and configuration support increasing cooling, increasing heating, or holding steady within the deadband around the active setpoint?"
+  - id: cq14
+    text: "If no temperature-control outcome can be established, what active-setpoint or configuration information must be checked before deciding?"
+  - id: cq15
+    text: "What fan status, filter condition, damper and valve positions, and economizer status are reported for a given air handler, and which need attention?"
+  - id: cq16
+    text: Does a given heating or cooling valve respond as expected when its command or expected position is compared with a subsequent position reading?
+  - id: cq17
+    text: Which plant device feeds a given cooling or heating valve?
+  - id: cq18
+    text: "What does a water-temperature sensor read, and what can that reading establish about plant-side heating or cooling delivery without assuming an unrecorded sensor-to-device or loop connection?"
+  - id: cq19
+    text: "Which spaces have occupancy readings indicating occupied, unoccupied, or unknown?"
+  - id: cq20
+    text: "If a given occupied space has a documented zone grouping, which zone contains it and which thermostat serves that zone; otherwise, what grouping is missing?"
+  - id: cq21
+    text: Which terminal unit serves a given occupied space?
+  - id: cq22
+    text: "Which space or zone does a given occupancy sensor's reading apply to?"
+  - id: cq23
+    text: "What outside-air and return-air CO2 readings apply to a given air handler, and what does an individually identified differential CO2 sensor report, where available, without assuming it is linked to that air handler; do source-aware readings warrant a ventilation check?"
+  - id: cq24
+    text: "Do the available sensed conditions and operating procedure establish suitability for economizer use on a given air handler, or is suitability undetermined; after an authorised enable command, does unit mode or economizer status confirm active operation rather than merely enabled status?"
+  - id: cq25
+    text: "Which space heater directly serves a given space, if any?"
+  - id: cq26
+    text: "Which packaged heat pump feeds a terminal unit serving a given space, if any?"
+  - id: cq27
+    text: "For a boiler or chiller reporting off or alarm, which valves does it feed and which air handlers contain those valves, indicating potential air-side impact?"
+  - id: cq28
+    text: "For a plant asset without a documented downstream path, what status and connections are known without inventing an affected-air-handler list?"
+  - id: cq29
+    text: "When a plant asset reports off, was it expected to be running before treating off as a fault?"
+  - id: cq30
+    text: Which floors does a given building contain?
+  - id: cq31
+    text: "What does a general CO2 sensor on a given air handler read, and can the agent determine whether it is elevated relative to expectations for its air stream without guessing which stream it monitors?"
+classes:
+  Space:
+    meaning: An area such as a room or office that can belong to a control zone and be served by equipment.
+    aliases: []
+    properties: {}
+  Zone:
+    meaning: An area or group of spaces controlled together.
+    aliases: []
+    properties: {}
+  Thermostat:
+    meaning: A temperature-control device serving a zone.
+    aliases: []
+    properties: {}
+  TerminalUnit:
+    meaning: A unit that conditions a served space.
+    aliases: []
+    properties: {}
+  AirHandler:
+    meaning: Air-side equipment that feeds a terminal unit or air plenum.
+    aliases:
+      - air handling unit
+      - air handler
+    properties: {}
+  Floor:
+    meaning: "A building level used to locate spaces and equipment, independently of which spaces equipment serves."
+    aliases: []
+    properties: {}
+  AirPlenum:
+    meaning: A retrievable downstream air-path section fed by an air handler.
+    aliases: []
+    properties: {}
+  AirTemperatureSensor:
+    meaning: A sensing point associated with an air handler that supplies an air-temperature reading.
+    aliases: []
+    properties: {}
+  Chiller:
+    meaning: Plant equipment that feeds cooling valves on the chilled-water side.
+    aliases: []
+    properties: {}
+  Boiler:
+    meaning: Plant equipment that feeds heating valves on the hot-water side.
+    aliases: []
+    properties: {}
+  CoolingValve:
+    meaning: A valve contained in an air handler and fed by a chiller for cooling.
+    aliases: []
+    properties: {}
+  HeatingValve:
+    meaning: A valve contained in an air handler and fed by a boiler for heating.
+    aliases: []
+    properties: {}
+  Pump:
+    meaning: Plant equipment that circulates water through a loop.
+    aliases: []
+    properties: {}
+  CoolingTower:
+    meaning: Plant equipment that rejects heat from the chiller side.
+    aliases: []
+    properties: {}
+  OccupancySensor:
+    meaning: "A sensor supplying an occupancy reading that applies to a space or zone, independently of its physical location."
+    aliases: []
+    properties: {}
+  WaterTemperatureSensor:
+    meaning: A sensor reporting a water-temperature reading without implying an undocumented connection to a plant loop or machine.
+    aliases: []
+    properties: {}
+  OutsideAirCO2Sensor:
+    meaning: An identifiable air-handler point reporting outside-air CO2.
+    aliases: []
+    properties: {}
+  ReturnAirCO2Sensor:
+    meaning: An identifiable air-handler point reporting return-air CO2.
+    aliases: []
+    properties: {}
+  CO2DifferentialSensor:
+    meaning: An identifiable point reporting the difference between inside and outside CO2 readings.
+    aliases: []
+    properties: {}
+  Fan:
+    meaning: An identifiable air-handler component reporting its operating condition.
+    aliases: []
+    properties: {}
+  Filter:
+    meaning: An identifiable air-handler component reporting its maintenance condition.
+    aliases: []
+    properties: {}
+  Damper:
+    meaning: An identifiable air-handler component reporting its position.
+    aliases: []
+    properties: {}
+  Economizer:
+    meaning: An identifiable air-handler component that can be enabled or actively operating.
+    aliases: []
+    properties: {}
+  SpaceHeater:
+    meaning: Equipment that directly serves a space with heating.
+    aliases: []
+    properties: {}
+  PackagedHeatPump:
+    meaning: Equipment that can feed a terminal unit.
+    aliases: []
+    properties: {}
+  Building:
+    meaning: An identifiable building containing floors and providing a recorded location for equipment.
+    aliases: []
+    properties: {}
+  AirTemperatureSetpoint:
+    meaning: An identifiable air-handler control point supplying an air-temperature setpoint value.
+    aliases: []
+    properties: {}
+  CoolingTemperatureSetpoint:
+    meaning: An identifiable air-handler control point supplying a cooling-temperature setpoint value.
+    aliases: []
+    properties: {}
+  HeatingTemperatureSetpoint:
+    meaning: An identifiable air-handler control point supplying a heating-temperature setpoint value.
+    aliases: []
+    properties: {}
+  TemperatureDeadbandSetpoint:
+    meaning: An identifiable air-handler control point supplying a temperature-deadband setting.
+    aliases: []
+    properties: {}
+  TemperatureSensor:
+    meaning: "A temperature-measuring point associated with a thermostat, separate from an air handler's air-temperature sensor."
+    aliases: []
+    properties: {}
+  TemperatureSetpoint:
+    meaning: "A desired-temperature control point associated with a thermostat, separate from its temperature sensor."
+    aliases: []
+    properties: {}
+  CO2Sensor:
+    meaning: A general air-handler CO2 sensing point whose monitored air stream is not necessarily identified as outside air or return air.
+    aliases: []
+    properties: {}
+relationships:
+  - name: madeUpOfFloors
+    from: Building
+    to: Floor
+    meaning: The floors that make up a building.
+    aliases: []
+  - name: madeUpOfSpaces
+    from: Floor
+    to: Space
+    meaning: The spaces that make up a floor.
+    aliases: []
+  - name: servesZone
+    from: Thermostat
+    to: Zone
+    meaning: The zone that a thermostat serves.
+    aliases: []
+  - name: servesSpace
+    from: TerminalUnit
+    to: Space
+    meaning: The space that a terminal unit serves.
+    aliases: []
+  - name: locatedInBuilding
+    from: AirHandler
+    to: Building
+    meaning: "The building directly recorded as the air handler's physical location, not the spaces it serves."
+    aliases: []
+  - name: locatedOnFloor
+    from: AirHandler
+    to: Floor
+    meaning: "The floor directly recorded as the air handler's physical location, not the spaces it serves."
+    aliases: []
+  - name: feedsTerminalUnit
+    from: AirHandler
+    to: TerminalUnit
+    meaning: The terminal unit directly fed downstream by an air handler.
+    aliases: []
+  - name: feedsAirPlenum
+    from: AirHandler
+    to: AirPlenum
+    meaning: The air plenum directly fed downstream by an air handler.
+    aliases: []
+  - name: hasAirTemperatureSensor
+    from: AirHandler
+    to: AirTemperatureSensor
+    meaning: The air-temperature sensing point directly associated with an air handler.
+    aliases: []
+  - name: hasAirTemperatureSetpoint
+    from: AirHandler
+    to: AirTemperatureSetpoint
+    meaning: The air-temperature setpoint point directly associated with an air handler.
+    aliases: []
+  - name: hasCoolingTemperatureSetpoint
+    from: AirHandler
+    to: CoolingTemperatureSetpoint
+    meaning: The cooling-temperature setpoint point directly associated with an air handler.
+    aliases: []
+  - name: hasHeatingTemperatureSetpoint
+    from: AirHandler
+    to: HeatingTemperatureSetpoint
+    meaning: The heating-temperature setpoint point directly associated with an air handler.
+    aliases: []
+  - name: hasTemperatureDeadbandSetpoint
+    from: AirHandler
+    to: TemperatureDeadbandSetpoint
+    meaning: The temperature-deadband setpoint point directly associated with an air handler.
+    aliases: []
+  - name: hasTemperatureSensor
+    from: Thermostat
+    to: TemperatureSensor
+    meaning: The temperature sensing point directly associated with a thermostat.
+    aliases: []
+  - name: hasTemperatureSetpoint
+    from: Thermostat
+    to: TemperatureSetpoint
+    meaning: The desired-temperature setpoint point directly associated with a thermostat.
+    aliases: []
+  - name: madeUpInPartOfFan
+    from: AirHandler
+    to: Fan
+    meaning: A fan belonging to an air handler as one of its components.
+    aliases: []
+  - name: madeUpInPartOfFilter
+    from: AirHandler
+    to: Filter
+    meaning: A filter belonging to an air handler as one of its components.
+    aliases: []
+  - name: madeUpInPartOfDamper
+    from: AirHandler
+    to: Damper
+    meaning: A damper belonging to an air handler as one of its components.
+    aliases: []
+  - name: madeUpInPartOfEconomizer
+    from: AirHandler
+    to: Economizer
+    meaning: An economizer belonging to an air handler where one is present.
+    aliases: []
+  - name: madeUpInPartOfCoolingValve
+    from: AirHandler
+    to: CoolingValve
+    meaning: A cooling valve belonging to an air handler where one is present.
+    aliases: []
+  - name: madeUpInPartOfHeatingValve
+    from: AirHandler
+    to: HeatingValve
+    meaning: A heating valve belonging to an air handler where one is present.
+    aliases: []
+  - name: feedsCoolingValve
+    from: Chiller
+    to: CoolingValve
+    meaning: A chiller directly feeds a cooling valve on the chilled-water side.
+    aliases: []
+  - name: feedsHeatingValve
+    from: Boiler
+    to: HeatingValve
+    meaning: A boiler directly feeds a heating valve on the hot-water side.
+    aliases: []
+  - name: hasOccupancySensor
+    from: Space
+    to: OccupancySensor
+    meaning: An occupancy sensor whose reading applies to this space.
+    aliases: []
+  - name: hasZoneOccupancySensor
+    from: Zone
+    to: OccupancySensor
+    meaning: An occupancy sensor whose reading applies to this zone.
+    aliases: []
+  - name: hasGeneralCo2Sensor
+    from: AirHandler
+    to: CO2Sensor
+    meaning: "A general CO2 sensor point directly associated with an air handler, without identifying its air stream."
+    aliases: []
+  - name: hasOutsideAirCo2Sensor
+    from: AirHandler
+    to: OutsideAirCO2Sensor
+    meaning: An outside-air CO2 sensor point directly associated with an air handler.
+    aliases: []
+  - name: hasReturnAirCo2Sensor
+    from: AirHandler
+    to: ReturnAirCO2Sensor
+    meaning: A return-air CO2 sensor point directly associated with an air handler.
+    aliases: []
+  - name: locatedInBuilding
+    from: OutsideAirCO2Sensor
+    to: Building
+    meaning: "The building recorded as the outside-air CO2 sensor's physical location, independently of the air handler with which it is associated."
+    aliases: []
+  - name: servesSpace
+    from: SpaceHeater
+    to: Space
+    meaning: A space heater directly serves a space.
+    aliases: []
+  - name: feedsTerminalUnit
+    from: PackagedHeatPump
+    to: TerminalUnit
+    meaning: "A packaged heat pump directly feeds a terminal unit; spaces are reached through that terminal unit's separate service connection."
+    aliases: []
+rules: {}
+actions: {}

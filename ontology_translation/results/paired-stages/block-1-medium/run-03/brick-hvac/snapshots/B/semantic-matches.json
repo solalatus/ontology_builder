@@ -1,0 +1,264 @@
+{
+  "fullDomain": {
+    "classes": [],
+    "relationships": [
+      {
+        "goldId": "rel_0",
+        "recoveredId": "e22"
+      },
+      {
+        "goldId": "rel_1",
+        "recoveredId": "e23"
+      },
+      {
+        "goldId": "rel_2",
+        "recoveredId": "e24"
+      },
+      {
+        "goldId": "rel_3",
+        "recoveredId": "e26"
+      },
+      {
+        "goldId": "rel_4",
+        "recoveredId": "e25"
+      },
+      {
+        "goldId": "rel_5",
+        "recoveredId": "e27"
+      },
+      {
+        "goldId": "rel_6",
+        "recoveredId": "e14"
+      },
+      {
+        "goldId": "rel_7",
+        "recoveredId": "e19"
+      },
+      {
+        "goldId": "rel_8",
+        "recoveredId": "e15"
+      },
+      {
+        "goldId": "rel_9",
+        "recoveredId": "e16"
+      },
+      {
+        "goldId": "rel_10",
+        "recoveredId": "e17"
+      },
+      {
+        "goldId": "rel_11",
+        "recoveredId": "e18"
+      },
+      {
+        "goldId": "rel_22",
+        "recoveredId": "e1"
+      },
+      {
+        "goldId": "rel_23",
+        "recoveredId": "e2"
+      },
+      {
+        "goldId": "rel_24",
+        "recoveredId": "e3"
+      },
+      {
+        "goldId": "rel_31",
+        "recoveredId": "e30"
+      },
+      {
+        "goldId": "rel_34",
+        "recoveredId": "e20"
+      },
+      {
+        "goldId": "rel_35",
+        "recoveredId": "e21"
+      }
+    ],
+    "properties": [
+      {
+        "goldId": "TemperatureSensor.value",
+        "matchedPropertyName": "measuredTemperature"
+      },
+      {
+        "goldId": "AirTemperatureSensor.value",
+        "matchedPropertyName": "measuredTemperature"
+      },
+      {
+        "goldId": "CO2Sensor.value",
+        "matchedPropertyName": "concentration"
+      },
+      {
+        "goldId": "OutsideAirCO2Sensor.value",
+        "matchedPropertyName": "concentration"
+      },
+      {
+        "goldId": "ReturnAirCO2Sensor.value",
+        "matchedPropertyName": "concentration"
+      },
+      {
+        "goldId": "TemperatureSetpoint.value",
+        "matchedPropertyName": "targetTemperature"
+      },
+      {
+        "goldId": "AirTemperatureSetpoint.value",
+        "matchedPropertyName": "targetTemperature"
+      },
+      {
+        "goldId": "CoolingTemperatureSetpoint.value",
+        "matchedPropertyName": "targetTemperature"
+      },
+      {
+        "goldId": "HeatingTemperatureSetpoint.value",
+        "matchedPropertyName": "targetTemperature"
+      },
+      {
+        "goldId": "TemperatureDeadbandSetpoint.value",
+        "matchedPropertyName": "bandSize"
+      },
+      {
+        "goldId": "OccupancySensor.occupied",
+        "matchedPropertyName": "occupancy"
+      }
+    ],
+    "valueFidelity": [
+      {
+        "id": "AirHandlingUnit.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "AirPlenum.airflowState",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Thermostat.mode",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Thermostat.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "TerminalUnit.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Fan.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Economizer.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Boiler.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Chiller.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Zone.occupancyStatus",
+        "semanticFidelity": 1
+      }
+    ]
+  },
+  "scoped": {
+    "classes": [],
+    "relationships": [
+      {
+        "goldId": "rel_5",
+        "recoveredId": "e27"
+      },
+      {
+        "goldId": "rel_7",
+        "recoveredId": "e19"
+      },
+      {
+        "goldId": "rel_9",
+        "recoveredId": "e16"
+      },
+      {
+        "goldId": "rel_10",
+        "recoveredId": "e17"
+      },
+      {
+        "goldId": "rel_22",
+        "recoveredId": "e1"
+      },
+      {
+        "goldId": "rel_23",
+        "recoveredId": "e2"
+      },
+      {
+        "goldId": "rel_24",
+        "recoveredId": "e3"
+      },
+      {
+        "goldId": "rel_31",
+        "recoveredId": "e30"
+      }
+    ],
+    "properties": [
+      {
+        "goldId": "TemperatureSensor.value",
+        "matchedPropertyName": "measuredTemperature"
+      },
+      {
+        "goldId": "CO2Sensor.value",
+        "matchedPropertyName": "concentration"
+      },
+      {
+        "goldId": "TemperatureSetpoint.value",
+        "matchedPropertyName": "targetTemperature"
+      },
+      {
+        "goldId": "CoolingTemperatureSetpoint.value",
+        "matchedPropertyName": "targetTemperature"
+      },
+      {
+        "goldId": "HeatingTemperatureSetpoint.value",
+        "matchedPropertyName": "targetTemperature"
+      },
+      {
+        "goldId": "OccupancySensor.occupied",
+        "matchedPropertyName": "occupancy"
+      }
+    ],
+    "valueFidelity": [
+      {
+        "id": "AirHandlingUnit.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Thermostat.mode",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Thermostat.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "TerminalUnit.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Economizer.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Boiler.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Chiller.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Zone.occupancyStatus",
+        "semanticFidelity": 1
+      }
+    ]
+  }
+}

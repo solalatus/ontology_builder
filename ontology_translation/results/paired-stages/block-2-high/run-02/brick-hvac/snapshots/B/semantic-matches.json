@@ -1,0 +1,248 @@
+{
+  "fullDomain": {
+    "classes": [],
+    "relationships": [
+      {
+        "goldId": "rel_0",
+        "recoveredId": "e11"
+      },
+      {
+        "goldId": "rel_1",
+        "recoveredId": "e12"
+      },
+      {
+        "goldId": "rel_2",
+        "recoveredId": "e13"
+      },
+      {
+        "goldId": "rel_3",
+        "recoveredId": "e15"
+      },
+      {
+        "goldId": "rel_4",
+        "recoveredId": "e14"
+      },
+      {
+        "goldId": "rel_5",
+        "recoveredId": "e16"
+      },
+      {
+        "goldId": "rel_6",
+        "recoveredId": "e25"
+      },
+      {
+        "goldId": "rel_12",
+        "recoveredId": "e32"
+      },
+      {
+        "goldId": "rel_13",
+        "recoveredId": "e24"
+      },
+      {
+        "goldId": "rel_14",
+        "recoveredId": "e22"
+      },
+      {
+        "goldId": "rel_15",
+        "recoveredId": "e23"
+      },
+      {
+        "goldId": "rel_22",
+        "recoveredId": "e1"
+      },
+      {
+        "goldId": "rel_23",
+        "recoveredId": "e2"
+      },
+      {
+        "goldId": "rel_24",
+        "recoveredId": "e3"
+      },
+      {
+        "goldId": "rel_34",
+        "recoveredId": "e30"
+      },
+      {
+        "goldId": "rel_35",
+        "recoveredId": "e31"
+      }
+    ],
+    "properties": [
+      {
+        "goldId": "TemperatureSensor.value",
+        "matchedPropertyName": "temperature"
+      },
+      {
+        "goldId": "AirTemperatureSensor.value",
+        "matchedPropertyName": "temperature"
+      },
+      {
+        "goldId": "OutsideAirCO2Sensor.value",
+        "matchedPropertyName": "co2Reading"
+      },
+      {
+        "goldId": "ReturnAirCO2Sensor.value",
+        "matchedPropertyName": "co2Reading"
+      },
+      {
+        "goldId": "OccupancySensor.occupied",
+        "matchedPropertyName": "occupancy"
+      },
+      {
+        "goldId": "CO2DifferentialSensor.value",
+        "matchedPropertyName": "co2Difference"
+      },
+      {
+        "goldId": "WaterTemperatureSensor.value",
+        "matchedPropertyName": "temperature"
+      }
+    ],
+    "valueFidelity": [
+      {
+        "id": "AirHandlingUnit.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Thermostat.mode",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Thermostat.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "TerminalUnit.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Filter.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Fan.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Economizer.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Boiler.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Chiller.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "PackagedHeatPump.mode",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Zone.occupancyStatus",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "CoolingTower.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "HeatExchanger.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Pump.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "SpaceHeater.status",
+        "semanticFidelity": 1
+      }
+    ]
+  },
+  "scoped": {
+    "classes": [],
+    "relationships": [
+      {
+        "goldId": "rel_5",
+        "recoveredId": "e16"
+      },
+      {
+        "goldId": "rel_12",
+        "recoveredId": "e32"
+      },
+      {
+        "goldId": "rel_13",
+        "recoveredId": "e24"
+      },
+      {
+        "goldId": "rel_14",
+        "recoveredId": "e22"
+      },
+      {
+        "goldId": "rel_15",
+        "recoveredId": "e23"
+      },
+      {
+        "goldId": "rel_22",
+        "recoveredId": "e1"
+      },
+      {
+        "goldId": "rel_23",
+        "recoveredId": "e2"
+      },
+      {
+        "goldId": "rel_24",
+        "recoveredId": "e3"
+      }
+    ],
+    "properties": [
+      {
+        "goldId": "TemperatureSensor.value",
+        "matchedPropertyName": "temperature"
+      },
+      {
+        "goldId": "OccupancySensor.occupied",
+        "matchedPropertyName": "occupancy"
+      }
+    ],
+    "valueFidelity": [
+      {
+        "id": "AirHandlingUnit.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Thermostat.mode",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Thermostat.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "TerminalUnit.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Economizer.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Boiler.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Chiller.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Zone.occupancyStatus",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Pump.status",
+        "semanticFidelity": 1
+      }
+    ]
+  }
+}

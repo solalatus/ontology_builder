@@ -1,0 +1,36 @@
+{
+  "label": "C",
+  "turn": 78,
+  "stage": "naming",
+  "takenAt": "2026-10-20T09:33:59.084Z",
+  "elapsedSec": 1014,
+  "cost": {
+    "all": {
+      "calls": 210,
+      "promptTokens": 5780673,
+      "cachedTokens": 5576375,
+      "completionTokens": 34949,
+      "reasoningTokens": 8744,
+      "cachedShare": 0.9646584402888729,
+      "costUsd": 1.873361
+    },
+    "app": {
+      "calls": 131,
+      "promptTokens": 4499224,
+      "cachedTokens": 4363798,
+      "completionTokens": 22601,
+      "reasoningTokens": 5746,
+      "cachedShare": 0.9699001427801772,
+      "costUsd": 1.3696216
+    },
+    "harness": {
+      "calls": 79,
+      "promptTokens": 1281449,
+      "cachedTokens": 1212577,
+      "completionTokens": 12348,
+      "reasoningTokens": 2998,
+      "cachedShare": 0.9462545914819864,
+      "costUsd": 0.5037394000000001
+    }
+  }
+}

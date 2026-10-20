@@ -1,0 +1,272 @@
+{
+  "fullDomain": {
+    "judgments": {
+      "classes": [
+        {
+          "goldId": "CO2Sensor",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "AirQualitySensor",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "CondensingUnit",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Humidifier",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "IsolationValve",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "DryCooler",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "relationships": [
+        {
+          "goldId": "rel_0",
+          "recoveredId": "e11",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_1",
+          "recoveredId": "e12",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_2",
+          "recoveredId": "e13",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_3",
+          "recoveredId": "e15",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_4",
+          "recoveredId": "e14",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_5",
+          "recoveredId": "e16",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_21",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_22",
+          "recoveredId": "e1",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_23",
+          "recoveredId": "e2",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_24",
+          "recoveredId": "e3",
+          "verdict": "MATCH"
+        }
+      ],
+      "properties": [
+        {
+          "goldId": "AirPlenum.airflowState",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "TemperatureSensor.status",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Chiller.coolingCapacity",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Building.yearBuilt",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Space.maxOccupancy",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "valueFidelity": [
+        {
+          "id": "AirHandlingUnit.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "OccupancySensor.occupied",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Thermostat.mode",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Thermostat.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "TerminalUnit.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Filter.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Fan.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Economizer.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Boiler.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Chiller.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "PackagedHeatPump.mode",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Zone.occupancyStatus",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "CoolingTower.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "HeatExchanger.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Pump.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "SpaceHeater.status",
+          "semanticFidelity": 1
+        }
+      ]
+    },
+    "rawResponses": {
+      "relationships": "1: MATCH 4 -- Both mean the air handling unit has a fan as a part.\n2: MATCH 5 -- Both mean the air handling unit has a filter as a part.\n3: MATCH 6 -- Both mean the air handling unit has a damper as a part.\n4: MATCH 8 -- Both mean the air handling unit has a cooling valve as a part.\n5: MATCH 7 -- Both mean the air handling unit has a heating valve as a part.\n6: MATCH 9 -- Both mean the air handling unit has an economizer as a part.\n7: NO MATCH -- No candidate describes the sensor’s location in a building.\n8: MATCH 1 -- Both mean a floor is part of a building.\n9: MATCH 2 -- Both mean a space is part of a floor.\n10: MATCH 3 -- Both mean a zone is part of a building.",
+      "valueFidelity": "1: 100 -- Identical distinctions.\n2: 100 -- Identical distinctions.\n3: 100 -- Identical distinctions.\n4: 100 -- Identical distinctions.\n5: 100 -- Identical distinctions.\n6: 100 -- Same distinctions; only formatting differs.\n7: 100 -- Identical distinctions.\n8: 100 -- Identical distinctions.\n9: 100 -- Identical distinctions.\n10: 100 -- Identical distinctions.\n11: 100 -- Identical distinctions.\n12: 100 -- Identical distinctions.\n13: 100 -- Identical distinctions.\n14: 100 -- Identical distinctions.\n15: 100 -- Identical distinctions.\n16: 100 -- Identical distinctions."
+    }
+  },
+  "scoped": {
+    "judgments": {
+      "classes": [],
+      "relationships": [
+        {
+          "goldId": "rel_5",
+          "recoveredId": "e16",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_7",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_22",
+          "recoveredId": "e1",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_23",
+          "recoveredId": "e2",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_24",
+          "recoveredId": "e3",
+          "verdict": "MATCH"
+        }
+      ],
+      "properties": [
+        {
+          "goldId": "TemperatureSensor.status",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "valueFidelity": [
+        {
+          "id": "AirHandlingUnit.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "OccupancySensor.occupied",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Thermostat.mode",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Thermostat.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "TerminalUnit.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Economizer.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Boiler.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Chiller.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Zone.occupancyStatus",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Pump.status",
+          "semanticFidelity": 1
+        }
+      ]
+    },
+    "rawResponses": {
+      "relationships": "1: MATCH 4 -- Both describe an economizer as part of an air handling unit.\n2: NO MATCH -- No candidate connects an air handling unit to a CO2 sensor.\n3: MATCH 1 -- Both describe a floor as part of a building.\n4: MATCH 2 -- Both describe a space as part of a floor.\n5: MATCH 3 -- Both describe a zone as part of a building.",
+      "valueFidelity": "1: 100 -- Identical distinctions.\n2: 100 -- Identical distinctions.\n3: 100 -- Identical distinctions.\n4: 100 -- Identical distinctions.\n5: 100 -- Identical distinctions.\n6: 100 -- Identical distinctions.\n7: 100 -- Identical distinctions.\n8: 100 -- Identical distinctions.\n9: 100 -- Identical distinctions.\n10: 100 -- Identical distinctions."
+    }
+  }
+}

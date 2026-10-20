@@ -1,0 +1,740 @@
+{
+  "label": "C",
+  "turn": 78,
+  "stage": "naming",
+  "elapsedSec": 1014,
+  "counts": {
+    "classes": 22,
+    "relationships": 22,
+    "properties": 19,
+    "allowedValueLists": 8,
+    "rules": 5,
+    "actions": 5,
+    "droppedEdges": 0
+  },
+  "metrics": {
+    "classes": {
+      "recall": 0.5641025641025641,
+      "precision": 1,
+      "f1": 0.7213114754098361,
+      "matched": 22,
+      "groundTruthTotal": 39,
+      "recoveredTotal": 22
+    },
+    "relationships": {
+      "recall": 0.5142857142857142,
+      "precision": 0.8181818181818182,
+      "f1": 0.6315789473684209,
+      "matched": 18,
+      "groundTruthTotal": 35,
+      "recoveredTotal": 22
+    },
+    "properties": {
+      "recall": 0.4523809523809524,
+      "precision": 1,
+      "f1": 0.6229508196721312,
+      "matched": 19,
+      "groundTruthTotal": 42,
+      "recoveredTotal": 19
+    },
+    "controlledValueFidelity": 1,
+    "controlledValuePropertyGoldTotal": 20,
+    "controlledValuePropertyMatchedCount": 8,
+    "recoveryEffectiveness": 0.6586137474834627,
+    "recoveryEffectivenessWithFidelity": 0.743960310612597
+  },
+  "scopedMetrics": {
+    "classes": {
+      "recall": 0.7222222222222222,
+      "precision": 0.5909090909090909,
+      "f1": 0.65,
+      "matched": 13,
+      "groundTruthTotal": 18,
+      "recoveredTotal": 22
+    },
+    "relationships": {
+      "recall": 0.3684210526315789,
+      "precision": 0.3181818181818182,
+      "f1": 0.3414634146341463,
+      "matched": 7,
+      "groundTruthTotal": 19,
+      "recoveredTotal": 22
+    },
+    "properties": {
+      "recall": 0.625,
+      "precision": 0.5263157894736842,
+      "f1": 0.5714285714285714,
+      "matched": 10,
+      "groundTruthTotal": 16,
+      "recoveredTotal": 19
+    },
+    "controlledValueFidelity": 1,
+    "controlledValuePropertyGoldTotal": 10,
+    "controlledValuePropertyMatchedCount": 6,
+    "recoveryEffectiveness": 0.5209639953542392,
+    "recoveryEffectivenessWithFidelity": 0.6407229965156794
+  },
+  "semanticMetrics": {
+    "classes": {
+      "recall": 0.5641025641025641,
+      "precision": 1,
+      "f1": 0.7213114754098361,
+      "matched": 22,
+      "groundTruthTotal": 39,
+      "recoveredTotal": 22
+    },
+    "relationships": {
+      "recall": 0.6,
+      "precision": 0.9545454545454546,
+      "f1": 0.7368421052631579,
+      "matched": 21,
+      "groundTruthTotal": 35,
+      "recoveredTotal": 22
+    },
+    "properties": {
+      "recall": 0.4523809523809524,
+      "precision": 1,
+      "f1": 0.6229508196721312,
+      "matched": 19,
+      "groundTruthTotal": 42,
+      "recoveredTotal": 19
+    },
+    "controlledValueFidelity": 1,
+    "controlledValuePropertyGoldTotal": 20,
+    "controlledValuePropertyMatchedCount": 8,
+    "recoveryEffectiveness": 0.6937014667817083,
+    "recoveryEffectivenessWithFidelity": 0.7702761000862812,
+    "judgeCallCount": 2,
+    "judgments": {
+      "classes": [
+        {
+          "goldId": "AirPlenum",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "CO2Sensor",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "AirQualitySensor",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "AirTemperatureSetpoint",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "PackagedHeatPump",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Building",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Floor",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "CO2DifferentialSensor",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "CondensingUnit",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "CoolingTower",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "HeatExchanger",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Humidifier",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "IsolationValve",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Pump",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "SpaceHeater",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "WaterTemperatureSensor",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "DryCooler",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "relationships": [
+        {
+          "goldId": "rel_12",
+          "recoveredId": "e7",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_13",
+          "recoveredId": "e8",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_18",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_19",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_31",
+          "recoveredId": "e3",
+          "verdict": "MATCH"
+        }
+      ],
+      "properties": [
+        {
+          "goldId": "TemperatureSensor.status",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Thermostat.mode",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Boiler.status",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Chiller.status",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Chiller.coolingCapacity",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Space.maxOccupancy",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "valueFidelity": [
+        {
+          "id": "AirHandlingUnit.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "OccupancySensor.occupied",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Thermostat.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "TerminalUnit.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Filter.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Fan.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Economizer.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Zone.occupancyStatus",
+          "semanticFidelity": 1
+        }
+      ]
+    },
+    "resolvedMatches": {
+      "classes": [],
+      "relationships": [
+        {
+          "goldId": "rel_12",
+          "recoveredId": "e7"
+        },
+        {
+          "goldId": "rel_13",
+          "recoveredId": "e8"
+        },
+        {
+          "goldId": "rel_31",
+          "recoveredId": "e3"
+        }
+      ],
+      "properties": [],
+      "valueFidelity": [
+        {
+          "id": "AirHandlingUnit.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "OccupancySensor.occupied",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Thermostat.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "TerminalUnit.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Filter.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Fan.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Economizer.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Zone.occupancyStatus",
+          "semanticFidelity": 1
+        }
+      ]
+    },
+    "heuristic": {
+      "classes": {
+        "recall": 0.5641025641025641,
+        "precision": 1,
+        "f1": 0.7213114754098361,
+        "matched": 22,
+        "groundTruthTotal": 39,
+        "recoveredTotal": 22
+      },
+      "relationships": {
+        "recall": 0.5142857142857142,
+        "precision": 0.8181818181818182,
+        "f1": 0.6315789473684209,
+        "matched": 18,
+        "groundTruthTotal": 35,
+        "recoveredTotal": 22
+      },
+      "properties": {
+        "recall": 0.4523809523809524,
+        "precision": 1,
+        "f1": 0.6229508196721312,
+        "matched": 19,
+        "groundTruthTotal": 42,
+        "recoveredTotal": 19
+      },
+      "controlledValueFidelity": 1,
+      "controlledValuePropertyGoldTotal": 20,
+      "controlledValuePropertyMatchedCount": 8,
+      "recoveryEffectiveness": 0.6586137474834627,
+      "recoveryEffectivenessWithFidelity": 0.743960310612597
+    },
+    "rawResponses": {
+      "relationships": "1: MATCH 3 -- The temperature sensor input is a point of the thermostat.\n2: MATCH 4 -- The temperature setpoint is a point of the thermostat.\n3: NO MATCH -- No candidate locates a terminal unit in a space.\n4: NO MATCH -- No candidate locates a thermostat in a space.\n5: MATCH 1 -- Serving a zone as its controller is serving that zone.",
+      "valueFidelity": "1: 100 -- Identical values.\n2: 100 -- Identical values.\n3: 100 -- Identical values.\n4: 100 -- Same values in a different order.\n5: 100 -- “Replacement due” has the same meaning.\n6: 100 -- Identical values.\n7: 100 -- Identical values.\n8: 100 -- Identical values."
+    }
+  },
+  "semanticScopedMetrics": {
+    "classes": {
+      "recall": 0.7222222222222222,
+      "precision": 0.5909090909090909,
+      "f1": 0.65,
+      "matched": 13,
+      "groundTruthTotal": 18,
+      "recoveredTotal": 22
+    },
+    "relationships": {
+      "recall": 0.47368421052631576,
+      "precision": 0.4090909090909091,
+      "f1": 0.43902439024390244,
+      "matched": 9,
+      "groundTruthTotal": 19,
+      "recoveredTotal": 22
+    },
+    "properties": {
+      "recall": 0.625,
+      "precision": 0.5263157894736842,
+      "f1": 0.5714285714285714,
+      "matched": 10,
+      "groundTruthTotal": 16,
+      "recoveredTotal": 19
+    },
+    "controlledValueFidelity": 1,
+    "controlledValuePropertyGoldTotal": 10,
+    "controlledValuePropertyMatchedCount": 6,
+    "recoveryEffectiveness": 0.5534843205574913,
+    "recoveryEffectivenessWithFidelity": 0.6651132404181185,
+    "judgeCallCount": 3,
+    "judgments": {
+      "classes": [
+        {
+          "goldId": "AirPlenum",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "CO2Sensor",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Building",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Floor",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Pump",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "relationships": [
+        {
+          "goldId": "rel_12",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_13",
+          "recoveredId": "e8",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "rel_18",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_19",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_31",
+          "recoveredId": "e3",
+          "verdict": "MATCH"
+        }
+      ],
+      "properties": [
+        {
+          "goldId": "TemperatureSensor.status",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Thermostat.mode",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Boiler.status",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Chiller.status",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "valueFidelity": [
+        {
+          "id": "AirHandlingUnit.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "OccupancySensor.occupied",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Thermostat.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "TerminalUnit.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Economizer.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Zone.occupancyStatus",
+          "semanticFidelity": 1
+        }
+      ]
+    },
+    "resolvedMatches": {
+      "classes": [],
+      "relationships": [
+        {
+          "goldId": "rel_13",
+          "recoveredId": "e8"
+        },
+        {
+          "goldId": "rel_31",
+          "recoveredId": "e3"
+        }
+      ],
+      "properties": [],
+      "valueFidelity": [
+        {
+          "id": "AirHandlingUnit.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "OccupancySensor.occupied",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Thermostat.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "TerminalUnit.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Economizer.status",
+          "semanticFidelity": 1
+        },
+        {
+          "id": "Zone.occupancyStatus",
+          "semanticFidelity": 1
+        }
+      ]
+    },
+    "heuristic": {
+      "classes": {
+        "recall": 0.7222222222222222,
+        "precision": 0.5909090909090909,
+        "f1": 0.65,
+        "matched": 13,
+        "groundTruthTotal": 18,
+        "recoveredTotal": 22
+      },
+      "relationships": {
+        "recall": 0.3684210526315789,
+        "precision": 0.3181818181818182,
+        "f1": 0.3414634146341463,
+        "matched": 7,
+        "groundTruthTotal": 19,
+        "recoveredTotal": 22
+      },
+      "properties": {
+        "recall": 0.625,
+        "precision": 0.5263157894736842,
+        "f1": 0.5714285714285714,
+        "matched": 10,
+        "groundTruthTotal": 16,
+        "recoveredTotal": 19
+      },
+      "controlledValueFidelity": 1,
+      "controlledValuePropertyGoldTotal": 10,
+      "controlledValuePropertyMatchedCount": 6,
+      "recoveryEffectiveness": 0.5209639953542392,
+      "recoveryEffectivenessWithFidelity": 0.6407229965156794
+    },
+    "rawResponses": {
+      "classes": "1: NO MATCH -- No candidate is an air plenum.\n2: NO MATCH -- The candidates specify particular CO₂ sensor locations, not the general CO₂ Sensor class.\n3: NO MATCH -- No candidate is a building.\n4: NO MATCH -- No candidate is a floor or storey.\n5: NO MATCH -- No candidate is a pump.",
+      "relationships": "1: NO MATCH -- A sensor input is not necessarily a point belonging to the thermostat.\n2: MATCH 4 -- Having a temperature setpoint expresses the thermostat’s connection to that point.\n3: NO MATCH -- No candidate describes the terminal unit’s location.\n4: NO MATCH -- No candidate describes the thermostat’s location.\n5: MATCH 1 -- Serving a zone as its controller is a form of serving that zone.",
+      "valueFidelity": "1: 100 -- Identical distinctions.\n2: 100 -- Identical distinctions.\n3: 100 -- Identical distinctions.\n4: 100 -- Same distinctions in a different order.\n5: 100 -- Identical distinctions.\n6: 100 -- Identical distinctions."
+    }
+  },
+  "ruleMetrics": {
+    "recall": 0.14285714285714285,
+    "precision": 0.2,
+    "f1": 0.16666666666666666,
+    "matched": 1,
+    "groundTruthTotal": 7,
+    "recoveredTotal": 5
+  },
+  "actionMetrics": {
+    "identification": {
+      "recall": 0.8,
+      "precision": 0.8,
+      "f1": 0.8000000000000002,
+      "matched": 4,
+      "groundTruthTotal": 5,
+      "recoveredTotal": 5
+    },
+    "inputClassAccuracy": 1,
+    "inputClassChecked": 4,
+    "preconditionRecovery": 0.18250373320059732,
+    "effectRecovery": 0.215098333186348,
+    "verificationRecovery": 0.1884469696969697
+  },
+  "semanticRuleActionMetrics": {
+    "rules": {
+      "recall": 0.5714285714285714,
+      "precision": 0.8,
+      "f1": 0.6666666666666666,
+      "matched": 4,
+      "groundTruthTotal": 7,
+      "recoveredTotal": 5
+    },
+    "actions": {
+      "recall": 1,
+      "precision": 1,
+      "f1": 1,
+      "matched": 5,
+      "groundTruthTotal": 5,
+      "recoveredTotal": 5,
+      "components": {
+        "identification": {
+          "recall": 0.8,
+          "precision": 0.8,
+          "f1": 0.8000000000000002,
+          "matched": 4,
+          "groundTruthTotal": 5,
+          "recoveredTotal": 5
+        },
+        "inputClassAccuracy": 1,
+        "inputClassChecked": 4,
+        "preconditionRecovery": 0.18250373320059732,
+        "effectRecovery": 0.215098333186348,
+        "verificationRecovery": 0.1884469696969697
+      }
+    },
+    "judgeCallCount": 2,
+    "judgments": {
+      "rules": [
+        {
+          "goldId": "needsCoolingFromSetpoint",
+          "recoveredId": "coolingNeed",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "needsHeatingFromSetpoint",
+          "recoveredId": "heatingNeed",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "occupiedZoneRequiresControl",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "investigateAirQuality",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "verifyThermostatControlContext",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "economizerReducesMechanicalConditioning",
+          "recoveredId": "economizerEligibility",
+          "verdict": "MATCH"
+        }
+      ],
+      "actions": [
+        {
+          "goldId": "maintainWithinDeadband",
+          "recoveredId": "leaveHeatingCoolingUnchangedWithinDeadband",
+          "verdict": "MATCH"
+        }
+      ]
+    },
+    "resolvedMatches": {
+      "rules": [
+        {
+          "goldId": "needsCoolingFromSetpoint",
+          "recoveredId": "coolingNeed"
+        },
+        {
+          "goldId": "needsHeatingFromSetpoint",
+          "recoveredId": "heatingNeed"
+        },
+        {
+          "goldId": "economizerReducesMechanicalConditioning",
+          "recoveredId": "economizerEligibility"
+        }
+      ],
+      "actions": [
+        {
+          "goldId": "maintainWithinDeadband",
+          "recoveredId": "leaveHeatingCoolingUnchangedWithinDeadband"
+        }
+      ]
+    },
+    "heuristic": {
+      "rules": {
+        "recall": 0.14285714285714285,
+        "precision": 0.2,
+        "f1": 0.16666666666666666,
+        "matched": 1,
+        "groundTruthTotal": 7,
+        "recoveredTotal": 5
+      },
+      "actions": {
+        "identification": {
+          "recall": 0.8,
+          "precision": 0.8,
+          "f1": 0.8000000000000002,
+          "matched": 4,
+          "groundTruthTotal": 5,
+          "recoveredTotal": 5
+        },
+        "inputClassAccuracy": 1,
+        "inputClassChecked": 4,
+        "preconditionRecovery": 0.18250373320059732,
+        "effectRecovery": 0.215098333186348,
+        "verificationRecovery": 0.1884469696969697
+      }
+    },
+    "rawResponses": {
+      "rules": "1: MATCH 1 -- Both trigger when measured air temperature exceeds the cooling setpoint.\n2: MATCH 2 -- Both trigger when measured air temperature falls below the heating setpoint.\n3: NO MATCH -- The candidate additionally requires normal or on equipment status, not just service to an occupied space.\n4: NO MATCH -- No candidate triggers on elevated CO₂ relative to the expected air-stream condition.\n5: NO MATCH -- No candidate checks whether a thermostat has both a sensor and a setpoint.\n6: MATCH 4 -- Both require appropriate economizer sensing and reduced mechanical conditioning.",
+      "actions": "1: MATCH 1 -- Both leave heating and cooling unchanged while temperature is within the configured deadband."
+    }
+  },
+  "offlineRescoreAgrees": true
+}
