@@ -1,0 +1,103 @@
+{
+  "schemaVersion": 1,
+  "domain": "brick-hvac",
+  "runId": "run-01",
+  "runUuid": "89323b49-96a1-4ae8-8f51-b1b941b78184",
+  "status": "complete",
+  "generatedAt": "2026-10-20T21:29:05.415Z",
+  "condition": "b1-one-shot",
+  "stoppedReason": "extracted",
+  "model": "gpt-6-sol",
+  "classifierModel": "gpt-6-sol",
+  "provider": "azure",
+  "endpointSha256": "e3e57f18180d7eb5a21f2693f60ce94f67ca899f783a0f790212e25a4f648197",
+  "extractionEffort": "high",
+  "source": {
+    "transcript": "ontology_translation/results/default-change-187/treatment/run-01/brick-hvac/conversation-log.md",
+    "runUuid": "ad079585-a6ce-45c2-bc91-0ee264394ed3",
+    "turnsUsed": 84,
+    "stoppedReason": "stages_complete"
+  },
+  "extraction": {
+    "model": "gpt-6-sol",
+    "extraBody": {
+      "reasoning_effort": "high"
+    },
+    "extractionSystemPromptSha256": "41c2e221409507e489f9cab3bced39ec940a523ce85ef94b767eed8bc7202de9",
+    "transcriptSha256": "212f4a712e2491e884be85247c528579a5d6e7989bd00e1354f7a1198492fa3a",
+    "usage": {
+      "completion_tokens": 5934,
+      "completion_tokens_details": {
+        "accepted_prediction_tokens": 0,
+        "audio_tokens": 0,
+        "reasoning_tokens": 1990,
+        "rejected_prediction_tokens": 0
+      },
+      "latency_checkpoint": {
+        "engine_tbt_ms": 7,
+        "engine_ttft_ms": 833,
+        "engine_ttlt_ms": 40170,
+        "pre_inference_ms": 225,
+        "service_tbt_ms": 7,
+        "service_ttft_ms": 1555,
+        "service_ttlt_ms": 40890,
+        "user_visible_ttft_ms": 1330
+      },
+      "prompt_tokens": 33275,
+      "prompt_tokens_details": {
+        "audio_tokens": 0,
+        "cache_write_tokens": 33272,
+        "cached_tokens": 0
+      },
+      "total_tokens": 39209
+    },
+    "finishReason": "stop",
+    "transcript": "ontology_translation/results/default-change-187/treatment/run-01/brick-hvac/conversation-log.md"
+  },
+  "domainYamlPath": "ontology_translation/domains/brick-hvac/reference.domain.yaml",
+  "groundTruthSha256": "b4d9eb718ec560f112a46c1fb998b8869b0e96d3739f1a84e8b797f5fb71d4d3",
+  "repoCommitSha": "b37b1d9df00d489c672313890617bd280d38c4b0",
+  "wallClockSec": 59,
+  "offlineRescoreAgrees": true,
+  "prices": {
+    "input": 2,
+    "cachedInput": 0.2,
+    "output": 10
+  },
+  "totalCostUsd": 0.140844,
+  "totalCost": {
+    "prices": {
+      "input": 2,
+      "cachedInput": 0.2,
+      "output": 10
+    },
+    "app": {
+      "calls": 0,
+      "promptTokens": 0,
+      "cachedTokens": 0,
+      "completionTokens": 0,
+      "reasoningTokens": 0,
+      "cachedShare": null,
+      "costUsd": 0
+    },
+    "appByKind": {},
+    "harness": {
+      "calls": 7,
+      "promptTokens": 36532,
+      "cachedTokens": 0,
+      "completionTokens": 6778,
+      "reasoningTokens": 2286,
+      "cachedShare": 0,
+      "costUsd": 0.140844
+    },
+    "all": {
+      "calls": 7,
+      "promptTokens": 36532,
+      "cachedTokens": 0,
+      "completionTokens": 6778,
+      "reasoningTokens": 2286,
+      "cachedShare": 0,
+      "costUsd": 0.140844
+    }
+  }
+}

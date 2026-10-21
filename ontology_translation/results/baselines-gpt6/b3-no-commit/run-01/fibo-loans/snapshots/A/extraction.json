@@ -1,0 +1,37 @@
+{
+  "condition": "b3-no-commit",
+  "transcript": "snapshots/A/extraction-input.md",
+  "model": "gpt-6-sol",
+  "extraBody": {
+    "reasoning_effort": "high"
+  },
+  "extractionSystemPromptSha256": "41c2e221409507e489f9cab3bced39ec940a523ce85ef94b767eed8bc7202de9",
+  "transcriptSha256": "6cecc573a344c549353ce7e5029fbc62397fedcd096e1aee8b91b287d113c571",
+  "usage": {
+    "completion_tokens": 6912,
+    "completion_tokens_details": {
+      "accepted_prediction_tokens": 0,
+      "audio_tokens": 0,
+      "reasoning_tokens": 3224,
+      "rejected_prediction_tokens": 0
+    },
+    "latency_checkpoint": {
+      "engine_tbt_ms": 6,
+      "engine_ttft_ms": 1194,
+      "engine_ttlt_ms": 41068,
+      "pre_inference_ms": 108,
+      "service_tbt_ms": 6,
+      "service_ttft_ms": 1779,
+      "service_ttlt_ms": 41649,
+      "user_visible_ttft_ms": 1672
+    },
+    "prompt_tokens": 40279,
+    "prompt_tokens_details": {
+      "audio_tokens": 0,
+      "cache_write_tokens": 40276,
+      "cached_tokens": 0
+    },
+    "total_tokens": 47191
+  },
+  "finishReason": "stop"
+}

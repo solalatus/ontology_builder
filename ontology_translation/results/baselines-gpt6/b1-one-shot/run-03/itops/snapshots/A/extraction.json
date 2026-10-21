@@ -1,0 +1,37 @@
+{
+  "condition": "b1-one-shot",
+  "transcript": "ontology_translation/results/final-scores/runs/run-03/itops/conversation-log.md",
+  "model": "gpt-6-sol",
+  "extraBody": {
+    "reasoning_effort": "high"
+  },
+  "extractionSystemPromptSha256": "41c2e221409507e489f9cab3bced39ec940a523ce85ef94b767eed8bc7202de9",
+  "transcriptSha256": "240c06efe92f52c83a42312eb7c59af45e469b14504a7999d6af4f015846a1d7",
+  "usage": {
+    "completion_tokens": 8850,
+    "completion_tokens_details": {
+      "accepted_prediction_tokens": 0,
+      "audio_tokens": 0,
+      "reasoning_tokens": 2901,
+      "rejected_prediction_tokens": 0
+    },
+    "latency_checkpoint": {
+      "engine_tbt_ms": 7,
+      "engine_ttft_ms": 991,
+      "engine_ttlt_ms": 61240,
+      "pre_inference_ms": 135,
+      "service_tbt_ms": 7,
+      "service_ttft_ms": 1618,
+      "service_ttlt_ms": 61861,
+      "user_visible_ttft_ms": 1483
+    },
+    "prompt_tokens": 49318,
+    "prompt_tokens_details": {
+      "audio_tokens": 0,
+      "cache_write_tokens": 49315,
+      "cached_tokens": 0
+    },
+    "total_tokens": 58168
+  },
+  "finishReason": "stop"
+}

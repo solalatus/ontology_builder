@@ -1,0 +1,188 @@
+{
+  "fullDomain": {
+    "classes": [],
+    "relationships": [
+      {
+        "goldId": "rel_0",
+        "recoveredId": "e7"
+      },
+      {
+        "goldId": "rel_1",
+        "recoveredId": "e8"
+      },
+      {
+        "goldId": "rel_2",
+        "recoveredId": "e9"
+      },
+      {
+        "goldId": "rel_3",
+        "recoveredId": "e10"
+      },
+      {
+        "goldId": "rel_4",
+        "recoveredId": "e11"
+      },
+      {
+        "goldId": "rel_5",
+        "recoveredId": "e14"
+      },
+      {
+        "goldId": "rel_22",
+        "recoveredId": "e25"
+      }
+    ],
+    "properties": [
+      {
+        "goldId": "TemperatureSensor.value",
+        "matchedPropertyName": "reading"
+      },
+      {
+        "goldId": "AirTemperatureSensor.value",
+        "matchedPropertyName": "reading"
+      },
+      {
+        "goldId": "OutsideAirCO2Sensor.value",
+        "matchedPropertyName": "reading"
+      },
+      {
+        "goldId": "ReturnAirCO2Sensor.value",
+        "matchedPropertyName": "reading"
+      },
+      {
+        "goldId": "CO2DifferentialSensor.value",
+        "matchedPropertyName": "reading"
+      },
+      {
+        "goldId": "WaterTemperatureSensor.value",
+        "matchedPropertyName": "reading"
+      }
+    ],
+    "valueFidelity": [
+      {
+        "id": "AirHandlingUnit.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "AirPlenum.airflowState",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "OccupancySensor.occupied",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Thermostat.mode",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Thermostat.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "TerminalUnit.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Filter.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Fan.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Economizer.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Boiler.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Chiller.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Zone.occupancyStatus",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "CoolingTower.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "HeatExchanger.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Pump.status",
+        "semanticFidelity": 1
+      }
+    ]
+  },
+  "scoped": {
+    "classes": [],
+    "relationships": [
+      {
+        "goldId": "rel_5",
+        "recoveredId": "e14"
+      },
+      {
+        "goldId": "rel_22",
+        "recoveredId": "e25"
+      }
+    ],
+    "properties": [
+      {
+        "goldId": "TemperatureSensor.value",
+        "matchedPropertyName": "reading"
+      },
+      {
+        "goldId": "CO2Sensor.value",
+        "matchedPropertyName": "reading"
+      }
+    ],
+    "valueFidelity": [
+      {
+        "id": "AirHandlingUnit.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "OccupancySensor.occupied",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Thermostat.mode",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Thermostat.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "TerminalUnit.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Economizer.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Boiler.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Chiller.status",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Zone.occupancyStatus",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "Pump.status",
+        "semanticFidelity": 1
+      }
+    ]
+  }
+}

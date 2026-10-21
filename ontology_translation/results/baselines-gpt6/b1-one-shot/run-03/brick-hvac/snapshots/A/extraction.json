@@ -1,0 +1,37 @@
+{
+  "condition": "b1-one-shot",
+  "transcript": "ontology_translation/results/default-change-187/treatment/run-03/brick-hvac/conversation-log.md",
+  "model": "gpt-6-sol",
+  "extraBody": {
+    "reasoning_effort": "high"
+  },
+  "extractionSystemPromptSha256": "41c2e221409507e489f9cab3bced39ec940a523ce85ef94b767eed8bc7202de9",
+  "transcriptSha256": "097d52fbbf5abb42b2c44d74320cbdd90000cf3f73c64388259bf546c0d45718",
+  "usage": {
+    "completion_tokens": 6355,
+    "completion_tokens_details": {
+      "accepted_prediction_tokens": 0,
+      "audio_tokens": 0,
+      "reasoning_tokens": 2192,
+      "rejected_prediction_tokens": 0
+    },
+    "latency_checkpoint": {
+      "engine_tbt_ms": 6,
+      "engine_ttft_ms": 1026,
+      "engine_ttlt_ms": 40636,
+      "pre_inference_ms": 122,
+      "service_tbt_ms": 6,
+      "service_ttft_ms": 1624,
+      "service_ttlt_ms": 41230,
+      "user_visible_ttft_ms": 1502
+    },
+    "prompt_tokens": 42407,
+    "prompt_tokens_details": {
+      "audio_tokens": 0,
+      "cache_write_tokens": 42404,
+      "cached_tokens": 0
+    },
+    "total_tokens": 48762
+  },
+  "finishReason": "stop"
+}

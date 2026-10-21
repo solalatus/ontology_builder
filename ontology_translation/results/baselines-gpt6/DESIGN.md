@@ -83,3 +83,7 @@ The detector ends a run in which the app goes 80 turns without a tool call. It w
 A dry run past the threshold covers it (`tests/baseline-conditions.spec.mjs`), and it fails without the change.
 
 **The stopped run.** It produced no snapshot and no extraction, so it has no result that could be kept or discarded. Its files are kept in `excluded/`, and its cost stays in the budget. Its slot is re-run. This departs from "a run is never re-run without the owner", which exists to stop an unlucky outcome being re-drawn. There is no outcome here. The deviation is stated here and in the write-up.
+
+## Note, 2026-10-21 01:21 UTC: container restart
+
+The machine running the series was restarted during B3 fibo-loans run-03, at turn 32 and 0.40 USD. The run was killed, not ended by anything in the protocol, and produced no snapshot. Its files are kept in `excluded/` and its cost stays in the budget. Its slot is re-run, for the same reason as Amendment 1: there is no outcome to keep or discard. The 25 runs completed before the restart were unaffected.

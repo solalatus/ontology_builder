@@ -1,0 +1,460 @@
+classes:
+  Space:
+    meaning: "A bounded room or area that can be identified, such as the area named in a comfort complaint."
+    aliases: []
+    properties: {}
+  Zone:
+    meaning: "One space or a group of spaces controlled together because their heating or cooling needs are similar."
+    aliases: []
+    properties:
+      occupancyStatus:
+        type: text
+        allowed: [occupied, unoccupied, unknown]
+  Thermostat:
+    meaning: "A control device that uses a temperature reading and setpoint to maintain a zone's temperature."
+    aliases: []
+    properties:
+      mode:
+        type: text
+        allowed: [heating, cooling, auto, "off"]
+      status:
+        type: text
+        allowed: [normal, fault, offline]
+  TerminalUnit:
+    meaning: "Equipment that regulates the air delivered to the area it serves."
+    aliases: []
+    properties:
+      status:
+        type: text
+        allowed: ["off", "on", alarm]
+  AHU:
+    meaning: "An air handler that moves and conditions air for a distribution system."
+    aliases: [air handler, air handling unit, air handler unit]
+    properties:
+      status:
+        type: text
+        allowed: ["off", "on", alarm]
+  Fan:
+    meaning: "The part that moves air through the AHU and distribution system."
+    aliases: []
+    properties:
+      status:
+        type: text
+        allowed: ["off", "on", alarm]
+  Filter:
+    meaning: "The part that removes material from air passing through it."
+    aliases: []
+    properties:
+      status:
+        type: text
+        allowed: [clean, dirty, replacement due]
+  Damper:
+    meaning: "A movable part that changes or shuts off airflow."
+    aliases: []
+    properties:
+      position:
+        type: number
+  CoolingValve:
+    meaning: "The valve that regulates chilled-water flow through a cooling coil to control air temperature."
+    aliases: []
+    properties:
+      position:
+        type: number
+  HeatingValve:
+    meaning: "The valve that regulates hot-water flow through a heating coil to control air temperature."
+    aliases: []
+    properties:
+      position:
+        type: number
+  Chiller:
+    meaning: "The plant machine that removes heat from a fluid to provide cooling."
+    aliases: []
+    properties:
+      status:
+        type: text
+        allowed: ["off", "on", alarm]
+  Boiler:
+    meaning: "The plant vessel that heats water or another fluid for heating service."
+    aliases: []
+    properties:
+      status:
+        type: text
+        allowed: ["off", "on", alarm]
+  Economizer:
+    meaning: "The AHU arrangement that uses suitable sensed conditions to reduce mechanical heating or cooling."
+    aliases: []
+    properties:
+      status:
+        type: text
+        allowed: [disabled, enabled, active]
+  TemperatureSensor:
+    meaning: "A point that measures temperature and can provide a thermostat's control reading."
+    aliases: []
+    properties:
+      reading:
+        type: number
+  AirTemperatureSensor:
+    meaning: "A point that measures air temperature, such as air at an AHU."
+    aliases: []
+    properties:
+      reading:
+        type: number
+  WaterTemperatureSensor:
+    meaning: "A point that measures water temperature, whose relevance to plant equipment depends on where it measures."
+    aliases: []
+    properties:
+      reading:
+        type: number
+  TemperatureSetpoint:
+    meaning: "The desired temperature used by a controller such as a thermostat."
+    aliases: []
+    properties:
+      setpointValue:
+        type: number
+  AirTemperatureSetpoint:
+    meaning: "The target air temperature under air-system control."
+    aliases: []
+    properties:
+      setpointValue:
+        type: number
+  CoolingTemperatureSetpoint:
+    meaning: "The temperature target used when deciding whether cooling is needed."
+    aliases: []
+    properties:
+      setpointValue:
+        type: number
+  HeatingTemperatureSetpoint:
+    meaning: "The temperature target used when deciding whether heating is needed."
+    aliases: []
+    properties:
+      setpointValue:
+        type: number
+  TemperatureDeadbandSetpoint:
+    meaning: "The configured size of the temperature range in which a heating or cooling change is avoided."
+    aliases: []
+    properties:
+      setpointValue:
+        type: number
+  OccupancySensor:
+    meaning: "A point that detects whether a space or zone is occupied."
+    aliases: []
+    properties:
+      occupied:
+        type: text
+        allowed: [occupied, unoccupied, unknown]
+  Building:
+    meaning: "The overall built facility containing the floors and controlled areas being operated."
+    aliases: []
+    properties: {}
+  Floor:
+    meaning: "A level of a building that groups its spaces."
+    aliases: [storey]
+    properties: {}
+  AirPlenum:
+    meaning: "A space or component that receives air for distribution or exhaust."
+    aliases: []
+    properties:
+      airflowState:
+        type: text
+        allowed: [supply, return, exhaust]
+  OutsideAirCO2Sensor:
+    meaning: "A point that measures CO₂ concentration in outside air."
+    aliases: []
+    properties:
+      reading:
+        type: number
+  ReturnAirCO2Sensor:
+    meaning: "A point that measures CO₂ concentration in air returning through the air system."
+    aliases: []
+    properties:
+      reading:
+        type: number
+  CO2DifferentialSensor:
+    meaning: "A point that measures the difference between inside-air and outside-air CO₂ concentrations."
+    aliases: []
+    properties:
+      reading:
+        type: number
+  Pump:
+    meaning: "A machine that moves water or another fluid through a system by adding energy to it."
+    aliases: []
+    properties:
+      status:
+        type: text
+        allowed: ["off", "on", alarm]
+  HeatExchanger:
+    meaning: "Equipment that transfers heat between two fluids or other media."
+    aliases: [HX]
+    properties:
+      status:
+        type: text
+        allowed: ["off", "on", alarm]
+  CoolingTower:
+    meaning: "Equipment that rejects waste heat to outdoor air by cooling a water stream."
+    aliases: []
+    properties:
+      status:
+        type: text
+        allowed: ["off", "on", alarm]
+
+relationships:
+  - name: contains
+    from: Zone
+    to: Space
+    meaning: "The space is part of the area controlled together as that zone when a reliable association is recorded."
+    aliases: []
+  - name: serves
+    from: Thermostat
+    to: Zone
+    meaning: "The thermostat is the control device for that zone."
+    aliases: []
+  - name: isPhysicallyLocatedIn
+    from: Thermostat
+    to: Space
+    meaning: "The space is where the thermostat sits, separately from which zone it serves."
+    aliases: []
+  - name: serves
+    from: TerminalUnit
+    to: Space
+    meaning: "The terminal unit regulates air delivered to that space."
+    aliases: []
+  - name: isPhysicallyLocatedIn
+    from: TerminalUnit
+    to: Space
+    meaning: "The terminal unit is located in that space, which need not be the space it serves."
+    aliases: []
+  - name: feeds
+    from: AHU
+    to: TerminalUnit
+    meaning: "The AHU supplies air to the terminal unit upstream in the air path."
+    aliases: []
+  - name: isPartOf
+    from: Fan
+    to: AHU
+    meaning: "The recorded fan is a component of that AHU."
+    aliases: []
+  - name: isPartOf
+    from: Filter
+    to: AHU
+    meaning: "The recorded filter is a component of that AHU."
+    aliases: []
+  - name: isPartOf
+    from: Damper
+    to: AHU
+    meaning: "The recorded damper is a component of that AHU."
+    aliases: []
+  - name: isPartOf
+    from: CoolingValve
+    to: AHU
+    meaning: "The recorded cooling valve is a component of that AHU."
+    aliases: []
+  - name: isPartOf
+    from: HeatingValve
+    to: AHU
+    meaning: "The recorded heating valve is a component of that AHU."
+    aliases: []
+  - name: feeds
+    from: Chiller
+    to: CoolingValve
+    meaning: "The recorded chiller feeds the cooling valve's chilled-water path upstream, not necessarily through an uninterrupted pipe."
+    aliases: []
+  - name: feeds
+    from: Boiler
+    to: HeatingValve
+    meaning: "The recorded boiler feeds the heating valve's hot-water path upstream, not necessarily through an uninterrupted pipe."
+    aliases: []
+  - name: isPartOf
+    from: Economizer
+    to: AHU
+    meaning: "The recorded economizer is a control arrangement on that AHU."
+    aliases: []
+  - name: has
+    from: Thermostat
+    to: TemperatureSensor
+    meaning: "The thermostat uses that sensor point for its temperature reading."
+    aliases: []
+  - name: has
+    from: AHU
+    to: AirTemperatureSensor
+    meaning: "That point measures air temperature for the AHU."
+    aliases: []
+  - name: has
+    from: Thermostat
+    to: TemperatureSetpoint
+    meaning: "That point provides the thermostat's temperature target."
+    aliases: []
+  - name: has
+    from: AHU
+    to: AirTemperatureSetpoint
+    meaning: "That point provides an air-temperature target for the AHU."
+    aliases: []
+  - name: has
+    from: AHU
+    to: CoolingTemperatureSetpoint
+    meaning: "That point provides a cooling target for the AHU."
+    aliases: []
+  - name: has
+    from: AHU
+    to: HeatingTemperatureSetpoint
+    meaning: "That point provides a heating target for the AHU."
+    aliases: []
+  - name: has
+    from: AHU
+    to: TemperatureDeadbandSetpoint
+    meaning: "That point provides the AHU's configured deadband size."
+    aliases: []
+  - name: has
+    from: Space
+    to: OccupancySensor
+    meaning: "The sensor's reading is used to indicate that space's occupancy."
+    aliases: []
+  - name: has
+    from: Zone
+    to: OccupancySensor
+    meaning: "The sensor's reading is used to indicate that zone's occupancy."
+    aliases: []
+  - name: isPhysicallyLocatedIn
+    from: OccupancySensor
+    to: Space
+    meaning: "The sensor is mounted in that space, separately from whose occupancy it reports."
+    aliases: []
+  - name: belongsTo
+    from: Floor
+    to: Building
+    meaning: "The floor is a level of that building."
+    aliases: []
+  - name: isLocatedOn
+    from: AHU
+    to: Floor
+    meaning: "The AHU's recorded floor is that level, without specifying a room."
+    aliases: []
+  - name: isLocatedIn
+    from: AHU
+    to: Building
+    meaning: "The AHU's recorded building is that facility, independently of whether its floor is recorded."
+    aliases: []
+  - name: feeds
+    from: AHU
+    to: AirPlenum
+    meaning: "The AHU feeds that recorded plenum independently of any terminal-unit connection."
+    aliases: []
+  - name: has
+    from: AHU
+    to: OutsideAirCO2Sensor
+    meaning: "That recorded point measures outside-air CO₂ for the AHU."
+    aliases: []
+  - name: has
+    from: AHU
+    to: ReturnAirCO2Sensor
+    meaning: "That recorded point measures return-air CO₂ for the AHU."
+    aliases: []
+
+rules:
+  - name: traceReportedSpace
+    conditions:
+      - "Identify the reported space from the investigation request; ask for it if it is missing or ambiguous."
+      - "Identify its zone only from a reliable Zone contains Space association; do not infer the zone from a thermostat's or terminal unit's location."
+      - "Find its terminal unit through Terminal Unit serves Space and its upstream AHU through AHU feeds Terminal Unit; report where the trace stops if a link is missing."
+  - name: interpretThermostatReading
+    conditions:
+      - "A thermostat reading describes conditions at its sensor, not necessarily in another space in the zone."
+      - "If the reported space differs from the thermostat's location, a reading or check in the reported space is needed to judge whether the thermostat reading represents it."
+      - "Compare the thermostat reading with its setpoint only when the reading is reliable and current and the target's applicability is established."
+  - name: requireApplicableControlContext
+    conditions:
+      - "Use a reading for a decision only when it is reliable, current, and associated with the equipment or area being checked."
+      - "Use a setpoint for a comparison only when reliable BAS or site control context establishes that it is the applicable target; a setpoint value or thermostat auto mode alone does not do so."
+      - "If required context is missing, report available readings and settings without claiming a deviation or sending a heating or cooling command."
+  - name: limitEquipmentIndications
+    conditions:
+      - "An on status does not prove that equipment is delivering the required air movement, water temperature, circulation, or heat rejection."
+      - "A damper or valve position does not by itself prove airflow or water flow."
+      - "An alarm status identifies an asset needing attention but not the cause of its alarm."
+  - name: usePlantWaterReading
+    conditions:
+      - "Use a water-temperature reading as evidence in a particular chiller or boiler check only when reliable site context identifies the water it measures and why that water is relevant."
+      - "Without that context, report the reading but leave its relevance to the plant asset unconfirmed."
+  - name: keepPlantFollowUpsSiteSpecific
+    conditions:
+      - "Identify a particular pump, heat exchanger, or cooling tower from the request or reliable site information."
+      - "Report its reliable status, but place it on the investigated path only when separate reliable site evidence establishes that role."
+      - "If the path or performance evidence is missing, leave its role or performance unconfirmed and flag what needs a field check."
+  - name: identifyAlarmFinding
+    conditions:
+      - "An identified AHU, terminal unit, fan, boiler, chiller, pump, heat exchanger, or cooling tower has a reliable status of alarm."
+      - "List that asset as in alarm; leave its cause unknown unless separate reliable alarm detail is available."
+  - name: identifyFilterAttention
+    conditions:
+      - "Put a filter on the attention list only when its reliable status is dirty or replacement due, preserving the reported value."
+      - "Identify its AHU through a recorded Filter isPartOf AHU connection and report that AHU's available building or floor."
+      - "If the part-of connection is missing, report the filter's status but leave its AHU and derived location unconfirmed."
+  - name: limitLocationFinding
+    conditions:
+      - "Report an AHU's recorded building or floor independently, or derive its building through a reliably linked floor."
+      - "Do not present a building or floor as a precise room location."
+      - "Report plant-equipment or more precise filter locations only when reliable site-specific information provides them."
+  - name: flagVentilationInvestigation
+    conditions:
+      - "At least one available CO₂ reading is reliable and relevant, and its outside-air stream, return-air stream, or inside-to-outside difference is known."
+      - "An approved expected condition is available for that comparison and the reading is elevated relative to it."
+      - "Flag a ventilation investigation, not a diagnosis or emergency; do not require all three sensor types."
+  - name: limitDifferentialCO2Use
+    conditions:
+      - "Use a CO₂ differential reading for a particular air system only when the request identifies the sensor or a reliable site-specific association establishes its relevance."
+      - "If no relevant differential sensor is identified, report that reading as unavailable and continue with relevant outside-air and return-air readings that are available."
+      - "CO₂ readings alone cannot establish economizer cooling suitability."
+  - name: establishEconomizerSuitability
+    conditions:
+      - "The economizer must be recorded as part of the target AHU."
+      - "Reliable sensed conditions for that AHU and a basis for expecting reduced mechanical conditioning must establish suitability before enabling it."
+      - "If that suitability evidence is unavailable, do not send the enable command; enabled status alone does not establish active operation."
+  - name: establishOccupiedZone
+    conditions:
+      - "Treat a zone as occupied for verification only from reliable Zone occupancyStatus = occupied or an occupied indication from a sensor reliably associated with that zone."
+      - "Unknown occupancy is neither occupied nor unoccupied, and a sensor's physical location alone does not establish which zone it informs."
+      - "A terminal unit can be related to the zone through a reliably recorded space it serves, not through an assumed direct zone-to-terminal-unit assignment."
+  - name: establishDeadbandBounds
+    conditions:
+      - "For an AHU no-change decision, use its current applicable air-temperature reading, established active setpoint, and deadband bounds interpreted through reliable control context."
+      - "The deadband setpoint's configured size alone does not establish whether it means total width or allowance on each side."
+      - "Do not substitute a thermostat's zone-temperature reading into the AHU deadband comparison."
+
+actions:
+  - name: enableEconomizerOperation
+    input: AHU
+    preconditions:
+      - "The economizer is reliably recorded as part of the identified AHU."
+      - "The agent has established BAS command authority and an identified permitted control for that AHU."
+      - "Reliable sensed conditions for that AHU support expecting economizer operation to reduce mechanical conditioning; CO₂ readings alone are insufficient."
+    effect: "Send and confirm an authorized enable command to the permitted AHU control; this does not itself establish operation."
+    verification: "Check for actual operation through AHU mode or active economizer status, and assess AHU air-temperature response separately; mark unavailable checks unverified."
+  - name: increaseCooling
+    input: AHU
+    preconditions:
+      - "The agent has established BAS command authority and an identified permitted control for the AHU."
+      - "A reliable, current air-temperature reading is associated with that AHU."
+      - "Reliable control context establishes the applicable cooling temperature setpoint, and the reading is above it."
+    effect: "Send and confirm an authorized command to increase the AHU's cooling response through its permitted BAS control, without assuming a valve or setpoint change."
+    verification: "Check that subsequent reliable AHU air-temperature readings trend down toward the applicable cooling setpoint; report the outcome as unverified if the command or trend cannot be confirmed."
+  - name: increaseHeating
+    input: AHU
+    preconditions:
+      - "The agent has established BAS command authority and an identified permitted control for the AHU."
+      - "A reliable, current air-temperature reading is associated with that AHU."
+      - "Reliable control context establishes the applicable heating temperature setpoint, and the reading is below it."
+    effect: "Send and confirm an authorized command to increase the AHU's heating response through its permitted BAS control, without assuming a valve or setpoint change."
+    verification: "Check that subsequent reliable AHU air-temperature readings trend up toward the applicable heating setpoint; report the outcome as unverified if the command or trend cannot be confirmed."
+  - name: verifyConditioningForOccupiedZone
+    input: Zone
+    preconditions:
+      - "Reliable zone occupancy status or a reliably associated occupancy sensor indicates occupied."
+      - "A thermostat serving the zone or a terminal unit serving a reliably linked space can be identified for the part being checked."
+    effect: "Report the established serving device, supporting occupancy and serving connections, and its BAS status; send no BAS command."
+    verification: "Check for normal thermostat status or on terminal-unit status, marking missing assignments or indications unverified rather than claiming the space is comfortable."
+  - name: holdCurrentResponseWithinDeadband
+    input: AHU
+    preconditions:
+      - "A reliable, current AHU air-temperature reading and the active applicable AHU setpoint are established."
+      - "Reliable control context establishes the AHU's deadband bounds and the reading is within them."
+    effect: "Make no heating or cooling change on that basis and send no hold command."
+    verification: "Continue checking that subsequent reliable AHU air-temperature readings remain within the established bounds; otherwise report the continued result as unverified."

@@ -1,0 +1,625 @@
+{
+  "label": "A",
+  "turn": 132,
+  "stage": "interview",
+  "elapsedSec": 1135,
+  "counts": {
+    "classes": 25,
+    "relationships": 27,
+    "properties": 2,
+    "allowedValueLists": 0,
+    "rules": 13,
+    "actions": 5,
+    "droppedEdges": 0
+  },
+  "metrics": {
+    "classes": {
+      "recall": 0.4528301886792453,
+      "precision": 0.96,
+      "f1": 0.6153846153846154,
+      "matched": 24,
+      "groundTruthTotal": 53,
+      "recoveredTotal": 25
+    },
+    "relationships": {
+      "recall": 0.6333333333333333,
+      "precision": 0.7037037037037037,
+      "f1": 0.6666666666666667,
+      "matched": 19,
+      "groundTruthTotal": 30,
+      "recoveredTotal": 27
+    },
+    "properties": {
+      "recall": 0.6666666666666666,
+      "precision": 1,
+      "f1": 0.8,
+      "matched": 2,
+      "groundTruthTotal": 3,
+      "recoveredTotal": 2
+    },
+    "controlledValueFidelity": null,
+    "controlledValuePropertyGoldTotal": 0,
+    "controlledValuePropertyMatchedCount": 0,
+    "recoveryEffectiveness": 0.6940170940170941,
+    "recoveryEffectivenessWithFidelity": null
+  },
+  "scopedMetrics": {
+    "classes": {
+      "recall": 0.8214285714285714,
+      "precision": 0.92,
+      "f1": 0.8679245283018867,
+      "matched": 23,
+      "groundTruthTotal": 28,
+      "recoveredTotal": 25
+    },
+    "relationships": {
+      "recall": 0.782608695652174,
+      "precision": 0.6666666666666666,
+      "f1": 0.72,
+      "matched": 18,
+      "groundTruthTotal": 23,
+      "recoveredTotal": 27
+    },
+    "properties": {
+      "recall": 1,
+      "precision": 1,
+      "f1": 1,
+      "matched": 2,
+      "groundTruthTotal": 2,
+      "recoveredTotal": 2
+    },
+    "controlledValueFidelity": null,
+    "controlledValuePropertyGoldTotal": 0,
+    "controlledValuePropertyMatchedCount": 0,
+    "recoveryEffectiveness": 0.8626415094339622,
+    "recoveryEffectivenessWithFidelity": null
+  },
+  "semanticMetrics": {
+    "classes": {
+      "recall": 0.4716981132075472,
+      "precision": 1,
+      "f1": 0.641025641025641,
+      "matched": 25,
+      "groundTruthTotal": 53,
+      "recoveredTotal": 25
+    },
+    "relationships": {
+      "recall": 0.6333333333333333,
+      "precision": 0.7037037037037037,
+      "f1": 0.6666666666666667,
+      "matched": 19,
+      "groundTruthTotal": 30,
+      "recoveredTotal": 27
+    },
+    "properties": {
+      "recall": 0.6666666666666666,
+      "precision": 1,
+      "f1": 0.8,
+      "matched": 2,
+      "groundTruthTotal": 3,
+      "recoveredTotal": 2
+    },
+    "controlledValueFidelity": null,
+    "controlledValuePropertyGoldTotal": 0,
+    "controlledValuePropertyMatchedCount": 0,
+    "recoveryEffectiveness": 0.7025641025641026,
+    "recoveryEffectivenessWithFidelity": null,
+    "judgeCallCount": 2,
+    "judgments": {
+      "classes": [
+        {
+          "goldId": "Consignee",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Shipper",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Distributor",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Retailer",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Wholesaler",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Trailer",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Wagon",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Traceability",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "StorageFacility",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "DistributionCenter",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Factory",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "GeospatialLocation",
+          "recoveredId": "n13",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "ShipFromLocation",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "ShipToLocation",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "ShippingRoute",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "SupplyChainTransportProcess",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "StorageProcess",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "WarehousingProcess",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "PackagingProcess",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "ConsigningProcess",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "FreightForwardingProcess",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "InventoryManagementProcess",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "SupplyChainProcess",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "LogisticsProcess",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "LogisticsService",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "StorageService",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "PackagingService",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "ManufacturingService",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "BillOfLading",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "relationships": [
+        {
+          "goldId": "rel_0",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_16",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "properties": [
+        {
+          "goldId": "FreightForwarder.status",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "valueFidelity": []
+    },
+    "resolvedMatches": {
+      "classes": [
+        {
+          "goldId": "GeospatialLocation",
+          "recoveredId": "n13"
+        }
+      ],
+      "relationships": [],
+      "properties": [],
+      "valueFidelity": []
+    },
+    "heuristic": {
+      "classes": {
+        "recall": 0.4528301886792453,
+        "precision": 0.96,
+        "f1": 0.6153846153846154,
+        "matched": 24,
+        "groundTruthTotal": 53,
+        "recoveredTotal": 25
+      },
+      "relationships": {
+        "recall": 0.6333333333333333,
+        "precision": 0.7037037037037037,
+        "f1": 0.6666666666666667,
+        "matched": 19,
+        "groundTruthTotal": 30,
+        "recoveredTotal": 27
+      },
+      "properties": {
+        "recall": 0.6666666666666666,
+        "precision": 1,
+        "f1": 0.8,
+        "matched": 2,
+        "groundTruthTotal": 3,
+        "recoveredTotal": 2
+      },
+      "controlledValueFidelity": null,
+      "controlledValuePropertyGoldTotal": 0,
+      "controlledValuePropertyMatchedCount": 0,
+      "recoveryEffectiveness": 0.6940170940170941,
+      "recoveryEffectivenessWithFidelity": null
+    },
+    "rawResponses": {
+      "classes": "1: NO MATCH -- A consignee is a receiving party, not a location.\n2: NO MATCH -- A shipper is a sending party, not a location.\n3: NO MATCH -- A distributor is an organization or role, not a location.\n4: NO MATCH -- A retailer is a business, not a location.\n5: NO MATCH -- A wholesaler is a business, not a location.\n6: NO MATCH -- A trailer is a vehicle, not a location.\n7: NO MATCH -- A wagon is a vehicle, not a location.\n8: NO MATCH -- Traceability is a capability, not a location.\n9: NO MATCH -- A storage facility is a specific kind of site, not any location.\n10: NO MATCH -- A distribution center is a specific kind of facility, not any location.\n11: NO MATCH -- A factory is a specific kind of facility, not any location.\n12: MATCH 1 -- Both denote a geographically identified place.\n13: NO MATCH -- Ship-from location specifies an origin role absent from the candidate.\n14: NO MATCH -- Ship-to location specifies a destination role absent from the candidate.\n15: NO MATCH -- A shipping route connects locations; it is not a location.\n16: NO MATCH -- Transport is a process, not a location.\n17: NO MATCH -- Storage is a process, not a location.\n18: NO MATCH -- Warehousing is a process, not a location.\n19: NO MATCH -- Packaging is a process, not a location.\n20: NO MATCH -- Consigning is a process, not a location.\n21: NO MATCH -- Freight forwarding is a process, not a location.\n22: NO MATCH -- Inventory management is a process, not a location.\n23: NO MATCH -- A supply chain process is not a location.\n24: NO MATCH -- A logistics process is not a location.\n25: NO MATCH -- A logistics service is not a location.\n26: NO MATCH -- A storage service is not a location.\n27: NO MATCH -- A packaging service is not a location.\n28: NO MATCH -- A manufacturing service is not a location.\n29: NO MATCH -- A bill of lading is a document, not a location.",
+      "relationships": "1: NO MATCH -- No candidate describes a supplier supplying a customer.\n2: NO MATCH -- No candidate describes a shipment using a freight container."
+    }
+  },
+  "semanticScopedMetrics": {
+    "classes": {
+      "recall": 0.8214285714285714,
+      "precision": 0.92,
+      "f1": 0.8679245283018867,
+      "matched": 23,
+      "groundTruthTotal": 28,
+      "recoveredTotal": 25
+    },
+    "relationships": {
+      "recall": 0.782608695652174,
+      "precision": 0.6666666666666666,
+      "f1": 0.72,
+      "matched": 18,
+      "groundTruthTotal": 23,
+      "recoveredTotal": 27
+    },
+    "properties": {
+      "recall": 1,
+      "precision": 1,
+      "f1": 1,
+      "matched": 2,
+      "groundTruthTotal": 2,
+      "recoveredTotal": 2
+    },
+    "controlledValueFidelity": null,
+    "controlledValuePropertyGoldTotal": 0,
+    "controlledValuePropertyMatchedCount": 0,
+    "recoveryEffectiveness": 0.8626415094339622,
+    "recoveryEffectivenessWithFidelity": null,
+    "judgeCallCount": 2,
+    "judgments": {
+      "classes": [
+        {
+          "goldId": "Traceability",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "StorageFacility",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "ShipFromLocation",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "ShipToLocation",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "StorageService",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "relationships": [
+        {
+          "goldId": "rel_0",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "rel_16",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "properties": [],
+      "valueFidelity": []
+    },
+    "resolvedMatches": {
+      "classes": [],
+      "relationships": [],
+      "properties": [],
+      "valueFidelity": []
+    },
+    "heuristic": {
+      "classes": {
+        "recall": 0.8214285714285714,
+        "precision": 0.92,
+        "f1": 0.8679245283018867,
+        "matched": 23,
+        "groundTruthTotal": 28,
+        "recoveredTotal": 25
+      },
+      "relationships": {
+        "recall": 0.782608695652174,
+        "precision": 0.6666666666666666,
+        "f1": 0.72,
+        "matched": 18,
+        "groundTruthTotal": 23,
+        "recoveredTotal": 27
+      },
+      "properties": {
+        "recall": 1,
+        "precision": 1,
+        "f1": 1,
+        "matched": 2,
+        "groundTruthTotal": 2,
+        "recoveredTotal": 2
+      },
+      "controlledValueFidelity": null,
+      "controlledValuePropertyGoldTotal": 0,
+      "controlledValuePropertyMatchedCount": 0,
+      "recoveryEffectiveness": 0.8626415094339622,
+      "recoveryEffectivenessWithFidelity": null
+    },
+    "rawResponses": {
+      "classes": "1: NO MATCH -- No candidate represents traceability.\n2: NO MATCH -- A generic location is not specifically a storage facility.\n3: NO MATCH -- A generic location is not specifically a ship-from location.\n4: NO MATCH -- A generic location is not specifically a ship-to location.\n5: NO MATCH -- Transportation is not a storage service.",
+      "relationships": "1: NO MATCH -- No candidate describes a supplier supplying a customer.\n2: NO MATCH -- No candidate describes a shipment using a freight container."
+    }
+  },
+  "ruleMetrics": {
+    "recall": 0,
+    "precision": 0,
+    "f1": 0,
+    "matched": 0,
+    "groundTruthTotal": 5,
+    "recoveredTotal": 13
+  },
+  "actionMetrics": {
+    "identification": {
+      "recall": 0,
+      "precision": 0,
+      "f1": 0,
+      "matched": 0,
+      "groundTruthTotal": 5,
+      "recoveredTotal": 5
+    },
+    "inputClassAccuracy": null,
+    "inputClassChecked": 0,
+    "preconditionRecovery": null,
+    "effectRecovery": null,
+    "verificationRecovery": null
+  },
+  "semanticRuleActionMetrics": {
+    "rules": {
+      "recall": 1,
+      "precision": 0.38461538461538464,
+      "f1": 0.5555555555555556,
+      "matched": 5,
+      "groundTruthTotal": 5,
+      "recoveredTotal": 13
+    },
+    "actions": {
+      "recall": 0.8,
+      "precision": 0.8,
+      "f1": 0.8000000000000002,
+      "matched": 4,
+      "groundTruthTotal": 5,
+      "recoveredTotal": 5,
+      "components": {
+        "identification": {
+          "recall": 0,
+          "precision": 0,
+          "f1": 0,
+          "matched": 0,
+          "groundTruthTotal": 5,
+          "recoveredTotal": 5
+        },
+        "inputClassAccuracy": null,
+        "inputClassChecked": 0,
+        "preconditionRecovery": null,
+        "effectRecovery": null,
+        "verificationRecovery": null
+      }
+    },
+    "judgeCallCount": 2,
+    "judgments": {
+      "rules": [
+        {
+          "goldId": "canPrepareShipment",
+          "recoveredId": "7",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "canReceiveShipment",
+          "recoveredId": "8",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "canRecordTrackingEvent",
+          "recoveredId": "10",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "canMaintainTraceability",
+          "recoveredId": "12",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "canEvaluateSupplyRelationship",
+          "recoveredId": "11",
+          "verdict": "MATCH"
+        }
+      ],
+      "actions": [
+        {
+          "goldId": "prepareShipment",
+          "recoveredId": "0",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "dispatchShipment",
+          "recoveredId": "1",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "receiveShipment",
+          "recoveredId": "2",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "recordTrackingEvent",
+          "recoveredId": "3",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "evaluateSupplyRelationship",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        }
+      ]
+    },
+    "resolvedMatches": {
+      "rules": [
+        {
+          "goldId": "canPrepareShipment",
+          "recoveredId": "7"
+        },
+        {
+          "goldId": "canReceiveShipment",
+          "recoveredId": "8"
+        },
+        {
+          "goldId": "canRecordTrackingEvent",
+          "recoveredId": "10"
+        },
+        {
+          "goldId": "canMaintainTraceability",
+          "recoveredId": "12"
+        },
+        {
+          "goldId": "canEvaluateSupplyRelationship",
+          "recoveredId": "11"
+        }
+      ],
+      "actions": [
+        {
+          "goldId": "prepareShipment",
+          "recoveredId": "0"
+        },
+        {
+          "goldId": "dispatchShipment",
+          "recoveredId": "1"
+        },
+        {
+          "goldId": "receiveShipment",
+          "recoveredId": "2"
+        },
+        {
+          "goldId": "recordTrackingEvent",
+          "recoveredId": "3"
+        }
+      ]
+    },
+    "heuristic": {
+      "rules": {
+        "recall": 0,
+        "precision": 0,
+        "f1": 0,
+        "matched": 0,
+        "groundTruthTotal": 5,
+        "recoveredTotal": 13
+      },
+      "actions": {
+        "identification": {
+          "recall": 0,
+          "precision": 0,
+          "f1": 0,
+          "matched": 0,
+          "groundTruthTotal": 5,
+          "recoveredTotal": 5
+        },
+        "inputClassAccuracy": null,
+        "inputClassChecked": 0,
+        "preconditionRecovery": null,
+        "effectRecovery": null,
+        "verificationRecovery": null
+      }
+    },
+    "rawResponses": {
+      "rules": "1: MATCH 8 -- Same shipment locations, preparation process, and carrier-or-forwarder condition.\n2: MATCH 9 -- Same facility, ship-to location, and transport-arrival conditions.\n3: MATCH 11 -- Same tracked entity, event time, and event type requirements.\n4: MATCH 13 -- Same movement-event coverage and traceable-unit association requirements.\n5: MATCH 12 -- Same supplier, customer, and material trade item requirements.",
+      "actions": "1: MATCH 1 -- Both document shipment locations and preparation and transport arrangements.\n2: MATCH 2 -- Both send the shipment for movement.\n3: MATCH 3 -- Both record arrival through a receiving process.\n4: MATCH 4 -- Both record a tracking event linked to the identified unit.\n5: NO MATCH -- The candidate does not identify a supply relationship or its dependencies."
+    }
+  },
+  "offlineRescoreAgrees": true
+}

@@ -1,0 +1,412 @@
+{
+  "label": "A",
+  "turn": null,
+  "stage": "extraction",
+  "elapsedSec": 34,
+  "counts": {
+    "classes": 21,
+    "relationships": 18,
+    "properties": 5,
+    "allowedValueLists": 1,
+    "rules": 12,
+    "actions": 5,
+    "droppedEdges": 0
+  },
+  "metrics": {
+    "classes": {
+      "recall": 1,
+      "precision": 0.9523809523809523,
+      "f1": 0.975609756097561,
+      "matched": 20,
+      "groundTruthTotal": 20,
+      "recoveredTotal": 21
+    },
+    "relationships": {
+      "recall": 1,
+      "precision": 0.7222222222222222,
+      "f1": 0.8387096774193548,
+      "matched": 13,
+      "groundTruthTotal": 13,
+      "recoveredTotal": 18
+    },
+    "properties": {
+      "recall": 1,
+      "precision": 1,
+      "f1": 1,
+      "matched": 5,
+      "groundTruthTotal": 5,
+      "recoveredTotal": 5
+    },
+    "controlledValueFidelity": 1,
+    "controlledValuePropertyGoldTotal": 1,
+    "controlledValuePropertyMatchedCount": 1,
+    "recoveryEffectiveness": 0.9381064778389719,
+    "recoveryEffectivenessWithFidelity": 0.953579858379229
+  },
+  "scopedMetrics": {
+    "classes": {
+      "recall": 1,
+      "precision": 0.7142857142857143,
+      "f1": 0.8333333333333333,
+      "matched": 15,
+      "groundTruthTotal": 15,
+      "recoveredTotal": 21
+    },
+    "relationships": {
+      "recall": 1,
+      "precision": 0.4444444444444444,
+      "f1": 0.6153846153846153,
+      "matched": 8,
+      "groundTruthTotal": 8,
+      "recoveredTotal": 18
+    },
+    "properties": {
+      "recall": 1,
+      "precision": 0.4,
+      "f1": 0.5714285714285715,
+      "matched": 2,
+      "groundTruthTotal": 2,
+      "recoveredTotal": 5
+    },
+    "controlledValueFidelity": null,
+    "controlledValuePropertyGoldTotal": 0,
+    "controlledValuePropertyMatchedCount": 0,
+    "recoveryEffectiveness": 0.6733821733821733,
+    "recoveryEffectivenessWithFidelity": null
+  },
+  "semanticMetrics": {
+    "classes": {
+      "recall": 1,
+      "precision": 0.9523809523809523,
+      "f1": 0.975609756097561,
+      "matched": 20,
+      "groundTruthTotal": 20,
+      "recoveredTotal": 21
+    },
+    "relationships": {
+      "recall": 1,
+      "precision": 0.7222222222222222,
+      "f1": 0.8387096774193548,
+      "matched": 13,
+      "groundTruthTotal": 13,
+      "recoveredTotal": 18
+    },
+    "properties": {
+      "recall": 1,
+      "precision": 1,
+      "f1": 1,
+      "matched": 5,
+      "groundTruthTotal": 5,
+      "recoveredTotal": 5
+    },
+    "controlledValueFidelity": 1,
+    "controlledValuePropertyGoldTotal": 1,
+    "controlledValuePropertyMatchedCount": 1,
+    "recoveryEffectiveness": 0.9381064778389719,
+    "recoveryEffectivenessWithFidelity": 0.953579858379229,
+    "judgeCallCount": 1,
+    "judgments": {
+      "classes": [],
+      "relationships": [],
+      "properties": [],
+      "valueFidelity": [
+        {
+          "id": "MaintenanceState.stateCategory",
+          "semanticFidelity": 1
+        }
+      ]
+    },
+    "resolvedMatches": {
+      "classes": [],
+      "relationships": [],
+      "properties": [],
+      "valueFidelity": [
+        {
+          "id": "MaintenanceState.stateCategory",
+          "semanticFidelity": 1
+        }
+      ]
+    },
+    "heuristic": {
+      "classes": {
+        "recall": 1,
+        "precision": 0.9523809523809523,
+        "f1": 0.975609756097561,
+        "matched": 20,
+        "groundTruthTotal": 20,
+        "recoveredTotal": 21
+      },
+      "relationships": {
+        "recall": 1,
+        "precision": 0.7222222222222222,
+        "f1": 0.8387096774193548,
+        "matched": 13,
+        "groundTruthTotal": 13,
+        "recoveredTotal": 18
+      },
+      "properties": {
+        "recall": 1,
+        "precision": 1,
+        "f1": 1,
+        "matched": 5,
+        "groundTruthTotal": 5,
+        "recoveredTotal": 5
+      },
+      "controlledValueFidelity": 1,
+      "controlledValuePropertyGoldTotal": 1,
+      "controlledValuePropertyMatchedCount": 1,
+      "recoveryEffectiveness": 0.9381064778389719,
+      "recoveryEffectivenessWithFidelity": 0.953579858379229
+    },
+    "rawResponses": {
+      "valueFidelity": "1: 100 -- Identical status distinctions."
+    }
+  },
+  "semanticScopedMetrics": {
+    "classes": {
+      "recall": 1,
+      "precision": 0.7142857142857143,
+      "f1": 0.8333333333333333,
+      "matched": 15,
+      "groundTruthTotal": 15,
+      "recoveredTotal": 21
+    },
+    "relationships": {
+      "recall": 1,
+      "precision": 0.4444444444444444,
+      "f1": 0.6153846153846153,
+      "matched": 8,
+      "groundTruthTotal": 8,
+      "recoveredTotal": 18
+    },
+    "properties": {
+      "recall": 1,
+      "precision": 0.4,
+      "f1": 0.5714285714285715,
+      "matched": 2,
+      "groundTruthTotal": 2,
+      "recoveredTotal": 5
+    },
+    "controlledValueFidelity": null,
+    "controlledValuePropertyGoldTotal": 0,
+    "controlledValuePropertyMatchedCount": 0,
+    "recoveryEffectiveness": 0.6733821733821733,
+    "recoveryEffectivenessWithFidelity": null,
+    "judgeCallCount": 0,
+    "judgments": {
+      "classes": [],
+      "relationships": [],
+      "properties": [],
+      "valueFidelity": []
+    },
+    "resolvedMatches": {
+      "classes": [],
+      "relationships": [],
+      "properties": [],
+      "valueFidelity": []
+    },
+    "heuristic": {
+      "classes": {
+        "recall": 1,
+        "precision": 0.7142857142857143,
+        "f1": 0.8333333333333333,
+        "matched": 15,
+        "groundTruthTotal": 15,
+        "recoveredTotal": 21
+      },
+      "relationships": {
+        "recall": 1,
+        "precision": 0.4444444444444444,
+        "f1": 0.6153846153846153,
+        "matched": 8,
+        "groundTruthTotal": 8,
+        "recoveredTotal": 18
+      },
+      "properties": {
+        "recall": 1,
+        "precision": 0.4,
+        "f1": 0.5714285714285715,
+        "matched": 2,
+        "groundTruthTotal": 2,
+        "recoveredTotal": 5
+      },
+      "controlledValueFidelity": null,
+      "controlledValuePropertyGoldTotal": 0,
+      "controlledValuePropertyMatchedCount": 0,
+      "recoveryEffectiveness": 0.6733821733821733,
+      "recoveryEffectivenessWithFidelity": null
+    },
+    "rawResponses": {}
+  },
+  "ruleMetrics": {
+    "recall": 0.5714285714285714,
+    "precision": 0.3333333333333333,
+    "f1": 0.4210526315789474,
+    "matched": 4,
+    "groundTruthTotal": 7,
+    "recoveredTotal": 12
+  },
+  "actionMetrics": {
+    "identification": {
+      "recall": 0,
+      "precision": 0,
+      "f1": 0,
+      "matched": 0,
+      "groundTruthTotal": 5,
+      "recoveredTotal": 5
+    },
+    "inputClassAccuracy": null,
+    "inputClassChecked": 0,
+    "preconditionRecovery": null,
+    "effectRecovery": null,
+    "verificationRecovery": null
+  },
+  "semanticRuleActionMetrics": {
+    "rules": {
+      "recall": 1,
+      "precision": 0.5833333333333334,
+      "f1": 0.7368421052631579,
+      "matched": 7,
+      "groundTruthTotal": 7,
+      "recoveredTotal": 12
+    },
+    "actions": {
+      "recall": 1,
+      "precision": 1,
+      "f1": 1,
+      "matched": 5,
+      "groundTruthTotal": 5,
+      "recoveredTotal": 5,
+      "components": {
+        "identification": {
+          "recall": 0,
+          "precision": 0,
+          "f1": 0,
+          "matched": 0,
+          "groundTruthTotal": 5,
+          "recoveredTotal": 5
+        },
+        "inputClassAccuracy": null,
+        "inputClassChecked": 0,
+        "preconditionRecovery": null,
+        "effectRecovery": null,
+        "verificationRecovery": null
+      }
+    },
+    "judgeCallCount": 2,
+    "judgments": {
+      "rules": [
+        {
+          "goldId": "canClassifyOperatingState",
+          "recoveredId": "1",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "canClassifyDegradedState",
+          "recoveredId": "2",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "canAssignQualifiedPerson",
+          "recoveredId": "9",
+          "verdict": "MATCH"
+        }
+      ],
+      "actions": [
+        {
+          "goldId": "classifyItemAsFailed",
+          "recoveredId": "0",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "createMaintenanceWorkOrder",
+          "recoveredId": "1",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "assignQualifiedMaintenancePerson",
+          "recoveredId": "2",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "startMaintenanceProcess",
+          "recoveredId": "3",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "closeMaintenanceWorkOrder",
+          "recoveredId": "4",
+          "verdict": "MATCH"
+        }
+      ]
+    },
+    "resolvedMatches": {
+      "rules": [
+        {
+          "goldId": "canClassifyOperatingState",
+          "recoveredId": "1"
+        },
+        {
+          "goldId": "canClassifyDegradedState",
+          "recoveredId": "2"
+        },
+        {
+          "goldId": "canAssignQualifiedPerson",
+          "recoveredId": "9"
+        }
+      ],
+      "actions": [
+        {
+          "goldId": "classifyItemAsFailed",
+          "recoveredId": "0"
+        },
+        {
+          "goldId": "createMaintenanceWorkOrder",
+          "recoveredId": "1"
+        },
+        {
+          "goldId": "assignQualifiedMaintenancePerson",
+          "recoveredId": "2"
+        },
+        {
+          "goldId": "startMaintenanceProcess",
+          "recoveredId": "3"
+        },
+        {
+          "goldId": "closeMaintenanceWorkOrder",
+          "recoveredId": "4"
+        }
+      ]
+    },
+    "heuristic": {
+      "rules": {
+        "recall": 0.5714285714285714,
+        "precision": 0.3333333333333333,
+        "f1": 0.4210526315789474,
+        "matched": 4,
+        "groundTruthTotal": 7,
+        "recoveredTotal": 12
+      },
+      "actions": {
+        "identification": {
+          "recall": 0,
+          "precision": 0,
+          "f1": 0,
+          "matched": 0,
+          "groundTruthTotal": 5,
+          "recoveredTotal": 5
+        },
+        "inputClassAccuracy": null,
+        "inputClassChecked": 0,
+        "preconditionRecovery": null,
+        "effectRecovery": null,
+        "verificationRecovery": null
+      }
+    },
+    "rawResponses": {
+      "rules": "1: MATCH 2 -- Both require the asset to perform its required function.\n2: MATCH 3 -- Both require reduced ability with acceptable performance.\n3: MATCH 8 -- Both require a qualification specification that the person satisfies.",
+      "actions": "1: MATCH 1 -- Both record a failed state for the affected item.\n2: MATCH 2 -- Both create a maintenance work order record.\n3: MATCH 3 -- Both assign a person to the maintenance activity.\n4: MATCH 4 -- Both begin the maintenance process under its strategy.\n5: MATCH 5 -- Both update the work order record to reflect completion."
+    }
+  },
+  "offlineRescoreAgrees": true
+}

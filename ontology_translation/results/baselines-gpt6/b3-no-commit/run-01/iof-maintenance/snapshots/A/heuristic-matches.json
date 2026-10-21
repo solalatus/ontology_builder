@@ -1,0 +1,113 @@
+{
+  "classes": [
+    {
+      "goldId": "MaintenanceState",
+      "recoveredId": "n2",
+      "weight": 1
+    },
+    {
+      "goldId": "FailureEvent",
+      "recoveredId": "n5",
+      "weight": 1
+    },
+    {
+      "goldId": "FailureProcess",
+      "recoveredId": "n6",
+      "weight": 1
+    },
+    {
+      "goldId": "FailureEffect",
+      "recoveredId": "n7",
+      "weight": 1
+    },
+    {
+      "goldId": "RequiredFunction",
+      "recoveredId": "n3",
+      "weight": 1
+    },
+    {
+      "goldId": "FunctioningProcess",
+      "recoveredId": "n4",
+      "weight": 1
+    },
+    {
+      "goldId": "MaintenanceStrategy",
+      "recoveredId": "n10",
+      "weight": 1
+    },
+    {
+      "goldId": "MaintenanceProcess",
+      "recoveredId": "n8",
+      "weight": 1
+    },
+    {
+      "goldId": "MaintenanceActivity",
+      "recoveredId": "n9",
+      "weight": 1
+    },
+    {
+      "goldId": "MaintenanceWorkOrderRecord",
+      "recoveredId": "n11",
+      "weight": 1
+    },
+    {
+      "goldId": "QualificationSpecification",
+      "recoveredId": "n13",
+      "weight": 1
+    },
+    {
+      "goldId": "QualifiedMaintenancePerson",
+      "recoveredId": "n12",
+      "weight": 0.6666666666666666
+    }
+  ],
+  "relationships": [
+    {
+      "goldId": "rel_1",
+      "edgeId": "e7",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_6",
+      "edgeId": "e9",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_9",
+      "edgeId": "e3",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_2",
+      "edgeId": "e6",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_3",
+      "edgeId": "e5",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_5",
+      "edgeId": "e8",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_12",
+      "edgeId": "e4",
+      "direction": "forward"
+    }
+  ],
+  "properties": [
+    {
+      "goldId": "MaintenanceState.stateCategory",
+      "hostNodeId": "n2",
+      "matchedPropertyName": "stateCategory"
+    },
+    {
+      "goldId": "MaintenanceWorkOrderRecord.cost",
+      "hostNodeId": "n11",
+      "matchedPropertyName": "cost"
+    }
+  ]
+}

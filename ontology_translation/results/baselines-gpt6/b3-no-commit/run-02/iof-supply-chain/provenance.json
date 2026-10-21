@@ -1,0 +1,207 @@
+{
+  "schemaVersion": 1,
+  "domain": "iof-supply-chain",
+  "runId": "run-02",
+  "runUuid": "e215d179-b1dc-4471-9a58-516dc0c2d4a5",
+  "status": "complete",
+  "generatedAt": "2026-10-21T00:46:47.915Z",
+  "model": "gpt-6-sol",
+  "personaModel": "gpt-6-sol",
+  "classifierModel": "gpt-6-sol",
+  "reasoningEffort": "high",
+  "provider": "azure",
+  "endpointSha256": "e3e57f18180d7eb5a21f2693f60ce94f67ca899f783a0f790212e25a4f648197",
+  "domainYamlPath": "ontology_translation/domains/iof-supply-chain/reference.domain.yaml",
+  "personaPath": "ontology_translation/domains/iof-supply-chain/persona.md",
+  "stoppedReason": "stages_complete",
+  "turnsUsed": 132,
+  "wallClockSec": 1197,
+  "semanticJudgingSucceeded": true,
+  "degraded": true,
+  "errorCounts": {},
+  "compactionEvents": 0,
+  "repoCommitSha": "ec52062e39eb9b2ab0ede600dc87a64821759491",
+  "interviewerPromptSha256": "603766dfec317f168ab5bebb8b901f681903a114139b8f469af1bbbbf98cf354",
+  "personaPromptSha256": "8d183e0f3de187a41c7f7f03cd593479294abe2e821a7e448fc872d3ce76c1c4",
+  "groundTruthSha256": "10d1322053aef557f17d8377e0504cc838392991a1f7740d6c62360d789f639e",
+  "wrapperSha256": "0316104269a6a163807c71e40c36929889e7dcba61fe59e8c7ddd0ca771c70f1",
+  "maxTurns": 300,
+  "wallClockMinutes": 120,
+  "appTurnTimeoutSec": 600,
+  "runCostCapUsd": 10,
+  "prices": {
+    "input": 2,
+    "cachedInput": 0.2,
+    "output": 10
+  },
+  "coverageSweep": false,
+  "namingPass": false,
+  "condition": "b3-no-commit",
+  "toolsDisabled": true,
+  "extraction": {
+    "model": "gpt-6-sol",
+    "extraBody": {
+      "reasoning_effort": "high"
+    },
+    "extractionSystemPromptSha256": "41c2e221409507e489f9cab3bced39ec940a523ce85ef94b767eed8bc7202de9",
+    "transcriptSha256": "88945ff65a616da6af34faa54fedd023fbeaff131a457905ee9ebb11cc63cec2",
+    "usage": {
+      "completion_tokens": 5013,
+      "completion_tokens_details": {
+        "accepted_prediction_tokens": 0,
+        "audio_tokens": 0,
+        "reasoning_tokens": 1536,
+        "rejected_prediction_tokens": 0
+      },
+      "latency_checkpoint": {
+        "engine_tbt_ms": 6,
+        "engine_ttft_ms": 980,
+        "engine_ttlt_ms": 30052,
+        "pre_inference_ms": 532,
+        "service_tbt_ms": 6,
+        "service_ttft_ms": 2170,
+        "service_ttlt_ms": 31202,
+        "user_visible_ttft_ms": 1637
+      },
+      "prompt_tokens": 39281,
+      "prompt_tokens_details": {
+        "audio_tokens": 0,
+        "cache_write_tokens": 39278,
+        "cached_tokens": 0
+      },
+      "total_tokens": 44294
+    },
+    "finishReason": "stop",
+    "transcript": "snapshots/A/extraction-input.md"
+  },
+  "sweepMaxRounds": 3,
+  "stageTurnCaps": {
+    "sweepRound": 45,
+    "sweepCloseout": 15,
+    "naming": 45
+  },
+  "stages": {
+    "enabled": {
+      "sweep": false,
+      "naming": false
+    },
+    "sweepMaxRounds": 3,
+    "turnCaps": {
+      "sweepRound": 45,
+      "sweepCloseout": 15,
+      "naming": 45
+    },
+    "lang": "en",
+    "finalStage": "interview",
+    "snapshots": [
+      {
+        "label": "A",
+        "turn": 132,
+        "stage": "interview",
+        "classCount": 0
+      }
+    ],
+    "events": [
+      {
+        "type": "snapshot",
+        "label": "A",
+        "turn": 132
+      }
+    ],
+    "sweepRounds": [],
+    "sweepLedgerTotals": {},
+    "stagesCapped": [],
+    "namingLedger": null,
+    "namingRenames": null
+  },
+  "snapshots": [
+    {
+      "label": "A",
+      "turn": 132,
+      "stage": "interview",
+      "elapsedSec": 1135,
+      "cost": {
+        "all": {
+          "calls": 265,
+          "promptTokens": 5739034,
+          "cachedTokens": 5651881,
+          "completionTokens": 70196,
+          "reasoningTokens": 43404,
+          "cachedShare": 0.9848139948290949,
+          "costUsd": 2.0066422
+        },
+        "app": {
+          "calls": 132,
+          "promptTokens": 3184118,
+          "cachedTokens": 3145699,
+          "completionTokens": 55557,
+          "reasoningTokens": 40379,
+          "cachedShare": 0.9879341783187683,
+          "costUsd": 1.2615478
+        },
+        "harness": {
+          "calls": 133,
+          "promptTokens": 2554916,
+          "cachedTokens": 2506182,
+          "completionTokens": 14639,
+          "reasoningTokens": 3025,
+          "cachedShare": 0.9809254002871327,
+          "costUsd": 0.7450944
+        }
+      }
+    }
+  ],
+  "harnessMessages": [],
+  "classifierParamsDropped": [
+    "temperature"
+  ],
+  "cachedShare": 0.9781192267988159,
+  "reasoningTokens": 44940,
+  "conversationCostUsd": 2.1353342000000004,
+  "totalCostUsd": 2.2412942,
+  "totalCost": {
+    "prices": {
+      "input": 2,
+      "cachedInput": 0.2,
+      "output": 10
+    },
+    "app": {
+      "calls": 132,
+      "promptTokens": 3184118,
+      "cachedTokens": 3145699,
+      "completionTokens": 55557,
+      "reasoningTokens": 40379,
+      "cachedShare": 0.9879341783187683,
+      "costUsd": 1.2615478
+    },
+    "appByKind": {
+      "interview": {
+        "calls": 132,
+        "promptTokens": 3184118,
+        "cachedTokens": 3145699,
+        "completionTokens": 55557,
+        "reasoningTokens": 40379,
+        "cachedShare": 0.9879341783187683,
+        "costUsd": 1.2615478
+      }
+    },
+    "harness": {
+      "calls": 141,
+      "promptTokens": 2636592,
+      "cachedTokens": 2506182,
+      "completionTokens": 21769,
+      "reasoningTokens": 5552,
+      "cachedShare": 0.9505384223270039,
+      "costUsd": 0.9797464
+    },
+    "all": {
+      "calls": 273,
+      "promptTokens": 5820710,
+      "cachedTokens": 5651881,
+      "completionTokens": 77326,
+      "reasoningTokens": 45931,
+      "cachedShare": 0.9709951191521309,
+      "costUsd": 2.2412942
+    }
+  }
+}
