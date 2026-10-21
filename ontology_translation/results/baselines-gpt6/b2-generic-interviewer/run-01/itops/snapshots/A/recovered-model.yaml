@@ -1,0 +1,610 @@
+competency_questions: []
+classes:
+  Monitoring Alert:
+    meaning: "A monitoring signal requiring triage, not automatically an incident."
+    aliases:
+      - alert
+    properties:
+      status:
+        type: text
+  Event:
+    meaning: An observed occurrence that may be correlated with an incident.
+    aliases: []
+    properties: {}
+  Incident:
+    meaning: "A managed response to an unplanned interruption, degradation, or security condition."
+    aliases: []
+    properties:
+      status:
+        type: text
+      severity:
+        type: text
+      observedImpact:
+        type: text
+      impactUncertainty:
+        type: text
+      majorIncidentDeclared:
+        type: boolean
+      cybersecurityIncident:
+        type: boolean
+      requiredCommunicationsComplete:
+        type: boolean
+      coordinationCadence:
+        type: text
+      communicationCadence:
+        type: text
+      dataRecoveryPointAcceptable:
+        type: boolean
+  IT Service:
+    meaning: An IT service whose operation and impact are assessed during an incident.
+    aliases: []
+    properties:
+      health:
+        type: text
+  Configuration Item:
+    meaning: A managed component that may be implicated in an alert or incident.
+    aliases:
+      - component
+    properties: {}
+  Business Service:
+    meaning: A business service dependent on IT service operation.
+    aliases: []
+    properties: {}
+  Customer Channel:
+    meaning: A customer channel dependent on IT service operation.
+    aliases: []
+    properties: {}
+  Resolver Group:
+    meaning: A group responsible for resolving issues with a service or component.
+    aliases: []
+    properties: {}
+  Operator:
+    meaning: A person authorised to acknowledge alerts for a resolver group.
+    aliases: []
+    properties: {}
+  Incident Commander:
+    meaning: The person assigned to command a major incident.
+    aliases: []
+    properties: {}
+  Monitoring Rule:
+    meaning: The monitoring rule behind an alert used in technical responder identification.
+    aliases: []
+    properties: {}
+  Recovery Environment:
+    meaning: The environment in which a failover is verified or a backup is restored.
+    aliases: []
+    properties:
+      available:
+        type: boolean
+      approvedForRestore:
+        type: boolean
+  Critical Business Transaction:
+    meaning: A critical business transaction whose operation is checked as part of restoration.
+    aliases: []
+    properties: {}
+  Verification Check:
+    meaning: "A recorded check of component condition, IT service health, critical transactions, data integrity, or application functionality."
+    aliases: []
+    properties:
+      kind:
+        type: text
+      result:
+        type: text
+  Evidence:
+    meaning: "Evidence retained in support of incident resolution, restoration, or regulatory reporting."
+    aliases: []
+    properties:
+      kind:
+        type: text
+  Stakeholder Communication:
+    meaning: "A recorded incident communication, including a restoration update."
+    aliases: []
+    properties:
+      kind:
+        type: text
+      audience:
+        type: text
+      message:
+        type: text
+      owner:
+        type: text
+      approvalState:
+        type: text
+      status:
+        type: text
+      deliveryConfirmed:
+        type: boolean
+      finalMessageArchived:
+        type: boolean
+  Materiality Assessment:
+    meaning: A documented assessment of incident significance and reporting implications.
+    aliases: []
+    properties:
+      result:
+        type: text
+  Regulatory Reporting Function:
+    meaning: The designated function involved in the reportability decision.
+    aliases: []
+    properties: {}
+  Notification:
+    meaning: A regulatory notification prepared for submission concerning an incident.
+    aliases: []
+    properties:
+      status:
+        type: text
+      requiredInformationComplete:
+        type: boolean
+      dueTime:
+        type: date
+  Regulator:
+    meaning: The regulator to whom a notification is addressed.
+    aliases: []
+    properties: {}
+  Submission Receipt:
+    meaning: "The retained receipt for a submitted notification, checked for acceptance or remediation."
+    aliases: []
+    properties:
+      outcome:
+        type: text
+  Residual Condition:
+    meaning: A condition accepted instead of fully healthy affected services at incident closure.
+    aliases: []
+    properties:
+      accepted:
+        type: boolean
+  Post-Incident Review:
+    meaning: A review required to be scheduled or completed for a major or cybersecurity incident before closure.
+    aliases: []
+    properties:
+      status:
+        type: text
+  Change:
+    meaning: A change used for an emergency incident response or to implement a corrective action.
+    aliases: []
+    properties:
+      kind:
+        type: text
+      implementationPlan:
+        type: text
+      backoutPlan:
+        type: text
+      riskAccepted:
+        type: boolean
+      implementationVerified:
+        type: boolean
+  Containment Action:
+    meaning: "An incident containment action, potentially involving isolation of a component."
+    aliases: []
+    properties:
+      scope:
+        type: text
+      expectedSideEffects:
+        type: text
+      isolationImpactAssessed:
+        type: boolean
+      rollbackOrReconnectionAvailable:
+        type: boolean
+  Recovery Plan:
+    meaning: A recovery plan whose applicability to the service is checked before failover.
+    aliases: []
+    properties: {}
+  Backup:
+    meaning: A backup checked before restoration for its successful or verified status and protection of the target.
+    aliases: []
+    properties:
+      status:
+        type: text
+  Restore Point:
+    meaning: A proposed restore point that must be approved before backup restoration.
+    aliases: []
+    properties:
+      approved:
+        type: boolean
+  Problem:
+    meaning: An investigation of an underlying or potential cause linked to an incident or identified by a review.
+    aliases: []
+    properties: {}
+  Known Error:
+    meaning: A documented diagnosed problem with a cause or workaround.
+    aliases: []
+    properties:
+      cause:
+        type: text
+  Workaround:
+    meaning: A temporary measure that reduces impact without establishing that the underlying cause has been removed.
+    aliases: []
+    properties:
+      effect:
+        type: text
+  Corrective Action:
+    meaning: A tracked permanent fix that may be implemented through a change.
+    aliases: []
+    properties: {}
+  Organizational Unit:
+    meaning: The organizational unit owning a corrective action.
+    aliases: []
+    properties: {}
+relationships:
+  - name: concernsItservice
+    from: Monitoring Alert
+    to: IT Service
+    meaning: null
+    aliases: []
+  - name: concernsConfigurationItem
+    from: Monitoring Alert
+    to: Configuration Item
+    meaning: null
+    aliases: []
+  - name: correlatedInto
+    from: Monitoring Alert
+    to: Incident
+    meaning: Multiple alerts can contribute to one incident.
+    aliases: []
+  - name: eventCorrelatedInto
+    from: Event
+    to: Incident
+    meaning: Multiple events can contribute to one incident.
+    aliases: []
+  - name: impacts
+    from: Incident
+    to: IT Service
+    meaning: An IT service identified as impacted by the incident.
+    aliases: []
+  - name: supportsItservice
+    from: Configuration Item
+    to: IT Service
+    meaning: null
+    aliases: []
+  - name: supportsBusinessService
+    from: IT Service
+    to: Business Service
+    meaning: null
+    aliases: []
+  - name: supportsCustomerChannel
+    from: IT Service
+    to: Customer Channel
+    meaning: null
+    aliases: []
+  - name: assignedTo
+    from: Incident
+    to: Resolver Group
+    meaning: null
+    aliases: []
+  - name: resolverGroupSupportsItservice
+    from: Resolver Group
+    to: IT Service
+    meaning: null
+    aliases: []
+  - name: resolverGroupSupportsConfigurationItem
+    from: Resolver Group
+    to: Configuration Item
+    meaning: null
+    aliases: []
+  - name: authorisedFor
+    from: Operator
+    to: Resolver Group
+    meaning: null
+    aliases: []
+  - name: commandedBy
+    from: Incident
+    to: Incident Commander
+    meaning: null
+    aliases: []
+  - name: triggeredByEvent
+    from: Monitoring Alert
+    to: Event
+    meaning: null
+    aliases: []
+  - name: basedOnMonitoringRule
+    from: Monitoring Alert
+    to: Monitoring Rule
+    meaning: null
+    aliases: []
+  - name: acknowledgedBy
+    from: Monitoring Alert
+    to: Operator
+    meaning: Identifies the operator making the alert acknowledgement; it does not imply a group was assigned to the alert in advance.
+    aliases: []
+  - name: checkConcernsConfigurationItem
+    from: Verification Check
+    to: Configuration Item
+    meaning: null
+    aliases: []
+  - name: checkConcernsItservice
+    from: Verification Check
+    to: IT Service
+    meaning: null
+    aliases: []
+  - name: checkConcernsCriticalTransaction
+    from: Verification Check
+    to: Critical Business Transaction
+    meaning: null
+    aliases: []
+  - name: checkPerformedIn
+    from: Verification Check
+    to: Recovery Environment
+    meaning: null
+    aliases: []
+  - name: hasEvidence
+    from: Incident
+    to: Evidence
+    meaning: Retains resolution and restoration evidence for the incident.
+    aliases: []
+  - name: communicationForIncident
+    from: Stakeholder Communication
+    to: Incident
+    meaning: null
+    aliases:
+      - hasStakeholderCommunication
+  - name: hasMaterialityAssessment
+    from: Incident
+    to: Materiality Assessment
+    meaning: null
+    aliases: []
+  - name: involvesReportingFunction
+    from: Materiality Assessment
+    to: Regulatory Reporting Function
+    meaning: null
+    aliases: []
+  - name: notificationForIncident
+    from: Notification
+    to: Incident
+    meaning: null
+    aliases: []
+  - name: addressedTo
+    from: Notification
+    to: Regulator
+    meaning: null
+    aliases: []
+  - name: supportedByEvidence
+    from: Notification
+    to: Evidence
+    meaning: null
+    aliases: []
+  - name: hasSubmissionReceipt
+    from: Notification
+    to: Submission Receipt
+    meaning: null
+    aliases: []
+  - name: hasResidualCondition
+    from: Incident
+    to: Residual Condition
+    meaning: null
+    aliases: []
+  - name: hasPostIncidentReview
+    from: Incident
+    to: Post-Incident Review
+    meaning: null
+    aliases: []
+  - name: concernsConfigurationItem
+    from: Incident
+    to: Configuration Item
+    meaning: A component affected or implicated in incident triage and resolver assignment.
+    aliases: []
+  - name: changeForIncident
+    from: Change
+    to: Incident
+    meaning: null
+    aliases: []
+  - name: affectsConfigurationItem
+    from: Change
+    to: Configuration Item
+    meaning: null
+    aliases: []
+  - name: containmentForIncident
+    from: Containment Action
+    to: Incident
+    meaning: null
+    aliases: []
+  - name: isolatesConfigurationItem
+    from: Containment Action
+    to: Configuration Item
+    meaning: null
+    aliases: []
+  - name: appliesToItservice
+    from: Recovery Plan
+    to: IT Service
+    meaning: null
+    aliases: []
+  - name: backupProtectsConfigurationItem
+    from: Backup
+    to: Configuration Item
+    meaning: null
+    aliases: []
+  - name: linkedToProblem
+    from: Incident
+    to: Problem
+    meaning: null
+    aliases: []
+  - name: identifiesProblem
+    from: Post-Incident Review
+    to: Problem
+    meaning: null
+    aliases: []
+  - name: documentedAsKnownError
+    from: Problem
+    to: Known Error
+    meaning: null
+    aliases: []
+  - name: hasWorkaround
+    from: Known Error
+    to: Workaround
+    meaning: null
+    aliases: []
+  - name: implementedThroughChange
+    from: Corrective Action
+    to: Change
+    meaning: null
+    aliases: []
+  - name: usesRecoveryPlan
+    from: Incident
+    to: Recovery Plan
+    meaning: The incident is recovered using a plan that identifies the IT service it recovers.
+    aliases: []
+  - name: usesRecoveryEnvironment
+    from: Incident
+    to: Recovery Environment
+    meaning: null
+    aliases: []
+  - name: restoresFromBackup
+    from: Incident
+    to: Backup
+    meaning: The backup set used to restore an incident target.
+    aliases: []
+  - name: usesRestorePoint
+    from: Incident
+    to: Restore Point
+    meaning: null
+    aliases: []
+  - name: hasVerificationCheck
+    from: Incident
+    to: Verification Check
+    meaning: Distinct service-health and critical-transaction questions can be recorded without mandating separate result records.
+    aliases: []
+  - name: producesCorrectiveAction
+    from: Post-Incident Review
+    to: Corrective Action
+    meaning: null
+    aliases: []
+  - name: ownedBy
+    from: Corrective Action
+    to: Organizational Unit
+    meaning: null
+    aliases: []
+rules:
+  alertAcknowledgementEligible:
+    conditions:
+      - The monitoring alert is new.
+      - "The acknowledging operator is authorised for the responsible resolver group, identified using what the alert concerns and the monitoring rule and event behind it; a pre-existing alert-to-group assignment is not assumed."
+      - Acknowledgement alone does not establish customer impact or create an incident.
+  majorIncidentDeclarationEligible:
+    conditions:
+      - The incident is still active.
+      - "Its severity is critical or high under the bank's approved criteria."
+      - At least one impacted IT service has been identified.
+      - An incident commander has been assigned.
+      - Major-incident declaration starts exceptional coordination and communication cadence but does not itself establish regulatory reportability.
+  restorationUpdateReady:
+    conditions:
+      - "The restoration update has a recorded audience, message, owner, and approval state appropriate for sending."
+      - Its content matches the latest verified state of the incident to which it belongs; healthy components alone do not establish restored IT service and critical transactions.
+  notificationSubmissionEligible:
+    conditions:
+      - The notification is linked to an incident and a regulator.
+      - "The incident's documented materiality assessment has a reportable result; undetermined or potentially reportable is insufficient."
+      - The notification has complete required information and supporting evidence.
+      - The notification status is approved.
+      - "Submission occurs before the notification's recorded due time."
+  incidentClosureEligible:
+    conditions:
+      - The incident status is resolved or monitoring.
+      - "Affected IT services are healthy, or a residual condition has been accepted under the bank's governing procedure."
+      - "Resolution and restoration evidence is complete and the incident's requiredCommunicationsComplete is true."
+      - "If this is a major or cybersecurity incident, its post-incident review is scheduled or completed."
+  incidentAssignmentEligible:
+    conditions:
+      - The chosen resolver group supports an affected IT service or configuration item associated with the incident.
+  failoverVerificationReady:
+    conditions:
+      - "Following failover, distinct checks confirm IT service health and critical business transactions in the recovery environment; separate result records and a universal restoration-decision record are not required."
+      - "Check results supply evidence for the incident's restoration state."
+  backupRestorationVerificationReady:
+    conditions:
+      - "Following backup restoration, checks validate data integrity and application functionality and support the incident's restoration evidence."
+  stakeholderCommunicationReady:
+    conditions:
+      - "The stakeholder communication has a recorded audience, message, owner, and approval state appropriate for sending."
+      - The message matches the latest verified state of its incident.
+  emergencyChangeExecutionEligible:
+    conditions:
+      - The change is an emergency change linked to an active incident.
+      - "Its affected configuration items, implementation plan, and backout plan are identified."
+      - The change risk is explicitly accepted under the governing procedure before execution.
+  failoverEligible:
+    conditions:
+      - "The incident's recovery plan applies to the IT service being recovered."
+      - The recovery environment used for the incident is available.
+      - "The incident's data-recovery point is acceptable."
+  backupRestorationEligible:
+    conditions:
+      - "The incident's backup set is successful or verified and protects the target configuration item."
+      - "The incident's restore point and target recovery environment are approved."
+  containmentEligible:
+    conditions:
+      - The linked incident is acknowledged or investigating.
+      - The containment scope and expected side effects are recorded.
+      - "If a component is to be isolated, it is linked to the incident, its isolation impact is assessed, and a rollback or reconnection method is available."
+  materialityAssessmentRequired:
+    conditions:
+      - A cybersecurity incident requires a documented materiality assessment.
+      - "For other incidents, the designated regulatory-reporting function applies the bank's governing criteria to determine whether an assessment is needed; no blanket threshold is assumed."
+  changePostImplementationCheck:
+    conditions:
+      - "After the change, the implementation, affected service health, and evidence are checked and recorded."
+actions:
+  acknowledgeAlert:
+    input: Monitoring Alert
+    preconditions:
+      - alertAcknowledgementEligible
+    effect: ""
+    verification: ""
+  declareMajorIncident:
+    input: Incident
+    preconditions:
+      - majorIncidentDeclarationEligible
+    effect: ""
+    verification: ""
+  sendRestorationUpdate:
+    input: Stakeholder Communication
+    preconditions:
+      - restorationUpdateReady
+    effect: ""
+    verification: ""
+  submitNotification:
+    input: Notification
+    preconditions:
+      - notificationSubmissionEligible
+    effect: ""
+    verification: ""
+  closeIncident:
+    input: Incident
+    preconditions:
+      - incidentClosureEligible
+    effect: ""
+    verification: ""
+  assignIncident:
+    input: Incident
+    preconditions:
+      - incidentAssignmentEligible
+    effect: ""
+    verification: ""
+  executeEmergencyChange:
+    input: Change
+    preconditions:
+      - emergencyChangeExecutionEligible
+    effect: ""
+    verification: ""
+  performFailover:
+    input: Incident
+    preconditions:
+      - failoverEligible
+    effect: ""
+    verification: ""
+  restoreFromBackup:
+    input: Incident
+    preconditions:
+      - backupRestorationEligible
+    effect: ""
+    verification: ""
+  performContainment:
+    input: Containment Action
+    preconditions:
+      - containmentEligible
+    effect: ""
+    verification: ""
+  sendStakeholderCommunication:
+    input: Stakeholder Communication
+    preconditions:
+      - stakeholderCommunicationReady
+    effect: ""
+    verification: ""

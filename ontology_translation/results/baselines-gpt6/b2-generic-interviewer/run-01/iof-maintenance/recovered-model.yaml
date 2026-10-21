@@ -1,0 +1,276 @@
+competency_questions: []
+classes:
+  Asset:
+    meaning: A physical item whose ability to perform a required function is maintained.
+    aliases: []
+    properties:
+      state:
+        type: text
+        allowed:
+          - operating
+          - degraded
+          - failed
+  RequiredFunction:
+    meaning: A function an asset is required to perform.
+    aliases: []
+    properties:
+      acceptablePerformance:
+        type: text
+  FailureEvent:
+    meaning: An occurrence after which an asset cannot perform a required function.
+    aliases: []
+    properties: {}
+  FailureProcess:
+    meaning: "An explanation of the change in condition leading up to a failure event, which may be suspected or established."
+    aliases: []
+    properties:
+      status:
+        type: text
+        allowed:
+          - suspected
+          - established
+  WorkOrder:
+    meaning: A work-order-system item raised for maintenance needed on an asset.
+    aliases: []
+    properties:
+      completedTaskInformation:
+        type: text
+      finalCost:
+        type: number
+  MaintenanceProcess:
+    meaning: "The maintenance process needed to retain or restore an asset's required function."
+    aliases: []
+    properties:
+      aim:
+        type: text
+        allowed:
+          - retain
+          - restore
+  MaintenanceActivity:
+    meaning: A specific activity within a maintenance process.
+    aliases: []
+    properties:
+      completed:
+        type: boolean
+  QualificationSpecification:
+    meaning: The activity-specific specification of the assessed skill required to perform a maintenance activity.
+    aliases:
+      - Qualification
+    properties: {}
+  Person:
+    meaning: A person considered for assignment to maintenance work.
+    aliases: []
+    properties: {}
+  MaintenanceStrategy:
+    meaning: The strategy under which a needed maintenance process is carried out.
+    aliases: []
+    properties: {}
+  MaintenancePlan:
+    meaning: A plan specifying an approved maintenance strategy for an asset.
+    aliases: []
+    properties: {}
+  GoverningProcedure:
+    meaning: "An applicable maintenance procedure governing strategy or additional activity conditions, and potentially acceptable performance."
+    aliases:
+      - maintenance procedure
+    properties: {}
+  Evidence:
+    meaning: Findings or observations used to assess whether a proposed failure process led to the loss of function.
+    aliases: []
+    properties: {}
+  AssessedSkill:
+    meaning: A skill assessed for a person and called for by a qualification specification.
+    aliases: []
+    properties: {}
+  OperatingProcedure:
+    meaning: "An operating procedure setting acceptable performance for an asset's required function."
+    aliases: []
+    properties: {}
+  WorkOrderProcedure:
+    meaning: The governing work-order procedure that determines whether further needed work stays on an original work order or is put on a new one.
+    aliases:
+      - governing work-order procedure
+    properties: {}
+relationships:
+  - name: requiresFunction
+    from: Asset
+    to: RequiredFunction
+    meaning: null
+    aliases: []
+  - name: occursOn
+    from: FailureEvent
+    to: Asset
+    meaning: null
+    aliases: []
+  - name: leadsTo
+    from: FailureProcess
+    to: FailureEvent
+    meaning: "The proposed explanation of the lead-up to the failure event, whether suspected or established."
+    aliases: []
+  - name: addressesAsset
+    from: WorkOrder
+    to: Asset
+    meaning: null
+    aliases: []
+  - name: callsFor
+    from: WorkOrder
+    to: MaintenanceProcess
+    meaning: null
+    aliases: []
+  - name: includesActivity
+    from: MaintenanceProcess
+    to: MaintenanceActivity
+    meaning: null
+    aliases: []
+  - name: requiresQualificationSpecification
+    from: MaintenanceActivity
+    to: QualificationSpecification
+    meaning: null
+    aliases:
+      - requiresQualification
+  - name: assignedTo
+    from: MaintenanceActivity
+    to: Person
+    meaning: null
+    aliases: []
+  - name: followsStrategy
+    from: MaintenanceProcess
+    to: MaintenanceStrategy
+    meaning: null
+    aliases: []
+  - name: retainsOrRestores
+    from: MaintenanceProcess
+    to: RequiredFunction
+    meaning: The maintenance process is needed to retain or restore the required function.
+    aliases: []
+  - name: hasMaintenancePlan
+    from: Asset
+    to: MaintenancePlan
+    meaning: null
+    aliases: []
+  - name: hasGoverningProcedure
+    from: Asset
+    to: GoverningProcedure
+    meaning: null
+    aliases: []
+  - name: specifiesStrategy
+    from: MaintenancePlan
+    to: MaintenanceStrategy
+    meaning: null
+    aliases: []
+  - name: specifiesStrategy
+    from: GoverningProcedure
+    to: MaintenanceStrategy
+    meaning: null
+    aliases: []
+  - name: supportedBy
+    from: FailureProcess
+    to: Evidence
+    meaning: null
+    aliases: []
+  - name: callsForAssessedSkill
+    from: QualificationSpecification
+    to: AssessedSkill
+    meaning: null
+    aliases: []
+  - name: hasAssessedSkill
+    from: Person
+    to: AssessedSkill
+    meaning: null
+    aliases: []
+  - name: governedBy
+    from: MaintenanceActivity
+    to: GoverningProcedure
+    meaning: Identifies the applicable procedure when it sets extra conditions for performing an activity.
+    aliases: []
+  - name: hasOperatingProcedure
+    from: Asset
+    to: OperatingProcedure
+    meaning: null
+    aliases: []
+  - name: governedBy
+    from: WorkOrder
+    to: WorkOrderProcedure
+    meaning: The governing procedure for handling further work on an original or new work order.
+    aliases: []
+rules:
+  failedState:
+    conditions:
+      - A failure event has occurred on the asset.
+      - The asset cannot perform a required function; being stopped by itself does not establish failure.
+  establishedFailureProcess:
+    conditions:
+      - "Evidence shows a change in condition leading to loss of function, such as inspection findings of progressive damage backed by earlier observations of reduced performance."
+      - "A seized bearing at failure establishes the failure event, not the earlier process by itself; without supporting evidence, report the process only as suspected."
+  qualifiedAssignment:
+    conditions:
+      - "For each maintenance activity needing a qualified person, check its specific qualification specification."
+      - "The assigned person has the assessed skill that specification calls for; general qualification, availability, or clearance for another activity does not suffice."
+      - "Apply any additional authorization, currency, or supervision conditions only when the applicable governing procedure specifies them; do not assume they are met."
+  degradedState:
+    conditions:
+      - "The asset's ability to perform its required function is reduced but still meets the acceptable performance set by the applicable operating or maintenance procedure; do not invent a cutoff."
+  stoppedIsNotNecessarilyFailed:
+    conditions:
+      - A deliberate shutdown of an asset still able to perform its required function when called on does not by itself make it failed.
+  operatingState:
+    conditions:
+      - "The asset can perform its required function without reduced ability when called on, even if deliberately stopped; operating describes capability, not whether it is running now."
+  workOrderBeforeMaintenance:
+    conditions:
+      - A maintenance process is needed to retain or restore a required function; an established cause is not required.
+      - "The maintenance process has a strategy defined by the asset's maintenance plan or governing procedure; the asset's current state alone does not determine it."
+      - A work order describes the maintenance process before it starts.
+  workOrderNeeded:
+    conditions:
+      - A maintenance process is needed to retain or restore a required function; an established cause is not required.
+  functionCheck:
+    conditions:
+      - "After the work, compare the asset's capability with its required function and applicable acceptable performance; task completion alone does not prove function is restored."
+      - "Record whether capability is fully available, reduced but acceptable, or unable to perform the required function; this check is distinct from closing the work order."
+  workOrderReadyForClosure:
+    conditions:
+      - All maintenance activities covered by the work order are completed.
+      - "The work order records what was actually done, including completed-task information and final cost."
+      - Record the function-check result honestly; a degraded or failed asset does not by itself require keeping an otherwise complete work order open or marking its function restored.
+  furtherWorkHandling:
+    conditions:
+      - "If the function check shows more maintenance is needed, identify that work without claiming the asset's function is restored."
+      - "Follow the governing work-order procedure to decide whether that work stays on the original work order or goes on a new one; do not assume either choice solely from the asset's state."
+actions:
+  assignMaintenanceActivity:
+    input: MaintenanceActivity
+    preconditions:
+      - qualifiedAssignment
+    effect: ""
+    verification: ""
+  startMaintenanceProcess:
+    input: WorkOrder
+    preconditions:
+      - workOrderBeforeMaintenance
+    effect: ""
+    verification: ""
+  raiseWorkOrder:
+    input: MaintenanceProcess
+    preconditions:
+      - workOrderNeeded
+    effect: ""
+    verification: ""
+  checkRequiredFunction:
+    input: WorkOrder
+    preconditions:
+      - functionCheck
+    effect: ""
+    verification: ""
+  closeWorkOrder:
+    input: WorkOrder
+    preconditions:
+      - workOrderReadyForClosure
+    effect: ""
+    verification: ""
+  identifyFurtherWork:
+    input: WorkOrder
+    preconditions:
+      - furtherWorkHandling
+    effect: ""
+    verification: ""

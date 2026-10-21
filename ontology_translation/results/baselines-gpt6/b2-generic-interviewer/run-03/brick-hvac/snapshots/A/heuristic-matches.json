@@ -1,0 +1,133 @@
+{
+  "classes": [
+    {
+      "goldId": "AirHandlingUnit",
+      "recoveredId": "n5",
+      "weight": 1
+    },
+    {
+      "goldId": "Thermostat",
+      "recoveredId": "n3",
+      "weight": 1
+    },
+    {
+      "goldId": "TerminalUnit",
+      "recoveredId": "n4",
+      "weight": 1
+    },
+    {
+      "goldId": "Economizer",
+      "recoveredId": "n15",
+      "weight": 1
+    },
+    {
+      "goldId": "CoolingValve",
+      "recoveredId": "n10",
+      "weight": 1
+    },
+    {
+      "goldId": "HeatingValve",
+      "recoveredId": "n11",
+      "weight": 1
+    },
+    {
+      "goldId": "Boiler",
+      "recoveredId": "n12",
+      "weight": 1
+    },
+    {
+      "goldId": "Chiller",
+      "recoveredId": "n6",
+      "weight": 1
+    },
+    {
+      "goldId": "Space",
+      "recoveredId": "n1",
+      "weight": 1
+    },
+    {
+      "goldId": "Zone",
+      "recoveredId": "n2",
+      "weight": 1
+    },
+    {
+      "goldId": "CoolingTower",
+      "recoveredId": "n8",
+      "weight": 1
+    },
+    {
+      "goldId": "Pump",
+      "recoveredId": "n7",
+      "weight": 1
+    }
+  ],
+  "relationships": [
+    {
+      "goldId": "rel_26",
+      "edgeId": "e3",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_28",
+      "edgeId": "e6",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_30",
+      "edgeId": "e2",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_31",
+      "edgeId": "e4",
+      "direction": "forward"
+    }
+  ],
+  "properties": [
+    {
+      "goldId": "Thermostat.mode",
+      "hostNodeId": "n3",
+      "matchedPropertyName": "mode"
+    },
+    {
+      "goldId": "Thermostat.status",
+      "hostNodeId": "n3",
+      "matchedPropertyName": "status"
+    },
+    {
+      "goldId": "Economizer.status",
+      "hostNodeId": "n15",
+      "matchedPropertyName": "status"
+    },
+    {
+      "goldId": "CoolingValve.position",
+      "hostNodeId": "n10",
+      "matchedPropertyName": "position"
+    },
+    {
+      "goldId": "HeatingValve.position",
+      "hostNodeId": "n11",
+      "matchedPropertyName": "position"
+    },
+    {
+      "goldId": "Boiler.status",
+      "hostNodeId": "n12",
+      "matchedPropertyName": "status"
+    },
+    {
+      "goldId": "Chiller.status",
+      "hostNodeId": "n6",
+      "matchedPropertyName": "status"
+    },
+    {
+      "goldId": "TerminalUnit.status",
+      "hostNodeId": "n4",
+      "matchedPropertyName": "operatingStatus"
+    },
+    {
+      "goldId": "Pump.status",
+      "hostNodeId": "n7",
+      "matchedPropertyName": "operatingStatus"
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "fullDomain": {
+    "classes": [
+      {
+        "goldId": "CreditFacility",
+        "recoveredId": "n1"
+      },
+      {
+        "goldId": "CreditEnhancementBeneficiary",
+        "recoveredId": "n24"
+      },
+      {
+        "goldId": "IndividualPaymentTransaction",
+        "recoveredId": "n21"
+      }
+    ],
+    "relationships": [
+      {
+        "goldId": "rel_24",
+        "recoveredId": "e11"
+      }
+    ],
+    "properties": [
+      {
+        "goldId": "PrepaymentTerms.prePaymentPenaltyTermMonths",
+        "matchedPropertyName": "penaltyPeriod"
+      }
+    ],
+    "valueFidelity": []
+  },
+  "scoped": {
+    "classes": [
+      {
+        "goldId": "CreditFacility",
+        "recoveredId": "n1"
+      }
+    ],
+    "relationships": [
+      {
+        "goldId": "rel_24",
+        "recoveredId": "e11"
+      }
+    ],
+    "properties": [],
+    "valueFidelity": []
+  }
+}

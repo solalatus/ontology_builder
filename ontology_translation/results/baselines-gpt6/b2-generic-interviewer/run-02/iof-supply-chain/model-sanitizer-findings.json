@@ -1,0 +1,293 @@
+[
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "concernsItem (PurchaseOrder → MaterialTradeItem)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "concernsItem",
+      "from": "PurchaseOrder",
+      "to": "MaterialTradeItem",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "suppliedBy (PurchaseOrder → Supplier)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "suppliedBy",
+      "from": "PurchaseOrder",
+      "to": "Supplier",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "fulfillsOrder (Shipment → PurchaseOrder)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "fulfillsOrder",
+      "from": "Shipment",
+      "to": "PurchaseOrder",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "concernsItem (Shipment → MaterialTradeItem)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "concernsItem",
+      "from": "Shipment",
+      "to": "MaterialTradeItem",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "shipsFrom (Shipment → Location)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "shipsFrom",
+      "from": "Shipment",
+      "to": "Location",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "shipsTo (Shipment → Location)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "shipsTo",
+      "from": "Shipment",
+      "to": "Location",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "usesContainer (Shipment → Container)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "usesContainer",
+      "from": "Shipment",
+      "to": "Container",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "hasPreparationProcess (Shipment → ShipmentPreparationProcess)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "hasPreparationProcess",
+      "from": "Shipment",
+      "to": "ShipmentPreparationProcess",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "hasCarrier (Shipment → Carrier)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "hasCarrier",
+      "from": "Shipment",
+      "to": "Carrier",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "hasFreightForwardingArrangement (Shipment → FreightForwardingArrangement)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "hasFreightForwardingArrangement",
+      "from": "Shipment",
+      "to": "FreightForwardingArrangement",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "followsTransportProcess (Shipment → TransportProcess)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "followsTransportProcess",
+      "from": "Shipment",
+      "to": "TransportProcess",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "startsAtNode (TransportProcess → SupplyChainNode)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "startsAtNode",
+      "from": "TransportProcess",
+      "to": "SupplyChainNode",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "endsAtNode (TransportProcess → SupplyChainNode)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "endsAtNode",
+      "from": "TransportProcess",
+      "to": "SupplyChainNode",
+      "meaning": null,
+      "aliases": [
+        "headsToNode"
+      ]
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "hasTrackingEvent (Shipment → TrackingEvent)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "hasTrackingEvent",
+      "from": "Shipment",
+      "to": "TrackingEvent",
+      "meaning": null,
+      "aliases": [
+        "refersToShipment"
+      ]
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "refersToLot (TrackingEvent → Lot)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "refersToLot",
+      "from": "TrackingEvent",
+      "to": "Lot",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "refersToLogisticUnit (TrackingEvent → LogisticUnit)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "refersToLogisticUnit",
+      "from": "TrackingEvent",
+      "to": "LogisticUnit",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "refersToLoad (TrackingEvent → Load)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "refersToLoad",
+      "from": "TrackingEvent",
+      "to": "Load",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "hasReceivingProcess (Shipment → ReceivingProcess)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "hasReceivingProcess",
+      "from": "Shipment",
+      "to": "ReceivingProcess",
+      "meaning": null,
+      "aliases": [
+        "receivesShipment"
+      ]
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "occursAtFacility (ReceivingProcess → Facility)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "occursAtFacility",
+      "from": "ReceivingProcess",
+      "to": "Facility",
+      "meaning": null,
+      "aliases": []
+    }
+  }
+]

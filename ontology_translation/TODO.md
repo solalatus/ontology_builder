@@ -4028,3 +4028,12 @@ reference and record deltas/decisions here instead.)*
   recounted offline: 330 -> 80 (published, `multi-domain/`), 167 -> 32
   (itops control). See `PAPER_NOTES.md`, 2026-10-20. Open tickets after
   this: #172 (future) and #184 (Bedrock key) only.
+- 2026-10-21 — Baselines at the shipped configuration (`results/baselines-gpt6/`,
+  pre-registered; 45 runs, 49.55 USD of an 80 USD budget). On the four published
+  domains: interactive 0.781, B1 one-shot 0.786 (level everywhere), B3 no commits
+  0.688 (interactive beats it on 2 of 5), B2 generic interviewer 0.353 (beaten on
+  all 5). Two deviations, both recorded in DESIGN.md: the #133 stall detector no
+  longer stops a run offered no tools (it would have ended every B3 run), and one
+  run was re-run after a container restart. Open tickets: #172 (future), #184
+  (Bedrock key).
+

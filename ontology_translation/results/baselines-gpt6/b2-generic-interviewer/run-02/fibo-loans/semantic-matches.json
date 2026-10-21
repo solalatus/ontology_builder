@@ -1,0 +1,24 @@
+{
+  "fullDomain": {
+    "classes": [
+      {
+        "goldId": "IndividualPaymentTransaction",
+        "recoveredId": "n11"
+      }
+    ],
+    "relationships": [],
+    "properties": [
+      {
+        "goldId": "Loan.loanBalance",
+        "matchedPropertyName": "outstandingPrincipal"
+      }
+    ],
+    "valueFidelity": []
+  },
+  "scoped": {
+    "classes": [],
+    "relationships": [],
+    "properties": [],
+    "valueFidelity": []
+  }
+}

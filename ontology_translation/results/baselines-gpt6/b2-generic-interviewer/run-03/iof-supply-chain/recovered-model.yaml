@@ -1,0 +1,260 @@
+competency_questions: []
+classes:
+  PurchaseOrder:
+    meaning: An order for a material trade item to be fulfilled by shipment.
+    aliases: []
+    properties: {}
+  MaterialTradeItem:
+    meaning: The material trade item a purchase order concerns.
+    aliases: []
+    properties: {}
+  Shipment:
+    meaning: "A movement of a material trade item that fulfills a purchase order and is prepared, transported, tracked, and potentially received."
+    aliases: []
+    properties: {}
+  Location:
+    meaning: "A shipment's ship-from or ship-to location."
+    aliases: []
+    properties: {}
+  Carrier:
+    meaning: The party transporting the goods.
+    aliases: []
+    properties: {}
+  FreightForwardingArrangement:
+    meaning: "The shipment's forwarding arrangement, arranged by a freight forwarder."
+    aliases: []
+    properties: {}
+  PreparationProcess:
+    meaning: The identified preparation process for a shipment.
+    aliases: []
+    properties: {}
+  TransportProcess:
+    meaning: "The shipment's process of movement from a starting supply-chain node to an ending supply-chain node."
+    aliases: []
+    properties:
+      reachedDestination:
+        type: boolean
+  SupplyChainNode:
+    meaning: "The starting or ending supply-chain node of a transport process, distinct from a shipment's ship-to location."
+    aliases:
+      - Node
+    properties: {}
+  TrackingEvent:
+    meaning: "A dated, typed tracking update concerning an identified shipment or other tracked unit."
+    aliases: []
+    properties:
+      time:
+        type: date
+      type:
+        type: text
+  Lot:
+    meaning: A lot that can have tracking events.
+    aliases: []
+    properties: {}
+  LogisticUnit:
+    meaning: A logistic unit that can have tracking events.
+    aliases: []
+    properties: {}
+  Load:
+    meaning: A load that can have tracking events.
+    aliases: []
+    properties: {}
+  ReceivingProcess:
+    meaning: A process that actually occurs at the destination facility and is completed for a shipment before receipt is recorded.
+    aliases: []
+    properties:
+      completed:
+        type: boolean
+  Facility:
+    meaning: "The warehouse facility where preparation, storage, or receiving takes place."
+    aliases: []
+    properties: {}
+  Supplier:
+    meaning: The trading partner supplying the goods.
+    aliases: []
+    properties: {}
+  FreightForwarder:
+    meaning: "The party arranging freight forwarding, distinct from the carrier transporting the goods."
+    aliases: []
+    properties: {}
+  Customer:
+    meaning: The customer in a supply relationship for a material trade item.
+    aliases: []
+    properties: {}
+  SupplyRelationship:
+    meaning: "The evaluated supply relationship between a supplier, customer, and material trade item."
+    aliases: []
+    properties: {}
+relationships:
+  - name: concerns
+    from: PurchaseOrder
+    to: MaterialTradeItem
+    meaning: null
+    aliases: []
+  - name: fulfills
+    from: Shipment
+    to: PurchaseOrder
+    meaning: null
+    aliases: []
+  - name: shipsFrom
+    from: Shipment
+    to: Location
+    meaning: null
+    aliases: []
+  - name: shipsTo
+    from: Shipment
+    to: Location
+    meaning: null
+    aliases: []
+  - name: usesCarrier
+    from: Shipment
+    to: Carrier
+    meaning: null
+    aliases: []
+  - name: hasFreightForwardingArrangement
+    from: Shipment
+    to: FreightForwardingArrangement
+    meaning: null
+    aliases: []
+  - name: hasPreparationProcess
+    from: Shipment
+    to: PreparationProcess
+    meaning: null
+    aliases: []
+  - name: hasTransportProcess
+    from: Shipment
+    to: TransportProcess
+    meaning: null
+    aliases: []
+  - name: startsAt
+    from: TransportProcess
+    to: SupplyChainNode
+    meaning: null
+    aliases: []
+  - name: endsAt
+    from: TransportProcess
+    to: SupplyChainNode
+    meaning: null
+    aliases:
+      - hasDestinationNode
+  - name: tracksShipment
+    from: TrackingEvent
+    to: Shipment
+    meaning: "Identifies the shipment this tracking event concerns; an event concerning a lot, logistic unit, or load alone does not establish that unit's association with a shipment."
+    aliases:
+      - hasTrackingEvent
+  - name: tracksLot
+    from: TrackingEvent
+    to: Lot
+    meaning: null
+    aliases: []
+  - name: tracksLogisticUnit
+    from: TrackingEvent
+    to: LogisticUnit
+    meaning: null
+    aliases: []
+  - name: tracksLoad
+    from: TrackingEvent
+    to: Load
+    meaning: null
+    aliases: []
+  - name: receivesShipment
+    from: ReceivingProcess
+    to: Shipment
+    meaning: null
+    aliases: []
+  - name: occursAt
+    from: ReceivingProcess
+    to: Facility
+    meaning: The receiving process occurs at the destination facility.
+    aliases: []
+  - name: concerns
+    from: Shipment
+    to: MaterialTradeItem
+    meaning: "Identifies the item the shipment concerns, which can be compared with the purchase order's item."
+    aliases: []
+  - name: arrangedBy
+    from: FreightForwardingArrangement
+    to: FreightForwarder
+    meaning: Identifies the forwarder arranging shipment movement.
+    aliases: []
+  - name: occursAt
+    from: PreparationProcess
+    to: Facility
+    meaning: The preparation process takes place at a warehouse facility.
+    aliases: []
+  - name: hasSupplier
+    from: SupplyRelationship
+    to: Supplier
+    meaning: null
+    aliases: []
+  - name: hasCustomer
+    from: SupplyRelationship
+    to: Customer
+    meaning: null
+    aliases: []
+  - name: concerns
+    from: SupplyRelationship
+    to: MaterialTradeItem
+    meaning: null
+    aliases: []
+rules:
+  trackingEventRecordable:
+    conditions:
+      - Tracking event has a time and type.
+      - "Tracking event identifies a shipment, lot, logistic unit, or load; a tracked-unit event alone does not establish an association with a shipment."
+  receiptRecordable:
+    conditions:
+      - Shipment has an identified ship-to location and an associated transport process with an identified ending supply-chain node.
+      - Verify that the transport process reached its ending supply-chain node; an arrived tracking update alone is not enough.
+      - Verify that receiving for the shipment was completed at the destination facility.
+      - "Check the identified ship-to location against the intended destination; if it is unclear whether the ending node, ship-to location, and receiving facility refer to the intended destination, resolve that with the transport party and warehouse before recording receipt, without assuming they are interchangeable."
+  movementCheck:
+    conditions:
+      - "Compare the purchase order's material trade item with the item the shipment concerns and check ship-from, ship-to, and transport destination."
+      - "Review dated shipment tracking events and, where relevant, events for candidate lots, logistic units, or loads; confirm unclear shipment-to-unit associations with the warehouse rather than infer them from separate events."
+      - "Ask the carrier or freight forwarder about movement, the warehouse about preparation or receipt, and evaluate the supplier-customer-item supply relationship if the issue concerns what was supplied; a missing update alone does not establish a delay or discrepancy."
+  shipmentPreparationReady:
+    conditions:
+      - "Identify the shipment's ship-from and ship-to locations."
+      - Identify its preparation process.
+      - Identify its carrier or freight-forwarding arrangement.
+  shipmentDispatchReady:
+    conditions:
+      - Identify the shipment being sent for movement; preparation being recorded is not a prerequisite.
+  supplyRelationshipReadyForEvaluation:
+    conditions:
+      - The supply relationship has an identified supplier.
+      - The supply relationship has an identified customer.
+      - The supply relationship has an identified material trade item.
+actions:
+  recordTrackingEvent:
+    input: TrackingEvent
+    preconditions:
+      - trackingEventRecordable
+    effect: "Record the tracking event's time and type and link it to the identified shipment, lot, logistic unit, or load."
+    verification: "Verify the recorded event has its time and type and is linked to its identified shipment, lot, logistic unit, or load."
+  recordReceipt:
+    input: ReceivingProcess
+    preconditions:
+      - receiptRecordable
+    effect: Record that the identified shipment arrived at the destination facility through the receiving process.
+    verification: Verify receipt of that shipment at the destination facility and completion of its receiving process.
+  prepareShipment:
+    input: Shipment
+    preconditions:
+      - shipmentPreparationReady
+    effect: "Record the ship-from and ship-to locations, preparation process, and carrier or freight-forwarding arrangement against the shipment."
+    verification: Verify that these four pieces are recorded against the shipment; completion of preparation is not a separate requirement.
+  dispatchShipment:
+    input: Shipment
+    preconditions:
+      - shipmentDispatchReady
+    effect: Record that the identified shipment was sent for movement.
+    verification: Verify which identified shipment was dispatched.
+  evaluateSupplyRelationship:
+    input: SupplyRelationship
+    preconditions:
+      - supplyRelationshipReadyForEvaluation
+    effect: "Review the supply relationship against its identified supplier, customer, and material trade item; this does not establish supplier reliability, order approval, or goods conformity."
+    verification: Verify all three links are present.

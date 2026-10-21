@@ -1,0 +1,215 @@
+competency_questions: []
+classes:
+  Space:
+    meaning: An individual area whose comfort may be reported or checked.
+    aliases: []
+    properties: {}
+  ControlZone:
+    meaning: An area under a common temperature control decision.
+    aliases:
+      - zone
+    properties:
+      occupied:
+        type: boolean
+  Thermostat:
+    meaning: Device with a temperature-sensor input and temperature setpoint that controls a zone.
+    aliases: []
+    properties:
+      mode:
+        type: text
+      status:
+        type: text
+      temperatureSensorInput:
+        type: number
+      temperatureSetpoint:
+        type: number
+  TerminalUnit:
+    meaning: Air-side unit serving a space and fed by an AHU.
+    aliases: []
+    properties:
+      operatingStatus:
+        type: text
+  AHU:
+    meaning: "Air handler feeding terminal units, with its own air-temperature sensor and cooling, heating and deadband setpoints."
+    aliases:
+      - air handler
+    properties:
+      callingForCooling:
+        type: boolean
+      airTemperatureSensor:
+        type: number
+      coolingValvePosition:
+        type: number
+      fanCondition:
+        type: text
+      filterCondition:
+        type: text
+      damperCondition:
+        type: text
+      coolingSetpoint:
+        type: number
+      heatingSetpoint:
+        type: number
+      deadbandSetpoint:
+        type: number
+      callingForHeating:
+        type: boolean
+  Chiller:
+    meaning: null
+    aliases: []
+    properties:
+      status:
+        type: text
+      waterTemperature:
+        type: number
+  Pump:
+    meaning: null
+    aliases: []
+    properties:
+      operatingStatus:
+        type: text
+  CoolingTower:
+    meaning: null
+    aliases:
+      - cooling tower
+    properties:
+      condition:
+        type: text
+  Technician:
+    meaning: Crew member sent to investigate an established equipment problem.
+    aliases: []
+    properties: {}
+  CoolingValve:
+    meaning: AHU cooling valve checked for response to a cooling call.
+    aliases: []
+    properties:
+      position:
+        type: number
+  HeatingValve:
+    meaning: AHU heating valve checked for response to a heating call.
+    aliases: []
+    properties:
+      position:
+        type: number
+  Boiler:
+    meaning: Boiler whose status is checked when the hot-water side is not warming the air.
+    aliases: []
+    properties:
+      status:
+        type: text
+  HotWaterSide:
+    meaning: Hot-water side checked when AHU heating-valve response does not warm the air.
+    aliases: []
+    properties:
+      waterTemperature:
+        type: number
+  CO2Reading:
+    meaning: "CO₂ reading, including an outside-air, return-air or differential measurement, that may prompt a ventilation check."
+    aliases: []
+    properties:
+      value:
+        type: number
+      readingType:
+        type: text
+  Economizer:
+    meaning: AHU economizer whose sensed inputs and operation are checked before reducing mechanical conditioning.
+    aliases: []
+    properties:
+      status:
+        type: text
+relationships:
+  - name: inControlZone
+    from: Space
+    to: ControlZone
+    meaning: "Identifies the control zone relevant to a space's comfort check."
+    aliases: []
+  - name: servesSpace
+    from: TerminalUnit
+    to: Space
+    meaning: Identifies the terminal unit serving an affected space.
+    aliases: []
+  - name: feedsTerminalUnit
+    from: AHU
+    to: TerminalUnit
+    meaning: Traces an affected terminal unit back to its feeding air handler.
+    aliases: []
+  - name: controlsZone
+    from: Thermostat
+    to: ControlZone
+    meaning: "Identifies the thermostat to check for a zone's mode and status."
+    aliases:
+      - servesControlZone
+  - name: hasCoolingValve
+    from: AHU
+    to: CoolingValve
+    meaning: Identifies the cooling valve checked for an AHU cooling call.
+    aliases: []
+  - name: feedsCoolingValve
+    from: Chiller
+    to: CoolingValve
+    meaning: Identifies the chiller feeding a cooling valve without assuming dedicated pumps or towers for an AHU.
+    aliases: []
+  - name: hasHeatingValve
+    from: AHU
+    to: HeatingValve
+    meaning: Identifies the heating valve checked for an AHU heating call.
+    aliases: []
+  - name: hasEconomizer
+    from: AHU
+    to: Economizer
+    meaning: Identifies the economizer and its status at an AHU.
+    aliases: []
+  - name: hasCo2Reading
+    from: AHU
+    to: CO2Reading
+    meaning: "Associates an outside-air, return-air or differential CO₂ reading with the AHU ventilation check."
+    aliases: []
+rules:
+  checkCoolingDemand:
+    conditions:
+      - "Compare the thermostat's temperature-sensor input with its applicable setpoint and check the configured deadband, thermostat mode and status, and zone occupancy; do not store all readings as zone properties."
+      - "If temperature is within the configured deadband, do not request more cooling on the warm complaint alone; examine the particular space."
+  traceCoolingShortfall:
+    conditions:
+      - "For an above-setpoint reading, trace from affected space through its serving terminal unit to its feeding AHU."
+      - "Check the AHU's own air-temperature sensor and cooling, heating and deadband setpoints, cooling call, cooling-valve position, fan, filter and damper condition."
+      - Check whether sensed conditions support economizer operation before requesting additional mechanical cooling.
+      - "If the AHU calls for cooling but air temperature does not respond, check chilled-water temperature, the chiller feeding the cooling valve, and relevant pump and cooling-tower condition without assuming a dedicated or building-wide plant arrangement."
+  assignAfterLocalization:
+    conditions:
+      - Establish the affected area and the equipment or fault to investigate before assigning a specific technician; do not assign from the temperature reading alone.
+  verifyCoolingResponse:
+    conditions:
+      - Confirm equipment operates as expected and air temperature trends down toward the applicable cooling setpoint.
+      - "For an occupied zone, confirm that the thermostat controlling the zone or terminal unit serving its affected space can be identified and is operating."
+  traceHeatingShortfall:
+    conditions:
+      - "For a cold complaint, trace from affected space to serving terminal unit and feeding AHU; compare measured air temperature with the applicable heating setpoint and check thermostat mode and status."
+      - "If temperature is within the configured deadband, do not increase heating on that reading alone."
+      - "At the AHU, check for a heating call and a responding heating valve; if the valve responds but air does not warm, check hot-water temperature, boiler status and relevant pump operation."
+  checkOccupiedZoneControl:
+    conditions:
+      - "For an occupied zone, identify the thermostat controlling the zone or the terminal unit serving its affected space, using BAS mapping where helpful."
+      - "Check that the identified serving device is operating; assigned means the serving connection is identifiable, not a separate approval or enablement step."
+  checkVentilationFromCO2:
+    conditions:
+      - An elevated CO₂ reading relative to what is expected for its air stream prompts a ventilation check; no fixed ppm threshold is specified.
+      - Identify whether readings are from outside air or return air and compare where available; differential CO₂ readings may also inform the check.
+      - Inspect the AHU outside-air path and damper operation; do not treat a CO₂ anomaly alone as proof of a cooling-plant fault.
+  checkEconomizerEligibility:
+    conditions:
+      - "Before enabling the economizer, check that it has the appropriate sensed inputs for its operation, that these support reducing mechanical conditioning, and check its status."
+      - "Do not require outside-air versus return-air CO₂ comparison as an economizer input; use that comparison for ventilation checks where available, and do not invent a CO₂ cutoff."
+  verifyEconomizerOperation:
+    conditions:
+      - "After enabling, verify that status indicates economizer operation."
+  verifyHeatingResponse:
+    conditions:
+      - "After a heating change, verify that air temperature trends upward toward its heating setpoint."
+actions:
+  enableEconomizer:
+    input: Economizer
+    preconditions:
+      - checkEconomizerEligibility
+    effect: ""
+    verification: ""

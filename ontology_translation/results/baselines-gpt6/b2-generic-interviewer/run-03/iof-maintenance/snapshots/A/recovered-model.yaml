@@ -1,0 +1,186 @@
+competency_questions: []
+classes:
+  Maintainable Item:
+    meaning: A physical item whose required function is retained or restored by maintenance.
+    aliases:
+      - Asset
+    properties: {}
+  Qualified Maintenance Person:
+    meaning: "A maintenance person whose qualifications can be checked against an activity's qualification specification."
+    aliases:
+      - Maintenance Tech
+    properties: {}
+  Maintenance Work Order Record:
+    meaning: "A record describing a maintenance process, whether for routine upkeep or emergency repair."
+    aliases:
+      - Work Order
+    properties: {}
+  Condition State:
+    meaning: "An assessment of a maintainable item's ability to perform its required function."
+    aliases: []
+    properties:
+      state:
+        type: text
+        allowed:
+          - operating
+          - degraded
+          - failed
+  Failure Process:
+    meaning: "A change reducing a maintainable item's ability to perform its required function, which can leave it degraded or failed without necessarily involving a failure event."
+    aliases: []
+    properties: {}
+  Failure Event:
+    meaning: The event that begins a failed state when an item loses its ability to perform its required function.
+    aliases: []
+    properties: {}
+  Failure Effect:
+    meaning: "A consequence of a failure event that can occur inside the failed item's boundary or beyond it."
+    aliases: []
+    properties: {}
+  Failure Mode Code:
+    meaning: "A code describing a known undesirable disposition, not evidence that a particular item exhibited it or that it caused a particular failure."
+    aliases: []
+    properties: {}
+  Maintenance Process:
+    meaning: "Work carried out under a maintenance strategy to retain or restore a maintainable item's required function; it can include maintenance activities and supporting activities."
+    aliases: []
+    properties: {}
+  Maintenance Strategy:
+    meaning: The strategy under which a maintenance process is carried out.
+    aliases: []
+    properties: {}
+  Maintenance Activity:
+    meaning: "A task within a maintenance process that retains or restores a maintainable item's required function."
+    aliases: []
+    properties: {}
+  Qualification Specification:
+    meaning: The qualification requirements for a maintenance activity that requires one.
+    aliases: []
+    properties: {}
+  Required Function:
+    meaning: "What a maintainable item needs to do, against which its condition is assessed; a separate entered record is not assumed."
+    aliases: []
+    properties: {}
+  Undesirable Disposition:
+    meaning: "A recognised tendency to produce an undesirable outcome, described by a failure mode code."
+    aliases: []
+    properties: {}
+  Supporting Activity:
+    meaning: An activity that supports execution of a maintenance process without itself being the task that retains or restores function.
+    aliases: []
+    properties: {}
+relationships:
+  - name: hasConditionState
+    from: Maintainable Item
+    to: Condition State
+    meaning: null
+    aliases: []
+  - name: resultsInConditionState
+    from: Failure Process
+    to: Condition State
+    meaning: A failure process can result in a degraded or failed state; it need not lead to a failure event.
+    aliases:
+      - changesConditionState
+  - name: producesFailureEffect
+    from: Failure Event
+    to: Failure Effect
+    meaning: "A failure effect is a consequence of a failure event, whether inside the item boundary or beyond it."
+    aliases: []
+  - name: isDescribedByMaintenanceWorkOrderRecord
+    from: Maintenance Process
+    to: Maintenance Work Order Record
+    meaning: The work order record describes the process for routine upkeep or emergency repair; this edge is oriented from process to record for checking readiness to start.
+    aliases:
+      - describesMaintenanceProcess
+  - name: followsMaintenanceStrategy
+    from: Maintenance Process
+    to: Maintenance Strategy
+    meaning: null
+    aliases: []
+  - name: includesMaintenanceActivity
+    from: Maintenance Process
+    to: Maintenance Activity
+    meaning: "The maintenance process includes the maintenance activities being carried out, for routine upkeep or emergency repair."
+    aliases: []
+  - name: requiresQualificationSpecification
+    from: Maintenance Activity
+    to: Qualification Specification
+    meaning: null
+    aliases: []
+  - name: satisfiesQualificationSpecification
+    from: Qualified Maintenance Person
+    to: Qualification Specification
+    meaning: null
+    aliases: []
+  - name: hasRequiredFunction
+    from: Maintainable Item
+    to: Required Function
+    meaning: "The item's required function is relevant to assessing its condition; this does not require a separate recorded function for every item."
+    aliases: []
+  - name: concernsMaintainableItem
+    from: Maintenance Process
+    to: Maintainable Item
+    meaning: "The maintenance process concerns retaining or restoring the item's required function."
+    aliases: []
+  - name: beginsFailedState
+    from: Failure Event
+    to: Condition State
+    meaning: A failure event initiates a failed state when the item loses its ability to perform its required function.
+    aliases: []
+  - name: describesUndesirableDisposition
+    from: Failure Mode Code
+    to: Undesirable Disposition
+    meaning: null
+    aliases: []
+  - name: hasAssignedQualifiedMaintenancePerson
+    from: Maintenance Activity
+    to: Qualified Maintenance Person
+    meaning: A person is assigned to an individual maintenance activity rather than to the work order as a whole.
+    aliases:
+      - assignedToMaintenanceActivity
+  - name: includesSupportingActivity
+    from: Maintenance Process
+    to: Supporting Activity
+    meaning: "If a supporting activity is tracked, it is identified as part of the maintenance process, distinct from maintenance activities; a separate supporting-activity record is not mandatory for each work order."
+    aliases: []
+rules:
+  degradedState:
+    conditions:
+      - "The maintainable item can still perform its required function, but with reduced ability; a failure process may have left it in this state without a failure event."
+  failedState:
+    conditions:
+      - A failure event has occurred and the maintainable item can no longer perform its required function.
+  qualifiedForActivity:
+    conditions:
+      - "For this qualification-based assignment check, the maintenance activity has an identified qualification specification."
+      - The person to be assigned satisfies that specification; availability alone does not establish qualification.
+      - "If no specification is identified, this check cannot be completed; this does not rule out assignment under a different governing procedure."
+  assessConditionAgainstFunction:
+    conditions:
+      - "Judge whether a maintainable item is operating, degraded, or failed against its required function, without requiring a separately entered function record for every item."
+  failureModeCodeNotProof:
+    conditions:
+      - A failure mode code describes an undesirable disposition but does not by itself establish that a particular item exhibited it or that it caused a particular failure.
+  readyToStartMaintenanceProcess:
+    conditions:
+      - A maintenance strategy is defined for the maintenance process before it starts.
+      - A maintenance work order record describes the maintenance process before it starts.
+actions:
+  startMaintenanceProcess:
+    input: Maintenance Process
+    preconditions:
+      - readyToStartMaintenanceProcess
+    effect: ""
+    verification: ""
+  assignPersonToMaintenanceActivity:
+    input: Maintenance Activity
+    preconditions:
+      - qualifiedForActivity
+    effect: ""
+    verification: ""
+  verifyAssignedPersonQualified:
+    input: Maintenance Activity
+    preconditions:
+      - qualifiedForActivity
+    effect: ""
+    verification: ""

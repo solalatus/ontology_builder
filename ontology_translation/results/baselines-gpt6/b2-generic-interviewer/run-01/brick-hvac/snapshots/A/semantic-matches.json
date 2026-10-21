@@ -1,0 +1,132 @@
+{
+  "fullDomain": {
+    "classes": [],
+    "relationships": [
+      {
+        "goldId": "rel_0",
+        "recoveredId": "e5"
+      },
+      {
+        "goldId": "rel_1",
+        "recoveredId": "e6"
+      },
+      {
+        "goldId": "rel_2",
+        "recoveredId": "e7"
+      },
+      {
+        "goldId": "rel_3",
+        "recoveredId": "e8"
+      },
+      {
+        "goldId": "rel_4",
+        "recoveredId": "e29"
+      },
+      {
+        "goldId": "rel_5",
+        "recoveredId": "e4"
+      },
+      {
+        "goldId": "rel_22",
+        "recoveredId": "e32"
+      }
+    ],
+    "properties": [
+      {
+        "goldId": "Filter.status",
+        "matchedPropertyName": "condition"
+      },
+      {
+        "goldId": "Zone.occupancyStatus",
+        "matchedPropertyName": "occupied"
+      }
+    ],
+    "valueFidelity": [
+      {
+        "id": "AirHandlingUnit.status",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "Thermostat.status",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "TerminalUnit.status",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "Fan.status",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "Economizer.status",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "Boiler.status",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "Chiller.status",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "CoolingTower.status",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "Pump.status",
+        "semanticFidelity": 0
+      }
+    ]
+  },
+  "scoped": {
+    "classes": [],
+    "relationships": [
+      {
+        "goldId": "rel_5",
+        "recoveredId": "e4"
+      },
+      {
+        "goldId": "rel_22",
+        "recoveredId": "e32"
+      }
+    ],
+    "properties": [
+      {
+        "goldId": "Zone.occupancyStatus",
+        "matchedPropertyName": "occupied"
+      }
+    ],
+    "valueFidelity": [
+      {
+        "id": "AirHandlingUnit.status",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "Thermostat.status",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "TerminalUnit.status",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "Economizer.status",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "Boiler.status",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "Chiller.status",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "Pump.status",
+        "semanticFidelity": 0
+      }
+    ]
+  }
+}

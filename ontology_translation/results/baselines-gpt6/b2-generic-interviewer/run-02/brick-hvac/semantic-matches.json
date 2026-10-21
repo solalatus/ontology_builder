@@ -1,0 +1,84 @@
+{
+  "fullDomain": {
+    "classes": [],
+    "relationships": [
+      {
+        "goldId": "rel_3",
+        "recoveredId": "e7"
+      },
+      {
+        "goldId": "rel_4",
+        "recoveredId": "e23"
+      }
+    ],
+    "properties": [
+      {
+        "goldId": "Zone.occupancyStatus",
+        "matchedPropertyName": "occupied"
+      }
+    ],
+    "valueFidelity": [
+      {
+        "id": "AirHandlingUnit.status",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "Thermostat.status",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "TerminalUnit.status",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "Boiler.status",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "Pump.status",
+        "semanticFidelity": 0
+      }
+    ]
+  },
+  "scoped": {
+    "classes": [],
+    "relationships": [
+      {
+        "goldId": "rel_26",
+        "recoveredId": "e3"
+      },
+      {
+        "goldId": "rel_31",
+        "recoveredId": "e14"
+      }
+    ],
+    "properties": [
+      {
+        "goldId": "Zone.occupancyStatus",
+        "matchedPropertyName": "occupied"
+      }
+    ],
+    "valueFidelity": [
+      {
+        "id": "AirHandlingUnit.status",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "Thermostat.status",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "TerminalUnit.status",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "Boiler.status",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "Pump.status",
+        "semanticFidelity": 0
+      }
+    ]
+  }
+}

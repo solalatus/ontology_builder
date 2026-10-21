@@ -1,0 +1,244 @@
+[
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "requiresFunction (Asset → RequiredFunction)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "requiresFunction",
+      "from": "Asset",
+      "to": "RequiredFunction",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "occursOn (FailureEvent → Asset)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "occursOn",
+      "from": "FailureEvent",
+      "to": "Asset",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "addressesAsset (WorkOrder → Asset)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "addressesAsset",
+      "from": "WorkOrder",
+      "to": "Asset",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "callsFor (WorkOrder → MaintenanceProcess)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "callsFor",
+      "from": "WorkOrder",
+      "to": "MaintenanceProcess",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "includesActivity (MaintenanceProcess → MaintenanceActivity)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "includesActivity",
+      "from": "MaintenanceProcess",
+      "to": "MaintenanceActivity",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "requiresQualificationSpecification (MaintenanceActivity → QualificationSpecification)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "requiresQualificationSpecification",
+      "from": "MaintenanceActivity",
+      "to": "QualificationSpecification",
+      "meaning": null,
+      "aliases": [
+        "requiresQualification"
+      ]
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "assignedTo (MaintenanceActivity → Person)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "assignedTo",
+      "from": "MaintenanceActivity",
+      "to": "Person",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "followsStrategy (MaintenanceProcess → MaintenanceStrategy)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "followsStrategy",
+      "from": "MaintenanceProcess",
+      "to": "MaintenanceStrategy",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "hasMaintenancePlan (Asset → MaintenancePlan)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "hasMaintenancePlan",
+      "from": "Asset",
+      "to": "MaintenancePlan",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "hasGoverningProcedure (Asset → GoverningProcedure)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "hasGoverningProcedure",
+      "from": "Asset",
+      "to": "GoverningProcedure",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "specifiesStrategy (MaintenancePlan → MaintenanceStrategy)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "specifiesStrategy",
+      "from": "MaintenancePlan",
+      "to": "MaintenanceStrategy",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "specifiesStrategy (GoverningProcedure → MaintenanceStrategy)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "specifiesStrategy",
+      "from": "GoverningProcedure",
+      "to": "MaintenanceStrategy",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "supportedBy (FailureProcess → Evidence)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "supportedBy",
+      "from": "FailureProcess",
+      "to": "Evidence",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "callsForAssessedSkill (QualificationSpecification → AssessedSkill)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "callsForAssessedSkill",
+      "from": "QualificationSpecification",
+      "to": "AssessedSkill",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "hasAssessedSkill (Person → AssessedSkill)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "hasAssessedSkill",
+      "from": "Person",
+      "to": "AssessedSkill",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "hasOperatingProcedure (Asset → OperatingProcedure)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "hasOperatingProcedure",
+      "from": "Asset",
+      "to": "OperatingProcedure",
+      "meaning": null,
+      "aliases": []
+    }
+  }
+]

@@ -1,0 +1,466 @@
+competency_questions: []
+classes:
+  Air Handler:
+    meaning: Air-side equipment serving building floors.
+    aliases:
+      - AHU
+    properties:
+      temperatureTrend:
+        type: text
+      operatingStatus:
+        type: text
+      coolingValvePosition:
+        type: number
+      callingForCooling:
+        type: boolean
+  Floor:
+    meaning: "A floor belonging to a building, on which physical spaces and equipment may be located."
+    aliases: []
+    properties: {}
+  Mechanical Room:
+    meaning: The space housing plant equipment.
+    aliases: []
+    properties: {}
+  Plant Equipment:
+    meaning: Equipment on the plant side in the mechanical room.
+    aliases: []
+    properties: {}
+  BAS Front End:
+    meaning: The building automation system interface used in facilities operations.
+    aliases: []
+    properties: {}
+  Technician:
+    meaning: A member of the rotating crew who diagnoses faults and performs hands-on work under applicable maintenance and safety procedures.
+    aliases: []
+    properties: {}
+  Zone:
+    meaning: An occupied area where temperature and comfort are assessed.
+    aliases: []
+    properties:
+      measuredAirTemperature:
+        type: number
+      coolingSetpoint:
+        type: number
+      configuredDeadband:
+        type: number
+      occupied:
+        type: boolean
+      heatingSetpoint:
+        type: number
+  Thermostat:
+    meaning: A control device whose service area and operating state are checked for a warm zone.
+    aliases: []
+    properties:
+      operatingStatus:
+        type: text
+  Terminal Unit:
+    meaning: Air-side unit whose service area and operating state are checked for a warm zone.
+    aliases: []
+    properties:
+      operatingStatus:
+        type: text
+  Economizer:
+    meaning: Air-side cooling mode or equipment considered as an alternative to mechanical cooling when sensed conditions support it.
+    aliases: []
+    properties:
+      operatingStatus:
+        type: text
+      CO2Differential:
+        type: number
+  Chiller:
+    meaning: Plant asset checked for operating status and water temperature when cooling is needed.
+    aliases: []
+    properties:
+      operatingStatus:
+        type: text
+      waterTemperature:
+        type: number
+  Pumps:
+    meaning: Plant equipment that circulates water in the chilled-water cooling path.
+    aliases:
+      - Circulation Equipment
+    properties:
+      operatingStatus:
+        type: text
+  Cooling Tower:
+    meaning: Plant equipment that rejects heat in the chilled-water cooling path.
+    aliases:
+      - Heat-Rejection Equipment
+    properties:
+      operatingStatus:
+        type: text
+  Fan:
+    meaning: null
+    aliases: []
+    properties:
+      alarmStatus:
+        type: text
+  Filter:
+    meaning: null
+    aliases: []
+    properties:
+      condition:
+        type: text
+  Damper:
+    meaning: null
+    aliases: []
+    properties:
+      responseToCommand:
+        type: text
+  Cooling Valve:
+    meaning: null
+    aliases: []
+    properties:
+      responseToCommand:
+        type: text
+  Chilled-Water Cooling Path:
+    meaning: "Operational grouping of the chiller, pumps, cooling tower, and cooling delivery toward the AHU's cooling valve, without implying a particular piping arrangement."
+    aliases: []
+    properties: {}
+  Outside Air:
+    meaning: Outside-air readings used to assess economizer suitability and ventilation.
+    aliases: []
+    properties:
+      sensedConditions:
+        type: text
+      CO2Reading:
+        type: number
+  Return Air:
+    meaning: Return-air readings compared with outside-air readings for economizer and ventilation checks.
+    aliases: []
+    properties:
+      sensedConditions:
+        type: text
+      CO2Reading:
+        type: number
+  Boiler:
+    meaning: Plant-side equipment checked when investigating a cold zone and the heating path.
+    aliases: []
+    properties:
+      operatingStatus:
+        type: text
+  AHU Heating Path:
+    meaning: "The heating path through an AHU's heating valve, checked when a cold zone calls for heat."
+    aliases: []
+    properties: {}
+  Building:
+    meaning: "The building used to describe an AHU's physical location."
+    aliases: []
+    properties: {}
+  Space:
+    meaning: "A physical space within a floor; a terminal unit may be located there or serve it, and a zone may group multiple spaces."
+    aliases: []
+    properties: {}
+  Heating Valve:
+    meaning: A valve in an AHU fed by a boiler.
+    aliases: []
+    properties: {}
+relationships:
+  - name: serves
+    from: Air Handler
+    to: Floor
+    meaning: An air handler serves a floor.
+    aliases: []
+  - name: houses
+    from: Mechanical Room
+    to: Plant Equipment
+    meaning: The mechanical room houses plant equipment.
+    aliases: []
+  - name: serves
+    from: Thermostat
+    to: Zone
+    meaning: The thermostat controls the zone and does not imply a direct zone-to-AHU feed.
+    aliases: []
+  - name: hasEconomizer
+    from: Air Handler
+    to: Economizer
+    meaning: null
+    aliases: []
+  - name: hasFan
+    from: Air Handler
+    to: Fan
+    meaning: null
+    aliases: []
+  - name: hasFilter
+    from: Air Handler
+    to: Filter
+    meaning: null
+    aliases: []
+  - name: hasDamper
+    from: Air Handler
+    to: Damper
+    meaning: null
+    aliases: []
+  - name: isPartOf
+    from: Cooling Valve
+    to: Air Handler
+    meaning: The cooling valve is part of the AHU it supplies.
+    aliases:
+      - hasCoolingValve
+  - name: includesChiller
+    from: Chilled-Water Cooling Path
+    to: Chiller
+    meaning: The chiller is checked as part of this cooling path; this does not specify piping arrangement.
+    aliases: []
+  - name: includesPumps
+    from: Chilled-Water Cooling Path
+    to: Pumps
+    meaning: Pumps circulate water as part of this cooling path; this does not specify piping arrangement.
+    aliases: []
+  - name: includesCoolingTower
+    from: Chilled-Water Cooling Path
+    to: Cooling Tower
+    meaning: The cooling tower rejects heat as part of this cooling path; this does not specify piping arrangement.
+    aliases: []
+  - name: investigates
+    from: Technician
+    to: Chilled-Water Cooling Path
+    meaning: A technician investigates the cooling path on site when plant indications warrant dispatch.
+    aliases: []
+  - name: investigates
+    from: Technician
+    to: Air Handler
+    meaning: A technician investigates a local air-handler problem on site when BAS evidence points to it.
+    aliases: []
+  - name: checksOutsideAir
+    from: Economizer
+    to: Outside Air
+    meaning: Outside-air sensed conditions are assessed when considering economizer operation.
+    aliases: []
+  - name: checksReturnAir
+    from: Economizer
+    to: Return Air
+    meaning: Return-air sensed conditions are compared with outside-air conditions when considering economizer operation.
+    aliases: []
+  - name: feeds
+    from: Air Handler
+    to: Terminal Unit
+    meaning: "The AHU feeds the terminal unit, which serves spaces rather than automatically serving an entire zone."
+    aliases: []
+  - name: hasHeatingPath
+    from: Air Handler
+    to: AHU Heating Path
+    meaning: null
+    aliases: []
+  - name: isPlantEquipment
+    from: Chiller
+    to: Plant Equipment
+    meaning: null
+    aliases: []
+  - name: isPlantEquipment
+    from: Pumps
+    to: Plant Equipment
+    meaning: null
+    aliases: []
+  - name: isPlantEquipment
+    from: Cooling Tower
+    to: Plant Equipment
+    meaning: null
+    aliases: []
+  - name: isPlantEquipment
+    from: Boiler
+    to: Plant Equipment
+    meaning: null
+    aliases: []
+  - name: isLocatedIn
+    from: Air Handler
+    to: Building
+    meaning: "Records the building in which the AHU is physically located, separately from its service area."
+    aliases: []
+  - name: isLocatedOn
+    from: Air Handler
+    to: Floor
+    meaning: "Records the floor where the AHU is physically located, separately from floors it serves."
+    aliases: []
+  - name: isLocatedIn
+    from: Terminal Unit
+    to: Space
+    meaning: "Records the physical space containing the terminal unit, separately from what it serves."
+    aliases: []
+  - name: serves
+    from: Terminal Unit
+    to: Space
+    meaning: "The terminal unit serves this space, which may differ from its physical location."
+    aliases: []
+  - name: groups
+    from: Zone
+    to: Space
+    meaning: "A zone groups one or more spaces, potentially served by different terminal units."
+    aliases: []
+  - name: feeds
+    from: Chiller
+    to: Cooling Valve
+    meaning: A chiller feeds a cooling valve for tracing affected AHUs; it does not specify a detailed piping layout.
+    aliases: []
+  - name: feeds
+    from: Boiler
+    to: Heating Valve
+    meaning: The boiler feeds a heating valve in an AHU.
+    aliases: []
+  - name: isPartOf
+    from: Heating Valve
+    to: Air Handler
+    meaning: The heating valve is part of an AHU.
+    aliases: []
+  - name: hasHeatingValve
+    from: AHU Heating Path
+    to: Heating Valve
+    meaning: A heating path includes an AHU heating valve.
+    aliases: []
+  - name: isOn
+    from: Space
+    to: Floor
+    meaning: The physical space is on this floor.
+    aliases: []
+  - name: isPartOf
+    from: Floor
+    to: Building
+    meaning: The floor is part of this building.
+    aliases: []
+rules:
+  noAdditionalCoolingWithinDeadband:
+    conditions:
+      - "The zone's measured air temperature is within its configured deadband; a warm complaint alone does not call for more cooling."
+  zoneNeedsCoolingInvestigation:
+    conditions:
+      - "The zone's measured air temperature is above its applicable cooling setpoint and outside its configured deadband."
+      - "Check the zone's controlling device and the units serving its grouped spaces before adjusting setpoints; do not infer direct terminal-unit-to-zone service."
+  economizerCandidate:
+    conditions:
+      - Compare sensed outside-air and return-air conditions to assess whether bringing in more outside air could reduce mechanical cooling.
+      - "Outside-air and return-air CO₂ readings or a direct CO₂ differential support a ventilation check, but do not alone establish cooling suitability; do not enable the economizer on CO₂ alone."
+  localAirSideProblem:
+    conditions:
+      - "BAS evidence points to a local air-handler problem, such as a fan alarm, dirty filter, or damper or valve not responding as expected."
+  possiblePlantProblem:
+    conditions:
+      - "An AHU is calling for cooling but its temperature is not moving toward setpoint; a flat trend prompts investigation, not a finding of plant failure."
+      - "Check chiller status and water temperature, then pump circulation and cooling-tower heat rejection; determine affected AHUs from verified chiller-to-cooling-valve-to-AHU feeds, not inferred pump or cooling-tower feeds."
+  plantDispatchIndication:
+    conditions:
+      - "Cooling is needed and a plant asset is in alarm or off, or chiller water is not getting cold as expected despite the cooling call."
+      - "Send a technician to investigate the chiller, pumps, and heat rejection on site; if indications are inconclusive, keep investigating instead of treating the BAS trend as proof of a plant fault."
+  economizerOperatingVerification:
+    conditions:
+      - "After enabling the economizer, check BAS economizer mode or status; enabled means available, while active means operating."
+      - Watch the AHU air-temperature response; the command alone does not demonstrate the result.
+  postWorkVerification:
+    conditions:
+      - "After work, check that the equipment and temperatures respond as expected."
+  technicianDisposition:
+    conditions:
+      - "Repair, escalate, or observe based on the technician's diagnosis and applicable maintenance and safety procedures; BAS indications alone do not determine a blanket disposition."
+  coldZoneInvestigation:
+    conditions:
+      - "Compare the zone's measured air temperature with its applicable heating setpoint and configured deadband; a cold complaint within the deadband alone does not call for more heat."
+      - Start with the spaces grouped in the zone and verify the applicable serving controls are operating before changing setpoints.
+  occupiedSpaceCheck:
+    conditions:
+      - "For an occupied zone, check that its controlling device is operating and that units serving its grouped spaces are operating, without treating a terminal unit as directly serving the whole zone."
+  ventilationCheck:
+    conditions:
+      - Compare outside-air and return-air CO₂ readings or a direct differential for a ventilation concern; CO₂ comparison alone does not establish economizer cooling suitability.
+  equipmentAlarmInvestigation:
+    conditions:
+      - "Trace a chiller alarm through actual chiller-to-cooling-valve-to-AHU connections, or a boiler alarm through boiler-to-heating-valve-to-AHU connections."
+      - "An AHU alarm leads to its physical location and to the terminal units and spaces it feeds and serves, respectively."
+      - Do not infer which AHUs a pump or cooling-tower alarm affects without checking the actual plant connections.
+  airHandlerHeatingInvestigation:
+    conditions:
+      - "At the identified AHU, check its heating path and heating-valve response; a cold space alone does not identify an upstream plant fault."
+  airHandlerAlarmInvestigation:
+    conditions:
+      - "On an AHU alarm, check its status and physical location, then trace the terminal units it feeds to the spaces they serve; location need not match service area."
+  chillerAlarmInvestigation:
+    conditions:
+      - "On a chiller alarm, check chiller status, trace the cooling valves it feeds to their AHUs, and trace those AHUs through their fed terminal units to served spaces."
+  boilerAlarmInvestigation:
+    conditions:
+      - "On a boiler alarm, check its status and trace the heating valves it feeds to their AHUs, then determine served spaces."
+  coldZoneUpstreamTrace:
+    conditions:
+      - "From each space grouped in the cold zone find the terminal unit serving it, then trace upstream to the AHU feeding that terminal unit; the thermostat's zone association is not a direct zone-to-AHU feed."
+      - "Check each identified AHU's heating path and, as needed, use actual boiler-to-heating-valve-to-AHU connections to identify the boiler side; do not assume the boiler has failed."
+actions:
+  checkBAS:
+    input: Zone
+    preconditions: []
+    effect: ""
+    verification: ""
+  enableEconomizer:
+    input: Economizer
+    preconditions:
+      - economizerCandidate
+    effect: ""
+    verification: ""
+  verifyEconomizerOperation:
+    input: Air Handler
+    preconditions:
+      - economizerOperatingVerification
+    effect: ""
+    verification: ""
+  sendTechnicianToAirHandler:
+    input: Air Handler
+    preconditions:
+      - localAirSideProblem
+    effect: ""
+    verification: ""
+  investigatePlant:
+    input: Chilled-Water Cooling Path
+    preconditions:
+      - possiblePlantProblem
+    effect: ""
+    verification: ""
+  sendTechnicianToPlant:
+    input: Technician
+    preconditions:
+      - plantDispatchIndication
+    effect: ""
+    verification: ""
+  verifyAirHandlerAfterWork:
+    input: Air Handler
+    preconditions:
+      - postWorkVerification
+    effect: ""
+    verification: ""
+  verifyCoolingPathAfterWork:
+    input: Chilled-Water Cooling Path
+    preconditions:
+      - postWorkVerification
+    effect: ""
+    verification: ""
+  checkOccupiedZone:
+    input: Zone
+    preconditions: []
+    effect: ""
+    verification: ""
+  investigateColdZone:
+    input: Zone
+    preconditions:
+      - coldZoneInvestigation
+    effect: ""
+    verification: ""
+  investigateEquipmentAlarm:
+    input: Air Handler
+    preconditions:
+      - airHandlerAlarmInvestigation
+    effect: ""
+    verification: ""
+  investigateAirHandlerHeating:
+    input: Air Handler
+    preconditions:
+      - airHandlerHeatingInvestigation
+    effect: ""
+    verification: ""
+  investigateChillerAlarm:
+    input: Chiller
+    preconditions:
+      - chillerAlarmInvestigation
+    effect: ""
+    verification: ""
+  investigateBoilerAlarm:
+    input: Boiler
+    preconditions:
+      - boilerAlarmInvestigation
+    effect: ""
+    verification: ""

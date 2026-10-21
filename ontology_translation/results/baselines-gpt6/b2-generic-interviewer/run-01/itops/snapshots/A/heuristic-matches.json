@@ -1,0 +1,223 @@
+{
+  "classes": [
+    {
+      "goldId": "OrganizationalUnit",
+      "recoveredId": "n33",
+      "weight": 1
+    },
+    {
+      "goldId": "ResolverGroup",
+      "recoveredId": "n8",
+      "weight": 1
+    },
+    {
+      "goldId": "IncidentCommander",
+      "recoveredId": "n10",
+      "weight": 1
+    },
+    {
+      "goldId": "Regulator",
+      "recoveredId": "n20",
+      "weight": 1
+    },
+    {
+      "goldId": "BusinessService",
+      "recoveredId": "n6",
+      "weight": 1
+    },
+    {
+      "goldId": "CustomerChannel",
+      "recoveredId": "n7",
+      "weight": 1
+    },
+    {
+      "goldId": "ItService",
+      "recoveredId": "n4",
+      "weight": 1
+    },
+    {
+      "goldId": "ConfigurationItem",
+      "recoveredId": "n5",
+      "weight": 1
+    },
+    {
+      "goldId": "BackupSet",
+      "recoveredId": "n27",
+      "weight": 1
+    },
+    {
+      "goldId": "MonitoringRule",
+      "recoveredId": "n11",
+      "weight": 1
+    },
+    {
+      "goldId": "Event",
+      "recoveredId": "n2",
+      "weight": 1
+    },
+    {
+      "goldId": "Alert",
+      "recoveredId": "n1",
+      "weight": 1
+    },
+    {
+      "goldId": "Incident",
+      "recoveredId": "n3",
+      "weight": 1
+    },
+    {
+      "goldId": "Problem",
+      "recoveredId": "n29",
+      "weight": 1
+    },
+    {
+      "goldId": "KnownError",
+      "recoveredId": "n30",
+      "weight": 1
+    },
+    {
+      "goldId": "Change",
+      "recoveredId": "n24",
+      "weight": 1
+    },
+    {
+      "goldId": "Workaround",
+      "recoveredId": "n31",
+      "weight": 1
+    },
+    {
+      "goldId": "RecoveryPlan",
+      "recoveredId": "n26",
+      "weight": 1
+    },
+    {
+      "goldId": "EvidenceItem",
+      "recoveredId": "n15",
+      "weight": 1
+    },
+    {
+      "goldId": "MaterialityAssessment",
+      "recoveredId": "n17",
+      "weight": 1
+    },
+    {
+      "goldId": "PostIncidentReview",
+      "recoveredId": "n23",
+      "weight": 1
+    },
+    {
+      "goldId": "CorrectiveAction",
+      "recoveredId": "n32",
+      "weight": 1
+    }
+  ],
+  "relationships": [
+    {
+      "goldId": "rel_9",
+      "edgeId": "e9",
+      "direction": "reciprocal"
+    },
+    {
+      "goldId": "rel_73",
+      "edgeId": "e5",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_110",
+      "edgeId": "e49",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_68",
+      "edgeId": "e1",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_69",
+      "edgeId": "e2",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_78",
+      "edgeId": "e13",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_84",
+      "edgeId": "e38",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_97",
+      "edgeId": "e41",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_108",
+      "edgeId": "e39",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_109",
+      "edgeId": "e48",
+      "direction": "forward"
+    }
+  ],
+  "properties": [
+    {
+      "goldId": "BackupSet.status",
+      "hostNodeId": "n27",
+      "matchedPropertyName": "status"
+    },
+    {
+      "goldId": "Alert.status",
+      "hostNodeId": "n1",
+      "matchedPropertyName": "status"
+    },
+    {
+      "goldId": "Incident.status",
+      "hostNodeId": "n3",
+      "matchedPropertyName": "status"
+    },
+    {
+      "goldId": "Incident.severity",
+      "hostNodeId": "n3",
+      "matchedPropertyName": "severity"
+    },
+    {
+      "goldId": "Change.implementationPlan",
+      "hostNodeId": "n24",
+      "matchedPropertyName": "implementationPlan"
+    },
+    {
+      "goldId": "Change.backoutPlan",
+      "hostNodeId": "n24",
+      "matchedPropertyName": "backoutPlan"
+    },
+    {
+      "goldId": "MaterialityAssessment.result",
+      "hostNodeId": "n17",
+      "matchedPropertyName": "result"
+    },
+    {
+      "goldId": "ItService.healthState",
+      "hostNodeId": "n4",
+      "matchedPropertyName": "health"
+    },
+    {
+      "goldId": "Incident.impact",
+      "hostNodeId": "n3",
+      "matchedPropertyName": "observedImpact"
+    },
+    {
+      "goldId": "KnownError.diagnosedCause",
+      "hostNodeId": "n30",
+      "matchedPropertyName": "cause"
+    },
+    {
+      "goldId": "Change.riskLevel",
+      "hostNodeId": "n24",
+      "matchedPropertyName": "riskAccepted"
+    }
+  ]
+}

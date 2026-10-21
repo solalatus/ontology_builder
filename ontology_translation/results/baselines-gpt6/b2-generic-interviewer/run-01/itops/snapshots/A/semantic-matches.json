@@ -1,0 +1,156 @@
+{
+  "fullDomain": {
+    "classes": [
+      {
+        "goldId": "RegulatoryNotification",
+        "recoveredId": "n19"
+      }
+    ],
+    "relationships": [
+      {
+        "goldId": "rel_24",
+        "recoveredId": "e7"
+      },
+      {
+        "goldId": "rel_44",
+        "recoveredId": "e37"
+      },
+      {
+        "goldId": "rel_46",
+        "recoveredId": "e36"
+      },
+      {
+        "goldId": "rel_66",
+        "recoveredId": "e15"
+      },
+      {
+        "goldId": "rel_72",
+        "recoveredId": "e4"
+      },
+      {
+        "goldId": "rel_80",
+        "recoveredId": "e21"
+      },
+      {
+        "goldId": "rel_86",
+        "recoveredId": "e43"
+      },
+      {
+        "goldId": "rel_87",
+        "recoveredId": "e23"
+      },
+      {
+        "goldId": "rel_88",
+        "recoveredId": "e30"
+      },
+      {
+        "goldId": "rel_96",
+        "recoveredId": "e40"
+      },
+      {
+        "goldId": "rel_111",
+        "recoveredId": "e42"
+      }
+    ],
+    "properties": [],
+    "valueFidelity": [
+      {
+        "id": "ItService.healthState",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "BackupSet.status",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "Alert.status",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "Incident.status",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "Incident.severity",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "Incident.impact",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "Change.riskLevel",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "MaterialityAssessment.result",
+        "semanticFidelity": 0
+      }
+    ]
+  },
+  "scoped": {
+    "classes": [
+      {
+        "goldId": "Communication",
+        "recoveredId": "n16"
+      },
+      {
+        "goldId": "RegulatoryNotification",
+        "recoveredId": "n19"
+      }
+    ],
+    "relationships": [
+      {
+        "goldId": "rel_44",
+        "recoveredId": "e37"
+      },
+      {
+        "goldId": "rel_80",
+        "recoveredId": "e21"
+      },
+      {
+        "goldId": "rel_86",
+        "recoveredId": "e43"
+      },
+      {
+        "goldId": "rel_87",
+        "recoveredId": "e23"
+      },
+      {
+        "goldId": "rel_88",
+        "recoveredId": "e30"
+      }
+    ],
+    "properties": [],
+    "valueFidelity": [
+      {
+        "id": "ItService.healthState",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "BackupSet.status",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "Alert.status",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "Incident.status",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "Incident.severity",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "Incident.impact",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "MaterialityAssessment.result",
+        "semanticFidelity": 0
+      }
+    ]
+  }
+}

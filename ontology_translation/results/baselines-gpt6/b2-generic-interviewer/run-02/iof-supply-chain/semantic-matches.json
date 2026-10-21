@@ -1,0 +1,48 @@
+{
+  "fullDomain": {
+    "classes": [],
+    "relationships": [
+      {
+        "goldId": "rel_19",
+        "recoveredId": "e15"
+      },
+      {
+        "goldId": "rel_20",
+        "recoveredId": "e16"
+      },
+      {
+        "goldId": "rel_21",
+        "recoveredId": "e17"
+      },
+      {
+        "goldId": "rel_22",
+        "recoveredId": "e18"
+      }
+    ],
+    "properties": [],
+    "valueFidelity": []
+  },
+  "scoped": {
+    "classes": [],
+    "relationships": [
+      {
+        "goldId": "rel_19",
+        "recoveredId": "e15"
+      },
+      {
+        "goldId": "rel_20",
+        "recoveredId": "e16"
+      },
+      {
+        "goldId": "rel_21",
+        "recoveredId": "e17"
+      },
+      {
+        "goldId": "rel_22",
+        "recoveredId": "e18"
+      }
+    ],
+    "properties": [],
+    "valueFidelity": []
+  }
+}

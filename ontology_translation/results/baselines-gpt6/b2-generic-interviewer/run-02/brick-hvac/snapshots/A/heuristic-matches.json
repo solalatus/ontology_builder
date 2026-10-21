@@ -1,0 +1,87 @@
+{
+  "classes": [
+    {
+      "goldId": "AirHandlingUnit",
+      "recoveredId": "n4",
+      "weight": 1
+    },
+    {
+      "goldId": "Thermostat",
+      "recoveredId": "n12",
+      "weight": 1
+    },
+    {
+      "goldId": "TerminalUnit",
+      "recoveredId": "n3",
+      "weight": 1
+    },
+    {
+      "goldId": "CoolingValve",
+      "recoveredId": "n9",
+      "weight": 1
+    },
+    {
+      "goldId": "HeatingValve",
+      "recoveredId": "n16",
+      "weight": 1
+    },
+    {
+      "goldId": "Boiler",
+      "recoveredId": "n14",
+      "weight": 1
+    },
+    {
+      "goldId": "Chiller",
+      "recoveredId": "n6",
+      "weight": 1
+    },
+    {
+      "goldId": "Zone",
+      "recoveredId": "n2",
+      "weight": 1
+    },
+    {
+      "goldId": "Pump",
+      "recoveredId": "n7",
+      "weight": 1
+    }
+  ],
+  "relationships": [],
+  "properties": [
+    {
+      "goldId": "CoolingValve.position",
+      "hostNodeId": "n9",
+      "matchedPropertyName": "position"
+    },
+    {
+      "goldId": "HeatingValve.position",
+      "hostNodeId": "n16",
+      "matchedPropertyName": "position"
+    },
+    {
+      "goldId": "Boiler.status",
+      "hostNodeId": "n14",
+      "matchedPropertyName": "status"
+    },
+    {
+      "goldId": "Pump.status",
+      "hostNodeId": "n7",
+      "matchedPropertyName": "status"
+    },
+    {
+      "goldId": "AirHandlingUnit.status",
+      "hostNodeId": "n4",
+      "matchedPropertyName": "fanStatus"
+    },
+    {
+      "goldId": "Thermostat.status",
+      "hostNodeId": "n12",
+      "matchedPropertyName": "operatingStatus"
+    },
+    {
+      "goldId": "TerminalUnit.status",
+      "hostNodeId": "n3",
+      "matchedPropertyName": "operatingStatus"
+    }
+  ]
+}

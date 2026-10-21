@@ -1,0 +1,371 @@
+classes:
+  Space:
+    meaning: "A bounded area used for a particular function."
+  Zone:
+    meaning: "One space or a group of spaces controlled together for heating or cooling."
+    properties:
+      occupancyStatus:
+        type: text
+        allowed:
+          - occupied
+          - unoccupied
+          - unknown
+  TerminalUnit:
+    meaning: "Equipment that regulates airflow or temperature for a served area."
+    properties:
+      status:
+        type: text
+        allowed:
+          - off
+          - on
+          - alarm
+  AirHandler:
+    meaning: "Equipment that moves and conditions air, typically for distribution through the building."
+    aliases:
+      - air handling unit
+      - AHU
+    properties:
+      status:
+        type: text
+        allowed:
+          - off
+          - on
+          - alarm
+  Thermostat:
+    meaning: "A device that controls temperature against a setpoint."
+    properties:
+      status:
+        type: text
+        allowed:
+          - normal
+          - fault
+          - offline
+      mode:
+        type: text
+        allowed:
+          - heating
+          - cooling
+          - auto
+          - off
+  CoolingValve:
+    meaning: "A valve that regulates cold-water flow through a cooling coil to control air temperature."
+    properties:
+      position:
+        type: number
+  Chiller:
+    meaning: "A machine that transfers heat between fluids to provide cooling."
+    properties:
+      status:
+        type: text
+        allowed:
+          - off
+          - on
+          - alarm
+  Pump:
+    meaning: "A machine that moves fluid through a system."
+    properties:
+      status:
+        type: text
+        allowed:
+          - off
+          - on
+          - alarm
+  CoolingTower:
+    meaning: "Equipment that rejects waste heat to the atmosphere by cooling a water stream."
+    properties:
+      status:
+        type: text
+        allowed:
+          - off
+          - on
+          - alarm
+  Economizer:
+    meaning: "Equipment or controls that use sensed conditions to reduce the need for mechanical heating or cooling."
+    properties:
+      status:
+        type: text
+        allowed:
+          - disabled
+          - enabled
+          - active
+  AirTemperatureSensor:
+    meaning: "A point that measures the temperature of air in °C."
+    properties:
+      value:
+        type: number
+  TemperatureSensor:
+    meaning: "A point that measures temperature in °C without its name alone specifying what it measures."
+    properties:
+      value:
+        type: number
+  WaterTemperatureSensor:
+    meaning: "A point that measures the temperature of water in °C."
+    properties:
+      value:
+        type: number
+  OccupancySensor:
+    meaning: "A point that detects whether an area is occupied."
+    properties:
+      occupied:
+        type: text
+        allowed:
+          - occupied
+          - unoccupied
+          - unknown
+  OutsideAirCO2Sensor:
+    meaning: "A point that measures CO₂ concentration in outside air in ppm."
+    properties:
+      value:
+        type: number
+  ReturnAirCO2Sensor:
+    meaning: "A point that measures CO₂ concentration in air returning from the served area in ppm."
+    properties:
+      value:
+        type: number
+  CO2DifferentialSensor:
+    meaning: "A point that measures the difference between inside- and outside-air CO₂ levels in ppm."
+    properties:
+      value:
+        type: number
+  AirTemperatureSetpoint:
+    meaning: "A control point giving the desired air-temperature target in °C."
+    properties:
+      value:
+        type: number
+  CoolingTemperatureSetpoint:
+    meaning: "A control point giving the temperature target for cooling control in °C."
+    properties:
+      value:
+        type: number
+  HeatingTemperatureSetpoint:
+    meaning: "A control point giving the temperature target for heating control in °C."
+    properties:
+      value:
+        type: number
+  TemperatureDeadbandSetpoint:
+    meaning: "A control point giving the size of the allowed temperature band around the active setpoint in °C, not another target."
+    properties:
+      value:
+        type: number
+  TemperatureSetpoint:
+    meaning: "A control point giving the desired temperature the thermostat uses for control in °C."
+    properties:
+      value:
+        type: number
+  Fan:
+    meaning: "A bladed device that moves air through the HVAC system."
+    properties:
+      status:
+        type: text
+        allowed:
+          - off
+          - on
+          - alarm
+  Filter:
+    meaning: "A device that removes material from the air passing through it."
+    properties:
+      status:
+        type: text
+        allowed:
+          - clean
+          - dirty
+          - replacement due
+  Damper:
+    meaning: "A movable part of the air path that regulates or shuts off airflow."
+    properties:
+      position:
+        type: number
+  HeatingValve:
+    meaning: "A valve that regulates hot-water flow through a heating coil to control air temperature."
+    properties:
+      position:
+        type: number
+
+relationships:
+  - name: serves
+    from: TerminalUnit
+    to: Space
+    meaning: "The terminal unit regulates airflow or temperature for the space."
+  - name: feeds
+    from: AirHandler
+    to: TerminalUnit
+    meaning: "The air handler is upstream of the terminal unit in the air path; this does not imply that nothing lies between them."
+  - name: serves
+    from: Thermostat
+    to: Zone
+    meaning: "The thermostat provides temperature control for the zone."
+  - name: feeds
+    from: Chiller
+    to: CoolingValve
+    meaning: "The chiller is upstream of the valve in the chilled-water cooling process, but the connection does not prove current water delivery."
+  - name: hasAsAPoint
+    from: AirHandler
+    to: AirTemperatureSensor
+    meaning: "The air handler has this sensor as an associated measurement point, where recorded."
+  - name: hasAsAPoint
+    from: AirHandler
+    to: AirTemperatureSetpoint
+    meaning: "The air handler has this general air-temperature target as an associated control point, where recorded."
+  - name: hasAsAPoint
+    from: AirHandler
+    to: CoolingTemperatureSetpoint
+    meaning: "The air handler has this cooling target as an associated control point, where recorded."
+  - name: hasAsAPoint
+    from: AirHandler
+    to: HeatingTemperatureSetpoint
+    meaning: "The air handler has this heating target as an associated control point, where recorded."
+  - name: hasAsAPoint
+    from: AirHandler
+    to: TemperatureDeadbandSetpoint
+    meaning: "The air handler has this deadband setting as an associated control point, where recorded."
+  - name: hasAsAPoint
+    from: Thermostat
+    to: TemperatureSensor
+    meaning: "The thermostat has this temperature sensor as an associated point, without establishing which space its reading represents."
+  - name: hasAsAPoint
+    from: Thermostat
+    to: TemperatureSetpoint
+    meaning: "The thermostat has this temperature setpoint as an associated control point."
+  - name: hasAsAPoint
+    from: Zone
+    to: OccupancySensor
+    meaning: "The zone has this sensor as a point for occupancy checks, without asserting its physical location."
+  - name: hasAsAPoint
+    from: Space
+    to: OccupancySensor
+    meaning: "The space has this sensor as a point for occupancy checks, without asserting its physical location."
+  - name: hasAsAPoint
+    from: AirHandler
+    to: OutsideAirCO2Sensor
+    meaning: "The air handler has this outside-air CO₂ sensor as an associated point."
+  - name: hasAsAPoint
+    from: AirHandler
+    to: ReturnAirCO2Sensor
+    meaning: "The air handler has this return-air CO₂ sensor as an associated point."
+  - name: hasAsAPart
+    from: AirHandler
+    to: CoolingValve
+    meaning: "The cooling valve is physical equipment fitted to this air handler where recorded."
+  - name: hasAsAPart
+    from: AirHandler
+    to: Economizer
+    meaning: "The economizer is physical equipment fitted to this air handler where recorded; its operating criteria are not established by this connection."
+  - name: hasAsAPart
+    from: AirHandler
+    to: Fan
+    meaning: "The fan is physical equipment fitted to this air handler where recorded."
+  - name: hasAsAPart
+    from: AirHandler
+    to: Filter
+    meaning: "The filter is physical equipment fitted to this air handler where recorded."
+  - name: hasAsAPart
+    from: AirHandler
+    to: Damper
+    meaning: "The damper is physical equipment fitted to this air handler where recorded."
+  - name: hasAsAPart
+    from: AirHandler
+    to: HeatingValve
+    meaning: "The heating valve is physical equipment fitted to this air handler where recorded."
+
+rules:
+  - name: chooseApplicableSetpoint
+    conditions:
+      - "The person starting a comfort check supplies whether the complaint is heating or cooling; if unclear, ask rather than infer it from a temperature reading."
+      - "Use the applicable cooling or heating temperature setpoint for that complaint, not the general air temperature setpoint."
+      - "An air-handler sensor reading is not, by itself, the temperature of the uncomfortable space."
+  - name: checkActiveDeadband
+    conditions:
+      - "A technician confirms which setpoint is active for control and either provides the deadband's lower and upper limits or confirms how the unit applies its deadband value to calculate them."
+      - "If a reading is exactly at a limit, a technician also confirms how that air handler treats the boundary before calling it within the band."
+      - "Without the needed confirmation, report the available values but leave the within-deadband conclusion unresolved."
+  - name: withinDeadbandTakesPrecedence
+    conditions:
+      - "The air-handler temperature is confirmed within the configured deadband around the active setpoint."
+      - "Recommend no heating or cooling change while it remains there, even if comparison with a cooling or heating setpoint would otherwise support an increase."
+  - name: qualifiedTemperatureRecommendation
+    conditions:
+      - "An air-handler reading above the applicable cooling setpoint can support increased cooling, and a reading below the applicable heating setpoint can support increased heating."
+      - "If the deadband check is unresolved, a recommendation may be made with that uncertainty stated; do not claim the reading is outside the band."
+      - "An air handler reporting off or alarm warrants investigation but does not automatically block the recommendation; its ability to respond remains unresolved."
+  - name: interpretOccupancy
+    conditions:
+      - "Report a zone's occupancy status separately from any associated occupancy sensor's occupied reading; unknown or missing does not mean unoccupied."
+      - "A zone-associated sensor reading occupied can prompt the occupied-zone check when zone status is unknown or absent."
+      - "A space-associated sensor informs a zone check only after a technician establishes that the space belongs to the zone."
+      - "If zone status and a relevant sensor give conflicting occupied and unoccupied indications, flag the conflict and perform the occupied-zone check as a precaution without declaring occupancy settled."
+      - "An unoccupied sensor reading with unknown or absent zone status does not settle zone occupancy or, by itself, trigger the occupied-zone check."
+  - name: distinguishOccupiedAreaFindings
+    conditions:
+      - "A thermostat's assignment, normal status, non-off mode, sensor reading, and setpoint show that control appears available, not that its operation is verified."
+      - "A thermostat in off mode is not set to provide heating or cooling control; fault or offline status leaves operation unverified."
+      - "A terminal unit's status counts toward a zone check only after a technician establishes that its served space belongs to the zone; on status alone does not verify operation."
+      - "A technician must verify terminal-unit operation on site or confirm that the thermostat responds to a heating or cooling call before operation is reported as verified."
+      - "Verified equipment operation is separate from verified space-temperature response."
+  - name: verifySpaceTemperatureResponse
+    conditions:
+      - "A technician verifies that the space belongs to the zone, that its thermostat's control setup governs the space, and that the temperature reading represents that particular space."
+      - "After a heating or cooling call, successive representative readings moving toward the applicable setpoint support reporting that the space temperature is responding; one reading does not."
+      - "An equal reading supports reporting equality with setpoint at that reading only; a nearby reading needs a technician-confirmed tolerance before it is called at setpoint."
+  - name: assessEconomizer
+    conditions:
+      - "A disabled economizer can be recommended for enablement only when a technician confirms its governing sensed conditions, current readings, and operating criteria support operation."
+      - "If the readings or criteria are unavailable, do not judge suitability; if the economizer is already enabled or active, report its state rather than recommend enabling it again."
+      - "Enabled means available to operate, while active indicates operation; neither status alone proves reduced mechanical cooling."
+  - name: interpretCoolingPath
+    conditions:
+      - "The chiller-to-cooling-valve connection identifies upstream equipment but does not prove cold water reaches the valve."
+      - "A cooling valve's percentage position alone proves neither response to a command nor water flow; response requires a technician to confirm a command and resulting movement or operation."
+      - "Cold-water delivery remains unconfirmed until a technician reports what they checked and observed at the relevant valve or cooling-coil path."
+      - "A technician verifies which pump, water-temperature reading, and cooling tower are relevant for this check; those findings are not permanent recorded connections."
+  - name: flagPlantSideCheck
+    conditions:
+      - "During a cooling complaint, an upstream chiller reporting off or alarm warrants a plant-side check."
+      - "A technician-identified relevant pump or cooling tower reporting off or alarm also warrants a plant-side check."
+      - "Report each actual status without inferring its cause; an on status does not prove water delivery or effective tower heat rejection."
+      - "Judging tower heat rejection requires on-site verification of its operation and applicable heat-rejection conditions."
+  - name: interpretVentilationReadings
+    conditions:
+      - "Compare an air handler's outside-air and return-air CO₂ readings for ventilation, not for economizer-cooling suitability."
+      - "Use a CO₂ differential reading in that comparison, or interpret its sign, only after a technician confirms the setup, air streams, and subtraction order."
+      - "A technician confirms the expected condition for each air stream before a reading is called elevated; an elevated reading prompts investigation, not a fault finding."
+  - name: flagAirHandlerParts
+    conditions:
+      - "A fan reporting alarm or a filter reporting dirty or replacement due warrants technician attention."
+      - "For a fan reporting off, a technician confirms whether it was expected to run under the air handler's current setup before treating off as a problem."
+      - "A part's presence, status, or percentage position alone does not establish why conditioning is not reaching a space."
+
+actions:
+  - name: recommendIncreasedCooling
+    input: AirHandler
+    preconditions:
+      - "The check is for a cooling complaint and the handler's air temperature sensor reads above its applicable cooling temperature setpoint."
+      - "A confirmed within-deadband result has not called for no change; state explicitly if the deadband check is unresolved."
+    effect: "Recommend increased cooling to someone with appropriate BAS access; the agent does not change the BAS."
+    verification: "Attribute any confirmation that the change was made to the person with BAS access, then separately compare successive air-handler sensor readings for a downward trend toward the cooling setpoint; without follow-up evidence, leave the effect unverified."
+  - name: recommendIncreasedHeating
+    input: AirHandler
+    preconditions:
+      - "The check is for a heating complaint and the handler's air temperature sensor reads below its applicable heating temperature setpoint."
+      - "A confirmed within-deadband result has not called for no change; state explicitly if the deadband check is unresolved."
+    effect: "Recommend increased heating to someone with appropriate BAS access; the agent does not change the BAS."
+    verification: "Attribute any confirmation that the change was made to the person with BAS access, then separately compare successive air-handler sensor readings for an upward trend toward the heating setpoint; without follow-up evidence, leave the effect unverified."
+  - name: recommendNoHeatingOrCoolingChange
+    input: AirHandler
+    preconditions:
+      - "A technician has confirmed the active setpoint, the deadband limits, and any boundary treatment needed to establish that the current reading is within the band."
+    effect: "Recommend leaving heating and cooling unchanged while the measured temperature remains within the confirmed band."
+    verification: "Use successive air-handler sensor readings to report whether temperature remained within the band for the observed period; do not claim that no BAS setting was changed without separately attributed confirmation."
+  - name: recommendEnablingEconomizer
+    input: Economizer
+    preconditions:
+      - "Its status is disabled."
+      - "A technician has confirmed that the unit's relevant sensed conditions, current readings, and operating criteria support economizer operation."
+    effect: "Recommend enablement to someone with appropriate BAS access; the agent does not change the BAS."
+    verification: "Attribute any confirmation of the change to that person, then check status: enabled confirms availability and active indicates operation, but neither proves reduced mechanical cooling."
+  - name: checkConditioningForOccupiedZone
+    input: Zone
+    preconditions:
+      - "An occupied indication supports the check, or conflicting occupancy indications call for it as a precaution."
+      - "Before using a terminal unit in this zone's check, a technician establishes that its served space belongs to the zone."
+    effect: "Report the serving thermostat or terminal unit, its actual status, and separately whether its operation and the space's conditioning are verified or unresolved."
+    verification: "Keep technician-confirmed equipment operation separate from successive temperature readings verified as representing the space; complete the investigation without claiming space conditioning is verified when that evidence is missing."
