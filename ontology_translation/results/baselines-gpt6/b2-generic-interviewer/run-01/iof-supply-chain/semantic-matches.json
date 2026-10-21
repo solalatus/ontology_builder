@@ -1,0 +1,45 @@
+{
+  "fullDomain": {
+    "classes": [
+      {
+        "goldId": "GeospatialLocation",
+        "recoveredId": "n4"
+      }
+    ],
+    "relationships": [
+      {
+        "goldId": "rel_8",
+        "recoveredId": "e23"
+      },
+      {
+        "goldId": "rel_15",
+        "recoveredId": "e5"
+      },
+      {
+        "goldId": "rel_19",
+        "recoveredId": "e11"
+      }
+    ],
+    "properties": [],
+    "valueFidelity": []
+  },
+  "scoped": {
+    "classes": [],
+    "relationships": [
+      {
+        "goldId": "rel_8",
+        "recoveredId": "e23"
+      },
+      {
+        "goldId": "rel_15",
+        "recoveredId": "e5"
+      },
+      {
+        "goldId": "rel_19",
+        "recoveredId": "e11"
+      }
+    ],
+    "properties": [],
+    "valueFidelity": []
+  }
+}

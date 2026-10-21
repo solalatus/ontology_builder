@@ -1,0 +1,222 @@
+competency_questions: []
+classes:
+  Purchase Order:
+    meaning: An order to a supplier for a material trade item.
+    aliases: []
+    properties: {}
+  Material Trade Item:
+    meaning: The material trade item concerned by a purchase order.
+    aliases: []
+    properties: {}
+  Shipment:
+    meaning: Goods moving to fulfill a purchase order between ship-from and ship-to locations.
+    aliases: []
+    properties:
+      expectedArrival:
+        type: date
+  Location:
+    meaning: "A place identified as a shipment's ship-from or ship-to location."
+    aliases: []
+    properties: {}
+  Container:
+    meaning: A container carrying shipment cargo.
+    aliases: []
+    properties: {}
+  Shipment Preparation Process:
+    meaning: The process required to prepare a shipment to move.
+    aliases: []
+    properties: {}
+  Transport Process:
+    meaning: The movement process with a starting location and intended destination.
+    aliases: []
+    properties: {}
+  Tracking Event:
+    meaning: "A recorded event with an event time, event type and tracked subject; an arrived event alone does not identify the node, and a unit event alone does not identify its shipment."
+    aliases: []
+    properties:
+      eventTime:
+        type: date
+      eventType:
+        type: text
+  Receiving Process:
+    meaning: The process required to receive a shipment at its destination.
+    aliases: []
+    properties: {}
+  Carrier:
+    meaning: An identified carrier for a shipment.
+    aliases: []
+    properties: {}
+  Freight-Forwarding Service:
+    meaning: An arranged freight-forwarding service for a shipment.
+    aliases: []
+    properties: {}
+  Lot:
+    meaning: Goods identified for batch-level tracing.
+    aliases: []
+    properties: {}
+  Sublot:
+    meaning: A subdivision of a lot.
+    aliases: []
+    properties: {}
+  Logistic Unit:
+    meaning: A handling unit traceable through storage and transport.
+    aliases: []
+    properties: {}
+  Load:
+    meaning: A traceable unit prepared for handling or movement.
+    aliases: []
+    properties: {}
+  Destination Node:
+    meaning: The node where a transport process is intended to end; naming it does not prove arrival.
+    aliases: []
+    properties: {}
+  Facility:
+    meaning: A facility at which a receiving process takes place.
+    aliases: []
+    properties: {}
+relationships:
+  - name: concerns
+    from: Purchase Order
+    to: Material Trade Item
+    meaning: null
+    aliases: []
+  - name: fulfills
+    from: Shipment
+    to: Purchase Order
+    meaning: null
+    aliases: []
+  - name: shipsFrom
+    from: Shipment
+    to: Location
+    meaning: null
+    aliases: []
+  - name: shipsTo
+    from: Shipment
+    to: Location
+    meaning: null
+    aliases: []
+  - name: carriedIn
+    from: Shipment
+    to: Container
+    meaning: null
+    aliases: []
+  - name: hasShipmentPreparationProcess
+    from: Shipment
+    to: Shipment Preparation Process
+    meaning: null
+    aliases: []
+  - name: hasTransportProcess
+    from: Shipment
+    to: Transport Process
+    meaning: null
+    aliases: []
+  - name: startsAt
+    from: Transport Process
+    to: Location
+    meaning: null
+    aliases: []
+  - name: hasTrackingEvent
+    from: Shipment
+    to: Tracking Event
+    meaning: null
+    aliases:
+      - tracks
+  - name: hasReceivingProcess
+    from: Shipment
+    to: Receiving Process
+    meaning: null
+    aliases: []
+  - name: hasCarrier
+    from: Shipment
+    to: Carrier
+    meaning: null
+    aliases: []
+  - name: hasFreightForwardingService
+    from: Shipment
+    to: Freight-Forwarding Service
+    meaning: null
+    aliases: []
+  - name: subdivides
+    from: Sublot
+    to: Lot
+    meaning: null
+    aliases: []
+  - name: associatedWithShipment
+    from: Lot
+    to: Shipment
+    meaning: "A reliable association independent of a tracking event, with no assumption that every shipment has a lot."
+    aliases: []
+  - name: associatedWithShipment
+    from: Logistic Unit
+    to: Shipment
+    meaning: "A reliable association independent of a tracking event, with no fixed one-to-one cardinality."
+    aliases: []
+  - name: associatedWithShipment
+    from: Load
+    to: Shipment
+    meaning: "A reliable association independent of a tracking event, with no fixed one-to-one cardinality."
+    aliases: []
+  - name: tracks
+    from: Tracking Event
+    to: Lot
+    meaning: null
+    aliases: []
+  - name: tracks
+    from: Tracking Event
+    to: Logistic Unit
+    meaning: null
+    aliases: []
+  - name: tracks
+    from: Tracking Event
+    to: Load
+    meaning: null
+    aliases: []
+  - name: endsAt
+    from: Transport Process
+    to: Destination Node
+    meaning: "Identifies the destination endpoint, not evidence the process has arrived."
+    aliases: []
+  - name: takesPlaceAt
+    from: Receiving Process
+    to: Facility
+    meaning: null
+    aliases: []
+rules:
+  readyToPrepare:
+    conditions:
+      - Both ship-from and ship-to locations are confirmed for the shipment.
+      - The shipment has a shipment preparation process.
+      - Either a carrier is identified or a freight-forwarding service is arranged for the shipment.
+  readyToMarkReceived:
+    conditions:
+      - The shipment has an identified ship-to location and an associated transport process with a destination node.
+      - "Corroborating movement or receiving evidence identifies the actual destination and establishes that the shipment's transport process reached its destination node; an arrived event with time and tracked subject, the intended endpoint, or expected arrival alone cannot establish this."
+      - "The shipment has a receiving process at the destination facility with separate evidence that goods were received there; verify the ship-to location, destination node and receiving facility make sense together without collapsing them into one place."
+      - "If the shipment association of a unit-only event or arrival at the destination node cannot be verified, leave it unconfirmed and do not record receipt on that basis."
+  verifiedShipmentMovement:
+    conditions:
+      - "Use a tracking event directly associated with the shipment, or a lot, logistic unit or load event only after checking an independent, reliable association between that unit and the shipment; do not infer the association from the event itself or presume a fixed unit hierarchy."
+      - "Event time and type establish what was recorded, not which node an arrived event refers to; report an actual destination only if separately corroborated by movement or receiving evidence."
+  groundedShipmentStatus:
+    conditions:
+      - Compare expected arrival with verified tracking and movement evidence for the shipment; distinguish what is recorded from what is unconfirmed.
+      - "Do not report a unit-only event as shipment movement without a checked, independent unit-to-shipment association, or an arrived event as arrival at a particular node without corroboration."
+actions:
+  prepareShipment:
+    input: Shipment
+    preconditions:
+      - readyToPrepare
+    effect: ""
+    verification: ""
+  markReceived:
+    input: Shipment
+    preconditions:
+      - readyToMarkReceived
+    effect: ""
+    verification: ""
+  reportShipmentStatus:
+    input: Shipment
+    preconditions:
+      - groundedShipmentStatus
+    effect: ""
+    verification: ""

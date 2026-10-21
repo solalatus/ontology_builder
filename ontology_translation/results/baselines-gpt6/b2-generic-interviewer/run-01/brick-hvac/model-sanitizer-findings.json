@@ -1,0 +1,169 @@
+[
+  {
+    "severity": "advisory",
+    "kind": "class",
+    "identity": "Fan",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty"
+  },
+  {
+    "severity": "advisory",
+    "kind": "class",
+    "identity": "Filter",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty"
+  },
+  {
+    "severity": "advisory",
+    "kind": "class",
+    "identity": "Damper",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty"
+  },
+  {
+    "severity": "advisory",
+    "kind": "class",
+    "identity": "Cooling Valve",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty"
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "hasEconomizer (Air Handler → Economizer)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "hasEconomizer",
+      "from": "Air Handler",
+      "to": "Economizer",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "hasFan (Air Handler → Fan)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "hasFan",
+      "from": "Air Handler",
+      "to": "Fan",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "hasFilter (Air Handler → Filter)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "hasFilter",
+      "from": "Air Handler",
+      "to": "Filter",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "hasDamper (Air Handler → Damper)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "hasDamper",
+      "from": "Air Handler",
+      "to": "Damper",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "hasHeatingPath (Air Handler → AHU Heating Path)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "hasHeatingPath",
+      "from": "Air Handler",
+      "to": "AHU Heating Path",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "isPlantEquipment (Chiller → Plant Equipment)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "isPlantEquipment",
+      "from": "Chiller",
+      "to": "Plant Equipment",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "isPlantEquipment (Pumps → Plant Equipment)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "isPlantEquipment",
+      "from": "Pumps",
+      "to": "Plant Equipment",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "isPlantEquipment (Cooling Tower → Plant Equipment)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "isPlantEquipment",
+      "from": "Cooling Tower",
+      "to": "Plant Equipment",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "isPlantEquipment (Boiler → Plant Equipment)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "isPlantEquipment",
+      "from": "Boiler",
+      "to": "Plant Equipment",
+      "meaning": null,
+      "aliases": []
+    }
+  }
+]

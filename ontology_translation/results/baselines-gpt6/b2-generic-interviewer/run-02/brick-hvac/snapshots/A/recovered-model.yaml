@@ -1,0 +1,314 @@
+competency_questions: []
+classes:
+  ComfortComplaint:
+    meaning: A reported comfort problem that prompts an investigation.
+    aliases: []
+    properties: {}
+  Zone:
+    meaning: An occupied area whose measured temperature is compared with its cooling setpoint.
+    aliases: []
+    properties:
+      temperature:
+        type: number
+      coolingSetpoint:
+        type: number
+      occupied:
+        type: boolean
+      heatingSetpoint:
+        type: number
+  TerminalUnit:
+    meaning: Air-side equipment serving a zone and checked for operation and airflow.
+    aliases: []
+    properties:
+      airflow:
+        type: number
+      operatingStatus:
+        type: text
+  AHU:
+    meaning: An air handler serving terminal units and checked for cooling delivery.
+    aliases:
+      - air handler
+    properties:
+      supplyAirTemperature:
+        type: number
+      fanStatus:
+        type: text
+      damperStatus:
+        type: text
+      coolingValveResponse:
+        type: text
+      filterCondition:
+        type: text
+      coolingCall:
+        type: boolean
+      fanAlarm:
+        type: boolean
+      airTemperatureSetpoint:
+        type: number
+      heatingCall:
+        type: boolean
+  Technician:
+    meaning: A crew member who inspects equipment in person and performs corrective work.
+    aliases: []
+    properties: {}
+  Chiller:
+    meaning: Plant equipment checked when chilled-water cooling is suspect.
+    aliases: []
+    properties: {}
+  Pump:
+    meaning: Plant equipment checked when chilled-water circulation is suspect.
+    aliases: []
+    properties:
+      status:
+        type: text
+  ChilledWaterLoop:
+    meaning: The chilled-water path supplying the AHU cooling valve and circulated by a pump.
+    aliases: []
+    properties:
+      waterTemperature:
+        type: number
+  CoolingValve:
+    meaning: The AHU valve that regulates chilled-water flow through the cooling coil.
+    aliases: []
+    properties:
+      position:
+        type: number
+  CoolingCoil:
+    meaning: The AHU component through which chilled water flows to cool its air.
+    aliases: []
+    properties: {}
+  CoolingPath:
+    meaning: "The AHU cooling path the crew checks across its valve and coil and the supplying chilled-water pump and chiller, without presuming which component failed."
+    aliases: []
+    properties: {}
+  Thermostat:
+    meaning: A zone device checked to see whether control is still being provided.
+    aliases: []
+    properties:
+      operatingStatus:
+        type: text
+  Alarm:
+    meaning: "An alarm indication on AHU, terminal-unit, or plant equipment that needs investigation in the context of what the equipment serves and measured conditions."
+    aliases: []
+    properties:
+      alarmType:
+        type: text
+  Boiler:
+    meaning: Plant equipment whose alarms are evaluated by checking the nearby heating-side condition and tracing the effect downstream.
+    aliases: []
+    properties:
+      status:
+        type: text
+  HotWaterLoop:
+    meaning: The hot-water path supplied by the boiler and circulated by a pump to the AHU heating valve.
+    aliases: []
+    properties:
+      waterTemperature:
+        type: number
+  HeatingValve:
+    meaning: The AHU valve regulating hot water through the heating coil.
+    aliases: []
+    properties:
+      position:
+        type: number
+  HeatingCoil:
+    meaning: The AHU coil through which hot water passes to warm the air.
+    aliases: []
+    properties: {}
+relationships:
+  - name: concernsZone
+    from: ComfortComplaint
+    to: Zone
+    meaning: null
+    aliases: []
+  - name: servesZone
+    from: TerminalUnit
+    to: Zone
+    meaning: null
+    aliases: []
+  - name: servesTerminalUnit
+    from: AHU
+    to: TerminalUnit
+    meaning: null
+    aliases: []
+  - name: suppliesChilledWaterLoop
+    from: Chiller
+    to: ChilledWaterLoop
+    meaning: null
+    aliases: []
+  - name: circulatesChilledWaterLoop
+    from: Pump
+    to: ChilledWaterLoop
+    meaning: null
+    aliases: []
+  - name: suppliesCoolingValve
+    from: ChilledWaterLoop
+    to: CoolingValve
+    meaning: null
+    aliases: []
+  - name: hasCoolingValve
+    from: AHU
+    to: CoolingValve
+    meaning: null
+    aliases: []
+  - name: hasCoolingCoil
+    from: AHU
+    to: CoolingCoil
+    meaning: null
+    aliases: []
+  - name: regulatesFlowThrough
+    from: CoolingValve
+    to: CoolingCoil
+    meaning: null
+    aliases: []
+  - name: hasCoolingPath
+    from: AHU
+    to: CoolingPath
+    meaning: null
+    aliases: []
+  - name: includesChilledWaterLoop
+    from: CoolingPath
+    to: ChilledWaterLoop
+    meaning: null
+    aliases: []
+  - name: includesPump
+    from: CoolingPath
+    to: Pump
+    meaning: null
+    aliases: []
+  - name: includesChiller
+    from: CoolingPath
+    to: Chiller
+    meaning: null
+    aliases: []
+  - name: hasThermostat
+    from: Zone
+    to: Thermostat
+    meaning: null
+    aliases: []
+  - name: hasAlarm
+    from: AHU
+    to: Alarm
+    meaning: null
+    aliases: []
+  - name: hasAlarm
+    from: TerminalUnit
+    to: Alarm
+    meaning: null
+    aliases: []
+  - name: hasAlarm
+    from: Chiller
+    to: Alarm
+    meaning: null
+    aliases: []
+  - name: hasAlarm
+    from: Pump
+    to: Alarm
+    meaning: null
+    aliases: []
+  - name: hasAlarm
+    from: Boiler
+    to: Alarm
+    meaning: null
+    aliases: []
+  - name: suppliesHotWaterLoop
+    from: Boiler
+    to: HotWaterLoop
+    meaning: null
+    aliases: []
+  - name: circulatesHotWaterLoop
+    from: Pump
+    to: HotWaterLoop
+    meaning: null
+    aliases: []
+  - name: suppliesHeatingValve
+    from: HotWaterLoop
+    to: HeatingValve
+    meaning: null
+    aliases: []
+  - name: hasHeatingValve
+    from: AHU
+    to: HeatingValve
+    meaning: null
+    aliases: []
+  - name: hasHeatingCoil
+    from: AHU
+    to: HeatingCoil
+    meaning: null
+    aliases: []
+  - name: regulatesFlowThrough
+    from: HeatingValve
+    to: HeatingCoil
+    meaning: null
+    aliases: []
+rules:
+  warmZoneCondition:
+    conditions:
+      - A zone has a warm complaint and its temperature is above its cooling setpoint.
+  verifyCoolingRecovery:
+    conditions:
+      - "After inspection or increased cooling, verify equipment is operating normally, AHU air temperature moves toward its applicable setpoint, and the served zone returns to its intended temperature and stays there; an alarm clearing alone is insufficient."
+  technicianVisitIndicated:
+    conditions:
+      - "An AHU fan alarm, dirty or replacement-due filter, or damper or cooling valve apparently failing to respond to a call warrants physical inspection."
+      - "Alternatively, BAS indications appear normal or call for cooling but the air-temperature response disagrees; a single suspect reading does not establish a failed component."
+  checkChilledWaterSide:
+    conditions:
+      - "The AHU calls for cooling but its air is not getting cooler; check chiller, pump, water temperature, and cooling valve indications, and have a technician inspect when indications disagree with air-temperature response."
+  fanAlarmWithWarmZone:
+    conditions:
+      - An AHU has a fan alarm and a zone served by its terminal unit is occupied and warming above its cooling setpoint; this is an active comfort problem.
+      - "Check the terminal unit and thermostat for control, and compare fan status with filter, damper, and cooling-valve indications to direct inspection, without declaring a failed part remotely."
+  fanAlarmWithNormalTemperatures:
+    conditions:
+      - An AHU fan alarm occurs but temperatures in its served zones remain normal; investigate the alarm and check those spaces without assuming lost conditioning or fan failure; normal temperatures do not clear the alarm.
+  formalPriorityAndDispatch:
+    conditions:
+      - "Formal alarm priority, dispatch, and closure follow the approved operating procedure, separate from the equipment assessment; an alarm indication alone does not establish priority or a failed part."
+  coolingPathInspectionIndicated:
+    conditions:
+      - "An AHU calls for cooling but its air temperature fails to respond; inspect its cooling valve and coil and the supplying pump and chiller, using chilled-water temperature to check whether the plant makes cold water."
+      - "Pump status and cooling-valve position indicate what is reported or called for, not proof of flow through the coil."
+  assessEquipmentIndication:
+    conditions:
+      - "Identify the affected equipment, what it serves, and whether measured conditions show an impact; use indications to direct inspection, not to declare a failed component remotely."
+      - A dirty or replacement-due filter and a fault or offline thermostat also deserve attention but are not necessarily equipment alarms.
+  assessPlantAlarmImpact:
+    conditions:
+      - "For a chiller or chilled-water pump alarm, check chilled-water temperature and pump status nearest the alarm, then affected AHUs' air temperatures, then temperatures in the spaces those AHUs serve."
+      - "For a boiler or hot-water pump alarm, check boiler and pump status and hot-water temperature, then the AHU heating response and served-zone condition."
+      - A plant alarm needs investigation even if zones remain comfortable; pump status does not prove water flow through a coil.
+  assessBoilerAlarmImpact:
+    conditions:
+      - "For a boiler alarm, check boiler and pump status and hot-water temperature; then heating-valve position against the call for heat and AHU air-temperature response; then terminal-unit and thermostat status and occupied-zone temperature against its heating setpoint."
+      - Investigate a boiler alarm even while zones remain comfortable; pump status and valve position do not prove hot water flows through the heating coil.
+  verifyHeatingPathRecovery:
+    conditions:
+      - "Check that the boiler alarm condition has cleared, boiler and pump status and hot-water temperature are consistent with expected operation, and served-zone temperatures are checked."
+      - "Where there is a call for heat, check that the AHU air temperature responds; do not require hot-water or AHU air temperatures to rise when there is no heating call."
+      - "Zones remaining at setpoint show no measured occupant impact, not by themselves that the plant problem is fixed."
+actions:
+  inspectTerminalUnit:
+    input: TerminalUnit
+    preconditions:
+      - warmZoneCondition
+    effect: ""
+    verification: ""
+  inspectAHU:
+    input: AHU
+    preconditions:
+      - technicianVisitIndicated
+    effect: ""
+    verification: ""
+  investigateFanAlarm:
+    input: AHU
+    preconditions:
+      - formalPriorityAndDispatch
+    effect: ""
+    verification: ""
+  inspectCoolingPath:
+    input: AHU
+    preconditions:
+      - coolingPathInspectionIndicated
+    effect: ""
+    verification: ""

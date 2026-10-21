@@ -1,0 +1,133 @@
+{
+  "classes": [
+    {
+      "goldId": "Loan",
+      "recoveredId": "n1",
+      "weight": 1
+    },
+    {
+      "goldId": "CreditFacility",
+      "recoveredId": "n8",
+      "weight": 1
+    },
+    {
+      "goldId": "Borrower",
+      "recoveredId": "n2",
+      "weight": 1
+    },
+    {
+      "goldId": "Lender",
+      "recoveredId": "n3",
+      "weight": 1
+    },
+    {
+      "goldId": "Servicer",
+      "recoveredId": "n4",
+      "weight": 1
+    },
+    {
+      "goldId": "Collateral",
+      "recoveredId": "n7",
+      "weight": 1
+    },
+    {
+      "goldId": "PaymentHistory",
+      "recoveredId": "n12",
+      "weight": 1
+    },
+    {
+      "goldId": "SubFacility",
+      "recoveredId": "n9",
+      "weight": 1
+    },
+    {
+      "goldId": "InterestRateReset",
+      "recoveredId": "n13",
+      "weight": 0.6666666666666666
+    }
+  ],
+  "relationships": [
+    {
+      "goldId": "rel_0",
+      "edgeId": "e1",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_1",
+      "edgeId": "e2",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_4",
+      "edgeId": "e7",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_5",
+      "edgeId": "e8",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_13",
+      "edgeId": "e13",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_15",
+      "edgeId": "e3",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_25",
+      "edgeId": "e10",
+      "direction": "forward"
+    }
+  ],
+  "properties": [
+    {
+      "goldId": "Loan.maturityDate",
+      "hostNodeId": "n1",
+      "matchedPropertyName": "maturityDate"
+    },
+    {
+      "goldId": "Loan.principalAmount",
+      "hostNodeId": "n1",
+      "matchedPropertyName": "principalAmount"
+    },
+    {
+      "goldId": "CreditFacility.availableAmount",
+      "hostNodeId": "n8",
+      "matchedPropertyName": "availableAmount"
+    },
+    {
+      "goldId": "CreditFacility.creditLimit",
+      "hostNodeId": "n8",
+      "matchedPropertyName": "creditLimit"
+    },
+    {
+      "goldId": "CreditFacility.amountOfCreditExtended",
+      "hostNodeId": "n8",
+      "matchedPropertyName": "creditExtendedAmount"
+    },
+    {
+      "goldId": "CreditFacility.maximumAdvanceAmount",
+      "hostNodeId": "n8",
+      "matchedPropertyName": "maximumAdvanceAmount"
+    },
+    {
+      "goldId": "Loan.initialExchangeDate",
+      "hostNodeId": "n1",
+      "matchedPropertyName": "initialFundingDate"
+    },
+    {
+      "goldId": "Loan.interestRateCap",
+      "hostNodeId": "n1",
+      "matchedPropertyName": "interestRate"
+    },
+    {
+      "goldId": "Loan.negativeAmortization",
+      "hostNodeId": "n1",
+      "matchedPropertyName": "amortizing"
+    }
+  ]
+}

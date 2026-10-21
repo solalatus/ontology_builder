@@ -1,0 +1,54 @@
+{
+  "fullDomain": {
+    "judgments": {
+      "classes": [
+        {
+          "goldId": "DispositionToExhibitUndesirableBehavior",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "SupportingMaintenanceActivity",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "relationships": [
+        {
+          "goldId": "rel_3",
+          "recoveredId": "e13",
+          "verdict": "MATCH"
+        }
+      ],
+      "properties": [],
+      "valueFidelity": [
+        {
+          "id": "MaintenanceState.stateCategory",
+          "semanticFidelity": 1
+        }
+      ]
+    },
+    "rawResponses": {
+      "classes": "1: NO MATCH -- A behavioral disposition is not a physical asset.\n2: NO MATCH -- A maintenance activity is not the asset being maintained.",
+      "relationships": "1: MATCH 5 -- Both mean that a Maintenance Process contains a Maintenance Activity.",
+      "valueFidelity": "1: 100 -- Identical states and distinctions."
+    }
+  },
+  "scoped": {
+    "judgments": {
+      "classes": [],
+      "relationships": [
+        {
+          "goldId": "rel_3",
+          "recoveredId": "e13",
+          "verdict": "MATCH"
+        }
+      ],
+      "properties": [],
+      "valueFidelity": []
+    },
+    "rawResponses": {
+      "relationships": "1: MATCH 4 -- “Includes” expresses that the maintenance process has a maintenance activity."
+    }
+  }
+}

@@ -1,0 +1,731 @@
+competency_questions: []
+classes:
+  Alert:
+    meaning: A monitoring signal that requires triage and does not by itself establish an incident.
+    aliases: []
+    properties: {}
+  Event:
+    meaning: An observed occurrence indicated by an alert or correlated during incident response.
+    aliases: []
+    properties: {}
+  MonitoringRule:
+    meaning: A rule that generates an alert.
+    aliases: []
+    properties: {}
+  Incident:
+    meaning: "An unplanned interruption, degradation, or security condition needing managed response."
+    aliases: []
+    properties:
+      status:
+        type: text
+      severity:
+        type: text
+      impact:
+        type: text
+      urgency:
+        type: text
+      majorIncidentDeclared:
+        type: boolean
+  ITService:
+    meaning: An IT service whose health and impact are assessed during operations and response.
+    aliases: []
+    properties:
+      serviceHealth:
+        type: text
+  BusinessService:
+    meaning: A business service supported by an IT service.
+    aliases: []
+    properties: {}
+  CustomerChannel:
+    meaning: A customer-facing channel that may be affected by an incident.
+    aliases: []
+    properties: {}
+  ConfigurationItem:
+    meaning: A technical component or configuration item involved in service delivery or response.
+    aliases:
+      - technical component
+    properties: {}
+  ResolverGroup:
+    meaning: A group assigned to resolve incidents for the services or components it supports.
+    aliases: []
+    properties: {}
+  OnCallEngineer:
+    meaning: An engineer assigned to respond when needed.
+    aliases: []
+    properties: {}
+  IncidentCommander:
+    meaning: The person assigned to lead command and decision cadence during a major incident.
+    aliases: []
+    properties: {}
+  IncidentResponseTeam:
+    meaning: The team coordinating incident response.
+    aliases: []
+    properties: {}
+  ServiceOwner:
+    meaning: The owner accountable for an IT service.
+    aliases: []
+    properties: {}
+  ThirdPartyService:
+    meaning: An external service on which an IT service or technical component depends.
+    aliases: []
+    properties: {}
+  Problem:
+    meaning: An underlying cause tracked after diagnosis or review.
+    aliases: []
+    properties: {}
+  Workaround:
+    meaning: A temporary bypass rather than the maintained response procedure.
+    aliases: []
+    properties: {}
+  Runbook:
+    meaning: A maintained procedure followed during response.
+    aliases: []
+    properties: {}
+  ContainmentAction:
+    meaning: "An action considered or taken to limit an incident's effects."
+    aliases: []
+    properties:
+      scope:
+        type: text
+      sideEffects:
+        type: text
+  RecoveryPlan:
+    meaning: A plan whose applicability to the affected service is checked before failover.
+    aliases: []
+    properties: {}
+  RecoveryEnvironment:
+    meaning: A target environment checked for availability and acceptability before recovery.
+    aliases: []
+    properties:
+      available:
+        type: boolean
+  DataRecoveryPoint:
+    meaning: A data-recovery point assessed for acceptability before failover.
+    aliases: []
+    properties: {}
+  Backup:
+    meaning: A backup checked for success or verification and protection of the restore target.
+    aliases: []
+    properties:
+      successfulOrVerified:
+        type: boolean
+  RestorePoint:
+    meaning: A restore point requiring approval before restoring a backup.
+    aliases: []
+    properties: {}
+  RecoveryAcceptance:
+    meaning: A recorded acceptance under the governing recovery and approval procedures.
+    aliases: []
+    properties:
+      decision:
+        type: text
+      accepted:
+        type: boolean
+  AuthorizedApprover:
+    meaning: A person authorized by the applicable procedure to make the specific acceptance decision.
+    aliases: []
+    properties: {}
+  BusinessOwner:
+    meaning: The owner of a business service involved when business impact is at stake.
+    aliases: []
+    properties: {}
+  ResidualCondition:
+    meaning: A remaining service condition that must be accepted before incident closure.
+    aliases: []
+    properties: {}
+  EmergencyChange:
+    meaning: "An urgent change linked to an active incident, with affected components, implementation and backout plans, and separate risk acceptance."
+    aliases: []
+    properties:
+      implementationPlan:
+        type: text
+      backoutPlan:
+        type: text
+  RiskAcceptance:
+    meaning: Explicit acceptance of the risk of an emergency change under its governing procedure.
+    aliases: []
+    properties: {}
+  Communication:
+    meaning: "An incident stakeholder update with an audience, message, owner, and approval state."
+    aliases: []
+    properties:
+      audience:
+        type: text
+      message:
+        type: text
+      approvalState:
+        type: text
+  Stakeholder:
+    meaning: A recipient of incident communications.
+    aliases: []
+    properties: {}
+  CommunicationOwner:
+    meaning: The owner responsible for a communication.
+    aliases: []
+    properties: {}
+  VerifiedIncidentState:
+    meaning: The latest verified incident facts used for communications and response decisions.
+    aliases: []
+    properties: {}
+  EvidenceItem:
+    meaning: "Preserved evidence supporting what happened, what was done, or what is being reported."
+    aliases: []
+    properties: {}
+  MaterialityAssessment:
+    meaning: "A documented assessment of reportability, distinct from major-incident declaration."
+    aliases: []
+    properties:
+      result:
+        type: text
+        allowed:
+          - not reportable
+          - potentially reportable
+          - reportable
+          - undetermined
+      rationale:
+        type: text
+  RegulatoryNotification:
+    meaning: A notification prepared for a regulator after a reportable assessment and submitted under the approval workflow.
+    aliases: []
+    properties:
+      status:
+        type: text
+        allowed:
+          - draft
+          - pending approval
+          - approved
+          - submitted
+          - accepted
+          - rejected
+          - withdrawn
+      requiredInformationComplete:
+        type: boolean
+      supportingEvidenceComplete:
+        type: boolean
+      submissionDueTime:
+        type: date
+  Regulator:
+    meaning: The regulator receiving a formal notification.
+    aliases: []
+    properties: {}
+  SubmissionReceipt:
+    meaning: The retained receipt evidencing submission of a regulatory notification.
+    aliases: []
+    properties: {}
+  NotificationRemediation:
+    meaning: "The remediation recorded after a notification rejection, coordinated by the reporting function according to the regulator's response and the bank's reporting procedure."
+    aliases: []
+    properties:
+      remediationNeeded:
+        type: text
+  ReportingFunction:
+    meaning: "Legal, Compliance, or the designated regulatory-reporting function owning formal reporting judgment and approval under governing procedure."
+    aliases: []
+    properties: {}
+  PostIncidentReview:
+    meaning: A review scheduled or completed for a major incident to identify problems and improvements.
+    aliases: []
+    properties:
+      status:
+        type: text
+        allowed:
+          - scheduled
+          - completed
+  CorrectiveAction:
+    meaning: A tracked action arising from review to prevent recurrence or improve response.
+    aliases: []
+    properties: {}
+  RestorationVerification:
+    meaning: "Checks confirming restoration of an affected service by the recovery method used, supported by retained evidence."
+    aliases: []
+    properties:
+      recoveryMethod:
+        type: text
+        allowed:
+          - failover
+          - backup restore
+          - emergency change
+          - other
+      criticalBusinessTransactionsVerified:
+        type: boolean
+      dataIntegrityVerified:
+        type: boolean
+      applicationFunctionalityVerified:
+        type: boolean
+      technicalChecksPassed:
+        type: boolean
+relationships:
+  - name: generatedBy
+    from: Alert
+    to: MonitoringRule
+    meaning: null
+    aliases: []
+  - name: indicates
+    from: Alert
+    to: Event
+    meaning: null
+    aliases: []
+  - name: concerns
+    from: Alert
+    to: ITService
+    meaning: null
+    aliases: []
+  - name: concerns
+    from: Alert
+    to: ConfigurationItem
+    meaning: null
+    aliases: []
+  - name: correlatedWith
+    from: Incident
+    to: Event
+    meaning: null
+    aliases: []
+  - name: correlatedWith
+    from: Incident
+    to: Alert
+    meaning: null
+    aliases: []
+  - name: affects
+    from: Incident
+    to: ITService
+    meaning: null
+    aliases: []
+  - name: affects
+    from: Incident
+    to: BusinessService
+    meaning: null
+    aliases: []
+  - name: affects
+    from: Incident
+    to: CustomerChannel
+    meaning: null
+    aliases: []
+  - name: affects
+    from: Incident
+    to: ConfigurationItem
+    meaning: null
+    aliases: []
+  - name: supports
+    from: ITService
+    to: BusinessService
+    meaning: null
+    aliases: []
+  - name: supportedBy
+    from: ITService
+    to: ResolverGroup
+    meaning: null
+    aliases: []
+  - name: supportedBy
+    from: ConfigurationItem
+    to: ResolverGroup
+    meaning: null
+    aliases: []
+  - name: ownedBy
+    from: ITService
+    to: ServiceOwner
+    meaning: null
+    aliases: []
+  - name: assignedTo
+    from: Incident
+    to: ResolverGroup
+    meaning: null
+    aliases: []
+  - name: assignedTo
+    from: Incident
+    to: OnCallEngineer
+    meaning: null
+    aliases: []
+  - name: commandedBy
+    from: Incident
+    to: IncidentCommander
+    meaning: null
+    aliases: []
+  - name: coordinatedBy
+    from: Incident
+    to: IncidentResponseTeam
+    meaning: null
+    aliases: []
+  - name: dependsOn
+    from: ITService
+    to: ConfigurationItem
+    meaning: null
+    aliases: []
+  - name: dependsOn
+    from: ITService
+    to: ThirdPartyService
+    meaning: null
+    aliases: []
+  - name: dependsOn
+    from: ConfigurationItem
+    to: ThirdPartyService
+    meaning: null
+    aliases: []
+  - name: supports
+    from: BusinessService
+    to: CustomerChannel
+    meaning: null
+    aliases: []
+  - name: ownedBy
+    from: BusinessService
+    to: BusinessOwner
+    meaning: null
+    aliases: []
+  - name: diagnoses
+    from: Problem
+    to: Incident
+    meaning: null
+    aliases: []
+  - name: usesWorkaround
+    from: Incident
+    to: Workaround
+    meaning: null
+    aliases: []
+  - name: followsRunbook
+    from: Incident
+    to: Runbook
+    meaning: null
+    aliases: []
+  - name: appliesContainment
+    from: Incident
+    to: ContainmentAction
+    meaning: null
+    aliases: []
+  - name: appliesRecoveryPlan
+    from: Incident
+    to: RecoveryPlan
+    meaning: null
+    aliases: []
+  - name: appliesTo
+    from: RecoveryPlan
+    to: ITService
+    meaning: null
+    aliases: []
+  - name: usesRecoveryEnvironment
+    from: RecoveryPlan
+    to: RecoveryEnvironment
+    meaning: null
+    aliases: []
+  - name: usesDataRecoveryPoint
+    from: RecoveryPlan
+    to: DataRecoveryPoint
+    meaning: null
+    aliases: []
+  - name: protects
+    from: Backup
+    to: ConfigurationItem
+    meaning: null
+    aliases: []
+  - name: protects
+    from: Backup
+    to: ITService
+    meaning: null
+    aliases: []
+  - name: usesRestorePoint
+    from: Backup
+    to: RestorePoint
+    meaning: null
+    aliases: []
+  - name: targets
+    from: Backup
+    to: RecoveryEnvironment
+    meaning: null
+    aliases: []
+  - name: accepts
+    from: RecoveryAcceptance
+    to: DataRecoveryPoint
+    meaning: null
+    aliases: []
+  - name: accepts
+    from: RecoveryAcceptance
+    to: RestorePoint
+    meaning: null
+    aliases: []
+  - name: accepts
+    from: RecoveryAcceptance
+    to: RecoveryEnvironment
+    meaning: null
+    aliases: []
+  - name: accepts
+    from: RecoveryAcceptance
+    to: ResidualCondition
+    meaning: null
+    aliases: []
+  - name: decidedBy
+    from: RecoveryAcceptance
+    to: AuthorizedApprover
+    meaning: null
+    aliases: []
+  - name: hasResidualCondition
+    from: Incident
+    to: ResidualCondition
+    meaning: null
+    aliases: []
+  - name: linkedToIncident
+    from: EmergencyChange
+    to: Incident
+    meaning: null
+    aliases:
+      - requiresEmergencyChange
+  - name: changes
+    from: EmergencyChange
+    to: ConfigurationItem
+    meaning: null
+    aliases: []
+  - name: hasRiskAcceptance
+    from: EmergencyChange
+    to: RiskAcceptance
+    meaning: null
+    aliases: []
+  - name: decidedBy
+    from: RiskAcceptance
+    to: AuthorizedApprover
+    meaning: null
+    aliases: []
+  - name: hasCommunication
+    from: Incident
+    to: Communication
+    meaning: null
+    aliases:
+      - documents
+  - name: addressedTo
+    from: Communication
+    to: Stakeholder
+    meaning: null
+    aliases: []
+  - name: ownedBy
+    from: Communication
+    to: CommunicationOwner
+    meaning: null
+    aliases: []
+  - name: basedOn
+    from: Communication
+    to: VerifiedIncidentState
+    meaning: null
+    aliases: []
+  - name: verifies
+    from: VerifiedIncidentState
+    to: Incident
+    meaning: null
+    aliases: []
+  - name: supportedByEvidence
+    from: Incident
+    to: EvidenceItem
+    meaning: null
+    aliases: []
+  - name: supportedByEvidence
+    from: VerifiedIncidentState
+    to: EvidenceItem
+    meaning: null
+    aliases: []
+  - name: assessedBy
+    from: Incident
+    to: MaterialityAssessment
+    meaning: null
+    aliases: []
+  - name: ownedBy
+    from: MaterialityAssessment
+    to: ReportingFunction
+    meaning: null
+    aliases: []
+  - name: resultsIn
+    from: MaterialityAssessment
+    to: RegulatoryNotification
+    meaning: null
+    aliases: []
+  - name: notifiesAbout
+    from: RegulatoryNotification
+    to: Incident
+    meaning: null
+    aliases: []
+  - name: addressedTo
+    from: RegulatoryNotification
+    to: Regulator
+    meaning: null
+    aliases: []
+  - name: approvedBy
+    from: RegulatoryNotification
+    to: ReportingFunction
+    meaning: null
+    aliases: []
+  - name: supportedByEvidence
+    from: RegulatoryNotification
+    to: EvidenceItem
+    meaning: null
+    aliases: []
+  - name: basedOn
+    from: RegulatoryNotification
+    to: VerifiedIncidentState
+    meaning: null
+    aliases: []
+  - name: hasSubmissionReceipt
+    from: RegulatoryNotification
+    to: SubmissionReceipt
+    meaning: null
+    aliases: []
+  - name: needsRemediation
+    from: RegulatoryNotification
+    to: NotificationRemediation
+    meaning: null
+    aliases: []
+  - name: reviewedIn
+    from: Incident
+    to: PostIncidentReview
+    meaning: null
+    aliases: []
+  - name: identifies
+    from: PostIncidentReview
+    to: Problem
+    meaning: null
+    aliases: []
+  - name: tracks
+    from: PostIncidentReview
+    to: CorrectiveAction
+    meaning: null
+    aliases: []
+  - name: hasRestorationVerification
+    from: Incident
+    to: RestorationVerification
+    meaning: null
+    aliases: []
+  - name: verifiesService
+    from: RestorationVerification
+    to: ITService
+    meaning: null
+    aliases: []
+  - name: supportedByEvidence
+    from: RestorationVerification
+    to: EvidenceItem
+    meaning: null
+    aliases: []
+  - name: appliesTo
+    from: ResidualCondition
+    to: ITService
+    meaning: null
+    aliases: []
+  - name: coordinatedBy
+    from: NotificationRemediation
+    to: ReportingFunction
+    meaning: null
+    aliases: []
+  - name: verifiesRestoreFrom
+    from: RestorationVerification
+    to: Backup
+    meaning: Connects restoration checks to the backup used for a restore.
+    aliases: []
+  - name: verifiesChange
+    from: RestorationVerification
+    to: EmergencyChange
+    meaning: Connects technical and service-health checks to the emergency change being verified.
+    aliases: []
+rules:
+  majorIncidentDeclarationEligible:
+    conditions:
+      - Incident remains active.
+      - Incident severity is critical or high.
+      - At least one impacted IT service is identified.
+      - An incident commander is assigned.
+      - "The bank's approved criteria support the judgment of high business or regulatory impact."
+  incidentRecordingRequired:
+    conditions:
+      - "Triage finds an unplanned interruption, degradation, or security condition needing managed response; an alert alone does not suffice."
+  failoverReady:
+    conditions:
+      - A recovery plan applies to the affected service.
+      - The target recovery environment is available.
+      - The data-recovery point is acceptable under the governing recovery and approval procedures.
+  backupRestoreReady:
+    conditions:
+      - The backup is successful or verified and protects the restore target.
+      - The restore point and target environment are approved under the governing recovery and approval procedures.
+  emergencyChangeReady:
+    conditions:
+      - An active incident is linked to the emergency change.
+      - Affected components are identified.
+      - Implementation and backout plans are present.
+      - The emergency-change risk has been explicitly accepted under the governing change procedure.
+  stakeholderUpdateReady:
+    conditions:
+      - The message is based on the latest verified incident state.
+      - "The audience, message, owner and approval state are recorded, and applicable approval is obtained before sending."
+  notificationPreparationReady:
+    conditions:
+      - The linked materiality assessment has a documented result of reportable and a rationale.
+      - The notification is linked to the incident and receiving regulator.
+      - Required information and supporting evidence are prepared.
+  notificationSubmissionReady:
+    conditions:
+      - The linked materiality assessment concluded reportable.
+      - The notification is approved under the applicable reporting workflow.
+      - Required information and supporting evidence are complete.
+      - Submission occurs before the recorded due time.
+  incidentClosureReady:
+    conditions:
+      - The incident is resolved or in monitoring.
+      - Each impacted IT service is healthy or has an accepted residual condition documented for that service.
+      - Restoration of affected services is verified and resolution and restoration evidence is retained.
+      - "After failover, critical business transactions are verified."
+      - "After a backup restore, data integrity and application functionality are verified."
+      - "After an emergency change, technical checks and service health are verified."
+      - Required communications are complete.
+      - "For a major incident, the post-incident review is scheduled or completed."
+      - "Any additional sign-off follows the bank's governing procedure; no fixed monitoring period or universal business-owner confirmation is assumed."
+actions:
+  triageAlert:
+    input: Alert
+    preconditions: []
+    effect: ""
+    verification: ""
+  recordIncident:
+    input: Alert
+    preconditions:
+      - incidentRecordingRequired
+    effect: ""
+    verification: ""
+  declareMajorIncident:
+    input: Incident
+    preconditions:
+      - majorIncidentDeclarationEligible
+    effect: ""
+    verification: ""
+  executeFailover:
+    input: RecoveryPlan
+    preconditions:
+      - failoverReady
+    effect: ""
+    verification: ""
+  restoreBackup:
+    input: Backup
+    preconditions:
+      - backupRestoreReady
+    effect: ""
+    verification: ""
+  implementEmergencyChange:
+    input: EmergencyChange
+    preconditions:
+      - emergencyChangeReady
+    effect: ""
+    verification: ""
+  sendStakeholderUpdate:
+    input: Communication
+    preconditions:
+      - stakeholderUpdateReady
+    effect: ""
+    verification: ""
+  prepareRegulatoryNotification:
+    input: RegulatoryNotification
+    preconditions:
+      - notificationPreparationReady
+    effect: ""
+    verification: ""
+  submitRegulatoryNotification:
+    input: RegulatoryNotification
+    preconditions:
+      - notificationSubmissionReady
+    effect: ""
+    verification: ""
+  closeIncident:
+    input: Incident
+    preconditions:
+      - incidentClosureReady
+    effect: ""
+    verification: ""

@@ -1,0 +1,321 @@
+competency_questions: []
+classes:
+  Loan:
+    meaning: A loan whose approved terms must be set up and tracked in servicing.
+    aliases: []
+    properties:
+      principalAmount:
+        type: number
+      initialFundingDate:
+        type: date
+      maturityDate:
+        type: date
+      interestRate:
+        type: number
+        unit: percent
+      interestPaymentTerms:
+        type: text
+      dayCountBasis:
+        type: text
+      principalRepaymentTerms:
+        type: text
+      rateStructure:
+        type: text
+      amortizing:
+        type: boolean
+      secured:
+        type: boolean
+      prepaymentPenaltyTiming:
+        type: text
+      outstandingPrincipal:
+        type: number
+      accruedUnpaidInterest:
+        type: number
+      guaranteed:
+        type: boolean
+  Borrower:
+    meaning: "The party obligated to repay under the agreement, rather than necessarily the applicant or payment collector."
+    aliases: []
+    properties: {}
+  Lender:
+    meaning: The party that provides the loan or facility.
+    aliases: []
+    properties: {}
+  Servicer:
+    meaning: The party that services the loan when distinct from the lender or borrower.
+    aliases: []
+    properties: {}
+  ApprovedAgreement:
+    meaning: The approved agreement whose terms must match the servicing setup.
+    aliases: []
+    properties: {}
+  Schedule:
+    meaning: "A schedule used to administer a loan's rate resets, amortization, payments, or interest calculation."
+    aliases: []
+    properties:
+      scheduleType:
+        type: text
+  Collateral:
+    meaning: Supporting collateral linked to a secured loan.
+    aliases: []
+    properties: {}
+  CreditFacility:
+    meaning: A credit agreement allowing the borrower to draw funds over time without seeking a new agreement for each draw.
+    aliases: []
+    properties:
+      creditLimit:
+        type: number
+      availableAmount:
+        type: number
+      creditExtendedAmount:
+        type: number
+      maximumAdvanceAmount:
+        type: number
+  SubFacility:
+    meaning: "A portion of a credit facility, sometimes set aside for a particular purpose."
+    aliases: []
+    properties:
+      purpose:
+        type: text
+      commitmentStatus:
+        type: text
+        allowed:
+          - committed
+          - uncommitted
+  Draw:
+    meaning: "An amount drawn under a facility, which need not be a separate loan record."
+    aliases: []
+    properties:
+      amount:
+        type: number
+  Payment:
+    meaning: "An individual payment transaction showing amounts paid toward an obligation; for a loan, it is recorded in its payment history."
+    aliases:
+      - Repayment
+    properties:
+      amount:
+        type: number
+      paymentDate:
+        type: date
+      principalPaid:
+        type: number
+      interestPaid:
+        type: number
+      feesPaid:
+        type: number
+      otherPaid:
+        type: number
+  PaymentHistory:
+    meaning: "The individual payments actually recorded toward a loan, distinct from what its schedule says is due."
+    aliases: []
+    properties: {}
+  RateReset:
+    meaning: "An actual rate-reset event, distinct from the scheduled reset date."
+    aliases: []
+    properties:
+      resetDate:
+        type: date
+      applicableRate:
+        type: number
+        unit: percent
+  Guarantee:
+    meaning: "Support for repayment of a loan by guaranty, distinct from the borrower's own repayment obligation and evidenced by relevant guarantee documentation."
+    aliases: []
+    properties: {}
+  Guarantor:
+    meaning: "The party providing support for repayment under a guaranty, not thereby the borrower."
+    aliases: []
+    properties: {}
+relationships:
+  - name: hasBorrower
+    from: Loan
+    to: Borrower
+    meaning: null
+    aliases: []
+  - name: hasLender
+    from: Loan
+    to: Lender
+    meaning: null
+    aliases: []
+  - name: servicedBy
+    from: Loan
+    to: Servicer
+    meaning: null
+    aliases: []
+  - name: governedBy
+    from: Loan
+    to: ApprovedAgreement
+    meaning: null
+    aliases: []
+  - name: hasSchedule
+    from: Loan
+    to: Schedule
+    meaning: null
+    aliases: []
+  - name: securedBy
+    from: Loan
+    to: Collateral
+    meaning: null
+    aliases: []
+  - name: hasBorrower
+    from: CreditFacility
+    to: Borrower
+    meaning: null
+    aliases: []
+  - name: hasLender
+    from: CreditFacility
+    to: Lender
+    meaning: null
+    aliases: []
+  - name: governedBy
+    from: CreditFacility
+    to: ApprovedAgreement
+    meaning: null
+    aliases: []
+  - name: hasSubFacility
+    from: CreditFacility
+    to: SubFacility
+    meaning: null
+    aliases: []
+  - name: hasDraw
+    from: CreditFacility
+    to: Draw
+    meaning: null
+    aliases: []
+  - name: hasRepayment
+    from: CreditFacility
+    to: Payment
+    meaning: null
+    aliases: []
+  - name: hasPaymentHistory
+    from: Loan
+    to: PaymentHistory
+    meaning: null
+    aliases: []
+  - name: containsPayment
+    from: PaymentHistory
+    to: Payment
+    meaning: null
+    aliases: []
+  - name: hasRateReset
+    from: Loan
+    to: RateReset
+    meaning: null
+    aliases: []
+  - name: supportedByGuarantee
+    from: Loan
+    to: Guarantee
+    meaning: null
+    aliases: []
+  - name: providedBy
+    from: Guarantee
+    to: Guarantor
+    meaning: null
+    aliases: []
+rules:
+  borrowerIdentified:
+    conditions:
+      - "The borrower is identified as the party obligated to repay under the loan agreement; do not infer that role from an application, a payment record, or a guaranty."
+  lenderIdentified:
+    conditions:
+      - The loan has a lender identified as the party that provided it.
+  variableRateHasResetSchedule:
+    conditions:
+      - "If the loan is variable-rate, it has a rate-reset schedule on file."
+  amortizingHasRepaymentTermsAndSchedule:
+    conditions:
+      - "If the loan is amortizing, it has principal repayment terms and an amortization schedule on file."
+  securedHasLinkedCollateral:
+    conditions:
+      - "If the loan is marked secured, supporting collateral is linked to it."
+  servicingSetupMatchesApprovedAgreement:
+    conditions:
+      - "The servicing setup matches the approved agreement's applicable terms, including amounts, dates, interest calculation and payment terms, principal repayment terms, and required schedules."
+  facilityPartiesIdentified:
+    conditions:
+      - The facility agreement identifies its borrower as the party obligated under its terms and its lender as the party providing credit; do not infer the borrower from a payment record.
+      - Posting a repayment does not by itself change the borrower obligated under the agreement.
+  facilityAmountsFollowTerms:
+    conditions:
+      - "When a draw or repayment is posted, the credit limit, available amount, credit already extended, and any maximum advance amount remain consistent with the facility's governing terms and any relevant sub-facility."
+      - "Apply availability according to the agreement and lender's approved procedure, not a universal formula derived from those amounts alone."
+  loanPaymentTrackingComplete:
+    conditions:
+      - "For a payment-record completeness review, the loan has a linked payment history containing individual payment transactions; an empty history does not pass this review."
+      - The linked history may be empty at initial setup before any payment has occurred; this does not by itself prevent loan setup sign-off.
+      - "The payment history records what was paid, separately from the schedules stating what was due."
+  loanPaymentsCheckedAgainstTerms:
+    conditions:
+      - "For payments that have occurred, compare individual payments in the loan's payment history against applicable principal and interest terms and schedules."
+      - Track outstanding principal separately from accrued-but-unpaid interest.
+  rateResetsChecked:
+    conditions:
+      - "If the loan is variable-rate, use its rate-reset schedule to identify when a reset is due and check the applicable rate recorded for the actual reset event."
+  maturityBalanceChecked:
+    conditions:
+      - Use the maturity date and principal repayment terms to identify the amount still due at maturity.
+      - Do not assume scheduled payments pay off a balloon or partially amortizing loan before its final payment.
+  guaranteedLoanHasGuaranty:
+    conditions:
+      - "If the loan is guaranteed, check the linked guaranty and relevant guarantee documentation for the nature of the guarantor's support for repayment."
+      - A guarantor is not the borrower merely because they provide that support.
+  facilitySetupMatchesApprovedTerms:
+    conditions:
+      - "The servicing record reflects the approved facility agreement and the lender's governing procedure."
+      - "Distinguish the credit limit, available amount, amount of credit extended, and any maximum advance amount; populate whichever amounts the applicable terms and procedure require."
+      - "If the agreement has sub-facilities, represent them as portions of the facility and reflect their committed or uncommitted status where applicable."
+      - Do not impose requirements from a separately funded obligation on the facility solely by analogy.
+actions:
+  signOffLoanSetup:
+    input: Loan
+    preconditions:
+      - borrowerIdentified
+      - lenderIdentified
+      - variableRateHasResetSchedule
+      - amortizingHasRepaymentTermsAndSchedule
+      - securedHasLinkedCollateral
+      - guaranteedLoanHasGuaranty
+      - servicingSetupMatchesApprovedAgreement
+    effect: ""
+    verification: ""
+  postDraw:
+    input: CreditFacility
+    preconditions:
+      - facilityPartiesIdentified
+      - facilityAmountsFollowTerms
+    effect: ""
+    verification: ""
+  postRepayment:
+    input: CreditFacility
+    preconditions:
+      - facilityPartiesIdentified
+      - facilityAmountsFollowTerms
+    effect: ""
+    verification: ""
+  verifyLoanPaymentTracking:
+    input: Loan
+    preconditions:
+      - loanPaymentTrackingComplete
+      - loanPaymentsCheckedAgainstTerms
+    effect: ""
+    verification: ""
+  verifyRateReset:
+    input: Loan
+    preconditions:
+      - variableRateHasResetSchedule
+      - rateResetsChecked
+    effect: ""
+    verification: ""
+  verifyMaturityBalance:
+    input: Loan
+    preconditions:
+      - maturityBalanceChecked
+    effect: ""
+    verification: ""
+  signOffFacilitySetup:
+    input: CreditFacility
+    preconditions:
+      - facilityPartiesIdentified
+      - facilitySetupMatchesApprovedTerms
+    effect: ""
+    verification: ""

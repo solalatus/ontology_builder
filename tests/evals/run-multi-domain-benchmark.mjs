@@ -65,8 +65,9 @@ import yaml from "js-yaml";
 import { findModelIssues } from "./lib/modelSanitizer.mjs";
 import { createStageController, DEFAULT_STAGE_TURN_CAPS } from "./lib/pairedStages.mjs";
 import { runCost, pricesFromEnv } from "./lib/runCost.mjs";
-import { recoveredStateFromYaml } from "./score-baseline.mjs";
-import { rescoreRun } from "./rescore-saved-run.mjs";
+import { scoreSnapshot } from "./lib/snapshotScoring.mjs";
+import { CONDITIONS, GENERIC_SYSTEM_PROMPT, extractModelFromTranscript, sha256 as promptSha256 } from "./lib/baselineConditions.mjs";
+import { toolCallNamesOf } from "./lib/reportGenerator.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DEFAULT_RESULTS_ROOT = path.resolve(__dirname, "..", "..", "ontology_translation", "results", "multi-domain");
@@ -139,6 +140,19 @@ const APP_TURN_TIMEOUT_MS = (Number(ENV.ONTOLOGY_EVAL_APP_TURN_TIMEOUT_SEC) || 9
 // A per-run spending ceiling, checked before every turn against the running
 // cost of both the app's and the harness's calls. Unset: no ceiling.
 const RUN_COST_CAP_USD = Number(ENV.EVAL_RUN_COST_CAP_USD) || null;
+// A baseline condition (EXPERIMENT_BRIEF.md §3; lib/baselineConditions.mjs),
+// unset for the app as shipped. Each varies one factor, then the run goes on
+// exactly as a snapshot-at-wrap-up run does:
+//   b2-generic-interviewer -- the interviewer gets the generic prompt instead
+//     of the staged one; tools, persona, effort and stopping are unchanged;
+//   b3-no-commit -- the staged prompt, but no tools are sent, so nothing can
+//     be committed; at the wrap-up one extraction call (B1's prompt) turns
+//     this run's own transcript into the model that snapshot A scores.
+const CONDITION = ENV.ONTOLOGY_EVAL_CONDITION || null;
+// The extraction call's reasoning effort (B3 here, B1 in run-baseline-b1.mjs):
+// the shipped interviewer's default, so the comparison is not between two
+// efforts.
+const EXTRACTION_EFFORT = ENV.EVAL_BASELINE_EXTRACTION_EFFORT || "high";
 const PRICES = pricesFromEnv(ENV);
 
 async function main() {
@@ -161,6 +175,14 @@ async function main() {
   const missing = missingCredentials(LLM);
   if (missing || !MODEL) {
     console.error(missing || "Set LLM_MODEL (or AZURE_OPENAI_DEPLOYMENT / BEDROCK_MODEL) to the interviewer model.");
+    process.exit(1);
+  }
+  if (CONDITION && !CONDITIONS.includes(CONDITION)) {
+    console.error(`Unknown ONTOLOGY_EVAL_CONDITION "${CONDITION}" (known: ${CONDITIONS.join(", ")})`);
+    process.exit(1);
+  }
+  if (CONDITION && (!SNAPSHOT_AT_WRAPUP || COVERAGE_SWEEP || NAMING_PASS)) {
+    console.error("A baseline condition runs to the wrap-up only: set ONTOLOGY_EVAL_SNAPSHOT_AT_WRAPUP=1 and no stages.");
     process.exit(1);
   }
   const { apiKey } = LLM;
@@ -284,6 +306,15 @@ async function main() {
     // fails here rather than as a 404 mid-interview.
     await connectAgentLiveProvider(page, LLM, { model: MODEL, reasoningEffort: REASONING_EFFORT });
     const reasoningEffort = await page.evaluate(() => window.__kg.agent.effectiveReasoningEffort());
+    if (CONDITION === "b2-generic-interviewer") {
+      await page.evaluate((prompt) => { window.__kg.agent.state.systemPromptOverride = prompt; }, GENERIC_SYSTEM_PROMPT);
+      const sent = await page.evaluate(() => window.buildAgentSystemPrompt());
+      if (!sent.startsWith(GENERIC_SYSTEM_PROMPT)) throw new Error("B2: the generic prompt is not what the app sends");
+    } else if (CONDITION === "b3-no-commit") {
+      await page.evaluate(() => { window.__kg.agent.state.toolsDisabled = true; });
+      const sent = await page.evaluate(() => window.buildAgentSystemPrompt());
+      if (!sent.includes("ROLE")) throw new Error("B3: the staged prompt must be unchanged");
+    }
 
     // Issue #133/E8: the app's own real system prompt, fetched from the live
     // page rather than re-derived statically -- buildAgentSystemPrompt() is
@@ -331,6 +362,8 @@ async function main() {
       personaPath, groundTruthText, groundTruthFilename: "reference.domain.yaml", groundTruthFormat: "domain-yaml", openingLine,
       appTurnTimeoutMs: APP_TURN_TIMEOUT_MS,
       stageController,
+      // B3 is offered no tools, so a turn without a tool call is not a stall.
+      toolActivityExpected: CONDITION !== "b3-no-commit",
       shouldStop: async () => {
         const cost = await refreshCost();
         if (RUN_COST_CAP_USD && cost && cost.all.costUsd >= RUN_COST_CAP_USD) {
@@ -352,6 +385,33 @@ async function main() {
 
     if (orchestratorResult.turnsUsed < 1) throw new Error("expected at least one real turn to happen");
     if (orchestratorResult.chatResponses.length < 1) throw new Error("expected at least one real app-agent API call");
+
+    // B3: nothing could be committed, so the canvas is empty. Check that no
+    // tool call happened at all, then extract the model from this run's own
+    // transcript and make it snapshot A, which is scored below like any
+    // other snapshot.
+    let extraction = null;
+    if (CONDITION === "b3-no-commit") {
+      const toolCalls = orchestratorResult.chatResponses.reduce((n, r) => n + toolCallNamesOf(r.body).length, 0);
+      if (toolCalls > 0) throw new Error(`B3: ${toolCalls} tool call(s) happened although no tools were sent`);
+      const snapA = stageSnapshots.find((x) => x.label === "A");
+      if (snapA) {
+        writeConversationLog(orchestratorResult, { dir: outDir });
+        const transcript = fs.readFileSync(path.join(outDir, "conversation-log.md"), "utf8");
+        writeProgress({ phase: "extracting", turnsUsed: orchestratorResult.turnsUsed, ...costLine() });
+        const x = await extractModelFromTranscript({ transcript, chat, model: MODEL, extraBody: { reasoning_effort: EXTRACTION_EFFORT } });
+        const dir = path.join(outDir, "snapshots", "A");
+        // The exact bytes sent: conversation-log.md is rewritten later with a
+        // fresh "Last updated" line, so the input is kept beside the snapshot.
+        fs.writeFileSync(path.join(dir, "extraction-input.md"), transcript);
+        fs.writeFileSync(path.join(dir, "recovered-model.yaml"), x.yamlText);
+        fs.writeFileSync(path.join(dir, "raw-response.md"), x.reply);
+        fs.writeFileSync(path.join(dir, "extraction.json"), `${JSON.stringify({ condition: CONDITION, transcript: "snapshots/A/extraction-input.md", ...x.provenance }, null, 2)}\n`);
+        snapA.yamlText = x.yamlText;
+        extraction = { ...x.provenance, transcript: "snapshots/A/extraction-input.md" };
+        console.log(`${domain}/${runId}: B3 extracted the model from the transcript (${(x.usage && x.usage.prompt_tokens) || "?"} prompt tokens)`);
+      }
+    }
 
     const recoveredState = await page.evaluate(() => ({
       nodes: window.__kg.state.nodes, edges: window.__kg.state.edges,
@@ -425,43 +485,8 @@ async function main() {
     for (const snap of stageSnapshots) {
       writeProgress({ phase: `scoring_snapshot_${snap.label}`, turnsUsed: orchestratorResult.turnsUsed, ...costLine() });
       const dir = path.join(outDir, "snapshots", snap.label);
-      const { state, droppedEdges } = recoveredStateFromYaml(snap.yamlText);
-      const sm = computeRecoveryMetrics(groundTruth, state);
-      const ssm = computeRecoveryMetrics(scopedGroundTruth, state);
-      writeHeuristicMatches(computeHeuristicMatchPairs(groundTruth, state), { dir });
-      let sem = null, semScoped = null, semRuleAction = null;
-      try {
-        sem = await computeSemanticRecoveryMetrics({ groundTruth, recoveredState: state, apiKey, model: CLASSIFIER_MODEL, chat });
-        semScoped = await computeSemanticRecoveryMetrics({ groundTruth: scopedGroundTruth, recoveredState: state, apiKey, model: CLASSIFIER_MODEL, chat });
-        semRuleAction = await computeSemanticRuleActionMetrics({ groundTruth, recoveredState: state, apiKey, model: CLASSIFIER_MODEL, chat });
-      } catch (err) {
-        console.error(`${domain}/${runId}: semantic judge pass failed on snapshot ${snap.label}, heuristic only: ${String((err && err.message) || err)}`);
-        sem = null; semScoped = null; semRuleAction = null;
-      }
-      writeSemanticJudgments({ fullDomain: sem, scoped: semScoped }, { dir });
-      writeSemanticMatches({ fullDomain: sem, scoped: semScoped }, { dir });
-      const counts = {
-        classes: state.nodes.length,
-        relationships: state.edges.length,
-        properties: state.nodes.reduce((n, x) => n + x.properties.length, 0),
-        allowedValueLists: state.nodes.reduce((n, x) => n + x.properties.filter((pr) => (pr.allowed || []).length > 0).length, 0),
-        rules: state.rules.length,
-        actions: state.actions.length,
-        droppedEdges,
-      };
-      const replay = rescoreRun(dir, domain);
-      const same = (a, b) => (a === null || a === undefined || b === null || b === undefined ? a == b : Math.abs(a - b) < 1e-9);
-      const offlineRescoreAgrees = same(replay.heuristic.full.recoveryEffectiveness, sm.recoveryEffectiveness)
-        && same(replay.heuristic.practical.recoveryEffectiveness, ssm.recoveryEffectiveness)
-        && same(replay.semantic.full && replay.semantic.full.recoveryEffectiveness, sem && sem.recoveryEffectiveness);
-      if (!offlineRescoreAgrees) console.error(`${domain}/${runId}: WARNING snapshot ${snap.label}: the offline rescore does not reproduce the live score`);
-      const entry = {
-        label: snap.label, turn: snap.turn, stage: snap.stage, elapsedSec: snap.elapsedSec, counts,
-        metrics: sm, scopedMetrics: ssm, semanticMetrics: sem, semanticScopedMetrics: semScoped,
-        ruleMetrics: computeRuleMetrics(groundTruth, state.rules || []), actionMetrics: computeActionMetrics(groundTruth, state),
-        semanticRuleActionMetrics: semRuleAction, offlineRescoreAgrees,
-      };
-      fs.writeFileSync(path.join(dir, "metrics.json"), `${JSON.stringify(entry, null, 2)}\n`);
+      const entry = await scoreSnapshot({ snap, dir, domain, groundTruth, scopedGroundTruth, apiKey, model: CLASSIFIER_MODEL, chat, label: `${domain}/${runId}` });
+      const sm = entry.metrics, ssm = entry.scopedMetrics, sem = entry.semanticMetrics;
       snapshotScores.push(entry);
       console.log(`${domain}/${runId}: snapshot ${snap.label} composite(full)=${sm.recoveryEffectiveness.toFixed(3)} (scoped)=${ssm.recoveryEffectiveness.toFixed(3)}`
         + (sem ? ` semantic=${sem.recoveryEffectiveness.toFixed(3)}` : ""));
@@ -534,6 +559,10 @@ async function main() {
       maxTurns: MAX_TURNS, wallClockMinutes: WALLCLOCK_MINUTES, appTurnTimeoutSec: APP_TURN_TIMEOUT_MS / 1000,
       runCostCapUsd: RUN_COST_CAP_USD, prices: PRICES,
       coverageSweep: COVERAGE_SWEEP, namingPass: NAMING_PASS,
+      // The baseline condition, if any, and what makes it verifiable.
+      condition: CONDITION,
+      ...(CONDITION === "b2-generic-interviewer" ? { conditionPromptSha256: promptSha256(GENERIC_SYSTEM_PROMPT) } : {}),
+      ...(CONDITION === "b3-no-commit" ? { toolsDisabled: true, extraction } : {}),
       ...(STAGES ? { sweepMaxRounds: SWEEP_MAX_ROUNDS, stageTurnCaps: STAGE_TURN_CAPS } : {}),
       stages: orchestratorResult.stages,
       snapshots: stageSnapshots.map((x) => ({ label: x.label, turn: x.turn, stage: x.stage, elapsedSec: x.elapsedSec, cost: x.cost })),

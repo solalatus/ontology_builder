@@ -649,6 +649,11 @@ export async function runOntologyRecoveryConversation({
   // Checked at the top of every turn; a non-null return (a reason string)
   // stops the run with that reason -- the runner's per-run cost ceiling.
   shouldStop = null,
+  // False when the app is offered no tools at all (baseline B3): then a turn
+  // without a tool call is the condition, not a stall, and the no-tool-
+  // activity detector below must not end the run. The streak is still
+  // counted for the operational stats. Every other stop applies unchanged.
+  toolActivityExpected = true,
 }) {
   // Issue #133/N7b (independent audit of this same fix): groundTruthFormat
   // defaults to "mtsr" (raw embed) and silently gates BOTH defenses at
@@ -827,7 +832,7 @@ export async function runOntologyRecoveryConversation({
       );
       consecutiveTurnsWithNoToolActivity = streak.current;
       maxConsecutiveTurnsWithNoToolActivity = streak.max;
-      if (streak.crossedThreshold) { stoppedReason = "wasted_turns_no_tool_activity"; break; }
+      if (streak.crossedThreshold && toolActivityExpected) { stoppedReason = "wasted_turns_no_tool_activity"; break; }
     }
 
     const lastAssistant = [...newEntries].reverse().find((m) => m.role === "assistant");

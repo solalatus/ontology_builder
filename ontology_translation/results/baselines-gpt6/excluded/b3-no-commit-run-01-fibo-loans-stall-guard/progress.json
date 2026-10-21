@@ -1,0 +1,15 @@
+{
+ "domain": "fibo-loans",
+ "runId": "run-01",
+ "model": "gpt-6-sol",
+ "startedAt": "2026-10-20T21:42:28.620Z",
+ "elapsedSec": 771,
+ "phase": "done",
+ "turnsUsed": 80,
+ "stoppedReason": "wasted_turns_no_tool_activity",
+ "costUsd": 1.237,
+ "appCalls": 80,
+ "promptTokens": 2920185,
+ "cachedShare": 0.961,
+ "reasoningTokens": 25789
+}

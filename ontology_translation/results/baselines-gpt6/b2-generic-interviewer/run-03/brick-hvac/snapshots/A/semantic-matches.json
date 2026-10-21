@@ -1,0 +1,100 @@
+{
+  "fullDomain": {
+    "classes": [],
+    "relationships": [
+      {
+        "goldId": "rel_3",
+        "recoveredId": "e5"
+      },
+      {
+        "goldId": "rel_4",
+        "recoveredId": "e7"
+      },
+      {
+        "goldId": "rel_5",
+        "recoveredId": "e8"
+      }
+    ],
+    "properties": [
+      {
+        "goldId": "Zone.occupancyStatus",
+        "matchedPropertyName": "occupied"
+      }
+    ],
+    "valueFidelity": [
+      {
+        "id": "Thermostat.mode",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "Thermostat.status",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "TerminalUnit.status",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "Economizer.status",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "Boiler.status",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "Chiller.status",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "Pump.status",
+        "semanticFidelity": 0
+      }
+    ]
+  },
+  "scoped": {
+    "classes": [],
+    "relationships": [
+      {
+        "goldId": "rel_5",
+        "recoveredId": "e8"
+      }
+    ],
+    "properties": [
+      {
+        "goldId": "Zone.occupancyStatus",
+        "matchedPropertyName": "occupied"
+      }
+    ],
+    "valueFidelity": [
+      {
+        "id": "Thermostat.mode",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "Thermostat.status",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "TerminalUnit.status",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "Economizer.status",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "Boiler.status",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "Chiller.status",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "Pump.status",
+        "semanticFidelity": 0
+      }
+    ]
+  }
+}

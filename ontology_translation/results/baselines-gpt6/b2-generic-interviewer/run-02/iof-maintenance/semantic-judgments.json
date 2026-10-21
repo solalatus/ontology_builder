@@ -1,0 +1,179 @@
+{
+  "fullDomain": {
+    "judgments": {
+      "classes": [
+        {
+          "goldId": "MaintenanceState",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "OperatingState",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "DegradedState",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "FailedState",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "UndesirableDisposition",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "DispositionToFail",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "DispositionToExhibitUndesirableBehavior",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "FailureModeCode",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "RequiredFunction",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "FunctioningProcess",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "SupportingMaintenanceActivity",
+          "recoveredId": "n9",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "QualificationSpecification",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "QualifiedMaintenancePerson",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "relationships": [
+        {
+          "goldId": "rel_2",
+          "recoveredId": "e5",
+          "verdict": "MATCH"
+        }
+      ],
+      "properties": [
+        {
+          "goldId": "MaintenanceWorkOrderRecord.workOrderDate",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "MaintenanceWorkOrderRecord.taskDescription",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "MaintenanceWorkOrderRecord.taskCode",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "valueFidelity": []
+    },
+    "rawResponses": {
+      "classes": "1: NO MATCH -- Asset State is broader than Maintenance State.\n2: NO MATCH -- Asset State is broader than Operating State.\n3: NO MATCH -- Asset State is broader than Degraded State.\n4: NO MATCH -- Asset State is broader than Failed State.\n5: NO MATCH -- No candidate denotes a failure mode.\n6: NO MATCH -- No candidate denotes a disposition to fail.\n7: NO MATCH -- No candidate denotes a disposition to exhibit undesirable behavior.\n8: NO MATCH -- No candidate denotes a failure mode code.\n9: NO MATCH -- Asset is an item, not its required function.\n10: NO MATCH -- No candidate denotes the functioning process.\n11: MATCH 3 -- Supporting Work denotes activity that supports maintenance.\n12: NO MATCH -- A Qualification is not a Qualification Specification.\n13: NO MATCH -- Person does not imply qualified maintenance personnel.",
+      "relationships": "1: MATCH 1 -- A process that follows a maintenance strategy is governed by it.",
+      "properties": "1: NO MATCH -- A work order date is not whether work was actually performed.\n2: NO MATCH -- A task description is not whether work was actually performed.\n3: NO MATCH -- A task code is not whether work was actually performed."
+    }
+  },
+  "scoped": {
+    "judgments": {
+      "classes": [
+        {
+          "goldId": "MaintenanceState",
+          "recoveredId": "n2",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "OperatingState",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "DegradedState",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "FailedState",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "UndesirableDisposition",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "FailureModeCode",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "RequiredFunction",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "FunctioningProcess",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "QualificationSpecification",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "QualifiedMaintenancePerson",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "relationships": [
+        {
+          "goldId": "rel_2",
+          "recoveredId": "e5",
+          "verdict": "MATCH"
+        }
+      ],
+      "properties": [
+        {
+          "goldId": "MaintenanceWorkOrderRecord.taskCode",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "valueFidelity": []
+    },
+    "rawResponses": {
+      "classes": "1: MATCH 2 -- Both describe an asset’s condition relative to its required function.\n2: NO MATCH -- Operating State is a specific state, not the general Asset State class.\n3: NO MATCH -- Degraded State is a specific state, not the general Asset State class.\n4: NO MATCH -- Failed State is a specific state, not the general Asset State class.\n5: NO MATCH -- A failure mode is not a failure process or its effect.\n6: NO MATCH -- No candidate represents a failure mode code.\n7: NO MATCH -- An asset is not its required function.\n8: NO MATCH -- A functioning process is not a failure process.\n9: NO MATCH -- A qualification is not a specification of qualifications.\n10: NO MATCH -- A person is not necessarily a qualified maintenance person.",
+      "relationships": "1: MATCH 1 -- A process that follows a maintenance strategy is governed by it.",
+      "properties": "1: NO MATCH -- A task code identifies the task; actuallyPerformed records whether it was carried out."
+    }
+  }
+}

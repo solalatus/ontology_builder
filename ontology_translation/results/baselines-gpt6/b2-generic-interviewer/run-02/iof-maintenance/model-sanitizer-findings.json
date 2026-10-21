@@ -1,0 +1,111 @@
+[
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "hasState (Asset → Asset State)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "hasState",
+      "from": "Asset",
+      "to": "Asset State",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "developsFailureProcess (Asset → Failure Process)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "developsFailureProcess",
+      "from": "Asset",
+      "to": "Failure Process",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "beginsFailedState (Failure Event → Asset State)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "beginsFailedState",
+      "from": "Failure Event",
+      "to": "Asset State",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "hasFailureEffect (Failure Event → Failure Effect)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "hasFailureEffect",
+      "from": "Failure Event",
+      "to": "Failure Effect",
+      "meaning": null,
+      "aliases": [
+        "hasConsequence"
+      ]
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "includesSupportingWork (Maintenance Process → Supporting Work)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "includesSupportingWork",
+      "from": "Maintenance Process",
+      "to": "Supporting Work",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "describesProcess (Work Order → Maintenance Process)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "describesProcess",
+      "from": "Work Order",
+      "to": "Maintenance Process",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "isAssignedTo (Maintenance Activity → Person)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "isAssignedTo",
+      "from": "Maintenance Activity",
+      "to": "Person",
+      "meaning": null,
+      "aliases": [
+        "assignedTo"
+      ]
+    }
+  }
+]

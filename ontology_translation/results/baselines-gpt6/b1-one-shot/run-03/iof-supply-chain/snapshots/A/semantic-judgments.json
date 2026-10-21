@@ -1,0 +1,236 @@
+{
+  "fullDomain": {
+    "judgments": {
+      "classes": [
+        {
+          "goldId": "Consignee",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Shipper",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Distributor",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Retailer",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Wholesaler",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Cargo",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "FreightContainer",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Trailer",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Wagon",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "TraceableResourceUnit",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Traceability",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "StorageFacility",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "DistributionCenter",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Factory",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "GeospatialLocation",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "ShippingRoute",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "SupplyChainTransportProcess",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "WarehousingProcess",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "PackagingProcess",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "ConsigningProcess",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "FreightForwardingProcess",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "InventoryManagementProcess",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "SupplyChainProcess",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "LogisticsProcess",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "LogisticsService",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "TransportationService",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "StorageService",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "PackagingService",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "FreightForwardingService",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "ManufacturingService",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "BillOfLading",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "relationships": [
+        {
+          "goldId": "rel_4",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "properties": [
+        {
+          "goldId": "FreightForwarder.status",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "valueFidelity": []
+    },
+    "rawResponses": {
+      "classes": "1: NO MATCH -- A consignee is a receiving party, not a service.\n2: NO MATCH -- A shipper is a sending party, not a service.\n3: NO MATCH -- A distributor is an organization or role, not a service.\n4: NO MATCH -- A retailer is a seller, not a service.\n5: NO MATCH -- A wholesaler is a seller, not a service.\n6: NO MATCH -- Cargo is goods, not a service.\n7: NO MATCH -- A freight container is equipment, not a service.\n8: NO MATCH -- A trailer is equipment, not a service.\n9: NO MATCH -- A wagon is equipment, not a service.\n10: NO MATCH -- A traceable resource unit is an identifiable unit, not a service.\n11: NO MATCH -- Traceability is a capability or property, not a service.\n12: NO MATCH -- A storage facility is a place, not a service.\n13: NO MATCH -- A distribution center is a facility, not a service.\n14: NO MATCH -- A factory is a facility, not a service.\n15: NO MATCH -- A geospatial location is a place, not a service.\n16: NO MATCH -- A shipping route is a path, not a service.\n17: NO MATCH -- A supply chain transport process is a process, not a service.\n18: NO MATCH -- A warehousing process is a process, not a service.\n19: NO MATCH -- A packaging process is a process, not a service.\n20: NO MATCH -- A consigning process is a process, not a service.\n21: NO MATCH -- A freight forwarding process is a process, not a service.\n22: NO MATCH -- An inventory management process is a process, not a service.\n23: NO MATCH -- A supply chain process is a process, not a service.\n24: NO MATCH -- A logistics process is a process, not a service.\n25: NO MATCH -- Logistics service is a specific type of service, not generic Service.\n26: NO MATCH -- Transportation service is a specific type of service, not generic Service.\n27: NO MATCH -- Storage service is a specific type of service, not generic Service.\n28: NO MATCH -- Packaging service is a specific type of service, not generic Service.\n29: NO MATCH -- Freight forwarding service is a specific type of service, not generic Service.\n30: NO MATCH -- Manufacturing service is a specific type of service, not generic Service.\n31: NO MATCH -- A bill of lading is a document, not a service.",
+      "relationships": "1: NO MATCH -- “Involves” does not specify that the carrier is the process’s agent."
+    }
+  },
+  "scoped": {
+    "judgments": {
+      "classes": [
+        {
+          "goldId": "Cargo",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "FreightContainer",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "TraceableResourceUnit",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Traceability",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "StorageFacility",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "StorageService",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "FreightForwardingService",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "relationships": [
+        {
+          "goldId": "rel_4",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "properties": [],
+      "valueFidelity": []
+    },
+    "rawResponses": {
+      "classes": "1: NO MATCH -- Neither candidate denotes cargo.\n2: NO MATCH -- Neither candidate denotes a freight container.\n3: NO MATCH -- Neither candidate denotes a traceable resource unit.\n4: NO MATCH -- Neither candidate denotes traceability.\n5: NO MATCH -- A storage process is not a storage facility.\n6: NO MATCH -- A storage process is not a service, and Service is broader than Storage Service.\n7: NO MATCH -- Service is broader than Freight Forwarding Service.",
+      "relationships": "1: NO MATCH -- “Involves” does not specify the carrier’s agent role."
+    }
+  }
+}

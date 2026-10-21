@@ -151,3 +151,26 @@ It now credits the expert's plain-words mentions made before the interviewer's f
 - the final-scores runs: 0–4 per run on the published domains and 1–10 on itops.
 
 A hand check of a sample of the moved terms found each to be the expert's own phrase, most of them from the opening competency questions. For the paper, report the corrected measure. The unpublished domain shows the most interviewer-first terms, which is the opposite of what memorization would predict.
+
+---
+
+## 2026-10-21 — Baselines at the shipped configuration: what each part of the method contributes
+
+`ontology_translation/results/baselines-gpt6/`: all five domains, 3 runs per condition, `gpt-6-sol`. Each condition varies one factor against the final scores; the prompts are the pre-registered originals.
+
+Macro composite, four published domains:
+
+| Condition | Composite | Reading against interactive (5 domains) |
+|---|---|---|
+| Interactive | 0.781 | |
+| B1, one-shot extraction over the interactive transcript | 0.786 | level on all 5 |
+| B3, staged prompt but no tools, extracted at the end | 0.688 | interactive beats it on 2, level on 3 |
+| B2, generic prompt | 0.353 | interactive beats it on all 5 |
+
+**For the paper.**
+- **The staged interview prompt carries most of the quality:** +0.43 over a generic interviewer with the same model, persona and tools. The generic interviewer wraps up after 4 to 13 turns.
+- **Committing to a live model during the interview helps the conversation, mostly the relationships.** Relationship F1 is 0.785 with commits and 0.600 without. Without commits the interview is longer: 142 turns against 96.
+- **It does not help the conversion.** B1 and B3 share the extraction prompt but read different conversations: 0.786 against 0.688. The live model's value is in how it steers the conversation, and in what the expert can see, not in turning talk into a model.
+
+**Caveat.** B1 is generous by construction. The #187 interviewer names every element it records, so its transcript documents the model.
+

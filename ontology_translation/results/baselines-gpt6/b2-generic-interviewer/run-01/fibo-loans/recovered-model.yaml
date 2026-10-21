@@ -1,0 +1,298 @@
+competency_questions: []
+classes:
+  Facility:
+    meaning: "An approved credit arrangement whose limit, extended amount, and available amount are tracked."
+    aliases: []
+    properties:
+      creditLimit:
+        type: number
+      amountExtended:
+        type: number
+      amountAvailable:
+        type: number
+  Loan:
+    meaning: "A funded lending obligation whose principal, dates, and servicing terms must be tracked."
+    aliases: []
+    properties:
+      principal:
+        type: number
+      initialFundingDate:
+        type: date
+      maturityDate:
+        type: date
+  Borrower:
+    meaning: The party entitled to draw a facility or obligated under a loan.
+    aliases: []
+    properties: {}
+  Lender:
+    meaning: The party providing the credit under a facility or loan.
+    aliases: []
+    properties: {}
+  Sub-facility:
+    meaning: A portion of a facility to which draws can be assigned.
+    aliases: []
+    properties: {}
+  Draw:
+    meaning: An extension of credit under a facility or sub-facility.
+    aliases: []
+    properties: {}
+  Interest Rate:
+    meaning: The interest rate applicable to an interest-bearing loan; floating and institution-managed rates are variable rates.
+    aliases: []
+    properties:
+      rateType:
+        type: text
+        allowed:
+          - fixed
+          - variable
+          - floating
+          - institution-managed
+  Interest Payment Terms:
+    meaning: "Terms governing payment of interest and specifying the accrual basis, also called the day-count convention."
+    aliases: []
+    properties:
+      accrualBasis:
+        type: text
+  Principal Repayment Terms:
+    meaning: "Terms governing repayment of a loan's principal."
+    aliases: []
+    properties: {}
+  Payment Schedule:
+    meaning: "The loan's schedule of expected payments, distinct from payments actually made."
+    aliases: []
+    properties: {}
+  Amortization Schedule:
+    meaning: The separate schedule used to track amortization of an amortizing loan.
+    aliases: []
+    properties: {}
+  Interest-rate Reset Schedule:
+    meaning: The separate schedule governing interest-rate resets for a variable-rate loan.
+    aliases: []
+    properties: {}
+  Principal-payment Schedule:
+    meaning: A separate schedule of expected principal payments when applicable.
+    aliases: []
+    properties: {}
+  Interest-payment Schedule:
+    meaning: A separate schedule of expected interest payments when applicable.
+    aliases: []
+    properties: {}
+  Interest-calculation Schedule:
+    meaning: A separate schedule for interest calculations when applicable.
+    aliases: []
+    properties: {}
+  Servicer:
+    meaning: "The party collecting payments on the lender's behalf for a loan."
+    aliases: []
+    properties: {}
+  Collateral:
+    meaning: Property pledged as security for a secured loan.
+    aliases: []
+    properties: {}
+  Security Agreement:
+    meaning: An agreement setting out rights over collateral that it secures.
+    aliases: []
+    properties: {}
+  Prepayment Terms:
+    meaning: "Terms for prepaying a loan, including the timing of an applicable prepayment penalty."
+    aliases: []
+    properties:
+      penaltyPeriod:
+        type: number
+        unit: months
+  Payment History:
+    meaning: "The loan's record of individual payments actually made, distinct from expected payment schedules."
+    aliases: []
+    properties: {}
+  Payment:
+    meaning: "An individual payment actually made toward principal, interest, fees, or other amounts."
+    aliases: []
+    properties: {}
+  Guaranty:
+    meaning: Backing for repayment of principal and interest on a guaranteed loan; no guarantor-party record is assumed.
+    aliases: []
+    properties: {}
+  Credit Enhancement Agreement:
+    meaning: An agreement for a backing arrangement that can identify its beneficiary.
+    aliases: []
+    properties: {}
+  Beneficiary:
+    meaning: "The party protected by a credit enhancement agreement, not necessarily obligated to repay the loan."
+    aliases: []
+    properties: {}
+relationships:
+  - name: hasBorrower
+    from: Facility
+    to: Borrower
+    meaning: null
+    aliases:
+      - canDraw
+  - name: hasLender
+    from: Facility
+    to: Lender
+    meaning: null
+    aliases:
+      - providesCreditUnder
+  - name: hasBorrower
+    from: Loan
+    to: Borrower
+    meaning: null
+    aliases:
+      - borrowsUnder
+  - name: hasLender
+    from: Loan
+    to: Lender
+    meaning: null
+    aliases:
+      - lendsUnder
+  - name: dividesInto
+    from: Facility
+    to: Sub-facility
+    meaning: null
+    aliases: []
+  - name: hasInterestRate
+    from: Loan
+    to: Interest Rate
+    meaning: null
+    aliases: []
+  - name: hasInterestPaymentTerms
+    from: Loan
+    to: Interest Payment Terms
+    meaning: null
+    aliases: []
+  - name: hasPrincipalRepaymentTerms
+    from: Loan
+    to: Principal Repayment Terms
+    meaning: null
+    aliases: []
+  - name: hasPaymentSchedule
+    from: Loan
+    to: Payment Schedule
+    meaning: null
+    aliases: []
+  - name: hasAmortizationSchedule
+    from: Loan
+    to: Amortization Schedule
+    meaning: null
+    aliases: []
+  - name: hasInterestRateResetSchedule
+    from: Loan
+    to: Interest-rate Reset Schedule
+    meaning: null
+    aliases: []
+  - name: hasPrincipalPaymentSchedule
+    from: Loan
+    to: Principal-payment Schedule
+    meaning: null
+    aliases: []
+  - name: hasInterestPaymentSchedule
+    from: Loan
+    to: Interest-payment Schedule
+    meaning: null
+    aliases: []
+  - name: hasInterestCalculationSchedule
+    from: Loan
+    to: Interest-calculation Schedule
+    meaning: null
+    aliases: []
+  - name: isServicedBy
+    from: Loan
+    to: Servicer
+    meaning: null
+    aliases: []
+  - name: isCollateralizedBy
+    from: Loan
+    to: Collateral
+    meaning: null
+    aliases: []
+  - name: secures
+    from: Security Agreement
+    to: Collateral
+    meaning: null
+    aliases: []
+  - name: hasPrepaymentTerms
+    from: Loan
+    to: Prepayment Terms
+    meaning: null
+    aliases: []
+  - name: hasPaymentHistory
+    from: Loan
+    to: Payment History
+    meaning: null
+    aliases: []
+  - name: contains
+    from: Payment History
+    to: Payment
+    meaning: null
+    aliases: []
+  - name: isGuaranteedBy
+    from: Loan
+    to: Guaranty
+    meaning: "Repayment of the loan's principal and interest is supported by a guaranty."
+    aliases: []
+  - name: identifiesBeneficiary
+    from: Credit Enhancement Agreement
+    to: Beneficiary
+    meaning: Identifies the party protected by the backing arrangement.
+    aliases: []
+rules:
+  facilitySetupCheck:
+    conditions:
+      - The facility has a recorded borrower and lender.
+      - "Its credit limit, amount extended, and amount available are recorded."
+  loanCoreReady:
+    conditions:
+      - "The loan has a recorded borrower and lender, principal, initial funding date, maturity date, principal repayment terms, and applicable payment schedules."
+  interestBearingLoanReady:
+    conditions:
+      - "If the loan bears interest, its interest rate and interest payment terms are linked and the terms specify an accrual basis (day-count convention)."
+  variableRateLoanReady:
+    conditions:
+      - "If the loan's rate is variable, including floating or institution-managed, it has a separate interest-rate reset schedule."
+  amortizingLoanReady:
+    conditions:
+      - "If the loan is amortizing, it has principal repayment terms and a separate amortization schedule."
+  securedLoanReady:
+    conditions:
+      - "If the loan is secured, it links to pledged collateral; a secured designation alone is insufficient."
+      - The linked collateral is secured by an applicable security agreement setting out rights over it.
+  prepaymentPenaltyReady:
+    conditions:
+      - "If prepayment penalties apply, the linked prepayment terms record the applicable penalty period in months; no standard period is presumed."
+  paymentHistoryComplete:
+    conditions:
+      - "Once payments start, the loan has a payment history containing individual payments actually made, not just schedules of expected payments."
+  paymentTrackingCheck:
+    conditions:
+      - Compare actual payments in the payment history against applicable schedules to assess whether the loan tracks its terms; no numerical tolerance is presumed.
+actions:
+  reviewFacilitySetup:
+    input: Facility
+    preconditions:
+      - facilitySetupCheck
+    effect: ""
+    verification: ""
+  reviewLoanSetup:
+    input: Loan
+    preconditions:
+      - loanCoreReady
+      - interestBearingLoanReady
+      - variableRateLoanReady
+      - amortizingLoanReady
+      - securedLoanReady
+      - prepaymentPenaltyReady
+    effect: ""
+    verification: ""
+  confirmPaymentHistory:
+    input: Loan
+    preconditions:
+      - paymentHistoryComplete
+    effect: ""
+    verification: ""
+  reviewPaymentTracking:
+    input: Loan
+    preconditions:
+      - paymentHistoryComplete
+      - paymentTrackingCheck
+    effect: ""
+    verification: ""

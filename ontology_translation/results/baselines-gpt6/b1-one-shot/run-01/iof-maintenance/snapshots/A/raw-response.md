@@ -1,0 +1,260 @@
+classes:
+  Asset:
+    meaning: "The maintainable item whose condition and required function the crew assesses."
+    aliases:
+      - maintainable item
+
+  MaintenanceState:
+    meaning: "A period during which an asset's functions, capabilities, or level of performance remain unchanged."
+    properties:
+      stateCategory:
+        type: text
+        allowed:
+          - operating
+          - degraded
+          - failed
+
+  OperatingState:
+    meaning: "A maintenance state in which the asset can perform its required function."
+
+  DegradedState:
+    meaning: "A maintenance state in which the asset's ability to perform as required is reduced but the crew judges that performance acceptable."
+
+  FailedState:
+    meaning: "A particular maintenance state in which a failure event has caused the asset to lose the ability to perform a required function."
+
+  RequiredFunction:
+    meaning: "The job an asset must perform to meet the process requirement."
+    aliases:
+      - primary function
+
+  FunctioningProcess:
+    meaning: "The process in which an asset actually performs a function and realizes a required function."
+
+  FailureProcess:
+    meaning: "A change in some quality of an asset that can result in a degraded or failed state."
+    aliases:
+      - functional failure
+
+  FailureEvent:
+    meaning: "An occurrence that causes an asset to lose the ability to perform a required function and initiates a failed state."
+    aliases:
+      - failure
+
+  FailureEffect:
+    meaning: "A consequential process of a failure event that may occur within or beyond the failed asset's boundary."
+
+  UndesirableDisposition:
+    meaning: "A tendency either to fail or to exhibit behavior unexpected in normal operation."
+    aliases:
+      - failure mode
+
+  DispositionToFail:
+    meaning: "An undesirable disposition to undergo a failure process."
+
+  DispositionToExhibitUndesirableBehavior:
+    meaning: "An undesirable disposition to behave unexpectedly under normal operating conditions without thereby establishing a failure."
+
+  FailureModeCode:
+    meaning: "A code that describes an undesirable disposition rather than a failure event or its effect."
+
+  MaintenanceProcess:
+    meaning: "Work undertaken to retain or restore an asset's required function."
+
+  MaintenanceWorkOrderRecord:
+    meaning: "A record describing a maintenance process whether or not the work has started."
+    aliases:
+      - work order
+      - MWO
+    properties:
+      workOrderDate:
+        type: date
+      taskDescription:
+        type: text
+      taskCode:
+        type: text
+      cost:
+        type: number
+
+  MaintenanceStrategy:
+    meaning: "The approach under which a maintenance process is carried out to help an asset meet its objectives."
+
+  MaintenanceActivity:
+    meaning: "A single main task within a maintenance process that contributes to retaining or restoring function."
+
+  SupportingMaintenanceActivity:
+    meaning: "A single action that helps execute a maintenance process but is not a main maintenance task."
+    aliases:
+      - supporting activity
+
+  QualificationSpecification:
+    meaning: "The assessed-skill requirement for performing a particular maintenance activity."
+
+  QualifiedMaintenancePerson:
+    meaning: "A maintenance person assessed as qualified for a particular maintenance activity, not necessarily for other activities."
+
+relationships:
+  - name: isKindOf
+    from: OperatingState
+    to: MaintenanceState
+    meaning: "An operating state is a distinct kind of maintenance state."
+  - name: isKindOf
+    from: DegradedState
+    to: MaintenanceState
+    meaning: "A degraded state is a distinct kind of maintenance state."
+  - name: isKindOf
+    from: FailedState
+    to: MaintenanceState
+    meaning: "A failed state is a distinct kind of maintenance state."
+  - name: isKindOf
+    from: DispositionToFail
+    to: UndesirableDisposition
+    meaning: "A disposition to fail is a distinct kind of undesirable disposition."
+  - name: isKindOf
+    from: DispositionToExhibitUndesirableBehavior
+    to: UndesirableDisposition
+    meaning: "A disposition to exhibit undesirable behavior is a distinct kind of undesirable disposition."
+  - name: initiates
+    from: FailureEvent
+    to: FailedState
+    meaning: "A failure event begins a particular failed state."
+  - name: resultsIn
+    from: FailureProcess
+    to: DegradedState
+    meaning: "An established failure process results in a particular degraded state."
+  - name: resultsIn
+    from: FailureProcess
+    to: FailedState
+    meaning: "An established failure process results in a particular failed state."
+  - name: hasFailureEffect
+    from: FailureEvent
+    to: FailureEffect
+    meaning: "A failure event has a failure effect as its consequence."
+  - name: describes
+    from: FailureModeCode
+    to: UndesirableDisposition
+    meaning: "A failure mode code describes an undesirable disposition."
+  - name: realizes
+    from: FailureProcess
+    to: DispositionToFail
+    meaning: "A failure process realizes a disposition to fail when that connection is established."
+  - name: realizes
+    from: FunctioningProcess
+    to: RequiredFunction
+    meaning: "A functioning process realizes the required function the asset is actually performing."
+  - name: describes
+    from: MaintenanceWorkOrderRecord
+    to: MaintenanceProcess
+    meaning: "A maintenance work order record describes a maintenance process without proving that work has started."
+  - name: isGovernedBy
+    from: MaintenanceProcess
+    to: MaintenanceStrategy
+    meaning: "A maintenance process is carried out under a maintenance strategy."
+    aliases:
+      - prescribed by
+  - name: hasMaintenanceActivity
+    from: MaintenanceProcess
+    to: MaintenanceActivity
+    meaning: "A maintenance process has a main maintenance activity."
+  - name: hasSupportingMaintenanceActivity
+    from: MaintenanceProcess
+    to: SupportingMaintenanceActivity
+    meaning: "A maintenance process may have a supporting maintenance activity."
+  - name: requires
+    from: MaintenanceActivity
+    to: QualificationSpecification
+    meaning: "A maintenance activity requires a qualification specification for its assessed-skill requirement."
+    aliases:
+      - prescribed by
+  - name: isQualifiedFor
+    from: QualifiedMaintenancePerson
+    to: MaintenanceActivity
+    meaning: "A qualified maintenance person has been assessed as qualified for that particular maintenance activity."
+
+rules:
+  - name: answerCurrentState
+    conditions:
+      - The agent establishes which asset's maintenance state it is examining.
+      - The state category is operating, degraded, or failed.
+  - name: classifyOperatingState
+    conditions:
+      - The crew establishes that the asset can perform its required function.
+  - name: classifyDegradedState
+    conditions:
+      - The crew establishes that the asset's ability to perform as required is reduced.
+      - The crew assesses that the reduced performance is acceptable.
+  - name: classifyFailedState
+    conditions:
+      - A failure event occurred.
+      - The asset cannot perform its required function because of that event.
+  - name: traceFailureCause
+    conditions:
+      - The particular degraded or failed state of the asset is established.
+      - Evidence establishes that a particular failure process resulted in that state.
+  - name: traceInitiatingEvent
+    conditions:
+      - The particular failed state of the asset is established.
+      - A failure event is established as initiating that failed state.
+  - name: determineFailureEffectScope
+    conditions:
+      - Evidence establishes what the failure effect affected relative to the asset's boundary.
+  - name: connectFailureProcessToDisposition
+    conditions:
+      - The undesirable disposition is established as a disposition to fail.
+      - Evidence establishes that the failure process realizes that disposition.
+  - name: canCreateMaintenanceWorkOrder
+    conditions:
+      - The crew assesses that a maintenance process is needed to retain or restore the asset's required function.
+  - name: canAssignQualifiedMaintenancePerson
+    conditions:
+      - The particular maintenance activity requires a qualification specification.
+      - The proposed person's assessed skill or certification satisfies that requirement for that activity.
+  - name: canStartMaintenanceProcess
+    conditions:
+      - The maintenance process's governing maintenance strategy is defined.
+      - A maintenance work order record describes that same process.
+  - name: canCloseMaintenanceWorkOrder
+    conditions:
+      - The maintenance process's main maintenance activities are complete.
+      - The work-order record has been updated with what was actually performed.
+
+actions:
+  - name: recordAssetAsFailed
+    input: FailureEvent
+    preconditions:
+      - The agent establishes that the event occurred and identifies the affected asset and assessed required function from available information and the crew's assessment.
+      - The asset can no longer perform that function because of the event.
+    effect: Record a failed state for the affected asset.
+    verification: Check that the correct asset is tracked as failed.
+
+  - name: createMaintenanceWorkOrder
+    input: MaintenanceProcess
+    preconditions:
+      - The crew has assessed that this process is needed to retain or restore the identified asset's required function.
+      - The asset, required function, and proposed process are identified rather than guessed.
+    effect: Create a maintenance work order record describing the process without starting the work.
+    verification: Check that the new record describes the intended process.
+
+  - name: assignQualifiedMaintenancePerson
+    input: MaintenanceActivity
+    preconditions:
+      - The proposed person is identified.
+      - The activity requires a qualification specification, and the person satisfies it for that activity.
+    effect: Assign the person to the activity in the work information.
+    verification: Check who was actually assigned and that the assigned person is qualified for the activity.
+
+  - name: startMaintenanceProcess
+    input: MaintenanceProcess
+    preconditions:
+      - Its governing maintenance strategy is defined.
+      - A maintenance work order record describes that same process.
+    effect: Begin the maintenance process under its governing strategy.
+    verification: Check in the work information that the order is active and the main maintenance activities are assigned; do not presume that starting established either result.
+
+  - name: closeMaintenanceWorkOrder
+    input: MaintenanceWorkOrderRecord
+    preconditions:
+      - The process described by the record is identified and its main maintenance activities are complete.
+      - The record has been updated with what was actually performed.
+    effect: Update the record to reflect completion without assuming that closing populates cost.
+    verification: Confirm completed-task information and a numeric final cost on the record; report post-close verification as incomplete if either cannot be confirmed.

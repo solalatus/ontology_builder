@@ -1,0 +1,208 @@
+competency_questions: []
+classes:
+  PurchaseOrder:
+    meaning: Order that identifies the material trade item ordered and its supplier; no purchase-order incoming location has been established.
+    aliases: []
+    properties: {}
+  MaterialTradeItem:
+    meaning: Material trade item ordered and shipped.
+    aliases: []
+    properties: {}
+  Supplier:
+    meaning: Supplier of a purchase order.
+    aliases: []
+    properties: {}
+  Shipment:
+    meaning: Movement of goods fulfilling a purchase order.
+    aliases: []
+    properties: {}
+  Location:
+    meaning: Ship-from or ship-to location for a shipment.
+    aliases: []
+    properties: {}
+  Container:
+    meaning: "Container used by a shipment to hold cargo; this does not establish which lot, load, or logistic unit it carried."
+    aliases: []
+    properties: {}
+  ShipmentPreparationProcess:
+    meaning: Identified process for preparing a shipment.
+    aliases: []
+    properties: {}
+  Carrier:
+    meaning: Carrier arranged to move a shipment.
+    aliases: []
+    properties: {}
+  FreightForwardingArrangement:
+    meaning: Freight-forwarding arrangement for a shipment.
+    aliases: []
+    properties: {}
+  TransportProcess:
+    meaning: Transport process with a starting and ending supply-chain node; the recorded endpoint does not by itself prove arrival.
+    aliases: []
+    properties: {}
+  SupplyChainNode:
+    meaning: Start or destination node of a transport process.
+    aliases: []
+    properties: {}
+  TrackingEvent:
+    meaning: "Event identifying the shipment, lot, logistic unit, or load it tracks and recording its event time and type; the latest event supports last recorded movement or handling, not guaranteed current position."
+    aliases: []
+    properties:
+      eventTime:
+        type: date
+      eventType:
+        type: text
+  Lot:
+    meaning: Lot that can be the material resource unit being traced through supply-chain activity.
+    aliases: []
+    properties: {}
+  LogisticUnit:
+    meaning: Logistic unit that can be the material resource unit being traced through supply-chain activity.
+    aliases: []
+    properties: {}
+  Load:
+    meaning: Load that can be the material resource unit being traced through supply-chain activity.
+    aliases: []
+    properties: {}
+  ReceivingProcess:
+    meaning: Process of receiving a shipment at a facility.
+    aliases: []
+    properties:
+      occurred:
+        type: boolean
+  Facility:
+    meaning: Facility at which receiving takes place.
+    aliases: []
+    properties: {}
+  Sublot:
+    meaning: Sublot that can be the material resource unit being traced; no direct shipment or tracking-event link for a sublot has been specified.
+    aliases: []
+    properties: {}
+relationships:
+  - name: concernsItem
+    from: PurchaseOrder
+    to: MaterialTradeItem
+    meaning: null
+    aliases: []
+  - name: suppliedBy
+    from: PurchaseOrder
+    to: Supplier
+    meaning: null
+    aliases: []
+  - name: fulfillsOrder
+    from: Shipment
+    to: PurchaseOrder
+    meaning: null
+    aliases: []
+  - name: concernsItem
+    from: Shipment
+    to: MaterialTradeItem
+    meaning: null
+    aliases: []
+  - name: shipsFrom
+    from: Shipment
+    to: Location
+    meaning: null
+    aliases: []
+  - name: shipsTo
+    from: Shipment
+    to: Location
+    meaning: null
+    aliases: []
+  - name: usesContainer
+    from: Shipment
+    to: Container
+    meaning: null
+    aliases: []
+  - name: hasPreparationProcess
+    from: Shipment
+    to: ShipmentPreparationProcess
+    meaning: null
+    aliases: []
+  - name: hasCarrier
+    from: Shipment
+    to: Carrier
+    meaning: null
+    aliases: []
+  - name: hasFreightForwardingArrangement
+    from: Shipment
+    to: FreightForwardingArrangement
+    meaning: null
+    aliases: []
+  - name: followsTransportProcess
+    from: Shipment
+    to: TransportProcess
+    meaning: null
+    aliases: []
+  - name: startsAtNode
+    from: TransportProcess
+    to: SupplyChainNode
+    meaning: null
+    aliases: []
+  - name: endsAtNode
+    from: TransportProcess
+    to: SupplyChainNode
+    meaning: null
+    aliases:
+      - headsToNode
+  - name: hasTrackingEvent
+    from: Shipment
+    to: TrackingEvent
+    meaning: null
+    aliases:
+      - refersToShipment
+  - name: refersToLot
+    from: TrackingEvent
+    to: Lot
+    meaning: null
+    aliases: []
+  - name: refersToLogisticUnit
+    from: TrackingEvent
+    to: LogisticUnit
+    meaning: null
+    aliases: []
+  - name: refersToLoad
+    from: TrackingEvent
+    to: Load
+    meaning: null
+    aliases: []
+  - name: hasReceivingProcess
+    from: Shipment
+    to: ReceivingProcess
+    meaning: null
+    aliases:
+      - receivesShipment
+  - name: occursAtFacility
+    from: ReceivingProcess
+    to: Facility
+    meaning: null
+    aliases: []
+rules:
+  readyToPrepare:
+    conditions:
+      - Shipment fulfills a purchase order and concerns a material trade item.
+      - Shipment has ship-from and ship-to locations and a container for its cargo.
+      - Shipment has an identified shipment preparation process.
+      - Shipment has either a carrier or a freight-forwarding arrangement.
+  receiptCanBeConfirmed:
+    conditions:
+      - The shipment has an identified ship-to location and is associated with the relevant transport process identified as ending at the destination supply-chain node.
+      - A person verifies the transport leg against available arrival evidence and that recorded endpoint; neither an arrived tracking event nor the recorded endpoint automatically proves the leg reached the node.
+      - "The shipment's receiving process actually occurred at a facility, and receipt there is verified separately from the transport-leg check."
+      - "Any discrepancy between ship-to location, destination node, and receiving facility is investigated rather than assuming an automatic equality rule."
+  traceIsIncomplete:
+    conditions:
+      - "The relevant resource unit's association with lots, loads, or logistic units and the movement history needed for this trace is missing; tracking events or a container alone do not establish which shipment carried a particular unit."
+actions:
+  markReadyToPrepare:
+    input: Shipment
+    preconditions:
+      - readyToPrepare
+    effect: ""
+    verification: ""
+  confirmReceipt:
+    input: Shipment
+    preconditions:
+      - receiptCanBeConfirmed
+    effect: ""
+    verification: ""

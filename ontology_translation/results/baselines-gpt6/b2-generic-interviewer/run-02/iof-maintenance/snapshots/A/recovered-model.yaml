@@ -1,0 +1,192 @@
+competency_questions: []
+classes:
+  Asset:
+    meaning: A maintainable physical item whose required function maintenance work retains or restores.
+    aliases:
+      - maintainable item
+      - item
+    properties: {}
+  Asset State:
+    meaning: The condition of an asset in terms of its ability to perform its required function.
+    aliases: []
+    properties:
+      state:
+        type: text
+        allowed:
+          - operating
+          - degraded
+          - failed
+  Failure Process:
+    meaning: The developing change in an asset that can lead to loss of required function.
+    aliases: []
+    properties: {}
+  Failure Event:
+    meaning: The event that begins a failed state.
+    aliases: []
+    properties: {}
+  Failure Effect:
+    meaning: "A consequence of a failure event, including production stoppage or other effects beyond the asset."
+    aliases:
+      - Consequence
+    properties: {}
+  Maintenance Strategy:
+    meaning: The strategy applicable to a maintenance process.
+    aliases: []
+    properties: {}
+  Maintenance Process:
+    meaning: "Work to retain or restore the function of a particular maintainable item, carried out under a maintenance strategy."
+    aliases: []
+    properties: {}
+  Supporting Work:
+    meaning: An action that helps execute the maintenance process rather than the maintenance task itself.
+    aliases: []
+    properties: {}
+  Work Order:
+    meaning: The order describing the maintenance process and updated with what was performed; its closed record includes completed task information and final cost.
+    aliases: []
+    properties:
+      finalCost:
+        type: number
+      actuallyPerformed:
+        type: text
+  Maintenance Activity:
+    meaning: "A single task in a maintenance process, for which an assessed skill may be specified before assignment."
+    aliases:
+      - task
+    properties:
+      complete:
+        type: boolean
+  Qualification:
+    meaning: The assessed skill specified as needed for a particular maintenance activity.
+    aliases: []
+    properties: {}
+  Person:
+    meaning: A proposed or assigned person who may perform maintenance work.
+    aliases: []
+    properties: {}
+relationships:
+  - name: hasState
+    from: Asset
+    to: Asset State
+    meaning: null
+    aliases: []
+  - name: developsFailureProcess
+    from: Asset
+    to: Failure Process
+    meaning: null
+    aliases: []
+  - name: beginsFailedState
+    from: Failure Event
+    to: Asset State
+    meaning: null
+    aliases: []
+  - name: hasFailureEffect
+    from: Failure Event
+    to: Failure Effect
+    meaning: null
+    aliases:
+      - hasConsequence
+  - name: followsStrategy
+    from: Maintenance Process
+    to: Maintenance Strategy
+    meaning: The maintenance process is carried out under the applicable maintenance strategy.
+    aliases: []
+  - name: includesSupportingWork
+    from: Maintenance Process
+    to: Supporting Work
+    meaning: null
+    aliases: []
+  - name: describesProcess
+    from: Work Order
+    to: Maintenance Process
+    meaning: null
+    aliases: []
+  - name: requiresQualification
+    from: Maintenance Activity
+    to: Qualification
+    meaning: The activity specifies the assessed skill needed to perform it.
+    aliases: []
+  - name: satisfiesQualification
+    from: Person
+    to: Qualification
+    meaning: The person meets the assessed skill specified for the activity.
+    aliases: []
+  - name: isAssignedTo
+    from: Maintenance Activity
+    to: Person
+    meaning: null
+    aliases:
+      - assignedTo
+  - name: changesState
+    from: Failure Process
+    to: Asset State
+    meaning: "A developing failure process changes an item's state and can leave it degraded or failed."
+    aliases: []
+  - name: containsActivity
+    from: Maintenance Process
+    to: Maintenance Activity
+    meaning: "A maintenance process contains maintenance activities, each of which is a single task."
+    aliases: []
+  - name: concernsAsset
+    from: Maintenance Process
+    to: Asset
+    meaning: The maintenance process concerns the maintainable item whose function it retains or restores.
+    aliases: []
+rules:
+  degradedState:
+    conditions:
+      - "The item's ability is reduced but performance remains acceptable; classify its state as degraded rather than failed."
+  failedState:
+    conditions:
+      - A failure event has occurred and the item cannot perform its required function; classify its state as failed.
+  qualificationMet:
+    conditions:
+      - "Before assignment, establish that the proposed person satisfies the assessed skill specified for that maintenance activity and is qualified to perform it."
+      - "If this cannot be established, do not assign the person."
+      - "Certification or separate authorization is evidence only when called for by the specified qualification, not a universal requirement."
+  readyToCloseWorkOrder:
+    conditions:
+      - "The maintenance activities in the work order's maintenance process are complete."
+      - The work order is updated to say what was performed.
+      - Completion of every supporting action is not a separate closing requirement.
+      - A plan-versus-actual comparison is not a separate closing requirement.
+  closedWorkOrderRecordVerified:
+    conditions:
+      - Verify that the closed work order record contains completed task information.
+      - Verify that the closed work order record contains the final cost; this is not an additional stated precondition for closing.
+  operatingState:
+    conditions:
+      - The item can perform its required function; classify its state as operating unless reduced but acceptable performance calls for degraded.
+  workOrderNeeded:
+    conditions:
+      - Issue a work order when a maintenance process is needed for the asset.
+      - Degraded performance may lead to maintenance to retain function; it does not automatically trigger planned work.
+      - A failed state may lead to maintenance to restore function; it does not automatically require an emergency fix.
+  responseUrgency:
+    conditions:
+      - Consider failure effects such as downstream production stoppage when deciding how urgently to respond.
+      - The maintenance strategy guides how the maintenance process is carried out but its link to that process does not itself specify an urgency rule.
+      - "No fixed priority follows solely from an operating, degraded, or failed state."
+  assessAffectedAsset:
+    conditions:
+      - "Record a knock-on consequence as a failure effect of the failure event, not as another state of the original asset."
+      - "If another asset is affected, assess its own condition separately; do not assume it has failed."
+actions:
+  assignPerson:
+    input: Maintenance Activity
+    preconditions:
+      - qualificationMet
+    effect: ""
+    verification: ""
+  closeWorkOrder:
+    input: Work Order
+    preconditions:
+      - readyToCloseWorkOrder
+    effect: ""
+    verification: ""
+  issueWorkOrder:
+    input: Work Order
+    preconditions:
+      - workOrderNeeded
+    effect: ""
+    verification: ""

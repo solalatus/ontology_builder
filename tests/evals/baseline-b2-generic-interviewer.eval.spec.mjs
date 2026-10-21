@@ -9,6 +9,7 @@ import { connectAgentLiveProvider, forwardChatToRealProvider } from "../lib/live
 import { llmEnv, resolveLlmConfig, missingCredentials, cheapPersonaModel } from "../lib/llmProvider.mjs";
 import { providerChat } from "./lib/chatClient.mjs";
 import { runOntologyRecoveryConversation } from "./lib/conversationOrchestrator.mjs";
+import { GENERIC_SYSTEM_PROMPT } from "./lib/baselineConditions.mjs";
 import { loadGroundTruthModel, scopeGroundTruth } from "./lib/groundTruthModel.mjs";
 import { computeRecoveryMetrics, computeHeuristicMatchPairs } from "./lib/recoveryMetrics.mjs";
 import { computeSemanticRecoveryMetrics } from "./lib/llmMatcher.mjs";
@@ -77,46 +78,9 @@ const REVIEW_MODEL_OVERRIDE = process.env.ONTOLOGY_EVAL_REVIEW_MODEL || null;
 const TRIAL_ID = process.env.BASELINE_TRIAL_ID || "trial-01";
 const OUT_DIR = path.join(__dirname, "results", "baselines", "b2-generic-interviewer", TRIAL_ID);
 
-// Deliberately short and generic ("interview this expert and build a domain
-// model" -- the brief's own example), procedural profile-constraints
-// paragraph included (structural, not domain-specific -- see this file's own
-// header comment), zero fixture content, zero staged-interview technique.
-const GENERIC_SYSTEM_PROMPT = `Interview this domain expert and build a compact domain model of what they describe.
+// The prompt now lives in lib/baselineConditions.mjs, moved there verbatim
+// (its hash is pinned to this condition's original runs).
 
-Ask questions, confirm what you've understood, and use the apply_ontology_yaml tool to add or update classes, relationships, rules, and actions in the model as you go -- call it whenever you've confirmed something new or changed, not only once at the end. Use the get_graph_state tool if you need to check the model's current state.
-
-The model has flat classes and directed relationship edges: there is no subclassing (express a specialization as a relationship instead), and each real-world connection should be exactly one directed edge, never also its inverse. Include a property only when it is decision-relevant -- something the expert would filter, compare, or act on -- not a purely technical identifier or record-keeping field. Use the expert's own vocabulary for class, relationship, and property names and aliases.
-
-Use this YAML shape when calling apply_ontology_yaml:
-
-classes:
-  ClassName:
-    meaning: <one sentence, or omit>
-    aliases: [alt name, ...]
-    properties:
-      propName:
-        type: text | number | date | boolean
-        unit: <only if type is number and a unit applies>
-        allowed: [choice1, choice2, ...]   # only if a fixed list exists
-
-relationships:
-  - name: camelCaseVerbPhrase
-    from: ClassA
-    to: ClassB
-    meaning: <one sentence, or omit>
-    aliases: [alt phrasing, ...]
-
-rules:
-  ruleName:
-    conditions:
-      - <plain-language condition>
-
-actions:
-  actionName:
-    input: ClassName
-    preconditions: [ruleName, ...]
-
-When you believe the interview has covered what the expert needs, say so clearly.`;
 
 const sha256 = (s) => crypto.createHash("sha256").update(s).digest("hex");
 

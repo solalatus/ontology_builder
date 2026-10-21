@@ -1,0 +1,233 @@
+classes:
+  Shipment:
+    meaning: "A shipment is the particular traceable unit of goods being prepared, moved, or received."
+  PurchaseOrder:
+    meaning: "A purchase order is an agreement requesting or authorizing supply."
+    aliases:
+      - order
+  Supplier:
+    meaning: "A supplier is a party supplying goods or services to a customer."
+  Customer:
+    meaning: "A customer is the party receiving supply."
+  MaterialTradeItem:
+    meaning: "A material trade item is the tradable item concerned by an order, shipment, or supply relationship."
+  SupplyRelationship:
+    meaning: "A supply relationship is a supply dependency reviewed in the context of a supplier, customer, and material trade item."
+  TrackingEvent:
+    meaning: "A tracking event is a recorded occurrence concerning a shipment or traceable unit."
+    properties:
+      eventTime:
+        type: date
+      eventType:
+        type: text
+  Lot:
+    meaning: "A lot is a batch-level unit that can be traced."
+  Sublot:
+    meaning: "A sublot is a traceable subdivision of a lot."
+  LogisticUnit:
+    meaning: "A logistic unit is a handling unit traced through storage and transport."
+  Load:
+    meaning: "A load is a traceable unit prepared for handling or transport."
+  Container:
+    meaning: "A container holds goods and may, when specifically used for freight transport, be a freight container."
+  ShipFromLocation:
+    meaning: "A ship-from location is where a shipment is sent from."
+  ShipToLocation:
+    meaning: "A ship-to location is where a shipment is intended to go."
+  SupplyChainNode:
+    meaning: "A supply chain node is an endpoint of a transport process."
+  ShipmentPreparationProcess:
+    meaning: "A shipment preparation process prepares a shipment for dispatch."
+  TransportProcess:
+    meaning: "A transport process moves goods between supply chain nodes."
+  ReceivingProcess:
+    meaning: "A receiving process records incoming work at a facility."
+  StorageProcess:
+    meaning: "A storage process is work that occurs at a facility used to store goods."
+  Facility:
+    meaning: "A facility is a site where work such as receiving or shipment preparation occurs."
+  Carrier:
+    meaning: "A carrier is a supplier that transports shipments."
+  FreightForwarder:
+    meaning: "A freight forwarder arranges freight forwarding rather than necessarily carrying the goods."
+  Service:
+    meaning: "A service describes a commercial capability rather than the process that performs work."
+    properties:
+      typeOfService:
+        type: text
+
+relationships:
+  - name: suppliesTo
+    from: Supplier
+    to: Customer
+    meaning: "A supplier supplies to a customer."
+  - name: dependsOn
+    from: SupplyRelationship
+    to: Supplier
+    meaning: "A supply relationship depends on its identified supplier."
+  - name: dependsOn
+    from: SupplyRelationship
+    to: Customer
+    meaning: "A supply relationship depends on its identified customer."
+  - name: dependsOn
+    from: SupplyRelationship
+    to: MaterialTradeItem
+    meaning: "A supply relationship depends on its identified material trade item."
+  - name: concernsTheItem
+    from: PurchaseOrder
+    to: MaterialTradeItem
+    meaning: "A purchase order concerns a material trade item."
+  - name: fulfillsTheOrder
+    from: Shipment
+    to: PurchaseOrder
+    meaning: "A shipment fulfills a purchase order."
+  - name: concernsTheItem
+    from: Shipment
+    to: MaterialTradeItem
+    meaning: "A shipment concerns a material trade item, independently of the item on the purchase order."
+  - name: shipsFrom
+    from: Shipment
+    to: ShipFromLocation
+    meaning: "A shipment ships from its ship-from location."
+  - name: shipsTo
+    from: Shipment
+    to: ShipToLocation
+    meaning: "A shipment ships to its intended ship-to location."
+  - name: startsAt
+    from: TransportProcess
+    to: SupplyChainNode
+    meaning: "A transport process starts at its start supply chain node."
+  - name: endsAt
+    from: TransportProcess
+    to: SupplyChainNode
+    meaning: "A transport process ends at its end supply chain node, which alone does not prove arrival."
+  - name: occursAt
+    from: ShipmentPreparationProcess
+    to: Facility
+    meaning: "A shipment preparation process occurs at a facility."
+  - name: occursAt
+    from: ReceivingProcess
+    to: Facility
+    meaning: "A receiving process occurs at a facility."
+  - name: occursAt
+    from: StorageProcess
+    to: Facility
+    meaning: "A storage process occurs at a facility whose storage use must be verified."
+  - name: tracks
+    from: TrackingEvent
+    to: Shipment
+    meaning: "A tracking event records information about a shipment it identifies."
+  - name: tracks
+    from: TrackingEvent
+    to: Lot
+    meaning: "A tracking event records information about a lot it identifies."
+  - name: tracks
+    from: TrackingEvent
+    to: LogisticUnit
+    meaning: "A tracking event records information about a logistic unit it identifies."
+  - name: tracks
+    from: TrackingEvent
+    to: Load
+    meaning: "A tracking event records information about a load it identifies."
+  - name: uses
+    from: Shipment
+    to: Container
+    meaning: "A shipment uses a container that holds goods."
+  - name: involves
+    from: ShipmentPreparationProcess
+    to: Carrier
+    meaning: "A shipment preparation process involves a carrier."
+  - name: involves
+    from: Service
+    to: Carrier
+    meaning: "A transportation service involves a carrier."
+  - name: involves
+    from: Service
+    to: FreightForwarder
+    meaning: "A freight forwarding service involves a freight forwarder."
+  - name: isAKindOf
+    from: Carrier
+    to: Supplier
+    meaning: "A carrier is a kind of supplier."
+
+rules:
+  - name: canRecordTrackingEvent
+    conditions:
+      - "An identified shipment, lot, logistic unit, or load is a target of the event."
+      - "The event time is available."
+      - "The event type is known."
+  - name: canPrepareShipment
+    conditions:
+      - "The shipment and both its ship-from and ship-to locations are identified."
+      - "The preparation process for this particular shipment is identified."
+      - "Either an involved carrier is identified or a freight forwarding service is verified as arranged for this shipment."
+  - name: canDispatchShipment
+    conditions:
+      - "The shipment to dispatch is identified."
+  - name: canReceiveShipment
+    conditions:
+      - "The shipment's ship-to location is identified."
+      - "Evidence establishes that a transport process associated with this shipment reached the destination node."
+      - "The receiving process occurred at the destination facility."
+      - "The correspondence among the ship-to location, destination node, and receiving facility is verified for this receipt."
+  - name: canEvaluateSupplyRelationship
+    conditions:
+      - "The particular supply relationship is identified."
+      - "Its links to an identified supplier, customer, and material trade item are all confirmed."
+  - name: establishCurrentWhereabouts
+    conditions:
+      - "Recorded events and any relevant transport or receiving evidence establish the claimed whereabouts."
+      - "A planned ship-to location or the latest recorded event alone is not treated as proof of current whereabouts."
+      - "If the evidence is insufficient, current whereabouts are reported as unestablished."
+  - name: identifyTraceableUnitForShipment
+    conditions:
+      - "Tracking events and available traceability or inventory evidence establish which lot, logistic unit, or load is relevant to the shipment."
+      - "A sublot is reported only when available evidence separately identifies it; no path from the shipment or parent lot is assumed."
+  - name: confirmFreightContainer
+    conditions:
+      - "Available evidence establishes that the container used by the shipment is specifically used for freight transport."
+  - name: confirmStorageFacility
+    conditions:
+      - "Available evidence establishes that the facility where storage occurred is used for storage."
+  - name: identifyApplicableService
+    conditions:
+      - "Available activity or arrangement evidence establishes that the service applies to the particular activity."
+      - "The service type is checked rather than treated as proof of applicability."
+
+actions:
+  - name: prepareShipment
+    input: Shipment
+    preconditions:
+      - "Confirm the identified shipment's ship-from and ship-to locations."
+      - "Identify the preparation process for that shipment."
+      - "Establish either an identified carrier or a freight forwarding service actually arranged for that shipment."
+    effect: "Documents the shipment's locations, identified preparation process, and transport arrangement."
+    verification: "Read back those details for the same shipment; without readable preparation documentation, leave the result unverified."
+  - name: dispatchShipment
+    input: Shipment
+    preconditions:
+      - "Identify the shipment to dispatch."
+    effect: "Records that the identified shipment was dispatched for movement."
+    verification: "Confirm which shipment was dispatched from a readable action result; the specific evidence record has not been established."
+  - name: receiveShipment
+    input: Shipment
+    preconditions:
+      - "Identify the shipment's ship-to location."
+      - "Establish with arrival evidence that its associated transport process reached the destination node."
+      - "Establish that the receiving process occurred at the corresponding destination facility."
+    effect: "Records the shipment as arrived at the destination facility through the receiving process."
+    verification: "Confirm receipt of the same shipment at that facility and find readable evidence that the same receiving process was completed; recording arrival alone does not verify completion."
+  - name: recordTrackingEvent
+    input: TrackingEvent
+    preconditions:
+      - "Identify at least one shipment, lot, logistic unit, or load that the event tracks."
+      - "Provide the event time and a known event type."
+    effect: "Records the tracking event for its identified target or targets."
+    verification: "Confirm that the event time, event type, and tracked target or targets were saved."
+  - name: evaluateSupplyRelationship
+    input: SupplyRelationship
+    preconditions:
+      - "Identify the particular supply relationship."
+      - "Confirm its links to an identified supplier, customer, and material trade item."
+    effect: "Reviews the supply relationship against those three dependencies without assigning a score or approval decision."
+    verification: "Confirm that all three dependency links are present; leave the evaluation unresolved if any is missing."

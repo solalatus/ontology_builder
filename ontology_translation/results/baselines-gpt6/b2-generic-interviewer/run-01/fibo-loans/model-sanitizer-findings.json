@@ -1,0 +1,310 @@
+[
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "hasBorrower (Facility → Borrower)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "hasBorrower",
+      "from": "Facility",
+      "to": "Borrower",
+      "meaning": null,
+      "aliases": [
+        "canDraw"
+      ]
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "hasLender (Facility → Lender)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "hasLender",
+      "from": "Facility",
+      "to": "Lender",
+      "meaning": null,
+      "aliases": [
+        "providesCreditUnder"
+      ]
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "hasBorrower (Loan → Borrower)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "hasBorrower",
+      "from": "Loan",
+      "to": "Borrower",
+      "meaning": null,
+      "aliases": [
+        "borrowsUnder"
+      ]
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "hasLender (Loan → Lender)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "hasLender",
+      "from": "Loan",
+      "to": "Lender",
+      "meaning": null,
+      "aliases": [
+        "lendsUnder"
+      ]
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "dividesInto (Facility → Sub-facility)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "dividesInto",
+      "from": "Facility",
+      "to": "Sub-facility",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "hasInterestRate (Loan → Interest Rate)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "hasInterestRate",
+      "from": "Loan",
+      "to": "Interest Rate",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "hasInterestPaymentTerms (Loan → Interest Payment Terms)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "hasInterestPaymentTerms",
+      "from": "Loan",
+      "to": "Interest Payment Terms",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "hasPrincipalRepaymentTerms (Loan → Principal Repayment Terms)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "hasPrincipalRepaymentTerms",
+      "from": "Loan",
+      "to": "Principal Repayment Terms",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "hasPaymentSchedule (Loan → Payment Schedule)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "hasPaymentSchedule",
+      "from": "Loan",
+      "to": "Payment Schedule",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "hasAmortizationSchedule (Loan → Amortization Schedule)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "hasAmortizationSchedule",
+      "from": "Loan",
+      "to": "Amortization Schedule",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "hasInterestRateResetSchedule (Loan → Interest-rate Reset Schedule)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "hasInterestRateResetSchedule",
+      "from": "Loan",
+      "to": "Interest-rate Reset Schedule",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "hasPrincipalPaymentSchedule (Loan → Principal-payment Schedule)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "hasPrincipalPaymentSchedule",
+      "from": "Loan",
+      "to": "Principal-payment Schedule",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "hasInterestPaymentSchedule (Loan → Interest-payment Schedule)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "hasInterestPaymentSchedule",
+      "from": "Loan",
+      "to": "Interest-payment Schedule",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "hasInterestCalculationSchedule (Loan → Interest-calculation Schedule)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "hasInterestCalculationSchedule",
+      "from": "Loan",
+      "to": "Interest-calculation Schedule",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "isServicedBy (Loan → Servicer)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "isServicedBy",
+      "from": "Loan",
+      "to": "Servicer",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "isCollateralizedBy (Loan → Collateral)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "isCollateralizedBy",
+      "from": "Loan",
+      "to": "Collateral",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "secures (Security Agreement → Collateral)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "secures",
+      "from": "Security Agreement",
+      "to": "Collateral",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "hasPrepaymentTerms (Loan → Prepayment Terms)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "hasPrepaymentTerms",
+      "from": "Loan",
+      "to": "Prepayment Terms",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "hasPaymentHistory (Loan → Payment History)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "hasPaymentHistory",
+      "from": "Loan",
+      "to": "Payment History",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "contains (Payment History → Payment)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "contains",
+      "from": "Payment History",
+      "to": "Payment",
+      "meaning": null,
+      "aliases": []
+    }
+  }
+]

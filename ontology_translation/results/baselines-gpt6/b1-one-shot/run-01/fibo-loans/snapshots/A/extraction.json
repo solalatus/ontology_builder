@@ -1,0 +1,37 @@
+{
+  "condition": "b1-one-shot",
+  "transcript": "ontology_translation/results/default-change-187/treatment/run-01/fibo-loans/conversation-log.md",
+  "model": "gpt-6-sol",
+  "extraBody": {
+    "reasoning_effort": "high"
+  },
+  "extractionSystemPromptSha256": "41c2e221409507e489f9cab3bced39ec940a523ce85ef94b767eed8bc7202de9",
+  "transcriptSha256": "739ba44186a3dad47ab5c3a9efabfe341e9872a56bf86f608d1ea2dc308153be",
+  "usage": {
+    "completion_tokens": 4148,
+    "completion_tokens_details": {
+      "accepted_prediction_tokens": 0,
+      "audio_tokens": 0,
+      "reasoning_tokens": 1536,
+      "rejected_prediction_tokens": 0
+    },
+    "latency_checkpoint": {
+      "engine_tbt_ms": 7,
+      "engine_ttft_ms": 1110,
+      "engine_ttlt_ms": 29013,
+      "pre_inference_ms": 111,
+      "service_tbt_ms": 7,
+      "service_ttft_ms": 1509,
+      "service_ttlt_ms": 29406,
+      "user_visible_ttft_ms": 1398
+    },
+    "prompt_tokens": 35037,
+    "prompt_tokens_details": {
+      "audio_tokens": 0,
+      "cache_write_tokens": 35034,
+      "cached_tokens": 0
+    },
+    "total_tokens": 39185
+  },
+  "finishReason": "stop"
+}

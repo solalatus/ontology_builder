@@ -1,0 +1,63 @@
+{
+  "classes": [
+    {
+      "goldId": "FailureEvent",
+      "recoveredId": "n3",
+      "weight": 1
+    },
+    {
+      "goldId": "FailureProcess",
+      "recoveredId": "n4",
+      "weight": 1
+    },
+    {
+      "goldId": "RequiredFunction",
+      "recoveredId": "n2",
+      "weight": 1
+    },
+    {
+      "goldId": "MaintenanceStrategy",
+      "recoveredId": "n10",
+      "weight": 1
+    },
+    {
+      "goldId": "MaintenanceProcess",
+      "recoveredId": "n6",
+      "weight": 1
+    },
+    {
+      "goldId": "MaintenanceActivity",
+      "recoveredId": "n7",
+      "weight": 1
+    },
+    {
+      "goldId": "QualificationSpecification",
+      "recoveredId": "n8",
+      "weight": 1
+    },
+    {
+      "goldId": "MaintenanceWorkOrderRecord",
+      "recoveredId": "n5",
+      "weight": 0.6666666666666666
+    }
+  ],
+  "relationships": [
+    {
+      "goldId": "rel_5",
+      "edgeId": "e7",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_3",
+      "edgeId": "e6",
+      "direction": "forward"
+    }
+  ],
+  "properties": [
+    {
+      "goldId": "MaintenanceWorkOrderRecord.cost",
+      "hostNodeId": "n5",
+      "matchedPropertyName": "finalCost"
+    }
+  ]
+}

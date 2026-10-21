@@ -1,0 +1,407 @@
+classes:
+  Loan:
+    meaning: "A debt arrangement in which money or credit is extended to a borrower and repaid under the loan's terms."
+    properties:
+      principalAmount:
+        type: number
+      initialExchangeDate:
+        type: date
+      maturityDate:
+        type: date
+      kindOfLoan:
+        type: text
+      interestRateCap:
+        type: number
+      firstRateChangeTermInMonths:
+        type: number
+  SecuredLoan:
+    meaning: "A kind of loan backed by pledged assets or other security, including a third-party guarantee."
+  UnsecuredLoan:
+    meaning: "A kind of loan recorded as unsecured."
+  CollateralizedLoan:
+    meaning: "A kind of secured loan backed by cash or other acceptable collateral provided by the borrower."
+  GuaranteedLoan:
+    meaning: "A kind of secured loan that may be supported by a third-party guarantee without being collateralized."
+  CreditAgreement:
+    meaning: "An agreement under which a borrower receives value and agrees to repay the lender."
+    properties:
+      kindOfCreditAgreement:
+        type: text
+      initialExchangeDate:
+        type: date
+      maturityDate:
+        type: date
+  OpenEndCredit:
+    meaning: "A kind of credit agreement under which credit can be drawn and paid down within an agreed limit."
+    aliases:
+      - revolving credit
+      - charge account credit
+  ClosedEndCredit:
+    meaning: "A kind of credit agreement whose principal cannot increase after full funding at closing."
+  CreditFacility:
+    meaning: "A credit agreement that lets a borrower draw credit over time rather than reapply each time."
+    aliases:
+      - master commitment
+    properties:
+      creditLimit:
+        type: number
+      amountOfCreditExtended:
+        type: number
+      availableAmount:
+        type: number
+      kindOfCreditAgreement:
+        type: text
+      initialExchangeDate:
+        type: date
+      maturityDate:
+        type: date
+  SubFacility:
+    meaning: "An identifiable portion of a credit facility that may be committed or uncommitted."
+    properties:
+      kindOfSubFacility:
+        type: text
+  Borrower:
+    meaning: "The party obligated to repay credit under the agreement's terms."
+  Lender:
+    meaning: "The party that extends credit."
+  Servicer:
+    meaning: "The party that collects principal and interest payments on the lender's behalf."
+  Principal:
+    meaning: "The amount of debt to be repaid, separate from interest and from the loan's recorded principal amount."
+  Interest:
+    meaning: "The cost of using credit, expressed as a rate over time and payable to the lender."
+  InterestRate:
+    meaning: "The specific applicable rate record linked to a loan, rather than an additional generic record."
+    properties:
+      rate:
+        type: number
+      kindOfInterestRate:
+        type: text
+  FixedInterestRate:
+    meaning: "An interest rate that does not fluctuate over the life of the loan."
+  VariableInterestRate:
+    meaning: "An interest rate that can change over the loan's term without necessarily being designated floating or managed."
+    aliases:
+      - adjustable rate
+  FloatingInterestRate:
+    meaning: "A variable interest rate based on an index or benchmark."
+  ManagedInterestRate:
+    meaning: "A variable interest rate set from time to time by the institution rather than by a prescribed margin over a base rate."
+  InterestPaymentTerms:
+    meaning: "Terms governing payment of interest that also carry details of its accrual."
+    properties:
+      initialInterestAccrualDate:
+        type: date
+      initialInterestPaymentDate:
+        type: date
+      finalInterestPaymentDate:
+        type: date
+      interestPaymentFrequency:
+        type: text
+      interestPaymentDay:
+        type: text
+      compoundingFrequency:
+        type: text
+  DayCountConvention:
+    meaning: "The convention used to count days when calculating accrued interest."
+  PrincipalRepaymentTerms:
+    meaning: "Terms governing when and how principal must be repaid."
+    properties:
+      initialPrincipalPaymentDate:
+        type: date
+      principalRepaymentDate:
+        type: date
+      principalPaymentFrequency:
+        type: text
+      principalPaymentDay:
+        type: text
+  PrepaymentTerms:
+    meaning: "A kind of principal repayment terms governing payment before maturity."
+    properties:
+      prepaymentPenaltyTermInMonths:
+        type: number
+  InterestCalculationSchedule:
+    meaning: "A schedule showing when interest is calculated."
+  InterestPaymentSchedule:
+    meaning: "A schedule showing when interest is due."
+  InterestRateResetSchedule:
+    meaning: "A schedule showing when rate resets and the corresponding actual rate are recalculated."
+  PrincipalPaymentSchedule:
+    meaning: "A schedule showing when principal payments are due."
+  AmortizationSchedule:
+    meaning: "A schedule showing expected changes in the debt balance over periodic payments, not payments actually received."
+  PaymentHistory:
+    meaning: "A loan's record of actual payments toward its repayment obligation."
+  IndividualPaymentTransaction:
+    meaning: "One actual payment recorded in a payment history, not a scheduled payment."
+  Collateral:
+    meaning: "An asset pledged to support a secured loan."
+  SecurityAgreement:
+    meaning: "An agreement granting a financial interest over collateral and setting out rights and duties concerning it."
+  CollateralValueAsOfDate:
+    meaning: "A record of collateral's appraised value and the date to which that value applies."
+    properties:
+      value:
+        type: number
+      asOfDate:
+        type: date
+  LoanToValueRatio:
+    meaning: "A percentage comparing a collateralized loan's principal amount with the appraised value of the asset securing it."
+    aliases:
+      - LTV
+    properties:
+      ratio:
+        type: number
+  CombinedLoanToValueRatio:
+    meaning: "A percentage comparing total debt secured by the asset or assets with their appraised value."
+    properties:
+      ratio:
+        type: number
+  AccruedInterest:
+    meaning: "Interest incurred but still unpaid, recorded as an amount with an as-of date."
+    properties:
+      amount:
+        type: number
+      asOfDate:
+        type: date
+
+relationships:
+  - name: isKindOf
+    from: SecuredLoan
+    to: Loan
+    meaning: "Secured loan describes a recorded kind of loan, not an additional loan record."
+  - name: isKindOf
+    from: UnsecuredLoan
+    to: Loan
+    meaning: "Unsecured loan describes a recorded kind of loan, not an additional loan record."
+  - name: isKindOf
+    from: CollateralizedLoan
+    to: SecuredLoan
+    meaning: "Every collateralized loan is secured, but not every secured loan is collateralized."
+  - name: isKindOf
+    from: GuaranteedLoan
+    to: SecuredLoan
+    meaning: "A guaranteed loan is a kind of secured loan that need not be collateralized."
+  - name: isKindOf
+    from: OpenEndCredit
+    to: CreditAgreement
+    meaning: "Open-end credit is a kind of credit agreement, not an additional agreement record."
+  - name: isKindOf
+    from: ClosedEndCredit
+    to: CreditAgreement
+    meaning: "Closed-end credit is a kind of credit agreement, not an additional agreement record."
+  - name: isKindOf
+    from: CreditFacility
+    to: CreditAgreement
+    meaning: "A credit facility is itself a kind of credit agreement, not a facility linked to a second agreement record."
+  - name: isKindOf
+    from: FixedInterestRate
+    to: InterestRate
+    meaning: "A fixed interest rate is a kind of applicable interest rate, not a second rate record."
+  - name: isKindOf
+    from: VariableInterestRate
+    to: InterestRate
+    meaning: "A variable interest rate is a kind of applicable interest rate, not a second rate record."
+  - name: isKindOf
+    from: FloatingInterestRate
+    to: VariableInterestRate
+    meaning: "A floating interest rate is a more specific kind of variable interest rate."
+  - name: isKindOf
+    from: ManagedInterestRate
+    to: VariableInterestRate
+    meaning: "A managed interest rate is a more specific kind of variable interest rate."
+  - name: isKindOf
+    from: PrepaymentTerms
+    to: PrincipalRepaymentTerms
+    meaning: "Prepayment terms are a separately identifiable kind of principal repayment terms."
+  - name: hasBorrower
+    from: Loan
+    to: Borrower
+    meaning: "The loan identifies the party obligated to repay it."
+  - name: hasLender
+    from: Loan
+    to: Lender
+    meaning: "The loan identifies the party financing it."
+  - name: isServicedBy
+    from: Loan
+    to: Servicer
+    meaning: "The loan identifies who collects its payments on the lender's behalf."
+  - name: hasBorrower
+    from: CreditAgreement
+    to: Borrower
+    meaning: "The agreement identifies the party receiving value and agreeing to repay."
+  - name: hasLender
+    from: CreditAgreement
+    to: Lender
+    meaning: "The agreement identifies the party financing it."
+  - name: hasBorrower
+    from: CreditFacility
+    to: Borrower
+    meaning: "The facility identifies the party that may draw under it, subject to its terms."
+  - name: hasLender
+    from: CreditFacility
+    to: Lender
+    meaning: "The facility identifies the party providing it."
+  - name: hasSubFacility
+    from: CreditFacility
+    to: SubFacility
+    meaning: "The facility contains the identified portion whether or not its financing kind is recorded."
+  - name: hasPrincipal
+    from: Loan
+    to: Principal
+    meaning: "The loan identifies its principal obligation."
+  - name: hasInterest
+    from: Loan
+    to: Interest
+    meaning: "The loan identifies its interest obligation."
+  - name: hasInterestRate
+    from: Loan
+    to: InterestRate
+    meaning: "The loan links to a specific applicable rate record, though multiple links alone do not select a rate for a particular date."
+  - name: governsPaymentOf
+    from: PrincipalRepaymentTerms
+    to: Principal
+    meaning: "The terms identify the principal obligation whose payment they govern."
+  - name: governsPaymentOf
+    from: PrepaymentTerms
+    to: Principal
+    meaning: "Recorded prepayment terms identify the principal obligation whose early payment they govern."
+  - name: governsPaymentOf
+    from: InterestPaymentTerms
+    to: Interest
+    meaning: "The terms identify the interest obligation whose payment they govern."
+  - name: hasAccrualBasis
+    from: InterestPaymentTerms
+    to: DayCountConvention
+    meaning: "The terms use the linked day-count convention to calculate accrued interest."
+  - name: hasSchedule
+    from: Loan
+    to: InterestCalculationSchedule
+    meaning: "The loan has a schedule on file showing when interest is calculated."
+  - name: hasSchedule
+    from: Loan
+    to: InterestPaymentSchedule
+    meaning: "The loan has a schedule on file showing when interest is due."
+  - name: hasSchedule
+    from: Loan
+    to: InterestRateResetSchedule
+    meaning: "The loan has a schedule on file showing when rate resets and actual rates are recalculated."
+  - name: hasSchedule
+    from: Loan
+    to: PrincipalPaymentSchedule
+    meaning: "The loan has a schedule on file showing when principal is due."
+  - name: hasSchedule
+    from: Loan
+    to: AmortizationSchedule
+    meaning: "The loan has a schedule on file showing expected debt-balance changes."
+  - name: hasPaymentHistory
+    from: Loan
+    to: PaymentHistory
+    meaning: "The loan links to its record of actual payments."
+  - name: hasIndividualPayments
+    from: PaymentHistory
+    to: IndividualPaymentTransaction
+    meaning: "The history contains actual individual payment entries, not scheduled payments."
+  - name: isCollateralizedBy
+    from: Loan
+    to: Collateral
+    meaning: "A secured loan links to collateral supporting it, without that link alone establishing its recorded kind as collateralized."
+  - name: hasCollateralValue
+    from: Collateral
+    to: CollateralValueAsOfDate
+    meaning: "The collateral has a dated record of its appraised value."
+  - name: secures
+    from: SecurityAgreement
+    to: Collateral
+    meaning: "The security agreement grants an interest over the collateral, without a direct agreement-to-loan link."
+  - name: hasLoanToValueRatio
+    from: Loan
+    to: LoanToValueRatio
+    meaning: "A loan recorded as collateralized has a separate ratio for its own principal against the securing asset's appraisal."
+  - name: hasCombinedLoanToValueRatio
+    from: Loan
+    to: CombinedLoanToValueRatio
+    meaning: "A loan recorded as collateralized has a separate ratio based on total debt secured by the asset or assets."
+
+rules:
+  - name: loanSetupReadinessEvidence
+    conditions:
+      - "Confirm the party portion only from the input loan's borrower and lender links."
+      - "Confirm the interest portion only when the loan has an applicable rate link and interest payment terms govern that loan's own interest obligation."
+      - "If a required link or match cannot be established, report cannot confirm for that portion; a missing rate link does not prove the loan is interest-free."
+      - "Confirmation does not validate the numeric rate, its kind, or values within the terms."
+  - name: securedLoanCollateralEvidence
+    conditions:
+      - "Establish from the loan's recorded kind whether it is secured, including a more specific secured kind such as collateralized or guaranteed."
+      - "For a loan known to be secured, confirm this check only from its direct link to collateral; neither a guarantee nor a security agreement substitutes for that link."
+      - "If the kind is unknown, applicability cannot be established; if the collateral link cannot be established, report cannot confirm without concluding that the loan lacks security."
+      - "The presence of a collateral link alone does not establish the recorded kind collateralized."
+  - name: variableRateSetupEvidence
+    conditions:
+      - "Establish that the loan's linked rate is recorded as variable, including floating or managed."
+      - "Confirm this check only when that same loan also has an interest rate reset schedule link."
+      - "An unknown rate kind leaves applicability unresolved, and a missing reset-schedule link for a known variable-rate loan means cannot confirm."
+      - "Confirmation does not validate the rate number, schedule dates, or a separate rate-to-schedule match."
+  - name: paymentRecordCompletenessEvidence
+    conditions:
+      - "Confirm only when the loan has a payment history containing at least one actual individual payment transaction."
+      - "If the history or an actual entry cannot be established, report cannot confirm; scheduled payments do not count."
+      - "Confirmation does not establish that every payment due was made or that the borrower is current."
+  - name: prepaymentPenaltyTimingEvidence
+    conditions:
+      - "Find prepayment terms recorded as governing the input loan's own principal obligation."
+      - "Confirm that timing is on file only when those terms contain a numeric prepayment penalty term in months."
+      - "If the applicable terms or months value cannot be established, report cannot confirm; confirmation does not validate the number or decide whether to charge a penalty."
+  - name: subFacilityListing
+    conditions:
+      - "List sub-facilities from their links to the facility even if their committed or uncommitted kind is missing."
+      - "Report a sub-facility's financing kind only when recorded; do not infer commitment from facility membership."
+  - name: datedAmountsAndRatios
+    conditions:
+      - "Report a collateral appraisal or unpaid accrued-interest amount with its as-of date when both values are available."
+      - "Report the two loan-to-value measures separately only for a loan recorded as collateralized, without substituting either measure for the other or for a dated appraisal."
+      - "Do not attribute accrued interest to a particular loan: no match to that loan or its interest obligation has been established."
+      - "Do not assume a currency or a stored-number display convention without source evidence."
+  - name: unresolvedMatches
+    conditions:
+      - "Do not attribute a credit agreement's kind or dates to a particular loan without an established loan-to-agreement match."
+      - "Do not claim a particular credit facility governs or funds a loan without an established loan-to-facility match."
+      - "If several rates are linked to a loan, their links and a reset schedule alone do not identify which rate applied on a particular date."
+      - "A schedule's presence does not establish individual due or reset dates unless those dates are available in its information, or that a particular schedule implements particular terms."
+  - name: recordedKindsAndMissingValues
+    conditions:
+      - "Report loan, agreement, sub-facility, and rate kinds as recorded, without treating the kinds discussed here as exhaustive allowed-value lists."
+      - "Do not infer a kind from a collateral link, balance, or schedule; flag a questionable recorded value for verification rather than silently replace it."
+      - "A missing value limits its own answer, not unrelated answers or review checks that do not examine that value."
+
+actions:
+  - name: checkLoanSetupReadiness
+    input: Loan
+    preconditions:
+      - "A loan is provided for review."
+    effect: "Report separate borrower-and-lender and interest-setup findings, naming the links and terms examined and any portion that cannot be confirmed."
+    verification: "Confirm the input loan's borrower, lender, and rate links and that the examined interest payment terms govern that loan's own interest obligation."
+  - name: checkSupportForSecuredLoan
+    input: Loan
+    preconditions:
+      - "A loan is provided; establish from its recorded kind whether the secured-loan check applies."
+    effect: "Report whether the direct collateral link can be confirmed and identify the link examined, or report that applicability or the link cannot be established."
+    verification: "Confirm that the reported collateral is directly linked to the input loan, without substituting a guarantee or security agreement."
+  - name: checkVariableRateSetup
+    input: Loan
+    preconditions:
+      - "A loan is provided; establish whether its linked rate is recorded as variable."
+    effect: "Report the linked rate and its recorded kind, the reset-schedule link on the same loan, and anything that cannot be confirmed."
+    verification: "Confirm the rate and reset-schedule links on the input loan without claiming a separate link between that rate record and schedule."
+  - name: checkPaymentRecordCompleteness
+    input: Loan
+    preconditions:
+      - "A loan is provided for review."
+    effect: "Report its payment history and actual individual payment transactions found, or cannot confirm if the history or an actual entry cannot be established."
+    verification: "Follow the same input loan to its payment history and from that history to the reported actual payment entries."
+  - name: checkPrepaymentPenaltyTiming
+    input: Loan
+    preconditions:
+      - "A loan is provided for a prepayment-penalty timing review."
+    effect: "Report the applicable prepayment terms, their connection to the loan's principal, and the numeric months value examined, or cannot confirm."
+    verification: "Confirm that the terms govern the input loan's own principal and that the prepayment penalty term in months is recorded, without validating its correctness or deciding to charge a penalty."

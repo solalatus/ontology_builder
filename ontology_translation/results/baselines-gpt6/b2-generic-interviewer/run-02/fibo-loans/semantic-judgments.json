@@ -1,0 +1,400 @@
+{
+  "fullDomain": {
+    "judgments": {
+      "classes": [
+        {
+          "goldId": "CreditAgreement",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "OpenEndCredit",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "ClosedEndCredit",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Principal",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Interest",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "AccruedInterest",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "FixedInterestRate",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "VariableInterestRate",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "FloatingInterestRate",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "ManagedInterestRate",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "DayCountConvention",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "DebtTerms",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "InterestPaymentTerms",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "PrincipalRepaymentTerms",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "PrepaymentTerms",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Amortization",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "FullAmortization",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "PartialAmortization",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "NegativeAmortization",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "AmortizationSchedule",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "LoanPaymentSchedule",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "InterestPaymentSchedule",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "PrincipalPaymentSchedule",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "InterestCalculationSchedule",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "InterestRateResetSchedule",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "ExplicitContractEventSchedule",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "SecurityAgreement",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "CreditEnhancementAgreement",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "CreditEnhancementBeneficiary",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "IndividualPaymentTransaction",
+          "recoveredId": "n11",
+          "verdict": "MATCH"
+        },
+        {
+          "goldId": "PrincipalPayment",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "InterestPayment",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "InterestCalculation",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "BorrowingCapacity",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "LoanToValueRatio",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "CombinedLoanToValueRatio",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "CollateralValueAsOfDate",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "SecuredLoan",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "CollateralizedLoan",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "GuaranteedLoan",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "UnsecuredLoan",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "RevolvingLineOfCredit",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "CommittedCreditFacility",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "UncommittedCreditFacility",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "CommittedSubFacility",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "UncommittedSubFacility",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Accrual",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "InterestRateSettingEvent",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "relationships": [],
+      "properties": [
+        {
+          "goldId": "Loan.firstRateChangeTermMonths",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Loan.assumable",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Loan.initiallyPayable",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Loan.interestOnly",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Loan.balloonPayment",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Loan.totalClosingCosts",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Loan.totalPointsAndFees",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Loan.loanBalance",
+          "matchedPropertyName": "outstandingPrincipal",
+          "verdict": "MATCH"
+        }
+      ],
+      "valueFidelity": []
+    },
+    "rawResponses": {
+      "classes": "1: NO MATCH -- An approved agreement is not specifically a credit agreement.\n2: NO MATCH -- No candidate denotes open-end credit.\n3: NO MATCH -- No candidate denotes closed-end credit.\n4: NO MATCH -- A draw is not the principal owed.\n5: NO MATCH -- No candidate denotes interest.\n6: NO MATCH -- No candidate denotes accrued interest.\n7: NO MATCH -- No candidate denotes a fixed interest rate.\n8: NO MATCH -- No candidate denotes a variable interest rate.\n9: NO MATCH -- No candidate denotes a floating interest rate.\n10: NO MATCH -- No candidate denotes a managed interest rate.\n11: NO MATCH -- No candidate denotes a day count convention.\n12: NO MATCH -- An approved agreement is not debt terms.\n13: NO MATCH -- No candidate denotes interest payment terms.\n14: NO MATCH -- No candidate denotes principal repayment terms.\n15: NO MATCH -- No candidate denotes prepayment terms.\n16: NO MATCH -- A schedule is not amortization itself.\n17: NO MATCH -- No candidate denotes full amortization.\n18: NO MATCH -- No candidate denotes partial amortization.\n19: NO MATCH -- No candidate denotes negative amortization.\n20: NO MATCH -- A generic schedule is not specifically an amortization schedule.\n21: NO MATCH -- A generic schedule is not specifically a loan payment schedule.\n22: NO MATCH -- A generic schedule is not specifically an interest payment schedule.\n23: NO MATCH -- A generic schedule is not specifically a principal payment schedule.\n24: NO MATCH -- A generic schedule is not specifically an interest calculation schedule.\n25: NO MATCH -- A generic schedule is not specifically an interest rate reset schedule.\n26: NO MATCH -- A generic schedule is not specifically an explicit contract event schedule.\n27: NO MATCH -- A guarantee is not a security agreement.\n28: NO MATCH -- A guarantee is not the specified credit support agreement.\n29: NO MATCH -- A guarantor provides support rather than receiving its benefit.\n30: MATCH 4 -- Payment explicitly denotes an individual payment transaction.\n31: NO MATCH -- Payment is not specifically a principal payment.\n32: NO MATCH -- Payment is not specifically an interest payment.\n33: NO MATCH -- No candidate denotes an interest calculation.\n34: NO MATCH -- A draw is an amount used, not borrowing capacity.\n35: NO MATCH -- No candidate denotes a loan-to-value ratio.\n36: NO MATCH -- No candidate denotes a combined loan-to-value ratio.\n37: NO MATCH -- No candidate denotes collateral value as of a date.\n38: NO MATCH -- A guarantee is not a secured loan.\n39: NO MATCH -- No candidate denotes a collateralized loan.\n40: NO MATCH -- A guarantee is support for, not a guaranteed loan.\n41: NO MATCH -- No candidate denotes an unsecured loan.\n42: NO MATCH -- A draw is not a revolving line of credit.\n43: NO MATCH -- No candidate denotes a committed credit facility.\n44: NO MATCH -- No candidate denotes an uncommitted credit facility.\n45: NO MATCH -- No candidate denotes a committed sub-facility.\n46: NO MATCH -- No candidate denotes an uncommitted sub-facility.\n47: NO MATCH -- No candidate denotes accrual.\n48: NO MATCH -- A schedule is not an interest rate setting event.",
+      "properties": "1: NO MATCH -- Rate structure does not specify months until the first rate change.\n2: NO MATCH -- None of the candidates indicates whether the loan is assumable.\n3: NO MATCH -- Payment terms do not identify what is initially payable.\n4: NO MATCH -- Repayment terms do not specifically indicate interest-only status.\n5: NO MATCH -- Repayment terms do not specifically identify a balloon payment.\n6: NO MATCH -- None of the candidates represents total closing costs.\n7: NO MATCH -- None of the candidates represents total points and fees.\n8: MATCH \"outstandingPrincipal\" -- Outstanding principal is the remaining loan balance."
+    }
+  },
+  "scoped": {
+    "judgments": {
+      "classes": [
+        {
+          "goldId": "CreditAgreement",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Principal",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Interest",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "VariableInterestRate",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "InterestPaymentTerms",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "PrincipalRepaymentTerms",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "PrepaymentTerms",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Amortization",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "NegativeAmortization",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "InterestRateResetSchedule",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "SecurityAgreement",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "PrincipalPayment",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "InterestPayment",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "BorrowingCapacity",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "SecuredLoan",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "CollateralizedLoan",
+          "recoveredId": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "relationships": [],
+      "properties": [
+        {
+          "goldId": "Loan.interestOnly",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        },
+        {
+          "goldId": "Loan.balloonPayment",
+          "matchedPropertyName": null,
+          "verdict": "NO MATCH"
+        }
+      ],
+      "valueFidelity": []
+    },
+    "rawResponses": {
+      "classes": "1: NO MATCH -- An approved agreement is not necessarily a credit agreement.\n2: NO MATCH -- A draw is not the principal owed.\n3: NO MATCH -- No candidate denotes interest owed or accrued.\n4: NO MATCH -- A schedule is not a variable interest rate.\n5: NO MATCH -- No candidate denotes terms governing interest payments.\n6: NO MATCH -- No candidate denotes terms governing principal repayment.\n7: NO MATCH -- No candidate denotes prepayment terms.\n8: NO MATCH -- A general schedule is not amortization.\n9: NO MATCH -- No candidate denotes negative amortization.\n10: NO MATCH -- A general schedule is not specifically an interest rate reset schedule.\n11: NO MATCH -- An approved agreement is not necessarily a security agreement.\n12: NO MATCH -- A generic payment is not specifically a principal payment.\n13: NO MATCH -- A generic payment is not specifically an interest payment.\n14: NO MATCH -- A subfacility or draw is not borrowing capacity.\n15: NO MATCH -- No candidate denotes a secured loan.\n16: NO MATCH -- No candidate denotes a collateralized loan.",
+      "properties": "1: NO MATCH -- \"interest Only\" is a specific loan feature, not the same field as payment terms.\n2: NO MATCH -- \"balloon Payment\" is a specific payment feature, not the same field as principal repayment terms."
+    }
+  }
+}

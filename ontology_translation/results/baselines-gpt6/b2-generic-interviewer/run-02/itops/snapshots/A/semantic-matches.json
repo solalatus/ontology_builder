@@ -1,0 +1,138 @@
+{
+  "fullDomain": {
+    "classes": [
+      {
+        "goldId": "ItService",
+        "recoveredId": "n5"
+      }
+    ],
+    "relationships": [
+      {
+        "goldId": "rel_16",
+        "recoveredId": "e23"
+      },
+      {
+        "goldId": "rel_20",
+        "recoveredId": "e57"
+      },
+      {
+        "goldId": "rel_74",
+        "recoveredId": "e8"
+      },
+      {
+        "goldId": "rel_79",
+        "recoveredId": "e26"
+      },
+      {
+        "goldId": "rel_86",
+        "recoveredId": "e28"
+      },
+      {
+        "goldId": "rel_116",
+        "recoveredId": "e55"
+      },
+      {
+        "goldId": "rel_118",
+        "recoveredId": "e56"
+      }
+    ],
+    "properties": [
+      {
+        "goldId": "RegulatoryNotification.dueAt",
+        "matchedPropertyName": "submissionDueTime"
+      }
+    ],
+    "valueFidelity": [
+      {
+        "id": "Incident.status",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "Incident.severity",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "Incident.impact",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "Incident.urgency",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "Communication.audience",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "MaterialityAssessment.result",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "RegulatoryNotification.status",
+        "semanticFidelity": 1
+      }
+    ]
+  },
+  "scoped": {
+    "classes": [
+      {
+        "goldId": "ItService",
+        "recoveredId": "n5"
+      }
+    ],
+    "relationships": [
+      {
+        "goldId": "rel_20",
+        "recoveredId": "e57"
+      },
+      {
+        "goldId": "rel_79",
+        "recoveredId": "e26"
+      },
+      {
+        "goldId": "rel_86",
+        "recoveredId": "e28"
+      },
+      {
+        "goldId": "rel_116",
+        "recoveredId": "e55"
+      },
+      {
+        "goldId": "rel_118",
+        "recoveredId": "e56"
+      }
+    ],
+    "properties": [
+      {
+        "goldId": "RegulatoryNotification.dueAt",
+        "matchedPropertyName": "submissionDueTime"
+      }
+    ],
+    "valueFidelity": [
+      {
+        "id": "Incident.status",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "Incident.severity",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "Incident.impact",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "Communication.audience",
+        "semanticFidelity": 0
+      },
+      {
+        "id": "MaterialityAssessment.result",
+        "semanticFidelity": 1
+      },
+      {
+        "id": "RegulatoryNotification.status",
+        "semanticFidelity": 1
+      }
+    ]
+  }
+}

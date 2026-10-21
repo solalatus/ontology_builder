@@ -1,0 +1,26 @@
+[
+  {
+    "severity": "advisory",
+    "kind": "class",
+    "identity": "Chiller",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty"
+  },
+  {
+    "severity": "advisory",
+    "kind": "class",
+    "identity": "Pump",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty"
+  },
+  {
+    "severity": "advisory",
+    "kind": "class",
+    "identity": "CoolingTower",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty"
+  }
+]

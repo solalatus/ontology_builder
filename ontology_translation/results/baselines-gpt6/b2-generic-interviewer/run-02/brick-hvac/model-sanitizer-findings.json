@@ -1,0 +1,377 @@
+[
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "concernsZone (ComfortComplaint → Zone)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "concernsZone",
+      "from": "ComfortComplaint",
+      "to": "Zone",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "servesZone (TerminalUnit → Zone)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "servesZone",
+      "from": "TerminalUnit",
+      "to": "Zone",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "servesTerminalUnit (AHU → TerminalUnit)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "servesTerminalUnit",
+      "from": "AHU",
+      "to": "TerminalUnit",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "suppliesChilledWaterLoop (Chiller → ChilledWaterLoop)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "suppliesChilledWaterLoop",
+      "from": "Chiller",
+      "to": "ChilledWaterLoop",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "circulatesChilledWaterLoop (Pump → ChilledWaterLoop)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "circulatesChilledWaterLoop",
+      "from": "Pump",
+      "to": "ChilledWaterLoop",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "suppliesCoolingValve (ChilledWaterLoop → CoolingValve)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "suppliesCoolingValve",
+      "from": "ChilledWaterLoop",
+      "to": "CoolingValve",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "hasCoolingValve (AHU → CoolingValve)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "hasCoolingValve",
+      "from": "AHU",
+      "to": "CoolingValve",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "hasCoolingCoil (AHU → CoolingCoil)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "hasCoolingCoil",
+      "from": "AHU",
+      "to": "CoolingCoil",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "regulatesFlowThrough (CoolingValve → CoolingCoil)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "regulatesFlowThrough",
+      "from": "CoolingValve",
+      "to": "CoolingCoil",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "hasCoolingPath (AHU → CoolingPath)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "hasCoolingPath",
+      "from": "AHU",
+      "to": "CoolingPath",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "includesChilledWaterLoop (CoolingPath → ChilledWaterLoop)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "includesChilledWaterLoop",
+      "from": "CoolingPath",
+      "to": "ChilledWaterLoop",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "includesPump (CoolingPath → Pump)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "includesPump",
+      "from": "CoolingPath",
+      "to": "Pump",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "includesChiller (CoolingPath → Chiller)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "includesChiller",
+      "from": "CoolingPath",
+      "to": "Chiller",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "hasThermostat (Zone → Thermostat)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "hasThermostat",
+      "from": "Zone",
+      "to": "Thermostat",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "hasAlarm (AHU → Alarm)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "hasAlarm",
+      "from": "AHU",
+      "to": "Alarm",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "hasAlarm (TerminalUnit → Alarm)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "hasAlarm",
+      "from": "TerminalUnit",
+      "to": "Alarm",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "hasAlarm (Chiller → Alarm)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "hasAlarm",
+      "from": "Chiller",
+      "to": "Alarm",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "hasAlarm (Pump → Alarm)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "hasAlarm",
+      "from": "Pump",
+      "to": "Alarm",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "hasAlarm (Boiler → Alarm)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "hasAlarm",
+      "from": "Boiler",
+      "to": "Alarm",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "suppliesHotWaterLoop (Boiler → HotWaterLoop)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "suppliesHotWaterLoop",
+      "from": "Boiler",
+      "to": "HotWaterLoop",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "circulatesHotWaterLoop (Pump → HotWaterLoop)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "circulatesHotWaterLoop",
+      "from": "Pump",
+      "to": "HotWaterLoop",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "suppliesHeatingValve (HotWaterLoop → HeatingValve)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "suppliesHeatingValve",
+      "from": "HotWaterLoop",
+      "to": "HeatingValve",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "hasHeatingValve (AHU → HeatingValve)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "hasHeatingValve",
+      "from": "AHU",
+      "to": "HeatingValve",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "hasHeatingCoil (AHU → HeatingCoil)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "hasHeatingCoil",
+      "from": "AHU",
+      "to": "HeatingCoil",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "regulatesFlowThrough (HeatingValve → HeatingCoil)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "regulatesFlowThrough",
+      "from": "HeatingValve",
+      "to": "HeatingCoil",
+      "meaning": null,
+      "aliases": []
+    }
+  }
+]

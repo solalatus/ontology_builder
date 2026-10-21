@@ -137,8 +137,8 @@ The whole series is the work in `paired-stages/`, `default-change-187/` and `fin
 - **One unpublished domain.** It is also the largest, so leakage and size cannot be separated (reading 2).
 - **Three replicates per domain**, which detect differences of about 0.1.
 - **The recall ceiling is set by the scope rule** (reading 1). The data identify only one lever that would move recall: what counts as in scope. The owner decided on 2026-10-14 not to pull it.
-- **No baselines on this model.** The earlier comparisons used other models and an earlier prompt, so `DESIGN.md` does not compare against them:
-  - the one-shot, generic-interviewer and no-commit baselines (`tests/evals/results/baselines/`) ran on itops only, with `gpt-5.5`;
-  - the earlier multi-domain runs used `gpt-5.4`.
-
-  A paper claiming "the interview beats one-shot extraction" at this configuration would need those baselines re-run on `gpt-6-sol`. That is the one measurement a reviewer would likely ask for that this series does not provide.
+- **Baselines on this model:** measured since, in `../baselines-gpt6/` (B1 one-shot, B2 generic interviewer, B3 no commits; all five domains, 3 runs each). On the four published domains:
+  - interactive 0.781;
+  - B1 0.786, level on all five domains;
+  - B3 0.688; the interactive method beats it on two domains and is level on three;
+  - B2 0.353; the interactive method beats it on all five.

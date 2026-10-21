@@ -1,0 +1,118 @@
+{
+  "classes": [
+    {
+      "goldId": "Carrier",
+      "recoveredId": "n10",
+      "weight": 1
+    },
+    {
+      "goldId": "MaterialTradeItem",
+      "recoveredId": "n2",
+      "weight": 1
+    },
+    {
+      "goldId": "PurchaseOrder",
+      "recoveredId": "n1",
+      "weight": 1
+    },
+    {
+      "goldId": "Shipment",
+      "recoveredId": "n3",
+      "weight": 1
+    },
+    {
+      "goldId": "Container",
+      "recoveredId": "n5",
+      "weight": 1
+    },
+    {
+      "goldId": "LogisticUnit",
+      "recoveredId": "n14",
+      "weight": 1
+    },
+    {
+      "goldId": "Load",
+      "recoveredId": "n15",
+      "weight": 1
+    },
+    {
+      "goldId": "Lot",
+      "recoveredId": "n12",
+      "weight": 1
+    },
+    {
+      "goldId": "Sublot",
+      "recoveredId": "n13",
+      "weight": 1
+    },
+    {
+      "goldId": "TrackingEvent",
+      "recoveredId": "n8",
+      "weight": 1
+    },
+    {
+      "goldId": "Facility",
+      "recoveredId": "n17",
+      "weight": 1
+    },
+    {
+      "goldId": "TransportProcess",
+      "recoveredId": "n7",
+      "weight": 1
+    },
+    {
+      "goldId": "ShipmentPreparationProcess",
+      "recoveredId": "n6",
+      "weight": 1
+    },
+    {
+      "goldId": "ReceivingProcess",
+      "recoveredId": "n9",
+      "weight": 1
+    },
+    {
+      "goldId": "FreightForwardingService",
+      "recoveredId": "n11",
+      "weight": 1
+    }
+  ],
+  "relationships": [
+    {
+      "goldId": "rel_20",
+      "edgeId": "e17",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_21",
+      "edgeId": "e18",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_22",
+      "edgeId": "e19",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_24",
+      "edgeId": "e2",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_25",
+      "edgeId": "e1",
+      "direction": "forward"
+    }
+  ],
+  "properties": [
+    {
+      "goldId": "TrackingEvent.eventTime",
+      "hostNodeId": "n8",
+      "matchedPropertyName": "eventTime"
+    },
+    {
+      "goldId": "TrackingEvent.eventType",
+      "hostNodeId": "n8",
+      "matchedPropertyName": "eventType"
+    }
+  ]
+}

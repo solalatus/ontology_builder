@@ -13,8 +13,13 @@
 // Like the real deployment, the first tool-carrying Chat Completions call is
 // refused ("Function tools with reasoning_effort are not supported"), and
 // the classifier's temperature:0 is refused, so both fallbacks are exercised.
+//
+// Baseline conditions (lib/baselineConditions.mjs): an app call that carries
+// no tools (B3) gets a text-only interview -- one question, then a wrap-up --
+// since a model offered no tools cannot call one; and B1's/B3's extraction
+// call gets a fenced YAML model back.
 import {
-  scriptedInterviewer, asChatCompletion, asResponse, lastFromChatBody, lastFromResponsesBody,
+  scriptedInterviewer, asChatCompletion, asResponse, lastFromChatBody, lastFromResponsesBody, SEED_YAML,
 } from "./scriptedInterviewer.mjs";
 
 const ENDPOINT = (process.env.MOCK_AZURE_ENDPOINT || "").replace(/\/+$/, "");
@@ -26,6 +31,14 @@ if (ENDPOINT) {
   const json = (status, body) => new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json" } });
   const harnessUsage = { prompt_tokens: 400, completion_tokens: 20, total_tokens: 420, prompt_tokens_details: { cached_tokens: 0 } };
   const harnessReply = (text) => json(200, { id: "h", object: "chat.completion", choices: [{ index: 0, message: { role: "assistant", content: text }, finish_reason: "stop" }], usage: harnessUsage });
+  // MOCK_TOOLLESS_QUESTIONS (default 1) questions before the wrap-up, so a
+  // test can run a tool-less interview past the orchestrator's stall threshold.
+  let toollessTurns = 0;
+  const toollessQuestions = Number(process.env.MOCK_TOOLLESS_QUESTIONS) || 1;
+  const toollessMove = () => (++toollessTurns <= toollessQuestions
+    ? { text: toollessTurns === 1 ? "What does the agent need to know about invoices and suppliers?" : `Question ${toollessTurns}: what else should the agent know about invoice ${toollessTurns}?` }
+    : { text: "Thank you. The ontology is complete: every class, relationship and property is confirmed." });
+  const APP_PROMPT = /professional knowledge engineer specializing in Minimal Typed/;
 
   globalThis.fetch = async (input, init = {}) => {
     const url = typeof input === "string" ? input : input.url;
@@ -36,12 +49,17 @@ if (ENDPOINT) {
     if (pathPart.startsWith("/openai/deployments?")) {
       return json(200, { object: "list", data: [{ id: DEPLOYMENT, model: `${DEPLOYMENT}-2026-09-22`, status: "succeeded", created_at: 1 }] });
     }
-    if (pathPart.startsWith("/openai/v1/responses")) return json(200, asResponse(interviewer.next(lastFromResponsesBody(body))));
+    if (pathPart.startsWith("/openai/v1/responses")) {
+      if (!body.tools) return json(200, asResponse(toollessMove()));
+      return json(200, asResponse(interviewer.next(lastFromResponsesBody(body))));
+    }
     if (/^\/openai\/deployments\/[^/]+\/chat\/completions/.test(pathPart)) {
       if (body.tools) {
         return json(400, { error: { message: "Function tools with reasoning_effort are not supported for this model in /v1/chat/completions. To use function tools, use /v1/responses or set reasoning_effort to 'none'.", code: "unsupported_parameter" } });
       }
       const system = String((body.messages[0] && body.messages[0].content) || "");
+      if (APP_PROMPT.test(system)) return json(200, asChatCompletion(toollessMove()));
+      if (/^You build a compact, agent-facing domain model/.test(system)) return harnessReply(`Here is the model.\n\n\`\`\`yaml\n${SEED_YAML}\`\`\`\n`);
       if (/You judge a single message/.test(system)) {
         if ("temperature" in body) return json(400, { error: { message: "Unsupported value: 'temperature' does not support 0 with this model. Only the default (1) value is supported.", param: "temperature" } });
         const judged = String(body.messages[1].content).split("MESSAGE TO JUDGE:\n").pop();

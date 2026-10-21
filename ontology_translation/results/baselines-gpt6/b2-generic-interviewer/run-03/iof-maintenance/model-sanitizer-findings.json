@@ -1,0 +1,77 @@
+[
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "hasConditionState (Maintainable Item → Condition State)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "hasConditionState",
+      "from": "Maintainable Item",
+      "to": "Condition State",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "followsMaintenanceStrategy (Maintenance Process → Maintenance Strategy)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "followsMaintenanceStrategy",
+      "from": "Maintenance Process",
+      "to": "Maintenance Strategy",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "requiresQualificationSpecification (Maintenance Activity → Qualification Specification)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "requiresQualificationSpecification",
+      "from": "Maintenance Activity",
+      "to": "Qualification Specification",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "satisfiesQualificationSpecification (Qualified Maintenance Person → Qualification Specification)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "satisfiesQualificationSpecification",
+      "from": "Qualified Maintenance Person",
+      "to": "Qualification Specification",
+      "meaning": null,
+      "aliases": []
+    }
+  },
+  {
+    "severity": "advisory",
+    "kind": "relationship",
+    "identity": "describesUndesirableDisposition (Failure Mode Code → Undesirable Disposition)",
+    "field": "meaning",
+    "pattern": "NULL_MEANING",
+    "detail": "meaning is null/empty",
+    "relationship": {
+      "name": "describesUndesirableDisposition",
+      "from": "Failure Mode Code",
+      "to": "Undesirable Disposition",
+      "meaning": null,
+      "aliases": []
+    }
+  }
+]

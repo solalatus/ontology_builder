@@ -1,0 +1,178 @@
+{
+  "classes": [
+    {
+      "goldId": "AirHandlingUnit",
+      "recoveredId": "n1",
+      "weight": 1
+    },
+    {
+      "goldId": "Thermostat",
+      "recoveredId": "n8",
+      "weight": 1
+    },
+    {
+      "goldId": "TerminalUnit",
+      "recoveredId": "n9",
+      "weight": 1
+    },
+    {
+      "goldId": "Damper",
+      "recoveredId": "n16",
+      "weight": 1
+    },
+    {
+      "goldId": "Filter",
+      "recoveredId": "n15",
+      "weight": 1
+    },
+    {
+      "goldId": "Fan",
+      "recoveredId": "n14",
+      "weight": 1
+    },
+    {
+      "goldId": "Economizer",
+      "recoveredId": "n10",
+      "weight": 1
+    },
+    {
+      "goldId": "CoolingValve",
+      "recoveredId": "n17",
+      "weight": 1
+    },
+    {
+      "goldId": "HeatingValve",
+      "recoveredId": "n25",
+      "weight": 1
+    },
+    {
+      "goldId": "Boiler",
+      "recoveredId": "n21",
+      "weight": 1
+    },
+    {
+      "goldId": "Chiller",
+      "recoveredId": "n11",
+      "weight": 1
+    },
+    {
+      "goldId": "Building",
+      "recoveredId": "n23",
+      "weight": 1
+    },
+    {
+      "goldId": "Floor",
+      "recoveredId": "n2",
+      "weight": 1
+    },
+    {
+      "goldId": "Space",
+      "recoveredId": "n24",
+      "weight": 1
+    },
+    {
+      "goldId": "Zone",
+      "recoveredId": "n7",
+      "weight": 1
+    },
+    {
+      "goldId": "CoolingTower",
+      "recoveredId": "n13",
+      "weight": 1
+    },
+    {
+      "goldId": "Pump",
+      "recoveredId": "n12",
+      "weight": 1
+    }
+  ],
+  "relationships": [
+    {
+      "goldId": "rel_26",
+      "edgeId": "e16",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_27",
+      "edgeId": "e28",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_28",
+      "edgeId": "e27",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_30",
+      "edgeId": "e25",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_31",
+      "edgeId": "e3",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_16",
+      "edgeId": "e22",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_17",
+      "edgeId": "e23",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_18",
+      "edgeId": "e24",
+      "direction": "forward"
+    }
+  ],
+  "properties": [
+    {
+      "goldId": "AirHandlingUnit.status",
+      "hostNodeId": "n1",
+      "matchedPropertyName": "operatingStatus"
+    },
+    {
+      "goldId": "Thermostat.status",
+      "hostNodeId": "n8",
+      "matchedPropertyName": "operatingStatus"
+    },
+    {
+      "goldId": "TerminalUnit.status",
+      "hostNodeId": "n9",
+      "matchedPropertyName": "operatingStatus"
+    },
+    {
+      "goldId": "Fan.status",
+      "hostNodeId": "n14",
+      "matchedPropertyName": "alarmStatus"
+    },
+    {
+      "goldId": "Economizer.status",
+      "hostNodeId": "n10",
+      "matchedPropertyName": "operatingStatus"
+    },
+    {
+      "goldId": "Boiler.status",
+      "hostNodeId": "n21",
+      "matchedPropertyName": "operatingStatus"
+    },
+    {
+      "goldId": "Chiller.status",
+      "hostNodeId": "n11",
+      "matchedPropertyName": "operatingStatus"
+    },
+    {
+      "goldId": "CoolingTower.status",
+      "hostNodeId": "n13",
+      "matchedPropertyName": "operatingStatus"
+    },
+    {
+      "goldId": "Pump.status",
+      "hostNodeId": "n12",
+      "matchedPropertyName": "operatingStatus"
+    }
+  ]
+}

@@ -1,0 +1,943 @@
+{
+  "classes": [
+    {
+      "goldId": "OrganizationalUnit",
+      "recoveredId": "n56",
+      "weight": 1
+    },
+    {
+      "goldId": "ItOperationsTeam",
+      "recoveredId": "n21",
+      "weight": 1
+    },
+    {
+      "goldId": "ServiceDesk",
+      "recoveredId": "n20",
+      "weight": 1
+    },
+    {
+      "goldId": "NetworkOperationsCentre",
+      "recoveredId": "n22",
+      "weight": 1
+    },
+    {
+      "goldId": "SecurityOperationsCentre",
+      "recoveredId": "n23",
+      "weight": 1
+    },
+    {
+      "goldId": "IncidentResponseTeam",
+      "recoveredId": "n19",
+      "weight": 1
+    },
+    {
+      "goldId": "ResolverGroup",
+      "recoveredId": "n16",
+      "weight": 1
+    },
+    {
+      "goldId": "OnCallEngineer",
+      "recoveredId": "n17",
+      "weight": 1
+    },
+    {
+      "goldId": "IncidentCommander",
+      "recoveredId": "n18",
+      "weight": 1
+    },
+    {
+      "goldId": "ServiceOwner",
+      "recoveredId": "n12",
+      "weight": 1
+    },
+    {
+      "goldId": "ApplicationOwner",
+      "recoveredId": "n13",
+      "weight": 1
+    },
+    {
+      "goldId": "TechnicalOwner",
+      "recoveredId": "n14",
+      "weight": 1
+    },
+    {
+      "goldId": "BusinessOwner",
+      "recoveredId": "n15",
+      "weight": 1
+    },
+    {
+      "goldId": "Vendor",
+      "recoveredId": "n24",
+      "weight": 1
+    },
+    {
+      "goldId": "Regulator",
+      "recoveredId": "n25",
+      "weight": 1
+    },
+    {
+      "goldId": "Stakeholder",
+      "recoveredId": "n26",
+      "weight": 1
+    },
+    {
+      "goldId": "BusinessService",
+      "recoveredId": "n3",
+      "weight": 1
+    },
+    {
+      "goldId": "CustomerChannel",
+      "recoveredId": "n4",
+      "weight": 1
+    },
+    {
+      "goldId": "ItService",
+      "recoveredId": "n2",
+      "weight": 1
+    },
+    {
+      "goldId": "ServiceLevelObjective",
+      "recoveredId": "n47",
+      "weight": 1
+    },
+    {
+      "goldId": "ConfigurationItem",
+      "recoveredId": "n7",
+      "weight": 1
+    },
+    {
+      "goldId": "Application",
+      "recoveredId": "n8",
+      "weight": 1
+    },
+    {
+      "goldId": "Database",
+      "recoveredId": "n49",
+      "weight": 1
+    },
+    {
+      "goldId": "InfrastructureComponent",
+      "recoveredId": "n9",
+      "weight": 1
+    },
+    {
+      "goldId": "Server",
+      "recoveredId": "n51",
+      "weight": 1
+    },
+    {
+      "goldId": "VirtualMachine",
+      "recoveredId": "n52",
+      "weight": 1
+    },
+    {
+      "goldId": "CloudService",
+      "recoveredId": "n11",
+      "weight": 1
+    },
+    {
+      "goldId": "NetworkDevice",
+      "recoveredId": "n53",
+      "weight": 1
+    },
+    {
+      "goldId": "NetworkSegment",
+      "recoveredId": "n54",
+      "weight": 1
+    },
+    {
+      "goldId": "StorageSystem",
+      "recoveredId": "n50",
+      "weight": 1
+    },
+    {
+      "goldId": "BackupSet",
+      "recoveredId": "n31",
+      "weight": 1
+    },
+    {
+      "goldId": "Environment",
+      "recoveredId": "n40",
+      "weight": 1
+    },
+    {
+      "goldId": "DataAsset",
+      "recoveredId": "n45",
+      "weight": 1
+    },
+    {
+      "goldId": "ThirdPartyService",
+      "recoveredId": "n10",
+      "weight": 1
+    },
+    {
+      "goldId": "MonitoringTool",
+      "recoveredId": "n27",
+      "weight": 1
+    },
+    {
+      "goldId": "MonitoringRule",
+      "recoveredId": "n28",
+      "weight": 1
+    },
+    {
+      "goldId": "Metric",
+      "recoveredId": "n48",
+      "weight": 1
+    },
+    {
+      "goldId": "LogSource",
+      "recoveredId": "n46",
+      "weight": 1
+    },
+    {
+      "goldId": "Event",
+      "recoveredId": "n6",
+      "weight": 1
+    },
+    {
+      "goldId": "Alert",
+      "recoveredId": "n5",
+      "weight": 1
+    },
+    {
+      "goldId": "Incident",
+      "recoveredId": "n1",
+      "weight": 1
+    },
+    {
+      "goldId": "Problem",
+      "recoveredId": "n34",
+      "weight": 1
+    },
+    {
+      "goldId": "KnownError",
+      "recoveredId": "n33",
+      "weight": 1
+    },
+    {
+      "goldId": "Change",
+      "recoveredId": "n37",
+      "weight": 1
+    },
+    {
+      "goldId": "Release",
+      "recoveredId": "n38",
+      "weight": 1
+    },
+    {
+      "goldId": "Deployment",
+      "recoveredId": "n39",
+      "weight": 1
+    },
+    {
+      "goldId": "Workaround",
+      "recoveredId": "n30",
+      "weight": 1
+    },
+    {
+      "goldId": "Runbook",
+      "recoveredId": "n29",
+      "weight": 1
+    },
+    {
+      "goldId": "RecoveryPlan",
+      "recoveredId": "n32",
+      "weight": 1
+    },
+    {
+      "goldId": "DisasterRecoveryTest",
+      "recoveredId": "n55",
+      "weight": 1
+    },
+    {
+      "goldId": "EvidenceItem",
+      "recoveredId": "n43",
+      "weight": 1
+    },
+    {
+      "goldId": "Communication",
+      "recoveredId": "n44",
+      "weight": 1
+    },
+    {
+      "goldId": "MaterialityAssessment",
+      "recoveredId": "n41",
+      "weight": 1
+    },
+    {
+      "goldId": "RegulatoryNotification",
+      "recoveredId": "n42",
+      "weight": 1
+    },
+    {
+      "goldId": "PostIncidentReview",
+      "recoveredId": "n36",
+      "weight": 1
+    },
+    {
+      "goldId": "CorrectiveAction",
+      "recoveredId": "n35",
+      "weight": 1
+    }
+  ],
+  "relationships": [
+    {
+      "goldId": "rel_4",
+      "edgeId": "e17",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_5",
+      "edgeId": "e16",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_6",
+      "edgeId": "e18",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_9",
+      "edgeId": "e29",
+      "direction": "reciprocal"
+    },
+    {
+      "goldId": "rel_10",
+      "edgeId": "e30",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_11",
+      "edgeId": "e34",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_13",
+      "edgeId": "e12",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_14",
+      "edgeId": "e13",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_15",
+      "edgeId": "e14",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_16",
+      "edgeId": "e15",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_17",
+      "edgeId": "e9",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_18",
+      "edgeId": "e11",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_19",
+      "edgeId": "e10",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_20",
+      "edgeId": "e60",
+      "direction": "reciprocal"
+    },
+    {
+      "goldId": "rel_23",
+      "edgeId": "e4",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_24",
+      "edgeId": "e3",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_26",
+      "edgeId": "e72",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_27",
+      "edgeId": "e5",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_28",
+      "edgeId": "e6",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_29",
+      "edgeId": "e8",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_30",
+      "edgeId": "e68",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_32",
+      "edgeId": "e55",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_33",
+      "edgeId": "e76",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_35",
+      "edgeId": "e7",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_36",
+      "edgeId": "e77",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_38",
+      "edgeId": "e79",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_40",
+      "edgeId": "e80",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_43",
+      "edgeId": "e56",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_44",
+      "edgeId": "e46",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_45",
+      "edgeId": "e78",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_46",
+      "edgeId": "e44",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_47",
+      "edgeId": "e45",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_49",
+      "edgeId": "e81",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_54",
+      "edgeId": "e23",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_55",
+      "edgeId": "e22",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_57",
+      "edgeId": "e73",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_58",
+      "edgeId": "e75",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_59",
+      "edgeId": "e74",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_60",
+      "edgeId": "e37",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_67",
+      "edgeId": "e24",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_68",
+      "edgeId": "e25",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_69",
+      "edgeId": "e26",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_70",
+      "edgeId": "e27",
+      "direction": "reciprocal"
+    },
+    {
+      "goldId": "rel_72",
+      "edgeId": "e28",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_73",
+      "edgeId": "e1",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_74",
+      "edgeId": "e2",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_75",
+      "edgeId": "e35",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_77",
+      "edgeId": "e31",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_78",
+      "edgeId": "e32",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_79",
+      "edgeId": "e38",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_80",
+      "edgeId": "e65",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_81",
+      "edgeId": "e62",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_82",
+      "edgeId": "e64",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_83",
+      "edgeId": "e36",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_84",
+      "edgeId": "e39",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_86",
+      "edgeId": "e47",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_87",
+      "edgeId": "e57",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_88",
+      "edgeId": "e69",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_96",
+      "edgeId": "e40",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_97",
+      "edgeId": "e41",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_98",
+      "edgeId": "e43",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_99",
+      "edgeId": "e42",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_100",
+      "edgeId": "e49",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_101",
+      "edgeId": "e48",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_102",
+      "edgeId": "e51",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_103",
+      "edgeId": "e52",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_104",
+      "edgeId": "e53",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_105",
+      "edgeId": "e54",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_108",
+      "edgeId": "e71",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_109",
+      "edgeId": "e70",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_110",
+      "edgeId": "e82",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_111",
+      "edgeId": "e83",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_113",
+      "edgeId": "e63",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_116",
+      "edgeId": "e58",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_118",
+      "edgeId": "e59",
+      "direction": "forward"
+    },
+    {
+      "goldId": "rel_119",
+      "edgeId": "e61",
+      "direction": "forward"
+    }
+  ],
+  "properties": [
+    {
+      "goldId": "BusinessService.healthState",
+      "hostNodeId": "n3",
+      "matchedPropertyName": "healthState"
+    },
+    {
+      "goldId": "ItService.healthState",
+      "hostNodeId": "n2",
+      "matchedPropertyName": "healthState"
+    },
+    {
+      "goldId": "ServiceLevelObjective.acknowledgementTarget",
+      "hostNodeId": "n47",
+      "matchedPropertyName": "acknowledgementTarget"
+    },
+    {
+      "goldId": "ServiceLevelObjective.restorationTarget",
+      "hostNodeId": "n47",
+      "matchedPropertyName": "restorationTarget"
+    },
+    {
+      "goldId": "BackupSet.status",
+      "hostNodeId": "n31",
+      "matchedPropertyName": "status"
+    },
+    {
+      "goldId": "BackupSet.lastSuccessfulBackup",
+      "hostNodeId": "n31",
+      "matchedPropertyName": "lastSuccessfulBackup"
+    },
+    {
+      "goldId": "BackupSet.lastVerification",
+      "hostNodeId": "n31",
+      "matchedPropertyName": "lastVerification"
+    },
+    {
+      "goldId": "Environment.environmentType",
+      "hostNodeId": "n40",
+      "matchedPropertyName": "environmentType"
+    },
+    {
+      "goldId": "DataAsset.dataClassification",
+      "hostNodeId": "n45",
+      "matchedPropertyName": "dataClassification"
+    },
+    {
+      "goldId": "Metric.metricName",
+      "hostNodeId": "n48",
+      "matchedPropertyName": "metricName"
+    },
+    {
+      "goldId": "Metric.numericValue",
+      "hostNodeId": "n48",
+      "matchedPropertyName": "numericValue"
+    },
+    {
+      "goldId": "Metric.unit",
+      "hostNodeId": "n48",
+      "matchedPropertyName": "unit"
+    },
+    {
+      "goldId": "Metric.measuredAt",
+      "hostNodeId": "n48",
+      "matchedPropertyName": "measuredAt"
+    },
+    {
+      "goldId": "Event.observedAt",
+      "hostNodeId": "n6",
+      "matchedPropertyName": "observedAt"
+    },
+    {
+      "goldId": "Event.detectionSource",
+      "hostNodeId": "n6",
+      "matchedPropertyName": "detectionSource"
+    },
+    {
+      "goldId": "Alert.raisedAt",
+      "hostNodeId": "n5",
+      "matchedPropertyName": "raisedAt"
+    },
+    {
+      "goldId": "Alert.status",
+      "hostNodeId": "n5",
+      "matchedPropertyName": "status"
+    },
+    {
+      "goldId": "Alert.detectionSource",
+      "hostNodeId": "n5",
+      "matchedPropertyName": "detectionSource"
+    },
+    {
+      "goldId": "Incident.detectedAt",
+      "hostNodeId": "n1",
+      "matchedPropertyName": "detectedAt"
+    },
+    {
+      "goldId": "Incident.openedAt",
+      "hostNodeId": "n1",
+      "matchedPropertyName": "openedAt"
+    },
+    {
+      "goldId": "Incident.resolvedAt",
+      "hostNodeId": "n1",
+      "matchedPropertyName": "resolvedAt"
+    },
+    {
+      "goldId": "Incident.closedAt",
+      "hostNodeId": "n1",
+      "matchedPropertyName": "closedAt"
+    },
+    {
+      "goldId": "Incident.status",
+      "hostNodeId": "n1",
+      "matchedPropertyName": "status"
+    },
+    {
+      "goldId": "Incident.severity",
+      "hostNodeId": "n1",
+      "matchedPropertyName": "severity"
+    },
+    {
+      "goldId": "Incident.impact",
+      "hostNodeId": "n1",
+      "matchedPropertyName": "impact"
+    },
+    {
+      "goldId": "Incident.detectionSource",
+      "hostNodeId": "n1",
+      "matchedPropertyName": "detectionSource"
+    },
+    {
+      "goldId": "Incident.timeToAcknowledge",
+      "hostNodeId": "n1",
+      "matchedPropertyName": "timeToAcknowledge"
+    },
+    {
+      "goldId": "Incident.timeToRestore",
+      "hostNodeId": "n1",
+      "matchedPropertyName": "timeToRestore"
+    },
+    {
+      "goldId": "Problem.status",
+      "hostNodeId": "n34",
+      "matchedPropertyName": "status"
+    },
+    {
+      "goldId": "Change.status",
+      "hostNodeId": "n37",
+      "matchedPropertyName": "status"
+    },
+    {
+      "goldId": "Change.riskLevel",
+      "hostNodeId": "n37",
+      "matchedPropertyName": "riskLevel"
+    },
+    {
+      "goldId": "Change.plannedStart",
+      "hostNodeId": "n37",
+      "matchedPropertyName": "plannedStart"
+    },
+    {
+      "goldId": "Change.plannedEnd",
+      "hostNodeId": "n37",
+      "matchedPropertyName": "plannedEnd"
+    },
+    {
+      "goldId": "Release.version",
+      "hostNodeId": "n38",
+      "matchedPropertyName": "version"
+    },
+    {
+      "goldId": "Release.releaseDate",
+      "hostNodeId": "n38",
+      "matchedPropertyName": "releaseDate"
+    },
+    {
+      "goldId": "Deployment.status",
+      "hostNodeId": "n39",
+      "matchedPropertyName": "status"
+    },
+    {
+      "goldId": "Deployment.startedAt",
+      "hostNodeId": "n39",
+      "matchedPropertyName": "startedAt"
+    },
+    {
+      "goldId": "Deployment.completedAt",
+      "hostNodeId": "n39",
+      "matchedPropertyName": "completedAt"
+    },
+    {
+      "goldId": "DisasterRecoveryTest.testResult",
+      "hostNodeId": "n55",
+      "matchedPropertyName": "testResult"
+    },
+    {
+      "goldId": "EvidenceItem.collectedAt",
+      "hostNodeId": "n43",
+      "matchedPropertyName": "collectedAt"
+    },
+    {
+      "goldId": "EvidenceItem.integrityStatus",
+      "hostNodeId": "n43",
+      "matchedPropertyName": "integrityStatus"
+    },
+    {
+      "goldId": "EvidenceItem.cryptographicHash",
+      "hostNodeId": "n43",
+      "matchedPropertyName": "cryptographicHash"
+    },
+    {
+      "goldId": "Communication.sentAt",
+      "hostNodeId": "n44",
+      "matchedPropertyName": "sentAt"
+    },
+    {
+      "goldId": "Communication.audience",
+      "hostNodeId": "n44",
+      "matchedPropertyName": "audience"
+    },
+    {
+      "goldId": "Communication.status",
+      "hostNodeId": "n44",
+      "matchedPropertyName": "status"
+    },
+    {
+      "goldId": "Communication.messageSummary",
+      "hostNodeId": "n44",
+      "matchedPropertyName": "messageSummary"
+    },
+    {
+      "goldId": "MaterialityAssessment.assessedAt",
+      "hostNodeId": "n41",
+      "matchedPropertyName": "assessedAt"
+    },
+    {
+      "goldId": "MaterialityAssessment.result",
+      "hostNodeId": "n41",
+      "matchedPropertyName": "result"
+    },
+    {
+      "goldId": "MaterialityAssessment.rationale",
+      "hostNodeId": "n41",
+      "matchedPropertyName": "rationale"
+    },
+    {
+      "goldId": "MaterialityAssessment.reportingDueTime",
+      "hostNodeId": "n41",
+      "matchedPropertyName": "reportingDueTime"
+    },
+    {
+      "goldId": "RegulatoryNotification.dueAt",
+      "hostNodeId": "n42",
+      "matchedPropertyName": "dueAt"
+    },
+    {
+      "goldId": "RegulatoryNotification.submittedAt",
+      "hostNodeId": "n42",
+      "matchedPropertyName": "submittedAt"
+    },
+    {
+      "goldId": "RegulatoryNotification.status",
+      "hostNodeId": "n42",
+      "matchedPropertyName": "status"
+    },
+    {
+      "goldId": "PostIncidentReview.heldOn",
+      "hostNodeId": "n36",
+      "matchedPropertyName": "heldOn"
+    },
+    {
+      "goldId": "CorrectiveAction.status",
+      "hostNodeId": "n35",
+      "matchedPropertyName": "status"
+    }
+  ]
+}
