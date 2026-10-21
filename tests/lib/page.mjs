@@ -11,7 +11,7 @@ export const APP_URL = "file://" + path.resolve(__dirname, "..", "..", "index.ht
 // console/page error, and always closes the browser.
 //
 // Pins the UI language to English by default (`lang: "en"`) — the app's own
-// real default is Hungarian (see tests/localization.spec.mjs, which is the
+// real default is English (see tests/localization.spec.mjs, which is the
 // one file that needs to see that), but every other test in this suite was
 // written against English button/placeholder text and is testing
 // functionality, not translation; forcing English here keeps all of that

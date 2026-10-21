@@ -21,7 +21,7 @@ async function withFolderPage(fn, { initScript } = {}) {
   if (initScript) await page.addInitScript(initScript.fn, initScript.arg);
   await page.goto(APP_URL);
   await page.waitForFunction(() => Boolean(window.__kg));
-  // The app's real default UI language is Hungarian; this suite (like the
+  // The app's real default UI language is English; this suite (like the
   // shared withPage() in lib/page.mjs) pins English so its existing text
   // assertions (e.g. the Folder Sync button's label) stay decoupled from
   // the language feature. Pinned via evaluate() post-load rather than

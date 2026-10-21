@@ -4,11 +4,17 @@ import { withPage, addNodeViaDblClick } from "./lib/page.mjs";
 
 // Unlike every other spec file, this one deliberately does NOT want the
 // shared withPage() default of pinning English — it exists specifically to
-// exercise the real default (Hungarian) and the toggle between languages.
+// exercise the real default (English) and the toggle between languages.
 // `lang: null` skips the pin so the app boots exactly as a real user would
 // see it.
 function withRealDefaultPage(fn) {
   return withPage(fn, { lang: null });
+}
+
+// The translation tests below start in Hungarian on purpose and toggle to
+// English, so they pin Hungarian explicitly now that English is the default.
+function withHungarianPage(fn) {
+  return withPage(fn, { lang: "hu" });
 }
 
 async function langButtonText(page) {
@@ -26,19 +32,25 @@ async function dropText(page, text, filename = "import.txt") {
   await page.waitForSelector("#import-overlay", { state: "visible" });
 }
 
-test("defaults to Hungarian on a fresh load (no prior localStorage)", async () => {
+test("defaults to English on a fresh load (no prior localStorage)", async () => {
   await withRealDefaultPage(async (page) => {
-    assert.equal(await page.evaluate(() => document.documentElement.lang), "hu");
-    assert.equal(await page.evaluate(() => window.__kg.lang.get()), "hu");
-    assert.equal(await page.locator("#btn-add-node").textContent(), "Csomópont hozzáadása");
-    assert.equal(await page.locator("#graph-title").textContent(), "Névtelen gráf");
-    assert.equal(await langButtonText(page), "Nyelv: Magyar");
-    assert.equal(await page.getAttribute("#btn-lang-toggle", "aria-pressed"), "false");
+    assert.equal(await page.evaluate(() => document.documentElement.lang), "en");
+    assert.equal(await page.evaluate(() => window.__kg.lang.get()), "en");
+    assert.equal(await page.locator("#btn-add-node").textContent(), "Add Node");
+    assert.equal(await page.locator("#graph-title").textContent(), "Untitled Graph");
+    assert.equal(await langButtonText(page), "Language: English");
+    assert.equal(await page.getAttribute("#btn-lang-toggle", "aria-pressed"), "true");
   });
 });
 
 test("toggling the language switches all static toolbar/dialog text, the <html> lang attribute, and back again", async () => {
   await withRealDefaultPage(async (page) => {
+    await page.click("#btn-lang-toggle");
+    assert.equal(await page.evaluate(() => document.documentElement.lang), "hu");
+    assert.equal(await page.locator("#btn-add-node").textContent(), "Csomópont hozzáadása");
+    assert.equal(await langButtonText(page), "Nyelv: Magyar");
+    assert.equal(await page.getAttribute("#btn-lang-toggle", "aria-pressed"), "false");
+
     await page.click("#btn-lang-toggle");
     assert.equal(await page.evaluate(() => document.documentElement.lang), "en");
     assert.equal(await page.locator("#btn-add-node").textContent(), "Add Node");
@@ -54,26 +66,20 @@ test("toggling the language switches all static toolbar/dialog text, the <html> 
     assert.equal(await page.getAttribute("#graph-title", "title"), "Click to rename");
     assert.equal(await langButtonText(page), "Language: English");
     assert.equal(await page.getAttribute("#btn-lang-toggle", "aria-pressed"), "true");
-
-    await page.click("#btn-lang-toggle");
-    assert.equal(await page.evaluate(() => document.documentElement.lang), "hu");
-    assert.equal(await page.locator("#btn-add-node").textContent(), "Csomópont hozzáadása");
-    assert.equal(await langButtonText(page), "Nyelv: Magyar");
-    assert.equal(await page.getAttribute("#btn-lang-toggle", "aria-pressed"), "false");
   });
 });
 
 test("language choice persists across a reload", async () => {
   await withRealDefaultPage(async (page) => {
-    await page.click("#btn-lang-toggle"); // -> en
-    assert.equal(await page.evaluate(() => window.__kg.lang.get()), "en");
+    await page.click("#btn-lang-toggle"); // -> hu
+    assert.equal(await page.evaluate(() => window.__kg.lang.get()), "hu");
 
     await page.reload();
     await page.waitForFunction(() => Boolean(window.__kg));
 
-    assert.equal(await page.evaluate(() => window.__kg.lang.get()), "en");
-    assert.equal(await page.evaluate(() => document.documentElement.lang), "en");
-    assert.equal(await page.locator("#btn-add-node").textContent(), "Add Node");
+    assert.equal(await page.evaluate(() => window.__kg.lang.get()), "hu");
+    assert.equal(await page.evaluate(() => document.documentElement.lang), "hu");
+    assert.equal(await page.locator("#btn-add-node").textContent(), "Csomópont hozzáadása");
   });
 });
 
@@ -92,15 +98,15 @@ test("toggling language is not an undoable graph action — it never touches the
 
 test("the window.__kg.lang test hook mirrors the toggle button's behavior", async () => {
   await withRealDefaultPage(async (page) => {
-    assert.equal(await page.evaluate(() => window.__kg.lang.get()), "hu");
-    await page.evaluate(() => window.__kg.lang.toggle());
     assert.equal(await page.evaluate(() => window.__kg.lang.get()), "en");
-    assert.equal(await langButtonText(page), "Language: English");
+    await page.evaluate(() => window.__kg.lang.toggle());
+    assert.equal(await page.evaluate(() => window.__kg.lang.get()), "hu");
+    assert.equal(await langButtonText(page), "Nyelv: Magyar");
   });
 });
 
 test("an untitled graph's placeholder name tracks the current language, but a user-chosen name never gets translated", async () => {
-  await withRealDefaultPage(async (page) => {
+  await withHungarianPage(async (page) => {
     assert.equal(await page.locator("#graph-title").textContent(), "Névtelen gráf");
     await page.click("#btn-lang-toggle"); // -> en
     assert.equal(await page.locator("#graph-title").textContent(), "Untitled Graph", "still-untitled placeholder should retranslate");
@@ -121,7 +127,7 @@ test("an untitled graph's placeholder name tracks the current language, but a us
 // string equality against that exact text, which couldn't tell this
 // deliberate choice apart from having never been renamed at all.
 test("renaming a graph to the literal placeholder text on purpose still survives a language toggle untranslated", async () => {
-  await withRealDefaultPage(async (page) => {
+  await withHungarianPage(async (page) => {
     await page.click("#btn-lang-toggle"); // -> en, so the placeholder text and the chosen name are identical strings
     assert.equal(await page.locator("#graph-title").textContent(), "Untitled Graph");
 
@@ -136,7 +142,7 @@ test("renaming a graph to the literal placeholder text on purpose still survives
 });
 
 test("canvas empty-state message and node/relation placeholders translate via the t() hook", async () => {
-  await withRealDefaultPage(async (page) => {
+  await withHungarianPage(async (page) => {
     const huEmpty = await page.evaluate(() => window.__kg.lang.t("emptyCanvasMessage", window.__kg.lang.t("addNode")));
     assert.equal(huEmpty, 'A vászon üres — kattints a(z) "Csomópont hozzáadása" gombra a kezdéshez');
 
@@ -146,8 +152,8 @@ test("canvas empty-state message and node/relation placeholders translate via th
   });
 });
 
-test("node placeholder is translated (Hungarian default, then English)", async () => {
-  await withRealDefaultPage(async (page) => {
+test("node placeholder is translated (Hungarian, then English)", async () => {
+  await withHungarianPage(async (page) => {
     const box = await page.locator("#canvas").boundingBox();
     await page.mouse.dblclick(box.x + 300, box.y + 300);
     assert.equal(await page.locator(".kg-inline-input").getAttribute("placeholder"), "Csomópont neve");
@@ -161,7 +167,7 @@ test("node placeholder is translated (Hungarian default, then English)", async (
 });
 
 test("relation placeholder is translated when connecting two nodes", async () => {
-  await withRealDefaultPage(async (page) => {
+  await withHungarianPage(async (page) => {
     await addNodeViaDblClick(page, 200, 200, "Alpha");
     await addNodeViaDblClick(page, 500, 200, "Beta");
 
@@ -182,7 +188,7 @@ test("relation placeholder is translated when connecting two nodes", async () =>
 });
 
 test("the Clear confirm dialog message and button label translate", async () => {
-  await withRealDefaultPage(async (page) => {
+  await withHungarianPage(async (page) => {
     await addNodeViaDblClick(page, 300, 300, "Alpha");
     await page.waitForFunction(() => document.getElementById("btn-clear").disabled === false);
 
@@ -208,7 +214,7 @@ test("the Clear confirm dialog message and button label translate", async () => 
 });
 
 test("the import summary message translates with correctly interpolated counts, in both languages", async () => {
-  await withRealDefaultPage(async (page) => {
+  await withHungarianPage(async (page) => {
     await dropText(page, "## NODES\nAlpha\nBeta\n\n## EDGES\nAlpha -> Beta : relates to");
     assert.equal(
       await page.locator("#import-summary").textContent(),
@@ -227,7 +233,7 @@ test("the import summary message translates with correctly interpolated counts, 
 });
 
 test("the Domain Model YAML import summary message translates with correctly interpolated counts, in both languages", async () => {
-  await withRealDefaultPage(async (page) => {
+  await withHungarianPage(async (page) => {
     const yamlText = [
       "classes:",
       "  Alpha:",
@@ -257,7 +263,7 @@ test("the Domain Model YAML import summary message translates with correctly int
 });
 
 test("the import dialog's Cancel/Replace/Merge button labels translate", async () => {
-  await withRealDefaultPage(async (page) => {
+  await withHungarianPage(async (page) => {
     await dropText(page, "## NODES\nAlpha\nBeta\n\n## EDGES\nAlpha -> Beta : relates to");
     assert.equal(await page.locator("#import-cancel").textContent(), "Mégse");
     assert.equal(await page.locator("#import-replace").textContent(), "Csere");
@@ -274,7 +280,7 @@ test("the import dialog's Cancel/Replace/Merge button labels translate", async (
 });
 
 test("the selection toolbar's Rename/Toggle-direction/Delete titles translate", async () => {
-  await withRealDefaultPage(async (page) => {
+  await withHungarianPage(async (page) => {
     await addNodeViaDblClick(page, 300, 300, "Alpha");
     await page.evaluate(() => window.__kg.actions.selectNode(window.__kg.state.nodes[0].id));
 
