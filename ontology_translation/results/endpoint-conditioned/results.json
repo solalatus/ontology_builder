@@ -1,0 +1,5992 @@
+{
+  "density": {
+    "brick-hvac": {
+      "classes": 39,
+      "relationships": 35,
+      "relPerClass": 0.8974358974358975,
+      "distinctEndpointShare": 1
+    },
+    "iof-maintenance": {
+      "classes": 20,
+      "relationships": 13,
+      "relPerClass": 0.65,
+      "distinctEndpointShare": 1
+    },
+    "iof-supply-chain": {
+      "classes": 53,
+      "relationships": 30,
+      "relPerClass": 0.5660377358490566,
+      "distinctEndpointShare": 1
+    },
+    "fibo-loans": {
+      "classes": 57,
+      "relationships": 31,
+      "relPerClass": 0.543859649122807,
+      "distinctEndpointShare": 1
+    },
+    "itops": {
+      "classes": 68,
+      "relationships": 108,
+      "relPerClass": 1.588235294117647,
+      "distinctEndpointShare": 1
+    }
+  },
+  "readings": {
+    "heuristic/full": {
+      "first-paper": {
+        "itops": {
+          "runs": [
+            "tests/evals/results/runs/run-01",
+            "tests/evals/results/runs/run-02",
+            "tests/evals/results/runs/run-03"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.3088235294117647,
+              "relRecall": 0.09259259259259259,
+              "eligibleShare": 0.23148148148148148,
+              "conditionalRate": 0.4,
+              "eligible": 25,
+              "recoveredEligible": 10,
+              "recoveredIneligible": 0,
+              "goldRelationships": 108,
+              "goldClasses": 68
+            },
+            {
+              "classRecall": 0.3088235294117647,
+              "relRecall": 0.09259259259259259,
+              "eligibleShare": 0.25925925925925924,
+              "conditionalRate": 0.35714285714285715,
+              "eligible": 28,
+              "recoveredEligible": 10,
+              "recoveredIneligible": 0,
+              "goldRelationships": 108,
+              "goldClasses": 68
+            },
+            {
+              "classRecall": 0.2647058823529412,
+              "relRecall": 0.037037037037037035,
+              "eligibleShare": 0.16666666666666666,
+              "conditionalRate": 0.2222222222222222,
+              "eligible": 18,
+              "recoveredEligible": 4,
+              "recoveredIneligible": 0,
+              "goldRelationships": 108,
+              "goldClasses": 68
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 0.32645502645502644,
+              "min": 0.2222222222222222,
+              "max": 0.4
+            },
+            "classRecall": 0.29411764705882354,
+            "relRecall": 0.07407407407407407,
+            "eligibleShare": 0.21913580246913578,
+            "relToClassRecall": 0.2518518518518518,
+            "eligible": [
+              25,
+              28,
+              18
+            ],
+            "recoveredEligible": [
+              10,
+              10,
+              4
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      },
+      "aug-sep": {
+        "brick-hvac": {
+          "runs": [
+            "ontology_translation/results/multi-domain/run-01/brick-hvac",
+            "ontology_translation/results/multi-domain/run-02/brick-hvac",
+            "ontology_translation/results/multi-domain/run-03/brick-hvac"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.5641025641025641,
+              "relRecall": 0.6571428571428571,
+              "eligibleShare": 0.7714285714285715,
+              "conditionalRate": 0.8518518518518519,
+              "eligible": 27,
+              "recoveredEligible": 23,
+              "recoveredIneligible": 0,
+              "goldRelationships": 35,
+              "goldClasses": 39
+            },
+            {
+              "classRecall": 0.6923076923076923,
+              "relRecall": 0.42857142857142855,
+              "eligibleShare": 0.9142857142857143,
+              "conditionalRate": 0.46875,
+              "eligible": 32,
+              "recoveredEligible": 15,
+              "recoveredIneligible": 0,
+              "goldRelationships": 35,
+              "goldClasses": 39
+            },
+            {
+              "classRecall": 0.6410256410256411,
+              "relRecall": 0.6571428571428571,
+              "eligibleShare": 0.8285714285714286,
+              "conditionalRate": 0.7931034482758621,
+              "eligible": 29,
+              "recoveredEligible": 23,
+              "recoveredIneligible": 0,
+              "goldRelationships": 35,
+              "goldClasses": 39
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 0.7045684333759047,
+              "min": 0.46875,
+              "max": 0.8518518518518519
+            },
+            "classRecall": 0.6324786324786325,
+            "relRecall": 0.580952380952381,
+            "eligibleShare": 0.8380952380952381,
+            "relToClassRecall": 0.9185328185328187,
+            "eligible": [
+              27,
+              32,
+              29
+            ],
+            "recoveredEligible": [
+              23,
+              15,
+              23
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "iof-maintenance": {
+          "runs": [
+            "ontology_translation/results/multi-domain/run-01/iof-maintenance",
+            "ontology_translation/results/multi-domain/run-02/iof-maintenance",
+            "ontology_translation/results/multi-domain/run-03/iof-maintenance"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.65,
+              "relRecall": 0.6153846153846154,
+              "eligibleShare": 0.6153846153846154,
+              "conditionalRate": 1,
+              "eligible": 8,
+              "recoveredEligible": 8,
+              "recoveredIneligible": 0,
+              "goldRelationships": 13,
+              "goldClasses": 20
+            },
+            {
+              "classRecall": 0.45,
+              "relRecall": 0.46153846153846156,
+              "eligibleShare": 0.46153846153846156,
+              "conditionalRate": 1,
+              "eligible": 6,
+              "recoveredEligible": 6,
+              "recoveredIneligible": 0,
+              "goldRelationships": 13,
+              "goldClasses": 20
+            },
+            {
+              "classRecall": 0.5,
+              "relRecall": 0.5384615384615384,
+              "eligibleShare": 0.5384615384615384,
+              "conditionalRate": 1,
+              "eligible": 7,
+              "recoveredEligible": 7,
+              "recoveredIneligible": 0,
+              "goldRelationships": 13,
+              "goldClasses": 20
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 1,
+              "min": 1,
+              "max": 1
+            },
+            "classRecall": 0.5333333333333333,
+            "relRecall": 0.5384615384615384,
+            "eligibleShare": 0.5384615384615384,
+            "relToClassRecall": 1.0096153846153846,
+            "eligible": [
+              8,
+              6,
+              7
+            ],
+            "recoveredEligible": [
+              8,
+              6,
+              7
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "iof-supply-chain": {
+          "runs": [
+            "ontology_translation/results/multi-domain/run-01/iof-supply-chain",
+            "ontology_translation/results/multi-domain/run-02/iof-supply-chain",
+            "ontology_translation/results/multi-domain/run-03/iof-supply-chain"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.4716981132075472,
+              "relRecall": 0.5333333333333333,
+              "eligibleShare": 0.7,
+              "conditionalRate": 0.7619047619047619,
+              "eligible": 21,
+              "recoveredEligible": 16,
+              "recoveredIneligible": 0,
+              "goldRelationships": 30,
+              "goldClasses": 53
+            },
+            {
+              "classRecall": 0.49056603773584906,
+              "relRecall": 0.6666666666666666,
+              "eligibleShare": 0.7666666666666667,
+              "conditionalRate": 0.8695652173913043,
+              "eligible": 23,
+              "recoveredEligible": 20,
+              "recoveredIneligible": 0,
+              "goldRelationships": 30,
+              "goldClasses": 53
+            },
+            {
+              "classRecall": 0.4716981132075472,
+              "relRecall": 0.4666666666666667,
+              "eligibleShare": 0.6666666666666666,
+              "conditionalRate": 0.7,
+              "eligible": 20,
+              "recoveredEligible": 14,
+              "recoveredIneligible": 0,
+              "goldRelationships": 30,
+              "goldClasses": 53
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 0.7771566597653553,
+              "min": 0.7,
+              "max": 0.8695652173913043
+            },
+            "classRecall": 0.47798742138364786,
+            "relRecall": 0.5555555555555555,
+            "eligibleShare": 0.7111111111111111,
+            "relToClassRecall": 1.1622807017543857,
+            "eligible": [
+              21,
+              23,
+              20
+            ],
+            "recoveredEligible": [
+              16,
+              20,
+              14
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "fibo-loans": {
+          "runs": [
+            "ontology_translation/results/multi-domain/run-01/fibo-loans",
+            "ontology_translation/results/multi-domain/run-02/fibo-loans",
+            "ontology_translation/results/multi-domain/run-03/fibo-loans"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.5087719298245614,
+              "relRecall": 0.7419354838709677,
+              "eligibleShare": 0.8064516129032258,
+              "conditionalRate": 0.92,
+              "eligible": 25,
+              "recoveredEligible": 23,
+              "recoveredIneligible": 0,
+              "goldRelationships": 31,
+              "goldClasses": 57
+            },
+            {
+              "classRecall": 0.38596491228070173,
+              "relRecall": 0.6451612903225806,
+              "eligibleShare": 0.6774193548387096,
+              "conditionalRate": 0.9523809523809523,
+              "eligible": 21,
+              "recoveredEligible": 20,
+              "recoveredIneligible": 0,
+              "goldRelationships": 31,
+              "goldClasses": 57
+            },
+            {
+              "classRecall": 0.5087719298245614,
+              "relRecall": 0.6451612903225806,
+              "eligibleShare": 0.7741935483870968,
+              "conditionalRate": 0.8333333333333334,
+              "eligible": 24,
+              "recoveredEligible": 20,
+              "recoveredIneligible": 0,
+              "goldRelationships": 31,
+              "goldClasses": 57
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 0.901904761904762,
+              "min": 0.8333333333333334,
+              "max": 0.9523809523809523
+            },
+            "classRecall": 0.4678362573099415,
+            "relRecall": 0.6774193548387096,
+            "eligibleShare": 0.7526881720430106,
+            "relToClassRecall": 1.447983870967742,
+            "eligible": [
+              25,
+              21,
+              24
+            ],
+            "recoveredEligible": [
+              23,
+              20,
+              20
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "itops": {
+          "runs": [
+            "ontology_translation/results/multi-domain-control/run-01/itops",
+            "ontology_translation/results/multi-domain-control/run-02/itops",
+            "ontology_translation/results/multi-domain-control/run-03/itops"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.5147058823529411,
+              "relRecall": 0.3055555555555556,
+              "eligibleShare": 0.4537037037037037,
+              "conditionalRate": 0.673469387755102,
+              "eligible": 49,
+              "recoveredEligible": 33,
+              "recoveredIneligible": 0,
+              "goldRelationships": 108,
+              "goldClasses": 68
+            },
+            {
+              "classRecall": 0.5294117647058824,
+              "relRecall": 0.37037037037037035,
+              "eligibleShare": 0.5185185185185185,
+              "conditionalRate": 0.7142857142857143,
+              "eligible": 56,
+              "recoveredEligible": 40,
+              "recoveredIneligible": 0,
+              "goldRelationships": 108,
+              "goldClasses": 68
+            },
+            {
+              "classRecall": 0.4852941176470588,
+              "relRecall": 0.35185185185185186,
+              "eligibleShare": 0.5185185185185185,
+              "conditionalRate": 0.6785714285714286,
+              "eligible": 56,
+              "recoveredEligible": 38,
+              "recoveredIneligible": 0,
+              "goldRelationships": 108,
+              "goldClasses": 68
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 0.6887755102040817,
+              "min": 0.673469387755102,
+              "max": 0.7142857142857143
+            },
+            "classRecall": 0.5098039215686274,
+            "relRecall": 0.34259259259259256,
+            "eligibleShare": 0.49691358024691357,
+            "relToClassRecall": 0.672008547008547,
+            "eligible": [
+              49,
+              56,
+              56
+            ],
+            "recoveredEligible": [
+              33,
+              40,
+              38
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "macroPublished": {
+          "conditionalRate": 0.8459074637615055,
+          "classRecall": 0.5279089111263888,
+          "relRecall": 0.5880972074520461,
+          "eligibleShare": 0.7100890149277246,
+          "relToClassRecall": 1.1346031939675827
+        }
+      },
+      "post-152": {
+        "brick-hvac": {
+          "runs": [
+            "ontology_translation/results/multi-domain-post152/run-01/brick-hvac",
+            "ontology_translation/results/multi-domain-post152/run-02/brick-hvac",
+            "ontology_translation/results/multi-domain-post152/run-03/brick-hvac"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.6410256410256411,
+              "relRecall": 0.7142857142857143,
+              "eligibleShare": 0.8571428571428571,
+              "conditionalRate": 0.8333333333333334,
+              "eligible": 30,
+              "recoveredEligible": 25,
+              "recoveredIneligible": 0,
+              "goldRelationships": 35,
+              "goldClasses": 39
+            },
+            {
+              "classRecall": 0.9230769230769231,
+              "relRecall": 0.8285714285714286,
+              "eligibleShare": 1,
+              "conditionalRate": 0.8285714285714286,
+              "eligible": 35,
+              "recoveredEligible": 29,
+              "recoveredIneligible": 0,
+              "goldRelationships": 35,
+              "goldClasses": 39
+            },
+            {
+              "classRecall": 0.6666666666666666,
+              "relRecall": 0.42857142857142855,
+              "eligibleShare": 0.8857142857142857,
+              "conditionalRate": 0.4838709677419355,
+              "eligible": 31,
+              "recoveredEligible": 15,
+              "recoveredIneligible": 0,
+              "goldRelationships": 35,
+              "goldClasses": 39
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 0.7152585765488991,
+              "min": 0.4838709677419355,
+              "max": 0.8333333333333334
+            },
+            "classRecall": 0.7435897435897436,
+            "relRecall": 0.6571428571428571,
+            "eligibleShare": 0.9142857142857143,
+            "relToClassRecall": 0.883743842364532,
+            "eligible": [
+              30,
+              35,
+              31
+            ],
+            "recoveredEligible": [
+              25,
+              29,
+              15
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "iof-maintenance": {
+          "runs": [
+            "ontology_translation/results/multi-domain-post152/run-01/iof-maintenance",
+            "ontology_translation/results/multi-domain-post152/run-02/iof-maintenance",
+            "ontology_translation/results/multi-domain-post152/run-03/iof-maintenance"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.65,
+              "relRecall": 0.6153846153846154,
+              "eligibleShare": 0.6153846153846154,
+              "conditionalRate": 1,
+              "eligible": 8,
+              "recoveredEligible": 8,
+              "recoveredIneligible": 0,
+              "goldRelationships": 13,
+              "goldClasses": 20
+            },
+            {
+              "classRecall": 0.85,
+              "relRecall": 0.6923076923076923,
+              "eligibleShare": 0.9230769230769231,
+              "conditionalRate": 0.75,
+              "eligible": 12,
+              "recoveredEligible": 9,
+              "recoveredIneligible": 0,
+              "goldRelationships": 13,
+              "goldClasses": 20
+            },
+            {
+              "classRecall": 0.65,
+              "relRecall": 0.6153846153846154,
+              "eligibleShare": 0.6153846153846154,
+              "conditionalRate": 1,
+              "eligible": 8,
+              "recoveredEligible": 8,
+              "recoveredIneligible": 0,
+              "goldRelationships": 13,
+              "goldClasses": 20
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 0.9166666666666666,
+              "min": 0.75,
+              "max": 1
+            },
+            "classRecall": 0.7166666666666667,
+            "relRecall": 0.6410256410256411,
+            "eligibleShare": 0.7179487179487181,
+            "relToClassRecall": 0.8944543828264759,
+            "eligible": [
+              8,
+              12,
+              8
+            ],
+            "recoveredEligible": [
+              8,
+              9,
+              8
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "iof-supply-chain": {
+          "runs": [
+            "ontology_translation/results/multi-domain-post152/run-01/iof-supply-chain",
+            "ontology_translation/results/multi-domain-post152/run-02/iof-supply-chain",
+            "ontology_translation/results/multi-domain-post152/run-03/iof-supply-chain"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.660377358490566,
+              "relRecall": 0.5666666666666667,
+              "eligibleShare": 0.8666666666666667,
+              "conditionalRate": 0.6538461538461539,
+              "eligible": 26,
+              "recoveredEligible": 17,
+              "recoveredIneligible": 0,
+              "goldRelationships": 30,
+              "goldClasses": 53
+            },
+            {
+              "classRecall": 0.5849056603773585,
+              "relRecall": 0.7333333333333333,
+              "eligibleShare": 0.7666666666666667,
+              "conditionalRate": 0.9565217391304348,
+              "eligible": 23,
+              "recoveredEligible": 22,
+              "recoveredIneligible": 0,
+              "goldRelationships": 30,
+              "goldClasses": 53
+            },
+            {
+              "classRecall": 0.4716981132075472,
+              "relRecall": 0.7333333333333333,
+              "eligibleShare": 0.7666666666666667,
+              "conditionalRate": 0.9565217391304348,
+              "eligible": 23,
+              "recoveredEligible": 22,
+              "recoveredIneligible": 0,
+              "goldRelationships": 30,
+              "goldClasses": 53
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 0.8556298773690078,
+              "min": 0.6538461538461539,
+              "max": 0.9565217391304348
+            },
+            "classRecall": 0.5723270440251572,
+            "relRecall": 0.6777777777777777,
+            "eligibleShare": 0.7999999999999999,
+            "relToClassRecall": 1.184249084249084,
+            "eligible": [
+              26,
+              23,
+              23
+            ],
+            "recoveredEligible": [
+              17,
+              22,
+              22
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "fibo-loans": {
+          "runs": [
+            "ontology_translation/results/multi-domain-post152/run-01/fibo-loans",
+            "ontology_translation/results/multi-domain-post152/run-02/fibo-loans",
+            "ontology_translation/results/multi-domain-post152/run-03/fibo-loans"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.5087719298245614,
+              "relRecall": 0.7741935483870968,
+              "eligibleShare": 0.8387096774193549,
+              "conditionalRate": 0.9230769230769231,
+              "eligible": 26,
+              "recoveredEligible": 24,
+              "recoveredIneligible": 0,
+              "goldRelationships": 31,
+              "goldClasses": 57
+            },
+            {
+              "classRecall": 0.543859649122807,
+              "relRecall": 0.8064516129032258,
+              "eligibleShare": 0.8064516129032258,
+              "conditionalRate": 1,
+              "eligible": 25,
+              "recoveredEligible": 25,
+              "recoveredIneligible": 0,
+              "goldRelationships": 31,
+              "goldClasses": 57
+            },
+            {
+              "classRecall": 0.5263157894736842,
+              "relRecall": 0.8064516129032258,
+              "eligibleShare": 0.8064516129032258,
+              "conditionalRate": 1,
+              "eligible": 25,
+              "recoveredEligible": 25,
+              "recoveredIneligible": 0,
+              "goldRelationships": 31,
+              "goldClasses": 57
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 0.9743589743589745,
+              "min": 0.9230769230769231,
+              "max": 1
+            },
+            "classRecall": 0.5263157894736842,
+            "relRecall": 0.7956989247311826,
+            "eligibleShare": 0.8172043010752686,
+            "relToClassRecall": 1.5118279569892472,
+            "eligible": [
+              26,
+              25,
+              25
+            ],
+            "recoveredEligible": [
+              24,
+              25,
+              25
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "itops": {
+          "runs": [
+            "ontology_translation/results/multi-domain-control-post152/run-01/itops",
+            "ontology_translation/results/multi-domain-control-post152/run-02/itops",
+            "ontology_translation/results/multi-domain-control-post152/run-03/itops"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.6029411764705882,
+              "relRecall": 0.42592592592592593,
+              "eligibleShare": 0.6574074074074074,
+              "conditionalRate": 0.647887323943662,
+              "eligible": 71,
+              "recoveredEligible": 46,
+              "recoveredIneligible": 0,
+              "goldRelationships": 108,
+              "goldClasses": 68
+            },
+            {
+              "classRecall": 0.6617647058823529,
+              "relRecall": 0.4537037037037037,
+              "eligibleShare": 0.6759259259259259,
+              "conditionalRate": 0.6712328767123288,
+              "eligible": 73,
+              "recoveredEligible": 49,
+              "recoveredIneligible": 0,
+              "goldRelationships": 108,
+              "goldClasses": 68
+            },
+            {
+              "classRecall": 0.6617647058823529,
+              "relRecall": 0.39814814814814814,
+              "eligibleShare": 0.5555555555555556,
+              "conditionalRate": 0.7166666666666667,
+              "eligible": 60,
+              "recoveredEligible": 43,
+              "recoveredIneligible": 0,
+              "goldRelationships": 108,
+              "goldClasses": 68
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 0.6785956224408859,
+              "min": 0.647887323943662,
+              "max": 0.7166666666666667
+            },
+            "classRecall": 0.642156862745098,
+            "relRecall": 0.4259259259259259,
+            "eligibleShare": 0.6296296296296297,
+            "relToClassRecall": 0.6632739609838846,
+            "eligible": [
+              71,
+              73,
+              60
+            ],
+            "recoveredEligible": [
+              46,
+              49,
+              43
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "macroPublished": {
+          "conditionalRate": 0.865478523735887,
+          "classRecall": 0.639724810938813,
+          "relRecall": 0.6929113001693646,
+          "eligibleShare": 0.8123596833274251,
+          "relToClassRecall": 1.1185688166073349
+        }
+      },
+      "final": {
+        "fibo-loans": {
+          "runs": [
+            "ontology_translation/results/default-change-187/treatment/run-01/fibo-loans",
+            "ontology_translation/results/default-change-187/treatment/run-02/fibo-loans",
+            "ontology_translation/results/default-change-187/treatment/run-03/fibo-loans"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.40350877192982454,
+              "relRecall": 0.6774193548387096,
+              "eligibleShare": 0.6774193548387096,
+              "conditionalRate": 1,
+              "eligible": 21,
+              "recoveredEligible": 21,
+              "recoveredIneligible": 0,
+              "goldRelationships": 31,
+              "goldClasses": 57
+            },
+            {
+              "classRecall": 0.49122807017543857,
+              "relRecall": 0.7419354838709677,
+              "eligibleShare": 0.7419354838709677,
+              "conditionalRate": 1,
+              "eligible": 23,
+              "recoveredEligible": 23,
+              "recoveredIneligible": 0,
+              "goldRelationships": 31,
+              "goldClasses": 57
+            },
+            {
+              "classRecall": 0.47368421052631576,
+              "relRecall": 0.6774193548387096,
+              "eligibleShare": 0.7419354838709677,
+              "conditionalRate": 0.9130434782608695,
+              "eligible": 23,
+              "recoveredEligible": 21,
+              "recoveredIneligible": 0,
+              "goldRelationships": 31,
+              "goldClasses": 57
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 0.9710144927536232,
+              "min": 0.9130434782608695,
+              "max": 1
+            },
+            "classRecall": 0.4561403508771929,
+            "relRecall": 0.6989247311827956,
+            "eligibleShare": 0.7204301075268816,
+            "relToClassRecall": 1.5322580645161292,
+            "eligible": [
+              21,
+              23,
+              23
+            ],
+            "recoveredEligible": [
+              21,
+              23,
+              21
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "brick-hvac": {
+          "runs": [
+            "ontology_translation/results/default-change-187/treatment/run-01/brick-hvac",
+            "ontology_translation/results/default-change-187/treatment/run-02/brick-hvac",
+            "ontology_translation/results/default-change-187/treatment/run-03/brick-hvac"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.7692307692307693,
+              "relRecall": 0.42857142857142855,
+              "eligibleShare": 0.9142857142857143,
+              "conditionalRate": 0.46875,
+              "eligible": 32,
+              "recoveredEligible": 15,
+              "recoveredIneligible": 0,
+              "goldRelationships": 35,
+              "goldClasses": 39
+            },
+            {
+              "classRecall": 0.8974358974358975,
+              "relRecall": 0.6571428571428571,
+              "eligibleShare": 1,
+              "conditionalRate": 0.6571428571428571,
+              "eligible": 35,
+              "recoveredEligible": 23,
+              "recoveredIneligible": 0,
+              "goldRelationships": 35,
+              "goldClasses": 39
+            },
+            {
+              "classRecall": 0.8717948717948718,
+              "relRecall": 0.8857142857142857,
+              "eligibleShare": 0.9714285714285714,
+              "conditionalRate": 0.9117647058823529,
+              "eligible": 34,
+              "recoveredEligible": 31,
+              "recoveredIneligible": 0,
+              "goldRelationships": 35,
+              "goldClasses": 39
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 0.67921918767507,
+              "min": 0.46875,
+              "max": 0.9117647058823529
+            },
+            "classRecall": 0.8461538461538461,
+            "relRecall": 0.6571428571428571,
+            "eligibleShare": 0.9619047619047619,
+            "relToClassRecall": 0.7766233766233767,
+            "eligible": [
+              32,
+              35,
+              34
+            ],
+            "recoveredEligible": [
+              15,
+              23,
+              31
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "iof-maintenance": {
+          "runs": [
+            "ontology_translation/results/final-scores/runs/run-01/iof-maintenance",
+            "ontology_translation/results/final-scores/runs/run-02/iof-maintenance",
+            "ontology_translation/results/final-scores/runs/run-03/iof-maintenance"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.9,
+              "relRecall": 0.9230769230769231,
+              "eligibleShare": 0.9230769230769231,
+              "conditionalRate": 1,
+              "eligible": 12,
+              "recoveredEligible": 12,
+              "recoveredIneligible": 0,
+              "goldRelationships": 13,
+              "goldClasses": 20
+            },
+            {
+              "classRecall": 1,
+              "relRecall": 1,
+              "eligibleShare": 1,
+              "conditionalRate": 1,
+              "eligible": 13,
+              "recoveredEligible": 13,
+              "recoveredIneligible": 0,
+              "goldRelationships": 13,
+              "goldClasses": 20
+            },
+            {
+              "classRecall": 0.8,
+              "relRecall": 0.7692307692307693,
+              "eligibleShare": 0.8461538461538461,
+              "conditionalRate": 0.9090909090909091,
+              "eligible": 11,
+              "recoveredEligible": 10,
+              "recoveredIneligible": 0,
+              "goldRelationships": 13,
+              "goldClasses": 20
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 0.9696969696969697,
+              "min": 0.9090909090909091,
+              "max": 1
+            },
+            "classRecall": 0.9,
+            "relRecall": 0.8974358974358975,
+            "eligibleShare": 0.923076923076923,
+            "relToClassRecall": 0.9971509971509972,
+            "eligible": [
+              12,
+              13,
+              11
+            ],
+            "recoveredEligible": [
+              12,
+              13,
+              10
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "iof-supply-chain": {
+          "runs": [
+            "ontology_translation/results/final-scores/runs/run-01/iof-supply-chain",
+            "ontology_translation/results/final-scores/runs/run-02/iof-supply-chain",
+            "ontology_translation/results/final-scores/runs/run-03/iof-supply-chain"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.4716981132075472,
+              "relRecall": 0.7,
+              "eligibleShare": 0.7,
+              "conditionalRate": 1,
+              "eligible": 21,
+              "recoveredEligible": 21,
+              "recoveredIneligible": 0,
+              "goldRelationships": 30,
+              "goldClasses": 53
+            },
+            {
+              "classRecall": 0.4716981132075472,
+              "relRecall": 0.7333333333333333,
+              "eligibleShare": 0.7666666666666667,
+              "conditionalRate": 0.9565217391304348,
+              "eligible": 23,
+              "recoveredEligible": 22,
+              "recoveredIneligible": 0,
+              "goldRelationships": 30,
+              "goldClasses": 53
+            },
+            {
+              "classRecall": 0.41509433962264153,
+              "relRecall": 0.6,
+              "eligibleShare": 0.6333333333333333,
+              "conditionalRate": 0.9473684210526315,
+              "eligible": 19,
+              "recoveredEligible": 18,
+              "recoveredIneligible": 0,
+              "goldRelationships": 30,
+              "goldClasses": 53
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 0.9679633867276888,
+              "min": 0.9473684210526315,
+              "max": 1
+            },
+            "classRecall": 0.45283018867924535,
+            "relRecall": 0.6777777777777777,
+            "eligibleShare": 0.7000000000000001,
+            "relToClassRecall": 1.496759259259259,
+            "eligible": [
+              21,
+              23,
+              19
+            ],
+            "recoveredEligible": [
+              21,
+              22,
+              18
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "itops": {
+          "runs": [
+            "ontology_translation/results/final-scores/runs/run-01/itops",
+            "ontology_translation/results/final-scores/runs/run-02/itops",
+            "ontology_translation/results/final-scores/runs/run-03/itops"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.38235294117647056,
+              "relRecall": 0.3148148148148148,
+              "eligibleShare": 0.3888888888888889,
+              "conditionalRate": 0.8095238095238095,
+              "eligible": 42,
+              "recoveredEligible": 34,
+              "recoveredIneligible": 0,
+              "goldRelationships": 108,
+              "goldClasses": 68
+            },
+            {
+              "classRecall": 0.5882352941176471,
+              "relRecall": 0.5185185185185185,
+              "eligibleShare": 0.5925925925925926,
+              "conditionalRate": 0.875,
+              "eligible": 64,
+              "recoveredEligible": 56,
+              "recoveredIneligible": 0,
+              "goldRelationships": 108,
+              "goldClasses": 68
+            },
+            {
+              "classRecall": 0.4852941176470588,
+              "relRecall": 0.4537037037037037,
+              "eligibleShare": 0.5092592592592593,
+              "conditionalRate": 0.8909090909090909,
+              "eligible": 55,
+              "recoveredEligible": 49,
+              "recoveredIneligible": 0,
+              "goldRelationships": 108,
+              "goldClasses": 68
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 0.8584776334776335,
+              "min": 0.8095238095238095,
+              "max": 0.8909090909090909
+            },
+            "classRecall": 0.4852941176470588,
+            "relRecall": 0.4290123456790123,
+            "eligibleShare": 0.49691358024691357,
+            "relToClassRecall": 0.8840254395809951,
+            "eligible": [
+              42,
+              64,
+              55
+            ],
+            "recoveredEligible": [
+              34,
+              56,
+              49
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "macroPublished": {
+          "conditionalRate": 0.8969735092133378,
+          "classRecall": 0.6637810964275711,
+          "relRecall": 0.732820315884832,
+          "eligibleShare": 0.8263529481271417,
+          "relToClassRecall": 1.2006979243874405
+        }
+      },
+      "final-b3": {
+        "brick-hvac": {
+          "runs": [
+            "ontology_translation/results/baselines-gpt6/b3-no-commit/run-01/brick-hvac/snapshots/A",
+            "ontology_translation/results/baselines-gpt6/b3-no-commit/run-02/brick-hvac/snapshots/A",
+            "ontology_translation/results/baselines-gpt6/b3-no-commit/run-03/brick-hvac/snapshots/A"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.7948717948717948,
+              "relRecall": 0.6,
+              "eligibleShare": 0.8857142857142857,
+              "conditionalRate": 0.6774193548387096,
+              "eligible": 31,
+              "recoveredEligible": 21,
+              "recoveredIneligible": 0,
+              "goldRelationships": 35,
+              "goldClasses": 39
+            },
+            {
+              "classRecall": 0.7692307692307693,
+              "relRecall": 0.42857142857142855,
+              "eligibleShare": 0.9142857142857143,
+              "conditionalRate": 0.46875,
+              "eligible": 32,
+              "recoveredEligible": 15,
+              "recoveredIneligible": 0,
+              "goldRelationships": 35,
+              "goldClasses": 39
+            },
+            {
+              "classRecall": 0.6666666666666666,
+              "relRecall": 0.11428571428571428,
+              "eligibleShare": 0.6571428571428571,
+              "conditionalRate": 0.17391304347826086,
+              "eligible": 23,
+              "recoveredEligible": 4,
+              "recoveredIneligible": 0,
+              "goldRelationships": 35,
+              "goldClasses": 39
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 0.44002746610565674,
+              "min": 0.17391304347826086,
+              "max": 0.6774193548387096
+            },
+            "classRecall": 0.7435897435897436,
+            "relRecall": 0.38095238095238093,
+            "eligibleShare": 0.8190476190476189,
+            "relToClassRecall": 0.5123152709359605,
+            "eligible": [
+              31,
+              32,
+              23
+            ],
+            "recoveredEligible": [
+              21,
+              15,
+              4
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "iof-maintenance": {
+          "runs": [
+            "ontology_translation/results/baselines-gpt6/b3-no-commit/run-01/iof-maintenance/snapshots/A",
+            "ontology_translation/results/baselines-gpt6/b3-no-commit/run-02/iof-maintenance/snapshots/A",
+            "ontology_translation/results/baselines-gpt6/b3-no-commit/run-03/iof-maintenance/snapshots/A"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.6,
+              "relRecall": 0.5384615384615384,
+              "eligibleShare": 0.5384615384615384,
+              "conditionalRate": 1,
+              "eligible": 7,
+              "recoveredEligible": 7,
+              "recoveredIneligible": 0,
+              "goldRelationships": 13,
+              "goldClasses": 20
+            },
+            {
+              "classRecall": 0.85,
+              "relRecall": 0.7692307692307693,
+              "eligibleShare": 0.7692307692307693,
+              "conditionalRate": 1,
+              "eligible": 10,
+              "recoveredEligible": 10,
+              "recoveredIneligible": 0,
+              "goldRelationships": 13,
+              "goldClasses": 20
+            },
+            {
+              "classRecall": 0.6,
+              "relRecall": 0.5384615384615384,
+              "eligibleShare": 0.5384615384615384,
+              "conditionalRate": 1,
+              "eligible": 7,
+              "recoveredEligible": 7,
+              "recoveredIneligible": 0,
+              "goldRelationships": 13,
+              "goldClasses": 20
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 1,
+              "min": 1,
+              "max": 1
+            },
+            "classRecall": 0.6833333333333332,
+            "relRecall": 0.6153846153846154,
+            "eligibleShare": 0.6153846153846154,
+            "relToClassRecall": 0.9005628517823642,
+            "eligible": [
+              7,
+              10,
+              7
+            ],
+            "recoveredEligible": [
+              7,
+              10,
+              7
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "iof-supply-chain": {
+          "runs": [
+            "ontology_translation/results/baselines-gpt6/b3-no-commit/run-01/iof-supply-chain/snapshots/A",
+            "ontology_translation/results/baselines-gpt6/b3-no-commit/run-02/iof-supply-chain/snapshots/A",
+            "ontology_translation/results/baselines-gpt6/b3-no-commit/run-03/iof-supply-chain/snapshots/A"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.39622641509433965,
+              "relRecall": 0.5666666666666667,
+              "eligibleShare": 0.6666666666666666,
+              "conditionalRate": 0.85,
+              "eligible": 20,
+              "recoveredEligible": 17,
+              "recoveredIneligible": 0,
+              "goldRelationships": 30,
+              "goldClasses": 53
+            },
+            {
+              "classRecall": 0.4528301886792453,
+              "relRecall": 0.6333333333333333,
+              "eligibleShare": 0.7,
+              "conditionalRate": 0.9047619047619048,
+              "eligible": 21,
+              "recoveredEligible": 19,
+              "recoveredIneligible": 0,
+              "goldRelationships": 30,
+              "goldClasses": 53
+            },
+            {
+              "classRecall": 0.4339622641509434,
+              "relRecall": 0.5666666666666667,
+              "eligibleShare": 0.7,
+              "conditionalRate": 0.8095238095238095,
+              "eligible": 21,
+              "recoveredEligible": 17,
+              "recoveredIneligible": 0,
+              "goldRelationships": 30,
+              "goldClasses": 53
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 0.8547619047619047,
+              "min": 0.8095238095238095,
+              "max": 0.9047619047619048
+            },
+            "classRecall": 0.42767295597484284,
+            "relRecall": 0.5888888888888889,
+            "eligibleShare": 0.6888888888888888,
+            "relToClassRecall": 1.3769607843137253,
+            "eligible": [
+              20,
+              21,
+              21
+            ],
+            "recoveredEligible": [
+              17,
+              19,
+              17
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "fibo-loans": {
+          "runs": [
+            "ontology_translation/results/baselines-gpt6/b3-no-commit/run-01/fibo-loans/snapshots/A",
+            "ontology_translation/results/baselines-gpt6/b3-no-commit/run-02/fibo-loans/snapshots/A",
+            "ontology_translation/results/baselines-gpt6/b3-no-commit/run-03/fibo-loans/snapshots/A"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.5789473684210527,
+              "relRecall": 0.7741935483870968,
+              "eligibleShare": 0.8064516129032258,
+              "conditionalRate": 0.96,
+              "eligible": 25,
+              "recoveredEligible": 24,
+              "recoveredIneligible": 0,
+              "goldRelationships": 31,
+              "goldClasses": 57
+            },
+            {
+              "classRecall": 0.5087719298245614,
+              "relRecall": 0.8064516129032258,
+              "eligibleShare": 0.8064516129032258,
+              "conditionalRate": 1,
+              "eligible": 25,
+              "recoveredEligible": 25,
+              "recoveredIneligible": 0,
+              "goldRelationships": 31,
+              "goldClasses": 57
+            },
+            {
+              "classRecall": 0.6491228070175439,
+              "relRecall": 0.7096774193548387,
+              "eligibleShare": 0.8709677419354839,
+              "conditionalRate": 0.8148148148148148,
+              "eligible": 27,
+              "recoveredEligible": 22,
+              "recoveredIneligible": 0,
+              "goldRelationships": 31,
+              "goldClasses": 57
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 0.9249382716049382,
+              "min": 0.8148148148148148,
+              "max": 1
+            },
+            "classRecall": 0.5789473684210527,
+            "relRecall": 0.7634408602150536,
+            "eligibleShare": 0.8279569892473119,
+            "relToClassRecall": 1.3186705767350926,
+            "eligible": [
+              25,
+              25,
+              27
+            ],
+            "recoveredEligible": [
+              24,
+              25,
+              22
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "itops": {
+          "runs": [
+            "ontology_translation/results/baselines-gpt6/b3-no-commit/run-01/itops/snapshots/A",
+            "ontology_translation/results/baselines-gpt6/b3-no-commit/run-02/itops/snapshots/A",
+            "ontology_translation/results/baselines-gpt6/b3-no-commit/run-03/itops/snapshots/A"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.6323529411764706,
+              "relRecall": 0.42592592592592593,
+              "eligibleShare": 0.6203703703703703,
+              "conditionalRate": 0.6865671641791045,
+              "eligible": 67,
+              "recoveredEligible": 46,
+              "recoveredIneligible": 0,
+              "goldRelationships": 108,
+              "goldClasses": 68
+            },
+            {
+              "classRecall": 0.5588235294117647,
+              "relRecall": 0.46296296296296297,
+              "eligibleShare": 0.6018518518518519,
+              "conditionalRate": 0.7692307692307693,
+              "eligible": 65,
+              "recoveredEligible": 50,
+              "recoveredIneligible": 0,
+              "goldRelationships": 108,
+              "goldClasses": 68
+            },
+            {
+              "classRecall": 0.8235294117647058,
+              "relRecall": 0.7037037037037037,
+              "eligibleShare": 0.7870370370370371,
+              "conditionalRate": 0.8941176470588236,
+              "eligible": 85,
+              "recoveredEligible": 76,
+              "recoveredIneligible": 0,
+              "goldRelationships": 108,
+              "goldClasses": 68
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 0.7833051934895657,
+              "min": 0.6865671641791045,
+              "max": 0.8941176470588236
+            },
+            "classRecall": 0.6715686274509803,
+            "relRecall": 0.5308641975308642,
+            "eligibleShare": 0.6697530864197532,
+            "relToClassRecall": 0.7904839145715059,
+            "eligible": [
+              67,
+              65,
+              85
+            ],
+            "recoveredEligible": [
+              46,
+              50,
+              76
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "macroPublished": {
+          "conditionalRate": 0.8049319106181249,
+          "classRecall": 0.608385850329743,
+          "relRecall": 0.5871666863602347,
+          "eligibleShare": 0.7378195281421087,
+          "relToClassRecall": 1.0271273709417856
+        }
+      }
+    },
+    "semantic/full": {
+      "first-paper": {
+        "itops": {
+          "runs": [
+            "tests/evals/results/runs/run-01",
+            "tests/evals/results/runs/run-02",
+            "tests/evals/results/runs/run-03"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.3382352941176471,
+              "relRecall": 0.12962962962962962,
+              "eligibleShare": 0.3055555555555556,
+              "conditionalRate": 0.42424242424242425,
+              "eligible": 33,
+              "recoveredEligible": 14,
+              "recoveredIneligible": 0,
+              "goldRelationships": 108,
+              "goldClasses": 68
+            },
+            {
+              "classRecall": 0.3235294117647059,
+              "relRecall": 0.17592592592592593,
+              "eligibleShare": 0.3148148148148148,
+              "conditionalRate": 0.5588235294117647,
+              "eligible": 34,
+              "recoveredEligible": 19,
+              "recoveredIneligible": 0,
+              "goldRelationships": 108,
+              "goldClasses": 68
+            },
+            {
+              "classRecall": 0.29411764705882354,
+              "relRecall": 0.12037037037037036,
+              "eligibleShare": 0.24074074074074073,
+              "conditionalRate": 0.5,
+              "eligible": 26,
+              "recoveredEligible": 13,
+              "recoveredIneligible": 0,
+              "goldRelationships": 108,
+              "goldClasses": 68
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 0.4943553178847297,
+              "min": 0.42424242424242425,
+              "max": 0.5588235294117647
+            },
+            "classRecall": 0.3186274509803922,
+            "relRecall": 0.1419753086419753,
+            "eligibleShare": 0.28703703703703703,
+            "relToClassRecall": 0.4455840455840455,
+            "eligible": [
+              33,
+              34,
+              26
+            ],
+            "recoveredEligible": [
+              14,
+              19,
+              13
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      },
+      "aug-sep": {
+        "brick-hvac": {
+          "runs": [
+            "ontology_translation/results/multi-domain/run-01/brick-hvac",
+            "ontology_translation/results/multi-domain/run-02/brick-hvac",
+            "ontology_translation/results/multi-domain/run-03/brick-hvac"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.5641025641025641,
+              "relRecall": 0.6571428571428571,
+              "eligibleShare": 0.7714285714285715,
+              "conditionalRate": 0.8518518518518519,
+              "eligible": 27,
+              "recoveredEligible": 23,
+              "recoveredIneligible": 0,
+              "goldRelationships": 35,
+              "goldClasses": 39
+            },
+            {
+              "classRecall": 0.717948717948718,
+              "relRecall": 0.6571428571428571,
+              "eligibleShare": 0.9428571428571428,
+              "conditionalRate": 0.696969696969697,
+              "eligible": 33,
+              "recoveredEligible": 23,
+              "recoveredIneligible": 0,
+              "goldRelationships": 35,
+              "goldClasses": 39
+            },
+            {
+              "classRecall": 0.6410256410256411,
+              "relRecall": 0.7428571428571429,
+              "eligibleShare": 0.8285714285714286,
+              "conditionalRate": 0.896551724137931,
+              "eligible": 29,
+              "recoveredEligible": 26,
+              "recoveredIneligible": 0,
+              "goldRelationships": 35,
+              "goldClasses": 39
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 0.8151244243198267,
+              "min": 0.696969696969697,
+              "max": 0.896551724137931
+            },
+            "classRecall": 0.641025641025641,
+            "relRecall": 0.6857142857142856,
+            "eligibleShare": 0.8476190476190477,
+            "relToClassRecall": 1.0697142857142856,
+            "eligible": [
+              27,
+              33,
+              29
+            ],
+            "recoveredEligible": [
+              23,
+              23,
+              26
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "iof-maintenance": {
+          "runs": [
+            "ontology_translation/results/multi-domain/run-01/iof-maintenance",
+            "ontology_translation/results/multi-domain/run-02/iof-maintenance",
+            "ontology_translation/results/multi-domain/run-03/iof-maintenance"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.65,
+              "relRecall": 0.6153846153846154,
+              "eligibleShare": 0.6153846153846154,
+              "conditionalRate": 1,
+              "eligible": 8,
+              "recoveredEligible": 8,
+              "recoveredIneligible": 0,
+              "goldRelationships": 13,
+              "goldClasses": 20
+            },
+            {
+              "classRecall": 0.45,
+              "relRecall": 0.46153846153846156,
+              "eligibleShare": 0.46153846153846156,
+              "conditionalRate": 1,
+              "eligible": 6,
+              "recoveredEligible": 6,
+              "recoveredIneligible": 0,
+              "goldRelationships": 13,
+              "goldClasses": 20
+            },
+            {
+              "classRecall": 0.5,
+              "relRecall": 0.5384615384615384,
+              "eligibleShare": 0.5384615384615384,
+              "conditionalRate": 1,
+              "eligible": 7,
+              "recoveredEligible": 7,
+              "recoveredIneligible": 0,
+              "goldRelationships": 13,
+              "goldClasses": 20
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 1,
+              "min": 1,
+              "max": 1
+            },
+            "classRecall": 0.5333333333333333,
+            "relRecall": 0.5384615384615384,
+            "eligibleShare": 0.5384615384615384,
+            "relToClassRecall": 1.0096153846153846,
+            "eligible": [
+              8,
+              6,
+              7
+            ],
+            "recoveredEligible": [
+              8,
+              6,
+              7
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "iof-supply-chain": {
+          "runs": [
+            "ontology_translation/results/multi-domain/run-01/iof-supply-chain",
+            "ontology_translation/results/multi-domain/run-02/iof-supply-chain",
+            "ontology_translation/results/multi-domain/run-03/iof-supply-chain"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.4716981132075472,
+              "relRecall": 0.6333333333333333,
+              "eligibleShare": 0.7,
+              "conditionalRate": 0.9047619047619048,
+              "eligible": 21,
+              "recoveredEligible": 19,
+              "recoveredIneligible": 0,
+              "goldRelationships": 30,
+              "goldClasses": 53
+            },
+            {
+              "classRecall": 0.49056603773584906,
+              "relRecall": 0.7,
+              "eligibleShare": 0.7666666666666667,
+              "conditionalRate": 0.9130434782608695,
+              "eligible": 23,
+              "recoveredEligible": 21,
+              "recoveredIneligible": 0,
+              "goldRelationships": 30,
+              "goldClasses": 53
+            },
+            {
+              "classRecall": 0.49056603773584906,
+              "relRecall": 0.6,
+              "eligibleShare": 0.6666666666666666,
+              "conditionalRate": 0.9,
+              "eligible": 20,
+              "recoveredEligible": 18,
+              "recoveredIneligible": 0,
+              "goldRelationships": 30,
+              "goldClasses": 53
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 0.9059351276742581,
+              "min": 0.9,
+              "max": 0.9130434782608695
+            },
+            "classRecall": 0.4842767295597484,
+            "relRecall": 0.6444444444444444,
+            "eligibleShare": 0.7111111111111111,
+            "relToClassRecall": 1.3307359307359308,
+            "eligible": [
+              21,
+              23,
+              20
+            ],
+            "recoveredEligible": [
+              19,
+              21,
+              18
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "fibo-loans": {
+          "runs": [
+            "ontology_translation/results/multi-domain/run-01/fibo-loans",
+            "ontology_translation/results/multi-domain/run-02/fibo-loans",
+            "ontology_translation/results/multi-domain/run-03/fibo-loans"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.5263157894736842,
+              "relRecall": 0.7419354838709677,
+              "eligibleShare": 0.8387096774193549,
+              "conditionalRate": 0.8846153846153846,
+              "eligible": 26,
+              "recoveredEligible": 23,
+              "recoveredIneligible": 0,
+              "goldRelationships": 31,
+              "goldClasses": 57
+            },
+            {
+              "classRecall": 0.38596491228070173,
+              "relRecall": 0.6774193548387096,
+              "eligibleShare": 0.6774193548387096,
+              "conditionalRate": 1,
+              "eligible": 21,
+              "recoveredEligible": 21,
+              "recoveredIneligible": 0,
+              "goldRelationships": 31,
+              "goldClasses": 57
+            },
+            {
+              "classRecall": 0.5263157894736842,
+              "relRecall": 0.7419354838709677,
+              "eligibleShare": 0.8064516129032258,
+              "conditionalRate": 0.92,
+              "eligible": 25,
+              "recoveredEligible": 23,
+              "recoveredIneligible": 0,
+              "goldRelationships": 31,
+              "goldClasses": 57
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 0.9348717948717948,
+              "min": 0.8846153846153846,
+              "max": 1
+            },
+            "classRecall": 0.4795321637426901,
+            "relRecall": 0.7204301075268816,
+            "eligibleShare": 0.7741935483870966,
+            "relToClassRecall": 1.5023603461841066,
+            "eligible": [
+              26,
+              21,
+              25
+            ],
+            "recoveredEligible": [
+              23,
+              21,
+              23
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "itops": {
+          "runs": [
+            "ontology_translation/results/multi-domain-control/run-01/itops",
+            "ontology_translation/results/multi-domain-control/run-02/itops",
+            "ontology_translation/results/multi-domain-control/run-03/itops"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.5294117647058824,
+              "relRecall": 0.3055555555555556,
+              "eligibleShare": 0.5555555555555556,
+              "conditionalRate": 0.55,
+              "eligible": 60,
+              "recoveredEligible": 33,
+              "recoveredIneligible": 0,
+              "goldRelationships": 108,
+              "goldClasses": 68
+            },
+            {
+              "classRecall": 0.5294117647058824,
+              "relRecall": 0.37037037037037035,
+              "eligibleShare": 0.5185185185185185,
+              "conditionalRate": 0.7142857142857143,
+              "eligible": 56,
+              "recoveredEligible": 40,
+              "recoveredIneligible": 0,
+              "goldRelationships": 108,
+              "goldClasses": 68
+            },
+            {
+              "classRecall": 0.4852941176470588,
+              "relRecall": 0.35185185185185186,
+              "eligibleShare": 0.5185185185185185,
+              "conditionalRate": 0.6785714285714286,
+              "eligible": 56,
+              "recoveredEligible": 38,
+              "recoveredIneligible": 0,
+              "goldRelationships": 108,
+              "goldClasses": 68
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 0.6476190476190476,
+              "min": 0.55,
+              "max": 0.7142857142857143
+            },
+            "classRecall": 0.5147058823529412,
+            "relRecall": 0.34259259259259256,
+            "eligibleShare": 0.5308641975308642,
+            "relToClassRecall": 0.6656084656084654,
+            "eligible": [
+              60,
+              56,
+              56
+            ],
+            "recoveredEligible": [
+              33,
+              40,
+              38
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "macroPublished": {
+          "conditionalRate": 0.91398283671647,
+          "classRecall": 0.5345419669153532,
+          "relRecall": 0.6472625940367875,
+          "eligibleShare": 0.7178463113946985,
+          "relToClassRecall": 1.228106486812427
+        }
+      },
+      "post-152": {
+        "brick-hvac": {
+          "runs": [
+            "ontology_translation/results/multi-domain-post152/run-01/brick-hvac",
+            "ontology_translation/results/multi-domain-post152/run-02/brick-hvac",
+            "ontology_translation/results/multi-domain-post152/run-03/brick-hvac"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.6410256410256411,
+              "relRecall": 0.7142857142857143,
+              "eligibleShare": 0.8571428571428571,
+              "conditionalRate": 0.8333333333333334,
+              "eligible": 30,
+              "recoveredEligible": 25,
+              "recoveredIneligible": 0,
+              "goldRelationships": 35,
+              "goldClasses": 39
+            },
+            {
+              "classRecall": 0.9230769230769231,
+              "relRecall": 0.8285714285714286,
+              "eligibleShare": 1,
+              "conditionalRate": 0.8285714285714286,
+              "eligible": 35,
+              "recoveredEligible": 29,
+              "recoveredIneligible": 0,
+              "goldRelationships": 35,
+              "goldClasses": 39
+            },
+            {
+              "classRecall": 0.6666666666666666,
+              "relRecall": 0.8285714285714286,
+              "eligibleShare": 0.8857142857142857,
+              "conditionalRate": 0.9354838709677419,
+              "eligible": 31,
+              "recoveredEligible": 29,
+              "recoveredIneligible": 0,
+              "goldRelationships": 35,
+              "goldClasses": 39
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 0.8657962109575013,
+              "min": 0.8285714285714286,
+              "max": 0.9354838709677419
+            },
+            "classRecall": 0.7435897435897436,
+            "relRecall": 0.7904761904761904,
+            "eligibleShare": 0.9142857142857143,
+            "relToClassRecall": 1.0630541871921182,
+            "eligible": [
+              30,
+              35,
+              31
+            ],
+            "recoveredEligible": [
+              25,
+              29,
+              29
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "iof-maintenance": {
+          "runs": [
+            "ontology_translation/results/multi-domain-post152/run-01/iof-maintenance",
+            "ontology_translation/results/multi-domain-post152/run-02/iof-maintenance",
+            "ontology_translation/results/multi-domain-post152/run-03/iof-maintenance"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.65,
+              "relRecall": 0.6153846153846154,
+              "eligibleShare": 0.6153846153846154,
+              "conditionalRate": 1,
+              "eligible": 8,
+              "recoveredEligible": 8,
+              "recoveredIneligible": 0,
+              "goldRelationships": 13,
+              "goldClasses": 20
+            },
+            {
+              "classRecall": 0.85,
+              "relRecall": 0.9230769230769231,
+              "eligibleShare": 0.9230769230769231,
+              "conditionalRate": 1,
+              "eligible": 12,
+              "recoveredEligible": 12,
+              "recoveredIneligible": 0,
+              "goldRelationships": 13,
+              "goldClasses": 20
+            },
+            {
+              "classRecall": 0.65,
+              "relRecall": 0.6153846153846154,
+              "eligibleShare": 0.6153846153846154,
+              "conditionalRate": 1,
+              "eligible": 8,
+              "recoveredEligible": 8,
+              "recoveredIneligible": 0,
+              "goldRelationships": 13,
+              "goldClasses": 20
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 1,
+              "min": 1,
+              "max": 1
+            },
+            "classRecall": 0.7166666666666667,
+            "relRecall": 0.7179487179487181,
+            "eligibleShare": 0.7179487179487181,
+            "relToClassRecall": 1.001788908765653,
+            "eligible": [
+              8,
+              12,
+              8
+            ],
+            "recoveredEligible": [
+              8,
+              12,
+              8
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "iof-supply-chain": {
+          "runs": [
+            "ontology_translation/results/multi-domain-post152/run-01/iof-supply-chain",
+            "ontology_translation/results/multi-domain-post152/run-02/iof-supply-chain",
+            "ontology_translation/results/multi-domain-post152/run-03/iof-supply-chain"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.6981132075471698,
+              "relRecall": 0.7666666666666667,
+              "eligibleShare": 0.9333333333333333,
+              "conditionalRate": 0.8214285714285714,
+              "eligible": 28,
+              "recoveredEligible": 23,
+              "recoveredIneligible": 0,
+              "goldRelationships": 30,
+              "goldClasses": 53
+            },
+            {
+              "classRecall": 0.5849056603773585,
+              "relRecall": 0.7333333333333333,
+              "eligibleShare": 0.7666666666666667,
+              "conditionalRate": 0.9565217391304348,
+              "eligible": 23,
+              "recoveredEligible": 22,
+              "recoveredIneligible": 0,
+              "goldRelationships": 30,
+              "goldClasses": 53
+            },
+            {
+              "classRecall": 0.4716981132075472,
+              "relRecall": 0.7333333333333333,
+              "eligibleShare": 0.7666666666666667,
+              "conditionalRate": 0.9565217391304348,
+              "eligible": 23,
+              "recoveredEligible": 22,
+              "recoveredIneligible": 0,
+              "goldRelationships": 30,
+              "goldClasses": 53
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 0.9114906832298137,
+              "min": 0.8214285714285714,
+              "max": 0.9565217391304348
+            },
+            "classRecall": 0.5849056603773585,
+            "relRecall": 0.7444444444444445,
+            "eligibleShare": 0.8222222222222223,
+            "relToClassRecall": 1.2727598566308245,
+            "eligible": [
+              28,
+              23,
+              23
+            ],
+            "recoveredEligible": [
+              23,
+              22,
+              22
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "fibo-loans": {
+          "runs": [
+            "ontology_translation/results/multi-domain-post152/run-01/fibo-loans",
+            "ontology_translation/results/multi-domain-post152/run-02/fibo-loans",
+            "ontology_translation/results/multi-domain-post152/run-03/fibo-loans"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.5087719298245614,
+              "relRecall": 0.7741935483870968,
+              "eligibleShare": 0.8387096774193549,
+              "conditionalRate": 0.9230769230769231,
+              "eligible": 26,
+              "recoveredEligible": 24,
+              "recoveredIneligible": 0,
+              "goldRelationships": 31,
+              "goldClasses": 57
+            },
+            {
+              "classRecall": 0.5614035087719298,
+              "relRecall": 0.8064516129032258,
+              "eligibleShare": 0.8387096774193549,
+              "conditionalRate": 0.9615384615384616,
+              "eligible": 26,
+              "recoveredEligible": 25,
+              "recoveredIneligible": 0,
+              "goldRelationships": 31,
+              "goldClasses": 57
+            },
+            {
+              "classRecall": 0.5263157894736842,
+              "relRecall": 0.8064516129032258,
+              "eligibleShare": 0.8064516129032258,
+              "conditionalRate": 1,
+              "eligible": 25,
+              "recoveredEligible": 25,
+              "recoveredIneligible": 0,
+              "goldRelationships": 31,
+              "goldClasses": 57
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 0.9615384615384616,
+              "min": 0.9230769230769231,
+              "max": 1
+            },
+            "classRecall": 0.5321637426900585,
+            "relRecall": 0.7956989247311826,
+            "eligibleShare": 0.8279569892473119,
+            "relToClassRecall": 1.4952144629563981,
+            "eligible": [
+              26,
+              26,
+              25
+            ],
+            "recoveredEligible": [
+              24,
+              25,
+              25
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "itops": {
+          "runs": [
+            "ontology_translation/results/multi-domain-control-post152/run-01/itops",
+            "ontology_translation/results/multi-domain-control-post152/run-02/itops",
+            "ontology_translation/results/multi-domain-control-post152/run-03/itops"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.6029411764705882,
+              "relRecall": 0.4444444444444444,
+              "eligibleShare": 0.6574074074074074,
+              "conditionalRate": 0.676056338028169,
+              "eligible": 71,
+              "recoveredEligible": 48,
+              "recoveredIneligible": 0,
+              "goldRelationships": 108,
+              "goldClasses": 68
+            },
+            {
+              "classRecall": 0.6617647058823529,
+              "relRecall": 0.46296296296296297,
+              "eligibleShare": 0.6759259259259259,
+              "conditionalRate": 0.684931506849315,
+              "eligible": 73,
+              "recoveredEligible": 50,
+              "recoveredIneligible": 0,
+              "goldRelationships": 108,
+              "goldClasses": 68
+            },
+            {
+              "classRecall": 0.6764705882352942,
+              "relRecall": 0.4537037037037037,
+              "eligibleShare": 0.6944444444444444,
+              "conditionalRate": 0.6533333333333333,
+              "eligible": 75,
+              "recoveredEligible": 49,
+              "recoveredIneligible": 0,
+              "goldRelationships": 108,
+              "goldClasses": 68
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 0.6714403927369391,
+              "min": 0.6533333333333333,
+              "max": 0.684931506849315
+            },
+            "classRecall": 0.6470588235294118,
+            "relRecall": 0.4537037037037037,
+            "eligibleShare": 0.6759259259259259,
+            "relToClassRecall": 0.7011784511784511,
+            "eligible": [
+              71,
+              73,
+              75
+            ],
+            "recoveredEligible": [
+              48,
+              50,
+              49
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "macroPublished": {
+          "conditionalRate": 0.9347063389314442,
+          "classRecall": 0.6443314533309569,
+          "relRecall": 0.7621420694001338,
+          "eligibleShare": 0.8206034109259916,
+          "relToClassRecall": 1.2082043538862486
+        }
+      },
+      "final": {
+        "fibo-loans": {
+          "runs": [
+            "ontology_translation/results/default-change-187/treatment/run-01/fibo-loans",
+            "ontology_translation/results/default-change-187/treatment/run-02/fibo-loans",
+            "ontology_translation/results/default-change-187/treatment/run-03/fibo-loans"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.40350877192982454,
+              "relRecall": 0.6774193548387096,
+              "eligibleShare": 0.6774193548387096,
+              "conditionalRate": 1,
+              "eligible": 21,
+              "recoveredEligible": 21,
+              "recoveredIneligible": 0,
+              "goldRelationships": 31,
+              "goldClasses": 57
+            },
+            {
+              "classRecall": 0.49122807017543857,
+              "relRecall": 0.7419354838709677,
+              "eligibleShare": 0.7419354838709677,
+              "conditionalRate": 1,
+              "eligible": 23,
+              "recoveredEligible": 23,
+              "recoveredIneligible": 0,
+              "goldRelationships": 31,
+              "goldClasses": 57
+            },
+            {
+              "classRecall": 0.47368421052631576,
+              "relRecall": 0.7419354838709677,
+              "eligibleShare": 0.7419354838709677,
+              "conditionalRate": 1,
+              "eligible": 23,
+              "recoveredEligible": 23,
+              "recoveredIneligible": 0,
+              "goldRelationships": 31,
+              "goldClasses": 57
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 1,
+              "min": 1,
+              "max": 1
+            },
+            "classRecall": 0.4561403508771929,
+            "relRecall": 0.7204301075268816,
+            "eligibleShare": 0.7204301075268816,
+            "relToClassRecall": 1.5794044665012408,
+            "eligible": [
+              21,
+              23,
+              23
+            ],
+            "recoveredEligible": [
+              21,
+              23,
+              23
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "brick-hvac": {
+          "runs": [
+            "ontology_translation/results/default-change-187/treatment/run-01/brick-hvac",
+            "ontology_translation/results/default-change-187/treatment/run-02/brick-hvac",
+            "ontology_translation/results/default-change-187/treatment/run-03/brick-hvac"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.7692307692307693,
+              "relRecall": 0.8571428571428571,
+              "eligibleShare": 0.9142857142857143,
+              "conditionalRate": 0.9375,
+              "eligible": 32,
+              "recoveredEligible": 30,
+              "recoveredIneligible": 0,
+              "goldRelationships": 35,
+              "goldClasses": 39
+            },
+            {
+              "classRecall": 0.8974358974358975,
+              "relRecall": 0.9428571428571428,
+              "eligibleShare": 1,
+              "conditionalRate": 0.9428571428571428,
+              "eligible": 35,
+              "recoveredEligible": 33,
+              "recoveredIneligible": 0,
+              "goldRelationships": 35,
+              "goldClasses": 39
+            },
+            {
+              "classRecall": 0.8717948717948718,
+              "relRecall": 0.9428571428571428,
+              "eligibleShare": 0.9714285714285714,
+              "conditionalRate": 0.9705882352941176,
+              "eligible": 34,
+              "recoveredEligible": 33,
+              "recoveredIneligible": 0,
+              "goldRelationships": 35,
+              "goldClasses": 39
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 0.9503151260504201,
+              "min": 0.9375,
+              "max": 0.9705882352941176
+            },
+            "classRecall": 0.8461538461538461,
+            "relRecall": 0.9142857142857143,
+            "eligibleShare": 0.9619047619047619,
+            "relToClassRecall": 1.0805194805194804,
+            "eligible": [
+              32,
+              35,
+              34
+            ],
+            "recoveredEligible": [
+              30,
+              33,
+              33
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "iof-maintenance": {
+          "runs": [
+            "ontology_translation/results/final-scores/runs/run-01/iof-maintenance",
+            "ontology_translation/results/final-scores/runs/run-02/iof-maintenance",
+            "ontology_translation/results/final-scores/runs/run-03/iof-maintenance"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.9,
+              "relRecall": 0.9230769230769231,
+              "eligibleShare": 0.9230769230769231,
+              "conditionalRate": 1,
+              "eligible": 12,
+              "recoveredEligible": 12,
+              "recoveredIneligible": 0,
+              "goldRelationships": 13,
+              "goldClasses": 20
+            },
+            {
+              "classRecall": 1,
+              "relRecall": 1,
+              "eligibleShare": 1,
+              "conditionalRate": 1,
+              "eligible": 13,
+              "recoveredEligible": 13,
+              "recoveredIneligible": 0,
+              "goldRelationships": 13,
+              "goldClasses": 20
+            },
+            {
+              "classRecall": 0.8,
+              "relRecall": 0.8461538461538461,
+              "eligibleShare": 0.8461538461538461,
+              "conditionalRate": 1,
+              "eligible": 11,
+              "recoveredEligible": 11,
+              "recoveredIneligible": 0,
+              "goldRelationships": 13,
+              "goldClasses": 20
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 1,
+              "min": 1,
+              "max": 1
+            },
+            "classRecall": 0.9,
+            "relRecall": 0.923076923076923,
+            "eligibleShare": 0.923076923076923,
+            "relToClassRecall": 1.0256410256410255,
+            "eligible": [
+              12,
+              13,
+              11
+            ],
+            "recoveredEligible": [
+              12,
+              13,
+              11
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "iof-supply-chain": {
+          "runs": [
+            "ontology_translation/results/final-scores/runs/run-01/iof-supply-chain",
+            "ontology_translation/results/final-scores/runs/run-02/iof-supply-chain",
+            "ontology_translation/results/final-scores/runs/run-03/iof-supply-chain"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.4716981132075472,
+              "relRecall": 0.7,
+              "eligibleShare": 0.7,
+              "conditionalRate": 1,
+              "eligible": 21,
+              "recoveredEligible": 21,
+              "recoveredIneligible": 0,
+              "goldRelationships": 30,
+              "goldClasses": 53
+            },
+            {
+              "classRecall": 0.4716981132075472,
+              "relRecall": 0.7333333333333333,
+              "eligibleShare": 0.7666666666666667,
+              "conditionalRate": 0.9565217391304348,
+              "eligible": 23,
+              "recoveredEligible": 22,
+              "recoveredIneligible": 0,
+              "goldRelationships": 30,
+              "goldClasses": 53
+            },
+            {
+              "classRecall": 0.41509433962264153,
+              "relRecall": 0.6,
+              "eligibleShare": 0.6333333333333333,
+              "conditionalRate": 0.9473684210526315,
+              "eligible": 19,
+              "recoveredEligible": 18,
+              "recoveredIneligible": 0,
+              "goldRelationships": 30,
+              "goldClasses": 53
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 0.9679633867276888,
+              "min": 0.9473684210526315,
+              "max": 1
+            },
+            "classRecall": 0.45283018867924535,
+            "relRecall": 0.6777777777777777,
+            "eligibleShare": 0.7000000000000001,
+            "relToClassRecall": 1.496759259259259,
+            "eligible": [
+              21,
+              23,
+              19
+            ],
+            "recoveredEligible": [
+              21,
+              22,
+              18
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "itops": {
+          "runs": [
+            "ontology_translation/results/final-scores/runs/run-01/itops",
+            "ontology_translation/results/final-scores/runs/run-02/itops",
+            "ontology_translation/results/final-scores/runs/run-03/itops"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.38235294117647056,
+              "relRecall": 0.3148148148148148,
+              "eligibleShare": 0.3888888888888889,
+              "conditionalRate": 0.8095238095238095,
+              "eligible": 42,
+              "recoveredEligible": 34,
+              "recoveredIneligible": 0,
+              "goldRelationships": 108,
+              "goldClasses": 68
+            },
+            {
+              "classRecall": 0.5882352941176471,
+              "relRecall": 0.5185185185185185,
+              "eligibleShare": 0.5925925925925926,
+              "conditionalRate": 0.875,
+              "eligible": 64,
+              "recoveredEligible": 56,
+              "recoveredIneligible": 0,
+              "goldRelationships": 108,
+              "goldClasses": 68
+            },
+            {
+              "classRecall": 0.4852941176470588,
+              "relRecall": 0.4537037037037037,
+              "eligibleShare": 0.5092592592592593,
+              "conditionalRate": 0.8909090909090909,
+              "eligible": 55,
+              "recoveredEligible": 49,
+              "recoveredIneligible": 0,
+              "goldRelationships": 108,
+              "goldClasses": 68
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 0.8584776334776335,
+              "min": 0.8095238095238095,
+              "max": 0.8909090909090909
+            },
+            "classRecall": 0.4852941176470588,
+            "relRecall": 0.4290123456790123,
+            "eligibleShare": 0.49691358024691357,
+            "relToClassRecall": 0.8840254395809951,
+            "eligible": [
+              42,
+              64,
+              55
+            ],
+            "recoveredEligible": [
+              34,
+              56,
+              49
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "macroPublished": {
+          "conditionalRate": 0.9795696281945272,
+          "classRecall": 0.6637810964275711,
+          "relRecall": 0.8088926306668242,
+          "eligibleShare": 0.8263529481271417,
+          "relToClassRecall": 1.2955810579802514
+        }
+      },
+      "final-b3": {
+        "brick-hvac": {
+          "runs": [
+            "ontology_translation/results/baselines-gpt6/b3-no-commit/run-01/brick-hvac/snapshots/A",
+            "ontology_translation/results/baselines-gpt6/b3-no-commit/run-02/brick-hvac/snapshots/A",
+            "ontology_translation/results/baselines-gpt6/b3-no-commit/run-03/brick-hvac/snapshots/A"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.7948717948717948,
+              "relRecall": 0.8,
+              "eligibleShare": 0.8857142857142857,
+              "conditionalRate": 0.9032258064516129,
+              "eligible": 31,
+              "recoveredEligible": 28,
+              "recoveredIneligible": 0,
+              "goldRelationships": 35,
+              "goldClasses": 39
+            },
+            {
+              "classRecall": 0.7692307692307693,
+              "relRecall": 0.8857142857142857,
+              "eligibleShare": 0.9142857142857143,
+              "conditionalRate": 0.96875,
+              "eligible": 32,
+              "recoveredEligible": 31,
+              "recoveredIneligible": 0,
+              "goldRelationships": 35,
+              "goldClasses": 39
+            },
+            {
+              "classRecall": 0.6666666666666666,
+              "relRecall": 0.6,
+              "eligibleShare": 0.6571428571428571,
+              "conditionalRate": 0.9130434782608695,
+              "eligible": 23,
+              "recoveredEligible": 21,
+              "recoveredIneligible": 0,
+              "goldRelationships": 35,
+              "goldClasses": 39
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 0.9283397615708275,
+              "min": 0.9032258064516129,
+              "max": 0.96875
+            },
+            "classRecall": 0.7435897435897436,
+            "relRecall": 0.7619047619047619,
+            "eligibleShare": 0.8190476190476189,
+            "relToClassRecall": 1.024630541871921,
+            "eligible": [
+              31,
+              32,
+              23
+            ],
+            "recoveredEligible": [
+              28,
+              31,
+              21
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "iof-maintenance": {
+          "runs": [
+            "ontology_translation/results/baselines-gpt6/b3-no-commit/run-01/iof-maintenance/snapshots/A",
+            "ontology_translation/results/baselines-gpt6/b3-no-commit/run-02/iof-maintenance/snapshots/A",
+            "ontology_translation/results/baselines-gpt6/b3-no-commit/run-03/iof-maintenance/snapshots/A"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.6,
+              "relRecall": 0.5384615384615384,
+              "eligibleShare": 0.5384615384615384,
+              "conditionalRate": 1,
+              "eligible": 7,
+              "recoveredEligible": 7,
+              "recoveredIneligible": 0,
+              "goldRelationships": 13,
+              "goldClasses": 20
+            },
+            {
+              "classRecall": 0.85,
+              "relRecall": 0.7692307692307693,
+              "eligibleShare": 0.7692307692307693,
+              "conditionalRate": 1,
+              "eligible": 10,
+              "recoveredEligible": 10,
+              "recoveredIneligible": 0,
+              "goldRelationships": 13,
+              "goldClasses": 20
+            },
+            {
+              "classRecall": 0.6,
+              "relRecall": 0.5384615384615384,
+              "eligibleShare": 0.5384615384615384,
+              "conditionalRate": 1,
+              "eligible": 7,
+              "recoveredEligible": 7,
+              "recoveredIneligible": 0,
+              "goldRelationships": 13,
+              "goldClasses": 20
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 1,
+              "min": 1,
+              "max": 1
+            },
+            "classRecall": 0.6833333333333332,
+            "relRecall": 0.6153846153846154,
+            "eligibleShare": 0.6153846153846154,
+            "relToClassRecall": 0.9005628517823642,
+            "eligible": [
+              7,
+              10,
+              7
+            ],
+            "recoveredEligible": [
+              7,
+              10,
+              7
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "iof-supply-chain": {
+          "runs": [
+            "ontology_translation/results/baselines-gpt6/b3-no-commit/run-01/iof-supply-chain/snapshots/A",
+            "ontology_translation/results/baselines-gpt6/b3-no-commit/run-02/iof-supply-chain/snapshots/A",
+            "ontology_translation/results/baselines-gpt6/b3-no-commit/run-03/iof-supply-chain/snapshots/A"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.39622641509433965,
+              "relRecall": 0.5666666666666667,
+              "eligibleShare": 0.6666666666666666,
+              "conditionalRate": 0.85,
+              "eligible": 20,
+              "recoveredEligible": 17,
+              "recoveredIneligible": 0,
+              "goldRelationships": 30,
+              "goldClasses": 53
+            },
+            {
+              "classRecall": 0.4716981132075472,
+              "relRecall": 0.6333333333333333,
+              "eligibleShare": 0.7,
+              "conditionalRate": 0.9047619047619048,
+              "eligible": 21,
+              "recoveredEligible": 19,
+              "recoveredIneligible": 0,
+              "goldRelationships": 30,
+              "goldClasses": 53
+            },
+            {
+              "classRecall": 0.4339622641509434,
+              "relRecall": 0.5666666666666667,
+              "eligibleShare": 0.7,
+              "conditionalRate": 0.8095238095238095,
+              "eligible": 21,
+              "recoveredEligible": 17,
+              "recoveredIneligible": 0,
+              "goldRelationships": 30,
+              "goldClasses": 53
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 0.8547619047619047,
+              "min": 0.8095238095238095,
+              "max": 0.9047619047619048
+            },
+            "classRecall": 0.43396226415094336,
+            "relRecall": 0.5888888888888889,
+            "eligibleShare": 0.6888888888888888,
+            "relToClassRecall": 1.3570048309178746,
+            "eligible": [
+              20,
+              21,
+              21
+            ],
+            "recoveredEligible": [
+              17,
+              19,
+              17
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "fibo-loans": {
+          "runs": [
+            "ontology_translation/results/baselines-gpt6/b3-no-commit/run-01/fibo-loans/snapshots/A",
+            "ontology_translation/results/baselines-gpt6/b3-no-commit/run-02/fibo-loans/snapshots/A",
+            "ontology_translation/results/baselines-gpt6/b3-no-commit/run-03/fibo-loans/snapshots/A"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.5789473684210527,
+              "relRecall": 0.8064516129032258,
+              "eligibleShare": 0.8064516129032258,
+              "conditionalRate": 1,
+              "eligible": 25,
+              "recoveredEligible": 25,
+              "recoveredIneligible": 0,
+              "goldRelationships": 31,
+              "goldClasses": 57
+            },
+            {
+              "classRecall": 0.5087719298245614,
+              "relRecall": 0.8064516129032258,
+              "eligibleShare": 0.8064516129032258,
+              "conditionalRate": 1,
+              "eligible": 25,
+              "recoveredEligible": 25,
+              "recoveredIneligible": 0,
+              "goldRelationships": 31,
+              "goldClasses": 57
+            },
+            {
+              "classRecall": 0.6491228070175439,
+              "relRecall": 0.8387096774193549,
+              "eligibleShare": 0.8709677419354839,
+              "conditionalRate": 0.9629629629629629,
+              "eligible": 27,
+              "recoveredEligible": 26,
+              "recoveredIneligible": 0,
+              "goldRelationships": 31,
+              "goldClasses": 57
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 0.9876543209876543,
+              "min": 0.9629629629629629,
+              "max": 1
+            },
+            "classRecall": 0.5789473684210527,
+            "relRecall": 0.8172043010752689,
+            "eligibleShare": 0.8279569892473119,
+            "relToClassRecall": 1.4115347018572826,
+            "eligible": [
+              25,
+              25,
+              27
+            ],
+            "recoveredEligible": [
+              25,
+              25,
+              26
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "itops": {
+          "runs": [
+            "ontology_translation/results/baselines-gpt6/b3-no-commit/run-01/itops/snapshots/A",
+            "ontology_translation/results/baselines-gpt6/b3-no-commit/run-02/itops/snapshots/A",
+            "ontology_translation/results/baselines-gpt6/b3-no-commit/run-03/itops/snapshots/A"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.6323529411764706,
+              "relRecall": 0.4351851851851852,
+              "eligibleShare": 0.6203703703703703,
+              "conditionalRate": 0.7014925373134329,
+              "eligible": 67,
+              "recoveredEligible": 47,
+              "recoveredIneligible": 0,
+              "goldRelationships": 108,
+              "goldClasses": 68
+            },
+            {
+              "classRecall": 0.5588235294117647,
+              "relRecall": 0.48148148148148145,
+              "eligibleShare": 0.6018518518518519,
+              "conditionalRate": 0.8,
+              "eligible": 65,
+              "recoveredEligible": 52,
+              "recoveredIneligible": 0,
+              "goldRelationships": 108,
+              "goldClasses": 68
+            },
+            {
+              "classRecall": 0.8235294117647058,
+              "relRecall": 0.7222222222222222,
+              "eligibleShare": 0.7870370370370371,
+              "conditionalRate": 0.9176470588235294,
+              "eligible": 85,
+              "recoveredEligible": 78,
+              "recoveredIneligible": 0,
+              "goldRelationships": 108,
+              "goldClasses": 68
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 0.8063798653789874,
+              "min": 0.7014925373134329,
+              "max": 0.9176470588235294
+            },
+            "classRecall": 0.6715686274509803,
+            "relRecall": 0.5462962962962963,
+            "eligibleShare": 0.6697530864197532,
+            "relToClassRecall": 0.813463098134631,
+            "eligible": [
+              67,
+              65,
+              85
+            ],
+            "recoveredEligible": [
+              47,
+              52,
+              78
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "macroPublished": {
+          "conditionalRate": 0.9426889968300967,
+          "classRecall": 0.6099581773737681,
+          "relRecall": 0.6958456418133838,
+          "eligibleShare": 0.7378195281421087,
+          "relToClassRecall": 1.1734332316073606
+        }
+      }
+    },
+    "heuristic/practical": {
+      "first-paper": {
+        "itops": {
+          "runs": [
+            "tests/evals/results/runs/run-01",
+            "tests/evals/results/runs/run-02",
+            "tests/evals/results/runs/run-03"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.6785714285714286,
+              "relRecall": 0.24390243902439024,
+              "eligibleShare": 0.5609756097560976,
+              "conditionalRate": 0.43478260869565216,
+              "eligible": 23,
+              "recoveredEligible": 10,
+              "recoveredIneligible": 0,
+              "goldRelationships": 41,
+              "goldClasses": 28
+            },
+            {
+              "classRecall": 0.6071428571428571,
+              "relRecall": 0.17073170731707318,
+              "eligibleShare": 0.4878048780487805,
+              "conditionalRate": 0.35,
+              "eligible": 20,
+              "recoveredEligible": 7,
+              "recoveredIneligible": 0,
+              "goldRelationships": 41,
+              "goldClasses": 28
+            },
+            {
+              "classRecall": 0.4642857142857143,
+              "relRecall": 0.07317073170731707,
+              "eligibleShare": 0.3170731707317073,
+              "conditionalRate": 0.23076923076923078,
+              "eligible": 13,
+              "recoveredEligible": 3,
+              "recoveredIneligible": 0,
+              "goldRelationships": 41,
+              "goldClasses": 28
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 0.33851727982162766,
+              "min": 0.23076923076923078,
+              "max": 0.43478260869565216
+            },
+            "classRecall": 0.5833333333333334,
+            "relRecall": 0.1626016260162602,
+            "eligibleShare": 0.4552845528455285,
+            "relToClassRecall": 0.2787456445993032,
+            "eligible": [
+              23,
+              20,
+              13
+            ],
+            "recoveredEligible": [
+              10,
+              7,
+              3
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      },
+      "aug-sep": {
+        "brick-hvac": {
+          "runs": [
+            "ontology_translation/results/multi-domain/run-01/brick-hvac",
+            "ontology_translation/results/multi-domain/run-02/brick-hvac",
+            "ontology_translation/results/multi-domain/run-03/brick-hvac"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.7777777777777778,
+              "relRecall": 0.631578947368421,
+              "eligibleShare": 0.8421052631578947,
+              "conditionalRate": 0.75,
+              "eligible": 16,
+              "recoveredEligible": 12,
+              "recoveredIneligible": 0,
+              "goldRelationships": 19,
+              "goldClasses": 18
+            },
+            {
+              "classRecall": 0.8888888888888888,
+              "relRecall": 0.3684210526315789,
+              "eligibleShare": 0.9473684210526315,
+              "conditionalRate": 0.3888888888888889,
+              "eligible": 18,
+              "recoveredEligible": 7,
+              "recoveredIneligible": 0,
+              "goldRelationships": 19,
+              "goldClasses": 18
+            },
+            {
+              "classRecall": 0.8333333333333334,
+              "relRecall": 0.5789473684210527,
+              "eligibleShare": 0.8421052631578947,
+              "conditionalRate": 0.6875,
+              "eligible": 16,
+              "recoveredEligible": 11,
+              "recoveredIneligible": 0,
+              "goldRelationships": 19,
+              "goldClasses": 18
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 0.6087962962962963,
+              "min": 0.3888888888888889,
+              "max": 0.75
+            },
+            "classRecall": 0.8333333333333334,
+            "relRecall": 0.5263157894736842,
+            "eligibleShare": 0.8771929824561403,
+            "relToClassRecall": 0.631578947368421,
+            "eligible": [
+              16,
+              18,
+              16
+            ],
+            "recoveredEligible": [
+              12,
+              7,
+              11
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "iof-maintenance": {
+          "runs": [
+            "ontology_translation/results/multi-domain/run-01/iof-maintenance",
+            "ontology_translation/results/multi-domain/run-02/iof-maintenance",
+            "ontology_translation/results/multi-domain/run-03/iof-maintenance"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.8,
+              "relRecall": 0.875,
+              "eligibleShare": 0.875,
+              "conditionalRate": 1,
+              "eligible": 7,
+              "recoveredEligible": 7,
+              "recoveredIneligible": 0,
+              "goldRelationships": 8,
+              "goldClasses": 15
+            },
+            {
+              "classRecall": 0.6,
+              "relRecall": 0.75,
+              "eligibleShare": 0.75,
+              "conditionalRate": 1,
+              "eligible": 6,
+              "recoveredEligible": 6,
+              "recoveredIneligible": 0,
+              "goldRelationships": 8,
+              "goldClasses": 15
+            },
+            {
+              "classRecall": 0.6,
+              "relRecall": 0.75,
+              "eligibleShare": 0.75,
+              "conditionalRate": 1,
+              "eligible": 6,
+              "recoveredEligible": 6,
+              "recoveredIneligible": 0,
+              "goldRelationships": 8,
+              "goldClasses": 15
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 1,
+              "min": 1,
+              "max": 1
+            },
+            "classRecall": 0.6666666666666666,
+            "relRecall": 0.7916666666666666,
+            "eligibleShare": 0.7916666666666666,
+            "relToClassRecall": 1.1875,
+            "eligible": [
+              7,
+              6,
+              6
+            ],
+            "recoveredEligible": [
+              7,
+              6,
+              6
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "iof-supply-chain": {
+          "runs": [
+            "ontology_translation/results/multi-domain/run-01/iof-supply-chain",
+            "ontology_translation/results/multi-domain/run-02/iof-supply-chain",
+            "ontology_translation/results/multi-domain/run-03/iof-supply-chain"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.8214285714285714,
+              "relRecall": 0.6521739130434783,
+              "eligibleShare": 0.8260869565217391,
+              "conditionalRate": 0.7894736842105263,
+              "eligible": 19,
+              "recoveredEligible": 15,
+              "recoveredIneligible": 0,
+              "goldRelationships": 23,
+              "goldClasses": 28
+            },
+            {
+              "classRecall": 0.75,
+              "relRecall": 0.6956521739130435,
+              "eligibleShare": 0.782608695652174,
+              "conditionalRate": 0.8888888888888888,
+              "eligible": 18,
+              "recoveredEligible": 16,
+              "recoveredIneligible": 0,
+              "goldRelationships": 23,
+              "goldClasses": 28
+            },
+            {
+              "classRecall": 0.7142857142857143,
+              "relRecall": 0.5652173913043478,
+              "eligibleShare": 0.7391304347826086,
+              "conditionalRate": 0.7647058823529411,
+              "eligible": 17,
+              "recoveredEligible": 13,
+              "recoveredIneligible": 0,
+              "goldRelationships": 23,
+              "goldClasses": 28
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 0.814356151817452,
+              "min": 0.7647058823529411,
+              "max": 0.8888888888888888
+            },
+            "classRecall": 0.7619047619047619,
+            "relRecall": 0.6376811594202899,
+            "eligibleShare": 0.7826086956521738,
+            "relToClassRecall": 0.8369565217391306,
+            "eligible": [
+              19,
+              18,
+              17
+            ],
+            "recoveredEligible": [
+              15,
+              16,
+              13
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "fibo-loans": {
+          "runs": [
+            "ontology_translation/results/multi-domain/run-01/fibo-loans",
+            "ontology_translation/results/multi-domain/run-02/fibo-loans",
+            "ontology_translation/results/multi-domain/run-03/fibo-loans"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.7916666666666666,
+              "relRecall": 0.7058823529411765,
+              "eligibleShare": 0.8235294117647058,
+              "conditionalRate": 0.8571428571428571,
+              "eligible": 14,
+              "recoveredEligible": 12,
+              "recoveredIneligible": 0,
+              "goldRelationships": 17,
+              "goldClasses": 24
+            },
+            {
+              "classRecall": 0.75,
+              "relRecall": 0.8235294117647058,
+              "eligibleShare": 0.8823529411764706,
+              "conditionalRate": 0.9333333333333333,
+              "eligible": 15,
+              "recoveredEligible": 14,
+              "recoveredIneligible": 0,
+              "goldRelationships": 17,
+              "goldClasses": 24
+            },
+            {
+              "classRecall": 0.9166666666666666,
+              "relRecall": 0.7058823529411765,
+              "eligibleShare": 1,
+              "conditionalRate": 0.7058823529411765,
+              "eligible": 17,
+              "recoveredEligible": 12,
+              "recoveredIneligible": 0,
+              "goldRelationships": 17,
+              "goldClasses": 24
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 0.8321195144724557,
+              "min": 0.7058823529411765,
+              "max": 0.9333333333333333
+            },
+            "classRecall": 0.8194444444444443,
+            "relRecall": 0.7450980392156863,
+            "eligibleShare": 0.9019607843137255,
+            "relToClassRecall": 0.9092721834496512,
+            "eligible": [
+              14,
+              15,
+              17
+            ],
+            "recoveredEligible": [
+              12,
+              14,
+              12
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "itops": {
+          "runs": [
+            "ontology_translation/results/multi-domain-control/run-01/itops",
+            "ontology_translation/results/multi-domain-control/run-02/itops",
+            "ontology_translation/results/multi-domain-control/run-03/itops"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.8333333333333334,
+              "relRecall": 0.4722222222222222,
+              "eligibleShare": 0.6944444444444444,
+              "conditionalRate": 0.68,
+              "eligible": 25,
+              "recoveredEligible": 17,
+              "recoveredIneligible": 0,
+              "goldRelationships": 36,
+              "goldClasses": 24
+            },
+            {
+              "classRecall": 0.8333333333333334,
+              "relRecall": 0.6388888888888888,
+              "eligibleShare": 0.8611111111111112,
+              "conditionalRate": 0.7419354838709677,
+              "eligible": 31,
+              "recoveredEligible": 23,
+              "recoveredIneligible": 0,
+              "goldRelationships": 36,
+              "goldClasses": 24
+            },
+            {
+              "classRecall": 0.875,
+              "relRecall": 0.6111111111111112,
+              "eligibleShare": 0.8888888888888888,
+              "conditionalRate": 0.6875,
+              "eligible": 32,
+              "recoveredEligible": 22,
+              "recoveredIneligible": 0,
+              "goldRelationships": 36,
+              "goldClasses": 24
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 0.7031451612903226,
+              "min": 0.68,
+              "max": 0.7419354838709677
+            },
+            "classRecall": 0.8472222222222223,
+            "relRecall": 0.5740740740740741,
+            "eligibleShare": 0.8148148148148149,
+            "relToClassRecall": 0.6775956284153004,
+            "eligible": [
+              25,
+              31,
+              32
+            ],
+            "recoveredEligible": [
+              17,
+              23,
+              22
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "macroPublished": {
+          "conditionalRate": 0.813817990646551,
+          "classRecall": 0.7703373015873015,
+          "relRecall": 0.6751904136940817,
+          "eligibleShare": 0.8383572822721765,
+          "relToClassRecall": 0.8913269131393007
+        }
+      },
+      "post-152": {
+        "brick-hvac": {
+          "runs": [
+            "ontology_translation/results/multi-domain-post152/run-01/brick-hvac",
+            "ontology_translation/results/multi-domain-post152/run-02/brick-hvac",
+            "ontology_translation/results/multi-domain-post152/run-03/brick-hvac"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.9444444444444444,
+              "relRecall": 0.8421052631578947,
+              "eligibleShare": 1,
+              "conditionalRate": 0.8421052631578947,
+              "eligible": 19,
+              "recoveredEligible": 16,
+              "recoveredIneligible": 0,
+              "goldRelationships": 19,
+              "goldClasses": 18
+            },
+            {
+              "classRecall": 1,
+              "relRecall": 0.8947368421052632,
+              "eligibleShare": 1,
+              "conditionalRate": 0.8947368421052632,
+              "eligible": 19,
+              "recoveredEligible": 17,
+              "recoveredIneligible": 0,
+              "goldRelationships": 19,
+              "goldClasses": 18
+            },
+            {
+              "classRecall": 0.8888888888888888,
+              "relRecall": 0.5263157894736842,
+              "eligibleShare": 0.9473684210526315,
+              "conditionalRate": 0.5555555555555556,
+              "eligible": 18,
+              "recoveredEligible": 10,
+              "recoveredIneligible": 0,
+              "goldRelationships": 19,
+              "goldClasses": 18
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 0.7641325536062379,
+              "min": 0.5555555555555556,
+              "max": 0.8947368421052632
+            },
+            "classRecall": 0.9444444444444443,
+            "relRecall": 0.7543859649122807,
+            "eligibleShare": 0.9824561403508771,
+            "relToClassRecall": 0.7987616099071209,
+            "eligible": [
+              19,
+              19,
+              18
+            ],
+            "recoveredEligible": [
+              16,
+              17,
+              10
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "iof-maintenance": {
+          "runs": [
+            "ontology_translation/results/multi-domain-post152/run-01/iof-maintenance",
+            "ontology_translation/results/multi-domain-post152/run-02/iof-maintenance",
+            "ontology_translation/results/multi-domain-post152/run-03/iof-maintenance"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.8,
+              "relRecall": 0.875,
+              "eligibleShare": 0.875,
+              "conditionalRate": 1,
+              "eligible": 7,
+              "recoveredEligible": 7,
+              "recoveredIneligible": 0,
+              "goldRelationships": 8,
+              "goldClasses": 15
+            },
+            {
+              "classRecall": 0.9333333333333333,
+              "relRecall": 0.875,
+              "eligibleShare": 1,
+              "conditionalRate": 0.875,
+              "eligible": 8,
+              "recoveredEligible": 7,
+              "recoveredIneligible": 0,
+              "goldRelationships": 8,
+              "goldClasses": 15
+            },
+            {
+              "classRecall": 0.8,
+              "relRecall": 0.875,
+              "eligibleShare": 0.875,
+              "conditionalRate": 1,
+              "eligible": 7,
+              "recoveredEligible": 7,
+              "recoveredIneligible": 0,
+              "goldRelationships": 8,
+              "goldClasses": 15
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 0.9583333333333334,
+              "min": 0.875,
+              "max": 1
+            },
+            "classRecall": 0.8444444444444444,
+            "relRecall": 0.875,
+            "eligibleShare": 0.9166666666666666,
+            "relToClassRecall": 1.0361842105263157,
+            "eligible": [
+              7,
+              8,
+              7
+            ],
+            "recoveredEligible": [
+              7,
+              7,
+              7
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "iof-supply-chain": {
+          "runs": [
+            "ontology_translation/results/multi-domain-post152/run-01/iof-supply-chain",
+            "ontology_translation/results/multi-domain-post152/run-02/iof-supply-chain",
+            "ontology_translation/results/multi-domain-post152/run-03/iof-supply-chain"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.9285714285714286,
+              "relRecall": 0.6086956521739131,
+              "eligibleShare": 0.9130434782608695,
+              "conditionalRate": 0.6666666666666666,
+              "eligible": 21,
+              "recoveredEligible": 14,
+              "recoveredIneligible": 0,
+              "goldRelationships": 23,
+              "goldClasses": 28
+            },
+            {
+              "classRecall": 0.8928571428571429,
+              "relRecall": 0.8695652173913043,
+              "eligibleShare": 0.9130434782608695,
+              "conditionalRate": 0.9523809523809523,
+              "eligible": 21,
+              "recoveredEligible": 20,
+              "recoveredIneligible": 0,
+              "goldRelationships": 23,
+              "goldClasses": 28
+            },
+            {
+              "classRecall": 0.8214285714285714,
+              "relRecall": 0.8695652173913043,
+              "eligibleShare": 0.9130434782608695,
+              "conditionalRate": 0.9523809523809523,
+              "eligible": 21,
+              "recoveredEligible": 20,
+              "recoveredIneligible": 0,
+              "goldRelationships": 23,
+              "goldClasses": 28
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 0.8571428571428571,
+              "min": 0.6666666666666666,
+              "max": 0.9523809523809523
+            },
+            "classRecall": 0.880952380952381,
+            "relRecall": 0.7826086956521738,
+            "eligibleShare": 0.9130434782608695,
+            "relToClassRecall": 0.8883666274970621,
+            "eligible": [
+              21,
+              21,
+              21
+            ],
+            "recoveredEligible": [
+              14,
+              20,
+              20
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "fibo-loans": {
+          "runs": [
+            "ontology_translation/results/multi-domain-post152/run-01/fibo-loans",
+            "ontology_translation/results/multi-domain-post152/run-02/fibo-loans",
+            "ontology_translation/results/multi-domain-post152/run-03/fibo-loans"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.75,
+              "relRecall": 0.8235294117647058,
+              "eligibleShare": 0.9411764705882353,
+              "conditionalRate": 0.875,
+              "eligible": 16,
+              "recoveredEligible": 14,
+              "recoveredIneligible": 0,
+              "goldRelationships": 17,
+              "goldClasses": 24
+            },
+            {
+              "classRecall": 0.7916666666666666,
+              "relRecall": 0.9411764705882353,
+              "eligibleShare": 0.9411764705882353,
+              "conditionalRate": 1,
+              "eligible": 16,
+              "recoveredEligible": 16,
+              "recoveredIneligible": 0,
+              "goldRelationships": 17,
+              "goldClasses": 24
+            },
+            {
+              "classRecall": 0.7916666666666666,
+              "relRecall": 0.9411764705882353,
+              "eligibleShare": 0.9411764705882353,
+              "conditionalRate": 1,
+              "eligible": 16,
+              "recoveredEligible": 16,
+              "recoveredIneligible": 0,
+              "goldRelationships": 17,
+              "goldClasses": 24
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 0.9583333333333334,
+              "min": 0.875,
+              "max": 1
+            },
+            "classRecall": 0.7777777777777777,
+            "relRecall": 0.9019607843137255,
+            "eligibleShare": 0.9411764705882352,
+            "relToClassRecall": 1.1596638655462186,
+            "eligible": [
+              16,
+              16,
+              16
+            ],
+            "recoveredEligible": [
+              14,
+              16,
+              16
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "itops": {
+          "runs": [
+            "ontology_translation/results/multi-domain-control-post152/run-01/itops",
+            "ontology_translation/results/multi-domain-control-post152/run-02/itops",
+            "ontology_translation/results/multi-domain-control-post152/run-03/itops"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.9583333333333334,
+              "relRecall": 0.6666666666666666,
+              "eligibleShare": 0.9722222222222222,
+              "conditionalRate": 0.6857142857142857,
+              "eligible": 35,
+              "recoveredEligible": 24,
+              "recoveredIneligible": 0,
+              "goldRelationships": 36,
+              "goldClasses": 24
+            },
+            {
+              "classRecall": 0.9583333333333334,
+              "relRecall": 0.6388888888888888,
+              "eligibleShare": 0.9722222222222222,
+              "conditionalRate": 0.6571428571428571,
+              "eligible": 35,
+              "recoveredEligible": 23,
+              "recoveredIneligible": 0,
+              "goldRelationships": 36,
+              "goldClasses": 24
+            },
+            {
+              "classRecall": 0.8333333333333334,
+              "relRecall": 0.6111111111111112,
+              "eligibleShare": 0.7222222222222222,
+              "conditionalRate": 0.8461538461538461,
+              "eligible": 26,
+              "recoveredEligible": 22,
+              "recoveredIneligible": 0,
+              "goldRelationships": 36,
+              "goldClasses": 24
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 0.7296703296703297,
+              "min": 0.6571428571428571,
+              "max": 0.8461538461538461
+            },
+            "classRecall": 0.9166666666666666,
+            "relRecall": 0.6388888888888888,
+            "eligibleShare": 0.8888888888888888,
+            "relToClassRecall": 0.6969696969696969,
+            "eligible": [
+              35,
+              35,
+              26
+            ],
+            "recoveredEligible": [
+              24,
+              23,
+              22
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "macroPublished": {
+          "conditionalRate": 0.8844855193539405,
+          "classRecall": 0.8619047619047618,
+          "relRecall": 0.828488861219545,
+          "eligibleShare": 0.9383356889666621,
+          "relToClassRecall": 0.9707440783691794
+        }
+      },
+      "final": {
+        "fibo-loans": {
+          "runs": [
+            "ontology_translation/results/default-change-187/treatment/run-01/fibo-loans",
+            "ontology_translation/results/default-change-187/treatment/run-02/fibo-loans",
+            "ontology_translation/results/default-change-187/treatment/run-03/fibo-loans"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.75,
+              "relRecall": 0.8235294117647058,
+              "eligibleShare": 0.8235294117647058,
+              "conditionalRate": 1,
+              "eligible": 14,
+              "recoveredEligible": 14,
+              "recoveredIneligible": 0,
+              "goldRelationships": 17,
+              "goldClasses": 24
+            },
+            {
+              "classRecall": 0.7083333333333334,
+              "relRecall": 0.7647058823529411,
+              "eligibleShare": 0.7647058823529411,
+              "conditionalRate": 1,
+              "eligible": 13,
+              "recoveredEligible": 13,
+              "recoveredIneligible": 0,
+              "goldRelationships": 17,
+              "goldClasses": 24
+            },
+            {
+              "classRecall": 0.75,
+              "relRecall": 0.7647058823529411,
+              "eligibleShare": 0.8235294117647058,
+              "conditionalRate": 0.9285714285714286,
+              "eligible": 14,
+              "recoveredEligible": 13,
+              "recoveredIneligible": 0,
+              "goldRelationships": 17,
+              "goldClasses": 24
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 0.9761904761904763,
+              "min": 0.9285714285714286,
+              "max": 1
+            },
+            "classRecall": 0.7361111111111112,
+            "relRecall": 0.784313725490196,
+            "eligibleShare": 0.8039215686274509,
+            "relToClassRecall": 1.0654827968923417,
+            "eligible": [
+              14,
+              13,
+              14
+            ],
+            "recoveredEligible": [
+              14,
+              13,
+              13
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "brick-hvac": {
+          "runs": [
+            "ontology_translation/results/default-change-187/treatment/run-01/brick-hvac",
+            "ontology_translation/results/default-change-187/treatment/run-02/brick-hvac",
+            "ontology_translation/results/default-change-187/treatment/run-03/brick-hvac"
+          ],
+          "perRun": [
+            {
+              "classRecall": 1,
+              "relRecall": 0.5263157894736842,
+              "eligibleShare": 1,
+              "conditionalRate": 0.5263157894736842,
+              "eligible": 19,
+              "recoveredEligible": 10,
+              "recoveredIneligible": 0,
+              "goldRelationships": 19,
+              "goldClasses": 18
+            },
+            {
+              "classRecall": 1,
+              "relRecall": 0.6842105263157895,
+              "eligibleShare": 1,
+              "conditionalRate": 0.6842105263157895,
+              "eligible": 19,
+              "recoveredEligible": 13,
+              "recoveredIneligible": 0,
+              "goldRelationships": 19,
+              "goldClasses": 18
+            },
+            {
+              "classRecall": 1,
+              "relRecall": 0.8947368421052632,
+              "eligibleShare": 1,
+              "conditionalRate": 0.8947368421052632,
+              "eligible": 19,
+              "recoveredEligible": 17,
+              "recoveredIneligible": 0,
+              "goldRelationships": 19,
+              "goldClasses": 18
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 0.7017543859649122,
+              "min": 0.5263157894736842,
+              "max": 0.8947368421052632
+            },
+            "classRecall": 1,
+            "relRecall": 0.7017543859649122,
+            "eligibleShare": 1,
+            "relToClassRecall": 0.7017543859649122,
+            "eligible": [
+              19,
+              19,
+              19
+            ],
+            "recoveredEligible": [
+              10,
+              13,
+              17
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "iof-maintenance": {
+          "runs": [
+            "ontology_translation/results/final-scores/runs/run-01/iof-maintenance",
+            "ontology_translation/results/final-scores/runs/run-02/iof-maintenance",
+            "ontology_translation/results/final-scores/runs/run-03/iof-maintenance"
+          ],
+          "perRun": [
+            {
+              "classRecall": 1,
+              "relRecall": 1,
+              "eligibleShare": 1,
+              "conditionalRate": 1,
+              "eligible": 8,
+              "recoveredEligible": 8,
+              "recoveredIneligible": 0,
+              "goldRelationships": 8,
+              "goldClasses": 15
+            },
+            {
+              "classRecall": 1,
+              "relRecall": 1,
+              "eligibleShare": 1,
+              "conditionalRate": 1,
+              "eligible": 8,
+              "recoveredEligible": 8,
+              "recoveredIneligible": 0,
+              "goldRelationships": 8,
+              "goldClasses": 15
+            },
+            {
+              "classRecall": 0.8666666666666667,
+              "relRecall": 0.875,
+              "eligibleShare": 1,
+              "conditionalRate": 0.875,
+              "eligible": 8,
+              "recoveredEligible": 7,
+              "recoveredIneligible": 0,
+              "goldRelationships": 8,
+              "goldClasses": 15
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 0.9583333333333334,
+              "min": 0.875,
+              "max": 1
+            },
+            "classRecall": 0.9555555555555556,
+            "relRecall": 0.9583333333333334,
+            "eligibleShare": 1,
+            "relToClassRecall": 1.002906976744186,
+            "eligible": [
+              8,
+              8,
+              8
+            ],
+            "recoveredEligible": [
+              8,
+              8,
+              7
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "iof-supply-chain": {
+          "runs": [
+            "ontology_translation/results/final-scores/runs/run-01/iof-supply-chain",
+            "ontology_translation/results/final-scores/runs/run-02/iof-supply-chain",
+            "ontology_translation/results/final-scores/runs/run-03/iof-supply-chain"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.8214285714285714,
+              "relRecall": 0.8260869565217391,
+              "eligibleShare": 0.8260869565217391,
+              "conditionalRate": 1,
+              "eligible": 19,
+              "recoveredEligible": 19,
+              "recoveredIneligible": 0,
+              "goldRelationships": 23,
+              "goldClasses": 28
+            },
+            {
+              "classRecall": 0.8571428571428571,
+              "relRecall": 0.9130434782608695,
+              "eligibleShare": 0.9565217391304348,
+              "conditionalRate": 0.9545454545454546,
+              "eligible": 22,
+              "recoveredEligible": 21,
+              "recoveredIneligible": 0,
+              "goldRelationships": 23,
+              "goldClasses": 28
+            },
+            {
+              "classRecall": 0.75,
+              "relRecall": 0.782608695652174,
+              "eligibleShare": 0.8260869565217391,
+              "conditionalRate": 0.9473684210526315,
+              "eligible": 19,
+              "recoveredEligible": 18,
+              "recoveredIneligible": 0,
+              "goldRelationships": 23,
+              "goldClasses": 28
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 0.967304625199362,
+              "min": 0.9473684210526315,
+              "max": 1
+            },
+            "classRecall": 0.8095238095238094,
+            "relRecall": 0.8405797101449276,
+            "eligibleShare": 0.8695652173913043,
+            "relToClassRecall": 1.0383631713554988,
+            "eligible": [
+              19,
+              22,
+              19
+            ],
+            "recoveredEligible": [
+              19,
+              21,
+              18
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "itops": {
+          "runs": [
+            "ontology_translation/results/final-scores/runs/run-01/itops",
+            "ontology_translation/results/final-scores/runs/run-02/itops",
+            "ontology_translation/results/final-scores/runs/run-03/itops"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.8333333333333334,
+              "relRecall": 0.6388888888888888,
+              "eligibleShare": 0.8055555555555556,
+              "conditionalRate": 0.7931034482758621,
+              "eligible": 29,
+              "recoveredEligible": 23,
+              "recoveredIneligible": 0,
+              "goldRelationships": 36,
+              "goldClasses": 24
+            },
+            {
+              "classRecall": 0.875,
+              "relRecall": 0.8888888888888888,
+              "eligibleShare": 0.8888888888888888,
+              "conditionalRate": 1,
+              "eligible": 32,
+              "recoveredEligible": 32,
+              "recoveredIneligible": 0,
+              "goldRelationships": 36,
+              "goldClasses": 24
+            },
+            {
+              "classRecall": 0.875,
+              "relRecall": 0.8611111111111112,
+              "eligibleShare": 0.8888888888888888,
+              "conditionalRate": 0.96875,
+              "eligible": 32,
+              "recoveredEligible": 31,
+              "recoveredIneligible": 0,
+              "goldRelationships": 36,
+              "goldClasses": 24
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 0.920617816091954,
+              "min": 0.7931034482758621,
+              "max": 1
+            },
+            "classRecall": 0.8611111111111112,
+            "relRecall": 0.7962962962962963,
+            "eligibleShare": 0.861111111111111,
+            "relToClassRecall": 0.9247311827956989,
+            "eligible": [
+              29,
+              32,
+              32
+            ],
+            "recoveredEligible": [
+              23,
+              32,
+              31
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "macroPublished": {
+          "conditionalRate": 0.900895705172021,
+          "classRecall": 0.875297619047619,
+          "relRecall": 0.8212452887333423,
+          "eligibleShare": 0.9183716965046888,
+          "relToClassRecall": 0.9521268327392347
+        }
+      },
+      "final-b3": {
+        "brick-hvac": {
+          "runs": [
+            "ontology_translation/results/baselines-gpt6/b3-no-commit/run-01/brick-hvac/snapshots/A",
+            "ontology_translation/results/baselines-gpt6/b3-no-commit/run-02/brick-hvac/snapshots/A",
+            "ontology_translation/results/baselines-gpt6/b3-no-commit/run-03/brick-hvac/snapshots/A"
+          ],
+          "perRun": [
+            {
+              "classRecall": 1,
+              "relRecall": 0.7368421052631579,
+              "eligibleShare": 1,
+              "conditionalRate": 0.7368421052631579,
+              "eligible": 19,
+              "recoveredEligible": 14,
+              "recoveredIneligible": 0,
+              "goldRelationships": 19,
+              "goldClasses": 18
+            },
+            {
+              "classRecall": 1,
+              "relRecall": 0.5263157894736842,
+              "eligibleShare": 1,
+              "conditionalRate": 0.5263157894736842,
+              "eligible": 19,
+              "recoveredEligible": 10,
+              "recoveredIneligible": 0,
+              "goldRelationships": 19,
+              "goldClasses": 18
+            },
+            {
+              "classRecall": 0.7777777777777778,
+              "relRecall": 0.15789473684210525,
+              "eligibleShare": 0.6842105263157895,
+              "conditionalRate": 0.23076923076923078,
+              "eligible": 13,
+              "recoveredEligible": 3,
+              "recoveredIneligible": 0,
+              "goldRelationships": 19,
+              "goldClasses": 18
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 0.4979757085020243,
+              "min": 0.23076923076923078,
+              "max": 0.7368421052631579
+            },
+            "classRecall": 0.9259259259259259,
+            "relRecall": 0.47368421052631576,
+            "eligibleShare": 0.8947368421052632,
+            "relToClassRecall": 0.511578947368421,
+            "eligible": [
+              19,
+              19,
+              13
+            ],
+            "recoveredEligible": [
+              14,
+              10,
+              3
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "iof-maintenance": {
+          "runs": [
+            "ontology_translation/results/baselines-gpt6/b3-no-commit/run-01/iof-maintenance/snapshots/A",
+            "ontology_translation/results/baselines-gpt6/b3-no-commit/run-02/iof-maintenance/snapshots/A",
+            "ontology_translation/results/baselines-gpt6/b3-no-commit/run-03/iof-maintenance/snapshots/A"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.6666666666666666,
+              "relRecall": 0.75,
+              "eligibleShare": 0.75,
+              "conditionalRate": 1,
+              "eligible": 6,
+              "recoveredEligible": 6,
+              "recoveredIneligible": 0,
+              "goldRelationships": 8,
+              "goldClasses": 15
+            },
+            {
+              "classRecall": 0.8,
+              "relRecall": 0.875,
+              "eligibleShare": 0.875,
+              "conditionalRate": 1,
+              "eligible": 7,
+              "recoveredEligible": 7,
+              "recoveredIneligible": 0,
+              "goldRelationships": 8,
+              "goldClasses": 15
+            },
+            {
+              "classRecall": 0.7333333333333333,
+              "relRecall": 0.75,
+              "eligibleShare": 0.75,
+              "conditionalRate": 1,
+              "eligible": 6,
+              "recoveredEligible": 6,
+              "recoveredIneligible": 0,
+              "goldRelationships": 8,
+              "goldClasses": 15
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 1,
+              "min": 1,
+              "max": 1
+            },
+            "classRecall": 0.7333333333333334,
+            "relRecall": 0.7916666666666666,
+            "eligibleShare": 0.7916666666666666,
+            "relToClassRecall": 1.0795454545454544,
+            "eligible": [
+              6,
+              7,
+              6
+            ],
+            "recoveredEligible": [
+              6,
+              7,
+              6
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "iof-supply-chain": {
+          "runs": [
+            "ontology_translation/results/baselines-gpt6/b3-no-commit/run-01/iof-supply-chain/snapshots/A",
+            "ontology_translation/results/baselines-gpt6/b3-no-commit/run-02/iof-supply-chain/snapshots/A",
+            "ontology_translation/results/baselines-gpt6/b3-no-commit/run-03/iof-supply-chain/snapshots/A"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.7142857142857143,
+              "relRecall": 0.7391304347826086,
+              "eligibleShare": 0.8260869565217391,
+              "conditionalRate": 0.8947368421052632,
+              "eligible": 19,
+              "recoveredEligible": 17,
+              "recoveredIneligible": 0,
+              "goldRelationships": 23,
+              "goldClasses": 28
+            },
+            {
+              "classRecall": 0.8214285714285714,
+              "relRecall": 0.782608695652174,
+              "eligibleShare": 0.8695652173913043,
+              "conditionalRate": 0.9,
+              "eligible": 20,
+              "recoveredEligible": 18,
+              "recoveredIneligible": 0,
+              "goldRelationships": 23,
+              "goldClasses": 28
+            },
+            {
+              "classRecall": 0.8214285714285714,
+              "relRecall": 0.7391304347826086,
+              "eligibleShare": 0.9130434782608695,
+              "conditionalRate": 0.8095238095238095,
+              "eligible": 21,
+              "recoveredEligible": 17,
+              "recoveredIneligible": 0,
+              "goldRelationships": 23,
+              "goldClasses": 28
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 0.8680868838763575,
+              "min": 0.8095238095238095,
+              "max": 0.9
+            },
+            "classRecall": 0.7857142857142856,
+            "relRecall": 0.7536231884057972,
+            "eligibleShare": 0.8695652173913043,
+            "relToClassRecall": 0.959156785243742,
+            "eligible": [
+              19,
+              20,
+              21
+            ],
+            "recoveredEligible": [
+              17,
+              18,
+              17
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "fibo-loans": {
+          "runs": [
+            "ontology_translation/results/baselines-gpt6/b3-no-commit/run-01/fibo-loans/snapshots/A",
+            "ontology_translation/results/baselines-gpt6/b3-no-commit/run-02/fibo-loans/snapshots/A",
+            "ontology_translation/results/baselines-gpt6/b3-no-commit/run-03/fibo-loans/snapshots/A"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.875,
+              "relRecall": 0.8823529411764706,
+              "eligibleShare": 0.9411764705882353,
+              "conditionalRate": 0.9375,
+              "eligible": 16,
+              "recoveredEligible": 15,
+              "recoveredIneligible": 0,
+              "goldRelationships": 17,
+              "goldClasses": 24
+            },
+            {
+              "classRecall": 0.8333333333333334,
+              "relRecall": 0.8823529411764706,
+              "eligibleShare": 0.8823529411764706,
+              "conditionalRate": 1,
+              "eligible": 15,
+              "recoveredEligible": 15,
+              "recoveredIneligible": 0,
+              "goldRelationships": 17,
+              "goldClasses": 24
+            },
+            {
+              "classRecall": 0.875,
+              "relRecall": 0.8235294117647058,
+              "eligibleShare": 0.9411764705882353,
+              "conditionalRate": 0.875,
+              "eligible": 16,
+              "recoveredEligible": 14,
+              "recoveredIneligible": 0,
+              "goldRelationships": 17,
+              "goldClasses": 24
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 0.9375,
+              "min": 0.875,
+              "max": 1
+            },
+            "classRecall": 0.8611111111111112,
+            "relRecall": 0.8627450980392156,
+            "eligibleShare": 0.9215686274509803,
+            "relToClassRecall": 1.001897533206831,
+            "eligible": [
+              16,
+              15,
+              16
+            ],
+            "recoveredEligible": [
+              15,
+              15,
+              14
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "itops": {
+          "runs": [
+            "ontology_translation/results/baselines-gpt6/b3-no-commit/run-01/itops/snapshots/A",
+            "ontology_translation/results/baselines-gpt6/b3-no-commit/run-02/itops/snapshots/A",
+            "ontology_translation/results/baselines-gpt6/b3-no-commit/run-03/itops/snapshots/A"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.75,
+              "relRecall": 0.5277777777777778,
+              "eligibleShare": 0.6944444444444444,
+              "conditionalRate": 0.76,
+              "eligible": 25,
+              "recoveredEligible": 19,
+              "recoveredIneligible": 0,
+              "goldRelationships": 36,
+              "goldClasses": 24
+            },
+            {
+              "classRecall": 0.9583333333333334,
+              "relRecall": 0.7777777777777778,
+              "eligibleShare": 0.9722222222222222,
+              "conditionalRate": 0.8,
+              "eligible": 35,
+              "recoveredEligible": 28,
+              "recoveredIneligible": 0,
+              "goldRelationships": 36,
+              "goldClasses": 24
+            },
+            {
+              "classRecall": 0.875,
+              "relRecall": 0.8611111111111112,
+              "eligibleShare": 0.8888888888888888,
+              "conditionalRate": 0.96875,
+              "eligible": 32,
+              "recoveredEligible": 31,
+              "recoveredIneligible": 0,
+              "goldRelationships": 36,
+              "goldClasses": 24
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 0.8429166666666666,
+              "min": 0.76,
+              "max": 0.96875
+            },
+            "classRecall": 0.8611111111111112,
+            "relRecall": 0.7222222222222223,
+            "eligibleShare": 0.8518518518518517,
+            "relToClassRecall": 0.8387096774193549,
+            "eligible": [
+              25,
+              35,
+              32
+            ],
+            "recoveredEligible": [
+              19,
+              28,
+              31
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "macroPublished": {
+          "conditionalRate": 0.8258906480945954,
+          "classRecall": 0.826521164021164,
+          "relRecall": 0.7204297909094989,
+          "eligibleShare": 0.8693843384035536,
+          "relToClassRecall": 0.8880446800911121
+        }
+      }
+    },
+    "semantic/practical": {
+      "first-paper": {
+        "itops": {
+          "runs": [
+            "tests/evals/results/runs/run-01",
+            "tests/evals/results/runs/run-02",
+            "tests/evals/results/runs/run-03"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.75,
+              "relRecall": 0.3170731707317073,
+              "eligibleShare": 0.7560975609756098,
+              "conditionalRate": 0.41935483870967744,
+              "eligible": 31,
+              "recoveredEligible": 13,
+              "recoveredIneligible": 0,
+              "goldRelationships": 41,
+              "goldClasses": 28
+            },
+            {
+              "classRecall": 0.6428571428571429,
+              "relRecall": 0.34146341463414637,
+              "eligibleShare": 0.5853658536585366,
+              "conditionalRate": 0.5833333333333334,
+              "eligible": 24,
+              "recoveredEligible": 14,
+              "recoveredIneligible": 0,
+              "goldRelationships": 41,
+              "goldClasses": 28
+            },
+            {
+              "classRecall": 0.5,
+              "relRecall": 0.1951219512195122,
+              "eligibleShare": 0.36585365853658536,
+              "conditionalRate": 0.5333333333333333,
+              "eligible": 15,
+              "recoveredEligible": 8,
+              "recoveredIneligible": 0,
+              "goldRelationships": 41,
+              "goldClasses": 28
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 0.5120071684587814,
+              "min": 0.41935483870967744,
+              "max": 0.5833333333333334
+            },
+            "classRecall": 0.6309523809523809,
+            "relRecall": 0.28455284552845533,
+            "eligibleShare": 0.5691056910569104,
+            "relToClassRecall": 0.450989415554533,
+            "eligible": [
+              31,
+              24,
+              15
+            ],
+            "recoveredEligible": [
+              13,
+              14,
+              8
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      },
+      "aug-sep": {
+        "brick-hvac": {
+          "runs": [
+            "ontology_translation/results/multi-domain/run-01/brick-hvac",
+            "ontology_translation/results/multi-domain/run-02/brick-hvac",
+            "ontology_translation/results/multi-domain/run-03/brick-hvac"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.7777777777777778,
+              "relRecall": 0.631578947368421,
+              "eligibleShare": 0.8421052631578947,
+              "conditionalRate": 0.75,
+              "eligible": 16,
+              "recoveredEligible": 12,
+              "recoveredIneligible": 0,
+              "goldRelationships": 19,
+              "goldClasses": 18
+            },
+            {
+              "classRecall": 0.9444444444444444,
+              "relRecall": 0.5263157894736842,
+              "eligibleShare": 1,
+              "conditionalRate": 0.5263157894736842,
+              "eligible": 19,
+              "recoveredEligible": 10,
+              "recoveredIneligible": 0,
+              "goldRelationships": 19,
+              "goldClasses": 18
+            },
+            {
+              "classRecall": 0.8333333333333334,
+              "relRecall": 0.7368421052631579,
+              "eligibleShare": 0.8421052631578947,
+              "conditionalRate": 0.875,
+              "eligible": 16,
+              "recoveredEligible": 14,
+              "recoveredIneligible": 0,
+              "goldRelationships": 19,
+              "goldClasses": 18
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 0.7171052631578947,
+              "min": 0.5263157894736842,
+              "max": 0.875
+            },
+            "classRecall": 0.851851851851852,
+            "relRecall": 0.6315789473684211,
+            "eligibleShare": 0.8947368421052632,
+            "relToClassRecall": 0.7414187643020594,
+            "eligible": [
+              16,
+              19,
+              16
+            ],
+            "recoveredEligible": [
+              12,
+              10,
+              14
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "iof-maintenance": {
+          "runs": [
+            "ontology_translation/results/multi-domain/run-01/iof-maintenance",
+            "ontology_translation/results/multi-domain/run-02/iof-maintenance",
+            "ontology_translation/results/multi-domain/run-03/iof-maintenance"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.8,
+              "relRecall": 0.875,
+              "eligibleShare": 0.875,
+              "conditionalRate": 1,
+              "eligible": 7,
+              "recoveredEligible": 7,
+              "recoveredIneligible": 0,
+              "goldRelationships": 8,
+              "goldClasses": 15
+            },
+            {
+              "classRecall": 0.6,
+              "relRecall": 0.75,
+              "eligibleShare": 0.75,
+              "conditionalRate": 1,
+              "eligible": 6,
+              "recoveredEligible": 6,
+              "recoveredIneligible": 0,
+              "goldRelationships": 8,
+              "goldClasses": 15
+            },
+            {
+              "classRecall": 0.6,
+              "relRecall": 0.75,
+              "eligibleShare": 0.75,
+              "conditionalRate": 1,
+              "eligible": 6,
+              "recoveredEligible": 6,
+              "recoveredIneligible": 0,
+              "goldRelationships": 8,
+              "goldClasses": 15
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 1,
+              "min": 1,
+              "max": 1
+            },
+            "classRecall": 0.6666666666666666,
+            "relRecall": 0.7916666666666666,
+            "eligibleShare": 0.7916666666666666,
+            "relToClassRecall": 1.1875,
+            "eligible": [
+              7,
+              6,
+              6
+            ],
+            "recoveredEligible": [
+              7,
+              6,
+              6
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "iof-supply-chain": {
+          "runs": [
+            "ontology_translation/results/multi-domain/run-01/iof-supply-chain",
+            "ontology_translation/results/multi-domain/run-02/iof-supply-chain",
+            "ontology_translation/results/multi-domain/run-03/iof-supply-chain"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.8214285714285714,
+              "relRecall": 0.7391304347826086,
+              "eligibleShare": 0.8260869565217391,
+              "conditionalRate": 0.8947368421052632,
+              "eligible": 19,
+              "recoveredEligible": 17,
+              "recoveredIneligible": 0,
+              "goldRelationships": 23,
+              "goldClasses": 28
+            },
+            {
+              "classRecall": 0.75,
+              "relRecall": 0.7391304347826086,
+              "eligibleShare": 0.782608695652174,
+              "conditionalRate": 0.9444444444444444,
+              "eligible": 18,
+              "recoveredEligible": 17,
+              "recoveredIneligible": 0,
+              "goldRelationships": 23,
+              "goldClasses": 28
+            },
+            {
+              "classRecall": 0.7142857142857143,
+              "relRecall": 0.6521739130434783,
+              "eligibleShare": 0.7391304347826086,
+              "conditionalRate": 0.8823529411764706,
+              "eligible": 17,
+              "recoveredEligible": 15,
+              "recoveredIneligible": 0,
+              "goldRelationships": 23,
+              "goldClasses": 28
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 0.907178075908726,
+              "min": 0.8823529411764706,
+              "max": 0.9444444444444444
+            },
+            "classRecall": 0.7619047619047619,
+            "relRecall": 0.7101449275362318,
+            "eligibleShare": 0.7826086956521738,
+            "relToClassRecall": 0.9320652173913043,
+            "eligible": [
+              19,
+              18,
+              17
+            ],
+            "recoveredEligible": [
+              17,
+              17,
+              15
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "fibo-loans": {
+          "runs": [
+            "ontology_translation/results/multi-domain/run-01/fibo-loans",
+            "ontology_translation/results/multi-domain/run-02/fibo-loans",
+            "ontology_translation/results/multi-domain/run-03/fibo-loans"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.8333333333333334,
+              "relRecall": 0.7058823529411765,
+              "eligibleShare": 0.8235294117647058,
+              "conditionalRate": 0.8571428571428571,
+              "eligible": 14,
+              "recoveredEligible": 12,
+              "recoveredIneligible": 0,
+              "goldRelationships": 17,
+              "goldClasses": 24
+            },
+            {
+              "classRecall": 0.75,
+              "relRecall": 0.8823529411764706,
+              "eligibleShare": 0.8823529411764706,
+              "conditionalRate": 1,
+              "eligible": 15,
+              "recoveredEligible": 15,
+              "recoveredIneligible": 0,
+              "goldRelationships": 17,
+              "goldClasses": 24
+            },
+            {
+              "classRecall": 0.9166666666666666,
+              "relRecall": 0.8235294117647058,
+              "eligibleShare": 1,
+              "conditionalRate": 0.8235294117647058,
+              "eligible": 17,
+              "recoveredEligible": 14,
+              "recoveredIneligible": 0,
+              "goldRelationships": 17,
+              "goldClasses": 24
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 0.8935574229691877,
+              "min": 0.8235294117647058,
+              "max": 1
+            },
+            "classRecall": 0.8333333333333334,
+            "relRecall": 0.8039215686274511,
+            "eligibleShare": 0.9019607843137255,
+            "relToClassRecall": 0.9647058823529413,
+            "eligible": [
+              14,
+              15,
+              17
+            ],
+            "recoveredEligible": [
+              12,
+              15,
+              14
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "itops": {
+          "runs": [
+            "ontology_translation/results/multi-domain-control/run-01/itops",
+            "ontology_translation/results/multi-domain-control/run-02/itops",
+            "ontology_translation/results/multi-domain-control/run-03/itops"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.875,
+              "relRecall": 0.4722222222222222,
+              "eligibleShare": 0.8611111111111112,
+              "conditionalRate": 0.5483870967741935,
+              "eligible": 31,
+              "recoveredEligible": 17,
+              "recoveredIneligible": 0,
+              "goldRelationships": 36,
+              "goldClasses": 24
+            },
+            {
+              "classRecall": 0.8333333333333334,
+              "relRecall": 0.6388888888888888,
+              "eligibleShare": 0.8611111111111112,
+              "conditionalRate": 0.7419354838709677,
+              "eligible": 31,
+              "recoveredEligible": 23,
+              "recoveredIneligible": 0,
+              "goldRelationships": 36,
+              "goldClasses": 24
+            },
+            {
+              "classRecall": 0.875,
+              "relRecall": 0.6111111111111112,
+              "eligibleShare": 0.8888888888888888,
+              "conditionalRate": 0.6875,
+              "eligible": 32,
+              "recoveredEligible": 22,
+              "recoveredIneligible": 0,
+              "goldRelationships": 36,
+              "goldClasses": 24
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 0.6592741935483871,
+              "min": 0.5483870967741935,
+              "max": 0.7419354838709677
+            },
+            "classRecall": 0.8611111111111112,
+            "relRecall": 0.5740740740740741,
+            "eligibleShare": 0.8703703703703703,
+            "relToClassRecall": 0.6666666666666666,
+            "eligible": [
+              31,
+              31,
+              32
+            ],
+            "recoveredEligible": [
+              17,
+              23,
+              22
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "macroPublished": {
+          "conditionalRate": 0.8794601905089521,
+          "classRecall": 0.7784391534391535,
+          "relRecall": 0.7343280275496927,
+          "eligibleShare": 0.8427432471844573,
+          "relToClassRecall": 0.9564224660115762
+        }
+      },
+      "post-152": {
+        "brick-hvac": {
+          "runs": [
+            "ontology_translation/results/multi-domain-post152/run-01/brick-hvac",
+            "ontology_translation/results/multi-domain-post152/run-02/brick-hvac",
+            "ontology_translation/results/multi-domain-post152/run-03/brick-hvac"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.9444444444444444,
+              "relRecall": 0.9473684210526315,
+              "eligibleShare": 1,
+              "conditionalRate": 0.9473684210526315,
+              "eligible": 19,
+              "recoveredEligible": 18,
+              "recoveredIneligible": 0,
+              "goldRelationships": 19,
+              "goldClasses": 18
+            },
+            {
+              "classRecall": 1,
+              "relRecall": 0.8947368421052632,
+              "eligibleShare": 1,
+              "conditionalRate": 0.8947368421052632,
+              "eligible": 19,
+              "recoveredEligible": 17,
+              "recoveredIneligible": 0,
+              "goldRelationships": 19,
+              "goldClasses": 18
+            },
+            {
+              "classRecall": 0.9444444444444444,
+              "relRecall": 0.8947368421052632,
+              "eligibleShare": 1,
+              "conditionalRate": 0.8947368421052632,
+              "eligible": 19,
+              "recoveredEligible": 17,
+              "recoveredIneligible": 0,
+              "goldRelationships": 19,
+              "goldClasses": 18
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 0.912280701754386,
+              "min": 0.8947368421052632,
+              "max": 0.9473684210526315
+            },
+            "classRecall": 0.9629629629629629,
+            "relRecall": 0.912280701754386,
+            "eligibleShare": 1,
+            "relToClassRecall": 0.9473684210526317,
+            "eligible": [
+              19,
+              19,
+              19
+            ],
+            "recoveredEligible": [
+              18,
+              17,
+              17
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "iof-maintenance": {
+          "runs": [
+            "ontology_translation/results/multi-domain-post152/run-01/iof-maintenance",
+            "ontology_translation/results/multi-domain-post152/run-02/iof-maintenance",
+            "ontology_translation/results/multi-domain-post152/run-03/iof-maintenance"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.8,
+              "relRecall": 0.875,
+              "eligibleShare": 0.875,
+              "conditionalRate": 1,
+              "eligible": 7,
+              "recoveredEligible": 7,
+              "recoveredIneligible": 0,
+              "goldRelationships": 8,
+              "goldClasses": 15
+            },
+            {
+              "classRecall": 0.9333333333333333,
+              "relRecall": 1,
+              "eligibleShare": 1,
+              "conditionalRate": 1,
+              "eligible": 8,
+              "recoveredEligible": 8,
+              "recoveredIneligible": 0,
+              "goldRelationships": 8,
+              "goldClasses": 15
+            },
+            {
+              "classRecall": 0.8,
+              "relRecall": 0.875,
+              "eligibleShare": 0.875,
+              "conditionalRate": 1,
+              "eligible": 7,
+              "recoveredEligible": 7,
+              "recoveredIneligible": 0,
+              "goldRelationships": 8,
+              "goldClasses": 15
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 1,
+              "min": 1,
+              "max": 1
+            },
+            "classRecall": 0.8444444444444444,
+            "relRecall": 0.9166666666666666,
+            "eligibleShare": 0.9166666666666666,
+            "relToClassRecall": 1.0855263157894737,
+            "eligible": [
+              7,
+              8,
+              7
+            ],
+            "recoveredEligible": [
+              7,
+              8,
+              7
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "iof-supply-chain": {
+          "runs": [
+            "ontology_translation/results/multi-domain-post152/run-01/iof-supply-chain",
+            "ontology_translation/results/multi-domain-post152/run-02/iof-supply-chain",
+            "ontology_translation/results/multi-domain-post152/run-03/iof-supply-chain"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.9642857142857143,
+              "relRecall": 0.782608695652174,
+              "eligibleShare": 0.9565217391304348,
+              "conditionalRate": 0.8181818181818182,
+              "eligible": 22,
+              "recoveredEligible": 18,
+              "recoveredIneligible": 0,
+              "goldRelationships": 23,
+              "goldClasses": 28
+            },
+            {
+              "classRecall": 0.8928571428571429,
+              "relRecall": 0.8695652173913043,
+              "eligibleShare": 0.9130434782608695,
+              "conditionalRate": 0.9523809523809523,
+              "eligible": 21,
+              "recoveredEligible": 20,
+              "recoveredIneligible": 0,
+              "goldRelationships": 23,
+              "goldClasses": 28
+            },
+            {
+              "classRecall": 0.8214285714285714,
+              "relRecall": 0.8695652173913043,
+              "eligibleShare": 0.9130434782608695,
+              "conditionalRate": 0.9523809523809523,
+              "eligible": 21,
+              "recoveredEligible": 20,
+              "recoveredIneligible": 0,
+              "goldRelationships": 23,
+              "goldClasses": 28
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 0.9076479076479075,
+              "min": 0.8181818181818182,
+              "max": 0.9523809523809523
+            },
+            "classRecall": 0.8928571428571429,
+            "relRecall": 0.8405797101449276,
+            "eligibleShare": 0.927536231884058,
+            "relToClassRecall": 0.9414492753623188,
+            "eligible": [
+              22,
+              21,
+              21
+            ],
+            "recoveredEligible": [
+              18,
+              20,
+              20
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "fibo-loans": {
+          "runs": [
+            "ontology_translation/results/multi-domain-post152/run-01/fibo-loans",
+            "ontology_translation/results/multi-domain-post152/run-02/fibo-loans",
+            "ontology_translation/results/multi-domain-post152/run-03/fibo-loans"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.7916666666666666,
+              "relRecall": 0.8235294117647058,
+              "eligibleShare": 0.9411764705882353,
+              "conditionalRate": 0.875,
+              "eligible": 16,
+              "recoveredEligible": 14,
+              "recoveredIneligible": 0,
+              "goldRelationships": 17,
+              "goldClasses": 24
+            },
+            {
+              "classRecall": 0.8333333333333334,
+              "relRecall": 0.9411764705882353,
+              "eligibleShare": 0.9411764705882353,
+              "conditionalRate": 1,
+              "eligible": 16,
+              "recoveredEligible": 16,
+              "recoveredIneligible": 0,
+              "goldRelationships": 17,
+              "goldClasses": 24
+            },
+            {
+              "classRecall": 0.8333333333333334,
+              "relRecall": 0.9411764705882353,
+              "eligibleShare": 0.9411764705882353,
+              "conditionalRate": 1,
+              "eligible": 16,
+              "recoveredEligible": 16,
+              "recoveredIneligible": 0,
+              "goldRelationships": 17,
+              "goldClasses": 24
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 0.9583333333333334,
+              "min": 0.875,
+              "max": 1
+            },
+            "classRecall": 0.8194444444444445,
+            "relRecall": 0.9019607843137255,
+            "eligibleShare": 0.9411764705882352,
+            "relToClassRecall": 1.1006979062811564,
+            "eligible": [
+              16,
+              16,
+              16
+            ],
+            "recoveredEligible": [
+              14,
+              16,
+              16
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "itops": {
+          "runs": [
+            "ontology_translation/results/multi-domain-control-post152/run-01/itops",
+            "ontology_translation/results/multi-domain-control-post152/run-02/itops",
+            "ontology_translation/results/multi-domain-control-post152/run-03/itops"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.9583333333333334,
+              "relRecall": 0.6666666666666666,
+              "eligibleShare": 0.9722222222222222,
+              "conditionalRate": 0.6857142857142857,
+              "eligible": 35,
+              "recoveredEligible": 24,
+              "recoveredIneligible": 0,
+              "goldRelationships": 36,
+              "goldClasses": 24
+            },
+            {
+              "classRecall": 0.9583333333333334,
+              "relRecall": 0.6666666666666666,
+              "eligibleShare": 0.9722222222222222,
+              "conditionalRate": 0.6857142857142857,
+              "eligible": 35,
+              "recoveredEligible": 24,
+              "recoveredIneligible": 0,
+              "goldRelationships": 36,
+              "goldClasses": 24
+            },
+            {
+              "classRecall": 0.875,
+              "relRecall": 0.6111111111111112,
+              "eligibleShare": 0.8888888888888888,
+              "conditionalRate": 0.6875,
+              "eligible": 32,
+              "recoveredEligible": 22,
+              "recoveredIneligible": 0,
+              "goldRelationships": 36,
+              "goldClasses": 24
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 0.6863095238095238,
+              "min": 0.6857142857142857,
+              "max": 0.6875
+            },
+            "classRecall": 0.9305555555555557,
+            "relRecall": 0.6481481481481481,
+            "eligibleShare": 0.9444444444444443,
+            "relToClassRecall": 0.6965174129353233,
+            "eligible": [
+              35,
+              35,
+              32
+            ],
+            "recoveredEligible": [
+              24,
+              24,
+              22
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "macroPublished": {
+          "conditionalRate": 0.9445654856839067,
+          "classRecall": 0.8799272486772487,
+          "relRecall": 0.8928719657199264,
+          "eligibleShare": 0.9463448422847399,
+          "relToClassRecall": 1.0187604796213952
+        }
+      },
+      "final": {
+        "fibo-loans": {
+          "runs": [
+            "ontology_translation/results/default-change-187/treatment/run-01/fibo-loans",
+            "ontology_translation/results/default-change-187/treatment/run-02/fibo-loans",
+            "ontology_translation/results/default-change-187/treatment/run-03/fibo-loans"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.75,
+              "relRecall": 0.8235294117647058,
+              "eligibleShare": 0.8235294117647058,
+              "conditionalRate": 1,
+              "eligible": 14,
+              "recoveredEligible": 14,
+              "recoveredIneligible": 0,
+              "goldRelationships": 17,
+              "goldClasses": 24
+            },
+            {
+              "classRecall": 0.7083333333333334,
+              "relRecall": 0.7647058823529411,
+              "eligibleShare": 0.7647058823529411,
+              "conditionalRate": 1,
+              "eligible": 13,
+              "recoveredEligible": 13,
+              "recoveredIneligible": 0,
+              "goldRelationships": 17,
+              "goldClasses": 24
+            },
+            {
+              "classRecall": 0.75,
+              "relRecall": 0.8235294117647058,
+              "eligibleShare": 0.8235294117647058,
+              "conditionalRate": 1,
+              "eligible": 14,
+              "recoveredEligible": 14,
+              "recoveredIneligible": 0,
+              "goldRelationships": 17,
+              "goldClasses": 24
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 1,
+              "min": 1,
+              "max": 1
+            },
+            "classRecall": 0.7361111111111112,
+            "relRecall": 0.8039215686274509,
+            "eligibleShare": 0.8039215686274509,
+            "relToClassRecall": 1.0921198668146501,
+            "eligible": [
+              14,
+              13,
+              14
+            ],
+            "recoveredEligible": [
+              14,
+              13,
+              14
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "brick-hvac": {
+          "runs": [
+            "ontology_translation/results/default-change-187/treatment/run-01/brick-hvac",
+            "ontology_translation/results/default-change-187/treatment/run-02/brick-hvac",
+            "ontology_translation/results/default-change-187/treatment/run-03/brick-hvac"
+          ],
+          "perRun": [
+            {
+              "classRecall": 1,
+              "relRecall": 0.9473684210526315,
+              "eligibleShare": 1,
+              "conditionalRate": 0.9473684210526315,
+              "eligible": 19,
+              "recoveredEligible": 18,
+              "recoveredIneligible": 0,
+              "goldRelationships": 19,
+              "goldClasses": 18
+            },
+            {
+              "classRecall": 1,
+              "relRecall": 0.8947368421052632,
+              "eligibleShare": 1,
+              "conditionalRate": 0.8947368421052632,
+              "eligible": 19,
+              "recoveredEligible": 17,
+              "recoveredIneligible": 0,
+              "goldRelationships": 19,
+              "goldClasses": 18
+            },
+            {
+              "classRecall": 1,
+              "relRecall": 1,
+              "eligibleShare": 1,
+              "conditionalRate": 1,
+              "eligible": 19,
+              "recoveredEligible": 19,
+              "recoveredIneligible": 0,
+              "goldRelationships": 19,
+              "goldClasses": 18
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 0.9473684210526315,
+              "min": 0.8947368421052632,
+              "max": 1
+            },
+            "classRecall": 1,
+            "relRecall": 0.9473684210526315,
+            "eligibleShare": 1,
+            "relToClassRecall": 0.9473684210526315,
+            "eligible": [
+              19,
+              19,
+              19
+            ],
+            "recoveredEligible": [
+              18,
+              17,
+              19
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "iof-maintenance": {
+          "runs": [
+            "ontology_translation/results/final-scores/runs/run-01/iof-maintenance",
+            "ontology_translation/results/final-scores/runs/run-02/iof-maintenance",
+            "ontology_translation/results/final-scores/runs/run-03/iof-maintenance"
+          ],
+          "perRun": [
+            {
+              "classRecall": 1,
+              "relRecall": 1,
+              "eligibleShare": 1,
+              "conditionalRate": 1,
+              "eligible": 8,
+              "recoveredEligible": 8,
+              "recoveredIneligible": 0,
+              "goldRelationships": 8,
+              "goldClasses": 15
+            },
+            {
+              "classRecall": 1,
+              "relRecall": 1,
+              "eligibleShare": 1,
+              "conditionalRate": 1,
+              "eligible": 8,
+              "recoveredEligible": 8,
+              "recoveredIneligible": 0,
+              "goldRelationships": 8,
+              "goldClasses": 15
+            },
+            {
+              "classRecall": 0.8666666666666667,
+              "relRecall": 1,
+              "eligibleShare": 1,
+              "conditionalRate": 1,
+              "eligible": 8,
+              "recoveredEligible": 8,
+              "recoveredIneligible": 0,
+              "goldRelationships": 8,
+              "goldClasses": 15
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 1,
+              "min": 1,
+              "max": 1
+            },
+            "classRecall": 0.9555555555555556,
+            "relRecall": 1,
+            "eligibleShare": 1,
+            "relToClassRecall": 1.0465116279069766,
+            "eligible": [
+              8,
+              8,
+              8
+            ],
+            "recoveredEligible": [
+              8,
+              8,
+              8
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "iof-supply-chain": {
+          "runs": [
+            "ontology_translation/results/final-scores/runs/run-01/iof-supply-chain",
+            "ontology_translation/results/final-scores/runs/run-02/iof-supply-chain",
+            "ontology_translation/results/final-scores/runs/run-03/iof-supply-chain"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.8214285714285714,
+              "relRecall": 0.8260869565217391,
+              "eligibleShare": 0.8260869565217391,
+              "conditionalRate": 1,
+              "eligible": 19,
+              "recoveredEligible": 19,
+              "recoveredIneligible": 0,
+              "goldRelationships": 23,
+              "goldClasses": 28
+            },
+            {
+              "classRecall": 0.8571428571428571,
+              "relRecall": 0.9130434782608695,
+              "eligibleShare": 0.9565217391304348,
+              "conditionalRate": 0.9545454545454546,
+              "eligible": 22,
+              "recoveredEligible": 21,
+              "recoveredIneligible": 0,
+              "goldRelationships": 23,
+              "goldClasses": 28
+            },
+            {
+              "classRecall": 0.75,
+              "relRecall": 0.782608695652174,
+              "eligibleShare": 0.8260869565217391,
+              "conditionalRate": 0.9473684210526315,
+              "eligible": 19,
+              "recoveredEligible": 18,
+              "recoveredIneligible": 0,
+              "goldRelationships": 23,
+              "goldClasses": 28
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 0.967304625199362,
+              "min": 0.9473684210526315,
+              "max": 1
+            },
+            "classRecall": 0.8095238095238094,
+            "relRecall": 0.8405797101449276,
+            "eligibleShare": 0.8695652173913043,
+            "relToClassRecall": 1.0383631713554988,
+            "eligible": [
+              19,
+              22,
+              19
+            ],
+            "recoveredEligible": [
+              19,
+              21,
+              18
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "itops": {
+          "runs": [
+            "ontology_translation/results/final-scores/runs/run-01/itops",
+            "ontology_translation/results/final-scores/runs/run-02/itops",
+            "ontology_translation/results/final-scores/runs/run-03/itops"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.8333333333333334,
+              "relRecall": 0.6388888888888888,
+              "eligibleShare": 0.8055555555555556,
+              "conditionalRate": 0.7931034482758621,
+              "eligible": 29,
+              "recoveredEligible": 23,
+              "recoveredIneligible": 0,
+              "goldRelationships": 36,
+              "goldClasses": 24
+            },
+            {
+              "classRecall": 0.875,
+              "relRecall": 0.8888888888888888,
+              "eligibleShare": 0.8888888888888888,
+              "conditionalRate": 1,
+              "eligible": 32,
+              "recoveredEligible": 32,
+              "recoveredIneligible": 0,
+              "goldRelationships": 36,
+              "goldClasses": 24
+            },
+            {
+              "classRecall": 0.875,
+              "relRecall": 0.8611111111111112,
+              "eligibleShare": 0.8888888888888888,
+              "conditionalRate": 0.96875,
+              "eligible": 32,
+              "recoveredEligible": 31,
+              "recoveredIneligible": 0,
+              "goldRelationships": 36,
+              "goldClasses": 24
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 0.920617816091954,
+              "min": 0.7931034482758621,
+              "max": 1
+            },
+            "classRecall": 0.8611111111111112,
+            "relRecall": 0.7962962962962963,
+            "eligibleShare": 0.861111111111111,
+            "relToClassRecall": 0.9247311827956989,
+            "eligible": [
+              29,
+              32,
+              32
+            ],
+            "recoveredEligible": [
+              23,
+              32,
+              31
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "macroPublished": {
+          "conditionalRate": 0.9786682615629984,
+          "classRecall": 0.875297619047619,
+          "relRecall": 0.8979674249562525,
+          "eligibleShare": 0.9183716965046888,
+          "relToClassRecall": 1.0310907717824391
+        }
+      },
+      "final-b3": {
+        "brick-hvac": {
+          "runs": [
+            "ontology_translation/results/baselines-gpt6/b3-no-commit/run-01/brick-hvac/snapshots/A",
+            "ontology_translation/results/baselines-gpt6/b3-no-commit/run-02/brick-hvac/snapshots/A",
+            "ontology_translation/results/baselines-gpt6/b3-no-commit/run-03/brick-hvac/snapshots/A"
+          ],
+          "perRun": [
+            {
+              "classRecall": 1,
+              "relRecall": 0.8421052631578947,
+              "eligibleShare": 1,
+              "conditionalRate": 0.8421052631578947,
+              "eligible": 19,
+              "recoveredEligible": 16,
+              "recoveredIneligible": 0,
+              "goldRelationships": 19,
+              "goldClasses": 18
+            },
+            {
+              "classRecall": 1,
+              "relRecall": 1,
+              "eligibleShare": 1,
+              "conditionalRate": 1,
+              "eligible": 19,
+              "recoveredEligible": 19,
+              "recoveredIneligible": 0,
+              "goldRelationships": 19,
+              "goldClasses": 18
+            },
+            {
+              "classRecall": 0.7777777777777778,
+              "relRecall": 0.5263157894736842,
+              "eligibleShare": 0.6842105263157895,
+              "conditionalRate": 0.7692307692307693,
+              "eligible": 13,
+              "recoveredEligible": 10,
+              "recoveredIneligible": 0,
+              "goldRelationships": 19,
+              "goldClasses": 18
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 0.8704453441295547,
+              "min": 0.7692307692307693,
+              "max": 1
+            },
+            "classRecall": 0.9259259259259259,
+            "relRecall": 0.7894736842105262,
+            "eligibleShare": 0.8947368421052632,
+            "relToClassRecall": 0.8526315789473683,
+            "eligible": [
+              19,
+              19,
+              13
+            ],
+            "recoveredEligible": [
+              16,
+              19,
+              10
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "iof-maintenance": {
+          "runs": [
+            "ontology_translation/results/baselines-gpt6/b3-no-commit/run-01/iof-maintenance/snapshots/A",
+            "ontology_translation/results/baselines-gpt6/b3-no-commit/run-02/iof-maintenance/snapshots/A",
+            "ontology_translation/results/baselines-gpt6/b3-no-commit/run-03/iof-maintenance/snapshots/A"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.6666666666666666,
+              "relRecall": 0.75,
+              "eligibleShare": 0.75,
+              "conditionalRate": 1,
+              "eligible": 6,
+              "recoveredEligible": 6,
+              "recoveredIneligible": 0,
+              "goldRelationships": 8,
+              "goldClasses": 15
+            },
+            {
+              "classRecall": 0.8,
+              "relRecall": 0.875,
+              "eligibleShare": 0.875,
+              "conditionalRate": 1,
+              "eligible": 7,
+              "recoveredEligible": 7,
+              "recoveredIneligible": 0,
+              "goldRelationships": 8,
+              "goldClasses": 15
+            },
+            {
+              "classRecall": 0.7333333333333333,
+              "relRecall": 0.75,
+              "eligibleShare": 0.75,
+              "conditionalRate": 1,
+              "eligible": 6,
+              "recoveredEligible": 6,
+              "recoveredIneligible": 0,
+              "goldRelationships": 8,
+              "goldClasses": 15
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 1,
+              "min": 1,
+              "max": 1
+            },
+            "classRecall": 0.7333333333333334,
+            "relRecall": 0.7916666666666666,
+            "eligibleShare": 0.7916666666666666,
+            "relToClassRecall": 1.0795454545454544,
+            "eligible": [
+              6,
+              7,
+              6
+            ],
+            "recoveredEligible": [
+              6,
+              7,
+              6
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "iof-supply-chain": {
+          "runs": [
+            "ontology_translation/results/baselines-gpt6/b3-no-commit/run-01/iof-supply-chain/snapshots/A",
+            "ontology_translation/results/baselines-gpt6/b3-no-commit/run-02/iof-supply-chain/snapshots/A",
+            "ontology_translation/results/baselines-gpt6/b3-no-commit/run-03/iof-supply-chain/snapshots/A"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.7142857142857143,
+              "relRecall": 0.7391304347826086,
+              "eligibleShare": 0.8260869565217391,
+              "conditionalRate": 0.8947368421052632,
+              "eligible": 19,
+              "recoveredEligible": 17,
+              "recoveredIneligible": 0,
+              "goldRelationships": 23,
+              "goldClasses": 28
+            },
+            {
+              "classRecall": 0.8214285714285714,
+              "relRecall": 0.782608695652174,
+              "eligibleShare": 0.8695652173913043,
+              "conditionalRate": 0.9,
+              "eligible": 20,
+              "recoveredEligible": 18,
+              "recoveredIneligible": 0,
+              "goldRelationships": 23,
+              "goldClasses": 28
+            },
+            {
+              "classRecall": 0.8214285714285714,
+              "relRecall": 0.7391304347826086,
+              "eligibleShare": 0.9130434782608695,
+              "conditionalRate": 0.8095238095238095,
+              "eligible": 21,
+              "recoveredEligible": 17,
+              "recoveredIneligible": 0,
+              "goldRelationships": 23,
+              "goldClasses": 28
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 0.8680868838763575,
+              "min": 0.8095238095238095,
+              "max": 0.9
+            },
+            "classRecall": 0.7857142857142856,
+            "relRecall": 0.7536231884057972,
+            "eligibleShare": 0.8695652173913043,
+            "relToClassRecall": 0.959156785243742,
+            "eligible": [
+              19,
+              20,
+              21
+            ],
+            "recoveredEligible": [
+              17,
+              18,
+              17
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "fibo-loans": {
+          "runs": [
+            "ontology_translation/results/baselines-gpt6/b3-no-commit/run-01/fibo-loans/snapshots/A",
+            "ontology_translation/results/baselines-gpt6/b3-no-commit/run-02/fibo-loans/snapshots/A",
+            "ontology_translation/results/baselines-gpt6/b3-no-commit/run-03/fibo-loans/snapshots/A"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.875,
+              "relRecall": 0.9411764705882353,
+              "eligibleShare": 0.9411764705882353,
+              "conditionalRate": 1,
+              "eligible": 16,
+              "recoveredEligible": 16,
+              "recoveredIneligible": 0,
+              "goldRelationships": 17,
+              "goldClasses": 24
+            },
+            {
+              "classRecall": 0.8333333333333334,
+              "relRecall": 0.8823529411764706,
+              "eligibleShare": 0.8823529411764706,
+              "conditionalRate": 1,
+              "eligible": 15,
+              "recoveredEligible": 15,
+              "recoveredIneligible": 0,
+              "goldRelationships": 17,
+              "goldClasses": 24
+            },
+            {
+              "classRecall": 0.875,
+              "relRecall": 0.9411764705882353,
+              "eligibleShare": 0.9411764705882353,
+              "conditionalRate": 1,
+              "eligible": 16,
+              "recoveredEligible": 16,
+              "recoveredIneligible": 0,
+              "goldRelationships": 17,
+              "goldClasses": 24
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 1,
+              "min": 1,
+              "max": 1
+            },
+            "classRecall": 0.8611111111111112,
+            "relRecall": 0.9215686274509803,
+            "eligibleShare": 0.9215686274509803,
+            "relToClassRecall": 1.0702087286527513,
+            "eligible": [
+              16,
+              15,
+              16
+            ],
+            "recoveredEligible": [
+              16,
+              15,
+              16
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "itops": {
+          "runs": [
+            "ontology_translation/results/baselines-gpt6/b3-no-commit/run-01/itops/snapshots/A",
+            "ontology_translation/results/baselines-gpt6/b3-no-commit/run-02/itops/snapshots/A",
+            "ontology_translation/results/baselines-gpt6/b3-no-commit/run-03/itops/snapshots/A"
+          ],
+          "perRun": [
+            {
+              "classRecall": 0.75,
+              "relRecall": 0.5555555555555556,
+              "eligibleShare": 0.6944444444444444,
+              "conditionalRate": 0.8,
+              "eligible": 25,
+              "recoveredEligible": 20,
+              "recoveredIneligible": 0,
+              "goldRelationships": 36,
+              "goldClasses": 24
+            },
+            {
+              "classRecall": 0.9583333333333334,
+              "relRecall": 0.8055555555555556,
+              "eligibleShare": 0.9722222222222222,
+              "conditionalRate": 0.8285714285714286,
+              "eligible": 35,
+              "recoveredEligible": 29,
+              "recoveredIneligible": 0,
+              "goldRelationships": 36,
+              "goldClasses": 24
+            },
+            {
+              "classRecall": 0.875,
+              "relRecall": 0.8611111111111112,
+              "eligibleShare": 0.8888888888888888,
+              "conditionalRate": 0.96875,
+              "eligible": 32,
+              "recoveredEligible": 31,
+              "recoveredIneligible": 0,
+              "goldRelationships": 36,
+              "goldClasses": 24
+            }
+          ],
+          "summary": {
+            "n": 3,
+            "conditionalRate": {
+              "mean": 0.8657738095238096,
+              "min": 0.8,
+              "max": 0.96875
+            },
+            "classRecall": 0.8611111111111112,
+            "relRecall": 0.7407407407407408,
+            "eligibleShare": 0.8518518518518517,
+            "relToClassRecall": 0.8602150537634409,
+            "eligible": [
+              25,
+              35,
+              32
+            ],
+            "recoveredEligible": [
+              20,
+              29,
+              31
+            ],
+            "recoveredIneligible": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "macroPublished": {
+          "conditionalRate": 0.934633057001478,
+          "classRecall": 0.826521164021164,
+          "relRecall": 0.8140830416834925,
+          "eligibleShare": 0.8693843384035536,
+          "relToClassRecall": 0.9903856368473289
+        }
+      }
+    }
+  }
+}

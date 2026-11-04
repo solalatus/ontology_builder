@@ -61,3 +61,25 @@ Each cell has 3 runs.
 - If neither meets it, the raw relationship-F1 gain reflects better class recovery (endpoint gating), not better relationship elicitation.
 
 This note decides nothing by a significance test. With 3 runs per cell it is descriptive.
+
+## Amendment 1: reading rule replaced (written after the first output was seen)
+
+The rule under "How it is read" compared the conditional rate with class recall. The two are not commensurable:
+- class recall is a share of all gold classes;
+- the conditional rate is a share of a subset that already presupposes the classes.
+
+The first paper's own runs pass that rule: conditional 32.6 % against class recall 29.4 % on the primary reading. Yet the gap was the first paper's main finding. A rule that the original gap also passes cannot show a change, so it is withdrawn. This amendment is written after the first output was seen, and it is reported as such.
+
+Replacement rule, primary reading:
+
+1. **The gap**, as the first paper stated it, is raw relationship recall against raw class recall on the same runs. It is measured as the **ratio relationship recall / class recall** (first paper: 0.25).
+   - The gap counts as **closed** in a cell if the ratio is at least 1.0.
+   - Otherwise the ratio is reported as how far the gap has narrowed.
+2. **The conditional rate** says where a remaining relationship deficit comes from. It is not a pass criterion.
+   - A high rate means that relationships between classes the run found are elicited. The rest of the deficit is then endpoint gating, which is a class-recall problem.
+   - A low rate means relationship elicitation itself falls short.
+3. **Density check.** itops is the only dense gold model (1.59 relationships per class; the published domains have 0.54–0.90). The question is whether the conditional rate on itops in a generation is close to the published macro rate.
+   - If it is, recovering a relationship once both endpoints are found does not depend on gold density.
+   - Any remaining raw gap is then about classes.
+
+The per-run eligible and recovered counts for the first paper's runs are compared with the published figures (semantic policy, practical scope; 31 / 24 / 19 eligible, 13 / 14 / 8 recovered) as a check of the script.
